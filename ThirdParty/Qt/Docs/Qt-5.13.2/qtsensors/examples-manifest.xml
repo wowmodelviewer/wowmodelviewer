@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<instructionals module="QtSensors">
+    <examples>
+        <example name="Qt Sensors - Accel Bubble" docUrl="qthelp://org.qt-project.qtsensors.5132/qtsensors/qtsensors-accelbubble-example.html" projectPath="sensors/accelbubble/accelbubble.pro" imageUrl="qthelp://org.qt-project.qtsensors.5132/qtsensors/images/accelbubble.png">
+            <description><![CDATA[The AccelBubble example demonstrates the Accelerometer QML type.]]></description>
+            <tags>accel,bubble,sensors</tags>
+            <fileToOpen>sensors/accelbubble/main.cpp</fileToOpen>
+            <fileToOpen mainFile="true">sensors/accelbubble/accelbubble.qml</fileToOpen>
+        </example>
+        <example name="Qt Sensors - C++ Sensor Gestures Example" docUrl="qthelp://org.qt-project.qtsensors.5132/qtsensors/qtsensors-sensorgestures-example.html" projectPath="sensors/sensorgestures/sensorgestures.pro" imageUrl="qthelp://org.qt-project.qtsensors.5132/qtsensors/images/sensorgesturecpp.png">
+            <description><![CDATA[The sensor gesture example demonstrates the steps for creating a C++ application that uses sensor gestures and the included shake sensor.]]></description>
+            <tags>c++,gestures,sensor,sensors</tags>
+            <fileToOpen mainFile="true">sensors/sensorgestures/main.cpp</fileToOpen>
+        </example>
+        <example name="Qt Sensors - Explorer QML Example" docUrl="qthelp://org.qt-project.qtsensors.5132/qtsensors/qtsensors-sensor-explorer-example.html" projectPath="sensors/sensor_explorer/sensor_explorer.pro" imageUrl="qthelp://org.qt-project.qtsensors.5132/qtsensors/images/qtsensors-examples-explorer.png">
+            <description><![CDATA[Demonstrates how to read the meta-data of available sensors.]]></description>
+            <tags>explorer,qml,sensors</tags>
+            <fileToOpen>sensors/sensor_explorer/main.cpp</fileToOpen>
+            <fileToOpen mainFile="true">sensors/sensor_explorer/sensor_explorer.qml</fileToOpen>
+        </example>
+        <example name="Qt Sensors - Grue Sensor Example" docUrl="qthelp://org.qt-project.qtsensors.5132/qtsensors/qtsensors-grue-example.html" projectPath="sensors/grue/grue.pro" imageUrl="qthelp://org.qt-project.qtsensors.5132/qtsensors/images/qtsensors-examples-grue.png">
+            <description><![CDATA[The Qt Sensors - Grue sensor example demonstrates all the steps from creating a new sensor to using it.]]></description>
+            <tags>grue,sensor,sensors</tags>
+            <fileToOpen>sensors/grue/main.cpp</fileToOpen>
+            <fileToOpen mainFile="true">sensors/grue/grue.qml</fileToOpen>
+        </example>
+        <example name="Qt Sensors - Maze QML Example" docUrl="qthelp://org.qt-project.qtsensors.5132/qtsensors/qtsensors-maze-example.html" projectPath="sensors/maze/maze.pro" imageUrl="qthelp://org.qt-project.qtsensors.5132/qtsensors/images/maze.png">
+            <description><![CDATA[The Maze example demonstrates the TiltSensor QML type.]]></description>
+            <tags>maze,qml,sensors</tags>
+            <fileToOpen>sensors/maze/main.cpp</fileToOpen>
+            <fileToOpen mainFile="true">sensors/maze/maze.qml</fileToOpen>
+        </example>
+        <example name="Qt Sensors - QML example" docUrl="qthelp://org.qt-project.qtsensors.5132/qtsensors/qtsensors-qmlqtsensors-example.html" projectPath="sensors/qmlqtsensors/qmlqtsensors.pro" imageUrl="qthelp://org.qt-project.qtsensors.5132/qtsensors/images/qmlqtsensors.png">
+            <description><![CDATA[The QtSensors - QML example demonstrates the QML sensors types in the QtSensors 5 import.]]></description>
+            <tags>qml,sensors</tags>
+            <fileToOpen>sensors/qmlqtsensors/main.cpp</fileToOpen>
+            <fileToOpen mainFile="true">sensors/qmlqtsensors/qmlqtsensors.qml</fileToOpen>
+        </example>
+        <example name="Qt Sensors - SensorGesture QML Type example" docUrl="qthelp://org.qt-project.qtsensors.5132/qtsensors/qtsensors-qmlsensorgestures-example.html" projectPath="sensors/qmlsensorgestures/qmlsensorgestures.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[Demonstrates the use of SensorGesture QML type.]]></description>
+            <tags>qml,sensorgesture,sensors,type</tags>
+            <fileToOpen>sensors/qmlsensorgestures/main.cpp</fileToOpen>
+            <fileToOpen mainFile="true">sensors/qmlsensorgestures/qmlsensorgestures.qml</fileToOpen>
+        </example>
+        <example name="Qt Sensors - ShakeIt QML Example" docUrl="qthelp://org.qt-project.qtsensors.5132/qtsensors/qtsensors-shakeit-example.html" projectPath="sensors/shakeit/shakeit.pro" imageUrl="qthelp://org.qt-project.qtsensors.5132/qtsensors/images/shakeit.png">
+            <description><![CDATA[The sensor gesture example demonstrates the steps for creating a QML application that uses sensor gestures and the included shake sensor.]]></description>
+            <tags>qml,sensors,shakeit</tags>
+            <fileToOpen>sensors/shakeit/main.cpp</fileToOpen>
+            <fileToOpen mainFile="true">sensors/shakeit/shakeit.qml</fileToOpen>
+        </example>
+    </examples>
+</instructionals>

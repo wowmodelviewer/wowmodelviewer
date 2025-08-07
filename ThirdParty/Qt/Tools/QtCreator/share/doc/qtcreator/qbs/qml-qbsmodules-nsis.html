@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- nsis-module.qdoc -->
+  <title>nsis QML Type | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<p class="naviNextPrevious headerNavi">
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#relevant-file-tags">Relevant File Tags</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">nsis QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$nsis-brief -->
+<p>Provides Nullsoft Scriptable Install System support. <a href="#details">More...</a></p>
+<!-- @@@nsis -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QbsModules .</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qbs 1.2</td></tr></table></div><ul>
+<li><a href="qml-qbsmodules-nsis-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qbsmodules-nsis.html#compilerFlags-prop">compilerFlags</a></b></b> : stringList</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-nsis.html#compilerName-prop">compilerName</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-nsis.html#compilerPath-prop">compilerPath</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-nsis.html#compressor-prop">compressor</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-nsis.html#defines-prop">defines</a></b></b> : stringList</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-nsis.html#disableConfig-prop">disableConfig</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-nsis.html#enableQbsDefines-prop">enableQbsDefines</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-nsis.html#toolchainInstallPath-prop">toolchainInstallPath</a></b></b> : path</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-nsis.html#version-prop">version</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-nsis.html#versionBuild-prop">versionBuild</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-nsis.html#versionMajor-prop">versionMajor</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-nsis.html#versionMinor-prop">versionMinor</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-nsis.html#versionParts-prop">versionParts</a></b></b> : list</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-nsis.html#versionPatch-prop">versionPatch</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-nsis.html#warningLevel-prop">warningLevel</a></b></b> : string</li>
+</ul>
+<!-- $$$nsis-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The <code>nsis</code> module contains properties and rules for building EXE installers for Windows using the Nullsoft Scriptable Install System (NSIS).</p>
+<p>This module is available on all platforms.</p>
+<p><b>Note: </b>A typical NSIS script includes an <code>OutFile</code> command to set the filename of the generated installer executable. However, Qbs overrides any <code>OutFile</code> commands found in the script, and therefore, you must use the <a href="qml-qbslanguageitems-product.html#targetName-prop">product.targetName</a> property to set the filename.</p><a name="relevant-file-tags"></a>
+<h3 id="relevant-file-tags">Relevant File Tags</h3>
+<a name="filetags-nsis"></a><div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Tag</th><th >Auto-tagged File Names</th><th >Since</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>&quot;nsh&quot;</code></td><td ><code>*.nsh</code></td><td >1.2</td><td >This tag is attached to NSIS header files.</td></tr>
+<tr valign="top" class="even"><td ><code>&quot;nsi&quot;</code></td><td ><code>*.nsi</code></td><td >1.2</td><td >This tag is attached to NSIS script files.</td></tr>
+<tr valign="top" class="odd"><td ><code>&quot;nsissetup&quot;</code></td><td >-</td><td >1.2</td><td >The rule that creates the NSIS setup executable attaches this tag to its output artifact.</td></tr>
+</table></div>
+<!-- @@@nsis -->
+<h2>Property Documentation</h2>
+<!-- $$$compilerFlags -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="compilerFlags-prop"></a><span class="name">compilerFlags</span> : <span class="type">stringList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>A list of additional flags for the NSIS compiler.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@compilerFlags -->
+<br/>
+<!-- $$$compilerName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="compilerName-prop"></a><span class="name">compilerName</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The name of the compiler binary.</p>
+<p>This property should not normally need to be changed.</p>
+<p>Default: <code>&quot;makensis&quot;</code></p>
+</div></div><!-- @@@compilerName -->
+<br/>
+<!-- $$$compilerPath -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="compilerPath-prop"></a><span class="name">compilerPath</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The directory where the compiler binary is located.</p>
+<p>This property should not normally need to be changed.</p>
+<p>Default: <a href="qml-qbsmodules-nsis.html#compilerName-prop">compilerName</a></p>
+</div></div><!-- @@@compilerPath -->
+<br/>
+<!-- $$$compressor -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="compressor-prop"></a><span class="name">compressor</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The compression algorithm used to compress files and data in the installer.</p>
+<p>Setting this property overrides any <code>SetCompressor</code> command in the NSI file being compiled.</p>
+<p>Possible values include: <code>&quot;default&quot;</code>, <code>&quot;zlib&quot;</code>, <code>&quot;zlib-solid&quot;</code>, <code>&quot;bzip2&quot;</code>, <code>&quot;bzip2-solid&quot;</code>, <code>&quot;lzma&quot;</code>, <code>&quot;lzma-solid&quot;</code>.</p>
+<p>Default: <code>&quot;default&quot;</code></p>
+</div></div><!-- @@@compressor -->
+<br/>
+<!-- $$$defines -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="defines-prop"></a><span class="name">defines</span> : <span class="type">stringList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>A list of preprocessor macros that get passed to the compiler.</p>
+<p>To set macro values, use the following syntax:</p>
+<pre class="cpp plain">
+
+  cpp.defines: [&quot;USE_COLORS=1&quot;, 'COLOR_STR=&quot;blanched almond&quot;']
+
+</pre>
+<p>Default: Undefined</p>
+</div></div><!-- @@@defines -->
+<br/>
+<!-- $$$disableConfig -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="disableConfig-prop"></a><span class="name">disableConfig</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to exclude <code>nsisconf.nsh</code>.</p>
+<p>Generally, you do not need to set this property.</p>
+<p>Default: <code>false</code></p>
+</div></div><!-- @@@disableConfig -->
+<br/>
+<!-- $$$enableQbsDefines -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="enableQbsDefines-prop"></a><span class="name">enableQbsDefines</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to define preprocessor macros corresponding to the values from the <a href="qml-qbslanguageitems-project.html">project</a> and <a href="qml-qbslanguageitems-product.html">product</a> objects.</p>
+<p>When building a 64-bit package, the preprocessor variable <code>Win64</code> will also be defined.</p>
+<p>Default: <code>true</code></p>
+</div></div><!-- @@@enableQbsDefines -->
+<br/>
+<!-- $$$toolchainInstallPath -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="toolchainInstallPath-prop"></a><span class="name">toolchainInstallPath</span> : <span class="type">path</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The NSIS installation directory.</p>
+<p>Determined by searching from the known registry keys and known installation paths until a match is found.</p>
+<p>This property should not normally need to be changed.</p>
+<p>Default: Determined automatically.</p>
+</div></div><!-- @@@toolchainInstallPath -->
+<br/>
+<!-- $$$version -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="version-prop"></a><span class="name">version</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The NSIS version. Consists of four numbers separated by dots. For example, <code>&quot;2.46.0&#x2e;0&quot;</code>.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@version -->
+<br/>
+<!-- $$$versionBuild -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="versionBuild-prop"></a><span class="name">versionBuild</span> : <span class="type">int</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The fourth NSIS version number component.</p>
+<p>Default: <code>versionParts[3]</code></p>
+</div></div><!-- @@@versionBuild -->
+<br/>
+<!-- $$$versionMajor -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="versionMajor-prop"></a><span class="name">versionMajor</span> : <span class="type">int</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The NSIS major version.</p>
+<p>Default: <code>versionParts[0]</code></p>
+</div></div><!-- @@@versionMajor -->
+<br/>
+<!-- $$$versionMinor -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="versionMinor-prop"></a><span class="name">versionMinor</span> : <span class="type">int</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The NSIS minor version.</p>
+<p>Default: <code>versionParts[1]</code></p>
+</div></div><!-- @@@versionMinor -->
+<br/>
+<!-- $$$versionParts -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="versionParts-prop"></a><span class="name">versionParts</span> : <span class="type">list</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The NSIS version as a list.</p>
+<p>For example, the NSIS version 2.46.0&#x2e;0 would correspond to a value of <code>[2, 46, 0, 0]</code>.</p>
+<p>Default: <code>[]</code></p>
+</div></div><!-- @@@versionParts -->
+<br/>
+<!-- $$$versionPatch -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="versionPatch-prop"></a><span class="name">versionPatch</span> : <span class="type">int</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The NSIS patch level.</p>
+<p>Default: <code>versionParts[2]</code></p>
+</div></div><!-- @@@versionPatch -->
+<br/>
+<!-- $$$warningLevel -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="warningLevel-prop"></a><span class="name">warningLevel</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The severity of the warnings to emit. The higher the level, the more warnings will be shown.</p>
+<p>The levels <code>none</code>, <code>errors</code>, <code>warnings</code>, <code>info</code>, and <code>all</code> correspond to the NSIS verbosity levels 0 through 4, inclusive. <code>normal</code> corresponds to the default level.</p>
+<p>Default: <code>&quot;normal&quot;</code></p>
+</div></div><!-- @@@warningLevel -->
+<br/>
+<p class="naviNextPrevious footerNavi">
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

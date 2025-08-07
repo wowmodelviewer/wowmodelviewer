@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qlowenergyadvertisingparameters.cpp -->
+  <title>QLowEnergyAdvertisingParameters Class | Qt Bluetooth 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtbluetooth-index.html">Qt Bluetooth</a></td><td ><a href="qtbluetooth-module.html">C++ Classes</a></td><td >QLowEnergyAdvertisingParameters</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtbluetooth-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QLowEnergyAdvertisingParameters Class</h1>
+<!-- $$$QLowEnergyAdvertisingParameters-brief -->
+<p>The <a href="qlowenergyadvertisingparameters.html">QLowEnergyAdvertisingParameters</a> class represents the parameters used for Bluetooth Low Energy advertising. <a href="#details">More...</a></p>
+<!-- @@@QLowEnergyAdvertisingParameters -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QLowEnergyAdvertisingParameters&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += bluetooth</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr></table></div><p>This class was introduced in  Qt 5.7.</p>
+<ul>
+<li><a href="qlowenergyadvertisingparameters-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingparameters-addressinfo.html">AddressInfo</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingparameters.html#FilterPolicy-enum">FilterPolicy</a></b> { IgnoreWhiteList, UseWhiteListForScanning, UseWhiteListForConnecting, UseWhiteListForScanningAndConnecting }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingparameters.html#Mode-enum">Mode</a></b> { AdvInd, AdvScanInd, AdvNonConnInd }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingparameters.html#QLowEnergyAdvertisingParameters-1">QLowEnergyAdvertisingParameters</a></b>(const QLowEnergyAdvertisingParameters &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingparameters.html#QLowEnergyAdvertisingParameters">QLowEnergyAdvertisingParameters</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QLowEnergyAdvertisingParameters &amp;</td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingparameters.html#operator-eq">operator=</a></b>(const QLowEnergyAdvertisingParameters &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingparameters.html#dtor.QLowEnergyAdvertisingParameters">~QLowEnergyAdvertisingParameters</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QLowEnergyAdvertisingParameters::FilterPolicy </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingparameters.html#filterPolicy">filterPolicy</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingparameters.html#maximumInterval">maximumInterval</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingparameters.html#minimumInterval">minimumInterval</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QLowEnergyAdvertisingParameters::Mode </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingparameters.html#mode">mode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingparameters.html#setInterval">setInterval</a></b>(quint16 <i>minimum</i>, quint16 <i>maximum</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingparameters.html#setMode">setMode</a></b>(QLowEnergyAdvertisingParameters::Mode <i>mode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingparameters.html#setWhiteList">setWhiteList</a></b>(const QList&lt;QLowEnergyAdvertisingParameters::AddressInfo&gt; &amp;<i>whiteList</i>, QLowEnergyAdvertisingParameters::FilterPolicy <i>policy</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingparameters.html#swap">swap</a></b>(QLowEnergyAdvertisingParameters &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QLowEnergyAdvertisingParameters::AddressInfo&gt; </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingparameters.html#whiteList">whiteList</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QLowEnergyAdvertisingParameters-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>When running the advertising procedure, a number of parameters can be configured, such as how fast to advertise or which clients, if any, can connect to the advertising device. These parameters are set via this class, and their values will be used when advertising is started by calling <a href="qlowenergycontroller.html#startAdvertising">QLowEnergyController::startAdvertising</a>().</p>
+</div>
+<p><b>See also </b><a href="qlowenergyadvertisingdata.html">QLowEnergyAdvertisingData</a> and <a href="qlowenergycontroller.html#startAdvertising">QLowEnergyController::startAdvertising</a>().</p>
+<!-- @@@QLowEnergyAdvertisingParameters -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$FilterPolicy$$$IgnoreWhiteList$$$UseWhiteListForScanning$$$UseWhiteListForConnecting$$$UseWhiteListForScanningAndConnecting -->
+<h3 class="fn" id="FilterPolicy-enum"><a name="FilterPolicy-enum"></a>enum QLowEnergyAdvertisingParameters::<span class="name">FilterPolicy</span></h3>
+<p>Specifies the semantics of the white list.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QLowEnergyAdvertisingParameters::IgnoreWhiteList</code></td><td class="topAlign tblval"><code>0x00</code></td><td class="topAlign">The value of the white list is ignored, that is, no filtering takes place for either scan or connection requests when using undirected advertising.</td></tr>
+<tr><td class="topAlign"><code>QLowEnergyAdvertisingParameters::UseWhiteListForScanning</code></td><td class="topAlign tblval"><code>0x01</code></td><td class="topAlign">The white list is used when handling scan requests, but is ignored for connection requests.</td></tr>
+<tr><td class="topAlign"><code>QLowEnergyAdvertisingParameters::UseWhiteListForConnecting</code></td><td class="topAlign tblval"><code>0x02</code></td><td class="topAlign">The white list is used when handling connection requests, but is ignored for scan requests.</td></tr>
+<tr><td class="topAlign"><code>QLowEnergyAdvertisingParameters::UseWhiteListForScanningAndConnecting</code></td><td class="topAlign tblval"><code>0x03</code></td><td class="topAlign">The white list is used for both connection and scan requests.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qlowenergyadvertisingparameters.html#whiteList">QLowEnergyAdvertisingParameters::whiteList</a>().</p>
+<!-- @@@FilterPolicy -->
+<!-- $$$Mode$$$AdvInd$$$AdvScanInd$$$AdvNonConnInd -->
+<h3 class="fn" id="Mode-enum"><a name="Mode-enum"></a>enum QLowEnergyAdvertisingParameters::<span class="name">Mode</span></h3>
+<p>Specifies in which way to advertise.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QLowEnergyAdvertisingParameters::AdvInd</code></td><td class="topAlign tblval"><code>0x0</code></td><td class="topAlign">For non-directed, connectable advertising. Advertising is not directed to one specific device and a device seeing the advertisement can connect to the advertising device or send scan requests.</td></tr>
+<tr><td class="topAlign"><code>QLowEnergyAdvertisingParameters::AdvScanInd</code></td><td class="topAlign tblval"><code>0x2</code></td><td class="topAlign">For non-directed, scannable advertising. Advertising is not directed to one specific device and a device seeing the advertisement can send a scan request to the advertising device, but cannot connect to it.</td></tr>
+<tr><td class="topAlign"><code>QLowEnergyAdvertisingParameters::AdvNonConnInd</code></td><td class="topAlign tblval"><code>0x3</code></td><td class="topAlign">For non-directed, non-connectable advertising. Advertising is not directed to one specific device. A device seeing the advertisement cannot connect to the advertising device, nor can it send a scan request. This mode thus implies pure broadcasting.</td></tr>
+</table></div>
+<!-- @@@Mode -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QLowEnergyAdvertisingParameters$$$QLowEnergyAdvertisingParametersconstQLowEnergyAdvertisingParameters& -->
+<h3 class="fn" id="QLowEnergyAdvertisingParameters-1"><a name="QLowEnergyAdvertisingParameters-1"></a>QLowEnergyAdvertisingParameters::<span class="name">QLowEnergyAdvertisingParameters</span>(const <span class="type"><a href="qlowenergyadvertisingparameters.html#QLowEnergyAdvertisingParameters">QLowEnergyAdvertisingParameters</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a new object of this class that is a copy of <i>other</i>.</p>
+<!-- @@@QLowEnergyAdvertisingParameters -->
+<!-- $$$QLowEnergyAdvertisingParameters[overload1]$$$QLowEnergyAdvertisingParameters -->
+<h3 class="fn" id="QLowEnergyAdvertisingParameters"><a name="QLowEnergyAdvertisingParameters"></a>QLowEnergyAdvertisingParameters::<span class="name">QLowEnergyAdvertisingParameters</span>()</h3>
+<p>Constructs a new object of this class. All values are initialized to their defaults according to the Bluetooth Low Energy specification.</p>
+<!-- @@@QLowEnergyAdvertisingParameters -->
+<!-- $$$operator=[overload1]$$$operator=constQLowEnergyAdvertisingParameters& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qlowenergyadvertisingparameters.html#QLowEnergyAdvertisingParameters">QLowEnergyAdvertisingParameters</a></span> &amp;QLowEnergyAdvertisingParameters::<span class="name">operator=</span>(const <span class="type"><a href="qlowenergyadvertisingparameters.html#QLowEnergyAdvertisingParameters">QLowEnergyAdvertisingParameters</a></span> &amp;<i>other</i>)</h3>
+<p>Makes this object a copy of <i>other</i> and returns the new value of this object.</p>
+<!-- @@@operator= -->
+<!-- $$$~QLowEnergyAdvertisingParameters[overload1]$$$~QLowEnergyAdvertisingParameters -->
+<h3 class="fn" id="dtor.QLowEnergyAdvertisingParameters"><a name="dtor.QLowEnergyAdvertisingParameters"></a>QLowEnergyAdvertisingParameters::<span class="name">~QLowEnergyAdvertisingParameters</span>()</h3>
+<p>Destroys this object.</p>
+<!-- @@@~QLowEnergyAdvertisingParameters -->
+<!-- $$$filterPolicy[overload1]$$$filterPolicy -->
+<h3 class="fn" id="filterPolicy"><a name="filterPolicy"></a><span class="type"><a href="qlowenergyadvertisingparameters.html#FilterPolicy-enum">QLowEnergyAdvertisingParameters::FilterPolicy</a></span> QLowEnergyAdvertisingParameters::<span class="name">filterPolicy</span>() const</h3>
+<p>Returns the filter policy that determines how the white list is used. The default is <a href="qlowenergyadvertisingparameters.html#FilterPolicy-enum">QLowEnergyAdvertisingParameters::IgnoreWhiteList</a>.</p>
+<!-- @@@filterPolicy -->
+<!-- $$$maximumInterval[overload1]$$$maximumInterval -->
+<h3 class="fn" id="maximumInterval"><a name="maximumInterval"></a><span class="type">int</span> QLowEnergyAdvertisingParameters::<span class="name">maximumInterval</span>() const</h3>
+<p>Returns the maximum advertising interval in milliseconds. The default is 1280.</p>
+<!-- @@@maximumInterval -->
+<!-- $$$minimumInterval[overload1]$$$minimumInterval -->
+<h3 class="fn" id="minimumInterval"><a name="minimumInterval"></a><span class="type">int</span> QLowEnergyAdvertisingParameters::<span class="name">minimumInterval</span>() const</h3>
+<p>Returns the minimum advertising interval in milliseconds. The default is 1280.</p>
+<!-- @@@minimumInterval -->
+<!-- $$$mode[overload1]$$$mode -->
+<h3 class="fn" id="mode"><a name="mode"></a><span class="type"><a href="qlowenergyadvertisingparameters.html#Mode-enum">QLowEnergyAdvertisingParameters::Mode</a></span> QLowEnergyAdvertisingParameters::<span class="name">mode</span>() const</h3>
+<p>Returns the advertising mode. The default is <a href="qlowenergyadvertisingparameters.html#Mode-enum">QLowEnergyAdvertisingParameters::AdvInd</a>.</p>
+<p><b>See also </b><a href="qlowenergyadvertisingparameters.html#setMode">setMode</a>().</p>
+<!-- @@@mode -->
+<!-- $$$setInterval[overload1]$$$setIntervalquint16quint16 -->
+<h3 class="fn" id="setInterval"><a name="setInterval"></a><span class="type">void</span> QLowEnergyAdvertisingParameters::<span class="name">setInterval</span>(<span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> <i>minimum</i>, <span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> <i>maximum</i>)</h3>
+<p>Sets the advertising interval. This is a range that gives the controller an upper and a lower bound for how often to send the advertising data. Both <i>minimum</i> and <i>maximum</i> are given in milliseconds. If <i>maximum</i> is smaller than <i>minimum</i>, it will be set to the value of <i>minimum</i>.</p>
+<p><b>Note: </b>There are limits for the minimum and maximum interval; the exact values depend on the mode. If they are exceeded, the lowest or highest possible value will be used, respectively.</p><!-- @@@setInterval -->
+<!-- $$$setMode[overload1]$$$setModeQLowEnergyAdvertisingParameters::Mode -->
+<h3 class="fn" id="setMode"><a name="setMode"></a><span class="type">void</span> QLowEnergyAdvertisingParameters::<span class="name">setMode</span>(<span class="type"><a href="qlowenergyadvertisingparameters.html#Mode-enum">QLowEnergyAdvertisingParameters::Mode</a></span> <i>mode</i>)</h3>
+<p>Sets the advertising mode to <i>mode</i>.</p>
+<p><b>See also </b><a href="qlowenergyadvertisingparameters.html#mode">mode</a>().</p>
+<!-- @@@setMode -->
+<!-- $$$setWhiteList[overload1]$$$setWhiteListconstQList<QLowEnergyAdvertisingParameters::AddressInfo>&QLowEnergyAdvertisingParameters::FilterPolicy -->
+<h3 class="fn" id="setWhiteList"><a name="setWhiteList"></a><span class="type">void</span> QLowEnergyAdvertisingParameters::<span class="name">setWhiteList</span>(const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qlowenergyadvertisingparameters-addressinfo.html">QLowEnergyAdvertisingParameters::AddressInfo</a></span>&gt; &amp;<i>whiteList</i>, <span class="type"><a href="qlowenergyadvertisingparameters.html#FilterPolicy-enum">QLowEnergyAdvertisingParameters::FilterPolicy</a></span> <i>policy</i>)</h3>
+<p>Sets the white list that is potentially used for filtering scan and connection requests. The <i>whiteList</i> parameter is the list of addresses to use for filtering, and <i>policy</i> specifies how exactly to use <i>whiteList</i>.</p>
+<p><b>See also </b><a href="qlowenergyadvertisingparameters.html#whiteList">whiteList</a>().</p>
+<!-- @@@setWhiteList -->
+<!-- $$$swap[overload1]$$$swapQLowEnergyAdvertisingParameters& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QLowEnergyAdvertisingParameters::<span class="name">swap</span>(<span class="type"><a href="qlowenergyadvertisingparameters.html#QLowEnergyAdvertisingParameters">QLowEnergyAdvertisingParameters</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps this object with <i>other</i>.</p>
+<!-- @@@swap -->
+<!-- $$$whiteList[overload1]$$$whiteList -->
+<h3 class="fn" id="whiteList"><a name="whiteList"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qlowenergyadvertisingparameters-addressinfo.html">QLowEnergyAdvertisingParameters::AddressInfo</a></span>&gt; QLowEnergyAdvertisingParameters::<span class="name">whiteList</span>() const</h3>
+<p>Returns the white list used for filtering scan and connection requests. By default, this list is empty.</p>
+<p><b>See also </b><a href="qlowenergyadvertisingparameters.html#setWhiteList">setWhiteList</a>().</p>
+<!-- @@@whiteList -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

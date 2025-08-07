@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdeclarativesupplier.cpp -->
+  <title>Supplier QML Type | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-qmlmodule.html">QML Types</a></td><td >Supplier QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#example">Example</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Supplier QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Supplier-brief -->
+<p>Holds data regarding the supplier of a place, a place's image, review, or editorial. <a href="#details">More...</a></p>
+<!-- @@@Supplier -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtLocation 5.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  QtLocation 5.5</td></tr></table></div><ul>
+<li><a href="qml-qtlocation-supplier-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtlocation-supplier.html#icon-prop">icon</a></b></b> : PlaceIcon</li>
+<li class="fn"><b><b><a href="qml-qtlocation-supplier.html#name-prop">name</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtlocation-supplier.html#supplier-prop">supplier</a></b></b> : QPlaceSupplier</li>
+<li class="fn"><b><b><a href="qml-qtlocation-supplier.html#supplierId-prop">supplierId</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtlocation-supplier.html#url-prop">url</a></b></b> : url</li>
+</ul>
+<!-- $$$Supplier-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>Each instance represents a set of data about a supplier, which can include supplier's name, url and icon. The supplier is typically a business or organization.</p>
+<p>Note: The Places API only supports suppliers as 'retrieve-only' objects. Submitting suppliers to a provider is not a supported use case.</p>
+<a name="example"></a>
+<h2 id="example">Example</h2>
+<p>The following example shows how to create and display a supplier in QML:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+  import QtPositioning 5.5
+  import QtLocation 5.6
+
+  <span class="type"><a href="qml-qtlocation-supplier.html">Supplier</a></span> {
+      <span class="name">id</span>: <span class="name">placeSupplier</span>
+      <span class="name">name</span>: <span class="string">&quot;Example&quot;</span>
+      <span class="name">url</span>: <span class="string">&quot;http://www.example.com/&quot;</span>
+  }
+
+  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+      <span class="name">text</span>: <span class="string">&quot;This place is was provided by &quot;</span> <span class="operator">+</span> <span class="name">placeSupplier</span>.<span class="name">name</span> <span class="operator">+</span> <span class="string">&quot;\n&quot;</span> <span class="operator">+</span> <span class="name">placeSupplier</span>.<span class="name">url</span>
+  }
+
+</pre>
+<p><b>See also </b><a href="qml-qtlocation-imagemodel.html">ImageModel</a>, <a href="qml-qtlocation-reviewmodel.html">ReviewModel</a>, and <a href="qml-qtlocation-editorialmodel.html">EditorialModel</a>.</p>
+<!-- @@@Supplier -->
+<h2>Property Documentation</h2>
+<!-- $$$icon -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="icon-prop"></a><span class="name">icon</span> : <span class="type">PlaceIcon</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the icon of the supplier.</p>
+</div></div><!-- @@@icon -->
+<br/>
+<!-- $$$name -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="name-prop"></a><span class="name">name</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the name of the supplier which can be displayed to the user.</p>
+<p>The name can potentially be localized. The language is dependent on the entity that sets it, typically this is the <a href="location-places-qml.html#plugin">Plugin</a>. The <a href="qml-qtlocation-plugin.html#locales-prop">Plugin::locales</a> property defines what language is used.</p>
+</div></div><!-- @@@name -->
+<br/>
+<!-- $$$supplier -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="supplier-prop"></a><span class="name">supplier</span> : <span class="type">QPlaceSupplier</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>For details on how to use this property to interface between C++ and QML see &quot;<a href="location-cpp-qml.html#supplier-qplacesupplier">Interfaces between C++ and QML Code</a>&quot;.</p>
+</div></div><!-- @@@supplier -->
+<br/>
+<!-- $$$supplierId -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="supplierId-prop"></a><span class="name">supplierId</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the identifier of the supplier. The identifier is unique to the Plugin backend which provided the supplier and is generally not suitable for displaying to the user.</p>
+</div></div><!-- @@@supplierId -->
+<br/>
+<!-- $$$url -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="url-prop"></a><span class="name">url</span> : <span class="type"><a href="../qtqml/qml-url.html">url</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the URL of the supplier's website.</p>
+</div></div><!-- @@@url -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qgesture.cpp -->
+  <title>QSwipeGesture Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QSwipeGesture</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSwipeGesture Class</h1>
+<!-- $$$QSwipeGesture-brief -->
+<p>The <a href="qswipegesture.html">QSwipeGesture</a> class describes a swipe gesture made by the user. <a href="#details">More...</a></p>
+<!-- @@@QSwipeGesture -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QSwipeGesture&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.6</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qgesture.html">QGesture</a></td></tr></table></div><p>This class was introduced in  Qt 4.6.</p>
+<ul>
+<li><a href="qswipegesture-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qswipegesture.html#SwipeDirection-enum">SwipeDirection</a></b> { NoDirection, Left, Right, Up, Down }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qswipegesture.html#horizontalDirection-prop">horizontalDirection</a></b> : const SwipeDirection</li>
+<li class="fn"><b><a href="qswipegesture.html#swipeAngle-prop">swipeAngle</a></b> : qreal</li>
+<li class="fn"><b><a href="qswipegesture.html#verticalDirection-prop">verticalDirection</a></b> : const SwipeDirection</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qswipegesture.html#dtor.QSwipeGesture">~QSwipeGesture</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSwipeGesture::SwipeDirection </td><td class="memItemRight bottomAlign"><b><a href="qswipegesture.html#horizontalDirection-prop">horizontalDirection</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qswipegesture.html#swipeAngle-prop">setSwipeAngle</a></b>(qreal <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qswipegesture.html#swipeAngle-prop">swipeAngle</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSwipeGesture::SwipeDirection </td><td class="memItemRight bottomAlign"><b><a href="qswipegesture.html#verticalDirection-prop">verticalDirection</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSwipeGesture-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p class="centerAlign"><img src="images/swipegesture.png" alt="" /></p><p>For an overview of gesture handling in Qt and information on using gestures in your applications, see the <a href="gestures-overview.html">Gestures in Widgets and Graphics View</a> document.</p>
+</div>
+<p><b>See also </b><a href="qpangesture.html">QPanGesture</a> and <a href="qpinchgesture.html">QPinchGesture</a>.</p>
+<!-- @@@QSwipeGesture -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$SwipeDirection$$$NoDirection$$$Left$$$Right$$$Up$$$Down -->
+<h3 class="fn" id="SwipeDirection-enum"><a name="SwipeDirection-enum"></a>enum QSwipeGesture::<span class="name">SwipeDirection</span></h3>
+<p>This enum describes the possible directions for the gesture's motion along the horizontal and vertical axes.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QSwipeGesture::NoDirection</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The gesture had no motion associated with it on a particular axis.</td></tr>
+<tr><td class="topAlign"><code>QSwipeGesture::Left</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The gesture involved a horizontal motion to the left.</td></tr>
+<tr><td class="topAlign"><code>QSwipeGesture::Right</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The gesture involved a horizontal motion to the right.</td></tr>
+<tr><td class="topAlign"><code>QSwipeGesture::Up</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">The gesture involved an upward vertical motion.</td></tr>
+<tr><td class="topAlign"><code>QSwipeGesture::Down</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">The gesture involved a downward vertical motion.</td></tr>
+</table></div>
+<!-- @@@SwipeDirection -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$horizontalDirection-prop$$$horizontalDirection -->
+<h3 class="fn" id="horizontalDirection-prop"><a name="horizontalDirection-prop"></a><span class="name">horizontalDirection</span> : const <span class="type"><a href="qswipegesture.html#SwipeDirection-enum">SwipeDirection</a></span></h3>
+<p>This property holds the horizontal direction of the gesture</p>
+<p>If the gesture has a horizontal component, the horizontal direction is either Left or Right; otherwise, it is <a href="qswipegesture.html#SwipeDirection-enum">NoDirection</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QSwipeGesture::SwipeDirection </td><td class="memItemRight bottomAlign"><span class="name"><b>horizontalDirection</b></span>() const</td></tr>
+</table></div>
+<p><b>See also </b><a href="qswipegesture.html#verticalDirection-prop">verticalDirection</a> and <a href="qswipegesture.html#swipeAngle-prop">swipeAngle</a>.</p>
+<!-- @@@horizontalDirection -->
+<!-- $$$swipeAngle-prop$$$swipeAngle$$$setSwipeAngleqreal -->
+<h3 class="fn" id="swipeAngle-prop"><a name="swipeAngle-prop"></a><span class="name">swipeAngle</span> : <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span></h3>
+<p>This property holds the angle of the motion associated with the gesture</p>
+<p>If the gesture has either a horizontal or vertical component, the swipe angle describes the angle between the direction of motion and the x-axis as defined using the standard widget <a href="../qtgui/coordsys.html">coordinate system</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qreal </td><td class="memItemRight bottomAlign"><span class="name"><b>swipeAngle</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setSwipeAngle</b></span>(qreal <i>value</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qswipegesture.html#horizontalDirection-prop">horizontalDirection</a> and <a href="qswipegesture.html#verticalDirection-prop">verticalDirection</a>.</p>
+<!-- @@@swipeAngle -->
+<!-- $$$verticalDirection-prop$$$verticalDirection -->
+<h3 class="fn" id="verticalDirection-prop"><a name="verticalDirection-prop"></a><span class="name">verticalDirection</span> : const <span class="type"><a href="qswipegesture.html#SwipeDirection-enum">SwipeDirection</a></span></h3>
+<p>This property holds the vertical direction of the gesture</p>
+<p>If the gesture has a vertical component, the vertical direction is either Up or Down; otherwise, it is <a href="qswipegesture.html#SwipeDirection-enum">NoDirection</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QSwipeGesture::SwipeDirection </td><td class="memItemRight bottomAlign"><span class="name"><b>verticalDirection</b></span>() const</td></tr>
+</table></div>
+<p><b>See also </b><a href="qswipegesture.html#horizontalDirection-prop">horizontalDirection</a> and <a href="qswipegesture.html#swipeAngle-prop">swipeAngle</a>.</p>
+<!-- @@@verticalDirection -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$~QSwipeGesture[overload1]$$$~QSwipeGesture -->
+<h3 class="fn" id="dtor.QSwipeGesture"><a name="dtor.QSwipeGesture"></a><code>[virtual] </code>QSwipeGesture::<span class="name">~QSwipeGesture</span>()</h3>
+<p>Destructor.</p>
+<!-- @@@~QSwipeGesture -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

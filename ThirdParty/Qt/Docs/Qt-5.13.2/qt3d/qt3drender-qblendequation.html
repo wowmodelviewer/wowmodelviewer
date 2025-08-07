@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qblendequation.cpp -->
+  <title>QBlendEquation Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QBlendEquation</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QBlendEquation Class</h1>
+<span class="small-subtitle">(<a href="qt3drender-qblendequation.html">Qt3DRender::QBlendEquation</a>)<br/></span>
+<!-- $$$QBlendEquation-brief -->
+<p>The <a href="qt3drender-qblendequation.html">QBlendEquation</a> class specifies the equation used for both the RGB blend equation and the Alpha blend equation. <a href="#details">More...</a></p>
+<!-- @@@QBlendEquation -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;Qt3DRender/QBlendEquation&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3drender</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-blendequation.html">BlendEquation</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3drender-qrenderstate.html">Qt3DRender::QRenderState</a></td></tr></table></div><p>This class was introduced in  Qt 5.7.</p>
+<ul>
+<li><a href="qt3drender-qblendequation-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qblendequation.html#BlendFunction-enum">BlendFunction</a></b> { Add, Subtract, ReverseSubtract, Min, Max }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qt3drender-qblendequation.html#blendFunction-prop">blendFunction</a></b> : BlendFunction</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qblendequation.html#QBlendEquation">QBlendEquation</a></b>(Qt3DCore::QNode *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QBlendEquation::BlendFunction </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qblendequation.html#blendFunction-prop">blendFunction</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qblendequation.html#blendFunction-prop">setBlendFunction</a></b>(Qt3DRender::QBlendEquation::BlendFunction <i>blendFunction</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qblendequation.html#blendFunction-prop">blendFunctionChanged</a></b>(Qt3DRender::QBlendEquation::BlendFunction <i>blendFunction</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QBlendEquation-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The blend equation is used to determine how a new pixel is combined with a pixel already in the framebuffer.</p>
+</div>
+<!-- @@@QBlendEquation -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$BlendFunction$$$Add$$$Subtract$$$ReverseSubtract$$$Min$$$Max -->
+<h3 class="fn" id="BlendFunction-enum"><a name="BlendFunction-enum"></a>enum QBlendEquation::<span class="name">BlendFunction</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QBlendEquation::Add</code></td><td class="topAlign tblval"><code>0x8006</code></td><td class="topAlign">GL_FUNC_ADD</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QBlendEquation::Subtract</code></td><td class="topAlign tblval"><code>0x800A</code></td><td class="topAlign">GL_FUNC_SUBTRACT</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QBlendEquation::ReverseSubtract</code></td><td class="topAlign tblval"><code>0x800B</code></td><td class="topAlign">GL_FUNC_REVERSE_SUBTRACT</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QBlendEquation::Min</code></td><td class="topAlign tblval"><code>0x8007</code></td><td class="topAlign">GL_MIN</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QBlendEquation::Max</code></td><td class="topAlign tblval"><code>0x8008</code></td><td class="topAlign">GL_MAX</td></tr>
+</table></div>
+<!-- @@@BlendFunction -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$blendFunction-prop$$$blendFunction$$$setBlendFunctionQt3DRender::QBlendEquation::BlendFunction$$$blendFunctionChangedQt3DRender::QBlendEquation::BlendFunction -->
+<h3 class="fn" id="blendFunction-prop"><a name="blendFunction-prop"></a><span class="name">blendFunction</span> : <span class="type"><a href="qt3drender-qblendequation.html#BlendFunction-enum">BlendFunction</a></span></h3>
+<p>Holds the blend function, which determines how source and destination colors are combined.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QBlendEquation::BlendFunction </td><td class="memItemRight bottomAlign"><span class="name"><b>blendFunction</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setBlendFunction</b></span>(Qt3DRender::QBlendEquation::BlendFunction <i>blendFunction</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>blendFunctionChanged</b></span>(Qt3DRender::QBlendEquation::BlendFunction <i>blendFunction</i>)</td></tr>
+</table></div>
+<!-- @@@blendFunction -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QBlendEquation[overload1]$$$QBlendEquationQt3DCore::QNode* -->
+<h3 class="fn" id="QBlendEquation"><a name="QBlendEquation"></a>QBlendEquation::<span class="name">QBlendEquation</span>(<span class="type"><a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></span> *<i>parent</i> = nullptr)</h3>
+<p>The constructor creates a new blend state object with the specified <i>parent</i>.</p>
+<!-- @@@QBlendEquation -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

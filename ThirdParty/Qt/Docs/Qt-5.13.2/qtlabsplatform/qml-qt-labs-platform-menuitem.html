@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickplatformmenuitem.cpp -->
+  <title>MenuItem QML Type | Qt Labs Platform 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlabsplatform-index.html">Qt Labs Platform</a></td><td ><a href="qt-labs-platform-qmlmodule.html">QML Types</a></td><td >MenuItem QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlabsplatform-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">MenuItem QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$MenuItem-brief -->
+<p>A native menu item. <a href="#details">More...</a></p>
+<!-- @@@MenuItem -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import Qt.labs.platform 1.1</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="../qtqml/qml-qtqml-qtobject.html">QtObject</a></p>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qt-labs-platform-menuseparator.html">MenuSeparator</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qt-labs-platform-menuitem-members.html">List of all members, including inherited members</a></li>
+<li><a href="qml-qt-labs-platform-menuitem-obsolete.html">Obsolete members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-menuitem.html#checkable-prop">checkable</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-menuitem.html#checked-prop">checked</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-menuitem.html#enabled-prop">enabled</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-menuitem.html#font-prop">font</a></b></b> : font</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-menuitem.html#group-prop">group</a></b></b> : MenuItemGroup</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-menuitem.html#icon-prop">icon</a></b></b><ul>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-menuitem.html#icon.source-prop">icon.source</a></b></b> : url</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-menuitem.html#icon.name-prop">icon.name</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-menuitem.html#icon.mask-prop">icon.mask</a></b></b> : bool</li>
+</ul>
+</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-menuitem.html#menu-prop">menu</a></b></b> : Menu</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-menuitem.html#role-prop">role</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-menuitem.html#separator-prop">separator</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-menuitem.html#shortcut-prop">shortcut</a></b></b> : keysequence</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-menuitem.html#subMenu-prop">subMenu</a></b></b> : Menu</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-menuitem.html#text-prop">text</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-menuitem.html#visible-prop">visible</a></b></b> : bool</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-menuitem.html#hovered-signal">hovered</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-menuitem.html#triggered-signal">triggered</a></b></b>()</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qt-labs-platform-menuitem.html#toggle-method">toggle</a></b></b>()</li>
+</ul>
+<!-- $$$MenuItem-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qml-qt-labs-platform-menuitem.html">MenuItem</a> type provides a QML API for native platform menu items.</p>
+<p class="centerAlign"><img src="images/qtlabsplatform-menu.png" alt="" /></p><p>A menu item consists of an <a href="qml-qt-labs-platform-menuitem-obsolete.html#iconSource-prop">icon</a>, <a href="qml-qt-labs-platform-menuitem.html#text-prop">text</a>, and <a href="qml-qt-labs-platform-menuitem.html#shortcut-prop">shortcut</a>.</p>
+<pre class="cpp">
+
+  Menu {
+      id: zoomMenu
+
+      MenuItem {
+          text: qsTr(<span class="string">&quot;Zoom In&quot;</span>)
+          shortcut: StandardKey<span class="operator">.</span>ZoomIn
+          onTriggered: zoomIn()
+      }
+
+      MenuItem {
+          text: qsTr(<span class="string">&quot;Zoom Out&quot;</span>)
+          shortcut: StandardKey<span class="operator">.</span>ZoomOut
+          onTriggered: zoomOut()
+      }
+  }
+
+</pre>
+<p><b>Note: </b><i>Types in Qt.labs modules are not guaranteed to remain compatible in future versions.</i></p><p><b>See also </b><a href="qml-qt-labs-platform-menu.html">Menu</a> and <a href="qml-qt-labs-platform-menuitemgroup.html">MenuItemGroup</a>.</p>
+<!-- @@@MenuItem -->
+<h2>Property Documentation</h2>
+<!-- $$$checkable -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="checkable-prop"></a><span class="name">checkable</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the item is checkable.</p>
+<p>A checkable menu item has an on/off state. For example, in a word processor, a &quot;Bold&quot; menu item may be either on or off. A menu item that is not checkable is a command item that is simply executed, e.g&#x2e; file save.</p>
+<p>The default value is <code>false</code>.</p>
+<p><b>See also </b><a href="qml-qt-labs-platform-menuitem.html#checked-prop">checked</a> and <a href="qml-qt-labs-platform-menuitemgroup.html">MenuItemGroup</a>.</p>
+</div></div><!-- @@@checkable -->
+<br/>
+<!-- $$$checked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="checked-prop"></a><span class="name">checked</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the item is checked (on) or unchecked (off). The default value is <code>false</code>.</p>
+<p><b>See also </b><a href="qml-qt-labs-platform-menuitem.html#checkable-prop">checkable</a> and <a href="qml-qt-labs-platform-menuitemgroup.html">MenuItemGroup</a>.</p>
+</div></div><!-- @@@checked -->
+<br/>
+<!-- $$$enabled -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="enabled-prop"></a><span class="name">enabled</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the item is enabled. The default value is <code>true</code>.</p>
+<p>Disabled items cannot be triggered by the user. They do not disappear from menus, but they are displayed in a way which indicates that they are unavailable. For example, they might be displayed using only shades of gray.</p>
+<p>When an item is disabled, it is not possible to trigger it through its <a href="qml-qt-labs-platform-menuitem.html#shortcut-prop">shortcut</a>.</p>
+</div></div><!-- @@@enabled -->
+<br/>
+<!-- $$$font -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="font-prop"></a><span class="name">font</span> : <span class="type"><a href="../qtquick/qml-font.html">font</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the menu item's font.</p>
+<p><b>See also </b><a href="qml-qt-labs-platform-menuitem.html#text-prop">text</a>.</p>
+</div></div><!-- @@@font -->
+<br/>
+<!-- $$$group -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="group-prop"></a><span class="name">group</span> : <span class="type"><a href="qml-qt-labs-platform-menuitemgroup.html">MenuItemGroup</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the group that the item belongs to, or <code>null</code> if the item is not in a group.</p>
+</div></div><!-- @@@group -->
+<br/>
+<!-- $$$icon -->
+<div class="qmlitem"><div class="qmlproto"><div class="table"><table class="qmlname"><tr valign="top" class="even" id="icon-prop"><th class="centerAlign"><p><a name="icon-prop"></a><b>icon group</b></p></th></tr><tr valign="top" class="odd" id="icon.source-prop"><td class="tblQmlPropNode"><p><a name="icon.source-prop"></a><span class="name">icon.source</span> : <span class="type"><a href="../qtqml/qml-url.html">url</a></span></p></td></tr><tr valign="top" class="odd" id="icon.name-prop"><td class="tblQmlPropNode"><p><a name="icon.name-prop"></a><span class="name">icon.name</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr><tr valign="top" class="odd" id="icon.mask-prop"><td class="tblQmlPropNode"><p><a name="icon.mask-prop"></a><span class="name">icon.mask</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr></table></div></div><div class="qmldoc"><p>This property holds the menu item's icon.</p>
+<pre class="cpp">
+
+  MenuItem {
+      icon<span class="operator">.</span>mask: <span class="keyword">true</span>
+      icon<span class="operator">.</span>name: <span class="string">&quot;edit-undo&quot;</span>
+      icon<span class="operator">.</span>source: <span class="string">&quot;qrc:/images/undo.png&quot;</span>
+  }
+
+</pre>
+<p>This documentation was introduced in  Qt.labs.platform 1.1 (Qt 5.12).</p>
+<p><b>See also </b><a href="../qtgui/qicon.html#fromTheme">QIcon::fromTheme()</a>.</p>
+</div></div><!-- @@@icon -->
+<br/>
+<!-- $$$menu -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="menu-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">menu</span> : <span class="type"><a href="qml-qt-labs-platform-menu.html">Menu</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the menu that the item belongs to, or <code>null</code> if the item is not in a menu.</p>
+</div></div><!-- @@@menu -->
+<br/>
+<!-- $$$role -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="role-prop"></a><span class="name">role</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the role of the item. The role determines whether the item should be placed into the application menu on <a href="../qtdoc/internationalization.html#macos">macOS</a>.</p>
+<p>Available values:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>MenuItem.NoRole</code></td><td class="topAlign">The item should not be put into the application menu</td></tr>
+<tr><td class="topAlign"><code>MenuItem.TextHeuristicRole</code></td><td class="topAlign">The item should be put in the application menu based on the action's text (default)</td></tr>
+<tr><td class="topAlign"><code>MenuItem.ApplicationSpecificRole</code></td><td class="topAlign">The item should be put in the application menu with an application-specific role</td></tr>
+<tr><td class="topAlign"><code>MenuItem.AboutQtRole</code></td><td class="topAlign">The item handles the &quot;About Qt&quot; menu item.</td></tr>
+<tr><td class="topAlign"><code>MenuItem.AboutRole</code></td><td class="topAlign">The item should be placed where the &quot;About&quot; menu item is in the application menu. The text of the menu item will be set to &quot;About &lt;application name&gt;&quot;. The application name is fetched from the <code>Info.plist</code> file in the application's bundle (See <a href="../qtdoc/macos-deployment.html">Qt for macOS - Deployment</a>).</td></tr>
+<tr><td class="topAlign"><code>MenuItem.PreferencesRole</code></td><td class="topAlign">The item should be placed where the &quot;Preferences..&#x2e;&quot; menu item is in the application menu.</td></tr>
+<tr><td class="topAlign"><code>MenuItem.QuitRole</code></td><td class="topAlign">The item should be placed where the Quit menu item is in the application menu.</td></tr>
+</table></div>
+<p>Specifying the role only has effect on items that are in the immediate menus of a menubar, not in the submenus of those menus. For example, if you have a &quot;File&quot; menu in your menubar and the &quot;File&quot; menu has a submenu, specifying a role for the items in that submenu has no effect. They will never be moved to the application menu.</p>
+</div></div><!-- @@@role -->
+<br/>
+<!-- $$$separator -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="separator-prop"></a><span class="name">separator</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the item is a separator line. The default value is <code>false</code>.</p>
+<p><b>See also </b><a href="qml-qt-labs-platform-menuseparator.html">MenuSeparator</a>.</p>
+</div></div><!-- @@@separator -->
+<br/>
+<!-- $$$shortcut -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="shortcut-prop"></a><span class="name">shortcut</span> : <span class="type">keysequence</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the menu item's shortcut.</p>
+<p>The shortcut key sequence can be set to one of the <a href="../qtgui/qkeysequence.html#StandardKey-enum">standard keyboard shortcuts</a>, or it can be specified by a string containing a sequence of up to four key presses that are needed to <a href="qml-qt-labs-platform-menuitem.html#triggered-signal">trigger</a> the shortcut.</p>
+<p>The default value is an empty key sequence.</p>
+<pre class="cpp">
+
+  MenuItem {
+      shortcut: <span class="string">&quot;Ctrl+E,Ctrl+W&quot;</span>
+      onTriggered: edit<span class="operator">.</span>wrapMode <span class="operator">=</span> TextEdit<span class="operator">.</span>Wrap
+  }
+
+</pre>
+</div></div><!-- @@@shortcut -->
+<br/>
+<!-- $$$subMenu -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="subMenu-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">subMenu</span> : <span class="type"><a href="qml-qt-labs-platform-menu.html">Menu</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the sub-menu that the item contains, or <code>null</code> if the item is not a sub-menu item.</p>
+</div></div><!-- @@@subMenu -->
+<br/>
+<!-- $$$text -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="text-prop"></a><span class="name">text</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the menu item's text.</p>
+</div></div><!-- @@@text -->
+<br/>
+<!-- $$$visible -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="visible-prop"></a><span class="name">visible</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the item is visible. The default value is <code>true</code>.</p>
+</div></div><!-- @@@visible -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$hovered[overload1]$$$hovered -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="hovered-signal"></a><span class="name">hovered</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the menu item is hovered by the user.</p>
+</div></div><!-- @@@hovered -->
+<br/>
+<!-- $$$triggered[overload1]$$$triggered -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="triggered-signal"></a><span class="name">triggered</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the menu item is triggered by the user.</p>
+</div></div><!-- @@@triggered -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$toggle[overload1]$$$toggle -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="toggle-method"></a><span class="type">void</span> <span class="name">toggle</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Toggles the <a href="qml-qt-labs-platform-menuitem.html#checked-prop">checked</a> state to its opposite state.</p>
+</div></div><!-- @@@toggle -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qgraphicssceneevent.cpp -->
+  <title>QGraphicsSceneResizeEvent Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QGraphicsSceneResizeEvent</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QGraphicsSceneResizeEvent Class</h1>
+<!-- $$$QGraphicsSceneResizeEvent-brief -->
+<p>The <a href="qgraphicssceneresizeevent.html">QGraphicsSceneResizeEvent</a> class provides events for widget resizing in the graphics view framework. <a href="#details">More...</a></p>
+<!-- @@@QGraphicsSceneResizeEvent -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QGraphicsSceneResizeEvent&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.4</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qgraphicssceneevent.html">QGraphicsSceneEvent</a></td></tr></table></div><p>This class was introduced in  Qt 4.4.</p>
+<ul>
+<li><a href="qgraphicssceneresizeevent-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgraphicssceneresizeevent.html#QGraphicsSceneResizeEvent-1">QGraphicsSceneResizeEvent</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qgraphicssceneresizeevent.html#dtor.QGraphicsSceneResizeEvent">~QGraphicsSceneResizeEvent</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSizeF </td><td class="memItemRight bottomAlign"><b><a href="qgraphicssceneresizeevent.html#newSize">newSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSizeF </td><td class="memItemRight bottomAlign"><b><a href="qgraphicssceneresizeevent.html#oldSize">oldSize</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QGraphicsSceneResizeEvent-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A <a href="graphicsview.html#qgraphicswidget">QGraphicsWidget</a> sends itself a <a href="qgraphicssceneresizeevent.html">QGraphicsSceneResizeEvent</a> immediately when its geometry changes.</p>
+<p>It's similar to <a href="../qtgui/qresizeevent.html">QResizeEvent</a>, but its sizes, <a href="qgraphicssceneresizeevent.html#oldSize">oldSize</a>() and <a href="qgraphicssceneresizeevent.html#newSize">newSize</a>(), use <a href="../qtcore/qsizef.html">QSizeF</a> instead of <a href="../qtcore/qsize.html">QSize</a>.</p>
+</div>
+<p><b>See also </b><a href="qgraphicswidget.html#geometry-prop">QGraphicsWidget::setGeometry</a>() and <a href="qgraphicswidget.html#size-prop">QGraphicsWidget::resize</a>().</p>
+<!-- @@@QGraphicsSceneResizeEvent -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QGraphicsSceneResizeEvent$$$QGraphicsSceneResizeEvent -->
+<h3 class="fn" id="QGraphicsSceneResizeEvent-1"><a name="QGraphicsSceneResizeEvent-1"></a>QGraphicsSceneResizeEvent::<span class="name">QGraphicsSceneResizeEvent</span>()</h3>
+<p>Constructs a <a href="qgraphicssceneresizeevent.html">QGraphicsSceneResizeEvent</a>.</p>
+<!-- @@@QGraphicsSceneResizeEvent -->
+<!-- $$$~QGraphicsSceneResizeEvent[overload1]$$$~QGraphicsSceneResizeEvent -->
+<h3 class="fn" id="dtor.QGraphicsSceneResizeEvent"><a name="dtor.QGraphicsSceneResizeEvent"></a><code>[virtual] </code>QGraphicsSceneResizeEvent::<span class="name">~QGraphicsSceneResizeEvent</span>()</h3>
+<p>Destroys the <a href="qgraphicssceneresizeevent.html">QGraphicsSceneResizeEvent</a>.</p>
+<!-- @@@~QGraphicsSceneResizeEvent -->
+<!-- $$$newSize[overload1]$$$newSize -->
+<h3 class="fn" id="newSize"><a name="newSize"></a><span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span> QGraphicsSceneResizeEvent::<span class="name">newSize</span>() const</h3>
+<p>Returns the new size (i.e&#x2e;, the current size).</p>
+<p><b>See also </b><a href="qgraphicssceneresizeevent.html#oldSize">oldSize</a>() and <a href="qgraphicswidget.html#size-prop">QGraphicsWidget::resize</a>().</p>
+<!-- @@@newSize -->
+<!-- $$$oldSize[overload1]$$$oldSize -->
+<h3 class="fn" id="oldSize"><a name="oldSize"></a><span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span> QGraphicsSceneResizeEvent::<span class="name">oldSize</span>() const</h3>
+<p>Returns the old size (i.e&#x2e;, the size immediately before the widget was resized).</p>
+<p><b>See also </b><a href="qgraphicssceneresizeevent.html#newSize">newSize</a>() and <a href="qgraphicswidget.html#size-prop">QGraphicsWidget::resize</a>().</p>
+<!-- @@@oldSize -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

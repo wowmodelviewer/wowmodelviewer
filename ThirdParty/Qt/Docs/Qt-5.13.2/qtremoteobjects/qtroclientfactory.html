@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qconnectionfactories.cpp -->
+  <title>QtROClientFactory Class | Qt Remote Objects 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtremoteobjects-index.html">Qt Remote Objects</a></td><td ><a href="qtremoteobjects-module.html">C++ Classes</a></td><td >QtROClientFactory</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtremoteobjects-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QtROClientFactory Class</h1>
+<!-- $$$QtROClientFactory-brief -->
+<p>A class that holds information about client backends available on the Qt Remote Objects network. <a href="#details">More...</a></p>
+<!-- @@@QtROClientFactory -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QtROClientFactory&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += remoteobjects</td></tr></table></div><ul>
+</ul>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtroclientfactory.html#qRegisterRemoteObjectsClient">qRegisterRemoteObjectsClient</a></b>(const QString &amp;<i>id</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QtROClientFactory-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QtROClientFactory -->
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$qRegisterRemoteObjectsClient[overload1]$$$qRegisterRemoteObjectsClientconstQString& -->
+<h3 class="fn" id="qRegisterRemoteObjectsClient"><a name="qRegisterRemoteObjectsClient"></a><span class="type">void</span> <span class="name">qRegisterRemoteObjectsClient</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>id</i>)</h3>
+<p>Registers the Remote Objects client <i>id</i> for the type <code>T</code>.</p>
+<p>If you need a custom transport protocol for Qt Remote Objects, you need to register the client &amp; server implementation here.</p>
+<p><b>Note: </b>This function requires that <code>T</code> is a fully defined type at the point where the function is called.</p><p>This example registers the class <code>CustomClientIo</code> as <code>&quot;myprotocol&quot;</code>:</p>
+<pre class="cpp">
+
+  qRegisterRemoteObjectsClient<span class="operator">&lt;</span>CustomClientIo<span class="operator">&gt;</span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;myprotocol&quot;</span>));
+
+</pre>
+<p>With this in place, you can now instantiate nodes using this new custom protocol:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qremoteobjectnode.html">QRemoteObjectNode</a></span> client(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;myprotocol:registry&quot;</span>)));
+
+</pre>
+<p><b>See also </b><a href="qtroserverfactory.html#qRegisterRemoteObjectsServer">qRegisterRemoteObjectsServer</a>.</p>
+<!-- @@@qRegisterRemoteObjectsClient -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qpagesize.cpp -->
+  <title>QPageSize Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QPageSize</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPageSize Class</h1>
+<!-- $$$QPageSize-brief -->
+<p>The <a href="qpagesize.html">QPageSize</a> class describes the size and name of a defined page size. <a href="#details">More...</a></p>
+<!-- @@@QPageSize -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QPageSize&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.3</td></tr></table></div><p>This class was introduced in  Qt 5.3.</p>
+<ul>
+<li><a href="qpagesize-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#PageSizeId-enum">PageSizeId</a></b> { A0, A1, A2, A3, ..., LastPageSize }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#SizeMatchPolicy-enum">SizeMatchPolicy</a></b> { FuzzyMatch, FuzzyOrientationMatch, ExactMatch }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#Unit-enum">Unit</a></b> { Millimeter, Point, Inch, Pica, Didot, Cicero }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#QPageSize-4">QPageSize</a></b>(const QPageSize &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#QPageSize-3">QPageSize</a></b>(const QSizeF &amp;<i>size</i>, QPageSize::Unit <i>units</i>, const QString &amp;<i>name</i> = QString(), QPageSize::SizeMatchPolicy <i>matchPolicy</i> = FuzzyMatch)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#QPageSize-2">QPageSize</a></b>(const QSize &amp;<i>pointSize</i>, const QString &amp;<i>name</i> = QString(), QPageSize::SizeMatchPolicy <i>matchPolicy</i> = FuzzyMatch)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#QPageSize-1">QPageSize</a></b>(QPageSize::PageSizeId <i>pageSize</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#QPageSize">QPageSize</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPageSize &amp;</td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#operator-eq-1">operator=</a></b>(const QPageSize &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPageSize &amp;</td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#operator-eq">operator=</a></b>(QPageSize &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#dtor.QPageSize">~QPageSize</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSizeF </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#definitionSize">definitionSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPageSize::Unit </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#definitionUnits">definitionUnits</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPageSize::PageSizeId </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#id">id</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#isEquivalentTo">isEquivalentTo</a></b>(const QPageSize &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#isValid">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#key">key</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#name">name</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRectF </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#rect">rect</a></b>(QPageSize::Unit <i>units</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRect </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#rectPixels">rectPixels</a></b>(int <i>resolution</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRect </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#rectPoints">rectPoints</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSizeF </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#size">size</a></b>(QPageSize::Unit <i>units</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#sizePixels">sizePixels</a></b>(int <i>resolution</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#sizePoints">sizePoints</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#swap">swap</a></b>(QPageSize &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#windowsId">windowsId</a></b>() const</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QSizeF </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#definitionSize-1">definitionSize</a></b>(QPageSize::PageSizeId <i>pageSizeId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPageSize::Unit </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#definitionUnits-1">definitionUnits</a></b>(QPageSize::PageSizeId <i>pageSizeId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPageSize::PageSizeId </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#id-1">id</a></b>(const QSize &amp;<i>pointSize</i>, QPageSize::SizeMatchPolicy <i>matchPolicy</i> = FuzzyMatch)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPageSize::PageSizeId </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#id-2">id</a></b>(const QSizeF &amp;<i>size</i>, QPageSize::Unit <i>units</i>, QPageSize::SizeMatchPolicy <i>matchPolicy</i> = FuzzyMatch)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPageSize::PageSizeId </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#id-3">id</a></b>(int <i>windowsId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#key-1">key</a></b>(QPageSize::PageSizeId <i>pageSizeId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#name-1">name</a></b>(QPageSize::PageSizeId <i>pageSizeId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSizeF </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#size-1">size</a></b>(QPageSize::PageSizeId <i>pageSizeId</i>, QPageSize::Unit <i>units</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#sizePixels-1">sizePixels</a></b>(QPageSize::PageSizeId <i>pageSizeId</i>, int <i>resolution</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#sizePoints-1">sizePoints</a></b>(QPageSize::PageSizeId <i>pageSizeId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#windowsId-1">windowsId</a></b>(QPageSize::PageSizeId <i>pageSizeId</i>)</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#operator-not-eq">operator!=</a></b>(const QPageSize &amp;<i>lhs</i>, const QPageSize &amp;<i>rhs</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpagesize.html#operator-eq-eq">operator==</a></b>(const QPageSize &amp;<i>lhs</i>, const QPageSize &amp;<i>rhs</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPageSize-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This class implements support for the set of standard page sizes as defined in the Adobe Postscript PPD Standard v4.3&#x2e; It defines the standard set of page sizes in points, millimeters and inches and ensures these sizes are consistently used. Other size units can be used but will be calculated results and so may not always be consistent. The defined point sizes are always a integer, all other sizes can be fractions of a unit.</p>
+<p>The defined size is always in width x height order with no implied page orientation. Note that it is possible for page sizes to be defined where the width is greater than the height, such as <a href="qpagesize.html#PageSizeId-enum">QPageSize::Ledger</a>, so you cannot rely on comparing the width and height values to determine page orientation.</p>
+<p>For example, A4 is defined by the standard as 210mm x 297mm, 8.27in x 11.69in, or 595pt x 842pt.</p>
+<p>You can also define custom page sizes with custom names in any units you want and this unit size will be preserved and used as the base for all other unit size calculations.</p>
+<p>When creating a <a href="qpagesize.html">QPageSize</a> using a custom <a href="../qtcore/qsize.html">QSize</a> you can choose if you want <a href="qpagesize.html">QPageSize</a> to try match the size to a standard page size. By default QPaperSize uses a <a href="qpagesize.html#SizeMatchPolicy-enum">FuzzyMatch</a> mode where it will match a given page size to a standard page size if it falls within 3 postscript points of a defined standard size. You can override this to request only an exact match but this is not recommended as conversions between units can easily lose 3 points and result in incorrect page sizes.</p>
+<p>A <a href="qpagesize.html">QPageSize</a> instance may also be obtained by querying the supported page sizes for a print device. In this case the localized name returned is that defined by the printer itself. Note that the print device may not support the current default locale language.</p>
+<p>The class also provides convenience methods for converting page size IDs to and from various unit sizes.</p>
+</div>
+<p><b>See also </b><a href="qpagedpaintdevice.html">QPagedPaintDevice</a> and <a href="qpdfwriter.html">QPdfWriter</a>.</p>
+<!-- @@@QPageSize -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$PageSizeId$$$A4$$$B5$$$Letter$$$Legal$$$Executive$$$A0$$$A1$$$A2$$$A3$$$A5$$$A6$$$A7$$$A8$$$A9$$$B0$$$B1$$$B10$$$B2$$$B3$$$B4$$$B6$$$B7$$$B8$$$B9$$$C5E$$$Comm10E$$$DLE$$$Folio$$$Ledger$$$Tabloid$$$Custom$$$A10$$$A3Extra$$$A4Extra$$$A4Plus$$$A4Small$$$A5Extra$$$B5Extra$$$JisB0$$$JisB1$$$JisB2$$$JisB3$$$JisB4$$$JisB5$$$JisB6$$$JisB7$$$JisB8$$$JisB9$$$JisB10$$$AnsiC$$$AnsiD$$$AnsiE$$$LegalExtra$$$LetterExtra$$$LetterPlus$$$LetterSmall$$$TabloidExtra$$$ArchA$$$ArchB$$$ArchC$$$ArchD$$$ArchE$$$Imperial7x9$$$Imperial8x10$$$Imperial9x11$$$Imperial9x12$$$Imperial10x11$$$Imperial10x13$$$Imperial10x14$$$Imperial12x11$$$Imperial15x11$$$ExecutiveStandard$$$Note$$$Quarto$$$Statement$$$SuperA$$$SuperB$$$Postcard$$$DoublePostcard$$$Prc16K$$$Prc32K$$$Prc32KBig$$$FanFoldUS$$$FanFoldGerman$$$FanFoldGermanLegal$$$EnvelopeB4$$$EnvelopeB5$$$EnvelopeB6$$$EnvelopeC0$$$EnvelopeC1$$$EnvelopeC2$$$EnvelopeC3$$$EnvelopeC4$$$EnvelopeC6$$$EnvelopeC65$$$EnvelopeC7$$$Envelope9$$$Envelope11$$$Envelope12$$$Envelope14$$$EnvelopeMonarch$$$EnvelopePersonal$$$EnvelopeChou3$$$EnvelopeChou4$$$EnvelopeInvite$$$EnvelopeItalian$$$EnvelopeKaku2$$$EnvelopeKaku3$$$EnvelopePrc1$$$EnvelopePrc2$$$EnvelopePrc3$$$EnvelopePrc4$$$EnvelopePrc5$$$EnvelopePrc6$$$EnvelopePrc7$$$EnvelopePrc8$$$EnvelopePrc9$$$EnvelopePrc10$$$EnvelopeYou4$$$LastPageSize$$$NPageSize$$$NPaperSize$$$AnsiA$$$AnsiB$$$EnvelopeC5$$$EnvelopeDL$$$Envelope10 -->
+<h3 class="fn" id="PageSizeId-enum"><a name="PageSizeId-enum"></a>enum QPageSize::<span class="name">PageSizeId</span></h3>
+<p>This enum type lists the available page sizes as defined in the Postscript PPD standard. These values are duplicated in <a href="qpagedpaintdevice.html">QPagedPaintDevice</a> and QPrinter.</p>
+<p>The defined sizes are:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QPageSize::A0</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">841 x 1189 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::A1</code></td><td class="topAlign tblval"><code>6</code></td><td class="topAlign">594 x 841 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::A2</code></td><td class="topAlign tblval"><code>7</code></td><td class="topAlign">420 x 594 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::A3</code></td><td class="topAlign tblval"><code>8</code></td><td class="topAlign">297 x 420 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::A4</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">210 x 297 mm, 8.26 x 11.69 inches</td></tr>
+<tr><td class="topAlign"><code>QPageSize::A5</code></td><td class="topAlign tblval"><code>9</code></td><td class="topAlign">148 x 210 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::A6</code></td><td class="topAlign tblval"><code>10</code></td><td class="topAlign">105 x 148 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::A7</code></td><td class="topAlign tblval"><code>11</code></td><td class="topAlign">74 x 105 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::A8</code></td><td class="topAlign tblval"><code>12</code></td><td class="topAlign">52 x 74 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::A9</code></td><td class="topAlign tblval"><code>13</code></td><td class="topAlign">37 x 52 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::B0</code></td><td class="topAlign tblval"><code>14</code></td><td class="topAlign">1000 x 1414 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::B1</code></td><td class="topAlign tblval"><code>15</code></td><td class="topAlign">707 x 1000 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::B2</code></td><td class="topAlign tblval"><code>17</code></td><td class="topAlign">500 x 707 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::B3</code></td><td class="topAlign tblval"><code>18</code></td><td class="topAlign">353 x 500 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::B4</code></td><td class="topAlign tblval"><code>19</code></td><td class="topAlign">250 x 353 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::B5</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">176 x 250 mm, 6.93 x 9.84 inches</td></tr>
+<tr><td class="topAlign"><code>QPageSize::B6</code></td><td class="topAlign tblval"><code>20</code></td><td class="topAlign">125 x 176 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::B7</code></td><td class="topAlign tblval"><code>21</code></td><td class="topAlign">88 x 125 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::B8</code></td><td class="topAlign tblval"><code>22</code></td><td class="topAlign">62 x 88 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::B9</code></td><td class="topAlign tblval"><code>23</code></td><td class="topAlign">44 x 62 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::B10</code></td><td class="topAlign tblval"><code>16</code></td><td class="topAlign">31 x 44 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::C5E</code></td><td class="topAlign tblval"><code>24</code></td><td class="topAlign">163 x 229 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Comm10E</code></td><td class="topAlign tblval"><code>25</code></td><td class="topAlign">105 x 241 mm, U.S&#x2e; Common 10 Envelope</td></tr>
+<tr><td class="topAlign"><code>QPageSize::DLE</code></td><td class="topAlign tblval"><code>26</code></td><td class="topAlign">110 x 220 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Executive</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">7.5 x 10 inches, 190.5 x 254 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Folio</code></td><td class="topAlign tblval"><code>27</code></td><td class="topAlign">210 x 330 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Ledger</code></td><td class="topAlign tblval"><code>28</code></td><td class="topAlign">431.8 x 279.4 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Legal</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">8.5 x 14 inches, 215.9 x 355.6 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Letter</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">8.5 x 11 inches, 215.9 x 279.4 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Tabloid</code></td><td class="topAlign tblval"><code>29</code></td><td class="topAlign">279.4 x 431.8 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Custom</code></td><td class="topAlign tblval"><code>30</code></td><td class="topAlign">Unknown, or a user defined size.</td></tr>
+<tr><td class="topAlign"><code>QPageSize::A10</code></td><td class="topAlign tblval"><code>31</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::A3Extra</code></td><td class="topAlign tblval"><code>32</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::A4Extra</code></td><td class="topAlign tblval"><code>33</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::A4Plus</code></td><td class="topAlign tblval"><code>34</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::A4Small</code></td><td class="topAlign tblval"><code>35</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::A5Extra</code></td><td class="topAlign tblval"><code>36</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::B5Extra</code></td><td class="topAlign tblval"><code>37</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::JisB0</code></td><td class="topAlign tblval"><code>38</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::JisB1</code></td><td class="topAlign tblval"><code>39</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::JisB2</code></td><td class="topAlign tblval"><code>40</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::JisB3</code></td><td class="topAlign tblval"><code>41</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::JisB4</code></td><td class="topAlign tblval"><code>42</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::JisB5</code></td><td class="topAlign tblval"><code>43</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::JisB6</code></td><td class="topAlign tblval"><code>44</code></td><td class="topAlign">,</td></tr>
+<tr><td class="topAlign"><code>QPageSize::JisB7</code></td><td class="topAlign tblval"><code>45</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::JisB8</code></td><td class="topAlign tblval"><code>46</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::JisB9</code></td><td class="topAlign tblval"><code>47</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::JisB10</code></td><td class="topAlign tblval"><code>48</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::AnsiA</code></td><td class="topAlign tblval"><code>Letter</code></td><td class="topAlign">= Letter</td></tr>
+<tr><td class="topAlign"><code>QPageSize::AnsiB</code></td><td class="topAlign tblval"><code>Ledger</code></td><td class="topAlign">= Ledger</td></tr>
+<tr><td class="topAlign"><code>QPageSize::AnsiC</code></td><td class="topAlign tblval"><code>49</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::AnsiD</code></td><td class="topAlign tblval"><code>50</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::AnsiE</code></td><td class="topAlign tblval"><code>51</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::LegalExtra</code></td><td class="topAlign tblval"><code>52</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::LetterExtra</code></td><td class="topAlign tblval"><code>53</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::LetterPlus</code></td><td class="topAlign tblval"><code>54</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::LetterSmall</code></td><td class="topAlign tblval"><code>55</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::TabloidExtra</code></td><td class="topAlign tblval"><code>56</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::ArchA</code></td><td class="topAlign tblval"><code>57</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::ArchB</code></td><td class="topAlign tblval"><code>58</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::ArchC</code></td><td class="topAlign tblval"><code>59</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::ArchD</code></td><td class="topAlign tblval"><code>60</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::ArchE</code></td><td class="topAlign tblval"><code>61</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Imperial7x9</code></td><td class="topAlign tblval"><code>62</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Imperial8x10</code></td><td class="topAlign tblval"><code>63</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Imperial9x11</code></td><td class="topAlign tblval"><code>64</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Imperial9x12</code></td><td class="topAlign tblval"><code>65</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Imperial10x11</code></td><td class="topAlign tblval"><code>66</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Imperial10x13</code></td><td class="topAlign tblval"><code>67</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Imperial10x14</code></td><td class="topAlign tblval"><code>68</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Imperial12x11</code></td><td class="topAlign tblval"><code>69</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Imperial15x11</code></td><td class="topAlign tblval"><code>70</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::ExecutiveStandard</code></td><td class="topAlign tblval"><code>71</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Note</code></td><td class="topAlign tblval"><code>72</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Quarto</code></td><td class="topAlign tblval"><code>73</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Statement</code></td><td class="topAlign tblval"><code>74</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::SuperA</code></td><td class="topAlign tblval"><code>75</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::SuperB</code></td><td class="topAlign tblval"><code>76</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Postcard</code></td><td class="topAlign tblval"><code>77</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::DoublePostcard</code></td><td class="topAlign tblval"><code>78</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Prc16K</code></td><td class="topAlign tblval"><code>79</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Prc32K</code></td><td class="topAlign tblval"><code>80</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Prc32KBig</code></td><td class="topAlign tblval"><code>81</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::FanFoldUS</code></td><td class="topAlign tblval"><code>82</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::FanFoldGerman</code></td><td class="topAlign tblval"><code>83</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::FanFoldGermanLegal</code></td><td class="topAlign tblval"><code>84</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopeB4</code></td><td class="topAlign tblval"><code>85</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopeB5</code></td><td class="topAlign tblval"><code>86</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopeB6</code></td><td class="topAlign tblval"><code>87</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopeC0</code></td><td class="topAlign tblval"><code>88</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopeC1</code></td><td class="topAlign tblval"><code>89</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopeC2</code></td><td class="topAlign tblval"><code>90</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopeC3</code></td><td class="topAlign tblval"><code>91</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopeC4</code></td><td class="topAlign tblval"><code>92</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopeC5</code></td><td class="topAlign tblval"><code>C5E</code></td><td class="topAlign">= C5E</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopeC6</code></td><td class="topAlign tblval"><code>93</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopeC65</code></td><td class="topAlign tblval"><code>94</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopeC7</code></td><td class="topAlign tblval"><code>95</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopeDL</code></td><td class="topAlign tblval"><code>DLE</code></td><td class="topAlign">= DLE</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Envelope9</code></td><td class="topAlign tblval"><code>96</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Envelope10</code></td><td class="topAlign tblval"><code>Comm10E</code></td><td class="topAlign">= Comm10E</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Envelope11</code></td><td class="topAlign tblval"><code>97</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Envelope12</code></td><td class="topAlign tblval"><code>98</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Envelope14</code></td><td class="topAlign tblval"><code>99</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopeMonarch</code></td><td class="topAlign tblval"><code>100</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopePersonal</code></td><td class="topAlign tblval"><code>101</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopeChou3</code></td><td class="topAlign tblval"><code>102</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopeChou4</code></td><td class="topAlign tblval"><code>103</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopeInvite</code></td><td class="topAlign tblval"><code>104</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopeItalian</code></td><td class="topAlign tblval"><code>105</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopeKaku2</code></td><td class="topAlign tblval"><code>106</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopeKaku3</code></td><td class="topAlign tblval"><code>107</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopePrc1</code></td><td class="topAlign tblval"><code>108</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopePrc2</code></td><td class="topAlign tblval"><code>109</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopePrc3</code></td><td class="topAlign tblval"><code>110</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopePrc4</code></td><td class="topAlign tblval"><code>111</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopePrc5</code></td><td class="topAlign tblval"><code>112</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopePrc6</code></td><td class="topAlign tblval"><code>113</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopePrc7</code></td><td class="topAlign tblval"><code>114</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopePrc8</code></td><td class="topAlign tblval"><code>115</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopePrc9</code></td><td class="topAlign tblval"><code>116</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopePrc10</code></td><td class="topAlign tblval"><code>117</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::EnvelopeYou4</code></td><td class="topAlign tblval"><code>118</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::LastPageSize</code></td><td class="topAlign tblval"><code>EnvelopeYou4</code></td><td class="topAlign">= EnvelopeYou4</td></tr>
+</table></div>
+<p>Due to historic reasons QPageSize::Executive is not the same as the standard Postscript and Windows Executive size, use QPageSize::ExecutiveStandard instead.</p>
+<p>The Postscript standard size QPageSize::Folio is different to the Windows DMPAPER_FOLIO size, use the Postscript standard size QPageSize::FanFoldGermanLegal if needed.</p>
+<!-- @@@PageSizeId -->
+<!-- $$$SizeMatchPolicy$$$FuzzyMatch$$$FuzzyOrientationMatch$$$ExactMatch -->
+<h3 class="fn" id="SizeMatchPolicy-enum"><a name="SizeMatchPolicy-enum"></a>enum QPageSize::<span class="name">SizeMatchPolicy</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QPageSize::FuzzyMatch</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Match to a standard page size if within the margin of tolerance.</td></tr>
+<tr><td class="topAlign"><code>QPageSize::FuzzyOrientationMatch</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Match to a standard page size if within the margin of tolerance regardless of orientation.</td></tr>
+<tr><td class="topAlign"><code>QPageSize::ExactMatch</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Only match to a standard page size if the sizes match exactly.</td></tr>
+</table></div>
+<!-- @@@SizeMatchPolicy -->
+<!-- $$$Unit$$$Millimeter$$$Point$$$Inch$$$Pica$$$Didot$$$Cicero -->
+<h3 class="fn" id="Unit-enum"><a name="Unit-enum"></a>enum QPageSize::<span class="name">Unit</span></h3>
+<p>This enum type is used to specify the measurement unit for page sizes.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QPageSize::Millimeter</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Point</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">1/72th of an inch</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Inch</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Pica</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">1/72th of a foot, 1/6th of an inch, 12 Points</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Didot</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">1/72th of a French inch, 0.375 mm</td></tr>
+<tr><td class="topAlign"><code>QPageSize::Cicero</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">1/6th of a French inch, 12 Didot, 4.5mm</td></tr>
+</table></div>
+<!-- @@@Unit -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QPageSize$$$QPageSizeconstQPageSize& -->
+<h3 class="fn" id="QPageSize-4"><a name="QPageSize-4"></a>QPageSize::<span class="name">QPageSize</span>(const <span class="type"><a href="qpagesize.html#QPageSize">QPageSize</a></span> &amp;<i>other</i>)</h3>
+<p>Copy constructor, copies <i>other</i> to this.</p>
+<!-- @@@QPageSize -->
+<!-- $$$QPageSize$$$QPageSizeconstQSizeF&QPageSize::UnitconstQString&QPageSize::SizeMatchPolicy -->
+<h3 class="fn" id="QPageSize-3"><a name="QPageSize-3"></a>QPageSize::<span class="name">QPageSize</span>(const <span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span> &amp;<i>size</i>, <span class="type"><a href="qpagesize.html#Unit-enum">QPageSize::Unit</a></span> <i>units</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i> = QString(), <span class="type"><a href="qpagesize.html#SizeMatchPolicy-enum">QPageSize::SizeMatchPolicy</a></span> <i>matchPolicy</i> = FuzzyMatch)</h3>
+<p>Creates a custom page of the given <i>size</i> in <i>units</i>.</p>
+<p>If the given <i>size</i> matches a standard <a href="qpagesize.html#PageSizeId-enum">QPageSize::PageSizeId</a>, then that page size will be used. Note that if the <i>matchPolicy</i> is <a href="qpagesize.html#SizeMatchPolicy-enum">FuzzyMatch</a> this may result in the <i>size</i> being adjusted to the standard size. To prevent this happening use a <i>matchPolicy</i> of <a href="qpagesize.html#SizeMatchPolicy-enum">ExactMatch</a> instead.</p>
+<p>If the given <i>size</i> is not a standard <a href="qpagesize.html#PageSizeId-enum">QPageSize::PageSizeId</a> then a <a href="qpagesize.html#PageSizeId-enum">QPageSize::Custom</a> size will be created. The original unit size will be preserved and used as the base for all other unit size calculations.</p>
+<p>If <i>name</i> is null then a custom name will be created in the form &quot;Custom (width x height)&quot; where the size is expressed in units provided.</p>
+<!-- @@@QPageSize -->
+<!-- $$$QPageSize$$$QPageSizeconstQSize&constQString&QPageSize::SizeMatchPolicy -->
+<h3 class="fn" id="QPageSize-2"><a name="QPageSize-2"></a>QPageSize::<span class="name">QPageSize</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>pointSize</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i> = QString(), <span class="type"><a href="qpagesize.html#SizeMatchPolicy-enum">QPageSize::SizeMatchPolicy</a></span> <i>matchPolicy</i> = FuzzyMatch)</h3>
+<p>Creates a <a href="qpagesize.html">QPageSize</a> of the given <i>pointSize</i> in Points using the matching <i>matchPolicy</i>.</p>
+<p>If the given <i>pointSize</i> matches a standard <a href="qpagesize.html#PageSizeId-enum">QPageSize::PageSizeId</a>, then that page size will be used. Note that if the <i>matchPolicy</i> is <a href="qpagesize.html#SizeMatchPolicy-enum">FuzzyMatch</a> this may result in the <i>pointSize</i> being adjusted to the standard size. To prevent this happening use a <i>matchPolicy</i> of <a href="qpagesize.html#SizeMatchPolicy-enum">ExactMatch</a> instead.</p>
+<p>If the given <i>pointSize</i> is not a standard <a href="qpagesize.html#PageSizeId-enum">QPageSize::PageSizeId</a> then a <a href="qpagesize.html#PageSizeId-enum">QPageSize::Custom</a> size will be created.</p>
+<p>If <i>name</i> is null then the standard localized name will be used. If a custom page size then a custom name in the format &quot;Custom (width x height)&quot; will be created.</p>
+<p>The <i>matchPolicy</i> defaults to <a href="qpagesize.html#SizeMatchPolicy-enum">FuzzyMatch</a>.</p>
+<!-- @@@QPageSize -->
+<!-- $$$QPageSize$$$QPageSizeQPageSize::PageSizeId -->
+<h3 class="fn" id="QPageSize-1"><a name="QPageSize-1"></a>QPageSize::<span class="name">QPageSize</span>(<span class="type"><a href="qpagesize.html#PageSizeId-enum">QPageSize::PageSizeId</a></span> <i>pageSize</i>)</h3>
+<p>Creates a <a href="qpagesize.html">QPageSize</a> of the standard <i>pageSize</i>.</p>
+<p>If <i>pageSize</i> is <a href="qpagesize.html#PageSizeId-enum">QPageSize::Custom</a> then the resulting <a href="qpagesize.html">QPageSize</a> will not be valid. Use the custom size constructor instead.</p>
+<!-- @@@QPageSize -->
+<!-- $$$QPageSize[overload1]$$$QPageSize -->
+<h3 class="fn" id="QPageSize"><a name="QPageSize"></a>QPageSize::<span class="name">QPageSize</span>()</h3>
+<p>Creates a null <a href="qpagesize.html">QPageSize</a>.</p>
+<!-- @@@QPageSize -->
+<!-- $$$operator=$$$operator=constQPageSize& -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type"><a href="qpagesize.html#QPageSize">QPageSize</a></span> &amp;QPageSize::<span class="name">operator=</span>(const <span class="type"><a href="qpagesize.html#QPageSize">QPageSize</a></span> &amp;<i>other</i>)</h3>
+<p>Assignment operator, assigns <i>other</i> to this.</p>
+<!-- @@@operator= -->
+<!-- $$$operator=[overload1]$$$operator=QPageSize&& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qpagesize.html#QPageSize">QPageSize</a></span> &amp;QPageSize::<span class="name">operator=</span>(<span class="type"><a href="qpagesize.html#QPageSize">QPageSize</a></span> &amp;&amp;<i>other</i>)</h3>
+<p>Move-assigns <i>other</i> to this <a href="qpagesize.html">QPageSize</a> instance, transferring the ownership of the managed pointer to this instance.</p>
+<!-- @@@operator= -->
+<!-- $$$~QPageSize[overload1]$$$~QPageSize -->
+<h3 class="fn" id="dtor.QPageSize"><a name="dtor.QPageSize"></a>QPageSize::<span class="name">~QPageSize</span>()</h3>
+<p>Destroys the page.</p>
+<!-- @@@~QPageSize -->
+<!-- $$$definitionSize[overload1]$$$definitionSize -->
+<h3 class="fn" id="definitionSize"><a name="definitionSize"></a><span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span> QPageSize::<span class="name">definitionSize</span>() const</h3>
+<p>Returns the definition size of the page size.</p>
+<p>For a standard page size this will be the size as defined in the relevant standard, i.e&#x2e; ISO A4 will be defined in millimeters while ANSI Letter will be defined in inches.</p>
+<p>For a custom page size this will be the original size used to create the page size object.</p>
+<p>If the <a href="qpagesize.html">QPageSize</a> is invalid then the <a href="../qtcore/qsizef.html">QSizeF</a> will be invalid.</p>
+<p><b>See also </b><a href="qpagesize.html#definitionUnits">definitionUnits</a>().</p>
+<!-- @@@definitionSize -->
+<!-- $$$definitionSize$$$definitionSizeQPageSize::PageSizeId -->
+<h3 class="fn" id="definitionSize-1"><a name="definitionSize-1"></a><code>[static] </code><span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span> QPageSize::<span class="name">definitionSize</span>(<span class="type"><a href="qpagesize.html#PageSizeId-enum">QPageSize::PageSizeId</a></span> <i>pageSizeId</i>)</h3>
+<p>Returns the definition size of the standard <i>pageSizeId</i>.</p>
+<p>To obtain the definition units, call <a href="qpagesize.html#definitionUnits">QPageSize::definitionUnits</a>().</p>
+<!-- @@@definitionSize -->
+<!-- $$$definitionUnits[overload1]$$$definitionUnits -->
+<h3 class="fn" id="definitionUnits"><a name="definitionUnits"></a><span class="type"><a href="qpagesize.html#Unit-enum">QPageSize::Unit</a></span> QPageSize::<span class="name">definitionUnits</span>() const</h3>
+<p>Returns the definition units of the page size.</p>
+<p>For a standard page size this will be the units as defined in the relevant standard, i.e&#x2e; ISO A4 will be defined in millimeters while ANSI Letter will be defined in inches.</p>
+<p>For a custom page size this will be the original units used to create the page size object.</p>
+<p>If the <a href="qpagesize.html">QPageSize</a> is invalid then the <a href="qpagesize.html#Unit-enum">QPageSize::Unit</a> will be invalid.</p>
+<p><b>See also </b><a href="qpagesize.html#definitionSize">definitionSize</a>().</p>
+<!-- @@@definitionUnits -->
+<!-- $$$definitionUnits$$$definitionUnitsQPageSize::PageSizeId -->
+<h3 class="fn" id="definitionUnits-1"><a name="definitionUnits-1"></a><code>[static] </code><span class="type"><a href="qpagesize.html#Unit-enum">QPageSize::Unit</a></span> QPageSize::<span class="name">definitionUnits</span>(<span class="type"><a href="qpagesize.html#PageSizeId-enum">QPageSize::PageSizeId</a></span> <i>pageSizeId</i>)</h3>
+<p>Returns the definition units of the standard <i>pageSizeId</i>.</p>
+<p>To obtain the definition size, call <a href="qpagesize.html#definitionSize">QPageSize::definitionSize</a>().</p>
+<!-- @@@definitionUnits -->
+<!-- $$$id[overload1]$$$id -->
+<h3 class="fn" id="id"><a name="id"></a><span class="type"><a href="qpagesize.html#PageSizeId-enum">QPageSize::PageSizeId</a></span> QPageSize::<span class="name">id</span>() const</h3>
+<p>Returns the standard <a href="qpagesize.html#PageSizeId-enum">QPageSize::PageSizeId</a> of the page, or <a href="qpagesize.html#PageSizeId-enum">QPageSize::Custom</a>.</p>
+<p>If the <a href="qpagesize.html">QPageSize</a> is invalid then the ID will be <a href="qpagesize.html#PageSizeId-enum">QPageSize::Custom</a>.</p>
+<!-- @@@id -->
+<!-- $$$id$$$idconstQSize&QPageSize::SizeMatchPolicy -->
+<h3 class="fn" id="id-1"><a name="id-1"></a><code>[static] </code><span class="type"><a href="qpagesize.html#PageSizeId-enum">QPageSize::PageSizeId</a></span> QPageSize::<span class="name">id</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>pointSize</i>, <span class="type"><a href="qpagesize.html#SizeMatchPolicy-enum">QPageSize::SizeMatchPolicy</a></span> <i>matchPolicy</i> = FuzzyMatch)</h3>
+<p>Returns the standard <a href="qpagesize.html#PageSizeId-enum">QPageSize::PageSizeId</a> of the given <i>pointSize</i> in points using the given <i>matchPolicy</i>.</p>
+<p>If using <a href="qpagesize.html#SizeMatchPolicy-enum">FuzzyMatch</a> then the point size of the <a href="qpagesize.html#PageSizeId-enum">PageSizeId</a> returned may not exactly match the <i>pointSize</i> you passed in. You should call <a href="qpagesize.html#sizePoints">QPageSize::sizePoints</a>() using the returned <a href="qpagesize.html#PageSizeId-enum">PageSizeId</a> to find out the actual point size of the <a href="qpagesize.html#PageSizeId-enum">PageSizeId</a> before using it in any calculations.</p>
+<!-- @@@id -->
+<!-- $$$id$$$idconstQSizeF&QPageSize::UnitQPageSize::SizeMatchPolicy -->
+<h3 class="fn" id="id-2"><a name="id-2"></a><code>[static] </code><span class="type"><a href="qpagesize.html#PageSizeId-enum">QPageSize::PageSizeId</a></span> QPageSize::<span class="name">id</span>(const <span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span> &amp;<i>size</i>, <span class="type"><a href="qpagesize.html#Unit-enum">QPageSize::Unit</a></span> <i>units</i>, <span class="type"><a href="qpagesize.html#SizeMatchPolicy-enum">QPageSize::SizeMatchPolicy</a></span> <i>matchPolicy</i> = FuzzyMatch)</h3>
+<p>Returns the standard <a href="qpagesize.html#PageSizeId-enum">QPageSize::PageSizeId</a> of the given <i>size</i> in <i>units</i> using the given <i>matchPolicy</i>.</p>
+<p>If using <a href="qpagesize.html#SizeMatchPolicy-enum">FuzzyMatch</a> then the unit size of the <a href="qpagesize.html#PageSizeId-enum">PageSizeId</a> returned may not exactly match the <i>size</i> you passed in. You should call <a href="qpagesize.html#size">QPageSize::size</a>() using the returned <a href="qpagesize.html#PageSizeId-enum">PageSizeId</a> to find out the actual unit size of the <a href="qpagesize.html#PageSizeId-enum">PageSizeId</a> before using it in any calculations.</p>
+<!-- @@@id -->
+<!-- $$$id$$$idint -->
+<h3 class="fn" id="id-3"><a name="id-3"></a><code>[static] </code><span class="type"><a href="qpagesize.html#PageSizeId-enum">QPageSize::PageSizeId</a></span> QPageSize::<span class="name">id</span>(<span class="type">int</span> <i>windowsId</i>)</h3>
+<p>Returns the <a href="qpagesize.html#PageSizeId-enum">PageSizeId</a> for the given Windows DMPAPER enum value <i>windowsId</i>.</p>
+<p>If there is no matching <a href="qpagesize.html#PageSizeId-enum">PageSizeId</a> then <a href="qpagesize.html#PageSizeId-enum">QPageSize::Custom</a> is returned.</p>
+<!-- @@@id -->
+<!-- $$$isEquivalentTo[overload1]$$$isEquivalentToconstQPageSize& -->
+<h3 class="fn" id="isEquivalentTo"><a name="isEquivalentTo"></a><span class="type">bool</span> QPageSize::<span class="name">isEquivalentTo</span>(const <span class="type"><a href="qpagesize.html#QPageSize">QPageSize</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns <code>true</code> if this page is equivalent to the <i>other</i> page, i.e&#x2e; if the page has the same size regardless of other attributes like name.</p>
+<!-- @@@isEquivalentTo -->
+<!-- $$$isValid[overload1]$$$isValid -->
+<h3 class="fn" id="isValid"><a name="isValid"></a><span class="type">bool</span> QPageSize::<span class="name">isValid</span>() const</h3>
+<p>Returns <code>true</code> if this page size is valid.</p>
+<p>The page size may be invalid if created with an invalid <a href="qpagesize.html#PageSizeId-enum">PageSizeId</a>, or a negative or invalid <a href="../qtcore/qsize.html">QSize</a> or <a href="../qtcore/qsizef.html">QSizeF</a>, or the null constructor.</p>
+<!-- @@@isValid -->
+<!-- $$$key[overload1]$$$key -->
+<h3 class="fn" id="key"><a name="key"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPageSize::<span class="name">key</span>() const</h3>
+<p>Returns the unique key of the page size.</p>
+<p>By default this is the PPD standard mediaOption keyword for the page size, or the PPD custom format key. If the <a href="qpagesize.html">QPageSize</a> instance was obtained from a print device then this will be the key provided by the print device and may differ from the standard key.</p>
+<p>If the <a href="qpagesize.html">QPageSize</a> is invalid then the key will be an empty string.</p>
+<p>This key should never be shown to end users, it is an internal key only. For a human-readable name use <a href="qpagesize.html#name">name</a>().</p>
+<p><b>See also </b><a href="qpagesize.html#name">name</a>().</p>
+<!-- @@@key -->
+<!-- $$$key$$$keyQPageSize::PageSizeId -->
+<h3 class="fn" id="key-1"><a name="key-1"></a><code>[static] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPageSize::<span class="name">key</span>(<span class="type"><a href="qpagesize.html#PageSizeId-enum">QPageSize::PageSizeId</a></span> <i>pageSizeId</i>)</h3>
+<p>Returns the PPD mediaOption keyword of the standard <i>pageSizeId</i>.</p>
+<p>If the <a href="qpagesize.html">QPageSize</a> is invalid then the key will be empty.</p>
+<!-- @@@key -->
+<!-- $$$name[overload1]$$$name -->
+<h3 class="fn" id="name"><a name="name"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPageSize::<span class="name">name</span>() const</h3>
+<p>Returns a localized human-readable name for the page size.</p>
+<p>If the <a href="qpagesize.html">QPageSize</a> instance was obtained from a print device then the name used is that provided by the print device. Note that a print device may not support the current default locale language.</p>
+<p>If the <a href="qpagesize.html">QPageSize</a> is invalid then the name will be an empty string.</p>
+<!-- @@@name -->
+<!-- $$$name$$$nameQPageSize::PageSizeId -->
+<h3 class="fn" id="name-1"><a name="name-1"></a><code>[static] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPageSize::<span class="name">name</span>(<span class="type"><a href="qpagesize.html#PageSizeId-enum">QPageSize::PageSizeId</a></span> <i>pageSizeId</i>)</h3>
+<p>Returns the localized name of the standard <i>pageSizeId</i>.</p>
+<p>If the <a href="qpagesize.html">QPageSize</a> is invalid then the name will be empty.</p>
+<!-- @@@name -->
+<!-- $$$rect[overload1]$$$rectQPageSize::Unit -->
+<h3 class="fn" id="rect"><a name="rect"></a><span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> QPageSize::<span class="name">rect</span>(<span class="type"><a href="qpagesize.html#Unit-enum">QPageSize::Unit</a></span> <i>units</i>) const</h3>
+<p>Returns the page rectangle in the required <i>units</i>.</p>
+<p>If the <a href="qpagesize.html">QPageSize</a> is invalid then the <a href="../qtcore/qrect.html">QRect</a> will be invalid.</p>
+<!-- @@@rect -->
+<!-- $$$rectPixels[overload1]$$$rectPixelsint -->
+<h3 class="fn" id="rectPixels"><a name="rectPixels"></a><span class="type"><a href="../qtcore/qrect.html">QRect</a></span> QPageSize::<span class="name">rectPixels</span>(<span class="type">int</span> <i>resolution</i>) const</h3>
+<p>Returns the page rectangle in Device Pixels at the given <i>resolution</i>.</p>
+<p>If the <a href="qpagesize.html">QPageSize</a> is invalid then the <a href="../qtcore/qrect.html">QRect</a> will be invalid.</p>
+<!-- @@@rectPixels -->
+<!-- $$$rectPoints[overload1]$$$rectPoints -->
+<h3 class="fn" id="rectPoints"><a name="rectPoints"></a><span class="type"><a href="../qtcore/qrect.html">QRect</a></span> QPageSize::<span class="name">rectPoints</span>() const</h3>
+<p>Returns the page rectangle in Postscript Points (1/72 of an inch).</p>
+<p>If the <a href="qpagesize.html">QPageSize</a> is invalid then the <a href="../qtcore/qrect.html">QRect</a> will be invalid.</p>
+<!-- @@@rectPoints -->
+<!-- $$$size[overload1]$$$sizeQPageSize::Unit -->
+<h3 class="fn" id="size"><a name="size"></a><span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span> QPageSize::<span class="name">size</span>(<span class="type"><a href="qpagesize.html#Unit-enum">QPageSize::Unit</a></span> <i>units</i>) const</h3>
+<p>Returns the size of the page in the required <i>units</i>.</p>
+<p>If the <a href="qpagesize.html">QPageSize</a> is invalid then the <a href="../qtcore/qsizef.html">QSizeF</a> will be invalid.</p>
+<!-- @@@size -->
+<!-- $$$size$$$sizeQPageSize::PageSizeIdQPageSize::Unit -->
+<h3 class="fn" id="size-1"><a name="size-1"></a><code>[static] </code><span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span> QPageSize::<span class="name">size</span>(<span class="type"><a href="qpagesize.html#PageSizeId-enum">QPageSize::PageSizeId</a></span> <i>pageSizeId</i>, <span class="type"><a href="qpagesize.html#Unit-enum">QPageSize::Unit</a></span> <i>units</i>)</h3>
+<p>Returns the size of the standard <i>pageSizeId</i> in the requested <i>units</i>.</p>
+<!-- @@@size -->
+<!-- $$$sizePixels[overload1]$$$sizePixelsint -->
+<h3 class="fn" id="sizePixels"><a name="sizePixels"></a><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QPageSize::<span class="name">sizePixels</span>(<span class="type">int</span> <i>resolution</i>) const</h3>
+<p>Returns the size of the page in Device Pixels at the given <i>resolution</i>.</p>
+<p>If the <a href="qpagesize.html">QPageSize</a> is invalid then the <a href="../qtcore/qsize.html">QSize</a> will be invalid.</p>
+<!-- @@@sizePixels -->
+<!-- $$$sizePixels$$$sizePixelsQPageSize::PageSizeIdint -->
+<h3 class="fn" id="sizePixels-1"><a name="sizePixels-1"></a><code>[static] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QPageSize::<span class="name">sizePixels</span>(<span class="type"><a href="qpagesize.html#PageSizeId-enum">QPageSize::PageSizeId</a></span> <i>pageSizeId</i>, <span class="type">int</span> <i>resolution</i>)</h3>
+<p>Returns the size of the standard <i>pageSizeId</i> in Device Pixels for the given <i>resolution</i>.</p>
+<!-- @@@sizePixels -->
+<!-- $$$sizePoints[overload1]$$$sizePoints -->
+<h3 class="fn" id="sizePoints"><a name="sizePoints"></a><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QPageSize::<span class="name">sizePoints</span>() const</h3>
+<p>Returns the size of the page in Postscript Points (1/72 of an inch).</p>
+<p>If the <a href="qpagesize.html">QPageSize</a> is invalid then the <a href="../qtcore/qsize.html">QSize</a> will be invalid.</p>
+<!-- @@@sizePoints -->
+<!-- $$$sizePoints$$$sizePointsQPageSize::PageSizeId -->
+<h3 class="fn" id="sizePoints-1"><a name="sizePoints-1"></a><code>[static] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QPageSize::<span class="name">sizePoints</span>(<span class="type"><a href="qpagesize.html#PageSizeId-enum">QPageSize::PageSizeId</a></span> <i>pageSizeId</i>)</h3>
+<p>Returns the size of the standard <i>pageSizeId</i> in Points.</p>
+<!-- @@@sizePoints -->
+<!-- $$$swap[overload1]$$$swapQPageSize& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QPageSize::<span class="name">swap</span>(<span class="type"><a href="qpagesize.html#QPageSize">QPageSize</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps this <a href="qpagesize.html">QPageSize</a> with <i>other</i>. This function is very fast and never fails.</p>
+<!-- @@@swap -->
+<!-- $$$windowsId[overload1]$$$windowsId -->
+<h3 class="fn" id="windowsId"><a name="windowsId"></a><span class="type">int</span> QPageSize::<span class="name">windowsId</span>() const</h3>
+<p>Returns the Windows DMPAPER enum value for the page size.</p>
+<p>Not all valid PPD page sizes have a Windows equivalent, in which case 0 will be returned.</p>
+<p>If the <a href="qpagesize.html">QPageSize</a> is invalid then the Windows ID will be 0.</p>
+<p><b>See also </b><a href="qpagesize.html#id">id</a>().</p>
+<!-- @@@windowsId -->
+<!-- $$$windowsId$$$windowsIdQPageSize::PageSizeId -->
+<h3 class="fn" id="windowsId-1"><a name="windowsId-1"></a><code>[static] </code><span class="type">int</span> QPageSize::<span class="name">windowsId</span>(<span class="type"><a href="qpagesize.html#PageSizeId-enum">QPageSize::PageSizeId</a></span> <i>pageSizeId</i>)</h3>
+<p>Returns the Windows DMPAPER enum value of the standard <i>pageSizeId</i>.</p>
+<p>Not all valid PPD page sizes have a Windows equivalent, in which case 0 will be returned.</p>
+<!-- @@@windowsId -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$operator!=[overload1]$$$operator!=constQPageSize&constQPageSize& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> <span class="name">operator!=</span>(const <span class="type"><a href="qpagesize.html#QPageSize">QPageSize</a></span> &amp;<i>lhs</i>, const <span class="type"><a href="qpagesize.html#QPageSize">QPageSize</a></span> &amp;<i>rhs</i>)</h3>
+<p>Returns <code>true</code> if page size <i>lhs</i> is unequal to page size <i>rhs</i>, i.e&#x2e; if the page size has different attributes. Current attributes are size and name.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQPageSize&constQPageSize& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> <span class="name">operator==</span>(const <span class="type"><a href="qpagesize.html#QPageSize">QPageSize</a></span> &amp;<i>lhs</i>, const <span class="type"><a href="qpagesize.html#QPageSize">QPageSize</a></span> &amp;<i>rhs</i>)</h3>
+<p>Returns <code>true</code> if page size <i>lhs</i> is equal to page size <i>rhs</i>, i.e&#x2e; if the page sizes have the same attributes. Current attributes are size and name.</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

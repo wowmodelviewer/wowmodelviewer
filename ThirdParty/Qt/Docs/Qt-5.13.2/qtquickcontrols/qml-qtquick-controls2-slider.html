@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickslider.cpp -->
+  <title>Slider QML Type | Qt Quick Controls 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td ><a href="qtquick-controls2-qmlmodule.html">QML Types</a></td><td >Slider QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Slider QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Slider-brief -->
+<p>Used to select a value by sliding a handle along a track. <a href="#details">More...</a></p>
+<!-- @@@Slider -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Controls 2.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-controls2-control.html">Control</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-controls2-slider-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-slider.html#from-prop">from</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-slider.html#handle-prop">handle</a></b></b> : Item</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-slider.html#horizontal-prop">horizontal</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-slider.html#implicitHandleHeight-prop">implicitHandleHeight</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-slider.html#implicitHandleWidth-prop">implicitHandleWidth</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-slider.html#live-prop">live</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-slider.html#orientation-prop">orientation</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-slider.html#position-prop">position</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-slider.html#pressed-prop">pressed</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-slider.html#snapMode-prop">snapMode</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-slider.html#stepSize-prop">stepSize</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-slider.html#to-prop">to</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-slider.html#touchDragThreshold-prop">touchDragThreshold</a></b></b> : qreal</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-slider.html#value-prop">value</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-slider.html#vertical-prop">vertical</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-slider.html#visualPosition-prop">visualPosition</a></b></b> : real</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-slider.html#moved-signal">moved</a></b></b>()</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-slider.html#decrease-method">decrease</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-slider.html#increase-method">increase</a></b></b>()</li>
+<li class="fn">real <b><b><a href="qml-qtquick-controls2-slider.html#valueAt-method">valueAt</a></b></b>(<i>position</i>)</li>
+</ul>
+<!-- $$$Slider-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p class="centerAlign"><img src="images/qtquickcontrols2-slider.gif" alt="" /></p><p>Slider is used to select a value by sliding a handle along a track.</p>
+<p>In the example below, custom <a href="qml-qtquick-controls2-slider.html#from-prop">from</a>, <a href="qml-qtquick-controls2-slider.html#value-prop">value</a>, and <a href="qml-qtquick-controls2-slider.html#to-prop">to</a> values are set:</p>
+<pre class="cpp">
+
+  Slider {
+      from: <span class="number">1</span>
+      value: <span class="number">25</span>
+      to: <span class="number">100</span>
+  }
+
+</pre>
+<p>The <a href="qml-qtquick-controls2-slider.html#position-prop">position</a> property is expressed as a fraction of the control's size, in the range <code>0.0 - 1.0</code>. The <a href="qml-qtquick-controls2-slider.html#visualPosition-prop">visualPosition</a> property is the same, except that it is reversed in a <a href="../qtquick/qtquick-positioning-righttoleft.html">right-to-left</a> application. The <a href="qml-qtquick-controls2-slider.html#visualPosition-prop">visualPosition</a> is useful for positioning the handle when styling Slider. In the example above, <a href="qml-qtquick-controls2-slider.html#visualPosition-prop">visualPosition</a> will be <code>0.24</code> in a left-to-right application, and <code>0.76</code> in a right-to-left application.</p>
+<p>For a slider that allows the user to select a range by providing two handles, see <a href="qml-qtquick-controls2-rangeslider.html">RangeSlider</a>.</p>
+<p><b>See also </b><a href="qtquickcontrols2-customize.html#customizing-slider">Customizing Slider</a> and <a href="qtquickcontrols2-input.html">Input Controls</a>.</p>
+<!-- @@@Slider -->
+<h2>Property Documentation</h2>
+<!-- $$$from -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="from-prop"></a><span class="name">from</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the starting value for the range. The default value is <code>0.0</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-slider.html#to-prop">to</a> and <a href="qml-qtquick-controls2-slider.html#value-prop">value</a>.</p>
+</div></div><!-- @@@from -->
+<br/>
+<!-- $$$handle -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="handle-prop"></a><span class="name">handle</span> : <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the handle item.</p>
+<p><b>See also </b><a href="qtquickcontrols2-customize.html#customizing-slider">Customizing Slider</a>.</p>
+</div></div><!-- @@@handle -->
+<br/>
+<!-- $$$horizontal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="horizontal-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">horizontal</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the slider is horizontal.</p>
+<p>This property was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-slider.html#orientation-prop">orientation</a>.</p>
+</div></div><!-- @@@horizontal -->
+<br/>
+<!-- $$$implicitHandleHeight -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="implicitHandleHeight-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">implicitHandleHeight</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the implicit handle height.</p>
+<p>The value is equal to <code>handle ? handle.implicitHeight : 0</code>.</p>
+<p>This is typically used, together with <a href="qml-qtquick-controls2-control.html#implicitContentHeight-prop">implicitContentHeight</a> and <a href="qml-qtquick-controls2-control.html#implicitBackgroundHeight-prop">implicitBackgroundHeight</a>, to calculate the <a href="../qtquick/qml-qtquick-item.html#implicitHeight-prop">implicitHeight</a>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-slider.html#implicitHandleWidth-prop">implicitHandleWidth</a>.</p>
+</div></div><!-- @@@implicitHandleHeight -->
+<br/>
+<!-- $$$implicitHandleWidth -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="implicitHandleWidth-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">implicitHandleWidth</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the implicit handle width.</p>
+<p>The value is equal to <code>handle ? handle.implicitWidth : 0</code>.</p>
+<p>This is typically used, together with <a href="qml-qtquick-controls2-control.html#implicitContentWidth-prop">implicitContentWidth</a> and <a href="qml-qtquick-controls2-control.html#implicitBackgroundWidth-prop">implicitBackgroundWidth</a>, to calculate the <a href="../qtquick/qml-qtquick-item.html#implicitWidth-prop">implicitWidth</a>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-slider.html#implicitHandleHeight-prop">implicitHandleHeight</a>.</p>
+</div></div><!-- @@@implicitHandleWidth -->
+<br/>
+<!-- $$$live -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="live-prop"></a><span class="name">live</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the slider provides live updates for the <a href="qml-qtquick-controls2-slider.html#value-prop">value</a> property while the handle is dragged.</p>
+<p>The default value is <code>true</code>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.2 (Qt 5.9).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-slider.html#value-prop">value</a> and <a href="qml-qtquick-controls2-slider.html#valueAt-method">valueAt()</a>.</p>
+</div></div><!-- @@@live -->
+<br/>
+<!-- $$$orientation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="orientation-prop"></a><span class="name">orientation</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the orientation.</p>
+<p>Possible values:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Qt.Horizontal</code></td><td class="topAlign">Horizontal (default)</td></tr>
+<tr><td class="topAlign"><code>Qt.Vertical</code></td><td class="topAlign">Vertical</td></tr>
+</table></div>
+<p><b>See also </b><a href="qml-qtquick-controls2-slider.html#horizontal-prop">horizontal</a> and <a href="qml-qtquick-controls2-slider.html#vertical-prop">vertical</a>.</p>
+</div></div><!-- @@@orientation -->
+<br/>
+<!-- $$$position -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="position-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">position</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the logical position of the handle.</p>
+<p>The position is expressed as a fraction of the control's size, in the range <code>0.0 - 1.0</code>. For visualizing a slider, the right-to-left aware <a href="qml-qtquick-controls2-slider.html#visualPosition-prop">visualPosition</a> should be used instead.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-slider.html#value-prop">value</a>, <a href="qml-qtquick-controls2-slider.html#visualPosition-prop">visualPosition</a>, and <a href="qml-qtquick-controls2-slider.html#valueAt-method">valueAt()</a>.</p>
+</div></div><!-- @@@position -->
+<br/>
+<!-- $$$pressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="pressed-prop"></a><span class="name">pressed</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the slider is pressed by either touch, mouse, or keys.</p>
+</div></div><!-- @@@pressed -->
+<br/>
+<!-- $$$snapMode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="snapMode-prop"></a><span class="name">snapMode</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the snap mode.</p>
+<p>The snap mode determines how the slider handle behaves with regards to the <a href="qml-qtquick-controls2-slider.html#stepSize-prop">stepSize</a>.</p>
+<p>Possible values:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Slider.NoSnap</code></td><td class="topAlign">The slider does not snap (default).</td></tr>
+<tr><td class="topAlign"><code>Slider.SnapAlways</code></td><td class="topAlign">The slider snaps while the handle is dragged.</td></tr>
+<tr><td class="topAlign"><code>Slider.SnapOnRelease</code></td><td class="topAlign">The slider does not snap while being dragged, but only after the handle is released.</td></tr>
+</table></div>
+<p>In the following table, the various modes are illustrated with animations. The movement of the mouse cursor and the <a href="qml-qtquick-controls2-slider.html#stepSize-prop">stepSize</a> (<code>0.2</code>) are identical in each animation.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"></tr></thead>
+<tr valign="top" class="odd"><td ><b>Value</b></td><td ><b>Example</b></td></tr>
+<tr valign="top" class="even"><td ><code>Slider.NoSnap</code></td><td ><p class="centerAlign"><img src="images/qtquickcontrols2-slider-nosnap.gif" alt="" /></p></td></tr>
+<tr valign="top" class="odd"><td ><code>Slider.SnapAlways</code></td><td ><p class="centerAlign"><img src="images/qtquickcontrols2-slider-snapalways.gif" alt="" /></p></td></tr>
+<tr valign="top" class="even"><td ><code>Slider.SnapOnRelease</code></td><td ><p class="centerAlign"><img src="images/qtquickcontrols2-slider-snaponrelease.gif" alt="" /></p></td></tr>
+</table></div>
+<p><b>See also </b><a href="qml-qtquick-controls2-slider.html#stepSize-prop">stepSize</a>.</p>
+</div></div><!-- @@@snapMode -->
+<br/>
+<!-- $$$stepSize -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="stepSize-prop"></a><span class="name">stepSize</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the step size. The default value is <code>0.0</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-slider.html#snapMode-prop">snapMode</a>, <a href="qml-qtquick-controls2-slider.html#increase-method">increase()</a>, and <a href="qml-qtquick-controls2-slider.html#decrease-method">decrease()</a>.</p>
+</div></div><!-- @@@stepSize -->
+<br/>
+<!-- $$$to -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="to-prop"></a><span class="name">to</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the end value for the range. The default value is <code>1.0</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-slider.html#from-prop">from</a> and <a href="qml-qtquick-controls2-slider.html#value-prop">value</a>.</p>
+</div></div><!-- @@@to -->
+<br/>
+<!-- $$$touchDragThreshold -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="touchDragThreshold-prop"></a><span class="name">touchDragThreshold</span> : <span class="type">qreal</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the threshold (in logical pixels) at which a touch drag event will be initiated. The mouse drag threshold won't be affected. The default value is <code>Qt.styleHints.startDragDistance</code>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="../qtgui/qstylehints.html">QStyleHints</a>.</p>
+</div></div><!-- @@@touchDragThreshold -->
+<br/>
+<!-- $$$value -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="value-prop"></a><span class="name">value</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the value in the range <code>from</code> - <code>to</code>. The default value is <code>0.0</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-slider.html#position-prop">position</a>.</p>
+</div></div><!-- @@@value -->
+<br/>
+<!-- $$$vertical -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="vertical-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">vertical</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the slider is vertical.</p>
+<p>This property was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-slider.html#orientation-prop">orientation</a>.</p>
+</div></div><!-- @@@vertical -->
+<br/>
+<!-- $$$visualPosition -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="visualPosition-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">visualPosition</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the visual position of the handle.</p>
+<p>The position is expressed as a fraction of the control's size, in the range <code>0.0 - 1.0</code>. When the control is <a href="qml-qtquick-controls2-control.html#mirrored-prop">mirrored</a>, the value is equal to <code>1.0 - position</code>. This makes the value suitable for visualizing the slider, taking right-to-left support into account.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-slider.html#position-prop">position</a>.</p>
+</div></div><!-- @@@visualPosition -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$moved[overload1]$$$moved -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="moved-signal"></a><span class="name">moved</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the slider has been interactively moved by the user by either touch, mouse, wheel, or keys.</p>
+<p>This signal was introduced in  QtQuick.Controls 2.2 (Qt 5.9).</p>
+</div></div><!-- @@@moved -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$decrease[overload1]$$$decrease -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="decrease-method"></a><span class="type">void</span> <span class="name">decrease</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Decreases the value by <a href="qml-qtquick-controls2-slider.html#stepSize-prop">stepSize</a> or <code>0.1</code> if <a href="qml-qtquick-controls2-slider.html#stepSize-prop">stepSize</a> is not defined.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-slider.html#stepSize-prop">stepSize</a>.</p>
+</div></div><!-- @@@decrease -->
+<br/>
+<!-- $$$increase[overload1]$$$increase -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="increase-method"></a><span class="type">void</span> <span class="name">increase</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Increases the value by <a href="qml-qtquick-controls2-slider.html#stepSize-prop">stepSize</a> or <code>0.1</code> if <a href="qml-qtquick-controls2-slider.html#stepSize-prop">stepSize</a> is not defined.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-slider.html#stepSize-prop">stepSize</a>.</p>
+</div></div><!-- @@@increase -->
+<br/>
+<!-- $$$valueAt[overload1]$$$valueAt -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="valueAt-method"></a><span class="type"><a href="../qtqml/qml-real.html">real</a></span> <span class="name">valueAt</span>(<i>position</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the value for the given <i>position</i>.</p>
+<p>This method was introduced in  QtQuick.Controls 2.1 (Qt 5.8).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-slider.html#value-prop">value</a> and <a href="qml-qtquick-controls2-slider.html#position-prop">position</a>.</p>
+</div></div><!-- @@@valueAt -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

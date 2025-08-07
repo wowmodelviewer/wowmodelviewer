@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- basiclayouts.qdoc -->
+  <title>Basic Layouts Example | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Basic Layouts Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+<li class="level1"><a href="#dialog-class-definition">Dialog Class Definition</a></li>
+<li class="level1"><a href="#dialog-class-implementation">Dialog Class Implementation</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Basic Layouts Example</h1>
+<span class="subtitle"></span>
+<!-- $$$layouts/basiclayouts-brief -->
+<p>Shows how to use the standard layout managers.</p>
+<!-- @@@layouts/basiclayouts -->
+<!-- $$$layouts/basiclayouts-description -->
+<div class="descr"> <a name="details"></a>
+<p><i>Basic Layouts</i> shows how to use the standard layout managers that are available in Qt: <a href="qboxlayout.html">QBoxLayout</a>, <a href="qgridlayout.html">QGridLayout</a>, and <a href="qformlayout.html">QFormLayout</a>.</p>
+<p class="centerAlign"><img src="images/basiclayouts-example.png" alt="Screenshot of the Basic Layouts example" /></p><p>The <a href="qboxlayout.html">QBoxLayout</a> class lines up widgets horizontally or vertically. <a href="qhboxlayout.html">QHBoxLayout</a> and <a href="qvboxlayout.html">QVBoxLayout</a> are convenience subclasses of <a href="qboxlayout.html">QBoxLayout</a>. <a href="qgridlayout.html">QGridLayout</a> lays out widgets in cells by dividing the available space into rows and columns. <a href="qformlayout.html">QFormLayout</a>, on the other hand, sets its children in a two-column form with labels in the left column and input fields in the right column.</p>
+<p>For more information, visit the <a href="layout.html">Layout Management</a> page.</p>
+<a name="running-the-example"></a>
+<h4 id="running-the-example">Running the Example</h4>
+<p>To run the example from <a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a>, open the <b>Welcome</b> mode and select the example from <b>Examples</b>. For more information, visit <a href="http://doc.qt.io/qtcreator/creator-build-example-application.html">Building and Running an Example</a>.</p>
+<a name="dialog-class-definition"></a>
+<h4 id="dialog-class-definition">Dialog Class Definition</h4>
+<pre class="cpp">
+
+  <span class="keyword">class</span> Dialog : <span class="keyword">public</span> <span class="type"><a href="qdialog.html">QDialog</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      Dialog();
+
+  <span class="keyword">private</span>:
+      <span class="type">void</span> createMenu();
+      <span class="type">void</span> createHorizontalGroupBox();
+      <span class="type">void</span> createGridGroupBox();
+      <span class="type">void</span> createFormGroupBox();
+
+      <span class="keyword">enum</span> { NumGridRows <span class="operator">=</span> <span class="number">3</span><span class="operator">,</span> NumButtons <span class="operator">=</span> <span class="number">4</span> };
+
+      <span class="type"><a href="qmenubar.html">QMenuBar</a></span> <span class="operator">*</span>menuBar;
+      <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>horizontalGroupBox;
+      <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>gridGroupBox;
+      <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>formGroupBox;
+      <span class="type"><a href="qtextedit.html">QTextEdit</a></span> <span class="operator">*</span>smallEditor;
+      <span class="type"><a href="qtextedit.html">QTextEdit</a></span> <span class="operator">*</span>bigEditor;
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>labels<span class="operator">[</span>NumGridRows<span class="operator">]</span>;
+      <span class="type"><a href="qlineedit.html">QLineEdit</a></span> <span class="operator">*</span>lineEdits<span class="operator">[</span>NumGridRows<span class="operator">]</span>;
+      <span class="type"><a href="qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>buttons<span class="operator">[</span>NumButtons<span class="operator">]</span>;
+      <span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span> <span class="operator">*</span>buttonBox;
+
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>fileMenu;
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>exitAction;
+  };
+
+</pre>
+<p>The <code>Dialog</code> class inherits <a href="qdialog.html">QDialog</a>. It is a custom widget that displays its child widgets using the geometry managers: <a href="qhboxlayout.html">QHBoxLayout</a>, <a href="qvboxlayout.html">QVBoxLayout</a>, <a href="qgridlayout.html">QGridLayout</a>, and <a href="qformlayout.html">QFormLayout</a>.</p>
+<p>There are four private functions to simplify the class constructor: the <code>createMenu()</code>, <code>createHorizontalGroupBox()</code>, <code>createGridGroupBox()</code>, and <code>createFormGroupBox()</code> functions create several widgets that the example uses to demonstrate how the layout affects their appearances.</p>
+<a name="dialog-class-implementation"></a>
+<h4 id="dialog-class-implementation">Dialog Class Implementation</h4>
+<pre class="cpp">
+
+  Dialog<span class="operator">::</span>Dialog()
+  {
+      createMenu();
+      createHorizontalGroupBox();
+      createGridGroupBox();
+      createFormGroupBox();
+
+</pre>
+<p>In the constructor, we first use the <code>createMenu()</code> function to create and populate a menu bar and the <code>createHorizontalGroupBox()</code> function to create a group box containing four buttons with a horizontal layout. Next, we use the <code>createGridGroupBox()</code> function to create a group box containing several line edits and a small text editor which are displayed in a grid layout. Finally, we use the <code>createFormGroupBox()</code> function to create a group box with three labels and three input fields: a line edit, a combo box, and a spin box.</p>
+<pre class="cpp">
+
+      bigEditor <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtextedit.html">QTextEdit</a></span>;
+      bigEditor<span class="operator">-</span><span class="operator">&gt;</span>setPlainText(tr(<span class="string">&quot;This widget takes up all the remaining space &quot;</span>
+                                 <span class="string">&quot;in the top-level layout.&quot;</span>));
+
+      buttonBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span>(<span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span><span class="operator">::</span>Ok
+                                       <span class="operator">|</span> <span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span><span class="operator">::</span>Cancel);
+
+      connect(buttonBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span><span class="operator">::</span>accepted<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qdialog.html">QDialog</a></span><span class="operator">::</span>accept);
+      connect(buttonBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span><span class="operator">::</span>rejected<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qdialog.html">QDialog</a></span><span class="operator">::</span>reject);
+
+</pre>
+<p>We also create a big text editor and a dialog button box. The <a href="qdialogbuttonbox.html">QDialogButtonBox</a> class is a widget that presents buttons in a layout that is appropriate to the current widget style. The preferred buttons can be specified as arguments to the constructor, using the <a href="qdialogbuttonbox.html#StandardButton-enum">QDialogButtonBox::StandardButtons</a> enum.</p>
+<p>Note that we don't have to specify a parent for the widgets when we create them. The reason is that all the widgets we create here will be added to a layout, and when we add a widget to a layout, it is automatically reparented to the widget the layout is installed on.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>mainLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+
+</pre>
+<p>The main layout is a <a href="qvboxlayout.html">QVBoxLayout</a> object. <a href="qvboxlayout.html">QVBoxLayout</a> is a convenience class for a box layout with vertical orientation.</p>
+<p>In general, the <a href="qboxlayout.html">QBoxLayout</a> class takes the space it gets (from its parent layout or from the parent widget), divides it up into a series of boxes, and makes each managed widget fill one box. If the <a href="qboxlayout.html">QBoxLayout</a>'s orientation is <a href="../qtcore/qt.html#Orientation-enum">Qt::Horizontal</a> the boxes are placed in a row. If the orientation is <a href="../qtcore/qt.html#Orientation-enum">Qt::Vertical</a>, the boxes are placed in a column. The corresponding convenience classes are <a href="qhboxlayout.html">QHBoxLayout</a> and <a href="qvboxlayout.html">QVBoxLayout</a>, respectively.</p>
+<pre class="cpp">
+
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>setMenuBar(menuBar);
+
+</pre>
+<p>When we call the <a href="qlayout.html#setMenuBar">QLayout::setMenuBar</a>() function, the layout places the provided menu bar at the top of the parent widget, and outside the widget's <a href="qwidget.html#contentsRect">content margins</a>. All child widgets are placed below the bottom edge of the menu bar.</p>
+<pre class="cpp">
+
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(horizontalGroupBox);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(gridGroupBox);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(formGroupBox);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(bigEditor);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(buttonBox);
+
+</pre>
+<p>We use the <a href="qboxlayout.html#addWidget">QBoxLayout::addWidget</a>() function to add the widgets to the end of the layout. Each widget will get at least its minimum size and at most its maximum size. It is possible to specify a stretch factor in the <a href="qboxlayout.html#addWidget">addWidget()</a> function, and any excess space is shared according to these stretch factors. If not specified, a widget's stretch factor is 0.</p>
+<pre class="cpp">
+
+      setLayout(mainLayout);
+
+      setWindowTitle(tr(<span class="string">&quot;Basic Layouts&quot;</span>));
+  }
+
+</pre>
+<p>We install the main layout on the <code>Dialog</code> widget using the <a href="qwidget.html#setLayout">QWidget::setLayout</a>() function, and all of the layout's widgets are automatically reparented to be children of the <code>Dialog</code> widget.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> Dialog<span class="operator">::</span>createMenu()
+  {
+      menuBar <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmenubar.html">QMenuBar</a></span>;
+
+      fileMenu <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmenu.html">QMenu</a></span>(tr(<span class="string">&quot;&amp;File&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      exitAction <span class="operator">=</span> fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;E&amp;xit&quot;</span>));
+      menuBar<span class="operator">-</span><span class="operator">&gt;</span>addMenu(fileMenu);
+
+      connect(exitAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qdialog.html">QDialog</a></span><span class="operator">::</span>accept);
+  }
+
+</pre>
+<p>In the private <code>createMenu()</code> function we create a menu bar, and add a pull-down <b>File</b> menu containing an <b>Exit</b> option.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> Dialog<span class="operator">::</span>createHorizontalGroupBox()
+  {
+      horizontalGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;Horizontal layout&quot;</span>));
+      <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span>;
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> NumButtons; <span class="operator">+</span><span class="operator">+</span>i) {
+          buttons<span class="operator">[</span>i<span class="operator">]</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;Button %1&quot;</span>)<span class="operator">.</span>arg(i <span class="operator">+</span> <span class="number">1</span>));
+          layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(buttons<span class="operator">[</span>i<span class="operator">]</span>);
+      }
+      horizontalGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(layout);
+  }
+
+</pre>
+<p>When we create the horizontal group box, we use a <a href="qhboxlayout.html">QHBoxLayout</a> as the internal layout. We create the buttons we want to put in the group box, add them to the layout and install the layout on the group box.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> Dialog<span class="operator">::</span>createGridGroupBox()
+  {
+      gridGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;Grid layout&quot;</span>));
+
+</pre>
+<p>In the <code>createGridGroupBox()</code> function we use a <a href="qgridlayout.html">QGridLayout</a> which lays out widgets in a grid. It takes the space made available to it (by its parent layout or by the parent widget), divides it up into rows and columns, and puts each widget it manages into the correct cell.</p>
+<pre class="cpp">
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> NumGridRows; <span class="operator">+</span><span class="operator">+</span>i) {
+          labels<span class="operator">[</span>i<span class="operator">]</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Line %1:&quot;</span>)<span class="operator">.</span>arg(i <span class="operator">+</span> <span class="number">1</span>));
+          lineEdits<span class="operator">[</span>i<span class="operator">]</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlineedit.html">QLineEdit</a></span>;
+          layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(labels<span class="operator">[</span>i<span class="operator">]</span><span class="operator">,</span> i <span class="operator">+</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>);
+          layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(lineEdits<span class="operator">[</span>i<span class="operator">]</span><span class="operator">,</span> i <span class="operator">+</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span>);
+      }
+
+</pre>
+<p>For each row in the grid we create a label and an associated line edit, and add them to the layout. The <a href="qgridlayout.html#addWidget-1">QGridLayout::addWidget</a>() function differ from the corresponding function in <a href="qboxlayout.html">QBoxLayout</a>: It needs the row and column specifying the grid cell to put the widget in.</p>
+<pre class="cpp">
+
+      smallEditor <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtextedit.html">QTextEdit</a></span>;
+      smallEditor<span class="operator">-</span><span class="operator">&gt;</span>setPlainText(tr(<span class="string">&quot;This widget takes up about two thirds of the &quot;</span>
+                                   <span class="string">&quot;grid layout.&quot;</span>));
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(smallEditor<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> <span class="number">1</span>);
+
+</pre>
+<p><a href="qgridlayout.html#addWidget-1">QGridLayout::addWidget</a>() can in addition take arguments specifying the number of rows and columns the cell will be spanning. In this example, we create a small editor which spans three rows and one column.</p>
+<p>For both the <a href="qboxlayout.html#addWidget">QBoxLayout::addWidget</a>() and <a href="qgridlayout.html#addWidget-1">QGridLayout::addWidget</a>() functions it is also possible to add a last argument specifying the widget's alignment. By default it fills the whole cell. But we could, for example, align a widget with the right edge by specifying the alignment to be <a href="../qtcore/qt.html#AlignmentFlag-enum">Qt::AlignRight</a>.</p>
+<pre class="cpp">
+
+      layout<span class="operator">-</span><span class="operator">&gt;</span>setColumnStretch(<span class="number">1</span><span class="operator">,</span> <span class="number">10</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>setColumnStretch(<span class="number">2</span><span class="operator">,</span> <span class="number">20</span>);
+      gridGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(layout);
+  }
+
+</pre>
+<p>Each column in a grid layout has a stretch factor. The stretch factor is set using <a href="qgridlayout.html#setColumnStretch">QGridLayout::setColumnStretch</a>() and determines how much of the available space the column will get over and above its necessary minimum.</p>
+<p>In this example, we set the stretch factors for columns 1 and 2. The stretch factor is relative to the other columns in this grid; columns with a higher stretch factor take more of the available space. So column 2 in our grid layout will get more of the available space than column 1, and column 0 will not grow at all since its stretch factor is 0 (the default).</p>
+<p>Columns and rows behave identically; there is an equivalent stretch factor for rows, as well as a <a href="qgridlayout.html#setRowStretch">QGridLayout::setRowStretch</a>() function.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> Dialog<span class="operator">::</span>createFormGroupBox()
+  {
+      formGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;Form layout&quot;</span>));
+      <span class="type"><a href="qformlayout.html">QFormLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qformlayout.html">QFormLayout</a></span>;
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Line 1:&quot;</span>))<span class="operator">,</span> <span class="keyword">new</span> <span class="type"><a href="qlineedit.html">QLineEdit</a></span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Line 2, long text:&quot;</span>))<span class="operator">,</span> <span class="keyword">new</span> <span class="type"><a href="qcombobox.html">QComboBox</a></span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Line 3:&quot;</span>))<span class="operator">,</span> <span class="keyword">new</span> <span class="type"><a href="qspinbox.html">QSpinBox</a></span>);
+      formGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(layout);
+  }
+
+</pre>
+<p>In the <code>createFormGroupBox()</code> function, we use a <a href="qformlayout.html">QFormLayout</a> to neatly arrange objects into two columns - name and field. There are three <a href="qlabel.html">QLabel</a> objects for names with three corresponding input widgets as fields: a <a href="qlineedit.html">QLineEdit</a>, a <a href="qcombobox.html">QComboBox</a> and a <a href="qspinbox.html">QSpinBox</a>. Unlike <a href="qboxlayout.html#addWidget">QBoxLayout::addWidget</a>() and <a href="qgridlayout.html#addWidget-1">QGridLayout::addWidget</a>(), we use <a href="qformlayout.html#addRow">QFormLayout::addRow</a>() to add widgets to the layout.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/layouts/basiclayouts?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@layouts/basiclayouts -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

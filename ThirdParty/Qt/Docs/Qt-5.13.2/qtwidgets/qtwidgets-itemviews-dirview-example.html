@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- dirview.qdoc -->
+  <title>Dir View Example | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Dir View Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Dir View Example</h1>
+<span class="subtitle"></span>
+<!-- $$$itemviews/dirview-brief -->
+<p>This example demonstrates the usage of a tree view.</p>
+<!-- @@@itemviews/dirview -->
+<!-- $$$itemviews/dirview-description -->
+<div class="descr"> <a name="details"></a>
+<p>The Dir View example shows a tree view of the local file system. It uses the <a href="qfilesystemmodel.html">QFileSystemModel</a> class to provide file and directory information.</p>
+<div class="border"><p class="centerAlign"><img src="images/dirview-example.png" alt="" /></p></div><pre class="cpp">
+
+      <span class="type"><a href="../qtcore/qcommandlineparser.html">QCommandLineParser</a></span> parser;
+      parser<span class="operator">.</span>setApplicationDescription(<span class="string">&quot;Qt Dir View Example&quot;</span>);
+      parser<span class="operator">.</span>addHelpOption();
+      parser<span class="operator">.</span>addVersionOption();
+      <span class="type"><a href="../qtcore/qcommandlineoption.html">QCommandLineOption</a></span> dontUseCustomDirectoryIconsOption(<span class="string">&quot;c&quot;</span><span class="operator">,</span> <span class="string">&quot;Set QFileIconProvider::DontUseCustomDirectoryIcons&quot;</span>);
+      parser<span class="operator">.</span>addOption(dontUseCustomDirectoryIconsOption);
+      parser<span class="operator">.</span>addPositionalArgument(<span class="string">&quot;directory&quot;</span><span class="operator">,</span> <span class="string">&quot;The directory to start in.&quot;</span>);
+      parser<span class="operator">.</span>process(app);
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> rootPath <span class="operator">=</span> parser<span class="operator">.</span>positionalArguments()<span class="operator">.</span>isEmpty()
+
+</pre>
+<p>The example supports a number of command line options. These options include:</p>
+<ul>
+<li>Application description</li>
+<li>-help option</li>
+<li>-version option</li>
+<li>if the optionc {-c} is specified, the application will not use custom directory options</li>
+</ul>
+<pre class="cpp">
+
+      <span class="type"><a href="qfilesystemmodel.html">QFileSystemModel</a></span> model;
+      model<span class="operator">.</span>setRootPath(<span class="string">&quot;&quot;</span>);
+      <span class="keyword">if</span> (parser<span class="operator">.</span>isSet(dontUseCustomDirectoryIconsOption))
+          model<span class="operator">.</span>iconProvider()<span class="operator">-</span><span class="operator">&gt;</span>setOptions(<span class="type"><a href="qfileiconprovider.html">QFileIconProvider</a></span><span class="operator">::</span>DontUseCustomDirectoryIcons);
+      <span class="type"><a href="qtreeview.html">QTreeView</a></span> tree;
+      tree<span class="operator">.</span>setModel(<span class="operator">&amp;</span>model);
+
+</pre>
+<p>Declares <code>model</code> as data model for reading the local filesystem. <code>model.setRootPath(&quot;&quot;)</code> sets the current folder as the folder from which <code>model</code> will start reading. <a href="qtreeview.html">QTreeView</a> object <code>tree</code> visualizes the filesystem in a tree structure.</p>
+<pre class="cpp">
+
+      tree<span class="operator">.</span>setAnimated(<span class="keyword">false</span>);
+      tree<span class="operator">.</span>setIndentation(<span class="number">20</span>);
+      tree<span class="operator">.</span>setSortingEnabled(<span class="keyword">true</span>);
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> availableSize <span class="operator">=</span> <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>desktop()<span class="operator">-</span><span class="operator">&gt;</span>availableGeometry(<span class="operator">&amp;</span>tree)<span class="operator">.</span>size();
+      tree<span class="operator">.</span>resize(availableSize <span class="operator">/</span> <span class="number">2</span>);
+      tree<span class="operator">.</span>setColumnWidth(<span class="number">0</span><span class="operator">,</span> tree<span class="operator">.</span>width() <span class="operator">/</span> <span class="number">3</span>);
+
+      tree<span class="operator">.</span>setWindowTitle(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>tr(<span class="string">&quot;Dir View&quot;</span>));
+
+</pre>
+<p>Sets layout options for animation, indentation, sorting, and sizing of the filesystem tree.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/itemviews/dirview?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@itemviews/dirview -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

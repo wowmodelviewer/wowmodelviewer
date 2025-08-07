@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+    <namespace>org.qt-project.qtxmlpatterns.5132</namespace>
+    <virtualFolder>qtxmlpatterns</virtualFolder>
+    <metaData name="version" value="5.13.2"/>
+    <filterSection>
+        <toc>
+            <section ref="qtxmlpatterns-index.html" title="Qt XML Patterns">
+                <section ref="qtxmlpatterns-module.html" title="C++ Classes">
+                    <section ref="qabstractmessagehandler.html" title="QAbstractMessageHandler Class Reference">
+                        <section ref="qabstractmessagehandler-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qabstracturiresolver.html" title="QAbstractUriResolver Class Reference">
+                        <section ref="qabstracturiresolver-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qabstractxmlnodemodel.html" title="QAbstractXmlNodeModel Class Reference">
+                        <section ref="qabstractxmlnodemodel-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qabstractxmlreceiver.html" title="QAbstractXmlReceiver Class Reference">
+                        <section ref="qabstractxmlreceiver-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qsimplexmlnodemodel.html" title="QSimpleXmlNodeModel Class Reference">
+                        <section ref="qsimplexmlnodemodel-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qsourcelocation.html" title="QSourceLocation Class Reference">
+                        <section ref="qsourcelocation-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qxmlformatter.html" title="QXmlFormatter Class Reference">
+                        <section ref="qxmlformatter-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qxmlitem.html" title="QXmlItem Class Reference">
+                        <section ref="qxmlitem-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qxmlname.html" title="QXmlName Class Reference">
+                        <section ref="qxmlname-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qxmlnamepool.html" title="QXmlNamePool Class Reference">
+                        <section ref="qxmlnamepool-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qxmlnodemodelindex.html" title="QXmlNodeModelIndex Class Reference">
+                        <section ref="qxmlnodemodelindex-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qxmlquery.html" title="QXmlQuery Class Reference">
+                        <section ref="qxmlquery-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qxmlresultitems.html" title="QXmlResultItems Class Reference">
+                        <section ref="qxmlresultitems-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qxmlschema.html" title="QXmlSchema Class Reference">
+                        <section ref="qxmlschema-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qxmlschemavalidator.html" title="QXmlSchemaValidator Class Reference">
+                        <section ref="qxmlschemavalidator-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qxmlserializer.html" title="QXmlSerializer Class Reference">
+                        <section ref="qxmlserializer-members.html" title="List of all members"/>
+                    </section>
+                </section>
+                <section ref="qtquick-xmllistmodel-qmlmodule.html" title="QML Types">
+                    <section ref="qml-qtquick-xmllistmodel-xmllistmodel.html" title="XmlListModel Type Reference">
+                        <section ref="qml-qtquick-xmllistmodel-xmllistmodel-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-xmllistmodel-xmlrole.html" title="XmlRole Type Reference">
+                        <section ref="qml-qtquick-xmllistmodel-xmlrole-members.html" title="List of all members"/>
+                    </section>
+                </section>
+            </section>
+        </toc>
+        <keywords>
+            <keyword name="A Short Path to XQuery" id="A Short Path to XQuery" ref="xquery-introduction.html"/>
+            <keyword name="Patternist" id="Patternist" ref="xmlprocessing.html"/>
+            <keyword name="QAbstractMessageHandler" id="QAbstractMessageHandler" ref="qabstractmessagehandler.html"/>
+            <keyword name="QAbstractUriResolver" id="QAbstractUriResolver" ref="qabstracturiresolver.html"/>
+            <keyword name="QAbstractXmlNodeModel" id="QAbstractXmlNodeModel" ref="qabstractxmlnodemodel.html"/>
+            <keyword name="QAbstractXmlNodeModel::FirstChild" id="QAbstractXmlNodeModel::FirstChild" ref="qabstractxmlnodemodel.html#SimpleAxis-enum"/>
+            <keyword name="QAbstractXmlNodeModel::List" id="QAbstractXmlNodeModel::List" ref="qabstractxmlnodemodel.html#List-typedef"/>
+            <keyword name="QAbstractXmlNodeModel::NextSibling" id="QAbstractXmlNodeModel::NextSibling" ref="qabstractxmlnodemodel.html#SimpleAxis-enum"/>
+            <keyword name="QAbstractXmlNodeModel::Parent" id="QAbstractXmlNodeModel::Parent" ref="qabstractxmlnodemodel.html#SimpleAxis-enum"/>
+            <keyword name="QAbstractXmlNodeModel::PreviousSibling" id="QAbstractXmlNodeModel::PreviousSibling" ref="qabstractxmlnodemodel.html#SimpleAxis-enum"/>
+            <keyword name="QAbstractXmlNodeModel::Ptr" id="QAbstractXmlNodeModel::Ptr" ref="qabstractxmlnodemodel.html#Ptr-typedef"/>
+            <keyword name="QAbstractXmlNodeModel::SimpleAxis" id="QAbstractXmlNodeModel::SimpleAxis" ref="qabstractxmlnodemodel.html#SimpleAxis-enum"/>
+            <keyword name="QAbstractXmlReceiver" id="QAbstractXmlReceiver" ref="qabstractxmlreceiver.html"/>
+            <keyword name="QSimpleXmlNodeModel" id="QSimpleXmlNodeModel" ref="qsimplexmlnodemodel.html"/>
+            <keyword name="QSourceLocation" id="QSourceLocation" ref="qsourcelocation.html"/>
+            <keyword name="QXmlFormatter" id="QXmlFormatter" ref="qxmlformatter.html"/>
+            <keyword name="QXmlItem" id="QXmlItem" ref="qxmlitem.html"/>
+            <keyword name="QXmlItem::Iterator" id="QXmlItem::Iterator" ref="qxmlitem.html#Iterator-typedef"/>
+            <keyword name="QXmlName" id="QXmlName" ref="qxmlname.html"/>
+            <keyword name="QXmlNamePool" id="QXmlNamePool" ref="qxmlnamepool.html"/>
+            <keyword name="QXmlNodeModelIndex" id="QXmlNodeModelIndex" ref="qxmlnodemodelindex.html"/>
+            <keyword name="QXmlNodeModelIndex::Attribute" id="QXmlNodeModelIndex::Attribute" ref="qxmlnodemodelindex.html#NodeKind-enum"/>
+            <keyword name="QXmlNodeModelIndex::Comment" id="QXmlNodeModelIndex::Comment" ref="qxmlnodemodelindex.html#NodeKind-enum"/>
+            <keyword name="QXmlNodeModelIndex::Document" id="QXmlNodeModelIndex::Document" ref="qxmlnodemodelindex.html#NodeKind-enum"/>
+            <keyword name="QXmlNodeModelIndex::DocumentOrder" id="QXmlNodeModelIndex::DocumentOrder" ref="qxmlnodemodelindex.html#DocumentOrder-enum"/>
+            <keyword name="QXmlNodeModelIndex::Element" id="QXmlNodeModelIndex::Element" ref="qxmlnodemodelindex.html#NodeKind-enum"/>
+            <keyword name="QXmlNodeModelIndex::Follows" id="QXmlNodeModelIndex::Follows" ref="qxmlnodemodelindex.html#DocumentOrder-enum"/>
+            <keyword name="QXmlNodeModelIndex::Is" id="QXmlNodeModelIndex::Is" ref="qxmlnodemodelindex.html#DocumentOrder-enum"/>
+            <keyword name="QXmlNodeModelIndex::List" id="QXmlNodeModelIndex::List" ref="qxmlnodemodelindex.html#List-typedef"/>
+            <keyword name="QXmlNodeModelIndex::Namespace" id="QXmlNodeModelIndex::Namespace" ref="qxmlnodemodelindex.html#NodeKind-enum"/>
+            <keyword name="QXmlNodeModelIndex::NodeKind" id="QXmlNodeModelIndex::NodeKind" ref="qxmlnodemodelindex.html#NodeKind-enum"/>
+            <keyword name="QXmlNodeModelIndex::Precedes" id="QXmlNodeModelIndex::Precedes" ref="qxmlnodemodelindex.html#DocumentOrder-enum"/>
+            <keyword name="QXmlNodeModelIndex::ProcessingInstruction" id="QXmlNodeModelIndex::ProcessingInstruction" ref="qxmlnodemodelindex.html#NodeKind-enum"/>
+            <keyword name="QXmlNodeModelIndex::Text" id="QXmlNodeModelIndex::Text" ref="qxmlnodemodelindex.html#NodeKind-enum"/>
+            <keyword name="QXmlQuery" id="QXmlQuery" ref="qxmlquery.html"/>
+            <keyword name="QXmlQuery::QueryLanguage" id="QXmlQuery::QueryLanguage" ref="qxmlquery.html#QueryLanguage-enum"/>
+            <keyword name="QXmlQuery::XQuery10" id="QXmlQuery::XQuery10" ref="qxmlquery.html#QueryLanguage-enum"/>
+            <keyword name="QXmlQuery::XSLT20" id="QXmlQuery::XSLT20" ref="qxmlquery.html#QueryLanguage-enum"/>
+            <keyword name="QXmlResultItems" id="QXmlResultItems" ref="qxmlresultitems.html"/>
+            <keyword name="QXmlSchema" id="QXmlSchema" ref="qxmlschema.html"/>
+            <keyword name="QXmlSchemaValidator" id="QXmlSchemaValidator" ref="qxmlschemavalidator.html"/>
+            <keyword name="QXmlSerializer" id="QXmlSerializer" ref="qxmlserializer.html"/>
+            <keyword name="Qt Quick XmlListModel QML Types" id="Qt Quick XmlListModel QML Types" ref="qtquick-xmllistmodel-qmlmodule.html"/>
+            <keyword name="Qt XML Patterns" id="Qt XML Patterns" ref="qtxmlpatterns-index.html"/>
+            <keyword name="Qt XML Patterns C++ Classes" id="Qt XML Patterns C++ Classes" ref="qtxmlpatterns-module.html"/>
+            <keyword name="Qt XML Patterns Examples" id="Qt XML Patterns Examples" ref="xmlpattern-examples.html"/>
+            <keyword name="Qt XML Patterns QML Types" id="Qt XML Patterns QML Types" ref="qtquick-xmllistmodel-qmlmodule.html"/>
+            <keyword name="XML Schema, version 2007/08" id="XML Schema, version 2007/08" ref="qtxmlpatterns-attribution-xml-xsd.html"/>
+            <keyword name="XQuery" id="XQuery" ref="xmlprocessing.html"/>
+            <keyword name="XQuery-introduction" id="XQuery-introduction" ref="xquery-introduction.html"/>
+            <keyword name="XmlListModel" id="QML.XmlListModel" ref="qml-qtquick-xmllistmodel-xmllistmodel.html"/>
+            <keyword name="XmlRole" id="QML.XmlRole" ref="qml-qtquick-xmllistmodel-xmlrole.html"/>
+            <keyword name="additionalData" id="QXmlNodeModelIndex::additionalData" ref="qxmlnodemodelindex.html#additionalData"/>
+            <keyword name="atomicValue" id="QAbstractXmlReceiver::atomicValue" ref="qabstractxmlreceiver.html#atomicValue"/>
+            <keyword name="atomicValue" id="QXmlFormatter::atomicValue" ref="qxmlformatter.html#atomicValue"/>
+            <keyword name="atomicValue" id="QXmlSerializer::atomicValue" ref="qxmlserializer.html#atomicValue"/>
+            <keyword name="attribute" id="QAbstractXmlReceiver::attribute" ref="qabstractxmlreceiver.html#attribute"/>
+            <keyword name="attribute" id="QXmlFormatter::attribute" ref="qxmlformatter.html#attribute"/>
+            <keyword name="attribute" id="QXmlSerializer::attribute" ref="qxmlserializer.html#attribute"/>
+            <keyword name="attributes" id="QAbstractXmlNodeModel::attributes" ref="qabstractxmlnodemodel.html#attributes"/>
+            <keyword name="baseUri" id="QAbstractXmlNodeModel::baseUri" ref="qabstractxmlnodemodel.html#baseUri"/>
+            <keyword name="baseUri" id="QSimpleXmlNodeModel::baseUri" ref="qsimplexmlnodemodel.html#baseUri"/>
+            <keyword name="bindVariable" id="QXmlQuery::bindVariable" ref="qxmlquery.html#bindVariable"/>
+            <keyword name="characters" id="QAbstractXmlReceiver::characters" ref="qabstractxmlreceiver.html#characters"/>
+            <keyword name="characters" id="QXmlFormatter::characters" ref="qxmlformatter.html#characters"/>
+            <keyword name="characters" id="QXmlSerializer::characters" ref="qxmlserializer.html#characters"/>
+            <keyword name="codec" id="QXmlSerializer::codec" ref="qxmlserializer.html#codec"/>
+            <keyword name="column" id="QSourceLocation::column" ref="qsourcelocation.html#column"/>
+            <keyword name="comment" id="QAbstractXmlReceiver::comment" ref="qabstractxmlreceiver.html#comment"/>
+            <keyword name="comment" id="QXmlFormatter::comment" ref="qxmlformatter.html#comment"/>
+            <keyword name="comment" id="QXmlSerializer::comment" ref="qxmlserializer.html#comment"/>
+            <keyword name="compareOrder" id="QAbstractXmlNodeModel::compareOrder" ref="qabstractxmlnodemodel.html#compareOrder"/>
+            <keyword name="count" id="XmlListModel::count" ref="qml-qtquick-xmllistmodel-xmllistmodel.html#count-prop"/>
+            <keyword name="createIndex" id="QAbstractXmlNodeModel::createIndex" ref="qabstractxmlnodemodel.html#createIndex"/>
+            <keyword name="current" id="QXmlResultItems::current" ref="qxmlresultitems.html#current"/>
+            <keyword name="data" id="QXmlNodeModelIndex::data" ref="qxmlnodemodelindex.html#data"/>
+            <keyword name="documentUri" id="QAbstractXmlNodeModel::documentUri" ref="qabstractxmlnodemodel.html#documentUri"/>
+            <keyword name="documentUri" id="QXmlSchema::documentUri" ref="qxmlschema.html#documentUri"/>
+            <keyword name="elementById" id="QAbstractXmlNodeModel::elementById" ref="qabstractxmlnodemodel.html#elementById"/>
+            <keyword name="elementById" id="QSimpleXmlNodeModel::elementById" ref="qsimplexmlnodemodel.html#elementById"/>
+            <keyword name="endDocument" id="QAbstractXmlReceiver::endDocument" ref="qabstractxmlreceiver.html#endDocument"/>
+            <keyword name="endDocument" id="QXmlFormatter::endDocument" ref="qxmlformatter.html#endDocument"/>
+            <keyword name="endDocument" id="QXmlSerializer::endDocument" ref="qxmlserializer.html#endDocument"/>
+            <keyword name="endElement" id="QAbstractXmlReceiver::endElement" ref="qabstractxmlreceiver.html#endElement"/>
+            <keyword name="endElement" id="QXmlFormatter::endElement" ref="qxmlformatter.html#endElement"/>
+            <keyword name="endElement" id="QXmlSerializer::endElement" ref="qxmlserializer.html#endElement"/>
+            <keyword name="endOfSequence" id="QAbstractXmlReceiver::endOfSequence" ref="qabstractxmlreceiver.html#endOfSequence"/>
+            <keyword name="endOfSequence" id="QXmlFormatter::endOfSequence" ref="qxmlformatter.html#endOfSequence"/>
+            <keyword name="endOfSequence" id="QXmlSerializer::endOfSequence" ref="qxmlserializer.html#endOfSequence"/>
+            <keyword name="errorString" id="XmlListModel::errorString" ref="qml-qtquick-xmllistmodel-xmllistmodel.html#errorString-method"/>
+            <keyword name="evaluateTo" id="QXmlQuery::evaluateTo" ref="qxmlquery.html#evaluateTo"/>
+            <keyword name="fromClarkName" id="QXmlName::fromClarkName" ref="qxmlname.html#fromClarkName"/>
+            <keyword name="get" id="XmlListModel::get" ref="qml-qtquick-xmllistmodel-xmllistmodel.html#get-method"/>
+            <keyword name="handleMessage" id="QAbstractMessageHandler::handleMessage" ref="qabstractmessagehandler.html#handleMessage"/>
+            <keyword name="hasError" id="QXmlResultItems::hasError" ref="qxmlresultitems.html#hasError"/>
+            <keyword name="indentationDepth" id="QXmlFormatter::indentationDepth" ref="qxmlformatter.html#indentationDepth"/>
+            <keyword name="initialTemplateName" id="QXmlQuery::initialTemplateName" ref="qxmlquery.html#initialTemplateName"/>
+            <keyword name="internalPointer" id="QXmlNodeModelIndex::internalPointer" ref="qxmlnodemodelindex.html#internalPointer"/>
+            <keyword name="isAtomicValue" id="QXmlItem::isAtomicValue" ref="qxmlitem.html#isAtomicValue"/>
+            <keyword name="isKey" id="XmlRole::isKey" ref="qml-qtquick-xmllistmodel-xmlrole.html#isKey-prop"/>
+            <keyword name="isNCName" id="QXmlName::isNCName" ref="qxmlname.html#isNCName"/>
+            <keyword name="isNode" id="QXmlItem::isNode" ref="qxmlitem.html#isNode"/>
+            <keyword name="isNull" id="QSourceLocation::isNull" ref="qsourcelocation.html#isNull"/>
+            <keyword name="isNull" id="QXmlItem::isNull" ref="qxmlitem.html#isNull"/>
+            <keyword name="isNull" id="QXmlName::isNull" ref="qxmlname.html#isNull"/>
+            <keyword name="isNull" id="QXmlNodeModelIndex::isNull" ref="qxmlnodemodelindex.html#isNull"/>
+            <keyword name="isValid" id="QXmlQuery::isValid" ref="qxmlquery.html#isValid"/>
+            <keyword name="isValid" id="QXmlSchema::isValid" ref="qxmlschema.html#isValid"/>
+            <keyword name="kind" id="QAbstractXmlNodeModel::kind" ref="qabstractxmlnodemodel.html#kind"/>
+            <keyword name="line" id="QSourceLocation::line" ref="qsourcelocation.html#line"/>
+            <keyword name="load" id="QXmlSchema::load" ref="qxmlschema.html#load"/>
+            <keyword name="localName" id="QXmlName::localName" ref="qxmlname.html#localName"/>
+            <keyword name="message" id="QAbstractMessageHandler::message" ref="qabstractmessagehandler.html#message"/>
+            <keyword name="messageHandler" id="QXmlQuery::messageHandler" ref="qxmlquery.html#messageHandler"/>
+            <keyword name="messageHandler" id="QXmlSchema::messageHandler" ref="qxmlschema.html#messageHandler"/>
+            <keyword name="messageHandler" id="QXmlSchemaValidator::messageHandler" ref="qxmlschemavalidator.html#messageHandler"/>
+            <keyword name="model" id="QXmlNodeModelIndex::model" ref="qxmlnodemodelindex.html#model"/>
+            <keyword name="name" id="QAbstractXmlNodeModel::name" ref="qabstractxmlnodemodel.html#name"/>
+            <keyword name="name" id="XmlRole::name" ref="qml-qtquick-xmllistmodel-xmlrole.html#name-prop"/>
+            <keyword name="namePool" id="QSimpleXmlNodeModel::namePool" ref="qsimplexmlnodemodel.html#namePool"/>
+            <keyword name="namePool" id="QXmlQuery::namePool" ref="qxmlquery.html#namePool"/>
+            <keyword name="namePool" id="QXmlSchema::namePool" ref="qxmlschema.html#namePool"/>
+            <keyword name="namePool" id="QXmlSchemaValidator::namePool" ref="qxmlschemavalidator.html#namePool"/>
+            <keyword name="namespaceBinding" id="QAbstractXmlReceiver::namespaceBinding" ref="qabstractxmlreceiver.html#namespaceBinding"/>
+            <keyword name="namespaceBinding" id="QXmlSerializer::namespaceBinding" ref="qxmlserializer.html#namespaceBinding"/>
+            <keyword name="namespaceBindings" id="QAbstractXmlNodeModel::namespaceBindings" ref="qabstractxmlnodemodel.html#namespaceBindings"/>
+            <keyword name="namespaceBindings" id="QSimpleXmlNodeModel::namespaceBindings" ref="qsimplexmlnodemodel.html#namespaceBindings"/>
+            <keyword name="namespaceDeclarations" id="XmlListModel::namespaceDeclarations" ref="qml-qtquick-xmllistmodel-xmllistmodel.html#namespaceDeclarations-prop"/>
+            <keyword name="namespaceUri" id="QXmlName::namespaceUri" ref="qxmlname.html#namespaceUri"/>
+            <keyword name="networkAccessManager" id="QXmlQuery::networkAccessManager" ref="qxmlquery.html#networkAccessManager"/>
+            <keyword name="networkAccessManager" id="QXmlSchema::networkAccessManager" ref="qxmlschema.html#networkAccessManager"/>
+            <keyword name="networkAccessManager" id="QXmlSchemaValidator::networkAccessManager" ref="qxmlschemavalidator.html#networkAccessManager"/>
+            <keyword name="next" id="QXmlResultItems::next" ref="qxmlresultitems.html#next"/>
+            <keyword name="nextFromSimpleAxis" id="QAbstractXmlNodeModel::nextFromSimpleAxis" ref="qabstractxmlnodemodel.html#nextFromSimpleAxis"/>
+            <keyword name="nodesByIdref" id="QAbstractXmlNodeModel::nodesByIdref" ref="qabstractxmlnodemodel.html#nodesByIdref"/>
+            <keyword name="nodesByIdref" id="QSimpleXmlNodeModel::nodesByIdref" ref="qsimplexmlnodemodel.html#nodesByIdref"/>
+            <keyword name="operator!=" id="QSourceLocation::operator!=" ref="qsourcelocation.html#operator-not-eq"/>
+            <keyword name="operator!=" id="QXmlName::operator!=" ref="qxmlname.html#operator-not-eq"/>
+            <keyword name="operator!=" id="QXmlNodeModelIndex::operator!=" ref="qxmlnodemodelindex.html#operator-not-eq"/>
+            <keyword name="operator&lt;&lt;" id="operator&lt;&lt;" ref="qsourcelocation.html#operator-lt-lt"/>
+            <keyword name="operator=" id="QSourceLocation::operator=" ref="qsourcelocation.html#operator-eq"/>
+            <keyword name="operator=" id="QXmlItem::operator=" ref="qxmlitem.html#operator-eq"/>
+            <keyword name="operator=" id="QXmlName::operator=" ref="qxmlname.html#operator-eq"/>
+            <keyword name="operator=" id="QXmlNamePool::operator=" ref="qxmlnamepool.html#operator-eq"/>
+            <keyword name="operator=" id="QXmlQuery::operator=" ref="qxmlquery.html#operator-eq"/>
+            <keyword name="operator=" id="QXmlSchema::operator=" ref="qxmlschema.html#operator-eq"/>
+            <keyword name="operator==" id="QSourceLocation::operator==" ref="qsourcelocation.html#operator-eq-eq"/>
+            <keyword name="operator==" id="QXmlName::operator==" ref="qxmlname.html#operator-eq-eq"/>
+            <keyword name="operator==" id="QXmlNodeModelIndex::operator==" ref="qxmlnodemodelindex.html#operator-eq-eq"/>
+            <keyword name="outputDevice" id="QXmlSerializer::outputDevice" ref="qxmlserializer.html#outputDevice"/>
+            <keyword name="prefix" id="QXmlName::prefix" ref="qxmlname.html#prefix"/>
+            <keyword name="processingInstruction" id="QAbstractXmlReceiver::processingInstruction" ref="qabstractxmlreceiver.html#processingInstruction"/>
+            <keyword name="processingInstruction" id="QXmlFormatter::processingInstruction" ref="qxmlformatter.html#processingInstruction"/>
+            <keyword name="processingInstruction" id="QXmlSerializer::processingInstruction" ref="qxmlserializer.html#processingInstruction"/>
+            <keyword name="progress" id="XmlListModel::progress" ref="qml-qtquick-xmllistmodel-xmllistmodel.html#progress-prop"/>
+            <keyword name="qHash" id="qHash" ref="qhash-proxy.html#qHash"/>
+            <keyword name="qHash" id="qHash" ref="qsourcelocation.html#qHash"/>
+            <keyword name="qHash" id="qHash" ref="qxmlname.html#qHash"/>
+            <keyword name="query" id="XmlListModel::query" ref="qml-qtquick-xmllistmodel-xmllistmodel.html#query-prop"/>
+            <keyword name="query" id="XmlRole::query" ref="qml-qtquick-xmllistmodel-xmlrole.html#query-prop"/>
+            <keyword name="queryLanguage" id="QXmlQuery::queryLanguage" ref="qxmlquery.html#queryLanguage"/>
+            <keyword name="reload" id="XmlListModel::reload" ref="qml-qtquick-xmllistmodel-xmllistmodel.html#reload-method"/>
+            <keyword name="resolve" id="QAbstractUriResolver::resolve" ref="qabstracturiresolver.html#resolve"/>
+            <keyword name="roles" id="XmlListModel::roles" ref="qml-qtquick-xmllistmodel-xmllistmodel.html#roles-prop"/>
+            <keyword name="root" id="QAbstractXmlNodeModel::root" ref="qabstractxmlnodemodel.html#root"/>
+            <keyword name="schema" id="QXmlSchemaValidator::schema" ref="qxmlschemavalidator.html#schema"/>
+            <keyword name="setCodec" id="QXmlSerializer::setCodec" ref="qxmlserializer.html#setCodec"/>
+            <keyword name="setColumn" id="QSourceLocation::setColumn" ref="qsourcelocation.html#setColumn"/>
+            <keyword name="setFocus" id="QXmlQuery::setFocus" ref="qxmlquery.html#setFocus"/>
+            <keyword name="setIndentationDepth" id="QXmlFormatter::setIndentationDepth" ref="qxmlformatter.html#setIndentationDepth"/>
+            <keyword name="setInitialTemplateName" id="QXmlQuery::setInitialTemplateName" ref="qxmlquery.html#setInitialTemplateName"/>
+            <keyword name="setLine" id="QSourceLocation::setLine" ref="qsourcelocation.html#setLine"/>
+            <keyword name="setMessageHandler" id="QXmlQuery::setMessageHandler" ref="qxmlquery.html#setMessageHandler"/>
+            <keyword name="setMessageHandler" id="QXmlSchema::setMessageHandler" ref="qxmlschema.html#setMessageHandler"/>
+            <keyword name="setMessageHandler" id="QXmlSchemaValidator::setMessageHandler" ref="qxmlschemavalidator.html#setMessageHandler"/>
+            <keyword name="setNetworkAccessManager" id="QXmlQuery::setNetworkAccessManager" ref="qxmlquery.html#setNetworkAccessManager"/>
+            <keyword name="setNetworkAccessManager" id="QXmlSchema::setNetworkAccessManager" ref="qxmlschema.html#setNetworkAccessManager"/>
+            <keyword name="setNetworkAccessManager" id="QXmlSchemaValidator::setNetworkAccessManager" ref="qxmlschemavalidator.html#setNetworkAccessManager"/>
+            <keyword name="setQuery" id="QXmlQuery::setQuery" ref="qxmlquery.html#setQuery"/>
+            <keyword name="setSchema" id="QXmlSchemaValidator::setSchema" ref="qxmlschemavalidator.html#setSchema"/>
+            <keyword name="setUri" id="QSourceLocation::setUri" ref="qsourcelocation.html#setUri"/>
+            <keyword name="setUriResolver" id="QXmlQuery::setUriResolver" ref="qxmlquery.html#setUriResolver"/>
+            <keyword name="setUriResolver" id="QXmlSchema::setUriResolver" ref="qxmlschema.html#setUriResolver"/>
+            <keyword name="setUriResolver" id="QXmlSchemaValidator::setUriResolver" ref="qxmlschemavalidator.html#setUriResolver"/>
+            <keyword name="source" id="XmlListModel::source" ref="qml-qtquick-xmllistmodel-xmllistmodel.html#source-prop"/>
+            <keyword name="sourceLocation" id="QAbstractXmlNodeModel::sourceLocation" ref="qabstractxmlnodemodel.html#sourceLocation"/>
+            <keyword name="startDocument" id="QAbstractXmlReceiver::startDocument" ref="qabstractxmlreceiver.html#startDocument"/>
+            <keyword name="startDocument" id="QXmlFormatter::startDocument" ref="qxmlformatter.html#startDocument"/>
+            <keyword name="startDocument" id="QXmlSerializer::startDocument" ref="qxmlserializer.html#startDocument"/>
+            <keyword name="startElement" id="QAbstractXmlReceiver::startElement" ref="qabstractxmlreceiver.html#startElement"/>
+            <keyword name="startElement" id="QXmlFormatter::startElement" ref="qxmlformatter.html#startElement"/>
+            <keyword name="startElement" id="QXmlSerializer::startElement" ref="qxmlserializer.html#startElement"/>
+            <keyword name="startOfSequence" id="QAbstractXmlReceiver::startOfSequence" ref="qabstractxmlreceiver.html#startOfSequence"/>
+            <keyword name="startOfSequence" id="QXmlFormatter::startOfSequence" ref="qxmlformatter.html#startOfSequence"/>
+            <keyword name="startOfSequence" id="QXmlSerializer::startOfSequence" ref="qxmlserializer.html#startOfSequence"/>
+            <keyword name="status" id="XmlListModel::status" ref="qml-qtquick-xmllistmodel-xmllistmodel.html#status-prop"/>
+            <keyword name="stringValue" id="QAbstractXmlNodeModel::stringValue" ref="qabstractxmlnodemodel.html#stringValue"/>
+            <keyword name="stringValue" id="QSimpleXmlNodeModel::stringValue" ref="qsimplexmlnodemodel.html#stringValue"/>
+            <keyword name="toAtomicValue" id="QXmlItem::toAtomicValue" ref="qxmlitem.html#toAtomicValue"/>
+            <keyword name="toClarkName" id="QXmlName::toClarkName" ref="qxmlname.html#toClarkName"/>
+            <keyword name="toNodeModelIndex" id="QXmlItem::toNodeModelIndex" ref="qxmlitem.html#toNodeModelIndex"/>
+            <keyword name="typedValue" id="QAbstractXmlNodeModel::typedValue" ref="qabstractxmlnodemodel.html#typedValue"/>
+            <keyword name="uri" id="QSourceLocation::uri" ref="qsourcelocation.html#uri"/>
+            <keyword name="uriResolver" id="QXmlQuery::uriResolver" ref="qxmlquery.html#uriResolver"/>
+            <keyword name="uriResolver" id="QXmlSchema::uriResolver" ref="qxmlschema.html#uriResolver"/>
+            <keyword name="uriResolver" id="QXmlSchemaValidator::uriResolver" ref="qxmlschemavalidator.html#uriResolver"/>
+            <keyword name="validate" id="QXmlSchemaValidator::validate" ref="qxmlschemavalidator.html#validate"/>
+            <keyword name="xml" id="XmlListModel::xml" ref="qml-qtquick-xmllistmodel-xmllistmodel.html#xml-prop"/>
+            <keyword name="~QAbstractMessageHandler" id="QAbstractMessageHandler::~QAbstractMessageHandler" ref="qabstractmessagehandler.html#dtor.QAbstractMessageHandler"/>
+            <keyword name="~QAbstractUriResolver" id="QAbstractUriResolver::~QAbstractUriResolver" ref="qabstracturiresolver.html#dtor.QAbstractUriResolver"/>
+            <keyword name="~QAbstractXmlNodeModel" id="QAbstractXmlNodeModel::~QAbstractXmlNodeModel" ref="qabstractxmlnodemodel.html#dtor.QAbstractXmlNodeModel"/>
+            <keyword name="~QAbstractXmlReceiver" id="QAbstractXmlReceiver::~QAbstractXmlReceiver" ref="qabstractxmlreceiver.html#dtor.QAbstractXmlReceiver"/>
+            <keyword name="~QSimpleXmlNodeModel" id="QSimpleXmlNodeModel::~QSimpleXmlNodeModel" ref="qsimplexmlnodemodel.html#dtor.QSimpleXmlNodeModel"/>
+            <keyword name="~QSourceLocation" id="QSourceLocation::~QSourceLocation" ref="qsourcelocation.html#dtor.QSourceLocation"/>
+            <keyword name="~QXmlItem" id="QXmlItem::~QXmlItem" ref="qxmlitem.html#dtor.QXmlItem"/>
+            <keyword name="~QXmlNamePool" id="QXmlNamePool::~QXmlNamePool" ref="qxmlnamepool.html#dtor.QXmlNamePool"/>
+            <keyword name="~QXmlQuery" id="QXmlQuery::~QXmlQuery" ref="qxmlquery.html#dtor.QXmlQuery"/>
+            <keyword name="~QXmlResultItems" id="QXmlResultItems::~QXmlResultItems" ref="qxmlresultitems.html#dtor.QXmlResultItems"/>
+            <keyword name="~QXmlSchema" id="QXmlSchema::~QXmlSchema" ref="qxmlschema.html#dtor.QXmlSchema"/>
+            <keyword name="~QXmlSchemaValidator" id="QXmlSchemaValidator::~QXmlSchemaValidator" ref="qxmlschemavalidator.html#dtor.QXmlSchemaValidator"/>
+        </keywords>
+        <files>
+            <file>images/arrow_bc.png</file>
+            <file>images/bgrContent.png</file>
+            <file>images/btn_next.png</file>
+            <file>images/btn_prev.png</file>
+            <file>images/bullet_dn.png</file>
+            <file>images/bullet_sq.png</file>
+            <file>images/filetree_1-example.png</file>
+            <file>images/filetree_2-example.png</file>
+            <file>images/home.png</file>
+            <file>images/ico_note.png</file>
+            <file>images/ico_note_attention.png</file>
+            <file>images/ico_out.png</file>
+            <file>images/logo.png</file>
+            <file>images/patternist-wordProcessor.png</file>
+            <file>images/qml-xmllistmodel-example.png</file>
+            <file>images/recipes-example.png</file>
+            <file>images/schema-example.png</file>
+            <file>qabstractmessagehandler-members.html</file>
+            <file>qabstractmessagehandler.html</file>
+            <file>qabstracturiresolver-members.html</file>
+            <file>qabstracturiresolver.html</file>
+            <file>qabstractxmlnodemodel-members.html</file>
+            <file>qabstractxmlnodemodel.html</file>
+            <file>qabstractxmlreceiver-members.html</file>
+            <file>qabstractxmlreceiver.html</file>
+            <file>qhash-proxy.html</file>
+            <file>qml-qtquick-xmllistmodel-xmllistmodel-members.html</file>
+            <file>qml-qtquick-xmllistmodel-xmllistmodel.html</file>
+            <file>qml-qtquick-xmllistmodel-xmlrole-members.html</file>
+            <file>qml-qtquick-xmllistmodel-xmlrole.html</file>
+            <file>qsimplexmlnodemodel-members.html</file>
+            <file>qsimplexmlnodemodel.html</file>
+            <file>qsourcelocation-members.html</file>
+            <file>qsourcelocation.html</file>
+            <file>qtquick-xmllistmodel-qmlmodule.html</file>
+            <file>qtxmlpatterns-attribution-xml-xsd.html</file>
+            <file>qtxmlpatterns-filetree-example.html</file>
+            <file>qtxmlpatterns-index.html</file>
+            <file>qtxmlpatterns-module.html</file>
+            <file>qtxmlpatterns-recipes-example.html</file>
+            <file>qtxmlpatterns-schema-example.html</file>
+            <file>qtxmlpatterns-xquery-example.html</file>
+            <file>qxmlformatter-members.html</file>
+            <file>qxmlformatter.html</file>
+            <file>qxmlitem-members.html</file>
+            <file>qxmlitem.html</file>
+            <file>qxmlname-members.html</file>
+            <file>qxmlname.html</file>
+            <file>qxmlnamepool-members.html</file>
+            <file>qxmlnamepool.html</file>
+            <file>qxmlnodemodelindex-members.html</file>
+            <file>qxmlnodemodelindex.html</file>
+            <file>qxmlquery-members.html</file>
+            <file>qxmlquery.html</file>
+            <file>qxmlresultitems-members.html</file>
+            <file>qxmlresultitems.html</file>
+            <file>qxmlschema-members.html</file>
+            <file>qxmlschema.html</file>
+            <file>qxmlschemavalidator-members.html</file>
+            <file>qxmlschemavalidator.html</file>
+            <file>qxmlserializer-members.html</file>
+            <file>qxmlserializer.html</file>
+            <file>style/offline-simple.css</file>
+            <file>style/offline.css</file>
+            <file>xmlpattern-examples.html</file>
+            <file>xmlprocessing.html</file>
+            <file>xquery-introduction.html</file>
+        </files>
+    </filterSection>
+</QtHelpProject>

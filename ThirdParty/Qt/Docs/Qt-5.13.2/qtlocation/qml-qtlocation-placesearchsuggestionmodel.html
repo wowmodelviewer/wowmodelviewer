@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdeclarativesearchsuggestionmodel.cpp -->
+  <title>PlaceSearchSuggestionModel QML Type | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-qmlmodule.html">QML Types</a></td><td >PlaceSearchSuggestionModel QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">PlaceSearchSuggestionModel QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$PlaceSearchSuggestionModel-brief -->
+<p>Provides access to search term suggestions. <a href="#details">More...</a></p>
+<!-- @@@PlaceSearchSuggestionModel -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtLocation 5.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  QtLocation 5.5</td></tr></table></div><ul>
+<li><a href="qml-qtlocation-placesearchsuggestionmodel-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtlocation-placesearchsuggestionmodel.html#limit-prop">limit</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtlocation-placesearchsuggestionmodel.html#offset-prop">offset</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtlocation-placesearchsuggestionmodel.html#plugin-prop">plugin</a></b></b> : Plugin</li>
+<li class="fn"><b><b><a href="qml-qtlocation-placesearchsuggestionmodel.html#searchArea-prop">searchArea</a></b></b> : geoshape</li>
+<li class="fn"><b><b><a href="qml-qtlocation-placesearchsuggestionmodel.html#searchTerm-prop">searchTerm</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtlocation-placesearchsuggestionmodel.html#status-prop">status</a></b></b> : enum</li>
+<li class="fn"><b><b><a href="qml-qtlocation-placesearchsuggestionmodel.html#suggestions-prop">suggestions</a></b></b> : stringlist</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtlocation-placesearchsuggestionmodel.html#cancel-method">cancel</a></b></b>()</li>
+<li class="fn">string <b><b><a href="qml-qtlocation-placesearchsuggestionmodel.html#errorString-method">errorString</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtlocation-placesearchsuggestionmodel.html#reset-method">reset</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtlocation-placesearchsuggestionmodel.html#update-method">update</a></b></b>()</li>
+</ul>
+<!-- $$$PlaceSearchSuggestionModel-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qml-qtlocation-placesearchsuggestionmodel.html">PlaceSearchSuggestionModel</a> can be used to provide search term suggestions as the user enters their search term. The properties of this model should match that of the <a href="qml-qtlocation-placesearchmodel.html">PlaceSearchModel</a>, which will be used to perform the actual search query, to ensure that the search suggestion results are relevant.</p>
+<p>There are two ways of accessing the data provided by this model, either through the <a href="qml-qtlocation-placesearchsuggestionmodel.html#suggestions-prop">suggestions</a> property or through views and delegates. The latter is the preferred method.</p>
+<p>The <a href="qml-qtlocation-placesearchsuggestionmodel.html#offset-prop">offset</a> and <a href="qml-qtlocation-placesearchsuggestionmodel.html#limit-prop">limit</a> properties can be used to access paged suggestions. When the <a href="qml-qtlocation-placesearchsuggestionmodel.html#offset-prop">offset</a> and <a href="qml-qtlocation-placesearchsuggestionmodel.html#limit-prop">limit</a> properties are set the suggestions between <a href="qml-qtlocation-placesearchsuggestionmodel.html#offset-prop">offset</a> and (<a href="qml-qtlocation-placesearchsuggestionmodel.html#offset-prop">offset</a> + <a href="qml-qtlocation-placesearchsuggestionmodel.html#limit-prop">limit</a> - 1) will be returned. Support for paging may vary from plugin to plugin.</p>
+<p>The model returns data for the following roles:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Role</th><th >Type</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >suggestion</td><td >string</td><td >Suggested search term.</td></tr>
+</table></div>
+<p>The following example shows how to use the <a href="qml-qtlocation-placesearchsuggestionmodel.html">PlaceSearchSuggestionModel</a> to get suggested search terms from a partial search term. The <a href="qml-qtlocation-placesearchsuggestionmodel.html#searchArea-prop">searchArea</a> is set to match what would be used to perform the actual place search with <a href="qml-qtlocation-placesearchmodel.html">PlaceSearchModel</a>.</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+  import QtPositioning 5.5
+  import QtLocation 5.6
+
+  <span class="type"><a href="qml-qtlocation-placesearchsuggestionmodel.html">PlaceSearchSuggestionModel</a></span> {
+      <span class="name">id</span>: <span class="name">suggestionModel</span>
+
+      <span class="name">plugin</span>: <span class="name">myPlugin</span>
+
+      <span class="comment">// Brisbane</span>
+      <span class="name">searchArea</span>: <span class="name">QtPositioning</span>.<span class="name">circle</span>(<span class="name">QtPositioning</span>.<span class="name">coordinate</span>(-<span class="number">27.46778</span>, <span class="number">153.02778</span>))
+
+      <span class="name">onSearchTermChanged</span>: <span class="name">update</span>()
+  }
+
+  <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+      <span class="name">model</span>: <span class="name">suggestionModel</span>
+      <span class="name">delegate</span>: <span class="name">Text</span> { <span class="name">text</span>: <span class="name">suggestion</span> }
+  }
+
+</pre>
+<p><b>See also </b><a href="qml-qtlocation-placesearchmodel.html">PlaceSearchModel</a> and <a href="qplacemanager.html">QPlaceManager</a>.</p>
+<!-- @@@PlaceSearchSuggestionModel -->
+<h2>Property Documentation</h2>
+<!-- $$$limit -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="limit-prop"></a><span class="name">limit</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the limit of the number of items that will be returned.</p>
+<p><b>See also </b><a href="qml-qtlocation-placesearchsuggestionmodel.html#offset-prop">offset</a>.</p>
+</div></div><!-- @@@limit -->
+<br/>
+<!-- $$$offset -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="offset-prop"></a><span class="name">offset</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the index of the first item in the model.</p>
+<p><b>See also </b><a href="qml-qtlocation-placesearchsuggestionmodel.html#limit-prop">limit</a>.</p>
+</div></div><!-- @@@offset -->
+<br/>
+<!-- $$$plugin -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="plugin-prop"></a><span class="name">plugin</span> : <span class="type"><a href="qml-qtlocation-plugin.html">Plugin</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the provider <a href="location-places-qml.html#plugin">Plugin</a> which will be used to perform the search.</p>
+</div></div><!-- @@@plugin -->
+<br/>
+<!-- $$$searchArea -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="searchArea-prop"></a><span class="name">searchArea</span> : <span class="type"><a href="../qtpositioning/qml-geoshape.html">geoshape</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the search area. Search suggestion results returned by the model will be relevant to the given search area.</p>
+<p>If this property is set to a <a href="../qtpositioning/qml-geocircle.html">geocircle</a> its <a href="../qtpositioning/qml-geocircle.html">radius</a> property may be left unset, in which case the <a href="location-places-qml.html#plugin">Plugin</a> will choose an appropriate radius for the search.</p>
+</div></div><!-- @@@searchArea -->
+<br/>
+<!-- $$$searchTerm -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="searchTerm-prop"></a><span class="name">searchTerm</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the partial search term used in query.</p>
+</div></div><!-- @@@searchTerm -->
+<br/>
+<!-- $$$status -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="status-prop"></a><span class="name">status</span> : <span class="type">enum</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the status of the model. It can be one of:</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><a href="qml-qtlocation-placesearchsuggestionmodel.html">PlaceSearchSuggestionModel</a>.Null</td><td >No search query has been executed. The model is empty.</td></tr>
+<tr valign="top" class="even"><td ><a href="qml-qtlocation-placesearchsuggestionmodel.html">PlaceSearchSuggestionModel</a>.Ready</td><td >The search query has completed, and the results are available.</td></tr>
+<tr valign="top" class="odd"><td ><a href="qml-qtlocation-placesearchsuggestionmodel.html">PlaceSearchSuggestionModel</a>.Loading</td><td >A search query is currently being executed.</td></tr>
+<tr valign="top" class="even"><td ><a href="qml-qtlocation-placesearchsuggestionmodel.html">PlaceSearchSuggestionModel</a>.Error</td><td >An error occurred when executing the previous search query.</td></tr>
+</table></div>
+</div></div><!-- @@@status -->
+<br/>
+<!-- $$$suggestions -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="suggestions-prop"></a><span class="name">suggestions</span> : <span class="type">stringlist</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the list of predicted search terms that the model currently has.</p>
+</div></div><!-- @@@suggestions -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$cancel[overload1]$$$cancel -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="cancel-method"></a><span class="type">void</span> <span class="name">cancel</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Cancels an ongoing search suggestion operation immediately and sets the model status to <a href="qml-qtlocation-placesearchsuggestionmodel.html">PlaceSearchSuggestionModel</a>.Ready. The model retains any search suggestions it had before the operation was started.</p>
+<p>If an operation is not ongoing, invoking cancel() has no effect.</p>
+<p><b>See also </b><a href="qml-qtlocation-placesearchsuggestionmodel.html#update-method">update()</a> and <a href="qml-qtlocation-placesearchsuggestionmodel.html#status-prop">status</a>.</p>
+</div></div><!-- @@@cancel -->
+<br/>
+<!-- $$$errorString[overload1]$$$errorString -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="errorString-method"></a><span class="type"><a href="../qtqml/qml-string.html">string</a></span> <span class="name">errorString</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This read-only property holds the textual presentation of the latest search suggestion model error. If no error has occurred, or if the model was cleared, an empty string is returned.</p>
+<p>An empty string may also be returned if an error occurred which has no associated textual representation.</p>
+</div></div><!-- @@@errorString -->
+<br/>
+<!-- $$$reset[overload1]$$$reset -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="reset-method"></a><span class="type">void</span> <span class="name">reset</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Resets the model. All search suggestions are cleared, any outstanding requests are aborted and possible errors are cleared. Model status will be set to <a href="qml-qtlocation-placesearchsuggestionmodel.html">PlaceSearchSuggestionModel</a>.Null.</p>
+</div></div><!-- @@@reset -->
+<br/>
+<!-- $$$update[overload1]$$$update -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="update-method"></a><span class="type">void</span> <span class="name">update</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Updates the model based on the provided query parameters. The model will be populated with a list of search suggestions for the partial <a href="qml-qtlocation-placesearchsuggestionmodel.html#searchTerm-prop">searchTerm</a> and <a href="qml-qtlocation-placesearchsuggestionmodel.html#searchArea-prop">searchArea</a>. If the <a href="location-places-qml.html#plugin">plugin</a> supports it, other parameters such as <a href="qml-qtlocation-placesearchsuggestionmodel.html#limit-prop">limit</a> and <a href="qml-qtlocation-placesearchsuggestionmodel.html#offset-prop">offset</a> may be specified. <code>update()</code> submits the set of parameters to the <a href="location-places-qml.html#plugin">plugin</a> to process.</p>
+<p>While the model is updating the <a href="qml-qtlocation-placesearchsuggestionmodel.html#status-prop">status</a> of the model is set to <code>PlaceSearchSuggestionModel.Loading</code>. If the model is successfully updated, the <a href="qml-qtlocation-placesearchsuggestionmodel.html#status-prop">status</a> is set to <code>PlaceSearchSuggestionModel.Ready</code>, while if it unsuccessfully completes, the <a href="qml-qtlocation-placesearchsuggestionmodel.html#status-prop">status</a> is set to <code>PlaceSearchSuggestionModel.Error</code> and the model cleared.</p>
+<p>This example shows use of the model</p>
+<pre class="cpp">
+
+  PlaceSeachSuggestionModel {
+      id: model
+      plugin: backendPlugin
+      searchArea: <span class="type"><a href="../qtpositioning/qml-qtpositioning-qtpositioning.html">QtPositioning</a></span><span class="operator">.</span>circle(<span class="type"><a href="../qtpositioning/qml-qtpositioning-qtpositioning.html">QtPositioning</a></span><span class="operator">.</span>coordinate(<span class="number">10</span><span class="operator">,</span> <span class="number">10</span>))
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  }
+
+  MouseArea {
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+      onClicked: {
+          model<span class="operator">.</span>searchTerm <span class="operator">=</span> <span class="string">&quot;piz&quot;</span>
+          model<span class="operator">.</span>searchArea<span class="operator">.</span>center<span class="operator">.</span>latitude <span class="operator">=</span> <span class="operator">-</span><span class="number">27.5</span>;
+          model<span class="operator">.</span>searchArea<span class="operator">.</span>cetner<span class="operator">.</span>longitude <span class="operator">=</span> <span class="number">153</span>;
+          model<span class="operator">.</span>update();
+      }
+  }
+
+</pre>
+<p>A more detailed example can be found in the in <a href="qtlocation-places-example.html#presenting-search-suggestions">Places (QML)</a> example.</p>
+<p><b>See also </b><a href="qml-qtlocation-placesearchsuggestionmodel.html#cancel-method">cancel()</a> and <a href="qml-qtlocation-placesearchsuggestionmodel.html#status-prop">status</a>.</p>
+</div></div><!-- @@@update -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

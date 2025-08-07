@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qplacesearchsuggestionreply.cpp -->
+  <title>QPlaceSearchSuggestionReply Class | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-module.html">C++ Classes</a></td><td >QPlaceSearchSuggestionReply</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPlaceSearchSuggestionReply Class</h1>
+<!-- $$$QPlaceSearchSuggestionReply-brief -->
+<p>The <a href="qplacesearchsuggestionreply.html">QPlaceSearchSuggestionReply</a> class manages a search suggestion operation started by an instance of <a href="qplacemanager.html">QPlaceManager</a>. <a href="#details">More...</a></p>
+<!-- @@@QPlaceSearchSuggestionReply -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QPlaceSearchSuggestionReply&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += location</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.6</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qplacereply.html">QPlaceReply</a></td></tr></table></div><p>This class was introduced in  Qt 5.6.</p>
+<ul>
+<li><a href="qplacesearchsuggestionreply-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qplacesearchsuggestionreply.html#QPlaceSearchSuggestionReply">QPlaceSearchSuggestionReply</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qplacesearchsuggestionreply.html#dtor.QPlaceSearchSuggestionReply">~QPlaceSearchSuggestionReply</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qplacesearchsuggestionreply.html#suggestions">suggestions</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QPlaceReply::Type </td><td class="memItemRight bottomAlign"><b><a href="qplacesearchsuggestionreply.html#type">type</a></b>() const override</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacesearchsuggestionreply.html#setSuggestions">setSuggestions</a></b>(const QStringList &amp;<i>suggestions</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPlaceSearchSuggestionReply-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>On successful completion of the operation, the reply will contain a list of search term suggestions. See <a href="location-places-cpp.html#search-suggestions">Search Suggestions</a> for an example on how to use a search suggestion reply.</p>
+</div>
+<p><b>See also </b><a href="qplacemanager.html">QPlaceManager</a>.</p>
+<!-- @@@QPlaceSearchSuggestionReply -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QPlaceSearchSuggestionReply[overload1]$$$QPlaceSearchSuggestionReplyQObject* -->
+<h3 class="fn" id="QPlaceSearchSuggestionReply"><a name="QPlaceSearchSuggestionReply"></a>QPlaceSearchSuggestionReply::<span class="name">QPlaceSearchSuggestionReply</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a search suggestion reply with a given <i>parent</i>.</p>
+<!-- @@@QPlaceSearchSuggestionReply -->
+<!-- $$$~QPlaceSearchSuggestionReply[overload1]$$$~QPlaceSearchSuggestionReply -->
+<h3 class="fn" id="dtor.QPlaceSearchSuggestionReply"><a name="dtor.QPlaceSearchSuggestionReply"></a><code>[virtual] </code>QPlaceSearchSuggestionReply::<span class="name">~QPlaceSearchSuggestionReply</span>()</h3>
+<p>Destroys the reply.</p>
+<!-- @@@~QPlaceSearchSuggestionReply -->
+<!-- $$$setSuggestions[overload1]$$$setSuggestionsconstQStringList& -->
+<h3 class="fn" id="setSuggestions"><a name="setSuggestions"></a><code>[protected] </code><span class="type">void</span> QPlaceSearchSuggestionReply::<span class="name">setSuggestions</span>(const <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> &amp;<i>suggestions</i>)</h3>
+<p>Sets the search term <i>suggestions</i>.</p>
+<p><b>See also </b><a href="qplacesearchsuggestionreply.html#suggestions">suggestions</a>().</p>
+<!-- @@@setSuggestions -->
+<!-- $$$suggestions[overload1]$$$suggestions -->
+<h3 class="fn" id="suggestions"><a name="suggestions"></a><span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> QPlaceSearchSuggestionReply::<span class="name">suggestions</span>() const</h3>
+<p>Returns the search term suggestions.</p>
+<p><b>See also </b><a href="qplacesearchsuggestionreply.html#setSuggestions">setSuggestions</a>().</p>
+<!-- @@@suggestions -->
+<!-- $$$type[overload1]$$$type -->
+<h3 class="fn" id="type"><a name="type"></a><code>[override virtual] </code><span class="type"><a href="qplacereply.html#Type-enum">QPlaceReply::Type</a></span> QPlaceSearchSuggestionReply::<span class="name">type</span>() const</h3>
+<p>Reimplements: <a href="qplacereply.html#type">QPlaceReply::type</a>() const.</p>
+<p>Returns type of reply.</p>
+<!-- @@@type -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qaccessible.cpp -->
+  <title>QAccessibleValueInterface Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QAccessibleValueInterface</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAccessibleValueInterface Class</h1>
+<!-- $$$QAccessibleValueInterface-brief -->
+<p>The <a href="qaccessiblevalueinterface.html">QAccessibleValueInterface</a> class implements support for objects that manipulate a value. <a href="#details">More...</a></p>
+<!-- @@@QAccessibleValueInterface -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAccessibleValueInterface&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr></table></div><ul>
+<li><a href="qaccessiblevalueinterface-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qaccessiblevalueinterface.html#dtor.QAccessibleValueInterface">~QAccessibleValueInterface</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QVariant </td><td class="memItemRight bottomAlign"><b><a href="qaccessiblevalueinterface.html#currentValue">currentValue</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QVariant </td><td class="memItemRight bottomAlign"><b><a href="qaccessiblevalueinterface.html#maximumValue">maximumValue</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QVariant </td><td class="memItemRight bottomAlign"><b><a href="qaccessiblevalueinterface.html#minimumStepSize">minimumStepSize</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QVariant </td><td class="memItemRight bottomAlign"><b><a href="qaccessiblevalueinterface.html#minimumValue">minimumValue</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qaccessiblevalueinterface.html#setCurrentValue">setCurrentValue</a></b>(const QVariant &amp;<i>value</i>) = 0</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAccessibleValueInterface-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This interface should be implemented by accessible objects that represent a value. Examples are spinner, slider, dial and scroll bar.</p>
+<p>Instead of forcing the user to deal with the individual parts of the widgets, this interface gives an easier approach to the kind of widget it represents.</p>
+<p>Usually this interface is implemented by classes that also implement <a href="qaccessibleinterface.html">QAccessibleInterface</a>.</p>
+<p><a href="http://www.linux-foundation.org/en/Accessibility/IAccessible2">IAccessible2 Specification</a></p>
+</div>
+<!-- @@@QAccessibleValueInterface -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$~QAccessibleValueInterface[overload1]$$$~QAccessibleValueInterface -->
+<h3 class="fn" id="dtor.QAccessibleValueInterface"><a name="dtor.QAccessibleValueInterface"></a><code>[virtual] </code>QAccessibleValueInterface::<span class="name">~QAccessibleValueInterface</span>()</h3>
+<p>Destroys the <a href="qaccessiblevalueinterface.html">QAccessibleValueInterface</a>.</p>
+<!-- @@@~QAccessibleValueInterface -->
+<!-- $$$currentValue[overload1]$$$currentValue -->
+<h3 class="fn" id="currentValue"><a name="currentValue"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QAccessibleValueInterface::<span class="name">currentValue</span>() const</h3>
+<p>Returns the current value of the widget. This is usually a double or int.</p>
+<p><b>See also </b><a href="qaccessiblevalueinterface.html#setCurrentValue">setCurrentValue</a>().</p>
+<!-- @@@currentValue -->
+<!-- $$$maximumValue[overload1]$$$maximumValue -->
+<h3 class="fn" id="maximumValue"><a name="maximumValue"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QAccessibleValueInterface::<span class="name">maximumValue</span>() const</h3>
+<p>Returns the maximum value this object accepts.</p>
+<p><b>See also </b><a href="qaccessiblevalueinterface.html#minimumValue">minimumValue</a>() and <a href="qaccessiblevalueinterface.html#currentValue">currentValue</a>().</p>
+<!-- @@@maximumValue -->
+<!-- $$$minimumStepSize[overload1]$$$minimumStepSize -->
+<h3 class="fn" id="minimumStepSize"><a name="minimumStepSize"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QAccessibleValueInterface::<span class="name">minimumStepSize</span>() const</h3>
+<p>Returns the minimum step size for the accessible. This is the smalles increment that makes sense when changing the value. When programatically changing the value it should always be a multiple of the minimum step size.</p>
+<p>Some tools use this value even when the <a href="qaccessiblevalueinterface.html#setCurrentValue">setCurrentValue</a> does not perform any action. Progress bars for example are read-only but should return their range divided by 100.</p>
+<!-- @@@minimumStepSize -->
+<!-- $$$minimumValue[overload1]$$$minimumValue -->
+<h3 class="fn" id="minimumValue"><a name="minimumValue"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QAccessibleValueInterface::<span class="name">minimumValue</span>() const</h3>
+<p>Returns the minimum value this object accepts.</p>
+<p><b>See also </b><a href="qaccessiblevalueinterface.html#maximumValue">maximumValue</a>() and <a href="qaccessiblevalueinterface.html#currentValue">currentValue</a>().</p>
+<!-- @@@minimumValue -->
+<!-- $$$setCurrentValue[overload1]$$$setCurrentValueconstQVariant& -->
+<h3 class="fn" id="setCurrentValue"><a name="setCurrentValue"></a><code>[pure virtual] </code><span class="type">void</span> QAccessibleValueInterface::<span class="name">setCurrentValue</span>(const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>value</i>)</h3>
+<p>Sets the <i>value</i>. If the desired <i>value</i> is out of the range of permissible values, this call will be ignored.</p>
+<p><b>See also </b><a href="qaccessiblevalueinterface.html#currentValue">currentValue</a>(), <a href="qaccessiblevalueinterface.html#minimumValue">minimumValue</a>(), and <a href="qaccessiblevalueinterface.html#maximumValue">maximumValue</a>().</p>
+<!-- @@@setCurrentValue -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

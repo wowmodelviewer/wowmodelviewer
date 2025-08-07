@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtexttospeechengine.cpp -->
+  <title>QTextToSpeechEngine Class | Qt Speech 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtspeech-index.html">Qt Speech</a></td><td ><a href="qtspeech-module.html">C++ Classes</a></td><td >QTextToSpeechEngine</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtspeech-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#static-protected-members">Static Protected Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QTextToSpeechEngine Class</h1>
+<!-- $$$QTextToSpeechEngine-brief -->
+<p>The <a href="qtexttospeechengine.html">QTextToSpeechEngine</a> class is the base for text-to-speech engine integrations. <a href="#details">More...</a></p>
+<!-- @@@QTextToSpeechEngine -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QTextToSpeechEngine&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += texttospeech</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><ul>
+<li><a href="qtexttospeechengine-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtexttospeechengine.html#QTextToSpeechEngine">QTextToSpeechEngine</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QVector&lt;QLocale&gt; </td><td class="memItemRight bottomAlign"><b><a href="qtexttospeechengine.html#availableLocales">availableLocales</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QVector&lt;QVoice&gt; </td><td class="memItemRight bottomAlign"><b><a href="qtexttospeechengine.html#availableVoices">availableVoices</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QLocale </td><td class="memItemRight bottomAlign"><b><a href="qtexttospeechengine.html#locale">locale</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qtexttospeechengine.html#pause">pause</a></b>() = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual double </td><td class="memItemRight bottomAlign"><b><a href="qtexttospeechengine.html#pitch">pitch</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual double </td><td class="memItemRight bottomAlign"><b><a href="qtexttospeechengine.html#rate">rate</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qtexttospeechengine.html#resume">resume</a></b>() = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qtexttospeechengine.html#say">say</a></b>(const QString &amp;<i>text</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qtexttospeechengine.html#setLocale">setLocale</a></b>(const QLocale &amp;<i>locale</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qtexttospeechengine.html#setPitch">setPitch</a></b>(double <i>pitch</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qtexttospeechengine.html#setRate">setRate</a></b>(double <i>rate</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qtexttospeechengine.html#setVoice">setVoice</a></b>(const QVoice &amp;<i>voice</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qtexttospeechengine.html#setVolume">setVolume</a></b>(double <i>volume</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QTextToSpeech::State </td><td class="memItemRight bottomAlign"><b><a href="qtexttospeechengine.html#state">state</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qtexttospeechengine.html#stop">stop</a></b>() = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QVoice </td><td class="memItemRight bottomAlign"><b><a href="qtexttospeechengine.html#voice">voice</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual double </td><td class="memItemRight bottomAlign"><b><a href="qtexttospeechengine.html#volume">volume</a></b>() const = 0</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtexttospeechengine.html#stateChanged">stateChanged</a></b>(QTextToSpeech::State <i>state</i>)</td></tr>
+</table></div>
+<a name="static-protected-members"></a>
+<h2 id="static-protected-members">Static Protected Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QVoice </td><td class="memItemRight bottomAlign"><b><a href="qtexttospeechengine.html#createVoice">createVoice</a></b>(const QString &amp;<i>name</i>, QVoice::Gender <i>gender</i>, QVoice::Age <i>age</i>, const QVariant &amp;<i>data</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariant </td><td class="memItemRight bottomAlign"><b><a href="qtexttospeechengine.html#voiceData">voiceData</a></b>(const QVoice &amp;<i>voice</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QTextToSpeechEngine-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>An engine implementation must derive from <a href="qtexttospeechengine.html">QTextToSpeechEngine</a> and implement all its pure virtual methods.</p>
+</div>
+<!-- @@@QTextToSpeechEngine -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QTextToSpeechEngine[overload1]$$$QTextToSpeechEngineQObject* -->
+<h3 class="fn" id="QTextToSpeechEngine"><a name="QTextToSpeechEngine"></a>QTextToSpeechEngine::<span class="name">QTextToSpeechEngine</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs the text-to-speech engine base class with <i>parent</i>.</p>
+<!-- @@@QTextToSpeechEngine -->
+<!-- $$$stateChanged[overload1]$$$stateChangedQTextToSpeech::State -->
+<h3 class="fn" id="stateChanged"><a name="stateChanged"></a><code>[signal] </code><span class="type">void</span> QTextToSpeechEngine::<span class="name">stateChanged</span>(<span class="type"><a href="qtexttospeech.html#State-enum">QTextToSpeech::State</a></span> <i>state</i>)</h3>
+<p>Emitted when the text-to-speech engine <i>state</i> has changed.</p>
+<p>This signal is connected to <a href="qtexttospeech.html#state-prop">QTextToSpeech::stateChanged</a>() signal.</p>
+<!-- @@@stateChanged -->
+<!-- $$$availableLocales[overload1]$$$availableLocales -->
+<h3 class="fn" id="availableLocales"><a name="availableLocales"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="../qtcore/qlocale.html">QLocale</a></span>&gt; QTextToSpeechEngine::<span class="name">availableLocales</span>() const</h3>
+<p>Implementation of <a href="qtexttospeech.html#availableLocales">QTextToSpeech::availableLocales</a>().</p>
+<!-- @@@availableLocales -->
+<!-- $$$availableVoices[overload1]$$$availableVoices -->
+<h3 class="fn" id="availableVoices"><a name="availableVoices"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="qvoice.html">QVoice</a></span>&gt; QTextToSpeechEngine::<span class="name">availableVoices</span>() const</h3>
+<p>Implementation of <a href="qtexttospeech.html#availableVoices">QTextToSpeech::availableVoices</a>().</p>
+<!-- @@@availableVoices -->
+<!-- $$$createVoice[overload1]$$$createVoiceconstQString&QVoice::GenderQVoice::AgeconstQVariant& -->
+<h3 class="fn" id="createVoice"><a name="createVoice"></a><code>[static protected] </code><span class="type"><a href="qvoice.html">QVoice</a></span> QTextToSpeechEngine::<span class="name">createVoice</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>, <span class="type"><a href="qvoice.html#Gender-enum">QVoice::Gender</a></span> <i>gender</i>, <span class="type"><a href="qvoice.html#Age-enum">QVoice::Age</a></span> <i>age</i>, const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>data</i>)</h3>
+<p>Creates a voice for a text-to-speech engine.</p>
+<p>Parameters <i>name</i>, <i>gender</i>, <i>age</i> and <i>data</i> are directly stored in the <a href="qvoice.html">QVoice</a> instance.</p>
+<!-- @@@createVoice -->
+<!-- $$$locale[overload1]$$$locale -->
+<h3 class="fn" id="locale"><a name="locale"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qlocale.html">QLocale</a></span> QTextToSpeechEngine::<span class="name">locale</span>() const</h3>
+<p>Implementation of <a href="qtexttospeech.html#locale-prop">QTextToSpeech::locale</a>().</p>
+<p><b>See also </b><a href="qtexttospeechengine.html#setLocale">setLocale</a>().</p>
+<!-- @@@locale -->
+<!-- $$$pause[overload1]$$$pause -->
+<h3 class="fn" id="pause"><a name="pause"></a><code>[pure virtual] </code><span class="type">void</span> QTextToSpeechEngine::<span class="name">pause</span>()</h3>
+<p>Implementation of <a href="qtexttospeech.html#pause">QTextToSpeech::pause</a>().</p>
+<!-- @@@pause -->
+<!-- $$$pitch[overload1]$$$pitch -->
+<h3 class="fn" id="pitch"><a name="pitch"></a><code>[pure virtual] </code><span class="type">double</span> QTextToSpeechEngine::<span class="name">pitch</span>() const</h3>
+<p>Implementation of <a href="qtexttospeech.html#pitch-prop">QTextToSpeech::pitch</a>().</p>
+<p><b>See also </b><a href="qtexttospeechengine.html#setPitch">setPitch</a>().</p>
+<!-- @@@pitch -->
+<!-- $$$rate[overload1]$$$rate -->
+<h3 class="fn" id="rate"><a name="rate"></a><code>[pure virtual] </code><span class="type">double</span> QTextToSpeechEngine::<span class="name">rate</span>() const</h3>
+<p>Implementation of <a href="qtexttospeech.html#rate-prop">QTextToSpeech::rate</a>().</p>
+<p><b>See also </b><a href="qtexttospeechengine.html#setRate">setRate</a>().</p>
+<!-- @@@rate -->
+<!-- $$$resume[overload1]$$$resume -->
+<h3 class="fn" id="resume"><a name="resume"></a><code>[pure virtual] </code><span class="type">void</span> QTextToSpeechEngine::<span class="name">resume</span>()</h3>
+<p>Implementation of <a href="qtexttospeech.html#resume">QTextToSpeech::resume</a>().</p>
+<!-- @@@resume -->
+<!-- $$$say[overload1]$$$sayconstQString& -->
+<h3 class="fn" id="say"><a name="say"></a><code>[pure virtual] </code><span class="type">void</span> QTextToSpeechEngine::<span class="name">say</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>text</i>)</h3>
+<p>Implementation of <a href="qtexttospeech.html#say">QTextToSpeech::say</a>(<i>text</i>).</p>
+<!-- @@@say -->
+<!-- $$$setLocale[overload1]$$$setLocaleconstQLocale& -->
+<h3 class="fn" id="setLocale"><a name="setLocale"></a><code>[pure virtual] </code><span class="type">bool</span> QTextToSpeechEngine::<span class="name">setLocale</span>(const <span class="type"><a href="../qtcore/qlocale.html">QLocale</a></span> &amp;<i>locale</i>)</h3>
+<p>Implementation <a href="qtexttospeech.html#setLocale">QTextToSpeech::setLocale</a>(<i>locale</i>).</p>
+<p>Return <code>true</code> if the operation was successful. In this case, the current voice (as returned by <a href="qtexttospeechengine.html#voice">voice</a>()) should also be updated to a new, valid value.</p>
+<p><b>See also </b><a href="qtexttospeechengine.html#locale">locale</a>().</p>
+<!-- @@@setLocale -->
+<!-- $$$setPitch[overload1]$$$setPitchdouble -->
+<h3 class="fn" id="setPitch"><a name="setPitch"></a><code>[pure virtual] </code><span class="type">bool</span> QTextToSpeechEngine::<span class="name">setPitch</span>(<span class="type">double</span> <i>pitch</i>)</h3>
+<p>Implementation of <a href="qtexttospeech.html#pitch-prop">QTextToSpeech::setPitch</a>(<i>pitch</i>).</p>
+<p>Return <code>true</code> if the operation was successful.</p>
+<p><b>See also </b><a href="qtexttospeechengine.html#pitch">pitch</a>().</p>
+<!-- @@@setPitch -->
+<!-- $$$setRate[overload1]$$$setRatedouble -->
+<h3 class="fn" id="setRate"><a name="setRate"></a><code>[pure virtual] </code><span class="type">bool</span> QTextToSpeechEngine::<span class="name">setRate</span>(<span class="type">double</span> <i>rate</i>)</h3>
+<p>Implementation of <a href="qtexttospeech.html#rate-prop">QTextToSpeech::setRate</a>(<i>rate</i>).</p>
+<p>Return <code>true</code> if the operation was successful.</p>
+<p><b>See also </b><a href="qtexttospeechengine.html#rate">rate</a>().</p>
+<!-- @@@setRate -->
+<!-- $$$setVoice[overload1]$$$setVoiceconstQVoice& -->
+<h3 class="fn" id="setVoice"><a name="setVoice"></a><code>[pure virtual] </code><span class="type">bool</span> QTextToSpeechEngine::<span class="name">setVoice</span>(const <span class="type"><a href="qvoice.html">QVoice</a></span> &amp;<i>voice</i>)</h3>
+<p>Implementation of <a href="qtexttospeech.html#setVoice">QTextToSpeech::setVoice</a>(<i>voice</i>).</p>
+<p>Return <code>true</code> if the operation was successful.</p>
+<p><b>See also </b><a href="qtexttospeechengine.html#voice">voice</a>().</p>
+<!-- @@@setVoice -->
+<!-- $$$setVolume[overload1]$$$setVolumedouble -->
+<h3 class="fn" id="setVolume"><a name="setVolume"></a><code>[pure virtual] </code><span class="type">bool</span> QTextToSpeechEngine::<span class="name">setVolume</span>(<span class="type">double</span> <i>volume</i>)</h3>
+<p>Implementation of <a href="qtexttospeech.html#volume-prop">QTextToSpeech::setVolume</a>(<i>volume</i>).</p>
+<p>Return <code>true</code> if the operation was successful.</p>
+<p><b>See also </b><a href="qtexttospeechengine.html#volume">volume</a>().</p>
+<!-- @@@setVolume -->
+<!-- $$$state[overload1]$$$state -->
+<h3 class="fn" id="state"><a name="state"></a><code>[pure virtual] </code><span class="type"><a href="qtexttospeech.html#State-enum">QTextToSpeech::State</a></span> QTextToSpeechEngine::<span class="name">state</span>() const</h3>
+<p>Implementation of <a href="qtexttospeech.html#state-prop">QTextToSpeech::state</a>().</p>
+<!-- @@@state -->
+<!-- $$$stop[overload1]$$$stop -->
+<h3 class="fn" id="stop"><a name="stop"></a><code>[pure virtual] </code><span class="type">void</span> QTextToSpeechEngine::<span class="name">stop</span>()</h3>
+<p>Implementation of <a href="qtexttospeech.html#stop">QTextToSpeech::stop</a>().</p>
+<!-- @@@stop -->
+<!-- $$$voice[overload1]$$$voice -->
+<h3 class="fn" id="voice"><a name="voice"></a><code>[pure virtual] </code><span class="type"><a href="qvoice.html">QVoice</a></span> QTextToSpeechEngine::<span class="name">voice</span>() const</h3>
+<p>Implementation of <a href="qtexttospeech.html#voice-prop">QTextToSpeech::voice</a>().</p>
+<p><b>See also </b><a href="qtexttospeechengine.html#setVoice">setVoice</a>().</p>
+<!-- @@@voice -->
+<!-- $$$voiceData[overload1]$$$voiceDataconstQVoice& -->
+<h3 class="fn" id="voiceData"><a name="voiceData"></a><code>[static protected] </code><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QTextToSpeechEngine::<span class="name">voiceData</span>(const <span class="type"><a href="qvoice.html">QVoice</a></span> &amp;<i>voice</i>)</h3>
+<p>Returns the engine-specific private data for the given <i>voice</i>.</p>
+<!-- @@@voiceData -->
+<!-- $$$volume[overload1]$$$volume -->
+<h3 class="fn" id="volume"><a name="volume"></a><code>[pure virtual] </code><span class="type">double</span> QTextToSpeechEngine::<span class="name">volume</span>() const</h3>
+<p>Implementation of <a href="qtexttospeech.html#volume-prop">QTextToSpeech::volume</a>().</p>
+<p><b>See also </b><a href="qtexttospeechengine.html#setVolume">setVolume</a>().</p>
+<!-- @@@volume -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

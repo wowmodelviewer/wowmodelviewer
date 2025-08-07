@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qstyleoption.cpp -->
+  <title>QStyleOptionDockWidget Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QStyleOptionDockWidget</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-variables">Public Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QStyleOptionDockWidget Class</h1>
+<!-- $$$QStyleOptionDockWidget-brief -->
+<p>The <a href="qstyleoptiondockwidget.html">QStyleOptionDockWidget</a> class is used to describe the parameters for drawing a dock widget. <a href="#details">More...</a></p>
+<!-- @@@QStyleOptionDockWidget -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QStyleOptionDockWidget&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qstyleoption.html">QStyleOption</a></td></tr></table></div><ul>
+<li><a href="qstyleoptiondockwidget-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptiondockwidget.html#StyleOptionType-enum">StyleOptionType</a></b> { Type }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptiondockwidget.html#StyleOptionVersion-enum">StyleOptionVersion</a></b> { Version }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptiondockwidget.html#QStyleOptionDockWidget-1">QStyleOptionDockWidget</a></b>(const QStyleOptionDockWidget &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptiondockwidget.html#QStyleOptionDockWidget">QStyleOptionDockWidget</a></b>()</td></tr>
+</table></div>
+<a name="public-variables"></a>
+<h2 id="public-variables">Public Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptiondockwidget.html#closable-var">closable</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptiondockwidget.html#floatable-var">floatable</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptiondockwidget.html#movable-var">movable</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptiondockwidget.html#title-var">title</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QStyleOptionDockWidget-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qstyleoptiondockwidget.html">QStyleOptionDockWidget</a> contains all the information that <a href="qstyle.html">QStyle</a> functions need to draw graphical elements like <a href="qdockwidget.html">QDockWidget</a>.</p>
+<p>For performance reasons, the access to the member variables is direct (i.e&#x2e;, using the <code>.</code> or <code>-&gt;</code> operator). This low-level feel makes the structures straightforward to use and emphasizes that these are simply parameters used by the style functions.</p>
+<p>For an example demonstrating how style options can be used, see the <a href="qtwidgets-widgets-styles-example.html">Styles</a> example.</p>
+</div>
+<p><b>See also </b><a href="qstyleoption.html">QStyleOption</a>.</p>
+<!-- @@@QStyleOptionDockWidget -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$StyleOptionType$$$Type -->
+<h3 class="fn" id="StyleOptionType-enum"><a name="StyleOptionType-enum"></a>enum QStyleOptionDockWidget::<span class="name">StyleOptionType</span></h3>
+<p>This enum is used to hold information about the type of the style option, and is defined for each <a href="qstyleoption.html">QStyleOption</a> subclass.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QStyleOptionDockWidget::Type</code></td><td class="topAlign tblval"><code>SO_DockWidget</code></td><td class="topAlign">The type of style option provided (<a href="qstyleoption.html#OptionType-enum">SO_DockWidget</a> for this class).</td></tr>
+</table></div>
+<p>The type is used internally by <a href="qstyleoption.html">QStyleOption</a>, its subclasses, and <a href="qstyleoption.html#qstyleoption_cast">qstyleoption_cast</a>() to determine the type of style option. In general you do not need to worry about this unless you want to create your own <a href="qstyleoption.html">QStyleOption</a> subclass and your own styles.</p>
+<p><b>See also </b><a href="qstyleoptiondockwidget.html#StyleOptionVersion-enum">StyleOptionVersion</a>.</p>
+<!-- @@@StyleOptionType -->
+<!-- $$$StyleOptionVersion$$$Version -->
+<h3 class="fn" id="StyleOptionVersion-enum"><a name="StyleOptionVersion-enum"></a>enum QStyleOptionDockWidget::<span class="name">StyleOptionVersion</span></h3>
+<p>This enum is used to hold information about the version of the style option, and is defined for each <a href="qstyleoption.html">QStyleOption</a> subclass.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QStyleOptionDockWidget::Version</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">2</td></tr>
+</table></div>
+<p>The version is used by <a href="qstyleoption.html">QStyleOption</a> subclasses to implement extensions without breaking compatibility. If you use <a href="qstyleoption.html#qstyleoption_cast">qstyleoption_cast</a>(), you normally do not need to check it.</p>
+<p><b>See also </b><a href="qstyleoptiondockwidget.html#StyleOptionType-enum">StyleOptionType</a>.</p>
+<!-- @@@StyleOptionVersion -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QStyleOptionDockWidget$$$QStyleOptionDockWidgetconstQStyleOptionDockWidget& -->
+<h3 class="fn" id="QStyleOptionDockWidget-1"><a name="QStyleOptionDockWidget-1"></a>QStyleOptionDockWidget::<span class="name">QStyleOptionDockWidget</span>(const <span class="type"><a href="qstyleoptiondockwidget.html#QStyleOptionDockWidget">QStyleOptionDockWidget</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a copy of the <i>other</i> style option.</p>
+<!-- @@@QStyleOptionDockWidget -->
+<!-- $$$QStyleOptionDockWidget[overload1]$$$QStyleOptionDockWidget -->
+<h3 class="fn" id="QStyleOptionDockWidget"><a name="QStyleOptionDockWidget"></a>QStyleOptionDockWidget::<span class="name">QStyleOptionDockWidget</span>()</h3>
+<p>Constructs a <a href="qstyleoptiondockwidget.html">QStyleOptionDockWidget</a>, initializing the member variables to their default values.</p>
+<!-- @@@QStyleOptionDockWidget -->
+</div>
+<div class="vars">
+<h2>Member Variable Documentation</h2>
+<!-- $$$closable -->
+<h3 class="fn" id="closable-var"><a name="closable-var"></a><span class="type">bool</span> QStyleOptionDockWidget::<span class="name">closable</span></h3>
+<p>This variable holds whether the dock window is closable</p>
+<p>The default value is true.</p>
+<!-- @@@closable -->
+<!-- $$$floatable -->
+<h3 class="fn" id="floatable-var"><a name="floatable-var"></a><span class="type">bool</span> QStyleOptionDockWidget::<span class="name">floatable</span></h3>
+<p>This variable holds whether the dock window is floatable</p>
+<p>The default value is true.</p>
+<!-- @@@floatable -->
+<!-- $$$movable -->
+<h3 class="fn" id="movable-var"><a name="movable-var"></a><span class="type">bool</span> QStyleOptionDockWidget::<span class="name">movable</span></h3>
+<p>This variable holds whether the dock window is movable</p>
+<p>The default value is false.</p>
+<!-- @@@movable -->
+<!-- $$$title -->
+<h3 class="fn" id="title-var"><a name="title-var"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QStyleOptionDockWidget::<span class="name">title</span></h3>
+<p>This variable holds the title of the dock window</p>
+<p>The default value is an empty string.</p>
+<!-- @@@title -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

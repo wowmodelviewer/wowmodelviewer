@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdoc-manual-markupcmds.qdoc -->
+  <title>Tables and Lists | QDoc Manual 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qdoc-index.html">QDoc Manual</a></td><td >Tables and Lists</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qdoc-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="09-qdoc-commands-includingimages.html" />
+  <link rel="next" href="11-qdoc-commands-specialcontent.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="09-qdoc-commands-includingimages.html">Including Images</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="11-qdoc-commands-specialcontent.html">Special Content</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#table">\table</a></li>
+<li class="level1"><a href="#header">\header</a></li>
+<li class="level1"><a href="#row">\row</a></li>
+<li class="level1"><a href="#value">\value</a></li>
+<li class="level1"><a href="#omitvalue">\omitvalue</a></li>
+<li class="level1"><a href="#list">\list</a></li>
+<li class="level1"><a href="#li-table-cell-list-item">\li (table cell, list item)</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Tables and Lists</h1>
+<span class="subtitle"></span>
+<!-- $$$10-qdoc-commands-tablesandlists.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>These commands enable creating lists and tables. A list is rendered left aligned as a separate paragraph. A table is rendered centered as a separate paragraph. The table width depends on the width of its contents.</p>
+<a name="table-command"></a><a name="table"></a>
+<h2 id="table">\table</h2>
+<p>The \table and \endtable commands delimit the contents of a table.</p>
+<p>The command accepts a single argument specifying the table's width as a percentage of the page width:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \table <span class="number">100</span> <span class="operator">%</span>
+
+         <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+      \endtable
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>The code above ensures that the table will fill all available space. If the table's width is smaller than 100 %, the table will be centered in the generated documentation.</p>
+<p>A table can contain headers, rows and columns. A row starts with a <a href="10-qdoc-commands-tablesandlists.html#row-command">\row</a> command and consists of cells, each of which starts with an <a href="10-qdoc-commands-tablesandlists.html#li-command">\li</a> command. There is also a <a href="10-qdoc-commands-tablesandlists.html#header-command">\header</a> command which is a special kind of row that has a special format.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \table
+      \header
+          \li <span class="type"><a href="../qtcore/qt.html">Qt</a></span> Core Feature
+          \li Brief Description
+      \row
+          \li \l {Signal and Slots}
+          \li Signals and <span class="keyword">slots</span> are used <span class="keyword">for</span> communication
+             between objects<span class="operator">.</span>
+      \row
+          \li \l {Layout Management}
+          \li The <span class="type"><a href="../qtcore/qt.html">Qt</a></span> layout system provides a simple
+             and powerful way of specifying the layout
+             of child widgets<span class="operator">.</span>
+      \row
+          \li \l {Drag and Drop}
+          \li Drag and drop provides a simple visual
+             mechanism which users can use to transfer
+             information between and within applications<span class="operator">.</span>
+      \endtable
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+               <table align="center" cellpadding="2"
+                   cellspacing="1" border="0">
+               <tr valign="top" bgcolor="#a2c511">
+                   <th>Qt Core Feature</th>
+                   <th>Brief Description</th>
+               </tr>
+
+               <tr valign="top" bgcolor="#d0d0d0">
+                   <td>
+                   <a href="http://doc.qt.io/qt-5/signalsandslots.html">
+                       Signals and Slots</a>
+                   </td>
+                   <td>Signals and slots are used for communication
+                       between objects.</td>
+               </tr>
+
+               <tr valign="top" bgcolor="#c0c0c0">
+                   <td>
+                   <a href="http://doc.qt.io/qt-5/layout.html">
+                       Layout Management</a></td>
+                   <td>The Qt layout system provides a simple
+                       and powerful way of specifying the layout
+                       of child widgets.</td>
+               </tr>
+
+               <tr valign="top" bgcolor="#d0d0d0">
+                   <td>
+                   <a href="http://doc.qt.io/qt-5/dnd.html">
+                       Drag and Drop</a></td>
+                   <td>Drag and drop provides a simple visual
+                       mechanism which users can use to transfer
+                       information between and within applications.</td>
+               </tr>
+
+               </table>
+           <p>You can also make cells span several rows and columns. For example:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \table
+      \header
+          \li {<span class="number">3</span><span class="operator">,</span><span class="number">1</span>} This header cell spans three columns<span class="operator">,</span>
+             but only one row<span class="operator">.</span>
+      \row
+          \li {<span class="number">2</span><span class="operator">,</span> <span class="number">1</span>} This table cell spans two columns<span class="operator">,</span>
+             but only one row
+          \li {<span class="number">1</span><span class="operator">,</span> <span class="number">2</span>} This table cell spans only one column<span class="operator">,</span>
+          but two rows<span class="operator">.</span>
+      \row
+          \li A regular table cell
+          \li A regular table cell
+      \endtable
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+               <table align="center" cellpadding="2" cellspacing="1"
+                border="0">
+
+               <tr valign="top" bgcolor="#a2c511">
+                   <th colspan="3" rowspan=" 1">
+                   This header cell spans three columns, but only one row.
+                   </th>
+               </tr>
+
+               <tr valign="top" bgcolor="#d0d0d0">
+                   <td colspan="2" rowspan=" 1">
+                   This table cell spans two columns, but only one row.
+                   </td>
+                   <td rowspan=" 2">
+                   This table cell spans only one column, but two rows.
+                   </td>
+               </tr>
+
+               <tr valign="top" bgcolor="#c0c0c0">
+                   <td>A regular table cell</td>
+                   <td>A regular table cell</td>
+               </tr>
+
+               </table>
+           <p>See also <a href="10-qdoc-commands-tablesandlists.html#header-command">\header</a>, <a href="10-qdoc-commands-tablesandlists.html#row-command">\row</a> and <a href="10-qdoc-commands-tablesandlists.html#li-command">\li</a>.</p>
+<a name="header-command"></a><a name="header"></a>
+<h2 id="header">\header</h2>
+<p>The \header command indicates that the following table cells are the current table's column headers.</p>
+<p>The command can only be used within the <a href="10-qdoc-commands-tablesandlists.html#table-command">\table..&#x2e;\endtable</a> commands. A header can contain several cells. A cell is created with the <a href="10-qdoc-commands-tablesandlists.html#li-command">\li</a> command.</p>
+<p>A header cell's text is centered within the table cell and rendered using a bold font.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \table
+      \header
+          \li <span class="type"><a href="../qtcore/qt.html">Qt</a></span> Core Feature
+          \li Brief Description
+      \row
+          \li \l {Signal and Slots}
+          \li Signals and <span class="keyword">slots</span> are used <span class="keyword">for</span> communication
+             between objects<span class="operator">.</span>
+      \endtable
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+               <table align="center" cellpadding="2"
+                   cellspacing="1" border="0">
+               <tr valign="top" bgcolor="#a2c511">
+                   <th>Qt Core Feature</th>
+                   <th>Brief Description</th>
+               </tr>
+
+               <tr valign="top" bgcolor="#d0d0d0">
+                   <td>
+                   <a href="http://doc.qt.io/qt-5/signalsandslots.html">
+                       Signals and Slots</a>
+                   </td>
+                   <td>Signals and slots are used for communication
+                       between objects.</td>
+               </tr>
+               </table>
+           <p>See also <a href="10-qdoc-commands-tablesandlists.html#table-command">\table</a>, <a href="10-qdoc-commands-tablesandlists.html#row-command">\row</a> and <a href="10-qdoc-commands-tablesandlists.html#li-command">\li</a>.</p>
+<a name="row-command"></a><a name="row"></a>
+<h2 id="row">\row</h2>
+<p>The \row command begins a new row in a table. The <a href="10-qdoc-commands-tablesandlists.html#li-command">\li items</a> that belong in the new row will immediately follow the \row.</p>
+<p>The command can only be used within the <a href="10-qdoc-commands-tablesandlists.html#table-command">\table..&#x2e;\endtable</a> commands. A row can contain several cells. A cell is created with the <a href="10-qdoc-commands-tablesandlists.html#li-command">\li</a> command.</p>
+<p>The background cell color of each row alternates between two shades of grey, making it easier to distinguish the rows from each other. The cells' contents is left aligned.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \table
+      \header
+          \li <span class="type"><a href="../qtcore/qt.html">Qt</a></span> Core Feature
+          \li Brief Description
+      \row
+          \li \l {Signal and Slots}
+          \li Signals and <span class="keyword">slots</span> are used <span class="keyword">for</span> communication
+             between objects<span class="operator">.</span>
+      \row
+          \li \l {Layout Management}
+          \li The <span class="type"><a href="../qtcore/qt.html">Qt</a></span> layout system provides a simple
+             and powerful way of specifying the layout
+             of child widgets<span class="operator">.</span>
+      \row
+          \li \l {Drag and Drop}
+          \li Drag and drop provides a simple visual
+             mechanism which users can use to transfer
+             information between and within applications<span class="operator">.</span>
+      \endtable
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+               <table align="center" cellpadding="2"
+                   cellspacing="1" border="0">
+               <tr valign="top" bgcolor="#a2c511">
+                   <th>Qt Core Feature</th>
+                   <th>Brief Description</th>
+               </tr>
+
+               <tr valign="top" bgcolor="#d0d0d0">
+                   <td>
+                   <a href="http://doc.qt.io/qt-5/signalsandslots.html">
+                       Signals and Slots</a>
+                   </td>
+                   <td>Signals and slots are used for communication
+                       between objects.</td>
+               </tr>
+
+               <tr valign="top" bgcolor="#c0c0c0">
+                   <td>
+                   <a href="http://doc.qt.io/qt-5/layout.html">
+                       Layout Management</a></td>
+                   <td>The Qt layout system provides a simple
+                       and powerful way of specifying the layout
+                       of child widgets.</td>
+               </tr>
+
+               <tr valign="top" bgcolor="#d0d0d0">
+                   <td>
+                   <a href="http://doc.qt.io/qt-5/dnd.html">
+                       Drag and Drop</a></td>
+                   <td>Drag and drop provides a simple visual
+                       mechanism which users can use to transfer
+                       information between and within applications.</td>
+               </tr>
+
+               </table>
+           <p>See also <a href="10-qdoc-commands-tablesandlists.html#table-command">\table</a>, <a href="10-qdoc-commands-tablesandlists.html#header-command">\header</a>, and <a href="10-qdoc-commands-tablesandlists.html#li-command">\li</a>.</p>
+<a name="value-command"></a><a name="value"></a>
+<h2 id="value">\value</h2>
+<p>The \value command starts the documentation of a C++ enum item.</p>
+<p>The command's first argument is the value name. The value name may be preceded by an optional <i>since</i> clause enclosed in square brackets. The value description follows the value name. The description ends at the next blank line or \value. The arguments are rendered in a table.</p>
+<p>Without a <i>since</i> clause, a \value command could look like this:</p>
+<pre class="cpp">
+
+  \value <span class="type"><a href="../qtcore/qtglobal.html#QtMsgType-enum">QtInfoMsg</a></span> A message generated by the <a href="../qtcore/qtglobal.html#qInfo">qInfo</a>() function<span class="operator">.</span>
+
+</pre>
+<p>The same command with a <i>since</i> clause would look like this:</p>
+<pre class="cpp">
+
+  \value <span class="operator">[</span>since <span class="number">5.5</span><span class="operator">]</span> <span class="type"><a href="../qtcore/qtglobal.html#QtMsgType-enum">QtInfoMsg</a></span> A message generated by the <a href="../qtcore/qtglobal.html#qInfo">qInfo</a>() function<span class="operator">.</span>
+
+</pre>
+<p>The documentation will be located in the associated class, header file or namespace documentation. See the <a href="13-qdoc-commands-topics.html#enum-command">\enum</a> documentation for an example.</p>
+<p><b>Note: </b>Since Qt 5.4, \value command can also be used outside the <a href="13-qdoc-commands-topics.html#enum-command">\enum</a> topic. In this case, QDoc renders a two-column table listing the constant name (taken as-is from the first argument) and its description. This can be used, for example, in <a href="13-qdoc-commands-topics.html#qmlproperty-command">\qmlproperty</a> topic for documenting acceptable values for a QML enumeration property.</p><p>See also <a href="13-qdoc-commands-topics.html#enum-command">\enum</a> and <a href="10-qdoc-commands-tablesandlists.html#omitvalue-command">\omitvalue</a>.</p>
+<a name="omitvalue-command"></a><a name="omitvalue"></a>
+<h2 id="omitvalue">\omitvalue</h2>
+<p>The \omitvalue command excludes a C++ enum item from the documentation.</p>
+<p>The command's only argument is the name of the enum item that will be omitted. See the <a href="13-qdoc-commands-topics.html#enum-command">\enum</a> documentation for an example.</p>
+<p>See also <a href="13-qdoc-commands-topics.html#enum-command">\enum</a> and <a href="10-qdoc-commands-tablesandlists.html#value-command">\value</a> <a href="16-qdoc-commands-status.html#since-command">\since</a></p>
+<a name="list-command"></a><a name="list"></a>
+<h2 id="list">\list</h2>
+<p>The \list and \endlist commands delimit a list of items.</p>
+<p>Create each list item with the <a href="10-qdoc-commands-tablesandlists.html#li-command">\li</a> command. A list always contains one or more items. Lists can be nested. For example:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \list
+      \li <span class="type"><a href="../qtcore/qt.html">Qt</a></span> Reference Documentation: Getting Started
+          \list
+          \li How to Learn <span class="type"><a href="../qtcore/qt.html">Qt</a></span>
+          \li Installation
+              \list
+              \li <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">/</span>X11
+              \li <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">/</span>Windows
+              \li <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">/</span>Mac
+              \li <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">/</span>Embedded
+              \endlist
+          \li Tutorial and Examples
+          \endlist
+      \endlist
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<ul>
+<li>Qt Reference Documentation: Getting Started<ul>
+<li>How to Learn Qt</li>
+<li>Installation<ul>
+<li>Qt/X11</li>
+<li>Qt/Windows</li>
+<li>Qt/Mac</li>
+<li>Qt/Embedded</li>
+</ul>
+</li>
+<li>Tutorial and Examples</li>
+</ul>
+</li>
+</ul>
+<p>The \list command takes an optional argument providing alternative appearances for the list items.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \list
+          \li How to Learn <span class="type"><a href="../qtcore/qt.html">Qt</a></span>
+          \li Installation
+          \li Tutorial and Examples
+      \endlist
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders the list items with bullets (the default):</p>
+<ul>
+<li>How to Learn Qt</li>
+<li>Installation</li>
+<li>Tutorial and Examples</li>
+</ul>
+<p><b>Warning:</b> There appears to be a bug in qdoc here. If you include any of the argument types, you get a numeric list. We're looking into it.</p>
+<p>If you provide 'A' as an argument to the \list command, the bullets are replaced with characters in alphabetical order:</p>
+<ol class="A" type="A"><li>How to Learn Qt</li>
+<li>Installation</li>
+<li>Tutorial and Examples</li>
+</ol>
+<p>If you replace 'A' with '1', the list items are numbered in ascending order:</p>
+<ol class="1" type="1"><li>How to Learn Qt</li>
+<li>Installation</li>
+<li>Tutorial and Examples</li>
+</ol>
+<p>If you provide 'i' as the argument, the bullets are replaced with roman numerals:</p>
+<ol class="i" type="i"><li>How to Learn Qt</li>
+<li>Installation</li>
+<li>Tutorial and Examples</li>
+</ol>
+<p>Finally, you can make the list items appear with roman numbers following in ascending order if you provide 'I' as the optional argument:</p>
+<ol class="I" type="I"><li>How to Learn Qt</li>
+<li>Installation</li>
+<li>Tutorial and Examples</li>
+</ol>
+<p>You can also make the listing start at any character or number by simply provide the number or character you want to start at. For example:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \list G
+          \li How to Learn <span class="type"><a href="../qtcore/qt.html">Qt</a></span>
+          \li Installation
+          \li Tutorial and Examples
+      \endlist
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p><b>Note: </b>This doesn't work in DITA XML, so don't use it because it produces a DITA XML file that doesn't validate. There probably is a way to do this in DITA, so if we figure it out, we will put it in. But this capability is not used anywhere other than right here, so it probably isn't important. For now, if you use this option, qdoc will ignore it and produce a list without it.</p><p>QDoc renders this as:</p>
+<ol class="A" type="A" start="7"><li>How to Learn Qt</li>
+<li>Installation</li>
+<li>Tutorial and Examples</li>
+</ol>
+<p>See also <a href="10-qdoc-commands-tablesandlists.html#li-command">\li</a>.</p>
+<a name="li-command"></a><a name="li-table-cell-list-item"></a>
+<h2 id="li-table-cell-list-item">\li (table cell, list item)</h2>
+<p>The \li command marks a table cell or a list item. This command is only used in <a href="10-qdoc-commands-tablesandlists.html#table-command">tables</a> and <a href="10-qdoc-commands-tablesandlists.html#list-command">lists</a>.</p>
+<p>It considers everything as its argument until the next \li command, until the next <a href="10-qdoc-commands-tablesandlists.html#table-command">\endtable</a>, or <a href="10-qdoc-commands-tablesandlists.html#list-command">\endlist</a> command. See <a href="10-qdoc-commands-tablesandlists.html#table-command">\table</a> and <a href="10-qdoc-commands-tablesandlists.html#list-command">\list</a> for examples.</p>
+<p>If the command is used within a table, you can also specify how many rows or columns the item should span.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \table
+      \header
+          \li {<span class="number">3</span><span class="operator">,</span><span class="number">1</span>} This header cell spans three columns
+             but only one row<span class="operator">.</span>
+      \row
+          \li {<span class="number">2</span><span class="operator">,</span> <span class="number">1</span>} This table item spans two columns
+             but only one row
+          \li {<span class="number">1</span><span class="operator">,</span> <span class="number">2</span>} This table item spans only one column<span class="operator">,</span>
+          but two rows<span class="operator">.</span>
+      \row
+          \li A regular table item
+          \li A regular table item
+      \endtable
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+               <table align="center" cellpadding="2" cellspacing="1"
+                border="0">
+
+               <tr valign="top" bgcolor="#a2c511">
+                   <th colspan="3" rowspan=" 1">
+                   This header cell spans three columns, but only one row.
+                   </th>
+               </tr>
+
+               <tr valign="top" bgcolor="#d0d0d0">
+                   <td colspan="2" rowspan=" 1">
+                   This table item spans two columns, but only one row.
+                   </td>
+                   <td rowspan=" 2">
+                   This table item spans only one column, but two rows.
+                   </td>
+               </tr>
+
+               <tr valign="top" bgcolor="#c0c0c0">
+                   <td>A regular table item</td>
+                   <td>A regular table item</td>
+               </tr>
+
+               </table>
+           <p>If not specified, the item will span one column and one row.</p>
+<p>See also <a href="10-qdoc-commands-tablesandlists.html#table-command">\table</a>, <a href="10-qdoc-commands-tablesandlists.html#header-command">\header</a>, and <a href="10-qdoc-commands-tablesandlists.html#list-command">\list</a>.</p>
+</div>
+<!-- @@@10-qdoc-commands-tablesandlists.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="09-qdoc-commands-includingimages.html">Including Images</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="11-qdoc-commands-specialcontent.html">Special Content</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

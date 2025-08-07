@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwintaskbarprogress.cpp -->
+  <title>QWinTaskbarProgress Class | Qt Windows Extras 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwinextras-index.html">Qt Windows Extras</a></td><td ><a href="qtwinextras-module.html">C++ Classes</a></td><td >QWinTaskbarProgress</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwinextras-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QWinTaskbarProgress Class</h1>
+<!-- $$$QWinTaskbarProgress-brief -->
+<p>The <a href="qwintaskbarprogress.html">QWinTaskbarProgress</a> class represents a progress indicator in the Windows taskbar. <a href="#details">More...</a></p>
+<!-- @@@QWinTaskbarProgress -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QWinTaskbarProgress&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += winextras</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.2</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.2.</p>
+<ul>
+<li><a href="qwintaskbarprogress-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qwintaskbarprogress.html#maximum-prop">maximum</a></b> : int</li>
+<li class="fn"><b><a href="qwintaskbarprogress.html#minimum-prop">minimum</a></b> : int</li>
+<li class="fn"><b><a href="qwintaskbarprogress.html#paused-prop">paused</a></b> : bool</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qwintaskbarprogress.html#stopped-prop">stopped</a></b> : const bool</li>
+<li class="fn"><b><a href="qwintaskbarprogress.html#value-prop">value</a></b> : int</li>
+<li class="fn"><b><a href="qwintaskbarprogress.html#visible-prop">visible</a></b> : bool</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#QWinTaskbarProgress">QWinTaskbarProgress</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#dtor.QWinTaskbarProgress">~QWinTaskbarProgress</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#paused-prop">isPaused</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#stopped-prop">isStopped</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#visible-prop">isVisible</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#maximum-prop">maximum</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#minimum-prop">minimum</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#value-prop">value</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#hide">hide</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#pause">pause</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#reset">reset</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#resume">resume</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#maximum-prop">setMaximum</a></b>(int <i>maximum</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#minimum-prop">setMinimum</a></b>(int <i>minimum</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#paused-prop">setPaused</a></b>(bool <i>paused</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#setRange">setRange</a></b>(int <i>minimum</i>, int <i>maximum</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#value-prop">setValue</a></b>(int <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#visible-prop">setVisible</a></b>(bool <i>visible</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#show">show</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#stop">stop</a></b>()</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#maximum-prop">maximumChanged</a></b>(int <i>maximum</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#minimum-prop">minimumChanged</a></b>(int <i>minimum</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#paused-prop">pausedChanged</a></b>(bool <i>paused</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#stopped-prop">stoppedChanged</a></b>(bool <i>stopped</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#value-prop">valueChanged</a></b>(int <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwintaskbarprogress.html#visible-prop">visibilityChanged</a></b>(bool <i>visible</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QWinTaskbarProgress-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A progress indicator is used to give the user an indication of the progress of an operation and to reassure them that the application is still running.</p>
+<p>The progress indicator uses the concept of <i>steps</i>. It is set up by specifying the minimum and maximum possible step values, and it will display the percentage of steps that have been completed when you later give it the current step value. The percentage is calculated by dividing the progress (<a href="qwintaskbarprogress.html#value-prop">value</a>() - <a href="qwintaskbarprogress.html#minimum-prop">minimum</a>()) divided by <a href="qwintaskbarprogress.html#maximum-prop">maximum</a>() - <a href="qwintaskbarprogress.html#minimum-prop">minimum</a>().</p>
+<p>The minimum and maximum number of steps can be specified by calling <a href="qwintaskbarprogress.html#minimum-prop">setMinimum</a>() and <a href="qwintaskbarprogress.html#maximum-prop">setMaximum</a>(). The current number of steps is set with <a href="qwintaskbarprogress.html#value-prop">setValue</a>(). The progress indicator can be rewound to the beginning with <a href="qwintaskbarprogress.html#reset">reset</a>().</p>
+<p>If minimum and maximum both are set to <code>0</code>, the indicator shows up as a busy (indeterminate) indicator instead of a percentage of steps. This is useful when it is not possible to determine the number of steps.</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><img src="images/taskbar-progress.png" alt="Screenshot of a progress indicator" /></td><td >A progress indicator at 50%.</td></tr>
+<tr valign="top" class="even"><td ><img src="images/taskbar-progress-paused.png" alt="Screenshot of a paused progress indicator" /></td><td >A paused progress indicator at 50%.</td></tr>
+<tr valign="top" class="odd"><td ><img src="images/taskbar-progress-stopped.png" alt="Screenshot of a stopped progress indicator" /></td><td >A stopped progress indicator at 50%.</td></tr>
+<tr valign="top" class="even"><td ><img src="images/taskbar-progress-indeterminate.png" alt="Screenshot of an indeterminate progress indicator" /></td><td >An indeterminate progress indicator.</td></tr>
+</table></div>
+<p><b>Note: </b>The final appearance of the progress indicator varies depending on the active Windows theme.</p></div>
+<p><b>See also </b><a href="qwintaskbarbutton.html">QWinTaskbarButton</a>.</p>
+<!-- @@@QWinTaskbarProgress -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$maximum-prop$$$maximum$$$setMaximumint$$$maximumChangedint -->
+<h3 class="fn" id="maximum-prop"><a name="maximum-prop"></a><span class="name">maximum</span> : <span class="type">int</span></h3>
+<p>This property holds the maximum value of the progress indicator</p>
+<p>The default value is <code>100</code>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>maximum</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setMaximum</b></span>(int <i>maximum</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>maximumChanged</b></span>(int <i>maximum</i>)</td></tr>
+</table></div>
+<!-- @@@maximum -->
+<!-- $$$minimum-prop$$$minimum$$$setMinimumint$$$minimumChangedint -->
+<h3 class="fn" id="minimum-prop"><a name="minimum-prop"></a><span class="name">minimum</span> : <span class="type">int</span></h3>
+<p>This property holds the minimum value of the progress indicator</p>
+<p>The default value is <code>0</code>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>minimum</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setMinimum</b></span>(int <i>minimum</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>minimumChanged</b></span>(int <i>minimum</i>)</td></tr>
+</table></div>
+<!-- @@@minimum -->
+<!-- $$$paused-prop$$$isPaused$$$setPausedbool$$$pausedChangedbool -->
+<h3 class="fn" id="paused-prop"><a name="paused-prop"></a><span class="name">paused</span> : <span class="type">bool</span></h3>
+<p>This property holds whether the progress indicator is paused.</p>
+<p>The default value is <code>false</code>.</p>
+<p>The final appearance of a paused progress indicator depends on the active Windows theme. Typically, a paused progress indicator turns yellow to indicate that the progress is currently paused. Unlike a <a href="qwintaskbarprogress.html#stopped-prop">stopped</a> progress indicator, a paused progress should not be used to indicate an error.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>isPaused</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setPaused</b></span>(bool <i>paused</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>pausedChanged</b></span>(bool <i>paused</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qwintaskbarprogress.html#pause">pause</a>() and <a href="qwintaskbarprogress.html#resume">resume</a>().</p>
+<!-- @@@paused -->
+<!-- $$$stopped-prop$$$isStopped$$$stoppedChangedbool -->
+<h3 class="fn" id="stopped-prop"><a name="stopped-prop"></a><span class="name">stopped</span> : const <span class="type">bool</span></h3>
+<p>This property holds whether the progress indicator is stopped.</p>
+<p>The default value is <code>false</code>.</p>
+<p>The final appearance of a stopped progress indicator depends on the active Windows theme. Typically, a stopped progress indicator turns red to indicate that the progress is currently stopped. Unlike a <a href="qwintaskbarprogress.html#paused-prop">paused</a> progress indicator, a stopped progress may be used to indicate an error.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>isStopped</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>stoppedChanged</b></span>(bool <i>stopped</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qwintaskbarprogress.html#stop">stop</a>() and <a href="qwintaskbarprogress.html#resume">resume</a>().</p>
+<!-- @@@stopped -->
+<!-- $$$value-prop$$$value$$$setValueint$$$valueChangedint -->
+<h3 class="fn" id="value-prop"><a name="value-prop"></a><span class="name">value</span> : <span class="type">int</span></h3>
+<p>This property holds the current value of the progress indicator</p>
+<p>The default value is <code>0</code>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>value</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setValue</b></span>(int <i>value</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>valueChanged</b></span>(int <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@value -->
+<!-- $$$visible-prop$$$isVisible$$$setVisiblebool$$$visibilityChangedbool -->
+<h3 class="fn" id="visible-prop"><a name="visible-prop"></a><span class="name">visible</span> : <span class="type">bool</span></h3>
+<p>This property holds whether the progress indicator is visible.</p>
+<p>The default value is <code>false</code>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>isVisible</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setVisible</b></span>(bool <i>visible</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>visibilityChanged</b></span>(bool <i>visible</i>)</td></tr>
+</table></div>
+<!-- @@@visible -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QWinTaskbarProgress[overload1]$$$QWinTaskbarProgressQObject* -->
+<h3 class="fn" id="QWinTaskbarProgress"><a name="QWinTaskbarProgress"></a>QWinTaskbarProgress::<span class="name">QWinTaskbarProgress</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a <a href="qwintaskbarprogress.html">QWinTaskbarProgress</a> with the parent object <i>parent</i>.</p>
+<!-- @@@QWinTaskbarProgress -->
+<!-- $$$hide[overload1]$$$hide -->
+<h3 class="fn" id="hide"><a name="hide"></a><code>[slot] </code><span class="type">void</span> QWinTaskbarProgress::<span class="name">hide</span>()</h3>
+<p>Hides the progress indicator.</p>
+<!-- @@@hide -->
+<!-- $$$pause[overload1]$$$pause -->
+<h3 class="fn" id="pause"><a name="pause"></a><code>[slot] </code><span class="type">void</span> QWinTaskbarProgress::<span class="name">pause</span>()</h3>
+<p>Pauses the progress indicator.</p>
+<p><b>See also </b><a href="qwintaskbarprogress.html#paused-prop">paused</a>.</p>
+<!-- @@@pause -->
+<!-- $$$reset[overload1]$$$reset -->
+<h3 class="fn" id="reset"><a name="reset"></a><code>[slot] </code><span class="type">void</span> QWinTaskbarProgress::<span class="name">reset</span>()</h3>
+<p>Resets the progress indicator.</p>
+<p>This function rewinds the value to the minimum value.</p>
+<!-- @@@reset -->
+<!-- $$$resume[overload1]$$$resume -->
+<h3 class="fn" id="resume"><a name="resume"></a><code>[slot] </code><span class="type">void</span> QWinTaskbarProgress::<span class="name">resume</span>()</h3>
+<p>Resumes a paused or stopped progress indicator.</p>
+<p><b>See also </b><a href="qwintaskbarprogress.html#paused-prop">paused</a> and <a href="qwintaskbarprogress.html#stopped-prop">stopped</a>.</p>
+<!-- @@@resume -->
+<!-- $$$setRange[overload1]$$$setRangeintint -->
+<h3 class="fn" id="setRange"><a name="setRange"></a><code>[slot] </code><span class="type">void</span> QWinTaskbarProgress::<span class="name">setRange</span>(<span class="type">int</span> <i>minimum</i>, <span class="type">int</span> <i>maximum</i>)</h3>
+<p>Sets both the <i>minimum</i> and <i>maximum</i> values.</p>
+<!-- @@@setRange -->
+<!-- $$$show[overload1]$$$show -->
+<h3 class="fn" id="show"><a name="show"></a><code>[slot] </code><span class="type">void</span> QWinTaskbarProgress::<span class="name">show</span>()</h3>
+<p>Shows the progress indicator.</p>
+<!-- @@@show -->
+<!-- $$$stop[overload1]$$$stop -->
+<h3 class="fn" id="stop"><a name="stop"></a><code>[slot] </code><span class="type">void</span> QWinTaskbarProgress::<span class="name">stop</span>()</h3>
+<p>Stops the progress indicator.</p>
+<p><b>See also </b><a href="qwintaskbarprogress.html#stopped-prop">stopped</a>.</p>
+<!-- @@@stop -->
+<!-- $$$~QWinTaskbarProgress[overload1]$$$~QWinTaskbarProgress -->
+<h3 class="fn" id="dtor.QWinTaskbarProgress"><a name="dtor.QWinTaskbarProgress"></a><code>[virtual] </code>QWinTaskbarProgress::<span class="name">~QWinTaskbarProgress</span>()</h3>
+<p>Destroys the <a href="qwintaskbarprogress.html">QWinTaskbarProgress</a>.</p>
+<!-- @@@~QWinTaskbarProgress -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qbluetoothserviceinfo.cpp -->
+  <title>QBluetoothServiceInfo Class | Qt Bluetooth 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtbluetooth-index.html">Qt Bluetooth</a></td><td ><a href="qtbluetooth-module.html">C++ Classes</a></td><td >QBluetoothServiceInfo</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtbluetooth-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QBluetoothServiceInfo Class</h1>
+<!-- $$$QBluetoothServiceInfo-brief -->
+<p>The <a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a> class enables access to the attributes of a Bluetooth service. <a href="#details">More...</a></p>
+<!-- @@@QBluetoothServiceInfo -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QBluetoothServiceInfo&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += bluetooth</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.2</td></tr></table></div><p>This class was introduced in  Qt 5.2.</p>
+<ul>
+<li><a href="qbluetoothserviceinfo-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> class </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo-alternative.html">Alternative</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> class </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo-sequence.html">Sequence</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#AttributeId-enum">AttributeId</a></b> { ServiceRecordHandle, ServiceClassIds, ServiceRecordState, ServiceId, ..., ServiceProvider }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#Protocol-enum">Protocol</a></b> { UnknownProtocol, L2capProtocol, RfcommProtocol }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#QBluetoothServiceInfo-1">QBluetoothServiceInfo</a></b>(const QBluetoothServiceInfo &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#QBluetoothServiceInfo">QBluetoothServiceInfo</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QBluetoothServiceInfo &amp;</td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#operator-eq">operator=</a></b>(const QBluetoothServiceInfo &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#dtor.QBluetoothServiceInfo">~QBluetoothServiceInfo</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariant </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#attribute">attribute</a></b>(quint16 <i>attributeId</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;quint16&gt; </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#attributes">attributes</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#contains">contains</a></b>(quint16 <i>attributeId</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QBluetoothDeviceInfo </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#device">device</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#isComplete">isComplete</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#isRegistered">isRegistered</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#isValid">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QBluetoothServiceInfo::Sequence </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#protocolDescriptor">protocolDescriptor</a></b>(QBluetoothUuid::ProtocolUuid <i>protocol</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#protocolServiceMultiplexer">protocolServiceMultiplexer</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#registerService">registerService</a></b>(const QBluetoothAddress &amp;<i>localAdapter</i> = QBluetoothAddress())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#removeAttribute">removeAttribute</a></b>(quint16 <i>attributeId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#serverChannel">serverChannel</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> quint8 </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#serviceAvailability">serviceAvailability</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QBluetoothUuid&gt; </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#serviceClassUuids">serviceClassUuids</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#serviceDescription">serviceDescription</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#serviceName">serviceName</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#serviceProvider">serviceProvider</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QBluetoothUuid </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#serviceUuid">serviceUuid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#setAttribute">setAttribute</a></b>(quint16 <i>attributeId</i>, const QVariant &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#setAttribute-1">setAttribute</a></b>(quint16 <i>attributeId</i>, const QBluetoothUuid &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#setAttribute-2">setAttribute</a></b>(quint16 <i>attributeId</i>, const QBluetoothServiceInfo::Sequence &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#setAttribute-3">setAttribute</a></b>(quint16 <i>attributeId</i>, const QBluetoothServiceInfo::Alternative &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#setDevice">setDevice</a></b>(const QBluetoothDeviceInfo &amp;<i>device</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#setServiceAvailability">setServiceAvailability</a></b>(quint8 <i>availability</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#setServiceDescription">setServiceDescription</a></b>(const QString &amp;<i>description</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#setServiceName">setServiceName</a></b>(const QString &amp;<i>name</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#setServiceProvider">setServiceProvider</a></b>(const QString &amp;<i>provider</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#setServiceUuid">setServiceUuid</a></b>(const QBluetoothUuid &amp;<i>uuid</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QBluetoothServiceInfo::Protocol </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#socketProtocol">socketProtocol</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserviceinfo.html#unregisterService">unregisterService</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QBluetoothServiceInfo-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a> provides information about a service offered by a Bluetooth device. In addition it can be used to register new services on the local device. Note that such a registration only affects the Bluetooth SDP entries. Any server listening for incoming connections (e.g an RFCOMM server) must be started before <a href="qbluetoothserviceinfo.html#registerService">registerService</a>() is called. Deregistration must happen in the reverse order.</p>
+<p><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a> is not a value type in the traditional sense. All copies of the same service info object share the same data as they do not detach upon changing them. This ensures that two copies can (de)register the same Bluetooth service.</p>
+<p>On iOS, this class cannot be used because the platform does not expose an API which may permit access to <a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a> related features.</p>
+</div>
+<!-- @@@QBluetoothServiceInfo -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$AttributeId$$$ServiceRecordHandle$$$ServiceClassIds$$$ServiceRecordState$$$ServiceId$$$ProtocolDescriptorList$$$BrowseGroupList$$$LanguageBaseAttributeIdList$$$ServiceInfoTimeToLive$$$ServiceAvailability$$$BluetoothProfileDescriptorList$$$DocumentationUrl$$$ClientExecutableUrl$$$IconUrl$$$AdditionalProtocolDescriptorList$$$PrimaryLanguageBase$$$ServiceName$$$ServiceDescription$$$ServiceProvider -->
+<h3 class="fn" id="AttributeId-enum"><a name="AttributeId-enum"></a>enum QBluetoothServiceInfo::<span class="name">AttributeId</span></h3>
+<p>Bluetooth service attributes. Please check the Bluetooth Core Specification for a more detailed description of these attributes.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QBluetoothServiceInfo::ServiceRecordHandle</code></td><td class="topAlign tblval"><code>0x0000</code></td><td class="topAlign">Specifies a service record from which attributes can be retrieved.</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServiceInfo::ServiceClassIds</code></td><td class="topAlign tblval"><code>0x0001</code></td><td class="topAlign">UUIDs of service classes that the service conforms to. The most common service classes are defined in (<a href="qbluetoothuuid.html#ServiceClassUuid-enum">QBluetoothUuid::ServiceClassUuid</a>)</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServiceInfo::ServiceRecordState</code></td><td class="topAlign tblval"><code>0x0002</code></td><td class="topAlign">Attibute changes when any other service attribute is added, deleted or modified.</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServiceInfo::ServiceId</code></td><td class="topAlign tblval"><code>0x0003</code></td><td class="topAlign">UUID that uniquely identifies the service.</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServiceInfo::ProtocolDescriptorList</code></td><td class="topAlign tblval"><code>0x0004</code></td><td class="topAlign">List of protocols used by the service. The most common protocol Uuids are defined in <a href="qbluetoothuuid.html#ProtocolUuid-enum">QBluetoothUuid::ProtocolUuid</a></td></tr>
+<tr><td class="topAlign"><code>QBluetoothServiceInfo::BrowseGroupList</code></td><td class="topAlign tblval"><code>0x0005</code></td><td class="topAlign">List of browse groups the service is in.</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServiceInfo::LanguageBaseAttributeIdList</code></td><td class="topAlign tblval"><code>0x0006</code></td><td class="topAlign">List of language base attribute IDs to support human-readable attributes.</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServiceInfo::ServiceInfoTimeToLive</code></td><td class="topAlign tblval"><code>0x0007</code></td><td class="topAlign">Number of seconds for which the service record is expected to remain valid and unchanged.</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServiceInfo::ServiceAvailability</code></td><td class="topAlign tblval"><code>0x0008</code></td><td class="topAlign">Value indicating the availability of the service.</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServiceInfo::BluetoothProfileDescriptorList</code></td><td class="topAlign tblval"><code>0x0009</code></td><td class="topAlign">List of profiles to which the service conforms.</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServiceInfo::DocumentationUrl</code></td><td class="topAlign tblval"><code>0x000A</code></td><td class="topAlign">URL that points to the documentation on the service..</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServiceInfo::ClientExecutableUrl</code></td><td class="topAlign tblval"><code>0x000B</code></td><td class="topAlign">URL that refers to the location of an application that can be used to utilize the service.</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServiceInfo::IconUrl</code></td><td class="topAlign tblval"><code>0x000C</code></td><td class="topAlign">URL to the location of the icon representing the service.</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServiceInfo::AdditionalProtocolDescriptorList</code></td><td class="topAlign tblval"><code>0x000D</code></td><td class="topAlign">Additional protocols used by the service. This attribute extends <code>ProtocolDescriptorList</code>.</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServiceInfo::PrimaryLanguageBase</code></td><td class="topAlign tblval"><code>0x0100</code></td><td class="topAlign">Base index for primary language text descriptors.</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServiceInfo::ServiceName</code></td><td class="topAlign tblval"><code>PrimaryLanguageBase + 0x0000</code></td><td class="topAlign">Name of the Bluetooth service in the primary language.</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServiceInfo::ServiceDescription</code></td><td class="topAlign tblval"><code>PrimaryLanguageBase + 0x0001</code></td><td class="topAlign">Description of the Bluetooth service in the primary language.</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServiceInfo::ServiceProvider</code></td><td class="topAlign tblval"><code>PrimaryLanguageBase + 0x0002</code></td><td class="topAlign">Name of the company / entity that provides the Bluetooth service primary language.</td></tr>
+</table></div>
+<p><b>Note: </b>On Windows ServiceClassIds and ProtocolDescriptorList are automatically set to default values when a service is created. Manually setting values for these attributes will not work and might lead to unexpected results on this platform.</p><!-- @@@AttributeId -->
+<!-- $$$Protocol$$$UnknownProtocol$$$L2capProtocol$$$RfcommProtocol -->
+<h3 class="fn" id="Protocol-enum"><a name="Protocol-enum"></a>enum QBluetoothServiceInfo::<span class="name">Protocol</span></h3>
+<p>This enum describes the socket protocol used by the service.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QBluetoothServiceInfo::UnknownProtocol</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The service uses an unknown socket protocol.</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServiceInfo::L2capProtocol</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The service uses the L2CAP socket protocol. This protocol is not supported for direct socket connections on Android.</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServiceInfo::RfcommProtocol</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The service uses the RFCOMM socket protocol.</td></tr>
+</table></div>
+<!-- @@@Protocol -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QBluetoothServiceInfo$$$QBluetoothServiceInfoconstQBluetoothServiceInfo& -->
+<h3 class="fn" id="QBluetoothServiceInfo-1"><a name="QBluetoothServiceInfo-1"></a>QBluetoothServiceInfo::<span class="name">QBluetoothServiceInfo</span>(const <span class="type"><a href="qbluetoothserviceinfo.html#QBluetoothServiceInfo">QBluetoothServiceInfo</a></span> &amp;<i>other</i>)</h3>
+<p>Construct a new <a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a> that is a copy of <i>other</i>.</p>
+<p>The two copies continue to share the same underlying data which does not detach upon write.</p>
+<!-- @@@QBluetoothServiceInfo -->
+<!-- $$$QBluetoothServiceInfo[overload1]$$$QBluetoothServiceInfo -->
+<h3 class="fn" id="QBluetoothServiceInfo"><a name="QBluetoothServiceInfo"></a>QBluetoothServiceInfo::<span class="name">QBluetoothServiceInfo</span>()</h3>
+<p>Construct a new invalid <a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a>;</p>
+<!-- @@@QBluetoothServiceInfo -->
+<!-- $$$operator=[overload1]$$$operator=constQBluetoothServiceInfo& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qbluetoothserviceinfo.html#QBluetoothServiceInfo">QBluetoothServiceInfo</a></span> &amp;QBluetoothServiceInfo::<span class="name">operator=</span>(const <span class="type"><a href="qbluetoothserviceinfo.html#QBluetoothServiceInfo">QBluetoothServiceInfo</a></span> &amp;<i>other</i>)</h3>
+<p>Makes a copy of the <i>other</i> and assigns it to this <a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a> object. The two copies continue to share the same service and registration details.</p>
+<!-- @@@operator= -->
+<!-- $$$~QBluetoothServiceInfo[overload1]$$$~QBluetoothServiceInfo -->
+<h3 class="fn" id="dtor.QBluetoothServiceInfo"><a name="dtor.QBluetoothServiceInfo"></a>QBluetoothServiceInfo::<span class="name">~QBluetoothServiceInfo</span>()</h3>
+<p>Destroys the <a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a> object.</p>
+<!-- @@@~QBluetoothServiceInfo -->
+<!-- $$$attribute[overload1]$$$attributequint16 -->
+<h3 class="fn" id="attribute"><a name="attribute"></a><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QBluetoothServiceInfo::<span class="name">attribute</span>(<span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> <i>attributeId</i>) const</h3>
+<p>Returns the value of the attribute <i>attributeId</i>.</p>
+<p><b>See also </b><a href="qbluetoothserviceinfo.html#setAttribute">setAttribute</a>().</p>
+<!-- @@@attribute -->
+<!-- $$$attributes[overload1]$$$attributes -->
+<h3 class="fn" id="attributes"><a name="attributes"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span>&gt; QBluetoothServiceInfo::<span class="name">attributes</span>() const</h3>
+<p>Returns a list of all attribute ids that the <a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a> object has.</p>
+<!-- @@@attributes -->
+<!-- $$$contains[overload1]$$$containsquint16 -->
+<h3 class="fn" id="contains"><a name="contains"></a><span class="type">bool</span> QBluetoothServiceInfo::<span class="name">contains</span>(<span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> <i>attributeId</i>) const</h3>
+<p>Returns true if the <a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a> object contains the attribute <i>attributeId</i>, otherwise returns false.</p>
+<!-- @@@contains -->
+<!-- $$$device[overload1]$$$device -->
+<h3 class="fn" id="device"><a name="device"></a><span class="type"><a href="qbluetoothdeviceinfo.html">QBluetoothDeviceInfo</a></span> QBluetoothServiceInfo::<span class="name">device</span>() const</h3>
+<p>Returns the address of the Bluetooth device that provides this service.</p>
+<p><b>See also </b><a href="qbluetoothserviceinfo.html#setDevice">setDevice</a>().</p>
+<!-- @@@device -->
+<!-- $$$isComplete[overload1]$$$isComplete -->
+<h3 class="fn" id="isComplete"><a name="isComplete"></a><span class="type">bool</span> QBluetoothServiceInfo::<span class="name">isComplete</span>() const</h3>
+<p>Returns true if the <a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a> object is considered complete, otherwise returns false.</p>
+<p>A complete <a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a> object contains a <a href="qbluetoothserviceinfo.html#AttributeId-enum">ProtocolDescriptorList</a> attribute.</p>
+<!-- @@@isComplete -->
+<!-- $$$isRegistered[overload1]$$$isRegistered -->
+<h3 class="fn" id="isRegistered"><a name="isRegistered"></a><span class="type">bool</span> QBluetoothServiceInfo::<span class="name">isRegistered</span>() const</h3>
+<p>Returns true if the service information is registered with the platform's Service Discovery Protocol (SDP) implementation, otherwise returns false.</p>
+<!-- @@@isRegistered -->
+<!-- $$$isValid[overload1]$$$isValid -->
+<h3 class="fn" id="isValid"><a name="isValid"></a><span class="type">bool</span> QBluetoothServiceInfo::<span class="name">isValid</span>() const</h3>
+<p>Returns true if the <a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a> object is valid, otherwise returns false.</p>
+<p>An invalid <a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a> object will have no attributes.</p>
+<!-- @@@isValid -->
+<!-- $$$protocolDescriptor[overload1]$$$protocolDescriptorQBluetoothUuid::ProtocolUuid -->
+<h3 class="fn" id="protocolDescriptor"><a name="protocolDescriptor"></a><span class="type"><a href="qbluetoothserviceinfo-sequence.html">QBluetoothServiceInfo::Sequence</a></span> QBluetoothServiceInfo::<span class="name">protocolDescriptor</span>(<span class="type"><a href="qbluetoothuuid.html#ProtocolUuid-enum">QBluetoothUuid::ProtocolUuid</a></span> <i>protocol</i>) const</h3>
+<p>Returns the protocol parameters as a <a href="qbluetoothserviceinfo-sequence.html">QBluetoothServiceInfo::Sequence</a> for protocol <i>protocol</i>.</p>
+<p>An empty <a href="qbluetoothserviceinfo-sequence.html">QBluetoothServiceInfo::Sequence</a> is returned if <i>protocol</i> is not supported.</p>
+<!-- @@@protocolDescriptor -->
+<!-- $$$protocolServiceMultiplexer[overload1]$$$protocolServiceMultiplexer -->
+<h3 class="fn" id="protocolServiceMultiplexer"><a name="protocolServiceMultiplexer"></a><span class="type">int</span> QBluetoothServiceInfo::<span class="name">protocolServiceMultiplexer</span>() const</h3>
+<p>This is a convenience function. Returns the protocol/service multiplexer for services which support the L2CAP protocol, otherwise returns -1.</p>
+<p>This function is equivalent to extracting the information from <a href="qbluetoothserviceinfo-sequence.html">QBluetoothServiceInfo::Sequence</a> returned by <a href="qbluetoothserviceinfo.html#attribute">QBluetoothServiceInfo::attribute</a>(<a href="qbluetoothserviceinfo.html#AttributeId-enum">QBluetoothServiceInfo::ProtocolDescriptorList</a>).</p>
+<!-- @@@protocolServiceMultiplexer -->
+<!-- $$$registerService[overload1]$$$registerServiceconstQBluetoothAddress& -->
+<h3 class="fn" id="registerService"><a name="registerService"></a><span class="type">bool</span> QBluetoothServiceInfo::<span class="name">registerService</span>(const <span class="type"><a href="qbluetoothaddress.html">QBluetoothAddress</a></span> &amp;<i>localAdapter</i> = QBluetoothAddress())</h3>
+<p>Registers this service with the platform's Service Discovery Protocol (SDP) implementation, making it findable by other devices when they perform service discovery. Returns true if the service is successfully registered, otherwise returns false. Once registered changes to the record cannot be made. The service must be unregistered and registered again with the changes.</p>
+<p>The <i>localAdapter</i> parameter determines the local Bluetooth adapter under which the service should be registered. If <i>localAdapter</i> is <code>null</code> the default Bluetooth adapter will be used. If this service info object is already registered via a local adapter and this is function is called using a different local adapter, the previous registration is removed and the service reregistered using the new adapter.</p>
+<!-- @@@registerService -->
+<!-- $$$removeAttribute[overload1]$$$removeAttributequint16 -->
+<h3 class="fn" id="removeAttribute"><a name="removeAttribute"></a><span class="type">void</span> QBluetoothServiceInfo::<span class="name">removeAttribute</span>(<span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> <i>attributeId</i>)</h3>
+<p>Removes the attribute <i>attributeId</i> from the <a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a> object.</p>
+<p>If the service information is already registered with the platforms SDP database, the database entry will not be updated until <a href="qbluetoothserviceinfo.html#registerService">registerService</a>() was called again.</p>
+<!-- @@@removeAttribute -->
+<!-- $$$serverChannel[overload1]$$$serverChannel -->
+<h3 class="fn" id="serverChannel"><a name="serverChannel"></a><span class="type">int</span> QBluetoothServiceInfo::<span class="name">serverChannel</span>() const</h3>
+<p>This is a convenience function. Returns the server channel for services which support the RFCOMM protocol, otherwise returns -1.</p>
+<p>This function is equivalent to extracting the information from <a href="qbluetoothserviceinfo-sequence.html">QBluetoothServiceInfo::Sequence</a> returned by <a href="qbluetoothserviceinfo.html#attribute">QBluetoothServiceInfo::attribute</a>(QBluetootherServiceInfo::ProtocolDescriptorList).</p>
+<!-- @@@serverChannel -->
+<!-- $$$serviceAvailability[overload1]$$$serviceAvailability -->
+<h3 class="fn" id="serviceAvailability"><a name="serviceAvailability"></a><span class="type"><a href="../qtcore/qtglobal.html#quint8-typedef">quint8</a></span> QBluetoothServiceInfo::<span class="name">serviceAvailability</span>() const</h3>
+<p>This is a convenience function. It is equivalent to calling attribute(<a href="qbluetoothserviceinfo.html#AttributeId-enum">QBluetoothServiceInfo::ServiceAvailability</a>).toUInt().</p>
+<p>Returns the availability of the service.</p>
+<p><b>See also </b><a href="qbluetoothserviceinfo.html#setServiceAvailability">setServiceAvailability</a>() and <a href="qbluetoothserviceinfo.html#attribute">attribute</a>().</p>
+<!-- @@@serviceAvailability -->
+<!-- $$$serviceClassUuids[overload1]$$$serviceClassUuids -->
+<h3 class="fn" id="serviceClassUuids"><a name="serviceClassUuids"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span>&gt; QBluetoothServiceInfo::<span class="name">serviceClassUuids</span>() const</h3>
+<p>Returns a list of UUIDs describing the service classes that this service conforms to.</p>
+<p>This is a convenience function. It is equivalent to calling attribute(<a href="qbluetoothserviceinfo.html#AttributeId-enum">QBluetoothServiceInfo::ServiceClassIds</a>).value&lt;<a href="qbluetoothserviceinfo-sequence.html">QBluetoothServiceInfo::Sequence</a>&gt;() and subsequently iterating over its <a href="qbluetoothuuid.html">QBluetoothUuid</a> entries.</p>
+<p><b>See also </b><a href="qbluetoothserviceinfo.html#attribute">attribute</a>().</p>
+<!-- @@@serviceClassUuids -->
+<!-- $$$serviceDescription[overload1]$$$serviceDescription -->
+<h3 class="fn" id="serviceDescription"><a name="serviceDescription"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QBluetoothServiceInfo::<span class="name">serviceDescription</span>() const</h3>
+<p>This is a convenience function. It is equivalent to calling attribute(<a href="qbluetoothserviceinfo.html#AttributeId-enum">QBluetoothServiceInfo::ServiceDescription</a>).toString().</p>
+<p>Returns the service description in the primary language.</p>
+<p><b>See also </b><a href="qbluetoothserviceinfo.html#setServiceDescription">setServiceDescription</a>() and <a href="qbluetoothserviceinfo.html#attribute">attribute</a>().</p>
+<!-- @@@serviceDescription -->
+<!-- $$$serviceName[overload1]$$$serviceName -->
+<h3 class="fn" id="serviceName"><a name="serviceName"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QBluetoothServiceInfo::<span class="name">serviceName</span>() const</h3>
+<p>This is a convenience function. It is equivalent to calling attribute(<a href="qbluetoothserviceinfo.html#AttributeId-enum">QBluetoothServiceInfo::ServiceName</a>).toString().</p>
+<p>Returns the service name in the primary language.</p>
+<p><b>See also </b><a href="qbluetoothserviceinfo.html#setServiceName">setServiceName</a>() and <a href="qbluetoothserviceinfo.html#attribute">attribute</a>().</p>
+<!-- @@@serviceName -->
+<!-- $$$serviceProvider[overload1]$$$serviceProvider -->
+<h3 class="fn" id="serviceProvider"><a name="serviceProvider"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QBluetoothServiceInfo::<span class="name">serviceProvider</span>() const</h3>
+<p>This is a convenience function. It is equivalent to calling attribute(<a href="qbluetoothserviceinfo.html#AttributeId-enum">QBluetoothServiceInfo::ServiceProvider</a>).toString().</p>
+<p>Returns the service provider in the primary language.</p>
+<p><b>See also </b><a href="qbluetoothserviceinfo.html#setServiceProvider">setServiceProvider</a>() and <a href="qbluetoothserviceinfo.html#attribute">attribute</a>().</p>
+<!-- @@@serviceProvider -->
+<!-- $$$serviceUuid[overload1]$$$serviceUuid -->
+<h3 class="fn" id="serviceUuid"><a name="serviceUuid"></a><span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span> QBluetoothServiceInfo::<span class="name">serviceUuid</span>() const</h3>
+<p>This is a convenience function. It is equivalent to calling attribute(<a href="qbluetoothserviceinfo.html#AttributeId-enum">QBluetoothServiceInfo::ServiceId</a>).value&lt;<a href="qbluetoothuuid.html">QBluetoothUuid</a>&gt;().</p>
+<p>Returns the custom UUID of the service. This UUID may be null. UUIDs based on <a href="https://bluetooth.org">Bluetooth SIG standards</a> should be retrieved via <a href="qbluetoothserviceinfo.html#serviceClassUuids">serviceClassUuids</a>().</p>
+<p><b>See also </b><a href="qbluetoothserviceinfo.html#setServiceUuid">setServiceUuid</a>() and <a href="qbluetoothserviceinfo.html#attribute">attribute</a>().</p>
+<!-- @@@serviceUuid -->
+<!-- $$$setAttribute[overload1]$$$setAttributequint16constQVariant& -->
+<h3 class="fn" id="setAttribute"><a name="setAttribute"></a><span class="type">void</span> QBluetoothServiceInfo::<span class="name">setAttribute</span>(<span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> <i>attributeId</i>, const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>value</i>)</h3>
+<p>Sets the attribute identified by <i>attributeId</i> to <i>value</i>.</p>
+<p>If the service information is already registered with the platform's SDP database, the database entry will not be updated until <a href="qbluetoothserviceinfo.html#registerService">registerService</a>() was called again.</p>
+<p><b>Note: </b>If an attribute expectes a byte-encoded value (e.g&#x2e; Bluetooth HID services), it should be set as <a href="../qtcore/qbytearray.html">QByteArray</a>.</p><p><b>See also </b><a href="qbluetoothserviceinfo.html#attribute">attribute</a>(), <a href="qbluetoothserviceinfo.html#isRegistered">isRegistered</a>(), and <a href="qbluetoothserviceinfo.html#registerService">registerService</a>().</p>
+<!-- @@@setAttribute -->
+<!-- $$$setAttribute$$$setAttributequint16constQBluetoothUuid& -->
+<h3 class="fn" id="setAttribute-1"><a name="setAttribute-1"></a><span class="type">void</span> QBluetoothServiceInfo::<span class="name">setAttribute</span>(<span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> <i>attributeId</i>, const <span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span> &amp;<i>value</i>)</h3>
+<p>This is a convenience function.</p>
+<p>Sets the attribute identified by <i>attributeId</i> to <i>value</i>.</p>
+<p>If the service information is already registered with the platform's SDP database, the database entry will not be updated until <a href="qbluetoothserviceinfo.html#registerService">registerService</a>() was called again.</p>
+<!-- @@@setAttribute -->
+<!-- $$$setAttribute$$$setAttributequint16constQBluetoothServiceInfo::Sequence& -->
+<h3 class="fn" id="setAttribute-2"><a name="setAttribute-2"></a><span class="type">void</span> QBluetoothServiceInfo::<span class="name">setAttribute</span>(<span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> <i>attributeId</i>, const <span class="type"><a href="qbluetoothserviceinfo-sequence.html">QBluetoothServiceInfo::Sequence</a></span> &amp;<i>value</i>)</h3>
+<p>This is a convenience function.</p>
+<p>Sets the attribute identified by <i>attributeId</i> to <i>value</i>.</p>
+<p>If the service information is already registered with the platform's SDP database, the database entry will not be updated until <a href="qbluetoothserviceinfo.html#registerService">registerService</a>() was called again.</p>
+<!-- @@@setAttribute -->
+<!-- $$$setAttribute$$$setAttributequint16constQBluetoothServiceInfo::Alternative& -->
+<h3 class="fn" id="setAttribute-3"><a name="setAttribute-3"></a><span class="type">void</span> QBluetoothServiceInfo::<span class="name">setAttribute</span>(<span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> <i>attributeId</i>, const <span class="type"><a href="qbluetoothserviceinfo-alternative.html">QBluetoothServiceInfo::Alternative</a></span> &amp;<i>value</i>)</h3>
+<p>This is a convenience function.</p>
+<p>Sets the attribute identified by <i>attributeId</i> to <i>value</i>.</p>
+<p>If the service information is already registered with the platform's SDP database, the database entry will not be updated until <a href="qbluetoothserviceinfo.html#registerService">registerService</a>() was called again.</p>
+<!-- @@@setAttribute -->
+<!-- $$$setDevice[overload1]$$$setDeviceconstQBluetoothDeviceInfo& -->
+<h3 class="fn" id="setDevice"><a name="setDevice"></a><span class="type">void</span> QBluetoothServiceInfo::<span class="name">setDevice</span>(const <span class="type"><a href="qbluetoothdeviceinfo.html">QBluetoothDeviceInfo</a></span> &amp;<i>device</i>)</h3>
+<p>Sets the Bluetooth device that provides this service to <i>device</i>.</p>
+<p><b>See also </b><a href="qbluetoothserviceinfo.html#device">device</a>().</p>
+<!-- @@@setDevice -->
+<!-- $$$setServiceAvailability[overload1]$$$setServiceAvailabilityquint8 -->
+<h3 class="fn" id="setServiceAvailability"><a name="setServiceAvailability"></a><span class="type">void</span> QBluetoothServiceInfo::<span class="name">setServiceAvailability</span>(<span class="type"><a href="../qtcore/qtglobal.html#quint8-typedef">quint8</a></span> <i>availability</i>)</h3>
+<p>This is a convenience function. It is equivalent to calling <a href="qbluetoothserviceinfo.html#setAttribute">setAttribute</a>(<a href="qbluetoothserviceinfo.html#AttributeId-enum">QBluetoothServiceInfo::ServiceAvailability</a>, availability).</p>
+<p>Sets the availabiltiy of the service to <i>availability</i>.</p>
+<p><b>See also </b><a href="qbluetoothserviceinfo.html#serviceAvailability">serviceAvailability</a>() and <a href="qbluetoothserviceinfo.html#setAttribute">setAttribute</a>().</p>
+<!-- @@@setServiceAvailability -->
+<!-- $$$setServiceDescription[overload1]$$$setServiceDescriptionconstQString& -->
+<h3 class="fn" id="setServiceDescription"><a name="setServiceDescription"></a><span class="type">void</span> QBluetoothServiceInfo::<span class="name">setServiceDescription</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>description</i>)</h3>
+<p>This is a convenience function. It is equivalent to calling <a href="qbluetoothserviceinfo.html#setAttribute">setAttribute</a>(<a href="qbluetoothserviceinfo.html#AttributeId-enum">QBluetoothServiceInfo::ServiceDescription</a>, description).</p>
+<p>Sets the service description in the primary language to <i>description</i>.</p>
+<p><b>See also </b><a href="qbluetoothserviceinfo.html#serviceDescription">serviceDescription</a>() and <a href="qbluetoothserviceinfo.html#setAttribute">setAttribute</a>().</p>
+<!-- @@@setServiceDescription -->
+<!-- $$$setServiceName[overload1]$$$setServiceNameconstQString& -->
+<h3 class="fn" id="setServiceName"><a name="setServiceName"></a><span class="type">void</span> QBluetoothServiceInfo::<span class="name">setServiceName</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>)</h3>
+<p>This is a convenience function. It is equivalent to calling <a href="qbluetoothserviceinfo.html#setAttribute">setAttribute</a>(<a href="qbluetoothserviceinfo.html#AttributeId-enum">QBluetoothServiceInfo::ServiceName</a>, name).</p>
+<p>Sets the service name in the primary language to <i>name</i>.</p>
+<p><b>See also </b><a href="qbluetoothserviceinfo.html#serviceName">serviceName</a>() and <a href="qbluetoothserviceinfo.html#setAttribute">setAttribute</a>().</p>
+<!-- @@@setServiceName -->
+<!-- $$$setServiceProvider[overload1]$$$setServiceProviderconstQString& -->
+<h3 class="fn" id="setServiceProvider"><a name="setServiceProvider"></a><span class="type">void</span> QBluetoothServiceInfo::<span class="name">setServiceProvider</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>provider</i>)</h3>
+<p>This is a convenience function. It is equivalent to calling <a href="qbluetoothserviceinfo.html#setAttribute">setAttribute</a>(<a href="qbluetoothserviceinfo.html#AttributeId-enum">QBluetoothServiceInfo::ServiceProvider</a>, provider).</p>
+<p>Sets the service provider in the primary language to <i>provider</i>.</p>
+<p><b>See also </b><a href="qbluetoothserviceinfo.html#serviceProvider">serviceProvider</a>() and <a href="qbluetoothserviceinfo.html#setAttribute">setAttribute</a>().</p>
+<!-- @@@setServiceProvider -->
+<!-- $$$setServiceUuid[overload1]$$$setServiceUuidconstQBluetoothUuid& -->
+<h3 class="fn" id="setServiceUuid"><a name="setServiceUuid"></a><span class="type">void</span> QBluetoothServiceInfo::<span class="name">setServiceUuid</span>(const <span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span> &amp;<i>uuid</i>)</h3>
+<p>This is a convenience function. It is equivalent to calling <a href="qbluetoothserviceinfo.html#setAttribute">setAttribute</a>(<a href="qbluetoothserviceinfo.html#AttributeId-enum">QBluetoothServiceInfo::ServiceId</a>, uuid).</p>
+<p>Sets the custom service UUID to <i>uuid</i>. This function should not be used to set a standardized service UUID.</p>
+<p><b>See also </b><a href="qbluetoothserviceinfo.html#serviceUuid">serviceUuid</a>() and <a href="qbluetoothserviceinfo.html#setAttribute">setAttribute</a>().</p>
+<!-- @@@setServiceUuid -->
+<!-- $$$socketProtocol[overload1]$$$socketProtocol -->
+<h3 class="fn" id="socketProtocol"><a name="socketProtocol"></a><span class="type"><a href="qbluetoothserviceinfo.html#Protocol-enum">QBluetoothServiceInfo::Protocol</a></span> QBluetoothServiceInfo::<span class="name">socketProtocol</span>() const</h3>
+<p>Returns the protocol that the <a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a> object uses.</p>
+<!-- @@@socketProtocol -->
+<!-- $$$unregisterService[overload1]$$$unregisterService -->
+<h3 class="fn" id="unregisterService"><a name="unregisterService"></a><span class="type">bool</span> QBluetoothServiceInfo::<span class="name">unregisterService</span>()</h3>
+<p>Unregisters this service with the platform's Service Discovery Protocol (SDP) implementation. After this, the service will no longer be findable by other devices through service discovery.</p>
+<p>Returns true if the service is successfully unregistered, otherwise returns false.</p>
+<!-- @@@unregisterService -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

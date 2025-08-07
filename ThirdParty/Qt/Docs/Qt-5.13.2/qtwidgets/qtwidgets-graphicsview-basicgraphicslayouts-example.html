@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- basicgraphicslayouts.qdoc -->
+  <title>Basic Graphics Layouts Example | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Basic Graphics Layouts Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#window-class-definition">Window Class Definition</a></li>
+<li class="level1"><a href="#window-class-implementation">Window Class Implementation</a></li>
+<li class="level1"><a href="#layoutitem-class-definition">LayoutItem Class Definition</a></li>
+<li class="level1"><a href="#layoutitem-class-implementation">LayoutItem Class Implementation</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Basic Graphics Layouts Example</h1>
+<span class="subtitle"></span>
+<!-- $$$graphicsview/basicgraphicslayouts-brief -->
+<p>Demonstrates how to create basic graphics layout.</p>
+<!-- @@@graphicsview/basicgraphicslayouts -->
+<!-- $$$graphicsview/basicgraphicslayouts-description -->
+<div class="descr"> <a name="details"></a>
+<p>The Basic Graphics Layouts example shows how to use the layout classes in <a href="qgraphicsview.html">QGraphicsView</a>: <a href="qgraphicslinearlayout.html">QGraphicsLinearLayout</a> and <a href="qgraphicsgridlayout.html">QGraphicsGridLayout</a>. In addition to that it shows how to write your own custom layout item.</p>
+<p class="centerAlign"><img src="images/basicgraphicslayouts-example.png" alt="Screenshot of the Basic Layouts Example" /></p><a name="window-class-definition"></a>
+<h4 id="window-class-definition">Window Class Definition</h4>
+<p>The <code>Window</code> class is a subclass of <a href="graphicsview.html#qgraphicswidget">QGraphicsWidget</a>. It has a constructor with a <a href="graphicsview.html#qgraphicswidget">QGraphicsWidget</a> <i>parent</i> as its parameter.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> Window : <span class="keyword">public</span> <span class="type"><a href="qgraphicswidget.html">QGraphicsWidget</a></span> {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      Window(<span class="type"><a href="qgraphicswidget.html">QGraphicsWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+
+  };
+
+</pre>
+<a name="window-class-implementation"></a>
+<h4 id="window-class-implementation">Window Class Implementation</h4>
+<p>The constructor of <code>Window</code> instantiates a <a href="qgraphicslinearlayout.html">QGraphicsLinearLayout</a> object, <code>windowLayout</code>, with vertical orientation. We instantiate another <a href="qgraphicslinearlayout.html">QGraphicsLinearLayout</a> object, <code>linear</code>, whose parent is <code>windowLayout</code>. Next, we create a <code>LayoutItem</code> object, <code>item</code> and add it to <code>linear</code> with the <a href="qgraphicslinearlayout.html#addItem">addItem()</a> function. We also provide <code>item</code> with a <a href="qgraphicslinearlayout.html#setStretchFactor">stretchFactor</a>.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qgraphicslinearlayout.html">QGraphicsLinearLayout</a></span> <span class="operator">*</span>windowLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgraphicslinearlayout.html">QGraphicsLinearLayout</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Vertical);
+      <span class="type"><a href="qgraphicslinearlayout.html">QGraphicsLinearLayout</a></span> <span class="operator">*</span>linear <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgraphicslinearlayout.html">QGraphicsLinearLayout</a></span>(windowLayout);
+      LayoutItem <span class="operator">*</span>item <span class="operator">=</span> <span class="keyword">new</span> LayoutItem;
+      linear<span class="operator">-</span><span class="operator">&gt;</span>addItem(item);
+      linear<span class="operator">-</span><span class="operator">&gt;</span>setStretchFactor(item<span class="operator">,</span> <span class="number">1</span>);
+
+</pre>
+<p>We repeat the process:</p>
+<ul>
+<li>create a new <code>LayoutItem</code>,</li>
+<li>add the item <code>linear</code>, and</li>
+<li>provide a stretch factor.</li>
+</ul>
+<pre class="cpp">
+
+      item <span class="operator">=</span> <span class="keyword">new</span> LayoutItem;
+      linear<span class="operator">-</span><span class="operator">&gt;</span>addItem(item);
+      linear<span class="operator">-</span><span class="operator">&gt;</span>setStretchFactor(item<span class="operator">,</span> <span class="number">3</span>);
+      windowLayout<span class="operator">-</span><span class="operator">&gt;</span>addItem(linear);
+
+</pre>
+<p>We then add <code>linear</code> to <code>windowLayout</code>, nesting two <a href="qgraphicslinearlayout.html">QGraphicsLinearLayout</a> objects. Apart from the <a href="qgraphicslinearlayout.html">QGraphicsLinearLayout</a>, we also use a <a href="qgraphicsgridlayout.html">QGraphicsGridLayout</a> object, <code>grid</code>, which is a 4x3 grid with some cells spanning to other rows.</p>
+<p>We create seven <code>LayoutItem</code> objects and place them into <code>grid</code> with the <a href="qgraphicsgridlayout.html#addItem">addItem()</a> function as shown in the code snippet below:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qgraphicsgridlayout.html">QGraphicsGridLayout</a></span> <span class="operator">*</span>grid <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgraphicsgridlayout.html">QGraphicsGridLayout</a></span>(windowLayout);
+      item <span class="operator">=</span> <span class="keyword">new</span> LayoutItem;
+      grid<span class="operator">-</span><span class="operator">&gt;</span>addItem(item<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> <span class="number">1</span>);
+      item <span class="operator">=</span> <span class="keyword">new</span> LayoutItem;
+      item<span class="operator">-</span><span class="operator">&gt;</span>setMaximumHeight(item<span class="operator">-</span><span class="operator">&gt;</span>minimumHeight());
+      grid<span class="operator">-</span><span class="operator">&gt;</span>addItem(item<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignVCenter);
+      item <span class="operator">=</span> <span class="keyword">new</span> LayoutItem;
+      item<span class="operator">-</span><span class="operator">&gt;</span>setMaximumHeight(item<span class="operator">-</span><span class="operator">&gt;</span>minimumHeight());
+      grid<span class="operator">-</span><span class="operator">&gt;</span>addItem(item<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignVCenter);
+      item <span class="operator">=</span> <span class="keyword">new</span> LayoutItem;
+      grid<span class="operator">-</span><span class="operator">&gt;</span>addItem(item<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">2</span>);
+      item <span class="operator">=</span> <span class="keyword">new</span> LayoutItem;
+      grid<span class="operator">-</span><span class="operator">&gt;</span>addItem(item<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">2</span>);
+      item <span class="operator">=</span> <span class="keyword">new</span> LayoutItem;
+      grid<span class="operator">-</span><span class="operator">&gt;</span>addItem(item<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">2</span>);
+      item <span class="operator">=</span> <span class="keyword">new</span> LayoutItem;
+      grid<span class="operator">-</span><span class="operator">&gt;</span>addItem(item<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">2</span>);
+      windowLayout<span class="operator">-</span><span class="operator">&gt;</span>addItem(grid);
+
+</pre>
+<p>The first item we add to <code>grid</code> is placed in the top left cell, spanning four rows. The next two items are placed in the second column, and they span two rows. Each item's <a href="qgraphicslayoutitem.html#maximumHeight">maximumHeight()</a> and <a href="qgraphicslayoutitem.html#minimumHeight">minimumHeight()</a> are set to be equal so that they do not expand vertically. As a result, these items will not fit vertically in their cells. So, we specify that they should be vertically aligned in the center of the cell using <a href="../qtcore/qt.html#AlignmentFlag-enum">Qt::AlignVCenter</a>.</p>
+<p>Finally, <code>grid</code> itself is added to <code>windowLayout</code>. Unlike <a href="qgridlayout.html#addItem">QGridLayout::addItem</a>(), <a href="qgraphicsgridlayout.html#addItem">QGraphicsGridLayout::addItem</a>() requires a row and a column for its argument, specifying which cell the item should be positioned in. Also, if the <code>rowSpan</code> and <code>columnSpan</code> arguments are omitted, they will default to 1.</p>
+<p>Note that we do not specify a parent for each <code>LayoutItem</code> that we construct, as all these items will be added to <code>windowLayout</code>. When we add an item to a layout, it will be automatically reparented to the widget on which the layout is installed.</p>
+<pre class="cpp">
+
+      setLayout(windowLayout);
+      setWindowTitle(tr(<span class="string">&quot;Basic Graphics Layouts Example&quot;</span>));
+
+</pre>
+<p>Now that we have set up <code>grid</code> and added it to <code>windowLayout</code>, we install <code>windowLayout</code> onto the window object using <a href="qgraphicswidget.html#setLayout">QGraphicsWidget::setLayout</a>() and we set the window title.</p>
+<a name="layoutitem-class-definition"></a>
+<h4 id="layoutitem-class-definition">LayoutItem Class Definition</h4>
+<p>The <code>LayoutItem</code> class is a subclass of <a href="qgraphicslayoutitem.html">QGraphicsLayoutItem</a> and <a href="qgraphicsitem.html">QGraphicsItem</a>. It has a constructor, a destructor, and some required reimplementations. Since it inherits <a href="qgraphicslayoutitem.html">QGraphicsLayoutItem</a> it must reimplement {<a href="qgraphicslayoutitem.html#setGeometry">QGraphicsLayoutItem::setGeometry</a>()}{setGeometry()} and {<a href="qgraphicslayoutitem.html#sizeHint">QGraphicsLayoutItem::sizeHint</a>()}{sizeHint()}. In addition to that it inherits <a href="qgraphicsitem.html">QGraphicsItem</a>, so it must reimplement {<a href="qgraphicsitem.html#boundingRect">QGraphicsItem::boundingRect</a>()}{boundingRect()} and {<a href="qgraphicsitem.html#paint">QGraphicsItem::paint</a>()}{paint()}.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> LayoutItem : <span class="keyword">public</span> <span class="type"><a href="qgraphicslayoutitem.html">QGraphicsLayoutItem</a></span><span class="operator">,</span> <span class="keyword">public</span> <span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span>
+  {
+  <span class="keyword">public</span>:
+      LayoutItem(<span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+      <span class="operator">~</span>LayoutItem();
+      <span class="comment">// Inherited from QGraphicsLayoutItem</span>
+      <span class="type">void</span> setGeometry(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> <span class="operator">&amp;</span>geom) override;
+      <span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span> sizeHint(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>SizeHint which<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span> <span class="operator">&amp;</span>constraint <span class="operator">=</span> <span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span>()) <span class="keyword">const</span> override;
+
+      <span class="comment">// Inherited from QGraphicsItem</span>
+      <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> boundingRect() <span class="keyword">const</span> override;
+      <span class="type">void</span> paint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">*</span>painter<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qstyleoptiongraphicsitem.html">QStyleOptionGraphicsItem</a></span> <span class="operator">*</span>option<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>widget <span class="operator">=</span> <span class="number">0</span>) override;
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> <span class="operator">*</span>m_pix;
+  };
+
+</pre>
+<p>The <code>LayoutItem</code> class also has a private instance of <a href="../qtgui/qpixmap.html">QPixmap</a>, <code>m_pix</code>.</p>
+<a name="layoutitem-class-implementation"></a>
+<h4 id="layoutitem-class-implementation">LayoutItem Class Implementation</h4>
+<p>In <code>LayoutItem</code>'s constructor, <code>m_pix</code> is instantiated and the <code>block.png</code> image is loaded into it.</p>
+<pre class="cpp">
+
+  LayoutItem<span class="operator">::</span>LayoutItem(<span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span>parent<span class="comment">/* = 0*/</span>)
+      : <span class="type"><a href="qgraphicslayoutitem.html">QGraphicsLayoutItem</a></span>()<span class="operator">,</span> <span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span>(parent)
+  {
+      m_pix <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span>(QLatin1String(<span class="string">&quot;:/images/block.png&quot;</span>));
+      setGraphicsItem(<span class="keyword">this</span>);
+  }
+
+</pre>
+<p>We use the <a href="../qtcore/qtglobal.html#Q_UNUSED">Q_UNUSED</a>() macro to prevent the compiler from generating warnings regarding unused parameters.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> LayoutItem<span class="operator">::</span>paint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">*</span>painter<span class="operator">,</span>
+      <span class="keyword">const</span> <span class="type"><a href="qstyleoptiongraphicsitem.html">QStyleOptionGraphicsItem</a></span> <span class="operator">*</span>option<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>widget <span class="comment">/*= 0*/</span>)
+  {
+      Q_UNUSED(widget);
+      Q_UNUSED(option);
+
+      <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> frame(<span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>(<span class="number">0</span><span class="operator">,</span><span class="number">0</span>)<span class="operator">,</span> geometry()<span class="operator">.</span>size());
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> w <span class="operator">=</span> m_pix<span class="operator">-</span><span class="operator">&gt;</span>width();
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> h <span class="operator">=</span> m_pix<span class="operator">-</span><span class="operator">&gt;</span>height();
+      <span class="type"><a href="../qtgui/qgradient.html#QGradientStops-typedef">QGradientStops</a></span> stops;
+
+</pre>
+<p>The idea behind the <code>paint()</code> function is to paint the background rect then paint a rect around the pixmap.</p>
+<pre class="cpp">
+
+      <span class="comment">// paint a background rect (with gradient)</span>
+      <span class="type"><a href="../qtgui/qlineargradient.html">QLinearGradient</a></span> gradient(frame<span class="operator">.</span>topLeft()<span class="operator">,</span> frame<span class="operator">.</span>topLeft() <span class="operator">+</span> <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>(<span class="number">200</span><span class="operator">,</span><span class="number">200</span>));
+      stops <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtgui/qgradient.html#QGradientStop-typedef">QGradientStop</a></span>(<span class="number">0.0</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="number">60</span><span class="operator">,</span> <span class="number">60</span><span class="operator">,</span>  <span class="number">60</span>));
+      stops <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtgui/qgradient.html#QGradientStop-typedef">QGradientStop</a></span>(frame<span class="operator">.</span>height() <span class="operator">/</span> <span class="number">2</span> <span class="operator">/</span> frame<span class="operator">.</span>height()<span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="number">102</span><span class="operator">,</span> <span class="number">176</span><span class="operator">,</span> <span class="number">54</span>));
+
+      <span class="comment">//stops &lt;&lt; QGradientStop(((frame.height() + h)/2 )/frame.height(), QColor(157, 195,  55));</span>
+      stops <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtgui/qgradient.html#QGradientStop-typedef">QGradientStop</a></span>(<span class="number">1.0</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="number">215</span><span class="operator">,</span> <span class="number">215</span><span class="operator">,</span> <span class="number">215</span>));
+      gradient<span class="operator">.</span>setStops(stops);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setBrush(<span class="type"><a href="../qtgui/qbrush.html">QBrush</a></span>(gradient));
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawRoundedRect(frame<span class="operator">,</span> <span class="number">10.0</span><span class="operator">,</span> <span class="number">10.0</span>);
+
+      <span class="comment">// paint a rect around the pixmap (with gradient)</span>
+      <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> pixpos <span class="operator">=</span> frame<span class="operator">.</span>center() <span class="operator">-</span> (<span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>(w<span class="operator">,</span> h) <span class="operator">/</span> <span class="number">2</span>);
+      <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> innerFrame(pixpos<span class="operator">,</span> <span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span>(w<span class="operator">,</span> h));
+      innerFrame<span class="operator">.</span>adjust(<span class="operator">-</span><span class="number">4</span><span class="operator">,</span> <span class="operator">-</span><span class="number">4</span><span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> <span class="number">4</span>);
+      gradient<span class="operator">.</span>setStart(innerFrame<span class="operator">.</span>topLeft());
+      gradient<span class="operator">.</span>setFinalStop(innerFrame<span class="operator">.</span>bottomRight());
+      stops<span class="operator">.</span>clear();
+      stops <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtgui/qgradient.html#QGradientStop-typedef">QGradientStop</a></span>(<span class="number">0.0</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="number">215</span><span class="operator">,</span> <span class="number">255</span><span class="operator">,</span> <span class="number">200</span>));
+      stops <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtgui/qgradient.html#QGradientStop-typedef">QGradientStop</a></span>(<span class="number">0.5</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="number">102</span><span class="operator">,</span> <span class="number">176</span><span class="operator">,</span> <span class="number">54</span>));
+      stops <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtgui/qgradient.html#QGradientStop-typedef">QGradientStop</a></span>(<span class="number">1.0</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span>  <span class="number">0</span>));
+      gradient<span class="operator">.</span>setStops(stops);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setBrush(<span class="type"><a href="../qtgui/qbrush.html">QBrush</a></span>(gradient));
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawRoundedRect(innerFrame<span class="operator">,</span> <span class="number">10.0</span><span class="operator">,</span> <span class="number">10.0</span>);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawPixmap(pixpos<span class="operator">,</span> <span class="operator">*</span>m_pix);
+  }
+
+</pre>
+<p>The reimplementation of <a href="qgraphicsitem.html#boundingRect">boundingRect()</a> will set the top left corner at (0,0), and the size of it will be the size of the layout items <a href="qgraphicslayoutitem.html#geometry">geometry()</a>. This is the area that we paint within.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> LayoutItem<span class="operator">::</span>boundingRect() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span>(<span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>(<span class="number">0</span><span class="operator">,</span><span class="number">0</span>)<span class="operator">,</span> geometry()<span class="operator">.</span>size());
+  }
+
+</pre>
+<p>The reimplementation of <a href="qgraphicslayoutitem.html#setGeometry">setGeometry()</a> simply calls its baseclass implementation. However, since this will change the boundingRect we must also call <a href="qgraphicsitem.html#prepareGeometryChange">prepareGeometryChange()</a>. Finally, we move the item according to <code>geom.topLeft()</code>.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> LayoutItem<span class="operator">::</span>setGeometry(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> <span class="operator">&amp;</span>geom)
+  {
+      prepareGeometryChange();
+      <span class="type"><a href="qgraphicslayoutitem.html">QGraphicsLayoutItem</a></span><span class="operator">::</span>setGeometry(geom);
+      setPos(geom<span class="operator">.</span>topLeft());
+  }
+
+</pre>
+<p>Since we don't want the size of the item to be smaller than the pixmap, we must make sure that we return a size hint that is larger than <code>m_pix</code>. We also add some extra space around for borders that we will paint later. Alternatively, you could scale the pixmap to prevent the item from becoming smaller than the pixmap. The preferred size is the same as the minimum size hint, while we set maximum to be a large value</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span> LayoutItem<span class="operator">::</span>sizeHint(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>SizeHint which<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span> <span class="operator">&amp;</span>constraint) <span class="keyword">const</span>
+  {
+      <span class="keyword">switch</span> (which) {
+      <span class="keyword">case</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>MinimumSize:
+      <span class="keyword">case</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>PreferredSize:
+          <span class="comment">// Do not allow a size smaller than the pixmap with two frames around it.</span>
+          <span class="keyword">return</span> m_pix<span class="operator">-</span><span class="operator">&gt;</span>size() <span class="operator">+</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(<span class="number">12</span><span class="operator">,</span> <span class="number">12</span>);
+      <span class="keyword">case</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>MaximumSize:
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span>(<span class="number">1000</span><span class="operator">,</span><span class="number">1000</span>);
+      <span class="keyword">default</span>:
+          <span class="keyword">break</span>;
+      }
+      <span class="keyword">return</span> constraint;
+  }
+
+</pre>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/graphicsview/basicgraphicslayouts?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@graphicsview/basicgraphicslayouts -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

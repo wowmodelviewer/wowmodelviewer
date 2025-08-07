@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- scalabilityintro.qdoc -->
+  <title>Scalability | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Scalability</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#resizing-application-windows-dynamically">Resizing Application Windows Dynamically</a></li>
+<li class="level1"><a href="#laying-out-screen-controls-dynamically">Laying Out Screen Controls Dynamically</a></li>
+<li class="level1"><a href="#using-bindings">Using Bindings</a></li>
+<li class="level1"><a href="#handling-pixel-density">Handling Pixel Density</a></li>
+<li class="level2"><a href="#high-dpi-scaling-on-macos-and-ios">High DPI Scaling on macOS and iOS</a></li>
+<li class="level2"><a href="#calculating-scaling-ratio">Calculating Scaling Ratio</a></li>
+<li class="level1"><a href="#loading-files-depending-on-platform">Loading Files Depending on Platform</a></li>
+<li class="level1"><a href="#loading-components-on-demand">Loading Components on Demand</a></li>
+<li class="level1"><a href="#switching-orientation">Switching Orientation</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Scalability</h1>
+<span class="subtitle"></span>
+<!-- $$$scalability.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>When you develop applications for several different mobile device platforms, you face the following challenges:</p>
+<ul>
+<li>Mobile device platforms support devices with varying screen configurations: size, aspect ratio, orientation, and density.</li>
+<li>Different platforms have different UI conventions and you need to meet the users' expectations on each platform.</li>
+</ul>
+<p>Qt Quick enables you to develop applications that can run on different types of devices, such as tablets and handsets. In particular, they can cope with different screen configurations. However, there is always a certain amount of fixing and polishing needed to create an optimal user experience for each target platform.</p>
+<p>You need to consider scalability when:</p>
+<ul>
+<li>You want to deploy your application to more than one device platform, such as Android and iOS, or more than one device screen configuration.</li>
+<li>Your want to be prepared for new devices that might appear on the market after your initial deployment.</li>
+</ul>
+<p>To implement scalable applications using <a href="../qtquick/qtquick-index.html">Qt Quick</a>:</p>
+<ul>
+<li>Design UIs using <i>Qt Quick Controls</i> that provide sets of UI controls.</li>
+<li>Define layouts using <i>Qt Quick Layouts</i>, which can resize their items.</li>
+<li>Use <i>property binding</i> to implement use cases not covered by the layouts. For example, to display alternative versions of images on screens with low and high pixel density or automatically adapt view contents according to the current screen orientation.</li>
+<li>Select a reference device and calculate a <i>scaling ratio</i> for adjusting image and font sizes and margins to the actual screen size.</li>
+<li>Load platform-specific assets using <i>file selectors</i>.</li>
+<li>Load components on demand by using a <i>Loader</i>.</li>
+</ul>
+<p>Consider the following patterns when designing your application:</p>
+<ul>
+<li>The contents of a view might be quite similar on all screen sizes, but with an expanded content area. If you use the <a href="../qtquickcontrols/qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a> QML type from Qt Quick Controls, it will automatically calculate the window size based on the sizes of its content items. If you use Qt Quick Layouts to position the content items, they will automatically resize the items pushed to them.</li>
+<li>The contents of an entire page in a smaller device could form a component element of a layout in a larger device. Therefore, consider making that a separate component (that is, defined in a separate QML file), and in the smaller device, the view will simply contain an instance of that component. On the larger device, there may be enough space to use loaders to show additional items. For example, in an email viewer, if the screen is large enough, it may be possible to show the email list view, and the email reader view side by side.</li>
+<li>For games, you would typically want to create a game board that does not scale, so as not to provide an unfair advantage to players on larger screens. One solution is to define a <i>safe zone</i> that fits the screen with the smallest supported aspect ratio (usually, 3:2), and add decorative-only content in the space that will be hidden on a 4:3 or 16:9 screen.</li>
+</ul>
+<a name="resizing-application-windows-dynamically"></a>
+<h2 id="resizing-application-windows-dynamically">Resizing Application Windows Dynamically</h2>
+<p><a href="../qtquickcontrols/qtquickcontrols-index.html">Qt Quick Controls</a> provide a set of UI controls to create user interfaces in Qt Quick. Typically, you declare an <a href="../qtquickcontrols/qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a> control as the root item of your application. The <a href="../qtquickcontrols/qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a> adds convenience for positioning other controls, such as <a href="../qtquickcontrols/qml-qtquick-controls2-menubar.html">MenuBar</a>, <a href="../qtquickcontrols/qml-qtquick-controls2-toolbar.html">ToolBar</a>, and <a href="../qtquickcontrols1/qml-qtquick-controls-statusbar.html">StatusBar</a> in a platform independent manner. The <a href="../qtquickcontrols/qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a> uses the size constraints of the content items as input when calculating the effective size constraints of the actual window.</p>
+<p>In addition to controls that define standard parts of application windows, controls are provided for creating views and menus, as well as presenting or receiving input from users. You can use <a href="../qtquickcontrols1/qtquickcontrolsstyles-index.html">Qt Quick Controls 1 Styles</a> to apply custom styling to the predefined controls. For examples of using the styles, see <a href="../qtquickcontrols1/qtquickcontrols1-touch-example.html">Qt Quick Controls 1 - Touch Gallery</a>.</p>
+<p>Qt Quick Controls, such as the <a href="../qtquickcontrols/qml-qtquick-controls2-toolbar.html">ToolBar</a>, do not provide a layout of their own, but require you to position their contents. For this, you can use Qt Quick Layouts.</p>
+<a name="laying-out-screen-controls-dynamically"></a>
+<h2 id="laying-out-screen-controls-dynamically">Laying Out Screen Controls Dynamically</h2>
+<p><a href="../qtquick/qtquicklayouts-index.html">Qt Quick Layouts</a> provide ways of laying out screen controls in a row, column, or grid, using the <a href="../qtquick/qml-qtquick-layouts-rowlayout.html">RowLayout</a>, <a href="../qtquick/qml-qtquick-layouts-columnlayout.html">ColumnLayout</a>, and <a href="../qtquick/qml-qtquick-layouts-gridlayout.html">GridLayout</a> QML types. The properties for these QML types hold their layout direction and spacing between the cells.</p>
+<p>You can use the <a href="../qtquick/qml-qtquick-layouts-layout.html">Layout</a> QML type to attach additional properties to the items pushed to the layouts. For example, you can specify mininum, maximum, and preferred values for item height, width, and size.</p>
+<p>The layouts ensure that your UIs are scaled properly when windows and screens are resized and always use the maximum amount of space available.</p>
+<p>A specific use case for the <a href="../qtquick/qml-qtquick-layouts-gridlayout.html">GridLayout</a> type is to use it as a row or a column depending on the screen orientation.</p>
+<p class="centerAlign"><img src="images/scalability-gridlayout.png" alt="" /></p><p>The following code snippet uses the <code>flow</code> property to set the flow of the grid from left to right (as a row) when the screen width is greater than the screen height and from top to bottom (as a column) otherwise:</p>
+<pre class="cpp">
+
+  ApplicationWindow {
+      id: root
+      visible: <span class="keyword">true</span>
+      width: <span class="number">480</span>
+      height: <span class="number">620</span>
+
+      GridLayout {
+          anchors<span class="operator">.</span>fill: parent
+          anchors<span class="operator">.</span>margins: <span class="number">20</span>
+          rowSpacing: <span class="number">20</span>
+          columnSpacing: <span class="number">20</span>
+          flow:  width <span class="operator">&gt;</span> height <span class="operator">?</span> GridLayout<span class="operator">.</span>LeftToRight : GridLayout<span class="operator">.</span>TopToBottom
+          Rectangle {
+              Layout<span class="operator">.</span>fillWidth: <span class="keyword">true</span>
+              Layout<span class="operator">.</span>fillHeight: <span class="keyword">true</span>
+              color: <span class="string">&quot;#5d5b59&quot;</span>
+              Label {
+                  anchors<span class="operator">.</span>centerIn: parent
+                  text: <span class="string">&quot;Top or left&quot;</span>
+                  color: <span class="string">&quot;white&quot;</span>
+              }
+          }
+          Rectangle {
+              Layout<span class="operator">.</span>fillWidth: <span class="keyword">true</span>
+              Layout<span class="operator">.</span>fillHeight: <span class="keyword">true</span>
+              color: <span class="string">&quot;#1e1b18&quot;</span>
+              Label {
+                  anchors<span class="operator">.</span>centerIn: parent
+                  text: <span class="string">&quot;Bottom or right&quot;</span>
+                  color: <span class="string">&quot;white&quot;</span>
+              }
+          }
+      }
+  }
+
+</pre>
+<p>Constantly resizing and recalculating screens comes with a performance cost. Mobile and embedded devices might not have the power required to recalculate the size and position of animated objects for every frame, for example. If you run into performance problems when using layouts, consider using some other methods, such as bindings, instead.</p>
+<p>Here are some things not to do with layouts:</p>
+<ul>
+<li>Do not have bindings to the x, y, width, or height properties of items in a Layout, since this would conflict with the goal of the Layout, and also cause binding loops.</li>
+<li>Do not define complex JavaScript functions that are regularly evaluated. This will cause poor performance, particularly during animated transitions.</li>
+<li>Do not make assumptions about the container size, or about the size of child items. Try to make flexible layout definitions that can absorb changes in the available space.</li>
+<li>Do not use layouts if you want the design to be pixel perfect. Content items will be automatically resized and positioned depending on the space available.</li>
+</ul>
+<a name="using-bindings"></a>
+<h2 id="using-bindings">Using Bindings</h2>
+<p>If Qt Quick Layouts do not fit your needs, you can fall back to using <a href="../qtqml/qtqml-syntax-propertybinding.html">property binding</a>. Binding enables objects to automatically update their properties in response to changing attributes in other objects or the occurrence of some external event.</p>
+<p>When an object's property is assigned a value, it can either be assigned a static value, or bound to a JavaScript expression. In the former case, the property's value will not change unless a new value is assigned to the property. In the latter case, a property binding is created and the property's value is automatically updated by the QML engine whenever the value of the evaluated expression changes.</p>
+<p>This type of positioning is the most highly dynamic. However, constantly evaluating JavaScript expressions comes with a performance cost.</p>
+<p>You can use bindings to handle low and high pixel density on platforms that do not have automatic support for it (like macOS and iOS do). The following code snippet uses the <a href="../qtquick/qml-qtquick-window-screen.html">Screen.PixelDensity</a> attached property to specify different images to display on screens with low, high, or normal pixel density:</p>
+<pre class="cpp">
+
+  Image {
+      source: {
+          <span class="keyword">if</span> (Screen<span class="operator">.</span>PixelDensity <span class="operator">&lt;</span> <span class="number">40</span>)
+          <span class="string">&quot;image_low_dpi.png&quot;</span>
+          <span class="keyword">else</span> <span class="keyword">if</span> (Screen<span class="operator">.</span>PixelDensity <span class="operator">&gt;</span> <span class="number">300</span>)
+          <span class="string">&quot;image_high_dpi.png&quot;</span>
+          <span class="keyword">else</span>
+          <span class="string">&quot;image.png&quot;</span>
+          }
+      }
+
+</pre>
+<p>On macOS and iOS, you can provide alternative resources with double the size and the <i>@2x</i> identifier for icons and images and place them in the resource file. On Retina displays, the @2x versions are used automatically.</p>
+<p>For example, the following code snippet will try to load <i>artwork@2x.png</i> on Retina displays:</p>
+<pre class="cpp">
+
+  Image {
+      source: <span class="string">&quot;artwork.png&quot;</span>
+  }
+
+</pre>
+<a name="handling-pixel-density"></a>
+<h2 id="handling-pixel-density">Handling Pixel Density</h2>
+<p>Some QML types, such as <a href="../qdoc/09-qdoc-commands-includingimages.html#image">Image</a>, <a href="../qtquick/qml-qtquick-borderimage.html">BorderImage</a>, and <a href="../qtquick/qml-qtquick-text.html">Text</a>, are automatically scaled according to the properties specified for them. If the width and height of an Image are not specified, it automatically uses the size of the source image, specified using the <code>source</code> property. By default, specifying the width and height causes the image to be scaled to that size. This behavior can be changed by setting the <code>fillMode</code> property, allowing the image to be stretched and tiled instead. However, the original image size might appear too small on high DPI displays.</p>
+<p>A <a href="../qtquick/qml-qtquick-borderimage.html">BorderImage</a> is used to create borders out of images by scaling or tiling parts of each image. It breaks a source image into 9 regions that are scaled or tiled according to property values. However, the corners are not scaled at all, which can make the results less than optimal on high DPI displays.</p>
+<p>A <a href="../qtquick/qml-qtquick-text.html">Text</a> QML type attempts to determine how much room is needed and set the <code>width</code> and <code>height</code> properties accordingly, unless they are explicitly set. The <code>fontPointSize</code> property sets the point size in a device-independent manner. However, specifying fonts in points and other sizes in pixels causes problems, because points are independent of the display density. A frame around a string that looks correct on low DPI displays is likely to become too small on high DPI displays, causing the text to be clipped.</p>
+<p>The level of high DPI support and the techniques used by the supported platforms varies from platform to platform. The following sections describe different approaches to scaling screen contents on high DPI displays.</p>
+<p>For more information about high DPI support in Qt and the supported platforms, see <a href="highdpi.html">High DPI Displays</a>.</p>
+<a name="high-dpi-scaling-on-macos-and-ios"></a>
+<h3 id="high-dpi-scaling-on-macos-and-ios">High DPI Scaling on macOS and iOS</h3>
+<p>On macOS and iOS, applications use high DPI scaling that is an alternative to the traditional DPI scaling. In the traditional approach, the application is presented with an DPI value used to multiply font sizes, layouts, and so on. In the new approach, the operating system provides Qt with a scaling ratio that is used to scale graphics output: allocate larger buffers and set a scaling transform.</p>
+<p>The advantage of this approach is that that vector graphics and fonts scale automatically and existing applications tend to work unmodified. For raster content, high-resolution alternative resources are needed, however.</p>
+<p>Scaling is implemented for the <a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a> and <a href="../qtgui/qtwidgets-module.html">QtWidgets</a> stacks, as well as general support in <a href="../qtgui/qtgui-module.html">QtGui</a> and the Cocoa platform plugin.</p>
+<p>The OS scales window, event, and desktop geometry. The Cocoa platform plugin sets the scaling ratio as <a href="../qtgui/qwindow.html#devicePixelRatio">QWindow::devicePixelRatio</a>() or <a href="../qtgui/qscreen.html#devicePixelRatio-prop">QScreen::devicePixelRatio</a>(), as well as on the backing store.</p>
+<p>For <a href="../qtgui/qtwidgets-module.html">QtWidgets</a>, <a href="../qtgui/qpainter.html">QPainter</a> picks up <code>devicePixelRatio()</code> from the backing store and interprets it as a scaling ratio.</p>
+<p>However, in OpenGL pixels are always device pixels. For example, geometry passed to glViewport() needs to be scaled by devicePixelRatio().</p>
+<p>The specified font sizes (in points or pixels) do not change and strings retain their relative size compared to the rest of the UI. Fonts are scaled as a part of painting, so that a size 12 font effectively becomes a size 24 font with 2x scaling, regardless of whether it is specified in points or in pixels. The <i>px</i> unit is interpreted as device independent pixels to ensure that fonts do not appear smaller on a high DPI display.</p>
+<a name="calculating-scaling-ratio"></a>
+<h3 id="calculating-scaling-ratio">Calculating Scaling Ratio</h3>
+<p>You can select one high DPI device as a reference device and calculate a scaling ratio for adjusting image and font sizes and margins to the actual screen size.</p>
+<p>The following code snippet uses reference values for DPI, height, and width from the Nexus 5 Android device, the actual screen size returned by the <a href="../qtcore/qrect.html">QRect</a> class, and the logical DPI value of the screen returned by the <code>qApp</code> global pointer to calculate a scaling ratio for image sizes and margins (<code>m_ratio</code>) and another for font sizes (<code>m_ratioFont</code>):</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> refDpi <span class="operator">=</span> <span class="number">216.</span>;
+  <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> refHeight <span class="operator">=</span> <span class="number">1776.</span>;
+  <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> refWidth <span class="operator">=</span> <span class="number">1080.</span>;
+  <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> rect <span class="operator">=</span> <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span><span class="operator">::</span>primaryScreen()<span class="operator">-</span><span class="operator">&gt;</span>geometry();
+  <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> height <span class="operator">=</span> <a href="../qtcore/qtglobal.html#qMax">qMax</a>(rect<span class="operator">.</span>width()<span class="operator">,</span> rect<span class="operator">.</span>height());
+  <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> width <span class="operator">=</span> <a href="../qtcore/qtglobal.html#qMin">qMin</a>(rect<span class="operator">.</span>width()<span class="operator">,</span> rect<span class="operator">.</span>height());
+  <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> dpi <span class="operator">=</span> <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span><span class="operator">::</span>primaryScreen()<span class="operator">-</span><span class="operator">&gt;</span>logicalDotsPerInch();
+  m_ratio <span class="operator">=</span> <a href="../qtcore/qtglobal.html#qMin">qMin</a>(height<span class="operator">/</span>refHeight<span class="operator">,</span> width<span class="operator">/</span>refWidth);
+  m_ratioFont <span class="operator">=</span> <a href="../qtcore/qtglobal.html#qMin">qMin</a>(height<span class="operator">*</span>refDpi<span class="operator">/</span>(dpi<span class="operator">*</span>refHeight)<span class="operator">,</span> width<span class="operator">*</span>refDpi<span class="operator">/</span>(dpi<span class="operator">*</span>refWidth));
+
+</pre>
+<p>For a reasonable scaling ratio, the height and width values must be set according to the default orientation of the reference device, which in this case is the portrait orientation.</p>
+<p>The following code snippet sets the font scaling ratio to <code>1</code> if it would be less than one and thus cause the font sizes to become too small:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> tempTimeColumnWidth <span class="operator">=</span> <span class="number">600</span>;
+  <span class="type">int</span> tempTrackHeaderWidth <span class="operator">=</span> <span class="number">270</span>;
+  <span class="keyword">if</span> (m_ratioFont <span class="operator">&lt;</span> <span class="number">1.</span>) {
+      m_ratioFont <span class="operator">=</span> <span class="number">1</span>;
+
+</pre>
+<p>You should experiment with the target devices to find edge cases that require additional calculations. Some screens might just be too short or narrow to fit all the planned content and thus require their own layout. For example, you might need to hide or replace some content on screens with atypical aspect ratios, such as 1:1.</p>
+<p>The scaling ratio can be applied to all sizes in a <a href="../qtqml/qqmlpropertymap.html">QQmlPropertyMap</a> to scale images, fonts, and margins:</p>
+<pre class="cpp">
+
+  m_sizes <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtqml/qqmlpropertymap.html">QQmlPropertyMap</a></span>(<span class="keyword">this</span>);
+  m_sizes<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;trackHeaderHeight&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyRatio(<span class="number">270</span>)));
+  m_sizes<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;trackHeaderWidth&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyRatio(tempTrackHeaderWidth)));
+  m_sizes<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;timeColumnWidth&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyRatio(tempTimeColumnWidth)));
+  m_sizes<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;conferenceHeaderHeight&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyRatio(<span class="number">158</span>)));
+  m_sizes<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;dayWidth&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyRatio(<span class="number">150</span>)));
+  m_sizes<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;favoriteImageHeight&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyRatio(<span class="number">76</span>)));
+  m_sizes<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;favoriteImageWidth&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyRatio(<span class="number">80</span>)));
+  m_sizes<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;titleHeight&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyRatio(<span class="number">60</span>)));
+  m_sizes<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;backHeight&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyRatio(<span class="number">74</span>)));
+  m_sizes<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;backWidth&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyRatio(<span class="number">42</span>)));
+  m_sizes<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;logoHeight&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyRatio(<span class="number">100</span>)));
+  m_sizes<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;logoWidth&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyRatio(<span class="number">286</span>)));
+
+  m_fonts <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtqml/qqmlpropertymap.html">QQmlPropertyMap</a></span>(<span class="keyword">this</span>);
+  m_fonts<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;six_pt&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyFontRatio(<span class="number">9</span>)));
+  m_fonts<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;seven_pt&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyFontRatio(<span class="number">10</span>)));
+  m_fonts<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;eight_pt&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyFontRatio(<span class="number">12</span>)));
+  m_fonts<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;ten_pt&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyFontRatio(<span class="number">14</span>)));
+  m_fonts<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;twelve_pt&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyFontRatio(<span class="number">16</span>)));
+
+  m_margins <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtqml/qqmlpropertymap.html">QQmlPropertyMap</a></span>(<span class="keyword">this</span>);
+  m_margins<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;five&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyRatio(<span class="number">5</span>)));
+  m_margins<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;seven&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyRatio(<span class="number">7</span>)));
+  m_margins<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;ten&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyRatio(<span class="number">10</span>)));
+  m_margins<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;fifteen&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyRatio(<span class="number">15</span>)));
+  m_margins<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;twenty&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyRatio(<span class="number">20</span>)));
+  m_margins<span class="operator">-</span><span class="operator">&gt;</span>insert(QLatin1String(<span class="string">&quot;thirty&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(applyRatio(<span class="number">30</span>)));
+
+</pre>
+<p>The functions in the following code snippet apply the scaling ratio to fonts, images, and margins:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> Theme<span class="operator">::</span>applyFontRatio(<span class="keyword">const</span> <span class="type">int</span> value)
+  {
+      <span class="keyword">return</span> <span class="type">int</span>(value <span class="operator">*</span> m_ratioFont);
+  }
+
+  <span class="type">int</span> Theme<span class="operator">::</span>applyRatio(<span class="keyword">const</span> <span class="type">int</span> value)
+  {
+      <span class="keyword">return</span> <a href="../qtcore/qtglobal.html#qMax">qMax</a>(<span class="number">2</span><span class="operator">,</span> <span class="type">int</span>(value <span class="operator">*</span> m_ratio));
+  }
+
+</pre>
+<p>This technique gives you reasonable results when the screen sizes of the target devices do not differ too much. If the differences are huge, consider creating several different layouts with different reference values.</p>
+<a name="loading-files-depending-on-platform"></a>
+<h2 id="loading-files-depending-on-platform">Loading Files Depending on Platform</h2>
+<p>You can use the <a href="../qtqml/qqmlfileselector.html">QQmlFileSelector</a> to apply a <a href="../qtcore/qfileselector.html">QFileSelector</a> to QML file loading. This enables you to load altenative resources depending on the platform on which the application is run. For example, you can use the <code>+android</code> file selector to load different image files when run on Android devices.</p>
+<p>You can use file selectors together with singleton objects to access a single instance of an object on a particular platform.</p>
+<p>File selectors are static and enforce a file structure where platform-specific files are stored in subfolders named after the platform. If you need a more dynamic solution for loading parts of your UI on demand, you can use a Loader.</p>
+<p>The target platforms might automate the loading of alternative resources for different display densities in various ways. On iOS, the <i>@2x</i> filename suffix is used to indicate high DPI versions of images. The <a href="../qdoc/09-qdoc-commands-includingimages.html#image">Image</a> QML type and the <a href="../qtgui/qicon.html">QIcon</a> class automatically load @2x versions of images and icons if they are provided. The <a href="../qtgui/qimage.html">QImage</a> and <a href="../qtgui/qpixmap.html">QPixmap</a> classes automatically set the <code>devicePixelRatio</code> of @2x versions of images to <code>2</code>, but you need to add code to actually use the @2x versions:</p>
+<pre class="cpp">
+
+  <span class="keyword">if</span> ( <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span><span class="operator">::</span>primaryScreen()<span class="operator">-</span><span class="operator">&gt;</span>devicePixelRatio() <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">2</span> ) {
+      imageVariant <span class="operator">=</span> <span class="string">&quot;@2x&quot;</span>;
+  } <span class="keyword">else</span> {
+      imageVariant <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+  }
+
+</pre>
+<p>Android defines generalized screen sizes (small, normal, large, xlarge) and densities (ldpi, mdpi, hdpi, xhdpi, xxhdpi, and xxxhdpi) for which you can create alternative resources. Android detects the current device configuration at runtime and loads the appropriate resources for your application. However, beginning with Android 3.2 (API level 13), these size groups are deprecated in favor of a new technique for managing screen sizes based on the available screen width.</p>
+<a name="loading-components-on-demand"></a>
+<h2 id="loading-components-on-demand">Loading Components on Demand</h2>
+<p>A <a href="../qtquick/qml-qtquick-loader.html">Loader</a> can load a QML file (using the <code>source</code> property) or a Component object (using the <code>sourceComponent</code> property). It is useful for delaying the creation of a component until it is required. For example, when a component should be created on demand, or when a component should not be created unnecessarily for performance reasons.</p>
+<p>You can also use loaders to react to situations where parts of your UI are not needed on a particular platform, because the platform does not support some functionality. Instead of displaying a view that is not needed on the device the application is running on, you can determine that the view is hidden and use loaders to display something else in its place.</p>
+<a name="switching-orientation"></a>
+<h2 id="switching-orientation">Switching Orientation</h2>
+<p>The <a href="../qtquick/qml-qtquick-window-screen.html">Screen.orientation</a> attached property contains the current orientation of the screen, from the accelerometer (if available). On a desktop computer, this value typically does not change.</p>
+<p>If <code>primaryOrientation</code> follows <code>orientation</code>, it means that the screen automatically rotates all content that is displayed, depending on how you hold the device. If orientation changes even though <code>primaryOrientation</code> does not change, the device might not rotate its own display. In that case, you may need to use <a href="../qtquick/qml-qtquick-item.html#rotation-prop">Item.rotation</a> or <a href="../qtquick/qml-qtquick-item.html#transform-prop">Item.transform</a> to rotate your content.</p>
+<p>Application top-level page definitions and reusable component definitions should use one QML layout definition for the layout structure. This single definition should include the layout design for separate device orientations and aspect ratios. The reason for this is that performance during an orientation switch is critical, and it is therefore a good idea to ensure that all of the components needed by both orientations are loaded when the orientation changes.</p>
+<p>On the contrary, you should perform thorough tests if you choose to use a <a href="../qtquick/qml-qtquick-loader.html">Loader</a> to load additional QML that is needed in separate orientations, as this will affect the performance of the orientation change.</p>
+<p>In order to enable layout animations between the orientations, the anchor definitions must reside within the same containing component. Therefore the structure of a page or a component should consist of a common set of child components, a common set of anchor definitions, and a collection of states (defined in a <a href="../qtquick/qml-qtquick-stategroup.html">StateGroup</a>) representing the different aspect ratios supported by the component.</p>
+<p>If a component contained within a page needs to be hosted in numerous different form factor definitions, then the layout states of the view should depend on the aspect ratio of the page (its immediate container). Similarly, different instances of a component might be situated within numerous different containers in a UI, and so its layout states should be determined by the aspect ratio of its parent. The conclusion is that layout states should always follow the aspect ratio of the direct container (not the &quot;orientation&quot; of the current device screen).</p>
+<p>Within each layout <a href="../qtqml/qml-qtqml-statemachine-state.html">State</a>, you should define the relationships between items using native QML layout definitions. See below for more information. During transitions between the states (triggered by the top level orientation change), in the case of anchor layouts, <a href="../qtquick/qml-qtquick-anchoranimation.html">AnchorAnimation</a> elements can be used to control the transitions. In some cases, you can also use a <a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a> on e.g&#x2e; the width of an item. Remember to avoid complex JavaScript calculations during each frame of animation. Using simple anchor definitions and anchor animations can help with this in the majority of cases.</p>
+<p>There are a few additional cases to consider:</p>
+<ul>
+<li>What if you have a single page that looks completely different between landscape and portrait, that is, all of the child items are different? For each page, have two child components, with separate layout definitions, and make one or other of the items have zero opacity in each state. You can use a cross-fade animation by simply applying a <a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a> transition to the opacity.</li>
+<li>What if you have a single page that shares 30% or more of the same layout contents between portrait and landscape? In that case, consider having one component with landscape and portrait states, and a collection of separate child items whose opacity (or position) depends on the orientation state. This will enable you to use layout animations for the items that are shared between the orientations, whilst the other items are either faded in/out, or animated on/off screen.</li>
+<li>What if you have two pages on a handheld device that need to be on screen at the same time, for example on a larger form factor device? In this case, notice that your view component will no longer be occupying the full screen. Therefore it's important to remember in all components (in particular, list delegate items) should depend on the size of the containing component width, not on the screen width. It may be necessary to set the width in a Component.onCompleted() handler in this case, to ensure that the list item delegate has been constructed before the value is set.</li>
+<li>What if the two orientations take up too much memory to have them both in memory at once? Use a <a href="../qtquick/qml-qtquick-loader.html">Loader</a> if necessary, if you cannot keep both versions of the view in memory at once, but beware performance on the cross-fade animation during layout switch. One solution could be to have two &quot;splash screen&quot; items that are children of the Page, then you cross fade between those during rotation. Then you can use a <a href="../qtquick/qml-qtquick-loader.html">Loader</a> to load another child component that loads the actual model data to another child Item, and cross-fade to that when the <a href="../qtquick/qml-qtquick-loader.html">Loader</a> has completed.</li>
+</ul>
+</div>
+<!-- @@@scalability.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

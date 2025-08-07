@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickfolderlistmodel.cpp -->
+  <title>FolderListModel QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >FolderListModel QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#filtering">Filtering</a></li>
+<li class="level2"><a href="#example-usage">Example Usage</a></li>
+<li class="level2"><a href="#path-separators">Path Separators</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">FolderListModel QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$FolderListModel-brief -->
+<p>The <a href="qml-qt-labs-folderlistmodel-folderlistmodel.html">FolderListModel</a> provides a model of the contents of a file system folder. <a href="#details">More...</a></p>
+<!-- @@@FolderListModel -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import Qt.labs.folderlistmodel 2.13</td></tr></table></div><ul>
+<li><a href="qml-qt-labs-folderlistmodel-folderlistmodel-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#caseSensitive-prop">caseSensitive</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#count-prop">count</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#folder-prop">folder</a></b></b> : url</li>
+<li class="fn"><b><b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#nameFilters-prop">nameFilters</a></b></b> : list&lt;string&gt;</li>
+<li class="fn"><b><b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#parentFolder-prop">parentFolder</a></b></b> : url</li>
+<li class="fn"><b><b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#rootFolder-prop">rootFolder</a></b></b> : url</li>
+<li class="fn"><b><b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#showDirs-prop">showDirs</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#showDirsFirst-prop">showDirsFirst</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#showDotAndDotDot-prop">showDotAndDotDot</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#showFiles-prop">showFiles</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#showHidden-prop">showHidden</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#showOnlyReadable-prop">showOnlyReadable</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#sortCaseSensitive-prop">sortCaseSensitive</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#sortField-prop">sortField</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#sortReversed-prop">sortReversed</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#status-prop">status</a></b></b> : enumeration</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">var <b><b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#get-method">get</a></b></b>(<i>index</i>,  string <i>property</i>)</li>
+<li class="fn">int <b><b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#indexOf-method">indexOf</a></b></b>(<i>file</i>)</li>
+<li class="fn">bool <b><b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#isFolder-method">isFolder</a></b></b>(<i>index</i>)</li>
+</ul>
+<!-- $$$FolderListModel-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html">FolderListModel</a> provides access to information about the contents of a folder in the local file system, exposing a list of files to views and other data components.</p>
+<p><b>Note: </b>This type is made available by importing the <code>Qt.labs.folderlistmodel</code> module. <i>Elements in the Qt.labs module are not guaranteed to remain compatible in future versions.</i></p><pre class="qml">
+
+  import Qt.labs.folderlistmodel 2.13
+
+</pre>
+<p>The <a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#folder-prop">folder</a> property specifies the folder to access. Information about the files and directories in the folder is supplied via the model's interface. Components access names and paths via the following roles:</p>
+<ul>
+<li><code>fileName</code></li>
+<li><code>filePath</code></li>
+<li><code>fileURL</code> (since Qt 5.2)</li>
+<li><code>fileBaseName</code></li>
+<li><code>fileSuffix</code></li>
+<li><code>fileSize</code></li>
+<li><code>fileModified</code></li>
+<li><code>fileAccessed</code></li>
+<li><code>fileIsDir</code></li>
+</ul>
+<p>Additionally a file entry can be differentiated from a folder entry via the <a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#isFolder-method">isFolder()</a> method.</p>
+<a name="filtering"></a>
+<h2 id="filtering">Filtering</h2>
+<p>Various properties can be set to filter the number of files and directories exposed by the model.</p>
+<p>The <a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#nameFilters-prop">nameFilters</a> property can be set to contain a list of wildcard filters that are applied to names of files and directories, causing only those that match the filters to be exposed.</p>
+<p>Directories can be included or excluded using the <a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#showDirs-prop">showDirs</a> property, navigation directories can also be excluded by setting the <a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#showDotAndDotDot-prop">showDotAndDotDot</a> property to false, hidden files can be included or excluded using the <a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#showHidden-prop">showHidden</a> property.</p>
+<p>It is sometimes useful to limit the files and directories exposed to those that the user can access. The <a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#showOnlyReadable-prop">showOnlyReadable</a> property can be set to enable this feature.</p>
+<a name="example-usage"></a>
+<h2 id="example-usage">Example Usage</h2>
+<p>The following example shows a <a href="qml-qt-labs-folderlistmodel-folderlistmodel.html">FolderListModel</a> being used to provide a list of QML files in a <a href="qml-qtquick-listview.html">ListView</a>:</p>
+<pre class="qml">
+
+  import QtQuick 2.13
+  import Qt.labs.folderlistmodel 2.13
+
+  <span class="type"><a href="qml-qtquick-listview.html">ListView</a></span> {
+      <span class="name">width</span>: <span class="number">200</span>; <span class="name">height</span>: <span class="number">400</span>
+
+      <span class="type"><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html">FolderListModel</a></span> {
+          <span class="name">id</span>: <span class="name">folderModel</span>
+          <span class="name">nameFilters</span>: [<span class="string">&quot;*.qml&quot;</span>]
+      }
+
+      <span class="type"><a href="../qtqml/qml-qtqml-component.html">Component</a></span> {
+          <span class="name">id</span>: <span class="name">fileDelegate</span>
+          <span class="type"><a href="qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="name">fileName</span> }
+      }
+
+      <span class="name">model</span>: <span class="name">folderModel</span>
+      <span class="name">delegate</span>: <span class="name">fileDelegate</span>
+  }
+
+</pre>
+<a name="path-separators"></a>
+<h2 id="path-separators">Path Separators</h2>
+<p>Qt uses &quot;/&quot; as a universal directory separator in the same way that &quot;/&quot; is used as a path separator in URLs. If you always use &quot;/&quot; as a directory separator, Qt will translate your paths to conform to the underlying operating system.</p>
+<p><b>See also </b><a href="qtquick-modelviewsdata-modelview.html#qml-data-models">QML Data Models</a>.</p>
+<!-- @@@FolderListModel -->
+<h2>Property Documentation</h2>
+<!-- $$$caseSensitive -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="caseSensitive-prop"></a><span class="name">caseSensitive</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Use case sensitive pattern matching.</p>
+<p>By default, this property is true.</p>
+<p>This property was introduced in  Qt 5.7.</p>
+</div></div><!-- @@@caseSensitive -->
+<br/>
+<!-- $$$count -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="count-prop"></a><span class="name">count</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the number of items in the current folder that match the filter criteria.</p>
+</div></div><!-- @@@count -->
+<br/>
+<!-- $$$folder -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="folder-prop"></a><span class="name">folder</span> : <span class="type"><a href="../qtqml/qml-url.html">url</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The <i>folder</i> property holds a URL for the folder that the model currently provides.</p>
+<p>The value must be a <code>file</code>: or <code>qrc</code>: URL, or a relative URL.</p>
+<p>The default value is an invalid URL.</p>
+</div></div><!-- @@@folder -->
+<br/>
+<!-- $$$nameFilters -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="nameFilters-prop"></a><span class="name">nameFilters</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="../qtqml/qml-string.html">string</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The <i>nameFilters</i> property contains a list of file name filters. The filters may include the ? and * wildcards.</p>
+<p>The example below filters on PNG and JPEG files:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html">FolderListModel</a></span> {
+      <span class="name">nameFilters</span>: [ <span class="string">&quot;*.png&quot;</span>, <span class="string">&quot;*.jpg&quot;</span> ]
+  }
+
+</pre>
+<p><b>Note: </b>Directories are not excluded by filters.</p></div></div><!-- @@@nameFilters -->
+<br/>
+<!-- $$$parentFolder -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="parentFolder-prop"></a><span class="name">parentFolder</span> : <span class="type"><a href="../qtqml/qml-url.html">url</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the URL of the parent of the current <a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#folder-prop">folder</a>.</p>
+</div></div><!-- @@@parentFolder -->
+<br/>
+<!-- $$$rootFolder -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="rootFolder-prop"></a><span class="name">rootFolder</span> : <span class="type"><a href="../qtqml/qml-url.html">url</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>When this property is set, the given folder will be treated as the root in the file system, so that you can only traverse subfolders within it.</p>
+</div></div><!-- @@@rootFolder -->
+<br/>
+<!-- $$$showDirs -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="showDirs-prop"></a><span class="name">showDirs</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If true, directories are included in the model; otherwise only files are included.</p>
+<p>By default, this property is true.</p>
+<p>Note that the <a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#nameFilters-prop">nameFilters</a> are not applied to directories.</p>
+<p><b>See also </b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#showDotAndDotDot-prop">showDotAndDotDot</a>.</p>
+</div></div><!-- @@@showDirs -->
+<br/>
+<!-- $$$showDirsFirst -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="showDirsFirst-prop"></a><span class="name">showDirsFirst</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If true, if directories are included in the model they will always be shown first, then the files.</p>
+<p>By default, this property is false.</p>
+</div></div><!-- @@@showDirsFirst -->
+<br/>
+<!-- $$$showDotAndDotDot -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="showDotAndDotDot-prop"></a><span class="name">showDotAndDotDot</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If true, the &quot;.&quot; and &quot;..&quot; directories are included in the model; otherwise they are excluded.</p>
+<p>By default, this property is false.</p>
+<p><b>See also </b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#showDirs-prop">showDirs</a>.</p>
+</div></div><!-- @@@showDotAndDotDot -->
+<br/>
+<!-- $$$showFiles -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="showFiles-prop"></a><span class="name">showFiles</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If true, files are included in the model; otherwise only directories are included.</p>
+<p>By default, this property is true.</p>
+<p>This property was introduced in  Qt 5.2.</p>
+<p><b>See also </b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#showDirs-prop">showDirs</a>.</p>
+</div></div><!-- @@@showFiles -->
+<br/>
+<!-- $$$showHidden -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="showHidden-prop"></a><span class="name">showHidden</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If true, hidden files and directories are included in the model; otherwise they are excluded.</p>
+<p>By default, this property is false.</p>
+<p>This property was introduced in  Qt 5.2.</p>
+</div></div><!-- @@@showHidden -->
+<br/>
+<!-- $$$showOnlyReadable -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="showOnlyReadable-prop"></a><span class="name">showOnlyReadable</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If true, only readable files and directories are shown; otherwise all files and directories are shown.</p>
+<p>By default, this property is false.</p>
+<p><b>See also </b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#showDirs-prop">showDirs</a>.</p>
+</div></div><!-- @@@showOnlyReadable -->
+<br/>
+<!-- $$$sortCaseSensitive -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="sortCaseSensitive-prop"></a><span class="name">sortCaseSensitive</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If set to <code>true</code>, the sort is case sensitive. This property is <code>true</code> by default.</p>
+<p>This property was introduced in  Qt 5.12.</p>
+</div></div><!-- @@@sortCaseSensitive -->
+<br/>
+<!-- $$$sortField -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="sortField-prop"></a><span class="name">sortField</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The <i>sortField</i> property contains field to use for sorting. sortField may be one of:</p>
+<ul>
+<li>Unsorted - no sorting is applied.</li>
+<li>Name - sort by filename</li>
+<li>Time - sort by time modified</li>
+<li>Size - sort by file size</li>
+<li>Type - sort by file type (extension)</li>
+</ul>
+<p><b>See also </b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#sortReversed-prop">sortReversed</a>.</p>
+</div></div><!-- @@@sortField -->
+<br/>
+<!-- $$$sortReversed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="sortReversed-prop"></a><span class="name">sortReversed</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If set to true, reverses the sort order. The default is false.</p>
+<p><b>See also </b><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html#sortField-prop">sortField</a>.</p>
+</div></div><!-- @@@sortReversed -->
+<br/>
+<!-- $$$status -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="status-prop"></a><span class="name">status</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the status of folder reading. It can be one of:</p>
+<ul>
+<li><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html">FolderListModel</a>.Null - no <i>folder</i> has been set</li>
+<li><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html">FolderListModel</a>.Ready - the folder has been loaded</li>
+<li><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html">FolderListModel</a>.Loading - the folder is currently being loaded</li>
+</ul>
+<p>Use this status to provide an update or respond to the status change in some way. For example, you could:</p>
+<ul>
+<li>Trigger a state change:<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-state.html">State</a></span> { <span class="name">name</span>: <span class="string">'loaded'</span>; <span class="name">when</span>: <span class="name">folderModel</span>.<span class="name">status</span> <span class="operator">==</span> <span class="name">FolderListModel</span>.<span class="name">Ready</span> }
+
+</pre>
+</li>
+<li>Implement an <code>onStatusChanged</code> signal handler:<pre class="qml">
+
+  <span class="type"><a href="qml-qt-labs-folderlistmodel-folderlistmodel.html">FolderListModel</a></span> {
+      <span class="name">id</span>: <span class="name">folderModel</span>
+      <span class="name">onStatusChanged</span>: <span class="keyword">if</span> (<span class="name">folderModel</span>.<span class="name">status</span> <span class="operator">==</span> <span class="name">FolderListModel</span>.<span class="name">Ready</span>) <span class="name">console</span>.<span class="name">log</span>(<span class="string">'Loaded'</span>)
+  }
+
+</pre>
+</li>
+<li>Bind to the status value:<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="name">folderModel</span>.<span class="name">status</span> <span class="operator">==</span> <span class="name">FolderListModel</span>.<span class="name">Ready</span> ? <span class="string">'Loaded'</span> : <span class="string">'Not loaded'</span> }
+
+</pre>
+</li>
+</ul>
+<p>This property was introduced in  Qt 5.11.</p>
+</div></div><!-- @@@status -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$get[overload1]$$$getstring -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="get-method"></a><span class="type"><a href="../qtqml/qml-var.html">var</a></span> <span class="name">get</span>(<i>index</i>,  <span class="type"><a href="../qtqml/qml-string.html">string</a></span> <i>property</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the folder <i>property</i> for the given <i>index</i>. The following properties are available:</p>
+<ul>
+<li><code>fileName</code></li>
+<li><code>filePath</code></li>
+<li><code>fileURL</code> (since Qt 5.2)</li>
+<li><code>fileBaseName</code></li>
+<li><code>fileSuffix</code></li>
+<li><code>fileSize</code></li>
+<li><code>fileModified</code></li>
+<li><code>fileAccessed</code></li>
+<li><code>fileIsDir</code></li>
+</ul>
+</div></div><!-- @@@get -->
+<br/>
+<!-- $$$indexOf[overload1]$$$indexOf -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="indexOf-method"></a><span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">indexOf</span>(<i>file</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the index of the given <i>file</i> URL if the model contains it, or -1 if not.</p>
+<p>This method was introduced in  Qt 5.6.</p>
+</div></div><!-- @@@indexOf -->
+<br/>
+<!-- $$$isFolder[overload1]$$$isFolder -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="isFolder-method"></a><span class="type"><a href="../qtqml/qml-bool.html">bool</a></span> <span class="name">isFolder</span>(<i>index</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns true if the entry <i>index</i> is a folder; otherwise returns false.</p>
+</div></div><!-- @@@isFolder -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

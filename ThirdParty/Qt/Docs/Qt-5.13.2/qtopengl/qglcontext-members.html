@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qgl.cpp -->
+  <title>List of All Members for QGLContext | Qt OpenGL</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtopengl-index.html">Qt OpenGL</a></td><td ><a href="qtopengl-module.html">C++ Classes</a></td><td >QGLContext</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtopengl-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">List of All Members for QGLContext</h1>
+<p>This is the complete list of members for <a href="qglcontext.html" class="obsolete">QGLContext</a>, including inherited members.</p>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn">enum <span class="name"><b><a href="qglcontext.html#BindOption-enum">BindOption</a></b></span></li>
+<li class="fn">flags <span class="name"><b><a href="qglcontext.html#BindOption-enum">BindOptions</a></b></span></li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#QGLContext-1">QGLContext</a></b></span>(const QGLFormat &amp;)</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#dtor.QGLContext">~QGLContext</a></b></span>()</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#areSharing">areSharing</a></b></span>(const QGLContext *, const QGLContext *) : bool</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#bindTexture">bindTexture</a></b></span>(const QImage &amp;, GLenum , GLint , QGLContext::BindOptions ) : GLuint</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#bindTexture-1">bindTexture</a></b></span>(const QPixmap &amp;, GLenum , GLint , QGLContext::BindOptions ) : GLuint</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#bindTexture-2">bindTexture</a></b></span>(const QImage &amp;, GLenum , GLint ) : GLuint</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#bindTexture-3">bindTexture</a></b></span>(const QPixmap &amp;, GLenum , GLint ) : GLuint</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#bindTexture-4">bindTexture</a></b></span>(const QString &amp;) : GLuint</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#chooseContext">chooseContext</a></b></span>(const QGLContext *) : bool</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#contextHandle">contextHandle</a></b></span>() const : QOpenGLContext *</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#create">create</a></b></span>(const QGLContext *) : bool</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#currentContext">currentContext</a></b></span>() : const QGLContext *</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#deleteTexture">deleteTexture</a></b></span>(GLuint )</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#device">device</a></b></span>() const : QPaintDevice *</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#deviceIsPixmap">deviceIsPixmap</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#doneCurrent">doneCurrent</a></b></span>()</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#drawTexture">drawTexture</a></b></span>(const QRectF &amp;, GLuint , GLenum )</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#drawTexture-1">drawTexture</a></b></span>(const QPointF &amp;, GLuint , GLenum )</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#format">format</a></b></span>() const : QGLFormat</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#fromOpenGLContext">fromOpenGLContext</a></b></span>(QOpenGLContext *) : QGLContext *</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#functions">functions</a></b></span>() const : QGLFunctions *</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#getProcAddress">getProcAddress</a></b></span>(const QString &amp;) const : QFunctionPointer</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#initialized">initialized</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#isSharing">isSharing</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#isValid">isValid</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#makeCurrent">makeCurrent</a></b></span>()</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#moveToThread">moveToThread</a></b></span>(QThread *)</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#overlayTransparentColor">overlayTransparentColor</a></b></span>() const : QColor</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#requestedFormat">requestedFormat</a></b></span>() const : QGLFormat</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#reset">reset</a></b></span>()</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#setFormat">setFormat</a></b></span>(const QGLFormat &amp;)</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#setInitialized">setInitialized</a></b></span>(bool )</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#setTextureCacheLimit">setTextureCacheLimit</a></b></span>(int )</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#setWindowCreated">setWindowCreated</a></b></span>(bool )</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#swapBuffers">swapBuffers</a></b></span>() const</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#textureCacheLimit">textureCacheLimit</a></b></span>() : int</li>
+<li class="fn"><span class="name"><b><a href="qglcontext.html#windowCreated">windowCreated</a></b></span>() const : bool</li>
+</ul>
+</td></tr>
+</table></div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

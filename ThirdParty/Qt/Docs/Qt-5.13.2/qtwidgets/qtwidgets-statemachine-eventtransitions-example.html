@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- eventtransitions.qdoc -->
+  <title>Event Transitions Example | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Event Transitions Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Event Transitions Example</h1>
+<span class="subtitle"></span>
+<!-- $$$statemachine/eventtransitions-brief -->
+<p>The Event Transitions example shows how to use event transitions, a feature of <a href="../qtcore/statemachine-api.html">The State Machine Framework</a>.</p>
+<!-- @@@statemachine/eventtransitions -->
+<!-- $$$statemachine/eventtransitions-description -->
+<div class="descr"> <a name="details"></a>
+<p>The Event Transitions Example illustrates how states change when a user enters or leaves the area of a button. The states are handled by a <a href="../qtcore/qstatemachine.html">QStateMachine</a> object. The screen consists of a <a href="qvboxlayout.html">QVBoxLayout</a> with a central button.</p>
+<p>When the mouse is outside the button, the text in the button displays &quot;Outside&quot;. When the mouse enters the button, it displays &quot;Inside&quot;.</p>
+<div class="border"><p class="centerAlign"><img src="images/transitions.png" alt="" /></p></div><pre class="cpp">
+
+  <span class="keyword">class</span> Window : <span class="keyword">public</span> <span class="type"><a href="qwidget.html">QWidget</a></span>
+  {
+  <span class="keyword">public</span>:
+      Window(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>)
+          : <span class="type"><a href="qwidget.html">QWidget</a></span>(parent)
+      {
+          <span class="type"><a href="qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>button <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpushbutton.html">QPushButton</a></span>(<span class="keyword">this</span>);
+          button<span class="operator">-</span><span class="operator">&gt;</span>setSizePolicy(<span class="type"><a href="qsizepolicy.html">QSizePolicy</a></span><span class="operator">::</span>Expanding<span class="operator">,</span> <span class="type"><a href="qsizepolicy.html">QSizePolicy</a></span><span class="operator">::</span>Expanding);
+
+          <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+          layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(button);
+          layout<span class="operator">-</span><span class="operator">&gt;</span>setContentsMargins(<span class="number">80</span><span class="operator">,</span> <span class="number">80</span><span class="operator">,</span> <span class="number">80</span><span class="operator">,</span> <span class="number">80</span>);
+          setLayout(layout);
+
+</pre>
+<p>The <code>Window</code> class's constructors begins by creating a button. This button is added to <code>layout</code>, which is a <a href="qvboxlayout.html">QVBoxLayout</a> object. Then two states are created: <code>s1</code> is the state &quot;Outside&quot;, and <code>s2</code> is the state &quot;Inside&quot;.</p>
+<pre class="cpp">
+
+          <span class="type"><a href="../qtcore/qstatemachine.html">QStateMachine</a></span> <span class="operator">*</span>machine <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qstatemachine.html">QStateMachine</a></span>(<span class="keyword">this</span>);
+
+          <span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>s1 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qstate.html">QState</a></span>();
+          s1<span class="operator">-</span><span class="operator">&gt;</span>assignProperty(button<span class="operator">,</span> <span class="string">&quot;text&quot;</span><span class="operator">,</span> <span class="string">&quot;Outside&quot;</span>);
+
+          <span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>s2 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qstate.html">QState</a></span>();
+          s2<span class="operator">-</span><span class="operator">&gt;</span>assignProperty(button<span class="operator">,</span> <span class="string">&quot;text&quot;</span><span class="operator">,</span> <span class="string">&quot;Inside&quot;</span>);
+
+</pre>
+<p>State <code>s1</code> is the state &quot;Outside&quot; and state <code>s2</code> is state &quot;Inside&quot;.</p>
+<pre class="cpp">
+
+          <span class="type"><a href="../qtcore/qeventtransition.html">QEventTransition</a></span> <span class="operator">*</span>enterTransition <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qeventtransition.html">QEventTransition</a></span>(button<span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>Enter);
+          enterTransition<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(s2);
+          s1<span class="operator">-</span><span class="operator">&gt;</span>addTransition(enterTransition);
+
+</pre>
+<p>When the button receives an event of type <a href="../qtcore/qevent.html#Type-enum">QEvent::Enter</a> and the state machine is in state <code>s1</code>, the machine will transition to state <code>s2</code>.</p>
+<pre class="cpp">
+
+          <span class="type"><a href="../qtcore/qeventtransition.html">QEventTransition</a></span> <span class="operator">*</span>leaveTransition <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qeventtransition.html">QEventTransition</a></span>(button<span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>Leave);
+          leaveTransition<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(s1);
+          s2<span class="operator">-</span><span class="operator">&gt;</span>addTransition(leaveTransition);
+
+</pre>
+<p>When the button receives an event of type <a href="../qtcore/qevent.html#Type-enum">QEvent::Leave</a> and the state machine is in state <code>s2</code>, the machine will transition back to state <code>s1</code>.</p>
+<pre class="cpp">
+
+          <span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>s3 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qstate.html">QState</a></span>();
+          s3<span class="operator">-</span><span class="operator">&gt;</span>assignProperty(button<span class="operator">,</span> <span class="string">&quot;text&quot;</span><span class="operator">,</span> <span class="string">&quot;Pressing...&quot;</span>);
+
+          <span class="type"><a href="../qtcore/qeventtransition.html">QEventTransition</a></span> <span class="operator">*</span>pressTransition <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qeventtransition.html">QEventTransition</a></span>(button<span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>MouseButtonPress);
+          pressTransition<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(s3);
+          s2<span class="operator">-</span><span class="operator">&gt;</span>addTransition(pressTransition);
+
+          <span class="type"><a href="../qtcore/qeventtransition.html">QEventTransition</a></span> <span class="operator">*</span>releaseTransition <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qeventtransition.html">QEventTransition</a></span>(button<span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>MouseButtonRelease);
+          releaseTransition<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(s2);
+          s3<span class="operator">-</span><span class="operator">&gt;</span>addTransition(releaseTransition);
+
+</pre>
+<p>Next, state <code>s3</code> is created. <code>s3</code> will be entered when the button receives an event of type <a href="../qtcore/qevent.html#Type-enum">QEvent::MouseButtonPress</a> and the state machine is in state <code>s2</code>. When the button receives an event of type <a href="../qtcore/qevent.html#Type-enum">QEvent::MouseButtonRelease</a> and the state machine is in state <code>s3</code>, the machine will revert to state <code>s2</code>.</p>
+<pre class="cpp">
+
+          machine<span class="operator">-</span><span class="operator">&gt;</span>addState(s1);
+          machine<span class="operator">-</span><span class="operator">&gt;</span>addState(s2);
+          machine<span class="operator">-</span><span class="operator">&gt;</span>addState(s3);
+
+          machine<span class="operator">-</span><span class="operator">&gt;</span>setInitialState(s1);
+          machine<span class="operator">-</span><span class="operator">&gt;</span>start();
+      }
+  };
+
+</pre>
+<p>Finally, the states are added to the machine as top-level states, the initial state is set to be <code>s1</code> (&quot;Outside&quot;), and the machine is started.</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span><span class="operator">*</span>argv)
+  {
+      <span class="type"><a href="qapplication.html">QApplication</a></span> app(argc<span class="operator">,</span> argv);
+      Window window;
+      window<span class="operator">.</span>resize(<span class="number">300</span><span class="operator">,</span> <span class="number">300</span>);
+      window<span class="operator">.</span>show();
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p>The main() function constructs a Window object that displays the <a href="qvboxlayout.html">QVBoxLayout</a> object <code>layout</code> with its <code>button</code>.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/statemachine/eventtransitions?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@statemachine/eventtransitions -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

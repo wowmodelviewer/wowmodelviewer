@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qabstractvideofilter.cpp -->
+  <title>QVideoFilterRunnable Class | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-modules.html">C++ Classes</a></td><td >QVideoFilterRunnable</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QVideoFilterRunnable Class</h1>
+<!-- $$$QVideoFilterRunnable-brief -->
+<p>The <a href="qvideofilterrunnable.html">QVideoFilterRunnable</a> class represents the implementation of a filter that owns all graphics and computational resources, and performs the actual filtering or calculations. <a href="#details">More...</a></p>
+<!-- @@@QVideoFilterRunnable -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QVideoFilterRunnable&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += multimedia</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.5</td></tr></table></div><p>This class was introduced in  Qt 5.5.</p>
+<ul>
+<li><a href="qvideofilterrunnable-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qvideofilterrunnable.html#RunFlag-enum">RunFlag</a></b> { LastInChain }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qvideofilterrunnable.html#RunFlag-enum">RunFlags</a></b></td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QVideoFrame </td><td class="memItemRight bottomAlign"><b><a href="qvideofilterrunnable.html#run">run</a></b>(QVideoFrame *<i>input</i>, const QVideoSurfaceFormat &amp;<i>surfaceFormat</i>, QVideoFilterRunnable::RunFlags <i>flags</i>) = 0</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QVideoFilterRunnable-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Video filters are split into <a href="qabstractvideofilter.html">QAbstractVideoFilter</a> and corresponding <a href="qvideofilterrunnable.html">QVideoFilterRunnable</a> instances, similar to <a href="../qtquick/qquickitem.html">QQuickItem</a> and <a href="../qtquick/qsgnode.html">QSGNode</a>. This is necessary to support threaded rendering scenarios. When using the threaded render loop of the Qt Quick scene graph, all rendering happens on a dedicated thread. <a href="qvideofilterrunnable.html">QVideoFilterRunnable</a> instances always live on this thread and all its functions, <a href="qvideofilterrunnable.html#run">run</a>(), the constructor, and the destructor, are guaranteed to be invoked on that thread with the OpenGL context bound. <a href="qabstractvideofilter.html">QAbstractVideoFilter</a> instances live on the main (GUI) thread, like any other <a href="../qtcore/qobject.html">QObject</a> and <a href="../qtquick/qquickitem.html">QQuickItem</a> instances created from QML.</p>
+<p>Once created, <a href="qvideofilterrunnable.html">QVideoFilterRunnable</a> instances are managed by Qt Multimedia and will be automatically destroyed and recreated when necessary, for example when the scene graph is invalidated or the <a href="../qtquick/qquickwindow.html">QQuickWindow</a> changes or is closed. Creation happens via the <a href="qabstractvideofilter.html#createFilterRunnable">QAbstractVideoFilter::createFilterRunnable</a>() factory function.</p>
+</div>
+<p><b>See also </b><a href="qabstractvideofilter.html">QAbstractVideoFilter</a>.</p>
+<!-- @@@QVideoFilterRunnable -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$RunFlag$$$LastInChain -->
+<h3 class="flags" id="RunFlag-enum"><a name="RunFlag-enum"></a>enum QVideoFilterRunnable::<span class="name">RunFlag</span><br/>flags QVideoFilterRunnable::<span class="name">RunFlags</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QVideoFilterRunnable::LastInChain</code></td><td class="topAlign tblval"><code>0x01</code></td><td class="topAlign">Indicates that the filter runnable's associated <a href="qabstractvideofilter.html">QAbstractVideoFilter</a> is the last in the corresponding <a href="qml-qtmultimedia-videooutput.html">VideoOutput</a> type's filters list, meaning that the returned frame is the one that is going to be presented to the scene graph without invoking any further filters.</td></tr>
+</table></div>
+<p>The RunFlags type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;RunFlag&gt;. It stores an OR combination of RunFlag values.</p>
+<!-- @@@RunFlag -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$run[overload1]$$$runQVideoFrame*constQVideoSurfaceFormat&QVideoFilterRunnable::RunFlags -->
+<h3 class="fn" id="run"><a name="run"></a><code>[pure virtual] </code><span class="type"><a href="qvideoframe.html">QVideoFrame</a></span> QVideoFilterRunnable::<span class="name">run</span>(<span class="type"><a href="qvideoframe.html">QVideoFrame</a></span> *<i>input</i>, const <span class="type"><a href="qvideosurfaceformat.html">QVideoSurfaceFormat</a></span> &amp;<i>surfaceFormat</i>, <span class="type"><a href="qvideofilterrunnable.html#RunFlag-enum">QVideoFilterRunnable::RunFlags</a></span> <i>flags</i>)</h3>
+<p>Reimplement this function to perform filtering or computation on the <i>input</i> video frame. Like the constructor and destructor, this function is always called on the render thread with the OpenGL context bound.</p>
+<p>Implementations that do not modify the video frame can simply return <i>input</i>.</p>
+<p>It is safe to access properties of the associated <a href="qabstractvideofilter.html">QAbstractVideoFilter</a> instance from this function.</p>
+<p><i>input</i> will not be mapped, it is up to this function to call <a href="qvideoframe.html#map">QVideoFrame::map</a>() and <a href="qvideoframe.html#unmap">QVideoFrame::unmap</a>() as necessary.</p>
+<p><i>surfaceFormat</i> provides additional information, for example it can be used to determine which way is up in the input image as that is important for filters to operate on multiple platforms with multiple cameras.</p>
+<p><i>flags</i> contains additional information about the filter's invocation. For example the <a href="qvideofilterrunnable.html#RunFlag-enum">LastInChain</a> flag indicates that the filter is the last in a <a href="qml-qtmultimedia-videooutput.html">VideoOutput</a>'s associated filter list. This can be very useful in cases where multiple filters are chained together and the work is performed on image data in some custom format (for example a format specific to some computer vision framework). To avoid conversion on every filter in the chain, all intermediate filters can return a <a href="qvideoframe.html">QVideoFrame</a> hosting data in the custom format. Only the last, where the flag is set, returns a <a href="qvideoframe.html">QVideoFrame</a> in a format compatible with Qt.</p>
+<p>Filters that want to expose the results of their computation to Javascript code in QML can declare their own custom signals in the <a href="qabstractvideofilter.html">QAbstractVideoFilter</a> subclass to indicate the completion of the operation. For filters that only calculate some results and do not modify the video frame, it is also possible to operate asynchronously. They can queue the necessary operations using the compute API and return from this function without emitting any signals. The signal indicating the completion is then emitted only when the compute API indicates that the operations were done and the results are available. Note that it is strongly recommended to represent the filter's output data as a separate instance of <a href="../qtqml/qjsvalue.html">QJSValue</a> or a <a href="../qtcore/qobject.html">QObject</a>-derived class which is passed as a parameter to the signal and becomes exposed to the Javascript engine. In case of <a href="../qtcore/qobject.html">QObject</a> the ownership of this object is controlled by the standard QML rules: if it has no parent, ownership is transferred to the Javascript engine, otherwise it stays with the emitter. Note that the signal connection may be queued,for example when using the threaded render loop of Qt Quick, and so the object must stay valid for a longer time, destroying it right after calling this function is not safe. Using a dedicated results object is guaranteed to be safe even when using threaded rendering. The same is not necessarily true for properties on the <a href="qabstractvideofilter.html">QAbstractVideoFilter</a> instance itself: properties can safely be read in run() since the gui thread is blocked during that time but writing may become problematic.</p>
+<p><b>Note: </b>Avoid time consuming operations in this function as they block the entire rendering of the application.</p><p><b>Note: </b>The handleType() and pixelFormat() of <i>input</i> is completely up to the video decoding backend on the platform in use. On some platforms different forms of input are used depending on the graphics stack. For example, when playing back videos on Windows with the WMF backend, <a href="qvideoframe.html">QVideoFrame</a> contains OpenGL-wrapped Direct3D textures in case of using ANGLE, but regular pixel data when using desktop OpenGL (opengl32.dll). Similarly, the video file format will often decide if the data is RGB or YUV, but this may also depend on the decoder and the configuration in use. The returned video frame does not have to be in the same format as the input, for example a filter with an input of a <a href="qvideoframe.html">QVideoFrame</a> backed by system memory can output a <a href="qvideoframe.html">QVideoFrame</a> with an OpenGL texture handle.</p><p><b>See also </b><a href="qvideoframe.html">QVideoFrame</a> and <a href="qvideosurfaceformat.html">QVideoSurfaceFormat</a>.</p>
+<!-- @@@run -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- invoke-static.qdoc -->
+  <title>Qt SCXML Invoke Example (Static) | Qt SCXML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtscxml-index.html">Qt SCXML</a></td><td >Qt SCXML Invoke Example (Static)</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtscxml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+<li class="level1"><a href="#invoking-the-state-machine">Invoking the State Machine</a></li>
+<li class="level1"><a href="#compiling-the-state-machine">Compiling the State Machine</a></li>
+<li class="level1"><a href="#instantiating-the-state-machine">Instantiating the State Machine</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt SCXML Invoke Example (Static)</h1>
+<span class="subtitle"></span>
+<!-- $$$invoke-static-brief -->
+<p>Invokes a compiled nested state machine.</p>
+<!-- @@@invoke-static -->
+<!-- $$$invoke-static-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/invoke-static.png" alt="" /></p><p><i>Invoke Example (Static)</i> demonstrates how to use the <code>&lt;invoke&gt;</code> element with generated nested state-machines, where the SCXML file is compiled to a C++ class. The <code>&lt;invoke&gt;</code> element is used to create an instance of an external service.</p>
+<a name="running-the-example"></a>
+<h4 id="running-the-example">Running the Example</h4>
+<p>To run the example from <a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a>, open the <b>Welcome</b> mode and select the example from <b>Examples</b>. For more information, visit <a href="http://doc.qt.io/qtcreator/creator-build-example-application.html">Building and Running an Example</a>.</p>
+<a name="invoking-the-state-machine"></a>
+<h4 id="invoking-the-state-machine">Invoking the State Machine</h4>
+<p>In <i>statemachine.scxml</i>, we specify a state machine with the name <i>Directions</i> of type <i>http://www.w3.org/TR/scxml/</i> to invoke:</p>
+<pre class="cpp">
+
+  &lt;scxml
+      xmlns=&quot;http://www.w3.org/2005/07/scxml&quot;
+      version=&quot;1.0&quot;
+      name=&quot;Directions&quot;
+      initial=&quot;anyplace&quot;
+  &gt;
+      &lt;state id=&quot;anyplace&quot;&gt;
+          &lt;transition event=&quot;goNowhere&quot; target=&quot;nowhere&quot;/&gt;
+          &lt;transition event=&quot;goSomewhere&quot; target=&quot;somewhere&quot;/&gt;
+
+          &lt;state id=&quot;nowhere&quot;/&gt;
+          &lt;state id=&quot;somewhere&quot;&gt;
+              &lt;invoke type=&quot;http://www.w3.org/TR/scxml/&quot;&gt;
+                  &lt;content&gt;
+                      &lt;scxml name=&quot;anywhere&quot; version=&quot;1.0&quot;&gt;
+                          &lt;state id=&quot;here&quot;&gt;
+                              &lt;transition event=&quot;goThere&quot; target=&quot;there&quot;/&gt;
+                          &lt;/state&gt;
+                          &lt;state id=&quot;there&quot;&gt;
+                              &lt;transition event=&quot;goHere&quot; target=&quot;here&quot;/&gt;
+                          &lt;/state&gt;
+                      &lt;/scxml&gt;
+                  &lt;/content&gt;
+              &lt;/invoke&gt;
+          &lt;/state&gt;
+      &lt;/state&gt;
+  &lt;/scxml&gt;
+
+</pre>
+<a name="compiling-the-state-machine"></a>
+<h4 id="compiling-the-state-machine">Compiling the State Machine</h4>
+<p>We link against the Qt SCXML module by adding the following line to the <i>invoke-static.pro</i> file:</p>
+<pre class="cpp">
+
+  QT += qml scxml
+
+</pre>
+<p>We then specify the state machine to compile:</p>
+<pre class="cpp">
+
+  STATECHARTS = ../invoke-common/statemachine.scxml
+
+</pre>
+<p>The Qt SCXML Compiler, <code>qscxmlc</code>, is run automatically to generate <i>statemachine.h</i> and <i>statemachine.cpp</i>, and to add them to the <code>HEADERS</code> and <code>SOURCES</code> variables for compilation.</p>
+<a name="instantiating-the-state-machine"></a>
+<h4 id="instantiating-the-state-machine">Instantiating the State Machine</h4>
+<p>We instantiate the generated <code>Directions</code> class in the <i>invoke-static.cpp</i> file, as follows:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &quot;statemachine.h&quot;</span>
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type">QGuiApplication</span> app(argc<span class="operator">,</span> argv);
+
+      qmlRegisterType<span class="operator">&lt;</span>Directions<span class="operator">&gt;</span>(<span class="string">&quot;Directions&quot;</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;Directions&quot;</span>);
+
+      <span class="type">QQmlApplicationEngine</span> engine;
+      engine<span class="operator">.</span>load(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;qrc:/invoke-static.qml&quot;</span>)));
+      <span class="keyword">if</span> (engine<span class="operator">.</span>rootObjects()<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span> <span class="operator">-</span><span class="number">1</span>;
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p><a href="https://code.qt.io/cgit/qt/qtscxml.git/tree/examples/scxml/invoke-static?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@invoke-static -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

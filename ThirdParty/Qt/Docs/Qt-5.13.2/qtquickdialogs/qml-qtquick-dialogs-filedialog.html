@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickplatformfiledialog.cpp -->
+  <title>FileDialog QML Type | Qt Quick Dialogs 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickdialogs-index.html">Qt Quick Dialogs</a></td><td ><a href="qtquick-dialogs-qmlmodule.html">QML Types</a></td><td >FileDialog QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickdialogs-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">FileDialog QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$FileDialog-brief -->
+<p>Dialog component for choosing files from a local filesystem. <a href="#details">More...</a></p>
+<!-- @@@FileDialog -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Dialogs 1.3</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.1</td></tr></table></div><ul>
+<li><a href="qml-qtquick-dialogs-filedialog-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-filedialog.html#defaultSuffix-prop">defaultSuffix</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-filedialog.html#fileUrl-prop">fileUrl</a></b></b> : url</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-filedialog.html#fileUrls-prop">fileUrls</a></b></b> : list&lt;url&gt;</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-filedialog.html#folder-prop">folder</a></b></b> : url</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-filedialog.html#modality-prop">modality</a></b></b> : Qt::WindowModality</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-filedialog.html#nameFilters-prop">nameFilters</a></b></b> : list&lt;string&gt;</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-filedialog.html#selectExisting-prop">selectExisting</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-filedialog.html#selectFolder-prop">selectFolder</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-filedialog.html#selectMultiple-prop">selectMultiple</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-filedialog.html#selectedNameFilter-prop">selectedNameFilter</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-filedialog.html#shortcuts-prop">shortcuts</a></b></b> : Object</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-filedialog.html#sidebarVisible-prop">sidebarVisible</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-filedialog.html#title-prop">title</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-filedialog.html#visible-prop">visible</a></b></b> : bool</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtquick-dialogs-filedialog.html#close-method">close</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtquick-dialogs-filedialog.html#open-method">open</a></b></b>()</li>
+</ul>
+<!-- $$$FileDialog-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><a href="qml-qtquick-dialogs-filedialog.html">FileDialog</a> provides a basic file chooser: it allows the user to select existing files and/or directories, or create new filenames. The dialog is initially invisible. You need to set the properties as desired first, then set <a href="qml-qtquick-dialogs-filedialog.html#visible-prop">visible</a> to true or call <a href="qml-qtquick-dialogs-filedialog.html#open-method">open()</a>.</p>
+<p>Here is a minimal example to open a file dialog and exit after the user chooses a file:</p>
+<pre class="qml">
+
+  import QtQuick 2.2
+  import QtQuick.Dialogs 1.0
+
+  <span class="type"><a href="qml-qtquick-dialogs-filedialog.html">FileDialog</a></span> {
+      <span class="name">id</span>: <span class="name">fileDialog</span>
+      <span class="name">title</span>: <span class="string">&quot;Please choose a file&quot;</span>
+      <span class="name">folder</span>: <span class="name">shortcuts</span>.<span class="name">home</span>
+      <span class="name">onAccepted</span>: {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;You chose: &quot;</span> <span class="operator">+</span> <span class="name">fileDialog</span>.<span class="name">fileUrls</span>)
+          <span class="name">Qt</span>.<span class="name">quit</span>()
+      }
+      <span class="name">onRejected</span>: {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Canceled&quot;</span>)
+          <span class="name">Qt</span>.<span class="name">quit</span>()
+      }
+      <span class="name">Component</span>.onCompleted: <span class="name">visible</span> <span class="operator">=</span> <span class="number">true</span>
+  }
+
+</pre>
+<p>A <a href="qml-qtquick-dialogs-filedialog.html">FileDialog</a> window is automatically transient for its parent window. So whether you declare the dialog inside an <a href="../qtquick/qml-qtquick-item.html">Item</a> or inside a <a href="../qtquick/qml-qtquick-window-window.html">Window</a>, the dialog will appear centered over the window containing the item, or over the Window that you declared.</p>
+<p>The implementation of <a href="qml-qtquick-dialogs-filedialog.html">FileDialog</a> will be a platform file dialog if possible. If that isn't possible, then it will try to instantiate a <a href="../qtwidgets/qfiledialog.html">QFileDialog</a>. If that also isn't possible, then it will fall back to a QML implementation, DefaultFileDialog.qml. In that case you can customize the appearance by editing this file. DefaultFileDialog.qml contains a Rectangle to hold the dialog's contents, because certain embedded systems do not support multiple top-level windows. When the dialog becomes visible, it will automatically be wrapped in a Window if possible, or simply reparented on top of the main window if there can only be one window.</p>
+<p>The QML implementation has a sidebar containing <a href="qml-qtquick-dialogs-filedialog.html#shortcuts-prop">shortcuts</a> to common platform-specific locations, and user-modifiable favorites. It uses application-specific <a href="../qtquick/qt-labs-settings-qmlmodule.html">settings</a> to store the user's favorites, as well as other user-modifiable state, such as whether or not the sidebar is shown, the positions of the splitters, and the dialog size. The settings are stored in a section called <code>QQControlsFileDialog</code> of the application-specific <a href="../qtcore/qsettings.html">QSettings</a>. For example when testing an application with the qml tool, the <code>QQControlsFileDialog</code> section will be created in the <code>Qml Runtime</code> settings file (or registry entry). If an application is started via a custom C++ main() function, it is recommended to set the <a href="../qtcore/qcoreapplication.html#applicationName-prop">name</a>, <a href="../qtcore/qcoreapplication.html#organizationName-prop">organization</a> and <a href="../qtcore/qcoreapplication.html#organizationDomain-prop">domain</a> in order to control the location of the application's settings. If you use <a href="../qtquick/qt-labs-settings-qmlmodule.html">Settings</a> objects in other parts of an application, they will be stored in other sections of the same file.</p>
+<p><a href="../qtwidgets/qfiledialog.html">QFileDialog</a> stores its settings globally instead of per-application. Platform-native file dialogs may or may not store settings in various platform-dependent ways.</p>
+<!-- @@@FileDialog -->
+<h2>Property Documentation</h2>
+<!-- $$$defaultSuffix -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="defaultSuffix-prop"></a><span class="name">defaultSuffix</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the suffix added to the filename if no other suffix was specified.</p>
+<p>This property specifies a string that will be added to the filename if it has no suffix already. The suffix is typically used to indicate the file type (e.g&#x2e; &quot;txt&quot; indicates a text file).</p>
+<p>If the first character is a dot ('.'), it is removed.</p>
+<p>This property was introduced in  Qt 5.10.</p>
+</div></div><!-- @@@defaultSuffix -->
+<br/>
+<!-- $$$fileUrl -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="fileUrl-prop"></a><span class="name">fileUrl</span> : <span class="type"><a href="../qtqml/qml-url.html">url</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The path of the file which was selected by the user.</p>
+<p><b>Note: </b>This property is set only if exactly one file was selected. In all other cases, it will be empty.</p><p><b>See also </b><a href="qml-qtquick-dialogs-filedialog.html#fileUrls-prop">fileUrls</a>.</p>
+</div></div><!-- @@@fileUrl -->
+<br/>
+<!-- $$$fileUrls -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="fileUrls-prop"></a><span class="name">fileUrls</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="../qtqml/qml-url.html">url</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The list of file paths which were selected by the user.</p>
+</div></div><!-- @@@fileUrls -->
+<br/>
+<!-- $$$folder -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="folder-prop"></a><span class="name">folder</span> : <span class="type"><a href="../qtqml/qml-url.html">url</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The path to the currently selected folder. Setting this property before invoking <a href="qml-qtquick-dialogs-filedialog.html#open-method">open()</a> will cause the file browser to be initially positioned on the specified folder.</p>
+<p>The value of this property is also updated after the dialog is closed.</p>
+<p>By default, the url is empty.</p>
+<p><b>Note: </b>On iOS, if you set <i>folder</i> to <a href="qml-qtquick-dialogs-filedialog.html#shortcuts-prop">shortcuts.pictures</a>, a native image picker dialog will be used for accessing the user's photo album. The URL returned can be set as <a href="../qtquick/qml-qtquick-image.html#source-prop">source</a> for <a href="../qtquick/qml-qtquick-image.html">Image</a>. For this to be enabled, the Info.plist assigned to QMAKE_INFO_PLIST in the project file must contain the key, NSPhotoLibraryUsageDescription. See Info.plist documentation from Apple for more information regarding this key. This feature was added in Qt 5.5&#x2e;</p><p><b>See also </b><a href="qml-qtquick-dialogs-filedialog.html#shortcuts-prop">shortcuts</a>.</p>
+</div></div><!-- @@@folder -->
+<br/>
+<!-- $$$modality -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="modality-prop"></a><span class="name">modality</span> : <span class="type">Qt::WindowModality</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether the dialog should be shown modal with respect to the window containing the dialog's parent Item, modal with respect to the whole application, or non-modal.</p>
+<p>By default it is <code>Qt.WindowModal</code>.</p>
+<p>Modality does not mean that there are any blocking calls to wait for the dialog to be accepted or rejected; it's only that the user will be prevented from interacting with the parent window and/or the application windows at the same time. You probably need to write an onAccepted handler to actually load or save the chosen file.</p>
+</div></div><!-- @@@modality -->
+<br/>
+<!-- $$$nameFilters -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="nameFilters-prop"></a><span class="name">nameFilters</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="../qtqml/qml-string.html">string</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>A list of strings to be used as file name filters. Each string can be a space-separated list of filters; filters may include the ? and * wildcards. The list of filters can also be enclosed in parentheses and a textual description of the filter can be provided.</p>
+<p>For example:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-dialogs-filedialog.html">FileDialog</a></span> {
+      <span class="name">nameFilters</span>: [ <span class="string">&quot;Image files (*.jpg *.png)&quot;</span>, <span class="string">&quot;All files (*)&quot;</span> ]
+  }
+
+</pre>
+<p><b>Note: </b>Directories are not excluded by filters.</p><p><b>See also </b><a href="qml-qtquick-dialogs-filedialog.html#selectedNameFilter-prop">selectedNameFilter</a>.</p>
+</div></div><!-- @@@nameFilters -->
+<br/>
+<!-- $$$selectExisting -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="selectExisting-prop"></a><span class="name">selectExisting</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether only existing files or directories can be selected.</p>
+<p>By default, this property is true. This property must be set to the desired value before opening the dialog. Setting this property to false implies that the dialog is for naming a file to which to save something, or naming a folder to be created; therefore <a href="qml-qtquick-dialogs-filedialog.html#selectMultiple-prop">selectMultiple</a> must be false.</p>
+</div></div><!-- @@@selectExisting -->
+<br/>
+<!-- $$$selectFolder -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="selectFolder-prop"></a><span class="name">selectFolder</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether the selected item should be a folder.</p>
+<p>By default, this property is false. This property must be set to the desired value before opening the dialog. Setting this property to true implies that <a href="qml-qtquick-dialogs-filedialog.html#selectMultiple-prop">selectMultiple</a> must be false and <a href="qml-qtquick-dialogs-filedialog.html#selectExisting-prop">selectExisting</a> must be true.</p>
+</div></div><!-- @@@selectFolder -->
+<br/>
+<!-- $$$selectMultiple -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="selectMultiple-prop"></a><span class="name">selectMultiple</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether more than one filename can be selected.</p>
+<p>By default, this property is false. This property must be set to the desired value before opening the dialog. Setting this property to true implies that <a href="qml-qtquick-dialogs-filedialog.html#selectExisting-prop">selectExisting</a> must be true.</p>
+</div></div><!-- @@@selectMultiple -->
+<br/>
+<!-- $$$selectedNameFilter -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="selectedNameFilter-prop"></a><span class="name">selectedNameFilter</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Which of the <a href="qml-qtquick-dialogs-filedialog.html#nameFilters-prop">nameFilters</a> is currently selected.</p>
+<p>This property can be set before the dialog is visible, to set the default name filter, and can also be set while the dialog is visible to set the current name filter. It is also updated when the user selects a different filter.</p>
+</div></div><!-- @@@selectedNameFilter -->
+<br/>
+<!-- $$$shortcuts -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="shortcuts-prop"></a><span class="name">shortcuts</span> : <span class="type">Object</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>A map of some useful paths from <a href="../qtdoc/whatsnew50.html#qstandardpaths">QStandardPaths</a> to their URLs. Each path is verified to exist on the user's computer before being added to this list, at the time when the <a href="qml-qtquick-dialogs-filedialog.html">FileDialog</a> is created.</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><code>desktop</code></td><td ><a href="../qtcore/qstandardpaths.html#StandardLocation-enum">QStandardPaths::DesktopLocation</a></td><td >The user's desktop directory.</td></tr>
+<tr valign="top" class="even"><td ><code>documents</code></td><td ><a href="../qtcore/qstandardpaths.html#StandardLocation-enum">QStandardPaths::DocumentsLocation</a></td><td >The directory containing user document files.</td></tr>
+<tr valign="top" class="odd"><td ><code>home</code></td><td ><a href="../qtcore/qstandardpaths.html#StandardLocation-enum">QStandardPaths::HomeLocation</a></td><td >The user's home directory.</td></tr>
+<tr valign="top" class="even"><td ><code>music</code></td><td ><a href="../qtcore/qstandardpaths.html#StandardLocation-enum">QStandardPaths::MusicLocation</a></td><td >The directory containing the user's music or other audio files.</td></tr>
+<tr valign="top" class="odd"><td ><code>movies</code></td><td ><a href="../qtcore/qstandardpaths.html#StandardLocation-enum">QStandardPaths::MoviesLocation</a></td><td >The directory containing the user's movies and videos.</td></tr>
+<tr valign="top" class="even"><td ><code>pictures</code></td><td ><a href="../qtcore/qstandardpaths.html#StandardLocation-enum">QStandardPaths::PicturesLocation</a></td><td >The directory containing the user's pictures or photos. It is always a kind of <code>file</code>: URL; but on some platforms, it will be specialized, such that the <a href="qml-qtquick-dialogs-filedialog.html">FileDialog</a> will be realized as a gallery browser dialog.</td></tr>
+</table></div>
+<p>For example, <code>shortcuts.home</code> will provide the URL of the user's home directory.</p>
+<p>This property was introduced in  Qt 5.5.</p>
+</div></div><!-- @@@shortcuts -->
+<br/>
+<!-- $$$sidebarVisible -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="sidebarVisible-prop"></a><span class="name">sidebarVisible</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the sidebar in the dialog containing shortcuts and bookmarks is visible. By default it depends on the setting stored in the <code>QQControlsFileDialog</code> section of the application's <a href="../qtquick/qt-labs-settings-qmlmodule.html">Settings</a>.</p>
+<p>This property was introduced in  Qt 5.4.</p>
+</div></div><!-- @@@sidebarVisible -->
+<br/>
+<!-- $$$title -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="title-prop"></a><span class="name">title</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The title of the dialog window.</p>
+</div></div><!-- @@@title -->
+<br/>
+<!-- $$$visible -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="visible-prop"></a><span class="name">visible</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the dialog is visible. By default this is false.</p>
+<p><b>See also </b><a href="qml-qtquick-dialogs-filedialog.html#modality-prop">modality</a>.</p>
+</div></div><!-- @@@visible -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$close[overload1]$$$close -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="close-method"></a><span class="type">void</span> <span class="name">close</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Closes the dialog.</p>
+</div></div><!-- @@@close -->
+<br/>
+<!-- $$$open[overload1]$$$open -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="open-method"></a><span class="type">void</span> <span class="name">open</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Shows the dialog to the user. It is equivalent to setting <a href="qml-qtquick-dialogs-filedialog.html#visible-prop">visible</a> to true.</p>
+</div></div><!-- @@@open -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

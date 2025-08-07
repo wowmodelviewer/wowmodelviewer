@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qundo.qdoc -->
+  <title>Overview of Qt's Undo Framework | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Overview of Qt's Undo Framework</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#introduction">Introduction</a></li>
+<li class="level1"><a href="#classes">Classes</a></li>
+<li class="level1"><a href="#concepts">Concepts</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Overview of Qt's Undo Framework</h1>
+<span class="subtitle"></span>
+<!-- $$$qundo.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="introduction"></a>
+<h2 id="introduction">Introduction</h2>
+<p>Qt's Undo Framework is an implementation of the Command pattern, for implementing undo/redo functionality in applications.</p>
+<p>The Command pattern is based on the idea that all editing in an application is done by creating instances of command objects. Command objects apply changes to the document and are stored on a command stack. Furthermore, each command knows how to undo its changes to bring the document back to its previous state. As long as the application only uses command objects to change the state of the document, it is possible to undo a sequence of commands by traversing the stack downwards and calling undo on each command in turn. It is also possible to redo a sequence of commands by traversing the stack upwards and calling redo on each command.</p>
+<a name="classes"></a>
+<h2 id="classes">Classes</h2>
+<p>The framework consists of four classes:</p>
+<ul>
+<li><a href="../qtwidgets/qundocommand.html">QUndoCommand</a> is the base class of all commands stored on an undo stack. It can apply (redo) or undo a single change in the document.</li>
+<li><a href="../qtwidgets/qundostack.html">QUndoStack</a> is a list of <a href="../qtwidgets/qundocommand.html">QUndoCommand</a> objects. It contains all the commands executed on the document and can roll the document's state backwards or forwards by undoing or redoing them.</li>
+<li><a href="../qtwidgets/qundogroup.html">QUndoGroup</a> is a group of undo stacks. It is useful when an application contains more than one undo stack, typically one for each opened document. <a href="../qtwidgets/qundogroup.html">QUndoGroup</a> provides a single pair of undo/redo slots for all the stacks in the group. It forwards undo and redo requests to the active stack, which is the stack associated with the document that is currently being edited by the user.</li>
+<li><a href="../qtwidgets/qundoview.html">QUndoView</a> is a widget which shows the contents of an undo stack. Clicking on a command in the view rolls the document's state backwards or forwards to that command.</li>
+</ul>
+<a name="concepts"></a>
+<h2 id="concepts">Concepts</h2>
+<p>The following concepts are supported by the framework:</p>
+<ul>
+<li><b>Clean state:</b> Used to signal when the document enters and leaves a state that has been saved to disk. This is typically used to disable or enable the save actions, and to update the document's title bar.</li>
+<li><b>Command compression:</b> Used to compress sequences of commands into a single command. For example: In a text editor, the commands that insert individual characters into the document can be compressed into a single command that inserts whole sections of text. These bigger changes are more convenient for the user to undo and redo.</li>
+<li><b>Command macros:</b> A sequence of commands, all of which are undone or redone in one step. These simplify the task of writing an application, since a set of simpler commands can be composed into more complex commands. For example, a command that moves a set of selected objects in a document can be created by combining a set of commands, each of which moves a single object.</li>
+</ul>
+<p><a href="../qtwidgets/qundostack.html">QUndoStack</a> provides convenient undo and redo <a href="../qtwidgets/qaction.html">QAction</a> objects that can be inserted into a menu or a toolbar. The text properties of these actions always reflect what command will be undone or redone when they are triggered. Similarly, <a href="../qtwidgets/qundogroup.html">QUndoGroup</a> provides undo and redo actions that always behave like the undo and redo actions of the active stack.</p>
+</div>
+<!-- @@@qundo.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

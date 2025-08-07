@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- linux.qdoc -->
+  <title>Qt for Linux/X11 - Specific Issues | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Qt for Linux/X11 - Specific Issues</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#linux">Linux</a></li>
+<li class="level2"><a href="#installation-problems">Installation problems</a></li>
+<li class="level2"><a href="#intel-c-compiler-for-linux">Intel C++ Compiler for Linux</a></li>
+<li class="level2"><a href="#known-issues-with-intel-c-compiler-for-linux">Known Issues with Intel C++ Compiler for Linux</a></li>
+<li class="level2"><a href="#known-issues-with-gcc-compilers">Known Issues with GCC Compilers</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt for Linux/X11 - Specific Issues</h1>
+<span class="subtitle"></span>
+<!-- $$$linux-issues.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>This page contains information about the X11 platforms Qt is currently known to run on, with links to platform-specific notes.</p>
+<a name="linux"></a>
+<h2 id="linux">Linux</h2>
+<p>There are no known problems with using Qt on production versions of Linux/x86, Linux/ppc, Linux/amd64 and Linux/ia64 (including Altix(R)).</p>
+<p>For information about the specific compilers supported, visit the <a href="supported-platforms.html#reference-configurations">supported platforms</a> page.</p>
+<a name="installation-problems"></a>
+<h3 id="installation-problems">Installation problems</h3>
+<p>Installing the source (<i>.tgz</i>) will likely conflict with the Qt version from your Linux distribution. This can result in link errors, such as:</p>
+<pre class="cpp">
+
+  undefined reference to <span class="char">'_vt.11QPushButton'</span>
+
+</pre>
+<p>This is solved by removing the older version of the library.</p>
+<p>If you have problems installing open source versions of Qt provided by your Linux distribution, for example, from RPM or APT repositories, please consult the maintainers of the distribution.</p>
+<p>Some RPM versions have problems installing some of the Qt RPM archives where installation stops with an error message warning about a <b>Failed Dependency</b>. Use the <code>--nodeps</code> option of <code>rpm</code> as workaround this problem.</p>
+<a name="intel-c-compiler-for-linux"></a>
+<h3 id="intel-c-compiler-for-linux">Intel C++ Compiler for Linux</h3>
+<p>Qt can be compiled with the Intel C++ compile for Linux, though, this configuration is not tested on a regular basis.</p>
+<a name="known-issues-with-intel-c-compiler-for-linux"></a>
+<h3 id="known-issues-with-intel-c-compiler-for-linux">Known Issues with Intel C++ Compiler for Linux</h3>
+<ul>
+<li>Precompiled header support does not work in version 10.0&#x2e;025 and older. For these compilers, you should configure Qt with -no-pch. Precompiled header support works properly in version 10.0&#x2e;026 and later.</li>
+<li>Version 10.0&#x2e;026 for Intel 64 is known to miscompile qmake when building in release mode. For now, configure Qt with -debug. Version 10.1&#x2e;008 and later can compile qmake in release mode.</li>
+<li>Versions 10.1&#x2e;008 to 10.1&#x2e;015 for both IA-32 and Intel 64 are known crash with &quot;(0): internal error: 0_47021&quot; when compiling <a href="../qtxmlpatterns/qtxmlpatterns-index.html">Qt XML Patterns</a> and <a href="../qtdesigner/qtdesigner-manual.html">Qt Designer</a> in release mode. Version 10.1&#x2e;017 compiles these modules correctly in release mode.</li>
+</ul>
+<a name="known-issues-with-gcc-compilers"></a>
+<h3 id="known-issues-with-gcc-compilers">Known Issues with GCC Compilers</h3>
+<p>Building Qt with certain versions of GCC has the following known issues:</p>
+<ul>
+<li>GCC 4.9&#x2e;2 fails to build Qt:<ul>
+<li><a href="https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65309">Related bug</a> in GCC's bug tracker</li>
+<li><a href="http://lists.qt-project.org/pipermail/development/2015-March/020632.html">Discussion</a> on <a href="mailto://development@qt-project.org">development@qt-project.org</a> mailing list</li>
+</ul>
+</li>
+<li>GCC 5.2&#x2e;1: Nested structs do not get their constructors called under some circumstances:<ul>
+<li><a href="https://gcc.gnu.org/bugzilla/show_bug.cgi?id=67550">Related bug</a> in GCC's bug tracker</li>
+<li><a href="https://codereview.qt-project.org/161071">A possible workaround</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<!-- @@@linux-issues.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

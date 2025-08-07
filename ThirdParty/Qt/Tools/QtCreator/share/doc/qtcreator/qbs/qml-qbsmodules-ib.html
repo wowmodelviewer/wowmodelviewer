@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- ib-module.qdoc -->
+  <title>ib QML Type | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<p class="naviNextPrevious headerNavi">
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#relevant-file-tags">Relevant File Tags</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">ib QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$ib-brief -->
+<p>Provides support for Apple Interface Builder and related tools and file types. <a href="#details">More...</a></p>
+<!-- @@@ib -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QbsModules .</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qbs 1.1</td></tr></table></div><ul>
+<li><a href="qml-qbsmodules-ib-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qbsmodules-ib.html#actoolName-prop">actoolName</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-ib.html#actoolPath-prop">actoolPath</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-ib.html#appIconName-prop">appIconName</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-ib.html#autoActivateCustomFonts-prop">autoActivateCustomFonts</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-ib.html#compressPngs-prop">compressPngs</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-ib.html#errors-prop">errors</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-ib.html#flags-prop">flags</a></b></b> : stringList</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-ib.html#flatten-prop">flatten</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-ib.html#ibtoolName-prop">ibtoolName</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-ib.html#ibtoolPath-prop">ibtoolPath</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-ib.html#iconutilName-prop">iconutilName</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-ib.html#iconutilPath-prop">iconutilPath</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-ib.html#launchImageName-prop">launchImageName</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-ib.html#module-prop">module</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-ib.html#notices-prop">notices</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-ib.html#warnings-prop">warnings</a></b></b> : bool</li>
+</ul>
+<!-- $$$ib-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The <code>ib</code> module contains properties and rules for building Interface Builder documents, storyboards, asset catalogs, and icon sets.</p>
+<p>This module is only available on Apple platforms.</p>
+<a name="relevant-file-tags"></a>
+<h3 id="relevant-file-tags">Relevant File Tags</h3>
+<a name="filetags-ib"></a><p>The file tags determine how the tagged directories and files are handled.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Tag</th><th >Auto-tagged File Names</th><th >Since</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>&quot;assetcatalog&quot;</code></td><td ><code>*.xcassets</code></td><td >1.3</td><td >Tagged directories are compiled into compiled asset catalog archives (<code>.car</code> files) on supported platforms, or a collection of loose resource files. The resulting files will be automatically tagged <a href="qml-qbsmodules-bundle.html#filetags-bundle">bundle.input</a>. If the current product is a bundle, the files will be included in the bundle's resources directory.</td></tr>
+<tr valign="top" class="even"><td ><code>&quot;iconset&quot;</code></td><td ><code>*.iconset</code></td><td >1.3</td><td >Tagged directories are compiled into Apple ICNS files. The resulting files will be automatically tagged <a href="qml-qbsmodules-bundle.html#filetags-bundle">bundle.input</a>. If the current product is a bundle, the files will be included in the bundle's resources directory.</td></tr>
+<tr valign="top" class="odd"><td ><code>&quot;nib&quot;</code></td><td ><code>*.nib</code>, <code>*.xib</code></td><td >1.1</td><td >Tagged &quot;NIB&quot; and &quot;XIB&quot; files will be compiled. The output may be a flat file or a bundle (directory structure). The resulting files will be automatically tagged <a href="qml-qbsmodules-bundle.html#filetags-bundle">bundle.input</a>. If the current product is a bundle, the files will be included in the bundle's resources directory.</td></tr>
+<tr valign="top" class="even"><td ><code>&quot;png&quot;</code></td><td ><code>*.png</code></td><td >1.9</td><td >Tagged PNG files may be converted into multi-resolution TIFFs. Source files should adopt the <a href="https://developer.apple.com/library/content/documentation/GraphicsAnimation/Conceptual/HighResolutionOSX/Optimizing/Optimizing.html#//apple_ref/doc/uid/TP40012302-CH7-SW28#">@2x naming convention</a> in order to be properly grouped. The resulting files will be given the <a href="qml-qbsmodules-dmg.html#filetags-dmg">tiff</a> file tag.</td></tr>
+<tr valign="top" class="odd"><td ><code>&quot;storyboard&quot;</code></td><td ><code>*.storyboard</code></td><td >1.3</td><td >Tagged storyboard files will be compiled. The output may be a flat file or a bundle (directory structure). The resulting files will be automatically tagged <a href="qml-qbsmodules-bundle.html#filetags-bundle">bundle.input</a>. If the current product is a bundle, the files will be included in the bundle's resources directory.</td></tr>
+</table></div>
+<!-- @@@ib -->
+<h2>Property Documentation</h2>
+<!-- $$$actoolName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="actoolName-prop"></a><span class="name">actoolName</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The name of the <code>actool</code> binary used to compile asset catalogs.</p>
+<p>This property should not normally need to be changed.</p>
+<p>Default: <code>&quot;actool&quot;</code></p>
+<p>This property was introduced in  Qbs 1.3.</p>
+</div></div><!-- @@@actoolName -->
+<br/>
+<!-- $$$actoolPath -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="actoolPath-prop"></a><span class="name">actoolPath</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The directory where the <code>actool</code> binary is located.</p>
+<p>This property should not normally need to be changed.</p>
+<p>Default: <code>actoolName</code></p>
+<p>This property was introduced in  Qbs 1.3.</p>
+</div></div><!-- @@@actoolPath -->
+<br/>
+<!-- $$$appIconName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="appIconName-prop"></a><span class="name">appIconName</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The name of the resource in the asset catalog that will be used as the application's icon.</p>
+<p>Used to generate the partial <code>Info.plist</code> which will be merged into the resulting app.</p>
+<p>If this property is <code>undefined</code>, no application icon will be specified.</p>
+<p>Default: Undefined</p>
+<p>This property was introduced in  Qbs 1.3.</p>
+</div></div><!-- @@@appIconName -->
+<br/>
+<!-- $$$autoActivateCustomFonts -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="autoActivateCustomFonts-prop"></a><span class="name">autoActivateCustomFonts</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Instructs the <code>ibtool</code> compiler to add custom fonts to the application's <code>Info.plist</code> when compiling XIBs and storyboards, which will cause the fonts to activate upon application launch.</p>
+<p>Requires Xcode 6 or newer.</p>
+<p>Default: <code>true</code></p>
+<p>This property was introduced in  Qbs 1.3.</p>
+</div></div><!-- @@@autoActivateCustomFonts -->
+<br/>
+<!-- $$$compressPngs -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="compressPngs-prop"></a><span class="name">compressPngs</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to compress PNG image files when building asset catalogs.</p>
+<p>Default: <code>true</code></p>
+<p>This property was introduced in  Qbs 1.3.</p>
+</div></div><!-- @@@compressPngs -->
+<br/>
+<!-- $$$errors -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="errors-prop"></a><span class="name">errors</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to print errors when compiling.</p>
+<p>Does not apply to icon sets.</p>
+<p>Default: <code>true</code></p>
+</div></div><!-- @@@errors -->
+<br/>
+<!-- $$$flags -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="flags-prop"></a><span class="name">flags</span> : <span class="type">stringList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Additional flags to pass to the underlying tool (<code>ibtool</code>, <code>actool</code>, <code>iconutil</code>).</p>
+<p>Default: Undefined</p>
+<p>Default: <code>true</code></p>
+</div></div><!-- @@@flags -->
+<br/>
+<!-- $$$flatten -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="flatten-prop"></a><span class="name">flatten</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Compiles XIBs and storyboards into flattened (non-wrapper) files.</p>
+<p>Set to <code>false</code> to preserve editability of the resulting NIB and storyboard bundles in Interface Builder.</p>
+<p>This property should not normally need to be changed.</p>
+<p>Default: <code>true</code></p>
+</div></div><!-- @@@flatten -->
+<br/>
+<!-- $$$ibtoolName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="ibtoolName-prop"></a><span class="name">ibtoolName</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The name of the <code>ibtool</code> binary used to compile NIBs and storyboards.</p>
+<p>This property should not normally need to be changed.</p>
+<p>Default: <code>&quot;ibtool&quot;</code></p>
+<p>This property was introduced in  Qbs 1.3.</p>
+</div></div><!-- @@@ibtoolName -->
+<br/>
+<!-- $$$ibtoolPath -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="ibtoolPath-prop"></a><span class="name">ibtoolPath</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The directory where the <code>ibtool</code> binary is located.</p>
+<p>This property should not normally need to be changed.</p>
+<p>Default: <code>ibtoolName</code></p>
+<p>This property was introduced in  Qbs 1.3.</p>
+</div></div><!-- @@@ibtoolPath -->
+<br/>
+<!-- $$$iconutilName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="iconutilName-prop"></a><span class="name">iconutilName</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The name of the <code>iconutil</code> binary used to compile icon sets.</p>
+<p>This property should not normally need to be changed.</p>
+<p>Default: <code>&quot;iconutil&quot;</code></p>
+<p>This property was introduced in  Qbs 1.3.</p>
+</div></div><!-- @@@iconutilName -->
+<br/>
+<!-- $$$iconutilPath -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="iconutilPath-prop"></a><span class="name">iconutilPath</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The directory where the <code>iconutil</code> binary is located.</p>
+<p>This property should not normally need to be changed.</p>
+<p>Default: <code>iconutilName</code></p>
+<p>This property was introduced in  Qbs 1.3.</p>
+</div></div><!-- @@@iconutilPath -->
+<br/>
+<!-- $$$launchImageName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="launchImageName-prop"></a><span class="name">launchImageName</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The name of the resource in the asset catalog that will be used as the application's launch image.</p>
+<p>Used to generate the partial <code>Info.plist</code> which will be merged into the resulting app.</p>
+<p>If this property is <code>undefined</code>, no launch image will be specified.</p>
+<p>This property is specific to iOS.</p>
+<p>Default: Undefined</p>
+<p>This property was introduced in  Qbs 1.3.</p>
+</div></div><!-- @@@launchImageName -->
+<br/>
+<!-- $$$module -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="module-prop"></a><span class="name">module</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Sets the name of the module that the NIB or storyboard is a part of.</p>
+<p>Requires Xcode 6 or newer.</p>
+<p>Default: Undefined</p>
+<p>This property was introduced in  Qbs 1.3.</p>
+</div></div><!-- @@@module -->
+<br/>
+<!-- $$$notices -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="notices-prop"></a><span class="name">notices</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to print notifications when compiling.</p>
+<p>Does not apply to icon sets.</p>
+<p>Default: <code>true</code></p>
+</div></div><!-- @@@notices -->
+<br/>
+<!-- $$$warnings -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="warnings-prop"></a><span class="name">warnings</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to print warnings when compiling.</p>
+<p>Does not apply to icon sets.</p>
+<p>Default: <code>true</code></p>
+</div></div><!-- @@@warnings -->
+<br/>
+<p class="naviNextPrevious footerNavi">
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

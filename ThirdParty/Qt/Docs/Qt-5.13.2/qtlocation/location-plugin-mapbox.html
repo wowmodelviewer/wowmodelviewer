@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- mapbox.qdoc -->
+  <title>Qt Location Mapbox Plugin | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td >Qt Location Mapbox Plugin</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#overview">Overview</a></li>
+<li class="level1"><a href="#parameters">Parameters</a></li>
+<li class="level2"><a href="#mandatory-parameters">Mandatory parameters</a></li>
+<li class="level2"><a href="#optional-parameters">Optional parameters</a></li>
+<li class="level1"><a href="#extra-routing-attributes">Extra routing attributes</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Location Mapbox Plugin</h1>
+<span class="subtitle"></span>
+<!-- $$$location-plugin-mapbox.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="overview"></a>
+<h2 id="overview">Overview</h2>
+<p>This geo services plugin allows applications to access <a href="http://mapbox.com">Mapbox</a> location based services using the Qt Location API. The use of these services is governed by the <a href="https://www.mapbox.com/tos">Mapbox terms of service</a>. An access token is required to use these services. Data is provided by <a href="https://www.mapbox.com/about/maps">OpenStreetMap and others</a>.</p>
+<p>The Mapbox geo services plugin can be loaded by using the plugin key &quot;mapbox&quot;.</p>
+<a name="parameters"></a>
+<h2 id="parameters">Parameters</h2>
+<a name="mandatory-parameters"></a>
+<h3 id="mandatory-parameters">Mandatory parameters</h3>
+<p>The following table lists mandatory parameters that <i>must</i> be passed to the Mapbox plugin.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Parameter</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >mapbox.access_token</td><td ><a href="https://www.mapbox.com/help/define-access-token/">Access token</a> provided by Mapbox.</td></tr>
+</table></div>
+<p>The Mapbox geo services plugin requires an access token and map ID to use the Mapbox services. To create a Mapbox account visit <a href="https://www.mapbox.com/#signup">https://www.mapbox.com/#signup</a>.</p>
+<a name="optional-parameters"></a>
+<h3 id="optional-parameters">Optional parameters</h3>
+<p>The following table lists optional parameters that can be passed to the Mapbox plugin.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Parameter</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >mapbox.enterprise</td><td >Boolean representing whether the access token comes from a <a href="https://www.mapbox.com/enterprise">Mapbox Enterprise</a> account.</td></tr>
+<tr valign="top" class="even"><td >mapbox.mapping.map_id, mapbox.map_id (<b>deprecated</b>)</td><td ><a href="https://www.mapbox.com/help/define-map-id/">ID</a> of the Mapbox map to show. An example ID is &quot;examples.map-zr0njcqy&quot;. If this parameter is present, the specified map type will be used by default, unless another is selected. If not present, the default Mapbox map ID is &quot;mapbox.streets&quot;. <b>Note:</b> neither in this parameter nor in <b>mapbox.mapping.additional_map_ids</b> it is allowed to use repeated map_ids. This includes the map_ids bundled in the plugin by default (documented <a href="https://www.mapbox.com/api-documentation/#maps">here</a> under <b>Mapbox classic map IDs</b>). Failing to do so will cause tile cache corruption.</td></tr>
+<tr valign="top" class="odd"><td >mapbox.mapping.additional_map_ids</td><td >Additional, comma separated, Mapbox map IDs to be added to the available map types.</td></tr>
+<tr valign="top" class="even"><td >mapbox.mapping.format, mapbox.format (<b>deprecated</b>)</td><td >Data format to download tiles in, available values are &quot;png&quot;, &quot;png32&quot;, &quot;png64&quot;, &quot;png128&quot;, &quot;png256&quot;, (PNG with full, 32, 64, 128 and 256 color palette) &quot;jpg70&quot;, &quot;jpg80&quot;, &quot;jpg90&quot; (JPEG with 70%, 80% and 90% compression). Defaults to &quot;png&quot;.</td></tr>
+<tr valign="top" class="odd"><td >mapbox.mapping.highdpi_tiles</td><td >Whether or not to request high dpi tiles. Valid values are <b>true</b> and <b>false</b>. The default value is <b>false</b>.</td></tr>
+<tr valign="top" class="even"><td >useragent</td><td >User agent string set when making network requests.</td></tr>
+<tr valign="top" class="odd"><td >mapbox.mapping.cache.directory</td><td >Absolute path to map tile cache directory used as network disk cache.<p>The default place for the cache is the <code>QtLocation/mapbox</code> subdirectory in the location returned by <a href="../qtcore/qstandardpaths.html#writableLocation">QStandardPaths::writableLocation</a>(), called with <a href="../qtcore/qstandardpaths.html#StandardLocation-enum">QStandardPaths::GenericCacheLocation</a> as a parameter. On systems that have no concept of a shared cache, the application-specific <a href="../qtcore/qstandardpaths.html#StandardLocation-enum">QStandardPaths::CacheLocation</a> is used instead.</p>
+</td></tr>
+<tr valign="top" class="even"><td >mapbox.mapping.cache.disk.cost_strategy</td><td >The cost strategy to use to cache map tiles on disk. Valid values are <b>bytesize</b> and <b>unitary</b>. Using <b>bytesize</b>, the related size parameter (<b>mapbox.mapping.cache.disk.size</b>) will be interpreted as bytes. Using <b>unitary</b>, they will be interpreted as number of tiles. The default value for this parameter is <b>unitary</b>.</td></tr>
+<tr valign="top" class="odd"><td >mapbox.mapping.cache.disk.size</td><td >Disk cache size for map tiles. The default size of this cache is 6000 if <b>unitary</b> is used as cost strategy, or 50 MiB, if <b>bytesize</b> is used as cost strategy. Note that 6000 is the maximum amount of tiles that the Mapbox free plan allows to cache. Make sure to comply with Mapbox Terms of Service before increasing this value.</td></tr>
+<tr valign="top" class="even"><td >mapbox.mapping.cache.memory.cost_strategy</td><td >The cost strategy to use to cache map tiles in memory. Valid values are <b>bytesize</b> and <b>unitary</b>. Using <b>bytesize</b>, the related size parameter (<b>mapbox.mapping.cache.memory.size</b>) will be interpreted as bytes. Using <b>unitary</b>, they will be interpreted as number of tiles. The default value for this parameter is <b>bytesize</b>.</td></tr>
+<tr valign="top" class="odd"><td >mapbox.mapping.cache.memory.size</td><td >Memory cache size for map tiles. The Default size of this cache is 100 if <b>unitary</b> is used as cost strategy, or 3 MiB, if <b>bytesize</b> is used as cost strategy.</td></tr>
+<tr valign="top" class="even"><td >mapbox.mapping.cache.texture.cost_strategy</td><td >The cost strategy to use to cache decompressed map tiles in memory. Valid values are <b>bytesize</b> and <b>unitary</b>. Using <b>bytesize</b>, the related size parameter (<b>mapbox.mapping.cache.texture.size</b>) will be interpreted as bytes. Using <b>unitary</b>, they will be interpreted as number of tiles. The default value for this parameter is <b>bytesize</b>.</td></tr>
+<tr valign="top" class="odd"><td >mapbox.mapping.cache.texture.size</td><td >Texture cache size for map tiles. The Default size of this cache is 30 if <b>unitary</b> is used as cost strategy, or 6 MiB, if <b>bytesize</b> is used as cost strategy. Note that the texture cache has a hard minimum size which depends on the size of the map viewport (it must contain enough data to display the tiles currently visible on the display). This value is the amount of tiles to be cached in addition to the bare minimum.</td></tr>
+<tr valign="top" class="even"><td >mapbox.mapping.prefetching_style</td><td >This parameter allows to provide a hint how tile prefetching is to be performed by the engine. The default value, <code>TwoNeighbourLayers</code>, makes the engine prefetch tiles for the layer above and the one below the current tile layer, providing ready tiles when zooming in or out from the current zoom level. <code>OneNeighbourLayer</code> only prefetches the one layer closest to the current zoom level. Finally, <code>NoPrefetching</code> allows to disable the prefetching, so only tiles that are visible will be fetched. Note that, depending on the active map type, this hint might be ignored.</td></tr>
+<tr valign="top" class="odd"><td >mapbox.routing.use_mapbox_text_instructions</td><td >Whether to use the instruction text that came with the response from the server (true) or the text generated by the plugin. The default value is true. Note that if instructions in a language that is not directly supported by Mapbox are needed (see <a href="https://www.mapbox.com/api-documentation/#instructions-languages">here</a> for the supported languages), it is possible to use the <a href="../qtlinguist/qtlinguist-index.html">Qt Linguist</a> to translate <a href="qtlocation-module.html">QtLocation</a> to the desired language, and set this parameter to false in order to use the translated built-in instructions.</td></tr>
+</table></div>
+<a name="extra-routing-attributes"></a>
+<h2 id="extra-routing-attributes">Extra routing attributes</h2>
+<p>When using this plugin, the <a href="qml-qtlocation-routemaneuver.html">RouteManeuver</a> objects in the returned route may contain additional extended attributes (see <a href="qml-qtlocation-routemaneuver.html#extendedAttributes-prop">RouteManeuver::extendedAttributes</a>), where available. These attributes are described in detail in the official <a href="https://www.mapbox.com/api-documentation/#stepmaneuver-object">Mapbox direction API documentation</a>.</p>
+</div>
+<!-- @@@location-plugin-mapbox.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

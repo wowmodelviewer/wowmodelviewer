@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtquickcontrols2-buttons.qdoc -->
+  <title>Button Controls | Qt Quick Controls 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td >Button Controls</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#button-control">Button Control</a></li>
+<li class="level1"><a href="#checkbox-control">CheckBox Control</a></li>
+<li class="level1"><a href="#delaybutton-control">DelayButton Control</a></li>
+<li class="level1"><a href="#radiobutton-control">RadioButton Control</a></li>
+<li class="level1"><a href="#roundbutton-control">RoundButton Control</a></li>
+<li class="level1"><a href="#switch-control">Switch Control</a></li>
+<li class="level1"><a href="#toolbutton-control">ToolButton Control</a></li>
+<li class="level1"><a href="#related-information">Related Information</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Button Controls</h1>
+<span class="subtitle"></span>
+<!-- $$$qtquickcontrols2-buttons.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Qt Quick Controls offers a selection of button-like controls.</p>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-controls2-abstractbutton.html">AbstractButton</a></p></td><td class="tblDescr"><p>Abstract base type providing functionality common to buttons</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-controls2-button.html">Button</a></p></td><td class="tblDescr"><p>Push-button that can be clicked to perform a command or answer a question</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-controls2-checkbox.html">CheckBox</a></p></td><td class="tblDescr"><p>Check button that can be toggled on or off</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-controls2-delaybutton.html">DelayButton</a></p></td><td class="tblDescr"><p>Check button that triggers when held down long enough</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-controls2-radiobutton.html">RadioButton</a></p></td><td class="tblDescr"><p>Exclusive radio button that can be toggled on or off</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-controls2-roundbutton.html">RoundButton</a></p></td><td class="tblDescr"><p>A push-button control with rounded corners that can be clicked by the user</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-controls2-switch.html">Switch</a></p></td><td class="tblDescr"><p>Button that can be toggled on or off</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-controls2-toolbutton.html">ToolButton</a></p></td><td class="tblDescr"><p>Button with a look suitable for a ToolBar</p></td></tr>
+</table></div>
+<p>Each type of button has its own specific use case. The following sections offer guidelines for choosing the appropriate type of button, depending on the use case.</p>
+<a name="button-control"></a>
+<h2 id="button-control">Button Control</h2>
+<p><a href="qml-qtquick-controls2-button.html">Button</a> is a clickable control that starts an action, or opens or closes a popup. A button usually has a text label but it can also contain an icon.</p>
+<p>Button is a very suitable control when a popup or dialog needs to perform an action. The most common examples are Apply, Cancel, Save, Close and Help.</p>
+<p class="centerAlign"><img src="images/qtquickcontrols2-button.gif" alt="" /></p><p>Recommendations:</p>
+<ul>
+<li>The button's text should be a verb describing the action, or a noun matching the title of the popup that will be opened.</li>
+<li>Don't use a button to set state. <a href="qml-qtquick-controls2-switch.html">Switch</a> is more suitable for that.</li>
+<li>Use the default font unless you have UI guidelines specifying otherwise.</li>
+<li>If the text is localized, consider the influence of a longer text on the layout.</li>
+</ul>
+<p><b>See also</b> <a href="qml-qtquick-controls2-button.html">Button</a> and <a href="qml-qtquick-controls2-abstractbutton.html">AbstractButton</a></p>
+<a name="checkbox-control"></a>
+<h2 id="checkbox-control">CheckBox Control</h2>
+<p class="centerAlign"><img src="images/qtquickcontrols2-checkbox.gif" alt="" /></p><p><a href="qml-qtquick-controls2-checkbox.html">CheckBox</a> is used to build multi-selection option lists. Any number of options can be selected, including none, but the options should not be mutually exclusive.</p>
+<p>Use a single <a href="qml-qtquick-controls2-checkbox.html">CheckBox</a> for a yes/no choice, such as when you have to accept the terms of service agreement in a form.</p>
+<p>For a single yes/no choice, it is also possible to use a switch. If the choice concerns an option, it is best to use a <a href="qml-qtquick-controls2-checkbox.html">CheckBox</a>. If it concerns action to be taken, a switch is recommended.</p>
+<p>When options can be grouped, you can use a partially checked <a href="qml-qtquick-controls2-checkbox.html">CheckBox</a> to represent the whole group. Use the checkbox's <a href="qml-qtquick-controls2-checkbox.html#checkState-prop">partially checked state</a> when a user selects some, but not all, sub-items in the group.</p>
+<p>The three availables check states are: checked, partially checked and unchecked.</p>
+<p>The checkable options are often listed vertically.</p>
+<p>Recommendations:</p>
+<ul>
+<li>The checkbox label should be a statement that the check mark makes true, and that the absence of a check mark makes false.</li>
+<li>The checkbox label should not contain a negative statement.</li>
+<li>Use the default font, unless you have UI guidelines specifying otherwise.</li>
+<li>If the text is localized, consider the influence of a longer text on the layout.</li>
+</ul>
+<p><b>See also</b> <a href="qml-qtquick-controls2-checkbox.html">CheckBox</a></p>
+<a name="delaybutton-control"></a>
+<h2 id="delaybutton-control">DelayButton Control</h2>
+<p><a href="qml-qtquick-controls2-delaybutton.html">DelayButton</a> is a button that incorporates a delay before triggering an action. This delay prevents accidental presses.</p>
+<p class="centerAlign"><img src="images/qtquickcontrols2-delaybutton.gif" alt="" /></p><p>Recommendations:</p>
+<ul>
+<li>Use in touch user interfaces.</li>
+<li>Use for actions that must be triggered with care.</li>
+</ul>
+<p><b>See also</b> <a href="qml-qtquick-controls2-button.html">Button</a> and <a href="qml-qtquick-controls2-abstractbutton.html">AbstractButton</a></p>
+<a name="radiobutton-control"></a>
+<h2 id="radiobutton-control">RadioButton Control</h2>
+<p class="centerAlign"><img src="images/qtquickcontrols2-radiobutton.gif" alt="" /></p><p><a href="qml-qtquick-controls2-radiobutton.html">RadioButton</a> is used to select only one option from a set of options. Selecting one option automatically deselects the one selected before.</p>
+<p>If there are only two mutually exclusive options, combine them into a single checkbox or a switch.</p>
+<p>Recommendations:</p>
+<ul>
+<li>Limit the label text to one line.</li>
+<li>Ensure that a sensible default option is checked.</li>
+<li>List <a href="qml-qtquick-controls2-radiobutton.html">RadioButton</a> options vertically.</li>
+<li>If the text is localized, consider the influence of a longer text on the layout.</li>
+<li>Use the default font, unless you have UI guidelines that specify otherwise.</li>
+<li>Just like with <a href="qml-qtquick-controls2-checkbox.html">CheckBox</a>, do not make the list too large.</li>
+<li>In order to avoid confusion, do not put two groups of radio buttons next to each other.</li>
+</ul>
+<p><b>See also</b> <a href="qml-qtquick-controls2-radiobutton.html">RadioButton</a></p>
+<a name="roundbutton-control"></a>
+<h2 id="roundbutton-control">RoundButton Control</h2>
+<p><a href="qml-qtquick-controls2-roundbutton.html">RoundButton</a> is a clickable control that starts an action, or opens or closes a popup. A round button with a square image icon or one-letter font icon is circular. A circular <a href="qml-qtquick-controls2-roundbutton.html">RoundButton</a> takes less space than a normal <a href="qml-qtquick-controls2-button.html">Button</a>, and can also be used as a floating action button.</p>
+<p class="centerAlign"><img src="images/qtquickcontrols2-roundbutton.png" alt="" /></p><p>Recommendations:</p>
+<ul>
+<li>Keep labels short and concise.</li>
+<li>If the text is localized, consider the influence of a longer text on the layout.</li>
+</ul>
+<p><b>See also</b> <a href="qml-qtquick-controls2-roundbutton.html">RoundButton</a></p>
+<a name="switch-control"></a>
+<h2 id="switch-control">Switch Control</h2>
+<p class="centerAlign"><img src="images/qtquickcontrols2-switch.png" alt="" /></p><p><a href="qml-qtquick-controls2-switch.html">Switch</a> represents a physical switch that allows users to choose between an &quot;on&quot; or &quot;off&quot; state. Use a switch for binary operations that take effect immediately after it has been switched on. For example, a switch to turn WIFI on or off.</p>
+<p>Recommendations:</p>
+<ul>
+<li>Keep labels short and concise.</li>
+<li>If the text is localized, consider the influence of a longer text on the layout.</li>
+</ul>
+<p><b>See also</b> <a href="qml-qtquick-controls2-switch.html">Switch</a></p>
+<a name="toolbutton-control"></a>
+<h2 id="toolbutton-control">ToolButton Control</h2>
+<p class="centerAlign"><img src="images/qtquickcontrols2-toolbutton.png" alt="" /></p><p><a href="qml-qtquick-controls2-toolbutton.html">ToolButton</a> is nearly identical to <a href="qml-qtquick-controls2-button.html">Button</a>, but it has a graphical appearance that makes it more suitable for insertion into a <a href="qml-qtquick-controls2-toolbar.html">ToolBar</a>.</p>
+<p><b>See also</b> <a href="qml-qtquick-controls2-toolbutton.html">ToolButton</a></p>
+<a name="related-information"></a>
+<h2 id="related-information">Related Information</h2>
+<ul>
+<li><a href="qtquickcontrols2-guidelines.html">Qt Quick Controls Guidelines</a></li>
+</ul>
+</div>
+<!-- @@@qtquickcontrols2-buttons.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

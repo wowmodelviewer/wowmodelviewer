@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qhelpfilterengine.cpp -->
+  <title>QHelpFilterEngine Class | Qt Help 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qthelp-index.html">Qt Help</a></td><td ><a href="qthelp-module.html">C++ Classes</a></td><td >QHelpFilterEngine</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qthelp-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QHelpFilterEngine Class</h1>
+<!-- $$$QHelpFilterEngine-brief -->
+<p>The <a href="qhelpfilterengine.html">QHelpFilterEngine</a> class provides a filtered view of the help contents. <a href="#details">More...</a></p>
+<!-- @@@QHelpFilterEngine -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QHelpFilterEngine&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += help</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.13.</p>
+<ul>
+<li><a href="qhelpfilterengine-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qhelpfilterengine.html#activeFilter">activeFilter</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qhelpfilterengine.html#availableComponents">availableComponents</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QHelpFilterData </td><td class="memItemRight bottomAlign"><b><a href="qhelpfilterengine.html#filterData">filterData</a></b>(const QString &amp;<i>filterName</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qhelpfilterengine.html#filters">filters</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMap&lt;QString, QString&gt; </td><td class="memItemRight bottomAlign"><b><a href="qhelpfilterengine.html#namespaceToComponent">namespaceToComponent</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMap&lt;QString, QVersionNumber&gt; </td><td class="memItemRight bottomAlign"><b><a href="qhelpfilterengine.html#namespaceToVersion">namespaceToVersion</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qhelpfilterengine.html#namespacesForFilter">namespacesForFilter</a></b>(const QString &amp;<i>filterName</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qhelpfilterengine.html#removeFilter">removeFilter</a></b>(const QString &amp;<i>filterName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qhelpfilterengine.html#setActiveFilter">setActiveFilter</a></b>(const QString &amp;<i>filterName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qhelpfilterengine.html#setFilterData">setFilterData</a></b>(const QString &amp;<i>filterName</i>, const QHelpFilterData &amp;<i>filterData</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qhelpfilterengine.html#filterActivated">filterActivated</a></b>(const QString &amp;<i>newFilter</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QHelpFilterEngine-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The filter engine allows the management of filters associated with a <a href="qhelpenginecore.html">QHelpEngineCore</a> instance. The help engine internally creates an instance of the filter engine, which can be accessed by calling <a href="qhelpenginecore.html#filterEngine">QHelpEngineCore::filterEngine</a>(). Therefore, the public constructor of this class is disabled.</p>
+<p>The filters are identified by a filter name string. Filter details are described by the <a href="qhelpfilterdata.html">QHelpFilterData</a> class.</p>
+<p>The filter engine allows for adding new filters and changing the existing filters' data through the <a href="qhelpfilterengine.html#setFilterData">setFilterData</a>() method. An existing filter can be removed through the <a href="qhelpfilterengine.html#removeFilter">removeFilter</a>() method.</p>
+<p>Out of the registered filters one can be marked as the active one. The active filter will be used by the associated help engine for returning filtered results of many different functions, such as content, index, or search results. If no filter is marked active, the help engine returns the full results list available.</p>
+<p>The active filter is returned by <a href="qhelpfilterengine.html#activeFilter">activeFilter</a>() and it can be changed by <a href="qhelpfilterengine.html#setActiveFilter">setActiveFilter</a>().</p>
+</div>
+<p><b>See also </b><a href="qhelpenginecore.html">QHelpEngineCore</a>.</p>
+<!-- @@@QHelpFilterEngine -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$filterActivated[overload1]$$$filterActivatedconstQString& -->
+<h3 class="fn" id="filterActivated"><a name="filterActivated"></a><code>[signal] </code><span class="type">void</span> QHelpFilterEngine::<span class="name">filterActivated</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>newFilter</i>)</h3>
+<p>This signal is emitted when the active filter is set. <i>newFilter</i> specifies the name of the filter.</p>
+<p><b>See also </b><a href="qhelpfilterengine.html#setActiveFilter">setActiveFilter</a>().</p>
+<!-- @@@filterActivated -->
+<!-- $$$activeFilter[overload1]$$$activeFilter -->
+<h3 class="fn" id="activeFilter"><a name="activeFilter"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QHelpFilterEngine::<span class="name">activeFilter</span>() const</h3>
+<p>Returns the name of the currently active filter.</p>
+<p><b>See also </b><a href="qhelpfilterengine.html#setActiveFilter">setActiveFilter</a>().</p>
+<!-- @@@activeFilter -->
+<!-- $$$availableComponents[overload1]$$$availableComponents -->
+<h3 class="fn" id="availableComponents"><a name="availableComponents"></a><span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> QHelpFilterEngine::<span class="name">availableComponents</span>() const</h3>
+<p>Returns the list of all available components defined in all registered documentation files.</p>
+<!-- @@@availableComponents -->
+<!-- $$$filterData[overload1]$$$filterDataconstQString& -->
+<h3 class="fn" id="filterData"><a name="filterData"></a><span class="type"><a href="qhelpfilterdata.html">QHelpFilterData</a></span> QHelpFilterEngine::<span class="name">filterData</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>filterName</i>) const</h3>
+<p>Returns the filter details associated with <i>filterName</i>.</p>
+<p><b>See also </b><a href="qhelpfilterengine.html#setFilterData">setFilterData</a>().</p>
+<!-- @@@filterData -->
+<!-- $$$filters[overload1]$$$filters -->
+<h3 class="fn" id="filters"><a name="filters"></a><span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> QHelpFilterEngine::<span class="name">filters</span>() const</h3>
+<p>Returns the list of all filter names defined inside the filter engine.</p>
+<!-- @@@filters -->
+<!-- $$$namespaceToComponent[overload1]$$$namespaceToComponent -->
+<h3 class="fn" id="namespaceToComponent"><a name="namespaceToComponent"></a><span class="type"><a href="../qtcore/qmap.html">QMap</a></span>&lt;<span class="type"><a href="../qtcore/qstring.html">QString</a></span>, <span class="type"><a href="../qtcore/qstring.html">QString</a></span>&gt; QHelpFilterEngine::<span class="name">namespaceToComponent</span>() const</h3>
+<p>Returns the map of all the available namespaces as keys together with their associated components as values.</p>
+<!-- @@@namespaceToComponent -->
+<!-- $$$namespaceToVersion[overload1]$$$namespaceToVersion -->
+<h3 class="fn" id="namespaceToVersion"><a name="namespaceToVersion"></a><span class="type"><a href="../qtcore/qmap.html">QMap</a></span>&lt;<span class="type"><a href="../qtcore/qstring.html">QString</a></span>, <span class="type"><a href="../qtcore/qversionnumber.html">QVersionNumber</a></span>&gt; QHelpFilterEngine::<span class="name">namespaceToVersion</span>() const</h3>
+<p>Returns the map of all the available namespaces as keys together with their associated versions as values.</p>
+<!-- @@@namespaceToVersion -->
+<!-- $$$namespacesForFilter[overload1]$$$namespacesForFilterconstQString& -->
+<h3 class="fn" id="namespacesForFilter"><a name="namespacesForFilter"></a><span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> QHelpFilterEngine::<span class="name">namespacesForFilter</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>filterName</i>) const</h3>
+<p>Returns the list of all registered documentation namespaces that match the filter identified by <i>filterName</i>.</p>
+<!-- @@@namespacesForFilter -->
+<!-- $$$removeFilter[overload1]$$$removeFilterconstQString& -->
+<h3 class="fn" id="removeFilter"><a name="removeFilter"></a><span class="type">bool</span> QHelpFilterEngine::<span class="name">removeFilter</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>filterName</i>)</h3>
+<p>Removes the filter identified by <i>filterName</i>.</p>
+<p>Returns <code>true</code> if removing the filter succeeded, otherwise returns <code>false</code>.</p>
+<!-- @@@removeFilter -->
+<!-- $$$setActiveFilter[overload1]$$$setActiveFilterconstQString& -->
+<h3 class="fn" id="setActiveFilter"><a name="setActiveFilter"></a><span class="type">bool</span> QHelpFilterEngine::<span class="name">setActiveFilter</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>filterName</i>)</h3>
+<p>Changes the currently active filter to <i>filterName</i>.</p>
+<p>Returns <code>true</code> if changing the filter succeeded, otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qhelpfilterengine.html#activeFilter">activeFilter</a>().</p>
+<!-- @@@setActiveFilter -->
+<!-- $$$setFilterData[overload1]$$$setFilterDataconstQString&constQHelpFilterData& -->
+<h3 class="fn" id="setFilterData"><a name="setFilterData"></a><span class="type">bool</span> QHelpFilterEngine::<span class="name">setFilterData</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>filterName</i>, const <span class="type"><a href="qhelpfilterdata.html">QHelpFilterData</a></span> &amp;<i>filterData</i>)</h3>
+<p>Changes the existing filter details of the filter identified by <i>filterName</i> to <i>filterData</i>. If the filter does not exist, a new filter is created.</p>
+<p>Returns <code>true</code> if setting the filter succeeded, otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qhelpfilterengine.html#filterData">filterData</a>().</p>
+<!-- @@@setFilterData -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

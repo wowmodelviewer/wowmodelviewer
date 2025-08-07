@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- calqlatr.qdoc -->
+  <title>Qt Quick Demo - Calqlatr | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Qt Quick Demo - Calqlatr</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<h1 class="title">Qt Quick Demo - Calqlatr</h1>
+<span class="subtitle"></span>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2017 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.0
+  import QtQuick.Window 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">display</span>
+      property <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <span class="name">fontSize</span>: <span class="name">Math</span>.<span class="name">floor</span>(<span class="name">Screen</span>.<span class="name">pixelDensity</span> <span class="operator">*</span> <span class="number">5.0</span>)
+      property <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span> <span class="name">enteringDigits</span>: <span class="number">false</span>
+      property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">maxDigits</span>: (<span class="name">width</span> <span class="operator">/</span> <span class="name">fontSize</span>) <span class="operator">+</span> <span class="number">1</span>
+      property <span class="type"><a href="../qtqml/qml-string.html">string</a></span> <span class="name">displayedOperand</span>
+      property <span class="type"><a href="../qtqml/qml-string.html">string</a></span> <span class="name">errorString</span>: <span class="name">qsTr</span>(<span class="string">&quot;ERROR&quot;</span>)
+      property <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span> <span class="name">isError</span>: <span class="name">displayedOperand</span> <span class="operator">===</span> <span class="name">errorString</span>
+
+      <span class="keyword">function</span> <span class="name">displayOperator</span>(operator)
+      {
+          <span class="name">listView</span>.<span class="name">model</span>.<span class="name">append</span>({ &quot;operator&quot;: <span class="name">operator</span>, &quot;operand&quot;: <span class="string">&quot;&quot;</span> })
+          <span class="name">enteringDigits</span> <span class="operator">=</span> <span class="number">true</span>
+          <span class="name">listView</span>.<span class="name">positionViewAtEnd</span>()
+      }
+
+      <span class="keyword">function</span> <span class="name">newLine</span>(operator, operand)
+      {
+          <span class="name">displayedOperand</span> <span class="operator">=</span> <span class="name">displayNumber</span>(<span class="name">operand</span>)
+          <span class="name">listView</span>.<span class="name">model</span>.<span class="name">append</span>({ &quot;operator&quot;: <span class="name">operator</span>, &quot;operand&quot;: <span class="name">displayedOperand</span> })
+          <span class="name">enteringDigits</span> <span class="operator">=</span> <span class="number">false</span>
+          <span class="name">listView</span>.<span class="name">positionViewAtEnd</span>()
+      }
+
+      <span class="keyword">function</span> <span class="name">appendDigit</span>(digit)
+      {
+          <span class="keyword">if</span> (!<span class="name">enteringDigits</span>)
+              <span class="name">listView</span>.<span class="name">model</span>.<span class="name">append</span>({ &quot;operator&quot;: <span class="string">&quot;&quot;</span>, &quot;operand&quot;: <span class="string">&quot;&quot;</span> })
+          var i = <span class="name">listView</span>.<span class="name">model</span>.<span class="name">count</span> <span class="operator">-</span> <span class="number">1</span>;
+          <span class="name">listView</span>.<span class="name">model</span>.<span class="name">get</span>(<span class="name">i</span>).<span class="name">operand</span> <span class="operator">=</span> <span class="name">listView</span>.<span class="name">model</span>.<span class="name">get</span>(<span class="name">i</span>).<span class="name">operand</span> <span class="operator">+</span> <span class="name">digit</span>;
+          <span class="name">enteringDigits</span> <span class="operator">=</span> <span class="number">true</span>
+          <span class="name">listView</span>.<span class="name">positionViewAtEnd</span>()
+      }
+
+      <span class="keyword">function</span> <span class="name">setDigit</span>(digit)
+      {
+          var i = <span class="name">listView</span>.<span class="name">model</span>.<span class="name">count</span> <span class="operator">-</span> <span class="number">1</span>;
+          <span class="name">listView</span>.<span class="name">model</span>.<span class="name">get</span>(<span class="name">i</span>).<span class="name">operand</span> <span class="operator">=</span> <span class="name">digit</span>;
+          <span class="name">listView</span>.<span class="name">positionViewAtEnd</span>()
+      }
+
+      <span class="keyword">function</span> <span class="name">clear</span>()
+      {
+          <span class="name">displayedOperand</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span>
+          <span class="keyword">if</span> (<span class="name">enteringDigits</span>) {
+              var i = <span class="name">listView</span>.<span class="name">model</span>.<span class="name">count</span> <span class="operator">-</span> <span class="number">1</span>
+              <span class="keyword">if</span> (<span class="name">i</span> <span class="operator">&gt;=</span> <span class="number">0</span>)
+                  <span class="name">listView</span>.<span class="name">model</span>.<span class="name">remove</span>(<span class="name">i</span>)
+              <span class="name">enteringDigits</span> <span class="operator">=</span> <span class="number">false</span>
+          }
+      }
+
+      <span class="comment">// Returns a string representation of a number that fits in</span>
+      <span class="comment">// display.maxDigits characters, trying to keep as much precision</span>
+      <span class="comment">// as possible. If the number cannot be displayed, returns an</span>
+      <span class="comment">// error string.</span>
+      <span class="keyword">function</span> <span class="name">displayNumber</span>(num) {
+          <span class="keyword">if</span> (typeof(<span class="name">num</span>) <span class="operator">!=</span> <span class="string">&quot;number&quot;</span>)
+              <span class="keyword">return</span> <span class="name">errorString</span>;
+
+          var intNum = <span class="name">parseInt</span>(<span class="name">num</span>);
+          var intLen = <span class="name">intNum</span>.<span class="name">toString</span>().<span class="name">length</span>;
+
+          <span class="comment">// Do not count the minus sign as a digit</span>
+          var maxLen = <span class="name">num</span> <span class="operator">&lt;</span> <span class="number">0</span> ? <span class="name">maxDigits</span> <span class="operator">+</span> <span class="number">1</span> : <span class="name">maxDigits</span>;
+
+          <span class="keyword">if</span> (<span class="name">num</span>.<span class="name">toString</span>().<span class="name">length</span> <span class="operator">&lt;=</span> <span class="name">maxLen</span>) {
+              <span class="keyword">if</span> (<span class="name">isFinite</span>(<span class="name">num</span>))
+                  <span class="keyword">return</span> <span class="name">num</span>.<span class="name">toString</span>();
+              <span class="keyword">return</span> <span class="name">errorString</span>;
+          }
+
+          <span class="comment">// Integer part of the number is too long - try</span>
+          <span class="comment">// an exponential notation</span>
+          <span class="keyword">if</span> (<span class="name">intNum</span> <span class="operator">==</span> <span class="name">num</span> <span class="operator">||</span> <span class="name">intLen</span> <span class="operator">&gt;</span> <span class="name">maxLen</span> <span class="operator">-</span> <span class="number">3</span>) {
+              var expVal = <span class="name">num</span>.<span class="name">toExponential</span>(<span class="name">maxDigits</span> <span class="operator">-</span> <span class="number">6</span>).<span class="name">toString</span>();
+              <span class="keyword">if</span> (<span class="name">expVal</span>.<span class="name">length</span> <span class="operator">&lt;=</span> <span class="name">maxLen</span>)
+                  <span class="keyword">return</span> <span class="name">expVal</span>;
+          }
+
+          <span class="comment">// Try a float presentation with fixed number of digits</span>
+          var floatStr = <span class="name">parseFloat</span>(<span class="name">num</span>).<span class="name">toFixed</span>(<span class="name">maxDigits</span> <span class="operator">-</span> <span class="name">intLen</span> <span class="operator">-</span> <span class="number">1</span>).<span class="name">toString</span>();
+          <span class="keyword">if</span> (<span class="name">floatStr</span>.<span class="name">length</span> <span class="operator">&lt;=</span> <span class="name">maxLen</span>)
+              <span class="keyword">return</span> <span class="name">floatStr</span>;
+
+          <span class="keyword">return</span> <span class="name">errorString</span>;
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+          <span class="name">id</span>: <span class="name">theItem</span>
+          <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span> <span class="operator">+</span> <span class="number">32</span>
+          <span class="name">height</span>: <span class="name">parent</span>.<span class="name">height</span>
+
+          <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+              <span class="name">id</span>: <span class="name">rect</span>
+              <span class="name">x</span>: <span class="number">16</span>
+              <span class="name">color</span>: <span class="string">&quot;white&quot;</span>
+              <span class="name">height</span>: <span class="name">parent</span>.<span class="name">height</span>
+              <span class="name">width</span>: <span class="name">display</span>.<span class="name">width</span> <span class="operator">-</span> <span class="number">16</span>
+          }
+          <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+              <span class="name">anchors</span>.right: <span class="name">rect</span>.<span class="name">left</span>
+              <span class="name">source</span>: <span class="string">&quot;images/paper-edge-left.png&quot;</span>
+              <span class="name">height</span>: <span class="name">parent</span>.<span class="name">height</span>
+              <span class="name">fillMode</span>: <span class="name">Image</span>.<span class="name">TileVertically</span>
+          }
+          <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+              <span class="name">anchors</span>.left: <span class="name">rect</span>.<span class="name">right</span>
+              <span class="name">source</span>: <span class="string">&quot;images/paper-edge-right.png&quot;</span>
+              <span class="name">height</span>: <span class="name">parent</span>.<span class="name">height</span>
+              <span class="name">fillMode</span>: <span class="name">Image</span>.<span class="name">TileVertically</span>
+          }
+
+          <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+              <span class="name">id</span>: <span class="name">grip</span>
+              <span class="name">source</span>: <span class="string">&quot;images/paper-grip.png&quot;</span>
+              <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+              <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+              <span class="name">anchors</span>.bottomMargin: <span class="number">20</span>
+          }
+
+          <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+              <span class="name">id</span>: <span class="name">listView</span>
+              <span class="name">x</span>: <span class="number">16</span>; <span class="name">y</span>: <span class="number">30</span>
+              <span class="name">width</span>: <span class="name">display</span>.<span class="name">width</span>
+              <span class="name">height</span>: <span class="name">display</span>.<span class="name">height</span> <span class="operator">-</span> <span class="number">50</span> <span class="operator">-</span> <span class="name">y</span>
+              <span class="name">delegate</span>: <span class="name">Item</span> {
+                  <span class="name">height</span>: <span class="name">display</span>.<span class="name">fontSize</span> <span class="operator">*</span> <span class="number">1.1</span>
+                  <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+                  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                      <span class="name">id</span>: <span class="name">operator</span>
+                      <span class="name">x</span>: <span class="number">6</span>
+                      <span class="name">font</span>.pixelSize: <span class="name">display</span>.<span class="name">fontSize</span>
+                      <span class="name">color</span>: <span class="string">&quot;#6da43d&quot;</span>
+                      <span class="name">text</span>: <span class="name">model</span>.<span class="name">operator</span>
+                  }
+                  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                      <span class="name">id</span>: <span class="name">operand</span>
+                      <span class="name">font</span>.pixelSize: <span class="name">display</span>.<span class="name">fontSize</span>
+                      <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+                      <span class="name">anchors</span>.rightMargin: <span class="number">22</span>
+                      <span class="name">text</span>: <span class="name">model</span>.<span class="name">operand</span>
+                  }
+              }
+              <span class="name">model</span>: <span class="name">ListModel</span> { }
+          }
+
+      }
+
+  }
+
+</pre>

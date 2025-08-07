@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-sidebar-views.qdoc -->
+  <title>Browsing Project Contents | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Browsing Project Contents</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-modes.html" />
+  <link rel="next" href="creator-output-panes.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-modes.html">Selecting Modes</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-output-panes.html">Viewing Output</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#viewing-project-files">Viewing Project Files</a></li>
+<li class="level1"><a href="#viewing-the-file-system">Viewing the File System</a></li>
+<li class="level1"><a href="#viewing-open-documents">Viewing Open Documents</a></li>
+<li class="level1"><a href="#viewing-defined-types-and-symbols">Viewing Defined Types and Symbols</a></li>
+<li class="level1"><a href="#viewing-the-class-hierarchy">Viewing the Class Hierarchy</a></li>
+<li class="level1"><a href="#viewing-type-hierarchy">Viewing Type Hierarchy</a></li>
+<li class="level1"><a href="#viewing-include-hierarchy">Viewing Include Hierarchy</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Browsing Project Contents</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-sidebar-views.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>A left and right sidebar are available in most Qt Creator <a href="creator-modes.html#">modes</a>. The availability of the sidebars and their contents depend on the mode.</p>
+<p>In the <b>Edit</b> and <b>Design</b> mode, you can use the sidebars to browse the project contents.</p>
+<p class="centerAlign"><img src="images/qtcreator-sidebar.png" alt="" /></p><p>You can select the contents of the sidebars in the sidebar menu (1):</p>
+<ul>
+<li><b>Projects</b> shows a list of projects open in the current session and the project files needed by the build system.</li>
+<li><b>Open Documents</b> shows currently open files.</li>
+<li><b>Bookmarks</b> shows all bookmarks for the current session.</li>
+<li><b>File System</b> shows all files in the currently selected directory.</li>
+<li><b>Git Branches</b> shows the local and remote brances for the project in the Git version control system. For more information, see <a href="creator-vcs-git.html#working-with-branches">Working with Branches</a>.</li>
+<li><b>Outline</b> shows an overview of defined types and other symbols, as well as their properties and hierarchy in a source file.</li>
+</ul>
+<p>The following views display additional information about C++ code:</p>
+<ul>
+<li><b>Class View</b> shows the class hierarchy of the currently open projects.</li>
+<li><b>Tests</b> lists autotests and Qt Quick tests in the project. For more information, see <a href="creator-autotest.html#">Running Autotests</a>.</li>
+<li><b>Type Hierarchy</b> shows the base classes of a class.</li>
+<li><b>Include Hierarchy</b> shows which files are included in the current file and which files include the current file.</li>
+</ul>
+<p>For more information about the sidebar views that are only available when editing QML files in the Design mode, see <a href="creator-using-qt-quick-designer.html#">Editing QML Files in Design Mode</a>.</p>
+<p>You can change the view of the sidebars in the following ways:</p>
+<ul>
+<li>To toggle the left sidebar, click <img src="images/leftsidebaricon.png" alt="" /> (<b>Hide Left Sidebar/Show Left Sidebar</b>) or press <b>Alt+0</b> (<b>Cmd+0</b> on macOS). To toggle the right sidebar, click <img src="images/rightsidebaricon.png" alt="" /> (<b>Hide Right Sidebar/Show Right Sidebar</b>) or press <b>Alt+Shift+0</b> (<b>Cmd+Shift+0</b> on macOS).</li>
+<li>To split a sidebar, click <img src="images/splitbutton_horizontal.png" alt="" /> (<b>Split</b>). Select new content to view in the split view.</li>
+<li>To close a sidebar view, click <img src="images/splitbutton_closetop.png" alt="" /> (<b>Close</b>).</li>
+</ul>
+<p>The additional options in each view are described in the following sections.</p>
+<p>In some views, right-clicking opens a context menu that contains functions for managing the objects listed in the view.</p>
+<a name="viewing-project-files"></a>
+<h2 id="viewing-project-files">Viewing Project Files</h2>
+<p>The sidebar displays projects in a project tree. The project tree contains a list of all projects open in the current session. For each project, the tree visualizes the build system structure of the project and lists all files that are part of the project.</p>
+<p>Some build systems support adding and removing files to a project in Qt Creator (currently qmake and Qbs). The faithful display of the project structure allows to specify exactly where a new file should be placed in the build system. If the project is under version control, information from the version control system might be displayed in brackets after the project name. This is currently implemented for Git (the branch name or a tag is displayed) and ClearCase (the view name is displayed). You can use the project tree in the following ways:</p>
+<ul>
+<li>To open files that belong to a project, double-click them in the project tree. Files open in the appropriate editor, according to the file type. For example, code source files open in the code editor.</li>
+<li>To bring up a context menu containing the actions most commonly needed, right-click an item in the project tree. For example, through the menu of the project root directory you can, among other actions, run and close the project.</li>
+<li>To hide the categories and sort project files alphabetically, click <img src="images/filtericon.png" alt="" /> (<b>Filter Tree</b>) and select <b>Simplify Tree</b>.</li>
+<li>To hide source files which are automatically generated by the build system, select <b>Filter Tree &gt; Hide Generated Files</b>.</li>
+<li>To hide directories that do not contain any files, select <b>Filter Tree</b> &gt; <b>Hide Empty Directories</b>.</li>
+<li>To stop synchronizing the position in the project tree with the file currently opened in the editor, deselect <img src="images/linkicon.png" alt="" /> (<b>Synchronize with Editor</b>). You can specify a keyboard shortcut to use when synchronization is needed. Select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Environment</b> &gt; <b>Keyboard</b>, and then search for <b>Show in Explorer</b>.</li>
+<li>To see the absolute path of a file, move the mouse pointer over the file name.</li>
+<li>To move files from one project to another, drag-and-drop them in the project tree. Qt Creator makes the necessary changes to project configuration files.</li>
+</ul>
+<p>Files that are not sources or data can be still included into a project's distribution tarball by adding their paths to the <code>DISTFILES</code> variable in the .pro file. This way they also become known to Qt Creator, so that they are visible in the <b>Projects</b> view and are known to the locator and search. The <b>Projects</b> view contains context menus for managing projects, subprojects, folders, and files. The following functions are available for managing projects and subprojects:</p>
+<ul>
+<li>Set a project as the active project.</li>
+<li>Execute the <b>Build</b> menu commands.</li>
+<li>Create new files. For more information, see <a href="creator-project-creating.html#adding-files-to-projects">Adding Files to Projects</a>.</li>
+<li>Add existing files and directories.</li>
+<li>Add libraries. For more information, see <a href="creator-project-qmake-libraries.html#">Adding Libraries to Projects</a>.</li>
+<li>Add and remove subprojects.</li>
+<li>Search from the selected directory.</li>
+<li>Expand or collapse the tree view to show or hide all files and folders.</li>
+<li>Close all files in a project.</li>
+<li>Close projects. By default, all files in the project are also closed. To keep them open, deselect the <b>Tools</b> &gt; <b>Options</b> &gt; <b>Build &amp; Run</b> &gt; <b>General</b> &gt; <b>Close source files along with project</b> check box.</li>
+</ul>
+<p>For managing files and directories, the same functions are available as in the <b>File System</b> view. In addition, you can remove and rename files, as well as compare the selected file with the currently open file in the diff editor. For more information, see <a href="creator-diff-editor.html#">Comparing Files</a>.</p>
+<a name="viewing-the-file-system"></a>
+<h2 id="viewing-the-file-system">Viewing the File System</h2>
+<p>If you cannot see a file in the <b>Projects</b> view, switch to the <b>File System</b> view, which shows all the files in the file system.</p>
+<p class="centerAlign"><img src="images/qtcreator-filesystem-view.png" alt="" /></p><p>By default, the contents of the directory that contains the file currently active in the editor are displayed. To stop the synchronization, delesect the <b>Synchronize Root Directory with Editor</b> button.</p>
+<p>The path to the active file is displayed as bread crumbs. You can move to any directory along the path by clicking it. To hide the bread crumbs, select <img src="images/filtericon.png" alt="" /> (<b>Options</b>) and then deselect the <b>Show Bread Crumbs</b> check box.</p>
+<p>To move to the root directory of the file system, select <b>Computer</b> in the menu (1). Select <b>Home</b> to move to the user's home directory. Further, you can select a project to move to an open project or <b>Projects</b> to open the <b>Projects</b> view.</p>
+<p>By default, folders are separated from files and listed first in the view. To list all items in alphabetic order, select <b>Options</b> and then deselect the <b>Show Folders on Top</b> check box.</p>
+<p>To also show hidden files, select <b>Options</b> &gt; <b>Show Hidden Files</b>.</p>
+<p>To stop the synchronization with the file currently opened in the editor, deselect <b>Synchronize with Editor</b>.</p>
+<p>Use the context menu functions to:</p>
+<ul>
+<li>Open files with the default editor or some other editor.</li>
+<li>Open a project located in the selected directory.</li>
+<li>Show the file or directory in the file explorer.</li>
+<li>Open a terminal window in the selected directory or in the directory that contains the file. To specify the terminal to use on Linux and macOS, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Environment</b> &gt; <b>System</b>.</li>
+<li>Search from the selected directory.</li>
+<li>View file properties, such as MIME type, default editor, and size.</li>
+<li>Create new files. For more information, see <a href="creator-project-creating.html#adding-files-to-projects">Adding Files to Projects</a>.</li>
+<li>Rename or remove existing files.</li>
+<li>Create new folders.</li>
+<li>Compare the selected file with the currently open file in the diff editor. For more information, see <a href="creator-diff-editor.html#">Comparing Files</a>.</li>
+<li>Display the contents of a particular directory in the view.</li>
+<li>Collapse all open folders.</li>
+</ul>
+<a name="viewing-open-documents"></a>
+<h2 id="viewing-open-documents">Viewing Open Documents</h2>
+<p>To see a list of open documents, switch to the <b>Open Documents</b> view. You can use the context-menu to perform some of the functions also available in the <b>File</b> menu and in the context menu in the <b>File System</b> view.</p>
+<p>In addition, you can:</p>
+<ul>
+<li>Copy the full path of the file or just the filename to the clipboard.</li>
+<li>Pin files to ensure they stay at the top of the list and are not closed when <b>Close All</b> is used.</li>
+</ul>
+<a name="viewing-defined-types-and-symbols"></a>
+<h2 id="viewing-defined-types-and-symbols">Viewing Defined Types and Symbols</h2>
+<p>The <b>Outline</b> view shows an overview of defined types and other symbols, as well as their properties and hierarchy in a source file.</p>
+<ul>
+<li>To see a complete list of all bindings, select <b>Filter Tree</b> &gt; <b>Show All Bindings</b>.</li>
+<li>To stop the synchronization with the type or symbol selected in the editor, deselect <b>Synchronize with Editor</b>.</li>
+</ul>
+<a name="viewing-the-class-hierarchy"></a>
+<h2 id="viewing-the-class-hierarchy">Viewing the Class Hierarchy</h2>
+<p>The <b>Class View</b> shows the class hierarchy of the currently open projects. To organize the view by subprojects, click <img src="images/qtcreator-show-subprojects.png" alt="" /> (<b>Show Subprojects</b>).</p>
+<p>To visit all parts of a namespace, double-click on the namespace item multiple times.</p>
+<a name="viewing-type-hierarchy"></a>
+<h2 id="viewing-type-hierarchy">Viewing Type Hierarchy</h2>
+<p>To view the base classes of a class, right-click the class and select <b>Open Type Hierarchy</b> or press <b>Ctrl+Shift+T</b>.</p>
+<a name="viewing-include-hierarchy"></a>
+<h2 id="viewing-include-hierarchy">Viewing Include Hierarchy</h2>
+<p>To view which files are included in the current file and which files include the current file, right-click in the editor and select <b>Open Include Hierarchy</b> or press <b>Ctrl+Shift+I</b>.</p>
+<p>To keep the view synchronized with the file currently opened in the editor, select <b>Synchronize with Editor</b>.</p>
+</div>
+<!-- @@@creator-sidebar-views.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-modes.html">Selecting Modes</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-output-panes.html">Viewing Output</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

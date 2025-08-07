@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qopenglbuffer.cpp -->
+  <title>QOpenGLBuffer Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QOpenGLBuffer</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QOpenGLBuffer Class</h1>
+<!-- $$$QOpenGLBuffer-brief -->
+<p>The <a href="qopenglbuffer.html">QOpenGLBuffer</a> class provides functions for creating and managing OpenGL buffer objects. <a href="#details">More...</a></p>
+<!-- @@@QOpenGLBuffer -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QOpenGLBuffer&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.0</td></tr></table></div><p>This class was introduced in  Qt 5.0.</p>
+<ul>
+<li><a href="qopenglbuffer-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#Access-enum">Access</a></b> { ReadOnly, WriteOnly, ReadWrite }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#RangeAccessFlag-enum">RangeAccessFlag</a></b> { RangeRead, RangeWrite, RangeInvalidate, RangeInvalidateBuffer, RangeFlushExplicit, RangeUnsynchronized }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#RangeAccessFlag-enum">RangeAccessFlags</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#Type-enum">Type</a></b> { VertexBuffer, IndexBuffer, PixelPackBuffer, PixelUnpackBuffer }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#UsagePattern-enum">UsagePattern</a></b> { StreamDraw, StreamRead, StreamCopy, StaticDraw, ..., DynamicCopy }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#QOpenGLBuffer-2">QOpenGLBuffer</a></b>(const QOpenGLBuffer &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#QOpenGLBuffer-1">QOpenGLBuffer</a></b>(QOpenGLBuffer::Type <i>type</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#QOpenGLBuffer">QOpenGLBuffer</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QOpenGLBuffer &amp;</td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#operator-eq">operator=</a></b>(const QOpenGLBuffer &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#dtor.QOpenGLBuffer">~QOpenGLBuffer</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#allocate">allocate</a></b>(const void *<i>data</i>, int <i>count</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#allocate-1">allocate</a></b>(int <i>count</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#bind">bind</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> GLuint </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#bufferId">bufferId</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#create">create</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#destroy">destroy</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#isCreated">isCreated</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void *</td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#map">map</a></b>(QOpenGLBuffer::Access <i>access</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void *</td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#mapRange">mapRange</a></b>(int <i>offset</i>, int <i>count</i>, QOpenGLBuffer::RangeAccessFlags <i>access</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#read">read</a></b>(int <i>offset</i>, void *<i>data</i>, int <i>count</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#release">release</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#setUsagePattern">setUsagePattern</a></b>(QOpenGLBuffer::UsagePattern <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#size">size</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QOpenGLBuffer::Type </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#type">type</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#unmap">unmap</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QOpenGLBuffer::UsagePattern </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#usagePattern">usagePattern</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#write">write</a></b>(int <i>offset</i>, const void *<i>data</i>, int <i>count</i>)</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopenglbuffer.html#release-1">release</a></b>(QOpenGLBuffer::Type <i>type</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QOpenGLBuffer-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Buffer objects are created in the OpenGL server so that the client application can avoid uploading vertices, indices, texture image data, etc every time they are needed.</p>
+<p><a href="qopenglbuffer.html">QOpenGLBuffer</a> objects can be copied around as a reference to the underlying OpenGL buffer object:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qopenglbuffer.html#QOpenGLBuffer">QOpenGLBuffer</a></span> buffer1(<span class="type"><a href="qopenglbuffer.html#QOpenGLBuffer">QOpenGLBuffer</a></span><span class="operator">::</span>IndexBuffer);
+      buffer1<span class="operator">.</span>create();
+
+      <span class="type"><a href="qopenglbuffer.html#QOpenGLBuffer">QOpenGLBuffer</a></span> buffer2 <span class="operator">=</span> buffer1;
+
+</pre>
+<p><a href="qopenglbuffer.html">QOpenGLBuffer</a> performs a shallow copy when objects are copied in this manner, but does not implement copy-on-write semantics. The original object will be affected whenever the copy is modified.</p>
+</div>
+<!-- @@@QOpenGLBuffer -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Access$$$ReadOnly$$$WriteOnly$$$ReadWrite -->
+<h3 class="fn" id="Access-enum"><a name="Access-enum"></a>enum QOpenGLBuffer::<span class="name">Access</span></h3>
+<p>This enum defines the access mode for <a href="qopenglbuffer.html#map">QOpenGLBuffer::map</a>().</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QOpenGLBuffer::ReadOnly</code></td><td class="topAlign tblval"><code>0x88B8</code></td><td class="topAlign">The buffer will be mapped for reading only.</td></tr>
+<tr><td class="topAlign"><code>QOpenGLBuffer::WriteOnly</code></td><td class="topAlign tblval"><code>0x88B9</code></td><td class="topAlign">The buffer will be mapped for writing only.</td></tr>
+<tr><td class="topAlign"><code>QOpenGLBuffer::ReadWrite</code></td><td class="topAlign tblval"><code>0x88BA</code></td><td class="topAlign">The buffer will be mapped for reading and writing.</td></tr>
+</table></div>
+<!-- @@@Access -->
+<!-- $$$RangeAccessFlag$$$RangeRead$$$RangeWrite$$$RangeInvalidate$$$RangeInvalidateBuffer$$$RangeFlushExplicit$$$RangeUnsynchronized -->
+<h3 class="flags" id="RangeAccessFlag-enum"><a name="RangeAccessFlag-enum"></a>enum QOpenGLBuffer::<span class="name">RangeAccessFlag</span><br/>flags QOpenGLBuffer::<span class="name">RangeAccessFlags</span></h3>
+<p>This enum defines the access mode bits for <a href="qopenglbuffer.html#mapRange">QOpenGLBuffer::mapRange</a>().</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QOpenGLBuffer::RangeRead</code></td><td class="topAlign tblval"><code>0x0001</code></td><td class="topAlign">The buffer will be mapped for reading.</td></tr>
+<tr><td class="topAlign"><code>QOpenGLBuffer::RangeWrite</code></td><td class="topAlign tblval"><code>0x0002</code></td><td class="topAlign">The buffer will be mapped for writing.</td></tr>
+<tr><td class="topAlign"><code>QOpenGLBuffer::RangeInvalidate</code></td><td class="topAlign tblval"><code>0x0004</code></td><td class="topAlign">Discard the previous contents of the specified range.</td></tr>
+<tr><td class="topAlign"><code>QOpenGLBuffer::RangeInvalidateBuffer</code></td><td class="topAlign tblval"><code>0x0008</code></td><td class="topAlign">Discard the previous contents of the entire buffer.</td></tr>
+<tr><td class="topAlign"><code>QOpenGLBuffer::RangeFlushExplicit</code></td><td class="topAlign tblval"><code>0x0010</code></td><td class="topAlign">Indicates that modifications are to be flushed explicitly via <code>glFlushMappedBufferRange</code>.</td></tr>
+<tr><td class="topAlign"><code>QOpenGLBuffer::RangeUnsynchronized</code></td><td class="topAlign tblval"><code>0x0020</code></td><td class="topAlign">Indicates that pending operations should not be synchronized before returning from <a href="qopenglbuffer.html#mapRange">mapRange</a>().</td></tr>
+</table></div>
+<p>The RangeAccessFlags type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;RangeAccessFlag&gt;. It stores an OR combination of RangeAccessFlag values.</p>
+<!-- @@@RangeAccessFlag -->
+<!-- $$$Type$$$VertexBuffer$$$IndexBuffer$$$PixelPackBuffer$$$PixelUnpackBuffer -->
+<h3 class="fn" id="Type-enum"><a name="Type-enum"></a>enum QOpenGLBuffer::<span class="name">Type</span></h3>
+<p>This enum defines the type of OpenGL buffer object to create with <a href="qopenglbuffer.html">QOpenGLBuffer</a>.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QOpenGLBuffer::VertexBuffer</code></td><td class="topAlign tblval"><code>0x8892</code></td><td class="topAlign">Vertex buffer object for use when specifying vertex arrays.</td></tr>
+<tr><td class="topAlign"><code>QOpenGLBuffer::IndexBuffer</code></td><td class="topAlign tblval"><code>0x8893</code></td><td class="topAlign">Index buffer object for use with <code>glDrawElements()</code>.</td></tr>
+<tr><td class="topAlign"><code>QOpenGLBuffer::PixelPackBuffer</code></td><td class="topAlign tblval"><code>0x88EB</code></td><td class="topAlign">Pixel pack buffer object for reading pixel data from the OpenGL server (for example, with <code>glReadPixels()</code>). Not supported under OpenGL/ES.</td></tr>
+<tr><td class="topAlign"><code>QOpenGLBuffer::PixelUnpackBuffer</code></td><td class="topAlign tblval"><code>0x88EC</code></td><td class="topAlign">Pixel unpack buffer object for writing pixel data to the OpenGL server (for example, with <code>glTexImage2D()</code>). Not supported under OpenGL/ES.</td></tr>
+</table></div>
+<!-- @@@Type -->
+<!-- $$$UsagePattern$$$StreamDraw$$$StreamRead$$$StreamCopy$$$StaticDraw$$$StaticRead$$$StaticCopy$$$DynamicDraw$$$DynamicRead$$$DynamicCopy -->
+<h3 class="fn" id="UsagePattern-enum"><a name="UsagePattern-enum"></a>enum QOpenGLBuffer::<span class="name">UsagePattern</span></h3>
+<p>This enum defines the usage pattern of a <a href="qopenglbuffer.html">QOpenGLBuffer</a> object.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QOpenGLBuffer::StreamDraw</code></td><td class="topAlign tblval"><code>0x88E0</code></td><td class="topAlign">The data will be set once and used a few times for drawing operations. Under OpenGL/ES 1.1 this is identical to StaticDraw.</td></tr>
+<tr><td class="topAlign"><code>QOpenGLBuffer::StreamRead</code></td><td class="topAlign tblval"><code>0x88E1</code></td><td class="topAlign">The data will be set once and used a few times for reading data back from the OpenGL server. Not supported under OpenGL/ES.</td></tr>
+<tr><td class="topAlign"><code>QOpenGLBuffer::StreamCopy</code></td><td class="topAlign tblval"><code>0x88E2</code></td><td class="topAlign">The data will be set once and used a few times for reading data back from the OpenGL server for use in further drawing operations. Not supported under OpenGL/ES.</td></tr>
+<tr><td class="topAlign"><code>QOpenGLBuffer::StaticDraw</code></td><td class="topAlign tblval"><code>0x88E4</code></td><td class="topAlign">The data will be set once and used many times for drawing operations.</td></tr>
+<tr><td class="topAlign"><code>QOpenGLBuffer::StaticRead</code></td><td class="topAlign tblval"><code>0x88E5</code></td><td class="topAlign">The data will be set once and used many times for reading data back from the OpenGL server. Not supported under OpenGL/ES.</td></tr>
+<tr><td class="topAlign"><code>QOpenGLBuffer::StaticCopy</code></td><td class="topAlign tblval"><code>0x88E6</code></td><td class="topAlign">The data will be set once and used many times for reading data back from the OpenGL server for use in further drawing operations. Not supported under OpenGL/ES.</td></tr>
+<tr><td class="topAlign"><code>QOpenGLBuffer::DynamicDraw</code></td><td class="topAlign tblval"><code>0x88E8</code></td><td class="topAlign">The data will be modified repeatedly and used many times for drawing operations.</td></tr>
+<tr><td class="topAlign"><code>QOpenGLBuffer::DynamicRead</code></td><td class="topAlign tblval"><code>0x88E9</code></td><td class="topAlign">The data will be modified repeatedly and used many times for reading data back from the OpenGL server. Not supported under OpenGL/ES.</td></tr>
+<tr><td class="topAlign"><code>QOpenGLBuffer::DynamicCopy</code></td><td class="topAlign tblval"><code>0x88EA</code></td><td class="topAlign">The data will be modified repeatedly and used many times for reading data back from the OpenGL server for use in further drawing operations. Not supported under OpenGL/ES.</td></tr>
+</table></div>
+<!-- @@@UsagePattern -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QOpenGLBuffer$$$QOpenGLBufferconstQOpenGLBuffer& -->
+<h3 class="fn" id="QOpenGLBuffer-2"><a name="QOpenGLBuffer-2"></a>QOpenGLBuffer::<span class="name">QOpenGLBuffer</span>(const <span class="type"><a href="qopenglbuffer.html#QOpenGLBuffer">QOpenGLBuffer</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a shallow copy of <i>other</i>.</p>
+<p>Note: <a href="qopenglbuffer.html">QOpenGLBuffer</a> does not implement copy-on-write semantics, so <i>other</i> will be affected whenever the copy is modified.</p>
+<!-- @@@QOpenGLBuffer -->
+<!-- $$$QOpenGLBuffer$$$QOpenGLBufferQOpenGLBuffer::Type -->
+<h3 class="fn" id="QOpenGLBuffer-1"><a name="QOpenGLBuffer-1"></a>QOpenGLBuffer::<span class="name">QOpenGLBuffer</span>(<span class="type"><a href="qopenglbuffer.html#Type-enum">QOpenGLBuffer::Type</a></span> <i>type</i>)</h3>
+<p>Constructs a new buffer object of <i>type</i>.</p>
+<p>Note: this constructor just creates the <a href="qopenglbuffer.html">QOpenGLBuffer</a> instance. The actual buffer object in the OpenGL server is not created until <a href="qopenglbuffer.html#create">create</a>() is called.</p>
+<p><b>See also </b><a href="qopenglbuffer.html#create">create</a>().</p>
+<!-- @@@QOpenGLBuffer -->
+<!-- $$$QOpenGLBuffer[overload1]$$$QOpenGLBuffer -->
+<h3 class="fn" id="QOpenGLBuffer"><a name="QOpenGLBuffer"></a>QOpenGLBuffer::<span class="name">QOpenGLBuffer</span>()</h3>
+<p>Constructs a new buffer object of type <a href="qopenglbuffer.html#Type-enum">QOpenGLBuffer::VertexBuffer</a>.</p>
+<p>Note: this constructor just creates the <a href="qopenglbuffer.html">QOpenGLBuffer</a> instance. The actual buffer object in the OpenGL server is not created until <a href="qopenglbuffer.html#create">create</a>() is called.</p>
+<p><b>See also </b><a href="qopenglbuffer.html#create">create</a>().</p>
+<!-- @@@QOpenGLBuffer -->
+<!-- $$$operator=[overload1]$$$operator=constQOpenGLBuffer& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qopenglbuffer.html#QOpenGLBuffer">QOpenGLBuffer</a></span> &amp;QOpenGLBuffer::<span class="name">operator=</span>(const <span class="type"><a href="qopenglbuffer.html#QOpenGLBuffer">QOpenGLBuffer</a></span> &amp;<i>other</i>)</h3>
+<p>Assigns a shallow copy of <i>other</i> to this object.</p>
+<p>Note: <a href="qopenglbuffer.html">QOpenGLBuffer</a> does not implement copy-on-write semantics, so <i>other</i> will be affected whenever the copy is modified.</p>
+<!-- @@@operator= -->
+<!-- $$$~QOpenGLBuffer[overload1]$$$~QOpenGLBuffer -->
+<h3 class="fn" id="dtor.QOpenGLBuffer"><a name="dtor.QOpenGLBuffer"></a>QOpenGLBuffer::<span class="name">~QOpenGLBuffer</span>()</h3>
+<p>Destroys this buffer object, including the storage being used in the OpenGL server.</p>
+<!-- @@@~QOpenGLBuffer -->
+<!-- $$$allocate[overload1]$$$allocateconstvoid*int -->
+<h3 class="fn" id="allocate"><a name="allocate"></a><span class="type">void</span> QOpenGLBuffer::<span class="name">allocate</span>(const <span class="type">void</span> *<i>data</i>, <span class="type">int</span> <i>count</i>)</h3>
+<p>Allocates <i>count</i> bytes of space to the buffer, initialized to the contents of <i>data</i>. Any previous contents will be removed.</p>
+<p>It is assumed that <a href="qopenglbuffer.html#create">create</a>() has been called on this buffer and that it has been bound to the current context.</p>
+<p><b>See also </b><a href="qopenglbuffer.html#create">create</a>(), <a href="qopenglbuffer.html#read">read</a>(), and <a href="qopenglbuffer.html#write">write</a>().</p>
+<!-- @@@allocate -->
+<!-- $$$allocate$$$allocateint -->
+<h3 class="fn" id="allocate-1"><a name="allocate-1"></a><span class="type">void</span> QOpenGLBuffer::<span class="name">allocate</span>(<span class="type">int</span> <i>count</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Allocates <i>count</i> bytes of space to the buffer. Any previous contents will be removed.</p>
+<p>It is assumed that <a href="qopenglbuffer.html#create">create</a>() has been called on this buffer and that it has been bound to the current context.</p>
+<p><b>See also </b><a href="qopenglbuffer.html#create">create</a>() and <a href="qopenglbuffer.html#write">write</a>().</p>
+<!-- @@@allocate -->
+<!-- $$$bind[overload1]$$$bind -->
+<h3 class="fn" id="bind"><a name="bind"></a><span class="type">bool</span> QOpenGLBuffer::<span class="name">bind</span>()</h3>
+<p>Binds the buffer associated with this object to the current OpenGL context. Returns <code>false</code> if binding was not possible, usually because <a href="qopenglbuffer.html#type">type</a>() is not supported on this OpenGL implementation.</p>
+<p>The buffer must be bound to the same <a href="qopenglcontext.html">QOpenGLContext</a> current when <a href="qopenglbuffer.html#create">create</a>() was called, or to another <a href="qopenglcontext.html">QOpenGLContext</a> that is sharing with it. Otherwise, false will be returned from this function.</p>
+<p><b>See also </b><a href="qopenglbuffer.html#release">release</a>() and <a href="qopenglbuffer.html#create">create</a>().</p>
+<!-- @@@bind -->
+<!-- $$$bufferId[overload1]$$$bufferId -->
+<h3 class="fn" id="bufferId"><a name="bufferId"></a><span class="type">GLuint</span> QOpenGLBuffer::<span class="name">bufferId</span>() const</h3>
+<p>Returns the OpenGL identifier associated with this buffer; zero if the buffer has not been created.</p>
+<p><b>See also </b><a href="qopenglbuffer.html#isCreated">isCreated</a>().</p>
+<!-- @@@bufferId -->
+<!-- $$$create[overload1]$$$create -->
+<h3 class="fn" id="create"><a name="create"></a><span class="type">bool</span> QOpenGLBuffer::<span class="name">create</span>()</h3>
+<p>Creates the buffer object in the OpenGL server. Returns <code>true</code> if the object was created; false otherwise.</p>
+<p>This function must be called with a current <a href="qopenglcontext.html">QOpenGLContext</a>. The buffer will be bound to and can only be used in that context (or any other context that is shared with it).</p>
+<p>This function will return false if the OpenGL implementation does not support buffers, or there is no current <a href="qopenglcontext.html">QOpenGLContext</a>.</p>
+<p><b>See also </b><a href="qopenglbuffer.html#isCreated">isCreated</a>(), <a href="qopenglbuffer.html#allocate">allocate</a>(), <a href="qopenglbuffer.html#write">write</a>(), and <a href="qopenglbuffer.html#destroy">destroy</a>().</p>
+<!-- @@@create -->
+<!-- $$$destroy[overload1]$$$destroy -->
+<h3 class="fn" id="destroy"><a name="destroy"></a><span class="type">void</span> QOpenGLBuffer::<span class="name">destroy</span>()</h3>
+<p>Destroys this buffer object, including the storage being used in the OpenGL server. All references to the buffer will become invalid.</p>
+<!-- @@@destroy -->
+<!-- $$$isCreated[overload1]$$$isCreated -->
+<h3 class="fn" id="isCreated"><a name="isCreated"></a><span class="type">bool</span> QOpenGLBuffer::<span class="name">isCreated</span>() const</h3>
+<p>Returns <code>true</code> if this buffer has been created; false otherwise.</p>
+<p><b>See also </b><a href="qopenglbuffer.html#create">create</a>() and <a href="qopenglbuffer.html#destroy">destroy</a>().</p>
+<!-- @@@isCreated -->
+<!-- $$$map[overload1]$$$mapQOpenGLBuffer::Access -->
+<h3 class="fn" id="map"><a name="map"></a><span class="type">void</span> *QOpenGLBuffer::<span class="name">map</span>(<span class="type"><a href="qopenglbuffer.html#Access-enum">QOpenGLBuffer::Access</a></span> <i>access</i>)</h3>
+<p>Maps the contents of this buffer into the application's memory space and returns a pointer to it. Returns null if memory mapping is not possible. The <i>access</i> parameter indicates the type of access to be performed.</p>
+<p>It is assumed that <a href="qopenglbuffer.html#create">create</a>() has been called on this buffer and that it has been bound to the current context.</p>
+<p><b>Note: </b>This function is only supported under OpenGL ES 2.0 or earlier if the <code>GL_OES_mapbuffer</code> extension is present.</p><p><b>Note: </b>On OpenGL ES 3.0 and newer, or, in case if desktop OpenGL, if <code>GL_ARB_map_buffer_range</code> is supported, this function uses <code>glMapBufferRange</code> instead of <code>glMapBuffer</code>.</p><p><b>See also </b><a href="qopenglbuffer.html#unmap">unmap</a>(), <a href="qopenglbuffer.html#create">create</a>(), <a href="qopenglbuffer.html#bind">bind</a>(), and <a href="qopenglbuffer.html#mapRange">mapRange</a>().</p>
+<!-- @@@map -->
+<!-- $$$mapRange[overload1]$$$mapRangeintintQOpenGLBuffer::RangeAccessFlags -->
+<h3 class="fn" id="mapRange"><a name="mapRange"></a><span class="type">void</span> *QOpenGLBuffer::<span class="name">mapRange</span>(<span class="type">int</span> <i>offset</i>, <span class="type">int</span> <i>count</i>, <span class="type"><a href="qopenglbuffer.html#RangeAccessFlag-enum">QOpenGLBuffer::RangeAccessFlags</a></span> <i>access</i>)</h3>
+<p>Maps the range specified by <i>offset</i> and <i>count</i> of the contents of this buffer into the application's memory space and returns a pointer to it. Returns null if memory mapping is not possible. The <i>access</i> parameter specifies a combination of access flags.</p>
+<p>It is assumed that <a href="qopenglbuffer.html#create">create</a>() has been called on this buffer and that it has been bound to the current context.</p>
+<p><b>Note: </b>This function is not available on OpenGL ES 2.0 and earlier.</p><p><b>See also </b><a href="qopenglbuffer.html#unmap">unmap</a>(), <a href="qopenglbuffer.html#create">create</a>(), and <a href="qopenglbuffer.html#bind">bind</a>().</p>
+<!-- @@@mapRange -->
+<!-- $$$read[overload1]$$$readintvoid*int -->
+<h3 class="fn" id="read"><a name="read"></a><span class="type">bool</span> QOpenGLBuffer::<span class="name">read</span>(<span class="type">int</span> <i>offset</i>, <span class="type">void</span> *<i>data</i>, <span class="type">int</span> <i>count</i>)</h3>
+<p>Reads the <i>count</i> bytes in this buffer starting at <i>offset</i> into <i>data</i>. Returns <code>true</code> on success; false if reading from the buffer is not supported. Buffer reading is not supported under OpenGL/ES.</p>
+<p>It is assumed that this buffer has been bound to the current context.</p>
+<p><b>See also </b><a href="qopenglbuffer.html#write">write</a>() and <a href="qopenglbuffer.html#bind">bind</a>().</p>
+<!-- @@@read -->
+<!-- $$$release[overload1]$$$release -->
+<h3 class="fn" id="release"><a name="release"></a><span class="type">void</span> QOpenGLBuffer::<span class="name">release</span>()</h3>
+<p>Releases the buffer associated with this object from the current OpenGL context.</p>
+<p>This function must be called with the same <a href="qopenglcontext.html">QOpenGLContext</a> current as when <a href="qopenglbuffer.html#bind">bind</a>() was called on the buffer.</p>
+<p><b>See also </b><a href="qopenglbuffer.html#bind">bind</a>().</p>
+<!-- @@@release -->
+<!-- $$$release$$$releaseQOpenGLBuffer::Type -->
+<h3 class="fn" id="release-1"><a name="release-1"></a><code>[static] </code><span class="type">void</span> QOpenGLBuffer::<span class="name">release</span>(<span class="type"><a href="qopenglbuffer.html#Type-enum">QOpenGLBuffer::Type</a></span> <i>type</i>)</h3>
+<p>Releases the buffer associated with <i>type</i> in the current <a href="qopenglcontext.html">QOpenGLContext</a>.</p>
+<p>This function is a direct call to <code>glBindBuffer(type, 0)</code> for use when the caller does not know which <a href="qopenglbuffer.html">QOpenGLBuffer</a> has been bound to the context but wants to make sure that it is released.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qopenglbuffer.html#QOpenGLBuffer">QOpenGLBuffer</a></span><span class="operator">::</span>release(<span class="type"><a href="qopenglbuffer.html#QOpenGLBuffer">QOpenGLBuffer</a></span><span class="operator">::</span>VertexBuffer);
+
+</pre>
+<!-- @@@release -->
+<!-- $$$setUsagePattern[overload1]$$$setUsagePatternQOpenGLBuffer::UsagePattern -->
+<h3 class="fn" id="setUsagePattern"><a name="setUsagePattern"></a><span class="type">void</span> QOpenGLBuffer::<span class="name">setUsagePattern</span>(<span class="type"><a href="qopenglbuffer.html#UsagePattern-enum">QOpenGLBuffer::UsagePattern</a></span> <i>value</i>)</h3>
+<p>Sets the usage pattern for this buffer object to <i>value</i>. This function must be called before <a href="qopenglbuffer.html#allocate">allocate</a>() or <a href="qopenglbuffer.html#write">write</a>().</p>
+<p><b>See also </b><a href="qopenglbuffer.html#usagePattern">usagePattern</a>(), <a href="qopenglbuffer.html#allocate">allocate</a>(), and <a href="qopenglbuffer.html#write">write</a>().</p>
+<!-- @@@setUsagePattern -->
+<!-- $$$size[overload1]$$$size -->
+<h3 class="fn" id="size"><a name="size"></a><span class="type">int</span> QOpenGLBuffer::<span class="name">size</span>() const</h3>
+<p>Returns the size of the data in this buffer, for reading operations. Returns -1 if fetching the buffer size is not supported, or the buffer has not been created.</p>
+<p>It is assumed that this buffer has been bound to the current context.</p>
+<p><b>See also </b><a href="qopenglbuffer.html#isCreated">isCreated</a>() and <a href="qopenglbuffer.html#bind">bind</a>().</p>
+<!-- @@@size -->
+<!-- $$$type[overload1]$$$type -->
+<h3 class="fn" id="type"><a name="type"></a><span class="type"><a href="qopenglbuffer.html#Type-enum">QOpenGLBuffer::Type</a></span> QOpenGLBuffer::<span class="name">type</span>() const</h3>
+<p>Returns the type of buffer represented by this object.</p>
+<!-- @@@type -->
+<!-- $$$unmap[overload1]$$$unmap -->
+<h3 class="fn" id="unmap"><a name="unmap"></a><span class="type">bool</span> QOpenGLBuffer::<span class="name">unmap</span>()</h3>
+<p>Unmaps the buffer after it was mapped into the application's memory space with a previous call to <a href="qopenglbuffer.html#map">map</a>(). Returns <code>true</code> if the unmap succeeded; false otherwise.</p>
+<p>It is assumed that this buffer has been bound to the current context, and that it was previously mapped with <a href="qopenglbuffer.html#map">map</a>().</p>
+<p><b>Note: </b>This function is only supported under OpenGL ES 2.0 and earlier if the <code>GL_OES_mapbuffer</code> extension is present.</p><p><b>See also </b><a href="qopenglbuffer.html#map">map</a>().</p>
+<!-- @@@unmap -->
+<!-- $$$usagePattern[overload1]$$$usagePattern -->
+<h3 class="fn" id="usagePattern"><a name="usagePattern"></a><span class="type"><a href="qopenglbuffer.html#UsagePattern-enum">QOpenGLBuffer::UsagePattern</a></span> QOpenGLBuffer::<span class="name">usagePattern</span>() const</h3>
+<p>Returns the usage pattern for this buffer object. The default value is <a href="qopenglbuffer.html#UsagePattern-enum">StaticDraw</a>.</p>
+<p><b>See also </b><a href="qopenglbuffer.html#setUsagePattern">setUsagePattern</a>().</p>
+<!-- @@@usagePattern -->
+<!-- $$$write[overload1]$$$writeintconstvoid*int -->
+<h3 class="fn" id="write"><a name="write"></a><span class="type">void</span> QOpenGLBuffer::<span class="name">write</span>(<span class="type">int</span> <i>offset</i>, const <span class="type">void</span> *<i>data</i>, <span class="type">int</span> <i>count</i>)</h3>
+<p>Replaces the <i>count</i> bytes of this buffer starting at <i>offset</i> with the contents of <i>data</i>. Any other bytes in the buffer will be left unmodified.</p>
+<p>It is assumed that <a href="qopenglbuffer.html#create">create</a>() has been called on this buffer and that it has been bound to the current context.</p>
+<p><b>See also </b><a href="qopenglbuffer.html#create">create</a>(), <a href="qopenglbuffer.html#read">read</a>(), and <a href="qopenglbuffer.html#allocate">allocate</a>().</p>
+<!-- @@@write -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

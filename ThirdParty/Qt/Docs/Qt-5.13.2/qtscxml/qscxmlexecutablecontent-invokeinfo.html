@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qscxmlexecutablecontent.cpp -->
+  <title>InvokeInfo Struct | Qt SCXML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtscxml-index.html">Qt SCXML</a></td><td ><a href="qtscxml-module.html">C++ Classes</a></td><td >InvokeInfo</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtscxml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-variables">Public Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">InvokeInfo Struct</h1>
+<span class="small-subtitle">(<a href="qscxmlexecutablecontent-invokeinfo.html">QScxmlExecutableContent::InvokeInfo</a>)<br/></span>
+<!-- $$$InvokeInfo-brief -->
+<p>The <a href="qscxmlexecutablecontent-invokeinfo.html">InvokeInfo</a> class represents a service invocation. <a href="#details">More...</a></p>
+<!-- @@@InvokeInfo -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;InvokeInfo&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += scxml</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr></table></div><p>This struct was introduced in  Qt 5.8.</p>
+<ul>
+<li><a href="qscxmlexecutablecontent-invokeinfo-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-variables"></a>
+<h2 id="public-variables">Public Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qscxmlexecutablecontent-invokeinfo.html#autoforward-var">autoforward</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QScxmlExecutableContent::StringId </td><td class="memItemRight bottomAlign"><b><a href="qscxmlexecutablecontent-invokeinfo.html#context-var">context</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QScxmlExecutableContent::EvaluatorId </td><td class="memItemRight bottomAlign"><b><a href="qscxmlexecutablecontent-invokeinfo.html#expr-var">expr</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QScxmlExecutableContent::ContainerId </td><td class="memItemRight bottomAlign"><b><a href="qscxmlexecutablecontent-invokeinfo.html#finalize-var">finalize</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QScxmlExecutableContent::StringId </td><td class="memItemRight bottomAlign"><b><a href="qscxmlexecutablecontent-invokeinfo.html#id-var">id</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QScxmlExecutableContent::StringId </td><td class="memItemRight bottomAlign"><b><a href="qscxmlexecutablecontent-invokeinfo.html#location-var">location</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QScxmlExecutableContent::StringId </td><td class="memItemRight bottomAlign"><b><a href="qscxmlexecutablecontent-invokeinfo.html#prefix-var">prefix</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$InvokeInfo-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@InvokeInfo -->
+<div class="vars">
+<h2>Member Variable Documentation</h2>
+<!-- $$$autoforward -->
+<h3 class="fn" id="autoforward-var"><a name="autoforward-var"></a><span class="type">bool</span> InvokeInfo::<span class="name">autoforward</span></h3>
+<p>This variable holds whether events should automatically be forwarded to the invoked service</p>
+<!-- @@@autoforward -->
+<!-- $$$context -->
+<h3 class="fn" id="context-var"><a name="context-var"></a><span class="type"><a href="qscxmlexecutablecontent.html#StringId-typedef">QScxmlExecutableContent::StringId</a></span> InvokeInfo::<span class="name">context</span></h3>
+<p>This variable holds the context to interpret the location in</p>
+<!-- @@@context -->
+<!-- $$$expr -->
+<h3 class="fn" id="expr-var"><a name="expr-var"></a><span class="type"><a href="qscxmlexecutablecontent.html#EvaluatorId-typedef">QScxmlExecutableContent::EvaluatorId</a></span> InvokeInfo::<span class="name">expr</span></h3>
+<p>This variable holds the expression representing the srcexpr of the invoke element</p>
+<!-- @@@expr -->
+<!-- $$$finalize -->
+<h3 class="fn" id="finalize-var"><a name="finalize-var"></a><span class="type"><a href="qscxmlexecutablecontent.html#ContainerId-typedef">QScxmlExecutableContent::ContainerId</a></span> InvokeInfo::<span class="name">finalize</span></h3>
+<p>This variable holds the ID of the container of executable content to be run on finalizing the invocation</p>
+<!-- @@@finalize -->
+<!-- $$$id -->
+<h3 class="fn" id="id-var"><a name="id-var"></a><span class="type"><a href="qscxmlexecutablecontent.html#StringId-typedef">QScxmlExecutableContent::StringId</a></span> InvokeInfo::<span class="name">id</span></h3>
+<p>This variable holds the ID specified by the <code>id</code> attribute in the <code>&lt;invoke&gt;</code> element.</p>
+<!-- @@@id -->
+<!-- $$$location -->
+<h3 class="fn" id="location-var"><a name="location-var"></a><span class="type"><a href="qscxmlexecutablecontent.html#StringId-typedef">QScxmlExecutableContent::StringId</a></span> InvokeInfo::<span class="name">location</span></h3>
+<p>This variable holds the data model location to write the invocation ID to</p>
+<!-- @@@location -->
+<!-- $$$prefix -->
+<h3 class="fn" id="prefix-var"><a name="prefix-var"></a><span class="type"><a href="qscxmlexecutablecontent.html#StringId-typedef">QScxmlExecutableContent::StringId</a></span> InvokeInfo::<span class="name">prefix</span></h3>
+<p>This variable holds the unique prefix for this invocation in the context of the state from which it is called</p>
+<!-- @@@prefix -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qabstractvideobuffer.cpp -->
+  <title>QAbstractPlanarVideoBuffer Class | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-modules.html">C++ Classes</a></td><td >QAbstractPlanarVideoBuffer</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAbstractPlanarVideoBuffer Class</h1>
+<!-- $$$QAbstractPlanarVideoBuffer-brief -->
+<p>The <a href="qabstractplanarvideobuffer.html">QAbstractPlanarVideoBuffer</a> class is an abstraction for planar video data. <a href="#details">More...</a></p>
+<!-- @@@QAbstractPlanarVideoBuffer -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAbstractPlanarVideoBuffer&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += multimedia</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.4</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qabstractvideobuffer.html">QAbstractVideoBuffer</a></td></tr></table></div><p>This class was introduced in  Qt 5.4.</p>
+<ul>
+<li><a href="qabstractplanarvideobuffer-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qabstractplanarvideobuffer.html#QAbstractPlanarVideoBuffer">QAbstractPlanarVideoBuffer</a></b>(QAbstractVideoBuffer::HandleType <i>type</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qabstractplanarvideobuffer.html#dtor.QAbstractPlanarVideoBuffer">~QAbstractPlanarVideoBuffer</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qabstractplanarvideobuffer.html#map-1">map</a></b>(QAbstractVideoBuffer::MapMode <i>mode</i>, int *<i>numBytes</i>, int [4] <i>bytesPerLine</i> = ..., uchar *[4] <i>data</i> = ...) = 0</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAbstractPlanarVideoBuffer-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qabstractplanarvideobuffer.html">QAbstractPlanarVideoBuffer</a> extends <a href="qabstractvideobuffer.html">QAbstractVideoBuffer</a> to support mapping non-continuous planar video data. Implement this instead of <a href="qabstractvideobuffer.html">QAbstractVideoBuffer</a> when the abstracted video data stores planes in separate buffers or includes padding between planes which would interfere with calculating offsets from the bytes per line and frame height.</p>
+</div>
+<p><b>See also </b><a href="qabstractvideobuffer.html#mapPlanes">QAbstractVideoBuffer::mapPlanes</a>().</p>
+<!-- @@@QAbstractPlanarVideoBuffer -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QAbstractPlanarVideoBuffer[overload1]$$$QAbstractPlanarVideoBufferQAbstractVideoBuffer::HandleType -->
+<h3 class="fn" id="QAbstractPlanarVideoBuffer"><a name="QAbstractPlanarVideoBuffer"></a>QAbstractPlanarVideoBuffer::<span class="name">QAbstractPlanarVideoBuffer</span>(<span class="type"><a href="qabstractvideobuffer.html#HandleType-enum">QAbstractVideoBuffer::HandleType</a></span> <i>type</i>)</h3>
+<p>Constructs an abstract planar video buffer of the given <i>type</i>.</p>
+<!-- @@@QAbstractPlanarVideoBuffer -->
+<!-- $$$~QAbstractPlanarVideoBuffer[overload1]$$$~QAbstractPlanarVideoBuffer -->
+<h3 class="fn" id="dtor.QAbstractPlanarVideoBuffer"><a name="dtor.QAbstractPlanarVideoBuffer"></a><code>[virtual] </code>QAbstractPlanarVideoBuffer::<span class="name">~QAbstractPlanarVideoBuffer</span>()</h3>
+<p>Destroys an abstract planar video buffer.</p>
+<!-- @@@~QAbstractPlanarVideoBuffer -->
+<!-- $$$map$$$mapQAbstractVideoBuffer::MapModeint*int[4]uchar*[4] -->
+<h3 class="fn" id="map-1"><a name="map-1"></a><code>[pure virtual] </code><span class="type">int</span> QAbstractPlanarVideoBuffer::<span class="name">map</span>(<span class="type"><a href="qabstractvideobuffer.html#MapMode-enum">QAbstractVideoBuffer::MapMode</a></span> <i>mode</i>, <span class="type">int</span> *<i>numBytes</i>, <span class="type">int</span> [<span class="type">4</span>] <i>bytesPerLine</i> = ..., <span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span> *[<span class="type">4</span>] <i>data</i> = ...)</h3>
+<p>Maps the contents of a video buffer to memory.</p>
+<p>The map <i>mode</i> indicates whether the contents of the mapped memory should be read from and/or written to the buffer. If the map mode includes the <code>QAbstractVideoBuffer::ReadOnly</code> flag the mapped memory will be populated with the content of the buffer when initially mapped. If the map mode includes the <code>QAbstractVideoBuffer::WriteOnly</code> flag the content of the possibly modified mapped memory will be written back to the buffer when unmapped.</p>
+<p>When access to the data is no longer needed be sure to call the <a href="qabstractvideobuffer.html#unmap">unmap</a>() function to release the mapped memory and possibly update the buffer contents.</p>
+<p>Returns the number of planes in the mapped video data. For each plane the line stride of that plane will be returned in <i>bytesPerLine</i>, and a pointer to the plane data will be returned in <i>data</i>. The accumulative size of the mapped data is returned in <i>numBytes</i>.</p>
+<p><b>See also </b><a href="qabstractvideobuffer.html#map">QAbstractVideoBuffer::map</a>(), <a href="qabstractvideobuffer.html#unmap">QAbstractVideoBuffer::unmap</a>(), and <a href="qabstractvideobuffer.html#mapMode">QAbstractVideoBuffer::mapMode</a>().</p>
+<!-- @@@map -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,731 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- tablet.qdoc -->
+  <title>Tablet Example | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Tablet Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#mainwindow-class-definition">MainWindow Class Definition</a></li>
+<li class="level1"><a href="#mainwindow-class-implementation">MainWindow Class Implementation</a></li>
+<li class="level1"><a href="#tabletcanvas-class-definition">TabletCanvas Class Definition</a></li>
+<li class="level1"><a href="#tabletcanvas-class-implementation">TabletCanvas Class Implementation</a></li>
+<li class="level1"><a href="#tabletapplication-class-definition">TabletApplication Class Definition</a></li>
+<li class="level1"><a href="#tabletapplication-class-implementation">TabletApplication Class Implementation</a></li>
+<li class="level1"><a href="#the-main-function">The <code>main()</code> function</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Tablet Example</h1>
+<span class="subtitle"></span>
+<!-- $$$widgets/tablet-brief -->
+<p>This example shows how to use a Wacom tablet in Qt applications.</p>
+<!-- @@@widgets/tablet -->
+<!-- $$$widgets/tablet-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/tabletexample.png" alt="" /></p><p>When you use a tablet with Qt applications, <a href="../qtgui/qtabletevent.html">QTabletEvent</a>s are generated. You need to reimplement the <a href="qwidget.html#tabletEvent">tabletEvent()</a> event handler if you want to handle tablet events. Events are generated when the tool (stylus) used for drawing enters and leaves the proximity of the tablet (i.e&#x2e;, when it is close but not pressed down on it), when the tool is pressed down and released from it, when the tool is moved across the tablet, and when one of the buttons on the tool is pressed or released.</p>
+<p>The information available in <a href="../qtgui/qtabletevent.html">QTabletEvent</a> depends on the device used. This example can handle a tablet with up to three different drawing tools: a stylus, an airbrush, and an art pen. For any of these the event will contain the position of the tool, pressure on the tablet, button status, vertical tilt, and horizontal tilt (i.e, the angle between the device and the perpendicular of the tablet, if the tablet hardware can provide it). The airbrush has a finger wheel; the position of this is also available in the tablet event. The art pen provides rotation around the axis perpendicular to the tablet surface, so that it can be used for calligraphy.</p>
+<p>In this example we implement a drawing program. You can use the stylus to draw on the tablet as you use a pencil on paper. When you draw with the airbrush you get a spray of virtual paint; the finger wheel is used to change the density of the spray. When you draw with the art pen, you get a a line whose width and endpoint angle depend on the rotation of the pen. The pressure and tilt can also be assigned to change the alpha and saturation values of the color and the width of the stroke.</p>
+<p>The example consists of the following:</p>
+<ul>
+<li>The <code>MainWindow</code> class inherits <a href="qmainwindow.html">QMainWindow</a>, creates the menus, and connects their slots and signals.</li>
+<li>The <code>TabletCanvas</code> class inherits <a href="qwidget.html">QWidget</a> and receives tablet events. It uses the events to paint onto an offscreen pixmap, and then renders it.</li>
+<li>The <code>TabletApplication</code> class inherits <a href="qapplication.html">QApplication</a>. This class handles tablet proximity events.</li>
+<li>The <code>main()</code> function creates a <code>MainWindow</code> and shows it as a top level window.</li>
+</ul>
+<a name="mainwindow-class-definition"></a>
+<h4 id="mainwindow-class-definition">MainWindow Class Definition</h4>
+<p>The <code>MainWindow</code> creates a <code>TabletCanvas</code> and sets it as its center widget.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> MainWindow : <span class="keyword">public</span> <span class="type"><a href="qmainwindow.html">QMainWindow</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      MainWindow(TabletCanvas <span class="operator">*</span>canvas);
+
+  <span class="keyword">private</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> setBrushColor();
+      <span class="type">void</span> setAlphaValuator(<span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>action);
+      <span class="type">void</span> setLineWidthValuator(<span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>action);
+      <span class="type">void</span> setSaturationValuator(<span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>action);
+      <span class="type">void</span> setEventCompression(bool compress);
+      bool save();
+      <span class="type">void</span> load();
+      <span class="type">void</span> clear();
+      <span class="type">void</span> about();
+
+  <span class="keyword">private</span>:
+      <span class="type">void</span> createMenus();
+
+      TabletCanvas <span class="operator">*</span>m_canvas;
+      <span class="type"><a href="qcolordialog.html">QColorDialog</a></span> <span class="operator">*</span>m_colorDialog;
+  };
+
+</pre>
+<p><code>createMenus()</code> sets up the menus with the actions. We have one <a href="qactiongroup.html">QActionGroup</a> for the actions that alter the alpha channel, color saturation and line width respectively. The action groups are connected to the <code>setAlphaValuator()</code>, <code>setSaturationValuator()</code>, and <code>setLineWidthValuator()</code> slots, which call functions in <code>TabletCanvas</code>.</p>
+<a name="mainwindow-class-implementation"></a>
+<h4 id="mainwindow-class-implementation">MainWindow Class Implementation</h4>
+<p>We start with a look at the constructor <code>MainWindow()</code>:</p>
+<pre class="cpp">
+
+  MainWindow<span class="operator">::</span>MainWindow(TabletCanvas <span class="operator">*</span>canvas)
+    : m_canvas(canvas)<span class="operator">,</span> m_colorDialog(nullptr)
+  {
+      createMenus();
+      setWindowTitle(tr(<span class="string">&quot;Tablet Example&quot;</span>));
+      setCentralWidget(m_canvas);
+      <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>setAttribute(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AA_CompressHighFrequencyEvents);
+  }
+
+</pre>
+<p>In the constructor we call <code>createMenus()</code> to create all the actions and menus, and set the canvas as the center widget.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>createMenus()
+  {
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>fileMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;File&quot;</span>));
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Open...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>load<span class="operator">,</span> <span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Open);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Save As...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>save<span class="operator">,</span> <span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>SaveAs);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;New&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>clear<span class="operator">,</span> <span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>New);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;E&amp;xit&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>close<span class="operator">,</span> <span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Quit);
+
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>brushMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;Brush&quot;</span>));
+      brushMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Brush Color...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>setBrushColor<span class="operator">,</span> tr(<span class="string">&quot;Ctrl+B&quot;</span>));
+
+</pre>
+<p>At the beginning of <code>createMenus()</code> we populate the <b>File</b> menu. We use an overload of <a href="qmenu.html#addAction">addAction()</a>, introduced in Qt 5.6, to create a menu item with a shortcut (and optionally an icon), add it to its menu, and connect it to a slot, all with one line of code. We use <a href="../qtgui/qkeysequence.html">QKeySequence</a> to get the platform-specific standard key shortcuts for these common menu items.</p>
+<p>We also populate the <b>Brush</b> menu. The command to change a brush does not normally have a standard shortcut, so we use <a href="../qtcore/qobject.html#tr">tr()</a> to enable translating the shortcut along with the language translation of the application.</p>
+<p>Now we will look at the creation of one group of mutually-exclusive actions in a submenu of the <b>Tablet</b> menu, for selecting which property of each <a href="../qtgui/qtabletevent.html">QTabletEvent</a> will be used to vary the translucency (alpha channel) of the line being drawn or color being airbrushed. (See the <a href="qtwidgets-mainwindows-application-example.html">application example</a> if you want a high-level introduction to QActions.)</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>alphaChannelMenu <span class="operator">=</span> tabletMenu<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;Alpha Channel&quot;</span>));
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>alphaChannelPressureAction <span class="operator">=</span> alphaChannelMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Pressure&quot;</span>));
+      alphaChannelPressureAction<span class="operator">-</span><span class="operator">&gt;</span>setData(TabletCanvas<span class="operator">::</span>PressureValuator);
+      alphaChannelPressureAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>alphaChannelTangentialPressureAction <span class="operator">=</span> alphaChannelMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;T&amp;angential Pressure&quot;</span>));
+      alphaChannelTangentialPressureAction<span class="operator">-</span><span class="operator">&gt;</span>setData(TabletCanvas<span class="operator">::</span>TangentialPressureValuator);
+      alphaChannelTangentialPressureAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      alphaChannelTangentialPressureAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>alphaChannelTiltAction <span class="operator">=</span> alphaChannelMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Tilt&quot;</span>));
+      alphaChannelTiltAction<span class="operator">-</span><span class="operator">&gt;</span>setData(TabletCanvas<span class="operator">::</span>TiltValuator);
+      alphaChannelTiltAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>noAlphaChannelAction <span class="operator">=</span> alphaChannelMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;No Alpha Channel&quot;</span>));
+      noAlphaChannelAction<span class="operator">-</span><span class="operator">&gt;</span>setData(TabletCanvas<span class="operator">::</span>NoValuator);
+      noAlphaChannelAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+
+      <span class="type"><a href="qactiongroup.html">QActionGroup</a></span> <span class="operator">*</span>alphaChannelGroup <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qactiongroup.html">QActionGroup</a></span>(<span class="keyword">this</span>);
+      alphaChannelGroup<span class="operator">-</span><span class="operator">&gt;</span>addAction(alphaChannelPressureAction);
+      alphaChannelGroup<span class="operator">-</span><span class="operator">&gt;</span>addAction(alphaChannelTangentialPressureAction);
+      alphaChannelGroup<span class="operator">-</span><span class="operator">&gt;</span>addAction(alphaChannelTiltAction);
+      alphaChannelGroup<span class="operator">-</span><span class="operator">&gt;</span>addAction(noAlphaChannelAction);
+      connect(alphaChannelGroup<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qactiongroup.html">QActionGroup</a></span><span class="operator">::</span>triggered<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>setAlphaValuator);
+
+</pre>
+<p>We want the user to be able to choose whether the drawing color's alpha component should be modulated by the tablet pressure, tilt, or the position of the thumbwheel on the airbrush tool. We have one action for each choice, and an additional action to choose not to change the alpha, that is, to keep the color opaque. We make the actions checkable; the <code>alphaChannelGroup</code> will then ensure that only one of the actions are checked at any time. The <code>triggered()</code> signal is emitted from the group when an action is checked, so we connect that to <code>MainWindow::setAlphaValuator()</code>. It will need to know which property (valuator) of the <a href="../qtgui/qtabletevent.html">QTabletEvent</a> to pay attention to from now on, so we use the <a href="qaction.html#data">QAction::data</a> property to pass this information along. (In order for this to be possible, the enum <code>Valuator</code> must be a registered metatype, so that it can be inserted into a <a href="../qtcore/qvariant.html">QVariant</a>. That is accomplished by the <code>Q_ENUM</code> declaration in tabletcanvas.h&#x2e;)</p>
+<p>Here is the implementation of <code>setAlphaValuator()</code>:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>setAlphaValuator(<span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>action)
+  {
+      m_canvas<span class="operator">-</span><span class="operator">&gt;</span>setAlphaChannelValuator(action<span class="operator">-</span><span class="operator">&gt;</span>data()<span class="operator">.</span>value<span class="operator">&lt;</span>TabletCanvas<span class="operator">::</span>Valuator<span class="operator">&gt;</span>());
+  }
+
+</pre>
+<p>It simply needs to retrieve the <code>Valuator</code> enum from <a href="qaction.html#data">QAction::data</a>(), and pass that to <code>TabletCanvas::setAlphaChannelValuator()</code>. If we were not using the <code>data</code> property, we would instead need to compare the <a href="qaction.html">QAction</a> pointer itself, for example in a switch statement. But that would require keeping pointers to each <a href="qaction.html">QAction</a> in class variables, for comparison purposes.</p>
+<p>Here is the implementation of <code>setBrushColor()</code>:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>setBrushColor()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_colorDialog) {
+          m_colorDialog <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcolordialog.html">QColorDialog</a></span>(<span class="keyword">this</span>);
+          m_colorDialog<span class="operator">-</span><span class="operator">&gt;</span>setModal(<span class="keyword">false</span>);
+          m_colorDialog<span class="operator">-</span><span class="operator">&gt;</span>setCurrentColor(m_canvas<span class="operator">-</span><span class="operator">&gt;</span>color());
+          connect(m_colorDialog<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qcolordialog.html">QColorDialog</a></span><span class="operator">::</span>colorSelected<span class="operator">,</span> m_canvas<span class="operator">,</span> <span class="operator">&amp;</span>TabletCanvas<span class="operator">::</span>setColor);
+      }
+      m_colorDialog<span class="operator">-</span><span class="operator">&gt;</span>setVisible(<span class="keyword">true</span>);
+  }
+
+</pre>
+<p>We do lazy initialization of a <a href="qcolordialog.html">QColorDialog</a> the first time the user chooses <b>Brush color..&#x2e;</b> from the menu or via the action shortcut. While the dialog is open, each time the user chooses a different color, <code>TabletCanvas::setColor()</code> will be called to change the drawing color. Because it is a non-modal dialog, the user is free to leave the color dialog open, so as to be able to conveniently and frequently change colors, or close it and re-open it later.</p>
+<p>Here is the implementation of <code>save()</code>:</p>
+<pre class="cpp">
+
+  bool MainWindow<span class="operator">::</span>save()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> path <span class="operator">=</span> <span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>currentPath() <span class="operator">+</span> <span class="string">&quot;/untitled.png&quot;</span>;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getSaveFileName(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Save Picture&quot;</span>)<span class="operator">,</span>
+                               path);
+      bool success <span class="operator">=</span> m_canvas<span class="operator">-</span><span class="operator">&gt;</span>saveImage(fileName);
+      <span class="keyword">if</span> (<span class="operator">!</span>success)
+          <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>information(<span class="keyword">this</span><span class="operator">,</span> <span class="string">&quot;Error Saving Picture&quot;</span><span class="operator">,</span>
+                                   <span class="string">&quot;Could not save the image&quot;</span>);
+      <span class="keyword">return</span> success;
+  }
+
+</pre>
+<p>We use the <a href="qfiledialog.html">QFileDialog</a> to let the user select a file to save the drawing, and then call <code>TabletCanvas::saveImage()</code> to actually write it to the file.</p>
+<p>Here is the implementation of <code>load()</code>:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>load()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getOpenFileName(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Open Picture&quot;</span>)<span class="operator">,</span>
+                                                      <span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>currentPath());
+
+      <span class="keyword">if</span> (<span class="operator">!</span>m_canvas<span class="operator">-</span><span class="operator">&gt;</span>loadImage(fileName))
+          <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>information(<span class="keyword">this</span><span class="operator">,</span> <span class="string">&quot;Error Opening Picture&quot;</span><span class="operator">,</span>
+                                   <span class="string">&quot;Could not open picture&quot;</span>);
+  }
+
+</pre>
+<p>We let the user select the image file to be opened with a <a href="qfiledialog.html">QFileDialog</a>; we then ask the canvas to load the image with <code>loadImage()</code>.</p>
+<p>Here is the implementation of <code>about()</code>:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>about()
+  {
+      <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>about(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;About Tablet Example&quot;</span>)<span class="operator">,</span>
+                         tr(<span class="string">&quot;This example shows how to use a graphics drawing tablet in Qt.&quot;</span>));
+  }
+
+</pre>
+<p>We show a message box with a short description of the example.</p>
+<a name="tabletcanvas-class-definition"></a>
+<h4 id="tabletcanvas-class-definition">TabletCanvas Class Definition</h4>
+<p>The <code>TabletCanvas</code> class provides a surface on which the user can draw with a tablet.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> TabletCanvas : <span class="keyword">public</span> <span class="type"><a href="qwidget.html">QWidget</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      <span class="keyword">enum</span> Valuator { PressureValuator<span class="operator">,</span> TangentialPressureValuator<span class="operator">,</span>
+                      TiltValuator<span class="operator">,</span> VTiltValuator<span class="operator">,</span> HTiltValuator<span class="operator">,</span> NoValuator };
+      Q_ENUM(Valuator)
+
+      TabletCanvas();
+
+      bool saveImage(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>file);
+      bool loadImage(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>file);
+      <span class="type">void</span> clear();
+      <span class="type">void</span> setAlphaChannelValuator(Valuator type)
+          { m_alphaChannelValuator <span class="operator">=</span> type; }
+      <span class="type">void</span> setColorSaturationValuator(Valuator type)
+          { m_colorSaturationValuator <span class="operator">=</span> type; }
+      <span class="type">void</span> setLineWidthType(Valuator type)
+          { m_lineWidthValuator <span class="operator">=</span> type; }
+      <span class="type">void</span> setColor(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> <span class="operator">&amp;</span>c)
+          { <span class="keyword">if</span> (c<span class="operator">.</span>isValid()) m_color <span class="operator">=</span> c; }
+      <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> color() <span class="keyword">const</span>
+          { <span class="keyword">return</span> m_color; }
+      <span class="type">void</span> setTabletDevice(<span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span> <span class="operator">*</span>event)
+          { updateCursor(event); }
+      <span class="type">int</span> maximum(<span class="type">int</span> a<span class="operator">,</span> <span class="type">int</span> b)
+          { <span class="keyword">return</span> a <span class="operator">&gt;</span> b <span class="operator">?</span> a : b; }
+
+  <span class="keyword">protected</span>:
+      <span class="type">void</span> tabletEvent(<span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span> <span class="operator">*</span>event) override;
+      <span class="type">void</span> paintEvent(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span> <span class="operator">*</span>event) override;
+      <span class="type">void</span> resizeEvent(<span class="type"><a href="../qtgui/qresizeevent.html">QResizeEvent</a></span> <span class="operator">*</span>event) override;
+
+  <span class="keyword">private</span>:
+      <span class="type">void</span> initPixmap();
+      <span class="type">void</span> paintPixmap(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">&amp;</span>painter<span class="operator">,</span> <span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span> <span class="operator">*</span>event);
+      <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>BrushStyle brushPattern(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> value);
+      <span class="keyword">static</span> <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> pressureToWidth(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> pressure);
+      <span class="type">void</span> updateBrush(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span> <span class="operator">*</span>event);
+      <span class="type">void</span> updateCursor(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span> <span class="operator">*</span>event);
+
+      Valuator m_alphaChannelValuator;
+      Valuator m_colorSaturationValuator;
+      Valuator m_lineWidthValuator;
+      <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> m_color;
+      <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> m_pixmap;
+      <span class="type"><a href="../qtgui/qbrush.html">QBrush</a></span> m_brush;
+      <span class="type"><a href="../qtgui/qpen.html">QPen</a></span> m_pen;
+      bool m_deviceDown;
+
+      <span class="keyword">struct</span> Point {
+          <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> pos;
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> pressure;
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> rotation;
+      } lastPoint;
+  };
+
+</pre>
+<p>The canvas can change the alpha channel, color saturation, and line width of the stroke. We have an enum listing the <a href="../qtgui/qtabletevent.html">QTabletEvent</a> properties with which it is possible to modulate them. We keep a private variable for each: <code>m_alphaChannelValuator</code>, <code>m_colorSaturationValuator</code> and <code>m_lineWidthValuator</code>, and we provide accessor functions for them.</p>
+<p>We draw on a <a href="../qtgui/qpixmap.html">QPixmap</a> with <code>m_pen</code> and <code>m_brush</code> using <code>m_color</code>. Each time a <a href="../qtgui/qtabletevent.html">QTabletEvent</a> is received, the stroke is drawn from <code>lastPoint</code> to the point given in the current <a href="../qtgui/qtabletevent.html">QTabletEvent</a>, and then the position and rotation are saved in <code>lastPoint</code> for next time. The <code>saveImage()</code> and <code>loadImage()</code> functions save and load the <a href="../qtgui/qpixmap.html">QPixmap</a> to disk. The pixmap is drawn on the widget in <code>paintEvent()</code>.</p>
+<p>The interpretation of events from the tablet is done in <code>tabletEvent()</code>, and <code>paintPixmap()</code>, <code>updateBrush()</code>, and <code>updateCursor()</code> are helper functions used by <code>tabletEvent()</code>.</p>
+<a name="tabletcanvas-class-implementation"></a>
+<h4 id="tabletcanvas-class-implementation">TabletCanvas Class Implementation</h4>
+<p>We start with a look at the constructor:</p>
+<pre class="cpp">
+
+  TabletCanvas<span class="operator">::</span>TabletCanvas()
+    : <span class="type"><a href="qwidget.html">QWidget</a></span>(nullptr)
+    <span class="operator">,</span> m_alphaChannelValuator(TangentialPressureValuator)
+    <span class="operator">,</span> m_colorSaturationValuator(NoValuator)
+    <span class="operator">,</span> m_lineWidthValuator(PressureValuator)
+    <span class="operator">,</span> m_color(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>red)
+    <span class="operator">,</span> m_brush(m_color)
+    <span class="operator">,</span> m_pen(m_brush<span class="operator">,</span> <span class="number">1.0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>SolidLine<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RoundCap<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RoundJoin)
+    <span class="operator">,</span> m_deviceDown(<span class="keyword">false</span>)
+  {
+      resize(<span class="number">500</span><span class="operator">,</span> <span class="number">500</span>);
+      setAutoFillBackground(<span class="keyword">true</span>);
+      setAttribute(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WA_TabletTracking);
+  }
+
+</pre>
+<p>In the constructor we initialize most of our class variables.</p>
+<p>Here is the implementation of <code>saveImage()</code>:</p>
+<pre class="cpp">
+
+  bool TabletCanvas<span class="operator">::</span>saveImage(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>file)
+  {
+      <span class="keyword">return</span> m_pixmap<span class="operator">.</span>save(file);
+  }
+
+</pre>
+<p><a href="../qtgui/qpixmap.html">QPixmap</a> implements functionality to save itself to disk, so we simply call <a href="../qtgui/qpixmap.html#save">save()</a>.</p>
+<p>Here is the implementation of <code>loadImage()</code>:</p>
+<pre class="cpp">
+
+  bool TabletCanvas<span class="operator">::</span>loadImage(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>file)
+  {
+      bool success <span class="operator">=</span> m_pixmap<span class="operator">.</span>load(file);
+
+      <span class="keyword">if</span> (success) {
+          update();
+          <span class="keyword">return</span> <span class="keyword">true</span>;
+      }
+      <span class="keyword">return</span> <span class="keyword">false</span>;
+  }
+
+</pre>
+<p>We simply call <a href="../qtgui/qpixmap.html#load">load()</a>, which loads the image from <i>file</i>.</p>
+<p>Here is the implementation of <code>tabletEvent()</code>:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> TabletCanvas<span class="operator">::</span>tabletEvent(<span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">switch</span> (event<span class="operator">-</span><span class="operator">&gt;</span>type()) {
+          <span class="keyword">case</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>TabletPress:
+              <span class="keyword">if</span> (<span class="operator">!</span>m_deviceDown) {
+                  m_deviceDown <span class="operator">=</span> <span class="keyword">true</span>;
+                  lastPoint<span class="operator">.</span>pos <span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>posF();
+                  lastPoint<span class="operator">.</span>pressure <span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>pressure();
+                  lastPoint<span class="operator">.</span>rotation <span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>rotation();
+              }
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>TabletMove:
+  <span class="preprocessor">#ifndef Q_OS_IOS</span>
+              <span class="keyword">if</span> (event<span class="operator">-</span><span class="operator">&gt;</span>device() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span><span class="operator">::</span>RotationStylus)
+                  updateCursor(event);
+  <span class="preprocessor">#endif</span>
+              <span class="keyword">if</span> (m_deviceDown) {
+                  updateBrush(event);
+                  <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> painter(<span class="operator">&amp;</span>m_pixmap);
+                  paintPixmap(painter<span class="operator">,</span> event);
+                  lastPoint<span class="operator">.</span>pos <span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>posF();
+                  lastPoint<span class="operator">.</span>pressure <span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>pressure();
+                  lastPoint<span class="operator">.</span>rotation <span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>rotation();
+              }
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>TabletRelease:
+              <span class="keyword">if</span> (m_deviceDown <span class="operator">&amp;</span><span class="operator">&amp;</span> event<span class="operator">-</span><span class="operator">&gt;</span>buttons() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoButton)
+                  m_deviceDown <span class="operator">=</span> <span class="keyword">false</span>;
+              update();
+              <span class="keyword">break</span>;
+          <span class="keyword">default</span>:
+              <span class="keyword">break</span>;
+      }
+      event<span class="operator">-</span><span class="operator">&gt;</span>accept();
+  }
+
+</pre>
+<p>We get three kind of events to this function: <code>TabletPress</code>, <code>TabletRelease</code>, and <code>TabletMove</code>, which are generated when a drawing tool is pressed down on, lifed up from, or moved across the tablet. We set <code>m_deviceDown</code> to <code>true</code> when a device is pressed down on the tablet; we then know that we should draw when we receive move events. We have implemented <code>updateBrush()</code> to update <code>m_brush</code> and <code>m_pen</code> depending on which of the tablet event properties the user has chosen to pay attention to. The <code>updateCursor()</code> function selects a cursor to represent the drawing tool in use, so that as you hover with the tool in proximity of the tablet, you can see what kind of stroke you are about to make.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> TabletCanvas<span class="operator">::</span>updateCursor(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="type"><a href="../qtgui/qcursor.html">QCursor</a></span> cursor;
+      <span class="keyword">if</span> (event<span class="operator">-</span><span class="operator">&gt;</span>type() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>TabletLeaveProximity) {
+          <span class="keyword">if</span> (event<span class="operator">-</span><span class="operator">&gt;</span>pointerType() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span><span class="operator">::</span>Eraser) {
+              cursor <span class="operator">=</span> <span class="type"><a href="../qtgui/qcursor.html">QCursor</a></span>(<span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span>(<span class="string">&quot;:/images/cursor-eraser.png&quot;</span>)<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">28</span>);
+          } <span class="keyword">else</span> {
+              <span class="keyword">switch</span> (event<span class="operator">-</span><span class="operator">&gt;</span>device()) {
+              <span class="keyword">case</span> <span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span><span class="operator">::</span>Stylus:
+                  cursor <span class="operator">=</span> <span class="type"><a href="../qtgui/qcursor.html">QCursor</a></span>(<span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span>(<span class="string">&quot;:/images/cursor-pencil.png&quot;</span>)<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span><span class="operator">::</span>Airbrush:
+                  cursor <span class="operator">=</span> <span class="type"><a href="../qtgui/qcursor.html">QCursor</a></span>(<span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span>(<span class="string">&quot;:/images/cursor-airbrush.png&quot;</span>)<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">4</span>);
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span><span class="operator">::</span>RotationStylus: {
+                  <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> origImg(QLatin1String(<span class="string">&quot;:/images/cursor-felt-marker.png&quot;</span>));
+                  <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> img(<span class="number">32</span><span class="operator">,</span> <span class="number">32</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qimage.html">QImage</a></span><span class="operator">::</span>Format_ARGB32);
+                  <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> solid <span class="operator">=</span> m_color;
+                  solid<span class="operator">.</span>setAlpha(<span class="number">255</span>);
+                  img<span class="operator">.</span>fill(solid);
+                  <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> painter(<span class="operator">&amp;</span>img);
+                  <span class="type"><a href="../qtgui/qtransform.html">QTransform</a></span> transform <span class="operator">=</span> painter<span class="operator">.</span>transform();
+                  transform<span class="operator">.</span>translate(<span class="number">16</span><span class="operator">,</span> <span class="number">16</span>);
+                  transform<span class="operator">.</span>rotate(event<span class="operator">-</span><span class="operator">&gt;</span>rotation());
+                  painter<span class="operator">.</span>setTransform(transform);
+                  painter<span class="operator">.</span>setCompositionMode(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>CompositionMode_DestinationIn);
+                  painter<span class="operator">.</span>drawImage(<span class="operator">-</span><span class="number">24</span><span class="operator">,</span> <span class="operator">-</span><span class="number">24</span><span class="operator">,</span> origImg);
+                  painter<span class="operator">.</span>setCompositionMode(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>CompositionMode_HardLight);
+                  painter<span class="operator">.</span>drawImage(<span class="operator">-</span><span class="number">24</span><span class="operator">,</span> <span class="operator">-</span><span class="number">24</span><span class="operator">,</span> origImg);
+                  painter<span class="operator">.</span>end();
+                  cursor <span class="operator">=</span> <span class="type"><a href="../qtgui/qcursor.html">QCursor</a></span>(<span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span><span class="operator">::</span>fromImage(img)<span class="operator">,</span> <span class="number">16</span><span class="operator">,</span> <span class="number">16</span>);
+              } <span class="keyword">break</span>;
+              <span class="keyword">default</span>:
+                  <span class="keyword">break</span>;
+              }
+          }
+      }
+      setCursor(cursor);
+  }
+
+</pre>
+<p>If an art pen (<code>RotationStylus</code>) is in use, <code>updateCursor()</code> is also called for each <code>TabletMove</code> event, and renders a rotated cursor so that you can see the angle of the pen tip.</p>
+<p>Here is the implementation of <code>paintEvent()</code>:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> TabletCanvas<span class="operator">::</span>initPixmap()
+  {
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> dpr <span class="operator">=</span> devicePixelRatioF();
+      <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> newPixmap <span class="operator">=</span> <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span>(width() <span class="operator">*</span> dpr<span class="operator">,</span> height() <span class="operator">*</span> dpr);
+      newPixmap<span class="operator">.</span>setDevicePixelRatio(dpr);
+      newPixmap<span class="operator">.</span>fill(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>white);
+      <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> painter(<span class="operator">&amp;</span>newPixmap);
+      <span class="keyword">if</span> (<span class="operator">!</span>m_pixmap<span class="operator">.</span>isNull())
+          painter<span class="operator">.</span>drawPixmap(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> m_pixmap);
+      painter<span class="operator">.</span>end();
+      m_pixmap <span class="operator">=</span> newPixmap;
+  }
+
+  <span class="type">void</span> TabletCanvas<span class="operator">::</span>paintEvent(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (m_pixmap<span class="operator">.</span>isNull())
+          initPixmap();
+      <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> painter(<span class="keyword">this</span>);
+      <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> pixmapPortion <span class="operator">=</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(event<span class="operator">-</span><span class="operator">&gt;</span>rect()<span class="operator">.</span>topLeft() <span class="operator">*</span> devicePixelRatioF()<span class="operator">,</span>
+                                  event<span class="operator">-</span><span class="operator">&gt;</span>rect()<span class="operator">.</span>size() <span class="operator">*</span> devicePixelRatioF());
+      painter<span class="operator">.</span>drawPixmap(event<span class="operator">-</span><span class="operator">&gt;</span>rect()<span class="operator">.</span>topLeft()<span class="operator">,</span> m_pixmap<span class="operator">,</span> pixmapPortion);
+  }
+
+</pre>
+<p>The first time Qt calls paintEvent(), m_pixmap is default-constructed, so <a href="../qtgui/qpixmap.html#isNull">QPixmap::isNull</a>() returns <code>true</code>. Now that we know which screen we will be rendering to, we can create a pixmap with the appropriate resolution. The size of the pixmap with which we fill the window depends on the screen resolution, as the example does not support zoom; and it may be that one screen is <a href="../qtdoc/highdpi.html">high DPI</a> while another is not. We need to draw the background too, as the default is gray.</p>
+<p>After that, we simply draw the pixmap to the top left of the widget.</p>
+<p>Here is the implementation of <code>paintPixmap()</code>:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> TabletCanvas<span class="operator">::</span>paintPixmap(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">&amp;</span>painter<span class="operator">,</span> <span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">static</span> <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> maxPenRadius <span class="operator">=</span> pressureToWidth(<span class="number">1.0</span>);
+      painter<span class="operator">.</span>setRenderHint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>Antialiasing);
+
+      <span class="keyword">switch</span> (event<span class="operator">-</span><span class="operator">&gt;</span>device()) {
+          <span class="keyword">case</span> <span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span><span class="operator">::</span>Airbrush:
+              {
+                  painter<span class="operator">.</span>setPen(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoPen);
+                  <span class="type"><a href="../qtgui/qradialgradient.html">QRadialGradient</a></span> grad(lastPoint<span class="operator">.</span>pos<span class="operator">,</span> m_pen<span class="operator">.</span>widthF() <span class="operator">*</span> <span class="number">10.0</span>);
+                  <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> color <span class="operator">=</span> m_brush<span class="operator">.</span>color();
+                  color<span class="operator">.</span>setAlphaF(color<span class="operator">.</span>alphaF() <span class="operator">*</span> <span class="number">0.25</span>);
+                  grad<span class="operator">.</span>setColorAt(<span class="number">0</span><span class="operator">,</span> m_brush<span class="operator">.</span>color());
+                  grad<span class="operator">.</span>setColorAt(<span class="number">0.5</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>transparent);
+                  painter<span class="operator">.</span>setBrush(grad);
+                  <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> radius <span class="operator">=</span> grad<span class="operator">.</span>radius();
+                  painter<span class="operator">.</span>drawEllipse(event<span class="operator">-</span><span class="operator">&gt;</span>posF()<span class="operator">,</span> radius<span class="operator">,</span> radius);
+                  update(<span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(event<span class="operator">-</span><span class="operator">&gt;</span>pos() <span class="operator">-</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(radius<span class="operator">,</span> radius)<span class="operator">,</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(radius <span class="operator">*</span> <span class="number">2</span><span class="operator">,</span> radius <span class="operator">*</span> <span class="number">2</span>)));
+              }
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span><span class="operator">::</span>RotationStylus:
+              {
+                  m_brush<span class="operator">.</span>setStyle(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>SolidPattern);
+                  painter<span class="operator">.</span>setPen(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoPen);
+                  painter<span class="operator">.</span>setBrush(m_brush);
+                  <span class="type"><a href="../qtgui/qpolygonf.html">QPolygonF</a></span> poly;
+                  <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> halfWidth <span class="operator">=</span> pressureToWidth(lastPoint<span class="operator">.</span>pressure);
+                  <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> brushAdjust(<a href="../qtcore/qtmath.html#qSin">qSin</a>(<a href="../qtcore/qtmath.html#qDegreesToRadians">qDegreesToRadians</a>(<span class="operator">-</span>lastPoint<span class="operator">.</span>rotation)) <span class="operator">*</span> halfWidth<span class="operator">,</span>
+                                      <a href="../qtcore/qtmath.html#qCos">qCos</a>(<a href="../qtcore/qtmath.html#qDegreesToRadians">qDegreesToRadians</a>(<span class="operator">-</span>lastPoint<span class="operator">.</span>rotation)) <span class="operator">*</span> halfWidth);
+                  poly <span class="operator">&lt;</span><span class="operator">&lt;</span> lastPoint<span class="operator">.</span>pos <span class="operator">+</span> brushAdjust;
+                  poly <span class="operator">&lt;</span><span class="operator">&lt;</span> lastPoint<span class="operator">.</span>pos <span class="operator">-</span> brushAdjust;
+                  halfWidth <span class="operator">=</span> m_pen<span class="operator">.</span>widthF();
+                  brushAdjust <span class="operator">=</span> <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>(<a href="../qtcore/qtmath.html#qSin">qSin</a>(<a href="../qtcore/qtmath.html#qDegreesToRadians">qDegreesToRadians</a>(<span class="operator">-</span>event<span class="operator">-</span><span class="operator">&gt;</span>rotation())) <span class="operator">*</span> halfWidth<span class="operator">,</span>
+                                        <a href="../qtcore/qtmath.html#qCos">qCos</a>(<a href="../qtcore/qtmath.html#qDegreesToRadians">qDegreesToRadians</a>(<span class="operator">-</span>event<span class="operator">-</span><span class="operator">&gt;</span>rotation())) <span class="operator">*</span> halfWidth);
+                  poly <span class="operator">&lt;</span><span class="operator">&lt;</span> event<span class="operator">-</span><span class="operator">&gt;</span>posF() <span class="operator">-</span> brushAdjust;
+                  poly <span class="operator">&lt;</span><span class="operator">&lt;</span> event<span class="operator">-</span><span class="operator">&gt;</span>posF() <span class="operator">+</span> brushAdjust;
+                  painter<span class="operator">.</span>drawConvexPolygon(poly);
+                  update(poly<span class="operator">.</span>boundingRect()<span class="operator">.</span>toRect());
+              }
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span><span class="operator">::</span>Puck:
+          <span class="keyword">case</span> <span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span><span class="operator">::</span>FourDMouse:
+              {
+                  <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> error(tr(<span class="string">&quot;This input device is not supported by the example.&quot;</span>));
+  <span class="preprocessor">#if QT_CONFIG(statustip)</span>
+                  <span class="type"><a href="../qtgui/qstatustipevent.html">QStatusTipEvent</a></span> status(error);
+                  <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>sendEvent(<span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>status);
+  <span class="preprocessor">#else</span>
+                  <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> error;
+  <span class="preprocessor">#endif</span>
+              }
+              <span class="keyword">break</span>;
+          <span class="keyword">default</span>:
+              {
+                  <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> error(tr(<span class="string">&quot;Unknown tablet device - treating as stylus&quot;</span>));
+  <span class="preprocessor">#if QT_CONFIG(statustip)</span>
+                  <span class="type"><a href="../qtgui/qstatustipevent.html">QStatusTipEvent</a></span> status(error);
+                  <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>sendEvent(<span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>status);
+  <span class="preprocessor">#else</span>
+                  <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> error;
+  <span class="preprocessor">#endif</span>
+              }
+              Q_FALLTHROUGH();
+          <span class="keyword">case</span> <span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span><span class="operator">::</span>Stylus:
+              painter<span class="operator">.</span>setPen(m_pen);
+              painter<span class="operator">.</span>drawLine(lastPoint<span class="operator">.</span>pos<span class="operator">,</span> event<span class="operator">-</span><span class="operator">&gt;</span>posF());
+              update(<span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(lastPoint<span class="operator">.</span>pos<span class="operator">.</span>toPoint()<span class="operator">,</span> event<span class="operator">-</span><span class="operator">&gt;</span>pos())<span class="operator">.</span>normalized()
+                     <span class="operator">.</span>adjusted(<span class="operator">-</span>maxPenRadius<span class="operator">,</span> <span class="operator">-</span>maxPenRadius<span class="operator">,</span> maxPenRadius<span class="operator">,</span> maxPenRadius));
+              <span class="keyword">break</span>;
+      }
+  }
+
+</pre>
+<p>In this function we draw on the pixmap based on the movement of the tool. If the tool used on the tablet is a stylus, we want to draw a line from the last-known position to the current position. We also assume that this is a reasonable handling of any unknown device, but update the status bar with a warning. If it is an airbrush, we want to draw a circle filled with a soft gradient, whose density can depend on various event parameters. By default it depends on the tangential pressure, which is the position of the finger wheel on the airbrush. If the tool is a rotation stylus, we simulate a felt marker by drawing trapezoidal stroke segments.</p>
+<pre class="cpp">
+
+          <span class="keyword">case</span> <span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span><span class="operator">::</span>Airbrush:
+              {
+                  painter<span class="operator">.</span>setPen(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoPen);
+                  <span class="type"><a href="../qtgui/qradialgradient.html">QRadialGradient</a></span> grad(lastPoint<span class="operator">.</span>pos<span class="operator">,</span> m_pen<span class="operator">.</span>widthF() <span class="operator">*</span> <span class="number">10.0</span>);
+                  <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> color <span class="operator">=</span> m_brush<span class="operator">.</span>color();
+                  color<span class="operator">.</span>setAlphaF(color<span class="operator">.</span>alphaF() <span class="operator">*</span> <span class="number">0.25</span>);
+                  grad<span class="operator">.</span>setColorAt(<span class="number">0</span><span class="operator">,</span> m_brush<span class="operator">.</span>color());
+                  grad<span class="operator">.</span>setColorAt(<span class="number">0.5</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>transparent);
+                  painter<span class="operator">.</span>setBrush(grad);
+                  <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> radius <span class="operator">=</span> grad<span class="operator">.</span>radius();
+                  painter<span class="operator">.</span>drawEllipse(event<span class="operator">-</span><span class="operator">&gt;</span>posF()<span class="operator">,</span> radius<span class="operator">,</span> radius);
+                  update(<span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(event<span class="operator">-</span><span class="operator">&gt;</span>pos() <span class="operator">-</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(radius<span class="operator">,</span> radius)<span class="operator">,</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(radius <span class="operator">*</span> <span class="number">2</span><span class="operator">,</span> radius <span class="operator">*</span> <span class="number">2</span>)));
+              }
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span><span class="operator">::</span>RotationStylus:
+              {
+                  m_brush<span class="operator">.</span>setStyle(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>SolidPattern);
+                  painter<span class="operator">.</span>setPen(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoPen);
+                  painter<span class="operator">.</span>setBrush(m_brush);
+                  <span class="type"><a href="../qtgui/qpolygonf.html">QPolygonF</a></span> poly;
+                  <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> halfWidth <span class="operator">=</span> pressureToWidth(lastPoint<span class="operator">.</span>pressure);
+                  <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> brushAdjust(<a href="../qtcore/qtmath.html#qSin">qSin</a>(<a href="../qtcore/qtmath.html#qDegreesToRadians">qDegreesToRadians</a>(<span class="operator">-</span>lastPoint<span class="operator">.</span>rotation)) <span class="operator">*</span> halfWidth<span class="operator">,</span>
+                                      <a href="../qtcore/qtmath.html#qCos">qCos</a>(<a href="../qtcore/qtmath.html#qDegreesToRadians">qDegreesToRadians</a>(<span class="operator">-</span>lastPoint<span class="operator">.</span>rotation)) <span class="operator">*</span> halfWidth);
+                  poly <span class="operator">&lt;</span><span class="operator">&lt;</span> lastPoint<span class="operator">.</span>pos <span class="operator">+</span> brushAdjust;
+                  poly <span class="operator">&lt;</span><span class="operator">&lt;</span> lastPoint<span class="operator">.</span>pos <span class="operator">-</span> brushAdjust;
+                  halfWidth <span class="operator">=</span> m_pen<span class="operator">.</span>widthF();
+                  brushAdjust <span class="operator">=</span> <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>(<a href="../qtcore/qtmath.html#qSin">qSin</a>(<a href="../qtcore/qtmath.html#qDegreesToRadians">qDegreesToRadians</a>(<span class="operator">-</span>event<span class="operator">-</span><span class="operator">&gt;</span>rotation())) <span class="operator">*</span> halfWidth<span class="operator">,</span>
+                                        <a href="../qtcore/qtmath.html#qCos">qCos</a>(<a href="../qtcore/qtmath.html#qDegreesToRadians">qDegreesToRadians</a>(<span class="operator">-</span>event<span class="operator">-</span><span class="operator">&gt;</span>rotation())) <span class="operator">*</span> halfWidth);
+                  poly <span class="operator">&lt;</span><span class="operator">&lt;</span> event<span class="operator">-</span><span class="operator">&gt;</span>posF() <span class="operator">-</span> brushAdjust;
+                  poly <span class="operator">&lt;</span><span class="operator">&lt;</span> event<span class="operator">-</span><span class="operator">&gt;</span>posF() <span class="operator">+</span> brushAdjust;
+                  painter<span class="operator">.</span>drawConvexPolygon(poly);
+                  update(poly<span class="operator">.</span>boundingRect()<span class="operator">.</span>toRect());
+              }
+              <span class="keyword">break</span>;
+
+</pre>
+<p>In <code>updateBrush()</code> we set the pen and brush used for drawing to match <code>m_alphaChannelValuator</code>, <code>m_lineWidthValuator</code>, <code>m_colorSaturationValuator</code>, and <code>m_color</code>. We will examine the code to set up <code>m_brush</code> and <code>m_pen</code> for each of these variables:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> TabletCanvas<span class="operator">::</span>updateBrush(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="type">int</span> hue<span class="operator">,</span> saturation<span class="operator">,</span> value<span class="operator">,</span> alpha;
+      m_color<span class="operator">.</span>getHsv(<span class="operator">&amp;</span>hue<span class="operator">,</span> <span class="operator">&amp;</span>saturation<span class="operator">,</span> <span class="operator">&amp;</span>value<span class="operator">,</span> <span class="operator">&amp;</span>alpha);
+
+      <span class="type">int</span> vValue <span class="operator">=</span> <span class="type">int</span>(((event<span class="operator">-</span><span class="operator">&gt;</span>yTilt() <span class="operator">+</span> <span class="number">60.0</span>) <span class="operator">/</span> <span class="number">120.0</span>) <span class="operator">*</span> <span class="number">255</span>);
+      <span class="type">int</span> hValue <span class="operator">=</span> <span class="type">int</span>(((event<span class="operator">-</span><span class="operator">&gt;</span>xTilt() <span class="operator">+</span> <span class="number">60.0</span>) <span class="operator">/</span> <span class="number">120.0</span>) <span class="operator">*</span> <span class="number">255</span>);
+
+</pre>
+<p>We fetch the current drawingcolor's hue, saturation, value, and alpha values. <code>hValue</code> and <code>vValue</code> are set to the horizontal and vertical tilt as a number from 0 to 255. The original values are in degrees from -60 to 60, i.e&#x2e;, 0 equals -60, 127 equals 0, and 255 equals 60 degrees. The angle measured is between the device and the perpendicular of the tablet (see <a href="../qtgui/qtabletevent.html">QTabletEvent</a> for an illustration).</p>
+<pre class="cpp">
+
+      <span class="keyword">switch</span> (m_alphaChannelValuator) {
+          <span class="keyword">case</span> PressureValuator:
+              m_color<span class="operator">.</span>setAlphaF(event<span class="operator">-</span><span class="operator">&gt;</span>pressure());
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> TangentialPressureValuator:
+              <span class="keyword">if</span> (event<span class="operator">-</span><span class="operator">&gt;</span>device() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span><span class="operator">::</span>Airbrush)
+                  m_color<span class="operator">.</span>setAlphaF(<a href="../qtcore/qtglobal.html#qMax">qMax</a>(<span class="number">0.01</span><span class="operator">,</span> (event<span class="operator">-</span><span class="operator">&gt;</span>tangentialPressure() <span class="operator">+</span> <span class="number">1.0</span>) <span class="operator">/</span> <span class="number">2.0</span>));
+              <span class="keyword">else</span>
+                  m_color<span class="operator">.</span>setAlpha(<span class="number">255</span>);
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> TiltValuator:
+              m_color<span class="operator">.</span>setAlpha(maximum(abs(vValue <span class="operator">-</span> <span class="number">127</span>)<span class="operator">,</span> abs(hValue <span class="operator">-</span> <span class="number">127</span>)));
+              <span class="keyword">break</span>;
+          <span class="keyword">default</span>:
+              m_color<span class="operator">.</span>setAlpha(<span class="number">255</span>);
+      }
+
+</pre>
+<p>The alpha channel of <a href="../qtgui/qcolor.html">QColor</a> is given as a number between 0 and 255 where 0 is transparent and 255 is opaque, or as a floating-point number where 0 is transparent and 1.0 is opaque. <a href="../qtgui/qtabletevent.html#pressure">pressure()</a> returns the pressure as a qreal between 0.0 and 1.0&#x2e; We get the smallest alpha values (i.e&#x2e;, the color is most transparent) when the pen is perpendicular to the tablet. We select the largest of the vertical and horizontal tilt values.</p>
+<pre class="cpp">
+
+      <span class="keyword">switch</span> (m_colorSaturationValuator) {
+          <span class="keyword">case</span> VTiltValuator:
+              m_color<span class="operator">.</span>setHsv(hue<span class="operator">,</span> vValue<span class="operator">,</span> value<span class="operator">,</span> alpha);
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> HTiltValuator:
+              m_color<span class="operator">.</span>setHsv(hue<span class="operator">,</span> hValue<span class="operator">,</span> value<span class="operator">,</span> alpha);
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> PressureValuator:
+              m_color<span class="operator">.</span>setHsv(hue<span class="operator">,</span> <span class="type">int</span>(event<span class="operator">-</span><span class="operator">&gt;</span>pressure() <span class="operator">*</span> <span class="number">255.0</span>)<span class="operator">,</span> value<span class="operator">,</span> alpha);
+              <span class="keyword">break</span>;
+          <span class="keyword">default</span>:
+              ;
+      }
+
+</pre>
+<p>The color saturation in the HSV color model can be given as an integer between 0 and 255 or as a floating-point value between 0 and 1. We chose to represent alpha as an integer, so we call <a href="../qtgui/qcolor.html#setHsv">setHsv()</a> with integer values. That means we need to multiply the pressure to a number between 0 and 255.</p>
+<pre class="cpp">
+
+      <span class="keyword">switch</span> (m_lineWidthValuator) {
+          <span class="keyword">case</span> PressureValuator:
+              m_pen<span class="operator">.</span>setWidthF(pressureToWidth(event<span class="operator">-</span><span class="operator">&gt;</span>pressure()));
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> TiltValuator:
+              m_pen<span class="operator">.</span>setWidthF(maximum(abs(vValue <span class="operator">-</span> <span class="number">127</span>)<span class="operator">,</span> abs(hValue <span class="operator">-</span> <span class="number">127</span>)) <span class="operator">/</span> <span class="number">12</span>);
+              <span class="keyword">break</span>;
+          <span class="keyword">default</span>:
+              m_pen<span class="operator">.</span>setWidthF(<span class="number">1</span>);
+      }
+
+</pre>
+<p>The width of the pen stroke can increase with pressure, if so chosen. But when the pen width is controlled by tilt, we let the width increase with the angle between the tool and the perpendicular of the tablet.</p>
+<pre class="cpp">
+
+      <span class="keyword">if</span> (event<span class="operator">-</span><span class="operator">&gt;</span>pointerType() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span><span class="operator">::</span>Eraser) {
+          m_brush<span class="operator">.</span>setColor(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>white);
+          m_pen<span class="operator">.</span>setColor(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>white);
+          m_pen<span class="operator">.</span>setWidthF(event<span class="operator">-</span><span class="operator">&gt;</span>pressure() <span class="operator">*</span> <span class="number">10</span> <span class="operator">+</span> <span class="number">1</span>);
+      } <span class="keyword">else</span> {
+          m_brush<span class="operator">.</span>setColor(m_color);
+          m_pen<span class="operator">.</span>setColor(m_color);
+      }
+  }
+
+</pre>
+<p>We finally check whether the pointer is the stylus or the eraser. If it is the eraser, we set the color to the background color of the pixmap and let the pressure decide the pen width, else we set the colors we have decided previously in the function.</p>
+<a name="tabletapplication-class-definition"></a>
+<h4 id="tabletapplication-class-definition">TabletApplication Class Definition</h4>
+<p>We inherit <a href="qapplication.html">QApplication</a> in this class because we want to reimplement the <a href="qapplication.html#event">event()</a> function.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> TabletApplication : <span class="keyword">public</span> <span class="type"><a href="qapplication.html">QApplication</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      <span class="keyword">using</span> <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span><span class="type"><a href="qapplication.html">QApplication</a></span>;
+
+      bool event(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> <span class="operator">*</span>event) override;
+      <span class="type">void</span> setCanvas(TabletCanvas <span class="operator">*</span>canvas)
+          { m_canvas <span class="operator">=</span> canvas; }
+
+  <span class="keyword">private</span>:
+      TabletCanvas <span class="operator">*</span>m_canvas <span class="operator">=</span> nullptr;
+  };
+
+</pre>
+<p><code>TabletApplication</code> exists as a subclass of <a href="qapplication.html">QApplication</a> in order to receive tablet proximity events and forward them to <code>TabletCanvas</code>. The <code>TabletEnterProximity</code> and <code>TabletLeaveProximity</code> events are sent to the <a href="qapplication.html">QApplication</a> object, while other tablet events are sent to the <a href="qwidget.html">QWidget</a>'s <code>event()</code> hander, which sends them on to <a href="qwidget.html#tabletEvent">tabletEvent()</a>.</p>
+<a name="tabletapplication-class-implementation"></a>
+<h4 id="tabletapplication-class-implementation">TabletApplication Class Implementation</h4>
+<p>Here is the implementation of <code>event()</code>:</p>
+<pre class="cpp">
+
+  bool TabletApplication<span class="operator">::</span>event(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (event<span class="operator">-</span><span class="operator">&gt;</span>type() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>TabletEnterProximity <span class="operator">|</span><span class="operator">|</span>
+          event<span class="operator">-</span><span class="operator">&gt;</span>type() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>TabletLeaveProximity) {
+          m_canvas<span class="operator">-</span><span class="operator">&gt;</span>setTabletDevice(<span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="../qtgui/qtabletevent.html">QTabletEvent</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(event));
+          <span class="keyword">return</span> <span class="keyword">true</span>;
+      }
+      <span class="keyword">return</span> <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>event(event);
+  }
+
+</pre>
+<p>We use this function to handle the <code>TabletEnterProximity</code> and <code>TabletLeaveProximity</code> events, which are generated when a drawing tool enters or leaves the proximity of the tablet. Here we call <code>TabletCanvas::setTabletDevice()</code>, which then calls <code>updateCursor()</code>, which will set an appropriate cursor. This is the only reason we need the proximity events; for the purpose of correct drawing, it is enough for <code>TabletCanvas</code> to observe the <a href="../qtgui/qtabletevent.html#device">device()</a> and <a href="../qtgui/qtabletevent.html#pointerType">pointerType()</a> in each event that it receives.</p>
+<a name="the-main-function"></a>
+<h4 id="the-main-function">The <code>main()</code> function</h4>
+<p>Here is the example's <code>main()</code> function:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argv<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>args<span class="operator">[</span><span class="operator">]</span>)
+  {
+      TabletApplication app(argv<span class="operator">,</span> args);
+      TabletCanvas <span class="operator">*</span>canvas <span class="operator">=</span> <span class="keyword">new</span> TabletCanvas;
+      app<span class="operator">.</span>setCanvas(canvas);
+
+      MainWindow mainWindow(canvas);
+      mainWindow<span class="operator">.</span>resize(<span class="number">500</span><span class="operator">,</span> <span class="number">500</span>);
+      mainWindow<span class="operator">.</span>show();
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p>Here we create a <code>MainWindow</code> and display it as a top level window. We use the <code>TabletApplication</code> class. We need to set the canvas after the application is created. We cannot use classes that implement event handling before an <a href="qapplication.html">QApplication</a> object is instantiated.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/widgets/tablet?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@widgets/tablet -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- scripting.qdoc -->
+  <title>Scripting | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Scripting</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#qt-script-module">Qt Script Module</a></li>
+<li class="level1"><a href="#js-api">JS API</a></li>
+<li class="level1"><a href="#qml">QML</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Scripting</h1>
+<span class="subtitle"></span>
+<!-- $$$topics-scripting.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Qt has three main ways to help make an application scriptable. All of them allow easy integration of the <a href="../qtscript/ecmascript.html">ECMAScript</a> (more widely known as JavaScript) language into the application. Depending on how deep the integration should be, one of these APIs can be used:</p>
+<a name="qt-script-module"></a>
+<h2 id="qt-script-module">Qt Script Module</h2>
+<p><a href="../qtscript/qtscript-index.html">Qt Script</a> is a separate module, designed with scripting applications in mind. It has a mature and rich API that permits a really deep integration of scripting functionality. It allows evaluating and debugging of scripts, and advanced use of objects and functions. It also gives access to a really low level <a href="../qtscript/ecmascript.html">ECMAScript</a> engine API. Full documentation about using <a href="../qtscript/qtscript-index.html">Qt Script</a> to make an application scriptable can be found <a href="../qtqml/qtjavascript.html">here</a>.</p>
+<p><b>Warning:</b> This module is not actively developed. It is provided for backwards compatibility with Qt 4 only. For new code, use <a href="topics-scripting.html#js-api">QJSEngine and related classes</a> in the Qt QML module instead.</p>
+<a name="js-api"></a>
+<h2 id="js-api">JS API</h2>
+<p>This is a simple API, very similar to <a href="../qtscript/qtscript-index.html">Qt Script</a>, but limited to basic functionality. The main classes are <a href="../qtqml/qjsengine.html">QJSEngine</a> and <a href="../qtqml/qjsvalue.html">QJSValue</a>, which can be used to embed pure <a href="../qtscript/ecmascript.html">ECMAScript</a> functionality like evaluating scripts and calling functions.</p>
+<a name="qml"></a>
+<h2 id="qml">QML</h2>
+<p><a href="../qtqml/qtqml-index.html">QML</a> exposes a modified <a href="../qtscript/ecmascript.html">ECMAScript</a> environment. It is designed to mix well with the JavaScript API mentioned earlier. QML may be used without <a href="../qtquick/qtquick-index.html">Qt Quick</a> components, which may be useful for server side scripting. With QML it is possible to mix pure <a href="../qtscript/ecmascript.html">ECMAScript</a> and declarative components (<a href="qtquick-usecase-integratingjs.html">Use Case - Integrating JavaScript in QML</a>).</p>
+<p>All of these three scripting solutions seamlessly inter-operate with <a href="../qtcore/metaobjects.html">the Meta-Object System</a>, which means that all <a href="../qtcore/signalsandslots.html">signals and slots</a> and <a href="../qtcore/properties.html">properties</a> of a <a href="../qtcore/qobject.html">QObject</a> instance are accessible in an <a href="../qtscript/ecmascript.html">ECMAScript</a> environment.</p>
+</div>
+<!-- @@@topics-scripting.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

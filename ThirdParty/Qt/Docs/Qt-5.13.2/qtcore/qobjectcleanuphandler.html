@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qobjectcleanuphandler.cpp -->
+  <title>QObjectCleanupHandler Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QObjectCleanupHandler</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QObjectCleanupHandler Class</h1>
+<!-- $$$QObjectCleanupHandler-brief -->
+<p>The <a href="qobjectcleanuphandler.html">QObjectCleanupHandler</a> class watches the lifetime of multiple QObjects. <a href="#details">More...</a></p>
+<!-- @@@QObjectCleanupHandler -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QObjectCleanupHandler&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qobject.html">QObject</a></td></tr></table></div><ul>
+<li><a href="qobjectcleanuphandler-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qobjectcleanuphandler.html#QObjectCleanupHandler">QObjectCleanupHandler</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qobjectcleanuphandler.html#dtor.QObjectCleanupHandler">~QObjectCleanupHandler</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QObject *</td><td class="memItemRight bottomAlign"><b><a href="qobjectcleanuphandler.html#add">add</a></b>(QObject *<i>object</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qobjectcleanuphandler.html#clear">clear</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qobjectcleanuphandler.html#isEmpty">isEmpty</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qobjectcleanuphandler.html#remove">remove</a></b>(QObject *<i>object</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QObjectCleanupHandler-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A <a href="qobjectcleanuphandler.html">QObjectCleanupHandler</a> is useful whenever you need to know when a number of <a href="qobject.html">QObject</a>s that are owned by someone else have been deleted. This is important, for example, when referencing memory in an application that has been allocated in a shared library.</p>
+<p>To keep track of some <a href="qobject.html">QObject</a>s, create a <a href="qobjectcleanuphandler.html">QObjectCleanupHandler</a>, and <a href="qobjectcleanuphandler.html#add">add</a>() the objects you are interested in. If you are no longer interested in tracking a particular object, use <a href="qobjectcleanuphandler.html#remove">remove</a>() to remove it from the cleanup handler. If an object being tracked by the cleanup handler gets deleted by someone else it will automatically be removed from the cleanup handler. You can delete all the objects in the cleanup handler with <a href="qobjectcleanuphandler.html#clear">clear</a>(), or by destroying the cleanup handler. <a href="qobjectcleanuphandler.html#isEmpty">isEmpty</a>() returns <code>true</code> if the <a href="qobjectcleanuphandler.html">QObjectCleanupHandler</a> has no objects to keep track of.</p>
+</div>
+<p><b>See also </b><a href="qpointer.html">QPointer</a>.</p>
+<!-- @@@QObjectCleanupHandler -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QObjectCleanupHandler[overload1]$$$QObjectCleanupHandler -->
+<h3 class="fn" id="QObjectCleanupHandler"><a name="QObjectCleanupHandler"></a>QObjectCleanupHandler::<span class="name">QObjectCleanupHandler</span>()</h3>
+<p>Constructs an empty <a href="qobjectcleanuphandler.html">QObjectCleanupHandler</a>.</p>
+<!-- @@@QObjectCleanupHandler -->
+<!-- $$$~QObjectCleanupHandler[overload1]$$$~QObjectCleanupHandler -->
+<h3 class="fn" id="dtor.QObjectCleanupHandler"><a name="dtor.QObjectCleanupHandler"></a><code>[virtual] </code>QObjectCleanupHandler::<span class="name">~QObjectCleanupHandler</span>()</h3>
+<p>Destroys the cleanup handler. All objects in this cleanup handler will be deleted.</p>
+<p><b>See also </b><a href="qobjectcleanuphandler.html#clear">clear</a>().</p>
+<!-- @@@~QObjectCleanupHandler -->
+<!-- $$$add[overload1]$$$addQObject* -->
+<h3 class="fn" id="add"><a name="add"></a><span class="type"><a href="qobject.html#QObject">QObject</a></span> *QObjectCleanupHandler::<span class="name">add</span>(<span class="type"><a href="qobject.html#QObject">QObject</a></span> *<i>object</i>)</h3>
+<p>Adds <i>object</i> to this cleanup handler and returns the pointer to the object.</p>
+<p><b>See also </b><a href="qobjectcleanuphandler.html#remove">remove</a>().</p>
+<!-- @@@add -->
+<!-- $$$clear[overload1]$$$clear -->
+<h3 class="fn" id="clear"><a name="clear"></a><span class="type">void</span> QObjectCleanupHandler::<span class="name">clear</span>()</h3>
+<p>Deletes all objects in this cleanup handler. The cleanup handler becomes empty.</p>
+<p><b>See also </b><a href="qobjectcleanuphandler.html#isEmpty">isEmpty</a>().</p>
+<!-- @@@clear -->
+<!-- $$$isEmpty[overload1]$$$isEmpty -->
+<h3 class="fn" id="isEmpty"><a name="isEmpty"></a><span class="type">bool</span> QObjectCleanupHandler::<span class="name">isEmpty</span>() const</h3>
+<p>Returns <code>true</code> if this cleanup handler is empty or if all objects in this cleanup handler have been destroyed; otherwise return false.</p>
+<p><b>See also </b><a href="qobjectcleanuphandler.html#add">add</a>(), <a href="qobjectcleanuphandler.html#remove">remove</a>(), and <a href="qobjectcleanuphandler.html#clear">clear</a>().</p>
+<!-- @@@isEmpty -->
+<!-- $$$remove[overload1]$$$removeQObject* -->
+<h3 class="fn" id="remove"><a name="remove"></a><span class="type">void</span> QObjectCleanupHandler::<span class="name">remove</span>(<span class="type"><a href="qobject.html#QObject">QObject</a></span> *<i>object</i>)</h3>
+<p>Removes the <i>object</i> from this cleanup handler. The object will not be destroyed.</p>
+<p><b>See also </b><a href="qobjectcleanuphandler.html#add">add</a>().</p>
+<!-- @@@remove -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

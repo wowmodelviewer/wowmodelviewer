@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- rule.qdoc -->
+  <title>Rule QML Type | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="qml-qbslanguageitems-propertyoptions.html" />
+  <link rel="next" href="qml-qbslanguageitems-scanner.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="qml-qbslanguageitems-propertyoptions.html">PropertyOptions</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qml-qbslanguageitems-scanner.html">Scanner</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#a-simple-example">A Simple Example</a></li>
+<li class="level2"><a href="#the-inputs-and-outputs-variables">The <code>inputs</code> and <code>outputs</code> Variables</a></li>
+<li class="level2"><a href="#rules-and-product-types">Rules and Product Types</a></li>
+<li class="level2"><a href="#a-complete-example">A Complete Example</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Rule QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Rule-brief -->
+<p>Creates transformers for input tags. <a href="#details">More...</a></p>
+<!-- @@@Rule -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QbsLanguageItems .</td></tr></table></div><ul>
+<li><a href="qml-qbslanguageitems-rule-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-rule.html#alwaysRun-prop">alwaysRun</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-rule.html#auxiliaryInputs-prop">auxiliaryInputs</a></b></b> : stringList</li>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-rule.html#condition-prop">condition</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-rule.html#excludedInputs-prop">excludedInputs</a></b></b> : stringList</li>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-rule.html#explicitlyDependsOn-prop">explicitlyDependsOn</a></b></b> : stringList</li>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-rule.html#explicitlyDependsOnFromDependencies-prop">explicitlyDependsOnFromDependencies</a></b></b> : stringList</li>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-rule.html#inputs-prop">inputs</a></b></b> : stringList</li>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-rule.html#inputsFromDependencies-prop">inputsFromDependencies</a></b></b> : stringList</li>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-rule.html#multiplex-prop">multiplex</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-rule.html#outputArtifacts-prop">outputArtifacts</a></b></b> : var</li>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-rule.html#outputFileTags-prop">outputFileTags</a></b></b> : stringList</li>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-rule.html#prepare-prop">prepare</a></b></b> : script</li>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-rule.html#requiresInputs-prop">requiresInputs</a></b></b> : bool</li>
+</ul>
+<!-- $$$Rule-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>In Qbs, rules create <i>transformers</i> that produce output files from input files. The term <i>transformer</i> refers to a list of <a href="commands.html#">commands</a>. These commands are created in a rule's <a href="qml-qbslanguageitems-rule.html#prepare-prop">prepare</a> script. They do the actual work, either directly or by executing external commands.</p>
+<a name="a-simple-example"></a>
+<h2 id="a-simple-example">A Simple Example</h2>
+<p>The following rule takes text files and replaces Windows-style line endings with their Unix-style counterparts. We will look at it one piece at a time.</p>
+<pre class="cpp">
+
+      Rule {
+          multiplex: false
+
+</pre>
+<p>A <i>multiplex rule</i> creates one transformer that takes all input artifacts with the matching input file tag and creates one or more output artifacts. We are setting the respective property to <code>false</code> here, indicating that we want to create one transformer per input file.</p>
+<p><b>Note: </b>This is actually the default, so the above assignment is not required.</p><pre class="cpp">
+
+          inputs: [&quot;txt_input&quot;]
+
+</pre>
+<p>Here we are specifying that our rule is interested in input files that have the tag <code>&quot;txt_input&quot;</code>. Such files could be source files, in which case you would tag them using a <a href="qml-qbslanguageitems-group.html">Group</a>. Or they could in turn get generated by a different rule, in which case that rule would assign the file tag. The files matching the tag will be available in the <a href="qml-qbslanguageitems-rule.html#prepare-prop">prepare</a> script under the name <code>inputs</code> (see <a href="qml-qbslanguageitems-rule.html#inputs-and-outputs">The inputs and outputs Variables</a>).</p>
+<pre class="cpp">
+
+          Artifact {
+              filePath: input.fileName + &quot;.out&quot;
+              fileTags: [&quot;txt_output&quot;]
+          }
+
+</pre>
+<p>Here we are specifying that for every input file, we want to create one output file whose name is the same as the input file, but with an additional extension. Because we are giving a relative path, Qbs will prepend that path by the product's build directory.</p>
+<p>In addition, we tell Qbs that the output files should get the file tag <code>&quot;txt_output&quot;</code>. This enables other rules to use these files as inputs. You must always assign suitable file tags to your output artifacts, or the rule will not be run. See <a href="qml-qbslanguageitems-rule.html#rules-and-product-types">Rules and Product Types</a> for details.</p>
+<p>If you want to create more than one output file per input file, you simply provide multiple <a href="qml-qbslanguageitems-artifact.html">Artifact</a> items. The set of output artifacts will be available in the prepare script under the name <code>outputs</code> (see <a href="qml-qbslanguageitems-rule.html#inputs-and-outputs">The inputs and outputs Variables</a>).</p>
+<pre class="cpp">
+
+          prepare: {
+              var cmd = new JavaScriptCommand();
+              cmd.description = input.fileName + &quot;-&gt;&quot; + output.fileName;
+              cmd.highlight = &quot;codegen&quot;;
+              cmd.sourceCode = function() {
+                  var file = new TextFile(input.filePath);
+                  var content = file.readAll();
+                  file.close()
+                  content = content.toUpperCase();
+                  file = new TextFile(output.filePath, TextFile.WriteOnly);
+                  file.write(content);
+                  file.close();
+              }
+              return [cmd];
+          }
+      }
+
+</pre>
+<p>The prepare script shown above puts everything together by creating the command that does the actual transformation of the file contents, employing the help of the <a href="jsextension-textfile.html#">TextFile</a> class.</p>
+<p>As you can see, the return value is an array, meaning you can provide several commands to implement the rule's functionality. For instance, if we had provided two <code>Artifact</code> items, we might have also provided two commands, each of them creating one output file.</p>
+<p>For the <code>input</code> and <code>output</code> variables used in the code, see the next section.</p>
+<a name="inputs-and-outputs"></a><a name="the-inputs-and-outputs-variables"></a>
+<h2 id="the-inputs-and-outputs-variables">The <code>inputs</code> and <code>outputs</code> Variables</h2>
+<p>We already mentioned that the input and output artifacts are available in the prepare script via the variables <code>inputs</code> and <code>outputs</code>, respectively. These variables are JavaScript objects whose property keys are file tags and whose property values are lists of objects representing the artifacts matching these tags. In our example, the <code>inputs</code> variable has a single property <code>txt_input</code>, whose value is a list with one element. Similarly, the <code>outputs</code> variable also has one single property <code>txt_output</code>, again with a list containing one element.</p>
+<p>The actual artifact objects have the following properties:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Property</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>baseName</code></td><td >The file name without any extension.</td></tr>
+<tr valign="top" class="even"><td ><code>completeBaseName</code></td><td >The file name without the last extension.</td></tr>
+<tr valign="top" class="odd"><td ><code>fileName</code></td><td >The name of the file (that is, <code>filePath</code> without any directory components).</td></tr>
+<tr valign="top" class="even"><td ><code>filePath</code></td><td >The full file path.</td></tr>
+<tr valign="top" class="odd"><td ><code>fileTags</code></td><td >The list of the artifact's file tags.</td></tr>
+</table></div>
+<p>The artifact object contains a property for every module that is used in the product. That can be used to access the module's properties. For instance, for an artifact in a C++ product, <code>artifact.cpp.defines</code> is the list of defines that will be passed when compiling the respective file.</p>
+<p>But what about the variables <code>input</code> and <code>output</code> that appeared in our example? These are simply convenience variables which are available in the case that the <code>inputs</code> and <code>outputs</code> variables contain only one artifact, respectively. So in our example, instead of <code>input</code> we also could have written <code>inputs.txt_input[0]</code>, which is considerably more verbose.</p>
+<a name="rules-and-product-types"></a>
+<h2 id="rules-and-product-types">Rules and Product Types</h2>
+<p>It is important to know that when figuring out which rules to execute, Qbs starts at the product type and then looks for a way to produce artifacts with matching file tags from source files, using a chain of rules that are connected by their respective input and output tags. For instance, consider this simple C++ project:</p>
+<pre class="cpp">
+
+  Product {
+      type: <span class="operator">[</span><span class="string">&quot;application&quot;</span><span class="operator">]</span>
+      Depends { name: <span class="string">&quot;cpp&quot;</span> }
+      files: <span class="operator">[</span><span class="string">&quot;main.cpp&quot;</span><span class="operator">]</span>
+  }
+
+</pre>
+<p>Here's how this product is built:</p>
+<ol class="1" type="1"><li>Qbs looks for a rule that can produce artifacts with the file tag <code>&quot;application&quot;</code>. Such a rule is found in the <a href="qml-qbsmodules-cpp.html">cpp</a> module (namely, the rule that invokes the linker).</li>
+<li>Since the rule found in the previous step takes inputs of type <code>&quot;obj&quot;</code>, Qbs now looks for a rule that produces artifacts of that type. Again, such a rule is found in the <code>cpp</code> module (the rule that runs the compiler).</li>
+<li>The rule found in the previous step takes inputs of type <code>&quot;cpp&quot;</code>. No rule is found that creates such artifacts, but we do have a source file with a matching type (because the <code>cpp</code> module contains a <a href="qml-qbslanguageitems-filetagger.html">FileTagger</a> which attached that type to <code>&quot;main.cpp&quot;</code> due to its file extension).</li>
+<li>Now that there is a chain of rules leading from a source file tag to the product type, the commands of these rules are executed one after the other until we end up with our executable.</li>
+</ol>
+<a name="a-complete-example"></a>
+<h2 id="a-complete-example">A Complete Example</h2>
+<p>The following code snippet shows a single <a href="qml-qbslanguageitems-rule.html">Rule</a> within a <a href="qml-qbslanguageitems-product.html">Product</a> and summarizes the previous sections.</p>
+<p><b>Note: </b>The product's type is set up to the <code>&quot;txt_output&quot;</code> file tag to tell Qbs that the product depends on output artifacts produced by the custom rule. Otherwise the rule would not be executed.</p><pre class="cpp">
+
+  import qbs.TextFile
+
+  Product {
+      type: &quot;txt_output&quot;
+
+      Group {
+          name: &quot;lorem_ipsum&quot;
+          files: &quot;lorem_ipsum.txt&quot;
+          fileTags: &quot;txt_input&quot;
+      }
+
+      Rule {
+          multiplex: false
+          inputs: [&quot;txt_input&quot;]
+          Artifact {
+              filePath: input.fileName + &quot;.out&quot;
+              fileTags: [&quot;txt_output&quot;]
+          }
+          prepare: {
+              var cmd = new JavaScriptCommand();
+              cmd.description = input.fileName + &quot;-&gt;&quot; + output.fileName;
+              cmd.highlight = &quot;codegen&quot;;
+              cmd.sourceCode = function() {
+                  var file = new TextFile(input.filePath);
+                  var content = file.readAll();
+                  file.close()
+                  content = content.toUpperCase();
+                  file = new TextFile(output.filePath, TextFile.WriteOnly);
+                  file.write(content);
+                  file.close();
+              }
+              return [cmd];
+          }
+      }
+  }
+
+</pre>
+<!-- @@@Rule -->
+<h2>Property Documentation</h2>
+<!-- $$$alwaysRun -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="alwaysRun-prop"></a><span class="name">alwaysRun</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If <code>true</code>, the rule's commands are always executed, even if all output artifacts are up to date.</p>
+<p>Default: <code>false</code></p>
+</div></div><!-- @@@alwaysRun -->
+<br/>
+<!-- $$$auxiliaryInputs -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="auxiliaryInputs-prop"></a><span class="name">auxiliaryInputs</span> : <span class="type">stringList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>A list of file tags. This rule will be dependent on every other rule that produces artifacts that are compatible with the value of this property.</p>
+<p>Unlike <a href="qml-qbslanguageitems-rule.html#inputs-prop">inputs</a>, this property has no effect on the content of the <code>inputs</code> variable of the <a href="qml-qbslanguageitems-rule.html#prepare-prop">prepare</a> script.</p>
+<p>All rules in this product and rules of product dependencies that produce target artifacts are considered.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@auxiliaryInputs -->
+<br/>
+<!-- $$$condition -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="condition-prop"></a><span class="name">condition</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If <code>true</code>, the rule is enabled, otherwise it does nothing.</p>
+<p>Default: <code>true</code></p>
+</div></div><!-- @@@condition -->
+<br/>
+<!-- $$$excludedInputs -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="excludedInputs-prop"></a><span class="name">excludedInputs</span> : <span class="type">stringList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>A list of file tags. Connections to rules that produce these file tags are prevented.</p>
+<p>Default: Undefined</p>
+<p>This property was introduced in  Qbs 1.12.</p>
+</div></div><!-- @@@excludedInputs -->
+<br/>
+<!-- $$$explicitlyDependsOn -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="explicitlyDependsOn-prop"></a><span class="name">explicitlyDependsOn</span> : <span class="type">stringList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>A list of file tags. Each artifact that matches the file tags is added to the dependencies of each output node. All artifacts in the current product are considered.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@explicitlyDependsOn -->
+<br/>
+<!-- $$$explicitlyDependsOnFromDependencies -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="explicitlyDependsOnFromDependencies-prop"></a><span class="name">explicitlyDependsOnFromDependencies</span> : <span class="type">stringList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>A list of file tags. Each artifact that matches the file tags is added to the dependencies of each output node. Only target artifacts of products that this product depends on are considered.</p>
+<p>Default: Undefined</p>
+<p>This property was introduced in  Qbs 1.12.</p>
+</div></div><!-- @@@explicitlyDependsOnFromDependencies -->
+<br/>
+<!-- $$$inputs -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="inputs-prop"></a><span class="name">inputs</span> : <span class="type">stringList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>A list of file tags the input artifacts must match.</p>
+<p>All output artifacts will depend on all artifacts in the product with the given input file tags. Also, these artifacts are available in the <code>inputs</code> variable of the <a href="qml-qbslanguageitems-rule.html#prepare-prop">prepare</a> script.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@inputs -->
+<br/>
+<!-- $$$inputsFromDependencies -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="inputsFromDependencies-prop"></a><span class="name">inputsFromDependencies</span> : <span class="type">stringList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>A list of file tags that the artifacts of product dependencies must match.</p>
+<p>For example, the product <i>foo</i> might appear as follows in the current product:</p>
+<pre class="cpp">
+
+  Depends {
+      name: <span class="string">&quot;foo&quot;</span>
+  }
+
+</pre>
+<p>All artifacts of <i>foo</i> that match the given file tags will appear in the <code>inputs</code> variable of the <a href="qml-qbslanguageitems-rule.html#prepare-prop">prepare</a> script.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@inputsFromDependencies -->
+<br/>
+<!-- $$$multiplex -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="multiplex-prop"></a><span class="name">multiplex</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Determines whether this is a multiplex rule.</p>
+<p>Default: <code>false</code></p>
+</div></div><!-- @@@multiplex -->
+<br/>
+<!-- $$$outputArtifacts -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="outputArtifacts-prop"></a><span class="name">outputArtifacts</span> : <span class="type">var</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>An array of output artifacts, specified as JavaScript objects.</p>
+<p>For example:</p>
+<pre class="cpp">
+
+  outputArtifacts: <span class="operator">[</span>{
+      filePath: <span class="string">&quot;myfile.cpp&quot;</span><span class="operator">,</span>
+      fileTags: <span class="operator">[</span><span class="string">&quot;cpp&quot;</span><span class="operator">]</span><span class="operator">,</span>
+      cpp: { cxxLanguageVersion: <span class="string">&quot;c++11&quot;</span> }
+  }<span class="operator">]</span>
+
+</pre>
+<p>For a description of the possible properties, see the documentation of the <a href="qml-qbslanguageitems-artifact.html">Artifact</a> item.</p>
+<p>Output artifacts can be specified either by this property or by <a href="qml-qbslanguageitems-artifact.html">Artifact</a> items. Use this property if the set of outputs is not fixed but depends the input's content. If no file tags are provided, Qbs will apply all <a href="qml-qbslanguageitems-filetagger.html">file taggers</a> known in the current context to the output file name.</p>
+<p>The user may set the property <code>explicitlyDependsOn</code> on artifact objects, which is similar to <a href="qml-qbslanguageitems-rule.html#explicitlyDependsOn-prop">Rule.explicitlyDependsOn</a>.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@outputArtifacts -->
+<br/>
+<!-- $$$outputFileTags -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="outputFileTags-prop"></a><span class="name">outputFileTags</span> : <span class="type">stringList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If output artifacts are specified by <a href="qml-qbslanguageitems-rule.html#outputArtifacts-prop">outputArtifacts</a>, this property must specify a list of file tags that the rule potentially produces.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@outputFileTags -->
+<br/>
+<!-- $$$prepare -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="prepare-prop"></a><span class="name">prepare</span> : <span class="type">script</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>A script that prepares the commands to transform the inputs to outputs.</p>
+<p>The code in this script is treated as a function with the signature <code>function(project, product, inputs, outputs, input, output, explicitlyDependsOn)</code>.</p>
+<p>The argument <code>input</code> is <code>undefined</code> if there's more than one input artifact for this rule. Similarly, <code>output</code> is only defined if there is exactly one output artifact.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@prepare -->
+<br/>
+<!-- $$$requiresInputs -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="requiresInputs-prop"></a><span class="name">requiresInputs</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Specifies whether a rule's commands should be created even if no inputs are available.</p>
+<p>Enabling this property can be useful if you are not sure whether input files exist, and you want Qbs to create an output file even if they do not.</p>
+<p>Set to <code>true</code> if the rule declares any inputs, <code>false</code> otherwise.</p>
+</div></div><!-- @@@requiresInputs -->
+<br/>
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="qml-qbslanguageitems-propertyoptions.html">PropertyOptions</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qml-qbslanguageitems-scanner.html">Scanner</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

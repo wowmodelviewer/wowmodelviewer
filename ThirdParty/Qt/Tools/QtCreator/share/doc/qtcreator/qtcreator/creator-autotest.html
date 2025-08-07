@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-autotest.qdoc -->
+  <title>Running Autotests | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Running Autotests</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-cppcheck.html" />
+  <link rel="next" href="creator-advanced.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-cppcheck.html">Analyzing Code with Cppcheck</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-advanced.html">Advanced Use</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#creating-tests">Creating Tests</a></li>
+<li class="level2"><a href="#creating-qt-and-qt-quick-tests">Creating Qt and Qt Quick Tests</a></li>
+<li class="level2"><a href="#creating-google-tests">Creating Google Tests</a></li>
+<li class="level2"><a href="#creating-boost-tests">Creating Boost Tests</a></li>
+<li class="level1"><a href="#setting-up-the-google-c-testing-framework">Setting Up the Google C++ Testing Framework</a></li>
+<li class="level1"><a href="#building-and-running-tests">Building and Running Tests</a></li>
+<li class="level2"><a href="#selecting-tests-to-run">Selecting Tests to Run</a></li>
+<li class="level2"><a href="#running-and-debugging-tests-from-code-editor">Running and Debugging Tests from Code Editor</a></li>
+<li class="level2"><a href="#specifying-settings-for-running-qt-tests">Specifying Settings for Running Qt Tests</a></li>
+<li class="level2"><a href="#specifying-settings-for-running-google-tests">Specifying Settings for Running Google Tests</a></li>
+<li class="level2"><a href="#specifying-settings-for-running-boost-tests">Specifying Settings for Running Boost Tests</a></li>
+<li class="level1"><a href="#viewing-test-output">Viewing Test Output</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Running Autotests</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-autotest.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Qt Creator integrates the <a href="http://doc.qt.io/qt-5/qttest-index.html">Qt Test</a> framework, <a href="https://github.com/google/googletest">Google C++ Testing Framework</a>, and <a href="https://www.boost.org/doc/libs/1_70_0/libs/test/doc/html/index.html">Boost.Test</a> for unit testing applications and libraries. You can use Qt Creator to create, build, and run Qt tests, Qt Quick tests (QML-based Qt tests), Google tests, and Boost tests for your projects.</p>
+<p class="centerAlign"><img src="images/qtcreator-autotests.png" alt="" /></p><a name="creating-tests"></a>
+<h2 id="creating-tests">Creating Tests</h2>
+<p>You can use a wizard to create projects that contain tests.</p>
+<a name="creating-qt-and-qt-quick-tests"></a>
+<h3 id="creating-qt-and-qt-quick-tests">Creating Qt and Qt Quick Tests</h3>
+<p>To create a Qt or Qt Quick test:</p>
+<ol class="1" type="1"><li>Select <b>File</b> &gt; <b>New File or Project</b> &gt; <b>Other Project</b> &gt; <b>Auto Test Project</b> &gt; <b>Choose</b> to create a project with boilerplate code for a Qt test or a Qt Quick test.</li>
+<li>In the <b>Project and Test Information</b> dialog, specify settings for the project and test:<ol class="1" type="1"><li>In the <b>Test framework</b> field, select <b>Qt Test</b> or <b>Qt Quick Test</b>.</li>
+<li>For a Qt test, select the <b>GUI Application</b> check box to create a Qt application.</li>
+<li>In the <b>Test case name</b> field, enter a name for the test case.</li>
+<li>For a Qt test, select the <b>Requires QApplication</b> check box to add the include statement for <a href="http://doc.qt.io/qt-5/qapplication.html">QApplication</a> to the main.cpp file of the project.</li>
+<li>Select the <b>Generate initialization and cleanup code</b> checkbox to add functions to your test that are executed by the testing framework to initialize and clean up the test.</li>
+<li>In the <b>Build system</b> field, select the build system to use for building the project: qmake, CMake, or Qbs.</li>
+</ol>
+</li>
+</ol>
+<p>Qt Creator creates the test in the specified project directory. Edit the .cpp file to add private slots for each test function in your test. For more information about creating Qt tests, see <a href="http://doc.qt.io/qt-5/qtest-overview.html#creating-a-test">Creating a Test</a>.</p>
+<a name="creating-google-tests"></a>
+<h3 id="creating-google-tests">Creating Google Tests</h3>
+<p>To create a Google test:</p>
+<ol class="1" type="1"><li>Select <b>File</b> &gt; <b>New File or Project</b> &gt; <b>Other Project</b> &gt; <b>Auto Test Project</b> &gt; <b>Choose</b> to create a project with boilerplate code for a Google test.</li>
+<li>In the <b>Project and Test Information</b> dialog, specify settings for the project and test:<ol class="1" type="1"><li>In the <b>Test framework</b> field, select <b>Google Test</b>.</li>
+<li>In the <b>Test suite name</b> field, enter a name for the test suite.</li>
+<li>In the <b>Test case name</b> field, enter a name for the test case.</li>
+<li>Select the <b>Enable C++ 11</b> check box to support C++ 11 features in the test.</li>
+<li>In the <b>Google test repository</b> field, select a directory that contains a clone of the googletest repository.<p>To use an installed Google C++ Testing framework instead, see <a href="#setting-up-the-google-c-testing-framework">Setting Up the Google C++ Testing Framework</a>.</p>
+</li>
+<li>In the <b>Build system</b> field, select the build system to use for building the project: qmake, CMake, or Qbs.</li>
+</ol>
+</li>
+</ol>
+<p>Qt Creator creates the test in the specified project directory. For more information about creating Google tests, see the <a href="https://github.com/google/googletest/blob/master/googletest/docs/primer.md">Google Test Primer</a>.</p>
+<a name="creating-boost-tests"></a>
+<h3 id="creating-boost-tests">Creating Boost Tests</h3>
+<p>To build and run Boost tests, you must have the Boost.Test installed on the development host. Typically, it is installed when you install Boost. You can download Boost from <a href="https://www.boost.org/">Boost.org</a>.</p>
+<p>If Boost libraries can be found by the used compiler and build system, you do not need to specify the include directory when creating the test.</p>
+<p>To create a Boost test:</p>
+<ol class="1" type="1"><li>Select <b>File</b> &gt; <b>New File or Project</b> &gt; <b>Other Project</b> &gt; <b>Auto Test Project</b> &gt; <b>Choose</b> to create a project with boilerplate code for a Boost test.</li>
+<li>In the <b>Project and Test Information</b> dialog, specify settings for the project and test:<ol class="1" type="1"><li>In the <b>Test framework</b> field, select <b>Boost Test</b>.</li>
+<li>In the <b>Test suite name</b> field, enter a name for the test suite.</li>
+<li>In the <b>Test case name</b> field, enter a name for the test case.</li>
+<li>In the <b>Boost include dir (optional)</b> field, enter the path to the directory that contains files needed by Boost.Test, such as <i>version.hpp</i> and a subfolder called <i>test</i> that contains the test header files.</li>
+<li>In the <b>Build system</b> field, select the build system to use for building the project: qmake, CMake, or Qbs.</li>
+</ol>
+</li>
+</ol>
+<p>Qt Creator creates the test in the specified project directory. For more information about creating Boost tests, see <a href="https://www.boost.org/doc/libs/1_70_0/libs/test/doc/html/index.html">Boost.Test</a>.</p>
+<a name="setting-up-the-google-c-testing-framework"></a>
+<h2 id="setting-up-the-google-c-testing-framework">Setting Up the Google C++ Testing Framework</h2>
+<p>To build and run Google tests, you must have the Google C++ Testing framework installed and configured on the development host. You can either clone it from Git Hub or install it from an installation package.</p>
+<p>To configure a project to use a cloned Google testing framework, edit the <code>INCLUDEPATH</code> variable in the project file (.pro) to include the source and <code>include</code> folders of Google Test's <code>googletest</code> and <code>googlemock</code>. Usually, you need to add the following subfolders:</p>
+<ul>
+<li><code>googletest</code></li>
+<li><code>googlemock</code></li>
+<li><code>googletest/include</code></li>
+<li><code>googlemock/include</code></li>
+</ul>
+<p>You also need to add the necessary files to the <code>SOURCES</code> variable. For example:</p>
+<ul>
+<li><code>googletest/src/gtest-all.cc</code></li>
+<li><code>googlemock/src/gmock-all.cc</code></li>
+</ul>
+<p>To configure a project to use an installed Google testing framework package, add the following include paths to the .pro file:</p>
+<ul>
+<li><code>&lt;googletest_install_path&gt;/include/gtest</code></li>
+<li><code>&lt;googletest_install_path&gt;/include/gmock</code></li>
+</ul>
+<p>Then add linker options to be able to find the libraries and to link against them. For example, for qmake based projects, you typically need to add the following values to the .pro file:</p>
+<ul>
+<li><code>LIBS += -lgtest -L&lt;path_to_gtest_lib&gt;</code></li>
+<li><code>LIBS += -lgmock -L&lt;path_to_gmock_lib&gt;</code></li>
+</ul>
+<a name="building-and-running-tests"></a>
+<h2 id="building-and-running-tests">Building and Running Tests</h2>
+<p>To build and run tests:</p>
+<ol class="1" type="1"><li>Open a project that contains tests.</li>
+<li>In the <b>Tests</b> view, select the tests to run.</li>
+<li>In the <b>Test Results</b> output pane, select:<ul>
+<li><img src="images/run_small.png" alt="" /> (<b>Run All Tests</b>) to run all tests.</li>
+<li><img src="images/qtcreator-run-selected-tests.png" alt="" /> (<b>Run Selected Tests</b>) to run the selected tests.</li>
+<li><img src="images/qtcreator-run-tests-in-current-file.png" alt="" /> (<b>Run Tests for Current File</b>) to run the tests in the file currently open in the code editor.</li>
+</ul>
+<p><b>Note: </b>By default, Qt Creator builds a project before deploying and running it.</p></li>
+</ol>
+<p>If a test takes more than a minute to execute, the default timeout might stop the test execution. To increase the timeout, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Testing</b> &gt; <b>General</b>.</p>
+<a name="selecting-tests-to-run"></a>
+<h3 id="selecting-tests-to-run">Selecting Tests to Run</h3>
+<p>The <b>Tests</b> view shows all the tests found for the currently active test frameworks in the current project. Select the test cases to run.</p>
+<p class="centerAlign"><img src="images/qtcreator-tests-view.png" alt="" /></p><p>If a Qt Quick test case does not have a name, it is marked <b>Unnamed</b> in the list. Unnamed test cases are executed when you select <b>Run All Tests</b>. You cannot select or deselect them.</p>
+<p>Qt Creator scans the project for tests when you open the project and updates the test list for the currently active test frameworks when you edit tests. To refresh the view, select <b>Rescan Tests</b> in the context menu.</p>
+<p>To group related test cases for an active test framework, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Testing</b> &gt; <b>General</b>, and then select the <b>Group</b> check box next to the framework name in the <b>Active Test Frameworks</b> list. By default, tests are grouped based on the directory where they are located.</p>
+<p>To group Google tests by using a GTest filter, select <b>Google Test</b>. In the <b>Group mode</b> field, select <b>GTest Filter</b> and specify the filter to use in the <b>Active filter</b> field. For more information about GTest filters, see <a href="https://github.com/google/googletest/blob/master/googletest/docs/advanced.md#running-a-subset-of-the-tests">Running a Subset of the Tests</a>.</p>
+<p class="centerAlign"><img src="images/qtcreator-autotests-options.png" alt="" /></p><p>In some special setups, Qt Creator cannot deduce which executable or run configuration it should use. If Qt Creator repeatedly asks you to select the tests to run when trying to execute tests, you can enable it to cache your choices and use them were appropriate. The cached information is cleared when you switch to another project, close the current one, or select <b>Reset Cached Choices</b>.</p>
+<p>To show or hide init and cleanup or data functions in the <b>Tests</b> view, select <img src="images/filtericon.png" alt="" /> (<b>Filter Test Tree</b>), and then select <b>Show Init and Cleanup Functions</b> or <b>Show Data Functions</b>. Double-click a function in the list to open its source code in the code editor.</p>
+<p>The test cases are listed in alphabetic order. To list them in the order in which they are defined in the source code, select <img src="images/leafsort.png" alt="" /> (<b>Sort Naturally</b>).</p>
+<a name="running-and-debugging-tests-from-code-editor"></a>
+<h3 id="running-and-debugging-tests-from-code-editor">Running and Debugging Tests from Code Editor</h3>
+<p>You can run and debug tests in the file currently open in the code editor. To run all tests in the open file, select <b>Tools</b> &gt; <b>Tests</b> &gt; <b>Run Tests for Current File</b>.</p>
+<p>To run the test currently selected in the open file, select <b>Run Test Under Cursor</b> in the context menu.</p>
+<p>To debug the currently selected test, select <b>Debug Test Under Cursor</b> in the context menu.</p>
+<a name="specifying-settings-for-running-qt-tests"></a>
+<h3 id="specifying-settings-for-running-qt-tests">Specifying Settings for Running Qt Tests</h3>
+<p>The code inside a benchmark test is measured, and possibly also repeated several times in order to get an accurate measurement. This depends on the measurement back-end that you can select in the <b>Benchmark Metrics</b> group in <b>Tools</b> &gt; <b>Options</b> &gt; <b>Testing</b> &gt; <b>Qt Test</b>: walltime, CPU tick counter, event counter, Valgrind Callgrind, and Linux Perf. For more information, see <a href="http://doc.qt.io/qt-5/qtest-overview.html#creating-a-benchmark">Creating a Benchmark</a>.</p>
+<p class="centerAlign"><img src="images/qtcreator-autotests-options-qt.png" alt="" /></p><p>To receive verbose output when running benchmarks, select the <b>Verbose benchmarks</b> check box.</p>
+<p>To allow the debugger to interrupt Qt tests on assertions, select the <b>Disable crash handler while debugging</b> check box.</p>
+<p>To record information about signals and slots in the test log, select the <b>Log signals and slots</b> check box.</p>
+<a name="specifying-settings-for-running-google-tests"></a>
+<h3 id="specifying-settings-for-running-google-tests">Specifying Settings for Running Google Tests</h3>
+<p>To specify settings for running Google tests, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Testing</b> &gt; <b>Google Test</b>.</p>
+<p class="centerAlign"><img src="images/qtcreator-autotests-options-google.png" alt="" /></p><p>To run disabled tests, select the <b>Run disabled tests</b> check box.</p>
+<p>To run several iterations of the tests, select the <b>Repeat tests</b> check box and enter the number of times the tests should be run in the <b>Iterations</b> field. To make sure that the tests are independent and repeatable, you can run them in a different order each time by selecting the <b>Shuffle tests</b> check box.</p>
+<p>To turn failures into debugger breakpoints, select the <b>Break on failure while debugging</b> check box. To turn assertion failures into C++ exceptions, select the <b>Throw on failure</b> check box.</p>
+<a name="specifying-settings-for-running-boost-tests"></a>
+<h3 id="specifying-settings-for-running-boost-tests">Specifying Settings for Running Boost Tests</h3>
+<ol class="1" type="1"><li>To specify settings for running Boost tests, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Testing</b> &gt; <b>Boost Test</b>.<p class="centerAlign"><img src="images/qtcreator-autotests-options-boost.png" alt="" /></p></li>
+<li>In the <b>Log format</b> field, select the error report format to specify the type of events you want recorded in the test report.</li>
+<li>In the <b>Report level</b> field, select the verbosity level of the test result report. Select <b>No</b> if you do not want a report.</li>
+<li>Select the <b>Randomize</b> check box to execute the tests in a random order, using the seed specified in the <b>Seed</b> field for initializing the randomizer.</li>
+<li>Select the <b>Catch system errors</b> check box to catch system errors.</li>
+<li>Select the <b>Floating point exceptions</b> check box to detect floating point exceptions.</li>
+<li>Select the <b>Detect memory leaks</b> check box to detect memory leaks.</li>
+</ol>
+<a name="viewing-test-output"></a>
+<h2 id="viewing-test-output">Viewing Test Output</h2>
+<p>The test results are displayed in the <b>Test Results</b> output pane in XML format. XML can be parsed more easily and reliably than plain text.</p>
+<p>However, if a Qt test crashes, it might not produce complete XML code that can be parsed, which might lead to information loss. The lost information might be retrievable when viewing the results as plain text. To view the results of Qt tests as plain text, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Testing</b> &gt; <b>Qt Test</b>, and then deselect the <b>Use XML output</b> check box. Then select the <img src="images/text.png" alt="" /> (<b>Switch Between Visual and Text Display</b>) button in the <b>Test Results</b> output pane to switch to the text display.</p>
+<p>The following table lists the messages that the <b>Test Results</b> output pane displays:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Result</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >BENCH</td><td >Benchmark test.</td></tr>
+<tr valign="top" class="even"><td >DEBUG</td><td >Debug message.</td></tr>
+<tr valign="top" class="odd"><td >FAIL</td><td >Test case failed. Double-click the line for more information.</td></tr>
+<tr valign="top" class="even"><td >FATAL</td><td >A fatal error occurred that stops the test case from being run, for example.</td></tr>
+<tr valign="top" class="odd"><td >INFO</td><td >Informative message.</td></tr>
+<tr valign="top" class="even"><td >INTERNAL</td><td >Internal message.</td></tr>
+<tr valign="top" class="odd"><td >PASS</td><td >Test case passed.</td></tr>
+<tr valign="top" class="even"><td >SKIP</td><td >Test case was skipped.</td></tr>
+<tr valign="top" class="odd"><td >SYSTEM</td><td >An error message received from or influenced by the OS.</td></tr>
+<tr valign="top" class="even"><td >XFAIL</td><td >Test case is expected to fail, so it is marked by using the <a href="http://doc.qt.io/qt-5/qtest.html#QEXPECT_FAIL">QEXPECT_FAIL</a> macro. If the test case passes instead, an unexpected pass (XPASS) is written to the test log.</td></tr>
+<tr valign="top" class="odd"><td >XPASS</td><td >Test case passed even though it was expected to fail.</td></tr>
+<tr valign="top" class="even"><td >WARN</td><td >Warning message.</td></tr>
+</table></div>
+<p>Since Qt 5.4, you can provide a BLACKLIST file for tests. It is mainly used internally by the Qt CI system.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Result</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >BFAIL</td><td >Blacklisted test case failed.</td></tr>
+<tr valign="top" class="even"><td >BPASS</td><td >Blacklisted test case passed.</td></tr>
+<tr valign="top" class="odd"><td >BXFAIL</td><td >Blacklisted test case failed but was marked to be expected to fail.</td></tr>
+<tr valign="top" class="even"><td >BXPASS</td><td >Blacklisted test case passed even though it was expected to fail.</td></tr>
+</table></div>
+<p>To view only messages of a particular type, select <img src="images/filtericon.png" alt="" /> (<b>Filter Test Results</b>), and then select the types of messages to show. To show all messages, select <b>Check All Filters</b>. To deselect all message types, select <b>Uncheck All Filters</b>.</p>
+<p>By default, test result output is limited to 100,000 characters. The output pane is automatically scrolled down when new results are added. To display full results, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Testing</b> &gt; <b>General</b>, and then deselect the <b>Limit result output</b> check box. To disable automatic scrolling, deselect the <b>Automatically scroll results</b> check box.</p>
+<p>Test results can be grouped by the executable path that was used to run the tests. This is useful if you have multiple test executables and run them all at once. To enable this functionality you need to select the <b>Group results by application</b> check box.</p>
+<p>Internal messages and run configuration warnings for deduced configurations are omitted by default. To view them, deselect the <b>Omit internal messages</b> and <b>Omit run configuration warnings</b> check boxes.</p>
+</div>
+<!-- @@@creator-autotest.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-cppcheck.html">Analyzing Code with Cppcheck</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-advanced.html">Advanced Use</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

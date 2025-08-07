@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwinjumplistitem.cpp -->
+  <title>QWinJumpListItem Class | Qt Windows Extras 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwinextras-index.html">Qt Windows Extras</a></td><td ><a href="qtwinextras-module.html">C++ Classes</a></td><td >QWinJumpListItem</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwinextras-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QWinJumpListItem Class</h1>
+<!-- $$$QWinJumpListItem-brief -->
+<p>The <a href="qwinjumplistitem.html">QWinJumpListItem</a> class represents a jump list item. <a href="#details">More...</a></p>
+<!-- @@@QWinJumpListItem -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QWinJumpListItem&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += winextras</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.2</td></tr></table></div><p>This class was introduced in  Qt 5.2.</p>
+<ul>
+<li><a href="qwinjumplistitem-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistitem.html#Type-enum">Type</a></b> { Destination, Link, Separator }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistitem.html#QWinJumpListItem">QWinJumpListItem</a></b>(QWinJumpListItem::Type <i>type</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistitem.html#dtor.QWinJumpListItem">~QWinJumpListItem</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistitem.html#arguments">arguments</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistitem.html#description">description</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistitem.html#filePath">filePath</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QIcon </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistitem.html#icon">icon</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistitem.html#setArguments">setArguments</a></b>(const QStringList &amp;<i>arguments</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistitem.html#setDescription">setDescription</a></b>(const QString &amp;<i>description</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistitem.html#setFilePath">setFilePath</a></b>(const QString &amp;<i>filePath</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistitem.html#setIcon">setIcon</a></b>(const QIcon &amp;<i>icon</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistitem.html#setTitle">setTitle</a></b>(const QString &amp;<i>title</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistitem.html#setType">setType</a></b>(QWinJumpListItem::Type <i>type</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistitem.html#setWorkingDirectory">setWorkingDirectory</a></b>(const QString &amp;<i>workingDirectory</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistitem.html#title">title</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWinJumpListItem::Type </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistitem.html#type">type</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistitem.html#workingDirectory">workingDirectory</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QWinJumpListItem-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QWinJumpListItem -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Type$$$Destination$$$Link$$$Separator -->
+<h3 class="fn" id="Type-enum"><a name="Type-enum"></a>enum QWinJumpListItem::<span class="name">Type</span></h3>
+<p>This enum describes the available <a href="qwinjumplistitem.html">QWinJumpListItem</a> types.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QWinJumpListItem::Destination</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Item acts as a link to a file that the application can open.</td></tr>
+<tr><td class="topAlign"><code>QWinJumpListItem::Link</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Item represents a link to an application.</td></tr>
+<tr><td class="topAlign"><code>QWinJumpListItem::Separator</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Item is a separator. Only tasks category supports separators.</td></tr>
+</table></div>
+<!-- @@@Type -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QWinJumpListItem[overload1]$$$QWinJumpListItemQWinJumpListItem::Type -->
+<h3 class="fn" id="QWinJumpListItem"><a name="QWinJumpListItem"></a>QWinJumpListItem::<span class="name">QWinJumpListItem</span>(<span class="type"><a href="qwinjumplistitem.html#Type-enum">QWinJumpListItem::Type</a></span> <i>type</i>)</h3>
+<p>Constructs a <a href="qwinjumplistitem.html">QWinJumpListItem</a> with the specified <i>type</i>.</p>
+<!-- @@@QWinJumpListItem -->
+<!-- $$$~QWinJumpListItem[overload1]$$$~QWinJumpListItem -->
+<h3 class="fn" id="dtor.QWinJumpListItem"><a name="dtor.QWinJumpListItem"></a>QWinJumpListItem::<span class="name">~QWinJumpListItem</span>()</h3>
+<p>Destroys the <a href="qwinjumplistitem.html">QWinJumpListItem</a>.</p>
+<!-- @@@~QWinJumpListItem -->
+<!-- $$$arguments[overload1]$$$arguments -->
+<h3 class="fn" id="arguments"><a name="arguments"></a><span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> QWinJumpListItem::<span class="name">arguments</span>() const</h3>
+<p>Returns the command-line arguments of this item.</p>
+<p><b>See also </b><a href="qwinjumplistitem.html#setArguments">setArguments</a>().</p>
+<!-- @@@arguments -->
+<!-- $$$description[overload1]$$$description -->
+<h3 class="fn" id="description"><a name="description"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QWinJumpListItem::<span class="name">description</span>() const</h3>
+<p>Returns the description of this item.</p>
+<p><b>See also </b><a href="qwinjumplistitem.html#setDescription">setDescription</a>().</p>
+<!-- @@@description -->
+<!-- $$$filePath[overload1]$$$filePath -->
+<h3 class="fn" id="filePath"><a name="filePath"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QWinJumpListItem::<span class="name">filePath</span>() const</h3>
+<p>Returns the file path set by <a href="qwinjumplistitem.html#setFilePath">setFilePath</a>().</p>
+<p><b>See also </b><a href="qwinjumplistitem.html#setFilePath">setFilePath</a>().</p>
+<!-- @@@filePath -->
+<!-- $$$icon[overload1]$$$icon -->
+<h3 class="fn" id="icon"><a name="icon"></a><span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> QWinJumpListItem::<span class="name">icon</span>() const</h3>
+<p>Returns the icon set for this item.</p>
+<p><b>See also </b><a href="qwinjumplistitem.html#setIcon">setIcon</a>().</p>
+<!-- @@@icon -->
+<!-- $$$setArguments[overload1]$$$setArgumentsconstQStringList& -->
+<h3 class="fn" id="setArguments"><a name="setArguments"></a><span class="type">void</span> QWinJumpListItem::<span class="name">setArguments</span>(const <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> &amp;<i>arguments</i>)</h3>
+<p>Sets command-line <i>arguments</i> for this item.</p>
+<p>This value is used only if the type of this item is <a href="qwinjumplistitem.html#Type-enum">QWinJumpListItem::Link</a>.</p>
+<p><b>See also </b><a href="qwinjumplistitem.html#arguments">arguments</a>() and <a href="qwinjumplistitem.html#setFilePath">setFilePath</a>().</p>
+<!-- @@@setArguments -->
+<!-- $$$setDescription[overload1]$$$setDescriptionconstQString& -->
+<h3 class="fn" id="setDescription"><a name="setDescription"></a><span class="type">void</span> QWinJumpListItem::<span class="name">setDescription</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>description</i>)</h3>
+<p>Sets a <i>description</i> for this item.</p>
+<p>This value is used only if the type of this item is <a href="qwinjumplistitem.html#Type-enum">QWinJumpListItem::Link</a>.</p>
+<p><b>See also </b><a href="qwinjumplistitem.html#description">description</a>().</p>
+<!-- @@@setDescription -->
+<!-- $$$setFilePath[overload1]$$$setFilePathconstQString& -->
+<h3 class="fn" id="setFilePath"><a name="setFilePath"></a><span class="type">void</span> QWinJumpListItem::<span class="name">setFilePath</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>filePath</i>)</h3>
+<p>Sets the item <i>filePath</i>, the meaning of which depends on the type of this item:</p>
+<ul>
+<li>If the item type is <a href="qwinjumplistitem.html#Type-enum">QWinJumpListItem::Destination</a>, <i>filePath</i> is the path to a file that can be opened by an application.</li>
+<li>If the item type is <a href="qwinjumplistitem.html#Type-enum">QWinJumpListItem::Link</a>, <i>filePath</i> is the path to an executable that is executed when this item is clicked by the user.</li>
+</ul>
+<p><b>See also </b><a href="qwinjumplistitem.html#filePath">filePath</a>(), <a href="qwinjumplistitem.html#setWorkingDirectory">setWorkingDirectory</a>(), and <a href="qwinjumplistitem.html#setArguments">setArguments</a>().</p>
+<!-- @@@setFilePath -->
+<!-- $$$setIcon[overload1]$$$setIconconstQIcon& -->
+<h3 class="fn" id="setIcon"><a name="setIcon"></a><span class="type">void</span> QWinJumpListItem::<span class="name">setIcon</span>(const <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> &amp;<i>icon</i>)</h3>
+<p>Sets the <i>icon</i> of this item.</p>
+<p>This value is used only if the type of this item is <a href="qwinjumplistitem.html#Type-enum">QWinJumpListItem::Link</a>.</p>
+<p><b>See also </b><a href="qwinjumplistitem.html#icon">icon</a>().</p>
+<!-- @@@setIcon -->
+<!-- $$$setTitle[overload1]$$$setTitleconstQString& -->
+<h3 class="fn" id="setTitle"><a name="setTitle"></a><span class="type">void</span> QWinJumpListItem::<span class="name">setTitle</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>title</i>)</h3>
+<p>Sets the <i>title</i> of this item.</p>
+<p>This value is used only if the type of this item is <a href="qwinjumplistitem.html#Type-enum">QWinJumpListItem::Link</a>.</p>
+<p><b>See also </b><a href="qwinjumplistitem.html#title">title</a>().</p>
+<!-- @@@setTitle -->
+<!-- $$$setType[overload1]$$$setTypeQWinJumpListItem::Type -->
+<h3 class="fn" id="setType"><a name="setType"></a><span class="type">void</span> QWinJumpListItem::<span class="name">setType</span>(<span class="type"><a href="qwinjumplistitem.html#Type-enum">QWinJumpListItem::Type</a></span> <i>type</i>)</h3>
+<p>Sets the item <i>type</i>.</p>
+<p><b>See also </b><a href="qwinjumplistitem.html#type">type</a>().</p>
+<!-- @@@setType -->
+<!-- $$$setWorkingDirectory[overload1]$$$setWorkingDirectoryconstQString& -->
+<h3 class="fn" id="setWorkingDirectory"><a name="setWorkingDirectory"></a><span class="type">void</span> QWinJumpListItem::<span class="name">setWorkingDirectory</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>workingDirectory</i>)</h3>
+<p>Sets the path to the working directory of this item to <i>workingDirectory</i>.</p>
+<p>This value is used only if the type of this item is <a href="qwinjumplistitem.html#Type-enum">QWinJumpListItem::Link</a>.</p>
+<p><b>See also </b><a href="qwinjumplistitem.html#workingDirectory">workingDirectory</a>() and <a href="qwinjumplistitem.html#setFilePath">setFilePath</a>().</p>
+<!-- @@@setWorkingDirectory -->
+<!-- $$$title[overload1]$$$title -->
+<h3 class="fn" id="title"><a name="title"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QWinJumpListItem::<span class="name">title</span>() const</h3>
+<p>Returns the title of this item.</p>
+<p><b>See also </b><a href="qwinjumplistitem.html#setTitle">setTitle</a>().</p>
+<!-- @@@title -->
+<!-- $$$type[overload1]$$$type -->
+<h3 class="fn" id="type"><a name="type"></a><span class="type"><a href="qwinjumplistitem.html#Type-enum">QWinJumpListItem::Type</a></span> QWinJumpListItem::<span class="name">type</span>() const</h3>
+<p>Returns the item type.</p>
+<p><b>See also </b><a href="qwinjumplistitem.html#setType">setType</a>().</p>
+<!-- @@@type -->
+<!-- $$$workingDirectory[overload1]$$$workingDirectory -->
+<h3 class="fn" id="workingDirectory"><a name="workingDirectory"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QWinJumpListItem::<span class="name">workingDirectory</span>() const</h3>
+<p>Returns the working directory path.</p>
+<p><b>See also </b><a href="qwinjumplistitem.html#setWorkingDirectory">setWorkingDirectory</a>().</p>
+<!-- @@@workingDirectory -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdrag.cpp -->
+  <title>QDrag Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QDrag</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QDrag Class</h1>
+<!-- $$$QDrag-brief -->
+<p>The <a href="qdrag.html">QDrag</a> class provides support for MIME-based drag and drop data transfer. <a href="#details">More...</a></p>
+<!-- @@@QDrag -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QDrag&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><ul>
+<li><a href="qdrag-members.html">List of all members, including inherited members</a></li>
+<li><a href="qdrag-obsolete.html">Obsolete members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdrag.html#QDrag">QDrag</a></b>(QObject *<i>dragSource</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qdrag.html#dtor.QDrag">~QDrag</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::DropAction </td><td class="memItemRight bottomAlign"><b><a href="qdrag.html#defaultAction">defaultAction</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPixmap </td><td class="memItemRight bottomAlign"><b><a href="qdrag.html#dragCursor">dragCursor</a></b>(Qt::DropAction <i>action</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::DropAction </td><td class="memItemRight bottomAlign"><b><a href="qdrag.html#exec">exec</a></b>(Qt::DropActions <i>supportedActions</i> = Qt::MoveAction)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::DropAction </td><td class="memItemRight bottomAlign"><b><a href="qdrag.html#exec-1">exec</a></b>(Qt::DropActions <i>supportedActions</i>, Qt::DropAction <i>defaultDropAction</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPoint </td><td class="memItemRight bottomAlign"><b><a href="qdrag.html#hotSpot">hotSpot</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMimeData *</td><td class="memItemRight bottomAlign"><b><a href="qdrag.html#mimeData">mimeData</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPixmap </td><td class="memItemRight bottomAlign"><b><a href="qdrag.html#pixmap">pixmap</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdrag.html#setDragCursor">setDragCursor</a></b>(const QPixmap &amp;<i>cursor</i>, Qt::DropAction <i>action</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdrag.html#setHotSpot">setHotSpot</a></b>(const QPoint &amp;<i>hotspot</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdrag.html#setMimeData">setMimeData</a></b>(QMimeData *<i>data</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdrag.html#setPixmap">setPixmap</a></b>(const QPixmap &amp;<i>pixmap</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QObject *</td><td class="memItemRight bottomAlign"><b><a href="qdrag.html#source">source</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::DropActions </td><td class="memItemRight bottomAlign"><b><a href="qdrag.html#supportedActions">supportedActions</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QObject *</td><td class="memItemRight bottomAlign"><b><a href="qdrag.html#target">target</a></b>() const</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdrag.html#actionChanged">actionChanged</a></b>(Qt::DropAction <i>action</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdrag.html#targetChanged">targetChanged</a></b>(QObject *<i>newTarget</i>)</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdrag.html#cancel">cancel</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QDrag-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Drag and drop is an intuitive way for users to copy or move data around in an application, and is used in many desktop environments as a mechanism for copying data between applications. Drag and drop support in Qt is centered around the <a href="qdrag.html">QDrag</a> class that handles most of the details of a drag and drop operation.</p>
+<p>The data to be transferred by the drag and drop operation is contained in a <a href="../qtcore/qmimedata.html">QMimeData</a> object. This is specified with the <a href="qdrag.html#setMimeData">setMimeData</a>() function in the following way:</p>
+<pre class="cpp">
+
+          <span class="type"><a href="qdrag.html#QDrag">QDrag</a></span> <span class="operator">*</span>drag <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qdrag.html#QDrag">QDrag</a></span>(<span class="keyword">this</span>);
+          <span class="type"><a href="../qtcore/qmimedata.html">QMimeData</a></span> <span class="operator">*</span>mimeData <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qmimedata.html">QMimeData</a></span>;
+
+          mimeData<span class="operator">-</span><span class="operator">&gt;</span>setText(commentEdit<span class="operator">-</span><span class="operator">&gt;</span>toPlainText());
+          drag<span class="operator">-</span><span class="operator">&gt;</span>setMimeData(mimeData);
+
+</pre>
+<p>Note that <a href="qdrag.html#setMimeData">setMimeData</a>() assigns ownership of the <a href="../qtcore/qmimedata.html">QMimeData</a> object to the <a href="qdrag.html">QDrag</a> object. The <a href="qdrag.html">QDrag</a> must be constructed on the heap with a parent <a href="../qtcore/qobject.html">QObject</a> to ensure that Qt can clean up after the drag and drop operation has been completed.</p>
+<p>A pixmap can be used to represent the data while the drag is in progress, and will move with the cursor to the drop target. This pixmap typically shows an icon that represents the MIME type of the data being transferred, but any pixmap can be set with <a href="qdrag.html#setPixmap">setPixmap</a>(). The cursor's hot spot can be given a position relative to the top-left corner of the pixmap with the <a href="qdrag.html#setHotSpot">setHotSpot</a>() function. The following code positions the pixmap so that the cursor's hot spot points to the center of its bottom edge:</p>
+<pre class="cpp">
+
+      drag<span class="operator">-</span><span class="operator">&gt;</span>setHotSpot(<span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(drag<span class="operator">-</span><span class="operator">&gt;</span>pixmap()<span class="operator">.</span>width()<span class="operator">/</span><span class="number">2</span><span class="operator">,</span>
+                              drag<span class="operator">-</span><span class="operator">&gt;</span>pixmap()<span class="operator">.</span>height()));
+
+</pre>
+<p><b>Note: </b>On X11, the pixmap may not be able to keep up with the mouse movements if the hot spot causes the pixmap to be displayed directly under the cursor.</p><p>The source and target widgets can be found with <a href="qdrag.html#source">source</a>() and <a href="qdrag.html#target">target</a>(). These functions are often used to determine whether drag and drop operations started and finished at the same widget, so that special behavior can be implemented.</p>
+<p><a href="qdrag.html">QDrag</a> only deals with the drag and drop operation itself. It is up to the developer to decide when a drag operation begins, and how a <a href="qdrag.html">QDrag</a> object should be constructed and used. For a given widget, it is often necessary to reimplement <a href="../qtwidgets/qwidget.html#mousePressEvent">mousePressEvent()</a> to determine whether the user has pressed a mouse button, and reimplement <a href="../qtwidgets/qwidget.html#mouseMoveEvent">mouseMoveEvent()</a> to check whether a <a href="qdrag.html">QDrag</a> is required.</p>
+</div>
+<p><b>See also </b><a href="dnd.html">Drag and Drop</a>, <a href="qclipboard.html">QClipboard</a>, <a href="../qtcore/qmimedata.html">QMimeData</a>, <a href="../qtmacextras/qmacpasteboardmime.html">QMacPasteboardMime</a>, <a href="../qtwidgets/qtwidgets-draganddrop-draggableicons-example.html">Draggable Icons Example</a>, <a href="../qtwidgets/qtwidgets-draganddrop-draggabletext-example.html">Draggable Text Example</a>, <a href="../qtwidgets/qtwidgets-draganddrop-dropsite-example.html">Drop Site Example</a>, and <a href="../qtwidgets/qtwidgets-draganddrop-fridgemagnets-example.html">Fridge Magnets Example</a>.</p>
+<!-- @@@QDrag -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QDrag[overload1]$$$QDragQObject* -->
+<h3 class="fn" id="QDrag"><a name="QDrag"></a>QDrag::<span class="name">QDrag</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>dragSource</i>)</h3>
+<p>Constructs a new drag object for the widget specified by <i>dragSource</i>.</p>
+<!-- @@@QDrag -->
+<!-- $$$actionChanged[overload1]$$$actionChangedQt::DropAction -->
+<h3 class="fn" id="actionChanged"><a name="actionChanged"></a><code>[signal] </code><span class="type">void</span> QDrag::<span class="name">actionChanged</span>(<span class="type"><a href="../qtcore/qt.html#DropAction-enum">Qt::DropAction</a></span> <i>action</i>)</h3>
+<p>This signal is emitted when the <i>action</i> associated with the drag changes.</p>
+<p><b>See also </b><a href="qdrag.html#targetChanged">targetChanged</a>().</p>
+<!-- @@@actionChanged -->
+<!-- $$$targetChanged[overload1]$$$targetChangedQObject* -->
+<h3 class="fn" id="targetChanged"><a name="targetChanged"></a><code>[signal] </code><span class="type">void</span> QDrag::<span class="name">targetChanged</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>newTarget</i>)</h3>
+<p>This signal is emitted when the target of the drag and drop operation changes, with <i>newTarget</i> the new target.</p>
+<p><b>See also </b><a href="qdrag.html#target">target</a>() and <a href="qdrag.html#actionChanged">actionChanged</a>().</p>
+<!-- @@@targetChanged -->
+<!-- $$$~QDrag[overload1]$$$~QDrag -->
+<h3 class="fn" id="dtor.QDrag"><a name="dtor.QDrag"></a><code>[virtual] </code>QDrag::<span class="name">~QDrag</span>()</h3>
+<p>Destroys the drag object.</p>
+<!-- @@@~QDrag -->
+<!-- $$$cancel[overload1]$$$cancel -->
+<h3 class="fn" id="cancel"><a name="cancel"></a><code>[static] </code><span class="type">void</span> QDrag::<span class="name">cancel</span>()</h3>
+<p>Cancels a drag operation initiated by Qt.</p>
+<p><b>Note: </b>This is currently implemented on Windows and X11.</p><p>This function was introduced in  Qt 5.7.</p>
+<p><b>See also </b><a href="qdrag.html#exec">exec</a>().</p>
+<!-- @@@cancel -->
+<!-- $$$defaultAction[overload1]$$$defaultAction -->
+<h3 class="fn" id="defaultAction"><a name="defaultAction"></a><span class="type"><a href="../qtcore/qt.html#DropAction-enum">Qt::DropAction</a></span> QDrag::<span class="name">defaultAction</span>() const</h3>
+<p>Returns the default proposed drop action for this drag operation.</p>
+<p><b>See also </b><a href="qdrag.html#exec">exec</a>() and <a href="qdrag.html#supportedActions">supportedActions</a>().</p>
+<!-- @@@defaultAction -->
+<!-- $$$dragCursor[overload1]$$$dragCursorQt::DropAction -->
+<h3 class="fn" id="dragCursor"><a name="dragCursor"></a><span class="type"><a href="qpixmap.html">QPixmap</a></span> QDrag::<span class="name">dragCursor</span>(<span class="type"><a href="../qtcore/qt.html#DropAction-enum">Qt::DropAction</a></span> <i>action</i>) const</h3>
+<p>Returns the drag cursor for the <i>action</i>.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qdrag.html#setDragCursor">setDragCursor</a>().</p>
+<!-- @@@dragCursor -->
+<!-- $$$exec[overload1]$$$execQt::DropActions -->
+<h3 class="fn" id="exec"><a name="exec"></a><span class="type"><a href="../qtcore/qt.html#DropAction-enum">Qt::DropAction</a></span> QDrag::<span class="name">exec</span>(<span class="type"><a href="../qtcore/qt.html#DropAction-enum">Qt::DropActions</a></span> <i>supportedActions</i> = Qt::MoveAction)</h3>
+<p>Starts the drag and drop operation and returns a value indicating the requested drop action when it is completed. The drop actions that the user can choose from are specified in <i>supportedActions</i>. The default proposed action will be selected among the allowed actions in the following order: Move, Copy and Link.</p>
+<p><b>Note:</b> On Linux and <a href="../qtdoc/internationalization.html#macos">macOS</a>, the drag and drop operation can take some time, but this function does not block the event loop. Other events are still delivered to the application while the operation is performed. On Windows, the Qt event loop is blocked during the operation.</p>
+<p>This function was introduced in  Qt 4.3.</p>
+<p><b>See also </b><a href="qdrag.html#cancel">cancel</a>().</p>
+<!-- @@@exec -->
+<!-- $$$exec$$$execQt::DropActionsQt::DropAction -->
+<h3 class="fn" id="exec-1"><a name="exec-1"></a><span class="type"><a href="../qtcore/qt.html#DropAction-enum">Qt::DropAction</a></span> QDrag::<span class="name">exec</span>(<span class="type"><a href="../qtcore/qt.html#DropAction-enum">Qt::DropActions</a></span> <i>supportedActions</i>, <span class="type"><a href="../qtcore/qt.html#DropAction-enum">Qt::DropAction</a></span> <i>defaultDropAction</i>)</h3>
+<p>Starts the drag and drop operation and returns a value indicating the requested drop action when it is completed. The drop actions that the user can choose from are specified in <i>supportedActions</i>.</p>
+<p>The <i>defaultDropAction</i> determines which action will be proposed when the user performs a drag without using modifier keys.</p>
+<p><b>Note:</b> On Linux and <a href="../qtdoc/internationalization.html#macos">macOS</a>, the drag and drop operation can take some time, but this function does not block the event loop. Other events are still delivered to the application while the operation is performed. On Windows, the Qt event loop is blocked during the operation. However, <a href="qdrag.html#exec">QDrag::exec</a>() on Windows causes processEvents() to be called frequently to keep the GUI responsive. If any loops or operations are called while a drag operation is active, it will block the drag operation.</p>
+<p>This function was introduced in  Qt 4.3.</p>
+<!-- @@@exec -->
+<!-- $$$hotSpot[overload1]$$$hotSpot -->
+<h3 class="fn" id="hotSpot"><a name="hotSpot"></a><span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> QDrag::<span class="name">hotSpot</span>() const</h3>
+<p>Returns the position of the hot spot relative to the top-left corner of the cursor.</p>
+<p><b>See also </b><a href="qdrag.html#setHotSpot">setHotSpot</a>().</p>
+<!-- @@@hotSpot -->
+<!-- $$$mimeData[overload1]$$$mimeData -->
+<h3 class="fn" id="mimeData"><a name="mimeData"></a><span class="type"><a href="../qtcore/qmimedata.html">QMimeData</a></span> *QDrag::<span class="name">mimeData</span>() const</h3>
+<p>Returns the MIME data that is encapsulated by the drag object.</p>
+<p><b>See also </b><a href="qdrag.html#setMimeData">setMimeData</a>().</p>
+<!-- @@@mimeData -->
+<!-- $$$pixmap[overload1]$$$pixmap -->
+<h3 class="fn" id="pixmap"><a name="pixmap"></a><span class="type"><a href="qpixmap.html">QPixmap</a></span> QDrag::<span class="name">pixmap</span>() const</h3>
+<p>Returns the pixmap used to represent the data in a drag and drop operation.</p>
+<p><b>See also </b><a href="qdrag.html#setPixmap">setPixmap</a>().</p>
+<!-- @@@pixmap -->
+<!-- $$$setDragCursor[overload1]$$$setDragCursorconstQPixmap&Qt::DropAction -->
+<h3 class="fn" id="setDragCursor"><a name="setDragCursor"></a><span class="type">void</span> QDrag::<span class="name">setDragCursor</span>(const <span class="type"><a href="qpixmap.html">QPixmap</a></span> &amp;<i>cursor</i>, <span class="type"><a href="../qtcore/qt.html#DropAction-enum">Qt::DropAction</a></span> <i>action</i>)</h3>
+<p>Sets the drag <i>cursor</i> for the <i>action</i>. This allows you to override the default native cursors. To revert to using the native cursor for <i>action</i> pass in a null <a href="qpixmap.html">QPixmap</a> as <i>cursor</i>.</p>
+<p>Note: setting the drag cursor for IgnoreAction may not work on all platforms. X11 and <a href="../qtdoc/internationalization.html#macos">macOS</a> has been tested to work. Windows does not support it.</p>
+<p><b>See also </b><a href="qdrag.html#dragCursor">dragCursor</a>().</p>
+<!-- @@@setDragCursor -->
+<!-- $$$setHotSpot[overload1]$$$setHotSpotconstQPoint& -->
+<h3 class="fn" id="setHotSpot"><a name="setHotSpot"></a><span class="type">void</span> QDrag::<span class="name">setHotSpot</span>(const <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> &amp;<i>hotspot</i>)</h3>
+<p>Sets the position of the hot spot relative to the top-left corner of the pixmap used to the point specified by <i>hotspot</i>.</p>
+<p><b>Note:</b> on X11, the pixmap may not be able to keep up with the mouse movements if the hot spot causes the pixmap to be displayed directly under the cursor.</p>
+<p><b>See also </b><a href="qdrag.html#hotSpot">hotSpot</a>().</p>
+<!-- @@@setHotSpot -->
+<!-- $$$setMimeData[overload1]$$$setMimeDataQMimeData* -->
+<h3 class="fn" id="setMimeData"><a name="setMimeData"></a><span class="type">void</span> QDrag::<span class="name">setMimeData</span>(<span class="type"><a href="../qtcore/qmimedata.html">QMimeData</a></span> *<i>data</i>)</h3>
+<p>Sets the data to be sent to the given MIME <i>data</i>. Ownership of the data is transferred to the <a href="qdrag.html">QDrag</a> object.</p>
+<p><b>See also </b><a href="qdrag.html#mimeData">mimeData</a>().</p>
+<!-- @@@setMimeData -->
+<!-- $$$setPixmap[overload1]$$$setPixmapconstQPixmap& -->
+<h3 class="fn" id="setPixmap"><a name="setPixmap"></a><span class="type">void</span> QDrag::<span class="name">setPixmap</span>(const <span class="type"><a href="qpixmap.html">QPixmap</a></span> &amp;<i>pixmap</i>)</h3>
+<p>Sets <i>pixmap</i> as the pixmap used to represent the data in a drag and drop operation. You can only set a pixmap before the drag is started.</p>
+<p><b>See also </b><a href="qdrag.html#pixmap">pixmap</a>().</p>
+<!-- @@@setPixmap -->
+<!-- $$$source[overload1]$$$source -->
+<h3 class="fn" id="source"><a name="source"></a><span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *QDrag::<span class="name">source</span>() const</h3>
+<p>Returns the source of the drag object. This is the widget where the drag and drop operation originated.</p>
+<!-- @@@source -->
+<!-- $$$supportedActions[overload1]$$$supportedActions -->
+<h3 class="fn" id="supportedActions"><a name="supportedActions"></a><span class="type"><a href="../qtcore/qt.html#DropAction-enum">Qt::DropActions</a></span> QDrag::<span class="name">supportedActions</span>() const</h3>
+<p>Returns the set of possible drop actions for this drag operation.</p>
+<p><b>See also </b><a href="qdrag.html#exec">exec</a>() and <a href="qdrag.html#defaultAction">defaultAction</a>().</p>
+<!-- @@@supportedActions -->
+<!-- $$$target[overload1]$$$target -->
+<h3 class="fn" id="target"><a name="target"></a><span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *QDrag::<span class="name">target</span>() const</h3>
+<p>Returns the target of the drag and drop operation. This is the widget where the drag object was dropped.</p>
+<!-- @@@target -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

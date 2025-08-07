@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qabstractitemmodeltester.cpp -->
+  <title>QAbstractItemModelTester Class | Qt Test 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qttest-index.html">Qt Test</a></td><td ><a href="qttest-module.html">C++ Classes</a></td><td >QAbstractItemModelTester</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qttest-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#usage">Usage</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAbstractItemModelTester Class</h1>
+<!-- $$$QAbstractItemModelTester-brief -->
+<p>The <a href="qabstractitemmodeltester.html">QAbstractItemModelTester</a> class helps testing <a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a> subclasses. <a href="#details">More...</a></p>
+<!-- @@@QAbstractItemModelTester -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAbstractItemModelTester&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += testlib</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.11</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.11.</p>
+<ul>
+<li><a href="qabstractitemmodeltester-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qabstractitemmodeltester.html#FailureReportingMode-enum">FailureReportingMode</a></b> { QtTest, Warning, Fatal }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qabstractitemmodeltester.html#QAbstractItemModelTester-1">QAbstractItemModelTester</a></b>(QAbstractItemModel *<i>model</i>, QAbstractItemModelTester::FailureReportingMode <i>mode</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qabstractitemmodeltester.html#QAbstractItemModelTester">QAbstractItemModelTester</a></b>(QAbstractItemModel *<i>model</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QAbstractItemModelTester::FailureReportingMode </td><td class="memItemRight bottomAlign"><b><a href="qabstractitemmodeltester.html#failureReportingMode">failureReportingMode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QAbstractItemModel *</td><td class="memItemRight bottomAlign"><b><a href="qabstractitemmodeltester.html#model">model</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAbstractItemModelTester-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qabstractitemmodeltester.html">QAbstractItemModelTester</a> class is a utility class to test item models.</p>
+<p>When implementing an item model (that is, a concrete <a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a> subclass) one must abide to a very strict set of rules that ensure consistency for users of the model (views, proxy models, and so on).</p>
+<p>For instance, for a given index, a model's reimplementation of <a href="../qtcore/qabstractitemmodel.html#hasChildren">hasChildren()</a> must be consistent with the values returned by <a href="../qtcore/qabstractitemmodel.html#rowCount">rowCount()</a> and <a href="../qtcore/qabstractitemmodel.html#columnCount">columnCount()</a>.</p>
+<p><a href="qabstractitemmodeltester.html">QAbstractItemModelTester</a> helps catching the most common errors in custom item model classes. By performing a series of tests, it will try to check that the model status is consistent at all times. The tests will be repeated automatically every time the model is modified.</p>
+<p><a href="qabstractitemmodeltester.html">QAbstractItemModelTester</a> employs non-destructive tests, which typically consist in reading data and metadata out of a given item model. <a href="qabstractitemmodeltester.html">QAbstractItemModelTester</a> will also attempt illegal modifications of the model. In models which are properly implemented, such attempts should be rejected, and no data should be changed as a consequence.</p>
+<a name="usage"></a>
+<h3 id="usage">Usage</h3>
+<p>Using <a href="qabstractitemmodeltester.html">QAbstractItemModelTester</a> is straightforward. In a <a href="qtest-overview.html">test case</a> it is sufficient to create an instance, passing the model that needs to be tested to the constructor:</p>
+<pre class="cpp">
+
+  MyModel <span class="operator">*</span>modelToBeTested <span class="operator">=</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>;
+  <span class="keyword">auto</span> tester <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qabstractitemmodeltester.html#QAbstractItemModelTester">QAbstractItemModelTester</a></span>(modelToBeTested);
+
+</pre>
+<p><a href="qabstractitemmodeltester.html">QAbstractItemModelTester</a> will report testing failures through the Qt Test logging mechanisms.</p>
+<p>It is also possible to use <a href="qabstractitemmodeltester.html">QAbstractItemModelTester</a> outside of a test case. For instance, it may be useful to test an item model used by an application without the need of building an explicit unit test for such a model (which might be challenging). In order to use <a href="qabstractitemmodeltester.html">QAbstractItemModelTester</a> outside of a test case, pass one of the <code>QAbstractItemModelTester::FailureReportingMode</code> enumerators to its constructor, therefore specifying how failures should be logged.</p>
+<p><a href="qabstractitemmodeltester.html">QAbstractItemModelTester</a> may also report additional debugging information as logging messages under the <code>qt.modeltest</code> logging category. Such debug logging is disabled by default; refer to the <a href="../qtcore/qloggingcategory.html">QLoggingCategory</a> documentation to learn how to enable it.</p>
+<p><b>Note: </b>While <a href="qabstractitemmodeltester.html">QAbstractItemModelTester</a> is a valid help for development and testing of custom item models, it does not (and cannot) catch all possible problems in <a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a> subclasses. Notably, it will never perform meaningful destructive testing of a model, which must be therefore tested separately.</p></div>
+<p><b>See also </b><a href="../qtwidgets/model-view-programming.html">Model/View Programming</a> and <a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a>.</p>
+<!-- @@@QAbstractItemModelTester -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$FailureReportingMode$$$QtTest$$$Warning$$$Fatal -->
+<h3 class="fn" id="FailureReportingMode-enum"><a name="FailureReportingMode-enum"></a>enum QAbstractItemModelTester::<span class="name">FailureReportingMode</span></h3>
+<p>This enumeration specifies how <a href="qabstractitemmodeltester.html">QAbstractItemModelTester</a> should report a failure when it tests a <a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a> subclass.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QAbstractItemModelTester::QtTest</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The failures will be reported through <a href="qttest-module.html">QtTest</a>'s logging mechanism.</td></tr>
+<tr><td class="topAlign"><code>QAbstractItemModelTester::Warning</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The failures will be reported as warning messages in the <code>qt.modeltest</code> logging category.</td></tr>
+<tr><td class="topAlign"><code>QAbstractItemModelTester::Fatal</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">A failure will cause immediate and abnormal program termination. The reason for the failure will be reported using <code>qFatal()</code>.</td></tr>
+</table></div>
+<!-- @@@FailureReportingMode -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QAbstractItemModelTester$$$QAbstractItemModelTesterQAbstractItemModel*QAbstractItemModelTester::FailureReportingModeQObject* -->
+<h3 class="fn" id="QAbstractItemModelTester-1"><a name="QAbstractItemModelTester-1"></a>QAbstractItemModelTester::<span class="name">QAbstractItemModelTester</span>(<span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span> *<i>model</i>, <span class="type"><a href="qabstractitemmodeltester.html#FailureReportingMode-enum">QAbstractItemModelTester::FailureReportingMode</a></span> <i>mode</i>, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Creates a model tester instance, with the given <i>parent</i>, that will test the model <i>model</i>, using the specified <i>mode</i> to report test failures.</p>
+<p><b>See also </b><a href="qabstractitemmodeltester.html#FailureReportingMode-enum">QAbstractItemModelTester::FailureReportingMode</a>.</p>
+<!-- @@@QAbstractItemModelTester -->
+<!-- $$$QAbstractItemModelTester[overload1]$$$QAbstractItemModelTesterQAbstractItemModel*QObject* -->
+<h3 class="fn" id="QAbstractItemModelTester"><a name="QAbstractItemModelTester"></a>QAbstractItemModelTester::<span class="name">QAbstractItemModelTester</span>(<span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span> *<i>model</i>, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Creates a model tester instance, with the given <i>parent</i>, that will test the model <i>model</i>.</p>
+<!-- @@@QAbstractItemModelTester -->
+<!-- $$$failureReportingMode[overload1]$$$failureReportingMode -->
+<h3 class="fn" id="failureReportingMode"><a name="failureReportingMode"></a><span class="type"><a href="qabstractitemmodeltester.html#FailureReportingMode-enum">QAbstractItemModelTester::FailureReportingMode</a></span> QAbstractItemModelTester::<span class="name">failureReportingMode</span>() const</h3>
+<p>Returns the mode that this instancing is using to report test failures.</p>
+<p><b>See also </b><a href="qabstractitemmodeltester.html#FailureReportingMode-enum">QAbstractItemModelTester::FailureReportingMode</a>.</p>
+<!-- @@@failureReportingMode -->
+<!-- $$$model[overload1]$$$model -->
+<h3 class="fn" id="model"><a name="model"></a><span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span> *QAbstractItemModelTester::<span class="name">model</span>() const</h3>
+<p>Returns the model that this instance is testing.</p>
+<!-- @@@model -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

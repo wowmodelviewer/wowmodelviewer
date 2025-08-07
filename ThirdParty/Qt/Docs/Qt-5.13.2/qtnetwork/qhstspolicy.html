@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qhstspolicy.cpp -->
+  <title>QHstsPolicy Class | Qt Network 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtnetwork-index.html">Qt Network</a></td><td ><a href="qtnetwork-module.html">C++ Classes</a></td><td >QHstsPolicy</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtnetwork-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QHstsPolicy Class</h1>
+<!-- $$$QHstsPolicy-brief -->
+<p>The <a href="qhstspolicy.html">QHstsPolicy</a> class specifies that a host supports HTTP Strict Transport Security policy (HSTS). <a href="#details">More...</a></p>
+<!-- @@@QHstsPolicy -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QHstsPolicy&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += network</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.9</td></tr></table></div><p>This class was introduced in  Qt 5.9.</p>
+<ul>
+<li><a href="qhstspolicy-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qhstspolicy.html#PolicyFlag-enum">PolicyFlag</a></b> { IncludeSubDomains }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qhstspolicy.html#PolicyFlag-enum">PolicyFlags</a></b></td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qhstspolicy.html#QHstsPolicy-2">QHstsPolicy</a></b>(const QHstsPolicy &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qhstspolicy.html#QHstsPolicy-1">QHstsPolicy</a></b>(const QDateTime &amp;<i>expiry</i>, QHstsPolicy::PolicyFlags <i>flags</i>, const QString &amp;<i>host</i>, QUrl::ParsingMode <i>mode</i> = QUrl::DecodedMode)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qhstspolicy.html#QHstsPolicy">QHstsPolicy</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QHstsPolicy &amp;</td><td class="memItemRight bottomAlign"><b><a href="qhstspolicy.html#operator-eq">operator=</a></b>(const QHstsPolicy &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qhstspolicy.html#dtor.QHstsPolicy">~QHstsPolicy</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDateTime </td><td class="memItemRight bottomAlign"><b><a href="qhstspolicy.html#expiry">expiry</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qhstspolicy.html#host">host</a></b>(QUrl::ComponentFormattingOptions <i>options</i> = QUrl::FullyDecoded) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qhstspolicy.html#includesSubDomains">includesSubDomains</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qhstspolicy.html#isExpired">isExpired</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qhstspolicy.html#setExpiry">setExpiry</a></b>(const QDateTime &amp;<i>expiry</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qhstspolicy.html#setHost">setHost</a></b>(const QString &amp;<i>host</i>, QUrl::ParsingMode <i>mode</i> = QUrl::DecodedMode)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qhstspolicy.html#setIncludesSubDomains">setIncludesSubDomains</a></b>(bool <i>include</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qhstspolicy.html#swap">swap</a></b>(QHstsPolicy &amp;<i>other</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QHstsPolicy-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>HSTS policy defines a period of time during which <a href="qnetworkaccessmanager.html">QNetworkAccessManager</a> should only access a host in a secure fashion. HSTS policy is defined by RFC6797.</p>
+<p>You can set expiry time and host name for this policy, and control whether it applies to subdomains, either in the constructor or by calling <a href="qhstspolicy.html#setExpiry">setExpiry</a>(), <a href="qhstspolicy.html#setHost">setHost</a>() and setIncludesSubdomains().</p>
+</div>
+<p><b>See also </b><a href="qnetworkaccessmanager.html#setStrictTransportSecurityEnabled">QNetworkAccessManager::setStrictTransportSecurityEnabled</a>().</p>
+<!-- @@@QHstsPolicy -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$PolicyFlag$$$IncludeSubDomains -->
+<h3 class="flags" id="PolicyFlag-enum"><a name="PolicyFlag-enum"></a>enum QHstsPolicy::<span class="name">PolicyFlag</span><br/>flags QHstsPolicy::<span class="name">PolicyFlags</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QHstsPolicy::IncludeSubDomains</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Indicates whether a policy must include subdomains</td></tr>
+</table></div>
+<p>The PolicyFlags type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;PolicyFlag&gt;. It stores an OR combination of PolicyFlag values.</p>
+<!-- @@@PolicyFlag -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QHstsPolicy$$$QHstsPolicyconstQHstsPolicy& -->
+<h3 class="fn" id="QHstsPolicy-2"><a name="QHstsPolicy-2"></a>QHstsPolicy::<span class="name">QHstsPolicy</span>(const <span class="type"><a href="qhstspolicy.html#QHstsPolicy">QHstsPolicy</a></span> &amp;<i>other</i>)</h3>
+<p>Creates a copy of <i>other</i> object.</p>
+<!-- @@@QHstsPolicy -->
+<!-- $$$QHstsPolicy$$$QHstsPolicyconstQDateTime&QHstsPolicy::PolicyFlagsconstQString&QUrl::ParsingMode -->
+<h3 class="fn" id="QHstsPolicy-1"><a name="QHstsPolicy-1"></a>QHstsPolicy::<span class="name">QHstsPolicy</span>(const <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> &amp;<i>expiry</i>, <span class="type"><a href="qhstspolicy.html#PolicyFlag-enum">QHstsPolicy::PolicyFlags</a></span> <i>flags</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>host</i>, <span class="type"><a href="../qtcore/qurl.html#ParsingMode-enum">QUrl::ParsingMode</a></span> <i>mode</i> = QUrl::DecodedMode)</h3>
+<p>Constructs <a href="qhstspolicy.html">QHstsPolicy</a> with <i>expiry</i> (in UTC); <i>flags</i> is a value indicating whether this policy must also include subdomains, <i>host</i> data is interpreted according to <i>mode</i>.</p>
+<p><b>See also </b><a href="../qtcore/qurl.html#setHost">QUrl::setHost</a>(), <a href="../qtcore/qurl.html#ParsingMode-enum">QUrl::ParsingMode</a>, and <a href="qhstspolicy.html#PolicyFlag-enum">QHstsPolicy::PolicyFlag</a>.</p>
+<!-- @@@QHstsPolicy -->
+<!-- $$$QHstsPolicy[overload1]$$$QHstsPolicy -->
+<h3 class="fn" id="QHstsPolicy"><a name="QHstsPolicy"></a>QHstsPolicy::<span class="name">QHstsPolicy</span>()</h3>
+<p>Constructs an invalid (expired) policy with empty host name and subdomains not included.</p>
+<!-- @@@QHstsPolicy -->
+<!-- $$$operator=[overload1]$$$operator=constQHstsPolicy& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qhstspolicy.html#QHstsPolicy">QHstsPolicy</a></span> &amp;QHstsPolicy::<span class="name">operator=</span>(const <span class="type"><a href="qhstspolicy.html#QHstsPolicy">QHstsPolicy</a></span> &amp;<i>other</i>)</h3>
+<p>Copy-assignment operator, makes a copy of <i>other</i>.</p>
+<!-- @@@operator= -->
+<!-- $$$~QHstsPolicy[overload1]$$$~QHstsPolicy -->
+<h3 class="fn" id="dtor.QHstsPolicy"><a name="dtor.QHstsPolicy"></a>QHstsPolicy::<span class="name">~QHstsPolicy</span>()</h3>
+<p>Destructor.</p>
+<!-- @@@~QHstsPolicy -->
+<!-- $$$expiry[overload1]$$$expiry -->
+<h3 class="fn" id="expiry"><a name="expiry"></a><span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> QHstsPolicy::<span class="name">expiry</span>() const</h3>
+<p>Returns the expiration date for the policy (in UTC).</p>
+<p><b>See also </b><a href="qhstspolicy.html#setExpiry">setExpiry</a>().</p>
+<!-- @@@expiry -->
+<!-- $$$host[overload1]$$$hostQUrl::ComponentFormattingOptions -->
+<h3 class="fn" id="host"><a name="host"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QHstsPolicy::<span class="name">host</span>(<span class="type"><a href="../qtcore/qurl.html#ComponentFormattingOption-enum">QUrl::ComponentFormattingOptions</a></span> <i>options</i> = QUrl::FullyDecoded) const</h3>
+<p>Returns a host for a given policy, formatted according to <i>options</i>.</p>
+<p><b>See also </b><a href="qhstspolicy.html#setHost">setHost</a>(), <a href="../qtcore/qurl.html#host">QUrl::host</a>(), and <a href="../qtcore/qurl.html#ComponentFormattingOption-enum">QUrl::ComponentFormattingOptions</a>.</p>
+<!-- @@@host -->
+<!-- $$$includesSubDomains[overload1]$$$includesSubDomains -->
+<h3 class="fn" id="includesSubDomains"><a name="includesSubDomains"></a><span class="type">bool</span> QHstsPolicy::<span class="name">includesSubDomains</span>() const</h3>
+<p>Returns <code>true</code> if this policy also includes subdomains.</p>
+<p><b>See also </b><a href="qhstspolicy.html#setIncludesSubDomains">setIncludesSubDomains</a>().</p>
+<!-- @@@includesSubDomains -->
+<!-- $$$isExpired[overload1]$$$isExpired -->
+<h3 class="fn" id="isExpired"><a name="isExpired"></a><span class="type">bool</span> QHstsPolicy::<span class="name">isExpired</span>() const</h3>
+<p>Return <code>true</code> if this policy has a valid expiration date and this date is greater than QDateTime::currentGetDateTimeUtc().</p>
+<p><b>See also </b><a href="qhstspolicy.html#setExpiry">setExpiry</a>() and <a href="qhstspolicy.html#expiry">expiry</a>().</p>
+<!-- @@@isExpired -->
+<!-- $$$setExpiry[overload1]$$$setExpiryconstQDateTime& -->
+<h3 class="fn" id="setExpiry"><a name="setExpiry"></a><span class="type">void</span> QHstsPolicy::<span class="name">setExpiry</span>(const <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> &amp;<i>expiry</i>)</h3>
+<p>Sets the expiration date for the policy (in UTC) to <i>expiry</i>.</p>
+<p><b>See also </b><a href="qhstspolicy.html#expiry">expiry</a>().</p>
+<!-- @@@setExpiry -->
+<!-- $$$setHost[overload1]$$$setHostconstQString&QUrl::ParsingMode -->
+<h3 class="fn" id="setHost"><a name="setHost"></a><span class="type">void</span> QHstsPolicy::<span class="name">setHost</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>host</i>, <span class="type"><a href="../qtcore/qurl.html#ParsingMode-enum">QUrl::ParsingMode</a></span> <i>mode</i> = QUrl::DecodedMode)</h3>
+<p>Sets a host, <i>host</i> data is interpreted according to <i>mode</i> parameter.</p>
+<p><b>See also </b><a href="qhstspolicy.html#host">host</a>(), <a href="../qtcore/qurl.html#setHost">QUrl::setHost</a>(), and <a href="../qtcore/qurl.html#ParsingMode-enum">QUrl::ParsingMode</a>.</p>
+<!-- @@@setHost -->
+<!-- $$$setIncludesSubDomains[overload1]$$$setIncludesSubDomainsbool -->
+<h3 class="fn" id="setIncludesSubDomains"><a name="setIncludesSubDomains"></a><span class="type">void</span> QHstsPolicy::<span class="name">setIncludesSubDomains</span>(<span class="type">bool</span> <i>include</i>)</h3>
+<p>Sets whether subdomains are included for this policy to <i>include</i>.</p>
+<p><b>See also </b><a href="qhstspolicy.html#includesSubDomains">includesSubDomains</a>().</p>
+<!-- @@@setIncludesSubDomains -->
+<!-- $$$swap[overload1]$$$swapQHstsPolicy& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QHstsPolicy::<span class="name">swap</span>(<span class="type"><a href="qhstspolicy.html#QHstsPolicy">QHstsPolicy</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps this policy with the <i>other</i> policy.</p>
+<!-- @@@swap -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

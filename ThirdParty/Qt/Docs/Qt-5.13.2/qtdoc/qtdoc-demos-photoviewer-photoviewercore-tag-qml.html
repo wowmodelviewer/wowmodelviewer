@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- photoviewer.qdoc -->
+  <title>Qt Quick Demo - Photo Viewer | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Qt Quick Demo - Photo Viewer</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<h1 class="title">Qt Quick Demo - Photo Viewer</h1>
+<span class="subtitle"></span>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-flipable.html">Flipable</a></span> {
+      <span class="name">id</span>: <span class="name">flipable</span>
+
+      property <span class="type">alias</span> <span class="name">frontLabel</span>: <span class="name">frontButton</span>.<span class="name">label</span>
+      property <span class="type">alias</span> <span class="name">backLabel</span>: <span class="name">backButton</span>.<span class="name">label</span>
+
+      property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">angle</span>: <span class="number">0</span>
+      property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">randomAngle</span>: <span class="name">Math</span>.<span class="name">random</span>() <span class="operator">*</span> (<span class="number">2</span> <span class="operator">*</span> <span class="number">6</span> <span class="operator">+</span> <span class="number">1</span>) <span class="operator">-</span> <span class="number">6</span>
+      property <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span> <span class="name">flipped</span>: <span class="number">false</span>
+
+      signal <span class="type">frontClicked</span>
+      signal <span class="type">backClicked</span>
+      signal <span class="type">tagChanged</span>(string tag)
+
+      <span class="name">front</span>: <span class="name">EditableButton</span> {
+          <span class="name">id</span>: <span class="name">frontButton</span>; <span class="name">rotation</span>: <span class="name">flipable</span>.<span class="name">randomAngle</span>
+          <span class="type">anchors</span> { <span class="name">centerIn</span>: <span class="name">parent</span>; <span class="name">verticalCenterOffset</span>: -<span class="number">20</span> }
+          <span class="name">onClicked</span>: <span class="name">flipable</span>.<span class="name">frontClicked</span>()
+          <span class="name">onLabelChanged</span>: <span class="name">flipable</span>.<span class="name">tagChanged</span>(<span class="name">label</span>)
+      }
+
+      <span class="name">back</span>: <span class="name">Button</span> {
+          <span class="name">id</span>: <span class="name">backButton</span>; <span class="name">tint</span>: <span class="string">&quot;red&quot;</span>; <span class="name">rotation</span>: <span class="name">flipable</span>.<span class="name">randomAngle</span>
+          <span class="type">anchors</span> { <span class="name">centerIn</span>: <span class="name">parent</span>; <span class="name">verticalCenterOffset</span>: -<span class="number">20</span> }
+          <span class="name">onClicked</span>: <span class="name">flipable</span>.<span class="name">backClicked</span>()
+      }
+
+      <span class="name">transform</span>: <span class="name">Rotation</span> {
+          <span class="name">origin</span>.x: <span class="name">flipable</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">2</span>; <span class="name">origin</span>.y: <span class="name">flipable</span>.<span class="name">height</span> <span class="operator">/</span> <span class="number">2</span>
+          <span class="name">axis</span>.x: <span class="number">0</span>; <span class="name">axis</span>.y: <span class="number">1</span>; <span class="name">axis</span>.z: <span class="number">0</span>
+          <span class="name">angle</span>: <span class="name">flipable</span>.<span class="name">angle</span>
+      }
+
+      <span class="name">states</span>: <span class="name">State</span> {
+          <span class="name">name</span>: <span class="string">&quot;back&quot;</span>; <span class="name">when</span>: <span class="name">flipable</span>.<span class="name">flipped</span>
+          <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> { <span class="name">target</span>: <span class="name">flipable</span>; <span class="name">angle</span>: <span class="number">180</span> }
+      }
+
+      <span class="name">transitions</span>: <span class="name">Transition</span> {
+          <span class="type"><a href="../qtquick/qml-qtquick-parallelanimation.html">ParallelAnimation</a></span> {
+              <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">properties</span>: <span class="string">&quot;angle&quot;</span>; <span class="name">duration</span>: <span class="number">400</span> }
+              <span class="type"><a href="../qtquick/qml-qtquick-sequentialanimation.html">SequentialAnimation</a></span> {
+                  <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">target</span>: <span class="name">flipable</span>; <span class="name">property</span>: <span class="string">&quot;scale&quot;</span>; <span class="name">to</span>: <span class="number">0.8</span>; <span class="name">duration</span>: <span class="number">200</span> }
+                  <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">target</span>: <span class="name">flipable</span>; <span class="name">property</span>: <span class="string">&quot;scale&quot;</span>; <span class="name">to</span>: <span class="number">1.0</span>; <span class="name">duration</span>: <span class="number">200</span> }
+              }
+          }
+      }
+  }
+
+</pre>

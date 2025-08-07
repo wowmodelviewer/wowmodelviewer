@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- cli-shell.qdoc -->
+  <title>shell | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td><td >shell</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<p class="naviNextPrevious headerNavi">
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#synopsis">Synopsis</a></li>
+<li class="level1"><a href="#description">Description</a></li>
+<li class="level1"><a href="#options">Options</a></li>
+<li class="level2"><a href="#op-op-op-op-build-op-op-directory-op-op-op-op-d-op-lt-op-directory-op-gt-op"><code>--build-directory|-d &lt;directory&gt;</code></a></li>
+<li class="level2"><a href="#op-op-op-op-op-op-file-op-op-op-op-f-op-lt-op-file-op-gt-op-op-op"><code>[--file|-f &lt;file&gt;]</code></a></li>
+<li class="level2"><a href="#op-op-op-op-products-op-op-op-op-p-op-lt-op-name-op-gt-op-op-op-op-op-op-lt-op-name-op-gt-op-op-op-op-op-op-op-op-op"><code>--products|-p &lt;name&gt;[,&lt;name&gt;..&#x2e;]</code></a></li>
+<li class="level2"><a href="#op-op-op-op-settings-op-op-dir-op-lt-op-directory-op-gt-op"><code>--settings-dir &lt;directory&gt;</code></a></li>
+<li class="level1"><a href="#parameters">Parameters</a></li>
+<li class="level2"><a href="#config-configuration-op-op-name"><code>config:configuration-name</code></a></li>
+<li class="level2"><a href="#property-value"><code>property:value</code></a></li>
+<li class="level1"><a href="#examples">Examples</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">shell</h1>
+<span class="subtitle"></span>
+<!-- $$$cli-shell.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="synopsis"></a>
+<h2 id="synopsis">Synopsis</h2>
+<pre class="cpp">
+
+  qbs shell <span class="operator">[</span>options<span class="operator">]</span> <span class="operator">[</span>config:configuration<span class="operator">-</span>name<span class="operator">]</span> <span class="operator">[</span>property:value<span class="operator">]</span>
+
+</pre>
+<a name="description"></a>
+<h2 id="description">Description</h2>
+<p>Opens a shell in the environment that a build with the specified parameters would use.</p>
+<p>For more information, see <a href="shell.html#">Using the Shell</a>.</p>
+<a name="options"></a>
+<h2 id="options">Options</h2>
+<a name="op-op-op-op-build-op-op-directory-op-op-op-op-d-op-lt-op-directory-op-gt-op"></a>
+<h3 id="op-op-op-op-build-op-op-directory-op-op-op-op-d-op-lt-op-directory-op-gt-op"><code>--build-directory|-d &lt;directory&gt;</code></h3>
+<p>Specifies a <code>&lt;directory&gt;</code> where build artifacts are stored.</p>
+<p>The default value is the current directory unless <code>preferences.defaultBuildDirectory</code> is set.</p>
+<p>Relative paths will be interpreted relative to the current directory.</p>
+<p>You can use the following special values as placeholders:</p>
+<ul>
+<li><code>@project</code> is expanded to the name of the project file excluding the extension <code>.qbs</code>.</li>
+<li><code>@path</code> is expanded to the name of the directory containing the project file.</li>
+</ul>
+<a name="op-op-op-op-op-op-file-op-op-op-op-f-op-lt-op-file-op-gt-op-op-op"></a>
+<h3 id="op-op-op-op-op-op-file-op-op-op-op-f-op-lt-op-file-op-gt-op-op-op"><code>[--file|-f &lt;file&gt;]</code></h3>
+<p>Uses <code>&lt;file&gt;</code> as the project file. If <code>&lt;file&gt;</code> is a directory and it contains a single file with the extension <code>.qbs</code>, that file will be used.</p>
+<p>If this option is not given at all, the behavior is the same as for <code>-f &lt;working-dir&gt;</code>.</p>
+<a name="op-op-op-op-products-op-op-op-op-p-op-lt-op-name-op-gt-op-op-op-op-op-op-lt-op-name-op-gt-op-op-op-op-op-op-op-op-op"></a>
+<h3 id="op-op-op-op-products-op-op-op-op-p-op-lt-op-name-op-gt-op-op-op-op-op-op-lt-op-name-op-gt-op-op-op-op-op-op-op-op-op"><code>--products|-p &lt;name&gt;[,&lt;name&gt;..&#x2e;]</code></h3>
+<p>Takes only the <a href="qml-qbslanguageitems-product.html">products</a> specified by <code>&lt;name&gt;</code> and their dependencies into account.</p>
+<a name="op-op-op-op-settings-op-op-dir-op-lt-op-directory-op-gt-op"></a>
+<h3 id="op-op-op-op-settings-op-op-dir-op-lt-op-directory-op-gt-op"><code>--settings-dir &lt;directory&gt;</code></h3>
+<p>Reads all settings (such as <a href="qml-qbslanguageitems-profile.html">profile</a> information) from the specified <code>&lt;directory&gt;</code>. If the directory does not exist, it will be created.</p>
+<p>The default value is system-specific. For example:</p>
+<ul>
+<li>Linux: <code>$HOME/.config/QtProject/qbs</code></li>
+<li>Windows: <code>%APPDATA%\QtProject\qbs</code></li>
+<li>macOS: <code>$HOME/Library/Preferences/qbs</code></li>
+</ul>
+<a name="parameters"></a>
+<h2 id="parameters">Parameters</h2>
+<a name="config-configuration-op-op-name"></a>
+<h3 id="config-configuration-op-op-name"><code>config:configuration-name</code></h3>
+<p>Specifies the build configuration to use.</p>
+<p>Qbs can build a project for one or multiple configurations at once, each having a different set of parameters. The <code>config</code> parameter has a special function: with each occurrence a new configuration instance begins and all subsequent parameters until the next <code>config</code> are assigned to this instance. Parameter assignments before the first occurrence of <code>config</code> are applied to all build configurations. Inside products and modules, the current active build configuration can be retrieved via <a href="qml-qbsmodules-qbs.html#configurationName-prop">qbs.configurationName</a>.</p>
+<p>In the following snippet, a profile <code>clang</code> is applied to all configurations while <code>cpp.optimization</code> is different for <code>debug</code> and <code>release</code>:</p>
+<pre class="cpp">
+
+  profile:clang config:debug cpp<span class="operator">.</span>optimization:none config:release cpp<span class="operator">.</span>optimization:small
+
+</pre>
+<p>The value of <code>config</code> determines the name of the build folder and affects the default value of the <a href="qml-qbsmodules-qbs.html#buildVariant-prop">qbs.buildVariant</a> property. Qbs knows the <code>config</code> values <code>&quot;debug&quot;</code> and <code>&quot;release&quot;</code>, but in general any name can be chosen. When naming configurations created for special purposes, follow the rules for legal names generally used in programming languages:</p>
+<ul>
+<li>The first character must be a letter (a-z), an underscore (_), or a dollar sign ($).</li>
+<li>Subsequent characters may be letters, digits, underscores, or dollar signs.</li>
+</ul>
+<a name="property-value"></a>
+<h3 id="property-value"><code>property:value</code></h3>
+<p>Property values set in project files or profiles can be overridden on the command line. The syntax is:</p>
+<pre class="cpp">
+
+  <span class="operator">&lt;</span>prefix<span class="operator">&gt;</span><span class="operator">.</span><span class="operator">&lt;</span>property<span class="operator">-</span>name<span class="operator">&gt;</span>:<span class="operator">&lt;</span>property<span class="operator">-</span>value<span class="operator">&gt;</span>
+
+</pre>
+<p>For more information, see <a href="language-introduction.html#overriding-property-values-from-the-command-line">Overriding Property Values from the Command Line</a>.</p>
+<a name="examples"></a>
+<h2 id="examples">Examples</h2>
+<p>Opens a shell with the same environment that Qbs uses when building the project:</p>
+<pre class="cpp">
+
+  qbs shell
+
+</pre>
+</div>
+<!-- @@@cli-shell.html -->
+<p class="naviNextPrevious footerNavi">
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

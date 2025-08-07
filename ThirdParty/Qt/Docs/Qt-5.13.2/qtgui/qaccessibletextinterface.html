@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qaccessible.cpp -->
+  <title>QAccessibleTextInterface Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QAccessibleTextInterface</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAccessibleTextInterface Class</h1>
+<!-- $$$QAccessibleTextInterface-brief -->
+<p>The <a href="qaccessibletextinterface.html">QAccessibleTextInterface</a> class implements support for text handling. <a href="#details">More...</a></p>
+<!-- @@@QAccessibleTextInterface -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAccessibleTextInterface&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr></table></div><ul>
+<li><a href="qaccessibletextinterface-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qaccessibletextinterface.html#dtor.QAccessibleTextInterface">~QAccessibleTextInterface</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qaccessibletextinterface.html#addSelection">addSelection</a></b>(int <i>startOffset</i>, int <i>endOffset</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QString </td><td class="memItemRight bottomAlign"><b><a href="qaccessibletextinterface.html#attributes">attributes</a></b>(int <i>offset</i>, int *<i>startOffset</i>, int *<i>endOffset</i>) const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qaccessibletextinterface.html#characterCount">characterCount</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QRect </td><td class="memItemRight bottomAlign"><b><a href="qaccessibletextinterface.html#characterRect">characterRect</a></b>(int <i>offset</i>) const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qaccessibletextinterface.html#cursorPosition">cursorPosition</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qaccessibletextinterface.html#offsetAtPoint">offsetAtPoint</a></b>(const QPoint &amp;<i>point</i>) const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qaccessibletextinterface.html#removeSelection">removeSelection</a></b>(int <i>selectionIndex</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qaccessibletextinterface.html#scrollToSubstring">scrollToSubstring</a></b>(int <i>startIndex</i>, int <i>endIndex</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qaccessibletextinterface.html#selection">selection</a></b>(int <i>selectionIndex</i>, int *<i>startOffset</i>, int *<i>endOffset</i>) const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qaccessibletextinterface.html#selectionCount">selectionCount</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qaccessibletextinterface.html#setCursorPosition">setCursorPosition</a></b>(int <i>position</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qaccessibletextinterface.html#setSelection">setSelection</a></b>(int <i>selectionIndex</i>, int <i>startOffset</i>, int <i>endOffset</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QString </td><td class="memItemRight bottomAlign"><b><a href="qaccessibletextinterface.html#text">text</a></b>(int <i>startOffset</i>, int <i>endOffset</i>) const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QString </td><td class="memItemRight bottomAlign"><b><a href="qaccessibletextinterface.html#textAfterOffset">textAfterOffset</a></b>(int <i>offset</i>, QAccessible::TextBoundaryType <i>boundaryType</i>, int *<i>startOffset</i>, int *<i>endOffset</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QString </td><td class="memItemRight bottomAlign"><b><a href="qaccessibletextinterface.html#textAtOffset">textAtOffset</a></b>(int <i>offset</i>, QAccessible::TextBoundaryType <i>boundaryType</i>, int *<i>startOffset</i>, int *<i>endOffset</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QString </td><td class="memItemRight bottomAlign"><b><a href="qaccessibletextinterface.html#textBeforeOffset">textBeforeOffset</a></b>(int <i>offset</i>, QAccessible::TextBoundaryType <i>boundaryType</i>, int *<i>startOffset</i>, int *<i>endOffset</i>) const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAccessibleTextInterface-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This interface corresponds to the IAccessibleText interface. It should be implemented for widgets that display more text than a plain label. Labels should be represented by only <a href="qaccessibleinterface.html">QAccessibleInterface</a> and return their text as name (<a href="qaccessibleinterface.html#text">QAccessibleInterface::text</a>() with <a href="qaccessible.html#Text-enum">QAccessible::Name</a> as type). The <a href="qaccessibletextinterface.html">QAccessibleTextInterface</a> is typically for text that a screen reader might want to read line by line, and for widgets that support text selection and input. This interface is, for example, implemented for <a href="../qtwidgets/qlineedit.html">QLineEdit</a>.</p>
+<p><a href="http://www.linux-foundation.org/en/Accessibility/IAccessible2">IAccessible2 Specification</a></p>
+</div>
+<!-- @@@QAccessibleTextInterface -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$~QAccessibleTextInterface[overload1]$$$~QAccessibleTextInterface -->
+<h3 class="fn" id="dtor.QAccessibleTextInterface"><a name="dtor.QAccessibleTextInterface"></a><code>[virtual] </code>QAccessibleTextInterface::<span class="name">~QAccessibleTextInterface</span>()</h3>
+<p>Destroys the <a href="qaccessibletextinterface.html">QAccessibleTextInterface</a>.</p>
+<!-- @@@~QAccessibleTextInterface -->
+<!-- $$$addSelection[overload1]$$$addSelectionintint -->
+<h3 class="fn" id="addSelection"><a name="addSelection"></a><code>[pure virtual] </code><span class="type">void</span> QAccessibleTextInterface::<span class="name">addSelection</span>(<span class="type">int</span> <i>startOffset</i>, <span class="type">int</span> <i>endOffset</i>)</h3>
+<p>Select the text from <i>startOffset</i> to <i>endOffset</i>. The <i>startOffset</i> is the first character that will be selected. The <i>endOffset</i> is the first character that will not be selected.</p>
+<p>When the object supports multiple selections (e.g&#x2e; in a word processor), this adds a new selection, otherwise it replaces the previous selection.</p>
+<p>The selection will be <i>endOffset</i> - <i>startOffset</i> characters long.</p>
+<!-- @@@addSelection -->
+<!-- $$$attributes[overload1]$$$attributesintint*int* -->
+<h3 class="fn" id="attributes"><a name="attributes"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QAccessibleTextInterface::<span class="name">attributes</span>(<span class="type">int</span> <i>offset</i>, <span class="type">int</span> *<i>startOffset</i>, <span class="type">int</span> *<i>endOffset</i>) const</h3>
+<p>Returns the text attributes at the position <i>offset</i>. In addition the range of the attributes is returned in <i>startOffset</i> and <i>endOffset</i>.</p>
+<!-- @@@attributes -->
+<!-- $$$characterCount[overload1]$$$characterCount -->
+<h3 class="fn" id="characterCount"><a name="characterCount"></a><code>[pure virtual] </code><span class="type">int</span> QAccessibleTextInterface::<span class="name">characterCount</span>() const</h3>
+<p>Returns the length of the text (total size including spaces).</p>
+<!-- @@@characterCount -->
+<!-- $$$characterRect[overload1]$$$characterRectint -->
+<h3 class="fn" id="characterRect"><a name="characterRect"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qrect.html">QRect</a></span> QAccessibleTextInterface::<span class="name">characterRect</span>(<span class="type">int</span> <i>offset</i>) const</h3>
+<p>Returns the position and size of the character at position <i>offset</i> in screen coordinates.</p>
+<!-- @@@characterRect -->
+<!-- $$$cursorPosition[overload1]$$$cursorPosition -->
+<h3 class="fn" id="cursorPosition"><a name="cursorPosition"></a><code>[pure virtual] </code><span class="type">int</span> QAccessibleTextInterface::<span class="name">cursorPosition</span>() const</h3>
+<p>Returns the current cursor position.</p>
+<p><b>See also </b><a href="qaccessibletextinterface.html#setCursorPosition">setCursorPosition</a>().</p>
+<!-- @@@cursorPosition -->
+<!-- $$$offsetAtPoint[overload1]$$$offsetAtPointconstQPoint& -->
+<h3 class="fn" id="offsetAtPoint"><a name="offsetAtPoint"></a><code>[pure virtual] </code><span class="type">int</span> QAccessibleTextInterface::<span class="name">offsetAtPoint</span>(const <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> &amp;<i>point</i>) const</h3>
+<p>Returns the offset of the character at the <i>point</i> in screen coordinates.</p>
+<!-- @@@offsetAtPoint -->
+<!-- $$$removeSelection[overload1]$$$removeSelectionint -->
+<h3 class="fn" id="removeSelection"><a name="removeSelection"></a><code>[pure virtual] </code><span class="type">void</span> QAccessibleTextInterface::<span class="name">removeSelection</span>(<span class="type">int</span> <i>selectionIndex</i>)</h3>
+<p>Clears the selection with index <i>selectionIndex</i>.</p>
+<!-- @@@removeSelection -->
+<!-- $$$scrollToSubstring[overload1]$$$scrollToSubstringintint -->
+<h3 class="fn" id="scrollToSubstring"><a name="scrollToSubstring"></a><code>[pure virtual] </code><span class="type">void</span> QAccessibleTextInterface::<span class="name">scrollToSubstring</span>(<span class="type">int</span> <i>startIndex</i>, <span class="type">int</span> <i>endIndex</i>)</h3>
+<p>Ensures that the text between <i>startIndex</i> and <i>endIndex</i> is visible.</p>
+<!-- @@@scrollToSubstring -->
+<!-- $$$selection[overload1]$$$selectionintint*int* -->
+<h3 class="fn" id="selection"><a name="selection"></a><code>[pure virtual] </code><span class="type">void</span> QAccessibleTextInterface::<span class="name">selection</span>(<span class="type">int</span> <i>selectionIndex</i>, <span class="type">int</span> *<i>startOffset</i>, <span class="type">int</span> *<i>endOffset</i>) const</h3>
+<p>Returns a selection. The size of the selection is returned in <i>startOffset</i> and <i>endOffset</i>. If there is no selection both <i>startOffset</i> and <i>endOffset</i> are 0.</p>
+<p>The accessibility APIs support multiple selections. For most widgets though, only one selection is supported with <i>selectionIndex</i> equal to 0.</p>
+<p><b>See also </b><a href="qaccessibletextinterface.html#setSelection">setSelection</a>().</p>
+<!-- @@@selection -->
+<!-- $$$selectionCount[overload1]$$$selectionCount -->
+<h3 class="fn" id="selectionCount"><a name="selectionCount"></a><code>[pure virtual] </code><span class="type">int</span> QAccessibleTextInterface::<span class="name">selectionCount</span>() const</h3>
+<p>Returns the number of selections in this text.</p>
+<!-- @@@selectionCount -->
+<!-- $$$setCursorPosition[overload1]$$$setCursorPositionint -->
+<h3 class="fn" id="setCursorPosition"><a name="setCursorPosition"></a><code>[pure virtual] </code><span class="type">void</span> QAccessibleTextInterface::<span class="name">setCursorPosition</span>(<span class="type">int</span> <i>position</i>)</h3>
+<p>Moves the cursor to <i>position</i>.</p>
+<p><b>See also </b><a href="qaccessibletextinterface.html#cursorPosition">cursorPosition</a>().</p>
+<!-- @@@setCursorPosition -->
+<!-- $$$setSelection[overload1]$$$setSelectionintintint -->
+<h3 class="fn" id="setSelection"><a name="setSelection"></a><code>[pure virtual] </code><span class="type">void</span> QAccessibleTextInterface::<span class="name">setSelection</span>(<span class="type">int</span> <i>selectionIndex</i>, <span class="type">int</span> <i>startOffset</i>, <span class="type">int</span> <i>endOffset</i>)</h3>
+<p>Set the selection <i>selectionIndex</i> to the range from <i>startOffset</i> to <i>endOffset</i>.</p>
+<p><b>See also </b><a href="qaccessibletextinterface.html#selection">selection</a>(), <a href="qaccessibletextinterface.html#addSelection">addSelection</a>(), and <a href="qaccessibletextinterface.html#removeSelection">removeSelection</a>().</p>
+<!-- @@@setSelection -->
+<!-- $$$text[overload1]$$$textintint -->
+<h3 class="fn" id="text"><a name="text"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QAccessibleTextInterface::<span class="name">text</span>(<span class="type">int</span> <i>startOffset</i>, <span class="type">int</span> <i>endOffset</i>) const</h3>
+<p>Returns the text from <i>startOffset</i> to <i>endOffset</i>. The <i>startOffset</i> is the first character that will be returned. The <i>endOffset</i> is the first character that will not be returned.</p>
+<!-- @@@text -->
+<!-- $$$textAfterOffset[overload1]$$$textAfterOffsetintQAccessible::TextBoundaryTypeint*int* -->
+<h3 class="fn" id="textAfterOffset"><a name="textAfterOffset"></a><code>[virtual] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QAccessibleTextInterface::<span class="name">textAfterOffset</span>(<span class="type">int</span> <i>offset</i>, <span class="type"><a href="qaccessible.html#TextBoundaryType-enum">QAccessible::TextBoundaryType</a></span> <i>boundaryType</i>, <span class="type">int</span> *<i>startOffset</i>, <span class="type">int</span> *<i>endOffset</i>) const</h3>
+<p>Returns the text item of type <i>boundaryType</i> that is right after offset <i>offset</i> and sets <i>startOffset</i> and <i>endOffset</i> values to the start and end positions of that item; returns an empty string if there is no such an item. Sets <i>startOffset</i> and <i>endOffset</i> values to -1 on error.</p>
+<p>This default implementation is provided for small text edits. A word processor or text editor should provide their own efficient implementations. This function makes no distinction between paragraphs and lines.</p>
+<p><b>Note: </b>this function can not take the cursor position into account. By convention an <i>offset</i> of -2 means that this function should use the cursor position as offset. Thus an offset of -2 must be converted to the cursor position before calling this function. An offset of -1 is used for the text length and custom implementations of this function have to return the result as if the length was passed in as offset.</p><!-- @@@textAfterOffset -->
+<!-- $$$textAtOffset[overload1]$$$textAtOffsetintQAccessible::TextBoundaryTypeint*int* -->
+<h3 class="fn" id="textAtOffset"><a name="textAtOffset"></a><code>[virtual] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QAccessibleTextInterface::<span class="name">textAtOffset</span>(<span class="type">int</span> <i>offset</i>, <span class="type"><a href="qaccessible.html#TextBoundaryType-enum">QAccessible::TextBoundaryType</a></span> <i>boundaryType</i>, <span class="type">int</span> *<i>startOffset</i>, <span class="type">int</span> *<i>endOffset</i>) const</h3>
+<p>Returns the text item of type <i>boundaryType</i> at offset <i>offset</i> and sets <i>startOffset</i> and <i>endOffset</i> values to the start and end positions of that item; returns an empty string if there is no such an item. Sets <i>startOffset</i> and <i>endOffset</i> values to -1 on error.</p>
+<p>This default implementation is provided for small text edits. A word processor or text editor should provide their own efficient implementations. This function makes no distinction between paragraphs and lines.</p>
+<p><b>Note: </b>this function can not take the cursor position into account. By convention an <i>offset</i> of -2 means that this function should use the cursor position as offset. Thus an offset of -2 must be converted to the cursor position before calling this function. An offset of -1 is used for the text length and custom implementations of this function have to return the result as if the length was passed in as offset.</p><!-- @@@textAtOffset -->
+<!-- $$$textBeforeOffset[overload1]$$$textBeforeOffsetintQAccessible::TextBoundaryTypeint*int* -->
+<h3 class="fn" id="textBeforeOffset"><a name="textBeforeOffset"></a><code>[virtual] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QAccessibleTextInterface::<span class="name">textBeforeOffset</span>(<span class="type">int</span> <i>offset</i>, <span class="type"><a href="qaccessible.html#TextBoundaryType-enum">QAccessible::TextBoundaryType</a></span> <i>boundaryType</i>, <span class="type">int</span> *<i>startOffset</i>, <span class="type">int</span> *<i>endOffset</i>) const</h3>
+<p>Returns the text item of type <i>boundaryType</i> that is close to offset <i>offset</i> and sets <i>startOffset</i> and <i>endOffset</i> values to the start and end positions of that item; returns an empty string if there is no such an item. Sets <i>startOffset</i> and <i>endOffset</i> values to -1 on error.</p>
+<p>This default implementation is provided for small text edits. A word processor or text editor should provide their own efficient implementations. This function makes no distinction between paragraphs and lines.</p>
+<p><b>Note: </b>this function can not take the cursor position into account. By convention an <i>offset</i> of -2 means that this function should use the cursor position as offset. Thus an offset of -2 must be converted to the cursor position before calling this function. An offset of -1 is used for the text length and custom implementations of this function have to return the result as if the length was passed in as offset.</p><!-- @@@textBeforeOffset -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

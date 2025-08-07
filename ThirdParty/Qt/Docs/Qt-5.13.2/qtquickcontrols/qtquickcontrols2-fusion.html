@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtquickcontrols2-fusion.qdoc -->
+  <title>Fusion Style | Qt Quick Controls 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td >Fusion Style</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level2"><a href="#customization">Customization</a></li>
+<li class="level1"><a href="#related-information">Related Information</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Fusion Style</h1>
+<span class="subtitle"></span>
+<!-- $$$qtquickcontrols2-fusion.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The Fusion style is a desktop-oriented style.</p>
+<p>The Fusion style is a platform-agnostic style that offers a desktop-oriented look'n'feel. It implements the same design language as the <a href="../qtwidgets/gallery.html">Fusion style for Qt Widgets</a>.</p>
+<p class="centerAlign"><img src="images/qtquickcontrols2-fusion.png" alt="" /></p><p>To run an application with the Fusion style, see <a href="qtquickcontrols2-styles.html#using-styles-in-qt-quick-controls">Using Styles in Qt Quick Controls</a>.</p>
+<p><b>Note: </b>The Fusion style is not a native desktop style. The style runs on any platform, and looks similar everywhere. Minor differences may occur due to differences in the standard system palettes, available fonts, and font rendering engines.</p><a name="customization"></a>
+<h3 id="customization">Customization</h3>
+<p>The Fusion style uses the standard system <a href="qml-qtquick-controls2-control.html#palette-prop">palettes</a> to provide colors that match the desktop environment.</p>
+<p class="centerAlign"><img src="images/qtquickcontrols2-fusion-palettes.png" alt="" /></p><p>Custom palettes can be specified for any <a href="qml-qtquick-controls2-control.html#palette-prop">control</a>, <a href="qml-qtquick-controls2-popup.html#palette-prop">popup</a>, or <a href="qml-qtquick-controls2-applicationwindow.html#palette-prop">application window</a>. Explicit palette attributes are automatically propagated from parent to children, overriding any system defaults for that attribute. In the following example, the window and all three switches appear with a violet highlight color:</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><pre class="qml">
+
+  import QtQuick 2.12
+  import QtQuick.Controls 2.12
+
+  <span class="type"><a href="qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a></span> {
+      <span class="name">visible</span>: <span class="number">true</span>
+
+      <span class="name">palette</span>.highlight: <span class="string">&quot;violet&quot;</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-column.html">Column</a></span> {
+          <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+
+          <span class="type"><a href="qml-qtquick-controls2-switch.html">Switch</a></span> { <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;First&quot;</span>); <span class="name">checked</span>: <span class="number">true</span> }
+          <span class="type"><a href="qml-qtquick-controls2-switch.html">Switch</a></span> { <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Second&quot;</span>); <span class="name">checked</span>: <span class="number">true</span> }
+          <span class="type"><a href="qml-qtquick-controls2-switch.html">Switch</a></span> { <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Third&quot;</span>) }
+      }
+  }
+
+</pre>
+</td><td ><p class="centerAlign"><img src="images/qtquickcontrols2-fusion-violet.png" alt="" /></p></td></tr>
+</table></div>
+<p><b>See also</b> <a href="qtquickcontrols2-default.html">Default Style</a>, <a href="qtquickcontrols2-material.html">Material Style</a>, <a href="qtquickcontrols2-universal.html">Universal Style</a></p>
+<a name="related-information"></a>
+<h2 id="related-information">Related Information</h2>
+<ul>
+<li><a href="qtquickcontrols2-styles.html">Styling Qt Quick Controls</a></li>
+</ul>
+</div>
+<!-- @@@qtquickcontrols2-fusion.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

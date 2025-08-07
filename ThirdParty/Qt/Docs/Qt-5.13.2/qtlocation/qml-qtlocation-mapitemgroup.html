@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdeclarativegeomapitemgroup.cpp -->
+  <title>MapItemGroup QML Type | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-qmlmodule.html">QML Types</a></td><td >MapItemGroup QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#example-usage">Example Usage</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">MapItemGroup QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$MapItemGroup-brief -->
+<p>The <a href="qml-qtlocation-mapitemgroup.html">MapItemGroup</a> type is a container for map items. <a href="#details">More...</a></p>
+<!-- @@@MapItemGroup -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtLocation 5.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  QtLocation 5.9</td></tr></table></div><ul>
+<li><a href="qml-qtlocation-mapitemgroup-members.html">List of all members, including inherited members</a></li>
+</ul>
+<!-- $$$MapItemGroup-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>Its purpose is to enable code modularization by allowing the usage of qml files containing map elements related to each other, and the associated bindings.</p>
+<p><b>Note: </b>The release of this API with Qt 5.9 is a Technology Preview.</p><a name="example-usage"></a>
+<h3 id="example-usage">Example Usage</h3>
+<p>The following snippet shows how to use a <a href="qml-qtlocation-mapitemgroup.html">MapItemGroup</a> to create a <a href="qml-qtlocation-mapcircle.html">MapCircle</a>, centered at the coordinate (63, -18) with a radius of 100km, filled in red, surrounded by an ondulated green border, both contained in a semitransparent blue circle with a <a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a> that moves the whole group. This group is defined in a separate file named PolygonGroup.qml:</p>
+<pre class="cpp">
+
+  import <span class="type">QtQuick</span> <span class="number">2.4</span>
+  import <span class="type"><a href="../qtpositioning/qml-qtpositioning-qtpositioning.html">QtPositioning</a></span> <span class="number">5.6</span>
+  import <span class="type">QtLocation</span> <span class="number">5.9</span>
+
+  MapItemGroup {
+      id: itemGroup
+      property alias position: mainCircle<span class="operator">.</span>center
+      property var radius: <span class="number">100</span> <span class="operator">*</span> <span class="number">1000</span>
+      property var borderHeightPct : <span class="number">0.3</span>
+
+      MapCircle {
+          id: mainCircle
+          center : <span class="type"><a href="../qtpositioning/qml-qtpositioning-qtpositioning.html">QtPositioning</a></span><span class="operator">.</span>coordinate(<span class="number">40</span><span class="operator">,</span> <span class="number">0</span>)
+          radius: itemGroup<span class="operator">.</span>radius <span class="operator">*</span> (<span class="number">1.0</span> <span class="operator">+</span> borderHeightPct)
+          opacity: <span class="number">0.05</span>
+          visible: <span class="keyword">true</span>
+          color: <span class="char">'blue'</span>
+
+          MouseArea{
+              anchors<span class="operator">.</span>fill: parent
+              drag<span class="operator">.</span>target: parent
+              id: maItemGroup
+          }
+      }
+
+      MapCircle {
+          id: groupCircle
+          center: itemGroup<span class="operator">.</span>position
+          radius: itemGroup<span class="operator">.</span>radius
+          color: <span class="char">'crimson'</span>
+
+          onCenterChanged: {
+              groupPolyline<span class="operator">.</span>populateBorder();
+          }
+      }
+
+      MapPolyline {
+          id: groupPolyline
+          line<span class="operator">.</span>color: <span class="char">'green'</span>
+          line<span class="operator">.</span>width: <span class="number">3</span>
+
+          function populateBorder() {
+              groupPolyline<span class="operator">.</span>path <span class="operator">=</span> <span class="operator">[</span><span class="operator">]</span> <span class="comment">// clearing the path</span>
+              var waveLength <span class="operator">=</span> <span class="number">8.0</span>;
+              var waveAmplitude <span class="operator">=</span> groupCircle<span class="operator">.</span>radius <span class="operator">*</span> borderHeightPct;
+              <span class="keyword">for</span> (var i<span class="operator">=</span><span class="number">0</span>; i <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">360</span>; i<span class="operator">+</span><span class="operator">+</span>) {
+                  var wavePhase <span class="operator">=</span> (i<span class="operator">/</span><span class="number">360.0</span> <span class="operator">*</span> <span class="number">2.0</span> <span class="operator">*</span> Math<span class="operator">.</span>PI )<span class="operator">*</span> waveLength
+                  var waveHeight <span class="operator">=</span> (Math<span class="operator">.</span>cos(wavePhase) <span class="operator">+</span> <span class="number">1.0</span>) <span class="operator">/</span> <span class="number">2.0</span>
+                  groupPolyline<span class="operator">.</span>addCoordinate(groupCircle<span class="operator">.</span>center<span class="operator">.</span>atDistanceAndAzimuth(groupCircle<span class="operator">.</span>radius <span class="operator">+</span> waveAmplitude <span class="operator">*</span> waveHeight <span class="operator">,</span> i))
+              }
+          }
+
+          Component<span class="operator">.</span>onCompleted: {
+              populateBorder()
+          }
+      }
+  }
+
+</pre>
+<p>PolygonGroup.qml is now a reusable component that can then be used in a Map as:</p>
+<pre class="cpp">
+
+  Map {
+      id: map
+      PolygonGroup {
+          id: polygonGroup
+          position: <span class="type"><a href="../qtpositioning/qml-qtpositioning-qtpositioning.html">QtPositioning</a></span><span class="operator">.</span>coordinate(<span class="number">63</span><span class="operator">,</span><span class="operator">-</span><span class="number">18</span>)
+      }
+  }
+
+</pre>
+<p class="centerAlign"><img src="images/api-mapitemgroup.png" alt="" /></p><!-- @@@MapItemGroup -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

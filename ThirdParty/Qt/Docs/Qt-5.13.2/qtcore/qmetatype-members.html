@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmetatype.cpp -->
+  <title>List of All Members for QMetaType | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QMetaType</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">List of All Members for QMetaType</h1>
+<p>This is the complete list of members for <a href="qmetatype.html">QMetaType</a>, including inherited members.</p>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#QMetaType">QMetaType</a></b></span>(const int )</li>
+<li class="fn">enum <span class="name"><b><a href="qmetatype.html#Type-enum">Type</a></b></span></li>
+<li class="fn">enum <span class="name"><b><a href="qmetatype.html#TypeFlag-enum">TypeFlag</a></b></span></li>
+<li class="fn">flags <span class="name"><b><a href="qmetatype.html#TypeFlag-enum">TypeFlags</a></b></span></li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#dtor.QMetaType">~QMetaType</a></b></span>()</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#compare">compare</a></b></span>(const void *, const void *, int , int *) : bool</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#construct-1">construct</a></b></span>(int , void *, const void *) : void *</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#construct-2">construct</a></b></span>(void *, const void *) const : void *</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#convert">convert</a></b></span>(const void *, int , void *, int ) : bool</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#create">create</a></b></span>(int , const void *) : void *</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#create-1">create</a></b></span>(const void *) const : void *</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#debugStream">debugStream</a></b></span>(QDebug &amp;, const void *, int ) : bool</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#destroy">destroy</a></b></span>(int , void *)</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#destroy-1">destroy</a></b></span>(void *) const</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#destruct">destruct</a></b></span>(int , void *)</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#destruct-1">destruct</a></b></span>(void *) const</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#equals">equals</a></b></span>(const void *, const void *, int , int *) : bool</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#flags">flags</a></b></span>() const : QMetaType::TypeFlags</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#hasRegisteredComparators">hasRegisteredComparators</a></b></span>() : bool</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#hasRegisteredComparators-1">hasRegisteredComparators</a></b></span>(int ) : bool</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#hasRegisteredConverterFunction">hasRegisteredConverterFunction</a></b></span>(int , int ) : bool</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#hasRegisteredConverterFunction-1">hasRegisteredConverterFunction</a></b></span>() : bool</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#hasRegisteredDebugStreamOperator">hasRegisteredDebugStreamOperator</a></b></span>() : bool</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#hasRegisteredDebugStreamOperator-1">hasRegisteredDebugStreamOperator</a></b></span>(int ) : bool</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#id">id</a></b></span>() const : int</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#isRegistered">isRegistered</a></b></span>(int ) : bool</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#isRegistered-1">isRegistered</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#isValid">isValid</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#load">load</a></b></span>(QDataStream &amp;, int , void *) : bool</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#metaObject">metaObject</a></b></span>() const : const QMetaObject *</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#metaObjectForType">metaObjectForType</a></b></span>(int ) : const QMetaObject *</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#registerComparators">registerComparators</a></b></span>() : bool</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#registerConverter">registerConverter</a></b></span>() : bool</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#registerConverter-1">registerConverter</a></b></span>(MemberFunction ) : bool</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#registerConverter-2">registerConverter</a></b></span>(MemberFunctionOk ) : bool</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#registerConverter-3">registerConverter</a></b></span>(UnaryFunction ) : bool</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#registerDebugStreamOperator">registerDebugStreamOperator</a></b></span>() : bool</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#registerEqualsComparator">registerEqualsComparator</a></b></span>() : bool</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#save">save</a></b></span>(QDataStream &amp;, int , const void *) : bool</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#sizeOf">sizeOf</a></b></span>(int ) : int</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#sizeOf-1">sizeOf</a></b></span>() const : int</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#type">type</a></b></span>(const char *) : int</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#type-1">type</a></b></span>(const ::QByteArray &amp;) : int</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#typeFlags">typeFlags</a></b></span>(int ) : QMetaType::TypeFlags</li>
+<li class="fn"><span class="name"><b><a href="qmetatype.html#typeName">typeName</a></b></span>(int ) : const char *</li>
+</ul>
+</td></tr>
+</table></div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

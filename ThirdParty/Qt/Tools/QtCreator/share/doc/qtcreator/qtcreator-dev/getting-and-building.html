@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- getting-and-building.qdoc -->
+  <title>Getting and Building Qt Creator | Extending Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="extending-index.html#">Extending Qt Creator Manual</a></td><td >Getting and Building Qt Creator</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="extending-index.html#">Extending Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#getting-qt">Getting Qt</a></li>
+<li class="level1"><a href="#getting-and-building-qt-creator">Getting and Building Qt Creator</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Getting and Building Qt Creator</h1>
+<span class="subtitle"></span>
+<!-- $$$getting-and-building.html-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  TODO: This should be extended<span class="operator">.</span>
+  <span class="operator">*</span> Windows specific hassle<span class="operator">,</span> see README in \QC sources
+
+</pre>
+<p>There are several reasons why you might want to do your own build of Qt Creator, like using the most current development version and being able to tweak Qt Creator at one or the other place. It is also necessary if you want to create your own Qt Creator plugin.</p>
+<a name="getting-qt"></a>
+<h2 id="getting-qt">Getting Qt</h2>
+<p>Prebuilt Qt Creator packages usually use the latest stable release of Qt. You can see the exact minimum requirement at the top of Qt Creator's <code>qtcreator.pro</code>. (You can find the current version in our source repository here: <a href="https://code.qt.io/cgit/qt-creator/qt-creator.git/tree/qtcreator.pro#n4">https://code.qt.io/cgit/qt-creator/qt-creator.git/tree/qtcreator.pro#n4</a>.)</p>
+<p>You can get prebuilt Qt packages from <a href="https://download.qt.io">Qt Downloads</a>. If you want to use Qt as provided by your Linux distribution, you need to make sure that all Qt development packages and private header packages are also installed.</p>
+<a name="getting-and-building-qt-creator"></a>
+<h2 id="getting-and-building-qt-creator">Getting and Building Qt Creator</h2>
+<p>You can get the Qt Creator sources for a specific version either by using one of the released source bundles, or from the Git repository <a href="https://code.qt.io/cgit/qt-creator/qt-creator.git">https://code.qt.io/cgit/qt-creator/qt-creator.git</a>. If you intend to contribute to Qt Creator itself, you should use the repository from our Gerrit review tool as described in: <a href="https://wiki.qt.io/Setting_up_Gerrit">Setting up Gerrit</a>.</p>
+<p>We strongly encourage you to do out-of-source builds of Qt Creator (also called shadow-builds).</p>
+<p>After you put the Qt Creator sources somewhere (lets call the path <code>&lt;QtCreatorSources&gt;</code>) you build it on Linux and Mac with</p>
+<pre class="cpp">
+
+  cd <span class="operator">&lt;</span><span class="type">QtCreatorSources</span><span class="operator">&gt;</span><span class="operator">/</span><span class="operator">.</span><span class="operator">.</span>
+  mkdir qtcreator<span class="operator">-</span>build
+  cd qtcreator<span class="operator">-</span>build
+  <span class="operator">&lt;</span><span class="type">QtInstall</span><span class="operator">&gt;</span><span class="operator">/</span>bin<span class="operator">/</span>qmake <span class="operator">-</span>r <span class="operator">&lt;</span><span class="type">QtCreatorSources</span><span class="operator">&gt;</span>
+  make
+
+</pre>
+<p>or the corresponding commands on Windows systems.</p>
+</div>
+<!-- @@@getting-and-building.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

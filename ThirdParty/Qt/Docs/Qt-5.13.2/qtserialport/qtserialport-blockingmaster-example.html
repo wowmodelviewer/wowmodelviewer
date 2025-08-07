@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- blockingmaster.qdoc -->
+  <title>Blocking Master Example | Qt Serial Port 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtserialport-index.html">Qt Serial Port</a></td><td >Blocking Master Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtserialport-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Blocking Master Example</h1>
+<span class="subtitle"></span>
+<!-- $$$blockingmaster-brief -->
+<p>Shows how to use the synchronous API of <a href="qserialport.html">QSerialPort</a> in a worker thread.</p>
+<!-- @@@blockingmaster -->
+<!-- $$$blockingmaster-description -->
+<div class="descr"> <a name="details"></a>
+<p><i>Blocking Master</i> shows how to create an application for a serial interface using the synchronous API of <a href="qserialport.html">QSerialPort</a> in a worker thread.</p>
+<p class="centerAlign"><img src="images/blockingmaster-example.png" alt="" /></p><p><a href="qserialport.html">QSerialPort</a> supports two programming alternatives:</p>
+<ul>
+<li><i>The asynchronous (non-blocking) alternative.</i> Operations are scheduled and performed when the control returns to the Qt event loop. The <a href="qserialport.html">QSerialPort</a> class emits a signal when the operation is finished. For example, the <a href="../qtcore/qiodevice.html#write">write()</a> method returns immediately. When the data is sent to the serial port, the <a href="qserialport.html">QSerialPort</a> class emits the <a href="../qtcore/qiodevice.html#bytesWritten">bytesWritten()</a> signal.</li>
+<li><i>The synchronous (blocking) alternative.</i> In headless and multithreaded applications, the wait method can be called (in this case, <a href="qserialport.html#waitForReadyRead">waitForReadyRead()</a>) to suspend the calling thread until the operation has completed.</li>
+</ul>
+<p>In this example, the synchronous alternative is demonstrated. The <a href="qtserialport-terminal-example.html">Terminal</a> example illustrates the asynchronous alternative.</p>
+<p>The purpose of this example is to demonstrate how to simplify your serial programming code without losing the responsiveness of the user interface. The blocking serial programming API often leads to simpler code, but it should only be used in non-GUI threads to keep the user interface responsive.</p>
+<p>This application is the master which demonstrates the work paired with the slave application <a href="qtserialport-blockingslave-example.html">Blocking Slave Example</a>.</p>
+<p>The master application initiates the transfer request via the serial port to the slave application and waits for response.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> MasterThread : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qthread.html">QThread</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> MasterThread(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+      <span class="operator">~</span>MasterThread();
+
+      <span class="type">void</span> transaction(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>portName<span class="operator">,</span> <span class="type">int</span> waitTimeout<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>request);
+
+  <span class="keyword">signals</span>:
+      <span class="type">void</span> response(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>s);
+      <span class="type">void</span> error(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>s);
+      <span class="type">void</span> timeout(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>s);
+
+  <span class="keyword">private</span>:
+      <span class="type">void</span> run() override;
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> m_portName;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> m_request;
+      <span class="type">int</span> m_waitTimeout <span class="operator">=</span> <span class="number">0</span>;
+      <span class="type"><a href="../qtcore/qmutex.html">QMutex</a></span> m_mutex;
+      <span class="type"><a href="../qtcore/qwaitcondition.html">QWaitCondition</a></span> m_cond;
+      bool m_quit <span class="operator">=</span> <span class="keyword">false</span>;
+  };
+
+</pre>
+<p>MasterThread is a <a href="../qtcore/qthread.html">QThread</a> subclass that provides API for scheduling requests to the slave. This class provides signals for responding and reporting errors. The transaction() method can be called to start up the new master transaction with the desired request. The result is provided by the response() signal. In case of any issues, the error() or timeout() signal is emitted.</p>
+<p>Note, the transaction() method is called in the main thread, but the request is provided in the MasterThread thread. The MasterThread data members are read and written concurrently in different threads, thus the <a href="../qtcore/qmutex.html">QMutex</a> class is used to synchronize the access.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MasterThread<span class="operator">::</span>transaction(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>portName<span class="operator">,</span> <span class="type">int</span> waitTimeout<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>request)
+  {
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmutexlocker.html">QMutexLocker</a></span> locker(<span class="operator">&amp;</span>m_mutex);
+      m_portName <span class="operator">=</span> portName;
+      m_waitTimeout <span class="operator">=</span> waitTimeout;
+      m_request <span class="operator">=</span> request;
+      <span class="keyword">if</span> (<span class="operator">!</span>isRunning())
+          start();
+      <span class="keyword">else</span>
+          m_cond<span class="operator">.</span>wakeOne();
+  }
+
+</pre>
+<p>The transaction() method stores the serial port name, timeout and request data. The mutex can be locked with <a href="../qtcore/qmutexlocker.html">QMutexLocker</a> to protect this data. The thread can be started then, unless it is already running. The <a href="../qtcore/qwaitcondition.html#wakeOne">wakeOne()</a> method is discussed later.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MasterThread<span class="operator">::</span>run()
+  {
+      bool currentPortNameChanged <span class="operator">=</span> <span class="keyword">false</span>;
+
+      m_mutex<span class="operator">.</span>lock();
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> currentPortName;
+      <span class="keyword">if</span> (currentPortName <span class="operator">!</span><span class="operator">=</span> m_portName) {
+          currentPortName <span class="operator">=</span> m_portName;
+          currentPortNameChanged <span class="operator">=</span> <span class="keyword">true</span>;
+      }
+
+      <span class="type">int</span> currentWaitTimeout <span class="operator">=</span> m_waitTimeout;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> currentRequest <span class="operator">=</span> m_request;
+      m_mutex<span class="operator">.</span>unlock();
+
+</pre>
+<p>In the run() function, the first is to lock the <a href="../qtcore/qmutex.html">QMutex</a> object, then fetch the serial port name, timeout and request data by using the member data. Having that done, the <a href="../qtcore/qmutex.html">QMutex</a> lock is released.</p>
+<p>Under no circumstance should the <code>transaction()</code> method be called simultaneously with a process fetching the data. Note, while the <a href="../qtcore/qstring.html">QString</a> class is reentrant, it is not thread-safe. Thereby, it is not recommended to read the serial port name in a request thread, and timeout or request data in another thread. The MasterThread class can only handle one request at a time.</p>
+<p>The <a href="qserialport.html">QSerialPort</a> object is constructed on stack in the run() method before entering the loop:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qserialport.html">QSerialPort</a></span> serial;
+
+      <span class="keyword">if</span> (currentPortName<span class="operator">.</span>isEmpty()) {
+          <span class="keyword">emit</span> error(tr(<span class="string">&quot;No port name specified&quot;</span>));
+          <span class="keyword">return</span>;
+      }
+
+      <span class="keyword">while</span> (<span class="operator">!</span>m_quit) {
+
+</pre>
+<p>This makes it possible to create an object while running the loop. It also means that all the object methods are executed in the scope of the run() method.</p>
+<p>It is checked inside the loop whether or not the serial port name of the current transaction has changed. If this has changed, the serial port is reopened and then reconfigured.</p>
+<pre class="cpp">
+
+          <span class="keyword">if</span> (currentPortNameChanged) {
+              serial<span class="operator">.</span>close();
+              serial<span class="operator">.</span>setPortName(currentPortName);
+
+              <span class="keyword">if</span> (<span class="operator">!</span>serial<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadWrite)) {
+                  <span class="keyword">emit</span> error(tr(<span class="string">&quot;Can't open %1, error code %2&quot;</span>)
+                             <span class="operator">.</span>arg(m_portName)<span class="operator">.</span>arg(serial<span class="operator">.</span>error()));
+                  <span class="keyword">return</span>;
+              }
+          }
+
+</pre>
+<p>The loop will continue to request data, write to the serial port and wait until all data is transferred.</p>
+<pre class="cpp">
+
+          <span class="comment">// write request</span>
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> requestData <span class="operator">=</span> currentRequest<span class="operator">.</span>toUtf8();
+          serial<span class="operator">.</span>write(requestData);
+          <span class="keyword">if</span> (serial<span class="operator">.</span>waitForBytesWritten(m_waitTimeout)) {
+
+</pre>
+<p><b>Warning:</b> As for the blocking transfer, the <a href="qserialport.html#waitForBytesWritten">waitForBytesWritten()</a> method should be used after each <a href="../qtcore/qiodevice.html#write">write</a> method call. This will process all the I/O routines instead of the Qt event loop.</p>
+<p>The timeout() signal is emitted if a timeout error occurs when transferring data.</p>
+<pre class="cpp">
+
+          } <span class="keyword">else</span> {
+              <span class="keyword">emit</span> timeout(tr(<span class="string">&quot;Wait write request timeout %1&quot;</span>)
+                           <span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime()<span class="operator">.</span>toString()));
+          }
+
+</pre>
+<p>There is a waiting period for response after a successful request, and then it is read again.</p>
+<pre class="cpp">
+
+              <span class="comment">// read response</span>
+              <span class="keyword">if</span> (serial<span class="operator">.</span>waitForReadyRead(currentWaitTimeout)) {
+                  <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> responseData <span class="operator">=</span> serial<span class="operator">.</span>readAll();
+                  <span class="keyword">while</span> (serial<span class="operator">.</span>waitForReadyRead(<span class="number">10</span>))
+                      responseData <span class="operator">+</span><span class="operator">=</span> serial<span class="operator">.</span>readAll();
+
+                  <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> response <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>fromUtf8(responseData);
+                  <span class="keyword">emit</span> <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>response(response);
+
+</pre>
+<p><b>Warning:</b> As for the blocking alternative, the <a href="qserialport.html#waitForReadyRead">waitForReadyRead()</a> method should be used before each read() call. This will processes all the I/O routines instead of the Qt event loop.</p>
+<p>The timeout() signal is emitted if a timeout error occurs when receiving data.</p>
+<pre class="cpp">
+
+              } <span class="keyword">else</span> {
+                  <span class="keyword">emit</span> timeout(tr(<span class="string">&quot;Wait read response timeout %1&quot;</span>)
+                               <span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime()<span class="operator">.</span>toString()));
+              }
+
+</pre>
+<p>When a transaction has been completed successfully, the response() signal contains the data received from the slave application:</p>
+<pre class="cpp">
+
+                  <span class="keyword">emit</span> <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>response(response);
+
+</pre>
+<p>Afterwards, the thread goes to sleep until the next transaction appears. The thread reads the new data after waking up by using the members and runs the loop from the beginning.</p>
+<pre class="cpp">
+
+          m_mutex<span class="operator">.</span>lock();
+          m_cond<span class="operator">.</span>wait(<span class="operator">&amp;</span>m_mutex);
+          <span class="keyword">if</span> (currentPortName <span class="operator">!</span><span class="operator">=</span> m_portName) {
+              currentPortName <span class="operator">=</span> m_portName;
+              currentPortNameChanged <span class="operator">=</span> <span class="keyword">true</span>;
+          } <span class="keyword">else</span> {
+              currentPortNameChanged <span class="operator">=</span> <span class="keyword">false</span>;
+          }
+          currentWaitTimeout <span class="operator">=</span> m_waitTimeout;
+          currentRequest <span class="operator">=</span> m_request;
+          m_mutex<span class="operator">.</span>unlock();
+      }
+
+</pre>
+<a name="running-the-example"></a>
+<h4 id="running-the-example">Running the Example</h4>
+<p>To run the example from <a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a>, open the <b>Welcome</b> mode and select the example from <b>Examples</b>. For more information, visit <a href="http://doc.qt.io/qtcreator/creator-build-example-application.html">Building and Running an Example</a>.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtserialport.git/tree/examples/serialport/blockingmaster?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<p><b>See also </b><a href="qtserialport-terminal-example.html">Terminal Example</a> and <a href="qtserialport-blockingslave-example.html">Blocking Slave Example</a>.</p>
+<!-- @@@blockingmaster -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

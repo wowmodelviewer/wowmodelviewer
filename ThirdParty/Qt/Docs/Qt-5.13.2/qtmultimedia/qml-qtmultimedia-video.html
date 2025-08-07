@@ -1,0 +1,567 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- Video.qml -->
+  <title>Video QML Type | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-qmlmodule.html">QML Types</a></td><td >Video QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Video QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Video-brief -->
+<p>A convenience type for showing a specified video. <a href="#details">More...</a></p>
+<!-- @@@Video -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtMultimedia 5.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="../qtquick/qml-qtquick-item.html">Item</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtmultimedia-video-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#audioRole-prop">audioRole</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#autoLoad-prop">autoLoad</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#autoPlay-prop">autoPlay</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#availability-prop">availability</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#bufferProgress-prop">bufferProgress</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#customAudioRole-prop">customAudioRole</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#duration-prop">duration</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#error-prop">error</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#errorString-prop">errorString</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#fillMode-prop">fillMode</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#hasAudio-prop">hasAudio</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#hasVideo-prop">hasVideo</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#loops-prop">loops</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#metaData-prop">metaData</a></b></b> : object</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#muted-prop">muted</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#notifyInterval-prop">notifyInterval</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#orientation-prop">orientation</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#playbackRate-prop">playbackRate</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#playbackState-prop">playbackState</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#playlist-prop">playlist</a></b></b> : Playlist</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#position-prop">position</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#seekable-prop">seekable</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#source-prop">source</a></b></b> : url</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#status-prop">status</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#volume-prop">volume</a></b></b> : real</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#paused-signal">paused</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#playing-signal">playing</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#stopped-signal">stopped</a></b></b>()</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#pause-method">pause</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#play-method">play</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#seek-method">seek</a></b></b>(<i>offset</i>)</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#stop-method">stop</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-video.html#supportedAudioRoles-method">supportedAudioRoles</a></b></b>()</li>
+</ul>
+<!-- $$$Video-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><code>Video</code> is a convenience type combining the functionality of a <a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a> and a <a href="qml-qtmultimedia-videooutput.html">VideoOutput</a> into one. It provides simple video playback functionality without having to declare multiple types.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtmultimedia-video.html">Video</a></span> {
+      <span class="name">id</span>: <span class="name">video</span>
+      <span class="name">width</span> : <span class="number">800</span>
+      <span class="name">height</span> : <span class="number">600</span>
+      <span class="name">source</span>: <span class="string">&quot;video.avi&quot;</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">onClicked</span>: {
+              <span class="name">video</span>.<span class="name">play</span>()
+          }
+      }
+
+      <span class="name">focus</span>: <span class="number">true</span>
+      <span class="name">Keys</span>.onSpacePressed: <span class="name">video</span>.<span class="name">playbackState</span> <span class="operator">==</span> <span class="name">MediaPlayer</span>.<span class="name">PlayingState</span> ? <span class="name">video</span>.<span class="name">pause</span>() : <span class="name">video</span>.<span class="name">play</span>()
+      <span class="name">Keys</span>.onLeftPressed: <span class="name">video</span>.<span class="name">seek</span>(<span class="name">video</span>.<span class="name">position</span> <span class="operator">-</span> <span class="number">5000</span>)
+      <span class="name">Keys</span>.onRightPressed: <span class="name">video</span>.<span class="name">seek</span>(<span class="name">video</span>.<span class="name">position</span> <span class="operator">+</span> <span class="number">5000</span>)
+  }
+
+</pre>
+<p><code>Video</code> supports untransformed, stretched, and uniformly scaled video presentation. For a description of stretched uniformly scaled presentation, see the <a href="qml-qtmultimedia-video.html#fillMode-prop">fillMode</a> property description.</p>
+<p><b>See also </b><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a> and <a href="qml-qtmultimedia-videooutput.html">VideoOutput</a>.</p>
+<!-- @@@Video -->
+<h2>Property Documentation</h2>
+<!-- $$$audioRole -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="audioRole-prop"></a><span class="name">audioRole</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the role of the audio stream. It can be set to specify the type of audio being played, allowing the system to make appropriate decisions when it comes to volume, routing or post-processing.</p>
+<p>The audio role must be set before setting the source property.</p>
+<p>Supported values can be retrieved with <a href="qml-qtmultimedia-video.html#supportedAudioRoles-method">supportedAudioRoles()</a>.</p>
+<p>The value can be one of:</p>
+<ul>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.UnknownRole - the role is unknown or undefined.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.MusicRole - music.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.VideoRole - soundtrack from a movie or a video.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.VoiceCommunicationRole - voice communications, such as telephony.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.AlarmRole - alarm.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.NotificationRole - notification, such as an incoming e-mail or a chat request.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.RingtoneRole - ringtone.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.AccessibilityRole - for accessibility, such as with a screen reader.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.SonificationRole - sonification, such as with user interface sounds.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.GameRole - game audio.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.CustomRole - The role is specified by <a href="qml-qtmultimedia-video.html#customAudioRole-prop">customAudioRole</a>.</li>
+</ul>
+<p><a href="qml-qtmultimedia-video.html#customAudioRole-prop">customAudioRole</a> is cleared when this property is set to anything other than CustomRole.</p>
+<p>This property was introduced in  Qt 5.6.</p>
+</div></div><!-- @@@audioRole -->
+<br/>
+<!-- $$$autoLoad -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="autoLoad-prop"></a><span class="name">autoLoad</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property indicates if loading of media should begin immediately.</p>
+<p>Defaults to true, if false media will not be loaded until playback is started.</p>
+</div></div><!-- @@@autoLoad -->
+<br/>
+<!-- $$$autoPlay -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="autoPlay-prop"></a><span class="name">autoPlay</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property determines whether the media should begin playback automatically.</p>
+<p>Setting to <code>true</code> also sets <a href="qml-qtmultimedia-video.html#autoLoad-prop">autoLoad</a> to <code>true</code>. The default is <code>false</code>.</p>
+</div></div><!-- @@@autoPlay -->
+<br/>
+<!-- $$$availability -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="availability-prop"></a><span class="name">availability</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the availability state of the video instance.</p>
+<p>This is one of:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Value</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.Available</td><td >The video player is available to use.</td></tr>
+<tr valign="top" class="even"><td ><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.Busy</td><td >The video player is usually available, but some other process is utilizing the hardware necessary to play media.</td></tr>
+<tr valign="top" class="odd"><td ><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.Unavailable</td><td >There are no supported video playback facilities.</td></tr>
+<tr valign="top" class="even"><td ><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.ResourceMissing</td><td >There is one or more resources missing, so the video player cannot be used. It may be possible to try again at a later time.</td></tr>
+</table></div>
+</div></div><!-- @@@availability -->
+<br/>
+<!-- $$$bufferProgress -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="bufferProgress-prop"></a><span class="name">bufferProgress</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds how much of the data buffer is currently filled, from 0.0 (empty) to 1.0 (full).</p>
+</div></div><!-- @@@bufferProgress -->
+<br/>
+<!-- $$$customAudioRole -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="customAudioRole-prop"></a><span class="name">customAudioRole</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the role of the audio stream when the backend supports audio roles unknown to Qt. It can be set to specify the type of audio being played, allowing the system to make appropriate decisions when it comes to volume, routing or post-processing.</p>
+<p>The audio role must be set before setting the source property.</p>
+<p><a href="qml-qtmultimedia-video.html#audioRole-prop">audioRole</a> is set to CustomRole when this property is set.</p>
+<p>This property was introduced in  Qt 5.11.</p>
+</div></div><!-- @@@customAudioRole -->
+<br/>
+<!-- $$$duration -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="duration-prop"></a><span class="name">duration</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the duration of the media in milliseconds.</p>
+<p>If the media doesn't have a fixed duration (a live stream for example) this will be 0.</p>
+</div></div><!-- @@@duration -->
+<br/>
+<!-- $$$error -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="error-prop"></a><span class="name">error</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the error state of the video. It can be one of:</p>
+<ul>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.<a href="../qtnetwork/qdtls.html#QDtlsError-enum">NoError</a> - there is no current error.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.ResourceError - the video cannot be played due to a problem allocating resources.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.FormatError - the video format is not supported.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.NetworkError - the video cannot be played due to network issues.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.AccessDenied - the video cannot be played due to insufficient permissions.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.ServiceMissing - the video cannot be played because the media service could not be instantiated.</li>
+</ul>
+</div></div><!-- @@@error -->
+<br/>
+<!-- $$$errorString -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="errorString-prop"></a><span class="name">errorString</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds a string describing the current error condition in more detail.</p>
+</div></div><!-- @@@errorString -->
+<br/>
+<!-- $$$fillMode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="fillMode-prop"></a><span class="name">fillMode</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Set this property to define how the video is scaled to fit the target area.</p>
+<ul>
+<li><a href="qml-qtmultimedia-videooutput.html">VideoOutput</a>.Stretch - the video is scaled to fit</li>
+<li><a href="qml-qtmultimedia-videooutput.html">VideoOutput</a>.PreserveAspectFit - the video is scaled uniformly to fit without cropping</li>
+<li><a href="qml-qtmultimedia-videooutput.html">VideoOutput</a>.PreserveAspectCrop - the video is scaled uniformly to fill, cropping if necessary</li>
+</ul>
+<p>Because this type is for convenience in QML, it does not support enumerations directly, so enumerations from <code>VideoOutput</code> are used to access the available fill modes.</p>
+<p>The default fill mode is preserveAspectFit.</p>
+</div></div><!-- @@@fillMode -->
+<br/>
+<!-- $$$hasAudio -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="hasAudio-prop"></a><span class="name">hasAudio</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the current media has audio content.</p>
+</div></div><!-- @@@hasAudio -->
+<br/>
+<!-- $$$hasVideo -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="hasVideo-prop"></a><span class="name">hasVideo</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the current media has video content.</p>
+</div></div><!-- @@@hasVideo -->
+<br/>
+<!-- $$$loops -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="loops-prop"></a><span class="name">loops</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the number of times the media is played. A value of <code>0</code> or <code>1</code> means the media will be played only once; set to <code>MediaPlayer.Infinite</code> to enable infinite looping.</p>
+<p>The value can be changed while the media is playing, in which case it will update the remaining loops to the new value.</p>
+<p>The default is <code>1</code>.</p>
+<p>This property was introduced in  Qt 5.9.</p>
+</div></div><!-- @@@loops -->
+<br/>
+<!-- $$$metaData -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="metaData-prop"></a><span class="name">metaData</span> : <span class="type">object</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the meta data for the current media.</p>
+<p>See <a href="qml-qtmultimedia-mediaplayer.html#metaData-prop">MediaPlayer.metaData</a> for details about each meta data key.</p>
+<p><b>See also </b><a href="qmediametadata.html">QMediaMetaData</a>.</p>
+</div></div><!-- @@@metaData -->
+<br/>
+<!-- $$$muted -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="muted-prop"></a><span class="name">muted</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the audio output is muted.</p>
+</div></div><!-- @@@muted -->
+<br/>
+<!-- $$$notifyInterval -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="notifyInterval-prop"></a><span class="name">notifyInterval</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The interval at which notifiable properties will update.</p>
+<p>The notifiable properties are <a href="qml-qtmultimedia-video.html#position-prop">position</a> and <a href="qml-qtmultimedia-video.html#bufferProgress-prop">bufferProgress</a>.</p>
+<p>The interval is expressed in milliseconds, the default value is 1000.</p>
+<p>This property was introduced in  Qt 5.9.</p>
+</div></div><!-- @@@notifyInterval -->
+<br/>
+<!-- $$$orientation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="orientation-prop"></a><span class="name">orientation</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The orientation of the <code>Video</code> in degrees. Only multiples of 90 degrees is supported, that is 0, 90, 180, 270, 360, etc.</p>
+</div></div><!-- @@@orientation -->
+<br/>
+<!-- $$$playbackRate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="playbackRate-prop"></a><span class="name">playbackRate</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the rate at which video is played at as a multiple of the normal rate.</p>
+</div></div><!-- @@@playbackRate -->
+<br/>
+<!-- $$$playbackState -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="playbackState-prop"></a><span class="name">playbackState</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This read only property indicates the playback state of the media.</p>
+<ul>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.PlayingState - the media is playing</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.PausedState - the media is paused</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.StoppedState - the media is stopped</li>
+</ul>
+<p>The default state is <a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.StoppedState.</p>
+</div></div><!-- @@@playbackState -->
+<br/>
+<!-- $$$playlist -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="playlist-prop"></a><span class="name">playlist</span> : <span class="type"><a href="qml-qtmultimedia-playlist.html">Playlist</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the playlist used by the media player.</p>
+<p>Setting the playlist property resets the <a href="qml-qtmultimedia-video.html#source-prop">source</a> to an empty string.</p>
+<p>This property was introduced in  Qt 5.6.</p>
+</div></div><!-- @@@playlist -->
+<br/>
+<!-- $$$position -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="position-prop"></a><span class="name">position</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the current playback position in milliseconds.</p>
+<p>To change this position, use the <a href="qml-qtmultimedia-video.html#seek-method">seek()</a> method.</p>
+<p><b>See also </b><a href="qml-qtmultimedia-video.html#seek-method">seek()</a>.</p>
+</div></div><!-- @@@position -->
+<br/>
+<!-- $$$seekable -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="seekable-prop"></a><span class="name">seekable</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the playback position of the video can be changed.</p>
+<p>If true, calling the <a href="qml-qtmultimedia-video.html#seek-method">seek()</a> method will cause playback to seek to the new position.</p>
+</div></div><!-- @@@seekable -->
+<br/>
+<!-- $$$source -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="source-prop"></a><span class="name">source</span> : <span class="type"><a href="../qtqml/qml-url.html">url</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the source URL of the media.</p>
+<p>Setting the source property clears the current <a href="qml-qtmultimedia-video.html#playlist-prop">playlist</a>, if any.</p>
+</div></div><!-- @@@source -->
+<br/>
+<!-- $$$status -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="status-prop"></a><span class="name">status</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the status of media loading. It can be one of:</p>
+<ul>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.NoMedia - no media has been set.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.Loading - the media is currently being loaded.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.Loaded - the media has been loaded.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.Buffering - the media is buffering data.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.Stalled - playback has been interrupted while the media is buffering data.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.Buffered - the media has buffered data.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.EndOfMedia - the media has played to the end.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.InvalidMedia - the media cannot be played.</li>
+<li><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>.UnknownStatus - the status of the media cannot be determined.</li>
+</ul>
+</div></div><!-- @@@status -->
+<br/>
+<!-- $$$volume -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="volume-prop"></a><span class="name">volume</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the audio volume.</p>
+<p>The volume is scaled linearly from <code>0.0</code> (silence) to <code>1.0</code> (full volume). Values outside this range will be clamped.</p>
+<p>The default volume is <code>1.0</code>.</p>
+<p>UI volume controls should usually be scaled nonlinearly. For example, using a logarithmic scale will produce linear changes in perceived loudness, which is what a user would normally expect from a volume control. See <a href="qml-qtmultimedia-qtmultimedia.html#convertVolume-method">QtMultimedia.convertVolume()</a> for more details.</p>
+</div></div><!-- @@@volume -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$paused[overload1]$$$paused -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="paused-signal"></a><span class="name">paused</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when playback is paused.</p>
+<p>The corresponding handler is <code>onPaused</code>.</p>
+</div></div><!-- @@@paused -->
+<br/>
+<!-- $$$playing[overload1]$$$playing -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="playing-signal"></a><span class="name">playing</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when playback is started or continued.</p>
+<p>The corresponding handler is <code>onPlaying</code>.</p>
+</div></div><!-- @@@playing -->
+<br/>
+<!-- $$$stopped[overload1]$$$stopped -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="stopped-signal"></a><span class="name">stopped</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when playback is stopped.</p>
+<p>The corresponding handler is <code>onStopped</code>.</p>
+</div></div><!-- @@@stopped -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$pause[overload1]$$$pause -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="pause-method"></a><span class="name">pause</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Pauses playback of the media.</p>
+</div></div><!-- @@@pause -->
+<br/>
+<!-- $$$play[overload1]$$$play -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="play-method"></a><span class="name">play</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Starts playback of the media.</p>
+</div></div><!-- @@@play -->
+<br/>
+<!-- $$$seek[overload1]$$$seek -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="seek-method"></a><span class="name">seek</span>(<i>offset</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If the <a href="qml-qtmultimedia-video.html#seekable-prop">seekable</a> property is true, seeks the current playback position to <i>offset</i>.</p>
+<p>Seeking may be asynchronous, so the <a href="qml-qtmultimedia-video.html#position-prop">position</a> property may not be updated immediately.</p>
+<p><b>See also </b><a href="qml-qtmultimedia-video.html#seekable-prop">seekable</a> and <a href="qml-qtmultimedia-video.html#position-prop">position</a>.</p>
+</div></div><!-- @@@seek -->
+<br/>
+<!-- $$$stop[overload1]$$$stop -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="stop-method"></a><span class="name">stop</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Stops playback of the media.</p>
+</div></div><!-- @@@stop -->
+<br/>
+<!-- $$$supportedAudioRoles[overload1]$$$supportedAudioRoles -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="supportedAudioRoles-method"></a><span class="name">supportedAudioRoles</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns a list of supported audio roles.</p>
+<p>If setting the audio role is not supported, an empty list is returned.</p>
+<p>This method was introduced in  Qt 5.6.</p>
+<p><b>See also </b><a href="qml-qtmultimedia-video.html#audioRole-prop">audioRole</a>.</p>
+</div></div><!-- @@@supportedAudioRoles -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

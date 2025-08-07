@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- legacymodules.qdoc -->
+  <title>Legacy Modules | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td >Legacy Modules</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#installed-legacy-modules">Installed Legacy Modules</a></li>
+<li class="level1"><a href="#located-legacy-modules">Located Legacy Modules</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Legacy Modules</h1>
+<span class="subtitle"></span>
+<!-- $$$qtqml-modules-legacymodules.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Legacy modules are modules whose specification <code>qmldir</code> file does not contain a module identifier directive. A legacy module may be either installed into the QML import path (as an installed legacy module) or imported by clients with a relative import (as a located legacy module). Clients are advised to avoid using legacy modules if possible. Module developers should ensure they create identified modules and not legacy modules.</p>
+<a name="installed-legacy-modules"></a>
+<h2 id="installed-legacy-modules">Installed Legacy Modules</h2>
+<p>An installed, non-identified module is automatically given an identifier by the QML engine. This implicitly defined identifier is equal to the install path of the module (relative to the QML import path) where directory-separator characters are replaced with period characters.</p>
+<p>A non-identified module which is installed into the QML import path has the following semantics:</p>
+<ul>
+<li>it may be imported by clients via the implicit module identifier</li>
+<li>clients must specify a version when importing the module</li>
+<li>conflicting type names are resolved arbitrarily by the QML engine, and the way in which conflicts are resolved is not guaranteed to stay the same between different versions of QML</li>
+<li>other legacy modules may modify or override type definitions provided by the installed legacy module</li>
+</ul>
+<a name="located-legacy-modules"></a>
+<h2 id="located-legacy-modules">Located Legacy Modules</h2>
+<p>A non-identified module which is imported via a relative directory path import statement is loaded by the engine as a located legacy module. The following semantics apply to located legacy modules:</p>
+<ul>
+<li>it may be imported by clients via a relative import path</li>
+<li>it is not mandatory for clients to specify a version when importing the module</li>
+<li>if no import version is supplied by the client in the import statement, no guarantees are given by the QML engine about which version of the definition of a given type name will be imported</li>
+<li>conflicting type names are resolved arbitrarily by the QML engine, and the way in which conflicts are resolved is not guaranteed to stay the same between different versions of QML</li>
+<li>other legacy modules may modify or override type definitions provided by the located legacy module</li>
+</ul>
+<p>A located legacy module may reside on the local file system or on the network and can be referred to by a URL that specifies the file system path or network URL.</p>
+</div>
+<!-- @@@qtqml-modules-legacymodules.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

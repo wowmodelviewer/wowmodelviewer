@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qstack.cpp -->
+  <title>QStack Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QStack</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QStack Class</h1>
+<!-- $$$QStack-brief -->
+<p>The <a href="qstack.html">QStack</a> class is a template class that provides a stack. <a href="#details">More...</a></p>
+<!-- @@@QStack -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QStack&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qvector.html">QVector</a></td></tr></table></div><ul>
+<li><a href="qstack-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> T </td><td class="memItemRight bottomAlign"><b><a href="qstack.html#pop">pop</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qstack.html#push">push</a></b>(const T &amp;<i>t</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qstack.html#swap">swap</a></b>(QStack&lt;T&gt; &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> T &amp;</td><td class="memItemRight bottomAlign"><b><a href="qstack.html#top">top</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const T &amp;</td><td class="memItemRight bottomAlign"><b><a href="qstack.html#top-1">top</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QStack-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qstack.html">QStack</a>&lt;T&gt; is one of Qt's generic <a href="containers.html">container classes</a>. It implements a stack data structure for items of a same type.</p>
+<p>A stack is a last in, first out (LIFO) structure. Items are added to the top of the stack using <a href="qstack.html#push">push</a>() and retrieved from the top using <a href="qstack.html#pop">pop</a>(). The <a href="qstack.html#top">top</a>() function provides access to the topmost item without removing it.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qstack.html">QStack</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span> stack;
+      stack<span class="operator">.</span>push(<span class="number">1</span>);
+      stack<span class="operator">.</span>push(<span class="number">2</span>);
+      stack<span class="operator">.</span>push(<span class="number">3</span>);
+      <span class="keyword">while</span> (<span class="operator">!</span>stack<span class="operator">.</span>isEmpty())
+          cout <span class="operator">&lt;</span><span class="operator">&lt;</span> stack<span class="operator">.</span>pop() <span class="operator">&lt;</span><span class="operator">&lt;</span> endl;
+
+</pre>
+<p>The example will output 3, 2, 1 in that order.</p>
+<p><a href="qstack.html">QStack</a> inherits from <a href="qvector.html">QVector</a>. All of <a href="qvector.html">QVector</a>'s functionality also applies to <a href="qstack.html">QStack</a>. For example, you can use <a href="qvector.html#isEmpty">isEmpty</a>() to test whether the stack is empty, and you can traverse a <a href="qstack.html">QStack</a> using <a href="qvector.html">QVector</a>'s iterator classes (for example, <a href="qvectoriterator.html">QVectorIterator</a>). But in addition, <a href="qstack.html">QStack</a> provides three convenience functions that make it easy to implement LIFO semantics: <a href="qstack.html#push">push</a>(), <a href="qstack.html#pop">pop</a>(), and <a href="qstack.html#top">top</a>().</p>
+<p><a href="qstack.html">QStack</a>'s value type must be an <a href="containers.html#assignable-data-type">assignable data type</a>. This covers most data types that are commonly used, but the compiler won't let you, for example, store a <a href="../qtwidgets/qwidget.html">QWidget</a> as a value; instead, store a <a href="../qtwidgets/qwidget.html">QWidget</a> *.</p>
+</div>
+<p><b>See also </b><a href="qvector.html">QVector</a> and <a href="qqueue.html">QQueue</a>.</p>
+<!-- @@@QStack -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$pop[overload1]$$$pop -->
+<h3 class="fn" id="pop"><a name="pop"></a><span class="type">T</span> QStack::<span class="name">pop</span>()</h3>
+<p>Removes the top item from the stack and returns it. This function assumes that the stack isn't empty.</p>
+<p><b>See also </b><a href="qstack.html#top">top</a>(), <a href="qstack.html#push">push</a>(), and <a href="qvector.html#isEmpty">isEmpty</a>().</p>
+<!-- @@@pop -->
+<!-- $$$push[overload1]$$$pushconstT& -->
+<h3 class="fn" id="push"><a name="push"></a><span class="type">void</span> QStack::<span class="name">push</span>(const <span class="type">T</span> &amp;<i>t</i>)</h3>
+<p>Adds element <i>t</i> to the top of the stack.</p>
+<p>This is the same as <a href="qvector.html#append">QVector::append</a>().</p>
+<p><b>See also </b><a href="qstack.html#pop">pop</a>() and <a href="qstack.html#top">top</a>().</p>
+<!-- @@@push -->
+<!-- $$$swap[overload1]$$$swapQStack<T>& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QStack::<span class="name">swap</span>(<span class="type"><a href="qstack.html">QStack</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>other</i>)</h3>
+<p>Swaps stack <i>other</i> with this stack. This operation is very fast and never fails.</p>
+<p>This function was introduced in  Qt 4.8.</p>
+<!-- @@@swap -->
+<!-- $$$top[overload1]$$$top -->
+<h3 class="fn" id="top"><a name="top"></a><span class="type">T</span> &amp;QStack::<span class="name">top</span>()</h3>
+<p>Returns a reference to the stack's top item. This function assumes that the stack isn't empty.</p>
+<p>This is the same as <a href="qvector.html#last">QVector::last</a>().</p>
+<p><b>See also </b><a href="qstack.html#pop">pop</a>(), <a href="qstack.html#push">push</a>(), and <a href="qvector.html#isEmpty">isEmpty</a>().</p>
+<!-- @@@top -->
+<!-- $$$top$$$top -->
+<h3 class="fn" id="top-1"><a name="top-1"></a>const <span class="type">T</span> &amp;QStack::<span class="name">top</span>() const</h3>
+<p>This is an overloaded function.</p>
+<p><b>See also </b><a href="qstack.html#pop">pop</a>() and <a href="qstack.html#push">push</a>().</p>
+<!-- @@@top -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

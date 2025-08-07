@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- calculator-qml.qdoc -->
+  <title>Qt SCXML Calculator QML Example | Qt SCXML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtscxml-index.html">Qt SCXML</a></td><td >Qt SCXML Calculator QML Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtscxml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+<li class="level1"><a href="#compiling-the-state-machine">Compiling the State Machine</a></li>
+<li class="level1"><a href="#instantiating-the-state-machine">Instantiating the State Machine</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt SCXML Calculator QML Example</h1>
+<span class="subtitle"></span>
+<!-- $$$calculator-qml-brief -->
+<p>A Qt Quick application that implements the Calculator example presented in the SCXML Specification.</p>
+<!-- @@@calculator-qml -->
+<!-- $$$calculator-qml-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/calculator-qml.png" alt="" /></p><p><i>Calculator</i> uses Qt SCXML to implement the <a href="http://www.w3.org/TR/scxml/#N11630">Calculator Example</a> presented in the SCXML Specification.</p>
+<p>The state machine is specified in the <i>statemachine.scxml</i> file and compiled into the <code>CalculatorStateMachine</code> class. The user interface is created using Qt Quick.</p>
+<a name="running-the-example"></a>
+<h4 id="running-the-example">Running the Example</h4>
+<p>To run the example from <a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a>, open the <b>Welcome</b> mode and select the example from <b>Examples</b>. For more information, visit <a href="http://doc.qt.io/qtcreator/creator-build-example-application.html">Building and Running an Example</a>.</p>
+<a name="compiling-the-state-machine"></a>
+<h4 id="compiling-the-state-machine">Compiling the State Machine</h4>
+<p>We link against the Qt SCXML module by adding the following line to the <i>.pro</i> file:</p>
+<pre class="cpp">
+
+  QT += widgets scxml
+
+</pre>
+<p>We then specify the state machine to compile:</p>
+<pre class="cpp">
+
+  STATECHARTS = ../calculator-common/statemachine.scxml
+
+</pre>
+<p>The Qt SCXML Compiler, <code>qscxmlc</code>, is run automatically to generate <i>statemachine.h</i> and <i>statemachine.cpp</i>, and to add them to the <code>HEADERS</code> and <code>SOURCES</code> variables for compilation.</p>
+<a name="instantiating-the-state-machine"></a>
+<h4 id="instantiating-the-state-machine">Instantiating the State Machine</h4>
+<p>We make the generated <code>CalculatorStateMachine</code> class available to QML by registering it as a QML type in the <i>calculator-qml.cpp</i> file:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &quot;statemachine.h&quot;</span>
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type">QGuiApplication</span> app(argc<span class="operator">,</span> argv);
+
+      qmlRegisterType<span class="operator">&lt;</span>CalculatorStateMachine<span class="operator">&gt;</span>(<span class="string">&quot;CalculatorStateMachine&quot;</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span>
+                                              <span class="string">&quot;CalculatorStateMachine&quot;</span>);
+
+      <span class="type">QQmlApplicationEngine</span> engine;
+      engine<span class="operator">.</span>load(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;qrc:/calculator-qml.qml&quot;</span>)));
+      <span class="keyword">if</span> (engine<span class="operator">.</span>rootObjects()<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span> <span class="operator">-</span><span class="number">1</span>;
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p>To use the CalculatorStateMachine type in a QML file, we import it:</p>
+<pre class="cpp">
+
+  import CalculatorStateMachine 1.0
+
+</pre>
+<p>We instantiate a CalculatorStateMachine and listen to the <code>updateDisplay</code> event. When it occurs, we change the text on the calculator display:</p>
+<pre class="cpp">
+
+      <span class="type">CalculatorStateMachine</span> {
+          <span class="name">id</span>: <span class="name">statemachine</span>
+          <span class="name">running</span>: <span class="number">true</span>
+          <span class="type"><a href="qml-qtscxml-eventconnection.html">EventConnection</a></span> {
+              <span class="name">events</span>: [<span class="string">&quot;updateDisplay&quot;</span>]
+              <span class="name">onOccurred</span>: <span class="name">resultText</span>.<span class="name">text</span> <span class="operator">=</span> <span class="name">event</span>.<span class="name">data</span>.<span class="name">display</span>
+          }
+      }
+
+</pre>
+<p>When users press the calculator buttons, the buttons submit events to the state machine:</p>
+<pre class="cpp">
+
+          <span class="type">Button</span> {
+              <span class="name">id</span>: <span class="name">resultButton</span>
+              <span class="name">x</span>: <span class="number">3</span> <span class="operator">*</span> <span class="name">width</span>
+              <span class="name">y</span>: <span class="name">parent</span>.<span class="name">height</span> <span class="operator">/</span> <span class="number">5</span>
+              <span class="name">textHeight</span>: <span class="name">y</span> <span class="operator">-</span> <span class="number">2</span>
+              <span class="name">fontHeight</span>: <span class="number">0.4</span>
+              <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">4</span>
+              <span class="name">height</span>: <span class="name">y</span> <span class="operator">*</span> <span class="number">4</span>
+              <span class="name">color</span>: <span class="name">pressed</span> ? <span class="string">&quot;#e0b91c&quot;</span> : <span class="string">&quot;#face20&quot;</span>
+              <span class="name">text</span>: <span class="string">&quot;=&quot;</span>
+              <span class="name">onClicked</span>: <span class="name">statemachine</span>.<span class="name">submitEvent</span>(<span class="string">&quot;EQUALS&quot;</span>)
+          }
+
+</pre>
+<p><a href="https://code.qt.io/cgit/qt/qtscxml.git/tree/examples/scxml/calculator-qml?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@calculator-qml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

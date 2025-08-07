@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- samegame.qdoc -->
+  <title>Qt Quick Demo - Same Game | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Qt Quick Demo - Same Game</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<h1 class="title">Qt Quick Demo - Same Game</h1>
+<span class="subtitle"></span>
+<pre class="cpp">
+
+  import QmlProject 1.1
+
+  Project {
+      mainFile: &quot;samegame.qml&quot;
+
+      /* Include .qml, .js, and image files from current directory and subdirectories */
+      QmlFiles {
+          directory: &quot;.&quot;
+      }
+      JavaScriptFiles {
+          directory: &quot;.&quot;
+      }
+      ImageFiles {
+          directory: &quot;.&quot;
+      }
+  }
+
+</pre>

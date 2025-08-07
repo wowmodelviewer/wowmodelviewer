@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qiconengine.cpp -->
+  <title>ScaledPixmapArgument Struct | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >ScaledPixmapArgument</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-variables">Public Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">ScaledPixmapArgument Struct</h1>
+<span class="small-subtitle">Struct ScaledPixmapArgument is declared in class <a href="qiconengine.html">QIconEngine</a>.<br/></span>
+<p>This struct was introduced in  Qt 5.9.</p>
+<ul>
+<li><a href="qiconengine-scaledpixmapargument-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-variables"></a>
+<h2 id="public-variables">Public Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QIcon::Mode </td><td class="memItemRight bottomAlign"><b><a href="qiconengine-scaledpixmapargument.html#mode-var">mode</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPixmap </td><td class="memItemRight bottomAlign"><b><a href="qiconengine-scaledpixmapargument.html#pixmap-var">pixmap</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qiconengine-scaledpixmapargument.html#scale-var">scale</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qiconengine-scaledpixmapargument.html#size-var">size</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QIcon::State </td><td class="memItemRight bottomAlign"><b><a href="qiconengine-scaledpixmapargument.html#state-var">state</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$ScaledPixmapArgument-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This struct represents arguments to the <a href="qiconengine.html#virtual_hook">virtual_hook</a>() function when the <i>id</i> parameter is <a href="qiconengine.html#IconEngineHook-enum">QIconEngine::ScaledPixmapHook</a>.</p>
+<p>The struct provides a way for icons created via <a href="qicon.html#fromTheme">QIcon::fromTheme</a>() to return pixmaps that are designed for the current device pixel ratio. The scale for such an icon is specified using the <a href="https://standards.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html#directory_layout">Scale directory key</a> in the appropriate <code>index.theme</code> file.</p>
+<p>Icons created via other approaches will return the same result as a call to <a href="qiconengine.html#pixmap">pixmap</a>() would, and continue to benefit from Qt's <a href="qimagereader.html#high-resolution-versions-of-images">&quot;@nx&quot; high DPI syntax</a>.</p>
+</div>
+<p><b>See also </b><a href="qiconengine.html#virtual_hook">virtual_hook</a>(), <a href="qiconengine.html#IconEngineHook-enum">QIconEngine::IconEngineHook</a>, and <a href="qicon.html#high-dpi-icons">High DPI Icons</a>.</p>
+<!-- @@@ScaledPixmapArgument -->
+<div class="vars">
+<h2>Member Variable Documentation</h2>
+<!-- $$$mode -->
+<h3 class="fn" id="mode-var"><a name="mode-var"></a><span class="type"><a href="qicon.html#Mode-enum">QIcon::Mode</a></span> ScaledPixmapArgument::<span class="name">mode</span></h3>
+<p>This variable holds the requested mode of the pixmap.</p>
+<p><b>See also </b><a href="qicon.html#Mode-enum">QIcon::Mode</a>.</p>
+<!-- @@@mode -->
+<!-- $$$pixmap -->
+<h3 class="fn" id="pixmap-var"><a name="pixmap-var"></a><span class="type"><a href="qpixmap.html">QPixmap</a></span> ScaledPixmapArgument::<span class="name">pixmap</span></h3>
+<p>This variable holds the pixmap that is the best match for the given <a href="qiconengine-scaledpixmapargument.html#size-var">size</a>, <a href="qiconengine-scaledpixmapargument.html#mode-var">mode</a>, <a href="qiconengine-scaledpixmapargument.html#state-var">state</a>, and <a href="qiconengine-scaledpixmapargument.html#scale-var">scale</a>. This is an output parameter that is set after calling <a href="qiconengine.html#virtual_hook">virtual_hook</a>().</p>
+<!-- @@@pixmap -->
+<!-- $$$scale -->
+<h3 class="fn" id="scale-var"><a name="scale-var"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> ScaledPixmapArgument::<span class="name">scale</span></h3>
+<p>This variable holds the requested scale of the pixmap.</p>
+<!-- @@@scale -->
+<!-- $$$size -->
+<h3 class="fn" id="size-var"><a name="size-var"></a><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> ScaledPixmapArgument::<span class="name">size</span></h3>
+<p>This variable holds the requested size of the pixmap.</p>
+<!-- @@@size -->
+<!-- $$$state -->
+<h3 class="fn" id="state-var"><a name="state-var"></a><span class="type"><a href="qicon.html#State-enum">QIcon::State</a></span> ScaledPixmapArgument::<span class="name">state</span></h3>
+<p>This variable holds the requested state of the pixmap.</p>
+<p><b>See also </b><a href="qicon.html#State-enum">QIcon::State</a>.</p>
+<!-- @@@state -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qabstractraycaster.cpp -->
+  <title>QAbstractRayCaster Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QAbstractRayCaster</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAbstractRayCaster Class</h1>
+<span class="small-subtitle">(<a href="qt3drender-qabstractraycaster.html">Qt3DRender::QAbstractRayCaster</a>)<br/></span>
+<!-- $$$QAbstractRayCaster-brief -->
+<p>An abstract base class for ray casting in 3d scenes. <a href="#details">More...</a></p>
+<!-- @@@QAbstractRayCaster -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAbstractRayCaster&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3drender</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.11</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-abstractraycaster.html">AbstractRayCaster</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3dcore-qcomponent.html">Qt3DCore::QComponent</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qt3drender-qraycaster.html">Qt3DRender::QRayCaster</a> and <a href="qt3drender-qscreenraycaster.html">Qt3DRender::QScreenRayCaster</a></p>
+</td></tr></table></div><p>This class was introduced in  Qt 5.11.</p>
+<ul>
+<li><a href="qt3drender-qabstractraycaster-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstractraycaster.html#FilterMode-enum">FilterMode</a></b> { AcceptAnyMatchingLayers, AcceptAllMatchingLayers, DiscardAnyMatchingLayers, DiscardAllMatchingLayers }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstractraycaster.html#RunMode-enum">RunMode</a></b> { Continuous, SingleShot }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qt3drender-qabstractraycaster.html#filterMode-prop">filterMode</a></b> : FilterMode</li>
+<li class="fn"><b><a href="qt3drender-qabstractraycaster.html#hits-prop">hits</a></b> : const Hits</li>
+<li class="fn"><b><a href="qt3drender-qabstractraycaster.html#runMode-prop">runMode</a></b> : RunMode</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstractraycaster.html#addLayer">addLayer</a></b>(Qt3DRender::QLayer *<i>layer</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QAbstractRayCaster::FilterMode </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstractraycaster.html#filterMode-prop">filterMode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QAbstractRayCaster::Hits </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstractraycaster.html#hits-prop">hits</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;Qt3DRender::QLayer *&gt; </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstractraycaster.html#layers">layers</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstractraycaster.html#removeLayer">removeLayer</a></b>(Qt3DRender::QLayer *<i>layer</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QAbstractRayCaster::RunMode </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstractraycaster.html#runMode-prop">runMode</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstractraycaster.html#filterMode-prop">setFilterMode</a></b>(Qt3DRender::QAbstractRayCaster::FilterMode <i>filterMode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstractraycaster.html#runMode-prop">setRunMode</a></b>(Qt3DRender::QAbstractRayCaster::RunMode <i>runMode</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstractraycaster.html#filterMode-prop">filterModeChanged</a></b>(Qt3DRender::QAbstractRayCaster::FilterMode <i>filterMode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstractraycaster.html#hits-prop">hitsChanged</a></b>(const Qt3DRender::QAbstractRayCaster::Hits &amp;<i>hits</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstractraycaster.html#runMode-prop">runModeChanged</a></b>(Qt3DRender::QAbstractRayCaster::RunMode <i>runMode</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAbstractRayCaster-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qt3drender-qabstractraycaster.html">Qt3DRender::QAbstractRayCaster</a> is an abstract base class for casting rays into a 3d scene. <a href="qt3drender-qabstractraycaster.html">Qt3DRender::QAbstractRayCaster</a> can not be directly instantiated, but rather through its subclasses. <a href="qt3drender-qabstractraycaster.html">QAbstractRayCaster</a> specifies common properties for all ray casters, such as run mode and layer handling, while leaving the actual ray casting details to the subclasses.</p>
+<p>Ray castings differs from picking (using <a href="qt3drender-qobjectpicker.html">Qt3DRender::QObjectPicker</a>) in that it does not require mouse events to trigger.</p>
+<p>By default, the instances of <a href="qt3drender-qabstractraycaster.html">Qt3DRender::QAbstractRayCaster</a> are disabled. When enabled, the specified ray will be tested for intersecting objects at every frame. The <a href="qt3drender-qabstractraycaster.html#hits-prop">QAbstractRayCaster::hits</a> property will be updated with the results of the ray casting, even if no objects are found.</p>
+<p>The <a href="qt3drender-qpickingsettings.html">Qt3DRender::QPickingSettings</a> can be used to control the ray casting, such as which primitives are tested and how the results are returned.</p>
+<p>Furthermore, <a href="qt3drender-qlayer.html">Qt3DRender::QLayer</a> components can be used to control how entities, or entity sub-graphs, react to ray casting.</p>
+<p><b>Note: </b>Components derived from <a href="qt3drender-qabstractraycaster.html">QAbstractRayCaster</a> should not be shared amount multiple entities.</p></div>
+<p><b>See also </b><a href="qt3drender-qraycaster.html">Qt3DRender::QRayCaster</a>, <a href="qt3drender-qscreenraycaster.html">Qt3DRender::QScreenRayCaster</a>, <a href="qt3drender-qobjectpicker.html">Qt3DRender::QObjectPicker</a>, and <a href="qt3drender-qpickingsettings.html">Qt3DRender::QPickingSettings</a>.</p>
+<!-- @@@QAbstractRayCaster -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$FilterMode$$$AcceptAnyMatchingLayers$$$AcceptAllMatchingLayers$$$DiscardAnyMatchingLayers$$$DiscardAllMatchingLayers -->
+<h3 class="fn" id="FilterMode-enum"><a name="FilterMode-enum"></a>enum QAbstractRayCaster::<span class="name">FilterMode</span></h3>
+<p>Specifies the rules for selecting entities to test for raycasting.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractRayCaster::AcceptAnyMatchingLayers</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Accept entities that reference one or more <a href="qt3drender-qlayer.html">QLayer</a> objects added to this <a href="qt3drender-qabstractraycaster.html">QAbstractRayCaster</a>. This is the default</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractRayCaster::AcceptAllMatchingLayers</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Accept entities that reference all the <a href="qt3drender-qlayer.html">QLayer</a> objects added to this <a href="qt3drender-qabstractraycaster.html">QAbstractRayCaster</a></td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractRayCaster::DiscardAnyMatchingLayers</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Discard entities that reference one or more <a href="qt3drender-qlayer.html">QLayer</a> objects added to this <a href="qt3drender-qabstractraycaster.html">QAbstractRayCaster</a></td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractRayCaster::DiscardAllMatchingLayers</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">Discard entities that reference all <a href="qt3drender-qlayer.html">QLayer</a> objects added to this <a href="qt3drender-qabstractraycaster.html">QAbstractRayCaster</a></td></tr>
+</table></div>
+<!-- @@@FilterMode -->
+<!-- $$$RunMode$$$Continuous$$$SingleShot -->
+<h3 class="fn" id="RunMode-enum"><a name="RunMode-enum"></a>enum QAbstractRayCaster::<span class="name">RunMode</span></h3>
+<p>This enumeration specifies how often ray casting is performed</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractRayCaster::Continuous</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Ray casting is performed at every frame as long as the component is enabled.</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractRayCaster::SingleShot</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Ray casting is done once then the component disables itself. This is the default</td></tr>
+</table></div>
+<!-- @@@RunMode -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$filterMode-prop$$$filterMode$$$setFilterModeQt3DRender::QAbstractRayCaster::FilterMode$$$filterModeChangedQt3DRender::QAbstractRayCaster::FilterMode -->
+<h3 class="fn" id="filterMode-prop"><a name="filterMode-prop"></a><span class="name">filterMode</span> : <span class="type"><a href="qt3drender-qabstractraycaster.html#FilterMode-enum">FilterMode</a></span></h3>
+<p>Holds the filter mode specifying the entities to select for ray casting tests.</p>
+<p>The default value is AcceptMatchingLayers.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QAbstractRayCaster::FilterMode </td><td class="memItemRight bottomAlign"><span class="name"><b>filterMode</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setFilterMode</b></span>(Qt3DRender::QAbstractRayCaster::FilterMode <i>filterMode</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>filterModeChanged</b></span>(Qt3DRender::QAbstractRayCaster::FilterMode <i>filterMode</i>)</td></tr>
+</table></div>
+<!-- @@@filterMode -->
+<!-- $$$hits-prop$$$hits$$$hitsChangedconstQt3DRender::QAbstractRayCaster::Hits& -->
+<h3 class="fn" id="hits-prop"><a name="hits-prop"></a><span class="name">hits</span> : const <span class="type">Hits</span></h3>
+<p>Holds the results of last ray casting test as a vector of <a href="qt3drender-qraycasterhit.html">Qt3DRender::QRayCasterHit</a> instances.</p>
+<p>Note that even if successive tests return the exact same results (or empty results), a change notification will be emitted at every test.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QAbstractRayCaster::Hits </td><td class="memItemRight bottomAlign"><span class="name"><b>hits</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>hitsChanged</b></span>(const Qt3DRender::QAbstractRayCaster::Hits &amp;<i>hits</i>)</td></tr>
+</table></div>
+<!-- @@@hits -->
+<!-- $$$runMode-prop$$$runMode$$$setRunModeQt3DRender::QAbstractRayCaster::RunMode$$$runModeChangedQt3DRender::QAbstractRayCaster::RunMode -->
+<h3 class="fn" id="runMode-prop"><a name="runMode-prop"></a><span class="name">runMode</span> : <span class="type"><a href="qt3drender-qabstractraycaster.html#RunMode-enum">RunMode</a></span></h3>
+<p>Holds the run mode controlling how often ray casting tests are performed.</p>
+<p>If set to <a href="qt3drender-qabstractraycaster.html#RunMode-enum">SingleShot</a> (the default), when the component is enabled, a single ray casting test will be performed and the component will automatically disable itself.</p>
+<p>If set to Continuous, ray casting tests will be performed at every frame as long as the component is enabled.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QAbstractRayCaster::RunMode </td><td class="memItemRight bottomAlign"><span class="name"><b>runMode</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setRunMode</b></span>(Qt3DRender::QAbstractRayCaster::RunMode <i>runMode</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>runModeChanged</b></span>(Qt3DRender::QAbstractRayCaster::RunMode <i>runMode</i>)</td></tr>
+</table></div>
+<!-- @@@runMode -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$addLayer[overload1]$$$addLayerQt3DRender::QLayer* -->
+<h3 class="fn" id="addLayer"><a name="addLayer"></a><span class="type">void</span> QAbstractRayCaster::<span class="name">addLayer</span>(<span class="type"><a href="qt3drender-qlayer.html">Qt3DRender::QLayer</a></span> *<i>layer</i>)</h3>
+<p>Add <i>layer</i> to the current list of layers</p>
+<!-- @@@addLayer -->
+<!-- $$$layers[overload1]$$$layers -->
+<h3 class="fn" id="layers"><a name="layers"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="qt3drender-qlayer.html">Qt3DRender::QLayer</a></span> *&gt; QAbstractRayCaster::<span class="name">layers</span>() const</h3>
+<p>Returns the current list of layers</p>
+<!-- @@@layers -->
+<!-- $$$removeLayer[overload1]$$$removeLayerQt3DRender::QLayer* -->
+<h3 class="fn" id="removeLayer"><a name="removeLayer"></a><span class="type">void</span> QAbstractRayCaster::<span class="name">removeLayer</span>(<span class="type"><a href="qt3drender-qlayer.html">Qt3DRender::QLayer</a></span> *<i>layer</i>)</h3>
+<p>Remove <i>layer</i> from the current list of layers</p>
+<!-- @@@removeLayer -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

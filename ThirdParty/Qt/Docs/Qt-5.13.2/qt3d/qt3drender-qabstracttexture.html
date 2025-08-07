@@ -1,0 +1,704 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qabstracttexture.cpp -->
+  <title>QAbstractTexture Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QAbstractTexture</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAbstractTexture Class</h1>
+<span class="small-subtitle">(<a href="qt3drender-qabstracttexture.html">Qt3DRender::QAbstractTexture</a>)<br/></span>
+<!-- $$$QAbstractTexture-brief -->
+<p>A base class to be used to provide textures. <a href="#details">More...</a></p>
+<!-- @@@QAbstractTexture -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAbstractTexture&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3drender</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qt3drender-qsharedgltexture.html">Qt3DRender::QSharedGLTexture</a>, <a href="qt3drender-qtexture1d.html">Qt3DRender::QTexture1D</a>, <a href="qt3drender-qtexture1darray.html">Qt3DRender::QTexture1DArray</a>, <a href="qt3drender-qtexture2d.html">Qt3DRender::QTexture2D</a>, <a href="qt3drender-qtexture2darray.html">Qt3DRender::QTexture2DArray</a>, <a href="qt3drender-qtexture2dmultisample.html">Qt3DRender::QTexture2DMultisample</a>, <a href="qt3drender-qtexture2dmultisamplearray.html">Qt3DRender::QTexture2DMultisampleArray</a>, <a href="qt3drender-qtexture3d.html">Qt3DRender::QTexture3D</a>, <a href="qt3drender-qtexturebuffer.html">Qt3DRender::QTextureBuffer</a>, <a href="qt3drender-qtexturecubemap.html">Qt3DRender::QTextureCubeMap</a>, <a href="qt3drender-qtexturecubemaparray.html">Qt3DRender::QTextureCubeMapArray</a>, <a href="qt3drender-qtextureloader.html">Qt3DRender::QTextureLoader</a>, and <a href="qt3drender-qtexturerectangle.html">Qt3DRender::QTextureRectangle</a></p>
+</td></tr></table></div><p>This class was introduced in  Qt 5.5.</p>
+<ul>
+<li><a href="qt3drender-qabstracttexture-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#CubeMapFace-enum">CubeMapFace</a></b> { CubeMapPositiveX, CubeMapNegativeX, CubeMapPositiveY, CubeMapNegativeY, ..., AllFaces }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#Filter-enum">Filter</a></b> { Nearest, Linear, NearestMipMapNearest, NearestMipMapLinear, LinearMipMapNearest, LinearMipMapLinear }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#Status-enum">Status</a></b> { None, Loading, Ready, Error }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#Target-enum">Target</a></b> { TargetAutomatic, Target1D, Target1DArray, Target2D, ..., TargetBuffer }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#TextureFormat-enum">TextureFormat</a></b> { NoFormat, Automatic, R8_UNorm, RG8_UNorm, ..., LuminanceAlphaFormat }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qt3drender-qabstracttexture.html#depth-prop">depth</a></b> : int</li>
+<li class="fn"><b><a href="qt3drender-qabstracttexture.html#format-prop">format</a></b> : TextureFormat</li>
+<li class="fn"><b><a href="qt3drender-qabstracttexture.html#generateMipMaps-prop">generateMipMaps</a></b> : bool</li>
+<li class="fn"><b><a href="qt3drender-qabstracttexture.html#handle-prop">handle</a></b> : const QVariant</li>
+<li class="fn"><b><a href="qt3drender-qabstracttexture.html#handleType-prop">handleType</a></b> : const HandleType</li>
+<li class="fn"><b><a href="qt3drender-qabstracttexture.html#height-prop">height</a></b> : int</li>
+<li class="fn"><b><a href="qt3drender-qabstracttexture.html#layers-prop">layers</a></b> : int</li>
+<li class="fn"><b><a href="qt3drender-qabstracttexture.html#magnificationFilter-prop">magnificationFilter</a></b> : Filter</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qt3drender-qabstracttexture.html#maximumAnisotropy-prop">maximumAnisotropy</a></b> : float</li>
+<li class="fn"><b><a href="qt3drender-qabstracttexture.html#minificationFilter-prop">minificationFilter</a></b> : Filter</li>
+<li class="fn"><b><a href="qt3drender-qabstracttexture.html#samples-prop">samples</a></b> : int</li>
+<li class="fn"><b><a href="qt3drender-qabstracttexture.html#status-prop">status</a></b> : const Status</li>
+<li class="fn"><b><a href="qt3drender-qabstracttexture.html#target-prop">target</a></b> : const Target</li>
+<li class="fn"><b><a href="qt3drender-qabstracttexture.html#width-prop">width</a></b> : int</li>
+<li class="fn"><b><a href="qt3drender-qabstracttexture.html#wrapMode-prop">wrapMode</a></b> : Qt3DRender::QTextureWrapMode* const</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#addTextureImage">addTextureImage</a></b>(Qt3DRender::QAbstractTextureImage *<i>textureImage</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QAbstractTexture::ComparisonFunction </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#comparisonFunction">comparisonFunction</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QAbstractTexture::ComparisonMode </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#comparisonMode">comparisonMode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QTextureGeneratorPtr </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#dataGenerator">dataGenerator</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#depth">depth</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QAbstractTexture::TextureFormat </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#format">format</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#generateMipMaps-prop">generateMipMaps</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariant </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#handle">handle</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QAbstractTexture::HandleType </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#handleType">handleType</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#height">height</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#layers">layers</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QAbstractTexture::Filter </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#magnificationFilter-prop">magnificationFilter</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> float </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#maximumAnisotropy">maximumAnisotropy</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QAbstractTexture::Filter </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#minificationFilter-prop">minificationFilter</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#removeTextureImage">removeTextureImage</a></b>(Qt3DRender::QAbstractTextureImage *<i>textureImage</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#samples">samples</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#setSize">setSize</a></b>(int <i>w</i>, int <i>h</i> = 1, int <i>d</i> = 1)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#setWrapMode">setWrapMode</a></b>(const Qt3DRender::QTextureWrapMode &amp;<i>wrapMode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QAbstractTexture::Status </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#status">status</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QAbstractTexture::Target </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#target">target</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;Qt3DRender::QAbstractTextureImage *&gt; </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#textureImages">textureImages</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#width">width</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QTextureWrapMode *</td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#wrapMode-prop">wrapMode</a></b>()</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#setComparisonFunction">setComparisonFunction</a></b>(Qt3DRender::QAbstractTexture::ComparisonFunction <i>function</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#setComparisonMode">setComparisonMode</a></b>(Qt3DRender::QAbstractTexture::ComparisonMode <i>mode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#setDepth">setDepth</a></b>(int <i>depth</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#setFormat">setFormat</a></b>(Qt3DRender::QAbstractTexture::TextureFormat <i>format</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#setGenerateMipMaps">setGenerateMipMaps</a></b>(bool <i>gen</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#setHeight">setHeight</a></b>(int <i>height</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#setLayers">setLayers</a></b>(int <i>layers</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#setMagnificationFilter">setMagnificationFilter</a></b>(Qt3DRender::QAbstractTexture::Filter <i>f</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#setMaximumAnisotropy">setMaximumAnisotropy</a></b>(float <i>anisotropy</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#setMinificationFilter">setMinificationFilter</a></b>(Qt3DRender::QAbstractTexture::Filter <i>f</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#setSamples">setSamples</a></b>(int <i>samples</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#setWidth">setWidth</a></b>(int <i>width</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#comparisonFunction-prop">comparisonFunctionChanged</a></b>(Qt3DRender::QAbstractTexture::ComparisonFunction <i>comparisonFunction</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#comparisonMode-prop">comparisonModeChanged</a></b>(Qt3DRender::QAbstractTexture::ComparisonMode <i>comparisonMode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#depth-prop">depthChanged</a></b>(int <i>depth</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#format-prop">formatChanged</a></b>(Qt3DRender::QAbstractTexture::TextureFormat <i>format</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#generateMipMaps-prop">generateMipMapsChanged</a></b>(bool <i>generateMipMaps</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#handle-prop">handleChanged</a></b>(QVariant <i>handle</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#handleType-prop">handleTypeChanged</a></b>(Qt3DRender::QAbstractTexture::HandleType <i>handleType</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#height-prop">heightChanged</a></b>(int <i>height</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#layers-prop">layersChanged</a></b>(int <i>layers</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#magnificationFilter-prop">magnificationFilterChanged</a></b>(Qt3DRender::QAbstractTexture::Filter <i>magnificationFilter</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#maximumAnisotropy-prop">maximumAnisotropyChanged</a></b>(float <i>maximumAnisotropy</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#minificationFilter-prop">minificationFilterChanged</a></b>(Qt3DRender::QAbstractTexture::Filter <i>minificationFilter</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#samples-prop">samplesChanged</a></b>(int <i>samples</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#status-prop">statusChanged</a></b>(Qt3DRender::QAbstractTexture::Status <i>status</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#width-prop">widthChanged</a></b>(int <i>width</i>)</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#QAbstractTexture-1">QAbstractTexture</a></b>(Qt3DRender::QAbstractTexture::Target <i>target</i>, Qt3DCore::QNode *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#QAbstractTexture">QAbstractTexture</a></b>(Qt3DCore::QNode *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#setStatus">setStatus</a></b>(Qt3DRender::QAbstractTexture::Status <i>status</i>)</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qabstracttexture.html#sceneChangeEvent">sceneChangeEvent</a></b>(const Qt3DCore::QSceneChangePtr &amp;<i>change</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAbstractTexture-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qt3drender-qabstracttexture.html">QAbstractTexture</a> class shouldn't be used directly but rather through one of its subclasses. Each subclass implements a given texture target (2D, 2DArray, 3D, CubeMap ..&#x2e;) Each subclass provides a set of functors for each layer, cube map face and mipmap level. In turn the backend uses those functor to properly fill a corresponding OpenGL texture with data.</p>
+</div>
+<!-- @@@QAbstractTexture -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$CubeMapFace$$$CubeMapPositiveX$$$CubeMapNegativeX$$$CubeMapPositiveY$$$CubeMapNegativeY$$$CubeMapPositiveZ$$$CubeMapNegativeZ$$$AllFaces -->
+<h3 class="fn" id="CubeMapFace-enum"><a name="CubeMapFace-enum"></a>enum QAbstractTexture::<span class="name">CubeMapFace</span></h3>
+<p>This enum identifies the faces of a cube map texture</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::CubeMapPositiveX</code></td><td class="topAlign tblval"><code>0x8515</code></td><td class="topAlign">Specify the positive X face of a cube map</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::CubeMapNegativeX</code></td><td class="topAlign tblval"><code>0x8516</code></td><td class="topAlign">Specify the negative X face of a cube map</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::CubeMapPositiveY</code></td><td class="topAlign tblval"><code>0x8517</code></td><td class="topAlign">Specify the positive Y face of a cube map</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::CubeMapNegativeY</code></td><td class="topAlign tblval"><code>0x8518</code></td><td class="topAlign">Specify the negative Y face of a cube map</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::CubeMapPositiveZ</code></td><td class="topAlign tblval"><code>0x8519</code></td><td class="topAlign">Specify the positive Z face of a cube map</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::CubeMapNegativeZ</code></td><td class="topAlign tblval"><code>0x851A</code></td><td class="topAlign">Specify the negative Z face of a cube map</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::AllFaces</code></td><td class="topAlign tblval"><code>0x851b</code></td><td class="topAlign">Specify all the faces of a cube map</td></tr>
+</table></div>
+<p><b>Note: </b>AllFaces should only be used when a behavior needs to be applied to all the faces of a cubemap. This is the case for example when using a cube map as a texture attachment. Using AllFaces in the attachment specfication would result in all faces being bound to the attachment point. On the other hand, if a specific face is specified, the attachment would only be using the specified face.</p><!-- @@@CubeMapFace -->
+<!-- $$$Filter$$$Nearest$$$Linear$$$NearestMipMapNearest$$$NearestMipMapLinear$$$LinearMipMapNearest$$$LinearMipMapLinear -->
+<h3 class="fn" id="Filter-enum"><a name="Filter-enum"></a>enum QAbstractTexture::<span class="name">Filter</span></h3>
+<p>Holds the filter type of the texture provider.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::Nearest</code></td><td class="topAlign tblval"><code>0x2600</code></td><td class="topAlign">GL_NEAREST</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::Linear</code></td><td class="topAlign tblval"><code>0x2601</code></td><td class="topAlign">GL_LINEAR</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::NearestMipMapNearest</code></td><td class="topAlign tblval"><code>0x2700</code></td><td class="topAlign">GL_NEAREST_MIPMAP_NEAREST</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::NearestMipMapLinear</code></td><td class="topAlign tblval"><code>0x2702</code></td><td class="topAlign">GL_NEAREST_MIPMAP_LINEAR</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::LinearMipMapNearest</code></td><td class="topAlign tblval"><code>0x2701</code></td><td class="topAlign">GL_LINEAR_MIPMAP_NEAREST</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::LinearMipMapLinear</code></td><td class="topAlign tblval"><code>0x2703</code></td><td class="topAlign">GL_LINEAR_MIPMAP_LINEAR</td></tr>
+</table></div>
+<!-- @@@Filter -->
+<!-- $$$Status$$$None$$$Loading$$$Ready$$$Error -->
+<h3 class="fn" id="Status-enum"><a name="Status-enum"></a>enum QAbstractTexture::<span class="name">Status</span></h3>
+<p>Contains the status of the texture provider.</p>
+<div class="table"><table class="valuelist"><tr><th class="tblConst">Constant</th><th class="tblVal">Value</th></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::None</code></td><td class="topAlign tblval"><code>0</code></td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::Loading</code></td><td class="topAlign tblval"><code>1</code></td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::Ready</code></td><td class="topAlign tblval"><code>2</code></td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::Error</code></td><td class="topAlign tblval"><code>3</code></td></tr>
+</table></div>
+<!-- @@@Status -->
+<!-- $$$Target$$$TargetAutomatic$$$Target1D$$$Target1DArray$$$Target2D$$$Target2DArray$$$Target3D$$$TargetCubeMap$$$TargetCubeMapArray$$$Target2DMultisample$$$Target2DMultisampleArray$$$TargetRectangle$$$TargetBuffer -->
+<h3 class="fn" id="Target-enum"><a name="Target-enum"></a>enum QAbstractTexture::<span class="name">Target</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::TargetAutomatic</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Target will be determined by the Qt3D engine</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::Target1D</code></td><td class="topAlign tblval"><code>0x0DE0</code></td><td class="topAlign">GL_TEXTURE_1D</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::Target1DArray</code></td><td class="topAlign tblval"><code>0x8C18</code></td><td class="topAlign">GL_TEXTURE_1D_ARRAY</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::Target2D</code></td><td class="topAlign tblval"><code>0x0DE1</code></td><td class="topAlign">GL_TEXTURE_2D</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::Target2DArray</code></td><td class="topAlign tblval"><code>0x8C1A</code></td><td class="topAlign">GL_TEXTURE_2D_ARRAY</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::Target3D</code></td><td class="topAlign tblval"><code>0x806F</code></td><td class="topAlign">GL_TEXTURE_3D</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::TargetCubeMap</code></td><td class="topAlign tblval"><code>0x8513</code></td><td class="topAlign">GL_TEXTURE_CUBE_MAP</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::TargetCubeMapArray</code></td><td class="topAlign tblval"><code>0x9009</code></td><td class="topAlign">GL_TEXTURE_CUBE_MAP_ARRAY</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::Target2DMultisample</code></td><td class="topAlign tblval"><code>0x9100</code></td><td class="topAlign">GL_TEXTURE_2D_MULTISAMPLE</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::Target2DMultisampleArray</code></td><td class="topAlign tblval"><code>0x9102</code></td><td class="topAlign">GL_TEXTURE_2D_MULTISAMPLE_ARRAY</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::TargetRectangle</code></td><td class="topAlign tblval"><code>0x84F5</code></td><td class="topAlign">GL_TEXTURE_RECTANGLE</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::TargetBuffer</code></td><td class="topAlign tblval"><code>0x8C2A</code></td><td class="topAlign">GL_TEXTURE_BUFFER</td></tr>
+</table></div>
+<!-- @@@Target -->
+<!-- $$$TextureFormat$$$NoFormat$$$Automatic$$$R8_UNorm$$$RG8_UNorm$$$RGB8_UNorm$$$RGBA8_UNorm$$$R16_UNorm$$$RG16_UNorm$$$RGB16_UNorm$$$RGBA16_UNorm$$$R8_SNorm$$$RG8_SNorm$$$RGB8_SNorm$$$RGBA8_SNorm$$$R16_SNorm$$$RG16_SNorm$$$RGB16_SNorm$$$RGBA16_SNorm$$$R8U$$$RG8U$$$RGB8U$$$RGBA8U$$$R16U$$$RG16U$$$RGB16U$$$RGBA16U$$$R32U$$$RG32U$$$RGB32U$$$RGBA32U$$$R8I$$$RG8I$$$RGB8I$$$RGBA8I$$$R16I$$$RG16I$$$RGB16I$$$RGBA16I$$$R32I$$$RG32I$$$RGB32I$$$RGBA32I$$$R16F$$$RG16F$$$RGB16F$$$RGBA16F$$$R32F$$$RG32F$$$RGB32F$$$RGBA32F$$$RGB9E5$$$RG11B10F$$$RG3B2$$$R5G6B5$$$RGB5A1$$$RGBA4$$$RGB10A2$$$D16$$$D24$$$D24S8$$$D32$$$D32F$$$D32FS8X24$$$RGB_DXT1$$$RGBA_DXT1$$$RGBA_DXT3$$$RGBA_DXT5$$$R_ATI1N_UNorm$$$R_ATI1N_SNorm$$$RG_ATI2N_UNorm$$$RG_ATI2N_SNorm$$$RGB_BP_UNSIGNED_FLOAT$$$RGB_BP_SIGNED_FLOAT$$$RGB_BP_UNorm$$$R11_EAC_UNorm$$$R11_EAC_SNorm$$$RG11_EAC_UNorm$$$RG11_EAC_SNorm$$$RGB8_ETC2$$$SRGB8_ETC2$$$RGB8_PunchThrough_Alpha1_ETC2$$$SRGB8_PunchThrough_Alpha1_ETC2$$$RGBA8_ETC2_EAC$$$SRGB8_Alpha8_ETC2_EAC$$$RGB8_ETC1$$$SRGB8$$$SRGB8_Alpha8$$$SRGB_DXT1$$$SRGB_Alpha_DXT1$$$SRGB_Alpha_DXT3$$$SRGB_Alpha_DXT5$$$SRGB_BP_UNorm$$$DepthFormat$$$AlphaFormat$$$RGBFormat$$$RGBAFormat$$$LuminanceFormat$$$LuminanceAlphaFormat -->
+<h3 class="fn" id="TextureFormat-enum"><a name="TextureFormat-enum"></a>enum QAbstractTexture::<span class="name">TextureFormat</span></h3>
+<p>This list describes all possible texture formats</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::NoFormat</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">GL_NONE</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::Automatic</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">automatically_determines_format</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::R8_UNorm</code></td><td class="topAlign tblval"><code>0x8229</code></td><td class="topAlign">GL_R8</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RG8_UNorm</code></td><td class="topAlign tblval"><code>0x822B</code></td><td class="topAlign">GL_RG8</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGB8_UNorm</code></td><td class="topAlign tblval"><code>0x8051</code></td><td class="topAlign">GL_RGB8</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGBA8_UNorm</code></td><td class="topAlign tblval"><code>0x8058</code></td><td class="topAlign">GL_RGBA8</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::R16_UNorm</code></td><td class="topAlign tblval"><code>0x822A</code></td><td class="topAlign">GL_R16</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RG16_UNorm</code></td><td class="topAlign tblval"><code>0x822C</code></td><td class="topAlign">GL_RG16</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGB16_UNorm</code></td><td class="topAlign tblval"><code>0x8054</code></td><td class="topAlign">GL_RGB16</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGBA16_UNorm</code></td><td class="topAlign tblval"><code>0x805B</code></td><td class="topAlign">GL_RGBA16</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::R8_SNorm</code></td><td class="topAlign tblval"><code>0x8F94</code></td><td class="topAlign">GL_R8_SNORM</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RG8_SNorm</code></td><td class="topAlign tblval"><code>0x8F95</code></td><td class="topAlign">GL_RG8_SNORM</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGB8_SNorm</code></td><td class="topAlign tblval"><code>0x8F96</code></td><td class="topAlign">GL_RGB8_SNORM</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGBA8_SNorm</code></td><td class="topAlign tblval"><code>0x8F97</code></td><td class="topAlign">GL_RGBA8_SNORM</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::R16_SNorm</code></td><td class="topAlign tblval"><code>0x8F98</code></td><td class="topAlign">GL_R16_SNORM</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RG16_SNorm</code></td><td class="topAlign tblval"><code>0x8F99</code></td><td class="topAlign">GL_RG16_SNORM</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGB16_SNorm</code></td><td class="topAlign tblval"><code>0x8F9A</code></td><td class="topAlign">GL_RGB16_SNORM</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGBA16_SNorm</code></td><td class="topAlign tblval"><code>0x8F9B</code></td><td class="topAlign">GL_RGBA16_SNORM</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::R8U</code></td><td class="topAlign tblval"><code>0x8232</code></td><td class="topAlign">GL_R8UI</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RG8U</code></td><td class="topAlign tblval"><code>0x8238</code></td><td class="topAlign">GL_RG8UI</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGB8U</code></td><td class="topAlign tblval"><code>0x8D7D</code></td><td class="topAlign">GL_RGB8UI</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGBA8U</code></td><td class="topAlign tblval"><code>0x8D7C</code></td><td class="topAlign">GL_RGBA8UI</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::R16U</code></td><td class="topAlign tblval"><code>0x8234</code></td><td class="topAlign">GL_R16UI</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RG16U</code></td><td class="topAlign tblval"><code>0x823A</code></td><td class="topAlign">GL_RG16UI</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGB16U</code></td><td class="topAlign tblval"><code>0x8D77</code></td><td class="topAlign">GL_RGB16UI</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGBA16U</code></td><td class="topAlign tblval"><code>0x8D76</code></td><td class="topAlign">GL_RGBA16UI</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::R32U</code></td><td class="topAlign tblval"><code>0x8236</code></td><td class="topAlign">GL_R32UI</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RG32U</code></td><td class="topAlign tblval"><code>0x823C</code></td><td class="topAlign">GL_RG32UI</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGB32U</code></td><td class="topAlign tblval"><code>0x8D71</code></td><td class="topAlign">GL_RGB32UI</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGBA32U</code></td><td class="topAlign tblval"><code>0x8D70</code></td><td class="topAlign">GL_RGBA32UI</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::R8I</code></td><td class="topAlign tblval"><code>0x8231</code></td><td class="topAlign">GL_R8I</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RG8I</code></td><td class="topAlign tblval"><code>0x8237</code></td><td class="topAlign">GL_RG8I</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGB8I</code></td><td class="topAlign tblval"><code>0x8D8F</code></td><td class="topAlign">GL_RGB8I</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGBA8I</code></td><td class="topAlign tblval"><code>0x8D8E</code></td><td class="topAlign">GL_RGBA8I</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::R16I</code></td><td class="topAlign tblval"><code>0x8233</code></td><td class="topAlign">GL_R16I</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RG16I</code></td><td class="topAlign tblval"><code>0x8239</code></td><td class="topAlign">GL_RG16I</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGB16I</code></td><td class="topAlign tblval"><code>0x8D89</code></td><td class="topAlign">GL_RGB16I</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGBA16I</code></td><td class="topAlign tblval"><code>0x8D88</code></td><td class="topAlign">GL_RGBA16I</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::R32I</code></td><td class="topAlign tblval"><code>0x8235</code></td><td class="topAlign">GL_R32I</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RG32I</code></td><td class="topAlign tblval"><code>0x823B</code></td><td class="topAlign">GL_RG32I</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGB32I</code></td><td class="topAlign tblval"><code>0x8D83</code></td><td class="topAlign">GL_RGB32I</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGBA32I</code></td><td class="topAlign tblval"><code>0x8D82</code></td><td class="topAlign">GL_RGBA32I</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::R16F</code></td><td class="topAlign tblval"><code>0x822D</code></td><td class="topAlign">GL_R16F</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RG16F</code></td><td class="topAlign tblval"><code>0x822F</code></td><td class="topAlign">GL_RG16F</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGB16F</code></td><td class="topAlign tblval"><code>0x881B</code></td><td class="topAlign">GL_RGB16F</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGBA16F</code></td><td class="topAlign tblval"><code>0x881A</code></td><td class="topAlign">GL_RGBA16F</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::R32F</code></td><td class="topAlign tblval"><code>0x822E</code></td><td class="topAlign">GL_R32F</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RG32F</code></td><td class="topAlign tblval"><code>0x8230</code></td><td class="topAlign">GL_RG32F</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGB32F</code></td><td class="topAlign tblval"><code>0x8815</code></td><td class="topAlign">GL_RGB32F</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGBA32F</code></td><td class="topAlign tblval"><code>0x8814</code></td><td class="topAlign">GL_RGBA32F</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGB9E5</code></td><td class="topAlign tblval"><code>0x8C3D</code></td><td class="topAlign">GL_RGB9_E5</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RG11B10F</code></td><td class="topAlign tblval"><code>0x8C3A</code></td><td class="topAlign">GL_R11F_G11F_B10F</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RG3B2</code></td><td class="topAlign tblval"><code>0x2A10</code></td><td class="topAlign">GL_R3_G3_B2</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::R5G6B5</code></td><td class="topAlign tblval"><code>0x8D62</code></td><td class="topAlign">GL_RGB565</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGB5A1</code></td><td class="topAlign tblval"><code>0x8057</code></td><td class="topAlign">GL_RGB5_A1</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGBA4</code></td><td class="topAlign tblval"><code>0x8056</code></td><td class="topAlign">GL_RGBA4</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGB10A2</code></td><td class="topAlign tblval"><code>0x906F</code></td><td class="topAlign">GL_RGB10_A2UI</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::D16</code></td><td class="topAlign tblval"><code>0x81A5</code></td><td class="topAlign">GL_DEPTH_COMPONENT16</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::D24</code></td><td class="topAlign tblval"><code>0x81A6</code></td><td class="topAlign">GL_DEPTH_COMPONENT24</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::D24S8</code></td><td class="topAlign tblval"><code>0x88F0</code></td><td class="topAlign">GL_DEPTH24_STENCIL8</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::D32</code></td><td class="topAlign tblval"><code>0x81A7</code></td><td class="topAlign">GL_DEPTH_COMPONENT32</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::D32F</code></td><td class="topAlign tblval"><code>0x8CAC</code></td><td class="topAlign">GL_DEPTH_COMPONENT32F</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::D32FS8X24</code></td><td class="topAlign tblval"><code>0x8CAD</code></td><td class="topAlign">GL_DEPTH32F_STENCIL8</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGB_DXT1</code></td><td class="topAlign tblval"><code>0x83F0</code></td><td class="topAlign">GL_COMPRESSED_RGB_S3TC_DXT1_EXT</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGBA_DXT1</code></td><td class="topAlign tblval"><code>0x83F1</code></td><td class="topAlign">GL_COMPRESSED_RGBA_S3TC_DXT1_EXT</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGBA_DXT3</code></td><td class="topAlign tblval"><code>0x83F2</code></td><td class="topAlign">GL_COMPRESSED_RGBA_S3TC_DXT3_EXT</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGBA_DXT5</code></td><td class="topAlign tblval"><code>0x83F3</code></td><td class="topAlign">GL_COMPRESSED_RGBA_S3TC_DXT5_EXT</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::R_ATI1N_UNorm</code></td><td class="topAlign tblval"><code>0x8DBB</code></td><td class="topAlign">GL_COMPRESSED_RED_RGTC1</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::R_ATI1N_SNorm</code></td><td class="topAlign tblval"><code>0x8DBC</code></td><td class="topAlign">GL_COMPRESSED_SIGNED_RED_RGTC1</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RG_ATI2N_UNorm</code></td><td class="topAlign tblval"><code>0x8DBD</code></td><td class="topAlign">GL_COMPRESSED_RG_RGTC2</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RG_ATI2N_SNorm</code></td><td class="topAlign tblval"><code>0x8DBE</code></td><td class="topAlign">GL_COMPRESSED_SIGNED_RG_RGTC2</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGB_BP_UNSIGNED_FLOAT</code></td><td class="topAlign tblval"><code>0x8E8F</code></td><td class="topAlign">GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_ARB</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGB_BP_SIGNED_FLOAT</code></td><td class="topAlign tblval"><code>0x8E8E</code></td><td class="topAlign">GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT_ARB</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGB_BP_UNorm</code></td><td class="topAlign tblval"><code>0x8E8C</code></td><td class="topAlign">GL_COMPRESSED_RGBA_BPTC_UNORM_ARB</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::R11_EAC_UNorm</code></td><td class="topAlign tblval"><code>0x9270</code></td><td class="topAlign">GL_COMPRESSED_R11_EAC</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::R11_EAC_SNorm</code></td><td class="topAlign tblval"><code>0x9271</code></td><td class="topAlign">GL_COMPRESSED_SIGNED_R11_EAC</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RG11_EAC_UNorm</code></td><td class="topAlign tblval"><code>0x9272</code></td><td class="topAlign">GL_COMPRESSED_RG11_EAC</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RG11_EAC_SNorm</code></td><td class="topAlign tblval"><code>0x9273</code></td><td class="topAlign">GL_COMPRESSED_SIGNED_RG11_EAC</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGB8_ETC2</code></td><td class="topAlign tblval"><code>0x9274</code></td><td class="topAlign">GL_COMPRESSED_RGB8_ETC2</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::SRGB8_ETC2</code></td><td class="topAlign tblval"><code>0x9275</code></td><td class="topAlign">GL_COMPRESSED_SRGB8_ETC2</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGB8_PunchThrough_Alpha1_ETC2</code></td><td class="topAlign tblval"><code>0x9276</code></td><td class="topAlign">GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::SRGB8_PunchThrough_Alpha1_ETC2</code></td><td class="topAlign tblval"><code>0x9277</code></td><td class="topAlign">GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGBA8_ETC2_EAC</code></td><td class="topAlign tblval"><code>0x9278</code></td><td class="topAlign">GL_COMPRESSED_RGBA8_ETC2_EAC</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::SRGB8_Alpha8_ETC2_EAC</code></td><td class="topAlign tblval"><code>0x9279</code></td><td class="topAlign">GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGB8_ETC1</code></td><td class="topAlign tblval"><code>0x8D64</code></td><td class="topAlign">GL_ETC1_RGB8_OES</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::SRGB8</code></td><td class="topAlign tblval"><code>0x8C41</code></td><td class="topAlign">GL_SRGB8</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::SRGB8_Alpha8</code></td><td class="topAlign tblval"><code>0x8C43</code></td><td class="topAlign">GL_SRGB8_ALPHA8</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::SRGB_DXT1</code></td><td class="topAlign tblval"><code>0x8C4C</code></td><td class="topAlign">GL_COMPRESSED_SRGB_S3TC_DXT1_EXT</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::SRGB_Alpha_DXT1</code></td><td class="topAlign tblval"><code>0x8C4D</code></td><td class="topAlign">GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::SRGB_Alpha_DXT3</code></td><td class="topAlign tblval"><code>0x8C4E</code></td><td class="topAlign">GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::SRGB_Alpha_DXT5</code></td><td class="topAlign tblval"><code>0x8C4F</code></td><td class="topAlign">GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::SRGB_BP_UNorm</code></td><td class="topAlign tblval"><code>0x8E8D</code></td><td class="topAlign">GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM_ARB</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::DepthFormat</code></td><td class="topAlign tblval"><code>0x1902</code></td><td class="topAlign">GL_DEPTH_COMPONENT</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::AlphaFormat</code></td><td class="topAlign tblval"><code>0x1906</code></td><td class="topAlign">GL_ALPHA</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGBFormat</code></td><td class="topAlign tblval"><code>0x1907</code></td><td class="topAlign">GL_RGB</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::RGBAFormat</code></td><td class="topAlign tblval"><code>0x1908</code></td><td class="topAlign">GL_RGBA</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::LuminanceFormat</code></td><td class="topAlign tblval"><code>0x1909</code></td><td class="topAlign">GL_LUMINANCE</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QAbstractTexture::LuminanceAlphaFormat</code></td><td class="topAlign tblval"><code>0x190A</code></td><td class="topAlign">0x190A</td></tr>
+</table></div>
+<!-- @@@TextureFormat -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$depth-prop$$$depth$$$setDepthint$$$depthChangedint -->
+<h3 class="fn" id="depth-prop"><a name="depth-prop"></a><span class="name">depth</span> : <span class="type">int</span></h3>
+<p>Holds the depth of the texture provider.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qabstracttexture.html#depth">depth</a></b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qabstracttexture.html#setDepth">setDepth</a></b></span>(int <i>depth</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>depthChanged</b></span>(int <i>depth</i>)</td></tr>
+</table></div>
+<!-- @@@depth -->
+<!-- $$$format-prop$$$format$$$setFormatQt3DRender::QAbstractTexture::TextureFormat$$$formatChangedQt3DRender::QAbstractTexture::TextureFormat -->
+<h3 class="fn" id="format-prop"><a name="format-prop"></a><span class="name">format</span> : <span class="type"><a href="qt3drender-qabstracttexture.html#TextureFormat-enum">TextureFormat</a></span></h3>
+<p>Holds the format of the texture provider.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QAbstractTexture::TextureFormat </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qabstracttexture.html#format">format</a></b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qabstracttexture.html#setFormat">setFormat</a></b></span>(Qt3DRender::QAbstractTexture::TextureFormat <i>format</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>formatChanged</b></span>(Qt3DRender::QAbstractTexture::TextureFormat <i>format</i>)</td></tr>
+</table></div>
+<!-- @@@format -->
+<!-- $$$generateMipMaps-prop$$$generateMipMaps$$$setGenerateMipMapsbool$$$generateMipMapsChangedbool -->
+<h3 class="fn" id="generateMipMaps-prop"><a name="generateMipMaps-prop"></a><span class="name">generateMipMaps</span> : <span class="type">bool</span></h3>
+<p>Holds whether the texture provider should auto generate mipmaps.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>generateMipMaps</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qabstracttexture.html#setGenerateMipMaps">setGenerateMipMaps</a></b></span>(bool <i>gen</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>generateMipMapsChanged</b></span>(bool <i>generateMipMaps</i>)</td></tr>
+</table></div>
+<!-- @@@generateMipMaps -->
+<!-- $$$handle-prop$$$handle$$$handleChangedQVariant -->
+<h3 class="fn" id="handle-prop"><a name="handle-prop"></a><span class="name">handle</span> : const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span></h3>
+<p>Holds the current texture handle, if Qt 3D is using the OpenGL renderer, handle is a texture id integer.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QVariant </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qabstracttexture.html#handle">handle</a></b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>handleChanged</b></span>(QVariant <i>handle</i>)</td></tr>
+</table></div>
+<!-- @@@handle -->
+<!-- $$$handleType-prop$$$handleType$$$handleTypeChangedQt3DRender::QAbstractTexture::HandleType -->
+<h3 class="fn" id="handleType-prop"><a name="handleType-prop"></a><span class="name">handleType</span> : const <span class="type">HandleType</span></h3>
+<p>Holds the current texture handle type.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QAbstractTexture::HandleType </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qabstracttexture.html#handleType">handleType</a></b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>handleTypeChanged</b></span>(Qt3DRender::QAbstractTexture::HandleType <i>handleType</i>)</td></tr>
+</table></div>
+<!-- @@@handleType -->
+<!-- $$$height-prop$$$height$$$setHeightint$$$heightChangedint -->
+<h3 class="fn" id="height-prop"><a name="height-prop"></a><span class="name">height</span> : <span class="type">int</span></h3>
+<p>Holds the height of the texture provider.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qabstracttexture.html#height">height</a></b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qabstracttexture.html#setHeight">setHeight</a></b></span>(int <i>height</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>heightChanged</b></span>(int <i>height</i>)</td></tr>
+</table></div>
+<!-- @@@height -->
+<!-- $$$layers-prop$$$layers$$$setLayersint$$$layersChangedint -->
+<h3 class="fn" id="layers-prop"><a name="layers-prop"></a><span class="name">layers</span> : <span class="type">int</span></h3>
+<p>Holds the maximum layer count of the texture provider. By default, the maximum layer count is 1.</p>
+<p><b>Note: </b>this has a meaning only for texture providers that have 3D or array target formats.</p><p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qabstracttexture.html#layers">layers</a></b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qabstracttexture.html#setLayers">setLayers</a></b></span>(int <i>layers</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>layersChanged</b></span>(int <i>layers</i>)</td></tr>
+</table></div>
+<!-- @@@layers -->
+<!-- $$$magnificationFilter-prop$$$magnificationFilter$$$setMagnificationFilterQt3DRender::QAbstractTexture::Filter$$$magnificationFilterChangedQt3DRender::QAbstractTexture::Filter -->
+<h3 class="fn" id="magnificationFilter-prop"><a name="magnificationFilter-prop"></a><span class="name">magnificationFilter</span> : <span class="type"><a href="qt3drender-qabstracttexture.html#Filter-enum">Filter</a></span></h3>
+<p>Holds the magnification filter of the texture provider.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QAbstractTexture::Filter </td><td class="memItemRight bottomAlign"><span class="name"><b>magnificationFilter</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qabstracttexture.html#setMagnificationFilter">setMagnificationFilter</a></b></span>(Qt3DRender::QAbstractTexture::Filter <i>f</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>magnificationFilterChanged</b></span>(Qt3DRender::QAbstractTexture::Filter <i>magnificationFilter</i>)</td></tr>
+</table></div>
+<!-- @@@magnificationFilter -->
+<!-- $$$maximumAnisotropy-prop$$$maximumAnisotropy$$$setMaximumAnisotropyfloat$$$maximumAnisotropyChangedfloat -->
+<h3 class="fn" id="maximumAnisotropy-prop"><a name="maximumAnisotropy-prop"></a><span class="name">maximumAnisotropy</span> : <span class="type">float</span></h3>
+<p>Holds the maximum anisotropy of the texture provider.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> float </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qabstracttexture.html#maximumAnisotropy">maximumAnisotropy</a></b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qabstracttexture.html#setMaximumAnisotropy">setMaximumAnisotropy</a></b></span>(float <i>anisotropy</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>maximumAnisotropyChanged</b></span>(float <i>maximumAnisotropy</i>)</td></tr>
+</table></div>
+<!-- @@@maximumAnisotropy -->
+<!-- $$$minificationFilter-prop$$$minificationFilter$$$setMinificationFilterQt3DRender::QAbstractTexture::Filter$$$minificationFilterChangedQt3DRender::QAbstractTexture::Filter -->
+<h3 class="fn" id="minificationFilter-prop"><a name="minificationFilter-prop"></a><span class="name">minificationFilter</span> : <span class="type"><a href="qt3drender-qabstracttexture.html#Filter-enum">Filter</a></span></h3>
+<p>Holds the minification filter of the texture provider.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QAbstractTexture::Filter </td><td class="memItemRight bottomAlign"><span class="name"><b>minificationFilter</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qabstracttexture.html#setMinificationFilter">setMinificationFilter</a></b></span>(Qt3DRender::QAbstractTexture::Filter <i>f</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>minificationFilterChanged</b></span>(Qt3DRender::QAbstractTexture::Filter <i>minificationFilter</i>)</td></tr>
+</table></div>
+<!-- @@@minificationFilter -->
+<!-- $$$samples-prop$$$samples$$$setSamplesint$$$samplesChangedint -->
+<h3 class="fn" id="samples-prop"><a name="samples-prop"></a><span class="name">samples</span> : <span class="type">int</span></h3>
+<p>Holds the number of samples per texel for the texture provider. By default, the number of samples is 1.</p>
+<p><b>Note: </b>this has a meaning only for texture providers that have multisample formats.</p><p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qabstracttexture.html#samples">samples</a></b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qabstracttexture.html#setSamples">setSamples</a></b></span>(int <i>samples</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>samplesChanged</b></span>(int <i>samples</i>)</td></tr>
+</table></div>
+<!-- @@@samples -->
+<!-- $$$status-prop$$$status$$$statusChangedQt3DRender::QAbstractTexture::Status -->
+<h3 class="fn" id="status-prop"><a name="status-prop"></a><span class="name">status</span> : const <span class="type"><a href="qt3drender-qabstracttexture.html#Status-enum">Status</a></span></h3>
+<p>Holds the current status of the texture provider.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QAbstractTexture::Status </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qabstracttexture.html#status">status</a></b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>statusChanged</b></span>(Qt3DRender::QAbstractTexture::Status <i>status</i>)</td></tr>
+</table></div>
+<!-- @@@status -->
+<!-- $$$target-prop$$$target -->
+<h3 class="fn" id="target-prop"><a name="target-prop"></a><span class="name">target</span> : const <span class="type"><a href="qt3drender-qabstracttexture.html#Target-enum">Target</a></span></h3>
+<p>Holds the target format of the texture provider.</p>
+<p><b>Note: </b>The target format can only be set once.</p><p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QAbstractTexture::Target </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qabstracttexture.html#target">target</a></b></span>() const</td></tr>
+</table></div>
+<!-- @@@target -->
+<!-- $$$width-prop$$$width$$$setWidthint$$$widthChangedint -->
+<h3 class="fn" id="width-prop"><a name="width-prop"></a><span class="name">width</span> : <span class="type">int</span></h3>
+<p>Holds the width of the texture provider.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qabstracttexture.html#width">width</a></b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qabstracttexture.html#setWidth">setWidth</a></b></span>(int <i>width</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>widthChanged</b></span>(int <i>width</i>)</td></tr>
+</table></div>
+<!-- @@@width -->
+<!-- $$$wrapMode-prop$$$wrapMode -->
+<h3 class="fn" id="wrapMode-prop"><a name="wrapMode-prop"></a><span class="name">wrapMode</span> : <span class="type"><a href="qt3drender-qtexturewrapmode.html">Qt3DRender::QTextureWrapMode</a></span>* const</h3>
+<p>Holds the wrap mode of the texture provider.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QTextureWrapMode *</td><td class="memItemRight bottomAlign"><span class="name"><b>wrapMode</b></span>()</td></tr>
+</table></div>
+<!-- @@@wrapMode -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QAbstractTexture$$$QAbstractTextureQt3DRender::QAbstractTexture::TargetQt3DCore::QNode* -->
+<h3 class="fn" id="QAbstractTexture-1"><a name="QAbstractTexture-1"></a><code>[protected] </code>QAbstractTexture::<span class="name">QAbstractTexture</span>(<span class="type"><a href="qt3drender-qabstracttexture.html#Target-enum">Qt3DRender::QAbstractTexture::Target</a></span> <i>target</i>, <span class="type"><a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></span> *<i>parent</i> = nullptr)</h3>
+<p>The constructor creates a new <a href="qt3drender-qabstracttexture.html">QAbstractTexture::QAbstractTexture</a> instance with the specified <i>target</i> and <i>parent</i>.</p>
+<!-- @@@QAbstractTexture -->
+<!-- $$$QAbstractTexture[overload1]$$$QAbstractTextureQt3DCore::QNode* -->
+<h3 class="fn" id="QAbstractTexture"><a name="QAbstractTexture"></a><code>[protected] </code>QAbstractTexture::<span class="name">QAbstractTexture</span>(<span class="type"><a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></span> *<i>parent</i> = nullptr)</h3>
+<p>The constructor creates a new <a href="qt3drender-qabstracttexture.html">QAbstractTexture::QAbstractTexture</a> instance with the specified <i>parent</i>.</p>
+<!-- @@@QAbstractTexture -->
+<!-- $$$setComparisonFunction -->
+<h3 class="fn" id="setComparisonFunction"><a name="setComparisonFunction"></a><code>[slot] </code><span class="type">void</span> QAbstractTexture::<span class="name">setComparisonFunction</span>(<span class="type">Qt3DRender::QAbstractTexture::ComparisonFunction</span> <i>function</i>)</h3>
+<p>Set the comparison function to <i>function</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">comparisonFunction</a>. </p><p><b>See also </b><a href="qt3drender-qabstracttexture.html#comparisonFunction">comparisonFunction</a>().</p>
+<!-- @@@setComparisonFunction -->
+<!-- $$$setComparisonMode -->
+<h3 class="fn" id="setComparisonMode"><a name="setComparisonMode"></a><code>[slot] </code><span class="type">void</span> QAbstractTexture::<span class="name">setComparisonMode</span>(<span class="type">Qt3DRender::QAbstractTexture::ComparisonMode</span> <i>mode</i>)</h3>
+<p>Set the comparison mode to <i>mode</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">comparisonMode</a>. </p><p><b>See also </b><a href="qt3drender-qabstracttexture.html#comparisonMode">comparisonMode</a>().</p>
+<!-- @@@setComparisonMode -->
+<!-- $$$setDepth -->
+<h3 class="fn" id="setDepth"><a name="setDepth"></a><code>[slot] </code><span class="type">void</span> QAbstractTexture::<span class="name">setDepth</span>(<span class="type">int</span> <i>depth</i>)</h3>
+<p>Set the depth of the texture to <i>depth</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="qt3drender-qabstracttexture.html#depth-prop">depth</a>. </p><p><b>See also </b><a href="qt3drender-qabstracttexture.html#depth">depth</a>().</p>
+<!-- @@@setDepth -->
+<!-- $$$setFormat -->
+<h3 class="fn" id="setFormat"><a name="setFormat"></a><code>[slot] </code><span class="type">void</span> QAbstractTexture::<span class="name">setFormat</span>(<span class="type"><a href="qt3drender-qabstracttexture.html#TextureFormat-enum">Qt3DRender::QAbstractTexture::TextureFormat</a></span> <i>format</i>)</h3>
+<p>Set the texture format to <i>format</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="qt3drender-qabstracttexture.html#format-prop">format</a>. </p><p><b>See also </b><a href="qt3drender-qabstracttexture.html#format">format</a>().</p>
+<!-- @@@setFormat -->
+<!-- $$$setGenerateMipMaps -->
+<h3 class="fn" id="setGenerateMipMaps"><a name="setGenerateMipMaps"></a><code>[slot] </code><span class="type">void</span> QAbstractTexture::<span class="name">setGenerateMipMaps</span>(<span class="type">bool</span> <i>gen</i>)</h3>
+<p>Boolean parameter <i>gen</i> sets a flag indicating whether the texture provider should generate mipmaps or not.</p>
+<p><b>Note:</b> Setter function for property <a href="qt3drender-qabstracttexture.html#generateMipMaps-prop">generateMipMaps</a>. </p><p><b>See also </b><a href="qt3drender-qabstracttexture.html#generateMipMaps-prop">generateMipMaps</a>().</p>
+<!-- @@@setGenerateMipMaps -->
+<!-- $$$setHeight -->
+<h3 class="fn" id="setHeight"><a name="setHeight"></a><code>[slot] </code><span class="type">void</span> QAbstractTexture::<span class="name">setHeight</span>(<span class="type">int</span> <i>height</i>)</h3>
+<p>Set the height to <i>height</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="qt3drender-qabstracttexture.html#height-prop">height</a>. </p><p><b>See also </b><a href="qt3drender-qabstracttexture.html#height">height</a>().</p>
+<!-- @@@setHeight -->
+<!-- $$$setLayers -->
+<h3 class="fn" id="setLayers"><a name="setLayers"></a><code>[slot] </code><span class="type">void</span> QAbstractTexture::<span class="name">setLayers</span>(<span class="type">int</span> <i>layers</i>)</h3>
+<p>Set the maximum layer count to <i>layers</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="qt3drender-qabstracttexture.html#layers-prop">layers</a>. </p><p><b>See also </b><a href="qt3drender-qabstracttexture.html#layers">layers</a>().</p>
+<!-- @@@setLayers -->
+<!-- $$$setMagnificationFilter -->
+<h3 class="fn" id="setMagnificationFilter"><a name="setMagnificationFilter"></a><code>[slot] </code><span class="type">void</span> QAbstractTexture::<span class="name">setMagnificationFilter</span>(<span class="type"><a href="qt3drender-qabstracttexture.html#Filter-enum">Qt3DRender::QAbstractTexture::Filter</a></span> <i>f</i>)</h3>
+<p>Set the magnification filter to <i>f</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="qt3drender-qabstracttexture.html#magnificationFilter-prop">magnificationFilter</a>. </p><p><b>See also </b><a href="qt3drender-qabstracttexture.html#magnificationFilter-prop">magnificationFilter</a>().</p>
+<!-- @@@setMagnificationFilter -->
+<!-- $$$setMaximumAnisotropy -->
+<h3 class="fn" id="setMaximumAnisotropy"><a name="setMaximumAnisotropy"></a><code>[slot] </code><span class="type">void</span> QAbstractTexture::<span class="name">setMaximumAnisotropy</span>(<span class="type">float</span> <i>anisotropy</i>)</h3>
+<p>Sets the maximum anisotropy to <i>anisotropy</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="qt3drender-qabstracttexture.html#maximumAnisotropy-prop">maximumAnisotropy</a>. </p><p><b>See also </b><a href="qt3drender-qabstracttexture.html#maximumAnisotropy">maximumAnisotropy</a>().</p>
+<!-- @@@setMaximumAnisotropy -->
+<!-- $$$setMinificationFilter -->
+<h3 class="fn" id="setMinificationFilter"><a name="setMinificationFilter"></a><code>[slot] </code><span class="type">void</span> QAbstractTexture::<span class="name">setMinificationFilter</span>(<span class="type"><a href="qt3drender-qabstracttexture.html#Filter-enum">Qt3DRender::QAbstractTexture::Filter</a></span> <i>f</i>)</h3>
+<p>Set the minification filter to the specified value <i>f</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="qt3drender-qabstracttexture.html#minificationFilter-prop">minificationFilter</a>. </p><p><b>See also </b><a href="qt3drender-qabstracttexture.html#minificationFilter-prop">minificationFilter</a>().</p>
+<!-- @@@setMinificationFilter -->
+<!-- $$$setSamples -->
+<h3 class="fn" id="setSamples"><a name="setSamples"></a><code>[slot] </code><span class="type">void</span> QAbstractTexture::<span class="name">setSamples</span>(<span class="type">int</span> <i>samples</i>)</h3>
+<p>Set the number of samples per texel to <i>samples</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="qt3drender-qabstracttexture.html#samples-prop">samples</a>. </p><p><b>See also </b><a href="qt3drender-qabstracttexture.html#samples">samples</a>().</p>
+<!-- @@@setSamples -->
+<!-- $$$setWidth -->
+<h3 class="fn" id="setWidth"><a name="setWidth"></a><code>[slot] </code><span class="type">void</span> QAbstractTexture::<span class="name">setWidth</span>(<span class="type">int</span> <i>width</i>)</h3>
+<p>Set the width of the texture provider to <i>width</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="qt3drender-qabstracttexture.html#width-prop">width</a>. </p><p><b>See also </b><a href="qt3drender-qabstracttexture.html#width">width</a>().</p>
+<!-- @@@setWidth -->
+<!-- $$$addTextureImage[overload1]$$$addTextureImageQt3DRender::QAbstractTextureImage* -->
+<h3 class="fn" id="addTextureImage"><a name="addTextureImage"></a><span class="type">void</span> QAbstractTexture::<span class="name">addTextureImage</span>(<span class="type"><a href="qt3drender-qabstracttextureimage.html">Qt3DRender::QAbstractTextureImage</a></span> *<i>textureImage</i>)</h3>
+<p>Adds a new Qt3DCore::QAbstractTextureImage <i>textureImage</i> to the texture provider.</p>
+<p><b>Note: </b><a href="qt3drender-qabstracttextureimage.html">Qt3DRender::QAbstractTextureImage</a> should never be shared between multiple <a href="qt3drender-qabstracttexture.html">Qt3DRender::QAbstractTexture</a> instances.</p><!-- @@@addTextureImage -->
+<!-- $$$comparisonFunction -->
+<h3 class="fn" id="comparisonFunction"><a name="comparisonFunction"></a><span class="type">Qt3DRender::QAbstractTexture::ComparisonFunction</span> QAbstractTexture::<span class="name">comparisonFunction</span>() const</h3>
+<p>Returns the current comparison function.</p>
+<p><b>Note:</b> Getter function for property <a href="">comparisonFunction</a>. </p><p><b>See also </b><a href="qt3drender-qabstracttexture.html#setComparisonFunction">setComparisonFunction</a>().</p>
+<!-- @@@comparisonFunction -->
+<!-- $$$comparisonMode -->
+<h3 class="fn" id="comparisonMode"><a name="comparisonMode"></a><span class="type">Qt3DRender::QAbstractTexture::ComparisonMode</span> QAbstractTexture::<span class="name">comparisonMode</span>() const</h3>
+<p>Returns the current comparison mode.</p>
+<p><b>Note:</b> Getter function for property <a href="">comparisonMode</a>. </p><p><b>See also </b><a href="qt3drender-qabstracttexture.html#setComparisonMode">setComparisonMode</a>().</p>
+<!-- @@@comparisonMode -->
+<!-- $$$dataGenerator[overload1]$$$dataGenerator -->
+<h3 class="fn" id="dataGenerator"><a name="dataGenerator"></a><span class="type">Qt3DRender::QTextureGeneratorPtr</span> QAbstractTexture::<span class="name">dataGenerator</span>() const</h3>
+<p>Returns the current data generator.</p>
+<!-- @@@dataGenerator -->
+<!-- $$$depth -->
+<h3 class="fn" id="depth"><a name="depth"></a><span class="type">int</span> QAbstractTexture::<span class="name">depth</span>() const</h3>
+<p>Returns the depth of the texture</p>
+<p><b>Note:</b> Getter function for property <a href="qt3drender-qabstracttexture.html#depth-prop">depth</a>. </p><p><b>See also </b><a href="qt3drender-qabstracttexture.html#setDepth">setDepth</a>().</p>
+<!-- @@@depth -->
+<!-- $$$format -->
+<h3 class="fn" id="format"><a name="format"></a><span class="type"><a href="qt3drender-qabstracttexture.html#TextureFormat-enum">Qt3DRender::QAbstractTexture::TextureFormat</a></span> QAbstractTexture::<span class="name">format</span>() const</h3>
+<p>Returns the texture provider's format.</p>
+<p><b>Note:</b> Getter function for property <a href="qt3drender-qabstracttexture.html#format-prop">format</a>. </p><p><b>See also </b><a href="qt3drender-qabstracttexture.html#setFormat">setFormat</a>().</p>
+<!-- @@@format -->
+<!-- $$$handle -->
+<h3 class="fn" id="handle"><a name="handle"></a><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QAbstractTexture::<span class="name">handle</span>() const</h3>
+<p>Returns the current texture handle, if Qt 3D is using the OpenGL renderer, handle is a texture id integer.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<p><b>Note:</b> Getter function for property <a href="qt3drender-qabstracttexture.html#handle-prop">handle</a>. </p><!-- @@@handle -->
+<!-- $$$handleType -->
+<h3 class="fn" id="handleType"><a name="handleType"></a><span class="type">Qt3DRender::QAbstractTexture::HandleType</span> QAbstractTexture::<span class="name">handleType</span>() const</h3>
+<p>Returns the current texture handle type.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<p><b>Note:</b> Getter function for property <a href="qt3drender-qabstracttexture.html#handleType-prop">handleType</a>. </p><!-- @@@handleType -->
+<!-- $$$height -->
+<h3 class="fn" id="height"><a name="height"></a><span class="type">int</span> QAbstractTexture::<span class="name">height</span>() const</h3>
+<p>Returns the height of the texture</p>
+<p><b>Note:</b> Getter function for property <a href="qt3drender-qabstracttexture.html#height-prop">height</a>. </p><p><b>See also </b><a href="qt3drender-qabstracttexture.html#setHeight">setHeight</a>().</p>
+<!-- @@@height -->
+<!-- $$$layers -->
+<h3 class="fn" id="layers"><a name="layers"></a><span class="type">int</span> QAbstractTexture::<span class="name">layers</span>() const</h3>
+<p>Returns the maximum number of layers for the texture provider.</p>
+<p><b>Note: </b>this has a meaning only for texture providers that have 3D or array target formats.</p><p><b>Note:</b> Getter function for property <a href="qt3drender-qabstracttexture.html#layers-prop">layers</a>. </p><p><b>See also </b><a href="qt3drender-qabstracttexture.html#setLayers">setLayers</a>().</p>
+<!-- @@@layers -->
+<!-- $$$maximumAnisotropy -->
+<h3 class="fn" id="maximumAnisotropy"><a name="maximumAnisotropy"></a><span class="type">float</span> QAbstractTexture::<span class="name">maximumAnisotropy</span>() const</h3>
+<p>Returns the current maximum anisotropy</p>
+<p><b>Note:</b> Getter function for property <a href="qt3drender-qabstracttexture.html#maximumAnisotropy-prop">maximumAnisotropy</a>. </p><p><b>See also </b><a href="qt3drender-qabstracttexture.html#setMaximumAnisotropy">setMaximumAnisotropy</a>().</p>
+<!-- @@@maximumAnisotropy -->
+<!-- $$$removeTextureImage[overload1]$$$removeTextureImageQt3DRender::QAbstractTextureImage* -->
+<h3 class="fn" id="removeTextureImage"><a name="removeTextureImage"></a><span class="type">void</span> QAbstractTexture::<span class="name">removeTextureImage</span>(<span class="type"><a href="qt3drender-qabstracttextureimage.html">Qt3DRender::QAbstractTextureImage</a></span> *<i>textureImage</i>)</h3>
+<p>Removes a Qt3DCore::QAbstractTextureImage <i>textureImage</i> from the texture provider.</p>
+<!-- @@@removeTextureImage -->
+<!-- $$$samples -->
+<h3 class="fn" id="samples"><a name="samples"></a><span class="type">int</span> QAbstractTexture::<span class="name">samples</span>() const</h3>
+<p>Returns the number of samples per texel for the texture provider.</p>
+<p><b>Note: </b>this has a meaning only for texture providers that have multisample formats.</p><p><b>Note:</b> Getter function for property <a href="qt3drender-qabstracttexture.html#samples-prop">samples</a>. </p><p><b>See also </b><a href="qt3drender-qabstracttexture.html#setSamples">setSamples</a>().</p>
+<!-- @@@samples -->
+<!-- $$$sceneChangeEvent[overload1]$$$sceneChangeEventconstQt3DCore::QSceneChangePtr& -->
+<h3 class="fn" id="sceneChangeEvent"><a name="sceneChangeEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QAbstractTexture::<span class="name">sceneChangeEvent</span>(const <span class="type"><a href="qt3dcore-qscenechange.html#QSceneChangePtr-typedef">Qt3DCore::QSceneChangePtr</a></span> &amp;<i>change</i>)</h3>
+<p>Reimplements: <a href="qt3dcore-qnode.html#sceneChangeEvent">QNode::sceneChangeEvent</a>(const Qt3DCore::QSceneChangePtr &amp;change).</p>
+<p>A function for receiving and processing a <i>change</i>.</p>
+<!-- @@@sceneChangeEvent -->
+<!-- $$$setSize[overload1]$$$setSizeintintint -->
+<h3 class="fn" id="setSize"><a name="setSize"></a><span class="type">void</span> QAbstractTexture::<span class="name">setSize</span>(<span class="type">int</span> <i>w</i>, <span class="type">int</span> <i>h</i> = 1, <span class="type">int</span> <i>d</i> = 1)</h3>
+<p>Sets the size of the texture provider to width <i>w</i>, height <i>h</i> and depth <i>d</i>.</p>
+<!-- @@@setSize -->
+<!-- $$$setStatus[overload1]$$$setStatusQt3DRender::QAbstractTexture::Status -->
+<h3 class="fn" id="setStatus"><a name="setStatus"></a><code>[protected] </code><span class="type">void</span> QAbstractTexture::<span class="name">setStatus</span>(<span class="type"><a href="qt3drender-qabstracttexture.html#Status-enum">Qt3DRender::QAbstractTexture::Status</a></span> <i>status</i>)</h3>
+<p>Set the status of the texture provider to the specified <i>status</i>.</p>
+<p><b>See also </b><a href="qt3drender-qabstracttexture.html#status">status</a>().</p>
+<!-- @@@setStatus -->
+<!-- $$$setWrapMode[overload1]$$$setWrapModeconstQt3DRender::QTextureWrapMode& -->
+<h3 class="fn" id="setWrapMode"><a name="setWrapMode"></a><span class="type">void</span> QAbstractTexture::<span class="name">setWrapMode</span>(const <span class="type"><a href="qt3drender-qtexturewrapmode.html">Qt3DRender::QTextureWrapMode</a></span> &amp;<i>wrapMode</i>)</h3>
+<p>Set the wrapmode to the value specified in <i>wrapMode</i>.</p>
+<p><b>See also </b><a href="qt3drender-qabstracttexture.html#wrapMode-prop">wrapMode</a>().</p>
+<!-- @@@setWrapMode -->
+<!-- $$$status -->
+<h3 class="fn" id="status"><a name="status"></a><span class="type"><a href="qt3drender-qabstracttexture.html#Status-enum">Qt3DRender::QAbstractTexture::Status</a></span> QAbstractTexture::<span class="name">status</span>() const</h3>
+<p>Returns the current status of the texture provider.</p>
+<p><b>Note:</b> Getter function for property <a href="qt3drender-qabstracttexture.html#status-prop">status</a>. </p><p><b>See also </b><a href="qt3drender-qabstracttexture.html#setStatus">setStatus</a>().</p>
+<!-- @@@status -->
+<!-- $$$target -->
+<h3 class="fn" id="target"><a name="target"></a><span class="type"><a href="qt3drender-qabstracttexture.html#Target-enum">Qt3DRender::QAbstractTexture::Target</a></span> QAbstractTexture::<span class="name">target</span>() const</h3>
+<p>Returns the target format of the texture provider.</p>
+<p><b>Note:</b> Getter function for property <a href="qt3drender-qabstracttexture.html#target-prop">target</a>. </p><!-- @@@target -->
+<!-- $$$textureImages[overload1]$$$textureImages -->
+<h3 class="fn" id="textureImages"><a name="textureImages"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="qt3drender-qabstracttextureimage.html">Qt3DRender::QAbstractTextureImage</a></span> *&gt; QAbstractTexture::<span class="name">textureImages</span>() const</h3>
+<p>Returns a list of pointers to <a href="qt3drender-qabstracttextureimage.html">QAbstractTextureImage</a> objects contained in the texture provider.</p>
+<!-- @@@textureImages -->
+<!-- $$$width -->
+<h3 class="fn" id="width"><a name="width"></a><span class="type">int</span> QAbstractTexture::<span class="name">width</span>() const</h3>
+<p>Returns the width of the texture</p>
+<p><b>Note:</b> Getter function for property <a href="qt3drender-qabstracttexture.html#width-prop">width</a>. </p><p><b>See also </b><a href="qt3drender-qabstracttexture.html#setWidth">setWidth</a>().</p>
+<!-- @@@width -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- macos.qdoc -->
+  <title>Qt for macOS | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Qt for macOS</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#supported-versions">Supported Versions</a></li>
+<li class="level2"><a href="#build-environment">Build Environment</a></li>
+<li class="level2"><a href="#target-platforms">Target Platforms</a></li>
+<li class="level2"><a href="#architectures">Architectures</a></li>
+<li class="level1"><a href="#additional-command-line-options">Additional Command-Line Options</a></li>
+<li class="level1"><a href="#deploying-applications-on-macos">Deploying Applications on macOS</a></li>
+<li class="level1"><a href="#macos-issues">macOS Issues</a></li>
+<li class="level1"><a href="#where-to-go-from-here">Where to Go from Here</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt for macOS</h1>
+<span class="subtitle"></span>
+<!-- $$$macos.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>macOS (previously known as OS X or Mac OS X) is Apple's operating system for the Mac line of computers. It's a UNIX platform, based on the Darwin kernel, and behaves largely similar to other UNIX-like platforms. The main difference is that X11 is not used as the windowing system. Instead, macOS uses its own native windowing system that is accessible through the Cocoa API.</p>
+<p>To download and install Qt for macOS, follow the instructions on the <a href="gettingstarted.html">Getting Started with Qt</a> page.</p>
+<a name="macos-supported-versions"></a><a name="supported-versions"></a>
+<h2 id="supported-versions">Supported Versions</h2>
+<p>When talking about version support on macOS, it's important to distinguish between the <a href="macos.html#build-environment">build environment</a>; the platform you're building on or with, and the <a href="macos.html#target-platforms">target platforms</a>; the platforms you are building for. The following macOS versions are supported.</p>
+<div class="table"><table class="generic" width="80%">
+ <thead><tr class="qt-style"><th >Target Platform</th><th >Architecture</th><th >Build Environment</th></tr></thead>
+<tr valign="top" class="odd"><td >macOS 10.12, 10.13, <b>10.14</b></td><td ><code>x86_64</code> and <code>x86_64h</code></td><td ><b>Xcode 10</b> (10.14 SDK), Xcode 9<sup>*</sup> (10.13 SDK)</td></tr>
+</table></div>
+<p><br />
+<b>Note:</b> Xcode 9 is only supported for application development (to be able to opt out of features such as layer-backing and dark mode), not for development of Qt itself.</p>
+<a name="build-environment"></a>
+<h3 id="build-environment">Build Environment</h3>
+<p>The build environment on macOS is defined <i>entirely</i> by the Xcode version used to build your application. Xcode contains both a toolchain (compiler, linker, and other tools), and a macOS platform-SDK (headers and libraries). Together these define how your application is built.</p>
+<p><b>Note: </b>The version of macOS that you are <i>running</i> Xcode on does not matter. As long as Apple ships a given Xcode version that runs on your operating system, the build environment will be defined by that Xcode version.</p><p>Xcode can be downloaded from Apple's <a href="https://developer.apple.com/download/">developer website</a> (including older versions of Xcode). Once installed, choosing an Xcode installation is done using the <code>xcode-select</code> tool.</p>
+<pre class="cpp">
+
+  $ sudo xcode<span class="operator">-</span>select <span class="operator">-</span><span class="operator">-</span><span class="keyword">switch</span> <span class="operator">/</span>Applications<span class="operator">/</span>Xcode<span class="operator">.</span>app
+
+</pre>
+<p>You can inspect the globally selected Xcode installation using the same tool.</p>
+<pre class="cpp">
+
+  $ xcode<span class="operator">-</span>select <span class="operator">-</span>print<span class="operator">-</span>path
+  <span class="operator">/</span>Applications<span class="operator">/</span>Xcode<span class="operator">.</span>app<span class="operator">/</span>Contents<span class="operator">/</span>Developer
+
+</pre>
+<p>The <code>xcrun</code> command can then be used to find a particular tool in the toolchain.</p>
+<pre class="cpp">
+
+  $ xcrun <span class="operator">-</span>sdk macosx <span class="operator">-</span>find clang
+  <span class="operator">/</span>Applications<span class="operator">/</span>Xcode<span class="operator">.</span>app<span class="operator">/</span>Contents<span class="operator">/</span>Developer<span class="operator">/</span>Toolchains<span class="operator">/</span>XcodeDefault<span class="operator">.</span>xctoolchain<span class="operator">/</span>usr<span class="operator">/</span>bin<span class="operator">/</span>clang
+
+</pre>
+<p>or show the platform SDK path used when building.</p>
+<pre class="cpp">
+
+  $ xcrun <span class="operator">-</span>sdk macosx <span class="operator">-</span><span class="operator">-</span>show<span class="operator">-</span>sdk<span class="operator">-</span>path
+  <span class="operator">/</span>Applications<span class="operator">/</span>Xcode<span class="operator">.</span>app<span class="operator">/</span>Contents<span class="operator">/</span>Developer<span class="operator">/</span>Platforms<span class="operator">/</span>MacOSX<span class="operator">.</span>platform<span class="operator">/</span>Developer<span class="operator">/</span>SDKs<span class="operator">/</span>MacOSX10<span class="operator">.</span><span class="number">14.sdk</span>
+
+</pre>
+<a name="target-platforms"></a>
+<h3 id="target-platforms">Target Platforms</h3>
+<p>Building for macOS utilizes a technique called <i>weak linking</i> that allows you to build your application against the headers and libraries of the latest platform SDK, while still allowing your application to be deployed to macOS versions lower than the SDK version. When the binary is run on a macOS version lower than the SDK it was built with, Qt will check at runtime whether or not a platform feature is available before utilizing it.</p>
+<p>In theory this would allow running your application on every single macOS version released, but for practical (and technical) reasons there is a lower limit to this range, known as the <i>deployment target</i> of your application. If the binary is launched on a macOS version below the deployment target macOS or Qt will give an error message and the application will not run.</p>
+<p>Qt expresses the deployment target via the <code>QMAKE_MACOSX_DEPLOYMENT_TARGET</code> qmake variable, which has a default value set via the makespec for macOS. You should not need to change this default, but if needed you can increase it in your project file:</p>
+<pre class="cpp">
+
+  QMAKE_MACOSX_DEPLOYMENT_TARGET <span class="operator">=</span> <span class="number">10.13</span>
+
+</pre>
+<p><b>Note: </b>You should not lower the deployment target beyond the default value set by Qt. Doing so will likely lead to crashes at runtime if the binary is then deployed to a macOS version lower than what Qt expected to run on.</p><p>By always building against the latest available platform SDK, you ensure that Qt can take advantage of new features introduced in recent versions of macOS.</p>
+<p>For more information about SDK-based development on macOS, see Apple's <a href="https://developer.apple.com/library/mac/#documentation/DeveloperTools/Conceptual/cross_development/Introduction/Introduction.html">developer documentation</a>.</p>
+<a name="opting-out-of-macos-behavior-changes"></a>
+<h4 id="opting-out-of-macos-behavior-changes">Opting out of macOS behavior changes</h4>
+<p>One caveat to using the latest Xcode version and SDK to build your application is that macOS's system frameworks will sometimes decide whether or not to enable behavior changes based on the SDK you built your application with.</p>
+<p>For example, when dark-mode was introduced in macOS 10.14 Mojave, macOS would only treat applications built against the 10.14 SDK as supporting dark-mode, and would leave applications built against earlier SDKs with the default light mode look. This technique allows Apple to ensure that binaries built long before the new SDK and operating system was released will still continue to run without regressions on new macOS releases.</p>
+<p>A consequence of this is that if Qt has problems dealing with some of these macOS features (dark-mode, layer-backed views), the only way to opt out of them is building with an earlier SDK (the 10.13 SDK, available through Xcode 9). This is a last-resort solution, and should only be applied if your application has no other ways of working around the problem.</p>
+<a name="architectures"></a>
+<h3 id="architectures">Architectures</h3>
+<p>By default, Qt is built for x86_64. To build for x86_64h (Haswell). use the <code>QMAKE_APPLE_DEVICE_ARCHS</code> <code>qmake</code> variable. This is selectable at configure time:</p>
+<pre class="cpp">
+
+  <span class="operator">.</span><span class="operator">/</span>configure <span class="operator">-</span>platform macx<span class="operator">-</span>clang QMAKE_APPLE_DEVICE_ARCHS<span class="operator">=</span>x86_64h
+
+</pre>
+<p><code>QMAKE_APPLE_DEVICE_ARCHS</code> can also be specified as a space-delimited list in order to build for multiple architectures simultaneously:</p>
+<pre class="cpp">
+
+  <span class="operator">.</span><span class="operator">/</span>configure <span class="operator">-</span>platform macx<span class="operator">-</span>clang QMAKE_APPLE_DEVICE_ARCHS<span class="operator">=</span><span class="string">&quot;x86_64 x86_64h&quot;</span>
+
+</pre>
+<a name="additional-command-line-options"></a>
+<h2 id="additional-command-line-options">Additional Command-Line Options</h2>
+<p>On the command-line, applications can be built using <code>qmake</code> and <code>make</code>. Optionally, <code>qmake</code> can generate project files for Xcode with <code>-spec macx-xcode</code>. If you are using the binary package, <code>qmake</code> generates Xcode projects by default; use <code>-spec macx-gcc</code> to generate makefiles. For example:</p>
+<pre class="cpp">
+
+  qmake <span class="operator">-</span>spec macx<span class="operator">-</span>xcode project<span class="operator">.</span>pro
+
+</pre>
+<p>Configuring with <code>-spec macx-xcode</code> generates an Xcode project file from project.pro. With <a href="../qmake/qmake-manual.html">qmake</a> you do not have to worry about rules for Qt's preprocessors (<a href="moc.html">moc</a> and <a href="uic.html">uic</a>) since <a href="../qmake/qmake-manual.html">qmake</a> automatically handles them and ensures that everything necessary is linked into your application.</p>
+<p>Qt does not entirely interact with the development environment (for example plugins to set a file to &quot;mocable&quot; from within the Xcode user interface).</p>
+<p>The result of the build process is an application bundle, which is a directory structure that contains the actual application executable. The application can be launched by double-clicking it in Finder, or by referring directly to its executable from the command line, for example, <code>myApp.app/Contents/MacOS/myApp</code>.</p>
+<p>If you wish to have a command-line tool that does not use the GUI for example, <code>moc</code>, <code>uic</code> or <code>ls</code>, you can tell qmake to disable bundle creation from the <code>CONFIG</code> variable in the project file:</p>
+<pre class="cpp">
+
+  CONFIG <span class="operator">-</span><span class="operator">=</span> app_bundle
+
+</pre>
+<a name="deploying-applications-on-macos"></a>
+<h2 id="deploying-applications-on-macos">Deploying Applications on macOS</h2>
+<p>macOS applications are typically deployed as self-contained application bundles. The application bundle contains the application executable as well as dependencies such as the Qt libraries, plugins, translations and other resources you may need. Third party libraries like Qt are normally not installed system-wide; each application provides its own copy.</p>
+<p>A common way to distribute applications is to provide a compressed disk image (.dmg file) that the user can mount in Finder. The deployment tool, <code>macdeployqt</code> (available from the macOS installers), can be used to create the self-contained bundles, and optionally also create a .dmg archive. Applications can also be distributed through the Mac App Store. Qt 5 aims to stay within the app store sandbox rules. macdeployqt (bin/macdeployqt) can be used as a starting point for app store deployment.</p>
+<ul>
+<li><a href="macos-deployment.html">Qt for macOS - Deployment</a></li>
+</ul>
+<a name="macos-issues"></a>
+<h2 id="macos-issues">macOS Issues</h2>
+<p>The page below covers specific issues and recommendations for creating macOS applications.</p>
+<ul>
+<li><a href="macos-issues.html">Qt for macOS - Specific Issues</a></li>
+</ul>
+<a name="where-to-go-from-here"></a>
+<h2 id="where-to-go-from-here">Where to Go from Here</h2>
+<p>We invite you to explore the rest of Qt. We prepared overviews to help you decide which APIs to use and our examples demonstrate how to use our API.</p>
+<ul>
+<li><a href="overviews-main.html">Qt Overviews</a> - list of topics about application development</li>
+<li><a href="qtexamplesandtutorials.html">Examples and Tutorials</a> - code samples and tutorials</li>
+<li><a href="reference-overview.html">Qt Reference Pages</a> - a listing of C++ and QML APIs</li>
+</ul>
+<p>Qt's vibrant and active community site, <a href="http://qt.io">http://qt.io</a> houses a wiki, a forum, and additional learning guides and presentations.</p>
+</div>
+<!-- @@@macos.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qndeffilter.cpp -->
+  <title>QNdefFilter Class | Qt NFC 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtnfc-index.html">Qt NFC</a></td><td ><a href="qtnfc-module.html">C++ Classes</a></td><td >QNdefFilter</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtnfc-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QNdefFilter Class</h1>
+<!-- $$$QNdefFilter-brief -->
+<p>The <a href="qndeffilter.html">QNdefFilter</a> class provides a filter for matching NDEF messages. <a href="#details">More...</a></p>
+<!-- @@@QNdefFilter -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QNdefFilter&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += nfc</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.2</td></tr></table></div><p>This class was introduced in  Qt 5.2.</p>
+<ul>
+<li><a href="qndeffilter-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qndeffilter.html#QNdefFilter-1">QNdefFilter</a></b>(const QNdefFilter &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qndeffilter.html#QNdefFilter">QNdefFilter</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QNdefFilter &amp;</td><td class="memItemRight bottomAlign"><b><a href="qndeffilter.html#operator-eq">operator=</a></b>(const QNdefFilter &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qndeffilter.html#dtor.QNdefFilter">~QNdefFilter</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qndeffilter.html#appendRecord">appendRecord</a></b>(unsigned int <i>min</i> = 1, unsigned int <i>max</i> = 1)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qndeffilter.html#appendRecord-1">appendRecord</a></b>(QNdefRecord::TypeNameFormat <i>typeNameFormat</i>, const QByteArray &amp;<i>type</i>, unsigned int <i>min</i> = 1, unsigned int <i>max</i> = 1)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qndeffilter.html#appendRecord-2">appendRecord</a></b>(const QNdefFilter::Record &amp;<i>record</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qndeffilter.html#clear">clear</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qndeffilter.html#orderMatch">orderMatch</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QNdefFilter::Record </td><td class="memItemRight bottomAlign"><b><a href="qndeffilter.html#recordAt">recordAt</a></b>(int <i>i</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qndeffilter.html#recordCount">recordCount</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qndeffilter.html#setOrderMatch">setOrderMatch</a></b>(bool <i>on</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QNdefFilter-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qndeffilter.html">QNdefFilter</a> encapsulates the structure of an NDEF message and is used by <a href="qnearfieldmanager.html#registerNdefMessageHandler">QNearFieldManager::registerNdefMessageHandler</a>() to match NDEF message that have a particular structure.</p>
+<p>The following filter matches NDEF messages that contain a single smart poster record:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qndeffilter.html#QNdefFilter">QNdefFilter</a></span> filter;
+  filter<span class="operator">.</span>append(<span class="type"><a href="qndefrecord.html">QNdefRecord</a></span><span class="operator">::</span>NfcRtd<span class="operator">,</span> <span class="string">&quot;Sp&quot;</span>);
+
+</pre>
+<p>The following filter matches NDEF messages that contain a URI, a localized piece of text and an optional JPEG image. The order of the records must be in the order specified:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qndeffilter.html#QNdefFilter">QNdefFilter</a></span> filter;
+  filter<span class="operator">.</span>setOrderMatch(<span class="keyword">true</span>);
+  filter<span class="operator">.</span>appendRecord(<span class="type"><a href="qndefrecord.html">QNdefRecord</a></span><span class="operator">::</span>NfcRtd<span class="operator">,</span> <span class="string">&quot;U&quot;</span>);
+  filter<span class="operator">.</span>appendRecord<span class="operator">&lt;</span><span class="type"><a href="qndefnfctextrecord.html">QNdefNfcTextRecord</a></span><span class="operator">&gt;</span>();
+  filter<span class="operator">.</span>appendRecord(<span class="type"><a href="qndefrecord.html">QNdefRecord</a></span><span class="operator">::</span>Mime<span class="operator">,</span> <span class="string">&quot;image/jpeg&quot;</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span>);
+
+</pre>
+</div>
+<!-- @@@QNdefFilter -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QNdefFilter$$$QNdefFilterconstQNdefFilter& -->
+<h3 class="fn" id="QNdefFilter-1"><a name="QNdefFilter-1"></a>QNdefFilter::<span class="name">QNdefFilter</span>(const <span class="type"><a href="qndeffilter.html#QNdefFilter">QNdefFilter</a></span> &amp;<i>other</i>)</h3>
+<p>constructs a new NDEF filter that is a copy of <i>other</i>.</p>
+<!-- @@@QNdefFilter -->
+<!-- $$$QNdefFilter[overload1]$$$QNdefFilter -->
+<h3 class="fn" id="QNdefFilter"><a name="QNdefFilter"></a>QNdefFilter::<span class="name">QNdefFilter</span>()</h3>
+<p>Constructs a new NDEF filter.</p>
+<!-- @@@QNdefFilter -->
+<!-- $$$operator=[overload1]$$$operator=constQNdefFilter& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qndeffilter.html#QNdefFilter">QNdefFilter</a></span> &amp;QNdefFilter::<span class="name">operator=</span>(const <span class="type"><a href="qndeffilter.html#QNdefFilter">QNdefFilter</a></span> &amp;<i>other</i>)</h3>
+<p>Assigns <i>other</i> to this filter and returns a reference to this filter.</p>
+<!-- @@@operator= -->
+<!-- $$$~QNdefFilter[overload1]$$$~QNdefFilter -->
+<h3 class="fn" id="dtor.QNdefFilter"><a name="dtor.QNdefFilter"></a>QNdefFilter::<span class="name">~QNdefFilter</span>()</h3>
+<p>Destroys the NDEF filter.</p>
+<!-- @@@~QNdefFilter -->
+<!-- $$$appendRecord[overload1]$$$appendRecordunsignedintunsignedint -->
+<h3 class="fn" id="appendRecord"><a name="appendRecord"></a><span class="type">void</span> QNdefFilter::<span class="name">appendRecord</span>(<span class="type">unsigned</span> <span class="type">int</span> <i>min</i> = 1, <span class="type">unsigned</span> <span class="type">int</span> <i>max</i> = 1)</h3>
+<p>Appends a record matching the template parameter to the NDEF filter. The record must occur between <i>min</i> and <i>max</i> times in the NDEF message.</p>
+<!-- @@@appendRecord -->
+<!-- $$$appendRecord$$$appendRecordQNdefRecord::TypeNameFormatconstQByteArray&unsignedintunsignedint -->
+<h3 class="fn" id="appendRecord-1"><a name="appendRecord-1"></a><span class="type">void</span> QNdefFilter::<span class="name">appendRecord</span>(<span class="type"><a href="qndefrecord.html#TypeNameFormat-enum">QNdefRecord::TypeNameFormat</a></span> <i>typeNameFormat</i>, const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>type</i>, <span class="type">unsigned</span> <span class="type">int</span> <i>min</i> = 1, <span class="type">unsigned</span> <span class="type">int</span> <i>max</i> = 1)</h3>
+<p>Appends a record with type name format <i>typeNameFormat</i> and type <i>type</i> to the NDEF filter. The record must occur between <i>min</i> and <i>max</i> times in the NDEF message.</p>
+<!-- @@@appendRecord -->
+<!-- $$$appendRecord$$$appendRecordconstQNdefFilter::Record& -->
+<h3 class="fn" id="appendRecord-2"><a name="appendRecord-2"></a><span class="type">void</span> QNdefFilter::<span class="name">appendRecord</span>(const <span class="type">QNdefFilter::Record</span> &amp;<i>record</i>)</h3>
+<p>Appends <i>record</i> to the NDEF filter.</p>
+<!-- @@@appendRecord -->
+<!-- $$$clear[overload1]$$$clear -->
+<h3 class="fn" id="clear"><a name="clear"></a><span class="type">void</span> QNdefFilter::<span class="name">clear</span>()</h3>
+<p>Clears the filter.</p>
+<!-- @@@clear -->
+<!-- $$$orderMatch[overload1]$$$orderMatch -->
+<h3 class="fn" id="orderMatch"><a name="orderMatch"></a><span class="type">bool</span> QNdefFilter::<span class="name">orderMatch</span>() const</h3>
+<p>Returns true if the filter takes NDEF record order into account when matching; otherwise returns false.</p>
+<p><b>See also </b><a href="qndeffilter.html#setOrderMatch">setOrderMatch</a>().</p>
+<!-- @@@orderMatch -->
+<!-- $$$recordAt[overload1]$$$recordAtint -->
+<h3 class="fn" id="recordAt"><a name="recordAt"></a><span class="type">QNdefFilter::Record</span> QNdefFilter::<span class="name">recordAt</span>(<span class="type">int</span> <i>i</i>) const</h3>
+<p>Returns the NDEF record at index <i>i</i>.</p>
+<!-- @@@recordAt -->
+<!-- $$$recordCount[overload1]$$$recordCount -->
+<h3 class="fn" id="recordCount"><a name="recordCount"></a><span class="type">int</span> QNdefFilter::<span class="name">recordCount</span>() const</h3>
+<p>Returns the number of NDEF records in the filter.</p>
+<!-- @@@recordCount -->
+<!-- $$$setOrderMatch[overload1]$$$setOrderMatchbool -->
+<h3 class="fn" id="setOrderMatch"><a name="setOrderMatch"></a><span class="type">void</span> QNdefFilter::<span class="name">setOrderMatch</span>(<span class="type">bool</span> <i>on</i>)</h3>
+<p>Sets the ording requirements of the filter. If <i>on</i> is true the filter will only match if the order of records in the filter matches the order of the records in the NDEF message. If <i>on</i> is false the order of the records is not taken into account when matching.</p>
+<p>By default record order is not taken into account.</p>
+<p><b>See also </b><a href="qndeffilter.html#orderMatch">orderMatch</a>().</p>
+<!-- @@@setOrderMatch -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

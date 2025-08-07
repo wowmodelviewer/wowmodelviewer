@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qqmlndefrecord.cpp -->
+  <title>QQmlNdefRecord Class | Qt NFC 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtnfc-index.html">Qt NFC</a></td><td ><a href="qtnfc-module.html">C++ Classes</a></td><td >QQmlNdefRecord</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtnfc-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#macros">Macros</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QQmlNdefRecord Class</h1>
+<!-- $$$QQmlNdefRecord-brief -->
+<p>The <a href="qqmlndefrecord.html">QQmlNdefRecord</a> class implements the <a href="qml-qtnfc-ndefrecord.html">NdefRecord</a> type in QML. <a href="#details">More...</a></p>
+<!-- @@@QQmlNdefRecord -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QQmlNdefRecord&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += nfc</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.2</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qtnfc-ndefrecord.html">NdefRecord</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.2.</p>
+<ul>
+<li><a href="qqmlndefrecord-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qqmlndefrecord.html#TypeNameFormat-enum">TypeNameFormat</a></b> { Empty, NfcRtd, Mime, Uri, ExternalRtd, Unknown }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qqmlndefrecord.html#record-prop">record</a></b> : QNdefRecord</li>
+<li class="fn"><b><a href="qqmlndefrecord.html#type-prop">type</a></b> : QString</li>
+<li class="fn"><b><a href="qqmlndefrecord.html#typeNameFormat-prop">typeNameFormat</a></b> : TypeNameFormat</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qqmlndefrecord.html#QQmlNdefRecord-1">QQmlNdefRecord</a></b>(const QNdefRecord &amp;<i>record</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qqmlndefrecord.html#QQmlNdefRecord">QQmlNdefRecord</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qqmlndefrecord.html#dtor.QQmlNdefRecord">~QQmlNdefRecord</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QNdefRecord </td><td class="memItemRight bottomAlign"><b><a href="qqmlndefrecord.html#record">record</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlndefrecord.html#setRecord">setRecord</a></b>(const QNdefRecord &amp;<i>record</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlndefrecord.html#setType">setType</a></b>(const QString &amp;<i>newtype</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlndefrecord.html#setTypeNameFormat">setTypeNameFormat</a></b>(QQmlNdefRecord::TypeNameFormat <i>newTypeNameFormat</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qqmlndefrecord.html#type">type</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQmlNdefRecord::TypeNameFormat </td><td class="memItemRight bottomAlign"><b><a href="qqmlndefrecord.html#typeNameFormat">typeNameFormat</a></b>() const</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlndefrecord.html#record-prop">recordChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlndefrecord.html#typeChanged">typeChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlndefrecord.html#typeNameFormat-prop">typeNameFormatChanged</a></b>()</td></tr>
+</table></div>
+<a name="macros"></a>
+<h2 id="macros">Macros</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qqmlndefrecord.html#Q_DECLARE_NDEFRECORD">Q_DECLARE_NDEFRECORD</a></b>(<i>className</i>, <i>typeNameFormat</i>, <i>type</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QQmlNdefRecord-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qqmlndefrecord.html">QQmlNdefRecord</a> class is the base class for all <a href="qml-qtnfc-ndefrecord.html">NdefRecord</a> types in QML. To support a new NDEF record type in QML subclass this class and expose new properties, member functions and signals appropriate for the new record type. The following must be done to create a new NDEF record type in QML:</p>
+<ul>
+<li>The subclass must have a <a href="../qtcore/qobject.html#Q_OBJECT">Q_OBJECT</a> macro in its declaration.</li>
+<li>The subclass must have an <a href="../qtcore/qobject.html#Q_INVOKABLE">invokable</a> constructor that takes a <a href="qndefrecord.html">QNdefRecord</a> and a <a href="../qtcore/qobject.html">QObject</a> pointer.</li>
+<li>The subclass must be declared as an NDEF record by expanding the <a href="qqmlndefrecord.html#Q_DECLARE_NDEFRECORD">Q_DECLARE_NDEFRECORD</a>() macro in the implementation file of the subclass.</li>
+<li>The subclass must be registered with QML.</li>
+</ul>
+<p>For example the declaration of such a class may look like the following.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> <span class="type">QQmlNdefFooRecord</span> : <span class="keyword">public</span> <span class="type"><a href="qqmlndefrecord.html#QQmlNdefRecord">QQmlNdefRecord</a></span>
+  {
+      Q_OBJECT
+
+      Q_PROPERTY(<span class="type">int</span> foo READ foo WRITE setFoo NOTIFY fooChanged)
+
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> <span class="type">QQmlNdefFooRecord</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+      Q_INVOKABLE <span class="type">QQmlNdefFooRecord</span>(<span class="keyword">const</span> <span class="type"><a href="qndefrecord.html">QNdefRecord</a></span> <span class="operator">&amp;</span>record<span class="operator">,</span> <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+      <span class="operator">~</span><span class="type">QQmlNdefFooRecord</span>();
+
+      <span class="type">int</span> foo() <span class="keyword">const</span>;
+      <span class="type">void</span> setFoo(<span class="type">int</span> value);
+
+  <span class="keyword">signals</span>:
+      <span class="type">void</span> fooChanged();
+  };
+
+</pre>
+<p>Within the implementation file the <a href="qqmlndefrecord.html#Q_DECLARE_NDEFRECORD">Q_DECLARE_NDEFRECORD</a>() macro is expanded:</p>
+<pre class="cpp">
+
+  Q_DECLARE_NDEFRECORD(<span class="type">QQmlNdefFooRecord</span><span class="operator">,</span> <span class="type"><a href="qndefrecord.html">QNdefRecord</a></span><span class="operator">::</span>ExternalRtd<span class="operator">,</span> <span class="string">&quot;com.example:f&quot;</span>)
+
+</pre>
+<p>Finially the application or plugin code calls qmlRegisterType():</p>
+<pre class="cpp">
+
+  qmlRegisterType<span class="operator">&lt;</span><span class="type">QQmlNdefFooRecord</span><span class="operator">&gt;</span>(uri<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;NdefFooRecord&quot;</span>);
+
+</pre>
+</div>
+<p><b>See also </b><a href="qml-qtnfc-ndefrecord.html">NdefRecord</a>.</p>
+<!-- @@@QQmlNdefRecord -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$TypeNameFormat$$$Empty$$$NfcRtd$$$Mime$$$Uri$$$ExternalRtd$$$Unknown -->
+<h3 class="fn" id="TypeNameFormat-enum"><a name="TypeNameFormat-enum"></a>enum QQmlNdefRecord::<span class="name">TypeNameFormat</span></h3>
+<p>This enum describes the type name format of an NDEF record. The values of this enum are according to <a href="qndefrecord.html#TypeNameFormat-enum">QNdefRecord::TypeNameFormat</a></p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QQmlNdefRecord::Empty</code></td><td class="topAlign tblval"><code>QNdefRecord::Empty</code></td><td class="topAlign">An empty NDEF record, the record does not contain a payload.</td></tr>
+<tr><td class="topAlign"><code>QQmlNdefRecord::NfcRtd</code></td><td class="topAlign tblval"><code>QNdefRecord::NfcRtd</code></td><td class="topAlign">The NDEF record type is defined by an NFC RTD Specification.</td></tr>
+<tr><td class="topAlign"><code>QQmlNdefRecord::Mime</code></td><td class="topAlign tblval"><code>QNdefRecord::Mime</code></td><td class="topAlign">The NDEF record type follows the construct described in RFC 2046.</td></tr>
+<tr><td class="topAlign"><code>QQmlNdefRecord::Uri</code></td><td class="topAlign tblval"><code>QNdefRecord::Uri</code></td><td class="topAlign">The NDEF record type follows the construct described in RFC 3986.</td></tr>
+<tr><td class="topAlign"><code>QQmlNdefRecord::ExternalRtd</code></td><td class="topAlign tblval"><code>QNdefRecord::ExternalRtd</code></td><td class="topAlign">The NDEF record type follows the construct for external type names described the NFC RTD Specification.</td></tr>
+<tr><td class="topAlign"><code>QQmlNdefRecord::Unknown</code></td><td class="topAlign tblval"><code>QNdefRecord::Unknown</code></td><td class="topAlign">The NDEF record type is unknown.</td></tr>
+</table></div>
+<!-- @@@TypeNameFormat -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$record-prop$$$record$$$setRecordconstQNdefRecord&$$$recordChanged -->
+<h3 class="fn" id="record-prop"><a name="record-prop"></a><span class="name">record</span> : <span class="type"><a href="qndefrecord.html">QNdefRecord</a></span></h3>
+<p>This property hold the NDEF record that this class represents.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QNdefRecord </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qqmlndefrecord.html#record">record</a></b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qqmlndefrecord.html#setRecord">setRecord</a></b></span>(const QNdefRecord &amp;<i>record</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>recordChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@record -->
+<!-- $$$type-prop$$$type$$$setTypeconstQString&$$$typeChanged -->
+<h3 class="fn" id="type-prop"><a name="type-prop"></a><span class="name">type</span> : <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>This property hold the type of the NDEF record.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qqmlndefrecord.html#type">type</a></b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qqmlndefrecord.html#setType">setType</a></b></span>(const QString &amp;<i>newtype</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qqmlndefrecord.html#typeChanged">typeChanged</a></b></span>()</td></tr>
+</table></div>
+<!-- @@@type -->
+<!-- $$$typeNameFormat-prop$$$typeNameFormat$$$setTypeNameFormatQQmlNdefRecord::TypeNameFormat$$$typeNameFormatChanged -->
+<h3 class="fn" id="typeNameFormat-prop"><a name="typeNameFormat-prop"></a><span class="name">typeNameFormat</span> : <span class="type"><a href="qqmlndefrecord.html#TypeNameFormat-enum">TypeNameFormat</a></span></h3>
+<p>This property hold the TNF of the NDEF record.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QQmlNdefRecord::TypeNameFormat </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qqmlndefrecord.html#typeNameFormat">typeNameFormat</a></b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qqmlndefrecord.html#setTypeNameFormat">setTypeNameFormat</a></b></span>(QQmlNdefRecord::TypeNameFormat <i>newTypeNameFormat</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>typeNameFormatChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@typeNameFormat -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QQmlNdefRecord$$$QQmlNdefRecordconstQNdefRecord&QObject* -->
+<h3 class="fn" id="QQmlNdefRecord-1"><a name="QQmlNdefRecord-1"></a>QQmlNdefRecord::<span class="name">QQmlNdefRecord</span>(const <span class="type"><a href="qndefrecord.html">QNdefRecord</a></span> &amp;<i>record</i>, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new <a href="qqmlndefrecord.html">QQmlNdefRecord</a> representing <i>record</i>. The parent of the newly constructed object will be set to <i>parent</i>.</p>
+<!-- @@@QQmlNdefRecord -->
+<!-- $$$QQmlNdefRecord[overload1]$$$QQmlNdefRecordQObject* -->
+<h3 class="fn" id="QQmlNdefRecord"><a name="QQmlNdefRecord"></a>QQmlNdefRecord::<span class="name">QQmlNdefRecord</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new empty <a href="qqmlndefrecord.html">QQmlNdefRecord</a> with <i>parent</i>.</p>
+<!-- @@@QQmlNdefRecord -->
+<!-- $$$typeChanged -->
+<h3 class="fn" id="typeChanged"><a name="typeChanged"></a><code>[signal] </code><span class="type">void</span> QQmlNdefRecord::<span class="name">typeChanged</span>()</h3>
+<p>This signal is emitted when the record type changes.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qqmlndefrecord.html#type-prop">type</a>. </p><!-- @@@typeChanged -->
+<!-- $$$~QQmlNdefRecord[overload1]$$$~QQmlNdefRecord -->
+<h3 class="fn" id="dtor.QQmlNdefRecord"><a name="dtor.QQmlNdefRecord"></a><code>[virtual] </code>QQmlNdefRecord::<span class="name">~QQmlNdefRecord</span>()</h3>
+<p>Destroys the <a href="qqmlndefrecord.html">QQmlNdefRecord</a> instance.</p>
+<!-- @@@~QQmlNdefRecord -->
+<!-- $$$record -->
+<h3 class="fn" id="record"><a name="record"></a><span class="type"><a href="qndefrecord.html">QNdefRecord</a></span> QQmlNdefRecord::<span class="name">record</span>() const</h3>
+<p>Returns a copy of the record.</p>
+<p><b>Note:</b> Getter function for property <a href="qqmlndefrecord.html#record-prop">record</a>. </p><p><b>See also </b><a href="qqmlndefrecord.html#setRecord">setRecord</a>().</p>
+<!-- @@@record -->
+<!-- $$$setRecord -->
+<h3 class="fn" id="setRecord"><a name="setRecord"></a><span class="type">void</span> QQmlNdefRecord::<span class="name">setRecord</span>(const <span class="type"><a href="qndefrecord.html">QNdefRecord</a></span> &amp;<i>record</i>)</h3>
+<p>Sets the record to <i>record</i>. If the record is set the <a href="qqmlndefrecord.html#record-prop">recordChanged</a>() signal will be emitted.</p>
+<p><b>Note:</b> Setter function for property <a href="qqmlndefrecord.html#record-prop">record</a>. </p><p><b>See also </b><a href="qqmlndefrecord.html#record">record</a>().</p>
+<!-- @@@setRecord -->
+<!-- $$$setType -->
+<h3 class="fn" id="setType"><a name="setType"></a><span class="type">void</span> QQmlNdefRecord::<span class="name">setType</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>newtype</i>)</h3>
+<p>Sets the record type to <i>newtype</i> if it is not currently equal to <a href="qqmlndefrecord.html#type">type</a>(); otherwise does nothing. If the record type is set the <a href="qqmlndefrecord.html#typeChanged">typeChanged</a>() signal will be emitted.</p>
+<p><b>Note:</b> Setter function for property <a href="qqmlndefrecord.html#type-prop">type</a>. </p><p><b>See also </b><a href="qndefrecord.html#setType">QNdefRecord::setType</a>() and <a href="qndefrecord.html#type">QNdefRecord::type</a>().</p>
+<!-- @@@setType -->
+<!-- $$$setTypeNameFormat -->
+<h3 class="fn" id="setTypeNameFormat"><a name="setTypeNameFormat"></a><span class="type">void</span> QQmlNdefRecord::<span class="name">setTypeNameFormat</span>(<span class="type"><a href="qqmlndefrecord.html#TypeNameFormat-enum">QQmlNdefRecord::TypeNameFormat</a></span> <i>newTypeNameFormat</i>)</h3>
+<p>Sets the type name format of the NDEF record to <i>newTypeNameFormat</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="qqmlndefrecord.html#typeNameFormat-prop">typeNameFormat</a>. </p><p><b>See also </b><a href="qqmlndefrecord.html#typeNameFormat">typeNameFormat</a>().</p>
+<!-- @@@setTypeNameFormat -->
+<!-- $$$type -->
+<h3 class="fn" id="type"><a name="type"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QQmlNdefRecord::<span class="name">type</span>() const</h3>
+<p>Returns the type of the record.</p>
+<p><b>Note:</b> Getter function for property <a href="qqmlndefrecord.html#type-prop">type</a>. </p><p><b>See also </b><a href="qndefrecord.html#setType">QNdefRecord::setType</a>() and <a href="qndefrecord.html#type">QNdefRecord::type</a>().</p>
+<!-- @@@type -->
+<!-- $$$typeNameFormat -->
+<h3 class="fn" id="typeNameFormat"><a name="typeNameFormat"></a><span class="type"><a href="qqmlndefrecord.html#TypeNameFormat-enum">QQmlNdefRecord::TypeNameFormat</a></span> QQmlNdefRecord::<span class="name">typeNameFormat</span>() const</h3>
+<p>Returns the type name format of the NDEF record.</p>
+<p><b>Note:</b> Getter function for property <a href="qqmlndefrecord.html#typeNameFormat-prop">typeNameFormat</a>. </p><p><b>See also </b><a href="qqmlndefrecord.html#setTypeNameFormat">setTypeNameFormat</a>().</p>
+<!-- @@@typeNameFormat -->
+</div>
+<div class="macros">
+<h2>Macro Documentation</h2>
+<!-- $$$Q_DECLARE_NDEFRECORD[overload1]$$$Q_DECLARE_NDEFRECORD -->
+<h3 class="fn" id="Q_DECLARE_NDEFRECORD"><a name="Q_DECLARE_NDEFRECORD"></a><span class="name">Q_DECLARE_NDEFRECORD</span>(<i>className</i>, <i>typeNameFormat</i>, <i>type</i>)</h3>
+<p>This macro ensures that <i>className</i> is declared as the class implementing the NDEF record identified by <i>typeNameFormat</i> and <i>type</i>.</p>
+<p>This macro should be expanded in the implementation file for <i>className</i>.</p>
+<!-- @@@Q_DECLARE_NDEFRECORD -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

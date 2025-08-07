@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qscissortest.cpp -->
+  <title>QScissorTest Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QScissorTest</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QScissorTest Class</h1>
+<span class="small-subtitle">(<a href="qt3drender-qscissortest.html">Qt3DRender::QScissorTest</a>)<br/></span>
+<!-- $$$QScissorTest-brief -->
+<p>The <a href="qt3drender-qscissortest.html">QScissorTest</a> class discards fragments that fall outside of a certain rectangular portion of the screen. <a href="#details">More...</a></p>
+<!-- @@@QScissorTest -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QScissorTest&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3drender</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-scissortest.html">ScissorTest</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3drender-qrenderstate.html">Qt3DRender::QRenderState</a></td></tr></table></div><p>This class was introduced in  Qt 5.7.</p>
+<ul>
+<li><a href="qt3drender-qscissortest-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qt3drender-qscissortest.html#bottom-prop">bottom</a></b> : int</li>
+<li class="fn"><b><a href="qt3drender-qscissortest.html#height-prop">height</a></b> : int</li>
+<li class="fn"><b><a href="qt3drender-qscissortest.html#left-prop">left</a></b> : int</li>
+<li class="fn"><b><a href="qt3drender-qscissortest.html#width-prop">width</a></b> : int</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qscissortest.html#QScissorTest">QScissorTest</a></b>(Qt3DCore::QNode *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qscissortest.html#bottom-prop">bottom</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qscissortest.html#height-prop">height</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qscissortest.html#left-prop">left</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qscissortest.html#width-prop">width</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qscissortest.html#bottom-prop">setBottom</a></b>(int <i>bottom</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qscissortest.html#height-prop">setHeight</a></b>(int <i>height</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qscissortest.html#left-prop">setLeft</a></b>(int <i>left</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qscissortest.html#width-prop">setWidth</a></b>(int <i>width</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qscissortest.html#bottom-prop">bottomChanged</a></b>(int <i>bottom</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qscissortest.html#height-prop">heightChanged</a></b>(int <i>height</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qscissortest.html#left-prop">leftChanged</a></b>(int <i>left</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qscissortest.html#width-prop">widthChanged</a></b>(int <i>width</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QScissorTest-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A <a href="qt3drender-qscissortest.html">QScissorTest</a> class enables scissor test, which discards fragments outside the rectangular area of the screen specified by the left, bottom, width and height properties.</p>
+</div>
+<!-- @@@QScissorTest -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$bottom-prop$$$bottom$$$setBottomint$$$bottomChangedint -->
+<h3 class="fn" id="bottom-prop"><a name="bottom-prop"></a><span class="name">bottom</span> : <span class="type">int</span></h3>
+<p>Holds the bottom coordinate of the scissor box.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>bottom</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setBottom</b></span>(int <i>bottom</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>bottomChanged</b></span>(int <i>bottom</i>)</td></tr>
+</table></div>
+<!-- @@@bottom -->
+<!-- $$$height-prop$$$height$$$setHeightint$$$heightChangedint -->
+<h3 class="fn" id="height-prop"><a name="height-prop"></a><span class="name">height</span> : <span class="type">int</span></h3>
+<p>Holds the height of the scissor box.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>height</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setHeight</b></span>(int <i>height</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>heightChanged</b></span>(int <i>height</i>)</td></tr>
+</table></div>
+<!-- @@@height -->
+<!-- $$$left-prop$$$left$$$setLeftint$$$leftChangedint -->
+<h3 class="fn" id="left-prop"><a name="left-prop"></a><span class="name">left</span> : <span class="type">int</span></h3>
+<p>Holds the left coordinate of the scissor box.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>left</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setLeft</b></span>(int <i>left</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>leftChanged</b></span>(int <i>left</i>)</td></tr>
+</table></div>
+<!-- @@@left -->
+<!-- $$$width-prop$$$width$$$setWidthint$$$widthChangedint -->
+<h3 class="fn" id="width-prop"><a name="width-prop"></a><span class="name">width</span> : <span class="type">int</span></h3>
+<p>Holds the width of the scissor box.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>width</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setWidth</b></span>(int <i>width</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>widthChanged</b></span>(int <i>width</i>)</td></tr>
+</table></div>
+<!-- @@@width -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QScissorTest[overload1]$$$QScissorTestQt3DCore::QNode* -->
+<h3 class="fn" id="QScissorTest"><a name="QScissorTest"></a>QScissorTest::<span class="name">QScissorTest</span>(<span class="type"><a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></span> *<i>parent</i> = nullptr)</h3>
+<p>The constructor creates a new <a href="qt3drender-qscissortest.html">QScissorTest::QScissorTest</a> instance with the specified <i>parent</i></p>
+<!-- @@@QScissorTest -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

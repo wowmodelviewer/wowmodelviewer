@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qrawfont.cpp -->
+  <title>List of All Members for QRawFont | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QRawFont</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">List of All Members for QRawFont</h1>
+<p>This is the complete list of members for <a href="qrawfont.html">QRawFont</a>, including inherited members.</p>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn">enum <span class="name"><b><a href="qrawfont.html#AntialiasingType-enum">AntialiasingType</a></b></span></li>
+<li class="fn">enum <span class="name"><b><a href="qrawfont.html#LayoutFlag-enum">LayoutFlag</a></b></span></li>
+<li class="fn">flags <span class="name"><b><a href="qrawfont.html#LayoutFlag-enum">LayoutFlags</a></b></span></li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#QRawFont-3">QRawFont</a></b></span>(const QRawFont &amp;)</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#QRawFont-2">QRawFont</a></b></span>(const QByteArray &amp;, qreal , QFont::HintingPreference )</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#QRawFont-1">QRawFont</a></b></span>(const QString &amp;, qreal , QFont::HintingPreference )</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#QRawFont">QRawFont</a></b></span>()</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#operator-eq-1">operator=</a></b></span>(const QRawFont &amp;) : QRawFont &amp;</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#dtor.QRawFont">~QRawFont</a></b></span>()</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#advancesForGlyphIndexes">advancesForGlyphIndexes</a></b></span>(const QVector&lt;quint32&gt; &amp;, QRawFont::LayoutFlags ) const : QVector&lt;QPointF&gt;</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#advancesForGlyphIndexes-1">advancesForGlyphIndexes</a></b></span>(const QVector&lt;quint32&gt; &amp;) const : QVector&lt;QPointF&gt;</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#advancesForGlyphIndexes-2">advancesForGlyphIndexes</a></b></span>(const quint32 *, QPointF *, int ) const : bool</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#advancesForGlyphIndexes-3">advancesForGlyphIndexes</a></b></span>(const quint32 *, QPointF *, int , QRawFont::LayoutFlags ) const : bool</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#alphaMapForGlyph">alphaMapForGlyph</a></b></span>(quint32 , QRawFont::AntialiasingType , const QTransform &amp;) const : QImage</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#ascent">ascent</a></b></span>() const : qreal</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#averageCharWidth">averageCharWidth</a></b></span>() const : qreal</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#boundingRect">boundingRect</a></b></span>(quint32 ) const : QRectF</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#capHeight">capHeight</a></b></span>() const : qreal</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#descent">descent</a></b></span>() const : qreal</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#familyName">familyName</a></b></span>() const : QString</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#fontTable">fontTable</a></b></span>(const char *) const : QByteArray</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#fromFont">fromFont</a></b></span>(const QFont &amp;, QFontDatabase::WritingSystem ) : QRawFont</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#glyphIndexesForChars">glyphIndexesForChars</a></b></span>(const QChar *, int , quint32 *, int *) const : bool</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#glyphIndexesForString">glyphIndexesForString</a></b></span>(const QString &amp;) const : QVector&lt;quint32&gt;</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#hintingPreference">hintingPreference</a></b></span>() const : QFont::HintingPreference</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#isValid">isValid</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#leading">leading</a></b></span>() const : qreal</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#lineThickness">lineThickness</a></b></span>() const : qreal</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#loadFromData">loadFromData</a></b></span>(const QByteArray &amp;, qreal , QFont::HintingPreference )</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#loadFromFile">loadFromFile</a></b></span>(const QString &amp;, qreal , QFont::HintingPreference )</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#maxCharWidth">maxCharWidth</a></b></span>() const : qreal</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#pathForGlyph">pathForGlyph</a></b></span>(quint32 ) const : QPainterPath</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#pixelSize">pixelSize</a></b></span>() const : qreal</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#setPixelSize">setPixelSize</a></b></span>(qreal )</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#style">style</a></b></span>() const : QFont::Style</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#styleName">styleName</a></b></span>() const : QString</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#supportedWritingSystems">supportedWritingSystems</a></b></span>() const : QList&lt;QFontDatabase::WritingSystem&gt;</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#supportsCharacter">supportsCharacter</a></b></span>(QChar ) const : bool</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#supportsCharacter-1">supportsCharacter</a></b></span>(uint ) const : bool</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#swap">swap</a></b></span>(QRawFont &amp;)</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#underlinePosition">underlinePosition</a></b></span>() const : qreal</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#unitsPerEm">unitsPerEm</a></b></span>() const : qreal</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#weight">weight</a></b></span>() const : int</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#xHeight">xHeight</a></b></span>() const : qreal</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#operator-not-eq">operator!=</a></b></span>(const QRawFont &amp;) const : bool</li>
+<li class="fn"><span class="name"><b><a href="qrawfont.html#operator-eq-eq">operator==</a></b></span>(const QRawFont &amp;) const : bool</li>
+</ul>
+</td></tr>
+</table></div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

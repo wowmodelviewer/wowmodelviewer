@@ -1,0 +1,695 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcbormap.cpp -->
+  <title>QCborMap Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QCborMap</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCborMap Class</h1>
+<!-- $$$QCborMap-brief -->
+<p>The <a href="qcbormap.html">QCborMap</a> class is used to hold an associative container representable in CBOR. <a href="#details">More...</a></p>
+<!-- @@@QCborMap -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QCborMap&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.12</td></tr></table></div><p>This class was introduced in  Qt 5.12.</p>
+<ul>
+<li><a href="qcbormap-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> class </td><td class="memItemRight bottomAlign"><b><a href="qcbormap-constiterator.html">ConstIterator</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> class </td><td class="memItemRight bottomAlign"><b><a href="qcbormap-iterator.html">Iterator</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#const_iterator-typedef">const_iterator</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#iterator-typedef">iterator</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#key_type-typedef">key_type</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#mapped_type-typedef">mapped_type</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#size_type-typedef">size_type</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#value_type-typedef">value_type</a></b></td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#QCborMap-2">QCborMap</a></b>(std::initializer_list&lt;value_type&gt; <i>args</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#QCborMap-1">QCborMap</a></b>(const QCborMap &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#QCborMap">QCborMap</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap &amp;</td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#operator-eq">operator=</a></b>(const QCborMap &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#dtor.QCborMap">~QCborMap</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#begin">begin</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#begin-1">begin</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#cbegin">cbegin</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#cend">cend</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#clear">clear</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#compare">compare</a></b>(const QCborMap &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#constBegin">constBegin</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#constEnd">constEnd</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#constFind">constFind</a></b>(qint64 <i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#constFind-1">constFind</a></b>(QLatin1String <i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#constFind-2">constFind</a></b>(const QString &amp;<i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#constFind-3">constFind</a></b>(const QCborValue &amp;<i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#contains">contains</a></b>(qint64 <i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#contains-1">contains</a></b>(QLatin1String <i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#contains-2">contains</a></b>(const QString &amp;<i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#contains-3">contains</a></b>(const QCborValue &amp;<i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#empty">empty</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#end">end</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#end-1">end</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#erase">erase</a></b>(QCborMap::const_iterator <i>it</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#erase-1">erase</a></b>(QCborMap::iterator <i>it</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#extract">extract</a></b>(QCborMap::iterator <i>it</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#extract-1">extract</a></b>(QCborMap::const_iterator <i>it</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#find">find</a></b>(qint64 <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#find-1">find</a></b>(QLatin1String <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#find-2">find</a></b>(const QString &amp;<i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#find-3">find</a></b>(const QCborValue &amp;<i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#find-4">find</a></b>(qint64 <i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#find-5">find</a></b>(QLatin1String <i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#find-6">find</a></b>(const QString &amp;<i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#find-7">find</a></b>(const QCborValue &amp;<i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#insert">insert</a></b>(qint64 <i>key</i>, const QCborValue &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#insert-1">insert</a></b>(QLatin1String <i>key</i>, const QCborValue &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#insert-2">insert</a></b>(const QString &amp;<i>key</i>, const QCborValue &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#insert-3">insert</a></b>(const QCborValue &amp;<i>key</i>, const QCborValue &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap::iterator </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#insert-4">insert</a></b>(QCborMap::value_type <i>v</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#isEmpty">isEmpty</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;QCborValue&gt; </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#keys">keys</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#remove">remove</a></b>(qint64 <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#remove-1">remove</a></b>(QLatin1String <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#remove-2">remove</a></b>(const QString &amp;<i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#remove-3">remove</a></b>(const QCborValue &amp;<i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qsizetype </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#size">size</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#swap">swap</a></b>(QCborMap &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#take">take</a></b>(qint64 <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#take-1">take</a></b>(QLatin1String <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#take-2">take</a></b>(const QString &amp;<i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#take-3">take</a></b>(const QCborValue &amp;<i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#toCborValue">toCborValue</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonObject </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#toJsonObject">toJsonObject</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariantHash </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#toVariantHash">toVariantHash</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariantMap </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#toVariantMap">toVariantMap</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#value">value</a></b>(qint64 <i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#value-1">value</a></b>(QLatin1String <i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#value-2">value</a></b>(const QString &amp;<i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#value-3">value</a></b>(const QCborValue &amp;<i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#operator-not-eq">operator!=</a></b>(const QCborMap &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#operator-lt">operator&lt;</a></b>(const QCborMap &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#operator-eq-eq">operator==</a></b>(const QCborMap &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#operator-5b-5d">operator[]</a></b>(qint64 <i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#operator-5b-5d-1">operator[]</a></b>(QLatin1String <i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#operator-5b-5d-2">operator[]</a></b>(const QString &amp;<i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#operator-5b-5d-3">operator[]</a></b>(const QCborValue &amp;<i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValueRef </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#operator-5b-5d-5">operator[]</a></b>(qint64 <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValueRef </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#operator-5b-5d-6">operator[]</a></b>(QLatin1String <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValueRef </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#operator-5b-5d-7">operator[]</a></b>(const QString &amp;<i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValueRef </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#operator-5b-5d-8">operator[]</a></b>(const QCborValue &amp;<i>key</i>)</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#fromJsonObject">fromJsonObject</a></b>(const QJsonObject &amp;<i>obj</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#fromVariantHash">fromVariantHash</a></b>(const QVariantHash &amp;<i>hash</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap </td><td class="memItemRight bottomAlign"><b><a href="qcbormap.html#fromVariantMap">fromVariantMap</a></b>(const QVariantMap &amp;<i>map</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCborMap-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This class can be used to hold an associative container in CBOR, a map between a key and a value type. CBOR is the Concise Binary Object Representation, a very compact form of binary data encoding that is a superset of JSON. It was created by the IETF Constrained RESTful Environments (CoRE) WG, which has used it in many new RFCs. It is meant to be used alongside the <a href="https://tools.ietf.org/html/rfc7252">CoAP protocol</a>.</p>
+<p>Unlike JSON and <a href="qvariant.html#QVariantMap-typedef">QVariantMap</a>, CBOR map keys can be of any type, not just strings. For that reason, <a href="qcbormap.html">QCborMap</a> is effectively a map between <a href="qcborvalue.html">QCborValue</a> keys to <a href="qcborvalue.html">QCborValue</a> value elements.</p>
+<p>However, for all member functions that take a key parameter, <a href="qcbormap.html">QCborMap</a> provides overloads that will work efficiently with integers and strings. In fact, the use of integer keys is encouraged, since they occupy fewer bytes to transmit and are simpler to encode and decode. Newer protocols designed by the IETF CoRE WG to work specifically with CBOR are known to use them.</p>
+<p><a href="qcbormap.html">QCborMap</a> is not sorted, because of that, searching for keys has linear complexity (O(n)). <a href="qcbormap.html">QCborMap</a> actually keeps the elements in the order that they were inserted, which means that it is possible to make sorted QCborMaps by carefully inserting elements in sorted order. CBOR does not require sorting, but recommends it.</p>
+<p><a href="qcbormap.html">QCborMap</a> can also be converted to and from <a href="qvariant.html#QVariantMap-typedef">QVariantMap</a> and <a href="qjsonobject.html">QJsonObject</a>. However, when performing the conversion, any non-string keys will be stringified using a one-way method that the conversion back to <a href="qcbormap.html">QCborMap</a> will not undo.</p>
+</div>
+<p><b>See also </b><a href="qcborarray.html">QCborArray</a>, <a href="qcborvalue.html">QCborValue</a>, <a href="qjsondocument.html">QJsonDocument</a>, and <a href="qvariant.html#QVariantMap-typedef">QVariantMap</a>.</p>
+<!-- @@@QCborMap -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$const_iterator -->
+<h3 class="fn" id="const_iterator-typedef"><a name="const_iterator-typedef"></a>typedef QCborMap::<span class="name">const_iterator</span></h3>
+<p>A synonym for <a href="qcbormap-constiterator.html">QCborMap::ConstIterator</a></p>
+<!-- @@@const_iterator -->
+<!-- $$$iterator -->
+<h3 class="fn" id="iterator-typedef"><a name="iterator-typedef"></a>typedef QCborMap::<span class="name">iterator</span></h3>
+<p>A synonym for <a href="qcbormap-iterator.html">QCborMap::Iterator</a>.</p>
+<!-- @@@iterator -->
+<!-- $$$key_type -->
+<h3 class="fn" id="key_type-typedef"><a name="key_type-typedef"></a>typedef QCborMap::<span class="name">key_type</span></h3>
+<p>The key type for this map. Since <a href="qcbormap.html">QCborMap</a> keys can be any CBOR type, this is a <a href="qcborvalue.html">QCborValue</a>.</p>
+<!-- @@@key_type -->
+<!-- $$$mapped_type -->
+<h3 class="fn" id="mapped_type-typedef"><a name="mapped_type-typedef"></a>typedef QCborMap::<span class="name">mapped_type</span></h3>
+<p>The type that is mapped to (the value), that is, a <a href="qcborvalue.html">QCborValue</a>.</p>
+<!-- @@@mapped_type -->
+<!-- $$$size_type -->
+<h3 class="fn" id="size_type-typedef"><a name="size_type-typedef"></a>typedef QCborMap::<span class="name">size_type</span></h3>
+<p>The type that <a href="qcbormap.html">QCborMap</a> uses for sizes.</p>
+<!-- @@@size_type -->
+<!-- $$$value_type -->
+<h3 class="fn" id="value_type-typedef"><a name="value_type-typedef"></a>typedef QCborMap::<span class="name">value_type</span></h3>
+<p>The value that is stored in this container: a pair of QCborValues</p>
+<!-- @@@value_type -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$ -->
+<div class="fngroup">
+<h3 class="fn fngroupitem" id="extract"><a name="extract"></a><span class="type"><a href="qcborvalue.html">QCborValue</a></span> QCborMap::<span class="name">extract</span>(<span class="type"><a href="qcbormap.html#iterator-typedef">QCborMap::iterator</a></span> <i>it</i>)</h3><h3 class="fn fngroupitem" id="extract-1"><a name="extract-1"></a><span class="type"><a href="qcborvalue.html">QCborValue</a></span> QCborMap::<span class="name">extract</span>(<span class="type"><a href="qcbormap.html#const_iterator-typedef">QCborMap::const_iterator</a></span> <i>it</i>)</h3></div>
+<p>Extracts a value from the map at the position indicated by iterator <i>it</i> and returns the value so extracted.</p>
+<p><b>See also </b><a href="qcbormap.html#insert">insert</a>(), <a href="qcbormap.html#erase">erase</a>(), <a href="qcbormap.html#take">take</a>(), and <a href="qcbormap.html#remove">remove</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<div class="fngroup">
+<h3 class="fn fngroupitem" id="find-3"><a name="find-3"></a><span class="type"><a href="qcbormap.html#iterator-typedef">QCborMap::iterator</a></span> QCborMap::<span class="name">find</span>(const <span class="type"><a href="qcborvalue.html">QCborValue</a></span> &amp;<i>key</i>)</h3><h3 class="fn fngroupitem" id="find-7"><a name="find-7"></a><span class="type"><a href="qcbormap.html#const_iterator-typedef">QCborMap::const_iterator</a></span> QCborMap::<span class="name">find</span>(const <span class="type"><a href="qcborvalue.html">QCborValue</a></span> &amp;<i>key</i>) const</h3></div>
+<p>This is an overloaded function.</p>
+<p>Returns a map iterator to the key-value pair whose key is <i>key</i>, if the map contains such a pair. If it doesn't, this function returns <a href="qcbormap.html#end">end</a>().</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will find. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p>value(qint64), value(<a href="qlatin1string.html">QLatin1String</a>), value(const <a href="qstring.html">QString</a> &amp;)</p>
+<p><b>See also </b><a href="qcbormap.html#value-3">value</a>(const QCborValue &amp;), <a href="qcbormap.html#operator-5b-5d-3">operator[]</a>(const QCborValue &amp;), <a href="qcbormap.html#constFind-3">constFind</a>(const QCborValue &amp;), <a href="qcbormap.html#remove-3">remove</a>(const QCborValue &amp;), and <a href="qcbormap.html#contains-3">contains</a>(const QCborValue &amp;).</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<div class="fngroup">
+<h3 class="fn fngroupitem" id="find-2"><a name="find-2"></a><span class="type"><a href="qcbormap.html#iterator-typedef">QCborMap::iterator</a></span> QCborMap::<span class="name">find</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>)</h3><h3 class="fn fngroupitem" id="find-6"><a name="find-6"></a><span class="type"><a href="qcbormap.html#const_iterator-typedef">QCborMap::const_iterator</a></span> QCborMap::<span class="name">find</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>) const</h3></div>
+<p>This is an overloaded function.</p>
+<p>Returns a map iterator to the key-value pair whose key is <i>key</i>, if the map contains such a pair. If it doesn't, this function returns <a href="qcbormap.html#end">end</a>().</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will find. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p>value(qint64), value(<a href="qlatin1string.html">QLatin1String</a>), value(const <a href="qcborvalue.html">QCborValue</a> &amp;)</p>
+<p><b>See also </b><a href="qcbormap.html#value-2">value</a>(const QString &amp;), <a href="qcbormap.html#operator-5b-5d-2">operator[]</a>(const QString &amp;), <a href="qcbormap.html#constFind-2">constFind</a>(const QString &amp;), <a href="qcbormap.html#remove-2">remove</a>(const QString &amp;), and <a href="qcbormap.html#contains-2">contains</a>(const QString &amp;).</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<div class="fngroup">
+<h3 class="fn fngroupitem" id="find-1"><a name="find-1"></a><span class="type"><a href="qcbormap.html#iterator-typedef">QCborMap::iterator</a></span> QCborMap::<span class="name">find</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>key</i>)</h3><h3 class="fn fngroupitem" id="find-5"><a name="find-5"></a><span class="type"><a href="qcbormap.html#const_iterator-typedef">QCborMap::const_iterator</a></span> QCborMap::<span class="name">find</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>key</i>) const</h3></div>
+<p>This is an overloaded function.</p>
+<p>Returns a map iterator to the key-value pair whose key is <i>key</i>, if the map contains such a pair. If it doesn't, this function returns <a href="qcbormap.html#end">end</a>().</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will find. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p>value(qint64), value(const <a href="qstring.html">QString</a> &amp;), value(const <a href="qcborvalue.html">QCborValue</a> &amp;)</p>
+<p><b>See also </b><a href="qcbormap.html#value-1">value</a>(QLatin1String), <a href="qcbormap.html#operator-5b-5d-1">operator[]</a>(QLatin1String), <a href="qcbormap.html#constFind-1">constFind</a>(QLatin1String), <a href="qcbormap.html#remove-1">remove</a>(QLatin1String), and <a href="qcbormap.html#contains-1">contains</a>(QLatin1String).</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<div class="fngroup">
+<h3 class="fn fngroupitem" id="find"><a name="find"></a><span class="type"><a href="qcbormap.html#iterator-typedef">QCborMap::iterator</a></span> QCborMap::<span class="name">find</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>key</i>)</h3><h3 class="fn fngroupitem" id="find-4"><a name="find-4"></a><span class="type"><a href="qcbormap.html#const_iterator-typedef">QCborMap::const_iterator</a></span> QCborMap::<span class="name">find</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>key</i>) const</h3></div>
+<p>Returns a map iterator to the key-value pair whose key is <i>key</i>, if the map contains such a pair. If it doesn't, this function returns <a href="qcbormap.html#end">end</a>().</p>
+<p>CBOR recommends using integer keys, since they occupy less space and are simpler to encode and decode.</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will find. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p>value(<a href="qlatin1string.html">QLatin1String</a>), value(const <a href="qstring.html">QString</a> &amp;), value(const <a href="qcborvalue.html">QCborValue</a> &amp;)</p>
+<p><b>See also </b><a href="qcbormap.html#value">value</a>(qint64), <a href="qcbormap.html#operator-5b-5d">operator[]</a>(qint64), <a href="qcbormap.html#constFind">constFind</a>(qint64), <a href="qcbormap.html#remove">remove</a>(qint64), and <a href="qcbormap.html#contains">contains</a>(qint64).</p>
+<!-- @@@ -->
+<!-- $$$QCborMap$$$QCborMapstd::initializer_list<value_type> -->
+<h3 class="fn" id="QCborMap-2"><a name="QCborMap-2"></a>QCborMap::<span class="name">QCborMap</span>(<span class="type">std::initializer_list</span>&lt;<span class="type"><a href="qcbormap.html#value_type-typedef">value_type</a></span>&gt; <i>args</i>)</h3>
+<p>Constructs a <a href="qcbormap.html">QCborMap</a> with items from a brace-initialization list found in <i>args</i>, as in the following example:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qcbormap.html#QCborMap">QCborMap</a></span> map <span class="operator">=</span> {
+      {<span class="number">0</span><span class="operator">,</span> <span class="string">&quot;Hello&quot;</span>}<span class="operator">,</span>
+      {<span class="number">1</span><span class="operator">,</span> <span class="string">&quot;World&quot;</span>}<span class="operator">,</span>
+      {<span class="string">&quot;foo&quot;</span><span class="operator">,</span> nullptr}<span class="operator">,</span>
+      {<span class="string">&quot;bar&quot;</span><span class="operator">,</span> <span class="type"><a href="qcborarray.html">QCborArray</a></span>{<span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">4</span>}}
+  };
+
+</pre>
+<!-- @@@QCborMap -->
+<!-- $$$QCborMap$$$QCborMapconstQCborMap& -->
+<h3 class="fn" id="QCborMap-1"><a name="QCborMap-1"></a>QCborMap::<span class="name">QCborMap</span>(const <span class="type"><a href="qcbormap.html#QCborMap">QCborMap</a></span> &amp;<i>other</i>)</h3>
+<p>Creates a <a href="qcbormap.html">QCborMap</a> object that is a copy of <i>other</i>.</p>
+<!-- @@@QCborMap -->
+<!-- $$$QCborMap[overload1]$$$QCborMap -->
+<h3 class="fn" id="QCborMap"><a name="QCborMap"></a>QCborMap::<span class="name">QCborMap</span>()</h3>
+<p>Constructs an empty CBOR Map object.</p>
+<p><b>See also </b><a href="qcbormap.html#isEmpty">isEmpty</a>().</p>
+<!-- @@@QCborMap -->
+<!-- $$$operator=[overload1]$$$operator=constQCborMap& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qcbormap.html#QCborMap">QCborMap</a></span> &amp;QCborMap::<span class="name">operator=</span>(const <span class="type"><a href="qcbormap.html#QCborMap">QCborMap</a></span> &amp;<i>other</i>)</h3>
+<p>Replaces the contents of this object with a copy of <i>other</i>, then returns a reference to this object.</p>
+<!-- @@@operator= -->
+<!-- $$$~QCborMap[overload1]$$$~QCborMap -->
+<h3 class="fn" id="dtor.QCborMap"><a name="dtor.QCborMap"></a>QCborMap::<span class="name">~QCborMap</span>()</h3>
+<p>Destroys this <a href="qcbormap.html">QCborMap</a> object and frees any associated resources it owns.</p>
+<!-- @@@~QCborMap -->
+<!-- $$$begin[overload1]$$$begin -->
+<h3 class="fn" id="begin"><a name="begin"></a><span class="type"><a href="qcbormap.html#iterator-typedef">QCborMap::iterator</a></span> QCborMap::<span class="name">begin</span>()</h3>
+<p>Returns a map iterator pointing to the first key-value pair of this map. If this map is empty, the returned iterator will be the same as <a href="qcbormap.html#end">end</a>().</p>
+<p><b>See also </b><a href="qcbormap.html#constBegin">constBegin</a>() and <a href="qcbormap.html#end">end</a>().</p>
+<!-- @@@begin -->
+<!-- $$$begin$$$begin -->
+<h3 class="fn" id="begin-1"><a name="begin-1"></a><span class="type"><a href="qcbormap.html#const_iterator-typedef">QCborMap::const_iterator</a></span> QCborMap::<span class="name">begin</span>() const</h3>
+<p>Returns a map iterator pointing to the first key-value pair of this map. If this map is empty, the returned iterator will be the same as <a href="qcbormap.html#constEnd">constEnd</a>().</p>
+<p><b>See also </b><a href="qcbormap.html#begin">begin</a>() and <a href="qcbormap.html#constEnd">constEnd</a>().</p>
+<!-- @@@begin -->
+<!-- $$$cbegin[overload1]$$$cbegin -->
+<h3 class="fn" id="cbegin"><a name="cbegin"></a><span class="type"><a href="qcbormap.html#const_iterator-typedef">QCborMap::const_iterator</a></span> QCborMap::<span class="name">cbegin</span>() const</h3>
+<p>Returns a map iterator pointing to the first key-value pair of this map. If this map is empty, the returned iterator will be the same as <a href="qcbormap.html#constEnd">constEnd</a>().</p>
+<p><b>See also </b><a href="qcbormap.html#begin">begin</a>() and <a href="qcbormap.html#constEnd">constEnd</a>().</p>
+<!-- @@@cbegin -->
+<!-- $$$cend[overload1]$$$cend -->
+<h3 class="fn" id="cend"><a name="cend"></a><span class="type"><a href="qcbormap.html#const_iterator-typedef">QCborMap::const_iterator</a></span> QCborMap::<span class="name">cend</span>() const</h3>
+<p>Returns a map iterator representing an element just past the last element in the map.</p>
+<p><b>See also </b><a href="qcbormap.html#begin">begin</a>(), <a href="qcbormap.html#constBegin">constBegin</a>(), <a href="qcbormap.html#find">find</a>(), and <a href="qcbormap.html#constFind">constFind</a>().</p>
+<!-- @@@cend -->
+<!-- $$$clear[overload1]$$$clear -->
+<h3 class="fn" id="clear"><a name="clear"></a><span class="type">void</span> QCborMap::<span class="name">clear</span>()</h3>
+<p>Empties this map.</p>
+<p><b>See also </b><a href="qcbormap.html#isEmpty">isEmpty</a>().</p>
+<!-- @@@clear -->
+<!-- $$$compare[overload1]$$$compareconstQCborMap& -->
+<h3 class="fn" id="compare"><a name="compare"></a><span class="type">int</span> QCborMap::<span class="name">compare</span>(const <span class="type"><a href="qcbormap.html#QCborMap">QCborMap</a></span> &amp;<i>other</i>) const</h3>
+<p>Compares this map and <i>other</i>, comparing each element in sequence, and returns an integer that indicates whether this map should be sorted prior to (if the result is negative) or after <i>other</i> (if the result is positive). If this function returns 0, the two maps are equal and contain the same elements.</p>
+<p>Note that CBOR maps are unordered, which means that two maps containing the very same pairs but in different order will still compare differently. To avoid this, it is recommended to insert elements into the map in a predictable order, such as by ascending key value. In fact, maps with keys in sorted order are required for Canonical CBOR representation.</p>
+<p>For more information on CBOR sorting order, see <a href="qcborvalue.html#compare">QCborValue::compare</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#compare">QCborValue::compare</a>(), <a href="qcborarray.html#compare">QCborArray::compare</a>(), and <a href="qcbormap.html#operator-eq-eq">operator==</a>().</p>
+<!-- @@@compare -->
+<!-- $$$constBegin[overload1]$$$constBegin -->
+<h3 class="fn" id="constBegin"><a name="constBegin"></a><span class="type"><a href="qcbormap.html#const_iterator-typedef">QCborMap::const_iterator</a></span> QCborMap::<span class="name">constBegin</span>() const</h3>
+<p>Returns a map iterator pointing to the first key-value pair of this map. If this map is empty, the returned iterator will be the same as <a href="qcbormap.html#constEnd">constEnd</a>().</p>
+<p><b>See also </b><a href="qcbormap.html#begin">begin</a>() and <a href="qcbormap.html#constEnd">constEnd</a>().</p>
+<!-- @@@constBegin -->
+<!-- $$$constEnd[overload1]$$$constEnd -->
+<h3 class="fn" id="constEnd"><a name="constEnd"></a><span class="type"><a href="qcbormap.html#const_iterator-typedef">QCborMap::const_iterator</a></span> QCborMap::<span class="name">constEnd</span>() const</h3>
+<p>Returns a map iterator representing an element just past the last element in the map.</p>
+<p><b>See also </b><a href="qcbormap.html#begin">begin</a>(), <a href="qcbormap.html#constBegin">constBegin</a>(), <a href="qcbormap.html#find">find</a>(), and <a href="qcbormap.html#constFind">constFind</a>().</p>
+<!-- @@@constEnd -->
+<!-- $$$constFind[overload1]$$$constFindqint64 -->
+<h3 class="fn" id="constFind"><a name="constFind"></a><span class="type"><a href="qcbormap.html#const_iterator-typedef">QCborMap::const_iterator</a></span> QCborMap::<span class="name">constFind</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>key</i>) const</h3>
+<p>Returns a map iterator to the key-value pair whose key is <i>key</i>, if the map contains such a pair. If it doesn't, this function returns <a href="qcbormap.html#constEnd">constEnd</a>().</p>
+<p>CBOR recommends using integer keys, since they occupy less space and are simpler to encode and decode.</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will find. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p>value(<a href="qlatin1string.html">QLatin1String</a>), value(const <a href="qstring.html">QString</a> &amp;), value(const <a href="qcborvalue.html">QCborValue</a> &amp;)</p>
+<p><b>See also </b><a href="qcbormap.html#value">value</a>(qint64), <a href="qcbormap.html#operator-5b-5d">operator[]</a>(qint64), <a href="qcbormap.html#find">find</a>(qint64), <a href="qcbormap.html#remove">remove</a>(qint64), and <a href="qcbormap.html#contains">contains</a>(qint64).</p>
+<!-- @@@constFind -->
+<!-- $$$constFind$$$constFindQLatin1String -->
+<h3 class="fn" id="constFind-1"><a name="constFind-1"></a><span class="type"><a href="qcbormap.html#const_iterator-typedef">QCborMap::const_iterator</a></span> QCborMap::<span class="name">constFind</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>key</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a map iterator to the key-value pair whose key is <i>key</i>, if the map contains such a pair. If it doesn't, this function returns <a href="qcbormap.html#constEnd">constEnd</a>().</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will find. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p>value(qint64), value(const <a href="qstring.html">QString</a> &amp;), value(const <a href="qcborvalue.html">QCborValue</a> &amp;)</p>
+<p><b>See also </b><a href="qcbormap.html#value-1">value</a>(QLatin1String), <a href="qcbormap.html#operator-5b-5d-1">operator[]</a>(QLatin1String), <a href="qcbormap.html#find-1">find</a>(QLatin1String), <a href="qcbormap.html#remove-1">remove</a>(QLatin1String), and <a href="qcbormap.html#contains-1">contains</a>(QLatin1String).</p>
+<!-- @@@constFind -->
+<!-- $$$constFind$$$constFindconstQString& -->
+<h3 class="fn" id="constFind-2"><a name="constFind-2"></a><span class="type"><a href="qcbormap.html#const_iterator-typedef">QCborMap::const_iterator</a></span> QCborMap::<span class="name">constFind</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a map iterator to the key-value pair whose key is <i>key</i>, if the map contains such a pair. If it doesn't, this function returns <a href="qcbormap.html#constEnd">constEnd</a>().</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will find. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p>value(qint64), value(<a href="qlatin1string.html">QLatin1String</a>), value(const <a href="qcborvalue.html">QCborValue</a> &amp;)</p>
+<p><b>See also </b><a href="qcbormap.html#value-2">value</a>(const QString &amp;), <a href="qcbormap.html#operator-5b-5d-2">operator[]</a>(const QString &amp;), <a href="qcbormap.html#find-2">find</a>(const QString &amp;), <a href="qcbormap.html#remove-2">remove</a>(const QString &amp;), and <a href="qcbormap.html#contains-2">contains</a>(const QString &amp;).</p>
+<!-- @@@constFind -->
+<!-- $$$constFind$$$constFindconstQCborValue& -->
+<h3 class="fn" id="constFind-3"><a name="constFind-3"></a><span class="type"><a href="qcbormap.html#const_iterator-typedef">QCborMap::const_iterator</a></span> QCborMap::<span class="name">constFind</span>(const <span class="type"><a href="qcborvalue.html">QCborValue</a></span> &amp;<i>key</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a map iterator to the key-value pair whose key is <i>key</i>, if the map contains such a pair. If it doesn't, this function returns <a href="qcbormap.html#constEnd">constEnd</a>().</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will find. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p><b>See also </b><a href="qcbormap.html#value-3">value</a>(const QCborValue &amp;), <a href="qcbormap.html#operator-5b-5d-3">operator[]</a>(const QCborValue &amp;), <a href="qcbormap.html#find-3">find</a>(const QCborValue &amp;), <a href="qcbormap.html#remove-3">remove</a>(const QCborValue &amp;), <a href="qcbormap.html#contains-3">contains</a>(const QCborValue &amp;), <a href="qcbormap.html#value">value</a>(qint64), <a href="qcbormap.html#value-1">value</a>(QLatin1String), and <a href="qcbormap.html#value-2">value</a>(const QString &amp;).</p>
+<!-- @@@constFind -->
+<!-- $$$contains[overload1]$$$containsqint64 -->
+<h3 class="fn" id="contains"><a name="contains"></a><span class="type">bool</span> QCborMap::<span class="name">contains</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>key</i>) const</h3>
+<p>Returns true if this map contains a key-value pair identified by key <i>key</i>. CBOR recommends using integer keys, since they occupy less space and are simpler to encode and decode.</p>
+<p><b>See also </b><a href="qcbormap.html#value">value</a>(qint64), <a href="qcbormap.html#operator-5b-5d">operator[]</a>(qint64), <a href="qcbormap.html#find">find</a>(qint64), <a href="qcbormap.html#remove">remove</a>(qint64), <a href="qcbormap.html#contains-1">contains</a>(QLatin1String), <a href="qcbormap.html#remove-2">remove</a>(const QString &amp;), and <a href="qcbormap.html#remove-3">remove</a>(const QCborValue &amp;).</p>
+<!-- @@@contains -->
+<!-- $$$contains$$$containsQLatin1String -->
+<h3 class="fn" id="contains-1"><a name="contains-1"></a><span class="type">bool</span> QCborMap::<span class="name">contains</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>key</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>Returns true if this map contains a key-value pair identified by key <i>key</i>.</p>
+<p><b>See also </b><a href="qcbormap.html#value-1">value</a>(QLatin1String), <a href="qcbormap.html#operator-5b-5d-1">operator[]</a>(QLatin1String), <a href="qcbormap.html#find-1">find</a>(QLatin1String), <a href="qcbormap.html#remove-1">remove</a>(QLatin1String), <a href="qcbormap.html#contains">contains</a>(qint64), <a href="qcbormap.html#remove-2">remove</a>(const QString &amp;), and <a href="qcbormap.html#remove-3">remove</a>(const QCborValue &amp;).</p>
+<!-- @@@contains -->
+<!-- $$$contains$$$containsconstQString& -->
+<h3 class="fn" id="contains-2"><a name="contains-2"></a><span class="type">bool</span> QCborMap::<span class="name">contains</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>Returns true if this map contains a key-value pair identified by key <i>key</i>.</p>
+<p><b>See also </b><a href="qcbormap.html#value-2">value</a>(const QString &amp;), <a href="qcbormap.html#operator-5b-5d-2">operator[]</a>(const QString &amp;), <a href="qcbormap.html#find-2">find</a>(const QString &amp;), <a href="qcbormap.html#remove-2">remove</a>(const QString &amp;), <a href="qcbormap.html#contains">contains</a>(qint64), <a href="qcbormap.html#remove-1">remove</a>(QLatin1String), and <a href="qcbormap.html#remove-3">remove</a>(const QCborValue &amp;).</p>
+<!-- @@@contains -->
+<!-- $$$contains$$$containsconstQCborValue& -->
+<h3 class="fn" id="contains-3"><a name="contains-3"></a><span class="type">bool</span> QCborMap::<span class="name">contains</span>(const <span class="type"><a href="qcborvalue.html">QCborValue</a></span> &amp;<i>key</i>) const</h3>
+<p>Returns true if this map contains a key-value pair identified by key <i>key</i>.</p>
+<p><b>See also </b><a href="qcbormap.html#value-3">value</a>(const QCborValue &amp;), <a href="qcbormap.html#operator-5b-5d-3">operator[]</a>(const QCborValue &amp;), <a href="qcbormap.html#find-3">find</a>(const QCborValue &amp;), <a href="qcbormap.html#remove-3">remove</a>(const QCborValue &amp;), <a href="qcbormap.html#contains">contains</a>(qint64), <a href="qcbormap.html#remove-1">remove</a>(QLatin1String), and <a href="qcbormap.html#remove-2">remove</a>(const QString &amp;).</p>
+<!-- @@@contains -->
+<!-- $$$empty[overload1]$$$empty -->
+<h3 class="fn" id="empty"><a name="empty"></a><span class="type">bool</span> QCborMap::<span class="name">empty</span>() const</h3>
+<p>Synonym for <a href="qcbormap.html#isEmpty">isEmpty</a>(). This function is provided for compatibility with generic code that uses the Standard Library API.</p>
+<p>Returns true if this map is empty (<a href="qcbormap.html#size">size</a>() == 0).</p>
+<p><b>See also </b><a href="qcbormap.html#isEmpty">isEmpty</a>() and <a href="qcbormap.html#size">size</a>().</p>
+<!-- @@@empty -->
+<!-- $$$end[overload1]$$$end -->
+<h3 class="fn" id="end"><a name="end"></a><span class="type"><a href="qcbormap.html#iterator-typedef">QCborMap::iterator</a></span> QCborMap::<span class="name">end</span>()</h3>
+<p>Returns a map iterator representing an element just past the last element in the map.</p>
+<p><b>See also </b><a href="qcbormap.html#begin">begin</a>(), <a href="qcbormap.html#constBegin">constBegin</a>(), <a href="qcbormap.html#find">find</a>(), and <a href="qcbormap.html#constFind">constFind</a>().</p>
+<!-- @@@end -->
+<!-- $$$end$$$end -->
+<h3 class="fn" id="end-1"><a name="end-1"></a><span class="type"><a href="qcbormap.html#const_iterator-typedef">QCborMap::const_iterator</a></span> QCborMap::<span class="name">end</span>() const</h3>
+<p>Returns a map iterator representing an element just past the last element in the map.</p>
+<p><b>See also </b><a href="qcbormap.html#begin">begin</a>(), <a href="qcbormap.html#constBegin">constBegin</a>(), <a href="qcbormap.html#find">find</a>(), and <a href="qcbormap.html#constFind">constFind</a>().</p>
+<!-- @@@end -->
+<!-- $$$erase[overload1]$$$eraseQCborMap::const_iterator -->
+<h3 class="fn" id="erase"><a name="erase"></a><span class="type"><a href="qcbormap.html#iterator-typedef">QCborMap::iterator</a></span> QCborMap::<span class="name">erase</span>(<span class="type"><a href="qcbormap.html#const_iterator-typedef">QCborMap::const_iterator</a></span> <i>it</i>)</h3>
+<p>Removes the key-value pair pointed to by the map iterator <i>it</i> and returns a pointer to the next element, after removal.</p>
+<p><b>See also </b><a href="qcbormap.html#remove">remove</a>(), <a href="qcbormap.html#begin">begin</a>(), <a href="qcbormap.html#end">end</a>(), <a href="qcbormap.html#insert">insert</a>(), and <a href="qcbormap.html#extract">extract</a>().</p>
+<!-- @@@erase -->
+<!-- $$$erase$$$eraseQCborMap::iterator -->
+<h3 class="fn" id="erase-1"><a name="erase-1"></a><span class="type"><a href="qcbormap.html#iterator-typedef">QCborMap::iterator</a></span> QCborMap::<span class="name">erase</span>(<span class="type"><a href="qcbormap.html#iterator-typedef">QCborMap::iterator</a></span> <i>it</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Removes the key-value pair pointed to by the map iterator <i>it</i> and returns a pointer to the next element, after removal.</p>
+<p><b>See also </b><a href="qcbormap.html#remove">remove</a>(), <a href="qcbormap.html#begin">begin</a>(), <a href="qcbormap.html#end">end</a>(), and <a href="qcbormap.html#insert">insert</a>().</p>
+<!-- @@@erase -->
+<!-- $$$fromJsonObject[overload1]$$$fromJsonObjectconstQJsonObject& -->
+<h3 class="fn" id="fromJsonObject"><a name="fromJsonObject"></a><code>[static] </code><span class="type"><a href="qcbormap.html#QCborMap">QCborMap</a></span> QCborMap::<span class="name">fromJsonObject</span>(const <span class="type"><a href="qjsonobject.html">QJsonObject</a></span> &amp;<i>obj</i>)</h3>
+<p>Converts all JSON items found in the <i>obj</i> object to CBOR using QCborValue::fromJson(), and returns the map composed of those elements.</p>
+<p>This conversion is lossless, as the CBOR type system is a superset of JSON's. Moreover, the map returned by this function can be converted back to the original <i>obj</i> by using <a href="qcbormap.html#toJsonObject">toJsonObject</a>().</p>
+<p><b>See also </b><a href="qcbormap.html#toJsonObject">toJsonObject</a>(), <a href="qcbormap.html#toVariantMap">toVariantMap</a>(), <a href="qcborvalue.html#fromJsonValue">QCborValue::fromJsonValue</a>(), and <a href="qcborarray.html#fromJsonArray">QCborArray::fromJsonArray</a>().</p>
+<!-- @@@fromJsonObject -->
+<!-- $$$fromVariantHash[overload1]$$$fromVariantHashconstQVariantHash& -->
+<h3 class="fn" id="fromVariantHash"><a name="fromVariantHash"></a><code>[static] </code><span class="type"><a href="qcbormap.html#QCborMap">QCborMap</a></span> QCborMap::<span class="name">fromVariantHash</span>(const <span class="type"><a href="qvariant.html#QVariantHash-typedef">QVariantHash</a></span> &amp;<i>hash</i>)</h3>
+<p>Converts all the items in <i>hash</i> to CBOR using <a href="qcborvalue.html#fromVariant">QCborValue::fromVariant</a>() and returns the map composed of those elements.</p>
+<p>Conversion from <a href="qvariant.html">QVariant</a> is not completely lossless. Please see the documentation in <a href="qcborvalue.html#fromVariant">QCborValue::fromVariant</a>() for more information.</p>
+<p><b>See also </b><a href="qcbormap.html#toVariantHash">toVariantHash</a>(), <a href="qcbormap.html#fromVariantMap">fromVariantMap</a>(), <a href="qcbormap.html#fromJsonObject">fromJsonObject</a>(), and <a href="qcborvalue.html#fromVariant">QCborValue::fromVariant</a>().</p>
+<!-- @@@fromVariantHash -->
+<!-- $$$fromVariantMap[overload1]$$$fromVariantMapconstQVariantMap& -->
+<h3 class="fn" id="fromVariantMap"><a name="fromVariantMap"></a><code>[static] </code><span class="type"><a href="qcbormap.html#QCborMap">QCborMap</a></span> QCborMap::<span class="name">fromVariantMap</span>(const <span class="type"><a href="qvariant.html#QVariantMap-typedef">QVariantMap</a></span> &amp;<i>map</i>)</h3>
+<p>Converts all the items in <i>map</i> to CBOR using <a href="qcborvalue.html#fromVariant">QCborValue::fromVariant</a>() and returns the map composed of those elements.</p>
+<p>Conversion from <a href="qvariant.html">QVariant</a> is not completely lossless. Please see the documentation in <a href="qcborvalue.html#fromVariant">QCborValue::fromVariant</a>() for more information.</p>
+<p><b>See also </b><a href="qcbormap.html#toVariantMap">toVariantMap</a>(), <a href="qcbormap.html#fromVariantHash">fromVariantHash</a>(), <a href="qcbormap.html#fromJsonObject">fromJsonObject</a>(), and <a href="qcborvalue.html#fromVariant">QCborValue::fromVariant</a>().</p>
+<!-- @@@fromVariantMap -->
+<!-- $$$insert[overload1]$$$insertqint64constQCborValue& -->
+<h3 class="fn" id="insert"><a name="insert"></a><span class="type"><a href="qcbormap.html#iterator-typedef">QCborMap::iterator</a></span> QCborMap::<span class="name">insert</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>key</i>, const <span class="type"><a href="qcborvalue.html">QCborValue</a></span> &amp;<i>value</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Inserts the key <i>key</i> and value <i>value</i> into this map and returns a map iterator pointing to the newly inserted pair.</p>
+<p>If the map already had a key equal to <i>key</i>, its value will be overwritten by <i>value</i>.</p>
+<p><b>See also </b><a href="qcbormap.html#erase">erase</a>(), <a href="qcbormap.html#remove">remove</a>(qint64), <a href="qcbormap.html#value">value</a>(qint64), <a href="qcbormap.html#operator-5b-5d">operator[]</a>(qint64), <a href="qcbormap.html#find">find</a>(qint64), <a href="qcbormap.html#contains">contains</a>(qint64), <a href="qcbormap.html#take">take</a>(qint64), and <a href="qcbormap.html#extract">extract</a>().</p>
+<!-- @@@insert -->
+<!-- $$$insert$$$insertQLatin1StringconstQCborValue& -->
+<h3 class="fn" id="insert-1"><a name="insert-1"></a><span class="type"><a href="qcbormap.html#iterator-typedef">QCborMap::iterator</a></span> QCborMap::<span class="name">insert</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>key</i>, const <span class="type"><a href="qcborvalue.html">QCborValue</a></span> &amp;<i>value</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Inserts the key <i>key</i> and value <i>value</i> into this map and returns a map iterator pointing to the newly inserted pair.</p>
+<p>If the map already had a key equal to <i>key</i>, its value will be overwritten by <i>value</i>.</p>
+<p><b>See also </b><a href="qcbormap.html#erase">erase</a>(), <a href="qcbormap.html#remove-1">remove</a>(QLatin1String), <a href="qcbormap.html#value-1">value</a>(QLatin1String), <a href="qcbormap.html#operator-5b-5d-1">operator[]</a>(QLatin1String), <a href="qcbormap.html#find-1">find</a>(QLatin1String), <a href="qcbormap.html#contains-1">contains</a>(QLatin1String), <a href="qcbormap.html#take-1">take</a>(QLatin1String), and <a href="qcbormap.html#extract">extract</a>().</p>
+<!-- @@@insert -->
+<!-- $$$insert$$$insertconstQString&constQCborValue& -->
+<h3 class="fn" id="insert-2"><a name="insert-2"></a><span class="type"><a href="qcbormap.html#iterator-typedef">QCborMap::iterator</a></span> QCborMap::<span class="name">insert</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>, const <span class="type"><a href="qcborvalue.html">QCborValue</a></span> &amp;<i>value</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Inserts the key <i>key</i> and value <i>value</i> into this map and returns a map iterator pointing to the newly inserted pair.</p>
+<p>If the map already had a key equal to <i>key</i>, its value will be overwritten by <i>value</i>.</p>
+<p><b>See also </b><a href="qcbormap.html#erase">erase</a>(), <a href="qcbormap.html#remove-2">remove</a>(const QString &amp;), <a href="qcbormap.html#value-2">value</a>(const QString &amp;), <a href="qcbormap.html#operator-5b-5d-2">operator[]</a>(const QString &amp;), <a href="qcbormap.html#find-2">find</a>(const QString &amp;), <a href="qcbormap.html#contains-2">contains</a>(const QString &amp;), <a href="qcbormap.html#take-2">take</a>(const QString &amp;), and <a href="qcbormap.html#extract">extract</a>().</p>
+<!-- @@@insert -->
+<!-- $$$insert$$$insertconstQCborValue&constQCborValue& -->
+<h3 class="fn" id="insert-3"><a name="insert-3"></a><span class="type"><a href="qcbormap.html#iterator-typedef">QCborMap::iterator</a></span> QCborMap::<span class="name">insert</span>(const <span class="type"><a href="qcborvalue.html">QCborValue</a></span> &amp;<i>key</i>, const <span class="type"><a href="qcborvalue.html">QCborValue</a></span> &amp;<i>value</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Inserts the key <i>key</i> and value <i>value</i> into this map and returns a map iterator pointing to the newly inserted pair.</p>
+<p>If the map already had a key equal to <i>key</i>, its value will be overwritten by <i>value</i>.</p>
+<p><b>See also </b><a href="qcbormap.html#erase">erase</a>(), <a href="qcbormap.html#remove-3">remove</a>(const QCborValue &amp;), <a href="qcbormap.html#value-3">value</a>(const QCborValue &amp;), <a href="qcbormap.html#operator-5b-5d-3">operator[]</a>(const QCborValue &amp;), <a href="qcbormap.html#find-3">find</a>(const QCborValue &amp;), <a href="qcbormap.html#contains-3">contains</a>(const QCborValue &amp;), <a href="qcbormap.html#take-3">take</a>(const QCborValue &amp;), and <a href="qcbormap.html#extract">extract</a>().</p>
+<!-- @@@insert -->
+<!-- $$$insert$$$insertQCborMap::value_type -->
+<h3 class="fn" id="insert-4"><a name="insert-4"></a><span class="type"><a href="qcbormap.html#iterator-typedef">QCborMap::iterator</a></span> QCborMap::<span class="name">insert</span>(<span class="type"><a href="qcbormap.html#value_type-typedef">QCborMap::value_type</a></span> <i>v</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Inserts the key-value pair in <i>v</i> into this map and returns a map iterator pointing to the newly inserted pair.</p>
+<p>If the map already had a key equal to <code>v.first</code>, its value will be overwritten by <code>v.second</code>.</p>
+<p><b>See also </b><a href="qcbormap.html#operator-5b-5d">operator[]</a>, <a href="qcbormap.html#erase">erase</a>(), and <a href="qcbormap.html#extract">extract</a>().</p>
+<!-- @@@insert -->
+<!-- $$$isEmpty[overload1]$$$isEmpty -->
+<h3 class="fn" id="isEmpty"><a name="isEmpty"></a><span class="type">bool</span> QCborMap::<span class="name">isEmpty</span>() const</h3>
+<p>Returns true if this map is empty (that is, <a href="qcbormap.html#size">size</a>() is 0).</p>
+<p><b>See also </b><a href="qcbormap.html#size">size</a>() and <a href="qcbormap.html#clear">clear</a>().</p>
+<!-- @@@isEmpty -->
+<!-- $$$keys[overload1]$$$keys -->
+<h3 class="fn" id="keys"><a name="keys"></a><span class="type"><a href="qvector.html">QVector</a></span>&lt;<span class="type"><a href="qcborvalue.html">QCborValue</a></span>&gt; QCborMap::<span class="name">keys</span>() const</h3>
+<p>Returns a list of all keys in this map.</p>
+<p><b>See also </b><a href="qmap.html#keys">QMap::keys</a>() and <a href="qhash.html#keys">QHash::keys</a>().</p>
+<!-- @@@keys -->
+<!-- $$$remove[overload1]$$$removeqint64 -->
+<h3 class="fn" id="remove"><a name="remove"></a><span class="type">void</span> QCborMap::<span class="name">remove</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>key</i>)</h3>
+<p>Removes the key <i>key</i> and the corresponding value from the map, if it is found. If the map contains no such key, this function does nothing.</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will remove. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p>remove(<a href="qlatin1string.html">QLatin1String</a>), remove(const <a href="qstring.html">QString</a> &amp;), remove(const <a href="qcborvalue.html">QCborValue</a> &amp;)</p>
+<p><b>See also </b><a href="qcbormap.html#value">value</a>(qint64), <a href="qcbormap.html#operator-5b-5d">operator[]</a>(qint64), <a href="qcbormap.html#find">find</a>(qint64), and <a href="qcbormap.html#contains">contains</a>(qint64).</p>
+<!-- @@@remove -->
+<!-- $$$remove$$$removeQLatin1String -->
+<h3 class="fn" id="remove-1"><a name="remove-1"></a><span class="type">void</span> QCborMap::<span class="name">remove</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>key</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Removes the key <i>key</i> and the corresponding value from the map, if it is found. If the map contains no such key, this function does nothing.</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will remove. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p>remove(qint64), remove(const <a href="qstring.html">QString</a> &amp;), remove(const <a href="qcborvalue.html">QCborValue</a> &amp;)</p>
+<p><b>See also </b><a href="qcbormap.html#value-1">value</a>(QLatin1String), <a href="qcbormap.html#operator-5b-5d-1">operator[]</a>(QLatin1String), <a href="qcbormap.html#find-1">find</a>(QLatin1String), and <a href="qcbormap.html#contains-1">contains</a>(QLatin1String).</p>
+<!-- @@@remove -->
+<!-- $$$remove$$$removeconstQString& -->
+<h3 class="fn" id="remove-2"><a name="remove-2"></a><span class="type">void</span> QCborMap::<span class="name">remove</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Removes the key <i>key</i> and the corresponding value from the map, if it is found. If the map contains no such key, this function does nothing.</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will remove. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p>remove(qint64), remove(<a href="qlatin1string.html">QLatin1String</a>), remove(const <a href="qcborvalue.html">QCborValue</a> &amp;)</p>
+<p><b>See also </b><a href="qcbormap.html#value-2">value</a>(const QString &amp;), <a href="qcbormap.html#operator-5b-5d-2">operator[]</a>(const QString &amp;), <a href="qcbormap.html#find-2">find</a>(const QString &amp;), and <a href="qcbormap.html#contains-2">contains</a>(const QString &amp;).</p>
+<!-- @@@remove -->
+<!-- $$$remove$$$removeconstQCborValue& -->
+<h3 class="fn" id="remove-3"><a name="remove-3"></a><span class="type">void</span> QCborMap::<span class="name">remove</span>(const <span class="type"><a href="qcborvalue.html">QCborValue</a></span> &amp;<i>key</i>)</h3>
+<p>Removes the key <i>key</i> and the corresponding value from the map, if it is found. If the map contains no such key, this function does nothing.</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will remove. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p>remove(qint64), remove(<a href="qlatin1string.html">QLatin1String</a>), remove(const <a href="qstring.html">QString</a> &amp;)</p>
+<p><b>See also </b><a href="qcbormap.html#value-3">value</a>(const QCborValue &amp;), <a href="qcbormap.html#operator-5b-5d-3">operator[]</a>(const QCborValue &amp;), <a href="qcbormap.html#find-3">find</a>(const QCborValue &amp;), and <a href="qcbormap.html#contains-3">contains</a>(const QCborValue &amp;).</p>
+<!-- @@@remove -->
+<!-- $$$size[overload1]$$$size -->
+<h3 class="fn" id="size"><a name="size"></a><span class="type">qsizetype</span> QCborMap::<span class="name">size</span>() const</h3>
+<p>Returns the number of elements in this map.</p>
+<p><b>See also </b><a href="qcbormap.html#isEmpty">isEmpty</a>().</p>
+<!-- @@@size -->
+<!-- $$$swap[overload1]$$$swapQCborMap& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QCborMap::<span class="name">swap</span>(<span class="type"><a href="qcbormap.html#QCborMap">QCborMap</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps the contents of this map and <i>other</i>.</p>
+<!-- @@@swap -->
+<!-- $$$take[overload1]$$$takeqint64 -->
+<h3 class="fn" id="take"><a name="take"></a><span class="type"><a href="qcborvalue.html">QCborValue</a></span> QCborMap::<span class="name">take</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>key</i>)</h3>
+<p>Removes the key <i>key</i> and the corresponding value from the map and returns the value, if it is found. If the map contains no such key, this function does nothing.</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will remove. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p><b>See also </b><a href="qcbormap.html#value">value</a>(qint64), <a href="qcbormap.html#operator-5b-5d">operator[]</a>(qint64), <a href="qcbormap.html#find">find</a>(qint64), <a href="qcbormap.html#contains">contains</a>(qint64), <a href="qcbormap.html#take-1">take</a>(QLatin1String), <a href="qcbormap.html#take-2">take</a>(const QString &amp;), <a href="qcbormap.html#take-3">take</a>(const QCborValue &amp;), and <a href="qcbormap.html#insert">insert</a>().</p>
+<!-- @@@take -->
+<!-- $$$take$$$takeQLatin1String -->
+<h3 class="fn" id="take-1"><a name="take-1"></a><span class="type"><a href="qcborvalue.html">QCborValue</a></span> QCborMap::<span class="name">take</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>key</i>)</h3>
+<p>Removes the key <i>key</i> and the corresponding value from the map and returns the value, if it is found. If the map contains no such key, this function does nothing.</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will remove. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p><b>See also </b><a href="qcbormap.html#value-1">value</a>(QLatin1String), <a href="qcbormap.html#operator-5b-5d-1">operator[]</a>(QLatin1String), <a href="qcbormap.html#find-1">find</a>(QLatin1String), <a href="qcbormap.html#contains-1">contains</a>(QLatin1String), <a href="qcbormap.html#take">take</a>(qint64), <a href="qcbormap.html#take-2">take</a>(const QString &amp;), <a href="qcbormap.html#take-3">take</a>(const QCborValue &amp;), and <a href="qcbormap.html#insert">insert</a>().</p>
+<!-- @@@take -->
+<!-- $$$take$$$takeconstQString& -->
+<h3 class="fn" id="take-2"><a name="take-2"></a><span class="type"><a href="qcborvalue.html">QCborValue</a></span> QCborMap::<span class="name">take</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>)</h3>
+<p>Removes the key <i>key</i> and the corresponding value from the map and returns the value, if it is found. If the map contains no such key, this function does nothing.</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will remove. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p><b>See also </b><a href="qcbormap.html#value-2">value</a>(const QString &amp;), <a href="qcbormap.html#operator-5b-5d-2">operator[]</a>(const QString &amp;), <a href="qcbormap.html#find-2">find</a>(const QString &amp;), <a href="qcbormap.html#contains-2">contains</a>(const QString &amp;), <a href="qcbormap.html#take-1">take</a>(QLatin1String), <a href="qcbormap.html#take">take</a>(qint64), <a href="qcbormap.html#take-3">take</a>(const QCborValue &amp;), and <a href="qcbormap.html#insert">insert</a>().</p>
+<!-- @@@take -->
+<!-- $$$take$$$takeconstQCborValue& -->
+<h3 class="fn" id="take-3"><a name="take-3"></a><span class="type"><a href="qcborvalue.html">QCborValue</a></span> QCborMap::<span class="name">take</span>(const <span class="type"><a href="qcborvalue.html">QCborValue</a></span> &amp;<i>key</i>)</h3>
+<p>Removes the key <i>key</i> and the corresponding value from the map and returns the value, if it is found. If the map contains no such key, this function does nothing.</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will remove. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p><b>See also </b><a href="qcbormap.html#value-3">value</a>(const QCborValue &amp;), <a href="qcbormap.html#operator-5b-5d-3">operator[]</a>(const QCborValue &amp;), <a href="qcbormap.html#find-3">find</a>(const QCborValue &amp;), <a href="qcbormap.html#contains-3">contains</a>(const QCborValue &amp;), <a href="qcbormap.html#take-1">take</a>(QLatin1String), <a href="qcbormap.html#take-2">take</a>(const QString &amp;), <a href="qcbormap.html#take">take</a>(qint64), and <a href="qcbormap.html#insert">insert</a>().</p>
+<!-- @@@take -->
+<!-- $$$toCborValue[overload1]$$$toCborValue -->
+<h3 class="fn" id="toCborValue"><a name="toCborValue"></a><span class="type"><a href="qcborvalue.html">QCborValue</a></span> QCborMap::<span class="name">toCborValue</span>() const</h3>
+<p>Explicitly constructs a <a href="qcborvalue.html">QCborValue</a> object that represents this map. This function is usually not necessary since <a href="qcborvalue.html">QCborValue</a> has a constructor for <a href="qcbormap.html">QCborMap</a>, so the conversion is implicit.</p>
+<p>Converting <a href="qcbormap.html">QCborMap</a> to <a href="qcborvalue.html">QCborValue</a> allows it to be used in any context where QCborValues can be used, including as keys and mapped types in <a href="qcbormap.html">QCborMap</a>, as well as <a href="qcborvalue.html#toCbor">QCborValue::toCbor</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#QCborValue-13">QCborValue::QCborValue</a>(const QCborMap &amp;).</p>
+<!-- @@@toCborValue -->
+<!-- $$$toJsonObject[overload1]$$$toJsonObject -->
+<h3 class="fn" id="toJsonObject"><a name="toJsonObject"></a><span class="type"><a href="qjsonobject.html">QJsonObject</a></span> QCborMap::<span class="name">toJsonObject</span>() const</h3>
+<p>Recursively converts every <a href="qcborvalue.html">QCborValue</a> value in this map to JSON using <a href="qcborvalue.html#toJsonValue">QCborValue::toJsonValue</a>() and creates a string key for all keys that aren't strings, then returns the corresponding <a href="qjsonobject.html">QJsonObject</a> composed of those associations.</p>
+<p>Please note that CBOR contains a richer and wider type set than JSON, so some information may be lost in this conversion. For more details on what conversions are applied, see <a href="qcborvalue.html#toJsonValue">QCborValue::toJsonValue</a>().</p>
+<a name="map-key-conversion-to-string"></a>
+<h6 id="map-key-conversion-to-string">Map key conversion to string</h6>
+<p>JSON objects are defined as having string keys, unlike CBOR, so the conversion of a <a href="qcbormap.html">QCborMap</a> to <a href="qjsonobject.html">QJsonObject</a> will imply a step of &quot;stringification&quot; of the key values. The conversion will use the special handling of tags and extended types from above and will also convert the rest of the types as follows:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Type</th><th >Transformation</th></tr></thead>
+<tr valign="top" class="odd"><td >Bool</td><td >&quot;true&quot; and &quot;false&quot;</td></tr>
+<tr valign="top" class="even"><td >Null</td><td >&quot;null&quot;</td></tr>
+<tr valign="top" class="odd"><td >Undefined</td><td >&quot;undefined&quot;</td></tr>
+<tr valign="top" class="even"><td >Integer</td><td >The decimal string form of the number</td></tr>
+<tr valign="top" class="odd"><td >Double</td><td >The decimal string form of the number</td></tr>
+<tr valign="top" class="even"><td >Byte array</td><td >Unless tagged differently (see above), encoded as Base64url</td></tr>
+<tr valign="top" class="odd"><td >Array</td><td >Replaced by the compact form of its <a href="qcborvalue.html#toDiagnosticNotation">Diagnostic notation</a></td></tr>
+<tr valign="top" class="even"><td >Map</td><td >Replaced by the compact form of its <a href="qcborvalue.html#toDiagnosticNotation">Diagnostic notation</a></td></tr>
+<tr valign="top" class="odd"><td >Tags and extended types</td><td >Tag number is dropped and the tagged value is converted to string</td></tr>
+</table></div>
+<p><b>See also </b><a href="qcbormap.html#fromJsonObject">fromJsonObject</a>(), <a href="qcborvalue.html#toJsonValue">QCborValue::toJsonValue</a>(), <a href="qcborarray.html#toJsonArray">QCborArray::toJsonArray</a>(), and <a href="qcbormap.html#toVariantMap">toVariantMap</a>().</p>
+<!-- @@@toJsonObject -->
+<!-- $$$toVariantHash[overload1]$$$toVariantHash -->
+<h3 class="fn" id="toVariantHash"><a name="toVariantHash"></a><span class="type"><a href="qvariant.html#QVariantHash-typedef">QVariantHash</a></span> QCborMap::<span class="name">toVariantHash</span>() const</h3>
+<p>Converts the CBOR values to <a href="qvariant.html">QVariant</a> using <a href="qcborvalue.html#toVariant">QCborValue::toVariant</a>() and &quot;stringifies&quot; all the CBOR keys in this map, returning the <a href="qvariant.html#QVariantHash-typedef">QVariantHash</a> that results from that association list.</p>
+<p>QVariantMaps have string keys, unlike CBOR, so the conversion of a <a href="qcbormap.html">QCborMap</a> to <a href="qvariant.html#QVariantMap-typedef">QVariantMap</a> will imply a step of &quot;stringification&quot; of the key values. See <a href="qcbormap.html#toJsonObject">QCborMap::toJsonObject</a>() for details.</p>
+<p>In addition, the conversion to <a href="qvariant.html">QVariant</a> is not completely lossless. Please see the documentation in <a href="qcborvalue.html#toVariant">QCborValue::toVariant</a>() for more information.</p>
+<p><b>See also </b><a href="qcbormap.html#fromVariantHash">fromVariantHash</a>(), <a href="qcbormap.html#toVariantMap">toVariantMap</a>(), <a href="qcbormap.html#toJsonObject">toJsonObject</a>(), <a href="qcborvalue.html#toVariant">QCborValue::toVariant</a>(), and <a href="qcborarray.html#toVariantList">QCborArray::toVariantList</a>().</p>
+<!-- @@@toVariantHash -->
+<!-- $$$toVariantMap[overload1]$$$toVariantMap -->
+<h3 class="fn" id="toVariantMap"><a name="toVariantMap"></a><span class="type"><a href="qvariant.html#QVariantMap-typedef">QVariantMap</a></span> QCborMap::<span class="name">toVariantMap</span>() const</h3>
+<p>Converts the CBOR values to <a href="qvariant.html">QVariant</a> using <a href="qcborvalue.html#toVariant">QCborValue::toVariant</a>() and &quot;stringifies&quot; all the CBOR keys in this map, returning the <a href="qvariant.html#QVariantMap-typedef">QVariantMap</a> that results from that association list.</p>
+<p>QVariantMaps have string keys, unlike CBOR, so the conversion of a <a href="qcbormap.html">QCborMap</a> to <a href="qvariant.html#QVariantMap-typedef">QVariantMap</a> will imply a step of &quot;stringification&quot; of the key values. See <a href="qcbormap.html#toJsonObject">QCborMap::toJsonObject</a>() for details.</p>
+<p>In addition, the conversion to <a href="qvariant.html">QVariant</a> is not completely lossless. Please see the documentation in <a href="qcborvalue.html#toVariant">QCborValue::toVariant</a>() for more information.</p>
+<p><b>See also </b><a href="qcbormap.html#fromVariantMap">fromVariantMap</a>(), <a href="qcbormap.html#toVariantHash">toVariantHash</a>(), <a href="qcbormap.html#toJsonObject">toJsonObject</a>(), <a href="qcborvalue.html#toVariant">QCborValue::toVariant</a>(), and <a href="qcborarray.html#toVariantList">QCborArray::toVariantList</a>().</p>
+<!-- @@@toVariantMap -->
+<!-- $$$value[overload1]$$$valueqint64 -->
+<h3 class="fn" id="value"><a name="value"></a><span class="type"><a href="qcborvalue.html">QCborValue</a></span> QCborMap::<span class="name">value</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>key</i>) const</h3>
+<p>Returns the <a href="qcborvalue.html">QCborValue</a> element in this map that corresponds to key <i>key</i>, if there is one. CBOR recommends using integer keys, since they occupy less space and are simpler to encode and decode.</p>
+<p>If the map does not contain key <i>key</i>, this function returns a <a href="qcborvalue.html">QCborValue</a> containing an undefined value. For that reason, it is not possible with this function to tell apart the situation where the key was not present from the situation where the key was mapped to an undefined value.</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one the return from function will reference. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p>value(<a href="qlatin1string.html">QLatin1String</a>), value(const <a href="qstring.html">QString</a> &amp;), value(const <a href="qcborvalue.html">QCborValue</a> &amp;)</p>
+<p><b>See also </b><a href="qcbormap.html#operator-5b-5d">operator[]</a>(qint64), <a href="qcbormap.html#find">find</a>(qint64), <a href="qcbormap.html#constFind">constFind</a>(qint64), <a href="qcbormap.html#remove">remove</a>(qint64), and <a href="qcbormap.html#contains">contains</a>(qint64).</p>
+<!-- @@@value -->
+<!-- $$$value$$$valueQLatin1String -->
+<h3 class="fn" id="value-1"><a name="value-1"></a><span class="type"><a href="qcborvalue.html">QCborValue</a></span> QCborMap::<span class="name">value</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>key</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>Returns the <a href="qcborvalue.html">QCborValue</a> element in this map that corresponds to key <i>key</i>, if there is one.</p>
+<p>If the map does not contain key <i>key</i>, this function returns a <a href="qcborvalue.html">QCborValue</a> containing an undefined value. For that reason, it is not possible with this function to tell apart the situation where the key was not present from the situation where the key was mapped to an undefined value.</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will return. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p>value(qint64), value(const <a href="qstring.html">QString</a> &amp;), value(const <a href="qcborvalue.html">QCborValue</a> &amp;)</p>
+<p><b>See also </b><a href="qcbormap.html#operator-5b-5d-1">operator[]</a>(QLatin1String), <a href="qcbormap.html#find-1">find</a>(QLatin1String), <a href="qcbormap.html#constFind-1">constFind</a>(QLatin1String), <a href="qcbormap.html#remove-1">remove</a>(QLatin1String), and <a href="qcbormap.html#contains-1">contains</a>(QLatin1String).</p>
+<!-- @@@value -->
+<!-- $$$value$$$valueconstQString& -->
+<h3 class="fn" id="value-2"><a name="value-2"></a><span class="type"><a href="qcborvalue.html">QCborValue</a></span> QCborMap::<span class="name">value</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>Returns the <a href="qcborvalue.html">QCborValue</a> element in this map that corresponds to key <i>key</i>, if there is one.</p>
+<p>If the map does not contain key <i>key</i>, this function returns a <a href="qcborvalue.html">QCborValue</a> containing an undefined value. For that reason, it is not possible with this function to tell apart the situation where the key was not present from the situation where the key was mapped to an undefined value.</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will return. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p>value(qint64), value(<a href="qlatin1string.html">QLatin1String</a>), value(const <a href="qcborvalue.html">QCborValue</a> &amp;)</p>
+<p><b>See also </b><a href="qcbormap.html#operator-5b-5d-2">operator[]</a>(const QString &amp;), <a href="qcbormap.html#find-2">find</a>(const QString &amp;), <a href="qcbormap.html#constFind-2">constFind</a>(const QString &amp;), <a href="qcbormap.html#remove-2">remove</a>(const QString &amp;), and <a href="qcbormap.html#contains-2">contains</a>(const QString &amp;).</p>
+<!-- @@@value -->
+<!-- $$$value$$$valueconstQCborValue& -->
+<h3 class="fn" id="value-3"><a name="value-3"></a><span class="type"><a href="qcborvalue.html">QCborValue</a></span> QCborMap::<span class="name">value</span>(const <span class="type"><a href="qcborvalue.html">QCborValue</a></span> &amp;<i>key</i>) const</h3>
+<p>Returns the <a href="qcborvalue.html">QCborValue</a> element in this map that corresponds to key <i>key</i>, if there is one.</p>
+<p>If the map does not contain key <i>key</i>, this function returns a <a href="qcborvalue.html">QCborValue</a> containing an undefined value. For that reason, it is not possible with this function to tell apart the situation where the key was not present from the situation where the key was mapped to an undefined value.</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will return. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p>value(qint64), value(<a href="qlatin1string.html">QLatin1String</a>), value(const <a href="qstring.html">QString</a> &amp;)</p>
+<p><b>See also </b><a href="qcbormap.html#operator-5b-5d-3">operator[]</a>(const QCborValue &amp;), <a href="qcbormap.html#find-3">find</a>(const QCborValue &amp;), <a href="qcbormap.html#constFind-3">constFind</a>(const QCborValue &amp;), <a href="qcbormap.html#remove-3">remove</a>(const QCborValue &amp;), and <a href="qcbormap.html#contains-3">contains</a>(const QCborValue &amp;).</p>
+<!-- @@@value -->
+<!-- $$$operator!=[overload1]$$$operator!=constQCborMap& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> QCborMap::<span class="name">operator!=</span>(const <span class="type"><a href="qcbormap.html#QCborMap">QCborMap</a></span> &amp;<i>other</i>) const</h3>
+<p>Compares this map and <i>other</i>, comparing each element in sequence, and returns true if the two maps contains any different elements or elements in different orders, false otherwise.</p>
+<p>Note that CBOR maps are unordered, which means that two maps containing the very same pairs but in different order will still compare differently. To avoid this, it is recommended to insert elements into the map in a predictable order, such as by ascending key value. In fact, maps with keys in sorted order are required for Canonical CBOR representation.</p>
+<p>For more information on CBOR equality in Qt, see, <a href="qcborvalue.html#compare">QCborValue::compare</a>().</p>
+<p><b>See also </b><a href="qcbormap.html#compare">compare</a>(), <a href="qcborvalue.html#operator-eq-eq">QCborValue::operator==</a>(), <a href="qcbormap.html#operator-eq-eq">QCborMap::operator==</a>(), <a href="qcbormap.html#operator-eq-eq">operator==</a>(), and <a href="qcbormap.html#operator-lt">operator&lt;</a>().</p>
+<!-- @@@operator!= -->
+<!-- $$$operator<[overload1]$$$operator<constQCborMap& -->
+<h3 class="fn" id="operator-lt"><a name="operator-lt"></a><span class="type">bool</span> QCborMap::<span class="name">operator&lt;</span>(const <span class="type"><a href="qcbormap.html#QCborMap">QCborMap</a></span> &amp;<i>other</i>) const</h3>
+<p>Compares this map and <i>other</i>, comparing each element in sequence, and returns true if this map should be sorted before <i>other</i>, false otherwise.</p>
+<p>Note that CBOR maps are unordered, which means that two maps containing the very same pairs but in different order will still compare differently. To avoid this, it is recommended to insert elements into the map in a predictable order, such as by ascending key value. In fact, maps with keys in sorted order are required for Canonical CBOR representation.</p>
+<p>For more information on CBOR sorting order, see <a href="qcborvalue.html#compare">QCborValue::compare</a>().</p>
+<p><b>See also </b><a href="qcbormap.html#compare">compare</a>(), <a href="qcborvalue.html#operator-eq-eq">QCborValue::operator==</a>(), <a href="qcbormap.html#operator-eq-eq">QCborMap::operator==</a>(), <a href="qcbormap.html#operator-eq-eq">operator==</a>(), and <a href="qcbormap.html#operator-not-eq">operator!=</a>().</p>
+<!-- @@@operator< -->
+<!-- $$$operator==[overload1]$$$operator==constQCborMap& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> QCborMap::<span class="name">operator==</span>(const <span class="type"><a href="qcbormap.html#QCborMap">QCborMap</a></span> &amp;<i>other</i>) const</h3>
+<p>Compares this map and <i>other</i>, comparing each element in sequence, and returns true if the two maps contains the same elements in the same order, false otherwise.</p>
+<p>Note that CBOR maps are unordered, which means that two maps containing the very same pairs but in different order will still compare differently. To avoid this, it is recommended to insert elements into the map in a predictable order, such as by ascending key value. In fact, maps with keys in sorted order are required for Canonical CBOR representation.</p>
+<p>For more information on CBOR equality in Qt, see, <a href="qcborvalue.html#compare">QCborValue::compare</a>().</p>
+<p><b>See also </b><a href="qcbormap.html#compare">compare</a>(), <a href="qcborvalue.html#operator-eq-eq">QCborValue::operator==</a>(), QCborMap::operator==(), <a href="qcbormap.html#operator-not-eq">operator!=</a>(), and <a href="qcbormap.html#operator-lt">operator&lt;</a>().</p>
+<!-- @@@operator== -->
+<!-- $$$operator[][overload1]$$$operator[]qint64 -->
+<h3 class="fn" id="operator-5b-5d"><a name="operator-5b-5d"></a>const <span class="type"><a href="qcborvalue.html">QCborValue</a></span> QCborMap::<span class="name">operator[]</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>key</i>) const</h3>
+<p>Returns the <a href="qcborvalue.html">QCborValue</a> element in this map that corresponds to key <i>key</i>, if there is one. CBOR recommends using integer keys, since they occupy less space and are simpler to encode and decode.</p>
+<p>If the map does not contain key <i>key</i>, this function returns a <a href="qcborvalue.html">QCborValue</a> containing an undefined value. For that reason, it is not possible with this function to tell apart the situation where the key was not present from the situation where the key was mapped to an undefined value.</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will return. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p>operator[](<a href="qlatin1string.html">QLatin1String</a>), operator[](const <a href="qstring.html">QString</a> &amp;), operator[](const QCborOperator[] &amp;)</p>
+<p><b>See also </b><a href="qcbormap.html#value">value</a>(qint64), <a href="qcbormap.html#find">find</a>(qint64), <a href="qcbormap.html#constFind">constFind</a>(qint64), <a href="qcbormap.html#remove">remove</a>(qint64), and <a href="qcbormap.html#contains">contains</a>(qint64).</p>
+<!-- @@@operator[] -->
+<!-- $$$operator[]$$$operator[]QLatin1String -->
+<h3 class="fn" id="operator-5b-5d-1"><a name="operator-5b-5d-1"></a>const <span class="type"><a href="qcborvalue.html">QCborValue</a></span> QCborMap::<span class="name">operator[]</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>key</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>Returns the <a href="qcborvalue.html">QCborValue</a> element in this map that corresponds to key <i>key</i>, if there is one.</p>
+<p>If the map does not contain key <i>key</i>, this function returns a <a href="qcborvalue.html">QCborValue</a> containing an undefined value. For that reason, it is not possible with this function to tell apart the situation where the key was not present from the situation where the key was mapped to an undefined value.</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will return. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p>operator[](qint64), operator[](const <a href="qstring.html">QString</a> &amp;), operator[](const QCborOperator[] &amp;)</p>
+<p><b>See also </b><a href="qcbormap.html#value-1">value</a>(QLatin1String), <a href="qcbormap.html#find-1">find</a>(QLatin1String), <a href="qcbormap.html#constFind-1">constFind</a>(QLatin1String), <a href="qcbormap.html#remove-1">remove</a>(QLatin1String), and <a href="qcbormap.html#contains-1">contains</a>(QLatin1String).</p>
+<!-- @@@operator[] -->
+<!-- $$$operator[]$$$operator[]constQString& -->
+<h3 class="fn" id="operator-5b-5d-2"><a name="operator-5b-5d-2"></a>const <span class="type"><a href="qcborvalue.html">QCborValue</a></span> QCborMap::<span class="name">operator[]</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>Returns the <a href="qcborvalue.html">QCborValue</a> element in this map that corresponds to key <i>key</i>, if there is one.</p>
+<p>If the map does not contain key <i>key</i>, this function returns a <a href="qcborvalue.html">QCborValue</a> containing an undefined value. For that reason, it is not possible with this function to tell apart the situation where the key was not present from the situation where the key was mapped to an undefined value.</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will return. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p>operator[](qint64), operator[](<a href="qlatin1string.html">QLatin1String</a>), operator[](const QCborOperator[] &amp;)</p>
+<p><b>See also </b><a href="qcbormap.html#value-2">value</a>(const QString &amp;), <a href="qcbormap.html#find-2">find</a>(const QString &amp;), <a href="qcbormap.html#constFind-2">constFind</a>(const QString &amp;), <a href="qcbormap.html#remove-2">remove</a>(const QString &amp;), and <a href="qcbormap.html#contains-2">contains</a>(const QString &amp;).</p>
+<!-- @@@operator[] -->
+<!-- $$$operator[]$$$operator[]constQCborValue& -->
+<h3 class="fn" id="operator-5b-5d-3"><a name="operator-5b-5d-3"></a>const <span class="type"><a href="qcborvalue.html">QCborValue</a></span> QCborMap::<span class="name">operator[]</span>(const <span class="type"><a href="qcborvalue.html">QCborValue</a></span> &amp;<i>key</i>) const</h3>
+<p>Returns the <a href="qcborvalue.html">QCborValue</a> element in this map that corresponds to key <i>key</i>, if there is one.</p>
+<p>If the map does not contain key <i>key</i>, this function returns a <a href="qcborvalue.html">QCborValue</a> containing an undefined value. For that reason, it is not possible with this function to tell apart the situation where the key was not present from the situation where the key was mapped to an undefined value.</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one this function will return. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p>operator[](qint64), operator[](<a href="qlatin1string.html">QLatin1String</a>), operator[](const QCborOperator[] &amp;)</p>
+<p><b>See also </b><a href="qcbormap.html#value-3">value</a>(const QCborValue &amp;), <a href="qcbormap.html#find-3">find</a>(const QCborValue &amp;), <a href="qcbormap.html#constFind-3">constFind</a>(const QCborValue &amp;), <a href="qcbormap.html#remove-3">remove</a>(const QCborValue &amp;), and <a href="qcbormap.html#contains-3">contains</a>(const QCborValue &amp;).</p>
+<!-- @@@operator[] -->
+<!-- $$$operator[]$$$operator[]qint64 -->
+<h3 class="fn" id="operator-5b-5d-5"><a name="operator-5b-5d-5"></a><span class="type">QCborValueRef</span> QCborMap::<span class="name">operator[]</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>key</i>)</h3>
+<p>Returns a <a href="qcborvalue.html#qcborvalueref">QCborValueRef</a> to the value in this map that corresponds to key <i>key</i>. CBOR recommends using integer keys, since they occupy less space and are simpler to encode and decode.</p>
+<p><a href="qcborvalue.html#qcborvalueref">QCborValueRef</a> has the exact same API as <a href="qcborvalue.html">QCborValue</a>, with one important difference: if you assign new values to it, this map will be updated with that new value.</p>
+<p>If the map did not have a key equal to <i>key</i>, one is inserted and this function returns a reference to the new value, which will be a <a href="qcborvalue.html">QCborValue</a> with an undefined value. For that reason, it is not possible with this function to tell apart the situation where the key was not present from the situation where the key was mapped to an undefined value.</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one the return will reference. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p><b>See also </b><a href="qcbormap.html#value">value</a>(qint64), <a href="qcbormap.html#find">find</a>(qint64), <a href="qcbormap.html#contains">contains</a>(qint64), <a href="qcbormap.html#remove">remove</a>(qint64), <a href="qcbormap.html#operator-5b-5d-1">operator[]</a>(QLatin1String), <a href="qcbormap.html#operator-5b-5d-2">operator[]</a>(const QString &amp;), and <a href="qcbormap.html#operator-5b-5d-3">operator[]</a>(const QCborValue &amp;).</p>
+<!-- @@@operator[] -->
+<!-- $$$operator[]$$$operator[]QLatin1String -->
+<h3 class="fn" id="operator-5b-5d-6"><a name="operator-5b-5d-6"></a><span class="type">QCborValueRef</span> QCborMap::<span class="name">operator[]</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>key</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a <a href="qcborvalue.html#qcborvalueref">QCborValueRef</a> to the value in this map that corresponds to key <i>key</i>.</p>
+<p><a href="qcborvalue.html#qcborvalueref">QCborValueRef</a> has the exact same API as <a href="qcborvalue.html">QCborValue</a>, with one important difference: if you assign new values to it, this map will be updated with that new value.</p>
+<p>If the map did not have a key equal to <i>key</i>, one is inserted and this function returns a reference to the new value, which will be a <a href="qcborvalue.html">QCborValue</a> with an undefined value. For that reason, it is not possible with this function to tell apart the situation where the key was not present from the situation where the key was mapped to an undefined value.</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one the return will reference. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p><b>See also </b><a href="qcbormap.html#value-1">value</a>(QLatin1String), <a href="qcbormap.html#find-1">find</a>(QLatin1String), <a href="qcbormap.html#contains-1">contains</a>(QLatin1String), <a href="qcbormap.html#remove-1">remove</a>(QLatin1String), <a href="qcbormap.html#operator-5b-5d">operator[]</a>(qint64), <a href="qcbormap.html#operator-5b-5d-2">operator[]</a>(const QString &amp;), and <a href="qcbormap.html#operator-5b-5d-3">operator[]</a>(const QCborValue &amp;).</p>
+<!-- @@@operator[] -->
+<!-- $$$operator[]$$$operator[]constQString& -->
+<h3 class="fn" id="operator-5b-5d-7"><a name="operator-5b-5d-7"></a><span class="type">QCborValueRef</span> QCborMap::<span class="name">operator[]</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a <a href="qcborvalue.html#qcborvalueref">QCborValueRef</a> to the value in this map that corresponds to key <i>key</i>.</p>
+<p><a href="qcborvalue.html#qcborvalueref">QCborValueRef</a> has the exact same API as <a href="qcborvalue.html">QCborValue</a>, with one important difference: if you assign new values to it, this map will be updated with that new value.</p>
+<p>If the map did not have a key equal to <i>key</i>, one is inserted and this function returns a reference to the new value, which will be a <a href="qcborvalue.html">QCborValue</a> with an undefined value. For that reason, it is not possible with this function to tell apart the situation where the key was not present from the situation where the key was mapped to an undefined value.</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one the return will reference. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p><b>See also </b><a href="qcbormap.html#value-2">value</a>(const QString &amp;), <a href="qcbormap.html#find-2">find</a>(const QString &amp;), <a href="qcbormap.html#contains-2">contains</a>(const QString &amp;), <a href="qcbormap.html#remove-2">remove</a>(const QString &amp;), <a href="qcbormap.html#operator-5b-5d">operator[]</a>(qint64), <a href="qcbormap.html#operator-5b-5d-1">operator[]</a>(QLatin1String), and <a href="qcbormap.html#operator-5b-5d-3">operator[]</a>(const QCborValue &amp;).</p>
+<!-- @@@operator[] -->
+<!-- $$$operator[]$$$operator[]constQCborValue& -->
+<h3 class="fn" id="operator-5b-5d-8"><a name="operator-5b-5d-8"></a><span class="type">QCborValueRef</span> QCborMap::<span class="name">operator[]</span>(const <span class="type"><a href="qcborvalue.html">QCborValue</a></span> &amp;<i>key</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a <a href="qcborvalue.html#qcborvalueref">QCborValueRef</a> to the value in this map that corresponds to key <i>key</i>.</p>
+<p><a href="qcborvalue.html#qcborvalueref">QCborValueRef</a> has the exact same API as <a href="qcborvalue.html">QCborValue</a>, with one important difference: if you assign new values to it, this map will be updated with that new value.</p>
+<p>If the map did not have a key equal to <i>key</i>, one is inserted and this function returns a reference to the new value, which will be a <a href="qcborvalue.html">QCborValue</a> with an undefined value. For that reason, it is not possible with this function to tell apart the situation where the key was not present from the situation where the key was mapped to an undefined value.</p>
+<p>If the map contains more than one key equal to <i>key</i>, it is undefined which one the return will reference. <a href="qcbormap.html">QCborMap</a> does not allow inserting duplicate keys, but it is possible to create such a map by decoding a CBOR stream with them. They are usually not permitted and having duplicate keys is usually an indication of a problem in the sender.</p>
+<p><b>See also </b><a href="qcbormap.html#value-3">value</a>(const QCborValue &amp;), <a href="qcbormap.html#find-3">find</a>(const QCborValue &amp;), <a href="qcbormap.html#contains-3">contains</a>(const QCborValue &amp;), <a href="qcbormap.html#remove-3">remove</a>(const QCborValue &amp;), <a href="qcbormap.html#operator-5b-5d">operator[]</a>(qint64), <a href="qcbormap.html#operator-5b-5d-1">operator[]</a>(QLatin1String), and <a href="qcbormap.html#operator-5b-5d-2">operator[]</a>(const QString &amp;).</p>
+<!-- @@@operator[] -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

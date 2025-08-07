@@ -1,0 +1,644 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdeclarativecamera.cpp -->
+  <title>Camera QML Type | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-qmlmodule.html">QML Types</a></td><td >Camera QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Camera QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Camera-brief -->
+<p>Access viewfinder frames, and take photos and movies. <a href="#details">More...</a></p>
+<!-- @@@Camera -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtMultimedia 5.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="../qtqml/qml-qtqml-qtobject.html">QtObject</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtmultimedia-camera-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#availability-prop">availability</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#cameraState-prop">cameraState</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#cameraStatus-prop">cameraStatus</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#captureMode-prop">captureMode</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#deviceId-prop">deviceId</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#digitalZoom-prop">digitalZoom</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#displayName-prop">displayName</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#errorCode-prop">errorCode</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#errorString-prop">errorString</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#lockStatus-prop">lockStatus</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#maximumDigitalZoom-prop">maximumDigitalZoom</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#maximumOpticalZoom-prop">maximumOpticalZoom</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#mediaObject-prop">mediaObject</a></b></b> : variant</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#metaData-prop">metaData</a></b></b><ul>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#metaData.cameraManufacturer-prop">metaData.cameraManufacturer</a></b></b> : variant</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#metaData.cameraModel-prop">metaData.cameraModel</a></b></b> : variant</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#metaData.event-prop">metaData.event</a></b></b> : variant</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#metaData.subject-prop">metaData.subject</a></b></b> : variant</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#metaData.orientation-prop">metaData.orientation</a></b></b> : variant</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#metaData.dateTimeOriginal-prop">metaData.dateTimeOriginal</a></b></b> : variant</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#metaData.gpsLatitude-prop">metaData.gpsLatitude</a></b></b> : variant</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#metaData.gpsLongitude-prop">metaData.gpsLongitude</a></b></b> : variant</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#metaData.gpsAltitude-prop">metaData.gpsAltitude</a></b></b> : variant</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#metaData.gpsTimestamp-prop">metaData.gpsTimestamp</a></b></b> : variant</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#metaData.gpsTrack-prop">metaData.gpsTrack</a></b></b> : variant</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#metaData.gpsSpeed-prop">metaData.gpsSpeed</a></b></b> : variant</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#metaData.gpsImgDirection-prop">metaData.gpsImgDirection</a></b></b> : variant</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#metaData.gpsProcessingMethod-prop">metaData.gpsProcessingMethod</a></b></b> : variant</li>
+</ul>
+</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#opticalZoom-prop">opticalZoom</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#orientation-prop">orientation</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#position-prop">position</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#viewfinder-prop">viewfinder</a></b></b><ul>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#viewfinder.resolution-prop">viewfinder.resolution</a></b></b> : size</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#viewfinder.minimumFrameRate-prop">viewfinder.minimumFrameRate</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#viewfinder.maximumFrameRate-prop">viewfinder.maximumFrameRate</a></b></b> : real</li>
+</ul>
+</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#cameraStateChanged-signal">cameraStateChanged</a></b></b>(<i>state</i>)</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#digitalZoomChanged-signal">digitalZoomChanged</a></b></b>(<i>zoom</i>)</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#error-signal">error</a></b></b>(<i>errorCode</i>, <i>errorString</i>)</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#lockStatusChanged-signal">lockStatusChanged</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#manualWhiteBalanceChanged-signal">manualWhiteBalanceChanged</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#maximumDigitalZoomChanged-signal">maximumDigitalZoomChanged</a></b></b>(<i>zoom</i>)</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#maximumOpticalZoomChanged-signal">maximumOpticalZoomChanged</a></b></b>(<i>zoom</i>)</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#opticalZoomChanged-signal">opticalZoomChanged</a></b></b>(<i>zoom</i>)</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#whiteBalanceModeChanged-signal">whiteBalanceModeChanged</a></b></b>()</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#searchAndLock-method">searchAndLock</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#start-method">start</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#stop-method">stop</a></b></b>()</li>
+<li class="fn">list&lt;object&gt; <b><b><a href="qml-qtmultimedia-camera.html#supportedViewfinderFrameRateRanges-method">supportedViewfinderFrameRateRanges</a></b></b>(<i>resolution</i>)</li>
+<li class="fn">list&lt;size&gt; <b><b><a href="qml-qtmultimedia-camera.html#supportedViewfinderResolutions-method">supportedViewfinderResolutions</a></b></b>(<i>minimumFrameRate</i>,  real <i>maximumFrameRate</i>)</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camera.html#unlock-method">unlock</a></b></b>()</li>
+</ul>
+<!-- $$$Camera-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>You can use <code>Camera</code> to capture images and movies from a camera, and manipulate the capture and processing settings that get applied to the images. To display the viewfinder you can use <a href="qml-qtmultimedia-videooutput.html">VideoOutput</a> with the Camera set as the source.</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">width</span>: <span class="number">640</span>
+      <span class="name">height</span>: <span class="number">360</span>
+
+      <span class="type"><a href="qml-qtmultimedia-camera.html">Camera</a></span> {
+          <span class="name">id</span>: <span class="name">camera</span>
+
+          <span class="name">imageProcessing</span>.whiteBalanceMode: <span class="name">CameraImageProcessing</span>.<span class="name">WhiteBalanceFlash</span>
+
+          <span class="type">exposure</span> {
+              <span class="name">exposureCompensation</span>: -<span class="number">1.0</span>
+              <span class="name">exposureMode</span>: <span class="name">Camera</span>.<span class="name">ExposurePortrait</span>
+          }
+
+          <span class="name">flash</span>.mode: <span class="name">Camera</span>.<span class="name">FlashRedEyeReduction</span>
+
+          <span class="type">imageCapture</span> {
+              <span class="name">onImageCaptured</span>: {
+                  <span class="name">photoPreview</span>.<span class="name">source</span> <span class="operator">=</span> <span class="name">preview</span>  <span class="comment">// Show the preview in an Image</span>
+              }
+          }
+      }
+
+      <span class="type"><a href="qml-qtmultimedia-videooutput.html">VideoOutput</a></span> {
+          <span class="name">source</span>: <span class="name">camera</span>
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">focus</span> : <span class="name">visible</span> <span class="comment">// to receive focus and capture key events when visible</span>
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+          <span class="name">id</span>: <span class="name">photoPreview</span>
+      }
+  }
+
+</pre>
+<p>If multiple cameras are available, you can select which one to use by setting the <a href="qml-qtmultimedia-camera.html#deviceId-prop">deviceId</a> property to a value from <a href="qml-qtmultimedia-qtmultimedia.html#availableCameras-prop">QtMultimedia.availableCameras</a>. On a mobile device, you can conveniently switch between front-facing and back-facing cameras by setting the <a href="qml-qtmultimedia-camera.html#position-prop">position</a> property.</p>
+<p>The various settings and functionality of the Camera stack is spread across a few different child properties of Camera.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Property</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><a href="qml-qtmultimedia-cameracapture.html">imageCapture</a></td><td >Methods and properties for capturing still images.</td></tr>
+<tr valign="top" class="even"><td ><a href="qml-qtmultimedia-camerarecorder.html">videoRecorder</a></td><td >Methods and properties for capturing movies.</td></tr>
+<tr valign="top" class="odd"><td ><a href="qml-qtmultimedia-cameraexposure.html">exposure</a></td><td >Methods and properties for adjusting exposure (aperture, shutter speed etc).</td></tr>
+<tr valign="top" class="even"><td ><a href="qml-qtmultimedia-camerafocus.html">focus</a></td><td >Methods and properties for adjusting focus and providing feedback on autofocus progress.</td></tr>
+<tr valign="top" class="odd"><td ><a href="qml-qtmultimedia-cameraflash.html">flash</a></td><td >Methods and properties for controlling the camera flash.</td></tr>
+<tr valign="top" class="even"><td ><a href="qml-qtmultimedia-cameraimageprocessing.html">imageProcessing</a></td><td >Methods and properties for adjusting camera image processing parameters.</td></tr>
+</table></div>
+<p>Basic camera state management, error reporting, and simple zoom properties are available in the Camera itself. For integration with C++ code, the <a href="qml-qtmultimedia-camera.html#mediaObject-prop">mediaObject</a> property allows you to access the standard Qt Multimedia camera controls.</p>
+<p>Many of the camera settings may take some time to apply, and might be limited to certain supported values depending on the hardware. Some camera settings may be set manually or automatically. These settings properties contain the current set value. For example, when autofocus is enabled the focus zones are exposed in the <a href="qml-qtmultimedia-camerafocus.html">focus</a> property.</p>
+<p>For additional information, read also the <a href="cameraoverview.html">camera overview</a>.</p>
+<!-- @@@Camera -->
+<h2>Property Documentation</h2>
+<!-- $$$availability -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="availability-prop"></a><span class="name">availability</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the availability state of the camera.</p>
+<p>The availability states can be one of the following:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Value</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >Available</td><td >The camera is available to use</td></tr>
+<tr valign="top" class="even"><td >Busy</td><td >The camera is busy at the moment as it is being used by another process.</td></tr>
+<tr valign="top" class="odd"><td >Unavailable</td><td >The camera is not available to use (there may be no camera hardware)</td></tr>
+<tr valign="top" class="even"><td >ResourceMissing</td><td >The camera cannot be used because of missing resources. It may be possible to try again at a later time.</td></tr>
+</table></div>
+</div></div><!-- @@@availability -->
+<br/>
+<!-- $$$cameraState -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="cameraState-prop"></a><span class="name">cameraState</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the camera object's current state, which can be one of the following:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Value</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >UnloadedState</td><td >The initial camera state, with the camera not loaded. The camera capabilities (with the exception of supported capture modes) are unknown. This state saves the most power, but takes the longest time to be ready for capture.<p>While the supported settings are unknown in this state, you can still set the camera capture settings like codec, resolution, or frame rate.</p>
+</td></tr>
+<tr valign="top" class="even"><td >LoadedState</td><td >The camera is loaded and ready to be configured.<p>In the Idle state you can query camera capabilities, set capture resolution, codecs, and so on.</p>
+<p>The viewfinder is not active in the loaded state.</p>
+</td></tr>
+<tr valign="top" class="odd"><td >ActiveState</td><td >In the active state the viewfinder frames are available and the camera is ready for capture.</td></tr>
+</table></div>
+<p>The default camera state is ActiveState.</p>
+</div></div><!-- @@@cameraState -->
+<br/>
+<!-- $$$cameraStatus -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="cameraStatus-prop"></a><span class="name">cameraStatus</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the camera object's current status, which can be one of the following:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Value</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >ActiveStatus</td><td >The camera has been started and can produce data, viewfinder displays video frames.<p>Depending on backend, changing camera settings such as capture mode, codecs, or resolution in ActiveState may lead to changing the status to LoadedStatus and StartingStatus while the settings are applied, and back to ActiveStatus when the camera is ready.</p>
+</td></tr>
+<tr valign="top" class="even"><td >StartingStatus</td><td >The camera is starting as a result of state transition to Camera.ActiveState. The camera service is not ready to capture yet.</td></tr>
+<tr valign="top" class="odd"><td >StoppingStatus</td><td >The camera is stopping as a result of state transition from Camera.ActiveState to Camera.LoadedState or Camera.UnloadedState.</td></tr>
+<tr valign="top" class="even"><td >StandbyStatus</td><td >The camera is in the power saving standby mode. The camera may enter standby mode after some time of inactivity in the Camera.LoadedState state.</td></tr>
+<tr valign="top" class="odd"><td >LoadedStatus</td><td >The camera is loaded and ready to be configured. This status indicates the camera device is opened and it's possible to query for supported image and video capture settings such as resolution, frame rate, and codecs.</td></tr>
+<tr valign="top" class="even"><td >LoadingStatus</td><td >The camera device loading as a result of state transition from Camera.UnloadedState to Camera.LoadedState or Camera.ActiveState.</td></tr>
+<tr valign="top" class="odd"><td >UnloadingStatus</td><td >The camera device is unloading as a result of state transition from Camera.LoadedState or Camera.ActiveState to Camera.UnloadedState.</td></tr>
+<tr valign="top" class="even"><td >UnloadedStatus</td><td >The initial camera status, with camera not loaded. The camera capabilities including supported capture settings may be unknown.</td></tr>
+<tr valign="top" class="odd"><td >UnavailableStatus</td><td >The camera or camera backend is not available.</td></tr>
+</table></div>
+</div></div><!-- @@@cameraStatus -->
+<br/>
+<!-- $$$captureMode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="captureMode-prop"></a><span class="name">captureMode</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the camera capture mode, which can be one of the following:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Value</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >CaptureViewfinder</td><td >Camera is only configured to display viewfinder.</td></tr>
+<tr valign="top" class="even"><td >CaptureStillImage</td><td >Prepares the Camera for capturing still images.</td></tr>
+<tr valign="top" class="odd"><td >CaptureVideo</td><td >Prepares the Camera for capturing video.</td></tr>
+</table></div>
+<p>The default capture mode is <code>CaptureStillImage</code>.</p>
+</div></div><!-- @@@captureMode -->
+<br/>
+<!-- $$$deviceId -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="deviceId-prop"></a><span class="name">deviceId</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the unique identifier for the camera device being used. It may not be human-readable.</p>
+<p>You can get all available device IDs from <a href="qml-qtmultimedia-qtmultimedia.html#availableCameras-prop">QtMultimedia.availableCameras</a>. If no value is provided or if set to an empty string, the system's default camera will be used.</p>
+<p>If possible, <a href="qml-qtmultimedia-camera.html#cameraState-prop">cameraState</a>, <a href="qml-qtmultimedia-camera.html#captureMode-prop">captureMode</a>, <a href="qml-qtmultimedia-camera.html#digitalZoom-prop">digitalZoom</a> and other camera parameters are preserved when changing the camera device.</p>
+<p>This property was introduced in  Qt 5.4.</p>
+<p><b>See also </b><a href="qml-qtmultimedia-camera.html#displayName-prop">displayName</a> and <a href="qml-qtmultimedia-camera.html#position-prop">position</a>.</p>
+</div></div><!-- @@@deviceId -->
+<br/>
+<!-- $$$digitalZoom -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="digitalZoom-prop"></a><span class="name">digitalZoom</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the current digital zoom factor.</p>
+</div></div><!-- @@@digitalZoom -->
+<br/>
+<!-- $$$displayName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="displayName-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">displayName</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the human-readable name of the camera.</p>
+<p>You can use this property to display the name of the camera in a user interface.</p>
+<p>This property was introduced in  Qt 5.4.</p>
+<p><b>See also </b><a href="qml-qtmultimedia-camera.html#deviceId-prop">deviceId</a>.</p>
+</div></div><!-- @@@displayName -->
+<br/>
+<!-- $$$errorCode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="errorCode-prop"></a><span class="name">errorCode</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the last error code.</p>
+<p><b>See also </b><a href="qml-qtmultimedia-camera.html#error-signal">error</a> and <a href="qml-qtmultimedia-camera.html#errorString-prop">errorString</a>.</p>
+</div></div><!-- @@@errorCode -->
+<br/>
+<!-- $$$errorString -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="errorString-prop"></a><span class="name">errorString</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the last error string, if any.</p>
+<p><b>See also </b><a href="qml-qtmultimedia-camera.html#error-signal">error</a> and <a href="qml-qtmultimedia-camera.html#errorCode-prop">errorCode</a>.</p>
+</div></div><!-- @@@errorString -->
+<br/>
+<!-- $$$lockStatus -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="lockStatus-prop"></a><span class="name">lockStatus</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the status of all the requested camera locks.</p>
+<p>The status can be one of the following values:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Value</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >Unlocked</td><td >The application is not interested in camera settings value. The camera may keep this parameter without changes, which is common with camera focus, or adjust exposure and white balance constantly to keep the viewfinder image nice.</td></tr>
+<tr valign="top" class="even"><td >Searching</td><td >The application has requested the camera focus, exposure, or white balance lock with <a href="qml-qtmultimedia-camera.html#searchAndLock-method">searchAndLock()</a>. This state indicates the camera is focusing or calculating exposure and white balance.</td></tr>
+<tr valign="top" class="odd"><td >Locked</td><td >The camera focus, exposure, or white balance is locked. The camera is ready to capture, and the application may check the exposure parameters.<p>The locked state usually means the requested parameter stays the same, except in cases where the parameter is requested to be updated constantly. For example in continuous focusing mode, the focus is considered locked as long as the object is in focus, even while the actual focusing distance may be constantly changing.</p>
+</td></tr>
+</table></div>
+</div></div><!-- @@@lockStatus -->
+<br/>
+<!-- $$$maximumDigitalZoom -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="maximumDigitalZoom-prop"></a><span class="name">maximumDigitalZoom</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the maximum digital zoom factor supported, or 1.0 if digital zoom is not supported.</p>
+</div></div><!-- @@@maximumDigitalZoom -->
+<br/>
+<!-- $$$maximumOpticalZoom -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="maximumOpticalZoom-prop"></a><span class="name">maximumOpticalZoom</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the maximum optical zoom factor supported, or 1.0 if optical zoom is not supported.</p>
+</div></div><!-- @@@maximumOpticalZoom -->
+<br/>
+<!-- $$$mediaObject -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="mediaObject-prop"></a><span class="name">mediaObject</span> : <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the native media object for the camera.</p>
+<p>It can be used to get a pointer to a <a href="qcamera.html">QCamera</a> object in order to integrate with C++ code.</p>
+<pre class="cpp">
+
+  <span class="type">QObject</span> <span class="operator">*</span>qmlCamera; <span class="comment">// The QML Camera object</span>
+  <span class="type">QCamera</span> <span class="operator">*</span>camera <span class="operator">=</span> qvariant_cast<span class="operator">&lt;</span><span class="type">QCamera</span> <span class="operator">*</span><span class="operator">&gt;</span>(qmlCamera<span class="operator">-</span><span class="operator">&gt;</span>property(<span class="string">&quot;mediaObject&quot;</span>));
+
+</pre>
+<p><b>Note: </b>This property is not accessible from QML.</p></div></div><!-- @@@mediaObject -->
+<br/>
+<!-- $$$metaData -->
+<div class="qmlitem"><div class="qmlproto"><div class="table"><table class="qmlname"><tr valign="top" class="even" id="metaData-prop"><th class="centerAlign"><p><a name="metaData-prop"></a><b>metaData group</b></p></th></tr><tr valign="top" class="odd" id="metaData.cameraManufacturer-prop"><td class="tblQmlPropNode"><p><a name="metaData.cameraManufacturer-prop"></a><span class="name">metaData.cameraManufacturer</span> : <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span></p></td></tr><tr valign="top" class="odd" id="metaData.cameraModel-prop"><td class="tblQmlPropNode"><p><a name="metaData.cameraModel-prop"></a><span class="name">metaData.cameraModel</span> : <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span></p></td></tr><tr valign="top" class="odd" id="metaData.event-prop"><td class="tblQmlPropNode"><p><a name="metaData.event-prop"></a><span class="name">metaData.event</span> : <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span></p></td></tr><tr valign="top" class="odd" id="metaData.subject-prop"><td class="tblQmlPropNode"><p><a name="metaData.subject-prop"></a><span class="name">metaData.subject</span> : <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span></p></td></tr><tr valign="top" class="odd" id="metaData.orientation-prop"><td class="tblQmlPropNode"><p><a name="metaData.orientation-prop"></a><span class="name">metaData.orientation</span> : <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span></p></td></tr><tr valign="top" class="odd" id="metaData.dateTimeOriginal-prop"><td class="tblQmlPropNode"><p><a name="metaData.dateTimeOriginal-prop"></a><span class="name">metaData.dateTimeOriginal</span> : <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span></p></td></tr><tr valign="top" class="odd" id="metaData.gpsLatitude-prop"><td class="tblQmlPropNode"><p><a name="metaData.gpsLatitude-prop"></a><span class="name">metaData.gpsLatitude</span> : <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span></p></td></tr><tr valign="top" class="odd" id="metaData.gpsLongitude-prop"><td class="tblQmlPropNode"><p><a name="metaData.gpsLongitude-prop"></a><span class="name">metaData.gpsLongitude</span> : <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span></p></td></tr><tr valign="top" class="odd" id="metaData.gpsAltitude-prop"><td class="tblQmlPropNode"><p><a name="metaData.gpsAltitude-prop"></a><span class="name">metaData.gpsAltitude</span> : <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span></p></td></tr><tr valign="top" class="odd" id="metaData.gpsTimestamp-prop"><td class="tblQmlPropNode"><p><a name="metaData.gpsTimestamp-prop"></a><span class="name">metaData.gpsTimestamp</span> : <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span></p></td></tr><tr valign="top" class="odd" id="metaData.gpsTrack-prop"><td class="tblQmlPropNode"><p><a name="metaData.gpsTrack-prop"></a><span class="name">metaData.gpsTrack</span> : <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span></p></td></tr><tr valign="top" class="odd" id="metaData.gpsSpeed-prop"><td class="tblQmlPropNode"><p><a name="metaData.gpsSpeed-prop"></a><span class="name">metaData.gpsSpeed</span> : <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span></p></td></tr><tr valign="top" class="odd" id="metaData.gpsImgDirection-prop"><td class="tblQmlPropNode"><p><a name="metaData.gpsImgDirection-prop"></a><span class="name">metaData.gpsImgDirection</span> : <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span></p></td></tr><tr valign="top" class="odd" id="metaData.gpsProcessingMethod-prop"><td class="tblQmlPropNode"><p><a name="metaData.gpsProcessingMethod-prop"></a><span class="name">metaData.gpsProcessingMethod</span> : <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span></p></td></tr></table></div></div><div class="qmldoc"><p>These properties hold the meta data for the camera captures.</p>
+<ul>
+<li><code>metaData.cameraManufacturer</code> holds the name of the manufacturer of the camera.</li>
+<li><code>metaData.cameraModel</code> holds the name of the model of the camera.</li>
+<li><code>metaData.event</code> holds the event during which the photo or video is to be captured.</li>
+<li><code>metaData.subject</code> holds the name of the subject of the capture or recording.</li>
+<li><code>metaData.orientation</code> holds the clockwise rotation of the camera at time of capture.</li>
+<li><code>metaData.dateTimeOriginal</code> holds the initial time at which the photo or video is captured.</li>
+<li><code>metaData.gpsLatitude</code> holds the latitude of the camera in decimal degrees at time of capture.</li>
+<li><code>metaData.gpsLongitude</code> holds the longitude of the camera in decimal degrees at time of capture.</li>
+<li><code>metaData.gpsAltitude</code> holds the altitude of the camera in meters at time of capture.</li>
+<li><code>metaData.gpsTimestamp</code> holds the timestamp of the GPS position data.</li>
+<li><code>metaData.gpsTrack</code> holds direction of movement of the camera at the time of capture. It is measured in degrees clockwise from north.</li>
+<li><code>metaData.gpsSpeed</code> holds the velocity in kilometers per hour of the camera at time of capture.</li>
+<li><code>metaData.gpsImgDirection</code> holds direction the camera is facing at the time of capture. It is measured in degrees clockwise from north.</li>
+<li><code>metaData.gpsProcessingMethod</code> holds the name of the method for determining the GPS position.</li>
+</ul>
+<p>This documentation was introduced in  Qt 5.4.</p>
+<p><b>See also </b><a href="qmediametadata.html">QMediaMetaData</a>.</p>
+</div></div><!-- @@@metaData -->
+<br/>
+<!-- $$$opticalZoom -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="opticalZoom-prop"></a><span class="name">opticalZoom</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the current optical zoom factor.</p>
+</div></div><!-- @@@opticalZoom -->
+<br/>
+<!-- $$$orientation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="orientation-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">orientation</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the physical orientation of the camera sensor.</p>
+<p>The value is the orientation angle (clockwise, in steps of 90 degrees) of the camera sensor in relation to the display in its natural orientation.</p>
+<p>For example, suppose a mobile device which is naturally in portrait orientation. The back-facing camera is mounted in landscape. If the top side of the camera sensor is aligned with the right edge of the screen in natural orientation, <code>orientation</code> returns <code>270</code>. If the top side of a front-facing camera sensor is aligned with the right edge of the screen, <code>orientation</code> returns <code>90</code>.</p>
+<p>This property was introduced in  Qt 5.4.</p>
+<p><b>See also </b><a href="qml-qtmultimedia-videooutput.html#orientation-prop">VideoOutput::orientation</a>.</p>
+</div></div><!-- @@@orientation -->
+<br/>
+<!-- $$$position -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="position-prop"></a><span class="name">position</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the physical position of the camera on the hardware system.</p>
+<p>The position can be one of the following:</p>
+<ul>
+<li><code>Camera.UnspecifiedPosition</code> - the camera position is unspecified or unknown.</li>
+<li><code>Camera.BackFace</code> - the camera is on the back face of the system hardware. For example on a mobile device, it means it is on the opposite side to that of the screem.</li>
+<li><code>Camera.FrontFace</code> - the camera is on the front face of the system hardware. For example on a mobile device, it means it is on the same side as that of the screen. Viewfinder frames of front-facing cameras are mirrored horizontally, so the users can see themselves as looking into a mirror. Captured images or videos are not mirrored.</li>
+</ul>
+<p>On a mobile device it can be used to easily choose between front-facing and back-facing cameras. If this property is set to <code>Camera.UnspecifiedPosition</code>, the system's default camera will be used.</p>
+<p>If possible, <a href="qml-qtmultimedia-camera.html#cameraState-prop">cameraState</a>, <a href="qml-qtmultimedia-camera.html#captureMode-prop">captureMode</a>, <a href="qml-qtmultimedia-camera.html#digitalZoom-prop">digitalZoom</a> and other camera parameters are preserved when changing the camera device.</p>
+<p>This property was introduced in  Qt 5.4.</p>
+<p><b>See also </b><a href="qml-qtmultimedia-camera.html#deviceId-prop">deviceId</a>.</p>
+</div></div><!-- @@@position -->
+<br/>
+<!-- $$$viewfinder -->
+<div class="qmlitem"><div class="qmlproto"><div class="table"><table class="qmlname"><tr valign="top" class="even" id="viewfinder-prop"><th class="centerAlign"><p><a name="viewfinder-prop"></a><b>viewfinder group</b></p></th></tr><tr valign="top" class="odd" id="viewfinder.resolution-prop"><td class="tblQmlPropNode"><p><a name="viewfinder.resolution-prop"></a><span class="name">viewfinder.resolution</span> : <span class="type"><a href="../qtqml/qml-size.html">size</a></span></p></td></tr><tr valign="top" class="odd" id="viewfinder.minimumFrameRate-prop"><td class="tblQmlPropNode"><p><a name="viewfinder.minimumFrameRate-prop"></a><span class="name">viewfinder.minimumFrameRate</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr><tr valign="top" class="odd" id="viewfinder.maximumFrameRate-prop"><td class="tblQmlPropNode"><p><a name="viewfinder.maximumFrameRate-prop"></a><span class="name">viewfinder.maximumFrameRate</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr></table></div></div><div class="qmldoc"><p>These properties hold the viewfinder settings.</p>
+<p><code>viewfinder.resolution</code> holds the resolution of the camera viewfinder. If no resolution is given or if it is empty, the backend uses a default value.</p>
+<p><code>viewfinder.minimumFrameRate</code> holds the minimum frame rate for the viewfinder in frames per second. If no value is given or if set to <code>0</code>, the backend uses a default value.</p>
+<p><code>viewfinder.maximumFrameRate</code> holds the maximum frame rate for the viewfinder in frames per second. If no value is given or if set to <code>0</code>, the backend uses a default value.</p>
+<p>If <code>viewfinder.minimumFrameRate</code> is equal to <code>viewfinder.maximumFrameRate</code>, the frame rate is fixed. If not, the actual frame rate fluctuates between the two values.</p>
+<p>Changing the viewfinder settings while the camera is in the <code>Camera.ActiveState</code> state may cause the camera to be restarted.</p>
+<p>If the camera is used to capture videos or images, the viewfinder settings might be ignored if they conflict with the capture settings. You can check the actual viewfinder settings once the camera is in the <code>Camera.ActiveStatus</code> status.</p>
+<p>Supported values can be retrieved with <a href="qml-qtmultimedia-camera.html#supportedViewfinderResolutions-method">supportedViewfinderResolutions()</a> and <a href="qml-qtmultimedia-camera.html#supportedViewfinderFrameRateRanges-method">supportedViewfinderFrameRateRanges()</a>.</p>
+<p>This documentation was introduced in  Qt 5.4.</p>
+</div></div><!-- @@@viewfinder -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$cameraStateChanged[overload1]$$$cameraStateChanged -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="cameraStateChanged-signal"></a><span class="name">cameraStateChanged</span>(<i>state</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the camera state has changed to <i>state</i>. Since the state changes may take some time to occur this signal may arrive sometime after the state change has been requested.</p>
+<p>The corresponding handler is <code>onCameraStateChanged</code>.</p>
+</div></div><!-- @@@cameraStateChanged -->
+<br/>
+<!-- $$$digitalZoomChanged[overload1]$$$digitalZoomChanged -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="digitalZoomChanged-signal"></a><span class="name">digitalZoomChanged</span>(<i>zoom</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the digital zoom setting has changed to <i>zoom</i>.</p>
+<p>The corresponding handler is <code>onDigitalZoomChanged</code>.</p>
+</div></div><!-- @@@digitalZoomChanged -->
+<br/>
+<!-- $$$error[overload1]$$$error -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="error-signal"></a><span class="name">error</span>(<i>errorCode</i>, <i>errorString</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when an error occurs. The enumeration value <i>errorCode</i> is one of the values defined below, and a descriptive string value is available in <i>errorString</i>.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Value</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><a href="../qtnetwork/qdtls.html#QDtlsError-enum">NoError</a></td><td >No errors have occurred.</td></tr>
+<tr valign="top" class="even"><td >CameraError</td><td >An error has occurred.</td></tr>
+<tr valign="top" class="odd"><td >InvalidRequestError</td><td >System resource doesn't support requested functionality.</td></tr>
+<tr valign="top" class="even"><td >ServiceMissingError</td><td >No camera service available.</td></tr>
+<tr valign="top" class="odd"><td >NotSupportedFeatureError</td><td >The feature is not supported.</td></tr>
+</table></div>
+<p>The corresponding handler is <code>onError</code>.</p>
+<p><b>See also </b><a href="qml-qtmultimedia-camera.html#errorCode-prop">errorCode</a> and <a href="qml-qtmultimedia-camera.html#errorString-prop">errorString</a>.</p>
+</div></div><!-- @@@error -->
+<br/>
+<!-- $$$lockStatusChanged[overload1]$$$lockStatusChanged -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="lockStatusChanged-signal"></a><span class="name">lockStatusChanged</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the lock status (focus, exposure etc) changes. This can happen when locking (e.g&#x2e; autofocusing) is complete or has failed.</p>
+<p>The corresponding handler is <code>onLockStatusChanged</code>.</p>
+</div></div><!-- @@@lockStatusChanged -->
+<br/>
+<!-- $$$manualWhiteBalanceChanged[overload1]$$$manualWhiteBalanceChanged -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="manualWhiteBalanceChanged-signal"></a><span class="name">manualWhiteBalanceChanged</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the <code>manualWhiteBalance</code> property is changed.</p>
+<p>The corresponding handler is <code>onManualWhiteBalanceChanged</code>.</p>
+</div></div><!-- @@@manualWhiteBalanceChanged -->
+<br/>
+<!-- $$$maximumDigitalZoomChanged[overload1]$$$maximumDigitalZoomChanged -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="maximumDigitalZoomChanged-signal"></a><span class="name">maximumDigitalZoomChanged</span>(<i>zoom</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the maximum digital zoom setting has changed to <i>zoom</i>. This can occur when you change between video and still image capture modes, or the capture settings are changed.</p>
+<p>The corresponding handler is <code>onMaximumDigitalZoomChanged</code>.</p>
+</div></div><!-- @@@maximumDigitalZoomChanged -->
+<br/>
+<!-- $$$maximumOpticalZoomChanged[overload1]$$$maximumOpticalZoomChanged -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="maximumOpticalZoomChanged-signal"></a><span class="name">maximumOpticalZoomChanged</span>(<i>zoom</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the maximum optical zoom setting has changed to <i>zoom</i>. This can occur when you change between video and still image capture modes, or the capture settings are changed.</p>
+<p>The corresponding handler is <code>onMaximumOpticalZoomChanged</code>.</p>
+</div></div><!-- @@@maximumOpticalZoomChanged -->
+<br/>
+<!-- $$$opticalZoomChanged[overload1]$$$opticalZoomChanged -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="opticalZoomChanged-signal"></a><span class="name">opticalZoomChanged</span>(<i>zoom</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the optical zoom setting has changed to <i>zoom</i>.</p>
+<p>The corresponding handler is <code>onOpticalZoomChanged</code>.</p>
+</div></div><!-- @@@opticalZoomChanged -->
+<br/>
+<!-- $$$whiteBalanceModeChanged[overload1]$$$whiteBalanceModeChanged -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="whiteBalanceModeChanged-signal"></a><span class="name">whiteBalanceModeChanged</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the <code>whiteBalanceMode</code> property is changed.</p>
+<p>The corresponding handler is <code>onWhiteBalanceModeChanged</code>.</p>
+</div></div><!-- @@@whiteBalanceModeChanged -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$searchAndLock[overload1]$$$searchAndLock -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="searchAndLock-method"></a><span class="name">searchAndLock</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Start focusing, exposure and white balance calculation.</p>
+<p>This is appropriate to call when the camera focus button is pressed (or on a camera capture button half-press). If the camera supports autofocusing, information on the focus zones is available through the <a href="qml-qtmultimedia-camerafocus.html">focus</a> property.</p>
+</div></div><!-- @@@searchAndLock -->
+<br/>
+<!-- $$$start[overload1]$$$start -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="start-method"></a><span class="name">start</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Starts the camera. Viewfinder frames will be available and image or movie capture will be possible.</p>
+</div></div><!-- @@@start -->
+<br/>
+<!-- $$$stop[overload1]$$$stop -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="stop-method"></a><span class="name">stop</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Stops the camera, but leaves the camera stack loaded.</p>
+</div></div><!-- @@@stop -->
+<br/>
+<!-- $$$supportedViewfinderFrameRateRanges[overload1]$$$supportedViewfinderFrameRateRanges -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="supportedViewfinderFrameRateRanges-method"></a><span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type">object</span>&gt; <span class="name">supportedViewfinderFrameRateRanges</span>(<i>resolution</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns a list of supported viewfinder frame rate ranges.</p>
+<p>Each range object in the list has the <code>minimumFrameRate</code> and <code>maximumFrameRate</code> properties.</p>
+<p>If the optional parameter <i>resolution</i> is specified, the returned list is reduced to frame rate ranges supported for the given <i>resolution</i>.</p>
+<p>The camera must be loaded before calling this function, otherwise the returned list is empty.</p>
+<p>This method was introduced in  Qt 5.5.</p>
+<p><b>See also </b><a href="qml-qtmultimedia-camera.html#viewfinder-prop">viewfinder</a>.</p>
+</div></div><!-- @@@supportedViewfinderFrameRateRanges -->
+<br/>
+<!-- $$$supportedViewfinderResolutions[overload1]$$$supportedViewfinderResolutionsreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="supportedViewfinderResolutions-method"></a><span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="../qtqml/qml-size.html">size</a></span>&gt; <span class="name">supportedViewfinderResolutions</span>(<i>minimumFrameRate</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>maximumFrameRate</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns a list of supported viewfinder resolutions.</p>
+<p>If both optional parameters <i>minimumFrameRate</i> and <i>maximumFrameRate</i> are specified, the returned list is reduced to resolutions supported for the given frame rate range.</p>
+<p>The camera must be loaded before calling this function, otherwise the returned list is empty.</p>
+<p>This method was introduced in  Qt 5.5.</p>
+<p><b>See also </b><a href="qml-qtmultimedia-camera.html#viewfinder-prop">viewfinder</a>.</p>
+</div></div><!-- @@@supportedViewfinderResolutions -->
+<br/>
+<!-- $$$unlock[overload1]$$$unlock -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="unlock-method"></a><span class="name">unlock</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Unlock focus, exposure and white balance locks.</p>
+</div></div><!-- @@@unlock -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

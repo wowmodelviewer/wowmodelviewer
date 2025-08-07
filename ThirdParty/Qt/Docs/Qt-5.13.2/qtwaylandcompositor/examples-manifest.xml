@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<instructionals module="QtWaylandCompositor">
+    <examples>
+        <example name="Qt Wayland Compositor Examples - IVI Compositor" docUrl="qthelp://org.qt-project.qtwaylandcompositor.5132/qtwaylandcompositor/qtwaylandcompositor-ivi-compositor-example.html" projectPath="wayland/ivi-compositor/ivi-compositor.pro">
+            <description><![CDATA[IVI Compositor is an example that demonstrates how to use the IviApplication extension.]]></description>
+            <tags>compositor,ivi,wayland</tags>
+            <fileToOpen>wayland/ivi-compositor/main.cpp</fileToOpen>
+            <fileToOpen mainFile="true">wayland/ivi-compositor/main.qml</fileToOpen>
+        </example>
+        <example name="Qt Wayland Compositor Examples - Minimal QML" docUrl="qthelp://org.qt-project.qtwaylandcompositor.5132/qtwaylandcompositor/qtwaylandcompositor-minimal-qml-example.html" projectPath="wayland/minimal-qml/minimal-qml.pro">
+            <description><![CDATA[Minimal QML is a simple example that demonstrates how to write a Wayland compositor in QML.]]></description>
+            <tags>compositor,minimal,qml,wayland</tags>
+            <fileToOpen>wayland/minimal-qml/main.cpp</fileToOpen>
+            <fileToOpen mainFile="true">wayland/minimal-qml/main.qml</fileToOpen>
+        </example>
+        <example name="Qt Wayland Compositor Examples - Multi Output" docUrl="qthelp://org.qt-project.qtwaylandcompositor.5132/qtwaylandcompositor/qtwaylandcompositor-multi-output-example.html" projectPath="wayland/multi-output/multi-output.pro">
+            <description><![CDATA[Multi Output is an example that demonstrates a compositor with multiple outputs.]]></description>
+            <tags>compositor,multi,output,wayland</tags>
+            <fileToOpen>wayland/multi-output/main.cpp</fileToOpen>
+            <fileToOpen mainFile="true">wayland/multi-output/qml/main.qml</fileToOpen>
+        </example>
+        <example name="Qt Wayland Compositor Examples - Multi Screen" docUrl="qthelp://org.qt-project.qtwaylandcompositor.5132/qtwaylandcompositor/qtwaylandcompositor-multi-screen-example.html" projectPath="wayland/multi-screen/multi-screen.pro">
+            <description><![CDATA[Multi Screen is a desktop-style Wayland compositor for multiple screens.]]></description>
+            <tags>compositor,multi,screen,wayland</tags>
+            <fileToOpen>wayland/multi-screen/main.cpp</fileToOpen>
+            <fileToOpen mainFile="true">wayland/multi-screen/qml/main.qml</fileToOpen>
+        </example>
+        <example name="Qt Wayland Compositor Examples - Overview Compositor" docUrl="qthelp://org.qt-project.qtwaylandcompositor.5132/qtwaylandcompositor/qtwaylandcompositor-overview-compositor-example.html" projectPath="wayland/overview-compositor/overview-compositor.pro">
+            <description><![CDATA[Overview Compositor shows how to switch between clients in a grid.]]></description>
+            <tags>compositor,overview,wayland</tags>
+            <fileToOpen>wayland/overview-compositor/main.cpp</fileToOpen>
+            <fileToOpen mainFile="true">wayland/overview-compositor/main.qml</fileToOpen>
+        </example>
+        <example name="Qt Wayland Compositor Examples - Pure QML" docUrl="qthelp://org.qt-project.qtwaylandcompositor.5132/qtwaylandcompositor/qtwaylandcompositor-pure-qml-example.html" projectPath="wayland/pure-qml/pure-qml.pro">
+            <description><![CDATA[Pure QML is an example that demonstrates how to write a Wayland compositor in pure QML.]]></description>
+            <tags>compositor,pure,qml,wayland</tags>
+            <fileToOpen>wayland/pure-qml/main.cpp</fileToOpen>
+            <fileToOpen mainFile="true">wayland/pure-qml/qml/main.qml</fileToOpen>
+        </example>
+        <example name="Qt Wayland Compositor Examples - QWindow Compositor" docUrl="qthelp://org.qt-project.qtwaylandcompositor.5132/qtwaylandcompositor/qtwaylandcompositor-qwindow-compositor-example.html" projectPath="wayland/qwindow-compositor/qwindow-compositor.pro">
+            <description><![CDATA[QWindow Compositor is an example that demonstrates how to write a Wayland compositor in C++.]]></description>
+            <tags>compositor,qwindow,wayland</tags>
+            <fileToOpen mainFile="true">wayland/qwindow-compositor/main.cpp</fileToOpen>
+        </example>
+        <example name="Qt Wayland Compositor Examples - Sever Side Decoration Compositor" docUrl="qthelp://org.qt-project.qtwaylandcompositor.5132/qtwaylandcompositor/qtwaylandcompositor-server-side-decoration-example.html" projectPath="wayland/server-side-decoration/server-side-decoration.pro">
+            <description><![CDATA[Server Side Decoration Compositor is a simple example that demonstrates server side window decorations on xdg-shell.]]></description>
+            <tags>compositor,decoration,sever,side,wayland</tags>
+            <fileToOpen>wayland/server-side-decoration/main.cpp</fileToOpen>
+            <fileToOpen mainFile="true">wayland/server-side-decoration/main.qml</fileToOpen>
+        </example>
+        <example name="Qt Wayland Compositor Examples - Spanning Screens" docUrl="qthelp://org.qt-project.qtwaylandcompositor.5132/qtwaylandcompositor/qtwaylandcompositor-spanning-screens-example.html" projectPath="wayland/spanning-screens/spanning-screens.pro">
+            <description><![CDATA[Spanning Screens is an example that demonstrates how to let Wayland clients span multiple screens.]]></description>
+            <tags>compositor,screens,spanning,wayland</tags>
+            <fileToOpen>wayland/spanning-screens/main.cpp</fileToOpen>
+            <fileToOpen mainFile="true">wayland/spanning-screens/main.qml</fileToOpen>
+        </example>
+    </examples>
+</instructionals>

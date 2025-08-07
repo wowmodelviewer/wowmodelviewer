@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qeffect.cpp -->
+  <title>Effect QML Type | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-qml.html">QML Types</a></td><td >Effect QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Effect QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Effect-brief -->
+<p>The base class for effects in a Qt 3D scene. <a href="#details">More...</a></p>
+<!-- @@@Effect -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import Qt3D.Render 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiates:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-effect.html"><a href="qt3drender-qeffect.html">QEffect</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qt3d-core-node.html">Node</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qt3d-render-effect-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qt3d-render-effect.html#parameters-prop">parameters</a></b></b> : list&lt;Parameter&gt;</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-effect.html#techniques-prop">techniques</a></b></b> : list&lt;Technique&gt;</li>
+</ul>
+<!-- $$$Effect-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The Effect type combines a set of techniques and parameters used by those techniques to produce a rendering effect for a material.</p>
+<p>An Effect instance should be shared among several Material instances when possible.</p>
+<p>A Parameter defined on an Effect is overridden by a QParameter (of the same name) defined in a Material, <a href="qml-qt3d-render-techniquefilter.html">TechniqueFilter</a>, <a href="qml-qt3d-render-renderpassfilter.html">RenderPassFilter</a>.</p>
+<p><b>Note: </b>Effect node can not be disabled.</p><pre class="cpp">
+
+  Effect {
+      id: effect
+
+      technique: <span class="operator">[</span>
+          Technique {
+              id: gl3Technique
+              graphicsApiFilter {
+                  api: GraphicsApiFilter<span class="operator">.</span>OpenGL
+                  profile: GraphicsApiFilter<span class="operator">.</span>CoreProfile
+                  majorVersion: <span class="number">3</span>
+                  minorVersion: <span class="number">1</span>
+              }
+              renderPasses: <span class="operator">[</span>
+                  RenderPass {
+                      id: gl3Pass
+                      shaderProgram: ShaderProgram {
+                          <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+                      }
+                  }
+              <span class="operator">]</span>
+          }
+      <span class="operator">]</span>
+  }
+
+</pre>
+<p><b>See also </b><a href="qml-qt3d-render-material.html">Material</a>, <a href="qml-qt3d-render-technique.html">Technique</a>, and <a href="qml-qt3d-render-parameter.html">Parameter</a>.</p>
+<!-- @@@Effect -->
+<h2>Property Documentation</h2>
+<!-- $$$parameters -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="parameters-prop"></a><span class="name">parameters</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="qml-qt3d-render-parameter.html">Parameter</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the list of parameters used by this effect. A parameter is used to set a corresponding uniform value in the shader used by this effect.</p>
+</div></div><!-- @@@parameters -->
+<br/>
+<!-- $$$techniques -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="techniques-prop"></a><span class="name">techniques</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="qml-qt3d-render-technique.html">Technique</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the list of techniques used by this effect.</p>
+</div></div><!-- @@@techniques -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

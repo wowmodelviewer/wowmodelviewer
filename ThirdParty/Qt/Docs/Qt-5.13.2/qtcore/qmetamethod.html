@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmetaobject.cpp -->
+  <title>QMetaMethod Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QMetaMethod</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#macros">Macros</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QMetaMethod Class</h1>
+<!-- $$$QMetaMethod-brief -->
+<p>The <a href="qmetamethod.html">QMetaMethod</a> class provides meta-data about a member function. <a href="#details">More...</a></p>
+<!-- @@@QMetaMethod -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QMetaMethod&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr></table></div><ul>
+<li><a href="qmetamethod-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#Access-enum">Access</a></b> { Private, Protected, Public }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#MethodType-enum">MethodType</a></b> { Method, Signal, Slot, Constructor }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QMetaMethod::Access </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#access">access</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#invoke">invoke</a></b>(QObject *<i>object</i>, Qt::ConnectionType <i>connectionType</i>, QGenericReturnArgument <i>returnValue</i>, QGenericArgument <i>val0</i> = QGenericArgument(nullptr), QGenericArgument <i>val1</i> = QGenericArgument(), QGenericArgument <i>val2</i> = QGenericArgument(), QGenericArgument <i>val3</i> = QGenericArgument(), QGenericArgument <i>val4</i> = QGenericArgument(), QGenericArgument <i>val5</i> = QGenericArgument(), QGenericArgument <i>val6</i> = QGenericArgument(), QGenericArgument <i>val7</i> = QGenericArgument(), QGenericArgument <i>val8</i> = QGenericArgument(), QGenericArgument <i>val9</i> = QGenericArgument()) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#invoke-1">invoke</a></b>(QObject *<i>object</i>, QGenericReturnArgument <i>returnValue</i>, QGenericArgument <i>val0</i> = ..., QGenericArgument <i>val1</i> = ..., QGenericArgument <i>val2</i> = ..., QGenericArgument <i>val3</i> = ..., QGenericArgument <i>val4</i> = ..., QGenericArgument <i>val5</i> = ..., QGenericArgument <i>val6</i> = ..., QGenericArgument <i>val7</i> = ..., QGenericArgument <i>val8</i> = ..., QGenericArgument <i>val9</i> = ...) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#invoke-2">invoke</a></b>(QObject *<i>object</i>, Qt::ConnectionType <i>connectionType</i>, QGenericArgument <i>val0</i> = ..., QGenericArgument <i>val1</i> = ..., QGenericArgument <i>val2</i> = ..., QGenericArgument <i>val3</i> = ..., QGenericArgument <i>val4</i> = ..., QGenericArgument <i>val5</i> = ..., QGenericArgument <i>val6</i> = ..., QGenericArgument <i>val7</i> = ..., QGenericArgument <i>val8</i> = ..., QGenericArgument <i>val9</i> = ...) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#invoke-3">invoke</a></b>(QObject *<i>object</i>, QGenericArgument <i>val0</i> = ..., QGenericArgument <i>val1</i> = ..., QGenericArgument <i>val2</i> = ..., QGenericArgument <i>val3</i> = ..., QGenericArgument <i>val4</i> = ..., QGenericArgument <i>val5</i> = ..., QGenericArgument <i>val6</i> = ..., QGenericArgument <i>val7</i> = ..., QGenericArgument <i>val8</i> = ..., QGenericArgument <i>val9</i> = ...) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#invokeOnGadget">invokeOnGadget</a></b>(void *<i>gadget</i>, QGenericReturnArgument <i>returnValue</i>, QGenericArgument <i>val0</i> = QGenericArgument(nullptr), QGenericArgument <i>val1</i> = QGenericArgument(), QGenericArgument <i>val2</i> = QGenericArgument(), QGenericArgument <i>val3</i> = QGenericArgument(), QGenericArgument <i>val4</i> = QGenericArgument(), QGenericArgument <i>val5</i> = QGenericArgument(), QGenericArgument <i>val6</i> = QGenericArgument(), QGenericArgument <i>val7</i> = QGenericArgument(), QGenericArgument <i>val8</i> = QGenericArgument(), QGenericArgument <i>val9</i> = QGenericArgument()) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#invokeOnGadget-1">invokeOnGadget</a></b>(void *<i>gadget</i>, QGenericArgument <i>val0</i> = ..., QGenericArgument <i>val1</i> = ..., QGenericArgument <i>val2</i> = ..., QGenericArgument <i>val3</i> = ..., QGenericArgument <i>val4</i> = ..., QGenericArgument <i>val5</i> = ..., QGenericArgument <i>val6</i> = ..., QGenericArgument <i>val7</i> = ..., QGenericArgument <i>val8</i> = ..., QGenericArgument <i>val9</i> = ...) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#isValid">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#methodIndex">methodIndex</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#methodSignature">methodSignature</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMetaMethod::MethodType </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#methodType">methodType</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#name">name</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#parameterCount">parameterCount</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QByteArray&gt; </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#parameterNames">parameterNames</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#parameterType">parameterType</a></b>(int <i>index</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QByteArray&gt; </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#parameterTypes">parameterTypes</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#returnType">returnType</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#revision">revision</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const char *</td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#tag">tag</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const char *</td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#typeName">typeName</a></b>() const</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QMetaMethod </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#fromSignal">fromSignal</a></b>(PointerToMemberFunction <i>signal</i>)</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#operator-not-eq">operator!=</a></b>(const QMetaMethod &amp;<i>m1</i>, const QMetaMethod &amp;<i>m2</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#operator-eq-eq">operator==</a></b>(const QMetaMethod &amp;<i>m1</i>, const QMetaMethod &amp;<i>m2</i>)</td></tr>
+</table></div>
+<a name="macros"></a>
+<h2 id="macros">Macros</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmetamethod.html#Q_METAMETHOD_INVOKE_MAX_ARGS">Q_METAMETHOD_INVOKE_MAX_ARGS</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QMetaMethod-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A <a href="qmetamethod.html">QMetaMethod</a> has a <a href="qmetamethod.html#methodType">methodType</a>(), a <a href="qmetamethod.html#methodSignature">methodSignature</a>(), a list of <a href="qmetamethod.html#parameterTypes">parameterTypes</a>() and <a href="qmetamethod.html#parameterNames">parameterNames</a>(), a return <a href="qmetamethod.html#typeName">typeName</a>(), a <a href="qmetamethod.html#tag">tag</a>(), and an <a href="qmetamethod.html#access">access</a>() specifier. You can use <a href="qmetamethod.html#invoke">invoke</a>() to invoke the method on an arbitrary <a href="qobject.html">QObject</a>.</p>
+</div>
+<p><b>See also </b><a href="qmetaobject.html">QMetaObject</a>, <a href="qmetaenum.html">QMetaEnum</a>, <a href="qmetaproperty.html">QMetaProperty</a>, and <a href="properties.html">Qt's Property System</a>.</p>
+<!-- @@@QMetaMethod -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Access$$$Private$$$Protected$$$Public -->
+<h3 class="fn" id="Access-enum"><a name="Access-enum"></a>enum QMetaMethod::<span class="name">Access</span></h3>
+<p>This enum describes the access level of a method, following the conventions used in C++.</p>
+<div class="table"><table class="valuelist"><tr><th class="tblConst">Constant</th><th class="tblVal">Value</th></tr>
+<tr><td class="topAlign"><code>QMetaMethod::Private</code></td><td class="topAlign tblval"><code>0</code></td></tr>
+<tr><td class="topAlign"><code>QMetaMethod::Protected</code></td><td class="topAlign tblval"><code>1</code></td></tr>
+<tr><td class="topAlign"><code>QMetaMethod::Public</code></td><td class="topAlign tblval"><code>2</code></td></tr>
+</table></div>
+<!-- @@@Access -->
+<!-- $$$MethodType$$$Method$$$Signal$$$Slot$$$Constructor -->
+<h3 class="fn" id="MethodType-enum"><a name="MethodType-enum"></a>enum QMetaMethod::<span class="name">MethodType</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QMetaMethod::Method</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The function is a plain member function.</td></tr>
+<tr><td class="topAlign"><code>QMetaMethod::Signal</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The function is a signal.</td></tr>
+<tr><td class="topAlign"><code>QMetaMethod::Slot</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The function is a slot.</td></tr>
+<tr><td class="topAlign"><code>QMetaMethod::Constructor</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">The function is a constructor.</td></tr>
+</table></div>
+<!-- @@@MethodType -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$access[overload1]$$$access -->
+<h3 class="fn" id="access"><a name="access"></a><span class="type"><a href="qmetamethod.html#Access-enum">QMetaMethod::Access</a></span> QMetaMethod::<span class="name">access</span>() const</h3>
+<p>Returns the access specification of this method (private, protected, or public).</p>
+<p><b>Note: </b>Signals are always public, but you should regard that as an implementation detail. It is almost always a bad idea to emit a signal from outside its class.</p><p><b>See also </b><a href="qmetamethod.html#methodType">methodType</a>().</p>
+<!-- @@@access -->
+<!-- $$$fromSignal[overload1]$$$fromSignalPointerToMemberFunction -->
+<h3 class="fn" id="fromSignal"><a name="fromSignal"></a><code>[static] </code><span class="type">QMetaMethod</span> QMetaMethod::<span class="name">fromSignal</span>(<span class="type">PointerToMemberFunction</span> <i>signal</i>)</h3>
+<p>Returns the meta-method that corresponds to the given <i>signal</i>, or an invalid <a href="qmetamethod.html">QMetaMethod</a> if <i>signal</i> is not a signal of the class.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="type">QMetaMethod</span> destroyedSignal <span class="operator">=</span> <span class="type">QMetaMethod</span><span class="operator">::</span>fromSignal(<span class="operator">&amp;</span><span class="type"><a href="qobject.html">QObject</a></span><span class="operator">::</span>destroyed);
+
+</pre>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@fromSignal -->
+<!-- $$$invoke[overload1]$$$invokeQObject*Qt::ConnectionTypeQGenericReturnArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgument -->
+<h3 class="fn" id="invoke"><a name="invoke"></a><span class="type">bool</span> QMetaMethod::<span class="name">invoke</span>(<span class="type"><a href="qobject.html">QObject</a></span> *<i>object</i>, <span class="type"><a href="qt.html#ConnectionType-enum">Qt::ConnectionType</a></span> <i>connectionType</i>, <span class="type"><a href="qgenericreturnargument.html">QGenericReturnArgument</a></span> <i>returnValue</i>, <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val0</i> = QGenericArgument(nullptr), <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val1</i> = QGenericArgument(), <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val2</i> = QGenericArgument(), <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val3</i> = QGenericArgument(), <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val4</i> = QGenericArgument(), <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val5</i> = QGenericArgument(), <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val6</i> = QGenericArgument(), <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val7</i> = QGenericArgument(), <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val8</i> = QGenericArgument(), <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val9</i> = QGenericArgument()) const</h3>
+<p>Invokes this method on the object <i>object</i>. Returns <code>true</code> if the member could be invoked. Returns <code>false</code> if there is no such member or the parameters did not match.</p>
+<p>The invocation can be either synchronous or asynchronous, depending on the <i>connectionType</i>:</p>
+<ul>
+<li>If <i>connectionType</i> is <a href="qt.html#ConnectionType-enum">Qt::DirectConnection</a>, the member will be invoked immediately.</li>
+<li>If <i>connectionType</i> is <a href="qt.html#ConnectionType-enum">Qt::QueuedConnection</a>, a <a href="qevent.html">QEvent</a> will be posted and the member is invoked as soon as the application enters the main event loop.</li>
+<li>If <i>connectionType</i> is <a href="qt.html#ConnectionType-enum">Qt::AutoConnection</a>, the member is invoked synchronously if <i>object</i> lives in the same thread as the caller; otherwise it will invoke the member asynchronously.</li>
+</ul>
+<p>The return value of this method call is placed in <i>returnValue</i>. If the invocation is asynchronous, the return value cannot be evaluated. You can pass up to ten arguments (<i>val0</i>, <i>val1</i>, <i>val2</i>, <i>val3</i>, <i>val4</i>, <i>val5</i>, <i>val6</i>, <i>val7</i>, <i>val8</i>, and <i>val9</i>) to this method call.</p>
+<p><a href="qgenericargument.html">QGenericArgument</a> and <a href="qgenericreturnargument.html">QGenericReturnArgument</a> are internal helper classes. Because signals and slots can be dynamically invoked, you must enclose the arguments using the <a href="qmetaobject.html#Q_ARG">Q_ARG</a>() and <a href="qmetaobject.html#Q_RETURN_ARG">Q_RETURN_ARG</a>() macros. <a href="qmetaobject.html#Q_ARG">Q_ARG</a>() takes a type name and a const reference of that type; <a href="qmetaobject.html#Q_RETURN_ARG">Q_RETURN_ARG</a>() takes a type name and a non-const reference.</p>
+<p>To asynchronously invoke the <a href="../qtwidgets/qabstractbutton.html#animateClick">animateClick()</a> slot on a <a href="../qtwidgets/qpushbutton.html">QPushButton</a>:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> methodIndex <span class="operator">=</span> pushButton<span class="operator">-</span><span class="operator">&gt;</span>metaObject()<span class="operator">-</span><span class="operator">&gt;</span>indexOfMethod(<span class="string">&quot;animateClick()&quot;</span>);
+  <span class="type">QMetaMethod</span> method <span class="operator">=</span> metaObject<span class="operator">-</span><span class="operator">&gt;</span>method(methodIndex);
+  method<span class="operator">.</span>invoke(pushButton<span class="operator">,</span> <span class="type">Qt</span><span class="operator">::</span>QueuedConnection);
+
+</pre>
+<p>With asynchronous method invocations, the parameters must be of types that are known to Qt's meta-object system, because Qt needs to copy the arguments to store them in an event behind the scenes. If you try to use a queued connection and get the error message</p>
+<pre class="cpp">
+
+  <span class="type">QMetaMethod</span><span class="operator">::</span>invoke: Unable to handle unregistered datatype <span class="char">'MyType'</span>
+
+</pre>
+<p>call <a href="qmetatype.html#qRegisterMetaType-1">qRegisterMetaType</a>() to register the data type before you call QMetaMethod::invoke().</p>
+<p>To synchronously invoke the <code>compute(QString, int, double)</code> slot on some arbitrary object <code>obj</code> retrieve its return value:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qstring.html">QString</a></span> retVal;
+  <span class="type"><a href="qbytearray.html">QByteArray</a></span> normalizedSignature <span class="operator">=</span> <span class="type"><a href="qmetaobject.html">QMetaObject</a></span><span class="operator">::</span>normalizedSignature(<span class="string">&quot;compute(QString, int, double)&quot;</span>);
+  <span class="type">int</span> methodIndex <span class="operator">=</span> obj<span class="operator">-</span><span class="operator">&gt;</span>metaObject()<span class="operator">-</span><span class="operator">&gt;</span>indexOfMethod(normalizedSignature);
+  <span class="type">QMetaMethod</span> method <span class="operator">=</span> obj<span class="operator">-</span><span class="operator">&gt;</span>metaObject()<span class="operator">-</span><span class="operator">&gt;</span>method(methodIndex);
+  method<span class="operator">.</span>invoke(obj<span class="operator">,</span>
+                <span class="type">Qt</span><span class="operator">::</span>DirectConnection<span class="operator">,</span>
+                Q_RETURN_ARG(<span class="type"><a href="qstring.html">QString</a></span><span class="operator">,</span> retVal)<span class="operator">,</span>
+                Q_ARG(<span class="type"><a href="qstring.html">QString</a></span><span class="operator">,</span> <span class="string">&quot;sqrt&quot;</span>)<span class="operator">,</span>
+                Q_ARG(<span class="type">int</span><span class="operator">,</span> <span class="number">42</span>)<span class="operator">,</span>
+                Q_ARG(<span class="type">double</span><span class="operator">,</span> <span class="number">9.7</span>));
+
+</pre>
+<p><a href="qmetaobject.html#normalizedSignature">QMetaObject::normalizedSignature</a>() is used here to ensure that the format of the signature is what invoke() expects. E.g&#x2e; extra whitespace is removed.</p>
+<p>If the &quot;compute&quot; slot does not take exactly one <a href="qstring.html">QString</a>, one int and one double in the specified order, the call will fail.</p>
+<p><b>Warning:</b> this method will not test the validity of the arguments: <i>object</i> must be an instance of the class of the <a href="qmetaobject.html">QMetaObject</a> of which this <a href="qmetamethod.html">QMetaMethod</a> has been constructed with. The arguments must have the same type as the ones expected by the method, else, the behaviour is undefined.</p>
+<p><b>See also </b><a href="qmetaobject.html#Q_ARG">Q_ARG</a>(), <a href="qmetaobject.html#Q_RETURN_ARG">Q_RETURN_ARG</a>(), <a href="qmetatype.html#qRegisterMetaType-1">qRegisterMetaType</a>(), and <a href="qmetaobject.html#invokeMethod">QMetaObject::invokeMethod</a>().</p>
+<!-- @@@invoke -->
+<!-- $$$invoke$$$invokeQObject*QGenericReturnArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgument -->
+<h3 class="fn" id="invoke-1"><a name="invoke-1"></a><span class="type">bool</span> QMetaMethod::<span class="name">invoke</span>(<span class="type"><a href="qobject.html">QObject</a></span> *<i>object</i>, <span class="type"><a href="qgenericreturnargument.html">QGenericReturnArgument</a></span> <i>returnValue</i>, <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val0</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val1</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val2</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val3</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val4</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val5</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val6</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val7</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val8</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val9</i> = ...) const</h3>
+<p>This function overloads <a href="qmetamethod.html#invoke">invoke</a>().</p>
+<p>This overload always invokes this method using the connection type <a href="qt.html#ConnectionType-enum">Qt::AutoConnection</a>.</p>
+<!-- @@@invoke -->
+<!-- $$$invoke$$$invokeQObject*Qt::ConnectionTypeQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgument -->
+<h3 class="fn" id="invoke-2"><a name="invoke-2"></a><span class="type">bool</span> QMetaMethod::<span class="name">invoke</span>(<span class="type"><a href="qobject.html">QObject</a></span> *<i>object</i>, <span class="type"><a href="qt.html#ConnectionType-enum">Qt::ConnectionType</a></span> <i>connectionType</i>, <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val0</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val1</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val2</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val3</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val4</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val5</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val6</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val7</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val8</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val9</i> = ...) const</h3>
+<p>This function overloads <a href="qmetamethod.html#invoke">invoke</a>().</p>
+<p>This overload can be used if the return value of the member is of no interest.</p>
+<!-- @@@invoke -->
+<!-- $$$invoke$$$invokeQObject*QGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgument -->
+<h3 class="fn" id="invoke-3"><a name="invoke-3"></a><span class="type">bool</span> QMetaMethod::<span class="name">invoke</span>(<span class="type"><a href="qobject.html">QObject</a></span> *<i>object</i>, <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val0</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val1</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val2</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val3</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val4</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val5</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val6</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val7</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val8</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val9</i> = ...) const</h3>
+<p>This function overloads <a href="qmetamethod.html#invoke">invoke</a>().</p>
+<p>This overload invokes this method using the connection type <a href="qt.html#ConnectionType-enum">Qt::AutoConnection</a> and ignores return values.</p>
+<!-- @@@invoke -->
+<!-- $$$invokeOnGadget[overload1]$$$invokeOnGadgetvoid*QGenericReturnArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgument -->
+<h3 class="fn" id="invokeOnGadget"><a name="invokeOnGadget"></a><span class="type">bool</span> QMetaMethod::<span class="name">invokeOnGadget</span>(<span class="type">void</span> *<i>gadget</i>, <span class="type"><a href="qgenericreturnargument.html">QGenericReturnArgument</a></span> <i>returnValue</i>, <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val0</i> = QGenericArgument(nullptr), <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val1</i> = QGenericArgument(), <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val2</i> = QGenericArgument(), <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val3</i> = QGenericArgument(), <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val4</i> = QGenericArgument(), <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val5</i> = QGenericArgument(), <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val6</i> = QGenericArgument(), <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val7</i> = QGenericArgument(), <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val8</i> = QGenericArgument(), <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val9</i> = QGenericArgument()) const</h3>
+<p>Invokes this method on a <a href="qobject.html#Q_GADGET">Q_GADGET</a>. Returns <code>true</code> if the member could be invoked. Returns <code>false</code> if there is no such member or the parameters did not match.</p>
+<p>The pointer <i>gadget</i> must point to an instance of the gadget class.</p>
+<p>The invocation is always synchronous.</p>
+<p>The return value of this method call is placed in <i>returnValue</i>. You can pass up to ten arguments (<i>val0</i>, <i>val1</i>, <i>val2</i>, <i>val3</i>, <i>val4</i>, <i>val5</i>, <i>val6</i>, <i>val7</i>, <i>val8</i>, and <i>val9</i>) to this method call.</p>
+<p><b>Warning:</b> this method will not test the validity of the arguments: <i>gadget</i> must be an instance of the class of the <a href="qmetaobject.html">QMetaObject</a> of which this <a href="qmetamethod.html">QMetaMethod</a> has been constructed with. The arguments must have the same type as the ones expected by the method, else, the behavior is undefined.</p>
+<p>This function was introduced in  Qt 5.5.</p>
+<p><b>See also </b><a href="qmetaobject.html#Q_ARG">Q_ARG</a>(), <a href="qmetaobject.html#Q_RETURN_ARG">Q_RETURN_ARG</a>(), <a href="qmetatype.html#qRegisterMetaType-1">qRegisterMetaType</a>(), and <a href="qmetaobject.html#invokeMethod">QMetaObject::invokeMethod</a>().</p>
+<!-- @@@invokeOnGadget -->
+<!-- $$$invokeOnGadget$$$invokeOnGadgetvoid*QGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgumentQGenericArgument -->
+<h3 class="fn" id="invokeOnGadget-1"><a name="invokeOnGadget-1"></a><span class="type">bool</span> QMetaMethod::<span class="name">invokeOnGadget</span>(<span class="type">void</span> *<i>gadget</i>, <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val0</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val1</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val2</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val3</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val4</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val5</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val6</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val7</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val8</i> = ..., <span class="type"><a href="qgenericargument.html">QGenericArgument</a></span> <i>val9</i> = ...) const</h3>
+<p>This is an overloaded function.</p>
+<p>This overload invokes this method for a <i>gadget</i> and ignores return values.</p>
+<p>This function was introduced in  Qt 5.5.</p>
+<!-- @@@invokeOnGadget -->
+<!-- $$$isValid[overload1]$$$isValid -->
+<h3 class="fn" id="isValid"><a name="isValid"></a><span class="type">bool</span> QMetaMethod::<span class="name">isValid</span>() const</h3>
+<p>Returns <code>true</code> if this method is valid (can be introspected and invoked), otherwise returns <code>false</code>.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@isValid -->
+<!-- $$$methodIndex[overload1]$$$methodIndex -->
+<h3 class="fn" id="methodIndex"><a name="methodIndex"></a><span class="type">int</span> QMetaMethod::<span class="name">methodIndex</span>() const</h3>
+<p>Returns this method's index.</p>
+<p>This function was introduced in  Qt 4.6.</p>
+<!-- @@@methodIndex -->
+<!-- $$$methodSignature[overload1]$$$methodSignature -->
+<h3 class="fn" id="methodSignature"><a name="methodSignature"></a><span class="type"><a href="qbytearray.html">QByteArray</a></span> QMetaMethod::<span class="name">methodSignature</span>() const</h3>
+<p>Returns the signature of this method (e.g&#x2e;, <code>setValue(double)</code>).</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qmetamethod.html#parameterTypes">parameterTypes</a>() and <a href="qmetamethod.html#parameterNames">parameterNames</a>().</p>
+<!-- @@@methodSignature -->
+<!-- $$$methodType[overload1]$$$methodType -->
+<h3 class="fn" id="methodType"><a name="methodType"></a><span class="type"><a href="qmetamethod.html#MethodType-enum">QMetaMethod::MethodType</a></span> QMetaMethod::<span class="name">methodType</span>() const</h3>
+<p>Returns the type of this method (signal, slot, or method).</p>
+<p><b>See also </b><a href="qmetamethod.html#access">access</a>().</p>
+<!-- @@@methodType -->
+<!-- $$$name[overload1]$$$name -->
+<h3 class="fn" id="name"><a name="name"></a><span class="type"><a href="qbytearray.html">QByteArray</a></span> QMetaMethod::<span class="name">name</span>() const</h3>
+<p>Returns the name of this method.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qmetamethod.html#methodSignature">methodSignature</a>() and <a href="qmetamethod.html#parameterCount">parameterCount</a>().</p>
+<!-- @@@name -->
+<!-- $$$parameterCount[overload1]$$$parameterCount -->
+<h3 class="fn" id="parameterCount"><a name="parameterCount"></a><span class="type">int</span> QMetaMethod::<span class="name">parameterCount</span>() const</h3>
+<p>Returns the number of parameters of this method.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qmetamethod.html#parameterType">parameterType</a>() and <a href="qmetamethod.html#parameterNames">parameterNames</a>().</p>
+<!-- @@@parameterCount -->
+<!-- $$$parameterNames[overload1]$$$parameterNames -->
+<h3 class="fn" id="parameterNames"><a name="parameterNames"></a><span class="type"><a href="qlist.html">QList</a></span>&lt;<span class="type"><a href="qbytearray.html">QByteArray</a></span>&gt; QMetaMethod::<span class="name">parameterNames</span>() const</h3>
+<p>Returns a list of parameter names.</p>
+<p><b>See also </b><a href="qmetamethod.html#parameterTypes">parameterTypes</a>() and <a href="qmetamethod.html#methodSignature">methodSignature</a>().</p>
+<!-- @@@parameterNames -->
+<!-- $$$parameterType[overload1]$$$parameterTypeint -->
+<h3 class="fn" id="parameterType"><a name="parameterType"></a><span class="type">int</span> QMetaMethod::<span class="name">parameterType</span>(<span class="type">int</span> <i>index</i>) const</h3>
+<p>Returns the type of the parameter at the given <i>index</i>.</p>
+<p>The return value is one of the types that are registered with <a href="qmetatype.html">QMetaType</a>, or <a href="qmetatype.html#Type-enum">QMetaType::UnknownType</a> if the type is not registered.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qmetamethod.html#parameterCount">parameterCount</a>(), <a href="qmetamethod.html#returnType">returnType</a>(), and <a href="qmetatype.html">QMetaType</a>.</p>
+<!-- @@@parameterType -->
+<!-- $$$parameterTypes[overload1]$$$parameterTypes -->
+<h3 class="fn" id="parameterTypes"><a name="parameterTypes"></a><span class="type"><a href="qlist.html">QList</a></span>&lt;<span class="type"><a href="qbytearray.html">QByteArray</a></span>&gt; QMetaMethod::<span class="name">parameterTypes</span>() const</h3>
+<p>Returns a list of parameter types.</p>
+<p><b>See also </b><a href="qmetamethod.html#parameterNames">parameterNames</a>() and <a href="qmetamethod.html#methodSignature">methodSignature</a>().</p>
+<!-- @@@parameterTypes -->
+<!-- $$$returnType[overload1]$$$returnType -->
+<h3 class="fn" id="returnType"><a name="returnType"></a><span class="type">int</span> QMetaMethod::<span class="name">returnType</span>() const</h3>
+<p>Returns the return type of this method.</p>
+<p>The return value is one of the types that are registered with <a href="qmetatype.html">QMetaType</a>, or <a href="qmetatype.html#Type-enum">QMetaType::UnknownType</a> if the type is not registered.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qmetamethod.html#parameterType">parameterType</a>(), <a href="qmetatype.html">QMetaType</a>, and <a href="qmetamethod.html#typeName">typeName</a>().</p>
+<!-- @@@returnType -->
+<!-- $$$revision[overload1]$$$revision -->
+<h3 class="fn" id="revision"><a name="revision"></a><span class="type">int</span> QMetaMethod::<span class="name">revision</span>() const</h3>
+<p>Returns the method revision if one was specified by <a href="qobject.html#Q_REVISION">Q_REVISION</a>, otherwise returns 0.</p>
+<p>This function was introduced in  Qt 5.1.</p>
+<!-- @@@revision -->
+<!-- $$$tag[overload1]$$$tag -->
+<h3 class="fn" id="tag"><a name="tag"></a>const <span class="type">char</span> *QMetaMethod::<span class="name">tag</span>() const</h3>
+<p>Returns the tag associated with this method.</p>
+<p>Tags are special macros recognized by <code>moc</code> that make it possible to add extra information about a method.</p>
+<p>Tag information can be added in the following way in the function declaration:</p>
+<pre class="cpp">
+
+      <span class="comment">// In the class MainWindow declaration</span>
+      <span class="preprocessor">#ifndef Q_MOC_RUN</span>
+      <span class="comment">// define the tag text as empty, so the compiler doesn't see it</span>
+      <span class="preprocessor">#  define MY_CUSTOM_TAG</span>
+      <span class="preprocessor">#endif</span>
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+      <span class="keyword">private</span> <span class="keyword">slots</span>:
+          MY_CUSTOM_TAG <span class="type">void</span> testFunc();
+
+</pre>
+<p>and the information can be accessed by using:</p>
+<pre class="cpp">
+
+      MainWindow win;
+      win<span class="operator">.</span>show();
+
+      <span class="type">int</span> functionIndex <span class="operator">=</span> win<span class="operator">.</span>metaObject()<span class="operator">-</span><span class="operator">&gt;</span>indexOfSlot(<span class="string">&quot;testFunc()&quot;</span>);
+      <span class="type">QMetaMethod</span> mm <span class="operator">=</span> win<span class="operator">.</span>metaObject()<span class="operator">-</span><span class="operator">&gt;</span>method(functionIndex);
+      <a href="qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> mm<span class="operator">.</span>tag(); <span class="comment">// prints MY_CUSTOM_TAG</span>
+
+</pre>
+<p>For the moment, <code>moc</code> will extract and record all tags, but it will not handle any of them specially. You can use the tags to annotate your methods differently, and treat them according to the specific needs of your application.</p>
+<p><b>Note: </b>Since Qt 5.0, <code>moc</code> expands preprocessor macros, so it is necessary to surround the definition with <code>#ifndef</code> <code>Q_MOC_RUN</code>, as shown in the example above. This was not required in Qt 4. The code as shown above works with Qt 4 too.</p><!-- @@@tag -->
+<!-- $$$typeName[overload1]$$$typeName -->
+<h3 class="fn" id="typeName"><a name="typeName"></a>const <span class="type">char</span> *QMetaMethod::<span class="name">typeName</span>() const</h3>
+<p>Returns the return type name of this method.</p>
+<p><b>See also </b><a href="qmetamethod.html#returnType">returnType</a>() and <a href="qmetatype.html#type">QMetaType::type</a>().</p>
+<!-- @@@typeName -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$operator!=[overload1]$$$operator!=constQMetaMethod&constQMetaMethod& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> <span class="name">operator!=</span>(const <span class="type">QMetaMethod</span> &amp;<i>m1</i>, const <span class="type">QMetaMethod</span> &amp;<i>m2</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns <code>true</code> if method <i>m1</i> is not equal to method <i>m2</i>, otherwise returns <code>false</code>.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQMetaMethod&constQMetaMethod& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> <span class="name">operator==</span>(const <span class="type">QMetaMethod</span> &amp;<i>m1</i>, const <span class="type">QMetaMethod</span> &amp;<i>m2</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns <code>true</code> if method <i>m1</i> is equal to method <i>m2</i>, otherwise returns <code>false</code>.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@operator== -->
+</div>
+<div class="macros">
+<h2>Macro Documentation</h2>
+<!-- $$$Q_METAMETHOD_INVOKE_MAX_ARGS[overload1]$$$Q_METAMETHOD_INVOKE_MAX_ARGS -->
+<h3 class="fn" id="Q_METAMETHOD_INVOKE_MAX_ARGS"><a name="Q_METAMETHOD_INVOKE_MAX_ARGS"></a><span class="name">Q_METAMETHOD_INVOKE_MAX_ARGS</span></h3>
+<p>Equals maximum number of arguments available for execution of the method via <a href="qmetamethod.html#invoke">QMetaMethod::invoke</a>()</p>
+<!-- @@@Q_METAMETHOD_INVOKE_MAX_ARGS -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

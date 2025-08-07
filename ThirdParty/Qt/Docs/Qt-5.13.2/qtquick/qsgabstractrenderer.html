@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qsgabstractrenderer.cpp -->
+  <title>QSGAbstractRenderer Class | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-module.html">C++ Classes</a></td><td >QSGAbstractRenderer</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSGAbstractRenderer Class</h1>
+<!-- $$$QSGAbstractRenderer-brief -->
+<p><a href="qsgabstractrenderer.html">QSGAbstractRenderer</a> gives access to the scene graph nodes and rendering of a <a href="qsgengine.html">QSGEngine</a>. <a href="#details">More...</a></p>
+<!-- @@@QSGAbstractRenderer -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QSGAbstractRenderer&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += quick</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.4</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.4.</p>
+<ul>
+<li><a href="qsgabstractrenderer-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qsgabstractrenderer.html#ClearModeBit-enum">ClearMode</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qsgabstractrenderer.html#ClearModeBit-enum">ClearModeBit</a></b> { ClearColorBuffer, ClearDepthBuffer, ClearStencilBuffer }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QColor </td><td class="memItemRight bottomAlign"><b><a href="qsgabstractrenderer.html#clearColor">clearColor</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSGAbstractRenderer::ClearMode </td><td class="memItemRight bottomAlign"><b><a href="qsgabstractrenderer.html#clearMode">clearMode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRect </td><td class="memItemRight bottomAlign"><b><a href="qsgabstractrenderer.html#deviceRect">deviceRect</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMatrix4x4 </td><td class="memItemRight bottomAlign"><b><a href="qsgabstractrenderer.html#projectionMatrix">projectionMatrix</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qsgabstractrenderer.html#renderScene">renderScene</a></b>(uint <i>fboId</i> = ...) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSGRootNode *</td><td class="memItemRight bottomAlign"><b><a href="qsgabstractrenderer.html#rootNode">rootNode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsgabstractrenderer.html#setClearColor">setClearColor</a></b>(const QColor &amp;<i>color</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsgabstractrenderer.html#setClearMode">setClearMode</a></b>(QSGAbstractRenderer::ClearMode <i>mode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsgabstractrenderer.html#setDeviceRect">setDeviceRect</a></b>(const QRect &amp;<i>rect</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsgabstractrenderer.html#setDeviceRect-1">setDeviceRect</a></b>(const QSize &amp;<i>size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsgabstractrenderer.html#setProjectionMatrix">setProjectionMatrix</a></b>(const QMatrix4x4 &amp;<i>matrix</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsgabstractrenderer.html#setProjectionMatrixToRect">setProjectionMatrixToRect</a></b>(const QRectF &amp;<i>rect</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsgabstractrenderer.html#setRootNode">setRootNode</a></b>(QSGRootNode *<i>node</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsgabstractrenderer.html#setViewportRect">setViewportRect</a></b>(const QRect &amp;<i>rect</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsgabstractrenderer.html#setViewportRect-1">setViewportRect</a></b>(const QSize &amp;<i>size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRect </td><td class="memItemRight bottomAlign"><b><a href="qsgabstractrenderer.html#viewportRect">viewportRect</a></b>() const</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsgabstractrenderer.html#sceneGraphChanged">sceneGraphChanged</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSGAbstractRenderer-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A <a href="qsgabstractrenderer.html">QSGAbstractRenderer</a> created by a <a href="qsgengine.html">QSGEngine</a> allows you to set your <a href="qsgnode.html">QSGNode</a> tree through <a href="qsgabstractrenderer.html#setRootNode">setRootNode</a>() and control the rendering viewport through <a href="qsgabstractrenderer.html#setDeviceRect">setDeviceRect</a>(), <a href="qsgabstractrenderer.html#setViewportRect">setViewportRect</a>() and <a href="qsgabstractrenderer.html#setProjectionMatrixToRect">setProjectionMatrixToRect</a>(). You can finally trigger the rendering to the desired framebuffer through <a href="qsgabstractrenderer.html#renderScene">renderScene</a>().</p>
+<p>The <a href="qsgabstractrenderer.html">QSGAbstractRenderer</a> is only available when used with a <a href="qsgengine.html">QSGEngine</a> and isn't exposed when used internally by <a href="qquickwindow.html">QQuickWindow</a>.</p>
+</div>
+<p><b>See also </b><a href="qsgengine.html">QSGEngine</a> and <a href="qsgnode.html">QSGNode</a>.</p>
+<!-- @@@QSGAbstractRenderer -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$ClearModeBit$$$ClearColorBuffer$$$ClearDepthBuffer$$$ClearStencilBuffer -->
+<h3 class="flags" id="ClearModeBit-enum"><a name="ClearModeBit-enum"></a>enum QSGAbstractRenderer::<span class="name">ClearModeBit</span><br/>flags QSGAbstractRenderer::<span class="name">ClearMode</span></h3>
+<p>Used with <a href="qsgabstractrenderer.html#setClearMode">setClearMode</a>() to indicate which buffer should be cleared before the scene render.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QSGAbstractRenderer::ClearColorBuffer</code></td><td class="topAlign tblval"><code>0x0001</code></td><td class="topAlign">Clear the color buffer using <a href="qsgabstractrenderer.html#clearColor">clearColor</a>().</td></tr>
+<tr><td class="topAlign"><code>QSGAbstractRenderer::ClearDepthBuffer</code></td><td class="topAlign tblval"><code>0x0002</code></td><td class="topAlign">Clear the depth buffer.</td></tr>
+<tr><td class="topAlign"><code>QSGAbstractRenderer::ClearStencilBuffer</code></td><td class="topAlign tblval"><code>0x0004</code></td><td class="topAlign">Clear the stencil buffer.</td></tr>
+</table></div>
+<p>The ClearMode type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;ClearModeBit&gt;. It stores an OR combination of ClearModeBit values.</p>
+<p><b>See also </b><a href="qsgabstractrenderer.html#setClearMode">setClearMode</a>() and <a href="qsgabstractrenderer.html#setClearColor">setClearColor</a>().</p>
+<!-- @@@ClearModeBit -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$sceneGraphChanged[overload1]$$$sceneGraphChanged -->
+<h3 class="fn" id="sceneGraphChanged"><a name="sceneGraphChanged"></a><code>[signal] </code><span class="type">void</span> QSGAbstractRenderer::<span class="name">sceneGraphChanged</span>()</h3>
+<p>This signal is emitted on the first modification of a node in the tree after the last scene render.</p>
+<!-- @@@sceneGraphChanged -->
+<!-- $$$clearColor[overload1]$$$clearColor -->
+<h3 class="fn" id="clearColor"><a name="clearColor"></a><span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> QSGAbstractRenderer::<span class="name">clearColor</span>() const</h3>
+<p>Returns the color that clears the framebuffer at the beginning of the rendering.</p>
+<p><b>See also </b><a href="qsgabstractrenderer.html#setClearColor">setClearColor</a>() and <a href="qsgabstractrenderer.html#clearMode">clearMode</a>().</p>
+<!-- @@@clearColor -->
+<!-- $$$clearMode[overload1]$$$clearMode -->
+<h3 class="fn" id="clearMode"><a name="clearMode"></a><span class="type"><a href="qsgabstractrenderer.html#ClearModeBit-enum">QSGAbstractRenderer::ClearMode</a></span> QSGAbstractRenderer::<span class="name">clearMode</span>() const</h3>
+<p>Flags defining which attachment of the framebuffer will be cleared before each scene render.</p>
+<p><b>See also </b><a href="qsgabstractrenderer.html#setClearMode">setClearMode</a>() and <a href="qsgabstractrenderer.html#clearColor">clearColor</a>().</p>
+<!-- @@@clearMode -->
+<!-- $$$deviceRect[overload1]$$$deviceRect -->
+<h3 class="fn" id="deviceRect"><a name="deviceRect"></a><span class="type"><a href="../qtcore/qrect.html">QRect</a></span> QSGAbstractRenderer::<span class="name">deviceRect</span>() const</h3>
+<p>Returns the device rect of the surface being rendered to.</p>
+<p><b>See also </b><a href="qsgabstractrenderer.html#setDeviceRect">setDeviceRect</a>().</p>
+<!-- @@@deviceRect -->
+<!-- $$$projectionMatrix[overload1]$$$projectionMatrix -->
+<h3 class="fn" id="projectionMatrix"><a name="projectionMatrix"></a><span class="type"><a href="../qtgui/qmatrix4x4.html">QMatrix4x4</a></span> QSGAbstractRenderer::<span class="name">projectionMatrix</span>() const</h3>
+<p>Returns the projection matrix</p>
+<p><b>See also </b><a href="qsgabstractrenderer.html#setProjectionMatrix">setProjectionMatrix</a>() and <a href="qsgabstractrenderer.html#setProjectionMatrixToRect">setProjectionMatrixToRect</a>().</p>
+<!-- @@@projectionMatrix -->
+<!-- $$$renderScene[overload1]$$$renderSceneuint -->
+<h3 class="fn" id="renderScene"><a name="renderScene"></a><code>[pure virtual] </code><span class="type">void</span> QSGAbstractRenderer::<span class="name">renderScene</span>(<span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> <i>fboId</i> = ...)</h3>
+<p>Render the scene to the specified <i>fboId</i></p>
+<p>If <i>fboId</i> isn't specified, the scene graph will be rendered to the default framebuffer. You will have to call <a href="../qtgui/qopenglcontext.html#swapBuffers">QOpenGLContext::swapBuffers</a>() yourself afterward.</p>
+<p>The framebuffer specified by <i>fboId</i> will be bound automatically.</p>
+<p><b>See also </b><a href="../qtgui/qopenglcontext.html#swapBuffers">QOpenGLContext::swapBuffers</a>() and <a href="../qtgui/qopenglframebufferobject.html#handle">QOpenGLFramebufferObject::handle</a>().</p>
+<!-- @@@renderScene -->
+<!-- $$$rootNode[overload1]$$$rootNode -->
+<h3 class="fn" id="rootNode"><a name="rootNode"></a><span class="type">QSGRootNode</span> *QSGAbstractRenderer::<span class="name">rootNode</span>() const</h3>
+<p>Returns the root of the <a href="qsgnode.html">QSGNode</a> scene.</p>
+<p><b>See also </b><a href="qsgabstractrenderer.html#setRootNode">setRootNode</a>().</p>
+<!-- @@@rootNode -->
+<!-- $$$setClearColor[overload1]$$$setClearColorconstQColor& -->
+<h3 class="fn" id="setClearColor"><a name="setClearColor"></a><span class="type">void</span> QSGAbstractRenderer::<span class="name">setClearColor</span>(const <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> &amp;<i>color</i>)</h3>
+<p>Use <i>color</i> to clear the framebuffer when <a href="qsgabstractrenderer.html#clearMode">clearMode</a>() is set to <a href="qsgabstractrenderer.html#ClearModeBit-enum">QSGAbstractRenderer::ClearColorBuffer</a>.</p>
+<p><b>See also </b><a href="qsgabstractrenderer.html#clearColor">clearColor</a>() and <a href="qsgabstractrenderer.html#setClearMode">setClearMode</a>().</p>
+<!-- @@@setClearColor -->
+<!-- $$$setClearMode[overload1]$$$setClearModeQSGAbstractRenderer::ClearMode -->
+<h3 class="fn" id="setClearMode"><a name="setClearMode"></a><span class="type">void</span> QSGAbstractRenderer::<span class="name">setClearMode</span>(<span class="type"><a href="qsgabstractrenderer.html#ClearModeBit-enum">QSGAbstractRenderer::ClearMode</a></span> <i>mode</i>)</h3>
+<p>Defines which attachment of the framebuffer should be cleared before each scene render with the <i>mode</i> flag.</p>
+<p><b>See also </b><a href="qsgabstractrenderer.html#clearMode">clearMode</a>() and <a href="qsgabstractrenderer.html#setClearColor">setClearColor</a>().</p>
+<!-- @@@setClearMode -->
+<!-- $$$setDeviceRect[overload1]$$$setDeviceRectconstQRect& -->
+<h3 class="fn" id="setDeviceRect"><a name="setDeviceRect"></a><span class="type">void</span> QSGAbstractRenderer::<span class="name">setDeviceRect</span>(const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> &amp;<i>rect</i>)</h3>
+<p>Sets <i>rect</i> as the geometry of the surface being rendered to.</p>
+<p><b>See also </b><a href="qsgabstractrenderer.html#deviceRect">deviceRect</a>().</p>
+<!-- @@@setDeviceRect -->
+<!-- $$$setDeviceRect$$$setDeviceRectconstQSize& -->
+<h3 class="fn" id="setDeviceRect-1"><a name="setDeviceRect-1"></a><span class="type">void</span> QSGAbstractRenderer::<span class="name">setDeviceRect</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>size</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Sets the <i>size</i> of the surface being rendered to.</p>
+<p><b>See also </b><a href="qsgabstractrenderer.html#deviceRect">deviceRect</a>().</p>
+<!-- @@@setDeviceRect -->
+<!-- $$$setProjectionMatrix[overload1]$$$setProjectionMatrixconstQMatrix4x4& -->
+<h3 class="fn" id="setProjectionMatrix"><a name="setProjectionMatrix"></a><span class="type">void</span> QSGAbstractRenderer::<span class="name">setProjectionMatrix</span>(const <span class="type"><a href="../qtgui/qmatrix4x4.html">QMatrix4x4</a></span> &amp;<i>matrix</i>)</h3>
+<p>Use <i>matrix</i> to project the <a href="qsgnode.html">QSGNode</a> coordinates onto surface pixels.</p>
+<p><b>See also </b><a href="qsgabstractrenderer.html#projectionMatrix">projectionMatrix</a>() and <a href="qsgabstractrenderer.html#setProjectionMatrixToRect">setProjectionMatrixToRect</a>().</p>
+<!-- @@@setProjectionMatrix -->
+<!-- $$$setProjectionMatrixToRect[overload1]$$$setProjectionMatrixToRectconstQRectF& -->
+<h3 class="fn" id="setProjectionMatrixToRect"><a name="setProjectionMatrixToRect"></a><span class="type">void</span> QSGAbstractRenderer::<span class="name">setProjectionMatrixToRect</span>(const <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> &amp;<i>rect</i>)</h3>
+<p>Convenience method that calls <a href="qsgabstractrenderer.html#setProjectionMatrix">setProjectionMatrix</a>() with an orthographic matrix generated from <i>rect</i>.</p>
+<p><b>See also </b><a href="qsgabstractrenderer.html#setProjectionMatrix">setProjectionMatrix</a>() and <a href="qsgabstractrenderer.html#projectionMatrix">projectionMatrix</a>().</p>
+<!-- @@@setProjectionMatrixToRect -->
+<!-- $$$setRootNode[overload1]$$$setRootNodeQSGRootNode* -->
+<h3 class="fn" id="setRootNode"><a name="setRootNode"></a><span class="type">void</span> QSGAbstractRenderer::<span class="name">setRootNode</span>(<span class="type">QSGRootNode</span> *<i>node</i>)</h3>
+<p>Sets the <i>node</i> as the root of the <a href="qsgnode.html">QSGNode</a> scene that you want to render. You need to provide a <i>node</i> before trying to render the scene.</p>
+<p><b>Note: </b>This doesn't take ownership of <i>node</i>.</p><p><b>See also </b><a href="qsgabstractrenderer.html#rootNode">rootNode</a>().</p>
+<!-- @@@setRootNode -->
+<!-- $$$setViewportRect[overload1]$$$setViewportRectconstQRect& -->
+<h3 class="fn" id="setViewportRect"><a name="setViewportRect"></a><span class="type">void</span> QSGAbstractRenderer::<span class="name">setViewportRect</span>(const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> &amp;<i>rect</i>)</h3>
+<p>Sets <i>rect</i> as the geometry of the viewport to render on the surface.</p>
+<p><b>See also </b><a href="qsgabstractrenderer.html#viewportRect">viewportRect</a>().</p>
+<!-- @@@setViewportRect -->
+<!-- $$$setViewportRect$$$setViewportRectconstQSize& -->
+<h3 class="fn" id="setViewportRect-1"><a name="setViewportRect-1"></a><span class="type">void</span> QSGAbstractRenderer::<span class="name">setViewportRect</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>size</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Sets the <i>size</i> of the viewport to render on the surface.</p>
+<p><b>See also </b><a href="qsgabstractrenderer.html#viewportRect">viewportRect</a>().</p>
+<!-- @@@setViewportRect -->
+<!-- $$$viewportRect[overload1]$$$viewportRect -->
+<h3 class="fn" id="viewportRect"><a name="viewportRect"></a><span class="type"><a href="../qtcore/qrect.html">QRect</a></span> QSGAbstractRenderer::<span class="name">viewportRect</span>() const</h3>
+<p>Returns the rect of the viewport to render.</p>
+<p><b>See also </b><a href="qsgabstractrenderer.html#setViewportRect">setViewportRect</a>().</p>
+<!-- @@@viewportRect -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

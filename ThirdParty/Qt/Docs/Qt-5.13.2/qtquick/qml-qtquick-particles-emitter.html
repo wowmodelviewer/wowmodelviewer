@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickparticleemitter.cpp -->
+  <title>Emitter QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >Emitter QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Emitter QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Emitter-brief -->
+<p>Emits logical particles. <a href="#details">More...</a></p>
+<!-- @@@Emitter -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Particles 2.13</td></tr></table></div><ul>
+<li><a href="qml-qtquick-particles-emitter-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-particles-emitter.html#acceleration-prop">acceleration</a></b></b> : StochasticDirection</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-emitter.html#emitRate-prop">emitRate</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-emitter.html#enabled-prop">enabled</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-emitter.html#endSize-prop">endSize</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-emitter.html#group-prop">group</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-emitter.html#lifeSpan-prop">lifeSpan</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-emitter.html#lifeSpanVariation-prop">lifeSpanVariation</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-emitter.html#maximumEmitted-prop">maximumEmitted</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-emitter.html#shape-prop">shape</a></b></b> : Shape</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-emitter.html#size-prop">size</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-emitter.html#sizeVariation-prop">sizeVariation</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-emitter.html#startTime-prop">startTime</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-emitter.html#system-prop">system</a></b></b> : ParticleSystem</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-emitter.html#velocity-prop">velocity</a></b></b> : StochasticDirection</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-emitter.html#velocityFromMovement-prop">velocityFromMovement</a></b></b> : qreal</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-particles-emitter.html#emitParticles-signal">emitParticles</a></b></b>(<i>particles</i>)</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-particles-emitter.html#burst-method-1">burst</a></b></b>(<i>count</i>,  int <i>x</i>,  int <i>y</i>)</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-emitter.html#burst-method">burst</a></b></b>(<i>count</i>)</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-emitter.html#pulse-method">pulse</a></b></b>(<i>duration</i>)</li>
+</ul>
+<!-- $$$Emitter-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>This element emits logical particles into the <a href="qml-qtquick-particles-particlesystem.html">ParticleSystem</a>, with the given starting attributes.</p>
+<p>Note that logical particles are not automatically rendered, you will need to have one or more <a href="qml-qtquick-particles-particlepainter.html">ParticlePainter</a> elements visualizing them.</p>
+<p>Note that the given starting attributes can be modified at any point in the particle's lifetime by any Affector element in the same <a href="qml-qtquick-particles-particlesystem.html">ParticleSystem</a>. This includes attributes like lifespan.</p>
+<!-- @@@Emitter -->
+<h2>Property Documentation</h2>
+<!-- $$$acceleration -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="acceleration-prop"></a><span class="name">acceleration</span> : <span class="type">StochasticDirection</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The starting acceleraton of the particles emitted.</p>
+</div></div><!-- @@@acceleration -->
+<br/>
+<!-- $$$emitRate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="emitRate-prop"></a><span class="name">emitRate</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Number of particles emitted per second.</p>
+<p>Default value is 10 particles per second.</p>
+</div></div><!-- @@@emitRate -->
+<br/>
+<!-- $$$enabled -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="enabled-prop"></a><span class="name">enabled</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If set to false, the emitter will cease emissions until it is set to true.</p>
+<p>Default value is true.</p>
+</div></div><!-- @@@enabled -->
+<br/>
+<!-- $$$endSize -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="endSize-prop"></a><span class="name">endSize</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The size in pixels of the particles at the end of their life. Size will be linearly interpolated during the life of the particle from this value and size. If endSize is -1, then the size of the particle will remain constant at the starting size.</p>
+<p>Default value is -1.</p>
+</div></div><!-- @@@endSize -->
+<br/>
+<!-- $$$group -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="group-prop"></a><span class="name">group</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This is the logical particle group which it will emit into.</p>
+<p>Default value is &quot;&quot; (empty string).</p>
+</div></div><!-- @@@group -->
+<br/>
+<!-- $$$lifeSpan -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="lifeSpan-prop"></a><span class="name">lifeSpan</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The time in milliseconds each emitted particle should last for.</p>
+<p>If you do not want particles to automatically die after a time, for example if you wish to dispose of them manually, set lifeSpan to Emitter.InfiniteLife.</p>
+<p>lifeSpans greater than or equal to 600000 (10 minutes) will be treated as infinite. Particles with lifeSpans less than or equal to 0 will start out dead.</p>
+<p>Default value is 1000 (one second).</p>
+</div></div><!-- @@@lifeSpan -->
+<br/>
+<!-- $$$lifeSpanVariation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="lifeSpanVariation-prop"></a><span class="name">lifeSpanVariation</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Particle lifespans will vary by up to this much in either direction.</p>
+<p>Default value is 0.</p>
+</div></div><!-- @@@lifeSpanVariation -->
+<br/>
+<!-- $$$maximumEmitted -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="maximumEmitted-prop"></a><span class="name">maximumEmitted</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The maximum number of particles at a time that this emitter will have alive.</p>
+<p>This can be set as a performance optimization (when using burst and pulse) or to stagger emissions.</p>
+<p>If this is set to a number below zero, then there is no maximum limit on the number of particles this emitter can have alive.</p>
+<p>The default value is -1.</p>
+</div></div><!-- @@@maximumEmitted -->
+<br/>
+<!-- $$$shape -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="shape-prop"></a><span class="name">shape</span> : <span class="type"><a href="qml-qtquick-shapes-shape.html">Shape</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This shape is applied with the size of the Emitter. Particles will be emitted randomly from any area covered by the shape.</p>
+<p>The default shape is a filled in rectangle, which corresponds to the full bounding box of the Emitter.</p>
+</div></div><!-- @@@shape -->
+<br/>
+<!-- $$$size -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="size-prop"></a><span class="name">size</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The size in pixels of the particles at the start of their life.</p>
+<p>Default value is 16.</p>
+</div></div><!-- @@@size -->
+<br/>
+<!-- $$$sizeVariation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="sizeVariation-prop"></a><span class="name">sizeVariation</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The size of a particle can vary by this much up or down from size/<a href="qml-qtquick-particles-emitter.html#endSize-prop">endSize</a>. The same random addition is made to both size and <a href="qml-qtquick-particles-emitter.html#endSize-prop">endSize</a> for a single particle.</p>
+<p>Default value is 0.</p>
+</div></div><!-- @@@sizeVariation -->
+<br/>
+<!-- $$$startTime -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="startTime-prop"></a><span class="name">startTime</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If this value is set when the emitter is loaded, then it will emit particles from the past, up to startTime milliseconds ago. These will simulate as if they were emitted then, but will not have any affectors applied to them. Affectors will take effect from the present time.</p>
+</div></div><!-- @@@startTime -->
+<br/>
+<!-- $$$system -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="system-prop"></a><span class="name">system</span> : <span class="type"><a href="qml-qtquick-particles-particlesystem.html">ParticleSystem</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This is the Particle system that the Emitter will emit into. This can be omitted if the Emitter is a direct child of the <a href="qml-qtquick-particles-particlesystem.html">ParticleSystem</a></p>
+</div></div><!-- @@@system -->
+<br/>
+<!-- $$$velocity -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="velocity-prop"></a><span class="name">velocity</span> : <span class="type">StochasticDirection</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The starting velocity of the particles emitted.</p>
+</div></div><!-- @@@velocity -->
+<br/>
+<!-- $$$velocityFromMovement -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="velocityFromMovement-prop"></a><span class="name">velocityFromMovement</span> : <span class="type">qreal</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If this value is non-zero, then any movement of the emitter will provide additional starting velocity to the particles based on the movement. The additional vector will be the same angle as the emitter's movement, with a magnitude that is the magnitude of the emitters movement multiplied by velocityFromMovement.</p>
+<p>Default value is 0.</p>
+</div></div><!-- @@@velocityFromMovement -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$emitParticles[overload1]$$$emitParticles -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="emitParticles-signal"></a><span class="name">emitParticles</span>(<i>particles</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when particles are emitted. <i>particles</i> is a JavaScript array of Particle objects. You can modify particle attributes directly within the handler.</p>
+<p><b>Note: </b>JavaScript is slower to execute, so it is not recommended to use this in high-volume particle systems.</p><p>The corresponding handler is <code>onEmitParticles</code>.</p>
+</div></div><!-- @@@emitParticles -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$burst$$$burstintint -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="burst-method-1"></a><span class="name">burst</span>(<i>count</i>,  <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <i>x</i>,  <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <i>y</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Emits a number of particles, specified by <i>count</i>, from this emitter immediately. The particles are emitted as if the Emitter was positioned at (<i>x</i>, <i>y</i>) but all other properties are the same.</p>
+</div></div><!-- @@@burst -->
+<br/>
+<!-- $$$burst[overload1]$$$burst -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="burst-method"></a><span class="name">burst</span>(<i>count</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Emits a number of particles, specified by <i>count</i>, from this emitter immediately.</p>
+</div></div><!-- @@@burst -->
+<br/>
+<!-- $$$pulse[overload1]$$$pulse -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="pulse-method"></a><span class="name">pulse</span>(<i>duration</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If the emitter is not enabled, enables it for a specified <i>duration</i> (in milliseconds) and then switches it back off.</p>
+</div></div><!-- @@@pulse -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

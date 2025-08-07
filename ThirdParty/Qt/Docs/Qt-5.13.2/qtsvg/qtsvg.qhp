@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+    <namespace>org.qt-project.qtsvg.5132</namespace>
+    <virtualFolder>qtsvg</virtualFolder>
+    <metaData name="version" value="5.13.2"/>
+    <customFilter name="QtSvg 5.13.2">
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtsvg</filterAttribute>
+    </customFilter>
+    <filterSection>
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtrefdoc</filterAttribute>
+        <filterAttribute>qtsvg</filterAttribute>
+        <toc>
+            <section ref="qtsvg-index.html" title="Qt SVG">
+                <section ref="qtsvg-module.html" title="C++ Classes">
+                    <section ref="qgraphicssvgitem.html" title="QGraphicsSvgItem Class Reference">
+                        <section ref="qgraphicssvgitem-members.html" title="List of all members"/>
+                        <section ref="qgraphicssvgitem-obsolete.html" title="Obsolete members"/>
+                    </section>
+                    <section ref="qsvggenerator.html" title="QSvgGenerator Class Reference">
+                        <section ref="qsvggenerator-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qsvgrenderer.html" title="QSvgRenderer Class Reference">
+                        <section ref="qsvgrenderer-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qsvgwidget.html" title="QSvgWidget Class Reference">
+                        <section ref="qsvgwidget-members.html" title="List of all members"/>
+                    </section>
+                </section>
+            </section>
+        </toc>
+        <keywords>
+            <keyword name="QGraphicsSvgItem" id="QGraphicsSvgItem" ref="qgraphicssvgitem.html"/>
+            <keyword name="QSvgGenerator" id="QSvgGenerator" ref="qsvggenerator.html"/>
+            <keyword name="QSvgRenderer" id="QSvgRenderer" ref="qsvgrenderer.html"/>
+            <keyword name="QSvgWidget" id="QSvgWidget" ref="qsvgwidget.html"/>
+            <keyword name="Qt SVG" id="Qt SVG" ref="qtsvg-index.html"/>
+            <keyword name="Qt SVG C++ Classes" id="Qt SVG C++ Classes" ref="qtsvg-module.html"/>
+            <keyword name="Rendering SVG Files" id="Rendering SVG Files" ref="svgrendering.html"/>
+            <keyword name="XSVG" id="XSVG" ref="qtsvg-attribution-xsvg.html"/>
+            <keyword name="animated" id="QSvgRenderer::animated" ref="qsvgrenderer.html#animated"/>
+            <keyword name="boundingRect" id="QGraphicsSvgItem::boundingRect" ref="qgraphicssvgitem.html#boundingRect"/>
+            <keyword name="boundsOnElement" id="QSvgRenderer::boundsOnElement" ref="qsvgrenderer.html#boundsOnElement"/>
+            <keyword name="defaultSize" id="QSvgRenderer::defaultSize" ref="qsvgrenderer.html#defaultSize"/>
+            <keyword name="description" id="QSvgGenerator::description" ref="qsvggenerator.html#description-prop"/>
+            <keyword name="description" id="QSvgGenerator::description" ref="qsvggenerator.html#description-prop"/>
+            <keyword name="elementExists" id="QSvgRenderer::elementExists" ref="qsvgrenderer.html#elementExists"/>
+            <keyword name="elementId" id="QGraphicsSvgItem::elementId" ref="qgraphicssvgitem.html#elementId"/>
+            <keyword name="elementId" id="QGraphicsSvgItem::elementId" ref="qgraphicssvgitem.html#elementId-prop"/>
+            <keyword name="fileName" id="QSvgGenerator::fileName" ref="qsvggenerator.html#fileName-prop"/>
+            <keyword name="fileName" id="QSvgGenerator::fileName" ref="qsvggenerator.html#fileName-prop"/>
+            <keyword name="framesPerSecond" id="QSvgRenderer::framesPerSecond" ref="qsvgrenderer.html#framesPerSecond-prop"/>
+            <keyword name="framesPerSecond" id="QSvgRenderer::framesPerSecond" ref="qsvgrenderer.html#framesPerSecond-prop"/>
+            <keyword name="isCachingEnabled" id="QGraphicsSvgItem::isCachingEnabled" ref="qgraphicssvgitem-obsolete.html#isCachingEnabled"/>
+            <keyword name="isValid" id="QSvgRenderer::isValid" ref="qsvgrenderer.html#isValid"/>
+            <keyword name="load" id="QSvgRenderer::load" ref="qsvgrenderer.html#load"/>
+            <keyword name="load" id="QSvgWidget::load" ref="qsvgwidget.html#load"/>
+            <keyword name="matrixForElement" id="QSvgRenderer::matrixForElement" ref="qsvgrenderer.html#matrixForElement"/>
+            <keyword name="maximumCacheSize" id="QGraphicsSvgItem::maximumCacheSize" ref="qgraphicssvgitem.html#maximumCacheSize"/>
+            <keyword name="maximumCacheSize" id="QGraphicsSvgItem::maximumCacheSize" ref="qgraphicssvgitem.html#maximumCacheSize-prop"/>
+            <keyword name="metric" id="QSvgGenerator::metric" ref="qsvggenerator.html#metric"/>
+            <keyword name="outputDevice" id="QSvgGenerator::outputDevice" ref="qsvggenerator.html#outputDevice-prop"/>
+            <keyword name="outputDevice" id="QSvgGenerator::outputDevice" ref="qsvggenerator.html#outputDevice-prop"/>
+            <keyword name="paint" id="QGraphicsSvgItem::paint" ref="qgraphicssvgitem.html#paint"/>
+            <keyword name="paintEngine" id="QSvgGenerator::paintEngine" ref="qsvggenerator.html#paintEngine"/>
+            <keyword name="paintEvent" id="QSvgWidget::paintEvent" ref="qsvgwidget.html#paintEvent"/>
+            <keyword name="render" id="QSvgRenderer::render" ref="qsvgrenderer.html#render"/>
+            <keyword name="renderer" id="QGraphicsSvgItem::renderer" ref="qgraphicssvgitem.html#renderer"/>
+            <keyword name="renderer" id="QSvgWidget::renderer" ref="qsvgwidget.html#renderer"/>
+            <keyword name="repaintNeeded" id="QSvgRenderer::repaintNeeded" ref="qsvgrenderer.html#repaintNeeded"/>
+            <keyword name="resolution" id="QSvgGenerator::resolution" ref="qsvggenerator.html#resolution-prop"/>
+            <keyword name="resolution" id="QSvgGenerator::resolution" ref="qsvggenerator.html#resolution-prop"/>
+            <keyword name="setCachingEnabled" id="QGraphicsSvgItem::setCachingEnabled" ref="qgraphicssvgitem-obsolete.html#setCachingEnabled"/>
+            <keyword name="setDescription" id="QSvgGenerator::setDescription" ref="qsvggenerator.html#description-prop"/>
+            <keyword name="setElementId" id="QGraphicsSvgItem::setElementId" ref="qgraphicssvgitem.html#setElementId"/>
+            <keyword name="setFileName" id="QSvgGenerator::setFileName" ref="qsvggenerator.html#fileName-prop"/>
+            <keyword name="setFramesPerSecond" id="QSvgRenderer::setFramesPerSecond" ref="qsvgrenderer.html#framesPerSecond-prop"/>
+            <keyword name="setMaximumCacheSize" id="QGraphicsSvgItem::setMaximumCacheSize" ref="qgraphicssvgitem.html#setMaximumCacheSize"/>
+            <keyword name="setOutputDevice" id="QSvgGenerator::setOutputDevice" ref="qsvggenerator.html#outputDevice-prop"/>
+            <keyword name="setResolution" id="QSvgGenerator::setResolution" ref="qsvggenerator.html#resolution-prop"/>
+            <keyword name="setSharedRenderer" id="QGraphicsSvgItem::setSharedRenderer" ref="qgraphicssvgitem.html#setSharedRenderer"/>
+            <keyword name="setSize" id="QSvgGenerator::setSize" ref="qsvggenerator.html#size-prop"/>
+            <keyword name="setTitle" id="QSvgGenerator::setTitle" ref="qsvggenerator.html#title-prop"/>
+            <keyword name="setViewBox" id="QSvgGenerator::setViewBox" ref="qsvggenerator.html#viewBox-prop"/>
+            <keyword name="setViewBox" id="QSvgRenderer::setViewBox" ref="qsvgrenderer.html#viewBox-prop"/>
+            <keyword name="size" id="QSvgGenerator::size" ref="qsvggenerator.html#size-prop"/>
+            <keyword name="size" id="QSvgGenerator::size" ref="qsvggenerator.html#size-prop"/>
+            <keyword name="sizeHint" id="QSvgWidget::sizeHint" ref="qsvgwidget.html#sizeHint"/>
+            <keyword name="title" id="QSvgGenerator::title" ref="qsvggenerator.html#title-prop"/>
+            <keyword name="title" id="QSvgGenerator::title" ref="qsvggenerator.html#title-prop"/>
+            <keyword name="type" id="QGraphicsSvgItem::type" ref="qgraphicssvgitem.html#type"/>
+            <keyword name="viewBox" id="QSvgGenerator::viewBox" ref="qsvggenerator.html#viewBox"/>
+            <keyword name="viewBox" id="QSvgGenerator::viewBox" ref="qsvggenerator.html#viewBox-prop"/>
+            <keyword name="viewBox" id="QSvgRenderer::viewBox" ref="qsvgrenderer.html#viewBox"/>
+            <keyword name="viewBox" id="QSvgRenderer::viewBox" ref="qsvgrenderer.html#viewBox-prop"/>
+            <keyword name="viewBoxF" id="QSvgGenerator::viewBoxF" ref="qsvggenerator.html#viewBox-prop"/>
+            <keyword name="viewBoxF" id="QSvgRenderer::viewBoxF" ref="qsvgrenderer.html#viewBox-prop"/>
+            <keyword name="~QSvgGenerator" id="QSvgGenerator::~QSvgGenerator" ref="qsvggenerator.html#dtor.QSvgGenerator"/>
+            <keyword name="~QSvgRenderer" id="QSvgRenderer::~QSvgRenderer" ref="qsvgrenderer.html#dtor.QSvgRenderer"/>
+            <keyword name="~QSvgWidget" id="QSvgWidget::~QSvgWidget" ref="qsvgwidget.html#dtor.QSvgWidget"/>
+        </keywords>
+        <files>
+            <file>images/arrow_bc.png</file>
+            <file>images/bgrContent.png</file>
+            <file>images/btn_next.png</file>
+            <file>images/btn_prev.png</file>
+            <file>images/bullet_dn.png</file>
+            <file>images/bullet_sq.png</file>
+            <file>images/home.png</file>
+            <file>images/ico_note.png</file>
+            <file>images/ico_note_attention.png</file>
+            <file>images/ico_out.png</file>
+            <file>images/logo.png</file>
+            <file>images/svggenerator-example.png</file>
+            <file>images/svgviewer-example.png</file>
+            <file>images/textobject-example.png</file>
+            <file>qgraphicssvgitem-members.html</file>
+            <file>qgraphicssvgitem-obsolete.html</file>
+            <file>qgraphicssvgitem.html</file>
+            <file>qsvggenerator-members.html</file>
+            <file>qsvggenerator.html</file>
+            <file>qsvgrenderer-members.html</file>
+            <file>qsvgrenderer.html</file>
+            <file>qsvgwidget-members.html</file>
+            <file>qsvgwidget.html</file>
+            <file>qtsvg-attribution-xsvg.html</file>
+            <file>qtsvg-index.html</file>
+            <file>qtsvg-module.html</file>
+            <file>qtsvg-richtext-textobject-example.html</file>
+            <file>qtsvg-svggenerator-example.html</file>
+            <file>qtsvg-svgviewer-example.html</file>
+            <file>style/offline-simple.css</file>
+            <file>style/offline.css</file>
+            <file>svgrendering.html</file>
+        </files>
+    </filterSection>
+</QtHelpProject>

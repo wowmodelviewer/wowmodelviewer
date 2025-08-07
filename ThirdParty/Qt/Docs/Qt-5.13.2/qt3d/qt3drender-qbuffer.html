@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qbuffer.cpp -->
+  <title>QBuffer Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QBuffer</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QBuffer Class</h1>
+<span class="small-subtitle">(<a href="qt3drender-qbuffer.html">Qt3DRender::QBuffer</a>)<br/></span>
+<!-- $$$QBuffer-brief -->
+<p>Provides a data store for raw data to later be used as vertices or uniforms. <a href="#details">More...</a></p>
+<!-- @@@QBuffer -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;Qt3DRender/QBuffer&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3drender</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-buffer.html">Buffer</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></td></tr></table></div><ul>
+<li><a href="qt3drender-qbuffer-members.html">List of all members, including inherited members</a></li>
+<li><a href="qt3drender-qbuffer-obsolete.html">Obsolete members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qbuffer.html#AccessType-enum">AccessType</a></b> { Write, Read, ReadWrite }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qbuffer.html#UsageType-enum">UsageType</a></b> { StreamDraw, StreamRead, StreamCopy, StaticDraw, ..., DynamicCopy }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qt3drender-qbuffer.html#accessType-prop">accessType</a></b> : AccessType</li>
+<li class="fn"><b><a href="qt3drender-qbuffer.html#syncData-prop">syncData</a></b> : bool</li>
+<li class="fn"><b><a href="qt3drender-qbuffer.html#usage-prop">usage</a></b> : UsageType</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qbuffer.html#QBuffer">QBuffer</a></b>(Qt3DCore::QNode *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QBuffer::AccessType </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qbuffer.html#accessType-prop">accessType</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qbuffer.html#data">data</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QBufferDataGeneratorPtr </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qbuffer.html#dataGenerator">dataGenerator</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qbuffer.html#syncData-prop">isSyncData</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qbuffer.html#setData">setData</a></b>(const QByteArray &amp;<i>bytes</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qbuffer.html#setDataGenerator">setDataGenerator</a></b>(const Qt3DRender::QBufferDataGeneratorPtr &amp;<i>functor</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qbuffer.html#updateData">updateData</a></b>(int <i>offset</i>, const QByteArray &amp;<i>bytes</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QBuffer::UsageType </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qbuffer.html#usage-prop">usage</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qbuffer.html#accessType-prop">setAccessType</a></b>(Qt3DRender::QBuffer::AccessType <i>access</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qbuffer.html#syncData-prop">setSyncData</a></b>(bool <i>syncData</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qbuffer.html#usage-prop">setUsage</a></b>(Qt3DRender::QBuffer::UsageType <i>usage</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qbuffer.html#accessType-prop">accessTypeChanged</a></b>(Qt3DRender::QBuffer::AccessType <i>access</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qbuffer.html#dataAvailable">dataAvailable</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qbuffer.html#dataChanged">dataChanged</a></b>(const QByteArray &amp;<i>bytes</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qbuffer.html#syncData-prop">syncDataChanged</a></b>(bool <i>syncData</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qbuffer.html#usage-prop">usageChanged</a></b>(Qt3DRender::QBuffer::UsageType <i>usage</i>)</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qbuffer.html#QBufferDataGeneratorPtr-typedef">QBufferDataGeneratorPtr</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QBuffer-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Data can either be provided directly using <a href="qt3drender-qbuffer.html#setData">QBuffer::setData</a>() or by specifying a generator with <a href="qt3drender-qbuffer.html#setDataGenerator">QBuffer::setDataGenerator</a>() and providing a <a href="qt3drender-qbuffer.html#QBufferDataGeneratorPtr-typedef">Qt3DRender::QBufferDataGeneratorPtr</a>.</p>
+<p>When using a generator the data will be loaded asynchronously in a job. The loaded data can be read back if the <a href="qt3drender-qbuffer.html#syncData-prop">QBuffer::syncData</a> flag is set to true.</p>
+</div>
+<!-- @@@QBuffer -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$AccessType$$$Write$$$Read$$$ReadWrite -->
+<h3 class="fn" id="AccessType-enum"><a name="AccessType-enum"></a>enum QBuffer::<span class="name">AccessType</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QBuffer::Write</code></td><td class="topAlign tblval"><code>0x1</code></td><td class="topAlign">Write access</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QBuffer::Read</code></td><td class="topAlign tblval"><code>0x2</code></td><td class="topAlign">Read access</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QBuffer::ReadWrite</code></td><td class="topAlign tblval"><code>Write|Read</code></td><td class="topAlign">Write|Read</td></tr>
+</table></div>
+<!-- @@@AccessType -->
+<!-- $$$UsageType$$$StreamDraw$$$StreamRead$$$StreamCopy$$$StaticDraw$$$StaticRead$$$StaticCopy$$$DynamicDraw$$$DynamicRead$$$DynamicCopy -->
+<h3 class="fn" id="UsageType-enum"><a name="UsageType-enum"></a>enum QBuffer::<span class="name">UsageType</span></h3>
+<p>The type of the usage.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QBuffer::StreamDraw</code></td><td class="topAlign tblval"><code>0x88E0</code></td><td class="topAlign">GL_STREAM_DRAW</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QBuffer::StreamRead</code></td><td class="topAlign tblval"><code>0x88E1</code></td><td class="topAlign">GL_STREAM_READ</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QBuffer::StreamCopy</code></td><td class="topAlign tblval"><code>0x88E2</code></td><td class="topAlign">GL_STREAM_COPY</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QBuffer::StaticDraw</code></td><td class="topAlign tblval"><code>0x88E4</code></td><td class="topAlign">GL_STATIC_DRAW</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QBuffer::StaticRead</code></td><td class="topAlign tblval"><code>0x88E5</code></td><td class="topAlign">GL_STATIC_READ</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QBuffer::StaticCopy</code></td><td class="topAlign tblval"><code>0x88E6</code></td><td class="topAlign">GL_STATIC_COPY</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QBuffer::DynamicDraw</code></td><td class="topAlign tblval"><code>0x88E8</code></td><td class="topAlign">GL_DYNAMIC_DRAW</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QBuffer::DynamicRead</code></td><td class="topAlign tblval"><code>0x88E9</code></td><td class="topAlign">GL_DYNAMIC_READ</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QBuffer::DynamicCopy</code></td><td class="topAlign tblval"><code>0x88EA</code></td><td class="topAlign">GL_DYNAMIC_COPY</td></tr>
+</table></div>
+<!-- @@@UsageType -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$accessType-prop$$$accessType$$$setAccessTypeQt3DRender::QBuffer::AccessType$$$accessTypeChangedQt3DRender::QBuffer::AccessType -->
+<h3 class="fn" id="accessType-prop"><a name="accessType-prop"></a><span class="name">accessType</span> : <span class="type"><a href="qt3drender-qbuffer.html#AccessType-enum">AccessType</a></span></h3>
+<p>Returns the <a href="qt3drender-qbuffer.html#AccessType-enum">AccessType</a> of the buffer.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QBuffer::AccessType </td><td class="memItemRight bottomAlign"><span class="name"><b>accessType</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setAccessType</b></span>(Qt3DRender::QBuffer::AccessType <i>access</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>accessTypeChanged</b></span>(Qt3DRender::QBuffer::AccessType <i>access</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qt3drender-qbuffer.html#AccessType-enum">QBuffer::AccessType</a>.</p>
+<!-- @@@accessType -->
+<!-- $$$syncData-prop$$$isSyncData$$$setSyncDatabool$$$syncDataChangedbool -->
+<h3 class="fn" id="syncData-prop"><a name="syncData-prop"></a><span class="name">syncData</span> : <span class="type">bool</span></h3>
+<p>Holds the syncData flag. When syncData is true, this will force data created by a <a href="qt3drender-qbufferdatagenerator.html">Qt3DRender::QBufferDataGenerator</a> to also be updated on the frontend <a href="qt3drender-qbuffer.html">Qt3DRender::QBuffer</a> node. By default syncData is false.</p>
+<p><b>Note: </b>: This has no effect if the buffer's data was set directly using the data property.</p><p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>isSyncData</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setSyncData</b></span>(bool <i>syncData</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>syncDataChanged</b></span>(bool <i>syncData</i>)</td></tr>
+</table></div>
+<!-- @@@syncData -->
+<!-- $$$usage-prop$$$usage$$$setUsageQt3DRender::QBuffer::UsageType$$$usageChangedQt3DRender::QBuffer::UsageType -->
+<h3 class="fn" id="usage-prop"><a name="usage-prop"></a><span class="name">usage</span> : <span class="type"><a href="qt3drender-qbuffer.html#UsageType-enum">UsageType</a></span></h3>
+<p>Holds the buffer usage.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QBuffer::UsageType </td><td class="memItemRight bottomAlign"><span class="name"><b>usage</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setUsage</b></span>(Qt3DRender::QBuffer::UsageType <i>usage</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>usageChanged</b></span>(Qt3DRender::QBuffer::UsageType <i>usage</i>)</td></tr>
+</table></div>
+<!-- @@@usage -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QBuffer[overload1]$$$QBufferQt3DCore::QNode* -->
+<h3 class="fn" id="QBuffer"><a name="QBuffer"></a>QBuffer::<span class="name">QBuffer</span>(<span class="type"><a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new <a href="qt3drender-qbuffer.html">QBuffer</a> with <i>parent</i>.</p>
+<!-- @@@QBuffer -->
+<!-- $$$dataAvailable[overload1]$$$dataAvailable -->
+<h3 class="fn" id="dataAvailable"><a name="dataAvailable"></a><code>[signal] </code><span class="type">void</span> QBuffer::<span class="name">dataAvailable</span>()</h3>
+<p>This signal is emitted when data becomes available.</p>
+<!-- @@@dataAvailable -->
+<!-- $$$dataChanged[overload1]$$$dataChangedconstQByteArray& -->
+<h3 class="fn" id="dataChanged"><a name="dataChanged"></a><code>[signal] </code><span class="type">void</span> QBuffer::<span class="name">dataChanged</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>bytes</i>)</h3>
+<p>This signal is emitted with <i>bytes</i> when data changes.</p>
+<!-- @@@dataChanged -->
+<!-- $$$data[overload1]$$$data -->
+<h3 class="fn" id="data"><a name="data"></a><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> QBuffer::<span class="name">data</span>() const</h3>
+<p>Returns the data.</p>
+<p><b>See also </b><a href="qt3drender-qbuffer.html#setData">setData</a>().</p>
+<!-- @@@data -->
+<!-- $$$dataGenerator[overload1]$$$dataGenerator -->
+<h3 class="fn" id="dataGenerator"><a name="dataGenerator"></a><span class="type"><a href="qt3drender-qbuffer.html#QBufferDataGeneratorPtr-typedef">Qt3DRender::QBufferDataGeneratorPtr</a></span> QBuffer::<span class="name">dataGenerator</span>() const</h3>
+<p>Returns the buffer functor.</p>
+<p><b>See also </b><a href="qt3drender-qbuffer.html#setDataGenerator">setDataGenerator</a>().</p>
+<!-- @@@dataGenerator -->
+<!-- $$$setData[overload1]$$$setDataconstQByteArray& -->
+<h3 class="fn" id="setData"><a name="setData"></a><span class="type">void</span> QBuffer::<span class="name">setData</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>bytes</i>)</h3>
+<p>Sets <i>bytes</i> as data.</p>
+<p><b>See also </b><a href="qt3drender-qbuffer.html#data">data</a>().</p>
+<!-- @@@setData -->
+<!-- $$$setDataGenerator[overload1]$$$setDataGeneratorconstQt3DRender::QBufferDataGeneratorPtr& -->
+<h3 class="fn" id="setDataGenerator"><a name="setDataGenerator"></a><span class="type">void</span> QBuffer::<span class="name">setDataGenerator</span>(const <span class="type"><a href="qt3drender-qbuffer.html#QBufferDataGeneratorPtr-typedef">Qt3DRender::QBufferDataGeneratorPtr</a></span> &amp;<i>functor</i>)</h3>
+<p>Sets the buffer <i>functor</i>.</p>
+<p><b>See also </b><a href="qt3drender-qbuffer.html#dataGenerator">dataGenerator</a>().</p>
+<!-- @@@setDataGenerator -->
+<!-- $$$updateData[overload1]$$$updateDataintconstQByteArray& -->
+<h3 class="fn" id="updateData"><a name="updateData"></a><span class="type">void</span> QBuffer::<span class="name">updateData</span>(<span class="type">int</span> <i>offset</i>, const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>bytes</i>)</h3>
+<p>Updates the data by replacing it with <i>bytes</i> at <i>offset</i>.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@updateData -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$QBufferDataGeneratorPtr -->
+<h3 class="fn" id="QBufferDataGeneratorPtr-typedef"><a name="QBufferDataGeneratorPtr-typedef"></a>typedef <span class="name">QBufferDataGeneratorPtr</span></h3>
+<!-- @@@QBufferDataGeneratorPtr -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

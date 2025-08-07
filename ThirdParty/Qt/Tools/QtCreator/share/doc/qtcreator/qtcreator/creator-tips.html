@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-tips.qdoc -->
+  <title>Tips and Tricks | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Tips and Tricks</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-faq.html" />
+  <link rel="next" href="creator-known-issues.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-faq.html">FAQ</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-known-issues.html">Known Issues</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#switching-between-modes">Switching Between Modes</a></li>
+<li class="level1"><a href="#moving-between-open-files">Moving Between Open Files</a></li>
+<li class="level1"><a href="#moving-to-the-edit-mode">Moving To the Edit Mode</a></li>
+<li class="level1"><a href="#using-the-filter-in-options-dialog">Using the Filter in Options Dialog</a></li>
+<li class="level1"><a href="#opening-output-panes">Opening Output Panes</a></li>
+<li class="level1"><a href="#using-keyboard-shortcuts">Using Keyboard Shortcuts</a></li>
+<li class="level1"><a href="#running-qt-creator-from-command-line">Running Qt Creator From Command Line</a></li>
+<li class="level1"><a href="#showing-and-hiding-sidebars">Showing and Hiding Sidebars</a></li>
+<li class="level1"><a href="#moving-to-symbols">Moving To Symbols</a></li>
+<li class="level1"><a href="#displaying-signals-and-slots">Displaying Signals and Slots</a></li>
+<li class="level1"><a href="#displaying-low-level-data">Displaying Low Level Data</a></li>
+<li class="level1"><a href="#showing-tooltips-in-debug-mode">Showing Tooltips in Debug Mode</a></li>
+<li class="level1"><a href="#locating-files">Locating Files</a></li>
+<li class="level1"><a href="#adding-a-license-header-template-for-c-code">Adding a License Header Template for C++ Code</a></li>
+<li class="level1"><a href="#pasting-from-clipboard-history">Pasting from Clipboard History</a></li>
+<li class="level1"><a href="#sorting-lines-alphabetically">Sorting Lines Alphabetically</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Tips and Tricks</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-tips.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="switching-between-modes"></a>
+<h2 id="switching-between-modes">Switching Between Modes</h2>
+<p>Qt Creator uses different modes for different purposes. You can quickly switch between these modes with the following keyboard shortcuts:</p>
+<ul>
+<li><b>Welcome</b> mode <b>Ctrl+1</b></li>
+<li><b>Edit</b> mode <b>Ctrl+2</b></li>
+<li><b>Design</b> mode <b>Ctrl+3</b></li>
+<li><b>Debug</b> mode <b>Ctrl+4</b></li>
+<li><b>Projects</b> mode <b>Ctrl+5</b></li>
+<li><b>Help</b> mode <b>Ctrl+6</b></li>
+</ul>
+<p>For more information about Qt Creator modes, see <a href="creator-modes.html#">Selecting Modes</a>.</p>
+<a name="moving-between-open-files"></a>
+<h2 id="moving-between-open-files">Moving Between Open Files</h2>
+<p>To quickly move between currently open files, press <b>Ctrl+Tab</b>.</p>
+<p>To move forward in the location history, press <b>Alt+Right</b> (<b>Cmd+Opt+Right</b> on macOS). To move backward, press <b>Alt+Left</b> (<b>Cmd+Opt+Left</b> on macOS). For example, if you use the <b>Locator</b> to jump to a symbol in the same file, you can jump back to your original location in that file by pressing <b>Alt+Left</b>.</p>
+<a name="moving-to-the-edit-mode"></a>
+<h2 id="moving-to-the-edit-mode">Moving To the Edit Mode</h2>
+<p>To move to the <b>Edit</b> mode and currently active file, press <b>Esc</b>.</p>
+<p>If you already are in the <b>Edit</b> mode:</p>
+<ul>
+<li>The first press moves focus to the editor</li>
+<li>The second press closes secondary windows</li>
+</ul>
+<a name="using-the-filter-in-options-dialog"></a>
+<h2 id="using-the-filter-in-options-dialog">Using the Filter in Options Dialog</h2>
+<p>To find specific settings you require in <b>Tools</b> &gt; <b>Options</b> use the filter located at the top left of the <b>Options</b> dialog box.</p>
+<a name="opening-output-panes"></a>
+<h2 id="opening-output-panes">Opening Output Panes</h2>
+<p>The output panes provide a list of errors and warnings encountered during a build, detailed output from the compiler, status of a program when it is executed and debug output, as well as search results.</p>
+<p>To open output panes, use the following shortcuts:</p>
+<ul>
+<li><b>Issues</b> pane Alt+1 (Cmd+1 on macOS)</li>
+<li><b>Search Results</b> pane Alt+2 (Cmd+2 on macOS)</li>
+<li><b>Application Output</b> pane Alt+3 (Cmd+3 on macOS)</li>
+<li><b>Compile Output</b> pane Alt+4 (Cmd+4 on macOS)</li>
+</ul>
+<p>To open the other output panes, such as <b>General Messages</b> and <b>Version Control</b>, select <b>Window</b> &gt; <b>Output Panes</b>. The menu items also display the keyboard shortcuts that you can use.</p>
+<p>For more information about output panes, see <a href="creator-output-panes.html#">Viewing Output</a>.</p>
+<a name="using-keyboard-shortcuts"></a>
+<h2 id="using-keyboard-shortcuts">Using Keyboard Shortcuts</h2>
+<p>Qt Creator provides <a href="creator-keyboard-shortcuts.html#">many useful keyboard shortcuts</a>. You can see the keyboard shortcut for a menu command in the menu or the tooltip for a button.</p>
+<p>To customize, import or export keyboard shortcuts, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Environment</b> &gt; <b>Keyboard</b>.</p>
+<a name="running-qt-creator-from-command-line"></a>
+<h2 id="running-qt-creator-from-command-line">Running Qt Creator From Command Line</h2>
+<p>You can launch Qt Creator from command line using the name of an existing session or <code>.pro</code> file by giving the name as the command argument.</p>
+<p>For example, running <code>qtcreator somesession</code>, launches Qt Creator and loads session somesession.</p>
+<p>For more information, see <a href="creator-cli.html#">Using Command Line Options</a>.</p>
+<a name="showing-and-hiding-sidebars"></a>
+<h2 id="showing-and-hiding-sidebars">Showing and Hiding Sidebars</h2>
+<p>You can toggle the left and right sidebar in some Qt Creator modes.</p>
+<p>To toggle the left sidebar, click <img src="images/leftsidebaricon.png" alt="" /> (<b>Hide Left Sidebar/Show Left Sidebar</b>) or press <b>Alt+0</b> (<b>Cmd+0</b> on macOS).</p>
+<p>To toggle the right sidebar, click <img src="images/rightsidebaricon.png" alt="" /> (<b>Hide Right Sidebar/Show Right Sidebar</b>) or press <b>Alt+Shift+0</b> (<b>Cmd+Shift+0</b> on macOS).</p>
+<p>For more information on using the sidebars, see <a href="creator-sidebar-views.html#">Browsing Project Contents</a>.</p>
+<a name="moving-to-symbols"></a>
+<h2 id="moving-to-symbols">Moving To Symbols</h2>
+<p>To move straight to a symbol used in a project, select the symbol in the <b>Editor</b> toolbar drop-down menu. For more information on the editor toolbar, see <a href="creator-coding-navigating.html#using-the-editor-toolbar">Using the Editor Toolbar</a>.</p>
+<p>To jump to a symbol in the current file, press <b>Ctrl+K</b> to open the <b>Locator</b>, enter a period (.), and start typing the symbol name. Then select the symbol in the list. For more information on using the locator, see <a href="creator-editor-locator.html#">Searching with the Locator</a>.</p>
+<p>Press <b>Ctrl</b> (<b>Cmd</b> on macOS) and click a symbol to move directly to the definition or the declaration of the symbol. You can also move the cursor on the symbol and press <b>F2</b>. For more information, see <a href="creator-coding-navigating.html#moving-to-symbol-definition-or-declaration">Moving to Symbol Definition or Declaration</a>.</p>
+<a name="displaying-signals-and-slots"></a>
+<h2 id="displaying-signals-and-slots">Displaying Signals and Slots</h2>
+<p>If an instance of a class is derived from <a href="http://doc.qt.io/qt-5/qobject.html">QObject</a>, and you would like to find all other objects connected to one of your object's slots using Qt's signals and slots mechanism, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Debugger</b> &gt; <b>Locals</b> &gt; <b>Use Debugging Helper</b>.</p>
+<p>In the <b>Locals</b> view, expand the object's entry and open the slot in the <i>slots</i> subitem. The objects connected to this slot are shown as children of the slot. This method works with signals too.</p>
+<p>For more information about the <b>Locals</b> view, see <a href="creator-debug-mode.html#local-variables-and-function-parameters">Local Variables and Function Parameters</a>.</p>
+<a name="displaying-low-level-data"></a>
+<h2 id="displaying-low-level-data">Displaying Low Level Data</h2>
+<p>If special debugging of Qt objects fails due to data corruption within the debugged objects, you can switch off the debugging helpers. When debugging helpers are switched off low-level structures become visible.</p>
+<p>To switch off the debugging helpers:</p>
+<ol class="1" type="1"><li>Select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Debugger</b> &gt; <b>Locals</b>.</li>
+<li>Uncheck the <b>Use Debugging Helper</b> checkbox.</li>
+</ol>
+<a name="showing-tooltips-in-debug-mode"></a>
+<h2 id="showing-tooltips-in-debug-mode">Showing Tooltips in Debug Mode</h2>
+<p>To inspect the value of variables from the editor, you can turn on tooltips. Tooltips are hidden by default for performance reasons.</p>
+<ol class="1" type="1"><li>Select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Debugger</b> &gt; <b>General</b>.</li>
+<li>Select the <b>Use tooltips in main editor while debugging</b> check box.</li>
+</ol>
+<p>When you hover over a variable in the code editor in <b>Debug</b> mode, a tooltip is displayed. To keep the tooltip visible, click the pin button. You can expand pinned tooltips to view their full content.</p>
+<p class="centerAlign"><img src="images/qtcreator-pin-tooltip.png" alt="" /></p><p>Pinned tooltips are stored in the session. To close all pinned tooltips, select <b>Close Editor Tooltips</b> in the context menu in the <b>Locals</b> view.</p>
+<a name="locating-files"></a>
+<h2 id="locating-files">Locating Files</h2>
+<p>The <b>Locator</b> provides one of the easiest ways in Qt Creator to browse through projects, files, classes, functions, documentation and file systems. To quickly access files not directly mentioned in your project, you can create your own locator filters. That way you can locate files in a directory structure you have defined.</p>
+<p>To create locator filters, select <b>Tools &gt; Options &gt; Locator &gt; Add</b>.</p>
+<p>For more information, see <a href="creator-editor-locator.html#creating-locator-filters">Creating Locator Filters</a>.</p>
+<a name="adding-a-license-header-template-for-c-code"></a>
+<h2 id="adding-a-license-header-template-for-c-code">Adding a License Header Template for C++ Code</h2>
+<p>A file containing a license header for C++ can be specified under <b>Tools &gt; Options &gt; C++ &gt; License Template</b>. It may contain special placeholders enclosed in <code>%%</code> that are replaced when generating a new file:</p>
+<ol class="1" type="1"><li><code>%YEAR%</code>: Year</li>
+<li><code>%MONTH%</code>: Month</li>
+<li><code>%DAY%</code>: Day of the month</li>
+<li><code>%DATE%</code>: Date</li>
+<li><code>%USER%</code>: Username</li>
+<li><code>%FILENAME%</code>: File name</li>
+<li><code>%CLASS%</code>: Class name (if applicable)</li>
+<li><code>%$VARIABLE%</code>: Contents of environment variable <code>VARIABLE</code>.</li>
+</ol>
+<a name="pasting-from-clipboard-history"></a>
+<h2 id="pasting-from-clipboard-history">Pasting from Clipboard History</h2>
+<p>Qt Creator stores copied text in clipboard history. To retrieve clips from the history, press <b>Ctrl+Shift+V</b> until the clip appears. The number of clips in the history is fixed to 10.</p>
+<a name="sorting-lines-alphabetically"></a>
+<h2 id="sorting-lines-alphabetically">Sorting Lines Alphabetically</h2>
+<p>To sort selected lines alphabetically, select <b>Edit</b> &gt; <b>Advanced</b> &gt; <b>Sort Selected Lines</b> or press <b>Alt+Shift+S</b> (or <b>Ctrl+Shift+S</b> on macOS).</p>
+</div>
+<!-- @@@creator-tips.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-faq.html">FAQ</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-known-issues.html">Known Issues</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

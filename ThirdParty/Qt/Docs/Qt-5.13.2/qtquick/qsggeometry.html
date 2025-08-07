@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qsggeometry.cpp -->
+  <title>QSGGeometry Class | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-module.html">C++ Classes</a></td><td >QSGGeometry</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSGGeometry Class</h1>
+<!-- $$$QSGGeometry-brief -->
+<p>The <a href="qsggeometry.html">QSGGeometry</a> class provides low-level storage for graphics primitives in the <a href="qtquick-visualcanvas-scenegraph.html">Qt Quick Scene Graph</a>. <a href="#details">More...</a></p>
+<!-- @@@QSGGeometry -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QSGGeometry&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += quick</td></tr></table></div><ul>
+<li><a href="qsggeometry-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry-attribute.html">Attribute</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry-attributeset.html">AttributeSet</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry-coloredpoint2d.html">ColoredPoint2D</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry-point2d.html">Point2D</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry-texturedpoint2d.html">TexturedPoint2D</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#AttributeType-enum">AttributeType</a></b> { UnknownAttribute, PositionAttribute, ColorAttribute, TexCoordAttribute, TexCoord1Attribute, TexCoord2Attribute }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#DataPattern-enum">DataPattern</a></b> { AlwaysUploadPattern, DynamicPattern, StaticPattern, StreamPattern }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#DrawingMode-enum">DrawingMode</a></b> { DrawPoints, DrawLines, DrawLineLoop, DrawLineStrip, ..., DrawTriangleFan }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#Type-enum">Type</a></b> { ByteType, UnsignedByteType, ShortType, UnsignedShortType, ..., FloatType }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#QSGGeometry">QSGGeometry</a></b>(const QSGGeometry::AttributeSet &amp;<i>attributes</i>, int <i>vertexCount</i>, int <i>indexCount</i> = 0, int <i>indexType</i> = UnsignedShortType)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#dtor.QSGGeometry">~QSGGeometry</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#allocate">allocate</a></b>(int <i>vertexCount</i>, int <i>indexCount</i> = 0)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#attributeCount">attributeCount</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QSGGeometry::Attribute *</td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#attributes">attributes</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> unsigned int </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#drawingMode">drawingMode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#indexCount">indexCount</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void *</td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#indexData">indexData</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const void *</td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#indexData-1">indexData</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint *</td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#indexDataAsUInt">indexDataAsUInt</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const uint *</td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#indexDataAsUInt-1">indexDataAsUInt</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> quint16 *</td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#indexDataAsUShort">indexDataAsUShort</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const quint16 *</td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#indexDataAsUShort-1">indexDataAsUShort</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSGGeometry::DataPattern </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#indexDataPattern">indexDataPattern</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#indexType">indexType</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> float </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#lineWidth">lineWidth</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#markIndexDataDirty">markIndexDataDirty</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#markVertexDataDirty">markVertexDataDirty</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#setDrawingMode">setDrawingMode</a></b>(unsigned int <i>mode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#setIndexDataPattern">setIndexDataPattern</a></b>(QSGGeometry::DataPattern <i>p</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#setLineWidth">setLineWidth</a></b>(float <i>width</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#setVertexDataPattern">setVertexDataPattern</a></b>(QSGGeometry::DataPattern <i>p</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#sizeOfIndex">sizeOfIndex</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#sizeOfVertex">sizeOfVertex</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#vertexCount">vertexCount</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void *</td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#vertexData">vertexData</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const void *</td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#vertexData-1">vertexData</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSGGeometry::ColoredPoint2D *</td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#vertexDataAsColoredPoint2D">vertexDataAsColoredPoint2D</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QSGGeometry::ColoredPoint2D *</td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#vertexDataAsColoredPoint2D-1">vertexDataAsColoredPoint2D</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSGGeometry::Point2D *</td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#vertexDataAsPoint2D">vertexDataAsPoint2D</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QSGGeometry::Point2D *</td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#vertexDataAsPoint2D-1">vertexDataAsPoint2D</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSGGeometry::TexturedPoint2D *</td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#vertexDataAsTexturedPoint2D">vertexDataAsTexturedPoint2D</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QSGGeometry::TexturedPoint2D *</td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#vertexDataAsTexturedPoint2D-1">vertexDataAsTexturedPoint2D</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSGGeometry::DataPattern </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#vertexDataPattern">vertexDataPattern</a></b>() const</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> const QSGGeometry::AttributeSet &amp;</td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#defaultAttributes_ColoredPoint2D">defaultAttributes_ColoredPoint2D</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QSGGeometry::AttributeSet &amp;</td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#defaultAttributes_Point2D">defaultAttributes_Point2D</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QSGGeometry::AttributeSet &amp;</td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#defaultAttributes_TexturedPoint2D">defaultAttributes_TexturedPoint2D</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#updateColoredRectGeometry">updateColoredRectGeometry</a></b>(QSGGeometry *<i>g</i>, const QRectF &amp;<i>rect</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#updateRectGeometry">updateRectGeometry</a></b>(QSGGeometry *<i>g</i>, const QRectF &amp;<i>rect</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsggeometry.html#updateTexturedRectGeometry">updateTexturedRectGeometry</a></b>(QSGGeometry *<i>g</i>, const QRectF &amp;<i>rect</i>, const QRectF &amp;<i>textureRect</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSGGeometry-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qsggeometry.html">QSGGeometry</a> class stores the geometry of the primitives rendered with the scene graph. It contains vertex data and optionally index data. The mode used to draw the geometry is specified with <a href="qsggeometry.html#setDrawingMode">setDrawingMode</a>(), which maps directly to the graphics API's drawing mode, such as <code>GL_TRIANGLE_STRIP</code>, <code>GL_TRIANGLES</code>, or <code>GL_POINTS</code> in case of OpenGL.</p>
+<p>Vertices can be as simple as points defined by x and y values or can be more complex where each vertex contains a normal, texture coordinates and a 3D position. The <a href="qsggeometry-attributeset.html">QSGGeometry::AttributeSet</a> is used to describe how the vertex data is built up. The attribute set can only be specified on construction. The <a href="qsggeometry.html">QSGGeometry</a> class provides a few convenience attributes and attribute sets by default. The <a href="qsggeometry.html#defaultAttributes_Point2D">defaultAttributes_Point2D</a>() function returns an attribute set to be used in normal solid color rectangles, while the <a href="qsggeometry.html#defaultAttributes_TexturedPoint2D">defaultAttributes_TexturedPoint2D</a> function returns attributes to be used for textured 2D geometry. The vertex data is internally stored as a <code>void *</code> and is accessible with the <a href="qsggeometry.html#vertexData">vertexData</a>() function. Convenience accessors for the common attribute sets are available with <a href="qsggeometry.html#vertexDataAsPoint2D">vertexDataAsPoint2D</a>() and <a href="qsggeometry.html#vertexDataAsTexturedPoint2D">vertexDataAsTexturedPoint2D</a>(). Vertex data is allocated by passing a vertex count to the constructor or by calling <a href="qsggeometry.html#allocate">allocate</a>() later.</p>
+<p>The <a href="qsggeometry.html">QSGGeometry</a> can optionally contain indices of either unsigned 32-bit, unsigned 16-bit, or unsigned 8-bit integers. The index type must be specified during construction and cannot be changed.</p>
+<p>Below is a snippet illustrating how a geometry composed of position and color vertices can be built.</p>
+<pre class="cpp">
+
+  <span class="keyword">struct</span> MyPoint2D {
+      <span class="type">float</span> x;
+      <span class="type">float</span> y;
+      <span class="type">float</span> r;
+      <span class="type">float</span> g;
+      <span class="type">float</span> b;
+      <span class="type">float</span> a;
+
+      <span class="type">void</span> set(<span class="type">float</span> x_<span class="operator">,</span> <span class="type">float</span> y_<span class="operator">,</span> <span class="type">float</span> r_<span class="operator">,</span> <span class="type">float</span> g_<span class="operator">,</span> <span class="type">float</span> b_<span class="operator">,</span> <span class="type">float</span> a_) {
+          x <span class="operator">=</span> x_;
+          y <span class="operator">=</span> y_;
+          r <span class="operator">=</span> r_;
+          g <span class="operator">=</span> g_;
+          b <span class="operator">=</span> b_;
+          a <span class="operator">=</span> a_;
+      }
+  };
+
+  <span class="type"><a href="qsggeometry.html#QSGGeometry">QSGGeometry</a></span><span class="operator">::</span>Attribute MyPoint2D_Attributes<span class="operator">[</span><span class="operator">]</span> <span class="operator">=</span> {
+      <span class="type"><a href="qsggeometry.html#QSGGeometry">QSGGeometry</a></span><span class="operator">::</span>Attribute<span class="operator">::</span>create(<span class="number">0</span><span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> GL_FLOAT<span class="operator">,</span> <span class="keyword">true</span>)<span class="operator">,</span>
+      <span class="type"><a href="qsggeometry.html#QSGGeometry">QSGGeometry</a></span><span class="operator">::</span>Attribute<span class="operator">::</span>create(<span class="number">1</span><span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> GL_FLOAT<span class="operator">,</span> <span class="keyword">false</span>)
+  };
+
+  <span class="type"><a href="qsggeometry.html#QSGGeometry">QSGGeometry</a></span><span class="operator">::</span>AttributeSet MyPoint2D_AttributeSet <span class="operator">=</span> {
+      <span class="number">2</span><span class="operator">,</span>
+      <span class="keyword">sizeof</span>(MyPoint2D)<span class="operator">,</span>
+      MyPoint2D_Attributes
+  };
+
+  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+  geometry <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qsggeometry.html#QSGGeometry">QSGGeometry</a></span>(MyPoint2D_AttributeSet<span class="operator">,</span> <span class="number">2</span>);
+  geometry<span class="operator">-</span><span class="operator">&gt;</span>setDrawingMode(GL_LINES);
+
+  MyPoint2D <span class="operator">*</span>vertices <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span>MyPoint2D <span class="operator">*</span><span class="operator">&gt;</span>(geometry<span class="operator">-</span><span class="operator">&gt;</span>vertexData());
+  vertices<span class="operator">[</span><span class="number">0</span><span class="operator">]</span><span class="operator">.</span>set(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span>);
+  vertices<span class="operator">[</span><span class="number">1</span><span class="operator">]</span><span class="operator">.</span>set(width()<span class="operator">,</span> height()<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span>);
+
+</pre>
+<p>The <a href="qsggeometry.html">QSGGeometry</a> is a software buffer and client-side in terms of OpenGL rendering, as the buffers used in 2D graphics typically consist of many small buffers that change every frame and do not benefit from being uploaded to graphics memory. However, the <a href="qsggeometry.html">QSGGeometry</a> supports hinting to the renderer that a buffer should be uploaded using the <a href="qsggeometry.html#setVertexDataPattern">setVertexDataPattern</a>() and <a href="qsggeometry.html#setIndexDataPattern">setIndexDataPattern</a>() functions. Whether this hint is respected or not is implementation specific.</p>
+<p><b>Note: </b>All classes with QSG prefix should be used solely on the scene graph's rendering thread. See <a href="qtquick-visualcanvas-scenegraph.html#scene-graph-and-rendering">Scene Graph and Rendering</a> for more information.</p></div>
+<p><b>See also </b><a href="qsggeometrynode.html">QSGGeometryNode</a> and <a href="qtquick-scenegraph-customgeometry-example.html">Scene Graph - Custom Geometry</a>.</p>
+<!-- @@@QSGGeometry -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$AttributeType$$$UnknownAttribute$$$PositionAttribute$$$ColorAttribute$$$TexCoordAttribute$$$TexCoord1Attribute$$$TexCoord2Attribute -->
+<h3 class="fn" id="AttributeType-enum"><a name="AttributeType-enum"></a>enum QSGGeometry::<span class="name">AttributeType</span></h3>
+<p>This enum identifies several attribute types.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QSGGeometry::UnknownAttribute</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Don't care</td></tr>
+<tr><td class="topAlign"><code>QSGGeometry::PositionAttribute</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Position</td></tr>
+<tr><td class="topAlign"><code>QSGGeometry::ColorAttribute</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Color</td></tr>
+<tr><td class="topAlign"><code>QSGGeometry::TexCoordAttribute</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">Texture coordinate</td></tr>
+<tr><td class="topAlign"><code>QSGGeometry::TexCoord1Attribute</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">Texture coordinate 1</td></tr>
+<tr><td class="topAlign"><code>QSGGeometry::TexCoord2Attribute</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">Texture coordinate 2</td></tr>
+</table></div>
+<!-- @@@AttributeType -->
+<!-- $$$DataPattern$$$AlwaysUploadPattern$$$StreamPattern$$$DynamicPattern$$$StaticPattern -->
+<h3 class="fn" id="DataPattern-enum"><a name="DataPattern-enum"></a>enum QSGGeometry::<span class="name">DataPattern</span></h3>
+<p>The DataPattern enum is used to specify the use pattern for the vertex and index data in a geometry object.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QSGGeometry::AlwaysUploadPattern</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The data is always uploaded. This means that the user does not need to explicitly mark index and vertex data as dirty after changing it. This is the default.</td></tr>
+<tr><td class="topAlign"><code>QSGGeometry::DynamicPattern</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The data is modified repeatedly and drawn many times. This is a hint that may provide better performance. When set the user must make sure to mark the data as dirty after changing it.</td></tr>
+<tr><td class="topAlign"><code>QSGGeometry::StaticPattern</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">The data is modified once and drawn many times. This is a hint that may provide better performance. When set the user must make sure to mark the data as dirty after changing it.</td></tr>
+<tr><td class="topAlign"><code>QSGGeometry::StreamPattern</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The data is modified for almost every time it is drawn. This is a hint that may provide better performance. When set, the user must make sure to mark the data as dirty after changing it.</td></tr>
+</table></div>
+<!-- @@@DataPattern -->
+<!-- $$$DrawingMode$$$DrawPoints$$$DrawLines$$$DrawLineLoop$$$DrawLineStrip$$$DrawTriangles$$$DrawTriangleStrip$$$DrawTriangleFan -->
+<h3 class="fn" id="DrawingMode-enum"><a name="DrawingMode-enum"></a>enum QSGGeometry::<span class="name">DrawingMode</span></h3>
+<p>The values correspond to OpenGL enum values like <code>GL_POINTS</code>, <code>GL_LINES</code>, etc. <a href="qsggeometry.html">QSGGeometry</a> provies its own type in order to be able to provide the same API with non-OpenGL backends as well.</p>
+<div class="table"><table class="valuelist"><tr><th class="tblConst">Constant</th><th class="tblVal">Value</th></tr>
+<tr><td class="topAlign"><code>QSGGeometry::DrawPoints</code></td><td class="topAlign tblval"><code>0x0000</code></td></tr>
+<tr><td class="topAlign"><code>QSGGeometry::DrawLines</code></td><td class="topAlign tblval"><code>0x0001</code></td></tr>
+<tr><td class="topAlign"><code>QSGGeometry::DrawLineLoop</code></td><td class="topAlign tblval"><code>0x0002</code></td></tr>
+<tr><td class="topAlign"><code>QSGGeometry::DrawLineStrip</code></td><td class="topAlign tblval"><code>0x0003</code></td></tr>
+<tr><td class="topAlign"><code>QSGGeometry::DrawTriangles</code></td><td class="topAlign tblval"><code>0x0004</code></td></tr>
+<tr><td class="topAlign"><code>QSGGeometry::DrawTriangleStrip</code></td><td class="topAlign tblval"><code>0x0005</code></td></tr>
+<tr><td class="topAlign"><code>QSGGeometry::DrawTriangleFan</code></td><td class="topAlign tblval"><code>0x0006</code></td></tr>
+</table></div>
+<!-- @@@DrawingMode -->
+<!-- $$$Type$$$ByteType$$$UnsignedByteType$$$ShortType$$$UnsignedShortType$$$IntType$$$UnsignedIntType$$$FloatType -->
+<h3 class="fn" id="Type-enum"><a name="Type-enum"></a>enum QSGGeometry::<span class="name">Type</span></h3>
+<p>The values correspond to OpenGL type constants like <code>GL_BYTE</code>, <code>GL_UNSIGNED_BYTE</code>, etc. <a href="qsggeometry.html">QSGGeometry</a> provies its own type in order to be able to provide the same API with non-OpenGL backends as well.</p>
+<div class="table"><table class="valuelist"><tr><th class="tblConst">Constant</th><th class="tblVal">Value</th></tr>
+<tr><td class="topAlign"><code>QSGGeometry::ByteType</code></td><td class="topAlign tblval"><code>0x1400</code></td></tr>
+<tr><td class="topAlign"><code>QSGGeometry::UnsignedByteType</code></td><td class="topAlign tblval"><code>0x1401</code></td></tr>
+<tr><td class="topAlign"><code>QSGGeometry::ShortType</code></td><td class="topAlign tblval"><code>0x1402</code></td></tr>
+<tr><td class="topAlign"><code>QSGGeometry::UnsignedShortType</code></td><td class="topAlign tblval"><code>0x1403</code></td></tr>
+<tr><td class="topAlign"><code>QSGGeometry::IntType</code></td><td class="topAlign tblval"><code>0x1404</code></td></tr>
+<tr><td class="topAlign"><code>QSGGeometry::UnsignedIntType</code></td><td class="topAlign tblval"><code>0x1405</code></td></tr>
+<tr><td class="topAlign"><code>QSGGeometry::FloatType</code></td><td class="topAlign tblval"><code>0x1406</code></td></tr>
+</table></div>
+<!-- @@@Type -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QSGGeometry[overload1]$$$QSGGeometryconstQSGGeometry::AttributeSet&intintint -->
+<h3 class="fn" id="QSGGeometry"><a name="QSGGeometry"></a>QSGGeometry::<span class="name">QSGGeometry</span>(const <span class="type"><a href="qsggeometry-attributeset.html">QSGGeometry::AttributeSet</a></span> &amp;<i>attributes</i>, <span class="type">int</span> <i>vertexCount</i>, <span class="type">int</span> <i>indexCount</i> = 0, <span class="type">int</span> <i>indexType</i> = UnsignedShortType)</h3>
+<p>Constructs a geometry object based on <i>attributes</i>.</p>
+<p>The object allocate space for <i>vertexCount</i> vertices based on the accumulated size in <i>attributes</i> and for <i>indexCount</i>.</p>
+<p>The <i>indexType</i> maps to the OpenGL index type and can be <code>GL_UNSIGNED_SHORT</code> and <code>GL_UNSIGNED_BYTE</code>. On OpenGL implementations that support it, such as desktop OpenGL, <code>GL_UNSIGNED_INT</code> can also be used.</p>
+<p>Geometry objects are constructed with <code>GL_TRIANGLE_STRIP</code> as default drawing mode.</p>
+<p>The attribute structure is assumed to be POD and the geometry object assumes this will not go away. There is no memory management involved.</p>
+<!-- @@@QSGGeometry -->
+<!-- $$$~QSGGeometry[overload1]$$$~QSGGeometry -->
+<h3 class="fn" id="dtor.QSGGeometry"><a name="dtor.QSGGeometry"></a><code>[virtual] </code>QSGGeometry::<span class="name">~QSGGeometry</span>()</h3>
+<p>Destroys the geometry object and the vertex and index data it has allocated.</p>
+<!-- @@@~QSGGeometry -->
+<!-- $$$allocate[overload1]$$$allocateintint -->
+<h3 class="fn" id="allocate"><a name="allocate"></a><span class="type">void</span> QSGGeometry::<span class="name">allocate</span>(<span class="type">int</span> <i>vertexCount</i>, <span class="type">int</span> <i>indexCount</i> = 0)</h3>
+<p>Resizes the vertex and index data of this geometry object to fit <i>vertexCount</i> vertices and <i>indexCount</i> indices.</p>
+<p>Vertex and index data will be invalidated after this call and the caller must mark the associated geometry node as dirty, by calling node-&gt;markDirty(<a href="qsgnode.html#DirtyStateBit-enum">QSGNode::DirtyGeometry</a>) to ensure that the renderer has a chance to update internal buffers.</p>
+<!-- @@@allocate -->
+<!-- $$$attributeCount[overload1]$$$attributeCount -->
+<h3 class="fn" id="attributeCount"><a name="attributeCount"></a><span class="type">int</span> QSGGeometry::<span class="name">attributeCount</span>() const</h3>
+<p>Returns the number of attributes in the attrbute set used by this geometry.</p>
+<!-- @@@attributeCount -->
+<!-- $$$attributes[overload1]$$$attributes -->
+<h3 class="fn" id="attributes"><a name="attributes"></a>const <span class="type"><a href="qsggeometry-attribute.html">QSGGeometry::Attribute</a></span> *QSGGeometry::<span class="name">attributes</span>() const</h3>
+<p>Returns an array with the attributes of this geometry. The size of the array is given with <a href="qsggeometry.html#attributeCount">attributeCount</a>().</p>
+<!-- @@@attributes -->
+<!-- $$$defaultAttributes_ColoredPoint2D[overload1]$$$defaultAttributes_ColoredPoint2D -->
+<h3 class="fn" id="defaultAttributes_ColoredPoint2D"><a name="defaultAttributes_ColoredPoint2D"></a><code>[static] </code>const <span class="type"><a href="qsggeometry-attributeset.html">QSGGeometry::AttributeSet</a></span> &amp;QSGGeometry::<span class="name">defaultAttributes_ColoredPoint2D</span>()</h3>
+<p>Convenience function which returns attributes to be used for per vertex colored 2D drawing.</p>
+<!-- @@@defaultAttributes_ColoredPoint2D -->
+<!-- $$$defaultAttributes_Point2D[overload1]$$$defaultAttributes_Point2D -->
+<h3 class="fn" id="defaultAttributes_Point2D"><a name="defaultAttributes_Point2D"></a><code>[static] </code>const <span class="type"><a href="qsggeometry-attributeset.html">QSGGeometry::AttributeSet</a></span> &amp;QSGGeometry::<span class="name">defaultAttributes_Point2D</span>()</h3>
+<p>Convenience function which returns attributes to be used for 2D solid color drawing.</p>
+<!-- @@@defaultAttributes_Point2D -->
+<!-- $$$defaultAttributes_TexturedPoint2D[overload1]$$$defaultAttributes_TexturedPoint2D -->
+<h3 class="fn" id="defaultAttributes_TexturedPoint2D"><a name="defaultAttributes_TexturedPoint2D"></a><code>[static] </code>const <span class="type"><a href="qsggeometry-attributeset.html">QSGGeometry::AttributeSet</a></span> &amp;QSGGeometry::<span class="name">defaultAttributes_TexturedPoint2D</span>()</h3>
+<p>Convenience function which returns attributes to be used for textured 2D drawing.</p>
+<!-- @@@defaultAttributes_TexturedPoint2D -->
+<!-- $$$drawingMode[overload1]$$$drawingMode -->
+<h3 class="fn" id="drawingMode"><a name="drawingMode"></a><span class="type">unsigned</span> <span class="type">int</span> QSGGeometry::<span class="name">drawingMode</span>() const</h3>
+<p>Returns the drawing mode of this geometry.</p>
+<p>The default value is <code>GL_TRIANGLE_STRIP</code>.</p>
+<p><b>See also </b><a href="qsggeometry.html#setDrawingMode">setDrawingMode</a>().</p>
+<!-- @@@drawingMode -->
+<!-- $$$indexCount[overload1]$$$indexCount -->
+<h3 class="fn" id="indexCount"><a name="indexCount"></a><span class="type">int</span> QSGGeometry::<span class="name">indexCount</span>() const</h3>
+<p>Returns the number of indices in this geometry object.</p>
+<!-- @@@indexCount -->
+<!-- $$$indexData[overload1]$$$indexData -->
+<h3 class="fn" id="indexData"><a name="indexData"></a><span class="type">void</span> *QSGGeometry::<span class="name">indexData</span>()</h3>
+<p>Returns a pointer to the raw index data of this geometry object.</p>
+<p><b>See also </b><a href="qsggeometry.html#indexDataAsUShort">indexDataAsUShort</a>() and <a href="qsggeometry.html#indexDataAsUInt">indexDataAsUInt</a>().</p>
+<!-- @@@indexData -->
+<!-- $$$indexData$$$indexData -->
+<h3 class="fn" id="indexData-1"><a name="indexData-1"></a>const <span class="type">void</span> *QSGGeometry::<span class="name">indexData</span>() const</h3>
+<p>Returns a pointer to the raw index data of this geometry object.</p>
+<p><b>See also </b><a href="qsggeometry.html#indexDataAsUShort">indexDataAsUShort</a>() and <a href="qsggeometry.html#indexDataAsUInt">indexDataAsUInt</a>().</p>
+<!-- @@@indexData -->
+<!-- $$$indexDataAsUInt[overload1]$$$indexDataAsUInt -->
+<h3 class="fn" id="indexDataAsUInt"><a name="indexDataAsUInt"></a><span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> *QSGGeometry::<span class="name">indexDataAsUInt</span>()</h3>
+<p>Convenience function to access the index data as a mutable array of 32-bit unsigned integers.</p>
+<!-- @@@indexDataAsUInt -->
+<!-- $$$indexDataAsUInt$$$indexDataAsUInt -->
+<h3 class="fn" id="indexDataAsUInt-1"><a name="indexDataAsUInt-1"></a>const <span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> *QSGGeometry::<span class="name">indexDataAsUInt</span>() const</h3>
+<p>Convenience function to access the index data as an immutable array of 32-bit unsigned integers.</p>
+<!-- @@@indexDataAsUInt -->
+<!-- $$$indexDataAsUShort[overload1]$$$indexDataAsUShort -->
+<h3 class="fn" id="indexDataAsUShort"><a name="indexDataAsUShort"></a><span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> *QSGGeometry::<span class="name">indexDataAsUShort</span>()</h3>
+<p>Convenience function to access the index data as a mutable array of 16-bit unsigned integers.</p>
+<!-- @@@indexDataAsUShort -->
+<!-- $$$indexDataAsUShort$$$indexDataAsUShort -->
+<h3 class="fn" id="indexDataAsUShort-1"><a name="indexDataAsUShort-1"></a>const <span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> *QSGGeometry::<span class="name">indexDataAsUShort</span>() const</h3>
+<p>Convenience function to access the index data as an immutable array of 16-bit unsigned integers.</p>
+<!-- @@@indexDataAsUShort -->
+<!-- $$$indexDataPattern[overload1]$$$indexDataPattern -->
+<h3 class="fn" id="indexDataPattern"><a name="indexDataPattern"></a><span class="type"><a href="qsggeometry.html#DataPattern-enum">QSGGeometry::DataPattern</a></span> QSGGeometry::<span class="name">indexDataPattern</span>() const</h3>
+<p>Returns the usage pattern for indices in this geometry. The default pattern is <a href="qsggeometry.html#DataPattern-enum">AlwaysUploadPattern</a>.</p>
+<p><b>See also </b><a href="qsggeometry.html#setIndexDataPattern">setIndexDataPattern</a>().</p>
+<!-- @@@indexDataPattern -->
+<!-- $$$indexType[overload1]$$$indexType -->
+<h3 class="fn" id="indexType"><a name="indexType"></a><span class="type">int</span> QSGGeometry::<span class="name">indexType</span>() const</h3>
+<p>Returns the primitive type used for indices in this geometry object.</p>
+<!-- @@@indexType -->
+<!-- $$$lineWidth[overload1]$$$lineWidth -->
+<h3 class="fn" id="lineWidth"><a name="lineWidth"></a><span class="type">float</span> QSGGeometry::<span class="name">lineWidth</span>() const</h3>
+<p>Gets the current line or point width or to be used for this geometry. This property only applies to line width when the <a href="qsggeometry.html#drawingMode">drawingMode</a> is <a href="qsggeometry.html#DrawingMode-enum">DrawLines</a>, DarwLineStrip, or <a href="qsggeometry.html#DrawingMode-enum">DrawLineLoop</a>. For desktop OpenGL, it also applies to point size when the <a href="qsggeometry.html#drawingMode">drawingMode</a> is <a href="qsggeometry.html#DrawingMode-enum">DrawPoints</a>.</p>
+<p>The default value is <code>1.0</code></p>
+<p><b>Note: </b>When not using OpenGL, support for point and line drawing may be limited. For example, some APIs do not support point sprites and so setting a size other than 1 is not possible. Some backends may be able implement support via geometry shaders, but this is not guaranteed to be always available.</p><p><b>See also </b><a href="qsggeometry.html#setLineWidth">setLineWidth</a>() and <a href="qsggeometry.html#drawingMode">drawingMode</a>().</p>
+<!-- @@@lineWidth -->
+<!-- $$$markIndexDataDirty[overload1]$$$markIndexDataDirty -->
+<h3 class="fn" id="markIndexDataDirty"><a name="markIndexDataDirty"></a><span class="type">void</span> QSGGeometry::<span class="name">markIndexDataDirty</span>()</h3>
+<p>Mark that the vertices in this geometry has changed and must be uploaded again.</p>
+<p>This function only has an effect when the usage pattern for vertices is StaticData and the renderer that renders this geometry uploads the geometry into Vertex Buffer Objects (VBOs).</p>
+<!-- @@@markIndexDataDirty -->
+<!-- $$$markVertexDataDirty[overload1]$$$markVertexDataDirty -->
+<h3 class="fn" id="markVertexDataDirty"><a name="markVertexDataDirty"></a><span class="type">void</span> QSGGeometry::<span class="name">markVertexDataDirty</span>()</h3>
+<p>Mark that the vertices in this geometry has changed and must be uploaded again.</p>
+<p>This function only has an effect when the usage pattern for vertices is StaticData and the renderer that renders this geometry uploads the geometry into Vertex Buffer Objects (VBOs).</p>
+<!-- @@@markVertexDataDirty -->
+<!-- $$$setDrawingMode[overload1]$$$setDrawingModeunsignedint -->
+<h3 class="fn" id="setDrawingMode"><a name="setDrawingMode"></a><span class="type">void</span> QSGGeometry::<span class="name">setDrawingMode</span>(<span class="type">unsigned</span> <span class="type">int</span> <i>mode</i>)</h3>
+<p>Sets the <i>mode</i> to be used for drawing this geometry.</p>
+<p>The default value is <a href="qsggeometry.html#DrawingMode-enum">QSGGeometry::DrawTriangleStrip</a>.</p>
+<p><b>See also </b><a href="qsggeometry.html#drawingMode">drawingMode</a>() and <a href="qsggeometry.html#DrawingMode-enum">DrawingMode</a>.</p>
+<!-- @@@setDrawingMode -->
+<!-- $$$setIndexDataPattern[overload1]$$$setIndexDataPatternQSGGeometry::DataPattern -->
+<h3 class="fn" id="setIndexDataPattern"><a name="setIndexDataPattern"></a><span class="type">void</span> QSGGeometry::<span class="name">setIndexDataPattern</span>(<span class="type"><a href="qsggeometry.html#DataPattern-enum">QSGGeometry::DataPattern</a></span> <i>p</i>)</h3>
+<p>Sets the usage pattern for indices to <i>p</i>.</p>
+<p>The default is <a href="qsggeometry.html#DataPattern-enum">AlwaysUploadPattern</a>. When set to anything other than the default, the user must call <a href="qsggeometry.html#markIndexDataDirty">markIndexDataDirty</a>() after changing the index data, in addition to calling <a href="qsgnode.html#markDirty">QSGNode::markDirty</a>() with <a href="qsgnode.html#DirtyStateBit-enum">QSGNode::DirtyGeometry</a>.</p>
+<p><b>See also </b><a href="qsggeometry.html#indexDataPattern">indexDataPattern</a>().</p>
+<!-- @@@setIndexDataPattern -->
+<!-- $$$setLineWidth[overload1]$$$setLineWidthfloat -->
+<h3 class="fn" id="setLineWidth"><a name="setLineWidth"></a><span class="type">void</span> QSGGeometry::<span class="name">setLineWidth</span>(<span class="type">float</span> <i>width</i>)</h3>
+<p>Sets the line or point width to be used for this geometry to <i>width</i>. This property only applies to line width when the <a href="qsggeometry.html#drawingMode">drawingMode</a> is <a href="qsggeometry.html#DrawingMode-enum">DrawLines</a>, <a href="qsggeometry.html#DrawingMode-enum">DrawLineStrip</a>, or <a href="qsggeometry.html#DrawingMode-enum">DrawLineLoop</a>. For Desktop OpenGL, it also applies to point size when the <a href="qsggeometry.html#drawingMode">drawingMode</a> is <a href="qsggeometry.html#DrawingMode-enum">DrawPoints</a>.</p>
+<p><b>Note: </b>How line width and point size are treated is implementation dependent: The application should not rely on these, but rather create triangles or similar to draw areas. On OpenGL ES, line width support is limited and point size is unsupported.</p><p><b>See also </b><a href="qsggeometry.html#lineWidth">lineWidth</a>() and <a href="qsggeometry.html#drawingMode">drawingMode</a>().</p>
+<!-- @@@setLineWidth -->
+<!-- $$$setVertexDataPattern[overload1]$$$setVertexDataPatternQSGGeometry::DataPattern -->
+<h3 class="fn" id="setVertexDataPattern"><a name="setVertexDataPattern"></a><span class="type">void</span> QSGGeometry::<span class="name">setVertexDataPattern</span>(<span class="type"><a href="qsggeometry.html#DataPattern-enum">QSGGeometry::DataPattern</a></span> <i>p</i>)</h3>
+<p>Sets the usage pattern for vertices to <i>p</i>.</p>
+<p>The default is <a href="qsggeometry.html#DataPattern-enum">AlwaysUploadPattern</a>. When set to anything other than the default, the user must call <a href="qsggeometry.html#markVertexDataDirty">markVertexDataDirty</a>() after changing the vertex data, in addition to calling <a href="qsgnode.html#markDirty">QSGNode::markDirty</a>() with <a href="qsgnode.html#DirtyStateBit-enum">QSGNode::DirtyGeometry</a>.</p>
+<p><b>See also </b><a href="qsggeometry.html#vertexDataPattern">vertexDataPattern</a>().</p>
+<!-- @@@setVertexDataPattern -->
+<!-- $$$sizeOfIndex[overload1]$$$sizeOfIndex -->
+<h3 class="fn" id="sizeOfIndex"><a name="sizeOfIndex"></a><span class="type">int</span> QSGGeometry::<span class="name">sizeOfIndex</span>() const</h3>
+<p>Returns the byte size of the index type.</p>
+<p>This value is either <code>1</code> when index type is <code>GL_UNSIGNED_BYTE</code> or <code>2</code> when index type is <code>GL_UNSIGNED_SHORT</code>. For Desktop OpenGL, <code>GL_UNSIGNED_INT</code> with the value <code>4</code> is also supported.</p>
+<!-- @@@sizeOfIndex -->
+<!-- $$$sizeOfVertex[overload1]$$$sizeOfVertex -->
+<h3 class="fn" id="sizeOfVertex"><a name="sizeOfVertex"></a><span class="type">int</span> QSGGeometry::<span class="name">sizeOfVertex</span>() const</h3>
+<p>Returns the size in bytes of one vertex.</p>
+<p>This value comes from the attributes.</p>
+<!-- @@@sizeOfVertex -->
+<!-- $$$updateColoredRectGeometry[overload1]$$$updateColoredRectGeometryQSGGeometry*constQRectF& -->
+<h3 class="fn" id="updateColoredRectGeometry"><a name="updateColoredRectGeometry"></a><code>[static] </code><span class="type">void</span> QSGGeometry::<span class="name">updateColoredRectGeometry</span>(<span class="type"><a href="qsggeometry.html#QSGGeometry">QSGGeometry</a></span> *<i>g</i>, const <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> &amp;<i>rect</i>)</h3>
+<p>Updates the geometry <i>g</i> with the coordinates in <i>rect</i>.</p>
+<p>The function assumes the geometry object contains a single triangle strip of <a href="qsggeometry-coloredpoint2d.html">QSGGeometry::ColoredPoint2D</a> vertices</p>
+<!-- @@@updateColoredRectGeometry -->
+<!-- $$$updateRectGeometry[overload1]$$$updateRectGeometryQSGGeometry*constQRectF& -->
+<h3 class="fn" id="updateRectGeometry"><a name="updateRectGeometry"></a><code>[static] </code><span class="type">void</span> QSGGeometry::<span class="name">updateRectGeometry</span>(<span class="type"><a href="qsggeometry.html#QSGGeometry">QSGGeometry</a></span> *<i>g</i>, const <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> &amp;<i>rect</i>)</h3>
+<p>Updates the geometry <i>g</i> with the coordinates in <i>rect</i>.</p>
+<p>The function assumes the geometry object contains a single triangle strip of <a href="qsggeometry-point2d.html">QSGGeometry::Point2D</a> vertices</p>
+<!-- @@@updateRectGeometry -->
+<!-- $$$updateTexturedRectGeometry[overload1]$$$updateTexturedRectGeometryQSGGeometry*constQRectF&constQRectF& -->
+<h3 class="fn" id="updateTexturedRectGeometry"><a name="updateTexturedRectGeometry"></a><code>[static] </code><span class="type">void</span> QSGGeometry::<span class="name">updateTexturedRectGeometry</span>(<span class="type"><a href="qsggeometry.html#QSGGeometry">QSGGeometry</a></span> *<i>g</i>, const <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> &amp;<i>rect</i>, const <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> &amp;<i>textureRect</i>)</h3>
+<p>Updates the geometry <i>g</i> with the coordinates in <i>rect</i> and texture coordinates from <i>textureRect</i>.</p>
+<p><i>textureRect</i> should be in normalized coordinates.</p>
+<p><i>g</i> is assumed to be a triangle strip of four vertices of type <a href="qsggeometry-texturedpoint2d.html">QSGGeometry::TexturedPoint2D</a>.</p>
+<!-- @@@updateTexturedRectGeometry -->
+<!-- $$$vertexCount[overload1]$$$vertexCount -->
+<h3 class="fn" id="vertexCount"><a name="vertexCount"></a><span class="type">int</span> QSGGeometry::<span class="name">vertexCount</span>() const</h3>
+<p>Returns the number of vertices in this geometry object.</p>
+<!-- @@@vertexCount -->
+<!-- $$$vertexData[overload1]$$$vertexData -->
+<h3 class="fn" id="vertexData"><a name="vertexData"></a><span class="type">void</span> *QSGGeometry::<span class="name">vertexData</span>()</h3>
+<p>Returns a pointer to the raw vertex data of this geometry object.</p>
+<p><b>See also </b><a href="qsggeometry.html#vertexDataAsPoint2D">vertexDataAsPoint2D</a>() and <a href="qsggeometry.html#vertexDataAsTexturedPoint2D">vertexDataAsTexturedPoint2D</a>().</p>
+<!-- @@@vertexData -->
+<!-- $$$vertexData$$$vertexData -->
+<h3 class="fn" id="vertexData-1"><a name="vertexData-1"></a>const <span class="type">void</span> *QSGGeometry::<span class="name">vertexData</span>() const</h3>
+<p>Returns a pointer to the raw vertex data of this geometry object.</p>
+<p><b>See also </b><a href="qsggeometry.html#vertexDataAsPoint2D">vertexDataAsPoint2D</a>() and <a href="qsggeometry.html#vertexDataAsTexturedPoint2D">vertexDataAsTexturedPoint2D</a>().</p>
+<!-- @@@vertexData -->
+<!-- $$$vertexDataAsColoredPoint2D[overload1]$$$vertexDataAsColoredPoint2D -->
+<h3 class="fn" id="vertexDataAsColoredPoint2D"><a name="vertexDataAsColoredPoint2D"></a><span class="type"><a href="qsggeometry-coloredpoint2d.html">QSGGeometry::ColoredPoint2D</a></span> *QSGGeometry::<span class="name">vertexDataAsColoredPoint2D</span>()</h3>
+<p>Convenience function to access the vertex data as a mutable array of <a href="qsggeometry-coloredpoint2d.html">QSGGeometry::ColoredPoint2D</a>.</p>
+<!-- @@@vertexDataAsColoredPoint2D -->
+<!-- $$$vertexDataAsColoredPoint2D$$$vertexDataAsColoredPoint2D -->
+<h3 class="fn" id="vertexDataAsColoredPoint2D-1"><a name="vertexDataAsColoredPoint2D-1"></a>const <span class="type"><a href="qsggeometry-coloredpoint2d.html">QSGGeometry::ColoredPoint2D</a></span> *QSGGeometry::<span class="name">vertexDataAsColoredPoint2D</span>() const</h3>
+<p>Convenience function to access the vertex data as an immutable array of <a href="qsggeometry-coloredpoint2d.html">QSGGeometry::ColoredPoint2D</a>.</p>
+<!-- @@@vertexDataAsColoredPoint2D -->
+<!-- $$$vertexDataAsPoint2D[overload1]$$$vertexDataAsPoint2D -->
+<h3 class="fn" id="vertexDataAsPoint2D"><a name="vertexDataAsPoint2D"></a><span class="type"><a href="qsggeometry-point2d.html">QSGGeometry::Point2D</a></span> *QSGGeometry::<span class="name">vertexDataAsPoint2D</span>()</h3>
+<p>Convenience function to access the vertex data as a mutable array of <a href="qsggeometry-point2d.html">QSGGeometry::Point2D</a>.</p>
+<!-- @@@vertexDataAsPoint2D -->
+<!-- $$$vertexDataAsPoint2D$$$vertexDataAsPoint2D -->
+<h3 class="fn" id="vertexDataAsPoint2D-1"><a name="vertexDataAsPoint2D-1"></a>const <span class="type"><a href="qsggeometry-point2d.html">QSGGeometry::Point2D</a></span> *QSGGeometry::<span class="name">vertexDataAsPoint2D</span>() const</h3>
+<p>Convenience function to access the vertex data as an immutable array of <a href="qsggeometry-point2d.html">QSGGeometry::Point2D</a>.</p>
+<!-- @@@vertexDataAsPoint2D -->
+<!-- $$$vertexDataAsTexturedPoint2D[overload1]$$$vertexDataAsTexturedPoint2D -->
+<h3 class="fn" id="vertexDataAsTexturedPoint2D"><a name="vertexDataAsTexturedPoint2D"></a><span class="type"><a href="qsggeometry-texturedpoint2d.html">QSGGeometry::TexturedPoint2D</a></span> *QSGGeometry::<span class="name">vertexDataAsTexturedPoint2D</span>()</h3>
+<p>Convenience function to access the vertex data as a mutable array of <a href="qsggeometry-texturedpoint2d.html">QSGGeometry::TexturedPoint2D</a>.</p>
+<!-- @@@vertexDataAsTexturedPoint2D -->
+<!-- $$$vertexDataAsTexturedPoint2D$$$vertexDataAsTexturedPoint2D -->
+<h3 class="fn" id="vertexDataAsTexturedPoint2D-1"><a name="vertexDataAsTexturedPoint2D-1"></a>const <span class="type"><a href="qsggeometry-texturedpoint2d.html">QSGGeometry::TexturedPoint2D</a></span> *QSGGeometry::<span class="name">vertexDataAsTexturedPoint2D</span>() const</h3>
+<p>Convenience function to access the vertex data as an immutable array of <a href="qsggeometry-texturedpoint2d.html">QSGGeometry::TexturedPoint2D</a>.</p>
+<!-- @@@vertexDataAsTexturedPoint2D -->
+<!-- $$$vertexDataPattern[overload1]$$$vertexDataPattern -->
+<h3 class="fn" id="vertexDataPattern"><a name="vertexDataPattern"></a><span class="type"><a href="qsggeometry.html#DataPattern-enum">QSGGeometry::DataPattern</a></span> QSGGeometry::<span class="name">vertexDataPattern</span>() const</h3>
+<p>Returns the usage pattern for vertices in this geometry. The default pattern is <a href="qsggeometry.html#DataPattern-enum">AlwaysUploadPattern</a>.</p>
+<p><b>See also </b><a href="qsggeometry.html#setVertexDataPattern">setVertexDataPattern</a>().</p>
+<!-- @@@vertexDataPattern -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

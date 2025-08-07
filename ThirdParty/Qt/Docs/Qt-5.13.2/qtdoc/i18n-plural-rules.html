@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- i18n.qdoc -->
+  <title>Translation Rules for Plurals | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Translation Rules for Plurals</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="i18n-source-translation.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="i18n-source-translation.html">Writing Source Code for Translation</a>
+</p><p/>
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Translation Rules for Plurals</h1>
+<span class="subtitle"></span>
+<!-- $$$i18n-plural-rules.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The table below shows the specific rules that are produced by Qt Linguist and <code>lrelease</code> for a selection of languages. Cells marked <i>otherwise</i> indicate the form used when none of the other rules are appropriate for a specific language.</p>
+<div class="table"><table class="generic" width="80%">
+ <thead><tr class="qt-style"><th >Language</th><th >Rule 1</th><th >Rule 2</th><th >Rule 3</th></tr></thead>
+<tr valign="top" class="odd"><td >English</td><td ><code>n == 1</code></td><td ><i>otherwise</i></td><td >N/A</td></tr>
+<tr valign="top" class="even"><td >French</td><td ><code>n &lt; 2</code></td><td ><i>otherwise</i></td><td >N/A</td></tr>
+<tr valign="top" class="odd"><td >Czech</td><td ><code>n % 100 == 1</code></td><td ><code>n % 100 &gt;= 2 &amp;&amp; n % 100 &lt;= 4</code></td><td ><i>otherwise</i></td></tr>
+<tr valign="top" class="even"><td >Irish</td><td ><code>n == 1</code></td><td ><code>n == 2</code></td><td ><i>otherwise</i></td></tr>
+<tr valign="top" class="odd"><td >Latvian</td><td ><code>n % 10 == 1&amp;&amp; n % 100 != 11</code></td><td ><code>n != 0</code></td><td ><i>otherwise</i></td></tr>
+<tr valign="top" class="even"><td >Lithuanian</td><td ><code>n % 10 == 1&amp;&amp; n % 100 != 11</code></td><td ><code>n % 100 != 12 &amp;&amp; n % 10 == 2</code></td><td ><i>otherwise</i></td></tr>
+<tr valign="top" class="odd"><td >Macedonian</td><td ><code>n % 10 == 1</code></td><td ><code>n % 10 == 2</code></td><td ><i>otherwise</i></td></tr>
+<tr valign="top" class="even"><td >Polish</td><td ><code>n == 1</code></td><td ><code>n % 10 &gt;= 2 &amp;&amp; n % 10 &lt;= 4 &amp;&amp; (n % 100 &lt; 10 || n % 100 &gt; 20)</code></td><td ><i>otherwise</i></td></tr>
+<tr valign="top" class="odd"><td >Romanian</td><td ><code>n == 1</code></td><td ><code>n == 0|| (n % 100 &gt;= 1 &amp;&amp; n % 100 &lt;= 20)</code></td><td ><i>otherwise</i></td></tr>
+<tr valign="top" class="even"><td >Russian</td><td ><code>n % 10 == 1&amp;&amp; n % 100 != 11</code></td><td ><code>n % 10 &gt;= 2 &amp;&amp; n % 10 &lt;= 4 &amp;&amp; (n % 100 &lt; 10 || n % 100 &gt; 20)</code></td><td ><i>otherwise</i></td></tr>
+<tr valign="top" class="odd"><td >Slovak</td><td ><code>n == 1</code></td><td ><code>n &gt;= 2 &amp;&amp; n &lt;= 4</code></td><td ><i>otherwise</i></td></tr>
+<tr valign="top" class="even"><td >Japanese</td><td ><i>otherwise</i></td><td >N/A</td><td >N/A</td></tr>
+</table></div>
+<p>The rules themselves are not documented and are internal to Qt Linguist and <code>lrelease</code>.</p>
+</div>
+<!-- @@@i18n-plural-rules.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="i18n-source-translation.html">Writing Source Code for Translation</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

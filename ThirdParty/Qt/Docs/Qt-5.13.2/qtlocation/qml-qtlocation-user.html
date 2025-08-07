@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdeclarativeplaceuser.cpp -->
+  <title>User QML Type | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-qmlmodule.html">QML Types</a></td><td >User QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#example">Example</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">User QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$User-brief -->
+<p>The User type identifies a user who contributed a particular <a href="qml-qtlocation-place.html">Place</a> content item. <a href="#details">More...</a></p>
+<!-- @@@User -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtLocation 5.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  QtLocation 5.5</td></tr></table></div><ul>
+<li><a href="qml-qtlocation-user-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtlocation-user.html#name-prop">name</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtlocation-user.html#user-prop">user</a></b></b> : QPlaceUser</li>
+<li class="fn"><b><b><a href="qml-qtlocation-user.html#userId-prop">userId</a></b></b> : string</li>
+</ul>
+<!-- $$$User-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>Each <a href="qml-qtlocation-place.html">Place</a> content item has an associated user who contributed the content. This type provides information about that user.</p>
+<a name="example"></a>
+<h2 id="example">Example</h2>
+<p>The following example shows how to display information about the user who submitted an editorial:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+  import QtPositioning 5.5
+  import QtLocation 5.6
+
+  <span class="type"><a href="qml-qtlocation-editorialmodel.html">EditorialModel</a></span> {
+      <span class="name">id</span>: <span class="name">editorialModel</span>
+      <span class="name">batchSize</span>: <span class="number">3</span>
+      <span class="name">place</span>: <span class="name">place</span>
+  }
+
+  <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+      <span class="name">model</span>: <span class="name">editorialModel</span>
+      <span class="name">delegate</span>: <span class="name">Item</span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+
+          <span class="type"><a href="../qtquick/qml-qtquick-column.html">Column</a></span> {
+              <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+              <span class="name">clip</span>: <span class="number">true</span>
+
+              <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                  <span class="name">text</span>: <span class="name">title</span>
+                  <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+                  <span class="name">wrapMode</span>: <span class="name">Text</span>.<span class="name">WordWrap</span>
+                  <span class="name">font</span>.pixelSize: <span class="number">24</span>
+              }
+
+              <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                  <span class="name">text</span>: <span class="name">text</span>
+                  <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+                  <span class="name">wrapMode</span>: <span class="name">Text</span>.<span class="name">WordWrap</span>
+                  <span class="name">font</span>.pixelSize: <span class="number">20</span>
+              }
+
+              <span class="type"><a href="../qtquick/qml-qtquick-row.html">Row</a></span> {
+                  <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+                      <span class="name">width</span>: <span class="number">16</span>
+                      <span class="name">height</span>: <span class="number">16</span>
+
+                      <span class="name">source</span>: <span class="name">supplier</span>.<span class="name">icon</span>.<span class="name">url</span>(<span class="name">Qt</span>.<span class="name">size</span>(<span class="name">width</span>, <span class="name">height</span>), <span class="name">Icon</span>.<span class="name">List</span>)
+                  }
+
+                  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                      <span class="name">text</span>: <span class="string">&quot;Provided by &quot;</span> <span class="operator">+</span> <span class="name">supplier</span>.<span class="name">name</span>
+                      <span class="name">font</span>.pixelSize: <span class="number">16</span>
+                  }
+              }
+
+              <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                  <span class="name">text</span>: <span class="string">&quot;Contributed by &quot;</span> <span class="operator">+</span> <span class="name">user</span>.<span class="name">name</span>
+                  <span class="name">font</span>.pixelSize: <span class="number">16</span>
+              }
+
+              <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                  <span class="name">text</span>: <span class="name">attribution</span>
+                  <span class="name">font</span>.pixelSize: <span class="number">8</span>
+              }
+          }
+      }
+  }
+
+</pre>
+<p><b>See also </b><a href="qml-qtlocation-imagemodel.html">ImageModel</a>, <a href="qml-qtlocation-reviewmodel.html">ReviewModel</a>, and <a href="qml-qtlocation-editorialmodel.html">EditorialModel</a>.</p>
+<!-- @@@User -->
+<h2>Property Documentation</h2>
+<!-- $$$name -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="name-prop"></a><span class="name">name</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the name of a user.</p>
+</div></div><!-- @@@name -->
+<br/>
+<!-- $$$user -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="user-prop"></a><span class="name">user</span> : <span class="type">QPlaceUser</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>For details on how to use this property to interface between C++ and QML see &quot;<a href="location-cpp-qml.html#user-qplaceuser">Interfaces between C++ and QML Code</a>&quot;.</p>
+</div></div><!-- @@@user -->
+<br/>
+<!-- $$$userId -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="userId-prop"></a><span class="name">userId</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the unique identifier of the user.</p>
+</div></div><!-- @@@userId -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

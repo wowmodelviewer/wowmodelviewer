@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmetaobject.cpp -->
+  <title>QGenericArgument Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QGenericArgument</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QGenericArgument Class</h1>
+<!-- $$$QGenericArgument-brief -->
+<p>The <a href="qgenericargument.html">QGenericArgument</a> class is an internal helper class for marshalling arguments. <a href="#details">More...</a></p>
+<!-- @@@QGenericArgument -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QGenericArgument&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qgenericreturnargument.html">QGenericReturnArgument</a></p>
+</td></tr></table></div><ul>
+<li><a href="qgenericargument-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgenericargument.html#QGenericArgument">QGenericArgument</a></b>(const char *<i>name</i> = nullptr, const void *<i>data</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void *</td><td class="memItemRight bottomAlign"><b><a href="qgenericargument.html#data">data</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const char *</td><td class="memItemRight bottomAlign"><b><a href="qgenericargument.html#name">name</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QGenericArgument-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This class should never be used directly. Please use the <a href="qmetaobject.html#Q_ARG">Q_ARG</a>() macro instead.</p>
+</div>
+<p><b>See also </b><a href="qmetaobject.html#Q_ARG">Q_ARG</a>(), <a href="qmetaobject.html#invokeMethod">QMetaObject::invokeMethod</a>(), and <a href="qgenericreturnargument.html">QGenericReturnArgument</a>.</p>
+<!-- @@@QGenericArgument -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QGenericArgument[overload1]$$$QGenericArgumentconstchar*constvoid* -->
+<h3 class="fn" id="QGenericArgument"><a name="QGenericArgument"></a>QGenericArgument::<span class="name">QGenericArgument</span>(const <span class="type">char</span> *<i>name</i> = nullptr, const <span class="type">void</span> *<i>data</i> = nullptr)</h3>
+<p>Constructs a <a href="qgenericargument.html">QGenericArgument</a> object with the given <i>name</i> and <i>data</i>.</p>
+<!-- @@@QGenericArgument -->
+<!-- $$$data[overload1]$$$data -->
+<h3 class="fn" id="data"><a name="data"></a><span class="type">void</span> *QGenericArgument::<span class="name">data</span>() const</h3>
+<p>Returns the data set in the constructor.</p>
+<!-- @@@data -->
+<!-- $$$name[overload1]$$$name -->
+<h3 class="fn" id="name"><a name="name"></a>const <span class="type">char</span> *QGenericArgument::<span class="name">name</span>() const</h3>
+<p>Returns the name set in the constructor.</p>
+<!-- @@@name -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

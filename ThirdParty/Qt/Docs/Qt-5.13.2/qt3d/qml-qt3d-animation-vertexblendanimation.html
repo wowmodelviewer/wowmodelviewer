@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qvertexblendanimation.cpp -->
+  <title>VertexBlendAnimation QML Type | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-qml.html">QML Types</a></td><td >VertexBlendAnimation QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">VertexBlendAnimation QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$VertexBlendAnimation-brief -->
+<p>A type implementing vertex-blend morphing animation. <a href="#details">More...</a></p>
+<!-- @@@VertexBlendAnimation -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import Qt3D.Animation 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.9</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiates:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-animation-vertexblendanimation.html"><a href="qt3danimation-qvertexblendanimation.html">QVertexBlendAnimation</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qt3d-animation-abstractanimation.html">AbstractAnimation</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qt3d-animation-vertexblendanimation-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qt3d-animation-vertexblendanimation.html#interpolator-prop">interpolator</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qt3d-animation-vertexblendanimation.html#morphTargets-prop">morphTargets</a></b></b> : list&lt;MorphTarget&gt;</li>
+<li class="fn"><b><b><a href="qml-qt3d-animation-vertexblendanimation.html#target-prop">target</a></b></b> : GeometryRenderer</li>
+<li class="fn"><b><b><a href="qml-qt3d-animation-vertexblendanimation.html#targetName-prop">targetName</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qt3d-animation-vertexblendanimation.html#targetPositions-prop">targetPositions</a></b></b> : list&lt;real&gt;</li>
+</ul>
+<!-- $$$VertexBlendAnimation-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>A <a href="qml-qt3d-animation-vertexblendanimation.html">VertexBlendAnimation</a> type implements vertex-blend morphing animation to a target <a href="qt3drender-geometry.html#geometryrenderer">GeometryRenderer</a>. The <a href="qml-qt3d-animation-vertexblendanimation.html">VertexBlendAnimation</a> sets the correct <a href="qt3drender-geometry.html#attribute">Attributes</a> from the morph targets to the target <a href="qml-qt3d-render-geometryrenderer.html#geometry-prop">GeometryRenderer::geometry</a> and calculates interpolator for the current position. Unlike with <a href="qml-qt3d-animation-morphinganimation.html">MorphingAnimation</a>, where the blending is controller with blend weights, the blending occurs between sequential morph targets. The actual blending between the attributes must be implemented in the material. MorphPhongMaterial implements material with morphing support for phong lighting model. The blending happens between 2 attributes - 'base' and 'target'. The names for the base and target attributes are taken from the morph target names, where the base attribute retains the name it already has and the target attribute name gets 'Target' appended to the name. All morph targets in the animation should contain the attributes with same names as those in the base geometry.</p>
+<!-- @@@VertexBlendAnimation -->
+<h2>Property Documentation</h2>
+<!-- $$$interpolator -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="interpolator-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">interpolator</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the interpolator between base and target attributes.</p>
+</div></div><!-- @@@interpolator -->
+<br/>
+<!-- $$$morphTargets -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="morphTargets-prop"></a><span class="name">morphTargets</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="qml-qt3d-animation-morphtarget.html">MorphTarget</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the list of <a href="qml-qt3d-animation-morphtarget.html">morph targets</a> added to the animation.</p>
+</div></div><!-- @@@morphTargets -->
+<br/>
+<!-- $$$target -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="target-prop"></a><span class="name">target</span> : <span class="type"><a href="qml-qt3d-render-geometryrenderer.html">GeometryRenderer</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the target <a href="qt3drender-geometry.html#geometryrenderer">GeometryRenderer</a> the morphing animation is applied to.</p>
+</div></div><!-- @@@target -->
+<br/>
+<!-- $$$targetName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="targetName-prop"></a><span class="name">targetName</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the name of the target geometry. This is a convenience property making it easier to match the target geometry to the morphing animation. The name is usually same as the name of the parent entity of the target <a href="qt3drender-geometry.html#geometryrenderer">GeometryRenderer</a>, but does not have to be.</p>
+</div></div><!-- @@@targetName -->
+<br/>
+<!-- $$$targetPositions -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="targetPositions-prop"></a><span class="name">targetPositions</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="../qtqml/qml-real.html">real</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the position values of the morph target. Each position in the list specifies the position of the corresponding morph target with the same index. The values must be in an ascending order. Values can be positive or negative and do not have any predefined unit.</p>
+</div></div><!-- @@@targetPositions -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

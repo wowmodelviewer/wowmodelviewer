@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qfocusframe.cpp -->
+  <title>QFocusFrame Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QFocusFrame</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QFocusFrame Class</h1>
+<!-- $$$QFocusFrame-brief -->
+<p>The <a href="qfocusframe.html">QFocusFrame</a> widget provides a focus frame which can be outside of a widget's normal paintable area. <a href="#details">More...</a></p>
+<!-- @@@QFocusFrame -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QFocusFrame&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qwidget.html">QWidget</a></td></tr></table></div><ul>
+<li><a href="qfocusframe-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qfocusframe.html#QFocusFrame">QFocusFrame</a></b>(QWidget *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qfocusframe.html#dtor.QFocusFrame">~QFocusFrame</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfocusframe.html#setWidget">setWidget</a></b>(QWidget *<i>widget</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWidget *</td><td class="memItemRight bottomAlign"><b><a href="qfocusframe.html#widget">widget</a></b>() const</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfocusframe.html#initStyleOption">initStyleOption</a></b>(QStyleOption *<i>option</i>) const</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qfocusframe.html#event">event</a></b>(QEvent *<i>e</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qfocusframe.html#eventFilter">eventFilter</a></b>(QObject *<i>o</i>, QEvent *<i>e</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qfocusframe.html#paintEvent">paintEvent</a></b>(<i>QPaintEvent *</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QFocusFrame-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Normally an application will not need to create its own <a href="qfocusframe.html">QFocusFrame</a> as <a href="qstyle.html">QStyle</a> will handle this detail for you. A style writer can optionally use a <a href="qfocusframe.html">QFocusFrame</a> to have a focus area outside of the widget's paintable geometry. In this way space need not be reserved for the widget to have focus but only set on a <a href="qwidget.html">QWidget</a> with <a href="qfocusframe.html#setWidget">QFocusFrame::setWidget</a>. It is, however, legal to create your own <a href="qfocusframe.html">QFocusFrame</a> on a custom widget and set its geometry manually via <a href="qwidget.html#geometry-prop">QWidget::setGeometry</a> however you will not get auto-placement when the focused widget changes size or placement.</p>
+</div>
+<!-- @@@QFocusFrame -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QFocusFrame[overload1]$$$QFocusFrameQWidget* -->
+<h3 class="fn" id="QFocusFrame"><a name="QFocusFrame"></a>QFocusFrame::<span class="name">QFocusFrame</span>(<span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a <a href="qfocusframe.html">QFocusFrame</a>.</p>
+<p>The focus frame will not monitor <i>parent</i> for updates but rather can be placed manually or by using <a href="qfocusframe.html#setWidget">QFocusFrame::setWidget</a>. A <a href="qfocusframe.html">QFocusFrame</a> sets <a href="../qtcore/qt.html#WidgetAttribute-enum">Qt::WA_NoChildEventsForParent</a> attribute; as a result the parent will not receive a <a href="../qtcore/qevent.html#Type-enum">QEvent::ChildAdded</a> event, this will make it possible to manually set the geometry of the <a href="qfocusframe.html">QFocusFrame</a> inside of a <a href="qsplitter.html">QSplitter</a> or other child event monitoring widget.</p>
+<p><b>See also </b><a href="qfocusframe.html#setWidget">QFocusFrame::setWidget</a>().</p>
+<!-- @@@QFocusFrame -->
+<!-- $$$~QFocusFrame[overload1]$$$~QFocusFrame -->
+<h3 class="fn" id="dtor.QFocusFrame"><a name="dtor.QFocusFrame"></a><code>[virtual] </code>QFocusFrame::<span class="name">~QFocusFrame</span>()</h3>
+<p>Destructor.</p>
+<!-- @@@~QFocusFrame -->
+<!-- $$$event[overload1]$$$eventQEvent* -->
+<h3 class="fn" id="event"><a name="event"></a><code>[override virtual protected] </code><span class="type">bool</span> QFocusFrame::<span class="name">event</span>(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#event">QWidget::event</a>(QEvent *event).</p>
+<!-- @@@event -->
+<!-- $$$eventFilter[overload1]$$$eventFilterQObject*QEvent* -->
+<h3 class="fn" id="eventFilter"><a name="eventFilter"></a><code>[override virtual protected] </code><span class="type">bool</span> QFocusFrame::<span class="name">eventFilter</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>o</i>, <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="../qtcore/qobject.html#eventFilter">QObject::eventFilter</a>(QObject *watched, QEvent *event).</p>
+<!-- @@@eventFilter -->
+<!-- $$$initStyleOption[overload1]$$$initStyleOptionQStyleOption* -->
+<h3 class="fn" id="initStyleOption"><a name="initStyleOption"></a><code>[protected] </code><span class="type">void</span> QFocusFrame::<span class="name">initStyleOption</span>(<span class="type"><a href="qstyleoption.html">QStyleOption</a></span> *<i>option</i>) const</h3>
+<p>Initialize <i>option</i> with the values from this <a href="qfocusframe.html">QFocusFrame</a>. This method is useful for subclasses when they need a <a href="qstyleoption.html">QStyleOption</a>, but don't want to fill in all the information themselves.</p>
+<p><b>See also </b><a href="qstyleoption.html#initFrom">QStyleOption::initFrom</a>().</p>
+<!-- @@@initStyleOption -->
+<!-- $$$paintEvent[overload1]$$$paintEventQPaintEvent* -->
+<h3 class="fn" id="paintEvent"><a name="paintEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QFocusFrame::<span class="name">paintEvent</span>(<i>QPaintEvent *</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#paintEvent">QWidget::paintEvent</a>(QPaintEvent *event).</p>
+<!-- @@@paintEvent -->
+<!-- $$$setWidget[overload1]$$$setWidgetQWidget* -->
+<h3 class="fn" id="setWidget"><a name="setWidget"></a><span class="type">void</span> QFocusFrame::<span class="name">setWidget</span>(<span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>widget</i>)</h3>
+<p><a href="qfocusframe.html">QFocusFrame</a> will track changes to <i>widget</i> and resize itself automatically. If the monitored widget's parent changes, <a href="qfocusframe.html">QFocusFrame</a> will follow the widget and place itself around the widget automatically. If the monitored widget is deleted, <a href="qfocusframe.html">QFocusFrame</a> will set it to zero.</p>
+<p><b>See also </b><a href="qfocusframe.html#widget">QFocusFrame::widget</a>().</p>
+<!-- @@@setWidget -->
+<!-- $$$widget[overload1]$$$widget -->
+<h3 class="fn" id="widget"><a name="widget"></a><span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *QFocusFrame::<span class="name">widget</span>() const</h3>
+<p>Returns the currently monitored widget for automatically resize and update.</p>
+<p><b>See also </b><a href="qfocusframe.html#setWidget">QFocusFrame::setWidget</a>().</p>
+<!-- @@@widget -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

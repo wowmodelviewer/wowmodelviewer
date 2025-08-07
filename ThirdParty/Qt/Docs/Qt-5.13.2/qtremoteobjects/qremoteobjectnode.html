@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qremoteobjectnode.cpp -->
+  <title>QRemoteObjectNode Class | Qt Remote Objects 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtremoteobjects-index.html">Qt Remote Objects</a></td><td ><a href="qtremoteobjects-module.html">C++ Classes</a></td><td >QRemoteObjectNode</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtremoteobjects-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QRemoteObjectNode Class</h1>
+<!-- $$$QRemoteObjectNode-brief -->
+<p>A node on a Qt Remote Objects network. <a href="#details">More...</a></p>
+<!-- @@@QRemoteObjectNode -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QRemoteObjectNode&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += remoteobjects</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qtremoteobjects-node.html">Node</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qremoteobjecthostbase.html">QRemoteObjectHostBase</a></p>
+</td></tr></table></div><ul>
+<li><a href="qremoteobjectnode-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#ErrorCode-enum">ErrorCode</a></b> { NoError, RegistryNotAcquired, RegistryAlreadyHosted, NodeIsNoServer, ..., ListenFailed }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#RemoteObjectSchemaHandler-typedef">RemoteObjectSchemaHandler</a></b></td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qremoteobjectnode.html#heartbeatInterval-prop">heartbeatInterval</a></b> : int</li>
+<li class="fn"><b><a href="qremoteobjectnode.html#persistedStore-prop">persistedStore</a></b> : QRemoteObjectAbstractPersistedStore*</li>
+<li class="fn"><b><a href="qremoteobjectnode.html#registryUrl-prop">registryUrl</a></b> : QUrl</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#QRemoteObjectNode-1">QRemoteObjectNode</a></b>(const QUrl &amp;<i>registryAddress</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#QRemoteObjectNode">QRemoteObjectNode</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> ObjectType *</td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#acquire">acquire</a></b>(const QString &amp;<i>name</i> = QString())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRemoteObjectDynamicReplica *</td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#acquireDynamic">acquireDynamic</a></b>(const QString &amp;<i>name</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QAbstractItemModelReplica *</td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#acquireModel">acquireModel</a></b>(const QString &amp;<i>name</i>, QtRemoteObjects::InitialAction <i>action</i> = QtRemoteObjects::FetchRootSize, const QVector&lt;int&gt; &amp;<i>rolesHint</i> = {})</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#addClientSideConnection">addClientSideConnection</a></b>(QIODevice *<i>ioDevice</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#connectToNode">connectToNode</a></b>(const QUrl &amp;<i>address</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#heartbeatInterval-prop">heartbeatInterval</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#instances">instances</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#instances-1">instances</a></b>(const QString &amp;<i>typeName</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRemoteObjectNode::ErrorCode </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#lastError">lastError</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRemoteObjectAbstractPersistedStore *</td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#persistedStore-prop">persistedStore</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#registerExternalSchema">registerExternalSchema</a></b>(const QString &amp;<i>schema</i>, QRemoteObjectNode::RemoteObjectSchemaHandler <i>handler</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QRemoteObjectRegistry *</td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#registry">registry</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QUrl </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#registryUrl-prop">registryUrl</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#heartbeatInterval-prop">setHeartbeatInterval</a></b>(int <i>interval</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#setName">setName</a></b>(const QString &amp;<i>name</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#persistedStore-prop">setPersistedStore</a></b>(QRemoteObjectAbstractPersistedStore *<i>persistedStore</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#registryUrl-prop">setRegistryUrl</a></b>(const QUrl &amp;<i>registryAddress</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#waitForRegistry">waitForRegistry</a></b>(int <i>timeout</i> = 30000)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#heartbeatInterval-prop">heartbeatIntervalChanged</a></b>(int <i>heartbeatInterval</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#remoteObjectAdded">remoteObjectAdded</a></b>(const QRemoteObjectSourceLocation &amp;<i>loc</i>)</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectnode.html#timerEvent">timerEvent</a></b>(<i>QTimerEvent *</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QRemoteObjectNode-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qremoteobjectnode.html">QRemoteObjectNode</a> class provides an entry point to a <a href="qtremoteobjects-qmlmodule.html">QtRemoteObjects</a> network. A network can be as simple as two nodes, or an arbitrarily complex set of processes and devices.</p>
+<p>A <a href="qremoteobjectnode.html">QRemoteObjectNode</a> does not have a url that other nodes can connect to, and thus is able to acquire replicas only. It is not able to share source objects (only <a href="qremoteobjecthost.html">QRemoteObjectHost</a> and <a href="qremoteobjectregistryhost.html">QRemoteObjectRegistryHost</a> Nodes can share).</p>
+<p>Nodes may connect to each other directly using <a href="qremoteobjectnode.html#connectToNode">connectToNode</a>, or they can use the <a href="qremoteobjectregistry.html">QRemoteObjectRegistry</a> to simplify connections.</p>
+<p>The <a href="qremoteobjectregistry.html">QRemoteObjectRegistry</a> is a special replica available to every node that connects to the Registry Url. It knows how to connect to every QRemoteObjectSource object on the network.</p>
+</div>
+<p><b>See also </b><a href="qremoteobjecthost.html">QRemoteObjectHost</a> and <a href="qremoteobjectregistryhost.html">QRemoteObjectRegistryHost</a>.</p>
+<!-- @@@QRemoteObjectNode -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$ErrorCode$$$NoError$$$RegistryNotAcquired$$$RegistryAlreadyHosted$$$NodeIsNoServer$$$ServerAlreadyCreated$$$UnintendedRegistryHosting$$$OperationNotValidOnClientNode$$$SourceNotRegistered$$$MissingObjectName$$$HostUrlInvalid$$$ProtocolMismatch$$$ListenFailed -->
+<h3 class="fn" id="ErrorCode-enum"><a name="ErrorCode-enum"></a>enum QRemoteObjectNode::<span class="name">ErrorCode</span></h3>
+<p>This enum type specifies the various error codes associated with <a href="qremoteobjectnode.html">QRemoteObjectNode</a> errors:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QRemoteObjectNode::NoError</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">No error.</td></tr>
+<tr><td class="topAlign"><code>QRemoteObjectNode::RegistryNotAcquired</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The registry could not be acquired.</td></tr>
+<tr><td class="topAlign"><code>QRemoteObjectNode::RegistryAlreadyHosted</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The registry is already defined and hosting Sources.</td></tr>
+<tr><td class="topAlign"><code>QRemoteObjectNode::NodeIsNoServer</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">The given <a href="qremoteobjectnode.html">QRemoteObjectNode</a> is not a host node.</td></tr>
+<tr><td class="topAlign"><code>QRemoteObjectNode::ServerAlreadyCreated</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">The host node has already been initialized.</td></tr>
+<tr><td class="topAlign"><code>QRemoteObjectNode::UnintendedRegistryHosting</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">An attempt was made to create a host <a href="qremoteobjectnode.html">QRemoteObjectNode</a> and connect to itself as the registry.</td></tr>
+<tr><td class="topAlign"><code>QRemoteObjectNode::OperationNotValidOnClientNode</code></td><td class="topAlign tblval"><code>6</code></td><td class="topAlign">The attempted operation is not valid on a client <a href="qremoteobjectnode.html">QRemoteObjectNode</a>.</td></tr>
+<tr><td class="topAlign"><code>QRemoteObjectNode::SourceNotRegistered</code></td><td class="topAlign tblval"><code>7</code></td><td class="topAlign">The given QRemoteObjectSource is not registered on this node.</td></tr>
+<tr><td class="topAlign"><code>QRemoteObjectNode::MissingObjectName</code></td><td class="topAlign tblval"><code>8</code></td><td class="topAlign">The given <a href="../qtcore/qobject.html">QObject</a> does not have <a href="../qtcore/qobject.html#objectName-prop">objectName</a>() set.</td></tr>
+<tr><td class="topAlign"><code>QRemoteObjectNode::HostUrlInvalid</code></td><td class="topAlign tblval"><code>9</code></td><td class="topAlign">The given url has an invalid or unrecognized scheme.</td></tr>
+<tr><td class="topAlign"><code>QRemoteObjectNode::ProtocolMismatch</code></td><td class="topAlign tblval"><code>10</code></td><td class="topAlign">The client and the server have different protocol versions.</td></tr>
+<tr><td class="topAlign"><code>QRemoteObjectNode::ListenFailed</code></td><td class="topAlign tblval"><code>11</code></td><td class="topAlign">Can't listen on the specified host port.</td></tr>
+</table></div>
+<!-- @@@ErrorCode -->
+<!-- $$$RemoteObjectSchemaHandler -->
+<h3 class="fn" id="RemoteObjectSchemaHandler-typedef"><a name="RemoteObjectSchemaHandler-typedef"></a>typedef QRemoteObjectNode::<span class="name">RemoteObjectSchemaHandler</span></h3>
+<p>Typedef for a std::function method that can take a <a href="../qtcore/qurl.html">QUrl</a> input and is responsible for creating the communications channel between this node and the node hosting the desired <a href="qtremoteobjects-source.html#source">Source</a>. As some types of QIODevices (e.g&#x2e;, <a href="../qtnetwork/qsslsocket.html">QSslSocket</a>) require additional steps before the device is ready for use, the method is responsible for calling <a href="qremoteobjectnode.html#addClientSideConnection">addClientSideConnection</a> once the connection is fully established.</p>
+<p>This typedef was introduced in  Qt 5.12.</p>
+<!-- @@@RemoteObjectSchemaHandler -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$heartbeatInterval-prop$$$heartbeatInterval$$$setHeartbeatIntervalint$$$heartbeatIntervalChangedint -->
+<h3 class="fn" id="heartbeatInterval-prop"><a name="heartbeatInterval-prop"></a><span class="name">heartbeatInterval</span> : <span class="type">int</span></h3>
+<p>Heartbeat interval in ms.</p>
+<p>The heartbeat (only helpful for socket connections) will periodically send a message to connected nodes to detect whether the connection was disrupted. Qt Remote Objects will try to reconnect automatically if it detects a dropped connection. This function can help with that detection since the client will only detect that the server is unavailable when it tries to send data.</p>
+<p>A value of <code>0</code> (the default) will disable the heartbeat.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>heartbeatInterval</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setHeartbeatInterval</b></span>(int <i>interval</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>heartbeatIntervalChanged</b></span>(int <i>heartbeatInterval</i>)</td></tr>
+</table></div>
+<!-- @@@heartbeatInterval -->
+<!-- $$$persistedStore-prop$$$persistedStore$$$setPersistedStoreQRemoteObjectAbstractPersistedStore* -->
+<h3 class="fn" id="persistedStore-prop"><a name="persistedStore-prop"></a><span class="name">persistedStore</span> : <span class="type"><a href="qremoteobjectabstractpersistedstore.html">QRemoteObjectAbstractPersistedStore</a></span>*</h3>
+<p>Allows setting a <a href="qremoteobjectabstractpersistedstore.html">QRemoteObjectAbstractPersistedStore</a> instance for the node.</p>
+<p>Allows replica <a href="qtremoteobjects-repc.html#prop">PROP</a> members with the PERSISTED trait to save their current value when the replica is deleted and restore a stored value the next time the replica is started.</p>
+<p>Requires a <a href="qremoteobjectabstractpersistedstore.html">QRemoteObjectAbstractPersistedStore</a> class implementation to control where and how persistence is handled.</p>
+<p>This property was introduced in  Qt 5.11.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QRemoteObjectAbstractPersistedStore *</td><td class="memItemRight bottomAlign"><span class="name"><b>persistedStore</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setPersistedStore</b></span>(QRemoteObjectAbstractPersistedStore *<i>persistedStore</i>)</td></tr>
+</table></div>
+<!-- @@@persistedStore -->
+<!-- $$$registryUrl-prop$$$registryUrl$$$setRegistryUrlconstQUrl& -->
+<h3 class="fn" id="registryUrl-prop"><a name="registryUrl-prop"></a><span class="name">registryUrl</span> : <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span></h3>
+<p>This property holds the address of the <a href="qremoteobjectregistry.html">Registry</a> used by this node.</p>
+<p>This is an empty <a href="../qtcore/qurl.html">QUrl</a> if there is no registry in use.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QUrl </td><td class="memItemRight bottomAlign"><span class="name"><b>registryUrl</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> virtual bool </td><td class="memItemRight bottomAlign"><span class="name"><b>setRegistryUrl</b></span>(const QUrl &amp;<i>registryAddress</i>)</td></tr>
+</table></div>
+<!-- @@@registryUrl -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QRemoteObjectNode$$$QRemoteObjectNodeconstQUrl&QObject* -->
+<h3 class="fn" id="QRemoteObjectNode-1"><a name="QRemoteObjectNode-1"></a>QRemoteObjectNode::<span class="name">QRemoteObjectNode</span>(const <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> &amp;<i>registryAddress</i>, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p><a href="qremoteobjectnode.html">QRemoteObjectNode</a> connected to a {<a href="qremoteobjectregistry.html">QRemoteObjectRegistry</a>} {Registry}. A Node constructed in this manner can not be connected to, and thus can not expose Source objects on the network. Finding and connecting to other (Host) Nodes is handled by the <a href="qremoteobjectregistry.html">QRemoteObjectRegistry</a> specified by <i>registryAddress</i>.</p>
+<p><b>See also </b><a href="qremoteobjectnode.html#connectToNode">connectToNode</a>, <a href="qremoteobjectnode.html#registryUrl-prop">setRegistryUrl</a>, <a href="qremoteobjecthost.html">QRemoteObjectHost</a>, and <a href="qremoteobjectregistryhost.html">QRemoteObjectRegistryHost</a>.</p>
+<!-- @@@QRemoteObjectNode -->
+<!-- $$$QRemoteObjectNode[overload1]$$$QRemoteObjectNodeQObject* -->
+<h3 class="fn" id="QRemoteObjectNode"><a name="QRemoteObjectNode"></a>QRemoteObjectNode::<span class="name">QRemoteObjectNode</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Default constructor for <a href="qremoteobjectnode.html">QRemoteObjectNode</a> with the given <i>parent</i>. A Node constructed in this manner can not be connected to, and thus can not expose Source objects on the network. It also will not include a <a href="qremoteobjectregistry.html">QRemoteObjectRegistry</a>, unless set manually using <a href="qremoteobjectnode.html#registryUrl-prop">setRegistryUrl</a>.</p>
+<p><b>See also </b><a href="qremoteobjectnode.html#connectToNode">connectToNode</a> and <a href="qremoteobjectnode.html#registryUrl-prop">setRegistryUrl</a>.</p>
+<!-- @@@QRemoteObjectNode -->
+<!-- $$$remoteObjectAdded[overload1]$$$remoteObjectAddedconstQRemoteObjectSourceLocation& -->
+<h3 class="fn" id="remoteObjectAdded"><a name="remoteObjectAdded"></a><code>[signal] </code><span class="type">void</span> QRemoteObjectNode::<span class="name">remoteObjectAdded</span>(const <span class="type">QRemoteObjectSourceLocation</span> &amp;<i>loc</i>)</h3>
+<p>This signal is emitted whenever a new <a href="qtremoteobjects-source.html#source">Source</a> object is added to the Registry. The signal will not be emitted if there is no Registry set (i.e&#x2e;, Sources over connections made via <a href="qremoteobjectnode.html#connectToNode">connectToNode</a> directly). The <i>loc</i> parameter contains the information about the added Source, including name, type and the <a href="../qtcore/qurl.html">QUrl</a> of the hosting Node.</p>
+<p><b>See also </b>remoteObjectRemoved() and <a href="qremoteobjectnode.html#instances">instances</a>().</p>
+<!-- @@@remoteObjectAdded -->
+<!-- $$$acquire[overload1]$$$acquireconstQString& -->
+<h3 class="fn" id="acquire"><a name="acquire"></a><span class="type">ObjectType</span> *QRemoteObjectNode::<span class="name">acquire</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i> = QString())</h3>
+<p>Returns a pointer to a Replica of type ObjectType (which is a template parameter and must inherit from <a href="qremoteobjectreplica.html">QRemoteObjectReplica</a>). That is, the template parameter must be a <a href="qtremoteobjects-repc.html">repc</a> generated type. The <i>name</i> parameter can be used to specify the <i>name</i> given to the object during the <a href="qremoteobjecthostbase.html#enableRemoting">QRemoteObjectHost::enableRemoting</a>() call.</p>
+<!-- @@@acquire -->
+<!-- $$$acquireDynamic[overload1]$$$acquireDynamicconstQString& -->
+<h3 class="fn" id="acquireDynamic"><a name="acquireDynamic"></a><span class="type"><a href="qremoteobjectdynamicreplica.html">QRemoteObjectDynamicReplica</a></span> *QRemoteObjectNode::<span class="name">acquireDynamic</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>)</h3>
+<p>Returns a <a href="qremoteobjectdynamicreplica.html">QRemoteObjectDynamicReplica</a> of the Source <i>name</i>.</p>
+<!-- @@@acquireDynamic -->
+<!-- $$$acquireModel[overload1]$$$acquireModelconstQString&QtRemoteObjects::InitialActionconstQVector<int>& -->
+<h3 class="fn" id="acquireModel"><a name="acquireModel"></a><span class="type">QAbstractItemModelReplica</span> *QRemoteObjectNode::<span class="name">acquireModel</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>, <span class="type">QtRemoteObjects::InitialAction</span> <i>action</i> = QtRemoteObjects::FetchRootSize, const <span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type">int</span>&gt; &amp;<i>rolesHint</i> = {})</h3>
+<p>Returns a pointer to a Replica which is specifically derived from <a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a>. The <i>name</i> provided must match the name used with the matching <a href="qremoteobjecthostbase.html#enableRemoting">enableRemoting</a> that put the Model on the network. The returned <code>model</code> will be empty until it is initialized with the <a href="qtremoteobjects-source.html#source">Source</a>.</p>
+<!-- @@@acquireModel -->
+<!-- $$$addClientSideConnection[overload1]$$$addClientSideConnectionQIODevice* -->
+<h3 class="fn" id="addClientSideConnection"><a name="addClientSideConnection"></a><span class="type">void</span> QRemoteObjectNode::<span class="name">addClientSideConnection</span>(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span> *<i>ioDevice</i>)</h3>
+<p>In order to <a href="qremoteobjectnode.html#acquire">QRemoteObjectNode::acquire</a>() <a href="qtremoteobjects-replica.html#replica">Replica</a> objects over <a href="qtremoteobjects-external-schemas.html#external-qiodevices">External QIODevices</a>, Qt Remote Objects needs access to the communications channel (a <a href="../qtcore/qiodevice.html">QIODevice</a>) between the respective nodes. It is the addClientSideConnection() call that enables this, taking the <i>ioDevice</i> as input. Any <a href="qremoteobjectnode.html#acquire">acquire</a>() call made without calling addClientSideConnection will still work, but the Node will not be able to initialize the <a href="qtremoteobjects-replica.html#replica">Replica</a> without being provided the connection to the Host node.</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<p><b>See also </b><a href="qremoteobjecthostbase.html#addHostSideConnection">QRemoteObjectHostBase::addHostSideConnection</a>.</p>
+<!-- @@@addClientSideConnection -->
+<!-- $$$connectToNode[overload1]$$$connectToNodeconstQUrl& -->
+<h3 class="fn" id="connectToNode"><a name="connectToNode"></a><span class="type">bool</span> QRemoteObjectNode::<span class="name">connectToNode</span>(const <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> &amp;<i>address</i>)</h3>
+<p>Connects a client node to the host node at <i>address</i>.</p>
+<p>Connections will remain valid until the host node is deleted or no longer accessible over a network.</p>
+<p>Once a client is connected to a host, valid Replicas can then be acquired if the corresponding Source is being remoted.</p>
+<p>Return <code>true</code> on success, <code>false</code> otherwise (usually an unrecognized url, or connecting to already connected address).</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@connectToNode -->
+<!-- $$$instances[overload1]$$$instances -->
+<h3 class="fn" id="instances"><a name="instances"></a><span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> QRemoteObjectNode::<span class="name">instances</span>() const</h3>
+<p>This templated function (taking a <a href="qtremoteobjects-repc.html">repc</a> generated type as the template parameter) will return the list of names of every instance of that type on the Remote Objects network. For example, if you have a Shape class defined in a .rep file, and Circle and Square classes inherit from the Source definition, they can be shared on the Remote Objects network using <a href="qremoteobjecthostbase.html#enableRemoting">enableRemoting</a>.</p>
+<pre class="cpp">
+
+  Square square;
+  Circle circle;
+  myHost<span class="operator">.</span>enableRemoting(<span class="operator">&amp;</span>square<span class="operator">,</span> <span class="string">&quot;Square&quot;</span>);
+  myHost<span class="operator">.</span>enableRemoting(<span class="operator">&amp;</span>circle<span class="operator">,</span> <span class="string">&quot;Circle&quot;</span>);
+
+</pre>
+<p>Then instance can be used to find the available instances of Shape.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> instances <span class="operator">=</span> clientNode<span class="operator">.</span>instances<span class="operator">&lt;</span>Shape<span class="operator">&gt;</span>();
+  <span class="comment">// will return a QStringList containing &quot;Circle&quot; and &quot;Square&quot;</span>
+  <span class="keyword">auto</span> instance1 <span class="operator">=</span> clientNode<span class="operator">.</span>acquire<span class="operator">&lt;</span>Shape<span class="operator">&gt;</span>(<span class="string">&quot;Circle&quot;</span>);
+  <span class="keyword">auto</span> instance2 <span class="operator">=</span> clientNode<span class="operator">.</span>acquire<span class="operator">&lt;</span>Shape<span class="operator">&gt;</span>(<span class="string">&quot;Square&quot;</span>);
+  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+</pre>
+<!-- @@@instances -->
+<!-- $$$instances$$$instancesconstQString& -->
+<h3 class="fn" id="instances-1"><a name="instances-1"></a><span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> QRemoteObjectNode::<span class="name">instances</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>typeName</i>) const</h3>
+<p>This function overloads <a href="qremoteobjectnode.html#instances">instances</a>().</p>
+<p>This convenience function provides the same result as the templated version, but takes the name of the <a href="qtremoteobjects-source.html#source">Source</a> class as a parameter (<i>typeName</i>) rather than deriving it from the class type.</p>
+<!-- @@@instances -->
+<!-- $$$lastError[overload1]$$$lastError -->
+<h3 class="fn" id="lastError"><a name="lastError"></a><span class="type"><a href="qremoteobjectnode.html#ErrorCode-enum">QRemoteObjectNode::ErrorCode</a></span> QRemoteObjectNode::<span class="name">lastError</span>() const</h3>
+<p>Returns the last error set.</p>
+<!-- @@@lastError -->
+<!-- $$$registerExternalSchema[overload1]$$$registerExternalSchemaconstQString&QRemoteObjectNode::RemoteObjectSchemaHandler -->
+<h3 class="fn" id="registerExternalSchema"><a name="registerExternalSchema"></a><span class="type">void</span> QRemoteObjectNode::<span class="name">registerExternalSchema</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>schema</i>, <span class="type"><a href="qremoteobjectnode.html#RemoteObjectSchemaHandler-typedef">QRemoteObjectNode::RemoteObjectSchemaHandler</a></span> <i>handler</i>)</h3>
+<p>Provide a custom method to handle externally provided schemas</p>
+<p>This method is tied to the <a href="qtremoteobjects-registry.html#registry">Registry</a> and <a href="qtremoteobjects-external-schemas.html#external-schemas">External Schemas</a>. By registering a std::function handler for an external schema, the registered method will be called when the registry is notified of a <a href="qtremoteobjects-source.html#source">Source</a> you've acquired being available. Without this registration, QtRO would only be able to handle the &quot;built-in&quot; schemas.</p>
+<p>The provided method, <i>handler</i>, will be called when the registry sees a <a href="qtremoteobjects-source.html#source">Source</a> object on a new (not yet connected) Node with a {QUrl::schema()} of <i>schema</i>. The <i>handler</i>, of type <a href="qremoteobjectnode.html#RemoteObjectSchemaHandler-typedef">QRemoteObjectNode::RemoteObjectSchemaHandler</a> will get the <a href="../qtcore/qurl.html">QUrl</a> of the Node providing the <a href="qtremoteobjects-source.html#source">Source</a> as an input parameter, and is responsible for establishing the communications channel (a <a href="../qtcore/qiodevice.html">QIODevice</a> of some sort) and calling <a href="qremoteobjectnode.html#addClientSideConnection">addClientSideConnection</a> with it.</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<p><b>See also </b><a href="qremoteobjectnode.html#RemoteObjectSchemaHandler-typedef">RemoteObjectSchemaHandler</a>.</p>
+<!-- @@@registerExternalSchema -->
+<!-- $$$registry[overload1]$$$registry -->
+<h3 class="fn" id="registry"><a name="registry"></a>const <span class="type"><a href="qremoteobjectregistry.html">QRemoteObjectRegistry</a></span> *QRemoteObjectNode::<span class="name">registry</span>() const</h3>
+<p>Returns a pointer to the Node's <a href="qremoteobjectregistry.html">QRemoteObjectRegistry</a>, if the Node is using the Registry feature; otherwise it returns 0.</p>
+<!-- @@@registry -->
+<!-- $$$setName[overload1]$$$setNameconstQString& -->
+<h3 class="fn" id="setName"><a name="setName"></a><code>[virtual] </code><span class="type">void</span> QRemoteObjectNode::<span class="name">setName</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>)</h3>
+<p>Sets <i>name</i> as the internal name for this Node. This is then output as part of the logging (if enabled). This is primarily useful if you merge log data from multiple nodes.</p>
+<!-- @@@setName -->
+<!-- $$$timerEvent[overload1]$$$timerEventQTimerEvent* -->
+<h3 class="fn" id="timerEvent"><a name="timerEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QRemoteObjectNode::<span class="name">timerEvent</span>(<i>QTimerEvent *</i>)</h3>
+<p>Reimplements: <a href="../qtcore/qobject.html#timerEvent">QObject::timerEvent</a>(QTimerEvent *event).</p>
+<!-- @@@timerEvent -->
+<!-- $$$waitForRegistry[overload1]$$$waitForRegistryint -->
+<h3 class="fn" id="waitForRegistry"><a name="waitForRegistry"></a><span class="type">bool</span> QRemoteObjectNode::<span class="name">waitForRegistry</span>(<span class="type">int</span> <i>timeout</i> = 30000)</h3>
+<p>Blocks until this Node's <a href="qtremoteobjects-registry.html#registry">Registry</a> is initialized or <i>timeout</i> (in milliseconds) expires. Returns <code>true</code> if the <a href="qtremoteobjects-registry.html#registry">Registry</a> is successfully initialized upon return, or <code>false</code> otherwise.</p>
+<!-- @@@waitForRegistry -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

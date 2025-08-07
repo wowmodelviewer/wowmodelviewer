@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qaxisaccumulator.cpp -->
+  <title>QAxisAccumulator Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QAxisAccumulator</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAxisAccumulator Class</h1>
+<span class="small-subtitle">(<a href="qt3dinput-qaxisaccumulator.html">Qt3DInput::QAxisAccumulator</a>)<br/></span>
+<!-- $$$QAxisAccumulator-brief -->
+<p><a href="qt3dinput-qaxisaccumulator.html">QAxisAccumulator</a> processes velocity or acceleration data from a <a href="qt3dinput-qaxis.html">QAxis</a>. <a href="#details">More...</a></p>
+<!-- @@@QAxisAccumulator -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAxisAccumulator&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3dinput</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-input-axisaccumulator.html">AxisAccumulator</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3dcore-qcomponent.html">Qt3DCore::QComponent</a></td></tr></table></div><p>This class was introduced in  Qt 5.8.</p>
+<ul>
+<li><a href="qt3dinput-qaxisaccumulator-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qaxisaccumulator.html#SourceAxisType-enum">SourceAxisType</a></b> { Velocity, Acceleration }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qt3dinput-qaxisaccumulator.html#value-prop">value</a></b> : const float</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qaxisaccumulator.html#QAxisAccumulator">QAxisAccumulator</a></b>(Qt3DCore::QNode *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> float </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qaxisaccumulator.html#scale">scale</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DInput::QAxis *</td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qaxisaccumulator.html#sourceAxis">sourceAxis</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DInput::QAxisAccumulator::SourceAxisType </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qaxisaccumulator.html#sourceAxisType">sourceAxisType</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> float </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qaxisaccumulator.html#value-prop">value</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> float </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qaxisaccumulator.html#velocity">velocity</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qaxisaccumulator.html#scale-prop">setScale</a></b>(float <i>scale</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qaxisaccumulator.html#setSourceAxis">setSourceAxis</a></b>(Qt3DInput::QAxis *<i>sourceAxis</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qaxisaccumulator.html#setSourceAxisType">setSourceAxisType</a></b>(QAxisAccumulator::SourceAxisType <i>sourceAxisType</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qaxisaccumulator.html#scale-prop">scaleChanged</a></b>(float <i>scale</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qaxisaccumulator.html#sourceAxis-prop">sourceAxisChanged</a></b>(Qt3DInput::QAxis *<i>sourceAxis</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qaxisaccumulator.html#sourceAxisType-prop">sourceAxisTypeChanged</a></b>(QAxisAccumulator::SourceAxisType <i>sourceAxisType</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qaxisaccumulator.html#value-prop">valueChanged</a></b>(float <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qaxisaccumulator.html#velocity-prop">velocityChanged</a></b>(float <i>value</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAxisAccumulator-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Constructs a new <a href="qt3dinput-qaxisaccumulator.html">QAxisAccumulator</a> instance with <i>parent</i>.</p>
+<p>A <a href="qt3dinput-qaxis.html">Qt3DInput::QAxis</a> reports the current position of an axis on an input device. When the axis is returned to its neutral position the value of that axis returns to 0. Often, it is required to have the input from an axis control a variable in other ways, for example treating the value from the <a href="qt3dinput-qaxis.html">Qt3DInput::QAxis</a> as a velocity (first derivative with respect to time) or as an acceleration (second derivative with respect to time). This can be done with user code or with a <a href="qt3dlogic-qframeaction.html">Qt3DLogic::QFrameAction</a> but those approached are not ideal as they add more work to the main thread and are inherently imperative. The <a href="qt3dinput-qaxisaccumulator.html">Qt3DInput::QAxisAccumulator</a> class allows for this common task to be performed on the Qt 3D backend and be specified in a declarative manner.</p>
+</div>
+<!-- @@@QAxisAccumulator -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$SourceAxisType$$$Velocity$$$Acceleration -->
+<h3 class="fn" id="SourceAxisType-enum"><a name="SourceAxisType-enum"></a>enum QAxisAccumulator::<span class="name">SourceAxisType</span></h3>
+<div class="table"><table class="valuelist"><tr><th class="tblConst">Constant</th><th class="tblVal">Value</th></tr>
+<tr><td class="topAlign"><code>Qt3DInput::QAxisAccumulator::Velocity</code></td><td class="topAlign tblval"><code>0</code></td></tr>
+<tr><td class="topAlign"><code>Qt3DInput::QAxisAccumulator::Acceleration</code></td><td class="topAlign tblval"><code>1</code></td></tr>
+</table></div>
+<!-- @@@SourceAxisType -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$value-prop$$$value$$$valueChangedfloat -->
+<h3 class="fn" id="value-prop"><a name="value-prop"></a><span class="name">value</span> : const <span class="type">float</span></h3>
+<p>Returns the accumulated (integrated) value.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> float </td><td class="memItemRight bottomAlign"><span class="name"><b>value</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>valueChanged</b></span>(float <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@value -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QAxisAccumulator[overload1]$$$QAxisAccumulatorQt3DCore::QNode* -->
+<h3 class="fn" id="QAxisAccumulator"><a name="QAxisAccumulator"></a>QAxisAccumulator::<span class="name">QAxisAccumulator</span>(<span class="type"><a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new <a href="qt3dinput-qaxisaccumulator.html">QAxisAccumulator</a> instance with parent <i>parent</i>.</p>
+<!-- @@@QAxisAccumulator -->
+<!-- $$$setSourceAxis -->
+<h3 class="fn" id="setSourceAxis"><a name="setSourceAxis"></a><code>[slot] </code><span class="type">void</span> QAxisAccumulator::<span class="name">setSourceAxis</span>(<span class="type"><a href="qt3dinput-qaxis.html">Qt3DInput::QAxis</a></span> *<i>sourceAxis</i>)</h3>
+<p>Sets the source axis from which the accumulator should receive values from to <i>sourceAxis</i>. How these values are treated is controlled by the <a href="qt3dinput-qaxisaccumulator.html#sourceAxisType">sourceAxisType</a> and scale properties.</p>
+<p><b>Note:</b> Setter function for property <a href="">sourceAxis</a>. </p><p><b>See also </b><a href="qt3dinput-qaxisaccumulator.html#sourceAxis">sourceAxis</a>().</p>
+<!-- @@@setSourceAxis -->
+<!-- $$$setSourceAxisType -->
+<h3 class="fn" id="setSourceAxisType"><a name="setSourceAxisType"></a><code>[slot] </code><span class="type">void</span> QAxisAccumulator::<span class="name">setSourceAxisType</span>(<span class="type"><a href="qt3dinput-qaxisaccumulator.html#SourceAxisType-enum">QAxisAccumulator::SourceAxisType</a></span> <i>sourceAxisType</i>)</h3>
+<p>Sets how the accumulator treats the values originating from the <i>sourceAxisType</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">sourceAxisType</a>. </p><p><b>See also </b><a href="qt3dinput-qaxisaccumulator.html#sourceAxisType">sourceAxisType</a>().</p>
+<!-- @@@setSourceAxisType -->
+<!-- $$$scale -->
+<h3 class="fn" id="scale"><a name="scale"></a><span class="type">float</span> QAxisAccumulator::<span class="name">scale</span>() const</h3>
+<p>The amount to scale the axis value by when accumulating. This can be thought of as the maximum velocity or acceleration the axis can control.</p>
+<p>Returns the amount the input axis values are scaled by.</p>
+<p><b>Note:</b> Getter function for property <a href="">scale</a>. </p><p><b>See also </b><a href="qt3dinput-qaxisaccumulator.html#scale-prop">setScale</a>().</p>
+<!-- @@@scale -->
+<!-- $$$sourceAxis -->
+<h3 class="fn" id="sourceAxis"><a name="sourceAxis"></a><span class="type"><a href="qt3dinput-qaxis.html">Qt3DInput::QAxis</a></span> *QAxisAccumulator::<span class="name">sourceAxis</span>() const</h3>
+<p>Returns <a href="qt3dinput-qaxis.html">QAxis</a> for which the accumulator should integrate axis values.</p>
+<p><b>Note:</b> Getter function for property <a href="">sourceAxis</a>. </p><p><b>See also </b><a href="qt3dinput-qaxisaccumulator.html#setSourceAxis">setSourceAxis</a>().</p>
+<!-- @@@sourceAxis -->
+<!-- $$$sourceAxisType -->
+<h3 class="fn" id="sourceAxisType"><a name="sourceAxisType"></a><span class="type"><a href="qt3dinput-qaxisaccumulator.html#SourceAxisType-enum">Qt3DInput::QAxisAccumulator::SourceAxisType</a></span> QAxisAccumulator::<span class="name">sourceAxisType</span>() const</h3>
+<p>Returns how the accumulator treats the value of the <a href="qt3dinput-qaxisaccumulator.html#sourceAxis">sourceAxis</a>.</p>
+<p><b>Note:</b> Getter function for property <a href="">sourceAxisType</a>. </p><p><b>See also </b><a href="qt3dinput-qaxisaccumulator.html#setSourceAxisType">setSourceAxisType</a>().</p>
+<!-- @@@sourceAxisType -->
+<!-- $$$velocity -->
+<h3 class="fn" id="velocity"><a name="velocity"></a><span class="type">float</span> QAxisAccumulator::<span class="name">velocity</span>() const</h3>
+<p>Returns the velocity. If the <a href="qt3dinput-qaxisaccumulator.html#sourceAxisType">sourceAxisType</a> is set to Velocity this is simply the value of the source axis multiplied by the scale. If the <a href="qt3dinput-qaxisaccumulator.html#sourceAxisType">sourceAxisType</a> is set to Acceleration, the velocity is integrated using the source axis' value as an acceleration.</p>
+<p><b>Note:</b> Getter function for property <a href="">velocity</a>. </p><!-- @@@velocity -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

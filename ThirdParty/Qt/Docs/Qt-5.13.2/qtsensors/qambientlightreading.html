@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qambientlightsensor.cpp -->
+  <title>QAmbientLightReading Class | Qt Sensors 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtsensors-index.html">Qt Sensors</a></td><td ><a href="qtsensors-module.html">C++ Classes</a></td><td >QAmbientLightReading</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtsensors-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#qambientlightreading-units">QAmbientLightReading Units</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAmbientLightReading Class</h1>
+<!-- $$$QAmbientLightReading-brief -->
+<p>The <a href="qambientlightreading.html">QAmbientLightReading</a> class represents one reading from the ambient light sensor. <a href="#details">More...</a></p>
+<!-- @@@QAmbientLightReading -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAmbientLightReading&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += sensors</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.1</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qsensorreading.html">QSensorReading</a></td></tr></table></div><p>This class was introduced in  Qt 5.1.</p>
+<ul>
+<li><a href="qambientlightreading-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qambientlightreading.html#LightLevel-enum">LightLevel</a></b> { Undefined, Dark, Twilight, Light, Bright, Sunny }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qambientlightreading.html#lightLevel-prop">lightLevel</a></b> : const LightLevel</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QAmbientLightReading::LightLevel </td><td class="memItemRight bottomAlign"><b><a href="qambientlightreading.html#lightLevel-prop">lightLevel</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qambientlightreading.html#setLightLevel">setLightLevel</a></b>(QAmbientLightReading::LightLevel <i>lightLevel</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAmbientLightReading-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<a name="qambientlightreading-units"></a>
+<h4 id="qambientlightreading-units">QAmbientLightReading Units</h4>
+<p>The ambient light sensor returns the intensity of the ambient light using the pre-defined values found in the <a href="qambientlightreading.html#LightLevel-enum">QAmbientLightReading::LightLevel</a> enum.</p>
+</div>
+<!-- @@@QAmbientLightReading -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$LightLevel$$$Undefined$$$Dark$$$Twilight$$$Light$$$Bright$$$Sunny -->
+<h3 class="fn" id="LightLevel-enum"><a name="LightLevel-enum"></a>enum QAmbientLightReading::<span class="name">LightLevel</span></h3>
+<p>This enum represents the ambient light level.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QAmbientLightReading::Undefined</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The light level is unknown.</td></tr>
+<tr><td class="topAlign"><code>QAmbientLightReading::Dark</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">It is dark.</td></tr>
+<tr><td class="topAlign"><code>QAmbientLightReading::Twilight</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">It is moderately dark.</td></tr>
+<tr><td class="topAlign"><code>QAmbientLightReading::Light</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">It is light (eg. internal lights).</td></tr>
+<tr><td class="topAlign"><code>QAmbientLightReading::Bright</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">It is bright (eg. shade).</td></tr>
+<tr><td class="topAlign"><code>QAmbientLightReading::Sunny</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">It is very bright (eg. direct sunlight).</td></tr>
+</table></div>
+<!-- @@@LightLevel -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$lightLevel-prop$$$lightLevel -->
+<h3 class="fn" id="lightLevel-prop"><a name="lightLevel-prop"></a><span class="name">lightLevel</span> : const <span class="type"><a href="qambientlightreading.html#LightLevel-enum">LightLevel</a></span></h3>
+<p>This property holds the ambient light level.</p>
+<p>The value represents the ambient light and comes from <a href="qambientlightreading.html#LightLevel-enum">QAmbientLightReading::LightLevel</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QAmbientLightReading::LightLevel </td><td class="memItemRight bottomAlign"><span class="name"><b>lightLevel</b></span>() const</td></tr>
+</table></div>
+<p><b>See also </b><a href="qambientlightreading.html#qambientlightreading-units">QAmbientLightReading Units</a>.</p>
+<!-- @@@lightLevel -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$setLightLevel[overload1]$$$setLightLevelQAmbientLightReading::LightLevel -->
+<h3 class="fn" id="setLightLevel"><a name="setLightLevel"></a><span class="type">void</span> QAmbientLightReading::<span class="name">setLightLevel</span>(<span class="type"><a href="qambientlightreading.html#LightLevel-enum">QAmbientLightReading::LightLevel</a></span> <i>lightLevel</i>)</h3>
+<p>Sets the ambient light level to <i>lightLevel</i>.</p>
+<p><b>See also </b><a href="qambientlightreading.html#lightLevel-prop">lightLevel</a>().</p>
+<!-- @@@setLightLevel -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

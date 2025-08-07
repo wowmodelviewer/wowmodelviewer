@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- eventconnection.cpp -->
+  <title>EventConnection QML Type | Qt SCXML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtscxml-index.html">Qt SCXML</a></td><td ><a href="qtscxml-qmlmodule.html">QML Types</a></td><td >EventConnection QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtscxml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">EventConnection QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$EventConnection-brief -->
+<p>Connects to events sent out by state machines. <a href="#details">More...</a></p>
+<!-- @@@EventConnection -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtScxml 5.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  QtScxml 5.8</td></tr></table></div><ul>
+<li><a href="qml-qtscxml-eventconnection-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtscxml-eventconnection.html#events-prop">events</a></b></b> : stringlist</li>
+<li class="fn"><b><b><a href="qml-qtscxml-eventconnection.html#stateMachine-prop">stateMachine</a></b></b> : ScxmlStateMachine</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtscxml-eventconnection.html#occurred-signal">occurred</a></b></b>(<i>event</i>)</li>
+</ul>
+<!-- $$$EventConnection-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>To receive a notification when a state machine sends out an event, a connection can be created to the corresponding signal.</p>
+<!-- @@@EventConnection -->
+<h2>Property Documentation</h2>
+<!-- $$$events -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="events-prop"></a><span class="name">events</span> : <span class="type">stringlist</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The list of SCXML event specifiers that describe the events to listen for.</p>
+<p>Even though spaces are allowed in event specifications in SCXML documents, they are not allowed in this list. However, the list can contain multiple specifiers, to the same effect.</p>
+</div></div><!-- @@@events -->
+<br/>
+<!-- $$$stateMachine -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="stateMachine-prop"></a><span class="name">stateMachine</span> : <span class="type"><a href="qml-qtscxml-scxmlstatemachine.html">ScxmlStateMachine</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The state machine that sends out the event.</p>
+</div></div><!-- @@@stateMachine -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$occurred[overload1]$$$occurred -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="occurred-signal"></a><span class="name">occurred</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the event <i>event</i> occurrs.</p>
+<p>The corresponding signal handler is <code>onOccurred</code>.</p>
+<p><b>See also </b><a href="qscxmlevent.html">QScxmlEvent</a>.</p>
+</div></div><!-- @@@occurred -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

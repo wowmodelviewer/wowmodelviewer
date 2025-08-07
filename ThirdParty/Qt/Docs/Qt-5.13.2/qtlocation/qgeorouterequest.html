@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qgeorouterequest.cpp -->
+  <title>QGeoRouteRequest Class | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-module.html">C++ Classes</a></td><td >QGeoRouteRequest</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QGeoRouteRequest Class</h1>
+<!-- $$$QGeoRouteRequest-brief -->
+<p>The <a href="qgeorouterequest.html">QGeoRouteRequest</a> class represents the parameters and restrictions which define a request for routing information. <a href="#details">More...</a></p>
+<!-- @@@QGeoRouteRequest -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QGeoRouteRequest&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += location</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.6</td></tr></table></div><p>This class was introduced in  Qt 5.6.</p>
+<ul>
+<li><a href="qgeorouterequest-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#FeatureType-enum">FeatureType</a></b> { NoFeature, TollFeature, HighwayFeature, PublicTransitFeature, ..., TrafficFeature }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#FeatureType-enum">FeatureTypes</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#FeatureWeight-enum">FeatureWeight</a></b> { NeutralFeatureWeight, PreferFeatureWeight, RequireFeatureWeight, AvoidFeatureWeight, DisallowFeatureWeight }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#FeatureWeight-enum">FeatureWeights</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#ManeuverDetail-enum">ManeuverDetail</a></b> { NoManeuvers, BasicManeuvers }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#ManeuverDetail-enum">ManeuverDetails</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#RouteOptimization-enum">RouteOptimization</a></b> { ShortestRoute, FastestRoute, MostEconomicRoute, MostScenicRoute }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#RouteOptimization-enum">RouteOptimizations</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#SegmentDetail-enum">SegmentDetail</a></b> { NoSegmentData, BasicSegmentData }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#SegmentDetail-enum">SegmentDetails</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#TravelMode-enum">TravelMode</a></b> { CarTravel, PedestrianTravel, BicycleTravel, PublicTransitTravel, TruckTravel }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#TravelMode-enum">TravelModes</a></b></td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#QGeoRouteRequest-2">QGeoRouteRequest</a></b>(const QGeoRouteRequest &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#QGeoRouteRequest-1">QGeoRouteRequest</a></b>(const QGeoCoordinate &amp;<i>origin</i>, const QGeoCoordinate &amp;<i>destination</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#QGeoRouteRequest">QGeoRouteRequest</a></b>(const QList&lt;QGeoCoordinate&gt; &amp;<i>waypoints</i> = QList&lt;QGeoCoordinate&gt;())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoRouteRequest &amp;</td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#operator-eq">operator=</a></b>(const QGeoRouteRequest &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#dtor.QGeoRouteRequest">~QGeoRouteRequest</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDateTime </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#departureTime">departureTime</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QGeoRectangle&gt; </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#excludeAreas">excludeAreas</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariantMap </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#extraParameters">extraParameters</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QGeoRouteRequest::FeatureType&gt; </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#featureTypes">featureTypes</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoRouteRequest::FeatureWeight </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#featureWeight">featureWeight</a></b>(QGeoRouteRequest::FeatureType <i>featureType</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoRouteRequest::ManeuverDetail </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#maneuverDetail">maneuverDetail</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#numberAlternativeRoutes">numberAlternativeRoutes</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoRouteRequest::RouteOptimizations </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#routeOptimization">routeOptimization</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoRouteRequest::SegmentDetail </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#segmentDetail">segmentDetail</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#setDepartureTime">setDepartureTime</a></b>(const QDateTime &amp;<i>departureTime</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#setExcludeAreas">setExcludeAreas</a></b>(const QList&lt;QGeoRectangle&gt; &amp;<i>areas</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#setExtraParameters">setExtraParameters</a></b>(const QVariantMap &amp;<i>extraParameters</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#setFeatureWeight">setFeatureWeight</a></b>(QGeoRouteRequest::FeatureType <i>featureType</i>, QGeoRouteRequest::FeatureWeight <i>featureWeight</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#setManeuverDetail">setManeuverDetail</a></b>(QGeoRouteRequest::ManeuverDetail <i>maneuverDetail</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#setNumberAlternativeRoutes">setNumberAlternativeRoutes</a></b>(int <i>alternatives</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#setRouteOptimization">setRouteOptimization</a></b>(QGeoRouteRequest::RouteOptimizations <i>optimization</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#setSegmentDetail">setSegmentDetail</a></b>(QGeoRouteRequest::SegmentDetail <i>segmentDetail</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#setTravelModes">setTravelModes</a></b>(QGeoRouteRequest::TravelModes <i>travelModes</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#setWaypoints">setWaypoints</a></b>(const QList&lt;QGeoCoordinate&gt; &amp;<i>waypoints</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#setWaypointsMetadata">setWaypointsMetadata</a></b>(const QList&lt;QVariantMap&gt; &amp;<i>waypointMetadata</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoRouteRequest::TravelModes </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#travelModes">travelModes</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QGeoCoordinate&gt; </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#waypoints">waypoints</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QVariantMap&gt; </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#waypointsMetadata">waypointsMetadata</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#operator-not-eq">operator!=</a></b>(const QGeoRouteRequest &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgeorouterequest.html#operator-eq-eq">operator==</a></b>(const QGeoRouteRequest &amp;<i>other</i>) const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QGeoRouteRequest-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The default state of a <a href="qgeorouterequest.html">QGeoRouteRequest</a> instance will result in a request for basic route segment and navigation maneuvers describing the fastest route by car which covers the given waypoints.</p>
+<p>There may be significant variation in the features supported by different providers of routing information, or even in the features supported by the same provider if different levels of authorization are used.</p>
+<p>There are several functions in <a href="qgeoroutingmanager.html">QGeoRoutingManager</a> which can be used to check which features are supported with the current provider and authorization level.</p>
+</div>
+<p><b>See also </b><a href="qgeoroutingmanager.html">QGeoRoutingManager</a>.</p>
+<!-- @@@QGeoRouteRequest -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$FeatureType$$$NoFeature$$$TollFeature$$$HighwayFeature$$$PublicTransitFeature$$$FerryFeature$$$TunnelFeature$$$DirtRoadFeature$$$ParksFeature$$$MotorPoolLaneFeature$$$TrafficFeature -->
+<h3 class="flags" id="FeatureType-enum"><a name="FeatureType-enum"></a>enum QGeoRouteRequest::<span class="name">FeatureType</span><br/>flags QGeoRouteRequest::<span class="name">FeatureTypes</span></h3>
+<p>Defines a feature which is important to the planning of a route.</p>
+<p>These values will be used in combination with <a href="qgeorouterequest.html#FeatureWeight-enum">QGeoRouteRequest::FeatureWeight</a> to determine if they should or should not be part of the route.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::NoFeature</code></td><td class="topAlign tblval"><code>0x00000000</code></td><td class="topAlign">Used by <a href="qgeoroutingmanager.html#supportedFeatureTypes">QGeoRoutingManager::supportedFeatureTypes</a>() to indicate that no features will be taken into account when planning the route.</td></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::TollFeature</code></td><td class="topAlign tblval"><code>0x00000001</code></td><td class="topAlign">Consdier tollways when planning the route.</td></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::HighwayFeature</code></td><td class="topAlign tblval"><code>0x00000002</code></td><td class="topAlign">Consider highways when planning the route.</td></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::PublicTransitFeature</code></td><td class="topAlign tblval"><code>0x00000004</code></td><td class="topAlign">Consider public transit when planning the route.</td></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::FerryFeature</code></td><td class="topAlign tblval"><code>0x00000008</code></td><td class="topAlign">Consider ferries when planning the route.</td></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::TunnelFeature</code></td><td class="topAlign tblval"><code>0x00000010</code></td><td class="topAlign">Consider tunnels when planning the route.</td></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::DirtRoadFeature</code></td><td class="topAlign tblval"><code>0x00000020</code></td><td class="topAlign">Consider dirt roads when planning the route.</td></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::ParksFeature</code></td><td class="topAlign tblval"><code>0x00000040</code></td><td class="topAlign">Consider parks when planning the route.</td></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::MotorPoolLaneFeature</code></td><td class="topAlign tblval"><code>0x00000080</code></td><td class="topAlign">Consider motor pool lanes when planning the route.</td></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::TrafficFeature</code></td><td class="topAlign tblval"><code>0x00000100</code></td><td class="topAlign">Consider the current traffic situation when planning the route. Since <a href="qtlocation-module.html">QtLocation</a> 5.10</td></tr>
+</table></div>
+<p>The FeatureTypes type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;FeatureType&gt;. It stores an OR combination of FeatureType values.</p>
+<!-- @@@FeatureType -->
+<!-- $$$FeatureWeight$$$NeutralFeatureWeight$$$PreferFeatureWeight$$$RequireFeatureWeight$$$AvoidFeatureWeight$$$DisallowFeatureWeight -->
+<h3 class="flags" id="FeatureWeight-enum"><a name="FeatureWeight-enum"></a>enum QGeoRouteRequest::<span class="name">FeatureWeight</span><br/>flags QGeoRouteRequest::<span class="name">FeatureWeights</span></h3>
+<p>Defines the weight to associate with a feature during the planning of a route.</p>
+<p>These values will be used in combination with QGeoRouteRequest::Feature to determine if they should or should not be part of the route.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::NeutralFeatureWeight</code></td><td class="topAlign tblval"><code>0x00000000</code></td><td class="topAlign">The presence or absence of the feature will not affect the planning of the route.</td></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::PreferFeatureWeight</code></td><td class="topAlign tblval"><code>0x00000001</code></td><td class="topAlign">Routes which contain the feature will be preferred over those that do not.</td></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::RequireFeatureWeight</code></td><td class="topAlign tblval"><code>0x00000002</code></td><td class="topAlign">Only routes which contain the feature will be considered, otherwise no route will be returned.</td></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::AvoidFeatureWeight</code></td><td class="topAlign tblval"><code>0x00000004</code></td><td class="topAlign">Routes which do not contain the feature will be preferred over those that do.</td></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::DisallowFeatureWeight</code></td><td class="topAlign tblval"><code>0x00000008</code></td><td class="topAlign">Only routes which do not contain the feature will be considered, otherwise no route will be returned.</td></tr>
+</table></div>
+<p>The FeatureWeights type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;FeatureWeight&gt;. It stores an OR combination of FeatureWeight values.</p>
+<!-- @@@FeatureWeight -->
+<!-- $$$ManeuverDetail$$$NoManeuvers$$$BasicManeuvers -->
+<h3 class="flags" id="ManeuverDetail-enum"><a name="ManeuverDetail-enum"></a>enum QGeoRouteRequest::<span class="name">ManeuverDetail</span><br/>flags QGeoRouteRequest::<span class="name">ManeuverDetails</span></h3>
+<p>Defines the amount of maneuver information that should be included with the route.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::NoManeuvers</code></td><td class="topAlign tblval"><code>0x0000</code></td><td class="topAlign">No maneuvers should be included with the route.</td></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::BasicManeuvers</code></td><td class="topAlign tblval"><code>0x0001</code></td><td class="topAlign">Basic manevuers will be included with the route. This will include <a href="qgeomaneuver.html#instructionText">QGeoManeuver::instructionText</a>().</td></tr>
+</table></div>
+<p>The ManeuverDetails type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;ManeuverDetail&gt;. It stores an OR combination of ManeuverDetail values.</p>
+<!-- @@@ManeuverDetail -->
+<!-- $$$RouteOptimization$$$ShortestRoute$$$FastestRoute$$$MostEconomicRoute$$$MostScenicRoute -->
+<h3 class="flags" id="RouteOptimization-enum"><a name="RouteOptimization-enum"></a>enum QGeoRouteRequest::<span class="name">RouteOptimization</span><br/>flags QGeoRouteRequest::<span class="name">RouteOptimizations</span></h3>
+<p>Defines the type of optimization which is applied to the planning of the route.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::ShortestRoute</code></td><td class="topAlign tblval"><code>0x0001</code></td><td class="topAlign">Minimize the length of the journey.</td></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::FastestRoute</code></td><td class="topAlign tblval"><code>0x0002</code></td><td class="topAlign">Minimize the traveling time for the journey.</td></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::MostEconomicRoute</code></td><td class="topAlign tblval"><code>0x0004</code></td><td class="topAlign">Minimize the cost of the journey.</td></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::MostScenicRoute</code></td><td class="topAlign tblval"><code>0x0008</code></td><td class="topAlign">Maximize the scenic potential of the journey.</td></tr>
+</table></div>
+<p>The RouteOptimizations type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;RouteOptimization&gt;. It stores an OR combination of RouteOptimization values.</p>
+<!-- @@@RouteOptimization -->
+<!-- $$$SegmentDetail$$$NoSegmentData$$$BasicSegmentData -->
+<h3 class="flags" id="SegmentDetail-enum"><a name="SegmentDetail-enum"></a>enum QGeoRouteRequest::<span class="name">SegmentDetail</span><br/>flags QGeoRouteRequest::<span class="name">SegmentDetails</span></h3>
+<p>Defines the amount of route segment information that should be included with the route.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::NoSegmentData</code></td><td class="topAlign tblval"><code>0x0000</code></td><td class="topAlign">No segment data should be included with the route. A route requested with this level of segment detail will initialize <a href="qgeoroutesegment.html#path">QGeoRouteSegment::path</a>() as a straight line between the positions of the previous and next <a href="qgeomaneuver.html">QGeoManeuver</a> instances.</td></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::BasicSegmentData</code></td><td class="topAlign tblval"><code>0x0001</code></td><td class="topAlign">Basic segment data will be included with the route. This will include <a href="qgeoroutesegment.html#path">QGeoRouteSegment::path</a>().</td></tr>
+</table></div>
+<p>The SegmentDetails type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;SegmentDetail&gt;. It stores an OR combination of SegmentDetail values.</p>
+<!-- @@@SegmentDetail -->
+<!-- $$$TravelMode$$$CarTravel$$$PedestrianTravel$$$BicycleTravel$$$PublicTransitTravel$$$TruckTravel -->
+<h3 class="flags" id="TravelMode-enum"><a name="TravelMode-enum"></a>enum QGeoRouteRequest::<span class="name">TravelMode</span><br/>flags QGeoRouteRequest::<span class="name">TravelModes</span></h3>
+<p>Defines modes of travel to be used for a route.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::CarTravel</code></td><td class="topAlign tblval"><code>0x0001</code></td><td class="topAlign">The route will be optimized for someone who is driving a car.</td></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::PedestrianTravel</code></td><td class="topAlign tblval"><code>0x0002</code></td><td class="topAlign">The route will be optimized for someone who is walking.</td></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::BicycleTravel</code></td><td class="topAlign tblval"><code>0x0004</code></td><td class="topAlign">The route will be optimized for someone who is riding a bicycle.</td></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::PublicTransitTravel</code></td><td class="topAlign tblval"><code>0x0008</code></td><td class="topAlign">The route will be optimized for someone who is making use of public transit.</td></tr>
+<tr><td class="topAlign"><code>QGeoRouteRequest::TruckTravel</code></td><td class="topAlign tblval"><code>0x0010</code></td><td class="topAlign">The route will be optimized for someone who is driving a truck.</td></tr>
+</table></div>
+<p>The TravelModes type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;TravelMode&gt;. It stores an OR combination of TravelMode values.</p>
+<!-- @@@TravelMode -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QGeoRouteRequest$$$QGeoRouteRequestconstQGeoRouteRequest& -->
+<h3 class="fn" id="QGeoRouteRequest-2"><a name="QGeoRouteRequest-2"></a>QGeoRouteRequest::<span class="name">QGeoRouteRequest</span>(const <span class="type"><a href="qgeorouterequest.html#QGeoRouteRequest">QGeoRouteRequest</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a route request object from the contents of <i>other</i>.</p>
+<!-- @@@QGeoRouteRequest -->
+<!-- $$$QGeoRouteRequest$$$QGeoRouteRequestconstQGeoCoordinate&constQGeoCoordinate& -->
+<h3 class="fn" id="QGeoRouteRequest-1"><a name="QGeoRouteRequest-1"></a>QGeoRouteRequest::<span class="name">QGeoRouteRequest</span>(const <span class="type"><a href="../qtpositioning/qgeocoordinate.html">QGeoCoordinate</a></span> &amp;<i>origin</i>, const <span class="type"><a href="../qtpositioning/qgeocoordinate.html">QGeoCoordinate</a></span> &amp;<i>destination</i>)</h3>
+<p>Constructs a request to calculate a route between <i>origin</i> and <i>destination</i>.</p>
+<!-- @@@QGeoRouteRequest -->
+<!-- $$$QGeoRouteRequest[overload1]$$$QGeoRouteRequestconstQList<QGeoCoordinate>& -->
+<h3 class="fn" id="QGeoRouteRequest"><a name="QGeoRouteRequest"></a>QGeoRouteRequest::<span class="name">QGeoRouteRequest</span>(const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="../qtpositioning/qgeocoordinate.html">QGeoCoordinate</a></span>&gt; &amp;<i>waypoints</i> = QList&lt;QGeoCoordinate&gt;())</h3>
+<p>Constructs a request to calculate a route through the coordinates <i>waypoints</i>.</p>
+<p>The route will traverse the objects of <i>waypoints</i> in order.</p>
+<!-- @@@QGeoRouteRequest -->
+<!-- $$$operator=[overload1]$$$operator=constQGeoRouteRequest& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qgeorouterequest.html#QGeoRouteRequest">QGeoRouteRequest</a></span> &amp;QGeoRouteRequest::<span class="name">operator=</span>(const <span class="type"><a href="qgeorouterequest.html#QGeoRouteRequest">QGeoRouteRequest</a></span> &amp;<i>other</i>)</h3>
+<p>Assigns <i>other</i> to this route request object and then returns a reference to this route request object.</p>
+<!-- @@@operator= -->
+<!-- $$$~QGeoRouteRequest[overload1]$$$~QGeoRouteRequest -->
+<h3 class="fn" id="dtor.QGeoRouteRequest"><a name="dtor.QGeoRouteRequest"></a>QGeoRouteRequest::<span class="name">~QGeoRouteRequest</span>()</h3>
+<p>Destroys the request.</p>
+<!-- @@@~QGeoRouteRequest -->
+<!-- $$$departureTime[overload1]$$$departureTime -->
+<h3 class="fn" id="departureTime"><a name="departureTime"></a><span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> QGeoRouteRequest::<span class="name">departureTime</span>() const</h3>
+<p>Returns the departure time in the request.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<p><b>See also </b><a href="qgeorouterequest.html#setDepartureTime">setDepartureTime</a>().</p>
+<!-- @@@departureTime -->
+<!-- $$$excludeAreas[overload1]$$$excludeAreas -->
+<h3 class="fn" id="excludeAreas"><a name="excludeAreas"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="../qtpositioning/qgeorectangle.html">QGeoRectangle</a></span>&gt; QGeoRouteRequest::<span class="name">excludeAreas</span>() const</h3>
+<p>Returns areas the route must not cross.</p>
+<p><b>See also </b><a href="qgeorouterequest.html#setExcludeAreas">setExcludeAreas</a>().</p>
+<!-- @@@excludeAreas -->
+<!-- $$$extraParameters[overload1]$$$extraParameters -->
+<h3 class="fn" id="extraParameters"><a name="extraParameters"></a><span class="type"><a href="../qtcore/qvariant.html#QVariantMap-typedef">QVariantMap</a></span> QGeoRouteRequest::<span class="name">extraParameters</span>() const</h3>
+<p>Returns the extra parameters set for this route request.</p>
+<p>This function was introduced in  Qt 5.11.</p>
+<p><b>See also </b><a href="qgeorouterequest.html#setExtraParameters">setExtraParameters</a>().</p>
+<!-- @@@extraParameters -->
+<!-- $$$featureTypes[overload1]$$$featureTypes -->
+<h3 class="fn" id="featureTypes"><a name="featureTypes"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qgeorouterequest.html#FeatureType-enum">QGeoRouteRequest::FeatureType</a></span>&gt; QGeoRouteRequest::<span class="name">featureTypes</span>() const</h3>
+<p>Returns the list of features that will be considered when planning the route. Features with a weight of <a href="qgeorouterequest.html#FeatureWeight-enum">NeutralFeatureWeight</a> will not be returned.</p>
+<!-- @@@featureTypes -->
+<!-- $$$featureWeight[overload1]$$$featureWeightQGeoRouteRequest::FeatureType -->
+<h3 class="fn" id="featureWeight"><a name="featureWeight"></a><span class="type"><a href="qgeorouterequest.html#FeatureWeight-enum">QGeoRouteRequest::FeatureWeight</a></span> QGeoRouteRequest::<span class="name">featureWeight</span>(<span class="type"><a href="qgeorouterequest.html#FeatureType-enum">QGeoRouteRequest::FeatureType</a></span> <i>featureType</i>) const</h3>
+<p>Returns the weight assigned to <i>featureType</i> in the planning of the route.</p>
+<p>If no feature weight has been specified for <i>featureType</i> then <a href="qgeorouterequest.html#FeatureWeight-enum">NeutralFeatureWeight</a> will be returned.</p>
+<p><b>See also </b><a href="qgeorouterequest.html#setFeatureWeight">setFeatureWeight</a>().</p>
+<!-- @@@featureWeight -->
+<!-- $$$maneuverDetail[overload1]$$$maneuverDetail -->
+<h3 class="fn" id="maneuverDetail"><a name="maneuverDetail"></a><span class="type"><a href="qgeorouterequest.html#ManeuverDetail-enum">QGeoRouteRequest::ManeuverDetail</a></span> QGeoRouteRequest::<span class="name">maneuverDetail</span>() const</h3>
+<p>Returns the level of detail which will be used in the representation of routing maneuvers.</p>
+<p><b>See also </b><a href="qgeorouterequest.html#setManeuverDetail">setManeuverDetail</a>().</p>
+<!-- @@@maneuverDetail -->
+<!-- $$$numberAlternativeRoutes[overload1]$$$numberAlternativeRoutes -->
+<h3 class="fn" id="numberAlternativeRoutes"><a name="numberAlternativeRoutes"></a><span class="type">int</span> QGeoRouteRequest::<span class="name">numberAlternativeRoutes</span>() const</h3>
+<p>Returns the number of alternative routes which will be requested.</p>
+<p><b>See also </b><a href="qgeorouterequest.html#setNumberAlternativeRoutes">setNumberAlternativeRoutes</a>().</p>
+<!-- @@@numberAlternativeRoutes -->
+<!-- $$$routeOptimization[overload1]$$$routeOptimization -->
+<h3 class="fn" id="routeOptimization"><a name="routeOptimization"></a><span class="type"><a href="qgeorouterequest.html#RouteOptimization-enum">QGeoRouteRequest::RouteOptimizations</a></span> QGeoRouteRequest::<span class="name">routeOptimization</span>() const</h3>
+<p>Returns the optimization criteria which this request specifies should be used while planning the route.</p>
+<p><b>See also </b><a href="qgeorouterequest.html#setRouteOptimization">setRouteOptimization</a>().</p>
+<!-- @@@routeOptimization -->
+<!-- $$$segmentDetail[overload1]$$$segmentDetail -->
+<h3 class="fn" id="segmentDetail"><a name="segmentDetail"></a><span class="type"><a href="qgeorouterequest.html#SegmentDetail-enum">QGeoRouteRequest::SegmentDetail</a></span> QGeoRouteRequest::<span class="name">segmentDetail</span>() const</h3>
+<p>Returns the level of detail which will be used in the representation of routing segments.</p>
+<p><b>See also </b><a href="qgeorouterequest.html#setSegmentDetail">setSegmentDetail</a>().</p>
+<!-- @@@segmentDetail -->
+<!-- $$$setDepartureTime[overload1]$$$setDepartureTimeconstQDateTime& -->
+<h3 class="fn" id="setDepartureTime"><a name="setDepartureTime"></a><span class="type">void</span> QGeoRouteRequest::<span class="name">setDepartureTime</span>(const <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> &amp;<i>departureTime</i>)</h3>
+<p>Sets the departure time <i>departureTime</i> for the route calculation. This information can be used by the backend to calculate a faster route, for example, by avoiding traffic congestion during rush hour.</p>
+<p>The default value is an invalid <a href="../qtcore/qdatetime.html">QDateTime</a>.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<p><b>See also </b><a href="qgeorouterequest.html#departureTime">departureTime</a>().</p>
+<!-- @@@setDepartureTime -->
+<!-- $$$setExcludeAreas[overload1]$$$setExcludeAreasconstQList<QGeoRectangle>& -->
+<h3 class="fn" id="setExcludeAreas"><a name="setExcludeAreas"></a><span class="type">void</span> QGeoRouteRequest::<span class="name">setExcludeAreas</span>(const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="../qtpositioning/qgeorectangle.html">QGeoRectangle</a></span>&gt; &amp;<i>areas</i>)</h3>
+<p>Sets <i>areas</i> as excluded areas that the route must not cross.</p>
+<p><b>See also </b><a href="qgeorouterequest.html#excludeAreas">excludeAreas</a>().</p>
+<!-- @@@setExcludeAreas -->
+<!-- $$$setExtraParameters[overload1]$$$setExtraParametersconstQVariantMap& -->
+<h3 class="fn" id="setExtraParameters"><a name="setExtraParameters"></a><span class="type">void</span> QGeoRouteRequest::<span class="name">setExtraParameters</span>(const <span class="type"><a href="../qtcore/qvariant.html#QVariantMap-typedef">QVariantMap</a></span> &amp;<i>extraParameters</i>)</h3>
+<p>Sets the extra parameters <i>extraParameters</i> for the route request. The format of the extra parameters is plugin specific, and documented per plugin.</p>
+<p>This function was introduced in  Qt 5.11.</p>
+<p><b>See also </b><a href="qgeorouterequest.html#extraParameters">extraParameters</a>().</p>
+<!-- @@@setExtraParameters -->
+<!-- $$$setFeatureWeight[overload1]$$$setFeatureWeightQGeoRouteRequest::FeatureTypeQGeoRouteRequest::FeatureWeight -->
+<h3 class="fn" id="setFeatureWeight"><a name="setFeatureWeight"></a><span class="type">void</span> QGeoRouteRequest::<span class="name">setFeatureWeight</span>(<span class="type"><a href="qgeorouterequest.html#FeatureType-enum">QGeoRouteRequest::FeatureType</a></span> <i>featureType</i>, <span class="type"><a href="qgeorouterequest.html#FeatureWeight-enum">QGeoRouteRequest::FeatureWeight</a></span> <i>featureWeight</i>)</h3>
+<p>Assigns the weight <i>featureWeight</i> to the feature <i>featureType</i> during the planning of the route.</p>
+<p>By default all features are assigned a weight of <a href="qgeorouterequest.html#FeatureWeight-enum">NeutralFeatureWeight</a>.</p>
+<p>It is impossible to assign a weight to <a href="qgeorouterequest.html#FeatureType-enum">QGeoRouteRequest::NoFeature</a>.</p>
+<p><b>See also </b><a href="qgeorouterequest.html#featureWeight">featureWeight</a>().</p>
+<!-- @@@setFeatureWeight -->
+<!-- $$$setManeuverDetail[overload1]$$$setManeuverDetailQGeoRouteRequest::ManeuverDetail -->
+<h3 class="fn" id="setManeuverDetail"><a name="setManeuverDetail"></a><span class="type">void</span> QGeoRouteRequest::<span class="name">setManeuverDetail</span>(<span class="type"><a href="qgeorouterequest.html#ManeuverDetail-enum">QGeoRouteRequest::ManeuverDetail</a></span> <i>maneuverDetail</i>)</h3>
+<p>Sets the level of detail to use when representing routing maneuvers to <i>maneuverDetail</i>.</p>
+<p>The default value is <a href="qgeorouterequest.html#ManeuverDetail-enum">QGeoRouteRequest::BasicManeuvers</a>.</p>
+<p><b>See also </b><a href="qgeorouterequest.html#maneuverDetail">maneuverDetail</a>().</p>
+<!-- @@@setManeuverDetail -->
+<!-- $$$setNumberAlternativeRoutes[overload1]$$$setNumberAlternativeRoutesint -->
+<h3 class="fn" id="setNumberAlternativeRoutes"><a name="setNumberAlternativeRoutes"></a><span class="type">void</span> QGeoRouteRequest::<span class="name">setNumberAlternativeRoutes</span>(<span class="type">int</span> <i>alternatives</i>)</h3>
+<p>Sets the number of alternative routes to request to <i>alternatives</i>. If <i>alternatives</i> is negative the number of alternative routes is set to 0.</p>
+<p>The default value is 0.</p>
+<p><b>See also </b><a href="qgeorouterequest.html#numberAlternativeRoutes">numberAlternativeRoutes</a>().</p>
+<!-- @@@setNumberAlternativeRoutes -->
+<!-- $$$setRouteOptimization[overload1]$$$setRouteOptimizationQGeoRouteRequest::RouteOptimizations -->
+<h3 class="fn" id="setRouteOptimization"><a name="setRouteOptimization"></a><span class="type">void</span> QGeoRouteRequest::<span class="name">setRouteOptimization</span>(<span class="type"><a href="qgeorouterequest.html#RouteOptimization-enum">QGeoRouteRequest::RouteOptimizations</a></span> <i>optimization</i>)</h3>
+<p>Sets the optimization criteria to use while planning the route to <i>optimization</i>.</p>
+<p>The default value is <a href="qgeorouterequest.html#RouteOptimization-enum">QGeoRouteRequest::FastestRoute</a>.</p>
+<p><b>See also </b><a href="qgeorouterequest.html#routeOptimization">routeOptimization</a>().</p>
+<!-- @@@setRouteOptimization -->
+<!-- $$$setSegmentDetail[overload1]$$$setSegmentDetailQGeoRouteRequest::SegmentDetail -->
+<h3 class="fn" id="setSegmentDetail"><a name="setSegmentDetail"></a><span class="type">void</span> QGeoRouteRequest::<span class="name">setSegmentDetail</span>(<span class="type"><a href="qgeorouterequest.html#SegmentDetail-enum">QGeoRouteRequest::SegmentDetail</a></span> <i>segmentDetail</i>)</h3>
+<p>Sets the level of detail to use when representing routing segments to <i>segmentDetail</i>.</p>
+<p><b>See also </b><a href="qgeorouterequest.html#segmentDetail">segmentDetail</a>().</p>
+<!-- @@@setSegmentDetail -->
+<!-- $$$setTravelModes[overload1]$$$setTravelModesQGeoRouteRequest::TravelModes -->
+<h3 class="fn" id="setTravelModes"><a name="setTravelModes"></a><span class="type">void</span> QGeoRouteRequest::<span class="name">setTravelModes</span>(<span class="type"><a href="qgeorouterequest.html#TravelMode-enum">QGeoRouteRequest::TravelModes</a></span> <i>travelModes</i>)</h3>
+<p>Sets the travel modes which should be considered during the planning of the route to <i>travelModes</i>.</p>
+<p>The default value is <a href="qgeorouterequest.html#TravelMode-enum">QGeoRouteRequest::CarTravel</a>.</p>
+<p><b>See also </b><a href="qgeorouterequest.html#travelModes">travelModes</a>().</p>
+<!-- @@@setTravelModes -->
+<!-- $$$setWaypoints[overload1]$$$setWaypointsconstQList<QGeoCoordinate>& -->
+<h3 class="fn" id="setWaypoints"><a name="setWaypoints"></a><span class="type">void</span> QGeoRouteRequest::<span class="name">setWaypoints</span>(const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="../qtpositioning/qgeocoordinate.html">QGeoCoordinate</a></span>&gt; &amp;<i>waypoints</i>)</h3>
+<p>Sets <i>waypoints</i> as the waypoints that the route should pass through.</p>
+<p>The waypoints should be given in order from origin to destination.</p>
+<p>This request will be invalid until the waypoints have been set to a list containing two or more coordinates.</p>
+<p><b>See also </b><a href="qgeorouterequest.html#waypoints">waypoints</a>().</p>
+<!-- @@@setWaypoints -->
+<!-- $$$setWaypointsMetadata[overload1]$$$setWaypointsMetadataconstQList<QVariantMap>& -->
+<h3 class="fn" id="setWaypointsMetadata"><a name="setWaypointsMetadata"></a><span class="type">void</span> QGeoRouteRequest::<span class="name">setWaypointsMetadata</span>(const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="../qtcore/qvariant.html#QVariantMap-typedef">QVariantMap</a></span>&gt; &amp;<i>waypointMetadata</i>)</h3>
+<p>Sets <i>waypointMetadata</i> as the metadata for the waypoints set in this request. The metadata are intended as one <a href="../qtcore/qvariant.html#QVariantMap-typedef">QVariantMap</a> per waypoint, given in the same order as the waypoints.</p>
+<p>The content of the <a href="../qtcore/qvariant.html#QVariantMap-typedef">QVariantMap</a> is somehow backend-specific, but properties that can be specified using <a href="qml-qtlocation-waypoint.html">Waypoint</a> elements in QML can be assumed to be named and to work the same way across plugins, where supported.</p>
+<p><b>See also </b><a href="qgeorouterequest.html#waypointsMetadata">waypointsMetadata</a>().</p>
+<!-- @@@setWaypointsMetadata -->
+<!-- $$$travelModes[overload1]$$$travelModes -->
+<h3 class="fn" id="travelModes"><a name="travelModes"></a><span class="type"><a href="qgeorouterequest.html#TravelMode-enum">QGeoRouteRequest::TravelModes</a></span> QGeoRouteRequest::<span class="name">travelModes</span>() const</h3>
+<p>Returns the travel modes which this request specifies should be considered during the planning of the route.</p>
+<p><b>See also </b><a href="qgeorouterequest.html#setTravelModes">setTravelModes</a>().</p>
+<!-- @@@travelModes -->
+<!-- $$$waypoints[overload1]$$$waypoints -->
+<h3 class="fn" id="waypoints"><a name="waypoints"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="../qtpositioning/qgeocoordinate.html">QGeoCoordinate</a></span>&gt; QGeoRouteRequest::<span class="name">waypoints</span>() const</h3>
+<p>Returns the waypoints that the route will pass through.</p>
+<p><b>See also </b><a href="qgeorouterequest.html#setWaypoints">setWaypoints</a>().</p>
+<!-- @@@waypoints -->
+<!-- $$$waypointsMetadata[overload1]$$$waypointsMetadata -->
+<h3 class="fn" id="waypointsMetadata"><a name="waypointsMetadata"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="../qtcore/qvariant.html#QVariantMap-typedef">QVariantMap</a></span>&gt; QGeoRouteRequest::<span class="name">waypointsMetadata</span>() const</h3>
+<p>Returns the metadata for the waypoints in this request.</p>
+<p><b>See also </b><a href="qgeorouterequest.html#setWaypointsMetadata">setWaypointsMetadata</a>().</p>
+<!-- @@@waypointsMetadata -->
+<!-- $$$operator!=[overload1]$$$operator!=constQGeoRouteRequest& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> QGeoRouteRequest::<span class="name">operator!=</span>(const <span class="type"><a href="qgeorouterequest.html#QGeoRouteRequest">QGeoRouteRequest</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns whether this route request and <i>other</i> are equal.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQGeoRouteRequest& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> QGeoRouteRequest::<span class="name">operator==</span>(const <span class="type"><a href="qgeorouterequest.html#QGeoRouteRequest">QGeoRouteRequest</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns whether this route request and <i>other</i> are equal.</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

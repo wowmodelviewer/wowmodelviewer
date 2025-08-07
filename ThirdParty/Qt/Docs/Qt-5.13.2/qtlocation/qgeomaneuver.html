@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qgeomaneuver.cpp -->
+  <title>QGeoManeuver Class | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-module.html">C++ Classes</a></td><td >QGeoManeuver</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QGeoManeuver Class</h1>
+<!-- $$$QGeoManeuver-brief -->
+<p>The <a href="qgeomaneuver.html">QGeoManeuver</a> class represents the information relevant to the point at which two QGeoRouteSegments meet. <a href="#details">More...</a></p>
+<!-- @@@QGeoManeuver -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QGeoManeuver&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += location</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.6</td></tr></table></div><p>This class was introduced in  Qt 5.6.</p>
+<ul>
+<li><a href="qgeomaneuver-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qgeomaneuver.html#InstructionDirection-enum">InstructionDirection</a></b> { NoDirection, DirectionForward, DirectionBearRight, DirectionLightRight, ..., DirectionBearLeft }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeomaneuver.html#QGeoManeuver-1">QGeoManeuver</a></b>(const QGeoManeuver &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeomaneuver.html#QGeoManeuver">QGeoManeuver</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoManeuver &amp;</td><td class="memItemRight bottomAlign"><b><a href="qgeomaneuver.html#operator-eq">operator=</a></b>(const QGeoManeuver &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeomaneuver.html#dtor.QGeoManeuver">~QGeoManeuver</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoManeuver::InstructionDirection </td><td class="memItemRight bottomAlign"><b><a href="qgeomaneuver.html#direction">direction</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qgeomaneuver.html#distanceToNextInstruction">distanceToNextInstruction</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariantMap </td><td class="memItemRight bottomAlign"><b><a href="qgeomaneuver.html#extendedAttributes">extendedAttributes</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qgeomaneuver.html#instructionText">instructionText</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgeomaneuver.html#isValid">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoCoordinate </td><td class="memItemRight bottomAlign"><b><a href="qgeomaneuver.html#position">position</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeomaneuver.html#setDirection">setDirection</a></b>(QGeoManeuver::InstructionDirection <i>direction</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeomaneuver.html#setDistanceToNextInstruction">setDistanceToNextInstruction</a></b>(qreal <i>distance</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeomaneuver.html#setExtendedAttributes">setExtendedAttributes</a></b>(const QVariantMap &amp;<i>extendedAttributes</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeomaneuver.html#setInstructionText">setInstructionText</a></b>(const QString &amp;<i>instructionText</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeomaneuver.html#setPosition">setPosition</a></b>(const QGeoCoordinate &amp;<i>position</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeomaneuver.html#setTimeToNextInstruction">setTimeToNextInstruction</a></b>(int <i>secs</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeomaneuver.html#setWaypoint">setWaypoint</a></b>(const QGeoCoordinate &amp;<i>coordinate</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qgeomaneuver.html#timeToNextInstruction">timeToNextInstruction</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoCoordinate </td><td class="memItemRight bottomAlign"><b><a href="qgeomaneuver.html#waypoint">waypoint</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgeomaneuver.html#operator-not-eq">operator!=</a></b>(const QGeoManeuver &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgeomaneuver.html#operator-eq-eq">operator==</a></b>(const QGeoManeuver &amp;<i>other</i>) const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QGeoManeuver-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qgeoroutesegment.html">QGeoRouteSegment</a> instances can be thought of as edges on a routing graph, with <a href="qgeomaneuver.html">QGeoManeuver</a> instances as optional labels attached to the vertices of the graph.</p>
+<p>The most interesting information help in a <a href="qgeomaneuver.html">QGeoManeuver</a> instance is normally the textual navigation to provide and the position at which to provide it, accessible by <a href="qgeomaneuver.html#instructionText">instructionText</a>() and <a href="qgeomaneuver.html#position">position</a>() respectively.</p>
+<p>It is also possible to determine if a routing waypoint has been passed by checking if <a href="qgeomaneuver.html#waypoint">waypoint</a>() returns a valid <a href="../qtpositioning/qgeocoordinate.html">QGeoCoordinate</a>.</p>
+</div>
+<!-- @@@QGeoManeuver -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$InstructionDirection$$$NoDirection$$$DirectionForward$$$DirectionBearRight$$$DirectionLightRight$$$DirectionRight$$$DirectionHardRight$$$DirectionUTurnRight$$$DirectionUTurnLeft$$$DirectionHardLeft$$$DirectionLeft$$$DirectionLightLeft$$$DirectionBearLeft -->
+<h3 class="fn" id="InstructionDirection-enum"><a name="InstructionDirection-enum"></a>enum QGeoManeuver::<span class="name">InstructionDirection</span></h3>
+<p>Describes the change in direction associated with the instruction text that is associated with a QGeoManaeuver.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QGeoManeuver::NoDirection</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">There is no direction associated with the instruction text.</td></tr>
+<tr><td class="topAlign"><code>QGeoManeuver::DirectionForward</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The instruction indicates that the direction of travel does not need to change.</td></tr>
+<tr><td class="topAlign"><code>QGeoManeuver::DirectionBearRight</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The instruction indicates that the direction of travel should bear to the right.</td></tr>
+<tr><td class="topAlign"><code>QGeoManeuver::DirectionLightRight</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">The instruction indicates that a light turn to the right is required.</td></tr>
+<tr><td class="topAlign"><code>QGeoManeuver::DirectionRight</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">The instruction indicates that a turn to the right is required.</td></tr>
+<tr><td class="topAlign"><code>QGeoManeuver::DirectionHardRight</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">The instruction indicates that a hard turn to the right is required.</td></tr>
+<tr><td class="topAlign"><code>QGeoManeuver::DirectionUTurnRight</code></td><td class="topAlign tblval"><code>6</code></td><td class="topAlign">The instruction indicates that a u-turn to the right is required.</td></tr>
+<tr><td class="topAlign"><code>QGeoManeuver::DirectionUTurnLeft</code></td><td class="topAlign tblval"><code>7</code></td><td class="topAlign">The instruction indicates that a u-turn to the left is required.</td></tr>
+<tr><td class="topAlign"><code>QGeoManeuver::DirectionHardLeft</code></td><td class="topAlign tblval"><code>8</code></td><td class="topAlign">The instruction indicates that a hard turn to the left is required.</td></tr>
+<tr><td class="topAlign"><code>QGeoManeuver::DirectionLeft</code></td><td class="topAlign tblval"><code>9</code></td><td class="topAlign">The instruction indicates that a turn to the left is required.</td></tr>
+<tr><td class="topAlign"><code>QGeoManeuver::DirectionLightLeft</code></td><td class="topAlign tblval"><code>10</code></td><td class="topAlign">The instruction indicates that a light turn to the left is required.</td></tr>
+<tr><td class="topAlign"><code>QGeoManeuver::DirectionBearLeft</code></td><td class="topAlign tblval"><code>11</code></td><td class="topAlign">The instruction indicates that the direction of travel should bear to the left.</td></tr>
+</table></div>
+<!-- @@@InstructionDirection -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QGeoManeuver$$$QGeoManeuverconstQGeoManeuver& -->
+<h3 class="fn" id="QGeoManeuver-1"><a name="QGeoManeuver-1"></a>QGeoManeuver::<span class="name">QGeoManeuver</span>(const <span class="type"><a href="qgeomaneuver.html#QGeoManeuver">QGeoManeuver</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a maneuver object from the contents of <i>other</i>.</p>
+<!-- @@@QGeoManeuver -->
+<!-- $$$QGeoManeuver[overload1]$$$QGeoManeuver -->
+<h3 class="fn" id="QGeoManeuver"><a name="QGeoManeuver"></a>QGeoManeuver::<span class="name">QGeoManeuver</span>()</h3>
+<p>Constructs a invalid maneuver object.</p>
+<p>The maneuver will remain invalid until one of <a href="qgeomaneuver.html#setPosition">setPosition</a>(), <a href="qgeomaneuver.html#setInstructionText">setInstructionText</a>(), <a href="qgeomaneuver.html#setDirection">setDirection</a>(), <a href="qgeomaneuver.html#setTimeToNextInstruction">setTimeToNextInstruction</a>(), <a href="qgeomaneuver.html#setDistanceToNextInstruction">setDistanceToNextInstruction</a>() or <a href="qgeomaneuver.html#setWaypoint">setWaypoint</a>() is called.</p>
+<!-- @@@QGeoManeuver -->
+<!-- $$$operator=[overload1]$$$operator=constQGeoManeuver& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qgeomaneuver.html#QGeoManeuver">QGeoManeuver</a></span> &amp;QGeoManeuver::<span class="name">operator=</span>(const <span class="type"><a href="qgeomaneuver.html#QGeoManeuver">QGeoManeuver</a></span> &amp;<i>other</i>)</h3>
+<p>Assigns <i>other</i> to this maneuver object and then returns a reference to this maneuver object.</p>
+<!-- @@@operator= -->
+<!-- $$$~QGeoManeuver[overload1]$$$~QGeoManeuver -->
+<h3 class="fn" id="dtor.QGeoManeuver"><a name="dtor.QGeoManeuver"></a>QGeoManeuver::<span class="name">~QGeoManeuver</span>()</h3>
+<p>Destroys this maneuver object.</p>
+<!-- @@@~QGeoManeuver -->
+<!-- $$$direction[overload1]$$$direction -->
+<h3 class="fn" id="direction"><a name="direction"></a><span class="type"><a href="qgeomaneuver.html#InstructionDirection-enum">QGeoManeuver::InstructionDirection</a></span> QGeoManeuver::<span class="name">direction</span>() const</h3>
+<p>Returns the direction associated with the associated instruction.</p>
+<p><b>See also </b><a href="qgeomaneuver.html#setDirection">setDirection</a>().</p>
+<!-- @@@direction -->
+<!-- $$$distanceToNextInstruction[overload1]$$$distanceToNextInstruction -->
+<h3 class="fn" id="distanceToNextInstruction"><a name="distanceToNextInstruction"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QGeoManeuver::<span class="name">distanceToNextInstruction</span>() const</h3>
+<p>Returns the distance, in meters, between the point at which the associated instruction was issued and the point that the next instruction should be issued.</p>
+<p><b>See also </b><a href="qgeomaneuver.html#setDistanceToNextInstruction">setDistanceToNextInstruction</a>().</p>
+<!-- @@@distanceToNextInstruction -->
+<!-- $$$extendedAttributes[overload1]$$$extendedAttributes -->
+<h3 class="fn" id="extendedAttributes"><a name="extendedAttributes"></a><span class="type"><a href="../qtcore/qvariant.html#QVariantMap-typedef">QVariantMap</a></span> QGeoManeuver::<span class="name">extendedAttributes</span>() const</h3>
+<p>Returns the extended attributes associated with this maneuver.</p>
+<p>This function was introduced in  QtLocation 5.11.</p>
+<p><b>See also </b><a href="qgeomaneuver.html#setExtendedAttributes">setExtendedAttributes</a>().</p>
+<!-- @@@extendedAttributes -->
+<!-- $$$instructionText[overload1]$$$instructionText -->
+<h3 class="fn" id="instructionText"><a name="instructionText"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QGeoManeuver::<span class="name">instructionText</span>() const</h3>
+<p>Returns the textual navigation instructions.</p>
+<p><b>See also </b><a href="qgeomaneuver.html#setInstructionText">setInstructionText</a>().</p>
+<!-- @@@instructionText -->
+<!-- $$$isValid[overload1]$$$isValid -->
+<h3 class="fn" id="isValid"><a name="isValid"></a><span class="type">bool</span> QGeoManeuver::<span class="name">isValid</span>() const</h3>
+<p>Returns whether this maneuver is valid or not.</p>
+<p>Invalid maneuvers are used when there is no information that needs to be attached to the endpoint of a <a href="qgeoroutesegment.html">QGeoRouteSegment</a> instance.</p>
+<!-- @@@isValid -->
+<!-- $$$position[overload1]$$$position -->
+<h3 class="fn" id="position"><a name="position"></a><span class="type"><a href="../qtpositioning/qgeocoordinate.html">QGeoCoordinate</a></span> QGeoManeuver::<span class="name">position</span>() const</h3>
+<p>Returns the position where <a href="qgeomaneuver.html#instructionText">instructionText</a>() should be displayed.</p>
+<p><b>See also </b><a href="qgeomaneuver.html#setPosition">setPosition</a>().</p>
+<!-- @@@position -->
+<!-- $$$setDirection[overload1]$$$setDirectionQGeoManeuver::InstructionDirection -->
+<h3 class="fn" id="setDirection"><a name="setDirection"></a><span class="type">void</span> QGeoManeuver::<span class="name">setDirection</span>(<span class="type"><a href="qgeomaneuver.html#InstructionDirection-enum">QGeoManeuver::InstructionDirection</a></span> <i>direction</i>)</h3>
+<p>Sets the direction associated with the associated instruction to <i>direction</i>.</p>
+<p><b>See also </b><a href="qgeomaneuver.html#direction">direction</a>().</p>
+<!-- @@@setDirection -->
+<!-- $$$setDistanceToNextInstruction[overload1]$$$setDistanceToNextInstructionqreal -->
+<h3 class="fn" id="setDistanceToNextInstruction"><a name="setDistanceToNextInstruction"></a><span class="type">void</span> QGeoManeuver::<span class="name">setDistanceToNextInstruction</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>distance</i>)</h3>
+<p>Sets the distance, in meters, between the point at which the associated instruction was issued and the point that the next instruction should be issued to <i>distance</i>.</p>
+<p><b>See also </b><a href="qgeomaneuver.html#distanceToNextInstruction">distanceToNextInstruction</a>().</p>
+<!-- @@@setDistanceToNextInstruction -->
+<!-- $$$setExtendedAttributes[overload1]$$$setExtendedAttributesconstQVariantMap& -->
+<h3 class="fn" id="setExtendedAttributes"><a name="setExtendedAttributes"></a><span class="type">void</span> QGeoManeuver::<span class="name">setExtendedAttributes</span>(const <span class="type"><a href="../qtcore/qvariant.html#QVariantMap-typedef">QVariantMap</a></span> &amp;<i>extendedAttributes</i>)</h3>
+<p>Sets the extended attributes <i>extendedAttributes</i> associated with this maneuver.</p>
+<p>This function was introduced in  QtLocation 5.11.</p>
+<p><b>See also </b><a href="qgeomaneuver.html#extendedAttributes">extendedAttributes</a>().</p>
+<!-- @@@setExtendedAttributes -->
+<!-- $$$setInstructionText[overload1]$$$setInstructionTextconstQString& -->
+<h3 class="fn" id="setInstructionText"><a name="setInstructionText"></a><span class="type">void</span> QGeoManeuver::<span class="name">setInstructionText</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>instructionText</i>)</h3>
+<p>Sets the textual navigation instructions to <i>instructionText</i>.</p>
+<p><b>See also </b><a href="qgeomaneuver.html#instructionText">instructionText</a>().</p>
+<!-- @@@setInstructionText -->
+<!-- $$$setPosition[overload1]$$$setPositionconstQGeoCoordinate& -->
+<h3 class="fn" id="setPosition"><a name="setPosition"></a><span class="type">void</span> QGeoManeuver::<span class="name">setPosition</span>(const <span class="type"><a href="../qtpositioning/qgeocoordinate.html">QGeoCoordinate</a></span> &amp;<i>position</i>)</h3>
+<p>Sets the position where <a href="qgeomaneuver.html#instructionText">instructionText</a>() should be displayed to <i>position</i>.</p>
+<p><b>See also </b><a href="qgeomaneuver.html#position">position</a>().</p>
+<!-- @@@setPosition -->
+<!-- $$$setTimeToNextInstruction[overload1]$$$setTimeToNextInstructionint -->
+<h3 class="fn" id="setTimeToNextInstruction"><a name="setTimeToNextInstruction"></a><span class="type">void</span> QGeoManeuver::<span class="name">setTimeToNextInstruction</span>(<span class="type">int</span> <i>secs</i>)</h3>
+<p>Sets the estimated time it will take to travel from the point at which the associated instruction was issued and the point that the next instruction should be issued, in seconds, to <i>secs</i>.</p>
+<p><b>See also </b><a href="qgeomaneuver.html#timeToNextInstruction">timeToNextInstruction</a>().</p>
+<!-- @@@setTimeToNextInstruction -->
+<!-- $$$setWaypoint[overload1]$$$setWaypointconstQGeoCoordinate& -->
+<h3 class="fn" id="setWaypoint"><a name="setWaypoint"></a><span class="type">void</span> QGeoManeuver::<span class="name">setWaypoint</span>(const <span class="type"><a href="../qtpositioning/qgeocoordinate.html">QGeoCoordinate</a></span> &amp;<i>coordinate</i>)</h3>
+<p>Sets the waypoint associated with this maneuver to <i>coordinate</i>.</p>
+<p><b>See also </b><a href="qgeomaneuver.html#waypoint">waypoint</a>().</p>
+<!-- @@@setWaypoint -->
+<!-- $$$timeToNextInstruction[overload1]$$$timeToNextInstruction -->
+<h3 class="fn" id="timeToNextInstruction"><a name="timeToNextInstruction"></a><span class="type">int</span> QGeoManeuver::<span class="name">timeToNextInstruction</span>() const</h3>
+<p>Returns the estimated time it will take to travel from the point at which the associated instruction was issued and the point that the next instruction should be issued, in seconds.</p>
+<p><b>See also </b><a href="qgeomaneuver.html#setTimeToNextInstruction">setTimeToNextInstruction</a>().</p>
+<!-- @@@timeToNextInstruction -->
+<!-- $$$waypoint[overload1]$$$waypoint -->
+<h3 class="fn" id="waypoint"><a name="waypoint"></a><span class="type"><a href="../qtpositioning/qgeocoordinate.html">QGeoCoordinate</a></span> QGeoManeuver::<span class="name">waypoint</span>() const</h3>
+<p>Returns the waypoint associated with this maneuver.</p>
+<p>If there is not waypoint associated with this maneuver an invalid <a href="../qtpositioning/qgeocoordinate.html">QGeoCoordinate</a> will be returned.</p>
+<p><b>See also </b><a href="qgeomaneuver.html#setWaypoint">setWaypoint</a>().</p>
+<!-- @@@waypoint -->
+<!-- $$$operator!=[overload1]$$$operator!=constQGeoManeuver& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> QGeoManeuver::<span class="name">operator!=</span>(const <span class="type"><a href="qgeomaneuver.html#QGeoManeuver">QGeoManeuver</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns whether this maneuver is not equal to <i>other</i>.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQGeoManeuver& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> QGeoManeuver::<span class="name">operator==</span>(const <span class="type"><a href="qgeomaneuver.html#QGeoManeuver">QGeoManeuver</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns whether this maneuver is equal to <i>other</i>.</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

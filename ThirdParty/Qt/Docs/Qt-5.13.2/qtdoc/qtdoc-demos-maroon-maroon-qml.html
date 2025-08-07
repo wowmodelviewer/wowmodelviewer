@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- maroon.qdoc -->
+  <title>Qt Quick Demo - Maroon in Trouble | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Qt Quick Demo - Maroon in Trouble</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<h1 class="title">Qt Quick Demo - Maroon in Trouble</h1>
+<span class="subtitle"></span>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2017 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.0
+  import QtQuick.Particles 2.0
+  import &quot;content&quot;
+  import &quot;content/logic.js&quot; as Logic
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">root</span>
+      <span class="name">width</span>: <span class="number">320</span>
+      <span class="name">height</span>: <span class="number">480</span>
+      property <span class="type"><a href="../qtqml/qml-var.html">var</a></span> <span class="name">gameState</span>
+      property <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span> <span class="name">passedSplash</span>: <span class="number">false</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+          <span class="name">source</span>:<span class="string">&quot;content/gfx/background.png&quot;</span>
+          <span class="name">anchors</span>.bottom: <span class="name">view</span>.<span class="name">bottom</span>
+
+          <span class="type"><a href="../qtquick/qml-qtquick-particles-particlesystem.html">ParticleSystem</a></span> {
+              <span class="name">id</span>: <span class="name">particles</span>
+              <span class="name">anchors</span>.fill: <span class="name">parent</span>
+
+              <span class="type"><a href="../qtquick/qml-qtquick-particles-imageparticle.html">ImageParticle</a></span> {
+                  <span class="name">id</span>: <span class="name">bubble</span>
+                  <span class="name">anchors</span>.fill: <span class="name">parent</span>
+                  <span class="name">source</span>: <span class="string">&quot;content/gfx/catch.png&quot;</span>
+                  <span class="name">opacity</span>: <span class="number">0.25</span>
+              }
+
+              <span class="type"><a href="../qtquick/qml-qtquick-particles-wander.html">Wander</a></span> {
+                  <span class="name">xVariance</span>: <span class="number">25</span>;
+                  <span class="name">pace</span>: <span class="number">25</span>;
+              }
+
+              <span class="type"><a href="../qtquick/qml-qtquick-particles-emitter.html">Emitter</a></span> {
+                  <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+                  <span class="name">height</span>: <span class="number">150</span>
+                  <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+                  <span class="name">anchors</span>.bottomMargin: <span class="number">3</span>
+                  <span class="name">startTime</span>: <span class="number">15000</span>
+
+                  <span class="name">emitRate</span>: <span class="number">2</span>
+                  <span class="name">lifeSpan</span>: <span class="number">15000</span>
+
+                  <span class="name">acceleration</span>: <span class="name">PointDirection</span>{ <span class="name">y</span>: -<span class="number">6</span>; <span class="name">xVariation</span>: <span class="number">2</span>; <span class="name">yVariation</span>: <span class="number">2</span> }
+
+                  <span class="name">size</span>: <span class="number">24</span>
+                  <span class="name">sizeVariation</span>: <span class="number">16</span>
+              }
+          }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-column.html">Column</a></span> {
+          <span class="name">id</span>: <span class="name">view</span>
+          <span class="name">y</span>: -(<span class="name">height</span> <span class="operator">-</span> <span class="number">480</span>)
+          <span class="name">width</span>: <span class="number">320</span>
+
+          <span class="type">GameOverScreen</span> { <span class="name">gameCanvas</span>: <span class="name">canvas</span> }
+
+          <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+              <span class="name">id</span>: <span class="name">canvasArea</span>
+              <span class="name">width</span>: <span class="number">320</span>
+              <span class="name">height</span>: <span class="number">480</span>
+
+              <span class="type"><a href="../qtquick/qml-qtquick-row.html">Row</a></span> {
+                  <span class="name">height</span>: <span class="name">childrenRect</span>.<span class="name">height</span>
+                  <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+                      <span class="name">id</span>: <span class="name">wave</span>
+                      <span class="name">y</span>: <span class="number">30</span>
+                      <span class="name">source</span>:<span class="string">&quot;content/gfx/wave.png&quot;</span>
+                  }
+                  <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+                      <span class="name">y</span>: <span class="number">30</span>
+                      <span class="name">source</span>:<span class="string">&quot;content/gfx/wave.png&quot;</span>
+                  }
+                  NumberAnimation on <span class="name">x</span> { <span class="name">from</span>: <span class="number">0</span>; <span class="name">to</span>: -(<span class="name">wave</span>.<span class="name">width</span>); <span class="name">duration</span>: <span class="number">16000</span>; <span class="name">loops</span>: <span class="name">Animation</span>.<span class="name">Infinite</span> }
+                  SequentialAnimation on <span class="name">y</span> {
+                      <span class="name">loops</span>: <span class="name">Animation</span>.<span class="name">Infinite</span>
+                      <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">from</span>: <span class="name">y</span> <span class="operator">-</span> <span class="number">2</span>; <span class="name">to</span>: <span class="name">y</span> <span class="operator">+</span> <span class="number">2</span>; <span class="name">duration</span>: <span class="number">1600</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutQuad</span> }
+                      <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">from</span>: <span class="name">y</span> <span class="operator">+</span> <span class="number">2</span>; <span class="name">to</span>: <span class="name">y</span> <span class="operator">-</span> <span class="number">2</span>; <span class="name">duration</span>: <span class="number">1600</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutQuad</span> }
+                  }
+              }
+
+              <span class="type"><a href="../qtquick/qml-qtquick-row.html">Row</a></span> {
+                  <span class="name">opacity</span>: <span class="number">0.5</span>
+                  <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+                      <span class="name">id</span>: <span class="name">wave2</span>
+                      <span class="name">y</span>: <span class="number">25</span>
+                      <span class="name">source</span>: <span class="string">&quot;content/gfx/wave.png&quot;</span>
+                  }
+                  <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+                      <span class="name">y</span>: <span class="number">25</span>
+                      <span class="name">source</span>: <span class="string">&quot;content/gfx/wave.png&quot;</span>
+                  }
+                  NumberAnimation on <span class="name">x</span> { <span class="name">from</span>: -(<span class="name">wave2</span>.<span class="name">width</span>); <span class="name">to</span>: <span class="number">0</span>; <span class="name">duration</span>: <span class="number">32000</span>; <span class="name">loops</span>: <span class="name">Animation</span>.<span class="name">Infinite</span> }
+                  SequentialAnimation on <span class="name">y</span> {
+                      <span class="name">loops</span>: <span class="name">Animation</span>.<span class="name">Infinite</span>
+                      <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">from</span>: <span class="name">y</span> <span class="operator">+</span> <span class="number">2</span>; <span class="name">to</span>: <span class="name">y</span> <span class="operator">-</span> <span class="number">2</span>; <span class="name">duration</span>: <span class="number">1600</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutQuad</span> }
+                      <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">from</span>: <span class="name">y</span> <span class="operator">-</span> <span class="number">2</span>; <span class="name">to</span>: <span class="name">y</span> <span class="operator">+</span> <span class="number">2</span>; <span class="name">duration</span>: <span class="number">1600</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutQuad</span> }
+                  }
+              }
+
+              <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+                  <span class="name">source</span>: <span class="string">&quot;content/gfx/sunlight.png&quot;</span>
+                  <span class="name">opacity</span>: <span class="number">0.02</span>
+                  <span class="name">y</span>: <span class="number">0</span>
+                  <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+                  <span class="name">transformOrigin</span>: <span class="name">Item</span>.<span class="name">Top</span>
+                  SequentialAnimation on <span class="name">rotation</span> {
+                      <span class="name">loops</span>: <span class="name">Animation</span>.<span class="name">Infinite</span>
+                      <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">from</span>: -<span class="number">10</span>; <span class="name">to</span>: <span class="number">10</span>; <span class="name">duration</span>: <span class="number">8000</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutSine</span> }
+                      <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">from</span>: <span class="number">10</span>; <span class="name">to</span>: -<span class="number">10</span>; <span class="name">duration</span>: <span class="number">8000</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutSine</span> }
+                  }
+              }
+
+              <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+                  <span class="name">source</span>: <span class="string">&quot;content/gfx/sunlight.png&quot;</span>
+                  <span class="name">opacity</span>: <span class="number">0.04</span>
+                  <span class="name">y</span>: <span class="number">20</span>
+                  <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+                  <span class="name">transformOrigin</span>: <span class="name">Item</span>.<span class="name">Top</span>
+                  SequentialAnimation on <span class="name">rotation</span> {
+                      <span class="name">loops</span>: <span class="name">Animation</span>.<span class="name">Infinite</span>
+                      <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">from</span>: <span class="number">10</span>; <span class="name">to</span>: -<span class="number">10</span>; <span class="name">duration</span>: <span class="number">8000</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutSine</span> }
+                      <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">from</span>: -<span class="number">10</span>; <span class="name">to</span>: <span class="number">10</span>; <span class="name">duration</span>: <span class="number">8000</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutSine</span> }
+                  }
+              }
+
+              <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+                  <span class="name">source</span>: <span class="string">&quot;content/gfx/grid.png&quot;</span>
+                  <span class="name">opacity</span>: <span class="number">0.5</span>
+              }
+
+              <span class="type">GameCanvas</span> {
+                  <span class="name">id</span>: <span class="name">canvas</span>
+                  <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+                  <span class="name">anchors</span>.bottomMargin: <span class="number">20</span>
+                  <span class="name">x</span>: <span class="number">32</span>
+                  <span class="name">focus</span>: <span class="number">true</span>
+              }
+
+              <span class="type">InfoBar</span> { <span class="name">anchors</span>.bottom: <span class="name">canvas</span>.<span class="name">top</span>; <span class="name">anchors</span>.bottomMargin: <span class="number">6</span>; <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span> }
+
+              <span class="comment">//3..2..1..go</span>
+              <span class="type"><a href="../qtqml/qml-qtqml-timer.html">Timer</a></span> {
+                  <span class="name">id</span>: <span class="name">countdownTimer</span>
+                  <span class="name">interval</span>: <span class="number">1000</span>
+                  <span class="name">running</span>: <span class="name">root</span>.<span class="name">countdown</span> <span class="operator">&lt;</span> <span class="number">5</span>
+                  <span class="name">repeat</span>: <span class="number">true</span>
+                  <span class="name">onTriggered</span>: root.countdown++
+              }
+              <span class="type"><a href="../qtquick/qml-qtquick-repeater.html">Repeater</a></span> {
+                  <span class="name">model</span>: [<span class="string">&quot;content/gfx/text-blank.png&quot;</span>, <span class="string">&quot;content/gfx/text-3.png&quot;</span>, <span class="string">&quot;content/gfx/text-2.png&quot;</span>, <span class="string">&quot;content/gfx/text-1.png&quot;</span>, <span class="string">&quot;content/gfx/text-go.png&quot;</span>]
+                  <span class="name">delegate</span>: <span class="name">Image</span> {
+                      <span class="name">visible</span>: <span class="name">root</span>.<span class="name">countdown</span> <span class="operator">&lt;=</span> <span class="name">index</span>
+                      <span class="name">opacity</span>: <span class="name">root</span>.<span class="name">countdown</span> <span class="operator">==</span> <span class="name">index</span> ? <span class="number">0.5</span> : <span class="number">0.1</span>
+                      <span class="name">scale</span>: <span class="name">root</span>.<span class="name">countdown</span> <span class="operator">&gt;=</span> <span class="name">index</span> ? <span class="number">1.0</span> : <span class="number">0.0</span>
+                      <span class="name">source</span>: <span class="name">modelData</span>
+                      Behavior on <span class="name">opacity</span> { <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> {} }
+                      Behavior on <span class="name">scale</span> { <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> {} }
+                  }
+              }
+          }
+
+          <span class="type">NewGameScreen</span> {
+              <span class="name">onStartButtonClicked</span>: <span class="name">root</span>.<span class="name">passedSplash</span> <span class="operator">=</span> <span class="number">true</span>
+          }
+      }
+
+      property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">countdown</span>: <span class="number">10</span>
+      <span class="type"><a href="../qtqml/qml-qtqml-timer.html">Timer</a></span> {
+          <span class="name">id</span>: <span class="name">gameStarter</span>
+          <span class="name">interval</span>: <span class="number">4000</span>
+          <span class="name">running</span>: <span class="number">false</span>
+          <span class="name">repeat</span>: <span class="number">false</span>
+          <span class="name">onTriggered</span>: <span class="name">Logic</span>.<span class="name">startGame</span>(<span class="name">canvas</span>);
+      }
+
+      <span class="name">states</span>: [
+          <span class="type"><a href="../qtqml/qml-qtqml-statemachine-state.html">State</a></span> {
+              <span class="name">name</span>: <span class="string">&quot;gameOn&quot;</span>; <span class="name">when</span>: <span class="name">gameState</span>.<span class="name">gameOver</span> <span class="operator">==</span> <span class="number">false</span> <span class="operator">&amp;&amp;</span> <span class="name">passedSplash</span>
+              <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> { <span class="name">target</span>: <span class="name">view</span>; <span class="name">y</span>: -(<span class="name">height</span> <span class="operator">-</span> <span class="number">960</span>) }
+              <span class="type"><a href="../qtquick/qml-qtquick-statechangescript.html">StateChangeScript</a></span> { <span class="name">script</span>: <span class="name">root</span>.<span class="name">countdown</span> <span class="operator">=</span> <span class="number">0</span>; }
+              <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> { <span class="name">target</span>: <span class="name">gameStarter</span>; <span class="name">running</span>: <span class="number">true</span> }
+          },
+          <span class="type"><a href="../qtqml/qml-qtqml-statemachine-state.html">State</a></span> {
+              <span class="name">name</span>: <span class="string">&quot;gameOver&quot;</span>; <span class="name">when</span>: <span class="name">gameState</span>.<span class="name">gameOver</span> <span class="operator">==</span> <span class="number">true</span>
+              <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> { <span class="name">target</span>: <span class="name">view</span>; <span class="name">y</span>: <span class="number">0</span> }
+          }
+      ]
+
+      <span class="name">transitions</span>: <span class="name">Transition</span> {
+          <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">properties</span>: <span class="string">&quot;x,y&quot;</span>; <span class="name">duration</span>: <span class="number">1200</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">OutQuad</span> }
+      }
+
+      <span class="name">Component</span>.onCompleted: <span class="name">gameState</span> <span class="operator">=</span> <span class="name">Logic</span>.<span class="name">newGameState</span>(<span class="name">canvas</span>);
+  }
+
+</pre>

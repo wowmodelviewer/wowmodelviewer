@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- supported-platforms.qdoc -->
+  <title>Supported Platforms | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Supported Platforms</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#desktop-platforms">Desktop Platforms</a></li>
+<li class="level2"><a href="#linux-x11"><a href="linux.html">Linux/X11</a></a></li>
+<li class="level2"><a href="#macos"><a href="macos.html">macOS</a></a></li>
+<li class="level2"><a href="#windows"><a href="windows.html">Windows</a></a></li>
+<li class="level1"><a href="#mobile-platforms">Mobile Platforms</a></li>
+<li class="level2"><a href="#android"><a href="android.html">Android</a></a></li>
+<li class="level2"><a href="#ios-tvos-watchos"><a href="ios.html">iOS/tvOS/watchOS</a></a></li>
+<li class="level2"><a href="#universal-windows-platform-uwp"><a href="winrt-support.html">Universal Windows Platform (UWP)</a></a></li>
+<li class="level1"><a href="#embedded-platforms">Embedded Platforms</a></li>
+<li class="level1"><a href="#reference-configurations">Reference Configurations</a></li>
+<li class="level1"><a href="#availability-of-packages">Availability of Packages</a></li>
+<li class="level2"><a href="#exceptions">Exceptions</a></li>
+<li class="level1"><a href="#deployment-of-qt-applications">Deployment of Qt Applications</a></li>
+<li class="level1"><a href="#general-legal-disclaimer">General Legal Disclaimer</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Supported Platforms</h1>
+<span class="subtitle"></span>
+<!-- $$$supported-platforms.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Qt is a commercial and open source licensed cross-platform application and UI framework. It is developed by The Qt Company, together with the Qt Project Community under an open source governance model.</p>
+<p>Using Qt, you can write GUI applications once and deploy them across desktop, mobile and embedded operating systems without rewriting the source code.</p>
+<p>Qt is supported on a variety of 32-bit and 64-bit platforms, and can usually be built on each platform with GCC, a vendor-supplied compiler, or a third party compiler as indicated in the overview below.</p>
+<p>Open GL (ES) 2.0, DirectX 9 or 11 (with ANGLE), or an <a href="http://doc.qt.io/QtQuick2DRenderer">alternative renderer</a> is required for <a href="../qtquick/qtquick-index.html">Qt Quick</a> 2. <a href="../qtwidgets/qtwidgets-index.html">Widgets</a> can be used without hardware acceleration.</p>
+<p>In Qt 5 all platforms are created using the <a href="qpa.html">Qt Platform Abstraction</a> (QPA), which makes it easy to port Qt into a new operating system.</p>
+<p>The following platforms are supported in Qt 5.13. For support information for prior Qt releases, please consult the relevant version in the <a href="http://doc.qt.io/archives/">Qt Documentation Archives</a>.</p>
+<p>Configurations in <b>bold</b> are <a href="supported-platforms.html#reference-configurations">Reference Configurations</a>.</p>
+<p><b>Note: </b>Support for specific configurations or operating system versions may end before the support for Qt 5.13 does. A subsequent patch release of Qt 5.13 may drop support for a configuration as a <i>reference configuration</i> or replace it with a currently-supported version.</p><a name="desktop-platforms"></a>
+<h2 id="desktop-platforms">Desktop Platforms</h2>
+<a name="linux-x11"></a>
+<h3 id="linux-x11"><a href="linux.html">Linux/X11</a></h3>
+<div class="table"><table class="generic" width="80%">
+ <thead><tr class="qt-style"><th >Distribution</th><th >Architecture</th><th >Compiler</th><th >Notes</th></tr></thead>
+<tr valign="top" class="odd"><td >openSUSE 15.x</td><td ><code>x86_64</code></td><td ><b>GCC 7</b>, <b>ICC</b></td><td ></td></tr>
+<tr valign="top" class="even"><td >Red Hat Enterprise Linux 7.x</td><td ><code>x86_64</code></td><td ><b>GCC 5.3&#x2e;1</b></td><td >devtoolset-4</td></tr>
+<tr valign="top" class="odd"><td >Ubuntu 18.04</td><td ><code>x86_64</code></td><td >GCC as provided by Canonical, <b>GCC 7.3&#x2e;0</b></td><td ></td></tr>
+<tr valign="top" class="even"><td >Ubuntu 16.04</td><td ><code>x86_64</code></td><td >GCC as provided by Canonical, GCC 5.4&#x2e;0</td><td ></td></tr>
+<tr valign="top" class="odd"><td >Generic Linux</td><td ><code>x86</code> and <code>x86_64</code></td><td >GCC 4.8, GCC 4.9, GCC 5, GCC 6, GCC 7</td><td ></td></tr>
+</table></div>
+<a name="macos"></a>
+<h3 id="macos"><a href="macos.html">macOS</a></h3>
+<div class="table"><table class="generic" width="80%">
+ <thead><tr class="qt-style"><th >Target Platform</th><th >Architecture</th><th >Build Environment</th></tr></thead>
+<tr valign="top" class="odd"><td >macOS 10.12, 10.13, <b>10.14</b></td><td ><code>x86_64</code> and <code>x86_64h</code></td><td ><b>Xcode 10</b> (10.14 SDK), Xcode 9<sup>*</sup> (10.13 SDK)</td></tr>
+</table></div>
+<p><br />
+<b>Note:</b> Xcode 9 is only supported for application development (to be able to opt out of features such as layer-backing and dark mode), not for development of Qt itself.</p>
+<a name="windows"></a>
+<h3 id="windows"><a href="windows.html">Windows</a></h3>
+<div class="table"><table class="generic" width="80%">
+ <thead><tr class="qt-style"><th >Operating System</th><th >Architecture</th><th >Compiler</th><th >Notes</th></tr></thead>
+<tr valign="top" class="odd"><td >Windows 10</td><td ><code>x86</code> and <code>x86_64</code></td><td ><b>MSVC 2017</b>, <b>MSVC 2015</b>, <b><a href="https://mingw-w64.org/">MinGW</a> 7.3</b></td><td >Tested on <i>Windows 10 (1809) October 2018 Update</i></td></tr>
+<tr valign="top" class="even"><td >Windows 8.1</td><td ><code>x86</code> and <code>x86_64</code></td><td >MSVC 2017, MSVC 2015, <a href="https://mingw-w64.org/">MinGW</a> 7.3</td><td ></td></tr>
+<tr valign="top" class="odd"><td >Windows 7</td><td ><code>x86</code> and <code>x86_64</code></td><td >MSVC 2017, MSVC 2015, <b><a href="https://mingw-w64.org/">MinGW</a> 7.3</b></td><td ><a href="https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/7.3.0/threads-posix/dwarf/i686-7.3.0-release-posix-dwarf-rt_v5-rev0.7z/download">MinGW-builds GCC 7.3&#x2e;0 (x86)</a></td></tr>
+</table></div>
+<a name="mobile-platforms"></a>
+<h2 id="mobile-platforms">Mobile Platforms</h2>
+<a name="android"></a>
+<h3 id="android"><a href="android.html">Android</a></h3>
+<div class="table"><table class="generic" width="80%">
+ <thead><tr class="qt-style"><th >Platform Version</th><th >Architecture</th><th >Compiler</th><th >Build Environment</th></tr></thead>
+<tr valign="top" class="odd"><td >Android 5.0 or later (that is, API Level 21 and up)</td><td ><code>armv7a</code> and <code>x86</code>, <code>arm64-v8</code> and <code>x86_64</code></td><td ><b>Clang as provided by Google</b>, <b><a href="https://mingw-w64.org/">MinGW</a> 7.3</b></td><td ><b>RHEL 7.x (x86_64)</b>, <b>macOS 10.13</b>, <b>Windows 7 (x86_64)</b>, <b>Windows 10</b></td></tr>
+</table></div>
+<a name="ios-tvos-watchos"></a>
+<h3 id="ios-tvos-watchos"><a href="ios.html">iOS/tvOS/watchOS</a></h3>
+<div class="table"><table class="generic" width="80%">
+ <thead><tr class="qt-style"><th >Target Platform</th><th >Architecture</th><th >Build Environment</th><th >Notes</th></tr></thead>
+<tr valign="top" class="odd"><td >iOS 11, <b>iOS 12</b></td><td ><code>armv8</code> (<code>arm64</code>)</td><td ><b>Xcode 10</b> (iOS 12 SDK)</td><td ></td></tr>
+<tr valign="top" class="even"><td >tvOS 11, <b>tvOS 12</b></td><td ><code>armv8</code> (<code>arm64</code>)</td><td ><b>Xcode 10</b> (tvOS 12 SDK)</td><td >Technology Preview</td></tr>
+<tr valign="top" class="odd"><td >watchOS 4, <b>watchOS 5</b></td><td ><code>armv7k</code></td><td ><b>Xcode 10</b> (watchOS 5 SDK)</td><td >Technology Preview. No UI.</td></tr>
+</table></div>
+<a name="universal-windows-platform-uwp"></a>
+<h3 id="universal-windows-platform-uwp"><a href="winrt-support.html">Universal Windows Platform (UWP)</a></h3>
+<div class="table"><table class="generic" width="80%">
+ <thead><tr class="qt-style"><th >Platform Version</th><th >Architecture</th><th >Compiler</th><th >Build Environment</th></tr></thead>
+<tr valign="top" class="odd"><td >Universal Windows Platform 10</td><td ><code>x86</code>, <code>x86_64</code>, and <code>armv7</code></td><td ><b>MSVC 2017</b>, <b>MSVC 2015</b></td><td ><b>Windows 10</b> (1809) October 2018 Update</td></tr>
+</table></div>
+<p><br />
+Universal Windows Platforms include Windows 10, Windows 10 IoT devices, Xbox One, and HoloLens.</p>
+<a name="embedded-platforms"></a>
+<h2 id="embedded-platforms">Embedded Platforms</h2>
+<p>For embedded platform support, including <a href="embedded-linux.html">Embedded Linux</a>, <a href="integrity.html">INTEGRITY</a>, <a href="qnx.html">QNX</a>, and <a href="vxworks.html">VxWorks</a>, please consult the <a href="http://doc.qt.io/QtForDeviceCreation">Qt for Device Creation</a> documentation.</p>
+<a name="reference-configurations"></a>
+<h2 id="reference-configurations">Reference Configurations</h2>
+<p>The reference configurations are run on the continuous integration (CI) system within Qt Project. In addition, they are subjected to unit test suite and other internal testing tools on a frequent basis (prior to new version releases, source tree branching, and at other significant period points in the development process). Errors or bugs discovered in these platforms are prioritized for correction. Significant errors discovered in tested configurations can impact release dates.</p>
+<p>Any configurations not listed above are not actively tested by the Qt Project. However, Qt may run on configurations other than those actively tested on, and additional configurations may be raised to tested state, if sufficient effort is made to bring continuous integration to an acceptable state for that particular configuration.</p>
+<p>The Qt Company, Qt partners, open source projects and community users are able to provide assistance with various different supported platforms and configurations.</p>
+<a name="availability-of-packages"></a>
+<h2 id="availability-of-packages">Availability of Packages</h2>
+<p>You can download the Qt 5 installers and source packages from the <a href="http://qt.io/download">Downloads</a> page. For more information, visit the <a href="gettingstarted.html">Getting Started with Qt</a> page.</p>
+<p><b>Note: </b>All the supported configurations are not provided as binary packages in the Qt installer. However, the intention is to provide the most widely-used reference configurations for the developer's convenience.</p><a name="exceptions"></a>
+<h3 id="exceptions">Exceptions</h3>
+<p>Individual modules might be available only on some platforms, or they might not support all configurations. For example, as Qt WebEngine has Chromium as a third-party dependency, platform or configuration limitations upstream also apply to Qt WebEngine.</p>
+<p>The documentation for each module contains detailed information about any exceptions the module has from the general platform and configuration support as described on this page.</p>
+<a name="deployment-of-qt-applications"></a>
+<h2 id="deployment-of-qt-applications">Deployment of Qt Applications</h2>
+<p>The deployment procedure for each platform is different and they are covered in greater detail in their platform pages. Meanwhile, there is a deployment article for summarizing the deployment procedure in general.</p>
+<ul>
+<li><a href="deployment.html">Deploying Qt Applications</a><ul>
+<li><a href="android-platform-notes.html#deployment">Android</a></li>
+<li><a href="ios.html">iOS</a></li>
+<li><a href="linux-deployment.html">Linux/X11</a></li>
+<li><a href="macos-deployment.html">macOS</a></li>
+<li><a href="windows-deployment.html">Windows</a></li>
+</ul>
+</li>
+</ul>
+<a name="general-legal-disclaimer"></a>
+<h2 id="general-legal-disclaimer">General Legal Disclaimer</h2>
+<p>Please note that Qt is offered on an &quot;as is&quot; basis without warranty of any kind and that our products are not error or bug free. To the maximum extent permitted by applicable law, The Qt Company on behalf of itself and its suppliers, disclaims all warranties and conditions, either express or implied, including, but not limited to, implied warranties of merchantability, fitness for a particular purpose, title and non-infringement with regard to the Licensed Software.</p>
+</div>
+<!-- @@@supported-platforms.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

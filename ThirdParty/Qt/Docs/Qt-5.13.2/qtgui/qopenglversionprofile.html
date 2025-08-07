@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qopenglcontext.cpp -->
+  <title>QOpenGLVersionProfile Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QOpenGLVersionProfile</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QOpenGLVersionProfile Class</h1>
+<!-- $$$QOpenGLVersionProfile-brief -->
+<p>The <a href="qopenglversionprofile.html">QOpenGLVersionProfile</a> class represents the version and if applicable the profile of an OpenGL context. <a href="#details">More...</a></p>
+<!-- @@@QOpenGLVersionProfile -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QOpenGLVersionProfile&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.1</td></tr></table></div><p>This class was introduced in  Qt 5.1.</p>
+<ul>
+<li><a href="qopenglversionprofile-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qopenglversionprofile.html#QOpenGLVersionProfile-2">QOpenGLVersionProfile</a></b>(const QOpenGLVersionProfile &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qopenglversionprofile.html#QOpenGLVersionProfile-1">QOpenGLVersionProfile</a></b>(const QSurfaceFormat &amp;<i>format</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qopenglversionprofile.html#QOpenGLVersionProfile">QOpenGLVersionProfile</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QOpenGLVersionProfile &amp;</td><td class="memItemRight bottomAlign"><b><a href="qopenglversionprofile.html#operator-eq">operator=</a></b>(const QOpenGLVersionProfile &amp;<i>rhs</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qopenglversionprofile.html#dtor.QOpenGLVersionProfile">~QOpenGLVersionProfile</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qopenglversionprofile.html#hasProfiles">hasProfiles</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qopenglversionprofile.html#isLegacyVersion">isLegacyVersion</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qopenglversionprofile.html#isValid">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSurfaceFormat::OpenGLContextProfile </td><td class="memItemRight bottomAlign"><b><a href="qopenglversionprofile.html#profile">profile</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopenglversionprofile.html#setProfile">setProfile</a></b>(QSurfaceFormat::OpenGLContextProfile <i>profile</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopenglversionprofile.html#setVersion">setVersion</a></b>(int <i>majorVersion</i>, int <i>minorVersion</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPair&lt;int, int&gt; </td><td class="memItemRight bottomAlign"><b><a href="qopenglversionprofile.html#version">version</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QOpenGLVersionProfile-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>An object of this class can be passed to <a href="qopenglcontext.html#versionFunctions-1">QOpenGLContext::versionFunctions</a>() to request a functions object for a specific version and profile of OpenGL.</p>
+<p>It also contains some helper functions to check if a version supports profiles or is a legacy version.</p>
+</div>
+<!-- @@@QOpenGLVersionProfile -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QOpenGLVersionProfile$$$QOpenGLVersionProfileconstQOpenGLVersionProfile& -->
+<h3 class="fn" id="QOpenGLVersionProfile-2"><a name="QOpenGLVersionProfile-2"></a>QOpenGLVersionProfile::<span class="name">QOpenGLVersionProfile</span>(const <span class="type"><a href="qopenglversionprofile.html#QOpenGLVersionProfile">QOpenGLVersionProfile</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a copy of <i>other</i>.</p>
+<!-- @@@QOpenGLVersionProfile -->
+<!-- $$$QOpenGLVersionProfile$$$QOpenGLVersionProfileconstQSurfaceFormat& -->
+<h3 class="fn" id="QOpenGLVersionProfile-1"><a name="QOpenGLVersionProfile-1"></a>QOpenGLVersionProfile::<span class="name">QOpenGLVersionProfile</span>(const <span class="type"><a href="qsurfaceformat.html">QSurfaceFormat</a></span> &amp;<i>format</i>)</h3>
+<p>Creates a <a href="qopenglversionprofile.html">QOpenGLVersionProfile</a> object initialised with the version and profile from <i>format</i>.</p>
+<!-- @@@QOpenGLVersionProfile -->
+<!-- $$$QOpenGLVersionProfile[overload1]$$$QOpenGLVersionProfile -->
+<h3 class="fn" id="QOpenGLVersionProfile"><a name="QOpenGLVersionProfile"></a>QOpenGLVersionProfile::<span class="name">QOpenGLVersionProfile</span>()</h3>
+<p>Creates a default invalid <a href="qopenglversionprofile.html">QOpenGLVersionProfile</a> object.</p>
+<!-- @@@QOpenGLVersionProfile -->
+<!-- $$$operator=[overload1]$$$operator=constQOpenGLVersionProfile& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qopenglversionprofile.html#QOpenGLVersionProfile">QOpenGLVersionProfile</a></span> &amp;QOpenGLVersionProfile::<span class="name">operator=</span>(const <span class="type"><a href="qopenglversionprofile.html#QOpenGLVersionProfile">QOpenGLVersionProfile</a></span> &amp;<i>rhs</i>)</h3>
+<p>Assigns the version and profile of <i>rhs</i> to this <a href="qopenglversionprofile.html">QOpenGLVersionProfile</a> object.</p>
+<!-- @@@operator= -->
+<!-- $$$~QOpenGLVersionProfile[overload1]$$$~QOpenGLVersionProfile -->
+<h3 class="fn" id="dtor.QOpenGLVersionProfile"><a name="dtor.QOpenGLVersionProfile"></a>QOpenGLVersionProfile::<span class="name">~QOpenGLVersionProfile</span>()</h3>
+<p>Destroys the <a href="qopenglversionprofile.html">QOpenGLVersionProfile</a> object.</p>
+<!-- @@@~QOpenGLVersionProfile -->
+<!-- $$$hasProfiles[overload1]$$$hasProfiles -->
+<h3 class="fn" id="hasProfiles"><a name="hasProfiles"></a><span class="type">bool</span> QOpenGLVersionProfile::<span class="name">hasProfiles</span>() const</h3>
+<p>Returns <code>true</code> if profiles are supported by the OpenGL version returned by <a href="qopenglversionprofile.html#version">version</a>(). Only OpenGL versions &gt;= 3.2 support profiles.</p>
+<p><b>See also </b><a href="qopenglversionprofile.html#profile">profile</a>() and <a href="qopenglversionprofile.html#version">version</a>().</p>
+<!-- @@@hasProfiles -->
+<!-- $$$isLegacyVersion[overload1]$$$isLegacyVersion -->
+<h3 class="fn" id="isLegacyVersion"><a name="isLegacyVersion"></a><span class="type">bool</span> QOpenGLVersionProfile::<span class="name">isLegacyVersion</span>() const</h3>
+<p>Returns <code>true</code> is the OpenGL version returned by <a href="qopenglversionprofile.html#version">version</a>() contains deprecated functions and does not support profiles i.e&#x2e; if the OpenGL version is &lt;= 3.1&#x2e;</p>
+<!-- @@@isLegacyVersion -->
+<!-- $$$isValid[overload1]$$$isValid -->
+<h3 class="fn" id="isValid"><a name="isValid"></a><span class="type">bool</span> QOpenGLVersionProfile::<span class="name">isValid</span>() const</h3>
+<p>Returns <code>true</code> if the version number is valid. Note that for a default constructed <a href="qopenglversionprofile.html">QOpenGLVersionProfile</a> object this function will return <code>false</code>.</p>
+<p><b>See also </b><a href="qopenglversionprofile.html#setVersion">setVersion</a>() and <a href="qopenglversionprofile.html#version">version</a>().</p>
+<!-- @@@isValid -->
+<!-- $$$profile[overload1]$$$profile -->
+<h3 class="fn" id="profile"><a name="profile"></a><span class="type"><a href="qsurfaceformat.html#OpenGLContextProfile-enum">QSurfaceFormat::OpenGLContextProfile</a></span> QOpenGLVersionProfile::<span class="name">profile</span>() const</h3>
+<p>Returns the OpenGL profile. Only makes sense if profiles are supported by this version.</p>
+<p><b>See also </b><a href="qopenglversionprofile.html#setProfile">setProfile</a>().</p>
+<!-- @@@profile -->
+<!-- $$$setProfile[overload1]$$$setProfileQSurfaceFormat::OpenGLContextProfile -->
+<h3 class="fn" id="setProfile"><a name="setProfile"></a><span class="type">void</span> QOpenGLVersionProfile::<span class="name">setProfile</span>(<span class="type"><a href="qsurfaceformat.html#OpenGLContextProfile-enum">QSurfaceFormat::OpenGLContextProfile</a></span> <i>profile</i>)</h3>
+<p>Sets the OpenGL profile <i>profile</i>. Only makes sense if profiles are supported by this version.</p>
+<p><b>See also </b><a href="qopenglversionprofile.html#profile">profile</a>().</p>
+<!-- @@@setProfile -->
+<!-- $$$setVersion[overload1]$$$setVersionintint -->
+<h3 class="fn" id="setVersion"><a name="setVersion"></a><span class="type">void</span> QOpenGLVersionProfile::<span class="name">setVersion</span>(<span class="type">int</span> <i>majorVersion</i>, <span class="type">int</span> <i>minorVersion</i>)</h3>
+<p>Sets the major and minor version numbers to <i>majorVersion</i> and <i>minorVersion</i> respectively.</p>
+<p><b>See also </b><a href="qopenglversionprofile.html#version">version</a>().</p>
+<!-- @@@setVersion -->
+<!-- $$$version[overload1]$$$version -->
+<h3 class="fn" id="version"><a name="version"></a><span class="type"><a href="../qtcore/qpair.html">QPair</a></span>&lt;<span class="type">int</span>, <span class="type">int</span>&gt; QOpenGLVersionProfile::<span class="name">version</span>() const</h3>
+<p>Returns a <a href="../qtcore/qpair.html">QPair</a>&lt;int,int&gt; where the components represent the major and minor OpenGL version numbers respectively.</p>
+<p><b>See also </b><a href="qopenglversionprofile.html#setVersion">setVersion</a>().</p>
+<!-- @@@version -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<instructionals module="QtDBus">
+    <examples>
+        <example name="D-Bus Chat Example" docUrl="qthelp://org.qt-project.qtdbus.5132/qtdbus/qtdbus-chat-example.html" projectPath="dbus/chat/chat.pro" imageUrl="qthelp://org.qt-project.qtdbus.5132/qtdbus/images/dbus-chat-example.png">
+            <description><![CDATA[Demonstrates communication among instances of an application.]]></description>
+            <tags>chat,d-bus,dbus</tags>
+            <fileToOpen>dbus/chat/chat.h</fileToOpen>
+            <fileToOpen mainFile="true">dbus/chat/chat.cpp</fileToOpen>
+        </example>
+        <example name="D-Bus Complex Ping Pong Example" docUrl="qthelp://org.qt-project.qtdbus.5132/qtdbus/qtdbus-complexpingpong-example.html" projectPath="dbus/complexpingpong/complexpingpong.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[Demonstrates usage of the Qt D-Bus typesystem.]]></description>
+            <tags>complex,d-bus,dbus,ping,pong</tags>
+        </example>
+        <example name="D-Bus List Names Example" docUrl="qthelp://org.qt-project.qtdbus.5132/qtdbus/qtdbus-listnames-example.html" projectPath="dbus/listnames/listnames.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[Shows how to access the D-Bus bus daemon service.]]></description>
+            <tags>d-bus,dbus,list,names</tags>
+            <fileToOpen mainFile="true">dbus/listnames/listnames.cpp</fileToOpen>
+        </example>
+        <example name="D-Bus Ping Pong Example" docUrl="qthelp://org.qt-project.qtdbus.5132/qtdbus/qtdbus-pingpong-example.html" projectPath="dbus/pingpong/pingpong.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[Demonstrates a simple message system using D-Bus.]]></description>
+            <tags>d-bus,dbus,ping,pong</tags>
+        </example>
+        <example name="D-Bus Remote Controlled Car Example" docUrl="qthelp://org.qt-project.qtdbus.5132/qtdbus/qtdbus-remotecontrolledcar-example.html" projectPath="dbus/remotecontrolledcar/remotecontrolledcar.pro" imageUrl="qthelp://org.qt-project.qtdbus.5132/qtdbus/images/remotecontrolledcar-car-example.png">
+            <description><![CDATA[Shows how to use Qt D-Bus to control a car from another application.]]></description>
+            <tags>car,controlled,d-bus,dbus,remote</tags>
+            <fileToOpen mainFile="true">dbus/remotecontrolledcar/car/main.cpp</fileToOpen>
+        </example>
+    </examples>
+</instructionals>

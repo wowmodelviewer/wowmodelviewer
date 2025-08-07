@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- Tumbler.qml -->
+  <title>Tumbler QML Type | Qt Quick Extras 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickextras-index.html">Qt Quick Extras</a></td><td ><a href="qtquick-extras-qmlmodule.html">QML Types</a></td><td >Tumbler QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickextras-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#limitations">Limitations</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Tumbler QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Tumbler-brief -->
+<p>A control that can have several spinnable wheels, each with items that can be selected. <a href="#details">More...</a></p>
+<!-- @@@Tumbler -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Extras 1.4</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.5</td></tr></table></div><ul>
+<li><a href="qml-qtquick-extras-tumbler-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-extras-tumbler.html#columnCount-prop">columnCount</a></b></b> : int</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">TumblerColumn <b><b><a href="qml-qtquick-extras-tumbler.html#addColumn-method">addColumn</a></b></b>(TumblerColumn <i>column</i>)</li>
+<li class="fn">int <b><b><a href="qml-qtquick-extras-tumbler.html#currentIndexAt-method">currentIndexAt</a></b></b>(int <i>columnIndex</i>)</li>
+<li class="fn">TumblerColumn <b><b><a href="qml-qtquick-extras-tumbler.html#getColumn-method">getColumn</a></b></b>(int <i>columnIndex</i>)</li>
+<li class="fn">TumblerColumn <b><b><a href="qml-qtquick-extras-tumbler.html#insertColumn-method">insertColumn</a></b></b>(int <i>index</i>, TumblerColumn <i>column</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-extras-tumbler.html#setCurrentIndexAt-method">setCurrentIndexAt</a></b></b>(int <i>columnIndex</i>, int <i>itemIndex</i>, int <i>interval</i>)</li>
+</ul>
+<!-- $$$Tumbler-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p class="centerAlign"><img src="images/tumbler.png" alt="A Tumbler" /></p><p><b>Note: </b>Tumbler requires Qt 5.5&#x2e;0 or later.</p><p>The Tumbler control is used with one or more <a href="qml-qtquick-extras-tumblercolumn.html">TumblerColumn</a> items, which define the content of each column:</p>
+<pre class="cpp">
+
+  Tumbler {
+      TumblerColumn {
+          model: <span class="number">5</span>
+      }
+      TumblerColumn {
+          model: <span class="operator">[</span><span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">4</span><span class="operator">]</span>
+      }
+      TumblerColumn {
+          model: <span class="operator">[</span><span class="string">&quot;A&quot;</span><span class="operator">,</span> <span class="string">&quot;B&quot;</span><span class="operator">,</span> <span class="string">&quot;C&quot;</span><span class="operator">,</span> <span class="string">&quot;D&quot;</span><span class="operator">,</span> <span class="string">&quot;E&quot;</span><span class="operator">]</span>
+      }
+  }
+
+</pre>
+<p>You can also use a traditional model with roles:</p>
+<pre class="cpp">
+
+  Rectangle {
+      width: <span class="number">220</span>
+      height: <span class="number">350</span>
+      color: <span class="string">&quot;#494d53&quot;</span>
+
+      ListModel {
+          id: listModel
+
+          ListElement {
+              foo: <span class="string">&quot;A&quot;</span>
+              bar: <span class="string">&quot;B&quot;</span>
+              baz: <span class="string">&quot;C&quot;</span>
+          }
+          ListElement {
+              foo: <span class="string">&quot;A&quot;</span>
+              bar: <span class="string">&quot;B&quot;</span>
+              baz: <span class="string">&quot;C&quot;</span>
+          }
+          ListElement {
+              foo: <span class="string">&quot;A&quot;</span>
+              bar: <span class="string">&quot;B&quot;</span>
+              baz: <span class="string">&quot;C&quot;</span>
+          }
+      }
+
+      Tumbler {
+          anchors<span class="operator">.</span>centerIn: parent
+
+          TumblerColumn {
+              model: listModel
+              role: <span class="string">&quot;foo&quot;</span>
+          }
+          TumblerColumn {
+              model: listModel
+              role: <span class="string">&quot;bar&quot;</span>
+          }
+          TumblerColumn {
+              model: listModel
+              role: <span class="string">&quot;baz&quot;</span>
+          }
+      }
+  }
+
+</pre>
+<a name="limitations"></a>
+<h2 id="limitations">Limitations</h2>
+<p>For technical reasons, the model count must be equal to or greater than <a href="../qtquickcontrols1/qml-qtquick-controls-styles-tumblerstyle.html#visibleItemCount-prop">visibleItemCount</a> plus one. The <a href="../qtquickcontrols1/qml-qtquick-controls-styles-tumblerstyle.html#visibleItemCount-prop">visibleItemCount</a> must also be an odd number.</p>
+<p>You can create a custom appearance for a Tumbler by assigning a <a href="../qtquickcontrols1/qml-qtquick-controls-styles-tumblerstyle.html">TumblerStyle</a>. To style individual columns, use the <a href="qml-qtquick-extras-tumblercolumn.html#delegate-prop">delegate</a> and <a href="qml-qtquick-extras-tumblercolumn.html#highlight-prop">highlight</a> properties of <a href="qml-qtquick-extras-tumblercolumn.html">TumblerColumn</a>.</p>
+<!-- @@@Tumbler -->
+<h2>Property Documentation</h2>
+<!-- $$$columnCount -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="columnCount-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">columnCount</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The number of columns in the Tumbler.</p>
+</div></div><!-- @@@columnCount -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$addColumn[overload1]$$$addColumnTumblerColumn -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="addColumn-method"></a><span class="type"><a href="qml-qtquick-extras-tumblercolumn.html">TumblerColumn</a></span> <span class="name">addColumn</span>(<span class="type"><a href="qml-qtquick-extras-tumblercolumn.html">TumblerColumn</a></span> <i>column</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Adds a <i>column</i> and returns the added column.</p>
+<p>The <i>column</i> argument can be an instance of <a href="qml-qtquick-extras-tumblercolumn.html">TumblerColumn</a>, or a <a href="../qtqml/qml-qtqml-component.html">Component</a>. The component has to contain a <a href="qml-qtquick-extras-tumblercolumn.html">TumblerColumn</a>. Otherwise <code>null</code> is returned.</p>
+</div></div><!-- @@@addColumn -->
+<br/>
+<!-- $$$currentIndexAt[overload1]$$$currentIndexAtint -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="currentIndexAt-method"></a><span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">currentIndexAt</span>(<span class="type"><a href="../qtqml/qml-int.html">int</a></span> <i>columnIndex</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the current index of the column at <i>columnIndex</i>, or <code>null</code> if the <i>index</i> is invalid.</p>
+<p><b>See also </b><a href="qml-qtquick-extras-tumbler.html#setCurrentIndexAt-method">setCurrentIndexAt()</a>.</p>
+</div></div><!-- @@@currentIndexAt -->
+<br/>
+<!-- $$$getColumn[overload1]$$$getColumnint -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="getColumn-method"></a><span class="type"><a href="qml-qtquick-extras-tumblercolumn.html">TumblerColumn</a></span> <span class="name">getColumn</span>(<span class="type"><a href="../qtqml/qml-int.html">int</a></span> <i>columnIndex</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the column at <i>columnIndex</i> or <code>null</code> if the index is invalid.</p>
+</div></div><!-- @@@getColumn -->
+<br/>
+<!-- $$$insertColumn[overload1]$$$insertColumnintTumblerColumn -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="insertColumn-method"></a><span class="type"><a href="qml-qtquick-extras-tumblercolumn.html">TumblerColumn</a></span> <span class="name">insertColumn</span>(<span class="type"><a href="../qtqml/qml-int.html">int</a></span> <i>index</i>, <span class="type"><a href="qml-qtquick-extras-tumblercolumn.html">TumblerColumn</a></span> <i>column</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Inserts a <i>column</i> at the given <i>index</i> and returns the inserted column.</p>
+<p>The <i>column</i> argument can be an instance of <a href="qml-qtquick-extras-tumblercolumn.html">TumblerColumn</a>, or a <a href="../qtqml/qml-qtqml-component.html">Component</a>. The component has to contain a <a href="qml-qtquick-extras-tumblercolumn.html">TumblerColumn</a>. Otherwise, <code>null</code> is returned.</p>
+</div></div><!-- @@@insertColumn -->
+<br/>
+<!-- $$$setCurrentIndexAt[overload1]$$$setCurrentIndexAtintintint -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="setCurrentIndexAt-method"></a><span class="type">void</span> <span class="name">setCurrentIndexAt</span>(<span class="type"><a href="../qtqml/qml-int.html">int</a></span> <i>columnIndex</i>, <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <i>itemIndex</i>, <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <i>interval</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Sets the current index of the column at <i>columnIndex</i> to <i>itemIndex</i>. The animation length can be set with <i>interval</i>, which defaults to <code>0</code>.</p>
+<p>Does nothing if <i>columnIndex</i> or <i>itemIndex</i> are invalid.</p>
+<p><b>See also </b><a href="qml-qtquick-extras-tumbler.html#currentIndexAt-method">currentIndexAt()</a>.</p>
+</div></div><!-- @@@setCurrentIndexAt -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+    <namespace>org.qt-project.qtserialbus.5132</namespace>
+    <virtualFolder>qtserialbus</virtualFolder>
+    <metaData name="version" value="5.13.2"/>
+    <customFilter name="QtSerialBus 5.13.2">
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtserialbus</filterAttribute>
+    </customFilter>
+    <filterSection>
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtrefdoc</filterAttribute>
+        <filterAttribute>qtserialbus</filterAttribute>
+        <toc>
+            <section ref="qtserialbus-index.html" title="Qt Serial Bus">
+                <section ref="qtserialbus-module.html" title="C++ Classes">
+                    <section ref="qcanbus.html" title="QCanBus Class Reference">
+                        <section ref="qcanbus-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qcanbusdevice.html" title="QCanBusDevice Class Reference">
+                        <section ref="qcanbusdevice-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qcanbusdeviceinfo.html" title="QCanBusDeviceInfo Class Reference">
+                        <section ref="qcanbusdeviceinfo-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qcanbusfactory.html" title="QCanBusFactory Class Reference">
+                        <section ref="qcanbusfactory-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qcanbusfactoryv2.html" title="QCanBusFactoryV2 Class Reference">
+                        <section ref="qcanbusfactoryv2-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qcanbusframe.html" title="QCanBusFrame Class Reference">
+                        <section ref="qcanbusframe-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qcanbusframe-timestamp.html" title="QCanBusFrame::TimeStamp Class Reference">
+                        <section ref="qcanbusframe-timestamp-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qmodbusclient.html" title="QModbusClient Class Reference">
+                        <section ref="qmodbusclient-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qmodbusdataunit.html" title="QModbusDataUnit Class Reference">
+                        <section ref="qmodbusdataunit-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qmodbusdevice.html" title="QModbusDevice Class Reference">
+                        <section ref="qmodbusdevice-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qmodbusdeviceidentification.html" title="QModbusDeviceIdentification Class Reference">
+                        <section ref="qmodbusdeviceidentification-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qmodbusexceptionresponse.html" title="QModbusExceptionResponse Class Reference">
+                        <section ref="qmodbusexceptionresponse-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qmodbuspdu.html" title="QModbusPdu Class Reference">
+                        <section ref="qmodbuspdu-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qmodbusreply.html" title="QModbusReply Class Reference">
+                        <section ref="qmodbusreply-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qmodbusrequest.html" title="QModbusRequest Class Reference">
+                        <section ref="qmodbusrequest-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qmodbusresponse.html" title="QModbusResponse Class Reference">
+                        <section ref="qmodbusresponse-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qmodbusrtuserialmaster.html" title="QModbusRtuSerialMaster Class Reference">
+                        <section ref="qmodbusrtuserialmaster-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qmodbusrtuserialslave.html" title="QModbusRtuSerialSlave Class Reference">
+                        <section ref="qmodbusrtuserialslave-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qmodbusserver.html" title="QModbusServer Class Reference">
+                        <section ref="qmodbusserver-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qmodbustcpclient.html" title="QModbusTcpClient Class Reference">
+                        <section ref="qmodbustcpclient-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qmodbustcpconnectionobserver.html" title="QModbusTcpConnectionObserver Class Reference">
+                        <section ref="qmodbustcpconnectionobserver-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qmodbustcpserver.html" title="QModbusTcpServer Class Reference">
+                        <section ref="qmodbustcpserver-members.html" title="List of all members"/>
+                    </section>
+                </section>
+            </section>
+        </toc>
+        <keywords>
+            <keyword name="ExceptionByte" id="QModbusPdu::ExceptionByte" ref="qmodbuspdu.html#ExceptionByte-var"/>
+            <keyword name="Filter" id="QCanBusDevice::Filter" ref="qcanbusdevice-filter.html"/>
+            <keyword name="Filter::FormatFilter" id="Filter::FormatFilter" ref="qcanbusdevice-filter.html#FormatFilter-enum"/>
+            <keyword name="Filter::FormatFilters" id="Filter::FormatFilters" ref="qcanbusdevice-filter.html#FormatFilter-enum"/>
+            <keyword name="Filter::MatchBaseAndExtendedFormat" id="Filter::MatchBaseAndExtendedFormat" ref="qcanbusdevice-filter.html#FormatFilter-enum"/>
+            <keyword name="Filter::MatchBaseFormat" id="Filter::MatchBaseFormat" ref="qcanbusdevice-filter.html#FormatFilter-enum"/>
+            <keyword name="Filter::MatchExtendedFormat" id="Filter::MatchExtendedFormat" ref="qcanbusdevice-filter.html#FormatFilter-enum"/>
+            <keyword name="QCanBus" id="QCanBus" ref="qcanbus.html"/>
+            <keyword name="QCanBusDevice" id="QCanBusDevice" ref="qcanbusdevice.html"/>
+            <keyword name="QCanBusDevice::AllDirections" id="QCanBusDevice::AllDirections" ref="qcanbusdevice.html#Direction-enum"/>
+            <keyword name="QCanBusDevice::BitRateKey" id="QCanBusDevice::BitRateKey" ref="qcanbusdevice.html#ConfigurationKey-enum"/>
+            <keyword name="QCanBusDevice::CanBusDeviceState" id="QCanBusDevice::CanBusDeviceState" ref="qcanbusdevice.html#CanBusDeviceState-enum"/>
+            <keyword name="QCanBusDevice::CanBusError" id="QCanBusDevice::CanBusError" ref="qcanbusdevice.html#CanBusError-enum"/>
+            <keyword name="QCanBusDevice::CanFdKey" id="QCanBusDevice::CanFdKey" ref="qcanbusdevice.html#ConfigurationKey-enum"/>
+            <keyword name="QCanBusDevice::ClosingState" id="QCanBusDevice::ClosingState" ref="qcanbusdevice.html#CanBusDeviceState-enum"/>
+            <keyword name="QCanBusDevice::ConfigurationError" id="QCanBusDevice::ConfigurationError" ref="qcanbusdevice.html#CanBusError-enum"/>
+            <keyword name="QCanBusDevice::ConfigurationKey" id="QCanBusDevice::ConfigurationKey" ref="qcanbusdevice.html#ConfigurationKey-enum"/>
+            <keyword name="QCanBusDevice::ConnectedState" id="QCanBusDevice::ConnectedState" ref="qcanbusdevice.html#CanBusDeviceState-enum"/>
+            <keyword name="QCanBusDevice::ConnectingState" id="QCanBusDevice::ConnectingState" ref="qcanbusdevice.html#CanBusDeviceState-enum"/>
+            <keyword name="QCanBusDevice::ConnectionError" id="QCanBusDevice::ConnectionError" ref="qcanbusdevice.html#CanBusError-enum"/>
+            <keyword name="QCanBusDevice::DataBitRateKey" id="QCanBusDevice::DataBitRateKey" ref="qcanbusdevice.html#ConfigurationKey-enum"/>
+            <keyword name="QCanBusDevice::Direction" id="QCanBusDevice::Direction" ref="qcanbusdevice.html#Direction-enum"/>
+            <keyword name="QCanBusDevice::Directions" id="QCanBusDevice::Directions" ref="qcanbusdevice.html#Direction-enum"/>
+            <keyword name="QCanBusDevice::ErrorFilterKey" id="QCanBusDevice::ErrorFilterKey" ref="qcanbusdevice.html#ConfigurationKey-enum"/>
+            <keyword name="QCanBusDevice::Input" id="QCanBusDevice::Input" ref="qcanbusdevice.html#Direction-enum"/>
+            <keyword name="QCanBusDevice::LoopbackKey" id="QCanBusDevice::LoopbackKey" ref="qcanbusdevice.html#ConfigurationKey-enum"/>
+            <keyword name="QCanBusDevice::NoError" id="QCanBusDevice::NoError" ref="qcanbusdevice.html#CanBusError-enum"/>
+            <keyword name="QCanBusDevice::Output" id="QCanBusDevice::Output" ref="qcanbusdevice.html#Direction-enum"/>
+            <keyword name="QCanBusDevice::RawFilterKey" id="QCanBusDevice::RawFilterKey" ref="qcanbusdevice.html#ConfigurationKey-enum"/>
+            <keyword name="QCanBusDevice::ReadError" id="QCanBusDevice::ReadError" ref="qcanbusdevice.html#CanBusError-enum"/>
+            <keyword name="QCanBusDevice::ReceiveOwnKey" id="QCanBusDevice::ReceiveOwnKey" ref="qcanbusdevice.html#ConfigurationKey-enum"/>
+            <keyword name="QCanBusDevice::UnconnectedState" id="QCanBusDevice::UnconnectedState" ref="qcanbusdevice.html#CanBusDeviceState-enum"/>
+            <keyword name="QCanBusDevice::UnknownError" id="QCanBusDevice::UnknownError" ref="qcanbusdevice.html#CanBusError-enum"/>
+            <keyword name="QCanBusDevice::UserKey" id="QCanBusDevice::UserKey" ref="qcanbusdevice.html#ConfigurationKey-enum"/>
+            <keyword name="QCanBusDevice::WriteError" id="QCanBusDevice::WriteError" ref="qcanbusdevice.html#CanBusError-enum"/>
+            <keyword name="QCanBusDeviceInfo" id="QCanBusDeviceInfo" ref="qcanbusdeviceinfo.html"/>
+            <keyword name="QCanBusFactory" id="QCanBusFactory" ref="qcanbusfactory.html"/>
+            <keyword name="QCanBusFactoryV2" id="QCanBusFactoryV2" ref="qcanbusfactoryv2.html"/>
+            <keyword name="QCanBusFrame" id="QCanBusFrame" ref="qcanbusframe.html"/>
+            <keyword name="QCanBusFrame::AnyError" id="QCanBusFrame::AnyError" ref="qcanbusframe.html#FrameError-enum"/>
+            <keyword name="QCanBusFrame::BusError" id="QCanBusFrame::BusError" ref="qcanbusframe.html#FrameError-enum"/>
+            <keyword name="QCanBusFrame::BusOffError" id="QCanBusFrame::BusOffError" ref="qcanbusframe.html#FrameError-enum"/>
+            <keyword name="QCanBusFrame::ControllerError" id="QCanBusFrame::ControllerError" ref="qcanbusframe.html#FrameError-enum"/>
+            <keyword name="QCanBusFrame::ControllerRestartError" id="QCanBusFrame::ControllerRestartError" ref="qcanbusframe.html#FrameError-enum"/>
+            <keyword name="QCanBusFrame::DataFrame" id="QCanBusFrame::DataFrame" ref="qcanbusframe.html#FrameType-enum"/>
+            <keyword name="QCanBusFrame::ErrorFrame" id="QCanBusFrame::ErrorFrame" ref="qcanbusframe.html#FrameType-enum"/>
+            <keyword name="QCanBusFrame::FrameError" id="QCanBusFrame::FrameError" ref="qcanbusframe.html#FrameError-enum"/>
+            <keyword name="QCanBusFrame::FrameErrors" id="QCanBusFrame::FrameErrors" ref="qcanbusframe.html#FrameError-enum"/>
+            <keyword name="QCanBusFrame::FrameType" id="QCanBusFrame::FrameType" ref="qcanbusframe.html#FrameType-enum"/>
+            <keyword name="QCanBusFrame::InvalidFrame" id="QCanBusFrame::InvalidFrame" ref="qcanbusframe.html#FrameType-enum"/>
+            <keyword name="QCanBusFrame::LostArbitrationError" id="QCanBusFrame::LostArbitrationError" ref="qcanbusframe.html#FrameError-enum"/>
+            <keyword name="QCanBusFrame::MissingAcknowledgmentError" id="QCanBusFrame::MissingAcknowledgmentError" ref="qcanbusframe.html#FrameError-enum"/>
+            <keyword name="QCanBusFrame::NoError" id="QCanBusFrame::NoError" ref="qcanbusframe.html#FrameError-enum"/>
+            <keyword name="QCanBusFrame::ProtocolViolationError" id="QCanBusFrame::ProtocolViolationError" ref="qcanbusframe.html#FrameError-enum"/>
+            <keyword name="QCanBusFrame::RemoteRequestFrame" id="QCanBusFrame::RemoteRequestFrame" ref="qcanbusframe.html#FrameType-enum"/>
+            <keyword name="QCanBusFrame::TransceiverError" id="QCanBusFrame::TransceiverError" ref="qcanbusframe.html#FrameError-enum"/>
+            <keyword name="QCanBusFrame::TransmissionTimeoutError" id="QCanBusFrame::TransmissionTimeoutError" ref="qcanbusframe.html#FrameError-enum"/>
+            <keyword name="QCanBusFrame::UnknownError" id="QCanBusFrame::UnknownError" ref="qcanbusframe.html#FrameError-enum"/>
+            <keyword name="QCanBusFrame::UnknownFrame" id="QCanBusFrame::UnknownFrame" ref="qcanbusframe.html#FrameType-enum"/>
+            <keyword name="QModbusClient" id="QModbusClient" ref="qmodbusclient.html"/>
+            <keyword name="QModbusDataUnit" id="QModbusDataUnit" ref="qmodbusdataunit.html"/>
+            <keyword name="QModbusDataUnit::Coils" id="QModbusDataUnit::Coils" ref="qmodbusdataunit.html#RegisterType-enum"/>
+            <keyword name="QModbusDataUnit::DiscreteInputs" id="QModbusDataUnit::DiscreteInputs" ref="qmodbusdataunit.html#RegisterType-enum"/>
+            <keyword name="QModbusDataUnit::HoldingRegisters" id="QModbusDataUnit::HoldingRegisters" ref="qmodbusdataunit.html#RegisterType-enum"/>
+            <keyword name="QModbusDataUnit::InputRegisters" id="QModbusDataUnit::InputRegisters" ref="qmodbusdataunit.html#RegisterType-enum"/>
+            <keyword name="QModbusDataUnit::Invalid" id="QModbusDataUnit::Invalid" ref="qmodbusdataunit.html#RegisterType-enum"/>
+            <keyword name="QModbusDataUnit::QModbusDataUnitMap" id="QModbusDataUnitMap" ref="qmodbusdataunit.html#QModbusDataUnitMap-typedef"/>
+            <keyword name="QModbusDataUnit::RegisterType" id="QModbusDataUnit::RegisterType" ref="qmodbusdataunit.html#RegisterType-enum"/>
+            <keyword name="QModbusDevice" id="QModbusDevice" ref="qmodbusdevice.html"/>
+            <keyword name="QModbusDevice::ClosingState" id="QModbusDevice::ClosingState" ref="qmodbusdevice.html#State-enum"/>
+            <keyword name="QModbusDevice::ConfigurationError" id="QModbusDevice::ConfigurationError" ref="qmodbusdevice.html#Error-enum"/>
+            <keyword name="QModbusDevice::ConnectedState" id="QModbusDevice::ConnectedState" ref="qmodbusdevice.html#State-enum"/>
+            <keyword name="QModbusDevice::ConnectingState" id="QModbusDevice::ConnectingState" ref="qmodbusdevice.html#State-enum"/>
+            <keyword name="QModbusDevice::ConnectionError" id="QModbusDevice::ConnectionError" ref="qmodbusdevice.html#Error-enum"/>
+            <keyword name="QModbusDevice::ConnectionParameter" id="QModbusDevice::ConnectionParameter" ref="qmodbusdevice.html#ConnectionParameter-enum"/>
+            <keyword name="QModbusDevice::Error" id="QModbusDevice::Error" ref="qmodbusdevice.html#Error-enum"/>
+            <keyword name="QModbusDevice::NetworkAddressParameter" id="QModbusDevice::NetworkAddressParameter" ref="qmodbusdevice.html#ConnectionParameter-enum"/>
+            <keyword name="QModbusDevice::NetworkPortParameter" id="QModbusDevice::NetworkPortParameter" ref="qmodbusdevice.html#ConnectionParameter-enum"/>
+            <keyword name="QModbusDevice::NoError" id="QModbusDevice::NoError" ref="qmodbusdevice.html#Error-enum"/>
+            <keyword name="QModbusDevice::ProtocolError" id="QModbusDevice::ProtocolError" ref="qmodbusdevice.html#Error-enum"/>
+            <keyword name="QModbusDevice::ReadError" id="QModbusDevice::ReadError" ref="qmodbusdevice.html#Error-enum"/>
+            <keyword name="QModbusDevice::ReplyAbortedError" id="QModbusDevice::ReplyAbortedError" ref="qmodbusdevice.html#Error-enum"/>
+            <keyword name="QModbusDevice::SerialBaudRateParameter" id="QModbusDevice::SerialBaudRateParameter" ref="qmodbusdevice.html#ConnectionParameter-enum"/>
+            <keyword name="QModbusDevice::SerialDataBitsParameter" id="QModbusDevice::SerialDataBitsParameter" ref="qmodbusdevice.html#ConnectionParameter-enum"/>
+            <keyword name="QModbusDevice::SerialParityParameter" id="QModbusDevice::SerialParityParameter" ref="qmodbusdevice.html#ConnectionParameter-enum"/>
+            <keyword name="QModbusDevice::SerialPortNameParameter" id="QModbusDevice::SerialPortNameParameter" ref="qmodbusdevice.html#ConnectionParameter-enum"/>
+            <keyword name="QModbusDevice::SerialStopBitsParameter" id="QModbusDevice::SerialStopBitsParameter" ref="qmodbusdevice.html#ConnectionParameter-enum"/>
+            <keyword name="QModbusDevice::State" id="QModbusDevice::State" ref="qmodbusdevice.html#State-enum"/>
+            <keyword name="QModbusDevice::TimeoutError" id="QModbusDevice::TimeoutError" ref="qmodbusdevice.html#Error-enum"/>
+            <keyword name="QModbusDevice::UnconnectedState" id="QModbusDevice::UnconnectedState" ref="qmodbusdevice.html#State-enum"/>
+            <keyword name="QModbusDevice::UnknownError" id="QModbusDevice::UnknownError" ref="qmodbusdevice.html#Error-enum"/>
+            <keyword name="QModbusDevice::UserParameter" id="QModbusDevice::UserParameter" ref="qmodbusdevice.html#ConnectionParameter-enum"/>
+            <keyword name="QModbusDevice::WriteError" id="QModbusDevice::WriteError" ref="qmodbusdevice.html#Error-enum"/>
+            <keyword name="QModbusDeviceIdentification" id="QModbusDeviceIdentification" ref="qmodbusdeviceidentification.html"/>
+            <keyword name="QModbusDeviceIdentification::BasicConformityLevel" id="QModbusDeviceIdentification::BasicConformityLevel" ref="qmodbusdeviceidentification.html#ConformityLevel-enum"/>
+            <keyword name="QModbusDeviceIdentification::BasicIndividualConformityLevel" id="QModbusDeviceIdentification::BasicIndividualConformityLevel" ref="qmodbusdeviceidentification.html#ConformityLevel-enum"/>
+            <keyword name="QModbusDeviceIdentification::BasicReadDeviceIdCode" id="QModbusDeviceIdentification::BasicReadDeviceIdCode" ref="qmodbusdeviceidentification.html#ReadDeviceIdCode-enum"/>
+            <keyword name="QModbusDeviceIdentification::ConformityLevel" id="QModbusDeviceIdentification::ConformityLevel" ref="qmodbusdeviceidentification.html#ConformityLevel-enum"/>
+            <keyword name="QModbusDeviceIdentification::ExtendedConformityLevel" id="QModbusDeviceIdentification::ExtendedConformityLevel" ref="qmodbusdeviceidentification.html#ConformityLevel-enum"/>
+            <keyword name="QModbusDeviceIdentification::ExtendedIndividualConformityLevel" id="QModbusDeviceIdentification::ExtendedIndividualConformityLevel" ref="qmodbusdeviceidentification.html#ConformityLevel-enum"/>
+            <keyword name="QModbusDeviceIdentification::ExtendedReadDeviceIdCode" id="QModbusDeviceIdentification::ExtendedReadDeviceIdCode" ref="qmodbusdeviceidentification.html#ReadDeviceIdCode-enum"/>
+            <keyword name="QModbusDeviceIdentification::IndividualReadDeviceIdCode" id="QModbusDeviceIdentification::IndividualReadDeviceIdCode" ref="qmodbusdeviceidentification.html#ReadDeviceIdCode-enum"/>
+            <keyword name="QModbusDeviceIdentification::MajorMinorRevisionObjectId" id="QModbusDeviceIdentification::MajorMinorRevisionObjectId" ref="qmodbusdeviceidentification.html#ObjectId-enum"/>
+            <keyword name="QModbusDeviceIdentification::ModelNameObjectId" id="QModbusDeviceIdentification::ModelNameObjectId" ref="qmodbusdeviceidentification.html#ObjectId-enum"/>
+            <keyword name="QModbusDeviceIdentification::ObjectId" id="QModbusDeviceIdentification::ObjectId" ref="qmodbusdeviceidentification.html#ObjectId-enum"/>
+            <keyword name="QModbusDeviceIdentification::ProductCodeObjectId" id="QModbusDeviceIdentification::ProductCodeObjectId" ref="qmodbusdeviceidentification.html#ObjectId-enum"/>
+            <keyword name="QModbusDeviceIdentification::ProductDependentObjectId" id="QModbusDeviceIdentification::ProductDependentObjectId" ref="qmodbusdeviceidentification.html#ObjectId-enum"/>
+            <keyword name="QModbusDeviceIdentification::ProductNameObjectId" id="QModbusDeviceIdentification::ProductNameObjectId" ref="qmodbusdeviceidentification.html#ObjectId-enum"/>
+            <keyword name="QModbusDeviceIdentification::ReadDeviceIdCode" id="QModbusDeviceIdentification::ReadDeviceIdCode" ref="qmodbusdeviceidentification.html#ReadDeviceIdCode-enum"/>
+            <keyword name="QModbusDeviceIdentification::RegularConformityLevel" id="QModbusDeviceIdentification::RegularConformityLevel" ref="qmodbusdeviceidentification.html#ConformityLevel-enum"/>
+            <keyword name="QModbusDeviceIdentification::RegularIndividualConformityLevel" id="QModbusDeviceIdentification::RegularIndividualConformityLevel" ref="qmodbusdeviceidentification.html#ConformityLevel-enum"/>
+            <keyword name="QModbusDeviceIdentification::RegularReadDeviceIdCode" id="QModbusDeviceIdentification::RegularReadDeviceIdCode" ref="qmodbusdeviceidentification.html#ReadDeviceIdCode-enum"/>
+            <keyword name="QModbusDeviceIdentification::ReservedObjectId" id="QModbusDeviceIdentification::ReservedObjectId" ref="qmodbusdeviceidentification.html#ObjectId-enum"/>
+            <keyword name="QModbusDeviceIdentification::UndefinedObjectId" id="QModbusDeviceIdentification::UndefinedObjectId" ref="qmodbusdeviceidentification.html#ObjectId-enum"/>
+            <keyword name="QModbusDeviceIdentification::UserApplicationNameObjectId" id="QModbusDeviceIdentification::UserApplicationNameObjectId" ref="qmodbusdeviceidentification.html#ObjectId-enum"/>
+            <keyword name="QModbusDeviceIdentification::VendorNameObjectId" id="QModbusDeviceIdentification::VendorNameObjectId" ref="qmodbusdeviceidentification.html#ObjectId-enum"/>
+            <keyword name="QModbusDeviceIdentification::VendorUrlObjectId" id="QModbusDeviceIdentification::VendorUrlObjectId" ref="qmodbusdeviceidentification.html#ObjectId-enum"/>
+            <keyword name="QModbusExceptionResponse" id="QModbusExceptionResponse" ref="qmodbusexceptionresponse.html"/>
+            <keyword name="QModbusPdu" id="QModbusPdu" ref="qmodbuspdu.html"/>
+            <keyword name="QModbusPdu::Acknowledge" id="QModbusPdu::Acknowledge" ref="qmodbuspdu.html#ExceptionCode-enum"/>
+            <keyword name="QModbusPdu::Diagnostics" id="QModbusPdu::Diagnostics" ref="qmodbuspdu.html#FunctionCode-enum"/>
+            <keyword name="QModbusPdu::EncapsulatedInterfaceTransport" id="QModbusPdu::EncapsulatedInterfaceTransport" ref="qmodbuspdu.html#FunctionCode-enum"/>
+            <keyword name="QModbusPdu::ExceptionCode" id="QModbusPdu::ExceptionCode" ref="qmodbuspdu.html#ExceptionCode-enum"/>
+            <keyword name="QModbusPdu::ExtendedException" id="QModbusPdu::ExtendedException" ref="qmodbuspdu.html#ExceptionCode-enum"/>
+            <keyword name="QModbusPdu::FunctionCode" id="QModbusPdu::FunctionCode" ref="qmodbuspdu.html#FunctionCode-enum"/>
+            <keyword name="QModbusPdu::GatewayPathUnavailable" id="QModbusPdu::GatewayPathUnavailable" ref="qmodbuspdu.html#ExceptionCode-enum"/>
+            <keyword name="QModbusPdu::GatewayTargetDeviceFailedToRespond" id="QModbusPdu::GatewayTargetDeviceFailedToRespond" ref="qmodbuspdu.html#ExceptionCode-enum"/>
+            <keyword name="QModbusPdu::GetCommEventCounter" id="QModbusPdu::GetCommEventCounter" ref="qmodbuspdu.html#FunctionCode-enum"/>
+            <keyword name="QModbusPdu::GetCommEventLog" id="QModbusPdu::GetCommEventLog" ref="qmodbuspdu.html#FunctionCode-enum"/>
+            <keyword name="QModbusPdu::IllegalDataAddress" id="QModbusPdu::IllegalDataAddress" ref="qmodbuspdu.html#ExceptionCode-enum"/>
+            <keyword name="QModbusPdu::IllegalDataValue" id="QModbusPdu::IllegalDataValue" ref="qmodbuspdu.html#ExceptionCode-enum"/>
+            <keyword name="QModbusPdu::IllegalFunction" id="QModbusPdu::IllegalFunction" ref="qmodbuspdu.html#ExceptionCode-enum"/>
+            <keyword name="QModbusPdu::Invalid" id="QModbusPdu::Invalid" ref="qmodbuspdu.html#FunctionCode-enum"/>
+            <keyword name="QModbusPdu::MaskWriteRegister" id="QModbusPdu::MaskWriteRegister" ref="qmodbuspdu.html#FunctionCode-enum"/>
+            <keyword name="QModbusPdu::MemoryParityError" id="QModbusPdu::MemoryParityError" ref="qmodbuspdu.html#ExceptionCode-enum"/>
+            <keyword name="QModbusPdu::NegativeAcknowledge" id="QModbusPdu::NegativeAcknowledge" ref="qmodbuspdu.html#ExceptionCode-enum"/>
+            <keyword name="QModbusPdu::ReadCoils" id="QModbusPdu::ReadCoils" ref="qmodbuspdu.html#FunctionCode-enum"/>
+            <keyword name="QModbusPdu::ReadDiscreteInputs" id="QModbusPdu::ReadDiscreteInputs" ref="qmodbuspdu.html#FunctionCode-enum"/>
+            <keyword name="QModbusPdu::ReadExceptionStatus" id="QModbusPdu::ReadExceptionStatus" ref="qmodbuspdu.html#FunctionCode-enum"/>
+            <keyword name="QModbusPdu::ReadFifoQueue" id="QModbusPdu::ReadFifoQueue" ref="qmodbuspdu.html#FunctionCode-enum"/>
+            <keyword name="QModbusPdu::ReadFileRecord" id="QModbusPdu::ReadFileRecord" ref="qmodbuspdu.html#FunctionCode-enum"/>
+            <keyword name="QModbusPdu::ReadHoldingRegisters" id="QModbusPdu::ReadHoldingRegisters" ref="qmodbuspdu.html#FunctionCode-enum"/>
+            <keyword name="QModbusPdu::ReadInputRegisters" id="QModbusPdu::ReadInputRegisters" ref="qmodbuspdu.html#FunctionCode-enum"/>
+            <keyword name="QModbusPdu::ReadWriteMultipleRegisters" id="QModbusPdu::ReadWriteMultipleRegisters" ref="qmodbuspdu.html#FunctionCode-enum"/>
+            <keyword name="QModbusPdu::ReportServerId" id="QModbusPdu::ReportServerId" ref="qmodbuspdu.html#FunctionCode-enum"/>
+            <keyword name="QModbusPdu::ServerDeviceBusy" id="QModbusPdu::ServerDeviceBusy" ref="qmodbuspdu.html#ExceptionCode-enum"/>
+            <keyword name="QModbusPdu::ServerDeviceFailure" id="QModbusPdu::ServerDeviceFailure" ref="qmodbuspdu.html#ExceptionCode-enum"/>
+            <keyword name="QModbusPdu::UndefinedFunctionCode" id="QModbusPdu::UndefinedFunctionCode" ref="qmodbuspdu.html#FunctionCode-enum"/>
+            <keyword name="QModbusPdu::WriteFileRecord" id="QModbusPdu::WriteFileRecord" ref="qmodbuspdu.html#FunctionCode-enum"/>
+            <keyword name="QModbusPdu::WriteMultipleCoils" id="QModbusPdu::WriteMultipleCoils" ref="qmodbuspdu.html#FunctionCode-enum"/>
+            <keyword name="QModbusPdu::WriteMultipleRegisters" id="QModbusPdu::WriteMultipleRegisters" ref="qmodbuspdu.html#FunctionCode-enum"/>
+            <keyword name="QModbusPdu::WriteSingleCoil" id="QModbusPdu::WriteSingleCoil" ref="qmodbuspdu.html#FunctionCode-enum"/>
+            <keyword name="QModbusPdu::WriteSingleRegister" id="QModbusPdu::WriteSingleRegister" ref="qmodbuspdu.html#FunctionCode-enum"/>
+            <keyword name="QModbusReply" id="QModbusReply" ref="qmodbusreply.html"/>
+            <keyword name="QModbusReply::Broadcast" id="QModbusReply::Broadcast" ref="qmodbusreply.html#ReplyType-enum"/>
+            <keyword name="QModbusReply::Common" id="QModbusReply::Common" ref="qmodbusreply.html#ReplyType-enum"/>
+            <keyword name="QModbusReply::Raw" id="QModbusReply::Raw" ref="qmodbusreply.html#ReplyType-enum"/>
+            <keyword name="QModbusReply::ReplyType" id="QModbusReply::ReplyType" ref="qmodbusreply.html#ReplyType-enum"/>
+            <keyword name="QModbusRequest" id="QModbusRequest" ref="qmodbusrequest.html"/>
+            <keyword name="QModbusRequest::CalcFuncPtr" id="QModbusRequest::CalcFuncPtr" ref="qmodbusrequest.html#CalcFuncPtr-typedef"/>
+            <keyword name="QModbusResponse" id="QModbusResponse" ref="qmodbusresponse.html"/>
+            <keyword name="QModbusResponse::CalcFuncPtr" id="QModbusResponse::CalcFuncPtr" ref="qmodbusresponse.html#CalcFuncPtr-typedef"/>
+            <keyword name="QModbusRtuSerialMaster" id="QModbusRtuSerialMaster" ref="qmodbusrtuserialmaster.html"/>
+            <keyword name="QModbusRtuSerialSlave" id="QModbusRtuSerialSlave" ref="qmodbusrtuserialslave.html"/>
+            <keyword name="QModbusServer" id="QModbusServer" ref="qmodbusserver.html"/>
+            <keyword name="QModbusServer::AdditionalData" id="QModbusServer::AdditionalData" ref="qmodbusserver.html#Option-enum"/>
+            <keyword name="QModbusServer::AsciiInputDelimiter" id="QModbusServer::AsciiInputDelimiter" ref="qmodbusserver.html#Option-enum"/>
+            <keyword name="QModbusServer::DeviceBusy" id="QModbusServer::DeviceBusy" ref="qmodbusserver.html#Option-enum"/>
+            <keyword name="QModbusServer::DeviceIdentification" id="QModbusServer::DeviceIdentification" ref="qmodbusserver.html#Option-enum"/>
+            <keyword name="QModbusServer::DiagnosticRegister" id="QModbusServer::DiagnosticRegister" ref="qmodbusserver.html#Option-enum"/>
+            <keyword name="QModbusServer::ExceptionStatusOffset" id="QModbusServer::ExceptionStatusOffset" ref="qmodbusserver.html#Option-enum"/>
+            <keyword name="QModbusServer::ListenOnlyMode" id="QModbusServer::ListenOnlyMode" ref="qmodbusserver.html#Option-enum"/>
+            <keyword name="QModbusServer::Option" id="QModbusServer::Option" ref="qmodbusserver.html#Option-enum"/>
+            <keyword name="QModbusServer::RunIndicatorStatus" id="QModbusServer::RunIndicatorStatus" ref="qmodbusserver.html#Option-enum"/>
+            <keyword name="QModbusServer::ServerIdentifier" id="QModbusServer::ServerIdentifier" ref="qmodbusserver.html#Option-enum"/>
+            <keyword name="QModbusServer::UserOption" id="QModbusServer::UserOption" ref="qmodbusserver.html#Option-enum"/>
+            <keyword name="QModbusTcpClient" id="QModbusTcpClient" ref="qmodbustcpclient.html"/>
+            <keyword name="QModbusTcpConnectionObserver" id="QModbusTcpConnectionObserver" ref="qmodbustcpconnectionobserver.html"/>
+            <keyword name="QModbusTcpServer" id="QModbusTcpServer" ref="qmodbustcpserver.html"/>
+            <keyword name="Qt CAN Bus" id="Qt CAN Bus" ref="qtcanbus-backends.html"/>
+            <keyword name="Qt Modbus" id="Qt Modbus" ref="qtmodbus-backends.html"/>
+            <keyword name="Qt Serial Bus" id="Qt Serial Bus" ref="qtserialbus-index.html"/>
+            <keyword name="Qt Serial Bus C++ Classes" id="Qt Serial Bus C++ Classes" ref="qtserialbus-module.html"/>
+            <keyword name="Qt SerialBus Examples" id="Qt SerialBus Examples" ref="qtserialbus-examples.html"/>
+            <keyword name="TimeStamp" id="QCanBusFrame::TimeStamp" ref="qcanbusframe-timestamp.html"/>
+            <keyword name="Using PassThruCAN Plugin" id="Using PassThruCAN Plugin" ref="qtserialbus-passthrucan-overview.html"/>
+            <keyword name="Using PeakCAN Plugin" id="Using PeakCAN Plugin" ref="qtserialbus-peakcan-overview.html"/>
+            <keyword name="Using SocketCAN Plugin" id="Using SocketCAN Plugin" ref="qtserialbus-socketcan-overview.html"/>
+            <keyword name="Using SystecCAN Plugin" id="Using SystecCAN Plugin" ref="qtserialbus-systeccan-overview.html"/>
+            <keyword name="Using TinyCAN Plugin" id="Using TinyCAN Plugin" ref="qtserialbus-tinycan-overview.html"/>
+            <keyword name="Using VectorCAN Plugin" id="Using VectorCAN Plugin" ref="qtserialbus-vectorcan-overview.html"/>
+            <keyword name="Using VirtualCAN Plugin" id="Using VirtualCAN Plugin" ref="qtserialbus-virtualcan-overview.html"/>
+            <keyword name="acceptNewConnection" id="QModbusTcpConnectionObserver::acceptNewConnection" ref="qmodbustcpconnectionobserver.html#acceptNewConnection"/>
+            <keyword name="availableDevices" id="QCanBus::availableDevices" ref="qcanbus.html#availableDevices"/>
+            <keyword name="availableDevices" id="QCanBusFactoryV2::availableDevices" ref="qcanbusfactoryv2.html#availableDevices"/>
+            <keyword name="calculateDataSize" id="QModbusRequest::calculateDataSize" ref="qmodbusrequest.html#calculateDataSize"/>
+            <keyword name="calculateDataSize" id="QModbusResponse::calculateDataSize" ref="qmodbusresponse.html#calculateDataSize"/>
+            <keyword name="channel" id="QCanBusDeviceInfo::channel" ref="qcanbusdeviceinfo.html#channel"/>
+            <keyword name="clear" id="QCanBusDevice::clear" ref="qcanbusdevice.html#clear"/>
+            <keyword name="close" id="QCanBusDevice::close" ref="qcanbusdevice.html#close"/>
+            <keyword name="close" id="QModbusDevice::close" ref="qmodbusdevice.html#close"/>
+            <keyword name="close" id="QModbusRtuSerialMaster::close" ref="qmodbusrtuserialmaster.html#close"/>
+            <keyword name="close" id="QModbusRtuSerialSlave::close" ref="qmodbusrtuserialslave.html#close"/>
+            <keyword name="close" id="QModbusTcpClient::close" ref="qmodbustcpclient.html#close"/>
+            <keyword name="close" id="QModbusTcpServer::close" ref="qmodbustcpserver.html#close"/>
+            <keyword name="configurationKeys" id="QCanBusDevice::configurationKeys" ref="qcanbusdevice.html#configurationKeys"/>
+            <keyword name="configurationParameter" id="QCanBusDevice::configurationParameter" ref="qcanbusdevice.html#configurationParameter"/>
+            <keyword name="conformityLevel" id="QModbusDeviceIdentification::conformityLevel" ref="qmodbusdeviceidentification.html#conformityLevel"/>
+            <keyword name="connectDevice" id="QCanBusDevice::connectDevice" ref="qcanbusdevice.html#connectDevice"/>
+            <keyword name="connectDevice" id="QModbusDevice::connectDevice" ref="qmodbusdevice.html#connectDevice"/>
+            <keyword name="connectionParameter" id="QModbusDevice::connectionParameter" ref="qmodbusdevice.html#connectionParameter"/>
+            <keyword name="contains" id="QModbusDeviceIdentification::contains" ref="qmodbusdeviceidentification.html#contains"/>
+            <keyword name="createDevice" id="QCanBus::createDevice" ref="qcanbus.html#createDevice"/>
+            <keyword name="createDevice" id="QCanBusFactory::createDevice" ref="qcanbusfactory.html#createDevice"/>
+            <keyword name="createDevice" id="QCanBusFactoryV2::createDevice" ref="qcanbusfactoryv2.html#createDevice"/>
+            <keyword name="data" id="QModbusPdu::data" ref="qmodbuspdu.html#data"/>
+            <keyword name="data" id="QModbusServer::data" ref="qmodbusserver.html#data"/>
+            <keyword name="dataSize" id="QModbusPdu::dataSize" ref="qmodbuspdu.html#dataSize"/>
+            <keyword name="dataWritten" id="QModbusServer::dataWritten" ref="qmodbusserver.html#dataWritten"/>
+            <keyword name="decodeData" id="QModbusPdu::decodeData" ref="qmodbuspdu.html#decodeData"/>
+            <keyword name="dequeueOutgoingFrame" id="QCanBusDevice::dequeueOutgoingFrame" ref="qcanbusdevice.html#dequeueOutgoingFrame"/>
+            <keyword name="description" id="QCanBusDeviceInfo::description" ref="qcanbusdeviceinfo.html#description"/>
+            <keyword name="disconnectDevice" id="QCanBusDevice::disconnectDevice" ref="qcanbusdevice.html#disconnectDevice"/>
+            <keyword name="disconnectDevice" id="QModbusDevice::disconnectDevice" ref="qmodbusdevice.html#disconnectDevice"/>
+            <keyword name="encodeData" id="QModbusPdu::encodeData" ref="qmodbuspdu.html#encodeData"/>
+            <keyword name="enqueueOutgoingFrame" id="QCanBusDevice::enqueueOutgoingFrame" ref="qcanbusdevice.html#enqueueOutgoingFrame"/>
+            <keyword name="enqueueReceivedFrames" id="QCanBusDevice::enqueueReceivedFrames" ref="qcanbusdevice.html#enqueueReceivedFrames"/>
+            <keyword name="error" id="QCanBusDevice::error" ref="qcanbusdevice.html#error"/>
+            <keyword name="error" id="QCanBusFrame::error" ref="qcanbusframe.html#error"/>
+            <keyword name="error" id="QModbusDevice::error" ref="qmodbusdevice.html#error"/>
+            <keyword name="error" id="QModbusReply::error" ref="qmodbusreply.html#error"/>
+            <keyword name="errorOccurred" id="QCanBusDevice::errorOccurred" ref="qcanbusdevice.html#errorOccurred"/>
+            <keyword name="errorOccurred" id="QModbusDevice::errorOccurred" ref="qmodbusdevice.html#errorOccurred"/>
+            <keyword name="errorOccurred" id="QModbusReply::errorOccurred" ref="qmodbusreply.html#errorOccurred"/>
+            <keyword name="errorString" id="QCanBusDevice::errorString" ref="qcanbusdevice.html#errorString"/>
+            <keyword name="errorString" id="QModbusDevice::errorString" ref="qmodbusdevice.html#errorString"/>
+            <keyword name="errorString" id="QModbusReply::errorString" ref="qmodbusreply.html#errorString"/>
+            <keyword name="exceptionCode" id="QModbusPdu::exceptionCode" ref="qmodbuspdu.html#exceptionCode"/>
+            <keyword name="finished" id="QModbusReply::finished" ref="qmodbusreply.html#finished"/>
+            <keyword name="format" id="Filter::format" ref="qcanbusdevice-filter.html#format-var"/>
+            <keyword name="frameId" id="Filter::frameId" ref="qcanbusdevice-filter.html#frameId-var"/>
+            <keyword name="frameId" id="QCanBusFrame::frameId" ref="qcanbusframe.html#frameId"/>
+            <keyword name="frameIdMask" id="Filter::frameIdMask" ref="qcanbusdevice-filter.html#frameIdMask-var"/>
+            <keyword name="frameType" id="QCanBusFrame::frameType" ref="qcanbusframe.html#frameType"/>
+            <keyword name="framesAvailable" id="QCanBusDevice::framesAvailable" ref="qcanbusdevice.html#framesAvailable"/>
+            <keyword name="framesReceived" id="QCanBusDevice::framesReceived" ref="qcanbusdevice.html#framesReceived"/>
+            <keyword name="framesToWrite" id="QCanBusDevice::framesToWrite" ref="qcanbusdevice.html#framesToWrite"/>
+            <keyword name="framesWritten" id="QCanBusDevice::framesWritten" ref="qcanbusdevice.html#framesWritten"/>
+            <keyword name="fromByteArray" id="QModbusDeviceIdentification::fromByteArray" ref="qmodbusdeviceidentification.html#fromByteArray"/>
+            <keyword name="fromMicroSeconds" id="TimeStamp::fromMicroSeconds" ref="qcanbusframe-timestamp.html#fromMicroSeconds"/>
+            <keyword name="functionCode" id="QModbusPdu::functionCode" ref="qmodbuspdu.html#functionCode"/>
+            <keyword name="hasBitrateSwitch" id="QCanBusFrame::hasBitrateSwitch" ref="qcanbusframe.html#hasBitrateSwitch"/>
+            <keyword name="hasErrorStateIndicator" id="QCanBusFrame::hasErrorStateIndicator" ref="qcanbusframe.html#hasErrorStateIndicator"/>
+            <keyword name="hasExtendedFrameFormat" id="QCanBusFrame::hasExtendedFrameFormat" ref="qcanbusframe.html#hasExtendedFrameFormat"/>
+            <keyword name="hasFlexibleDataRate" id="QCanBusDeviceInfo::hasFlexibleDataRate" ref="qcanbusdeviceinfo.html#hasFlexibleDataRate"/>
+            <keyword name="hasFlexibleDataRateFormat" id="QCanBusFrame::hasFlexibleDataRateFormat" ref="qcanbusframe.html#hasFlexibleDataRateFormat"/>
+            <keyword name="hasLocalEcho" id="QCanBusFrame::hasLocalEcho" ref="qcanbusframe.html#hasLocalEcho"/>
+            <keyword name="hasOutgoingFrames" id="QCanBusDevice::hasOutgoingFrames" ref="qcanbusdevice.html#hasOutgoingFrames"/>
+            <keyword name="insert" id="QModbusDeviceIdentification::insert" ref="qmodbusdeviceidentification.html#insert"/>
+            <keyword name="installConnectionObserver" id="QModbusTcpServer::installConnectionObserver" ref="qmodbustcpserver.html#installConnectionObserver"/>
+            <keyword name="instance" id="QCanBus::instance" ref="qcanbus.html#instance"/>
+            <keyword name="interFrameDelay" id="QModbusRtuSerialMaster::interFrameDelay" ref="qmodbusrtuserialmaster.html#interFrameDelay"/>
+            <keyword name="interpretErrorFrame" id="QCanBusDevice::interpretErrorFrame" ref="qcanbusdevice.html#interpretErrorFrame"/>
+            <keyword name="isException" id="QModbusPdu::isException" ref="qmodbuspdu.html#isException"/>
+            <keyword name="isFinished" id="QModbusReply::isFinished" ref="qmodbusreply.html#isFinished"/>
+            <keyword name="isValid" id="QCanBusFrame::isValid" ref="qcanbusframe.html#isValid"/>
+            <keyword name="isValid" id="QModbusDataUnit::isValid" ref="qmodbusdataunit.html#isValid"/>
+            <keyword name="isValid" id="QModbusDeviceIdentification::isValid" ref="qmodbusdeviceidentification.html#isValid"/>
+            <keyword name="isValid" id="QModbusPdu::isValid" ref="qmodbuspdu.html#isValid"/>
+            <keyword name="isVirtual" id="QCanBusDeviceInfo::isVirtual" ref="qcanbusdeviceinfo.html#isVirtual"/>
+            <keyword name="microSeconds" id="TimeStamp::microSeconds" ref="qcanbusframe-timestamp.html#microSeconds"/>
+            <keyword name="minimumDataSize" id="QModbusRequest::minimumDataSize" ref="qmodbusrequest.html#minimumDataSize"/>
+            <keyword name="minimumDataSize" id="QModbusResponse::minimumDataSize" ref="qmodbusresponse.html#minimumDataSize"/>
+            <keyword name="modbusClientDisconnected" id="QModbusTcpServer::modbusClientDisconnected" ref="qmodbustcpserver.html#modbusClientDisconnected"/>
+            <keyword name="name" id="QCanBusDeviceInfo::name" ref="qcanbusdeviceinfo.html#name"/>
+            <keyword name="numberOfRetries" id="QModbusClient::numberOfRetries" ref="qmodbusclient.html#numberOfRetries"/>
+            <keyword name="objectIds" id="QModbusDeviceIdentification::objectIds" ref="qmodbusdeviceidentification.html#objectIds"/>
+            <keyword name="open" id="QCanBusDevice::open" ref="qcanbusdevice.html#open"/>
+            <keyword name="open" id="QModbusDevice::open" ref="qmodbusdevice.html#open"/>
+            <keyword name="open" id="QModbusRtuSerialMaster::open" ref="qmodbusrtuserialmaster.html#open"/>
+            <keyword name="open" id="QModbusRtuSerialSlave::open" ref="qmodbusrtuserialslave.html#open"/>
+            <keyword name="open" id="QModbusTcpClient::open" ref="qmodbustcpclient.html#open"/>
+            <keyword name="open" id="QModbusTcpServer::open" ref="qmodbustcpserver.html#open"/>
+            <keyword name="operator&lt;&lt;" id="operator&lt;&lt;" ref="qcanbusframe.html#operator-lt-lt"/>
+            <keyword name="operator&lt;&lt;" id="operator&lt;&lt;" ref="qmodbuspdu.html#operator-lt-lt"/>
+            <keyword name="operator=" id="QCanBusDeviceInfo::operator=" ref="qcanbusdeviceinfo.html#operator-eq"/>
+            <keyword name="operator=" id="QModbusPdu::operator=" ref="qmodbuspdu.html#operator-eq"/>
+            <keyword name="operator&gt;&gt;" id="operator&gt;&gt;" ref="qcanbusframe.html#operator-gt-gt"/>
+            <keyword name="operator&gt;&gt;" id="operator&gt;&gt;" ref="qmodbusrequest.html#operator-gt-gt"/>
+            <keyword name="operator&gt;&gt;" id="operator&gt;&gt;" ref="qmodbusresponse.html#operator-gt-gt"/>
+            <keyword name="payload" id="QCanBusFrame::payload" ref="qcanbusframe.html#payload"/>
+            <keyword name="plugins" id="QCanBus::plugins" ref="qcanbus.html#plugins"/>
+            <keyword name="processPrivateRequest" id="QModbusServer::processPrivateRequest" ref="qmodbusserver.html#processPrivateRequest"/>
+            <keyword name="processPrivateResponse" id="QModbusClient::processPrivateResponse" ref="qmodbusclient.html#processPrivateResponse"/>
+            <keyword name="processRequest" id="QModbusRtuSerialSlave::processRequest" ref="qmodbusrtuserialslave.html#processRequest"/>
+            <keyword name="processRequest" id="QModbusServer::processRequest" ref="qmodbusserver.html#processRequest"/>
+            <keyword name="processRequest" id="QModbusTcpServer::processRequest" ref="qmodbustcpserver.html#processRequest"/>
+            <keyword name="processResponse" id="QModbusClient::processResponse" ref="qmodbusclient.html#processResponse"/>
+            <keyword name="processesBroadcast" id="QModbusRtuSerialSlave::processesBroadcast" ref="qmodbusrtuserialslave.html#processesBroadcast"/>
+            <keyword name="processesBroadcast" id="QModbusServer::processesBroadcast" ref="qmodbusserver.html#processesBroadcast"/>
+            <keyword name="rawResult" id="QModbusReply::rawResult" ref="qmodbusreply.html#rawResult"/>
+            <keyword name="readAllFrames" id="QCanBusDevice::readAllFrames" ref="qcanbusdevice.html#readAllFrames"/>
+            <keyword name="readData" id="QModbusServer::readData" ref="qmodbusserver.html#readData"/>
+            <keyword name="readFrame" id="QCanBusDevice::readFrame" ref="qcanbusdevice.html#readFrame"/>
+            <keyword name="registerDataSizeCalculator" id="QModbusRequest::registerDataSizeCalculator" ref="qmodbusrequest.html#registerDataSizeCalculator"/>
+            <keyword name="registerDataSizeCalculator" id="QModbusResponse::registerDataSizeCalculator" ref="qmodbusresponse.html#registerDataSizeCalculator"/>
+            <keyword name="registerType" id="QModbusDataUnit::registerType" ref="qmodbusdataunit.html#registerType"/>
+            <keyword name="remove" id="QModbusDeviceIdentification::remove" ref="qmodbusdeviceidentification.html#remove"/>
+            <keyword name="result" id="QModbusReply::result" ref="qmodbusreply.html#result"/>
+            <keyword name="seconds" id="TimeStamp::seconds" ref="qcanbusframe-timestamp.html#seconds"/>
+            <keyword name="sendRawRequest" id="QModbusClient::sendRawRequest" ref="qmodbusclient.html#sendRawRequest"/>
+            <keyword name="sendReadRequest" id="QModbusClient::sendReadRequest" ref="qmodbusclient.html#sendReadRequest"/>
+            <keyword name="sendReadWriteRequest" id="QModbusClient::sendReadWriteRequest" ref="qmodbusclient.html#sendReadWriteRequest"/>
+            <keyword name="sendWriteRequest" id="QModbusClient::sendWriteRequest" ref="qmodbusclient.html#sendWriteRequest"/>
+            <keyword name="serialNumber" id="QCanBusDeviceInfo::serialNumber" ref="qcanbusdeviceinfo.html#serialNumber"/>
+            <keyword name="serverAddress" id="QModbusReply::serverAddress" ref="qmodbusreply.html#serverAddress"/>
+            <keyword name="serverAddress" id="QModbusServer::serverAddress" ref="qmodbusserver.html#serverAddress"/>
+            <keyword name="setBitrateSwitch" id="QCanBusFrame::setBitrateSwitch" ref="qcanbusframe.html#setBitrateSwitch"/>
+            <keyword name="setConfigurationParameter" id="QCanBusDevice::setConfigurationParameter" ref="qcanbusdevice.html#setConfigurationParameter"/>
+            <keyword name="setConformityLevel" id="QModbusDeviceIdentification::setConformityLevel" ref="qmodbusdeviceidentification.html#setConformityLevel"/>
+            <keyword name="setConnectionParameter" id="QModbusDevice::setConnectionParameter" ref="qmodbusdevice.html#setConnectionParameter"/>
+            <keyword name="setData" id="QModbusPdu::setData" ref="qmodbuspdu.html#setData"/>
+            <keyword name="setData" id="QModbusServer::setData" ref="qmodbusserver.html#setData"/>
+            <keyword name="setError" id="QCanBusDevice::setError" ref="qcanbusdevice.html#setError"/>
+            <keyword name="setError" id="QCanBusFrame::setError" ref="qcanbusframe.html#setError"/>
+            <keyword name="setError" id="QModbusDevice::setError" ref="qmodbusdevice.html#setError"/>
+            <keyword name="setErrorStateIndicator" id="QCanBusFrame::setErrorStateIndicator" ref="qcanbusframe.html#setErrorStateIndicator"/>
+            <keyword name="setExceptionCode" id="QModbusExceptionResponse::setExceptionCode" ref="qmodbusexceptionresponse.html#setExceptionCode"/>
+            <keyword name="setExtendedFrameFormat" id="QCanBusFrame::setExtendedFrameFormat" ref="qcanbusframe.html#setExtendedFrameFormat"/>
+            <keyword name="setFlexibleDataRateFormat" id="QCanBusFrame::setFlexibleDataRateFormat" ref="qcanbusframe.html#setFlexibleDataRateFormat"/>
+            <keyword name="setFrameId" id="QCanBusFrame::setFrameId" ref="qcanbusframe.html#setFrameId"/>
+            <keyword name="setFrameType" id="QCanBusFrame::setFrameType" ref="qcanbusframe.html#setFrameType"/>
+            <keyword name="setFunctionCode" id="QModbusExceptionResponse::setFunctionCode" ref="qmodbusexceptionresponse.html#setFunctionCode"/>
+            <keyword name="setFunctionCode" id="QModbusPdu::setFunctionCode" ref="qmodbuspdu.html#setFunctionCode"/>
+            <keyword name="setInterFrameDelay" id="QModbusRtuSerialMaster::setInterFrameDelay" ref="qmodbusrtuserialmaster.html#setInterFrameDelay"/>
+            <keyword name="setLocalEcho" id="QCanBusFrame::setLocalEcho" ref="qcanbusframe.html#setLocalEcho"/>
+            <keyword name="setMap" id="QModbusServer::setMap" ref="qmodbusserver.html#setMap"/>
+            <keyword name="setNumberOfRetries" id="QModbusClient::setNumberOfRetries" ref="qmodbusclient.html#setNumberOfRetries"/>
+            <keyword name="setPayload" id="QCanBusFrame::setPayload" ref="qcanbusframe.html#setPayload"/>
+            <keyword name="setRegisterType" id="QModbusDataUnit::setRegisterType" ref="qmodbusdataunit.html#setRegisterType"/>
+            <keyword name="setServerAddress" id="QModbusServer::setServerAddress" ref="qmodbusserver.html#setServerAddress"/>
+            <keyword name="setStartAddress" id="QModbusDataUnit::setStartAddress" ref="qmodbusdataunit.html#setStartAddress"/>
+            <keyword name="setState" id="QCanBusDevice::setState" ref="qcanbusdevice.html#setState"/>
+            <keyword name="setState" id="QModbusDevice::setState" ref="qmodbusdevice.html#setState"/>
+            <keyword name="setTimeStamp" id="QCanBusFrame::setTimeStamp" ref="qcanbusframe.html#setTimeStamp"/>
+            <keyword name="setTimeout" id="QModbusClient::setTimeout" ref="qmodbusclient.html#setTimeout"/>
+            <keyword name="setTurnaroundDelay" id="QModbusRtuSerialMaster::setTurnaroundDelay" ref="qmodbusrtuserialmaster.html#setTurnaroundDelay"/>
+            <keyword name="setValue" id="QModbusDataUnit::setValue" ref="qmodbusdataunit.html#setValue"/>
+            <keyword name="setValue" id="QModbusServer::setValue" ref="qmodbusserver.html#setValue"/>
+            <keyword name="setValueCount" id="QModbusDataUnit::setValueCount" ref="qmodbusdataunit.html#setValueCount"/>
+            <keyword name="setValues" id="QModbusDataUnit::setValues" ref="qmodbusdataunit.html#setValues"/>
+            <keyword name="size" id="QModbusPdu::size" ref="qmodbuspdu.html#size"/>
+            <keyword name="startAddress" id="QModbusDataUnit::startAddress" ref="qmodbusdataunit.html#startAddress"/>
+            <keyword name="state" id="QCanBusDevice::state" ref="qcanbusdevice.html#state"/>
+            <keyword name="state" id="QModbusDevice::state" ref="qmodbusdevice.html#state"/>
+            <keyword name="stateChanged" id="QCanBusDevice::stateChanged" ref="qcanbusdevice.html#stateChanged"/>
+            <keyword name="stateChanged" id="QModbusDevice::stateChanged" ref="qmodbusdevice.html#stateChanged"/>
+            <keyword name="swap" id="QCanBusDeviceInfo::swap" ref="qcanbusdeviceinfo.html#swap"/>
+            <keyword name="timeStamp" id="QCanBusFrame::timeStamp" ref="qcanbusframe.html#timeStamp"/>
+            <keyword name="timeout" id="QModbusClient::timeout" ref="qmodbusclient.html#timeout-prop"/>
+            <keyword name="timeout" id="QModbusClient::timeout" ref="qmodbusclient.html#timeout-prop"/>
+            <keyword name="timeoutChanged" id="QModbusClient::timeoutChanged" ref="qmodbusclient.html#timeoutChanged"/>
+            <keyword name="toString" id="QCanBusFrame::toString" ref="qcanbusframe.html#toString"/>
+            <keyword name="turnaroundDelay" id="QModbusRtuSerialMaster::turnaroundDelay" ref="qmodbusrtuserialmaster.html#turnaroundDelay"/>
+            <keyword name="type" id="Filter::type" ref="qcanbusdevice-filter.html#type-var"/>
+            <keyword name="type" id="QModbusReply::type" ref="qmodbusreply.html#type"/>
+            <keyword name="value" id="QModbusDataUnit::value" ref="qmodbusdataunit.html#value"/>
+            <keyword name="value" id="QModbusDeviceIdentification::value" ref="qmodbusdeviceidentification.html#value"/>
+            <keyword name="value" id="QModbusServer::value" ref="qmodbusserver.html#value"/>
+            <keyword name="valueCount" id="QModbusDataUnit::valueCount" ref="qmodbusdataunit.html#valueCount"/>
+            <keyword name="values" id="QModbusDataUnit::values" ref="qmodbusdataunit.html#values"/>
+            <keyword name="waitForFramesReceived" id="QCanBusDevice::waitForFramesReceived" ref="qcanbusdevice.html#waitForFramesReceived"/>
+            <keyword name="waitForFramesWritten" id="QCanBusDevice::waitForFramesWritten" ref="qcanbusdevice.html#waitForFramesWritten"/>
+            <keyword name="writeData" id="QModbusServer::writeData" ref="qmodbusserver.html#writeData"/>
+            <keyword name="writeFrame" id="QCanBusDevice::writeFrame" ref="qcanbusdevice.html#writeFrame"/>
+            <keyword name="~QCanBusDeviceInfo" id="QCanBusDeviceInfo::~QCanBusDeviceInfo" ref="qcanbusdeviceinfo.html#dtor.QCanBusDeviceInfo"/>
+            <keyword name="~QModbusDevice" id="QModbusDevice::~QModbusDevice" ref="qmodbusdevice.html#dtor.QModbusDevice"/>
+            <keyword name="~QModbusPdu" id="QModbusPdu::~QModbusPdu" ref="qmodbuspdu.html#dtor.QModbusPdu"/>
+            <keyword name="~QModbusRtuSerialSlave" id="QModbusRtuSerialSlave::~QModbusRtuSerialSlave" ref="qmodbusrtuserialslave.html#dtor.QModbusRtuSerialSlave"/>
+            <keyword name="~QModbusTcpClient" id="QModbusTcpClient::~QModbusTcpClient" ref="qmodbustcpclient.html#dtor.QModbusTcpClient"/>
+            <keyword name="~QModbusTcpServer" id="QModbusTcpServer::~QModbusTcpServer" ref="qmodbustcpserver.html#dtor.QModbusTcpServer"/>
+        </keywords>
+        <files>
+            <file>images/arrow_bc.png</file>
+            <file>images/bgrContent.png</file>
+            <file>images/btn_next.png</file>
+            <file>images/btn_prev.png</file>
+            <file>images/bullet_dn.png</file>
+            <file>images/bullet_sq.png</file>
+            <file>images/can-example.png</file>
+            <file>images/home.png</file>
+            <file>images/ico_note.png</file>
+            <file>images/ico_note_attention.png</file>
+            <file>images/ico_out.png</file>
+            <file>images/logo.png</file>
+            <file>images/modbusmaster.png</file>
+            <file>images/modbusserver.png</file>
+            <file>qcanbus-members.html</file>
+            <file>qcanbus.html</file>
+            <file>qcanbusdevice-filter-members.html</file>
+            <file>qcanbusdevice-filter.html</file>
+            <file>qcanbusdevice-members.html</file>
+            <file>qcanbusdevice.html</file>
+            <file>qcanbusdeviceinfo-members.html</file>
+            <file>qcanbusdeviceinfo.html</file>
+            <file>qcanbusfactory-members.html</file>
+            <file>qcanbusfactory.html</file>
+            <file>qcanbusfactoryv2-members.html</file>
+            <file>qcanbusfactoryv2.html</file>
+            <file>qcanbusframe-members.html</file>
+            <file>qcanbusframe-timestamp-members.html</file>
+            <file>qcanbusframe-timestamp.html</file>
+            <file>qcanbusframe.html</file>
+            <file>qmodbusclient-members.html</file>
+            <file>qmodbusclient.html</file>
+            <file>qmodbusdataunit-members.html</file>
+            <file>qmodbusdataunit.html</file>
+            <file>qmodbusdevice-members.html</file>
+            <file>qmodbusdevice.html</file>
+            <file>qmodbusdeviceidentification-members.html</file>
+            <file>qmodbusdeviceidentification.html</file>
+            <file>qmodbusexceptionresponse-members.html</file>
+            <file>qmodbusexceptionresponse.html</file>
+            <file>qmodbuspdu-members.html</file>
+            <file>qmodbuspdu.html</file>
+            <file>qmodbusreply-members.html</file>
+            <file>qmodbusreply.html</file>
+            <file>qmodbusrequest-members.html</file>
+            <file>qmodbusrequest.html</file>
+            <file>qmodbusresponse-members.html</file>
+            <file>qmodbusresponse.html</file>
+            <file>qmodbusrtuserialmaster-members.html</file>
+            <file>qmodbusrtuserialmaster.html</file>
+            <file>qmodbusrtuserialslave-members.html</file>
+            <file>qmodbusrtuserialslave.html</file>
+            <file>qmodbusserver-members.html</file>
+            <file>qmodbusserver.html</file>
+            <file>qmodbustcpclient-members.html</file>
+            <file>qmodbustcpclient.html</file>
+            <file>qmodbustcpconnectionobserver-members.html</file>
+            <file>qmodbustcpconnectionobserver.html</file>
+            <file>qmodbustcpserver-members.html</file>
+            <file>qmodbustcpserver.html</file>
+            <file>qtcanbus-backends.html</file>
+            <file>qtmodbus-backends.html</file>
+            <file>qtserialbus-can-example.html</file>
+            <file>qtserialbus-examples.html</file>
+            <file>qtserialbus-index.html</file>
+            <file>qtserialbus-modbus-master-example.html</file>
+            <file>qtserialbus-modbus-slave-example.html</file>
+            <file>qtserialbus-module.html</file>
+            <file>qtserialbus-passthrucan-overview.html</file>
+            <file>qtserialbus-peakcan-overview.html</file>
+            <file>qtserialbus-socketcan-overview.html</file>
+            <file>qtserialbus-systeccan-overview.html</file>
+            <file>qtserialbus-tinycan-overview.html</file>
+            <file>qtserialbus-vectorcan-overview.html</file>
+            <file>qtserialbus-virtualcan-overview.html</file>
+            <file>style/offline-simple.css</file>
+            <file>style/offline.css</file>
+        </files>
+    </filterSection>
+</QtHelpProject>

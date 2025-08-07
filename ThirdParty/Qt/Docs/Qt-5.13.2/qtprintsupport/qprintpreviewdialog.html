@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qprintpreviewdialog.cpp -->
+  <title>QPrintPreviewDialog Class | Qt Print Support 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtprintsupport-index.html">Qt Print Support</a></td><td ><a href="qtprintsupport-module.html">C++ Classes</a></td><td >QPrintPreviewDialog</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtprintsupport-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPrintPreviewDialog Class</h1>
+<!-- $$$QPrintPreviewDialog-brief -->
+<p>The <a href="qprintpreviewdialog.html">QPrintPreviewDialog</a> class provides a dialog for previewing and configuring page layouts for printer output. <a href="#details">More...</a></p>
+<!-- @@@QPrintPreviewDialog -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QPrintPreviewDialog&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += printsupport</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.4</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtwidgets/qdialog.html">QDialog</a></td></tr></table></div><p>This class was introduced in  Qt 4.4.</p>
+<ul>
+<li><a href="qprintpreviewdialog-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qprintpreviewdialog.html#QPrintPreviewDialog">QPrintPreviewDialog</a></b>(QPrinter *<i>printer</i>, QWidget *<i>parent</i> = nullptr, Qt::WindowFlags <i>flags</i> = Qt::WindowFlags())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qprintpreviewdialog.html#QPrintPreviewDialog-1">QPrintPreviewDialog</a></b>(QWidget *<i>parent</i> = nullptr, Qt::WindowFlags <i>flags</i> = Qt::WindowFlags())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qprintpreviewdialog.html#dtor.QPrintPreviewDialog">~QPrintPreviewDialog</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qprintpreviewdialog.html#open">open</a></b>(QObject *<i>receiver</i>, const char *<i>member</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPrinter *</td><td class="memItemRight bottomAlign"><b><a href="qprintpreviewdialog.html#printer">printer</a></b>()</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qprintpreviewdialog.html#done">done</a></b>(int <i>result</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qprintpreviewdialog.html#setVisible">setVisible</a></b>(bool <i>visible</i>) override</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qprintpreviewdialog.html#paintRequested">paintRequested</a></b>(QPrinter *<i>printer</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPrintPreviewDialog-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Using <a href="qprintpreviewdialog.html">QPrintPreviewDialog</a> in your existing application is straightforward:</p>
+<ol class="1" type="1"><li>Create the <a href="qprintpreviewdialog.html">QPrintPreviewDialog</a>.<p>You can construct a <a href="qprintpreviewdialog.html">QPrintPreviewDialog</a> with an existing <a href="qprinter.html">QPrinter</a> object, or you can have <a href="qprintpreviewdialog.html">QPrintPreviewDialog</a> create one for you, which will be the system default printer.</p>
+</li>
+<li>Connect the <a href="qprintpreviewdialog.html#paintRequested">paintRequested</a>() signal to a slot.<p>When the dialog needs to generate a set of preview pages, the <a href="qprintpreviewdialog.html#paintRequested">paintRequested</a>() signal will be emitted. You can use the exact same code for the actual printing as for having the preview generated, including calling <a href="qprinter.html#newPage">QPrinter::newPage</a>() to start a new page in the preview. Connect a slot to the <a href="qprintpreviewdialog.html#paintRequested">paintRequested</a>() signal, where you draw onto the <a href="qprinter.html">QPrinter</a> object that is passed into the slot.</p>
+</li>
+<li>Call <a href="../qtwidgets/qdialog.html#exec">exec</a>().<p>Call <a href="../qtwidgets/qdialog.html#exec">QPrintPreviewDialog::exec</a>() to show the preview dialog.</p>
+</li>
+</ol>
+</div>
+<p><b>See also </b><a href="qprinter.html">QPrinter</a>, <a href="qprintdialog.html">QPrintDialog</a>, <a href="qpagesetupdialog.html">QPageSetupDialog</a>, and <a href="qprintpreviewwidget.html">QPrintPreviewWidget</a>.</p>
+<!-- @@@QPrintPreviewDialog -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QPrintPreviewDialog[overload1]$$$QPrintPreviewDialogQPrinter*QWidget*Qt::WindowFlags -->
+<h3 class="fn" id="QPrintPreviewDialog"><a name="QPrintPreviewDialog"></a>QPrintPreviewDialog::<span class="name">QPrintPreviewDialog</span>(<span class="type"><a href="qprinter.html">QPrinter</a></span> *<i>printer</i>, <span class="type"><a href="../qtwidgets/qwidget.html#QWidget">QWidget</a></span> *<i>parent</i> = nullptr, <span class="type"><a href="../qtcore/qt.html#WindowType-enum">Qt::WindowFlags</a></span> <i>flags</i> = Qt::WindowFlags())</h3>
+<p>Constructs a <a href="qprintpreviewdialog.html">QPrintPreviewDialog</a> based on <i>printer</i> and with <i>parent</i> as the parent widget. The widget flags <i>flags</i> are passed on to the <a href="../qtwidgets/qwidget.html">QWidget</a> constructor.</p>
+<p><b>See also </b><a href="../qtwidgets/qwidget.html#windowFlags-prop">QWidget::setWindowFlags</a>().</p>
+<!-- @@@QPrintPreviewDialog -->
+<!-- $$$QPrintPreviewDialog$$$QPrintPreviewDialogQWidget*Qt::WindowFlags -->
+<h3 class="fn" id="QPrintPreviewDialog-1"><a name="QPrintPreviewDialog-1"></a>QPrintPreviewDialog::<span class="name">QPrintPreviewDialog</span>(<span class="type"><a href="../qtwidgets/qwidget.html#QWidget">QWidget</a></span> *<i>parent</i> = nullptr, <span class="type"><a href="../qtcore/qt.html#WindowType-enum">Qt::WindowFlags</a></span> <i>flags</i> = Qt::WindowFlags())</h3>
+<p>This is an overloaded function.</p>
+<p>This will create an internal <a href="qprinter.html">QPrinter</a> object, which will use the system default printer.</p>
+<!-- @@@QPrintPreviewDialog -->
+<!-- $$$paintRequested[overload1]$$$paintRequestedQPrinter* -->
+<h3 class="fn" id="paintRequested"><a name="paintRequested"></a><code>[signal] </code><span class="type">void</span> QPrintPreviewDialog::<span class="name">paintRequested</span>(<span class="type"><a href="qprinter.html">QPrinter</a></span> *<i>printer</i>)</h3>
+<p>This signal is emitted when the <a href="qprintpreviewdialog.html">QPrintPreviewDialog</a> needs to generate a set of preview pages.</p>
+<p>The <i>printer</i> instance supplied is the paint device onto which you should paint the contents of each page, using the <a href="qprinter.html">QPrinter</a> instance in the same way as you would when printing directly.</p>
+<!-- @@@paintRequested -->
+<!-- $$$~QPrintPreviewDialog[overload1]$$$~QPrintPreviewDialog -->
+<h3 class="fn" id="dtor.QPrintPreviewDialog"><a name="dtor.QPrintPreviewDialog"></a><code>[virtual] </code>QPrintPreviewDialog::<span class="name">~QPrintPreviewDialog</span>()</h3>
+<p>Destroys the <a href="qprintpreviewdialog.html">QPrintPreviewDialog</a>.</p>
+<!-- @@@~QPrintPreviewDialog -->
+<!-- $$$done[overload1]$$$doneint -->
+<h3 class="fn" id="done"><a name="done"></a><code>[override virtual] </code><span class="type">void</span> QPrintPreviewDialog::<span class="name">done</span>(<span class="type">int</span> <i>result</i>)</h3>
+<p>Reimplements: <a href="../qtwidgets/qdialog.html#done">QDialog::done</a>(int r).</p>
+<!-- @@@done -->
+<!-- $$$open[overload1]$$$openQObject*constchar* -->
+<h3 class="fn" id="open"><a name="open"></a><span class="type">void</span> QPrintPreviewDialog::<span class="name">open</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>receiver</i>, const <span class="type">char</span> *<i>member</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Opens the dialog and connects its finished(int) signal to the slot specified by <i>receiver</i> and <i>member</i>.</p>
+<p>The signal will be disconnected from the slot when the dialog is closed.</p>
+<p>This function was introduced in  Qt 4.5.</p>
+<!-- @@@open -->
+<!-- $$$printer[overload1]$$$printer -->
+<h3 class="fn" id="printer"><a name="printer"></a><span class="type"><a href="qprinter.html">QPrinter</a></span> *QPrintPreviewDialog::<span class="name">printer</span>()</h3>
+<p>Returns a pointer to the <a href="qprinter.html">QPrinter</a> object this dialog is currently operating on.</p>
+<!-- @@@printer -->
+<!-- $$$setVisible[overload1]$$$setVisiblebool -->
+<h3 class="fn" id="setVisible"><a name="setVisible"></a><code>[override virtual] </code><span class="type">void</span> QPrintPreviewDialog::<span class="name">setVisible</span>(<span class="type">bool</span> <i>visible</i>)</h3>
+<p>Reimplements: <a href="../qtwidgets/qdialog.html#setVisible">QDialog::setVisible</a>(bool visible).</p>
+<!-- @@@setVisible -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

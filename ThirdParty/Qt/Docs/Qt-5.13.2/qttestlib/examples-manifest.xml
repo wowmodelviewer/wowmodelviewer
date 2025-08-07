@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<instructionals module="QtTestLib">
+    <examples>
+        <example name="Chapter 1: Writing a Unit Test" docUrl="qthelp://org.qt-project.qttest.5132/qttest/qttestlib-tutorial1-example.html" projectPath="qtestlib/tutorial1/tutorial1.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[How to write a unit test.]]></description>
+            <tags>lib,test,unit,writing</tags>
+        </example>
+        <example name="Chapter 2: Data Driven Testing" docUrl="qthelp://org.qt-project.qttest.5132/qttest/qttestlib-tutorial2-example.html" projectPath="qtestlib/tutorial2/tutorial2.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[How to create data driven tests.]]></description>
+            <tags>data,driven,lib,test,testing</tags>
+        </example>
+        <example name="Chapter 3: Simulating GUI Events" docUrl="qthelp://org.qt-project.qttest.5132/qttest/qttestlib-tutorial3-example.html" projectPath="qtestlib/tutorial3/tutorial3.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[Howe to simulate GUI events.]]></description>
+            <tags>events,gui,lib,simulating,test</tags>
+        </example>
+        <example name="Chapter 4: Replaying GUI Events" docUrl="qthelp://org.qt-project.qttest.5132/qttest/qttestlib-tutorial4-example.html" projectPath="qtestlib/tutorial4/tutorial4.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[How to replay GUI events.]]></description>
+            <tags>events,gui,lib,replaying,test</tags>
+        </example>
+        <example name="Chapter 5: Writing a Benchmark" docUrl="qthelp://org.qt-project.qttest.5132/qttest/qttestlib-tutorial5-example.html" projectPath="qtestlib/tutorial5/tutorial5.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[How to write a benchmark.]]></description>
+            <tags>benchmark,lib,test,writing</tags>
+        </example>
+    </examples>
+</instructionals>

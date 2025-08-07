@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmodbusdeviceidentification.cpp -->
+  <title>QModbusDeviceIdentification Class | Qt Serial Bus 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtserialbus-index.html">Qt Serial Bus</a></td><td ><a href="qtserialbus-module.html">C++ Classes</a></td><td >QModbusDeviceIdentification</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtserialbus-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QModbusDeviceIdentification Class</h1>
+<!-- $$$QModbusDeviceIdentification-brief -->
+<p>The <a href="qmodbusdeviceidentification.html">QModbusDeviceIdentification</a> is a container class representing the physical and functional description of a Modbus server. <a href="#details">More...</a></p>
+<!-- @@@QModbusDeviceIdentification -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QModbusDeviceIdentification&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += serialbus</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr></table></div><p>This class was introduced in  Qt 5.8.</p>
+<ul>
+<li><a href="qmodbusdeviceidentification-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdeviceidentification.html#ConformityLevel-enum">ConformityLevel</a></b> { BasicConformityLevel, RegularConformityLevel, ExtendedConformityLevel, BasicIndividualConformityLevel, RegularIndividualConformityLevel, ExtendedIndividualConformityLevel }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdeviceidentification.html#ObjectId-enum">ObjectId</a></b> { VendorNameObjectId, ProductCodeObjectId, MajorMinorRevisionObjectId, VendorUrlObjectId, ..., UndefinedObjectId }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdeviceidentification.html#ReadDeviceIdCode-enum">ReadDeviceIdCode</a></b> { BasicReadDeviceIdCode, RegularReadDeviceIdCode, ExtendedReadDeviceIdCode, IndividualReadDeviceIdCode }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdeviceidentification.html#QModbusDeviceIdentification">QModbusDeviceIdentification</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QModbusDeviceIdentification::ConformityLevel </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdeviceidentification.html#conformityLevel">conformityLevel</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdeviceidentification.html#contains">contains</a></b>(uint <i>objectId</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdeviceidentification.html#insert">insert</a></b>(uint <i>objectId</i>, const QByteArray &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdeviceidentification.html#isValid">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;int&gt; </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdeviceidentification.html#objectIds">objectIds</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdeviceidentification.html#remove">remove</a></b>(uint <i>objectId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdeviceidentification.html#setConformityLevel">setConformityLevel</a></b>(QModbusDeviceIdentification::ConformityLevel <i>level</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdeviceidentification.html#value">value</a></b>(uint <i>objectId</i>) const</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QModbusDeviceIdentification </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdeviceidentification.html#fromByteArray">fromByteArray</a></b>(const QByteArray &amp;<i>ba</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QModbusDeviceIdentification-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The Device Identification interface is modeled as an address space composed of a set of addressable data elements. The data elements are called objects and an <a href="qmodbusdeviceidentification.html#ObjectId-enum">ObjectId</a> identifies them.</p>
+</div>
+<!-- @@@QModbusDeviceIdentification -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$ConformityLevel$$$BasicConformityLevel$$$RegularConformityLevel$$$ExtendedConformityLevel$$$BasicIndividualConformityLevel$$$RegularIndividualConformityLevel$$$ExtendedIndividualConformityLevel -->
+<h3 class="fn" id="ConformityLevel-enum"><a name="ConformityLevel-enum"></a>enum QModbusDeviceIdentification::<span class="name">ConformityLevel</span></h3>
+<p>Defines the identification conformity level of the device and type of supported access.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QModbusDeviceIdentification::BasicConformityLevel</code></td><td class="topAlign tblval"><code>0x01</code></td><td class="topAlign">Basic identification (stream access).</td></tr>
+<tr><td class="topAlign"><code>QModbusDeviceIdentification::RegularConformityLevel</code></td><td class="topAlign tblval"><code>0x02</code></td><td class="topAlign">Regular identification (stream access).</td></tr>
+<tr><td class="topAlign"><code>QModbusDeviceIdentification::ExtendedConformityLevel</code></td><td class="topAlign tblval"><code>0x03</code></td><td class="topAlign">Extended identification (stream access).</td></tr>
+<tr><td class="topAlign"><code>QModbusDeviceIdentification::BasicIndividualConformityLevel</code></td><td class="topAlign tblval"><code>0x81</code></td><td class="topAlign">Basic identification (stream access and individual access).</td></tr>
+<tr><td class="topAlign"><code>QModbusDeviceIdentification::RegularIndividualConformityLevel</code></td><td class="topAlign tblval"><code>0x82</code></td><td class="topAlign">Regular identification (stream access and individual access).</td></tr>
+<tr><td class="topAlign"><code>QModbusDeviceIdentification::ExtendedIndividualConformityLevel</code></td><td class="topAlign tblval"><code>0x83</code></td><td class="topAlign">Extended identification (stream access and individual access).</td></tr>
+</table></div>
+<p><b>See also </b><a href="qmodbusdeviceidentification.html#ReadDeviceIdCode-enum">ReadDeviceIdCode</a>.</p>
+<!-- @@@ConformityLevel -->
+<!-- $$$ObjectId$$$VendorNameObjectId$$$ProductCodeObjectId$$$MajorMinorRevisionObjectId$$$VendorUrlObjectId$$$ProductNameObjectId$$$ModelNameObjectId$$$UserApplicationNameObjectId$$$ReservedObjectId$$$ProductDependentObjectId$$$UndefinedObjectId -->
+<h3 class="fn" id="ObjectId-enum"><a name="ObjectId-enum"></a>enum QModbusDeviceIdentification::<span class="name">ObjectId</span></h3>
+<p>This enum describes the possible server objects. The interface consists of three categories of objects:</p>
+<p>Basic Device Identification. All objects of this category are mandatory.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QModbusDeviceIdentification::VendorNameObjectId</code></td><td class="topAlign tblval"><code>0x00</code></td><td class="topAlign">The vendor name of the device.</td></tr>
+<tr><td class="topAlign"><code>QModbusDeviceIdentification::ProductCodeObjectId</code></td><td class="topAlign tblval"><code>0x01</code></td><td class="topAlign">The product code of the device.</td></tr>
+<tr><td class="topAlign"><code>QModbusDeviceIdentification::MajorMinorRevisionObjectId</code></td><td class="topAlign tblval"><code>0x02</code></td><td class="topAlign">The product version numbering.</td></tr>
+</table></div>
+<p>Regular Device Identification. All objects of this category are standard defined and optional.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="even"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QModbusDeviceIdentification::VendorUrlObjectId</code></td><td class="topAlign tblval"><code>0x03</code></td><td class="topAlign">The vendor URL of the device.</td></tr>
+<tr><td class="topAlign"><code>QModbusDeviceIdentification::ProductNameObjectId</code></td><td class="topAlign tblval"><code>0x04</code></td><td class="topAlign">The product name of the device.</td></tr>
+<tr><td class="topAlign"><code>QModbusDeviceIdentification::ModelNameObjectId</code></td><td class="topAlign tblval"><code>0x05</code></td><td class="topAlign">The model name of the device.</td></tr>
+<tr><td class="topAlign"><code>QModbusDeviceIdentification::UserApplicationNameObjectId</code></td><td class="topAlign tblval"><code>0x06</code></td><td class="topAlign">The user application name of the device.</td></tr>
+</table></div>
+<p>Reserved range (i.e&#x2e;, ReservedObjectId &gt;= ObjectId &lt; ProductDependentObjectId). Do not use.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QModbusDeviceIdentification::ReservedObjectId</code></td><td class="topAlign tblval"><code>0x07</code></td><td class="topAlign">First value of reserved object Ids.</td></tr>
+</table></div>
+<p>Extended Device Identification. All of these data are device dependent and optional.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="even"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QModbusDeviceIdentification::ProductDependentObjectId</code></td><td class="topAlign tblval"><code>0x80</code></td><td class="topAlign">First possible value of product dependent identifiers.</td></tr>
+<tr><td class="topAlign"><code>QModbusDeviceIdentification::UndefinedObjectId</code></td><td class="topAlign tblval"><code>0x100</code></td><td class="topAlign">Do not use.</td></tr>
+</table></div>
+<!-- @@@ObjectId -->
+<!-- $$$ReadDeviceIdCode$$$BasicReadDeviceIdCode$$$RegularReadDeviceIdCode$$$ExtendedReadDeviceIdCode$$$IndividualReadDeviceIdCode -->
+<h3 class="fn" id="ReadDeviceIdCode-enum"><a name="ReadDeviceIdCode-enum"></a>enum QModbusDeviceIdentification::<span class="name">ReadDeviceIdCode</span></h3>
+<p>Defines the access type of the read identification request.</p>
+<p>Stream access:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QModbusDeviceIdentification::BasicReadDeviceIdCode</code></td><td class="topAlign tblval"><code>0x01</code></td><td class="topAlign">Request to get the basic device identification.</td></tr>
+<tr><td class="topAlign"><code>QModbusDeviceIdentification::RegularReadDeviceIdCode</code></td><td class="topAlign tblval"><code>0x02</code></td><td class="topAlign">Request to get the regular device identification.</td></tr>
+<tr><td class="topAlign"><code>QModbusDeviceIdentification::ExtendedReadDeviceIdCode</code></td><td class="topAlign tblval"><code>0x03</code></td><td class="topAlign">Request to get the extended device identification.</td></tr>
+</table></div>
+<p>Individual access:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="even"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QModbusDeviceIdentification::IndividualReadDeviceIdCode</code></td><td class="topAlign tblval"><code>0x04</code></td><td class="topAlign">Request to get one specific identification object.</td></tr>
+</table></div>
+<!-- @@@ReadDeviceIdCode -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QModbusDeviceIdentification[overload1]$$$QModbusDeviceIdentification -->
+<h3 class="fn" id="QModbusDeviceIdentification"><a name="QModbusDeviceIdentification"></a>QModbusDeviceIdentification::<span class="name">QModbusDeviceIdentification</span>()</h3>
+<p>Constructs an invalid <a href="qmodbusdeviceidentification.html">QModbusDeviceIdentification</a> object.</p>
+<!-- @@@QModbusDeviceIdentification -->
+<!-- $$$conformityLevel[overload1]$$$conformityLevel -->
+<h3 class="fn" id="conformityLevel"><a name="conformityLevel"></a><span class="type"><a href="qmodbusdeviceidentification.html#ConformityLevel-enum">QModbusDeviceIdentification::ConformityLevel</a></span> QModbusDeviceIdentification::<span class="name">conformityLevel</span>() const</h3>
+<p>Returns the identification conformity level of the device and type of supported access.</p>
+<p><b>See also </b><a href="qmodbusdeviceidentification.html#setConformityLevel">setConformityLevel</a>().</p>
+<!-- @@@conformityLevel -->
+<!-- $$$contains[overload1]$$$containsuint -->
+<h3 class="fn" id="contains"><a name="contains"></a><span class="type">bool</span> QModbusDeviceIdentification::<span class="name">contains</span>(<span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> <i>objectId</i>) const</h3>
+<p>Returns <code>true</code> if there is an item for the given <i>objectId</i>; otherwise <code>false</code>.</p>
+<p><b>See also </b><a href="qmodbusdeviceidentification.html#ObjectId-enum">ObjectId</a>.</p>
+<!-- @@@contains -->
+<!-- $$$fromByteArray[overload1]$$$fromByteArrayconstQByteArray& -->
+<h3 class="fn" id="fromByteArray"><a name="fromByteArray"></a><code>[static] </code><span class="type"><a href="qmodbusdeviceidentification.html#QModbusDeviceIdentification">QModbusDeviceIdentification</a></span> QModbusDeviceIdentification::<span class="name">fromByteArray</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>ba</i>)</h3>
+<p>Converts the byte array <i>ba</i> to a <a href="qmodbusdeviceidentification.html">QModbusDeviceIdentification</a> object.</p>
+<p><b>Note: </b>: The returned object might be empty or even invalid if some error occurs while processing the byte array.</p><p><b>See also </b><a href="qmodbusdeviceidentification.html#isValid">isValid</a>().</p>
+<!-- @@@fromByteArray -->
+<!-- $$$insert[overload1]$$$insertuintconstQByteArray& -->
+<h3 class="fn" id="insert"><a name="insert"></a><span class="type">bool</span> QModbusDeviceIdentification::<span class="name">insert</span>(<span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> <i>objectId</i>, const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>value</i>)</h3>
+<p>Inserts a new item with the <i>objectId</i> and a value of <i>value</i>. If there is already an item with the <i>objectId</i>, that item's value is replaced with <i>value</i>.</p>
+<p>Returns <code>true</code> if the size of <i>value</i> is less than 245 bytes and the <i>objectId</i> is less then <a href="qmodbusdeviceidentification.html#ObjectId-enum">QModbusDeviceIdentification::UndefinedObjectId</a>.</p>
+<p><b>See also </b><a href="qmodbusdeviceidentification.html#ObjectId-enum">ObjectId</a>.</p>
+<!-- @@@insert -->
+<!-- $$$isValid[overload1]$$$isValid -->
+<h3 class="fn" id="isValid"><a name="isValid"></a><span class="type">bool</span> QModbusDeviceIdentification::<span class="name">isValid</span>() const</h3>
+<p>Returns <code>true</code> if the device identification object is valid; otherwise <code>false</code>.</p>
+<p>A device identification object is considered valid if <a href="qmodbusdeviceidentification.html#ObjectId-enum">ProductNameObjectId</a>, <a href="qmodbusdeviceidentification.html#ObjectId-enum">ProductCodeObjectId</a> and <a href="qmodbusdeviceidentification.html#ObjectId-enum">MajorMinorRevisionObjectId</a> are set to a non-empty value. Still the object can contain valid object id's and associated data.</p>
+<p><b>Note: </b>A default constructed device identification object is invalid.</p><!-- @@@isValid -->
+<!-- $$$objectIds[overload1]$$$objectIds -->
+<h3 class="fn" id="objectIds"><a name="objectIds"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type">int</span>&gt; QModbusDeviceIdentification::<span class="name">objectIds</span>() const</h3>
+<p>Returns a list containing all the object id's in the <code>QModbusDeviceIdentification</code> object in ascending order.</p>
+<p><b>See also </b><a href="qmodbusdeviceidentification.html#ObjectId-enum">ObjectId</a>.</p>
+<!-- @@@objectIds -->
+<!-- $$$remove[overload1]$$$removeuint -->
+<h3 class="fn" id="remove"><a name="remove"></a><span class="type">void</span> QModbusDeviceIdentification::<span class="name">remove</span>(<span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> <i>objectId</i>)</h3>
+<p>Removes the item for the given <i>objectId</i>.</p>
+<p><b>See also </b><a href="qmodbusdeviceidentification.html#ObjectId-enum">ObjectId</a>.</p>
+<!-- @@@remove -->
+<!-- $$$setConformityLevel[overload1]$$$setConformityLevelQModbusDeviceIdentification::ConformityLevel -->
+<h3 class="fn" id="setConformityLevel"><a name="setConformityLevel"></a><span class="type">void</span> QModbusDeviceIdentification::<span class="name">setConformityLevel</span>(<span class="type"><a href="qmodbusdeviceidentification.html#ConformityLevel-enum">QModbusDeviceIdentification::ConformityLevel</a></span> <i>level</i>)</h3>
+<p>Sets the identification conformity level of the device and type of supported access to <i>level</i>.</p>
+<p><b>See also </b><a href="qmodbusdeviceidentification.html#conformityLevel">conformityLevel</a>().</p>
+<!-- @@@setConformityLevel -->
+<!-- $$$value[overload1]$$$valueuint -->
+<h3 class="fn" id="value"><a name="value"></a><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> QModbusDeviceIdentification::<span class="name">value</span>(<span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> <i>objectId</i>) const</h3>
+<p>Returns the value associated with the <i>objectId</i>. If there is no item with the <i>objectId</i>, the function returns a <a href="../qtcore/containers.html#default-constructed-value">default-constructed value</a>.</p>
+<p><b>See also </b><a href="qmodbusdeviceidentification.html#ObjectId-enum">ObjectId</a>.</p>
+<!-- @@@value -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

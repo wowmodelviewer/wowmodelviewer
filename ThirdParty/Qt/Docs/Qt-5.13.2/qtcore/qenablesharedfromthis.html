@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qsharedpointer.cpp -->
+  <title>QEnableSharedFromThis Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QEnableSharedFromThis</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QEnableSharedFromThis Class</h1>
+<!-- $$$QEnableSharedFromThis-brief -->
+<p>A base class that allows obtaining a <a href="qsharedpointer.html">QSharedPointer</a> for an object already managed by a shared pointer. <a href="#details">More...</a></p>
+<!-- @@@QEnableSharedFromThis -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QEnableSharedFromThis&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.4</td></tr></table></div><p>This class was introduced in  Qt 5.4.</p>
+<ul>
+<li><a href="qenablesharedfromthis-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QSharedPointer&lt;T&gt; </td><td class="memItemRight bottomAlign"><b><a href="qenablesharedfromthis.html#sharedFromThis">sharedFromThis</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSharedPointer&lt;const T&gt; </td><td class="memItemRight bottomAlign"><b><a href="qenablesharedfromthis.html#sharedFromThis-1">sharedFromThis</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QEnableSharedFromThis-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>You can inherit this class when you need to create a <a href="qsharedpointer.html">QSharedPointer</a> from any instance of a class; for instance, from within the object itself. The key point is that the technique of just returning <a href="qsharedpointer.html">QSharedPointer</a>&lt;T&gt;(this) cannot be used, because this winds up creating multiple distinct <a href="qsharedpointer.html">QSharedPointer</a> objects with separate reference counts. For this reason you must never create more than one <a href="qsharedpointer.html">QSharedPointer</a> from the same raw pointer.</p>
+<p><a href="qenablesharedfromthis.html">QEnableSharedFromThis</a> defines two member functions called <a href="qenablesharedfromthis.html#sharedFromThis">sharedFromThis</a>() that return a <a href="qsharedpointer.html">QSharedPointer</a>&lt;T&gt; and <a href="qsharedpointer.html">QSharedPointer</a>&lt;const T&gt;, depending on constness, to <code>this</code>:</p>
+<pre class="cpp">
+
+      <span class="keyword">class</span> Y: <span class="keyword">public</span> <span class="type"><a href="qenablesharedfromthis.html">QEnableSharedFromThis</a></span><span class="operator">&lt;</span>Y<span class="operator">&gt;</span>
+      {
+      <span class="keyword">public</span>:
+          <span class="type"><a href="qsharedpointer.html">QSharedPointer</a></span><span class="operator">&lt;</span>Y<span class="operator">&gt;</span> f()
+          {
+              <span class="keyword">return</span> sharedFromThis();
+          }
+      };
+
+      <span class="type">int</span> main()
+      {
+          <span class="type"><a href="qsharedpointer.html">QSharedPointer</a></span><span class="operator">&lt;</span>Y<span class="operator">&gt;</span> p(<span class="keyword">new</span> Y());
+          <span class="type"><a href="qsharedpointer.html">QSharedPointer</a></span><span class="operator">&lt;</span>Y<span class="operator">&gt;</span> y <span class="operator">=</span> p<span class="operator">-</span><span class="operator">&gt;</span>f();
+          Q_ASSERT(p <span class="operator">=</span><span class="operator">=</span> y); <span class="comment">// p and q must share ownership</span>
+      }
+
+</pre>
+<p>It is also possible to get a shared pointer from an object outside of the class itself. This is especially useful in code that provides an interface to scripts, where it is currently not possible to use shared pointers. For example:</p>
+<pre class="cpp">
+
+      <span class="keyword">class</span> ScriptInterface : <span class="keyword">public</span> <span class="type"><a href="qobject.html">QObject</a></span>
+      {
+          Q_OBJECT
+
+          <span class="comment">// ...</span>
+
+      <span class="keyword">public</span> <span class="keyword">slots</span>:
+          <span class="type">void</span> slotCalledByScript(Y <span class="operator">*</span>managedBySharedPointer)
+          {
+              <span class="type"><a href="qsharedpointer.html">QSharedPointer</a></span><span class="operator">&lt;</span>Y<span class="operator">&gt;</span> yPtr <span class="operator">=</span> managedBySharedPointer<span class="operator">-</span><span class="operator">&gt;</span>sharedFromThis();
+              <span class="comment">// Some other code unrelated to scripts that expects a QSharedPointer&lt;Y&gt; ...</span>
+          }
+      };
+
+</pre>
+</div>
+<!-- @@@QEnableSharedFromThis -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$sharedFromThis[overload1]$$$sharedFromThis -->
+<h3 class="fn" id="sharedFromThis"><a name="sharedFromThis"></a><span class="type"><a href="qsharedpointer.html">QSharedPointer</a></span>&lt;<span class="type">T</span>&gt; QEnableSharedFromThis::<span class="name">sharedFromThis</span>()</h3>
+<p>If <code>this</code> (that is, the subclass instance invoking this method) is being managed by a <a href="qsharedpointer.html">QSharedPointer</a>, returns a shared pointer instance pointing to <code>this</code>; otherwise returns a null <a href="qsharedpointer.html">QSharedPointer</a>.</p>
+<p>This function was introduced in  Qt 5.4.</p>
+<!-- @@@sharedFromThis -->
+<!-- $$$sharedFromThis$$$sharedFromThis -->
+<h3 class="fn" id="sharedFromThis-1"><a name="sharedFromThis-1"></a><span class="type"><a href="qsharedpointer.html">QSharedPointer</a></span>&lt;const <span class="type">T</span>&gt; QEnableSharedFromThis::<span class="name">sharedFromThis</span>() const</h3>
+<p>This is an overloaded function.</p>
+<p>Const overload of <a href="qenablesharedfromthis.html#sharedFromThis">sharedFromThis</a>().</p>
+<p>This function was introduced in  Qt 5.4.</p>
+<!-- @@@sharedFromThis -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

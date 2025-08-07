@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qphongalphamaterial.cpp -->
+  <title>QPhongAlphaMaterial Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QPhongAlphaMaterial</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPhongAlphaMaterial Class</h1>
+<span class="small-subtitle">(<a href="qt3dextras-qphongalphamaterial.html">Qt3DExtras::QPhongAlphaMaterial</a>)<br/></span>
+<!-- $$$QPhongAlphaMaterial-brief -->
+<p>The <a href="qt3dextras-qphongalphamaterial.html">QPhongAlphaMaterial</a> class provides a default implementation of the phong lighting effect with alpha. <a href="#details">More...</a></p>
+<!-- @@@QPhongAlphaMaterial -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QPhongAlphaMaterial&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3dextras</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3drender-qmaterial.html">Qt3DRender::QMaterial</a></td></tr></table></div><p><b>This class is obsolete.</b> It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>This class was introduced in  Qt 5.7.</p>
+<ul>
+<li><a href="qt3dextras-qphongalphamaterial-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qt3dextras-qphongalphamaterial.html#alpha-prop">alpha</a></b> : float</li>
+<li class="fn"><b><a href="qt3dextras-qphongalphamaterial.html#ambient-prop">ambient</a></b> : QColor</li>
+<li class="fn"><b><a href="qt3dextras-qphongalphamaterial.html#blendFunctionArg-prop">blendFunctionArg</a></b> : Qt3DRender::QBlendEquation::BlendFunction</li>
+<li class="fn"><b><a href="qt3dextras-qphongalphamaterial.html#destinationAlphaArg-prop">destinationAlphaArg</a></b> : Qt3DRender::QBlendEquationArguments::Blending</li>
+<li class="fn"><b><a href="qt3dextras-qphongalphamaterial.html#destinationRgbArg-prop">destinationRgbArg</a></b> : Qt3DRender::QBlendEquationArguments::Blending</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qt3dextras-qphongalphamaterial.html#diffuse-prop">diffuse</a></b> : QColor</li>
+<li class="fn"><b><a href="qt3dextras-qphongalphamaterial.html#shininess-prop">shininess</a></b> : float</li>
+<li class="fn"><b><a href="qt3dextras-qphongalphamaterial.html#sourceAlphaArg-prop">sourceAlphaArg</a></b> : Qt3DRender::QBlendEquationArguments::Blending</li>
+<li class="fn"><b><a href="qt3dextras-qphongalphamaterial.html#sourceRgbArg-prop">sourceRgbArg</a></b> : Qt3DRender::QBlendEquationArguments::Blending</li>
+<li class="fn"><b><a href="qt3dextras-qphongalphamaterial.html#specular-prop">specular</a></b> : QColor</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#QPhongAlphaMaterial">QPhongAlphaMaterial</a></b>(Qt3DCore::QNode *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#dtor.QPhongAlphaMaterial">~QPhongAlphaMaterial</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> float </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#alpha-prop">alpha</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QColor </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#ambient-prop">ambient</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QBlendEquation::BlendFunction </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#blendFunctionArg-prop">blendFunctionArg</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QBlendEquationArguments::Blending </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#destinationAlphaArg-prop">destinationAlphaArg</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QBlendEquationArguments::Blending </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#destinationRgbArg-prop">destinationRgbArg</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QColor </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#diffuse-prop">diffuse</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> float </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#shininess-prop">shininess</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QBlendEquationArguments::Blending </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#sourceAlphaArg-prop">sourceAlphaArg</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QBlendEquationArguments::Blending </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#sourceRgbArg-prop">sourceRgbArg</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QColor </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#specular-prop">specular</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#alpha-prop">setAlpha</a></b>(float <i>alpha</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#ambient-prop">setAmbient</a></b>(const QColor &amp;<i>ambient</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#blendFunctionArg-prop">setBlendFunctionArg</a></b>(Qt3DRender::QBlendEquation::BlendFunction <i>blendFunctionArg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#destinationAlphaArg-prop">setDestinationAlphaArg</a></b>(Qt3DRender::QBlendEquationArguments::Blending <i>destinationAlphaArg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#destinationRgbArg-prop">setDestinationRgbArg</a></b>(Qt3DRender::QBlendEquationArguments::Blending <i>destinationRgbArg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#diffuse-prop">setDiffuse</a></b>(const QColor &amp;<i>diffuse</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#shininess-prop">setShininess</a></b>(float <i>shininess</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#sourceAlphaArg-prop">setSourceAlphaArg</a></b>(Qt3DRender::QBlendEquationArguments::Blending <i>sourceAlphaArg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#sourceRgbArg-prop">setSourceRgbArg</a></b>(Qt3DRender::QBlendEquationArguments::Blending <i>sourceRgbArg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#specular-prop">setSpecular</a></b>(const QColor &amp;<i>specular</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#alpha-prop">alphaChanged</a></b>(float <i>alpha</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#ambient-prop">ambientChanged</a></b>(const QColor &amp;<i>ambient</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#blendFunctionArg-prop">blendFunctionArgChanged</a></b>(Qt3DRender::QBlendEquation::BlendFunction <i>blendFunctionArg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#destinationAlphaArg-prop">destinationAlphaArgChanged</a></b>(Qt3DRender::QBlendEquationArguments::Blending <i>destinationAlphaArg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#destinationRgbArg-prop">destinationRgbArgChanged</a></b>(Qt3DRender::QBlendEquationArguments::Blending <i>destinationRgbArg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#diffuse-prop">diffuseChanged</a></b>(const QColor &amp;<i>diffuse</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#shininess-prop">shininessChanged</a></b>(float <i>shininess</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#sourceAlphaArg-prop">sourceAlphaArgChanged</a></b>(Qt3DRender::QBlendEquationArguments::Blending <i>sourceAlphaArg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#sourceRgbArg-prop">sourceRgbArgChanged</a></b>(Qt3DRender::QBlendEquationArguments::Blending <i>sourceRgbArg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qphongalphamaterial.html#specular-prop">specularChanged</a></b>(const QColor &amp;<i>specular</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPhongAlphaMaterial-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This class is deprecated; use <a href="qt3dextras-qdiffusespecularmaterial.html">QDiffuseSpecularMaterial</a> instead.</p>
+<p>The phong lighting effect is based on the combination of 3 lighting components ambient, diffuse and specular. The relative strengths of these components are controlled by means of their reflectivity coefficients which are modelled as RGB triplets:</p>
+<ul>
+<li>Ambient is the color that is emitted by an object without any other light source.</li>
+<li>Diffuse is the color that is emitted for rought surface reflections with the lights.</li>
+<li>Specular is the color emitted for shiny surface reflections with the lights.</li>
+<li>The shininess of a surface is controlled by a float property.</li>
+<li>Alpha is the transparency of the surface between 0 (fully transparent) and 1 (opaque).</li>
+</ul>
+<p>This material uses an effect with a single render pass approach and performs per fragment lighting. Techniques are provided for OpenGL 2, OpenGL 3 or above as well as OpenGL ES 2.</p>
+</div>
+<!-- @@@QPhongAlphaMaterial -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$alpha-prop$$$alpha$$$setAlphafloat$$$alphaChangedfloat -->
+<h3 class="fn" id="alpha-prop"><a name="alpha-prop"></a><span class="name">alpha</span> : <span class="type">float</span></h3>
+<p>Holds the alpha component of the object which varies between 0 and 1.</p>
+<p>The default value is 0.5f.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> float </td><td class="memItemRight bottomAlign"><span class="name"><b>alpha</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setAlpha</b></span>(float <i>alpha</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>alphaChanged</b></span>(float <i>alpha</i>)</td></tr>
+</table></div>
+<!-- @@@alpha -->
+<!-- $$$ambient-prop$$$ambient$$$setAmbientconstQColor&$$$ambientChangedconstQColor& -->
+<h3 class="fn" id="ambient-prop"><a name="ambient-prop"></a><span class="name">ambient</span> : <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span></h3>
+<p>Holds the ambient color.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QColor </td><td class="memItemRight bottomAlign"><span class="name"><b>ambient</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setAmbient</b></span>(const QColor &amp;<i>ambient</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>ambientChanged</b></span>(const QColor &amp;<i>ambient</i>)</td></tr>
+</table></div>
+<!-- @@@ambient -->
+<!-- $$$blendFunctionArg-prop$$$blendFunctionArg$$$setBlendFunctionArgQt3DRender::QBlendEquation::BlendFunction$$$blendFunctionArgChangedQt3DRender::QBlendEquation::BlendFunction -->
+<h3 class="fn" id="blendFunctionArg-prop"><a name="blendFunctionArg-prop"></a><span class="name">blendFunctionArg</span> : <span class="type"><a href="qt3drender-qblendequation.html#BlendFunction-enum">Qt3DRender::QBlendEquation::BlendFunction</a></span></h3>
+<p>Holds the blend equation function argument.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QBlendEquation::BlendFunction </td><td class="memItemRight bottomAlign"><span class="name"><b>blendFunctionArg</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setBlendFunctionArg</b></span>(Qt3DRender::QBlendEquation::BlendFunction <i>blendFunctionArg</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>blendFunctionArgChanged</b></span>(Qt3DRender::QBlendEquation::BlendFunction <i>blendFunctionArg</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qt3drender-qblendequation.html#BlendFunction-enum">Qt3DRender::QBlendEquation::BlendFunction</a>.</p>
+<!-- @@@blendFunctionArg -->
+<!-- $$$destinationAlphaArg-prop$$$destinationAlphaArg$$$setDestinationAlphaArgQt3DRender::QBlendEquationArguments::Blending$$$destinationAlphaArgChangedQt3DRender::QBlendEquationArguments::Blending -->
+<h3 class="fn" id="destinationAlphaArg-prop"><a name="destinationAlphaArg-prop"></a><span class="name">destinationAlphaArg</span> : <span class="type"><a href="qt3drender-qblendequationarguments.html#Blending-enum">Qt3DRender::QBlendEquationArguments::Blending</a></span></h3>
+<p>Holds the blend equation destination alpha blending argument.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QBlendEquationArguments::Blending </td><td class="memItemRight bottomAlign"><span class="name"><b>destinationAlphaArg</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setDestinationAlphaArg</b></span>(Qt3DRender::QBlendEquationArguments::Blending <i>destinationAlphaArg</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>destinationAlphaArgChanged</b></span>(Qt3DRender::QBlendEquationArguments::Blending <i>destinationAlphaArg</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qt3drender-qblendequationarguments.html#Blending-enum">Qt3DRender::QBlendEquationArguments::Blending</a>.</p>
+<!-- @@@destinationAlphaArg -->
+<!-- $$$destinationRgbArg-prop$$$destinationRgbArg$$$setDestinationRgbArgQt3DRender::QBlendEquationArguments::Blending$$$destinationRgbArgChangedQt3DRender::QBlendEquationArguments::Blending -->
+<h3 class="fn" id="destinationRgbArg-prop"><a name="destinationRgbArg-prop"></a><span class="name">destinationRgbArg</span> : <span class="type"><a href="qt3drender-qblendequationarguments.html#Blending-enum">Qt3DRender::QBlendEquationArguments::Blending</a></span></h3>
+<p>Holds the blend equation destination RGB blending argument.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QBlendEquationArguments::Blending </td><td class="memItemRight bottomAlign"><span class="name"><b>destinationRgbArg</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setDestinationRgbArg</b></span>(Qt3DRender::QBlendEquationArguments::Blending <i>destinationRgbArg</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>destinationRgbArgChanged</b></span>(Qt3DRender::QBlendEquationArguments::Blending <i>destinationRgbArg</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qt3drender-qblendequationarguments.html#Blending-enum">Qt3DRender::QBlendEquationArguments::Blending</a>.</p>
+<!-- @@@destinationRgbArg -->
+<!-- $$$diffuse-prop$$$diffuse$$$setDiffuseconstQColor&$$$diffuseChangedconstQColor& -->
+<h3 class="fn" id="diffuse-prop"><a name="diffuse-prop"></a><span class="name">diffuse</span> : <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span></h3>
+<p>Holds the diffuse color.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QColor </td><td class="memItemRight bottomAlign"><span class="name"><b>diffuse</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setDiffuse</b></span>(const QColor &amp;<i>diffuse</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>diffuseChanged</b></span>(const QColor &amp;<i>diffuse</i>)</td></tr>
+</table></div>
+<!-- @@@diffuse -->
+<!-- $$$shininess-prop$$$shininess$$$setShininessfloat$$$shininessChangedfloat -->
+<h3 class="fn" id="shininess-prop"><a name="shininess-prop"></a><span class="name">shininess</span> : <span class="type">float</span></h3>
+<p>Holds the shininess exponent.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> float </td><td class="memItemRight bottomAlign"><span class="name"><b>shininess</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setShininess</b></span>(float <i>shininess</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>shininessChanged</b></span>(float <i>shininess</i>)</td></tr>
+</table></div>
+<!-- @@@shininess -->
+<!-- $$$sourceAlphaArg-prop$$$sourceAlphaArg$$$setSourceAlphaArgQt3DRender::QBlendEquationArguments::Blending$$$sourceAlphaArgChangedQt3DRender::QBlendEquationArguments::Blending -->
+<h3 class="fn" id="sourceAlphaArg-prop"><a name="sourceAlphaArg-prop"></a><span class="name">sourceAlphaArg</span> : <span class="type"><a href="qt3drender-qblendequationarguments.html#Blending-enum">Qt3DRender::QBlendEquationArguments::Blending</a></span></h3>
+<p>Holds the blend equation source alpha blending argument.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QBlendEquationArguments::Blending </td><td class="memItemRight bottomAlign"><span class="name"><b>sourceAlphaArg</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setSourceAlphaArg</b></span>(Qt3DRender::QBlendEquationArguments::Blending <i>sourceAlphaArg</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>sourceAlphaArgChanged</b></span>(Qt3DRender::QBlendEquationArguments::Blending <i>sourceAlphaArg</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qt3drender-qblendequationarguments.html#Blending-enum">Qt3DRender::QBlendEquationArguments::Blending</a>.</p>
+<!-- @@@sourceAlphaArg -->
+<!-- $$$sourceRgbArg-prop$$$sourceRgbArg$$$setSourceRgbArgQt3DRender::QBlendEquationArguments::Blending$$$sourceRgbArgChangedQt3DRender::QBlendEquationArguments::Blending -->
+<h3 class="fn" id="sourceRgbArg-prop"><a name="sourceRgbArg-prop"></a><span class="name">sourceRgbArg</span> : <span class="type"><a href="qt3drender-qblendequationarguments.html#Blending-enum">Qt3DRender::QBlendEquationArguments::Blending</a></span></h3>
+<p>Holds the blend equation source RGB blending argument.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QBlendEquationArguments::Blending </td><td class="memItemRight bottomAlign"><span class="name"><b>sourceRgbArg</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setSourceRgbArg</b></span>(Qt3DRender::QBlendEquationArguments::Blending <i>sourceRgbArg</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>sourceRgbArgChanged</b></span>(Qt3DRender::QBlendEquationArguments::Blending <i>sourceRgbArg</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qt3drender-qblendequationarguments.html#Blending-enum">Qt3DRender::QBlendEquationArguments::Blending</a>.</p>
+<!-- @@@sourceRgbArg -->
+<!-- $$$specular-prop$$$specular$$$setSpecularconstQColor&$$$specularChangedconstQColor& -->
+<h3 class="fn" id="specular-prop"><a name="specular-prop"></a><span class="name">specular</span> : <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span></h3>
+<p>Holds the specular color.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QColor </td><td class="memItemRight bottomAlign"><span class="name"><b>specular</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setSpecular</b></span>(const QColor &amp;<i>specular</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>specularChanged</b></span>(const QColor &amp;<i>specular</i>)</td></tr>
+</table></div>
+<!-- @@@specular -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QPhongAlphaMaterial[overload1]$$$QPhongAlphaMaterialQt3DCore::QNode* -->
+<h3 class="fn" id="QPhongAlphaMaterial"><a name="QPhongAlphaMaterial"></a>QPhongAlphaMaterial::<span class="name">QPhongAlphaMaterial</span>(<span class="type"><a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new <a href="qt3dextras-qphongalphamaterial.html" class="obsolete">QPhongAlphaMaterial</a> instance with parent object <i>parent</i>.</p>
+<!-- @@@QPhongAlphaMaterial -->
+<!-- $$$~QPhongAlphaMaterial[overload1]$$$~QPhongAlphaMaterial -->
+<h3 class="fn" id="dtor.QPhongAlphaMaterial"><a name="dtor.QPhongAlphaMaterial"></a><code>[virtual] </code>QPhongAlphaMaterial::<span class="name">~QPhongAlphaMaterial</span>()</h3>
+<p>Destroys the <a href="qt3dextras-qphongalphamaterial.html" class="obsolete">QPhongAlphaMaterial</a>.</p>
+<!-- @@@~QPhongAlphaMaterial -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

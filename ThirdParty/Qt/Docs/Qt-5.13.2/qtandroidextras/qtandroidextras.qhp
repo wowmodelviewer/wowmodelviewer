@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+    <namespace>org.qt-project.qtandroidextras.5132</namespace>
+    <virtualFolder>qtandroidextras</virtualFolder>
+    <metaData name="version" value="5.13.2"/>
+    <customFilter name="QtAndroidExtras 5.13.2">
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtandroidextras</filterAttribute>
+    </customFilter>
+    <filterSection>
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtandroidextras</filterAttribute>
+        <filterAttribute>qtrefdoc</filterAttribute>
+        <toc>
+            <section ref="qtandroidextras-index.html" title="Qt Android Extras">
+                <section ref="qtandroidextras-module.html" title="C++ Classes and Namespaces">
+                    <section ref="qandroidactivityresultreceiver.html" title="QAndroidActivityResultReceiver Class Reference">
+                        <section ref="qandroidactivityresultreceiver-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qandroidbinder.html" title="QAndroidBinder Class Reference">
+                        <section ref="qandroidbinder-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qandroidintent.html" title="QAndroidIntent Class Reference">
+                        <section ref="qandroidintent-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qandroidjnienvironment.html" title="QAndroidJniEnvironment Class Reference">
+                        <section ref="qandroidjnienvironment-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qandroidjniexceptioncleaner.html" title="QAndroidJniExceptionCleaner Class Reference">
+                        <section ref="qandroidjniexceptioncleaner-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qandroidjniobject.html" title="QAndroidJniObject Class Reference">
+                        <section ref="qandroidjniobject-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qandroidparcel.html" title="QAndroidParcel Class Reference">
+                        <section ref="qandroidparcel-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qandroidservice.html" title="QAndroidService Class Reference">
+                        <section ref="qandroidservice-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qandroidserviceconnection.html" title="QAndroidServiceConnection Class Reference">
+                        <section ref="qandroidserviceconnection-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qtandroid.html" title="QtAndroid"/>
+                </section>
+                <section ref="examples-qtandroidextras.html" title="Examples"/>
+            </section>
+        </toc>
+        <keywords>
+            <keyword name="QAndroidActivityResultReceiver" id="QAndroidActivityResultReceiver" ref="qandroidactivityresultreceiver.html"/>
+            <keyword name="QAndroidBinder" id="QAndroidBinder" ref="qandroidbinder.html"/>
+            <keyword name="QAndroidBinder::CallType" id="QAndroidBinder::CallType" ref="qandroidbinder.html#CallType-enum"/>
+            <keyword name="QAndroidBinder::Normal" id="QAndroidBinder::Normal" ref="qandroidbinder.html#CallType-enum"/>
+            <keyword name="QAndroidBinder::OneWay" id="QAndroidBinder::OneWay" ref="qandroidbinder.html#CallType-enum"/>
+            <keyword name="QAndroidIntent" id="QAndroidIntent" ref="qandroidintent.html"/>
+            <keyword name="QAndroidJniEnvironment" id="QAndroidJniEnvironment" ref="qandroidjnienvironment.html"/>
+            <keyword name="QAndroidJniExceptionCleaner" id="QAndroidJniExceptionCleaner" ref="qandroidjniexceptioncleaner.html"/>
+            <keyword name="QAndroidJniExceptionCleaner::OutputMode" id="QAndroidJniExceptionCleaner::OutputMode" ref="qandroidjniexceptioncleaner.html#OutputMode-enum"/>
+            <keyword name="QAndroidJniExceptionCleaner::Silent" id="QAndroidJniExceptionCleaner::Silent" ref="qandroidjniexceptioncleaner.html#OutputMode-enum"/>
+            <keyword name="QAndroidJniExceptionCleaner::Verbose" id="QAndroidJniExceptionCleaner::Verbose" ref="qandroidjniexceptioncleaner.html#OutputMode-enum"/>
+            <keyword name="QAndroidJniObject" id="QAndroidJniObject" ref="qandroidjniobject.html"/>
+            <keyword name="QAndroidParcel" id="QAndroidParcel" ref="qandroidparcel.html"/>
+            <keyword name="QAndroidService" id="QAndroidService" ref="qandroidservice.html"/>
+            <keyword name="QAndroidServiceConnection" id="QAndroidServiceConnection" ref="qandroidserviceconnection.html"/>
+            <keyword name="Qt Android Extras" id="Qt Android Extras" ref="qtandroidextras-index.html"/>
+            <keyword name="Qt Android Extras C++ Classes" id="Qt Android Extras C++ Classes" ref="qtandroidextras-module.html"/>
+            <keyword name="Qt Android Extras Examples" id="Qt Android Extras Examples" ref="examples-qtandroidextras.html"/>
+            <keyword name="QtAndroid" id="QtAndroid" ref="qtandroid.html"/>
+            <keyword name="QtAndroid::AboveClient" id="QtAndroid::AboveClient" ref="qtandroid.html#BindFlag-enum"/>
+            <keyword name="QtAndroid::AdjustWithActivity" id="QtAndroid::AdjustWithActivity" ref="qtandroid.html#BindFlag-enum"/>
+            <keyword name="QtAndroid::AllowOomManagement" id="QtAndroid::AllowOomManagement" ref="qtandroid.html#BindFlag-enum"/>
+            <keyword name="QtAndroid::AutoCreate" id="QtAndroid::AutoCreate" ref="qtandroid.html#BindFlag-enum"/>
+            <keyword name="QtAndroid::BindFlag" id="QtAndroid::BindFlag" ref="qtandroid.html#BindFlag-enum"/>
+            <keyword name="QtAndroid::BindFlags" id="QtAndroid::BindFlags" ref="qtandroid.html#BindFlag-enum"/>
+            <keyword name="QtAndroid::DebugUnbind" id="QtAndroid::DebugUnbind" ref="qtandroid.html#BindFlag-enum"/>
+            <keyword name="QtAndroid::Denied" id="QtAndroid::Denied" ref="qtandroid.html#PermissionResult-enum"/>
+            <keyword name="QtAndroid::ExternalService" id="QtAndroid::ExternalService" ref="qtandroid.html#BindFlag-enum"/>
+            <keyword name="QtAndroid::Granted" id="QtAndroid::Granted" ref="qtandroid.html#PermissionResult-enum"/>
+            <keyword name="QtAndroid::Important" id="QtAndroid::Important" ref="qtandroid.html#BindFlag-enum"/>
+            <keyword name="QtAndroid::None" id="QtAndroid::None" ref="qtandroid.html#BindFlag-enum"/>
+            <keyword name="QtAndroid::NotForeground" id="QtAndroid::NotForeground" ref="qtandroid.html#BindFlag-enum"/>
+            <keyword name="QtAndroid::PermissionResult" id="QtAndroid::PermissionResult" ref="qtandroid.html#PermissionResult-enum"/>
+            <keyword name="QtAndroid::PermissionResultCallback" id="QtAndroid::PermissionResultCallback" ref="qtandroid.html#PermissionResultCallback-typedef"/>
+            <keyword name="QtAndroid::PermissionResultMap" id="QtAndroid::PermissionResultMap" ref="qtandroid.html#PermissionResultMap-typedef"/>
+            <keyword name="QtAndroid::Runnable" id="QtAndroid::Runnable" ref="qtandroid.html#Runnable-typedef"/>
+            <keyword name="QtAndroid::WaivePriority" id="QtAndroid::WaivePriority" ref="qtandroid.html#BindFlag-enum"/>
+            <keyword name="androidActivity" id="QtAndroid::androidActivity" ref="qtandroid.html#androidActivity"/>
+            <keyword name="androidContext" id="QtAndroid::androidContext" ref="qtandroid.html#androidContext"/>
+            <keyword name="androidSdkVersion" id="QtAndroid::androidSdkVersion" ref="qtandroid.html#androidSdkVersion"/>
+            <keyword name="androidService" id="QtAndroid::androidService" ref="qtandroid.html#androidService"/>
+            <keyword name="bindService" id="QtAndroid::bindService" ref="qtandroid.html#bindService"/>
+            <keyword name="callMethod" id="QAndroidJniObject::callMethod" ref="qandroidjniobject.html#callMethod"/>
+            <keyword name="callObjectMethod" id="QAndroidJniObject::callObjectMethod" ref="qandroidjniobject.html#callObjectMethod"/>
+            <keyword name="callStaticMethod" id="QAndroidJniObject::callStaticMethod" ref="qandroidjniobject.html#callStaticMethod"/>
+            <keyword name="callStaticObjectMethod" id="QAndroidJniObject::callStaticObjectMethod" ref="qandroidjniobject.html#callStaticObjectMethod"/>
+            <keyword name="checkPermission" id="QtAndroid::checkPermission" ref="qtandroid.html#checkPermission"/>
+            <keyword name="clean" id="QAndroidJniExceptionCleaner::clean" ref="qandroidjniexceptioncleaner.html#clean"/>
+            <keyword name="extraBytes" id="QAndroidIntent::extraBytes" ref="qandroidintent.html#extraBytes"/>
+            <keyword name="extraVariant" id="QAndroidIntent::extraVariant" ref="qandroidintent.html#extraVariant"/>
+            <keyword name="findClass" id="QAndroidJniEnvironment::findClass" ref="qandroidjnienvironment.html#findClass"/>
+            <keyword name="fromLocalRef" id="QAndroidJniObject::fromLocalRef" ref="qandroidjniobject.html#fromLocalRef"/>
+            <keyword name="fromString" id="QAndroidJniObject::fromString" ref="qandroidjniobject.html#fromString"/>
+            <keyword name="getField" id="QAndroidJniObject::getField" ref="qandroidjniobject.html#getField"/>
+            <keyword name="getObjectField" id="QAndroidJniObject::getObjectField" ref="qandroidjniobject.html#getObjectField"/>
+            <keyword name="getStaticField" id="QAndroidJniObject::getStaticField" ref="qandroidjniobject.html#getStaticField"/>
+            <keyword name="getStaticObjectField" id="QAndroidJniObject::getStaticObjectField" ref="qandroidjniobject.html#getStaticObjectField"/>
+            <keyword name="handle" id="QAndroidBinder::handle" ref="qandroidbinder.html#handle"/>
+            <keyword name="handle" id="QAndroidIntent::handle" ref="qandroidintent.html#handle"/>
+            <keyword name="handle" id="QAndroidParcel::handle" ref="qandroidparcel.html#handle"/>
+            <keyword name="handle" id="QAndroidServiceConnection::handle" ref="qandroidserviceconnection.html#handle"/>
+            <keyword name="handleActivityResult" id="QAndroidActivityResultReceiver::handleActivityResult" ref="qandroidactivityresultreceiver.html#handleActivityResult"/>
+            <keyword name="hideSplashScreen" id="QtAndroid::hideSplashScreen" ref="qtandroid.html#hideSplashScreen"/>
+            <keyword name="isClassAvailable" id="QAndroidJniObject::isClassAvailable" ref="qandroidjniobject.html#isClassAvailable"/>
+            <keyword name="isValid" id="QAndroidJniObject::isValid" ref="qandroidjniobject.html#isValid"/>
+            <keyword name="javaVM" id="QAndroidJniEnvironment::javaVM" ref="qandroidjnienvironment.html#javaVM"/>
+            <keyword name="object" id="QAndroidJniObject::object" ref="qandroidjniobject.html#object"/>
+            <keyword name="onBind" id="QAndroidService::onBind" ref="qandroidservice.html#onBind"/>
+            <keyword name="onServiceConnected" id="QAndroidServiceConnection::onServiceConnected" ref="qandroidserviceconnection.html#onServiceConnected"/>
+            <keyword name="onServiceDisconnected" id="QAndroidServiceConnection::onServiceDisconnected" ref="qandroidserviceconnection.html#onServiceDisconnected"/>
+            <keyword name="onTransact" id="QAndroidBinder::onTransact" ref="qandroidbinder.html#onTransact"/>
+            <keyword name="operator JNIEnv *" id="QAndroidJniEnvironment::operator JNIEnv *" ref="qandroidjnienvironment.html#operator-JNIEnv--2a"/>
+            <keyword name="operator!=" id="operator!=" ref="qandroidjniobject.html#operator-not-eq"/>
+            <keyword name="operator-&gt;" id="QAndroidJniEnvironment::operator-&gt;" ref="qandroidjnienvironment.html#operator--gt"/>
+            <keyword name="operator=" id="QAndroidJniObject::operator=" ref="qandroidjniobject.html#operator-eq"/>
+            <keyword name="operator==" id="operator==" ref="qandroidjniobject.html#operator-eq-eq"/>
+            <keyword name="putExtra" id="QAndroidIntent::putExtra" ref="qandroidintent.html#putExtra"/>
+            <keyword name="readBinder" id="QAndroidParcel::readBinder" ref="qandroidparcel.html#readBinder"/>
+            <keyword name="readData" id="QAndroidParcel::readData" ref="qandroidparcel.html#readData"/>
+            <keyword name="readFileDescriptor" id="QAndroidParcel::readFileDescriptor" ref="qandroidparcel.html#readFileDescriptor"/>
+            <keyword name="readVariant" id="QAndroidParcel::readVariant" ref="qandroidparcel.html#readVariant"/>
+            <keyword name="requestPermissions" id="QtAndroid::requestPermissions" ref="qtandroid.html#requestPermissions"/>
+            <keyword name="requestPermissionsSync" id="QtAndroid::requestPermissionsSync" ref="qtandroid.html#requestPermissionsSync"/>
+            <keyword name="runOnAndroidThread" id="QtAndroid::runOnAndroidThread" ref="qtandroid.html#runOnAndroidThread"/>
+            <keyword name="runOnAndroidThreadSync" id="QtAndroid::runOnAndroidThreadSync" ref="qtandroid.html#runOnAndroidThreadSync"/>
+            <keyword name="setField" id="QAndroidJniObject::setField" ref="qandroidjniobject.html#setField"/>
+            <keyword name="setStaticField" id="QAndroidJniObject::setStaticField" ref="qandroidjniobject.html#setStaticField"/>
+            <keyword name="shouldShowRequestPermissionRationale" id="QtAndroid::shouldShowRequestPermissionRationale" ref="qtandroid.html#shouldShowRequestPermissionRationale"/>
+            <keyword name="startActivity" id="QtAndroid::startActivity" ref="qtandroid.html#startActivity"/>
+            <keyword name="startIntentSender" id="QtAndroid::startIntentSender" ref="qtandroid.html#startIntentSender"/>
+            <keyword name="toString" id="QAndroidJniObject::toString" ref="qandroidjniobject.html#toString"/>
+            <keyword name="transact" id="QAndroidBinder::transact" ref="qandroidbinder.html#transact"/>
+            <keyword name="writeBinder" id="QAndroidParcel::writeBinder" ref="qandroidparcel.html#writeBinder"/>
+            <keyword name="writeData" id="QAndroidParcel::writeData" ref="qandroidparcel.html#writeData"/>
+            <keyword name="writeFileDescriptor" id="QAndroidParcel::writeFileDescriptor" ref="qandroidparcel.html#writeFileDescriptor"/>
+            <keyword name="writeVariant" id="QAndroidParcel::writeVariant" ref="qandroidparcel.html#writeVariant"/>
+            <keyword name="~QAndroidJniEnvironment" id="QAndroidJniEnvironment::~QAndroidJniEnvironment" ref="qandroidjnienvironment.html#dtor.QAndroidJniEnvironment"/>
+            <keyword name="~QAndroidJniExceptionCleaner" id="QAndroidJniExceptionCleaner::~QAndroidJniExceptionCleaner" ref="qandroidjniexceptioncleaner.html#dtor.QAndroidJniExceptionCleaner"/>
+            <keyword name="~QAndroidJniObject" id="QAndroidJniObject::~QAndroidJniObject" ref="qandroidjniobject.html#dtor.QAndroidJniObject"/>
+        </keywords>
+        <files>
+            <file>examples-qtandroidextras.html</file>
+            <file>images/arrow_bc.png</file>
+            <file>images/bgrContent.png</file>
+            <file>images/btn_next.png</file>
+            <file>images/btn_prev.png</file>
+            <file>images/bullet_dn.png</file>
+            <file>images/bullet_sq.png</file>
+            <file>images/home.png</file>
+            <file>images/ico_note.png</file>
+            <file>images/ico_note_attention.png</file>
+            <file>images/ico_out.png</file>
+            <file>images/logo.png</file>
+            <file>images/notification.png</file>
+            <file>qandroidactivityresultreceiver-members.html</file>
+            <file>qandroidactivityresultreceiver.html</file>
+            <file>qandroidbinder-members.html</file>
+            <file>qandroidbinder.html</file>
+            <file>qandroidintent-members.html</file>
+            <file>qandroidintent.html</file>
+            <file>qandroidjnienvironment-members.html</file>
+            <file>qandroidjnienvironment.html</file>
+            <file>qandroidjniexceptioncleaner-members.html</file>
+            <file>qandroidjniexceptioncleaner.html</file>
+            <file>qandroidjniobject-members.html</file>
+            <file>qandroidjniobject.html</file>
+            <file>qandroidparcel-members.html</file>
+            <file>qandroidparcel.html</file>
+            <file>qandroidservice-members.html</file>
+            <file>qandroidservice.html</file>
+            <file>qandroidserviceconnection-members.html</file>
+            <file>qandroidserviceconnection.html</file>
+            <file>qtandroid.html</file>
+            <file>qtandroidextras-index.html</file>
+            <file>qtandroidextras-module.html</file>
+            <file>qtandroidextras-notification-example.html</file>
+            <file>style/offline-simple.css</file>
+            <file>style/offline.css</file>
+        </files>
+    </filterSection>
+</QtHelpProject>

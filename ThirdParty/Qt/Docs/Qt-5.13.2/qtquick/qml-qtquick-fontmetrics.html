@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickfontmetrics.cpp -->
+  <title>FontMetrics QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >FontMetrics QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">FontMetrics QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$FontMetrics-brief -->
+<p>Provides metrics for a given font. <a href="#details">More...</a></p>
+<!-- @@@FontMetrics -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.4</td></tr></table></div><ul>
+<li><a href="qml-qtquick-fontmetrics-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-fontmetrics.html#ascent-prop">ascent</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-fontmetrics.html#averageCharacterWidth-prop">averageCharacterWidth</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-fontmetrics.html#descent-prop">descent</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-fontmetrics.html#font-prop">font</a></b></b> : font</li>
+<li class="fn"><b><b><a href="qml-qtquick-fontmetrics.html#height-prop">height</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-fontmetrics.html#leading-prop">leading</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-fontmetrics.html#lineSpacing-prop">lineSpacing</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-fontmetrics.html#lineWidth-prop">lineWidth</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-fontmetrics.html#maximumCharacterWidth-prop">maximumCharacterWidth</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-fontmetrics.html#minimumLeftBearing-prop">minimumLeftBearing</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-fontmetrics.html#minimumRightBearing-prop">minimumRightBearing</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-fontmetrics.html#overlinePosition-prop">overlinePosition</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-fontmetrics.html#strikeOutPosition-prop">strikeOutPosition</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-fontmetrics.html#underlinePosition-prop">underlinePosition</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-fontmetrics.html#xHeight-prop">xHeight</a></b></b> : real</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">qreal <b><b><a href="qml-qtquick-fontmetrics.html#advanceWidth-method">advanceWidth</a></b></b>(<i>text</i>)</li>
+<li class="fn">rect <b><b><a href="qml-qtquick-fontmetrics.html#boundingRect-method">boundingRect</a></b></b>(<i>text</i>)</li>
+<li class="fn">string <b><b><a href="qml-qtquick-fontmetrics.html#elidedText-method">elidedText</a></b></b>(<i>text</i>,  enumeration <i>mode</i>,  real <i>width</i>,  int <i>flags</i>)</li>
+<li class="fn">rect <b><b><a href="qml-qtquick-fontmetrics.html#tightBoundingRect-method">tightBoundingRect</a></b></b>(<i>text</i>)</li>
+</ul>
+<!-- $$$FontMetrics-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><a href="qml-qtquick-fontmetrics.html">FontMetrics</a> calculates the size of characters and strings for a given font.</p>
+<p>It provides a subset of the C++ <a href="../qtgui/qfontmetricsf.html">QFontMetricsF</a> API, with the added ability to change the font that is used for calculations via the <a href="qml-qtquick-fontmetrics.html#font-prop">font</a> property.</p>
+<pre class="cpp">
+
+  FontMetrics {
+      id: fontMetrics
+      font<span class="operator">.</span>family: <span class="string">&quot;Arial&quot;</span>
+  }
+
+  Rectangle {
+      width: fontMetrics<span class="operator">.</span>height <span class="operator">*</span> <span class="number">4</span>
+      height: fontMetrics<span class="operator">.</span>height <span class="operator">*</span> <span class="number">2</span>
+  }
+
+</pre>
+<p><b>See also </b><a href="../qtgui/qfontmetricsf.html">QFontMetricsF</a> and <a href="qml-qtquick-textmetrics.html">TextMetrics</a>.</p>
+<!-- @@@FontMetrics -->
+<h2>Property Documentation</h2>
+<!-- $$$ascent -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="ascent-prop"></a><span class="name">ascent</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the ascent of the font.</p>
+<p><b>See also </b><a href="../qtgui/qfontmetricsf.html#ascent">QFontMetricsF::ascent()</a>, <a href="qml-qtquick-fontmetrics.html#descent-prop">descent</a>, and <a href="qml-qtquick-fontmetrics.html#height-prop">height</a>.</p>
+</div></div><!-- @@@ascent -->
+<br/>
+<!-- $$$averageCharacterWidth -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="averageCharacterWidth-prop"></a><span class="name">averageCharacterWidth</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the average width of glyphs in the font.</p>
+<p><b>See also </b><a href="../qtgui/qfontmetricsf.html#averageCharWidth">QFontMetricsF::averageCharWidth()</a>.</p>
+</div></div><!-- @@@averageCharacterWidth -->
+<br/>
+<!-- $$$descent -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="descent-prop"></a><span class="name">descent</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the descent of the font.</p>
+<p><b>See also </b><a href="../qtgui/qfontmetricsf.html#descent">QFontMetricsF::descent()</a>, <a href="qml-qtquick-fontmetrics.html#ascent-prop">ascent</a>, and <a href="qml-qtquick-fontmetrics.html#height-prop">height</a>.</p>
+</div></div><!-- @@@descent -->
+<br/>
+<!-- $$$font -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="font-prop"></a><span class="name">font</span> : <span class="type"><a href="qml-font.html">font</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the font used for the metrics calculations.</p>
+</div></div><!-- @@@font -->
+<br/>
+<!-- $$$height -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="height-prop"></a><span class="name">height</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the height of the font.</p>
+<p><b>See also </b><a href="../qtgui/qfontmetricsf.html#height">QFontMetricsF::height()</a>.</p>
+</div></div><!-- @@@height -->
+<br/>
+<!-- $$$leading -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="leading-prop"></a><span class="name">leading</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the leading of the font.</p>
+<p><b>See also </b><a href="../qtgui/qfontmetricsf.html#leading">QFontMetricsF::leading()</a>.</p>
+</div></div><!-- @@@leading -->
+<br/>
+<!-- $$$lineSpacing -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="lineSpacing-prop"></a><span class="name">lineSpacing</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the distance from one base line to the next.</p>
+<p><b>See also </b><a href="../qtgui/qfontmetricsf.html#lineSpacing">QFontMetricsF::lineSpacing()</a>.</p>
+</div></div><!-- @@@lineSpacing -->
+<br/>
+<!-- $$$lineWidth -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="lineWidth-prop"></a><span class="name">lineWidth</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the width of the underline and strikeout lines, adjusted for the point size of the font.</p>
+<p><b>See also </b><a href="../qtgui/qfontmetricsf.html#lineWidth">QFontMetricsF::lineWidth()</a>.</p>
+</div></div><!-- @@@lineWidth -->
+<br/>
+<!-- $$$maximumCharacterWidth -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="maximumCharacterWidth-prop"></a><span class="name">maximumCharacterWidth</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the width of the widest character in the font.</p>
+<p><b>See also </b><a href="../qtgui/qfontmetricsf.html#maxWidth">QFontMetricsF::maxWidth()</a>.</p>
+</div></div><!-- @@@maximumCharacterWidth -->
+<br/>
+<!-- $$$minimumLeftBearing -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="minimumLeftBearing-prop"></a><span class="name">minimumLeftBearing</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the minimum left bearing of the font.</p>
+<p><b>See also </b><a href="../qtgui/qfontmetricsf.html#minLeftBearing">QFontMetricsF::minLeftBearing()</a>.</p>
+</div></div><!-- @@@minimumLeftBearing -->
+<br/>
+<!-- $$$minimumRightBearing -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="minimumRightBearing-prop"></a><span class="name">minimumRightBearing</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the minimum right bearing of the font.</p>
+<p><b>See also </b><a href="../qtgui/qfontmetricsf.html#minRightBearing">QFontMetricsF::minRightBearing()</a>.</p>
+</div></div><!-- @@@minimumRightBearing -->
+<br/>
+<!-- $$$overlinePosition -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="overlinePosition-prop"></a><span class="name">overlinePosition</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the distance from the base line to where an overline should be drawn.</p>
+<p><b>See also </b><a href="../qtgui/qfontmetricsf.html#overlinePos">QFontMetricsF::overlinePos()</a>, <a href="qml-qtquick-fontmetrics.html#underlinePosition-prop">underlinePosition</a>, and <a href="qml-qtquick-fontmetrics.html#strikeOutPosition-prop">strikeOutPosition</a>.</p>
+</div></div><!-- @@@overlinePosition -->
+<br/>
+<!-- $$$strikeOutPosition -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="strikeOutPosition-prop"></a><span class="name">strikeOutPosition</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the distance from the base line to where the strikeout line should be drawn.</p>
+<p><b>See also </b><a href="../qtgui/qfontmetricsf.html#strikeOutPos">QFontMetricsF::strikeOutPos()</a>, <a href="qml-qtquick-fontmetrics.html#overlinePosition-prop">overlinePosition</a>, and <a href="qml-qtquick-fontmetrics.html#underlinePosition-prop">underlinePosition</a>.</p>
+</div></div><!-- @@@strikeOutPosition -->
+<br/>
+<!-- $$$underlinePosition -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="underlinePosition-prop"></a><span class="name">underlinePosition</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the distance from the base line to where an underscore should be drawn.</p>
+<p><b>See also </b><a href="../qtgui/qfontmetricsf.html#underlinePos">QFontMetricsF::underlinePos()</a>, <a href="qml-qtquick-fontmetrics.html#overlinePosition-prop">overlinePosition</a>, and <a href="qml-qtquick-fontmetrics.html#strikeOutPosition-prop">strikeOutPosition</a>.</p>
+</div></div><!-- @@@underlinePosition -->
+<br/>
+<!-- $$$xHeight -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="xHeight-prop"></a><span class="name">xHeight</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the 'x' height of the font.</p>
+<p><b>See also </b><a href="../qtgui/qfontmetricsf.html#xHeight">QFontMetricsF::xHeight()</a>.</p>
+</div></div><!-- @@@xHeight -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$advanceWidth[overload1]$$$advanceWidth -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="advanceWidth-method"></a><span class="type">qreal</span> <span class="name">advanceWidth</span>(<i>text</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This method returns the advance in pixels of the characters in <i>text</i>. This is the distance from the position of the string to where the next string should be drawn.</p>
+<p>This method is offered as an imperative alternative to the <a href="qquicktextmetrics.html#advanceWidth-prop">advanceWidth</a> property of <a href="qquicktextmetrics.html#advanceWidth-prop">TextMetrics</a>.</p>
+<p><b>See also </b><a href="../qtgui/qfontmetricsf-obsolete.html#width">QFontMetricsF::width()</a> and <a href="../qtgui/qfontmetricsf.html#height">QFontMetricsF::height()</a>.</p>
+</div></div><!-- @@@advanceWidth -->
+<br/>
+<!-- $$$boundingRect[overload1]$$$boundingRect -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="boundingRect-method"></a><span class="type"><a href="../qtqml/qml-rect.html">rect</a></span> <span class="name">boundingRect</span>(<i>text</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This method returns the bounding rectangle of the characters in the string specified by <i>text</i>.</p>
+<p>This method is offered as an imperative alternative to the <a href="qquicktextmetrics.html#boundingRect-prop">boundingRect</a> property of <a href="qquicktextmetrics.html#boundingRect-prop">TextMetrics</a>.</p>
+<p><b>See also </b><a href="../qtgui/qfontmetricsf.html#boundingRect">QFontMetricsF::boundingRect()</a> and <a href="qml-qtquick-fontmetrics.html#tightBoundingRect-method">tightBoundingRect()</a>.</p>
+</div></div><!-- @@@boundingRect -->
+<br/>
+<!-- $$$elidedText[overload1]$$$elidedTextenumerationrealint -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="elidedText-method"></a><span class="type"><a href="../qtqml/qml-string.html">string</a></span> <span class="name">elidedText</span>(<i>text</i>,  <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span> <i>mode</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>width</i>,  <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <i>flags</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This method returns an elided version of the string (i.e&#x2e;, a string with &quot;..&#x2e;&quot; in it) if the string <i>text</i> is wider than <i>width</i>. Otherwise, returns the original string.</p>
+<p>The <i>mode</i> argument specifies the text elide mode; that is, where the ellipsis should appear when displaying text that doesn't fit.</p>
+<p>The <i>flags</i> argument is optional and currently only supports <a href="../qtcore/qt.html#TextFlag-enum">Qt::TextShowMnemonic</a>.</p>
+<p>This method is offered as an imperative alternative to the <a href="qquicktextmetrics.html#elidedText-prop">elidedText</a> property of <a href="qquicktextmetrics.html#elidedText-prop">TextMetrics</a>.</p>
+<p><b>See also </b><a href="../qtcore/qt.html#TextElideMode-enum">Qt::TextElideMode</a> and <a href="../qtgui/qfontmetricsf.html#elidedText">QFontMetricsF::elidedText()</a>.</p>
+</div></div><!-- @@@elidedText -->
+<br/>
+<!-- $$$tightBoundingRect[overload1]$$$tightBoundingRect -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="tightBoundingRect-method"></a><span class="type"><a href="../qtqml/qml-rect.html">rect</a></span> <span class="name">tightBoundingRect</span>(<i>text</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This method returns a tight bounding rectangle around the characters in the string specified by <i>text</i>.</p>
+<p>This method is offered as an imperative alternative to the <a href="qquicktextmetrics.html#tightBoundingRect-prop">tightBoundingRect</a> property of <a href="qquicktextmetrics.html#tightBoundingRect-prop">TextMetrics</a>.</p>
+<p><b>See also </b><a href="../qtgui/qfontmetricsf.html#tightBoundingRect">QFontMetricsF::tightBoundingRect()</a> and <a href="qml-qtquick-fontmetrics.html#boundingRect-method">boundingRect()</a>.</p>
+</div></div><!-- @@@tightBoundingRect -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- stylesheet.qdoc -->
+  <title>Style Sheet Example | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Style Sheet Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#mainwindow-class">MainWindow Class</a></li>
+<li class="level1"><a href="#stylesheeteditor-class">StyleSheetEditor Class</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Style Sheet Example</h1>
+<span class="subtitle"></span>
+<!-- $$$widgets/stylesheet-brief -->
+<p>The Style Sheet Example shows how to use style sheets.</p>
+<!-- @@@widgets/stylesheet -->
+<!-- $$$widgets/stylesheet-description -->
+<div class="descr"> <a name="details"></a>
+<div class="border"><p class="centerAlign"><img src="images/stylesheet-pagefold.png" alt="" /></p></div><p class="figCaption">Screen Shot of the Pagefold style sheet</p>
+<p>The Style Sheet example shows how widgets can be styled using Qt Style Sheets. You can open the style editor by selecting <b>File</b> &gt; <b>Edit</b> Style Sheet, to select an existing style sheet or design your own style and load it.</p>
+<p>The Style Sheet example consists of 2 classes:</p>
+<ul>
+<li><code>MainWindow</code></li>
+<li><code>StyleSheetEditor</code></li>
+</ul>
+<a name="mainwindow-class"></a>
+<h4 id="mainwindow-class">MainWindow Class</h4>
+<p><code>MainWindow</code> inherits <a href="qwidget.html">QWidget</a>, and is the application's main window defined in <code>mainwindow.ui</code>. The style of <code>MainWindow</code> can be modified with <code>StyleSheetEditor</code>.</p>
+<a name="stylesheeteditor-class"></a>
+<h4 id="stylesheeteditor-class">StyleSheetEditor Class</h4>
+<p><code>StyleSheetEditor</code> enables you to open an editor where you can load an existing style sheet. It is also possible to define a new stylesheet and load it. Its layout is defined in <code>stylesheeteditor.ui</code>.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> StyleSheetEditor<span class="operator">::</span>on_styleCombo_activated(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>styleName)
+
+</pre>
+<p>Sets the specified <i>styleName</i> and grays the <code>applyButton</code>.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> StyleSheetEditor<span class="operator">::</span>on_styleSheetCombo_activated(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>sheetName)
+
+</pre>
+<p>Loads the stylesheet from <code>styleSheetName</code>.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> StyleSheetEditor<span class="operator">::</span>on_styleTextEdit_textChanged()
+
+</pre>
+<p>Enables the <code>applyButton</code> when the text in the buffer has changed.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> StyleSheetEditor<span class="operator">::</span>on_applyButton_clicked()
+
+</pre>
+<p>Sets the stylesheet properties in <a href="qapplication.html#qApp">qApp</a> and disables the <code>applyButton</code>.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> StyleSheetEditor<span class="operator">::</span>loadStyleSheet(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>sheetName)
+
+</pre>
+<p>Loads the specified <i>sheetName</i>, and sets its properties in <a href="qapplication.html#qApp">qApp</a>.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/widgets/stylesheet?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@widgets/stylesheet -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

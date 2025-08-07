@@ -1,0 +1,881 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- styles.qdoc -->
+  <title>Styles and Style Aware Widgets | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Styles and Style Aware Widgets</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#customizing-a-style">Customizing a Style</a></li>
+<li class="level1"><a href="#implementing-a-custom-style">Implementing a Custom Style</a></li>
+<li class="level1"><a href="#classes-for-widget-styling">Classes for Widget Styling</a></li>
+<li class="level1"><a href="#the-qstyle-implementation">The QStyle Implementation</a></li>
+<li class="level2"><a href="#the-style-elements">The Style Elements</a></li>
+<li class="level2"><a href="#style-options">Style Options</a></li>
+<li class="level2"><a href="#qstyle-functions">QStyle Functions</a></li>
+<li class="level2"><a href="#the-palette">The Palette</a></li>
+<li class="level2"><a href="#implementation-issues">Implementation Issues</a></li>
+<li class="level1"><a href="#java-style">Java Style</a></li>
+<li class="level2"><a href="#design-and-implementation">Design and Implementation</a></li>
+<li class="level2"><a href="#limitations-and-differences-from-java">Limitations and Differences from Java</a></li>
+<li class="level2"><a href="#styling-java-check-boxes">Styling Java Check Boxes</a></li>
+<li class="level1"><a href="#widget-walkthrough">Widget Walkthrough</a></li>
+<li class="level2"><a href="#common-widget-properties">Common Widget Properties</a></li>
+<li class="level2"><a href="#widget-reference">Widget Reference</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Styles and Style Aware Widgets</h1>
+<span class="subtitle"></span>
+<!-- $$$style-reference.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Styles (classes that inherit <a href="qstyle.html">QStyle</a>) draw on behalf of widgets and encapsulate the look and feel of a GUI. The <a href="qstyle.html">QStyle</a> class is an abstract base class that encapsulates the look and feel of a GUI. Qt's built-in widgets use it to perform nearly all of their drawing, ensuring that they look exactly like the equivalent native widgets.</p>
+<p>Qt comes with a selection of built-in styles. Certain styles are only available on specific platforms. Custom styles are made available as plugins or by creating an instance of a specific style class with <a href="qstylefactory.html#create">QStyleFactory::create</a>() and setting it with <a href="qapplication.html#setStyle">QApplication::setStyle</a>().</p>
+<a name="customizing-a-style"></a>
+<h2 id="customizing-a-style">Customizing a Style</h2>
+<p>In order to customize an existing style, inherit <a href="qproxystyle.html">QProxyStyle</a> and reimplement the desired virtual methods. <a href="qproxystyle.html">QProxyStyle</a> allows one to specify a certain base style, or it will automatically use the application style when the base style is left unspecified. The former gives a full control on the base style and works best if the customization expects a certain style behavior, whereas the latter provides a platform agnostic way to customize the application style that defaults to the native platform style.</p>
+<a name="implementing-a-custom-style"></a>
+<h2 id="implementing-a-custom-style">Implementing a Custom Style</h2>
+<p><a href="qcommonstyle.html">QCommonStyle</a> provides a convenient base for full custom style implementations. The approach is same than with <a href="qproxystyle.html">QProxyStyle</a>, but inherit <a href="qcommonstyle.html">QCommonStyle</a> instead and reimplement the appropriate virtual methods. Implementing a full custom style is somewhat involved, and we therefore provide this overview. We give a step-by-step walkthrough of how to style individual Qt widgets. We will examine the <a href="qstyle.html">QStyle</a> virtual functions, member variables, and enumerations.</p>
+<p>The part of this document that does not concern the styling of individual widgets is meant to be read sequentially because later sections tend to depend on earlier ones. The description of the widgets can be used for reference while implementing a style. However, you may need to consult the Qt source code in some cases. The sequence in the styling process should become clear after reading this document, which will aid you in locating relevant code.</p>
+<p>To develop style aware widgets (i.e&#x2e;, widgets that conform to the style in which they are drawn), you need to draw them using the current style. This document shows how widgets draw themselves and which possibilities the style gives them.</p>
+<a name="classes-for-widget-styling"></a>
+<h2 id="classes-for-widget-styling">Classes for Widget Styling</h2>
+<p>These classes are used to customize an application's appearance and style.</p>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qcursor.html">QCursor</a></p></td><td class="tblDescr"><p>Mouse cursor with an arbitrary shape</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qpalette.html">QPalette</a></p></td><td class="tblDescr"><p>Contains color groups for each widget state</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qcolor.html">QColor</a></p></td><td class="tblDescr"><p>Colors based on RGB, HSV or CMYK values</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qfont.html">QFont</a></p></td><td class="tblDescr"><p>Specifies a query for a font used for drawing text</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qfontdatabase.html">QFontDatabase</a></p></td><td class="tblDescr"><p>Information about the fonts available in the underlying window system</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qfontinfo.html">QFontInfo</a></p></td><td class="tblDescr"><p>General information about fonts</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qgraphicsanchor.html">QGraphicsAnchor</a></p></td><td class="tblDescr"><p>Represents an anchor between two items in a QGraphicsAnchorLayout</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qgraphicsanchorlayout.html">QGraphicsAnchorLayout</a></p></td><td class="tblDescr"><p>Layout where one can anchor widgets together in Graphics View</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qcommonstyle.html">QCommonStyle</a></p></td><td class="tblDescr"><p>Encapsulates the common Look and Feel of a GUI</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qstyle.html">QStyle</a></p></td><td class="tblDescr"><p>Abstract base class that encapsulates the look and feel of a GUI</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qstylefactory.html">QStyleFactory</a></p></td><td class="tblDescr"><p>Creates QStyle objects</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qstylehintreturn.html">QStyleHintReturn</a></p></td><td class="tblDescr"><p>Style hints that return more than basic data types</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qstylehintreturnmask.html">QStyleHintReturnMask</a></p></td><td class="tblDescr"><p>Style hints that return a QRegion</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qstylehintreturnvariant.html">QStyleHintReturnVariant</a></p></td><td class="tblDescr"><p>Style hints that return a QVariant</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qstyleoption.html">QStyleOption</a></p></td><td class="tblDescr"><p>Stores the parameters used by QStyle functions</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qstylepainter.html">QStylePainter</a></p></td><td class="tblDescr"><p>Convenience class for drawing QStyle elements inside a widget</p></td></tr>
+</table></div>
+<a name="the-qstyle-implementation"></a>
+<h2 id="the-qstyle-implementation">The QStyle Implementation</h2>
+<p>The API of <a href="qstyle.html">QStyle</a> contains functions that draw the widgets, static helper functions to do common and difficult tasks (e.g&#x2e;, calculating the position of slider handles) and functions to do the various calculations necessary while drawing (e.g&#x2e;, for the widgets to calculate their size hints). The style also helps some widgets with the layout of their contents. In addition, it creates a <a href="../qtgui/qpalette.html">QPalette</a> that contains <a href="../qtgui/qbrush.html">QBrush</a>es to draw with.</p>
+<p><a href="qstyle.html">QStyle</a> draws graphical elements; an element is a widget or a widget part like a push button bevel, a window frame, or a scroll bar. Most draw functions now take four arguments:</p>
+<ul>
+<li>an enum value specifying which graphical element to draw</li>
+<li>a <a href="qstyleoption.html">QStyleOption</a> specifying how and where to render that element</li>
+<li>a <a href="../qtgui/qpainter.html">QPainter</a> that should be used to draw the element</li>
+<li>a <a href="qwidget.html">QWidget</a> on which the drawing is performed (optional)</li>
+</ul>
+<p>When a widget asks a style to draw an element, it provides the style with a <a href="qstyleoption.html">QStyleOption</a>, which is a class that contains the information necessary for drawing. Thanks to <a href="qstyleoption.html">QStyleOption</a>, it is possible to make <a href="qstyle.html">QStyle</a> draw widgets without linking in any code for the widget. This makes it possible to use <a href="qstyle.html">QStyle</a>'s draw functions on any paint device, i.e&#x2e;, you can draw a combobox on any widget, not just on a <a href="qcombobox.html">QComboBox</a>.</p>
+<p>The widget is passed as the last argument in case the style needs it to perform special effects (such as animated default buttons on <a href="../qtdoc/internationalization.html#macos">macOS</a>), but it isn't mandatory.</p>
+<p>In the course of this section, we will look at the style elements, the style options, and the functions of <a href="qstyle.html">QStyle</a>. Finally, we describe how the palette is used.</p>
+<p>Items in item views are drawn by <a href="model-view-programming.html#delegate-classes">delegates</a> in Qt. The item view headers are still drawn by the style. Qt's default delegate, <a href="qstyleditemdelegate.html">QStyledItemDelegate</a>, draws its items partially through the current style; it draws the check box indicators and calculates bounding rectangles for the elements of which the item consists. In this document, we only describe how to implement a <a href="qstyle.html">QStyle</a> subclass. If you wish to add support for other datatypes than those supported by the <a href="qstyleditemdelegate.html">QStyledItemDelegate</a>, you need to implement a custom delegate. Note that delegates must be set programmatically for each individual widget (i.e&#x2e;, default delegates cannot be provided as plugins).</p>
+<a name="the-style-elements"></a>
+<h3 id="the-style-elements">The Style Elements</h3>
+<p>A style element is a graphical part of a GUI. A widget consists of a hierarchy (or tree) of style elements. For instance, when a style receives a request to draw a push button (from <a href="qpushbutton.html">QPushButton</a>, for example), it draws a label (text and icon), a button bevel, and a focus frame. The button bevel, in turn, consists of a frame around the bevel and two other elements, which we will look at later. Below is a conceptual illustration of the push button element tree. We will see the actual tree for <a href="qpushbutton.html">QPushButton</a> when we go through the individual widgets.</p>
+<p class="centerAlign"><img src="images/conceptualpushbuttontree.png" alt="" /></p><p>Widgets are not necessarily drawn by asking the style to draw only one element. Widgets can make several calls to the style to draw different elements. An example is <a href="qtabwidget.html">QTabWidget</a>, which draws its tabs and frame individually.</p>
+<p>There are three element types: primitive elements, control elements, and complex control elements. The elements are defined by the <a href="qstyle.html#ComplexControl-enum">ComplexControl</a>, <a href="qstyle.html#ControlElement-enum">ControlElement</a>, and <a href="qstyle.html#PrimitiveElement-enum">PrimitiveElement</a> enums. The values of each element enum has a prefix to identify their type: <code>CC_</code> for complex elements, <code>CE_</code> for control elements, and <code>PE_</code> for primitive elements. We will in the following three sections see what defines the different elements and see examples of widgets that use them.</p>
+<p>The <a href="qstyle.html">QStyle</a> class description contains a list of these elements and their roles in styling widgets. We will see how they are used when we style individual widgets.</p>
+<a name="primitive-elements"></a>
+<h4 id="primitive-elements">Primitive Elements</h4>
+<p>Primitive elements are GUI elements that are common and often used by several widgets. Examples of these are frames, button bevels, and arrows for spin boxes, scroll bars, and combo boxes. Primitive elements cannot exist on their own: they are always part of a larger construct. They take no part in the interaction with the user, but are passive decorations in the GUI.</p>
+<a name="control-elements"></a>
+<h4 id="control-elements">Control Elements</h4>
+<p>A control element performs an action or displays information to the user. Examples of control elements are push buttons, check boxes, and header sections in tables and tree views. Control elements are not necessarily complete widgets such as push buttons, but can also be widget parts such as tab bar tabs and scroll bar sliders. They differ from primitive elements in that they are not passive, but fill a function in the interaction with the user. Controls that consist of several elements often use the style to calculate the bounding rectangles of the elements. The available sub elements are defined by the <a href="qstyle.html#SubElement-enum">SubElement</a> enum. This enum is only used for calculating bounding rectangles; sub elements are not graphical elements to be drawn like primitive, control, and complex elements.</p>
+<a name="complex-control-elements"></a>
+<h4 id="complex-control-elements">Complex Control Elements</h4>
+<p>Complex control elements contain sub controls. Complex controls behave differently depending on where the user handles them with the mouse and which keyboard keys are pressed. This is dependent on which sub control (if any) the mouse is over or pressed on. Examples of complex controls are scroll bars and combo boxes. With a scroll bar, you can use the mouse to move the slider and press the line up and line down buttons. The available sub controls are defined by the <a href="qstyle.html">SubControl</a> enum.</p>
+<p>In addition to drawing, the style needs to provide the widgets with information on which sub control (if any) a mouse press was made on. For instance, a <a href="qscrollbar.html">QScrollBar</a> needs to know if the user pressed the slider, the slider groove, or one of the buttons.</p>
+<p>Note that sub controls are not the same as the control elements described in the previous section. You cannot use the style to draw a sub control; the style will only calculate the bounding rectangle in which the sub control should be drawn. It is common, though, that complex elements use control and primitive elements to draw their sub controls, which is an approach that is frequently used by the built-in styles in Qt and also the Java style. For instance, the Java style uses PE_IndicatorCheckBox to draw the check box in group boxes (which is a sub control of <code>CC_GroupBox</code>). Some sub controls have an equivalent control element, e.g&#x2e;, the scroll bar slider (<code>SC_SCrollBarSlider</code> and <code>CE_ScrollBarSlider</code>).</p>
+<a name="other-qstyle-tasks"></a>
+<h4 id="other-qstyle-tasks">Other QStyle Tasks</h4>
+<p>The style elements and widgets, as mentioned, use the style to calculate bounding rectangles of sub elements and sub controls. Pixel metrics, which are style-dependent sizes in screen pixels, are also used for measurements when drawing. The available rectangles and pixel metrics are represented by three enums in <a href="qstyle.html">QStyle</a>: <a href="qstyle.html#SubElement-enum">SubElement</a>, <a href="qstyle.html#SubControl-enum">SubControl</a>, and <a href="qstyle.html#PixelMetric-enum">PixelMetric</a>. Values of the enums can easily by identified as they start with SE_, SC_ and PM_.</p>
+<p>The style also contains a set of style hints, which is represented as values in the <a href="qstyle.html#StyleHint-enum">StyleHint</a> enum. All widgets do not have the same functionality and look in the different styles. For instance, when the menu items in a menu do not fit in a single column on the screen, some styles support scrolling while others draw more than one column to fit all items.</p>
+<p>A style usually has a set of standard images (such as a warning, a question, and an error image) for message boxes, file dialogs, etc. <a href="qstyle.html">QStyle</a> provides the <a href="qstyle.html#StandardPixmap-enum">StandardPixmap</a> enum. Its values represent the standard images. Qt's widgets use these, so when you implement a custom style you should supply the images used by the style that is being implemented.</p>
+<p>The style calculates the spacing between widgets in layouts. There are two ways the style can handle these calculations. You can set the <code>PM_LayoutHorizontalSpacing</code> and <code>PM_LayoutVerticalSpacing</code>, which is the way the Java style does it (through <a href="qcommonstyle.html">QCommonStyle</a>). Alternatively, you can implement <a href="qstyle.html#layoutSpacing">QStyle::layoutSpacing</a>() and QStyle::layoutSpacingImplementation() if you need more control over this part of the layout. In these functions you can calculate the spacing based on control types (<a href="qsizepolicy.html#ControlType-enum">QSizePolicy::ControlType</a>) for different size policies (<a href="qsizepolicy.html#Policy-enum">QSizePolicy::Policy</a>) and also the style option for the widget in question.</p>
+<a name="style-options"></a>
+<h3 id="style-options">Style Options</h3>
+<p>The sub-classes of <a href="qstyleoption.html">QStyleOption</a> contain all information necessary to style the individual elements. Style options are instantiated - usually on the stack - and filled out by the caller of the <a href="qstyle.html">QStyle</a> function. Depending on what is drawn the style will expect different a different style option class. For example, the <code>QStyle::PE_FrameFocusRect</code> element expects a <a href="qstyleoptionfocusrect.html">QStyleOptionFocusRect</a> argument, and it's possible to create custom subclasses that a custom style can use. The style options keep public variables for performance reasons.</p>
+<p>The widgets can be in a number of different states, which are defined by the <a href="qstyle.html#StateFlag-enum">State</a> enum. Some of the state flags have different meanings depending on the widget, but others are common for all widgets like <code>State_Disabled</code>. It is <a href="qstyleoption.html">QStyleOption</a> that sets the common states with <a href="qstyleoption.html#initFrom">QStyleOption::initFrom</a>(); the rest of the states are set by the individual widgets.</p>
+<p>Most notably, the style options contain the palette and bounding rectangles of the widgets to be drawn. Most widgets have specialized style options. <a href="qpushbutton.html">QPushButton</a> and <a href="qcheckbox.html">QCheckBox</a>, for instance, use <a href="qstyleoptionbutton.html">QStyleOptionButton</a> as their style option, which contains the text, icon, and the size of their icon. The exact contents of all options are described when we go through the individual widgets.</p>
+<p>When reimplementing <a href="qstyle.html">QStyle</a> functions that take a <a href="qstyleoption.html">QStyleOption</a> parameter, you often need to cast the <a href="qstyleoption.html">QStyleOption</a> to a subclass (e.g&#x2e;, <a href="qstyleoptionfocusrect.html">QStyleOptionFocusRect</a>). For safety, you can use <a href="qstyleoption.html#qstyleoption_cast">qstyleoption_cast</a>() to ensure that the pointer type is correct. If the object isn't of the right type, <a href="qstyleoption.html#qstyleoption_cast">qstyleoption_cast</a>() returns <code>nullptr</code>. For example:</p>
+<pre class="cpp">
+
+  <span class="keyword">const</span> <span class="type"><a href="qstyleoptionfocusrect.html">QStyleOptionFocusRect</a></span> <span class="operator">*</span>focusRectOption <span class="operator">=</span>
+          qstyleoption_cast<span class="operator">&lt;</span><span class="keyword">const</span> <span class="type"><a href="qstyleoptionfocusrect.html">QStyleOptionFocusRect</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(option);
+  <span class="keyword">if</span> (focusRectOption) {
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  }
+
+</pre>
+<p>The following code snippet illustrates how to use <a href="qstyle.html">QStyle</a> to draw the focus rectangle from a custom widget's paintEvent():</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MyWidget<span class="operator">::</span>paintEvent(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> painter(<span class="keyword">this</span>);
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+      <span class="type"><a href="qstyleoptionfocusrect.html">QStyleOptionFocusRect</a></span> option(<span class="number">1</span>);
+      option<span class="operator">.</span>init(<span class="keyword">this</span>);
+      option<span class="operator">.</span>backgroundColor <span class="operator">=</span> palette()<span class="operator">.</span>color(<span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>Window);
+
+      style()<span class="operator">.</span>drawPrimitive(<span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PE_FrameFocusRect<span class="operator">,</span> <span class="operator">&amp;</span>option<span class="operator">,</span> <span class="operator">&amp;</span>painter<span class="operator">,</span>
+                            <span class="keyword">this</span>);
+  }
+
+</pre>
+<p>The next example shows how to derive from an existing style to customize the look of a graphical element:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> CustomStyle : <span class="keyword">public</span> <span class="type"><a href="qproxystyle.html">QProxyStyle</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      CustomStyle();
+      <span class="operator">~</span>CustomStyle() {}
+
+      <span class="type">void</span> drawPrimitive(PrimitiveElement element<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qstyleoption.html">QStyleOption</a></span> <span class="operator">*</span>option<span class="operator">,</span>
+                         <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">*</span>painter<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>widget) <span class="keyword">const</span> override;
+  };
+
+  <span class="type">void</span> CustomStyle<span class="operator">::</span>drawPrimitive(PrimitiveElement element<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qstyleoption.html">QStyleOption</a></span> <span class="operator">*</span>option<span class="operator">,</span>
+                                  <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">*</span>painter<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>widget) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (element <span class="operator">=</span><span class="operator">=</span> PE_IndicatorSpinUp <span class="operator">|</span><span class="operator">|</span> element <span class="operator">=</span><span class="operator">=</span> PE_IndicatorSpinDown) {
+          <span class="type"><a href="../qtgui/qpolygon.html">QPolygon</a></span> points(<span class="number">3</span>);
+          <span class="type">int</span> x <span class="operator">=</span> option<span class="operator">-</span><span class="operator">&gt;</span>rect<span class="operator">.</span>x();
+          <span class="type">int</span> y <span class="operator">=</span> option<span class="operator">-</span><span class="operator">&gt;</span>rect<span class="operator">.</span>y();
+          <span class="type">int</span> w <span class="operator">=</span> option<span class="operator">-</span><span class="operator">&gt;</span>rect<span class="operator">.</span>width() <span class="operator">/</span> <span class="number">2</span>;
+          <span class="type">int</span> h <span class="operator">=</span> option<span class="operator">-</span><span class="operator">&gt;</span>rect<span class="operator">.</span>height() <span class="operator">/</span> <span class="number">2</span>;
+          x <span class="operator">+</span><span class="operator">=</span> (option<span class="operator">-</span><span class="operator">&gt;</span>rect<span class="operator">.</span>width() <span class="operator">-</span> w) <span class="operator">/</span> <span class="number">2</span>;
+          y <span class="operator">+</span><span class="operator">=</span> (option<span class="operator">-</span><span class="operator">&gt;</span>rect<span class="operator">.</span>height() <span class="operator">-</span> h) <span class="operator">/</span> <span class="number">2</span>;
+
+          <span class="keyword">if</span> (element <span class="operator">=</span><span class="operator">=</span> PE_IndicatorSpinUp) {
+              points<span class="operator">[</span><span class="number">0</span><span class="operator">]</span> <span class="operator">=</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(x<span class="operator">,</span> y <span class="operator">+</span> h);
+              points<span class="operator">[</span><span class="number">1</span><span class="operator">]</span> <span class="operator">=</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(x <span class="operator">+</span> w<span class="operator">,</span> y <span class="operator">+</span> h);
+              points<span class="operator">[</span><span class="number">2</span><span class="operator">]</span> <span class="operator">=</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(x <span class="operator">+</span> w <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> y);
+          } <span class="keyword">else</span> { <span class="comment">// PE_SpinBoxDown</span>
+              points<span class="operator">[</span><span class="number">0</span><span class="operator">]</span> <span class="operator">=</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(x<span class="operator">,</span> y);
+              points<span class="operator">[</span><span class="number">1</span><span class="operator">]</span> <span class="operator">=</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(x <span class="operator">+</span> w<span class="operator">,</span> y);
+              points<span class="operator">[</span><span class="number">2</span><span class="operator">]</span> <span class="operator">=</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(x <span class="operator">+</span> w <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> y <span class="operator">+</span> h);
+          }
+
+          <span class="keyword">if</span> (option<span class="operator">-</span><span class="operator">&gt;</span>state <span class="operator">&amp;</span> State_Enabled) {
+              painter<span class="operator">-</span><span class="operator">&gt;</span>setPen(option<span class="operator">-</span><span class="operator">&gt;</span>palette<span class="operator">.</span>mid()<span class="operator">.</span>color());
+              painter<span class="operator">-</span><span class="operator">&gt;</span>setBrush(option<span class="operator">-</span><span class="operator">&gt;</span>palette<span class="operator">.</span>buttonText());
+          } <span class="keyword">else</span> {
+              painter<span class="operator">-</span><span class="operator">&gt;</span>setPen(option<span class="operator">-</span><span class="operator">&gt;</span>palette<span class="operator">.</span>buttonText()<span class="operator">.</span>color());
+              painter<span class="operator">-</span><span class="operator">&gt;</span>setBrush(option<span class="operator">-</span><span class="operator">&gt;</span>palette<span class="operator">.</span>mid());
+          }
+          painter<span class="operator">-</span><span class="operator">&gt;</span>drawPolygon(points);
+      } <span class="keyword">else</span> {
+      <span class="type"><a href="qproxystyle.html">QProxyStyle</a></span><span class="operator">::</span>drawPrimitive(element<span class="operator">,</span> option<span class="operator">,</span> painter<span class="operator">,</span> widget);
+      }
+  }
+
+</pre>
+<a name="qstyle-functions"></a>
+<h3 id="qstyle-functions">QStyle Functions</h3>
+<p>The <a href="qstyle.html">QStyle</a> class defines three functions for drawing the primitive, control, and complex elements: <a href="qstyle.html#drawPrimitive">drawPrimitive()</a>, <a href="qstyle.html#drawControl">drawControl()</a>, and <a href="qstyle.html#drawComplexControl">drawComplexControl()</a>. The functions takes the following parameters:</p>
+<ul>
+<li>the enum value of the element to draw.</li>
+<li>a <a href="qstyleoption.html">QStyleOption</a> which contains the information needed to draw the element.</li>
+<li>a <a href="../qtgui/qpainter.html">QPainter</a> with which to draw the element.</li>
+<li>a pointer to a <a href="qwidget.html">QWidget</a>, typically the widget that the element is painted on.</li>
+</ul>
+<p>Not all widgets send a pointer to themselves. If the style option sent to the function does not contain the information you need, you should check the widget implementation to see if it sends a pointer to itself.</p>
+<p>The <a href="qstyle.html">QStyle</a> class also provides helper functions that are used when drawing the elements. The <a href="qstyle.html#drawItemText">drawItemText()</a> function draws text within a specified rectangle, taking a <a href="../qtgui/qpalette.html">QPalette</a> as a parameter. The <a href="qstyle.html#drawItemPixmap">drawItemPixmap()</a> function helps to align a pixmap within a specified bounding rectangle.</p>
+<p>Other <a href="qstyle.html">QStyle</a> functions do various calculations for the functions that do drawing. The widgets also use these functions for calculating size hints and bounding rectangles if they draw several style elements themselves. As with the functions that draw elements, the helper functions typically take the same arguments.</p>
+<ul>
+<li>The <a href="qstyle.html#subElementRect">subElementRect()</a> function takes a <a href="qstyle.html#SubElement-enum">SubElement</a> enum value and calculates a bounding rectangle for a sub element. The style uses this function to know where to draw the different parts of an element. This is mainly done for reuse; if you create a new style, you can use the same location of sub elements as the super class.</li>
+<li>The <a href="qstyle.html#subControlRect">subControlRect()</a> function is used to calculate bounding rectangles for sub controls in complex controls. When you implement a new style, you reimplement <code>subControlRect()</code> and calculate the rectangles that are different from the super class.</li>
+<li>The <a href="qstyle.html#pixelMetric">pixelMetric()</a> function returns a pixel metric, which is a style-dependent size given in screen pixels. It takes a value of the <a href="qstyle.html#PixelMetric-enum">PixelMetric</a> enum and returns the correct measurement. Note that pixel metrics do not necessarily have to be static measurements, but can be calculated with, for example, the style option.</li>
+<li>The <a href="qstyle.html#hitTestComplexControl">hitTestComplexControl()</a> function returns the sub control that the mouse pointer is over in a complex control. Usually, this is simply a matter of using <a href="qstyle.html#subControlRect">subControlRect()</a> to get the bounding rectangles of the sub controls, and then seeing which rectangle contains the position of the cursor.</li>
+</ul>
+<p><a href="qstyle.html">QStyle</a> also has the functions <a href="qstyle.html#polish">polish()</a> and <a href="qstyle.html#unpolish">unpolish()</a>. All widgets are sent to the <code>polish()</code> function before being shown and to <code>unpolish()</code> when they are hidden. You can use these functions to set attributes on the widgets or do other work that is required by your style. For instance, if you need to know when the mouse is hovering over the widget, you need to set the <a href="../qtcore/qt.html#WidgetAttribute-enum">WA_Hover</a> widget attribute. The <code>State_MouseOver</code> state flag will then be set in the widget's style options.</p>
+<p><a href="qstyle.html">QStyle</a> has a few static helper functions that do some common and difficult tasks. They can calculate the position of a slider handle from the value of the slider and transform rectangles and draw text considering reverse layouts; see the <a href="qstyle.html">QStyle</a> class documentation for more details.</p>
+<p>The usual approach when one reimplements <a href="qstyle.html">QStyle</a> virtual functions is to do work on elements that are different from the super class; for all other elements, you can simply use the super class implementation.</p>
+<a name="the-palette"></a>
+<h3 id="the-palette">The Palette</h3>
+<p>Each style provides a color - that is, <a href="../qtgui/qbrush.html">QBrush</a> - palette that should be used for drawing the widgets. There is one set of colors for the different widget states (<a href="../qtgui/qpalette.html#ColorGroup-enum">QPalette::ColorGroup</a>): active (widgets in the window that have keyboard focus), inactive (widgets used for other windows), and disabled (widgets that are disabled). The states can be found by querying the <code>State_Active</code> and <code>State_Enabled</code> state flags. Each set contains certain color roles given by the <a href="../qtgui/qpalette.html#ColorRole-enum">QPalette::ColorRole</a> enum. The roles describe in which situations the colors should be used (e.g&#x2e;, for painting widget backgrounds, text, or buttons).</p>
+<p>How the color roles are used is up to the style. For instance, if the style uses gradients, one can use a palette color and make it darker or lighter with <a href="../qtgui/qcolor.html#darker">QColor::darker</a>() and <a href="../qtgui/qcolor.html#lighter">QColor::lighter</a>() to create the gradient. In general, if you need a brush that is not provided by the palette, you should try to derive it from one.</p>
+<p><a href="../qtgui/qpalette.html">QPalette</a>, which provides the palette, stores colors for different widget states and color roles. The palette for a style is returned by <a href="qstyle.html#standardPalette">standardPalette()</a>. The standard palette is not installed automatically when a new style is set on the application (<a href="qapplication.html#setStyle">QApplication::setStyle</a>()) or widget (<a href="qwidget.html#setStyle">QWidget::setStyle</a>()), so you must set the palette yourself with (<a href="qapplication.html#setPalette">QApplication::setPalette</a>()) or (<a href="qwidget.html#palette-prop">QWidget::setPalette</a>()).</p>
+<p>It is not recommended to hard-code colors, as applications and individual widgets can set their own palette and also use their style's palette for drawing. Note that none of Qt's widgets set their own palette. The Java style does hard-code some colors, but only as a decision of the author; it is not advised. Of course, it is not intended that the style should look good with any palette.</p>
+<a name="implementation-issues"></a>
+<h3 id="implementation-issues">Implementation Issues</h3>
+<p>When you implement styles, there are several issues to consider. We will give some hints and advice on implementation here.</p>
+<p>When implementing styles, it is necessary to look through the code of the widgets and code of the base class and its ancestors. This is because the widgets use the style differently, because the implementation in the different styles' virtual functions can affect the state of the drawing (e.g&#x2e;, by altering the <a href="../qtgui/qpainter.html">QPainter</a> state without restoring it and drawing some elements without using the appropriate pixel metrics and sub elements).</p>
+<p>It is recommended that the styles do not alter the proposed size of widgets with the <a href="qstyle.html#sizeFromContents">QStyle::sizeFromContents</a>() function, but let the <a href="qcommonstyle.html">QCommonStyle</a> implementation handle it instead. If changes need to be made, you should try to keep them small; application development may be difficult if the layout of widgets looks considerably different in the various styles.</p>
+<a name="java-style"></a>
+<h2 id="java-style">Java Style</h2>
+<p>We have implemented a style that resembles the Java default look and feel (previously known as Metal). We have done this as it is relatively simple to implement and we wanted to build a style for this overview document. To keep it simple and not too extensive, we have simplified the style somewhat, but Qt is perfectly able to make an exact copy of the style. However, there are no concrete plans to implement the style as a part of Qt.</p>
+<p>In this section we will have a look at some implementation issues. Finally, we will see a complete example on the styling of a Java widget. We will continue to use the Java style throughout the document for examples and widget images. The implementation itself is somewhat involved, and it is not intended that you should read through it.</p>
+<a name="design-and-implementation"></a>
+<h3 id="design-and-implementation">Design and Implementation</h3>
+<p>The first step in designing the style was to select the base class. We chose to subclass <a href="qcommonstyle.html">QCommonStyle</a>. This class implements most of the functionality we need, other than performing the actual drawing.</p>
+<p>The style is implemented in one class. We have done this because we find it convenient to keep all code in one file. Also, it is an advantage with regards to optimization as we instantiate less objects. We also keep the number of functions at a minimum by using switches to identify which element to draw in the functions. This results in large functions, but since we divide the code for each element in the switches, the code should still be easy to read.</p>
+<a name="limitations-and-differences-from-java"></a>
+<h3 id="limitations-and-differences-from-java">Limitations and Differences from Java</h3>
+<p>We have not fully implemented every element in the Java style. This way, we have reduced the amount and complexity of the code. In general, the style was intended as a practical example for this style overview document, and not to be a part of Qt itself.</p>
+<p>Not all widgets have every state implemented. This goes for states that are common, e.g&#x2e;, <code>State_Disabled</code>. Each state is, however, implemented for at least one widget.</p>
+<p>We have only implemented ticks below the slider. Flat push buttons are also left out. We do not handle the case where the title bars and dock window titles grow too small for their contents, but simply draw sub controls over each other.</p>
+<p>We have not tried to emulate the Java fonts. Java and Qt use very different font engines, so we don't consider it worth the effort as we only use the style as an example for this overview.</p>
+<p>We have hard-coded the colors (we don't use the <a href="../qtgui/qpalette.html">QPalette</a>) for the linear gradients, which are used, for example, for button bevels, tool bars, and check boxes. This is because the Java palette cannot produce these colors. Java does not change these colors based on widget color group or role anyway (they are not dependent on the palette), so it does not present a problem in any case.</p>
+<p>It is Qt's widgets that are styled. Some widgets do not exist at all in Java, e.g&#x2e;, <a href="qtoolbox.html">QToolBox</a>. Others contain elements that the Java widgets don't. The tree widget is an example of the latter in which Java's JTree does not have a header.</p>
+<p>The style does not handle reverse layouts. We assume that the layout direction is left to right. <a href="qcommonstyle.html">QCommonStyle</a> handles reverse widgets; if we implemented reverse layouts, widgets that we change the position of sub elements, or handle text alignment in labels ourselves would need to be updated.</p>
+<a name="styling-java-check-boxes"></a>
+<h3 id="styling-java-check-boxes">Styling Java Check Boxes</h3>
+<p>As an example, we will examine the styling of check boxes in the Java style. We describe the complete process and print all code in both the Java style and Qt classes involved. In the rest of this document, we will not examine the source code of the individual widgets. Hopefully, this will give you an idea on how to search through the code if you need to check specific implementation details; most widgets follow the same structure as the check boxes. We have edited the <a href="qcommonstyle.html">QCommonStyle</a> code somewhat to remove code that is not directly relevant for check box styling.</p>
+<p>We start with a look at how <a href="qcheckbox.html">QCheckBox</a> builds its style option, which is <a href="qstyleoptionbutton.html">QStyleOptionButton</a> for checkboxes:</p>
+<pre class="cpp">
+
+      opt<span class="operator">.</span>initFrom(q);
+          <span class="keyword">if</span> (down)
+          opt<span class="operator">.</span>state <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>State_Sunken;
+      <span class="keyword">if</span> (tristate <span class="operator">&amp;</span><span class="operator">&amp;</span> noChange)
+          opt<span class="operator">.</span>state <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>State_NoChange;
+      <span class="keyword">else</span>
+          opt<span class="operator">.</span>state <span class="operator">|</span><span class="operator">=</span> checked <span class="operator">?</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>State_On :
+          <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>State_Off;
+      <span class="keyword">if</span> (q<span class="operator">-</span><span class="operator">&gt;</span>testAttribute(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WA_Hover) <span class="operator">&amp;</span><span class="operator">&amp;</span>  q<span class="operator">-</span><span class="operator">&gt;</span>underMouse()) {
+          <span class="keyword">if</span> (hovering)
+          opt<span class="operator">.</span>state <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>State_MouseOver;
+          <span class="keyword">else</span>
+          opt<span class="operator">.</span>state <span class="operator">&amp;</span><span class="operator">=</span> <span class="operator">~</span><span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>State_MouseOver;
+      }
+      opt<span class="operator">.</span>text <span class="operator">=</span> text;
+      opt<span class="operator">.</span>icon <span class="operator">=</span> icon;
+      opt<span class="operator">.</span>iconSize <span class="operator">=</span> q<span class="operator">-</span><span class="operator">&gt;</span>iconSize();
+
+</pre>
+<p>First we let <a href="qstyleoption.html">QStyleOption</a> set up the option with the information that is common for all widgets with <code>initFrom()</code>. We will look at this shortly.</p>
+<p><a href="qstyleoption.html">QStyleOption</a>'s <code>down</code> variable is <code>true</code> when the user presses the box down; this is true of the checkbox whether the box is checked or not. The <code>State_NoChange</code> state is set when we have a tri-state checkbox and it is partially checked. It has <code>State_On</code> if the box is checked and <code>State_Off</code> if it is unchecked. <code>State_MouseOver</code> is set if the mouse hovers over the checkbox and the widget has attribute <code>Qt::WA_Hover</code> set - you set this in <a href="qstyle.html#polish">QStyle::polish</a>(). In addition, the style option also contains the text, icon, and icon size of the button.</p>
+<p><a href="qstyleoption.html#initFrom">initFrom()</a> sets up the style option with the attributes that are common for all widgets. We print its implementation here:</p>
+<pre class="cpp">
+
+      state <span class="operator">=</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>State_None;
+      <span class="keyword">if</span> (widget<span class="operator">-</span><span class="operator">&gt;</span>isEnabled())
+          state <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>State_Enabled;
+      <span class="keyword">if</span> (widget<span class="operator">-</span><span class="operator">&gt;</span>hasFocus())
+          state <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>State_HasFocus;
+      <span class="keyword">if</span> (widget<span class="operator">-</span><span class="operator">&gt;</span>window()<span class="operator">-</span><span class="operator">&gt;</span>testAttribute(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WA_KeyboardFocusChange))
+          state <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>State_KeyboardFocusChange;
+      <span class="keyword">if</span> (widget<span class="operator">-</span><span class="operator">&gt;</span>underMouse())
+          state <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>State_MouseOver;
+      <span class="keyword">if</span> (widget<span class="operator">-</span><span class="operator">&gt;</span>window()<span class="operator">-</span><span class="operator">&gt;</span>isActiveWindow())
+          state <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>State_Active;
+  <span class="preprocessor">#if 0 // Used to be included in Qt4 for Q_WS_MAC</span>
+      <span class="keyword">extern</span> bool qt_mac_can_clickThrough(<span class="keyword">const</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>w); <span class="comment">//qwidget_mac.cpp</span>
+      <span class="keyword">if</span> (<span class="operator">!</span>(state <span class="operator">&amp;</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>State_Active) <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>qt_mac_can_clickThrough(widget))
+          state <span class="operator">&amp;</span><span class="operator">=</span> <span class="operator">~</span><span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>State_Enabled;
+  <span class="preprocessor">#endif</span>
+  <span class="preprocessor">#ifdef QT_KEYPAD_NAVIGATION</span>
+      <span class="keyword">if</span> (widget<span class="operator">-</span><span class="operator">&gt;</span>hasEditFocus())
+          state <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>State_HasEditFocus;
+  <span class="preprocessor">#endif</span>
+
+      direction <span class="operator">=</span> widget<span class="operator">-</span><span class="operator">&gt;</span>layoutDirection();
+      rect <span class="operator">=</span> widget<span class="operator">-</span><span class="operator">&gt;</span>rect();
+      palette <span class="operator">=</span> widget<span class="operator">-</span><span class="operator">&gt;</span>palette();
+      fontMetrics <span class="operator">=</span> widget<span class="operator">-</span><span class="operator">&gt;</span>fontMetrics();
+
+</pre>
+<p>The <code>State_Enabled</code> is set when the widget is enabled. When the widget has focus the <code>State_HasFocus</code> flag is set. Equally, the <code>State_Active</code> flag is set when the widget is a child of the active window. The <code>State_MouseOver</code> will only be set if the widget has the <code>WA_HoverEnabled</code> windows flag set. Notice that keypad navigation must be enabled in Qt for the <code>State_HasEditFocus</code> to be included; it is not included by default.</p>
+<p>In addition to setting state flags the <a href="qstyleoption.html">QStyleOption</a> contains other information about the widget: <code>direction</code> is the layout direction of the layout, <code>rect</code> is the bounding rectangle of the widget (the area in which to draw), <code>palette</code> is the <a href="../qtgui/qpalette.html">QPalette</a> that should be used for drawing the widget, and <code>fontMetrics</code> is the metrics of the font that is used by the widget.</p>
+<p>We give an image of a checkbox and the style option to match it.</p>
+<p class="centerAlign"><img src="images/checkboxexample.png" alt="A Java style checkbox" /></p><p>The above checkbox will have the following state flags in its style option:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >State flag</th><th >Set</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>State_Sunken</code></td><td >Yes</td></tr>
+<tr valign="top" class="even"><td ><code>State_NoChange</code></td><td >No</td></tr>
+<tr valign="top" class="odd"><td ><code>State_On</code></td><td >Yes</td></tr>
+<tr valign="top" class="even"><td ><code>State_Off</code></td><td >No</td></tr>
+<tr valign="top" class="odd"><td ><code>State_MouseOver</code></td><td >Yes</td></tr>
+<tr valign="top" class="even"><td ><code>State_Enabled</code></td><td >Yes</td></tr>
+<tr valign="top" class="odd"><td ><code>State_HasFocus</code></td><td >Yes</td></tr>
+<tr valign="top" class="even"><td ><code>State_KeyboardFocusChange</code></td><td >No</td></tr>
+<tr valign="top" class="odd"><td ><code>State_Active</code></td><td >Yes</td></tr>
+</table></div>
+<p>The <a href="qcheckbox.html">QCheckBox</a> paints itself in <a href="qwidget.html#paintEvent">QWidget::paintEvent</a>() with style option <code>opt</code> and <a href="qstylepainter.html">QStylePainter</a> <code>p</code>. The <a href="qstylepainter.html">QStylePainter</a> class is a convenience class to draw style elements. Most notably, it wraps the methods in <a href="qstyle.html">QStyle</a> used for painting. The <a href="qcheckbox.html">QCheckBox</a> draws itself as follows:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qstylepainter.html">QStylePainter</a></span> p(<span class="keyword">this</span>);
+      <span class="type"><a href="qstyleoptionbutton.html">QStyleOptionButton</a></span> opt <span class="operator">=</span> d<span class="operator">-</span><span class="operator">&gt;</span>getStyleOption();
+      p<span class="operator">.</span>drawControl(<span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>CE_CheckBox<span class="operator">,</span> opt);
+
+</pre>
+<p><a href="qcommonstyle.html">QCommonStyle</a> handles the CE_CheckBox element. The <a href="qcheckbox.html">QCheckBox</a> has two sub elements: SE_CheckBoxIndicator (the checked indicator) and SE_CheckBoxContents (the contents, which are used for the checkbox label). <a href="qcommonstyle.html">QCommonStyle</a> also implements these sub element bounding rectangles. Next, we'll have a look at the <a href="qcommonstyle.html">QCommonStyle</a> code:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qstyleoptionbutton.html">QStyleOptionButton</a></span> subopt <span class="operator">=</span> <span class="operator">*</span>btn;
+      subopt<span class="operator">.</span>rect <span class="operator">=</span> subElementRect(SE_CheckBoxIndicator<span class="operator">,</span> btn<span class="operator">,</span> widget);
+      drawPrimitive(PE_IndicatorCheckBox<span class="operator">,</span> <span class="operator">&amp;</span>subopt<span class="operator">,</span> p<span class="operator">,</span> widget);
+      subopt<span class="operator">.</span>rect <span class="operator">=</span> subElementRect(SE_CheckBoxContents<span class="operator">,</span> btn<span class="operator">,</span> widget);
+      drawControl(CE_CheckBoxLabel<span class="operator">,</span> <span class="operator">&amp;</span>subopt<span class="operator">,</span> p<span class="operator">,</span> widget);
+
+      <span class="keyword">if</span> (btn<span class="operator">-</span><span class="operator">&gt;</span>state <span class="operator">&amp;</span> State_HasFocus) {
+          <span class="type"><a href="qstyleoptionfocusrect.html">QStyleOptionFocusRect</a></span> fropt;
+          fropt<span class="operator">.</span><span class="type"><a href="qstyleoption.html">QStyleOption</a></span><span class="operator">::</span><span class="keyword">operator</span><span class="operator">=</span>(<span class="operator">*</span>btn);
+          fropt<span class="operator">.</span>rect <span class="operator">=</span> subElementRect(SE_CheckBoxFocusRect<span class="operator">,</span> btn<span class="operator">,</span> widget);
+          drawPrimitive(PE_FrameFocusRect<span class="operator">,</span> <span class="operator">&amp;</span>fropt<span class="operator">,</span> p<span class="operator">,</span> widget);
+      }
+
+</pre>
+<p>As can be seen from the code extract, the common style gets the bounding rectangles of the two sub elements of CE_CheckBox, and then draws them. If the checkbox has focus, the focus frame is also drawn.</p>
+<p>The Java style draws CE_CheckBoxIndicator, while <a href="qcommonstyle.html">QCommonStyle</a> handles CE_CheckboxLabel. We will examine each implementation and start with CE_CheckBoxLabel:</p>
+<pre class="cpp">
+
+      <span class="keyword">const</span> <span class="type"><a href="qstyleoptionbutton.html">QStyleOptionButton</a></span> <span class="operator">*</span>btn <span class="operator">=</span> qstyleoption_cast<span class="operator">&lt;</span><span class="keyword">const</span> <span class="type"><a href="qstyleoptionbutton.html">QStyleOptionButton</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(opt);
+      <span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> alignment <span class="operator">=</span> visualAlignment(btn<span class="operator">-</span><span class="operator">&gt;</span>direction<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignLeft <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignVCenter);
+
+      <span class="keyword">if</span> (<span class="operator">!</span>styleHint(SH_UnderlineShortcut<span class="operator">,</span> btn<span class="operator">,</span> widget))
+          alignment <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>TextHideMnemonic;
+      <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> pix;
+      <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> textRect <span class="operator">=</span> btn<span class="operator">-</span><span class="operator">&gt;</span>rect;
+      <span class="keyword">if</span> (<span class="operator">!</span>btn<span class="operator">-</span><span class="operator">&gt;</span>icon<span class="operator">.</span>isNull()) {
+          pix <span class="operator">=</span> btn<span class="operator">-</span><span class="operator">&gt;</span>icon<span class="operator">.</span>pixmap(btn<span class="operator">-</span><span class="operator">&gt;</span>iconSize<span class="operator">,</span> btn<span class="operator">-</span><span class="operator">&gt;</span>state <span class="operator">&amp;</span> State_Enabled <span class="operator">?</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Normal : <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Disabled);
+          drawItemPixmap(p<span class="operator">,</span> btn<span class="operator">-</span><span class="operator">&gt;</span>rect<span class="operator">,</span> alignment<span class="operator">,</span> pix);
+          <span class="keyword">if</span> (btn<span class="operator">-</span><span class="operator">&gt;</span>direction <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RightToLeft)
+              textRect<span class="operator">.</span>setRight(textRect<span class="operator">.</span>right() <span class="operator">-</span> btn<span class="operator">-</span><span class="operator">&gt;</span>iconSize<span class="operator">.</span>width() <span class="operator">-</span> <span class="number">4</span>);
+          <span class="keyword">else</span>
+              textRect<span class="operator">.</span>setLeft(textRect<span class="operator">.</span>left() <span class="operator">+</span> btn<span class="operator">-</span><span class="operator">&gt;</span>iconSize<span class="operator">.</span>width() <span class="operator">+</span> <span class="number">4</span>);
+      }
+      <span class="keyword">if</span> (<span class="operator">!</span>btn<span class="operator">-</span><span class="operator">&gt;</span>text<span class="operator">.</span>isEmpty()){
+          drawItemText(p<span class="operator">,</span> textRect<span class="operator">,</span> alignment <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>TextShowMnemonic<span class="operator">,</span>
+              btn<span class="operator">-</span><span class="operator">&gt;</span>palette<span class="operator">,</span> btn<span class="operator">-</span><span class="operator">&gt;</span>state <span class="operator">&amp;</span> State_Enabled<span class="operator">,</span> btn<span class="operator">-</span><span class="operator">&gt;</span>text<span class="operator">,</span> <span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>WindowText);
+      }
+
+</pre>
+<p><a href="qstyle.html#visualAlignment">visualAlignment()</a> adjusts the alignment of text according to the layout direction. We then draw an icon if it exists, and adjust the space left for the text. <a href="qstyle.html#drawItemText">drawItemText()</a> draws the text, taking alignment, layout direction, and the mnemonic into account. It also uses the palette to draw the text in the right color.</p>
+<p>The drawing of labels often gets somewhat involved. Luckily, it can usually be handled by the base class. The Java style implements its own push button label, since Java centers button contents also when the button has an icon. You can examine that implementation if you need an example of reimplementing label drawing.</p>
+<p>We'll now take a look at the Java implementation of CE_CheckBoxIndicator in <code>drawControl()</code>:</p>
+<pre class="cpp">
+
+          <span class="keyword">case</span> PE_IndicatorCheckBox: {
+              painter<span class="operator">-</span><span class="operator">&gt;</span>save();
+              drawButtonBackground(option<span class="operator">,</span> painter<span class="operator">,</span> <span class="keyword">true</span>);
+
+              <span class="keyword">if</span> (option<span class="operator">-</span><span class="operator">&gt;</span>state <span class="operator">&amp;</span> State_Enabled <span class="operator">&amp;</span><span class="operator">&amp;</span>
+                  option<span class="operator">-</span><span class="operator">&gt;</span>state <span class="operator">&amp;</span> State_MouseOver <span class="operator">&amp;</span><span class="operator">&amp;</span>
+                  <span class="operator">!</span>(option<span class="operator">-</span><span class="operator">&gt;</span>state <span class="operator">&amp;</span> State_Sunken)) {
+                  painter<span class="operator">-</span><span class="operator">&gt;</span>setPen(option<span class="operator">-</span><span class="operator">&gt;</span>palette<span class="operator">.</span>color(<span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>Button));
+                  <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> rect <span class="operator">=</span> option<span class="operator">-</span><span class="operator">&gt;</span>rect<span class="operator">.</span>adjusted(<span class="number">1</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">2</span><span class="operator">,</span> <span class="operator">-</span><span class="number">2</span>);
+                  painter<span class="operator">-</span><span class="operator">&gt;</span>drawRect(rect);
+                  rect <span class="operator">=</span> rect<span class="operator">.</span>adjusted(<span class="number">1</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span>);
+                  painter<span class="operator">-</span><span class="operator">&gt;</span>drawRect(rect);
+              }
+
+              <span class="keyword">if</span> (option<span class="operator">-</span><span class="operator">&gt;</span>state <span class="operator">&amp;</span> State_On) {
+                  <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> image(<span class="string">&quot;:/images/checkboxchecked.png&quot;</span>);
+                  painter<span class="operator">-</span><span class="operator">&gt;</span>drawImage(option<span class="operator">-</span><span class="operator">&gt;</span>rect<span class="operator">.</span>topLeft()<span class="operator">,</span> image);
+              }
+              painter<span class="operator">-</span><span class="operator">&gt;</span>restore();
+              <span class="keyword">break</span>;
+
+</pre>
+<p>We first save the state of the painter. This is not always necessary, but in this case the <a href="qcommonstyle.html">QCommonStyle</a> needs the painter in the same state as it was when PE_IndicatorCheckBox was called (We could also set the state with function calls, of course). We then use <code>drawButtonBackground()</code> to draw the background of the check box indicator. This is a helper function that draws the background and also the frame of push buttons and check boxes. We take a look at that function below. We then check if the mouse is hovering over the checkbox. If it is, we draw the frame that Java checkboxes have when the box is not pressed down and the mouse is over it. You may note that Java does not handle tri-state boxes, so we have not implemented it.</p>
+<p>Here we use a PNG image for our indicator. We could also check if the widget is disabled. We would then have to use another image with the indicator in the disabled color.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> JavaStyle<span class="operator">::</span>drawButtonBackground(<span class="keyword">const</span> <span class="type"><a href="qstyleoption.html">QStyleOption</a></span> <span class="operator">*</span>option<span class="operator">,</span>
+                                       <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">*</span>painter<span class="operator">,</span> bool isCheckbox) <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtgui/qbrush.html">QBrush</a></span> buttonBrush <span class="operator">=</span> option<span class="operator">-</span><span class="operator">&gt;</span>palette<span class="operator">.</span>button();
+      bool sunken <span class="operator">=</span> option<span class="operator">-</span><span class="operator">&gt;</span>state <span class="operator">&amp;</span> State_Sunken;
+      bool disabled <span class="operator">=</span> <span class="operator">!</span>(option<span class="operator">-</span><span class="operator">&gt;</span>state <span class="operator">&amp;</span> State_Enabled);
+      bool on <span class="operator">=</span> option<span class="operator">-</span><span class="operator">&gt;</span>state <span class="operator">&amp;</span> State_On;
+
+      <span class="keyword">if</span> (<span class="operator">!</span>sunken <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>disabled <span class="operator">&amp;</span><span class="operator">&amp;</span> (<span class="operator">!</span>on <span class="operator">|</span><span class="operator">|</span> isCheckbox))
+          buttonBrush <span class="operator">=</span> gradientBrush(option<span class="operator">-</span><span class="operator">&gt;</span>rect);
+
+          painter<span class="operator">-</span><span class="operator">&gt;</span>fillRect(option<span class="operator">-</span><span class="operator">&gt;</span>rect<span class="operator">,</span> buttonBrush);
+
+          <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> rect <span class="operator">=</span> option<span class="operator">-</span><span class="operator">&gt;</span>rect<span class="operator">.</span>adjusted(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span>);
+
+          <span class="keyword">if</span> (disabled)
+              painter<span class="operator">-</span><span class="operator">&gt;</span>setPen(option<span class="operator">-</span><span class="operator">&gt;</span>palette<span class="operator">.</span>color(<span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>Disabled<span class="operator">,</span>
+                                                    <span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>WindowText));
+          <span class="keyword">else</span>
+              painter<span class="operator">-</span><span class="operator">&gt;</span>setPen(option<span class="operator">-</span><span class="operator">&gt;</span>palette<span class="operator">.</span>color(<span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>Mid));
+
+          painter<span class="operator">-</span><span class="operator">&gt;</span>drawRect(rect);
+
+          <span class="keyword">if</span> (sunken <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>disabled) {
+              drawSunkenButtonShadow(painter<span class="operator">,</span> rect<span class="operator">,</span>
+                     option<span class="operator">-</span><span class="operator">&gt;</span>palette<span class="operator">.</span>color(<span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>Mid)<span class="operator">,</span>
+                     option<span class="operator">-</span><span class="operator">&gt;</span>direction <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RightToLeft);
+      }
+  }
+
+</pre>
+<p>We have seen how check boxes are styled in the Java style from the time the widget gets a paint request to the time the style is finished painting. To learn in detail how each widget is painted, you need to go through the code step-by-step as we have done here. However, it is usually enough to know which style elements the widgets draw. The widget builds a style option and calls on the style one or more times to draw the style elements of which it consists. Usually, it is also sufficient to know the states a widget can be in and the other contents of the style option, i.e&#x2e;, what we list in the next section.</p>
+<a name="widget-walkthrough"></a>
+<h2 id="widget-walkthrough">Widget Walkthrough</h2>
+<p>In this section, we will examine how most of Qt's widgets are styled. Hopefully, this will save you some time and effort while developing your own styles and widgets. You will not find information here that is not attainable elsewhere (i.e&#x2e;, by examining the source code or the class descriptions for the style related classes).</p>
+<p>We mostly use Java style widgets as examples. The Java style does not draw every element in the element trees. This is because they are not visible for that widget in the Java style. We still make sure that all elements are implemented in a way that conforms with the Java style, as custom widgets might need them (this does not exclude leaving implementations to <a href="qcommonstyle.html">QCommonStyle</a> though).</p>
+<p>The following is given for each widget:</p>
+<ul>
+<li>A table with the members (variables, etc.) of its style option.</li>
+<li>A table of the state flags (<a href="qstyle.html#StateFlag-enum">QStyle::StateFlag</a>) that can be set on the widget and when the states are set.</li>
+<li>Its element tree (see section <a href="style-reference.html#the-style-elements">The Style Elements</a>).</li>
+<li>An image of the widget in which the elements are outlined.</li>
+</ul>
+<p>The element tree contains the primitive, control, and complex style elements. By doing a top-down traversal of the element tree, you get the sequence in which the elements should be drawn. In the nodes, we have written the sub element rectangles, sub control elements, and pixel metrics that should be considered when drawing the element of the node.</p>
+<p>Our approach on styling centers on the drawing of the widgets. The calculations of sub elements rectangles, sub controls, and pixel metrics used <b>during</b> drawing is only listed as contents in the element trees. Note that there are rectangles and pixel metrics that are only used by widgets. This leaves these calculations untreated in the walkthrough. For instance, the <a href="qstyle.html#subControlRect">subControlRect()</a> and <a href="qstyle.html#sizeFromContents">sizeFromContents()</a> functions often call <a href="qstyle.html#subElementRect">subElementRect()</a> to calculate their bounding rectangles. We could draw trees for this as well. However, how these calculations are done is completely up to the individual styles, and they do not have to follow a specific structure (Qt does not impose a specific structure). You should still make sure that you use the appropriate pixel metrics, though. To limit the size of the document, we have therefore chosen not to include trees or describe the calculations made by the Java (or any other) style.</p>
+<p>You may be confused about how the different pixel metrics, sub element rectangles, and sub control rectangles should be used when examining the trees. If you are in doubt after reading the <a href="qstyle.html">QStyle</a> enum descriptions, we suggest that you examine the <a href="qcommonstyle.html">QCommonStyle</a> implementation.</p>
+<p>Some of the bounding rectangles that we outline in the widget images are equal. Reasons for this are that some elements draw backgrounds while others draw frames and labels. If in doubt, check the description of each element in <a href="qstyle.html">QStyle</a>. Also, some elements are there to layout, i.e&#x2e;, decide where to draw, other elements.</p>
+<a name="common-widget-properties"></a>
+<h3 id="common-widget-properties">Common Widget Properties</h3>
+<p>Some states and variables are common for all widgets. These are set with <a href="qstyleoption.html#initFrom">QStyleOption::initFrom</a>(). Not all elements use this function; it is the widgets that create the style options, and for some elements the information from <a href="qstyleoption.html#initFrom">initFrom()</a> is not necessary.</p>
+<p>A table with the common states follows:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >State</th><th >State Set When</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>State_Enabled</code></td><td >Set if the widget is not disabled (see <a href="qwidget.html#enabled-prop">QWidget::setEnabled</a>())</td></tr>
+<tr valign="top" class="even"><td ><code>State_Focus</code></td><td >Set if the widget has focus (see <a href="qwidget.html#focus-prop">QWidget::hasFocus</a>())</td></tr>
+<tr valign="top" class="odd"><td ><code>State_KeyobordFocusChange</code></td><td >Set when the user changes focus with the keyboard (see <a href="../qtcore/qt.html#WidgetAttribute-enum">Qt::WA_KeyboardFocusChange</a>)</td></tr>
+<tr valign="top" class="even"><td ><code>State_MouseOver</code></td><td >Set if the mouse cursor is over the widget</td></tr>
+<tr valign="top" class="odd"><td ><code>State_Active</code></td><td >Set if the widget is a child of the active window.</td></tr>
+<tr valign="top" class="even"><td ><code>State_HasEditFocus</code></td><td >Set if the widget has the edit focus</td></tr>
+</table></div>
+<p>The other common members for widgets are:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >Member</th><th >Content</th></tr></thead>
+<tr valign="top" class="odd"><td >rect</td><td >The bounding rectangle of the element to draw. This is set to the widget bounding rectangle (<a href="qwidget.html#rect-prop">QWidget::rect</a>()).</td></tr>
+<tr valign="top" class="even"><td >direction</td><td >The layout direction; a value of the <a href="../qtcore/qt.html#LayoutDirection-enum">Qt::LayoutDirection</a> enum.</td></tr>
+<tr valign="top" class="odd"><td >palette</td><td >The <a href="../qtgui/qpalette.html">QPalette</a> to use when drawing the element. This is set to the widgets palette (<a href="qwidget.html#palette-prop">QWidget::palette</a>()).</td></tr>
+<tr valign="top" class="even"><td >fontMetrics</td><td >The <a href="../qtgui/qfontmetrics.html">QFontMetrics</a> to use when drawing text on the widget.</td></tr>
+</table></div>
+<p>The complex style options (classes that inherit <a href="qstyleoptioncomplex.html">QStyleOptionComplex</a>) used for complex style elements share two variables: <a href="qstyleoptioncomplex.html#subControls-var">subControls</a> and <a href="qstyleoptioncomplex.html#activeSubControls-var">activeSubControls</a>. Both variables are an OR'ed combination of <a href="qstyle.html#SubControl-enum">QStyle::SubControl</a> enum values. They indicate which sub controls the complex control consists of and which of these controls are currently active.</p>
+<p>As mentioned, the style calculates the size of the widget's contents, which the widgets calculate their size hints from. In addition, complex controls also use the style to test which sub-controls the mouse is over.</p>
+<a name="widget-reference"></a>
+<h3 id="widget-reference">Widget Reference</h3>
+<p>Without further delay, we present the widget walkthrough; each widget has its own sub-section.</p>
+<a name="push-buttons"></a>
+<h4 id="push-buttons">Push Buttons</h4>
+<p>The style structure for push buttons is shown below. By doing a top-down traversal of the tree, you get the sequence in which the elements should be drawn.</p>
+<p class="centerAlign"><img src="images/pushbutton.png" alt="The style structure for push buttons" /></p><p>The layout of the buttons, with regard to element bounds, varies from style to style. This makes it difficult to show conceptual images of this. Also, elements may - even be intended to - have the same bounds; the <code>PE_PushButtonBevel</code>, for instance, is used in <a href="qcommonstyle.html">QCommonStyle</a> to draw the elements that it contains: <code>PE_FrameDefaultButton</code>, <code>PE_FrameButtonBevel</code>, and <code>PE_PanelButtonCommand</code>, all of which have the same bounds in common style. <code>PE_PushButtonBevel</code> is also responsible for drawing the menu indicator (<a href="qcommonstyle.html">QCommonStyle</a> draws <code>PE_IndicatorArrowDown</code>).</p>
+<p>An image of a push button in the Java style that shows the bounding rectangles of the elements is given below. Colors are used to separate the bounding rectangles in the image; they do not fill any other purpose. This is also true for similar images for the other widgets.</p>
+<p class="centerAlign"><img src="images/button.png" alt="" /></p><p>The Java style, as well as all other styles implemented in Qt, does not use <code>PE_FrameButtonBevel</code>. It is usual that a button with a <code>PE_DefaultFrame</code> adjusts the <code>PE_PanelButtonCommand</code>'s rectangle by <code>PM_ButtonDefaultIndicator</code>. The <code>CE_PushButtonLabel</code> is found by adjusting the rect by <code>PM_DefaultFrameWidth</code>.</p>
+<p>We will now examine the style option for push buttons - <a href="qstyleoptionbutton.html">QStyleOptionButton</a>. A table for the states that <a href="qpushbutton.html">QPushButton</a> can set on the style option follows:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >State</th><th >State Set When</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>State_Sunken</code></td><td >Button is down or menu is pressed shown</td></tr>
+<tr valign="top" class="even"><td ><code>State_On</code></td><td >Button is checked</td></tr>
+<tr valign="top" class="odd"><td ><code>State_Raised</code></td><td >Button is not flat and not pressed down</td></tr>
+</table></div>
+<p>Other members of <a href="qstyleoptionbutton.html">QStyleOptionButton</a> is:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >Member</th><th >Content</th></tr></thead>
+<tr valign="top" class="odd"><td >features</td><td >Flags of the <a href="qstyleoptionbutton.html#ButtonFeature-enum">QStyleOptionButton::ButtonFeatures</a> enum, which describes various button properties (see enum)</td></tr>
+<tr valign="top" class="even"><td >icon</td><td >The buttons <a href="../qtgui/qicon.html">QIcon</a> (if any)</td></tr>
+<tr valign="top" class="odd"><td >iconSize</td><td >The <a href="../qtcore/qsize.html">QSize</a> of the icon</td></tr>
+<tr valign="top" class="even"><td >text</td><td >a <a href="../qtcore/qstring.html">QString</a> with the buttons text</td></tr>
+</table></div>
+<a name="check-and-radio-buttons"></a>
+<h4 id="check-and-radio-buttons">Check and Radio Buttons</h4>
+<p>The structures for radio and check buttons are identical. We show the structure using <a href="qcheckbox.html">QCheckBox</a> element and pixel metric names:</p>
+<p class="centerAlign"><img src="images/checkbox.png" alt="" /></p><p><a href="qstyleoptionbutton.html">QStyleOptionButton</a> is used as the style option for both check and radio buttons. We first give a table of the states that can be set in the option:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >State</th><th >State Set When</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>State_sunken</code></td><td >The box is pressed down</td></tr>
+<tr valign="top" class="even"><td ><code>State_NoChange</code></td><td >The box is partially checked (for tri-state checkboxes.)</td></tr>
+<tr valign="top" class="odd"><td ><code>State_On</code></td><td >The box is checked</td></tr>
+<tr valign="top" class="even"><td ><code>State_Off</code></td><td >The box is unchecked</td></tr>
+</table></div>
+<p>See <a href="style-reference.html#push-buttons">Push Buttons</a> for a table over other members in the QStyleOptionButtonClass.</p>
+<a name="tabs"></a>
+<h4 id="tabs">Tabs</h4>
+<p>In Qt, <a href="qtabbar.html">QTabBar</a> uses the style to draw its tabs. Tabs exist either in a <a href="qtabwidget.html">QTabWidget</a>, which contains a <a href="qtabbar.html">QTabBar</a>, or as a separate bar. If the bar is not part of a tab widget, it draws its own base.</p>
+<p><a href="qtabbar.html">QTabBar</a> lays out the tabs, so the style does not have control over tab placement. However, while laying out its tabs, the bar asks the style for <code>PM_TabBarTabHSpace</code> and <code>PM_TabBarTabVSpace</code>, which is extra width and height over the minimum size of the tab bar tab label (icon and text). The style can also further influence the tab size before it is laid out, as the tab bar asks for <code>CT_TabBarTab</code>. The bounding rectangle of the bar is decided by the tab widget when it is part of the widget (still considering <code>CT_TabBarTab</code>).</p>
+<p>The tab bar is responsible for drawing the buttons that appear on the tab bar when all tabs do not fit. Their placement is not controlled by the style, but the buttons are <a href="qtoolbutton.html">QToolButton</a>s and are therefore drawn by the style.</p>
+<p>Here is the style structure for <a href="qtabwidget.html">QTabWidget</a> and <a href="qtabbar.html">QTabBar</a>:</p>
+<p class="centerAlign"><img src="images/tab.png" alt="" /></p><p>The dotted lines indicate that the <a href="qtabwidget.html">QTabWidget</a> contains a tab bar, but does not draw it itself. <a href="qtabbar.html">QTabBar</a> only draws its base line when not part of a tab widget, and it keeps two tool buttons that scroll the bar when all tabs do not fit; see <a href="style-reference.html#tool-buttons">Tool Buttons</a> for their element tree. Also note that since the buttons are children of the tab bar, they are drawn after the bar. The tabs' bounding rectangles overlap the base by <code>PM_TabBarBaseOverlap</code>.</p>
+<p>Here is a tab widget in the Java style:</p>
+<p class="centerAlign"><img src="images/tabwidget.png" alt="" /></p><p>In the Java style, the tab bar shape and label have the same bounding rectangle as <code>CE_TabBarTab</code>. Notice that the tabs overlap with the tab widget frame. The base of the tab bar (if drawn) is the area where the tabs and frame overlap.</p>
+<p>The style option for tabs (<a href="qstyleoptiontab.html">QStyleOptionTab</a>) contains the necessary information for drawing tabs. The option contains the position of the tab in the tab bar, the position of the selected tab, the shape of the tab, the text, the icon, and the icon's size.</p>
+<p>As the Java style tabs don't overlap, we also present an image of a tab widget in the common style. Note that if you want the tabs to overlap horizontally, you do that when drawing the tabs in <code>CE_TabBarTabShape</code>; the tabs bounding rectangles will not be altered by the tab bar. The tabs are drawn from left to right in a north tab bar shape, top to bottom in an east tab bar shape, etc. The selected tab is drawn last, so that it is easy to draw it over the other tabs (if it is to be bigger).</p>
+<p class="centerAlign"><img src="images/windowstabimage.png" alt="" /></p><p>A table of the states a tab bar can set on its tabs follows:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >State</th><th >State Set When</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>State_Sunken</code></td><td >The tab is pressed on with the mouse.</td></tr>
+<tr valign="top" class="even"><td ><code>State_Selected</code></td><td >If it is the current tab.</td></tr>
+<tr valign="top" class="odd"><td ><code>State_HasFocus</code></td><td >The tab bar has focus and the tab is selected.</td></tr>
+</table></div>
+<p>Note that individual tabs may be disabled even if the tab bar is not. The tab will be active if the tab bar is active.</p>
+<p>Here follows a table of <a href="qstyleoptiontab.html">QStyleOptionTab</a>'s members:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >Member</th><th >Content</th></tr></thead>
+<tr valign="top" class="odd"><td >cornerWidgets</td><td >Flags of the CornerWidget enum, which indicate if and which corner widgets the tab bar has.</td></tr>
+<tr valign="top" class="even"><td >icon</td><td >The <a href="../qtgui/qicon.html">QIcon</a> of the tab.</td></tr>
+<tr valign="top" class="odd"><td >iconSize</td><td >The <a href="../qtcore/qsize.html">QSize</a> of the icon.</td></tr>
+<tr valign="top" class="even"><td >position</td><td >A TabPosition enum value that indicates the tab's position on the bar relative to the other tabs.</td></tr>
+<tr valign="top" class="odd"><td >row</td><td >Holds which row the tab is in.</td></tr>
+<tr valign="top" class="even"><td >selectedPosition</td><td >A value of the SelectedPosition enum that indicates whether the selected tab is adjacent to or is the tab.</td></tr>
+<tr valign="top" class="odd"><td >shape</td><td >A value of the <a href="qtabbar.html#Shape-enum">QTabBar::Shape</a> enum indicating whether the tab has rounded or triangular corners and the orientation of the tab.</td></tr>
+<tr valign="top" class="even"><td >text</td><td >The tab text.</td></tr>
+</table></div>
+<p>The frame for tab widgets use <a href="qstyleoptiontabwidgetframe.html">QStyleOptionTabWidgetFrame</a> as style option. We list its members here. It does not have states set besides the common flags.</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >Member</th><th >content</th></tr></thead>
+<tr valign="top" class="odd"><td >leftCornerWidgetSize</td><td >The <a href="../qtcore/qsize.html">QSize</a> of the left corner widget (if any).</td></tr>
+<tr valign="top" class="even"><td >rightCornerWidgetSize</td><td >The <a href="../qtcore/qsize.html">QSize</a> of the right corner widget (if any).</td></tr>
+<tr valign="top" class="odd"><td >lineWidth</td><td >Holds the line with for drawing the panel.</td></tr>
+<tr valign="top" class="even"><td >midLineWith</td><td >This value is currently always 0.</td></tr>
+<tr valign="top" class="odd"><td >shape</td><td >The shape of the tabs on the tab bar.</td></tr>
+<tr valign="top" class="even"><td >tabBarSize</td><td >The <a href="../qtcore/qsize.html">QSize</a> of the tab bar.</td></tr>
+</table></div>
+<a name="scroll-bars"></a>
+<h4 id="scroll-bars">Scroll Bars</h4>
+<p>Here is the style structure for scrollbars:</p>
+<p class="centerAlign"><img src="images/scrollbar.png" alt="" /></p><p><a href="qscrollbar.html">QScrollBar</a> simply creates its style option and then draws <code>CC_ScrollBar</code>. Some styles draw the background of add page and sub page with <code>PE_PanelButtonBevel</code>, and also use indicator arrows to draw the arrows in the next and previous line indicators; we have not included these in the tree as their use is up to the individual style. The style's <code>PM_MaximumDragDistance</code> is the maximum distance in pixels the mouse can move from the bounds of the scroll bar and still move the handle.</p>
+<p>Here is an image of a scrollbar in the Java style:</p>
+<p class="centerAlign"><img src="images/scrollbarimage.png" alt="" /></p><p>You may notice that the scrollbar is slightly different from Java's, as it has two line up indicators. We have done this to show that you can have two separate bounding rectangles for a single sub control. The scroll bar is an example of a widget that is entirely implemented by the Java style - <a href="qcommonstyle.html">QCommonStyle</a> is not involved in the drawing.</p>
+<p>We have a look at the different states a scroll bar can set on the style option:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >State</th><th >State Set When</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>State_Horizontal</code></td><td >The scroll bar is horizontal.</td></tr>
+</table></div>
+<p>The style option of <a href="qscrollbar.html">QScrollBar</a> is <a href="qstyleoptionslider.html">QStyleOptionSlider</a>. Its members are listed in the following table. The option is used by all <a href="qabstractslider.html">QAbstractSlider</a>s; we only describe the members relevant for scroll bars here.</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >Member</th><th >Content</th></tr></thead>
+<tr valign="top" class="odd"><td >maximum</td><td >The maximum value of the scroll bar.</td></tr>
+<tr valign="top" class="even"><td >minimum</td><td >The minimum value of the scroll bar.</td></tr>
+<tr valign="top" class="odd"><td >notchTarget</td><td >The number of pixels between notches.</td></tr>
+<tr valign="top" class="even"><td >orientation</td><td >A value of the <a href="../qtcore/qt.html#Orientation-enum">Qt::Orientation</a> enum that specifies whether the scroll bar is vertical or horizontal.</td></tr>
+<tr valign="top" class="odd"><td >pageStep</td><td >The number by which to increase or decrease the slider's value (relative to the size of the slider and its value range) on page steps.</td></tr>
+<tr valign="top" class="even"><td >singleStep</td><td >The number by which to increase or decrease the slider's value on single (or line) steps.</td></tr>
+<tr valign="top" class="odd"><td >sliderValue</td><td >The value of the slider.</td></tr>
+<tr valign="top" class="even"><td >sliderPosition</td><td >The position of the slider handle. This is the same as <code>sliderValue</code> if the scroll bar is <a href="qabstractslider.html#tracking-prop">QAbstractSlider::tracking</a>. If not, the scroll bar does not update its value before the mouse releases the handle.</td></tr>
+<tr valign="top" class="odd"><td >upsideDown</td><td >Holds the direction in which the scroll bar increases its value. This is used instead of <a href="qstyleoption.html#direction-var">QStyleOption::direction</a> for all abstract sliders.</td></tr>
+</table></div>
+<a name="sliders"></a>
+<h4 id="sliders">Sliders</h4>
+<p>When calculating the slider's size hint, <code>PM_SliderThickness</code> and <code>PM_SliderLength</code> are queried from the style. As with scroll bars, the <a href="qslider.html">QSlider</a> only lets the user move the handle if the mouse is within <code>PM_MaximumDragDistance</code> from the slider bounds. When it draws itself, it creates the style option and calls <code>drawComplexControl()</code> with <code>CC_Slider</code>:</p>
+<p class="centerAlign"><img src="images/slider.png" alt="" /></p><p>We also show a picture of a slider in the Java style. We show the bounding rectangles of the sub elements, as all drawing is done in <code>CC_Slider</code>.</p>
+<p class="centerAlign"><img src="images/sliderimage.png" alt="" /></p><p><a href="qslider.html">QSlider</a> uses <a href="qstyleoptionslider.html">QStyleOptionSlider</a> as all <a href="qabstractslider.html">QAbstractSlider</a>s do. We present a table with the members that affect <a href="qslider.html">QSlider</a>:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >Member</th><th >Content</th></tr></thead>
+<tr valign="top" class="odd"><td >maximum</td><td >The maximum value of the slider.</td></tr>
+<tr valign="top" class="even"><td >minimum</td><td >The minimum value of the slider.</td></tr>
+<tr valign="top" class="odd"><td >notchTarget</td><td >This is the number of pixels between each notch.</td></tr>
+<tr valign="top" class="even"><td >orientation</td><td >A <a href="../qtcore/qt.html#Orientation-enum">Qt::Orientation</a> enum value that indicates whether the slider is vertical or horizontal.</td></tr>
+<tr valign="top" class="odd"><td >pageStep</td><td >The number by which to increase or decrease the slider's value on page steps.</td></tr>
+<tr valign="top" class="even"><td >singleStep</td><td >The number by which to increase or decrease the slider's value on single (or line) steps.</td></tr>
+<tr valign="top" class="odd"><td >sliderValue</td><td >The value of the slider.</td></tr>
+<tr valign="top" class="even"><td >sliderPosition</td><td >The position of the slider given as a slider value. This will be equal to the <code>sliderValue</code> if the slider is <a href="qabstractslider.html#tracking-prop">tracking</a>; if not, the slider's value will not change until the handle is released with the mouse.</td></tr>
+<tr valign="top" class="odd"><td >upsideDown</td><td >This member is used instead of <a href="qstyleoption.html#direction-var">QStyleOption::direction</a> for all abstract sliders.</td></tr>
+</table></div>
+<p>You should note that the slider does not use direction for reverse layouts; it uses <code>upsideDown</code>.</p>
+<a name="spin-boxes"></a>
+<h4 id="spin-boxes">Spin Boxes</h4>
+<p>When <a href="qspinbox.html">QSpinBox</a> paints itself, it creates a <a href="qstyleoptionspinbox.html">QStyleOptionSpinBox</a> and asks the style to draw <code>CC_SpinBox</code>. The edit field is a line edit that is a child of the spin box. The dimensions of the field are calculated by the style with <code>SC_SpinBoxEditField</code>.</p>
+<p>Here follows the style tree for spin boxes. It is not required that a style uses the button panel primitive to paint the indicator backgrounds. You can see an image below the tree showing the sub elements in <a href="qspinbox.html">QSpinBox</a> in the Java style.</p>
+<p class="centerAlign"><img src="images/spinbox.png" alt="" /></p><p class="centerAlign"><img src="images/spinboximage.png" alt="" /></p><p>The <a href="qstyleoptionspinbox.html">QStyleOptionSpinBox</a>, which is the style option for spin boxes. It can set the following states on the spin box:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >State</th><th >State Set When</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>State_Sunken</code></td><td >Is set if one of the sub controls <code>CC_SpinUp</code> or <code>CC_SpinDown</code> is pressed on with the mouse.</td></tr>
+</table></div>
+<p>The rest of the members in the spin box style options are:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >Property</th><th >Function</th></tr></thead>
+<tr valign="top" class="odd"><td >frame</td><td >Boolean that is <code>true</code> if the spin box is to draw a frame.</td></tr>
+<tr valign="top" class="even"><td >buttonSymbols</td><td >Value of the ButtonSymbols enum that decides the symbol on the up/down buttons.</td></tr>
+<tr valign="top" class="odd"><td >stepEnabled</td><td >A value of the StepEnabled enum, indicating which of the spin box buttons are pressed down.</td></tr>
+</table></div>
+<a name="title-bar"></a>
+<h4 id="title-bar">Title Bar</h4>
+<p>The title bar complex control, <code>CC_TitleBar</code>, is used to draw the title bars of internal windows in <a href="qmdiarea.html">QMdiArea</a>. It typically consists of a window title, and close, minimize, system menu, and maximize buttons. Some styles also provide buttons for shading the window, as well as a button for context sensitive help.</p>
+<p>The bar is drawn in <code>CC_TitleBar</code> without using any sub elements. How the individual styles draw their buttons is up to them, but there are standard pixmaps for the buttons that the style should provide.</p>
+<p class="centerAlign"><img src="images/titlebar.png" alt="" /></p><p>In an image over a title bar in the Java style, we show the bounding rectangles of the sub elements supported by the Java style (all of which are drawn with standard pixmaps). It is usual to draw the button backgrounds using <code>PE_PanelButtonTool</code>, but it's not mandatory.</p>
+<p class="centerAlign"><img src="images/titlebarimage.png" alt="" /></p><p>The style option for title bars is <a href="qstyleoptiontitlebar.html">QStyleOptionTitleBar</a>. Its members are:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >Member</th><th >Content</th></tr></thead>
+<tr valign="top" class="odd"><td >icon</td><td >The title bar's icon.</td></tr>
+<tr valign="top" class="even"><td >text</td><td >The text for the title bar's label.</td></tr>
+<tr valign="top" class="odd"><td >windowFlags</td><td >Flags of the Qt::WindowFlag enum. The window flags used by <a href="qmdiarea.html">QMdiArea</a> for window management.</td></tr>
+<tr valign="top" class="even"><td >titleBarState</td><td >This is the <a href="qwidget.html#windowState">QWidget::windowState</a>() of the window that contains the title bar.</td></tr>
+</table></div>
+<a name="combo-box"></a>
+<h4 id="combo-box">Combo Box</h4>
+<p>A <a href="qcombobox.html">QComboBox</a> uses the style to draw the button and label of non-editable boxes with <code>CC_ComboBox</code> and <code>CE_ComboBoxLabel</code>.</p>
+<p>The list that pops up when the user clicks on the combo box is drawn by a <a href="model-view-programming.html#delegate-classes">delegate</a>, which we do not cover in this overview. You can, however, use the style to control the list's size and position with the sub element <code>SC_ComboBoxListBoxPopup</code>. The style also decides where the edit field for editable boxes should be with <code>SC_ComboBoxEditField</code>; the field itself is a <a href="qlineedit.html">QLineEdit</a> that is a child of the combo box.</p>
+<p class="centerAlign"><img src="images/combobox.png" alt="" /></p><p>We show an image over a Java style combo box in which we have outlined its sub elements and sub element rectangles:</p>
+<p class="centerAlign"><img src="images/comboboximage.png" alt="" /></p><p>Java combo boxes do not use the focus rect; it changes its background color when it has focus. The <code>SC_ComboBoxEdit</code> field is used both by <a href="qcombobox.html">QComboBox</a> to calculate the size of the edit field and the style for calculating the size of the combo box label.</p>
+<p>The style option for combo boxes is <a href="qstyleoptioncombobox.html">QStyleOptionComboBox</a>. It can set the following states:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >State</th><th >Set When</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>State_Selected</code></td><td >The box is not editable and has focus.</td></tr>
+<tr valign="top" class="even"><td ><code>State_Sunken</code></td><td ><code>SC_ComboBoxArrow</code> is active.</td></tr>
+<tr valign="top" class="odd"><td ><code>State_on</code></td><td >The container (list) of the box is visible.</td></tr>
+</table></div>
+<p>The style options other members are:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Member</th><th >Content</th></tr></thead>
+<tr valign="top" class="odd"><td >currentIcon</td><td >The icon of the current (selected) item of the combo box.</td></tr>
+<tr valign="top" class="even"><td >currentText</td><td >The text of the current item in the box.</td></tr>
+<tr valign="top" class="odd"><td >editable</td><td >Holds whether the combo box is editable or not.</td></tr>
+<tr valign="top" class="even"><td >frame</td><td >Holds whether the combo box has a frame or not.</td></tr>
+<tr valign="top" class="odd"><td >iconSize</td><td >The size of the current items icon.</td></tr>
+<tr valign="top" class="even"><td >popupRect</td><td >The bounding rectangle of the combo box's popup list.</td></tr>
+</table></div>
+<a name="group-boxes"></a>
+<h4 id="group-boxes">Group Boxes</h4>
+<p>When calculating the size hint, <a href="qgroupbox.html">QGroupBox</a> fetches three pixel metrics from the style: <code>PM_IndicatorWidth</code>, <code>PM_CheckBoxLabelSpacing</code>, and <code>PM_IndicatorHeight</code>. <a href="qgroupbox.html">QGroupBox</a> has the following style element tree:</p>
+<p class="centerAlign"><img src="images/groupbox.png" alt="" /></p><p>Qt does not impose restrictions on how the check box is drawn; the Java style draws it with <code>CE_IndicatorCheckBox</code>. See <a href="style-reference.html#check-and-radio-buttons">Check and Radio Buttons</a> for the complete tree.</p>
+<p>We also give an image of the widget with the sub controls and sub control rectangles drawn:</p>
+<p class="centerAlign"><img src="images/groupboximage.png" alt="" /></p><p>The style option for group boxes is <a href="qstyleoptiongroupbox.html">QStyleOptionGroupBox</a>. The following states can be set on it:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >State</th><th >Set When</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>State_On</code></td><td >The check box is checked.</td></tr>
+<tr valign="top" class="even"><td ><code>State_Sunken</code></td><td >The check box is pressed down.</td></tr>
+<tr valign="top" class="odd"><td ><code>State_Off</code></td><td >The check box is unchecked (or there is no check box).</td></tr>
+</table></div>
+<p>The remaining members of <a href="qstyleoptiongroupbox.html">QStyleOptionGroupBox</a> are:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Member</th><th >Content</th></tr></thead>
+<tr valign="top" class="odd"><td >features</td><td >Flags of the <a href="qstyleoptionframe.html#FrameFeature-enum">QStyleOptionFrame::FrameFeatures</a> enum describing the frame of the group box.</td></tr>
+<tr valign="top" class="even"><td >lineWidth</td><td >The line width with which to draw the panel. This is always 1.</td></tr>
+<tr valign="top" class="odd"><td >text</td><td >The text of the group box.</td></tr>
+<tr valign="top" class="even"><td >textAlignment</td><td >The alignment of the group box title.</td></tr>
+<tr valign="top" class="odd"><td >textColor</td><td >The <a href="../qtgui/qcolor.html">QColor</a> of the text.</td></tr>
+</table></div>
+<a name="splitters"></a>
+<h4 id="splitters">Splitters</h4>
+<p>As the structure of splitters are simple and do not contain any sub elements, we do not include any images of splitters. <code>CE_Splitter</code> does not use any other elements or metrics.</p>
+<p>For its style option, the splitter uses the base class <a href="qstyleoption.html">QStyleOption</a>. It can set the following state flags on it:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >State</th><th >Set When</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>State_Horizontal</code></td><td >Set if it is a horizontal splitter.</td></tr>
+</table></div>
+<p><a href="qsplitter.html">QSplitter</a> does not use <a href="qstyleoption.html#initFrom">initFrom()</a> to set up its option; it sets the <code>State_MouseOver</code> and <code>State_Disabled</code> flags itself.</p>
+<a name="progress-bar"></a>
+<h4 id="progress-bar">Progress Bar</h4>
+<p>The <code>CE_ProgressBar</code> element is used by <a href="qprogressbar.html">QProgressBar</a>, and it is the only element used by this widget. We start with the style structure:</p>
+<p class="centerAlign"><img src="images/progressbar.png" alt="" /></p><p>Here is a progress bar in the common style (the Java style bounding rectangles are equal):</p>
+<p class="centerAlign"><img src="images/progressbarimage.png" alt="" /></p><p>The style option for <a href="qprogressbar.html">QProgressBar</a> is <a href="qstyleoptionprogressbar.html">QStyleOptionProgressBar</a>. The bar does not set any state flags, but the other members of the option are:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >Member</th><th >Content</th></tr></thead>
+<tr valign="top" class="odd"><td >minimum</td><td >The minimum value of the bar.</td></tr>
+<tr valign="top" class="even"><td >maximum</td><td >The maximum value of the bar.</td></tr>
+<tr valign="top" class="odd"><td >progress</td><td >The current value of the bar.</td></tr>
+<tr valign="top" class="even"><td >textAlignment</td><td >How the text is aligned in the label.</td></tr>
+<tr valign="top" class="odd"><td >textVisible</td><td >Whether the label is drawn.</td></tr>
+<tr valign="top" class="even"><td >text</td><td >The label text.</td></tr>
+<tr valign="top" class="odd"><td >orientation</td><td >Progress bars can be vertical or horizontal.</td></tr>
+<tr valign="top" class="even"><td >invertedAppearance</td><td >The progress is inverted (i.e&#x2e;, right to left in a horizontal bar).</td></tr>
+<tr valign="top" class="odd"><td >bottomToTop</td><td >Boolean, that, if <code>true</code>, turns the label of vertical progress bars 90 degrees.</td></tr>
+</table></div>
+<a name="tool-buttons"></a>
+<h4 id="tool-buttons">Tool Buttons</h4>
+<p>Tool buttons exist either independently or as part of tool bars. They are drawn equally either way. The <a href="qtoolbutton.html">QToolButton</a> draws only one style element: <code>CC_ToolButton</code>.</p>
+<p>Below is a tree of the widget's style structure:</p>
+<p class="centerAlign"><img src="images/toolbutton.png" alt="" /></p><p>Note that <code>PE_FrameButtonTool</code> and <code>PE_IndicatorArrowDown</code> are included in the tree as the Java style draws them, but they can safely be omitted if you prefer it. The structure may also be different. <a href="qcommonstyle.html">QCommonStyle</a>, for instance, draws both <code>PE_IndicatorButtonDropDown</code> and <code>PE_IndicatorArrowDown</code> in <code>CE_ToolButton</code>.</p>
+<p>We also have an image of a tool button where we have outlined the sub element bounding rectangles and sub controls.</p>
+<p class="centerAlign"><img src="images/toolbuttonimage.png" alt="" /></p><p>Here is the states table for tool buttons:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >State</th><th >Set When</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>State_AutoRise</code></td><td >The tool button has the autoRise property set.</td></tr>
+<tr valign="top" class="even"><td ><code>State_Raised</code></td><td >The button is not sunken (i.e&#x2e;, by being checked or pressed on with the mouse).</td></tr>
+<tr valign="top" class="odd"><td ><code>State_Sunken</code></td><td >The button is down.</td></tr>
+<tr valign="top" class="even"><td ><code>State_On</code></td><td >The button is checkable and checked.</td></tr>
+</table></div>
+<p><a href="qstyleoptiontoolbutton.html">QStyleOptionToolButton</a> also contains the following members:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Member</th><th >Content</th></tr></thead>
+<tr valign="top" class="odd"><td >arrowType</td><td >A <a href="../qtcore/qt.html#ArrowType-enum">Qt::ArrowType</a> enum value, which contains the direction of the buttons arrow (if an arrow is to be used in place of an icon).</td></tr>
+<tr valign="top" class="even"><td >features</td><td >Flags of the QStyleOptionToolButton::ButtonFeature enum describing if the button has an arrow, a menu, and/or has a popup-delay.</td></tr>
+<tr valign="top" class="odd"><td >font</td><td >The <a href="../qtgui/qfont.html">QFont</a> of the buttons label.</td></tr>
+<tr valign="top" class="even"><td >icon</td><td >The <a href="../qtgui/qicon.html">QIcon</a> of the tool button.</td></tr>
+<tr valign="top" class="odd"><td >iconSize</td><td >The icon size of the button's icon.</td></tr>
+<tr valign="top" class="even"><td >pos</td><td >The position of the button, as given by <a href="qwidget.html#pos-prop">QWidget::pos</a>()</td></tr>
+<tr valign="top" class="odd"><td >text</td><td >The text of the button.</td></tr>
+<tr valign="top" class="even"><td >toolButtonStyle</td><td >A <a href="../qtcore/qt.html#ToolButtonStyle-enum">Qt::ToolButtonStyle</a> enum value which decides whether the button shows the icon, the text, or both.</td></tr>
+</table></div>
+<a name="toolbars"></a>
+<h4 id="toolbars">Toolbars</h4>
+<p>Toolbars are part of the <a href="qmainwindow.html">main window framework</a>, and cooperate with the <a href="qmainwindow.html">QMainWindow</a> to which they belong while it builds its style option. A main window has 4 areas that toolbars can be placed in. They are positioned next to the four sides of the window (i.e&#x2e;, north, south, east and west). Within each area there can be more than one line of toolbars; a line consists of toolbars with equal orientation (vertical or horizontal) placed next to each other.</p>
+<p><a href="qtoolbar.html">Toolbars</a> in Qt consist of three elements: <code>CE_ToolBar</code>, <code>PE_IndicatorToolBarHandle</code>, and <code>PE_IndicatorToolBarSeparator</code>. It is QMainWindowLayout that calculates the bounding rectangles (i.e&#x2e;, position and size of the toolbars and their contents. The main window also uses the <code>sizeHint()</code> of the items in the toolbars when calculating the size of the bars.</p>
+<p>Here is the element tree for <a href="qtoolbar.html">QToolBar</a>:</p>
+<p class="centerAlign"><img src="images/toolbar.png" alt="" /></p><p>The dotted lines indicate that the <a href="qtoolbar.html">QToolBar</a> keeps an instance of QToolBarLayout and that QToolBarSeparators are kept by QToolBarLayout. When the toolbar is floating (i.e&#x2e;, has its own window) the <code>PE_FrameMenu</code> element is drawn, else <a href="qtoolbar.html">QToolBar</a> draws <code>CE_ToolBar</code>.</p>
+<p>Here is an image of a toolbar in the Java style:</p>
+<p class="centerAlign"><img src="images/toolbarimage.png" alt="" /></p><p>QToolBarSaparator uses <a href="qstyleoption.html">QStyleOption</a> for its style option. It sets the <code>State_Horizontal</code> flag if the toolbar it lives in is horizontal. Other than that, they use <a href="qstyleoption.html#initFrom">initFrom()</a>.</p>
+<p>The style option for <a href="qtoolbar.html">QToolBar</a> is <a href="qstyleoptiontoolbar.html">QStyleOptionToolBar</a>. The only state flag set (besides the common flags) is <code>State_Horizontal</code> if the bar is horizontal (i.e&#x2e;, in the north or south toolbar area). The member variables of the style option are:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >Member</th><th >Content</th></tr></thead>
+<tr valign="top" class="odd"><td >features</td><td >Holds whether the bar is movable in a value of the ToolBarFeature, which is either Movable or None.</td></tr>
+<tr valign="top" class="even"><td >lineWidth</td><td >The width of the tool bar frame.</td></tr>
+<tr valign="top" class="odd"><td >midLineWidth</td><td >This variable is currently not used and is always 0.</td></tr>
+<tr valign="top" class="even"><td >positionOfLine</td><td >The position of the toolbar line within the toolbar area to which it belongs.</td></tr>
+<tr valign="top" class="odd"><td >positionWithinLine</td><td >The position of the toolbar within the toolbar line.</td></tr>
+<tr valign="top" class="even"><td >toolBarArea</td><td >The toolbar area in which the toolbar lives.</td></tr>
+</table></div>
+<a name="menus"></a>
+<h4 id="menus">Menus</h4>
+<p>Menus in Qt are implemented in <a href="qmenu.html">QMenu</a>. The <a href="qmenu.html">QMenu</a> keeps a list of actions, which it draws as menu items. When <a href="qmenu.html">QMenu</a> receives paint events, it calculates the size of each menu item and draws them individually with <code>CE_MenuItem</code>. Menu items do not have a separate element for their label (contents), so all drawing is done in <code>CE_MenuItem</code>. The menu also draws the frame of the menu with <code>PE_FrameMenu</code>. It also draws <code>CE_MenuScroller</code> if the style supports scrolling. <code>CE_MenuTearOff</code> is drawn if the menu is too large for its bounding rectangle.</p>
+<p>In the style structure tree, we also include <a href="qmenu.html">QMenu</a> as it also does styling related work. The bounding rectangles of menu items are calculated for the menu's size hint and when the menu is displayed or resized.</p>
+<p class="centerAlign"><img src="images/menu.png" alt="" /></p><p>The <code>CE_MenuScroller</code> and <code>CE_MenuTearOff</code> elements are handled by <a href="qcommonstyle.html">QCommonStyle</a> and are not shown unless the menu is too large to fit on the screen. <code>PE_FrameMenu</code> is only drawn for pop-up menus.</p>
+<p><a href="qmenu.html">QMenu</a> calculates rectangles based on its actions and calls <code>CE_MenuItem</code> and <code>CE_MenuScroller</code> if the style supports that.</p>
+<p>It is also usual to use <code>PE_IndicatorCheckBox</code> (instead of using <code>PE_IndicatorMenuCheckMark</code>) and <code>PE_IndicatorRadioButton</code> for drawing checkable menu items; we have not included them in the style tree as this is optional and varies from style to style.</p>
+<p class="centerAlign"><img src="images/menuimage.png" alt="" /></p><p>The style option for menu items is <a href="qstyleoptionmenuitem.html">QStyleOptionMenuItem</a>. The following tables describe its state flags and other members.</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >State</th><th >Set When</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>State_Selected</code></td><td >The mouse is over the action and the action is not a separator.</td></tr>
+<tr valign="top" class="even"><td ><code>State_Sunken</code></td><td >The mouse is pressed down on the menu item.</td></tr>
+<tr valign="top" class="odd"><td ><code>State_DownArrow</code></td><td >Set if the menu item is a menu scroller and it scrolls the menu downwards.</td></tr>
+</table></div>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >Member</th><th >Content</th></tr></thead>
+<tr valign="top" class="odd"><td >checkType</td><td >A value of the <a href="qstyleoptionmenuitem.html#CheckType-enum">CheckType</a> enum, which is either NotCheckable, Exclusive, or NonExclusive.</td></tr>
+<tr valign="top" class="even"><td >checked</td><td >Boolean that is <code>true</code> if the menu item is checked.</td></tr>
+<tr valign="top" class="odd"><td >font</td><td >The <a href="../qtgui/qfont.html">QFont</a> to use for the menu item's text.</td></tr>
+<tr valign="top" class="even"><td >icon</td><td >The <a href="../qtgui/qicon.html">QIcon</a> of the menu item.</td></tr>
+<tr valign="top" class="odd"><td >maxIconWidth</td><td >The maximum width allowed for the icon.</td></tr>
+<tr valign="top" class="even"><td >menuHasChecableItem</td><td >Boolean which is <code>true</code> if at least one item in the menu is checkable.</td></tr>
+<tr valign="top" class="odd"><td >menuItemType</td><td >The type of the menu item. This a value of the <a href="qstyleoptionmenuitem.html#MenuItemType-enum">MenuItemType</a>.</td></tr>
+<tr valign="top" class="even"><td >menuRect</td><td >The bounding rectangle for the <a href="qmenu.html">QMenu</a> that the menu item lives in.</td></tr>
+<tr valign="top" class="odd"><td >tabWidth</td><td >This is the distance between the text of the menu item and the shortcut.</td></tr>
+<tr valign="top" class="even"><td >text</td><td >The text of the menu item.</td></tr>
+</table></div>
+<p>The setup of the style option for <code>CE_MenuTearOff</code> and <code>CE_MenuScroller</code> also uses <a href="qstyleoptionmenuitem.html">QStyleOptionMenuItem</a>; they only set the <code>menuRect</code> variable in addition to the common settings with <a href="qstyleoption.html">QStyleOption</a>'s <a href="qstyleoption.html#initFrom">initFrom()</a>.</p>
+<a name="menu-bar"></a>
+<h4 id="menu-bar">Menu Bar</h4>
+<p><a href="qmenubar.html">QMenuBar</a> uses the style to draw each menu bar item and the empty area of the menu bar. The pull-down menus themselves are <a href="qmenu.html">QMenu</a>s (see <a href="style-reference.html#menus">Menus</a>). The style element tree for the menu bar follows:</p>
+<p class="centerAlign"><img src="images/menubar.png" alt="" /></p><p>The panel and empty area are drawn after the menu items. The <a href="../qtgui/qpainter.html">QPainter</a> that the <a href="qmenubar.html">QMenuBar</a> sends to the style has the bounding rectangles of the items clipped out (i.e&#x2e;, clip region), so you don't need to worry about drawing over the items. The pixel metrics in <a href="qmenubar.html">QMenuBar</a> are used when the bounding rectangles of the menu bar items are calculated.</p>
+<p class="centerAlign"><img src="images/menubarimage.png" alt="" /></p><p><a href="qstyleoptionmenuitem.html">QStyleOptionMenuItem</a> is used for menu bar items. The members that are used by <a href="qmenubar.html">QMenuBar</a> are described in the following table:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Member</th><th >Content</th></tr></thead>
+<tr valign="top" class="odd"><td >menuRect</td><td >The bounding rectangle of the entire menu bar to which the item belongs.</td></tr>
+<tr valign="top" class="even"><td >text</td><td >The text of the item.</td></tr>
+<tr valign="top" class="odd"><td >icon</td><td >The icon of the menu item (it is not common that styles draw this icon).</td></tr>
+</table></div>
+<p><a href="qstyleoptionmenuitem.html">QStyleOptionMenuItem</a> is also used for drawing <code>CE_EmptyMenuBarArea</code>.</p>
+<p><a href="qstyleoptionframe.html">QStyleOptionFrame</a> is used for drawing the panel frame. The <a href="qstyleoptionframe.html#lineWidth-var">lineWidth</a> is set to <code>PM_MenuBarPanelWidth</code>. The <a href="qstyleoptionframe.html#midLineWidth-var">midLineWidth</a> is currently always set to 0.</p>
+<a name="item-view-headers"></a>
+<h4 id="item-view-headers">Item View Headers</h4>
+<p>It is the style that draws the headers of Qt's item views. The item views keep the dimensions on individual sections. Also note that the delegates may use the style to paint decorations and frames around items. <a href="qitemdelegate.html">QItemDelegate</a>, for instance, draws <code>PE_FrameFocusRect</code> and <code>PE_IndicatorViewItemCheck</code>.</p>
+<p class="centerAlign"><img src="images/header.png" alt="" /></p><p>Here is a <a href="qtablewidget.html">QTableWidget</a> showing the bounding rects of a Java header:</p>
+<p class="centerAlign"><img src="images/headerimage.png" alt="" /></p><p>The <a href="qheaderview.html">QHeaderView</a> uses <code>CT_HeaderSection</code>, <code>PM_HeaderMargin</code> and <code>PM_HeaderGripMargin</code> for size and hit test calculations. The <code>PM_HeaderMarkSize</code> is currently not used by Qt. <a href="qtableview.html">QTableView</a> draws the button in the top-left corner (i.e&#x2e;, the area where the vertical and horizontal headers intersect) as a <code>CE_Header</code>.</p>
+<p>The style option for header views is <a href="qstyleoptionheader.html">QStyleOptionHeader</a>. The view paints one header section at a time, so the data is for the section being drawn. Its contents are:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >Member</th><th >Content</th></tr></thead>
+<tr valign="top" class="odd"><td >icon</td><td >The icon of the header (for section that is being drawn).</td></tr>
+<tr valign="top" class="even"><td >iconAlignment</td><td >The alignment (<a href="../qtcore/qt.html#AlignmentFlag-enum">Qt::Alignment</a>) of the icon in the header.</td></tr>
+<tr valign="top" class="odd"><td >orientation</td><td >A <a href="../qtcore/qt.html#Orientation-enum">Qt::Orientation</a> value deciding whether the header is the horizontal header above the view or the vertical header on the left.</td></tr>
+<tr valign="top" class="even"><td >position</td><td >A <a href="qstyleoptionheader.html#SectionPosition-enum">QStyleOptionHeader::SectionPosition</a> value giving the header section's position relative to the other sections.</td></tr>
+<tr valign="top" class="odd"><td >section</td><td >Holds the section that is being drawn.</td></tr>
+<tr valign="top" class="even"><td >selectedPosition</td><td >A <a href="qstyleoptionheader.html#SelectedPosition-enum">QStyleOptionHeader::SelectedPosition</a> value giving the selected section's position relative to the section that is being painted.</td></tr>
+<tr valign="top" class="odd"><td >sortIndicator</td><td >A <a href="qstyleoptionheader.html#SortIndicator-enum">QStyleOptionHeader::SortIndicator</a> value that describes the direction in which the section's sort indicator should be drawn.</td></tr>
+<tr valign="top" class="even"><td >text</td><td >The text of the currently drawn section.</td></tr>
+<tr valign="top" class="odd"><td >textAlignment</td><td >The <a href="../qtcore/qt.html#AlignmentFlag-enum">Qt::Alignment</a> of the text within the header section.</td></tr>
+</table></div>
+<a name="tree-branch-indicators"></a>
+<h4 id="tree-branch-indicators">Tree Branch Indicators</h4>
+<p>The branch indicators in a tree view are drawn by the style with <code>PE_IndicatorBranch</code>. We think of indicators here as the indicators that describe the relationship of the nodes in the tree. The generic <a href="qstyleoption.html">QStyleOption</a> is sent to the style for drawing these elements. The various branch types are described by states. Since there is no specific style option, we simply present the states table:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >State</th><th >Set When</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>State_Sibling</code></td><td >The node in the tree has a sibling (i.e&#x2e;, there is another node in the same column).</td></tr>
+<tr valign="top" class="even"><td ><code>State_Item</code></td><td >This branch indicator has an item.</td></tr>
+<tr valign="top" class="odd"><td ><code>State_Children</code></td><td >The branch has children (i.e&#x2e;, a new sub-tree can be opened at the branch).</td></tr>
+<tr valign="top" class="even"><td ><code>State_Open</code></td><td >The branch indicator has an opened sub-tree.</td></tr>
+</table></div>
+<p>The tree view (and tree widget) use the style to draw the branches (nodes) of the tree.</p>
+<p><a href="qstyleoption.html">QStyleOption</a> is used as the style for <code>PE_IndicatorBranch</code> has state flags set depending on what type of branch it is.</p>
+<p>Since there is no tree structure for branch indicators, we only present an image of a tree in the Java style. Each state is marked in the image with a rectangle in a specific color (i.e&#x2e;, the rectangles are not bounding rectangles). All combinations of states you must be aware of are represented in the image.</p>
+<p class="centerAlign"><img src="images/branchindicatorimage.png" alt="" /></p><a name="tool-boxes"></a>
+<h4 id="tool-boxes">Tool Boxes</h4>
+<p><code>PM_SmallIconSize</code> for sizeHints.</p>
+<p><a href="qtoolbox.html">QToolBox</a> is a container that keeps a collection of widgets. It has one tab for each widget and displays one of them at a time. The tool box lays the components it displays (the tool box buttons and selected widget) in a <a href="qvboxlayout.html">QVBoxLayout</a>. The style tree for tool boxes looks like this:</p>
+<p class="centerAlign"><img src="images/toolbox.png" alt="" /></p><p>We show an image of a tool box in the Plastique style:</p>
+<p class="centerAlign"><img src="images/toolboximage.png" alt="" /></p><p>All elements have the same bounding rectangles in the Plastique style as well as the other built-in Qt styles.</p>
+<p>The style option for tool boxes is <a href="qstyleoptiontoolbox.html">QStyleOptionToolBox</a>. It contains the text and icon of the tool box contents. The only state set by <a href="qtoolbox.html">QToolBox</a> is <code>State_Sunken</code>, which is set when the user presses a tab down with the mouse. The rest of the <a href="qstyleoptiontoolbox.html">QStyleOptionToolBox</a> members are:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >Member</th><th >Content</th></tr></thead>
+<tr valign="top" class="odd"><td >icon</td><td >The icon on the toolbox tab.</td></tr>
+<tr valign="top" class="even"><td >text</td><td >The text on the toolbox tab.</td></tr>
+</table></div>
+<a name="size-grip"></a>
+<h4 id="size-grip">Size Grip</h4>
+<p>The size grip calculates its size hint with <code>CT_SizeGrip</code>. The pixel metric <code>PM_SizeGripSize</code> is currently unused by Qt. The element tree for an image in the Plastique style of <a href="qsizegrip.html">QSizeGrip</a> follows:</p>
+<p class="centerAlign"><img src="images/sizegrip.png" alt="" /></p><p class="centerAlign"><img src="images/sizegripimage.png" alt="" /></p><p>We show the size grip in <a href="qmainwindow.html">QMainWindow</a>'s bottom right corner.</p>
+<p>The size grip style option, <a href="qstyleoptionsizegrip.html">QStyleOptionSizeGrip</a>, has one member besides the common members from <a href="qstyleoption.html">QStyleOption</a>:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >Member</th><th >Content</th></tr></thead>
+<tr valign="top" class="odd"><td >corner</td><td >A <a href="../qtcore/qt.html#Corner-enum">Qt::Corner</a> value that describes which corner in a window (or equivalent) the grip is located.</td></tr>
+</table></div>
+<a name="rubber-band"></a>
+<h4 id="rubber-band">Rubber Band</h4>
+<p>The <a href="qrubberband.html">QRubberBand</a>'s style tree consists of two nodes.</p>
+<p class="centerAlign"><img src="images/rubberband.png" alt="" /></p><p>We present an image of a Java style window being moved in a <a href="qmdiarea.html">QMdiArea</a> with a rubber band:</p>
+<p class="centerAlign"><img src="images/rubberbandimage.png" alt="" /></p><p>The style option for rubber bands is <a href="qstyleoptionrubberband.html">QStyleOptionRubberBand</a>. Its members are:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Member</th><th >Content</th></tr></thead>
+<tr valign="top" class="odd"><td >opaque</td><td >Boolean that is <code>true</code> if the rubber band must be drawn in an opaque style (i.e&#x2e;, color).</td></tr>
+<tr valign="top" class="even"><td >shape</td><td >A <a href="qrubberband.html#Shape-enum">QRubberBand::Shape</a> enum value that holds the shape of the band (which is either a rectangle or a line).</td></tr>
+</table></div>
+<a name="dock-widgets"></a>
+<h4 id="dock-widgets">Dock Widgets</h4>
+<p>When the dock widget lays out its contents it asks the style for these pixel metrics: <code>PM_DockWidgetSeparatorExtent</code>, <code>PM_DockWidgetTitleBarButtonMargin</code>, <code>PM_DockWidgetFrameWidth</code>, and <code>PM_DockWidgetTitleMargin</code>. It also calculates the bounding rectangles of the float and close buttons with <code>SE_DockWidgetCloseButton</code> and <code>SE_DockWidgetFloatButton</code>.</p>
+<p class="centerAlign"><img src="images/dockwidget.png" alt="" /></p><p>The dotted lines indicate that the sender keeps instances of the recipient of the arrow (i.e&#x2e;, it is not a style element to draw). The dock widget only draws <code>PE_frameDockWidget</code> when it is detached from its main window (i.e&#x2e;, it is a top level window). If it is docked it draws the indicator dock widget resize handle. We show a dock widget in both docked and floating state in the plastique style:</p>
+<p class="centerAlign"><img src="images/dockwidgetimage.png" alt="" /></p><p>The style option is <a href="qstyleoptiondockwidget.html">QStyleOptionDockWidget</a>:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >Member</th><th >Content</th></tr></thead>
+<tr valign="top" class="odd"><td >closeable</td><td >Boolean that holds whether the dock window can be closed.</td></tr>
+<tr valign="top" class="even"><td >floatable</td><td >Boolean that holds whether the dock window can float (i.e&#x2e;, detach from the main window in which it lives).</td></tr>
+<tr valign="top" class="odd"><td >movable</td><td >Boolean that holds whether the window is movable (i.e&#x2e;, can move to other dock widget areas).</td></tr>
+<tr valign="top" class="even"><td >title</td><td >The title text of the dock window.</td></tr>
+</table></div>
+<p>For the buttons, <a href="qstyleoptionbutton.html">QStyleOptionButton</a> is used (see <a href="style-reference.html#tool-buttons">Tool Buttons</a> for content description). The dock widget resize handle has a plain <a href="qstyleoption.html">QStyleOption</a>.</p>
+</div>
+<!-- @@@style-reference.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-ui.qdoc -->
+  <title>User Interface | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >User Interface</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-overview.html" />
+  <link rel="next" href="creator-modes.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-overview.html">IDE Overview</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-modes.html">Selecting Modes</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#navigating-with-keyboard">Navigating with Keyboard</a></li>
+<li class="level1"><a href="#useful-features">Useful Features</a></li>
+<li class="level1"><a href="#changing-languages">Changing Languages</a></li>
+<li class="level1"><a href="#viewing-images">Viewing Images</a></li>
+<li class="level2"><a href="#exporting-svg-images">Exporting SVG Images</a></li>
+<li class="level1"><a href="#platform-notes">Platform Notes</a></li>
+<li class="level2"><a href="#location-of-functions">Location of Functions</a></li>
+<li class="level2"><a href="#location-of-settings-files">Location of Settings Files</a></li>
+<li class="level2"><a href="#high-dpi-scaling">High DPI Scaling</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">User Interface</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-quick-tour.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>When you start Qt Creator, it opens to the <b>Welcome</b> mode, where you can:</p>
+<ul>
+<li>Open recent sessions and projects</li>
+<li>Create and open projects</li>
+<li>Open tutorials and example projects</li>
+<li>Read news from the online community and Qt blogs</li>
+<li>Create or manage a Qt Account</li>
+</ul>
+<p class="centerAlign"><img src="images/qtcreator-breakdown.png" alt="" /></p><p>You can use the <a href="creator-modes.html#">mode selector</a> (1) to change to another Qt Creator mode.</p>
+<p>You can use the kit selector (2) to select the <a href="creator-glossary.html#glossary-buildandrun-kit">kit</a> for running (3), debugging (4), or building (5) the application. Output from these actions is displayed in the output panes (7). You can use the <a href="creator-editor-locator.html#">locator</a> (6) to browse through projects, files, classes, functions, documentation, and file systems.</p>
+<p>For a quick tour of the user interface that takes you to the locations of these controls, select <b>Help</b> &gt; <b>UI Tour</b>.</p>
+<p>The following sections describe some of these controls in more detail:</p>
+<ul>
+<li><a href="creator-modes.html#">Mode selector</a></li>
+<li><a href="creator-sidebar-views.html#">Sidebars</a></li>
+<li><a href="creator-output-panes.html#">Output panes</a></li>
+</ul>
+<a name="navigating-with-keyboard"></a>
+<h2 id="navigating-with-keyboard">Navigating with Keyboard</h2>
+<p>Qt Creator caters not only to developers who are used to using the mouse, but also to developers who are more comfortable with the keyboard. A wide range of <a href="creator-keyboard-shortcuts.html#">keyboard</a> and <a href="creator-editor-locator.html#">navigation</a> shortcuts are available to help speed up the process of developing your application.</p>
+<a name="useful-features"></a>
+<h2 id="useful-features">Useful Features</h2>
+<p>For a list of useful Qt Creator features described in other parts of the documentation, see <a href="creator-tips.html#">Tips and Tricks</a>.</p>
+<a name="changing-languages"></a>
+<h2 id="changing-languages">Changing Languages</h2>
+<p>Qt Creator has been localized into several languages. If the system language is one of the supported languages, it is automatically selected. To change the language, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Environment</b> and select a language in the <b>Language</b> field. The change takes effect after you restart Qt Creator.</p>
+<a name="viewing-images"></a>
+<h2 id="viewing-images">Viewing Images</h2>
+<p>Qt Creator opens image files in the image viewer.</p>
+<p class="centerAlign"><img src="images/qtcreator-image-viewer.png" alt="&quot;Image viewer&quot;" /></p><p>Use the toolbar buttons (1) or <a href="creator-keyboard-shortcuts.html#">keyboard shortcuts</a> to:</p>
+<ul>
+<li>Export SVG images to pixmaps</li>
+<li>Switch between background and outline modes</li>
+<li>Zoom in and out</li>
+<li>Fit images to screen</li>
+<li>Return to original size</li>
+<li>Play and pause animated GIF and MNG images</li>
+</ul>
+<a name="exporting-svg-images"></a>
+<h3 id="exporting-svg-images">Exporting SVG Images</h3>
+<p>If you receive a freely scalable icon in the SVG format from an UI designer, you can export it to several images of different sizes to create a set of pixmaps. You can then use <a href="http://doc.qt.io/qt-5/qicon.html#addPixmap">QIcon::addPixmap</a>() to add the pixmaps to icons in different modes and states.</p>
+<a name="platform-notes"></a>
+<h2 id="platform-notes">Platform Notes</h2>
+<p>This section describes the cases where the behavior of Qt Creator depends on the operating system it runs on.</p>
+<a name="location-of-functions"></a>
+<h3 id="location-of-functions">Location of Functions</h3>
+<p>Qt Creator uses standard names and locations for standard features, such as <i>options</i> or <i>preferences</i>. In this manual, the names and locations on Windows and Linux are usually used to keep the instructions short. Here are some places to check if you cannot find a function, dialog, or keyboard shortcut on macOS when following the instructions:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >For</th><th >Look In</th></tr></thead>
+<tr valign="top" class="odd"><td ><b>Tools</b> &gt; <b>Options</b></td><td ><b>Qt Creator</b> &gt; <b>Preferences</b></td></tr>
+<tr valign="top" class="even"><td ><b>Help</b> &gt; <b>About Plugins</b></td><td ><b>Qt Creator</b> &gt; <b>About Plugins</b></td></tr>
+<tr valign="top" class="odd"><td >Keyboard shortcuts</td><td ><b>Qt Creator</b> &gt; <b>Preferences</b> &gt; <b>Environment</b> &gt; <b>Keyboard</b></td></tr>
+</table></div>
+<a name="location-of-settings-files"></a>
+<h3 id="location-of-settings-files">Location of Settings Files</h3>
+<p>Qt Creator creates the following files and directories:</p>
+<ul>
+<li>QtCreator.db</li>
+<li>QtCreator.ini</li>
+<li>qtversion.xml</li>
+<li>toolChains.xml</li>
+<li>qtcreator</li>
+<li>qtc-qmldump</li>
+</ul>
+<p>The location of the above files and directories depends on the platform:</p>
+<ul>
+<li>On Linux and other Unix platforms, the files are located in <code>~/.config/QtProject</code> and <code>~/.local/share/data/QtProject/qtcreator</code>.</li>
+<li>On macOS, the files are located in <code>~/.config/QtProject</code> and <code>~/Library/Application Support/QtProject/Qt Creator</code>.</li>
+<li>On Windows XP, the files are located in <code>%SystemDrive%\Documents and Settings\%USERNAME%\Application Data\QtProject</code> and <code>%SystemDrive%\Documents and Settings\%USERNAME%\Local Settings\Application Data\QtProject</code>.</li>
+<li>On Windows 7, the files are located in <code>%SystemDrive%\Users\%USERNAME%\AppData\Roaming\QtProject</code> and <code>%SystemDrive%\Users\%USERNAME%\AppData\Local\QtProject</code>.</li>
+</ul>
+<a name="high-dpi-scaling"></a>
+<h3 id="high-dpi-scaling">High DPI Scaling</h3>
+<p>The operating systems supported by Qt Creator implement high dots-per-inch (DPI) scaling at varying levels. Therefore, Qt Creator handles high DPI scaling differently on different operating system:</p>
+<ul>
+<li>On macOS, high DPI scaling is forced, which means that Qt Creator allows Qt to use the system scaling factor as the Qt Creator scaling factor.</li>
+<li>On Windows, if no <a href="http://doc.qt.io/qt-5/highdpi.html#high-dpi-support-in-qt">scaling environment variables</a> are set, Qt Creator instructs Qt to detect the scaling factor and use it for Qt Creator.</li>
+<li>On Linux, Qt Creator leaves it to the user to enable high DPI scaling, because the process varies so much on different distributions and windowing systems that it cannot be reliably done automatically.</li>
+</ul>
+<p>To override the default approach and always enable high-DPI scaling, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Environment</b> &gt; <b>Enable high DPI scaling</b>. The changes will take effect after you restart Qt Creator.</p>
+</div>
+<!-- @@@creator-quick-tour.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-overview.html">IDE Overview</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-modes.html">Selecting Modes</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

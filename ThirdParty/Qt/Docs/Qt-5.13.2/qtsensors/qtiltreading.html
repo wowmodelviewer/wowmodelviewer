@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtiltsensor.cpp -->
+  <title>QTiltReading Class | Qt Sensors 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtsensors-index.html">Qt Sensors</a></td><td ><a href="qtsensors-module.html">C++ Classes</a></td><td >QTiltReading</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtsensors-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QTiltReading Class</h1>
+<!-- $$$QTiltReading-brief -->
+<p>The <a href="qtiltreading.html">QTiltReading</a> class holds readings from the tilt sensor. <a href="#details">More...</a></p>
+<!-- @@@QTiltReading -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QTiltReading&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += sensors</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.1</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qsensorreading.html">QSensorReading</a></td></tr></table></div><p>This class was introduced in  Qt 5.1.</p>
+<ul>
+<li><a href="qtiltreading-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qtiltreading.html#xRotation-prop">xRotation</a></b> : const qreal</li>
+<li class="fn"><b><a href="qtiltreading.html#yRotation-prop">yRotation</a></b> : const qreal</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtiltreading.html#setXRotation">setXRotation</a></b>(qreal <i>x</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtiltreading.html#setYRotation">setYRotation</a></b>(qreal <i>y</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qtiltreading.html#xRotation-prop">xRotation</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qtiltreading.html#yRotation-prop">yRotation</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QTiltReading-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The tilt sensor reports the angle of tilt in degrees of the device along the X and Y plane.</p>
+</div>
+<!-- @@@QTiltReading -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$xRotation-prop$$$xRotation -->
+<h3 class="fn" id="xRotation-prop"><a name="xRotation-prop"></a><span class="name">xRotation</span> : const <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span></h3>
+<p>This property holds the amount of tilt on the X axis.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qreal </td><td class="memItemRight bottomAlign"><span class="name"><b>xRotation</b></span>() const</td></tr>
+</table></div>
+<!-- @@@xRotation -->
+<!-- $$$yRotation-prop$$$yRotation -->
+<h3 class="fn" id="yRotation-prop"><a name="yRotation-prop"></a><span class="name">yRotation</span> : const <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span></h3>
+<p>This property holds the amount of tilt on the Y axis.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qreal </td><td class="memItemRight bottomAlign"><span class="name"><b>yRotation</b></span>() const</td></tr>
+</table></div>
+<!-- @@@yRotation -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$setXRotation[overload1]$$$setXRotationqreal -->
+<h3 class="fn" id="setXRotation"><a name="setXRotation"></a><span class="type">void</span> QTiltReading::<span class="name">setXRotation</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>x</i>)</h3>
+<p>Sets <a href="qtiltreading.html#xRotation-prop">xRotation</a> to <i>x</i>.</p>
+<p><b>See also </b><a href="qtiltreading.html#xRotation-prop">xRotation</a>().</p>
+<!-- @@@setXRotation -->
+<!-- $$$setYRotation[overload1]$$$setYRotationqreal -->
+<h3 class="fn" id="setYRotation"><a name="setYRotation"></a><span class="type">void</span> QTiltReading::<span class="name">setYRotation</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>y</i>)</h3>
+<p>Sets <a href="qtiltreading.html#yRotation-prop">yRotation</a> to <i>y</i>.</p>
+<p><b>See also </b><a href="qtiltreading.html#yRotation-prop">yRotation</a>().</p>
+<!-- @@@setYRotation -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

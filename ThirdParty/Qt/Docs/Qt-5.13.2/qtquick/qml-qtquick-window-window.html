@@ -1,0 +1,569 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickwindow.cpp -->
+  <title>Window QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >Window QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#attached-properties">Attached Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Window QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Window-brief -->
+<p>Creates a new top-level window. <a href="#details">More...</a></p>
+<!-- @@@Window -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Window 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiates:</td><td class="memItemRight bottomAlign"> <a href="qml-qtquick-window-window.html"><a href="qquickwindow.html">QQuickWindow</a></td></tr></table></div><ul>
+<li><a href="qml-qtquick-window-window-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#active-prop">active</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#activeFocusItem-prop">activeFocusItem</a></b></b> : Item</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#color-prop">color</a></b></b> : color</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#contentItem-prop">contentItem</a></b></b> : Item</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#contentOrientation-prop">contentOrientation</a></b></b> : Qt::ScreenOrientation</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#data-prop">data</a></b></b> : list&lt;Object&gt;</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#flags-prop">flags</a></b></b> : Qt::WindowFlags</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#height-prop">height</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#height-attached-prop">height</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#maximumHeight-prop">maximumHeight</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#maximumWidth-prop">maximumWidth</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#minimumHeight-prop">minimumHeight</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#minimumWidth-prop">minimumWidth</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#modality-prop">modality</a></b></b> : Qt::WindowModality</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#opacity-prop">opacity</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#screen-prop">screen</a></b></b> : variant</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#title-prop">title</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#transientParent-prop">transientParent</a></b></b> : QWindow</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#visibility-prop">visibility</a></b></b> : QWindow::Visibility</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#visible-prop">visible</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#width-prop">width</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#width-attached-prop">width</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#x-prop">x</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#y-prop">y</a></b></b> : int</li>
+</ul>
+<a name="attached-properties"></a>
+<h2 id="attached-properties">Attached Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#active-attached-prop">active</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#activeFocusItem-attached-prop">activeFocusItem</a></b></b> : Item</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#contentItem-attached-prop">contentItem</a></b></b> : Item</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#visibility-attached-prop">visibility</a></b></b> : QWindow::Visibility</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#window-attached-prop">window</a></b></b> : Window</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#closing-signal">closing</a></b></b>(<i>close</i>)</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#alert-method">alert</a></b></b>(<i>msec</i>)</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#close-method">close</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#hide-method">hide</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#lower-method">lower</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#raise-method">raise</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#requestActivate-method">requestActivate</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#show-method">show</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#showFullScreen-method">showFullScreen</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#showMaximized-method">showMaximized</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#showMinimized-method">showMinimized</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-window-window.html#showNormal-method">showNormal</a></b></b>()</li>
+</ul>
+<!-- $$$Window-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The Window object creates a new top-level window for a Qt Quick scene. It automatically sets up the window for use with <code>QtQuick 2.x</code> graphical types.</p>
+<p>To use this type, you will need to import the module with the following line:</p>
+<pre class="cpp">
+
+  import <span class="type">QtQuick</span><span class="operator">.</span>Window <span class="number">2.2</span>
+
+</pre>
+<p>Omitting this import will allow you to have a QML environment without access to window system features.</p>
+<p>A Window can be declared inside an Item or inside another Window; in that case the inner Window will automatically become &quot;transient for&quot; the outer Window: that is, most platforms will show it centered upon the outer window by default, and there may be other platform-dependent behaviors, depending also on the <a href="qml-qtquick-window-window.html#flags-prop">flags</a>. If the nested window is intended to be a dialog in your application, you should also set <a href="qml-qtquick-window-window.html#flags-prop">flags</a> to Qt.Dialog, because some window managers will not provide the centering behavior without that flag. You can also declare multiple windows inside a top-level <a href="../qtqml/qml-qtqml-qtobject.html">QtObject</a>, in which case the windows will have no transient relationship.</p>
+<p>Alternatively you can set or bind <a href="qml-qtquick-window-window.html#x-prop">x</a> and <a href="qml-qtquick-window-window.html#y-prop">y</a> to position the Window explicitly on the screen.</p>
+<p>When the user attempts to close a window, the <a href="qml-qtquick-window-window.html#closing-signal">closing</a> signal will be emitted. You can force the window to stay open (for example to prompt the user to save changes) by writing an <code>onClosing</code> handler and setting <code>close.accepted = false</code>.</p>
+<!-- @@@Window -->
+<h2>Property Documentation</h2>
+<!-- $$$ -->
+<div class="qmlitem"><div class="qmlproto"><div class="table"><table class="qmlname"><tr valign="top" class="odd" id="maximumWidth-prop"><td class="tblQmlPropNode"><p><a name="maximumWidth-prop"></a><span class="name">maximumWidth</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr><tr valign="top" class="odd" id="maximumHeight-prop"><td class="tblQmlPropNode"><p><a name="maximumHeight-prop"></a><span class="name">maximumHeight</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr></table></div></div><div class="qmldoc"><p>Defines the window's maximum size.</p>
+<p>This is a hint to the window manager to prevent resizing above the specified width and height.</p>
+<p>This documentation was introduced in  Qt 5.1.</p>
+</div></div><!-- @@@ -->
+<br/>
+<!-- $$$ -->
+<div class="qmlitem"><div class="qmlproto"><div class="table"><table class="qmlname"><tr valign="top" class="odd" id="minimumWidth-prop"><td class="tblQmlPropNode"><p><a name="minimumWidth-prop"></a><span class="name">minimumWidth</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr><tr valign="top" class="odd" id="minimumHeight-prop"><td class="tblQmlPropNode"><p><a name="minimumHeight-prop"></a><span class="name">minimumHeight</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr></table></div></div><div class="qmldoc"><p>Defines the window's minimum size.</p>
+<p>This is a hint to the window manager to prevent resizing below the specified width and height.</p>
+<p>This documentation was introduced in  Qt 5.1.</p>
+</div></div><!-- @@@ -->
+<br/>
+<!-- $$$ -->
+<div class="qmlitem"><div class="qmlproto"><div class="table"><table class="qmlname"><tr valign="top" class="odd" id="x-prop"><td class="tblQmlPropNode"><p><a name="x-prop"></a><span class="name">x</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr><tr valign="top" class="odd" id="y-prop"><td class="tblQmlPropNode"><p><a name="y-prop"></a><span class="name">y</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr><tr valign="top" class="odd" id="width-prop"><td class="tblQmlPropNode"><p><a name="width-prop"></a><span class="name">width</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr><tr valign="top" class="odd" id="height-prop"><td class="tblQmlPropNode"><p><a name="height-prop"></a><span class="name">height</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr></table></div></div><div class="qmldoc"><p>Defines the window's position and size.</p>
+<p>The (x,y) position is relative to the <a href="qml-qtquick-window-screen.html">Screen</a> if there is only one, or to the virtual desktop (arrangement of multiple screens).</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-window-window.html">Window</a></span> { <span class="name">x</span>: <span class="number">100</span>; <span class="name">y</span>: <span class="number">100</span>; <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span> }
+
+</pre>
+<p class="centerAlign"><img src="images/screen-and-window-dimensions.jpg" alt="" /></p></div></div><!-- @@@ -->
+<br/>
+<!-- $$$ -->
+<div class="qmlitem"><div class="qmlproto"><div class="table"><table class="qmlname"><tr valign="top" class="odd" id="width-attached-prop"><td class="tblQmlPropNode"><p><a name="width-attached-prop"></a><span class="name">Window.width</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr><tr valign="top" class="odd" id="height-attached-prop"><td class="tblQmlPropNode"><p><a name="height-attached-prop"></a><span class="name">Window.height</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr></table></div></div><div class="qmldoc"><p>These attached properties hold the size of the item's window. The Window attached property can be attached to any Item.</p>
+<p>This documentation was introduced in  Qt 5.5.</p>
+</div></div><!-- @@@ -->
+<br/>
+<!-- $$$active -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="active-prop"></a><span class="name">active</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The active status of the window.</p>
+<p>This property was introduced in  Qt 5.1.</p>
+<p><b>See also </b><a href="qml-qtquick-window-window.html#requestActivate-method">requestActivate()</a>.</p>
+</div></div><!-- @@@active -->
+<br/>
+<!-- $$$activeFocusItem -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="activeFocusItem-prop"></a><span class="name">activeFocusItem</span> : <span class="type"><a href="qml-qtquick-item.html">Item</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The item which currently has active focus or <code>null</code> if there is no item with active focus.</p>
+<p>This property was introduced in  Qt 5.1.</p>
+</div></div><!-- @@@activeFocusItem -->
+<br/>
+<!-- $$$color -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="color-prop"></a><span class="name">color</span> : <span class="type"><a href="qml-color.html">color</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The background color for the window.</p>
+<p>Setting this property is more efficient than using a separate Rectangle.</p>
+</div></div><!-- @@@color -->
+<br/>
+<!-- $$$contentItem -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="contentItem-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">contentItem</span> : <span class="type"><a href="qml-qtquick-item.html">Item</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The invisible root item of the scene.</p>
+</div></div><!-- @@@contentItem -->
+<br/>
+<!-- $$$contentOrientation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="contentOrientation-prop"></a><span class="name">contentOrientation</span> : <span class="type">Qt::ScreenOrientation</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This is a hint to the window manager in case it needs to display additional content like popups, dialogs, status bars, or similar in relation to the window.</p>
+<p>The recommended orientation is <a href="qml-qtquick-window-screen.html#orientation-attached-prop">Screen.orientation</a>, but an application doesn't have to support all possible orientations, and thus can opt to ignore the current screen orientation.</p>
+<p>The difference between the window and the content orientation determines how much to rotate the content by.</p>
+<p>The default value is <a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::PrimaryOrientation</a>.</p>
+<p>This property was introduced in  Qt 5.1.</p>
+<p><b>See also </b><a href="qml-qtquick-window-screen.html">Screen</a>.</p>
+</div></div><!-- @@@contentOrientation -->
+<br/>
+<!-- $$$data -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="data-prop"></a><span class="qmldefault">[default] </span><span class="name">data</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type">Object</span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The data property allows you to freely mix visual children, resources and other Windows in a Window.</p>
+<p>If you assign another Window to the data list, the nested window will become &quot;transient for&quot; the outer Window.</p>
+<p>If you assign an <a href="qml-qtquick-item.html">Item</a> to the data list, it becomes a child of the Window's <a href="qml-qtquick-window-window.html#contentItem-prop">contentItem</a>, so that it appears inside the window. The item's parent will be the window's <a href="qml-qtquick-window-window.html#contentItem-prop">contentItem</a>, which is the root of the Item ownership tree within that Window.</p>
+<p>If you assign any other object type, it is added as a resource.</p>
+<p>It should not generally be necessary to refer to the <code>data</code> property, as it is the default property for Window and thus all child items are automatically assigned to this property.</p>
+<p><b>See also </b><a href="../qtgui/qwindow.html#transientParent">QWindow::transientParent()</a>.</p>
+</div></div><!-- @@@data -->
+<br/>
+<!-- $$$flags -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="flags-prop"></a><span class="name">flags</span> : <span class="type">Qt::WindowFlags</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The window flags of the window.</p>
+<p>The window flags control the window's appearance in the windowing system, whether it's a dialog, popup, or a regular window, and whether it should have a title bar, etc.</p>
+<p>The flags which you read from this property might differ from the ones that you set if the requested flags could not be fulfilled.</p>
+<p><b>See also </b><a href="../qtcore/qt.html#WindowType-enum">Qt::WindowFlags</a>.</p>
+</div></div><!-- @@@flags -->
+<br/>
+<!-- $$$modality -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="modality-prop"></a><span class="name">modality</span> : <span class="type">Qt::WindowModality</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The modality of the window.</p>
+<p>A modal window prevents other windows from receiving input events. Possible values are Qt.NonModal (the default), Qt.WindowModal, and Qt.ApplicationModal.</p>
+</div></div><!-- @@@modality -->
+<br/>
+<!-- $$$opacity -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="opacity-prop"></a><span class="name">opacity</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The opacity of the window.</p>
+<p>If the windowing system supports window opacity, this can be used to fade the window in and out, or to make it semitransparent.</p>
+<p>A value of 1.0 or above is treated as fully opaque, whereas a value of 0.0 or below is treated as fully transparent. Values inbetween represent varying levels of translucency between the two extremes.</p>
+<p>The default value is 1.0&#x2e;</p>
+<p>This property was introduced in  Qt 5.1.</p>
+</div></div><!-- @@@opacity -->
+<br/>
+<!-- $$$screen -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="screen-prop"></a><span class="name">screen</span> : <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The screen with which the window is associated.</p>
+<p>If specified before showing a window, will result in the window being shown on that screen, unless an explicit window position has been set. The value must be an element from the Qt.application.screens array.</p>
+<p><b>Note: </b>To ensure that the window is associated with the desired screen when the underlying native window is created, make sure this property is set as early as possible and that the setting of its value is not deferred. This can be particularly important on embedded platforms without a windowing system, where only one window per screen is allowed at a time. Setting the screen after a window has been created does not move the window if the new screen is part of the same virtual desktop as the old screen.</p><p>This property was introduced in  Qt 5.9.</p>
+<p><b>See also </b><a href="../qtgui/qwindow.html#setScreen">QWindow::setScreen()</a>, <a href="../qtgui/qwindow.html#screen">QWindow::screen()</a>, <a href="../qtgui/qscreen.html">QScreen</a>, and <a href="../qtqml/qml-qtqml-qt.html#application-prop">Qt.application</a>.</p>
+</div></div><!-- @@@screen -->
+<br/>
+<!-- $$$title -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="title-prop"></a><span class="name">title</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The window's title in the windowing system.</p>
+<p>The window title might appear in the title area of the window decorations, depending on the windowing system and the window flags. It might also be used by the windowing system to identify the window in other contexts, such as in the task switcher.</p>
+</div></div><!-- @@@title -->
+<br/>
+<!-- $$$transientParent -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="transientParent-prop"></a><span class="name">transientParent</span> : <span class="type">QWindow</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The window for which this window is a transient pop-up.</p>
+<p>This is a hint to the window manager that this window is a dialog or pop-up on behalf of the transient parent. It usually means that the transient window will be centered over its transient parent when it is initially shown, that minimizing the parent window will also minimize the transient window, and so on; however results vary somewhat from platform to platform.</p>
+<p>Normally if you declare a Window inside an Item or inside another Window, this relationship is deduced automatically. In that case, if you declare this window's <a href="qml-qtquick-window-window.html#visible-prop">visible</a> property <code>true</code>, it will not actually be shown until the <code>transientParent</code> window is shown.</p>
+<p>However if you set this property, then Qt Quick will no longer wait until the <code>transientParent</code> window is shown before showing this window. If you want to to be able to show a transient window independently of the &quot;parent&quot; Item or Window within which it was declared, you can remove that relationship by setting <code>transientParent</code> to <code>null</code>:</p>
+<pre class="qml">
+
+  import QtQuick.Window 2.13
+
+  <span class="type"><a href="qml-qtquick-window-window.html">Window</a></span> {
+      <span class="comment">// visible is false by default</span>
+      <span class="type"><a href="qml-qtquick-window-window.html">Window</a></span> {
+          <span class="name">transientParent</span>: <span class="number">null</span>
+          <span class="name">visible</span>: <span class="number">true</span>
+      }
+  }
+
+</pre>
+<p>In order to cause the window to be centered above its transient parent by default, depending on the window manager, it may also be necessary to set the <a href="qml-qtquick-window-window.html#flags-prop">Window::flags</a> property with a suitable <a href="../qtcore/qt.html#WindowType-enum">Qt::WindowType</a> (such as <code>Qt::Dialog</code>).</p>
+<p>This property was introduced in  Qt 5.13.</p>
+</div></div><!-- @@@transientParent -->
+<br/>
+<!-- $$$visibility -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="visibility-prop"></a><span class="name">visibility</span> : <span class="type">QWindow::Visibility</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The screen-occupation state of the window.</p>
+<p>Visibility is whether the window should appear in the windowing system as normal, minimized, maximized, fullscreen or hidden.</p>
+<p>To set the visibility to <a href="../qtgui/qwindow.html#Visibility-enum">AutomaticVisibility</a> means to give the window a default visible state, which might be <a href="../qtgui/qwindow.html#Visibility-enum">FullScreen</a> or <a href="../qtgui/qwindow.html#Visibility-enum">Windowed</a> depending on the platform. However when reading the visibility property you will always get the actual state, never <code>AutomaticVisibility</code>.</p>
+<p>When a window is not visible its visibility is Hidden, and setting visibility to <a href="../qtgui/qwindow.html#Visibility-enum">Hidden</a> is the same as setting <a href="qml-qtquick-window-window.html#visible-prop">visible</a> to <code>false</code>.</p>
+<p>This property was introduced in  Qt 5.1.</p>
+<p><b>See also </b><a href="qml-qtquick-window-window.html#visible-prop">visible</a>.</p>
+</div></div><!-- @@@visibility -->
+<br/>
+<!-- $$$visible -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="visible-prop"></a><span class="name">visible</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether the window is visible on the screen.</p>
+<p>Setting visible to false is the same as setting <a href="qml-qtquick-window-window.html#visibility-attached-prop">visibility</a> to <a href="../qtgui/qwindow.html#Visibility-enum">Hidden</a>.</p>
+<p><b>See also </b><a href="qml-qtquick-window-window.html#visibility-attached-prop">visibility</a>.</p>
+</div></div><!-- @@@visible -->
+<br/>
+<h2>Attached Property Documentation</h2>
+<!-- $$$active -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="active-attached-prop"></a><span class="name">Window.active</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This attached property tells whether the window is active. The Window attached property can be attached to any Item.</p>
+<p>Here is an example which changes a label to show the active state of the window in which it is shown:</p>
+<pre class="qml">
+
+  import QtQuick 2.4
+  import QtQuick.Window 2.2
+
+  <span class="type"><a href="qml-qtquick-text.html">Text</a></span> {
+      <span class="name">text</span>: <span class="name">Window</span>.<span class="name">active</span> ? <span class="string">&quot;active&quot;</span> : <span class="string">&quot;inactive&quot;</span>
+  }
+
+</pre>
+<p>This property was introduced in  Qt 5.4.</p>
+</div></div><!-- @@@active -->
+<br/>
+<!-- $$$activeFocusItem -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="activeFocusItem-attached-prop"></a><span class="name">Window.activeFocusItem</span> : <span class="type"><a href="qml-qtquick-item.html">Item</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This attached property holds the item which currently has active focus or <code>null</code> if there is no item with active focus. The Window attached property can be attached to any Item.</p>
+<p>This property was introduced in  Qt 5.4.</p>
+</div></div><!-- @@@activeFocusItem -->
+<br/>
+<!-- $$$contentItem -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="contentItem-attached-prop"></a><span class="name">Window.contentItem</span> : <span class="type"><a href="qml-qtquick-item.html">Item</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This attached property holds the invisible root item of the scene or <code>null</code> if the item is not in a window. The Window attached property can be attached to any Item.</p>
+<p>This property was introduced in  Qt 5.4.</p>
+</div></div><!-- @@@contentItem -->
+<br/>
+<!-- $$$visibility -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="visibility-attached-prop"></a><span class="name">Window.visibility</span> : <span class="type">QWindow::Visibility</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This attached property holds whether the window is currently shown in the windowing system as normal, minimized, maximized, fullscreen or hidden. The <code>Window</code> attached property can be attached to any Item. If the item is not shown in any window, the value will be <a href="../qtgui/qwindow.html#Visibility-enum">Hidden</a>.</p>
+<p>This property was introduced in  Qt 5.4.</p>
+<p><b>See also </b><a href="qml-qtquick-window-window.html#visible-prop">visible</a> and visibility.</p>
+</div></div><!-- @@@visibility -->
+<br/>
+<!-- $$$window -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="window-attached-prop"></a><span class="name">Window.window</span> : <span class="type"><a href="qml-qtquick-window-window.html">Window</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This attached property holds the item's window. The Window attached property can be attached to any Item.</p>
+<p>This property was introduced in  Qt 5.7.</p>
+</div></div><!-- @@@window -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$closing[overload1]$$$closing -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="closing-signal"></a><span class="name">closing</span>(<i>close</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the user tries to close the window.</p>
+<p>This signal includes a <i>close</i> parameter. The <code>close.accepted</code> property is true by default so that the window is allowed to close; but you can implement an <code>onClosing</code> handler and set <code>close.accepted = false</code> if you need to do something else before the window can be closed.</p>
+<p>The corresponding handler is <code>onClosing</code>.</p>
+<p>This signal was introduced in  Qt 5.1.</p>
+</div></div><!-- @@@closing -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$alert[overload1]$$$alert -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="alert-method"></a><span class="name">alert</span>(<i>msec</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Causes an alert to be shown for <i>msec</i> milliseconds. If <i>msec</i> is <code>0</code> (the default), then the alert is shown indefinitely until the window becomes active again.</p>
+<p>In alert state, the window indicates that it demands attention, for example by flashing or bouncing the taskbar entry.</p>
+<p>This method was introduced in  Qt 5.1.</p>
+</div></div><!-- @@@alert -->
+<br/>
+<!-- $$$close[overload1]$$$close -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="close-method"></a><span class="name">close</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Closes the window.</p>
+<p>When this method is called, or when the user tries to close the window by its title bar button, the <a href="qml-qtquick-window-window.html#closing-signal">closing</a> signal will be emitted. If there is no handler, or the handler does not revoke permission to close, the window will subsequently close. If the <a href="../qtgui/qguiapplication.html#quitOnLastWindowClosed-prop">QGuiApplication::quitOnLastWindowClosed</a> property is <code>true</code>, and there are no other windows open, the application will quit.</p>
+</div></div><!-- @@@close -->
+<br/>
+<!-- $$$hide[overload1]$$$hide -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="hide-method"></a><span class="name">hide</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Hides the window.</p>
+<p>Equivalent to setting <a href="qml-qtquick-window-window.html#visible-prop">visible</a> to <code>false</code> or <a href="qml-qtquick-window-window.html#visibility-attached-prop">visibility</a> to <a href="../qtgui/qwindow.html#Visibility-enum">Hidden</a>.</p>
+<p><b>See also </b><a href="qml-qtquick-window-window.html#show-method">show()</a>.</p>
+</div></div><!-- @@@hide -->
+<br/>
+<!-- $$$lower[overload1]$$$lower -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="lower-method"></a><span class="name">lower</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Lowers the window in the windowing system.</p>
+<p>Requests that the window be lowered to appear below other windows.</p>
+</div></div><!-- @@@lower -->
+<br/>
+<!-- $$$raise[overload1]$$$raise -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="raise-method"></a><span class="name">raise</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Raises the window in the windowing system.</p>
+<p>Requests that the window be raised to appear above other windows.</p>
+</div></div><!-- @@@raise -->
+<br/>
+<!-- $$$requestActivate[overload1]$$$requestActivate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="requestActivate-method"></a><span class="name">requestActivate</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Requests the window to be activated, i.e&#x2e; receive keyboard focus.</p>
+<p>This method was introduced in  Qt 5.1.</p>
+</div></div><!-- @@@requestActivate -->
+<br/>
+<!-- $$$show[overload1]$$$show -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="show-method"></a><span class="name">show</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Shows the window.</p>
+<p>This is equivalent to calling <a href="qml-qtquick-window-window.html#showFullScreen-method">showFullScreen()</a>, <a href="qml-qtquick-window-window.html#showMaximized-method">showMaximized()</a>, or <a href="qml-qtquick-window-window.html#showNormal-method">showNormal()</a>, depending on the platform's default behavior for the window type and flags.</p>
+<p><b>See also </b><a href="qml-qtquick-window-window.html#showFullScreen-method">showFullScreen()</a>, <a href="qml-qtquick-window-window.html#showMaximized-method">showMaximized()</a>, <a href="qml-qtquick-window-window.html#showNormal-method">showNormal()</a>, <a href="qml-qtquick-window-window.html#hide-method">hide()</a>, and <a href="qquickitem.html#flags">QQuickItem::flags()</a>.</p>
+</div></div><!-- @@@show -->
+<br/>
+<!-- $$$showFullScreen[overload1]$$$showFullScreen -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="showFullScreen-method"></a><span class="name">showFullScreen</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Shows the window as fullscreen.</p>
+<p>Equivalent to setting <a href="qml-qtquick-window-window.html#visibility-attached-prop">visibility</a> to <a href="../qtgui/qwindow.html#Visibility-enum">FullScreen</a>.</p>
+</div></div><!-- @@@showFullScreen -->
+<br/>
+<!-- $$$showMaximized[overload1]$$$showMaximized -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="showMaximized-method"></a><span class="name">showMaximized</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Shows the window as maximized.</p>
+<p>Equivalent to setting <a href="qml-qtquick-window-window.html#visibility-attached-prop">visibility</a> to <a href="../qtgui/qwindow.html#Visibility-enum">Maximized</a>.</p>
+</div></div><!-- @@@showMaximized -->
+<br/>
+<!-- $$$showMinimized[overload1]$$$showMinimized -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="showMinimized-method"></a><span class="name">showMinimized</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Shows the window as minimized.</p>
+<p>Equivalent to setting <a href="qml-qtquick-window-window.html#visibility-attached-prop">visibility</a> to <a href="../qtgui/qwindow.html#Visibility-enum">Minimized</a>.</p>
+</div></div><!-- @@@showMinimized -->
+<br/>
+<!-- $$$showNormal[overload1]$$$showNormal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="showNormal-method"></a><span class="name">showNormal</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Shows the window as normal, i.e&#x2e; neither maximized, minimized, nor fullscreen.</p>
+<p>Equivalent to setting <a href="qml-qtquick-window-window.html#visibility-attached-prop">visibility</a> to <a href="../qtgui/qwindow.html#Visibility-enum">Windowed</a>.</p>
+</div></div><!-- @@@showNormal -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

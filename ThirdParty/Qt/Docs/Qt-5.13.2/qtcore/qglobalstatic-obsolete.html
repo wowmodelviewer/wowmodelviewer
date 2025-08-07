@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qglobalstatic.qdoc -->
+  <title>Obsolete Members for QGlobalStatic | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QGlobalStatic</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Obsolete Members for QGlobalStatic</h1>
+<p><b>The following members of class <a href="qglobalstatic.html">QGlobalStatic</a> are obsolete.</b> They are provided to keep old source code working. We strongly advise against using them in new code.</p>
+<h2>Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>QGlobalStatic::Type *</td><td class="memItemRight bottomAlign"><b><a href="qglobalstatic-obsolete.html#operator-28-29">operator()</a></b>()</td></tr>
+</table></div>
+<h2>Member Function Documentation</h2>
+<!-- $$$operator()[overload1]$$$operator() -->
+<h3 class="fn" id="operator-28-29"><a name="operator-28-29"></a><span class="type"><a href="qglobalstatic.html#Type-typedef">QGlobalStatic::Type</a></span> *QGlobalStatic::<span class="name">operator()</span>()</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>This function returns the address of the contents of this global static. If the contents have not yet been created, they will be created thread-safely by this function. If the contents have already been destroyed, this function will return a null pointer.</p>
+<p>This function is equivalent to <a href="qglobalstatic.html#operator-QGlobalStatic::Type--2a">operator Type *</a>(). It is provided for compatibility with the private <a href="qglobalstatic.html#Q_GLOBAL_STATIC">Q_GLOBAL_STATIC</a> implementation that existed in Qt 4.x and 5.0&#x2e; New code should avoid using it and should instead treat the object as a smart pointer.</p>
+<!-- @@@operator() -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

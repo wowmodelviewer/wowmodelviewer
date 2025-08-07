@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qpickpointevent.cpp -->
+  <title>QPickPointEvent Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QPickPointEvent</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPickPointEvent Class</h1>
+<span class="small-subtitle">(<a href="qt3drender-qpickpointevent.html">Qt3DRender::QPickPointEvent</a>)<br/></span>
+<!-- $$$QPickPointEvent-brief -->
+<p>The <a href="qt3drender-qpickpointevent.html">QPickPointEvent</a> class holds information when a segment of a point cloud is picked. <a href="#details">More...</a></p>
+<!-- @@@QPickPointEvent -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QPickPointEvent&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3drender</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.10</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-pickpointevent.html">PickPointEvent</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3drender-qpickevent.html">Qt3DRender::QPickEvent</a></td></tr></table></div><p>This class was introduced in  Qt 5.10.</p>
+<ul>
+<li><a href="qt3drender-qpickpointevent-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qt3drender-qpickpointevent.html#pointIndex-prop">pointIndex</a></b> : const uint</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qpickpointevent.html#QPickPointEvent">QPickPointEvent</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qpickpointevent.html#pointIndex">pointIndex</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPickPointEvent-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<p><b>See also </b><a href="qt3drender-qpickevent.html">QPickEvent</a>.</p>
+<!-- @@@QPickPointEvent -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$pointIndex-prop$$$pointIndex -->
+<h3 class="fn" id="pointIndex-prop"><a name="pointIndex-prop"></a><span class="name">pointIndex</span> : const <span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span></h3>
+<p>Specifies the index of the point that was picked</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> uint </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qpickpointevent.html#pointIndex">pointIndex</a></b></span>() const</td></tr>
+</table></div>
+<!-- @@@pointIndex -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QPickPointEvent[overload1]$$$QPickPointEvent -->
+<h3 class="fn" id="QPickPointEvent"><a name="QPickPointEvent"></a>QPickPointEvent::<span class="name">QPickPointEvent</span>()</h3>
+<p>Constructs a new <a href="qt3drender-qpickpointevent.html">QPickPointEvent</a>.</p>
+<!-- @@@QPickPointEvent -->
+<!-- $$$pointIndex -->
+<h3 class="fn" id="pointIndex"><a name="pointIndex"></a><span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> QPickPointEvent::<span class="name">pointIndex</span>() const</h3>
+<p>QPickPointEvent::pointIndex Returns the index of the picked point</p>
+<p><b>Note:</b> Getter function for property <a href="qt3drender-qpickpointevent.html#pointIndex-prop">pointIndex</a>. </p><!-- @@@pointIndex -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

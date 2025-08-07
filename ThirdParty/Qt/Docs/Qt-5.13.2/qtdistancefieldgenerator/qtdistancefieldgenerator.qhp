@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+    <namespace>org.qt-project.qtdistancefieldgenerator.5132</namespace>
+    <virtualFolder>qtdistancefieldgenerator</virtualFolder>
+    <metaData name="version" value=""/>
+    <customFilter name="Qt Distance Field Generator Manual">
+        <filterAttribute>qt</filterAttribute>
+        <filterAttribute>qtdistancefieldgenerator</filterAttribute>
+        <filterAttribute>tools</filterAttribute>
+    </customFilter>
+    <filterSection>
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qt</filterAttribute>
+        <filterAttribute>qtdistancefieldgenerator</filterAttribute>
+        <filterAttribute>tools</filterAttribute>
+        <toc>
+            <section ref="qtdistancefieldgenerator-index.html" title="Qt Distance Field Generator Manual"/>
+        </toc>
+        <keywords>
+            <keyword name="Qt Distance Field Generator Manual" id="Qt Distance Field Generator Manual" ref="qtdistancefieldgenerator-index.html"/>
+        </keywords>
+        <files>
+            <file>images/arrow_bc.png</file>
+            <file>images/bgrContent.png</file>
+            <file>images/btn_next.png</file>
+            <file>images/btn_prev.png</file>
+            <file>images/bullet_dn.png</file>
+            <file>images/bullet_sq.png</file>
+            <file>images/distancefieldgenerator.png</file>
+            <file>images/home.png</file>
+            <file>images/ico_note.png</file>
+            <file>images/ico_note_attention.png</file>
+            <file>images/ico_out.png</file>
+            <file>images/logo.png</file>
+            <file>qtdistancefieldgenerator-index.html</file>
+            <file>style/offline-simple.css</file>
+            <file>style/offline.css</file>
+        </files>
+    </filterSection>
+</QtHelpProject>

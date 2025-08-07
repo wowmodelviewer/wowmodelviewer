@@ -1,0 +1,974 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qqmlengine.cpp -->
+  <title>QQmlEngine Class | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td ><a href="qtqml-module.html">C++ Classes</a></td><td >QQmlEngine</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#macros">Macros</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QQmlEngine Class</h1>
+<!-- $$$QQmlEngine-brief -->
+<p>The <a href="qqmlengine.html">QQmlEngine</a> class provides an environment for instantiating QML components. <a href="#details">More...</a></p>
+<!-- @@@QQmlEngine -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QQmlEngine&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += qml</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.0</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qjsengine.html">QJSEngine</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qqmlapplicationengine.html">QQmlApplicationEngine</a></p>
+</td></tr></table></div><p>This class was introduced in  Qt 5.0.</p>
+<ul>
+<li><a href="qqmlengine-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#ObjectOwnership-enum">ObjectOwnership</a></b> { CppOwnership, JavaScriptOwnership }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qqmlengine.html#offlineStoragePath-prop">offlineStoragePath</a></b> : QString</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#QQmlEngine">QQmlEngine</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#dtor.QQmlEngine">~QQmlEngine</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#addImageProvider">addImageProvider</a></b>(const QString &amp;<i>providerId</i>, QQmlImageProviderBase *<i>provider</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#addImportPath">addImportPath</a></b>(const QString &amp;<i>path</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#addPluginPath">addPluginPath</a></b>(const QString &amp;<i>path</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QUrl </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#baseUrl">baseUrl</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#clearComponentCache">clearComponentCache</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQmlImageProviderBase *</td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#imageProvider">imageProvider</a></b>(const QString &amp;<i>providerId</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#importPathList">importPathList</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#importPlugin">importPlugin</a></b>(const QString &amp;<i>filePath</i>, const QString &amp;<i>uri</i>, QList&lt;QQmlError&gt; *<i>errors</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQmlIncubationController *</td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#incubationController">incubationController</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QNetworkAccessManager *</td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#networkAccessManager">networkAccessManager</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQmlNetworkAccessManagerFactory *</td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#networkAccessManagerFactory">networkAccessManagerFactory</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#offlineStorageDatabaseFilePath">offlineStorageDatabaseFilePath</a></b>(const QString &amp;<i>databaseName</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#offlineStoragePath-prop">offlineStoragePath</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#outputWarningsToStandardError">outputWarningsToStandardError</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#pluginPathList">pluginPathList</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#removeImageProvider">removeImageProvider</a></b>(const QString &amp;<i>providerId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQmlContext *</td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#rootContext">rootContext</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#setBaseUrl">setBaseUrl</a></b>(const QUrl &amp;<i>url</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#setImportPathList">setImportPathList</a></b>(const QStringList &amp;<i>paths</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#setIncubationController">setIncubationController</a></b>(QQmlIncubationController *<i>controller</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#setNetworkAccessManagerFactory">setNetworkAccessManagerFactory</a></b>(QQmlNetworkAccessManagerFactory *<i>factory</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#offlineStoragePath-prop">setOfflineStoragePath</a></b>(const QString &amp;<i>dir</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#setOutputWarningsToStandardError">setOutputWarningsToStandardError</a></b>(bool <i>enabled</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#setPluginPathList">setPluginPathList</a></b>(const QStringList &amp;<i>paths</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> T </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#singletonInstance">singletonInstance</a></b>(int <i>qmlTypeId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#trimComponentCache">trimComponentCache</a></b>()</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#retranslate">retranslate</a></b>()</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#exit">exit</a></b>(int <i>retCode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#quit">quit</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#warnings">warnings</a></b>(const QList&lt;QQmlError&gt; &amp;<i>warnings</i>)</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QQmlContext *</td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#contextForObject">contextForObject</a></b>(const QObject *<i>object</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQmlEngine::ObjectOwnership </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#objectOwnership">objectOwnership</a></b>(QObject *<i>object</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#setContextForObject">setContextForObject</a></b>(QObject *<i>object</i>, QQmlContext *<i>context</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#setObjectOwnership">setObjectOwnership</a></b>(QObject *<i>object</i>, QQmlEngine::ObjectOwnership <i>ownership</i>)</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#event">event</a></b>(QEvent *<i>e</i>) override</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QObject *</td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlAttachedPropertiesObject">qmlAttachedPropertiesObject</a></b>(const QObject *<i>attachee</i>, bool <i>create</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlClearTypeRegistrations">qmlClearTypeRegistrations</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQmlContext *</td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlContext">qmlContext</a></b>(const QObject *<i>object</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQmlInfo </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlDebug">qmlDebug</a></b>(const QObject *<i>object</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQmlEngine *</td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlEngine">qmlEngine</a></b>(const QObject *<i>object</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQmlInfo </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlInfo">qmlInfo</a></b>(const QObject *<i>object</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlProtectModule">qmlProtectModule</a></b>(const char *<i>uri</i>, int <i>majVersion</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlRegisterExtendedType">qmlRegisterExtendedType</a></b>(const char *<i>uri</i>, int <i>versionMajor</i>, int <i>versionMinor</i>, const char *<i>qmlName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlRegisterExtendedUncreatableType">qmlRegisterExtendedUncreatableType</a></b>(const char *<i>uri</i>, int <i>versionMajor</i>, int <i>versionMinor</i>, const char *<i>qmlName</i>, const QString &amp;<i>reason</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlRegisterInterface">qmlRegisterInterface</a></b>(const char *<i>typeName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlRegisterModule">qmlRegisterModule</a></b>(const char *<i>uri</i>, int <i>versionMajor</i>, int <i>versionMinor</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlRegisterRevision">qmlRegisterRevision</a></b>(const char *<i>uri</i>, int <i>versionMajor</i>, int <i>versionMinor</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlRegisterSingletonType">qmlRegisterSingletonType</a></b>(const char *<i>uri</i>, int <i>versionMajor</i>, int <i>versionMinor</i>, const char *<i>typeName</i>, QJSValue (*)(QQmlEngine *, QJSEngine *) <i>callback</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlRegisterSingletonType-1">qmlRegisterSingletonType</a></b>(const char *<i>uri</i>, int <i>versionMajor</i>, int <i>versionMinor</i>, const char *<i>typeName</i>, QObject *(*)(QQmlEngine *, QJSEngine *) <i>callback</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlRegisterSingletonType-2">qmlRegisterSingletonType</a></b>(const QUrl &amp;<i>url</i>, const char *<i>uri</i>, int <i>versionMajor</i>, int <i>versionMinor</i>, const char *<i>qmlName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlRegisterType">qmlRegisterType</a></b>(const char *<i>uri</i>, int <i>versionMajor</i>, int <i>versionMinor</i>, const char *<i>qmlName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlRegisterType-1">qmlRegisterType</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlRegisterType-2">qmlRegisterType</a></b>(const QUrl &amp;<i>url</i>, const char *<i>uri</i>, int <i>versionMajor</i>, int <i>versionMinor</i>, const char *<i>qmlName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlRegisterTypeNotAvailable">qmlRegisterTypeNotAvailable</a></b>(const char *<i>uri</i>, int <i>versionMajor</i>, int <i>versionMinor</i>, const char *<i>qmlName</i>, const QString &amp;<i>message</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlRegisterUncreatableMetaObject">qmlRegisterUncreatableMetaObject</a></b>(const QMetaObject &amp;<i>staticMetaObject</i>, const char *<i>uri</i>, int <i>versionMajor</i>, int <i>versionMinor</i>, const char *<i>qmlName</i>, const QString &amp;<i>reason</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlRegisterUncreatableType">qmlRegisterUncreatableType</a></b>(const char *<i>uri</i>, int <i>versionMajor</i>, int <i>versionMinor</i>, const char *<i>qmlName</i>, const QString &amp;<i>message</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlTypeId">qmlTypeId</a></b>(const char *<i>uri</i>, int <i>versionMajor</i>, int <i>versionMinor</i>, const char *<i>qmlName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQmlInfo </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#qmlWarning">qmlWarning</a></b>(const QObject *<i>object</i>)</td></tr>
+</table></div>
+<a name="macros"></a>
+<h2 id="macros">Macros</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#QML_DECLARE_TYPE">QML_DECLARE_TYPE</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qqmlengine.html#QML_DECLARE_TYPEINFO">QML_DECLARE_TYPEINFO</a></b>(<i>Type</i>, <i>Flags</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QQmlEngine-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Each QML component is instantiated in a <a href="qqmlcontext.html">QQmlContext</a>. <a href="qqmlcontext.html">QQmlContext</a>'s are essential for passing data to QML components. In QML, contexts are arranged hierarchically and this hierarchy is managed by the <a href="qqmlengine.html">QQmlEngine</a>.</p>
+<p>Prior to creating any QML components, an application must have created a <a href="qqmlengine.html">QQmlEngine</a> to gain access to a QML context. The following example shows how to create a simple Text item.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qqmlengine.html#QQmlEngine">QQmlEngine</a></span> engine;
+  <span class="type"><a href="qqmlcomponent.html">QQmlComponent</a></span> component(<span class="operator">&amp;</span>engine);
+  component<span class="operator">.</span>setData(<span class="string">&quot;import QtQuick 2.0\nText { text: \&quot;Hello world!\&quot; }&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>());
+  <span class="type"><a href="../qtquick/qquickitem.html">QQuickItem</a></span> <span class="operator">*</span>item <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="../qtquick/qquickitem.html">QQuickItem</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(component<span class="operator">.</span>create());
+
+  <span class="comment">//add item to view, etc</span>
+  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+</pre>
+<p>In this case, the Text item will be created in the engine's <a href="qqmlengine.html#rootContext">root context</a>.</p>
+</div>
+<p><b>See also </b><a href="qqmlcomponent.html">QQmlComponent</a>, <a href="qqmlcontext.html">QQmlContext</a>, and <a href="qtqml-javascript-qmlglobalobject.html">QML Global Object</a>.</p>
+<!-- @@@QQmlEngine -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$ObjectOwnership$$$CppOwnership$$$JavaScriptOwnership -->
+<h3 class="fn" id="ObjectOwnership-enum"><a name="ObjectOwnership-enum"></a>enum QQmlEngine::<span class="name">ObjectOwnership</span></h3>
+<p>ObjectOwnership controls whether or not QML automatically destroys the <a href="../qtcore/qobject.html">QObject</a> when the corresponding JavaScript object is garbage collected by the engine. The two ownership options are:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QQmlEngine::CppOwnership</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The object is owned by C++ code and QML will never delete it. The JavaScript destroy() method cannot be used on these objects. This option is similar to <a href="../qtscript/qscriptengine.html#ValueOwnership-enum">QScriptEngine::QtOwnership</a>.</td></tr>
+<tr><td class="topAlign"><code>QQmlEngine::JavaScriptOwnership</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The object is owned by JavaScript. When the object is returned to QML as the return value of a method call, QML will track it and delete it if there are no remaining JavaScript references to it and it has no <a href="../qtcore/qobject.html#parent">QObject::parent</a>(). An object tracked by one <a href="qqmlengine.html">QQmlEngine</a> will be deleted during that <a href="qqmlengine.html">QQmlEngine</a>'s destructor. Thus, JavaScript references between objects with JavaScriptOwnership from two different engines will not be valid if one of these engines is deleted. This option is similar to <a href="../qtscript/qscriptengine.html#ValueOwnership-enum">QScriptEngine::ScriptOwnership</a>.</td></tr>
+</table></div>
+<p>Generally an application doesn't need to set an object's ownership explicitly. QML uses a heuristic to set the default ownership. By default, an object that is created by QML has JavaScriptOwnership. The exception to this are the root objects created by calling <a href="qqmlcomponent.html#create">QQmlComponent::create</a>() or <a href="qqmlcomponent.html#beginCreate">QQmlComponent::beginCreate</a>(), which have CppOwnership by default. The ownership of these root-level objects is considered to have been transferred to the C++ caller.</p>
+<p>Objects not-created by QML have CppOwnership by default. The exception to this are objects returned from C++ method calls; their ownership will be set to JavaScriptOwnership. This applies only to explicit invocations of <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a> methods or slots, but not to property getter invocations.</p>
+<p>Calling <a href="qqmlengine.html#setObjectOwnership">setObjectOwnership</a>() overrides the default ownership heuristic used by QML.</p>
+<!-- @@@ObjectOwnership -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$offlineStoragePath-prop$$$offlineStoragePath$$$setOfflineStoragePathconstQString& -->
+<h3 class="fn" id="offlineStoragePath-prop"><a name="offlineStoragePath-prop"></a><span class="name">offlineStoragePath</span> : <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>This property holds the directory for storing offline user data</p>
+<p>Returns the directory where SQL and other offline storage is placed.</p>
+<p>The SQL databases created with openDatabase() are stored here.</p>
+<p>The default is QML/OfflineStorage in the platform-standard user application data directory.</p>
+<p>Note that the path may not currently exist on the filesystem, so callers wanting to <i>create</i> new files at this location should create it first - see <a href="../qtcore/qdir.html#mkpath">QDir::mkpath</a>().</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>offlineStoragePath</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setOfflineStoragePath</b></span>(const QString &amp;<i>dir</i>)</td></tr>
+</table></div>
+<!-- @@@offlineStoragePath -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QQmlEngine[overload1]$$$QQmlEngineQObject* -->
+<h3 class="fn" id="QQmlEngine"><a name="QQmlEngine"></a>QQmlEngine::<span class="name">QQmlEngine</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Create a new <a href="qqmlengine.html">QQmlEngine</a> with the given <i>parent</i>.</p>
+<!-- @@@QQmlEngine -->
+<!-- $$$exit[overload1]$$$exitint -->
+<h3 class="fn" id="exit"><a name="exit"></a><code>[signal] </code><span class="type">void</span> QQmlEngine::<span class="name">exit</span>(<span class="type">int</span> <i>retCode</i>)</h3>
+<p>This signal is emitted when the QML loaded by the engine would like to exit from the event loop with the specified return code <i>retCode</i>.</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<p><b>See also </b><a href="qqmlengine.html#quit">quit</a>().</p>
+<!-- @@@exit -->
+<!-- $$$quit[overload1]$$$quit -->
+<h3 class="fn" id="quit"><a name="quit"></a><code>[signal] </code><span class="type">void</span> QQmlEngine::<span class="name">quit</span>()</h3>
+<p>This signal is emitted when the QML loaded by the engine would like to quit.</p>
+<p><b>See also </b><a href="qqmlengine.html#exit">exit</a>().</p>
+<!-- @@@quit -->
+<!-- $$$retranslate[overload1]$$$retranslate -->
+<h3 class="fn" id="retranslate"><a name="retranslate"></a><code>[slot] </code><span class="type">void</span> QQmlEngine::<span class="name">retranslate</span>()</h3>
+<p>Refreshes all binding expressions that use strings marked for translation.</p>
+<p>Call this function after you have installed a new translator with <a href="../qtcore/qcoreapplication.html#installTranslator">QCoreApplication::installTranslator</a>, to ensure that your user-interface shows up-to-date translations.</p>
+<p><b>Note: </b>Due to a limitation in the implementation, this function refreshes all the engine's bindings, not only those that use strings marked for translation. This may be optimized in a future release.</p><p>This function was introduced in  Qt 5.10.</p>
+<!-- @@@retranslate -->
+<!-- $$$warnings[overload1]$$$warningsconstQList<QQmlError>& -->
+<h3 class="fn" id="warnings"><a name="warnings"></a><code>[signal] </code><span class="type">void</span> QQmlEngine::<span class="name">warnings</span>(const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qqmlerror.html">QQmlError</a></span>&gt; &amp;<i>warnings</i>)</h3>
+<p>This signal is emitted when <i>warnings</i> messages are generated by QML.</p>
+<!-- @@@warnings -->
+<!-- $$$~QQmlEngine[overload1]$$$~QQmlEngine -->
+<h3 class="fn" id="dtor.QQmlEngine"><a name="dtor.QQmlEngine"></a><code>[override virtual] </code>QQmlEngine::<span class="name">~QQmlEngine</span>()</h3>
+<p>Destroys the <a href="qqmlengine.html">QQmlEngine</a>.</p>
+<p>Any <a href="qqmlcontext.html">QQmlContext</a>'s created on this engine will be invalidated, but not destroyed (unless they are parented to the <a href="qqmlengine.html">QQmlEngine</a> object).</p>
+<p>See <a href="qjsengine.html">QJSEngine</a> docs for details on cleaning up the JS engine.</p>
+<!-- @@@~QQmlEngine -->
+<!-- $$$addImageProvider[overload1]$$$addImageProviderconstQString&QQmlImageProviderBase* -->
+<h3 class="fn" id="addImageProvider"><a name="addImageProvider"></a><span class="type">void</span> QQmlEngine::<span class="name">addImageProvider</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>providerId</i>, <span class="type"><a href="qqmlimageproviderbase.html">QQmlImageProviderBase</a></span> *<i>provider</i>)</h3>
+<p>Sets the <i>provider</i> to use for images requested via the <i>image</i>: url scheme, with host <i>providerId</i>. The <a href="qqmlengine.html">QQmlEngine</a> takes ownership of <i>provider</i>.</p>
+<p>Image providers enable support for pixmap and threaded image requests. See the <a href="../qtquick/qquickimageprovider.html">QQuickImageProvider</a> documentation for details on implementing and using image providers.</p>
+<p>All required image providers should be added to the engine before any QML sources files are loaded.</p>
+<p><b>See also </b><a href="qqmlengine.html#removeImageProvider">removeImageProvider</a>(), <a href="../qtquick/qquickimageprovider.html">QQuickImageProvider</a>, and <a href="qqmlimageproviderbase.html">QQmlImageProviderBase</a>.</p>
+<!-- @@@addImageProvider -->
+<!-- $$$addImportPath[overload1]$$$addImportPathconstQString& -->
+<h3 class="fn" id="addImportPath"><a name="addImportPath"></a><span class="type">void</span> QQmlEngine::<span class="name">addImportPath</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>path</i>)</h3>
+<p>Adds <i>path</i> as a directory where the engine searches for installed modules in a URL-based directory structure.</p>
+<p>The <i>path</i> may be a local filesystem directory, a <a href="../qtcore/resources.html">Qt Resource</a> path (<code>:/imports</code>), a <a href="../qtcore/resources.html">Qt Resource</a> url (<code>qrc:/imports</code>) or a URL.</p>
+<p>The <i>path</i> will be converted into canonical form before it is added to the import path list.</p>
+<p>The newly added <i>path</i> will be first in the <a href="qqmlengine.html#importPathList">importPathList</a>().</p>
+<p><b>See also </b><a href="qqmlengine.html#setImportPathList">setImportPathList</a>() and <a href="qtqml-modules-topic.html">QML Modules</a>.</p>
+<!-- @@@addImportPath -->
+<!-- $$$addPluginPath[overload1]$$$addPluginPathconstQString& -->
+<h3 class="fn" id="addPluginPath"><a name="addPluginPath"></a><span class="type">void</span> QQmlEngine::<span class="name">addPluginPath</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>path</i>)</h3>
+<p>Adds <i>path</i> as a directory where the engine searches for native plugins for imported modules (referenced in the <code>qmldir</code> file).</p>
+<p>By default, the list contains only <code>.</code>, i.e&#x2e; the engine searches in the directory of the <code>qmldir</code> file itself.</p>
+<p>The newly added <i>path</i> will be first in the <a href="qqmlengine.html#pluginPathList">pluginPathList</a>().</p>
+<p><b>See also </b><a href="qqmlengine.html#setPluginPathList">setPluginPathList</a>().</p>
+<!-- @@@addPluginPath -->
+<!-- $$$baseUrl[overload1]$$$baseUrl -->
+<h3 class="fn" id="baseUrl"><a name="baseUrl"></a><span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> QQmlEngine::<span class="name">baseUrl</span>() const</h3>
+<p>Return the base URL for this engine. The base URL is only used to resolve components when a relative URL is passed to the <a href="qqmlcomponent.html">QQmlComponent</a> constructor.</p>
+<p>If a base URL has not been explicitly set, this method returns the application's current working directory.</p>
+<p><b>See also </b><a href="qqmlengine.html#setBaseUrl">setBaseUrl</a>().</p>
+<!-- @@@baseUrl -->
+<!-- $$$clearComponentCache[overload1]$$$clearComponentCache -->
+<h3 class="fn" id="clearComponentCache"><a name="clearComponentCache"></a><span class="type">void</span> QQmlEngine::<span class="name">clearComponentCache</span>()</h3>
+<p>Clears the engine's internal component cache.</p>
+<p>This function causes the property metadata of all components previously loaded by the engine to be destroyed. All previously loaded components and the property bindings for all extant objects created from those components will cease to function.</p>
+<p>This function returns the engine to a state where it does not contain any loaded component data. This may be useful in order to reload a smaller subset of the previous component set, or to load a new version of a previously loaded component.</p>
+<p>Once the component cache has been cleared, components must be loaded before any new objects can be created.</p>
+<p><b>See also </b><a href="qqmlengine.html#trimComponentCache">trimComponentCache</a>().</p>
+<!-- @@@clearComponentCache -->
+<!-- $$$contextForObject[overload1]$$$contextForObjectconstQObject* -->
+<h3 class="fn" id="contextForObject"><a name="contextForObject"></a><code>[static] </code><span class="type"><a href="qqmlcontext.html">QQmlContext</a></span> *QQmlEngine::<span class="name">contextForObject</span>(const <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>object</i>)</h3>
+<p>Returns the <a href="qqmlcontext.html">QQmlContext</a> for the <i>object</i>, or 0 if no context has been set.</p>
+<p>When the <a href="qqmlengine.html">QQmlEngine</a> instantiates a <a href="../qtcore/qobject.html">QObject</a>, the context is set automatically.</p>
+<p><b>See also </b><a href="qqmlengine.html#setContextForObject">setContextForObject</a>(), <a href="qqmlengine.html#qmlContext">qmlContext</a>(), and <a href="qqmlengine.html#qmlEngine">qmlEngine</a>().</p>
+<!-- @@@contextForObject -->
+<!-- $$$event[overload1]$$$eventQEvent* -->
+<h3 class="fn" id="event"><a name="event"></a><code>[override virtual protected] </code><span class="type">bool</span> QQmlEngine::<span class="name">event</span>(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="../qtcore/qobject.html#event">QObject::event</a>(QEvent *e).</p>
+<!-- @@@event -->
+<!-- $$$imageProvider[overload1]$$$imageProviderconstQString& -->
+<h3 class="fn" id="imageProvider"><a name="imageProvider"></a><span class="type"><a href="qqmlimageproviderbase.html">QQmlImageProviderBase</a></span> *QQmlEngine::<span class="name">imageProvider</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>providerId</i>) const</h3>
+<p>Returns the image provider set for <i>providerId</i> if found; otherwise returns <code>nullptr</code>.</p>
+<p><b>See also </b><a href="../qtquick/qquickimageprovider.html">QQuickImageProvider</a>.</p>
+<!-- @@@imageProvider -->
+<!-- $$$importPathList[overload1]$$$importPathList -->
+<h3 class="fn" id="importPathList"><a name="importPathList"></a><span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> QQmlEngine::<span class="name">importPathList</span>() const</h3>
+<p>Returns the list of directories where the engine searches for installed modules in a URL-based directory structure.</p>
+<p>For example, if <code>/opt/MyApp/lib/imports</code> is in the path, then QML that imports <code>com.mycompany.Feature</code> will cause the <a href="qqmlengine.html">QQmlEngine</a> to look in <code>/opt/MyApp/lib/imports/com/mycompany/Feature/</code> for the components provided by that module. A <code>qmldir</code> file is required for defining the type version mapping and possibly QML extensions plugins.</p>
+<p>By default, the list contains the directory of the application executable, paths specified in the <code>QML2_IMPORT_PATH</code> environment variable, and the builtin <code>Qml2ImportsPath</code> from <a href="../qtcore/qlibraryinfo.html">QLibraryInfo</a>.</p>
+<p><b>See also </b><a href="qqmlengine.html#addImportPath">addImportPath</a>() and <a href="qqmlengine.html#setImportPathList">setImportPathList</a>().</p>
+<!-- @@@importPathList -->
+<!-- $$$importPlugin[overload1]$$$importPluginconstQString&constQString&QList<QQmlError>* -->
+<h3 class="fn" id="importPlugin"><a name="importPlugin"></a><span class="type">bool</span> QQmlEngine::<span class="name">importPlugin</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>filePath</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>uri</i>, <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qqmlerror.html">QQmlError</a></span>&gt; *<i>errors</i>)</h3>
+<p>Imports the plugin named <i>filePath</i> with the <i>uri</i> provided. Returns true if the plugin was successfully imported; otherwise returns false.</p>
+<p>On failure and if non-null, the <i>errors</i> list will have any errors which occurred prepended to it.</p>
+<p>The plugin has to be a Qt plugin which implements the <a href="qqmlextensionplugin.html">QQmlExtensionPlugin</a> interface.</p>
+<!-- @@@importPlugin -->
+<!-- $$$incubationController[overload1]$$$incubationController -->
+<h3 class="fn" id="incubationController"><a name="incubationController"></a><span class="type"><a href="qqmlincubationcontroller.html">QQmlIncubationController</a></span> *QQmlEngine::<span class="name">incubationController</span>() const</h3>
+<p>Returns the currently set incubation controller, or 0 if no controller has been set.</p>
+<p><b>See also </b><a href="qqmlengine.html#setIncubationController">setIncubationController</a>().</p>
+<!-- @@@incubationController -->
+<!-- $$$networkAccessManager[overload1]$$$networkAccessManager -->
+<h3 class="fn" id="networkAccessManager"><a name="networkAccessManager"></a><span class="type">QNetworkAccessManager</span> *QQmlEngine::<span class="name">networkAccessManager</span>() const</h3>
+<p>Returns a common QNetworkAccessManager which can be used by any QML type instantiated by this engine.</p>
+<p>If a <a href="qqmlnetworkaccessmanagerfactory.html">QQmlNetworkAccessManagerFactory</a> has been set and a QNetworkAccessManager has not yet been created, the <a href="qqmlnetworkaccessmanagerfactory.html">QQmlNetworkAccessManagerFactory</a> will be used to create the QNetworkAccessManager; otherwise the returned QNetworkAccessManager will have no proxy or cache set.</p>
+<p><b>See also </b><a href="qqmlengine.html#setNetworkAccessManagerFactory">setNetworkAccessManagerFactory</a>().</p>
+<!-- @@@networkAccessManager -->
+<!-- $$$networkAccessManagerFactory[overload1]$$$networkAccessManagerFactory -->
+<h3 class="fn" id="networkAccessManagerFactory"><a name="networkAccessManagerFactory"></a><span class="type"><a href="qqmlnetworkaccessmanagerfactory.html">QQmlNetworkAccessManagerFactory</a></span> *QQmlEngine::<span class="name">networkAccessManagerFactory</span>() const</h3>
+<p>Returns the current <a href="qqmlnetworkaccessmanagerfactory.html">QQmlNetworkAccessManagerFactory</a>.</p>
+<p><b>See also </b><a href="qqmlengine.html#setNetworkAccessManagerFactory">setNetworkAccessManagerFactory</a>().</p>
+<!-- @@@networkAccessManagerFactory -->
+<!-- $$$objectOwnership[overload1]$$$objectOwnershipQObject* -->
+<h3 class="fn" id="objectOwnership"><a name="objectOwnership"></a><code>[static] </code><span class="type"><a href="qqmlengine.html#ObjectOwnership-enum">QQmlEngine::ObjectOwnership</a></span> QQmlEngine::<span class="name">objectOwnership</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>object</i>)</h3>
+<p>Returns the ownership of <i>object</i>.</p>
+<p><b>See also </b><a href="qqmlengine.html#setObjectOwnership">setObjectOwnership</a>().</p>
+<!-- @@@objectOwnership -->
+<!-- $$$offlineStorageDatabaseFilePath[overload1]$$$offlineStorageDatabaseFilePathconstQString& -->
+<h3 class="fn" id="offlineStorageDatabaseFilePath"><a name="offlineStorageDatabaseFilePath"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QQmlEngine::<span class="name">offlineStorageDatabaseFilePath</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>databaseName</i>) const</h3>
+<p>Returns the file path where a <a href="../qtquick/qtquick-localstorage-qmlmodule.html">Local Storage</a> database with the identifier <i>databaseName</i> is (or would be) located.</p>
+<p>This function was introduced in  Qt 5.9.</p>
+<p><b>See also </b><a href="../qtquick/qtquick-localstorage-qmlmodule.html#opendatabasesync">LocalStorage.openDatabaseSync</a>().</p>
+<!-- @@@offlineStorageDatabaseFilePath -->
+<!-- $$$outputWarningsToStandardError[overload1]$$$outputWarningsToStandardError -->
+<h3 class="fn" id="outputWarningsToStandardError"><a name="outputWarningsToStandardError"></a><span class="type">bool</span> QQmlEngine::<span class="name">outputWarningsToStandardError</span>() const</h3>
+<p>Returns true if warning messages will be output to stderr in addition to being emitted by the <a href="qqmlengine.html#warnings">warnings</a>() signal, otherwise false.</p>
+<p>The default value is true.</p>
+<p><b>See also </b><a href="qqmlengine.html#setOutputWarningsToStandardError">setOutputWarningsToStandardError</a>().</p>
+<!-- @@@outputWarningsToStandardError -->
+<!-- $$$pluginPathList[overload1]$$$pluginPathList -->
+<h3 class="fn" id="pluginPathList"><a name="pluginPathList"></a><span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> QQmlEngine::<span class="name">pluginPathList</span>() const</h3>
+<p>Returns the list of directories where the engine searches for native plugins for imported modules (referenced in the <code>qmldir</code> file).</p>
+<p>By default, the list contains only <code>.</code>, i.e&#x2e; the engine searches in the directory of the <code>qmldir</code> file itself.</p>
+<p><b>See also </b><a href="qqmlengine.html#addPluginPath">addPluginPath</a>() and <a href="qqmlengine.html#setPluginPathList">setPluginPathList</a>().</p>
+<!-- @@@pluginPathList -->
+<!-- $$$removeImageProvider[overload1]$$$removeImageProviderconstQString& -->
+<h3 class="fn" id="removeImageProvider"><a name="removeImageProvider"></a><span class="type">void</span> QQmlEngine::<span class="name">removeImageProvider</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>providerId</i>)</h3>
+<p>Removes the image provider for <i>providerId</i>.</p>
+<p><b>See also </b><a href="qqmlengine.html#addImageProvider">addImageProvider</a>() and <a href="../qtquick/qquickimageprovider.html">QQuickImageProvider</a>.</p>
+<!-- @@@removeImageProvider -->
+<!-- $$$rootContext[overload1]$$$rootContext -->
+<h3 class="fn" id="rootContext"><a name="rootContext"></a><span class="type"><a href="qqmlcontext.html">QQmlContext</a></span> *QQmlEngine::<span class="name">rootContext</span>() const</h3>
+<p>Returns the engine's root context.</p>
+<p>The root context is automatically created by the <a href="qqmlengine.html">QQmlEngine</a>. Data that should be available to all QML component instances instantiated by the engine should be put in the root context.</p>
+<p>Additional data that should only be available to a subset of component instances should be added to sub-contexts parented to the root context.</p>
+<!-- @@@rootContext -->
+<!-- $$$setBaseUrl[overload1]$$$setBaseUrlconstQUrl& -->
+<h3 class="fn" id="setBaseUrl"><a name="setBaseUrl"></a><span class="type">void</span> QQmlEngine::<span class="name">setBaseUrl</span>(const <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> &amp;<i>url</i>)</h3>
+<p>Set the base URL for this engine to <i>url</i>.</p>
+<p><b>See also </b><a href="qqmlengine.html#baseUrl">baseUrl</a>().</p>
+<!-- @@@setBaseUrl -->
+<!-- $$$setContextForObject[overload1]$$$setContextForObjectQObject*QQmlContext* -->
+<h3 class="fn" id="setContextForObject"><a name="setContextForObject"></a><code>[static] </code><span class="type">void</span> QQmlEngine::<span class="name">setContextForObject</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>object</i>, <span class="type"><a href="qqmlcontext.html">QQmlContext</a></span> *<i>context</i>)</h3>
+<p>Sets the <a href="qqmlcontext.html">QQmlContext</a> for the <i>object</i> to <i>context</i>. If the <i>object</i> already has a context, a warning is output, but the context is not changed.</p>
+<p>When the <a href="qqmlengine.html">QQmlEngine</a> instantiates a <a href="../qtcore/qobject.html">QObject</a>, the context is set automatically.</p>
+<p><b>See also </b><a href="qqmlengine.html#contextForObject">contextForObject</a>().</p>
+<!-- @@@setContextForObject -->
+<!-- $$$setImportPathList[overload1]$$$setImportPathListconstQStringList& -->
+<h3 class="fn" id="setImportPathList"><a name="setImportPathList"></a><span class="type">void</span> QQmlEngine::<span class="name">setImportPathList</span>(const <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> &amp;<i>paths</i>)</h3>
+<p>Sets <i>paths</i> as the list of directories where the engine searches for installed modules in a URL-based directory structure.</p>
+<p>By default, the list contains the directory of the application executable, paths specified in the <code>QML2_IMPORT_PATH</code> environment variable, and the builtin <code>Qml2ImportsPath</code> from <a href="../qtcore/qlibraryinfo.html">QLibraryInfo</a>.</p>
+<p><b>See also </b><a href="qqmlengine.html#importPathList">importPathList</a>() and <a href="qqmlengine.html#addImportPath">addImportPath</a>().</p>
+<!-- @@@setImportPathList -->
+<!-- $$$setIncubationController[overload1]$$$setIncubationControllerQQmlIncubationController* -->
+<h3 class="fn" id="setIncubationController"><a name="setIncubationController"></a><span class="type">void</span> QQmlEngine::<span class="name">setIncubationController</span>(<span class="type"><a href="qqmlincubationcontroller.html">QQmlIncubationController</a></span> *<i>controller</i>)</h3>
+<p>Sets the engine's incubation <i>controller</i>. The engine can only have one active controller and it does not take ownership of it.</p>
+<p><b>See also </b><a href="qqmlengine.html#incubationController">incubationController</a>().</p>
+<!-- @@@setIncubationController -->
+<!-- $$$setNetworkAccessManagerFactory[overload1]$$$setNetworkAccessManagerFactoryQQmlNetworkAccessManagerFactory* -->
+<h3 class="fn" id="setNetworkAccessManagerFactory"><a name="setNetworkAccessManagerFactory"></a><span class="type">void</span> QQmlEngine::<span class="name">setNetworkAccessManagerFactory</span>(<span class="type"><a href="qqmlnetworkaccessmanagerfactory.html">QQmlNetworkAccessManagerFactory</a></span> *<i>factory</i>)</h3>
+<p>Sets the <i>factory</i> to use for creating QNetworkAccessManager(s).</p>
+<p>QNetworkAccessManager is used for all network access by QML. By implementing a factory it is possible to create custom QNetworkAccessManager with specialized caching, proxy and cookie support.</p>
+<p>The factory must be set before executing the engine.</p>
+<p><b>Note: </b><a href="qqmlengine.html">QQmlEngine</a> does not take ownership of the factory.</p><p><b>See also </b><a href="qqmlengine.html#networkAccessManagerFactory">networkAccessManagerFactory</a>().</p>
+<!-- @@@setNetworkAccessManagerFactory -->
+<!-- $$$setObjectOwnership[overload1]$$$setObjectOwnershipQObject*QQmlEngine::ObjectOwnership -->
+<h3 class="fn" id="setObjectOwnership"><a name="setObjectOwnership"></a><code>[static] </code><span class="type">void</span> QQmlEngine::<span class="name">setObjectOwnership</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>object</i>, <span class="type"><a href="qqmlengine.html#ObjectOwnership-enum">QQmlEngine::ObjectOwnership</a></span> <i>ownership</i>)</h3>
+<p>Sets the <i>ownership</i> of <i>object</i>.</p>
+<p><b>See also </b><a href="qqmlengine.html#objectOwnership">objectOwnership</a>().</p>
+<!-- @@@setObjectOwnership -->
+<!-- $$$setOutputWarningsToStandardError[overload1]$$$setOutputWarningsToStandardErrorbool -->
+<h3 class="fn" id="setOutputWarningsToStandardError"><a name="setOutputWarningsToStandardError"></a><span class="type">void</span> QQmlEngine::<span class="name">setOutputWarningsToStandardError</span>(<span class="type">bool</span> <i>enabled</i>)</h3>
+<p>Set whether warning messages will be output to stderr to <i>enabled</i>.</p>
+<p>If <i>enabled</i> is true, any warning messages generated by QML will be output to stderr and emitted by the <a href="qqmlengine.html#warnings">warnings</a>() signal. If <i>enabled</i> is false, only the <a href="qqmlengine.html#warnings">warnings</a>() signal will be emitted. This allows applications to handle warning output themselves.</p>
+<p>The default value is true.</p>
+<p><b>See also </b><a href="qqmlengine.html#outputWarningsToStandardError">outputWarningsToStandardError</a>().</p>
+<!-- @@@setOutputWarningsToStandardError -->
+<!-- $$$setPluginPathList[overload1]$$$setPluginPathListconstQStringList& -->
+<h3 class="fn" id="setPluginPathList"><a name="setPluginPathList"></a><span class="type">void</span> QQmlEngine::<span class="name">setPluginPathList</span>(const <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> &amp;<i>paths</i>)</h3>
+<p>Sets the list of directories where the engine searches for native plugins for imported modules (referenced in the <code>qmldir</code> file) to <i>paths</i>.</p>
+<p>By default, the list contains only <code>.</code>, i.e&#x2e; the engine searches in the directory of the <code>qmldir</code> file itself.</p>
+<p><b>See also </b><a href="qqmlengine.html#pluginPathList">pluginPathList</a>() and <a href="qqmlengine.html#addPluginPath">addPluginPath</a>().</p>
+<!-- @@@setPluginPathList -->
+<!-- $$$singletonInstance[overload1]$$$singletonInstanceint -->
+<h3 class="fn" id="singletonInstance"><a name="singletonInstance"></a><span class="type">T</span> QQmlEngine::<span class="name">singletonInstance</span>(<span class="type">int</span> <i>qmlTypeId</i>)</h3>
+<p>Returns the instance of a singleton type that was registered under <i>qmlTypeId</i>.</p>
+<p>The template argument <i>T</i> may be either <a href="qjsvalue.html">QJSValue</a> or a pointer to a <a href="../qtcore/qobject.html">QObject</a>-derived type and depends on how the singleton was registered. If no instance of <i>T</i> has been created yet, it is created now. If <i>qmlTypeId</i> does not represent a valid singleton type, either a default constructed <a href="qjsvalue.html">QJSValue</a> or a <code>nullptr</code> is returned.</p>
+<p><a href="../qtcore/qobject.html">QObject</a>* example:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> MySingleton : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> {
+    Q_OBJECT
+    <span class="keyword">static</span> <span class="type">int</span> typeId;
+    <span class="comment">// ...</span>
+  };
+
+  <span class="comment">// Register with QObject* callback</span>
+  MySingleton<span class="operator">::</span>typeId <span class="operator">=</span> qmlRegisterSingletonType<span class="operator">&lt;</span>MySingleton<span class="operator">&gt;</span>(<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>);
+
+  <span class="comment">// Retrieve as QObject*</span>
+  <span class="type"><a href="qqmlengine.html#QQmlEngine">QQmlEngine</a></span> engine;
+  MySingleton<span class="operator">*</span> instance <span class="operator">=</span> engine<span class="operator">.</span>singletonInstance<span class="operator">&lt;</span>MySingleton<span class="operator">*</span><span class="operator">&gt;</span>(MySingleton<span class="operator">::</span>typeId);
+
+</pre>
+<p><a href="qjsvalue.html">QJSValue</a> example:</p>
+<pre class="cpp">
+
+  <span class="comment">// Register with QJSValue callback</span>
+  <span class="type">int</span> typeId <span class="operator">=</span> qmlRegisterSingletonType(<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>);
+
+  <span class="comment">// Retrieve as QJSValue</span>
+  <span class="type"><a href="qqmlengine.html#QQmlEngine">QQmlEngine</a></span> engine;
+  <span class="type"><a href="qjsvalue.html">QJSValue</a></span> instance <span class="operator">=</span> engine<span class="operator">.</span>singletonInstance<span class="operator">&lt;</span><span class="type"><a href="qjsvalue.html">QJSValue</a></span><span class="operator">&gt;</span>(typeId);
+
+</pre>
+<p>It is recommended to store the QML type id during registration, e.g&#x2e; as a static member in the singleton class. Otherwise, a costly lookup via <a href="qqmlengine.html#qmlTypeId">qmlTypeId</a>() has to be performed at run-time.</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<p><b>See also </b><a href="qqmlengine.html#qmlRegisterSingletonType">qmlRegisterSingletonType</a>() and <a href="qqmlengine.html#qmlTypeId">qmlTypeId</a>().</p>
+<!-- @@@singletonInstance -->
+<!-- $$$trimComponentCache[overload1]$$$trimComponentCache -->
+<h3 class="fn" id="trimComponentCache"><a name="trimComponentCache"></a><span class="type">void</span> QQmlEngine::<span class="name">trimComponentCache</span>()</h3>
+<p>Trims the engine's internal component cache.</p>
+<p>This function causes the property metadata of any loaded components which are not currently in use to be destroyed.</p>
+<p>A component is considered to be in use if there are any extant instances of the component itself, any instances of other components that use the component, or any objects instantiated by any of those components.</p>
+<p><b>See also </b><a href="qqmlengine.html#clearComponentCache">clearComponentCache</a>().</p>
+<!-- @@@trimComponentCache -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$qmlAttachedPropertiesObject[overload1]$$$qmlAttachedPropertiesObjectconstQObject*bool -->
+<h3 class="fn" id="qmlAttachedPropertiesObject"><a name="qmlAttachedPropertiesObject"></a><span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<span class="name">qmlAttachedPropertiesObject</span>(const <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>attachee</i>, <span class="type">bool</span> <i>create</i> = ...)</h3>
+<p>The form of this template function is:</p>
+<pre class="cpp">
+
+  <span class="keyword">template</span><span class="operator">&lt;</span><span class="keyword">typename</span> T<span class="operator">&gt;</span> <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> <span class="operator">*</span>qmlAttachedPropertiesObject(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> <span class="operator">*</span>attachee<span class="operator">,</span> bool create <span class="operator">=</span> <span class="keyword">true</span>)
+
+</pre>
+<p>This returns the attached object instance that has been attached to the specified <i>attachee</i> by the attaching type <i>T</i>.</p>
+<p>If <i>create</i> is true and type <i>T</i> is a valid attaching type, this creates and returns a new attached object instance.</p>
+<p>Returns 0 if type <i>T</i> is not a valid attaching type, or if <i>create</i> is false and no attachment object instance has previously been created for <i>attachee</i>.</p>
+<p><b>See also </b><a href="qtqml-cppintegration-definetypes.html#providing-attached-properties">Providing Attached Properties</a>.</p>
+<!-- @@@qmlAttachedPropertiesObject -->
+<!-- $$$qmlClearTypeRegistrations[overload1]$$$qmlClearTypeRegistrations -->
+<h3 class="fn" id="qmlClearTypeRegistrations"><a name="qmlClearTypeRegistrations"></a><span class="type">void</span> <span class="name">qmlClearTypeRegistrations</span>()</h3>
+<p>Clears all stored type registrations, such as those produced with <a href="qqmlengine.html#qmlRegisterType-1">qmlRegisterType</a>().</p>
+<p>Do not call this function while a <a href="qqmlengine.html">QQmlEngine</a> exists or behavior will be undefined. Any existing QQmlEngines must be deleted before calling this function. This function only affects the application global cache. Delete the <a href="qqmlengine.html">QQmlEngine</a> to clear all cached data relating to that engine.</p>
+<!-- @@@qmlClearTypeRegistrations -->
+<!-- $$$qmlContext[overload1]$$$qmlContextconstQObject* -->
+<h3 class="fn" id="qmlContext"><a name="qmlContext"></a><span class="type"><a href="qqmlcontext.html">QQmlContext</a></span> *<span class="name">qmlContext</span>(const <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>object</i>)</h3>
+<p>Returns the <a href="qqmlcontext.html">QQmlContext</a> associated with <i>object</i>, if any. This is equivalent to <a href="qqmlengine.html#contextForObject">QQmlEngine::contextForObject</a>(object).</p>
+<p><b>Note: </b>Add <code>#include &lt;QtQml&gt;</code> to use this function.</p><p><b>See also </b><a href="qqmlengine.html#contextForObject">contextForObject</a>() and <a href="qqmlengine.html#qmlEngine">qmlEngine</a>().</p>
+<!-- @@@qmlContext -->
+<!-- $$$qmlDebug[overload1]$$$qmlDebugconstQObject* -->
+<h3 class="fn" id="qmlDebug"><a name="qmlDebug"></a><span class="type">QQmlInfo</span> <span class="name">qmlDebug</span>(const <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>object</i>)</h3>
+<p>Prints debug messages that include the file and line number for the specified QML <i>object</i>.</p>
+<p>When QML types produce logging messages, it improves traceability if they include the QML file and line number on which the particular instance was instantiated.</p>
+<p>To include the file and line number, an object must be passed. If the file and line number is not available for that instance (either it was not instantiated by the QML engine or location information is disabled), &quot;unknown location&quot; will be used instead. For example,</p>
+<pre class="cpp">
+
+  qmlDebug(object) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Internal state: 42&quot;</span>;
+
+</pre>
+<p>prints</p>
+<pre class="cpp plain">
+
+  QML MyCustomType (unknown location): Internal state: 42
+
+</pre>
+<p>This function was introduced in  Qt 5.9.</p>
+<p><b>See also </b><a href="qqmlengine.html#qmlInfo">QtQml::qmlInfo</a> and <a href="qqmlengine.html#qmlWarning">QtQml::qmlWarning</a>.</p>
+<!-- @@@qmlDebug -->
+<!-- $$$qmlEngine[overload1]$$$qmlEngineconstQObject* -->
+<h3 class="fn" id="qmlEngine"><a name="qmlEngine"></a><span class="type"><a href="qqmlengine.html#QQmlEngine">QQmlEngine</a></span> *<span class="name">qmlEngine</span>(const <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>object</i>)</h3>
+<p>Returns the <a href="qqmlengine.html">QQmlEngine</a> associated with <i>object</i>, if any. This is equivalent to <a href="qqmlengine.html#contextForObject">QQmlEngine::contextForObject</a>(object)-&gt;engine(), but more efficient.</p>
+<p><b>Note: </b>Add <code>#include &lt;QtQml&gt;</code> to use this function.</p><p><b>See also </b><a href="qqmlengine.html#contextForObject">contextForObject</a>() and <a href="qqmlengine.html#qmlContext">qmlContext</a>().</p>
+<!-- @@@qmlEngine -->
+<!-- $$$qmlInfo[overload1]$$$qmlInfoconstQObject* -->
+<h3 class="fn" id="qmlInfo"><a name="qmlInfo"></a><span class="type">QQmlInfo</span> <span class="name">qmlInfo</span>(const <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>object</i>)</h3>
+<p>Prints informational messages that include the file and line number for the specified QML <i>object</i>.</p>
+<p>When QML types produce logging messages, it improves traceability if they include the QML file and line number on which the particular instance was instantiated.</p>
+<p>To include the file and line number, an object must be passed. If the file and line number is not available for that instance (either it was not instantiated by the QML engine or location information is disabled), &quot;unknown location&quot; will be used instead.</p>
+<p>For example,</p>
+<pre class="cpp">
+
+  qmlInfo(object) <span class="operator">&lt;</span><span class="operator">&lt;</span> tr(<span class="string">&quot;component property is a write-once property&quot;</span>);
+
+</pre>
+<p>prints</p>
+<pre class="cpp plain">
+
+  QML MyCustomType (unknown location): component property is a write-once property
+
+</pre>
+<p><b>Note: </b>In versions prior to Qt 5.9, qmlInfo reported messages using a warning <a href="../qtcore/qtglobal.html#QtMsgType-enum">QtMsgType</a>. For Qt 5.9 and above, qmlInfo uses an info <a href="../qtcore/qtglobal.html#QtMsgType-enum">QtMsgType</a>. To send warnings, use <a href="qqmlengine.html#qmlWarning">qmlWarning</a>.</p><p><b>See also </b><a href="qqmlengine.html#qmlDebug">QtQml::qmlDebug</a> and <a href="qqmlengine.html#qmlWarning">QtQml::qmlWarning</a>.</p>
+<!-- @@@qmlInfo -->
+<!-- $$$qmlProtectModule[overload1]$$$qmlProtectModuleconstchar*int -->
+<h3 class="fn" id="qmlProtectModule"><a name="qmlProtectModule"></a><span class="type">bool</span> <span class="name">qmlProtectModule</span>(const <span class="type">char</span> *<i>uri</i>, <span class="type">int</span> <i>majVersion</i>)</h3>
+<p>This function protects a module from having types registered into it. This can be used to prevent other plugins from injecting types into your module. It can also be a performance improvement, as it allows the engine to skip checking for the possibility of new types or plugins when this import is reached.</p>
+<p>The performance benefit is primarily seen when registering application specific types from within the application instead of through a plugin. Using qmlProtectModule allows the engine to skip checking for a plugin when that uri is imported, which can be noticeable with slow file systems.</p>
+<p>After this function is called, any attempt to register C++ types into this uri, major version combination will lead to a runtime error. Call this after you have registered all of your types with the engine.</p>
+<p>Returns true if the module with <i>uri</i> as a <a href="qtqml-modules-identifiedmodules.html">module identifier</a> and <i>majVersion</i> as a major version number was found and locked, otherwise returns false. The module must contain exported types in order to be found.</p>
+<!-- @@@qmlProtectModule -->
+<!-- $$$qmlRegisterExtendedType[overload1]$$$qmlRegisterExtendedTypeconstchar*intintconstchar* -->
+<h3 class="fn" id="qmlRegisterExtendedType"><a name="qmlRegisterExtendedType"></a><span class="type">int</span> <span class="name">qmlRegisterExtendedType</span>(const <span class="type">char</span> *<i>uri</i>, <span class="type">int</span> <i>versionMajor</i>, <span class="type">int</span> <i>versionMinor</i>, const <span class="type">char</span> *<i>qmlName</i>)</h3>
+<p>This template function registers the C++ type and its extension object in the QML system with the name <i>qmlName</i> in the library imported from <i>uri</i> having version number composed from <i>versionMajor</i> and <i>versionMinor</i>. Properties not available in the main type will be searched for in the extension object.</p>
+<p>Returns the QML type id.</p>
+<p><b>See also </b><a href="qqmlengine.html#qmlRegisterType-1">qmlRegisterType</a>() and <a href="qtqml-cppintegration-definetypes.html#registering-extension-objects">Registering Extension Objects</a>.</p>
+<!-- @@@qmlRegisterExtendedType -->
+<!-- $$$qmlRegisterExtendedUncreatableType[overload1]$$$qmlRegisterExtendedUncreatableTypeconstchar*intintconstchar*constQString& -->
+<h3 class="fn" id="qmlRegisterExtendedUncreatableType"><a name="qmlRegisterExtendedUncreatableType"></a><span class="type">int</span> <span class="name">qmlRegisterExtendedUncreatableType</span>(const <span class="type">char</span> *<i>uri</i>, <span class="type">int</span> <i>versionMajor</i>, <span class="type">int</span> <i>versionMinor</i>, const <span class="type">char</span> *<i>qmlName</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>reason</i>)</h3>
+<p>This template function registers the C++ type and its extension in the QML system with the name <i>qmlName</i> in the library imported from <i>uri</i> having version number composed from <i>versionMajor</i> and <i>versionMinor</i>.</p>
+<p>While the type has a name and a type, it cannot be created. An error message with the given <i>reason</i> is printed if the user attempts to create an instance of this type.</p>
+<p>This is useful where the type is only intended for providing attached properties, enum values or an abstract base class with its extension.</p>
+<p>Returns the QML type id.</p>
+<p><b>See also </b><a href="qqmlengine.html#qmlRegisterUncreatableType">qmlRegisterUncreatableType</a>().</p>
+<!-- @@@qmlRegisterExtendedUncreatableType -->
+<!-- $$$qmlRegisterInterface[overload1]$$$qmlRegisterInterfaceconstchar* -->
+<h3 class="fn" id="qmlRegisterInterface"><a name="qmlRegisterInterface"></a><span class="type">int</span> <span class="name">qmlRegisterInterface</span>(const <span class="type">char</span> *<i>typeName</i>)</h3>
+<p>This template function registers the C++ type in the QML system under the name <i>typeName</i>.</p>
+<p>Types registered as an interface with the engine should also declare themselves as an interface with the <a href="../qtcore/metaobjects.html">meta object system</a>. For example:</p>
+<pre class="cpp">
+
+  <span class="keyword">struct</span> FooInterface
+  {
+  <span class="keyword">public</span>:
+      <span class="keyword">virtual</span> <span class="operator">~</span>FooInterface();
+      <span class="keyword">virtual</span> <span class="type">void</span> doSomething() <span class="operator">=</span> <span class="number">0</span>;
+  };
+
+  Q_DECLARE_INTERFACE(FooInterface<span class="operator">,</span> <span class="string">&quot;org.foo.FooInterface&quot;</span>)
+
+</pre>
+<p>When registered with the QML engine in this way, they can be used as property types:</p>
+<p><a href="../qtcore/qobject.html#Q_PROPERTY">Q_PROPERTY</a>(FooInterface *foo READ foo WRITE setFoo)</p>
+<p>When you assign a <a href="../qtcore/qobject.html">QObject</a> sub-class to this property, the QML engine does the interface cast to <code>FooInterface*</code> automatically.</p>
+<p>Returns the QML type id.</p>
+<!-- @@@qmlRegisterInterface -->
+<!-- $$$qmlRegisterModule[overload1]$$$qmlRegisterModuleconstchar*intint -->
+<h3 class="fn" id="qmlRegisterModule"><a name="qmlRegisterModule"></a><span class="type">void</span> <span class="name">qmlRegisterModule</span>(const <span class="type">char</span> *<i>uri</i>, <span class="type">int</span> <i>versionMajor</i>, <span class="type">int</span> <i>versionMinor</i>)</h3>
+<p>This function registers a module in a particular <i>uri</i> with a version specified in <i>versionMajor</i> and <i>versionMinor</i>.</p>
+<p>This can be used to make a certain module version available, even if no types are registered for that version. This is particularly useful for keeping the versions of related modules in sync.</p>
+<p>This function was introduced in  Qt 5.9.</p>
+<!-- @@@qmlRegisterModule -->
+<!-- $$$qmlRegisterRevision[overload1]$$$qmlRegisterRevisionconstchar*intint -->
+<h3 class="fn" id="qmlRegisterRevision"><a name="qmlRegisterRevision"></a><span class="type">int</span> <span class="name">qmlRegisterRevision</span>(const <span class="type">char</span> *<i>uri</i>, <span class="type">int</span> <i>versionMajor</i>, <span class="type">int</span> <i>versionMinor</i>)</h3>
+<p>This template function registers the specified revision of a C++ type in the QML system with the library imported from <i>uri</i> having the version number composed from <i>versionMajor</i> and <i>versionMinor</i>.</p>
+<p>Returns the QML type id.</p>
+<pre class="cpp">
+
+  <span class="keyword">template</span><span class="operator">&lt;</span><span class="keyword">typename</span> T<span class="operator">,</span> <span class="type">int</span> metaObjectRevision<span class="operator">&gt;</span>
+  <span class="type">int</span> qmlRegisterRevision(<span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>uri<span class="operator">,</span> <span class="type">int</span> versionMajor<span class="operator">,</span> <span class="type">int</span> versionMinor);
+
+</pre>
+<p>This function is typically used to register the revision of a base class to use for the specified version of the type (see <a href="qtqml-cppintegration-definetypes.html#type-revisions-and-versions">Type Revisions and Versions</a>).</p>
+<!-- @@@qmlRegisterRevision -->
+<!-- $$$qmlRegisterSingletonType[overload1]$$$qmlRegisterSingletonTypeconstchar*intintconstchar*QJSValue(*)(QQmlEngine*,QJSEngine*) -->
+<h3 class="fn" id="qmlRegisterSingletonType"><a name="qmlRegisterSingletonType"></a><span class="type">int</span> <span class="name">qmlRegisterSingletonType</span>(const <span class="type">char</span> *<i>uri</i>, <span class="type">int</span> <i>versionMajor</i>, <span class="type">int</span> <i>versionMinor</i>, const <span class="type">char</span> *<i>typeName</i>, <span class="type"><a href="qjsvalue.html">QJSValue</a></span> (*)(<span class="type"><a href="qqmlengine.html#QQmlEngine">QQmlEngine</a></span> *, <span class="type"><a href="qjsengine.html#QJSEnginex">QJSEngine</a></span> *) <i>callback</i>)</h3>
+<p>This function may be used to register a singleton type provider <i>callback</i> in a particular <i>uri</i> and <i>typeName</i> with a version specified in <i>versionMajor</i> and <i>versionMinor</i>.</p>
+<p>Installing a singleton type allows developers to provide arbitrary functionality (methods and properties) to a client without requiring individual instances of the type to be instantiated by the client.</p>
+<p>A singleton type may be either a <a href="../qtcore/qobject.html">QObject</a> or a <a href="qjsvalue.html">QJSValue</a>. This function should be used to register a singleton type provider function which returns a <a href="qjsvalue.html">QJSValue</a> as a singleton type.</p>
+<p><b>NOTE:</b> <a href="qjsvalue.html">QJSValue</a> singleton type properties will <b>not</b> trigger binding re-evaluation if changed.</p>
+<p>Usage:</p>
+<pre class="cpp">
+
+  <span class="comment">// First, define the singleton type provider function (callback).</span>
+  <span class="keyword">static</span> <span class="type"><a href="qjsvalue.html">QJSValue</a></span> example_qjsvalue_singletontype_provider(<span class="type"><a href="qqmlengine.html#QQmlEngine">QQmlEngine</a></span> <span class="operator">*</span>engine<span class="operator">,</span> <span class="type"><a href="qjsengine.html#QJSEnginex">QJSEngine</a></span> <span class="operator">*</span>scriptEngine)
+  {
+      Q_UNUSED(engine)
+
+      <span class="keyword">static</span> <span class="type">int</span> seedValue <span class="operator">=</span> <span class="number">5</span>;
+      <span class="type"><a href="qjsvalue.html">QJSValue</a></span> example <span class="operator">=</span> scriptEngine<span class="operator">-</span><span class="operator">&gt;</span>newObject();
+      example<span class="operator">.</span>setProperty(<span class="string">&quot;someProperty&quot;</span><span class="operator">,</span> seedValue<span class="operator">+</span><span class="operator">+</span>);
+      <span class="keyword">return</span> example;
+  }
+
+  <span class="comment">// Second, register the singleton type provider with QML by calling this function in an initialization function.</span>
+  qmlRegisterSingletonType(<span class="string">&quot;Qt.example.qjsvalueApi&quot;</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;MyApi&quot;</span><span class="operator">,</span> example_qjsvalue_singletontype_provider);
+
+</pre>
+<p>Alternatively, you can use a C++11 lambda:</p>
+<pre class="cpp">
+
+  qmlRegisterSingletonType(<span class="string">&quot;Qt.example.qjsvalueApi&quot;</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;MyApi&quot;</span><span class="operator">,</span> <span class="operator">[</span><span class="operator">]</span>(<span class="type"><a href="qqmlengine.html#QQmlEngine">QQmlEngine</a></span> <span class="operator">*</span>engine<span class="operator">,</span> <span class="type"><a href="qjsengine.html#QJSEnginex">QJSEngine</a></span> <span class="operator">*</span>scriptEngine) <span class="operator">-</span><span class="operator">&gt;</span> <span class="type"><a href="qjsvalue.html">QJSValue</a></span> {
+      Q_UNUSED(engine)
+
+      <span class="keyword">static</span> <span class="type">int</span> seedValue <span class="operator">=</span> <span class="number">5</span>;
+      <span class="type"><a href="qjsvalue.html">QJSValue</a></span> example <span class="operator">=</span> scriptEngine<span class="operator">-</span><span class="operator">&gt;</span>newObject();
+      example<span class="operator">.</span>setProperty(<span class="string">&quot;someProperty&quot;</span><span class="operator">,</span> seedValue<span class="operator">+</span><span class="operator">+</span>);
+      <span class="keyword">return</span> example;
+  });
+
+</pre>
+<p>In order to use the registered singleton type in QML, you must import the singleton type.</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+  import Qt.example.qjsvalueApi 1.0 as ExampleApi
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">root</span>
+      property <span class="type"><a href="qml-int.html">int</a></span> <span class="name">someValue</span>: <span class="name">ExampleApi</span>.<span class="name">MyApi</span>.<span class="name">someProperty</span>
+  }
+
+</pre>
+<p><b>See also </b><a href="qtqml-cppintegration-overview.html#choosing-the-correct-integration-method-between-c-and-qml">Choosing the Correct Integration Method Between C++ and QML</a>.</p>
+<!-- @@@qmlRegisterSingletonType -->
+<!-- $$$qmlRegisterSingletonType$$$qmlRegisterSingletonTypeconstchar*intintconstchar*QObject*(*)(QQmlEngine*,QJSEngine*) -->
+<h3 class="fn" id="qmlRegisterSingletonType-1"><a name="qmlRegisterSingletonType-1"></a><span class="type">int</span> <span class="name">qmlRegisterSingletonType</span>(const <span class="type">char</span> *<i>uri</i>, <span class="type">int</span> <i>versionMajor</i>, <span class="type">int</span> <i>versionMinor</i>, const <span class="type">char</span> *<i>typeName</i>, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *(*)(<span class="type"><a href="qqmlengine.html#QQmlEngine">QQmlEngine</a></span> *, <span class="type"><a href="qjsengine.html#QJSEnginex">QJSEngine</a></span> *) <i>callback</i>)</h3>
+<p>This function may be used to register a singleton type provider <i>callback</i> in a particular <i>uri</i> and <i>typeName</i> with a version specified in <i>versionMajor</i> and <i>versionMinor</i>.</p>
+<p>Installing a singleton type into a uri allows developers to provide arbitrary functionality (methods and properties) to clients without requiring individual instances ot the type to be instantiated by the client.</p>
+<p>A singleton type may be either a <a href="../qtcore/qobject.html">QObject</a> or a <a href="qjsvalue.html">QJSValue</a>. This function should be used to register a singleton type provider function which returns a <a href="../qtcore/qobject.html">QObject</a> of the given type T as a singleton type.</p>
+<p>A <a href="../qtcore/qobject.html">QObject</a> singleton type may be referenced via the type name with which it was registered, and this typename may be used as the target in a <a href="qml-qtqml-connections.html">Connections</a> type or otherwise used as any other type id would. One exception to this is that a <a href="../qtcore/qobject.html">QObject</a> singleton type property may not be aliased (because the singleton type name does not identify an object within the same component as any other item).</p>
+<p><b>NOTE:</b> A <a href="../qtcore/qobject.html">QObject</a> singleton type instance returned from a singleton type provider is owned by the QML engine unless the object has explicit <a href="qqmlengine.html#ObjectOwnership-enum">QQmlEngine::CppOwnership</a> flag set.</p>
+<p>Usage:</p>
+<pre class="cpp">
+
+  <span class="comment">// First, define your QObject which provides the functionality.</span>
+  <span class="keyword">class</span> SingletonTypeExample : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span>
+  {
+      Q_OBJECT
+      Q_PROPERTY (<span class="type">int</span> someProperty READ someProperty WRITE setSomeProperty NOTIFY somePropertyChanged)
+
+  <span class="keyword">public</span>:
+      SingletonTypeExample(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span><span class="operator">*</span> parent <span class="operator">=</span> <span class="number">0</span>)
+          : <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span>(parent)<span class="operator">,</span> m_someProperty(<span class="number">0</span>)
+      {
+      }
+
+      <span class="operator">~</span>SingletonTypeExample() {}
+
+      Q_INVOKABLE <span class="type">int</span> doSomething() { setSomeProperty(<span class="number">5</span>); <span class="keyword">return</span> m_someProperty; }
+
+      <span class="type">int</span> someProperty() <span class="keyword">const</span> { <span class="keyword">return</span> m_someProperty; }
+      <span class="type">void</span> setSomeProperty(<span class="type">int</span> val) { m_someProperty <span class="operator">=</span> val; <span class="keyword">emit</span> somePropertyChanged(val); }
+
+  <span class="keyword">signals</span>:
+      <span class="type">void</span> somePropertyChanged(<span class="type">int</span> newValue);
+
+  <span class="keyword">private</span>:
+      <span class="type">int</span> m_someProperty;
+  };
+
+  <span class="comment">// Second, define the singleton type provider function (callback).</span>
+  <span class="keyword">static</span> <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> <span class="operator">*</span>example_qobject_singletontype_provider(<span class="type"><a href="qqmlengine.html#QQmlEngine">QQmlEngine</a></span> <span class="operator">*</span>engine<span class="operator">,</span> <span class="type"><a href="qjsengine.html#QJSEnginex">QJSEngine</a></span> <span class="operator">*</span>scriptEngine)
+  {
+      Q_UNUSED(engine)
+      Q_UNUSED(scriptEngine)
+
+      SingletonTypeExample <span class="operator">*</span>example <span class="operator">=</span> <span class="keyword">new</span> SingletonTypeExample();
+      <span class="keyword">return</span> example;
+  }
+
+  <span class="comment">// Third, register the singleton type provider with QML by calling this function in an initialization function.</span>
+  qmlRegisterSingletonType<span class="operator">&lt;</span>SingletonTypeExample<span class="operator">&gt;</span>(<span class="string">&quot;Qt.example.qobjectSingleton&quot;</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;MyApi&quot;</span><span class="operator">,</span> example_qobject_singletontype_provider);
+
+</pre>
+<p>Alternatively, you can use a C++11 lambda:</p>
+<pre class="cpp">
+
+  qmlRegisterSingletonType<span class="operator">&lt;</span>SingletonTypeExample<span class="operator">&gt;</span>(<span class="string">&quot;Qt.example.qjsvalueApi&quot;</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;MyApi&quot;</span><span class="operator">,</span> <span class="operator">[</span><span class="operator">]</span>(<span class="type"><a href="qqmlengine.html#QQmlEngine">QQmlEngine</a></span> <span class="operator">*</span>engine<span class="operator">,</span> <span class="type"><a href="qjsengine.html#QJSEnginex">QJSEngine</a></span> <span class="operator">*</span>scriptEngine) <span class="operator">-</span><span class="operator">&gt;</span> <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> <span class="operator">*</span> {
+      Q_UNUSED(engine)
+      Q_UNUSED(scriptEngine)
+
+      SingletonTypeExample <span class="operator">*</span>example <span class="operator">=</span> <span class="keyword">new</span> SingletonTypeExample();
+      <span class="keyword">return</span> example;
+  });
+
+</pre>
+<p>In order to use the registered singleton type in QML, you must import the singleton type.</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+  import Qt.example.qobjectSingleton 1.0
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">root</span>
+      property <span class="type"><a href="qml-int.html">int</a></span> <span class="name">someValue</span>: <span class="name">MyApi</span>.<span class="name">someProperty</span>
+
+      <span class="name">Component</span>.onCompleted: {
+          <span class="name">someValue</span> <span class="operator">=</span> <span class="name">MyApi</span>.<span class="name">doSomething</span>()
+      }
+  }
+
+</pre>
+<p><b>See also </b><a href="qtqml-cppintegration-overview.html#choosing-the-correct-integration-method-between-c-and-qml">Choosing the Correct Integration Method Between C++ and QML</a>.</p>
+<!-- @@@qmlRegisterSingletonType -->
+<!-- $$$qmlRegisterSingletonType$$$qmlRegisterSingletonTypeconstQUrl&constchar*intintconstchar* -->
+<h3 class="fn" id="qmlRegisterSingletonType-2"><a name="qmlRegisterSingletonType-2"></a><span class="type">int</span> <span class="name">qmlRegisterSingletonType</span>(const <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> &amp;<i>url</i>, const <span class="type">char</span> *<i>uri</i>, <span class="type">int</span> <i>versionMajor</i>, <span class="type">int</span> <i>versionMinor</i>, const <span class="type">char</span> *<i>qmlName</i>)</h3>
+<p>This function may be used to register a singleton type with the name <i>qmlName</i>, in the library imported from <i>uri</i> having the version number composed from <i>versionMajor</i> and <i>versionMinor</i>. The type is defined by the QML file located at <i>url</i>. The url must be an absolute URL, i.e&#x2e; url.isRelative() == false.</p>
+<p>In addition the type's QML file must have pragma Singleton statement among its import statements.</p>
+<p>A singleton type may be referenced via the type name with which it was registered, and this typename may be used as the target in a <a href="qml-qtqml-connections.html">Connections</a> type or otherwise used as any other type id would. One exception to this is that a singleton type property may not be aliased (because the singleton type name does not identify an object within the same component as any other item).</p>
+<p>Usage:</p>
+<pre class="qml">
+
+  <span class="comment">// First, define your QML singleton type which provides the functionality.</span>
+  pragma Singleton
+  import QtQuick 2.0
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      property <span class="type"><a href="qml-int.html">int</a></span> <span class="name">testProp1</span>: <span class="number">125</span>
+  }
+
+</pre>
+<pre class="cpp">
+
+  <span class="comment">// Second, register the QML singleton type by calling this function in an initialization function.</span>
+  qmlRegisterSingletonType(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="string">&quot;file:///absolute/path/SingletonType.qml&quot;</span>)<span class="operator">,</span> <span class="string">&quot;Qt.example.qobjectSingleton&quot;</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;RegisteredSingleton&quot;</span>);
+
+</pre>
+<p>In order to use the registered singleton type in QML, you must import the singleton type.</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+  import Qt.example.qobjectSingleton 1.0
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">root</span>
+      property <span class="type"><a href="qml-int.html">int</a></span> <span class="name">someValue</span>: <span class="name">RegisteredSingleton</span>.<span class="name">testProp1</span>
+  }
+
+</pre>
+<p>It is also possible to have QML singleton types registered without using the <a href="qqmlengine.html#qmlRegisterSingletonType">qmlRegisterSingletonType</a> function. That can be done by adding a pragma Singleton statement among the imports of the type's QML file. In addition the type must be defined in a qmldir file with a singleton keyword and the qmldir must be imported by the QML files using the singleton.</p>
+<!-- @@@qmlRegisterSingletonType -->
+<!-- $$$qmlRegisterType[overload1]$$$qmlRegisterTypeconstchar*intintconstchar* -->
+<h3 class="fn" id="qmlRegisterType"><a name="qmlRegisterType"></a><span class="type">int</span> <span class="name">qmlRegisterType</span>(const <span class="type">char</span> *<i>uri</i>, <span class="type">int</span> <i>versionMajor</i>, <span class="type">int</span> <i>versionMinor</i>, const <span class="type">char</span> *<i>qmlName</i>)</h3>
+<p>This template function registers the C++ type in the QML system with the name <i>qmlName</i>, in the library imported from <i>uri</i> having the version number composed from <i>versionMajor</i> and <i>versionMinor</i>.</p>
+<p>Returns the QML type id.</p>
+<p>There are two forms of this template function:</p>
+<pre class="cpp">
+
+  <span class="keyword">template</span><span class="operator">&lt;</span><span class="keyword">typename</span> T<span class="operator">&gt;</span>
+  <span class="type">int</span> qmlRegisterType(<span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>uri<span class="operator">,</span> <span class="type">int</span> versionMajor<span class="operator">,</span> <span class="type">int</span> versionMinor<span class="operator">,</span> <span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>qmlName);
+
+  <span class="keyword">template</span><span class="operator">&lt;</span><span class="keyword">typename</span> T<span class="operator">,</span> <span class="type">int</span> metaObjectRevision<span class="operator">&gt;</span>
+  <span class="type">int</span> qmlRegisterType(<span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>uri<span class="operator">,</span> <span class="type">int</span> versionMajor<span class="operator">,</span> <span class="type">int</span> versionMinor<span class="operator">,</span> <span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>qmlName);
+
+</pre>
+<p>The former is the standard form which registers the type <i>T</i> as a new type. The latter allows a particular revision of a class to be registered in a specified version (see <a href="qtqml-cppintegration-definetypes.html#type-revisions-and-versions">Type Revisions and Versions</a>).</p>
+<p>For example, this registers a C++ class <code>MySliderItem</code> as a QML type named <code>Slider</code> for version 1.0 of a type namespace called &quot;com.mycompany.qmlcomponents&quot;:</p>
+<pre class="cpp">
+
+  qmlRegisterType<span class="operator">&lt;</span>MySliderItem<span class="operator">&gt;</span>(<span class="string">&quot;com.mycompany.qmlcomponents&quot;</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;Slider&quot;</span>);
+
+</pre>
+<p>Once this is registered, the type can be used in QML by importing the specified type namespace and version number:</p>
+<pre class="qml">
+
+  import com.mycompany.qmlcomponents 1.0
+
+  <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-slider.html">Slider</a></span> {
+      <span class="comment">// ...</span>
+  }
+
+</pre>
+<p>Note that it's perfectly reasonable for a library to register types to older versions than the actual version of the library. Indeed, it is normal for the new library to allow QML written to previous versions to continue to work, even if more advanced versions of some of its types are available.</p>
+<p><b>See also </b><a href="qtqml-cppintegration-overview.html#choosing-the-correct-integration-method-between-c-and-qml">Choosing the Correct Integration Method Between C++ and QML</a>.</p>
+<!-- @@@qmlRegisterType -->
+<!-- $$$qmlRegisterType$$$qmlRegisterType -->
+<h3 class="fn" id="qmlRegisterType-1"><a name="qmlRegisterType-1"></a><span class="type">int</span> <span class="name">qmlRegisterType</span>()</h3>
+<p>This is an overloaded function.</p>
+<p>This template function registers the C++ type in the QML system. Instances of this type cannot be created from the QML system.</p>
+<p>This function should be used when the type will not be referenced by name. Specifically, it has to be used for C++ types that are used as the left-hand side of a property binding.</p>
+<p>For example, consider the following two classes:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> Bar : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span>
+  {
+      Q_OBJECT
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> baz READ baz WRITE setBaz NOTIFY bazChanged)
+
+  <span class="keyword">public</span>:
+      Bar() {}
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> baz() <span class="keyword">const</span> { <span class="keyword">return</span> mBaz; }
+
+      <span class="type">void</span> setBaz(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>baz)
+      {
+          <span class="keyword">if</span> (baz <span class="operator">=</span><span class="operator">=</span> mBaz)
+              <span class="keyword">return</span>;
+
+          mBaz <span class="operator">=</span> baz;
+          <span class="keyword">emit</span> bazChanged();
+      }
+
+  <span class="keyword">signals</span>:
+      <span class="type">void</span> bazChanged();
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> mBaz;
+  };
+
+  <span class="keyword">class</span> Foo : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span>
+  {
+      Q_OBJECT
+      Q_PROPERTY(Bar <span class="operator">*</span>bar READ bar CONSTANT FINAL)
+
+  <span class="keyword">public</span>:
+      Foo() {}
+
+      Bar <span class="operator">*</span>bar() { <span class="keyword">return</span> <span class="operator">&amp;</span>mBar; }
+
+  <span class="keyword">private</span>:
+      Bar mBar;
+  };
+
+</pre>
+<p>In QML, we assign a string to the <code>baz</code> property of <code>bar</code>:</p>
+<pre class="cpp">
+
+  Foo {
+      bar<span class="operator">.</span>baz: <span class="string">&quot;abc&quot;</span>
+      Component<span class="operator">.</span>onCompleted: print(bar<span class="operator">.</span>baz)
+  }
+
+</pre>
+<p>For the QML engine to know that the <code>Bar</code> type has a <code>baz</code> property, we have to make <code>Bar</code> known:</p>
+<pre class="cpp">
+
+  qmlRegisterType<span class="operator">&lt;</span>Foo<span class="operator">&gt;</span>(<span class="string">&quot;App&quot;</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;Foo&quot;</span>);
+  qmlRegisterType<span class="operator">&lt;</span>Bar<span class="operator">&gt;</span>();
+
+</pre>
+<p>As the <code>Foo</code> type is instantiated in QML, it must be registered with the version of qmlRegisterType() that takes an import URI.</p>
+<p>Returns the QML type id.</p>
+<p><b>See also </b><a href="qtqml-cppintegration-overview.html#choosing-the-correct-integration-method-between-c-and-qml">Choosing the Correct Integration Method Between C++ and QML</a>.</p>
+<!-- @@@qmlRegisterType -->
+<!-- $$$qmlRegisterType$$$qmlRegisterTypeconstQUrl&constchar*intintconstchar* -->
+<h3 class="fn" id="qmlRegisterType-2"><a name="qmlRegisterType-2"></a><span class="type">int</span> <span class="name">qmlRegisterType</span>(const <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> &amp;<i>url</i>, const <span class="type">char</span> *<i>uri</i>, <span class="type">int</span> <i>versionMajor</i>, <span class="type">int</span> <i>versionMinor</i>, const <span class="type">char</span> *<i>qmlName</i>)</h3>
+<p>This function registers a type in the QML system with the name <i>qmlName</i>, in the library imported from <i>uri</i> having the version number composed from <i>versionMajor</i> and <i>versionMinor</i>. The type is defined by the QML file located at <i>url</i>. The url must be an absolute URL, i.e&#x2e; url.isRelative() == false.</p>
+<p>Normally QML files can be loaded as types directly from other QML files, or using a qmldir file. This function allows registration of files to types from C++ code, such as when the type mapping needs to be procedurally determined at startup.</p>
+<p>Returns -1 if the registration was not successful.</p>
+<!-- @@@qmlRegisterType -->
+<!-- $$$qmlRegisterTypeNotAvailable[overload1]$$$qmlRegisterTypeNotAvailableconstchar*intintconstchar*constQString& -->
+<h3 class="fn" id="qmlRegisterTypeNotAvailable"><a name="qmlRegisterTypeNotAvailable"></a><span class="type">int</span> <span class="name">qmlRegisterTypeNotAvailable</span>(const <span class="type">char</span> *<i>uri</i>, <span class="type">int</span> <i>versionMajor</i>, <span class="type">int</span> <i>versionMinor</i>, const <span class="type">char</span> *<i>qmlName</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>message</i>)</h3>
+<p>This function registers a type in the QML system with the name <i>qmlName</i>, in the type namespace imported from <i>uri</i> having the version number composed from <i>versionMajor</i> and <i>versionMinor</i>, but any attempt to instantiate the type will produce the given error <i>message</i>.</p>
+<p>Normally, the types exported by a plugin should be fixed. However, if a C++ type is not available, you should at least &quot;reserve&quot; the QML type name, and give the user of the unavailable type a meaningful error message.</p>
+<p>Returns the QML type id.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#ifdef NO_GAMES_ALLOWED</span>
+  qmlRegisterTypeNotAvailable(<span class="string">&quot;MinehuntCore&quot;</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="string">&quot;Game&quot;</span><span class="operator">,</span> <span class="string">&quot;Get back to work, slacker!&quot;</span>);
+  <span class="preprocessor">#else</span>
+  qmlRegisterType<span class="operator">&lt;</span>MinehuntGame<span class="operator">&gt;</span>(<span class="string">&quot;MinehuntCore&quot;</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="string">&quot;Game&quot;</span>);
+  <span class="preprocessor">#endif</span>
+
+</pre>
+<p>This will cause any QML which imports the &quot;MinehuntCore&quot; type namespace and attempts to use the type to produce an error message:</p>
+<pre class="cpp">
+
+  fun<span class="operator">.</span>qml: Get back to work<span class="operator">,</span> slacker<span class="operator">!</span>
+     Game {
+     <span class="operator">^</span>
+
+</pre>
+<p>Without this, a generic &quot;Game is not a type&quot; message would be given.</p>
+<p><b>See also </b><a href="qqmlengine.html#qmlRegisterUncreatableType">qmlRegisterUncreatableType</a>() and <a href="qtqml-cppintegration-overview.html#choosing-the-correct-integration-method-between-c-and-qml">Choosing the Correct Integration Method Between C++ and QML</a>.</p>
+<!-- @@@qmlRegisterTypeNotAvailable -->
+<!-- $$$qmlRegisterUncreatableMetaObject[overload1]$$$qmlRegisterUncreatableMetaObjectconstQMetaObject&constchar*intintconstchar*constQString& -->
+<h3 class="fn" id="qmlRegisterUncreatableMetaObject"><a name="qmlRegisterUncreatableMetaObject"></a><span class="type">int</span> <span class="name">qmlRegisterUncreatableMetaObject</span>(const <span class="type"><a href="../qtcore/qmetaobject.html">QMetaObject</a></span> &amp;<i>staticMetaObject</i>, const <span class="type">char</span> *<i>uri</i>, <span class="type">int</span> <i>versionMajor</i>, <span class="type">int</span> <i>versionMinor</i>, const <span class="type">char</span> *<i>qmlName</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>reason</i>)</h3>
+<p>This function registers the <i>staticMetaObject</i> and its extension in the QML system with the name <i>qmlName</i> in the library imported from <i>uri</i> having version number composed from <i>versionMajor</i> and <i>versionMinor</i>.</p>
+<p>An instance of the meta object cannot be created. An error message with the given <i>reason</i> is printed if the user attempts to create it.</p>
+<p>This function is useful for registering <a href="../qtcore/qobject.html#Q_NAMESPACE">Q_NAMESPACE</a> namespaces.</p>
+<p>Returns the QML type id.</p>
+<p>For example:</p>
+<pre class="cpp">
+
+  <span class="keyword">namespace</span> MyNamespace {
+    Q_NAMESPACE
+    <span class="keyword">enum</span> MyEnum {
+        Key1<span class="operator">,</span>
+        Key2<span class="operator">,</span>
+    };
+    Q_ENUMS(MyEnum)
+  }
+
+  <span class="comment">//...</span>
+  qmlRegisterUncreatableMetaObject(MyNamespace<span class="operator">::</span>staticMetaObject<span class="operator">,</span> <span class="string">&quot;io.qt&quot;</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;MyNamespace&quot;</span><span class="operator">,</span> <span class="string">&quot;Access to enums &amp; flags only&quot;</span>);
+
+</pre>
+<p>On the QML side, you can now use the registered enums:</p>
+<pre class="cpp">
+
+  Component<span class="operator">.</span>onCompleted: console<span class="operator">.</span>log(MyNamespace<span class="operator">.</span>Key2)
+
+</pre>
+<p>This function was introduced in  Qt 5.8.</p>
+<!-- @@@qmlRegisterUncreatableMetaObject -->
+<!-- $$$qmlRegisterUncreatableType[overload1]$$$qmlRegisterUncreatableTypeconstchar*intintconstchar*constQString& -->
+<h3 class="fn" id="qmlRegisterUncreatableType"><a name="qmlRegisterUncreatableType"></a><span class="type">int</span> <span class="name">qmlRegisterUncreatableType</span>(const <span class="type">char</span> *<i>uri</i>, <span class="type">int</span> <i>versionMajor</i>, <span class="type">int</span> <i>versionMinor</i>, const <span class="type">char</span> *<i>qmlName</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>message</i>)</h3>
+<p>This template function registers the C++ type in the QML system with the name <i>qmlName</i>, in the library imported from <i>uri</i> having the version number composed from <i>versionMajor</i> and <i>versionMinor</i>.</p>
+<p>While the type has a name and a type, it cannot be created, and the given error <i>message</i> will result if creation is attempted.</p>
+<p>This is useful where the type is only intended for providing attached properties or enum values.</p>
+<p>Returns the QML type id.</p>
+<p><b>See also </b><a href="qqmlengine.html#qmlRegisterTypeNotAvailable">qmlRegisterTypeNotAvailable</a>() and <a href="qtqml-cppintegration-overview.html#choosing-the-correct-integration-method-between-c-and-qml">Choosing the Correct Integration Method Between C++ and QML</a>.</p>
+<!-- @@@qmlRegisterUncreatableType -->
+<!-- $$$qmlTypeId[overload1]$$$qmlTypeIdconstchar*intintconstchar* -->
+<h3 class="fn" id="qmlTypeId"><a name="qmlTypeId"></a><span class="type">int</span> <span class="name">qmlTypeId</span>(const <span class="type">char</span> *<i>uri</i>, <span class="type">int</span> <i>versionMajor</i>, <span class="type">int</span> <i>versionMinor</i>, const <span class="type">char</span> *<i>qmlName</i>)</h3>
+<p>Returns the QML type id of a type that was registered with the name <i>qmlName</i> in a particular <i>uri</i> and a version specified in <i>versionMajor</i> and <i>versionMinor</i>.</p>
+<p>This function returns the same value as the QML type registration functions such as <a href="qqmlengine.html#qmlRegisterType-1">qmlRegisterType</a>() and <a href="qqmlengine.html#qmlRegisterSingletonType">qmlRegisterSingletonType</a>().</p>
+<p>If <i>qmlName</i>, <i>uri</i> and <i>versionMajor</i> match a registered type, but the specified minor version in <i>versionMinor</i> is higher, then the id of the type with the closest minor version is returned.</p>
+<p>Returns -1 if no matching type was found or one of the given parameters was invalid.</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<p><b>See also </b><a href="qqmlengine.html#qmlRegisterType-1">qmlRegisterType</a>() and <a href="qqmlengine.html#qmlRegisterSingletonType">qmlRegisterSingletonType</a>().</p>
+<!-- @@@qmlTypeId -->
+<!-- $$$qmlWarning[overload1]$$$qmlWarningconstQObject* -->
+<h3 class="fn" id="qmlWarning"><a name="qmlWarning"></a><span class="type">QQmlInfo</span> <span class="name">qmlWarning</span>(const <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>object</i>)</h3>
+<p>Prints warning messages that include the file and line number for the specified QML <i>object</i>.</p>
+<p>When QML types produce logging messages, it improves traceability if they include the QML file and line number on which the particular instance was instantiated.</p>
+<p>To include the file and line number, an object must be passed. If the file and line number is not available for that instance (either it was not instantiated by the QML engine or location information is disabled), &quot;unknown location&quot; will be used instead.</p>
+<p>For example,</p>
+<pre class="cpp">
+
+  qmlInfo(object) <span class="operator">&lt;</span><span class="operator">&lt;</span> tr(<span class="string">&quot;property cannot be set to 0&quot;</span>);
+
+</pre>
+<p>prints</p>
+<pre class="cpp plain">
+
+  QML MyCustomType (unknown location): property cannot be set to 0
+
+</pre>
+<p>This function was introduced in  Qt 5.9.</p>
+<p><b>See also </b><a href="qqmlengine.html#qmlDebug">QtQml::qmlDebug</a> and <a href="qqmlengine.html#qmlInfo">QtQml::qmlInfo</a>.</p>
+<!-- @@@qmlWarning -->
+</div>
+<div class="macros">
+<h2>Macro Documentation</h2>
+<!-- $$$QML_DECLARE_TYPE[overload1]$$$QML_DECLARE_TYPE -->
+<h3 class="fn" id="QML_DECLARE_TYPE"><a name="QML_DECLARE_TYPE"></a><span class="name">QML_DECLARE_TYPE</span></h3>
+<p>Equivalent to <code>Q_DECLARE_METATYPE(TYPE *)</code> and <code>Q_DECLARE_METATYPE(QQmlListProperty&lt;TYPE&gt;)</code></p>
+<!-- @@@QML_DECLARE_TYPE -->
+<!-- $$$QML_DECLARE_TYPEINFO[overload1]$$$QML_DECLARE_TYPEINFO -->
+<h3 class="fn" id="QML_DECLARE_TYPEINFO"><a name="QML_DECLARE_TYPEINFO"></a><span class="name">QML_DECLARE_TYPEINFO</span>(<i>Type</i>, <i>Flags</i>)</h3>
+<p>Declares additional properties of the given <i>Type</i> as described by the specified <i>Flags</i>.</p>
+<p>Current the only supported type info is <code>QML_HAS_ATTACHED_PROPERTIES</code> which declares that the <i>Type</i> supports <a href="qtqml-syntax-objectattributes.html#attached-properties-and-attached-signal-handlers">attached properties</a>.</p>
+<!-- @@@QML_DECLARE_TYPEINFO -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

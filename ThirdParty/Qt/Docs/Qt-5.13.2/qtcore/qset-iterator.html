@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qset.qdoc -->
+  <title>iterator Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >iterator</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">iterator Class</h1>
+<span class="small-subtitle">Class iterator is declared in class <a href="qset.html">QSet</a>.<br/></span>
+<!-- $$$iterator-brief -->
+<p>The <a href="qset-iterator.html">QSet::iterator</a> class provides an STL-style non-const iterator for <a href="qset.html">QSet</a>. <a href="#details">More...</a></p>
+<!-- @@@iterator -->
+<p>This class was introduced in  Qt 4.2.</p>
+<ul>
+<li><a href="qset-iterator-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qset-iterator.html#difference_type-typedef">difference_type</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qset-iterator.html#iterator_category-typedef">iterator_category</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qset-iterator.html#pointer-typedef">pointer</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qset-iterator.html#reference-typedef">reference</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qset-iterator.html#value_type-typedef">value_type</a></b></td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qset-iterator.html#iterator-2">iterator</a></b>(const iterator &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qset-iterator.html#iterator">iterator</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> iterator &amp;</td><td class="memItemRight bottomAlign"><b><a href="qset-iterator.html#operator-eq">operator=</a></b>(const iterator &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qset-iterator.html#operator-not-eq">operator!=</a></b>(const iterator &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qset-iterator.html#operator-not-eq-1">operator!=</a></b>(const const_iterator &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const T &amp;</td><td class="memItemRight bottomAlign"><b><a href="qset-iterator.html#operator-2a">operator*</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> iterator </td><td class="memItemRight bottomAlign"><b><a href="qset-iterator.html#operator-2b">operator+</a></b>(int <i>j</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> iterator &amp;</td><td class="memItemRight bottomAlign"><b><a href="qset-iterator.html#operator-2b-2b">operator++</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> iterator </td><td class="memItemRight bottomAlign"><b><a href="qset-iterator.html#operator-2b-2b-1">operator++</a></b>(<i>int</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> iterator &amp;</td><td class="memItemRight bottomAlign"><b><a href="qset-iterator.html#operator-2b-eq">operator+=</a></b>(int <i>j</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> iterator </td><td class="memItemRight bottomAlign"><b><a href="qset-iterator.html#operator-">operator-</a></b>(int <i>j</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> iterator &amp;</td><td class="memItemRight bottomAlign"><b><a href="qset-iterator.html#operator--">operator--</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> iterator </td><td class="memItemRight bottomAlign"><b><a href="qset-iterator.html#operator---1">operator--</a></b>(<i>int</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> iterator &amp;</td><td class="memItemRight bottomAlign"><b><a href="qset-iterator.html#operator--eq">operator-=</a></b>(int <i>j</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const T *</td><td class="memItemRight bottomAlign"><b><a href="qset-iterator.html#operator--gt">operator-&gt;</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qset-iterator.html#operator-eq-eq">operator==</a></b>(const iterator &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qset-iterator.html#operator-eq-eq-1">operator==</a></b>(const const_iterator &amp;<i>other</i>) const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$iterator-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qset.html">QSet</a> features both <a href="containers.html#stl-style-iterators">STL-style iterators</a> and <a href="containers.html#java-style-iterators">Java-style iterators</a>. The STL-style iterators are more low-level and more cumbersome to use; on the other hand, they are slightly faster and, for developers who already know STL, have the advantage of familiarity.</p>
+<p><a href="qset.html">QSet</a>&lt;T&gt;::iterator allows you to iterate over a <a href="qset.html">QSet</a> and to remove items (using <a href="qset.html#erase">QSet::erase</a>()) while you iterate. (<a href="qset.html">QSet</a> doesn't let you <i>modify</i> a value through an iterator, because that would potentially require moving the value in the internal hash table used by <a href="qset.html">QSet</a>.) If you want to iterate over a const <a href="qset.html">QSet</a>, you should use <a href="qset-const-iterator.html">QSet::const_iterator</a>. It is generally good practice to use <a href="qset-const-iterator.html">QSet::const_iterator</a> on a non-const <a href="qset.html">QSet</a> as well, unless you need to change the <a href="qset.html">QSet</a> through the iterator. Const iterators are slightly faster, and can improve code readability.</p>
+<p>The default <a href="qset-iterator.html">QSet::iterator</a> constructor creates an uninitialized iterator. You must initialize it using a function like <a href="qset.html#begin">QSet::begin</a>(), <a href="qset.html#end">QSet::end</a>(), or <a href="qset.html#insert">QSet::insert</a>() before you can start iterating. Here's a typical loop that prints all the items stored in a set:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qset.html#QSet">QSet</a></span><span class="operator">&lt;</span><span class="type"><a href="qstring.html">QString</a></span><span class="operator">&gt;</span> set;
+  set <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;January&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;February&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;December&quot;</span>;
+
+  <span class="type"><a href="qset.html#QSet">QSet</a></span><span class="operator">&lt;</span><span class="type"><a href="qstring.html">QString</a></span><span class="operator">&gt;</span><span class="operator">::</span>iterator i;
+  <span class="keyword">for</span> (i <span class="operator">=</span> set<span class="operator">.</span>begin(); i <span class="operator">!</span><span class="operator">=</span> set<span class="operator">.</span>end(); <span class="operator">+</span><span class="operator">+</span>i)
+      <a href="qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="operator">*</span>i;
+
+</pre>
+<p>Here's a loop that removes certain items (all those that start with 'J') from a set while iterating:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qset.html#QSet">QSet</a></span><span class="operator">&lt;</span><span class="type"><a href="qstring.html">QString</a></span><span class="operator">&gt;</span> set;
+  set <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;January&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;February&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;December&quot;</span>;
+
+  <span class="type"><a href="qset.html#QSet">QSet</a></span><span class="operator">&lt;</span><span class="type"><a href="qstring.html">QString</a></span><span class="operator">&gt;</span><span class="operator">::</span>iterator i <span class="operator">=</span> set<span class="operator">.</span>begin();
+  <span class="keyword">while</span> (i <span class="operator">!</span><span class="operator">=</span> set<span class="operator">.</span>end()) {
+      <span class="keyword">if</span> ((<span class="operator">*</span>i)<span class="operator">.</span>startsWith(<span class="char">'J'</span>)) {
+          i <span class="operator">=</span> set<span class="operator">.</span>erase(i);
+      } <span class="keyword">else</span> {
+          <span class="operator">+</span><span class="operator">+</span>i;
+      }
+  }
+
+</pre>
+<p>STL-style iterators can be used as arguments to <a href="qtalgorithms.html">generic algorithms</a>. For example, here's how to find an item in the set using the qFind() algorithm:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qset.html#QSet">QSet</a></span><span class="operator">&lt;</span><span class="type"><a href="qstring.html">QString</a></span><span class="operator">&gt;</span> set;
+  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  <span class="type"><a href="qset.html#QSet">QSet</a></span><span class="operator">&lt;</span><span class="type"><a href="qstring.html">QString</a></span><span class="operator">&gt;</span><span class="operator">::</span>iterator it <span class="operator">=</span> <a href="qtalgorithms-obsolete.html#qFind">qFind</a>(set<span class="operator">.</span>begin()<span class="operator">,</span> set<span class="operator">.</span>end()<span class="operator">,</span> <span class="string">&quot;Jeanette&quot;</span>);
+  <span class="keyword">if</span> (it <span class="operator">!</span><span class="operator">=</span> set<span class="operator">.</span>end())
+      cout <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Found Jeanette&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> endl;
+
+</pre>
+<p>Multiple iterators can be used on the same set.</p>
+<p><b>Warning:</b> Iterators on implicitly shared containers do not work exactly like STL-iterators. You should avoid copying a container while iterators are active on that container. For more information, read <a href="containers.html#implicit-sharing-iterator-problem">Implicit sharing iterator problem</a>.</p>
+</div>
+<p><b>See also </b><a href="qset-const-iterator.html">QSet::const_iterator</a> and <a href="qmutablesetiterator.html">QMutableSetIterator</a>.</p>
+<!-- @@@iterator -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="operator--eq"><a name="operator--eq"></a><span class="type"><a href="qset-iterator.html#iterator">iterator</a></span> &amp;iterator::<span class="name">operator-=</span>(<span class="type">int</span> <i>j</i>)</h3>
+<p>Makes the iterator go back by <i>j</i> items. (If <i>j</i> is negative, the iterator goes forward.)</p>
+<p>This operation can be slow for large <i>j</i> values.</p>
+<p><b>See also </b><a href="qset-iterator.html#operator-2b-eq">operator+=</a>() and <a href="qset-iterator.html#operator-">operator-</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="operator-2b-eq"><a name="operator-2b-eq"></a><span class="type"><a href="qset-iterator.html#iterator">iterator</a></span> &amp;iterator::<span class="name">operator+=</span>(<span class="type">int</span> <i>j</i>)</h3>
+<p>Advances the iterator by <i>j</i> items. (If <i>j</i> is negative, the iterator goes backward.)</p>
+<p>This operation can be slow for large <i>j</i> values.</p>
+<p><b>See also </b><a href="qset-iterator.html#operator--eq">operator-=</a>() and <a href="qset-iterator.html#operator-2b">operator+</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="operator-"><a name="operator-"></a><span class="type"><a href="qset-iterator.html#iterator">iterator</a></span> iterator::<span class="name">operator-</span>(<span class="type">int</span> <i>j</i>) const</h3>
+<p>Returns an iterator to the item at <i>j</i> positions backward from this iterator. (If <i>j</i> is negative, the iterator goes forward.)</p>
+<p>This operation can be slow for large <i>j</i> values.</p>
+<p><b>See also </b><a href="qset-iterator.html#operator-2b">operator+</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="operator-2b"><a name="operator-2b"></a><span class="type"><a href="qset-iterator.html#iterator">iterator</a></span> iterator::<span class="name">operator+</span>(<span class="type">int</span> <i>j</i>) const</h3>
+<p>Returns an iterator to the item at <i>j</i> positions forward from this iterator. (If <i>j</i> is negative, the iterator goes backward.)</p>
+<p>This operation can be slow for large <i>j</i> values.</p>
+<p><b>See also </b><a href="qset-iterator.html#operator-">operator-</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="operator---1"><a name="operator---1"></a><span class="type"><a href="qset-iterator.html#iterator">iterator</a></span> iterator::<span class="name">operator--</span>(<i>int</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>The postfix -- operator (<code>it--</code>) makes the preceding item current and returns an iterator to the previously current item.</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="operator--"><a name="operator--"></a><span class="type"><a href="qset-iterator.html#iterator">iterator</a></span> &amp;iterator::<span class="name">operator--</span>()</h3>
+<p>The prefix -- operator (<code>--it</code>) makes the preceding item current and returns an iterator to the new current item.</p>
+<p>Calling this function on <a href="qset.html#begin">QSet::begin</a>() leads to undefined results.</p>
+<p><b>See also </b><a href="qset-iterator.html#operator-2b-2b">operator++</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="operator-2b-2b-1"><a name="operator-2b-2b-1"></a><span class="type"><a href="qset-iterator.html#iterator">iterator</a></span> iterator::<span class="name">operator++</span>(<i>int</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>The postfix ++ operator (<code>it++</code>) advances the iterator to the next item in the set and returns an iterator to the previously current item.</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="operator-2b-2b"><a name="operator-2b-2b"></a><span class="type"><a href="qset-iterator.html#iterator">iterator</a></span> &amp;iterator::<span class="name">operator++</span>()</h3>
+<p>The prefix ++ operator (<code>++it</code>) advances the iterator to the next item in the set and returns an iterator to the new current item.</p>
+<p>Calling this function on <a href="qset.html">QSet</a>&lt;T&gt;::constEnd() leads to undefined results.</p>
+<p><b>See also </b><a href="qset-iterator.html#operator--">operator--</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> iterator::<span class="name">operator!=</span>(const <span class="type"><a href="qset-iterator.html#iterator">iterator</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns <code>true</code> if <i>other</i> points to a different item than this iterator; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qset-iterator.html#operator-eq-eq">operator==</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<div class="fngroup">
+<h3 class="fn fngroupitem" id="operator-eq-eq-1"><a name="operator-eq-eq-1"></a><span class="type">bool</span> iterator::<span class="name">operator==</span>(const <span class="type"><a href="qset-const-iterator.html">const_iterator</a></span> &amp;<i>other</i>) const</h3><h3 class="fn fngroupitem" id="operator-not-eq-1"><a name="operator-not-eq-1"></a><span class="type">bool</span> iterator::<span class="name">operator!=</span>(const <span class="type"><a href="qset-const-iterator.html">const_iterator</a></span> &amp;<i>other</i>) const</h3></div>
+<p>This is an overloaded function.</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> iterator::<span class="name">operator==</span>(const <span class="type"><a href="qset-iterator.html#iterator">iterator</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns <code>true</code> if <i>other</i> points to the same item as this iterator; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qset-iterator.html#operator-not-eq">operator!=</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="operator--gt"><a name="operator--gt"></a>const <span class="type">T</span> *iterator::<span class="name">operator-&gt;</span>() const</h3>
+<p>Returns a pointer to the current item.</p>
+<p><b>See also </b><a href="qset-iterator.html#operator-2a">operator*</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="operator-2a"><a name="operator-2a"></a>const <span class="type">T</span> &amp;iterator::<span class="name">operator*</span>() const</h3>
+<p>Returns a reference to the current item.</p>
+<p><b>See also </b><a href="qset-iterator.html#operator--gt">operator-&gt;</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qset-iterator.html#iterator">iterator</a></span> &amp;iterator::<span class="name">operator=</span>(const <span class="type"><a href="qset-iterator.html#iterator">iterator</a></span> &amp;<i>other</i>)</h3>
+<p>Assigns <i>other</i> to this iterator.</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="iterator-2"><a name="iterator-2"></a>iterator::<span class="name">iterator</span>(const <span class="type"><a href="qset-iterator.html#iterator">iterator</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a copy of <i>other</i>.</p>
+<!-- @@@ -->
+<!-- $$$ -->
+
+<p>Synonyms for <i>std::bidirectional_iterator_tag</i> indicating these iterators are bidirectional iterators.</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="iterator"><a name="iterator"></a>iterator::<span class="name">iterator</span>()</h3>
+<p>Constructs an uninitialized iterator.</p>
+<p>Functions like operator*() and operator++() should not be called on an uninitialized iterator. Use operator=() to assign a value to it before using it.</p>
+<p><b>See also </b><a href="qset.html#begin">QSet::begin</a>() and <a href="qset.html#end">QSet::end</a>().</p>
+<!-- @@@ -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

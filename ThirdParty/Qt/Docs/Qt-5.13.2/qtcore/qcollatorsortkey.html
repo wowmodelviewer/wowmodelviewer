@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcollator.cpp -->
+  <title>QCollatorSortKey Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QCollatorSortKey</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCollatorSortKey Class</h1>
+<!-- $$$QCollatorSortKey-brief -->
+<p>The <a href="qcollatorsortkey.html">QCollatorSortKey</a> class can be used to speed up string collation. <a href="#details">More...</a></p>
+<!-- @@@QCollatorSortKey -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QCollatorSortKey&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.2</td></tr></table></div><p>This class was introduced in  Qt 5.2.</p>
+<ul>
+<li><a href="qcollatorsortkey-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcollatorsortkey.html#QCollatorSortKey">QCollatorSortKey</a></b>(const QCollatorSortKey &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCollatorSortKey &amp;</td><td class="memItemRight bottomAlign"><b><a href="qcollatorsortkey.html#operator-eq-1">operator=</a></b>(QCollatorSortKey &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCollatorSortKey &amp;</td><td class="memItemRight bottomAlign"><b><a href="qcollatorsortkey.html#operator-eq">operator=</a></b>(const QCollatorSortKey &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcollatorsortkey.html#dtor.QCollatorSortKey">~QCollatorSortKey</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcollatorsortkey.html#compare">compare</a></b>(const QCollatorSortKey &amp;<i>otherKey</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcollatorsortkey.html#swap">swap</a></b>(QCollatorSortKey &amp;<i>other</i>)</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcollatorsortkey.html#operator-lt">operator&lt;</a></b>(const QCollatorSortKey &amp;<i>lhs</i>, const QCollatorSortKey &amp;<i>rhs</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCollatorSortKey-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qcollatorsortkey.html">QCollatorSortKey</a> class is always created by <a href="qcollator.html#sortKey">QCollator::sortKey</a>() and is used for fast strings collation, for example when collating many strings.</p>
+</div>
+<p><b>See also </b><a href="qcollator.html">QCollator</a> and <a href="qcollator.html#sortKey">QCollator::sortKey</a>().</p>
+<!-- @@@QCollatorSortKey -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QCollatorSortKey[overload1]$$$QCollatorSortKeyconstQCollatorSortKey& -->
+<h3 class="fn" id="QCollatorSortKey"><a name="QCollatorSortKey"></a>QCollatorSortKey::<span class="name">QCollatorSortKey</span>(const <span class="type"><a href="qcollatorsortkey.html#QCollatorSortKey">QCollatorSortKey</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a copy of the <i>other</i> collator key.</p>
+<!-- @@@QCollatorSortKey -->
+<!-- $$$operator=$$$operator=QCollatorSortKey&& -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type"><a href="qcollatorsortkey.html#QCollatorSortKey">QCollatorSortKey</a></span> &amp;QCollatorSortKey::<span class="name">operator=</span>(<span class="type"><a href="qcollatorsortkey.html#QCollatorSortKey">QCollatorSortKey</a></span> &amp;&amp;<i>other</i>)</h3>
+<p>Move-assigns <i>other</i> to this collator key.</p>
+<!-- @@@operator= -->
+<!-- $$$operator=[overload1]$$$operator=constQCollatorSortKey& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qcollatorsortkey.html#QCollatorSortKey">QCollatorSortKey</a></span> &amp;QCollatorSortKey::<span class="name">operator=</span>(const <span class="type"><a href="qcollatorsortkey.html#QCollatorSortKey">QCollatorSortKey</a></span> &amp;<i>other</i>)</h3>
+<p>Assigns <i>other</i> to this collator key.</p>
+<!-- @@@operator= -->
+<!-- $$$~QCollatorSortKey[overload1]$$$~QCollatorSortKey -->
+<h3 class="fn" id="dtor.QCollatorSortKey"><a name="dtor.QCollatorSortKey"></a>QCollatorSortKey::<span class="name">~QCollatorSortKey</span>()</h3>
+<p>Destroys the collator key.</p>
+<!-- @@@~QCollatorSortKey -->
+<!-- $$$compare[overload1]$$$compareconstQCollatorSortKey& -->
+<h3 class="fn" id="compare"><a name="compare"></a><span class="type">int</span> QCollatorSortKey::<span class="name">compare</span>(const <span class="type"><a href="qcollatorsortkey.html#QCollatorSortKey">QCollatorSortKey</a></span> &amp;<i>otherKey</i>) const</h3>
+<p>Compares the key to <i>otherKey</i>. Returns a negative value if the key is less than <i>otherKey</i>, 0 if the key is equal to <i>otherKey</i> or a positive value if the key is greater than <i>otherKey</i>.</p>
+<p><b>See also </b><a href="qcollatorsortkey.html#operator-lt">operator&lt;</a>().</p>
+<!-- @@@compare -->
+<!-- $$$swap[overload1]$$$swapQCollatorSortKey& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QCollatorSortKey::<span class="name">swap</span>(<span class="type"><a href="qcollatorsortkey.html#QCollatorSortKey">QCollatorSortKey</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps this collator key with <i>other</i>.</p>
+<!-- @@@swap -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$operator<[overload1]$$$operator<constQCollatorSortKey&constQCollatorSortKey& -->
+<h3 class="fn" id="operator-lt"><a name="operator-lt"></a><span class="type">bool</span> <span class="name">operator&lt;</span>(const <span class="type"><a href="qcollatorsortkey.html#QCollatorSortKey">QCollatorSortKey</a></span> &amp;<i>lhs</i>, const <span class="type"><a href="qcollatorsortkey.html#QCollatorSortKey">QCollatorSortKey</a></span> &amp;<i>rhs</i>)</h3>
+<p>According to the <a href="qcollator.html">QCollator</a> that created the keys, returns <code>true</code> if <i>lhs</i> should be sorted before <i>rhs</i>; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qcollatorsortkey.html#compare">QCollatorSortKey::compare</a>().</p>
+<!-- @@@operator< -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

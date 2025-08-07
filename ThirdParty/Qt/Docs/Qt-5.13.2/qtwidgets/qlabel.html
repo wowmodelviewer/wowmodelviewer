@@ -1,0 +1,521 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qlabel.cpp -->
+  <title>QLabel Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QLabel</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QLabel Class</h1>
+<!-- $$$QLabel-brief -->
+<p>The <a href="qlabel.html">QLabel</a> widget provides a text or image display. <a href="#details">More...</a></p>
+<!-- @@@QLabel -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QLabel&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qframe.html">QFrame</a></td></tr></table></div><ul>
+<li><a href="qlabel-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qlabel.html#alignment-prop">alignment</a></b> : Qt::Alignment</li>
+<li class="fn"><b><a href="qlabel.html#hasSelectedText-prop">hasSelectedText</a></b> : const bool</li>
+<li class="fn"><b><a href="qlabel.html#indent-prop">indent</a></b> : int</li>
+<li class="fn"><b><a href="qlabel.html#margin-prop">margin</a></b> : int</li>
+<li class="fn"><b><a href="qlabel.html#openExternalLinks-prop">openExternalLinks</a></b> : bool</li>
+<li class="fn"><b><a href="qlabel.html#pixmap-prop">pixmap</a></b> : QPixmap</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qlabel.html#scaledContents-prop">scaledContents</a></b> : bool</li>
+<li class="fn"><b><a href="qlabel.html#selectedText-prop">selectedText</a></b> : const QString</li>
+<li class="fn"><b><a href="qlabel.html#text-prop">text</a></b> : QString</li>
+<li class="fn"><b><a href="qlabel.html#textFormat-prop">textFormat</a></b> : Qt::TextFormat</li>
+<li class="fn"><b><a href="qlabel.html#textInteractionFlags-prop">textInteractionFlags</a></b> : Qt::TextInteractionFlags</li>
+<li class="fn"><b><a href="qlabel.html#wordWrap-prop">wordWrap</a></b> : bool</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#QLabel-1">QLabel</a></b>(const QString &amp;<i>text</i>, QWidget *<i>parent</i> = nullptr, Qt::WindowFlags <i>f</i> = Qt::WindowFlags())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#QLabel">QLabel</a></b>(QWidget *<i>parent</i> = nullptr, Qt::WindowFlags <i>f</i> = Qt::WindowFlags())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#dtor.QLabel">~QLabel</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::Alignment </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#alignment-prop">alignment</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWidget *</td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#buddy">buddy</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#scaledContents-prop">hasScaledContents</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#hasSelectedText-prop">hasSelectedText</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#indent-prop">indent</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#margin-prop">margin</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMovie *</td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#movie">movie</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#openExternalLinks-prop">openExternalLinks</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QPicture *</td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#picture">picture</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QPixmap *</td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#pixmap-prop">pixmap</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#selectedText-prop">selectedText</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#selectionStart">selectionStart</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#alignment-prop">setAlignment</a></b>(<i>Qt::Alignment</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#setBuddy">setBuddy</a></b>(QWidget *<i>buddy</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#indent-prop">setIndent</a></b>(<i>int</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#margin-prop">setMargin</a></b>(<i>int</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#openExternalLinks-prop">setOpenExternalLinks</a></b>(bool <i>open</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#scaledContents-prop">setScaledContents</a></b>(<i>bool</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#setSelection">setSelection</a></b>(int <i>start</i>, int <i>length</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#textFormat-prop">setTextFormat</a></b>(<i>Qt::TextFormat</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#textInteractionFlags-prop">setTextInteractionFlags</a></b>(Qt::TextInteractionFlags <i>flags</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#wordWrap-prop">setWordWrap</a></b>(bool <i>on</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#text-prop">text</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::TextFormat </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#textFormat-prop">textFormat</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::TextInteractionFlags </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#textInteractionFlags-prop">textInteractionFlags</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#wordWrap-prop">wordWrap</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#heightForWidth">heightForWidth</a></b>(int <i>w</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSize </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#minimumSizeHint">minimumSizeHint</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSize </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#sizeHint">sizeHint</a></b>() const override</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#clear">clear</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#setMovie">setMovie</a></b>(QMovie *<i>movie</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#setNum-1">setNum</a></b>(double <i>num</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#setNum">setNum</a></b>(int <i>num</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#setPicture">setPicture</a></b>(const QPicture &amp;<i>picture</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#pixmap-prop">setPixmap</a></b>(<i>const QPixmap &amp;</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#text-prop">setText</a></b>(<i>const QString &amp;</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#linkActivated">linkActivated</a></b>(const QString &amp;<i>link</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#linkHovered">linkHovered</a></b>(const QString &amp;<i>link</i>)</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#changeEvent">changeEvent</a></b>(QEvent *<i>ev</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#contextMenuEvent">contextMenuEvent</a></b>(QContextMenuEvent *<i>ev</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#event">event</a></b>(QEvent *<i>e</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#focusInEvent">focusInEvent</a></b>(QFocusEvent *<i>ev</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#focusNextPrevChild">focusNextPrevChild</a></b>(bool <i>next</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#focusOutEvent">focusOutEvent</a></b>(QFocusEvent *<i>ev</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#keyPressEvent">keyPressEvent</a></b>(QKeyEvent *<i>ev</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#mouseMoveEvent">mouseMoveEvent</a></b>(QMouseEvent *<i>ev</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#mousePressEvent">mousePressEvent</a></b>(QMouseEvent *<i>ev</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#mouseReleaseEvent">mouseReleaseEvent</a></b>(QMouseEvent *<i>ev</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qlabel.html#paintEvent">paintEvent</a></b>(<i>QPaintEvent *</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QLabel-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p class="centerAlign"><img src="images/windows-label.png" alt="" /></p><p><a href="qlabel.html">QLabel</a> is used for displaying text or an image. No user interaction functionality is provided. The visual appearance of the label can be configured in various ways, and it can be used for specifying a focus mnemonic key for another widget.</p>
+<p>A <a href="qlabel.html">QLabel</a> can contain any of the following content types:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Content</th><th >Setting</th></tr></thead>
+<tr valign="top" class="odd"><td >Plain text</td><td >Pass a <a href="../qtcore/qstring.html">QString</a> to <a href="qlabel.html#text-prop">setText</a>().</td></tr>
+<tr valign="top" class="even"><td >Rich text</td><td >Pass a <a href="../qtcore/qstring.html">QString</a> that contains rich text to <a href="qlabel.html#text-prop">setText</a>().</td></tr>
+<tr valign="top" class="odd"><td >A pixmap</td><td >Pass a <a href="../qtgui/qpixmap.html">QPixmap</a> to <a href="qlabel.html#pixmap-prop">setPixmap</a>().</td></tr>
+<tr valign="top" class="even"><td >A movie</td><td >Pass a <a href="../qtgui/qmovie.html">QMovie</a> to <a href="qlabel.html#setMovie">setMovie</a>().</td></tr>
+<tr valign="top" class="odd"><td >A number</td><td >Pass an <i>int</i> or a <i>double</i> to <a href="qlabel.html#setNum">setNum</a>(), which converts the number to plain text.</td></tr>
+<tr valign="top" class="even"><td >Nothing</td><td >The same as an empty plain text. This is the default. Set by <a href="qlabel.html#clear">clear</a>().</td></tr>
+</table></div>
+<p><b>Warning:</b> When passing a <a href="../qtcore/qstring.html">QString</a> to the constructor or calling <a href="qlabel.html#text-prop">setText</a>(), make sure to sanitize your input, as <a href="qlabel.html">QLabel</a> tries to guess whether it displays the text as plain text or as rich text, a subset of HTML 4 markup. You may want to call <a href="qlabel.html#textFormat-prop">setTextFormat</a>() explicitly, e.g&#x2e; in case you expect the text to be in plain format but cannot control the text source (for instance when displaying data loaded from the Web).</p>
+<p>When the content is changed using any of these functions, any previous content is cleared.</p>
+<p>By default, labels display <a href="stylesheet-reference.html#alignment">left-aligned, vertically-centered</a> text and images, where any tabs in the text to be displayed are <a href="../qtcore/qt.html#TextFlag-enum">automatically expanded</a>. However, the look of a <a href="qlabel.html">QLabel</a> can be adjusted and fine-tuned in several ways.</p>
+<p>The positioning of the content within the <a href="qlabel.html">QLabel</a> widget area can be tuned with <a href="qlabel.html#alignment-prop">setAlignment</a>() and <a href="qlabel.html#indent-prop">setIndent</a>(). Text content can also wrap lines along word boundaries with <a href="qlabel.html#wordWrap-prop">setWordWrap</a>(). For example, this code sets up a sunken panel with a two-line text in the bottom right corner (both lines being flush with the right side of the label):</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qlabel.html#QLabel">QLabel</a></span> <span class="operator">*</span>label <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html#QLabel">QLabel</a></span>(<span class="keyword">this</span>);
+  label<span class="operator">-</span><span class="operator">&gt;</span>setFrameStyle(<span class="type"><a href="qframe.html#QFrame">QFrame</a></span><span class="operator">::</span>Panel <span class="operator">|</span> <span class="type"><a href="qframe.html#QFrame">QFrame</a></span><span class="operator">::</span>Sunken);
+  label<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="string">&quot;first line\nsecond line&quot;</span>);
+  label<span class="operator">-</span><span class="operator">&gt;</span>setAlignment(<span class="type">Qt</span><span class="operator">::</span>AlignBottom <span class="operator">|</span> <span class="type">Qt</span><span class="operator">::</span>AlignRight);
+
+</pre>
+<p>The properties and functions <a href="qlabel.html">QLabel</a> inherits from <a href="qframe.html">QFrame</a> can also be used to specify the widget frame to be used for any given label.</p>
+<p>A <a href="qlabel.html">QLabel</a> is often used as a label for an interactive widget. For this use <a href="qlabel.html">QLabel</a> provides a useful mechanism for adding an mnemonic (see <a href="../qtgui/qkeysequence.html">QKeySequence</a>) that will set the keyboard focus to the other widget (called the <a href="qlabel.html">QLabel</a>'s &quot;buddy&quot;). For example:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qlineedit.html">QLineEdit</a></span> <span class="operator">*</span>phoneEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlineedit.html">QLineEdit</a></span>(<span class="keyword">this</span>);
+  <span class="type"><a href="qlabel.html#QLabel">QLabel</a></span> <span class="operator">*</span>phoneLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html#QLabel">QLabel</a></span>(<span class="string">&quot;&amp;Phone:&quot;</span><span class="operator">,</span> <span class="keyword">this</span>);
+  phoneLabel<span class="operator">-</span><span class="operator">&gt;</span>setBuddy(phoneEdit);
+
+</pre>
+<p>In this example, keyboard focus is transferred to the label's buddy (the <a href="qlineedit.html">QLineEdit</a>) when the user presses Alt+P. If the buddy was a button (inheriting from <a href="qabstractbutton.html">QAbstractButton</a>), triggering the mnemonic would emulate a button click.</p>
+</div>
+<p><b>See also </b><a href="qlineedit.html">QLineEdit</a>, <a href="qtextedit.html">QTextEdit</a>, <a href="../qtgui/qpixmap.html">QPixmap</a>, <a href="../qtgui/qmovie.html">QMovie</a>, and <a href="guibooks.html#fowler">GUI Design Handbook: Label</a>.</p>
+<!-- @@@QLabel -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$alignment-prop$$$alignment$$$setAlignmentQt::Alignment -->
+<h3 class="fn" id="alignment-prop"><a name="alignment-prop"></a><span class="name">alignment</span> : <span class="type"><a href="../qtcore/qt.html#AlignmentFlag-enum">Qt::Alignment</a></span></h3>
+<p>This property holds the alignment of the label's contents</p>
+<p>By default, the contents of the label are left-aligned and vertically-centered.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt::Alignment </td><td class="memItemRight bottomAlign"><span class="name"><b>alignment</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setAlignment</b></span>(<i>Qt::Alignment</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qlabel.html#text-prop">text</a>.</p>
+<!-- @@@alignment -->
+<!-- $$$hasSelectedText-prop$$$hasSelectedText -->
+<h3 class="fn" id="hasSelectedText-prop"><a name="hasSelectedText-prop"></a><span class="name">hasSelectedText</span> : const <span class="type">bool</span></h3>
+<p>This property holds whether there is any text selected</p>
+<p>hasSelectedText() returns <code>true</code> if some or all of the text has been selected by the user; otherwise returns <code>false</code>.</p>
+<p>By default, this property is <code>false</code>.</p>
+<p><b>Note:</b> The <a href="qlabel.html#textInteractionFlags-prop">textInteractionFlags</a> set on the label need to include either TextSelectableByMouse or TextSelectableByKeyboard.</p>
+<p>This property was introduced in  Qt 4.7.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>hasSelectedText</b></span>() const</td></tr>
+</table></div>
+<p><b>See also </b><a href="qlabel.html#selectedText-prop">selectedText</a>().</p>
+<!-- @@@hasSelectedText -->
+<!-- $$$indent-prop$$$indent$$$setIndentint -->
+<h3 class="fn" id="indent-prop"><a name="indent-prop"></a><span class="name">indent</span> : <span class="type">int</span></h3>
+<p>This property holds the label's text indent in pixels</p>
+<p>If a label displays text, the indent applies to the left edge if <a href="qlabel.html#alignment-prop">alignment</a>() is <a href="../qtcore/qt.html#AlignmentFlag-enum">Qt::AlignLeft</a>, to the right edge if <a href="qlabel.html#alignment-prop">alignment</a>() is <a href="../qtcore/qt.html#AlignmentFlag-enum">Qt::AlignRight</a>, to the top edge if <a href="qlabel.html#alignment-prop">alignment</a>() is <a href="../qtcore/qt.html#AlignmentFlag-enum">Qt::AlignTop</a>, and to the bottom edge if <a href="qlabel.html#alignment-prop">alignment</a>() is <a href="../qtcore/qt.html#AlignmentFlag-enum">Qt::AlignBottom</a>.</p>
+<p>If indent is negative, or if no indent has been set, the label computes the effective indent as follows: If <a href="qframe.html#frameWidth-prop">frameWidth</a>() is 0, the effective indent becomes 0. If <a href="qframe.html#frameWidth-prop">frameWidth</a>() is greater than 0, the effective indent becomes half the width of the &quot;x&quot; character of the widget's current <a href="qwidget.html#font-prop">font</a>().</p>
+<p>By default, the indent is -1, meaning that an effective indent is calculating in the manner described above.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>indent</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setIndent</b></span>(<i>int</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="stylesheet-reference.html#alignment">alignment</a>, <a href="qlabel.html#margin-prop">margin</a>, <a href="qframe.html#frameWidth-prop">frameWidth</a>(), and <a href="qwidget.html#font-prop">font</a>().</p>
+<!-- @@@indent -->
+<!-- $$$margin-prop$$$margin$$$setMarginint -->
+<h3 class="fn" id="margin-prop"><a name="margin-prop"></a><span class="name">margin</span> : <span class="type">int</span></h3>
+<p>This property holds the width of the margin</p>
+<p>The margin is the distance between the innermost pixel of the frame and the outermost pixel of contents.</p>
+<p>The default margin is 0.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>margin</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setMargin</b></span>(<i>int</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qlabel.html#indent-prop">indent</a>.</p>
+<!-- @@@margin -->
+<!-- $$$openExternalLinks-prop$$$openExternalLinks$$$setOpenExternalLinksbool -->
+<h3 class="fn" id="openExternalLinks-prop"><a name="openExternalLinks-prop"></a><span class="name">openExternalLinks</span> : <span class="type">bool</span></h3>
+<p>Specifies whether <a href="qlabel.html">QLabel</a> should automatically open links using <a href="../qtgui/qdesktopservices.html#openUrl">QDesktopServices::openUrl</a>() instead of emitting the <a href="qlabel.html#linkActivated">linkActivated</a>() signal.</p>
+<p><b>Note:</b> The <a href="qlabel.html#textInteractionFlags-prop">textInteractionFlags</a> set on the label need to include either LinksAccessibleByMouse or LinksAccessibleByKeyboard.</p>
+<p>The default value is false.</p>
+<p>This property was introduced in  Qt 4.2.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>openExternalLinks</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setOpenExternalLinks</b></span>(bool <i>open</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qlabel.html#textInteractionFlags-prop">textInteractionFlags</a>().</p>
+<!-- @@@openExternalLinks -->
+<!-- $$$pixmap-prop$$$pixmap$$$setPixmapconstQPixmap& -->
+<h3 class="fn" id="pixmap-prop"><a name="pixmap-prop"></a><span class="name">pixmap</span> : <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span></h3>
+<p>This property holds the label's pixmap</p>
+<p>If no pixmap has been set this will return nullptr.</p>
+<p>Setting the pixmap clears any previous content. The buddy shortcut, if any, is disabled.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> const QPixmap *</td><td class="memItemRight bottomAlign"><span class="name"><b>pixmap</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setPixmap</b></span>(<i>const QPixmap &amp;</i>)</td></tr>
+</table></div>
+<!-- @@@pixmap -->
+<!-- $$$scaledContents-prop$$$hasScaledContents$$$setScaledContentsbool -->
+<h3 class="fn" id="scaledContents-prop"><a name="scaledContents-prop"></a><span class="name">scaledContents</span> : <span class="type">bool</span></h3>
+<p>This property holds whether the label will scale its contents to fill all available space.</p>
+<p>When enabled and the label shows a pixmap, it will scale the pixmap to fill the available space.</p>
+<p>This property's default is false.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>hasScaledContents</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setScaledContents</b></span>(<i>bool</i>)</td></tr>
+</table></div>
+<!-- @@@scaledContents -->
+<!-- $$$selectedText-prop$$$selectedText -->
+<h3 class="fn" id="selectedText-prop"><a name="selectedText-prop"></a><span class="name">selectedText</span> : const <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>This property holds the selected text</p>
+<p>If there is no selected text this property's value is an empty string.</p>
+<p>By default, this property contains an empty string.</p>
+<p><b>Note:</b> The <a href="qlabel.html#textInteractionFlags-prop">textInteractionFlags</a> set on the label need to include either TextSelectableByMouse or TextSelectableByKeyboard.</p>
+<p>This property was introduced in  Qt 4.7.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>selectedText</b></span>() const</td></tr>
+</table></div>
+<p><b>See also </b><a href="qlabel.html#hasSelectedText-prop">hasSelectedText</a>().</p>
+<!-- @@@selectedText -->
+<!-- $$$text-prop$$$text$$$setTextconstQString& -->
+<h3 class="fn" id="text-prop"><a name="text-prop"></a><span class="name">text</span> : <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>This property holds the label's text</p>
+<p>If no text has been set this will return an empty string. Setting the text clears any previous content.</p>
+<p>The text will be interpreted either as plain text or as rich text, depending on the text format setting; see <a href="qlabel.html#textFormat-prop">setTextFormat</a>(). The default setting is <a href="../qtcore/qt.html#TextFormat-enum">Qt::AutoText</a>; i.e&#x2e; <a href="qlabel.html">QLabel</a> will try to auto-detect the format of the text set. See <a href="../qtgui/richtext-html-subset.html">Supported HTML Subset</a> for the definition of rich text.</p>
+<p>If a buddy has been set, the buddy mnemonic key is updated from the new text.</p>
+<p>Note that <a href="qlabel.html">QLabel</a> is well-suited to display small rich text documents, such as small documents that get their document specific settings (font, text color, link color) from the label's palette and font properties. For large documents, use <a href="qtextedit.html">QTextEdit</a> in read-only mode instead. <a href="qtextedit.html">QTextEdit</a> can also provide a scroll bar when necessary.</p>
+<p><b>Note: </b>This function enables mouse tracking if <i>text</i> contains rich text.</p><p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>text</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setText</b></span>(<i>const QString &amp;</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qlabel.html#textFormat-prop">setTextFormat</a>(), <a href="qlabel.html#setBuddy">setBuddy</a>(), and <a href="stylesheet-reference.html#alignment">alignment</a>.</p>
+<!-- @@@text -->
+<!-- $$$textFormat-prop$$$textFormat$$$setTextFormatQt::TextFormat -->
+<h3 class="fn" id="textFormat-prop"><a name="textFormat-prop"></a><span class="name">textFormat</span> : <span class="type"><a href="../qtcore/qt.html#TextFormat-enum">Qt::TextFormat</a></span></h3>
+<p>This property holds the label's text format</p>
+<p>See the <a href="../qtcore/qt.html#TextFormat-enum">Qt::TextFormat</a> enum for an explanation of the possible options.</p>
+<p>The default format is <a href="../qtcore/qt.html#TextFormat-enum">Qt::AutoText</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt::TextFormat </td><td class="memItemRight bottomAlign"><span class="name"><b>textFormat</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setTextFormat</b></span>(<i>Qt::TextFormat</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qlabel.html#text-prop">text</a>().</p>
+<!-- @@@textFormat -->
+<!-- $$$textInteractionFlags-prop$$$textInteractionFlags$$$setTextInteractionFlagsQt::TextInteractionFlags -->
+<h3 class="fn" id="textInteractionFlags-prop"><a name="textInteractionFlags-prop"></a><span class="name">textInteractionFlags</span> : <span class="type"><a href="../qtcore/qt.html#TextInteractionFlag-enum">Qt::TextInteractionFlags</a></span></h3>
+<p>Specifies how the label should interact with user input if it displays text.</p>
+<p>If the flags contain <a href="../qtcore/qt.html#TextInteractionFlag-enum">Qt::LinksAccessibleByKeyboard</a> the focus policy is also automatically set to <a href="../qtcore/qt.html#FocusPolicy-enum">Qt::StrongFocus</a>. If <a href="../qtcore/qt.html#TextInteractionFlag-enum">Qt::TextSelectableByKeyboard</a> is set then the focus policy is set to <a href="../qtcore/qt.html#FocusPolicy-enum">Qt::ClickFocus</a>.</p>
+<p>The default value is <a href="../qtcore/qt.html#TextInteractionFlag-enum">Qt::LinksAccessibleByMouse</a>.</p>
+<p>This property was introduced in  Qt 4.2.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt::TextInteractionFlags </td><td class="memItemRight bottomAlign"><span class="name"><b>textInteractionFlags</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setTextInteractionFlags</b></span>(Qt::TextInteractionFlags <i>flags</i>)</td></tr>
+</table></div>
+<!-- @@@textInteractionFlags -->
+<!-- $$$wordWrap-prop$$$wordWrap$$$setWordWrapbool -->
+<h3 class="fn" id="wordWrap-prop"><a name="wordWrap-prop"></a><span class="name">wordWrap</span> : <span class="type">bool</span></h3>
+<p>This property holds the label's word-wrapping policy</p>
+<p>If this property is <code>true</code> then label text is wrapped where necessary at word-breaks; otherwise it is not wrapped at all.</p>
+<p>By default, word wrap is disabled.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>wordWrap</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setWordWrap</b></span>(bool <i>on</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qlabel.html#text-prop">text</a>.</p>
+<!-- @@@wordWrap -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QLabel$$$QLabelconstQString&QWidget*Qt::WindowFlags -->
+<h3 class="fn" id="QLabel-1"><a name="QLabel-1"></a>QLabel::<span class="name">QLabel</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>text</i>, <span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i> = nullptr, <span class="type"><a href="../qtcore/qt.html#WindowType-enum">Qt::WindowFlags</a></span> <i>f</i> = Qt::WindowFlags())</h3>
+<p>Constructs a label that displays the text, <i>text</i>.</p>
+<p>The <i>parent</i> and widget flag <i>f</i>, arguments are passed to the <a href="qframe.html">QFrame</a> constructor.</p>
+<p><b>See also </b><a href="qlabel.html#text-prop">setText</a>(), <a href="qlabel.html#alignment-prop">setAlignment</a>(), <a href="qframe.html#setFrameStyle">setFrameStyle</a>(), and <a href="qlabel.html#indent-prop">setIndent</a>().</p>
+<!-- @@@QLabel -->
+<!-- $$$QLabel[overload1]$$$QLabelQWidget*Qt::WindowFlags -->
+<h3 class="fn" id="QLabel"><a name="QLabel"></a>QLabel::<span class="name">QLabel</span>(<span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i> = nullptr, <span class="type"><a href="../qtcore/qt.html#WindowType-enum">Qt::WindowFlags</a></span> <i>f</i> = Qt::WindowFlags())</h3>
+<p>Constructs an empty label.</p>
+<p>The <i>parent</i> and widget flag <i>f</i>, arguments are passed to the <a href="qframe.html">QFrame</a> constructor.</p>
+<p><b>See also </b><a href="qlabel.html#alignment-prop">setAlignment</a>(), <a href="qframe.html#setFrameStyle">setFrameStyle</a>(), and <a href="qlabel.html#indent-prop">setIndent</a>().</p>
+<!-- @@@QLabel -->
+<!-- $$$clear[overload1]$$$clear -->
+<h3 class="fn" id="clear"><a name="clear"></a><code>[slot] </code><span class="type">void</span> QLabel::<span class="name">clear</span>()</h3>
+<p>Clears any label contents.</p>
+<!-- @@@clear -->
+<!-- $$$linkActivated[overload1]$$$linkActivatedconstQString& -->
+<h3 class="fn" id="linkActivated"><a name="linkActivated"></a><code>[signal] </code><span class="type">void</span> QLabel::<span class="name">linkActivated</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>link</i>)</h3>
+<p>This signal is emitted when the user clicks a link. The URL referred to by the anchor is passed in <i>link</i>.</p>
+<p>This function was introduced in  Qt 4.2.</p>
+<p><b>See also </b><a href="qlabel.html#linkHovered">linkHovered</a>().</p>
+<!-- @@@linkActivated -->
+<!-- $$$linkHovered[overload1]$$$linkHoveredconstQString& -->
+<h3 class="fn" id="linkHovered"><a name="linkHovered"></a><code>[signal] </code><span class="type">void</span> QLabel::<span class="name">linkHovered</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>link</i>)</h3>
+<p>This signal is emitted when the user hovers over a link. The URL referred to by the anchor is passed in <i>link</i>.</p>
+<p>This function was introduced in  Qt 4.2.</p>
+<p><b>See also </b><a href="qlabel.html#linkActivated">linkActivated</a>().</p>
+<!-- @@@linkHovered -->
+<!-- $$$setMovie[overload1]$$$setMovieQMovie* -->
+<h3 class="fn" id="setMovie"><a name="setMovie"></a><code>[slot] </code><span class="type">void</span> QLabel::<span class="name">setMovie</span>(<span class="type"><a href="../qtgui/qmovie.html">QMovie</a></span> *<i>movie</i>)</h3>
+<p>Sets the label contents to <i>movie</i>. Any previous content is cleared. The label does NOT take ownership of the movie.</p>
+<p>The buddy shortcut, if any, is disabled.</p>
+<p><b>See also </b><a href="qlabel.html#movie">movie</a>() and <a href="qlabel.html#setBuddy">setBuddy</a>().</p>
+<!-- @@@setMovie -->
+<!-- $$$setNum$$$setNumdouble -->
+<h3 class="fn" id="setNum-1"><a name="setNum-1"></a><code>[slot] </code><span class="type">void</span> QLabel::<span class="name">setNum</span>(<span class="type">double</span> <i>num</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Sets the label contents to plain text containing the textual representation of double <i>num</i>. Any previous content is cleared. Does nothing if the double's string representation is the same as the current contents of the label.</p>
+<p>The buddy shortcut, if any, is disabled.</p>
+<p><b>See also </b><a href="qlabel.html#text-prop">setText</a>(), <a href="../qtcore/qstring.html#setNum">QString::setNum</a>(), and <a href="qlabel.html#setBuddy">setBuddy</a>().</p>
+<!-- @@@setNum -->
+<!-- $$$setNum[overload1]$$$setNumint -->
+<h3 class="fn" id="setNum"><a name="setNum"></a><code>[slot] </code><span class="type">void</span> QLabel::<span class="name">setNum</span>(<span class="type">int</span> <i>num</i>)</h3>
+<p>Sets the label contents to plain text containing the textual representation of integer <i>num</i>. Any previous content is cleared. Does nothing if the integer's string representation is the same as the current contents of the label.</p>
+<p>The buddy shortcut, if any, is disabled.</p>
+<p><b>See also </b><a href="qlabel.html#text-prop">setText</a>(), <a href="../qtcore/qstring.html#setNum">QString::setNum</a>(), and <a href="qlabel.html#setBuddy">setBuddy</a>().</p>
+<!-- @@@setNum -->
+<!-- $$$setPicture[overload1]$$$setPictureconstQPicture& -->
+<h3 class="fn" id="setPicture"><a name="setPicture"></a><code>[slot] </code><span class="type">void</span> QLabel::<span class="name">setPicture</span>(const <span class="type"><a href="../qtgui/qpicture.html">QPicture</a></span> &amp;<i>picture</i>)</h3>
+<p>Sets the label contents to <i>picture</i>. Any previous content is cleared.</p>
+<p>The buddy shortcut, if any, is disabled.</p>
+<p><b>See also </b><a href="qlabel.html#picture">picture</a>() and <a href="qlabel.html#setBuddy">setBuddy</a>().</p>
+<!-- @@@setPicture -->
+<!-- $$$~QLabel[overload1]$$$~QLabel -->
+<h3 class="fn" id="dtor.QLabel"><a name="dtor.QLabel"></a><code>[virtual] </code>QLabel::<span class="name">~QLabel</span>()</h3>
+<p>Destroys the label.</p>
+<!-- @@@~QLabel -->
+<!-- $$$buddy[overload1]$$$buddy -->
+<h3 class="fn" id="buddy"><a name="buddy"></a><span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *QLabel::<span class="name">buddy</span>() const</h3>
+<p>Returns this label's buddy, or nullptr if no buddy is currently set.</p>
+<p><b>See also </b><a href="qlabel.html#setBuddy">setBuddy</a>().</p>
+<!-- @@@buddy -->
+<!-- $$$changeEvent[overload1]$$$changeEventQEvent* -->
+<h3 class="fn" id="changeEvent"><a name="changeEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QLabel::<span class="name">changeEvent</span>(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>ev</i>)</h3>
+<p>Reimplements: <a href="qframe.html#changeEvent">QFrame::changeEvent</a>(QEvent *ev).</p>
+<!-- @@@changeEvent -->
+<!-- $$$contextMenuEvent[overload1]$$$contextMenuEventQContextMenuEvent* -->
+<h3 class="fn" id="contextMenuEvent"><a name="contextMenuEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QLabel::<span class="name">contextMenuEvent</span>(<span class="type"><a href="../qtgui/qcontextmenuevent.html">QContextMenuEvent</a></span> *<i>ev</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#contextMenuEvent">QWidget::contextMenuEvent</a>(QContextMenuEvent *event).</p>
+<!-- @@@contextMenuEvent -->
+<!-- $$$event[overload1]$$$eventQEvent* -->
+<h3 class="fn" id="event"><a name="event"></a><code>[override virtual protected] </code><span class="type">bool</span> QLabel::<span class="name">event</span>(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="qframe.html#event">QFrame::event</a>(QEvent *e).</p>
+<!-- @@@event -->
+<!-- $$$focusInEvent[overload1]$$$focusInEventQFocusEvent* -->
+<h3 class="fn" id="focusInEvent"><a name="focusInEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QLabel::<span class="name">focusInEvent</span>(<span class="type"><a href="../qtgui/qfocusevent.html">QFocusEvent</a></span> *<i>ev</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#focusInEvent">QWidget::focusInEvent</a>(QFocusEvent *event).</p>
+<!-- @@@focusInEvent -->
+<!-- $$$focusNextPrevChild[overload1]$$$focusNextPrevChildbool -->
+<h3 class="fn" id="focusNextPrevChild"><a name="focusNextPrevChild"></a><code>[override virtual protected] </code><span class="type">bool</span> QLabel::<span class="name">focusNextPrevChild</span>(<span class="type">bool</span> <i>next</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#focusNextPrevChild">QWidget::focusNextPrevChild</a>(bool next).</p>
+<!-- @@@focusNextPrevChild -->
+<!-- $$$focusOutEvent[overload1]$$$focusOutEventQFocusEvent* -->
+<h3 class="fn" id="focusOutEvent"><a name="focusOutEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QLabel::<span class="name">focusOutEvent</span>(<span class="type"><a href="../qtgui/qfocusevent.html">QFocusEvent</a></span> *<i>ev</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#focusOutEvent">QWidget::focusOutEvent</a>(QFocusEvent *event).</p>
+<!-- @@@focusOutEvent -->
+<!-- $$$heightForWidth[overload1]$$$heightForWidthint -->
+<h3 class="fn" id="heightForWidth"><a name="heightForWidth"></a><code>[override virtual] </code><span class="type">int</span> QLabel::<span class="name">heightForWidth</span>(<span class="type">int</span> <i>w</i>) const</h3>
+<p>Reimplements: <a href="qwidget.html#heightForWidth">QWidget::heightForWidth</a>(int w) const.</p>
+<!-- @@@heightForWidth -->
+<!-- $$$keyPressEvent[overload1]$$$keyPressEventQKeyEvent* -->
+<h3 class="fn" id="keyPressEvent"><a name="keyPressEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QLabel::<span class="name">keyPressEvent</span>(<span class="type"><a href="../qtgui/qkeyevent.html">QKeyEvent</a></span> *<i>ev</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#keyPressEvent">QWidget::keyPressEvent</a>(QKeyEvent *event).</p>
+<!-- @@@keyPressEvent -->
+<!-- $$$minimumSizeHint[overload1]$$$minimumSizeHint -->
+<h3 class="fn" id="minimumSizeHint"><a name="minimumSizeHint"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QLabel::<span class="name">minimumSizeHint</span>() const</h3>
+<p>Reimplements an access function for property: <a href="qwidget.html#minimumSizeHint-prop">QWidget::minimumSizeHint</a>.</p>
+<!-- @@@minimumSizeHint -->
+<!-- $$$mouseMoveEvent[overload1]$$$mouseMoveEventQMouseEvent* -->
+<h3 class="fn" id="mouseMoveEvent"><a name="mouseMoveEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QLabel::<span class="name">mouseMoveEvent</span>(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> *<i>ev</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#mouseMoveEvent">QWidget::mouseMoveEvent</a>(QMouseEvent *event).</p>
+<!-- @@@mouseMoveEvent -->
+<!-- $$$mousePressEvent[overload1]$$$mousePressEventQMouseEvent* -->
+<h3 class="fn" id="mousePressEvent"><a name="mousePressEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QLabel::<span class="name">mousePressEvent</span>(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> *<i>ev</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#mousePressEvent">QWidget::mousePressEvent</a>(QMouseEvent *event).</p>
+<!-- @@@mousePressEvent -->
+<!-- $$$mouseReleaseEvent[overload1]$$$mouseReleaseEventQMouseEvent* -->
+<h3 class="fn" id="mouseReleaseEvent"><a name="mouseReleaseEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QLabel::<span class="name">mouseReleaseEvent</span>(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> *<i>ev</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#mouseReleaseEvent">QWidget::mouseReleaseEvent</a>(QMouseEvent *event).</p>
+<!-- @@@mouseReleaseEvent -->
+<!-- $$$movie[overload1]$$$movie -->
+<h3 class="fn" id="movie"><a name="movie"></a><span class="type"><a href="../qtgui/qmovie.html">QMovie</a></span> *QLabel::<span class="name">movie</span>() const</h3>
+<p>Returns a pointer to the label's movie, or nullptr if no movie has been set.</p>
+<p><b>See also </b><a href="qlabel.html#setMovie">setMovie</a>().</p>
+<!-- @@@movie -->
+<!-- $$$paintEvent[overload1]$$$paintEventQPaintEvent* -->
+<h3 class="fn" id="paintEvent"><a name="paintEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QLabel::<span class="name">paintEvent</span>(<i>QPaintEvent *</i>)</h3>
+<p>Reimplements: <a href="qframe.html#paintEvent">QFrame::paintEvent</a>(QPaintEvent *).</p>
+<!-- @@@paintEvent -->
+<!-- $$$picture[overload1]$$$picture -->
+<h3 class="fn" id="picture"><a name="picture"></a>const <span class="type"><a href="../qtgui/qpicture.html">QPicture</a></span> *QLabel::<span class="name">picture</span>() const</h3>
+<p>Returns the label's picture or nullptr if the label doesn't have a picture.</p>
+<p><b>See also </b><a href="qlabel.html#setPicture">setPicture</a>().</p>
+<!-- @@@picture -->
+<!-- $$$selectionStart[overload1]$$$selectionStart -->
+<h3 class="fn" id="selectionStart"><a name="selectionStart"></a><span class="type">int</span> QLabel::<span class="name">selectionStart</span>() const</h3>
+<p>selectionStart() returns the index of the first selected character in the label or -1 if no text is selected.</p>
+<p><b>Note:</b> The <a href="qlabel.html#textInteractionFlags-prop">textInteractionFlags</a> set on the label need to include either TextSelectableByMouse or TextSelectableByKeyboard.</p>
+<p>This function was introduced in  Qt 4.7.</p>
+<p><b>See also </b><a href="qlabel.html#selectedText-prop">selectedText</a>().</p>
+<!-- @@@selectionStart -->
+<!-- $$$setBuddy[overload1]$$$setBuddyQWidget* -->
+<h3 class="fn" id="setBuddy"><a name="setBuddy"></a><span class="type">void</span> QLabel::<span class="name">setBuddy</span>(<span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>buddy</i>)</h3>
+<p>Sets this label's buddy to <i>buddy</i>.</p>
+<p>When the user presses the shortcut key indicated by this label, the keyboard focus is transferred to the label's buddy widget.</p>
+<p>The buddy mechanism is only available for QLabels that contain text in which one character is prefixed with an ampersand, '&amp;'. This character is set as the shortcut key. See the <a href="../qtgui/qkeysequence.html#mnemonic">QKeySequence::mnemonic</a>() documentation for details (to display an actual ampersand, use '&amp;&amp;').</p>
+<p>In a dialog, you might create two data entry widgets and a label for each, and set up the geometry layout so each label is just to the left of its data entry widget (its &quot;buddy&quot;), for example:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qlineedit.html">QLineEdit</a></span> <span class="operator">*</span>nameEdit  <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlineedit.html">QLineEdit</a></span>(<span class="keyword">this</span>);
+  <span class="type"><a href="qlabel.html#QLabel">QLabel</a></span>    <span class="operator">*</span>nameLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html#QLabel">QLabel</a></span>(<span class="string">&quot;&amp;Name:&quot;</span><span class="operator">,</span> <span class="keyword">this</span>);
+  nameLabel<span class="operator">-</span><span class="operator">&gt;</span>setBuddy(nameEdit);
+  <span class="type"><a href="qlineedit.html">QLineEdit</a></span> <span class="operator">*</span>phoneEdit  <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlineedit.html">QLineEdit</a></span>(<span class="keyword">this</span>);
+  <span class="type"><a href="qlabel.html#QLabel">QLabel</a></span>    <span class="operator">*</span>phoneLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html#QLabel">QLabel</a></span>(<span class="string">&quot;&amp;Phone:&quot;</span><span class="operator">,</span> <span class="keyword">this</span>);
+  phoneLabel<span class="operator">-</span><span class="operator">&gt;</span>setBuddy(phoneEdit);
+  <span class="comment">// (layout setup not shown)</span>
+
+</pre>
+<p>With the code above, the focus jumps to the Name field when the user presses Alt+N, and to the Phone field when the user presses Alt+P.</p>
+<p>To unset a previously set buddy, call this function with <i>buddy</i> set to nullptr.</p>
+<p><b>See also </b><a href="qlabel.html#buddy">buddy</a>(), <a href="qlabel.html#text-prop">setText</a>(), <a href="qshortcut.html">QShortcut</a>, and <a href="qlabel.html#alignment-prop">setAlignment</a>().</p>
+<!-- @@@setBuddy -->
+<!-- $$$setSelection[overload1]$$$setSelectionintint -->
+<h3 class="fn" id="setSelection"><a name="setSelection"></a><span class="type">void</span> QLabel::<span class="name">setSelection</span>(<span class="type">int</span> <i>start</i>, <span class="type">int</span> <i>length</i>)</h3>
+<p>Selects text from position <i>start</i> and for <i>length</i> characters.</p>
+<p><b>Note:</b> The <a href="qlabel.html#textInteractionFlags-prop">textInteractionFlags</a> set on the label need to include either TextSelectableByMouse or TextSelectableByKeyboard.</p>
+<p>This function was introduced in  Qt 4.7.</p>
+<p><b>See also </b><a href="qlabel.html#selectedText-prop">selectedText</a>().</p>
+<!-- @@@setSelection -->
+<!-- $$$sizeHint[overload1]$$$sizeHint -->
+<h3 class="fn" id="sizeHint"><a name="sizeHint"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QLabel::<span class="name">sizeHint</span>() const</h3>
+<p>Reimplements: <a href="qframe.html#sizeHint">QFrame::sizeHint</a>() const.</p>
+<!-- @@@sizeHint -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- queuedcustomtype.qdoc -->
+  <title>Queued Custom Type Example | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td >Queued Custom Type Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#overview">Overview</a></li>
+<li class="level1"><a href="#the-block-class">The Block Class</a></li>
+<li class="level1"><a href="#the-window-class">The Window Class</a></li>
+<li class="level1"><a href="#the-renderthread-class">The RenderThread Class</a></li>
+<li class="level1"><a href="#registering-the-type">Registering the Type</a></li>
+<li class="level1"><a href="#further-reading">Further Reading</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Queued Custom Type Example</h1>
+<span class="subtitle"></span>
+<!-- $$$threads/queuedcustomtype-brief -->
+<p>Demonstrates multi-thread programming using Qt.</p>
+<!-- @@@threads/queuedcustomtype -->
+<!-- $$$threads/queuedcustomtype-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/queuedcustomtype-example.png" alt="" /></p><p>Contents:</p>
+<a name="overview"></a>
+<h4 id="overview">Overview</h4>
+<p>In the <a href="qtcore-tools-customtype-example.html">Custom Type Example</a>, we showed how to integrate custom types with the meta-object system, enabling them to be stored in <a href="qvariant.html">QVariant</a> objects, written out in debugging information and used in signal-slot communication.</p>
+<p>In this example, we create a new value class, <code>Block</code>, and register it with the meta-object system to enable us to send instances of it between threads using queued signals and slots.</p>
+<a name="the-block-class"></a>
+<h4 id="the-block-class">The Block Class</h4>
+<p>The <code>Block</code> class is similar to the <code>Message</code> class described in the <a href="qtcore-tools-customtype-example.html">Custom Type Example</a>. It provides the default constructor, copy constructor and destructor in the public section of the class that the meta-object system requires. It describes a colored rectangle.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> Block
+  {
+  <span class="keyword">public</span>:
+      Block();
+      Block(<span class="keyword">const</span> Block <span class="operator">&amp;</span>other);
+      <span class="operator">~</span>Block();
+
+      Block(<span class="keyword">const</span> <span class="type"><a href="qrect.html">QRect</a></span> <span class="operator">&amp;</span>rect<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> <span class="operator">&amp;</span>color);
+
+      <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> color() <span class="keyword">const</span>;
+      <span class="type"><a href="qrect.html">QRect</a></span> rect() <span class="keyword">const</span>;
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="qrect.html">QRect</a></span> m_rect;
+      <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> m_color;
+  };
+
+  Q_DECLARE_METATYPE(Block);
+
+</pre>
+<p>We will still need to register it with the meta-object system at run-time by calling the <a href="qmetatype.html#qRegisterMetaType-1">qRegisterMetaType</a>() template function before we make any signal-slot connections that use this type. Even though we do not intend to use the type with <a href="qvariant.html">QVariant</a> in this example, it is good practice to also declare the new type with <a href="qmetatype.html#Q_DECLARE_METATYPE">Q_DECLARE_METATYPE</a>().</p>
+<p>The implementation of the <code>Block</code> class is trivial, so we avoid quoting it here.</p>
+<a name="the-window-class"></a>
+<h4 id="the-window-class">The Window Class</h4>
+<p>We define a simple <code>Window</code> class with a public slot that accepts a <code>Block</code> object. The rest of the class is concerned with managing the user interface and handling images.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> Window : <span class="keyword">public</span> <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      Window(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+      <span class="type">void</span> loadImage(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> <span class="operator">&amp;</span>image);
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> addBlock(<span class="keyword">const</span> Block <span class="operator">&amp;</span>block);
+
+  <span class="keyword">private</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> loadImage();
+      <span class="type">void</span> resetUi();
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="../qtwidgets/qlabel.html">QLabel</a></span> <span class="operator">*</span>label;
+      <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> pixmap;
+      <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>loadButton;
+      <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>resetButton;
+      <span class="type"><a href="qstring.html">QString</a></span> path;
+      RenderThread <span class="operator">*</span>thread;
+  };
+
+</pre>
+<p>The <code>Window</code> class also contains a worker thread, provided by a <code>RenderThread</code> object. This will emit signals to send <code>Block</code> objects to the window's <code>addBlock(Block)</code> slot.</p>
+<p>The parts of the <code>Window</code> class that are most relevant are the constructor and the <code>addBlock(Block)</code> slot.</p>
+<p>The constructor creates a thread for rendering images, sets up a user interface containing a label and two push buttons that are connected to slots in the same class.</p>
+<pre class="cpp">
+
+  Window<span class="operator">::</span>Window(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>(parent)<span class="operator">,</span> thread(<span class="keyword">new</span> RenderThread(<span class="keyword">this</span>))
+  {
+      label <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qlabel.html">QLabel</a></span>(<span class="keyword">this</span>);
+      label<span class="operator">-</span><span class="operator">&gt;</span>setAlignment(<span class="type"><a href="qt.html">Qt</a></span><span class="operator">::</span>AlignCenter);
+
+      loadButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;&amp;Load image...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      resetButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;&amp;Stop&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      resetButton<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+
+      connect(loadButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="type">QOverload</span><span class="operator">&lt;</span><span class="operator">&gt;</span><span class="operator">::</span>of(<span class="operator">&amp;</span>Window<span class="operator">::</span>loadImage));
+      connect(resetButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span>
+              thread<span class="operator">,</span> <span class="operator">&amp;</span>RenderThread<span class="operator">::</span>stopProcess);
+      connect(thread<span class="operator">,</span> <span class="operator">&amp;</span>RenderThread<span class="operator">::</span>finished<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>Window<span class="operator">::</span>resetUi);
+      connect(thread<span class="operator">,</span> <span class="operator">&amp;</span>RenderThread<span class="operator">::</span>sendBlock<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>Window<span class="operator">::</span>addBlock);
+
+</pre>
+<p>In the last of these connections, we connect a signal in the <code>RenderThread</code> object to the <code>addBlock(Block)</code> slot in the window.</p>
+<pre class="cpp">
+
+      ...
+      setWindowTitle(tr(<span class="string">&quot;Queued Custom Type&quot;</span>));
+  }
+
+</pre>
+<p>The rest of the constructor simply sets up the layout of the window.</p>
+<p>The <code>addBlock(Block)</code> slot receives blocks from the rendering thread via the signal-slot connection set up in the constructor:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> Window<span class="operator">::</span>addBlock(<span class="keyword">const</span> Block <span class="operator">&amp;</span>block)
+  {
+      <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> color <span class="operator">=</span> block<span class="operator">.</span>color();
+      color<span class="operator">.</span>setAlpha(<span class="number">64</span>);
+
+      <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> painter;
+      painter<span class="operator">.</span>begin(<span class="operator">&amp;</span>pixmap);
+      painter<span class="operator">.</span>fillRect(block<span class="operator">.</span>rect()<span class="operator">,</span> color);
+      painter<span class="operator">.</span>end();
+      label<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(pixmap);
+  }
+
+</pre>
+<p>We simply paint these onto the label as they arrive.</p>
+<a name="the-renderthread-class"></a>
+<h4 id="the-renderthread-class">The RenderThread Class</h4>
+<p>The <code>RenderThread</code> class processes an image, creating <code>Block</code> objects and using the <code>sendBlock(Block)</code> signal to send them to other components in the example.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> RenderThread : <span class="keyword">public</span> <span class="type"><a href="qthread.html">QThread</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      RenderThread(<span class="type"><a href="qobject.html">QObject</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+      <span class="operator">~</span>RenderThread();
+
+      <span class="type">void</span> processImage(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> <span class="operator">&amp;</span>image);
+
+  <span class="keyword">signals</span>:
+      <span class="type">void</span> sendBlock(<span class="keyword">const</span> Block <span class="operator">&amp;</span>block);
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> stopProcess();
+
+  <span class="keyword">protected</span>:
+      <span class="type">void</span> run();
+
+  <span class="keyword">private</span>:
+      bool m_abort;
+      <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> m_image;
+      <span class="type"><a href="qmutex.html">QMutex</a></span> mutex;
+  };
+
+</pre>
+<p>The constructor and destructor are not quoted here. These take care of setting up the thread's internal state and cleaning up when it is destroyed.</p>
+<p>Processing is started with the <code>processImage()</code> function, which calls the <code>RenderThread</code> class's reimplementation of the <a href="qthread.html#run">QThread::run</a>() function:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> RenderThread<span class="operator">::</span>processImage(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> <span class="operator">&amp;</span>image)
+  {
+      <span class="keyword">if</span> (image<span class="operator">.</span>isNull())
+          <span class="keyword">return</span>;
+
+      m_image <span class="operator">=</span> image;
+      m_abort <span class="operator">=</span> <span class="keyword">false</span>;
+      start();
+  }
+
+  <span class="type">void</span> RenderThread<span class="operator">::</span>run()
+  {
+      <span class="type">int</span> size <span class="operator">=</span> <a href="qtglobal.html#qMax">qMax</a>(m_image<span class="operator">.</span>width()<span class="operator">/</span><span class="number">20</span><span class="operator">,</span> m_image<span class="operator">.</span>height()<span class="operator">/</span><span class="number">20</span>);
+      <span class="keyword">for</span> (<span class="type">int</span> s <span class="operator">=</span> size; s <span class="operator">&gt;</span> <span class="number">0</span>; <span class="operator">-</span><span class="operator">-</span>s) {
+          <span class="keyword">for</span> (<span class="type">int</span> c <span class="operator">=</span> <span class="number">0</span>; c <span class="operator">&lt;</span> <span class="number">400</span>; <span class="operator">+</span><span class="operator">+</span>c) {
+
+</pre>
+<p>Ignoring the details of the way the image is processed, we see that the signal containing a block is emitted in the usual way:</p>
+<pre class="cpp">
+
+      ...
+              Block block(<span class="type"><a href="qrect.html">QRect</a></span>(x1<span class="operator">,</span> y1<span class="operator">,</span> x2 <span class="operator">-</span> x1 <span class="operator">+</span> <span class="number">1</span><span class="operator">,</span> y2 <span class="operator">-</span> y1 <span class="operator">+</span> <span class="number">1</span>)<span class="operator">,</span>
+                          <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(red<span class="operator">/</span>n<span class="operator">,</span> green<span class="operator">/</span>n<span class="operator">,</span> blue<span class="operator">/</span>n));
+              <span class="keyword">emit</span> sendBlock(block);
+              <span class="keyword">if</span> (m_abort)
+                  <span class="keyword">return</span>;
+              msleep(<span class="number">10</span>);
+          }
+      }
+  }
+
+</pre>
+<p>Each signal that is emitted will be queued and delivered later to the window's <code>addBlock(Block)</code> slot.</p>
+<a name="registering-the-type"></a>
+<h4 id="registering-the-type">Registering the Type</h4>
+<p>In the example's <code>main()</code> function, we perform the registration of the <code>Block</code> class as a custom type with the meta-object system by calling the <a href="qmetatype.html#qRegisterMetaType-1">qRegisterMetaType</a>() template function:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> app(argc<span class="operator">,</span> argv);
+      <a href="qmetatype.html#qRegisterMetaType-1">qRegisterMetaType</a><span class="operator">&lt;</span>Block<span class="operator">&gt;</span>();
+
+      Window window;
+      window<span class="operator">.</span>show();
+
+      window<span class="operator">.</span>loadImage(createImage(<span class="number">256</span><span class="operator">,</span> <span class="number">256</span>));
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p>This call is placed here to ensure that the type is registered before any signal-slot connections are made that use it.</p>
+<p>The rest of the <code>main()</code> function is concerned with setting a seed for the pseudo-random number generator, creating and showing the window, and setting a default image. See the source code for the implementation of the <code>createImage()</code> function.</p>
+<a name="further-reading"></a>
+<h4 id="further-reading">Further Reading</h4>
+<p>This example showed how a custom type can be registered with the meta-object system so that it can be used with signal-slot connections between threads. For ordinary communication involving direct signals and slots, it is enough to simply declare the type in the way described in the <a href="qtcore-tools-customtype-example.html">Custom Type Example</a>.</p>
+<p>In practice, both the <a href="qmetatype.html#Q_DECLARE_METATYPE">Q_DECLARE_METATYPE</a>() macro and the <a href="qmetatype.html#qRegisterMetaType-1">qRegisterMetaType</a>() template function can be used to register custom types, but <a href="qmetatype.html#qRegisterMetaType-1">qRegisterMetaType</a>() is only required if you need to perform signal-slot communication or need to create and destroy objects of the custom type at run-time.</p>
+<p>More information on using custom types with Qt can be found in the <a href="custom-types.html">Creating Custom Qt Types</a> document.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/corelib/threads/queuedcustomtype?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@threads/queuedcustomtype -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qnodecommand.cpp -->
+  <title>QNodeCommand Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QNodeCommand</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QNodeCommand Class</h1>
+<span class="small-subtitle">(<a href="qt3dcore-qnodecommand.html">Qt3DCore::QNodeCommand</a>)<br/></span>
+<!-- $$$QNodeCommand-brief -->
+<p>The <a href="qt3dcore-qnodecommand.html">QNodeCommand</a> class is the base class for all <a href="qt3dcore-qscenechange.html#ChangeFlag-enum">CommandRequested</a> <a href="qt3dcore-qscenechange.html">QSceneChange</a> events. <a href="#details">More...</a></p>
+<!-- @@@QNodeCommand -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;Qt3DCore/QNodeCommand&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3dcore</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.10</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3dcore-qscenechange.html">Qt3DCore::QSceneChange</a></td></tr></table></div><p>This class was introduced in  Qt 5.10.</p>
+<ul>
+<li><a href="qt3dcore-qnodecommand-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qnodecommand.html#CommandId-typedef">CommandId</a></b></td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qnodecommand.html#QNodeCommand">QNodeCommand</a></b>(Qt3DCore::QNodeId <i>id</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DCore::QNodeCommand::CommandId </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qnodecommand.html#commandId">commandId</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariant </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qnodecommand.html#data">data</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DCore::QNodeCommand::CommandId </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qnodecommand.html#inReplyTo">inReplyTo</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qnodecommand.html#name">name</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qnodecommand.html#setData">setData</a></b>(const QVariant &amp;<i>data</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qnodecommand.html#setName">setName</a></b>(const QString &amp;<i>name</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qnodecommand.html#setReplyToCommandId">setReplyToCommandId</a></b>(Qt3DCore::QNodeCommand::CommandId <i>id</i>)</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qnodecommand.html#QNodeCommandPtr-typedef">QNodeCommandPtr</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QNodeCommand-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qt3dcore-qnodecommand.html">QNodeCommand</a> class is the base class for all <a href="qt3dcore-qscenechange.html">QSceneChange</a> events that have the changeType() <a href="qt3dcore-qscenechange.html#ChangeFlag-enum">CommandRequested</a>.</p>
+<p>You can subclass this to create your own node update types for communication between your <a href="qt3dcore-qnode.html">QNode</a> and <a href="qt3dcore-qbackendnode.html">QBackendNode</a> subclasses when writing your own aspects.</p>
+</div>
+<!-- @@@QNodeCommand -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$CommandId -->
+<h3 class="fn" id="CommandId-typedef"><a name="CommandId-typedef"></a>typedef QNodeCommand::<span class="name">CommandId</span></h3>
+<p>Type of the command id, defined either as quint64 or quint32 depending on the platform support.</p>
+<!-- @@@CommandId -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QNodeCommand[overload1]$$$QNodeCommandQt3DCore::QNodeId -->
+<h3 class="fn" id="QNodeCommand"><a name="QNodeCommand"></a>QNodeCommand::<span class="name">QNodeCommand</span>(<span class="type"><a href="qt3dcore-qnodeid.html">Qt3DCore::QNodeId</a></span> <i>id</i>)</h3>
+<p>Constructs a new <a href="qt3dcore-qnodecommand.html">QNodeCommand</a> with <i>id</i>.</p>
+<!-- @@@QNodeCommand -->
+<!-- $$$commandId[overload1]$$$commandId -->
+<h3 class="fn" id="commandId"><a name="commandId"></a><span class="type"><a href="qt3dcore-qnodecommand.html#CommandId-typedef">Qt3DCore::QNodeCommand::CommandId</a></span> QNodeCommand::<span class="name">commandId</span>() const</h3>
+<p>Returns commandId.</p>
+<!-- @@@commandId -->
+<!-- $$$data[overload1]$$$data -->
+<h3 class="fn" id="data"><a name="data"></a><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QNodeCommand::<span class="name">data</span>() const</h3>
+<p>Returns data.</p>
+<p><b>See also </b><a href="qt3dcore-qnodecommand.html#setData">setData</a>().</p>
+<!-- @@@data -->
+<!-- $$$inReplyTo[overload1]$$$inReplyTo -->
+<h3 class="fn" id="inReplyTo"><a name="inReplyTo"></a><span class="type"><a href="qt3dcore-qnodecommand.html#CommandId-typedef">Qt3DCore::QNodeCommand::CommandId</a></span> QNodeCommand::<span class="name">inReplyTo</span>() const</h3>
+<p>Returns the id of the original <a href="qt3dcore-qnodecommand.html">QNodeCommand</a> message that was sent to the backend.</p>
+<!-- @@@inReplyTo -->
+<!-- $$$name[overload1]$$$name -->
+<h3 class="fn" id="name"><a name="name"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QNodeCommand::<span class="name">name</span>() const</h3>
+<p>Returns name.</p>
+<p><b>See also </b><a href="qt3dcore-qnodecommand.html#setName">setName</a>().</p>
+<!-- @@@name -->
+<!-- $$$setData[overload1]$$$setDataconstQVariant& -->
+<h3 class="fn" id="setData"><a name="setData"></a><span class="type">void</span> QNodeCommand::<span class="name">setData</span>(const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>data</i>)</h3>
+<p>Sets the data (<i>data</i>) in the backend node to perform the operations requested.</p>
+<p><b>See also </b><a href="qt3dcore-qnodecommand.html#data">data</a>().</p>
+<!-- @@@setData -->
+<!-- $$$setName[overload1]$$$setNameconstQString& -->
+<h3 class="fn" id="setName"><a name="setName"></a><span class="type">void</span> QNodeCommand::<span class="name">setName</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>)</h3>
+<p>Sets the data (<i>name</i>) in the backend node to perform the operations requested.</p>
+<p><b>See also </b><a href="qt3dcore-qnodecommand.html#name">name</a>().</p>
+<!-- @@@setName -->
+<!-- $$$setReplyToCommandId[overload1]$$$setReplyToCommandIdQt3DCore::QNodeCommand::CommandId -->
+<h3 class="fn" id="setReplyToCommandId"><a name="setReplyToCommandId"></a><span class="type">void</span> QNodeCommand::<span class="name">setReplyToCommandId</span>(<span class="type"><a href="qt3dcore-qnodecommand.html#CommandId-typedef">Qt3DCore::QNodeCommand::CommandId</a></span> <i>id</i>)</h3>
+<p>Sets the command <i>id</i> to which the message is a reply.</p>
+<!-- @@@setReplyToCommandId -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$QNodeCommandPtr -->
+<h3 class="fn" id="QNodeCommandPtr-typedef"><a name="QNodeCommandPtr-typedef"></a>typedef <span class="name">QNodeCommandPtr</span></h3>
+<p>A shared pointer for <a href="qt3dcore-qnodecommand.html">QNodeCommand</a>.</p>
+<!-- @@@QNodeCommandPtr -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

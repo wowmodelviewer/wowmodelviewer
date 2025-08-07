@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmediaresource.cpp -->
+  <title>QMediaResource Class | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-modules.html">C++ Classes</a></td><td >QMediaResource</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QMediaResource Class</h1>
+<!-- $$$QMediaResource-brief -->
+<p>The <a href="qmediaresource.html">QMediaResource</a> class provides a description of a media resource. <a href="#details">More...</a></p>
+<!-- @@@QMediaResource -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QMediaResource&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += multimedia</td></tr></table></div><p><b>This class is obsolete.</b> It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<ul>
+<li><a href="qmediaresource-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#QMediaResource-3">QMediaResource</a></b>(const QMediaResource &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#QMediaResource-2">QMediaResource</a></b>(const QNetworkRequest &amp;<i>request</i>, const QString &amp;<i>mimeType</i> = QString())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#QMediaResource-1">QMediaResource</a></b>(const QUrl &amp;<i>url</i>, const QString &amp;<i>mimeType</i> = QString())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#QMediaResource">QMediaResource</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMediaResource &amp;</td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#operator-eq">operator=</a></b>(const QMediaResource &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#dtor.QMediaResource">~QMediaResource</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#audioBitRate">audioBitRate</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#audioCodec">audioCodec</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#channelCount">channelCount</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint64 </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#dataSize">dataSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#isNull">isNull</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#language">language</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#mimeType">mimeType</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QNetworkRequest </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#request">request</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#resolution">resolution</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#sampleRate">sampleRate</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#setAudioBitRate">setAudioBitRate</a></b>(int <i>rate</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#setAudioCodec">setAudioCodec</a></b>(const QString &amp;<i>codec</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#setChannelCount">setChannelCount</a></b>(int <i>channels</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#setDataSize">setDataSize</a></b>(const qint64 <i>size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#setLanguage">setLanguage</a></b>(const QString &amp;<i>language</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#setResolution">setResolution</a></b>(const QSize &amp;<i>resolution</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#setResolution-1">setResolution</a></b>(int <i>width</i>, int <i>height</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#setSampleRate">setSampleRate</a></b>(int <i>sampleRate</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#setVideoBitRate">setVideoBitRate</a></b>(int <i>rate</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#setVideoCodec">setVideoCodec</a></b>(const QString &amp;<i>codec</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QUrl </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#url">url</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#videoBitRate">videoBitRate</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#videoCodec">videoCodec</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#operator-not-eq">operator!=</a></b>(const QMediaResource &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#operator-eq-eq">operator==</a></b>(const QMediaResource &amp;<i>other</i>) const</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qmediaresource.html#QMediaResourceList-typedef">QMediaResourceList</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QMediaResource-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A media resource is composed of a <a href="qmediaresource.html#url">URL</a> containing the location of the resource and a set of properties that describe the format of the resource. The properties provide a means to assess a resource without first attempting to load it, and in situations where media be represented by multiple alternative representations provide a means to select the appropriate resource.</p>
+<p>Media made available by a remote services can often be available in multiple encodings or quality levels, this allows a client to select an appropriate resource based on considerations such as codecs supported, network bandwidth, and display constraints. <a href="qmediaresource.html">QMediaResource</a> includes information such as the <a href="qmediaresource.html#mimeType">MIME type</a>, <a href="qmediaresource.html#audioCodec">audio</a> and <a href="qmediaresource.html#videoCodec">video</a> codecs, <a href="qmediaresource.html#audioBitRate">audio</a> and <a href="qmediaresource.html#videoBitRate">video</a> bit rates, and <a href="qmediaresource.html#resolution">resolution</a> so these constraints and others can be evaluated.</p>
+<p>The only mandatory property of a <a href="qmediaresource.html">QMediaResource</a> is the <a href="qmediaresource.html#url">url</a>().</p>
+</div>
+<p><b>See also </b><a href="qmediacontent.html">QMediaContent</a>.</p>
+<!-- @@@QMediaResource -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QMediaResource$$$QMediaResourceconstQMediaResource& -->
+<h3 class="fn" id="QMediaResource-3"><a name="QMediaResource-3"></a>QMediaResource::<span class="name">QMediaResource</span>(const <span class="type"><a href="qmediaresource.html#QMediaResource">QMediaResource</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a copy of a media resource <i>other</i>.</p>
+<!-- @@@QMediaResource -->
+<!-- $$$QMediaResource$$$QMediaResourceconstQNetworkRequest&constQString& -->
+<h3 class="fn" id="QMediaResource-2"><a name="QMediaResource-2"></a>QMediaResource::<span class="name">QMediaResource</span>(const <span class="type"><a href="../qtnetwork/qnetworkrequest.html">QNetworkRequest</a></span> &amp;<i>request</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>mimeType</i> = QString())</h3>
+<p>Constructs a media resource with the given <i>mimeType</i> from a network <i>request</i>.</p>
+<!-- @@@QMediaResource -->
+<!-- $$$QMediaResource$$$QMediaResourceconstQUrl&constQString& -->
+<h3 class="fn" id="QMediaResource-1"><a name="QMediaResource-1"></a>QMediaResource::<span class="name">QMediaResource</span>(const <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> &amp;<i>url</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>mimeType</i> = QString())</h3>
+<p>Constructs a media resource with the given <i>mimeType</i> from a <i>url</i>.</p>
+<!-- @@@QMediaResource -->
+<!-- $$$QMediaResource[overload1]$$$QMediaResource -->
+<h3 class="fn" id="QMediaResource"><a name="QMediaResource"></a>QMediaResource::<span class="name">QMediaResource</span>()</h3>
+<p>Constructs a null media resource.</p>
+<!-- @@@QMediaResource -->
+<!-- $$$operator=[overload1]$$$operator=constQMediaResource& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qmediaresource.html#QMediaResource">QMediaResource</a></span> &amp;QMediaResource::<span class="name">operator=</span>(const <span class="type"><a href="qmediaresource.html#QMediaResource">QMediaResource</a></span> &amp;<i>other</i>)</h3>
+<p>Assigns the value of <i>other</i> to a media resource.</p>
+<!-- @@@operator= -->
+<!-- $$$~QMediaResource[overload1]$$$~QMediaResource -->
+<h3 class="fn" id="dtor.QMediaResource"><a name="dtor.QMediaResource"></a>QMediaResource::<span class="name">~QMediaResource</span>()</h3>
+<p>Destroys a media resource.</p>
+<!-- @@@~QMediaResource -->
+<!-- $$$audioBitRate[overload1]$$$audioBitRate -->
+<h3 class="fn" id="audioBitRate"><a name="audioBitRate"></a><span class="type">int</span> QMediaResource::<span class="name">audioBitRate</span>() const</h3>
+<p>Returns the bit rate in bits per second of a media resource's audio stream.</p>
+<p>This may be zero if the bit rate is unknown, or the resource contains no audio stream.</p>
+<p><b>See also </b><a href="qmediaresource.html#setAudioBitRate">setAudioBitRate</a>().</p>
+<!-- @@@audioBitRate -->
+<!-- $$$audioCodec[overload1]$$$audioCodec -->
+<h3 class="fn" id="audioCodec"><a name="audioCodec"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QMediaResource::<span class="name">audioCodec</span>() const</h3>
+<p>Returns the audio codec of a media resource.</p>
+<p>This may be null if the media resource does not contain an audio stream, or the codec is unknown.</p>
+<p><b>See also </b><a href="qmediaresource.html#setAudioCodec">setAudioCodec</a>().</p>
+<!-- @@@audioCodec -->
+<!-- $$$channelCount[overload1]$$$channelCount -->
+<h3 class="fn" id="channelCount"><a name="channelCount"></a><span class="type">int</span> QMediaResource::<span class="name">channelCount</span>() const</h3>
+<p>Returns the number of audio channels in a media resource.</p>
+<p>This may be zero if the sample size is unknown, or the resource contains no audio stream.</p>
+<p><b>See also </b><a href="qmediaresource.html#setChannelCount">setChannelCount</a>().</p>
+<!-- @@@channelCount -->
+<!-- $$$dataSize[overload1]$$$dataSize -->
+<h3 class="fn" id="dataSize"><a name="dataSize"></a><span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> QMediaResource::<span class="name">dataSize</span>() const</h3>
+<p>Returns the size in bytes of a media resource.</p>
+<p>This may be zero if the size is unknown.</p>
+<p><b>See also </b><a href="qmediaresource.html#setDataSize">setDataSize</a>().</p>
+<!-- @@@dataSize -->
+<!-- $$$isNull[overload1]$$$isNull -->
+<h3 class="fn" id="isNull"><a name="isNull"></a><span class="type">bool</span> QMediaResource::<span class="name">isNull</span>() const</h3>
+<p>Identifies if a media resource is null.</p>
+<p>Returns true if the resource is null, and false otherwise.</p>
+<!-- @@@isNull -->
+<!-- $$$language[overload1]$$$language -->
+<h3 class="fn" id="language"><a name="language"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QMediaResource::<span class="name">language</span>() const</h3>
+<p>Returns the language of a media resource as an ISO 639-2 code.</p>
+<p>This may be null if the language is unknown.</p>
+<p><b>See also </b><a href="qmediaresource.html#setLanguage">setLanguage</a>().</p>
+<!-- @@@language -->
+<!-- $$$mimeType[overload1]$$$mimeType -->
+<h3 class="fn" id="mimeType"><a name="mimeType"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QMediaResource::<span class="name">mimeType</span>() const</h3>
+<p>Returns the MIME type of a media resource.</p>
+<p>This may be null if the MIME type is unknown.</p>
+<!-- @@@mimeType -->
+<!-- $$$request[overload1]$$$request -->
+<h3 class="fn" id="request"><a name="request"></a><span class="type"><a href="../qtnetwork/qnetworkrequest.html">QNetworkRequest</a></span> QMediaResource::<span class="name">request</span>() const</h3>
+<p>Returns the network request associated with this media resource.</p>
+<!-- @@@request -->
+<!-- $$$resolution[overload1]$$$resolution -->
+<h3 class="fn" id="resolution"><a name="resolution"></a><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QMediaResource::<span class="name">resolution</span>() const</h3>
+<p>Returns the resolution in pixels of a media resource.</p>
+<p>This may be null is the resolution is unknown, or the resource contains no pixel data (i.e&#x2e; the resource is an audio stream.</p>
+<p><b>See also </b><a href="qmediaresource.html#setResolution">setResolution</a>().</p>
+<!-- @@@resolution -->
+<!-- $$$sampleRate[overload1]$$$sampleRate -->
+<h3 class="fn" id="sampleRate"><a name="sampleRate"></a><span class="type">int</span> QMediaResource::<span class="name">sampleRate</span>() const</h3>
+<p>Returns the audio sample rate of a media resource.</p>
+<p>This may be zero if the sample size is unknown, or the resource contains no audio stream.</p>
+<p><b>See also </b><a href="qmediaresource.html#setSampleRate">setSampleRate</a>().</p>
+<!-- @@@sampleRate -->
+<!-- $$$setAudioBitRate[overload1]$$$setAudioBitRateint -->
+<h3 class="fn" id="setAudioBitRate"><a name="setAudioBitRate"></a><span class="type">void</span> QMediaResource::<span class="name">setAudioBitRate</span>(<span class="type">int</span> <i>rate</i>)</h3>
+<p>Sets the bit <i>rate</i> in bits per second of a media resource's video stream.</p>
+<p><b>See also </b><a href="qmediaresource.html#audioBitRate">audioBitRate</a>().</p>
+<!-- @@@setAudioBitRate -->
+<!-- $$$setAudioCodec[overload1]$$$setAudioCodecconstQString& -->
+<h3 class="fn" id="setAudioCodec"><a name="setAudioCodec"></a><span class="type">void</span> QMediaResource::<span class="name">setAudioCodec</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>codec</i>)</h3>
+<p>Sets the audio <i>codec</i> of a media resource.</p>
+<p><b>See also </b><a href="qmediaresource.html#audioCodec">audioCodec</a>().</p>
+<!-- @@@setAudioCodec -->
+<!-- $$$setChannelCount[overload1]$$$setChannelCountint -->
+<h3 class="fn" id="setChannelCount"><a name="setChannelCount"></a><span class="type">void</span> QMediaResource::<span class="name">setChannelCount</span>(<span class="type">int</span> <i>channels</i>)</h3>
+<p>Sets the number of audio <i>channels</i> in a media resource.</p>
+<p><b>See also </b><a href="qmediaresource.html#channelCount">channelCount</a>().</p>
+<!-- @@@setChannelCount -->
+<!-- $$$setDataSize[overload1]$$$setDataSizeconstqint64 -->
+<h3 class="fn" id="setDataSize"><a name="setDataSize"></a><span class="type">void</span> QMediaResource::<span class="name">setDataSize</span>(const <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> <i>size</i>)</h3>
+<p>Sets the <i>size</i> in bytes of a media resource.</p>
+<p><b>See also </b><a href="qmediaresource.html#dataSize">dataSize</a>().</p>
+<!-- @@@setDataSize -->
+<!-- $$$setLanguage[overload1]$$$setLanguageconstQString& -->
+<h3 class="fn" id="setLanguage"><a name="setLanguage"></a><span class="type">void</span> QMediaResource::<span class="name">setLanguage</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>language</i>)</h3>
+<p>Sets the <i>language</i> of a media resource.</p>
+<p><b>See also </b><a href="qmediaresource.html#language">language</a>().</p>
+<!-- @@@setLanguage -->
+<!-- $$$setResolution[overload1]$$$setResolutionconstQSize& -->
+<h3 class="fn" id="setResolution"><a name="setResolution"></a><span class="type">void</span> QMediaResource::<span class="name">setResolution</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>resolution</i>)</h3>
+<p>Sets the <i>resolution</i> in pixels of a media resource.</p>
+<p><b>See also </b><a href="qmediaresource.html#resolution">resolution</a>().</p>
+<!-- @@@setResolution -->
+<!-- $$$setResolution$$$setResolutionintint -->
+<h3 class="fn" id="setResolution-1"><a name="setResolution-1"></a><span class="type">void</span> QMediaResource::<span class="name">setResolution</span>(<span class="type">int</span> <i>width</i>, <span class="type">int</span> <i>height</i>)</h3>
+<p>Sets the <i>width</i> and <i>height</i> in pixels of a media resource.</p>
+<!-- @@@setResolution -->
+<!-- $$$setSampleRate[overload1]$$$setSampleRateint -->
+<h3 class="fn" id="setSampleRate"><a name="setSampleRate"></a><span class="type">void</span> QMediaResource::<span class="name">setSampleRate</span>(<span class="type">int</span> <i>sampleRate</i>)</h3>
+<p>Sets the audio <i>sampleRate</i> of a media resource.</p>
+<p><b>See also </b><a href="qmediaresource.html#sampleRate">sampleRate</a>().</p>
+<!-- @@@setSampleRate -->
+<!-- $$$setVideoBitRate[overload1]$$$setVideoBitRateint -->
+<h3 class="fn" id="setVideoBitRate"><a name="setVideoBitRate"></a><span class="type">void</span> QMediaResource::<span class="name">setVideoBitRate</span>(<span class="type">int</span> <i>rate</i>)</h3>
+<p>Sets the bit <i>rate</i> in bits per second of a media resource's video stream.</p>
+<p><b>See also </b><a href="qmediaresource.html#videoBitRate">videoBitRate</a>().</p>
+<!-- @@@setVideoBitRate -->
+<!-- $$$setVideoCodec[overload1]$$$setVideoCodecconstQString& -->
+<h3 class="fn" id="setVideoCodec"><a name="setVideoCodec"></a><span class="type">void</span> QMediaResource::<span class="name">setVideoCodec</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>codec</i>)</h3>
+<p>Sets the video <i>codec</i> of media resource.</p>
+<p><b>See also </b><a href="qmediaresource.html#videoCodec">videoCodec</a>().</p>
+<!-- @@@setVideoCodec -->
+<!-- $$$url[overload1]$$$url -->
+<h3 class="fn" id="url"><a name="url"></a><span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> QMediaResource::<span class="name">url</span>() const</h3>
+<p>Returns the URL of a media resource.</p>
+<!-- @@@url -->
+<!-- $$$videoBitRate[overload1]$$$videoBitRate -->
+<h3 class="fn" id="videoBitRate"><a name="videoBitRate"></a><span class="type">int</span> QMediaResource::<span class="name">videoBitRate</span>() const</h3>
+<p>Returns the bit rate in bits per second of a media resource's video stream.</p>
+<p>This may be zero if the bit rate is unknown, or the resource contains no video stream.</p>
+<p><b>See also </b><a href="qmediaresource.html#setVideoBitRate">setVideoBitRate</a>().</p>
+<!-- @@@videoBitRate -->
+<!-- $$$videoCodec[overload1]$$$videoCodec -->
+<h3 class="fn" id="videoCodec"><a name="videoCodec"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QMediaResource::<span class="name">videoCodec</span>() const</h3>
+<p>Returns the video codec of a media resource.</p>
+<p>This may be null if the media resource does not contain a video stream, or the codec is unknonwn.</p>
+<p><b>See also </b><a href="qmediaresource.html#setVideoCodec">setVideoCodec</a>().</p>
+<!-- @@@videoCodec -->
+<!-- $$$operator!=[overload1]$$$operator!=constQMediaResource& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> QMediaResource::<span class="name">operator!=</span>(const <span class="type"><a href="qmediaresource.html#QMediaResource">QMediaResource</a></span> &amp;<i>other</i>) const</h3>
+<p>Compares a media resource to <i>other</i>.</p>
+<p>Returns true if they are different, and false otherwise.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQMediaResource& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> QMediaResource::<span class="name">operator==</span>(const <span class="type"><a href="qmediaresource.html#QMediaResource">QMediaResource</a></span> &amp;<i>other</i>) const</h3>
+<p>Compares a media resource to <i>other</i>.</p>
+<p>Returns true if the resources are identical, and false otherwise.</p>
+<!-- @@@operator== -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$QMediaResourceList -->
+<h3 class="fn" id="QMediaResourceList-typedef"><a name="QMediaResourceList-typedef"></a>typedef <span class="name">QMediaResourceList</span></h3>
+<p>Synonym for <code>QList&lt;QMediaResource&gt;</code></p>
+<!-- @@@QMediaResourceList -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

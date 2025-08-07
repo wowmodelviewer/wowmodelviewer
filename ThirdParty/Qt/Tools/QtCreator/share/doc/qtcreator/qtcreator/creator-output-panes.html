@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-ui.qdoc -->
+  <title>Viewing Output | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Viewing Output</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-sidebar-views.html" />
+  <link rel="next" href="creator-configuring.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-sidebar-views.html">Browsing Project Contents</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-configuring.html">Configuring Qt Creator</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#issues">Issues</a></li>
+<li class="level1"><a href="#search-results">Search Results</a></li>
+<li class="level1"><a href="#application-output">Application Output</a></li>
+<li class="level1"><a href="#compile-output">Compile Output</a></li>
+<li class="level2"><a href="#parsing-existing-compile-output">Parsing Existing Compile Output</a></li>
+<li class="level1"><a href="#to-do-entries">To-Do Entries</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Viewing Output</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-output-panes.html-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/qtcreator-general-messages.png" alt="&quot;General Messages output pane&quot;" /></p><p>The task pane in Qt Creator can display one of the following panes:</p>
+<ul>
+<li><b>Issues</b></li>
+<li><b>Search Results</b></li>
+<li><b>Application Output</b></li>
+<li><b>Compile Output</b></li>
+<li><b>QML Debugger Console</b></li>
+<li><b>General Messages</b></li>
+<li><b>Version Control</b></li>
+<li><b>Test Results</b></li>
+<li><b>To-Do Entries</b></li>
+</ul>
+<p>Output panes are available in all <a href="creator-modes.html#">modes</a>. Click the name of an output pane to open the pane. To maximize an open output pane, click the <b>Maximize Output Pane</b> button or press <b>Alt+9</b>.</p>
+<p>To search within the <b>Application Output</b> and <b>Compile Output</b> panes, press <b>Ctrl+F</b> when the pane is active. Enter search criteria in the <b>Find</b> field and click the left and right arrows to search down and up in the pane.</p>
+<p>To increase or decrease the output text size, select <img src="images/plus.png" alt="" /> (<b>Zoom In</b>) or <img src="images/minus.png" alt="" /> (<b>Zoom Out</b>), or press <b>Ctrl++</b> or <b>Ctrl+-</b>. Zooming is not supported in all output panes.</p>
+<p>To filter the output, enter a string in the <b>Filter</b> field. Filtering is not supported in all output panes.</p>
+<p>To open the <b>General Messages</b> and <a href="creator-version-control.html#">Version Control</a> panes, select <b>Window &gt; Output Panes</b>. To display the <b>To-Do Entries</b> pane, enable the Todo plugin. For more information about the <b>QML Debugger Console</b> view, see <a href="creator-debugging-qml.html#executing-javascript-expressions">Executing JavaScript Expressions</a>.</p>
+<a name="issues"></a>
+<h2 id="issues">Issues</h2>
+<p>The <b>Issues</b> pane provides lists of following types of issues:</p>
+<ul>
+<li><b>Build System</b> - Errors and warnings encountered during a build.</li>
+<li><b>Clang Code Model</b> - <a href="creator-clang-codemodel.html#">Errors and warnings from the current editor</a>.</li>
+<li><b>Compile</b> - Selected output from the compiler. Open the <b>Compile Output</b> pane for more detailed information.</li>
+<li><b>Debug Information</b> - Lists debug information packages that might be missing.</li>
+<li><b>Debugger</b> - Errors encountered while running the <a href="creator-analyze-mode.html#">Valgrind code analysis tools</a>.</li>
+<li><b>Debugger Runtime</b> - Errors encountered when starting Qt Creator. For example, information about missing DLLs.</li>
+<li><b>Deployment</b> - Errors encountered between building an application successfully and starting it on a <a href="creator-glossary.html#glossary-device">device</a>.</li>
+<li><b>My Tasks</b> - Entries from a task list file (.tasks) generated by <a href="creator-task-lists.html#">code scanning and analysis tools</a>.</li>
+<li><b>Python</b> - Runtime errors and exceptions of Python scripts.</li>
+<li><b>QML</b> and <b>QML Analysis</b> - <a href="creator-checking-code-syntax.html#javascript-and-qml-error-codes">QML and JavaScript syntax errors</a>.</li>
+</ul>
+<p>The pane filters out irrelevant output from the build tools and presents the issues in an organized way. To further filter the output by type, select <b>Filter Tree</b> and then select a filter.</p>
+<p class="centerAlign"><img src="images/qtcreator-issues.png" alt="&quot;Issues output pane&quot;" /></p><p>Right-clicking on a line brings up a context menu with actions that you can apply to the contents of the line. You can remove a line, copy its contents to the clipboard, or search the Internet for a solution using the contents of the line as search criteria. In addition, you can show a version control annotation view of the line that causes the error message.</p>
+<p>To navigate to the corresponding source code, click an issue or select <b>Show in Editor</b> in the context menu. The entry must contain the name of the file where the issue was found.</p>
+<p>To view more information about an issue in the <b>Compile Output</b> pane, select <b>Show Output</b> in the context menu.</p>
+<p>To jump from one issue to the next or previous one, press <b>F6</b> and <b>Shift+F6</b>.</p>
+<p>By default, the <b>Issues</b> pane is cleared on a new build. To keep the issues from the previous build rounds, deselect <b>Tools</b> &gt; <b>Options</b> &gt; <b>Build &amp; Run</b> &gt; <b>General</b> &gt; <b>Clear issues list on new build</b>.</p>
+<a name="search-results"></a>
+<h2 id="search-results">Search Results</h2>
+<p>In the <b>Search Results</b> pane, you can search through projects, files on a file system or the currently open files:</p>
+<p class="centerAlign"><img src="images/qtcreator-search-results.png" alt="&quot;Search Results output pane&quot;" /></p><p>The search results are stored in the search history (1) from which you can select earlier searches.</p>
+<p>The figure below shows an example search result for all occurrences of the search string in the specified directory.</p>
+<p class="centerAlign"><img src="images/qtcreator-searchresults.png" alt="" /></p><p>For more information about the different search options, see <a href="creator-editor-finding.html#">Finding and Replacing</a>.</p>
+<a name="application-output"></a>
+<h2 id="application-output">Application Output</h2>
+<p>The <b>Application Output</b> pane displays the status of a program when it is executed, and the debug output.</p>
+<p class="centerAlign"><img src="images/qtcreator-application-output.png" alt="" /></p><p>If you specify command line arguments in the run settings that are passed to the application when running it, they are displayed as a part of the application output. For more information, see <a href="creator-run-settings.html#specifying-run-settings-for-desktop-device-types">Specifying Run Settings for Desktop Device Types</a>. Select toolbar buttons to run applications, to attach the debugger to the running application, and to stop running or debugging.</p>
+<p>To specify settings for displaying application output, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Build &amp; Run</b> &gt; <b>Application</b> Output, or click the <b>Open Settings Page</b> button. You can select whether to open the <b>Application Output</b> pane on output when running or debugging applications, to clear old output on a new run, to word-wrap output, and to limit output to the specified number of lines.</p>
+<a name="compile-output"></a>
+<h2 id="compile-output">Compile Output</h2>
+<p>The <b>Compile Output</b> pane provides all output from the compiler. The <b>Compile Output</b> is a more detailed version of information displayed in the <b>Issues</b> pane.</p>
+<p class="centerAlign"><img src="images/qtcreator-compile-output.png" alt="&quot;Compile Output pane&quot;" /></p><p>Double-click on a file name in an error message to open the file in the code editor.</p>
+<p>Select the <b>Cancel Build</b> button to cancel the build.</p>
+<p>To specify whether to open the <b>Compile Output</b> pane on output when building applications, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Build &amp; Run</b> &gt; <b>Compile</b> Output, and then select the <b>Open pane when building</b> check box. In the <b>Limit output to</b> field, you can specify the maximum amount of build output lines to display in the pane.</p>
+<p>You can also reach the options page by clicking the <b>Open Settings Page</b> button.</p>
+<p>To copy the output from the pane to the clipboard, select <b>Select All</b> in the context menu, and then select <b>Copy</b>. Save the output as a file if you want to examine it later without having to build the project again. This is useful for large projects that take a long time to build.</p>
+<a name="parsing-existing-compile-output"></a>
+<h3 id="parsing-existing-compile-output">Parsing Existing Compile Output</h3>
+<p>You can use Qt Creator's output parsers to parse output from builds done outside of Qt Creator or stored from previous build runs. By default, the parsers from the kit selected for the active project are used, but you can select another kit.</p>
+<p>To parse compile output:</p>
+<ol class="1" type="1"><li>Select <b>Tools</b> &gt; <b>Parse Build Output</b>.<p class="centerAlign"><img src="images/qtcreator-parse-build-output.png" alt="" /></p></li>
+<li>Paste the build output in the <b>Build Output</b> field, or select <b>Load from File</b> to load it from a file.</li>
+<li>Deselect the <b>Output went to stderr</b> check box if the parser expects issues on <code>stdout</code>.</li>
+<li>In the <b>Use parsers from kit</b> field, select the kit to use for parsing the output. Select <b>Manage</b> to view and modify kit settings.</li>
+<li>The parser displays the parsed output in the <b>Issues</b> pane. By default, the pane is cleared before adding the new output. Deselect the <b>Clear existing tasks</b> check box to append the new output to the old output.</li>
+<li>Select <b>OK</b> to start parsing.</li>
+</ol>
+<a name="to-do-entries"></a>
+<h2 id="to-do-entries">To-Do Entries</h2>
+<p>The <b>To-Do Entries</b> pane lists the BUG, FIXME, NOTE, TODO, and WARNING keywords from the current file, from all project files, or from a subproject. Click the icons on the toolbar to show only the selected keywords.</p>
+<p class="centerAlign"><img src="images/qtcreator-todo-pane.png" alt="" /></p><p>To add keywords, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>To-Do</b> &gt; <b>Add</b>. Set an icon and a line background color for the keyword.</p>
+<p class="centerAlign"><img src="images/qtcreator-todo-options.png" alt="" /></p><p>To change the icon and line background color of the selected keyword, select <b>Edit</b>.</p>
+<p>To remove the selected keyword, select <b>Remove</b>.</p>
+<p>To reset the list to predefined keywords, select <b>Reset</b>. All your changes will be permanently lost.</p>
+<p>To determine whether the keywords in the whole project, in the current file, or in a subproject are displayed by default, select the appropriate option in the <b>Scanning scope</b> group.</p>
+<p>To exclude files from scanning, select <b>Project Settings</b> &gt; <b>To-Do</b> in the <b>Projects</b> mode. Select <b>Add</b> and enter a regular expression that matches the path to files to exclude. Use a forward slash (/) as a separator in the path also on Windows.</p>
+<p>The Todo plugin is disabled by default. To enable the plugin, select <b>Help</b> &gt; <b>About Plugins</b> &gt; <b>Utilities</b> &gt; <b>Todo</b> and restart Qt Creator.</p>
+<p>In addition, you can open task list files generated by code scanning and analysis tools in the <b>Issues</b> pane. For more information, see <a href="creator-task-lists.html#">Showing Task List Files in Issues Pane</a>.</p>
+</div>
+<!-- @@@creator-output-panes.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-sidebar-views.html">Browsing Project Contents</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-configuring.html">Configuring Qt Creator</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

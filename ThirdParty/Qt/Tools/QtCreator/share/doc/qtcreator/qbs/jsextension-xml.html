@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- jsextension-xml.qdoc -->
+  <title>Xml Service | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td><td >Xml Service</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<p class="naviNextPrevious headerNavi">
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#xml-dom-document-node-operations">XML DOM Document Node Operations</a></li>
+<li class="level2"><a href="#constructor">Constructor</a></li>
+<li class="level2"><a href="#createcdatasection">createCDATASection</a></li>
+<li class="level2"><a href="#createelement">createElement</a></li>
+<li class="level2"><a href="#createtextnode">createTextNode</a></li>
+<li class="level2"><a href="#documentelement">documentElement</a></li>
+<li class="level2"><a href="#load">load</a></li>
+<li class="level2"><a href="#save">save</a></li>
+<li class="level2"><a href="#setcontent">setContent</a></li>
+<li class="level2"><a href="#tostring">toString</a></li>
+<li class="level1"><a href="#xml-dom-node-operations">XML DOM Node Operations</a></li>
+<li class="level2"><a href="#constructor">Constructor</a></li>
+<li class="level2"><a href="#appendchild">appendChild</a></li>
+<li class="level2"><a href="#attribute">attribute</a></li>
+<li class="level2"><a href="#clear">clear</a></li>
+<li class="level2"><a href="#data">data</a></li>
+<li class="level2"><a href="#firstchild">firstChild</a></li>
+<li class="level2"><a href="#hasattribute">hasAttribute</a></li>
+<li class="level2"><a href="#hasattributes">hasAttributes</a></li>
+<li class="level2"><a href="#haschildnodes">hasChildNodes</a></li>
+<li class="level2"><a href="#insertafter">insertAfter</a></li>
+<li class="level2"><a href="#insertbefore">insertBefore</a></li>
+<li class="level2"><a href="#iscdatasection">isCDATASection</a></li>
+<li class="level2"><a href="#iselement">isElement</a></li>
+<li class="level2"><a href="#istext">isText</a></li>
+<li class="level2"><a href="#lastchild">lastChild</a></li>
+<li class="level2"><a href="#nextsibling">nextSibling</a></li>
+<li class="level2"><a href="#parentnode">parentNode</a></li>
+<li class="level2"><a href="#previoussibling">previousSibling</a></li>
+<li class="level2"><a href="#removechild">removeChild</a></li>
+<li class="level2"><a href="#replacechild">replaceChild</a></li>
+<li class="level2"><a href="#setattribute">setAttribute</a></li>
+<li class="level2"><a href="#setdata">setData</a></li>
+<li class="level2"><a href="#settagname">setTagName</a></li>
+<li class="level2"><a href="#tagname">tagName</a></li>
+<li class="level2"><a href="#text">text</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Xml Service</h1>
+<span class="subtitle"></span>
+<!-- $$$jsextension-xml.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The <code>Xml</code> service enables you to access and manipulate XML Document Object Model (DOM) documents. The entire document is a <i>document node</i>, each XML element is an <i>element node</i>, the text paragraphs in the XML elements are <i>text nodes</i>, and each attribute is an <i>attribute node</i>.</p>
+<p>XML DOM presents documents as tree structures. The contents of the nodes can be accessed in the tree. They can be modified or deleted, and new nodes can be created.</p>
+<p>The nodes in the node tree have a hierarchical relationship to each other. The top node is called the <i>root</i>. Each node, except the root, has exactly one <i>parent</i> node, while it can have any number of <i>children</i>. Nodes with the same parent are called <i>siblings</i>.</p>
+<a name="xml-dom-document-node-operations"></a>
+<h2 id="xml-dom-document-node-operations">XML DOM Document Node Operations</h2>
+<p>A document node represents an entire document. That is, the root of the DOM tree.</p>
+<a name="constructor"></a>
+<h3 id="constructor">Constructor</h3>
+<pre class="cpp plain">
+
+  Xml.DomDocument()
+
+</pre>
+<p>Creates an XML DOM root node that can contain one element.</p>
+<a name="createcdatasection"></a>
+<h3 id="createcdatasection">createCDATASection</h3>
+<pre class="cpp plain">
+
+  Xml.DomDocument.createCDATASection(value: string)
+
+</pre>
+<p>Creates a CDATA section that is not parsed by a parser. It can be used to include XML fragments without having to escape the delimiters, for example. Tags inside the section are not treated as markup nor are entities expanded.</p>
+<a name="createelement"></a>
+<h3 id="createelement">createElement</h3>
+<pre class="cpp plain">
+
+  Xml.DomDocument.createElement(tagName: string)
+
+</pre>
+<p>Creates an element that can contain other elements, CDATA sections, and text nodes.</p>
+<a name="createtextnode"></a>
+<h3 id="createtextnode">createTextNode</h3>
+<pre class="cpp plain">
+
+  Xml.DomDocument.createTextNode(value: string)
+
+</pre>
+<p>Creates a text node that represents textual content in an element or attribute.</p>
+<a name="documentelement"></a>
+<h3 id="documentelement">documentElement</h3>
+<pre class="cpp plain">
+
+  Xml.DomDocument.documentElement()
+
+</pre>
+<p>Returns the document element.</p>
+<a name="load"></a>
+<h3 id="load">load</h3>
+<pre class="cpp plain">
+
+  Xml.DomDocument.load(filePath: string): void
+
+</pre>
+<p>Loads the document specified by <code>filePath</code>.</p>
+<a name="save"></a>
+<h3 id="save">save</h3>
+<pre class="cpp plain">
+
+  Xml.DomDocument.save(filePath: string, indentation: int): void
+
+</pre>
+<p>Saves the document at the location specified by <code>filePath</code> with the indentation specified by <code>int</code>.</p>
+<a name="setcontent"></a>
+<h3 id="setcontent">setContent</h3>
+<pre class="cpp plain">
+
+  Xml.DomDocument.setContent(content: string)
+
+</pre>
+<p>Returns the content of the document.</p>
+<a name="tostring"></a>
+<h3 id="tostring">toString</h3>
+<pre class="cpp plain">
+
+  Xml.DomDocument.toString(indentation: int)
+
+</pre>
+<p>Converts the document to a string with the indentation specified by <code>int</code>.</p>
+<a name="xml-dom-node-operations"></a>
+<h2 id="xml-dom-node-operations">XML DOM Node Operations</h2>
+<p>A node represents a single node in the document tree. There are several different types of nodes, such as element, attribute, and text nodes.</p>
+<p>All objects inherit the node properties for handling parents and children, even if they cannot have parents or children. For example, attempting to add children to text nodes results in a DOM error.</p>
+<a name="constructor"></a>
+<h3 id="constructor">Constructor</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode()
+
+</pre>
+<p>Creates an XML DOM node.</p>
+<a name="appendchild"></a>
+<h3 id="appendchild">appendChild</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.appendChild(tagName: string)
+
+</pre>
+<p>Appends a new child node to the end of the list of children of a node.</p>
+<a name="attribute"></a>
+<h3 id="attribute">attribute</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.attribute(name: string, defaultValue: string)
+
+</pre>
+<p>Returns the name and default value of the attribute.</p>
+<a name="clear"></a>
+<h3 id="clear">clear</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.clear()
+
+</pre>
+<p>Clears the contents of the node.</p>
+<a name="data"></a>
+<h3 id="data">data</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.data()
+
+</pre>
+<p>Returns the contents of the text node, CDATA section, or character data node.</p>
+<a name="firstchild"></a>
+<h3 id="firstchild">firstChild</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.firstChild(tagName: string)
+
+</pre>
+<p>Returns the first child of a node.</p>
+<a name="hasattribute"></a>
+<h3 id="hasattribute">hasAttribute</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.hasAttribute(name: string) boolean
+
+</pre>
+<p>Returns <code>true</code> if the node has the specified attribute.</p>
+<a name="hasattributes"></a>
+<h3 id="hasattributes">hasAttributes</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.hasAttributes() boolean
+
+</pre>
+<p>Returns <code>true</code> if the node has attributes.</p>
+<a name="haschildnodes"></a>
+<h3 id="haschildnodes">hasChildNodes</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.hasChildNodes() boolean
+
+</pre>
+<p>Returns <code>true</code> if the node has children.</p>
+<a name="insertafter"></a>
+<h3 id="insertafter">insertAfter</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.insertAfter(newChild: tagName, refChild: tagName)
+
+</pre>
+<p>Inserts a new child node after the child node specified by <code>refChild</code>.</p>
+<a name="insertbefore"></a>
+<h3 id="insertbefore">insertBefore</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.insertBefore(newChild: tagName, refChild: tagName)
+
+</pre>
+<p>Inserts a new child node before the child node specified by <code>refChild</code>.</p>
+<a name="iscdatasection"></a>
+<h3 id="iscdatasection">isCDATASection</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.isCDATASection() boolean
+
+</pre>
+<p>Returns <code>true</code> if this is a CDATA section.</p>
+<a name="iselement"></a>
+<h3 id="iselement">isElement</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.isElement() boolean
+
+</pre>
+<p>Returns <code>true</code> if this is an element.</p>
+<a name="istext"></a>
+<h3 id="istext">isText</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.isText() boolean
+
+</pre>
+<p>Returns <code>true</code> if this is a text node.</p>
+<a name="lastchild"></a>
+<h3 id="lastchild">lastChild</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.lastChild(tagName: string)
+
+</pre>
+<p>Returns the last child of a node.</p>
+<a name="nextsibling"></a>
+<h3 id="nextsibling">nextSibling</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.nextSibling(tagName: string)
+
+</pre>
+<p>Returns the node immediately following a node.</p>
+<a name="parentnode"></a>
+<h3 id="parentnode">parentNode</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.parentNode()
+
+</pre>
+<p>Returns the parent of the node.</p>
+<a name="previoussibling"></a>
+<h3 id="previoussibling">previousSibling</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.previousSibling(tagName: string)
+
+</pre>
+<p>Returns the node before a node.</p>
+<a name="removechild"></a>
+<h3 id="removechild">removeChild</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.removeChild(tagName: string)
+
+</pre>
+<p>Removes the child node.</p>
+<a name="replacechild"></a>
+<h3 id="replacechild">replaceChild</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.replaceChild(newChild: tagName, oldChild: tagName)
+
+</pre>
+<p>Replaces a child node with another one.</p>
+<a name="setattribute"></a>
+<h3 id="setattribute">setAttribute</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.setAttribute(name: string, value: string)
+
+</pre>
+<p>Sets the name and value of an attribute.</p>
+<a name="setdata"></a>
+<h3 id="setdata">setData</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.setData(value: string): void
+
+</pre>
+<p>Sets the data of the node to a text node, CDATA section, or character data node.</p>
+<a name="settagname"></a>
+<h3 id="settagname">setTagName</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.setTagName(tagName: string)
+
+</pre>
+<p>Sets the tag name of the node.</p>
+<a name="tagname"></a>
+<h3 id="tagname">tagName</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.tagName()
+
+</pre>
+<p>Returns the tag name of the node.</p>
+<a name="text"></a>
+<h3 id="text">text</h3>
+<pre class="cpp plain">
+
+  Xml.DomNode.text()
+
+</pre>
+<p>Returns the text of the node.</p>
+</div>
+<!-- @@@jsextension-xml.html -->
+<p class="naviNextPrevious footerNavi">
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

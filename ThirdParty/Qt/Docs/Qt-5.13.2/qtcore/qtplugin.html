@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qplugin.qdoc -->
+  <title>&lt;QtPlugin&gt; - Defining Plugins | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="plugins.html">Plugin Classes</a></td><td >&lt;QtPlugin&gt; - Defining Plugins</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">&lt;QtPlugin&gt; - Defining Plugins</h1>
+<!-- $$$<QtPlugin>-brief -->
+<p>The &lt;<a href="../qmake/qmake-variable-reference.html#qtplugin">QtPlugin</a>&gt; header file defines macros for defining plugins. <a href="#details">More...</a></p>
+<!-- @@@<QtPlugin> -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QtPlugin&gt;</span>
+</td></tr></table></div><ul>
+</ul>
+<a name="macros"></a>
+<h2 id="macros">Macros</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtplugin.html#Q_DECLARE_INTERFACE">Q_DECLARE_INTERFACE</a></b>(<i>ClassName</i>, <i>Identifier</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtplugin.html#Q_IMPORT_PLUGIN">Q_IMPORT_PLUGIN</a></b>(<i>PluginName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtplugin.html#Q_PLUGIN_METADATA">Q_PLUGIN_METADATA</a></b>(<i>...</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$<QtPlugin>-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<p><b>See also </b><a href="../qtdoc/plugins-howto.html">How to Create Qt Plugins</a>.</p>
+<!-- @@@<QtPlugin> -->
+<div class="macros">
+<h2>Macro Documentation</h2>
+<!-- $$$Q_DECLARE_INTERFACE[overload1]$$$Q_DECLARE_INTERFACE -->
+<h3 class="fn" id="Q_DECLARE_INTERFACE"><a name="Q_DECLARE_INTERFACE"></a><span class="name">Q_DECLARE_INTERFACE</span>(<i>ClassName</i>, <i>Identifier</i>)</h3>
+<p>This macro associates the given <i>Identifier</i> (a string literal) to the interface class called <i>ClassName</i>. The <i>Identifier</i> must be unique. For example:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#define BrushInterface_iid &quot;org.qt-project.Qt.Examples.PlugAndPaint.BrushInterface/1.0&quot;</span>
+
+  Q_DECLARE_INTERFACE(BrushInterface<span class="operator">,</span> BrushInterface_iid)
+
+</pre>
+<p>This macro is normally used right after the class definition for <i>ClassName</i>, in a header file. See the <a href="../qtwidgets/qtwidgets-tools-plugandpaint-app-example.html">Plug &amp; Paint</a> example for details.</p>
+<p>If you want to use Q_DECLARE_INTERFACE with interface classes declared in a namespace then you have to make sure the Q_DECLARE_INTERFACE is not inside a namespace though. For example:</p>
+<pre class="cpp">
+
+  <span class="keyword">namespace</span> Foo
+  {
+      <span class="keyword">struct</span> MyInterface { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> };
+  }
+
+  Q_DECLARE_INTERFACE(Foo<span class="operator">::</span>MyInterface<span class="operator">,</span> <span class="string">&quot;org.examples.MyInterface&quot;</span>)
+
+</pre>
+<p><b>See also </b><a href="qobject.html#Q_INTERFACES">Q_INTERFACES</a>() and <a href="../qtdoc/plugins-howto.html">How to Create Qt Plugins</a>.</p>
+<!-- @@@Q_DECLARE_INTERFACE -->
+<!-- $$$Q_IMPORT_PLUGIN[overload1]$$$Q_IMPORT_PLUGIN -->
+<h3 class="fn" id="Q_IMPORT_PLUGIN"><a name="Q_IMPORT_PLUGIN"></a><span class="name">Q_IMPORT_PLUGIN</span>(<i>PluginName</i>)</h3>
+<p>This macro imports the plugin named <i>PluginName</i>, which corresponds with the name of the class that declares metadata for the plugin with <a href="qtplugin.html#Q_PLUGIN_METADATA">Q_PLUGIN_METADATA</a>().</p>
+<p>Inserting this macro into your application's source code will allow you to make use of a static plugin.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  Q_IMPORT_PLUGIN(qjpeg)
+
+</pre>
+<p>Static plugins must also be included by the linker when your application is built. For Qt's predefined plugins, you can use the <code>QTPLUGIN</code> to add the required plugins to your build. For example:</p>
+<pre class="cpp">
+
+  TEMPLATE      = app
+  QTPLUGIN     += qjpeg qgif    # image formats
+
+</pre>
+<p><b>See also </b><a href="../qtdoc/plugins-howto.html#static-plugins">Static Plugins</a>, <a href="../qtdoc/plugins-howto.html">How to Create Qt Plugins</a>, and <a href="../qmake/qmake-tutorial.html">Getting Started with qmake</a>.</p>
+<!-- @@@Q_IMPORT_PLUGIN -->
+<!-- $$$Q_PLUGIN_METADATA[overload1]$$$Q_PLUGIN_METADATA... -->
+<h3 class="fn" id="Q_PLUGIN_METADATA"><a name="Q_PLUGIN_METADATA"></a><span class="name">Q_PLUGIN_METADATA</span>(<i>...</i>)</h3>
+<p>This macro is being used to declare meta data that is part of a plugin that instantiates this object.</p>
+<p>The macro needs to declare the IID of the interface implemented through the object, and reference a file containing the meta data for the plugin.</p>
+<p>There should be exactly one occurrence of this macro in the source code for a Qt plugin.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> MyInstance : <span class="keyword">public</span> <span class="type"><a href="qobject.html">QObject</a></span>
+  {
+      Q_PLUGIN_METADATA(IID <span class="string">&quot;org.qt-project.Qt.QDummyPlugin&quot;</span> FILE <span class="string">&quot;mymetadata.json&quot;</span>)
+  };
+
+</pre>
+<p>See the <a href="../qtwidgets/qtwidgets-tools-plugandpaint-app-example.html">Plug &amp; Paint</a> example for details.</p>
+<p>Note that the class this macro appears on must be default-constructible.</p>
+<p>FILE is optional and points to a json file.</p>
+<p>The json file must reside in one of the include directories specified by the build-system. moc exits with an error when it could not find the specified file.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qtplugin.html#Q_DECLARE_INTERFACE">Q_DECLARE_INTERFACE</a>() and <a href="../qtdoc/plugins-howto.html">How to Create Qt Plugins</a>.</p>
+<!-- @@@Q_PLUGIN_METADATA -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

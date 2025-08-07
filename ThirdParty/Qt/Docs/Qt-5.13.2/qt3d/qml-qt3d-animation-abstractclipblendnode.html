@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qabstractclipblendnode.cpp -->
+  <title>AbstractClipBlendNode QML Type | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-qml.html">QML Types</a></td><td >AbstractClipBlendNode QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">AbstractClipBlendNode QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$AbstractClipBlendNode-brief -->
+<p><a href="qml-qt3d-animation-abstractclipblendnode.html">AbstractClipBlendNode</a> is the base class for types used to construct animation blend trees. <a href="#details">More...</a></p>
+<!-- @@@AbstractClipBlendNode -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import Qt3D.Animation 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.9</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiates:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-animation-abstractclipblendnode.html"><a href="qt3danimation-qabstractclipblendnode.html">QAbstractClipBlendNode</a></td></tr></table></div><ul>
+<li><a href="qml-qt3d-animation-abstractclipblendnode-members.html">List of all members, including inherited members</a></li>
+</ul>
+<!-- $$$AbstractClipBlendNode-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>Animation blend trees are used with a <a href="qml-qt3d-animation-blendedclipanimator.html">BlendedClipAnimator</a> to dynamically blend a set of animation clips together. The way in which the blending of animation clips is performed is controlled by the structure of the blend tree and the properties on the nodes it contains.</p>
+<p>The leaf nodes in a blend tree are containers for the input animation clips. These clips can be baked clips read from file via AnimationClipLoader, or they can be clips that you build within your application with AnimatitonClip and AnimationClipData. To include a clip in your blend tree, wrap it in a <a href="qml-qt3d-animation-clipblendvalue.html">ClipBlendValue</a> node.</p>
+<p>The interior nodes of a blend tree represent blending operations that will be applied to their arguments which hold the input clips or even entire sub-trees of other blend tree nodes.</p>
+<p>At present, the Qt 3D Animation module provides the following blend tree node types:</p>
+<ul>
+<li>Qt3D.Animation.<a href="qml-qt3d-animation-clipblendvalue.html">ClipBlendValue</a></li>
+<li>Qt3D.Animation.<a href="qml-qt3d-animation-lerpclipblend.html">LerpClipBlend</a></li>
+<li>Qt3D.Animation.QAdditiveClipBlend</li>
+</ul>
+<p>Additional node types representing other blending operations will be added in the future.</p>
+<p><b>See also </b><a href="qml-qt3d-animation-blendedclipanimator.html">BlendedClipAnimator</a>.</p>
+<!-- @@@AbstractClipBlendNode -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

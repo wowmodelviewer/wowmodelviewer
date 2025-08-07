@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qhelpsearchquerywidget.cpp -->
+  <title>QHelpSearchQueryWidget Class | Qt Help 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qthelp-index.html">Qt Help</a></td><td ><a href="qthelp-module.html">C++ Classes</a></td><td >QHelpSearchQueryWidget</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qthelp-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QHelpSearchQueryWidget Class</h1>
+<!-- $$$QHelpSearchQueryWidget-brief -->
+<p>The <a href="qhelpsearchquerywidget.html">QHelpSearchQueryWidget</a> class provides a simple line edit or an advanced widget to enable the user to input a search term in a standardized input mask. <a href="#details">More...</a></p>
+<!-- @@@QHelpSearchQueryWidget -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QHelpSearchQueryWidget&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += help</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.4</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtwidgets/qwidget.html">QWidget</a></td></tr></table></div><p>This class was introduced in  Qt 4.4.</p>
+<ul>
+<li><a href="qhelpsearchquerywidget-members.html">List of all members, including inherited members</a></li>
+<li><a href="qhelpsearchquerywidget-obsolete.html">Obsolete members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qhelpsearchquerywidget.html#QHelpSearchQueryWidget">QHelpSearchQueryWidget</a></b>(QWidget *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qhelpsearchquerywidget.html#dtor.QHelpSearchQueryWidget">~QHelpSearchQueryWidget</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qhelpsearchquerywidget.html#collapseExtendedSearch">collapseExtendedSearch</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qhelpsearchquerywidget.html#expandExtendedSearch">expandExtendedSearch</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qhelpsearchquerywidget.html#searchInput">searchInput</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qhelpsearchquerywidget.html#setSearchInput">setSearchInput</a></b>(const QString &amp;<i>searchInput</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qhelpsearchquerywidget.html#search">search</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QHelpSearchQueryWidget-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QHelpSearchQueryWidget -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QHelpSearchQueryWidget[overload1]$$$QHelpSearchQueryWidgetQWidget* -->
+<h3 class="fn" id="QHelpSearchQueryWidget"><a name="QHelpSearchQueryWidget"></a>QHelpSearchQueryWidget::<span class="name">QHelpSearchQueryWidget</span>(<span class="type"><a href="../qtwidgets/qwidget.html#QWidget">QWidget</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new search query widget with the given <i>parent</i>.</p>
+<!-- @@@QHelpSearchQueryWidget -->
+<!-- $$$search[overload1]$$$search -->
+<h3 class="fn" id="search"><a name="search"></a><code>[signal] </code><span class="type">void</span> QHelpSearchQueryWidget::<span class="name">search</span>()</h3>
+<p>This signal is emitted when a the user has the search button invoked. After receiving the signal you can ask the <a href="qhelpsearchquerywidget.html">QHelpSearchQueryWidget</a> for the search input that you may pass to the QHelpSearchEngine::search() function.</p>
+<!-- @@@search -->
+<!-- $$$~QHelpSearchQueryWidget[overload1]$$$~QHelpSearchQueryWidget -->
+<h3 class="fn" id="dtor.QHelpSearchQueryWidget"><a name="dtor.QHelpSearchQueryWidget"></a><code>[override virtual] </code>QHelpSearchQueryWidget::<span class="name">~QHelpSearchQueryWidget</span>()</h3>
+<p>Destroys the search query widget.</p>
+<!-- @@@~QHelpSearchQueryWidget -->
+<!-- $$$collapseExtendedSearch[overload1]$$$collapseExtendedSearch -->
+<h3 class="fn" id="collapseExtendedSearch"><a name="collapseExtendedSearch"></a><span class="type">void</span> QHelpSearchQueryWidget::<span class="name">collapseExtendedSearch</span>()</h3>
+<p>Collapses the search query widget so that only the default search field is shown.</p>
+<!-- @@@collapseExtendedSearch -->
+<!-- $$$expandExtendedSearch[overload1]$$$expandExtendedSearch -->
+<h3 class="fn" id="expandExtendedSearch"><a name="expandExtendedSearch"></a><span class="type">void</span> QHelpSearchQueryWidget::<span class="name">expandExtendedSearch</span>()</h3>
+<p>Expands the search query widget so that the extended search fields are shown.</p>
+<!-- @@@expandExtendedSearch -->
+<!-- $$$searchInput[overload1]$$$searchInput -->
+<h3 class="fn" id="searchInput"><a name="searchInput"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QHelpSearchQueryWidget::<span class="name">searchInput</span>() const</h3>
+<p>Returns a search phrase to use in combination with the QHelpSearchEngine::search(const <a href="../qtcore/qstring.html">QString</a> &amp;searchInput) function.</p>
+<p>This function was introduced in  Qt 5.9.</p>
+<p><b>See also </b><a href="qhelpsearchquerywidget.html#setSearchInput">setSearchInput</a>().</p>
+<!-- @@@searchInput -->
+<!-- $$$setSearchInput[overload1]$$$setSearchInputconstQString& -->
+<h3 class="fn" id="setSearchInput"><a name="setSearchInput"></a><span class="type">void</span> QHelpSearchQueryWidget::<span class="name">setSearchInput</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>searchInput</i>)</h3>
+<p>Sets the <a href="qhelpsearchquerywidget.html">QHelpSearchQueryWidget</a> input field to the value specified by <i>searchInput</i>.</p>
+<p><b>Note: </b>The QHelpSearchEngine::search(const <a href="../qtcore/qstring.html">QString</a> &amp;<a href="qhelpsearchquerywidget.html#searchInput">searchInput</a>) function has to be called to perform the actual search.</p><p>This function was introduced in  Qt 5.9.</p>
+<p><b>See also </b><a href="qhelpsearchquerywidget.html#searchInput">searchInput</a>().</p>
+<!-- @@@setSearchInput -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

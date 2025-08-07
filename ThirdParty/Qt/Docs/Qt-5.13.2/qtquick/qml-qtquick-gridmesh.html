@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickshadereffectmesh.cpp -->
+  <title>GridMesh QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >GridMesh QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">GridMesh QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$GridMesh-brief -->
+<p>Defines a mesh with vertices arranged in a grid. <a href="#details">More...</a></p>
+<!-- @@@GridMesh -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.0</td></tr></table></div><ul>
+<li><a href="qml-qtquick-gridmesh-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-gridmesh.html#resolution-prop">resolution</a></b></b> : size</li>
+</ul>
+<!-- $$$GridMesh-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><a href="qml-qtquick-gridmesh.html">GridMesh</a> defines a rectangular mesh consisting of vertices arranged in an evenly spaced grid. It is used to generate <a href="qsggeometry.html">geometry</a>. The grid resolution is specified with the <a href="qml-qtquick-gridmesh.html#resolution-prop">resolution</a> property.</p>
+<!-- @@@GridMesh -->
+<h2>Property Documentation</h2>
+<!-- $$$resolution -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="resolution-prop"></a><span class="name">resolution</span> : <span class="type"><a href="../qtqml/qml-size.html">size</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the grid resolution. The resolution's width and height specify the number of cells or spacings between vertices horizontally and vertically respectively. The minimum and default is 1x1, which corresponds to four vertices in total, one in each corner. For non-linear vertex transformations, you probably want to set the resolution higher.</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><p class="centerAlign"><img src="images/declarative-gridmesh.png" alt="" /></p></td><td ><pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="qml-qtquick-shadereffect.html">ShaderEffect</a></span> {
+      <span class="name">width</span>: <span class="number">200</span>
+      <span class="name">height</span>: <span class="number">200</span>
+      <span class="name">mesh</span>: <span class="name">GridMesh</span> {
+          <span class="name">resolution</span>: <span class="name">Qt</span>.<span class="name">size</span>(<span class="number">20</span>, <span class="number">20</span>)
+      }
+      property <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span> <span class="name">source</span>: <span class="name">Image</span> {
+          <span class="name">source</span>: <span class="string">&quot;qt-logo.png&quot;</span>
+          <span class="type">sourceSize</span> { <span class="name">width</span>: <span class="number">200</span>; <span class="name">height</span>: <span class="number">200</span> }
+      }
+      <span class="name">vertexShader</span>: <span class="string">&quot;
+          uniform highp mat4 qt_Matrix;
+          attribute highp vec4 qt_Vertex;
+          attribute highp vec2 qt_MultiTexCoord0;
+          varying highp vec2 qt_TexCoord0;
+          uniform highp float width;
+          void main() {
+              highp vec4 pos = qt_Vertex;
+              highp float d = .5 * smoothstep(0., 1., qt_MultiTexCoord0.y);
+              pos.x = width * mix(d, 1.0 - d, qt_MultiTexCoord0.x);
+              gl_Position = qt_Matrix * pos;
+              qt_TexCoord0 = qt_MultiTexCoord0;
+          }&quot;</span>
+  }
+
+</pre>
+</td></tr>
+</table></div>
+</div></div><!-- @@@resolution -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

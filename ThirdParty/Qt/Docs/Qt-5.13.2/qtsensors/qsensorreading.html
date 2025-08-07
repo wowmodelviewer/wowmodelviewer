@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qsensor.cpp -->
+  <title>QSensorReading Class | Qt Sensors 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtsensors-index.html">Qt Sensors</a></td><td ><a href="qtsensors-module.html">C++ Classes</a></td><td >QSensorReading</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtsensors-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#macros">Macros</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSensorReading Class</h1>
+<!-- $$$QSensorReading-brief -->
+<p>The <a href="qsensorreading.html">QSensorReading</a> class holds the readings from the sensor. <a href="#details">More...</a></p>
+<!-- @@@QSensorReading -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QSensorReading&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += sensors</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qaccelerometerreading.html">QAccelerometerReading</a>, <a href="qaltimeterreading.html">QAltimeterReading</a>, <a href="qambientlightreading.html">QAmbientLightReading</a>, <a href="qambienttemperaturereading.html">QAmbientTemperatureReading</a>, <a href="qcompassreading.html">QCompassReading</a>, <a href="qdistancereading.html">QDistanceReading</a>, <a href="qgyroscopereading.html">QGyroscopeReading</a>, <a href="qholsterreading.html">QHolsterReading</a>, <a href="qhumidityreading.html">QHumidityReading</a>, <a href="qirproximityreading.html">QIRProximityReading</a>, <a href="qlidreading.html">QLidReading</a>, <a href="qlightreading.html">QLightReading</a>, <a href="qmagnetometerreading.html">QMagnetometerReading</a>, <a href="qorientationreading.html">QOrientationReading</a>, <a href="qpressurereading.html">QPressureReading</a>, <a href="qproximityreading.html">QProximityReading</a>, <a href="qrotationreading.html">QRotationReading</a>, <a href="qtapreading.html">QTapReading</a>, and <a href="qtiltreading.html">QTiltReading</a></p>
+</td></tr></table></div><ul>
+<li><a href="qsensorreading-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qsensorreading.html#timestamp-prop">timestamp</a></b> : const quint64</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsensorreading.html#setTimestamp">setTimestamp</a></b>(quint64 <i>timestamp</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> quint64 </td><td class="memItemRight bottomAlign"><b><a href="qsensorreading.html#timestamp">timestamp</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariant </td><td class="memItemRight bottomAlign"><b><a href="qsensorreading.html#value">value</a></b>(int <i>index</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qsensorreading.html#valueCount">valueCount</a></b>() const</td></tr>
+</table></div>
+<a name="macros"></a>
+<h2 id="macros">Macros</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsensorreading.html#DECLARE_READING">DECLARE_READING</a></b>(<i>classname</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsensorreading.html#IMPLEMENT_READING">IMPLEMENT_READING</a></b>(<i>classname</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSensorReading-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Note that <a href="qsensorreading.html">QSensorReading</a> is not particularly useful by itself. The interesting data for each sensor is defined in a sub-class of <a href="qsensorreading.html">QSensorReading</a>.</p>
+</div>
+<!-- @@@QSensorReading -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$timestamp-prop$$$timestamp -->
+<h3 class="fn" id="timestamp-prop"><a name="timestamp-prop"></a><span class="name">timestamp</span> : const <span class="type"><a href="../qtcore/qtglobal.html#quint64-typedef">quint64</a></span></h3>
+<p>This property holds the timestamp of the reading.</p>
+<p>Timestamps values are microseconds since a fixed point. You can use timestamps to see how far apart two sensor readings are.</p>
+<p>Note that sensor timestamps from different sensors may not be directly comparable (as they may choose different fixed points for their reference).</p>
+<p><b>Note that some platforms do not deliver timestamps correctly</b>. Applications should be prepared for occasional issues that cause timestamps to jump backwards.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> quint64 </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qsensorreading.html#timestamp">timestamp</a></b></span>() const</td></tr>
+</table></div>
+<!-- @@@timestamp -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$setTimestamp[overload1]$$$setTimestampquint64 -->
+<h3 class="fn" id="setTimestamp"><a name="setTimestamp"></a><span class="type">void</span> QSensorReading::<span class="name">setTimestamp</span>(<span class="type"><a href="../qtcore/qtglobal.html#quint64-typedef">quint64</a></span> <i>timestamp</i>)</h3>
+<p>Sets the <i>timestamp</i> of the reading.</p>
+<p><b>See also </b><a href="qsensorreading.html#timestamp">timestamp</a>().</p>
+<!-- @@@setTimestamp -->
+<!-- $$$timestamp -->
+<h3 class="fn" id="timestamp"><a name="timestamp"></a><span class="type"><a href="../qtcore/qtglobal.html#quint64-typedef">quint64</a></span> QSensorReading::<span class="name">timestamp</span>() const</h3>
+<p>Returns the timestamp of the reading.</p>
+<p><b>Note:</b> Getter function for property <a href="qsensorreading.html#timestamp-prop">timestamp</a>. </p><p><b>See also </b><a href="qsensorreading.html#setTimestamp">setTimestamp</a>().</p>
+<!-- @@@timestamp -->
+<!-- $$$value[overload1]$$$valueint -->
+<h3 class="fn" id="value"><a name="value"></a><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QSensorReading::<span class="name">value</span>(<span class="type">int</span> <i>index</i>) const</h3>
+<p>Returns the value of the property at <i>index</i>.</p>
+<p>Note that this function is slower than calling the data function directly.</p>
+<p>Here is an example of getting a property via the different mechanisms available.</p>
+<p>Accessing directly provides the best performance but requires compile-time knowledge of the data you are accessing.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qaccelerometerreading.html">QAccelerometerReading</a></span> <span class="operator">*</span>reading <span class="operator">=</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>;
+  <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> x <span class="operator">=</span> reading<span class="operator">-</span><span class="operator">&gt;</span>x();
+
+</pre>
+<p>You can also access a property by name. To do this you must call <a href="../qtcore/qobject.html#property">QObject::property</a>().</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> x <span class="operator">=</span> reading<span class="operator">-</span><span class="operator">&gt;</span>property(<span class="string">&quot;x&quot;</span>)<span class="operator">.</span>value<span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span><span class="operator">&gt;</span>();
+
+</pre>
+<p>Finally, you can access values via numeric index.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> x <span class="operator">=</span> reading<span class="operator">-</span><span class="operator">&gt;</span>value(<span class="number">0</span>)<span class="operator">.</span>value<span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span><span class="operator">&gt;</span>();
+
+</pre>
+<p>Note that value() can only access properties declared with <a href="../qtcore/qobject.html#Q_PROPERTY">Q_PROPERTY</a>() in sub-classes of <a href="qsensorreading.html">QSensorReading</a>.</p>
+<p><b>See also </b><a href="qsensorreading.html#valueCount">valueCount</a>() and <a href="../qtcore/qobject.html#property">QObject::property</a>().</p>
+<!-- @@@value -->
+<!-- $$$valueCount[overload1]$$$valueCount -->
+<h3 class="fn" id="valueCount"><a name="valueCount"></a><span class="type">int</span> QSensorReading::<span class="name">valueCount</span>() const</h3>
+<p>Returns the number of extra properties that the reading has.</p>
+<p>Note that this does not count properties declared in <a href="qsensorreading.html">QSensorReading</a>.</p>
+<p>As an example, this returns 3 for <a href="qaccelerometerreading.html">QAccelerometerReading</a> because there are 3 properties defined in that class.</p>
+<!-- @@@valueCount -->
+</div>
+<div class="macros">
+<h2>Macro Documentation</h2>
+<!-- $$$DECLARE_READING[overload1]$$$DECLARE_READING -->
+<h3 class="fn" id="DECLARE_READING"><a name="DECLARE_READING"></a><span class="name">DECLARE_READING</span>(<i>classname</i>)</h3>
+<p>The DECLARE_READING macro adds some required methods to a reading class.</p>
+<p>This macro should be used for all reading classes. Pass the <i>classname</i> of your reading class.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> MyReading : <span class="keyword">public</span> <span class="type">QSensorReading</span>
+  {
+      Q_OBJECT
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> myprop READ myprop)
+      DECLARE_READING(MyReading)
+  <span class="keyword">public</span>:
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> myprop() <span class="keyword">const</span>;
+      vod setMyprop(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> myprop);
+  };
+
+</pre>
+<p><b>See also </b><a href="qsensorreading.html#IMPLEMENT_READING">IMPLEMENT_READING</a>().</p>
+<!-- @@@DECLARE_READING -->
+<!-- $$$IMPLEMENT_READING[overload1]$$$IMPLEMENT_READING -->
+<h3 class="fn" id="IMPLEMENT_READING"><a name="IMPLEMENT_READING"></a><span class="name">IMPLEMENT_READING</span>(<i>classname</i>)</h3>
+<p>The IMPLEMENT_READING macro implements the required methods for a reading class.</p>
+<p>This macro should be used for all reading classes. It should be placed into a single compilation unit (source file), not into a header file. Pass the <i>classname</i> of your reading class.</p>
+<pre class="cpp">
+
+  IMPLEMENT_READING(MyReading)
+
+</pre>
+<p><b>See also </b><a href="qsensorreading.html#DECLARE_READING">DECLARE_READING</a>().</p>
+<!-- @@@IMPLEMENT_READING -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,570 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qscreen.cpp -->
+  <title>QScreen Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QScreen</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QScreen Class</h1>
+<!-- $$$QScreen-brief -->
+<p>The <a href="qscreen.html">QScreen</a> class is used to query screen properties. <a href="#details">More...</a></p>
+<!-- @@@QScreen -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QScreen&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.0</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.0.</p>
+<ul>
+<li><a href="qscreen-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qscreen.html#availableGeometry-prop">availableGeometry</a></b> : const QRect</li>
+<li class="fn"><b><a href="qscreen.html#availableSize-prop">availableSize</a></b> : const QSize</li>
+<li class="fn"><b><a href="qscreen.html#availableVirtualGeometry-prop">availableVirtualGeometry</a></b> : const QRect</li>
+<li class="fn"><b><a href="qscreen.html#availableVirtualSize-prop">availableVirtualSize</a></b> : const QSize</li>
+<li class="fn"><b><a href="qscreen.html#depth-prop">depth</a></b> : const int</li>
+<li class="fn"><b><a href="qscreen.html#devicePixelRatio-prop">devicePixelRatio</a></b> : const qreal</li>
+<li class="fn"><b><a href="qscreen.html#geometry-prop">geometry</a></b> : const QRect</li>
+<li class="fn"><b><a href="qscreen.html#logicalDotsPerInch-prop">logicalDotsPerInch</a></b> : const qreal</li>
+<li class="fn"><b><a href="qscreen.html#logicalDotsPerInchX-prop">logicalDotsPerInchX</a></b> : const qreal</li>
+<li class="fn"><b><a href="qscreen.html#logicalDotsPerInchY-prop">logicalDotsPerInchY</a></b> : const qreal</li>
+<li class="fn"><b><a href="qscreen.html#manufacturer-prop">manufacturer</a></b> : const QString</li>
+<li class="fn"><b><a href="qscreen.html#model-prop">model</a></b> : const QString</li>
+<li class="fn"><b><a href="qscreen.html#name-prop">name</a></b> : const QString</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qscreen.html#nativeOrientation-prop">nativeOrientation</a></b> : const Qt::ScreenOrientation</li>
+<li class="fn"><b><a href="qscreen.html#orientation-prop">orientation</a></b> : const Qt::ScreenOrientation</li>
+<li class="fn"><b><a href="qscreen.html#physicalDotsPerInch-prop">physicalDotsPerInch</a></b> : const qreal</li>
+<li class="fn"><b><a href="qscreen.html#physicalDotsPerInchX-prop">physicalDotsPerInchX</a></b> : const qreal</li>
+<li class="fn"><b><a href="qscreen.html#physicalDotsPerInchY-prop">physicalDotsPerInchY</a></b> : const qreal</li>
+<li class="fn"><b><a href="qscreen.html#physicalSize-prop">physicalSize</a></b> : const QSizeF</li>
+<li class="fn"><b><a href="qscreen.html#primaryOrientation-prop">primaryOrientation</a></b> : const Qt::ScreenOrientation</li>
+<li class="fn"><b><a href="qscreen.html#refreshRate-prop">refreshRate</a></b> : const qreal</li>
+<li class="fn"><b><a href="qscreen.html#serialNumber-prop">serialNumber</a></b> : const QString</li>
+<li class="fn"><b><a href="qscreen.html#size-prop">size</a></b> : const QSize</li>
+<li class="fn"><b><a href="qscreen.html#virtualGeometry-prop">virtualGeometry</a></b> : const QRect</li>
+<li class="fn"><b><a href="qscreen.html#virtualSize-prop">virtualSize</a></b> : const QSize</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#dtor.QScreen">~QScreen</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#angleBetween">angleBetween</a></b>(Qt::ScreenOrientation <i>a</i>, Qt::ScreenOrientation <i>b</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRect </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#availableGeometry-prop">availableGeometry</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#availableSize-prop">availableSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRect </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#availableVirtualGeometry-prop">availableVirtualGeometry</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#availableVirtualSize-prop">availableVirtualSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#depth-prop">depth</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#devicePixelRatio-prop">devicePixelRatio</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRect </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#geometry-prop">geometry</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPixmap </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#grabWindow">grabWindow</a></b>(WId <i>window</i>, int <i>x</i> = 0, int <i>y</i> = 0, int <i>width</i> = -1, int <i>height</i> = -1)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPlatformScreen *</td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#handle">handle</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#isLandscape">isLandscape</a></b>(Qt::ScreenOrientation <i>o</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#isPortrait">isPortrait</a></b>(Qt::ScreenOrientation <i>o</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#logicalDotsPerInch-prop">logicalDotsPerInch</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#logicalDotsPerInchX-prop">logicalDotsPerInchX</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#logicalDotsPerInchY-prop">logicalDotsPerInchY</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#manufacturer-prop">manufacturer</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRect </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#mapBetween">mapBetween</a></b>(Qt::ScreenOrientation <i>a</i>, Qt::ScreenOrientation <i>b</i>, const QRect &amp;<i>rect</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#model-prop">model</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#name-prop">name</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::ScreenOrientation </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#nativeOrientation-prop">nativeOrientation</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::ScreenOrientation </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#orientation-prop">orientation</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::ScreenOrientations </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#orientationUpdateMask">orientationUpdateMask</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#physicalDotsPerInch-prop">physicalDotsPerInch</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#physicalDotsPerInchX-prop">physicalDotsPerInchX</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#physicalDotsPerInchY-prop">physicalDotsPerInchY</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSizeF </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#physicalSize-prop">physicalSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::ScreenOrientation </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#primaryOrientation-prop">primaryOrientation</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#refreshRate-prop">refreshRate</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#serialNumber-prop">serialNumber</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#setOrientationUpdateMask">setOrientationUpdateMask</a></b>(Qt::ScreenOrientations <i>mask</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#size-prop">size</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QTransform </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#transformBetween">transformBetween</a></b>(Qt::ScreenOrientation <i>a</i>, Qt::ScreenOrientation <i>b</i>, const QRect &amp;<i>target</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRect </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#virtualGeometry-prop">virtualGeometry</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QScreen *&gt; </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#virtualSiblings">virtualSiblings</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#virtualSize-prop">virtualSize</a></b>() const</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#availableGeometryChanged">availableGeometryChanged</a></b>(const QRect &amp;<i>geometry</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#geometryChanged">geometryChanged</a></b>(const QRect &amp;<i>geometry</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#logicalDotsPerInchChanged">logicalDotsPerInchChanged</a></b>(qreal <i>dpi</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#orientationChanged">orientationChanged</a></b>(Qt::ScreenOrientation <i>orientation</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#physicalDotsPerInchChanged">physicalDotsPerInchChanged</a></b>(qreal <i>dpi</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#physicalSize-prop">physicalSizeChanged</a></b>(const QSizeF &amp;<i>size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#primaryOrientationChanged">primaryOrientationChanged</a></b>(Qt::ScreenOrientation <i>orientation</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#refreshRate-prop">refreshRateChanged</a></b>(qreal <i>refreshRate</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qscreen.html#virtualGeometryChanged">virtualGeometryChanged</a></b>(const QRect &amp;<i>rect</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QScreen-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A note on logical vs physical dots per inch: physical DPI is based on the actual physical pixel sizes when available, and is useful for print preview and other cases where it's desirable to know the exact physical dimensions of screen displayed contents.</p>
+<p>Logical dots per inch are used to convert font and user interface elements from point sizes to pixel sizes, and might be different from the physical dots per inch. The logical dots per inch are sometimes user-settable in the desktop environment's settings panel, to let the user globally control UI and font sizes in different applications.</p>
+</div>
+<!-- @@@QScreen -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$availableGeometry-prop$$$availableGeometry$$$availableGeometryChangedconstQRect& -->
+<h3 class="fn" id="availableGeometry-prop"><a name="availableGeometry-prop"></a><span class="name">availableGeometry</span> : const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span></h3>
+<p>This property holds the screen's available geometry in pixels</p>
+<p>The available geometry is the geometry excluding window manager reserved areas such as task bars and system menus.</p>
+<p>Note, on X11 this will return the true available geometry only on systems with one monitor and if window manager has set _NET_WORKAREA atom. In all other cases this is equal to <a href="qscreen.html#geometry-prop">geometry</a>(). This is a limitation in X11 window manager specification.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QRect </td><td class="memItemRight bottomAlign"><span class="name"><b>availableGeometry</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qscreen.html#availableGeometryChanged">availableGeometryChanged</a></b></span>(const QRect &amp;<i>geometry</i>)</td></tr>
+</table></div>
+<!-- @@@availableGeometry -->
+<!-- $$$availableSize-prop$$$availableSize$$$availableGeometryChangedconstQRect& -->
+<h3 class="fn" id="availableSize-prop"><a name="availableSize-prop"></a><span class="name">availableSize</span> : const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span></h3>
+<p>This property holds the screen's available size in pixels</p>
+<p>The available size is the size excluding window manager reserved areas such as task bars and system menus.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QSize </td><td class="memItemRight bottomAlign"><span class="name"><b>availableSize</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qscreen.html#availableGeometryChanged">availableGeometryChanged</a></b></span>(const QRect &amp;<i>geometry</i>)</td></tr>
+</table></div>
+<!-- @@@availableSize -->
+<!-- $$$availableVirtualGeometry-prop$$$availableVirtualGeometry$$$virtualGeometryChangedconstQRect& -->
+<h3 class="fn" id="availableVirtualGeometry-prop"><a name="availableVirtualGeometry-prop"></a><span class="name">availableVirtualGeometry</span> : const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span></h3>
+<p>This property holds the available geometry of the virtual desktop to which this screen belongs</p>
+<p>Returns the available geometry of the virtual desktop corresponding to this screen.</p>
+<p>This is the union of the virtual siblings' individual available geometries.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QRect </td><td class="memItemRight bottomAlign"><span class="name"><b>availableVirtualGeometry</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qscreen.html#virtualGeometryChanged">virtualGeometryChanged</a></b></span>(const QRect &amp;<i>rect</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qscreen.html#availableGeometry-prop">availableGeometry</a>() and <a href="qscreen.html#virtualSiblings">virtualSiblings</a>().</p>
+<!-- @@@availableVirtualGeometry -->
+<!-- $$$availableVirtualSize-prop$$$availableVirtualSize$$$virtualGeometryChangedconstQRect& -->
+<h3 class="fn" id="availableVirtualSize-prop"><a name="availableVirtualSize-prop"></a><span class="name">availableVirtualSize</span> : const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span></h3>
+<p>This property holds the available size of the virtual desktop to which this screen belongs</p>
+<p>Returns the available pixel size of the virtual desktop corresponding to this screen.</p>
+<p>This is the combined size of the virtual siblings' individual available geometries.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QSize </td><td class="memItemRight bottomAlign"><span class="name"><b>availableVirtualSize</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qscreen.html#virtualGeometryChanged">virtualGeometryChanged</a></b></span>(const QRect &amp;<i>rect</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qscreen.html#availableSize-prop">availableSize</a>() and <a href="qscreen.html#virtualSiblings">virtualSiblings</a>().</p>
+<!-- @@@availableVirtualSize -->
+<!-- $$$depth-prop$$$depth -->
+<h3 class="fn" id="depth-prop"><a name="depth-prop"></a><span class="name">depth</span> : const <span class="type">int</span></h3>
+<p>This property holds the color depth of the screen</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>depth</b></span>() const</td></tr>
+</table></div>
+<!-- @@@depth -->
+<!-- $$$devicePixelRatio-prop$$$devicePixelRatio$$$physicalDotsPerInchChangedqreal -->
+<h3 class="fn" id="devicePixelRatio-prop"><a name="devicePixelRatio-prop"></a><span class="name">devicePixelRatio</span> : const <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span></h3>
+<p>This property holds the screen's ratio between physical pixels and device-independent pixels</p>
+<p>Returns the ratio between physical pixels and device-independent pixels for the screen.</p>
+<p>Common values are 1.0 on normal displays and 2.0 on &quot;retina&quot; displays. Higher values are also possible.</p>
+<p>This property was introduced in  Qt 5.5.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qreal </td><td class="memItemRight bottomAlign"><span class="name"><b>devicePixelRatio</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qscreen.html#physicalDotsPerInchChanged">physicalDotsPerInchChanged</a></b></span>(qreal <i>dpi</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qwindow.html#devicePixelRatio">QWindow::devicePixelRatio</a>() and <a href="qguiapplication.html#devicePixelRatio">QGuiApplication::devicePixelRatio</a>().</p>
+<!-- @@@devicePixelRatio -->
+<!-- $$$geometry-prop$$$geometry$$$geometryChangedconstQRect& -->
+<h3 class="fn" id="geometry-prop"><a name="geometry-prop"></a><span class="name">geometry</span> : const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span></h3>
+<p>This property holds the screen's geometry in pixels</p>
+<p>As an example this might return <a href="../qtcore/qrect.html">QRect</a>(0, 0, 1280, 1024), or in a virtual desktop setting <a href="../qtcore/qrect.html">QRect</a>(1280, 0, 1280, 1024).</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QRect </td><td class="memItemRight bottomAlign"><span class="name"><b>geometry</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qscreen.html#geometryChanged">geometryChanged</a></b></span>(const QRect &amp;<i>geometry</i>)</td></tr>
+</table></div>
+<!-- @@@geometry -->
+<!-- $$$logicalDotsPerInch-prop$$$logicalDotsPerInch$$$logicalDotsPerInchChangedqreal -->
+<h3 class="fn" id="logicalDotsPerInch-prop"><a name="logicalDotsPerInch-prop"></a><span class="name">logicalDotsPerInch</span> : const <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span></h3>
+<p>This property holds the number of logical dots or pixels per inch</p>
+<p>This value can be used to convert font point sizes to pixel sizes.</p>
+<p>This is a convenience property that's simply the average of the <a href="qscreen.html#logicalDotsPerInchX-prop">logicalDotsPerInchX</a> and <a href="qscreen.html#logicalDotsPerInchY-prop">logicalDotsPerInchY</a> properties.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qreal </td><td class="memItemRight bottomAlign"><span class="name"><b>logicalDotsPerInch</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qscreen.html#logicalDotsPerInchChanged">logicalDotsPerInchChanged</a></b></span>(qreal <i>dpi</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qscreen.html#logicalDotsPerInchX-prop">logicalDotsPerInchX</a>() and <a href="qscreen.html#logicalDotsPerInchY-prop">logicalDotsPerInchY</a>().</p>
+<!-- @@@logicalDotsPerInch -->
+<!-- $$$logicalDotsPerInchX-prop$$$logicalDotsPerInchX$$$logicalDotsPerInchChangedqreal -->
+<h3 class="fn" id="logicalDotsPerInchX-prop"><a name="logicalDotsPerInchX-prop"></a><span class="name">logicalDotsPerInchX</span> : const <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span></h3>
+<p>This property holds the number of logical dots or pixels per inch in the horizontal direction</p>
+<p>This value is used to convert font point sizes to pixel sizes.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qreal </td><td class="memItemRight bottomAlign"><span class="name"><b>logicalDotsPerInchX</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qscreen.html#logicalDotsPerInchChanged">logicalDotsPerInchChanged</a></b></span>(qreal <i>dpi</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qscreen.html#logicalDotsPerInchY-prop">logicalDotsPerInchY</a>().</p>
+<!-- @@@logicalDotsPerInchX -->
+<!-- $$$logicalDotsPerInchY-prop$$$logicalDotsPerInchY$$$logicalDotsPerInchChangedqreal -->
+<h3 class="fn" id="logicalDotsPerInchY-prop"><a name="logicalDotsPerInchY-prop"></a><span class="name">logicalDotsPerInchY</span> : const <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span></h3>
+<p>This property holds the number of logical dots or pixels per inch in the vertical direction</p>
+<p>This value is used to convert font point sizes to pixel sizes.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qreal </td><td class="memItemRight bottomAlign"><span class="name"><b>logicalDotsPerInchY</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qscreen.html#logicalDotsPerInchChanged">logicalDotsPerInchChanged</a></b></span>(qreal <i>dpi</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qscreen.html#logicalDotsPerInchX-prop">logicalDotsPerInchX</a>().</p>
+<!-- @@@logicalDotsPerInchY -->
+<!-- $$$manufacturer-prop$$$manufacturer -->
+<h3 class="fn" id="manufacturer-prop"><a name="manufacturer-prop"></a><span class="name">manufacturer</span> : const <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>This property holds the manufacturer of the screen</p>
+<p>This property was introduced in  Qt 5.9.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>manufacturer</b></span>() const</td></tr>
+</table></div>
+<!-- @@@manufacturer -->
+<!-- $$$model-prop$$$model -->
+<h3 class="fn" id="model-prop"><a name="model-prop"></a><span class="name">model</span> : const <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>This property holds the model of the screen</p>
+<p>This property was introduced in  Qt 5.9.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>model</b></span>() const</td></tr>
+</table></div>
+<!-- @@@model -->
+<!-- $$$name-prop$$$name -->
+<h3 class="fn" id="name-prop"><a name="name-prop"></a><span class="name">name</span> : const <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>This property holds a user presentable string representing the screen</p>
+<p>For example, on X11 these correspond to the XRandr screen names, typically &quot;VGA1&quot;, &quot;HDMI1&quot;, etc.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>name</b></span>() const</td></tr>
+</table></div>
+<!-- @@@name -->
+<!-- $$$nativeOrientation-prop$$$nativeOrientation -->
+<h3 class="fn" id="nativeOrientation-prop"><a name="nativeOrientation-prop"></a><span class="name">nativeOrientation</span> : const <span class="type"><a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::ScreenOrientation</a></span></h3>
+<p>This property holds the native screen orientation</p>
+<p>The native orientation of the screen is the orientation where the logo sticker of the device appears the right way up, or <a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::PrimaryOrientation</a> if the platform does not support this functionality.</p>
+<p>The native orientation is a property of the hardware, and does not change.</p>
+<p>This property was introduced in  Qt 5.2.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt::ScreenOrientation </td><td class="memItemRight bottomAlign"><span class="name"><b>nativeOrientation</b></span>() const</td></tr>
+</table></div>
+<!-- @@@nativeOrientation -->
+<!-- $$$orientation-prop$$$orientation$$$orientationChangedQt::ScreenOrientation -->
+<h3 class="fn" id="orientation-prop"><a name="orientation-prop"></a><span class="name">orientation</span> : const <span class="type"><a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::ScreenOrientation</a></span></h3>
+<p>This property holds the screen orientation</p>
+<p>The screen orientation represents the physical orientation of the display. For example, the screen orientation of a mobile device will change based on how it is being held. A change to the orientation might or might not trigger a change to the primary orientation of the screen.</p>
+<p>Changes to this property will be filtered by <a href="qscreen.html#orientationUpdateMask">orientationUpdateMask</a>(), so in order to receive orientation updates the application must first call <a href="qscreen.html#setOrientationUpdateMask">setOrientationUpdateMask</a>() with a mask of the orientations it wants to receive.</p>
+<p><a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::PrimaryOrientation</a> is never returned.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt::ScreenOrientation </td><td class="memItemRight bottomAlign"><span class="name"><b>orientation</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qscreen.html#orientationChanged">orientationChanged</a></b></span>(Qt::ScreenOrientation <i>orientation</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qscreen.html#primaryOrientation-prop">primaryOrientation</a>().</p>
+<!-- @@@orientation -->
+<!-- $$$physicalDotsPerInch-prop$$$physicalDotsPerInch$$$physicalDotsPerInchChangedqreal -->
+<h3 class="fn" id="physicalDotsPerInch-prop"><a name="physicalDotsPerInch-prop"></a><span class="name">physicalDotsPerInch</span> : const <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span></h3>
+<p>This property holds the number of physical dots or pixels per inch</p>
+<p>This value represents the pixel density on the screen's display. Depending on what information the underlying system provides the value might not be entirely accurate.</p>
+<p>This is a convenience property that's simply the average of the <a href="qscreen.html#physicalDotsPerInchX-prop">physicalDotsPerInchX</a> and <a href="qscreen.html#physicalDotsPerInchY-prop">physicalDotsPerInchY</a> properties.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qreal </td><td class="memItemRight bottomAlign"><span class="name"><b>physicalDotsPerInch</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qscreen.html#physicalDotsPerInchChanged">physicalDotsPerInchChanged</a></b></span>(qreal <i>dpi</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qscreen.html#physicalDotsPerInchX-prop">physicalDotsPerInchX</a>() and <a href="qscreen.html#physicalDotsPerInchY-prop">physicalDotsPerInchY</a>().</p>
+<!-- @@@physicalDotsPerInch -->
+<!-- $$$physicalDotsPerInchX-prop$$$physicalDotsPerInchX$$$physicalDotsPerInchChangedqreal -->
+<h3 class="fn" id="physicalDotsPerInchX-prop"><a name="physicalDotsPerInchX-prop"></a><span class="name">physicalDotsPerInchX</span> : const <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span></h3>
+<p>This property holds the number of physical dots or pixels per inch in the horizontal direction</p>
+<p>This value represents the actual horizontal pixel density on the screen's display. Depending on what information the underlying system provides the value might not be entirely accurate.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qreal </td><td class="memItemRight bottomAlign"><span class="name"><b>physicalDotsPerInchX</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qscreen.html#physicalDotsPerInchChanged">physicalDotsPerInchChanged</a></b></span>(qreal <i>dpi</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qscreen.html#physicalDotsPerInchY-prop">physicalDotsPerInchY</a>().</p>
+<!-- @@@physicalDotsPerInchX -->
+<!-- $$$physicalDotsPerInchY-prop$$$physicalDotsPerInchY$$$physicalDotsPerInchChangedqreal -->
+<h3 class="fn" id="physicalDotsPerInchY-prop"><a name="physicalDotsPerInchY-prop"></a><span class="name">physicalDotsPerInchY</span> : const <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span></h3>
+<p>This property holds the number of physical dots or pixels per inch in the vertical direction</p>
+<p>This value represents the actual vertical pixel density on the screen's display. Depending on what information the underlying system provides the value might not be entirely accurate.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qreal </td><td class="memItemRight bottomAlign"><span class="name"><b>physicalDotsPerInchY</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qscreen.html#physicalDotsPerInchChanged">physicalDotsPerInchChanged</a></b></span>(qreal <i>dpi</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qscreen.html#physicalDotsPerInchX-prop">physicalDotsPerInchX</a>().</p>
+<!-- @@@physicalDotsPerInchY -->
+<!-- $$$physicalSize-prop$$$physicalSize$$$physicalSizeChangedconstQSizeF& -->
+<h3 class="fn" id="physicalSize-prop"><a name="physicalSize-prop"></a><span class="name">physicalSize</span> : const <span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span></h3>
+<p>This property holds the screen's physical size (in millimeters)</p>
+<p>The physical size represents the actual physical dimensions of the screen's display.</p>
+<p>Depending on what information the underlying system provides the value might not be entirely accurate.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QSizeF </td><td class="memItemRight bottomAlign"><span class="name"><b>physicalSize</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>physicalSizeChanged</b></span>(const QSizeF &amp;<i>size</i>)</td></tr>
+</table></div>
+<!-- @@@physicalSize -->
+<!-- $$$primaryOrientation-prop$$$primaryOrientation$$$primaryOrientationChangedQt::ScreenOrientation -->
+<h3 class="fn" id="primaryOrientation-prop"><a name="primaryOrientation-prop"></a><span class="name">primaryOrientation</span> : const <span class="type"><a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::ScreenOrientation</a></span></h3>
+<p>This property holds the primary screen orientation</p>
+<p>The primary screen orientation is <a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::LandscapeOrientation</a> if the screen geometry's width is greater than or equal to its height, or <a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::PortraitOrientation</a> otherwise. This property might change when the screen orientation was changed (i.e&#x2e; when the display is rotated). The behavior is however platform dependent and can often be specified in an application manifest file.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt::ScreenOrientation </td><td class="memItemRight bottomAlign"><span class="name"><b>primaryOrientation</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qscreen.html#primaryOrientationChanged">primaryOrientationChanged</a></b></span>(Qt::ScreenOrientation <i>orientation</i>)</td></tr>
+</table></div>
+<!-- @@@primaryOrientation -->
+<!-- $$$refreshRate-prop$$$refreshRate$$$refreshRateChangedqreal -->
+<h3 class="fn" id="refreshRate-prop"><a name="refreshRate-prop"></a><span class="name">refreshRate</span> : const <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span></h3>
+<p>This property holds the approximate vertical refresh rate of the screen in Hz</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qreal </td><td class="memItemRight bottomAlign"><span class="name"><b>refreshRate</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>refreshRateChanged</b></span>(qreal <i>refreshRate</i>)</td></tr>
+</table></div>
+<!-- @@@refreshRate -->
+<!-- $$$serialNumber-prop$$$serialNumber -->
+<h3 class="fn" id="serialNumber-prop"><a name="serialNumber-prop"></a><span class="name">serialNumber</span> : const <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>This property holds the serial number of the screen</p>
+<p>This property was introduced in  Qt 5.9.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>serialNumber</b></span>() const</td></tr>
+</table></div>
+<!-- @@@serialNumber -->
+<!-- $$$size-prop$$$size$$$geometryChangedconstQRect& -->
+<h3 class="fn" id="size-prop"><a name="size-prop"></a><span class="name">size</span> : const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span></h3>
+<p>This property holds the pixel resolution of the screen</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QSize </td><td class="memItemRight bottomAlign"><span class="name"><b>size</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qscreen.html#geometryChanged">geometryChanged</a></b></span>(const QRect &amp;<i>geometry</i>)</td></tr>
+</table></div>
+<!-- @@@size -->
+<!-- $$$virtualGeometry-prop$$$virtualGeometry$$$virtualGeometryChangedconstQRect& -->
+<h3 class="fn" id="virtualGeometry-prop"><a name="virtualGeometry-prop"></a><span class="name">virtualGeometry</span> : const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span></h3>
+<p>This property holds the pixel geometry of the virtual desktop to which this screen belongs</p>
+<p>Returns the pixel geometry of the virtual desktop corresponding to this screen.</p>
+<p>This is the union of the virtual siblings' individual geometries.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QRect </td><td class="memItemRight bottomAlign"><span class="name"><b>virtualGeometry</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qscreen.html#virtualGeometryChanged">virtualGeometryChanged</a></b></span>(const QRect &amp;<i>rect</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qscreen.html#virtualSiblings">virtualSiblings</a>().</p>
+<!-- @@@virtualGeometry -->
+<!-- $$$virtualSize-prop$$$virtualSize$$$virtualGeometryChangedconstQRect& -->
+<h3 class="fn" id="virtualSize-prop"><a name="virtualSize-prop"></a><span class="name">virtualSize</span> : const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span></h3>
+<p>This property holds the pixel size of the virtual desktop to which this screen belongs</p>
+<p>Returns the pixel size of the virtual desktop corresponding to this screen.</p>
+<p>This is the combined size of the virtual siblings' individual geometries.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QSize </td><td class="memItemRight bottomAlign"><span class="name"><b>virtualSize</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qscreen.html#virtualGeometryChanged">virtualGeometryChanged</a></b></span>(const QRect &amp;<i>rect</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qscreen.html#virtualSiblings">virtualSiblings</a>().</p>
+<!-- @@@virtualSize -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$orientationChanged -->
+<h3 class="fn" id="orientationChanged"><a name="orientationChanged"></a><code>[signal] </code><span class="type">void</span> QScreen::<span class="name">orientationChanged</span>(<span class="type"><a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::ScreenOrientation</a></span> <i>orientation</i>)</h3>
+<p>This signal is emitted when the orientation of the screen changes with <i>orientation</i> as an argument.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qscreen.html#orientation-prop">orientation</a>. </p><p><b>See also </b><a href="qscreen.html#orientation-prop">orientation</a>().</p>
+<!-- @@@orientationChanged -->
+<!-- $$$primaryOrientationChanged -->
+<h3 class="fn" id="primaryOrientationChanged"><a name="primaryOrientationChanged"></a><code>[signal] </code><span class="type">void</span> QScreen::<span class="name">primaryOrientationChanged</span>(<span class="type"><a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::ScreenOrientation</a></span> <i>orientation</i>)</h3>
+<p>This signal is emitted when the primary orientation of the screen changes with <i>orientation</i> as an argument.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qscreen.html#primaryOrientation-prop">primaryOrientation</a>. </p><p><b>See also </b><a href="qscreen.html#primaryOrientation-prop">primaryOrientation</a>().</p>
+<!-- @@@primaryOrientationChanged -->
+<!-- $$$~QScreen[overload1]$$$~QScreen -->
+<h3 class="fn" id="dtor.QScreen"><a name="dtor.QScreen"></a><code>[virtual] </code>QScreen::<span class="name">~QScreen</span>()</h3>
+<p>Destroys the screen.</p>
+<!-- @@@~QScreen -->
+<!-- $$$angleBetween[overload1]$$$angleBetweenQt::ScreenOrientationQt::ScreenOrientation -->
+<h3 class="fn" id="angleBetween"><a name="angleBetween"></a><span class="type">int</span> QScreen::<span class="name">angleBetween</span>(<span class="type"><a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::ScreenOrientation</a></span> <i>a</i>, <span class="type"><a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::ScreenOrientation</a></span> <i>b</i>) const</h3>
+<p>Convenience function to compute the angle of rotation to get from rotation <i>a</i> to rotation <i>b</i>.</p>
+<p>The result will be 0, 90, 180, or 270.</p>
+<p><a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::PrimaryOrientation</a> is interpreted as the screen's <a href="qscreen.html#primaryOrientation-prop">primaryOrientation</a>().</p>
+<!-- @@@angleBetween -->
+<!-- $$$grabWindow[overload1]$$$grabWindowWIdintintintint -->
+<h3 class="fn" id="grabWindow"><a name="grabWindow"></a><span class="type"><a href="qpixmap.html">QPixmap</a></span> QScreen::<span class="name">grabWindow</span>(<span class="type">WId</span> <i>window</i>, <span class="type">int</span> <i>x</i> = 0, <span class="type">int</span> <i>y</i> = 0, <span class="type">int</span> <i>width</i> = -1, <span class="type">int</span> <i>height</i> = -1)</h3>
+<p>Creates and returns a pixmap constructed by grabbing the contents of the given <i>window</i> restricted by <a href="../qtcore/qrect.html">QRect</a>(<i>x</i>, <i>y</i>, <i>width</i>, <i>height</i>).</p>
+<p>The arguments (<i>x</i>, <i>y</i>) specify the offset in the window, whereas (<i>width</i>, <i>height</i>) specify the area to be copied. If <i>width</i> is negative, the function copies everything to the right border of the window. If <i>height</i> is negative, the function copies everything to the bottom of the window.</p>
+<p>The offset and size arguments are specified in device independent pixels. The returned pixmap may be larger than the requested size when grabbing from a high-DPI screen. Call <a href="qpixmap.html#devicePixelRatio">QPixmap::devicePixelRatio</a>() to determine if this is the case.</p>
+<p>The window system identifier (<code>WId</code>) can be retrieved using the <a href="../qtwidgets/qwidget.html#winId">QWidget::winId</a>() function. The rationale for using a window identifier and not a <a href="../qtwidgets/qwidget.html">QWidget</a>, is to enable grabbing of windows that are not part of the application, window system frames, and so on.</p>
+<p><b>Warning:</b> Grabbing windows that are not part of the application is not supported on systems such as iOS, where sandboxing/security prevents reading pixels of windows not owned by the application.</p>
+<p>The grabWindow() function grabs pixels from the screen, not from the window, i.e&#x2e; if there is another window partially or entirely over the one you grab, you get pixels from the overlying window, too. The mouse cursor is generally not grabbed.</p>
+<p>Note on X11 that if the given <i>window</i> doesn't have the same depth as the root window, and another window partially or entirely obscures the one you grab, you will <i>not</i> get pixels from the overlying window. The contents of the obscured areas in the pixmap will be undefined and uninitialized.</p>
+<p>On Windows Vista and above grabbing a layered window, which is created by setting the <a href="../qtcore/qt.html#WidgetAttribute-enum">Qt::WA_TranslucentBackground</a> attribute, will not work. Instead grabbing the desktop widget should work.</p>
+<p><b>Warning:</b> In general, grabbing an area outside the screen is not safe. This depends on the underlying window system.</p>
+<!-- @@@grabWindow -->
+<!-- $$$handle[overload1]$$$handle -->
+<h3 class="fn" id="handle"><a name="handle"></a><span class="type">QPlatformScreen</span> *QScreen::<span class="name">handle</span>() const</h3>
+<p>Get the platform screen handle.</p>
+<!-- @@@handle -->
+<!-- $$$isLandscape[overload1]$$$isLandscapeQt::ScreenOrientation -->
+<h3 class="fn" id="isLandscape"><a name="isLandscape"></a><span class="type">bool</span> QScreen::<span class="name">isLandscape</span>(<span class="type"><a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::ScreenOrientation</a></span> <i>o</i>) const</h3>
+<p>Convenience function that returns <code>true</code> if <i>o</i> is either landscape or inverted landscape; otherwise returns <code>false</code>.</p>
+<p><a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::PrimaryOrientation</a> is interpreted as the screen's <a href="qscreen.html#primaryOrientation-prop">primaryOrientation</a>().</p>
+<!-- @@@isLandscape -->
+<!-- $$$isPortrait[overload1]$$$isPortraitQt::ScreenOrientation -->
+<h3 class="fn" id="isPortrait"><a name="isPortrait"></a><span class="type">bool</span> QScreen::<span class="name">isPortrait</span>(<span class="type"><a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::ScreenOrientation</a></span> <i>o</i>) const</h3>
+<p>Convenience function that returns <code>true</code> if <i>o</i> is either portrait or inverted portrait; otherwise returns <code>false</code>.</p>
+<p><a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::PrimaryOrientation</a> is interpreted as the screen's <a href="qscreen.html#primaryOrientation-prop">primaryOrientation</a>().</p>
+<!-- @@@isPortrait -->
+<!-- $$$mapBetween[overload1]$$$mapBetweenQt::ScreenOrientationQt::ScreenOrientationconstQRect& -->
+<h3 class="fn" id="mapBetween"><a name="mapBetween"></a><span class="type"><a href="../qtcore/qrect.html">QRect</a></span> QScreen::<span class="name">mapBetween</span>(<span class="type"><a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::ScreenOrientation</a></span> <i>a</i>, <span class="type"><a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::ScreenOrientation</a></span> <i>b</i>, const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> &amp;<i>rect</i>) const</h3>
+<p>Maps the rect between two screen orientations.</p>
+<p>This will flip the x and y dimensions of the rectangle <i>rect</i> if the orientation <i>a</i> is <a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::PortraitOrientation</a> or <a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::InvertedPortraitOrientation</a> and orientation <i>b</i> is <a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::LandscapeOrientation</a> or <a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::InvertedLandscapeOrientation</a>, or vice versa.</p>
+<p><a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::PrimaryOrientation</a> is interpreted as the screen's <a href="qscreen.html#primaryOrientation-prop">primaryOrientation</a>().</p>
+<!-- @@@mapBetween -->
+<!-- $$$orientationUpdateMask[overload1]$$$orientationUpdateMask -->
+<h3 class="fn" id="orientationUpdateMask"><a name="orientationUpdateMask"></a><span class="type"><a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::ScreenOrientations</a></span> QScreen::<span class="name">orientationUpdateMask</span>() const</h3>
+<p>Returns the currently set orientation update mask.</p>
+<p><b>See also </b><a href="qscreen.html#setOrientationUpdateMask">setOrientationUpdateMask</a>().</p>
+<!-- @@@orientationUpdateMask -->
+<!-- $$$setOrientationUpdateMask[overload1]$$$setOrientationUpdateMaskQt::ScreenOrientations -->
+<h3 class="fn" id="setOrientationUpdateMask"><a name="setOrientationUpdateMask"></a><span class="type">void</span> QScreen::<span class="name">setOrientationUpdateMask</span>(<span class="type"><a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::ScreenOrientations</a></span> <i>mask</i>)</h3>
+<p>Sets the orientations that the application is interested in receiving updates for in conjunction with this screen.</p>
+<p>For example, to receive <a href="qscreen.html#orientation-prop">orientation</a>() updates and thus have <a href="qscreen.html#orientationChanged">orientationChanged</a>() signals being emitted for LandscapeOrientation and InvertedLandscapeOrientation, call setOrientationUpdateMask() with <i>mask</i> set to <a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::LandscapeOrientation</a> | <a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::InvertedLandscapeOrientation</a>.</p>
+<p>The default, 0, means no <a href="qscreen.html#orientationChanged">orientationChanged</a>() signals are fired.</p>
+<p><b>See also </b><a href="qscreen.html#orientationUpdateMask">orientationUpdateMask</a>().</p>
+<!-- @@@setOrientationUpdateMask -->
+<!-- $$$transformBetween[overload1]$$$transformBetweenQt::ScreenOrientationQt::ScreenOrientationconstQRect& -->
+<h3 class="fn" id="transformBetween"><a name="transformBetween"></a><span class="type"><a href="qtransform.html">QTransform</a></span> QScreen::<span class="name">transformBetween</span>(<span class="type"><a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::ScreenOrientation</a></span> <i>a</i>, <span class="type"><a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::ScreenOrientation</a></span> <i>b</i>, const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> &amp;<i>target</i>) const</h3>
+<p>Convenience function to compute a transform that maps from the coordinate system defined by orientation <i>a</i> into the coordinate system defined by orientation <i>b</i> and target dimensions <i>target</i>.</p>
+<p>Example, <i>a</i> is Qt::Landscape, <i>b</i> is Qt::Portrait, and <i>target</i> is <a href="../qtcore/qrect.html">QRect</a>(0, 0, w, h) the resulting transform will be such that the point <a href="../qtcore/qpoint.html">QPoint</a>(0, 0) is mapped to <a href="../qtcore/qpoint.html">QPoint</a>(0, w), and <a href="../qtcore/qpoint.html">QPoint</a>(h, w) is mapped to <a href="../qtcore/qpoint.html">QPoint</a>(0, h). Thus, the landscape coordinate system <a href="../qtcore/qrect.html">QRect</a>(0, 0, h, w) is mapped (with a 90 degree rotation) into the portrait coordinate system <a href="../qtcore/qrect.html">QRect</a>(0, 0, w, h).</p>
+<p><a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::PrimaryOrientation</a> is interpreted as the screen's <a href="qscreen.html#primaryOrientation-prop">primaryOrientation</a>().</p>
+<!-- @@@transformBetween -->
+<!-- $$$virtualSiblings[overload1]$$$virtualSiblings -->
+<h3 class="fn" id="virtualSiblings"><a name="virtualSiblings"></a><span class="type">QList</span>&lt;<span class="type">QScreen</span> *&gt; QScreen::<span class="name">virtualSiblings</span>() const</h3>
+<p>Get the screen's virtual siblings.</p>
+<p>The virtual siblings are the screen instances sharing the same virtual desktop. They share a common coordinate system, and windows can freely be moved or positioned across them without having to be re-created.</p>
+<!-- @@@virtualSiblings -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

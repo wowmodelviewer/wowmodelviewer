@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tagfile>
+    <compound kind="namespace">
+        <name>QQuickTest</name>
+        <filename>qquicktest.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>qIsPolishScheduled</name>
+            <anchorfile>qquicktest.html</anchorfile>
+            <anchor>qIsPolishScheduled</anchor>
+            <arglist>(const QQuickItem *item)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>qWaitForItemPolished</name>
+            <anchorfile>qquicktest.html</anchorfile>
+            <anchor>qWaitForItemPolished</anchor>
+            <arglist>(const QQuickItem *item, int timeout)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QUICK_TEST_MAIN</name>
+            <anchorfile>qquicktest.html</anchorfile>
+            <anchor>QUICK_TEST_MAIN</anchor>
+            <arglist>( name)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QUICK_TEST_MAIN_WITH_SETUP</name>
+            <anchorfile>qquicktest.html</anchorfile>
+            <anchor>QUICK_TEST_MAIN_WITH_SETUP</anchor>
+            <arglist>( name,  QuickTestSetupClass)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtTest.TestCase</name>
+        <filename>qml-qttest-testcase.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>fail</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>fail-method</anchor>
+            <arglist>( message)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>qtest_fail</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>qtest_fail-method</anchor>
+            <arglist>( ,  )</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>verify</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>verify-method</anchor>
+            <arglist>( condition,  message)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>tryVerify</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>tryVerify-method</anchor>
+            <arglist>( function,  timeout,  message)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>isPolishScheduled</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>isPolishScheduled-method</anchor>
+            <arglist>(object item)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>waitForItemPolished</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>waitForItemPolished-method</anchor>
+            <arglist>(object item, int timeout)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>object</type>
+            <name>createTemporaryQmlObject</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>createTemporaryQmlObject-method</anchor>
+            <arglist>(string qml, object parent, string filePath)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>object</type>
+            <name>createTemporaryObject</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>createTemporaryObject-method</anchor>
+            <arglist>(Component component, object parent, object properties)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>qtest_destroyTemporaryObjects</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>qtest_destroyTemporaryObjects-method</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>qtest_typeof</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>qtest_typeof-method</anchor>
+            <arglist>( )</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>qtest_compareInternal</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>qtest_compareInternal-method</anchor>
+            <arglist>( ,  )</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>qtest_compareInternalObjects</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>qtest_compareInternalObjects-method</anchor>
+            <arglist>( ,  )</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>qtest_compareInternalArrays</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>qtest_compareInternalArrays-method</anchor>
+            <arglist>( ,  )</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>compare</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>compare-method</anchor>
+            <arglist>( actual,  expected,  message)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>fuzzyCompare</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>fuzzyCompare-method</anchor>
+            <arglist>( actual,  expected,  delta,  message)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>object</type>
+            <name>grabImage</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>grabImage-method</anchor>
+            <arglist>( item)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QtObject</type>
+            <name>findChild</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>findChild-method</anchor>
+            <arglist>( parent,  objectName)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>qtest_findVisualChild</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>qtest_findVisualChild-method</anchor>
+            <arglist>( ,  )</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>tryCompare</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>tryCompare-method</anchor>
+            <arglist>( obj,  property,  expected,  timeout,  message)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>skip</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>skip-method</anchor>
+            <arglist>( message)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>expectFail</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>expectFail-method</anchor>
+            <arglist>( tag,  message)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>expectFailContinue</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>expectFailContinue-method</anchor>
+            <arglist>( tag,  message)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>warn</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>warn-method</anchor>
+            <arglist>( message)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>ignoreWarning</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>ignoreWarning-method</anchor>
+            <arglist>( message)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>wait</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>wait-method</anchor>
+            <arglist>( ms)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>waitForRendering</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>waitForRendering-method</anchor>
+            <arglist>( item,  timeout)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>sleep</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>sleep-method</anchor>
+            <arglist>( ms)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>keyPress</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>keyPress-method</anchor>
+            <arglist>( key,  modifiers,  delay)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>keyRelease</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>keyRelease-method</anchor>
+            <arglist>( key,  modifiers,  delay)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>keyClick</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>keyClick-method</anchor>
+            <arglist>( key,  modifiers,  delay)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>keySequence</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>keySequence-method</anchor>
+            <arglist>( keySequence)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>mousePress</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>mousePress-method</anchor>
+            <arglist>( item,  x,  y,  button,  modifiers,  delay)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>mouseRelease</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>mouseRelease-method</anchor>
+            <arglist>( item,  x,  y,  button,  modifiers,  delay)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>mouseDrag</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>mouseDrag-method</anchor>
+            <arglist>( item,  x,  y,  dx,  dy,  button,  modifiers,  delay)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>mouseClick</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>mouseClick-method</anchor>
+            <arglist>( item,  x,  y,  button,  modifiers,  delay)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>mouseDoubleClick</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>mouseDoubleClick-method</anchor>
+            <arglist>( item,  x,  y,  button,  modifiers,  delay)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>mouseDoubleClickSequence</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>mouseDoubleClickSequence-method</anchor>
+            <arglist>( item,  x,  y,  button,  modifiers,  delay)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>mouseMove</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>mouseMove-method</anchor>
+            <arglist>( item,  x,  y,  delay)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>mouseWheel</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>mouseWheel-method</anchor>
+            <arglist>( item,  x,  y,  xDelta,  yDelta,  button,  modifiers,  delay)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>TouchEventSequence</type>
+            <name>touchEvent</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>touchEvent-method</anchor>
+            <arglist>(object item)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>initTestCase</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>initTestCase-method</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>cleanupTestCase</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>cleanupTestCase-method</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>init</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>init-method</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>cleanup</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>cleanup-method</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>qtest_verifyItem</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>qtest_verifyItem-method</anchor>
+            <arglist>( ,  )</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>qtest_runInternal</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>qtest_runInternal-method</anchor>
+            <arglist>( ,  )</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>qtest_runFunction</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>qtest_runFunction-method</anchor>
+            <arglist>( ,  )</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>qtest_runBenchmarkFunction</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>qtest_runBenchmarkFunction-method</anchor>
+            <arglist>( ,  )</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>qtest_run</name>
+            <anchorfile>qml-qttest-testcase.html</anchorfile>
+            <anchor>qtest_run-method</anchor>
+            <arglist>()</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtTest.SignalSpy</name>
+        <filename>qml-qttest-signalspy.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>clear</name>
+            <anchorfile>qml-qttest-signalspy.html</anchorfile>
+            <anchor>clear-method</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>wait</name>
+            <anchorfile>qml-qttest-signalspy.html</anchorfile>
+            <anchor>wait-method</anchor>
+            <arglist>( timeout)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>qtest_update</name>
+            <anchorfile>qml-qttest-signalspy.html</anchorfile>
+            <anchor>qtest_update-method</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>qtest_activated</name>
+            <anchorfile>qml-qttest-signalspy.html</anchorfile>
+            <anchor>qtest_activated-method</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>qtest_signalHandlerName</name>
+            <anchorfile>qml-qttest-signalspy.html</anchorfile>
+            <anchor>qtest_signalHandlerName-method</anchor>
+            <arglist>( )</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtTest.TouchEventSequence</name>
+        <filename>qml-qttest-toucheventsequence.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>TouchEventSequence</type>
+            <name>press</name>
+            <anchorfile>qml-qttest-toucheventsequence.html</anchorfile>
+            <anchor>press-method</anchor>
+            <arglist>( touchId,  object item,  real x = item.width / 2 ,  real y = item.height / 2 )</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>TouchEventSequence</type>
+            <name>move</name>
+            <anchorfile>qml-qttest-toucheventsequence.html</anchorfile>
+            <anchor>move-method</anchor>
+            <arglist>( touchId,  object item,  real x = item.width / 2 ,  real y = item.height / 2 )</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>TouchEventSequence</type>
+            <name>release</name>
+            <anchorfile>qml-qttest-toucheventsequence.html</anchorfile>
+            <anchor>release-method</anchor>
+            <arglist>( touchId,  object item,  real x = item.width / 2 ,  real y = item.height / 2 )</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>TouchEventSequence</type>
+            <name>stationary</name>
+            <anchorfile>qml-qttest-toucheventsequence.html</anchorfile>
+            <anchor>stationary-method</anchor>
+            <arglist>( touchId)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>TouchEventSequence</type>
+            <name>commit</name>
+            <anchorfile>qml-qttest-toucheventsequence.html</anchorfile>
+            <anchor>commit-method</anchor>
+            <arglist>()</arglist>
+        </member>
+    </compound>
+</tagfile>

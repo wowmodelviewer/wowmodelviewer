@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickpositioners.cpp -->
+  <title>Positioner QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >Positioner QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#attached-properties">Attached Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Positioner QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Positioner-brief -->
+<p>Provides attached properties that contain details on where an item exists in a positioner. <a href="#details">More...</a></p>
+<!-- @@@Positioner -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick 2.13</td></tr></table></div><ul>
+<li><a href="qml-qtquick-positioner-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-positioner.html#isFirstItem-attached-prop">isFirstItem</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-positioner.html#isLastItem-attached-prop">isLastItem</a></b></b> : bool</li>
+</ul>
+<a name="attached-properties"></a>
+<h2 id="attached-properties">Attached Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-positioner.html#index-attached-prop">index</a></b></b> : int</li>
+</ul>
+<!-- $$$Positioner-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>An object of type Positioner is attached to the top-level child item within a Column, Row, Flow or Grid. It provides properties that allow a child item to determine where it exists within the layout of its parent Column, Row, Flow or Grid.</p>
+<p>For example, below is a <a href="qml-qtquick-grid.html">Grid</a> with 16 child rectangles, as created through a <a href="qml-qtquick-repeater.html">Repeater</a>. Each <a href="qml-qtquick-rectangle.html">Rectangle</a> displays its index in the Grid using <a href="qml-qtquick-positioner.html#index-attached-prop">Positioner.index</a>, and the first item is colored differently by taking <a href="qml-qtquick-positioner.html#isFirstItem-attached-prop">Positioner.isFirstItem</a> into account:</p>
+<pre class="cpp">
+
+  Grid {
+      Repeater {
+          model: <span class="number">16</span>
+
+          Rectangle {
+              id: rect
+              width: <span class="number">30</span>; height: <span class="number">30</span>
+              border<span class="operator">.</span>width: <span class="number">1</span>
+              color: Positioner<span class="operator">.</span>isFirstItem <span class="operator">?</span> <span class="string">&quot;yellow&quot;</span> : <span class="string">&quot;lightsteelblue&quot;</span>
+
+              Text { text: rect<span class="operator">.</span>Positioner<span class="operator">.</span>index }
+          }
+      }
+  }
+
+</pre>
+<p class="centerAlign"><img src="images/positioner-example.png" alt="" /></p><!-- @@@Positioner -->
+<h2>Property Documentation</h2>
+<!-- $$$ -->
+<div class="qmlitem"><div class="qmlproto"><div class="table"><table class="qmlname"><tr valign="top" class="odd" id="isFirstItem-attached-prop"><td class="tblQmlPropNode"><p><a name="isFirstItem-attached-prop"></a><span class="name">Positioner.isFirstItem</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr><tr valign="top" class="odd" id="isLastItem-attached-prop"><td class="tblQmlPropNode"><p><a name="isLastItem-attached-prop"></a><span class="name">Positioner.isLastItem</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr></table></div></div><div class="qmldoc"><p>These properties allow the item to determine if it is the first or last item in the positioner, respectively.</p>
+</div></div><!-- @@@ -->
+<br/>
+<h2>Attached Property Documentation</h2>
+<!-- $$$index -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="index-attached-prop"></a><span class="name">Positioner.index</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property allows the item to determine its index within the positioner.</p>
+</div></div><!-- @@@index -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

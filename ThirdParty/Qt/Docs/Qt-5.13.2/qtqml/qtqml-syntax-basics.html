@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- basics.qdoc -->
+  <title>QML Syntax Basics | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td >QML Syntax Basics</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#import-statements">Import Statements</a></li>
+<li class="level1"><a href="#object-declarations">Object Declarations</a></li>
+<li class="level2"><a href="#child-objects">Child Objects</a></li>
+<li class="level1"><a href="#comments">Comments</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QML Syntax Basics</h1>
+<span class="subtitle"></span>
+<!-- $$$qtqml-syntax-basics.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>QML is a multi-paradigm language that enables objects to be defined in terms of their attributes and how they relate and respond to changes in other objects. In contrast to purely imperative code, where changes in attributes and behavior are expressed through a series of statements that are processed step by step, QML's declarative syntax integrates attribute and behavioral changes directly into the definitions of individual objects. These attribute definitions can then include imperative code, in the case where complex custom application behavior is needed.</p>
+<p>QML source code is generally loaded by the engine through QML <i>documents</i>, which are standalone documents of QML code. These can be used to define <a href="qtqml-typesystem-objecttypes.html">QML object types</a> that can then be reused throughout an application. Note that type names must begin with an uppercase letter in order to be declared as QML object types in a QML file.</p>
+<a name="import-statements"></a>
+<h2 id="import-statements">Import Statements</h2>
+<p>A QML document may have one or more imports at the top of the file. An import can be any one of:</p>
+<ul>
+<li>a versioned namespace into which types have been registered (e.g&#x2e;, by a plugin)</li>
+<li>a relative directory which contains type-definitions as QML documents</li>
+<li>a JavaScript file</li>
+</ul>
+<p>JavaScript file imports must be qualified when imported, so that the properties and methods they provide can be accessed.</p>
+<p>The generic form of the various imports are as follows:</p>
+<ul>
+<li><code>import Namespace VersionMajor.VersionMinor</code></li>
+<li><code>import Namespace VersionMajor.VersionMinor as SingletonTypeIdentifier</code></li>
+<li><code>import &quot;directory&quot;</code></li>
+<li><code>import &quot;file.js&quot; as ScriptIdentifier</code></li>
+</ul>
+<p>Examples:</p>
+<ul>
+<li><code>import <a href="../qtquick/qtquick-qmlmodule.html">QtQuick</a> 2.0</code></li>
+<li><code>import <a href="../qtquick/qtquick-qmlmodule.html">QtQuick</a>.LocalStorage 2.0 as Database</code></li>
+<li><code>import &quot;../privateComponents&quot;</code></li>
+<li><code>import &quot;somefile.js&quot; as Script</code></li>
+</ul>
+<p>Please see the <a href="qtqml-syntax-imports.html">QML Syntax - Import Statements</a> documentation for in-depth information about QML imports.</p>
+<a name="qml-object-declarations"></a><a name="object-declarations"></a>
+<h2 id="object-declarations">Object Declarations</h2>
+<p>Syntactically, a block of QML code defines a tree of QML objects to be created. Objects are defined using <i>object declarations</i> that describe the type of object to be created as well as the attributes that are to be given to the object. Each object may also declare child objects using nested object declarations.</p>
+<p>An object declaration consists of the name of its object type, followed by a set of curly braces. All attributes and child objects are then declared within these braces.</p>
+<p>Here is a simple object declaration:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">width</span>: <span class="number">100</span>
+      <span class="name">height</span>: <span class="number">100</span>
+      <span class="name">color</span>: <span class="string">&quot;red&quot;</span>
+  }
+
+</pre>
+<p>This declares an object of type <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a>, followed by a set of curly braces that encompasses the attributes defined for that object. The <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> type is a type made available by the <code>QtQuick</code> module, and the attributes defined in this case are the values of the rectangle's <code>width</code>, <code>height</code> and <code>color</code> properties. (These are properties made available by the <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> type, as described in the <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> documentation.)</p>
+<p>The above object can be loaded by the engine if it is part of a <a href="qtqml-documents-topic.html">QML document</a>. That is, if the source code is complemented with <i>import</i> statement that imports the <code>QtQuick</code> module (to make the <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> type available), as below:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">width</span>: <span class="number">100</span>
+      <span class="name">height</span>: <span class="number">100</span>
+      <span class="name">color</span>: <span class="string">&quot;red&quot;</span>
+  }
+
+</pre>
+<p>When placed into a <code>.qml</code> file and loaded by the QML engine, the above code creates a <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> object using the <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> type supplied by the <code>QtQuick</code> module:</p>
+<p class="centerAlign"><img src="images/qtqml-syntax-basics-object-declaration.png" alt="" /></p><p><b>Note: </b>If an object definition only has a small number of properties, it can be written on a single line like this, with the properties separated by semi-colons:</p><pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> { <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span>; <span class="name">color</span>: <span class="string">&quot;red&quot;</span> }
+
+</pre>
+<p>Obviously, the <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> object declared in this example is very simple indeed, as it defines nothing more than a few property values. To create more useful objects, an object declaration may define many other types of attributes: these are discussed in the <a href="qtqml-syntax-objectattributes.html">QML Object Attributes</a> documentation. Additionally, an object declaration may define child objects, as discussed below.</p>
+<a name="child-objects"></a>
+<h3 id="child-objects">Child Objects</h3>
+<p>Any object declaration can define child objects through nested object declarations. In this way, <b>any object declaration implicitly declares an object tree that may contain any number of child objects</b>.</p>
+<p>For example, the <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> object declaration below includes a <a href="../qtquick/qml-qtquick-gradient.html">Gradient</a> object declaration, which in turn contains two <a href="../qtquick/qml-qtquick-gradientstop.html">GradientStop</a> declarations:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">width</span>: <span class="number">100</span>
+      <span class="name">height</span>: <span class="number">100</span>
+
+      <span class="name">gradient</span>: <span class="name">Gradient</span> {
+          <span class="type"><a href="../qtquick/qml-qtquick-gradientstop.html">GradientStop</a></span> { <span class="name">position</span>: <span class="number">0.0</span>; <span class="name">color</span>: <span class="string">&quot;yellow&quot;</span> }
+          <span class="type"><a href="../qtquick/qml-qtquick-gradientstop.html">GradientStop</a></span> { <span class="name">position</span>: <span class="number">1.0</span>; <span class="name">color</span>: <span class="string">&quot;green&quot;</span> }
+      }
+  }
+
+</pre>
+<p>When this code is loaded by the engine, it creates an object tree with a <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> object at the root; this object has a <a href="../qtquick/qml-qtquick-gradient.html">Gradient</a> child object, which in turn has two <a href="../qtquick/qml-qtquick-gradientstop.html">GradientStop</a> children.</p>
+<p>Note, however, that this is a parent-child relationship in the context of the QML object tree, not in the context of the visual scene. The concept of a parent-child relationship in a visual scene is provided by the <a href="../qtquick/qml-qtquick-item.html">Item</a> type from the <code>QtQuick</code> module, which is the base type for most QML types, as most QML objects are intended to be visually rendered. For example, <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> and <a href="../qtquick/qml-qtquick-text.html">Text</a> are both <a href="../qtquick/qml-qtquick-item.html">Item</a>-based types, and below, a <a href="../qtquick/qml-qtquick-text.html">Text</a> object has been declared as a visual child of a <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> object:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">width</span>: <span class="number">200</span>
+      <span class="name">height</span>: <span class="number">200</span>
+      <span class="name">color</span>: <span class="string">&quot;red&quot;</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+          <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+          <span class="name">text</span>: <span class="string">&quot;Hello, QML!&quot;</span>
+      }
+  }
+
+</pre>
+<p>When the <a href="../qtquick/qml-qtquick-text.html">Text</a> object refers to its <a href="../qtquick/qml-qtquick-item.html#parent-prop">parent</a> value in the above code, it is referring to its <i>visual parent</i>, not the parent in the object tree. In this case, they are one and the same: the <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> object is the parent of the <a href="../qtquick/qml-qtquick-text.html">Text</a> object in both the context of the QML object tree as well as the context of the visual scene. However, while the <a href="../qtquick/qml-qtquick-item.html#parent-prop">parent</a> property can be modified to change the visual parent, the parent of an object in the context of the object tree cannot be changed from QML.</p>
+<p>(Additionally, notice that the <a href="../qtquick/qml-qtquick-text.html">Text</a> object has been declared without assigning it to a property of the <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a>, unlike the earlier example which assigned a <a href="../qtquick/qml-qtquick-gradient.html">Gradient</a> object to the rectangle's <code>gradient</code> property. This is because the <a href="../qtquick/qml-qtquick-item.html#children-prop">children</a> property of <a href="../qtquick/qml-qtquick-item.html">Item</a> has been set as the type's <a href="qtqml-syntax-objectattributes.html#default-properties">default property</a> to enable this more convenient syntax.)</p>
+<p>See the <a href="../qtquick/qtquick-visualcanvas-visualparent.html">visual parent</a> documentation for more information on the concept of visual parenting with the <a href="../qtquick/qml-qtquick-item.html">Item</a> type.</p>
+<a name="comments"></a>
+<h2 id="comments">Comments</h2>
+<p>The syntax for commenting in QML is similar to that of JavaScript:</p>
+<ul>
+<li>Single line comments start with // and finish at the end of the line.</li>
+<li>Multiline comments start with /* and finish with */</li>
+</ul>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+      <span class="name">text</span>: <span class="string">&quot;Hello world!&quot;</span>    <span class="comment">//a basic greeting</span>
+      <span class="comment">/*
+          We want this text to stand out from the rest so
+          we give it a large size and different font.
+       */</span>
+      <span class="name">font</span>.family: <span class="string">&quot;Helvetica&quot;</span>
+      <span class="name">font</span>.pointSize: <span class="number">24</span>
+  }
+
+</pre>
+<p>Comments are ignored by the engine when processing QML code. They are useful for explaining what a section of code is doing, whether for reference at a later date or for explaining the implementation to others.</p>
+<p>Comments can also be used to prevent the execution of code, which is sometimes useful for tracking down problems.</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+      <span class="name">text</span>: <span class="string">&quot;Hello world!&quot;</span>
+      <span class="comment">//opacity: 0.5</span>
+  }
+
+</pre>
+<p>In the above example, the <a href="../qtquick/qml-qtquick-text.html">Text</a> object will have normal opacity, since the line opacity: 0.5 has been turned into a comment.</p>
+</div>
+<!-- @@@qtqml-syntax-basics.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

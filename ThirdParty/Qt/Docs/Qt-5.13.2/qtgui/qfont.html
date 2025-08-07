@@ -1,0 +1,774 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qfont.cpp -->
+  <title>QFont Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QFont</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QFont Class</h1>
+<!-- $$$QFont-brief -->
+<p>The <a href="qfont.html">QFont</a> class specifies a query for a font used for drawing text. <a href="#details">More...</a></p>
+<!-- @@@QFont -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QFont&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr></table></div><ul>
+<li><a href="qfont-members.html">List of all members, including inherited members</a></li>
+<li><a href="qfont-obsolete.html">Obsolete members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#Capitalization-enum">Capitalization</a></b> { MixedCase, AllUppercase, AllLowercase, SmallCaps, Capitalize }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#HintingPreference-enum">HintingPreference</a></b> { PreferDefaultHinting, PreferNoHinting, PreferVerticalHinting, PreferFullHinting }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#SpacingType-enum">SpacingType</a></b> { PercentageSpacing, AbsoluteSpacing }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#Stretch-enum">Stretch</a></b> { AnyStretch, UltraCondensed, ExtraCondensed, Condensed, ..., UltraExpanded }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#Style-enum">Style</a></b> { StyleNormal, StyleItalic, StyleOblique }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#StyleHint-enum">StyleHint</a></b> { AnyStyle, SansSerif, Helvetica, Serif, ..., System }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#StyleStrategy-enum">StyleStrategy</a></b> { PreferDefault, PreferBitmap, PreferDevice, PreferOutline, ..., ForceIntegerMetrics }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#Weight-enum">Weight</a></b> { Thin, ExtraLight, Light, Normal, ..., Black }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#QFont-4">QFont</a></b>(const QFont &amp;<i>font</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#QFont-3">QFont</a></b>(const QFont &amp;<i>font</i>, const QPaintDevice *<i>pd</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#QFont-1">QFont</a></b>(const QString &amp;<i>family</i>, int <i>pointSize</i> = -1, int <i>weight</i> = -1, bool <i>italic</i> = false)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#QFont">QFont</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QFont &amp;</td><td class="memItemRight bottomAlign"><b><a href="qfont.html#operator-eq-1">operator=</a></b>(QFont &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QFont &amp;</td><td class="memItemRight bottomAlign"><b><a href="qfont.html#operator-eq">operator=</a></b>(const QFont &amp;<i>font</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#dtor.QFont">~QFont</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#bold">bold</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QFont::Capitalization </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#capitalization">capitalization</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#defaultFamily">defaultFamily</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#exactMatch">exactMatch</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#families">families</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#family">family</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#fixedPitch">fixedPitch</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#fromString">fromString</a></b>(const QString &amp;<i>descrip</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QFont::HintingPreference </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#hintingPreference">hintingPreference</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#isCopyOf">isCopyOf</a></b>(const QFont &amp;<i>f</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#italic">italic</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#kerning">kerning</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#key">key</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#letterSpacing">letterSpacing</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QFont::SpacingType </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#letterSpacingType">letterSpacingType</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#overline">overline</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#pixelSize">pixelSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#pointSize">pointSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#pointSizeF">pointSizeF</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QFont </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#resolve">resolve</a></b>(const QFont &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#setBold">setBold</a></b>(bool <i>enable</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#setCapitalization">setCapitalization</a></b>(QFont::Capitalization <i>caps</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#setFamilies">setFamilies</a></b>(const QStringList &amp;<i>families</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#setFamily">setFamily</a></b>(const QString &amp;<i>family</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#setFixedPitch">setFixedPitch</a></b>(bool <i>enable</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#setHintingPreference">setHintingPreference</a></b>(QFont::HintingPreference <i>hintingPreference</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#setItalic">setItalic</a></b>(bool <i>enable</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#setKerning">setKerning</a></b>(bool <i>enable</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#setLetterSpacing">setLetterSpacing</a></b>(QFont::SpacingType <i>type</i>, qreal <i>spacing</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#setOverline">setOverline</a></b>(bool <i>enable</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#setPixelSize">setPixelSize</a></b>(int <i>pixelSize</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#setPointSize">setPointSize</a></b>(int <i>pointSize</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#setPointSizeF">setPointSizeF</a></b>(qreal <i>pointSize</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#setStretch">setStretch</a></b>(int <i>factor</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#setStrikeOut">setStrikeOut</a></b>(bool <i>enable</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#setStyle">setStyle</a></b>(QFont::Style <i>style</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#setStyleHint">setStyleHint</a></b>(QFont::StyleHint <i>hint</i>, QFont::StyleStrategy <i>strategy</i> = PreferDefault)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#setStyleName">setStyleName</a></b>(const QString &amp;<i>styleName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#setStyleStrategy">setStyleStrategy</a></b>(QFont::StyleStrategy <i>s</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#setUnderline">setUnderline</a></b>(bool <i>enable</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#setWeight">setWeight</a></b>(int <i>weight</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#setWordSpacing">setWordSpacing</a></b>(qreal <i>spacing</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#stretch">stretch</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#strikeOut">strikeOut</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QFont::Style </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#style">style</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QFont::StyleHint </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#styleHint">styleHint</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#styleName">styleName</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QFont::StyleStrategy </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#styleStrategy">styleStrategy</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#swap">swap</a></b>(QFont &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#toString">toString</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#underline">underline</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#weight">weight</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#wordSpacing">wordSpacing</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariant </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#operator-QVariant">operator QVariant</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#operator-not-eq">operator!=</a></b>(const QFont &amp;<i>f</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#operator-lt">operator&lt;</a></b>(const QFont &amp;<i>f</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#operator-eq-eq">operator==</a></b>(const QFont &amp;<i>f</i>) const</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#insertSubstitution">insertSubstitution</a></b>(const QString &amp;<i>familyName</i>, const QString &amp;<i>substituteName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#insertSubstitutions">insertSubstitutions</a></b>(const QString &amp;<i>familyName</i>, const QStringList &amp;<i>substituteNames</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#removeSubstitutions">removeSubstitutions</a></b>(const QString &amp;<i>familyName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#substitute">substitute</a></b>(const QString &amp;<i>familyName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#substitutes">substitutes</a></b>(const QString &amp;<i>familyName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#substitutions">substitutions</a></b>()</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qfont.html#qHash">qHash</a></b>(const QFont &amp;<i>font</i>, uint <i>seed</i> = 0)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDataStream &amp;</td><td class="memItemRight bottomAlign"><b><a href="qfont.html#operator-lt-lt-11">operator&lt;&lt;</a></b>(QDataStream &amp;<i>s</i>, const QFont &amp;<i>font</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDataStream &amp;</td><td class="memItemRight bottomAlign"><b><a href="qfont.html#operator-gt-gt">operator&gt;&gt;</a></b>(QDataStream &amp;<i>s</i>, QFont &amp;<i>font</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QFont-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qfont.html">QFont</a> can be regarded as a query for one or more fonts on the system.</p>
+<p>When you create a <a href="qfont.html">QFont</a> object you specify various attributes that you want the font to have. Qt will use the font with the specified attributes, or if no matching font exists, Qt will use the closest matching installed font. The attributes of the font that is actually used are retrievable from a <a href="qfontinfo.html">QFontInfo</a> object. If the window system provides an exact match <a href="qfont.html#exactMatch">exactMatch</a>() returns <code>true</code>. Use <a href="qfontmetricsf.html">QFontMetricsF</a> to get measurements, e.g&#x2e; the pixel length of a string using QFontMetrics::width().</p>
+<p>Attributes which are not specifically set will not affect the font selection algorithm, and default values will be preferred instead.</p>
+<p>To load a specific physical font, typically represented by a single file, use <a href="qrawfont.html">QRawFont</a> instead.</p>
+<p>Note that a <a href="qguiapplication.html">QGuiApplication</a> instance must exist before a <a href="qfont.html">QFont</a> can be used. You can set the application's default font with <a href="qguiapplication.html#setFont">QGuiApplication::setFont</a>().</p>
+<p>If a chosen font does not include all the characters that need to be displayed, <a href="qfont.html">QFont</a> will try to find the characters in the nearest equivalent fonts. When a <a href="qpainter.html">QPainter</a> draws a character from a font the <a href="qfont.html">QFont</a> will report whether or not it has the character; if it does not, <a href="qpainter.html">QPainter</a> will draw an unfilled square.</p>
+<p>Create QFonts like this:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qfont.html#QFont">QFont</a></span> serifFont(<span class="string">&quot;Times&quot;</span><span class="operator">,</span> <span class="number">10</span><span class="operator">,</span> <span class="type"><a href="qfont.html#QFont">QFont</a></span><span class="operator">::</span>Bold);
+  <span class="type"><a href="qfont.html#QFont">QFont</a></span> sansFont(<span class="string">&quot;Helvetica [Cronyx]&quot;</span><span class="operator">,</span> <span class="number">12</span>);
+
+</pre>
+<p>The attributes set in the constructor can also be set later, e.g&#x2e; <a href="qfont.html#setFamily">setFamily</a>(), <a href="qfont.html#setPointSize">setPointSize</a>(), <a href="qfont.html#setPointSizeF">setPointSizeF</a>(), <a href="qfont.html#setWeight">setWeight</a>() and <a href="qfont.html#setItalic">setItalic</a>(). The remaining attributes must be set after contstruction, e.g&#x2e; <a href="qfont.html#setBold">setBold</a>(), <a href="qfont.html#setUnderline">setUnderline</a>(), <a href="qfont.html#setOverline">setOverline</a>(), <a href="qfont.html#setStrikeOut">setStrikeOut</a>() and <a href="qfont.html#setFixedPitch">setFixedPitch</a>(). <a href="qfontinfo.html">QFontInfo</a> objects should be created <i>after</i> the font's attributes have been set. A <a href="qfontinfo.html">QFontInfo</a> object will not change, even if you change the font's attributes. The corresponding &quot;get&quot; functions, e.g&#x2e; <a href="qfont.html#family">family</a>(), <a href="qfont.html#pointSize">pointSize</a>(), etc., return the values that were set, even though the values used may differ. The actual values are available from a <a href="qfontinfo.html">QFontInfo</a> object.</p>
+<p>If the requested font family is unavailable you can influence the <a href="qfont.html#fontmatching">font matching algorithm</a> by choosing a particular <a href="qfont.html#StyleHint-enum">QFont::StyleHint</a> and <a href="qfont.html#StyleStrategy-enum">QFont::StyleStrategy</a> with <a href="qfont.html#setStyleHint">setStyleHint</a>(). The default family (corresponding to the current style hint) is returned by <a href="qfont.html#defaultFamily">defaultFamily</a>().</p>
+<p>You can provide substitutions for font family names using <a href="qfont.html#insertSubstitution">insertSubstitution</a>() and <a href="qfont.html#insertSubstitutions">insertSubstitutions</a>(). Substitutions can be removed with <a href="qfont.html#removeSubstitutions">removeSubstitutions</a>(). Use <a href="qfont.html#substitute">substitute</a>() to retrieve a family's first substitute, or the family name itself if it has no substitutes. Use <a href="qfont.html#substitutes">substitutes</a>() to retrieve a list of a family's substitutes (which may be empty).</p>
+<p>Every <a href="qfont.html">QFont</a> has a <a href="qfont.html#key">key</a>() which you can use, for example, as the key in a cache or dictionary. If you want to store a user's font preferences you could use <a href="../qtcore/qsettings.html">QSettings</a>, writing the font information with <a href="qfont.html#toString">toString</a>() and reading it back with <a href="qfont.html#fromString">fromString</a>(). The operator&lt;&lt;() and operator&gt;&gt;() functions are also available, but they work on a data stream.</p>
+<p>It is possible to set the height of characters shown on the screen to a specified number of pixels with <a href="qfont.html#setPixelSize">setPixelSize</a>(); however using <a href="qfont.html#setPointSize">setPointSize</a>() has a similar effect and provides device independence.</p>
+<p>Loading fonts can be expensive, especially on X11. <a href="qfont.html">QFont</a> contains extensive optimizations to make the copying of <a href="qfont.html">QFont</a> objects fast, and to cache the results of the slow window system functions it depends upon.</p>
+<a name="fontmatching"></a><p>The font matching algorithm works as follows:</p>
+<ol class="1" type="1"><li>The specified font families (set by <a href="qfont.html#setFamilies">setFamilies</a>()) are searched for.</li>
+<li>If not found, then if set the specified font family exists and can be used to represent the writing system in use, it will be selected.</li>
+<li>If not, a replacement font that supports the writing system is selected. The font matching algorithm will try to find the best match for all the properties set in the <a href="qfont.html">QFont</a>. How this is done varies from platform to platform.</li>
+<li>If no font exists on the system that can support the text, then special &quot;missing character&quot; boxes will be shown in its place.</li>
+</ol>
+<p><b>Note: </b>If the selected font, though supporting the writing system in general, is missing glyphs for one or more specific characters, then Qt will try to find a fallback font for this or these particular characters. This feature can be disabled using <a href="qfont.html#StyleStrategy-enum">QFont::NoFontMerging</a> style strategy.</p><p>In Windows a request for the &quot;Courier&quot; font is automatically changed to &quot;Courier New&quot;, an improved version of Courier that allows for smooth scaling. The older &quot;Courier&quot; bitmap font can be selected by setting the <a href="qfont.html#StyleStrategy-enum">PreferBitmap</a> style strategy (see <a href="qfont.html#setStyleStrategy">setStyleStrategy</a>()).</p>
+<p>Once a font is found, the remaining attributes are matched in order of priority:</p>
+<ol class="1" type="1"><li><a href="qfont.html#fixedPitch">fixedPitch</a>()</li>
+<li><a href="qfont.html#pointSize">pointSize</a>() (see below)</li>
+<li><a href="qfont.html#weight">weight</a>()</li>
+<li><a href="qfont.html#style">style</a>()</li>
+</ol>
+<p>If you have a font which matches on family, even if none of the other attributes match, this font will be chosen in preference to a font which doesn't match on family but which does match on the other attributes. This is because font family is the dominant search criteria.</p>
+<p>The point size is defined to match if it is within 20% of the requested point size. When several fonts match and are only distinguished by point size, the font with the closest point size to the one requested will be chosen.</p>
+<p>The actual family, font size, weight and other font attributes used for drawing text will depend on what's available for the chosen family under the window system. A <a href="qfontinfo.html">QFontInfo</a> object can be used to determine the actual values used for drawing the text.</p>
+<p>Examples:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qfont.html#QFont">QFont</a></span> f(<span class="string">&quot;Helvetica&quot;</span>);
+
+</pre>
+<p>If you had both an Adobe and a Cronyx Helvetica, you might get either.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qfont.html#QFont">QFont</a></span> f(<span class="string">&quot;Helvetica [Cronyx]&quot;</span>);
+
+</pre>
+<p>You can specify the foundry you want in the family name. The font f in the above example will be set to &quot;Helvetica [Cronyx]&quot;.</p>
+<p>To determine the attributes of the font actually used in the window system, use a <a href="qfontinfo.html">QFontInfo</a> object, e.g&#x2e;</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qfontinfo.html">QFontInfo</a></span> info(f1);
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> family <span class="operator">=</span> info<span class="operator">.</span>family();
+
+</pre>
+<p>To find out font metrics use a <a href="qfontmetrics.html">QFontMetrics</a> object, e.g&#x2e;</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qfontmetrics.html">QFontMetrics</a></span> fm(f1);
+  <span class="type">int</span> textWidthInPixels <span class="operator">=</span> fm<span class="operator">.</span>horizontalAdvance(<span class="string">&quot;How many pixels wide is this text?&quot;</span>);
+  <span class="type">int</span> textHeightInPixels <span class="operator">=</span> fm<span class="operator">.</span>height();
+
+</pre>
+<p>For more general information on fonts, see the <a href="http://nwalsh.com/comp.fonts/FAQ/">comp.fonts FAQ</a>. Information on encodings can be found from <a href="http://czyborra.com/">Roman Czyborra's</a> page.</p>
+</div>
+<p><b>See also </b><a href="qfontmetrics.html">QFontMetrics</a>, <a href="qfontinfo.html">QFontInfo</a>, <a href="qfontdatabase.html">QFontDatabase</a>, and <a href="../qtwidgets/qtwidgets-widgets-charactermap-example.html">Character Map Example</a>.</p>
+<!-- @@@QFont -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Capitalization$$$MixedCase$$$AllUppercase$$$AllLowercase$$$SmallCaps$$$Capitalize -->
+<h3 class="fn" id="Capitalization-enum"><a name="Capitalization-enum"></a>enum QFont::<span class="name">Capitalization</span></h3>
+<p>Rendering option for text this font applies to.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QFont::MixedCase</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">This is the normal text rendering option where no capitalization change is applied.</td></tr>
+<tr><td class="topAlign"><code>QFont::AllUppercase</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">This alters the text to be rendered in all uppercase type.</td></tr>
+<tr><td class="topAlign"><code>QFont::AllLowercase</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">This alters the text to be rendered in all lowercase type.</td></tr>
+<tr><td class="topAlign"><code>QFont::SmallCaps</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">This alters the text to be rendered in small-caps type.</td></tr>
+<tr><td class="topAlign"><code>QFont::Capitalize</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">This alters the text to be rendered with the first character of each word as an uppercase character.</td></tr>
+</table></div>
+<p>This enum was introduced or modified in  Qt 4.4.</p>
+<!-- @@@Capitalization -->
+<!-- $$$HintingPreference$$$PreferDefaultHinting$$$PreferNoHinting$$$PreferVerticalHinting$$$PreferFullHinting -->
+<h3 class="fn" id="HintingPreference-enum"><a name="HintingPreference-enum"></a>enum QFont::<span class="name">HintingPreference</span></h3>
+<p>This enum describes the different levels of hinting that can be applied to glyphs to improve legibility on displays where it might be warranted by the density of pixels.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QFont::PreferDefaultHinting</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Use the default hinting level for the target platform.</td></tr>
+<tr><td class="topAlign"><code>QFont::PreferNoHinting</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">If possible, render text without hinting the outlines of the glyphs. The text layout will be typographically accurate and scalable, using the same metrics as are used e.g&#x2e; when printing.</td></tr>
+<tr><td class="topAlign"><code>QFont::PreferVerticalHinting</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">If possible, render text with no horizontal hinting, but align glyphs to the pixel grid in the vertical direction. The text will appear crisper on displays where the density is too low to give an accurate rendering of the glyphs. But since the horizontal metrics of the glyphs are unhinted, the text's layout will be scalable to higher density devices (such as printers) without impacting details such as line breaks.</td></tr>
+<tr><td class="topAlign"><code>QFont::PreferFullHinting</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">If possible, render text with hinting in both horizontal and vertical directions. The text will be altered to optimize legibility on the target device, but since the metrics will depend on the target size of the text, the positions of glyphs, line breaks, and other typographical detail will not scale, meaning that a text layout may look different on devices with different pixel densities.</td></tr>
+</table></div>
+<p>Please note that this enum only describes a preference, as the full range of hinting levels are not supported on all of Qt's supported platforms. The following table details the effect of a given hinting preference on a selected set of target platforms.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th ></th><th >PreferDefaultHinting</th><th >PreferNoHinting</th><th >PreferVerticalHinting</th><th >PreferFullHinting</th></tr></thead>
+<tr valign="top" class="odd"><td >Windows Vista (w/o Platform Update) and earlier</td><td >Full hinting</td><td >Full hinting</td><td >Full hinting</td><td >Full hinting</td></tr>
+<tr valign="top" class="even"><td >Windows 7 and Windows Vista (w/Platform Update) and DirectWrite enabled in Qt</td><td >Full hinting</td><td >Vertical hinting</td><td >Vertical hinting</td><td >Full hinting</td></tr>
+<tr valign="top" class="odd"><td ><a href="qtgui-attribution-freetype.html#freetype">FreeType</a></td><td >Operating System setting</td><td >No hinting</td><td >Vertical hinting (light)</td><td >Full hinting</td></tr>
+<tr valign="top" class="even"><td >Cocoa on <a href="../qtdoc/internationalization.html#macos">macOS</a></td><td >No hinting</td><td >No hinting</td><td >No hinting</td><td >No hinting</td></tr>
+</table></div>
+<p><b>Note: </b>Please be aware that altering the hinting preference on Windows is available through the DirectWrite font engine. This is available on Windows Vista after installing the platform update, and on Windows 7. In order to use this extension, configure Qt using -directwrite. The target application will then depend on the availability of DirectWrite on the target system.</p><p>This enum was introduced or modified in  Qt 4.8.</p>
+<!-- @@@HintingPreference -->
+<!-- $$$SpacingType$$$PercentageSpacing$$$AbsoluteSpacing -->
+<h3 class="fn" id="SpacingType-enum"><a name="SpacingType-enum"></a>enum QFont::<span class="name">SpacingType</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QFont::PercentageSpacing</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">A value of 100 will keep the spacing unchanged; a value of 200 will enlarge the spacing after a character by the width of the character itself.</td></tr>
+<tr><td class="topAlign"><code>QFont::AbsoluteSpacing</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">A positive value increases the letter spacing by the corresponding pixels; a negative value decreases the spacing.</td></tr>
+</table></div>
+<p>This enum was introduced or modified in  Qt 4.4.</p>
+<!-- @@@SpacingType -->
+<!-- $$$Stretch$$$AnyStretch$$$UltraCondensed$$$ExtraCondensed$$$Condensed$$$SemiCondensed$$$Unstretched$$$SemiExpanded$$$Expanded$$$ExtraExpanded$$$UltraExpanded -->
+<h3 class="fn" id="Stretch-enum"><a name="Stretch-enum"></a>enum QFont::<span class="name">Stretch</span></h3>
+<p>Predefined stretch values that follow the CSS naming convention. The higher the value, the more stretched the text is.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QFont::AnyStretch</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">0 Accept any stretch matched using the other <a href="qfont.html">QFont</a> properties (added in Qt 5.8)</td></tr>
+<tr><td class="topAlign"><code>QFont::UltraCondensed</code></td><td class="topAlign tblval"><code>50</code></td><td class="topAlign">50</td></tr>
+<tr><td class="topAlign"><code>QFont::ExtraCondensed</code></td><td class="topAlign tblval"><code>62</code></td><td class="topAlign">62</td></tr>
+<tr><td class="topAlign"><code>QFont::Condensed</code></td><td class="topAlign tblval"><code>75</code></td><td class="topAlign">75</td></tr>
+<tr><td class="topAlign"><code>QFont::SemiCondensed</code></td><td class="topAlign tblval"><code>87</code></td><td class="topAlign">87</td></tr>
+<tr><td class="topAlign"><code>QFont::Unstretched</code></td><td class="topAlign tblval"><code>100</code></td><td class="topAlign">100</td></tr>
+<tr><td class="topAlign"><code>QFont::SemiExpanded</code></td><td class="topAlign tblval"><code>112</code></td><td class="topAlign">112</td></tr>
+<tr><td class="topAlign"><code>QFont::Expanded</code></td><td class="topAlign tblval"><code>125</code></td><td class="topAlign">125</td></tr>
+<tr><td class="topAlign"><code>QFont::ExtraExpanded</code></td><td class="topAlign tblval"><code>150</code></td><td class="topAlign">150</td></tr>
+<tr><td class="topAlign"><code>QFont::UltraExpanded</code></td><td class="topAlign tblval"><code>200</code></td><td class="topAlign">200</td></tr>
+</table></div>
+<p><b>See also </b><a href="qfont.html#setStretch">setStretch</a>() and <a href="qfont.html#stretch">stretch</a>().</p>
+<!-- @@@Stretch -->
+<!-- $$$Style$$$StyleNormal$$$StyleItalic$$$StyleOblique -->
+<h3 class="fn" id="Style-enum"><a name="Style-enum"></a>enum QFont::<span class="name">Style</span></h3>
+<p>This enum describes the different styles of glyphs that are used to display text.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QFont::StyleNormal</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Normal glyphs used in unstyled text.</td></tr>
+<tr><td class="topAlign"><code>QFont::StyleItalic</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Italic glyphs that are specifically designed for the purpose of representing italicized text.</td></tr>
+<tr><td class="topAlign"><code>QFont::StyleOblique</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Glyphs with an italic appearance that are typically based on the unstyled glyphs, but are not fine-tuned for the purpose of representing italicized text.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qfont.html#Weight-enum">Weight</a>.</p>
+<!-- @@@Style -->
+<!-- $$$StyleHint$$$Helvetica$$$SansSerif$$$Times$$$Serif$$$Courier$$$TypeWriter$$$OldEnglish$$$Decorative$$$System$$$AnyStyle$$$Cursive$$$Monospace$$$Fantasy -->
+<h3 class="fn" id="StyleHint-enum"><a name="StyleHint-enum"></a>enum QFont::<span class="name">StyleHint</span></h3>
+<p>Style hints are used by the <a href="qfont.html">font matching</a> algorithm to find an appropriate default family if a selected font family is not available.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QFont::AnyStyle</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">leaves the font matching algorithm to choose the family. This is the default.</td></tr>
+<tr><td class="topAlign"><code>QFont::SansSerif</code></td><td class="topAlign tblval"><code>Helvetica</code></td><td class="topAlign">the font matcher prefer sans serif fonts.</td></tr>
+<tr><td class="topAlign"><code>QFont::Helvetica</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">is a synonym for <code>SansSerif</code>.</td></tr>
+<tr><td class="topAlign"><code>QFont::Serif</code></td><td class="topAlign tblval"><code>Times</code></td><td class="topAlign">the font matcher prefers serif fonts.</td></tr>
+<tr><td class="topAlign"><code>QFont::Times</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">is a synonym for <code>Serif</code>.</td></tr>
+<tr><td class="topAlign"><code>QFont::TypeWriter</code></td><td class="topAlign tblval"><code>Courier</code></td><td class="topAlign">the font matcher prefers fixed pitch fonts.</td></tr>
+<tr><td class="topAlign"><code>QFont::Courier</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">a synonym for <code>TypeWriter</code>.</td></tr>
+<tr><td class="topAlign"><code>QFont::OldEnglish</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">the font matcher prefers decorative fonts.</td></tr>
+<tr><td class="topAlign"><code>QFont::Decorative</code></td><td class="topAlign tblval"><code>OldEnglish</code></td><td class="topAlign">is a synonym for <code>OldEnglish</code>.</td></tr>
+<tr><td class="topAlign"><code>QFont::Monospace</code></td><td class="topAlign tblval"><code>7</code></td><td class="topAlign">the font matcher prefers fonts that map to the CSS generic font-family 'monospace'.</td></tr>
+<tr><td class="topAlign"><code>QFont::Fantasy</code></td><td class="topAlign tblval"><code>8</code></td><td class="topAlign">the font matcher prefers fonts that map to the CSS generic font-family 'fantasy'.</td></tr>
+<tr><td class="topAlign"><code>QFont::Cursive</code></td><td class="topAlign tblval"><code>6</code></td><td class="topAlign">the font matcher prefers fonts that map to the CSS generic font-family 'cursive'.</td></tr>
+<tr><td class="topAlign"><code>QFont::System</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">the font matcher prefers system fonts.</td></tr>
+</table></div>
+<!-- @@@StyleHint -->
+<!-- $$$StyleStrategy$$$PreferDefault$$$PreferBitmap$$$PreferDevice$$$PreferOutline$$$ForceOutline$$$PreferMatch$$$PreferQuality$$$PreferAntialias$$$NoAntialias$$$OpenGLCompatible$$$ForceIntegerMetrics$$$NoSubpixelAntialias$$$PreferNoShaping$$$NoFontMerging -->
+<h3 class="fn" id="StyleStrategy-enum"><a name="StyleStrategy-enum"></a>enum QFont::<span class="name">StyleStrategy</span></h3>
+<p>The style strategy tells the <a href="qfont.html">font matching</a> algorithm what type of fonts should be used to find an appropriate default family.</p>
+<p>The following strategies are available:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QFont::PreferDefault</code></td><td class="topAlign tblval"><code>0x0001</code></td><td class="topAlign">the default style strategy. It does not prefer any type of font.</td></tr>
+<tr><td class="topAlign"><code>QFont::PreferBitmap</code></td><td class="topAlign tblval"><code>0x0002</code></td><td class="topAlign">prefers bitmap fonts (as opposed to outline fonts).</td></tr>
+<tr><td class="topAlign"><code>QFont::PreferDevice</code></td><td class="topAlign tblval"><code>0x0004</code></td><td class="topAlign">prefers device fonts.</td></tr>
+<tr><td class="topAlign"><code>QFont::PreferOutline</code></td><td class="topAlign tblval"><code>0x0008</code></td><td class="topAlign">prefers outline fonts (as opposed to bitmap fonts).</td></tr>
+<tr><td class="topAlign"><code>QFont::ForceOutline</code></td><td class="topAlign tblval"><code>0x0010</code></td><td class="topAlign">forces the use of outline fonts.</td></tr>
+<tr><td class="topAlign"><code>QFont::NoAntialias</code></td><td class="topAlign tblval"><code>0x0100</code></td><td class="topAlign">don't antialias the fonts.</td></tr>
+<tr><td class="topAlign"><code>QFont::NoSubpixelAntialias</code></td><td class="topAlign tblval"><code>0x0800</code></td><td class="topAlign">avoid subpixel antialiasing on the fonts if possible.</td></tr>
+<tr><td class="topAlign"><code>QFont::PreferAntialias</code></td><td class="topAlign tblval"><code>0x0080</code></td><td class="topAlign">antialias if possible.</td></tr>
+<tr><td class="topAlign"><code>QFont::OpenGLCompatible</code></td><td class="topAlign tblval"><code>0x0200</code></td><td class="topAlign">forces the use of OpenGL compatible fonts.</td></tr>
+<tr><td class="topAlign"><code>QFont::NoFontMerging</code></td><td class="topAlign tblval"><code>0x8000</code></td><td class="topAlign">If the font selected for a certain writing system does not contain a character requested to draw, then Qt automatically chooses a similar looking font that contains the character. The NoFontMerging flag disables this feature. Please note that enabling this flag will not prevent Qt from automatically picking a suitable font when the selected font does not support the writing system of the text.</td></tr>
+<tr><td class="topAlign"><code>QFont::PreferNoShaping</code></td><td class="topAlign tblval"><code>0x1000</code></td><td class="topAlign">Sometimes, a font will apply complex rules to a set of characters in order to display them correctly. In some writing systems, such as Brahmic scripts, this is required in order for the text to be legible, but in e.g&#x2e; Latin script, it is merely a cosmetic feature. The PreferNoShaping flag will disable all such features when they are not required, which will improve performance in most cases (since Qt 5.10).</td></tr>
+</table></div>
+<p>Any of these may be OR-ed with one of these flags:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="even"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QFont::PreferMatch</code></td><td class="topAlign tblval"><code>0x0020</code></td><td class="topAlign">prefer an exact match. The font matcher will try to use the exact font size that has been specified.</td></tr>
+<tr><td class="topAlign"><code>QFont::PreferQuality</code></td><td class="topAlign tblval"><code>0x0040</code></td><td class="topAlign">prefer the best quality font. The font matcher will use the nearest standard point size that the font supports.</td></tr>
+<tr><td class="topAlign"><code>QFont::ForceIntegerMetrics</code></td><td class="topAlign tblval"><code>0x0400</code></td><td class="topAlign">forces the use of integer values in font engines that support fractional font metrics.</td></tr>
+</table></div>
+<!-- @@@StyleStrategy -->
+<!-- $$$Weight$$$Thin$$$ExtraLight$$$Light$$$Normal$$$Medium$$$DemiBold$$$Bold$$$ExtraBold$$$Black -->
+<h3 class="fn" id="Weight-enum"><a name="Weight-enum"></a>enum QFont::<span class="name">Weight</span></h3>
+<p>Qt uses a weighting scale from 0 to 99 similar to, but not the same as, the scales used in Windows or CSS. A weight of 0 will be thin, whilst 99 will be extremely black.</p>
+<p>This enum contains the predefined font weights:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QFont::Thin</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">0</td></tr>
+<tr><td class="topAlign"><code>QFont::ExtraLight</code></td><td class="topAlign tblval"><code>12</code></td><td class="topAlign">12</td></tr>
+<tr><td class="topAlign"><code>QFont::Light</code></td><td class="topAlign tblval"><code>25</code></td><td class="topAlign">25</td></tr>
+<tr><td class="topAlign"><code>QFont::Normal</code></td><td class="topAlign tblval"><code>50</code></td><td class="topAlign">50</td></tr>
+<tr><td class="topAlign"><code>QFont::Medium</code></td><td class="topAlign tblval"><code>57</code></td><td class="topAlign">57</td></tr>
+<tr><td class="topAlign"><code>QFont::DemiBold</code></td><td class="topAlign tblval"><code>63</code></td><td class="topAlign">63</td></tr>
+<tr><td class="topAlign"><code>QFont::Bold</code></td><td class="topAlign tblval"><code>75</code></td><td class="topAlign">75</td></tr>
+<tr><td class="topAlign"><code>QFont::ExtraBold</code></td><td class="topAlign tblval"><code>81</code></td><td class="topAlign">81</td></tr>
+<tr><td class="topAlign"><code>QFont::Black</code></td><td class="topAlign tblval"><code>87</code></td><td class="topAlign">87</td></tr>
+</table></div>
+<!-- @@@Weight -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QFont$$$QFontconstQFont& -->
+<h3 class="fn" id="QFont-4"><a name="QFont-4"></a>QFont::<span class="name">QFont</span>(const <span class="type"><a href="qfont.html#QFont">QFont</a></span> &amp;<i>font</i>)</h3>
+<p>Constructs a font that is a copy of <i>font</i>.</p>
+<!-- @@@QFont -->
+<!-- $$$QFont$$$QFontconstQFont&constQPaintDevice* -->
+<h3 class="fn" id="QFont-3"><a name="QFont-3"></a>QFont::<span class="name">QFont</span>(const <span class="type"><a href="qfont.html#QFont">QFont</a></span> &amp;<i>font</i>, const <span class="type"><a href="qpaintdevice.html">QPaintDevice</a></span> *<i>pd</i>)</h3>
+<p>Constructs a font from <i>font</i> for use on the paint device <i>pd</i>.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@QFont -->
+<!-- $$$QFont$$$QFontconstQString&intintbool -->
+<h3 class="fn" id="QFont-1"><a name="QFont-1"></a>QFont::<span class="name">QFont</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>family</i>, <span class="type">int</span> <i>pointSize</i> = -1, <span class="type">int</span> <i>weight</i> = -1, <span class="type">bool</span> <i>italic</i> = false)</h3>
+<p>Constructs a font object with the specified <i>family</i>, <i>pointSize</i>, <i>weight</i> and <i>italic</i> settings.</p>
+<p>If <i>pointSize</i> is zero or negative, the point size of the font is set to a system-dependent default value. Generally, this is 12 points.</p>
+<p>The <i>family</i> name may optionally also include a foundry name, e.g&#x2e; &quot;Helvetica [Cronyx]&quot;. If the <i>family</i> is available from more than one foundry and the foundry isn't specified, an arbitrary foundry is chosen. If the family isn't available a family will be set using the <a href="qfont.html">font matching</a> algorithm.</p>
+<p><b>See also </b><a href="qfont.html#Weight-enum">Weight</a>, <a href="qfont.html#setFamily">setFamily</a>(), <a href="qfont.html#setPointSize">setPointSize</a>(), <a href="qfont.html#setWeight">setWeight</a>(), <a href="qfont.html#setItalic">setItalic</a>(), <a href="qfont.html#setStyleHint">setStyleHint</a>(), and <a href="qguiapplication.html#font">QGuiApplication::font</a>().</p>
+<!-- @@@QFont -->
+<!-- $$$QFont[overload1]$$$QFont -->
+<h3 class="fn" id="QFont"><a name="QFont"></a>QFont::<span class="name">QFont</span>()</h3>
+<p>Constructs a font object that uses the application's default font.</p>
+<p><b>See also </b><a href="qguiapplication.html#setFont">QGuiApplication::setFont</a>() and <a href="qguiapplication.html#font">QGuiApplication::font</a>().</p>
+<!-- @@@QFont -->
+<!-- $$$operator=$$$operator=QFont&& -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type"><a href="qfont.html#QFont">QFont</a></span> &amp;QFont::<span class="name">operator=</span>(<span class="type"><a href="qfont.html#QFont">QFont</a></span> &amp;&amp;<i>other</i>)</h3>
+<p>Move-assigns <i>other</i> to this <a href="qfont.html">QFont</a> instance.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@operator= -->
+<!-- $$$operator=[overload1]$$$operator=constQFont& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qfont.html#QFont">QFont</a></span> &amp;QFont::<span class="name">operator=</span>(const <span class="type"><a href="qfont.html#QFont">QFont</a></span> &amp;<i>font</i>)</h3>
+<p>Assigns <i>font</i> to this font and returns a reference to it.</p>
+<!-- @@@operator= -->
+<!-- $$$~QFont[overload1]$$$~QFont -->
+<h3 class="fn" id="dtor.QFont"><a name="dtor.QFont"></a>QFont::<span class="name">~QFont</span>()</h3>
+<p>Destroys the font object and frees all allocated resources.</p>
+<!-- @@@~QFont -->
+<!-- $$$bold[overload1]$$$bold -->
+<h3 class="fn" id="bold"><a name="bold"></a><span class="type">bool</span> QFont::<span class="name">bold</span>() const</h3>
+<p>Returns <code>true</code> if <a href="qfont.html#weight">weight</a>() is a value greater than <a href="qfont.html#Weight-enum">QFont::Medium</a>; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qfont.html#weight">weight</a>(), <a href="qfont.html#setBold">setBold</a>(), and <a href="qfontinfo.html#bold">QFontInfo::bold</a>().</p>
+<!-- @@@bold -->
+<!-- $$$capitalization[overload1]$$$capitalization -->
+<h3 class="fn" id="capitalization"><a name="capitalization"></a><span class="type"><a href="qfont.html#Capitalization-enum">QFont::Capitalization</a></span> QFont::<span class="name">capitalization</span>() const</h3>
+<p>Returns the current capitalization type of the font.</p>
+<p>This function was introduced in  Qt 4.4.</p>
+<p><b>See also </b><a href="qfont.html#setCapitalization">setCapitalization</a>().</p>
+<!-- @@@capitalization -->
+<!-- $$$defaultFamily[overload1]$$$defaultFamily -->
+<h3 class="fn" id="defaultFamily"><a name="defaultFamily"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QFont::<span class="name">defaultFamily</span>() const</h3>
+<p>Returns the family name that corresponds to the current style hint.</p>
+<p><b>See also </b><a href="qfont.html#StyleHint-enum">StyleHint</a>, <a href="qfont.html#styleHint">styleHint</a>(), and <a href="qfont.html#setStyleHint">setStyleHint</a>().</p>
+<!-- @@@defaultFamily -->
+<!-- $$$exactMatch[overload1]$$$exactMatch -->
+<h3 class="fn" id="exactMatch"><a name="exactMatch"></a><span class="type">bool</span> QFont::<span class="name">exactMatch</span>() const</h3>
+<p>Returns <code>true</code> if a window system font exactly matching the settings of this font is available.</p>
+<p><b>See also </b><a href="qfontinfo.html">QFontInfo</a>.</p>
+<!-- @@@exactMatch -->
+<!-- $$$families[overload1]$$$families -->
+<h3 class="fn" id="families"><a name="families"></a><span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> QFont::<span class="name">families</span>() const</h3>
+<p>Returns the requested font family names, i.e&#x2e; the names set in the last <a href="qfont.html#setFamilies">setFamilies</a>() call or via the constructor. Otherwise it returns an empty list.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<p><b>See also </b><a href="qfont.html#setFamily">setFamily</a>(), <a href="qfont.html#setFamilies">setFamilies</a>(), <a href="qfont.html#family">family</a>(), <a href="qfont.html#substitutes">substitutes</a>(), and <a href="qfont.html#substitute">substitute</a>().</p>
+<!-- @@@families -->
+<!-- $$$family[overload1]$$$family -->
+<h3 class="fn" id="family"><a name="family"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QFont::<span class="name">family</span>() const</h3>
+<p>Returns the requested font family name, i.e&#x2e; the name set in the constructor or the last setFont() call.</p>
+<p><b>See also </b><a href="qfont.html#setFamily">setFamily</a>(), <a href="qfont.html#substitutes">substitutes</a>(), and <a href="qfont.html#substitute">substitute</a>().</p>
+<!-- @@@family -->
+<!-- $$$fixedPitch[overload1]$$$fixedPitch -->
+<h3 class="fn" id="fixedPitch"><a name="fixedPitch"></a><span class="type">bool</span> QFont::<span class="name">fixedPitch</span>() const</h3>
+<p>Returns <code>true</code> if fixed pitch has been set; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qfont.html#setFixedPitch">setFixedPitch</a>() and <a href="qfontinfo.html#fixedPitch">QFontInfo::fixedPitch</a>().</p>
+<!-- @@@fixedPitch -->
+<!-- $$$fromString[overload1]$$$fromStringconstQString& -->
+<h3 class="fn" id="fromString"><a name="fromString"></a><span class="type">bool</span> QFont::<span class="name">fromString</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>descrip</i>)</h3>
+<p>Sets this font to match the description <i>descrip</i>. The description is a comma-separated list of the font attributes, as returned by <a href="qfont.html#toString">toString</a>().</p>
+<p><b>See also </b><a href="qfont.html#toString">toString</a>().</p>
+<!-- @@@fromString -->
+<!-- $$$hintingPreference[overload1]$$$hintingPreference -->
+<h3 class="fn" id="hintingPreference"><a name="hintingPreference"></a><span class="type"><a href="qfont.html#HintingPreference-enum">QFont::HintingPreference</a></span> QFont::<span class="name">hintingPreference</span>() const</h3>
+<p>Returns the currently preferred hinting level for glyphs rendered with this font.</p>
+<p>This function was introduced in  Qt 4.8.</p>
+<p><b>See also </b><a href="qfont.html#setHintingPreference">setHintingPreference</a>().</p>
+<!-- @@@hintingPreference -->
+<!-- $$$insertSubstitution[overload1]$$$insertSubstitutionconstQString&constQString& -->
+<h3 class="fn" id="insertSubstitution"><a name="insertSubstitution"></a><code>[static] </code><span class="type">void</span> QFont::<span class="name">insertSubstitution</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>familyName</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>substituteName</i>)</h3>
+<p>Inserts <i>substituteName</i> into the substitution table for the family <i>familyName</i>.</p>
+<p><b>See also </b><a href="qfont.html#insertSubstitutions">insertSubstitutions</a>(), <a href="qfont.html#removeSubstitutions">removeSubstitutions</a>(), <a href="qfont.html#substitutions">substitutions</a>(), <a href="qfont.html#substitute">substitute</a>(), and <a href="qfont.html#substitutes">substitutes</a>().</p>
+<!-- @@@insertSubstitution -->
+<!-- $$$insertSubstitutions[overload1]$$$insertSubstitutionsconstQString&constQStringList& -->
+<h3 class="fn" id="insertSubstitutions"><a name="insertSubstitutions"></a><code>[static] </code><span class="type">void</span> QFont::<span class="name">insertSubstitutions</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>familyName</i>, const <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> &amp;<i>substituteNames</i>)</h3>
+<p>Inserts the list of families <i>substituteNames</i> into the substitution list for <i>familyName</i>.</p>
+<p><b>See also </b><a href="qfont.html#insertSubstitution">insertSubstitution</a>(), <a href="qfont.html#removeSubstitutions">removeSubstitutions</a>(), <a href="qfont.html#substitutions">substitutions</a>(), and <a href="qfont.html#substitute">substitute</a>().</p>
+<!-- @@@insertSubstitutions -->
+<!-- $$$isCopyOf[overload1]$$$isCopyOfconstQFont& -->
+<h3 class="fn" id="isCopyOf"><a name="isCopyOf"></a><span class="type">bool</span> QFont::<span class="name">isCopyOf</span>(const <span class="type"><a href="qfont.html#QFont">QFont</a></span> &amp;<i>f</i>) const</h3>
+<p>Returns <code>true</code> if this font and <i>f</i> are copies of each other, i.e&#x2e; one of them was created as a copy of the other and neither has been modified since. This is much stricter than equality.</p>
+<p><b>See also </b><a href="qfont.html#operator-eq">operator=</a>() and <a href="qfont.html#operator-eq-eq">operator==</a>().</p>
+<!-- @@@isCopyOf -->
+<!-- $$$italic[overload1]$$$italic -->
+<h3 class="fn" id="italic"><a name="italic"></a><span class="type">bool</span> QFont::<span class="name">italic</span>() const</h3>
+<p>Returns <code>true</code> if the <a href="qfont.html#style">style</a>() of the font is not <a href="qfont.html#Style-enum">QFont::StyleNormal</a></p>
+<p><b>See also </b><a href="qfont.html#setItalic">setItalic</a>() and <a href="qfont.html#style">style</a>().</p>
+<!-- @@@italic -->
+<!-- $$$kerning[overload1]$$$kerning -->
+<h3 class="fn" id="kerning"><a name="kerning"></a><span class="type">bool</span> QFont::<span class="name">kerning</span>() const</h3>
+<p>Returns <code>true</code> if kerning should be used when drawing text with this font.</p>
+<p><b>See also </b><a href="qfont.html#setKerning">setKerning</a>().</p>
+<!-- @@@kerning -->
+<!-- $$$key[overload1]$$$key -->
+<h3 class="fn" id="key"><a name="key"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QFont::<span class="name">key</span>() const</h3>
+<p>Returns the font's key, a textual representation of a font. It is typically used as the key for a cache or dictionary of fonts.</p>
+<p><b>See also </b><a href="../qtcore/qmap.html">QMap</a>.</p>
+<!-- @@@key -->
+<!-- $$$letterSpacing[overload1]$$$letterSpacing -->
+<h3 class="fn" id="letterSpacing"><a name="letterSpacing"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QFont::<span class="name">letterSpacing</span>() const</h3>
+<p>Returns the letter spacing for the font.</p>
+<p>This function was introduced in  Qt 4.4.</p>
+<p><b>See also </b><a href="qfont.html#setLetterSpacing">setLetterSpacing</a>(), <a href="qfont.html#letterSpacingType">letterSpacingType</a>(), and <a href="qfont.html#setWordSpacing">setWordSpacing</a>().</p>
+<!-- @@@letterSpacing -->
+<!-- $$$letterSpacingType[overload1]$$$letterSpacingType -->
+<h3 class="fn" id="letterSpacingType"><a name="letterSpacingType"></a><span class="type"><a href="qfont.html#SpacingType-enum">QFont::SpacingType</a></span> QFont::<span class="name">letterSpacingType</span>() const</h3>
+<p>Returns the spacing type used for letter spacing.</p>
+<p>This function was introduced in  Qt 4.4.</p>
+<p><b>See also </b><a href="qfont.html#letterSpacing">letterSpacing</a>(), <a href="qfont.html#setLetterSpacing">setLetterSpacing</a>(), and <a href="qfont.html#setWordSpacing">setWordSpacing</a>().</p>
+<!-- @@@letterSpacingType -->
+<!-- $$$overline[overload1]$$$overline -->
+<h3 class="fn" id="overline"><a name="overline"></a><span class="type">bool</span> QFont::<span class="name">overline</span>() const</h3>
+<p>Returns <code>true</code> if overline has been set; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qfont.html#setOverline">setOverline</a>().</p>
+<!-- @@@overline -->
+<!-- $$$pixelSize[overload1]$$$pixelSize -->
+<h3 class="fn" id="pixelSize"><a name="pixelSize"></a><span class="type">int</span> QFont::<span class="name">pixelSize</span>() const</h3>
+<p>Returns the pixel size of the font if it was set with <a href="qfont.html#setPixelSize">setPixelSize</a>(). Returns -1 if the size was set with <a href="qfont.html#setPointSize">setPointSize</a>() or <a href="qfont.html#setPointSizeF">setPointSizeF</a>().</p>
+<p><b>See also </b><a href="qfont.html#setPixelSize">setPixelSize</a>(), <a href="qfont.html#pointSize">pointSize</a>(), <a href="qfontinfo.html#pointSize">QFontInfo::pointSize</a>(), and <a href="qfontinfo.html#pixelSize">QFontInfo::pixelSize</a>().</p>
+<!-- @@@pixelSize -->
+<!-- $$$pointSize[overload1]$$$pointSize -->
+<h3 class="fn" id="pointSize"><a name="pointSize"></a><span class="type">int</span> QFont::<span class="name">pointSize</span>() const</h3>
+<p>Returns the point size of the font. Returns -1 if the font size was specified in pixels.</p>
+<p><b>See also </b><a href="qfont.html#setPointSize">setPointSize</a>() and <a href="qfont.html#pointSizeF">pointSizeF</a>().</p>
+<!-- @@@pointSize -->
+<!-- $$$pointSizeF[overload1]$$$pointSizeF -->
+<h3 class="fn" id="pointSizeF"><a name="pointSizeF"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QFont::<span class="name">pointSizeF</span>() const</h3>
+<p>Returns the point size of the font. Returns -1 if the font size was specified in pixels.</p>
+<p><b>See also </b><a href="qfont.html#pointSize">pointSize</a>(), <a href="qfont.html#setPointSizeF">setPointSizeF</a>(), <a href="qfont.html#pixelSize">pixelSize</a>(), <a href="qfontinfo.html#pointSize">QFontInfo::pointSize</a>(), and <a href="qfontinfo.html#pixelSize">QFontInfo::pixelSize</a>().</p>
+<!-- @@@pointSizeF -->
+<!-- $$$removeSubstitutions[overload1]$$$removeSubstitutionsconstQString& -->
+<h3 class="fn" id="removeSubstitutions"><a name="removeSubstitutions"></a><code>[static] </code><span class="type">void</span> QFont::<span class="name">removeSubstitutions</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>familyName</i>)</h3>
+<p>Removes all the substitutions for <i>familyName</i>.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qfont.html#insertSubstitutions">insertSubstitutions</a>(), <a href="qfont.html#insertSubstitution">insertSubstitution</a>(), <a href="qfont.html#substitutions">substitutions</a>(), and <a href="qfont.html#substitute">substitute</a>().</p>
+<!-- @@@removeSubstitutions -->
+<!-- $$$resolve[overload1]$$$resolveconstQFont& -->
+<h3 class="fn" id="resolve"><a name="resolve"></a><span class="type"><a href="qfont.html#QFont">QFont</a></span> QFont::<span class="name">resolve</span>(const <span class="type"><a href="qfont.html#QFont">QFont</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns a new <a href="qfont.html">QFont</a> that has attributes copied from <i>other</i> that have not been previously set on this font.</p>
+<!-- @@@resolve -->
+<!-- $$$setBold[overload1]$$$setBoldbool -->
+<h3 class="fn" id="setBold"><a name="setBold"></a><span class="type">void</span> QFont::<span class="name">setBold</span>(<span class="type">bool</span> <i>enable</i>)</h3>
+<p>If <i>enable</i> is true sets the font's weight to <a href="qfont.html#Weight-enum">QFont::Bold</a>; otherwise sets the weight to <a href="qfont.html#Weight-enum">QFont::Normal</a>.</p>
+<p>For finer boldness control use <a href="qfont.html#setWeight">setWeight</a>().</p>
+<p><b>Note: </b>If <a href="qfont.html#styleName">styleName</a>() is set, this value may be ignored, or if supported on the platform, the font artificially embolded.</p><p><b>See also </b><a href="qfont.html#bold">bold</a>() and <a href="qfont.html#setWeight">setWeight</a>().</p>
+<!-- @@@setBold -->
+<!-- $$$setCapitalization[overload1]$$$setCapitalizationQFont::Capitalization -->
+<h3 class="fn" id="setCapitalization"><a name="setCapitalization"></a><span class="type">void</span> QFont::<span class="name">setCapitalization</span>(<span class="type"><a href="qfont.html#Capitalization-enum">QFont::Capitalization</a></span> <i>caps</i>)</h3>
+<p>Sets the capitalization of the text in this font to <i>caps</i>.</p>
+<p>A font's capitalization makes the text appear in the selected capitalization mode.</p>
+<p>This function was introduced in  Qt 4.4.</p>
+<p><b>See also </b><a href="qfont.html#capitalization">capitalization</a>().</p>
+<!-- @@@setCapitalization -->
+<!-- $$$setFamilies[overload1]$$$setFamiliesconstQStringList& -->
+<h3 class="fn" id="setFamilies"><a name="setFamilies"></a><span class="type">void</span> QFont::<span class="name">setFamilies</span>(const <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> &amp;<i>families</i>)</h3>
+<p>Sets the list of family names for the font. The names are case insensitive and may include a foundry name. The first family in <i>families</i> will be set as the main family for the font.</p>
+<p>Each family name entry in <i>families</i> may optionally also include a foundry name, e.g&#x2e; &quot;Helvetica [Cronyx]&quot;. If the family is available from more than one foundry and the foundry isn't specified, an arbitrary foundry is chosen. If the family isn't available a family will be set using the <a href="qfont.html">font matching</a> algorithm.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<p><b>See also </b><a href="qfont.html#family">family</a>(), <a href="qfont.html#families">families</a>(), <a href="qfont.html#setFamily">setFamily</a>(), <a href="qfont.html#setStyleHint">setStyleHint</a>(), and <a href="qfontinfo.html">QFontInfo</a>.</p>
+<!-- @@@setFamilies -->
+<!-- $$$setFamily[overload1]$$$setFamilyconstQString& -->
+<h3 class="fn" id="setFamily"><a name="setFamily"></a><span class="type">void</span> QFont::<span class="name">setFamily</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>family</i>)</h3>
+<p>Sets the family name of the font. The name is case insensitive and may include a foundry name.</p>
+<p>The <i>family</i> name may optionally also include a foundry name, e.g&#x2e; &quot;Helvetica [Cronyx]&quot;. If the <i>family</i> is available from more than one foundry and the foundry isn't specified, an arbitrary foundry is chosen. If the family isn't available a family will be set using the <a href="qfont.html">font matching</a> algorithm.</p>
+<p><b>See also </b><a href="qfont.html#family">family</a>(), <a href="qfont.html#setStyleHint">setStyleHint</a>(), and <a href="qfontinfo.html">QFontInfo</a>.</p>
+<!-- @@@setFamily -->
+<!-- $$$setFixedPitch[overload1]$$$setFixedPitchbool -->
+<h3 class="fn" id="setFixedPitch"><a name="setFixedPitch"></a><span class="type">void</span> QFont::<span class="name">setFixedPitch</span>(<span class="type">bool</span> <i>enable</i>)</h3>
+<p>If <i>enable</i> is true, sets fixed pitch on; otherwise sets fixed pitch off.</p>
+<p><b>See also </b><a href="qfont.html#fixedPitch">fixedPitch</a>() and <a href="qfontinfo.html">QFontInfo</a>.</p>
+<!-- @@@setFixedPitch -->
+<!-- $$$setHintingPreference[overload1]$$$setHintingPreferenceQFont::HintingPreference -->
+<h3 class="fn" id="setHintingPreference"><a name="setHintingPreference"></a><span class="type">void</span> QFont::<span class="name">setHintingPreference</span>(<span class="type"><a href="qfont.html#HintingPreference-enum">QFont::HintingPreference</a></span> <i>hintingPreference</i>)</h3>
+<p>Set the preference for the hinting level of the glyphs to <i>hintingPreference</i>. This is a hint to the underlying font rendering system to use a certain level of hinting, and has varying support across platforms. See the table in the documentation for <a href="qfont.html#HintingPreference-enum">QFont::HintingPreference</a> for more details.</p>
+<p>The default hinting preference is <a href="qfont.html#HintingPreference-enum">QFont::PreferDefaultHinting</a>.</p>
+<p>This function was introduced in  Qt 4.8.</p>
+<p><b>See also </b><a href="qfont.html#hintingPreference">hintingPreference</a>().</p>
+<!-- @@@setHintingPreference -->
+<!-- $$$setItalic[overload1]$$$setItalicbool -->
+<h3 class="fn" id="setItalic"><a name="setItalic"></a><span class="type">void</span> QFont::<span class="name">setItalic</span>(<span class="type">bool</span> <i>enable</i>)</h3>
+<p>Sets the <a href="qfont.html#style">style</a>() of the font to <a href="qfont.html#Style-enum">QFont::StyleItalic</a> if <i>enable</i> is true; otherwise the style is set to <a href="qfont.html#Style-enum">QFont::StyleNormal</a>.</p>
+<p><b>Note: </b>If <a href="qfont.html#styleName">styleName</a>() is set, this value may be ignored, or if supported on the platform, the font may be rendered tilted instead of picking a designed italic font-variant.</p><p><b>See also </b><a href="qfont.html#italic">italic</a>() and <a href="qfontinfo.html">QFontInfo</a>.</p>
+<!-- @@@setItalic -->
+<!-- $$$setKerning[overload1]$$$setKerningbool -->
+<h3 class="fn" id="setKerning"><a name="setKerning"></a><span class="type">void</span> QFont::<span class="name">setKerning</span>(<span class="type">bool</span> <i>enable</i>)</h3>
+<p>Enables kerning for this font if <i>enable</i> is true; otherwise disables it. By default, kerning is enabled.</p>
+<p>When kerning is enabled, glyph metrics do not add up anymore, even for Latin text. In other words, the assumption that width('a') + width('b') is equal to width(&quot;ab&quot;) is not necessarily true.</p>
+<p><b>See also </b><a href="qfont.html#kerning">kerning</a>() and <a href="qfontmetrics.html">QFontMetrics</a>.</p>
+<!-- @@@setKerning -->
+<!-- $$$setLetterSpacing[overload1]$$$setLetterSpacingQFont::SpacingTypeqreal -->
+<h3 class="fn" id="setLetterSpacing"><a name="setLetterSpacing"></a><span class="type">void</span> QFont::<span class="name">setLetterSpacing</span>(<span class="type"><a href="qfont.html#SpacingType-enum">QFont::SpacingType</a></span> <i>type</i>, <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>spacing</i>)</h3>
+<p>Sets the letter spacing for the font to <i>spacing</i> and the type of spacing to <i>type</i>.</p>
+<p>Letter spacing changes the default spacing between individual letters in the font. The spacing between the letters can be made smaller as well as larger either in percentage of the character width or in pixels, depending on the selected spacing type.</p>
+<p>This function was introduced in  Qt 4.4.</p>
+<p><b>See also </b><a href="qfont.html#letterSpacing">letterSpacing</a>(), <a href="qfont.html#letterSpacingType">letterSpacingType</a>(), and <a href="qfont.html#setWordSpacing">setWordSpacing</a>().</p>
+<!-- @@@setLetterSpacing -->
+<!-- $$$setOverline[overload1]$$$setOverlinebool -->
+<h3 class="fn" id="setOverline"><a name="setOverline"></a><span class="type">void</span> QFont::<span class="name">setOverline</span>(<span class="type">bool</span> <i>enable</i>)</h3>
+<p>If <i>enable</i> is true, sets overline on; otherwise sets overline off.</p>
+<p><b>See also </b><a href="qfont.html#overline">overline</a>() and <a href="qfontinfo.html">QFontInfo</a>.</p>
+<!-- @@@setOverline -->
+<!-- $$$setPixelSize[overload1]$$$setPixelSizeint -->
+<h3 class="fn" id="setPixelSize"><a name="setPixelSize"></a><span class="type">void</span> QFont::<span class="name">setPixelSize</span>(<span class="type">int</span> <i>pixelSize</i>)</h3>
+<p>Sets the font size to <i>pixelSize</i> pixels.</p>
+<p>Using this function makes the font device dependent. Use <a href="qfont.html#setPointSize">setPointSize</a>() or <a href="qfont.html#setPointSizeF">setPointSizeF</a>() to set the size of the font in a device independent manner.</p>
+<p><b>See also </b><a href="qfont.html#pixelSize">pixelSize</a>().</p>
+<!-- @@@setPixelSize -->
+<!-- $$$setPointSize[overload1]$$$setPointSizeint -->
+<h3 class="fn" id="setPointSize"><a name="setPointSize"></a><span class="type">void</span> QFont::<span class="name">setPointSize</span>(<span class="type">int</span> <i>pointSize</i>)</h3>
+<p>Sets the point size to <i>pointSize</i>. The point size must be greater than zero.</p>
+<p><b>See also </b><a href="qfont.html#pointSize">pointSize</a>() and <a href="qfont.html#setPointSizeF">setPointSizeF</a>().</p>
+<!-- @@@setPointSize -->
+<!-- $$$setPointSizeF[overload1]$$$setPointSizeFqreal -->
+<h3 class="fn" id="setPointSizeF"><a name="setPointSizeF"></a><span class="type">void</span> QFont::<span class="name">setPointSizeF</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>pointSize</i>)</h3>
+<p>Sets the point size to <i>pointSize</i>. The point size must be greater than zero. The requested precision may not be achieved on all platforms.</p>
+<p><b>See also </b><a href="qfont.html#pointSizeF">pointSizeF</a>(), <a href="qfont.html#setPointSize">setPointSize</a>(), and <a href="qfont.html#setPixelSize">setPixelSize</a>().</p>
+<!-- @@@setPointSizeF -->
+<!-- $$$setStretch[overload1]$$$setStretchint -->
+<h3 class="fn" id="setStretch"><a name="setStretch"></a><span class="type">void</span> QFont::<span class="name">setStretch</span>(<span class="type">int</span> <i>factor</i>)</h3>
+<p>Sets the stretch factor for the font.</p>
+<p>The stretch factor matches a condensed or expanded version of the font or applies a stretch transform that changes the width of all characters in the font by <i>factor</i> percent. For example, setting <i>factor</i> to 150 results in all characters in the font being 1.5 times (ie. 150%) wider. The minimum stretch factor is 1, and the maximum stretch factor is 4000. The default stretch factor is <code>AnyStretch</code>, which will accept any stretch factor and not apply any transform on the font.</p>
+<p>The stretch factor is only applied to outline fonts. The stretch factor is ignored for bitmap fonts.</p>
+<p><b>Note: </b>When matching a font with a native non-default stretch factor, requesting a stretch of 100 will stretch it back to a medium width font.</p><p><b>See also </b><a href="qfont.html#stretch">stretch</a>() and <a href="qfont.html#Stretch-enum">QFont::Stretch</a>.</p>
+<!-- @@@setStretch -->
+<!-- $$$setStrikeOut[overload1]$$$setStrikeOutbool -->
+<h3 class="fn" id="setStrikeOut"><a name="setStrikeOut"></a><span class="type">void</span> QFont::<span class="name">setStrikeOut</span>(<span class="type">bool</span> <i>enable</i>)</h3>
+<p>If <i>enable</i> is true, sets strikeout on; otherwise sets strikeout off.</p>
+<p><b>See also </b><a href="qfont.html#strikeOut">strikeOut</a>() and <a href="qfontinfo.html">QFontInfo</a>.</p>
+<!-- @@@setStrikeOut -->
+<!-- $$$setStyle[overload1]$$$setStyleQFont::Style -->
+<h3 class="fn" id="setStyle"><a name="setStyle"></a><span class="type">void</span> QFont::<span class="name">setStyle</span>(<span class="type"><a href="qfont.html#Style-enum">QFont::Style</a></span> <i>style</i>)</h3>
+<p>Sets the style of the font to <i>style</i>.</p>
+<p><b>See also </b><a href="qfont.html#style">style</a>(), <a href="qfont.html#italic">italic</a>(), and <a href="qfontinfo.html">QFontInfo</a>.</p>
+<!-- @@@setStyle -->
+<!-- $$$setStyleHint[overload1]$$$setStyleHintQFont::StyleHintQFont::StyleStrategy -->
+<h3 class="fn" id="setStyleHint"><a name="setStyleHint"></a><span class="type">void</span> QFont::<span class="name">setStyleHint</span>(<span class="type"><a href="qfont.html#StyleHint-enum">QFont::StyleHint</a></span> <i>hint</i>, <span class="type"><a href="qfont.html#StyleStrategy-enum">QFont::StyleStrategy</a></span> <i>strategy</i> = PreferDefault)</h3>
+<p>Sets the style hint and strategy to <i>hint</i> and <i>strategy</i>, respectively.</p>
+<p>If these aren't set explicitly the style hint will default to <code>AnyStyle</code> and the style strategy to <code>PreferDefault</code>.</p>
+<p>Qt does not support style hints on X11 since this information is not provided by the window system.</p>
+<p><b>See also </b><a href="qfont.html#StyleHint-enum">StyleHint</a>, <a href="qfont.html#styleHint">styleHint</a>(), <a href="qfont.html#StyleStrategy-enum">StyleStrategy</a>, <a href="qfont.html#styleStrategy">styleStrategy</a>(), and <a href="qfontinfo.html">QFontInfo</a>.</p>
+<!-- @@@setStyleHint -->
+<!-- $$$setStyleName[overload1]$$$setStyleNameconstQString& -->
+<h3 class="fn" id="setStyleName"><a name="setStyleName"></a><span class="type">void</span> QFont::<span class="name">setStyleName</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>styleName</i>)</h3>
+<p>Sets the style name of the font to <i>styleName</i>. When set, other style properties like <a href="qfont.html#style">style</a>() and <a href="qfont.html#weight">weight</a>() will be ignored for font matching, though they may be simulated afterwards if supported by the platform's font engine.</p>
+<p>Due to the lower quality of artificially simulated styles, and the lack of full cross platform support, it is not recommended to use matching by style name together with matching by style properties</p>
+<p>This function was introduced in  Qt 4.8.</p>
+<p><b>See also </b><a href="qfont.html#styleName">styleName</a>().</p>
+<!-- @@@setStyleName -->
+<!-- $$$setStyleStrategy[overload1]$$$setStyleStrategyQFont::StyleStrategy -->
+<h3 class="fn" id="setStyleStrategy"><a name="setStyleStrategy"></a><span class="type">void</span> QFont::<span class="name">setStyleStrategy</span>(<span class="type"><a href="qfont.html#StyleStrategy-enum">QFont::StyleStrategy</a></span> <i>s</i>)</h3>
+<p>Sets the style strategy for the font to <i>s</i>.</p>
+<p><b>See also </b><a href="qfont.html#styleStrategy">styleStrategy</a>() and <a href="qfont.html#StyleStrategy-enum">QFont::StyleStrategy</a>.</p>
+<!-- @@@setStyleStrategy -->
+<!-- $$$setUnderline[overload1]$$$setUnderlinebool -->
+<h3 class="fn" id="setUnderline"><a name="setUnderline"></a><span class="type">void</span> QFont::<span class="name">setUnderline</span>(<span class="type">bool</span> <i>enable</i>)</h3>
+<p>If <i>enable</i> is true, sets underline on; otherwise sets underline off.</p>
+<p><b>See also </b><a href="qfont.html#underline">underline</a>() and <a href="qfontinfo.html">QFontInfo</a>.</p>
+<!-- @@@setUnderline -->
+<!-- $$$setWeight[overload1]$$$setWeightint -->
+<h3 class="fn" id="setWeight"><a name="setWeight"></a><span class="type">void</span> QFont::<span class="name">setWeight</span>(<span class="type">int</span> <i>weight</i>)</h3>
+<p>Sets the weight of the font to <i>weight</i>, using the scale defined by <a href="qfont.html#Weight-enum">QFont::Weight</a> enumeration.</p>
+<p><b>Note: </b>If <a href="qfont.html#styleName">styleName</a>() is set, this value may be ignored for font selection.</p><p><b>See also </b><a href="qfont.html#weight">weight</a>() and <a href="qfontinfo.html">QFontInfo</a>.</p>
+<!-- @@@setWeight -->
+<!-- $$$setWordSpacing[overload1]$$$setWordSpacingqreal -->
+<h3 class="fn" id="setWordSpacing"><a name="setWordSpacing"></a><span class="type">void</span> QFont::<span class="name">setWordSpacing</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>spacing</i>)</h3>
+<p>Sets the word spacing for the font to <i>spacing</i>.</p>
+<p>Word spacing changes the default spacing between individual words. A positive value increases the word spacing by a corresponding amount of pixels, while a negative value decreases the inter-word spacing accordingly.</p>
+<p>Word spacing will not apply to writing systems, where indiviaul words are not separated by white space.</p>
+<p>This function was introduced in  Qt 4.4.</p>
+<p><b>See also </b><a href="qfont.html#wordSpacing">wordSpacing</a>() and <a href="qfont.html#setLetterSpacing">setLetterSpacing</a>().</p>
+<!-- @@@setWordSpacing -->
+<!-- $$$stretch[overload1]$$$stretch -->
+<h3 class="fn" id="stretch"><a name="stretch"></a><span class="type">int</span> QFont::<span class="name">stretch</span>() const</h3>
+<p>Returns the stretch factor for the font.</p>
+<p><b>See also </b><a href="qfont.html#setStretch">setStretch</a>().</p>
+<!-- @@@stretch -->
+<!-- $$$strikeOut[overload1]$$$strikeOut -->
+<h3 class="fn" id="strikeOut"><a name="strikeOut"></a><span class="type">bool</span> QFont::<span class="name">strikeOut</span>() const</h3>
+<p>Returns <code>true</code> if strikeout has been set; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qfont.html#setStrikeOut">setStrikeOut</a>().</p>
+<!-- @@@strikeOut -->
+<!-- $$$style[overload1]$$$style -->
+<h3 class="fn" id="style"><a name="style"></a><span class="type"><a href="qfont.html#Style-enum">QFont::Style</a></span> QFont::<span class="name">style</span>() const</h3>
+<p>Returns the style of the font.</p>
+<p><b>See also </b><a href="qfont.html#setStyle">setStyle</a>().</p>
+<!-- @@@style -->
+<!-- $$$styleHint[overload1]$$$styleHint -->
+<h3 class="fn" id="styleHint"><a name="styleHint"></a><span class="type"><a href="qfont.html#StyleHint-enum">QFont::StyleHint</a></span> QFont::<span class="name">styleHint</span>() const</h3>
+<p>Returns the <a href="qfont.html#StyleHint-enum">StyleHint</a>.</p>
+<p>The style hint affects the <a href="qfont.html#fontmatching">font matching algorithm</a>. See <a href="qfont.html#StyleHint-enum">QFont::StyleHint</a> for the list of available hints.</p>
+<p><b>See also </b><a href="qfont.html#setStyleHint">setStyleHint</a>(), <a href="qfont.html#StyleStrategy-enum">QFont::StyleStrategy</a>, and <a href="qfontinfo.html#styleHint">QFontInfo::styleHint</a>().</p>
+<!-- @@@styleHint -->
+<!-- $$$styleName[overload1]$$$styleName -->
+<h3 class="fn" id="styleName"><a name="styleName"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QFont::<span class="name">styleName</span>() const</h3>
+<p>Returns the requested font style name. This can be used to match the font with irregular styles (that can't be normalized in other style properties).</p>
+<p>This function was introduced in  Qt 4.8.</p>
+<p><b>See also </b><a href="qfont.html#setStyleName">setStyleName</a>(), <a href="qfont.html#setFamily">setFamily</a>(), and <a href="qfont.html#setStyle">setStyle</a>().</p>
+<!-- @@@styleName -->
+<!-- $$$styleStrategy[overload1]$$$styleStrategy -->
+<h3 class="fn" id="styleStrategy"><a name="styleStrategy"></a><span class="type"><a href="qfont.html#StyleStrategy-enum">QFont::StyleStrategy</a></span> QFont::<span class="name">styleStrategy</span>() const</h3>
+<p>Returns the <a href="qfont.html#StyleStrategy-enum">StyleStrategy</a>.</p>
+<p>The style strategy affects the <a href="qfont.html">font matching</a> algorithm. See <a href="qfont.html#StyleStrategy-enum">QFont::StyleStrategy</a> for the list of available strategies.</p>
+<p><b>See also </b><a href="qfont.html#setStyleStrategy">setStyleStrategy</a>(), <a href="qfont.html#setStyleHint">setStyleHint</a>(), and <a href="qfont.html#StyleHint-enum">QFont::StyleHint</a>.</p>
+<!-- @@@styleStrategy -->
+<!-- $$$substitute[overload1]$$$substituteconstQString& -->
+<h3 class="fn" id="substitute"><a name="substitute"></a><code>[static] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QFont::<span class="name">substitute</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>familyName</i>)</h3>
+<p>Returns the first family name to be used whenever <i>familyName</i> is specified. The lookup is case insensitive.</p>
+<p>If there is no substitution for <i>familyName</i>, <i>familyName</i> is returned.</p>
+<p>To obtain a list of substitutions use <a href="qfont.html#substitutes">substitutes</a>().</p>
+<p><b>See also </b><a href="qfont.html#setFamily">setFamily</a>(), <a href="qfont.html#insertSubstitutions">insertSubstitutions</a>(), <a href="qfont.html#insertSubstitution">insertSubstitution</a>(), and <a href="qfont.html#removeSubstitutions">removeSubstitutions</a>().</p>
+<!-- @@@substitute -->
+<!-- $$$substitutes[overload1]$$$substitutesconstQString& -->
+<h3 class="fn" id="substitutes"><a name="substitutes"></a><code>[static] </code><span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> QFont::<span class="name">substitutes</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>familyName</i>)</h3>
+<p>Returns a list of family names to be used whenever <i>familyName</i> is specified. The lookup is case insensitive.</p>
+<p>If there is no substitution for <i>familyName</i>, an empty list is returned.</p>
+<p><b>See also </b><a href="qfont.html#substitute">substitute</a>(), <a href="qfont.html#insertSubstitutions">insertSubstitutions</a>(), <a href="qfont.html#insertSubstitution">insertSubstitution</a>(), and <a href="qfont.html#removeSubstitutions">removeSubstitutions</a>().</p>
+<!-- @@@substitutes -->
+<!-- $$$substitutions[overload1]$$$substitutions -->
+<h3 class="fn" id="substitutions"><a name="substitutions"></a><code>[static] </code><span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> QFont::<span class="name">substitutions</span>()</h3>
+<p>Returns a sorted list of substituted family names.</p>
+<p><b>See also </b><a href="qfont.html#insertSubstitution">insertSubstitution</a>(), <a href="qfont-obsolete.html#removeSubstitution">removeSubstitution</a>(), and <a href="qfont.html#substitute">substitute</a>().</p>
+<!-- @@@substitutions -->
+<!-- $$$swap[overload1]$$$swapQFont& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QFont::<span class="name">swap</span>(<span class="type"><a href="qfont.html#QFont">QFont</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps this font instance with <i>other</i>. This function is very fast and never fails.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@swap -->
+<!-- $$$toString[overload1]$$$toString -->
+<h3 class="fn" id="toString"><a name="toString"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QFont::<span class="name">toString</span>() const</h3>
+<p>Returns a description of the font. The description is a comma-separated list of the attributes, perfectly suited for use in <a href="../qtcore/qsettings.html">QSettings</a>.</p>
+<p><b>See also </b><a href="qfont.html#fromString">fromString</a>().</p>
+<!-- @@@toString -->
+<!-- $$$underline[overload1]$$$underline -->
+<h3 class="fn" id="underline"><a name="underline"></a><span class="type">bool</span> QFont::<span class="name">underline</span>() const</h3>
+<p>Returns <code>true</code> if underline has been set; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qfont.html#setUnderline">setUnderline</a>().</p>
+<!-- @@@underline -->
+<!-- $$$weight[overload1]$$$weight -->
+<h3 class="fn" id="weight"><a name="weight"></a><span class="type">int</span> QFont::<span class="name">weight</span>() const</h3>
+<p>Returns the weight of the font, using the same scale as the <a href="qfont.html#Weight-enum">QFont::Weight</a> enumeration.</p>
+<p><b>See also </b><a href="qfont.html#setWeight">setWeight</a>(), <a href="qfont.html#Weight-enum">Weight</a>, and <a href="qfontinfo.html">QFontInfo</a>.</p>
+<!-- @@@weight -->
+<!-- $$$wordSpacing[overload1]$$$wordSpacing -->
+<h3 class="fn" id="wordSpacing"><a name="wordSpacing"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QFont::<span class="name">wordSpacing</span>() const</h3>
+<p>Returns the word spacing for the font.</p>
+<p>This function was introduced in  Qt 4.4.</p>
+<p><b>See also </b><a href="qfont.html#setWordSpacing">setWordSpacing</a>() and <a href="qfont.html#setLetterSpacing">setLetterSpacing</a>().</p>
+<!-- @@@wordSpacing -->
+<!-- $$$operator QVariant[overload1]$$$operator QVariant -->
+<h3 class="fn" id="operator-QVariant"><a name="operator-QVariant"></a><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QFont::<span class="name">operator QVariant</span>() const</h3>
+<p>Returns the font as a <a href="../qtcore/qvariant.html">QVariant</a></p>
+<!-- @@@operator QVariant -->
+<!-- $$$operator!=[overload1]$$$operator!=constQFont& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> QFont::<span class="name">operator!=</span>(const <span class="type"><a href="qfont.html#QFont">QFont</a></span> &amp;<i>f</i>) const</h3>
+<p>Returns <code>true</code> if this font is different from <i>f</i>; otherwise returns <code>false</code>.</p>
+<p>Two QFonts are considered to be different if their font attributes are different.</p>
+<p><b>See also </b><a href="qfont.html#operator-eq-eq">operator==</a>().</p>
+<!-- @@@operator!= -->
+<!-- $$$operator<[overload1]$$$operator<constQFont& -->
+<h3 class="fn" id="operator-lt"><a name="operator-lt"></a><span class="type">bool</span> QFont::<span class="name">operator&lt;</span>(const <span class="type"><a href="qfont.html#QFont">QFont</a></span> &amp;<i>f</i>) const</h3>
+<p>Provides an arbitrary comparison of this font and font <i>f</i>. All that is guaranteed is that the operator returns <code>false</code> if both fonts are equal and that (f1 &lt; f2) == !(f2 &lt; f1) if the fonts are not equal.</p>
+<p>This function is useful in some circumstances, for example if you want to use <a href="qfont.html">QFont</a> objects as keys in a <a href="../qtcore/qmap.html">QMap</a>.</p>
+<p><b>See also </b><a href="qfont.html#operator-eq-eq">operator==</a>(), <a href="qfont.html#operator-not-eq">operator!=</a>(), and <a href="qfont.html#isCopyOf">isCopyOf</a>().</p>
+<!-- @@@operator< -->
+<!-- $$$operator==[overload1]$$$operator==constQFont& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> QFont::<span class="name">operator==</span>(const <span class="type"><a href="qfont.html#QFont">QFont</a></span> &amp;<i>f</i>) const</h3>
+<p>Returns <code>true</code> if this font is equal to <i>f</i>; otherwise returns false.</p>
+<p>Two QFonts are considered equal if their font attributes are equal.</p>
+<p><b>See also </b><a href="qfont.html#operator-not-eq">operator!=</a>() and <a href="qfont.html#isCopyOf">isCopyOf</a>().</p>
+<!-- @@@operator== -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$qHash[overload1]$$$qHashconstQFont&uint -->
+<h3 class="fn" id="qHash"><a name="qHash"></a><span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> <span class="name">qHash</span>(const <span class="type"><a href="qfont.html#QFont">QFont</a></span> &amp;<i>font</i>, <span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> <i>seed</i> = 0)</h3>
+<p>Returns the hash value for <i>font</i>. If specified, <i>seed</i> is used to initialize the hash.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<!-- @@@qHash -->
+<!-- $$$operator<<$$$operator<<QDataStream&constQFont& -->
+<h3 class="fn" id="operator-lt-lt-11"><a name="operator-lt-lt-11"></a><span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> &amp;<span class="name">operator&lt;&lt;</span>(<span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> &amp;<i>s</i>, const <span class="type"><a href="qfont.html#QFont">QFont</a></span> &amp;<i>font</i>)</h3>
+<p>Writes the font <i>font</i> to the data stream <i>s</i>. (<a href="qfont.html#toString">toString</a>() writes to a text stream.)</p>
+<p><b>See also </b><a href="../qtcore/datastreamformat.html">Format of the QDataStream operators</a>.</p>
+<!-- @@@operator<< -->
+<!-- $$$operator>>[overload1]$$$operator>>QDataStream&QFont& -->
+<h3 class="fn" id="operator-gt-gt"><a name="operator-gt-gt"></a><span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> &amp;<span class="name">operator&gt;&gt;</span>(<span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> &amp;<i>s</i>, <span class="type"><a href="qfont.html#QFont">QFont</a></span> &amp;<i>font</i>)</h3>
+<p>Reads the font <i>font</i> from the data stream <i>s</i>. (<a href="qfont.html#fromString">fromString</a>() reads from a text stream.)</p>
+<p><b>See also </b><a href="../qtcore/datastreamformat.html">Format of the QDataStream operators</a>.</p>
+<!-- @@@operator>> -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qpainterpath.cpp -->
+  <title>Element Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >Element</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-variables">Public Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Element Class</h1>
+<span class="small-subtitle">Class Element is declared in class <a href="qpainterpath.html">QPainterPath</a>.<br/></span>
+<!-- $$$Element-brief -->
+<p>The <a href="qpainterpath-element.html">QPainterPath::Element</a> class specifies the position and type of a subpath. <a href="#details">More...</a></p>
+<!-- @@@Element -->
+<ul>
+<li><a href="qpainterpath-element-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpainterpath-element.html#isCurveTo">isCurveTo</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpainterpath-element.html#isLineTo">isLineTo</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpainterpath-element.html#isMoveTo">isMoveTo</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPointF </td><td class="memItemRight bottomAlign"><b><a href="qpainterpath-element.html#operator-QPointF">operator QPointF</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpainterpath-element.html#operator-not-eq">operator!=</a></b>(const Element &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpainterpath-element.html#operator-eq-eq">operator==</a></b>(const Element &amp;<i>other</i>) const</td></tr>
+</table></div>
+<a name="public-variables"></a>
+<h2 id="public-variables">Public Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QPainterPath::ElementType </td><td class="memItemRight bottomAlign"><b><a href="qpainterpath-element.html#type-var">type</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qpainterpath-element.html#x-var">x</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qpainterpath-element.html#y-var">y</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$Element-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Once a <a href="qpainterpath.html">QPainterPath</a> object is constructed, subpaths like lines and curves can be added to the path (creating <a href="qpainterpath.html#ElementType-enum">QPainterPath::LineToElement</a> and <a href="qpainterpath.html#ElementType-enum">QPainterPath::CurveToElement</a> components).</p>
+<p>The lines and curves stretch from the <a href="qpainterpath.html#currentPosition">currentPosition</a>() to the position passed as argument. The <a href="qpainterpath.html#currentPosition">currentPosition</a>() of the <a href="qpainterpath.html">QPainterPath</a> object is always the end position of the last subpath that was added (or the initial start point). The <a href="qpainterpath.html#moveTo">moveTo</a>() function can be used to move the <a href="qpainterpath.html#currentPosition">currentPosition</a>() without adding a line or curve, creating a <a href="qpainterpath.html#ElementType-enum">QPainterPath::MoveToElement</a> component.</p>
+</div>
+<p><b>See also </b><a href="qpainterpath.html">QPainterPath</a>.</p>
+<!-- @@@Element -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$isCurveTo[overload1]$$$isCurveTo -->
+<h3 class="fn" id="isCurveTo"><a name="isCurveTo"></a><span class="type">bool</span> Element::<span class="name">isCurveTo</span>() const</h3>
+<p>Returns <code>true</code> if the element is a curve, otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qpainterpath-element.html#type-var">type</a> and <a href="qpainterpath.html#ElementType-enum">QPainterPath::CurveToElement</a>.</p>
+<!-- @@@isCurveTo -->
+<!-- $$$isLineTo[overload1]$$$isLineTo -->
+<h3 class="fn" id="isLineTo"><a name="isLineTo"></a><span class="type">bool</span> Element::<span class="name">isLineTo</span>() const</h3>
+<p>Returns <code>true</code> if the element is a line, otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qpainterpath-element.html#type-var">type</a> and <a href="qpainterpath.html#ElementType-enum">QPainterPath::LineToElement</a>.</p>
+<!-- @@@isLineTo -->
+<!-- $$$isMoveTo[overload1]$$$isMoveTo -->
+<h3 class="fn" id="isMoveTo"><a name="isMoveTo"></a><span class="type">bool</span> Element::<span class="name">isMoveTo</span>() const</h3>
+<p>Returns <code>true</code> if the element is moving the current position, otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qpainterpath-element.html#type-var">type</a> and <a href="qpainterpath.html#ElementType-enum">QPainterPath::MoveToElement</a>.</p>
+<!-- @@@isMoveTo -->
+<!-- $$$operator QPointF[overload1]$$$operator QPointF -->
+<h3 class="fn" id="operator-QPointF"><a name="operator-QPointF"></a><span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> Element::<span class="name">operator QPointF</span>() const</h3>
+<p>Returns the element's position.</p>
+<p><b>See also </b><a href="qpainterpath-element.html#x-var">x</a> and <a href="qpainterpath-element.html#y-var">y</a>.</p>
+<!-- @@@operator QPointF -->
+<!-- $$$operator!=[overload1]$$$operator!=constElement& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> Element::<span class="name">operator!=</span>(const <span class="type"><a href="qpainterpath-element.html">Element</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns <code>true</code> if this element is not equal to <i>other</i>; otherwise returns <code>false</code>.</p>
+<p>This function was introduced in  Qt 4.2.</p>
+<p><b>See also </b><a href="qpainterpath-element.html#operator-eq-eq">operator==</a>().</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constElement& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> Element::<span class="name">operator==</span>(const <span class="type"><a href="qpainterpath-element.html">Element</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns <code>true</code> if this element is equal to <i>other</i>; otherwise returns <code>false</code>.</p>
+<p>This function was introduced in  Qt 4.2.</p>
+<p><b>See also </b><a href="qpainterpath-element.html#operator-not-eq">operator!=</a>().</p>
+<!-- @@@operator== -->
+</div>
+<div class="vars">
+<h2>Member Variable Documentation</h2>
+<!-- $$$type -->
+<h3 class="fn" id="type-var"><a name="type-var"></a><span class="type"><a href="qpainterpath.html#ElementType-enum">QPainterPath::ElementType</a></span> Element::<span class="name">type</span></h3>
+<p>This variable holds the type of element</p>
+<p><b>See also </b><a href="qpainterpath-element.html#isCurveTo">isCurveTo</a>(), <a href="qpainterpath-element.html#isLineTo">isLineTo</a>(), and <a href="qpainterpath-element.html#isMoveTo">isMoveTo</a>().</p>
+<!-- @@@type -->
+<!-- $$$x -->
+<h3 class="fn" id="x-var"><a name="x-var"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> Element::<span class="name">x</span></h3>
+<p>This variable holds the x coordinate of the element's position.</p>
+<p><b>See also </b><a href="qpainterpath-element.html#operator-QPointF">operator QPointF</a>().</p>
+<!-- @@@x -->
+<!-- $$$y -->
+<h3 class="fn" id="y-var"><a name="y-var"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> Element::<span class="name">y</span></h3>
+<p>This variable holds the y coordinate of the element's position.</p>
+<p><b>See also </b><a href="qpainterpath-element.html#operator-QPointF">operator QPointF</a>().</p>
+<!-- @@@y -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

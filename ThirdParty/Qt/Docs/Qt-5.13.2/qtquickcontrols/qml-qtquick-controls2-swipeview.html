@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickswipeview.cpp -->
+  <title>SwipeView QML Type | Qt Quick Controls 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td ><a href="qtquick-controls2-qmlmodule.html">QML Types</a></td><td >SwipeView QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#attached-properties">Attached Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">SwipeView QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$SwipeView-brief -->
+<p>Enables the user to navigate pages by swiping sideways. <a href="#details">More...</a></p>
+<!-- @@@SwipeView -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Controls 2.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-controls2-container.html">Container</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-controls2-swipeview-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-swipeview.html#horizontal-prop">horizontal</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-swipeview.html#interactive-prop">interactive</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-swipeview.html#orientation-prop">orientation</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-swipeview.html#vertical-prop">vertical</a></b></b> : bool</li>
+</ul>
+<a name="attached-properties"></a>
+<h2 id="attached-properties">Attached Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-swipeview.html#index-attached-prop">index</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-swipeview.html#isCurrentItem-attached-prop">isCurrentItem</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-swipeview.html#isNextItem-attached-prop">isNextItem</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-swipeview.html#isPreviousItem-attached-prop">isPreviousItem</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-swipeview.html#view-attached-prop">view</a></b></b> : SwipeView</li>
+</ul>
+<!-- $$$SwipeView-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><a href="qml-qtquick-controls2-swipeview.html">SwipeView</a> provides a swipe-based navigation model.</p>
+<p class="centerAlign"><img src="images/qtquickcontrols2-swipeview.gif" alt="" /></p><p><a href="qml-qtquick-controls2-swipeview.html">SwipeView</a> is populated with a set of pages. One page is visible at a time. The user can navigate between the pages by swiping sideways. Notice that <a href="qml-qtquick-controls2-swipeview.html">SwipeView</a> itself is entirely non-visual. It is recommended to combine it with <a href="qml-qtquick-controls2-pageindicator.html">PageIndicator</a>, to give the user a visual clue that there are multiple pages.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls2-swipeview.html">SwipeView</a></span> {
+      <span class="name">id</span>: <span class="name">view</span>
+
+      <span class="name">currentIndex</span>: <span class="number">1</span>
+      <span class="name">anchors</span>.fill: <span class="name">parent</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+          <span class="name">id</span>: <span class="name">firstPage</span>
+      }
+      <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+          <span class="name">id</span>: <span class="name">secondPage</span>
+      }
+      <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+          <span class="name">id</span>: <span class="name">thirdPage</span>
+      }
+  }
+
+  <span class="type"><a href="qml-qtquick-controls2-pageindicator.html">PageIndicator</a></span> {
+      <span class="name">id</span>: <span class="name">indicator</span>
+
+      <span class="name">count</span>: <span class="name">view</span>.<span class="name">count</span>
+      <span class="name">currentIndex</span>: <span class="name">view</span>.<span class="name">currentIndex</span>
+
+      <span class="name">anchors</span>.bottom: <span class="name">view</span>.<span class="name">bottom</span>
+      <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+  }
+
+</pre>
+<p>As shown above, <a href="qml-qtquick-controls2-swipeview.html">SwipeView</a> is typically populated with a static set of pages that are defined inline as children of the view. It is also possible to <a href="qml-qtquick-controls2-container.html#addItem-method">add</a>, <a href="qml-qtquick-controls2-container.html#insertItem-method">insert</a>, <a href="qml-qtquick-controls2-container.html#moveItem-method">move</a>, and <a href="qml-qtquick-controls2-container-obsolete.html#removeItem-method">remove</a> pages dynamically at run time.</p>
+<p>It is generally not advisable to add excessive amounts of pages to a <a href="qml-qtquick-controls2-swipeview.html">SwipeView</a>. However, when the amount of pages grows larger, or individual pages are relatively complex, it may be desirable to free up resources by unloading pages that are outside the immediate reach of the user. The following example presents how to use <a href="../qtquick/qml-qtquick-loader.html">Loader</a> to keep a maximum of three pages simultaneously instantiated.</p>
+<pre class="cpp">
+
+  SwipeView {
+      Repeater {
+          model: <span class="number">6</span>
+          Loader {
+              active: SwipeView<span class="operator">.</span>isCurrentItem <span class="operator">|</span><span class="operator">|</span> SwipeView<span class="operator">.</span>isNextItem <span class="operator">|</span><span class="operator">|</span> SwipeView<span class="operator">.</span>isPreviousItem
+              sourceComponent: Text {
+                  text: index
+                  Component<span class="operator">.</span>onCompleted: console<span class="operator">.</span>log(<span class="string">&quot;created:&quot;</span><span class="operator">,</span> index)
+                  Component<span class="operator">.</span>onDestruction: console<span class="operator">.</span>log(<span class="string">&quot;destroyed:&quot;</span><span class="operator">,</span> index)
+              }
+          }
+      }
+  }
+
+</pre>
+<p><b>Note: </b><a href="qml-qtquick-controls2-swipeview.html">SwipeView</a> takes over the geometry management of items added to the view. Using anchors on the items is not supported, and any <code>width</code> or <code>height</code> assignment will be overridden by the view. Notice that this only applies to the root of the item. Specifying width and height, or using anchors for its children works as expected.</p><p><b>See also </b><a href="qml-qtquick-controls2-tabbar.html">TabBar</a>, <a href="qml-qtquick-controls2-pageindicator.html">PageIndicator</a>, <a href="qtquickcontrols2-customize.html#customizing-swipeview">Customizing SwipeView</a>, <a href="qtquickcontrols2-navigation.html">Navigation Controls</a>, <a href="qtquickcontrols2-containers.html">Container Controls</a>, and <a href="qtquickcontrols2-focus.html">Focus Management in Qt Quick Controls</a>.</p>
+<!-- @@@SwipeView -->
+<h2>Property Documentation</h2>
+<!-- $$$horizontal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="horizontal-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">horizontal</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the swipe view is horizontal.</p>
+<p>This property was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-swipeview.html#orientation-prop">orientation</a>.</p>
+</div></div><!-- @@@horizontal -->
+<br/>
+<!-- $$$interactive -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="interactive-prop"></a><span class="name">interactive</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property describes whether the user can interact with the <a href="qml-qtquick-controls2-swipeview.html">SwipeView</a>. The user cannot swipe a view that is not interactive.</p>
+<p>The default value is <code>true</code>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.1 (Qt 5.8).</p>
+</div></div><!-- @@@interactive -->
+<br/>
+<!-- $$$orientation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="orientation-prop"></a><span class="name">orientation</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the orientation.</p>
+<p>Possible values:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Qt.Horizontal</code></td><td class="topAlign">Horizontal (default)</td></tr>
+<tr><td class="topAlign"><code>Qt.Vertical</code></td><td class="topAlign">Vertical</td></tr>
+</table></div>
+<p>This property was introduced in  QtQuick.Controls 2.2 (Qt 5.9).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-swipeview.html#horizontal-prop">horizontal</a> and <a href="qml-qtquick-controls2-swipeview.html#vertical-prop">vertical</a>.</p>
+</div></div><!-- @@@orientation -->
+<br/>
+<!-- $$$vertical -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="vertical-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">vertical</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the swipe view is vertical.</p>
+<p>This property was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-swipeview.html#orientation-prop">orientation</a>.</p>
+</div></div><!-- @@@vertical -->
+<br/>
+<h2>Attached Property Documentation</h2>
+<!-- $$$index -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="index-attached-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">SwipeView.index</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This attached property holds the index of each child item in the <a href="qml-qtquick-controls2-swipeview.html">SwipeView</a>.</p>
+<p>It is attached to each child item of the <a href="qml-qtquick-controls2-swipeview.html">SwipeView</a>.</p>
+</div></div><!-- @@@index -->
+<br/>
+<!-- $$$isCurrentItem -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="isCurrentItem-attached-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">SwipeView.isCurrentItem</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This attached property is <code>true</code> if this child is the current item.</p>
+<p>It is attached to each child item of the <a href="qml-qtquick-controls2-swipeview.html">SwipeView</a>.</p>
+</div></div><!-- @@@isCurrentItem -->
+<br/>
+<!-- $$$isNextItem -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="isNextItem-attached-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">SwipeView.isNextItem</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This attached property is <code>true</code> if this child is the next item.</p>
+<p>It is attached to each child item of the <a href="qml-qtquick-controls2-swipeview.html">SwipeView</a>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.1 (Qt 5.8).</p>
+</div></div><!-- @@@isNextItem -->
+<br/>
+<!-- $$$isPreviousItem -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="isPreviousItem-attached-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">SwipeView.isPreviousItem</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This attached property is <code>true</code> if this child is the previous item.</p>
+<p>It is attached to each child item of the <a href="qml-qtquick-controls2-swipeview.html">SwipeView</a>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.1 (Qt 5.8).</p>
+</div></div><!-- @@@isPreviousItem -->
+<br/>
+<!-- $$$view -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="view-attached-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">SwipeView.view</span> : <span class="type"><a href="qml-qtquick-controls2-swipeview.html">SwipeView</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This attached property holds the view that manages this child item.</p>
+<p>It is attached to each child item of the <a href="qml-qtquick-controls2-swipeview.html">SwipeView</a>.</p>
+</div></div><!-- @@@view -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

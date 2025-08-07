@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qqmlextensionplugin.cpp -->
+  <title>QQmlExtensionPlugin Class | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td ><a href="qtqml-module.html">C++ Classes</a></td><td >QQmlExtensionPlugin</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#timeexample-qml-extension-plugin">TimeExample QML extension plugin</a></li>
+<li class="level2"><a href="#project-settings-for-the-plugin">Project settings for the plugin</a></li>
+<li class="level2"><a href="#plugin-definition-in-the-qmldir">Plugin definition in the qmldir</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QQmlExtensionPlugin Class</h1>
+<!-- $$$QQmlExtensionPlugin-brief -->
+<p>The <a href="qqmlextensionplugin.html">QQmlExtensionPlugin</a> class provides an abstract base for custom QML extension plugins. <a href="#details">More...</a></p>
+<!-- @@@QQmlExtensionPlugin -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QQmlExtensionPlugin&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += qml</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.0</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.0.</p>
+<ul>
+<li><a href="qqmlextensionplugin-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qqmlextensionplugin.html#QQmlExtensionPlugin">QQmlExtensionPlugin</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QUrl </td><td class="memItemRight bottomAlign"><b><a href="qqmlextensionplugin.html#baseUrl">baseUrl</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qqmlextensionplugin.html#initializeEngine">initializeEngine</a></b>(QQmlEngine *<i>engine</i>, const char *<i>uri</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qqmlextensionplugin.html#registerTypes">registerTypes</a></b>(const char *<i>uri</i>) override = 0</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QQmlExtensionPlugin-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qqmlextensionplugin.html">QQmlExtensionPlugin</a> is a plugin interface that makes it possible to create QML extensions that can be loaded dynamically into QML applications. These extensions allow custom QML types to be made available to the QML engine.</p>
+<p>To write a QML extension plugin:</p>
+<ol class="1" type="1"><li>Subclass <a href="qqmlextensionplugin.html">QQmlExtensionPlugin</a><ul>
+<li>Use the <a href="../qtcore/qtplugin.html#Q_PLUGIN_METADATA">Q_PLUGIN_METADATA</a>() macro to register the plugin with the Qt meta object system</li>
+<li>Override the <a href="qqmlextensionplugin.html#registerTypes">registerTypes()</a> method and call <a href="qqmlengine.html#qmlRegisterType-1">qmlRegisterType</a>() to register the types to be exported by the plugin</li>
+</ul>
+</li>
+<li>Write a project file for the plugin</li>
+<li>Create a <a href="qtqml-modules-qmldir.html">qmldir file</a> to describe the plugin</li>
+</ol>
+<p>QML extension plugins are for either application-specific or library-like plugins. Library plugins should limit themselves to registering types, as any manipulation of the engine's root context may cause conflicts or other issues in the library user's code.</p>
+<a name="timeexample-qml-extension-plugin"></a>
+<h3 id="timeexample-qml-extension-plugin">TimeExample QML extension plugin</h3>
+<p>Suppose there is a new <code>TimeModel</code> C++ class that should be made available as a new QML type. It provides the current time through <code>hour</code> and <code>minute</code> properties.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> TimeModel : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span>
+  {
+      Q_OBJECT
+      Q_PROPERTY(<span class="type">int</span> hour READ hour NOTIFY timeChanged)
+      Q_PROPERTY(<span class="type">int</span> minute READ minute NOTIFY timeChanged)
+      ...
+
+</pre>
+<p>To make this type available, we create a plugin class named <code>QExampleQmlPlugin</code> which is a subclass of <a href="qqmlextensionplugin.html">QQmlExtensionPlugin</a>. It overrides the <a href="qqmlextensionplugin.html#registerTypes">registerTypes()</a> method in order to register the <code>TimeModel</code> type using <a href="qqmlengine.html#qmlRegisterType-1">qmlRegisterType</a>(). It also uses the <a href="../qtcore/qtplugin.html#Q_PLUGIN_METADATA">Q_PLUGIN_METADATA</a>() macro in the class definition to register the plugin with the Qt meta object system using a unique identifier for the plugin.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> <span class="type">QExampleQmlPlugin</span> : <span class="keyword">public</span> <span class="type"><a href="qqmlextensionplugin.html#QQmlExtensionPlugin">QQmlExtensionPlugin</a></span>
+  {
+      Q_OBJECT
+      Q_PLUGIN_METADATA(IID QQmlExtensionInterface_iid)
+
+  <span class="keyword">public</span>:
+      <span class="type">void</span> registerTypes(<span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>uri) override
+      {
+          Q_ASSERT(uri <span class="operator">=</span><span class="operator">=</span> QLatin1String(<span class="string">&quot;TimeExample&quot;</span>));
+          qmlRegisterType<span class="operator">&lt;</span>TimeModel<span class="operator">&gt;</span>(uri<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;Time&quot;</span>);
+      }
+  };
+
+</pre>
+<p>This registers the <code>TimeModel</code> class with version <code>1.0</code> of this plugin library, as a QML type called <code>Time</code>. The <a href="../qtcore/qtglobal.html#Q_ASSERT">Q_ASSERT</a>() macro can ensure the type namespace is imported correctly by any QML components that use this plugin. The <a href="qtqml-cppintegration-definetypes.html">Defining QML Types from C++</a> article has more information about registering C++ types into the runtime.</p>
+<a name="project-settings-for-the-plugin"></a>
+<h3 id="project-settings-for-the-plugin">Project settings for the plugin</h3>
+<p>Additionally, the project file (<code>.pro</code>) defines the project as a plugin library, specifies it should be built into the <code>imports/TimeExample</code> directory, and registers the plugin target name and various other details:</p>
+<pre class="cpp">
+
+  TEMPLATE <span class="operator">=</span> lib
+  CONFIG <span class="operator">+</span><span class="operator">=</span> qt plugin
+  QT <span class="operator">+</span><span class="operator">=</span> qml
+
+  DESTDIR <span class="operator">=</span> imports<span class="operator">/</span>TimeExample
+  TARGET <span class="operator">=</span> qmlqtimeexampleplugin
+  SOURCES <span class="operator">+</span><span class="operator">=</span> qexampleqmlplugin<span class="operator">.</span>cpp
+
+</pre>
+<a name="plugin-definition-in-the-qmldir"></a>
+<h3 id="plugin-definition-in-the-qmldir">Plugin definition in the qmldir</h3>
+<p>Finally, a <a href="qtqml-modules-qmldir.html">qmldir file</a> is required in the <code>imports/TimeExample</code> directory to describe the plugin and the types that it exports. The plugin includes a <code>Clock.qml</code> file along with the <code>qmlqtimeexampleplugin</code> that is built by the project (as shown above in the <code>.pro</code> file) so both of these need to be specified in the <code>qmldir</code> file:</p>
+<pre class="cpp">
+
+  module TimeExample
+  Clock <span class="number">1.0</span> Clock<span class="operator">.</span>qml
+  plugin qmlqtimeexampleplugin
+
+</pre>
+<p>To make things easier for this example, the TimeExample source directory is in <code>imports/TimeExample</code>, and we build <a href="../qtdoc/configure-options.html#source-build-and-install-directories">in-source</a>. However, the structure of the source directory is not so important, as the <code>qmldir</code> file can specify paths to installed QML files.</p>
+<p>What is important is the name of the directory that the qmldir is installed into. When the user imports our module, the QML engine uses the <a href="qtqml-modules-qmldir.html#contents-of-a-module-definition-qmldir-file">module identifier</a> (<code>TimeExample</code>) to find the plugin, and so the directory in which it is installed must match the module identifier.</p>
+<p>Once the project is built and installed, the new <code>Time</code> component is accessible by any QML component that imports the <code>TimeExample</code> module</p>
+<pre class="qml">
+
+  import TimeExample 1.0 <span class="comment">// import types from the plugin</span>
+
+  <span class="type">Clock</span> { <span class="comment">// this class is defined in QML (imports/TimeExample/Clock.qml)</span>
+
+      <span class="type">Time</span> { <span class="comment">// this class is defined in C++ (plugin.cpp)</span>
+          <span class="name">id</span>: <span class="name">time</span>
+      }
+
+      <span class="name">hours</span>: <span class="name">time</span>.<span class="name">hour</span>
+      <span class="name">minutes</span>: <span class="name">time</span>.<span class="name">minute</span>
+
+  }
+
+</pre>
+<p>The full source code is available in the <a href="qtqml-qmlextensionplugins-example.html">plugins example</a>.</p>
+<p>The <a href="qtqml-tutorials-extending-qml-example.html">Writing QML Extensions with C++</a> tutorial also contains a chapter on creating QML plugins.</p>
+</div>
+<p><b>See also </b><a href="qqmlengine.html#importPlugin">QQmlEngine::importPlugin</a>() and <a href="../qtdoc/plugins-howto.html">How to Create Qt Plugins</a>.</p>
+<!-- @@@QQmlExtensionPlugin -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QQmlExtensionPlugin[overload1]$$$QQmlExtensionPluginQObject* -->
+<h3 class="fn" id="QQmlExtensionPlugin"><a name="QQmlExtensionPlugin"></a>QQmlExtensionPlugin::<span class="name">QQmlExtensionPlugin</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a QML extension plugin with the given <i>parent</i>.</p>
+<p>Note that this constructor is invoked automatically by the <a href="../qtcore/qtplugin.html#Q_PLUGIN_METADATA">Q_PLUGIN_METADATA</a>() macro, so there is no need for calling it explicitly.</p>
+<!-- @@@QQmlExtensionPlugin -->
+<!-- $$$baseUrl[overload1]$$$baseUrl -->
+<h3 class="fn" id="baseUrl"><a name="baseUrl"></a><span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> QQmlExtensionPlugin::<span class="name">baseUrl</span>() const</h3>
+<p>Returns the URL of the directory from which the extension is loaded.</p>
+<p>This is useful when the plugin also needs to load QML files or other assets from the same directory.</p>
+<p>This function was introduced in  Qt 5.1.</p>
+<!-- @@@baseUrl -->
+<!-- $$$initializeEngine[overload1]$$$initializeEngineQQmlEngine*constchar* -->
+<h3 class="fn" id="initializeEngine"><a name="initializeEngine"></a><code>[override virtual] </code><span class="type">void</span> QQmlExtensionPlugin::<span class="name">initializeEngine</span>(<span class="type"><a href="qqmlengine.html">QQmlEngine</a></span> *<i>engine</i>, const <span class="type">char</span> *<i>uri</i>)</h3>
+<p>Initializes the extension from the <i>uri</i> using the <i>engine</i>. Here an application plugin might, for example, expose some data or objects to QML, as context properties on the engine's root context.</p>
+<!-- @@@initializeEngine -->
+<!-- $$$registerTypes[overload1]$$$registerTypesconstchar* -->
+<h3 class="fn" id="registerTypes"><a name="registerTypes"></a><code>[override pure virtual] </code><span class="type">void</span> QQmlExtensionPlugin::<span class="name">registerTypes</span>(const <span class="type">char</span> *<i>uri</i>)</h3>
+<p>Registers the QML types in the given <i>uri</i>. Subclasses should implement this to call <a href="qqmlengine.html#qmlRegisterType-1">qmlRegisterType</a>() for all types which are provided by the extension plugin.</p>
+<p>The <i>uri</i> is an identifier for the plugin generated by the QML engine based on the name and path of the extension's plugin library.</p>
+<!-- @@@registerTypes -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

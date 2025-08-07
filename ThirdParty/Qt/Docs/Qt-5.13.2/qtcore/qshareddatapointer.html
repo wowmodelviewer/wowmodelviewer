@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qshareddata.cpp -->
+  <title>QSharedDataPointer Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QSharedDataPointer</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#implicit-vs-explicit-sharing">Implicit vs Explicit Sharing</a></li>
+<li class="level2"><a href="#optimize-performance-for-usage-in-qt-containers">Optimize Performance for Usage in Qt Containers</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSharedDataPointer Class</h1>
+<!-- $$$QSharedDataPointer-brief -->
+<p>The <a href="qshareddatapointer.html">QSharedDataPointer</a> class represents a pointer to an implicitly shared object. <a href="#details">More...</a></p>
+<!-- @@@QSharedDataPointer -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QSharedDataPointer&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.0</td></tr></table></div><p>This class was introduced in  Qt 4.0.</p>
+<ul>
+<li><a href="qshareddatapointer-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#Type-typedef">Type</a></b></td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#QSharedDataPointer-3">QSharedDataPointer</a></b>(QSharedDataPointer&lt;T&gt; &amp;&amp;<i>o</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#QSharedDataPointer-2">QSharedDataPointer</a></b>(const QSharedDataPointer&lt;T&gt; &amp;<i>o</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#QSharedDataPointer-1">QSharedDataPointer</a></b>(T *<i>data</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#QSharedDataPointer">QSharedDataPointer</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSharedDataPointer&lt;T&gt; &amp;</td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#operator-eq-2">operator=</a></b>(QSharedDataPointer&lt;T&gt; &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSharedDataPointer&lt;T&gt; &amp;</td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#operator-eq">operator=</a></b>(const QSharedDataPointer&lt;T&gt; &amp;<i>o</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#dtor.QSharedDataPointer">~QSharedDataPointer</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const T *</td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#constData">constData</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> T *</td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#data">data</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const T *</td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#data-1">data</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#detach">detach</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#swap">swap</a></b>(QSharedDataPointer&lt;T&gt; &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> T *</td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#operator-T--2a">operator T *</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const T *</td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#operator-const-T--2a">operator const T *</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#operator-not">operator!</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#operator-not-eq">operator!=</a></b>(const QSharedDataPointer&lt;T&gt; &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> T &amp;</td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#operator-2a">operator*</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const T &amp;</td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#operator-2a-1">operator*</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> T *</td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#operator--gt">operator-&gt;</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const T *</td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#operator--gt-1">operator-&gt;</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSharedDataPointer&lt;T&gt; &amp;</td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#operator-eq-1">operator=</a></b>(T *<i>o</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#operator-eq-eq">operator==</a></b>(const QSharedDataPointer&lt;T&gt; &amp;<i>other</i>) const</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> T *</td><td class="memItemRight bottomAlign"><b><a href="qshareddatapointer.html#clone">clone</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSharedDataPointer-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qshareddatapointer.html">QSharedDataPointer</a>&lt;T&gt; makes writing your own <a href="implicit-sharing.html">implicitly shared</a> classes easy. <a href="qshareddatapointer.html">QSharedDataPointer</a> implements <a href="../qtdoc/threads-reentrancy.html">thread-safe</a> reference counting, ensuring that adding QSharedDataPointers to your <a href="../qtdoc/threads-reentrancy.html">reentrant</a> classes won't make them non-reentrant.</p>
+<p><a href="implicit-sharing.html">Implicit sharing</a> is used by many Qt classes to combine the speed and memory efficiency of pointers with the ease of use of classes. See the <a href="implicit-sharing.html">Shared Classes</a> page for more information.</p>
+<a name="employee-example"></a><p>Suppose you want to make an <code>Employee</code> class implicitly shared. The procedure is:</p>
+<ul>
+<li>Define the class <code>Employee</code> to have a single data member of type <code>QSharedDataPointer&lt;EmployeeData&gt;</code>.</li>
+<li>Define the <code>EmployeeData</code> class derived from <a href="qshareddata.html">QSharedData</a> to contain all the data members you would normally have put in the <code>Employee</code> class.</li>
+</ul>
+<p>To show this in practice, we review the source code for the implicitly shared <code>Employee</code> class. In the header file we define the two classes <code>Employee</code> and <code>EmployeeData</code>.</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QSharedData&gt;</span>
+  <span class="preprocessor">#include &lt;QString&gt;</span>
+
+  <span class="keyword">class</span> EmployeeData : <span class="keyword">public</span> <span class="type"><a href="qshareddata.html">QSharedData</a></span>
+  {
+    <span class="keyword">public</span>:
+      EmployeeData() : id(<span class="operator">-</span><span class="number">1</span>) { }
+      EmployeeData(<span class="keyword">const</span> EmployeeData <span class="operator">&amp;</span>other)
+          : <span class="type"><a href="qshareddata.html">QSharedData</a></span>(other)<span class="operator">,</span> id(other<span class="operator">.</span>id)<span class="operator">,</span> name(other<span class="operator">.</span>name) { }
+      <span class="operator">~</span>EmployeeData() { }
+
+      <span class="type">int</span> id;
+      <span class="type"><a href="qstring.html">QString</a></span> name;
+  };
+
+  <span class="keyword">class</span> Employee
+  {
+    <span class="keyword">public</span>:
+      Employee() { d <span class="operator">=</span> <span class="keyword">new</span> EmployeeData; }
+      Employee(<span class="type">int</span> id<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qstring.html">QString</a></span> <span class="operator">&amp;</span>name) {
+          d <span class="operator">=</span> <span class="keyword">new</span> EmployeeData;
+          setId(id);
+          setName(name);
+      }
+      Employee(<span class="keyword">const</span> Employee <span class="operator">&amp;</span>other)
+            : d (other<span class="operator">.</span>d)
+      {
+      }
+      <span class="type">void</span> setId(<span class="type">int</span> id) { d<span class="operator">-</span><span class="operator">&gt;</span>id <span class="operator">=</span> id; }
+      <span class="type">void</span> setName(<span class="keyword">const</span> <span class="type"><a href="qstring.html">QString</a></span> <span class="operator">&amp;</span>name) { d<span class="operator">-</span><span class="operator">&gt;</span>name <span class="operator">=</span> name; }
+
+      <span class="type">int</span> id() <span class="keyword">const</span> { <span class="keyword">return</span> d<span class="operator">-</span><span class="operator">&gt;</span>id; }
+      <span class="type"><a href="qstring.html">QString</a></span> name() <span class="keyword">const</span> { <span class="keyword">return</span> d<span class="operator">-</span><span class="operator">&gt;</span>name; }
+
+    <span class="keyword">private</span>:
+      <span class="type"><a href="qshareddatapointer.html#QSharedDataPointer">QSharedDataPointer</a></span><span class="operator">&lt;</span>EmployeeData<span class="operator">&gt;</span> d;
+  };
+
+</pre>
+<p>In class <code>Employee</code>, note the single data member, a <i>d pointer</i> of type <code>QSharedDataPointer&lt;EmployeeData&gt;</code>. All accesses of employee data must go through the <i>d pointer's</i> <code>operator-&gt;()</code>. For write accesses, <code>operator-&gt;()</code> will automatically call <a href="qshareddatapointer.html#detach">detach</a>(), which creates a copy of the shared data object if the shared data object's reference count is greater than 1. This ensures that writes to one <code>Employee</code> object don't affect any other <code>Employee</code> objects that share the same <code>EmployeeData</code> object.</p>
+<p>Class <code>EmployeeData</code> inherits <a href="qshareddata.html">QSharedData</a>, which provides the <i>behind the scenes</i> reference counter. <code>EmployeeData</code> has a default constructor, a copy constructor, and a destructor. Normally, trivial implementations of these are all that is needed in the <i>data</i> class for an implicitly shared class.</p>
+<p>Implementing the two constructors for class <code>Employee</code> is also straightforward. Both create a new instance of <code>EmployeeData</code> and assign it to the <i>d pointer</i> .</p>
+<pre class="cpp">
+
+      Employee() { d <span class="operator">=</span> <span class="keyword">new</span> EmployeeData; }
+
+      Employee(<span class="type">int</span> id<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qstring.html">QString</a></span> <span class="operator">&amp;</span>name) {
+          d <span class="operator">=</span> <span class="keyword">new</span> EmployeeData;
+          setId(id);
+          setName(name);
+      }
+
+</pre>
+<p>Note that class <code>Employee</code> also has a trivial copy constructor defined, which is not strictly required in this case.</p>
+<pre class="cpp">
+
+      Employee(<span class="keyword">const</span> Employee <span class="operator">&amp;</span>other)
+            : d (other<span class="operator">.</span>d)
+      {
+      }
+
+</pre>
+<p>The copy constructor is not strictly required here, because class <code>EmployeeData</code> is included in the same file as class <code>Employee</code> (<code>employee.h</code>). However, including the private subclass of <a href="qshareddata.html">QSharedData</a> in the same file as the public class containing the <a href="qshareddatapointer.html">QSharedDataPointer</a> is not typical. Normally, the idea is to hide the private subclass of <a href="qshareddata.html">QSharedData</a> from the user by putting it in a separate file which would not be included in the public file. In this case, we would normally put class <code>EmployeeData</code> in a separate file, which would <i>not</i> be included in <code>employee.h</code>. Instead, we would just predeclare the private subclass <code>EmployeeData</code> in <code>employee.h</code> this way:</p>
+<pre class="cpp">
+
+      <span class="keyword">class</span> EmployeeData;
+
+</pre>
+<p>If we had done it that way here, the copy constructor shown would be required. Since the copy constructor is trivial, you might as well just always include it.</p>
+<p>Behind the scenes, <a href="qshareddatapointer.html">QSharedDataPointer</a> automatically increments the reference count whenever an <code>Employee</code> object is copied, assigned, or passed as a parameter. It decrements the reference count whenever an <code>Employee</code> object is deleted or goes out of scope. The shared <code>EmployeeData</code> object is deleted automatically if and when the reference count reaches 0.</p>
+<p>In a non-const member function of <code>Employee</code>, whenever the <i>d pointer</i> is dereferenced, <a href="qshareddatapointer.html">QSharedDataPointer</a> automatically calls <a href="qshareddatapointer.html#detach">detach</a>() to ensure that the function operates on its own copy of the data.</p>
+<pre class="cpp">
+
+      <span class="type">void</span> setId(<span class="type">int</span> id) { d<span class="operator">-</span><span class="operator">&gt;</span>id <span class="operator">=</span> id; }
+
+      <span class="type">void</span> setName(<span class="keyword">const</span> <span class="type"><a href="qstring.html">QString</a></span> <span class="operator">&amp;</span>name) { d<span class="operator">-</span><span class="operator">&gt;</span>name <span class="operator">=</span> name; }
+
+</pre>
+<p>Note that if <a href="qshareddatapointer.html#detach">detach</a>() is called more than once in a member function due to multiple dereferences of the <i>d pointer</i>, <a href="qshareddatapointer.html#detach">detach</a>() will only create a copy of the shared data the first time it is called, if at all, because on the second and subsequent calls of <a href="qshareddatapointer.html#detach">detach</a>(), the reference count will be 1 again.</p>
+<p>But note that in the second <code>Employee</code> constructor, which takes an employee ID and a name, both setId() and setName() are called, but they don't cause <i>copy on write</i>, because the reference count for the newly constructed <code>EmployeeData</code> object has just been set to 1.</p>
+<p>In <code>Employee</code>'s <i>const</i> member functions, dereferencing the <i>d pointer</i> does <i>not</i> cause <a href="qshareddatapointer.html#detach">detach</a>() to be called.</p>
+<pre class="cpp">
+
+      <span class="type">int</span> id() <span class="keyword">const</span> { <span class="keyword">return</span> d<span class="operator">-</span><span class="operator">&gt;</span>id; }
+
+      <span class="type"><a href="qstring.html">QString</a></span> name() <span class="keyword">const</span> { <span class="keyword">return</span> d<span class="operator">-</span><span class="operator">&gt;</span>name; }
+
+</pre>
+<p>Notice that there is no need to implement a copy constructor or an assignment operator for the <code>Employee</code> class, because the copy constructor and assignment operator provided by the C++ compiler will do the <i>member by member</i> shallow copy required. The only member to copy is the <i>d pointer</i>, which is a <a href="qshareddatapointer.html">QSharedDataPointer</a>, whose <code>operator=()</code> just increments the reference count of the shared <code>EmployeeData</code> object.</p>
+<a name="implicit-vs-explicit-sharing"></a><a name="implicit-vs-explicit-sharing"></a>
+<h3 id="implicit-vs-explicit-sharing">Implicit vs Explicit Sharing</h3>
+<p>Implicit sharing might not be right for the <code>Employee</code> class. Consider a simple example that creates two instances of the implicitly shared <code>Employee</code> class.</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &quot;employee.h&quot;</span>
+
+  <span class="type">int</span> main()
+  {
+      Employee e1(<span class="number">1001</span><span class="operator">,</span> <span class="string">&quot;Albrecht Durer&quot;</span>);
+      Employee e2 <span class="operator">=</span> e1;
+      e1<span class="operator">.</span>setName(<span class="string">&quot;Hans Holbein&quot;</span>);
+  }
+
+</pre>
+<p>After the second employee e2 is created and e1 is assigned to it, both <code>e1</code> and <code>e2</code> refer to Albrecht Durer, employee 1001. Both <code>Employee</code> objects point to the same instance of <code>EmployeeData</code>, which has reference count 2. Then <code>e1.setName(&quot;Hans Holbein&quot;)</code> is called to change the employee name, but because the reference count is greater than 1, a <i>copy on write</i> is performed before the name is changed. Now <code>e1</code> and <code>e2</code> point to different <code>EmployeeData</code> objects. They have different names, but both have ID 1001, which is probably not what you want. You can, of course, just continue with <code>e1.setId(1002)</code>, if you really mean to create a second, unique employee, but if you only want to change the employee's name everywhere, consider using <a href="qexplicitlyshareddatapointer.html">explicit sharing</a> in the <code>Employee</code> class instead of implicit sharing.</p>
+<p>If you declare the <i>d pointer</i> in the <code>Employee</code> class to be <code>QExplicitlySharedDataPointer&lt;EmployeeData&gt;</code>, then explicit sharing is used and <i>copy on write</i> operations are not performed automatically (i.e&#x2e; <a href="qshareddatapointer.html#detach">detach</a>() is not called in non-const functions). In that case, after <code>e1.setName(&quot;Hans Holbein&quot;)</code>, the employee's name has been changed, but both e1 and e2 still refer to the same instance of <code>EmployeeData</code>, so there is only one employee with ID 1001.</p>
+<p>In the member function documentation, <i>d pointer</i> always refers to the internal pointer to the shared data object.</p>
+<a name="optimize-performance-for-usage-in-qt-containers"></a>
+<h3 id="optimize-performance-for-usage-in-qt-containers">Optimize Performance for Usage in Qt Containers</h3>
+<p>You should consider marking your implicitly shared class as a movable type using the <a href="qtglobal.html#Q_DECLARE_TYPEINFO">Q_DECLARE_TYPEINFO</a>() macro if it resembles the <code>Employee</code> class above and uses a <a href="qshareddatapointer.html">QSharedDataPointer</a> or <a href="qexplicitlyshareddatapointer.html">QExplicitlySharedDataPointer</a> as the only member. This can improve performance and memory efficiency when using Qt's <a href="containers.html">container classes</a>.</p>
+</div>
+<p><b>See also </b><a href="qshareddata.html">QSharedData</a>, <a href="qexplicitlyshareddatapointer.html">QExplicitlySharedDataPointer</a>, <a href="qscopedpointer.html">QScopedPointer</a>, and <a href="qsharedpointer.html">QSharedPointer</a>.</p>
+<!-- @@@QSharedDataPointer -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Type -->
+<h3 class="fn" id="Type-typedef"><a name="Type-typedef"></a>typedef QSharedDataPointer::<span class="name">Type</span></h3>
+<p>This is the type of the shared data object. The <i>d pointer</i> points to an object of this type.</p>
+<!-- @@@Type -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QSharedDataPointer$$$QSharedDataPointerQSharedDataPointer<T>&& -->
+<h3 class="fn" id="QSharedDataPointer-3"><a name="QSharedDataPointer-3"></a>QSharedDataPointer::<span class="name">QSharedDataPointer</span>(<span class="type"><a href="qshareddatapointer.html#QSharedDataPointer">QSharedDataPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;&amp;<i>o</i>)</h3>
+<p>Move-constructs a <a href="qshareddatapointer.html">QSharedDataPointer</a> instance, making it point at the same object that <i>o</i> was pointing to.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@QSharedDataPointer -->
+<!-- $$$QSharedDataPointer$$$QSharedDataPointerconstQSharedDataPointer<T>& -->
+<h3 class="fn" id="QSharedDataPointer-2"><a name="QSharedDataPointer-2"></a>QSharedDataPointer::<span class="name">QSharedDataPointer</span>(const <span class="type"><a href="qshareddatapointer.html#QSharedDataPointer">QSharedDataPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>o</i>)</h3>
+<p>Sets the <i>d pointer</i> of <i>this</i> to the <i>d pointer</i> in <i>o</i> and increments the reference count of the shared data object.</p>
+<!-- @@@QSharedDataPointer -->
+<!-- $$$QSharedDataPointer$$$QSharedDataPointerT* -->
+<h3 class="fn" id="QSharedDataPointer-1"><a name="QSharedDataPointer-1"></a>QSharedDataPointer::<span class="name">QSharedDataPointer</span>(<span class="type">T</span> *<i>data</i>)</h3>
+<p>Constructs a <a href="qshareddatapointer.html">QSharedDataPointer</a> with <i>d pointer</i> set to <i>data</i> and increments <i>data</i>'s reference count.</p>
+<!-- @@@QSharedDataPointer -->
+<!-- $$$QSharedDataPointer[overload1]$$$QSharedDataPointer -->
+<h3 class="fn" id="QSharedDataPointer"><a name="QSharedDataPointer"></a>QSharedDataPointer::<span class="name">QSharedDataPointer</span>()</h3>
+<p>Constructs a <a href="qshareddatapointer.html">QSharedDataPointer</a> initialized with <code>nullptr</code> as <i>d pointer</i>.</p>
+<!-- @@@QSharedDataPointer -->
+<!-- $$$operator=$$$operator=QSharedDataPointer<T>&& -->
+<h3 class="fn" id="operator-eq-2"><a name="operator-eq-2"></a><span class="type"><a href="qshareddatapointer.html#QSharedDataPointer">QSharedDataPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;QSharedDataPointer::<span class="name">operator=</span>(<span class="type"><a href="qshareddatapointer.html#QSharedDataPointer">QSharedDataPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;&amp;<i>other</i>)</h3>
+<p>Move-assigns <i>other</i> to this <a href="qshareddatapointer.html">QSharedDataPointer</a> instance.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@operator= -->
+<!-- $$$operator=[overload1]$$$operator=constQSharedDataPointer<T>& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qshareddatapointer.html#QSharedDataPointer">QSharedDataPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;QSharedDataPointer::<span class="name">operator=</span>(const <span class="type"><a href="qshareddatapointer.html#QSharedDataPointer">QSharedDataPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>o</i>)</h3>
+<p>Sets the <i>d pointer</i> of <i>this</i> to the <i>d pointer</i> of <i>o</i> and increments the reference count of the shared data object. The reference count of the old shared data object of <i>this</i> is decremented. If the reference count of the old shared data object becomes 0, the old shared data object is deleted.</p>
+<!-- @@@operator= -->
+<!-- $$$~QSharedDataPointer[overload1]$$$~QSharedDataPointer -->
+<h3 class="fn" id="dtor.QSharedDataPointer"><a name="dtor.QSharedDataPointer"></a>QSharedDataPointer::<span class="name">~QSharedDataPointer</span>()</h3>
+<p>Decrements the reference count of the shared data object. If the reference count becomes 0, the shared data object is deleted. <i>This</i> is then destroyed.</p>
+<!-- @@@~QSharedDataPointer -->
+<!-- $$$clone[overload1]$$$clone -->
+<h3 class="fn" id="clone"><a name="clone"></a><code>[protected] </code><span class="type">T</span> *QSharedDataPointer::<span class="name">clone</span>()</h3>
+<p>Creates and returns a deep copy of the current data. This function is called by <a href="qshareddatapointer.html#detach">detach</a>() when the reference count is greater than 1 in order to create the new copy. This function uses the <i>operator new</i> and calls the copy constructor of the type T.</p>
+<p>This function is provided so that you may support &quot;virtual copy constructors&quot; for your own types. In order to so, you should declare a template-specialization of this function for your own type, like the example below:</p>
+<pre class="cpp">
+
+      <span class="keyword">template</span><span class="operator">&lt;</span><span class="operator">&gt;</span>
+      EmployeeData <span class="operator">*</span><span class="type"><a href="qshareddatapointer.html#QSharedDataPointer">QSharedDataPointer</a></span><span class="operator">&lt;</span>EmployeeData<span class="operator">&gt;</span><span class="operator">::</span>clone()
+      {
+          <span class="keyword">return</span> d<span class="operator">-</span><span class="operator">&gt;</span>clone();
+      }
+
+</pre>
+<p>In the example above, the template specialization for the clone() function calls the <i>EmployeeData::clone()</i> virtual function. A class derived from EmployeeData could override that function and return the proper polymorphic type.</p>
+<p>This function was introduced in  Qt 4.5.</p>
+<!-- @@@clone -->
+<!-- $$$constData[overload1]$$$constData -->
+<h3 class="fn" id="constData"><a name="constData"></a>const <span class="type">T</span> *QSharedDataPointer::<span class="name">constData</span>() const</h3>
+<p>Returns a const pointer to the shared data object. This function does <i>not</i> call <a href="qshareddatapointer.html#detach">detach</a>().</p>
+<p><b>See also </b><a href="qshareddatapointer.html#data">data</a>().</p>
+<!-- @@@constData -->
+<!-- $$$data[overload1]$$$data -->
+<h3 class="fn" id="data"><a name="data"></a><span class="type">T</span> *QSharedDataPointer::<span class="name">data</span>()</h3>
+<p>Returns a pointer to the shared data object. This function calls <a href="qshareddatapointer.html#detach">detach</a>().</p>
+<p><b>See also </b><a href="qshareddatapointer.html#constData">constData</a>().</p>
+<!-- @@@data -->
+<!-- $$$data$$$data -->
+<h3 class="fn" id="data-1"><a name="data-1"></a>const <span class="type">T</span> *QSharedDataPointer::<span class="name">data</span>() const</h3>
+<p>Returns a pointer to the shared data object. This function does <i>not</i> call <a href="qshareddatapointer.html#detach">detach</a>().</p>
+<!-- @@@data -->
+<!-- $$$detach[overload1]$$$detach -->
+<h3 class="fn" id="detach"><a name="detach"></a><span class="type">void</span> QSharedDataPointer::<span class="name">detach</span>()</h3>
+<p>If the shared data object's reference count is greater than 1, this function creates a deep copy of the shared data object and sets the <i>d pointer</i> of <i>this</i> to the copy.</p>
+<p>This function is called automatically by non-const member functions of <a href="qshareddatapointer.html">QSharedDataPointer</a> if <i>copy on write</i> is required. You don't need to call it yourself.</p>
+<!-- @@@detach -->
+<!-- $$$swap[overload1]$$$swapQSharedDataPointer<T>& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QSharedDataPointer::<span class="name">swap</span>(<span class="type"><a href="qshareddatapointer.html#QSharedDataPointer">QSharedDataPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>other</i>)</h3>
+<p>Swap this instance's shared data pointer with the shared data pointer in <i>other</i>.</p>
+<!-- @@@swap -->
+<!-- $$$operator T *[overload1]$$$operator T * -->
+<h3 class="fn" id="operator-T--2a"><a name="operator-T--2a"></a><span class="type">T</span> *QSharedDataPointer::<span class="name">operator T *</span>()</h3>
+<p>Returns a pointer to the shared data object. This function calls <a href="qshareddatapointer.html#detach">detach</a>().</p>
+<p><b>See also </b><a href="qshareddatapointer.html#data">data</a>() and <a href="qshareddatapointer.html#constData">constData</a>().</p>
+<!-- @@@operator T * -->
+<!-- $$$operator const T *[overload1]$$$operator const T * -->
+<h3 class="fn" id="operator-const-T--2a"><a name="operator-const-T--2a"></a>const <span class="type">T</span> *QSharedDataPointer::<span class="name">operator const T *</span>() const</h3>
+<p>Returns a pointer to the shared data object. This function does <i>not</i> call <a href="qshareddatapointer.html#detach">detach</a>().</p>
+<!-- @@@operator const T * -->
+<!-- $$$operator![overload1]$$$operator! -->
+<h3 class="fn" id="operator-not"><a name="operator-not"></a><span class="type">bool</span> QSharedDataPointer::<span class="name">operator!</span>() const</h3>
+<p>Returns <code>true</code> if the <i>d pointer</i> of <i>this</i> is <code>nullptr</code>.</p>
+<!-- @@@operator! -->
+<!-- $$$operator!=[overload1]$$$operator!=constQSharedDataPointer<T>& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> QSharedDataPointer::<span class="name">operator!=</span>(const <span class="type"><a href="qshareddatapointer.html#QSharedDataPointer">QSharedDataPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>other</i>) const</h3>
+<p>Returns <code>true</code> if <i>other</i> and <i>this</i> do <i>not</i> have the same <i>d pointer</i>. This function does <i>not</i> call <a href="qshareddatapointer.html#detach">detach</a>().</p>
+<!-- @@@operator!= -->
+<!-- $$$operator*[overload1]$$$operator* -->
+<h3 class="fn" id="operator-2a"><a name="operator-2a"></a><span class="type">T</span> &amp;QSharedDataPointer::<span class="name">operator*</span>()</h3>
+<p>Provides access to the shared data object's members. This function calls <a href="qshareddatapointer.html#detach">detach</a>().</p>
+<!-- @@@operator* -->
+<!-- $$$operator*$$$operator* -->
+<h3 class="fn" id="operator-2a-1"><a name="operator-2a-1"></a>const <span class="type">T</span> &amp;QSharedDataPointer::<span class="name">operator*</span>() const</h3>
+<p>Provides const access to the shared data object's members. This function does <i>not</i> call <a href="qshareddatapointer.html#detach">detach</a>().</p>
+<!-- @@@operator* -->
+<!-- $$$operator->[overload1]$$$operator-> -->
+<h3 class="fn" id="operator--gt"><a name="operator--gt"></a><span class="type">T</span> *QSharedDataPointer::<span class="name">operator-&gt;</span>()</h3>
+<p>Provides access to the shared data object's members. This function calls <a href="qshareddatapointer.html#detach">detach</a>().</p>
+<!-- @@@operator-> -->
+<!-- $$$operator->$$$operator-> -->
+<h3 class="fn" id="operator--gt-1"><a name="operator--gt-1"></a>const <span class="type">T</span> *QSharedDataPointer::<span class="name">operator-&gt;</span>() const</h3>
+<p>Provides const access to the shared data object's members. This function does <i>not</i> call <a href="qshareddatapointer.html#detach">detach</a>().</p>
+<!-- @@@operator-> -->
+<!-- $$$operator=$$$operator=T* -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type"><a href="qshareddatapointer.html#QSharedDataPointer">QSharedDataPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;QSharedDataPointer::<span class="name">operator=</span>(<span class="type">T</span> *<i>o</i>)</h3>
+<p>Sets the <i>d pointer</i> og <i>this</i> to <i>o</i> and increments <i>o</i>'s reference count. The reference count of the old shared data object of <i>this</i> is decremented. If the reference count of the old shared data object becomes 0, the old shared data object is deleted.</p>
+<!-- @@@operator= -->
+<!-- $$$operator==[overload1]$$$operator==constQSharedDataPointer<T>& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> QSharedDataPointer::<span class="name">operator==</span>(const <span class="type"><a href="qshareddatapointer.html#QSharedDataPointer">QSharedDataPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>other</i>) const</h3>
+<p>Returns <code>true</code> if <i>other</i> and <i>this</i> have the same <i>d pointer</i>. This function does <i>not</i> call <a href="qshareddatapointer.html#detach">detach</a>().</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

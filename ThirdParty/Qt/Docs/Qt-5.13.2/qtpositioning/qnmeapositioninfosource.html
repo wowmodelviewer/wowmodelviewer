@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qnmeapositioninfosource.cpp -->
+  <title>QNmeaPositionInfoSource Class | Qt Positioning 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtpositioning-index.html">Qt Positioning</a></td><td ><a href="qtpositioning-module.html">C++ Classes</a></td><td >QNmeaPositionInfoSource</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtpositioning-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QNmeaPositionInfoSource Class</h1>
+<!-- $$$QNmeaPositionInfoSource-brief -->
+<p>The <a href="qnmeapositioninfosource.html">QNmeaPositionInfoSource</a> class provides positional information using a NMEA data source. <a href="#details">More...</a></p>
+<!-- @@@QNmeaPositionInfoSource -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QNmeaPositionInfoSource&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += positioning</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.2</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qgeopositioninfosource.html">QGeoPositionInfoSource</a></td></tr></table></div><p>This class was introduced in  Qt 5.2.</p>
+<ul>
+<li><a href="qnmeapositioninfosource-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qnmeapositioninfosource.html#UpdateMode-enum">UpdateMode</a></b> { RealTimeMode, SimulationMode }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qnmeapositioninfosource.html#QNmeaPositionInfoSource">QNmeaPositionInfoSource</a></b>(QNmeaPositionInfoSource::UpdateMode <i>updateMode</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qnmeapositioninfosource.html#dtor.QNmeaPositionInfoSource">~QNmeaPositionInfoSource</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QIODevice *</td><td class="memItemRight bottomAlign"><b><a href="qnmeapositioninfosource.html#device">device</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qnmeapositioninfosource.html#setDevice">setDevice</a></b>(QIODevice *<i>device</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qnmeapositioninfosource.html#setUserEquivalentRangeError">setUserEquivalentRangeError</a></b>(double <i>uere</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QNmeaPositionInfoSource::UpdateMode </td><td class="memItemRight bottomAlign"><b><a href="qnmeapositioninfosource.html#updateMode">updateMode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qnmeapositioninfosource.html#userEquivalentRangeError">userEquivalentRangeError</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QGeoPositionInfoSource::Error </td><td class="memItemRight bottomAlign"><b><a href="qnmeapositioninfosource.html#error">error</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QGeoPositionInfo </td><td class="memItemRight bottomAlign"><b><a href="qnmeapositioninfosource.html#lastKnownPosition">lastKnownPosition</a></b>(bool <i>fromSatellitePositioningMethodsOnly</i> = false) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qnmeapositioninfosource.html#minimumUpdateInterval">minimumUpdateInterval</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qnmeapositioninfosource.html#setUpdateInterval">setUpdateInterval</a></b>(int <i>msec</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QGeoPositionInfoSource::PositioningMethods </td><td class="memItemRight bottomAlign"><b><a href="qnmeapositioninfosource.html#supportedPositioningMethods">supportedPositioningMethods</a></b>() const override</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qnmeapositioninfosource.html#requestUpdate">requestUpdate</a></b>(int <i>msec</i> = 0) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qnmeapositioninfosource.html#startUpdates">startUpdates</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qnmeapositioninfosource.html#stopUpdates">stopUpdates</a></b>() override</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qnmeapositioninfosource.html#parsePosInfoFromNmeaData">parsePosInfoFromNmeaData</a></b>(const char *<i>data</i>, int <i>size</i>, QGeoPositionInfo *<i>posInfo</i>, bool *<i>hasFix</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QNmeaPositionInfoSource-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>NMEA is a commonly used protocol for the specification of one's global position at a certain point in time. The <a href="qnmeapositioninfosource.html">QNmeaPositionInfoSource</a> class reads NMEA data and uses it to provide positional data in the form of <a href="qgeopositioninfo.html">QGeoPositionInfo</a> objects.</p>
+<p>A <a href="qnmeapositioninfosource.html">QNmeaPositionInfoSource</a> instance operates in either <a href="qnmeapositioninfosource.html#UpdateMode-enum">RealTimeMode</a> or <a href="qnmeapositioninfosource.html#UpdateMode-enum">SimulationMode</a>. These modes allow NMEA data to be read from either a live source of positional data, or replayed for simulation purposes from previously recorded NMEA data.</p>
+<p>The source of NMEA data is set with <a href="qnmeapositioninfosource.html#setDevice">setDevice</a>().</p>
+<p>Use <a href="qnmeapositioninfosource.html#startUpdates">startUpdates</a>() to start receiving regular position updates and <a href="qnmeapositioninfosource.html#stopUpdates">stopUpdates</a>() to stop these updates. If you only require updates occasionally, you can call <a href="qnmeapositioninfosource.html#requestUpdate">requestUpdate</a>() to request a single update.</p>
+<p>In both cases the position information is received via the <a href="qgeopositioninfosource.html#positionUpdated">positionUpdated</a>() signal and the last known position can be accessed with <a href="qnmeapositioninfosource.html#lastKnownPosition">lastKnownPosition</a>().</p>
+<p><a href="qnmeapositioninfosource.html">QNmeaPositionInfoSource</a> supports reporting the accuracy of the horizontal and vertical position. To enable position accuracy reporting an estimate of the User Equivalent Range Error associated with the NMEA source must be set with <a href="qnmeapositioninfosource.html#setUserEquivalentRangeError">setUserEquivalentRangeError</a>().</p>
+</div>
+<!-- @@@QNmeaPositionInfoSource -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$UpdateMode$$$RealTimeMode$$$SimulationMode -->
+<h3 class="fn" id="UpdateMode-enum"><a name="UpdateMode-enum"></a>enum QNmeaPositionInfoSource::<span class="name">UpdateMode</span></h3>
+<p>Defines the available update modes.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QNmeaPositionInfoSource::RealTimeMode</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Positional data is read and distributed from the data source as it becomes available. Use this mode if you are using a live source of positional data (for example, a GPS hardware device).</td></tr>
+<tr><td class="topAlign"><code>QNmeaPositionInfoSource::SimulationMode</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The data and time information in the NMEA source data is used to provide positional updates at the rate at which the data was originally recorded. Use this mode if the data source contains previously recorded NMEA data and you want to replay the data for simulation purposes.</td></tr>
+</table></div>
+<!-- @@@UpdateMode -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QNmeaPositionInfoSource[overload1]$$$QNmeaPositionInfoSourceQNmeaPositionInfoSource::UpdateModeQObject* -->
+<h3 class="fn" id="QNmeaPositionInfoSource"><a name="QNmeaPositionInfoSource"></a>QNmeaPositionInfoSource::<span class="name">QNmeaPositionInfoSource</span>(<span class="type"><a href="qnmeapositioninfosource.html#UpdateMode-enum">QNmeaPositionInfoSource::UpdateMode</a></span> <i>updateMode</i>, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a <a href="qnmeapositioninfosource.html">QNmeaPositionInfoSource</a> instance with the given <i>parent</i> and <i>updateMode</i>.</p>
+<!-- @@@QNmeaPositionInfoSource -->
+<!-- $$$requestUpdate[overload1]$$$requestUpdateint -->
+<h3 class="fn" id="requestUpdate"><a name="requestUpdate"></a><code>[override virtual slot] </code><span class="type">void</span> QNmeaPositionInfoSource::<span class="name">requestUpdate</span>(<span class="type">int</span> <i>msec</i> = 0)</h3>
+<p>Reimplements: <a href="qgeopositioninfosource.html#requestUpdate">QGeoPositionInfoSource::requestUpdate</a>(int timeout).</p>
+<!-- @@@requestUpdate -->
+<!-- $$$startUpdates[overload1]$$$startUpdates -->
+<h3 class="fn" id="startUpdates"><a name="startUpdates"></a><code>[override virtual slot] </code><span class="type">void</span> QNmeaPositionInfoSource::<span class="name">startUpdates</span>()</h3>
+<p>Reimplements: <a href="qgeopositioninfosource.html#startUpdates">QGeoPositionInfoSource::startUpdates</a>().</p>
+<!-- @@@startUpdates -->
+<!-- $$$stopUpdates[overload1]$$$stopUpdates -->
+<h3 class="fn" id="stopUpdates"><a name="stopUpdates"></a><code>[override virtual slot] </code><span class="type">void</span> QNmeaPositionInfoSource::<span class="name">stopUpdates</span>()</h3>
+<p>Reimplements: <a href="qgeopositioninfosource.html#stopUpdates">QGeoPositionInfoSource::stopUpdates</a>().</p>
+<!-- @@@stopUpdates -->
+<!-- $$$~QNmeaPositionInfoSource[overload1]$$$~QNmeaPositionInfoSource -->
+<h3 class="fn" id="dtor.QNmeaPositionInfoSource"><a name="dtor.QNmeaPositionInfoSource"></a><code>[virtual] </code>QNmeaPositionInfoSource::<span class="name">~QNmeaPositionInfoSource</span>()</h3>
+<p>Destroys the position source.</p>
+<!-- @@@~QNmeaPositionInfoSource -->
+<!-- $$$device[overload1]$$$device -->
+<h3 class="fn" id="device"><a name="device"></a><span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span> *QNmeaPositionInfoSource::<span class="name">device</span>() const</h3>
+<p>Returns the NMEA data source.</p>
+<p><b>See also </b><a href="qnmeapositioninfosource.html#setDevice">setDevice</a>().</p>
+<!-- @@@device -->
+<!-- $$$error[overload1]$$$error -->
+<h3 class="fn" id="error"><a name="error"></a><code>[override virtual] </code><span class="type"><a href="qgeopositioninfosource.html#Error-enum">QGeoPositionInfoSource::Error</a></span> QNmeaPositionInfoSource::<span class="name">error</span>() const</h3>
+<p>Reimplements: <a href="qgeopositioninfosource.html#error">QGeoPositionInfoSource::error</a>() const.</p>
+<!-- @@@error -->
+<!-- $$$lastKnownPosition[overload1]$$$lastKnownPositionbool -->
+<h3 class="fn" id="lastKnownPosition"><a name="lastKnownPosition"></a><code>[override virtual] </code><span class="type"><a href="qgeopositioninfo.html">QGeoPositionInfo</a></span> QNmeaPositionInfoSource::<span class="name">lastKnownPosition</span>(<span class="type">bool</span> <i>fromSatellitePositioningMethodsOnly</i> = false) const</h3>
+<p>Reimplements: <a href="qgeopositioninfosource.html#lastKnownPosition">QGeoPositionInfoSource::lastKnownPosition</a>(bool fromSatellitePositioningMethodsOnly) const.</p>
+<!-- @@@lastKnownPosition -->
+<!-- $$$minimumUpdateInterval[overload1]$$$minimumUpdateInterval -->
+<h3 class="fn" id="minimumUpdateInterval"><a name="minimumUpdateInterval"></a><code>[override virtual] </code><span class="type">int</span> QNmeaPositionInfoSource::<span class="name">minimumUpdateInterval</span>() const</h3>
+<p>Reimplements an access function for property: <a href="qgeopositioninfosource.html#minimumUpdateInterval-prop">QGeoPositionInfoSource::minimumUpdateInterval</a>.</p>
+<!-- @@@minimumUpdateInterval -->
+<!-- $$$parsePosInfoFromNmeaData[overload1]$$$parsePosInfoFromNmeaDataconstchar*intQGeoPositionInfo*bool* -->
+<h3 class="fn" id="parsePosInfoFromNmeaData"><a name="parsePosInfoFromNmeaData"></a><code>[virtual protected] </code><span class="type">bool</span> QNmeaPositionInfoSource::<span class="name">parsePosInfoFromNmeaData</span>(const <span class="type">char</span> *<i>data</i>, <span class="type">int</span> <i>size</i>, <span class="type"><a href="qgeopositioninfo.html">QGeoPositionInfo</a></span> *<i>posInfo</i>, <span class="type">bool</span> *<i>hasFix</i>)</h3>
+<p>Parses an NMEA sentence string into a <a href="qgeopositioninfo.html">QGeoPositionInfo</a>.</p>
+<p>The default implementation will parse standard NMEA sentences. This method should be reimplemented in a subclass whenever the need to deal with non-standard NMEA sentences arises.</p>
+<p>The parser reads <i>size</i> bytes from <i>data</i> and uses that information to setup <i>posInfo</i> and <i>hasFix</i>. If <i>hasFix</i> is set to false then <i>posInfo</i> may contain only the time or the date and the time.</p>
+<p>Returns true if the sentence was succsesfully parsed, otherwise returns false and should not modifiy <i>posInfo</i> or <i>hasFix</i>.</p>
+<!-- @@@parsePosInfoFromNmeaData -->
+<!-- $$$setDevice[overload1]$$$setDeviceQIODevice* -->
+<h3 class="fn" id="setDevice"><a name="setDevice"></a><span class="type">void</span> QNmeaPositionInfoSource::<span class="name">setDevice</span>(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span> *<i>device</i>)</h3>
+<p>Sets the NMEA data source to <i>device</i>. If the device is not open, it will be opened in <a href="../qtcore/qiodevice.html#OpenModeFlag-enum">QIODevice::ReadOnly</a> mode.</p>
+<p>The source device can only be set once and must be set before calling <a href="qnmeapositioninfosource.html#startUpdates">startUpdates</a>() or <a href="qnmeapositioninfosource.html#requestUpdate">requestUpdate</a>().</p>
+<p><b>Note:</b> The <i>device</i> must emit <a href="../qtcore/qiodevice.html#readyRead">QIODevice::readyRead</a>() for the source to be notified when data is available for reading. <a href="qnmeapositioninfosource.html">QNmeaPositionInfoSource</a> does not assume the ownership of the device, and hence does not deallocate it upon destruction.</p>
+<p><b>See also </b><a href="qnmeapositioninfosource.html#device">device</a>().</p>
+<!-- @@@setDevice -->
+<!-- $$$setUpdateInterval[overload1]$$$setUpdateIntervalint -->
+<h3 class="fn" id="setUpdateInterval"><a name="setUpdateInterval"></a><code>[override virtual] </code><span class="type">void</span> QNmeaPositionInfoSource::<span class="name">setUpdateInterval</span>(<span class="type">int</span> <i>msec</i>)</h3>
+<p>Reimplements an access function for property: <a href="qgeopositioninfosource.html#updateInterval-prop">QGeoPositionInfoSource::updateInterval</a>.</p>
+<!-- @@@setUpdateInterval -->
+<!-- $$$setUserEquivalentRangeError[overload1]$$$setUserEquivalentRangeErrordouble -->
+<h3 class="fn" id="setUserEquivalentRangeError"><a name="setUserEquivalentRangeError"></a><span class="type">void</span> QNmeaPositionInfoSource::<span class="name">setUserEquivalentRangeError</span>(<span class="type">double</span> <i>uere</i>)</h3>
+<p>Sets the User Equivalent Range Error (UERE) to <i>uere</i>. The UERE is used in calculating an estimate of the accuracy of the position information reported by the position info source. The UERE should be set to a value appropriate for the GPS device which generated the NMEA stream.</p>
+<p>The true UERE value is calculated from multiple error sources including errors introduced by the satellites and signal propogation delays through the atmosphere as well as errors introduced by the receiving GPS equipment. For details on GPS accuracy see <a href="http://edu-observatory.org/gps/gps_accuracy.html">http://edu-observatory.org/gps/gps_accuracy.html</a>.</p>
+<p>A typical value for UERE is approximately 5.1&#x2e;</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<p><b>See also </b><a href="qnmeapositioninfosource.html#userEquivalentRangeError">userEquivalentRangeError</a>().</p>
+<!-- @@@setUserEquivalentRangeError -->
+<!-- $$$supportedPositioningMethods[overload1]$$$supportedPositioningMethods -->
+<h3 class="fn" id="supportedPositioningMethods"><a name="supportedPositioningMethods"></a><code>[override virtual] </code><span class="type"><a href="qgeopositioninfosource.html#PositioningMethod-enum">QGeoPositionInfoSource::PositioningMethods</a></span> QNmeaPositionInfoSource::<span class="name">supportedPositioningMethods</span>() const</h3>
+<p>Reimplements: <a href="qgeopositioninfosource.html#supportedPositioningMethods">QGeoPositionInfoSource::supportedPositioningMethods</a>() const.</p>
+<!-- @@@supportedPositioningMethods -->
+<!-- $$$updateMode[overload1]$$$updateMode -->
+<h3 class="fn" id="updateMode"><a name="updateMode"></a><span class="type"><a href="qnmeapositioninfosource.html#UpdateMode-enum">QNmeaPositionInfoSource::UpdateMode</a></span> QNmeaPositionInfoSource::<span class="name">updateMode</span>() const</h3>
+<p>Returns the update mode.</p>
+<!-- @@@updateMode -->
+<!-- $$$userEquivalentRangeError[overload1]$$$userEquivalentRangeError -->
+<h3 class="fn" id="userEquivalentRangeError"><a name="userEquivalentRangeError"></a><span class="type">double</span> QNmeaPositionInfoSource::<span class="name">userEquivalentRangeError</span>() const</h3>
+<p>Returns the current User Equivalent Range Error (UERE). The UERE is used in calculating an estimate of the accuracy of the position information reported by the position info source. The default value is NaN which means no accuracy information will be provided.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<p><b>See also </b><a href="qnmeapositioninfosource.html#setUserEquivalentRangeError">setUserEquivalentRangeError</a>().</p>
+<!-- @@@userEquivalentRangeError -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

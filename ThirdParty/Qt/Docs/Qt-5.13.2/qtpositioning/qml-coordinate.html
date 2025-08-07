@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- positioning.cpp -->
+  <title>coordinate QML Basic Type | Qt Positioning 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtpositioning-index.html">Qt Positioning</a></td><td ><a href="qtpositioning-qmlmodule.html">QML Types</a></td><td >coordinate QML Basic Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtpositioning-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#accuracy">Accuracy</a></li>
+<li class="level1"><a href="#example-usage">Example Usage</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level2"><a href="#latitude">latitude</a></li>
+<li class="level2"><a href="#longitude">longitude</a></li>
+<li class="level2"><a href="#altitude">altitude</a></li>
+<li class="level2"><a href="#isvalid">isValid</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level2"><a href="#distanceto">distanceTo()</a></li>
+<li class="level2"><a href="#azimuthto">azimuthTo()</a></li>
+<li class="level2"><a href="#atdistanceandazimuth">atDistanceAndAzimuth()</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">coordinate QML Basic Type</h1>
+<span class="subtitle"></span>
+<!-- $$$coordinate-description -->
+<div class="descr"> <a name="details"></a>
+<p>This type is a QML representation of <a href="qgeocoordinate.html">QGeoCoordinate</a> and represents a geographic position in the form of <a href="qml-coordinate.html#latitude">latitude</a>, <a href="qml-coordinate.html#longitude">longitude</a> and <a href="qml-coordinate.html#altitude">altitude</a> attributes. The <a href="qml-coordinate.html#latitude">latitude</a> attribute specifies the number of decimal degrees above and below the equator. A positive latitude indicates the Northern Hemisphere and a negative latitude indicates the Southern Hemisphere. The <a href="qml-coordinate.html#longitude">longitude</a> attribute specifies the number of decimal degrees east and west. A positive longitude indicates the Eastern Hemisphere and a negative longitude indicates the Western Hemisphere. The <a href="qml-coordinate.html#altitude">altitude</a> attribute specifies the number of meters above sea level. Together, these attributes specify a 3-dimensional position anywhere on or near the Earth's surface.</p>
+<p>The <a href="qml-geoshape.html#isvalid">isValid</a> attribute can be used to test if a coordinate is valid. A coordinate is considered valid if it has a valid latitude and longitude. A valid altitude is not required. The latitude must be between -90 and 90 inclusive and the longitude must be between -180 and 180 inclusive.</p>
+<p>The <code>coordinate</code> type is used by many other types in the Qt Location module, for specifying the position of an object on a Map, the current position of a device and many other tasks. They also feature a number of important utility methods that make otherwise complex calculations simple to use, such as <a href="qml-coordinate.html#atdistanceandazimuth">atDistanceAndAzimuth</a>().</p>
+<a name="accuracy"></a>
+<h2 id="accuracy">Accuracy</h2>
+<p>The latitude, longitude and altitude attributes stored in the coordinate type are represented as doubles, giving them approximately 16 decimal digits of precision -- enough to specify micrometers. The calculations performed in coordinate's methods such as <a href="qml-coordinate.html#azimuthto">azimuthTo</a>() and <a href="qml-coordinate.html#distanceto">distanceTo</a>() also use doubles for all intermediate values, but the inherent inaccuracies in their spherical Earth model dominate the amount of error in their output.</p>
+<a name="example-usage"></a>
+<h2 id="example-usage">Example Usage</h2>
+<p>Use properties of type <a href="../qtqml/qml-variant.html">variant</a> to store a <code>coordinate</code>. To create a <code>coordinate</code> use one of the methods described below. In all cases, specifying the <a href="qml-coordinate.html#altitude">altitude</a> attribute is optional.</p>
+<p>To create a <code>coordinate</code> value, use the <a href="qml-qtpositioning-qtpositioning.html#coordinate-method">QtPositioning.coordinate()</a> function:</p>
+<pre class="qml">
+
+  import QtPositioning 5.2
+
+  <span class="type"><a href="qml-qtpositioning-location.html">Location</a></span> { <span class="name">coordinate</span>: <span class="name">QtPositioning</span>.<span class="name">coordinate</span>(-<span class="number">27.5</span>, <span class="number">153.1</span>) }
+
+</pre>
+<p>or as separate <a href="qml-coordinate.html#latitude">latitude</a>, <a href="qml-coordinate.html#longitude">longitude</a> and <a href="qml-coordinate.html#altitude">altitude</a> components:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtpositioning-location.html">Location</a></span> {
+      <span class="type"><a href="qml-coordinate.html">coordinate</a></span> {
+          <span class="name">latitude</span>: -<span class="number">27.5</span>
+          <span class="name">longitude</span>: <span class="number">153.1</span>
+      }
+  }
+
+</pre>
+<p>When integrating with C++, note that any <a href="qgeocoordinate.html">QGeoCoordinate</a> value passed into QML from C++ is automatically converted into a <code>coordinate</code> value, and vice-versa.</p>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<a name="latitude"></a>
+<h3 id="latitude">latitude</h3>
+<pre class="cpp">
+
+  real latitude
+
+</pre>
+<p>This property holds the latitude value of the geographical position (decimal degrees). A positive latitude indicates the Northern Hemisphere, and a negative latitude indicates the Southern Hemisphere. If the property has not been set, its default value is NaN.</p>
+<p>For more details see the <a href="qgeocoordinate.html#latitude">QGeoCoordinate::latitude</a> property</p>
+<a name="longitude"></a>
+<h3 id="longitude">longitude</h3>
+<pre class="cpp">
+
+  real longitude
+
+</pre>
+<p>This property holds the longitude value of the geographical position (decimal degrees). A positive longitude indicates the Eastern Hemisphere, and a negative longitude indicates the Western Hemisphere If the property has not been set, its default value is NaN.</p>
+<p>For more details see the <a href="qgeocoordinate.html#longitude">QGeoCoordinate::longitude</a> property</p>
+<a name="altitude"></a>
+<h3 id="altitude">altitude</h3>
+<pre class="cpp">
+
+  real altitude
+
+</pre>
+<p>This property holds the altitude value (meters above sea level). If the property has not been set, its default value is NaN.</p>
+<p>For more details see the <a href="qgeocoordinate.html#altitude">QGeoCoordinate::altitude</a> property</p>
+<a name="isvalid"></a>
+<h3 id="isvalid">isValid</h3>
+<pre class="cpp">
+
+  bool isValid
+
+</pre>
+<p>This property holds the current validity of the coordinate. Coordinates are considered valid if they have been set with a valid latitude and longitude (altitude is not required).</p>
+<p>The latitude must be between -90 to 90 inclusive to be considered valid, and the longitude must be between -180 to 180 inclusive to be considered valid.</p>
+<p>This is a read-only property.</p>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<a name="distanceto"></a>
+<h3 id="distanceto">distanceTo()</h3>
+<pre class="cpp">
+
+  real distanceTo(coordinate other)
+
+</pre>
+<p>Returns the distance (in meters) from this coordinate to the coordinate specified by <i>other</i>. Altitude is not used in the calculation.</p>
+<p>This calculation returns the great-circle distance between the two coordinates, with an assumption that the Earth is spherical for the purpose of this calculation.</p>
+<a name="azimuthto"></a>
+<h3 id="azimuthto">azimuthTo()</h3>
+<pre class="cpp">
+
+  real azimuth(coordinate other)
+
+</pre>
+<p>Returns the azimuth (or bearing) in degrees from this coordinate to the coordinate specified by <i>other</i>. Altitude is not used in the calculation.</p>
+<p>There is an assumption that the Earth is spherical for the purpose of this calculation.</p>
+<a name="atdistanceandazimuth"></a>
+<h3 id="atdistanceandazimuth">atDistanceAndAzimuth()</h3>
+<pre class="cpp">
+
+  coordinate atDistanceAndAzimuth(real distance<span class="operator">,</span> real azimuth)
+
+</pre>
+<p>Returns the coordinate that is reached by traveling <i>distance</i> metres from this coordinate at <i>azimuth</i> degrees along a great-circle.</p>
+<p>There is an assumption that the Earth is spherical for the purpose of this calculation.</p>
+</div>
+<!-- @@@coordinate -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

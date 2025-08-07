@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qevent.cpp -->
+  <title>QScrollEvent Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QScrollEvent</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QScrollEvent Class</h1>
+<!-- $$$QScrollEvent-brief -->
+<p>The <a href="qscrollevent.html">QScrollEvent</a> class is sent when scrolling. <a href="#details">More...</a></p>
+<!-- @@@QScrollEvent -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QScrollEvent&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.8</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qevent.html">QEvent</a></td></tr></table></div><p>This class was introduced in  Qt 4.8.</p>
+<ul>
+<li><a href="qscrollevent-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qscrollevent.html#ScrollState-enum">ScrollState</a></b> { ScrollStarted, ScrollUpdated, ScrollFinished }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qscrollevent.html#QScrollEvent">QScrollEvent</a></b>(const QPointF &amp;<i>contentPos</i>, const QPointF &amp;<i>overshootDistance</i>, QScrollEvent::ScrollState <i>scrollState</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qscrollevent.html#dtor.QScrollEvent">~QScrollEvent</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPointF </td><td class="memItemRight bottomAlign"><b><a href="qscrollevent.html#contentPos">contentPos</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPointF </td><td class="memItemRight bottomAlign"><b><a href="qscrollevent.html#overshootDistance">overshootDistance</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QScrollEvent::ScrollState </td><td class="memItemRight bottomAlign"><b><a href="qscrollevent.html#scrollState">scrollState</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QScrollEvent-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The scroll event is sent to indicate that the receiver should be scrolled. Usually the receiver should be something visual like <a href="../qtwidgets/qwidget.html">QWidget</a> or <a href="../qtwidgets/qgraphicsobject.html">QGraphicsObject</a>.</p>
+<p>Some care should be taken that no conflicting QScrollEvents are sent from two sources. Using <a href="../qtwidgets/qscroller.html#scrollTo">QScroller::scrollTo</a> is save however.</p>
+</div>
+<p><b>See also </b><a href="qscrollprepareevent.html">QScrollPrepareEvent</a> and <a href="../qtwidgets/qscroller.html">QScroller</a>.</p>
+<!-- @@@QScrollEvent -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$ScrollState$$$ScrollStarted$$$ScrollUpdated$$$ScrollFinished -->
+<h3 class="fn" id="ScrollState-enum"><a name="ScrollState-enum"></a>enum QScrollEvent::<span class="name">ScrollState</span></h3>
+<p>This enum describes the states a scroll event can have.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QScrollEvent::ScrollStarted</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Set for the first scroll event of a scroll activity.</td></tr>
+<tr><td class="topAlign"><code>QScrollEvent::ScrollUpdated</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Set for all but the first and the last scroll event of a scroll activity.</td></tr>
+<tr><td class="topAlign"><code>QScrollEvent::ScrollFinished</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Set for the last scroll event of a scroll activity.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qscrollevent.html#scrollState">QScrollEvent::scrollState</a>().</p>
+<!-- @@@ScrollState -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QScrollEvent[overload1]$$$QScrollEventconstQPointF&constQPointF&QScrollEvent::ScrollState -->
+<h3 class="fn" id="QScrollEvent"><a name="QScrollEvent"></a>QScrollEvent::<span class="name">QScrollEvent</span>(const <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> &amp;<i>contentPos</i>, const <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> &amp;<i>overshootDistance</i>, <span class="type"><a href="qscrollevent.html#ScrollState-enum">QScrollEvent::ScrollState</a></span> <i>scrollState</i>)</h3>
+<p>Creates a new <a href="qscrollevent.html">QScrollEvent</a> <i>contentPos</i> is the new content position, <i>overshootDistance</i> is the new overshoot distance while <i>scrollState</i> indicates if this scroll event is the first one, the last one or some event in between.</p>
+<!-- @@@QScrollEvent -->
+<!-- $$$~QScrollEvent[overload1]$$$~QScrollEvent -->
+<h3 class="fn" id="dtor.QScrollEvent"><a name="dtor.QScrollEvent"></a><code>[virtual] </code>QScrollEvent::<span class="name">~QScrollEvent</span>()</h3>
+<p>Destroys <a href="qscrollevent.html">QScrollEvent</a>.</p>
+<!-- @@@~QScrollEvent -->
+<!-- $$$contentPos[overload1]$$$contentPos -->
+<h3 class="fn" id="contentPos"><a name="contentPos"></a><span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> QScrollEvent::<span class="name">contentPos</span>() const</h3>
+<p>Returns the new scroll position.</p>
+<!-- @@@contentPos -->
+<!-- $$$overshootDistance[overload1]$$$overshootDistance -->
+<h3 class="fn" id="overshootDistance"><a name="overshootDistance"></a><span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> QScrollEvent::<span class="name">overshootDistance</span>() const</h3>
+<p>Returns the new overshoot distance. See <a href="../qtwidgets/qscroller.html">QScroller</a> for an explanation of the term overshoot.</p>
+<p><b>See also </b><a href="../qtwidgets/qscroller.html">QScroller</a>.</p>
+<!-- @@@overshootDistance -->
+<!-- $$$scrollState[overload1]$$$scrollState -->
+<h3 class="fn" id="scrollState"><a name="scrollState"></a><span class="type"><a href="qscrollevent.html#ScrollState-enum">QScrollEvent::ScrollState</a></span> QScrollEvent::<span class="name">scrollState</span>() const</h3>
+<p>Returns the current scroll state as a combination of ScrollStateFlag values. <a href="qscrollevent.html#ScrollState-enum">ScrollStarted</a> (or <a href="qscrollevent.html#ScrollState-enum">ScrollFinished</a>) will be set, if this scroll event is the first (or last) event in a scrolling activity. Please note that both values can be set at the same time, if the activity consists of a single <a href="qscrollevent.html">QScrollEvent</a>. All other scroll events in between will have their state set to <a href="qscrollevent.html#ScrollState-enum">ScrollUpdated</a>.</p>
+<p>A widget could for example revert selections when scrolling is started and stopped.</p>
+<!-- @@@scrollState -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

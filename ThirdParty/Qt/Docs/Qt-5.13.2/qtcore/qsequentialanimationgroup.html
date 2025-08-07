@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qsequentialanimationgroup.cpp -->
+  <title>QSequentialAnimationGroup Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QSequentialAnimationGroup</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSequentialAnimationGroup Class</h1>
+<!-- $$$QSequentialAnimationGroup-brief -->
+<p>The <a href="qsequentialanimationgroup.html">QSequentialAnimationGroup</a> class provides a sequential group of animations. <a href="#details">More...</a></p>
+<!-- @@@QSequentialAnimationGroup -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QSequentialAnimationGroup&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.6</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qanimationgroup.html">QAnimationGroup</a></td></tr></table></div><p>This class was introduced in  Qt 4.6.</p>
+<ul>
+<li><a href="qsequentialanimationgroup-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qsequentialanimationgroup.html#currentAnimation-prop">currentAnimation</a></b> : QAbstractAnimation* const</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsequentialanimationgroup.html#QSequentialAnimationGroup">QSequentialAnimationGroup</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qsequentialanimationgroup.html#dtor.QSequentialAnimationGroup">~QSequentialAnimationGroup</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPauseAnimation *</td><td class="memItemRight bottomAlign"><b><a href="qsequentialanimationgroup.html#addPause">addPause</a></b>(int <i>msecs</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QAbstractAnimation *</td><td class="memItemRight bottomAlign"><b><a href="qsequentialanimationgroup.html#currentAnimation-prop">currentAnimation</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPauseAnimation *</td><td class="memItemRight bottomAlign"><b><a href="qsequentialanimationgroup.html#insertPause">insertPause</a></b>(int <i>index</i>, int <i>msecs</i>)</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qsequentialanimationgroup.html#duration">duration</a></b>() const override</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsequentialanimationgroup.html#currentAnimationChanged">currentAnimationChanged</a></b>(QAbstractAnimation *<i>current</i>)</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qsequentialanimationgroup.html#event">event</a></b>(QEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qsequentialanimationgroup.html#updateCurrentTime">updateCurrentTime</a></b>(int <i>currentTime</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qsequentialanimationgroup.html#updateDirection">updateDirection</a></b>(QAbstractAnimation::Direction <i>direction</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qsequentialanimationgroup.html#updateState">updateState</a></b>(QAbstractAnimation::State <i>newState</i>, QAbstractAnimation::State <i>oldState</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSequentialAnimationGroup-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qsequentialanimationgroup.html">QSequentialAnimationGroup</a> is a <a href="qanimationgroup.html">QAnimationGroup</a> that runs its animations in sequence, i.e&#x2e;, it starts one animation after another has finished playing. The animations are played in the order they are added to the group (using <a href="qanimationgroup.html#addAnimation">addAnimation()</a> or <a href="qanimationgroup.html#insertAnimation">insertAnimation()</a>). The animation group finishes when its last animation has finished.</p>
+<p>At each moment there is at most one animation that is active in the group; it is returned by <a href="qsequentialanimationgroup.html#currentAnimation-prop">currentAnimation</a>(). An empty group has no current animation.</p>
+<p>A sequential animation group can be treated as any other animation, i.e&#x2e;, it can be started, stopped, and added to other groups. You can also call <a href="qsequentialanimationgroup.html#addPause">addPause</a>() or <a href="qsequentialanimationgroup.html#insertPause">insertPause</a>() to add a pause to a sequential animation group.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qsequentialanimationgroup.html#QSequentialAnimationGroup">QSequentialAnimationGroup</a></span> <span class="operator">*</span>group <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qsequentialanimationgroup.html#QSequentialAnimationGroup">QSequentialAnimationGroup</a></span>;
+
+      group<span class="operator">-</span><span class="operator">&gt;</span>addAnimation(anim1);
+      group<span class="operator">-</span><span class="operator">&gt;</span>addAnimation(anim2);
+
+      group<span class="operator">-</span><span class="operator">&gt;</span>start();
+
+</pre>
+<p>In this example, <code>anim1</code> and <code>anim2</code> are two already set up <a href="qpropertyanimation.html">QPropertyAnimation</a>s.</p>
+</div>
+<p><b>See also </b><a href="qanimationgroup.html">QAnimationGroup</a>, <a href="qabstractanimation.html">QAbstractAnimation</a>, and <a href="animation-overview.html">The Animation Framework</a>.</p>
+<!-- @@@QSequentialAnimationGroup -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$currentAnimation-prop$$$currentAnimation$$$currentAnimationChangedQAbstractAnimation* -->
+<h3 class="fn" id="currentAnimation-prop"><a name="currentAnimation-prop"></a><span class="name">currentAnimation</span> : <span class="type"><a href="qabstractanimation.html#QAbstractAnimation">QAbstractAnimation</a></span>* const</h3>
+<p>Returns the animation in the current time.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QAbstractAnimation *</td><td class="memItemRight bottomAlign"><span class="name"><b>currentAnimation</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qsequentialanimationgroup.html#currentAnimationChanged">currentAnimationChanged</a></b></span>(QAbstractAnimation *<i>current</i>)</td></tr>
+</table></div>
+<!-- @@@currentAnimation -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QSequentialAnimationGroup[overload1]$$$QSequentialAnimationGroupQObject* -->
+<h3 class="fn" id="QSequentialAnimationGroup"><a name="QSequentialAnimationGroup"></a>QSequentialAnimationGroup::<span class="name">QSequentialAnimationGroup</span>(<span class="type"><a href="qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a <a href="qsequentialanimationgroup.html">QSequentialAnimationGroup</a>. <i>parent</i> is passed to <a href="qobject.html">QObject</a>'s constructor.</p>
+<!-- @@@QSequentialAnimationGroup -->
+<!-- $$$currentAnimationChanged -->
+<h3 class="fn" id="currentAnimationChanged"><a name="currentAnimationChanged"></a><code>[signal] </code><span class="type">void</span> QSequentialAnimationGroup::<span class="name">currentAnimationChanged</span>(<span class="type"><a href="qabstractanimation.html#QAbstractAnimation">QAbstractAnimation</a></span> *<i>current</i>)</h3>
+<p><a href="qsequentialanimationgroup.html">QSequentialAnimationGroup</a> emits this signal when <a href="qsequentialanimationgroup.html#currentAnimation-prop">currentAnimation</a> has been changed. <i>current</i> is the current animation.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qsequentialanimationgroup.html#currentAnimation-prop">currentAnimation</a>. </p><p><b>See also </b><a href="qsequentialanimationgroup.html#currentAnimation-prop">currentAnimation</a>().</p>
+<!-- @@@currentAnimationChanged -->
+<!-- $$$~QSequentialAnimationGroup[overload1]$$$~QSequentialAnimationGroup -->
+<h3 class="fn" id="dtor.QSequentialAnimationGroup"><a name="dtor.QSequentialAnimationGroup"></a><code>[virtual] </code>QSequentialAnimationGroup::<span class="name">~QSequentialAnimationGroup</span>()</h3>
+<p>Destroys the animation group. It will also destroy all its animations.</p>
+<!-- @@@~QSequentialAnimationGroup -->
+<!-- $$$addPause[overload1]$$$addPauseint -->
+<h3 class="fn" id="addPause"><a name="addPause"></a><span class="type"><a href="qpauseanimation.html">QPauseAnimation</a></span> *QSequentialAnimationGroup::<span class="name">addPause</span>(<span class="type">int</span> <i>msecs</i>)</h3>
+<p>Adds a pause of <i>msecs</i> to this animation group. The pause is considered as a special type of animation, thus <a href="qanimationgroup.html#animationCount">animationCount</a> will be increased by one.</p>
+<p><b>See also </b><a href="qsequentialanimationgroup.html#insertPause">insertPause</a>() and <a href="qanimationgroup.html#addAnimation">QAnimationGroup::addAnimation</a>().</p>
+<!-- @@@addPause -->
+<!-- $$$duration[overload1]$$$duration -->
+<h3 class="fn" id="duration"><a name="duration"></a><code>[override virtual] </code><span class="type">int</span> QSequentialAnimationGroup::<span class="name">duration</span>() const</h3>
+<p>Reimplements: <a href="qabstractanimation.html#duration">QAbstractAnimation::duration</a>() const.</p>
+<!-- @@@duration -->
+<!-- $$$event[overload1]$$$eventQEvent* -->
+<h3 class="fn" id="event"><a name="event"></a><code>[override virtual protected] </code><span class="type">bool</span> QSequentialAnimationGroup::<span class="name">event</span>(<span class="type"><a href="qevent.html">QEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qanimationgroup.html#event">QAnimationGroup::event</a>(QEvent *event).</p>
+<!-- @@@event -->
+<!-- $$$insertPause[overload1]$$$insertPauseintint -->
+<h3 class="fn" id="insertPause"><a name="insertPause"></a><span class="type"><a href="qpauseanimation.html">QPauseAnimation</a></span> *QSequentialAnimationGroup::<span class="name">insertPause</span>(<span class="type">int</span> <i>index</i>, <span class="type">int</span> <i>msecs</i>)</h3>
+<p>Inserts a pause of <i>msecs</i> milliseconds at <i>index</i> in this animation group.</p>
+<p><b>See also </b><a href="qsequentialanimationgroup.html#addPause">addPause</a>() and <a href="qanimationgroup.html#insertAnimation">QAnimationGroup::insertAnimation</a>().</p>
+<!-- @@@insertPause -->
+<!-- $$$updateCurrentTime[overload1]$$$updateCurrentTimeint -->
+<h3 class="fn" id="updateCurrentTime"><a name="updateCurrentTime"></a><code>[override virtual protected] </code><span class="type">void</span> QSequentialAnimationGroup::<span class="name">updateCurrentTime</span>(<span class="type">int</span> <i>currentTime</i>)</h3>
+<p>Reimplements: <a href="qabstractanimation.html#updateCurrentTime">QAbstractAnimation::updateCurrentTime</a>(int currentTime).</p>
+<!-- @@@updateCurrentTime -->
+<!-- $$$updateDirection[overload1]$$$updateDirectionQAbstractAnimation::Direction -->
+<h3 class="fn" id="updateDirection"><a name="updateDirection"></a><code>[override virtual protected] </code><span class="type">void</span> QSequentialAnimationGroup::<span class="name">updateDirection</span>(<span class="type"><a href="qabstractanimation.html#Direction-enum">QAbstractAnimation::Direction</a></span> <i>direction</i>)</h3>
+<p>Reimplements: <a href="qabstractanimation.html#updateDirection">QAbstractAnimation::updateDirection</a>(QAbstractAnimation::Direction direction).</p>
+<!-- @@@updateDirection -->
+<!-- $$$updateState[overload1]$$$updateStateQAbstractAnimation::StateQAbstractAnimation::State -->
+<h3 class="fn" id="updateState"><a name="updateState"></a><code>[override virtual protected] </code><span class="type">void</span> QSequentialAnimationGroup::<span class="name">updateState</span>(<span class="type"><a href="qabstractanimation.html#State-enum">QAbstractAnimation::State</a></span> <i>newState</i>, <span class="type"><a href="qabstractanimation.html#State-enum">QAbstractAnimation::State</a></span> <i>oldState</i>)</h3>
+<p>Reimplements: <a href="qabstractanimation.html#updateState">QAbstractAnimation::updateState</a>(QAbstractAnimation::State newState, QAbstractAnimation::State oldState).</p>
+<!-- @@@updateState -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

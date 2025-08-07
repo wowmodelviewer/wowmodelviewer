@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qgamepad.cpp -->
+  <title>QGamepad Class | Qt Gamepad 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgamepad-index.html">Qt Gamepad</a></td><td ><a href="qtgamepad-module.html">C++ Classes</a></td><td >QGamepad</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgamepad-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QGamepad Class</h1>
+<!-- $$$QGamepad-brief -->
+<p>A gamepad device connected to a system. <a href="#details">More...</a></p>
+<!-- @@@QGamepad -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QGamepad&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gamepad</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qtgamepad-gamepad.html">Gamepad</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><ul>
+<li><a href="qgamepad-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qgamepad.html#axisLeftX-prop">axisLeftX</a></b> : const double</li>
+<li class="fn"><b><a href="qgamepad.html#axisLeftY-prop">axisLeftY</a></b> : const double</li>
+<li class="fn"><b><a href="qgamepad.html#axisRightX-prop">axisRightX</a></b> : const double</li>
+<li class="fn"><b><a href="qgamepad.html#axisRightY-prop">axisRightY</a></b> : const double</li>
+<li class="fn"><b><a href="qgamepad.html#buttonL1-prop">buttonL1</a></b> : const bool</li>
+<li class="fn"><b><a href="qgamepad.html#buttonL2-prop">buttonL2</a></b> : const double</li>
+<li class="fn"><b><a href="qgamepad.html#buttonL3-prop">buttonL3</a></b> : const bool</li>
+<li class="fn"><b><a href="qgamepad.html#buttonR1-prop">buttonR1</a></b> : const bool</li>
+<li class="fn"><b><a href="qgamepad.html#buttonR2-prop">buttonR2</a></b> : const double</li>
+<li class="fn"><b><a href="qgamepad.html#buttonR3-prop">buttonR3</a></b> : const bool</li>
+<li class="fn"><b><a href="qgamepad.html#buttonA-prop">buttonA</a></b> : const bool</li>
+<li class="fn"><b><a href="qgamepad.html#buttonB-prop">buttonB</a></b> : const bool</li>
+<li class="fn"><b><a href="qgamepad.html#buttonCenter-prop">buttonCenter</a></b> : const bool</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qgamepad.html#buttonDown-prop">buttonDown</a></b> : const bool</li>
+<li class="fn"><b><a href="qgamepad.html#buttonGuide-prop">buttonGuide</a></b> : const bool</li>
+<li class="fn"><b><a href="qgamepad.html#buttonLeft-prop">buttonLeft</a></b> : const bool</li>
+<li class="fn"><b><a href="qgamepad.html#buttonRight-prop">buttonRight</a></b> : const bool</li>
+<li class="fn"><b><a href="qgamepad.html#buttonSelect-prop">buttonSelect</a></b> : const bool</li>
+<li class="fn"><b><a href="qgamepad.html#buttonStart-prop">buttonStart</a></b> : const bool</li>
+<li class="fn"><b><a href="qgamepad.html#buttonUp-prop">buttonUp</a></b> : const bool</li>
+<li class="fn"><b><a href="qgamepad.html#buttonX-prop">buttonX</a></b> : const bool</li>
+<li class="fn"><b><a href="qgamepad.html#buttonY-prop">buttonY</a></b> : const bool</li>
+<li class="fn"><b><a href="qgamepad.html#connected-prop">connected</a></b> : const bool</li>
+<li class="fn"><b><a href="qgamepad.html#deviceId-prop">deviceId</a></b> : int</li>
+<li class="fn"><b><a href="qgamepad.html#name-prop">name</a></b> : const QString</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#QGamepad">QGamepad</a></b>(int <i>deviceId</i> = 0, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#axisLeftX-prop">axisLeftX</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#axisLeftY-prop">axisLeftY</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#axisRightX-prop">axisRightX</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#axisRightY-prop">axisRightY</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonL1-prop">buttonL1</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonL2-prop">buttonL2</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonL3-prop">buttonL3</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonR1-prop">buttonR1</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonR2-prop">buttonR2</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonR3-prop">buttonR3</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonA-prop">buttonA</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonB-prop">buttonB</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonCenter-prop">buttonCenter</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonDown-prop">buttonDown</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonGuide-prop">buttonGuide</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonLeft-prop">buttonLeft</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonRight-prop">buttonRight</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonSelect-prop">buttonSelect</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonStart-prop">buttonStart</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonUp-prop">buttonUp</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonX-prop">buttonX</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonY-prop">buttonY</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#deviceId-prop">deviceId</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#connected-prop">isConnected</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#name-prop">name</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#deviceId-prop">setDeviceId</a></b>(int <i>number</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#axisLeftX-prop">axisLeftXChanged</a></b>(double <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#axisLeftY-prop">axisLeftYChanged</a></b>(double <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#axisRightX-prop">axisRightXChanged</a></b>(double <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#axisRightY-prop">axisRightYChanged</a></b>(double <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonA-prop">buttonAChanged</a></b>(bool <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonB-prop">buttonBChanged</a></b>(bool <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonCenter-prop">buttonCenterChanged</a></b>(bool <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonDown-prop">buttonDownChanged</a></b>(bool <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonGuide-prop">buttonGuideChanged</a></b>(bool <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonL1-prop">buttonL1Changed</a></b>(bool <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonL2-prop">buttonL2Changed</a></b>(double <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonL3-prop">buttonL3Changed</a></b>(bool <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonLeft-prop">buttonLeftChanged</a></b>(bool <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonR1-prop">buttonR1Changed</a></b>(bool <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonR2-prop">buttonR2Changed</a></b>(double <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonR3-prop">buttonR3Changed</a></b>(bool <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonRight-prop">buttonRightChanged</a></b>(bool <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonSelect-prop">buttonSelectChanged</a></b>(bool <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonStart-prop">buttonStartChanged</a></b>(bool <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonUp-prop">buttonUpChanged</a></b>(bool <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonX-prop">buttonXChanged</a></b>(bool <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#buttonY-prop">buttonYChanged</a></b>(bool <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#connected-prop">connectedChanged</a></b>(bool <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#deviceId-prop">deviceIdChanged</a></b>(int <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepad.html#name-prop">nameChanged</a></b>(QString <i>value</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QGamepad-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qgamepad.html">QGamepad</a> is used to access the current state of gamepad hardware connected to a system.</p>
+</div>
+<!-- @@@QGamepad -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$axisLeftX-prop$$$axisLeftX$$$axisLeftXChangeddouble -->
+<h3 class="fn" id="axisLeftX-prop"><a name="axisLeftX-prop"></a><span class="name">axisLeftX</span> : const <span class="type">double</span></h3>
+<p>The value of the left thumbstick's X axis. The axis values range from -1.0 to 1.0&#x2e;</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> double </td><td class="memItemRight bottomAlign"><span class="name"><b>axisLeftX</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>axisLeftXChanged</b></span>(double <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@axisLeftX -->
+<!-- $$$axisLeftY-prop$$$axisLeftY$$$axisLeftYChangeddouble -->
+<h3 class="fn" id="axisLeftY-prop"><a name="axisLeftY-prop"></a><span class="name">axisLeftY</span> : const <span class="type">double</span></h3>
+<p>The value of the left thumbstick's Y axis. The axis values range from -1.0 to 1.0&#x2e;</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> double </td><td class="memItemRight bottomAlign"><span class="name"><b>axisLeftY</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>axisLeftYChanged</b></span>(double <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@axisLeftY -->
+<!-- $$$axisRightX-prop$$$axisRightX$$$axisRightXChangeddouble -->
+<h3 class="fn" id="axisRightX-prop"><a name="axisRightX-prop"></a><span class="name">axisRightX</span> : const <span class="type">double</span></h3>
+<p>This value of the right thumbstick's X axis. The axis values range from -1.0 to 1.0&#x2e;</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> double </td><td class="memItemRight bottomAlign"><span class="name"><b>axisRightX</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>axisRightXChanged</b></span>(double <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@axisRightX -->
+<!-- $$$axisRightY-prop$$$axisRightY$$$axisRightYChangeddouble -->
+<h3 class="fn" id="axisRightY-prop"><a name="axisRightY-prop"></a><span class="name">axisRightY</span> : const <span class="type">double</span></h3>
+<p>This value of the right thumbstick's Y axis. The axis values range from -1.0 to 1.0&#x2e;</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> double </td><td class="memItemRight bottomAlign"><span class="name"><b>axisRightY</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>axisRightYChanged</b></span>(double <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@axisRightY -->
+<!-- $$$buttonL1-prop$$$buttonL1$$$buttonL1Changedbool -->
+<h3 class="fn" id="buttonL1-prop"><a name="buttonL1-prop"></a><span class="name">buttonL1</span> : const <span class="type">bool</span></h3>
+<p>The state of the left shoulder button. The value is <code>true</code> when pressed, and <code>false</code> when not pressed.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonL1</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonL1Changed</b></span>(bool <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@buttonL1 -->
+<!-- $$$buttonL2-prop$$$buttonL2$$$buttonL2Changeddouble -->
+<h3 class="fn" id="buttonL2-prop"><a name="buttonL2-prop"></a><span class="name">buttonL2</span> : const <span class="type">double</span></h3>
+<p>The value of the left trigger button. This trigger value ranges from 0.0 when not pressed to 1.0 when pressed completely.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> double </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonL2</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonL2Changed</b></span>(double <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@buttonL2 -->
+<!-- $$$buttonL3-prop$$$buttonL3$$$buttonL3Changedbool -->
+<h3 class="fn" id="buttonL3-prop"><a name="buttonL3-prop"></a><span class="name">buttonL3</span> : const <span class="type">bool</span></h3>
+<p>The state of the left stick button. The value is <code>true</code> when pressed, and <code>false</code> when not pressed. This button is usually triggered by pressing the left joystick itself.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonL3</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonL3Changed</b></span>(bool <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@buttonL3 -->
+<!-- $$$buttonR1-prop$$$buttonR1$$$buttonR1Changedbool -->
+<h3 class="fn" id="buttonR1-prop"><a name="buttonR1-prop"></a><span class="name">buttonR1</span> : const <span class="type">bool</span></h3>
+<p>The state of the right shoulder button. The value is <code>true</code> when pressed, and <code>false</code> when not pressed.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonR1</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonR1Changed</b></span>(bool <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@buttonR1 -->
+<!-- $$$buttonR2-prop$$$buttonR2$$$buttonR2Changeddouble -->
+<h3 class="fn" id="buttonR2-prop"><a name="buttonR2-prop"></a><span class="name">buttonR2</span> : const <span class="type">double</span></h3>
+<p>The value of the right trigger button. This trigger value ranges from 0.0 when not pressed to 1.0 when pressed completely.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> double </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonR2</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonR2Changed</b></span>(double <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@buttonR2 -->
+<!-- $$$buttonR3-prop$$$buttonR3$$$buttonR3Changedbool -->
+<h3 class="fn" id="buttonR3-prop"><a name="buttonR3-prop"></a><span class="name">buttonR3</span> : const <span class="type">bool</span></h3>
+<p>The state of the right stick button. The value is <code>true</code> when pressed, and <code>false</code> when not pressed. This button is usually triggered by pressing the right joystick itself.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonR3</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonR3Changed</b></span>(bool <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@buttonR3 -->
+<!-- $$$buttonA-prop$$$buttonA$$$buttonAChangedbool -->
+<h3 class="fn" id="buttonA-prop"><a name="buttonA-prop"></a><span class="name">buttonA</span> : const <span class="type">bool</span></h3>
+<p>The state of the A button. The value is <code>true</code> when pressed, and <code>false</code> when not pressed.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonA</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonAChanged</b></span>(bool <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@buttonA -->
+<!-- $$$buttonB-prop$$$buttonB$$$buttonBChangedbool -->
+<h3 class="fn" id="buttonB-prop"><a name="buttonB-prop"></a><span class="name">buttonB</span> : const <span class="type">bool</span></h3>
+<p>The state of the B button. The value is <code>true</code> when pressed, and <code>false</code> when not pressed.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonB</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonBChanged</b></span>(bool <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@buttonB -->
+<!-- $$$buttonCenter-prop$$$buttonCenter$$$buttonCenterChangedbool -->
+<h3 class="fn" id="buttonCenter-prop"><a name="buttonCenter-prop"></a><span class="name">buttonCenter</span> : const <span class="type">bool</span></h3>
+<p>The state of the center button. The value is <code>true</code> when pressed, and <code>false</code> when not pressed.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonCenter</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonCenterChanged</b></span>(bool <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@buttonCenter -->
+<!-- $$$buttonDown-prop$$$buttonDown$$$buttonDownChangedbool -->
+<h3 class="fn" id="buttonDown-prop"><a name="buttonDown-prop"></a><span class="name">buttonDown</span> : const <span class="type">bool</span></h3>
+<p>The state of the direction pad down button. The value is <code>true</code> when pressed, and <code>false</code> when not pressed.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonDown</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonDownChanged</b></span>(bool <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@buttonDown -->
+<!-- $$$buttonGuide-prop$$$buttonGuide$$$buttonGuideChangedbool -->
+<h3 class="fn" id="buttonGuide-prop"><a name="buttonGuide-prop"></a><span class="name">buttonGuide</span> : const <span class="type">bool</span></h3>
+<p>The state of the guide button. The value is <code>true</code> when pressed, and <code>false</code> when not pressed. This button is typically the one in the center of the gamepad with a logo. Not all gamepads have a guide button.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonGuide</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonGuideChanged</b></span>(bool <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@buttonGuide -->
+<!-- $$$buttonLeft-prop$$$buttonLeft$$$buttonLeftChangedbool -->
+<h3 class="fn" id="buttonLeft-prop"><a name="buttonLeft-prop"></a><span class="name">buttonLeft</span> : const <span class="type">bool</span></h3>
+<p>The state of the direction pad left button. The value is <code>true</code> when pressed, and <code>false</code> when not pressed.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonLeft</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonLeftChanged</b></span>(bool <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@buttonLeft -->
+<!-- $$$buttonRight-prop$$$buttonRight$$$buttonRightChangedbool -->
+<h3 class="fn" id="buttonRight-prop"><a name="buttonRight-prop"></a><span class="name">buttonRight</span> : const <span class="type">bool</span></h3>
+<p>The state of the direction pad right button. The value is <code>true</code> when pressed, and <code>false</code> when not pressed.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonRight</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonRightChanged</b></span>(bool <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@buttonRight -->
+<!-- $$$buttonSelect-prop$$$buttonSelect$$$buttonSelectChangedbool -->
+<h3 class="fn" id="buttonSelect-prop"><a name="buttonSelect-prop"></a><span class="name">buttonSelect</span> : const <span class="type">bool</span></h3>
+<p>The state of the Select button. The value is <code>true</code> when pressed, and <code>false</code> when not pressed. This button can sometimes be labeled as the Back button on some gamepads.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonSelect</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonSelectChanged</b></span>(bool <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@buttonSelect -->
+<!-- $$$buttonStart-prop$$$buttonStart$$$buttonStartChangedbool -->
+<h3 class="fn" id="buttonStart-prop"><a name="buttonStart-prop"></a><span class="name">buttonStart</span> : const <span class="type">bool</span></h3>
+<p>The state of the Start button. The value is <code>true</code> when pressed, and <code>false</code> when not pressed. This button can sometimes be labeled as the Forward button on some gamepads.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonStart</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonStartChanged</b></span>(bool <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@buttonStart -->
+<!-- $$$buttonUp-prop$$$buttonUp$$$buttonUpChangedbool -->
+<h3 class="fn" id="buttonUp-prop"><a name="buttonUp-prop"></a><span class="name">buttonUp</span> : const <span class="type">bool</span></h3>
+<p>The state of the direction pad up button. The value is <code>true</code> when pressed, and <code>false</code> when not pressed.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonUp</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonUpChanged</b></span>(bool <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@buttonUp -->
+<!-- $$$buttonX-prop$$$buttonX$$$buttonXChangedbool -->
+<h3 class="fn" id="buttonX-prop"><a name="buttonX-prop"></a><span class="name">buttonX</span> : const <span class="type">bool</span></h3>
+<p>The state of the X button. The value is <code>true</code> when pressed, and <code>false</code> when not pressed.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonX</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonXChanged</b></span>(bool <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@buttonX -->
+<!-- $$$buttonY-prop$$$buttonY$$$buttonYChangedbool -->
+<h3 class="fn" id="buttonY-prop"><a name="buttonY-prop"></a><span class="name">buttonY</span> : const <span class="type">bool</span></h3>
+<p>The state of the Y button. The value is <code>true</code> when pressed, and <code>false</code> when not pressed.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonY</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonYChanged</b></span>(bool <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@buttonY -->
+<!-- $$$connected-prop$$$isConnected$$$connectedChangedbool -->
+<h3 class="fn" id="connected-prop"><a name="connected-prop"></a><span class="name">connected</span> : const <span class="type">bool</span></h3>
+<p>The connectivity state of the gamepad device. If a gamepad is connected, this property will be <code>true</code>, otherwise <code>false</code>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>isConnected</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>connectedChanged</b></span>(bool <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@connected -->
+<!-- $$$deviceId-prop$$$deviceId$$$setDeviceIdint$$$deviceIdChangedint -->
+<h3 class="fn" id="deviceId-prop"><a name="deviceId-prop"></a><span class="name">deviceId</span> : <span class="type">int</span></h3>
+<p>This property holds the deviceId of the gamepad device. Multiple gamepad devices can be connected at any given time, so setting this property defines which gamepad to use.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>deviceId</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setDeviceId</b></span>(int <i>number</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>deviceIdChanged</b></span>(int <i>value</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qgamepadmanager.html#connectedGamepads">QGamepadManager::connectedGamepads</a>().</p>
+<!-- @@@deviceId -->
+<!-- $$$name-prop$$$name$$$nameChangedQString -->
+<h3 class="fn" id="name-prop"><a name="name-prop"></a><span class="name">name</span> : const <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>The reported name of the gamepad if one is available.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>name</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>nameChanged</b></span>(QString <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@name -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QGamepad[overload1]$$$QGamepadintQObject* -->
+<h3 class="fn" id="QGamepad"><a name="QGamepad"></a>QGamepad::<span class="name">QGamepad</span>(<span class="type">int</span> <i>deviceId</i> = 0, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a <a href="qgamepad.html">QGamepad</a> with the given <i>deviceId</i> and <i>parent</i>.</p>
+<!-- @@@QGamepad -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

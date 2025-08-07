@@ -1,0 +1,3088 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tagfile>
+    <compound kind="class">
+        <name>QSensorFilter</name>
+        <filename>qsensorfilter.html</filename>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>filter</name>
+            <anchorfile>qsensorfilter.html</anchorfile>
+            <anchor>filter</anchor>
+            <arglist>(QSensorReading *reading) = 0</arglist>
+        </member>
+        <member kind="function" protection="protected" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QSensorFilter</name>
+            <anchorfile>qsensorfilter.html</anchorfile>
+            <anchor>dtor.QSensorFilter</anchor>
+            <arglist>()</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QLightReading</name>
+        <filename>qlightreading.html</filename>
+        <base>QSensorReading</base>
+        <member kind="property" type="qreal">
+            <name>lux</name>
+            <anchorfile>qlightreading.html</anchorfile>
+            <anchor>lux-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>lux</name>
+            <anchorfile>qlightreading.html</anchorfile>
+            <anchor>lux-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setLux</name>
+            <anchorfile>qlightreading.html</anchorfile>
+            <anchor>setLux</anchor>
+            <arglist>(qreal lux)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QAmbientLightReading</name>
+        <filename>qambientlightreading.html</filename>
+        <base>QSensorReading</base>
+        <member kind="property" type="LightLevel">
+            <name>lightLevel</name>
+            <anchorfile>qambientlightreading.html</anchorfile>
+            <anchor>lightLevel-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="enum">
+            <name>LightLevel</name>
+            <anchor>LightLevel-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Undefined">
+            <anchor>LightLevel-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Dark">
+            <anchor>LightLevel-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Twilight">
+            <anchor>LightLevel-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Light">
+            <anchor>LightLevel-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Bright">
+            <anchor>LightLevel-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Sunny">
+            <anchor>LightLevel-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QAmbientLightReading::LightLevel</type>
+            <name>lightLevel</name>
+            <anchorfile>qambientlightreading.html</anchorfile>
+            <anchor>lightLevel-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setLightLevel</name>
+            <anchorfile>qambientlightreading.html</anchorfile>
+            <anchor>setLightLevel</anchor>
+            <arglist>(QAmbientLightReading::LightLevel lightLevel)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QSensorPluginInterface</name>
+        <filename>qsensorplugininterface.html</filename>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual void</type>
+            <name>registerSensors</name>
+            <anchorfile>qsensorplugininterface.html</anchorfile>
+            <anchor>registerSensors</anchor>
+            <arglist>() = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QAmbientTemperatureSensor</name>
+        <filename>qambienttemperaturesensor.html</filename>
+        <base>QSensor</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QAmbientTemperatureSensor</name>
+            <anchorfile>qambienttemperaturesensor.html</anchorfile>
+            <anchor>QAmbientTemperatureSensor</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QAmbientTemperatureSensor</name>
+            <anchorfile>qambienttemperaturesensor.html</anchorfile>
+            <anchor>dtor.QAmbientTemperatureSensor</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QAmbientTemperatureReading *</type>
+            <name>reading</name>
+            <anchorfile>qambienttemperaturesensor.html</anchorfile>
+            <anchor>reading</anchor>
+            <arglist>() const const</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QSensorGestureRecognizer</name>
+        <filename>qsensorgesturerecognizer.html</filename>
+        <base>QObject</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QSensorGestureRecognizer</name>
+            <anchorfile>qsensorgesturerecognizer.html</anchorfile>
+            <anchor>QSensorGestureRecognizer</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QSensorGestureRecognizer</name>
+            <anchorfile>qsensorgesturerecognizer.html</anchorfile>
+            <anchor>dtor.QSensorGestureRecognizer</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual QString</type>
+            <name>id</name>
+            <anchorfile>qsensorgesturerecognizer.html</anchorfile>
+            <anchor>id</anchor>
+            <arglist>() const const = 0</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>isActive</name>
+            <anchorfile>qsensorgesturerecognizer.html</anchorfile>
+            <anchor>isActive</anchor>
+            <arglist>() = 0</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>startBackend</name>
+            <anchorfile>qsensorgesturerecognizer.html</anchorfile>
+            <anchor>startBackend</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>stopBackend</name>
+            <anchorfile>qsensorgesturerecognizer.html</anchorfile>
+            <anchor>stopBackend</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>createBackend</name>
+            <anchorfile>qsensorgesturerecognizer.html</anchorfile>
+            <anchor>createBackend</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QStringList</type>
+            <name>gestureSignals</name>
+            <anchorfile>qsensorgesturerecognizer.html</anchorfile>
+            <anchor>gestureSignals</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>detected</name>
+            <anchorfile>qsensorgesturerecognizer.html</anchorfile>
+            <anchor>detected</anchor>
+            <arglist>(const QString &amp;)</arglist>
+        </member>
+        <member kind="function" protection="protected" virtualness="pure" static="no">
+            <type>virtual void</type>
+            <name>create</name>
+            <anchorfile>qsensorgesturerecognizer.html</anchorfile>
+            <anchor>create</anchor>
+            <arglist>() = 0</arglist>
+        </member>
+        <member kind="function" protection="protected" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>start</name>
+            <anchorfile>qsensorgesturerecognizer.html</anchorfile>
+            <anchor>start</anchor>
+            <arglist>() = 0</arglist>
+        </member>
+        <member kind="function" protection="protected" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>stop</name>
+            <anchorfile>qsensorgesturerecognizer.html</anchorfile>
+            <anchor>stop</anchor>
+            <arglist>() = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QCompass</name>
+        <filename>qcompass.html</filename>
+        <base>QSensor</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QCompass</name>
+            <anchorfile>qcompass.html</anchorfile>
+            <anchor>QCompass</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QCompass</name>
+            <anchorfile>qcompass.html</anchorfile>
+            <anchor>dtor.QCompass</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QCompassReading *</type>
+            <name>reading</name>
+            <anchorfile>qcompass.html</anchorfile>
+            <anchor>reading</anchor>
+            <arglist>() const const</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.OrientationSensor</name>
+        <filename>qml-qtsensors-orientationsensor.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QProximitySensor</name>
+        <filename>qproximitysensor.html</filename>
+        <base>QSensor</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QProximitySensor</name>
+            <anchorfile>qproximitysensor.html</anchorfile>
+            <anchor>QProximitySensor</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QProximitySensor</name>
+            <anchorfile>qproximitysensor.html</anchorfile>
+            <anchor>dtor.QProximitySensor</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QProximityReading *</type>
+            <name>reading</name>
+            <anchorfile>qproximitysensor.html</anchorfile>
+            <anchor>reading</anchor>
+            <arglist>() const const</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.AmbientTemperatureReading</name>
+        <filename>qml-qtsensors-ambienttemperaturereading.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.LidReading</name>
+        <filename>qml-qtsensors-lidreading.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QIRProximityReading</name>
+        <filename>qirproximityreading.html</filename>
+        <base>QSensorReading</base>
+        <member kind="property" type="qreal">
+            <name>reflectance</name>
+            <anchorfile>qirproximityreading.html</anchorfile>
+            <anchor>reflectance-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>reflectance</name>
+            <anchorfile>qirproximityreading.html</anchorfile>
+            <anchor>reflectance-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setReflectance</name>
+            <anchorfile>qirproximityreading.html</anchorfile>
+            <anchor>setReflectance</anchor>
+            <arglist>(qreal reflectance)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QProximityReading</name>
+        <filename>qproximityreading.html</filename>
+        <base>QSensorReading</base>
+        <member kind="property" type="bool">
+            <name>close</name>
+            <anchorfile>qproximityreading.html</anchorfile>
+            <anchor>close-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>close</name>
+            <anchorfile>qproximityreading.html</anchorfile>
+            <anchor>close-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setClose</name>
+            <anchorfile>qproximityreading.html</anchorfile>
+            <anchor>setClose</anchor>
+            <arglist>(bool close)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QLidSensor</name>
+        <filename>qlidsensor.html</filename>
+        <base>QSensor</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QLidSensor</name>
+            <anchorfile>qlidsensor.html</anchorfile>
+            <anchor>QLidSensor</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QLidSensor</name>
+            <anchorfile>qlidsensor.html</anchorfile>
+            <anchor>dtor.QLidSensor</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QLidReading *</type>
+            <name>reading</name>
+            <anchorfile>qlidsensor.html</anchorfile>
+            <anchor>reading</anchor>
+            <arglist>() const const</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QSensorChangesInterface</name>
+        <filename>qsensorchangesinterface.html</filename>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual void</type>
+            <name>sensorsChanged</name>
+            <anchorfile>qsensorchangesinterface.html</anchorfile>
+            <anchor>sensorsChanged</anchor>
+            <arglist>() = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QTapReading</name>
+        <filename>qtapreading.html</filename>
+        <base>QSensorReading</base>
+        <member kind="property" type="TapDirection">
+            <name>tapDirection</name>
+            <anchorfile>qtapreading.html</anchorfile>
+            <anchor>tapDirection-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="bool">
+            <name>doubleTap</name>
+            <anchorfile>qtapreading.html</anchorfile>
+            <anchor>doubleTap-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="enum">
+            <name>TapDirection</name>
+            <anchor>TapDirection-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Undefined">
+            <anchor>TapDirection-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="X">
+            <anchor>TapDirection-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Y">
+            <anchor>TapDirection-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Z">
+            <anchor>TapDirection-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="X_Pos">
+            <anchor>TapDirection-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Y_Pos">
+            <anchor>TapDirection-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Z_Pos">
+            <anchor>TapDirection-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="X_Neg">
+            <anchor>TapDirection-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Y_Neg">
+            <anchor>TapDirection-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Z_Neg">
+            <anchor>TapDirection-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="X_Both">
+            <anchor>TapDirection-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Y_Both">
+            <anchor>TapDirection-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Z_Both">
+            <anchor>TapDirection-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QTapReading::TapDirection</type>
+            <name>tapDirection</name>
+            <anchorfile>qtapreading.html</anchorfile>
+            <anchor>tapDirection-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setTapDirection</name>
+            <anchorfile>qtapreading.html</anchorfile>
+            <anchor>setTapDirection</anchor>
+            <arglist>(QTapReading::TapDirection tapDirection)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>isDoubleTap</name>
+            <anchorfile>qtapreading.html</anchorfile>
+            <anchor>doubleTap-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setDoubleTap</name>
+            <anchorfile>qtapreading.html</anchorfile>
+            <anchor>setDoubleTap</anchor>
+            <arglist>(bool doubleTap)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.SensorReading</name>
+        <filename>qml-qtsensors-sensorreading.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.TiltReading</name>
+        <filename>qml-qtsensors-tiltreading.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.DistanceSensor</name>
+        <filename>qml-qtsensors-distancesensor.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.DistanceReading</name>
+        <filename>qml-qtsensors-distancereading.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QIRProximitySensor</name>
+        <filename>qirproximitysensor.html</filename>
+        <base>QSensor</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QIRProximitySensor</name>
+            <anchorfile>qirproximitysensor.html</anchorfile>
+            <anchor>QIRProximitySensor</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QIRProximitySensor</name>
+            <anchorfile>qirproximitysensor.html</anchorfile>
+            <anchor>dtor.QIRProximitySensor</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QIRProximityReading *</type>
+            <name>reading</name>
+            <anchorfile>qirproximitysensor.html</anchorfile>
+            <anchor>reading</anchor>
+            <arglist>() const const</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QSensorGesturePluginInterface</name>
+        <filename>qsensorgestureplugininterface.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QSensorGesturePluginInterface</name>
+            <anchorfile>qsensorgestureplugininterface.html</anchorfile>
+            <anchor>QSensorGesturePluginInterface</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QSensorGesturePluginInterface</name>
+            <anchorfile>qsensorgestureplugininterface.html</anchorfile>
+            <anchor>dtor.QSensorGesturePluginInterface</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual QList&lt;QSensorGestureRecognizer *&gt;</type>
+            <name>createRecognizers</name>
+            <anchorfile>qsensorgestureplugininterface.html</anchorfile>
+            <anchor>createRecognizers</anchor>
+            <arglist>() = 0</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual QStringList</type>
+            <name>supportedIds</name>
+            <anchorfile>qsensorgestureplugininterface.html</anchorfile>
+            <anchor>supportedIds</anchor>
+            <arglist>() const const = 0</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual QString</type>
+            <name>name</name>
+            <anchorfile>qsensorgestureplugininterface.html</anchorfile>
+            <anchor>name</anchor>
+            <arglist>() const const = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QGyroscopeFilter</name>
+        <filename>qgyroscopefilter.html</filename>
+        <base>QSensorFilter</base>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>filter</name>
+            <anchorfile>qgyroscopefilter.html</anchorfile>
+            <anchor>filter</anchor>
+            <arglist>(QGyroscopeReading *reading) = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QTapFilter</name>
+        <filename>qtapfilter.html</filename>
+        <base>QSensorFilter</base>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>filter</name>
+            <anchorfile>qtapfilter.html</anchorfile>
+            <anchor>filter</anchor>
+            <arglist>(QTapReading *reading) = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QTapSensor</name>
+        <filename>qtapsensor.html</filename>
+        <base>QSensor</base>
+        <member kind="property" type="bool">
+            <name>returnDoubleTapEvents</name>
+            <anchorfile>qtapsensor.html</anchorfile>
+            <anchor>returnDoubleTapEvents-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QTapSensor</name>
+            <anchorfile>qtapsensor.html</anchorfile>
+            <anchor>QTapSensor</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QTapSensor</name>
+            <anchorfile>qtapsensor.html</anchorfile>
+            <anchor>dtor.QTapSensor</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QTapReading *</type>
+            <name>reading</name>
+            <anchorfile>qtapsensor.html</anchorfile>
+            <anchor>reading</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>returnDoubleTapEvents</name>
+            <anchorfile>qtapsensor.html</anchorfile>
+            <anchor>returnDoubleTapEvents-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setReturnDoubleTapEvents</name>
+            <anchorfile>qtapsensor.html</anchorfile>
+            <anchor>returnDoubleTapEvents-prop</anchor>
+            <arglist>(bool returnDoubleTapEvents)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>returnDoubleTapEventsChanged</name>
+            <anchorfile>qtapsensor.html</anchorfile>
+            <anchor>returnDoubleTapEvents-prop</anchor>
+            <arglist>(bool returnDoubleTapEvents)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QHolsterReading</name>
+        <filename>qholsterreading.html</filename>
+        <base>QSensorReading</base>
+        <member kind="property" type="bool">
+            <name>holstered</name>
+            <anchorfile>qholsterreading.html</anchorfile>
+            <anchor>holstered-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>holstered</name>
+            <anchorfile>qholsterreading.html</anchorfile>
+            <anchor>holstered-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setHolstered</name>
+            <anchorfile>qholsterreading.html</anchorfile>
+            <anchor>setHolstered</anchor>
+            <arglist>(bool holstered)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QLightFilter</name>
+        <filename>qlightfilter.html</filename>
+        <base>QSensorFilter</base>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>filter</name>
+            <anchorfile>qlightfilter.html</anchorfile>
+            <anchor>filter</anchor>
+            <arglist>(QLightReading *reading) = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.AccelerometerReading</name>
+        <filename>qml-qtsensors-accelerometerreading.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QSensorGestureManager</name>
+        <filename>qsensorgesturemanager.html</filename>
+        <base>QObject</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QSensorGestureManager</name>
+            <anchorfile>qsensorgesturemanager.html</anchorfile>
+            <anchor>QSensorGestureManager</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QSensorGestureManager</name>
+            <anchorfile>qsensorgesturemanager.html</anchorfile>
+            <anchor>dtor.QSensorGestureManager</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>registerSensorGestureRecognizer</name>
+            <anchorfile>qsensorgesturemanager.html</anchorfile>
+            <anchor>registerSensorGestureRecognizer</anchor>
+            <arglist>(QSensorGestureRecognizer *recognizer)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QStringList</type>
+            <name>gestureIds</name>
+            <anchorfile>qsensorgesturemanager.html</anchorfile>
+            <anchor>gestureIds</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QStringList</type>
+            <name>recognizerSignals</name>
+            <anchorfile>qsensorgesturemanager.html</anchorfile>
+            <anchor>recognizerSignals</anchor>
+            <arglist>(const QString &amp;gestureId) const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>QSensorGestureRecognizer *</type>
+            <name>sensorGestureRecognizer</name>
+            <anchorfile>qsensorgesturemanager.html</anchorfile>
+            <anchor>sensorGestureRecognizer</anchor>
+            <arglist>(const QString &amp;id)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>newSensorGestureAvailable</name>
+            <anchorfile>qsensorgesturemanager.html</anchorfile>
+            <anchor>newSensorGestureAvailable</anchor>
+            <arglist>()</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.CompassReading</name>
+        <filename>qml-qtsensors-compassreading.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QAccelerometerReading</name>
+        <filename>qaccelerometerreading.html</filename>
+        <base>QSensorReading</base>
+        <member kind="property" type="qreal">
+            <name>x</name>
+            <anchorfile>qaccelerometerreading.html</anchorfile>
+            <anchor>x-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="qreal">
+            <name>y</name>
+            <anchorfile>qaccelerometerreading.html</anchorfile>
+            <anchor>y-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="qreal">
+            <name>z</name>
+            <anchorfile>qaccelerometerreading.html</anchorfile>
+            <anchor>z-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>x</name>
+            <anchorfile>qaccelerometerreading.html</anchorfile>
+            <anchor>x-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setX</name>
+            <anchorfile>qaccelerometerreading.html</anchorfile>
+            <anchor>setX</anchor>
+            <arglist>(qreal x)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>y</name>
+            <anchorfile>qaccelerometerreading.html</anchorfile>
+            <anchor>y-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setY</name>
+            <anchorfile>qaccelerometerreading.html</anchorfile>
+            <anchor>setY</anchor>
+            <arglist>(qreal y)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>z</name>
+            <anchorfile>qaccelerometerreading.html</anchorfile>
+            <anchor>z-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setZ</name>
+            <anchorfile>qaccelerometerreading.html</anchorfile>
+            <anchor>setZ</anchor>
+            <arglist>(qreal z)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.AmbientLightSensor</name>
+        <filename>qml-qtsensors-ambientlightsensor.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QGyroscope</name>
+        <filename>qgyroscope.html</filename>
+        <base>QSensor</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QGyroscope</name>
+            <anchorfile>qgyroscope.html</anchorfile>
+            <anchor>QGyroscope</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QGyroscope</name>
+            <anchorfile>qgyroscope.html</anchorfile>
+            <anchor>dtor.QGyroscope</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QGyroscopeReading *</type>
+            <name>reading</name>
+            <anchorfile>qgyroscope.html</anchorfile>
+            <anchor>reading</anchor>
+            <arglist>() const const</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QCompassReading</name>
+        <filename>qcompassreading.html</filename>
+        <base>QSensorReading</base>
+        <member kind="property" type="qreal">
+            <name>azimuth</name>
+            <anchorfile>qcompassreading.html</anchorfile>
+            <anchor>azimuth-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="qreal">
+            <name>calibrationLevel</name>
+            <anchorfile>qcompassreading.html</anchorfile>
+            <anchor>calibrationLevel-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>azimuth</name>
+            <anchorfile>qcompassreading.html</anchorfile>
+            <anchor>azimuth-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setAzimuth</name>
+            <anchorfile>qcompassreading.html</anchorfile>
+            <anchor>setAzimuth</anchor>
+            <arglist>(qreal azimuth)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>calibrationLevel</name>
+            <anchorfile>qcompassreading.html</anchorfile>
+            <anchor>calibrationLevel-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setCalibrationLevel</name>
+            <anchorfile>qcompassreading.html</anchorfile>
+            <anchor>setCalibrationLevel</anchor>
+            <arglist>(qreal calibrationLevel)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QAltimeter</name>
+        <filename>qaltimeter.html</filename>
+        <base>QSensor</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QAltimeter</name>
+            <anchorfile>qaltimeter.html</anchorfile>
+            <anchor>QAltimeter</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QAltimeter</name>
+            <anchorfile>qaltimeter.html</anchorfile>
+            <anchor>dtor.QAltimeter</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QAltimeterReading *</type>
+            <name>reading</name>
+            <anchorfile>qaltimeter.html</anchorfile>
+            <anchor>reading</anchor>
+            <arglist>() const const</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.PressureSensor</name>
+        <filename>qml-qtsensors-pressuresensor.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.PressureReading</name>
+        <filename>qml-qtsensors-pressurereading.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QHumidityReading</name>
+        <filename>qhumidityreading.html</filename>
+        <base>QSensorReading</base>
+        <member kind="property" type="qreal">
+            <name>relativeHumidity</name>
+            <anchorfile>qhumidityreading.html</anchorfile>
+            <anchor>relativeHumidity-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="qreal">
+            <name>absoluteHumidity</name>
+            <anchorfile>qhumidityreading.html</anchorfile>
+            <anchor>absoluteHumidity-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>relativeHumidity</name>
+            <anchorfile>qhumidityreading.html</anchorfile>
+            <anchor>relativeHumidity-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setRelativeHumidity</name>
+            <anchorfile>qhumidityreading.html</anchorfile>
+            <anchor>setRelativeHumidity</anchor>
+            <arglist>(qreal humidity)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>absoluteHumidity</name>
+            <anchorfile>qhumidityreading.html</anchorfile>
+            <anchor>absoluteHumidity-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setAbsoluteHumidity</name>
+            <anchorfile>qhumidityreading.html</anchorfile>
+            <anchor>setAbsoluteHumidity</anchor>
+            <arglist>(qreal value)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.OrientationReading</name>
+        <filename>qml-qtsensors-orientationreading.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QPressureFilter</name>
+        <filename>qpressurefilter.html</filename>
+        <base>QSensorFilter</base>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>filter</name>
+            <anchorfile>qpressurefilter.html</anchorfile>
+            <anchor>filter</anchor>
+            <arglist>(QPressureReading *reading) = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.AmbientTemperatureSensor</name>
+        <filename>qml-qtsensors-ambienttemperaturesensor.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QHumidityFilter</name>
+        <filename>qhumidityfilter.html</filename>
+        <base>QSensorFilter</base>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>filter</name>
+            <anchorfile>qhumidityfilter.html</anchorfile>
+            <anchor>filter</anchor>
+            <arglist>(QHumidityReading *reading) = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QMagnetometer</name>
+        <filename>qmagnetometer.html</filename>
+        <base>QSensor</base>
+        <member kind="property" type="bool">
+            <name>returnGeoValues</name>
+            <anchorfile>qmagnetometer.html</anchorfile>
+            <anchor>returnGeoValues-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QMagnetometer</name>
+            <anchorfile>qmagnetometer.html</anchorfile>
+            <anchor>QMagnetometer</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QMagnetometer</name>
+            <anchorfile>qmagnetometer.html</anchorfile>
+            <anchor>dtor.QMagnetometer</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QMagnetometerReading *</type>
+            <name>reading</name>
+            <anchorfile>qmagnetometer.html</anchorfile>
+            <anchor>reading</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>returnGeoValues</name>
+            <anchorfile>qmagnetometer.html</anchorfile>
+            <anchor>returnGeoValues-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setReturnGeoValues</name>
+            <anchorfile>qmagnetometer.html</anchorfile>
+            <anchor>returnGeoValues-prop</anchor>
+            <arglist>(bool returnGeoValues)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>returnGeoValuesChanged</name>
+            <anchorfile>qmagnetometer.html</anchorfile>
+            <anchor>returnGeoValues-prop</anchor>
+            <arglist>(bool returnGeoValues)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.Compass</name>
+        <filename>qml-qtsensors-compass.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.ProximitySensor</name>
+        <filename>qml-qtsensors-proximitysensor.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.SensorGesture</name>
+        <filename>qml-qtsensors-sensorgesture.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>detected</name>
+            <anchorfile>qml-qtsensors-sensorgesture.html</anchorfile>
+            <anchor>detected-signal</anchor>
+            <arglist>( gesture)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QSensorReading</name>
+        <filename>qsensorreading.html</filename>
+        <base>QObject</base>
+        <member kind="property" type="quint64">
+            <name>timestamp</name>
+            <anchorfile>qsensorreading.html</anchorfile>
+            <anchor>timestamp-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>quint64</type>
+            <name>timestamp</name>
+            <anchorfile>qsensorreading.html</anchorfile>
+            <anchor>timestamp</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setTimestamp</name>
+            <anchorfile>qsensorreading.html</anchorfile>
+            <anchor>setTimestamp</anchor>
+            <arglist>(quint64 timestamp)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>valueCount</name>
+            <anchorfile>qsensorreading.html</anchorfile>
+            <anchor>valueCount</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QVariant</type>
+            <name>value</name>
+            <anchorfile>qsensorreading.html</anchorfile>
+            <anchor>value</anchor>
+            <arglist>(int index) const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>DECLARE_READING</name>
+            <anchorfile>qsensorreading.html</anchorfile>
+            <anchor>DECLARE_READING</anchor>
+            <arglist>( classname)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>IMPLEMENT_READING</name>
+            <anchorfile>qsensorreading.html</anchorfile>
+            <anchor>IMPLEMENT_READING</anchor>
+            <arglist>( classname)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QRotationFilter</name>
+        <filename>qrotationfilter.html</filename>
+        <base>QSensorFilter</base>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>filter</name>
+            <anchorfile>qrotationfilter.html</anchorfile>
+            <anchor>filter</anchor>
+            <arglist>(QRotationReading *reading) = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QRotationSensor</name>
+        <filename>qrotationsensor.html</filename>
+        <base>QSensor</base>
+        <member kind="property" type="bool">
+            <name>hasZ</name>
+            <anchorfile>qrotationsensor.html</anchorfile>
+            <anchor>hasZ-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QRotationSensor</name>
+            <anchorfile>qrotationsensor.html</anchorfile>
+            <anchor>QRotationSensor</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QRotationSensor</name>
+            <anchorfile>qrotationsensor.html</anchorfile>
+            <anchor>dtor.QRotationSensor</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QRotationReading *</type>
+            <name>reading</name>
+            <anchorfile>qrotationsensor.html</anchorfile>
+            <anchor>reading</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>hasZ</name>
+            <anchorfile>qrotationsensor.html</anchorfile>
+            <anchor>hasZ-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setHasZ</name>
+            <anchorfile>qrotationsensor.html</anchorfile>
+            <anchor>setHasZ</anchor>
+            <arglist>(bool hasZ)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>hasZChanged</name>
+            <anchorfile>qrotationsensor.html</anchorfile>
+            <anchor>hasZ-prop</anchor>
+            <arglist>(bool hasZ)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QAmbientLightFilter</name>
+        <filename>qambientlightfilter.html</filename>
+        <base>QSensorFilter</base>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>filter</name>
+            <anchorfile>qambientlightfilter.html</anchorfile>
+            <anchor>filter</anchor>
+            <arglist>(QAmbientLightReading *reading) = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.Accelerometer</name>
+        <filename>qml-qtsensors-accelerometer.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.IRProximitySensor</name>
+        <filename>qml-qtsensors-irproximitysensor.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.IRProximityReading</name>
+        <filename>qml-qtsensors-irproximityreading.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QMagnetometerFilter</name>
+        <filename>qmagnetometerfilter.html</filename>
+        <base>QSensorFilter</base>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>filter</name>
+            <anchorfile>qmagnetometerfilter.html</anchorfile>
+            <anchor>filter</anchor>
+            <arglist>(QMagnetometerReading *reading) = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QPressureSensor</name>
+        <filename>qpressuresensor.html</filename>
+        <base>QSensor</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QPressureSensor</name>
+            <anchorfile>qpressuresensor.html</anchorfile>
+            <anchor>QPressureSensor</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QPressureSensor</name>
+            <anchorfile>qpressuresensor.html</anchorfile>
+            <anchor>dtor.QPressureSensor</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPressureReading *</type>
+            <name>reading</name>
+            <anchorfile>qpressuresensor.html</anchorfile>
+            <anchor>reading</anchor>
+            <arglist>() const const</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QHumiditySensor</name>
+        <filename>qhumiditysensor.html</filename>
+        <base>QSensor</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QHumiditySensor</name>
+            <anchorfile>qhumiditysensor.html</anchorfile>
+            <anchor>QHumiditySensor</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QHumiditySensor</name>
+            <anchorfile>qhumiditysensor.html</anchorfile>
+            <anchor>dtor.QHumiditySensor</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QHumidityReading *</type>
+            <name>reading</name>
+            <anchorfile>qhumiditysensor.html</anchorfile>
+            <anchor>reading</anchor>
+            <arglist>() const const</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.TapSensor</name>
+        <filename>qml-qtsensors-tapsensor.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.LightReading</name>
+        <filename>qml-qtsensors-lightreading.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QPressureReading</name>
+        <filename>qpressurereading.html</filename>
+        <base>QSensorReading</base>
+        <member kind="property" type="qreal">
+            <name>pressure</name>
+            <anchorfile>qpressurereading.html</anchorfile>
+            <anchor>pressure-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="qreal">
+            <name>temperature</name>
+            <anchorfile>qpressurereading.html</anchorfile>
+            <anchor>temperature-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>pressure</name>
+            <anchorfile>qpressurereading.html</anchorfile>
+            <anchor>pressure-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setPressure</name>
+            <anchorfile>qpressurereading.html</anchorfile>
+            <anchor>setPressure</anchor>
+            <arglist>(qreal pressure)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>temperature</name>
+            <anchorfile>qpressurereading.html</anchorfile>
+            <anchor>temperature-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setTemperature</name>
+            <anchorfile>qpressurereading.html</anchorfile>
+            <anchor>setTemperature</anchor>
+            <arglist>(qreal temperature)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.HolsterReading</name>
+        <filename>qml-qtsensors-holsterreading.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.Magnetometer</name>
+        <filename>qml-qtsensors-magnetometer.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.HumiditySensor</name>
+        <filename>qml-qtsensors-humiditysensor.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.HumidityReading</name>
+        <filename>qml-qtsensors-humidityreading.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QMagnetometerReading</name>
+        <filename>qmagnetometerreading.html</filename>
+        <base>QSensorReading</base>
+        <member kind="property" type="qreal">
+            <name>x</name>
+            <anchorfile>qmagnetometerreading.html</anchorfile>
+            <anchor>x-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="qreal">
+            <name>y</name>
+            <anchorfile>qmagnetometerreading.html</anchorfile>
+            <anchor>y-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="qreal">
+            <name>z</name>
+            <anchorfile>qmagnetometerreading.html</anchorfile>
+            <anchor>z-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="qreal">
+            <name>calibrationLevel</name>
+            <anchorfile>qmagnetometerreading.html</anchorfile>
+            <anchor>calibrationLevel-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>x</name>
+            <anchorfile>qmagnetometerreading.html</anchorfile>
+            <anchor>x-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setX</name>
+            <anchorfile>qmagnetometerreading.html</anchorfile>
+            <anchor>setX</anchor>
+            <arglist>(qreal x)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>y</name>
+            <anchorfile>qmagnetometerreading.html</anchorfile>
+            <anchor>y-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setY</name>
+            <anchorfile>qmagnetometerreading.html</anchorfile>
+            <anchor>setY</anchor>
+            <arglist>(qreal y)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>z</name>
+            <anchorfile>qmagnetometerreading.html</anchorfile>
+            <anchor>z-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setZ</name>
+            <anchorfile>qmagnetometerreading.html</anchorfile>
+            <anchor>setZ</anchor>
+            <arglist>(qreal z)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>calibrationLevel</name>
+            <anchorfile>qmagnetometerreading.html</anchorfile>
+            <anchor>calibrationLevel-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setCalibrationLevel</name>
+            <anchorfile>qmagnetometerreading.html</anchorfile>
+            <anchor>setCalibrationLevel</anchor>
+            <arglist>(qreal calibrationLevel)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.ProximityReading</name>
+        <filename>qml-qtsensors-proximityreading.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QAccelerometerFilter</name>
+        <filename>qaccelerometerfilter.html</filename>
+        <base>QSensorFilter</base>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>filter</name>
+            <anchorfile>qaccelerometerfilter.html</anchorfile>
+            <anchor>filter</anchor>
+            <arglist>(QAccelerometerReading *reading) = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.RotationReading</name>
+        <filename>qml-qtsensors-rotationreading.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QAmbientLightSensor</name>
+        <filename>qambientlightsensor.html</filename>
+        <base>QSensor</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QAmbientLightSensor</name>
+            <anchorfile>qambientlightsensor.html</anchorfile>
+            <anchor>QAmbientLightSensor</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QAmbientLightSensor</name>
+            <anchorfile>qambientlightsensor.html</anchorfile>
+            <anchor>dtor.QAmbientLightSensor</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QAmbientLightReading *</type>
+            <name>reading</name>
+            <anchorfile>qambientlightsensor.html</anchorfile>
+            <anchor>reading</anchor>
+            <arglist>() const const</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QSensorBackendFactory</name>
+        <filename>qsensorbackendfactory.html</filename>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual QSensorBackend *</type>
+            <name>createBackend</name>
+            <anchorfile>qsensorbackendfactory.html</anchorfile>
+            <anchor>createBackend</anchor>
+            <arglist>(QSensor *sensor) = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QTiltReading</name>
+        <filename>qtiltreading.html</filename>
+        <base>QSensorReading</base>
+        <member kind="property" type="qreal">
+            <name>yRotation</name>
+            <anchorfile>qtiltreading.html</anchorfile>
+            <anchor>yRotation-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="qreal">
+            <name>xRotation</name>
+            <anchorfile>qtiltreading.html</anchorfile>
+            <anchor>xRotation-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>yRotation</name>
+            <anchorfile>qtiltreading.html</anchorfile>
+            <anchor>yRotation-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setYRotation</name>
+            <anchorfile>qtiltreading.html</anchorfile>
+            <anchor>setYRotation</anchor>
+            <arglist>(qreal y)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>xRotation</name>
+            <anchorfile>qtiltreading.html</anchorfile>
+            <anchor>xRotation-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setXRotation</name>
+            <anchorfile>qtiltreading.html</anchorfile>
+            <anchor>setXRotation</anchor>
+            <arglist>(qreal x)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QAccelerometer</name>
+        <filename>qaccelerometer.html</filename>
+        <base>QSensor</base>
+        <member kind="property" type="AccelerationMode">
+            <name>accelerationMode</name>
+            <anchorfile>qaccelerometer.html</anchorfile>
+            <anchor>accelerationMode-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QAccelerometer</name>
+            <anchorfile>qaccelerometer.html</anchorfile>
+            <anchor>QAccelerometer</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QAccelerometer</name>
+            <anchorfile>qaccelerometer.html</anchorfile>
+            <anchor>dtor.QAccelerometer</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="enum">
+            <name>AccelerationMode</name>
+            <anchor>AccelerationMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Combined">
+            <anchor>AccelerationMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Gravity">
+            <anchor>AccelerationMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="User">
+            <anchor>AccelerationMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QAccelerometer::AccelerationMode</type>
+            <name>accelerationMode</name>
+            <anchorfile>qaccelerometer.html</anchorfile>
+            <anchor>accelerationMode-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setAccelerationMode</name>
+            <anchorfile>qaccelerometer.html</anchorfile>
+            <anchor>setAccelerationMode</anchor>
+            <arglist>(QAccelerometer::AccelerationMode accelerationMode)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QAccelerometerReading *</type>
+            <name>reading</name>
+            <anchorfile>qaccelerometer.html</anchorfile>
+            <anchor>reading</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>accelerationModeChanged</name>
+            <anchorfile>qaccelerometer.html</anchorfile>
+            <anchor>accelerationModeChanged</anchor>
+            <arglist>(QAccelerometer::AccelerationMode accelerationMode)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QDistanceFilter</name>
+        <filename>qdistancefilter.html</filename>
+        <base>QSensorFilter</base>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>filter</name>
+            <anchorfile>qdistancefilter.html</anchorfile>
+            <anchor>filter</anchor>
+            <arglist>(QDistanceReading *reading) = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QDistanceSensor</name>
+        <filename>qdistancesensor.html</filename>
+        <base>QSensor</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QDistanceSensor</name>
+            <anchorfile>qdistancesensor.html</anchorfile>
+            <anchor>QDistanceSensor</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QDistanceSensor</name>
+            <anchorfile>qdistancesensor.html</anchorfile>
+            <anchor>dtor.QDistanceSensor</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QDistanceReading *</type>
+            <name>reading</name>
+            <anchorfile>qdistancesensor.html</anchorfile>
+            <anchor>reading</anchor>
+            <arglist>() const const</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.Gyroscope</name>
+        <filename>qml-qtsensors-gyroscope.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.LightSensor</name>
+        <filename>qml-qtsensors-lightsensor.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.Altimeter</name>
+        <filename>qml-qtsensors-altimeter.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.GyroscopeReading</name>
+        <filename>qml-qtsensors-gyroscopereading.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QAmbientTemperatureReading</name>
+        <filename>qambienttemperaturereading.html</filename>
+        <base>QSensorReading</base>
+        <member kind="property" type="qreal">
+            <name>temperature</name>
+            <anchorfile>qambienttemperaturereading.html</anchorfile>
+            <anchor>temperature-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>temperature</name>
+            <anchorfile>qambienttemperaturereading.html</anchorfile>
+            <anchor>temperature-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setTemperature</name>
+            <anchorfile>qambienttemperaturereading.html</anchorfile>
+            <anchor>setTemperature</anchor>
+            <arglist>(qreal temperature)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QSensorManager</name>
+        <filename>qsensormanager.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>void</type>
+            <name>registerBackend</name>
+            <anchorfile>qsensormanager.html</anchorfile>
+            <anchor>registerBackend</anchor>
+            <arglist>(const QByteArray &amp;type, const QByteArray &amp;identifier, QSensorBackendFactory *factory)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>void</type>
+            <name>unregisterBackend</name>
+            <anchorfile>qsensormanager.html</anchorfile>
+            <anchor>unregisterBackend</anchor>
+            <arglist>(const QByteArray &amp;type, const QByteArray &amp;identifier)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>bool</type>
+            <name>isBackendRegistered</name>
+            <anchorfile>qsensormanager.html</anchorfile>
+            <anchor>isBackendRegistered</anchor>
+            <arglist>(const QByteArray &amp;type, const QByteArray &amp;identifier)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>QSensorBackend *</type>
+            <name>createBackend</name>
+            <anchorfile>qsensormanager.html</anchorfile>
+            <anchor>createBackend</anchor>
+            <arglist>(QSensor *sensor)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>void</type>
+            <name>setDefaultBackend</name>
+            <anchorfile>qsensormanager.html</anchorfile>
+            <anchor>setDefaultBackend</anchor>
+            <arglist>(const QByteArray &amp;type, const QByteArray &amp;identifier)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QAltimeterFilter</name>
+        <filename>qaltimeterfilter.html</filename>
+        <base>QSensorFilter</base>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>filter</name>
+            <anchorfile>qaltimeterfilter.html</anchorfile>
+            <anchor>filter</anchor>
+            <arglist>(QAltimeterReading *reading) = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.MagnetometerReading</name>
+        <filename>qml-qtsensors-magnetometerreading.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.AltimeterReading</name>
+        <filename>qml-qtsensors-altimeterreading.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QGyroscopeReading</name>
+        <filename>qgyroscopereading.html</filename>
+        <base>QSensorReading</base>
+        <member kind="property" type="qreal">
+            <name>x</name>
+            <anchorfile>qgyroscopereading.html</anchorfile>
+            <anchor>x-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="qreal">
+            <name>y</name>
+            <anchorfile>qgyroscopereading.html</anchorfile>
+            <anchor>y-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="qreal">
+            <name>z</name>
+            <anchorfile>qgyroscopereading.html</anchorfile>
+            <anchor>z-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>x</name>
+            <anchorfile>qgyroscopereading.html</anchorfile>
+            <anchor>x-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setX</name>
+            <anchorfile>qgyroscopereading.html</anchorfile>
+            <anchor>setX</anchor>
+            <arglist>(qreal x)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>y</name>
+            <anchorfile>qgyroscopereading.html</anchorfile>
+            <anchor>y-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setY</name>
+            <anchorfile>qgyroscopereading.html</anchorfile>
+            <anchor>setY</anchor>
+            <arglist>(qreal y)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>z</name>
+            <anchorfile>qgyroscopereading.html</anchorfile>
+            <anchor>z-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setZ</name>
+            <anchorfile>qgyroscopereading.html</anchorfile>
+            <anchor>setZ</anchor>
+            <arglist>(qreal z)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.TapReading</name>
+        <filename>qml-qtsensors-tapreading.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QAltimeterReading</name>
+        <filename>qaltimeterreading.html</filename>
+        <base>QSensorReading</base>
+        <member kind="property" type="qreal">
+            <name>altitude</name>
+            <anchorfile>qaltimeterreading.html</anchorfile>
+            <anchor>altitude-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>altitude</name>
+            <anchorfile>qaltimeterreading.html</anchorfile>
+            <anchor>altitude-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setAltitude</name>
+            <anchorfile>qaltimeterreading.html</anchorfile>
+            <anchor>setAltitude</anchor>
+            <arglist>(qreal altitude)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.TiltSensor</name>
+        <filename>qml-qtsensors-tiltsensor.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>calibrate</name>
+            <anchorfile>qml-qtsensors-tiltsensor.html</anchorfile>
+            <anchor>calibrate-method</anchor>
+            <arglist>()</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QHolsterFilter</name>
+        <filename>qholsterfilter.html</filename>
+        <base>QSensorFilter</base>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>filter</name>
+            <anchorfile>qholsterfilter.html</anchorfile>
+            <anchor>filter</anchor>
+            <arglist>(QHolsterReading *reading) = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QOrientationReading</name>
+        <filename>qorientationreading.html</filename>
+        <base>QSensorReading</base>
+        <member kind="property" type="Orientation">
+            <name>orientation</name>
+            <anchorfile>qorientationreading.html</anchorfile>
+            <anchor>orientation-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="enum">
+            <name>Orientation</name>
+            <anchor>Orientation-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Undefined">
+            <anchor>Orientation-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="TopUp">
+            <anchor>Orientation-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="TopDown">
+            <anchor>Orientation-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="LeftUp">
+            <anchor>Orientation-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="RightUp">
+            <anchor>Orientation-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="FaceUp">
+            <anchor>Orientation-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="FaceDown">
+            <anchor>Orientation-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QOrientationReading::Orientation</type>
+            <name>orientation</name>
+            <anchorfile>qorientationreading.html</anchorfile>
+            <anchor>orientation-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setOrientation</name>
+            <anchorfile>qorientationreading.html</anchorfile>
+            <anchor>setOrientation</anchor>
+            <arglist>(QOrientationReading::Orientation orientation)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QHolsterSensor</name>
+        <filename>qholstersensor.html</filename>
+        <base>QSensor</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QHolsterSensor</name>
+            <anchorfile>qholstersensor.html</anchorfile>
+            <anchor>QHolsterSensor</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QHolsterSensor</name>
+            <anchorfile>qholstersensor.html</anchorfile>
+            <anchor>dtor.QHolsterSensor</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QHolsterReading *</type>
+            <name>reading</name>
+            <anchorfile>qholstersensor.html</anchorfile>
+            <anchor>reading</anchor>
+            <arglist>() const const</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QIRProximityFilter</name>
+        <filename>qirproximityfilter.html</filename>
+        <base>QSensorFilter</base>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>filter</name>
+            <anchorfile>qirproximityfilter.html</anchorfile>
+            <anchor>filter</anchor>
+            <arglist>(QIRProximityReading *reading) = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QOrientationSensor</name>
+        <filename>qorientationsensor.html</filename>
+        <base>QSensor</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QOrientationSensor</name>
+            <anchorfile>qorientationsensor.html</anchorfile>
+            <anchor>QOrientationSensor</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QOrientationSensor</name>
+            <anchorfile>qorientationsensor.html</anchorfile>
+            <anchor>dtor.QOrientationSensor</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QOrientationReading *</type>
+            <name>reading</name>
+            <anchorfile>qorientationsensor.html</anchorfile>
+            <anchor>reading</anchor>
+            <arglist>() const const</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QDistanceReading</name>
+        <filename>qdistancereading.html</filename>
+        <base>QSensorReading</base>
+        <member kind="property" type="qreal">
+            <name>distance</name>
+            <anchorfile>qdistancereading.html</anchorfile>
+            <anchor>distance-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>distance</name>
+            <anchorfile>qdistancereading.html</anchorfile>
+            <anchor>distance-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setDistance</name>
+            <anchorfile>qdistancereading.html</anchorfile>
+            <anchor>setDistance</anchor>
+            <arglist>(qreal distance)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.RotationSensor</name>
+        <filename>qml-qtsensors-rotationsensor.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QLightSensor</name>
+        <filename>qlightsensor.html</filename>
+        <base>QSensor</base>
+        <member kind="property" type="qreal">
+            <name>fieldOfView</name>
+            <anchorfile>qlightsensor.html</anchorfile>
+            <anchor>fieldOfView-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QLightSensor</name>
+            <anchorfile>qlightsensor.html</anchorfile>
+            <anchor>QLightSensor</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QLightSensor</name>
+            <anchorfile>qlightsensor.html</anchorfile>
+            <anchor>dtor.QLightSensor</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QLightReading *</type>
+            <name>reading</name>
+            <anchorfile>qlightsensor.html</anchorfile>
+            <anchor>reading</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>fieldOfView</name>
+            <anchorfile>qlightsensor.html</anchorfile>
+            <anchor>fieldOfView-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setFieldOfView</name>
+            <anchorfile>qlightsensor.html</anchorfile>
+            <anchor>setFieldOfView</anchor>
+            <arglist>(qreal fieldOfView)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>fieldOfViewChanged</name>
+            <anchorfile>qlightsensor.html</anchorfile>
+            <anchor>fieldOfView-prop</anchor>
+            <arglist>(qreal fieldOfView)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.LidSensor</name>
+        <filename>qml-qtsensors-lidsensor.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QSensor</name>
+        <filename>qsensor.html</filename>
+        <base>QObject</base>
+        <member kind="property" type="QByteArray">
+            <name>identifier</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>identifier-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="QByteArray">
+            <name>type</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>type-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="bool">
+            <name>connectedToBackend</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>connectedToBackend-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="qrangelist">
+            <name>availableDataRates</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>availableDataRates-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="int">
+            <name>dataRate</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>dataRate-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="QSensorReading*">
+            <name>reading</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>reading-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="bool">
+            <name>busy</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>busy-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="bool">
+            <name>active</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>active-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="qoutputrangelist">
+            <name>outputRanges</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>outputRanges-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="int">
+            <name>outputRange</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>outputRange-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="QString">
+            <name>description</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>description-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="int">
+            <name>error</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>error-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="bool">
+            <name>alwaysOn</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>alwaysOn-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="bool">
+            <name>skipDuplicates</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>skipDuplicates-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="AxesOrientationMode">
+            <name>axesOrientationMode</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>axesOrientationMode-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="int">
+            <name>currentOrientation</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>currentOrientation-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="int">
+            <name>userOrientation</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>userOrientation-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="int">
+            <name>maxBufferSize</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>maxBufferSize-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="int">
+            <name>efficientBufferSize</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>efficientBufferSize-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="int">
+            <name>bufferSize</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>bufferSize-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="enum">
+            <name>Feature</name>
+            <anchor>Feature-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Buffering">
+            <anchor>Feature-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="AlwaysOn">
+            <anchor>Feature-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="GeoValues">
+            <anchor>Feature-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="FieldOfView">
+            <anchor>Feature-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="AccelerationMode">
+            <anchor>Feature-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="SkipDuplicates">
+            <anchor>Feature-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="AxesOrientation">
+            <anchor>Feature-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PressureSensorTemperature">
+            <anchor>Feature-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Reserved">
+            <anchor>Feature-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="enum">
+            <name>AxesOrientationMode</name>
+            <anchor>AxesOrientationMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="FixedOrientation">
+            <anchor>AxesOrientationMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="AutomaticOrientation">
+            <anchor>AxesOrientationMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="UserOrientation">
+            <anchor>AxesOrientationMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QSensor</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>QSensor</anchor>
+            <arglist>(const QByteArray &amp;type, QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QSensor</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>dtor.QSensor</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QByteArray</type>
+            <name>identifier</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>identifier-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setIdentifier</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>identifier-prop</anchor>
+            <arglist>(const QByteArray &amp;identifier)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QByteArray</type>
+            <name>type</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>type-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>connectToBackend</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>connectToBackend</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>isConnectedToBackend</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>connectedToBackend-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>isBusy</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>busy-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setActive</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>active-prop</anchor>
+            <arglist>(bool active)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>isActive</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>active-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>isAlwaysOn</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>alwaysOn-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setAlwaysOn</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>alwaysOn-prop</anchor>
+            <arglist>(bool alwaysOn)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>skipDuplicates</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>skipDuplicates-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setSkipDuplicates</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>setSkipDuplicates</anchor>
+            <arglist>(bool skipDuplicates)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qrangelist</type>
+            <name>availableDataRates</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>availableDataRates-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>dataRate</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>dataRate-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setDataRate</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>dataRate-prop</anchor>
+            <arglist>(int rate)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qoutputrangelist</type>
+            <name>outputRanges</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>outputRanges-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>outputRange</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>outputRange-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setOutputRange</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>outputRange-prop</anchor>
+            <arglist>(int index)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QString</type>
+            <name>description</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>description-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>error</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>error-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>addFilter</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>addFilter</anchor>
+            <arglist>(QSensorFilter *filter)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>removeFilter</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>removeFilter</anchor>
+            <arglist>(QSensorFilter *filter)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QList&lt;QSensorFilter *&gt;</type>
+            <name>filters</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>filters</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QSensorReading *</type>
+            <name>reading</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>reading-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>QList&lt;QByteArray&gt;</type>
+            <name>sensorTypes</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>sensorTypes</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>QList&lt;QByteArray&gt;</type>
+            <name>sensorsForType</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>sensorsForType</anchor>
+            <arglist>(const QByteArray &amp;type)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>QByteArray</type>
+            <name>defaultSensorForType</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>defaultSensorForType</anchor>
+            <arglist>(const QByteArray &amp;type)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>isFeatureSupported</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>isFeatureSupported</anchor>
+            <arglist>(QSensor::Feature feature) const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QSensor::AxesOrientationMode</type>
+            <name>axesOrientationMode</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>axesOrientationMode-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setAxesOrientationMode</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>axesOrientationMode-prop</anchor>
+            <arglist>(QSensor::AxesOrientationMode axesOrientationMode)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>currentOrientation</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>currentOrientation-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setCurrentOrientation</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>setCurrentOrientation</anchor>
+            <arglist>(int currentOrientation)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>userOrientation</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>userOrientation-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setUserOrientation</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>userOrientation-prop</anchor>
+            <arglist>(int userOrientation)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>maxBufferSize</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>maxBufferSize-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setMaxBufferSize</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>setMaxBufferSize</anchor>
+            <arglist>(int maxBufferSize)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>efficientBufferSize</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>efficientBufferSize-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setEfficientBufferSize</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>setEfficientBufferSize</anchor>
+            <arglist>(int efficientBufferSize)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>bufferSize</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>bufferSize-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setBufferSize</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>bufferSize-prop</anchor>
+            <arglist>(int bufferSize)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>start</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>start</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>stop</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>stop</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>busyChanged</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>busyChanged</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>activeChanged</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>activeChanged</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>readingChanged</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>readingChanged</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>sensorError</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>sensorError</anchor>
+            <arglist>(int error)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>availableSensorsChanged</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>availableSensorsChanged</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>alwaysOnChanged</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>alwaysOnChanged</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>dataRateChanged</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>dataRate-prop</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>skipDuplicatesChanged</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>skipDuplicatesChanged</anchor>
+            <arglist>(bool skipDuplicates)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>axesOrientationModeChanged</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>axesOrientationMode-prop</anchor>
+            <arglist>(QSensor::AxesOrientationMode axesOrientationMode)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>currentOrientationChanged</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>currentOrientation-prop</anchor>
+            <arglist>(int currentOrientation)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>userOrientationChanged</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>userOrientation-prop</anchor>
+            <arglist>(int userOrientation)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>maxBufferSizeChanged</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>maxBufferSize-prop</anchor>
+            <arglist>(int maxBufferSize)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>efficientBufferSizeChanged</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>efficientBufferSize-prop</anchor>
+            <arglist>(int efficientBufferSize)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>bufferSizeChanged</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>bufferSize-prop</anchor>
+            <arglist>(int bufferSize)</arglist>
+        </member>
+        <member kind="typedef" type="">
+            <name>qrange</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>qrange-typedef</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="typedef" type="">
+            <name>qrangelist</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>qrangelist-typedef</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="typedef" type="">
+            <name>qoutputrangelist</name>
+            <anchorfile>qsensor.html</anchorfile>
+            <anchor>qoutputrangelist-typedef</anchor>
+            <arglist></arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QTiltFilter</name>
+        <filename>qtiltfilter.html</filename>
+        <base>QSensorFilter</base>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>filter</name>
+            <anchorfile>qtiltfilter.html</anchorfile>
+            <anchor>filter</anchor>
+            <arglist>(QTiltReading *reading) = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QTiltSensor</name>
+        <filename>qtiltsensor.html</filename>
+        <base>QSensor</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QTiltSensor</name>
+            <anchorfile>qtiltsensor.html</anchorfile>
+            <anchor>QTiltSensor</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QTiltSensor</name>
+            <anchorfile>qtiltsensor.html</anchorfile>
+            <anchor>dtor.QTiltSensor</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QTiltReading *</type>
+            <name>reading</name>
+            <anchorfile>qtiltsensor.html</anchorfile>
+            <anchor>reading</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>calibrate</name>
+            <anchorfile>qtiltsensor.html</anchorfile>
+            <anchor>calibrate</anchor>
+            <arglist>()</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QProximityFilter</name>
+        <filename>qproximityfilter.html</filename>
+        <base>QSensorFilter</base>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>filter</name>
+            <anchorfile>qproximityfilter.html</anchorfile>
+            <anchor>filter</anchor>
+            <arglist>(QProximityReading *reading) = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QSensorBackend</name>
+        <filename>qsensorbackend.html</filename>
+        <base>QObject</base>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual void</type>
+            <name>start</name>
+            <anchorfile>qsensorbackend.html</anchorfile>
+            <anchor>start</anchor>
+            <arglist>() = 0</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual void</type>
+            <name>stop</name>
+            <anchorfile>qsensorbackend.html</anchorfile>
+            <anchor>stop</anchor>
+            <arglist>() = 0</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual bool</type>
+            <name>isFeatureSupported</name>
+            <anchorfile>qsensorbackend.html</anchorfile>
+            <anchor>isFeatureSupported</anchor>
+            <arglist>(QSensor::Feature feature) const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>addDataRate</name>
+            <anchorfile>qsensorbackend.html</anchorfile>
+            <anchor>addDataRate</anchor>
+            <arglist>(qreal min, qreal max)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setDataRates</name>
+            <anchorfile>qsensorbackend.html</anchorfile>
+            <anchor>setDataRates</anchor>
+            <arglist>(const QSensor *otherSensor)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>addOutputRange</name>
+            <anchorfile>qsensorbackend.html</anchorfile>
+            <anchor>addOutputRange</anchor>
+            <arglist>(qreal min, qreal max, qreal accuracy)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setDescription</name>
+            <anchorfile>qsensorbackend.html</anchorfile>
+            <anchor>setDescription</anchor>
+            <arglist>(const QString &amp;description)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>T *</type>
+            <name>setReading</name>
+            <anchorfile>qsensorbackend.html</anchorfile>
+            <anchor>setReading</anchor>
+            <arglist>(T *reading)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QSensorReading *</type>
+            <name>reading</name>
+            <anchorfile>qsensorbackend.html</anchorfile>
+            <anchor>reading</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QSensor *</type>
+            <name>sensor</name>
+            <anchorfile>qsensorbackend.html</anchorfile>
+            <anchor>sensor</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>newReadingAvailable</name>
+            <anchorfile>qsensorbackend.html</anchorfile>
+            <anchor>newReadingAvailable</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>sensorStopped</name>
+            <anchorfile>qsensorbackend.html</anchorfile>
+            <anchor>sensorStopped</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>sensorBusy</name>
+            <anchorfile>qsensorbackend.html</anchorfile>
+            <anchor>sensorBusy</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>sensorError</name>
+            <anchorfile>qsensorbackend.html</anchorfile>
+            <anchor>sensorError</anchor>
+            <arglist>(int error)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QCompassFilter</name>
+        <filename>qcompassfilter.html</filename>
+        <base>QSensorFilter</base>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>filter</name>
+            <anchorfile>qcompassfilter.html</anchorfile>
+            <anchor>filter</anchor>
+            <arglist>(QCompassReading *reading) = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QAmbientTemperatureFilter</name>
+        <filename>qambienttemperaturefilter.html</filename>
+        <base>QSensorFilter</base>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>filter</name>
+            <anchorfile>qambienttemperaturefilter.html</anchorfile>
+            <anchor>filter</anchor>
+            <arglist>(QAmbientTemperatureReading *reading) = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QSensorGesture</name>
+        <filename>qsensorgesture.html</filename>
+        <base>QObject</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QSensorGesture</name>
+            <anchorfile>qsensorgesture.html</anchorfile>
+            <anchor>QSensorGesture</anchor>
+            <arglist>(const QStringList &amp;ids, QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QSensorGesture</name>
+            <anchorfile>qsensorgesture.html</anchorfile>
+            <anchor>dtor.QSensorGesture</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>isActive</name>
+            <anchorfile>qsensorgesture.html</anchorfile>
+            <anchor>isActive</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QStringList</type>
+            <name>validIds</name>
+            <anchorfile>qsensorgesture.html</anchorfile>
+            <anchor>validIds</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QStringList</type>
+            <name>invalidIds</name>
+            <anchorfile>qsensorgesture.html</anchorfile>
+            <anchor>invalidIds</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QStringList</type>
+            <name>gestureSignals</name>
+            <anchorfile>qsensorgesture.html</anchorfile>
+            <anchor>gestureSignals</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>startDetection</name>
+            <anchorfile>qsensorgesture.html</anchorfile>
+            <anchor>startDetection</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>stopDetection</name>
+            <anchorfile>qsensorgesture.html</anchorfile>
+            <anchor>stopDetection</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>detected</name>
+            <anchorfile>qsensorgesture.html</anchorfile>
+            <anchor>detected</anchor>
+            <arglist>(QString )</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QRotationReading</name>
+        <filename>qrotationreading.html</filename>
+        <base>QSensorReading</base>
+        <member kind="property" type="qreal">
+            <name>x</name>
+            <anchorfile>qrotationreading.html</anchorfile>
+            <anchor>x-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="qreal">
+            <name>y</name>
+            <anchorfile>qrotationreading.html</anchorfile>
+            <anchor>y-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="qreal">
+            <name>z</name>
+            <anchorfile>qrotationreading.html</anchorfile>
+            <anchor>z-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>x</name>
+            <anchorfile>qrotationreading.html</anchorfile>
+            <anchor>x-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>y</name>
+            <anchorfile>qrotationreading.html</anchorfile>
+            <anchor>y-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>z</name>
+            <anchorfile>qrotationreading.html</anchorfile>
+            <anchor>z-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setFromEuler</name>
+            <anchorfile>qrotationreading.html</anchorfile>
+            <anchor>setFromEuler</anchor>
+            <arglist>(qreal x, qreal y, qreal z)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QLidReading</name>
+        <filename>qlidreading.html</filename>
+        <base>QSensorReading</base>
+        <member kind="property" type="bool">
+            <name>backLidClosed</name>
+            <anchorfile>qlidreading.html</anchorfile>
+            <anchor>backLidClosed-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="bool">
+            <name>frontLidClosed</name>
+            <anchorfile>qlidreading.html</anchorfile>
+            <anchor>frontLidClosed-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>backLidClosed</name>
+            <anchorfile>qlidreading.html</anchorfile>
+            <anchor>backLidClosed-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setBackLidClosed</name>
+            <anchorfile>qlidreading.html</anchorfile>
+            <anchor>setBackLidClosed</anchor>
+            <arglist>(bool closed)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>frontLidClosed</name>
+            <anchorfile>qlidreading.html</anchorfile>
+            <anchor>frontLidClosed-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setFrontLidClosed</name>
+            <anchorfile>qlidreading.html</anchorfile>
+            <anchor>setFrontLidClosed</anchor>
+            <arglist>(bool closed)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QLidFilter</name>
+        <filename>qlidfilter.html</filename>
+        <base>QSensorFilter</base>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>filter</name>
+            <anchorfile>qlidfilter.html</anchorfile>
+            <anchor>filter</anchor>
+            <arglist>(QLidReading *reading) = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QOrientationFilter</name>
+        <filename>qorientationfilter.html</filename>
+        <base>QSensorFilter</base>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>filter</name>
+            <anchorfile>qorientationfilter.html</anchorfile>
+            <anchor>filter</anchor>
+            <arglist>(QOrientationReading *reading) = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.HolsterSensor</name>
+        <filename>qml-qtsensors-holstersensor.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.AmbientLightReading</name>
+        <filename>qml-qtsensors-ambientlightreading.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>qoutputrange</name>
+        <filename>qoutputrange.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.QmlSensors</name>
+        <filename>qml-qtsensors-qmlsensors.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>list&lt;string&gt;</type>
+            <name>sensorTypes</name>
+            <anchorfile>qml-qtsensors-qmlsensors.html</anchorfile>
+            <anchor>sensorTypes-method</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>list&lt;string&gt;</type>
+            <name>sensorsForType</name>
+            <anchorfile>qml-qtsensors-qmlsensors.html</anchorfile>
+            <anchor>sensorsForType-method</anchor>
+            <arglist>( type)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>string</type>
+            <name>defaultSensorForType</name>
+            <anchorfile>qml-qtsensors-qmlsensors.html</anchorfile>
+            <anchor>defaultSensorForType-method</anchor>
+            <arglist>( type)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtSensors.Sensor</name>
+        <filename>qml-qtsensors-sensor.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>start</name>
+            <anchorfile>qml-qtsensors-sensor.html</anchorfile>
+            <anchor>start-method</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>stop</name>
+            <anchorfile>qml-qtsensors-sensor.html</anchorfile>
+            <anchor>stop-method</anchor>
+            <arglist>()</arglist>
+        </member>
+    </compound>
+</tagfile>

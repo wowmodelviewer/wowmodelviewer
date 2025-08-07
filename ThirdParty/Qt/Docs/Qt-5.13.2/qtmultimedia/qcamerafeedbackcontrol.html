@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcamerafeedbackcontrol.cpp -->
+  <title>QCameraFeedbackControl Class | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-modules.html">C++ Classes</a></td><td >QCameraFeedbackControl</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#macros">Macros</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCameraFeedbackControl Class</h1>
+<!-- $$$QCameraFeedbackControl-brief -->
+<p>The <a href="qcamerafeedbackcontrol.html">QCameraFeedbackControl</a> class allows controlling feedback (sounds etc) during camera operation. <a href="#details">More...</a></p>
+<!-- @@@QCameraFeedbackControl -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QCameraFeedbackControl&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += multimedia</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.0</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qmediacontrol.html">QMediaControl</a></td></tr></table></div><p>This class was introduced in  Qt 5.0.</p>
+<ul>
+<li><a href="qcamerafeedbackcontrol-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qcamerafeedbackcontrol.html#EventType-enum">EventType</a></b> { ViewfinderStarted, ViewfinderStopped, ImageCaptured, ImageSaved, ..., AutoFocusFailed }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qcamerafeedbackcontrol.html#dtor.QCameraFeedbackControl">~QCameraFeedbackControl</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qcamerafeedbackcontrol.html#isEventFeedbackEnabled">isEventFeedbackEnabled</a></b>(QCameraFeedbackControl::EventType <i>event</i>) const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qcamerafeedbackcontrol.html#isEventFeedbackLocked">isEventFeedbackLocked</a></b>(QCameraFeedbackControl::EventType <i>event</i>) const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcamerafeedbackcontrol.html#resetEventFeedback">resetEventFeedback</a></b>(QCameraFeedbackControl::EventType <i>event</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qcamerafeedbackcontrol.html#setEventFeedbackEnabled">setEventFeedbackEnabled</a></b>(QCameraFeedbackControl::EventType <i>event</i>, bool <i>enabled</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qcamerafeedbackcontrol.html#setEventFeedbackSound">setEventFeedbackSound</a></b>(QCameraFeedbackControl::EventType <i>event</i>, const QString &amp;<i>filePath</i>) = 0</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcamerafeedbackcontrol.html#QCameraFeedbackControl">QCameraFeedbackControl</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+</table></div>
+<a name="macros"></a>
+<h2 id="macros">Macros</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcamerafeedbackcontrol.html#QCameraFeedbackControl_iid">QCameraFeedbackControl_iid</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCameraFeedbackControl-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>When using a camera, there are several times when some form of feedback to the user is given - for example, when an image is taken, or when recording is started. You can enable or disable some of this feedback, or adjust what sound might be played for these actions.</p>
+<p>In some cases it may be undesirable to play a sound effect - for example, when initiating video recording the sound itself may be recorded.</p>
+<p><b>Note: </b>In some countries or regions, feedback sounds or other indications (e.g&#x2e; a red light) are mandatory during camera operation. In these cases, you can check <code>isEventFeedbackLocked</code> to check if that type of feedback can be modified. Any attempts to change a locked feedback type will be ignored.</p><p>The interface name of <a href="qcamerafeedbackcontrol.html">QCameraFeedbackControl</a> is <code>org.qt-project.qt.camerafeedbackcontrol/5.0</code> as defined in <a href="qcamerafeedbackcontrol.html#QCameraFeedbackControl_iid">QCameraFeedbackControl_iid</a>.</p>
+</div>
+<p><b>See also </b><a href="qcamera.html">QCamera</a>.</p>
+<!-- @@@QCameraFeedbackControl -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$EventType$$$ViewfinderStarted$$$ViewfinderStopped$$$ImageCaptured$$$ImageSaved$$$ImageError$$$RecordingStarted$$$RecordingInProgress$$$RecordingStopped$$$AutoFocusInProgress$$$AutoFocusLocked$$$AutoFocusFailed -->
+<h3 class="fn" id="EventType-enum"><a name="EventType-enum"></a>enum QCameraFeedbackControl::<span class="name">EventType</span></h3>
+<p>This enumeration describes certain events that occur during camera usage. You can associate some form of feedback to be given when the event occurs, or check whether feedback for this event is enabled or locked so that changes cannot be made.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QCameraFeedbackControl::ViewfinderStarted</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The viewfinder stream was started (even if not visible)</td></tr>
+<tr><td class="topAlign"><code>QCameraFeedbackControl::ViewfinderStopped</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The viewfinder stream was stopped</td></tr>
+<tr><td class="topAlign"><code>QCameraFeedbackControl::ImageCaptured</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">An image was captured but not yet fully processed</td></tr>
+<tr><td class="topAlign"><code>QCameraFeedbackControl::ImageSaved</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">An image is fully available and saved somewhere.</td></tr>
+<tr><td class="topAlign"><code>QCameraFeedbackControl::ImageError</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">An error occurred while capturing an image</td></tr>
+<tr><td class="topAlign"><code>QCameraFeedbackControl::RecordingStarted</code></td><td class="topAlign tblval"><code>6</code></td><td class="topAlign">Video recording has started</td></tr>
+<tr><td class="topAlign"><code>QCameraFeedbackControl::RecordingInProgress</code></td><td class="topAlign tblval"><code>7</code></td><td class="topAlign">Video recording is in progress</td></tr>
+<tr><td class="topAlign"><code>QCameraFeedbackControl::RecordingStopped</code></td><td class="topAlign tblval"><code>8</code></td><td class="topAlign">Video recording has stopped</td></tr>
+<tr><td class="topAlign"><code>QCameraFeedbackControl::AutoFocusInProgress</code></td><td class="topAlign tblval"><code>9</code></td><td class="topAlign">The camera is trying to automatically focus</td></tr>
+<tr><td class="topAlign"><code>QCameraFeedbackControl::AutoFocusLocked</code></td><td class="topAlign tblval"><code>10</code></td><td class="topAlign">The camera has automatically focused successfully</td></tr>
+<tr><td class="topAlign"><code>QCameraFeedbackControl::AutoFocusFailed</code></td><td class="topAlign tblval"><code>11</code></td><td class="topAlign">The camera was unable to focus automatically</td></tr>
+</table></div>
+<!-- @@@EventType -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QCameraFeedbackControl[overload1]$$$QCameraFeedbackControlQObject* -->
+<h3 class="fn" id="QCameraFeedbackControl"><a name="QCameraFeedbackControl"></a><code>[protected] </code>QCameraFeedbackControl::<span class="name">QCameraFeedbackControl</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a camera feedback control object with <i>parent</i>.</p>
+<!-- @@@QCameraFeedbackControl -->
+<!-- $$$~QCameraFeedbackControl[overload1]$$$~QCameraFeedbackControl -->
+<h3 class="fn" id="dtor.QCameraFeedbackControl"><a name="dtor.QCameraFeedbackControl"></a><code>[virtual] </code>QCameraFeedbackControl::<span class="name">~QCameraFeedbackControl</span>()</h3>
+<p>Destroys the camera feedback control object.</p>
+<!-- @@@~QCameraFeedbackControl -->
+<!-- $$$isEventFeedbackEnabled[overload1]$$$isEventFeedbackEnabledQCameraFeedbackControl::EventType -->
+<h3 class="fn" id="isEventFeedbackEnabled"><a name="isEventFeedbackEnabled"></a><code>[pure virtual] </code><span class="type">bool</span> QCameraFeedbackControl::<span class="name">isEventFeedbackEnabled</span>(<span class="type"><a href="qcamerafeedbackcontrol.html#EventType-enum">QCameraFeedbackControl::EventType</a></span> <i>event</i>) const</h3>
+<p>Returns true if the feedback for <i>event</i> is enabled.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@isEventFeedbackEnabled -->
+<!-- $$$isEventFeedbackLocked[overload1]$$$isEventFeedbackLockedQCameraFeedbackControl::EventType -->
+<h3 class="fn" id="isEventFeedbackLocked"><a name="isEventFeedbackLocked"></a><code>[pure virtual] </code><span class="type">bool</span> QCameraFeedbackControl::<span class="name">isEventFeedbackLocked</span>(<span class="type"><a href="qcamerafeedbackcontrol.html#EventType-enum">QCameraFeedbackControl::EventType</a></span> <i>event</i>) const</h3>
+<p>Returns true if the feedback setting for <i>event</i> is locked. This may be true because of legal compliance issues, or because configurability of this event's feedback is not supported.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@isEventFeedbackLocked -->
+<!-- $$$resetEventFeedback[overload1]$$$resetEventFeedbackQCameraFeedbackControl::EventType -->
+<h3 class="fn" id="resetEventFeedback"><a name="resetEventFeedback"></a><code>[pure virtual] </code><span class="type">void</span> QCameraFeedbackControl::<span class="name">resetEventFeedback</span>(<span class="type"><a href="qcamerafeedbackcontrol.html#EventType-enum">QCameraFeedbackControl::EventType</a></span> <i>event</i>)</h3>
+<p>Restores the feedback setting for this <i>event</i> to its default setting.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@resetEventFeedback -->
+<!-- $$$setEventFeedbackEnabled[overload1]$$$setEventFeedbackEnabledQCameraFeedbackControl::EventTypebool -->
+<h3 class="fn" id="setEventFeedbackEnabled"><a name="setEventFeedbackEnabled"></a><code>[pure virtual] </code><span class="type">bool</span> QCameraFeedbackControl::<span class="name">setEventFeedbackEnabled</span>(<span class="type"><a href="qcamerafeedbackcontrol.html#EventType-enum">QCameraFeedbackControl::EventType</a></span> <i>event</i>, <span class="type">bool</span> <i>enabled</i>)</h3>
+<p>Turns on feedback for the specific <i>event</i> if <i>enabled</i> is true, otherwise disables the feedback. Returns true if the feedback could be modified, or false otherwise (e.g&#x2e; this feedback type is locked).</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qcamerafeedbackcontrol.html#isEventFeedbackEnabled">isEventFeedbackEnabled</a>().</p>
+<!-- @@@setEventFeedbackEnabled -->
+<!-- $$$setEventFeedbackSound[overload1]$$$setEventFeedbackSoundQCameraFeedbackControl::EventTypeconstQString& -->
+<h3 class="fn" id="setEventFeedbackSound"><a name="setEventFeedbackSound"></a><code>[pure virtual] </code><span class="type">bool</span> QCameraFeedbackControl::<span class="name">setEventFeedbackSound</span>(<span class="type"><a href="qcamerafeedbackcontrol.html#EventType-enum">QCameraFeedbackControl::EventType</a></span> <i>event</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>filePath</i>)</h3>
+<p>When the given <i>event</i> occurs, the sound effect referenced by <i>filePath</i> will be played instead of the default sound.</p>
+<p>If this feedback type is locked, or if the supplied path is inaccessible, this function will return false. In addition, some forms of feedback may be non-auditory (e.g&#x2e; a red light, or a vibration), and false may be returned in this case.</p>
+<p>The file referenced should be linear PCM (WAV format).</p>
+<p><b>Note: </b>In the case that a valid file path to an unsupported file is given, this function will return true but the feedback will use the original setting.</p><p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@setEventFeedbackSound -->
+</div>
+<div class="macros">
+<h2>Macro Documentation</h2>
+<!-- $$$QCameraFeedbackControl_iid[overload1]$$$QCameraFeedbackControl_iid -->
+<h3 class="fn" id="QCameraFeedbackControl_iid"><a name="QCameraFeedbackControl_iid"></a><span class="name">QCameraFeedbackControl_iid</span></h3>
+<p><code>org.qt-project.qt.camerafeedbackcontrol/5.0</code></p>
+<p>Defines the interface name of the <a href="qcamerafeedbackcontrol.html">QCameraFeedbackControl</a> class.</p>
+<!-- @@@QCameraFeedbackControl_iid -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

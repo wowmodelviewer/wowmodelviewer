@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qopengltimerquery.cpp -->
+  <title>QOpenGLTimeMonitor Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QOpenGLTimeMonitor</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QOpenGLTimeMonitor Class</h1>
+<!-- $$$QOpenGLTimeMonitor-brief -->
+<p>The <a href="qopengltimemonitor.html">QOpenGLTimeMonitor</a> class wraps a sequence of OpenGL timer query objects. <a href="#details">More...</a></p>
+<!-- @@@QOpenGLTimeMonitor -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QOpenGLTimeMonitor&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.1</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.1.</p>
+<ul>
+<li><a href="qopengltimemonitor-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qopengltimemonitor.html#QOpenGLTimeMonitor">QOpenGLTimeMonitor</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qopengltimemonitor.html#dtor.QOpenGLTimeMonitor">~QOpenGLTimeMonitor</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qopengltimemonitor.html#create">create</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopengltimemonitor.html#destroy">destroy</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qopengltimemonitor.html#isCreated">isCreated</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qopengltimemonitor.html#isResultAvailable">isResultAvailable</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;GLuint&gt; </td><td class="memItemRight bottomAlign"><b><a href="qopengltimemonitor.html#objectIds">objectIds</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qopengltimemonitor.html#recordSample">recordSample</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopengltimemonitor.html#reset">reset</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qopengltimemonitor.html#sampleCount">sampleCount</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopengltimemonitor.html#setSampleCount">setSampleCount</a></b>(int <i>sampleCount</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;GLuint64&gt; </td><td class="memItemRight bottomAlign"><b><a href="qopengltimemonitor.html#waitForIntervals">waitForIntervals</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;GLuint64&gt; </td><td class="memItemRight bottomAlign"><b><a href="qopengltimemonitor.html#waitForSamples">waitForSamples</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QOpenGLTimeMonitor-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qopengltimemonitor.html">QOpenGLTimeMonitor</a> class is a convenience wrapper around a collection of OpenGL timer query objects used to measure intervals of time on the GPU to the level of granularity required by your rendering application.</p>
+<p>The OpenGL timer queries objects are queried in sequence to record the GPU timestamps at positions of interest in your rendering code. Once the results for all issues timer queries become available, the results can be fetched and QOpenGLTimerMonitor will calculate the recorded time intervals for you.</p>
+<p>The typical use case of this class is to either profile your application's rendering algorithms or to adjust those algorithms in real-time for dynamic performance/quality balancing.</p>
+<p>Prior to using <a href="qopengltimemonitor.html">QOpenGLTimeMonitor</a> in your rendering function you should set the required number of sample points that you wish to record by calling setSamples(). Note that measuring N sample points will produce N-1 time intervals. Once you have set the number of sample points, call the <a href="qopengltimemonitor.html#create">create</a>() function with a valid current OpenGL context to create the necessary query timer objects. These steps are usually performed just once in an initialization function.</p>
+<p>Use the <a href="qopengltimemonitor.html#recordSample">recordSample</a>() function to delimit blocks of code containing OpenGL commands that you wish to time. You can check availability of the resulting time samples and time intervals with <a href="qopengltimemonitor.html#isResultAvailable">isResultAvailable</a>(). The calculated time intervals and the raw timestamp samples can be retrieved with the blocking <a href="qopengltimemonitor.html#waitForIntervals">waitForIntervals</a>() and <a href="qopengltimemonitor.html#waitForSamples">waitForSamples</a>() functions respectively.</p>
+<p>After retrieving the results and before starting a new round of taking samples (for example, in the next frame) be sure to call the <a href="qopengltimemonitor.html#reset">reset</a>() function which will clear the cached results and reset the timer index back to the first timer object.</p>
+</div>
+<p><b>See also </b><a href="qopengltimerquery.html">QOpenGLTimerQuery</a>.</p>
+<!-- @@@QOpenGLTimeMonitor -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QOpenGLTimeMonitor[overload1]$$$QOpenGLTimeMonitorQObject* -->
+<h3 class="fn" id="QOpenGLTimeMonitor"><a name="QOpenGLTimeMonitor"></a>QOpenGLTimeMonitor::<span class="name">QOpenGLTimeMonitor</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Creates a <a href="qopengltimemonitor.html">QOpenGLTimeMonitor</a> instance with the given <i>parent</i>. You must call <a href="qopengltimemonitor.html#create">create</a>() with a valid OpenGL context before using.</p>
+<p><b>See also </b><a href="qopengltimemonitor.html#setSampleCount">setSampleCount</a>() and <a href="qopengltimemonitor.html#create">create</a>().</p>
+<!-- @@@QOpenGLTimeMonitor -->
+<!-- $$$~QOpenGLTimeMonitor[overload1]$$$~QOpenGLTimeMonitor -->
+<h3 class="fn" id="dtor.QOpenGLTimeMonitor"><a name="dtor.QOpenGLTimeMonitor"></a><code>[virtual] </code>QOpenGLTimeMonitor::<span class="name">~QOpenGLTimeMonitor</span>()</h3>
+<p>Destroys the <a href="qopengltimemonitor.html">QOpenGLTimeMonitor</a> and any underlying OpenGL resources.</p>
+<!-- @@@~QOpenGLTimeMonitor -->
+<!-- $$$create[overload1]$$$create -->
+<h3 class="fn" id="create"><a name="create"></a><span class="type">bool</span> QOpenGLTimeMonitor::<span class="name">create</span>()</h3>
+<p>Instantiate <a href="qopengltimemonitor.html#sampleCount">sampleCount</a>() OpenGL timer query objects that will be used to track the amount of time taken to execute OpenGL commands between successive calls to <a href="qopengltimemonitor.html#recordSample">recordSample</a>().</p>
+<p>Returns <code>true</code> if the OpenGL timer query objects could be created.</p>
+<p><b>See also </b><a href="qopengltimemonitor.html#destroy">destroy</a>(), <a href="qopengltimemonitor.html#setSampleCount">setSampleCount</a>(), and <a href="qopengltimemonitor.html#recordSample">recordSample</a>().</p>
+<!-- @@@create -->
+<!-- $$$destroy[overload1]$$$destroy -->
+<h3 class="fn" id="destroy"><a name="destroy"></a><span class="type">void</span> QOpenGLTimeMonitor::<span class="name">destroy</span>()</h3>
+<p>Destroys any OpenGL timer query objects used within this instance.</p>
+<p><b>See also </b><a href="qopengltimemonitor.html#create">create</a>().</p>
+<!-- @@@destroy -->
+<!-- $$$isCreated[overload1]$$$isCreated -->
+<h3 class="fn" id="isCreated"><a name="isCreated"></a><span class="type">bool</span> QOpenGLTimeMonitor::<span class="name">isCreated</span>() const</h3>
+<p>Returns <code>true</code> if the underlying OpenGL query objects have been created. If this returns <code>true</code> and the associated OpenGL context is current, then you are able to record time samples with this object.</p>
+<!-- @@@isCreated -->
+<!-- $$$isResultAvailable[overload1]$$$isResultAvailable -->
+<h3 class="fn" id="isResultAvailable"><a name="isResultAvailable"></a><span class="type">bool</span> QOpenGLTimeMonitor::<span class="name">isResultAvailable</span>() const</h3>
+<p>Returns <code>true</code> if the OpenGL timer query results are available.</p>
+<p><b>See also </b><a href="qopengltimemonitor.html#waitForSamples">waitForSamples</a>() and <a href="qopengltimemonitor.html#waitForIntervals">waitForIntervals</a>().</p>
+<!-- @@@isResultAvailable -->
+<!-- $$$objectIds[overload1]$$$objectIds -->
+<h3 class="fn" id="objectIds"><a name="objectIds"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type">GLuint</span>&gt; QOpenGLTimeMonitor::<span class="name">objectIds</span>() const</h3>
+<p>Returns a <a href="../qtcore/qvector.html">QVector</a> containing the object Ids of the OpenGL timer query objects.</p>
+<!-- @@@objectIds -->
+<!-- $$$recordSample[overload1]$$$recordSample -->
+<h3 class="fn" id="recordSample"><a name="recordSample"></a><span class="type">int</span> QOpenGLTimeMonitor::<span class="name">recordSample</span>()</h3>
+<p>Issues an OpenGL timer query at this point in the OpenGL command queue. Calling this function in a sequence in your application's rendering function, will build up details of the GPU time taken to execute the OpenGL commands between successive calls to this function.</p>
+<p><b>See also </b><a href="qopengltimemonitor.html#setSampleCount">setSampleCount</a>(), <a href="qopengltimemonitor.html#isResultAvailable">isResultAvailable</a>(), <a href="qopengltimemonitor.html#waitForSamples">waitForSamples</a>(), and <a href="qopengltimemonitor.html#waitForIntervals">waitForIntervals</a>().</p>
+<!-- @@@recordSample -->
+<!-- $$$reset[overload1]$$$reset -->
+<h3 class="fn" id="reset"><a name="reset"></a><span class="type">void</span> QOpenGLTimeMonitor::<span class="name">reset</span>()</h3>
+<p>Resets the time monitor ready for use in another frame of rendering. Call this once you have obtained the previous results and before calling <a href="qopengltimemonitor.html#recordSample">recordSample</a>() for the first time on the next frame.</p>
+<p><b>See also </b><a href="qopengltimemonitor.html#recordSample">recordSample</a>().</p>
+<!-- @@@reset -->
+<!-- $$$sampleCount[overload1]$$$sampleCount -->
+<h3 class="fn" id="sampleCount"><a name="sampleCount"></a><span class="type">int</span> QOpenGLTimeMonitor::<span class="name">sampleCount</span>() const</h3>
+<p>Returns the number of sample points that have been requested with <a href="qopengltimemonitor.html#setSampleCount">setSampleCount</a>(). If create was successfully called following <a href="qopengltimemonitor.html#setSampleCount">setSampleCount</a>(), then the value returned will be the actual number of sample points that can be used.</p>
+<p>The default value for sample count is 2, leading to the measurement of a single interval.</p>
+<p><b>See also </b><a href="qopengltimemonitor.html#setSampleCount">setSampleCount</a>().</p>
+<!-- @@@sampleCount -->
+<!-- $$$setSampleCount[overload1]$$$setSampleCountint -->
+<h3 class="fn" id="setSampleCount"><a name="setSampleCount"></a><span class="type">void</span> QOpenGLTimeMonitor::<span class="name">setSampleCount</span>(<span class="type">int</span> <i>sampleCount</i>)</h3>
+<p>Sets the number of sample points to <i>sampleCount</i>. After setting the number of samples with this function, you must call <a href="qopengltimemonitor.html#create">create</a>() to instantiate the underlying OpenGL timer query objects.</p>
+<p>The new <i>sampleCount</i> must be at least 2.</p>
+<p><b>See also </b><a href="qopengltimemonitor.html#sampleCount">sampleCount</a>(), <a href="qopengltimemonitor.html#create">create</a>(), and <a href="qopengltimemonitor.html#recordSample">recordSample</a>().</p>
+<!-- @@@setSampleCount -->
+<!-- $$$waitForIntervals[overload1]$$$waitForIntervals -->
+<h3 class="fn" id="waitForIntervals"><a name="waitForIntervals"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type">GLuint64</span>&gt; QOpenGLTimeMonitor::<span class="name">waitForIntervals</span>() const</h3>
+<p>Returns a <a href="../qtcore/qvector.html">QVector</a> containing the time intervals delimited by the calls to <a href="qopengltimemonitor.html#recordSample">recordSample</a>(). The resulting vector will contain one fewer element as this represents the intervening intervals rather than the actual timestamp samples.</p>
+<p>This function will block until OpenGL indicates the results are available. It is recommended to check the availability of the result prior to calling this function with <a href="qopengltimemonitor.html#isResultAvailable">isResultAvailable</a>().</p>
+<p><b>See also </b><a href="qopengltimemonitor.html#waitForSamples">waitForSamples</a>() and <a href="qopengltimemonitor.html#isResultAvailable">isResultAvailable</a>().</p>
+<!-- @@@waitForIntervals -->
+<!-- $$$waitForSamples[overload1]$$$waitForSamples -->
+<h3 class="fn" id="waitForSamples"><a name="waitForSamples"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type">GLuint64</span>&gt; QOpenGLTimeMonitor::<span class="name">waitForSamples</span>() const</h3>
+<p>Returns a <a href="../qtcore/qvector.html">QVector</a> containing the GPU timestamps taken with <a href="qopengltimemonitor.html#recordSample">recordSample</a>().</p>
+<p>This function will block until OpenGL indicates the results are available. It is recommended to check the availability of the result prior to calling this function with <a href="qopengltimemonitor.html#isResultAvailable">isResultAvailable</a>().</p>
+<p><b>Note: </b>This function only works on systems that have OpenGL &gt;=3.3 or the ARB_timer_query extension. See <a href="qopengltimerquery.html">QOpenGLTimerQuery</a> for more details.</p><p><b>See also </b><a href="qopengltimemonitor.html#waitForIntervals">waitForIntervals</a>() and <a href="qopengltimemonitor.html#isResultAvailable">isResultAvailable</a>().</p>
+<!-- @@@waitForSamples -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

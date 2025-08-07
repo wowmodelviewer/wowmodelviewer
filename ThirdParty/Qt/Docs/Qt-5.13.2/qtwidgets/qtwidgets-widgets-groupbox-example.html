@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- groupbox.qdoc -->
+  <title>Group Box Example | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Group Box Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#window-class-definition">Window Class Definition</a></li>
+<li class="level1"><a href="#window-class-implementation">Window Class Implementation</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Group Box Example</h1>
+<span class="subtitle"></span>
+<!-- $$$widgets/groupbox-brief -->
+<p>The Group Box example shows how to use the different kinds of group boxes in Qt.</p>
+<!-- @@@widgets/groupbox -->
+<!-- $$$widgets/groupbox-description -->
+<div class="descr"> <a name="details"></a>
+<p>Group boxes are container widgets that organize buttons into groups, both logically and on screen. They manage the interactions between the user and the application so that you do not have to enforce simple constraints.</p>
+<p>Group boxes are usually used to organize check boxes and radio buttons into exclusive groups.</p>
+<div class="border"><p class="centerAlign"><img src="images/groupbox-example.png" alt="" /></p></div><p>The Group Boxes example consists of a single <code>Window</code> class that is used to show four group boxes: an exclusive radio button group, a non-exclusive checkbox group, an exclusive radio button group with an enabling checkbox, and a group box with normal push buttons.</p>
+<a name="window-class-definition"></a>
+<h4 id="window-class-definition">Window Class Definition</h4>
+<p>The <code>Window</code> class is a subclass of <code>QWidget</code> that is used to display a number of group boxes. The class definition contains functions to construct each group box and populate it with different selections of button widgets:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> Window : <span class="keyword">public</span> <span class="type"><a href="qwidget.html">QWidget</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      Window(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>createFirstExclusiveGroup();
+      <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>createSecondExclusiveGroup();
+      <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>createNonExclusiveGroup();
+      <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>createPushButtonGroup();
+  };
+
+</pre>
+<p>In the example, the widget will be used as a top-level window, so the constructor is defined so that we do not have to specify a parent widget.</p>
+<a name="window-class-implementation"></a>
+<h4 id="window-class-implementation">Window Class Implementation</h4>
+<p>The constructor creates a grid layout and fills it with each of the group boxes that are to be displayed:</p>
+<pre class="cpp">
+
+  Window<span class="operator">::</span>Window(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qwidget.html">QWidget</a></span>(parent)
+  {
+      <span class="type"><a href="qgridlayout.html">QGridLayout</a></span> <span class="operator">*</span>grid <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>;
+      grid<span class="operator">-</span><span class="operator">&gt;</span>addWidget(createFirstExclusiveGroup()<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+      grid<span class="operator">-</span><span class="operator">&gt;</span>addWidget(createSecondExclusiveGroup()<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>);
+      grid<span class="operator">-</span><span class="operator">&gt;</span>addWidget(createNonExclusiveGroup()<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span>);
+      grid<span class="operator">-</span><span class="operator">&gt;</span>addWidget(createPushButtonGroup()<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span>);
+      setLayout(grid);
+
+      setWindowTitle(tr(<span class="string">&quot;Group Boxes&quot;</span>));
+      resize(<span class="number">480</span><span class="operator">,</span> <span class="number">320</span>);
+  }
+
+</pre>
+<p>The functions used to create each group box each return a <a href="qgroupbox.html">QGroupBox</a> to be inserted into the grid layout.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>Window<span class="operator">::</span>createFirstExclusiveGroup()
+  {
+      <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>groupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;Exclusive Radio Buttons&quot;</span>));
+
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>radio1 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qradiobutton.html">QRadioButton</a></span>(tr(<span class="string">&quot;&amp;Radio button 1&quot;</span>));
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>radio2 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qradiobutton.html">QRadioButton</a></span>(tr(<span class="string">&quot;R&amp;adio button 2&quot;</span>));
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>radio3 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qradiobutton.html">QRadioButton</a></span>(tr(<span class="string">&quot;Ra&amp;dio button 3&quot;</span>));
+
+      radio1<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+
+</pre>
+<p>The first group box contains and manages three radio buttons. Since the group box contains only radio buttons, it is exclusive by default, so only one radio button can be checked at any given time. We check the first radio button to ensure that the button group contains one checked button.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>vbox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+      vbox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(radio1);
+      vbox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(radio2);
+      vbox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(radio3);
+      vbox<span class="operator">-</span><span class="operator">&gt;</span>addStretch(<span class="number">1</span>);
+      groupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(vbox);
+
+      <span class="keyword">return</span> groupBox;
+  }
+
+</pre>
+<p>We use a vertical layout within the group box to present the buttons in the form of a vertical list, and return the group box to the constructor.</p>
+<p>The second group box is itself checkable, providing a convenient way to disable all the buttons inside it. Initially, it is unchecked, so the group box itself must be checked before any of the radio buttons inside can be checked.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>Window<span class="operator">::</span>createSecondExclusiveGroup()
+  {
+      <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>groupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;E&amp;xclusive Radio Buttons&quot;</span>));
+      groupBox<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      groupBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+
+</pre>
+<p>The group box contains three exclusive radio buttons, and an independent checkbox. For consistency, one radio button must be checked at all times, so we ensure that the first one is initially checked.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>radio1 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qradiobutton.html">QRadioButton</a></span>(tr(<span class="string">&quot;Rad&amp;io button 1&quot;</span>));
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>radio2 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qradiobutton.html">QRadioButton</a></span>(tr(<span class="string">&quot;Radi&amp;o button 2&quot;</span>));
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>radio3 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qradiobutton.html">QRadioButton</a></span>(tr(<span class="string">&quot;Radio &amp;button 3&quot;</span>));
+      radio1<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>checkBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;Ind&amp;ependent checkbox&quot;</span>));
+      checkBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+
+</pre>
+<p>The buttons are arranged in the same way as those in the first group box.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>vbox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+      vbox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(radio1);
+      vbox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(radio2);
+      vbox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(radio3);
+      vbox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(checkBox);
+      vbox<span class="operator">-</span><span class="operator">&gt;</span>addStretch(<span class="number">1</span>);
+      groupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(vbox);
+
+      <span class="keyword">return</span> groupBox;
+  }
+
+</pre>
+<p>The third group box is constructed with a &quot;flat&quot; style that is better suited to certain types of dialog.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>Window<span class="operator">::</span>createNonExclusiveGroup()
+  {
+      <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>groupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;Non-Exclusive Checkboxes&quot;</span>));
+      groupBox<span class="operator">-</span><span class="operator">&gt;</span>setFlat(<span class="keyword">true</span>);
+
+</pre>
+<p>This group box contains only checkboxes, so it is non-exclusive by default. This means that each checkbox can be checked independently of the others.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>checkBox1 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;&amp;Checkbox 1&quot;</span>));
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>checkBox2 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;C&amp;heckbox 2&quot;</span>));
+      checkBox2<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>tristateBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;Tri-&amp;state button&quot;</span>));
+      tristateBox<span class="operator">-</span><span class="operator">&gt;</span>setTristate(<span class="keyword">true</span>);
+
+</pre>
+<p>Again, we use a vertical layout within the group box to present the buttons in the form of a vertical list.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>vbox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+      vbox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(checkBox1);
+      vbox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(checkBox2);
+      vbox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(tristateBox);
+      vbox<span class="operator">-</span><span class="operator">&gt;</span>addStretch(<span class="number">1</span>);
+      groupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(vbox);
+
+      <span class="keyword">return</span> groupBox;
+  }
+
+</pre>
+<p>The final group box contains only push buttons and, like the second group box, it is checkable.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>Window<span class="operator">::</span>createPushButtonGroup()
+  {
+      <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>groupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;&amp;Push Buttons&quot;</span>));
+      groupBox<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      groupBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+
+</pre>
+<p>We create a normal button, a toggle button, and a flat push button:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>pushButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;&amp;Normal Button&quot;</span>));
+      <span class="type"><a href="qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>toggleButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;&amp;Toggle Button&quot;</span>));
+      toggleButton<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      toggleButton<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      <span class="type"><a href="qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>flatButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;&amp;Flat Button&quot;</span>));
+      flatButton<span class="operator">-</span><span class="operator">&gt;</span>setFlat(<span class="keyword">true</span>);
+
+</pre>
+<p>Push buttons can be used to display popup menus. We create one, and attach a simple menu to it:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>popupButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;Pop&amp;up Button&quot;</span>));
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>menu <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmenu.html">QMenu</a></span>(<span class="keyword">this</span>);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;First Item&quot;</span>));
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Second Item&quot;</span>));
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Third Item&quot;</span>));
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;F&amp;ourth Item&quot;</span>));
+      popupButton<span class="operator">-</span><span class="operator">&gt;</span>setMenu(menu);
+
+</pre>
+<p>Finally, we lay out the widgets vertically, and return the group box that we created:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>vbox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+      vbox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(pushButton);
+      vbox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(toggleButton);
+      vbox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(flatButton);
+      vbox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(popupButton);
+      vbox<span class="operator">-</span><span class="operator">&gt;</span>addStretch(<span class="number">1</span>);
+      groupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(vbox);
+
+      <span class="keyword">return</span> groupBox;
+  }
+
+</pre>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/widgets/groupbox?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@widgets/groupbox -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,888 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE QDOCINDEX>
+<INDEX url="http://doc.qt.io/qtcreator" title="Qt Creator Manual" version="" project="Qt Creator" indexTitle="Qt Creator Manual">
+    <namespace name="" status="active" access="public" module="qt creator">
+        <page name="creator-running-valgrind-remotely.html" href="creator-running-valgrind-remotely.html" status="active" location="creator-valgrind.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/analyze/creator-valgrind.qdoc" lineno="273" documented="true" subtype="page" title="Running Valgrind Tools on External Applications" fulltitle="Running Valgrind Tools on External Applications" subtitle="" module="Qt Creator"/>
+        <page name="creator-cppcheck.html" href="creator-cppcheck.html" status="active" location="creator-cppcheck.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/analyze/creator-cppcheck.qdoc" lineno="26" documented="true" subtype="page" title="Analyzing Code with Cppcheck" fulltitle="Analyzing Code with Cppcheck" subtitle="" module="Qt Creator"/>
+        <page name="creator-cpu-usage-analyzer.html" href="creator-cpu-usage-analyzer.html" status="active" location="cpu-usage-analyzer.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/analyze/cpu-usage-analyzer.qdoc" lineno="32" documented="true" subtype="page" title="Analyzing CPU Usage" fulltitle="Analyzing CPU Usage" subtitle="" module="Qt Creator">
+            <contents name="using-the-performance-analyzer" title="Using the Performance Analyzer" level="1"/>
+            <contents name="profiling-memory-usage-on-devices" title="Profiling Memory Usage on Devices" level="1"/>
+            <contents name="specifying-performance-analyzer-settings" title="Specifying Performance Analyzer Settings" level="1"/>
+            <contents name="choosing-event-types" title="Choosing Event Types" level="2"/>
+            <contents name="choosing-a-sampling-mode-and-period" title="Choosing a Sampling Mode and Period" level="2"/>
+            <contents name="selecting-call-graph-mode" title="Selecting Call Graph Mode" level="2"/>
+            <contents name="setting-stack-snapshot-size" title="Setting Stack Snapshot Size" level="2"/>
+            <contents name="adding-command-line-options-for-perf" title="Adding Command Line Options For Perf" level="2"/>
+            <contents name="resolving-names-for-jit-compiled-javascript-functions" title="Resolving Names for JIT-compiled JavaScript Functions" level="2"/>
+            <contents name="analyzing-collected-data" title="Analyzing Collected Data" level="1"/>
+            <contents name="selecting-event-ranges" title="Selecting Event Ranges" level="2"/>
+            <contents name="understanding-the-data" title="Understanding the Data" level="2"/>
+            <contents name="viewing-statistics" title="Viewing Statistics" level="1"/>
+            <contents name="visualizing-statistics-as-flame-graphs" title="Visualizing Statistics as Flame Graphs" level="2"/>
+            <contents name="interaction-between-the-views" title="Interaction between the views" level="2"/>
+            <contents name="loading-perf-data-files" title="Loading Perf Data Files" level="1"/>
+            <contents name="loading-and-saving-trace-files" title="Loading and Saving Trace Files" level="1"/>
+            <contents name="troubleshooting" title="Troubleshooting" level="1"/>
+        </page>
+        <page name="creator-analyzer.html" href="creator-analyzer.html" status="active" location="creator-valgrind.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/analyze/creator-valgrind.qdoc" lineno="32" documented="true" subtype="page" title="Detecting Memory Leaks with Memcheck" fulltitle="Detecting Memory Leaks with Memcheck" subtitle="" module="Qt Creator">
+            <contents name="selecting-options-for-memory-analysis" title="Selecting Options for Memory Analysis" level="1"/>
+            <contents name="showing-reachable-and-indirectly-lost-blocks" title="Showing Reachable and Indirectly Lost Blocks" level="2"/>
+            <contents name="suppressing-errors" title="Suppressing Errors" level="2"/>
+        </page>
+        <page name="creator-developing-android.html" href="creator-developing-android.html" status="active" location="androiddev.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/android/androiddev.qdoc" lineno="26" documented="true" subtype="page" title="Connecting Android Devices" fulltitle="Connecting Android Devices" subtitle="" module="Qt Creator">
+            <contents name="requirements" title="Requirements" level="1"/>
+            <contents name="setting-up-the-development-environment" title="Setting Up the Development Environment" level="1"/>
+            <contents name="specifying-android-device-settings" title="Specifying Android Device Settings" level="2"/>
+            <contents name="managing-android-sdk-packages" title="Managing Android SDK Packages" level="2"/>
+            <contents name="selecting-android-devices" title="Selecting Android Devices" level="1"/>
+            <contents name="using-the-android-emulator" title="Using the Android Emulator" level="1"/>
+            <contents name="debugging-on-android-devices" title="Debugging on Android Devices" level="1"/>
+        </page>
+        <page name="creator-analyze-mode.html" href="creator-analyze-mode.html" status="active" location="creator-analyze.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/analyze/creator-analyze.qdoc" lineno="32" documented="true" subtype="page" title="Analyzing Code" fulltitle="Analyzing Code" subtitle="" module="Qt Creator"/>
+        <page name="creator-heob.html" href="creator-heob.html" status="active" location="creator-heob.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/analyze/creator-heob.qdoc" lineno="32" documented="true" subtype="page" title="Detecting Memory Leaks with Heob" fulltitle="Detecting Memory Leaks with Heob" subtitle="" module="Qt Creator">
+            <contents name="specifying-heob-settings" title="Specifying Heob Settings" level="1"/>
+            <contents name="recording-results" title="Recording Results" level="2"/>
+            <contents name="handling-exceptions" title="Handling Exceptions" level="2"/>
+            <contents name="raising-exceptions-on-errors" title="Raising Exceptions on Errors" level="2"/>
+            <contents name="protecting-pages" title="Protecting Pages" level="2"/>
+            <contents name="handling-leak-data" title="Handling Leak Data" level="2"/>
+        </page>
+        <page name="creator-valgrind-overview.html" href="creator-valgrind-overview.html" status="active" location="creator-valgrind-overview.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/analyze/creator-valgrind-overview.qdoc" lineno="32" documented="true" subtype="page" title="Using Valgrind Code Analysis Tools" fulltitle="Using Valgrind Code Analysis Tools" subtitle="" module="Qt Creator"/>
+        <page name="creator-clang-tools.html" href="creator-clang-tools.html" status="active" location="creator-clang-static-analyzer.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/analyze/creator-clang-static-analyzer.qdoc" lineno="32" documented="true" subtype="page" title="Using Clang Tools" fulltitle="Using Clang Tools" subtitle="" module="Qt Creator">
+            <contents name="running-clang-tools" title="Running Clang Tools" level="1"/>
+            <contents name="configuring-clang-tools" title="Configuring Clang Tools" level="1"/>
+            <contents name="selecting-clazy-check-levels" title="Selecting Clazy Check Levels" level="2"/>
+        </page>
+        <page name="creator-cache-profiler.html" href="creator-cache-profiler.html" status="active" location="creator-valgrind.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/analyze/creator-valgrind.qdoc" lineno="142" documented="true" subtype="page" title="Profiling Function Execution" fulltitle="Profiling Function Execution" subtitle="" module="Qt Creator">
+            <contents name="selecting-profiling-options" title="Selecting Profiling Options" level="1"/>
+            <contents name="enabling-full-cache-simulation" title="Enabling Full Cache Simulation" level="2"/>
+            <contents name="enabling-branch-prediction-simulation" title="Enabling Branch Prediction Simulation" level="2"/>
+        </page>
+        <page name="creator-debugging-qml.html" href="creator-debugging-qml.html" status="active" location="qtquick-debugging.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/debugger/qtquick-debugging.qdoc" lineno="32" documented="true" subtype="page" title="Debugging Qt Quick Projects" fulltitle="Debugging Qt Quick Projects" subtitle="" module="Qt Creator">
+            <contents name="setting-up-qml-debugging" title="Setting Up QML Debugging" level="1"/>
+            <contents name="mixed-c-qml-debugging" title="Mixed C++/QML Debugging" level="1"/>
+            <contents name="starting-qml-debugging" title="Starting QML Debugging" level="1"/>
+            <contents name="debugging-javascript-functions" title="Debugging JavaScript Functions" level="1"/>
+            <contents name="inspecting-items" title="Inspecting Items" level="1"/>
+            <contents name="inspecting-user-interfaces" title="Inspecting User Interfaces" level="1"/>
+            <contents name="executing-javascript-expressions" title="Executing JavaScript Expressions" level="1"/>
+            <contents name="applying-qml-changes-at-runtime" title="Applying QML Changes at Runtime" level="1"/>
+        </page>
+        <page name="creator-project-cmake.html" href="creator-project-cmake.html" status="active" location="creator-projects-cmake.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/cmake/creator-projects-cmake.qdoc" lineno="32" documented="true" subtype="page" title="Setting Up CMake" fulltitle="Setting Up CMake" subtitle="" module="Qt Creator">
+            <contents name="adding-cmake-tools" title="Adding CMake Tools" level="1"/>
+            <contents name="editing-cmake-configuration-files" title="Editing CMake Configuration Files" level="1"/>
+            <contents name="adding-external-libraries-to-cmake-projects" title="Adding External Libraries to CMake Projects" level="1"/>
+            <contents name="related-topics" title="Related Topics" level="1"/>
+        </page>
+        <page name="creator-debugger-engines.html" href="creator-debugger-engines.html" status="active" location="creator-debugger-setup.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/debugger/creator-only/creator-debugger-setup.qdoc" lineno="33" documented="true" subtype="page" title="Setting Up Debugger" fulltitle="Setting Up Debugger" subtitle="" module="Qt Creator">
+            <contents name="supported-native-debugger-versions" title="Supported Native Debugger Versions" level="1"/>
+            <contents name="supported-gdb-versions" title="Supported GDB Versions" level="2"/>
+            <contents name="supported-cdb-versions" title="Supported CDB Versions" level="2"/>
+            <contents name="supported-lldb-versions" title="Supported LLDB Versions" level="2"/>
+            <contents name="installing-native-debuggers" title="Installing Native Debuggers" level="1"/>
+            <contents name="gdb" title="GDB" level="2"/>
+            <contents name="debugging-tools-for-windows" title="Debugging Tools for Windows" level="2"/>
+            <contents name="debugging-tools-for-macos" title="Debugging Tools for macOS" level="2"/>
+            <contents name="lldb" title="LLDB" level="2"/>
+            <contents name="mapping-source-paths" title="Mapping Source Paths" level="1"/>
+            <contents name="setting-cdb-paths-on-windows" title="Setting CDB Paths on Windows" level="1"/>
+            <contents name="setting-up-fsf-gdb-for-macos" title="Setting up FSF GDB for macOS" level="1"/>
+        </page>
+        <page name="creator-troubleshooting-debugging.html" href="creator-troubleshooting-debugging.html" status="active" location="creator-debugger.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/debugger/creator-only/creator-debugger.qdoc" lineno="1341" documented="true" subtype="page" title="Troubleshooting Debugger" fulltitle="Troubleshooting Debugger" subtitle="" module="Qt Creator">
+            <contents name="cannot-launch-debugger" title="Cannot Launch Debugger" level="1"/>
+            <contents name="debugger-does-not-hit-breakpoints" title="Debugger Does Not Hit Breakpoints" level="1"/>
+            <contents name="debugger-does-not-work" title="Debugger Does Not Work" level="1"/>
+            <contents name="pointer-variable-members-are-not-displayed-directly" title="Pointer Variable Members Are Not Displayed Directly" level="1"/>
+            <contents name="structure-members-are-not-sorted-according-to-structure-layout" title="Structure Members Are Not Sorted According to Structure Layout" level="1"/>
+            <contents name="built-in-debugger-is-slow-during-startup-and-runtime" title="Built-in Debugger Is Slow During Startup and Runtime" level="1"/>
+            <contents name="debugger-cannot-attach-to-running-process-on-linux" title="Debugger Cannot Attach to Running Process on Linux" level="1"/>
+        </page>
+        <page name="creator-debug-mode.html" href="creator-debug-mode.html" status="active" location="creator-debugger.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/debugger/creator-only/creator-debugger.qdoc" lineno="459" documented="true" subtype="page" title="Interacting with the Debugger" fulltitle="Interacting with the Debugger" subtitle="" module="Qt Creator">
+            <contents name="using-the-debugger" title="Using the Debugger" level="1"/>
+            <contents name="setting-breakpoints" title="Setting Breakpoints" level="1"/>
+            <contents name="adding-breakpoints" title="Adding Breakpoints" level="2"/>
+            <contents name="moving-breakpoints" title="Moving Breakpoints" level="2"/>
+            <contents name="deleting-breakpoints" title="Deleting Breakpoints" level="2"/>
+            <contents name="enabling-and-disabling-breakpoints" title="Enabling and Disabling Breakpoints" level="2"/>
+            <contents name="setting-data-breakpoints" title="Setting Data Breakpoints" level="2"/>
+            <contents name="viewing-call-stack-trace" title="Viewing Call Stack Trace" level="1"/>
+            <contents name="local-variables-and-function-parameters" title="Local Variables and Function Parameters" level="1"/>
+            <contents name="evaluating-expressions" title="Evaluating Expressions" level="1"/>
+            <contents name="inspecting-basic-qt-objects" title="Inspecting Basic Qt Objects" level="1"/>
+            <contents name="directly-interacting-with-native-debuggers" title="Directly Interacting with Native Debuggers" level="1"/>
+            <contents name="debugging-c-based-applications" title="Debugging C++ Based Applications" level="1"/>
+            <contents name="starting-the-debugger-from-the-command-line" title="Starting the Debugger from the Command Line" level="2"/>
+            <contents name="stepping-into-frameworks-in-macos" title="Stepping into Frameworks in macOS" level="2"/>
+            <contents name="viewing-threads" title="Viewing Threads" level="2"/>
+            <contents name="viewing-modules" title="Viewing Modules" level="2"/>
+            <contents name="viewing-source-files" title="Viewing Source Files" level="2"/>
+            <contents name="viewing-disassembled-code" title="Viewing Disassembled Code" level="2"/>
+            <contents name="viewing-and-editing-register-state" title="Viewing and Editing Register State" level="2"/>
+        </page>
+        <page name="creator-debugging.html" href="creator-debugging.html" status="active" location="creator-debugger.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/debugger/creator-only/creator-debugger.qdoc" lineno="32" documented="true" subtype="page" title="Debugging" fulltitle="Debugging" subtitle="" module="Qt Creator"/>
+        <page name="creator-developing-baremetal.html" href="creator-developing-baremetal.html" status="active" location="creator-baremetal-dev.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/baremetal/creator-baremetal-dev.qdoc" lineno="26" documented="true" subtype="page" title="Connecting Bare Metal Devices" fulltitle="Connecting Bare Metal Devices" subtitle="" module="Qt Creator"/>
+        <page name="creator-debugging-example.html" href="creator-debugging-example.html" status="active" location="creator-debugger-example.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/debugger/creator-only/creator-debugger-example.qdoc" lineno="32" documented="true" subtype="page" title="Debugging a C++ Example Application" fulltitle="Debugging a C++ Example Application" subtitle="" module="Qt Creator"/>
+        <page name="creator-completing-code.html" href="creator-completing-code.html" status="active" location="creator-code-completion.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-code-completion.qdoc" lineno="26" documented="true" subtype="page" title="Completing Code" fulltitle="Completing Code" subtitle="" module="Qt Creator">
+            <contents name="summary-of-available-types" title="Summary of Available Types" level="1"/>
+            <contents name="completing-code-snippets" title="Completing Code Snippets" level="1"/>
+            <contents name="editing-code-snippets" title="Editing Code Snippets" level="2"/>
+            <contents name="adding-and-editing-snippets" title="Adding and Editing Snippets" level="2"/>
+            <contents name="removing-snippets" title="Removing Snippets" level="2"/>
+            <contents name="resetting-snippets" title="Resetting Snippets" level="2"/>
+            <contents name="completing-nim-code" title="Completing Nim Code" level="1"/>
+        </page>
+        <page name="creator-debugger-operating-modes.html" href="creator-debugger-operating-modes.html" status="active" location="creator-debugger.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/debugger/creator-only/creator-debugger.qdoc" lineno="100" documented="true" subtype="page" title="Launching the Debugger" fulltitle="Launching the Debugger" subtitle="" module="Qt Creator">
+            <contents name="launching-the-debugger-in-different-modes" title="Launching the Debugger in Different Modes" level="1"/>
+            <contents name="launching-in-start-internal-mode" title="Launching in Start Internal Mode" level="2"/>
+            <contents name="launching-in-start-external-mode" title="Launching in Start External Mode" level="2"/>
+            <contents name="launching-in-attach-mode" title="Launching in Attach Mode" level="2"/>
+            <contents name="attaching-to-running-applications" title="Attaching to Running Applications" level="3"/>
+            <contents name="attaching-to-processes-when-they-start" title="Attaching to Processes when They Start" level="3"/>
+            <contents name="launching-in-core-mode" title="Launching in Core Mode" level="2"/>
+            <contents name="launching-in-post-mortem-mode" title="Launching in Post-Mortem Mode" level="2"/>
+            <contents name="remote-debugging" title="Remote Debugging" level="1"/>
+            <contents name="using-gdb" title="Using GDB" level="3"/>
+            <contents name="using-cdb" title="Using CDB" level="3"/>
+        </page>
+        <page name="creator-qml-debugging-example.html" href="creator-qml-debugging-example.html" status="active" location="qtquick-debugger-example.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/debugger/qtquick-debugger-example.qdoc" lineno="32" documented="true" subtype="page" title="Debugging a Qt Quick Example Application" fulltitle="Debugging a Qt Quick Example Application" subtitle="" module="Qt Creator"/>
+        <page name="creator-editor-refactoring.html" href="creator-editor-refactoring.html" status="active" location="creator-code-refactoring.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-code-refactoring.qdoc" lineno="26" documented="true" subtype="page" title="Refactoring" fulltitle="Refactoring" subtitle="" module="Qt Creator">
+            <contents name="finding-symbols" title="Finding Symbols" level="1"/>
+            <contents name="finding-qml-types" title="Finding QML Types" level="1"/>
+            <contents name="viewing-search-results" title="Viewing Search Results" level="1"/>
+            <contents name="renaming-symbols" title="Renaming Symbols" level="1"/>
+            <contents name="column-editing" title="Column Editing" level="1"/>
+            <contents name="applying-refactoring-actions" title="Applying Refactoring Actions" level="1"/>
+            <contents name="refactoring-c-code" title="Refactoring C++ Code" level="2"/>
+            <contents name="refactoring-qml-code" title="Refactoring QML Code" level="2"/>
+        </page>
+        <page name="creator-indenting-code.html" href="creator-indenting-code.html" status="active" location="creator-code-indentation.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-code-indentation.qdoc" lineno="26" documented="true" subtype="page" title="Indenting Text or Code" fulltitle="Indenting Text or Code" subtitle="" module="Qt Creator">
+            <contents name="indenting-c-files" title="Indenting C++ Files" level="1"/>
+            <contents name="automatic-formatting-and-indentation" title="Automatic Formatting and Indentation" level="2"/>
+            <contents name="indenting-qml-files" title="Indenting QML Files" level="1"/>
+            <contents name="indenting-nim-files" title="Indenting Nim Files" level="1"/>
+            <contents name="indenting-other-text-files" title="Indenting Other Text Files" level="1"/>
+            <contents name="specifying-tab-settings" title="Specifying Tab Settings" level="1"/>
+            <contents name="specifying-tabs-and-indentation" title="Specifying Tabs and Indentation" level="2"/>
+            <contents name="specifying-typing-options" title="Specifying Typing Options" level="1"/>
+            <contents name="specifying-settings-for-content" title="Specifying Settings for Content" level="1"/>
+            <contents name="specifying-settings-for-braces" title="Specifying Settings for Braces" level="1"/>
+            <contents name="specifying-settings-for-switch-statements" title="Specifying Settings for Switch Statements" level="1"/>
+            <contents name="specifying-alignment" title="Specifying Alignment" level="1"/>
+            <contents name="binding-pointers-and-references" title="Binding Pointers and References" level="1"/>
+            <contents name="naming-getters" title="Naming Getters" level="1"/>
+        </page>
+        <page name="creator-deploying-android.html" href="creator-deploying-android.html" status="active" location="deploying-android.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/android/deploying-android.qdoc" lineno="26" documented="true" subtype="page" title="Deploying Applications to Android Devices" fulltitle="Deploying Applications to Android Devices" subtitle="" module="Qt Creator">
+            <contents name="using-ministro-to-install-qt-libraries" title="Using Ministro to Install Qt Libraries" level="1"/>
+            <contents name="packaging-applications" title="Packaging Applications" level="1"/>
+            <contents name="specifying-settings-for-packages" title="Specifying Settings for Packages" level="2"/>
+            <contents name="selecting-api-level" title="Selecting API Level" level="3"/>
+            <contents name="signing-android-packages" title="Signing Android Packages" level="3"/>
+            <contents name="adding-external-libraries" title="Adding External Libraries" level="3"/>
+            <contents name="editing-manifest-files" title="Editing Manifest Files" level="3"/>
+            <contents name="installing-ministro" title="Installing Ministro" level="1"/>
+        </page>
+        <page name="creator-debugging-helpers.html" href="creator-debugging-helpers.html" status="active" location="creator-debugger.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/debugger/creator-only/creator-debugger.qdoc" lineno="743" documented="true" subtype="page" title="Using Debugging Helpers" fulltitle="Using Debugging Helpers" subtitle="" module="Qt Creator">
+            <contents name="extending-debugging-helpers" title="Extending Debugging Helpers" level="1"/>
+            <contents name="adding-custom-debugging-helpers" title="Adding Custom Debugging Helpers" level="2"/>
+            <contents name="debugging-helper-overview" title="Debugging Helper Overview" level="2"/>
+            <contents name="debugging-helper-implementation" title="Debugging Helper Implementation" level="2"/>
+            <contents name="dumper-class" title="Dumper Class" level="3"/>
+            <contents name="dumper-type-class" title="Dumper.Type Class" level="3"/>
+            <contents name="dumper-field-class" title="Dumper.Field Class" level="3"/>
+            <contents name="dumper-value-class" title="Dumper.Value Class" level="3"/>
+            <contents name="children-and-subitem-class" title="Children and SubItem Class" level="3"/>
+        </page>
+        <page name="creator-beautifier.html" href="creator-beautifier.html" status="active" location="creator-beautifier.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-only/creator-beautifier.qdoc" lineno="32" documented="true" subtype="page" title="Beautifying Source Code" fulltitle="Beautifying Source Code" subtitle="" module="Qt Creator"/>
+        <page name="creator-editor-options.html" href="creator-editor-options.html" status="active" location="creator-editors-options.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-editors-options.qdoc" lineno="32" documented="true" subtype="page" title="Configuring the Editor" fulltitle="Configuring the Editor" subtitle="" module="Qt Creator">
+            <contents name="related-topics" title="Related Topics" level="1"/>
+        </page>
+        <page name="creator-editor-codepasting.html" href="creator-editor-codepasting.html" status="active" location="creator-code-pasting.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-only/creator-code-pasting.qdoc" lineno="26" documented="true" subtype="page" title="Pasting and Fetching Code Snippets" fulltitle="Pasting and Fetching Code Snippets" subtitle="" module="Qt Creator">
+            <contents name="specifying-settings-for-code-pasting" title="Specifying Settings for Code Pasting" level="1"/>
+            <contents name="using-code-pasting-services" title="Using Code Pasting Services" level="1"/>
+        </page>
+        <page name="creator-coding-navigating.html" href="creator-coding-navigating.html" status="active" location="creator-coding-edit-mode.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-coding-edit-mode.qdoc" lineno="32" documented="true" subtype="page" title="Working in Edit Mode" fulltitle="Working in Edit Mode" subtitle="" module="Qt Creator">
+            <contents name="using-the-editor-toolbar" title="Using the Editor Toolbar" level="1"/>
+            <contents name="navigating-between-open-files-and-symbols" title="Navigating Between Open Files and Symbols" level="2"/>
+            <contents name="selecting-parse-context" title="Selecting Parse Context" level="2"/>
+            <contents name="changing-text-encoding" title="Changing Text Encoding" level="2"/>
+            <contents name="splitting-the-editor-view" title="Splitting the Editor View" level="1"/>
+            <contents name="using-bookmarks" title="Using Bookmarks" level="1"/>
+            <contents name="moving-to-symbol-definition-or-declaration" title="Moving to Symbol Definition or Declaration" level="1"/>
+            <contents name="reparsing-externally-changed-files" title="Reparsing Externally Changed Files" level="1"/>
+            <contents name="inspecting-the-code-model" title="Inspecting the Code Model" level="1"/>
+        </page>
+        <page name="creator-checking-code-syntax.html" href="creator-checking-code-syntax.html" status="active" location="creator-code-syntax.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-code-syntax.qdoc" lineno="26" documented="true" subtype="page" title="Checking Code Syntax" fulltitle="Checking Code Syntax" subtitle="" module="Qt Creator">
+            <target name="m126"/>
+            <contents name="viewing-annotations" title="Viewing Annotations" level="1"/>
+            <contents name="specifying-line-annotation-positions" title="Specifying Line Annotation Positions" level="2"/>
+            <contents name="javascript-and-qml-error-codes" title="JavaScript and QML Error Codes" level="1"/>
+            <contents name="resetting-the-code-model" title="Resetting the Code Model" level="1"/>
+            <contents name="inspecting-qml-and-javascript" title="Inspecting QML and JavaScript" level="1"/>
+            <contents name="automatically-formatting-qml-js-files" title="Automatically Formatting QML/JS Files" level="1"/>
+        </page>
+        <page name="creator-clang-codemodel.html" href="creator-clang-codemodel.html" status="active" location="creator-clang-codemodel.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-only/creator-clang-codemodel.qdoc" lineno="32" documented="true" subtype="page" title="Parsing C++ Files with the Clang Code Model" fulltitle="Parsing C++ Files with the Clang Code Model" subtitle="" module="Qt Creator">
+            <contents name="about-the-clang-code-model" title="About the Clang Code Model" level="1"/>
+            <contents name="configuring-clang-code-model" title="Configuring Clang Code Model" level="1"/>
+            <contents name="clang-checks" title="Clang Checks" level="1"/>
+            <contents name="specifying-clang-code-model-settings-at-project-level" title="Specifying Clang Code Model Settings at Project Level" level="1"/>
+            <contents name="using-compilation-databases" title="Using Compilation Databases" level="1"/>
+        </page>
+        <page name="creator-finding-overview.html" href="creator-finding-overview.html" status="active" location="creator-finding.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-finding.qdoc" lineno="32" documented="true" subtype="page" title="Finding" fulltitle="Finding" subtitle="" module="Qt Creator"/>
+        <page name="creator-mime-types.html" href="creator-mime-types.html" status="active" location="creator-mime-types.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-only/creator-mime-types.qdoc" lineno="32" documented="true" subtype="page" title="Editing MIME Types" fulltitle="Editing MIME Types" subtitle="" module="Qt Creator"/>
+        <page name="creator-editor-functions.html" href="creator-editor-functions.html" status="active" location="creator-editors-writing-code.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-editors-writing-code.qdoc" lineno="32" documented="true" subtype="page" title="Writing Code" fulltitle="Writing Code" subtitle="" module="Qt Creator">
+            <contents name="related-topics" title="Related Topics" level="1"/>
+        </page>
+        <page name="creator-scxml.html" href="creator-scxml.html" status="active" location="creator-scxml.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-only/creator-scxml.qdoc" lineno="32" documented="true" subtype="page" title="Editing State Charts" fulltitle="Editing State Charts" subtitle="" module="Qt Creator">
+            <contents name="creating-state-charts" title="Creating State Charts" level="1"/>
+            <contents name="managing-states" title="Managing States" level="1"/>
+            <contents name="managing-transitions" title="Managing Transitions" level="1"/>
+            <contents name="adding-executable-content" title="Adding Executable Content" level="1"/>
+        </page>
+        <page name="creator-macros.html" href="creator-macros.html" status="active" location="creator-text-editing-macros.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-only/creator-text-editing-macros.qdoc" lineno="26" documented="true" subtype="page" title="Using Text Editing Macros" fulltitle="Using Text Editing Macros" subtitle="" module="Qt Creator"/>
+        <page name="creator-highlighting.html" href="creator-highlighting.html" status="active" location="creator-semantic-highlighting.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-semantic-highlighting.qdoc" lineno="26" documented="true" subtype="page" title="Semantic Highlighting" fulltitle="Semantic Highlighting" subtitle="" module="Qt Creator">
+            <contents name="generic-highlighting" title="Generic Highlighting" level="1"/>
+            <contents name="highlighting-and-folding-blocks" title="Highlighting and Folding Blocks" level="1"/>
+        </page>
+        <page name="creator-help.html" href="creator-help.html" status="active" location="creator-help.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/howto/creator-help.qdoc" lineno="26" documented="true" subtype="page" title="Using the Help Mode" fulltitle="Using the Help Mode" subtitle="" module="Qt Creator">
+            <contents name="viewing-function-tooltips" title="Viewing Function Tooltips" level="1"/>
+            <contents name="finding-information-in-qt-documentation" title="Finding Information in Qt Documentation" level="1"/>
+            <contents name="adding-bookmarks-to-help-pages" title="Adding Bookmarks to Help Pages" level="2"/>
+            <contents name="full-text-search" title="Full-text Search" level="2"/>
+            <contents name="adding-external-documentation" title="Adding External Documentation" level="1"/>
+            <contents name="detaching-the-help-window" title="Detaching the Help Window" level="1"/>
+            <contents name="selecting-the-start-page" title="Selecting the Start Page" level="1"/>
+            <contents name="using-documentation-filters" title="Using Documentation Filters" level="1"/>
+        </page>
+        <page name="creator-editor-fakevim.html" href="creator-editor-fakevim.html" status="active" location="creator-fakevim.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-only/creator-fakevim.qdoc" lineno="26" documented="true" subtype="page" title="Using FakeVim Mode" fulltitle="Using FakeVim Mode" subtitle="" module="Qt Creator">
+            <contents name="supported-modes-and-commands" title="Supported Modes and Commands" level="1"/>
+            <contents name="normal-and-visual-modes" title="Normal and Visual Modes" level="2"/>
+            <contents name="command-line-mode" title="Command Line Mode" level="2"/>
+            <contents name="insert-mode" title="Insert Mode" level="2"/>
+            <contents name="options" title="Options" level="2"/>
+            <contents name="vimrc-example" title="Vimrc Example" level="2"/>
+            <contents name="mapping-fakevim-commands" title="Mapping FakeVim Commands" level="1"/>
+            <contents name="specifying-fakevim-options" title="Specifying FakeVim Options" level="1"/>
+            <contents name="quitting-fakevim-mode" title="Quitting FakeVim Mode" level="1"/>
+        </page>
+        <page name="creator-modeling.html" href="creator-modeling.html" status="active" location="creator-modeling.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-only/creator-modeling.qdoc" lineno="32" documented="true" subtype="page" title="Modeling" fulltitle="Modeling" subtitle="" module="Qt Creator">
+            <contents name="using-the-model-editor" title="Using the Model Editor" level="1"/>
+            <contents name="creating-models" title="Creating Models" level="1"/>
+            <contents name="creating-package-diagrams" title="Creating Package Diagrams" level="1"/>
+            <contents name="creating-class-diagrams" title="Creating Class Diagrams" level="1"/>
+            <contents name="adding-relations" title="Adding Relations" level="2"/>
+            <contents name="specifying-members" title="Specifying Members" level="2"/>
+            <contents name="creating-component-diagrams" title="Creating Component Diagrams" level="1"/>
+            <contents name="adding-custom-elements" title="Adding Custom Elements" level="1"/>
+        </page>
+        <page name="creator-editor-finding.html" href="creator-editor-finding.html" status="active" location="creator-search.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-search.qdoc" lineno="26" documented="true" subtype="page" title="Finding and Replacing" fulltitle="Finding and Replacing" subtitle="" module="Qt Creator">
+            <contents name="advanced-search" title="Advanced Search" level="1"/>
+            <contents name="enabling-silver-searcher" title="Enabling Silver Searcher" level="1"/>
+            <contents name="exploring-clang-ast" title="Exploring Clang AST" level="1"/>
+        </page>
+        <page name="creator-editor-options-text.html" href="creator-editor-options-text.html" status="active" location="creator-editors-options-text.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-editors-options-text.qdoc" lineno="32" documented="true" subtype="page" title="Specifying Text Editor Settings" fulltitle="Specifying Text Editor Settings" subtitle="" module="Qt Creator">
+            <contents name="configuring-fonts" title="Configuring Fonts" level="2"/>
+            <contents name="defining-color-schemes" title="Defining Color Schemes" level="2"/>
+            <contents name="file-encoding" title="File Encoding" level="2"/>
+        </page>
+        <page name="creator-diff-editor.html" href="creator-diff-editor.html" status="active" location="creator-diff-editor.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-diff-editor.qdoc" lineno="32" documented="true" subtype="page" title="Comparing Files" fulltitle="Comparing Files" subtitle="" module="Qt Creator">
+            <contents name="viewing-the-changes" title="Viewing the Changes" level="1"/>
+            <contents name="changing-the-colors" title="Changing the Colors" level="1"/>
+        </page>
+        <page name="creator-editor-locator.html" href="creator-editor-locator.html" status="active" location="creator-locator.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-locator.qdoc" lineno="26" documented="true" subtype="page" title="Searching with the Locator" fulltitle="Searching with the Locator" subtitle="" module="Qt Creator">
+            <contents name="using-locator-filters" title="Using Locator Filters" level="1"/>
+            <contents name="configuring-locator-filters" title="Configuring Locator Filters" level="1"/>
+            <contents name="adding-web-search-engines" title="Adding Web Search Engines" level="2"/>
+            <contents name="creating-locator-filters" title="Creating Locator Filters" level="1"/>
+            <contents name="configuring-locator-cache" title="Configuring Locator Cache" level="1"/>
+            <contents name="executing-javascript" title="Executing JavaScript" level="1"/>
+        </page>
+        <page name="creator-language-servers.html" href="creator-language-servers.html" status="active" location="creator-language-server.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-only/creator-language-server.qdoc" lineno="26" documented="true" subtype="page" title="Using Language Servers" fulltitle="Using Language Servers" subtitle="" module="Qt Creator">
+            <contents name="adding-mime-types-for-language-servers" title="Adding MIME Types for Language Servers" level="1"/>
+            <contents name="specifying-settings-for-language-clients" title="Specifying Settings for Language Clients" level="1"/>
+            <contents name="supported-locator-filters" title="Supported Locator Filters" level="1"/>
+            <contents name="reporting-issues" title="Reporting Issues" level="1"/>
+        </page>
+        <page name="nolink" href="nolink" status="internal" location="external-resources.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/external-resources/external-resources.qdoc" lineno="32" documented="true" subtype="externalpage" title="macOS" fulltitle="macOS" subtitle=""/>
+        <page name="creator-keyboard-shortcuts.html" href="creator-keyboard-shortcuts.html" status="active" location="creator-keyboard-shortcuts.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/howto/creator-keyboard-shortcuts.qdoc" lineno="32" documented="true" subtype="page" title="Keyboard Shortcuts" fulltitle="Keyboard Shortcuts" subtitle="" module="Qt Creator">
+            <contents name="configuring-keyboard-shortcuts" title="Configuring Keyboard Shortcuts" level="1"/>
+            <contents name="default-keyboard-shortcuts" title="Default Keyboard Shortcuts" level="1"/>
+            <contents name="general-keyboard-shortcuts" title="General Keyboard Shortcuts" level="2"/>
+            <contents name="editing-keyboard-shortcuts" title="Editing Keyboard Shortcuts" level="2"/>
+            <contents name="emacs-shortcuts" title="Emacs Shortcuts" level="3"/>
+            <contents name="image-viewer-shortcuts" title="Image Viewer Shortcuts" level="2"/>
+            <contents name="design-mode-keyboard-shortcuts" title="Design Mode Keyboard Shortcuts" level="2"/>
+            <contents name="debugging-keyboard-shortcuts" title="Debugging Keyboard Shortcuts" level="2"/>
+            <contents name="project-keyboard-shortcuts" title="Project Keyboard Shortcuts" level="2"/>
+            <contents name="help-keyboard-shortcuts" title="Help Keyboard Shortcuts" level="2"/>
+            <contents name="version-control-keyboard-shortcuts" title="Version Control Keyboard Shortcuts" level="2"/>
+        </page>
+        <page name="creator-coding.html" href="creator-coding.html" status="active" location="creator-coding.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/editors/creator-coding.qdoc" lineno="32" documented="true" subtype="page" title="Coding" fulltitle="Coding" subtitle="" module="Qt Creator">
+            <contents name="related-topics" title="Related Topics" level="1"/>
+        </page>
+        <page name="creator-cli.html" href="creator-cli.html" status="active" location="creator-cli.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/howto/creator-only/creator-cli.qdoc" lineno="32" documented="true" subtype="page" title="Using Command Line Options" fulltitle="Using Command Line Options" subtitle="" module="Qt Creator">
+            <contents name="using-custom-styles" title="Using Custom Styles" level="1"/>
+        </page>
+        <page name="creator-modes.html" href="creator-modes.html" status="active" location="creator-ui.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/howto/creator-ui.qdoc" lineno="252" documented="true" subtype="page" title="Selecting Modes" fulltitle="Selecting Modes" subtitle="" module="Qt Creator"/>
+        <page name="creator-developing-ios.html" href="creator-developing-ios.html" status="active" location="creator-ios-dev.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/ios/creator-ios-dev.qdoc" lineno="26" documented="true" subtype="page" title="Connecting iOS Devices" fulltitle="Connecting iOS Devices" subtitle="" module="Qt Creator">
+            <contents name="configuring-devices" title="Configuring Devices" level="1"/>
+            <contents name="viewing-device-connection-status" title="Viewing Device Connection Status" level="1"/>
+            <contents name="specifying-supported-ios-versions" title="Specifying Supported iOS Versions" level="1"/>
+            <contents name="testing-on-simulator" title="Testing on Simulator" level="1"/>
+            <contents name="managing-simulators" title="Managing Simulators" level="2"/>
+            <contents name="checking-current-xcode-version" title="Checking Current Xcode Version" level="2"/>
+        </page>
+        <page name="creator-developing-generic-linux.html" href="creator-developing-generic-linux.html" status="active" location="linuxdev.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/linux-mobile/linuxdev.qdoc" lineno="26" documented="true" subtype="page" title="Connecting Embedded Linux Devices" fulltitle="Connecting Embedded Linux Devices" subtitle="" module="Qt Creator">
+            <contents name="configuring-ssh-connections" title="Configuring SSH Connections" level="2"/>
+            <contents name="generating-ssh-keys" title="Generating SSH Keys" level="2"/>
+            <contents name="managing-device-processes" title="Managing Device Processes" level="2"/>
+        </page>
+        <page name="creator-advanced.html" href="creator-advanced.html" status="active" location="creator-advanced.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/overview/creator-only/creator-advanced.qdoc" lineno="32" documented="true" subtype="page" title="Advanced Use" fulltitle="Advanced Use" subtitle="" module="Qt Creator">
+            <contents name="related-topics" title="Related Topics" level="1"/>
+        </page>
+        <page name="creator-deployment.html" href="creator-deployment.html" status="active" location="creator-deployment-overview.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/overview/creator-only/creator-deployment-overview.qdoc" lineno="32" documented="true" subtype="page" title="Deploying to Devices" fulltitle="Deploying to Devices" subtitle="" module="Qt Creator"/>
+        <page name="creator-getting-started.html" href="creator-getting-started.html" status="active" location="creator-getting-started.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/overview/creator-only/creator-getting-started.qdoc" lineno="32" documented="true" subtype="page" title="Getting Started" fulltitle="Getting Started" subtitle="" module="Qt Creator"/>
+        <page name="creator-glossary.html" href="creator-glossary.html" status="active" location="creator-glossary.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/overview/creator-only/creator-glossary.qdoc" lineno="32" documented="true" subtype="page" title="Glossary" fulltitle="Glossary" subtitle="" module="Qt Creator">
+            <target name="glossary-build-config"/>
+            <target name="glossary-build-step"/>
+            <target name="glossary-component"/>
+            <target name="glossary-deploy-config"/>
+            <target name="glossary-device"/>
+            <target name="glossary-buildandrun-kit"/>
+            <target name="glossary-mode"/>
+            <target name="glossary-project"/>
+            <target name="glossary-project-qt"/>
+            <target name="glossary-run-config"/>
+            <target name="glossary-shadow-build"/>
+        </page>
+        <page name="creator-help-overview.html" href="creator-help-overview.html" status="active" location="creator-help-overview.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/overview/creator-only/creator-help-overview.qdoc" lineno="32" documented="true" subtype="page" title="Getting Help" fulltitle="Getting Help" subtitle="" module="Qt Creator">
+            <contents name="related-topics" title="Related Topics" level="1"/>
+        </page>
+        <page name="creator-output-panes.html" href="creator-output-panes.html" status="active" location="creator-ui.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/howto/creator-ui.qdoc" lineno="327" documented="true" subtype="page" title="Viewing Output" fulltitle="Viewing Output" subtitle="" module="Qt Creator">
+            <contents name="issues" title="Issues" level="1"/>
+            <contents name="search-results" title="Search Results" level="1"/>
+            <contents name="application-output" title="Application Output" level="1"/>
+            <contents name="compile-output" title="Compile Output" level="1"/>
+            <contents name="parsing-existing-compile-output" title="Parsing Existing Compile Output" level="2"/>
+            <contents name="to-do-entries" title="To-Do Entries" level="1"/>
+        </page>
+        <page name="creator-editor-external.html" href="creator-editor-external.html" status="active" location="creator-external-tools.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/howto/creator-only/creator-external-tools.qdoc" lineno="32" documented="true" subtype="page" title="Using External Tools" fulltitle="Using External Tools" subtitle="" module="Qt Creator">
+            <contents name="using-qt-linguist" title="Using Qt Linguist" level="1"/>
+            <contents name="previewing-qml-files" title="Previewing QML Files" level="1"/>
+            <contents name="using-external-text-editors" title="Using External Text Editors" level="1"/>
+            <contents name="configuring-external-tools" title="Configuring External Tools" level="1"/>
+        </page>
+        <page name="creator-autotest.html" href="creator-autotest.html" status="active" location="creator-autotest.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/howto/creator-only/creator-autotest.qdoc" lineno="26" documented="true" subtype="page" title="Running Autotests" fulltitle="Running Autotests" subtitle="" module="Qt Creator">
+            <contents name="creating-tests" title="Creating Tests" level="1"/>
+            <contents name="creating-qt-and-qt-quick-tests" title="Creating Qt and Qt Quick Tests" level="2"/>
+            <contents name="creating-google-tests" title="Creating Google Tests" level="2"/>
+            <contents name="creating-boost-tests" title="Creating Boost Tests" level="2"/>
+            <contents name="setting-up-the-google-c-testing-framework" title="Setting Up the Google C++ Testing Framework" level="1"/>
+            <contents name="building-and-running-tests" title="Building and Running Tests" level="1"/>
+            <contents name="selecting-tests-to-run" title="Selecting Tests to Run" level="2"/>
+            <contents name="running-and-debugging-tests-from-code-editor" title="Running and Debugging Tests from Code Editor" level="2"/>
+            <contents name="specifying-settings-for-running-qt-tests" title="Specifying Settings for Running Qt Tests" level="2"/>
+            <contents name="specifying-settings-for-running-google-tests" title="Specifying Settings for Running Google Tests" level="2"/>
+            <contents name="specifying-settings-for-running-boost-tests" title="Specifying Settings for Running Boost Tests" level="2"/>
+            <contents name="viewing-test-output" title="Viewing Test Output" level="1"/>
+        </page>
+        <page name="creator-project-managing-sessions.html" href="creator-project-managing-sessions.html" status="active" location="creator-sessions.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/howto/creator-only/creator-sessions.qdoc" lineno="32" documented="true" subtype="page" title="Managing Sessions" fulltitle="Managing Sessions" subtitle="" module="Qt Creator"/>
+        <page name="creator-faq.html" href="creator-faq.html" status="active" location="qtcreator-faq.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/howto/creator-only/qtcreator-faq.qdoc" lineno="26" documented="true" subtype="page" title="FAQ" fulltitle="FAQ" subtitle="" module="Qt Creator">
+            <contents name="general-questions" title="General Questions" level="1"/>
+            <contents name="qt-designer-integration-questions" title="Qt Designer Integration Questions" level="1"/>
+            <contents name="qml-and-qt-quick-questions" title="QML and Qt Quick Questions" level="1"/>
+            <contents name="help-questions" title="Help Questions" level="1"/>
+            <contents name="debugger-questions" title="Debugger Questions" level="1"/>
+            <contents name="compiler-questions" title="Compiler Questions" level="1"/>
+            <contents name="qt-installation-questions" title="Qt Installation Questions" level="1"/>
+            <contents name="platform-related-questions" title="Platform Related Questions" level="1"/>
+            <contents name="questions-about-new-features" title="Questions about New Features" level="1"/>
+        </page>
+        <page name="creator-configuring.html" href="creator-configuring.html" status="active" location="creator-configuring.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/overview/creator-only/creator-configuring.qdoc" lineno="32" documented="true" subtype="page" title="Configuring Qt Creator" fulltitle="Configuring Qt Creator" subtitle="" module="Qt Creator">
+            <contents name="checking-build-and-run-settings" title="Checking Build and Run Settings" level="1"/>
+            <contents name="changing-keyboard-shortcuts" title="Changing Keyboard Shortcuts" level="1"/>
+            <contents name="changing-color-schemes" title="Changing Color Schemes" level="1"/>
+            <contents name="adding-your-own-code-snippets" title="Adding Your Own Code Snippets" level="1"/>
+            <contents name="configuring-version-control-systems" title="Configuring Version Control Systems" level="1"/>
+            <contents name="enabling-and-disabling-plugins" title="Enabling and Disabling Plugins" level="1"/>
+        </page>
+        <page name="creator-sidebar-views.html" href="creator-sidebar-views.html" status="active" location="creator-sidebar-views.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/howto/creator-sidebar-views.qdoc" lineno="26" documented="true" subtype="page" title="Browsing Project Contents" fulltitle="Browsing Project Contents" subtitle="" module="Qt Creator">
+            <contents name="viewing-project-files" title="Viewing Project Files" level="1"/>
+            <contents name="viewing-the-file-system" title="Viewing the File System" level="1"/>
+            <contents name="viewing-open-documents" title="Viewing Open Documents" level="1"/>
+            <contents name="viewing-defined-types-and-symbols" title="Viewing Defined Types and Symbols" level="1"/>
+            <contents name="viewing-the-class-hierarchy" title="Viewing the Class Hierarchy" level="1"/>
+            <contents name="viewing-type-hierarchy" title="Viewing Type Hierarchy" level="1"/>
+            <contents name="viewing-include-hierarchy" title="Viewing Include Hierarchy" level="1"/>
+        </page>
+        <page name="creator-commercial-overview.html" href="creator-commercial-overview.html" status="active" location="creator-commercial-overview.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/overview/creator-only/creator-commercial-overview.qdoc" lineno="32" documented="true" subtype="page" title="Commercial Features" fulltitle="Commercial Features" subtitle="" module="Qt Creator"/>
+        <page name="creator-acknowledgements.html" href="creator-acknowledgements.html" status="active" location="creator-acknowledgements.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/overview/creator-acknowledgements.qdoc" lineno="32" documented="true" subtype="page" title="Acknowledgements" fulltitle="Acknowledgements" subtitle="" module="Qt Creator">
+            <contents name="credits" title="Credits" level="1"/>
+            <contents name="third-party-components" title="Third-party Components" level="1"/>
+        </page>
+        <page name="creator-quick-tour.html" href="creator-quick-tour.html" status="active" location="creator-ui.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/howto/creator-ui.qdoc" lineno="32" documented="true" subtype="page" title="User Interface" fulltitle="User Interface" subtitle="" module="Qt Creator">
+            <contents name="navigating-with-keyboard" title="Navigating with Keyboard" level="1"/>
+            <contents name="useful-features" title="Useful Features" level="1"/>
+            <contents name="changing-languages" title="Changing Languages" level="1"/>
+            <contents name="viewing-images" title="Viewing Images" level="1"/>
+            <contents name="exporting-svg-images" title="Exporting SVG Images" level="2"/>
+            <contents name="platform-notes" title="Platform Notes" level="1"/>
+            <contents name="location-of-functions" title="Location of Functions" level="2"/>
+            <contents name="location-of-settings-files" title="Location of Settings Files" level="2"/>
+            <contents name="high-dpi-scaling" title="High DPI Scaling" level="2"/>
+        </page>
+        <page name="creator-design-mode.html" href="creator-design-mode.html" status="active" location="creator-design-overview.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/overview/creator-only/creator-design-overview.qdoc" lineno="32" documented="true" subtype="page" title="Designing User Interfaces" fulltitle="Designing User Interfaces" subtitle="" module="Qt Creator"/>
+        <page name="creator-task-lists.html" href="creator-task-lists.html" status="active" location="creator-task-lists.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/howto/creator-only/creator-task-lists.qdoc" lineno="32" documented="true" subtype="page" title="Showing Task List Files in Issues Pane" fulltitle="Showing Task List Files in Issues Pane" subtitle="" module="Qt Creator">
+            <contents name="managing-task-list-entries" title="Managing Task List Entries" level="1"/>
+            <contents name="task-list-file-format" title="Task List File Format" level="1"/>
+        </page>
+        <page name="creator-deployment-embedded-linux.html" href="creator-deployment-embedded-linux.html" status="active" location="creator-deployment-embedded-linux.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/linux-mobile/creator-deployment-embedded-linux.qdoc" lineno="32" documented="true" subtype="page" title="Deploying Applications to Embedded Linux Devices" fulltitle="Deploying Applications to Embedded Linux Devices" subtitle="" module="Qt Creator">
+            <contents name="generic-deployment-steps" title="Generic Deployment Steps" level="1"/>
+            <contents name="qt-for-device-creation-deployment-steps" title="Qt for Device Creation Deployment Steps" level="1"/>
+            <contents name="developing-with-qt-5-8-or-earlier" title="Developing with Qt 5.8 or Earlier" level="2"/>
+            <contents name="developing-with-qt-5-9-or-later" title="Developing with Qt 5.9 or Later" level="2"/>
+            <contents name="deploying-cmake-projects-to-embedded-linux-devices" title="Deploying CMake Projects to Embedded Linux Devices" level="1"/>
+        </page>
+        <page name="creator-tips.html" href="creator-tips.html" status="active" location="creator-tips.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/howto/creator-only/creator-tips.qdoc" lineno="32" documented="true" subtype="page" title="Tips and Tricks" fulltitle="Tips and Tricks" subtitle="" module="Qt Creator">
+            <contents name="switching-between-modes" title="Switching Between Modes" level="1"/>
+            <contents name="moving-between-open-files" title="Moving Between Open Files" level="1"/>
+            <contents name="moving-to-the-edit-mode" title="Moving To the Edit Mode" level="1"/>
+            <contents name="using-the-filter-in-options-dialog" title="Using the Filter in Options Dialog" level="1"/>
+            <contents name="opening-output-panes" title="Opening Output Panes" level="1"/>
+            <contents name="using-keyboard-shortcuts" title="Using Keyboard Shortcuts" level="1"/>
+            <contents name="running-qt-creator-from-command-line" title="Running Qt Creator From Command Line" level="1"/>
+            <contents name="showing-and-hiding-sidebars" title="Showing and Hiding Sidebars" level="1"/>
+            <contents name="moving-to-symbols" title="Moving To Symbols" level="1"/>
+            <contents name="displaying-signals-and-slots" title="Displaying Signals and Slots" level="1"/>
+            <contents name="displaying-low-level-data" title="Displaying Low Level Data" level="1"/>
+            <contents name="showing-tooltips-in-debug-mode" title="Showing Tooltips in Debug Mode" level="1"/>
+            <contents name="locating-files" title="Locating Files" level="1"/>
+            <contents name="adding-a-license-header-template-for-c-code" title="Adding a License Header Template for C++ Code" level="1"/>
+            <contents name="pasting-from-clipboard-history" title="Pasting from Clipboard History" level="1"/>
+            <contents name="sorting-lines-alphabetically" title="Sorting Lines Alphabetically" level="1"/>
+        </page>
+        <page name="creator-overview.html" href="creator-overview.html" status="active" location="creator-overview.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/overview/creator-only/creator-overview.qdoc" lineno="32" documented="true" subtype="page" title="IDE Overview" fulltitle="IDE Overview" subtitle="" module="Qt Creator"/>
+        <page name="creator-project-wizards-json.html" href="creator-project-wizards-json.html" status="active" location="creator-projects-custom-wizards-json.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-custom-wizards-json.qdoc" lineno="32" documented="true" subtype="page" title="Adding JSON-Based Wizards" fulltitle="Adding JSON-Based Wizards" subtitle="" module="Qt Creator">
+            <contents name="integrating-wizards-into-builds" title="Integrating Wizards into Builds" level="1"/>
+            <contents name="using-variables-in-wizards" title="Using Variables in Wizards" level="1"/>
+            <contents name="localizing-wizards" title="Localizing Wizards" level="1"/>
+            <contents name="creating-wizards" title="Creating Wizards" level="1"/>
+            <contents name="values-available-to-the-wizard" title="Values Available to the Wizard" level="1"/>
+            <contents name="available-pages" title="Available Pages" level="1"/>
+            <contents name="field-page" title="Field Page" level="2"/>
+            <contents name="file-page" title="File Page" level="2"/>
+            <contents name="form-page" title="Form Page" level="2"/>
+            <contents name="kits" title="Kits" level="2"/>
+            <contents name="project" title="Project" level="2"/>
+            <contents name="summary" title="Summary" level="2"/>
+            <contents name="vcscommand" title="VcsCommand" level="2"/>
+            <contents name="vcsconfiguration" title="VcsConfiguration" level="2"/>
+            <contents name="available-widgets" title="Available Widgets" level="1"/>
+            <contents name="check-box" title="Check Box" level="2"/>
+            <contents name="list" title="List" level="2"/>
+            <contents name="label" title="Label" level="2"/>
+            <contents name="line-edit" title="Line Edit" level="2"/>
+            <contents name="path-chooser" title="Path Chooser" level="2"/>
+            <contents name="spacer" title="Spacer" level="2"/>
+            <contents name="text-edit" title="Text Edit" level="2"/>
+            <contents name="available-generators" title="Available Generators" level="1"/>
+            <contents name="file-generator" title="File Generator" level="2"/>
+            <contents name="scanner-generator" title="Scanner Generator" level="2"/>
+        </page>
+        <page name="creator-testing.html" href="creator-testing.html" status="active" location="creator-testing.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/overview/creator-only/creator-testing.qdoc" lineno="32" documented="true" subtype="page" title="Testing" fulltitle="Testing" subtitle="" module="Qt Creator"/>
+        <page name="creator-build-process-customizing.html" href="creator-build-process-customizing.html" status="active" location="creator-projects-builds-customizing.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-builds-customizing.qdoc" lineno="32" documented="true" subtype="page" title="Customizing the Build Process" fulltitle="Customizing the Build Process" subtitle="" module="Qt Creator"/>
+        <page name="creator-os-supported-platforms.html" href="creator-os-supported-platforms.html" status="active" location="creator-supported-platforms.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/overview/creator-only/creator-supported-platforms.qdoc" lineno="33" documented="true" subtype="page" title="Supported Platforms" fulltitle="Supported Platforms" subtitle="" module="Qt Creator">
+            <contents name="development-platforms" title="Development Platforms" level="1"/>
+            <contents name="developing-for-embedded-devices" title="Developing for Embedded Devices" level="2"/>
+            <contents name="compiling-from-source" title="Compiling from Source" level="1"/>
+            <contents name="target-platforms" title="Target Platforms" level="1"/>
+            <contents name="embedded-devices" title="Embedded Devices" level="2"/>
+            <contents name="mobile-devices" title="Mobile Devices" level="2"/>
+        </page>
+        <page name="creator-tutorials.html" href="creator-tutorials.html" status="active" location="creator-tutorials.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/overview/creator-only/creator-tutorials.qdoc" lineno="32" documented="true" subtype="page" title="Tutorials" fulltitle="Tutorials" subtitle="" module="Qt Creator"/>
+        <page name="technical-support.html" href="technical-support.html" status="active" location="creator-tech-support.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/overview/creator-only/creator-tech-support.qdoc" lineno="32" documented="true" subtype="page" title="Technical Support" fulltitle="Technical Support" subtitle="" module="Qt Creator"/>
+        <page name="creator-build-example-application.html" href="creator-build-example-application.html" status="active" location="creator-projects-build-run-tutorial.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-build-run-tutorial.qdoc" lineno="32" documented="true" subtype="page" title="Building and Running an Example" fulltitle="Building and Running an Example" subtitle="" module="Qt Creator"/>
+        <page name="creator-building-targets.html" href="creator-building-targets.html" status="active" location="creator-projects-building.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-building.qdoc" lineno="32" documented="true" subtype="page" title="Building for Multiple Platforms" fulltitle="Building for Multiple Platforms" subtitle="" module="Qt Creator">
+            <contents name="additional-qmake-options" title="Additional qmake Options" level="1"/>
+        </page>
+        <page name="creator-tool-chains.html" href="creator-tool-chains.html" status="active" location="creator-projects-compilers.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-compilers.qdoc" lineno="32" documented="true" subtype="page" title="Adding Compilers" fulltitle="Adding Compilers" subtitle="" module="Qt Creator">
+            <contents name="redetecting-compilers" title="Redetecting Compilers" level="1"/>
+            <contents name="specifying-compiler-settings" title="Specifying Compiler Settings" level="1"/>
+            <contents name="adding-nim-compilers" title="Adding Nim Compilers" level="1"/>
+            <contents name="adding-custom-compilers" title="Adding Custom Compilers" level="1"/>
+            <contents name="troubleshooting-mingw-compilation-errors" title="Troubleshooting MinGW Compilation Errors" level="1"/>
+        </page>
+        <page name="creator-project-creating.html" href="creator-project-creating.html" status="active" location="creator-projects-creating.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-creating.qdoc" lineno="32" documented="true" subtype="page" title="Creating Projects" fulltitle="Creating Projects" subtitle="" module="Qt Creator">
+            <contents name="selecting-the-build-system" title="Selecting the Build System" level="1"/>
+            <contents name="using-project-wizards" title="Using Project Wizards" level="1"/>
+            <contents name="selecting-project-type" title="Selecting Project Type" level="1"/>
+            <contents name="creating-qt-for-python-applications" title="Creating Qt for Python Applications" level="2"/>
+            <contents name="adding-files-to-projects" title="Adding Files to Projects" level="1"/>
+            <contents name="creating-c-classes" title="Creating C++ Classes" level="2"/>
+            <contents name="creating-resource-files" title="Creating Resource Files" level="2"/>
+            <contents name="creating-opengl-fragment-and-vertex-shaders" title="Creating OpenGL Fragment and Vertex Shaders" level="2"/>
+            <contents name="displaying-additional-file-types-in-projects-pane" title="Displaying Additional File Types in Projects Pane" level="2"/>
+            <contents name="adding-subprojects-to-projects" title="Adding Subprojects to Projects" level="1"/>
+            <contents name="binding-keyboard-shortcuts-to-wizards" title="Binding Keyboard Shortcuts to Wizards" level="1"/>
+            <contents name="related-topics" title="Related Topics" level="1"/>
+        </page>
+        <page name="creator-connecting-mobile.html" href="creator-connecting-mobile.html" status="active" location="creator-mobile-targets.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/overview/creator-only/creator-mobile-targets.qdoc" lineno="32" documented="true" subtype="page" title="Connecting Devices" fulltitle="Connecting Devices" subtitle="" module="Qt Creator">
+            <contents name="related-topics" title="Related Topics" level="1"/>
+        </page>
+        <page name="creator-usability.html" href="creator-usability.html" status="active" location="mobile-app-design.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/overview/creator-only/mobile-app-design.qdoc" lineno="32" documented="true" subtype="page" title="Optimizing Applications for Mobile Devices" fulltitle="Optimizing Applications for Mobile Devices" subtitle="" module="Qt Creator"/>
+        <page name="creator-building-running.html" href="creator-building-running.html" status="active" location="creator-projects-building-running.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-building-running.qdoc" lineno="32" documented="true" subtype="page" title="Building and Running" fulltitle="Building and Running" subtitle="" module="Qt Creator">
+            <contents name="related-topics" title="Related Topics" level="1"/>
+        </page>
+        <page name="creator-projects-autotools.html" href="creator-projects-autotools.html" status="active" location="creator-projects-autotools.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-autotools.qdoc" lineno="28" documented="true" subtype="page" title="Setting Up an Autotools Project" fulltitle="Setting Up an Autotools Project" subtitle="" module="Qt Creator"/>
+        <page name="creator-known-issues.html" href="creator-known-issues.html" status="active" location="creator-issues.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/overview/creator-only/creator-issues.qdoc" lineno="32" documented="true" subtype="page" title="Known Issues" fulltitle="Known Issues" subtitle="" module="Qt Creator">
+            <contents name="general-issues" title="General Issues" level="1"/>
+            <contents name="editing-issues" title="Editing Issues" level="1"/>
+            <contents name="projects-issues" title="Projects Issues" level="1"/>
+            <contents name="debugging-issues" title="Debugging Issues" level="1"/>
+            <contents name="design-mode-issues" title="Design Mode Issues" level="1"/>
+        </page>
+        <page name="creator-run-settings.html" href="creator-run-settings.html" status="active" location="creator-projects-settings-run.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-settings-run.qdoc" lineno="32" documented="true" subtype="page" title="Specifying Run Settings" fulltitle="Specifying Run Settings" subtitle="" module="Qt Creator">
+            <contents name="creating-run-configurations-for-subprojects" title="Creating Run Configurations for Subprojects" level="1"/>
+            <contents name="specifying-run-settings-for-desktop-device-types" title="Specifying Run Settings for Desktop Device Types" level="1"/>
+            <contents name="specifying-valgrind-settings" title="Specifying Valgrind Settings" level="1"/>
+            <contents name="specifying-debugger-settings" title="Specifying Debugger Settings" level="1"/>
+            <contents name="specifying-run-settings-for-android-devices" title="Specifying Run Settings for Android Devices" level="1"/>
+            <contents name="specifying-run-settings-for-linux-based-devices" title="Specifying Run Settings for Linux-Based Devices" level="1"/>
+            <contents name="specifying-run-settings-for-qnx-devices" title="Specifying Run Settings for QNX Devices" level="1"/>
+            <contents name="specifying-run-settings-for-embedded-devices" title="Specifying Run Settings for Embedded Devices" level="1"/>
+            <contents name="selecting-the-run-environment" title="Selecting the Run Environment" level="1"/>
+            <contents name="specifying-a-custom-executable-to-run" title="Specifying a Custom Executable to Run" level="1"/>
+            <contents name="specifying-run-settings-for-qt-quick-ui-projects" title="Specifying Run Settings for Qt Quick UI Projects" level="1"/>
+            <contents name="specifying-run-settings-for-python-projects" title="Specifying Run Settings for Python Projects" level="1"/>
+        </page>
+        <page name="creator-sharing-project-settings.html" href="creator-sharing-project-settings.html" status="active" location="creator-projects-settings-sharing.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-settings-sharing.qdoc" lineno="32" documented="true" subtype="page" title="Sharing Project Settings" fulltitle="Sharing Project Settings" subtitle="" module="Qt Creator">
+            <contents name="creating-shared-settings-file" title="Creating Shared Settings File" level="1"/>
+            <contents name="updating-shared-settings" title="Updating Shared Settings" level="1"/>
+        </page>
+        <page name="creator-build-dependencies.html" href="creator-build-dependencies.html" status="active" location="creator-projects-settings-dependencies.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-settings-dependencies.qdoc" lineno="32" documented="true" subtype="page" title="Specifying Dependencies" fulltitle="Specifying Dependencies" subtitle="" module="Qt Creator"/>
+        <page name="creator-targets.html" href="creator-targets.html" status="active" location="creator-projects-targets.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-targets.qdoc" lineno="32" documented="true" subtype="page" title="Adding Kits" fulltitle="Adding Kits" subtitle="" module="Qt Creator">
+            <contents name="filtering-kit-settings" title="Filtering Kit Settings" level="1"/>
+            <contents name="specifying-kit-settings" title="Specifying Kit Settings" level="1"/>
+            <contents name="using-ninja-as-a-cmake-generator" title="Using Ninja as a CMake Generator" level="2"/>
+            <contents name="editing-qbs-profiles" title="Editing Qbs Profiles" level="1"/>
+        </page>
+        <page name="creator-running-targets.html" href="creator-running-targets.html" status="active" location="creator-projects-running.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-projects-running.qdoc" lineno="32" documented="true" subtype="page" title="Running on Multiple Platforms" fulltitle="Running on Multiple Platforms" subtitle="" module="Qt Creator">
+            <contents name="running-on-embedded-linux-devices" title="Running on Embedded Linux Devices" level="1"/>
+            <contents name="running-on-qnx-devices" title="Running on QNX Devices" level="1"/>
+            <contents name="troubleshooting-errors" title="Troubleshooting Errors" level="2"/>
+            <contents name="debug-output-cannot-be-shown" title="Debug Output Cannot Be Shown" level="3"/>
+            <contents name="cannot-run-debug-or-stop-applications" title="Cannot Run, Debug, or Stop Applications" level="3"/>
+            <contents name="running-python-projects" title="Running Python Projects" level="1"/>
+        </page>
+        <page name="creator-project-wizards-xml.html" href="creator-project-wizards-xml.html" status="active" location="creator-projects-custom-wizards-xml.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-custom-wizards-xml.qdoc" lineno="32" documented="true" subtype="page" title="Adding XML-Based Wizards" fulltitle="Adding XML-Based Wizards" subtitle="" module="Qt Creator">
+            <contents name="creating-xml-based-project-wizards" title="Creating XML-Based Project Wizards" level="1"/>
+            <contents name="creating-class-wizards" title="Creating Class Wizards" level="1"/>
+            <contents name="supported-widgets" title="Supported Widgets" level="1"/>
+            <contents name="path-choosers" title="Path Choosers" level="2"/>
+            <contents name="check-boxes" title="Check Boxes" level="2"/>
+            <contents name="text-editors" title="Text Editors" level="2"/>
+            <contents name="processing-template-files" title="Processing Template Files" level="1"/>
+            <contents name="pre-defined-standard-variables" title="Pre-defined Standard Variables" level="1"/>
+            <contents name="validating-user-input" title="Validating User Input" level="1"/>
+        </page>
+        <page name="creator-deployment-qnx.html" href="creator-deployment-qnx.html" status="active" location="creator-deployment-qnx.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qnx/creator-deployment-qnx.qdoc" lineno="36" documented="true" subtype="page" title="Deploying Applications to QNX Neutrino Devices" fulltitle="Deploying Applications to QNX Neutrino Devices" subtitle="" module="Qt Creator"/>
+        <page name="creator-project-wizards.html" href="creator-project-wizards.html" status="active" location="creator-projects-custom-wizards.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-custom-wizards.qdoc" lineno="32" documented="true" subtype="page" title="Adding New Custom Wizards" fulltitle="Adding New Custom Wizards" subtitle="" module="Qt Creator">
+            <contents name="wizard-types" title="Wizard Types" level="1"/>
+            <contents name="locating-wizards" title="Locating Wizards" level="1"/>
+            <contents name="tips-for-wizard-development" title="Tips for Wizard Development" level="1"/>
+            <contents name="verbose-output" title="Verbose Output" level="2"/>
+        </page>
+        <page name="creator-project-managing.html" href="creator-project-managing.html" status="active" location="creator-projects-overview.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-overview.qdoc" lineno="32" documented="true" subtype="page" title="Managing Projects" fulltitle="Managing Projects" subtitle="" module="Qt Creator">
+            <contents name="related-topics" title="Related Topics" level="1"/>
+        </page>
+        <page name="creator-project-other.html" href="creator-project-other.html" status="active" location="creator-projects-other.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-other.qdoc" lineno="32" documented="true" subtype="page" title="Using Other Build Systems" fulltitle="Using Other Build Systems" subtitle="" module="Qt Creator"/>
+        <page name="creator-project-qmake.html" href="creator-project-qmake.html" status="active" location="creator-projects-qt-versions.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-qt-versions.qdoc" lineno="32" documented="true" subtype="page" title="Adding Qt Versions" fulltitle="Adding Qt Versions" subtitle="" module="Qt Creator">
+            <contents name="setting-up-new-qt-versions" title="Setting Up New Qt Versions" level="1"/>
+            <contents name="troubleshooting-qt-installations" title="Troubleshooting Qt Installations" level="1"/>
+            <contents name="minimum-requirements" title="Minimum Requirements" level="1"/>
+        </page>
+        <page name="creator-configuring-projects.html" href="creator-configuring-projects.html" status="active" location="creator-projects-settings-overview.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-settings-overview.qdoc" lineno="32" documented="true" subtype="page" title="Configuring Projects" fulltitle="Configuring Projects" subtitle="" module="Qt Creator">
+            <contents name="activating-kits-for-a-project" title="Activating Kits for a Project" level="1"/>
+            <contents name="specifying-settings" title="Specifying Settings" level="1"/>
+        </page>
+        <page name="creator-project-generic.html" href="creator-project-generic.html" status="active" location="creator-projects-generic.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-generic.qdoc" lineno="32" documented="true" subtype="page" title="Setting Up a Generic Project" fulltitle="Setting Up a Generic Project" subtitle="" module="Qt Creator">
+            <contents name="importing-a-generic-project" title="Importing a Generic Project" level="1"/>
+            <contents name="working-with-generic-project-files" title="Working with Generic Project Files" level="1"/>
+            <contents name="specifying-files" title="Specifying Files" level="1"/>
+            <contents name="specifying-include-paths" title="Specifying Include Paths" level="1"/>
+            <contents name="specifying-defines" title="Specifying Defines" level="1"/>
+            <contents name="forwarding-flags-to-clang-code-model" title="Forwarding Flags to Clang Code Model" level="1"/>
+            <contents name="providing-deployment-information" title="Providing Deployment Information" level="1"/>
+            <contents name="creating-a-run-configuration" title="Creating a Run Configuration" level="1"/>
+        </page>
+        <page name="creator-project-opening.html" href="creator-project-opening.html" status="active" location="creator-projects-opening.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-opening.qdoc" lineno="33" documented="true" subtype="page" title="Opening Projects" fulltitle="Opening Projects" subtitle="" module="Qt Creator"/>
+        <page name="creator-project-qmake-libraries.html" href="creator-project-qmake-libraries.html" status="active" location="creator-projects-libraries.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-libraries.qdoc" lineno="32" documented="true" subtype="page" title="Adding Libraries to Projects" fulltitle="Adding Libraries to Projects" subtitle="" module="Qt Creator">
+            <contents name="to-add-libraries" title="To Add Libraries" level="1"/>
+            <contents name="example-of-adding-internal-libraries" title="Example of Adding Internal Libraries" level="1"/>
+        </page>
+        <page name="creator-build-settings.html" href="creator-build-settings.html" status="active" location="creator-projects-settings-build.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-settings-build.qdoc" lineno="32" documented="true" subtype="page" title="Specifying Build Settings" fulltitle="Specifying Build Settings" subtitle="" module="Qt Creator">
+            <contents name="editing-build-configurations" title="Editing Build Configurations" level="1"/>
+            <contents name="qmake-build-configuration" title="qmake Build Configuration" level="2"/>
+            <contents name="cmake-build-configuration" title="CMake Build Configuration" level="2"/>
+            <contents name="starting-external-processes" title="Starting External Processes" level="1"/>
+            <contents name="using-environment-variables" title="Using Environment Variables" level="2"/>
+            <contents name="using-qt-creator-variables" title="Using Qt Creator Variables" level="2"/>
+            <contents name="build-steps" title="Build Steps" level="1"/>
+            <contents name="qmake-build-steps" title="qmake Build Steps" level="2"/>
+            <contents name="compiling-qml" title="Compiling QML" level="3"/>
+            <contents name="cmake-build-steps" title="CMake Build Steps" level="2"/>
+            <contents name="qbs-build-steps" title="Qbs Build Steps" level="2"/>
+            <contents name="adding-custom-build-steps" title="Adding Custom Build Steps" level="2"/>
+            <contents name="executing-custom-commands" title="Executing Custom Commands" level="2"/>
+            <contents name="clean-steps" title="Clean Steps" level="1"/>
+            <contents name="cmake-clean-steps" title="CMake Clean Steps" level="2"/>
+            <contents name="qbs-clean-steps" title="Qbs Clean Steps" level="2"/>
+            <contents name="build-environment" title="Build Environment" level="1"/>
+            <contents name="batch-editing" title="Batch Editing" level="2"/>
+            <contents name="clearing-the-system-environment" title="Clearing the System Environment" level="2"/>
+        </page>
+        <page name="creator-code-style-settings.html" href="creator-code-style-settings.html" status="active" location="creator-projects-settings-code-style.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-settings-code-style.qdoc" lineno="32" documented="true" subtype="page" title="Specifying Code Style Settings" fulltitle="Specifying Code Style Settings" subtitle="" module="Qt Creator"/>
+        <page name="creator-debuggers.html" href="creator-debuggers.html" status="active" location="creator-projects-debuggers.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-debuggers.qdoc" lineno="32" documented="true" subtype="page" title="Adding Debuggers" fulltitle="Adding Debuggers" subtitle="" module="Qt Creator"/>
+        <page name="creator-project-qbs.html" href="creator-project-qbs.html" status="active" location="creator-projects-qbs.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-qbs.qdoc" lineno="26" documented="true" subtype="page" title="Setting Up Qbs" fulltitle="Setting Up Qbs" subtitle="" module="Qt Creator">
+            <contents name="building-qbs" title="Building Qbs" level="1"/>
+            <contents name="specifying-qbs-settings" title="Specifying Qbs Settings" level="1"/>
+            <contents name="related-topics" title="Related Topics" level="1"/>
+        </page>
+        <page name="creator-editor-settings.html" href="creator-editor-settings.html" status="active" location="creator-projects-settings-editor.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/projects/creator-only/creator-projects-settings-editor.qdoc" lineno="32" documented="true" subtype="page" title="Specifying Editor Settings" fulltitle="Specifying Editor Settings" subtitle="" module="Qt Creator"/>
+        <page name="creator-qml-modules-with-plugins.html" href="creator-qml-modules-with-plugins.html" status="active" location="qtquick-modules-with-plugins.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/creator-only/qtquick-modules-with-plugins.qdoc" lineno="32" documented="true" subtype="page" title="Using QML Modules with Plugins" fulltitle="Using QML Modules with Plugins" subtitle="" module="Qt Creator">
+            <contents name="registering-qml-types" title="Registering QML Types" level="1"/>
+            <contents name="generating-qmltypes-files" title="Generating qmltypes Files" level="1"/>
+            <contents name="dumping-plugins-automatically" title="Dumping Plugins Automatically" level="2"/>
+            <contents name="importing-qml-modules" title="Importing QML Modules" level="1"/>
+            <contents name="running-qml-modules-in-design-mode" title="Running QML Modules in Design Mode" level="1"/>
+        </page>
+        <page name="quick-projects.html" href="quick-projects.html" status="active" location="qtquick-creating.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/creator-only/qtquick-creating.qdoc" lineno="32" documented="true" subtype="page" title="Creating Qt Quick Projects" fulltitle="Creating Qt Quick Projects" subtitle="" module="Qt Creator">
+            <contents name="creating-empty-qt-quick-applications" title="Creating Empty Qt Quick Applications" level="1"/>
+            <contents name="creating-qt-quick-controls-applications" title="Creating Qt Quick Controls Applications" level="1"/>
+            <contents name="creating-qt-quick-ui-projects" title="Creating Qt Quick UI Projects" level="1"/>
+        </page>
+        <page name="creator-live-preview.html" href="creator-live-preview.html" status="active" location="qtquick-live-preview.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/qtquick-live-preview.qdoc" lineno="26" documented="true" subtype="page" title="Previewing" fulltitle="Previewing" subtitle="" module="Qt Creator"/>
+        <page name="quick-property-bindings.html" href="quick-property-bindings.html" status="active" location="qtquick-connection-editor-bindings.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/qtquick-connection-editor-bindings.qdoc" lineno="26" documented="true" subtype="page" title="Adding Bindings Between Properties" fulltitle="Adding Bindings Between Properties" subtitle="" module="Qt Creator"/>
+        <page name="quick-export-to-qml.html" href="quick-export-to-qml.html" status="active" location="qtquick-exporting-qml.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/creator-only/qtquick-exporting-qml.qdoc" lineno="32" documented="true" subtype="page" title="Exporting Designs from Graphics Software" fulltitle="Exporting Designs from Graphics Software" subtitle="" module="Qt Creator">
+            <contents name="exporting-from-adobe-photoshop-to-qml" title="Exporting from Adobe Photoshop to QML" level="1"/>
+            <contents name="exporting-from-gimp-to-qml" title="Exporting from GIMP to QML" level="1"/>
+            <contents name="conversion-rules" title="Conversion Rules" level="2"/>
+            <contents name="preparing-files-for-conversion" title="Preparing Files for Conversion" level="2"/>
+            <contents name="running-the-export-script" title="Running the Export Script" level="2"/>
+        </page>
+        <page name="quick-components.html" href="quick-components.html" status="active" location="qtquick-components.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/qtquick-components.qdoc" lineno="32" documented="true" subtype="page" title="Creating Components" fulltitle="Creating Components" subtitle="" module="Qt Creator">
+            <contents name="adding-components-to-designs" title="Adding Components to Designs" level="1"/>
+            <contents name="using-basic-qml-types" title="Using Basic QML Types" level="1"/>
+            <contents name="using-data-models" title="Using Data Models" level="1"/>
+            <contents name="positioning-items-in-uis" title="Positioning Items in UIs" level="1"/>
+            <contents name="setting-bindings" title="Setting Bindings" level="2"/>
+            <contents name="setting-anchors-and-margins" title="Setting Anchors and Margins" level="2"/>
+            <contents name="using-positioners" title="Using Positioners" level="2"/>
+            <contents name="using-layouts" title="Using Layouts" level="2"/>
+            <contents name="editing-stack-layouts" title="Editing Stack Layouts" level="2"/>
+            <contents name="organizing-items" title="Organizing Items" level="2"/>
+            <contents name="adding-user-interaction-methods" title="Adding User Interaction Methods" level="1"/>
+            <contents name="history-of-qt-quick-controls" title="History of Qt Quick Controls" level="1"/>
+            <contents name="creating-components-in-design-mode" title="Creating Components in Design Mode" level="1"/>
+            <contents name="moving-within-components" title="Moving Within Components" level="1"/>
+        </page>
+        <page name="qtquick-iso-icon-browser.html" href="qtquick-iso-icon-browser.html" status="active" location="qtquick-iso-icon-browser.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/creator-only/qtquick-iso-icon-browser.qdoc" lineno="26" documented="true" subtype="page" title="Browsing ISO 7000 Icons" fulltitle="Browsing ISO 7000 Icons" subtitle="" module="Qt Creator">
+            <contents name="using-iso-icons-in-applications" title="Using ISO Icons in Applications" level="1"/>
+        </page>
+        <page name="creator-using-qt-quick-designer.html" href="creator-using-qt-quick-designer.html" status="active" location="qtquick-designer.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/qtquick-designer.qdoc" lineno="32" documented="true" subtype="page" title="Editing QML Files in Design Mode" fulltitle="Editing QML Files in Design Mode" subtitle="" module="Qt Creator">
+            <contents name="snapping-to-parent-and-sibling-items" title="Snapping to Parent and Sibling Items" level="1"/>
+            <contents name="hiding-item-boundaries" title="Hiding Item Boundaries" level="1"/>
+            <contents name="selecting-items" title="Selecting Items" level="1"/>
+            <contents name="previewing-component-size" title="Previewing Component Size" level="1"/>
+            <contents name="specifying-canvas-size" title="Specifying Canvas Size" level="1"/>
+            <contents name="refreshing-the-canvas" title="Refreshing the Canvas" level="1"/>
+        </page>
+        <page name="creator-developing-qnx.html" href="creator-developing-qnx.html" status="active" location="creator-developing-qnx.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qnx/creator-developing-qnx.qdoc" lineno="31" documented="true" subtype="page" title="Connecting QNX Devices" fulltitle="Connecting QNX Devices" subtitle="" module="Qt Creator">
+            <contents name="adding-a-qnx-neutrino-device-in-qt-creator" title="Adding a QNX Neutrino Device in Qt Creator" level="1"/>
+            <contents name="adding-kits-for-qnx-devices" title="Adding Kits for QNX Devices" level="1"/>
+        </page>
+        <page name="creator-visual-editor.html" href="creator-visual-editor.html" status="active" location="qtquick-app-development.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/creator-only/qtquick-app-development.qdoc" lineno="32" documented="true" subtype="page" title="Developing Qt Quick Applications" fulltitle="Developing Qt Quick Applications" subtitle="" module="Qt Creator">
+            <contents name="related-topics" title="Related Topics" level="1"/>
+        </page>
+        <page name="qmldesigner-connections.html" href="qmldesigner-connections.html" status="active" location="qtquick-connection-editor.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/qtquick-connection-editor.qdoc" lineno="26" documented="true" subtype="page" title="Adding Connections" fulltitle="Adding Connections" subtitle="" module="Qt Creator"/>
+        <page name="quick-converting-ui-projects.html" href="quick-converting-ui-projects.html" status="active" location="qtquick-from-qmlproject-to-pro.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/qtquick-from-qmlproject-to-pro.qdoc" lineno="26" documented="true" subtype="page" title="Converting UI Projects to Applications" fulltitle="Converting UI Projects to Applications" subtitle="" module="Qt Creator">
+            <contents name="converting-projects" title="Converting Projects" level="1"/>
+            <contents name="adding-qt-quick-timeline-module-to-qt-installations" title="Adding Qt Quick Timeline Module to Qt Installations" level="1"/>
+        </page>
+        <page name="index.html" href="index.html" status="active" location="qtcreator.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtcreator.qdoc" lineno="33" documented="true" subtype="page" title="Qt Creator Manual" fulltitle="Qt Creator Manual" subtitle="" module="Qt Creator"/>
+        <page name="quick-buttons.html" href="quick-buttons.html" status="active" location="qtquick-buttons.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/qtquick-buttons.qdoc" lineno="32" documented="true" subtype="page" title="Creating Buttons" fulltitle="Creating Buttons" subtitle="" module="Qt Creator"/>
+        <page name="creator-live-preview-devices.html" href="creator-live-preview-devices.html" status="active" location="qtquick-live-preview-devices.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/qtquick-live-preview-devices.qdoc" lineno="26" documented="true" subtype="page" title="Previewing on Devices" fulltitle="Previewing on Devices" subtitle="" module="Qt Creator">
+            <contents name="previewing-on-embedded-devices" title="Previewing on Embedded Devices" level="2"/>
+        </page>
+        <page name="quick-signals.html" href="quick-signals.html" status="active" location="qtquick-connection-editor-signals.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/qtquick-connection-editor-signals.qdoc" lineno="26" documented="true" subtype="page" title="Connecting Objects to Signals" fulltitle="Connecting Objects to Signals" subtitle="" module="Qt Creator"/>
+        <page name="qtquick-navigator.html" href="qtquick-navigator.html" status="active" location="qtquick-navigator.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/qtquick-navigator.qdoc" lineno="26" documented="true" subtype="page" title="Managing Item Hierarchy" fulltitle="Managing Item Hierarchy" subtitle="" module="Qt Creator">
+            <contents name="setting-the-stacking-order" title="Setting the Stacking Order" level="1"/>
+            <contents name="switching-parent-items" title="Switching Parent Items" level="1"/>
+        </page>
+        <page name="quick-connections-backend.html" href="quick-connections-backend.html" status="active" location="qtquick-connection-editor-backend.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/creator-only/qtquick-connection-editor-backend.qdoc" lineno="26" documented="true" subtype="page" title="Managing C++ Backend Objects" fulltitle="Managing C++ Backend Objects" subtitle="" module="Qt Creator"/>
+        <page name="quick-scalable-image.html" href="quick-scalable-image.html" status="active" location="qtquick-buttons.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/qtquick-buttons.qdoc" lineno="120" documented="true" subtype="page" title="Creating Scalable Buttons and Borders" fulltitle="Creating Scalable Buttons and Borders" subtitle="" module="Qt Creator"/>
+        <page name="creator-live-preview-desktop.html" href="creator-live-preview-desktop.html" status="active" location="qtquick-live-preview-desktop.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/qtquick-live-preview-desktop.qdoc" lineno="26" documented="true" subtype="page" title="Previewing on Desktop" fulltitle="Previewing on Desktop" subtitle="" module="Qt Creator"/>
+        <page name="quick-dynamic-properties.html" href="quick-dynamic-properties.html" status="active" location="qtquick-connection-editor-properties.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/qtquick-connection-editor-properties.qdoc" lineno="26" documented="true" subtype="page" title="Specifying Dynamic Properties" fulltitle="Specifying Dynamic Properties" subtitle="" module="Qt Creator"/>
+        <page name="qtcreator-toc.html" href="qtcreator-toc.html" status="active" location="qtcreator-toc.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtcreator-toc.qdoc" lineno="27" documented="true" subtype="page" title="All Topics" fulltitle="All Topics" subtitle="" module="Qt Creator"/>
+        <page name="creator-version-control.html" href="creator-version-control.html" status="active" location="creator-vcs.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/vcs/creator-only/creator-vcs.qdoc" lineno="32" documented="true" subtype="page" title="Using Version Control Systems" fulltitle="Using Version Control Systems" subtitle="" module="Qt Creator">
+            <contents name="setting-up-version-control-systems" title="Setting Up Version Control Systems" level="1"/>
+            <contents name="setting-up-general-options" title="Setting Up General Options" level="1"/>
+            <contents name="creating-vcs-repositories-for-new-projects" title="Creating VCS Repositories for New Projects" level="1"/>
+            <contents name="using-common-functions" title="Using Common Functions" level="1"/>
+            <contents name="adding-files" title="Adding Files" level="2"/>
+            <contents name="viewing-diff-output" title="Viewing Diff Output" level="2"/>
+            <contents name="viewing-versioning-history-and-change-details" title="Viewing Versioning History and Change Details" level="2"/>
+            <contents name="annotating-files" title="Annotating Files" level="2"/>
+            <contents name="committing-changes" title="Committing Changes" level="2"/>
+            <contents name="reverting-changes" title="Reverting Changes" level="2"/>
+            <contents name="viewing-status" title="Viewing Status" level="2"/>
+            <contents name="updating-the-working-tree" title="Updating the Working Tree" level="2"/>
+            <contents name="deleting-files" title="Deleting Files" level="2"/>
+        </page>
+        <page name="creator-vcs-mercurial.html" href="creator-vcs-mercurial.html" status="active" location="creator-vcs-mercurial.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/vcs/creator-only/creator-vcs-mercurial.qdoc" lineno="32" documented="true" subtype="page" title="Using Mercurial" fulltitle="Using Mercurial" subtitle="" module="Qt Creator"/>
+        <page name="creator-vcs-subversion.html" href="creator-vcs-subversion.html" status="active" location="creator-vcs-subversion.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/vcs/creator-only/creator-vcs-subversion.qdoc" lineno="32" documented="true" subtype="page" title="Using Subversion" fulltitle="Using Subversion" subtitle="" module="Qt Creator"/>
+        <page name="creator-using-qt-designer.html" href="creator-using-qt-designer.html" status="active" location="qtdesigner-overview.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/widgets/qtdesigner-overview.qdoc" lineno="32" documented="true" subtype="page" title="Developing Widget Based Applications" fulltitle="Developing Widget Based Applications" subtitle="" module="Qt Creator">
+            <contents name="code-editor-integration" title="Code Editor Integration" level="1"/>
+            <contents name="managing-image-resources" title="Managing Image Resources" level="1"/>
+            <contents name="specifying-settings-for-qt-designer" title="Specifying Settings for Qt Designer" level="1"/>
+            <contents name="previewing-forms-using-device-skins" title="Previewing Forms Using Device Skins" level="1"/>
+            <contents name="adding-widgets" title="Adding Widgets" level="1"/>
+        </page>
+        <page name="adding-plugins.html" href="adding-plugins.html" status="active" location="qtdesigner-plugins.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/widgets/qtdesigner-plugins.qdoc" lineno="32" documented="true" subtype="page" title="Adding Qt Designer Plugins" fulltitle="Adding Qt Designer Plugins" subtitle="" module="Qt Creator">
+            <contents name="locating-qt-designer-plugins" title="Locating Qt Designer Plugins" level="1"/>
+            <contents name="configuring-qt-designer-plugins-on-macos" title="Configuring Qt Designer Plugins on macOS" level="2"/>
+            <contents name="matching-build-keys" title="Matching Build Keys" level="1"/>
+        </page>
+        <page name="creator-writing-program.html" href="creator-writing-program.html" status="active" location="qtdesigner-app-tutorial.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/widgets/qtdesigner-app-tutorial.qdoc" lineno="32" documented="true" subtype="page" title="Creating a Qt Widget Based Application" fulltitle="Creating a Qt Widget Based Application" subtitle="" module="Qt Creator">
+            <contents name="creating-the-text-finder-project" title="Creating the Text Finder Project" level="1"/>
+            <contents name="filling-in-the-missing-pieces" title="Filling in the Missing Pieces" level="1"/>
+            <contents name="designing-the-user-interface" title="Designing the User Interface" level="2"/>
+            <contents name="completing-the-header-file" title="Completing the Header File" level="2"/>
+            <contents name="completing-the-source-file" title="Completing the Source File" level="2"/>
+            <contents name="creating-a-resource-file" title="Creating a Resource File" level="2"/>
+            <contents name="compiling-and-running-your-program" title="Compiling and Running Your Program" level="1"/>
+        </page>
+        <page name="creator-qml-performance-monitor.html" href="creator-qml-performance-monitor.html" status="active" location="qtquick-profiler.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/qtquick-profiler.qdoc" lineno="32" documented="true" subtype="page" title="Profiling QML Applications" fulltitle="Profiling QML Applications" subtitle="" module="Qt Creator">
+            <contents name="using-qml-profiler" title="Using QML Profiler" level="1"/>
+            <contents name="specifying-flushing-settings" title="Specifying Flushing Settings" level="1"/>
+            <contents name="attaching-to-running-qt-quick-applications" title="Attaching to Running Qt Quick Applications" level="1"/>
+            <contents name="analyzing-collected-data" title="Analyzing Collected Data" level="1"/>
+            <contents name="selecting-event-ranges" title="Selecting Event Ranges" level="2"/>
+            <contents name="understanding-the-data" title="Understanding the Data" level="2"/>
+            <contents name="analyzing-scene-graph-events" title="Analyzing Scene Graph Events" level="2"/>
+            <contents name="viewing-statistics" title="Viewing Statistics" level="1"/>
+            <contents name="visualizing-statistics-as-flame-graphs" title="Visualizing Statistics as Flame Graphs" level="2"/>
+        </page>
+        <page name="qt-quick-toolbars.html" href="qt-quick-toolbars.html" status="active" location="qtquick-toolbars.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/qtquick-toolbars.qdoc" lineno="32" documented="true" subtype="page" title="Using Qt Quick Toolbars" fulltitle="Using Qt Quick Toolbars" subtitle="" module="Qt Creator">
+            <contents name="previewing-images" title="Previewing Images" level="1"/>
+            <contents name="formatting-text" title="Formatting Text" level="1"/>
+            <contents name="previewing-animation" title="Previewing Animation" level="1"/>
+            <contents name="editing-rectangles" title="Editing Rectangles" level="1"/>
+        </page>
+        <page name="creator-vcs-cvs.html" href="creator-vcs-cvs.html" status="active" location="creator-vcs-cvs.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/vcs/creator-only/creator-vcs-cvs.qdoc" lineno="32" documented="true" subtype="page" title="Using CVS" fulltitle="Using CVS" subtitle="" module="Qt Creator"/>
+        <page name="creator-quick-ui-forms.html" href="creator-quick-ui-forms.html" status="active" location="qtquick-ui-forms.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/qtquick-ui-forms.qdoc" lineno="32" documented="true" subtype="page" title="Qt Quick UI Forms" fulltitle="Qt Quick UI Forms" subtitle="" module="Qt Creator">
+            <contents name="supported-methods" title="Supported Methods" level="1"/>
+            <contents name="javascript-functions" title="JavaScript Functions" level="2"/>
+            <contents name="qt-qml-methods" title="Qt QML Methods" level="2"/>
+            <contents name="using-qt-quick-ui-forms" title="Using Qt Quick UI Forms" level="1"/>
+        </page>
+        <page name="creator-vcs-git.html" href="creator-vcs-git.html" status="active" location="creator-vcs-git.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/vcs/creator-vcs-git.qdoc" lineno="32" documented="true" subtype="page" title="Using Git" fulltitle="Using Git" subtitle="" module="Qt Creator">
+            <contents name="using-git-for-windows" title="Using Git for Windows" level="1"/>
+            <contents name="working-with-the-current-file" title="Working with the Current File" level="1"/>
+            <contents name="viewing-git-diff" title="Viewing Git Diff" level="2"/>
+            <contents name="viewing-git-log" title="Viewing Git Log" level="2"/>
+            <contents name="viewing-annotations" title="Viewing Annotations" level="2"/>
+            <contents name="staging-changes" title="Staging Changes" level="2"/>
+            <contents name="resetting-changes" title="Resetting Changes" level="2"/>
+            <contents name="working-with-the-current-project" title="Working with the Current Project" level="1"/>
+            <contents name="cleaning-projects" title="Cleaning Projects" level="2"/>
+            <contents name="working-with-local-repositories" title="Working with Local Repositories" level="1"/>
+            <contents name="viewing-reference-log" title="Viewing Reference Log" level="2"/>
+            <contents name="viewing-git-status" title="Viewing Git Status" level="2"/>
+            <contents name="committing-changes-to-git" title="Committing Changes to Git" level="2"/>
+            <contents name="amending-commits" title="Amending Commits" level="2"/>
+            <contents name="resetting-local-repository" title="Resetting Local Repository" level="2"/>
+            <contents name="working-with-branches" title="Working with Branches" level="2"/>
+            <contents name="configuring-merge-tools" title="Configuring Merge Tools" level="3"/>
+            <contents name="applying-patches" title="Applying Patches" level="2"/>
+            <contents name="using-stashes" title="Using Stashes" level="2"/>
+            <contents name="applying-actions-to-commits" title="Applying Actions to Commits" level="1"/>
+            <contents name="initializing-git-repositories" title="Initializing Git Repositories" level="1"/>
+            <contents name="working-with-remote-repositories" title="Working with Remote Repositories" level="1"/>
+            <contents name="managing-remote-repositories" title="Managing Remote Repositories" level="2"/>
+            <contents name="using-git-with-subversion" title="Using Git with Subversion" level="2"/>
+            <contents name="reviewing-code-with-gerrit" title="Reviewing Code with Gerrit" level="2"/>
+            <contents name="working-with-git-tools" title="Working with Git Tools" level="1"/>
+        </page>
+        <page name="qmldesigner-pathview-editor.html" href="qmldesigner-pathview-editor.html" status="active" location="qtquick-pathview-editor.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/qtquick-pathview-editor.qdoc" lineno="26" documented="true" subtype="page" title="Editing PathView Properties" fulltitle="Editing PathView Properties" subtitle="" module="Qt Creator"/>
+        <page name="studio-timeline.html" href="studio-timeline.html" status="active" location="qtquick-timeline.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/qtquick-timeline.qdoc" lineno="26" documented="true" subtype="page" title="Creating Animations" fulltitle="Creating Animations" subtitle="" module="Qt Creator">
+            <contents name="enabling-the-timeline-editor" title="Enabling the Timeline Editor" level="1"/>
+            <contents name="creating-timelines" title="Creating Timelines" level="1"/>
+            <contents name="binding-animations-to-states" title="Binding Animations to States" level="2"/>
+            <contents name="managing-keyframes" title="Managing Keyframes" level="1"/>
+            <contents name="navigating-the-timeline" title="Navigating the Timeline" level="2"/>
+            <contents name="setting-keyframe-values" title="Setting Keyframe Values" level="2"/>
+            <contents name="viewing-the-animation" title="Viewing the Animation" level="1"/>
+            <contents name="editing-easing-curves" title="Editing Easing Curves" level="1"/>
+            <contents name="attaching-easing-curves-to-keyframes" title="Attaching Easing Curves to Keyframes" level="2"/>
+            <contents name="customizing-easing-curves" title="Customizing Easing Curves" level="2"/>
+            <contents name="editing-animation-curves" title="Editing Animation Curves" level="1"/>
+            <contents name="rotating-items" title="Rotating Items" level="1"/>
+        </page>
+        <page name="creator-vcs-perforce.html" href="creator-vcs-perforce.html" status="active" location="creator-vcs-perforce.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/vcs/creator-only/creator-vcs-perforce.qdoc" lineno="32" documented="true" subtype="page" title="Using Perforce" fulltitle="Using Perforce" subtitle="" module="Qt Creator">
+            <contents name="configuring-perforce" title="Configuring Perforce" level="1"/>
+            <contents name="editing-files" title="Editing Files" level="1"/>
+        </page>
+        <page name="creator-vcs-clearcase.html" href="creator-vcs-clearcase.html" status="active" location="creator-vcs-clearcase.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/vcs/creator-only/creator-vcs-clearcase.qdoc" lineno="32" documented="true" subtype="page" title="Using ClearCase" fulltitle="Using ClearCase" subtitle="" module="Qt Creator">
+            <contents name="using-gnu-diffutils-with-clearcase" title="Using GNU Diffutils with ClearCase" level="1"/>
+            <contents name="checking-out-and-checking-in" title="Checking out and Checking in" level="1"/>
+        </page>
+        <page name="quick-states.html" href="quick-states.html" status="active" location="qtquick-states.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/qtquick-states.qdoc" lineno="26" documented="true" subtype="page" title="Adding States" fulltitle="Adding States" subtitle="" module="Qt Creator">
+            <contents name="using-states" title="Using States" level="1"/>
+            <contents name="using-scxml-state-machines" title="Using SCXML State Machines" level="2"/>
+            <contents name="animating-transitions-between-states" title="Animating Transitions Between States" level="1"/>
+        </page>
+        <page name="qtquick-properties.html" href="qtquick-properties.html" status="active" location="qtquick-properties.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/qtquick-properties.qdoc" lineno="26" documented="true" subtype="page" title="Specifying Item Properties" fulltitle="Specifying Item Properties" subtitle="" module="Qt Creator">
+            <contents name="viewing-changes-in-properties" title="Viewing Changes in Properties" level="1"/>
+            <contents name="picking-colors" title="Picking Colors" level="1"/>
+            <contents name="picking-gradients" title="Picking Gradients" level="1"/>
+            <contents name="marking-text-items-for-translation" title="Marking Text Items for Translation" level="1"/>
+            <contents name="loading-placeholder-data" title="Loading Placeholder Data" level="1"/>
+            <contents name="using-dummy-models" title="Using Dummy Models" level="2"/>
+            <contents name="creating-dummy-context" title="Creating Dummy Context" level="2"/>
+            <contents name="building-transformations-on-items" title="Building Transformations on Items" level="1"/>
+            <contents name="editing-properties-inline" title="Editing Properties Inline" level="1"/>
+        </page>
+        <page name="creator-vcs-bazaar.html" href="creator-vcs-bazaar.html" status="active" location="creator-vcs-bazaar.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/vcs/creator-only/creator-vcs-bazaar.qdoc" lineno="32" documented="true" subtype="page" title="Using Bazaar" fulltitle="Using Bazaar" subtitle="" module="Qt Creator">
+            <contents name="uncommitting-revisions" title="Uncommitting Revisions" level="1"/>
+        </page>
+        <page name="transitions" href="qt-creator-transitions-example.html" status="active" location="qtquick-app-tutorial.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/creator-only/qtquick-app-tutorial.qdoc" lineno="32" documented="true" subtype="example" title="Creating a Qt Quick Application" fulltitle="Creating a Qt Quick Application" subtitle="" module="Qt Creator">
+            <contents name="creating-the-project" title="Creating the Project" level="1"/>
+            <contents name="creating-the-main-view" title="Creating the Main View" level="1"/>
+            <contents name="adding-application-logic" title="Adding Application Logic" level="1"/>
+            <contents name="adding-animation-to-the-view" title="Adding Animation to the View" level="1"/>
+            <page name="transitions/Page1Form.ui.qml" href="qt-creator-transitions-page1form-ui-qml.html" status="active" subtype="file" title="" fulltitle="Page1Form.ui.qml Example File" subtitle="transitions/Page1Form.ui.qml"/>
+            <page name="transitions/Page2Form.ui.qml" href="qt-creator-transitions-page2form-ui-qml.html" status="active" subtype="file" title="" fulltitle="Page2Form.ui.qml Example File" subtitle="transitions/Page2Form.ui.qml"/>
+            <page name="transitions/main.qml" href="qt-creator-transitions-main-qml.html" status="active" subtype="file" title="" fulltitle="main.qml Example File" subtitle="transitions/main.qml"/>
+            <page name="transitions/qml.qrc" href="qt-creator-transitions-qml-qrc.html" status="active" subtype="file" title="" fulltitle="qml.qrc Example File" subtitle="transitions/qml.qrc"/>
+            <page name="transitions/transitions.pro" href="qt-creator-transitions-transitions-pro.html" status="active" subtype="file" title="" fulltitle="transitions.pro Example File" subtitle="transitions/transitions.pro"/>
+            <page name="transitions/qt-logo.png" href="qt-creator-transitions-qt-logo-png.html" status="active" subtype="image" title="" fulltitle="qt-logo.png Image File" subtitle="transitions/qt-logo.png"/>
+        </page>
+        <page name="accelbubble" href="qt-creator-accelbubble-example.html" status="active" location="creator-mobile-app-tutorial.qdoc" filepath="C:/Users/qt/work/build/qt-creator/doc/src/qtquick/creator-only/creator-mobile-app-tutorial.qdoc" lineno="32" documented="true" subtype="example" title="Creating a Mobile Application" fulltitle="Creating a Mobile Application" subtitle="" module="Qt Creator">
+            <contents name="setting-up-the-development-environment" title="Setting up the Development Environment" level="1"/>
+            <contents name="creating-the-project" title="Creating the Project" level="1"/>
+            <contents name="creating-the-accelbubble-main-view" title="Creating the Accelbubble Main View" level="1"/>
+            <contents name="moving-the-bubble" title="Moving the Bubble" level="1"/>
+            <contents name="locking-device-orientation" title="Locking Device Orientation" level="1"/>
+            <contents name="adding-dependencies" title="Adding Dependencies" level="1"/>
+            <contents name="adding-resources" title="Adding Resources" level="1"/>
+            <contents name="running-the-application" title="Running the Application" level="1"/>
+            <page name="accelbubble/Bluebubble.svg" href="qt-creator-accelbubble-bluebubble-svg.html" status="active" subtype="file" title="" fulltitle="Bluebubble.svg Example File" subtitle="accelbubble/Bluebubble.svg"/>
+            <page name="accelbubble/Bubble.qml" href="qt-creator-accelbubble-bubble-qml.html" status="active" subtype="file" title="" fulltitle="Bubble.qml Example File" subtitle="accelbubble/Bubble.qml"/>
+            <page name="accelbubble/Page1Form.ui.qml" href="qt-creator-accelbubble-page1form-ui-qml.html" status="active" subtype="file" title="" fulltitle="Page1Form.ui.qml Example File" subtitle="accelbubble/Page1Form.ui.qml"/>
+            <page name="accelbubble/Page2Form.ui.qml" href="qt-creator-accelbubble-page2form-ui-qml.html" status="active" subtype="file" title="" fulltitle="Page2Form.ui.qml Example File" subtitle="accelbubble/Page2Form.ui.qml"/>
+            <page name="accelbubble/main.qml" href="qt-creator-accelbubble-main-qml.html" status="active" subtype="file" title="" fulltitle="main.qml Example File" subtitle="accelbubble/main.qml"/>
+            <page name="accelbubble/accelbubble.pro" href="qt-creator-accelbubble-accelbubble-pro.html" status="active" subtype="file" title="" fulltitle="accelbubble.pro Example File" subtitle="accelbubble/accelbubble.pro"/>
+            <page name="accelbubble/qml.qrc" href="qt-creator-accelbubble-qml-qrc.html" status="active" subtype="file" title="" fulltitle="qml.qrc Example File" subtitle="accelbubble/qml.qrc"/>
+        </page>
+    </namespace>
+</INDEX>

@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcamerainfo.cpp -->
+  <title>QCameraInfo Class | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-modules.html">C++ Classes</a></td><td >QCameraInfo</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCameraInfo Class</h1>
+<!-- $$$QCameraInfo-brief -->
+<p>The <a href="qcamerainfo.html">QCameraInfo</a> class provides general information about camera devices. <a href="#details">More...</a></p>
+<!-- @@@QCameraInfo -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QCameraInfo&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += multimedia</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.3</td></tr></table></div><p>This class was introduced in  Qt 5.3.</p>
+<ul>
+<li><a href="qcamerainfo-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcamerainfo.html#QCameraInfo-2">QCameraInfo</a></b>(const QCameraInfo &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcamerainfo.html#QCameraInfo-1">QCameraInfo</a></b>(const QCamera &amp;<i>camera</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcamerainfo.html#QCameraInfo">QCameraInfo</a></b>(const QByteArray &amp;<i>name</i> = QByteArray())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCameraInfo &amp;</td><td class="memItemRight bottomAlign"><b><a href="qcamerainfo.html#operator-eq">operator=</a></b>(const QCameraInfo &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcamerainfo.html#dtor.QCameraInfo">~QCameraInfo</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qcamerainfo.html#description">description</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qcamerainfo.html#deviceName">deviceName</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcamerainfo.html#isNull">isNull</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcamerainfo.html#orientation">orientation</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCamera::Position </td><td class="memItemRight bottomAlign"><b><a href="qcamerainfo.html#position">position</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcamerainfo.html#operator-not-eq">operator!=</a></b>(const QCameraInfo &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcamerainfo.html#operator-eq-eq">operator==</a></b>(const QCameraInfo &amp;<i>other</i>) const</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QCameraInfo&gt; </td><td class="memItemRight bottomAlign"><b><a href="qcamerainfo.html#availableCameras">availableCameras</a></b>(QCamera::Position <i>position</i> = QCamera::UnspecifiedPosition)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCameraInfo </td><td class="memItemRight bottomAlign"><b><a href="qcamerainfo.html#defaultCamera">defaultCamera</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCameraInfo-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qcamerainfo.html">QCameraInfo</a> lets you query for camera devices that are currently available on the system.</p>
+<p>The static functions <a href="qcamerainfo.html#defaultCamera">defaultCamera</a>() and <a href="qcamerainfo.html#availableCameras">availableCameras</a>() provide you a list of all available cameras.</p>
+<p>This example prints the name of all available cameras:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qcamerainfo.html#QCameraInfo">QCameraInfo</a></span><span class="operator">&gt;</span> cameras <span class="operator">=</span> <span class="type"><a href="qcamerainfo.html#QCameraInfo">QCameraInfo</a></span><span class="operator">::</span>availableCameras();
+  foreach (<span class="keyword">const</span> <span class="type"><a href="qcamerainfo.html#QCameraInfo">QCameraInfo</a></span> <span class="operator">&amp;</span>cameraInfo<span class="operator">,</span> cameras)
+      <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> cameraInfo<span class="operator">.</span>deviceName();
+
+</pre>
+<p>A <a href="qcamerainfo.html">QCameraInfo</a> can be used to construct a <a href="qcamera.html">QCamera</a>. The following example instantiates a <a href="qcamera.html">QCamera</a> whose camera device is named 'mycamera':</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qcamerainfo.html#QCameraInfo">QCameraInfo</a></span><span class="operator">&gt;</span> cameras <span class="operator">=</span> <span class="type"><a href="qcamerainfo.html#QCameraInfo">QCameraInfo</a></span><span class="operator">::</span>availableCameras();
+  foreach (<span class="keyword">const</span> <span class="type"><a href="qcamerainfo.html#QCameraInfo">QCameraInfo</a></span> <span class="operator">&amp;</span>cameraInfo<span class="operator">,</span> cameras) {
+      <span class="keyword">if</span> (cameraInfo<span class="operator">.</span>deviceName() <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;mycamera&quot;</span>)
+          camera <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcamera.html">QCamera</a></span>(cameraInfo);
+  }
+
+</pre>
+<p>You can also use <a href="qcamerainfo.html">QCameraInfo</a> to get general information about a camera device such as description, physical position on the system, or camera sensor orientation.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qcamera.html">QCamera</a></span> myCamera;
+  <span class="type"><a href="qcamerainfo.html#QCameraInfo">QCameraInfo</a></span> cameraInfo(myCamera);
+
+  <span class="keyword">if</span> (cameraInfo<span class="operator">.</span>position() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qcamera.html">QCamera</a></span><span class="operator">::</span>FrontFace)
+      <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;The camera is on the front face of the hardware system.&quot;</span>;
+  <span class="keyword">else</span> <span class="keyword">if</span> (cameraInfo<span class="operator">.</span>position() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qcamera.html">QCamera</a></span><span class="operator">::</span>BackFace)
+      <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;The camera is on the back face of the hardware system.&quot;</span>;
+
+  <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;The camera sensor orientation is &quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> cameraInfo<span class="operator">.</span>orientation() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot; degrees.&quot;</span>;
+
+</pre>
+</div>
+<p><b>See also </b><a href="qcamera.html">QCamera</a>.</p>
+<!-- @@@QCameraInfo -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QCameraInfo$$$QCameraInfoconstQCameraInfo& -->
+<h3 class="fn" id="QCameraInfo-2"><a name="QCameraInfo-2"></a>QCameraInfo::<span class="name">QCameraInfo</span>(const <span class="type"><a href="qcamerainfo.html#QCameraInfo">QCameraInfo</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a copy of <i>other</i>.</p>
+<!-- @@@QCameraInfo -->
+<!-- $$$QCameraInfo$$$QCameraInfoconstQCamera& -->
+<h3 class="fn" id="QCameraInfo-1"><a name="QCameraInfo-1"></a>QCameraInfo::<span class="name">QCameraInfo</span>(const <span class="type"><a href="qcamera.html">QCamera</a></span> &amp;<i>camera</i>)</h3>
+<p>Constructs a camera info object for <i>camera</i>.</p>
+<p>You can use it to query information about the <i>camera</i> object passed as argument.</p>
+<p>If the <i>camera</i> is invalid, for example when no camera device is available on the system, the <a href="qcamerainfo.html">QCameraInfo</a> object will be invalid and <a href="qcamerainfo.html#isNull">isNull</a>() will return true.</p>
+<!-- @@@QCameraInfo -->
+<!-- $$$QCameraInfo[overload1]$$$QCameraInfoconstQByteArray& -->
+<h3 class="fn" id="QCameraInfo"><a name="QCameraInfo"></a>QCameraInfo::<span class="name">QCameraInfo</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>name</i> = QByteArray())</h3>
+<p>Constructs a camera info object from a camera device <i>name</i>.</p>
+<p>If no such device exists, the <a href="qcamerainfo.html">QCameraInfo</a> object will be invalid and <a href="qcamerainfo.html#isNull">isNull</a>() will return true.</p>
+<!-- @@@QCameraInfo -->
+<!-- $$$operator=[overload1]$$$operator=constQCameraInfo& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qcamerainfo.html#QCameraInfo">QCameraInfo</a></span> &amp;QCameraInfo::<span class="name">operator=</span>(const <span class="type"><a href="qcamerainfo.html#QCameraInfo">QCameraInfo</a></span> &amp;<i>other</i>)</h3>
+<p>Sets the <a href="qcamerainfo.html">QCameraInfo</a> object to be equal to <i>other</i>.</p>
+<!-- @@@operator= -->
+<!-- $$$~QCameraInfo[overload1]$$$~QCameraInfo -->
+<h3 class="fn" id="dtor.QCameraInfo"><a name="dtor.QCameraInfo"></a>QCameraInfo::<span class="name">~QCameraInfo</span>()</h3>
+<p>Destroys the <a href="qcamerainfo.html">QCameraInfo</a>.</p>
+<!-- @@@~QCameraInfo -->
+<!-- $$$availableCameras[overload1]$$$availableCamerasQCamera::Position -->
+<h3 class="fn" id="availableCameras"><a name="availableCameras"></a><code>[static] </code><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qcamerainfo.html#QCameraInfo">QCameraInfo</a></span>&gt; QCameraInfo::<span class="name">availableCameras</span>(<span class="type"><a href="qcamera.html#Position-enum">QCamera::Position</a></span> <i>position</i> = QCamera::UnspecifiedPosition)</h3>
+<p>Returns a list of available cameras on the system which are located at <i>position</i>.</p>
+<p>If <i>position</i> is not specified or if the value is <a href="qcamera.html#Position-enum">QCamera::UnspecifiedPosition</a>, a list of all available cameras will be returned.</p>
+<!-- @@@availableCameras -->
+<!-- $$$defaultCamera[overload1]$$$defaultCamera -->
+<h3 class="fn" id="defaultCamera"><a name="defaultCamera"></a><code>[static] </code><span class="type"><a href="qcamerainfo.html#QCameraInfo">QCameraInfo</a></span> QCameraInfo::<span class="name">defaultCamera</span>()</h3>
+<p>Returns the default camera on the system.</p>
+<p>The returned object should be checked using <a href="qcamerainfo.html#isNull">isNull</a>() before being used, in case there is no default camera or no cameras at all.</p>
+<p><b>See also </b><a href="qcamerainfo.html#availableCameras">availableCameras</a>().</p>
+<!-- @@@defaultCamera -->
+<!-- $$$description[overload1]$$$description -->
+<h3 class="fn" id="description"><a name="description"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QCameraInfo::<span class="name">description</span>() const</h3>
+<p>Returns the human-readable description of the camera.</p>
+<!-- @@@description -->
+<!-- $$$deviceName[overload1]$$$deviceName -->
+<h3 class="fn" id="deviceName"><a name="deviceName"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QCameraInfo::<span class="name">deviceName</span>() const</h3>
+<p>Returns the device name of the camera</p>
+<p>This is a unique ID to identify the camera and may not be human-readable.</p>
+<!-- @@@deviceName -->
+<!-- $$$isNull[overload1]$$$isNull -->
+<h3 class="fn" id="isNull"><a name="isNull"></a><span class="type">bool</span> QCameraInfo::<span class="name">isNull</span>() const</h3>
+<p>Returns true if this <a href="qcamerainfo.html">QCameraInfo</a> is null or invalid.</p>
+<!-- @@@isNull -->
+<!-- $$$orientation[overload1]$$$orientation -->
+<h3 class="fn" id="orientation"><a name="orientation"></a><span class="type">int</span> QCameraInfo::<span class="name">orientation</span>() const</h3>
+<p>Returns the physical orientation of the camera sensor.</p>
+<p>The value is the orientation angle (clockwise, in steps of 90 degrees) of the camera sensor in relation to the display in its natural orientation.</p>
+<p>You can show the camera image in the correct orientation by rotating it by this value in the anti-clockwise direction.</p>
+<p>For example, suppose a mobile device which is naturally in portrait orientation. The back-facing camera is mounted in landscape. If the top side of the camera sensor is aligned with the right edge of the screen in natural orientation, the value should be 270. If the top side of a front-facing camera sensor is aligned with the right of the screen, the value should be 90.</p>
+<!-- @@@orientation -->
+<!-- $$$position[overload1]$$$position -->
+<h3 class="fn" id="position"><a name="position"></a><span class="type"><a href="qcamera.html#Position-enum">QCamera::Position</a></span> QCameraInfo::<span class="name">position</span>() const</h3>
+<p>Returns the physical position of the camera on the hardware system.</p>
+<!-- @@@position -->
+<!-- $$$operator!=[overload1]$$$operator!=constQCameraInfo& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> QCameraInfo::<span class="name">operator!=</span>(const <span class="type"><a href="qcamerainfo.html#QCameraInfo">QCameraInfo</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns true if this <a href="qcamerainfo.html">QCameraInfo</a> is different from <i>other</i>.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQCameraInfo& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> QCameraInfo::<span class="name">operator==</span>(const <span class="type"><a href="qcamerainfo.html#QCameraInfo">QCameraInfo</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns true if this <a href="qcamerainfo.html">QCameraInfo</a> is equal to <i>other</i>.</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

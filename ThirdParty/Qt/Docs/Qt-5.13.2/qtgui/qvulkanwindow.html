@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qvulkanwindow.cpp -->
+  <title>QVulkanWindow Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QVulkanWindow</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#coordinate-system-differences-between-opengl-and-vulkan">Coordinate system differences between OpenGL and Vulkan</a></li>
+<li class="level2"><a href="#multisampling">Multisampling</a></li>
+<li class="level2"><a href="#reading-images-back">Reading images back</a></li>
+<li class="level2"><a href="#srgb-support">sRGB support</a></li>
+<li class="level2"><a href="#validation-layers">Validation layers</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QVulkanWindow Class</h1>
+<!-- $$$QVulkanWindow-brief -->
+<p>The <a href="qvulkanwindow.html">QVulkanWindow</a> class is a convenience subclass of <a href="qwindow.html">QWindow</a> to perform Vulkan rendering. <a href="#details">More...</a></p>
+<!-- @@@QVulkanWindow -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QVulkanWindow&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.10</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qwindow.html">QWindow</a></td></tr></table></div><p>This class was introduced in  Qt 5.10.</p>
+<ul>
+<li><a href="qvulkanwindow-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#Flag-enum">Flag</a></b> { PersistentResources }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#Flag-enum">Flags</a></b></td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#QVulkanWindow">QVulkanWindow</a></b>(QWindow *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#dtor.QVulkanWindow">~QVulkanWindow</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#availablePhysicalDevices">availablePhysicalDevices</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMatrix4x4 </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#clipCorrectionMatrix">clipCorrectionMatrix</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#colorFormat">colorFormat</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#concurrentFrameCount">concurrentFrameCount</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QVulkanWindowRenderer *</td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#createRenderer">createRenderer</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#currentCommandBuffer">currentCommandBuffer</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#currentFrame">currentFrame</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#currentFramebuffer">currentFramebuffer</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#currentSwapChainImageIndex">currentSwapChainImageIndex</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#defaultRenderPass">defaultRenderPass</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#depthStencilFormat">depthStencilFormat</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> VkImage </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#depthStencilImage">depthStencilImage</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> VkImageView </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#depthStencilImageView">depthStencilImageView</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#device">device</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint32_t </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#deviceLocalMemoryIndex">deviceLocalMemoryIndex</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVulkanWindow::Flags </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#flags">flags</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#frameReady">frameReady</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QImage </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#grab">grab</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#graphicsCommandPool">graphicsCommandPool</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#graphicsQueue">graphicsQueue</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint32_t </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#hostVisibleMemoryIndex">hostVisibleMemoryIndex</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#isValid">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> VkImage </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#msaaColorImage">msaaColorImage</a></b>(int <i>idx</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> VkImageView </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#msaaColorImageView">msaaColorImageView</a></b>(int <i>idx</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#physicalDevice">physicalDevice</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const int *</td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#physicalDeviceProperties">physicalDeviceProperties</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#sampleCountFlagBits">sampleCountFlagBits</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#setDeviceExtensions">setDeviceExtensions</a></b>(const QByteArrayList &amp;<i>extensions</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#setFlags">setFlags</a></b>(QVulkanWindow::Flags <i>flags</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#setPhysicalDeviceIndex">setPhysicalDeviceIndex</a></b>(int <i>idx</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#setPreferredColorFormats">setPreferredColorFormats</a></b>(const int &amp;<i>formats</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#setSampleCount">setSampleCount</a></b>(int <i>sampleCount</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVulkanInfoVector&lt;QVulkanExtension&gt; </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#supportedDeviceExtensions">supportedDeviceExtensions</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;int&gt; </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#supportedSampleCounts">supportedSampleCounts</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#supportsGrab">supportsGrab</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> VkImage </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#swapChainImage">swapChainImage</a></b>(int <i>idx</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#swapChainImageCount">swapChainImageCount</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#swapChainImageSize">swapChainImageSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> VkImageView </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#swapChainImageView">swapChainImageView</a></b>(int <i>idx</i>) const</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> const int </td><td class="memItemRight bottomAlign"><b><a href="qvulkanwindow.html#MAX_CONCURRENT_FRAME_COUNT-var">MAX_CONCURRENT_FRAME_COUNT</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QVulkanWindow-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qvulkanwindow.html">QVulkanWindow</a> is a Vulkan-capable <a href="qwindow.html">QWindow</a> that manages a Vulkan device, a graphics queue, a command pool and buffer, a depth-stencil image and a double-buffered FIFO swapchain, while taking care of correct behavior when it comes to events like resize, special situations like not having a device queue supporting both graphics and presentation, device lost scenarios, and additional functionality like reading the rendered content back. Conceptually it is the counterpart of <a href="qopenglwindow.html">QOpenGLWindow</a> in the Vulkan world.</p>
+<p><b>Note: </b><a href="qvulkanwindow.html">QVulkanWindow</a> does not always eliminate the need to implement a fully custom <a href="qwindow.html">QWindow</a> subclass as it will not necessarily be sufficient in advanced use cases.</p><p><a href="qvulkanwindow.html">QVulkanWindow</a> can be embedded into <a href="../qtwidgets/qwidget.html">QWidget</a>-based user interfaces via <a href="../qtwidgets/qwidget.html#createWindowContainer">QWidget::createWindowContainer</a>(). This approach has a number of limitations, however. Make sure to study the <a href="../qtwidgets/qwidget.html#createWindowContainer">documentation</a> first.</p>
+<p>A typical application using <a href="qvulkanwindow.html">QVulkanWindow</a> may look like the following:</p>
+<pre class="cpp">
+
+    <span class="keyword">class</span> VulkanRenderer : <span class="keyword">public</span> <span class="type"><a href="qvulkanwindowrenderer.html">QVulkanWindowRenderer</a></span>
+    {
+    <span class="keyword">public</span>:
+        VulkanRenderer(<span class="type"><a href="qvulkanwindow.html#QVulkanWindow">QVulkanWindow</a></span> <span class="operator">*</span>w) : m_window(w) { }
+
+        <span class="type">void</span> initResources() override
+        {
+            m_devFuncs <span class="operator">=</span> m_window<span class="operator">-</span><span class="operator">&gt;</span>vulkanInstance()<span class="operator">-</span><span class="operator">&gt;</span>deviceFunctions(m_window<span class="operator">-</span><span class="operator">&gt;</span>device());
+            <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+        }
+        <span class="type">void</span> initSwapChainResources() override { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
+        <span class="type">void</span> releaseSwapChainResources() override { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
+        <span class="type">void</span> releaseResources() override { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
+
+        <span class="type">void</span> startNextFrame() override
+        {
+            VkCommandBuffer cmdBuf <span class="operator">=</span> m_window<span class="operator">-</span><span class="operator">&gt;</span>currentCommandBuffer();
+            <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+            m_devFuncs<span class="operator">-</span><span class="operator">&gt;</span>vkCmdBeginRenderPass(<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>);
+            <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+            m_window<span class="operator">-</span><span class="operator">&gt;</span>frameReady();
+        }
+
+    <span class="keyword">private</span>:
+        <span class="type"><a href="qvulkanwindow.html#QVulkanWindow">QVulkanWindow</a></span> <span class="operator">*</span>m_window;
+        <span class="type"><a href="qvulkandevicefunctions.html">QVulkanDeviceFunctions</a></span> <span class="operator">*</span>m_devFuncs;
+    };
+
+    <span class="keyword">class</span> VulkanWindow : <span class="keyword">public</span> <span class="type"><a href="qvulkanwindow.html#QVulkanWindow">QVulkanWindow</a></span>
+    {
+    <span class="keyword">public</span>:
+        <span class="type"><a href="qvulkanwindowrenderer.html">QVulkanWindowRenderer</a></span> <span class="operator">*</span>createRenderer() override {
+            <span class="keyword">return</span> <span class="keyword">new</span> VulkanRenderer(<span class="keyword">this</span>);
+        }
+    };
+
+    <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+    {
+        <span class="type"><a href="qguiapplication.html">QGuiApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+        <span class="type"><a href="qvulkaninstance.html">QVulkanInstance</a></span> inst;
+        <span class="comment">// enable the standard validation layers, when available</span>
+        inst<span class="operator">.</span>setLayers(<span class="type"><a href="../qtcore/qbytearraylist.html">QByteArrayList</a></span>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;VK_LAYER_LUNARG_standard_validation&quot;</span>);
+        <span class="keyword">if</span> (<span class="operator">!</span>inst<span class="operator">.</span>create())
+            <a href="../qtcore/qtglobal.html#qFatal">qFatal</a>(<span class="string">&quot;Failed to create Vulkan instance: %d&quot;</span><span class="operator">,</span> inst<span class="operator">.</span>errorCode());
+
+        VulkanWindow w;
+        w<span class="operator">.</span>setVulkanInstance(<span class="operator">&amp;</span>inst);
+        w<span class="operator">.</span>showMaximized();
+
+        <span class="keyword">return</span> app<span class="operator">.</span>exec();
+    }
+
+</pre>
+<p>As it can be seen in the example, the main patterns in <a href="qvulkanwindow.html">QVulkanWindow</a> usage are:</p>
+<ul>
+<li>The <a href="qvulkaninstance.html">QVulkanInstance</a> is associated via <a href="qwindow.html#setVulkanInstance">QWindow::setVulkanInstance</a>(). It is then retrievable via <a href="qwindow.html#vulkanInstance">QWindow::vulkanInstance</a>() from everywhere, on any thread.</li>
+<li>Similarly to <a href="qvulkaninstance.html">QVulkanInstance</a>, device extensions can be queried via <a href="qvulkanwindow.html#supportedDeviceExtensions">supportedDeviceExtensions</a>() before the actual initialization. Requesting an extension to be enabled is done via <a href="qvulkanwindow.html#setDeviceExtensions">setDeviceExtensions</a>(). Such calls must be made before the window becomes visible, that is, before calling <a href="qwindow.html#show">show</a>() or similar functions. Unsupported extension requests are gracefully ignored.</li>
+<li>The renderer is implemented in a <a href="qvulkanwindowrenderer.html">QVulkanWindowRenderer</a> subclass, an instance of which is created in the <a href="qvulkanwindow.html#createRenderer">createRenderer</a>() factory function.</li>
+<li>The core Vulkan commands are exposed via the <a href="qvulkanfunctions.html">QVulkanFunctions</a> object, retrievable by calling <a href="qvulkaninstance.html#functions">QVulkanInstance::functions</a>(). Device level functions are available after creating a VkDevice by calling <a href="qvulkaninstance.html#deviceFunctions">QVulkanInstance::deviceFunctions</a>().</li>
+<li>The building of the draw calls for the next frame happens in QVulkanWindowRenderer::startNextFrame(). The implementation is expected to add commands to the command buffer returned from <a href="qvulkanwindow.html#currentCommandBuffer">currentCommandBuffer</a>(). Returning from the function does not indicate that the commands are ready for submission. Rather, an explicit call to <a href="qvulkanwindow.html#frameReady">frameReady</a>() is required. This allows asynchronous generation of commands, possibly on multiple threads. Simple implementations will simply call <a href="qvulkanwindow.html#frameReady">frameReady</a>() at the end of their QVulkanWindowRenderer::startNextFrame().</li>
+<li>The basic Vulkan resources (physical device, graphics queue, a command pool, the window's main command buffer, image formats, etc.) are exposed on the <a href="qvulkanwindow.html">QVulkanWindow</a> via lightweight getter functions. Some of these are for convenience only, and applications are always free to query, create and manage additional resources directly via the Vulkan API.</li>
+<li>The renderer lives in the gui/main thread, like the window itself. This thread is then throttled to the presentation rate, similarly to how OpenGL with a swap interval of 1 would behave. However, the renderer implementation is free to utilize multiple threads in any way it sees fit. The accessors like <a href="qwindow.html#vulkanInstance">vulkanInstance</a>(), <a href="qvulkanwindow.html#currentCommandBuffer">currentCommandBuffer</a>(), etc. can be called from any thread. The submission of the main command buffer, the queueing of present, and the building of the next frame do not start until <a href="qvulkanwindow.html#frameReady">frameReady</a>() is invoked on the gui/main thread.</li>
+<li>When the window is made visible, the content is updated automatically. Further updates can be requested by calling <a href="qwindow.html#requestUpdate">QWindow::requestUpdate</a>(). To render continuously, call <a href="qwindow.html#requestUpdate">requestUpdate</a>() after <a href="qvulkanwindow.html#frameReady">frameReady</a>().</li>
+</ul>
+<p>For troubleshooting, enable the logging category <code>qt.vulkan</code>. Critical errors are printed via <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() automatically.</p>
+<a name="coordinate-system-differences-between-opengl-and-vulkan"></a>
+<h3 id="coordinate-system-differences-between-opengl-and-vulkan">Coordinate system differences between OpenGL and Vulkan</h3>
+<p>There are two notable differences to be aware of: First, with Vulkan Y points down the screen in clip space, while OpenGL uses an upwards pointing Y axis. Second, the standard OpenGL projection matrix assume a near and far plane values of -1 and 1, while Vulkan prefers 0 and 1.</p>
+<p>In order to help applications migrate from OpenGL-based code without having to flip Y coordinates in the vertex data, and to allow using <a href="qmatrix4x4.html">QMatrix4x4</a> functions like <a href="qmatrix4x4.html#perspective">QMatrix4x4::perspective</a>() while keeping the Vulkan viewport's minDepth and maxDepth set to 0 and 1, <a href="qvulkanwindow.html">QVulkanWindow</a> provides a correction matrix retrievable by calling <a href="qvulkanwindow.html#clipCorrectionMatrix">clipCorrectionMatrix</a>().</p>
+<a name="multisampling"></a>
+<h3 id="multisampling">Multisampling</h3>
+<p>While disabled by default, multisample antialiasing is fully supported by <a href="qvulkanwindow.html">QVulkanWindow</a>. Additional color buffers and resolving into the swapchain's non-multisample buffers are all managed automatically.</p>
+<p>To query the supported sample counts, call <a href="qvulkanwindow.html#supportedSampleCounts">supportedSampleCounts</a>(). When the returned set contains 4, 8, ..&#x2e;, passing one of those values to <a href="qvulkanwindow.html#setSampleCount">setSampleCount</a>() requests multisample rendering.</p>
+<p><b>Note: </b>unlike <a href="qsurfaceformat.html#setSamples">QSurfaceFormat::setSamples</a>(), the list of supported sample counts are exposed to the applications in advance and there is no automatic falling back to lower sample counts in <a href="qvulkanwindow.html#setSampleCount">setSampleCount</a>(). If the requested value is not supported, a warning is shown and a no multisampling will be used.</p><a name="reading-images-back"></a>
+<h3 id="reading-images-back">Reading images back</h3>
+<p>When <a href="qvulkanwindow.html#supportsGrab">supportsGrab</a>() returns true, <a href="qvulkanwindow.html">QVulkanWindow</a> can perform readbacks from the color buffer into a <a href="qimage.html">QImage</a>. <a href="qvulkanwindow.html#grab">grab</a>() is a slow and inefficient operation, so frequent usage should be avoided. It is nonetheless valuable since it allows applications to take screenshots, or tools and tests to process and verify the output of the GPU rendering.</p>
+<a name="srgb-support"></a>
+<h3 id="srgb-support">sRGB support</h3>
+<p>While many applications will be fine with the default behavior of <a href="qvulkanwindow.html">QVulkanWindow</a> when it comes to swapchain image formats, <a href="qvulkanwindow.html#setPreferredColorFormats">setPreferredColorFormats</a>() allows requesting a pre-defined format. This is useful most notably when working in the sRGB color space. Passing a format like <code>VK_FORMAT_B8G8R8A8_SRGB</code> results in choosing an sRGB format, when available.</p>
+<a name="validation-layers"></a>
+<h3 id="validation-layers">Validation layers</h3>
+<p>During application development it can be extremely valuable to have the Vulkan validation layers enabled. As shown in the example code above, calling <a href="qvulkaninstance.html#setLayers">QVulkanInstance::setLayers</a>() on the <a href="qvulkaninstance.html">QVulkanInstance</a> before <a href="qvulkaninstance.html#create">QVulkanInstance::create</a>() enables validation, assuming the Vulkan driver stack in the system contains the necessary layers.</p>
+<p><b>Note: </b>Be aware of platform-specific differences. On desktop platforms installing the <a href="https://www.lunarg.com/vulkan-sdk/">Vulkan SDK</a> is typically sufficient. However, Android for example requires deploying additional shared libraries together with the application, and also mandates a different list of validation layer names. See <a href="https://developer.android.com/ndk/guides/graphics/validation-layer.html">the Android Vulkan development pages</a> for more information.</p><p><b>Note: </b><a href="qvulkanwindow.html">QVulkanWindow</a> does not expose device layers since this functionality has been deprecated since version 1.0&#x2e;13 of the Vulkan API.</p></div>
+<p><b>See also </b><a href="qvulkaninstance.html">QVulkanInstance</a> and <a href="qwindow.html">QWindow</a>.</p>
+<!-- @@@QVulkanWindow -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Flag$$$PersistentResources -->
+<h3 class="flags" id="Flag-enum"><a name="Flag-enum"></a>enum QVulkanWindow::<span class="name">Flag</span><br/>flags QVulkanWindow::<span class="name">Flags</span></h3>
+<p>This enum describes the flags that can be passed to <a href="qvulkanwindow.html#setFlags">setFlags</a>().</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QVulkanWindow::PersistentResources</code></td><td class="topAlign tblval"><code>0x01</code></td><td class="topAlign">Ensures no graphics resources are released when the window becomes unexposed. The default behavior is to release everything, and reinitialize later when becoming visible again.</td></tr>
+</table></div>
+<p>The Flags type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;Flag&gt;. It stores an OR combination of Flag values.</p>
+<!-- @@@Flag -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QVulkanWindow[overload1]$$$QVulkanWindowQWindow* -->
+<h3 class="fn" id="QVulkanWindow"><a name="QVulkanWindow"></a>QVulkanWindow::<span class="name">QVulkanWindow</span>(<span class="type"><a href="qwindow.html#QWindow">QWindow</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new <a href="qvulkanwindow.html">QVulkanWindow</a> with the given <i>parent</i>.</p>
+<p>The surface type is set to <a href="qsurface.html#SurfaceType-enum">QSurface::VulkanSurface</a>.</p>
+<!-- @@@QVulkanWindow -->
+<!-- $$$~QVulkanWindow[overload1]$$$~QVulkanWindow -->
+<h3 class="fn" id="dtor.QVulkanWindow"><a name="dtor.QVulkanWindow"></a><code>[virtual] </code>QVulkanWindow::<span class="name">~QVulkanWindow</span>()</h3>
+<p>Destructor.</p>
+<!-- @@@~QVulkanWindow -->
+<!-- $$$availablePhysicalDevices[overload1]$$$availablePhysicalDevices -->
+<h3 class="fn" id="availablePhysicalDevices"><a name="availablePhysicalDevices"></a><span class="type">int</span> QVulkanWindow::<span class="name">availablePhysicalDevices</span>()</h3>
+<p>Returns the list of properties for the supported physical devices in the system.</p>
+<p><b>Note: </b>This function can be called before making the window visible.</p><!-- @@@availablePhysicalDevices -->
+<!-- $$$clipCorrectionMatrix[overload1]$$$clipCorrectionMatrix -->
+<h3 class="fn" id="clipCorrectionMatrix"><a name="clipCorrectionMatrix"></a><span class="type"><a href="qmatrix4x4.html">QMatrix4x4</a></span> QVulkanWindow::<span class="name">clipCorrectionMatrix</span>()</h3>
+<p>Returns a <a href="qmatrix4x4.html">QMatrix4x4</a> that can be used to correct for coordinate system differences between OpenGL and Vulkan.</p>
+<p>By pre-multiplying the projection matrix with this matrix, applications can continue to assume that Y is pointing upwards, and can set minDepth and maxDepth in the viewport to 0 and 1, respectively, without having to do any further corrections to the vertex Z positions. Geometry from OpenGL applications can then be used as-is, assuming a rasterization state matching the OpenGL culling and front face settings.</p>
+<!-- @@@clipCorrectionMatrix -->
+<!-- $$$colorFormat[overload1]$$$colorFormat -->
+<h3 class="fn" id="colorFormat"><a name="colorFormat"></a><span class="type">int</span> QVulkanWindow::<span class="name">colorFormat</span>() const</h3>
+<p>Returns the color buffer format used by the swapchain.</p>
+<p><b>Note: </b>Calling this function is only valid from the invocation of <a href="qvulkanwindowrenderer.html#initResources">QVulkanWindowRenderer::initResources</a>() up until <a href="qvulkanwindowrenderer.html#releaseResources">QVulkanWindowRenderer::releaseResources</a>().</p><p><b>See also </b><a href="qvulkanwindow.html#setPreferredColorFormats">setPreferredColorFormats</a>().</p>
+<!-- @@@colorFormat -->
+<!-- $$$concurrentFrameCount[overload1]$$$concurrentFrameCount -->
+<h3 class="fn" id="concurrentFrameCount"><a name="concurrentFrameCount"></a><span class="type">int</span> QVulkanWindow::<span class="name">concurrentFrameCount</span>() const</h3>
+<p>Returns the number of frames that can be potentially active at the same time.</p>
+<p><b>Note: </b>The value is constant for the entire lifetime of the <a href="qvulkanwindow.html">QVulkanWindow</a>.</p><pre class="cpp">
+
+      <span class="keyword">class</span> Renderer {
+          <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+          VkDescriptorBufferInfo m_uniformBufInfo<span class="operator">[</span><span class="type"><a href="qvulkanwindow.html#QVulkanWindow">QVulkanWindow</a></span><span class="operator">::</span>MAX_CONCURRENT_FRAME_COUNT<span class="operator">]</span>;
+      };
+
+      <span class="type">void</span> Renderer<span class="operator">::</span>startNextFrame()
+      {
+          <span class="keyword">const</span> <span class="type">int</span> count <span class="operator">=</span> m_window<span class="operator">-</span><span class="operator">&gt;</span>concurrentFrameCount();
+          <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> count; <span class="operator">+</span><span class="operator">+</span>i)
+              m_uniformBufInfo<span class="operator">[</span>i<span class="operator">]</span> <span class="operator">=</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+          <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+      }
+
+</pre>
+<p><b>See also </b><a href="qvulkanwindow.html#currentFrame">currentFrame</a>().</p>
+<!-- @@@concurrentFrameCount -->
+<!-- $$$createRenderer[overload1]$$$createRenderer -->
+<h3 class="fn" id="createRenderer"><a name="createRenderer"></a><code>[virtual] </code><span class="type"><a href="qvulkanwindowrenderer.html">QVulkanWindowRenderer</a></span> *QVulkanWindow::<span class="name">createRenderer</span>()</h3>
+<p>Returns a new instance of <a href="qvulkanwindowrenderer.html">QVulkanWindowRenderer</a>.</p>
+<p>This virtual function is called once during the lifetime of the window, at some point after making it visible for the first time.</p>
+<p>The default implementation returns null and so no rendering will be performed apart from clearing the buffers.</p>
+<p>The window takes ownership of the returned renderer object.</p>
+<!-- @@@createRenderer -->
+<!-- $$$currentCommandBuffer[overload1]$$$currentCommandBuffer -->
+<h3 class="fn" id="currentCommandBuffer"><a name="currentCommandBuffer"></a><span class="type">int</span> QVulkanWindow::<span class="name">currentCommandBuffer</span>() const</h3>
+<p>Returns The active command buffer for the current swap chain image. Implementations of QVulkanWindowRenderer::startNextFrame() are expected to add commands to this command buffer.</p>
+<p><b>Note: </b>This function must only be called from within startNextFrame() and, in case of asynchronous command generation, up until the call to <a href="qvulkanwindow.html#frameReady">frameReady</a>().</p><!-- @@@currentCommandBuffer -->
+<!-- $$$currentFrame[overload1]$$$currentFrame -->
+<h3 class="fn" id="currentFrame"><a name="currentFrame"></a><span class="type">int</span> QVulkanWindow::<span class="name">currentFrame</span>() const</h3>
+<p>Returns the current frame index in the range [0, <a href="qvulkanwindow.html#concurrentFrameCount">concurrentFrameCount</a>() - 1].</p>
+<p>Renderer implementations will have to ensure that uniform data and other dynamic resources exist in multiple copies, in order to prevent frame N altering the data used by the still-active frames N - 1, N - 2, ..&#x2e; N - <a href="qvulkanwindow.html#concurrentFrameCount">concurrentFrameCount</a>() + 1.</p>
+<p>To avoid relying on dynamic array sizes, applications can use <a href="qvulkanwindow.html#MAX_CONCURRENT_FRAME_COUNT-var">MAX_CONCURRENT_FRAME_COUNT</a> when declaring arrays. This is guaranteed to be always equal to or greater than the value returned from <a href="qvulkanwindow.html#concurrentFrameCount">concurrentFrameCount</a>(). Such arrays can then be indexed by the value returned from this function.</p>
+<pre class="cpp">
+
+      <span class="keyword">class</span> Renderer {
+          <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+          VkDescriptorBufferInfo m_uniformBufInfo<span class="operator">[</span><span class="type"><a href="qvulkanwindow.html#QVulkanWindow">QVulkanWindow</a></span><span class="operator">::</span>MAX_CONCURRENT_FRAME_COUNT<span class="operator">]</span>;
+      };
+
+      <span class="type">void</span> Renderer<span class="operator">::</span>startNextFrame()
+      {
+          VkDescriptorBufferInfo <span class="operator">&amp;</span>uniformBufInfo(m_uniformBufInfo<span class="operator">[</span>m_window<span class="operator">-</span><span class="operator">&gt;</span>currentFrame()<span class="operator">]</span>);
+          <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+      }
+
+</pre>
+<p><b>Note: </b>This function must only be called from within startNextFrame() and, in case of asynchronous command generation, up until the call to <a href="qvulkanwindow.html#frameReady">frameReady</a>().</p><p><b>See also </b><a href="qvulkanwindow.html#concurrentFrameCount">concurrentFrameCount</a>().</p>
+<!-- @@@currentFrame -->
+<!-- $$$currentFramebuffer[overload1]$$$currentFramebuffer -->
+<h3 class="fn" id="currentFramebuffer"><a name="currentFramebuffer"></a><span class="type">int</span> QVulkanWindow::<span class="name">currentFramebuffer</span>() const</h3>
+<p>Returns a VkFramebuffer for the current swapchain image using the default render pass.</p>
+<p>The framebuffer has two attachments (color, depth-stencil) when multisampling is not in use, and three (color resolve, depth-stencil, multisample color) when <a href="qvulkanwindow.html#sampleCountFlagBits">sampleCountFlagBits</a>() is greater than <code>VK_SAMPLE_COUNT_1_BIT</code>. Renderers must take this into account, for example when providing clear values.</p>
+<p><b>Note: </b>Applications are not required to use this framebuffer in case they provide their own render pass instead of using the one returned from <a href="qvulkanwindow.html#defaultRenderPass">defaultRenderPass</a>().</p><p><b>Note: </b>This function must only be called from within startNextFrame() and, in case of asynchronous command generation, up until the call to <a href="qvulkanwindow.html#frameReady">frameReady</a>().</p><p><b>See also </b><a href="qvulkanwindow.html#defaultRenderPass">defaultRenderPass</a>().</p>
+<!-- @@@currentFramebuffer -->
+<!-- $$$currentSwapChainImageIndex[overload1]$$$currentSwapChainImageIndex -->
+<h3 class="fn" id="currentSwapChainImageIndex"><a name="currentSwapChainImageIndex"></a><span class="type">int</span> QVulkanWindow::<span class="name">currentSwapChainImageIndex</span>() const</h3>
+<p>Returns the current swap chain image index in the range [0, <a href="qvulkanwindow.html#swapChainImageCount">swapChainImageCount</a>() - 1].</p>
+<p><b>Note: </b>This function must only be called from within startNextFrame() and, in case of asynchronous command generation, up until the call to <a href="qvulkanwindow.html#frameReady">frameReady</a>().</p><!-- @@@currentSwapChainImageIndex -->
+<!-- $$$defaultRenderPass[overload1]$$$defaultRenderPass -->
+<h3 class="fn" id="defaultRenderPass"><a name="defaultRenderPass"></a><span class="type">int</span> QVulkanWindow::<span class="name">defaultRenderPass</span>() const</h3>
+<p>Returns a typical render pass with one sub-pass.</p>
+<p><b>Note: </b>Applications are not required to use this render pass. However, they are then responsible for ensuring the current swap chain and depth-stencil images get transitioned from <code>VK_IMAGE_LAYOUT_UNDEFINED</code> to <code>VK_IMAGE_LAYOUT_PRESENT_SRC_KHR</code> and <code>VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL</code> either via the application's custom render pass or by other means.</p><p><b>Note: </b>Stencil read/write is not enabled in this render pass.</p><p><b>Note: </b>Calling this function is only valid from the invocation of <a href="qvulkanwindowrenderer.html#initResources">QVulkanWindowRenderer::initResources</a>() up until <a href="qvulkanwindowrenderer.html#releaseResources">QVulkanWindowRenderer::releaseResources</a>().</p><p><b>See also </b><a href="qvulkanwindow.html#currentFramebuffer">currentFramebuffer</a>().</p>
+<!-- @@@defaultRenderPass -->
+<!-- $$$depthStencilFormat[overload1]$$$depthStencilFormat -->
+<h3 class="fn" id="depthStencilFormat"><a name="depthStencilFormat"></a><span class="type">int</span> QVulkanWindow::<span class="name">depthStencilFormat</span>() const</h3>
+<p>Returns the format used by the depth-stencil buffer(s).</p>
+<p><b>Note: </b>Calling this function is only valid from the invocation of <a href="qvulkanwindowrenderer.html#initResources">QVulkanWindowRenderer::initResources</a>() up until <a href="qvulkanwindowrenderer.html#releaseResources">QVulkanWindowRenderer::releaseResources</a>().</p><!-- @@@depthStencilFormat -->
+<!-- $$$depthStencilImage[overload1]$$$depthStencilImage -->
+<h3 class="fn" id="depthStencilImage"><a name="depthStencilImage"></a><span class="type">VkImage</span> QVulkanWindow::<span class="name">depthStencilImage</span>() const</h3>
+<p>Returns the depth-stencil image.</p>
+<p><b>Note: </b>Calling this function is only valid from the invocation of <a href="qvulkanwindowrenderer.html#initSwapChainResources">QVulkanWindowRenderer::initSwapChainResources</a>() up until <a href="qvulkanwindowrenderer.html#releaseSwapChainResources">QVulkanWindowRenderer::releaseSwapChainResources</a>().</p><!-- @@@depthStencilImage -->
+<!-- $$$depthStencilImageView[overload1]$$$depthStencilImageView -->
+<h3 class="fn" id="depthStencilImageView"><a name="depthStencilImageView"></a><span class="type">VkImageView</span> QVulkanWindow::<span class="name">depthStencilImageView</span>() const</h3>
+<p>Returns the depth-stencil image view.</p>
+<p><b>Note: </b>Calling this function is only valid from the invocation of <a href="qvulkanwindowrenderer.html#initSwapChainResources">QVulkanWindowRenderer::initSwapChainResources</a>() up until <a href="qvulkanwindowrenderer.html#releaseSwapChainResources">QVulkanWindowRenderer::releaseSwapChainResources</a>().</p><!-- @@@depthStencilImageView -->
+<!-- $$$device[overload1]$$$device -->
+<h3 class="fn" id="device"><a name="device"></a><span class="type">int</span> QVulkanWindow::<span class="name">device</span>() const</h3>
+<p>Returns the active logical device.</p>
+<p><b>Note: </b>Calling this function is only valid from the invocation of <a href="qvulkanwindowrenderer.html#initResources">QVulkanWindowRenderer::initResources</a>() up until <a href="qvulkanwindowrenderer.html#releaseResources">QVulkanWindowRenderer::releaseResources</a>().</p><!-- @@@device -->
+<!-- $$$deviceLocalMemoryIndex[overload1]$$$deviceLocalMemoryIndex -->
+<h3 class="fn" id="deviceLocalMemoryIndex"><a name="deviceLocalMemoryIndex"></a><span class="type">uint32_t</span> QVulkanWindow::<span class="name">deviceLocalMemoryIndex</span>() const</h3>
+<p>Returns a device local memory type index suitable for general use.</p>
+<p><b>Note: </b>Calling this function is only valid from the invocation of <a href="qvulkanwindowrenderer.html#initResources">QVulkanWindowRenderer::initResources</a>() up until <a href="qvulkanwindowrenderer.html#releaseResources">QVulkanWindowRenderer::releaseResources</a>().</p><p><b>Note: </b>It is not guaranteed that this memory type is always suitable. The correct, cross-implementation solution - especially for device local images - is to manually pick a memory type after checking the mask returned from <code>vkGetImageMemoryRequirements</code>.</p><!-- @@@deviceLocalMemoryIndex -->
+<!-- $$$flags[overload1]$$$flags -->
+<h3 class="fn" id="flags"><a name="flags"></a><span class="type"><a href="qvulkanwindow.html#Flag-enum">QVulkanWindow::Flags</a></span> QVulkanWindow::<span class="name">flags</span>() const</h3>
+<p>Return the requested flags.</p>
+<p><b>See also </b><a href="qvulkanwindow.html#setFlags">setFlags</a>().</p>
+<!-- @@@flags -->
+<!-- $$$frameReady[overload1]$$$frameReady -->
+<h3 class="fn" id="frameReady"><a name="frameReady"></a><span class="type">void</span> QVulkanWindow::<span class="name">frameReady</span>()</h3>
+<p>This function must be called exactly once in response to each invocation of the QVulkanWindowRenderer::startNextFrame() implementation. At the time of this call, the main command buffer, exposed via <a href="qvulkanwindow.html#currentCommandBuffer">currentCommandBuffer</a>(), must have all necessary rendering commands added to it since this function will trigger submitting the commands and queuing the present command.</p>
+<p><b>Note: </b>This function must only be called from the gui/main thread, which is where <a href="qvulkanwindowrenderer.html">QVulkanWindowRenderer</a>'s functions are invoked and where the <a href="qvulkanwindow.html">QVulkanWindow</a> instance lives.</p><p><b>See also </b>QVulkanWindowRenderer::startNextFrame().</p>
+<!-- @@@frameReady -->
+<!-- $$$grab[overload1]$$$grab -->
+<h3 class="fn" id="grab"><a name="grab"></a><span class="type"><a href="qimage.html">QImage</a></span> QVulkanWindow::<span class="name">grab</span>()</h3>
+<p>Builds and renders the next frame without presenting it, then performs a blocking readback of the image content.</p>
+<p>Returns the image if the renderer's startNextFrame() implementation calls back <a href="qvulkanwindow.html#frameReady">frameReady</a>() directly. Otherwise, returns an incomplete image, that has the correct size but not the content yet. The content will be delivered via the frameGrabbed() signal in the latter case.</p>
+<p><b>Note: </b>This function should not be called when a frame is in progress (that is, <a href="qvulkanwindow.html#frameReady">frameReady</a>() has not yet been called back by the application).</p><p><b>Note: </b>This function is potentially expensive due to the additional, blocking readback.</p><p><b>Note: </b>This function currently requires that the swapchain supports usage as a transfer source (<code>VK_IMAGE_USAGE_TRANSFER_SRC_BIT</code>), and will fail otherwise.</p><!-- @@@grab -->
+<!-- $$$graphicsCommandPool[overload1]$$$graphicsCommandPool -->
+<h3 class="fn" id="graphicsCommandPool"><a name="graphicsCommandPool"></a><span class="type">int</span> QVulkanWindow::<span class="name">graphicsCommandPool</span>() const</h3>
+<p>Returns the active graphics command pool.</p>
+<p><b>Note: </b>Calling this function is only valid from the invocation of <a href="qvulkanwindowrenderer.html#initResources">QVulkanWindowRenderer::initResources</a>() up until <a href="qvulkanwindowrenderer.html#releaseResources">QVulkanWindowRenderer::releaseResources</a>().</p><!-- @@@graphicsCommandPool -->
+<!-- $$$graphicsQueue[overload1]$$$graphicsQueue -->
+<h3 class="fn" id="graphicsQueue"><a name="graphicsQueue"></a><span class="type">int</span> QVulkanWindow::<span class="name">graphicsQueue</span>() const</h3>
+<p>Returns the active graphics queue.</p>
+<p><b>Note: </b>Calling this function is only valid from the invocation of <a href="qvulkanwindowrenderer.html#initResources">QVulkanWindowRenderer::initResources</a>() up until <a href="qvulkanwindowrenderer.html#releaseResources">QVulkanWindowRenderer::releaseResources</a>().</p><!-- @@@graphicsQueue -->
+<!-- $$$hostVisibleMemoryIndex[overload1]$$$hostVisibleMemoryIndex -->
+<h3 class="fn" id="hostVisibleMemoryIndex"><a name="hostVisibleMemoryIndex"></a><span class="type">uint32_t</span> QVulkanWindow::<span class="name">hostVisibleMemoryIndex</span>() const</h3>
+<p>Returns a host visible memory type index suitable for general use.</p>
+<p>The returned memory type will be both host visible and coherent. In addition, it will also be cached, if possible.</p>
+<p><b>Note: </b>Calling this function is only valid from the invocation of <a href="qvulkanwindowrenderer.html#initResources">QVulkanWindowRenderer::initResources</a>() up until <a href="qvulkanwindowrenderer.html#releaseResources">QVulkanWindowRenderer::releaseResources</a>().</p><!-- @@@hostVisibleMemoryIndex -->
+<!-- $$$isValid[overload1]$$$isValid -->
+<h3 class="fn" id="isValid"><a name="isValid"></a><span class="type">bool</span> QVulkanWindow::<span class="name">isValid</span>() const</h3>
+<p>Returns true if this window has successfully initialized all Vulkan resources, including the swapchain.</p>
+<p><b>Note: </b>Initialization happens on the first expose event after the window is made visible.</p><!-- @@@isValid -->
+<!-- $$$msaaColorImage[overload1]$$$msaaColorImageint -->
+<h3 class="fn" id="msaaColorImage"><a name="msaaColorImage"></a><span class="type">VkImage</span> QVulkanWindow::<span class="name">msaaColorImage</span>(<span class="type">int</span> <i>idx</i>) const</h3>
+<p>Returns the specified multisample color image, or <code>VK_NULL_HANDLE</code> if multisampling is not in use.</p>
+<p><i>idx</i> must be in the range [0, <a href="qvulkanwindow.html#swapChainImageCount">swapChainImageCount</a>() - 1].</p>
+<p><b>Note: </b>Calling this function is only valid from the invocation of <a href="qvulkanwindowrenderer.html#initSwapChainResources">QVulkanWindowRenderer::initSwapChainResources</a>() up until <a href="qvulkanwindowrenderer.html#releaseSwapChainResources">QVulkanWindowRenderer::releaseSwapChainResources</a>().</p><!-- @@@msaaColorImage -->
+<!-- $$$msaaColorImageView[overload1]$$$msaaColorImageViewint -->
+<h3 class="fn" id="msaaColorImageView"><a name="msaaColorImageView"></a><span class="type">VkImageView</span> QVulkanWindow::<span class="name">msaaColorImageView</span>(<span class="type">int</span> <i>idx</i>) const</h3>
+<p>Returns the specified multisample color image view, or <code>VK_NULL_HANDLE</code> if multisampling is not in use.</p>
+<p><i>idx</i> must be in the range [0, <a href="qvulkanwindow.html#swapChainImageCount">swapChainImageCount</a>() - 1].</p>
+<p><b>Note: </b>Calling this function is only valid from the invocation of <a href="qvulkanwindowrenderer.html#initSwapChainResources">QVulkanWindowRenderer::initSwapChainResources</a>() up until <a href="qvulkanwindowrenderer.html#releaseSwapChainResources">QVulkanWindowRenderer::releaseSwapChainResources</a>().</p><!-- @@@msaaColorImageView -->
+<!-- $$$physicalDevice[overload1]$$$physicalDevice -->
+<h3 class="fn" id="physicalDevice"><a name="physicalDevice"></a><span class="type">int</span> QVulkanWindow::<span class="name">physicalDevice</span>() const</h3>
+<p>Returns the active physical device.</p>
+<p><b>Note: </b>Calling this function is only valid from the invocation of <a href="qvulkanwindowrenderer.html#preInitResources">QVulkanWindowRenderer::preInitResources</a>() up until <a href="qvulkanwindowrenderer.html#releaseResources">QVulkanWindowRenderer::releaseResources</a>().</p><!-- @@@physicalDevice -->
+<!-- $$$physicalDeviceProperties[overload1]$$$physicalDeviceProperties -->
+<h3 class="fn" id="physicalDeviceProperties"><a name="physicalDeviceProperties"></a>const <span class="type">int</span> *QVulkanWindow::<span class="name">physicalDeviceProperties</span>() const</h3>
+<p>Returns a pointer to the properties for the active physical device.</p>
+<p><b>Note: </b>Calling this function is only valid from the invocation of <a href="qvulkanwindowrenderer.html#preInitResources">QVulkanWindowRenderer::preInitResources</a>() up until <a href="qvulkanwindowrenderer.html#releaseResources">QVulkanWindowRenderer::releaseResources</a>().</p><!-- @@@physicalDeviceProperties -->
+<!-- $$$sampleCountFlagBits[overload1]$$$sampleCountFlagBits -->
+<h3 class="fn" id="sampleCountFlagBits"><a name="sampleCountFlagBits"></a><span class="type">int</span> QVulkanWindow::<span class="name">sampleCountFlagBits</span>() const</h3>
+<p>Returns the current sample count as a <code>VkSampleCountFlagBits</code> value.</p>
+<p>When targeting the default render target, the <code>rasterizationSamples</code> field of <code>VkPipelineMultisampleStateCreateInfo</code> must be set to this value.</p>
+<p><b>See also </b><a href="qvulkanwindow.html#setSampleCount">setSampleCount</a>() and <a href="qvulkanwindow.html#supportedSampleCounts">supportedSampleCounts</a>().</p>
+<!-- @@@sampleCountFlagBits -->
+<!-- $$$setDeviceExtensions[overload1]$$$setDeviceExtensionsconstQByteArrayList& -->
+<h3 class="fn" id="setDeviceExtensions"><a name="setDeviceExtensions"></a><span class="type">void</span> QVulkanWindow::<span class="name">setDeviceExtensions</span>(const <span class="type"><a href="../qtcore/qbytearraylist.html">QByteArrayList</a></span> &amp;<i>extensions</i>)</h3>
+<p>Sets the list of device <i>extensions</i> to be enabled.</p>
+<p>Unsupported extensions are ignored.</p>
+<p>The swapchain extension will always be added automatically, no need to include it in this list.</p>
+<p><b>Note: </b>This function must be called before the window is made visible or at latest in <a href="qvulkanwindowrenderer.html#preInitResources">QVulkanWindowRenderer::preInitResources</a>(), and has no effect if called afterwards.</p><!-- @@@setDeviceExtensions -->
+<!-- $$$setFlags[overload1]$$$setFlagsQVulkanWindow::Flags -->
+<h3 class="fn" id="setFlags"><a name="setFlags"></a><span class="type">void</span> QVulkanWindow::<span class="name">setFlags</span>(<span class="type"><a href="qvulkanwindow.html#Flag-enum">QVulkanWindow::Flags</a></span> <i>flags</i>)</h3>
+<p>Configures the behavior based on the provided <i>flags</i>.</p>
+<p><b>Note: </b>This function must be called before the window is made visible or at latest in <a href="qvulkanwindowrenderer.html#preInitResources">QVulkanWindowRenderer::preInitResources</a>(), and has no effect if called afterwards.</p><p><b>See also </b><a href="qvulkanwindow.html#flags">flags</a>().</p>
+<!-- @@@setFlags -->
+<!-- $$$setPhysicalDeviceIndex[overload1]$$$setPhysicalDeviceIndexint -->
+<h3 class="fn" id="setPhysicalDeviceIndex"><a name="setPhysicalDeviceIndex"></a><span class="type">void</span> QVulkanWindow::<span class="name">setPhysicalDeviceIndex</span>(<span class="type">int</span> <i>idx</i>)</h3>
+<p>Requests the usage of the physical device with index <i>idx</i>. The index corresponds to the list returned from <a href="qvulkanwindow.html#availablePhysicalDevices">availablePhysicalDevices</a>().</p>
+<p>By default the first physical device is used.</p>
+<p><b>Note: </b>This function must be called before the window is made visible or at latest in <a href="qvulkanwindowrenderer.html#preInitResources">QVulkanWindowRenderer::preInitResources</a>(), and has no effect if called afterwards.</p><!-- @@@setPhysicalDeviceIndex -->
+<!-- $$$setPreferredColorFormats[overload1]$$$setPreferredColorFormatsconstint& -->
+<h3 class="fn" id="setPreferredColorFormats"><a name="setPreferredColorFormats"></a><span class="type">void</span> QVulkanWindow::<span class="name">setPreferredColorFormats</span>(const <span class="type">int</span> &amp;<i>formats</i>)</h3>
+<p>Sets the preferred <i>formats</i> of the swapchain.</p>
+<p>By default no application-preferred format is set. In this case the surface's preferred format will be used or, in absence of that, <code>VK_FORMAT_B8G8R8A8_UNORM</code>.</p>
+<p>The list in <i>formats</i> is ordered. If the first format is not supported, the second will be considered, and so on. When no formats in the list are supported, the behavior is the same as in the default case.</p>
+<p>To query the actual format after initialization, call <a href="qvulkanwindow.html#colorFormat">colorFormat</a>().</p>
+<p><b>Note: </b>This function must be called before the window is made visible or at latest in <a href="qvulkanwindowrenderer.html#preInitResources">QVulkanWindowRenderer::preInitResources</a>(), and has no effect if called afterwards.</p><p><b>Note: </b>Reimplementing <a href="qvulkanwindowrenderer.html#preInitResources">QVulkanWindowRenderer::preInitResources</a>() allows dynamically examining the list of supported formats, should that be desired. There the surface is retrievable via QVulkanInstace::surfaceForWindow(), while this function can still safely be called to affect the later stages of initialization.</p><p><b>See also </b><a href="qvulkanwindow.html#colorFormat">colorFormat</a>().</p>
+<!-- @@@setPreferredColorFormats -->
+<!-- $$$setSampleCount[overload1]$$$setSampleCountint -->
+<h3 class="fn" id="setSampleCount"><a name="setSampleCount"></a><span class="type">void</span> QVulkanWindow::<span class="name">setSampleCount</span>(<span class="type">int</span> <i>sampleCount</i>)</h3>
+<p>Requests multisample antialiasing with the given <i>sampleCount</i>. The valid values are 1, 2, 4, 8, ..&#x2e; up until the maximum value supported by the physical device.</p>
+<p>When the sample count is greater than 1, <a href="qvulkanwindow.html">QVulkanWindow</a> will create a multisample color buffer instead of simply targeting the swapchain's images. The rendering in the multisample buffer will get resolved into the non-multisample buffers at the end of each frame.</p>
+<p>To examine the list of supported sample counts, call <a href="qvulkanwindow.html#supportedSampleCounts">supportedSampleCounts</a>().</p>
+<p>When setting up the rendering pipeline, call <a href="qvulkanwindow.html#sampleCountFlagBits">sampleCountFlagBits</a>() to query the active sample count as a <code>VkSampleCountFlagBits</code> value.</p>
+<p><b>Note: </b>This function must be called before the window is made visible or at latest in <a href="qvulkanwindowrenderer.html#preInitResources">QVulkanWindowRenderer::preInitResources</a>(), and has no effect if called afterwards.</p><p><b>See also </b><a href="qvulkanwindow.html#supportedSampleCounts">supportedSampleCounts</a>() and <a href="qvulkanwindow.html#sampleCountFlagBits">sampleCountFlagBits</a>().</p>
+<!-- @@@setSampleCount -->
+<!-- $$$supportedDeviceExtensions[overload1]$$$supportedDeviceExtensions -->
+<h3 class="fn" id="supportedDeviceExtensions"><a name="supportedDeviceExtensions"></a><span class="type"><a href="qvulkaninfovector.html">QVulkanInfoVector</a></span>&lt;<span class="type"><a href="qvulkanextension.html">QVulkanExtension</a></span>&gt; QVulkanWindow::<span class="name">supportedDeviceExtensions</span>()</h3>
+<p>Returns the list of the extensions that are supported by logical devices created from the physical device selected by <a href="qvulkanwindow.html#setPhysicalDeviceIndex">setPhysicalDeviceIndex</a>().</p>
+<p><b>Note: </b>This function can be called before making the window visible.</p><!-- @@@supportedDeviceExtensions -->
+<!-- $$$supportedSampleCounts[overload1]$$$supportedSampleCounts -->
+<h3 class="fn" id="supportedSampleCounts"><a name="supportedSampleCounts"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type">int</span>&gt; QVulkanWindow::<span class="name">supportedSampleCounts</span>()</h3>
+<p>Returns the set of supported sample counts when using the physical device selected by <a href="qvulkanwindow.html#setPhysicalDeviceIndex">setPhysicalDeviceIndex</a>(), as a sorted vector.</p>
+<p>By default <a href="qvulkanwindow.html">QVulkanWindow</a> uses a sample count of 1. By calling <a href="qvulkanwindow.html#setSampleCount">setSampleCount</a>() with a different value (2, 4, 8, ..&#x2e;) from the set returned by this function, multisample anti-aliasing can be requested.</p>
+<p><b>Note: </b>This function can be called before making the window visible.</p><p><b>See also </b><a href="qvulkanwindow.html#setSampleCount">setSampleCount</a>().</p>
+<!-- @@@supportedSampleCounts -->
+<!-- $$$supportsGrab[overload1]$$$supportsGrab -->
+<h3 class="fn" id="supportsGrab"><a name="supportsGrab"></a><span class="type">bool</span> QVulkanWindow::<span class="name">supportsGrab</span>() const</h3>
+<p>Returns true if the swapchain supports usage as transfer source, meaning <a href="qvulkanwindow.html#grab">grab</a>() is functional.</p>
+<p><b>Note: </b>Calling this function is only valid from the invocation of <a href="qvulkanwindowrenderer.html#initSwapChainResources">QVulkanWindowRenderer::initSwapChainResources</a>() up until <a href="qvulkanwindowrenderer.html#releaseSwapChainResources">QVulkanWindowRenderer::releaseSwapChainResources</a>().</p><!-- @@@supportsGrab -->
+<!-- $$$swapChainImage[overload1]$$$swapChainImageint -->
+<h3 class="fn" id="swapChainImage"><a name="swapChainImage"></a><span class="type">VkImage</span> QVulkanWindow::<span class="name">swapChainImage</span>(<span class="type">int</span> <i>idx</i>) const</h3>
+<p>Returns the specified swap chain image.</p>
+<p><i>idx</i> must be in the range [0, <a href="qvulkanwindow.html#swapChainImageCount">swapChainImageCount</a>() - 1].</p>
+<p><b>Note: </b>Calling this function is only valid from the invocation of <a href="qvulkanwindowrenderer.html#initSwapChainResources">QVulkanWindowRenderer::initSwapChainResources</a>() up until <a href="qvulkanwindowrenderer.html#releaseSwapChainResources">QVulkanWindowRenderer::releaseSwapChainResources</a>().</p><!-- @@@swapChainImage -->
+<!-- $$$swapChainImageCount[overload1]$$$swapChainImageCount -->
+<h3 class="fn" id="swapChainImageCount"><a name="swapChainImageCount"></a><span class="type">int</span> QVulkanWindow::<span class="name">swapChainImageCount</span>() const</h3>
+<p>Returns the number of images in the swap chain.</p>
+<p><b>Note: </b>Accessing this is necessary when providing a custom render pass and framebuffer. The framebuffer is specific to the current swapchain image and hence the application must provide multiple framebuffers.</p><p><b>Note: </b>Calling this function is only valid from the invocation of <a href="qvulkanwindowrenderer.html#initSwapChainResources">QVulkanWindowRenderer::initSwapChainResources</a>() up until <a href="qvulkanwindowrenderer.html#releaseSwapChainResources">QVulkanWindowRenderer::releaseSwapChainResources</a>().</p><!-- @@@swapChainImageCount -->
+<!-- $$$swapChainImageSize[overload1]$$$swapChainImageSize -->
+<h3 class="fn" id="swapChainImageSize"><a name="swapChainImageSize"></a><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QVulkanWindow::<span class="name">swapChainImageSize</span>() const</h3>
+<p>Returns the image size of the swapchain.</p>
+<p>This usually matches the size of the window, but may also differ in case <code>vkGetPhysicalDeviceSurfaceCapabilitiesKHR</code> reports a fixed size.</p>
+<p><b>Note: </b>Calling this function is only valid from the invocation of <a href="qvulkanwindowrenderer.html#initSwapChainResources">QVulkanWindowRenderer::initSwapChainResources</a>() up until <a href="qvulkanwindowrenderer.html#releaseSwapChainResources">QVulkanWindowRenderer::releaseSwapChainResources</a>().</p><!-- @@@swapChainImageSize -->
+<!-- $$$swapChainImageView[overload1]$$$swapChainImageViewint -->
+<h3 class="fn" id="swapChainImageView"><a name="swapChainImageView"></a><span class="type">VkImageView</span> QVulkanWindow::<span class="name">swapChainImageView</span>(<span class="type">int</span> <i>idx</i>) const</h3>
+<p>Returns the specified swap chain image view.</p>
+<p><i>idx</i> must be in the range [0, <a href="qvulkanwindow.html#swapChainImageCount">swapChainImageCount</a>() - 1].</p>
+<p><b>Note: </b>Calling this function is only valid from the invocation of <a href="qvulkanwindowrenderer.html#initSwapChainResources">QVulkanWindowRenderer::initSwapChainResources</a>() up until <a href="qvulkanwindowrenderer.html#releaseSwapChainResources">QVulkanWindowRenderer::releaseSwapChainResources</a>().</p><!-- @@@swapChainImageView -->
+</div>
+<div class="vars">
+<h2>Member Variable Documentation</h2>
+<!-- $$$MAX_CONCURRENT_FRAME_COUNT -->
+<h3 class="fn" id="MAX_CONCURRENT_FRAME_COUNT-var"><a name="MAX_CONCURRENT_FRAME_COUNT-var"></a>const <span class="type">int</span> QVulkanWindow::<span class="name">MAX_CONCURRENT_FRAME_COUNT</span></h3>
+<p>This variable holds a constant value that is always equal to or greater than the maximum value of <a href="qvulkanwindow.html#concurrentFrameCount">concurrentFrameCount</a>().</p>
+<!-- @@@MAX_CONCURRENT_FRAME_COUNT -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

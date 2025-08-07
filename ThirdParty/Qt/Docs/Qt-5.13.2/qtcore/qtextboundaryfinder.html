@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtextboundaryfinder.cpp -->
+  <title>QTextBoundaryFinder Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QTextBoundaryFinder</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QTextBoundaryFinder Class</h1>
+<!-- $$$QTextBoundaryFinder-brief -->
+<p>The <a href="qtextboundaryfinder.html">QTextBoundaryFinder</a> class provides a way of finding Unicode text boundaries in a string. <a href="#details">More...</a></p>
+<!-- @@@QTextBoundaryFinder -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QTextBoundaryFinder&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.4</td></tr></table></div><p>This class was introduced in  Qt 4.4.</p>
+<ul>
+<li><a href="qtextboundaryfinder-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qtextboundaryfinder.html#BoundaryReason-enum">BoundaryReason</a></b> { NotAtBoundary, BreakOpportunity, StartOfItem, EndOfItem, MandatoryBreak, SoftHyphen }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qtextboundaryfinder.html#BoundaryReason-enum">BoundaryReasons</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qtextboundaryfinder.html#BoundaryType-enum">BoundaryType</a></b> { Grapheme, Word, Line, Sentence }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtextboundaryfinder.html#QTextBoundaryFinder-3">QTextBoundaryFinder</a></b>(QTextBoundaryFinder::BoundaryType <i>type</i>, const QChar *<i>chars</i>, int <i>length</i>, unsigned char *<i>buffer</i> = nullptr, int <i>bufferSize</i> = 0)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtextboundaryfinder.html#QTextBoundaryFinder-2">QTextBoundaryFinder</a></b>(QTextBoundaryFinder::BoundaryType <i>type</i>, const QString &amp;<i>string</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtextboundaryfinder.html#QTextBoundaryFinder-1">QTextBoundaryFinder</a></b>(const QTextBoundaryFinder &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtextboundaryfinder.html#QTextBoundaryFinder">QTextBoundaryFinder</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QTextBoundaryFinder &amp;</td><td class="memItemRight bottomAlign"><b><a href="qtextboundaryfinder.html#operator-eq">operator=</a></b>(const QTextBoundaryFinder &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtextboundaryfinder.html#dtor.QTextBoundaryFinder">~QTextBoundaryFinder</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QTextBoundaryFinder::BoundaryReasons </td><td class="memItemRight bottomAlign"><b><a href="qtextboundaryfinder.html#boundaryReasons">boundaryReasons</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qtextboundaryfinder.html#isAtBoundary">isAtBoundary</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qtextboundaryfinder.html#isValid">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qtextboundaryfinder.html#position">position</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtextboundaryfinder.html#setPosition">setPosition</a></b>(int <i>position</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qtextboundaryfinder.html#string">string</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtextboundaryfinder.html#toEnd">toEnd</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qtextboundaryfinder.html#toNextBoundary">toNextBoundary</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qtextboundaryfinder.html#toPreviousBoundary">toPreviousBoundary</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtextboundaryfinder.html#toStart">toStart</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QTextBoundaryFinder::BoundaryType </td><td class="memItemRight bottomAlign"><b><a href="qtextboundaryfinder.html#type">type</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QTextBoundaryFinder-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qtextboundaryfinder.html">QTextBoundaryFinder</a> allows to find Unicode text boundaries in a string, accordingly to the Unicode text boundary specification (see <a href="http://www.unicode.org/reports/tr14/">Unicode Standard Annex #14</a> and <a href="http://www.unicode.org/reports/tr29/">Unicode Standard Annex #29</a>).</p>
+<p><a href="qtextboundaryfinder.html">QTextBoundaryFinder</a> can operate on a <a href="qstring.html">QString</a> in four possible modes depending on the value of <i>BoundaryType</i>.</p>
+<p>Units of Unicode characters that make up what the user thinks of as a character or basic unit of the language are here called Grapheme clusters. The two unicode characters 'A' + diaeresis do for example form one grapheme cluster as the user thinks of them as one character, yet it is in this case represented by two unicode code points (see <a href="http://www.unicode.org/reports/tr29/#Grapheme_Cluster_Boundaries">http://www.unicode.org/reports/tr29/#Grapheme_Cluster_Boundaries</a>).</p>
+<p>Word boundaries are there to locate the start and end of what a language considers to be a word (see <a href="http://www.unicode.org/reports/tr29/#Word_Boundaries">http://www.unicode.org/reports/tr29/#Word_Boundaries</a>).</p>
+<p>Line break boundaries give possible places where a line break might happen and sentence boundaries will show the beginning and end of whole sentences (see <a href="http://www.unicode.org/reports/tr29/#Sentence_Boundaries">http://www.unicode.org/reports/tr29/#Sentence_Boundaries</a> and <a href="http://www.unicode.org/reports/tr14/">http://www.unicode.org/reports/tr14/</a>).</p>
+<p>The first position in a string is always a valid boundary and refers to the position before the first character. The last position at the length of the string is also valid and refers to the position after the last character.</p>
+</div>
+<!-- @@@QTextBoundaryFinder -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$BoundaryReason$$$NotAtBoundary$$$BreakOpportunity$$$StartOfItem$$$EndOfItem$$$MandatoryBreak$$$SoftHyphen -->
+<h3 class="flags" id="BoundaryReason-enum"><a name="BoundaryReason-enum"></a>enum QTextBoundaryFinder::<span class="name">BoundaryReason</span><br/>flags QTextBoundaryFinder::<span class="name">BoundaryReasons</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QTextBoundaryFinder::NotAtBoundary</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The boundary finder is not at a boundary position.</td></tr>
+<tr><td class="topAlign"><code>QTextBoundaryFinder::BreakOpportunity</code></td><td class="topAlign tblval"><code>0x1f</code></td><td class="topAlign">The boundary finder is at a break opportunity position. Such a break opportunity might also be an item boundary (either StartOfItem, EndOfItem, or combination of both), a mandatory line break, or a soft hyphen.</td></tr>
+<tr><td class="topAlign"><code>QTextBoundaryFinder::StartOfItem</code></td><td class="topAlign tblval"><code>0x20</code></td><td class="topAlign">Since 5.0&#x2e; The boundary finder is at the start of a grapheme, a word, a sentence, or a line.</td></tr>
+<tr><td class="topAlign"><code>QTextBoundaryFinder::EndOfItem</code></td><td class="topAlign tblval"><code>0x40</code></td><td class="topAlign">Since 5.0&#x2e; The boundary finder is at the end of a grapheme, a word, a sentence, or a line.</td></tr>
+<tr><td class="topAlign"><code>QTextBoundaryFinder::MandatoryBreak</code></td><td class="topAlign tblval"><code>0x80</code></td><td class="topAlign">Since 5.0&#x2e; The boundary finder is at the end of line (can occur for a Line boundary type only).</td></tr>
+<tr><td class="topAlign"><code>QTextBoundaryFinder::SoftHyphen</code></td><td class="topAlign tblval"><code>0x100</code></td><td class="topAlign">The boundary finder is at the soft hyphen (can occur for a Line boundary type only).</td></tr>
+</table></div>
+<p>The BoundaryReasons type is a typedef for <a href="qflags.html">QFlags</a>&lt;BoundaryReason&gt;. It stores an OR combination of BoundaryReason values.</p>
+<!-- @@@BoundaryReason -->
+<!-- $$$BoundaryType$$$Grapheme$$$Word$$$Sentence$$$Line -->
+<h3 class="fn" id="BoundaryType-enum"><a name="BoundaryType-enum"></a>enum QTextBoundaryFinder::<span class="name">BoundaryType</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QTextBoundaryFinder::Grapheme</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Finds a grapheme which is the smallest boundary. It including letters, punctuation marks, numerals and more.</td></tr>
+<tr><td class="topAlign"><code>QTextBoundaryFinder::Word</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Finds a word.</td></tr>
+<tr><td class="topAlign"><code>QTextBoundaryFinder::Line</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">Finds possible positions for breaking the text into multiple lines.</td></tr>
+<tr><td class="topAlign"><code>QTextBoundaryFinder::Sentence</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Finds sentence boundaries. These include periods, question marks etc.</td></tr>
+</table></div>
+<!-- @@@BoundaryType -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QTextBoundaryFinder$$$QTextBoundaryFinderQTextBoundaryFinder::BoundaryTypeconstQChar*intunsignedchar*int -->
+<h3 class="fn" id="QTextBoundaryFinder-3"><a name="QTextBoundaryFinder-3"></a>QTextBoundaryFinder::<span class="name">QTextBoundaryFinder</span>(<span class="type"><a href="qtextboundaryfinder.html#BoundaryType-enum">QTextBoundaryFinder::BoundaryType</a></span> <i>type</i>, const <span class="type"><a href="qchar.html">QChar</a></span> *<i>chars</i>, <span class="type">int</span> <i>length</i>, <span class="type">unsigned</span> <span class="type">char</span> *<i>buffer</i> = nullptr, <span class="type">int</span> <i>bufferSize</i> = 0)</h3>
+<p>Creates a <a href="qtextboundaryfinder.html">QTextBoundaryFinder</a> object of <i>type</i> operating on <i>chars</i> with <i>length</i>.</p>
+<p><i>buffer</i> is an optional working buffer of size <i>bufferSize</i> you can pass to the <a href="qtextboundaryfinder.html">QTextBoundaryFinder</a>. If the buffer is large enough to hold the working data required (bufferSize &gt;= length + 1), it will use this instead of allocating its own buffer.</p>
+<p><b>Warning:</b> <a href="qtextboundaryfinder.html">QTextBoundaryFinder</a> does not create a copy of <i>chars</i>. It is the application programmer's responsibility to ensure the array is allocated for as long as the <a href="qtextboundaryfinder.html">QTextBoundaryFinder</a> object stays alive. The same applies to <i>buffer</i>.</p>
+<!-- @@@QTextBoundaryFinder -->
+<!-- $$$QTextBoundaryFinder$$$QTextBoundaryFinderQTextBoundaryFinder::BoundaryTypeconstQString& -->
+<h3 class="fn" id="QTextBoundaryFinder-2"><a name="QTextBoundaryFinder-2"></a>QTextBoundaryFinder::<span class="name">QTextBoundaryFinder</span>(<span class="type"><a href="qtextboundaryfinder.html#BoundaryType-enum">QTextBoundaryFinder::BoundaryType</a></span> <i>type</i>, const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>string</i>)</h3>
+<p>Creates a <a href="qtextboundaryfinder.html">QTextBoundaryFinder</a> object of <i>type</i> operating on <i>string</i>.</p>
+<!-- @@@QTextBoundaryFinder -->
+<!-- $$$QTextBoundaryFinder$$$QTextBoundaryFinderconstQTextBoundaryFinder& -->
+<h3 class="fn" id="QTextBoundaryFinder-1"><a name="QTextBoundaryFinder-1"></a>QTextBoundaryFinder::<span class="name">QTextBoundaryFinder</span>(const <span class="type"><a href="qtextboundaryfinder.html#QTextBoundaryFinder">QTextBoundaryFinder</a></span> &amp;<i>other</i>)</h3>
+<p>Copies the <a href="qtextboundaryfinder.html">QTextBoundaryFinder</a> object, <i>other</i>.</p>
+<!-- @@@QTextBoundaryFinder -->
+<!-- $$$QTextBoundaryFinder[overload1]$$$QTextBoundaryFinder -->
+<h3 class="fn" id="QTextBoundaryFinder"><a name="QTextBoundaryFinder"></a>QTextBoundaryFinder::<span class="name">QTextBoundaryFinder</span>()</h3>
+<p>Constructs an invalid <a href="qtextboundaryfinder.html">QTextBoundaryFinder</a> object.</p>
+<!-- @@@QTextBoundaryFinder -->
+<!-- $$$operator=[overload1]$$$operator=constQTextBoundaryFinder& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qtextboundaryfinder.html#QTextBoundaryFinder">QTextBoundaryFinder</a></span> &amp;QTextBoundaryFinder::<span class="name">operator=</span>(const <span class="type"><a href="qtextboundaryfinder.html#QTextBoundaryFinder">QTextBoundaryFinder</a></span> &amp;<i>other</i>)</h3>
+<p>Assigns the object, <i>other</i>, to another <a href="qtextboundaryfinder.html">QTextBoundaryFinder</a> object.</p>
+<!-- @@@operator= -->
+<!-- $$$~QTextBoundaryFinder[overload1]$$$~QTextBoundaryFinder -->
+<h3 class="fn" id="dtor.QTextBoundaryFinder"><a name="dtor.QTextBoundaryFinder"></a>QTextBoundaryFinder::<span class="name">~QTextBoundaryFinder</span>()</h3>
+<p>Destructs the <a href="qtextboundaryfinder.html">QTextBoundaryFinder</a> object.</p>
+<!-- @@@~QTextBoundaryFinder -->
+<!-- $$$boundaryReasons[overload1]$$$boundaryReasons -->
+<h3 class="fn" id="boundaryReasons"><a name="boundaryReasons"></a><span class="type"><a href="qtextboundaryfinder.html#BoundaryReason-enum">QTextBoundaryFinder::BoundaryReasons</a></span> QTextBoundaryFinder::<span class="name">boundaryReasons</span>() const</h3>
+<p>Returns the reasons for the boundary finder to have chosen the current position as a boundary.</p>
+<!-- @@@boundaryReasons -->
+<!-- $$$isAtBoundary[overload1]$$$isAtBoundary -->
+<h3 class="fn" id="isAtBoundary"><a name="isAtBoundary"></a><span class="type">bool</span> QTextBoundaryFinder::<span class="name">isAtBoundary</span>() const</h3>
+<p>Returns <code>true</code> if the object's <a href="qtextboundaryfinder.html#position">position</a>() is currently at a valid text boundary.</p>
+<!-- @@@isAtBoundary -->
+<!-- $$$isValid[overload1]$$$isValid -->
+<h3 class="fn" id="isValid"><a name="isValid"></a><span class="type">bool</span> QTextBoundaryFinder::<span class="name">isValid</span>() const</h3>
+<p>Returns <code>true</code> if the text boundary finder is valid; otherwise returns <code>false</code>. A default <a href="qtextboundaryfinder.html">QTextBoundaryFinder</a> is invalid.</p>
+<!-- @@@isValid -->
+<!-- $$$position[overload1]$$$position -->
+<h3 class="fn" id="position"><a name="position"></a><span class="type">int</span> QTextBoundaryFinder::<span class="name">position</span>() const</h3>
+<p>Returns the current position of the <a href="qtextboundaryfinder.html">QTextBoundaryFinder</a>.</p>
+<p>The range is from 0 (the beginning of the string) to the length of the string inclusive.</p>
+<p><b>See also </b><a href="qtextboundaryfinder.html#setPosition">setPosition</a>().</p>
+<!-- @@@position -->
+<!-- $$$setPosition[overload1]$$$setPositionint -->
+<h3 class="fn" id="setPosition"><a name="setPosition"></a><span class="type">void</span> QTextBoundaryFinder::<span class="name">setPosition</span>(<span class="type">int</span> <i>position</i>)</h3>
+<p>Sets the current position of the <a href="qtextboundaryfinder.html">QTextBoundaryFinder</a> to <i>position</i>.</p>
+<p>If <i>position</i> is out of bounds, it will be bound to only valid positions. In this case, valid positions are from 0 to the length of the string inclusive.</p>
+<p><b>See also </b><a href="qtextboundaryfinder.html#position">position</a>().</p>
+<!-- @@@setPosition -->
+<!-- $$$string[overload1]$$$string -->
+<h3 class="fn" id="string"><a name="string"></a><span class="type"><a href="qstring.html">QString</a></span> QTextBoundaryFinder::<span class="name">string</span>() const</h3>
+<p>Returns the string the <a href="qtextboundaryfinder.html">QTextBoundaryFinder</a> object operates on.</p>
+<!-- @@@string -->
+<!-- $$$toEnd[overload1]$$$toEnd -->
+<h3 class="fn" id="toEnd"><a name="toEnd"></a><span class="type">void</span> QTextBoundaryFinder::<span class="name">toEnd</span>()</h3>
+<p>Moves the finder to the end of the string. This is equivalent to <a href="qtextboundaryfinder.html#setPosition">setPosition</a>(string.<a href="../qtwidgets/stylesheet-reference.html#length">length</a>()).</p>
+<p><b>See also </b><a href="qtextboundaryfinder.html#setPosition">setPosition</a>() and <a href="qtextboundaryfinder.html#position">position</a>().</p>
+<!-- @@@toEnd -->
+<!-- $$$toNextBoundary[overload1]$$$toNextBoundary -->
+<h3 class="fn" id="toNextBoundary"><a name="toNextBoundary"></a><span class="type">int</span> QTextBoundaryFinder::<span class="name">toNextBoundary</span>()</h3>
+<p>Moves the <a href="qtextboundaryfinder.html">QTextBoundaryFinder</a> to the next boundary position and returns that position.</p>
+<p>Returns -1 if there is no next boundary.</p>
+<!-- @@@toNextBoundary -->
+<!-- $$$toPreviousBoundary[overload1]$$$toPreviousBoundary -->
+<h3 class="fn" id="toPreviousBoundary"><a name="toPreviousBoundary"></a><span class="type">int</span> QTextBoundaryFinder::<span class="name">toPreviousBoundary</span>()</h3>
+<p>Moves the <a href="qtextboundaryfinder.html">QTextBoundaryFinder</a> to the previous boundary position and returns that position.</p>
+<p>Returns -1 if there is no previous boundary.</p>
+<!-- @@@toPreviousBoundary -->
+<!-- $$$toStart[overload1]$$$toStart -->
+<h3 class="fn" id="toStart"><a name="toStart"></a><span class="type">void</span> QTextBoundaryFinder::<span class="name">toStart</span>()</h3>
+<p>Moves the finder to the start of the string. This is equivalent to <a href="qtextboundaryfinder.html#setPosition">setPosition</a>(0).</p>
+<p><b>See also </b><a href="qtextboundaryfinder.html#setPosition">setPosition</a>() and <a href="qtextboundaryfinder.html#position">position</a>().</p>
+<!-- @@@toStart -->
+<!-- $$$type[overload1]$$$type -->
+<h3 class="fn" id="type"><a name="type"></a><span class="type"><a href="qtextboundaryfinder.html#BoundaryType-enum">QTextBoundaryFinder::BoundaryType</a></span> QTextBoundaryFinder::<span class="name">type</span>() const</h3>
+<p>Returns the type of the <a href="qtextboundaryfinder.html">QTextBoundaryFinder</a>.</p>
+<!-- @@@type -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

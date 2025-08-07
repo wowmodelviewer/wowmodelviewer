@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickcanvasitem.cpp -->
+  <title>Obsolete Members for Canvas | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >Obsolete Members for Canvas</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Obsolete Members for Canvas</h1>
+<p><b>The following members of QML type <a href="qml-qtquick-canvas.html">Canvas</a> are obsolete.</b> They are provided to keep old source code working. We strongly advise against using them in new code.</p>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-canvas-obsolete.html#canvasWindow-prop">canvasWindow</a></b></b> : rect<code> (obsolete)</code></li>
+<li class="fn"><b><b><a href="qml-qtquick-canvas-obsolete.html#tileSize-prop">tileSize</a></b></b> : size<code> (obsolete)</code></li>
+</ul>
+<h2>Property Documentation</h2>
+<!-- $$$canvasWindow -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="canvasWindow-prop"></a><span class="name">canvasWindow</span> : <span class="type"><a href="../qtqml/qml-rect.html">rect</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Holds the current canvas visible window.</p>
+<p>By default the canvasWindow size is the same as the Canvas item size with the top-left point as (0, 0).</p>
+<p>If the <a href="qml-qtquick-canvas.html#canvasSize-prop">canvasSize</a> is different to the Canvas item size, the Canvas item can display different visible areas by changing the canvas windowSize and/or position.</p>
+<p><b>See also </b><a href="qml-qtquick-canvas.html#canvasSize-prop">canvasSize</a> and <a href="qml-qtquick-canvas-obsolete.html#tileSize-prop">tileSize</a>.</p>
+</div></div><!-- @@@canvasWindow -->
+<br/>
+<!-- $$$tileSize -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="tileSize-prop"></a><span class="name">tileSize</span> : <span class="type"><a href="../qtqml/qml-size.html">size</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Holds the canvas rendering tile size.</p>
+<p>The Canvas item enters tiled mode by setting <a href="qml-qtquick-canvas.html#canvasSize-prop">canvasSize</a>, tileSize and the <a href="qml-qtquick-canvas-obsolete.html#canvasWindow-prop">canvasWindow</a>. This can improve rendering performance by rendering and caching tiles instead of rendering the whole canvas every time.</p>
+<p>Memory will be consumed only by those tiles within the current visible region.</p>
+<p>By default the tileSize is the same as the <a href="qml-qtquick-canvas.html#canvasSize-prop">canvasSize</a>.</p>
+<p><b>See also </b><a href="qml-qtquick-canvas.html#canvasSize-prop">canvasSize</a> and <a href="qml-qtquick-canvas-obsolete.html#canvasWindow-prop">canvasWindow</a>.</p>
+</div></div><!-- @@@tileSize -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

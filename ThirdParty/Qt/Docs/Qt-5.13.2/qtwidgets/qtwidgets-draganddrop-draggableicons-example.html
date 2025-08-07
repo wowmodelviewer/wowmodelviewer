@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- draggableicons.qdoc -->
+  <title>Draggable Icons Example | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Draggable Icons Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#dragwidget-class-definition">DragWidget Class Definition</a></li>
+<li class="level1"><a href="#dragwidget-class-implementation">DragWidget Class Implementation</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Draggable Icons Example</h1>
+<span class="subtitle"></span>
+<!-- $$$draganddrop/draggableicons-brief -->
+<p>The Draggable Icons example shows how to drag and drop image data between widgets in the same application, and between different applications.</p>
+<!-- @@@draganddrop/draggableicons -->
+<!-- $$$draganddrop/draggableicons-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/draggableicons-example.png" alt="" /></p><p>In many situations where drag and drop is used, the user starts dragging from a particular widget and drops the payload onto another widget. In this example, we subclass <a href="qlabel.html">QLabel</a> to create labels that we use as drag sources, and place them inside <a href="qwidget.html">QWidget</a>s that serve as both containers and drop sites.</p>
+<p>In addition, when a drag and drop operation occurs, we want to send more than just an image. We also want to send information about where the user clicked in the image so that the user can place it precisely on the drop target. This level of detail means that we must create a custom MIME type for our data.</p>
+<a name="dragwidget-class-definition"></a>
+<h4 id="dragwidget-class-definition">DragWidget Class Definition</h4>
+<p>The icon widgets that we use to display icons are subclassed from <a href="qlabel.html">QLabel</a>:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> DragWidget : <span class="keyword">public</span> <span class="type"><a href="qframe.html">QFrame</a></span>
+  {
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> DragWidget(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+
+  <span class="keyword">protected</span>:
+      <span class="type">void</span> dragEnterEvent(<span class="type"><a href="../qtgui/qdragenterevent.html">QDragEnterEvent</a></span> <span class="operator">*</span>event) override;
+      <span class="type">void</span> dragMoveEvent(<span class="type"><a href="../qtgui/qdragmoveevent.html">QDragMoveEvent</a></span> <span class="operator">*</span>event) override;
+      <span class="type">void</span> dropEvent(<span class="type"><a href="../qtgui/qdropevent.html">QDropEvent</a></span> <span class="operator">*</span>event) override;
+      <span class="type">void</span> mousePressEvent(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> <span class="operator">*</span>event) override;
+  };
+
+</pre>
+<p>Since the <a href="qlabel.html">QLabel</a> class provides most of what we require for the icon, we only need to reimplement the <a href="qwidget.html#mousePressEvent">QWidget::mousePressEvent</a>() to provide drag and drop facilities.</p>
+<a name="dragwidget-class-implementation"></a>
+<h4 id="dragwidget-class-implementation">DragWidget Class Implementation</h4>
+<p>The <code>DragWidget</code> constructor sets an attribute on the widget that ensures that it will be deleted when it is closed:</p>
+<pre class="cpp">
+
+  DragWidget<span class="operator">::</span>DragWidget(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qframe.html">QFrame</a></span>(parent)
+  {
+      setMinimumSize(<span class="number">200</span><span class="operator">,</span> <span class="number">200</span>);
+      setFrameStyle(<span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>Sunken <span class="operator">|</span> <span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>StyledPanel);
+      setAcceptDrops(<span class="keyword">true</span>);
+
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>boatIcon <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(<span class="keyword">this</span>);
+      boatIcon<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(<span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span>(<span class="string">&quot;:/images/boat.png&quot;</span>));
+      boatIcon<span class="operator">-</span><span class="operator">&gt;</span>move(<span class="number">10</span><span class="operator">,</span> <span class="number">10</span>);
+      boatIcon<span class="operator">-</span><span class="operator">&gt;</span>show();
+      boatIcon<span class="operator">-</span><span class="operator">&gt;</span>setAttribute(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WA_DeleteOnClose);
+
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>carIcon <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(<span class="keyword">this</span>);
+      carIcon<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(<span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span>(<span class="string">&quot;:/images/car.png&quot;</span>));
+      carIcon<span class="operator">-</span><span class="operator">&gt;</span>move(<span class="number">100</span><span class="operator">,</span> <span class="number">10</span>);
+      carIcon<span class="operator">-</span><span class="operator">&gt;</span>show();
+      carIcon<span class="operator">-</span><span class="operator">&gt;</span>setAttribute(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WA_DeleteOnClose);
+
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>houseIcon <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(<span class="keyword">this</span>);
+      houseIcon<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(<span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span>(<span class="string">&quot;:/images/house.png&quot;</span>));
+      houseIcon<span class="operator">-</span><span class="operator">&gt;</span>move(<span class="number">10</span><span class="operator">,</span> <span class="number">80</span>);
+      houseIcon<span class="operator">-</span><span class="operator">&gt;</span>show();
+      houseIcon<span class="operator">-</span><span class="operator">&gt;</span>setAttribute(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WA_DeleteOnClose);
+  }
+
+</pre>
+<p>To enable dragging from the icon, we need to act on a mouse press event. We do this by reimplementing <a href="qwidget.html#mousePressEvent">QWidget::mousePressEvent</a>() and setting up a <a href="../qtgui/qdrag.html">QDrag</a> object.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> DragWidget<span class="operator">::</span>mousePressEvent(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>child <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="qlabel.html">QLabel</a></span><span class="operator">*</span><span class="operator">&gt;</span>(childAt(event<span class="operator">-</span><span class="operator">&gt;</span>pos()));
+      <span class="keyword">if</span> (<span class="operator">!</span>child)
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> pixmap <span class="operator">=</span> <span class="operator">*</span>child<span class="operator">-</span><span class="operator">&gt;</span>pixmap();
+
+      <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> itemData;
+      <span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> dataStream(<span class="operator">&amp;</span>itemData<span class="operator">,</span> <span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>WriteOnly);
+      dataStream <span class="operator">&lt;</span><span class="operator">&lt;</span> pixmap <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(event<span class="operator">-</span><span class="operator">&gt;</span>pos() <span class="operator">-</span> child<span class="operator">-</span><span class="operator">&gt;</span>pos());
+
+</pre>
+<p>Since we will be sending pixmap data for the icon and information about the user's click in the icon widget, we construct a <a href="../qtcore/qbytearray.html">QByteArray</a> and package up the details using a <a href="../qtcore/qdatastream.html">QDataStream</a>.</p>
+<p>For interoperability, drag and drop operations describe the data they contain using MIME types. In Qt, we describe this data using a <a href="../qtcore/qmimedata.html">QMimeData</a> object:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="../qtcore/qmimedata.html">QMimeData</a></span> <span class="operator">*</span>mimeData <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qmimedata.html">QMimeData</a></span>;
+      mimeData<span class="operator">-</span><span class="operator">&gt;</span>setData(<span class="string">&quot;application/x-dnditemdata&quot;</span><span class="operator">,</span> itemData);
+
+</pre>
+<p>We choose an unofficial MIME type for this purpose, and supply the <a href="../qtcore/qbytearray.html">QByteArray</a> to the MIME data object.</p>
+<p>The drag and drop operation itself is handled by a <a href="../qtgui/qdrag.html">QDrag</a> object:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="../qtgui/qdrag.html">QDrag</a></span> <span class="operator">*</span>drag <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtgui/qdrag.html">QDrag</a></span>(<span class="keyword">this</span>);
+      drag<span class="operator">-</span><span class="operator">&gt;</span>setMimeData(mimeData);
+      drag<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(pixmap);
+      drag<span class="operator">-</span><span class="operator">&gt;</span>setHotSpot(event<span class="operator">-</span><span class="operator">&gt;</span>pos() <span class="operator">-</span> child<span class="operator">-</span><span class="operator">&gt;</span>pos());
+
+</pre>
+<p>Here, we pass the data to the drag object, set a pixmap that will be shown alongside the cursor during the operation, and define the position of a hot spot that places the position of this pixmap under the cursor.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/draganddrop/draggableicons?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@draganddrop/draggableicons -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

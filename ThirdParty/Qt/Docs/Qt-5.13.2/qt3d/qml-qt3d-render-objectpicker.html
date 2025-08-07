@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qobjectpicker.cpp -->
+  <title>ObjectPicker QML Type | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-qml.html">QML Types</a></td><td >ObjectPicker QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">ObjectPicker QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$ObjectPicker-brief -->
+<p>The <a href="qml-qt3d-render-objectpicker.html">ObjectPicker</a> class instantiates a component that can be used to interact with an Entity by a process known as picking. <a href="#details">More...</a></p>
+<!-- @@@ObjectPicker -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import Qt3D.Render 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiates:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-objectpicker.html"><a href="qt3drender-qobjectpicker.html">QObjectPicker</a></td></tr></table></div><ul>
+<li><a href="qml-qt3d-render-objectpicker-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qt3d-render-objectpicker.html#containsMouse-prop">containsMouse</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-objectpicker.html#dragEnabled-prop">dragEnabled</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-objectpicker.html#hoverEnabled-prop">hoverEnabled</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-objectpicker.html#pressed-prop">pressed</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-objectpicker.html#priority-prop">priority</a></b></b> : int</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qt3d-render-objectpicker.html#clicked-signal">clicked</a></b></b>(<i>pick</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-objectpicker.html#clicked-signal">clicked</a></b></b>(<i>pick</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-objectpicker.html#entered-signal">entered</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-objectpicker.html#exited-signal">exited</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-objectpicker.html#moved-signal">moved</a></b></b>(<i>pick</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-objectpicker.html#pressed-signal">pressed</a></b></b>(<i>pick</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-objectpicker.html#released-signal">released</a></b></b>(<i>pick</i>)</li>
+</ul>
+<!-- $$$ObjectPicker-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>For every combination of viewport and camera, picking casts a ray through the scene to find entities who's bounding volume intersects the ray. The bounding volume is computed using the values in the attribute buffer specified by the boundingVolumePositionAttribute of the geometry.</p>
+<p>The signals <a href="qml-qt3d-render-objectpicker.html#pressed-signal">pressed()</a>, <a href="qml-qt3d-render-objectpicker.html#released-signal">released()</a>, <a href="qml-qt3d-render-objectpicker.html#clicked-signal">clicked()</a>, <a href="qml-qt3d-render-objectpicker.html#moved-signal">moved()</a>, <a href="qml-qt3d-render-objectpicker.html#entered-signal">entered()</a>, and <a href="qml-qt3d-render-objectpicker.html#exited-signal">exited()</a> are emitted when the bounding volume defined by the pickAttribute property intersects with a ray.</p>
+<p>Most signals carry a <a href="qml-qt3d-render-pickevent.html">PickEvent</a> instance. If <a href="qml-qt3d-render-pickingsettings.html">PickingSettings</a>.pickMode is set to <a href="qml-qt3d-render-pickingsettings.html">PickingSettings</a>.TrianglePicking, the actual type of the pick parameter will be <a href="qml-qt3d-render-picktriangleevent.html">PickTriangleEvent</a>.</p>
+<p>Pick queries are performed on mouse press and mouse release. If drag is enabled, queries also happen on each mouse move while any button is pressed. If hover is enabled, queries happen on every mouse move even if no button is pressed.</p>
+<p><b>Note: </b>To receive hover events in <a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a>, the <a href="qml-qt3d-render-objectpicker.html#hoverEnabled-prop">hoverEnabled</a> property of <a href="qml-qtquick-scene3d-scene3d.html">Scene3D</a> must also be set.</p><p><b>Note: </b>Instances of this component shouldn't be shared, not respecting that condition will most likely result in undefined behavior.</p><p><b>Note: </b>The camera far plane value affects picking and produces incorrect results due to floating-point precision if it is greater than ~100 000.</p><p><b>See also </b><a href="qml-qt3d-render-pickingsettings.html">PickingSettings</a>, <a href="qt3drender-geometry.html#geometry">Geometry</a>, <a href="qt3drender-geometry.html#attribute">Attribute</a>, <a href="qml-qt3d-render-pickevent.html">PickEvent</a>, and <a href="qml-qt3d-render-picktriangleevent.html">PickTriangleEvent</a>.</p>
+<!-- @@@ObjectPicker -->
+<h2>Property Documentation</h2>
+<!-- $$$containsMouse -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="containsMouse-prop"></a><span class="name">containsMouse</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Specifies if the object picker currently contains the mouse</p>
+</div></div><!-- @@@containsMouse -->
+<br/>
+<!-- $$$dragEnabled -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="dragEnabled-prop"></a><span class="name">dragEnabled</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"></div></div><!-- @@@dragEnabled -->
+<br/>
+<!-- $$$hoverEnabled -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="hoverEnabled-prop"></a><span class="name">hoverEnabled</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Specifies if hover is enabled</p>
+</div></div><!-- @@@hoverEnabled -->
+<br/>
+<!-- $$$pressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="pressed-prop"></a><span class="name">pressed</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Specifies if the object picker is currently pressed</p>
+</div></div><!-- @@@pressed -->
+<br/>
+<!-- $$$priority -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="priority-prop"></a><span class="name">priority</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The priority to be used when filtering pick results by priority when <a href="qml-qt3d-render-pickingsettings.html">PickingSettings</a>.pickResultMode is set to <a href="qml-qt3d-render-pickingsettings.html">PickingSettings</a>.PriorityPick.</p>
+</div></div><!-- @@@priority -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$clicked$$$clicked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="clicked-signal"></a><span class="name">clicked</span>(<i>pick</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the bounding volume defined by the pickAttribute property intersects with a ray on a mouse click. Intersection information are accessible through the pick <i>parameter</i>.</p>
+</div></div><!-- @@@clicked -->
+<br/>
+<!-- $$$clicked[overload1]$$$clicked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="clicked-signal"></a><span class="name">clicked</span>(<i>pick</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the bounding volume defined by the pickAttribute property intersects with a ray on a mouse click the <a href="qml-qt3d-render-pickevent.html">PickEvent</a> <i>pick</i> contains details of the event.</p>
+</div></div><!-- @@@clicked -->
+<br/>
+<!-- $$$entered[overload1]$$$entered -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="entered-signal"></a><span class="name">entered</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the bounding volume defined by the pickAttribute property intersects with a ray on the mouse entering the volume.</p>
+</div></div><!-- @@@entered -->
+<br/>
+<!-- $$$exited[overload1]$$$exited -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="exited-signal"></a><span class="name">exited</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the bounding volume defined by the pickAttribute property intersects with a ray on the ray exiting the volume.</p>
+</div></div><!-- @@@exited -->
+<br/>
+<!-- $$$moved[overload1]$$$moved -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="moved-signal"></a><span class="name">moved</span>(<i>pick</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the bounding volume defined by the pickAttribute property intersects with a ray on a mouse move with a button pressed. Intersection information are accessible through the <i>pick</i> parameter.</p>
+</div></div><!-- @@@moved -->
+<br/>
+<!-- $$$pressed[overload1]$$$pressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="pressed-signal"></a><span class="name">pressed</span>(<i>pick</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the bounding volume defined by the pickAttribute property intersects with a ray on a mouse press. Intersection information are accessible through the <i>pick</i> parameter.</p>
+</div></div><!-- @@@pressed -->
+<br/>
+<!-- $$$released[overload1]$$$released -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="released-signal"></a><span class="name">released</span>(<i>pick</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the bounding volume defined by the pickAttribute property intersects with a ray on a mouse release. Intersection information are accessible through the <i>pick</i> parameter.</p>
+</div></div><!-- @@@released -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

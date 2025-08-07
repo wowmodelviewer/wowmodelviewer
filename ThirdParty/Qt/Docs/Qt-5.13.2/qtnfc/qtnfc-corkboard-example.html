@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- corkboard.qdoc -->
+  <title>QML CorkBoard Example | Qt NFC 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtnfc-index.html">Qt NFC</a></td><td >QML CorkBoard Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtnfc-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#implementation-details">Implementation details</a></li>
+<li class="level1"><a href="#corkboards-qml-details">corkboards.qml details</a></li>
+<li class="level1"><a href="#mode-qml-details">Mode.qml details</a></li>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QML CorkBoard Example</h1>
+<span class="subtitle"></span>
+<!-- $$$corkboard-brief -->
+<p>A QML example about displaying NFC Data Exchange Format (NDEF) messages.</p>
+<!-- @@@corkboard -->
+<!-- $$$corkboard-description -->
+<div class="descr"> <a name="details"></a>
+<p>The QML corkboard example displays the contents of NDEF messages read from an NFC Tag. Each newly detected NDEF message is added to the corkboard and can be dragged into an arbitrary position on the board. The corkboard has a <i>Personal</i> and <i>Work</i> space. The workspace can be changed by sliding left or right.</p>
+<p class="centerAlign"><img src="images/corkboard.png" alt="" /></p><a name="implementation-details"></a>
+<h4 id="implementation-details">Implementation details</h4>
+<p>In the corkboard example, we use the following .qml files:</p>
+<ul>
+<li>corkboards.qml</li>
+<li>Mode.qml</li>
+</ul>
+<p>The main.cpp holds the application logic to load the main view stored in the corkboards.qml file.</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type">QGuiApplication</span> application(argc<span class="operator">,</span> argv);
+      <span class="type">QQuickView</span> view;
+      view<span class="operator">.</span>setSource(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="string">&quot;qrc:/corkboards.qml&quot;</span>));
+      view<span class="operator">.</span>setResizeMode(<span class="type">QQuickView</span><span class="operator">::</span>SizeRootObjectToView);
+      view<span class="operator">.</span>show();
+      <span class="keyword">return</span> application<span class="operator">.</span>exec();
+  }
+
+</pre>
+<a name="corkboards-qml-details"></a>
+<h4 id="corkboards-qml-details">corkboards.qml details</h4>
+<p>There are two basic QML components in this file:</p>
+<ul>
+<li><a href="qml-qtnfc-nearfield.html">NearField</a></li>
+<li>ListView</li>
+</ul>
+<p>The first time the <a href="qml-qtnfc-nearfield.html">NearField</a> QML type is instantiated, the Component.onCompleted handler will start the NFC polling process. The <a href="qml-qtnfc-nearfield.html">onMessageRecordsChanged</a> handler parses NFC Messages that are detected by the <a href="qml-qtnfc-nearfield.html">NearField</a> component and builds up a data model that is passed into the ListView. Additionally, every time the <a href="qml-qtnfc-nearfield.html">NearField</a> manager stops the polling process, the onPollingChanged handler restarts it.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qml-qtnfc-nearfield.html">NearField</a></span> {
+          property <span class="type">bool</span> <span class="name">requiresManualPolling</span>: <span class="number">false</span>
+          <span class="name">orderMatch</span>: <span class="number">false</span>
+
+          <span class="name">onMessageRecordsChanged</span>: {
+          ...
+          <span class="name">onPollingChanged</span>: {
+          ...
+          <span class="name">Component</span>.onCompleted: {
+          ...
+          }
+
+</pre>
+<p>The ListView component takes a ListModel as parameter (built from the NFC records). The view of each of the items of the model is defined by the Mode component (its implementation details can be found in the file Mode.qml). The data model consists of a list of corkboards. Each corkboard can display multiple NFC text message records.</p>
+<pre class="cpp">
+
+      <span class="type">ListView</span> {
+          <span class="name">id</span>: <span class="name">listView</span>
+          ...
+          <span class="name">model</span>: <span class="name">list</span>
+          ...
+          <span class="name">delegate</span>: <span class="name">Mode</span> {}
+      }
+
+</pre>
+<a name="mode-qml-details"></a>
+<h4 id="mode-qml-details">Mode.qml details</h4>
+<p>A corkboard title is displayed for each of the items that form part of the data model:</p>
+<pre class="cpp">
+
+          <span class="type">Text</span> {
+              <span class="type">anchors</span> { <span class="name">horizontalCenter</span>: <span class="name">parent</span>.<span class="name">horizontalCenter</span>; <span class="name">top</span>: <span class="name">parent</span>.<span class="name">top</span>; <span class="name">topMargin</span>: <span class="number">10</span>}
+              <span class="name">text</span>: <span class="name">name</span>;
+              <span class="type">font</span> { <span class="name">pixelSize</span>: <span class="number">30</span>; <span class="name">bold</span>: <span class="number">true</span> }
+
+</pre>
+<p>Every text record that was read from an NFC message, is represented by a sticky note with its own position on the display. Initially the position is set randomly. The text on the sticky note is set on a TextField.</p>
+<pre class="cpp">
+
+          <span class="type">Repeater</span> {
+              <span class="name">model</span>: <span class="name">notes</span>
+              <span class="type">Item</span> {
+                  <span class="name">id</span>: <span class="name">stickyPage</span>
+
+                  <span class="name">x</span>: <span class="name">ListView</span>.<span class="name">width</span> <span class="operator">*</span> (<span class="number">0.7</span> <span class="operator">*</span> <span class="name">Math</span>.<span class="name">random</span>() <span class="operator">+</span> <span class="number">0.1</span>)
+                  <span class="name">y</span>: <span class="name">ListView</span>.<span class="name">height</span> <span class="operator">*</span> (<span class="number">0.7</span> <span class="operator">*</span> <span class="name">Math</span>.<span class="name">random</span>() <span class="operator">+</span> <span class="number">0.1</span>)
+                  ...
+                  <span class="type">Item</span> {
+                      <span class="name">id</span>: <span class="name">sticky</span>
+                      ...
+                      <span class="type">TextEdit</span> {
+                          <span class="name">id</span>: <span class="name">myText</span>
+                          <span class="name">text</span>: <span class="name">noteText</span>
+                          ...
+                      }
+                      ...
+
+</pre>
+<a name="running-the-example"></a>
+<h4 id="running-the-example">Running the Example</h4>
+<p>To run the example from <a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a>, open the <b>Welcome</b> mode and select the example from <b>Examples</b>. For more information, visit <a href="http://doc.qt.io/qtcreator/creator-build-example-application.html">Building and Running an Example</a>.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtconnectivity.git/tree/examples/nfc/corkboard?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<p><b>See also </b><a href="qtnfc-index.html">Qt NFC</a>.</p>
+<!-- @@@corkboard -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

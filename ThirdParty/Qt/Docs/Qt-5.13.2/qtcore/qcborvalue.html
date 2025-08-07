@@ -1,0 +1,902 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcborvalue.cpp -->
+  <title>QCborValue Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QCborValue</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#extended-types-and-tagged-values">Extended types and tagged values</a></li>
+<li class="level2"><a href="#undefined-and-null-values">Undefined and null values</a></li>
+<li class="level2"><a href="#simple-types">Simple types</a></li>
+<li class="level2"><a href="#cbor-support">CBOR support</a></li>
+<li class="level2"><a href="#qcborvalueref">QCborValueRef</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCborValue Class</h1>
+<!-- $$$QCborValue-brief -->
+<p>The <a href="qcborvalue.html">QCborValue</a> class encapsulates a value in CBOR. <a href="#details">More...</a></p>
+<!-- @@@QCborValue -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QCborValue&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.12</td></tr></table></div><p>This class was introduced in  Qt 5.12.</p>
+<ul>
+<li><a href="qcborvalue-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#DiagnosticNotationOption-enum">DiagnosticNotationOption</a></b> { Compact, LineWrapped, ExtendedFormat }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#DiagnosticNotationOption-enum">DiagnosticNotationOptions</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#EncodingOption-enum">EncodingOption</a></b> { NoTransformation, UseFloat, UseFloat16, UseIntegers }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#EncodingOption-enum">EncodingOptions</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#Type-enum">Type</a></b> { Integer, ByteArray, String, Array, ..., Uuid }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#QCborValue-23">QCborValue</a></b>(QCborValue &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#QCborValue-22">QCborValue</a></b>(const QCborValue &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#QCborValue-20">QCborValue</a></b>(const QUuid &amp;<i>uuid</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#QCborValue-19">QCborValue</a></b>(const QRegularExpression &amp;<i>rx</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#QCborValue-18">QCborValue</a></b>(const QUrl &amp;<i>url</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#QCborValue-17">QCborValue</a></b>(const QDateTime &amp;<i>dt</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#QCborValue-16">QCborValue</a></b>(QCborKnownTags <i>t</i>, const QCborValue &amp;<i>tv</i> = QCborValue())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#QCborValue-15">QCborValue</a></b>(QCborTag <i>t</i>, const QCborValue &amp;<i>tv</i> = QCborValue())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#QCborValue-14">QCborValue</a></b>(QCborMap &amp;&amp;<i>m</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#QCborValue-13">QCborValue</a></b>(const QCborMap &amp;<i>m</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#QCborValue-12">QCborValue</a></b>(QCborArray &amp;&amp;<i>a</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#QCborValue-11">QCborValue</a></b>(const QCborArray &amp;<i>a</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#QCborValue-9">QCborValue</a></b>(QLatin1String <i>s</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#QCborValue-8">QCborValue</a></b>(const QString &amp;<i>s</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#QCborValue-7">QCborValue</a></b>(const QByteArray &amp;<i>ba</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#QCborValue-6">QCborValue</a></b>(QCborSimpleType <i>st</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#QCborValue-5">QCborValue</a></b>(double <i>d</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#QCborValue-4">QCborValue</a></b>(qint64 <i>i</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#QCborValue-3">QCborValue</a></b>(bool <i>b</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#QCborValue-2">QCborValue</a></b>(<i>std::nullptr_t</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#QCborValue-1">QCborValue</a></b>(QCborValue::Type <i>t_</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#QCborValue">QCborValue</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValue &amp;</td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#operator-eq-1">operator=</a></b>(QCborValue &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValue &amp;</td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#operator-eq">operator=</a></b>(const QCborValue &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#dtor.QCborValue">~QCborValue</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#compare">compare</a></b>(const QCborValue &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#isArray">isArray</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#isBool">isBool</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#isByteArray">isByteArray</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#isContainer">isContainer</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#isDateTime">isDateTime</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#isDouble">isDouble</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#isFalse">isFalse</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#isInteger">isInteger</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#isInvalid">isInvalid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#isMap">isMap</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#isNull">isNull</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#isRegularExpression">isRegularExpression</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#isSimpleType">isSimpleType</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#isSimpleType-1">isSimpleType</a></b>(QCborSimpleType <i>st</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#isString">isString</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#isTag">isTag</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#isTrue">isTrue</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#isUndefined">isUndefined</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#isUrl">isUrl</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#isUuid">isUuid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#swap">swap</a></b>(QCborValue &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborTag </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#tag">tag</a></b>(QCborTag <i>defaultValue</i> = QCborTag(-1)) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#taggedValue">taggedValue</a></b>(const QCborValue &amp;<i>defaultValue</i> = QCborValue()) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborArray </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#toArray">toArray</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborArray </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#toArray-1">toArray</a></b>(const QCborArray &amp;<i>defaultValue</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#toBool">toBool</a></b>(bool <i>defaultValue</i> = false) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#toByteArray">toByteArray</a></b>(const QByteArray &amp;<i>defaultValue</i> = {}) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#toCbor">toCbor</a></b>(QCborValue::EncodingOptions <i>opt</i> = NoTransformation)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#toCbor-1">toCbor</a></b>(QCborStreamWriter &amp;<i>writer</i>, QCborValue::EncodingOptions <i>opt</i> = NoTransformation)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDateTime </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#toDateTime">toDateTime</a></b>(const QDateTime &amp;<i>defaultValue</i> = {}) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#toDiagnosticNotation">toDiagnosticNotation</a></b>(QCborValue::DiagnosticNotationOptions <i>opts</i> = Compact) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#toDouble">toDouble</a></b>(double <i>defaultValue</i> = 0) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint64 </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#toInteger">toInteger</a></b>(qint64 <i>defaultValue</i> = 0) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonValue </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#toJsonValue">toJsonValue</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#toMap">toMap</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborMap </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#toMap-1">toMap</a></b>(const QCborMap &amp;<i>defaultValue</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRegularExpression </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#toRegularExpression">toRegularExpression</a></b>(const QRegularExpression &amp;<i>defaultValue</i> = {}) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborSimpleType </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#toSimpleType">toSimpleType</a></b>(QCborSimpleType <i>defaultValue</i> = QCborSimpleType::Undefined) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#toString">toString</a></b>(const QString &amp;<i>defaultValue</i> = {}) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QUrl </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#toUrl">toUrl</a></b>(const QUrl &amp;<i>defaultValue</i> = {}) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QUuid </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#toUuid">toUuid</a></b>(const QUuid &amp;<i>defaultValue</i> = {}) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariant </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#toVariant">toVariant</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValue::Type </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#type">type</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#operator-not-eq">operator!=</a></b>(const QCborValue &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#operator-lt">operator&lt;</a></b>(const QCborValue &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#operator-eq-eq">operator==</a></b>(const QCborValue &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#operator-5b-5d">operator[]</a></b>(const QString &amp;<i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#operator-5b-5d-1">operator[]</a></b>(QLatin1String <i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#operator-5b-5d-2">operator[]</a></b>(qint64 <i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValueRef </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#operator-5b-5d-3">operator[]</a></b>(qint64 <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValueRef </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#operator-5b-5d-4">operator[]</a></b>(QLatin1String <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValueRef </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#operator-5b-5d-5">operator[]</a></b>(const QString &amp;<i>key</i>)</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#fromCbor">fromCbor</a></b>(QCborStreamReader &amp;<i>reader</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#fromCbor-1">fromCbor</a></b>(const QByteArray &amp;<i>ba</i>, QCborParserError *<i>error</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#fromCbor-2">fromCbor</a></b>(const char *<i>data</i>, qsizetype <i>len</i>, QCborParserError *<i>error</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#fromCbor-3">fromCbor</a></b>(const quint8 *<i>data</i>, qsizetype <i>len</i>, QCborParserError *<i>error</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#fromJsonValue">fromJsonValue</a></b>(const QJsonValue &amp;<i>v</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborValue </td><td class="memItemRight bottomAlign"><b><a href="qcborvalue.html#fromVariant">fromVariant</a></b>(const QVariant &amp;<i>variant</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCborValue-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This class can be used to hold one of the many types available in CBOR. CBOR is the Concise Binary Object Representation, a very compact form of binary data encoding that is a superset of JSON. It was created by the IETF Constrained RESTful Environments (CoRE) WG, which has used it in many new RFCs. It is meant to be used alongside the <a href="https://tools.ietf.org/html/rfc7252">CoAP protocol</a>.</p>
+<p>CBOR has three groups of built-in types:</p>
+<ul>
+<li>Basic types: integers, floating point (double), boolean, null, etc.</li>
+<li>String-like types: strings and byte arrays</li>
+<li>Containers: arrays and maps</li>
+</ul>
+<p>Additionally, CBOR supports a form of type extensibility by associating a &quot;tag&quot; to one of the above types to convey more information. For example, a UUID is represented by a tag and a byte array containing the 16 bytes of the UUID content. <a href="qcborvalue.html">QCborValue</a> supports creating and decoding several of those extended types directly with Qt classes (like <a href="quuid.html">QUuid</a>).</p>
+<p>For the complete list, see <a href="qcborvalue.html#Type-enum">QCborValue::Type</a>. The type of a <a href="qcborvalue.html">QCborValue</a> can be queried using <a href="qcborvalue.html#type">type</a>() or one of the &quot;isXxxx&quot; functions.</p>
+<a name="extended-types-and-tagged-values"></a>
+<h3 id="extended-types-and-tagged-values">Extended types and tagged values</h3>
+<p>A tagged value is a normal <a href="qcborvalue.html">QCborValue</a> that is paired with a number that is its tag. See <a href="qtcborcommon.html#QCborKnownTags-enum">QCborKnownTags</a> for more information on what tags are in the API as well as the full, official list. Such combinations form extended types.</p>
+<p><a href="qcborvalue.html">QCborValue</a> has support for certain extended types in the API, like URL (with <a href="qurl.html">QUrl</a>) and UUID (with <a href="quuid.html">QUuid</a>). Other extended types not supported in the API are represented by a <a href="qcborvalue.html">QCborValue</a> of <a href="qcborvalue.html#Type-enum">Tag</a> type. The tag can later be retrieved by <a href="qcborvalue.html#tag">tag</a>() and the tagged value using <a href="qcborvalue.html#taggedValue">taggedValue</a>().</p>
+<p>In order to support future compatibility, QCborValues containing extended Qt types compare equal to the tag type of the same contents. In other words, the following expression is true:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span>(uuid) <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span>(<span class="type"><a href="qtcborcommon.html#QCborKnownTags-enum">QCborKnownTags</a></span><span class="operator">::</span>Uuid<span class="operator">,</span> uuid<span class="operator">.</span>toRfc4122());
+
+</pre>
+<a name="undefined-and-null-values"></a>
+<h3 id="undefined-and-null-values">Undefined and null values</h3>
+<p><a href="qcborvalue.html">QCborValue</a> can contain a value of &quot;null&quot;, which is not of any specific type. It resembles the C++ <code>std::nullptr_t</code> type, whose only possible value is <code>nullptr</code>. <a href="qcborvalue.html">QCborValue</a> has a constructor taking such a type and creates a null <a href="qcborvalue.html">QCborValue</a>.</p>
+<p>Null values are used to indicate that an optional value is not present. In that aspect, it is similar to the C++ Standard Library type <code>std::optional</code> when that is disengaged. Unlike the C++ type, CBOR nulls are simply of type &quot;Null&quot; and it is not possible to determine what concrete type it is replacing.</p>
+<p><a href="qcborvalue.html">QCborValue</a> can also be of the undefined type, which represents a value of &quot;undefined&quot;. In fact, that is what the <a href="qcborvalue.html">QCborValue</a> default constructor creates.</p>
+<p>Undefined values are different from null values. While nulls are used to indicate an optional value that is not provided, Undefined is usually used to indicate that an expected value could not be provided, usually due to an error or a precondition that could not be satisfied.</p>
+<p>Such values are completely valid and may appear in CBOR streams, unlike JSON content and <a href="qjsonvalue.html">QJsonValue</a>'s undefined bit. But like <a href="qjsonvalue.html">QJsonValue</a>'s Undefined, it is returned by a CBOR container's value() or read-only operator[] for invalid look-ups (index out of range for <a href="qcborarray.html">QCborArray</a>, or key not found for <a href="qcbormap.html">QCborMap</a>). It is not possible to tell such a case apart from the value of Undefined, so if that is required, check the <a href="qcborarray.html">QCborArray</a> size and use the <a href="qcbormap.html">QCborMap</a> iterator API.</p>
+<a name="simple-types"></a>
+<h3 id="simple-types">Simple types</h3>
+<p>CBOR supports additional simple types that, like Null and Undefined, carry no other value. They are called interchangeably &quot;Simple Types&quot; and &quot;Simple Values&quot;. CBOR encodes booleans as two distinct types (one for <code>true</code> and one for <code>false</code>), but <a href="qcborvalue.html">QCborValue</a> has a convenience API for them.</p>
+<p>There are currently no other defined CBOR simple types. <a href="qcborvalue.html">QCborValue</a> supports them simply by their number with API like <a href="qcborvalue.html#isSimpleType">isSimpleType</a>() and <a href="qcborvalue.html#toSimpleType">toSimpleType</a>(), available for compatibility with future specifications before the Qt API can be updated. Their use before such a specification is discouraged, as other CBOR implementations may not support them fully.</p>
+<a name="cbor-support"></a>
+<h3 id="cbor-support">CBOR support</h3>
+<p><a href="qcborvalue.html">QCborValue</a> supports all CBOR features required to create canonical and strict streams. It implements almost all of the features specified in <a href="https://tools.ietf.org/html/rfc7049">RFC 7049</a>.</p>
+<p>The following table lists the CBOR features that <a href="qcborvalue.html">QCborValue</a> supports.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Feature</th><th >Support</th></tr></thead>
+<tr valign="top" class="odd"><td >Unsigned numbers</td><td >Yes (<a href="qtglobal.html#qint64-typedef">qint64</a> range)</td></tr>
+<tr valign="top" class="even"><td >Negative numbers</td><td >Yes (<a href="qtglobal.html#qint64-typedef">qint64</a> range)</td></tr>
+<tr valign="top" class="odd"><td >Byte strings</td><td >Yes</td></tr>
+<tr valign="top" class="even"><td >Text strings</td><td >Yes</td></tr>
+<tr valign="top" class="odd"><td >Chunked strings</td><td >See below</td></tr>
+<tr valign="top" class="even"><td >Tags</td><td >Yes (arbitrary)</td></tr>
+<tr valign="top" class="odd"><td >Booleans</td><td >Yes</td></tr>
+<tr valign="top" class="even"><td >Null</td><td >Yes</td></tr>
+<tr valign="top" class="odd"><td >Undefined</td><td >Yes</td></tr>
+<tr valign="top" class="even"><td >Arbitrary simple values</td><td >Yes</td></tr>
+<tr valign="top" class="odd"><td >Half-precision float (16-bit)</td><td >Yes</td></tr>
+<tr valign="top" class="even"><td >Single-precision float (32-bit)</td><td >Yes</td></tr>
+<tr valign="top" class="odd"><td >Double-precision float (64-bit)</td><td >Yes</td></tr>
+<tr valign="top" class="even"><td >Infinities and NaN floating point</td><td >Yes</td></tr>
+<tr valign="top" class="odd"><td >Determinate-length arrays and maps</td><td >Yes</td></tr>
+<tr valign="top" class="even"><td >Indeterminate-length arrays and maps</td><td >Yes</td></tr>
+<tr valign="top" class="odd"><td >Map key types other than strings and integers</td><td >Yes (arbitrary)</td></tr>
+</table></div>
+<p>Integers in <a href="qcborvalue.html">QCborValue</a> are limited to the range of the <a href="qtglobal.html#qint64-typedef">qint64</a> type. That is, from -9,223,372,036,854,775,808 (-2<sup>63</sup>) to 9,223,372,036,854,775,807 (2<sup>63</sup> - 1). CBOR itself can represent integer values outside of this range, which <a href="qcborvalue.html">QCborValue</a> does not support. When decoding a stream using <a href="qcborvalue.html#fromCbor">fromCbor</a>() containing one of those values, <a href="qcborvalue.html">QCborValue</a> will convert automatically to <a href="qcborvalue.html#Type-enum">Double</a>, but that may lose up to 11 bits of precision.</p>
+<p><a href="qcborvalue.html#fromCbor">fromCbor</a>() is able to decode chunked strings, but will always merge the chunks together into a single <a href="qcborvalue.html">QCborValue</a>. For that reason, it always writes non-chunked strings when using <a href="qcborvalue.html#toCbor">toCbor</a>() (which is required by the Canonical format anyway).</p>
+<p><a href="qcborvalue.html">QCborValue</a> will always convert half- and single-precision floating point values in the CBOR stream to double-precision. The <a href="qcborvalue.html#toCbor">toCbor</a>() function can take a parameter indicating to recreate them.</p>
+<a name="qcborvalueref"></a>
+<h3 id="qcborvalueref">QCborValueRef</h3>
+<p><a href="qcborvalue.html#qcborvalueref">QCborValueRef</a> is a helper class for <a href="qcborarray.html">QCborArray</a> and <a href="qcbormap.html">QCborMap</a>. It is the type you get when using one of the mutating APIs in those classes. Unlike <a href="qcborvalue.html">QCborValue</a>, new values can be assigned to that class. When that is done, the array or map it refers to will be modified with the new value. In all other aspects, its API is identical to <a href="qcborvalue.html">QCborValue</a>.</p>
+<p><a href="qjsonvalue.html">QJsonValue</a>, <a href="qjsondocument.html">QJsonDocument</a></p>
+</div>
+<p><b>See also </b><a href="qcborarray.html">QCborArray</a>, <a href="qcbormap.html">QCborMap</a>, <a href="qcborstreamreader.html">QCborStreamReader</a>, and <a href="qcborstreamwriter.html">QCborStreamWriter</a>.</p>
+<!-- @@@QCborValue -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$DiagnosticNotationOption$$$Compact$$$LineWrapped$$$ExtendedFormat -->
+<h3 class="flags" id="DiagnosticNotationOption-enum"><a name="DiagnosticNotationOption-enum"></a>enum QCborValue::<span class="name">DiagnosticNotationOption</span><br/>flags QCborValue::<span class="name">DiagnosticNotationOptions</span></h3>
+<p>This enum is used in the option argument to <a href="qcborvalue.html#toDiagnosticNotation">toDiagnosticNotation</a>(), to modify the output format.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QCborValue::Compact</code></td><td class="topAlign tblval"><code>0x00</code></td><td class="topAlign">Does not use any line-breaks, producing a compact representation.</td></tr>
+<tr><td class="topAlign"><code>QCborValue::LineWrapped</code></td><td class="topAlign tblval"><code>0x01</code></td><td class="topAlign">Uses line-breaks, one <a href="qcborvalue.html">QCborValue</a> per line.</td></tr>
+<tr><td class="topAlign"><code>QCborValue::ExtendedFormat</code></td><td class="topAlign tblval"><code>0x02</code></td><td class="topAlign">Uses some different options to represent values, not found in RFC 7049. Those options are subject to change.</td></tr>
+</table></div>
+<p>Currently, <code>ExtendedFormat</code> will change how byte arrays are represented. Without it, they are always hex-encoded and without spaces. With it, <a href="qcborvalue.html#toCbor">QCborValue::toCbor</a>() will either use hex with spaces, base64 or base64url encoding, depending on the context.</p>
+<p>The DiagnosticNotationOptions type is a typedef for <a href="qflags.html">QFlags</a>&lt;DiagnosticNotationOption&gt;. It stores an OR combination of DiagnosticNotationOption values.</p>
+<p><b>See also </b><a href="qcborvalue.html#toDiagnosticNotation">toDiagnosticNotation</a>().</p>
+<!-- @@@DiagnosticNotationOption -->
+<!-- $$$EncodingOption$$$SortKeysInMaps$$$UseFloat$$$UseFloat16$$$UseIntegers$$$NoTransformation -->
+<h3 class="flags" id="EncodingOption-enum"><a name="EncodingOption-enum"></a>enum QCborValue::<span class="name">EncodingOption</span><br/>flags QCborValue::<span class="name">EncodingOptions</span></h3>
+<p>This enum is used in the options argument to <a href="qcborvalue.html#toCbor">toCbor</a>(), modifying the behavior of the encoder.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QCborValue::NoTransformation</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">(Default) Performs no transformations.</td></tr>
+<tr><td class="topAlign"><code>QCborValue::UseFloat</code></td><td class="topAlign tblval"><code>0x02</code></td><td class="topAlign">Tells the encoder to use IEEE 754 single-precision floating point (that is, <code>float</code>) whenever possible.</td></tr>
+<tr><td class="topAlign"><code>QCborValue::UseFloat16</code></td><td class="topAlign tblval"><code>UseFloat | 0x04</code></td><td class="topAlign">Tells the encoder to use IEEE 754 half-precision floating point (that is, <code>qfloat16</code>), whenever possible. Implies <code>UseFloat</code>.</td></tr>
+<tr><td class="topAlign"><code>QCborValue::UseIntegers</code></td><td class="topAlign tblval"><code>0x08</code></td><td class="topAlign">Tells the encoder to use integers whenever a value of type <a href="qcborvalue.html#Type-enum">Double</a> contains an integer.</td></tr>
+</table></div>
+<p>The use of <code>UseFloat16</code> is required to encode the stream in Canonical Format, but is not otherwise necessary.</p>
+<p>The EncodingOptions type is a typedef for <a href="qflags.html">QFlags</a>&lt;EncodingOption&gt;. It stores an OR combination of EncodingOption values.</p>
+<p><b>See also </b><a href="qcborvalue.html#toCbor">toCbor</a>().</p>
+<!-- @@@EncodingOption -->
+<!-- $$$Type$$$Integer$$$ByteArray$$$String$$$Array$$$Map$$$Tag$$$SimpleType$$$False$$$True$$$Null$$$Undefined$$$Double$$$DateTime$$$Url$$$RegularExpression$$$Uuid$$$Invalid -->
+<h3 class="fn" id="Type-enum"><a name="Type-enum"></a>enum QCborValue::<span class="name">Type</span></h3>
+<p>This enum represents the <a href="qcborvalue.html">QCborValue</a> type. It is returned by the <a href="qcborvalue.html#type">type</a>() function.</p>
+<p>The CBOR built-in types are:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QCborValue::Integer</code></td><td class="topAlign tblval"><code>0x00</code></td><td class="topAlign"><code>qint64</code>: An integer value</td></tr>
+<tr><td class="topAlign"><code>QCborValue::ByteArray</code></td><td class="topAlign tblval"><code>0x40</code></td><td class="topAlign"><a href="qbytearray.html">QByteArray</a>: a byte array (&quot;byte string&quot;)</td></tr>
+<tr><td class="topAlign"><code>QCborValue::String</code></td><td class="topAlign tblval"><code>0x60</code></td><td class="topAlign"><a href="qstring.html">QString</a>: a Unicode string (&quot;text string&quot;)</td></tr>
+<tr><td class="topAlign"><code>QCborValue::Array</code></td><td class="topAlign tblval"><code>0x80</code></td><td class="topAlign"><a href="qcborarray.html">QCborArray</a>: an array of QCborValues</td></tr>
+<tr><td class="topAlign"><code>QCborValue::Map</code></td><td class="topAlign tblval"><code>0xa0</code></td><td class="topAlign"><a href="qcbormap.html">QCborMap</a>: an associative container of QCborValues</td></tr>
+<tr><td class="topAlign"><code>QCborValue::SimpleType</code></td><td class="topAlign tblval"><code>0x100</code></td><td class="topAlign"><a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a>: one of several simple types/values</td></tr>
+<tr><td class="topAlign"><code>QCborValue::False</code></td><td class="topAlign tblval"><code>SimpleType + int(QCborSimpleType::False)</code></td><td class="topAlign"><code>bool</code>: the simple type for value <code>false</code></td></tr>
+<tr><td class="topAlign"><code>QCborValue::True</code></td><td class="topAlign tblval"><code>SimpleType + int(QCborSimpleType::True)</code></td><td class="topAlign"><code>bool</code>: the simple type for value <code>true</code></td></tr>
+<tr><td class="topAlign"><code>QCborValue::Null</code></td><td class="topAlign tblval"><code>SimpleType + int(QCborSimpleType::Null)</code></td><td class="topAlign"><code>std::nullptr_t</code>: the simple type for the null value</td></tr>
+<tr><td class="topAlign"><code>QCborValue::Undefined</code></td><td class="topAlign tblval"><code>SimpleType + int(QCborSimpleType::Undefined)</code></td><td class="topAlign">(no type) the simple type for the undefined value</td></tr>
+<tr><td class="topAlign"><code>QCborValue::Double</code></td><td class="topAlign tblval"><code>0x202</code></td><td class="topAlign"><code>double</code>: a double-precision floating point</td></tr>
+<tr><td class="topAlign"><code>QCborValue::Invalid</code></td><td class="topAlign tblval"><code>-1</code></td><td class="topAlign">Not a valid value, this usually indicates a CBOR decoding error</td></tr>
+</table></div>
+<p>Additionally, <a href="qcborvalue.html">QCborValue</a> can represent extended types:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="even"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QCborValue::Tag</code></td><td class="topAlign tblval"><code>0xc0</code></td><td class="topAlign">An unknown or unrecognized extended type, represented by its tag (a <a href="qtcborcommon.html#QCborTag-enum">QCborTag</a>) and the tagged value (a <a href="qcborvalue.html">QCborValue</a>)</td></tr>
+<tr><td class="topAlign"><code>QCborValue::DateTime</code></td><td class="topAlign tblval"><code>0x10000</code></td><td class="topAlign"><a href="qdatetime.html">QDateTime</a>: a date and time stamp</td></tr>
+<tr><td class="topAlign"><code>QCborValue::Url</code></td><td class="topAlign tblval"><code>0x10020</code></td><td class="topAlign"><a href="qurl.html">QUrl</a>: a URL or URI</td></tr>
+<tr><td class="topAlign"><code>QCborValue::RegularExpression</code></td><td class="topAlign tblval"><code>0x10023</code></td><td class="topAlign"><a href="qregularexpression.html">QRegularExpression</a>: the pattern of a regular expression</td></tr>
+<tr><td class="topAlign"><code>QCborValue::Uuid</code></td><td class="topAlign tblval"><code>0x10025</code></td><td class="topAlign"><a href="quuid.html">QUuid</a>: a UUID</td></tr>
+</table></div>
+<p><b>See also </b><a href="qcborvalue.html#type">type</a>().</p>
+<!-- @@@Type -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$ -->
+<div class="fngroup">
+<h3 class="fn fngroupitem" id="fromCbor-2"><a name="fromCbor-2"></a><code>[static] </code><span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> QCborValue::<span class="name">fromCbor</span>(const <span class="type">char</span> *<i>data</i>, <span class="type">qsizetype</span> <i>len</i>, <span class="type"><a href="qcborparsererror.html">QCborParserError</a></span> *<i>error</i> = nullptr)</h3><h3 class="fn fngroupitem" id="fromCbor-3"><a name="fromCbor-3"></a><code>[static] </code><span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> QCborValue::<span class="name">fromCbor</span>(const <span class="type"><a href="qtglobal.html#quint8-typedef">quint8</a></span> *<i>data</i>, <span class="type">qsizetype</span> <i>len</i>, <span class="type"><a href="qcborparsererror.html">QCborParserError</a></span> *<i>error</i> = nullptr)</h3></div>
+<p>This is an overloaded function.</p>
+<p>Converts <i>len</i> bytes of <i>data</i> to a <a href="qbytearray.html">QByteArray</a> and then calls the overload of this function that accepts a <a href="qbytearray.html">QByteArray</a>, also passing <i>error</i>, if provided.</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<div class="fngroup">
+<h3 class="fn fngroupitem" id="toMap"><a name="toMap"></a><span class="type"><a href="qcbormap.html">QCborMap</a></span> QCborValue::<span class="name">toMap</span>() const</h3><h3 class="fn fngroupitem" id="toMap-1"><a name="toMap-1"></a><span class="type"><a href="qcbormap.html">QCborMap</a></span> QCborValue::<span class="name">toMap</span>(const <span class="type"><a href="qcbormap.html">QCborMap</a></span> &amp;<i>defaultValue</i>) const</h3></div>
+<p>Returns the map value stored in this <a href="qcborvalue.html">QCborValue</a>, if it is of the map type. Otherwise, it returns <i>defaultValue</i>.</p>
+<p>Note that this function performs no conversion from other types to <a href="qcbormap.html">QCborMap</a>.</p>
+<p><b>See also </b><a href="qcborvalue.html#isMap">isMap</a>(), <a href="qcborvalue.html#isArray">isArray</a>(), <a href="qcborvalue.html#isContainer">isContainer</a>(), and <a href="qcborvalue.html#toArray">toArray</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<div class="fngroup">
+<h3 class="fn fngroupitem" id="toArray"><a name="toArray"></a><span class="type"><a href="qcborarray.html">QCborArray</a></span> QCborValue::<span class="name">toArray</span>() const</h3><h3 class="fn fngroupitem" id="toArray-1"><a name="toArray-1"></a><span class="type"><a href="qcborarray.html">QCborArray</a></span> QCborValue::<span class="name">toArray</span>(const <span class="type"><a href="qcborarray.html">QCborArray</a></span> &amp;<i>defaultValue</i>) const</h3></div>
+<p>Returns the array value stored in this <a href="qcborvalue.html">QCborValue</a>, if it is of the array type. Otherwise, it returns <i>defaultValue</i>.</p>
+<p>Note that this function performs no conversion from other types to <a href="qcborarray.html">QCborArray</a>.</p>
+<p><b>See also </b><a href="qcborvalue.html#isArray">isArray</a>(), <a href="qcborvalue.html#isByteArray">isByteArray</a>(), <a href="qcborvalue.html#isMap">isMap</a>(), <a href="qcborvalue.html#isContainer">isContainer</a>(), and <a href="qcborvalue.html#toMap">toMap</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<div class="fngroup">
+<h3 class="fn fngroupitem" id="QCborValue-15"><a name="QCborValue-15"></a>QCborValue::<span class="name">QCborValue</span>(<span class="type"><a href="qtcborcommon.html#QCborTag-enum">QCborTag</a></span> <i>t</i>, const <span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> &amp;<i>tv</i> = QCborValue())</h3><h3 class="fn fngroupitem" id="QCborValue-16"><a name="QCborValue-16"></a>QCborValue::<span class="name">QCborValue</span>(<span class="type"><a href="qtcborcommon.html#QCborKnownTags-enum">QCborKnownTags</a></span> <i>t</i>, const <span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> &amp;<i>tv</i> = QCborValue())</h3></div>
+<p>Creates a <a href="qcborvalue.html">QCborValue</a> for the extended type represented by the tag value <i>t</i>, tagging value <i>tv</i>. The tag can later be retrieved using <a href="qcborvalue.html#tag">tag</a>() and the tagged value using <a href="qcborvalue.html#taggedValue">taggedValue</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#isTag">isTag</a>(), <a href="qcborvalue.html#tag">tag</a>(), <a href="qcborvalue.html#taggedValue">taggedValue</a>(), and <a href="qtcborcommon.html#QCborKnownTags-enum">QCborKnownTags</a>.</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<div class="fngroup">
+<h3 class="fn fngroupitem" id="QCborValue-13"><a name="QCborValue-13"></a>QCborValue::<span class="name">QCborValue</span>(const <span class="type"><a href="qcbormap.html">QCborMap</a></span> &amp;<i>m</i>)</h3><h3 class="fn fngroupitem" id="QCborValue-14"><a name="QCborValue-14"></a>QCborValue::<span class="name">QCborValue</span>(<span class="type"><a href="qcbormap.html">QCborMap</a></span> &amp;&amp;<i>m</i>)</h3></div>
+<p>Creates a <a href="qcborvalue.html">QCborValue</a> with the map <i>m</i>. The map can later be retrieved using <a href="qcborvalue.html#toMap">toMap</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#toMap">toMap</a>(), <a href="qcborvalue.html#isMap">isMap</a>(), and <a href="qcborvalue.html#isArray">isArray</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<div class="fngroup">
+<h3 class="fn fngroupitem" id="QCborValue-11"><a name="QCborValue-11"></a>QCborValue::<span class="name">QCborValue</span>(const <span class="type"><a href="qcborarray.html">QCborArray</a></span> &amp;<i>a</i>)</h3><h3 class="fn fngroupitem" id="QCborValue-12"><a name="QCborValue-12"></a>QCborValue::<span class="name">QCborValue</span>(<span class="type"><a href="qcborarray.html">QCborArray</a></span> &amp;&amp;<i>a</i>)</h3></div>
+<p>Creates a <a href="qcborvalue.html">QCborValue</a> with the array <i>a</i>. The array can later be retrieved using <a href="qcborvalue.html#toArray">toArray</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#toArray">toArray</a>(), <a href="qcborvalue.html#isArray">isArray</a>(), and <a href="qcborvalue.html#isMap">isMap</a>().</p>
+<!-- @@@ -->
+<!-- $$$QCborValue$$$QCborValueQCborValue&& -->
+<h3 class="fn" id="QCborValue-23"><a name="QCborValue-23"></a>QCborValue::<span class="name">QCborValue</span>(<span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> &amp;&amp;<i>other</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Moves the contents of the <i>other</i> <a href="qcborvalue.html">QCborValue</a> object into this one and frees the resources of this one.</p>
+<!-- @@@QCborValue -->
+<!-- $$$QCborValue$$$QCborValueconstQCborValue& -->
+<h3 class="fn" id="QCborValue-22"><a name="QCborValue-22"></a>QCborValue::<span class="name">QCborValue</span>(const <span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> &amp;<i>other</i>)</h3>
+<p>Copies the contents of <i>other</i> into this object.</p>
+<!-- @@@QCborValue -->
+<!-- $$$QCborValue$$$QCborValueconstQUuid& -->
+<h3 class="fn" id="QCborValue-20"><a name="QCborValue-20"></a>QCborValue::<span class="name">QCborValue</span>(const <span class="type"><a href="quuid.html">QUuid</a></span> &amp;<i>uuid</i>)</h3>
+<p>Creates a <a href="qcborvalue.html">QCborValue</a> object of the UUID extended type and containing the value represented by <i>uuid</i>. The value can later be retrieved using <a href="qcborvalue.html#toUuid">toUuid</a>().</p>
+<p>The CBOR UUID type is an extended type represented by a byte array tagged as an <a href="qtcborcommon.html#QCborKnownTags-enum">Uuid</a>.</p>
+<p><b>See also </b><a href="qcborvalue.html#toUuid">toUuid</a>(), <a href="qcborvalue.html#isUuid">isUuid</a>(), and <a href="qcborvalue.html#taggedValue">taggedValue</a>().</p>
+<!-- @@@QCborValue -->
+<!-- $$$QCborValue$$$QCborValueconstQRegularExpression& -->
+<h3 class="fn" id="QCborValue-19"><a name="QCborValue-19"></a>QCborValue::<span class="name">QCborValue</span>(const <span class="type"><a href="qregularexpression.html">QRegularExpression</a></span> &amp;<i>rx</i>)</h3>
+<p>Creates a <a href="qcborvalue.html">QCborValue</a> object of the regular expression pattern extended type and containing the value represented by <i>rx</i>. The value can later be retrieved using <a href="qcborvalue.html#toRegularExpression">toRegularExpression</a>().</p>
+<p>The CBOR regular expression type is an extended type represented by a string tagged as an <a href="qtcborcommon.html#QCborKnownTags-enum">RegularExpression</a>. Note that CBOR regular expressions only store the patterns, so any flags that the <a href="qregularexpression.html">QRegularExpression</a> object may carry will be lost.</p>
+<p><b>See also </b><a href="qcborvalue.html#toRegularExpression">toRegularExpression</a>(), <a href="qcborvalue.html#isRegularExpression">isRegularExpression</a>(), and <a href="qcborvalue.html#taggedValue">taggedValue</a>().</p>
+<!-- @@@QCborValue -->
+<!-- $$$QCborValue$$$QCborValueconstQUrl& -->
+<h3 class="fn" id="QCborValue-18"><a name="QCborValue-18"></a>QCborValue::<span class="name">QCborValue</span>(const <span class="type"><a href="qurl.html">QUrl</a></span> &amp;<i>url</i>)</h3>
+<p>Creates a <a href="qcborvalue.html">QCborValue</a> object of the URL extended type and containing the value represented by <i>url</i>. The value can later be retrieved using <a href="qcborvalue.html#toUrl">toUrl</a>().</p>
+<p>The CBOR URL type is an extended type represented by a string tagged as an <a href="qtcborcommon.html#QCborKnownTags-enum">Url</a>.</p>
+<p><b>See also </b><a href="qcborvalue.html#toUrl">toUrl</a>(), <a href="qcborvalue.html#isUrl">isUrl</a>(), and <a href="qcborvalue.html#taggedValue">taggedValue</a>().</p>
+<!-- @@@QCborValue -->
+<!-- $$$QCborValue$$$QCborValueconstQDateTime& -->
+<h3 class="fn" id="QCborValue-17"><a name="QCborValue-17"></a>QCborValue::<span class="name">QCborValue</span>(const <span class="type"><a href="qdatetime.html">QDateTime</a></span> &amp;<i>dt</i>)</h3>
+<p>Creates a <a href="qcborvalue.html">QCborValue</a> object of the date/time extended type and containing the value represented by <i>dt</i>. The value can later be retrieved using <a href="qcborvalue.html#toDateTime">toDateTime</a>().</p>
+<p>The CBOR date/time types are extension types using tags: either a string (in ISO date format) tagged as a <a href="qtcborcommon.html#QCborKnownTags-enum">DateTime</a> or a number (of seconds since the start of 1970, UTC) tagged as a <a href="qtcborcommon.html#QCborKnownTags-enum">UnixTime_t</a>. When parsing CBOR streams, <a href="qcborvalue.html">QCborValue</a> will convert <a href="qtcborcommon.html#QCborKnownTags-enum">UnixTime_t</a> to the string-based type.</p>
+<p><b>See also </b><a href="qcborvalue.html#toDateTime">toDateTime</a>(), <a href="qcborvalue.html#isDateTime">isDateTime</a>(), and <a href="qcborvalue.html#taggedValue">taggedValue</a>().</p>
+<!-- @@@QCborValue -->
+<!-- $$$QCborValue$$$QCborValueQLatin1String -->
+<h3 class="fn" id="QCborValue-9"><a name="QCborValue-9"></a>QCborValue::<span class="name">QCborValue</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>s</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Creates a <a href="qcborvalue.html">QCborValue</a> with string value <i>s</i>. The value can later be retrieved using <a href="qcborvalue.html#toString">toString</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#toString">toString</a>(), <a href="qcborvalue.html#isString">isString</a>(), and <a href="qcborvalue.html#isByteArray">isByteArray</a>().</p>
+<!-- @@@QCborValue -->
+<!-- $$$QCborValue$$$QCborValueconstQString& -->
+<h3 class="fn" id="QCborValue-8"><a name="QCborValue-8"></a>QCborValue::<span class="name">QCborValue</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>s</i>)</h3>
+<p>Creates a <a href="qcborvalue.html">QCborValue</a> with string value <i>s</i>. The value can later be retrieved using <a href="qcborvalue.html#toString">toString</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#toString">toString</a>(), <a href="qcborvalue.html#isString">isString</a>(), and <a href="qcborvalue.html#isByteArray">isByteArray</a>().</p>
+<!-- @@@QCborValue -->
+<!-- $$$QCborValue$$$QCborValueconstQByteArray& -->
+<h3 class="fn" id="QCborValue-7"><a name="QCborValue-7"></a>QCborValue::<span class="name">QCborValue</span>(const <span class="type"><a href="qbytearray.html">QByteArray</a></span> &amp;<i>ba</i>)</h3>
+<p>Creates a <a href="qcborvalue.html">QCborValue</a> with byte array value <i>ba</i>. The value can later be retrieved using <a href="qcborvalue.html#toByteArray">toByteArray</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#toByteArray">toByteArray</a>(), <a href="qcborvalue.html#isByteArray">isByteArray</a>(), and <a href="qcborvalue.html#isString">isString</a>().</p>
+<!-- @@@QCborValue -->
+<!-- $$$QCborValue$$$QCborValueQCborSimpleType -->
+<h3 class="fn" id="QCborValue-6"><a name="QCborValue-6"></a>QCborValue::<span class="name">QCborValue</span>(<span class="type"><a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a></span> <i>st</i>)</h3>
+<p>Creates a <a href="qcborvalue.html">QCborValue</a> of simple type <i>st</i>. The type can later later be retrieved using <a href="qcborvalue.html#toSimpleType">toSimpleType</a>() as well as <a href="qcborvalue.html#isSimpleType">isSimpleType</a>(st).</p>
+<p>CBOR simple types are types that do not have any associated value, like C++'s <code>std::nullptr_t</code> type, whose only possible value is <code>nullptr</code>.</p>
+<p>If <i>st</i> is <code>QCborSimpleType::Null</code>, the resulting <a href="qcborvalue.html">QCborValue</a> will be of the <a href="qcborvalue.html#Type-enum">Null</a> type and similarly for <code>QCborSimpleType::Undefined</code>. If <i>st</i> is <code>QCborSimpleType::False</code> or <code>QCborSimpleType::True</code>, the created <a href="qcborvalue.html">QCborValue</a> will be a boolean containing a value of false or true, respectively.</p>
+<p>This function can be used with simple types not defined in the API. For example, to create a <a href="qcborvalue.html">QCborValue</a> with simple type 12, one could write:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> value(<span class="type"><a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a></span>(<span class="number">12</span>));
+
+</pre>
+<p>Simple types should not be used until a specification for them has been published, since other implementations may not support them properly. Simple type values 24 to 31 are reserved and must not be used.</p>
+<p><a href="qcborvalue.html#isSimpleType">isSimpleType</a>(), <a href="qcborvalue.html#isNull">isNull</a>(), <a href="qcborvalue.html#isUndefined">isUndefined</a>(), <a href="qcborvalue.html#isTrue">isTrue</a>(), <a href="qcborvalue.html#isFalse">isFalse</a>()</p>
+<!-- @@@QCborValue -->
+<!-- $$$QCborValue$$$QCborValuedouble -->
+<h3 class="fn" id="QCborValue-5"><a name="QCborValue-5"></a>QCborValue::<span class="name">QCborValue</span>(<span class="type">double</span> <i>d</i>)</h3>
+<p>Creates a <a href="qcborvalue.html">QCborValue</a> with floating point value <i>d</i>. The value can later be retrieved using <a href="qcborvalue.html#toDouble">toDouble</a>().</p>
+<p>CBOR floating point values are distinct from integer values. Therefore, <a href="qcborvalue.html">QCborValue</a> objects with integers will compare differently to <a href="qcborvalue.html">QCborValue</a> objects containing floating-point, even if the values contained in the objects are equivalent.</p>
+<p><b>See also </b><a href="qcborvalue.html#toDouble">toDouble</a>(), <a href="qcborvalue.html#isDouble">isDouble</a>(), and <a href="qcborvalue.html#isInteger">isInteger</a>().</p>
+<!-- @@@QCborValue -->
+<!-- $$$QCborValue$$$QCborValueqint64 -->
+<h3 class="fn" id="QCborValue-4"><a name="QCborValue-4"></a>QCborValue::<span class="name">QCborValue</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>i</i>)</h3>
+<p>Creates a <a href="qcborvalue.html">QCborValue</a> with integer value <i>i</i>. The value can later be retrieved using <a href="qcborvalue.html#toInteger">toInteger</a>().</p>
+<p>CBOR integer values are distinct from floating point values. Therefore, <a href="qcborvalue.html">QCborValue</a> objects with integers will compare differently to <a href="qcborvalue.html">QCborValue</a> objects containing floating-point, even if the values contained in the objects are equivalent.</p>
+<p><b>See also </b><a href="qcborvalue.html#toInteger">toInteger</a>(), <a href="qcborvalue.html#isInteger">isInteger</a>(), and <a href="qcborvalue.html#isDouble">isDouble</a>().</p>
+<!-- @@@QCborValue -->
+<!-- $$$QCborValue$$$QCborValuebool -->
+<h3 class="fn" id="QCborValue-3"><a name="QCborValue-3"></a>QCborValue::<span class="name">QCborValue</span>(<span class="type">bool</span> <i>b</i>)</h3>
+<p>Creates a <a href="qcborvalue.html">QCborValue</a> with boolean value <i>b</i>. The value can later be retrieved using <a href="qcborvalue.html#toBool">toBool</a>().</p>
+<p>Internally, CBOR booleans are represented by a pair of types, one for true and one for false. For that reason, boolean QCborValues will return true for <a href="qcborvalue.html#isSimpleType">isSimpleType</a>() and one of <code>isSimpleType(QCborSimpleType::False)</code> or <code>isSimpleType(QCborSimpleType::True)</code>.</p>
+<p><b>See also </b><a href="qcborvalue.html#toBool">toBool</a>(), <a href="qcborvalue.html#isBool">isBool</a>(), <a href="qcborvalue.html#isTrue">isTrue</a>(), <a href="qcborvalue.html#isFalse">isFalse</a>(), and <a href="qcborvalue.html#isSimpleType">isSimpleType</a>().</p>
+<!-- @@@QCborValue -->
+<!-- $$$QCborValue$$$QCborValuestd::nullptr_t -->
+<h3 class="fn" id="QCborValue-2"><a name="QCborValue-2"></a>QCborValue::<span class="name">QCborValue</span>(<i>std::nullptr_t</i>)</h3>
+<p>Creates a <a href="qcborvalue.html">QCborValue</a> of the <a href="qcborvalue.html#Type-enum">Null</a> type.</p>
+<p>CBOR null values are used to indicate optional values that were not provided. They are distinct from undefined values, in that null values are usually not the result of an earlier error or problem.</p>
+<p><b>See also </b><a href="qcborvalue.html#isNull">isNull</a>(), <a href="qcborvalue.html#isUndefined">isUndefined</a>(), and <a href="qcborvalue.html#isSimpleType">isSimpleType</a>().</p>
+<!-- @@@QCborValue -->
+<!-- $$$QCborValue$$$QCborValueQCborValue::Type -->
+<h3 class="fn" id="QCborValue-1"><a name="QCborValue-1"></a>QCborValue::<span class="name">QCborValue</span>(<span class="type"><a href="qcborvalue.html#Type-enum">QCborValue::Type</a></span> <i>t_</i>)</h3>
+<p>Creates a <a href="qcborvalue.html">QCborValue</a> of type <i>t_</i>. The value associated with such a type (if any) will be default constructed.</p>
+<p><b>See also </b><a href="qcborvalue.html#type">type</a>().</p>
+<!-- @@@QCborValue -->
+<!-- $$$QCborValue[overload1]$$$QCborValue -->
+<h3 class="fn" id="QCborValue"><a name="QCborValue"></a>QCborValue::<span class="name">QCborValue</span>()</h3>
+<p>Creates a <a href="qcborvalue.html">QCborValue</a> of the <a href="qcborvalue.html#Type-enum">Undefined</a> type.</p>
+<p>CBOR undefined values are used to indicate missing information, usually as a result of a previous operation that did not complete as expected. They are also used by the <a href="qcborarray.html">QCborArray</a> and <a href="qcbormap.html">QCborMap</a> API to indicate the searched item was not found.</p>
+<p>Undefined values are represented by the <a href="qtcborcommon.html#QCborSimpleType-enum">Undefined simple type</a>. Because of that, QCborValues with undefined values will also return true for <a href="qcborvalue.html#isSimpleType">isSimpleType</a>() and <code>isSimpleType(QCborSimpleType::Undefined)</code>.</p>
+<p>Undefined values are different from null values.</p>
+<p><a href="qcborvalue.html">QCborValue</a> objects with undefined values are also different from invalid <a href="qcborvalue.html">QCborValue</a> objects. The API will not create invalid QCborValues, but they may exist as a result of a parsing error.</p>
+<p><b>See also </b><a href="qcborvalue.html#isUndefined">isUndefined</a>(), <a href="qcborvalue.html#isNull">isNull</a>(), and <a href="qcborvalue.html#isSimpleType">isSimpleType</a>().</p>
+<!-- @@@QCborValue -->
+<!-- $$$operator=$$$operator=QCborValue&& -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> &amp;QCborValue::<span class="name">operator=</span>(<span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> &amp;&amp;<i>other</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Moves the contents of the <i>other</i> <a href="qcborvalue.html">QCborValue</a> object into this one and frees the resources of this one. Returns a reference to this object.</p>
+<!-- @@@operator= -->
+<!-- $$$operator=[overload1]$$$operator=constQCborValue& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> &amp;QCborValue::<span class="name">operator=</span>(const <span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> &amp;<i>other</i>)</h3>
+<p>Replaces the contents of this QCborObject with a copy of <i>other</i>.</p>
+<!-- @@@operator= -->
+<!-- $$$~QCborValue[overload1]$$$~QCborValue -->
+<h3 class="fn" id="dtor.QCborValue"><a name="dtor.QCborValue"></a>QCborValue::<span class="name">~QCborValue</span>()</h3>
+<p>Disposes of the current <a href="qcborvalue.html">QCborValue</a> object and frees any associated resources.</p>
+<!-- @@@~QCborValue -->
+<!-- $$$compare[overload1]$$$compareconstQCborValue& -->
+<h3 class="fn" id="compare"><a name="compare"></a><span class="type">int</span> QCborValue::<span class="name">compare</span>(const <span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> &amp;<i>other</i>) const</h3>
+<p>Compares this value and <i>other</i>, and returns an integer that indicates whether this value should be sorted prior to (if the result is negative) or after <i>other</i> (if the result is positive). If this function returns 0, the two values are equal and hold the same contents.</p>
+<p>If each <a href="qcborvalue.html">QCborValue</a> contains an array or map, the comparison is recursive to elements contained in them.</p>
+<a name="extended-types"></a>
+<h6 id="extended-types">Extended types</h6>
+<p><a href="qcborvalue.html">QCborValue</a> compares equal a <a href="qcborvalue.html">QCborValue</a> containing an extended type, like <a href="qcborvalue.html#Type-enum">Url</a> and <a href="qcborvalue.html#Type-enum">Url</a> and its equivalent tagged representation. So, for example, the following expression is true:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span>(<span class="type"><a href="qurl.html">QUrl</a></span>(<span class="string">&quot;https://example.com&quot;</span>)) <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span>(<span class="type"><a href="qtcborcommon.html#QCborKnownTags-enum">QCborKnownTags</a></span><span class="operator">::</span>Url<span class="operator">,</span> <span class="string">&quot;https://example.com&quot;</span>);
+
+</pre>
+<p>Do note that Qt types like <a href="qurl.html">QUrl</a> and <a href="qdatetime.html">QDateTime</a> will normalize and otherwise modify their arguments. The expression above is true only because the string on the right side is the normalized value that the <a href="qcborvalue.html">QCborValue</a> on the left would take. If, for example, the &quot;https&quot; part were uppercase in both sides, the comparison would fail. For information on normalizations performed by <a href="qcborvalue.html">QCborValue</a>, please consult the documentation of the constructor taking the Qt type in question.</p>
+<a name="sorting-order"></a>
+<h6 id="sorting-order">Sorting order</h6>
+<p>Sorting order in CBOR is defined in RFC 7049 {https://tools.ietf.org/html/rfc7049#section-3.9}{section 3.9}, which discusses the sorting of keys in a map when following the Canonical encoding. According to the specification, &quot;sorting is performed on the bytes of the representation of the key data items&quot; and lists as consequences that:</p>
+<ul>
+<li>&quot;If two keys have different lengths, the shorter one sorts earlier;&quot;</li>
+<li>&quot;If two keys have the same length, the one with the lower value in (byte-wise) lexical order sorts earlier.&quot;</li>
+</ul>
+<p>This results in surprising sorting of QCborValues, where the result of this function is different from that which would later be retrieved by comparing the contained elements. For example, the <a href="qcborvalue.html">QCborValue</a> containing string &quot;zzz&quot; sorts before the <a href="qcborvalue.html">QCborValue</a> with string &quot;foobar&quot;, even though when comparing as <a href="qstring.html#compare">QStrings</a> or <a href="qbytearray.html">QByteArrays</a> the &quot;zzz&quot; sorts after &quot;foobar&quot; (dictionary order).</p>
+<p>The specification does not clearly indicate what sorting order should be done for values of different types (it says sorting should not pay &quot;attention to the 3/5 bit splitting for major types&quot;). <a href="qcborvalue.html">QCborValue</a> makes the assumption that types should be sorted too. The numeric values of the <a href="qcborvalue.html#Type-enum">QCborValue::Type</a> enumeration are in that order, with the exception of the extended types, which compare as their tagged equivalents.</p>
+<p><b>Note: </b>Sorting order is preliminary and is subject to change. Applications should not depend on the order returned by this function for the time being.</p><p><b>See also </b><a href="qcborarray.html#compare">QCborArray::compare</a>(), <a href="qcbormap.html#compare">QCborMap::compare</a>(), and <a href="qcborvalue.html#operator-eq-eq">operator==</a>().</p>
+<!-- @@@compare -->
+<!-- $$$fromCbor[overload1]$$$fromCborQCborStreamReader& -->
+<h3 class="fn" id="fromCbor"><a name="fromCbor"></a><code>[static] </code><span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> QCborValue::<span class="name">fromCbor</span>(<span class="type"><a href="qcborstreamreader.html">QCborStreamReader</a></span> &amp;<i>reader</i>)</h3>
+<p>Decodes one item from the CBOR stream found in <i>reader</i> and returns the equivalent representation. This function is recursive: if the item is a map or array, it will decode all items found in that map or array, until the outermost object is finished.</p>
+<p>This function need not be used on the root element of a <a href="qcborstreamreader.html">QCborStreamReader</a>. For example, the following code illustrates how to skip the CBOR signature tag from the beginning of a file:</p>
+<pre class="cpp">
+
+      <span class="keyword">if</span> (reader<span class="operator">.</span>isTag() <span class="operator">&amp;</span><span class="operator">&amp;</span> reader<span class="operator">.</span>toTag() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qtcborcommon.html#QCborKnownTags-enum">QCborKnownTags</a></span><span class="operator">::</span>Signature)
+          reader<span class="operator">.</span>next();
+
+      <span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> contents <span class="operator">=</span> <span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span><span class="operator">::</span>fromCbor(reader);
+
+</pre>
+<p>The returned value may be partially complete and indistinguishable from a valid <a href="qcborvalue.html">QCborValue</a> even if the decoding failed. To determine if there was an error, check if <a href="qcborstreamreader.html#lastError">reader.lastError()</a> is indicating an error condition. This function stops decoding immediately after the first error.</p>
+<p><b>See also </b><a href="qcborvalue.html#toCbor">toCbor</a>(), <a href="qcborvalue.html#toDiagnosticNotation">toDiagnosticNotation</a>(), <a href="qcborvalue.html#toVariant">toVariant</a>(), and <a href="qcborvalue.html#toJsonValue">toJsonValue</a>().</p>
+<!-- @@@fromCbor -->
+<!-- $$$fromCbor$$$fromCborconstQByteArray&QCborParserError* -->
+<h3 class="fn" id="fromCbor-1"><a name="fromCbor-1"></a><code>[static] </code><span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> QCborValue::<span class="name">fromCbor</span>(const <span class="type"><a href="qbytearray.html">QByteArray</a></span> &amp;<i>ba</i>, <span class="type"><a href="qcborparsererror.html">QCborParserError</a></span> *<i>error</i> = nullptr)</h3>
+<p>This is an overloaded function.</p>
+<p>Decodes one item from the CBOR stream found in the byte array <i>ba</i> and returns the equivalent representation. This function is recursive: if the item is a map or array, it will decode all items found in that map or array, until the outermost object is finished.</p>
+<p>This function stores the error state, if any, in the object pointed to by <i>error</i>, along with the offset of where the error occurred. If no error happened, it stores <a href="qcborerror.html">NoError</a> in the error state and the number of bytes that it consumed (that is, it stores the offset for the first unused byte). Using that information makes it possible to parse further data that may exist in the same byte array.</p>
+<p>The returned value may be partially complete and indistinguishable from a valid <a href="qcborvalue.html">QCborValue</a> even if the decoding failed. To determine if there was an error, check if there was an error stored in <i>error</i>. This function stops decoding immediately after the first error.</p>
+<p><b>See also </b><a href="qcborvalue.html#toCbor">toCbor</a>(), <a href="qcborvalue.html#toDiagnosticNotation">toDiagnosticNotation</a>(), <a href="qcborvalue.html#toVariant">toVariant</a>(), and <a href="qcborvalue.html#toJsonValue">toJsonValue</a>().</p>
+<!-- @@@fromCbor -->
+<!-- $$$fromJsonValue[overload1]$$$fromJsonValueconstQJsonValue& -->
+<h3 class="fn" id="fromJsonValue"><a name="fromJsonValue"></a><code>[static] </code><span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> QCborValue::<span class="name">fromJsonValue</span>(const <span class="type"><a href="qjsonvalue.html">QJsonValue</a></span> &amp;<i>v</i>)</h3>
+<p>Converts the JSON value contained in <i>v</i> into its corresponding CBOR value and returns it. There is no data loss in converting from JSON to CBOR, as the CBOR type set is richer than JSON's. Additionally, values converted to CBOR using this function can be converted back to JSON using <a href="qcborvalue.html#toJsonValue">toJsonValue</a>() with no data loss.</p>
+<p>The following table lists the mapping of JSON types to CBOR types:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >JSON Type</th><th >CBOR Type</th></tr></thead>
+<tr valign="top" class="odd"><td >Bool</td><td >Bool</td></tr>
+<tr valign="top" class="even"><td >Number</td><td >Integer (if the number has no fraction and is in the <a href="qtglobal.html#qint64-typedef">qint64</a> range) or Double</td></tr>
+<tr valign="top" class="odd"><td >String</td><td >String</td></tr>
+<tr valign="top" class="even"><td >Array</td><td >Array</td></tr>
+<tr valign="top" class="odd"><td >Object</td><td >Map</td></tr>
+<tr valign="top" class="even"><td >Null</td><td >Null</td></tr>
+</table></div>
+<p><a href="qjsonvalue.html">QJsonValue</a> can also be undefined, indicating a previous operation that failed to complete (for example, searching for a key not present in an object). Undefined values are not JSON types and may not appear in JSON arrays and objects, but this function does return the <a href="qcborvalue.html">QCborValue</a> undefined value if the corresponding <a href="qjsonvalue.html">QJsonValue</a> is undefined.</p>
+<p><b>See also </b><a href="qcborvalue.html#toJsonValue">toJsonValue</a>(), <a href="qcborvalue.html#fromVariant">fromVariant</a>(), <a href="qcborarray.html#fromJsonArray">QCborArray::fromJsonArray</a>(), and <a href="qcbormap.html#fromJsonObject">QCborMap::fromJsonObject</a>().</p>
+<!-- @@@fromJsonValue -->
+<!-- $$$fromVariant[overload1]$$$fromVariantconstQVariant& -->
+<h3 class="fn" id="fromVariant"><a name="fromVariant"></a><code>[static] </code><span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> QCborValue::<span class="name">fromVariant</span>(const <span class="type"><a href="qvariant.html">QVariant</a></span> &amp;<i>variant</i>)</h3>
+<p>Converts the <a href="qvariant.html">QVariant</a> <i>variant</i> into <a href="qcborvalue.html">QCborValue</a> and returns it.</p>
+<p>QVariants may contain a large list of different meta types, many of which have no corresponding representation in CBOR. That includes all user-defined meta types. When preparing transmission using CBOR, it is suggested to encode carefully each value to prevent loss of representation.</p>
+<p>The following table lists the conversion this function will apply:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Qt (C++) type</th><th >CBOR type</th></tr></thead>
+<tr valign="top" class="odd"><td >invalid (QVariant())</td><td >Undefined</td></tr>
+<tr valign="top" class="even"><td ><code>bool</code></td><td >Bool</td></tr>
+<tr valign="top" class="odd"><td ><code>std::nullptr_t</code></td><td >Null</td></tr>
+<tr valign="top" class="even"><td ><code>short</code>, <code>ushort</code>, <code>int</code>, <code>uint</code>, <a href="qtglobal.html#qint64-typedef">qint64</a></td><td >Integer</td></tr>
+<tr valign="top" class="odd"><td ><a href="qtglobal.html#quint64-typedef">quint64</a></td><td >Integer, but they are cast to <code>qint64</code> first so values higher than 2<sup>63</sup>-1 (<code>INT64_MAX</code>) will be wrapped to negative</td></tr>
+<tr valign="top" class="even"><td ><code>float</code>, <code>double</code></td><td >Double</td></tr>
+<tr valign="top" class="odd"><td ><a href="qbytearray.html">QByteArray</a></td><td ><a href="qcborvalue.html#Type-enum">ByteArray</a></td></tr>
+<tr valign="top" class="even"><td ><a href="qdatetime.html">QDateTime</a></td><td ><a href="qcborvalue.html#Type-enum">DateTime</a></td></tr>
+<tr valign="top" class="odd"><td ><a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a></td><td >Simple type</td></tr>
+<tr valign="top" class="even"><td ><a href="qjsonarray.html">QJsonArray</a></td><td >Array, converted using QCborArray::formJsonArray()</td></tr>
+<tr valign="top" class="odd"><td ><a href="qjsondocument.html">QJsonDocument</a></td><td >Array or Map</td></tr>
+<tr valign="top" class="even"><td ><a href="qjsonobject.html">QJsonObject</a></td><td >Map, converted using <a href="qcbormap.html#fromJsonObject">QCborMap::fromJsonObject</a>()</td></tr>
+<tr valign="top" class="odd"><td ><a href="qjsonvalue.html">QJsonValue</a></td><td >converted using <a href="qcborvalue.html#fromJsonValue">fromJsonValue</a>()</td></tr>
+<tr valign="top" class="even"><td ><a href="qregularexpression.html">QRegularExpression</a></td><td ><a href="qcborvalue.html#Type-enum">RegularExpression</a></td></tr>
+<tr valign="top" class="odd"><td ><a href="qstring.html">QString</a></td><td >String</td></tr>
+<tr valign="top" class="even"><td ><a href="qstringlist.html">QStringList</a></td><td >Array</td></tr>
+<tr valign="top" class="odd"><td ><a href="qvariant.html#QVariantHash-typedef">QVariantHash</a></td><td >Map</td></tr>
+<tr valign="top" class="even"><td ><a href="qvariant.html#QVariantList-typedef">QVariantList</a></td><td >Array</td></tr>
+<tr valign="top" class="odd"><td ><a href="qvariant.html#QVariantMap-typedef">QVariantMap</a></td><td >Map</td></tr>
+<tr valign="top" class="even"><td ><a href="qurl.html">QUrl</a></td><td >Url</td></tr>
+<tr valign="top" class="odd"><td ><a href="quuid.html">QUuid</a></td><td >Uuid</td></tr>
+</table></div>
+<p>For any other types, this function will return Null if the <a href="qvariant.html">QVariant</a> itself is null, and otherwise will try to convert to string using <a href="qvariant.html#toString">QVariant::toString</a>(). If the conversion to string fails, this function returns Undefined.</p>
+<p>Please note that the conversions via <a href="qvariant.html#toString">QVariant::toString</a>() are subject to change at any time. <a href="qcborvalue.html">QCborValue</a> may be extended in the future to support more types, which will result in a change in how this function performs conversions.</p>
+<p><b>See also </b><a href="qcborvalue.html#toVariant">toVariant</a>(), <a href="qcborvalue.html#fromJsonValue">fromJsonValue</a>(), <a href="qcborarray.html#toVariantList">QCborArray::toVariantList</a>(), and <a href="qcbormap.html#toVariantMap">QCborMap::toVariantMap</a>().</p>
+<!-- @@@fromVariant -->
+<!-- $$$isArray[overload1]$$$isArray -->
+<h3 class="fn" id="isArray"><a name="isArray"></a><span class="type">bool</span> QCborValue::<span class="name">isArray</span>() const</h3>
+<p>Returns true if this <a href="qcborvalue.html">QCborValue</a> is of the array type. The array value can be retrieved using <a href="qcborvalue.html#toArray">toArray</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#type">type</a>() and <a href="qcborvalue.html#toArray">toArray</a>().</p>
+<!-- @@@isArray -->
+<!-- $$$isBool[overload1]$$$isBool -->
+<h3 class="fn" id="isBool"><a name="isBool"></a><span class="type">bool</span> QCborValue::<span class="name">isBool</span>() const</h3>
+<p>Returns true if this <a href="qcborvalue.html">QCborValue</a> is a boolean. The value can be retrieved using <a href="qcborvalue.html#toBool">toBool</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#type">type</a>(), <a href="qcborvalue.html#toBool">toBool</a>(), <a href="qcborvalue.html#isTrue">isTrue</a>(), and <a href="qcborvalue.html#isFalse">isFalse</a>().</p>
+<!-- @@@isBool -->
+<!-- $$$isByteArray[overload1]$$$isByteArray -->
+<h3 class="fn" id="isByteArray"><a name="isByteArray"></a><span class="type">bool</span> QCborValue::<span class="name">isByteArray</span>() const</h3>
+<p>Returns true if this <a href="qcborvalue.html">QCborValue</a> is of the byte array type. The byte array value can be retrieved using <a href="qcborvalue.html#toByteArray">toByteArray</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#type">type</a>() and <a href="qcborvalue.html#toByteArray">toByteArray</a>().</p>
+<!-- @@@isByteArray -->
+<!-- $$$isContainer[overload1]$$$isContainer -->
+<h3 class="fn" id="isContainer"><a name="isContainer"></a><span class="type">bool</span> QCborValue::<span class="name">isContainer</span>() const</h3>
+<p>This convenience function returns true if the <a href="qcborvalue.html">QCborValue</a> is either an array or a map.</p>
+<p><b>See also </b><a href="qcborvalue.html#isArray">isArray</a>() and <a href="qcborvalue.html#isMap">isMap</a>().</p>
+<!-- @@@isContainer -->
+<!-- $$$isDateTime[overload1]$$$isDateTime -->
+<h3 class="fn" id="isDateTime"><a name="isDateTime"></a><span class="type">bool</span> QCborValue::<span class="name">isDateTime</span>() const</h3>
+<p>Returns true if this <a href="qcborvalue.html">QCborValue</a> is of the date/time type. The value can be retrieved using <a href="qcborvalue.html#toDateTime">toDateTime</a>(). Date/times are extended types that use the tag <a href="qtcborcommon.html#QCborKnownTags-enum">DateTime</a>.</p>
+<p>Additionally, when decoding from a CBOR stream, <a href="qcborvalue.html">QCborValue</a> will interpret tags of value <a href="qtcborcommon.html#QCborKnownTags-enum">UnixTime_t</a> and convert them to the equivalent date/time.</p>
+<p><b>See also </b><a href="qcborvalue.html#type">type</a>() and <a href="qcborvalue.html#toDateTime">toDateTime</a>().</p>
+<!-- @@@isDateTime -->
+<!-- $$$isDouble[overload1]$$$isDouble -->
+<h3 class="fn" id="isDouble"><a name="isDouble"></a><span class="type">bool</span> QCborValue::<span class="name">isDouble</span>() const</h3>
+<p>Returns true if this <a href="qcborvalue.html">QCborValue</a> is of the floating-point type. The value can be retrieved using <a href="qcborvalue.html#toDouble">toDouble</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#type">type</a>() and <a href="qcborvalue.html#toDouble">toDouble</a>().</p>
+<!-- @@@isDouble -->
+<!-- $$$isFalse[overload1]$$$isFalse -->
+<h3 class="fn" id="isFalse"><a name="isFalse"></a><span class="type">bool</span> QCborValue::<span class="name">isFalse</span>() const</h3>
+<p>Returns true if this <a href="qcborvalue.html">QCborValue</a> is a boolean with false value. This function exists because, internally, CBOR booleans are stored as two separate types, one for true and one for false.</p>
+<p><b>See also </b><a href="qcborvalue.html#type">type</a>(), <a href="qcborvalue.html#isBool">isBool</a>(), <a href="qcborvalue.html#isTrue">isTrue</a>(), and <a href="qcborvalue.html#toBool">toBool</a>().</p>
+<!-- @@@isFalse -->
+<!-- $$$isInteger[overload1]$$$isInteger -->
+<h3 class="fn" id="isInteger"><a name="isInteger"></a><span class="type">bool</span> QCborValue::<span class="name">isInteger</span>() const</h3>
+<p>Returns true if this <a href="qcborvalue.html">QCborValue</a> is of the integer type. The integer value can be retrieved using <a href="qcborvalue.html#toInteger">toInteger</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#type">type</a>() and <a href="qcborvalue.html#toInteger">toInteger</a>().</p>
+<!-- @@@isInteger -->
+<!-- $$$isInvalid[overload1]$$$isInvalid -->
+<h3 class="fn" id="isInvalid"><a name="isInvalid"></a><span class="type">bool</span> QCborValue::<span class="name">isInvalid</span>() const</h3>
+<p>Returns true if this <a href="qcborvalue.html">QCborValue</a> is not of any valid type. Invalid QCborValues are distinct from those with undefined values and they usually represent a decoding error.</p>
+<p><b>See also </b><a href="qcborvalue.html#isUndefined">isUndefined</a>() and <a href="qcborvalue.html#isNull">isNull</a>().</p>
+<!-- @@@isInvalid -->
+<!-- $$$isMap[overload1]$$$isMap -->
+<h3 class="fn" id="isMap"><a name="isMap"></a><span class="type">bool</span> QCborValue::<span class="name">isMap</span>() const</h3>
+<p>Returns true if this <a href="qcborvalue.html">QCborValue</a> is of the map type. The map value can be retrieved using <a href="qcborvalue.html#toMap">toMap</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#type">type</a>() and <a href="qcborvalue.html#toMap">toMap</a>().</p>
+<!-- @@@isMap -->
+<!-- $$$isNull[overload1]$$$isNull -->
+<h3 class="fn" id="isNull"><a name="isNull"></a><span class="type">bool</span> QCborValue::<span class="name">isNull</span>() const</h3>
+<p>Returns true if this <a href="qcborvalue.html">QCborValue</a> is of the null type.</p>
+<p>CBOR null values are used to indicate optional values that were not provided. They are distinct from undefined values, in that null values are usually not the result of an earlier error or problem.</p>
+<p>Null values are distinct from undefined values and from invalid <a href="qcborvalue.html">QCborValue</a> objects. The API will not create invalid QCborValues, but they may exist as a result of a parsing error.</p>
+<p><b>See also </b><a href="qcborvalue.html#type">type</a>(), <a href="qcborvalue.html#isUndefined">isUndefined</a>(), and <a href="qcborvalue.html#isInvalid">isInvalid</a>().</p>
+<!-- @@@isNull -->
+<!-- $$$isRegularExpression[overload1]$$$isRegularExpression -->
+<h3 class="fn" id="isRegularExpression"><a name="isRegularExpression"></a><span class="type">bool</span> QCborValue::<span class="name">isRegularExpression</span>() const</h3>
+<p>Returns true if this <a href="qcborvalue.html">QCborValue</a> contains a regular expression's pattern. The pattern can be retrieved using <a href="qcborvalue.html#toRegularExpression">toRegularExpression</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#type">type</a>() and <a href="qcborvalue.html#toRegularExpression">toRegularExpression</a>().</p>
+<!-- @@@isRegularExpression -->
+<!-- $$$isSimpleType[overload1]$$$isSimpleType -->
+<h3 class="fn" id="isSimpleType"><a name="isSimpleType"></a><span class="type">bool</span> QCborValue::<span class="name">isSimpleType</span>() const</h3>
+<p>Returns true if this <a href="qcborvalue.html">QCborValue</a> is of one of the CBOR simple types. The type itself can later be retrieved using <a href="qcborvalue.html#type">type</a>(), even for types that don't have an enumeration in the API. They can also be checked with the <a href="qcborvalue.html#isSimpleType-1">isSimpleType</a>(QCborSimpleType) overload.</p>
+<p><b>See also </b><a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a>, <a href="qcborvalue.html#isSimpleType-1">isSimpleType</a>(QCborSimpleType), and <a href="qcborvalue.html#toSimpleType">toSimpleType</a>().</p>
+<!-- @@@isSimpleType -->
+<!-- $$$isSimpleType$$$isSimpleTypeQCborSimpleType -->
+<h3 class="fn" id="isSimpleType-1"><a name="isSimpleType-1"></a><span class="type">bool</span> QCborValue::<span class="name">isSimpleType</span>(<span class="type"><a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a></span> <i>st</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>Returns true if this <a href="qcborvalue.html">QCborValue</a> is of a simple type and <a href="qcborvalue.html#toSimpleType">toSimpleType</a>() would return <i>st</i>, false otherwise. This function can be used to check for any CBOR simple type, even those for which there is no enumeration in the API. For example, for the simple type of value 12, you could write:</p>
+<pre class="cpp">
+
+      value<span class="operator">.</span>isSimpleType(<span class="type"><a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a></span>(<span class="number">12</span>));
+
+</pre>
+<p><b>See also </b><a href="qcborvalue.html#QCborValue-6">QCborValue::QCborValue</a>(QCborSimpleType), <a href="qcborvalue.html#isSimpleType">isSimpleType</a>(), <a href="qcborvalue.html#isFalse">isFalse</a>(), <a href="qcborvalue.html#isTrue">isTrue</a>(), <a href="qcborvalue.html#isNull">isNull</a>, <a href="qcborvalue.html#isUndefined">isUndefined</a>(), and <a href="qcborvalue.html#toSimpleType">toSimpleType</a>().</p>
+<!-- @@@isSimpleType -->
+<!-- $$$isString[overload1]$$$isString -->
+<h3 class="fn" id="isString"><a name="isString"></a><span class="type">bool</span> QCborValue::<span class="name">isString</span>() const</h3>
+<p>Returns true if this <a href="qcborvalue.html">QCborValue</a> is of the string type. The string value can be retrieved using <a href="qcborvalue.html#toString">toString</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#type">type</a>() and <a href="qcborvalue.html#toString">toString</a>().</p>
+<!-- @@@isString -->
+<!-- $$$isTag[overload1]$$$isTag -->
+<h3 class="fn" id="isTag"><a name="isTag"></a><span class="type">bool</span> QCborValue::<span class="name">isTag</span>() const</h3>
+<p>Returns true if this <a href="qcborvalue.html">QCborValue</a> is of the tag type. The tag value can be retrieved using <a href="qcborvalue.html#tag">tag</a>() and the tagged value using <a href="qcborvalue.html#taggedValue">taggedValue</a>().</p>
+<p>This function also returns true for extended types that the API recognizes. For code that handles extended types directly before the Qt API is updated to support them, it is possible to recreate the tag + tagged value pair by using <a href="qcborvalue.html#taggedValue">taggedValue</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#type">type</a>(), <a href="qcborvalue.html#tag">tag</a>(), <a href="qcborvalue.html#taggedValue">taggedValue</a>(), and <a href="qcborvalue.html#taggedValue">taggedValue</a>().</p>
+<!-- @@@isTag -->
+<!-- $$$isTrue[overload1]$$$isTrue -->
+<h3 class="fn" id="isTrue"><a name="isTrue"></a><span class="type">bool</span> QCborValue::<span class="name">isTrue</span>() const</h3>
+<p>Returns true if this <a href="qcborvalue.html">QCborValue</a> is a boolean with true value. This function exists because, internally, CBOR booleans are stored as two separate types, one for false and one for true.</p>
+<p><b>See also </b><a href="qcborvalue.html#type">type</a>(), <a href="qcborvalue.html#isBool">isBool</a>(), <a href="qcborvalue.html#isFalse">isFalse</a>(), and <a href="qcborvalue.html#toBool">toBool</a>().</p>
+<!-- @@@isTrue -->
+<!-- $$$isUndefined[overload1]$$$isUndefined -->
+<h3 class="fn" id="isUndefined"><a name="isUndefined"></a><span class="type">bool</span> QCborValue::<span class="name">isUndefined</span>() const</h3>
+<p>Returns true if this <a href="qcborvalue.html">QCborValue</a> is of the undefined type.</p>
+<p>CBOR undefined values are used to indicate missing information, usually as a result of a previous operation that did not complete as expected. They are also used by the <a href="qcborarray.html">QCborArray</a> and <a href="qcbormap.html">QCborMap</a> API to indicate the searched item was not found.</p>
+<p>Undefined values are distinct from null values.</p>
+<p><a href="qcborvalue.html">QCborValue</a> objects with undefined values are also different from invalid <a href="qcborvalue.html">QCborValue</a> objects. The API will not create invalid QCborValues, but they may exist as a result of a parsing error.</p>
+<p><b>See also </b><a href="qcborvalue.html#type">type</a>(), <a href="qcborvalue.html#isNull">isNull</a>(), and <a href="qcborvalue.html#isInvalid">isInvalid</a>().</p>
+<!-- @@@isUndefined -->
+<!-- $$$isUrl[overload1]$$$isUrl -->
+<h3 class="fn" id="isUrl"><a name="isUrl"></a><span class="type">bool</span> QCborValue::<span class="name">isUrl</span>() const</h3>
+<p>Returns true if this <a href="qcborvalue.html">QCborValue</a> is of the URL type. The URL value can be retrieved using <a href="qcborvalue.html#toUrl">toUrl</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#type">type</a>() and <a href="qcborvalue.html#toUrl">toUrl</a>().</p>
+<!-- @@@isUrl -->
+<!-- $$$isUuid[overload1]$$$isUuid -->
+<h3 class="fn" id="isUuid"><a name="isUuid"></a><span class="type">bool</span> QCborValue::<span class="name">isUuid</span>() const</h3>
+<p>Returns true if this <a href="qcborvalue.html">QCborValue</a> contains a UUID. The value can be retrieved using <a href="qcborvalue.html#toUuid">toUuid</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#type">type</a>() and <a href="qcborvalue.html#toUuid">toUuid</a>().</p>
+<!-- @@@isUuid -->
+<!-- $$$swap[overload1]$$$swapQCborValue& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QCborValue::<span class="name">swap</span>(<span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps the contents of this <a href="qcborvalue.html">QCborValue</a> object and <i>other</i>.</p>
+<!-- @@@swap -->
+<!-- $$$tag[overload1]$$$tagQCborTag -->
+<h3 class="fn" id="tag"><a name="tag"></a><span class="type"><a href="qtcborcommon.html#QCborTag-enum">QCborTag</a></span> QCborValue::<span class="name">tag</span>(<span class="type"><a href="qtcborcommon.html#QCborTag-enum">QCborTag</a></span> <i>defaultValue</i> = QCborTag(-1)) const</h3>
+<p>Returns the tag of this extended <a href="qcborvalue.html">QCborValue</a> object, if it is of the tag type, <i>defaultValue</i> otherwise.</p>
+<p>CBOR represents extended types by associating a number (the tag) with a stored representation. This function returns that number. To retrieve the representation, use <a href="qcborvalue.html#taggedValue">taggedValue</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#isTag">isTag</a>(), <a href="qcborvalue.html#taggedValue">taggedValue</a>(), <a href="qcborvalue.html#isDateTime">isDateTime</a>(), <a href="qcborvalue.html#isUrl">isUrl</a>(), <a href="qcborvalue.html#isRegularExpression">isRegularExpression</a>(), and <a href="qcborvalue.html#isUuid">isUuid</a>().</p>
+<!-- @@@tag -->
+<!-- $$$taggedValue[overload1]$$$taggedValueconstQCborValue& -->
+<h3 class="fn" id="taggedValue"><a name="taggedValue"></a><span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> QCborValue::<span class="name">taggedValue</span>(const <span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> &amp;<i>defaultValue</i> = QCborValue()) const</h3>
+<p>Returns the tagged value of this extended <a href="qcborvalue.html">QCborValue</a> object, if it is of the tag type, <i>defaultValue</i> otherwise.</p>
+<p>CBOR represents extended types by associating a number (the tag) with a stored representation. This function returns that representation. To retrieve the tag, use <a href="qcborvalue.html#tag">tag</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#isTag">isTag</a>(), <a href="qcborvalue.html#tag">tag</a>(), <a href="qcborvalue.html#isDateTime">isDateTime</a>(), <a href="qcborvalue.html#isUrl">isUrl</a>(), <a href="qcborvalue.html#isRegularExpression">isRegularExpression</a>(), and <a href="qcborvalue.html#isUuid">isUuid</a>().</p>
+<!-- @@@taggedValue -->
+<!-- $$$toBool[overload1]$$$toBoolbool -->
+<h3 class="fn" id="toBool"><a name="toBool"></a><span class="type">bool</span> QCborValue::<span class="name">toBool</span>(<span class="type">bool</span> <i>defaultValue</i> = false) const</h3>
+<p>Returns the boolean value stored in this <a href="qcborvalue.html">QCborValue</a>, if it is of a boolean type. Otherwise, it returns <i>defaultValue</i>.</p>
+<p><b>See also </b><a href="qcborvalue.html#isBool">isBool</a>(), <a href="qcborvalue.html#isTrue">isTrue</a>(), and <a href="qcborvalue.html#isFalse">isFalse</a>().</p>
+<!-- @@@toBool -->
+<!-- $$$toByteArray[overload1]$$$toByteArrayconstQByteArray& -->
+<h3 class="fn" id="toByteArray"><a name="toByteArray"></a><span class="type"><a href="qbytearray.html">QByteArray</a></span> QCborValue::<span class="name">toByteArray</span>(const <span class="type"><a href="qbytearray.html">QByteArray</a></span> &amp;<i>defaultValue</i> = {}) const</h3>
+<p>Returns the byte array value stored in this <a href="qcborvalue.html">QCborValue</a>, if it is of the byte array type. Otherwise, it returns <i>defaultValue</i>.</p>
+<p>Note that this function performs no conversion from other types to <a href="qbytearray.html">QByteArray</a>.</p>
+<p><b>See also </b><a href="qcborvalue.html#isByteArray">isByteArray</a>(), <a href="qcborvalue.html#isString">isString</a>(), and <a href="qcborvalue.html#toString">toString</a>().</p>
+<!-- @@@toByteArray -->
+<!-- $$$toCbor[overload1]$$$toCborQCborValue::EncodingOptions -->
+<h3 class="fn" id="toCbor"><a name="toCbor"></a><span class="type"><a href="qbytearray.html">QByteArray</a></span> QCborValue::<span class="name">toCbor</span>(<span class="type"><a href="qcborvalue.html#EncodingOption-enum">QCborValue::EncodingOptions</a></span> <i>opt</i> = NoTransformation)</h3>
+<p>Encodes this <a href="qcborvalue.html">QCborValue</a> object to its CBOR representation, using the options specified in <i>opt</i>, and return the byte array containing that representation.</p>
+<p>This function will not fail, except if this <a href="qcborvalue.html">QCborValue</a> or any of the contained items, if this is a map or array, are invalid. Invalid types are not produced normally by the API, but can result from decoding errors.</p>
+<p>By default, this function performs no transformation on the values in the <a href="qcborvalue.html">QCborValue</a>, writing all floating point directly as double-precision (<code>double</code>) types. If the <a href="qcborvalue.html#EncodingOption-enum">UseFloat</a> option is specified, it will use single precision (<code>float</code>) for any floating point value for which there's no loss of precision in using that representation. That includes infinities and NaN values.</p>
+<p>Similarly, if <a href="qcborvalue.html#EncodingOption-enum">UseFloat16</a> is specified, this function will try to use half-precision (<code>qfloat16</code>) floating point if the conversion to that results in no loss of precision. This is always true for infinities and NaN.</p>
+<p>If <a href="qcborvalue.html#EncodingOption-enum">UseIntegers</a> is specified, it will use integers for any floating point value that contains an actual integer.</p>
+<p><b>See also </b><a href="qcborvalue.html#fromCbor">fromCbor</a>(), <a href="qcborvalue.html#fromVariant">fromVariant</a>(), and <a href="qcborvalue.html#fromJsonValue">fromJsonValue</a>().</p>
+<!-- @@@toCbor -->
+<!-- $$$toCbor$$$toCborQCborStreamWriter&QCborValue::EncodingOptions -->
+<h3 class="fn" id="toCbor-1"><a name="toCbor-1"></a><span class="type">void</span> QCborValue::<span class="name">toCbor</span>(<span class="type"><a href="qcborstreamwriter.html">QCborStreamWriter</a></span> &amp;<i>writer</i>, <span class="type"><a href="qcborvalue.html#EncodingOption-enum">QCborValue::EncodingOptions</a></span> <i>opt</i> = NoTransformation)</h3>
+<p>This is an overloaded function.</p>
+<p>Encodes this <a href="qcborvalue.html">QCborValue</a> object to its CBOR representation, using the options specified in <i>opt</i>, to the writer specified by <i>writer</i>. The same writer can be used by multiple QCborValues, for example, in order to encode different elements in a larger array.</p>
+<p>This function will not fail, except if this <a href="qcborvalue.html">QCborValue</a> or any of the contained items, if this is a map or array, are invalid. Invalid types are not produced normally by the API, but can result from decoding errors.</p>
+<p>By default, this function performs no transformation on the values in the <a href="qcborvalue.html">QCborValue</a>, writing all floating point directly as double-precision (binary64) types. If the <a href="qcborvalue.html#EncodingOption-enum">UseFloat</a> option is specified, it will use single precision (binary32) for any floating point value for which there's no loss of precision in using that representation. That includes infinities and NaN values.</p>
+<p>Similarly, if <a href="qcborvalue.html#EncodingOption-enum">UseFloat16</a> is specified, this function will try to use half-precision (binary16) floating point if the conversion to that results in no loss of precision. This is always true for infinities and NaN.</p>
+<p>If <a href="qcborvalue.html#EncodingOption-enum">UseIntegers</a> is specified, it will use integers for any floating point value that contains an actual integer.</p>
+<p><b>See also </b><a href="qcborvalue.html#fromCbor">fromCbor</a>(), <a href="qcborvalue.html#fromVariant">fromVariant</a>(), and <a href="qcborvalue.html#fromJsonValue">fromJsonValue</a>().</p>
+<!-- @@@toCbor -->
+<!-- $$$toDateTime[overload1]$$$toDateTimeconstQDateTime& -->
+<h3 class="fn" id="toDateTime"><a name="toDateTime"></a><span class="type"><a href="qdatetime.html">QDateTime</a></span> QCborValue::<span class="name">toDateTime</span>(const <span class="type"><a href="qdatetime.html">QDateTime</a></span> &amp;<i>defaultValue</i> = {}) const</h3>
+<p>Returns the date/time value stored in this <a href="qcborvalue.html">QCborValue</a>, if it is of the date/time extended type. Otherwise, it returns <i>defaultValue</i>.</p>
+<p>Note that this function performs no conversion from other types to <a href="qdatetime.html">QDateTime</a>.</p>
+<p><b>See also </b><a href="qcborvalue.html#isDateTime">isDateTime</a>(), <a href="qcborvalue.html#isTag">isTag</a>(), and <a href="qcborvalue.html#taggedValue">taggedValue</a>().</p>
+<!-- @@@toDateTime -->
+<!-- $$$toDiagnosticNotation[overload1]$$$toDiagnosticNotationQCborValue::DiagnosticNotationOptions -->
+<h3 class="fn" id="toDiagnosticNotation"><a name="toDiagnosticNotation"></a><span class="type"><a href="qstring.html">QString</a></span> QCborValue::<span class="name">toDiagnosticNotation</span>(<span class="type"><a href="qcborvalue.html#DiagnosticNotationOption-enum">QCborValue::DiagnosticNotationOptions</a></span> <i>opts</i> = Compact) const</h3>
+<p>Creates the diagnostic notation equivalent of this CBOR object and returns it. The <i>opts</i> parameter controls the dialect of the notation. Diagnostic notation is useful in debugging, to aid the developer in understanding what value is stored in the <a href="qcborvalue.html">QCborValue</a> or in a CBOR stream. For that reason, the Qt API provides no support for parsing the diagnostic back into the in-memory format or CBOR stream, though the representation is unique and it would be possible.</p>
+<p>CBOR diagnostic notation is specified by <a href="https://tools.ietf.org/html/rfc7049#section-6">section 6</a> of RFC 7049. It is a text representation of the CBOR stream and it is very similar to JSON, but it supports the CBOR types not found in JSON. The extended format enabled by the <a href="qcborvalue.html#DiagnosticNotationOption-enum">ExtendedFormat</a> flag is currently in some IETF drafts and its format is subject to change.</p>
+<p>This function produces the equivalent representation of the stream that <a href="qcborvalue.html#toCbor">toCbor</a>() would produce, without any transformation option provided there. This also implies this function may not produce a representation of the stream that was used to create the object, if it was created using <a href="qcborvalue.html#fromCbor">fromCbor</a>(), as that function may have applied transformations. For a high-fidelity notation of a stream, without transformation, see the <code>cbordump</code> example.</p>
+<p><b>See also </b><a href="qcborvalue.html#toCbor">toCbor</a>() and <a href="qjsondocument.html#toJson">QJsonDocument::toJson</a>().</p>
+<!-- @@@toDiagnosticNotation -->
+<!-- $$$toDouble[overload1]$$$toDoubledouble -->
+<h3 class="fn" id="toDouble"><a name="toDouble"></a><span class="type">double</span> QCborValue::<span class="name">toDouble</span>(<span class="type">double</span> <i>defaultValue</i> = 0) const</h3>
+<p>Returns the floating point value stored in this <a href="qcborvalue.html">QCborValue</a>, if it is of the Double type. If it is of the Integer type, this function returns the integer value converted to double. In any other case, it returns <i>defaultValue</i>.</p>
+<p><b>See also </b><a href="qcborvalue.html#isDouble">isDouble</a>(), <a href="qcborvalue.html#isInteger">isInteger</a>(), and <a href="qcborvalue.html#toInteger">toInteger</a>().</p>
+<!-- @@@toDouble -->
+<!-- $$$toInteger[overload1]$$$toIntegerqint64 -->
+<h3 class="fn" id="toInteger"><a name="toInteger"></a><span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> QCborValue::<span class="name">toInteger</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>defaultValue</i> = 0) const</h3>
+<p>Returns the integer value stored in this <a href="qcborvalue.html">QCborValue</a>, if it is of the integer type. If it is of the Double type, this function returns the floating point value converted to integer. In any other case, it returns <i>defaultValue</i>.</p>
+<p><b>See also </b><a href="qcborvalue.html#isInteger">isInteger</a>(), <a href="qcborvalue.html#isDouble">isDouble</a>(), and <a href="qcborvalue.html#toDouble">toDouble</a>().</p>
+<!-- @@@toInteger -->
+<!-- $$$toJsonValue[overload1]$$$toJsonValue -->
+<h3 class="fn" id="toJsonValue"><a name="toJsonValue"></a><span class="type"><a href="qjsonvalue.html">QJsonValue</a></span> QCborValue::<span class="name">toJsonValue</span>() const</h3>
+<p>Converts this <a href="qcborvalue.html">QCborValue</a> object to an equivalent representation in JSON and returns it as a <a href="qjsonvalue.html">QJsonValue</a>.</p>
+<p>Please note that CBOR contains a richer and wider type set than JSON, so some information may be lost in this conversion. The following table compares CBOR types to JSON types and indicates whether information may be lost or not.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >CBOR Type</th><th >JSON Type</th><th >Comments</th></tr></thead>
+<tr valign="top" class="odd"><td >Bool</td><td >Bool</td><td >No data loss possible</td></tr>
+<tr valign="top" class="even"><td >Double</td><td >Number</td><td >Infinities and NaN will be converted to Null; no data loss for other values</td></tr>
+<tr valign="top" class="odd"><td >Integer</td><td >Number</td><td >Data loss possible in the conversion if the integer is larger than 2<sup>53</sup> or smaller than -2<sup>53</sup>.</td></tr>
+<tr valign="top" class="even"><td >Null</td><td >Null</td><td >No data loss possible</td></tr>
+<tr valign="top" class="odd"><td >Undefined</td><td >Null</td><td >Type information lost</td></tr>
+<tr valign="top" class="even"><td >String</td><td >String</td><td >No data loss possible</td></tr>
+<tr valign="top" class="odd"><td >Byte Array</td><td >String</td><td >Converted to a lossless encoding like Base64url, but the distinction between strings and byte arrays is lost</td></tr>
+<tr valign="top" class="even"><td >Other simple types</td><td >String</td><td >Type information lost</td></tr>
+<tr valign="top" class="odd"><td >Array</td><td >Array</td><td >Conversion applies to each contained value</td></tr>
+<tr valign="top" class="even"><td >Map</td><td >Object</td><td >Keys are converted to string; values converted according to this table</td></tr>
+<tr valign="top" class="odd"><td >Tags and extended types</td><td >Special</td><td >The tag number itself is lost and the tagged value is converted to JSON</td></tr>
+</table></div>
+<p>For information on the conversion of CBOR map keys to string, see <a href="qcbormap.html#toJsonObject">QCborMap::toJsonObject</a>().</p>
+<p>If this <a href="qcborvalue.html">QCborValue</a> contains the undefined value, this function will return an undefined <a href="qjsonvalue.html">QJsonValue</a> too. Note that JSON does not support undefined values and undefined QJsonValues are an extension to the specification. They cannot be held in a <a href="qjsonarray.html">QJsonArray</a> or <a href="qjsonobject.html">QJsonObject</a>, but can be returned from functions to indicate a failure. For all other intents and purposes, they are the same as null.</p>
+<a name="special-handling-of-tags-and-extended-types"></a>
+<h6 id="special-handling-of-tags-and-extended-types">Special handling of tags and extended types</h6>
+<p>Some tags are handled specially and change the transformation of the tagged value from CBOR to JSON. The following table lists those special cases:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Tag</th><th >CBOR type</th><th >Transformation</th></tr></thead>
+<tr valign="top" class="odd"><td ><a href="qtcborcommon.html#QCborKnownTags-enum">ExpectedBase64url</a></td><td >Byte array</td><td >Encodes the byte array as Base64url</td></tr>
+<tr valign="top" class="even"><td ><a href="qtcborcommon.html#QCborKnownTags-enum">ExpectedBase64</a></td><td >Byte array</td><td >Encodes the byte array as Base64</td></tr>
+<tr valign="top" class="odd"><td ><a href="qtcborcommon.html#QCborKnownTags-enum">ExpectedBase16</a></td><td >Byte array</td><td >Encodes the byte array as hex</td></tr>
+<tr valign="top" class="even"><td >Url</td><td >Url and String</td><td >Uses <a href="qurl.html#toEncoded">QUrl::toEncoded</a>() to normalize the encoding to the URL's fully encoded format</td></tr>
+<tr valign="top" class="odd"><td >Uuid</td><td >Uuid and Byte array</td><td >Uses <a href="quuid.html#toString">QUuid::toString</a>() to create the string representation</td></tr>
+</table></div>
+<p><b>See also </b><a href="qcborvalue.html#fromJsonValue">fromJsonValue</a>(), <a href="qcborvalue.html#toVariant">toVariant</a>(), <a href="qcborarray.html#toJsonArray">QCborArray::toJsonArray</a>(), and <a href="qcbormap.html#toJsonObject">QCborMap::toJsonObject</a>().</p>
+<!-- @@@toJsonValue -->
+<!-- $$$toRegularExpression[overload1]$$$toRegularExpressionconstQRegularExpression& -->
+<h3 class="fn" id="toRegularExpression"><a name="toRegularExpression"></a><span class="type"><a href="qregularexpression.html">QRegularExpression</a></span> QCborValue::<span class="name">toRegularExpression</span>(const <span class="type"><a href="qregularexpression.html">QRegularExpression</a></span> &amp;<i>defaultValue</i> = {}) const</h3>
+<p>Returns the regular expression value stored in this <a href="qcborvalue.html">QCborValue</a>, if it is of the regular expression pattern extended type. Otherwise, it returns <i>defaultValue</i>.</p>
+<p>Note that this function performs no conversion from other types to <a href="qregularexpression.html">QRegularExpression</a>.</p>
+<p><b>See also </b><a href="qcborvalue.html#isRegularExpression">isRegularExpression</a>(), <a href="qcborvalue.html#isTag">isTag</a>(), and <a href="qcborvalue.html#taggedValue">taggedValue</a>().</p>
+<!-- @@@toRegularExpression -->
+<!-- $$$toSimpleType[overload1]$$$toSimpleTypeQCborSimpleType -->
+<h3 class="fn" id="toSimpleType"><a name="toSimpleType"></a><span class="type"><a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a></span> QCborValue::<span class="name">toSimpleType</span>(<span class="type"><a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a></span> <i>defaultValue</i> = QCborSimpleType::Undefined) const</h3>
+<p>Returns the simple type this <a href="qcborvalue.html">QCborValue</a> is of, if it is a simple type. If it is not a simple type, it returns <i>defaultValue</i>.</p>
+<p>The following types are simple types and this function will return the listed values:</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><a href="qcborvalue.html#Type-enum">QCborValue::False</a></td><td >QCborSimpleType::False</td></tr>
+<tr valign="top" class="even"><td ><a href="qcborvalue.html#Type-enum">QCborValue::True</a></td><td >QCborSimpleType::True</td></tr>
+<tr valign="top" class="odd"><td ><a href="qcborvalue.html#Type-enum">QCborValue::Null</a></td><td >QCborSimpleType::Null</td></tr>
+<tr valign="top" class="even"><td ><a href="qcborvalue.html#Type-enum">QCborValue::Undefined</a></td><td >QCborSimpleType::Undefined</td></tr>
+</table></div>
+<p><b>See also </b><a href="qcborvalue.html#type">type</a>(), <a href="qcborvalue.html#isSimpleType">isSimpleType</a>(), <a href="qcborvalue.html#isBool">isBool</a>(), <a href="qcborvalue.html#isTrue">isTrue</a>(), <a href="qcborvalue.html#isFalse">isFalse</a>(), <a href="qcborvalue.html#isTrue">isTrue</a>(), <a href="qcborvalue.html#isNull">isNull</a>(), and <a href="qcborvalue.html#isUndefined">isUndefined</a>().</p>
+<!-- @@@toSimpleType -->
+<!-- $$$toString[overload1]$$$toStringconstQString& -->
+<h3 class="fn" id="toString"><a name="toString"></a><span class="type"><a href="qstring.html">QString</a></span> QCborValue::<span class="name">toString</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>defaultValue</i> = {}) const</h3>
+<p>Returns the string value stored in this <a href="qcborvalue.html">QCborValue</a>, if it is of the string type. Otherwise, it returns <i>defaultValue</i>.</p>
+<p>Note that this function performs no conversion from other types to <a href="qstring.html">QString</a>.</p>
+<p><b>See also </b><a href="qcborvalue.html#isString">isString</a>(), <a href="qcborvalue.html#isByteArray">isByteArray</a>(), and <a href="qcborvalue.html#toByteArray">toByteArray</a>().</p>
+<!-- @@@toString -->
+<!-- $$$toUrl[overload1]$$$toUrlconstQUrl& -->
+<h3 class="fn" id="toUrl"><a name="toUrl"></a><span class="type"><a href="qurl.html">QUrl</a></span> QCborValue::<span class="name">toUrl</span>(const <span class="type"><a href="qurl.html">QUrl</a></span> &amp;<i>defaultValue</i> = {}) const</h3>
+<p>Returns the URL value stored in this <a href="qcborvalue.html">QCborValue</a>, if it is of the URL extended type. Otherwise, it returns <i>defaultValue</i>.</p>
+<p>Note that this function performs no conversion from other types to <a href="qurl.html">QUrl</a>.</p>
+<p><b>See also </b><a href="qcborvalue.html#isUrl">isUrl</a>(), <a href="qcborvalue.html#isTag">isTag</a>(), and <a href="qcborvalue.html#taggedValue">taggedValue</a>().</p>
+<!-- @@@toUrl -->
+<!-- $$$toUuid[overload1]$$$toUuidconstQUuid& -->
+<h3 class="fn" id="toUuid"><a name="toUuid"></a><span class="type"><a href="quuid.html">QUuid</a></span> QCborValue::<span class="name">toUuid</span>(const <span class="type"><a href="quuid.html">QUuid</a></span> &amp;<i>defaultValue</i> = {}) const</h3>
+<p>Returns the UUID value stored in this <a href="qcborvalue.html">QCborValue</a>, if it is of the UUID extended type. Otherwise, it returns <i>defaultValue</i>.</p>
+<p>Note that this function performs no conversion from other types to <a href="quuid.html">QUuid</a>.</p>
+<p><b>See also </b><a href="qcborvalue.html#isUuid">isUuid</a>(), <a href="qcborvalue.html#isTag">isTag</a>(), and <a href="qcborvalue.html#taggedValue">taggedValue</a>().</p>
+<!-- @@@toUuid -->
+<!-- $$$toVariant[overload1]$$$toVariant -->
+<h3 class="fn" id="toVariant"><a name="toVariant"></a><span class="type"><a href="qvariant.html">QVariant</a></span> QCborValue::<span class="name">toVariant</span>() const</h3>
+<p>Converts this value to a native Qt type and returns the corresponding <a href="qvariant.html">QVariant</a>.</p>
+<p>The following table lists the mapping performed between <a href="qcborvalue.html#Type-enum">QCborValue types</a> and <a href="qmetatype.html#Type-enum">Qt meta types</a>.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >CBOR Type</th><th >Qt or C++ type</th><th >Notes</th></tr></thead>
+<tr valign="top" class="odd"><td >Integer</td><td ><a href="qtglobal.html#qint64-typedef">qint64</a></td><td ></td></tr>
+<tr valign="top" class="even"><td >Double</td><td ><code>double</code></td><td ></td></tr>
+<tr valign="top" class="odd"><td >Bool</td><td ><code>bool</code></td><td ></td></tr>
+<tr valign="top" class="even"><td >Null</td><td ><code>std::nullptr_t</code></td><td ></td></tr>
+<tr valign="top" class="odd"><td >Undefined</td><td >no type (QVariant())</td><td ></td></tr>
+<tr valign="top" class="even"><td >Byte array</td><td ><a href="qbytearray.html">QByteArray</a></td><td ></td></tr>
+<tr valign="top" class="odd"><td >String</td><td ><a href="qstring.html">QString</a></td><td ></td></tr>
+<tr valign="top" class="even"><td >Array</td><td ><a href="qvariant.html#QVariantList-typedef">QVariantList</a></td><td >Recursively converts all values</td></tr>
+<tr valign="top" class="odd"><td >Map</td><td ><a href="qvariant.html#QVariantMap-typedef">QVariantMap</a></td><td >Key types are &quot;stringified&quot;</td></tr>
+<tr valign="top" class="even"><td >Other simple types</td><td ><a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a></td><td ></td></tr>
+<tr valign="top" class="odd"><td ><a href="qcborvalue.html#Type-enum">DateTime</a></td><td ><a href="qdatetime.html">QDateTime</a></td><td ></td></tr>
+<tr valign="top" class="even"><td >Url</td><td ><a href="qurl.html">QUrl</a></td><td ></td></tr>
+<tr valign="top" class="odd"><td ><a href="qcborvalue.html#Type-enum">RegularExpression</a></td><td ><a href="qregularexpression.html">QRegularExpression</a></td><td ></td></tr>
+<tr valign="top" class="even"><td >Uuid</td><td ><a href="quuid.html">QUuid</a></td><td ></td></tr>
+<tr valign="top" class="odd"><td >Other tags</td><td >Special</td><td >The tag is ignored and the tagged value is converted using this function</td></tr>
+</table></div>
+<p>Note that values in both CBOR Maps and Arrays are converted recursively using this function too and placed in <a href="qvariant.html#QVariantMap-typedef">QVariantMap</a> and <a href="qvariant.html#QVariantList-typedef">QVariantList</a> instead. You will not find <a href="qcbormap.html">QCborMap</a> and <a href="qcborarray.html">QCborArray</a> stored inside the QVariants.</p>
+<p>QVariantMaps have string keys, unlike CBOR, so the conversion of a <a href="qcbormap.html">QCborMap</a> to <a href="qvariant.html#QVariantMap-typedef">QVariantMap</a> will imply a step of &quot;stringification&quot; of the key values. See <a href="qcbormap.html#toJsonObject">QCborMap::toJsonObject</a>() for details.</p>
+<p><b>See also </b><a href="qcborvalue.html#fromVariant">fromVariant</a>(), <a href="qcborvalue.html#toJsonValue">toJsonValue</a>(), <a href="qcborarray.html#toVariantList">QCborArray::toVariantList</a>(), and <a href="qcbormap.html#toVariantMap">QCborMap::toVariantMap</a>().</p>
+<!-- @@@toVariant -->
+<!-- $$$type[overload1]$$$type -->
+<h3 class="fn" id="type"><a name="type"></a><span class="type"><a href="qcborvalue.html#Type-enum">QCborValue::Type</a></span> QCborValue::<span class="name">type</span>() const</h3>
+<p>Returns the type of this <a href="qcborvalue.html">QCborValue</a>. The type can also later be retrieved by one of the &quot;isXxx&quot; functions.</p>
+<p><b>See also </b><a href="qcborvalue.html#isInteger">isInteger</a>(), <a href="qcborvalue.html#isByteArray">isByteArray</a>(), <a href="qcborvalue.html#isString">isString</a>(), <a href="qcborvalue.html#isArray">isArray</a>(), <a href="qcborvalue.html#isMap">isMap</a>(), <a href="qcborvalue.html#isTag">isTag</a>(), <a href="qcborvalue.html#isFalse">isFalse</a>(), <a href="qcborvalue.html#isTrue">isTrue</a>(), <a href="qcborvalue.html#isBool">isBool</a>(), <a href="qcborvalue.html#isNull">isNull</a>(), <a href="qcborvalue.html#isUndefined">isUndefined</a>, <a href="qcborvalue.html#isDouble">isDouble</a>(), <a href="qcborvalue.html#isDateTime">isDateTime</a>(), <a href="qcborvalue.html#isUrl">isUrl</a>(), <a href="qcborvalue.html#isRegularExpression">isRegularExpression</a>(), and <a href="qcborvalue.html#isUuid">isUuid</a>().</p>
+<!-- @@@type -->
+<!-- $$$operator!=[overload1]$$$operator!=constQCborValue& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> QCborValue::<span class="name">operator!=</span>(const <span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> &amp;<i>other</i>) const</h3>
+<p>Compares this value and <i>other</i>, and returns true if contents differ, false otherwise. If each <a href="qcborvalue.html">QCborValue</a> contains an array or map, the comparison is recursive to elements contained in them.</p>
+<p>For more information on CBOR equality in Qt, see, <a href="qcborvalue.html#compare">QCborValue::compare</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#compare">compare</a>(), <a href="qcborvalue.html#operator-eq-eq">QCborValue::operator==</a>(), <a href="qcbormap.html#operator-eq-eq">QCborMap::operator==</a>(), <a href="qcborvalue.html#operator-eq-eq">operator==</a>(), and <a href="qcborvalue.html#operator-lt">operator&lt;</a>().</p>
+<!-- @@@operator!= -->
+<!-- $$$operator<[overload1]$$$operator<constQCborValue& -->
+<h3 class="fn" id="operator-lt"><a name="operator-lt"></a><span class="type">bool</span> QCborValue::<span class="name">operator&lt;</span>(const <span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> &amp;<i>other</i>) const</h3>
+<p>Compares this value and <i>other</i>, and returns true if this value should be sorted before <i>other</i>, false otherwise. If each <a href="qcborvalue.html">QCborValue</a> contains an array or map, the comparison is recursive to elements contained in them.</p>
+<p>For more information on CBOR sorting order, see <a href="qcborvalue.html#compare">QCborValue::compare</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#compare">compare</a>(), <a href="qcborvalue.html#operator-eq-eq">QCborValue::operator==</a>(), <a href="qcbormap.html#operator-eq-eq">QCborMap::operator==</a>(), <a href="qcborvalue.html#operator-eq-eq">operator==</a>(), and <a href="qcborvalue.html#operator-not-eq">operator!=</a>().</p>
+<!-- @@@operator< -->
+<!-- $$$operator==[overload1]$$$operator==constQCborValue& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> QCborValue::<span class="name">operator==</span>(const <span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> &amp;<i>other</i>) const</h3>
+<p>Compares this value and <i>other</i>, and returns true if they hold the same contents, false otherwise. If each <a href="qcborvalue.html">QCborValue</a> contains an array or map, the comparison is recursive to elements contained in them.</p>
+<p>For more information on CBOR equality in Qt, see, <a href="qcborvalue.html#compare">compare</a>().</p>
+<p><b>See also </b><a href="qcborvalue.html#compare">compare</a>(), QCborValue::operator==(), <a href="qcbormap.html#operator-eq-eq">QCborMap::operator==</a>(), <a href="qcborvalue.html#operator-not-eq">operator!=</a>(), and <a href="qcborvalue.html#operator-lt">operator&lt;</a>().</p>
+<!-- @@@operator== -->
+<!-- $$$operator[][overload1]$$$operator[]constQString& -->
+<h3 class="fn" id="operator-5b-5d"><a name="operator-5b-5d"></a>const <span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> QCborValue::<span class="name">operator[]</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>) const</h3>
+<p>If this <a href="qcborvalue.html">QCborValue</a> is a <a href="qcbormap.html">QCborMap</a>, searches elements for the value whose key matches <i>key</i>. If there's no key matching <i>key</i> in the map or if this <a href="qcborvalue.html">QCborValue</a> object is not a map, returns the undefined value.</p>
+<p>This function is equivalent to:</p>
+<pre class="cpp">
+
+      value<span class="operator">.</span>toMap()<span class="operator">.</span>value(key);
+
+</pre>
+<p><b>See also </b><a href="qcborvalue.html#operator-5b-5d-2">operator[]</a>(qint64), <a href="qcbormap.html#operator-5b-5d">QCborMap::operator[]</a>, <a href="qcbormap.html#value">QCborMap::value</a>(), and <a href="qcbormap.html#find">QCborMap::find</a>().</p>
+<!-- @@@operator[] -->
+<!-- $$$operator[]$$$operator[]QLatin1String -->
+<h3 class="fn" id="operator-5b-5d-1"><a name="operator-5b-5d-1"></a>const <span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> QCborValue::<span class="name">operator[]</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>key</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>If this <a href="qcborvalue.html">QCborValue</a> is a <a href="qcbormap.html">QCborMap</a>, searches elements for the value whose key matches <i>key</i>. If there's no key matching <i>key</i> in the map or if this <a href="qcborvalue.html">QCborValue</a> object is not a map, returns the undefined value.</p>
+<p>This function is equivalent to:</p>
+<pre class="cpp">
+
+      value<span class="operator">.</span>toMap()<span class="operator">.</span>value(key);
+
+</pre>
+<p><b>See also </b><a href="qcborvalue.html#operator-5b-5d-2">operator[]</a>(qint64), <a href="qcbormap.html#operator-5b-5d">QCborMap::operator[]</a>, <a href="qcbormap.html#value">QCborMap::value</a>(), and <a href="qcbormap.html#find">QCborMap::find</a>().</p>
+<!-- @@@operator[] -->
+<!-- $$$operator[]$$$operator[]qint64 -->
+<h3 class="fn" id="operator-5b-5d-2"><a name="operator-5b-5d-2"></a>const <span class="type"><a href="qcborvalue.html#QCborValue">QCborValue</a></span> QCborValue::<span class="name">operator[]</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>key</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>If this <a href="qcborvalue.html">QCborValue</a> is a <a href="qcbormap.html">QCborMap</a>, searches elements for the value whose key matches <i>key</i>. If this is a <a href="qcborarray.html">QCborArray</a>, returns the element whose index is <i>key</i>. If there's no matching value in the array or map, or if this <a href="qcborvalue.html">QCborValue</a> object is not an array or map, returns the undefined value.</p>
+<p><b>See also </b><a href="qcborvalue.html#operator-5b-5d">operator[]</a>, <a href="qcbormap.html#operator-5b-5d">QCborMap::operator[]</a>, <a href="qcbormap.html#value">QCborMap::value</a>(), <a href="qcbormap.html#find">QCborMap::find</a>(), <a href="qcborarray.html#operator-5b-5d">QCborArray::operator[]</a>, and <a href="qcborarray.html#at">QCborArray::at</a>().</p>
+<!-- @@@operator[] -->
+<!-- $$$operator[]$$$operator[]qint64 -->
+<h3 class="fn" id="operator-5b-5d-3"><a name="operator-5b-5d-3"></a><span class="type">QCborValueRef</span> QCborValue::<span class="name">operator[]</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>key</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a <a href="qcborvalue.html#qcborvalueref">QCborValueRef</a> that can be used to read or modify the entry in this, as a map or array, with the given <i>key</i>. When this <a href="qcborvalue.html">QCborValue</a> is a <a href="qcbormap.html">QCborMap</a> or, for 0 &lt;= key &lt; 0x10000, a <a href="qcborarray.html">QCborArray</a>, this function is equivalent to the matching operator[] on that map or array.</p>
+<p>Before returning the reference: if this <a href="qcborvalue.html">QCborValue</a> was an array but the key is out of range, the array is first converted to a map (so that <code>map[i]</code> is <code>array[i]</code> for each index, <code>i</code>, with valid <code>array[i]</code>); otherwise, if it was not a map it will be over-written with an empty map.</p>
+<p><b>See also </b><a href="qcborvalue.html#operator-5b-5d">operator[]</a>, <a href="qcbormap.html#operator-5b-5d">QCborMap::operator[]</a>, <a href="qcbormap.html#value">QCborMap::value</a>(), <a href="qcbormap.html#find">QCborMap::find</a>(), <a href="qcborarray.html#operator-5b-5d">QCborArray::operator[]</a>, and <a href="qcborarray.html#at">QCborArray::at</a>().</p>
+<!-- @@@operator[] -->
+<!-- $$$operator[]$$$operator[]QLatin1String -->
+<h3 class="fn" id="operator-5b-5d-4"><a name="operator-5b-5d-4"></a><span class="type">QCborValueRef</span> QCborValue::<span class="name">operator[]</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>key</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a <a href="qcborvalue.html#qcborvalueref">QCborValueRef</a> that can be used to read or modify the entry in this, as a map, with the given <i>key</i>. When this <a href="qcborvalue.html">QCborValue</a> is a <a href="qcbormap.html">QCborMap</a>, this function is equivalent to the matching operator[] on that map.</p>
+<p>Before returning the reference: if this <a href="qcborvalue.html">QCborValue</a> was an array, it is first converted to a map (so that <code>map[i]</code> is <code>array[i]</code> for each index, <code>i</code>, with valid <code>array[i]</code>); otherwise, if it was not a map it will be over-written with an empty map.</p>
+<p><b>See also </b><a href="qcborvalue.html#operator-5b-5d-2">operator[]</a>(qint64), <a href="qcbormap.html#operator-5b-5d">QCborMap::operator[]</a>, <a href="qcbormap.html#value">QCborMap::value</a>(), and <a href="qcbormap.html#find">QCborMap::find</a>().</p>
+<!-- @@@operator[] -->
+<!-- $$$operator[]$$$operator[]constQString& -->
+<h3 class="fn" id="operator-5b-5d-5"><a name="operator-5b-5d-5"></a><span class="type">QCborValueRef</span> QCborValue::<span class="name">operator[]</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>)</h3>
+<p>Returns a <a href="qcborvalue.html#qcborvalueref">QCborValueRef</a> that can be used to read or modify the entry in this, as a map, with the given <i>key</i>. When this <a href="qcborvalue.html">QCborValue</a> is a <a href="qcbormap.html">QCborMap</a>, this function is equivalent to the matching operator[] on that map.</p>
+<p>Before returning the reference: if this <a href="qcborvalue.html">QCborValue</a> was an array, it is first converted to a map (so that <code>map[i]</code> is <code>array[i]</code> for each index, <code>i</code>, with valid <code>array[i]</code>); otherwise, if it was not a map it will be over-written with an empty map.</p>
+<p><b>See also </b><a href="qcborvalue.html#operator-5b-5d-2">operator[]</a>(qint64), <a href="qcbormap.html#operator-5b-5d">QCborMap::operator[]</a>, <a href="qcbormap.html#value">QCborMap::value</a>(), and <a href="qcbormap.html#find">QCborMap::find</a>().</p>
+<!-- @@@operator[] -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+    <namespace>org.qt-project.qtimageformats.5132</namespace>
+    <virtualFolder>qtimageformats</virtualFolder>
+    <metaData name="version" value="5.13.2"/>
+    <filterSection>
+        <toc>
+            <section ref="qtimageformats-index.html" title="Qt Image Formats"/>
+        </toc>
+        <keywords>
+            <keyword name="Qt Image Formats" id="Qt Image Formats" ref="qtimageformats-index.html"/>
+            <keyword name="TIFF Software Distribution (libtiff), version 4.0.10" id="TIFF Software Distribution (libtiff), version 4.0.10" ref="qtimageformats-attribution-libtiff.html"/>
+            <keyword name="WebP (libwebp), version 1.0.3" id="WebP (libwebp), version 1.0.3" ref="qtimageformats-attribution-libwebp.html"/>
+        </keywords>
+        <files>
+            <file>images/arrow_bc.png</file>
+            <file>images/bgrContent.png</file>
+            <file>images/btn_next.png</file>
+            <file>images/btn_prev.png</file>
+            <file>images/bullet_dn.png</file>
+            <file>images/bullet_sq.png</file>
+            <file>images/home.png</file>
+            <file>images/ico_note.png</file>
+            <file>images/ico_note_attention.png</file>
+            <file>images/ico_out.png</file>
+            <file>images/logo.png</file>
+            <file>qtimageformats-attribution-libtiff.html</file>
+            <file>qtimageformats-attribution-libwebp.html</file>
+            <file>qtimageformats-index.html</file>
+            <file>style/offline-simple.css</file>
+            <file>style/offline.css</file>
+        </files>
+    </filterSection>
+</QtHelpProject>

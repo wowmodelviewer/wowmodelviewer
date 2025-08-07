@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcborstream.cpp -->
+  <title>List of All Members for QCborStreamReader | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QCborStreamReader</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">List of All Members for QCborStreamReader</h1>
+<p>This is the complete list of members for <a href="qcborstreamreader.html">QCborStreamReader</a>, including inherited members.</p>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn">class <span class="name"><b><a href="qcborstreamreader-stringresult.html">StringResult</a></b></span></li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#QCborStreamReader-4">QCborStreamReader</a></b></span>(QIODevice *)</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#QCborStreamReader-3">QCborStreamReader</a></b></span>(const QByteArray &amp;)</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#QCborStreamReader-2">QCborStreamReader</a></b></span>(const quint8 *, qsizetype )</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#QCborStreamReader-1">QCborStreamReader</a></b></span>(const char *, qsizetype )</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></b></span>()</li>
+<li class="fn">enum <span class="name"><b><a href="qcborstreamreader.html#StringResultCode-enum">StringResultCode</a></b></span></li>
+<li class="fn">enum <span class="name"><b><a href="qcborstreamreader.html#Type-enum">Type</a></b></span></li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#dtor.QCborStreamReader">~QCborStreamReader</a></b></span>()</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#addData">addData</a></b></span>(const QByteArray &amp;)</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#addData-1">addData</a></b></span>(const char *, qsizetype )</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#addData-2">addData</a></b></span>(const quint8 *, qsizetype )</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#clear">clear</a></b></span>()</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#containerDepth">containerDepth</a></b></span>() const : int</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#currentOffset">currentOffset</a></b></span>() const : qint64</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#currentStringChunkSize">currentStringChunkSize</a></b></span>() const : qsizetype</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#device">device</a></b></span>() const : QIODevice *</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#enterContainer">enterContainer</a></b></span>() : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#hasNext">hasNext</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#isArray">isArray</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#isBool">isBool</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#isByteArray">isByteArray</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#isContainer">isContainer</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#isDouble">isDouble</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#isFalse">isFalse</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#isFloat16">isFloat16</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#isFloat">isFloat</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#isInteger">isInteger</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#isInvalid">isInvalid</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#isLengthKnown">isLengthKnown</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#isMap">isMap</a></b></span>() const : bool</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#isNegativeInteger">isNegativeInteger</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#isNull">isNull</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#isSimpleType">isSimpleType</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#isSimpleType-1">isSimpleType</a></b></span>(QCborSimpleType ) const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#isString">isString</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#isTag">isTag</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#isTrue">isTrue</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#isUndefined">isUndefined</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#isUnsignedInteger">isUnsignedInteger</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#isValid">isValid</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#lastError">lastError</a></b></span>() : QCborError</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#leaveContainer">leaveContainer</a></b></span>() : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#length">length</a></b></span>() const : quint64</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#next">next</a></b></span>(int ) : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#parentContainerType">parentContainerType</a></b></span>() const : QCborStreamReader::Type</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#readByteArray">readByteArray</a></b></span>() : StringResult&lt;QByteArray&gt;</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#readString">readString</a></b></span>() : StringResult&lt;QString&gt;</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#readStringChunk">readStringChunk</a></b></span>(char *, qsizetype ) : StringResult&lt;qsizetype&gt;</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#reparse">reparse</a></b></span>()</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#reset">reset</a></b></span>()</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#setDevice">setDevice</a></b></span>(QIODevice *)</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#toBool">toBool</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#toDouble">toDouble</a></b></span>() const : double</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#toFloat16">toFloat16</a></b></span>() const : qfloat16</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#toFloat">toFloat</a></b></span>() const : float</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#toInteger">toInteger</a></b></span>() const : qint64</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#toNegativeInteger">toNegativeInteger</a></b></span>() const : QCborNegativeInteger</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#toSimpleType">toSimpleType</a></b></span>() const : QCborSimpleType</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#toTag">toTag</a></b></span>() const : QCborTag</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#toUnsignedInteger">toUnsignedInteger</a></b></span>() const : quint64</li>
+<li class="fn"><span class="name"><b><a href="qcborstreamreader.html#type">type</a></b></span>() const : QCborStreamReader::Type</li>
+</ul>
+</td></tr>
+</table></div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

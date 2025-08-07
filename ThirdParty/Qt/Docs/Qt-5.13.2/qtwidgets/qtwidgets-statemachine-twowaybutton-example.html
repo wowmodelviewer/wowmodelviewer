@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- twowaybutton.qdoc -->
+  <title>Two-way Button Example | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Two-way Button Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Two-way Button Example</h1>
+<span class="subtitle"></span>
+<!-- $$$statemachine/twowaybutton-brief -->
+<p>The Two-way button example shows how to use <a href="../qtcore/statemachine-api.html">The State Machine Framework</a> to implement a simple state machine that toggles the current state when a button is clicked.</p>
+<!-- @@@statemachine/twowaybutton -->
+<!-- $$$statemachine/twowaybutton-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span><span class="operator">*</span>argv)
+  {
+      <span class="type"><a href="qapplication.html">QApplication</a></span> app(argc<span class="operator">,</span> argv);
+      <span class="type"><a href="qpushbutton.html">QPushButton</a></span> button;
+      <span class="type"><a href="../qtcore/qstatemachine.html">QStateMachine</a></span> machine;
+
+</pre>
+<p>The application's main() function begins by constructing the application object, a button and a state machine.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>off <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qstate.html">QState</a></span>();
+      off<span class="operator">-</span><span class="operator">&gt;</span>assignProperty(<span class="operator">&amp;</span>button<span class="operator">,</span> <span class="string">&quot;text&quot;</span><span class="operator">,</span> <span class="string">&quot;Off&quot;</span>);
+      off<span class="operator">-</span><span class="operator">&gt;</span>setObjectName(<span class="string">&quot;off&quot;</span>);
+
+      <span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>on <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qstate.html">QState</a></span>();
+      on<span class="operator">-</span><span class="operator">&gt;</span>setObjectName(<span class="string">&quot;on&quot;</span>);
+      on<span class="operator">-</span><span class="operator">&gt;</span>assignProperty(<span class="operator">&amp;</span>button<span class="operator">,</span> <span class="string">&quot;text&quot;</span><span class="operator">,</span> <span class="string">&quot;On&quot;</span>);
+
+</pre>
+<p>The state machine has two states; <code>on</code> and <code>off</code>. When either state is entered, the text of the button will be set accordingly.</p>
+<pre class="cpp">
+
+      off<span class="operator">-</span><span class="operator">&gt;</span>addTransition(<span class="operator">&amp;</span>button<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qabstractbutton.html">QAbstractButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span> on);
+      on<span class="operator">-</span><span class="operator">&gt;</span>addTransition(<span class="operator">&amp;</span>button<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qabstractbutton.html">QAbstractButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span> off);
+
+</pre>
+<p>When the state machine is in the <code>off</code> state and the button is clicked, it will transition to the <code>on</code> state; when the state machine is in the <code>on</code> state and the button is clicked, it will transition to the <code>off</code> state.</p>
+<pre class="cpp">
+
+      machine<span class="operator">.</span>addState(off);
+      machine<span class="operator">.</span>addState(on);
+
+</pre>
+<p>The states are added to the state machine; they become top-level (sibling) states.</p>
+<pre class="cpp">
+
+      machine<span class="operator">.</span>setInitialState(off);
+      machine<span class="operator">.</span>start();
+
+</pre>
+<p>The initial state is <code>off</code>; this is the state the state machine will immediately transition to once the state machine is started.</p>
+<pre class="cpp">
+
+      button<span class="operator">.</span>resize(<span class="number">100</span><span class="operator">,</span> <span class="number">50</span>);
+      button<span class="operator">.</span>show();
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p>Finally, the button is resized and made visible, and the application event loop is entered.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/statemachine/twowaybutton?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@statemachine/twowaybutton -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

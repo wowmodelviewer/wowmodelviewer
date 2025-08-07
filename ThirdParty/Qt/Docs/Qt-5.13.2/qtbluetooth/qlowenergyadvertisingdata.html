@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qlowenergyadvertisingdata.cpp -->
+  <title>QLowEnergyAdvertisingData Class | Qt Bluetooth 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtbluetooth-index.html">Qt Bluetooth</a></td><td ><a href="qtbluetooth-module.html">C++ Classes</a></td><td >QLowEnergyAdvertisingData</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtbluetooth-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QLowEnergyAdvertisingData Class</h1>
+<!-- $$$QLowEnergyAdvertisingData-brief -->
+<p>The <a href="qlowenergyadvertisingdata.html">QLowEnergyAdvertisingData</a> class represents the data to be broadcast during Bluetooth Low Energy advertising. <a href="#details">More...</a></p>
+<!-- @@@QLowEnergyAdvertisingData -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QLowEnergyAdvertisingData&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += bluetooth</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr></table></div><p>This class was introduced in  Qt 5.7.</p>
+<ul>
+<li><a href="qlowenergyadvertisingdata-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingdata.html#Discoverability-enum">Discoverability</a></b> { DiscoverabilityNone, DiscoverabilityLimited, DiscoverabilityGeneral }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingdata.html#QLowEnergyAdvertisingData-1">QLowEnergyAdvertisingData</a></b>(const QLowEnergyAdvertisingData &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingdata.html#QLowEnergyAdvertisingData">QLowEnergyAdvertisingData</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QLowEnergyAdvertisingData &amp;</td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingdata.html#operator-eq">operator=</a></b>(const QLowEnergyAdvertisingData &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingdata.html#dtor.QLowEnergyAdvertisingData">~QLowEnergyAdvertisingData</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QLowEnergyAdvertisingData::Discoverability </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingdata.html#discoverability">discoverability</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingdata.html#includePowerLevel">includePowerLevel</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingdata.html#localName">localName</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingdata.html#manufacturerData">manufacturerData</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> quint16 </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingdata.html#manufacturerId">manufacturerId</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingdata.html#rawData">rawData</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QBluetoothUuid&gt; </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingdata.html#services">services</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingdata.html#setDiscoverability">setDiscoverability</a></b>(QLowEnergyAdvertisingData::Discoverability <i>mode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingdata.html#setIncludePowerLevel">setIncludePowerLevel</a></b>(bool <i>doInclude</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingdata.html#setLocalName">setLocalName</a></b>(const QString &amp;<i>name</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingdata.html#setManufacturerData">setManufacturerData</a></b>(quint16 <i>id</i>, const QByteArray &amp;<i>data</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingdata.html#setRawData">setRawData</a></b>(const QByteArray &amp;<i>data</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingdata.html#setServices">setServices</a></b>(const QList&lt;QBluetoothUuid&gt; &amp;<i>services</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingdata.html#swap">swap</a></b>(QLowEnergyAdvertisingData &amp;<i>other</i>)</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> quint16 </td><td class="memItemRight bottomAlign"><b><a href="qlowenergyadvertisingdata.html#invalidManufacturerId">invalidManufacturerId</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QLowEnergyAdvertisingData-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This data can include the device name, GATT services offered by the device, and so on. The data set via this class will be used when advertising is started by calling <a href="qlowenergycontroller.html#startAdvertising">QLowEnergyController::startAdvertising</a>(). Objects of this class can represent an Advertising Data packet or a Scan Response packet.</p>
+<p><b>Note: </b>The actual data packets sent over the advertising channel cannot contain more than 31 bytes. If the variable-length data set via this class exceeds that limit, it will be left out of the packet or truncated, depending on the type.</p></div>
+<p><b>See also </b><a href="qlowenergyadvertisingparameters.html">QLowEnergyAdvertisingParameters</a> and <a href="qlowenergycontroller.html#startAdvertising">QLowEnergyController::startAdvertising</a>().</p>
+<!-- @@@QLowEnergyAdvertisingData -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Discoverability$$$DiscoverabilityNone$$$DiscoverabilityLimited$$$DiscoverabilityGeneral -->
+<h3 class="fn" id="Discoverability-enum"><a name="Discoverability-enum"></a>enum QLowEnergyAdvertisingData::<span class="name">Discoverability</span></h3>
+<p>The discoverability of the advertising device as defined by the Generic Access Profile.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QLowEnergyAdvertisingData::DiscoverabilityNone</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The advertising device does not wish to be discoverable by scanning devices.</td></tr>
+<tr><td class="topAlign"><code>QLowEnergyAdvertisingData::DiscoverabilityLimited</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The advertising device wishes to be discoverable with a high priority. Note that this mode is not compatible with using a white list. The value of <a href="qlowenergyadvertisingparameters.html#filterPolicy">QLowEnergyAdvertisingParameters::filterPolicy</a>() is always assumed to be <a href="qlowenergyadvertisingparameters.html#FilterPolicy-enum">QLowEnergyAdvertisingParameters::IgnoreWhiteList</a> when limited discoverability is used.</td></tr>
+<tr><td class="topAlign"><code>QLowEnergyAdvertisingData::DiscoverabilityGeneral</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The advertising device wishes to be discoverable by scanning devices.</td></tr>
+</table></div>
+<!-- @@@Discoverability -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QLowEnergyAdvertisingData$$$QLowEnergyAdvertisingDataconstQLowEnergyAdvertisingData& -->
+<h3 class="fn" id="QLowEnergyAdvertisingData-1"><a name="QLowEnergyAdvertisingData-1"></a>QLowEnergyAdvertisingData::<span class="name">QLowEnergyAdvertisingData</span>(const <span class="type"><a href="qlowenergyadvertisingdata.html#QLowEnergyAdvertisingData">QLowEnergyAdvertisingData</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a new object of this class that is a copy of <i>other</i>.</p>
+<!-- @@@QLowEnergyAdvertisingData -->
+<!-- $$$QLowEnergyAdvertisingData[overload1]$$$QLowEnergyAdvertisingData -->
+<h3 class="fn" id="QLowEnergyAdvertisingData"><a name="QLowEnergyAdvertisingData"></a>QLowEnergyAdvertisingData::<span class="name">QLowEnergyAdvertisingData</span>()</h3>
+<p>Creates a new object of this class. All values are initialized to their defaults according to the Bluetooth Low Energy specification.</p>
+<!-- @@@QLowEnergyAdvertisingData -->
+<!-- $$$operator=[overload1]$$$operator=constQLowEnergyAdvertisingData& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qlowenergyadvertisingdata.html#QLowEnergyAdvertisingData">QLowEnergyAdvertisingData</a></span> &amp;QLowEnergyAdvertisingData::<span class="name">operator=</span>(const <span class="type"><a href="qlowenergyadvertisingdata.html#QLowEnergyAdvertisingData">QLowEnergyAdvertisingData</a></span> &amp;<i>other</i>)</h3>
+<p>Makes this object a copy of <i>other</i> and returns the new value of this object.</p>
+<!-- @@@operator= -->
+<!-- $$$~QLowEnergyAdvertisingData[overload1]$$$~QLowEnergyAdvertisingData -->
+<h3 class="fn" id="dtor.QLowEnergyAdvertisingData"><a name="dtor.QLowEnergyAdvertisingData"></a>QLowEnergyAdvertisingData::<span class="name">~QLowEnergyAdvertisingData</span>()</h3>
+<p>Destroys this object.</p>
+<!-- @@@~QLowEnergyAdvertisingData -->
+<!-- $$$discoverability[overload1]$$$discoverability -->
+<h3 class="fn" id="discoverability"><a name="discoverability"></a><span class="type"><a href="qlowenergyadvertisingdata.html#Discoverability-enum">QLowEnergyAdvertisingData::Discoverability</a></span> QLowEnergyAdvertisingData::<span class="name">discoverability</span>() const</h3>
+<p>Returns the discoverability mode of the advertising device. The default is <a href="qlowenergyadvertisingdata.html#Discoverability-enum">DiscoverabilityNone</a>.</p>
+<p><b>See also </b><a href="qlowenergyadvertisingdata.html#setDiscoverability">setDiscoverability</a>().</p>
+<!-- @@@discoverability -->
+<!-- $$$includePowerLevel[overload1]$$$includePowerLevel -->
+<h3 class="fn" id="includePowerLevel"><a name="includePowerLevel"></a><span class="type">bool</span> QLowEnergyAdvertisingData::<span class="name">includePowerLevel</span>() const</h3>
+<p>Returns whether to include the device's transmit power level in the advertising data. The default is <code>false</code>.</p>
+<p><b>See also </b><a href="qlowenergyadvertisingdata.html#setIncludePowerLevel">setIncludePowerLevel</a>().</p>
+<!-- @@@includePowerLevel -->
+<!-- $$$invalidManufacturerId[overload1]$$$invalidManufacturerId -->
+<h3 class="fn" id="invalidManufacturerId"><a name="invalidManufacturerId"></a><code>[static] </code><span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> QLowEnergyAdvertisingData::<span class="name">invalidManufacturerId</span>()</h3>
+<p>Returns an invalid manufacturer id. If this value is set as the manufacturer id (which it is by default), no manufacturer data will be present in the advertising data.</p>
+<!-- @@@invalidManufacturerId -->
+<!-- $$$localName[overload1]$$$localName -->
+<h3 class="fn" id="localName"><a name="localName"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QLowEnergyAdvertisingData::<span class="name">localName</span>() const</h3>
+<p>Returns the name of the local device that is to be advertised.</p>
+<p><b>See also </b><a href="qlowenergyadvertisingdata.html#setLocalName">setLocalName</a>().</p>
+<!-- @@@localName -->
+<!-- $$$manufacturerData[overload1]$$$manufacturerData -->
+<h3 class="fn" id="manufacturerData"><a name="manufacturerData"></a><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> QLowEnergyAdvertisingData::<span class="name">manufacturerData</span>() const</h3>
+<p>Returns the manufacturer data. The default is an empty byte array.</p>
+<p><b>See also </b><a href="qlowenergyadvertisingdata.html#setManufacturerData">setManufacturerData</a>().</p>
+<!-- @@@manufacturerData -->
+<!-- $$$manufacturerId[overload1]$$$manufacturerId -->
+<h3 class="fn" id="manufacturerId"><a name="manufacturerId"></a><span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> QLowEnergyAdvertisingData::<span class="name">manufacturerId</span>() const</h3>
+<p>Returns the manufacturer id. The default is <a href="qlowenergyadvertisingdata.html#invalidManufacturerId">QLowEnergyAdvertisingData::invalidManufacturerId</a>(), which means the data will not be advertised.</p>
+<!-- @@@manufacturerId -->
+<!-- $$$rawData[overload1]$$$rawData -->
+<h3 class="fn" id="rawData"><a name="rawData"></a><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> QLowEnergyAdvertisingData::<span class="name">rawData</span>() const</h3>
+<p>Returns the user-supplied raw data to be advertised. The default is an empty byte array.</p>
+<p><b>See also </b><a href="qlowenergyadvertisingdata.html#setRawData">setRawData</a>().</p>
+<!-- @@@rawData -->
+<!-- $$$services[overload1]$$$services -->
+<h3 class="fn" id="services"><a name="services"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span>&gt; QLowEnergyAdvertisingData::<span class="name">services</span>() const</h3>
+<p>Returns the list of service UUIDs to be advertised. By default, this list is empty.</p>
+<p><b>See also </b><a href="qlowenergyadvertisingdata.html#setServices">setServices</a>().</p>
+<!-- @@@services -->
+<!-- $$$setDiscoverability[overload1]$$$setDiscoverabilityQLowEnergyAdvertisingData::Discoverability -->
+<h3 class="fn" id="setDiscoverability"><a name="setDiscoverability"></a><span class="type">void</span> QLowEnergyAdvertisingData::<span class="name">setDiscoverability</span>(<span class="type"><a href="qlowenergyadvertisingdata.html#Discoverability-enum">QLowEnergyAdvertisingData::Discoverability</a></span> <i>mode</i>)</h3>
+<p>Sets the discoverability type of the advertising device to <i>mode</i>.</p>
+<p><b>Note: </b>Discoverability information can only appear in an actual advertising data packet. If this object acts as scan response data, a call to this function will have no effect on the scan response sent.</p><p><b>See also </b><a href="qlowenergyadvertisingdata.html#discoverability">discoverability</a>().</p>
+<!-- @@@setDiscoverability -->
+<!-- $$$setIncludePowerLevel[overload1]$$$setIncludePowerLevelbool -->
+<h3 class="fn" id="setIncludePowerLevel"><a name="setIncludePowerLevel"></a><span class="type">void</span> QLowEnergyAdvertisingData::<span class="name">setIncludePowerLevel</span>(<span class="type">bool</span> <i>doInclude</i>)</h3>
+<p>Specifies whether to include the device's transmit power level in the advertising data. If <i>doInclude</i> is <code>true</code>, the data will be included, otherwise it will not.</p>
+<p><b>See also </b><a href="qlowenergyadvertisingdata.html#includePowerLevel">includePowerLevel</a>().</p>
+<!-- @@@setIncludePowerLevel -->
+<!-- $$$setLocalName[overload1]$$$setLocalNameconstQString& -->
+<h3 class="fn" id="setLocalName"><a name="setLocalName"></a><span class="type">void</span> QLowEnergyAdvertisingData::<span class="name">setLocalName</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>)</h3>
+<p>Specifies that <i>name</i> should be broadcast as the name of the device. If the full name does not fit into the advertising data packet, an abbreviated name is sent, as described by the Bluetooth Low Energy specification.</p>
+<p>On Android, the local name cannot be changed. Android always uses the device name. If this local name is not empty, the Android implementation includes the device name in the advertisement packet; otherwise the device name is omitted from the advertisement packet.</p>
+<p><b>See also </b><a href="qlowenergyadvertisingdata.html#localName">localName</a>().</p>
+<!-- @@@setLocalName -->
+<!-- $$$setManufacturerData[overload1]$$$setManufacturerDataquint16constQByteArray& -->
+<h3 class="fn" id="setManufacturerData"><a name="setManufacturerData"></a><span class="type">void</span> QLowEnergyAdvertisingData::<span class="name">setManufacturerData</span>(<span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> <i>id</i>, const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>data</i>)</h3>
+<p>Sets the manufacturer id and data. The <i>id</i> parameter is a company identifier as assigned by the Bluetooth SIG. The <i>data</i> parameter is an arbitrary value.</p>
+<p><b>See also </b><a href="qlowenergyadvertisingdata.html#manufacturerData">manufacturerData</a>().</p>
+<!-- @@@setManufacturerData -->
+<!-- $$$setRawData[overload1]$$$setRawDataconstQByteArray& -->
+<h3 class="fn" id="setRawData"><a name="setRawData"></a><span class="type">void</span> QLowEnergyAdvertisingData::<span class="name">setRawData</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>data</i>)</h3>
+<p>Sets the data to be advertised to <i>data</i>. If the value is not an empty byte array, it will be sent as-is as the advertising data and all other data in this object will be ignored. This can be used to send non-standard data.</p>
+<p><b>Note: </b>If <i>data</i> is longer than 31 bytes, it will be truncated. It is the caller's responsibility to ensure that <i>data</i> is well-formed.</p><p><b>See also </b><a href="qlowenergyadvertisingdata.html#rawData">rawData</a>().</p>
+<!-- @@@setRawData -->
+<!-- $$$setServices[overload1]$$$setServicesconstQList<QBluetoothUuid>& -->
+<h3 class="fn" id="setServices"><a name="setServices"></a><span class="type">void</span> QLowEnergyAdvertisingData::<span class="name">setServices</span>(const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span>&gt; &amp;<i>services</i>)</h3>
+<p>Specifies that the service UUIDs in <i>services</i> should be advertised. If the entire list does not fit into the packet, an incomplete list is sent as specified by the Bluetooth Low Energy specification.</p>
+<p><b>See also </b><a href="qlowenergyadvertisingdata.html#services">services</a>().</p>
+<!-- @@@setServices -->
+<!-- $$$swap[overload1]$$$swapQLowEnergyAdvertisingData& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QLowEnergyAdvertisingData::<span class="name">swap</span>(<span class="type"><a href="qlowenergyadvertisingdata.html#QLowEnergyAdvertisingData">QLowEnergyAdvertisingData</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps this object with <i>other</i>.</p>
+<!-- @@@swap -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

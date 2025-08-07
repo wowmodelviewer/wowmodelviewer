@@ -1,0 +1,982 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- TestCase.qml -->
+  <title>TestCase QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >TestCase QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#introduction-to-qml-test-cases">Introduction to QML Test Cases</a></li>
+<li class="level2"><a href="#data-driven-tests">Data-driven Tests</a></li>
+<li class="level2"><a href="#benchmarks">Benchmarks</a></li>
+<li class="level2"><a href="#simulating-keyboard-and-mouse-events">Simulating Keyboard and Mouse Events</a></li>
+<li class="level2"><a href="#managing-dynamically-created-test-objects">Managing Dynamically Created Test Objects</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">TestCase QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$TestCase-brief -->
+<p>Represents a unit test case. <a href="#details">More...</a></p>
+<!-- @@@TestCase -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import  .</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.8</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-item.html">Item</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-testcase-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-testcase.html#completed-prop">completed</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-testcase.html#name-prop">name</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-testcase.html#optional-prop">optional</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-testcase.html#running-prop">running</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-testcase.html#when-prop">when</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-testcase.html#windowShown-prop">windowShown</a></b></b> : bool</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-testcase.html#cleanup-method">cleanup</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-testcase.html#cleanupTestCase-method">cleanupTestCase</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-testcase.html#compare-method">compare</a></b></b>(<i>actual</i>, <i>expected</i>, <i>message</i>)</li>
+<li class="fn">object <b><b><a href="qml-testcase.html#createTemporaryObject-method">createTemporaryObject</a></b></b>(Component <i>component</i>, object <i>parent</i>, object <i>properties</i>)</li>
+<li class="fn">object <b><b><a href="qml-testcase.html#createTemporaryQmlObject-method">createTemporaryQmlObject</a></b></b>(string <i>qml</i>, object <i>parent</i>, string <i>filePath</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#expectFail-method">expectFail</a></b></b>(<i>tag</i>, <i>message</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#expectFailContinue-method">expectFailContinue</a></b></b>(<i>tag</i>, <i>message</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#fail-method">fail</a></b></b>(<i>message</i>)</li>
+<li class="fn">QtObject <b><b><a href="qml-testcase.html#findChild-method">findChild</a></b></b>(<i>parent</i>, <i>objectName</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#fuzzyCompare-method">fuzzyCompare</a></b></b>(<i>actual</i>, <i>expected</i>, <i>delta</i>, <i>message</i>)</li>
+<li class="fn">object <b><b><a href="qml-testcase.html#grabImage-method">grabImage</a></b></b>(<i>item</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#ignoreWarning-method">ignoreWarning</a></b></b>(<i>message</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#init-method">init</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-testcase.html#initTestCase-method">initTestCase</a></b></b>()</li>
+<li class="fn">bool <b><b><a href="qml-testcase.html#isPolishScheduled-method">isPolishScheduled</a></b></b>(object <i>item</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#keyClick-method">keyClick</a></b></b>(<i>key</i>, <i>modifiers</i>, <i>delay</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#keyPress-method">keyPress</a></b></b>(<i>key</i>, <i>modifiers</i>, <i>delay</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#keyRelease-method">keyRelease</a></b></b>(<i>key</i>, <i>modifiers</i>, <i>delay</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#keySequence-method">keySequence</a></b></b>(<i>keySequence</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#mouseClick-method">mouseClick</a></b></b>(<i>item</i>, <i>x</i>, <i>y</i>, <i>button</i>, <i>modifiers</i>, <i>delay</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#mouseDoubleClick-method">mouseDoubleClick</a></b></b>(<i>item</i>, <i>x</i>, <i>y</i>, <i>button</i>, <i>modifiers</i>, <i>delay</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#mouseDoubleClickSequence-method">mouseDoubleClickSequence</a></b></b>(<i>item</i>, <i>x</i>, <i>y</i>, <i>button</i>, <i>modifiers</i>, <i>delay</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#mouseDrag-method">mouseDrag</a></b></b>(<i>item</i>, <i>x</i>, <i>y</i>, <i>dx</i>, <i>dy</i>, <i>button</i>, <i>modifiers</i>, <i>delay</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#mouseMove-method">mouseMove</a></b></b>(<i>item</i>, <i>x</i>, <i>y</i>, <i>delay</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#mousePress-method">mousePress</a></b></b>(<i>item</i>, <i>x</i>, <i>y</i>, <i>button</i>, <i>modifiers</i>, <i>delay</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#mouseRelease-method">mouseRelease</a></b></b>(<i>item</i>, <i>x</i>, <i>y</i>, <i>button</i>, <i>modifiers</i>, <i>delay</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#mouseWheel-method">mouseWheel</a></b></b>(<i>item</i>, <i>x</i>, <i>y</i>, <i>xDelta</i>, <i>yDelta</i>, <i>button</i>, <i>modifiers</i>, <i>delay</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#skip-method">skip</a></b></b>(<i>message</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#sleep-method">sleep</a></b></b>(<i>ms</i>)</li>
+<li class="fn">TouchEventSequence <b><b><a href="qml-testcase.html#touchEvent-method">touchEvent</a></b></b>(object <i>item</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#tryCompare-method">tryCompare</a></b></b>(<i>obj</i>, <i>property</i>, <i>expected</i>, <i>timeout</i>, <i>message</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#tryVerify-method">tryVerify</a></b></b>(<i>function</i>, <i>timeout</i>, <i>message</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#verify-method">verify</a></b></b>(<i>condition</i>, <i>message</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#wait-method">wait</a></b></b>(<i>ms</i>)</li>
+<li class="fn">bool <b><b><a href="qml-testcase.html#waitForItemPolished-method">waitForItemPolished</a></b></b>(object <i>item</i>, int <i>timeout</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#waitForRendering-method">waitForRendering</a></b></b>(<i>item</i>, <i>timeout</i>)</li>
+<li class="fn"><b><b><a href="qml-testcase.html#warn-method">warn</a></b></b>(<i>message</i>)</li>
+</ul>
+<!-- $$$TestCase-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<a name="introduction-to-qml-test-cases"></a>
+<h2 id="introduction-to-qml-test-cases">Introduction to QML Test Cases</h2>
+<p>Test cases are written as JavaScript functions within a <a href="qml-testcase.html">TestCase</a> type:</p>
+<pre class="cpp">
+
+  import <span class="type">QtQuick</span> <span class="number">2.0</span>
+  import <span class="type">QtTest</span> <span class="number">1.2</span>
+
+  TestCase {
+      name: <span class="string">&quot;MathTests&quot;</span>
+
+      function test_math() {
+          compare(<span class="number">2</span> <span class="operator">+</span> <span class="number">2</span><span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> <span class="string">&quot;2 + 2 = 4&quot;</span>)
+      }
+
+      function test_fail() {
+          compare(<span class="number">2</span> <span class="operator">+</span> <span class="number">2</span><span class="operator">,</span> <span class="number">5</span><span class="operator">,</span> <span class="string">&quot;2 + 2 = 5&quot;</span>)
+      }
+  }
+
+</pre>
+<p>Functions whose names start with &quot;test_&quot; are treated as test cases to be executed. The <a href="qml-testcase.html#name-prop">name</a> property is used to prefix the functions in the output:</p>
+<pre class="cpp">
+
+  <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> Start testing of MathTests <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span>
+  Config: Using <span class="type">QTest</span> library <span class="number">4.7.2</span><span class="operator">,</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span> <span class="number">4.7.2</span>
+  PASS   : MathTests<span class="operator">::</span>initTestCase()
+  FAIL<span class="operator">!</span>  : MathTests<span class="operator">::</span>test_fail() <span class="number">2</span> <span class="operator">+</span> <span class="number">2</span> <span class="operator">=</span> <span class="number">5</span>
+     Actual (): <span class="number">4</span>
+     Expected (): <span class="number">5</span>
+     Loc: <span class="operator">[</span><span class="operator">/</span>home<span class="operator">/</span><span class="operator">.</span><span class="operator">.</span><span class="operator">.</span><span class="operator">/</span>tst_math<span class="operator">.</span>qml(<span class="number">12</span>)<span class="operator">]</span>
+  PASS   : MathTests<span class="operator">::</span>test_math()
+  PASS   : MathTests<span class="operator">::</span>cleanupTestCase()
+  Totals: <span class="number">3</span> passed<span class="operator">,</span> <span class="number">1</span> failed<span class="operator">,</span> <span class="number">0</span> skipped
+  <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> Finished testing of MathTests <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span>
+
+</pre>
+<p>Because of the way JavaScript properties work, the order in which the test functions are found is unpredictable. To assist with predictability, the test framework will sort the functions on ascending order of name. This can help when there are two tests that must be run in order.</p>
+<p>Multiple <a href="qml-testcase.html">TestCase</a> types can be supplied. The test program will exit once they have all completed. If a test case doesn't need to run (because a precondition has failed), then <a href="qml-testcase.html#optional-prop">optional</a> can be set to true.</p>
+<a name="data-driven-tests"></a>
+<h2 id="data-driven-tests">Data-driven Tests</h2>
+<p>Table data can be provided to a test using a function name that ends with &quot;_data&quot;. Alternatively, the <code>init_data()</code> function can be used to provide default test data for all test functions in a <a href="qml-testcase.html">TestCase</a> type:</p>
+<pre class="cpp">
+
+  import <span class="type">QtQuick</span> <span class="number">2.0</span>
+  import <span class="type">QtTest</span> <span class="number">1.2</span>
+
+  TestCase {
+      name: <span class="string">&quot;DataTests&quot;</span>
+
+      function init_data() {
+        <span class="keyword">return</span> <span class="operator">[</span>
+             {tag:<span class="string">&quot;init_data_1&quot;</span><span class="operator">,</span> a:<span class="number">1</span><span class="operator">,</span> b:<span class="number">2</span><span class="operator">,</span> answer: <span class="number">3</span>}<span class="operator">,</span>
+             {tag:<span class="string">&quot;init_data_2&quot;</span><span class="operator">,</span> a:<span class="number">2</span><span class="operator">,</span> b:<span class="number">4</span><span class="operator">,</span> answer: <span class="number">6</span>}
+        <span class="operator">]</span>;
+      }
+
+      function test_table_data() {
+          <span class="keyword">return</span> <span class="operator">[</span>
+              {tag: <span class="string">&quot;2 + 2 = 4&quot;</span><span class="operator">,</span> a: <span class="number">2</span><span class="operator">,</span> b: <span class="number">2</span><span class="operator">,</span> answer: <span class="number">4</span> }<span class="operator">,</span>
+              {tag: <span class="string">&quot;2 + 6 = 8&quot;</span><span class="operator">,</span> a: <span class="number">2</span><span class="operator">,</span> b: <span class="number">6</span><span class="operator">,</span> answer: <span class="number">8</span> }<span class="operator">,</span>
+          <span class="operator">]</span>
+      }
+
+      function test_table(data) {
+          <span class="comment">//data comes from test_table_data</span>
+          compare(data<span class="operator">.</span>a <span class="operator">+</span> data<span class="operator">.</span>b<span class="operator">,</span> data<span class="operator">.</span>answer)
+      }
+
+      function test__default_table(data) {
+          <span class="comment">//data comes from init_data</span>
+          compare(data<span class="operator">.</span>a <span class="operator">+</span> data<span class="operator">.</span>b<span class="operator">,</span> data<span class="operator">.</span>answer)
+      }
+  }
+
+</pre>
+<p>The test framework will iterate over all of the rows in the table and pass each row to the test function. As shown, the columns can be extracted for use in the test. The <code>tag</code> column is special - it is printed by the test framework when a row fails, to help the reader identify which case failed amongst a set of otherwise passing tests.</p>
+<a name="benchmarks"></a>
+<h2 id="benchmarks">Benchmarks</h2>
+<p>Functions whose names start with &quot;benchmark_&quot; will be run multiple times with the Qt benchmark framework, with an average timing value reported for the runs. This is equivalent to using the <code>QBENCHMARK</code> macro in the C++ version of QTestLib.</p>
+<pre class="cpp">
+
+  TestCase {
+      id: top
+      name: <span class="string">&quot;CreateBenchmark&quot;</span>
+
+      function benchmark_create_component() {
+          var component <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>createComponent(<span class="string">&quot;item.qml&quot;</span>)
+          var obj <span class="operator">=</span> component<span class="operator">.</span>createObject(top)
+          obj<span class="operator">.</span>destroy()
+          component<span class="operator">.</span>destroy()
+      }
+  }
+
+  RESULT : CreateBenchmark<span class="operator">::</span>benchmark_create_component:
+       <span class="number">0.23</span> msecs per iteration (total: <span class="number">60</span><span class="operator">,</span> iterations: <span class="number">256</span>)
+  PASS   : CreateBenchmark<span class="operator">::</span>benchmark_create_component()
+
+</pre>
+<p>To get the effect of the <code>QBENCHMARK_ONCE</code> macro, prefix the test function name with &quot;benchmark_once_&quot;.</p>
+<a name="simulating-keyboard-and-mouse-events"></a>
+<h2 id="simulating-keyboard-and-mouse-events">Simulating Keyboard and Mouse Events</h2>
+<p>The <a href="qml-testcase.html#keyPress-method">keyPress()</a>, <a href="qml-testcase.html#keyRelease-method">keyRelease()</a>, and <a href="qml-testcase.html#keyClick-method">keyClick()</a> methods can be used to simulate keyboard events within unit tests. The events are delivered to the currently focused QML item. You can pass either a Qt.Key enum value or a latin1 char (string of length one)</p>
+<pre class="cpp">
+
+  Rectangle {
+      width: <span class="number">50</span>; height: <span class="number">50</span>
+      focus: <span class="keyword">true</span>
+
+      TestCase {
+          name: <span class="string">&quot;KeyClick&quot;</span>
+          when: windowShown
+
+          function test_key_click() {
+              keyClick(<span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>Key_Left)
+              keyClick(<span class="string">&quot;a&quot;</span>)
+              <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+          }
+      }
+  }
+
+</pre>
+<p>The <a href="qml-testcase.html#mousePress-method">mousePress()</a>, <a href="qml-testcase.html#mouseRelease-method">mouseRelease()</a>, <a href="qml-testcase.html#mouseClick-method">mouseClick()</a>, <a href="qml-testcase.html#mouseDoubleClick-method">mouseDoubleClick()</a>, <a href="qml-testcase.html#mouseDoubleClickSequence-method">mouseDoubleClickSequence()</a> and <a href="qml-testcase.html#mouseMove-method">mouseMove()</a> methods can be used to simulate mouse events in a similar fashion.</p>
+<p><b>Note:</b> keyboard and mouse events can only be delivered once the main window has been shown. Attempts to deliver events before then will fail. Use the <a href="qml-testcase.html#when-prop">when</a> and <a href="qml-testcase.html#windowShown-prop">windowShown</a> properties to track when the main window has been shown.</p>
+<a name="managing-dynamically-created-test-objects"></a>
+<h2 id="managing-dynamically-created-test-objects">Managing Dynamically Created Test Objects</h2>
+<p>A typical pattern with QML tests is to <a href="../qtqml/qtqml-javascript-dynamicobjectcreation.html">dynamically create</a> an item and then destroy it at the end of the test function:</p>
+<pre class="cpp">
+
+  TestCase {
+      id: testCase
+      name: <span class="string">&quot;MyTest&quot;</span>
+      when: windowShown
+
+      function test_click() {
+          var item <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>createQmlObject(<span class="string">&quot;import QtQuick 2.0; Item {}&quot;</span><span class="operator">,</span> testCase);
+          verify(item);
+
+          <span class="comment">// Test item...</span>
+
+          item<span class="operator">.</span>destroy();
+      }
+  }
+
+</pre>
+<p>The problem with this pattern is that any failures in the test function will cause the call to <code>item.destroy()</code> to be skipped, leaving the item hanging around in the scene until the test case has finished. This can result in interference with future tests; for example, by blocking input events or producing unrelated debug output that makes it difficult to follow the code's execution.</p>
+<p>By calling <a href="qml-testcase.html#createTemporaryQmlObject-method">createTemporaryQmlObject()</a> instead, the object is guaranteed to be destroyed at the end of the test function:</p>
+<pre class="cpp">
+
+  TestCase {
+      id: testCase
+      name: <span class="string">&quot;MyTest&quot;</span>
+      when: windowShown
+
+      function test_click() {
+          var item <span class="operator">=</span> createTemporaryQmlObject(<span class="string">&quot;import QtQuick 2.0; Item {}&quot;</span><span class="operator">,</span> testCase);
+          verify(item);
+
+          <span class="comment">// Test item...</span>
+
+          <span class="comment">// Don't need to worry about destroying &quot;item&quot; here.</span>
+      }
+  }
+
+</pre>
+<p>For objects that are created via the <a href="../qtqml/qml-qtqml-component.html#createObject-method">createObject()</a> function of <a href="../qtqml/qml-qtqml-component.html">Component</a>, the <a href="qml-testcase.html#createTemporaryObject-method">createTemporaryObject()</a> function can be used.</p>
+<p><b>See also </b><a href="qml-signalspy.html">SignalSpy</a> and <a href="../qtqmltest/qtquicktest-index.html">Qt Quick Test</a>.</p>
+<!-- @@@TestCase -->
+<h2>Property Documentation</h2>
+<!-- $$$completed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="completed-prop"></a><span class="name">completed</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property will be set to true once the test case has completed execution. Test cases are only executed once. The initial value is false.</p>
+<p><b>See also </b><a href="qml-testcase.html#running-prop">running</a> and <a href="qml-testcase.html#when-prop">when</a>.</p>
+</div></div><!-- @@@completed -->
+<br/>
+<!-- $$$name -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="name-prop"></a><span class="name">name</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property defines the name of the test case for result reporting. The default value is an empty string.</p>
+<pre class="cpp">
+
+  TestCase {
+      name: <span class="string">&quot;ButtonTests&quot;</span>
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  }
+
+</pre>
+</div></div><!-- @@@name -->
+<br/>
+<!-- $$$optional -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="optional-prop"></a><span class="name">optional</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Multiple <a href="qml-testcase.html">TestCase</a> types can be supplied in a test application. The application will exit once they have all completed. If a test case does not need to run (because a precondition has failed), then this property can be set to true. The default value is false.</p>
+<pre class="cpp">
+
+  TestCase {
+      when: <span class="keyword">false</span>
+      optional: <span class="keyword">true</span>
+      function test_not_run() {
+          verify(<span class="keyword">false</span>)
+      }
+  }
+
+</pre>
+<p><b>See also </b><a href="qml-testcase.html#when-prop">when</a> and <a href="qml-testcase.html#completed-prop">completed</a>.</p>
+</div></div><!-- @@@optional -->
+<br/>
+<!-- $$$running -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="running-prop"></a><span class="name">running</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property will be set to true while the test case is running. The initial value is false, and the value will become false again once the test case completes.</p>
+<p><b>See also </b><a href="qml-testcase.html#completed-prop">completed</a> and <a href="qml-testcase.html#when-prop">when</a>.</p>
+</div></div><!-- @@@running -->
+<br/>
+<!-- $$$when -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="when-prop"></a><span class="name">when</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property should be set to true when the application wants the test cases to run. The default value is true. In the following example, a test is run when the user presses the mouse button:</p>
+<pre class="cpp">
+
+  Rectangle {
+      id: foo
+      width: <span class="number">640</span>; height: <span class="number">480</span>
+      color: <span class="string">&quot;cyan&quot;</span>
+
+      MouseArea {
+          id: area
+          anchors<span class="operator">.</span>fill: parent
+      }
+
+      property bool bar: <span class="keyword">true</span>
+
+      TestCase {
+          name: <span class="string">&quot;ItemTests&quot;</span>
+          when: area<span class="operator">.</span>pressed
+          id: test1
+
+          function test_bar() {
+              verify(bar)
+          }
+      }
+  }
+
+</pre>
+<p>The test application will exit once all <a href="qml-testcase.html">TestCase</a> types have been triggered and have run. The <a href="qml-testcase.html#optional-prop">optional</a> property can be used to exclude a <a href="qml-testcase.html">TestCase</a> type.</p>
+<p><b>See also </b><a href="qml-testcase.html#optional-prop">optional</a> and <a href="qml-testcase.html#completed-prop">completed</a>.</p>
+</div></div><!-- @@@when -->
+<br/>
+<!-- $$$windowShown -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="windowShown-prop"></a><span class="name">windowShown</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property will be set to true after the QML viewing window has been displayed. Normally test cases run as soon as the test application is loaded and before a window is displayed. If the test case involves visual types and behaviors, then it may need to be delayed until after the window is shown.</p>
+<pre class="cpp">
+
+  Button {
+      id: button
+      onClicked: text <span class="operator">=</span> <span class="string">&quot;Clicked&quot;</span>
+      TestCase {
+          name: <span class="string">&quot;ClickTest&quot;</span>
+          when: windowShown
+          function test_click() {
+              button<span class="operator">.</span>clicked();
+              compare(button<span class="operator">.</span>text<span class="operator">,</span> <span class="string">&quot;Clicked&quot;</span>);
+          }
+      }
+  }
+
+</pre>
+</div></div><!-- @@@windowShown -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$cleanup[overload1]$$$cleanup -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="cleanup-method"></a><span class="name">cleanup</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This function is called after each test function that is executed in the <a href="qml-testcase.html">TestCase</a> type. The default implementation does nothing. The application can provide its own implementation to perform cleanup after each test function.</p>
+<p><b>See also </b><a href="qml-testcase.html#init-method">init()</a> and <a href="qml-testcase.html#cleanupTestCase-method">cleanupTestCase()</a>.</p>
+</div></div><!-- @@@cleanup -->
+<br/>
+<!-- $$$cleanupTestCase[overload1]$$$cleanupTestCase -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="cleanupTestCase-method"></a><span class="name">cleanupTestCase</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This function is called after all other test functions in the <a href="qml-testcase.html">TestCase</a> type have completed. The default implementation does nothing. The application can provide its own implementation to perform test case cleanup.</p>
+<p><b>See also </b><a href="qml-testcase.html#initTestCase-method">initTestCase()</a> and <a href="qml-testcase.html#cleanup-method">cleanup()</a>.</p>
+</div></div><!-- @@@cleanupTestCase -->
+<br/>
+<!-- $$$compare[overload1]$$$compare -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="compare-method"></a><span class="name">compare</span>(<i>actual</i>, <i>expected</i>, <i>message</i> = &quot;&quot;)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Fails the current test case if <i>actual</i> is not the same as <i>expected</i>, and displays the optional <i>message</i>. Similar to <code>QCOMPARE(actual, expected)</code> in C++.</p>
+<p><b>See also </b><a href="qml-testcase.html#tryCompare-method">tryCompare()</a> and <a href="qml-testcase.html#fuzzyCompare-method">fuzzyCompare</a>.</p>
+</div></div><!-- @@@compare -->
+<br/>
+<!-- $$$createTemporaryObject[overload1]$$$createTemporaryObjectComponentobjectobject -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="createTemporaryObject-method"></a><span class="type">object</span> <span class="name">createTemporaryObject</span>(<span class="type"><a href="../qtqml/qml-qtqml-component.html">Component</a></span> <i>component</i>, <span class="type">object</span> <i>parent</i>, <span class="type">object</span> <i>properties</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This function dynamically creates a QML object from the given <i>component</i> with the specified optional <i>parent</i> and <i>properties</i>. The returned object will be destroyed (if it was not already) after <a href="qml-testcase.html#cleanup-method">cleanup()</a> has finished executing, meaning that objects created with this function are guaranteed to be destroyed after each test, regardless of whether or not the tests fail.</p>
+<p>If there was an error while creating the object, <code>null</code> will be returned.</p>
+<p>This function calls <a href="../qtqml/qml-qtqml-component.html#createObject-method">component.createObject()</a> internally.</p>
+<p>This method was introduced in  Qt 5.9.</p>
+<p><b>See also </b><a href="qml-testcase.html#managing-dynamically-created-test-objects">Managing Dynamically Created Test Objects</a>.</p>
+</div></div><!-- @@@createTemporaryObject -->
+<br/>
+<!-- $$$createTemporaryQmlObject[overload1]$$$createTemporaryQmlObjectstringobjectstring -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="createTemporaryQmlObject-method"></a><span class="type">object</span> <span class="name">createTemporaryQmlObject</span>(<span class="type"><a href="../qtqml/qml-string.html">string</a></span> <i>qml</i>, <span class="type">object</span> <i>parent</i>, <span class="type"><a href="../qtqml/qml-string.html">string</a></span> <i>filePath</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This function dynamically creates a QML object from the given <i>qml</i> string with the specified <i>parent</i>. The returned object will be destroyed (if it was not already) after <a href="qml-testcase.html#cleanup-method">cleanup()</a> has finished executing, meaning that objects created with this function are guaranteed to be destroyed after each test, regardless of whether or not the tests fail.</p>
+<p>If there was an error while creating the object, <code>null</code> will be returned.</p>
+<p>If <i>filePath</i> is specified, it will be used for error reporting for the created object.</p>
+<p>This function calls <a href="../qtqml/qml-qtqml-qt.html#createQmlObject-method">Qt.createQmlObject()</a> internally.</p>
+<p>This method was introduced in  Qt 5.9.</p>
+<p><b>See also </b><a href="qml-testcase.html#managing-dynamically-created-test-objects">Managing Dynamically Created Test Objects</a>.</p>
+</div></div><!-- @@@createTemporaryQmlObject -->
+<br/>
+<!-- $$$expectFail[overload1]$$$expectFail -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="expectFail-method"></a><span class="name">expectFail</span>(<i>tag</i>, <i>message</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>In a data-driven test, marks the row associated with <i>tag</i> as expected to fail. When the fail occurs, display the <i>message</i>, abort the test, and mark the test as passing. Similar to <code>QEXPECT_FAIL(tag, message, Abort)</code> in C++.</p>
+<p>If the test is not data-driven, then <i>tag</i> must be set to an empty string.</p>
+<p><b>See also </b><a href="qml-testcase.html#expectFailContinue-method">expectFailContinue()</a>.</p>
+</div></div><!-- @@@expectFail -->
+<br/>
+<!-- $$$expectFailContinue[overload1]$$$expectFailContinue -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="expectFailContinue-method"></a><span class="name">expectFailContinue</span>(<i>tag</i>, <i>message</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>In a data-driven test, marks the row associated with <i>tag</i> as expected to fail. When the fail occurs, display the <i>message</i>, and then continue the test. Similar to <code>QEXPECT_FAIL(tag, message, Continue)</code> in C++.</p>
+<p>If the test is not data-driven, then <i>tag</i> must be set to an empty string.</p>
+<p><b>See also </b><a href="qml-testcase.html#expectFail-method">expectFail()</a>.</p>
+</div></div><!-- @@@expectFailContinue -->
+<br/>
+<!-- $$$fail[overload1]$$$fail -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="fail-method"></a><span class="name">fail</span>(<i>message</i> = &quot;&quot;)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Fails the current test case, with the optional <i>message</i>. Similar to <code>QFAIL(message)</code> in C++.</p>
+</div></div><!-- @@@fail -->
+<br/>
+<!-- $$$findChild[overload1]$$$findChild -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="findChild-method"></a><span class="type"><a href="../qtqml/qml-qtqml-qtobject.html">QtObject</a></span> <span class="name">findChild</span>(<i>parent</i>, <i>objectName</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the first child of <i>parent</i> with <i>objectName</i>, or <code>null</code> if no such item exists. Both visual and non-visual children are searched recursively, with visual children being searched first.</p>
+<pre class="cpp">
+
+  compare(findChild(item<span class="operator">,</span> <span class="string">&quot;childObject&quot;</span>)<span class="operator">,</span> expectedChildObject);
+
+</pre>
+<p>This method was introduced in  Qt 5.4.</p>
+</div></div><!-- @@@findChild -->
+<br/>
+<!-- $$$fuzzyCompare[overload1]$$$fuzzyCompare -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="fuzzyCompare-method"></a><span class="name">fuzzyCompare</span>(<i>actual</i>, <i>expected</i>, <i>delta</i>, <i>message</i> = &quot;&quot;)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Fails the current test case if the difference betwen <i>actual</i> and <i>expected</i> is greater than <i>delta</i>, and displays the optional <i>message</i>. Similar to <code>qFuzzyCompare(actual, expected)</code> in C++ but with a required <i>delta</i> value.</p>
+<p>This function can also be used for color comparisons if both the <i>actual</i> and <i>expected</i> values can be converted into color values. If any of the differences for RGBA channel values are greater than <i>delta</i>, the test fails.</p>
+<p><b>See also </b><a href="qml-testcase.html#tryCompare-method">tryCompare()</a> and <a href="qml-testcase.html#compare-method">compare()</a>.</p>
+</div></div><!-- @@@fuzzyCompare -->
+<br/>
+<!-- $$$grabImage[overload1]$$$grabImage -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="grabImage-method"></a><span class="type">object</span> <span class="name">grabImage</span>(<i>item</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns a snapshot image object of the given <i>item</i>.</p>
+<p>The returned image object has the following properties:</p>
+<ul>
+<li>width Returns the width of the underlying image (since 5.10)</li>
+<li>height Returns the height of the underlying image (since 5.10)</li>
+<li>size Returns the size of the underlying image (since 5.10)</li>
+</ul>
+<p>Additionally, the returned image object has the following methods:</p>
+<ul>
+<li><code>red(x, y)</code> Returns the red channel value of the pixel at <i>x</i>, <i>y</i> position</li>
+<li><code>green(x, y)</code> Returns the green channel value of the pixel at <i>x</i>, <i>y</i> position</li>
+<li><code>blue(x, y)</code> Returns the blue channel value of the pixel at <i>x</i>, <i>y</i> position</li>
+<li><code>alpha(x, y)</code> Returns the alpha channel value of the pixel at <i>x</i>, <i>y</i> position</li>
+<li><code>pixel(x, y)</code> Returns the color value of the pixel at <i>x</i>, <i>y</i> position</li>
+<li><code>equals(image)</code> Returns <code>true</code> if this image is identical to <i>image</i> - see <a href="../qtgui/qimage.html#operator-eq-eq">QImage::operator==</a> (since 5.6)<p>For example:</p>
+<pre class="cpp">
+
+  var image <span class="operator">=</span> grabImage(rect);
+  compare(image<span class="operator">.</span>red(<span class="number">10</span><span class="operator">,</span> <span class="number">10</span>)<span class="operator">,</span> <span class="number">255</span>);
+  compare(image<span class="operator">.</span>pixel(<span class="number">20</span><span class="operator">,</span> <span class="number">20</span>)<span class="operator">,</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>rgba(<span class="number">255</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">255</span>));
+
+  rect<span class="operator">.</span>width <span class="operator">+</span><span class="operator">=</span> <span class="number">10</span>;
+  var newImage <span class="operator">=</span> grabImage(rect);
+  verify(<span class="operator">!</span>newImage<span class="operator">.</span>equals(image));
+
+</pre>
+</li>
+<li><code>save(path)</code> Saves the image to the given <i>path</i>. If the image cannot be saved, an exception will be thrown. (since 5.10)<p>This can be useful to perform postmortem analysis on failing tests, for example:</p>
+<pre class="cpp">
+
+  var image <span class="operator">=</span> grabImage(rect);
+  <span class="keyword">try</span> {
+      compare(image<span class="operator">.</span>width<span class="operator">,</span> <span class="number">100</span>);
+  } <span class="keyword">catch</span> (ex) {
+      image<span class="operator">.</span>save(<span class="string">&quot;debug.png&quot;</span>);
+      <span class="keyword">throw</span> ex;
+  }
+
+</pre>
+</li>
+</ul>
+</div></div><!-- @@@grabImage -->
+<br/>
+<!-- $$$ignoreWarning[overload1]$$$ignoreWarning -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="ignoreWarning-method"></a><span class="name">ignoreWarning</span>(<i>message</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Marks <i>message</i> as an ignored warning message. When it occurs, the warning will not be printed and the test passes. If the message does not occur, then the test will fail. Similar to <code>QTest::ignoreMessage(QtWarningMsg, message)</code> in C++.</p>
+<p>Since Qt 5.12, <i>message</i> can be either a string, or a regular expression providing a pattern of messages to ignore.</p>
+<p>For example, the following snippet will ignore a string warning message:</p>
+<pre class="qml">
+
+  ignoreWarning(&quot;Something sort of bad happened&quot;)
+
+</pre>
+<p>And the following snippet will ignore a regular expression matching a number of possible warning messages:</p>
+<pre class="qml">
+
+  ignoreWarning(new RegExp(&quot;[0-9]+ bad things happened&quot;))
+
+</pre>
+<p><b>Note: </b>Despite being a JavaScript RegExp object, it will not be interpreted as such; instead, the pattern will be passed to <a href="../qtcore/qregularexpression.html">QRegularExpression</a>.</p><p><b>See also </b><a href="qml-testcase.html#warn-method">warn()</a>.</p>
+</div></div><!-- @@@ignoreWarning -->
+<br/>
+<!-- $$$init[overload1]$$$init -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="init-method"></a><span class="name">init</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This function is called before each test function that is executed in the <a href="qml-testcase.html">TestCase</a> type. The default implementation does nothing. The application can provide its own implementation to perform initialization before each test function.</p>
+<p><b>See also </b><a href="qml-testcase.html#cleanup-method">cleanup()</a> and <a href="qml-testcase.html#initTestCase-method">initTestCase()</a>.</p>
+</div></div><!-- @@@init -->
+<br/>
+<!-- $$$initTestCase[overload1]$$$initTestCase -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="initTestCase-method"></a><span class="name">initTestCase</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This function is called before any other test functions in the <a href="qml-testcase.html">TestCase</a> type. The default implementation does nothing. The application can provide its own implementation to perform test case initialization.</p>
+<p><b>See also </b><a href="qml-testcase.html#cleanupTestCase-method">cleanupTestCase()</a> and <a href="qml-testcase.html#init-method">init()</a>.</p>
+</div></div><!-- @@@initTestCase -->
+<br/>
+<!-- $$$isPolishScheduled[overload1]$$$isPolishScheduledobject -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="isPolishScheduled-method"></a><span class="type"><a href="../qtqml/qml-bool.html">bool</a></span> <span class="name">isPolishScheduled</span>(<span class="type">object</span> <i>item</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns <code>true</code> if <a href="qquickitem.html#updatePolish">updatePolish()</a> has not been called on <i>item</i> since the last call to <a href="qquickitem.html#polish">polish()</a>, otherwise returns <code>false</code>.</p>
+<p>When assigning values to properties in QML, any layouting the item must do as a result of the assignment might not take effect immediately, but can instead be postponed until the item is polished. For these cases, you can use this function to ensure that the item has been polished before the execution of the test continues. For example:</p>
+<pre class="cpp">
+
+  verify(isPolishScheduled(item))
+  verify(waitForItemPolished(item))
+
+</pre>
+<p>Without the call to <code>isPolishScheduled()</code> above, the call to <code>waitForItemPolished()</code> might see that no polish was scheduled and therefore pass instantly, assuming that the item had already been polished. This function makes it obvious why an item wasn't polished and allows tests to fail early under such circumstances.</p>
+<p>This method was introduced in  Qt 5.13.</p>
+<p><b>See also </b><a href="qml-testcase.html#waitForItemPolished-method">waitForItemPolished()</a>, <a href="qquickitem.html#polish">QQuickItem::polish()</a>, and <a href="qquickitem.html#updatePolish">QQuickItem::updatePolish()</a>.</p>
+</div></div><!-- @@@isPolishScheduled -->
+<br/>
+<!-- $$$keyClick[overload1]$$$keyClick -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="keyClick-method"></a><span class="name">keyClick</span>(<i>key</i>, <i>modifiers</i> = Qt.NoModifier, <i>delay</i> = -1)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Simulates clicking of <i>key</i> with optional <i>modifiers</i> on the currently focused item. If <i>delay</i> is larger than 0, the test will wait for <i>delay</i> milliseconds.</p>
+<p>The event will be sent to the <a href="qml-testcase.html">TestCase</a> window or, in case of multiple windows, to the current active window. See <a href="../qtgui/qguiapplication.html#focusWindow">QGuiApplication::focusWindow()</a> for more details.</p>
+<p><b>See also </b><a href="qml-testcase.html#keyPress-method">keyPress()</a> and <a href="qml-testcase.html#keyRelease-method">keyRelease()</a>.</p>
+</div></div><!-- @@@keyClick -->
+<br/>
+<!-- $$$keyPress[overload1]$$$keyPress -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="keyPress-method"></a><span class="name">keyPress</span>(<i>key</i>, <i>modifiers</i> = Qt.NoModifier, <i>delay</i> = -1)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Simulates pressing a <i>key</i> with optional <i>modifiers</i> on the currently focused item. If <i>delay</i> is larger than 0, the test will wait for <i>delay</i> milliseconds.</p>
+<p>The event will be sent to the <a href="qml-testcase.html">TestCase</a> window or, in case of multiple windows, to the current active window. See <a href="../qtgui/qguiapplication.html#focusWindow">QGuiApplication::focusWindow()</a> for more details.</p>
+<p><b>Note:</b> At some point you should release the key using <a href="qml-testcase.html#keyRelease-method">keyRelease()</a>.</p>
+<p><b>See also </b><a href="qml-testcase.html#keyRelease-method">keyRelease()</a> and <a href="qml-testcase.html#keyClick-method">keyClick()</a>.</p>
+</div></div><!-- @@@keyPress -->
+<br/>
+<!-- $$$keyRelease[overload1]$$$keyRelease -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="keyRelease-method"></a><span class="name">keyRelease</span>(<i>key</i>, <i>modifiers</i> = Qt.NoModifier, <i>delay</i> = -1)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Simulates releasing a <i>key</i> with optional <i>modifiers</i> on the currently focused item. If <i>delay</i> is larger than 0, the test will wait for <i>delay</i> milliseconds.</p>
+<p>The event will be sent to the <a href="qml-testcase.html">TestCase</a> window or, in case of multiple windows, to the current active window. See <a href="../qtgui/qguiapplication.html#focusWindow">QGuiApplication::focusWindow()</a> for more details.</p>
+<p><b>See also </b><a href="qml-testcase.html#keyPress-method">keyPress()</a> and <a href="qml-testcase.html#keyClick-method">keyClick()</a>.</p>
+</div></div><!-- @@@keyRelease -->
+<br/>
+<!-- $$$keySequence[overload1]$$$keySequence -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="keySequence-method"></a><span class="name">keySequence</span>(<i>keySequence</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Simulates typing of <i>keySequence</i>. The key sequence can be set to one of the <a href="../qtgui/qkeysequence.html#StandardKey-enum">standard keyboard shortcuts</a>, or it can be described with a string containing a sequence of up to four key presses.</p>
+<p>Each event shall be sent to the <a href="qml-testcase.html">TestCase</a> window or, in case of multiple windows, to the current active window. See <a href="../qtgui/qguiapplication.html#focusWindow">QGuiApplication::focusWindow()</a> for more details.</p>
+<p>This method was introduced in  Qt 5.10.</p>
+<p><b>See also </b><a href="qml-testcase.html#keyPress-method">keyPress()</a>, <a href="qml-testcase.html#keyRelease-method">keyRelease()</a>, <a href="../qtgui/qkeysequence.html#gnu-emacs-style-key-sequences">GNU Emacs Style Key Sequences</a>, and <a href="qml-qtquick-shortcut.html#sequence-prop">Shortcut.sequence</a>.</p>
+</div></div><!-- @@@keySequence -->
+<br/>
+<!-- $$$mouseClick[overload1]$$$mouseClick -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="mouseClick-method"></a><span class="name">mouseClick</span>(<i>item</i>, <i>x</i> = item.width / 2, <i>y</i> = item.height / 2, <i>button</i> = Qt.LeftButton, <i>modifiers</i> = Qt.NoModifier, <i>delay</i> = -1)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Simulates clicking a mouse <i>button</i> with optional <i>modifiers</i> on an <i>item</i>. The position of the click is defined by <i>x</i> and <i>y</i>. If <i>x</i> and <i>y</i> are not defined the position will be the center of <i>item</i>. If <i>delay</i> is specified, the test will wait for the specified amount of milliseconds before pressing and before releasing the button.</p>
+<p>The position given by <i>x</i> and <i>y</i> is transformed from the co-ordinate system of <i>item</i> into window co-ordinates and then delivered. If <i>item</i> is obscured by another item, or a child of <i>item</i> occupies that position, then the event will be delivered to the other item instead.</p>
+<p><b>See also </b><a href="qml-testcase.html#mousePress-method">mousePress()</a>, <a href="qml-testcase.html#mouseRelease-method">mouseRelease()</a>, <a href="qml-testcase.html#mouseDoubleClick-method">mouseDoubleClick()</a>, <a href="qml-testcase.html#mouseDoubleClickSequence-method">mouseDoubleClickSequence()</a>, <a href="qml-testcase.html#mouseMove-method">mouseMove()</a>, <a href="qml-testcase.html#mouseDrag-method">mouseDrag()</a>, and <a href="qml-testcase.html#mouseWheel-method">mouseWheel()</a>.</p>
+</div></div><!-- @@@mouseClick -->
+<br/>
+<!-- $$$mouseDoubleClick[overload1]$$$mouseDoubleClick -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="mouseDoubleClick-method"></a><span class="name">mouseDoubleClick</span>(<i>item</i>, <i>x</i> = item.width / 2, <i>y</i> = item.height / 2, <i>button</i> = Qt.LeftButton, <i>modifiers</i> = Qt.NoModifier, <i>delay</i> = -1)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Simulates double-clicking a mouse <i>button</i> with optional <i>modifiers</i> on an <i>item</i>. The position of the click is defined by <i>x</i> and <i>y</i>. If <i>x</i> and <i>y</i> are not defined the position will be the center of <i>item</i>. If <i>delay</i> is specified, the test will wait for the specified amount of milliseconds before pressing and before releasing the button.</p>
+<p>The position given by <i>x</i> and <i>y</i> is transformed from the co-ordinate system of <i>item</i> into window co-ordinates and then delivered. If <i>item</i> is obscured by another item, or a child of <i>item</i> occupies that position, then the event will be delivered to the other item instead.</p>
+<p><b>See also </b><a href="qml-testcase.html#mouseDoubleClickSequence-method">mouseDoubleClickSequence()</a>, <a href="qml-testcase.html#mousePress-method">mousePress()</a>, <a href="qml-testcase.html#mouseRelease-method">mouseRelease()</a>, <a href="qml-testcase.html#mouseClick-method">mouseClick()</a>, <a href="qml-testcase.html#mouseMove-method">mouseMove()</a>, <a href="qml-testcase.html#mouseDrag-method">mouseDrag()</a>, and <a href="qml-testcase.html#mouseWheel-method">mouseWheel()</a>.</p>
+</div></div><!-- @@@mouseDoubleClick -->
+<br/>
+<!-- $$$mouseDoubleClickSequence[overload1]$$$mouseDoubleClickSequence -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="mouseDoubleClickSequence-method"></a><span class="name">mouseDoubleClickSequence</span>(<i>item</i>, <i>x</i> = item.width / 2, <i>y</i> = item.height / 2, <i>button</i> = Qt.LeftButton, <i>modifiers</i> = Qt.NoModifier, <i>delay</i> = -1)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Simulates the full sequence of events generated by double-clicking a mouse <i>button</i> with optional <i>modifiers</i> on an <i>item</i>.</p>
+<p>This method reproduces the sequence of mouse events generated when a user makes a double click: Press-Release-Press-DoubleClick-Release.</p>
+<p>The position of the click is defined by <i>x</i> and <i>y</i>. If <i>x</i> and <i>y</i> are not defined the position will be the center of <i>item</i>. If <i>delay</i> is specified, the test will wait for the specified amount of milliseconds before pressing and before releasing the button.</p>
+<p>The position given by <i>x</i> and <i>y</i> is transformed from the co-ordinate system of <i>item</i> into window co-ordinates and then delivered. If <i>item</i> is obscured by another item, or a child of <i>item</i> occupies that position, then the event will be delivered to the other item instead.</p>
+<p>This QML method was introduced in Qt 5.5&#x2e;</p>
+<p><b>See also </b><a href="qml-testcase.html#mouseDoubleClick-method">mouseDoubleClick()</a>, <a href="qml-testcase.html#mousePress-method">mousePress()</a>, <a href="qml-testcase.html#mouseRelease-method">mouseRelease()</a>, <a href="qml-testcase.html#mouseClick-method">mouseClick()</a>, <a href="qml-testcase.html#mouseMove-method">mouseMove()</a>, <a href="qml-testcase.html#mouseDrag-method">mouseDrag()</a>, and <a href="qml-testcase.html#mouseWheel-method">mouseWheel()</a>.</p>
+</div></div><!-- @@@mouseDoubleClickSequence -->
+<br/>
+<!-- $$$mouseDrag[overload1]$$$mouseDrag -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="mouseDrag-method"></a><span class="name">mouseDrag</span>(<i>item</i>, <i>x</i>, <i>y</i>, <i>dx</i>, <i>dy</i>, <i>button</i> = Qt.LeftButton, <i>modifiers</i> = Qt.NoModifier, <i>delay</i> = -1)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Simulates dragging the mouse on an <i>item</i> with <i>button</i> pressed and optional <i>modifiers</i> The initial drag position is defined by <i>x</i> and <i>y</i>, and drag distance is defined by <i>dx</i> and <i>dy</i>. If <i>delay</i> is specified, the test will wait for the specified amount of milliseconds before releasing the button.</p>
+<p>The position given by <i>x</i> and <i>y</i> is transformed from the co-ordinate system of <i>item</i> into window co-ordinates and then delivered. If <i>item</i> is obscured by another item, or a child of <i>item</i> occupies that position, then the event will be delivered to the other item instead.</p>
+<p><b>See also </b><a href="qml-testcase.html#mousePress-method">mousePress()</a>, <a href="qml-testcase.html#mouseClick-method">mouseClick()</a>, <a href="qml-testcase.html#mouseDoubleClick-method">mouseDoubleClick()</a>, <a href="qml-testcase.html#mouseDoubleClickSequence-method">mouseDoubleClickSequence()</a>, <a href="qml-testcase.html#mouseMove-method">mouseMove()</a>, <a href="qml-testcase.html#mouseRelease-method">mouseRelease()</a>, and <a href="qml-testcase.html#mouseWheel-method">mouseWheel()</a>.</p>
+</div></div><!-- @@@mouseDrag -->
+<br/>
+<!-- $$$mouseMove[overload1]$$$mouseMove -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="mouseMove-method"></a><span class="name">mouseMove</span>(<i>item</i>, <i>x</i>, <i>y</i>, <i>delay</i> = -1)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Moves the mouse pointer to the position given by <i>x</i> and <i>y</i> within <i>item</i>. If a <i>delay</i> (in milliseconds) is given, the test will wait before moving the mouse pointer.</p>
+<p>The position given by <i>x</i> and <i>y</i> is transformed from the co-ordinate system of <i>item</i> into window co-ordinates and then delivered. If <i>item</i> is obscured by another item, or a child of <i>item</i> occupies that position, then the event will be delivered to the other item instead.</p>
+<p><b>See also </b><a href="qml-testcase.html#mousePress-method">mousePress()</a>, <a href="qml-testcase.html#mouseRelease-method">mouseRelease()</a>, <a href="qml-testcase.html#mouseClick-method">mouseClick()</a>, <a href="qml-testcase.html#mouseDoubleClick-method">mouseDoubleClick()</a>, <a href="qml-testcase.html#mouseDoubleClickSequence-method">mouseDoubleClickSequence()</a>, <a href="qml-testcase.html#mouseDrag-method">mouseDrag()</a>, and <a href="qml-testcase.html#mouseWheel-method">mouseWheel()</a>.</p>
+</div></div><!-- @@@mouseMove -->
+<br/>
+<!-- $$$mousePress[overload1]$$$mousePress -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="mousePress-method"></a><span class="name">mousePress</span>(<i>item</i>, <i>x</i> = item.width / 2, <i>y</i> = item.height / 2, <i>button</i> = Qt.LeftButton, <i>modifiers</i> = Qt.NoModifier, <i>delay</i> = -1)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Simulates pressing a mouse <i>button</i> with optional <i>modifiers</i> on an <i>item</i>. The position is defined by <i>x</i> and <i>y</i>. If <i>x</i> or <i>y</i> are not defined the position will be the center of <i>item</i>. If <i>delay</i> is specified, the test will wait for the specified amount of milliseconds before the press.</p>
+<p>The position given by <i>x</i> and <i>y</i> is transformed from the co-ordinate system of <i>item</i> into window co-ordinates and then delivered. If <i>item</i> is obscured by another item, or a child of <i>item</i> occupies that position, then the event will be delivered to the other item instead.</p>
+<p><b>See also </b><a href="qml-testcase.html#mouseRelease-method">mouseRelease()</a>, <a href="qml-testcase.html#mouseClick-method">mouseClick()</a>, <a href="qml-testcase.html#mouseDoubleClick-method">mouseDoubleClick()</a>, <a href="qml-testcase.html#mouseDoubleClickSequence-method">mouseDoubleClickSequence()</a>, <a href="qml-testcase.html#mouseMove-method">mouseMove()</a>, <a href="qml-testcase.html#mouseDrag-method">mouseDrag()</a>, and <a href="qml-testcase.html#mouseWheel-method">mouseWheel()</a>.</p>
+</div></div><!-- @@@mousePress -->
+<br/>
+<!-- $$$mouseRelease[overload1]$$$mouseRelease -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="mouseRelease-method"></a><span class="name">mouseRelease</span>(<i>item</i>, <i>x</i> = item.width / 2, <i>y</i> = item.height / 2, <i>button</i> = Qt.LeftButton, <i>modifiers</i> = Qt.NoModifier, <i>delay</i> = -1)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Simulates releasing a mouse <i>button</i> with optional <i>modifiers</i> on an <i>item</i>. The position of the release is defined by <i>x</i> and <i>y</i>. If <i>x</i> or <i>y</i> are not defined the position will be the center of <i>item</i>. If <i>delay</i> is specified, the test will wait for the specified amount of milliseconds before releasing the button.</p>
+<p>The position given by <i>x</i> and <i>y</i> is transformed from the co-ordinate system of <i>item</i> into window co-ordinates and then delivered. If <i>item</i> is obscured by another item, or a child of <i>item</i> occupies that position, then the event will be delivered to the other item instead.</p>
+<p><b>See also </b><a href="qml-testcase.html#mousePress-method">mousePress()</a>, <a href="qml-testcase.html#mouseClick-method">mouseClick()</a>, <a href="qml-testcase.html#mouseDoubleClick-method">mouseDoubleClick()</a>, <a href="qml-testcase.html#mouseDoubleClickSequence-method">mouseDoubleClickSequence()</a>, <a href="qml-testcase.html#mouseMove-method">mouseMove()</a>, <a href="qml-testcase.html#mouseDrag-method">mouseDrag()</a>, and <a href="qml-testcase.html#mouseWheel-method">mouseWheel()</a>.</p>
+</div></div><!-- @@@mouseRelease -->
+<br/>
+<!-- $$$mouseWheel[overload1]$$$mouseWheel -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="mouseWheel-method"></a><span class="name">mouseWheel</span>(<i>item</i>, <i>x</i>, <i>y</i>, <i>xDelta</i>, <i>yDelta</i>, <i>button</i> = Qt.LeftButton, <i>modifiers</i> = Qt.NoModifier, <i>delay</i> = -1)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Simulates rotating the mouse wheel on an <i>item</i> with <i>button</i> pressed and optional <i>modifiers</i>. The position of the wheel event is defined by <i>x</i> and <i>y</i>. If <i>delay</i> is specified, the test will wait for the specified amount of milliseconds before releasing the button.</p>
+<p>The position given by <i>x</i> and <i>y</i> is transformed from the co-ordinate system of <i>item</i> into window co-ordinates and then delivered. If <i>item</i> is obscured by another item, or a child of <i>item</i> occupies that position, then the event will be delivered to the other item instead.</p>
+<p>The <i>xDelta</i> and <i>yDelta</i> contain the wheel rotation distance in eighths of a degree. see <a href="../qtgui/qwheelevent.html#angleDelta">QWheelEvent::angleDelta()</a> for more details.</p>
+<p><b>See also </b><a href="qml-testcase.html#mousePress-method">mousePress()</a>, <a href="qml-testcase.html#mouseClick-method">mouseClick()</a>, <a href="qml-testcase.html#mouseDoubleClick-method">mouseDoubleClick()</a>, <a href="qml-testcase.html#mouseDoubleClickSequence-method">mouseDoubleClickSequence()</a>, <a href="qml-testcase.html#mouseMove-method">mouseMove()</a>, <a href="qml-testcase.html#mouseRelease-method">mouseRelease()</a>, <a href="qml-testcase.html#mouseDrag-method">mouseDrag()</a>, and <a href="../qtgui/qwheelevent.html#angleDelta">QWheelEvent::angleDelta()</a>.</p>
+</div></div><!-- @@@mouseWheel -->
+<br/>
+<!-- $$$skip[overload1]$$$skip -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="skip-method"></a><span class="name">skip</span>(<i>message</i> = &quot;&quot;)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Skips the current test case and prints the optional <i>message</i>. If this is a data-driven test, then only the current row is skipped. Similar to <code>QSKIP(message)</code> in C++.</p>
+</div></div><!-- @@@skip -->
+<br/>
+<!-- $$$sleep[overload1]$$$sleep -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="sleep-method"></a><span class="name">sleep</span>(<i>ms</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Sleeps for <i>ms</i> milliseconds without processing Qt events.</p>
+<p><b>See also </b><a href="qml-testcase.html#wait-method">wait()</a> and <a href="qml-testcase.html#waitForRendering-method">waitForRendering()</a>.</p>
+</div></div><!-- @@@sleep -->
+<br/>
+<!-- $$$touchEvent[overload1]$$$touchEventobject -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="touchEvent-method"></a><span class="type"><a href="qml-toucheventsequence.html">TouchEventSequence</a></span> <span class="name">touchEvent</span>(<span class="type">object</span> <i>item</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Begins a sequence of touch events through a simulated <a href="../qtgui/qtouchdevice.html#DeviceType-enum">QTouchDevice::TouchScreen</a>. Events are delivered to the window containing <i>item</i>.</p>
+<p>The returned object is used to enumerate events to be delivered through a single <a href="../qtgui/qtouchevent.html">QTouchEvent</a>. Touches are delivered to the window containing the <a href="qml-testcase.html">TestCase</a> unless otherwise specified.</p>
+<pre class="cpp">
+
+  Rectangle {
+      width: <span class="number">640</span>; height: <span class="number">480</span>
+
+      MultiPointTouchArea {
+          id: area
+          anchors<span class="operator">.</span>fill: parent
+
+          property bool touched: <span class="keyword">false</span>
+
+          onPressed: touched <span class="operator">=</span> <span class="keyword">true</span>
+      }
+
+      TestCase {
+          name: <span class="string">&quot;ItemTests&quot;</span>
+          when: windowShown
+          id: test1
+
+          function test_touch() {
+              var touch <span class="operator">=</span> touchEvent(area);
+              touch<span class="operator">.</span>press(<span class="number">0</span><span class="operator">,</span> area<span class="operator">,</span> <span class="number">10</span><span class="operator">,</span> <span class="number">10</span>);
+              touch<span class="operator">.</span>commit();
+              verify(area<span class="operator">.</span>touched);
+          }
+      }
+  }
+
+</pre>
+<p>This method was introduced in  Qt 5.9.</p>
+<p><b>See also </b><a href="qml-toucheventsequence.html#press-method">TouchEventSequence::press()</a>, <a href="qml-toucheventsequence.html#move-method">TouchEventSequence::move()</a>, <a href="qml-toucheventsequence.html#release-method">TouchEventSequence::release()</a>, <a href="qml-toucheventsequence.html#stationary-method">TouchEventSequence::stationary()</a>, <a href="qml-toucheventsequence.html#commit-method">TouchEventSequence::commit()</a>, and <a href="../qtgui/qtouchdevice.html#DeviceType-enum">QTouchDevice::TouchScreen</a>.</p>
+</div></div><!-- @@@touchEvent -->
+<br/>
+<!-- $$$tryCompare[overload1]$$$tryCompare -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="tryCompare-method"></a><span class="name">tryCompare</span>(<i>obj</i>, <i>property</i>, <i>expected</i>, <i>timeout</i> = 5000, <i>message</i> = &quot;&quot;)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Fails the current test case if the specified <i>property</i> on <i>obj</i> is not the same as <i>expected</i>, and displays the optional <i>message</i>. The test will be retried multiple times until the <i>timeout</i> (in milliseconds) is reached.</p>
+<p>This function is intended for testing applications where a property changes value based on asynchronous events. Use <a href="qml-testcase.html#compare-method">compare()</a> for testing synchronous property changes.</p>
+<pre class="cpp">
+
+  tryCompare(img<span class="operator">,</span> <span class="string">&quot;status&quot;</span><span class="operator">,</span> BorderImage<span class="operator">.</span>Ready)
+  compare(img<span class="operator">.</span>width<span class="operator">,</span> <span class="number">120</span>)
+  compare(img<span class="operator">.</span>height<span class="operator">,</span> <span class="number">120</span>)
+  compare(img<span class="operator">.</span>horizontalTileMode<span class="operator">,</span> BorderImage<span class="operator">.</span>Stretch)
+  compare(img<span class="operator">.</span>verticalTileMode<span class="operator">,</span> BorderImage<span class="operator">.</span>Stretch)
+
+</pre>
+<p><a href="qml-signalspy.html#wait-method">SignalSpy::wait()</a> provides an alternative method to wait for a signal to be emitted.</p>
+<p><b>See also </b><a href="qml-testcase.html#compare-method">compare()</a> and <a href="qml-signalspy.html#wait-method">SignalSpy::wait()</a>.</p>
+</div></div><!-- @@@tryCompare -->
+<br/>
+<!-- $$$tryVerify[overload1]$$$tryVerify -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="tryVerify-method"></a><span class="name">tryVerify</span>(<i>function</i>, <i>timeout</i> = 5000, <i>message</i> = &quot;&quot;)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Fails the current test case if <i>function</i> does not evaluate to <code>true</code> before the specified <i>timeout</i> (in milliseconds) has elapsed. The function is evaluated multiple times until the timeout is reached. An optional <i>message</i> is displayed upon failure.</p>
+<p>This function is intended for testing applications where a condition changes based on asynchronous events. Use <a href="qml-testcase.html#verify-method">verify()</a> for testing synchronous condition changes, and <a href="qml-testcase.html#tryCompare-method">tryCompare()</a> for testing asynchronous property changes.</p>
+<p>For example, in the code below, it's not possible to use <a href="qml-testcase.html#tryCompare-method">tryCompare()</a>, because the <code>currentItem</code> property might be <code>null</code> for a short period of time:</p>
+<pre class="cpp">
+
+  tryCompare(listView<span class="operator">.</span>currentItem<span class="operator">,</span> <span class="string">&quot;text&quot;</span><span class="operator">,</span> <span class="string">&quot;Hello&quot;</span>);
+
+</pre>
+<p>Instead, we can use tryVerify() to first check that <code>currentItem</code> isn't <code>null</code>, and then use a regular compare afterwards:</p>
+<pre class="cpp">
+
+  tryVerify(function(){ <span class="keyword">return</span> listView<span class="operator">.</span>currentItem })
+  compare(listView<span class="operator">.</span>currentItem<span class="operator">.</span>text<span class="operator">,</span> <span class="string">&quot;Hello&quot;</span>)
+
+</pre>
+<p>This method was introduced in  Qt 5.8.</p>
+<p><b>See also </b><a href="qml-testcase.html#verify-method">verify()</a>, <a href="qml-testcase.html#compare-method">compare()</a>, <a href="qml-testcase.html#tryCompare-method">tryCompare()</a>, and <a href="qml-signalspy.html#wait-method">SignalSpy::wait()</a>.</p>
+</div></div><!-- @@@tryVerify -->
+<br/>
+<!-- $$$verify[overload1]$$$verify -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="verify-method"></a><span class="name">verify</span>(<i>condition</i>, <i>message</i> = &quot;&quot;)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Fails the current test case if <i>condition</i> is false, and displays the optional <i>message</i>. Similar to <code>QVERIFY(condition)</code> or <code>QVERIFY2(condition, message)</code> in C++.</p>
+</div></div><!-- @@@verify -->
+<br/>
+<!-- $$$wait[overload1]$$$wait -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="wait-method"></a><span class="name">wait</span>(<i>ms</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Waits for <i>ms</i> milliseconds while processing Qt events.</p>
+<p><b>See also </b><a href="qml-testcase.html#sleep-method">sleep()</a> and <a href="qml-testcase.html#waitForRendering-method">waitForRendering()</a>.</p>
+</div></div><!-- @@@wait -->
+<br/>
+<!-- $$$waitForItemPolished[overload1]$$$waitForItemPolishedobjectint -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="waitForItemPolished-method"></a><span class="type"><a href="../qtqml/qml-bool.html">bool</a></span> <span class="name">waitForItemPolished</span>(<span class="type">object</span> <i>item</i>, <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <i>timeout</i> = 5000)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Waits for <i>timeout</i> milliseconds or until <a href="qquickitem.html#updatePolish">updatePolish()</a> has been called on <i>item</i>.</p>
+<p>Returns <code>true</code> if <code>updatePolish()</code> was called on <i>item</i> within <i>timeout</i> milliseconds, otherwise returns <code>false</code>.</p>
+<p>This method was introduced in  Qt 5.13.</p>
+<p><b>See also </b><a href="qml-testcase.html#isPolishScheduled-method">isPolishScheduled()</a>, <a href="qquickitem.html#polish">QQuickItem::polish()</a>, and <a href="qquickitem.html#updatePolish">QQuickItem::updatePolish()</a>.</p>
+</div></div><!-- @@@waitForItemPolished -->
+<br/>
+<!-- $$$waitForRendering[overload1]$$$waitForRendering -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="waitForRendering-method"></a><span class="name">waitForRendering</span>(<i>item</i>, <i>timeout</i> = 5000)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Waits for <i>timeout</i> milliseconds or until the <i>item</i> is rendered by the renderer. Returns true if <code>item</code> is rendered in <i>timeout</i> milliseconds, otherwise returns false. The default <i>timeout</i> value is 5000.</p>
+<p><b>See also </b><a href="qml-testcase.html#sleep-method">sleep()</a> and <a href="qml-testcase.html#wait-method">wait()</a>.</p>
+</div></div><!-- @@@waitForRendering -->
+<br/>
+<!-- $$$warn[overload1]$$$warn -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="warn-method"></a><span class="name">warn</span>(<i>message</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Prints <i>message</i> as a warning message. Similar to <code>QWARN(message)</code> in C++.</p>
+<p><b>See also </b><a href="qml-testcase.html#ignoreWarning-method">ignoreWarning()</a>.</p>
+</div></div><!-- @@@warn -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- protobufcpp-module.qdoc -->
+  <title>protobuf.cpp QML Type | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<p class="naviNextPrevious headerNavi">
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#relevant-file-tags">Relevant File Tags</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">protobuf.cpp QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$protobuf.cpp-brief -->
+<p>Provides support for protocol buffers for the C++ language. <a href="#details">More...</a></p>
+<!-- @@@protobuf.cpp -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QbsModules .</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qbs 1.13</td></tr></table></div><ul>
+<li><a href="qml-qbsmodules-protobuf-cpp-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qbsmodules-protobuf-cpp.html#grpcIncludePath-prop">grpcIncludePath</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-protobuf-cpp.html#grpcLibraryPath-prop">grpcLibraryPath</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-protobuf-cpp.html#importPaths-prop">importPaths</a></b></b> : pathList</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-protobuf-cpp.html#includePath-prop">includePath</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-protobuf-cpp.html#libraryPath-prop">libraryPath</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-protobuf-cpp.html#protocBinary-prop">protocBinary</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-protobuf-cpp.html#useGrpc-prop">useGrpc</a></b></b> : bool</li>
+</ul>
+<!-- $$$protobuf.cpp-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The <code>protobuf.cpp</code> module provides support for generating C++ headers and sources from proto definition files using the <a href="https://github.com/protocolbuffers/protobuf#">protoc</a> tool.</p>
+<p>A simple qbs file that uses protobuf can be written as follows:</p>
+<pre class="cpp">
+
+  CppApplication {
+      Depends { name: <span class="string">&quot;protobuf.cpp&quot;</span> }
+      files: <span class="operator">[</span><span class="string">&quot;foo.proto&quot;</span><span class="operator">,</span> <span class="string">&quot;main.cpp&quot;</span><span class="operator">]</span>
+  }
+
+</pre>
+<p>A generated header now can be included in the C++ sources:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;foo.pb.h&gt;</span>
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span><span class="operator">*</span> argv<span class="operator">[</span><span class="operator">]</span>) {
+      Foo bar;
+      bar<span class="operator">.</span>set_answer(<span class="number">42</span>);
+      google<span class="operator">::</span>protobuf<span class="operator">::</span>ShutdownProtobufLibrary();
+      <span class="keyword">return</span> <span class="number">0</span>;
+  }
+
+</pre>
+<a name="relevant-file-tags"></a>
+<h3 id="relevant-file-tags">Relevant File Tags</h3>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Tag</th><th >Auto-tagged File Names</th><th >Since</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>&quot;protobuf.input&quot;</code></td><td ><code>*.proto</code></td><td >1.13.0</td><td >Source files with this tag are considered inputs to the <code>protoc</code> compiler.</td></tr>
+<tr valign="top" class="even"><td ><code>&quot;protobuf.grpc&quot;</code></td><td ></td><td >1.14.0</td><td >Source files with this tag are considered as gRPC files.</td></tr>
+</table></div>
+<!-- @@@protobuf.cpp -->
+<h2>Property Documentation</h2>
+<!-- $$$grpcIncludePath -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="grpcIncludePath-prop"></a><span class="name">grpcIncludePath</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The path where grpc++ headers are located. Set this property to override the default location.</p>
+<p>Default: <code>auto-detected</code></p>
+</div></div><!-- @@@grpcIncludePath -->
+<br/>
+<!-- $$$grpcLibraryPath -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="grpcLibraryPath-prop"></a><span class="name">grpcLibraryPath</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The path where the grpc++ library is located. Set this property to override the default location.</p>
+<p>Default: <code>auto-detected</code></p>
+</div></div><!-- @@@grpcLibraryPath -->
+<br/>
+<!-- $$$importPaths -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="importPaths-prop"></a><span class="name">importPaths</span> : <span class="type">pathList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The list of imports that are passed to the <code>protoc</code> tool via the <code>--proto_path</code> option. These imports should contain the proto files. They are used to determine the relative structure of the generated files.</p>
+<p><b>Note: </b>The paths are passed to <code>protoc</code> in the same order as specified in this property and <code>protoc</code> output may differ depending on that order.</p><p>Default: <code>[]</code></p>
+</div></div><!-- @@@importPaths -->
+<br/>
+<!-- $$$includePath -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="includePath-prop"></a><span class="name">includePath</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The path where protobuf C++ headers are located. Set this property to override the default location.</p>
+<p>Default: <code>auto-detected</code></p>
+</div></div><!-- @@@includePath -->
+<br/>
+<!-- $$$libraryPath -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="libraryPath-prop"></a><span class="name">libraryPath</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The path where the protobuf C++ library is located. Set this property to override the default location.</p>
+<p>Default: <code>auto-detected</code></p>
+</div></div><!-- @@@libraryPath -->
+<br/>
+<!-- $$$protocBinary -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="protocBinary-prop"></a><span class="name">protocBinary</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The command to invoke when compiling proto definition files.</p>
+<p>Default: <code>auto-detected</code></p>
+</div></div><!-- @@@protocBinary -->
+<br/>
+<!-- $$$useGrpc -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="useGrpc-prop"></a><span class="name">useGrpc</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use gRPC framework.</p>
+<p>Use this property to enable support for the modern open source high performance RPC framework by Google, gRPC (<a href="https://www.grpc.io">https://www.grpc.io</a>).</p>
+<p>A simple qbs file that uses grpc can be written as follows:</p>
+<pre class="cpp">
+
+  CppApplication {
+      Depends { name: <span class="string">&quot;protobuf.cpp&quot;</span> }
+      protobuf<span class="operator">.</span>cpp<span class="operator">.</span>useGrpc: <span class="keyword">true</span>
+      files: <span class="operator">[</span><span class="string">&quot;main.cpp&quot;</span><span class="operator">]</span>
+      Group {
+          files: <span class="string">&quot;grpc.proto&quot;</span>
+          fileTags: <span class="string">&quot;protobuf.grpc&quot;</span>
+      }
+  }
+
+</pre>
+<p><b>Note: </b>that <code>protobuf.grpc</code> tag should be assigned manually because gRPC uses same <code>*.proto</code> files and Qbs can't detect whether to generate gRPC or <code>protobuf</code>.</p><p>The following <code>grpc.proto</code> file..&#x2e;</p>
+<pre class="cpp">
+
+  syntax <span class="operator">=</span> <span class="string">&quot;proto3&quot;</span>;
+
+  package Qbs;
+
+  message Request {
+      string name <span class="operator">=</span> <span class="number">1</span>;
+  }
+
+  message Response {
+      string name <span class="operator">=</span> <span class="number">1</span>;
+  }
+
+  service Grpc {
+      rpc doWork(Request) returns (Response) {}
+  }
+
+</pre>
+<p>...can be used in the C++ sources as follows:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;grpc.grpc.pb.h&gt;</span>
+
+  <span class="keyword">class</span> Service final : <span class="keyword">public</span> Qbs<span class="operator">::</span>Grpc<span class="operator">::</span>Service
+  {
+      grpc<span class="operator">::</span>Status doWork(
+              grpc<span class="operator">::</span>ServerContext<span class="operator">*</span> context<span class="operator">,</span>
+              <span class="keyword">const</span> Qbs<span class="operator">::</span>Request<span class="operator">*</span> request<span class="operator">,</span>
+              Qbs<span class="operator">::</span>Response<span class="operator">*</span> reply) override
+      {
+          (<span class="type">void</span>)context;
+          reply<span class="operator">-</span><span class="operator">&gt;</span>set_name(request<span class="operator">-</span><span class="operator">&gt;</span>name());
+          <span class="keyword">return</span> grpc<span class="operator">::</span>Status<span class="operator">::</span>OK;
+      }
+  };
+
+</pre>
+<p>Default: <code>false</code></p>
+</div></div><!-- @@@useGrpc -->
+<br/>
+<p class="naviNextPrevious footerNavi">
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

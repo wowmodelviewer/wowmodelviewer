@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- particles.qdoc -->
+  <title>Particle System Performance Guide | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td >Particle System Performance Guide</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Particle System Performance Guide</h1>
+<span class="subtitle"></span>
+<!-- $$$qtquick-particles-performance.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The performance of the particle system scales with the number of particles it is maintaining. After prototyping the desired effect, performance can be improved by lowering the particle count. Conversely, if performance is well within the acceptable bounds, you can increase the number of particles until you hit that point (should that improve the effect).</p>
+<p>Note that particle count is often estimated by the particle system, and in some cases explicitly providing hints as to how many particles will be needed will improve performance. You can do this by setting maximumEmitted on an Emitter, and it is generally useful for Emitters which do not continuously emit particles.</p>
+<p>Like <a href="qml-qtquick-shadereffect.html">ShaderEffect</a>, the performance of the particle system is largely dependent on the graphics hardware it is running on. The exception to this is Affectors. For systems not including Affectors, the majority of the performance cost of particles will be on the GPU. Since the GPU is better at parallelizing large numbers of operations more particles can be drawn at 60FPS when Affectors are not used.</p>
+<p>Affectors, particularly if modifying the particles in javascript, can be relatively slow as well as increasing the CPU cost of using particles. Avoid using them in high-volume systems where possible. Some easy cases where Affectors can be avoided are using timed <a href="qml-qtquick-particles-particlegroup.html">ParticleGroup</a> transitions instead of time-triggered Affectors, or setting acceleration due to gravity in the acceleration property of the Emitter instead of with a Gravity Affector.</p>
+</div>
+<!-- @@@qtquick-particles-performance.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

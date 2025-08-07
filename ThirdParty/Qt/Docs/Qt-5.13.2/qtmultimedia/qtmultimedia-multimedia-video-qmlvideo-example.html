@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmlvideo.qdoc -->
+  <title>QML Video Example | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td >QML Video Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+<li class="level1"><a href="#application-structure">Application Structure</a></li>
+<li class="level1"><a href="#calculating-and-displaying-qml-painting-rate">Calculating and Displaying QML Painting Rate</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QML Video Example</h1>
+<span class="subtitle"></span>
+<!-- $$$multimedia/video/qmlvideo-brief -->
+<p>Transforming video and camera viewfinder content.</p>
+<!-- @@@multimedia/video/qmlvideo -->
+<!-- $$$multimedia/video/qmlvideo-description -->
+<div class="descr"> <a name="details"></a>
+<p><i>QML Video</i> demonstrates the various transformations (move; resize; rotate; change aspect ratio) that can be applied to QML <a href="qml-qtmultimedia-videooutput.html">VideoOutput</a> and <a href="qml-multimedia.html#camera">Camera</a> types.</p>
+<p>It also shows how native code can be combined with QML to implement more advanced functionality - in this case, C++ code is used to calculate the QML frame rate. This value is rendered in QML in a semi-transparent item overlaid on the video content.</p>
+<p>The following image shows the application executing the video-overlay scene, which creates a dummy overlay item (just a semi-transparent <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a>), which moves across the <a href="qml-qtmultimedia-videooutput.html">VideoOutput</a> item.</p>
+<p class="centerAlign"><img src="images/qmlvideo-overlay.jpg" alt="" /></p><a name="running-the-example"></a>
+<h4 id="running-the-example">Running the Example</h4>
+<p>To run the example from <a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a>, open the <b>Welcome</b> mode and select the example from <b>Examples</b>. For more information, visit <a href="http://doc.qt.io/qtcreator/creator-build-example-application.html">Building and Running an Example</a>.</p>
+<a name="application-structure"></a>
+<h4 id="application-structure">Application Structure</h4>
+<p>The <code>main.qml</code> file creates a UI which includes the following items:</p>
+<ul>
+<li>Two <code>Button</code> instances, each of which displays a filename, and can be used to launch a <code>FileBrowser</code>.</li>
+<li>An exit <code>Button</code>.</li>
+<li>A <code>SceneSelectionPanel</code>, which is a flickable list displaying the available scenes.</li>
+<li>At the lower left, an item which displays the QML repainting rate - the upper number is the instantaneous frame rate and the lower number is the average over the past second.</li>
+</ul>
+<p class="centerAlign"><img src="images/qmlvideo-menu.jpg" alt="" /></p><p>Each scene in the flickable list is implemented in its own QML file - for example the video-basic scene (which just displays a static <a href="qml-qtmultimedia-videooutput.html">VideoOutput</a> in the center of the screen) is implemented in the <code>VideoBasic.qml</code> file. As you can see from the code, this makes use of a type of inheritance; a <code>VideoBasic</code> item ..&#x2e;</p>
+<pre class="cpp">
+
+  import QtQuick 2.0
+
+  <span class="type">SceneBasic</span> {
+      <span class="name">contentType</span>: <span class="string">&quot;video&quot;</span>
+  }
+
+</pre>
+<p>... is of type <code>SceneBasic</code> ..&#x2e;</p>
+<pre class="cpp">
+
+  import QtQuick 2.0
+
+  <span class="type">Scene</span> {
+      <span class="name">id</span>: <span class="name">root</span>
+      property <span class="type">string</span> <span class="name">contentType</span>
+      ...
+      <span class="type">Content</span> {
+          <span class="name">id</span>: <span class="name">content</span>
+      ...
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+          <span class="type">anchors</span> {
+              <span class="name">horizontalCenter</span>: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+              <span class="name">bottom</span>: <span class="name">parent</span>.<span class="name">bottom</span>
+              <span class="name">margins</span>: <span class="number">20</span>
+          }
+          <span class="name">text</span>: <span class="name">content</span>.<span class="name">started</span> ? <span class="string">&quot;Tap the screen to stop content&quot;</span>
+                                : <span class="string">&quot;Tap the screen to start content&quot;</span>
+          <span class="name">color</span>: <span class="string">&quot;#e0e0e0&quot;</span>
+          <span class="name">z</span>: <span class="number">2.0</span>
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">onClicked</span>: {
+              <span class="keyword">if</span> (<span class="name">content</span>.<span class="name">started</span>)
+                  <span class="name">content</span>.<span class="name">stop</span>()
+              <span class="keyword">else</span>
+                  <span class="name">content</span>.<span class="name">start</span>()
+          }
+      }
+
+      <span class="name">Component</span>.onCompleted: <span class="name">root</span>.<span class="name">content</span> <span class="operator">=</span> <span class="name">content</span>
+  }
+
+</pre>
+<p>... which itself is a <code>Scene</code>:</p>
+<pre class="cpp">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">root</span>
+      ...
+      property <span class="type"><a href="../qtqml/qml-qtqml-qtobject.html">QtObject</a></span> <span class="name">content</span>
+      ...
+      <span class="type">Button</span> {
+          <span class="name">id</span>: <span class="name">closeButton</span>
+          <span class="type">anchors</span> {
+              <span class="name">top</span>: <span class="name">parent</span>.<span class="name">top</span>
+              <span class="name">right</span>: <span class="name">parent</span>.<span class="name">right</span>
+              <span class="name">margins</span>: <span class="name">root</span>.<span class="name">margins</span>
+          }
+          <span class="name">width</span>: <span class="name">Math</span>.<span class="name">max</span>(<span class="name">parent</span>.<span class="name">width</span>, <span class="name">parent</span>.<span class="name">height</span>) <span class="operator">/</span> <span class="number">12</span>
+          <span class="name">height</span>: <span class="name">Math</span>.<span class="name">min</span>(<span class="name">parent</span>.<span class="name">width</span>, <span class="name">parent</span>.<span class="name">height</span>) <span class="operator">/</span> <span class="number">12</span>
+          <span class="name">z</span>: <span class="number">2.0</span>
+          <span class="name">bgColor</span>: <span class="string">&quot;#212121&quot;</span>
+          <span class="name">bgColorSelected</span>: <span class="string">&quot;#757575&quot;</span>
+          <span class="name">textColorSelected</span>: <span class="string">&quot;white&quot;</span>
+          <span class="name">text</span>: <span class="string">&quot;Back&quot;</span>
+          <span class="name">onClicked</span>: <span class="name">root</span>.<span class="name">close</span>()
+      }
+  }
+
+</pre>
+<p><code>SceneBasic</code> describes the structure and behavior of the scene, but is agnostic of the type of content which will be displayed - this is abstracted by <code>Content</code>.</p>
+<p>This pattern allows us to define a particular use case (in this case, simply display a static piece of content), and then instantiate that use case for both video content (<code>VideoBasic</code>) and camera content <code>({CameraBasic})</code>. This approach is used to implement many of the other scenes - for example, <i>&quot;repeatedly slide the content from left to right and back again&quot;</i> is implemented by <code>SceneMove</code>, on which <code>VideoMove</code> and <code>CameraMove</code> are based.</p>
+<p>Depending on the value of the contentType property in the top-level scene instance, the embedded <code>Content</code> item creates either a <a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a> or a <a href="qml-qtmultimedia-camera.html">Camera</a> item.</p>
+<a name="calculating-and-displaying-qml-painting-rate"></a>
+<h4 id="calculating-and-displaying-qml-painting-rate">Calculating and Displaying QML Painting Rate</h4>
+<p>The QML painting rate is calculated by the FrequencyMonitor class, which turns a stream of events (received via the notify() slot), into an instantaneous and an averaged frequency:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> FrequencyMonitor : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>
+  {
+      Q_OBJECT
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> instantaneousFrequency READ instantaneousFrequency NOTIFY instantaneousFrequencyChanged)
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> averageFrequency READ averageFrequency NOTIFY averageFrequencyChanged)
+
+  <span class="keyword">public</span>:
+      ...
+      <span class="keyword">static</span> <span class="type">void</span> qmlRegisterType();
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      Q_INVOKABLE <span class="type">void</span> notify();
+  };
+
+</pre>
+<p>The FrequencyMonitor class is exposed to QML like this</p>
+<pre class="cpp">
+
+  <span class="type">void</span> FrequencyMonitor<span class="operator">::</span>qmlRegisterType()
+  {
+      <span class="operator">::</span>qmlRegisterType<span class="operator">&lt;</span>FrequencyMonitor<span class="operator">&gt;</span>(<span class="string">&quot;FrequencyMonitor&quot;</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;FrequencyMonitor&quot;</span>);
+  }
+
+</pre>
+<p>and its data is displayed by defining a QML item called FrequencyItem, like this:</p>
+<pre class="cpp">
+
+  import FrequencyMonitor 1.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">root</span>
+      ...
+      <span class="keyword">function</span> <span class="name">notify</span>() {
+          <span class="name">monitor</span>.<span class="name">notify</span>()
+      }
+
+      <span class="type">FrequencyMonitor</span> {
+          <span class="name">id</span>: <span class="name">monitor</span>
+          <span class="name">onAverageFrequencyChanged</span>: {
+              <span class="name">averageFrequencyText</span>.<span class="name">text</span> <span class="operator">=</span> <span class="name">monitor</span>.<span class="name">averageFrequency</span>.<span class="name">toFixed</span>(<span class="number">2</span>)
+          }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+          <span class="name">id</span>: <span class="name">labelText</span>
+          <span class="type">anchors</span> {
+              <span class="name">left</span>: <span class="name">parent</span>.<span class="name">left</span>
+              <span class="name">top</span>: <span class="name">parent</span>.<span class="name">top</span>
+              <span class="name">margins</span>: <span class="number">10</span>
+          }
+          <span class="name">color</span>: <span class="name">root</span>.<span class="name">textColor</span>
+          <span class="name">font</span>.pixelSize: <span class="number">0.6</span> <span class="operator">*</span> <span class="name">root</span>.<span class="name">textSize</span>
+          <span class="name">text</span>: <span class="name">root</span>.<span class="name">label</span>
+          <span class="name">width</span>: <span class="name">root</span>.<span class="name">width</span> <span class="operator">-</span> <span class="number">2</span><span class="operator">*</span><span class="name">anchors</span>.<span class="name">margins</span>
+          <span class="name">elide</span>: <span class="name">Text</span>.<span class="name">ElideRight</span>
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+          <span class="name">id</span>: <span class="name">averageFrequencyText</span>
+          <span class="type">anchors</span> {
+              <span class="name">right</span>: <span class="name">parent</span>.<span class="name">right</span>
+              <span class="name">bottom</span>: <span class="name">parent</span>.<span class="name">bottom</span>
+              <span class="name">margins</span>: <span class="number">10</span>
+          }
+          <span class="name">color</span>: <span class="name">root</span>.<span class="name">textColor</span>
+          <span class="name">font</span>.pixelSize: <span class="name">root</span>.<span class="name">textSize</span>
+      }
+  }
+
+</pre>
+<p>The result looks like this:</p>
+<p class="centerAlign"><img src="images/video-qml-paint-rate.png" alt="" /></p><p>All that remains is to connect the afterRendering() signal of the <a href="../qtquick/qquickview.html">QQuickView</a> object to a JavaScript function, which will eventually call <code>frequencyItem.notify()</code>:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QtGui/QGuiApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QtQuick/QQuickItem&gt;</span>
+  <span class="preprocessor">#include &lt;QtQuick/QQuickView&gt;</span>
+  <span class="preprocessor">#include &quot;trace.h&quot;</span>
+
+  <span class="preprocessor">#ifdef PERFORMANCEMONITOR_SUPPORT</span>
+  <span class="preprocessor">#include &quot;performancemonitordeclarative.h&quot;</span>
+  <span class="preprocessor">#endif</span>
+
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> DefaultFileName1 <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+      ...
+      <span class="type"><a href="../qtquick/qquickitem.html">QQuickItem</a></span> <span class="operator">*</span>rootObject <span class="operator">=</span> viewer<span class="operator">.</span>rootObject();
+      ...
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(<span class="operator">&amp;</span>viewer<span class="operator">,</span> SIGNAL(afterRendering())<span class="operator">,</span>
+                       rootObject<span class="operator">,</span> SLOT(qmlFramePainted()));
+
+</pre>
+<p><a href="https://code.qt.io/cgit/qt/qtmultimedia.git/tree/examples/multimedia/video/qmlvideo?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@multimedia/video/qmlvideo -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

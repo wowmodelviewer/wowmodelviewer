@@ -1,0 +1,1039 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickcontext2d.cpp -->
+  <title>Context2D QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >Context2D QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Context2D QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Context2D-brief -->
+<p>Provides 2D context for shapes on a Canvas item. <a href="#details">More...</a></p>
+<!-- @@@Context2D -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.0</td></tr></table></div><ul>
+<li><a href="qml-qtquick-context2d-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-context2d.html#canvas-prop">canvas</a></b></b> : QtQuick::Canvas</li>
+<li class="fn"><b><b><a href="qml-qtquick-context2d.html#fillRule-prop">fillRule</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-context2d.html#fillStyle-prop">fillStyle</a></b></b> : variant</li>
+<li class="fn"><b><b><a href="qml-qtquick-context2d.html#font-prop">font</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-context2d.html#globalAlpha-prop">globalAlpha</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-context2d.html#globalCompositeOperation-prop">globalCompositeOperation</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-context2d.html#lineCap-prop">lineCap</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-context2d.html#lineDashOffset-prop">lineDashOffset</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-context2d.html#lineJoin-prop">lineJoin</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-context2d.html#lineWidth-prop">lineWidth</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-context2d.html#miterLimit-prop">miterLimit</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-context2d.html#shadowBlur-prop">shadowBlur</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-context2d.html#shadowColor-prop">shadowColor</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-context2d.html#shadowOffsetX-prop">shadowOffsetX</a></b></b> : qreal</li>
+<li class="fn"><b><b><a href="qml-qtquick-context2d.html#shadowOffsetY-prop">shadowOffsetY</a></b></b> : qreal</li>
+<li class="fn"><b><b><a href="qml-qtquick-context2d.html#strokeStyle-prop">strokeStyle</a></b></b> : variant</li>
+<li class="fn"><b><b><a href="qml-qtquick-context2d.html#textAlign-prop">textAlign</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-context2d.html#textBaseline-prop">textBaseline</a></b></b> : string</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#arc-method">arc</a></b></b>(<i>x</i>,  real <i>y</i>,  real <i>radius</i>,  real <i>startAngle</i>,  real <i>endAngle</i>,  bool <i>anticlockwise</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#arcTo-method">arcTo</a></b></b>(<i>x1</i>,  real <i>y1</i>,  real <i>x2</i>,  real <i>y2</i>,  real <i>radius</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#beginPath-method">beginPath</a></b></b>()</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#bezierCurveTo-method">bezierCurveTo</a></b></b>(<i>cp1x</i>,  real <i>cp1y</i>,  real <i>cp2x</i>,  real <i>cp2y</i>,  real <i>x</i>,  real <i>y</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#clearRect-method">clearRect</a></b></b>(<i>x</i>,  real <i>y</i>,  real <i>w</i>,  real <i>h</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#clip-method">clip</a></b></b>()</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#closePath-method">closePath</a></b></b>()</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#createConicalGradient-method">createConicalGradient</a></b></b>(<i>x</i>,  real <i>y</i>,  real <i>angle</i>)</li>
+<li class="fn">CanvasImageData <b><b><a href="qml-qtquick-context2d.html#createImageData-method-2">createImageData</a></b></b>(<i>imageUrl</i>)</li>
+<li class="fn">CanvasImageData <b><b><a href="qml-qtquick-context2d.html#createImageData-method-1">createImageData</a></b></b>(<i>imageData</i>)</li>
+<li class="fn">CanvasImageData <b><b><a href="qml-qtquick-context2d.html#createImageData-method">createImageData</a></b></b>(<i>sw</i>,  real <i>sh</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#createLinearGradient-method">createLinearGradient</a></b></b>(<i>x0</i>,  real <i>y0</i>,  real <i>x1</i>,  real <i>y1</i>)</li>
+<li class="fn">variant <b><b><a href="qml-qtquick-context2d.html#createPattern-method-1">createPattern</a></b></b>(<i>image</i>,  string <i>repetition</i>)</li>
+<li class="fn">variant <b><b><a href="qml-qtquick-context2d.html#createPattern-method">createPattern</a></b></b>(<i>color</i>,  enumeration <i>patternMode</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#createRadialGradient-method">createRadialGradient</a></b></b>(<i>x0</i>,  real <i>y0</i>,  real <i>r0</i>,  real <i>x1</i>,  real <i>y1</i>,  real <i>r1</i>)</li>
+<li class="fn"><b><b><a href="qml-qtquick-context2d.html#drawImage-method-2">drawImage</a></b></b>(<i>image</i>,  real <i>sx</i>,  real <i>sy</i>,  real <i>sw</i>,  real <i>sh</i>,  real <i>dx</i>,  real <i>dy</i>,  real <i>dw</i>,  real <i>dh</i>)</li>
+<li class="fn"><b><b><a href="qml-qtquick-context2d.html#drawImage-method-1">drawImage</a></b></b>(<i>image</i>,  real <i>dx</i>,  real <i>dy</i>,  real <i>dw</i>,  real <i>dh</i>)</li>
+<li class="fn"><b><b><a href="qml-qtquick-context2d.html#drawImage-method">drawImage</a></b></b>(<i>image</i>,  real <i>dx</i>,  real <i>dy</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#ellipse-method">ellipse</a></b></b>(<i>x</i>,  real <i>y</i>,  real <i>w</i>,  real <i>h</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#fill-method">fill</a></b></b>()</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#fillRect-method">fillRect</a></b></b>(<i>x</i>,  real <i>y</i>,  real <i>w</i>,  real <i>h</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#fillText-method">fillText</a></b></b>(<i>text</i>, <i>x</i>, <i>y</i>)</li>
+<li class="fn">CanvasImageData <b><b><a href="qml-qtquick-context2d.html#getImageData-method">getImageData</a></b></b>(<i>x</i>,  real <i>y</i>,  real <i>w</i>,  real <i>h</i>)</li>
+<li class="fn">array <b><b><a href="qml-qtquick-context2d.html#getLineDash-method">getLineDash</a></b></b>()</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#isPointInPath-method">isPointInPath</a></b></b>(<i>x</i>,  real <i>y</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#lineTo-method">lineTo</a></b></b>(<i>x</i>,  real <i>y</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#measureText-method">measureText</a></b></b>(<i>text</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#moveTo-method">moveTo</a></b></b>(<i>x</i>,  real <i>y</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#putImageData-method">putImageData</a></b></b>(<i>imageData</i>,  real <i>dx</i>,  real <i>dy</i>,  real <i>dirtyX</i>,  real <i>dirtyY</i>,  real <i>dirtyWidth</i>,  real <i>dirtyHeight</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#quadraticCurveTo-method">quadraticCurveTo</a></b></b>(<i>cpx</i>,  real <i>cpy</i>,  real <i>x</i>,  real <i>y</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#rect-method">rect</a></b></b>(<i>x</i>,  real <i>y</i>,  real <i>w</i>,  real <i>h</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#reset-method">reset</a></b></b>()</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#resetTransform-method">resetTransform</a></b></b>()</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#restore-method">restore</a></b></b>()</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#rotate-method">rotate</a></b></b>(<i>angle</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#roundedRect-method">roundedRect</a></b></b>(<i>x</i>,  real <i>y</i>,  real <i>w</i>,  real <i>h</i>,  real <i>xRadius</i>,  real <i>yRadius</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#save-method">save</a></b></b>()</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#scale-method">scale</a></b></b>(<i>x</i>,  real <i>y</i>)</li>
+<li class="fn"><b><b><a href="qml-qtquick-context2d.html#setLineDash-method">setLineDash</a></b></b>(<i>pattern</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#setTransform-method">setTransform</a></b></b>(<i>a</i>,  real <i>b</i>,  real <i>c</i>,  real <i>d</i>,  real <i>e</i>,  real <i>f</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#shear-method">shear</a></b></b>(<i>sh</i>,  real <i>sv</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#stroke-method">stroke</a></b></b>()</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#strokeRect-method">strokeRect</a></b></b>(<i>x</i>,  real <i>y</i>,  real <i>w</i>,  real <i>h</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#strokeText-method">strokeText</a></b></b>(<i>text</i>, <i>x</i>, <i>y</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#text-method">text</a></b></b>(<i>text</i>,  real <i>x</i>,  real <i>y</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#transform-method">transform</a></b></b>(<i>a</i>,  real <i>b</i>,  real <i>c</i>,  real <i>d</i>,  real <i>e</i>,  real <i>f</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtquick-context2d.html#translate-method">translate</a></b></b>(<i>x</i>,  real <i>y</i>)</li>
+</ul>
+<!-- $$$Context2D-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qml-qtquick-context2d.html">Context2D</a> object can be created by <code>Canvas</code> item's <code>getContext()</code> method:</p>
+<pre class="cpp">
+
+  Canvas {
+    id:canvas
+    onPaint:{
+       var ctx <span class="operator">=</span> canvas<span class="operator">.</span>getContext(<span class="char">'2d'</span>);
+       <span class="comment">//...</span>
+    }
+  }
+
+</pre>
+<p>The <a href="qml-qtquick-context2d.html">Context2D</a> API implements the same <a href="http://www.w3.org/TR/2dcontext">W3C Canvas 2D Context API standard</a> with some enhanced features.</p>
+<p>The <a href="qml-qtquick-context2d.html">Context2D</a> API provides the rendering <b>context</b> which defines the methods and attributes needed to draw on the <code>Canvas</code> item. The following assigns the canvas rendering context to a <code>context</code> variable:</p>
+<pre class="cpp">
+
+  var context <span class="operator">=</span> mycanvas<span class="operator">.</span>getContext(<span class="string">&quot;2d&quot;</span>)
+
+</pre>
+<p>The <a href="qml-qtquick-context2d.html">Context2D</a> API renders the canvas as a coordinate system whose origin (0,0) is at the top left corner, as shown in the figure below. Coordinates increase along the <code>x</code> axis from left to right and along the <code>y</code> axis from top to bottom of the canvas.</p>
+<p class="centerAlign"><img src="images/qml-item-canvas-context.gif" alt="" /></p><!-- @@@Context2D -->
+<h2>Property Documentation</h2>
+<!-- $$$canvas -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="canvas-prop"></a><span class="name">canvas</span> : <span class="type"><a href="qml-qtquick-canvas.html">QtQuick::Canvas</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the canvas item that the context paints on.</p>
+<p>This property is read only.</p>
+</div></div><!-- @@@canvas -->
+<br/>
+<!-- $$$fillRule -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="fillRule-prop"></a><span class="name">fillRule</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the current fill rule used for filling shapes. The following fill rules supported:</p>
+<ul>
+<li>Qt.OddEvenFill</li>
+<li>Qt.WindingFill</li>
+</ul>
+<p>Note: Unlike the <a href="../qtgui/qpainterpath.html">QPainterPath</a>, the Canvas API uses the winding fill as the default fill rule. The fillRule property is part of the context rendering state.</p>
+<p><b>See also </b><a href="qml-qtquick-context2d.html#fillStyle-prop">fillStyle</a>.</p>
+</div></div><!-- @@@fillRule -->
+<br/>
+<!-- $$$fillStyle -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="fillStyle-prop"></a><span class="name">fillStyle</span> : <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the current style used for filling shapes. The style can be either a string containing a CSS color, a <a href="qml-qtquick-canvasgradient.html">CanvasGradient</a> or CanvasPattern object. Invalid values are ignored. This property accepts several color syntaxes:</p>
+<ul>
+<li>'rgb(red, green, blue)' - for example: 'rgb(255, 100, 55)' or 'rgb(100%, 70%, 30%)'</li>
+<li>'rgba(red, green, blue, alpha)' - for example: 'rgb(255, 100, 55, 1.0)' or 'rgb(100%, 70%, 30%, 0.5)'</li>
+<li>'hsl(hue, saturation, lightness)'</li>
+<li>'hsla(hue, saturation, lightness, alpha)'</li>
+<li>'#RRGGBB' - for example: '#00FFCC'</li>
+<li>Qt.rgba(red, green, blue, alpha) - for example: Qt.rgba(0.3, 0.7, 1, 1.0)</li>
+</ul>
+<p>If the <code>fillStyle</code> or <a href="qml-qtquick-context2d.html#strokeStyle-prop">strokeStyle</a> is assigned many times in a loop, the last Qt.rgba() syntax should be chosen, as it has the best performance, because it's already a valid <a href="../qtgui/qcolor.html">QColor</a> value, does not need to be parsed everytime.</p>
+<p>The default value is '#000000'.</p>
+<p><b>See also </b><a href="qml-qtquick-context2d.html#createLinearGradient-method">createLinearGradient()</a>, <a href="qml-qtquick-context2d.html#createRadialGradient-method">createRadialGradient()</a>, <a href="qml-qtquick-context2d.html#createPattern-method">createPattern()</a>, and <a href="qml-qtquick-context2d.html#strokeStyle-prop">strokeStyle</a>.</p>
+</div></div><!-- @@@fillStyle -->
+<br/>
+<!-- $$$font -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="font-prop"></a><span class="name">font</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the current font settings.</p>
+<p>A subset of the <a href="http://www.w3.org/TR/2dcontext/#dom-context-2d-font">w3C 2d context standard for font</a> is supported:</p>
+<ul>
+<li>font-style (optional): normal | italic | oblique</li>
+<li>font-variant (optional): normal | small-caps</li>
+<li>font-weight (optional): normal | bold | 0 ..&#x2e; 99</li>
+<li>font-size: Npx | Npt (where N is a positive number)</li>
+<li>font-family: See <a href="http://www.w3.org/TR/CSS2/fonts.html#propdef-font-family">http://www.w3.org/TR/CSS2/fonts.html#propdef-font-family</a></li>
+</ul>
+<p><b>Note: </b>The font-size and font-family properties are mandatory and must be in the order they are shown in above. In addition, a font family with spaces in its name must be quoted.</p><p>The default font value is &quot;10px sans-serif&quot;.</p>
+</div></div><!-- @@@font -->
+<br/>
+<!-- $$$globalAlpha -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="globalAlpha-prop"></a><span class="name">globalAlpha</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the current alpha value applied to rendering operations. The value must be in the range from <code>0.0</code> (fully transparent) to <code>1.0</code> (fully opaque). The default value is <code>1.0</code>.</p>
+</div></div><!-- @@@globalAlpha -->
+<br/>
+<!-- $$$globalCompositeOperation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="globalCompositeOperation-prop"></a><span class="name">globalCompositeOperation</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the current the current composition operation, from the list below:</p>
+<ul>
+<li>source-atop - A atop B. Display the source image wherever both images are opaque. Display the destination image wherever the destination image is opaque but the source image is transparent. Display transparency elsewhere.</li>
+<li>source-in - A in B. Display the source image wherever both the source image and destination image are opaque. Display transparency elsewhere.</li>
+<li>source-out - A out B. Display the source image wherever the source image is opaque and the destination image is transparent. Display transparency elsewhere.</li>
+<li>source-over - (default) A over B. Display the source image wherever the source image is opaque. Display the destination image elsewhere.</li>
+<li>destination-atop - B atop A. Same as source-atop but using the destination image instead of the source image and vice versa.</li>
+<li>destination-in - B in A. Same as source-in but using the destination image instead of the source image and vice versa.</li>
+<li>destination-out - B out A. Same as source-out but using the destination image instead of the source image and vice versa.</li>
+<li>destination-over - B over A. Same as source-over but using the destination image instead of the source image and vice versa.</li>
+<li>lighter - A plus B. Display the sum of the source image and destination image, with color values approaching 255 (100%) as a limit.</li>
+<li>copy - A (B is ignored). Display the source image instead of the destination image.</li>
+<li>xor - A xor B. Exclusive OR of the source image and destination image.</li>
+</ul>
+<p>Additionally, this property also accepts the compositon modes listed in <a href="../qtgui/qpainter.html#CompositionMode-enum">QPainter::CompositionMode</a>. According to the W3C standard, these extension composition modes are provided as &quot;vendorName-operationName&quot; syntax, for example: <a href="../qtgui/qpainter.html#CompositionMode-enum">QPainter::CompositionMode_Exclusion</a> is provided as &quot;qt-exclusion&quot;.</p>
+</div></div><!-- @@@globalCompositeOperation -->
+<br/>
+<!-- $$$lineCap -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="lineCap-prop"></a><span class="name">lineCap</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the current line cap style. The possible line cap styles are:</p>
+<ul>
+<li>butt - the end of each line has a flat edge perpendicular to the direction of the line, this is the default line cap value.</li>
+<li>round - a semi-circle with the diameter equal to the width of the line must then be added on to the end of the line.</li>
+<li>square - a rectangle with the length of the line width and the width of half the line width, placed flat against the edge perpendicular to the direction of the line.</li>
+</ul>
+<p>Other values are ignored.</p>
+</div></div><!-- @@@lineCap -->
+<br/>
+<!-- $$$lineDashOffset -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="lineDashOffset-prop"></a><span class="name">lineDashOffset</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the current line dash offset. The default line dash offset value is <code>0</code>.</p>
+<p>This property was introduced in  QtQuick 2.11.</p>
+<p><b>See also </b><a href="qml-qtquick-context2d.html#getLineDash-method">getLineDash()</a> and <a href="qml-qtquick-context2d.html#setLineDash-method">setLineDash()</a>.</p>
+</div></div><!-- @@@lineDashOffset -->
+<br/>
+<!-- $$$lineJoin -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="lineJoin-prop"></a><span class="name">lineJoin</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the current line join style. A join exists at any point in a subpath shared by two consecutive lines. When a subpath is closed, then a join also exists at its first point (equivalent to its last point) connecting the first and last lines in the subpath.</p>
+<p>The possible line join styles are:</p>
+<ul>
+<li>bevel - this is all that is rendered at joins.</li>
+<li>round - a filled arc connecting the two aforementioned corners of the join, abutting (and not overlapping) the aforementioned triangle, with the diameter equal to the line width and the origin at the point of the join, must be rendered at joins.</li>
+<li>miter - a second filled triangle must (if it can given the miter length) be rendered at the join, this is the default line join style.</li>
+</ul>
+<p>Other values are ignored.</p>
+</div></div><!-- @@@lineJoin -->
+<br/>
+<!-- $$$lineWidth -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="lineWidth-prop"></a><span class="name">lineWidth</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the current line width. Values that are not finite values greater than zero are ignored.</p>
+</div></div><!-- @@@lineWidth -->
+<br/>
+<!-- $$$miterLimit -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="miterLimit-prop"></a><span class="name">miterLimit</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the current miter limit ratio. The default miter limit value is 10.0&#x2e;</p>
+</div></div><!-- @@@miterLimit -->
+<br/>
+<!-- $$$shadowBlur -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="shadowBlur-prop"></a><span class="name">shadowBlur</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the current level of blur applied to shadows</p>
+</div></div><!-- @@@shadowBlur -->
+<br/>
+<!-- $$$shadowColor -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="shadowColor-prop"></a><span class="name">shadowColor</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the current shadow color.</p>
+</div></div><!-- @@@shadowColor -->
+<br/>
+<!-- $$$shadowOffsetX -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="shadowOffsetX-prop"></a><span class="name">shadowOffsetX</span> : <span class="type">qreal</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the current shadow offset in the positive horizontal distance.</p>
+<p><b>See also </b><a href="qml-qtquick-context2d.html#shadowOffsetY-prop">shadowOffsetY</a>.</p>
+</div></div><!-- @@@shadowOffsetX -->
+<br/>
+<!-- $$$shadowOffsetY -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="shadowOffsetY-prop"></a><span class="name">shadowOffsetY</span> : <span class="type">qreal</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the current shadow offset in the positive vertical distance.</p>
+<p><b>See also </b><a href="qml-qtquick-context2d.html#shadowOffsetX-prop">shadowOffsetX</a>.</p>
+</div></div><!-- @@@shadowOffsetY -->
+<br/>
+<!-- $$$strokeStyle -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="strokeStyle-prop"></a><span class="name">strokeStyle</span> : <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the current color or style to use for the lines around shapes, The style can be either a string containing a CSS color, a <a href="qml-qtquick-canvasgradient.html">CanvasGradient</a> or CanvasPattern object. Invalid values are ignored.</p>
+<p>The default value is '#000000'.</p>
+<p><b>See also </b><a href="qml-qtquick-context2d.html#createLinearGradient-method">createLinearGradient()</a>, <a href="qml-qtquick-context2d.html#createRadialGradient-method">createRadialGradient()</a>, <a href="qml-qtquick-context2d.html#createPattern-method">createPattern()</a>, and <a href="qml-qtquick-context2d.html#fillStyle-prop">fillStyle</a>.</p>
+</div></div><!-- @@@strokeStyle -->
+<br/>
+<!-- $$$textAlign -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="textAlign-prop"></a><span class="name">textAlign</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the current text alignment settings. The possible values are:</p>
+<ul>
+<li>start</li>
+<li>end</li>
+<li>left</li>
+<li>right</li>
+<li>center</li>
+</ul>
+<p>Other values are ignored. The default value is &quot;start&quot;.</p>
+</div></div><!-- @@@textAlign -->
+<br/>
+<!-- $$$textBaseline -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="textBaseline-prop"></a><span class="name">textBaseline</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the current baseline alignment settings. The possible values are:</p>
+<ul>
+<li>top</li>
+<li>hanging</li>
+<li>middle</li>
+<li>alphabetic</li>
+<li>ideographic</li>
+<li>bottom</li>
+</ul>
+<p>Other values are ignored. The default value is &quot;alphabetic&quot;.</p>
+</div></div><!-- @@@textBaseline -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$arc[overload1]$$$arcrealrealrealrealbool -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="arc-method"></a><span class="type">object</span> <span class="name">arc</span>(<i>x</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>radius</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>startAngle</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>endAngle</i>,  <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span> <i>anticlockwise</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Adds an arc to the current subpath that lies on the circumference of the circle whose center is at the point (<i>x</i>, <i>y</i>) and whose radius is <i>radius</i>.</p>
+<p>Both <i>startAngle</i> and <i>endAngle</i> are measured from the x-axis in radians.</p>
+<p class="centerAlign"><img src="images/qml-item-canvas-arc.png" alt="" /></p><p class="centerAlign"><img src="images/qml-item-canvas-startAngle.png" alt="" /></p><p>The <i>anticlockwise</i> parameter is <code>true</code> for each arc in the figure above because they are all drawn in the anticlockwise direction.</p>
+<p><b>See also </b><a href="qml-qtquick-context2d.html#arcTo-method">arcTo</a> and <a href="http://www.w3.org/TR/2dcontext/#dom-context-2d-arc">W3C's 2D Context Standard for arc()</a>.</p>
+</div></div><!-- @@@arc -->
+<br/>
+<!-- $$$arcTo[overload1]$$$arcTorealrealrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="arcTo-method"></a><span class="type">object</span> <span class="name">arcTo</span>(<i>x1</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y1</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>x2</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y2</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>radius</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Adds an arc with the given control points and radius to the current subpath, connected to the previous point by a straight line. To draw an arc, you begin with the same steps you followed to create a line:</p>
+<ul>
+<li>Call the <a href="qml-qtquick-context2d.html#beginPath-method">beginPath()</a> method to set a new path.</li>
+<li>Call the <a href="qml-qtquick-context2d.html#moveTo-method">moveTo</a>(<code>x</code>, <code>y</code>) method to set your starting position on the canvas at the point (<code>x</code>, <code>y</code>).</li>
+<li>To draw an arc or circle, call the arcTo(<i>x1</i>, <i>y1</i>, <i>x2</i>, <i>y2</i>, <i>radius</i>) method. This adds an arc with starting point (<i>x1</i>, <i>y1</i>), ending point (<i>x2</i>, <i>y2</i>), and <i>radius</i> to the current subpath and connects it to the previous subpath by a straight line.</li>
+</ul>
+<p class="centerAlign"><img src="images/qml-item-canvas-arcTo.png" alt="" /></p><p><b>See also </b><a href="qml-qtquick-context2d.html#arc-method">arc</a> and <a href="http://www.w3.org/TR/2dcontext/#dom-context-2d-arcto">W3C's 2D Context Standard for arcTo()</a>.</p>
+</div></div><!-- @@@arcTo -->
+<br/>
+<!-- $$$beginPath[overload1]$$$beginPath -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="beginPath-method"></a><span class="type">object</span> <span class="name">beginPath</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Resets the current path to a new path.</p>
+</div></div><!-- @@@beginPath -->
+<br/>
+<!-- $$$bezierCurveTo[overload1]$$$bezierCurveTorealrealrealrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="bezierCurveTo-method"></a><span class="type">object</span> <span class="name">bezierCurveTo</span>(<i>cp1x</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>cp1y</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>cp2x</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>cp2y</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>x</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Adds a cubic bezier curve between the current position and the given endPoint using the control points specified by (<i>cp1x</i>, <i>cp1y</i>), and (<i>cp2x</i>, <i>cp2y</i>). After the curve is added, the current position is updated to be at the end point (<i>x</i>, <i>y</i>) of the curve. The following code produces the path shown below:</p>
+<pre class="cpp">
+
+  ctx<span class="operator">.</span>strokeStyle <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>rgba(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span>);
+  ctx<span class="operator">.</span>lineWidth <span class="operator">=</span> <span class="number">1</span>;
+  ctx<span class="operator">.</span>beginPath();
+  ctx<span class="operator">.</span>moveTo(<span class="number">20</span><span class="operator">,</span> <span class="number">0</span>);<span class="comment">//start point</span>
+  ctx<span class="operator">.</span>bezierCurveTo(<span class="operator">-</span><span class="number">10</span><span class="operator">,</span> <span class="number">90</span><span class="operator">,</span> <span class="number">210</span><span class="operator">,</span> <span class="number">90</span><span class="operator">,</span> <span class="number">180</span><span class="operator">,</span> <span class="number">0</span>);
+  ctx<span class="operator">.</span>stroke();
+
+</pre>
+<p class="centerAlign"><img src="images/qml-item-canvas-bezierCurveTo.png" alt="" /></p><p><b>See also </b><a href="http://www.w3.org/TR/2dcontext/#dom-context-2d-beziercurveto">W3C 2d context standard for bezierCurveTo</a> and <a href="http://www.openrise.com/lab/FlowerPower/">The beautiful flower demo by using bezierCurveTo</a>.</p>
+</div></div><!-- @@@bezierCurveTo -->
+<br/>
+<!-- $$$clearRect[overload1]$$$clearRectrealrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="clearRect-method"></a><span class="type">object</span> <span class="name">clearRect</span>(<i>x</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>w</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>h</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Clears all pixels on the canvas in the rectangle specified by (<i>x</i>, <i>y</i>, <i>w</i>, <i>h</i>) to transparent black.</p>
+</div></div><!-- @@@clearRect -->
+<br/>
+<!-- $$$clip[overload1]$$$clip -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="clip-method"></a><span class="type">object</span> <span class="name">clip</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates the clipping region from the current path. Any parts of the shape outside the clipping path are not displayed. To create a complex shape using the <code>clip()</code> method:</p>
+<ol class="1" type="1"><li>Call the <code>context.beginPath()</code> method to set the clipping path.</li>
+<li>Define the clipping path by calling any combination of the <code>lineTo</code>, <code>arcTo</code>, <code>arc</code>, <code>moveTo</code>, etc and <code>closePath</code> methods.</li>
+<li>Call the <code>context.clip()</code> method.</li>
+</ol>
+<p>The new shape displays. The following shows how a clipping path can modify how an image displays:</p>
+<p class="centerAlign"><img src="images/qml-item-canvas-clip-complex.png" alt="" /></p><p><b>See also </b><a href="qml-qtquick-context2d.html#beginPath-method">beginPath()</a>, <a href="qml-qtquick-context2d.html#closePath-method">closePath()</a>, <a href="qml-qtquick-context2d.html#stroke-method">stroke()</a>, <a href="qml-qtquick-context2d.html#fill-method">fill()</a>, and <a href="http://www.w3.org/TR/2dcontext/#dom-context-2d-clip">W3C 2d context standard for clip</a>.</p>
+</div></div><!-- @@@clip -->
+<br/>
+<!-- $$$closePath[overload1]$$$closePath -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="closePath-method"></a><span class="type">object</span> <span class="name">closePath</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Closes the current subpath by drawing a line to the beginning of the subpath, automatically starting a new path. The current point of the new path is the previous subpath's first point.</p>
+<p><b>See also </b><a href="http://www.w3.org/TR/2dcontext/#dom-context-2d-closepath">W3C 2d context standard for closePath</a>.</p>
+</div></div><!-- @@@closePath -->
+<br/>
+<!-- $$$createConicalGradient[overload1]$$$createConicalGradientrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="createConicalGradient-method"></a><span class="type">object</span> <span class="name">createConicalGradient</span>(<i>x</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>angle</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns a <a href="qml-qtquick-canvasgradient.html">CanvasGradient</a> object that represents a conical gradient that interpolates colors counter-clockwise around a center point (<i>x</i>, <i>y</i>) with a start angle <i>angle</i> in units of radians.</p>
+<p><b>See also </b><a href="qml-qtquick-canvasgradient.html#addColorStop-method">CanvasGradient::addColorStop()</a>, <a href="qml-qtquick-context2d.html#createLinearGradient-method">createLinearGradient()</a>, <a href="qml-qtquick-context2d.html#createRadialGradient-method">createRadialGradient()</a>, <a href="qml-qtquick-context2d.html#createPattern-method">createPattern()</a>, <a href="qml-qtquick-context2d.html#fillStyle-prop">fillStyle</a>, and <a href="qml-qtquick-context2d.html#strokeStyle-prop">strokeStyle</a>.</p>
+</div></div><!-- @@@createConicalGradient -->
+<br/>
+<!-- $$$createImageData$$$createImageData -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="createImageData-method-2"></a><span class="type"><a href="qml-qtquick-canvasimagedata.html">CanvasImageData</a></span> <span class="name">createImageData</span>(<i>imageUrl</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a <a href="qml-qtquick-canvasimagedata.html">CanvasImageData</a> object with the given image loaded from <i>imageUrl</i>.</p>
+<p><b>Note: </b>The <i>imageUrl</i> must be already loaded before this function call, otherwise an empty <a href="qml-qtquick-canvasimagedata.html">CanvasImageData</a> obect will be returned.</p><p><b>See also </b><a href="qml-qtquick-canvas.html#loadImage-method">Canvas::loadImage()</a>, <a href="qml-qtquick-canvas.html#unloadImage-method">QtQuick::Canvas::unloadImage()</a>, and <a href="qml-qtquick-canvas.html#isImageLoaded-method">QtQuick::Canvas::isImageLoaded</a>.</p>
+</div></div><!-- @@@createImageData -->
+<br/>
+<!-- $$$createImageData$$$createImageData -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="createImageData-method-1"></a><span class="type"><a href="qml-qtquick-canvasimagedata.html">CanvasImageData</a></span> <span class="name">createImageData</span>(<i>imageData</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a <a href="qml-qtquick-canvasimagedata.html">CanvasImageData</a> object with the same dimensions as the argument.</p>
+</div></div><!-- @@@createImageData -->
+<br/>
+<!-- $$$createImageData[overload1]$$$createImageDatareal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="createImageData-method"></a><span class="type"><a href="qml-qtquick-canvasimagedata.html">CanvasImageData</a></span> <span class="name">createImageData</span>(<i>sw</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>sh</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a <a href="qml-qtquick-canvasimagedata.html">CanvasImageData</a> object with the given dimensions(<i>sw</i>, <i>sh</i>).</p>
+</div></div><!-- @@@createImageData -->
+<br/>
+<!-- $$$createLinearGradient[overload1]$$$createLinearGradientrealrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="createLinearGradient-method"></a><span class="type">object</span> <span class="name">createLinearGradient</span>(<i>x0</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y0</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>x1</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y1</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns a <a href="qml-qtquick-canvasgradient.html">CanvasGradient</a> object that represents a linear gradient that transitions the color along a line between the start point (<i>x0</i>, <i>y0</i>) and the end point (<i>x1</i>, <i>y1</i>).</p>
+<p>A gradient is a smooth transition between colors. There are two types of gradients: linear and radial. Gradients must have two or more color stops, representing color shifts positioned from 0 to 1 between to the gradient's starting and end points or circles.</p>
+<p><b>See also </b><a href="qml-qtquick-canvasgradient.html#addColorStop-method">CanvasGradient::addColorStop()</a>, <a href="qml-qtquick-context2d.html#createRadialGradient-method">createRadialGradient()</a>, <a href="qml-qtquick-context2d.html#createConicalGradient-method">createConicalGradient()</a>, <a href="qml-qtquick-context2d.html#createPattern-method">createPattern()</a>, <a href="qml-qtquick-context2d.html#fillStyle-prop">fillStyle</a>, and <a href="qml-qtquick-context2d.html#strokeStyle-prop">strokeStyle</a>.</p>
+</div></div><!-- @@@createLinearGradient -->
+<br/>
+<!-- $$$createPattern$$$createPatternstring -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="createPattern-method-1"></a><span class="type"><a href="../qtqml/qml-variant.html">variant</a></span> <span class="name">createPattern</span>(<i>image</i>,  <span class="type"><a href="../qtqml/qml-string.html">string</a></span> <i>repetition</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns a CanvasPattern object that uses the given image and repeats in the direction(s) given by the repetition argument.</p>
+<p>The <i>image</i> parameter must be a valid Image item, a valid <a href="qml-qtquick-canvasimagedata.html">CanvasImageData</a> object or loaded image url, if there is no image data, throws an INVALID_STATE_ERR exception.</p>
+<p>The allowed values for <i>repetition</i> are:</p>
+<ul>
+<li>&quot;repeat&quot; - both directions</li>
+<li>&quot;repeat-x - horizontal only</li>
+<li>&quot;repeat-y&quot; - vertical only</li>
+<li>&quot;no-repeat&quot; - neither</li>
+</ul>
+<p>If the repetition argument is empty or null, the value &quot;repeat&quot; is used.</p>
+<p><b>See also </b><a href="qml-qtquick-context2d.html#strokeStyle-prop">strokeStyle</a> and <a href="qml-qtquick-context2d.html#fillStyle-prop">fillStyle</a>.</p>
+</div></div><!-- @@@createPattern -->
+<br/>
+<!-- $$$createPattern[overload1]$$$createPatternenumeration -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="createPattern-method"></a><span class="type"><a href="../qtqml/qml-variant.html">variant</a></span> <span class="name">createPattern</span>(<i>color</i>,  <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span> <i>patternMode</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This is a overload function. Returns a CanvasPattern object that uses the given <i>color</i> and <i>patternMode</i>. The valid pattern modes are:</p>
+<ul>
+<li>Qt.SolidPattern</li>
+<li>Qt.Dense1Pattern</li>
+<li>Qt.Dense2Pattern</li>
+<li>Qt.Dense3Pattern</li>
+<li>Qt.Dense4Pattern</li>
+<li>Qt.Dense5Pattern</li>
+<li>Qt.Dense6Pattern</li>
+<li>Qt.Dense7Pattern</li>
+<li>Qt.HorPattern</li>
+<li>Qt.VerPattern</li>
+<li>Qt.CrossPattern</li>
+<li>Qt.BDiagPattern</li>
+<li>Qt.FDiagPattern</li>
+<li>Qt.DiagCrossPattern</li>
+</ul>
+<p><b>See also </b><a href="../qtcore/qt.html#BrushStyle-enum">Qt::BrushStyle</a>.</p>
+</div></div><!-- @@@createPattern -->
+<br/>
+<!-- $$$createRadialGradient[overload1]$$$createRadialGradientrealrealrealrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="createRadialGradient-method"></a><span class="type">object</span> <span class="name">createRadialGradient</span>(<i>x0</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y0</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>r0</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>x1</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y1</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>r1</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns a <a href="qml-qtquick-canvasgradient.html">CanvasGradient</a> object that represents a radial gradient that paints along the cone given by the start circle with origin (<i>x0</i>, <i>y0</i>) and radius <i>r0</i>, and the end circle with origin (<i>x1</i>, <i>y1</i>) and radius <i>r1</i>.</p>
+<p><b>See also </b><a href="qml-qtquick-canvasgradient.html#addColorStop-method">CanvasGradient::addColorStop()</a>, <a href="qml-qtquick-context2d.html#createLinearGradient-method">createLinearGradient()</a>, <a href="qml-qtquick-context2d.html#createConicalGradient-method">createConicalGradient()</a>, <a href="qml-qtquick-context2d.html#createPattern-method">createPattern()</a>, <a href="qml-qtquick-context2d.html#fillStyle-prop">fillStyle</a>, and <a href="qml-qtquick-context2d.html#strokeStyle-prop">strokeStyle</a>.</p>
+</div></div><!-- @@@createRadialGradient -->
+<br/>
+<!-- $$$drawImage$$$drawImagerealrealrealrealrealrealrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="drawImage-method-2"></a><span class="name">drawImage</span>(<i>image</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>sx</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>sy</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>sw</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>sh</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>dx</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>dy</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>dw</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>dh</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This is an overloaded function. Draws the given item as <i>image</i> from source point (<i>sx</i>, <i>sy</i>) and source width <i>sw</i>, source height <i>sh</i> onto the canvas at point (<i>dx</i>, <i>dy</i>) and with width <i>dw</i>, height <i>dh</i>.</p>
+<p>Note: The <i>image</i> type can be an Image or Canvas item, an image url or a <a href="qml-qtquick-canvasimagedata.html">CanvasImageData</a> object. When given as Image item, if the image isn't fully loaded, this method draws nothing. When given as url string, the image should be loaded by calling Canvas item's <a href="qml-qtquick-canvas.html#loadImage-method">Canvas::loadImage()</a> method first. This image been drawing is subject to the current context clip path, even the given <code>image</code> is a <a href="qml-qtquick-canvasimagedata.html">CanvasImageData</a> object.</p>
+<p><b>See also </b><a href="qml-qtquick-canvasimagedata.html">CanvasImageData</a>, <a href="qml-qtquick-image.html">Image</a>, <a href="qml-qtquick-canvas.html#loadImage-method">Canvas::loadImage()</a>, <a href="qml-qtquick-canvas.html#isImageLoaded-method">Canvas::isImageLoaded</a>, <a href="qml-qtquick-canvas.html#imageLoaded-signal">Canvas::imageLoaded</a>, and <a href="http://www.w3.org/TR/2dcontext/#dom-context-2d-drawimage">W3C 2d context standard for drawImage</a>.</p>
+</div></div><!-- @@@drawImage -->
+<br/>
+<!-- $$$drawImage$$$drawImagerealrealrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="drawImage-method-1"></a><span class="name">drawImage</span>(<i>image</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>dx</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>dy</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>dw</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>dh</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This is an overloaded function. Draws the given item as <i>image</i> onto the canvas at point (<i>dx</i>, <i>dy</i>) and with width <i>dw</i>, height <i>dh</i>.</p>
+<p>Note: The <i>image</i> type can be an Image item, an image url or a <a href="qml-qtquick-canvasimagedata.html">CanvasImageData</a> object. When given as Image item, if the image isn't fully loaded, this method draws nothing. When given as url string, the image should be loaded by calling Canvas item's <a href="qml-qtquick-canvas.html#loadImage-method">Canvas::loadImage()</a> method first. This image been drawing is subject to the current context clip path, even the given <code>image</code> is a <a href="qml-qtquick-canvasimagedata.html">CanvasImageData</a> object.</p>
+<p><b>See also </b><a href="qml-qtquick-canvasimagedata.html">CanvasImageData</a>, <a href="qml-qtquick-image.html">Image</a>, <a href="qml-qtquick-canvas.html#loadImage-method">Canvas::loadImage()</a>, <a href="qml-qtquick-canvas.html#isImageLoaded-method">Canvas::isImageLoaded</a>, <a href="qml-qtquick-canvas.html#imageLoaded-signal">Canvas::imageLoaded</a>, and <a href="http://www.w3.org/TR/2dcontext/#dom-context-2d-drawimage">W3C 2d context standard for drawImage</a>.</p>
+</div></div><!-- @@@drawImage -->
+<br/>
+<!-- $$$drawImage[overload1]$$$drawImagerealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="drawImage-method"></a><span class="name">drawImage</span>(<i>image</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>dx</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>dy</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Draws the given <i>image</i> on the canvas at position (<i>dx</i>, <i>dy</i>). Note: The <i>image</i> type can be an Image item, an image url or a <a href="qml-qtquick-canvasimagedata.html">CanvasImageData</a> object. When given as Image item, if the image isn't fully loaded, this method draws nothing. When given as url string, the image should be loaded by calling Canvas item's <a href="qml-qtquick-canvas.html#loadImage-method">Canvas::loadImage()</a> method first. This image been drawing is subject to the current context clip path, even the given <code>image</code> is a <a href="qml-qtquick-canvasimagedata.html">CanvasImageData</a> object.</p>
+<p><b>See also </b><a href="qml-qtquick-canvasimagedata.html">CanvasImageData</a>, <a href="qml-qtquick-image.html">Image</a>, <a href="qml-qtquick-canvas.html#loadImage-method">Canvas::loadImage</a>, <a href="qml-qtquick-canvas.html#isImageLoaded-method">Canvas::isImageLoaded</a>, <a href="qml-qtquick-canvas.html#imageLoaded-signal">Canvas::imageLoaded</a>, and <a href="http://www.w3.org/TR/2dcontext/#dom-context-2d-drawimage">W3C 2d context standard for drawImage</a>.</p>
+</div></div><!-- @@@drawImage -->
+<br/>
+<!-- $$$ellipse[overload1]$$$ellipserealrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="ellipse-method"></a><span class="type">object</span> <span class="name">ellipse</span>(<i>x</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>w</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>h</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates an ellipse within the bounding rectangle defined by its top-left corner at (<i>x</i>, <i>y</i>), width <i>w</i> and height <i>h</i>, and adds it to the path as a closed subpath.</p>
+<p>The ellipse is composed of a clockwise curve, starting and finishing at zero degrees (the 3 o'clock position).</p>
+</div></div><!-- @@@ellipse -->
+<br/>
+<!-- $$$fill[overload1]$$$fill -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="fill-method"></a><span class="type">object</span> <span class="name">fill</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Fills the subpaths with the current fill style.</p>
+<p><b>See also </b><a href="http://www.w3.org/TR/2dcontext/#dom-context-2d-fill">W3C 2d context standard for fill</a> and <a href="qml-qtquick-context2d.html#fillStyle-prop">fillStyle</a>.</p>
+</div></div><!-- @@@fill -->
+<br/>
+<!-- $$$fillRect[overload1]$$$fillRectrealrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="fillRect-method"></a><span class="type">object</span> <span class="name">fillRect</span>(<i>x</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>w</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>h</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Paints a rectangular area specified by (<i>x</i>, <i>y</i>, <i>w</i>, <i>h</i>) using <a href="qml-qtquick-context2d.html#fillStyle-prop">fillStyle</a>.</p>
+<p><b>See also </b><a href="qml-qtquick-context2d.html#fillStyle-prop">fillStyle</a>.</p>
+</div></div><!-- @@@fillRect -->
+<br/>
+<!-- $$$fillText[overload1]$$$fillText -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="fillText-method"></a><span class="type">object</span> <span class="name">fillText</span>(<i>text</i>, <i>x</i>, <i>y</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Fills the specified <i>text</i> at the given position (<i>x</i>, <i>y</i>).</p>
+<p><b>See also </b><a href="qml-qtquick-context2d.html#font-prop">font</a>, <a href="qml-qtquick-context2d.html#textAlign-prop">textAlign</a>, <a href="qml-qtquick-context2d.html#textBaseline-prop">textBaseline</a>, and <a href="qml-qtquick-context2d.html#strokeText-method">strokeText</a>.</p>
+</div></div><!-- @@@fillText -->
+<br/>
+<!-- $$$getImageData[overload1]$$$getImageDatarealrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="getImageData-method"></a><span class="type"><a href="qml-qtquick-canvasimagedata.html">CanvasImageData</a></span> <span class="name">getImageData</span>(<i>x</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>w</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>h</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns an <a href="qml-qtquick-canvasimagedata.html">CanvasImageData</a> object containing the image data for the canvas rectangle specified by (<i>x</i>, <i>y</i>, <i>w</i>, <i>h</i>).</p>
+</div></div><!-- @@@getImageData -->
+<br/>
+<!-- $$$getLineDash[overload1]$$$getLineDash -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="getLineDash-method"></a><span class="type">array</span> <span class="name">getLineDash</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns an array of qreals representing the dash pattern of the line.</p>
+<p>This method was introduced in  QtQuick 2.11.</p>
+<p><b>See also </b><a href="qml-qtquick-context2d.html#setLineDash-method">setLineDash()</a> and <a href="qml-qtquick-context2d.html#lineDashOffset-prop">lineDashOffset</a>.</p>
+</div></div><!-- @@@getLineDash -->
+<br/>
+<!-- $$$isPointInPath[overload1]$$$isPointInPathreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="isPointInPath-method"></a><span class="type">object</span> <span class="name">isPointInPath</span>(<i>x</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns <code>true</code> if the point (<i>x</i>, <i>y</i>) is in the current path.</p>
+<p><b>See also </b><a href="http://www.w3.org/TR/2dcontext/#dom-context-2d-ispointinpath">W3C 2d context standard for isPointInPath</a>.</p>
+</div></div><!-- @@@isPointInPath -->
+<br/>
+<!-- $$$lineTo[overload1]$$$lineToreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="lineTo-method"></a><span class="type">object</span> <span class="name">lineTo</span>(<i>x</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Draws a line from the current position to the point at (<i>x</i>, <i>y</i>).</p>
+</div></div><!-- @@@lineTo -->
+<br/>
+<!-- $$$measureText[overload1]$$$measureText -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="measureText-method"></a><span class="type">object</span> <span class="name">measureText</span>(<i>text</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns an object with a <code>width</code> property, whose value is equivalent to calling <a href="../qtgui/qfontmetrics-obsolete.html#width">QFontMetrics::width()</a> with the given <i>text</i> in the current font.</p>
+</div></div><!-- @@@measureText -->
+<br/>
+<!-- $$$moveTo[overload1]$$$moveToreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="moveTo-method"></a><span class="type">object</span> <span class="name">moveTo</span>(<i>x</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a new subpath with a point at (<i>x</i>, <i>y</i>).</p>
+</div></div><!-- @@@moveTo -->
+<br/>
+<!-- $$$putImageData[overload1]$$$putImageDatarealrealrealrealrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="putImageData-method"></a><span class="type">object</span> <span class="name">putImageData</span>(<i>imageData</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>dx</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>dy</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>dirtyX</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>dirtyY</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>dirtyWidth</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>dirtyHeight</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Paints the data from the given <i>imageData</i> object onto the canvas at (<i>dx</i>, <i>dy</i>).</p>
+<p>If a dirty rectangle (<i>dirtyX</i>, <i>dirtyY</i>, <i>dirtyWidth</i>, <i>dirtyHeight</i>) is provided, only the pixels from that rectangle are painted.</p>
+</div></div><!-- @@@putImageData -->
+<br/>
+<!-- $$$quadraticCurveTo[overload1]$$$quadraticCurveTorealrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="quadraticCurveTo-method"></a><span class="type">object</span> <span class="name">quadraticCurveTo</span>(<i>cpx</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>cpy</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>x</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Adds a quadratic bezier curve between the current point and the endpoint (<i>x</i>, <i>y</i>) with the control point specified by (<i>cpx</i>, <i>cpy</i>).</p>
+<p><b>See also </b><a href="http://www.w3.org/TR/2dcontext/#dom-context-2d-quadraticcurveto">W3C 2d context standard for quadraticCurveTo</a>.</p>
+</div></div><!-- @@@quadraticCurveTo -->
+<br/>
+<!-- $$$rect[overload1]$$$rectrealrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="rect-method"></a><span class="type">object</span> <span class="name">rect</span>(<i>x</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>w</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>h</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Adds a rectangle at position (<i>x</i>, <i>y</i>), with the given width <i>w</i> and height <i>h</i>, as a closed subpath.</p>
+</div></div><!-- @@@rect -->
+<br/>
+<!-- $$$reset[overload1]$$$reset -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="reset-method"></a><span class="type">object</span> <span class="name">reset</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Resets the context state and properties to the default values.</p>
+</div></div><!-- @@@reset -->
+<br/>
+<!-- $$$resetTransform[overload1]$$$resetTransform -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="resetTransform-method"></a><span class="type">object</span> <span class="name">resetTransform</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Reset the transformation matrix to the default value (equivalent to calling <a href="qml-qtquick-context2d.html#setTransform-method">setTransform</a>(<code>1</code>, <code>0</code>, <code>0</code>, <code>1</code>, <code>0</code>, <code>0</code>)).</p>
+<p><b>See also </b><a href="qml-qtquick-context2d.html#transform-method">transform()</a>, <a href="qml-qtquick-context2d.html#setTransform-method">setTransform()</a>, and <a href="qml-qtquick-context2d.html#reset-method">reset()</a>.</p>
+</div></div><!-- @@@resetTransform -->
+<br/>
+<!-- $$$restore[overload1]$$$restore -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="restore-method"></a><span class="type">object</span> <span class="name">restore</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Pops the top state on the stack, restoring the context to that state.</p>
+<p><b>See also </b><a href="qml-qtquick-context2d.html#save-method">save()</a>.</p>
+</div></div><!-- @@@restore -->
+<br/>
+<!-- $$$rotate[overload1]$$$rotate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="rotate-method"></a><span class="type">object</span> <span class="name">rotate</span>(<i>angle</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Rotate the canvas around the current origin by <i>angle</i> in radians and clockwise direction.</p>
+<pre class="cpp">
+
+  ctx<span class="operator">.</span>rotate(Math<span class="operator">.</span>PI<span class="operator">/</span><span class="number">2</span>);
+
+</pre>
+<p class="centerAlign"><img src="images/qml-item-canvas-rotate.png" alt="" /></p><p>The rotation transformation matrix is as follows:</p>
+<p class="centerAlign"><img src="images/qml-item-canvas-math-rotate.png" alt="" /></p><p>where the <i>angle</i> of rotation is in radians.</p>
+</div></div><!-- @@@rotate -->
+<br/>
+<!-- $$$roundedRect[overload1]$$$roundedRectrealrealrealrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="roundedRect-method"></a><span class="type">object</span> <span class="name">roundedRect</span>(<i>x</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>w</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>h</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>xRadius</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>yRadius</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Adds a rounded-corner rectangle, specified by (<i>x</i>, <i>y</i>, <i>w</i>, <i>h</i>), to the path. The <i>xRadius</i> and <i>yRadius</i> arguments specify the radius of the ellipses defining the corners of the rounded rectangle.</p>
+</div></div><!-- @@@roundedRect -->
+<br/>
+<!-- $$$save[overload1]$$$save -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="save-method"></a><span class="type">object</span> <span class="name">save</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Pushes the current state onto the state stack.</p>
+<p>Before changing any state attributes, you should save the current state for future reference. The context maintains a stack of drawing states. Each state consists of the current transformation matrix, clipping region, and values of the following attributes:</p>
+<ul>
+<li><a href="qml-qtquick-context2d.html#strokeStyle-prop">strokeStyle</a></li>
+<li><a href="qml-qtquick-context2d.html#fillStyle-prop">fillStyle</a></li>
+<li><a href="qml-qtquick-context2d.html#fillRule-prop">fillRule</a></li>
+<li><a href="qml-qtquick-context2d.html#globalAlpha-prop">globalAlpha</a></li>
+<li><a href="qml-qtquick-context2d.html#lineWidth-prop">lineWidth</a></li>
+<li><a href="qml-qtquick-context2d.html#lineCap-prop">lineCap</a></li>
+<li><a href="qml-qtquick-context2d.html#lineJoin-prop">lineJoin</a></li>
+<li><a href="qml-qtquick-context2d.html#miterLimit-prop">miterLimit</a></li>
+<li><a href="qml-qtquick-context2d.html#shadowOffsetX-prop">shadowOffsetX</a></li>
+<li><a href="qml-qtquick-context2d.html#shadowOffsetY-prop">shadowOffsetY</a></li>
+<li><a href="qml-qtquick-context2d.html#shadowBlur-prop">shadowBlur</a></li>
+<li><a href="qml-qtquick-context2d.html#shadowColor-prop">shadowColor</a></li>
+<li><a href="qml-qtquick-context2d.html#globalCompositeOperation-prop">globalCompositeOperation</a></li>
+<li><a href="qml-qtquick-context2d.html#font-prop">font</a></li>
+<li><a href="qml-qtquick-context2d.html#textAlign-prop">textAlign</a></li>
+<li><a href="qml-qtquick-context2d.html#textBaseline-prop">textBaseline</a></li>
+</ul>
+<p>The current path is NOT part of the drawing state. The path can be reset by invoking the <a href="qml-qtquick-context2d.html#beginPath-method">beginPath()</a> method.</p>
+</div></div><!-- @@@save -->
+<br/>
+<!-- $$$scale[overload1]$$$scalereal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="scale-method"></a><span class="type">object</span> <span class="name">scale</span>(<i>x</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Increases or decreases the size of each unit in the canvas grid by multiplying the scale factors to the current tranform matrix. <i>x</i> is the scale factor in the horizontal direction and <i>y</i> is the scale factor in the vertical direction.</p>
+<p>The following code doubles the horizontal size of an object drawn on the canvas and halves its vertical size:</p>
+<pre class="cpp">
+
+  ctx<span class="operator">.</span>scale(<span class="number">2.0</span><span class="operator">,</span> <span class="number">0.5</span>);
+
+</pre>
+<p class="centerAlign"><img src="images/qml-item-canvas-scale.png" alt="" /></p></div></div><!-- @@@scale -->
+<br/>
+<!-- $$$setLineDash[overload1]$$$setLineDash -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="setLineDash-method"></a><span class="name">setLineDash</span>(<i>pattern</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Sets the dash pattern to the given pattern.</p>
+<p><i>pattern</i> a list of numbers that specifies distances to alternately draw a line and a gap.</p>
+<p>If the number of elements in the array is odd, the elements of the array get copied and concatenated. For example, [5, 15, 25] will become [5, 15, 25, 5, 15, 25].</p>
+<div class="table"><table class="generic" width="100%">
+ <tr valign="top" class="odd"><td ><img src="images/qml-item-canvas-lineDash.png" alt="" /></td><td ><pre class="cpp">
+
+  var space <span class="operator">=</span> <span class="number">4</span>
+  ctx<span class="operator">.</span>setLineDash(<span class="operator">[</span><span class="number">1</span><span class="operator">,</span> space<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> space<span class="operator">,</span> <span class="number">9</span><span class="operator">,</span> space<span class="operator">,</span> <span class="number">27</span><span class="operator">,</span> space<span class="operator">,</span> <span class="number">9</span><span class="operator">,</span> space<span class="operator">]</span>)
+  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  ctx<span class="operator">.</span>stroke();
+
+</pre>
+</td></tr>
+</table></div>
+<p>This method was introduced in  QtQuick 2.11.</p>
+<p><b>See also </b><a href="qml-qtquick-context2d.html#getLineDash-method">getLineDash()</a> and <a href="qml-qtquick-context2d.html#lineDashOffset-prop">lineDashOffset</a>.</p>
+</div></div><!-- @@@setLineDash -->
+<br/>
+<!-- $$$setTransform[overload1]$$$setTransformrealrealrealrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="setTransform-method"></a><span class="type">object</span> <span class="name">setTransform</span>(<i>a</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>b</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>c</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>d</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>e</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>f</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Changes the transformation matrix to the matrix given by the arguments as described below.</p>
+<p>Modifying the transformation matrix directly enables you to perform scaling, rotating, and translating transformations in a single step.</p>
+<p>Each point on the canvas is multiplied by the matrix before anything is drawn. The <a href="http://www.w3.org/TR/2dcontext/#transformations">HTML Canvas 2D Context specification</a> defines the transformation matrix as:</p>
+<p class="centerAlign"><img src="images/qml-item-canvas-math.png" alt="" /></p><p>where:</p>
+<ul>
+<li><i>a</i> is the scale factor in the horizontal (x) direction<p class="centerAlign"><img src="images/qml-item-canvas-scalex.png" alt="" /></p></li>
+<li><i>c</i> is the skew factor in the x direction<p class="centerAlign"><img src="images/qml-item-canvas-skewx.png" alt="" /></p></li>
+<li><i>e</i> is the translation in the x direction<p class="centerAlign"><img src="images/qml-item-canvas-translate.png" alt="" /></p></li>
+<li><i>b</i> is the skew factor in the y (vertical) direction<p class="centerAlign"><img src="images/qml-item-canvas-skewy.png" alt="" /></p></li>
+<li><i>d</i> is the scale factor in the y direction<p class="centerAlign"><img src="images/qml-item-canvas-scaley.png" alt="" /></p></li>
+<li><i>f</i> is the translation in the y direction<p class="centerAlign"><img src="images/qml-item-canvas-translatey.png" alt="" /></p></li>
+<li>the last row remains constant</li>
+</ul>
+<p>The scale factors and skew factors are multiples; <i>e</i> and <i>f</i> are coordinate space units, just like the units in the translate(x,y) method.</p>
+<p><b>See also </b><a href="qml-qtquick-context2d.html#transform-method">transform()</a>.</p>
+</div></div><!-- @@@setTransform -->
+<br/>
+<!-- $$$shear[overload1]$$$shearreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="shear-method"></a><span class="type">object</span> <span class="name">shear</span>(<i>sh</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>sv</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Shears the transformation matrix by <i>sh</i> in the horizontal direction and <i>sv</i> in the vertical direction.</p>
+</div></div><!-- @@@shear -->
+<br/>
+<!-- $$$stroke[overload1]$$$stroke -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="stroke-method"></a><span class="type">object</span> <span class="name">stroke</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Strokes the subpaths with the current stroke style.</p>
+<p><b>See also </b><a href="qml-qtquick-context2d.html#strokeStyle-prop">strokeStyle</a> and <a href="http://www.w3.org/TR/2dcontext/#dom-context-2d-stroke">W3C 2d context standard for stroke</a>.</p>
+</div></div><!-- @@@stroke -->
+<br/>
+<!-- $$$strokeRect[overload1]$$$strokeRectrealrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="strokeRect-method"></a><span class="type">object</span> <span class="name">strokeRect</span>(<i>x</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>w</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>h</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Strokes the path of the rectangle specified by (<i>x</i>, <i>y</i>, <i>w</i>, <i>h</i>) using <a href="qml-qtquick-context2d.html#strokeStyle-prop">strokeStyle</a>, <a href="qml-qtquick-context2d.html#lineWidth-prop">lineWidth</a>, <a href="qml-qtquick-context2d.html#lineJoin-prop">lineJoin</a>, and (if appropriate) <a href="qml-qtquick-context2d.html#miterLimit-prop">miterLimit</a> attributes.</p>
+<p><b>See also </b><a href="qml-qtquick-context2d.html#strokeStyle-prop">strokeStyle</a>, <a href="qml-qtquick-context2d.html#lineWidth-prop">lineWidth</a>, <a href="qml-qtquick-context2d.html#lineJoin-prop">lineJoin</a>, and <a href="qml-qtquick-context2d.html#miterLimit-prop">miterLimit</a>.</p>
+</div></div><!-- @@@strokeRect -->
+<br/>
+<!-- $$$strokeText[overload1]$$$strokeText -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="strokeText-method"></a><span class="type">object</span> <span class="name">strokeText</span>(<i>text</i>, <i>x</i>, <i>y</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Strokes the given <i>text</i> at a position specified by (<i>x</i>, <i>y</i>).</p>
+<p><b>See also </b><a href="qml-qtquick-context2d.html#font-prop">font</a>, <a href="qml-qtquick-context2d.html#textAlign-prop">textAlign</a>, <a href="qml-qtquick-context2d.html#textBaseline-prop">textBaseline</a>, and <a href="qml-qtquick-context2d.html#fillText-method">fillText</a>.</p>
+</div></div><!-- @@@strokeText -->
+<br/>
+<!-- $$$text[overload1]$$$textrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="text-method"></a><span class="type">object</span> <span class="name">text</span>(<i>text</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>x</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Adds the given <i>text</i> to the path as a set of closed subpaths created from the current context font supplied.</p>
+<p>The subpaths are positioned so that the left end of the text's baseline lies at the point specified by (<i>x</i>, <i>y</i>).</p>
+</div></div><!-- @@@text -->
+<br/>
+<!-- $$$transform[overload1]$$$transformrealrealrealrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="transform-method"></a><span class="type">object</span> <span class="name">transform</span>(<i>a</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>b</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>c</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>d</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>e</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>f</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This method is very similar to <a href="qml-qtquick-context2d.html#setTransform-method">setTransform()</a>, but instead of replacing the old transform matrix, this method applies the given tranform matrix to the current matrix by multiplying to it.</p>
+<p>The <a href="qml-qtquick-context2d.html#setTransform-method">setTransform</a>(<i>a</i>, <i>b</i>, <i>c</i>, <i>d</i>, <i>e</i>, <i>f</i>) method actually resets the current transform to the identity matrix, and then invokes the transform(<i>a</i>, <i>b</i>, <i>c</i>, <i>d</i>, <i>e</i>, <i>f</i>) method with the same arguments.</p>
+<p><b>See also </b><a href="qml-qtquick-context2d.html#setTransform-method">setTransform()</a>.</p>
+</div></div><!-- @@@transform -->
+<br/>
+<!-- $$$translate[overload1]$$$translatereal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="translate-method"></a><span class="type">object</span> <span class="name">translate</span>(<i>x</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Translates the origin of the canvas by a horizontal distance of <i>x</i>, and a vertical distance of <i>y</i>, in coordinate space units.</p>
+<p>Translating the origin enables you to draw patterns of different objects on the canvas without having to measure the coordinates manually for each shape.</p>
+</div></div><!-- @@@translate -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qbs.qdoc -->
+  <title>Configuring Profiles and Preferences | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td><td >Configuring Profiles and Preferences</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="installing.html" />
+  <link rel="next" href="qt-versions.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="installing.html">Installing</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qt-versions.html">Managing Qt Versions</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#setting-up-toolchain-profiles">Setting Up Toolchain Profiles</a></li>
+<li class="level1"><a href="#global-preferences">Global Preferences</a></li>
+<li class="level1"><a href="#managing-profiles-and-preferences">Managing Profiles and Preferences</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Configuring Profiles and Preferences</h1>
+<span class="subtitle"></span>
+<!-- $$$configuring.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Profiles contain properties that apply to one or more projects. They are stored independently of the project files and are usually not shared between build hosts. Typically, profiles contain module properties, such as installation paths of tools or libraries on the host computer. This approach has the following advantages, among others:</p>
+<ul>
+<li>Team members with different computer setups can work together smoothly because no host-specific settings end up in the project files.</li>
+<li>Different versions of a tool or library can be used to build the same project without affecting each other.</li>
+</ul>
+<p>For example, a profile for building C++ applications contains at least the installation path and the type of the compiler toolchain. A profile for building Qt applications contains the toolchain-specific properties as well as <a href="qt-modules.html#qt-specific-module-provider-properties">the path to the Qt installation</a>.</p>
+<p>This topic describes profiles stored in the Qbs settings. In some cases it might be beneficial to keep profiles explicitly in the project sources. This can be achieved with the <a href="qml-qbslanguageitems-profile.html">Profile</a> item.</p>
+<a name="setting-up-toolchain-profiles"></a>
+<h2 id="setting-up-toolchain-profiles">Setting Up Toolchain Profiles</h2>
+<p>Qbs comes with a helper tool <a href="cli-setup-toolchains.html#">setup-toolchains</a> that can create profiles for many toolchains. Open a terminal window and type:</p>
+<pre class="cpp">
+
+  qbs setup<span class="operator">-</span>toolchains <span class="operator">-</span><span class="operator">-</span>detect
+
+</pre>
+<p>This will automatically set up a profile for each detected toolchain on your computer. You can list the existing profiles by running:</p>
+<pre class="cpp">
+
+  qbs config <span class="operator">-</span><span class="operator">-</span>list profiles
+
+</pre>
+<p>Some toolchains, especially for bare-metal targets, may require additional module properties. Those can be added with the <a href="cli-config.html#">config</a> or the <a href="cli-config-ui.html#">config-ui</a> tools. Now you should be ready to build your first project with Qbs. Go into examples/helloworld-minimal and type:</p>
+<pre class="cpp">
+
+  qbs build profile:<span class="operator">&lt;</span>profile name<span class="operator">&gt;</span>
+
+</pre>
+<p>You have successfully built your first Qbs project. If you want to build projects that use Qt, additional steps might be necessary. Please refer to <a href="qt-versions.html#">Managing Qt Versions</a> for more information.</p>
+<a name="global-preferences"></a>
+<h2 id="global-preferences">Global Preferences</h2>
+<p>In addition to profiles, Qbs provides some global preferences such as <code>qbsSearchPaths</code> and <code>defaultProfile</code>.</p>
+<a name="managing-profiles-and-preferences"></a>
+<h2 id="managing-profiles-and-preferences">Managing Profiles and Preferences</h2>
+<p>You can use the <a href="cli-config.html#">config</a> command to manage all Qbs configuration settings, such as profiles and global preferences from the command line, for example:</p>
+<pre class="cpp">
+
+  qbs config profiles<span class="operator">.</span><span class="operator">&lt;</span>someprofile<span class="operator">&gt;</span><span class="operator">.</span>qbs<span class="operator">.</span>architecture arm
+
+</pre>
+<p>For convenience, Qbs provides a tool <a href="cli-config-ui.html#">config-ui</a> where you can manage the settings in a hierarchical view.</p>
+<p class="centerAlign"><img src="images/qbs-settings-gui.png" alt="" /></p><p>Qbs Settings displays the keys in the specified settings directory and their values. To expand all keys, select <b>View</b> &gt; <b>Expand All</b> (<b>Ctrl+E</b> or <b>Cmd+E</b> on macOS). To collapse all keys, select <b>Collapse All</b> (<b>Ctrl+C</b> or <b>Cmd+C</b>).</p>
+<p>To change the value of a key, double-click it and enter the new value.</p>
+<p>To save your changes, select <b>File</b> &gt; <b>Save</b>.</p>
+<p>To refresh the settings from the settings directory, select <b>File</b> &gt; <b>Reload</b>.</p>
+</div>
+<!-- @@@configuring.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="installing.html">Installing</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qt-versions.html">Managing Qt Versions</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

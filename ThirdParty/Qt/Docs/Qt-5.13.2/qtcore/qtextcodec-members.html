@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtextcodec.cpp -->
+  <title>List of All Members for QTextCodec | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QTextCodec</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">List of All Members for QTextCodec</h1>
+<p>This is the complete list of members for <a href="qtextcodec.html">QTextCodec</a>, including inherited members.</p>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn">enum <span class="name"><b><a href="qtextcodec.html#ConversionFlag-enum">ConversionFlag</a></b></span></li>
+<li class="fn">flags <span class="name"><b><a href="qtextcodec.html#ConversionFlag-enum">ConversionFlags</a></b></span></li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#QTextCodec-1">QTextCodec</a></b></span>()</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#dtor.QTextCodec">~QTextCodec</a></b></span>()</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#aliases">aliases</a></b></span>() const : QList&lt;QByteArray&gt;</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#availableCodecs">availableCodecs</a></b></span>() : QList&lt;QByteArray&gt;</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#availableMibs">availableMibs</a></b></span>() : QList&lt;int&gt;</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#canEncode">canEncode</a></b></span>(QChar ) const : bool</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#canEncode-1">canEncode</a></b></span>(const QString &amp;) const : bool</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#canEncode-2">canEncode</a></b></span>(QStringView ) const : bool</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#codecForHtml">codecForHtml</a></b></span>(const QByteArray &amp;, QTextCodec *) : QTextCodec *</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#codecForHtml-1">codecForHtml</a></b></span>(const QByteArray &amp;) : QTextCodec *</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#codecForLocale">codecForLocale</a></b></span>() : QTextCodec *</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#codecForMib">codecForMib</a></b></span>(int ) : QTextCodec *</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#codecForName">codecForName</a></b></span>(const QByteArray &amp;) : QTextCodec *</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#codecForName-1">codecForName</a></b></span>(const char *) : QTextCodec *</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#codecForUtfText">codecForUtfText</a></b></span>(const QByteArray &amp;, QTextCodec *) : QTextCodec *</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#codecForUtfText-1">codecForUtfText</a></b></span>(const QByteArray &amp;) : QTextCodec *</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#convertFromUnicode">convertFromUnicode</a></b></span>(const QChar *, int , QTextCodec::ConverterState *) const : QByteArray</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#convertToUnicode">convertToUnicode</a></b></span>(const char *, int , QTextCodec::ConverterState *) const : QString</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#fromUnicode">fromUnicode</a></b></span>(const QString &amp;) const : QByteArray</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#fromUnicode-1">fromUnicode</a></b></span>(QStringView ) const : QByteArray</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#fromUnicode-2">fromUnicode</a></b></span>(const QChar *, int , QTextCodec::ConverterState *) const : QByteArray</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#makeDecoder">makeDecoder</a></b></span>(QTextCodec::ConversionFlags ) const : QTextDecoder *</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#makeEncoder">makeEncoder</a></b></span>(QTextCodec::ConversionFlags ) const : QTextEncoder *</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#mibEnum">mibEnum</a></b></span>() const : int</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#name">name</a></b></span>() const : QByteArray</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#setCodecForLocale">setCodecForLocale</a></b></span>(QTextCodec *)</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#toUnicode">toUnicode</a></b></span>(const QByteArray &amp;) const : QString</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#toUnicode-1">toUnicode</a></b></span>(const char *) const : QString</li>
+<li class="fn"><span class="name"><b><a href="qtextcodec.html#toUnicode-2">toUnicode</a></b></span>(const char *, int , QTextCodec::ConverterState *) const : QString</li>
+</ul>
+</td></tr>
+</table></div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

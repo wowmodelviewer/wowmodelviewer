@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmlextracontrollers.qdoc -->
+  <title>OrbitCameraController QML Type | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-qml.html">QML Types</a></td><td >OrbitCameraController QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">OrbitCameraController QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$OrbitCameraController-brief -->
+<p>The <a href="qml-qt3d-extras-orbitcameracontroller.html">OrbitCameraController</a> class allows controlling the scene camera along orbital path. <a href="#details">More...</a></p>
+<!-- @@@OrbitCameraController -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import Qt3D.Extras 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr></table></div><ul>
+<li><a href="qml-qt3d-extras-orbitcameracontroller-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qt3d-extras-orbitcameracontroller.html#camera-prop">camera</a></b></b> : Camera</li>
+<li class="fn"><b><b><a href="qml-qt3d-extras-orbitcameracontroller.html#linearSpeed-prop">linearSpeed</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qt3d-extras-orbitcameracontroller.html#lookSpeed-prop">lookSpeed</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qt3d-extras-orbitcameracontroller.html#zoomLimit-prop">zoomLimit</a></b></b> : real</li>
+</ul>
+<!-- $$$OrbitCameraController-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qml-qt3d-extras-orbitcameracontroller.html">OrbitCameraController</a> class allows controlling the scene camera along orbital path.</p>
+<p>The controls are:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Input</th><th >Action</th></tr></thead>
+<tr valign="top" class="odd"><td >Left mouse button</td><td >While the left mouse button is pressed, mouse movement along x-axis moves the camera left and right and movement along y-axis moves it up and down.</td></tr>
+<tr valign="top" class="even"><td >Right mouse button</td><td >While the right mouse button is pressed, mouse movement along x-axis pans the camera around the camera view center and movement along y-axis tilts it around the camera view center.</td></tr>
+<tr valign="top" class="odd"><td >Both left and right mouse button</td><td >While both the left and the right mouse button are pressed, mouse movement along y-axis zooms the camera in and out without changing the view center.</td></tr>
+<tr valign="top" class="even"><td >Arrow keys</td><td >Move the camera vertically and horizontally relative to camera viewport.</td></tr>
+<tr valign="top" class="odd"><td >Page up and page down keys</td><td >Move the camera forwards and backwards.</td></tr>
+<tr valign="top" class="even"><td >Shift key</td><td >Changes the behavior of the up and down arrow keys to zoom the camera in and out without changing the view center. The other movement keys are disabled.</td></tr>
+<tr valign="top" class="odd"><td >Alt key</td><td >Changes the behovior of the arrow keys to pan and tilt the camera around the view center. Disables the page up and page down keys.</td></tr>
+</table></div>
+<!-- @@@OrbitCameraController -->
+<h2>Property Documentation</h2>
+<!-- $$$camera -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="camera-prop"></a><span class="name">camera</span> : <span class="type"><a href="qml-qt3d-render-camera.html">Camera</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the currently controlled camera.</p>
+</div></div><!-- @@@camera -->
+<br/>
+<!-- $$$linearSpeed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="linearSpeed-prop"></a><span class="name">linearSpeed</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the current linear speed of the camera controller. Linear speed determines the movement speed of the camera.</p>
+</div></div><!-- @@@linearSpeed -->
+<br/>
+<!-- $$$lookSpeed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="lookSpeed-prop"></a><span class="name">lookSpeed</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the current look speed of the camera controller. The look speed determines the turn rate of the camera pan and tilt.</p>
+</div></div><!-- @@@lookSpeed -->
+<br/>
+<!-- $$$zoomLimit -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="zoomLimit-prop"></a><span class="name">zoomLimit</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the current zoom-in limit. The zoom-in limit determines how close to the view center the camera can be zoomed.</p>
+</div></div><!-- @@@zoomLimit -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

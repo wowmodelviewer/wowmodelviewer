@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qenvironmentlight.cpp -->
+  <title>QEnvironmentLight Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QEnvironmentLight</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QEnvironmentLight Class</h1>
+<span class="small-subtitle">(<a href="qt3drender-qenvironmentlight.html">Qt3DRender::QEnvironmentLight</a>)<br/></span>
+<!-- $$$QEnvironmentLight-brief -->
+<p>Encapsulate an environment light object in a Qt 3D scene. <a href="#details">More...</a></p>
+<!-- @@@QEnvironmentLight -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QEnvironmentLight&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3drender</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.9</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-environmentlight.html">EnvironmentLight</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3dcore-qcomponent.html">Qt3DCore::QComponent</a></td></tr></table></div><p>This class was introduced in  Qt 5.9.</p>
+<ul>
+<li><a href="qt3drender-qenvironmentlight-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qt3drender-qenvironmentlight.html#irradiance-prop">irradiance</a></b> : Qt3DRender::QAbstractTexture*</li>
+<li class="fn"><b><a href="qt3drender-qenvironmentlight.html#specular-prop">specular</a></b> : Qt3DRender::QAbstractTexture*</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QAbstractTexture *</td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qenvironmentlight.html#irradiance-prop">irradiance</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QAbstractTexture *</td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qenvironmentlight.html#specular-prop">specular</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qenvironmentlight.html#irradiance-prop">setIrradiance</a></b>(Qt3DRender::QAbstractTexture *<i>irradiance</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qenvironmentlight.html#specular-prop">setSpecular</a></b>(Qt3DRender::QAbstractTexture *<i>specular</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qenvironmentlight.html#irradiance-prop">irradianceChanged</a></b>(Qt3DRender::QAbstractTexture *<i>environmentIrradiance</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qenvironmentlight.html#specular-prop">specularChanged</a></b>(Qt3DRender::QAbstractTexture *<i>environmentSpecular</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QEnvironmentLight-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qt3drender-qenvironmentlight.html">QEnvironmentLight</a> uses cubemaps to implement image-based lighting (IBL), a technique often used in conjunction with physically-based rendering (PBR). The cubemaps are typically expected be based on high dynamic range (HDR) images, with a suitable OpenGL format (such as RGBA16F) that can handle the increased range of values.</p>
+<p>There are a variety of tools that can be used to produce the cubemaps needed by <a href="qt3drender-qenvironmentlight.html">QEnvironmentLight</a>. Some examples include</p>
+<ul>
+<li><a href="https://github.com/dariomanesku/cmftStudio">cmftStudio</a></li>
+<li><a href="https://github.com/derkreature/IBLBaker">IBLBaker</a></li>
+<li><a href="https://www.knaldtech.com/lys/">Lys</a></li>
+</ul>
+<p><a href="https://hdrihaven.com/hdris/">HDRI Haven</a> provides many CC0-licensed HDR images that can be used as source material for the above tools.</p>
+</div>
+<!-- @@@QEnvironmentLight -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$irradiance-prop$$$irradiance$$$setIrradianceQt3DRender::QAbstractTexture*$$$irradianceChangedQt3DRender::QAbstractTexture* -->
+<h3 class="fn" id="irradiance-prop"><a name="irradiance-prop"></a><span class="name">irradiance</span> : <span class="type"><a href="qt3drender-qabstracttexture.html">Qt3DRender::QAbstractTexture</a></span>*</h3>
+<p>Holds the current environment irradiance map texture.</p>
+<p>By default, the environment irradiance texture is null.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QAbstractTexture *</td><td class="memItemRight bottomAlign"><span class="name"><b>irradiance</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setIrradiance</b></span>(Qt3DRender::QAbstractTexture *<i>irradiance</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>irradianceChanged</b></span>(Qt3DRender::QAbstractTexture *<i>environmentIrradiance</i>)</td></tr>
+</table></div>
+<!-- @@@irradiance -->
+<!-- $$$specular-prop$$$specular$$$setSpecularQt3DRender::QAbstractTexture*$$$specularChangedQt3DRender::QAbstractTexture* -->
+<h3 class="fn" id="specular-prop"><a name="specular-prop"></a><span class="name">specular</span> : <span class="type"><a href="qt3drender-qabstracttexture.html">Qt3DRender::QAbstractTexture</a></span>*</h3>
+<p>Holds the current environment specular map texture.</p>
+<p>By default, the environment specular texture is null.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QAbstractTexture *</td><td class="memItemRight bottomAlign"><span class="name"><b>specular</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setSpecular</b></span>(Qt3DRender::QAbstractTexture *<i>specular</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>specularChanged</b></span>(Qt3DRender::QAbstractTexture *<i>environmentSpecular</i>)</td></tr>
+</table></div>
+<!-- @@@specular -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

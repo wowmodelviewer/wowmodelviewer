@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- signaltransition.cpp -->
+  <title>QAbstractTransition QML Type | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td ><a href="qtqml-qmlmodule.html">QML Types</a></td><td >QAbstractTransition QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAbstractTransition QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$QAbstractTransition-brief -->
+<p>The <a href="qml-qtqml-statemachine-qabstracttransition.html">QAbstractTransition</a> type is the base type of transitions between <a href="qml-qtqml-statemachine-qabstractstate.html">QAbstractState</a> objects. <a href="#details">More...</a></p>
+<!-- @@@QAbstractTransition -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQml.StateMachine 1.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.4</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtqml-statemachine-qsignaltransition.html">QSignalTransition</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtqml-statemachine-qabstracttransition-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtqml-statemachine-qabstracttransition.html#sourceState-prop">sourceState</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtqml-statemachine-qabstracttransition.html#targetState-prop">targetState</a></b></b> : QAbstractState</li>
+<li class="fn"><b><b><a href="qml-qtqml-statemachine-qabstracttransition.html#targetStates-prop">targetStates</a></b></b> : list&lt;QAbstractState&gt;</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtqml-statemachine-qabstracttransition.html#triggered-signal">triggered</a></b></b>()</li>
+</ul>
+<!-- $$$QAbstractTransition-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qml-qtqml-statemachine-qabstracttransition.html">QAbstractTransition</a> type is the abstract base type of transitions between states (<a href="qml-qtqml-statemachine-qabstractstate.html">QAbstractState</a> objects) of a <a href="qml-qtqml-statemachine-statemachine.html">StateMachine</a>. <a href="qml-qtqml-statemachine-qabstracttransition.html">QAbstractTransition</a> is part of <a href="qmlstatemachine.html">The Declarative State Machine Framework</a>.</p>
+<p>The sourceState() property has the source of the transition. The <a href="qml-qtqml-statemachine-qabstracttransition.html#targetState-prop">targetState</a> and <a href="qml-qtqml-statemachine-qabstracttransition.html#targetStates-prop">targetStates</a> properties return the target(s) of the transition.</p>
+<p>The <a href="qml-qtqml-statemachine-qabstracttransition.html#triggered-signal">triggered()</a> signal is emitted when the transition has been triggered.</p>
+<p>Do not use <a href="qml-qtqml-statemachine-qabstracttransition.html">QAbstractTransition</a> directly; use <a href="qml-qtqml-statemachine-signaltransition.html">SignalTransition</a> or <a href="qml-qtqml-statemachine-timeouttransition.html">TimeoutTransition</a> instead.</p>
+<p><b>See also </b><a href="qml-qtqml-statemachine-signaltransition.html">SignalTransition</a> and <a href="qml-qtqml-statemachine-timeouttransition.html">TimeoutTransition</a>.</p>
+<!-- @@@QAbstractTransition -->
+<h2>Property Documentation</h2>
+<!-- $$$sourceState -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="sourceState-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">sourceState</span> : <span class="type"><a href="qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The source state (parent) of this transition.</p>
+</div></div><!-- @@@sourceState -->
+<br/>
+<!-- $$$targetState -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="targetState-prop"></a><span class="name">targetState</span> : <span class="type"><a href="qml-qtqml-statemachine-qabstractstate.html">QAbstractState</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The target state of this transition.</p>
+<p>If a transition has no target state, the transition may still be triggered, but this will not cause the state machine's configuration to change (i.e&#x2e; the current state will not be exited and re-entered).</p>
+</div></div><!-- @@@targetState -->
+<br/>
+<!-- $$$targetStates -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="targetStates-prop"></a><span class="name">targetStates</span> : <span class="type"><a href="qml-list.html">list</a></span>&lt;<span class="type"><a href="qml-qtqml-statemachine-qabstractstate.html">QAbstractState</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The target states of this transition.</p>
+<p>If multiple states are specified, they all must be descendants of the same parallel group state.</p>
+</div></div><!-- @@@targetStates -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$triggered[overload1]$$$triggered -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="triggered-signal"></a><span class="name">triggered</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the transition has been triggered.</p>
+<p>The corresponding handler is <code>onTriggered</code>.</p>
+</div></div><!-- @@@triggered -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

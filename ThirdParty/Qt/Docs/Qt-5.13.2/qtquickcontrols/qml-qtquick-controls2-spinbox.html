@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickspinbox.cpp -->
+  <title>SpinBox QML Type | Qt Quick Controls 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td ><a href="qtquick-controls2-qmlmodule.html">QML Types</a></td><td >SpinBox QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#custom-values">Custom Values</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">SpinBox QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$SpinBox-brief -->
+<p>Allows the user to select from a set of preset values. <a href="#details">More...</a></p>
+<!-- @@@SpinBox -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Controls 2.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-controls2-control.html">Control</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-controls2-spinbox-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#displayText-prop">displayText</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#down-prop">down</a></b></b><ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#down.pressed-prop">down.pressed</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#down.indicator-prop">down.indicator</a></b></b> : Item</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#down.hovered-prop">down.hovered</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#down.implicitIndicatorWidth-prop">down.implicitIndicatorWidth</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#down.implicitIndicatorHeight-prop">down.implicitIndicatorHeight</a></b></b> : real</li>
+</ul>
+</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#editable-prop">editable</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#from-prop">from</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#inputMethodComposing-prop">inputMethodComposing</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#inputMethodHints-prop">inputMethodHints</a></b></b> : flags</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#stepSize-prop">stepSize</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#textFromValue-prop">textFromValue</a></b></b> : function</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#to-prop">to</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#up-prop">up</a></b></b><ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#up.pressed-prop">up.pressed</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#up.indicator-prop">up.indicator</a></b></b> : Item</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#up.hovered-prop">up.hovered</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#up.implicitIndicatorWidth-prop">up.implicitIndicatorWidth</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#up.implicitIndicatorHeight-prop">up.implicitIndicatorHeight</a></b></b> : real</li>
+</ul>
+</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#validator-prop">validator</a></b></b> : Validator</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#value-prop">value</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#valueFromText-prop">valueFromText</a></b></b> : function</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#wrap-prop">wrap</a></b></b> : bool</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-spinbox.html#valueModified-signal">valueModified</a></b></b>()</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-spinbox.html#decrease-method">decrease</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-spinbox.html#increase-method">increase</a></b></b>()</li>
+</ul>
+<!-- $$$SpinBox-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p class="centerAlign"><img src="images/qtquickcontrols2-spinbox.png" alt="" /></p><p><a href="qml-qtquick-controls2-spinbox.html">SpinBox</a> allows the user to choose an integer value by clicking the up or down indicator buttons, or by pressing up or down on the keyboard. Optionally, <a href="qml-qtquick-controls2-spinbox.html">SpinBox</a> can be also made <a href="qml-qtquick-controls2-spinbox.html#editable-prop">editable</a>, so the user can enter a text value in the input field.</p>
+<p>By default, <a href="qml-qtquick-controls2-spinbox.html">SpinBox</a> provides discrete values in the range of <code>[0-99]</code> with a <a href="qml-qtquick-controls2-spinbox.html#stepSize-prop">stepSize</a> of <code>1</code>.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls2-spinbox.html">SpinBox</a></span> {
+      <span class="name">value</span>: <span class="number">50</span>
+  }
+
+</pre>
+<a name="custom-values"></a>
+<h3 id="custom-values">Custom Values</h3>
+<p class="centerAlign"><img src="images/qtquickcontrols2-spinbox-textual.png" alt="" /></p><p>Even though <a href="qml-qtquick-controls2-spinbox.html">SpinBox</a> works on integer values, it can be customized to accept arbitrary input values. The following snippet demonstrates how <a href="qml-qtquick-controls2-spinbox.html#validator-prop">validator</a>, <a href="qml-qtquick-controls2-spinbox.html#textFromValue-prop">textFromValue</a> and <a href="qml-qtquick-controls2-spinbox.html#valueFromText-prop">valueFromText</a> can be used to customize the default behavior.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls2-spinbox.html">SpinBox</a></span> {
+      <span class="name">from</span>: <span class="number">0</span>
+      <span class="name">to</span>: <span class="name">items</span>.<span class="name">length</span> <span class="operator">-</span> <span class="number">1</span>
+      <span class="name">value</span>: <span class="number">1</span> <span class="comment">// &quot;Medium&quot;</span>
+
+      property <span class="type"><a href="../qtqml/qml-var.html">var</a></span> <span class="name">items</span>: [<span class="string">&quot;Small&quot;</span>, <span class="string">&quot;Medium&quot;</span>, <span class="string">&quot;Large&quot;</span>]
+
+      <span class="name">validator</span>: <span class="name">RegExpValidator</span> {
+          <span class="name">regExp</span>: new <span class="name">RegExp</span>(<span class="string">&quot;(Small|Medium|Large)&quot;</span>, <span class="string">&quot;i&quot;</span>)
+      }
+
+      <span class="name">textFromValue</span>: <span class="keyword">function</span>(value) {
+          <span class="keyword">return</span> <span class="name">items</span>[<span class="name">value</span>];
+      }
+
+      <span class="name">valueFromText</span>: <span class="keyword">function</span>(text) {
+          <span class="keyword">for</span> (var i = 0; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">items</span>.<span class="name">length</span>; ++<span class="name">i</span>) {
+              <span class="keyword">if</span> (<span class="name">items</span>[<span class="name">i</span>].<span class="name">toLowerCase</span>().<span class="name">indexOf</span>(<span class="name">text</span>.<span class="name">toLowerCase</span>()) <span class="operator">===</span> <span class="number">0</span>)
+                  <span class="keyword">return</span> <span class="name">i</span>
+          }
+          <span class="keyword">return</span> <span class="name">sb</span>.<span class="name">value</span>
+      }
+  }
+
+</pre>
+<p>In the same manner, <a href="qml-qtquick-controls2-spinbox.html">SpinBox</a> can be customized to accept floating point numbers:</p>
+<p class="centerAlign"><img src="images/qtquickcontrols2-spinbox-double.png" alt="" /></p><pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls2-spinbox.html">SpinBox</a></span> {
+      <span class="name">id</span>: <span class="name">spinbox</span>
+      <span class="name">from</span>: <span class="number">0</span>
+      <span class="name">value</span>: <span class="number">110</span>
+      <span class="name">to</span>: <span class="number">100</span> <span class="operator">*</span> <span class="number">100</span>
+      <span class="name">stepSize</span>: <span class="number">100</span>
+      <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+
+      property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">decimals</span>: <span class="number">2</span>
+      property <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <span class="name">realValue</span>: <span class="name">value</span> <span class="operator">/</span> <span class="number">100</span>
+
+      <span class="name">validator</span>: <span class="name">DoubleValidator</span> {
+          <span class="name">bottom</span>: <span class="name">Math</span>.<span class="name">min</span>(<span class="name">spinbox</span>.<span class="name">from</span>, <span class="name">spinbox</span>.<span class="name">to</span>)
+          <span class="name">top</span>:  <span class="name">Math</span>.<span class="name">max</span>(<span class="name">spinbox</span>.<span class="name">from</span>, <span class="name">spinbox</span>.<span class="name">to</span>)
+      }
+
+      <span class="name">textFromValue</span>: <span class="keyword">function</span>(value, locale) {
+          <span class="keyword">return</span> <span class="name">Number</span>(<span class="name">value</span> <span class="operator">/</span> <span class="number">100</span>).<span class="name">toLocaleString</span>(<span class="name">locale</span>, <span class="string">'f'</span>, <span class="name">spinbox</span>.<span class="name">decimals</span>)
+      }
+
+      <span class="name">valueFromText</span>: <span class="keyword">function</span>(text, locale) {
+          <span class="keyword">return</span> <span class="name">Number</span>.<span class="name">fromLocaleString</span>(<span class="name">locale</span>, <span class="name">text</span>) <span class="operator">*</span> <span class="number">100</span>
+      }
+  }
+
+</pre>
+<p><b>See also </b><a href="qml-qtquick-controls2-tumbler.html">Tumbler</a>, <a href="qtquickcontrols2-customize.html#customizing-spinbox">Customizing SpinBox</a>, and <a href="qtquickcontrols2-focus.html">Focus Management in Qt Quick Controls</a>.</p>
+<!-- @@@SpinBox -->
+<h2>Property Documentation</h2>
+<!-- $$$displayText -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="displayText-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">displayText</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the textual value of the spinbox.</p>
+<p>The value of the property is based on <a href="qml-qtquick-controls2-spinbox.html#textFromValue-prop">textFromValue</a> and <a href="qml-qtquick-controls2-control.html#locale-prop">locale</a>, and equal to:</p>
+<pre class="cpp plain">
+
+  var text = spinBox.textFromValue(spinBox.value, spinBox.locale)
+
+</pre>
+<p>This property was introduced in  QtQuick.Controls 2.4 (Qt 5.11).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-spinbox.html#textFromValue-prop">textFromValue</a>.</p>
+</div></div><!-- @@@displayText -->
+<br/>
+<!-- $$$down -->
+<div class="qmlitem"><div class="qmlproto"><div class="table"><table class="qmlname"><tr valign="top" class="even" id="down-prop"><th class="centerAlign"><p><a name="down-prop"></a><b>down group</b></p></th></tr><tr valign="top" class="odd" id="down.pressed-prop"><td class="tblQmlPropNode"><p><a name="down.pressed-prop"></a><span class="name">down.pressed</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr><tr valign="top" class="odd" id="down.indicator-prop"><td class="tblQmlPropNode"><p><a name="down.indicator-prop"></a><span class="name">down.indicator</span> : <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span></p></td></tr><tr valign="top" class="odd" id="down.hovered-prop"><td class="tblQmlPropNode"><p><a name="down.hovered-prop"></a><span class="name">down.hovered</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr><tr valign="top" class="odd" id="down.implicitIndicatorWidth-prop"><td class="tblQmlPropNode"><p><a name="down.implicitIndicatorWidth-prop"></a><span class="name">down.implicitIndicatorWidth</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr><tr valign="top" class="odd" id="down.implicitIndicatorHeight-prop"><td class="tblQmlPropNode"><p><a name="down.implicitIndicatorHeight-prop"></a><span class="name">down.implicitIndicatorHeight</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr></table></div></div><div class="qmldoc"><p>These properties hold the down indicator item and whether it is pressed or hovered. The <code>down.hovered</code> property was introduced in <a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a>.Controls 2.1, and the <code>down.implicitIndicatorWidth</code> and <code>down.implicitIndicatorHeight</code> properties were introduced in <a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a>.Controls 2.5&#x2e;</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-spinbox.html#decrease-method">decrease()</a>.</p>
+</div></div><!-- @@@down -->
+<br/>
+<!-- $$$editable -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="editable-prop"></a><span class="name">editable</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the spinbox is editable. The default value is <code>false</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-spinbox.html#validator-prop">validator</a>.</p>
+</div></div><!-- @@@editable -->
+<br/>
+<!-- $$$from -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="from-prop"></a><span class="name">from</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the starting value for the range. The default value is <code>0</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-spinbox.html#to-prop">to</a> and <a href="qml-qtquick-controls2-spinbox.html#value-prop">value</a>.</p>
+</div></div><!-- @@@from -->
+<br/>
+<!-- $$$inputMethodComposing -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="inputMethodComposing-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">inputMethodComposing</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether an editable spin box has partial text input from an input method.</p>
+<p>While it is composing, an input method may rely on mouse or key events from the spin box to edit or commit the partial text. This property can be used to determine when to disable event handlers that may interfere with the correct operation of an input method.</p>
+<p>This property was introduced in  QtQuick.Controls 2.2 (Qt 5.9).</p>
+</div></div><!-- @@@inputMethodComposing -->
+<br/>
+<!-- $$$inputMethodHints -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="inputMethodHints-prop"></a><span class="name">inputMethodHints</span> : <span class="type">flags</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property provides hints to the input method about the expected content of the spin box and how it should operate.</p>
+<p>The default value is <code>Qt.ImhDigitsOnly</code>.</p>
+<p>The value is a bit-wise combination of flags or <code>Qt.ImhNone</code> if no hints are set.</p>
+<p>Flags that alter behavior are:</p>
+<ul>
+<li>Qt.ImhHiddenText - Characters should be hidden, as is typically used when entering passwords.</li>
+<li>Qt.ImhSensitiveData - Typed text should not be stored by the active input method in any persistent storage like predictive user dictionary.</li>
+<li>Qt.ImhNoAutoUppercase - The input method should not try to automatically switch to upper case when a sentence ends.</li>
+<li>Qt.ImhPreferNumbers - Numbers are preferred (but not required).</li>
+<li>Qt.ImhPreferUppercase - Upper case letters are preferred (but not required).</li>
+<li>Qt.ImhPreferLowercase - Lower case letters are preferred (but not required).</li>
+<li>Qt.ImhNoPredictiveText - Do not use predictive text (i.e&#x2e; dictionary lookup) while typing.</li>
+<li>Qt.ImhDate - The text editor functions as a date field.</li>
+<li>Qt.ImhTime - The text editor functions as a time field.</li>
+</ul>
+<p>Flags that restrict input (exclusive flags) are:</p>
+<ul>
+<li>Qt.ImhDigitsOnly - Only digits are allowed.</li>
+<li>Qt.ImhFormattedNumbersOnly - Only number input is allowed. This includes decimal point and minus sign.</li>
+<li>Qt.ImhUppercaseOnly - Only upper case letter input is allowed.</li>
+<li>Qt.ImhLowercaseOnly - Only lower case letter input is allowed.</li>
+<li>Qt.ImhDialableCharactersOnly - Only characters suitable for phone dialing are allowed.</li>
+<li>Qt.ImhEmailCharactersOnly - Only characters suitable for email addresses are allowed.</li>
+<li>Qt.ImhUrlCharactersOnly - Only characters suitable for URLs are allowed.</li>
+</ul>
+<p>Masks:</p>
+<ul>
+<li>Qt.ImhExclusiveInputMask - This mask yields nonzero if any of the exclusive flags are used.</li>
+</ul>
+<p>This property was introduced in  QtQuick.Controls 2.2 (Qt 5.9).</p>
+</div></div><!-- @@@inputMethodHints -->
+<br/>
+<!-- $$$stepSize -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="stepSize-prop"></a><span class="name">stepSize</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the step size. The default value is <code>1</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-spinbox.html#increase-method">increase()</a> and <a href="qml-qtquick-controls2-spinbox.html#decrease-method">decrease()</a>.</p>
+</div></div><!-- @@@stepSize -->
+<br/>
+<!-- $$$textFromValue -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="textFromValue-prop"></a><span class="name">textFromValue</span> : <span class="type">function</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds a callback function that is called whenever an integer value needs to be converted to display text.</p>
+<p>The default function can be overridden to display custom text for a given value. This applies to both editable and non-editable spinboxes; for example, when using the up and down buttons or a mouse wheel to increment and decrement the value, the new value is converted to display text using this function.</p>
+<p>The callback function signature is <code>string function(value, locale)</code>. The function can have one or two arguments, where the first argument is the value to be converted, and the optional second argument is the locale that should be used for the conversion, if applicable.</p>
+<p>The default implementation does the conversion using <a href="../qtqml/qml-qtqml-number.html#toLocaleString-method">Number.toLocaleString</a>():</p>
+<pre class="cpp">
+
+  textFromValue: function(value<span class="operator">,</span> locale) { <span class="keyword">return</span> Number(value)<span class="operator">.</span>toLocaleString(locale<span class="operator">,</span> <span class="char">'f'</span><span class="operator">,</span> <span class="number">0</span>); }
+
+</pre>
+<p><b>Note: </b>When applying a custom <code>textFromValue</code> implementation for editable spinboxes, a matching <a href="qml-qtquick-controls2-spinbox.html#valueFromText-prop">valueFromText</a> implementation must be provided to be able to convert the custom text back to an integer value.</p><p><b>See also </b><a href="qml-qtquick-controls2-spinbox.html#valueFromText-prop">valueFromText</a>, <a href="qml-qtquick-controls2-spinbox.html#validator-prop">validator</a>, and <a href="qml-qtquick-controls2-control.html#locale-prop">locale</a>.</p>
+</div></div><!-- @@@textFromValue -->
+<br/>
+<!-- $$$to -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="to-prop"></a><span class="name">to</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the end value for the range. The default value is <code>99</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-spinbox.html#from-prop">from</a> and <a href="qml-qtquick-controls2-spinbox.html#value-prop">value</a>.</p>
+</div></div><!-- @@@to -->
+<br/>
+<!-- $$$up -->
+<div class="qmlitem"><div class="qmlproto"><div class="table"><table class="qmlname"><tr valign="top" class="even" id="up-prop"><th class="centerAlign"><p><a name="up-prop"></a><b>up group</b></p></th></tr><tr valign="top" class="odd" id="up.pressed-prop"><td class="tblQmlPropNode"><p><a name="up.pressed-prop"></a><span class="name">up.pressed</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr><tr valign="top" class="odd" id="up.indicator-prop"><td class="tblQmlPropNode"><p><a name="up.indicator-prop"></a><span class="name">up.indicator</span> : <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span></p></td></tr><tr valign="top" class="odd" id="up.hovered-prop"><td class="tblQmlPropNode"><p><a name="up.hovered-prop"></a><span class="name">up.hovered</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr><tr valign="top" class="odd" id="up.implicitIndicatorWidth-prop"><td class="tblQmlPropNode"><p><a name="up.implicitIndicatorWidth-prop"></a><span class="name">up.implicitIndicatorWidth</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr><tr valign="top" class="odd" id="up.implicitIndicatorHeight-prop"><td class="tblQmlPropNode"><p><a name="up.implicitIndicatorHeight-prop"></a><span class="name">up.implicitIndicatorHeight</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr></table></div></div><div class="qmldoc"><p>These properties hold the up indicator item and whether it is pressed or hovered. The <code>up.hovered</code> property was introduced in <a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a>.Controls 2.1, and the <code>up.implicitIndicatorWidth</code> and <code>up.implicitIndicatorHeight</code> properties were introduced in <a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a>.Controls 2.5&#x2e;</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-spinbox.html#increase-method">increase()</a>.</p>
+</div></div><!-- @@@up -->
+<br/>
+<!-- $$$validator -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="validator-prop"></a><span class="name">validator</span> : <span class="type">Validator</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the input text validator for editable spinboxes. By default, <a href="qml-qtquick-controls2-spinbox.html">SpinBox</a> uses <a href="../qtquick/qml-qtquick-intvalidator.html">IntValidator</a> to accept input of integer numbers.</p>
+<pre class="cpp">
+
+  SpinBox {
+      id: control
+      validator: IntValidator {
+          locale: control<span class="operator">.</span>locale<span class="operator">.</span>name
+          bottom: Math<span class="operator">.</span>min(control<span class="operator">.</span>from<span class="operator">,</span> control<span class="operator">.</span>to)
+          top: Math<span class="operator">.</span>max(control<span class="operator">.</span>from<span class="operator">,</span> control<span class="operator">.</span>to)
+      }
+  }
+
+</pre>
+<p><b>See also </b><a href="qml-qtquick-controls2-spinbox.html#editable-prop">editable</a>, <a href="qml-qtquick-controls2-spinbox.html#textFromValue-prop">textFromValue</a>, <a href="qml-qtquick-controls2-spinbox.html#valueFromText-prop">valueFromText</a>, and <a href="qml-qtquick-controls2-control.html#locale-prop">locale</a>.</p>
+</div></div><!-- @@@validator -->
+<br/>
+<!-- $$$value -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="value-prop"></a><span class="name">value</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the value in the range <code>from</code> - <code>to</code>. The default value is <code>0</code>.</p>
+</div></div><!-- @@@value -->
+<br/>
+<!-- $$$valueFromText -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="valueFromText-prop"></a><span class="name">valueFromText</span> : <span class="type">function</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds a callback function that is called whenever input text needs to be converted to an integer value.</p>
+<p>This function only needs to be overridden when <a href="qml-qtquick-controls2-spinbox.html#textFromValue-prop">textFromValue</a> is overridden for an editable spinbox.</p>
+<p>The callback function signature is <code>int function(text, locale)</code>. The function can have one or two arguments, where the first argument is the text to be converted, and the optional second argument is the locale that should be used for the conversion, if applicable.</p>
+<p>The default implementation does the conversion using <a href="../qtqml/qml-qtqml-locale.html">Number.fromLocaleString()</a>:</p>
+<pre class="cpp">
+
+  valueFromText: function(text<span class="operator">,</span> locale) { <span class="keyword">return</span> Number<span class="operator">.</span>fromLocaleString(locale<span class="operator">,</span> text); }
+
+</pre>
+<p><b>Note: </b>When applying a custom <a href="qml-qtquick-controls2-spinbox.html#textFromValue-prop">textFromValue</a> implementation for editable spinboxes, a matching <code>valueFromText</code> implementation must be provided to be able to convert the custom text back to an integer value.</p><p><b>See also </b><a href="qml-qtquick-controls2-spinbox.html#textFromValue-prop">textFromValue</a>, <a href="qml-qtquick-controls2-spinbox.html#validator-prop">validator</a>, and <a href="qml-qtquick-controls2-control.html#locale-prop">locale</a>.</p>
+</div></div><!-- @@@valueFromText -->
+<br/>
+<!-- $$$wrap -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="wrap-prop"></a><span class="name">wrap</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the spinbox wraps. The default value is <code>false</code>.</p>
+<p>If wrap is <code>true</code>, stepping past <a href="qml-qtquick-controls2-spinbox.html#to-prop">to</a> changes the value to <a href="qml-qtquick-controls2-spinbox.html#from-prop">from</a> and vice versa.</p>
+<p>This property was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+</div></div><!-- @@@wrap -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$valueModified[overload1]$$$valueModified -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="valueModified-signal"></a><span class="name">valueModified</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the spin box value has been interactively modified by the user by either touch, mouse, wheel, or keys.</p>
+<p>This signal was introduced in  QtQuick.Controls 2.2 (Qt 5.9).</p>
+</div></div><!-- @@@valueModified -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$decrease[overload1]$$$decrease -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="decrease-method"></a><span class="type">void</span> <span class="name">decrease</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Decreases the value by <a href="qml-qtquick-controls2-spinbox.html#stepSize-prop">stepSize</a>, or <code>1</code> if <a href="qml-qtquick-controls2-spinbox.html#stepSize-prop">stepSize</a> is not defined.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-spinbox.html#stepSize-prop">stepSize</a>.</p>
+</div></div><!-- @@@decrease -->
+<br/>
+<!-- $$$increase[overload1]$$$increase -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="increase-method"></a><span class="type">void</span> <span class="name">increase</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Increases the value by <a href="qml-qtquick-controls2-spinbox.html#stepSize-prop">stepSize</a>, or <code>1</code> if <a href="qml-qtquick-controls2-spinbox.html#stepSize-prop">stepSize</a> is not defined.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-spinbox.html#stepSize-prop">stepSize</a>.</p>
+</div></div><!-- @@@increase -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

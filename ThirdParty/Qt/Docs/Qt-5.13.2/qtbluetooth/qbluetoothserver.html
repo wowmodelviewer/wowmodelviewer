@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qbluetoothserver.cpp -->
+  <title>QBluetoothServer Class | Qt Bluetooth 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtbluetooth-index.html">Qt Bluetooth</a></td><td ><a href="qtbluetooth-module.html">C++ Classes</a></td><td >QBluetoothServer</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtbluetooth-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QBluetoothServer Class</h1>
+<!-- $$$QBluetoothServer-brief -->
+<p>The <a href="qbluetoothserver.html">QBluetoothServer</a> class uses the RFCOMM or L2cap protocol to communicate with a Bluetooth device. <a href="#details">More...</a></p>
+<!-- @@@QBluetoothServer -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QBluetoothServer&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += bluetooth</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.2</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.2.</p>
+<ul>
+<li><a href="qbluetoothserver-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserver.html#Error-enum">Error</a></b> { NoError, UnknownError, PoweredOffError, InputOutputError, ServiceAlreadyRegisteredError, UnsupportedProtocolError }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserver.html#QBluetoothServer">QBluetoothServer</a></b>(QBluetoothServiceInfo::Protocol <i>serverType</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserver.html#dtor.QBluetoothServer">~QBluetoothServer</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserver.html#close">close</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QBluetoothServer::Error </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserver.html#error">error</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserver.html#hasPendingConnections">hasPendingConnections</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserver.html#isListening">isListening</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserver.html#listen">listen</a></b>(const QBluetoothAddress &amp;<i>address</i> = QBluetoothAddress(), quint16 <i>port</i> = 0)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QBluetoothServiceInfo </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserver.html#listen-1">listen</a></b>(const QBluetoothUuid &amp;<i>uuid</i>, const QString &amp;<i>serviceName</i> = QString())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserver.html#maxPendingConnections">maxPendingConnections</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QBluetoothSocket *</td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserver.html#nextPendingConnection">nextPendingConnection</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QBluetooth::SecurityFlags </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserver.html#securityFlags">securityFlags</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QBluetoothAddress </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserver.html#serverAddress">serverAddress</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> quint16 </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserver.html#serverPort">serverPort</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QBluetoothServiceInfo::Protocol </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserver.html#serverType">serverType</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserver.html#setMaxPendingConnections">setMaxPendingConnections</a></b>(int <i>numConnections</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserver.html#setSecurityFlags">setSecurityFlags</a></b>(QBluetooth::SecurityFlags <i>security</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserver.html#error-1">error</a></b>(QBluetoothServer::Error <i>error</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbluetoothserver.html#newConnection">newConnection</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QBluetoothServer-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qbluetoothserver.html">QBluetoothServer</a> is used to implement Bluetooth services over RFCOMM or L2cap.</p>
+<p>Start listening for incoming connections with <a href="qbluetoothserver.html#listen">listen</a>(). Wait till the <a href="qbluetoothserver.html#newConnection">newConnection</a>() signal is emitted when a new connection is established, and call <a href="qbluetoothserver.html#nextPendingConnection">nextPendingConnection</a>() to get a <a href="qbluetoothsocket.html">QBluetoothSocket</a> for the new connection.</p>
+<p>To enable other devices to find your service, create a <a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a> with the applicable attributes for your service and register it using <a href="qbluetoothserviceinfo.html#registerService">QBluetoothServiceInfo::registerService</a>(). Call <a href="qbluetoothserver.html#serverPort">serverPort</a>() to get the channel number that is being used.</p>
+<p>If the <a href="qbluetoothserviceinfo.html#Protocol-enum">QBluetoothServiceInfo::Protocol</a> is not supported by a platform, <a href="qbluetoothserver.html#listen">listen</a>() will return <code>false</code>. Android and WinRT only support RFCOMM for example.</p>
+<p>On iOS, this class cannot be used because the platform does not expose an API which may permit access to <a href="qbluetoothserver.html">QBluetoothServer</a> related features.</p>
+</div>
+<p><b>See also </b><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a> and <a href="qbluetoothsocket.html">QBluetoothSocket</a>.</p>
+<!-- @@@QBluetoothServer -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Error$$$NoError$$$UnknownError$$$PoweredOffError$$$InputOutputError$$$ServiceAlreadyRegisteredError$$$UnsupportedProtocolError -->
+<h3 class="fn" id="Error-enum"><a name="Error-enum"></a>enum QBluetoothServer::<span class="name">Error</span></h3>
+<p>This enum describes Bluetooth server error types.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QBluetoothServer::NoError</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">No error.</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServer::UnknownError</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">An unknown error occurred.</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServer::PoweredOffError</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The Bluetooth adapter is powered off.</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServer::InputOutputError</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">An input output error occurred.</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServer::ServiceAlreadyRegisteredError</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">The service or port was already registered</td></tr>
+<tr><td class="topAlign"><code>QBluetoothServer::UnsupportedProtocolError</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">The <a href="qbluetoothserviceinfo.html#Protocol-enum">Protocol</a> is not supported on this platform.</td></tr>
+</table></div>
+<!-- @@@Error -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QBluetoothServer[overload1]$$$QBluetoothServerQBluetoothServiceInfo::ProtocolQObject* -->
+<h3 class="fn" id="QBluetoothServer"><a name="QBluetoothServer"></a>QBluetoothServer::<span class="name">QBluetoothServer</span>(<span class="type"><a href="qbluetoothserviceinfo.html#Protocol-enum">QBluetoothServiceInfo::Protocol</a></span> <i>serverType</i>, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a bluetooth server with <i>parent</i> and <i>serverType</i>.</p>
+<!-- @@@QBluetoothServer -->
+<!-- $$$error$$$errorQBluetoothServer::Error -->
+<h3 class="fn" id="error-1"><a name="error-1"></a><code>[signal] </code><span class="type">void</span> QBluetoothServer::<span class="name">error</span>(<span class="type"><a href="qbluetoothserver.html#Error-enum">QBluetoothServer::Error</a></span> <i>error</i>)</h3>
+<p>This signal is emitted when an <i>error</i> occurs.</p>
+<p><b>Note:</b> Signal <i>error</i> is overloaded in this class. To connect to this signal by using the function pointer syntax, Qt provides a convenient helper for obtaining the function pointer as shown in this example:<pre class="cpp">
+
+  connect(bluetoothServer<span class="operator">,</span> <span class="type">QOverload</span><span class="operator">&lt;</span><span class="type"><a href="qbluetoothserver.html#QBluetoothServer">QBluetoothServer</a></span><span class="operator">::</span>Error<span class="operator">&gt;</span><span class="operator">::</span>of(<span class="operator">&amp;</span><span class="type"><a href="qbluetoothserver.html#QBluetoothServer">QBluetoothServer</a></span><span class="operator">::</span>error)<span class="operator">,</span>
+      <span class="operator">[</span><span class="operator">=</span><span class="operator">]</span>(<span class="type"><a href="qbluetoothserver.html#QBluetoothServer">QBluetoothServer</a></span><span class="operator">::</span>Error error){ <span class="comment">/* ... */</span> });
+
+</pre>
+<p><b>See also </b><a href="qbluetoothserver.html#error">error</a>() and <a href="qbluetoothserver.html#Error-enum">QBluetoothServer::Error</a>.</p>
+<!-- @@@error -->
+<!-- $$$newConnection[overload1]$$$newConnection -->
+<h3 class="fn" id="newConnection"><a name="newConnection"></a><code>[signal] </code><span class="type">void</span> QBluetoothServer::<span class="name">newConnection</span>()</h3>
+<p>This signal is emitted when a new connection is available.</p>
+<p>The connected slot should call <a href="qbluetoothserver.html#nextPendingConnection">nextPendingConnection</a>() to get a <a href="qbluetoothsocket.html">QBluetoothSocket</a> object to send and receive data over the connection.</p>
+<p><b>See also </b><a href="qbluetoothserver.html#nextPendingConnection">nextPendingConnection</a>() and <a href="qbluetoothserver.html#hasPendingConnections">hasPendingConnections</a>().</p>
+<!-- @@@newConnection -->
+<!-- $$$~QBluetoothServer[overload1]$$$~QBluetoothServer -->
+<h3 class="fn" id="dtor.QBluetoothServer"><a name="dtor.QBluetoothServer"></a><code>[virtual] </code>QBluetoothServer::<span class="name">~QBluetoothServer</span>()</h3>
+<p>Destroys the bluetooth server.</p>
+<!-- @@@~QBluetoothServer -->
+<!-- $$$close[overload1]$$$close -->
+<h3 class="fn" id="close"><a name="close"></a><span class="type">void</span> QBluetoothServer::<span class="name">close</span>()</h3>
+<p>Closes and resets the listening socket. Any already established <a href="qbluetoothsocket.html">QBluetoothSocket</a> continues to operate and must be separately <a href="qbluetoothsocket.html#close">closed</a>.</p>
+<!-- @@@close -->
+<!-- $$$error[overload1]$$$error -->
+<h3 class="fn" id="error"><a name="error"></a><span class="type"><a href="qbluetoothserver.html#Error-enum">QBluetoothServer::Error</a></span> QBluetoothServer::<span class="name">error</span>() const</h3>
+<p>Returns the last error of the <a href="qbluetoothserver.html">QBluetoothServer</a>.</p>
+<!-- @@@error -->
+<!-- $$$hasPendingConnections[overload1]$$$hasPendingConnections -->
+<h3 class="fn" id="hasPendingConnections"><a name="hasPendingConnections"></a><span class="type">bool</span> QBluetoothServer::<span class="name">hasPendingConnections</span>() const</h3>
+<p>Returns true if a connection is pending, otherwise false.</p>
+<!-- @@@hasPendingConnections -->
+<!-- $$$isListening[overload1]$$$isListening -->
+<h3 class="fn" id="isListening"><a name="isListening"></a><span class="type">bool</span> QBluetoothServer::<span class="name">isListening</span>() const</h3>
+<p>Returns true if the server is listening for incoming connections, otherwise false.</p>
+<!-- @@@isListening -->
+<!-- $$$listen[overload1]$$$listenconstQBluetoothAddress&quint16 -->
+<h3 class="fn" id="listen"><a name="listen"></a><span class="type">bool</span> QBluetoothServer::<span class="name">listen</span>(const <span class="type"><a href="qbluetoothaddress.html">QBluetoothAddress</a></span> &amp;<i>address</i> = QBluetoothAddress(), <span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> <i>port</i> = 0)</h3>
+<p>Start listening for incoming connections to <i>address</i> on <i>port</i>. <i>address</i> must be a local Bluetooth adapter address and <i>port</i> must be larger than zero and not be taken already by another Bluetooth server object. It is recommended to avoid setting a port number to enable the system to automatically choose a port.</p>
+<p>Returns <code>true</code> if the operation succeeded and the server is listening for incoming connections, otherwise returns <code>false</code>.</p>
+<p>If the server object is already listening for incoming connections this function always returns <code>false</code>. <a href="qbluetoothserver.html#close">close</a>() should be called before calling this function.</p>
+<p><b>See also </b><a href="qbluetoothserver.html#isListening">isListening</a>() and <a href="qbluetoothserver.html#newConnection">newConnection</a>().</p>
+<!-- @@@listen -->
+<!-- $$$listen$$$listenconstQBluetoothUuid&constQString& -->
+<h3 class="fn" id="listen-1"><a name="listen-1"></a><span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span> QBluetoothServer::<span class="name">listen</span>(const <span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span> &amp;<i>uuid</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>serviceName</i> = QString())</h3>
+<p>Convenience function for registering an SPP service with <i>uuid</i> and <i>serviceName</i>. Because this function already registers the service, the <a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a> object which is returned can not be changed any more. To shutdown the server later on it is required to call <a href="qbluetoothserviceinfo.html#unregisterService">QBluetoothServiceInfo::unregisterService</a>() and <a href="qbluetoothserver.html#close">close</a>() on this server object.</p>
+<p>Returns a registered <a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a> instance if successful otherwise an invalid <a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a>. This function always assumes that the default Bluetooth adapter should be used.</p>
+<p>If the server object is already listening for incoming connections this function returns an invalid <a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a>.</p>
+<p>For an RFCOMM server this function is equivalent to following code snippet.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span> serviceInfo;
+      serviceInfo<span class="operator">.</span>setAttribute(<span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>ServiceName<span class="operator">,</span> serviceName);
+      <span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>Sequence browseSequence;
+      browseSequence <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span>(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span><span class="operator">::</span>PublicBrowseGroup));
+      serviceInfo<span class="operator">.</span>setAttribute(<span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>BrowseGroupList<span class="operator">,</span>
+                               browseSequence);
+
+      <span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>Sequence profileSequence;
+      <span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>Sequence classId;
+      classId <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span>(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span><span class="operator">::</span>SerialPort));
+      classId <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span>(<span class="number">0x100</span>));
+      profileSequence<span class="operator">.</span>append(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(classId));
+      serviceInfo<span class="operator">.</span>setAttribute(<span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>BluetoothProfileDescriptorList<span class="operator">,</span>
+                               profileSequence);
+
+      classId<span class="operator">.</span>clear();
+      <span class="comment">//Android requires custom uuid to be set as service class</span>
+      classId <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(uuid);
+      classId <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span>(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span><span class="operator">::</span>SerialPort));
+      serviceInfo<span class="operator">.</span>setAttribute(<span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>ServiceClassIds<span class="operator">,</span> classId);
+      serviceInfo<span class="operator">.</span>setServiceUuid(uuid);
+
+      <span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>Sequence protocolDescriptorList;
+      <span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>Sequence protocol;
+      protocol <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span>(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span><span class="operator">::</span>L2cap));
+      <span class="keyword">if</span> (d<span class="operator">-</span><span class="operator">&gt;</span>serverType <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>L2capProtocol)
+          protocol <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(serverPort());
+      protocolDescriptorList<span class="operator">.</span>append(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(protocol));
+      protocol<span class="operator">.</span>clear();
+      protocol <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span>(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span><span class="operator">::</span>Rfcomm))
+               <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="type"><a href="../qtcore/qtglobal.html#quint8-typedef">quint8</a></span>(serverPort()));
+      protocolDescriptorList<span class="operator">.</span>append(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(protocol));
+      serviceInfo<span class="operator">.</span>setAttribute(<span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>ProtocolDescriptorList<span class="operator">,</span>
+                               protocolDescriptorList);
+      bool result <span class="operator">=</span> serviceInfo<span class="operator">.</span>registerService();
+
+</pre>
+<p><b>See also </b><a href="qbluetoothserver.html#isListening">isListening</a>(), <a href="qbluetoothserver.html#newConnection">newConnection</a>(), and <a href="qbluetoothserver.html#listen">listen</a>().</p>
+<!-- @@@listen -->
+<!-- $$$maxPendingConnections[overload1]$$$maxPendingConnections -->
+<h3 class="fn" id="maxPendingConnections"><a name="maxPendingConnections"></a><span class="type">int</span> QBluetoothServer::<span class="name">maxPendingConnections</span>() const</h3>
+<p>Returns the maximum number of pending connections.</p>
+<p><b>See also </b><a href="qbluetoothserver.html#setMaxPendingConnections">setMaxPendingConnections</a>().</p>
+<!-- @@@maxPendingConnections -->
+<!-- $$$nextPendingConnection[overload1]$$$nextPendingConnection -->
+<h3 class="fn" id="nextPendingConnection"><a name="nextPendingConnection"></a><span class="type"><a href="qbluetoothsocket.html">QBluetoothSocket</a></span> *QBluetoothServer::<span class="name">nextPendingConnection</span>()</h3>
+<p>Returns a pointer to the <a href="qbluetoothsocket.html">QBluetoothSocket</a> for the next pending connection. It is the callers responsibility to delete the pointer.</p>
+<!-- @@@nextPendingConnection -->
+<!-- $$$securityFlags[overload1]$$$securityFlags -->
+<h3 class="fn" id="securityFlags"><a name="securityFlags"></a><span class="type"><a href="qbluetooth.html#Security-enum">QBluetooth::SecurityFlags</a></span> QBluetoothServer::<span class="name">securityFlags</span>() const</h3>
+<p>Returns the Bluetooth security flags.</p>
+<p><b>See also </b><a href="qbluetoothserver.html#setSecurityFlags">setSecurityFlags</a>().</p>
+<!-- @@@securityFlags -->
+<!-- $$$serverAddress[overload1]$$$serverAddress -->
+<h3 class="fn" id="serverAddress"><a name="serverAddress"></a><span class="type"><a href="qbluetoothaddress.html">QBluetoothAddress</a></span> QBluetoothServer::<span class="name">serverAddress</span>() const</h3>
+<p>Returns the server address.</p>
+<!-- @@@serverAddress -->
+<!-- $$$serverPort[overload1]$$$serverPort -->
+<h3 class="fn" id="serverPort"><a name="serverPort"></a><span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> QBluetoothServer::<span class="name">serverPort</span>() const</h3>
+<p>Returns the server port number.</p>
+<!-- @@@serverPort -->
+<!-- $$$serverType[overload1]$$$serverType -->
+<h3 class="fn" id="serverType"><a name="serverType"></a><span class="type"><a href="qbluetoothserviceinfo.html#Protocol-enum">QBluetoothServiceInfo::Protocol</a></span> QBluetoothServer::<span class="name">serverType</span>() const</h3>
+<p>Returns the type of the <a href="qbluetoothserver.html">QBluetoothServer</a>.</p>
+<!-- @@@serverType -->
+<!-- $$$setMaxPendingConnections[overload1]$$$setMaxPendingConnectionsint -->
+<h3 class="fn" id="setMaxPendingConnections"><a name="setMaxPendingConnections"></a><span class="type">void</span> QBluetoothServer::<span class="name">setMaxPendingConnections</span>(<span class="type">int</span> <i>numConnections</i>)</h3>
+<p>Sets the maximum number of pending connections to <i>numConnections</i>. If the number of pending sockets exceeds this limit new sockets will be rejected.</p>
+<p><b>See also </b><a href="qbluetoothserver.html#maxPendingConnections">maxPendingConnections</a>().</p>
+<!-- @@@setMaxPendingConnections -->
+<!-- $$$setSecurityFlags[overload1]$$$setSecurityFlagsQBluetooth::SecurityFlags -->
+<h3 class="fn" id="setSecurityFlags"><a name="setSecurityFlags"></a><span class="type">void</span> QBluetoothServer::<span class="name">setSecurityFlags</span>(<span class="type"><a href="qbluetooth.html#Security-enum">QBluetooth::SecurityFlags</a></span> <i>security</i>)</h3>
+<p>Sets the Bluetooth security flags to <i>security</i>. This function must be called before calling <a href="qbluetoothserver.html#listen">listen</a>(). The Bluetooth link will always be encrypted when using Bluetooth 2.1 devices as encryption is mandatory.</p>
+<p>Android only supports two levels of security (secure and non-secure). If this flag is set to <a href="qbluetooth.html#Security-enum">QBluetooth::NoSecurity</a> the server object will not employ any authentication or encryption. Any other security flag combination will trigger a secure Bluetooth connection.</p>
+<p>On <a href="../qtdoc/internationalization.html#macos">macOS</a>, security flags are not supported and will be ignored.</p>
+<p><b>See also </b><a href="qbluetoothserver.html#securityFlags">securityFlags</a>().</p>
+<!-- @@@setSecurityFlags -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

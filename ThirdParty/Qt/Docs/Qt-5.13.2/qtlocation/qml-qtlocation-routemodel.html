@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdeclarativegeoroutemodel.cpp -->
+  <title>RouteModel QML Type | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-qmlmodule.html">QML Types</a></td><td >RouteModel QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#example-usage">Example Usage</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">RouteModel QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$RouteModel-brief -->
+<p>The <a href="qml-qtlocation-routemodel.html">RouteModel</a> type provides access to routes. <a href="#details">More...</a></p>
+<!-- @@@RouteModel -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtLocation 5.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  QtLocation 5.5</td></tr></table></div><ul>
+<li><a href="qml-qtlocation-routemodel-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtlocation-routemodel.html#autoUpdate-prop">autoUpdate</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtlocation-routemodel.html#count-prop">count</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtlocation-routemodel.html#error-prop">error</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtlocation-routemodel.html#errorString-prop">errorString</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtlocation-routemodel.html#measurementSystem-prop">measurementSystem</a></b></b> : Locale::MeasurementSystem</li>
+<li class="fn"><b><b><a href="qml-qtlocation-routemodel.html#plugin-prop">plugin</a></b></b> : Plugin</li>
+<li class="fn"><b><b><a href="qml-qtlocation-routemodel.html#query-prop">query</a></b></b> : RouteQuery</li>
+<li class="fn"><b><b><a href="qml-qtlocation-routemodel.html#status-prop">status</a></b></b> : enumeration</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtlocation-routemodel.html#cancel-method">cancel</a></b></b>()</li>
+<li class="fn">Route <b><b><a href="qml-qtlocation-routemodel.html#get-method">get</a></b></b>(<i>index</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtlocation-routemodel.html#reset-method">reset</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtlocation-routemodel.html#update-method">update</a></b></b>()</li>
+</ul>
+<!-- $$$RouteModel-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qml-qtlocation-routemodel.html">RouteModel</a> type is used as part of a model/view grouping to retrieve geographic routes from a backend provider. Routes include data about driving directions between two points, walking directions with multiple waypoints, and various other similar concepts. It functions much like other Model types in QML (see for example <a href="../qtquick/qtquick-modelviewsdata-modelview.html#models">ListModel</a> and XmlListModel), and interacts with views such as <a href="qml-qtlocation-mapitemview.html">MapItemView</a>, and <a href="../qtquick/qml-qtquick-listview.html">ListView</a>.</p>
+<p>Like <a href="qml-qtlocation-map.html">Map</a> and <a href="qml-qtlocation-geocodemodel.html">GeocodeModel</a>, all the data for a <a href="qml-qtlocation-routemodel.html">RouteModel</a> to work comes from a services plugin. This is contained in the <a href="location-places-qml.html#plugin">plugin</a> property, and this must be set before the <a href="qml-qtlocation-routemodel.html">RouteModel</a> can do any useful work.</p>
+<p>Once the plugin is set, create a <a href="qml-qtlocation-routequery.html">RouteQuery</a> with the appropriate waypoints and other settings, and set the <a href="qml-qtlocation-routemodel.html">RouteModel</a>'s <a href="qml-qtlocation-routemodel.html#query-prop">query</a> property. If <a href="qml-qtlocation-routemodel.html#autoUpdate-prop">autoUpdate</a> is enabled, the update will being automatically. Otherwise, the <a href="qml-qtlocation-routemodel.html#update-method">update</a> method may be used. By default, <a href="qml-qtlocation-routemodel.html#autoUpdate-prop">autoUpdate</a> is disabled.</p>
+<p>The data stored and returned in the <a href="qml-qtlocation-routemodel.html">RouteModel</a> consists of <a href="qml-qtlocation-route.html">Route</a> objects, as a list with the role name &quot;routeData&quot;. See the documentation for <a href="qml-qtlocation-route.html">Route</a> for further details on its structure and contents.</p>
+<a name="example-usage"></a>
+<h3 id="example-usage">Example Usage</h3>
+<p>The following snippet is two-part, showing firstly the declaration of objects, and secondly a short piece of procedural code using it. We set the routeModel's <a href="qml-qtlocation-routemodel.html#autoUpdate-prop">autoUpdate</a> property to false, and call <a href="qml-qtlocation-routemodel.html#update-method">update</a> once the query is set up, to avoid useless extra requests halfway through the set up of the query.</p>
+<pre class="cpp">
+
+  Plugin {
+      id: aPlugin
+      name: <span class="string">&quot;osm&quot;</span>
+  }
+
+  RouteQuery {
+      id: aQuery
+  }
+
+  RouteModel {
+      id: routeModel
+      plugin: aPlugin
+      query: aQuery
+      autoUpdate: <span class="keyword">false</span>
+  }
+
+</pre>
+<pre class="cpp">
+
+  {
+      aQuery<span class="operator">.</span>addWaypoint(<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>)
+      aQuery<span class="operator">.</span>addWaypoint(<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>)
+      aQuery<span class="operator">.</span>travelModes <span class="operator">=</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+      routeModel<span class="operator">.</span>update()
+  }
+
+</pre>
+<!-- @@@RouteModel -->
+<h2>Property Documentation</h2>
+<!-- $$$autoUpdate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="autoUpdate-prop"></a><span class="name">autoUpdate</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property controls whether the Model automatically updates in response to changes in its attached <a href="qml-qtlocation-routequery.html">RouteQuery</a>. The default value of this property is false.</p>
+<p>If setting this value to 'true', note that any change at all in the <a href="qml-qtlocation-routequery.html">RouteQuery</a> object set in the <a href="qml-qtlocation-routemodel.html#query-prop">query</a> property will trigger a new request to be sent. If you are adjusting many properties of the <a href="qml-qtlocation-routequery.html">RouteQuery</a> with autoUpdate enabled, this can generate large numbers of useless (and later discarded) requests.</p>
+</div></div><!-- @@@autoUpdate -->
+<br/>
+<!-- $$$count -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="count-prop"></a><span class="name">count</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds how many routes the model currently has. Amongst other uses, you can use this value when accessing routes via the <a href="qml-qtlocation-routemodel.html#get-method">QtLocation::RouteModel::get</a> -method.</p>
+</div></div><!-- @@@count -->
+<br/>
+<!-- $$$error -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="error-prop"></a><span class="name">error</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This read-only property holds the latest error value of the routing request.</p>
+<ul>
+<li><a href="qml-qtlocation-routemodel.html">RouteModel</a>.<a href="../qtnetwork/qdtls.html#QDtlsError-enum">NoError</a> - No error has occurred.</li>
+<li><a href="qml-qtlocation-routemodel.html">RouteModel</a>.CommunicationError - An error occurred while communicating with the service provider.</li>
+<li><a href="qml-qtlocation-routemodel.html">RouteModel</a>.EngineNotSetError - The model's plugin property was not set or there is no routing manager associated with the plugin.</li>
+<li><a href="qml-qtlocation-routemodel.html">RouteModel</a>.MissingRequiredParameterError - A required parameter was not specified.</li>
+<li><a href="qml-qtlocation-routemodel.html">RouteModel</a>.ParseError - The response from the service provider was in an unrecognizable format.</li>
+<li><a href="qml-qtlocation-routemodel.html">RouteModel</a>.UnknownError - An error occurred which does not fit into any of the other categories.</li>
+<li><a href="qml-qtlocation-routemodel.html">RouteModel</a>.UnknownParameterError - The plugin did not recognize one of the parameters it was given.</li>
+<li><a href="qml-qtlocation-routemodel.html">RouteModel</a>.UnsupportedOptionError - The requested operation is not supported by the routing provider. This may happen when the loaded engine does not support a particular type of routing request.</li>
+</ul>
+</div></div><!-- @@@error -->
+<br/>
+<!-- $$$errorString -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="errorString-prop"></a><span class="name">errorString</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This read-only property holds the textual presentation of the latest routing error. If no error has occurred or the model has been reset, an empty string is returned.</p>
+<p>An empty string may also be returned if an error occurred which has no associated textual representation.</p>
+</div></div><!-- @@@errorString -->
+<br/>
+<!-- $$$measurementSystem -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="measurementSystem-prop"></a><span class="name">measurementSystem</span> : <span class="type">Locale::MeasurementSystem</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the measurement system which will be used when calculating the route. This property is changed when the <a href="qml-qtlocation-plugin.html#locales-prop">Plugin::locales</a> property of <a href="qml-qtlocation-routemodel.html#plugin-prop">plugin</a> changes.</p>
+<p>If setting this property it must be set after the <a href="qml-qtlocation-routemodel.html#plugin-prop">plugin</a> property is set.</p>
+</div></div><!-- @@@measurementSystem -->
+<br/>
+<!-- $$$plugin -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="plugin-prop"></a><span class="name">plugin</span> : <span class="type"><a href="qml-qtlocation-plugin.html">Plugin</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the plugin that providers the actual routing service. Note that all plugins do not necessarily provide routing (could for example provide only geocoding or maps).</p>
+<p>A valid plugin must be set before the <a href="qml-qtlocation-routemodel.html">RouteModel</a> can perform any useful operations.</p>
+<p><b>See also </b><a href="location-places-qml.html#plugin">Plugin</a>.</p>
+</div></div><!-- @@@plugin -->
+<br/>
+<!-- $$$query -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="query-prop"></a><span class="name">query</span> : <span class="type"><a href="qml-qtlocation-routequery.html">RouteQuery</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the data of the route request. The primary data are the waypoint coordinates and possible further preferences (means of traveling, things to avoid on route etc).</p>
+</div></div><!-- @@@query -->
+<br/>
+<!-- $$$status -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="status-prop"></a><span class="name">status</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This read-only property holds the current status of the model.</p>
+<ul>
+<li><a href="qml-qtlocation-routemodel.html">RouteModel</a>.Null - No route requests have been issued or <a href="qml-qtlocation-routemodel.html#reset-method">reset</a> has been called.</li>
+<li><a href="qml-qtlocation-routemodel.html">RouteModel</a>.Ready - Route request(s) have finished successfully.</li>
+<li><a href="qml-qtlocation-routemodel.html">RouteModel</a>.Loading - Route request has been issued but not yet finished</li>
+<li><a href="qml-qtlocation-routemodel.html">RouteModel</a>.Error - Routing error has occurred, details are in <a href="qml-qtlocation-routemodel.html#error-prop">error</a> and <a href="qml-qtlocation-routemodel.html#errorString-prop">errorString</a></li>
+</ul>
+</div></div><!-- @@@status -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$cancel[overload1]$$$cancel -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="cancel-method"></a><span class="type">void</span> <span class="name">cancel</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Cancels any outstanding requests and clears errors. Model status will be set to either <a href="qml-qtlocation-routemodel.html">RouteModel</a>.Null or <a href="qml-qtlocation-routemodel.html">RouteModel</a>.Ready.</p>
+</div></div><!-- @@@cancel -->
+<br/>
+<!-- $$$get[overload1]$$$get -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="get-method"></a><span class="type"><a href="qml-qtlocation-route.html">Route</a></span> <span class="name">get</span>(<i>index</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the Route at the specified index <i>int</i>. Use the <a href="qml-qtlocation-routemodel.html#count-prop">count</a> property to check the amount of routes available. The routes are indexed from zero, so the accessible range is 0..&#x2e;(count - 1).</p>
+<p>If you access out of bounds, a zero (null object) is returned and a warning is issued.</p>
+</div></div><!-- @@@get -->
+<br/>
+<!-- $$$reset[overload1]$$$reset -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="reset-method"></a><span class="type">void</span> <span class="name">reset</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Resets the model. All route data is cleared, any outstanding requests are aborted and possible errors are cleared. Model status will be set to <a href="qml-qtlocation-routemodel.html">RouteModel</a>.Null</p>
+</div></div><!-- @@@reset -->
+<br/>
+<!-- $$$update[overload1]$$$update -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="update-method"></a><span class="type">void</span> <span class="name">update</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Instructs the <a href="qml-qtlocation-routemodel.html">RouteModel</a> to update its data. This is most useful when <a href="qml-qtlocation-routemodel.html#autoUpdate-prop">autoUpdate</a> is disabled, to force a refresh when the query has been changed.</p>
+</div></div><!-- @@@update -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

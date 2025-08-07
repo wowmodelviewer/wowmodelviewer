@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qeffect.cpp -->
+  <title>QEffect Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QEffect</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QEffect Class</h1>
+<span class="small-subtitle">(<a href="qt3drender-qeffect.html">Qt3DRender::QEffect</a>)<br/></span>
+<!-- $$$QEffect-brief -->
+<p>The base class for effects in a Qt 3D scene. <a href="#details">More...</a></p>
+<!-- @@@QEffect -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QEffect&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3drender</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-effect.html">Effect</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></td></tr></table></div><p>This class was introduced in  Qt 5.7.</p>
+<ul>
+<li><a href="qt3drender-qeffect-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qeffect.html#addParameter">addParameter</a></b>(Qt3DRender::QParameter *<i>parameter</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qeffect.html#addTechnique">addTechnique</a></b>(Qt3DRender::QTechnique *<i>t</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;Qt3DRender::QParameter *&gt; </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qeffect.html#parameters">parameters</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qeffect.html#removeParameter">removeParameter</a></b>(Qt3DRender::QParameter *<i>parameter</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qeffect.html#removeTechnique">removeTechnique</a></b>(Qt3DRender::QTechnique *<i>t</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;Qt3DRender::QTechnique *&gt; </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qeffect.html#techniques">techniques</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QEffect-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qt3drender-qeffect.html">QEffect</a> class combines a set of techniques and parameters used by those techniques to produce a rendering effect for a material.</p>
+<p>An <a href="qt3drender-qeffect.html">QEffect</a> instance should be shared among several <a href="qt3drender-qmaterial.html">QMaterial</a> instances when possible.</p>
+<p><b>Note: </b><a href="qt3drender-qeffect.html">QEffect</a> node can not be disabled.</p><pre class="cpp">
+
+  <span class="type">QEffect</span> <span class="operator">*</span>effect <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QEffect</span>();
+
+  <span class="comment">// Create technique, render pass and shader</span>
+  <span class="type"><a href="qt3drender-qtechnique.html">QTechnique</a></span> <span class="operator">*</span>gl3Technique <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3drender-qtechnique.html">QTechnique</a></span>();
+  <span class="type"><a href="qt3drender-qrenderpass.html">QRenderPass</a></span> <span class="operator">*</span>gl3Pass <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3drender-qrenderpass.html">QRenderPass</a></span>();
+  <span class="type"><a href="qt3drender-qshaderprogram.html">QShaderProgram</a></span> <span class="operator">*</span>glShader <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3drender-qshaderprogram.html">QShaderProgram</a></span>();
+
+  <span class="comment">// Set the shader on the render pass</span>
+  gl3Pass<span class="operator">-</span><span class="operator">&gt;</span>setShaderProgram(glShader);
+
+  <span class="comment">// Add the pass to the technique</span>
+  gl3Technique<span class="operator">-</span><span class="operator">&gt;</span>addRenderPass(gl3Pass);
+
+  <span class="comment">// Set the targeted GL version for the technique</span>
+  gl3Technique<span class="operator">-</span><span class="operator">&gt;</span>graphicsApiFilter()<span class="operator">-</span><span class="operator">&gt;</span>setApi(<span class="type"><a href="qt3drender-qgraphicsapifilter.html">QGraphicsApiFilter</a></span><span class="operator">::</span>OpenGL);
+  gl3Technique<span class="operator">-</span><span class="operator">&gt;</span>graphicsApiFilter()<span class="operator">-</span><span class="operator">&gt;</span>setMajorVersion(<span class="number">3</span>);
+  gl3Technique<span class="operator">-</span><span class="operator">&gt;</span>graphicsApiFilter()<span class="operator">-</span><span class="operator">&gt;</span>setMinorVersion(<span class="number">1</span>);
+  gl3Technique<span class="operator">-</span><span class="operator">&gt;</span>graphicsApiFilter()<span class="operator">-</span><span class="operator">&gt;</span>setProfile(<span class="type"><a href="qt3drender-qgraphicsapifilter.html">QGraphicsApiFilter</a></span><span class="operator">::</span>CoreProfile);
+
+  <span class="comment">// Add the technique to the effect</span>
+  effect<span class="operator">-</span><span class="operator">&gt;</span>addTechnique(gl3Technique);
+
+</pre>
+<p>A <a href="qt3drender-qparameter.html">QParameter</a> defined on an Effect is overridden by a <a href="qt3drender-qparameter.html">QParameter</a> (of the same name) defined in a <a href="qt3drender-qmaterial.html">QMaterial</a>, <a href="qt3drender-qtechniquefilter.html">QTechniqueFilter</a>, <a href="qt3drender-qrenderpassfilter.html">QRenderPassFilter</a>.</p>
+</div>
+<p><b>See also </b><a href="qt3drender-qmaterial.html">QMaterial</a>, <a href="qt3drender-qtechnique.html">QTechnique</a>, and <a href="qt3drender-qparameter.html">QParameter</a>.</p>
+<!-- @@@QEffect -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$addParameter[overload1]$$$addParameterQt3DRender::QParameter* -->
+<h3 class="fn" id="addParameter"><a name="addParameter"></a><span class="type">void</span> QEffect::<span class="name">addParameter</span>(<span class="type"><a href="qt3drender-qparameter.html">Qt3DRender::QParameter</a></span> *<i>parameter</i>)</h3>
+<p>Adds <i>parameter</i> to the effect. It sends a QPropertyNodeAddedChange to the backend. The <i>parameter</i> will be used to set a corresponding uniform value in the shader used by this effect.</p>
+<!-- @@@addParameter -->
+<!-- $$$addTechnique[overload1]$$$addTechniqueQt3DRender::QTechnique* -->
+<h3 class="fn" id="addTechnique"><a name="addTechnique"></a><span class="type">void</span> QEffect::<span class="name">addTechnique</span>(<span class="type"><a href="qt3drender-qtechnique.html">Qt3DRender::QTechnique</a></span> *<i>t</i>)</h3>
+<p>Adds a new technique <i>t</i> to the effect. It sends a QPropertyNodeAddedChange to the backend.</p>
+<!-- @@@addTechnique -->
+<!-- $$$parameters[overload1]$$$parameters -->
+<h3 class="fn" id="parameters"><a name="parameters"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="qt3drender-qparameter.html">Qt3DRender::QParameter</a></span> *&gt; QEffect::<span class="name">parameters</span>() const</h3>
+<p>Returns the list of parameters used by the effect.</p>
+<!-- @@@parameters -->
+<!-- $$$removeParameter[overload1]$$$removeParameterQt3DRender::QParameter* -->
+<h3 class="fn" id="removeParameter"><a name="removeParameter"></a><span class="type">void</span> QEffect::<span class="name">removeParameter</span>(<span class="type"><a href="qt3drender-qparameter.html">Qt3DRender::QParameter</a></span> *<i>parameter</i>)</h3>
+<p>Removes a parameter <i>parameter</i> from the effect.</p>
+<!-- @@@removeParameter -->
+<!-- $$$removeTechnique[overload1]$$$removeTechniqueQt3DRender::QTechnique* -->
+<h3 class="fn" id="removeTechnique"><a name="removeTechnique"></a><span class="type">void</span> QEffect::<span class="name">removeTechnique</span>(<span class="type"><a href="qt3drender-qtechnique.html">Qt3DRender::QTechnique</a></span> *<i>t</i>)</h3>
+<p>Removes a technique <i>t</i> from the effect.</p>
+<!-- @@@removeTechnique -->
+<!-- $$$techniques[overload1]$$$techniques -->
+<h3 class="fn" id="techniques"><a name="techniques"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="qt3drender-qtechnique.html">Qt3DRender::QTechnique</a></span> *&gt; QEffect::<span class="name">techniques</span>() const</h3>
+<p>Returns the list of techniques used by the effect.</p>
+<!-- @@@techniques -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

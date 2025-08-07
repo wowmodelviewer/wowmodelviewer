@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qsgsimplematerial.cpp -->
+  <title>QSGSimpleMaterialShader Class | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-module.html">C++ Classes</a></td><td >QSGSimpleMaterialShader</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#macros">Macros</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSGSimpleMaterialShader Class</h1>
+<!-- $$$QSGSimpleMaterialShader-brief -->
+<p>The <a href="qsgsimplematerialshader.html">QSGSimpleMaterialShader</a> class provides a convenient way of building custom OpenGL-based materials for the scene graph. <a href="#details">More...</a></p>
+<!-- @@@QSGSimpleMaterialShader -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QSGSimpleMaterialShader&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += quick</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qsgmaterialshader.html">QSGMaterialShader</a></td></tr></table></div><ul>
+<li><a href="qsgsimplematerialshader-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QList&lt;QByteArray&gt; </td><td class="memItemRight bottomAlign"><b><a href="qsgsimplematerialshader.html#attributes">attributes</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qsgsimplematerialshader.html#resolveUniforms">resolveUniforms</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const char *</td><td class="memItemRight bottomAlign"><b><a href="qsgsimplematerialshader.html#uniformMatrixName">uniformMatrixName</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const char *</td><td class="memItemRight bottomAlign"><b><a href="qsgsimplematerialshader.html#uniformOpacityName">uniformOpacityName</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qsgsimplematerialshader.html#updateState-1">updateState</a></b>(const State *<i>newState</i>, const State *<i>oldState</i>) = 0</td></tr>
+</table></div>
+<a name="macros"></a>
+<h2 id="macros">Macros</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsgsimplematerialshader.html#QSG_DECLARE_SIMPLE_COMPARABLE_SHADER">QSG_DECLARE_SIMPLE_COMPARABLE_SHADER</a></b>(<i>Shader</i>, <i>State</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsgsimplematerialshader.html#QSG_DECLARE_SIMPLE_SHADER">QSG_DECLARE_SIMPLE_SHADER</a></b>(<i>Shader</i>, <i>State</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSGSimpleMaterialShader-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><b>Warning:</b> This utility class is only functional when running with the OpenGL backend of the Qt Quick scenegraph.</p>
+<p>Where the <a href="qsgmaterial.html">QSGMaterial</a> and <a href="qsgmaterialshader.html">QSGMaterialShader</a> API requires a bit of boilerplate code to create a functioning material, the <a href="qsgsimplematerialshader.html">QSGSimpleMaterialShader</a> tries to hide some of this through the use of templates.</p>
+<p><a href="qsgmaterialshader.html#vertexShader">QSGSimpleMaterialShader::vertexShader</a>() and <a href="qsgmaterialshader.html#fragmentShader">QSGSimpleMaterialShader::fragmentShader</a>() are used to specify the actual shader source code. The names of the vertex attributes should be listed in the <a href="qsgsimplematerialshader.html#attributes">QSGSimpleMaterialShader::attributes</a>()</p>
+<p><a href="qsgsimplematerialshader.html#updateState-1">QSGSimpleMaterialShader::updateState</a>() is used to push the material state to the OpenGL shader program.</p>
+<p>The actual OpenGL shader program is accessible through the <a href="qsgmaterialshader.html#program">QSGSimpleMaterialShader::program</a>() function.</p>
+<p>Each <a href="qsgsimplematerialshader.html">QSGSimpleMaterialShader</a> implementation operates on a unique state struct. The state struct must be declared using the <code>QSG_DECLARE_SIMPLE_SHADER</code> macro.</p>
+<p>Here is a simple example of a custom solid-color:</p>
+<pre class="cpp">
+
+  <span class="keyword">struct</span> Color
+  {
+      <span class="type">float</span> r<span class="operator">,</span> g<span class="operator">,</span> b<span class="operator">,</span> a;
+  };
+
+  <span class="keyword">class</span> MinimalShader : <span class="keyword">public</span> <span class="type"><a href="qsgsimplematerialshader.html">QSGSimpleMaterialShader</a></span><span class="operator">&lt;</span>Color<span class="operator">&gt;</span>
+  {
+      QSG_DECLARE_SIMPLE_SHADER(MinimalShader<span class="operator">,</span> Color)
+  <span class="keyword">public</span>:
+
+      <span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>vertexShader() <span class="keyword">const</span> {
+          <span class="keyword">return</span>
+          <span class="string">&quot;attribute highp vec4 vertex;               \n&quot;</span>
+          <span class="string">&quot;uniform highp mat4 qt_Matrix;              \n&quot;</span>
+          <span class="string">&quot;void main() {                              \n&quot;</span>
+          <span class="string">&quot;    gl_Position = qt_Matrix * vertex;      \n&quot;</span>
+          <span class="string">&quot;}&quot;</span>;
+      }
+
+      <span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>fragmentShader() <span class="keyword">const</span> {
+          <span class="keyword">return</span>
+          <span class="string">&quot;uniform lowp float qt_Opacity;             \n&quot;</span>
+          <span class="string">&quot;uniform lowp vec4 color;                   \n&quot;</span>
+          <span class="string">&quot;void main() {                              \n&quot;</span>
+          <span class="string">&quot;    gl_FragColor = color * qt_Opacity;     \n&quot;</span>
+          <span class="string">&quot;}&quot;</span>;
+      }
+
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> attributes() <span class="keyword">const</span> {
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;vertex&quot;</span>;
+      }
+
+      <span class="type">void</span> updateState(<span class="keyword">const</span> Color <span class="operator">*</span>color<span class="operator">,</span> <span class="keyword">const</span> Color <span class="operator">*</span>) {
+          program()<span class="operator">-</span><span class="operator">&gt;</span>setUniformValue(<span class="string">&quot;color&quot;</span><span class="operator">,</span> color<span class="operator">-</span><span class="operator">&gt;</span>r<span class="operator">,</span> color<span class="operator">-</span><span class="operator">&gt;</span>g<span class="operator">,</span> color<span class="operator">-</span><span class="operator">&gt;</span>b<span class="operator">,</span> color<span class="operator">-</span><span class="operator">&gt;</span>a);
+      }
+
+  };
+
+</pre>
+<p>Instances of materials using this shader can be created using the createMaterial() function which will be defined by the <a href="qsgsimplematerialshader.html#QSG_DECLARE_SIMPLE_SHADER">QSG_DECLARE_SIMPLE_SHADER</a> macro.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qsgsimplematerial.html">QSGSimpleMaterial</a></span><span class="operator">&lt;</span>Color<span class="operator">&gt;</span> <span class="operator">*</span>material <span class="operator">=</span> MinimalShader<span class="operator">::</span>createMaterial();
+  material<span class="operator">-</span><span class="operator">&gt;</span>state()<span class="operator">-</span><span class="operator">&gt;</span>r <span class="operator">=</span> <span class="number">1</span>;
+  material<span class="operator">-</span><span class="operator">&gt;</span>state()<span class="operator">-</span><span class="operator">&gt;</span>g <span class="operator">=</span> <span class="number">0</span>;
+  material<span class="operator">-</span><span class="operator">&gt;</span>state()<span class="operator">-</span><span class="operator">&gt;</span>b <span class="operator">=</span> <span class="number">0</span>;
+  material<span class="operator">-</span><span class="operator">&gt;</span>state()<span class="operator">-</span><span class="operator">&gt;</span>a <span class="operator">=</span> <span class="number">1</span>;
+
+  node<span class="operator">-</span><span class="operator">&gt;</span>setMaterial(material);
+
+</pre>
+<p>The scene graph will often try to find materials that have the same or at least similar state so that these can be batched together inside the renderer, which gives better performance. To specify sortable material states, use <a href="qsgsimplematerialshader.html#QSG_DECLARE_SIMPLE_COMPARABLE_SHADER">QSG_DECLARE_SIMPLE_COMPARABLE_SHADER</a> instead of <a href="qsgsimplematerialshader.html#QSG_DECLARE_SIMPLE_SHADER">QSG_DECLARE_SIMPLE_SHADER</a>. The state struct must then also define the function:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> compare(<span class="keyword">const</span> Type <span class="operator">*</span>other) <span class="keyword">const</span>;
+
+</pre>
+<p><b>Warning:</b> The <a href="qsgsimplematerialshader.html">QSGSimpleMaterialShader</a> relies on template instantiation to create a <a href="qsgmaterialtype.html">QSGMaterialType</a> which the scene graph renderer internally uses to identify this shader. For this reason, the unique <a href="qsgsimplematerialshader.html">QSGSimpleMaterialShader</a> implementation must be instantiated with a unique C++ type.</p>
+<p><b>Note: </b>All classes with QSG prefix should be used solely on the scene graph's rendering thread. See <a href="qtquick-visualcanvas-scenegraph.html#scene-graph-and-rendering">Scene Graph and Rendering</a> for more information.</p></div>
+<p><b>See also </b><a href="qtquick-scenegraph-simplematerial-example.html">Scene Graph - Simple Material</a>.</p>
+<!-- @@@QSGSimpleMaterialShader -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$attributes[overload1]$$$attributes -->
+<h3 class="fn" id="attributes"><a name="attributes"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span>&gt; QSGSimpleMaterialShader::<span class="name">attributes</span>() const</h3>
+<p>Returns a list of names, declaring the vertex attributes in the vertex shader.</p>
+<!-- @@@attributes -->
+<!-- $$$resolveUniforms[overload1]$$$resolveUniforms -->
+<h3 class="fn" id="resolveUniforms"><a name="resolveUniforms"></a><code>[virtual] </code><span class="type">void</span> QSGSimpleMaterialShader::<span class="name">resolveUniforms</span>()</h3>
+<p>Reimplement this function to resolve the location of named uniforms in the shader program.</p>
+<p>This function is called when the material shader is initialized.</p>
+<!-- @@@resolveUniforms -->
+<!-- $$$uniformMatrixName[overload1]$$$uniformMatrixName -->
+<h3 class="fn" id="uniformMatrixName"><a name="uniformMatrixName"></a>const <span class="type">char</span> *QSGSimpleMaterialShader::<span class="name">uniformMatrixName</span>() const</h3>
+<p>Returns the name for the transform matrix uniform of this item. The default value is <code>qt_Matrix</code>.</p>
+<!-- @@@uniformMatrixName -->
+<!-- $$$uniformOpacityName[overload1]$$$uniformOpacityName -->
+<h3 class="fn" id="uniformOpacityName"><a name="uniformOpacityName"></a>const <span class="type">char</span> *QSGSimpleMaterialShader::<span class="name">uniformOpacityName</span>() const</h3>
+<p>Returns the name for the opacity uniform of this item. The default value is <code>qt_Opacity</code>.</p>
+<!-- @@@uniformOpacityName -->
+<!-- $$$updateState$$$updateStateconstState*constState* -->
+<h3 class="fn" id="updateState-1"><a name="updateState-1"></a><code>[pure virtual] </code><span class="type">void</span> QSGSimpleMaterialShader::<span class="name">updateState</span>(const <span class="type">State</span> *<i>newState</i>, const <span class="type">State</span> *<i>oldState</i>)</h3>
+<p>Called whenever the state of this shader should be updated from <i>oldState</i> to <i>newState</i>, typical for each new set of geometries being drawn.</p>
+<p>Both the old and the new state are passed in so that the implementation can compare and minimize the state changes when applicable.</p>
+<!-- @@@updateState -->
+</div>
+<div class="macros">
+<h2>Macro Documentation</h2>
+<!-- $$$QSG_DECLARE_SIMPLE_COMPARABLE_SHADER[overload1]$$$QSG_DECLARE_SIMPLE_COMPARABLE_SHADER -->
+<h3 class="fn" id="QSG_DECLARE_SIMPLE_COMPARABLE_SHADER"><a name="QSG_DECLARE_SIMPLE_COMPARABLE_SHADER"></a><span class="name">QSG_DECLARE_SIMPLE_COMPARABLE_SHADER</span>(<i>Shader</i>, <i>State</i>)</h3>
+<p>This macro is used to declare a <a href="qsgmaterialtype.html">QSGMaterialType</a> and a <code>createMaterial()</code> function for <i>Shader</i> with the given <i>State</i>, where the <i>State</i> class must define a compare function on the form:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> compare(<span class="keyword">const</span> State <span class="operator">*</span>other) <span class="keyword">const</span>;
+
+</pre>
+<!-- @@@QSG_DECLARE_SIMPLE_COMPARABLE_SHADER -->
+<!-- $$$QSG_DECLARE_SIMPLE_SHADER[overload1]$$$QSG_DECLARE_SIMPLE_SHADER -->
+<h3 class="fn" id="QSG_DECLARE_SIMPLE_SHADER"><a name="QSG_DECLARE_SIMPLE_SHADER"></a><span class="name">QSG_DECLARE_SIMPLE_SHADER</span>(<i>Shader</i>, <i>State</i>)</h3>
+<p>This macro is used to declare a <a href="qsgmaterialtype.html">QSGMaterialType</a> and a <code>createMaterial()</code> function for <i>Shader</i> with the given <i>State</i>.</p>
+<!-- @@@QSG_DECLARE_SIMPLE_SHADER -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

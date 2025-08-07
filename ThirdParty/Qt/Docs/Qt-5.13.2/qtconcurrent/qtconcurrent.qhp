@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+    <namespace>org.qt-project.qtconcurrent.5132</namespace>
+    <virtualFolder>qtconcurrent</virtualFolder>
+    <metaData name="version" value="5.13.2"/>
+    <customFilter name="QtConcurrent 5.13.2">
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtconcurrent</filterAttribute>
+    </customFilter>
+    <filterSection>
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtconcurrent</filterAttribute>
+        <filterAttribute>qtrefdoc</filterAttribute>
+        <toc>
+            <section ref="qtconcurrent-index.html" title="Qt Concurrent">
+                <section ref="qtconcurrent-module.html" title="C++ Classes"/>
+            </section>
+        </toc>
+        <keywords>
+            <keyword name="Concurrent Filter and Filter-Reduce" id="Concurrent Filter and Filter-Reduce" ref="qtconcurrentfilter.html"/>
+            <keyword name="Concurrent Map and Map-Reduce" id="Concurrent Map and Map-Reduce" ref="qtconcurrentmap.html"/>
+            <keyword name="Concurrent Run" id="Concurrent Run" ref="qtconcurrentrun.html"/>
+            <keyword name="Qt Concurrent" id="Qt Concurrent" ref="qtconcurrent-index.html"/>
+            <keyword name="Qt Concurrent C++ Classes" id="Qt Concurrent C++ Classes" ref="qtconcurrent-module.html"/>
+            <keyword name="QtConcurrent" id="QtConcurrent" ref="qtconcurrent.html"/>
+            <keyword name="QtConcurrent::Exception" id="QtConcurrent::Exception" ref="qtconcurrent-obsolete.html#Exception-typedef"/>
+            <keyword name="QtConcurrent::OrderedReduce" id="QtConcurrent::OrderedReduce" ref="qtconcurrent.html#ReduceOption-enum"/>
+            <keyword name="QtConcurrent::ReduceOption" id="QtConcurrent::ReduceOption" ref="qtconcurrent.html#ReduceOption-enum"/>
+            <keyword name="QtConcurrent::ReduceOptions" id="QtConcurrent::ReduceOptions" ref="qtconcurrent.html#ReduceOption-enum"/>
+            <keyword name="QtConcurrent::SequentialReduce" id="QtConcurrent::SequentialReduce" ref="qtconcurrent.html#ReduceOption-enum"/>
+            <keyword name="QtConcurrent::UnhandledException" id="QtConcurrent::UnhandledException" ref="qtconcurrent-obsolete.html#UnhandledException-typedef"/>
+            <keyword name="QtConcurrent::UnorderedReduce" id="QtConcurrent::UnorderedReduce" ref="qtconcurrent.html#ReduceOption-enum"/>
+            <keyword name="blockingFilter" id="QtConcurrent::blockingFilter" ref="qtconcurrent.html#blockingFilter"/>
+            <keyword name="blockingFiltered" id="QtConcurrent::blockingFiltered" ref="qtconcurrent.html#blockingFiltered"/>
+            <keyword name="blockingFilteredReduced" id="QtConcurrent::blockingFilteredReduced" ref="qtconcurrent.html#blockingFilteredReduced"/>
+            <keyword name="blockingMap" id="QtConcurrent::blockingMap" ref="qtconcurrent.html#blockingMap"/>
+            <keyword name="blockingMapped" id="QtConcurrent::blockingMapped" ref="qtconcurrent.html#blockingMapped"/>
+            <keyword name="blockingMappedReduced" id="QtConcurrent::blockingMappedReduced" ref="qtconcurrent.html#blockingMappedReduced"/>
+            <keyword name="filter" id="QtConcurrent::filter" ref="qtconcurrent.html#filter"/>
+            <keyword name="filtered" id="QtConcurrent::filtered" ref="qtconcurrent.html#filtered"/>
+            <keyword name="filteredReduced" id="QtConcurrent::filteredReduced" ref="qtconcurrent.html#filteredReduced"/>
+            <keyword name="map" id="QtConcurrent::map" ref="qtconcurrent.html#map"/>
+            <keyword name="mapped" id="QtConcurrent::mapped" ref="qtconcurrent.html#mapped"/>
+            <keyword name="mappedReduced" id="QtConcurrent::mappedReduced" ref="qtconcurrent.html#mappedReduced"/>
+            <keyword name="run" id="QtConcurrent::run" ref="qtconcurrent.html#run"/>
+        </keywords>
+        <files>
+            <file>images/arrow_bc.png</file>
+            <file>images/bgrContent.png</file>
+            <file>images/btn_next.png</file>
+            <file>images/btn_prev.png</file>
+            <file>images/bullet_dn.png</file>
+            <file>images/bullet_sq.png</file>
+            <file>images/home.png</file>
+            <file>images/ico_note.png</file>
+            <file>images/ico_note_attention.png</file>
+            <file>images/ico_out.png</file>
+            <file>images/imagescaling_example.png</file>
+            <file>images/logo.png</file>
+            <file>images/qtconcurrent-progressdialog.png</file>
+            <file>qtconcurrent-imagescaling-example.html</file>
+            <file>qtconcurrent-index.html</file>
+            <file>qtconcurrent-map-example.html</file>
+            <file>qtconcurrent-module.html</file>
+            <file>qtconcurrent-obsolete.html</file>
+            <file>qtconcurrent-progressdialog-example.html</file>
+            <file>qtconcurrent-runfunction-example.html</file>
+            <file>qtconcurrent-wordcount-example.html</file>
+            <file>qtconcurrent.html</file>
+            <file>qtconcurrentfilter.html</file>
+            <file>qtconcurrentmap.html</file>
+            <file>qtconcurrentrun.html</file>
+            <file>style/offline-simple.css</file>
+            <file>style/offline.css</file>
+        </files>
+    </filterSection>
+</QtHelpProject>

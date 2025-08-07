@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtexturewrapmode.cpp -->
+  <title>QTextureWrapMode Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QTextureWrapMode</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QTextureWrapMode Class</h1>
+<span class="small-subtitle">(<a href="qt3drender-qtexturewrapmode.html">Qt3DRender::QTextureWrapMode</a>)<br/></span>
+<!-- $$$QTextureWrapMode-brief -->
+<p>Defines the wrap mode a <a href="qt3drender-qabstracttexture.html">Qt3DRender::QAbstractTexture</a> should apply to a texture. <a href="#details">More...</a></p>
+<!-- @@@QTextureWrapMode -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QTextureWrapMode&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3drender</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.5.</p>
+<ul>
+<li><a href="qt3drender-qtexturewrapmode-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qtexturewrapmode.html#WrapMode-enum">WrapMode</a></b> { Repeat, MirroredRepeat, ClampToEdge, ClampToBorder }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qt3drender-qtexturewrapmode.html#x-prop">x</a></b> : WrapMode</li>
+<li class="fn"><b><a href="qt3drender-qtexturewrapmode.html#y-prop">y</a></b> : WrapMode</li>
+<li class="fn"><b><a href="qt3drender-qtexturewrapmode.html#z-prop">z</a></b> : WrapMode</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qtexturewrapmode.html#QTextureWrapMode-1">QTextureWrapMode</a></b>(Qt3DRender::QTextureWrapMode::WrapMode <i>x</i>, Qt3DRender::QTextureWrapMode::WrapMode <i>y</i>, Qt3DRender::QTextureWrapMode::WrapMode <i>z</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QTextureWrapMode::WrapMode </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qtexturewrapmode.html#x-prop">x</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QTextureWrapMode::WrapMode </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qtexturewrapmode.html#y-prop">y</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QTextureWrapMode::WrapMode </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qtexturewrapmode.html#z-prop">z</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qtexturewrapmode.html#setX">setX</a></b>(Qt3DRender::QTextureWrapMode::WrapMode <i>x</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qtexturewrapmode.html#setY">setY</a></b>(Qt3DRender::QTextureWrapMode::WrapMode <i>y</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qtexturewrapmode.html#setZ">setZ</a></b>(Qt3DRender::QTextureWrapMode::WrapMode <i>z</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qtexturewrapmode.html#x-prop">xChanged</a></b>(Qt3DRender::QTextureWrapMode::WrapMode <i>x</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qtexturewrapmode.html#y-prop">yChanged</a></b>(Qt3DRender::QTextureWrapMode::WrapMode <i>y</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qtexturewrapmode.html#z-prop">zChanged</a></b>(Qt3DRender::QTextureWrapMode::WrapMode <i>z</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QTextureWrapMode-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QTextureWrapMode -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$WrapMode$$$Repeat$$$MirroredRepeat$$$ClampToEdge$$$ClampToBorder -->
+<h3 class="fn" id="WrapMode-enum"><a name="WrapMode-enum"></a>enum QTextureWrapMode::<span class="name">WrapMode</span></h3>
+<p>Specifies the type of text wrapping. Possible values:</p>
+<div class="table"><table class="valuelist"><tr><th class="tblConst">Constant</th><th class="tblVal">Value</th></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QTextureWrapMode::Repeat</code></td><td class="topAlign tblval"><code>0x2901</code></td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QTextureWrapMode::MirroredRepeat</code></td><td class="topAlign tblval"><code>0x8370</code></td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QTextureWrapMode::ClampToEdge</code></td><td class="topAlign tblval"><code>0x812F</code></td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QTextureWrapMode::ClampToBorder</code></td><td class="topAlign tblval"><code>0x812D</code></td></tr>
+</table></div>
+<!-- @@@WrapMode -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$x-prop$$$x$$$setXQt3DRender::QTextureWrapMode::WrapMode$$$xChangedQt3DRender::QTextureWrapMode::WrapMode -->
+<h3 class="fn" id="x-prop"><a name="x-prop"></a><span class="name">x</span> : <span class="type"><a href="qt3drender-qtexturewrapmode.html#WrapMode-enum">WrapMode</a></span></h3>
+<p>Returns the wrap mode of the x dimension.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QTextureWrapMode::WrapMode </td><td class="memItemRight bottomAlign"><span class="name"><b>x</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qtexturewrapmode.html#setX">setX</a></b></span>(Qt3DRender::QTextureWrapMode::WrapMode <i>x</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>xChanged</b></span>(Qt3DRender::QTextureWrapMode::WrapMode <i>x</i>)</td></tr>
+</table></div>
+<!-- @@@x -->
+<!-- $$$y-prop$$$y$$$setYQt3DRender::QTextureWrapMode::WrapMode$$$yChangedQt3DRender::QTextureWrapMode::WrapMode -->
+<h3 class="fn" id="y-prop"><a name="y-prop"></a><span class="name">y</span> : <span class="type"><a href="qt3drender-qtexturewrapmode.html#WrapMode-enum">WrapMode</a></span></h3>
+<p>Returns the wrap mode of the y dimension.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QTextureWrapMode::WrapMode </td><td class="memItemRight bottomAlign"><span class="name"><b>y</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qtexturewrapmode.html#setY">setY</a></b></span>(Qt3DRender::QTextureWrapMode::WrapMode <i>y</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>yChanged</b></span>(Qt3DRender::QTextureWrapMode::WrapMode <i>y</i>)</td></tr>
+</table></div>
+<!-- @@@y -->
+<!-- $$$z-prop$$$z$$$setZQt3DRender::QTextureWrapMode::WrapMode$$$zChangedQt3DRender::QTextureWrapMode::WrapMode -->
+<h3 class="fn" id="z-prop"><a name="z-prop"></a><span class="name">z</span> : <span class="type"><a href="qt3drender-qtexturewrapmode.html#WrapMode-enum">WrapMode</a></span></h3>
+<p>Returns the wrap mode of the z dimension.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QTextureWrapMode::WrapMode </td><td class="memItemRight bottomAlign"><span class="name"><b>z</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qtexturewrapmode.html#setZ">setZ</a></b></span>(Qt3DRender::QTextureWrapMode::WrapMode <i>z</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>zChanged</b></span>(Qt3DRender::QTextureWrapMode::WrapMode <i>z</i>)</td></tr>
+</table></div>
+<!-- @@@z -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QTextureWrapMode$$$QTextureWrapModeQt3DRender::QTextureWrapMode::WrapModeQt3DRender::QTextureWrapMode::WrapModeQt3DRender::QTextureWrapMode::WrapModeQObject* -->
+<h3 class="fn" id="QTextureWrapMode-1"><a name="QTextureWrapMode-1"></a>QTextureWrapMode::<span class="name">QTextureWrapMode</span>(<span class="type"><a href="qt3drender-qtexturewrapmode.html#WrapMode-enum">Qt3DRender::QTextureWrapMode::WrapMode</a></span> <i>x</i>, <span class="type"><a href="qt3drender-qtexturewrapmode.html#WrapMode-enum">Qt3DRender::QTextureWrapMode::WrapMode</a></span> <i>y</i>, <span class="type"><a href="qt3drender-qtexturewrapmode.html#WrapMode-enum">Qt3DRender::QTextureWrapMode::WrapMode</a></span> <i>z</i>, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Contrusts a new <a href="qt3drender-qtexturewrapmode.html">Qt3DRender::QTextureWrapMode</a> instance with the wrap mode to apply to each dimension <i>x</i>, <i>y</i> <i>z</i> of the texture and <i>parent</i> as parent.</p>
+<!-- @@@QTextureWrapMode -->
+<!-- $$$setX -->
+<h3 class="fn" id="setX"><a name="setX"></a><code>[slot] </code><span class="type">void</span> QTextureWrapMode::<span class="name">setX</span>(<span class="type"><a href="qt3drender-qtexturewrapmode.html#WrapMode-enum">Qt3DRender::QTextureWrapMode::WrapMode</a></span> <i>x</i>)</h3>
+<p>Sets the wrap mode of the x dimension to <i>x</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="qt3drender-qtexturewrapmode.html#x-prop">x</a>. </p><p><b>See also </b><a href="qt3drender-qtexturewrapmode.html#x-prop">x</a>().</p>
+<!-- @@@setX -->
+<!-- $$$setY -->
+<h3 class="fn" id="setY"><a name="setY"></a><code>[slot] </code><span class="type">void</span> QTextureWrapMode::<span class="name">setY</span>(<span class="type"><a href="qt3drender-qtexturewrapmode.html#WrapMode-enum">Qt3DRender::QTextureWrapMode::WrapMode</a></span> <i>y</i>)</h3>
+<p>Sets the wrap mode of the y dimension to <i>y</i>.</p>
+<p><b>Note: </b>this is not available on 1D textures.</p><p><b>Note:</b> Setter function for property <a href="qt3drender-qtexturewrapmode.html#y-prop">y</a>. </p><p><b>See also </b><a href="qt3drender-qtexturewrapmode.html#y-prop">y</a>().</p>
+<!-- @@@setY -->
+<!-- $$$setZ -->
+<h3 class="fn" id="setZ"><a name="setZ"></a><code>[slot] </code><span class="type">void</span> QTextureWrapMode::<span class="name">setZ</span>(<span class="type"><a href="qt3drender-qtexturewrapmode.html#WrapMode-enum">Qt3DRender::QTextureWrapMode::WrapMode</a></span> <i>z</i>)</h3>
+<p>Sets the wrap mode of the z dimension to <i>z</i>.</p>
+<p><b>Note: </b>this is only available on 3D textures.</p><p><b>Note:</b> Setter function for property <a href="qt3drender-qtexturewrapmode.html#z-prop">z</a>. </p><p><b>See also </b><a href="qt3drender-qtexturewrapmode.html#z-prop">z</a>().</p>
+<!-- @@@setZ -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

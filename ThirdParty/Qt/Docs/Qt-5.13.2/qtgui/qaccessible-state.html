@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qaccessible.cpp -->
+  <title>State Struct | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >State</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">State Struct</h1>
+<span class="small-subtitle">Struct State is declared in class <a href="qaccessible.html">QAccessible</a>.<br/></span>
+<ul>
+<li><a href="qaccessible-state-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qaccessible-state.html#State">State</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$State-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This structure defines bit flags that indicate the state of an accessible object. The values are:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>active</code></td><td class="topAlign">The object is the active window or the active sub-element in a container (that would get focus when focusing the container).</td></tr>
+<tr><td class="topAlign"><code>adjustable</code></td><td class="topAlign">The object represents an adjustable value, e.g&#x2e; sliders.</td></tr>
+<tr><td class="topAlign"><code>animated</code></td><td class="topAlign">The object's appearance changes frequently.</td></tr>
+<tr><td class="topAlign"><code>busy</code></td><td class="topAlign">The object cannot accept input at the moment.</td></tr>
+<tr><td class="topAlign"><code>checkable</code></td><td class="topAlign">The object is checkable.</td></tr>
+<tr><td class="topAlign"><code>checked</code></td><td class="topAlign">The object's check box is checked.</td></tr>
+<tr><td class="topAlign"><code>checkStateMixed</code></td><td class="topAlign">The third state of checkboxes (half checked in tri-state check boxes).</td></tr>
+<tr><td class="topAlign"><code>collapsed</code></td><td class="topAlign">The object is collapsed, e.g&#x2e; a closed listview item, or an iconified window.</td></tr>
+<tr><td class="topAlign"><code>defaultButton</code></td><td class="topAlign">The object represents the default button in a dialog.</td></tr>
+<tr><td class="topAlign"><code>defunct</code></td><td class="topAlign">The object no longer exists.</td></tr>
+<tr><td class="topAlign"><code>editable</code></td><td class="topAlign">The object has a text carret (and often implements the text interface).</td></tr>
+<tr><td class="topAlign"><code>expandable</code></td><td class="topAlign">The object is expandable, mostly used for cells in a tree view.</td></tr>
+<tr><td class="topAlign"><code>expanded</code></td><td class="topAlign">The object is expanded, currently its children are visible.</td></tr>
+<tr><td class="topAlign"><code>extSelectable</code></td><td class="topAlign">The object supports extended selection.</td></tr>
+<tr><td class="topAlign"><code>focusable</code></td><td class="topAlign">The object can receive focus. Only objects in the active window can receive focus.</td></tr>
+<tr><td class="topAlign"><code>focused</code></td><td class="topAlign">The object has keyboard focus.</td></tr>
+<tr><td class="topAlign"><code>hasPopup</code></td><td class="topAlign">The object opens a popup.</td></tr>
+<tr><td class="topAlign"><code>hotTracked</code></td><td class="topAlign">The object's appearance is sensitive to the mouse cursor position.</td></tr>
+<tr><td class="topAlign"><code>invalid</code></td><td class="topAlign">The object is no longer valid (because it has been deleted).</td></tr>
+<tr><td class="topAlign"><code>invalidEntry</code></td><td class="topAlign">Input validation current input invalid.</td></tr>
+<tr><td class="topAlign"><code>invisible</code></td><td class="topAlign">The object is not visible to the user.</td></tr>
+<tr><td class="topAlign"><code>linked</code></td><td class="topAlign">The object is linked to another object, e.g&#x2e; a hyperlink.</td></tr>
+<tr><td class="topAlign"><code>marqueed</code></td><td class="topAlign">The object displays scrolling contents, e.g&#x2e; a log view.</td></tr>
+<tr><td class="topAlign"><code>modal</code></td><td class="topAlign">The object blocks input from other objects.</td></tr>
+<tr><td class="topAlign"><code>movable</code></td><td class="topAlign">The object can be moved.</td></tr>
+<tr><td class="topAlign"><code>multiLine</code></td><td class="topAlign">The object has multiple lines of text (word wrap), as opposed to a single line.</td></tr>
+<tr><td class="topAlign"><code>multiSelectable</code></td><td class="topAlign">The object supports multiple selected items.</td></tr>
+<tr><td class="topAlign"><code>offscreen</code></td><td class="topAlign">The object is clipped by the visible area. Objects that are off screen are also invisible.</td></tr>
+<tr><td class="topAlign"><code>passwordEdit</code></td><td class="topAlign">The object is a password field, e.g&#x2e; a line edit for entering a Password.</td></tr>
+<tr><td class="topAlign"><code>playsSound</code></td><td class="topAlign">The object produces sound when interacted with.</td></tr>
+<tr><td class="topAlign"><code>pressed</code></td><td class="topAlign">The object is pressed.</td></tr>
+<tr><td class="topAlign"><code>readOnly</code></td><td class="topAlign">The object can usually be edited, but is explicitly set to read-only.</td></tr>
+<tr><td class="topAlign"><code>searchEdit</code></td><td class="topAlign">The object is a line edit that is the input for search queries.</td></tr>
+<tr><td class="topAlign"><code>selectable</code></td><td class="topAlign">The object is selectable.</td></tr>
+<tr><td class="topAlign"><code>selectableText</code></td><td class="topAlign">The object has text which can be selected. This is different from selectable which refers to the object's children.</td></tr>
+<tr><td class="topAlign"><code>selected</code></td><td class="topAlign">The object is selected, this is independent of text selection.</td></tr>
+<tr><td class="topAlign"><code>selfVoicing</code></td><td class="topAlign">The object describes itself through speech or sound.</td></tr>
+<tr><td class="topAlign"><code>sizeable</code></td><td class="topAlign">The object can be resized, e.g&#x2e; top-level windows.</td></tr>
+<tr><td class="topAlign"><code>summaryElement</code></td><td class="topAlign">The object summarizes the state of the window and should be treated with priority.</td></tr>
+<tr><td class="topAlign"><code>supportsAutoCompletion</code></td><td class="topAlign">The object has auto-completion, for example in line edits or combo boxes.</td></tr>
+<tr><td class="topAlign"><code>traversed</code></td><td class="topAlign">The object is linked and has been visited.</td></tr>
+<tr><td class="topAlign"><code>updatesFrequently</code></td><td class="topAlign">The object changes frequently and needs to be refreshed when accessing it.</td></tr>
+<tr><td class="topAlign"><code>disabled</code></td><td class="topAlign">The object is unavailable to the user, e.g&#x2e; a disabled widget.</td></tr>
+</table></div>
+<p>Implementations of <a href="qaccessibleinterface.html#statex">QAccessibleInterface::state</a>() return a combination of these flags.</p>
+</div>
+<!-- @@@State -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$State[overload1]$$$State -->
+<h3 class="fn" id="State"><a name="State"></a>State::<span class="name">State</span>()</h3>
+<p>Constructs a new <a href="qaccessible-state.html">QAccessible::State</a> with all states set to false.</p>
+<!-- @@@State -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

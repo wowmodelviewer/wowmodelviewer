@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickpositioners.cpp -->
+  <title>Column QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >Column QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#using-transitions">Using Transitions</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Column QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Column-brief -->
+<p>Positions its children in a column. <a href="#details">More...</a></p>
+<!-- @@@Column -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-item.html">Item</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-column-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-column.html#add-prop">add</a></b></b> : Transition</li>
+<li class="fn"><b><b><a href="qml-qtquick-column.html#bottomPadding-prop">bottomPadding</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-column.html#leftPadding-prop">leftPadding</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-column.html#move-prop">move</a></b></b> : Transition</li>
+<li class="fn"><b><b><a href="qml-qtquick-column.html#padding-prop">padding</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-column.html#populate-prop">populate</a></b></b> : Transition</li>
+<li class="fn"><b><b><a href="qml-qtquick-column.html#rightPadding-prop">rightPadding</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-column.html#spacing-prop">spacing</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-column.html#topPadding-prop">topPadding</a></b></b> : real</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-column.html#positioningComplete-signal">positioningComplete</a></b></b>()</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-column.html#forceLayout-method">forceLayout</a></b></b>()</li>
+</ul>
+<!-- $$$Column-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>Column is a type that positions its child items along a single column. It can be used as a convenient way to vertically position a series of items without using <a href="qtquick-positioning-anchors.html">anchors</a>.</p>
+<p>Below is a Column that contains three rectangles of various sizes:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-column.html">Column</a></span> {
+      <span class="name">spacing</span>: <span class="number">2</span>
+
+      <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> { <span class="name">color</span>: <span class="string">&quot;red&quot;</span>; <span class="name">width</span>: <span class="number">50</span>; <span class="name">height</span>: <span class="number">50</span> }
+      <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> { <span class="name">color</span>: <span class="string">&quot;green&quot;</span>; <span class="name">width</span>: <span class="number">20</span>; <span class="name">height</span>: <span class="number">50</span> }
+      <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> { <span class="name">color</span>: <span class="string">&quot;blue&quot;</span>; <span class="name">width</span>: <span class="number">50</span>; <span class="name">height</span>: <span class="number">20</span> }
+  }
+
+</pre>
+<p>The Column automatically positions these items in a vertical formation, like this:</p>
+<p class="centerAlign"><img src="images/verticalpositioner_example.png" alt="" /></p><p>If an item within a Column is not <a href="qml-qtquick-item.html#visible-prop">visible</a>, or if it has a width or height of 0, the item will not be laid out and it will not be visible within the column. Also, since a Column automatically positions its children vertically, a child item within a Column should not set its <a href="qml-qtquick-item.html#y-prop">y</a> position or vertically anchor itself using the <a href="qml-qtquick-item.html#anchors.top-prop">top</a>, <a href="qml-qtquick-item.html#anchors.bottom-prop">bottom</a>, <a href="qml-qtquick-item.html#anchors.verticalCenter-prop">anchors.verticalCenter</a>, <a href="qml-qtquick-item.html#anchors.fill-prop">fill</a> or <a href="qml-qtquick-item.html#anchors.centerIn-prop">centerIn</a> anchors. If you need to perform these actions, consider positioning the items without the use of a Column.</p>
+<p>Note that items in a Column can use the <a href="qml-qtquick-positioner.html">Positioner</a> attached property to access more information about its position within the Column.</p>
+<p>For more information on using Column and other related positioner-types, see <a href="qtquick-positioning-layouts.html">Item Positioners</a>.</p>
+<a name="using-transitions"></a>
+<h2 id="using-transitions">Using Transitions</h2>
+<p>A Column animate items using specific transitions when items are added to or moved within a Column.</p>
+<p>For example, the Column below sets the <a href="qml-qtquick-column.html#move-prop">move</a> property to a specific <a href="qmlexampletoggleswitch.html#transition">Transition</a>:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-column.html">Column</a></span> {
+      <span class="name">spacing</span>: <span class="number">2</span>
+
+      <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> { <span class="name">color</span>: <span class="string">&quot;red&quot;</span>; <span class="name">width</span>: <span class="number">50</span>; <span class="name">height</span>: <span class="number">50</span> }
+      <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> { <span class="name">id</span>: <span class="name">greenRect</span>; <span class="name">color</span>: <span class="string">&quot;green&quot;</span>; <span class="name">width</span>: <span class="number">20</span>; <span class="name">height</span>: <span class="number">50</span> }
+      <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> { <span class="name">color</span>: <span class="string">&quot;blue&quot;</span>; <span class="name">width</span>: <span class="number">50</span>; <span class="name">height</span>: <span class="number">20</span> }
+
+      <span class="name">move</span>: <span class="name">Transition</span> {
+          <span class="type"><a href="qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">properties</span>: <span class="string">&quot;x,y&quot;</span>; <span class="name">duration</span>: <span class="number">1000</span> }
+      }
+
+      <span class="name">focus</span>: <span class="number">true</span>
+      <span class="name">Keys</span>.onSpacePressed: <span class="name">greenRect</span>.<span class="name">visible</span> <span class="operator">=</span> !<span class="name">greenRect</span>.<span class="name">visible</span>
+  }
+
+</pre>
+<p>When the Space key is pressed, the <a href="qml-qtquick-item.html#visible-prop">visible</a> value of the green <a href="qml-qtquick-rectangle.html">Rectangle</a> is toggled. As it appears and disappears, the blue <a href="qml-qtquick-rectangle.html">Rectangle</a> moves within the Column, and the <a href="qml-qtquick-column.html#move-prop">move</a> transition is automatically applied to the blue <a href="qml-qtquick-rectangle.html">Rectangle</a>:</p>
+<p class="centerAlign"><img src="images/verticalpositioner_transition.gif" alt="" /></p><p><b>See also </b><a href="qml-qtquick-row.html">Row</a>, <a href="qml-qtquick-grid.html">Grid</a>, <a href="qml-qtquick-flow.html">Flow</a>, <a href="qml-qtquick-positioner.html">Positioner</a>, <a href="qml-qtquick-layouts-columnlayout.html">ColumnLayout</a>, and <a href="qtquick-positioners-example.html">Qt Quick Examples - Positioners</a>.</p>
+<!-- @@@Column -->
+<h2>Property Documentation</h2>
+<!-- $$$ -->
+<div class="qmlitem"><div class="qmlproto"><div class="table"><table class="qmlname"><tr valign="top" class="odd" id="padding-prop"><td class="tblQmlPropNode"><p><a name="padding-prop"></a><span class="name">padding</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr><tr valign="top" class="odd" id="topPadding-prop"><td class="tblQmlPropNode"><p><a name="topPadding-prop"></a><span class="name">topPadding</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr><tr valign="top" class="odd" id="leftPadding-prop"><td class="tblQmlPropNode"><p><a name="leftPadding-prop"></a><span class="name">leftPadding</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr><tr valign="top" class="odd" id="bottomPadding-prop"><td class="tblQmlPropNode"><p><a name="bottomPadding-prop"></a><span class="name">bottomPadding</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr><tr valign="top" class="odd" id="rightPadding-prop"><td class="tblQmlPropNode"><p><a name="rightPadding-prop"></a><span class="name">rightPadding</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr></table></div></div><div class="qmldoc"><p>These properties hold the padding around the content.</p>
+<p>This documentation was introduced in  Qt 5.6.</p>
+</div></div><!-- @@@ -->
+<br/>
+<!-- $$$add -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="add-prop"></a><span class="name">add</span> : <span class="type"><a href="qml-qtquick-transition.html">Transition</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the transition to be run for items that are added to this positioner. For a positioner, this applies to:</p>
+<ul>
+<li>Items that are created or reparented as a child of the positioner after the positioner has been created</li>
+<li>Child items that change their <a href="qml-qtquick-item.html#visible-prop">Item::visible</a> property from false to true, and thus are now visible</li>
+</ul>
+<p>The transition can use the <a href="qml-qtquick-viewtransition.html">ViewTransition</a> property to access more details about the item that is being added. See the <a href="qml-qtquick-viewtransition.html">ViewTransition</a> documentation for more details and examples on using these transitions.</p>
+<p><b>Note: </b>This transition is not applied to the items that are already part of the positioner at the time of its creation. In this case, the <a href="qml-qtquick-column.html#populate-prop">populate</a> transition is applied instead.</p><p><b>See also </b><a href="qml-qtquick-column.html#populate-prop">populate</a>, <a href="qml-qtquick-viewtransition.html">ViewTransition</a>, and <a href="qtquick-positioners-example.html">Qt Quick Examples - Positioners</a>.</p>
+</div></div><!-- @@@add -->
+<br/>
+<!-- $$$move -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="move-prop"></a><span class="name">move</span> : <span class="type"><a href="qml-qtquick-transition.html">Transition</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the transition to run for items that have moved within the positioner. For a positioner, this applies to:</p>
+<ul>
+<li>Child items that move when they are displaced due to the addition, removal or rearrangement of other items in the positioner</li>
+<li>Child items that are repositioned due to the resizing of other items in the positioner</li>
+</ul>
+<p>The transition can use the <a href="qml-qtquick-viewtransition.html">ViewTransition</a> property to access more details about the item that is being moved. Note, however, that for this move transition, the <a href="qml-qtquick-viewtransition.html">ViewTransition</a>.targetIndexes and <a href="qml-qtquick-viewtransition.html">ViewTransition</a>.targetItems lists are only set when this transition is triggered by the addition of other items in the positioner; in other cases, these lists will be empty. See the <a href="qml-qtquick-viewtransition.html">ViewTransition</a> documentation for more details and examples on using these transitions.</p>
+<p><b>See also </b><a href="qml-qtquick-column.html#add-prop">add</a>, <a href="qml-qtquick-column.html#populate-prop">populate</a>, <a href="qml-qtquick-viewtransition.html">ViewTransition</a>, and <a href="qtquick-positioners-example.html">Qt Quick Examples - Positioners</a>.</p>
+</div></div><!-- @@@move -->
+<br/>
+<!-- $$$populate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="populate-prop"></a><span class="name">populate</span> : <span class="type"><a href="qml-qtquick-transition.html">Transition</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the transition to be run for items that are part of this positioner at the time of its creation. The transition is run when the positioner is first created.</p>
+<p>The transition can use the <a href="qml-qtquick-viewtransition.html">ViewTransition</a> property to access more details about the item that is being added. See the <a href="qml-qtquick-viewtransition.html">ViewTransition</a> documentation for more details and examples on using these transitions.</p>
+<p><b>See also </b><a href="qml-qtquick-column.html#add-prop">add</a>, <a href="qml-qtquick-viewtransition.html">ViewTransition</a>, and <a href="qtquick-positioners-example.html">Qt Quick Examples - Positioners</a>.</p>
+</div></div><!-- @@@populate -->
+<br/>
+<!-- $$$spacing -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="spacing-prop"></a><span class="name">spacing</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The spacing is the amount in pixels left empty between adjacent items. The default spacing is 0.</p>
+<p><b>See also </b><a href="qml-qtquick-grid.html#spacing-prop">Grid::spacing</a>.</p>
+</div></div><!-- @@@spacing -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$positioningComplete[overload1]$$$positioningComplete -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="positioningComplete-signal"></a><span class="name">positioningComplete</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when positioning has been completed.</p>
+<p>The corresponding handler is <code>onPositioningComplete</code>.</p>
+<p>This signal was introduced in  Qt 5.9.</p>
+</div></div><!-- @@@positioningComplete -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$forceLayout[overload1]$$$forceLayout -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="forceLayout-method"></a><span class="name">forceLayout</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Column typically positions its children once per frame. This means that inside script blocks it is possible for the underlying children to have changed, but the Column to have not yet been updated accordingly.</p>
+<p>This method forces the Column to immediately respond to any outstanding changes in its children.</p>
+<p><b>Note</b>: methods in general should only be called after the Component has completed.</p>
+<p>This method was introduced in  Qt 5.9.</p>
+</div></div><!-- @@@forceLayout -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- dynamicview-tutorial.qdoc -->
+  <title>QML Dynamic View Ordering Tutorial 2 - Dragging View Items | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td >QML Dynamic View Ordering Tutorial 2 - Dragging View Items</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="qtquick-tutorials-dynamicview-dynamicview1-example.html" />
+  <link rel="next" href="qtquick-tutorials-dynamicview-dynamicview3-example.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="qtquick-tutorials-dynamicview-dynamicview1-example.html">QML Dynamic View Ordering Tutorial 1 - A Simple ListView and Delegate</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qtquick-tutorials-dynamicview-dynamicview3-example.html">QML Dynamic View Ordering Tutorial 3 - Moving Dragged Items</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level2"><a href="#walkthrough">Walkthrough</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QML Dynamic View Ordering Tutorial 2 - Dragging View Items</h1>
+<span class="subtitle"></span>
+<!-- $$$tutorials/dynamicview/dynamicview2-description -->
+<div class="descr"> <a name="details"></a>
+<p>Now that we have a visible list of items we want to be able to interact with them. We'll start by extending the delegate so the visible content can be dragged up and down the screen. The updated delegate looks like this:</p>
+<pre class="qml">
+
+      <span class="type"><a href="../qtqml/qml-qtqml-component.html">Component</a></span> {
+          <span class="name">id</span>: <span class="name">dragDelegate</span>
+
+          <span class="type"><a href="qml-qtquick-mousearea.html">MouseArea</a></span> {
+              <span class="name">id</span>: <span class="name">dragArea</span>
+
+              property <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span> <span class="name">held</span>: <span class="number">false</span>
+
+              <span class="type">anchors</span> { <span class="name">left</span>: <span class="name">parent</span>.<span class="name">left</span>; <span class="name">right</span>: <span class="name">parent</span>.<span class="name">right</span> }
+              <span class="name">height</span>: <span class="name">content</span>.<span class="name">height</span>
+
+              <span class="name">drag</span>.target: <span class="name">held</span> ? <span class="name">content</span> : <span class="name">undefined</span>
+              <span class="name">drag</span>.axis: <span class="name">Drag</span>.<span class="name">YAxis</span>
+
+              <span class="name">onPressAndHold</span>: <span class="name">held</span> <span class="operator">=</span> <span class="number">true</span>
+              <span class="name">onReleased</span>: <span class="name">held</span> <span class="operator">=</span> <span class="number">false</span>
+
+              <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+                  <span class="name">id</span>: <span class="name">content</span>
+                  <span class="type">anchors</span> {
+                      <span class="name">horizontalCenter</span>: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+                      <span class="name">verticalCenter</span>: <span class="name">parent</span>.<span class="name">verticalCenter</span>
+                  }
+                  <span class="name">width</span>: <span class="name">dragArea</span>.<span class="name">width</span>; <span class="name">height</span>: <span class="name">column</span>.<span class="name">implicitHeight</span> <span class="operator">+</span> <span class="number">4</span>
+
+                  <span class="name">border</span>.width: <span class="number">1</span>
+                  <span class="name">border</span>.color: <span class="string">&quot;lightsteelblue&quot;</span>
+                  <span class="name">color</span>: <span class="name">dragArea</span>.<span class="name">held</span> ? <span class="string">&quot;lightsteelblue&quot;</span> : <span class="string">&quot;white&quot;</span>
+                  Behavior on <span class="name">color</span> { <span class="type"><a href="qml-qtquick-coloranimation.html">ColorAnimation</a></span> { <span class="name">duration</span>: <span class="number">100</span> } }
+                  <span class="name">radius</span>: <span class="number">2</span>
+                  <span class="name">states</span>: <span class="name">State</span> {
+                      <span class="name">when</span>: <span class="name">dragArea</span>.<span class="name">held</span>
+
+                      <span class="type"><a href="qml-qtquick-parentchange.html">ParentChange</a></span> { <span class="name">target</span>: <span class="name">content</span>; <span class="name">parent</span>: <span class="name">root</span> }
+                      <span class="type"><a href="qml-qtquick-anchorchanges.html">AnchorChanges</a></span> {
+                          <span class="name">target</span>: <span class="name">content</span>
+                          <span class="type">anchors</span> { <span class="name">horizontalCenter</span>: <span class="name">undefined</span>; <span class="name">verticalCenter</span>: <span class="name">undefined</span> }
+                      }
+                  }
+                  <span class="type"><a href="qml-qtquick-column.html">Column</a></span> {
+                      <span class="name">id</span>: <span class="name">column</span>
+                      <span class="type">anchors</span> { <span class="name">fill</span>: <span class="name">parent</span>; <span class="name">margins</span>: <span class="number">2</span> }
+
+                      <span class="type"><a href="qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="string">'Name: '</span> <span class="operator">+</span> <span class="name">name</span> }
+                      <span class="type"><a href="qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="string">'Type: '</span> <span class="operator">+</span> <span class="name">type</span> }
+                      <span class="type"><a href="qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="string">'Age: '</span> <span class="operator">+</span> <span class="name">age</span> }
+                      <span class="type"><a href="qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="string">'Size: '</span> <span class="operator">+</span> <span class="name">size</span> }
+                  }
+              }
+          }
+      }
+
+</pre>
+<a name="walkthrough"></a>
+<h5 id="walkthrough">Walkthrough</h5>
+<p>The major change here is the root item of the delegate is now a <a href="qml-qtquick-mousearea.html">MouseArea</a> which provides handlers for mouse events and will allow us to drag the delegate's content item. It also acts as a container for the content item which is important as a delegate's root item is positioned by the view and cannot be moved by other means.</p>
+<pre class="qml">
+
+          <span class="type"><a href="qml-qtquick-mousearea.html">MouseArea</a></span> {
+              <span class="name">id</span>: <span class="name">dragArea</span>
+
+              property <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span> <span class="name">held</span>: <span class="number">false</span>
+
+              <span class="type">anchors</span> { <span class="name">left</span>: <span class="name">parent</span>.<span class="name">left</span>; <span class="name">right</span>: <span class="name">parent</span>.<span class="name">right</span> }
+              <span class="name">height</span>: <span class="name">content</span>.<span class="name">height</span>
+
+              <span class="name">drag</span>.target: <span class="name">held</span> ? <span class="name">content</span> : <span class="name">undefined</span>
+              <span class="name">drag</span>.axis: <span class="name">Drag</span>.<span class="name">YAxis</span>
+
+              <span class="name">onPressAndHold</span>: <span class="name">held</span> <span class="operator">=</span> <span class="number">true</span>
+              <span class="name">onReleased</span>: <span class="name">held</span> <span class="operator">=</span> <span class="number">false</span>
+
+              <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+                  <span class="name">id</span>: <span class="name">content</span>
+              }
+          }
+
+</pre>
+<p>Dragging the content item is enabled by binding it to the <a href="qml-qtquick-mousearea.html">MouseArea</a>'s <a href="qml-qtquick-mousearea.html#drag.target-prop">drag.target</a> property. Because we still want the view to be flickable we wait until the <a href="qml-qtquick-mousearea.html">MouseArea</a>'s <a href="qml-qtquick-mousearea.html#pressAndHold-signal">pressAndHold</a> signal is emitted before binding the drag target. This way when mouse moves before the hold timeout has expired it is interpreted as moving the list and if it moves after it is interpreted as dragging an item. To make it more obvious to the user when an item can be dragged we'll change the background color of the content item when the timeout has expired.</p>
+<pre class="qml">
+
+                  <span class="name">color</span>: <span class="name">dragArea</span>.<span class="name">held</span> ? <span class="string">&quot;lightsteelblue&quot;</span> : <span class="string">&quot;white&quot;</span>
+                  Behavior on <span class="name">color</span> { <span class="type"><a href="qml-qtquick-coloranimation.html">ColorAnimation</a></span> { <span class="name">duration</span>: <span class="number">100</span> } }
+
+</pre>
+<p>The other thing we'll need to do before an item can be dragged is to unset any anchors on the content item so it can be freely moved around. We do this in a state change that is triggered when the delegate item is held, at the same time we can reparent the content item to the root item so that is above other items in the stacking order and isn't obscured as it is dragged around.</p>
+<pre class="qml">
+
+                  <span class="name">states</span>: <span class="name">State</span> {
+                      <span class="name">when</span>: <span class="name">dragArea</span>.<span class="name">held</span>
+
+                      <span class="type"><a href="qml-qtquick-parentchange.html">ParentChange</a></span> { <span class="name">target</span>: <span class="name">content</span>; <span class="name">parent</span>: <span class="name">root</span> }
+                      <span class="type"><a href="qml-qtquick-anchorchanges.html">AnchorChanges</a></span> {
+                          <span class="name">target</span>: <span class="name">content</span>
+                          <span class="type">anchors</span> { <span class="name">horizontalCenter</span>: <span class="name">undefined</span>; <span class="name">verticalCenter</span>: <span class="name">undefined</span> }
+                      }
+                  }
+
+</pre>
+<p><a href="https://code.qt.io/cgit/qt/qtdeclarative.git/tree/examples/quick/tutorials/dynamicview/dynamicview2?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@tutorials/dynamicview/dynamicview2 -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="qtquick-tutorials-dynamicview-dynamicview1-example.html">QML Dynamic View Ordering Tutorial 1 - A Simple ListView and Delegate</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qtquick-tutorials-dynamicview-dynamicview3-example.html">QML Dynamic View Ordering Tutorial 3 - Moving Dragged Items</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

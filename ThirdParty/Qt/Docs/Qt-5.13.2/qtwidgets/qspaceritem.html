@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qlayoutitem.cpp -->
+  <title>QSpacerItem Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QSpacerItem</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSpacerItem Class</h1>
+<!-- $$$QSpacerItem-brief -->
+<p>The <a href="qspaceritem.html">QSpacerItem</a> class provides blank space in a layout. <a href="#details">More...</a></p>
+<!-- @@@QSpacerItem -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QSpacerItem&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qlayoutitem.html">QLayoutItem</a></td></tr></table></div><ul>
+<li><a href="qspaceritem-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qspaceritem.html#QSpacerItem">QSpacerItem</a></b>(int <i>w</i>, int <i>h</i>, QSizePolicy::Policy <i>hPolicy</i> = QSizePolicy::Minimum, QSizePolicy::Policy <i>vPolicy</i> = QSizePolicy::Minimum)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qspaceritem.html#dtor.QSpacerItem">~QSpacerItem</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qspaceritem.html#changeSize">changeSize</a></b>(int <i>w</i>, int <i>h</i>, QSizePolicy::Policy <i>hPolicy</i> = QSizePolicy::Minimum, QSizePolicy::Policy <i>vPolicy</i> = QSizePolicy::Minimum)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSizePolicy </td><td class="memItemRight bottomAlign"><b><a href="qspaceritem.html#sizePolicy">sizePolicy</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual Qt::Orientations </td><td class="memItemRight bottomAlign"><b><a href="qspaceritem.html#expandingDirections">expandingDirections</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QRect </td><td class="memItemRight bottomAlign"><b><a href="qspaceritem.html#geometry">geometry</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qspaceritem.html#isEmpty">isEmpty</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSize </td><td class="memItemRight bottomAlign"><b><a href="qspaceritem.html#maximumSize">maximumSize</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSize </td><td class="memItemRight bottomAlign"><b><a href="qspaceritem.html#minimumSize">minimumSize</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qspaceritem.html#setGeometry">setGeometry</a></b>(const QRect &amp;<i>r</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSize </td><td class="memItemRight bottomAlign"><b><a href="qspaceritem.html#sizeHint">sizeHint</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSpacerItem *</td><td class="memItemRight bottomAlign"><b><a href="qspaceritem.html#spacerItem">spacerItem</a></b>() override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSpacerItem-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Normally, you don't need to use this class directly. Qt's built-in layout managers provide the following functions for manipulating empty space in layouts:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Class</th><th >Functions</th></tr></thead>
+<tr valign="top" class="odd"><td ><a href="qhboxlayout.html">QHBoxLayout</a></td><td ><a href="qboxlayout.html#addSpacing">addSpacing()</a>, <a href="qboxlayout.html#addStretch">addStretch()</a>, <a href="qboxlayout.html#insertSpacing">insertSpacing()</a>, <a href="qboxlayout.html#insertStretch">insertStretch()</a></td></tr>
+<tr valign="top" class="even"><td ><a href="qgridlayout.html">QGridLayout</a></td><td ><a href="qgridlayout.html#setRowMinimumHeight">setRowMinimumHeight()</a>, <a href="qgridlayout.html#setRowStretch">setRowStretch()</a>, <a href="qgridlayout.html#setColumnMinimumWidth">setColumnMinimumWidth()</a>, <a href="qgridlayout.html#setColumnStretch">setColumnStretch()</a></td></tr>
+</table></div>
+</div>
+<p><b>See also </b><a href="qlayout.html">QLayout</a>, <a href="qwidgetitem.html">QWidgetItem</a>, and <a href="qlayoutitem.html#spacerItem">QLayoutItem::spacerItem</a>().</p>
+<!-- @@@QSpacerItem -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QSpacerItem[overload1]$$$QSpacerItemintintQSizePolicy::PolicyQSizePolicy::Policy -->
+<h3 class="fn" id="QSpacerItem"><a name="QSpacerItem"></a>QSpacerItem::<span class="name">QSpacerItem</span>(<span class="type">int</span> <i>w</i>, <span class="type">int</span> <i>h</i>, <span class="type"><a href="qsizepolicy.html#Policy-enum">QSizePolicy::Policy</a></span> <i>hPolicy</i> = QSizePolicy::Minimum, <span class="type"><a href="qsizepolicy.html#Policy-enum">QSizePolicy::Policy</a></span> <i>vPolicy</i> = QSizePolicy::Minimum)</h3>
+<p>Constructs a spacer item with preferred width <i>w</i>, preferred height <i>h</i>, horizontal size policy <i>hPolicy</i> and vertical size policy <i>vPolicy</i>.</p>
+<p>The default values provide a gap that is able to stretch if nothing else wants the space.</p>
+<!-- @@@QSpacerItem -->
+<!-- $$$~QSpacerItem[overload1]$$$~QSpacerItem -->
+<h3 class="fn" id="dtor.QSpacerItem"><a name="dtor.QSpacerItem"></a><code>[virtual] </code>QSpacerItem::<span class="name">~QSpacerItem</span>()</h3>
+<p>Destructor.</p>
+<!-- @@@~QSpacerItem -->
+<!-- $$$changeSize[overload1]$$$changeSizeintintQSizePolicy::PolicyQSizePolicy::Policy -->
+<h3 class="fn" id="changeSize"><a name="changeSize"></a><span class="type">void</span> QSpacerItem::<span class="name">changeSize</span>(<span class="type">int</span> <i>w</i>, <span class="type">int</span> <i>h</i>, <span class="type"><a href="qsizepolicy.html#Policy-enum">QSizePolicy::Policy</a></span> <i>hPolicy</i> = QSizePolicy::Minimum, <span class="type"><a href="qsizepolicy.html#Policy-enum">QSizePolicy::Policy</a></span> <i>vPolicy</i> = QSizePolicy::Minimum)</h3>
+<p>Changes this spacer item to have preferred width <i>w</i>, preferred height <i>h</i>, horizontal size policy <i>hPolicy</i> and vertical size policy <i>vPolicy</i>.</p>
+<p>The default values provide a gap that is able to stretch if nothing else wants the space.</p>
+<p>Note that if changeSize() is called after the spacer item has been added to a layout, it is necessary to invalidate the layout in order for the spacer item's new size to take effect.</p>
+<p><b>See also </b><a href="qlayoutitem.html#invalidate">QSpacerItem::invalidate</a>().</p>
+<!-- @@@changeSize -->
+<!-- $$$expandingDirections[overload1]$$$expandingDirections -->
+<h3 class="fn" id="expandingDirections"><a name="expandingDirections"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qt.html#Orientation-enum">Qt::Orientations</a></span> QSpacerItem::<span class="name">expandingDirections</span>() const</h3>
+<p>Reimplements: <a href="qlayoutitem.html#expandingDirections">QLayoutItem::expandingDirections</a>() const.</p>
+<!-- @@@expandingDirections -->
+<!-- $$$geometry[overload1]$$$geometry -->
+<h3 class="fn" id="geometry"><a name="geometry"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qrect.html">QRect</a></span> QSpacerItem::<span class="name">geometry</span>() const</h3>
+<p>Reimplements: <a href="qlayoutitem.html#geometry">QLayoutItem::geometry</a>() const.</p>
+<p><b>See also </b><a href="qspaceritem.html#setGeometry">setGeometry</a>().</p>
+<!-- @@@geometry -->
+<!-- $$$isEmpty[overload1]$$$isEmpty -->
+<h3 class="fn" id="isEmpty"><a name="isEmpty"></a><code>[override virtual] </code><span class="type">bool</span> QSpacerItem::<span class="name">isEmpty</span>() const</h3>
+<p>Reimplements: <a href="qlayoutitem.html#isEmpty">QLayoutItem::isEmpty</a>() const.</p>
+<p>Returns <code>true</code>.</p>
+<!-- @@@isEmpty -->
+<!-- $$$maximumSize[overload1]$$$maximumSize -->
+<h3 class="fn" id="maximumSize"><a name="maximumSize"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QSpacerItem::<span class="name">maximumSize</span>() const</h3>
+<p>Reimplements: <a href="qlayoutitem.html#maximumSize">QLayoutItem::maximumSize</a>() const.</p>
+<!-- @@@maximumSize -->
+<!-- $$$minimumSize[overload1]$$$minimumSize -->
+<h3 class="fn" id="minimumSize"><a name="minimumSize"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QSpacerItem::<span class="name">minimumSize</span>() const</h3>
+<p>Reimplements: <a href="qlayoutitem.html#minimumSize">QLayoutItem::minimumSize</a>() const.</p>
+<!-- @@@minimumSize -->
+<!-- $$$setGeometry[overload1]$$$setGeometryconstQRect& -->
+<h3 class="fn" id="setGeometry"><a name="setGeometry"></a><code>[override virtual] </code><span class="type">void</span> QSpacerItem::<span class="name">setGeometry</span>(const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> &amp;<i>r</i>)</h3>
+<p>Reimplements: <a href="qlayoutitem.html#setGeometry">QLayoutItem::setGeometry</a>(const QRect &amp;r).</p>
+<p><b>See also </b><a href="qspaceritem.html#geometry">geometry</a>().</p>
+<!-- @@@setGeometry -->
+<!-- $$$sizeHint[overload1]$$$sizeHint -->
+<h3 class="fn" id="sizeHint"><a name="sizeHint"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QSpacerItem::<span class="name">sizeHint</span>() const</h3>
+<p>Reimplements: <a href="qlayoutitem.html#sizeHint">QLayoutItem::sizeHint</a>() const.</p>
+<!-- @@@sizeHint -->
+<!-- $$$sizePolicy[overload1]$$$sizePolicy -->
+<h3 class="fn" id="sizePolicy"><a name="sizePolicy"></a><span class="type"><a href="qsizepolicy.html">QSizePolicy</a></span> QSpacerItem::<span class="name">sizePolicy</span>() const</h3>
+<p>Returns the size policy of this item.</p>
+<p>This function was introduced in  Qt 5.5.</p>
+<!-- @@@sizePolicy -->
+<!-- $$$spacerItem[overload1]$$$spacerItem -->
+<h3 class="fn" id="spacerItem"><a name="spacerItem"></a><code>[override virtual] </code><span class="type"><a href="qspaceritem.html#QSpacerItem">QSpacerItem</a></span> *QSpacerItem::<span class="name">spacerItem</span>()</h3>
+<p>Reimplements: <a href="qlayoutitem.html#spacerItem">QLayoutItem::spacerItem</a>().</p>
+<p>Returns a pointer to this object.</p>
+<!-- @@@spacerItem -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

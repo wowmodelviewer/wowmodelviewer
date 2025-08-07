@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcommandlineoption.cpp -->
+  <title>QCommandLineOption Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QCommandLineOption</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCommandLineOption Class</h1>
+<!-- $$$QCommandLineOption-brief -->
+<p>The <a href="qcommandlineoption.html">QCommandLineOption</a> class defines a possible command-line option. <a href="#details">More...</a></p>
+<!-- @@@QCommandLineOption -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QCommandLineOption&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.2</td></tr></table></div><p>This class was introduced in  Qt 5.2.</p>
+<ul>
+<li><a href="qcommandlineoption-members.html">List of all members, including inherited members</a></li>
+<li><a href="qcommandlineoption-obsolete.html">Obsolete members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qcommandlineoption.html#Flag-enum">Flag</a></b> { HiddenFromHelp, ShortOptionStyle }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qcommandlineoption.html#Flag-enum">Flags</a></b></td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcommandlineoption.html#QCommandLineOption-4">QCommandLineOption</a></b>(const QCommandLineOption &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcommandlineoption.html#QCommandLineOption-3">QCommandLineOption</a></b>(const QStringList &amp;<i>names</i>, const QString &amp;<i>description</i>, const QString &amp;<i>valueName</i> = QString(), const QString &amp;<i>defaultValue</i> = QString())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcommandlineoption.html#QCommandLineOption-2">QCommandLineOption</a></b>(const QString &amp;<i>name</i>, const QString &amp;<i>description</i>, const QString &amp;<i>valueName</i> = QString(), const QString &amp;<i>defaultValue</i> = QString())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcommandlineoption.html#QCommandLineOption-1">QCommandLineOption</a></b>(const QStringList &amp;<i>names</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcommandlineoption.html#QCommandLineOption">QCommandLineOption</a></b>(const QString &amp;<i>name</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCommandLineOption &amp;</td><td class="memItemRight bottomAlign"><b><a href="qcommandlineoption.html#operator-eq-1">operator=</a></b>(QCommandLineOption &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCommandLineOption &amp;</td><td class="memItemRight bottomAlign"><b><a href="qcommandlineoption.html#operator-eq">operator=</a></b>(const QCommandLineOption &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcommandlineoption.html#dtor.QCommandLineOption">~QCommandLineOption</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qcommandlineoption.html#defaultValues">defaultValues</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qcommandlineoption.html#description">description</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCommandLineOption::Flags </td><td class="memItemRight bottomAlign"><b><a href="qcommandlineoption.html#flags">flags</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qcommandlineoption.html#names">names</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcommandlineoption.html#setDefaultValue">setDefaultValue</a></b>(const QString &amp;<i>defaultValue</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcommandlineoption.html#setDefaultValues">setDefaultValues</a></b>(const QStringList &amp;<i>defaultValues</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcommandlineoption.html#setDescription">setDescription</a></b>(const QString &amp;<i>description</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcommandlineoption.html#setFlags">setFlags</a></b>(QCommandLineOption::Flags <i>flags</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcommandlineoption.html#setValueName">setValueName</a></b>(const QString &amp;<i>valueName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcommandlineoption.html#swap">swap</a></b>(QCommandLineOption &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qcommandlineoption.html#valueName">valueName</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCommandLineOption-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This class is used to describe an option on the command line. It allows different ways of defining the same option with multiple aliases possible. It is also used to describe how the option is used - it may be a flag (e.g&#x2e; <code>-v</code>) or take a value (e.g&#x2e; <code>-o file</code>).</p>
+<p>Examples:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qcommandlineoption.html#QCommandLineOption">QCommandLineOption</a></span> verboseOption(<span class="string">&quot;verbose&quot;</span><span class="operator">,</span> <span class="string">&quot;Verbose mode. Prints out more information.&quot;</span>);
+  <span class="type"><a href="qcommandlineoption.html#QCommandLineOption">QCommandLineOption</a></span> outputOption(<span class="type"><a href="qstringlist.html">QStringList</a></span>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;o&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;output&quot;</span><span class="operator">,</span> <span class="string">&quot;Write generated data into &lt;file&gt;.&quot;</span><span class="operator">,</span> <span class="string">&quot;file&quot;</span>);
+
+</pre>
+</div>
+<p><b>See also </b><a href="qcommandlineparser.html">QCommandLineParser</a>.</p>
+<!-- @@@QCommandLineOption -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Flag$$$HiddenFromHelp$$$ShortOptionStyle -->
+<h3 class="flags" id="Flag-enum"><a name="Flag-enum"></a>enum QCommandLineOption::<span class="name">Flag</span><br/>flags QCommandLineOption::<span class="name">Flags</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QCommandLineOption::HiddenFromHelp</code></td><td class="topAlign tblval"><code>0x1</code></td><td class="topAlign">Hide this option in the user-visible help output. All options are visible by default. Setting this flag for a particular option makes it internal, i.e&#x2e; not listed in the help output.</td></tr>
+<tr><td class="topAlign"><code>QCommandLineOption::ShortOptionStyle</code></td><td class="topAlign tblval"><code>0x2</code></td><td class="topAlign">The option will always be understood as a short option, regardless of what was set by <a href="qcommandlineparser.html#setSingleDashWordOptionMode">QCommandLineParser::setSingleDashWordOptionMode</a>. This allows flags such as <code>-DDEFINE=VALUE</code> or <code>-I/include/path</code> to be interpreted as short flags even when the parser is in <a href="qcommandlineparser.html#SingleDashWordOptionMode-enum">QCommandLineParser::ParseAsLongOptions</a> mode.</td></tr>
+</table></div>
+<p>The Flags type is a typedef for <a href="qflags.html">QFlags</a>&lt;Flag&gt;. It stores an OR combination of Flag values.</p>
+<p><b>See also </b><a href="qcommandlineoption.html#setFlags">QCommandLineOption::setFlags</a>() and <a href="qcommandlineoption.html#flags">QCommandLineOption::flags</a>().</p>
+<!-- @@@Flag -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QCommandLineOption$$$QCommandLineOptionconstQCommandLineOption& -->
+<h3 class="fn" id="QCommandLineOption-4"><a name="QCommandLineOption-4"></a>QCommandLineOption::<span class="name">QCommandLineOption</span>(const <span class="type"><a href="qcommandlineoption.html#QCommandLineOption">QCommandLineOption</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a <a href="qcommandlineoption.html">QCommandLineOption</a> object that is a copy of the <a href="qcommandlineoption.html">QCommandLineOption</a> object <i>other</i>.</p>
+<p><b>See also </b><a href="qcommandlineoption.html#operator-eq">operator=</a>().</p>
+<!-- @@@QCommandLineOption -->
+<!-- $$$QCommandLineOption$$$QCommandLineOptionconstQStringList&constQString&constQString&constQString& -->
+<h3 class="fn" id="QCommandLineOption-3"><a name="QCommandLineOption-3"></a>QCommandLineOption::<span class="name">QCommandLineOption</span>(const <span class="type"><a href="qstringlist.html">QStringList</a></span> &amp;<i>names</i>, const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>description</i>, const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>valueName</i> = QString(), const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>defaultValue</i> = QString())</h3>
+<p>Constructs a command line option object with the given arguments.</p>
+<p>This overload allows to set multiple names for the option, for instance <code>o</code> and <code>output</code>.</p>
+<p>The names of the option are set to <i>names</i>. The names can be either short or long. Any name in the list that is one character in length is a short name. Option names must not be empty, must not start with a dash or a slash character, must not contain a <code>=</code> and cannot be repeated.</p>
+<p>The description is set to <i>description</i>. It is customary to add a &quot;.&quot; at the end of the description.</p>
+<p>In addition, the <i>valueName</i> needs to be set if the option expects a value. The default value for the option is set to <i>defaultValue</i>.</p>
+<p>In Qt versions before 5.4, this constructor was <code>explicit</code>. In Qt 5.4 and later, it no longer is and can be used for C++11-style uniform initialization:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qcommandlineparser.html">QCommandLineParser</a></span> parser;
+  parser<span class="operator">.</span>addOption({{<span class="string">&quot;o&quot;</span><span class="operator">,</span> <span class="string">&quot;output&quot;</span>}<span class="operator">,</span> <span class="string">&quot;Write generated data into &lt;file&gt;.&quot;</span><span class="operator">,</span> <span class="string">&quot;file&quot;</span>});
+
+</pre>
+<p><b>See also </b><a href="qcommandlineoption.html#setDescription">setDescription</a>(), <a href="qcommandlineoption.html#setValueName">setValueName</a>(), and <a href="qcommandlineoption.html#setDefaultValues">setDefaultValues</a>().</p>
+<!-- @@@QCommandLineOption -->
+<!-- $$$QCommandLineOption$$$QCommandLineOptionconstQString&constQString&constQString&constQString& -->
+<h3 class="fn" id="QCommandLineOption-2"><a name="QCommandLineOption-2"></a>QCommandLineOption::<span class="name">QCommandLineOption</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>name</i>, const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>description</i>, const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>valueName</i> = QString(), const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>defaultValue</i> = QString())</h3>
+<p>Constructs a command line option object with the given arguments.</p>
+<p>The name of the option is set to <i>name</i>. The name can be either short or long. If the name is one character in length, it is considered a short name. Option names must not be empty, must not start with a dash or a slash character, must not contain a <code>=</code> and cannot be repeated.</p>
+<p>The description is set to <i>description</i>. It is customary to add a &quot;.&quot; at the end of the description.</p>
+<p>In addition, the <i>valueName</i> needs to be set if the option expects a value. The default value for the option is set to <i>defaultValue</i>.</p>
+<p>In Qt versions before 5.4, this constructor was <code>explicit</code>. In Qt 5.4 and later, it no longer is and can be used for C++11-style uniform initialization:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qcommandlineparser.html">QCommandLineParser</a></span> parser;
+  parser<span class="operator">.</span>addOption({<span class="string">&quot;verbose&quot;</span><span class="operator">,</span> <span class="string">&quot;Verbose mode. Prints out more information.&quot;</span>});
+
+</pre>
+<p><b>See also </b><a href="qcommandlineoption.html#setDescription">setDescription</a>(), <a href="qcommandlineoption.html#setValueName">setValueName</a>(), and <a href="qcommandlineoption.html#setDefaultValues">setDefaultValues</a>().</p>
+<!-- @@@QCommandLineOption -->
+<!-- $$$QCommandLineOption$$$QCommandLineOptionconstQStringList& -->
+<h3 class="fn" id="QCommandLineOption-1"><a name="QCommandLineOption-1"></a>QCommandLineOption::<span class="name">QCommandLineOption</span>(const <span class="type"><a href="qstringlist.html">QStringList</a></span> &amp;<i>names</i>)</h3>
+<p>Constructs a command line option object with the names <i>names</i>.</p>
+<p>This overload allows to set multiple names for the option, for instance <code>o</code> and <code>output</code>.</p>
+<p>The names can be either short or long. Any name in the list that is one character in length is a short name. Option names must not be empty, must not start with a dash or a slash character, must not contain a <code>=</code> and cannot be repeated.</p>
+<p><b>See also </b><a href="qcommandlineoption.html#setDescription">setDescription</a>(), <a href="qcommandlineoption.html#setValueName">setValueName</a>(), and <a href="qcommandlineoption.html#setDefaultValues">setDefaultValues</a>().</p>
+<!-- @@@QCommandLineOption -->
+<!-- $$$QCommandLineOption[overload1]$$$QCommandLineOptionconstQString& -->
+<h3 class="fn" id="QCommandLineOption"><a name="QCommandLineOption"></a>QCommandLineOption::<span class="name">QCommandLineOption</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>name</i>)</h3>
+<p>Constructs a command line option object with the name <i>name</i>.</p>
+<p>The name can be either short or long. If the name is one character in length, it is considered a short name. Option names must not be empty, must not start with a dash or a slash character, must not contain a <code>=</code> and cannot be repeated.</p>
+<p><b>See also </b><a href="qcommandlineoption.html#setDescription">setDescription</a>(), <a href="qcommandlineoption.html#setValueName">setValueName</a>(), and <a href="qcommandlineoption.html#setDefaultValues">setDefaultValues</a>().</p>
+<!-- @@@QCommandLineOption -->
+<!-- $$$operator=$$$operator=QCommandLineOption&& -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type"><a href="qcommandlineoption.html#QCommandLineOption">QCommandLineOption</a></span> &amp;QCommandLineOption::<span class="name">operator=</span>(<span class="type"><a href="qcommandlineoption.html#QCommandLineOption">QCommandLineOption</a></span> &amp;&amp;<i>other</i>)</h3>
+<p>Move-assigns <i>other</i> to this <a href="qcommandlineoption.html">QCommandLineOption</a> instance.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@operator= -->
+<!-- $$$operator=[overload1]$$$operator=constQCommandLineOption& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qcommandlineoption.html#QCommandLineOption">QCommandLineOption</a></span> &amp;QCommandLineOption::<span class="name">operator=</span>(const <span class="type"><a href="qcommandlineoption.html#QCommandLineOption">QCommandLineOption</a></span> &amp;<i>other</i>)</h3>
+<p>Makes a copy of the <i>other</i> object and assigns it to this <a href="qcommandlineoption.html">QCommandLineOption</a> object.</p>
+<!-- @@@operator= -->
+<!-- $$$~QCommandLineOption[overload1]$$$~QCommandLineOption -->
+<h3 class="fn" id="dtor.QCommandLineOption"><a name="dtor.QCommandLineOption"></a>QCommandLineOption::<span class="name">~QCommandLineOption</span>()</h3>
+<p>Destroys the command line option object.</p>
+<!-- @@@~QCommandLineOption -->
+<!-- $$$defaultValues[overload1]$$$defaultValues -->
+<h3 class="fn" id="defaultValues"><a name="defaultValues"></a><span class="type"><a href="qstringlist.html">QStringList</a></span> QCommandLineOption::<span class="name">defaultValues</span>() const</h3>
+<p>Returns the default values set for this option.</p>
+<p><b>See also </b><a href="qcommandlineoption.html#setDefaultValues">setDefaultValues</a>().</p>
+<!-- @@@defaultValues -->
+<!-- $$$description[overload1]$$$description -->
+<h3 class="fn" id="description"><a name="description"></a><span class="type"><a href="qstring.html">QString</a></span> QCommandLineOption::<span class="name">description</span>() const</h3>
+<p>Returns the description set for this option.</p>
+<p><b>See also </b><a href="qcommandlineoption.html#setDescription">setDescription</a>().</p>
+<!-- @@@description -->
+<!-- $$$flags[overload1]$$$flags -->
+<h3 class="fn" id="flags"><a name="flags"></a><span class="type"><a href="qcommandlineoption.html#Flag-enum">QCommandLineOption::Flags</a></span> QCommandLineOption::<span class="name">flags</span>() const</h3>
+<p>Returns a set of flags that affect this command-line option.</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<p><b>See also </b><a href="qcommandlineoption.html#setFlags">setFlags</a>() and <a href="qcommandlineoption.html#Flag-enum">QCommandLineOption::Flags</a>.</p>
+<!-- @@@flags -->
+<!-- $$$names[overload1]$$$names -->
+<h3 class="fn" id="names"><a name="names"></a><span class="type"><a href="qstringlist.html">QStringList</a></span> QCommandLineOption::<span class="name">names</span>() const</h3>
+<p>Returns the names set for this option.</p>
+<!-- @@@names -->
+<!-- $$$setDefaultValue[overload1]$$$setDefaultValueconstQString& -->
+<h3 class="fn" id="setDefaultValue"><a name="setDefaultValue"></a><span class="type">void</span> QCommandLineOption::<span class="name">setDefaultValue</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>defaultValue</i>)</h3>
+<p>Sets the default value used for this option to <i>defaultValue</i>.</p>
+<p>The default value is used if the user of the application does not specify the option on the command line.</p>
+<p>If <i>defaultValue</i> is empty, the option has no default values.</p>
+<p><b>See also </b><a href="qcommandlineoption.html#defaultValues">defaultValues</a>() and <a href="qcommandlineoption.html#setDefaultValues">setDefaultValues</a>().</p>
+<!-- @@@setDefaultValue -->
+<!-- $$$setDefaultValues[overload1]$$$setDefaultValuesconstQStringList& -->
+<h3 class="fn" id="setDefaultValues"><a name="setDefaultValues"></a><span class="type">void</span> QCommandLineOption::<span class="name">setDefaultValues</span>(const <span class="type"><a href="qstringlist.html">QStringList</a></span> &amp;<i>defaultValues</i>)</h3>
+<p>Sets the list of default values used for this option to <i>defaultValues</i>.</p>
+<p>The default values are used if the user of the application does not specify the option on the command line.</p>
+<p><b>See also </b><a href="qcommandlineoption.html#defaultValues">defaultValues</a>() and <a href="qcommandlineoption.html#setDefaultValue">setDefaultValue</a>().</p>
+<!-- @@@setDefaultValues -->
+<!-- $$$setDescription[overload1]$$$setDescriptionconstQString& -->
+<h3 class="fn" id="setDescription"><a name="setDescription"></a><span class="type">void</span> QCommandLineOption::<span class="name">setDescription</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>description</i>)</h3>
+<p>Sets the description used for this option to <i>description</i>.</p>
+<p>It is customary to add a &quot;.&quot; at the end of the description.</p>
+<p>The description is used by <a href="qcommandlineparser.html#showHelp">QCommandLineParser::showHelp</a>().</p>
+<p><b>See also </b><a href="qcommandlineoption.html#description">description</a>().</p>
+<!-- @@@setDescription -->
+<!-- $$$setFlags[overload1]$$$setFlagsQCommandLineOption::Flags -->
+<h3 class="fn" id="setFlags"><a name="setFlags"></a><span class="type">void</span> QCommandLineOption::<span class="name">setFlags</span>(<span class="type"><a href="qcommandlineoption.html#Flag-enum">QCommandLineOption::Flags</a></span> <i>flags</i>)</h3>
+<p>Set the set of flags that affect this command-line option to <i>flags</i>.</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<p><b>See also </b><a href="qcommandlineoption.html#flags">flags</a>() and <a href="qcommandlineoption.html#Flag-enum">QCommandLineOption::Flags</a>.</p>
+<!-- @@@setFlags -->
+<!-- $$$setValueName[overload1]$$$setValueNameconstQString& -->
+<h3 class="fn" id="setValueName"><a name="setValueName"></a><span class="type">void</span> QCommandLineOption::<span class="name">setValueName</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>valueName</i>)</h3>
+<p>Sets the name of the expected value, for the documentation, to <i>valueName</i>.</p>
+<p>Options without a value assigned have a boolean-like behavior: either the user specifies --option or they don't.</p>
+<p>Options with a value assigned need to set a name for the expected value, for the documentation of the option in the help output. An option with names <code>o</code> and <code>output</code>, and a value name of <code>file</code> will appear as <code>-o, --output &lt;file&gt;</code>.</p>
+<p>Call <a href="qcommandlineparser.html#value">QCommandLineParser::value</a>() if you expect the option to be present only once, and <a href="qcommandlineparser.html#values">QCommandLineParser::values</a>() if you expect that option to be present multiple times.</p>
+<p><b>See also </b><a href="qcommandlineoption.html#valueName">valueName</a>().</p>
+<!-- @@@setValueName -->
+<!-- $$$swap[overload1]$$$swapQCommandLineOption& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QCommandLineOption::<span class="name">swap</span>(<span class="type"><a href="qcommandlineoption.html#QCommandLineOption">QCommandLineOption</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps option <i>other</i> with this option. This operation is very fast and never fails.</p>
+<!-- @@@swap -->
+<!-- $$$valueName[overload1]$$$valueName -->
+<h3 class="fn" id="valueName"><a name="valueName"></a><span class="type"><a href="qstring.html">QString</a></span> QCommandLineOption::<span class="name">valueName</span>() const</h3>
+<p>Returns the name of the expected value.</p>
+<p>If empty, the option doesn't take a value.</p>
+<p><b>See also </b><a href="qcommandlineoption.html#setValueName">setValueName</a>().</p>
+<!-- @@@valueName -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

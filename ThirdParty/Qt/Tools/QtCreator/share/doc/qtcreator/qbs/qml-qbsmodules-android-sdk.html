@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- android-sdk-module.qdoc -->
+  <title>Android.sdk QML Type | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<p class="naviNextPrevious headerNavi">
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#relevant-file-tags">Relevant File Tags</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Android.sdk QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Android.sdk-brief -->
+<p>Provides support for building Android packages. <a href="#details">More...</a></p>
+<!-- @@@Android.sdk -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QbsModules .</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qbs 1.4</td></tr></table></div><ul>
+<li><a href="qml-qbsmodules-android-sdk-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qbsmodules-android-sdk.html#aidlSearchPaths-prop">aidlSearchPaths</a></b></b> : stringList</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-android-sdk.html#apkBaseName-prop">apkBaseName</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-android-sdk.html#assetsDir-prop">assetsDir</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-android-sdk.html#automaticSources-prop">automaticSources</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-android-sdk.html#buildToolsVersion-prop">buildToolsVersion</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-android-sdk.html#embedJar-prop">embedJar</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-android-sdk.html#manifestFile-prop">manifestFile</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-android-sdk.html#ndkDir-prop">ndkDir</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-android-sdk.html#packageName-prop">packageName</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-android-sdk.html#platform-prop">platform</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-android-sdk.html#resourcesDir-prop">resourcesDir</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-android-sdk.html#sdkDir-prop">sdkDir</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-android-sdk.html#sourcesDir-prop">sourcesDir</a></b></b> : path</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-android-sdk.html#versionCode-prop">versionCode</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-android-sdk.html#versionName-prop">versionName</a></b></b> : string</li>
+</ul>
+<!-- $$$Android.sdk-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The Android.sdk module contains the properties and rules to create Android application packages from Java sources, resources, and so on. It is usually pulled in indirectly by declaring an <a href="qml-qbsconvenienceitems-application.html">Application</a> product.</p>
+<a name="relevant-file-tags"></a>
+<h3 id="relevant-file-tags">Relevant File Tags</h3>
+<a name="filetags-android-sdk"></a><div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Tag</th><th >Auto-tagged File Names</th><th >Since</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>&quot;android.aidl&quot;</code></td><td ><code>*.aidl</code></td><td >1.4&#x2e;0</td><td >Attached to Android AIDL files. One Java source file will be generated for each such file.</td></tr>
+<tr valign="top" class="even"><td ><code>&quot;android.assets&quot;</code></td><td >-</td><td >1.4&#x2e;0</td><td >Attached to Android assets, which are typically located in an <code>assets/</code> subdirectory. These files are tagged automatically if the <a href="qml-qbsmodules-android-sdk.html#automaticSources-prop">automaticSources</a> property is enabled.</td></tr>
+<tr valign="top" class="odd"><td ><code>&quot;android.manifest&quot;</code></td><td ><code>AndroidManifest.xml</code></td><td >1.4&#x2e;0</td><td >Attached to the Android manifest. There must be one such file for every Android app.</td></tr>
+<tr valign="top" class="even"><td ><code>&quot;android.resources&quot;</code></td><td >-</td><td >1.4&#x2e;0</td><td >Attached to Android resources, which are typically located in a <code>res/</code> subdirectory. These files are tagged automatically if the <a href="qml-qbsmodules-android-sdk.html#automaticSources-prop">automaticSources</a> property is enabled.</td></tr>
+</table></div>
+<!-- @@@Android.sdk -->
+<h2>Property Documentation</h2>
+<!-- $$$aidlSearchPaths -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="aidlSearchPaths-prop"></a><span class="name">aidlSearchPaths</span> : <span class="type">stringList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Search paths for import statements to pass to the <code>aidl</code> tool via the <code>-I</code> option.</p>
+</div></div><!-- @@@aidlSearchPaths -->
+<br/>
+<!-- $$$apkBaseName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="apkBaseName-prop"></a><span class="name">apkBaseName</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The base name of the APK file to to be built, that is, the file name without the &quot;.apk&quot; extension.</p>
+<p>Default: <a href="qml-qbsmodules-android-sdk.html#packageName-prop">packageName</a></p>
+</div></div><!-- @@@apkBaseName -->
+<br/>
+<!-- $$$assetsDir -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="assetsDir-prop"></a><span class="name">assetsDir</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The base directory for Android assets in the respective product.</p>
+<p><b>Note: </b>Android requires that the file name of this directory is always <code>&quot;assets&quot;</code>.</p><p>Default: <code>&quot;src/main/assets&quot;</code> in the product source directory</p>
+</div></div><!-- @@@assetsDir -->
+<br/>
+<!-- $$$automaticSources -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="automaticSources-prop"></a><span class="name">automaticSources</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If <code>true</code>, Java sources as well as Android resources, assets, and the manifest file will be automatically included in the respective product via wildcards. Set this property to <code>false</code> if you want to specify these files manually.</p>
+<p>Default: <code>true</code></p>
+</div></div><!-- @@@automaticSources -->
+<br/>
+<!-- $$$buildToolsVersion -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="buildToolsVersion-prop"></a><span class="name">buildToolsVersion</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The version of the build tools such as <code>aapt</code> and <code>dx</code>.</p>
+<p>Default: Highest build tools version version available in the SDK.</p>
+</div></div><!-- @@@buildToolsVersion -->
+<br/>
+<!-- $$$embedJar -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="embedJar-prop"></a><span class="name">embedJar</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If <code>true</code>, then if the dependency is a JAR file, its classes and the classes of its dependencies (if <code>embedJar</code> is also true for them) will be recursively processed by <code>dex</code> and included in the final APK.</p>
+<p>Default: <code>true</code></p>
+<p>This property was introduced in  Qbs 1.10.</p>
+</div></div><!-- @@@embedJar -->
+<br/>
+<!-- $$$manifestFile -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="manifestFile-prop"></a><span class="name">manifestFile</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The file path to the Android manifest file. This property is only relevant if <a href="qml-qbsmodules-android-sdk.html#automaticSources-prop">automaticSources</a> is enabled.</p>
+<p><b>Note: </b>Android requires that the file name is always &quot;AndroidManifest.xml&quot;.</p><p>Default: <code>&quot;src/main/AndroidManifest.xml&quot;</code> in the product source directory</p>
+</div></div><!-- @@@manifestFile -->
+<br/>
+<!-- $$$ndkDir -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="ndkDir-prop"></a><span class="name">ndkDir</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The NDK base directory, if an NDK is present.</p>
+<p>Default: Determined automatically based on standard search paths.</p>
+</div></div><!-- @@@ndkDir -->
+<br/>
+<!-- $$$packageName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="packageName-prop"></a><span class="name">packageName</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The package name of the respective product. The <code>package</code> attribute in the manifest file will be set to this value automatically.</p>
+<p>Default: <code>name</code></p>
+</div></div><!-- @@@packageName -->
+<br/>
+<!-- $$$platform -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="platform-prop"></a><span class="name">platform</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The versioned platform name (for example, <code>&quot;android-21&quot;</code>).</p>
+<p>Default: Highest build tools version version available in the SDK.</p>
+</div></div><!-- @@@platform -->
+<br/>
+<!-- $$$resourcesDir -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="resourcesDir-prop"></a><span class="name">resourcesDir</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The base directory for Android resources in the respective product.</p>
+<p><b>Note: </b>Android requires that the file name of this directory is always <code>&quot;res&quot;</code>.</p><p>Default: <code>&quot;src/main/res&quot;</code> in the product source directory</p>
+</div></div><!-- @@@resourcesDir -->
+<br/>
+<!-- $$$sdkDir -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="sdkDir-prop"></a><span class="name">sdkDir</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The SDK base directory.</p>
+<p>Default: Determined automatically based on standard search paths.</p>
+</div></div><!-- @@@sdkDir -->
+<br/>
+<!-- $$$sourcesDir -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="sourcesDir-prop"></a><span class="name">sourcesDir</span> : <span class="type">path</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The base directory for Java sources. This property is only relevant if <a href="qml-qbsmodules-android-sdk.html#automaticSources-prop">automaticSources</a> is enabled.</p>
+<p>Default: <code>&quot;src/main/java&quot;</code> in the product source directory</p>
+</div></div><!-- @@@sourcesDir -->
+<br/>
+<!-- $$$versionCode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="versionCode-prop"></a><span class="name">versionCode</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The Android Manifest version code of the respective product. The <code>android:versionCode</code> attribute in the manifest file will be set to this value if not undefined.</p>
+<p>In the following example we provide an architecture-specific value for <code>android:versionCode</code>:</p>
+<pre class="cpp">
+
+  <span class="comment">// ...</span>
+  property <span class="type">int</span> _version: <span class="number">1</span>
+  property <span class="type">int</span> _patchVersion: <span class="number">0</span>
+  Android<span class="operator">.</span>sdk<span class="operator">.</span>versionCode: {
+      <span class="keyword">switch</span> (Android<span class="operator">.</span>ndk<span class="operator">.</span>abi) {
+      <span class="keyword">case</span> <span class="string">&quot;armeabi-v7a&quot;</span>:
+          <span class="keyword">return</span> <span class="number">132000000</span> <span class="operator">|</span> _version <span class="operator">*</span> <span class="number">10</span> <span class="operator">+</span> _patchVersion;
+      <span class="keyword">case</span> <span class="string">&quot;arm64-v8a&quot;</span>:
+          <span class="keyword">return</span> <span class="number">164000000</span> <span class="operator">|</span> _version <span class="operator">*</span> <span class="number">10</span> <span class="operator">+</span> _patchVersion;
+      <span class="keyword">case</span> <span class="string">&quot;x86&quot;</span>:
+          <span class="keyword">return</span> <span class="number">232000000</span> <span class="operator">|</span> _version <span class="operator">*</span> <span class="number">10</span> <span class="operator">+</span> _patchVersion;
+      <span class="keyword">case</span> <span class="string">&quot;x86_64&quot;</span>:
+          <span class="keyword">return</span> <span class="number">264000000</span> <span class="operator">|</span> _version <span class="operator">*</span> <span class="number">10</span> <span class="operator">+</span> _patchVersion;
+      }
+      <span class="keyword">throw</span> <span class="string">&quot;Unknown architecture&quot;</span>;
+  }
+
+</pre>
+<p>Default: <code>undefined</code></p>
+</div></div><!-- @@@versionCode -->
+<br/>
+<!-- $$$versionName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="versionName-prop"></a><span class="name">versionName</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The Android Manifest version name of the respective product. The <code>android:versionName</code> attribute in the manifest file will be set to this value if not undefined.</p>
+<p>Default: <code>undefined</code></p>
+</div></div><!-- @@@versionName -->
+<br/>
+<p class="naviNextPrevious footerNavi">
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

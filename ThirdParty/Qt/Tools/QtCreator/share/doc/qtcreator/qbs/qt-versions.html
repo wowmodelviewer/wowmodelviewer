@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qbs.qdoc -->
+  <title>Managing Qt Versions | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td><td >Managing Qt Versions</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="configuring.html" />
+  <link rel="next" href="usage.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="configuring.html">Configuring Profiles and Preferences</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="usage.html">Usage</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#introduction">Introduction</a></li>
+<li class="level1"><a href="#multiple-qt-builds">Multiple Qt Builds</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Managing Qt Versions</h1>
+<span class="subtitle"></span>
+<!-- $$$qt-versions.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="introduction"></a>
+<h2 id="introduction">Introduction</h2>
+<p>If your environment has the right <code>qmake</code> binary in its <code>PATH</code> and is also set up properly for a matching toolchain, then you do not necessarily need a profile to build projects with a Qt dependency. Otherwise, you should create one:</p>
+<pre class="cpp">
+
+  qbs setup<span class="operator">-</span>qt <span class="operator">/</span>usr<span class="operator">/</span>bin<span class="operator">/</span>qmake myqt
+
+</pre>
+<p>This will create the <code>myqt</code> profile which can then be used on the command line:</p>
+<pre class="cpp">
+
+  qbs profile:myqt
+
+</pre>
+<p><b>Note: </b>If the <code>setup-toolchains</code> command has found more than one toolchain, you will need to manually link your Qt profile to one of them, like this:</p><pre class="cpp">
+
+  qbs config profiles<span class="operator">.</span>myqt<span class="operator">.</span>baseProfile <span class="operator">&lt;</span>profile name<span class="operator">&gt;</span>
+
+</pre>
+<a name="multiple-qt-builds"></a>
+<h2 id="multiple-qt-builds">Multiple Qt Builds</h2>
+<p>To support multiple Qt builds, or in fact any combination of related settings, you need to create several profiles. The following example illustrates how to set up three different profiles, each for a different Qt build:</p>
+<pre class="cpp">
+
+  qbs setup<span class="operator">-</span>qt <span class="operator">~</span><span class="operator">/</span>dev<span class="operator">/</span>qt<span class="operator">/</span><span class="number">4.7</span><span class="operator">/</span>bin<span class="operator">/</span>qmake qt47
+  qbs setup<span class="operator">-</span>qt <span class="operator">~</span><span class="operator">/</span>dev<span class="operator">/</span>qt<span class="operator">/</span><span class="number">4.8</span><span class="operator">/</span>bin<span class="operator">/</span>qmake qt48
+  qbs setup<span class="operator">-</span>qt <span class="operator">~</span><span class="operator">/</span>dev<span class="operator">/</span>qt<span class="operator">/</span><span class="number">5.0</span><span class="operator">/</span>qtbase<span class="operator">/</span>bin<span class="operator">/</span>qmake qt5
+
+</pre>
+<p>You can set the default Qt build like this:</p>
+<pre class="cpp">
+
+  qbs config defaultProfile qt5
+
+</pre>
+<p>To choose a Qt build that is different from the default, use:</p>
+<pre class="cpp">
+
+  qbs build profile:qt48
+
+</pre>
+<p>You can set other properties in a profile (not just Qt ones), in the same way you override them from the command line. For example:</p>
+<pre class="cpp">
+
+  qbs setup<span class="operator">-</span>qt C:\<span class="type">Qt</span>\<span class="number">5.0.0</span>\qtbase\bin\qmake<span class="operator">.</span>exe qt5
+  qbs config profiles<span class="operator">.</span>qt5<span class="operator">.</span>qbs<span class="operator">.</span>architecture x86_64
+  qbs config profiles<span class="operator">.</span>qt5<span class="operator">.</span>baseProfile msvc2010
+
+</pre>
+<p>The last example uses the inheritance feature of profiles. All settings in the profile set as <code>baseProfile</code> are known in the derived profile as well. They can of course be overridden there.</p>
+</div>
+<!-- @@@qt-versions.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="configuring.html">Configuring Profiles and Preferences</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="usage.html">Usage</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qqmlxmllistmodel.cpp -->
+  <title>XmlRole QML Type | Qt XML Patterns 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtxmlpatterns-index.html">Qt XML Patterns</a></td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtxmlpatterns-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">XmlRole QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$XmlRole-brief -->
+<p>For specifying a role to an <a href="qml-qtquick-xmllistmodel-xmllistmodel.html">XmlListModel</a>. <a href="#details">More...</a></p>
+<!-- @@@XmlRole -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.XmlListModel 2.13</td></tr></table></div><ul>
+<li><a href="qml-qtquick-xmllistmodel-xmlrole-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-xmllistmodel-xmlrole.html#isKey-prop">isKey</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-xmllistmodel-xmlrole.html#name-prop">name</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-xmllistmodel-xmlrole.html#query-prop">query</a></b></b> : string</li>
+</ul>
+<!-- $$$XmlRole-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><b>See also </b><a href="../qtdoc/qmltypes.html">Qt QML</a>.</p>
+<!-- @@@XmlRole -->
+<h2>Property Documentation</h2>
+<!-- $$$isKey -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="isKey-prop"></a><span class="name">isKey</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Defines whether this is a key role. Key roles are used to determine whether a set of values should be updated or added to the XML list model when <a href="qml-qtquick-xmllistmodel-xmllistmodel.html#reload-method">XmlListModel::reload()</a> is called.</p>
+<p><b>See also </b><a href="qml-qtquick-xmllistmodel-xmllistmodel.html">XmlListModel</a>.</p>
+</div></div><!-- @@@isKey -->
+<br/>
+<!-- $$$name -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="name-prop"></a><span class="name">name</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The name for the role. This name is used to access the model data for this role.</p>
+<p>For example, the following model has a role named &quot;title&quot;, which can be accessed from the view's delegate:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-xmllistmodel-xmllistmodel.html">XmlListModel</a></span> {
+      <span class="name">id</span>: <span class="name">xmlModel</span>
+      <span class="comment">// ...</span>
+      <span class="type"><a href="qml-qtquick-xmllistmodel-xmlrole.html">XmlRole</a></span> {
+          <span class="name">name</span>: <span class="string">&quot;title&quot;</span>
+          <span class="name">query</span>: <span class="string">&quot;title/string()&quot;</span>
+      }
+  }
+
+</pre>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+      <span class="name">model</span>: <span class="name">xmlModel</span>
+      <span class="name">delegate</span>: <span class="name">Text</span> { <span class="name">text</span>: <span class="name">title</span> }
+  }
+
+</pre>
+</div></div><!-- @@@name -->
+<br/>
+<!-- $$$query -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="query-prop"></a><span class="name">query</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The relative XPath expression query for this role. The query must be relative; it cannot start with a '/'.</p>
+<p>For example, if there is an XML document like this:</p>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2017 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the documentation of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.0
+  import QtQuick.XmlListModel 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">width</span>: <span class="number">300</span>; <span class="name">height</span>: <span class="number">200</span>
+
+  <span class="type"><a href="qml-qtquick-xmllistmodel-xmllistmodel.html">XmlListModel</a></span> {
+      <span class="name">id</span>: <span class="name">model</span>
+      <span class="name">source</span>: <span class="string">&quot;xmlrole.xml&quot;</span>
+
+      <span class="comment">// XmlRole queries will be made on &lt;book&gt; elements</span>
+      <span class="name">query</span>: <span class="string">&quot;/catalog/book&quot;</span>
+
+      <span class="comment">// query the book title</span>
+      <span class="type"><a href="qml-qtquick-xmllistmodel-xmlrole.html">XmlRole</a></span> { <span class="name">name</span>: <span class="string">&quot;title&quot;</span>; <span class="name">query</span>: <span class="string">&quot;title/string()&quot;</span> }
+
+      <span class="comment">// query the book's year</span>
+      <span class="type"><a href="qml-qtquick-xmllistmodel-xmlrole.html">XmlRole</a></span> { <span class="name">name</span>: <span class="string">&quot;year&quot;</span>; <span class="name">query</span>: <span class="string">&quot;year/number()&quot;</span> }
+
+      <span class="comment">// query the book's type (the '@' indicates 'type' is an attribute, not an element)</span>
+      <span class="type"><a href="qml-qtquick-xmllistmodel-xmlrole.html">XmlRole</a></span> { <span class="name">name</span>: <span class="string">&quot;type&quot;</span>; <span class="name">query</span>: <span class="string">&quot;@type/string()&quot;</span> }
+
+      <span class="comment">// query the book's first listed author (note in XPath the first index is 1, not 0)</span>
+      <span class="type"><a href="qml-qtquick-xmllistmodel-xmlrole.html">XmlRole</a></span> { <span class="name">name</span>: <span class="string">&quot;first_author&quot;</span>; <span class="name">query</span>: <span class="string">&quot;author[1]/string()&quot;</span> }
+
+      <span class="comment">// query the wanted attribute as a boolean</span>
+      <span class="type"><a href="qml-qtquick-xmllistmodel-xmlrole.html">XmlRole</a></span> { <span class="name">name</span>: <span class="string">&quot;wanted&quot;</span>; <span class="name">query</span>: <span class="string">&quot;boolean(@wanted)&quot;</span> }
+  }
+
+  <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+      <span class="name">width</span>: <span class="number">300</span>; <span class="name">height</span>: <span class="number">200</span>
+      <span class="name">model</span>: <span class="name">model</span>
+      <span class="name">delegate</span>: <span class="name">Column</span> {
+          <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="name">title</span> <span class="operator">+</span> <span class="string">&quot; (&quot;</span> <span class="operator">+</span> <span class="name">type</span> <span class="operator">+</span> <span class="string">&quot;)&quot;</span>; <span class="name">font</span>.bold: <span class="name">wanted</span> }
+          <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="name">first_author</span> }
+          <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="name">year</span> }
+      }
+  }
+
+  }
+
+</pre>
+<p>Here are some valid XPath expressions for <a href="qml-qtquick-xmllistmodel-xmlrole.html">XmlRole</a> queries on this document:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-xmllistmodel-xmllistmodel.html">XmlListModel</a></span> {
+      <span class="name">id</span>: <span class="name">model</span>
+      ...
+      <span class="comment">// XmlRole queries will be made on &lt;book&gt; elements</span>
+      <span class="name">query</span>: <span class="string">&quot;/catalog/book&quot;</span>
+
+      <span class="comment">// query the book title</span>
+      <span class="type"><a href="qml-qtquick-xmllistmodel-xmlrole.html">XmlRole</a></span> { <span class="name">name</span>: <span class="string">&quot;title&quot;</span>; <span class="name">query</span>: <span class="string">&quot;title/string()&quot;</span> }
+
+      <span class="comment">// query the book's year</span>
+      <span class="type"><a href="qml-qtquick-xmllistmodel-xmlrole.html">XmlRole</a></span> { <span class="name">name</span>: <span class="string">&quot;year&quot;</span>; <span class="name">query</span>: <span class="string">&quot;year/number()&quot;</span> }
+
+      <span class="comment">// query the book's type (the '@' indicates 'type' is an attribute, not an element)</span>
+      <span class="type"><a href="qml-qtquick-xmllistmodel-xmlrole.html">XmlRole</a></span> { <span class="name">name</span>: <span class="string">&quot;type&quot;</span>; <span class="name">query</span>: <span class="string">&quot;@type/string()&quot;</span> }
+
+      <span class="comment">// query the book's first listed author (note in XPath the first index is 1, not 0)</span>
+      <span class="type"><a href="qml-qtquick-xmllistmodel-xmlrole.html">XmlRole</a></span> { <span class="name">name</span>: <span class="string">&quot;first_author&quot;</span>; <span class="name">query</span>: <span class="string">&quot;author[1]/string()&quot;</span> }
+
+      <span class="comment">// query the wanted attribute as a boolean</span>
+      <span class="type"><a href="qml-qtquick-xmllistmodel-xmlrole.html">XmlRole</a></span> { <span class="name">name</span>: <span class="string">&quot;wanted&quot;</span>; <span class="name">query</span>: <span class="string">&quot;boolean(@wanted)&quot;</span> }
+  }
+
+</pre>
+<p>Accessing the model data for the above roles from a delegate:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+      <span class="name">width</span>: <span class="number">300</span>; <span class="name">height</span>: <span class="number">200</span>
+      <span class="name">model</span>: <span class="name">model</span>
+      <span class="name">delegate</span>: <span class="name">Column</span> {
+          <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="name">title</span> <span class="operator">+</span> <span class="string">&quot; (&quot;</span> <span class="operator">+</span> <span class="name">type</span> <span class="operator">+</span> <span class="string">&quot;)&quot;</span>; <span class="name">font</span>.bold: <span class="name">wanted</span> }
+          <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="name">first_author</span> }
+          <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="name">year</span> }
+      }
+
+</pre>
+<p>See the <a href="http://www.w3.org/TR/xpath20/">W3C XPath 2.0 specification</a> for more information.</p>
+</div></div><!-- @@@query -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

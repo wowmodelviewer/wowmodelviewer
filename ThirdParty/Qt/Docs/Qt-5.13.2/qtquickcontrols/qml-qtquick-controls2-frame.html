@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickframe.cpp -->
+  <title>Frame QML Type | Qt Quick Controls 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td ><a href="qtquick-controls2-qmlmodule.html">QML Types</a></td><td >Frame QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Frame QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Frame-brief -->
+<p>Visual frame for a logical group of controls. <a href="#details">More...</a></p>
+<!-- @@@Frame -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Controls 2.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-controls2-pane.html">Pane</a></p>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-controls2-groupbox.html">GroupBox</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-controls2-frame-members.html">List of all members, including inherited members</a></li>
+</ul>
+<!-- $$$Frame-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>Frame is used to layout a logical group of controls together within a visual frame. Frame does not provide a layout of its own, but requires you to position its contents, for instance by creating a <a href="../qtquick/qml-qtquick-layouts-rowlayout.html">RowLayout</a> or a <a href="../qtquick/qml-qtquick-layouts-columnlayout.html">ColumnLayout</a>.</p>
+<p>Items declared as children of a Frame are automatically parented to the Frame's <a href="qml-qtquick-controls2-control.html#contentItem-prop">contentItem</a>. Items created dynamically need to be explicitly parented to the contentItem.</p>
+<p>If only a single item is used within a Frame, it will resize to fit the implicit size of its contained item. This makes it particularly suitable for use together with layouts.</p>
+<p class="centerAlign"><img src="images/qtquickcontrols2-frame.png" alt="" /></p><pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls2-frame.html">Frame</a></span> {
+      <span class="type"><a href="../qtquick/qml-qtquick-layouts-columnlayout.html">ColumnLayout</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="type"><a href="qml-qtquick-controls2-checkbox.html">CheckBox</a></span> { <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;E-mail&quot;</span>) }
+          <span class="type"><a href="qml-qtquick-controls2-checkbox.html">CheckBox</a></span> { <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Calendar&quot;</span>) }
+          <span class="type"><a href="qml-qtquick-controls2-checkbox.html">CheckBox</a></span> { <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Contacts&quot;</span>) }
+      }
+  }
+
+</pre>
+<p><b>See also </b><a href="qtquickcontrols2-customize.html#customizing-frame">Customizing Frame</a> and <a href="qtquickcontrols2-containers.html">Container Controls</a>.</p>
+<!-- @@@Frame -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

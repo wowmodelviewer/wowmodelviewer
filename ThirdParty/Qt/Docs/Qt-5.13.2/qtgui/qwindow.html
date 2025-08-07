@@ -1,0 +1,1151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwindow.cpp -->
+  <title>QWindow Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QWindow</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#resource-management">Resource Management</a></li>
+<li class="level2"><a href="#content-orientation">Content Orientation</a></li>
+<li class="level2"><a href="#visibility-and-windowing-system-exposure">Visibility and Windowing System Exposure</a></li>
+<li class="level2"><a href="#rendering">Rendering</a></li>
+<li class="level2"><a href="#initial-geometry">Initial Geometry</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QWindow Class</h1>
+<!-- $$$QWindow-brief -->
+<p>The <a href="qwindow.html">QWindow</a> class represents a window in the underlying windowing system. <a href="#details">More...</a></p>
+<!-- @@@QWindow -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QWindow&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.0</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a> and <a href="qsurface.html">QSurface</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qpaintdevicewindow.html">QPaintDeviceWindow</a>, <a href="../qtquick/qquickwindow.html">QQuickWindow</a>, and <a href="qvulkanwindow.html">QVulkanWindow</a></p>
+</td></tr></table></div><p>This class was introduced in  Qt 5.0.</p>
+<ul>
+<li><a href="qwindow-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#AncestorMode-enum">AncestorMode</a></b> { ExcludeTransients, IncludeTransients }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#Visibility-enum">Visibility</a></b> { Windowed, Minimized, Maximized, FullScreen, AutomaticVisibility, Hidden }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qwindow.html#active-prop">active</a></b> : const bool</li>
+<li class="fn"><b><a href="qwindow.html#contentOrientation-prop">contentOrientation</a></b> : Qt::ScreenOrientation</li>
+<li class="fn"><b><a href="qwindow.html#flags-prop">flags</a></b> : Qt::WindowFlags</li>
+<li class="fn"><b><a href="qwindow.html#height-prop">height</a></b> : int</li>
+<li class="fn"><b><a href="qwindow.html#maximumHeight-prop">maximumHeight</a></b> : int</li>
+<li class="fn"><b><a href="qwindow.html#maximumWidth-prop">maximumWidth</a></b> : int</li>
+<li class="fn"><b><a href="qwindow.html#minimumHeight-prop">minimumHeight</a></b> : int</li>
+<li class="fn"><b><a href="qwindow.html#minimumWidth-prop">minimumWidth</a></b> : int</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qwindow.html#modality-prop">modality</a></b> : Qt::WindowModality</li>
+<li class="fn"><b><a href="qwindow.html#opacity-prop">opacity</a></b> : qreal</li>
+<li class="fn"><b><a href="qwindow.html#title-prop">title</a></b> : QString</li>
+<li class="fn"><b><a href="qwindow.html#visibility-prop">visibility</a></b> : Visibility</li>
+<li class="fn"><b><a href="qwindow.html#visible-prop">visible</a></b> : bool</li>
+<li class="fn"><b><a href="qwindow.html#width-prop">width</a></b> : int</li>
+<li class="fn"><b><a href="qwindow.html#x-prop">x</a></b> : int</li>
+<li class="fn"><b><a href="qwindow.html#y-prop">y</a></b> : int</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#QWindow-1">QWindow</a></b>(QWindow *<i>parent</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#QWindow">QWindow</a></b>(QScreen *<i>targetScreen</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#dtor.QWindow">~QWindow</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#baseSize">baseSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::ScreenOrientation </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#contentOrientation-prop">contentOrientation</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#create">create</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCursor </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#cursor">cursor</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#destroy">destroy</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#devicePixelRatio">devicePixelRatio</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#filePath">filePath</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::WindowFlags </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#flags-prop">flags</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QObject *</td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#focusObject">focusObject</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRect </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#frameGeometry">frameGeometry</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMargins </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#frameMargins">frameMargins</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPoint </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#framePosition">framePosition</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRect </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#geometry">geometry</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#height-prop">height</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QIcon </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#icon">icon</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#isActive">isActive</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#isAncestorOf">isAncestorOf</a></b>(const QWindow *<i>child</i>, QWindow::AncestorMode <i>mode</i> = IncludeTransients) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#isExposed">isExposed</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#isModal">isModal</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#isTopLevel">isTopLevel</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#visible-prop">isVisible</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPoint </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#mapFromGlobal">mapFromGlobal</a></b>(const QPoint &amp;<i>pos</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPoint </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#mapToGlobal">mapToGlobal</a></b>(const QPoint &amp;<i>pos</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRegion </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#mask">mask</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#maximumHeight-prop">maximumHeight</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#maximumSize">maximumSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#maximumWidth-prop">maximumWidth</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#minimumHeight-prop">minimumHeight</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#minimumSize">minimumSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#minimumWidth-prop">minimumWidth</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::WindowModality </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#modality-prop">modality</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#opacity-prop">opacity</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWindow *</td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#parent">parent</a></b>(QWindow::AncestorMode <i>mode</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWindow *</td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#parent-1">parent</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPoint </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#position">position</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#contentOrientation-prop">reportContentOrientationChange</a></b>(Qt::ScreenOrientation <i>orientation</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSurfaceFormat </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#requestedFormat">requestedFormat</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#resize">resize</a></b>(const QSize &amp;<i>newSize</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#resize-1">resize</a></b>(int <i>w</i>, int <i>h</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QScreen *</td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#screen">screen</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setBaseSize">setBaseSize</a></b>(const QSize &amp;<i>size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setCursor">setCursor</a></b>(const QCursor &amp;<i>cursor</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setFilePath">setFilePath</a></b>(const QString &amp;<i>filePath</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setFlag">setFlag</a></b>(Qt::WindowType <i>flag</i>, bool <i>on</i> = true)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#flags-prop">setFlags</a></b>(Qt::WindowFlags <i>flags</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setFormat">setFormat</a></b>(const QSurfaceFormat &amp;<i>format</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setFramePosition">setFramePosition</a></b>(const QPoint &amp;<i>point</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setIcon">setIcon</a></b>(const QIcon &amp;<i>icon</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setKeyboardGrabEnabled">setKeyboardGrabEnabled</a></b>(bool <i>grab</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setMask">setMask</a></b>(const QRegion &amp;<i>region</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setMaximumSize">setMaximumSize</a></b>(const QSize &amp;<i>size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setMinimumSize">setMinimumSize</a></b>(const QSize &amp;<i>size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#modality-prop">setModality</a></b>(Qt::WindowModality <i>modality</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setMouseGrabEnabled">setMouseGrabEnabled</a></b>(bool <i>grab</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#opacity-prop">setOpacity</a></b>(qreal <i>level</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setParent">setParent</a></b>(QWindow *<i>parent</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setPosition">setPosition</a></b>(const QPoint &amp;<i>pt</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setPosition-1">setPosition</a></b>(int <i>posx</i>, int <i>posy</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setScreen">setScreen</a></b>(QScreen *<i>newScreen</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setSizeIncrement">setSizeIncrement</a></b>(const QSize &amp;<i>size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setSurfaceType">setSurfaceType</a></b>(QSurface::SurfaceType <i>surfaceType</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#visibility-prop">setVisibility</a></b>(QWindow::Visibility <i>v</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setVulkanInstance">setVulkanInstance</a></b>(QVulkanInstance *<i>instance</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setWindowState">setWindowState</a></b>(Qt::WindowState <i>state</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setWindowStates">setWindowStates</a></b>(Qt::WindowStates <i>state</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#sizeIncrement">sizeIncrement</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#title-prop">title</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::WindowType </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#type">type</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#unsetCursor">unsetCursor</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWindow::Visibility </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#visibility-prop">visibility</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVulkanInstance *</td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#vulkanInstance">vulkanInstance</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#width-prop">width</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> WId </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#winId">winId</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::WindowState </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#windowState">windowState</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::WindowStates </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#windowStates">windowStates</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#x-prop">x</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#y-prop">y</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSurfaceFormat </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#format">format</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSize </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#size">size</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSurface::SurfaceType </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#surfaceType">surfaceType</a></b>() const override</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#alert">alert</a></b>(int <i>msec</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#close">close</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#hide">hide</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#lower">lower</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#raise">raise</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#requestActivate">requestActivate</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#requestUpdate">requestUpdate</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setGeometry-1">setGeometry</a></b>(const QRect &amp;<i>rect</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#setGeometry">setGeometry</a></b>(int <i>posx</i>, int <i>posy</i>, int <i>w</i>, int <i>h</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#height-prop">setHeight</a></b>(int <i>arg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#maximumHeight-prop">setMaximumHeight</a></b>(int <i>h</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#maximumWidth-prop">setMaximumWidth</a></b>(int <i>w</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#minimumHeight-prop">setMinimumHeight</a></b>(int <i>h</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#minimumWidth-prop">setMinimumWidth</a></b>(int <i>w</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#title-prop">setTitle</a></b>(<i>const QString &amp;</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#visible-prop">setVisible</a></b>(bool <i>visible</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#width-prop">setWidth</a></b>(int <i>arg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#x-prop">setX</a></b>(int <i>arg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#y-prop">setY</a></b>(int <i>arg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#show">show</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#showFullScreen">showFullScreen</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#showMaximized">showMaximized</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#showMinimized">showMinimized</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#showNormal">showNormal</a></b>()</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#active-prop">activeChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#contentOrientation-prop">contentOrientationChanged</a></b>(Qt::ScreenOrientation <i>orientation</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#focusObjectChanged">focusObjectChanged</a></b>(QObject *<i>object</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#height-prop">heightChanged</a></b>(int <i>arg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#maximumHeight-prop">maximumHeightChanged</a></b>(int <i>arg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#maximumWidth-prop">maximumWidthChanged</a></b>(int <i>arg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#minimumHeight-prop">minimumHeightChanged</a></b>(int <i>arg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#minimumWidth-prop">minimumWidthChanged</a></b>(int <i>arg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#modalityChanged">modalityChanged</a></b>(Qt::WindowModality <i>modality</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#opacity-prop">opacityChanged</a></b>(qreal <i>opacity</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#screenChanged">screenChanged</a></b>(QScreen *<i>screen</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#visibility-prop">visibilityChanged</a></b>(QWindow::Visibility <i>visibility</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#visible-prop">visibleChanged</a></b>(bool <i>arg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#width-prop">widthChanged</a></b>(int <i>arg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#windowStateChanged">windowStateChanged</a></b>(Qt::WindowState <i>windowState</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#title-prop">windowTitleChanged</a></b>(const QString &amp;<i>title</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#x-prop">xChanged</a></b>(int <i>arg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#y-prop">yChanged</a></b>(int <i>arg</i>)</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QWindow *</td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#fromWinId">fromWinId</a></b>(WId <i>id</i>)</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#exposeEvent">exposeEvent</a></b>(QExposeEvent *<i>ev</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#focusInEvent">focusInEvent</a></b>(QFocusEvent *<i>ev</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#focusOutEvent">focusOutEvent</a></b>(QFocusEvent *<i>ev</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#hideEvent">hideEvent</a></b>(QHideEvent *<i>ev</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#keyPressEvent">keyPressEvent</a></b>(QKeyEvent *<i>ev</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#keyReleaseEvent">keyReleaseEvent</a></b>(QKeyEvent *<i>ev</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#mouseDoubleClickEvent">mouseDoubleClickEvent</a></b>(QMouseEvent *<i>ev</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#mouseMoveEvent">mouseMoveEvent</a></b>(QMouseEvent *<i>ev</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#mousePressEvent">mousePressEvent</a></b>(QMouseEvent *<i>ev</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#mouseReleaseEvent">mouseReleaseEvent</a></b>(QMouseEvent *<i>ev</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#moveEvent">moveEvent</a></b>(QMoveEvent *<i>ev</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#nativeEvent">nativeEvent</a></b>(const QByteArray &amp;<i>eventType</i>, void *<i>message</i>, long *<i>result</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#resizeEvent">resizeEvent</a></b>(QResizeEvent *<i>ev</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#showEvent">showEvent</a></b>(QShowEvent *<i>ev</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#tabletEvent">tabletEvent</a></b>(QTabletEvent *<i>ev</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#touchEvent">touchEvent</a></b>(QTouchEvent *<i>ev</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#wheelEvent">wheelEvent</a></b>(QWheelEvent *<i>ev</i>)</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qwindow.html#event">event</a></b>(QEvent *<i>ev</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QWindow-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A window that is supplied a parent becomes a native child window of their parent window.</p>
+<p>An application will typically use <a href="../qtwidgets/qwidget.html">QWidget</a> or <a href="../qtquick/qquickview.html">QQuickView</a> for its UI, and not <a href="qwindow.html">QWindow</a> directly. Still, it is possible to render directly to a <a href="qwindow.html">QWindow</a> with <a href="qbackingstore.html">QBackingStore</a> or <a href="qopenglcontext.html">QOpenGLContext</a>, when wanting to keep dependencies to a minimum or when wanting to use OpenGL directly. The <a href="qtgui-rasterwindow-example.html">Raster Window Example</a> and <a href="qtgui-openglwindow-example.html">OpenGL Window Example</a> are useful reference examples for how to render to a <a href="qwindow.html">QWindow</a> using either approach.</p>
+<a name="resource-management"></a>
+<h3 id="resource-management">Resource Management</h3>
+<p>Windows can potentially use a lot of memory. A usual measurement is width times height times color depth. A window might also include multiple buffers to support double and triple buffering, as well as depth and stencil buffers. To release a window's memory resources, call the <a href="qwindow.html#destroy">destroy</a>() function.</p>
+<a name="content-orientation"></a>
+<h3 id="content-orientation">Content Orientation</h3>
+<p><a href="qwindow.html">QWindow</a> has <a href="qwindow.html#contentOrientation-prop">reportContentOrientationChange</a>() that can be used to specify the layout of the window contents in relation to the screen. The content orientation is simply a hint to the windowing system about which orientation the window contents are in. It's useful when you wish to keep the same window size, but rotate the contents instead, especially when doing rotation animations between different orientations. The windowing system might use this value to determine the layout of system popups or dialogs.</p>
+<a name="visibility-and-windowing-system-exposure"></a>
+<h3 id="visibility-and-windowing-system-exposure">Visibility and Windowing System Exposure</h3>
+<p>By default, the window is not visible, and you must call <a href="qwindow.html#visible-prop">setVisible</a>(true), or <a href="qwindow.html#show">show</a>() or similar to make it visible. To make a window hidden again, call <a href="qwindow.html#visible-prop">setVisible</a>(false) or <a href="qwindow.html#hide">hide</a>(). The visible property describes the state the application wants the window to be in. Depending on the underlying system, a visible window might still not be shown on the screen. It could, for instance, be covered by other opaque windows or moved outside the physical area of the screen. On windowing systems that have exposure notifications, the <a href="qwindow.html#isExposed">isExposed</a>() accessor describes whether the window should be treated as directly visible on screen. The <a href="qwindow.html#exposeEvent">exposeEvent</a>() function is called whenever an area of the window is invalidated, for example due to the exposure in the windowing system changing. On windowing systems that do not make this information visible to the application, <a href="qwindow.html#isExposed">isExposed</a>() will simply return the same value as <a href="qwindow.html#visible-prop">isVisible</a>().</p>
+<p><a href="qwindow.html#Visibility-enum">QWindow::Visibility</a> queried through <a href="qwindow.html#visibility-prop">visibility</a>() is a convenience API combining the functions of visible() and <a href="qwindow.html#windowStates">windowStates</a>().</p>
+<a name="rendering"></a>
+<h3 id="rendering">Rendering</h3>
+<p>There are two Qt APIs that can be used to render content into a window, <a href="qbackingstore.html">QBackingStore</a> for rendering with a <a href="qpainter.html">QPainter</a> and flushing the contents to a window with type <a href="qsurface.html#SurfaceType-enum">QSurface::RasterSurface</a>, and <a href="qopenglcontext.html">QOpenGLContext</a> for rendering with OpenGL to a window with type <a href="qsurface.html#SurfaceType-enum">QSurface::OpenGLSurface</a>.</p>
+<p>The application can start rendering as soon as <a href="qwindow.html#isExposed">isExposed</a>() returns <code>true</code>, and can keep rendering until it <a href="qwindow.html#isExposed">isExposed</a>() returns <code>false</code>. To find out when <a href="qwindow.html#isExposed">isExposed</a>() changes, reimplement <a href="qwindow.html#exposeEvent">exposeEvent</a>(). The window will always get a resize event before the first expose event.</p>
+<a name="initial-geometry"></a>
+<h3 id="initial-geometry">Initial Geometry</h3>
+<p>If the window's width and height are left uninitialized, the window will get a reasonable default geometry from the platform window. If the position is left uninitialized, then the platform window will allow the windowing system to position the window. For example on X11, the window manager usually does some kind of smart positioning to try to avoid having new windows completely obscure existing windows. However <a href="qwindow.html#setGeometry">setGeometry</a>() initializes both the position and the size, so if you want a fixed size but an automatic position, you should call <a href="qwindow.html#resize">resize</a>() or <a href="qwindow.html#width-prop">setWidth</a>() and <a href="qwindow.html#height-prop">setHeight</a>() instead.</p>
+</div>
+<!-- @@@QWindow -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$AncestorMode$$$ExcludeTransients$$$IncludeTransients -->
+<h3 class="fn" id="AncestorMode-enum"><a name="AncestorMode-enum"></a>enum QWindow::<span class="name">AncestorMode</span></h3>
+<p>This enum is used to control whether or not transient parents should be considered ancestors.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QWindow::ExcludeTransients</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Transient parents are not considered ancestors.</td></tr>
+<tr><td class="topAlign"><code>QWindow::IncludeTransients</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Transient parents are considered ancestors.</td></tr>
+</table></div>
+<!-- @@@AncestorMode -->
+<!-- $$$Visibility$$$Hidden$$$AutomaticVisibility$$$Windowed$$$Minimized$$$Maximized$$$FullScreen -->
+<h3 class="fn" id="Visibility-enum"><a name="Visibility-enum"></a>enum QWindow::<span class="name">Visibility</span></h3>
+<p>This enum describes what part of the screen the window occupies or should occupy.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QWindow::Windowed</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The window occupies part of the screen, but not necessarily the entire screen. This state will occur only on windowing systems which support showing multiple windows simultaneously. In this state it is possible for the user to move and resize the window manually, if WindowFlags permit it and if it is supported by the windowing system.</td></tr>
+<tr><td class="topAlign"><code>QWindow::Minimized</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">The window is reduced to an entry or icon on the task bar, dock, task list or desktop, depending on how the windowing system handles minimized windows.</td></tr>
+<tr><td class="topAlign"><code>QWindow::Maximized</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">The window occupies one entire screen, and the titlebar is still visible. On most windowing systems this is the state achieved by clicking the maximize button on the toolbar.</td></tr>
+<tr><td class="topAlign"><code>QWindow::FullScreen</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">The window occupies one entire screen, is not resizable, and there is no titlebar. On some platforms which do not support showing multiple simultaneous windows, this can be the usual visibility when the window is not hidden.</td></tr>
+<tr><td class="topAlign"><code>QWindow::AutomaticVisibility</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">This means to give the window a default visible state, which might be fullscreen or windowed depending on the platform. It can be given as a parameter to <a href="qwindow.html#visibility-prop">setVisibility</a> but will never be read back from the visibility accessor.</td></tr>
+<tr><td class="topAlign"><code>QWindow::Hidden</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The window is not visible in any way, however it may remember a latent visibility which can be restored by setting AutomaticVisibility.</td></tr>
+</table></div>
+<p>This enum was introduced or modified in  Qt 5.1.</p>
+<!-- @@@Visibility -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$active-prop$$$isActive$$$activeChanged -->
+<h3 class="fn" id="active-prop"><a name="active-prop"></a><span class="name">active</span> : const <span class="type">bool</span></h3>
+<p>This property holds the active status of the window</p>
+<p>This property was introduced in  Qt 5.1.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qwindow.html#isActive">isActive</a></b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>activeChanged</b></span>()</td></tr>
+</table></div>
+<p><b>See also </b><a href="qwindow.html#requestActivate">requestActivate</a>().</p>
+<!-- @@@active -->
+<!-- $$$contentOrientation-prop$$$contentOrientation$$$reportContentOrientationChangeQt::ScreenOrientation$$$contentOrientationChangedQt::ScreenOrientation -->
+<h3 class="fn" id="contentOrientation-prop"><a name="contentOrientation-prop"></a><span class="name">contentOrientation</span> : <span class="type"><a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::ScreenOrientation</a></span></h3>
+<p>This property holds the orientation of the window's contents</p>
+<p>This is a hint to the window manager in case it needs to display additional content like popups, dialogs, status bars, or similar in relation to the window.</p>
+<p>The recommended orientation is <a href="qscreen.html#orientation-prop">QScreen::orientation</a>() but an application doesn't have to support all possible orientations, and thus can opt to ignore the current screen orientation.</p>
+<p>The difference between the window and the content orientation determines how much to rotate the content by. <a href="qscreen.html#angleBetween">QScreen::angleBetween</a>(), <a href="qscreen.html#transformBetween">QScreen::transformBetween</a>(), and <a href="qscreen.html#mapBetween">QScreen::mapBetween</a>() can be used to compute the necessary transform.</p>
+<p>The default value is <a href="../qtcore/qt.html#ScreenOrientation-enum">Qt::PrimaryOrientation</a></p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt::ScreenOrientation </td><td class="memItemRight bottomAlign"><span class="name"><b>contentOrientation</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>reportContentOrientationChange</b></span>(Qt::ScreenOrientation <i>orientation</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>contentOrientationChanged</b></span>(Qt::ScreenOrientation <i>orientation</i>)</td></tr>
+</table></div>
+<!-- @@@contentOrientation -->
+<!-- $$$flags-prop$$$flags$$$setFlagsQt::WindowFlags -->
+<h3 class="fn" id="flags-prop"><a name="flags-prop"></a><span class="name">flags</span> : <span class="type"><a href="../qtcore/qt.html#WindowType-enum">Qt::WindowFlags</a></span></h3>
+<p>This property holds the window flags of the window</p>
+<p>The window flags control the window's appearance in the windowing system, whether it's a dialog, popup, or a regular window, and whether it should have a title bar, etc.</p>
+<p>The actual window flags might differ from the flags set with setFlags() if the requested flags could not be fulfilled.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt::WindowFlags </td><td class="memItemRight bottomAlign"><span class="name"><b>flags</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setFlags</b></span>(Qt::WindowFlags <i>flags</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qwindow.html#setFlag">setFlag</a>().</p>
+<!-- @@@flags -->
+<!-- $$$height-prop$$$height$$$setHeightint$$$heightChangedint -->
+<h3 class="fn" id="height-prop"><a name="height-prop"></a><span class="name">height</span> : <span class="type">int</span></h3>
+<p>This property holds the height of the window's geometry</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>height</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setHeight</b></span>(int <i>arg</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>heightChanged</b></span>(int <i>arg</i>)</td></tr>
+</table></div>
+<!-- @@@height -->
+<!-- $$$maximumHeight-prop$$$maximumHeight$$$setMaximumHeightint$$$maximumHeightChangedint -->
+<h3 class="fn" id="maximumHeight-prop"><a name="maximumHeight-prop"></a><span class="name">maximumHeight</span> : <span class="type">int</span></h3>
+<p>This property holds the maximum height of the window's geometry</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>maximumHeight</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setMaximumHeight</b></span>(int <i>h</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>maximumHeightChanged</b></span>(int <i>arg</i>)</td></tr>
+</table></div>
+<!-- @@@maximumHeight -->
+<!-- $$$maximumWidth-prop$$$maximumWidth$$$setMaximumWidthint$$$maximumWidthChangedint -->
+<h3 class="fn" id="maximumWidth-prop"><a name="maximumWidth-prop"></a><span class="name">maximumWidth</span> : <span class="type">int</span></h3>
+<p>This property holds the maximum width of the window's geometry</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>maximumWidth</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setMaximumWidth</b></span>(int <i>w</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>maximumWidthChanged</b></span>(int <i>arg</i>)</td></tr>
+</table></div>
+<!-- @@@maximumWidth -->
+<!-- $$$minimumHeight-prop$$$minimumHeight$$$setMinimumHeightint$$$minimumHeightChangedint -->
+<h3 class="fn" id="minimumHeight-prop"><a name="minimumHeight-prop"></a><span class="name">minimumHeight</span> : <span class="type">int</span></h3>
+<p>This property holds the minimum height of the window's geometry</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>minimumHeight</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setMinimumHeight</b></span>(int <i>h</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>minimumHeightChanged</b></span>(int <i>arg</i>)</td></tr>
+</table></div>
+<!-- @@@minimumHeight -->
+<!-- $$$minimumWidth-prop$$$minimumWidth$$$setMinimumWidthint$$$minimumWidthChangedint -->
+<h3 class="fn" id="minimumWidth-prop"><a name="minimumWidth-prop"></a><span class="name">minimumWidth</span> : <span class="type">int</span></h3>
+<p>This property holds the minimum width of the window's geometry</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>minimumWidth</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setMinimumWidth</b></span>(int <i>w</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>minimumWidthChanged</b></span>(int <i>arg</i>)</td></tr>
+</table></div>
+<!-- @@@minimumWidth -->
+<!-- $$$modality-prop$$$modality$$$setModalityQt::WindowModality$$$modalityChangedQt::WindowModality -->
+<h3 class="fn" id="modality-prop"><a name="modality-prop"></a><span class="name">modality</span> : <span class="type"><a href="../qtcore/qt.html#WindowModality-enum">Qt::WindowModality</a></span></h3>
+<p>This property holds the modality of the window</p>
+<p>A modal window prevents other windows from receiving input events. Qt supports two types of modality: <a href="../qtcore/qt.html#WindowModality-enum">Qt::WindowModal</a> and <a href="../qtcore/qt.html#WindowModality-enum">Qt::ApplicationModal</a>.</p>
+<p>By default, this property is <a href="../qtcore/qt.html#WindowModality-enum">Qt::NonModal</a></p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt::WindowModality </td><td class="memItemRight bottomAlign"><span class="name"><b>modality</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setModality</b></span>(Qt::WindowModality <i>modality</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qwindow.html#modalityChanged">modalityChanged</a></b></span>(Qt::WindowModality <i>modality</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="../qtcore/qt.html#WindowModality-enum">Qt::WindowModality</a>.</p>
+<!-- @@@modality -->
+<!-- $$$opacity-prop$$$opacity$$$setOpacityqreal$$$opacityChangedqreal -->
+<h3 class="fn" id="opacity-prop"><a name="opacity-prop"></a><span class="name">opacity</span> : <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span></h3>
+<p>This property holds the opacity of the window in the windowing system.</p>
+<p>If the windowing system supports window opacity, this can be used to fade the window in and out, or to make it semitransparent.</p>
+<p>A value of 1.0 or above is treated as fully opaque, whereas a value of 0.0 or below is treated as fully transparent. Values inbetween represent varying levels of translucency between the two extremes.</p>
+<p>The default value is 1.0&#x2e;</p>
+<p>This property was introduced in  Qt 5.1.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qreal </td><td class="memItemRight bottomAlign"><span class="name"><b>opacity</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setOpacity</b></span>(qreal <i>level</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>opacityChanged</b></span>(qreal <i>opacity</i>)</td></tr>
+</table></div>
+<!-- @@@opacity -->
+<!-- $$$title-prop$$$title$$$setTitleconstQString&$$$windowTitleChangedconstQString& -->
+<h3 class="fn" id="title-prop"><a name="title-prop"></a><span class="name">title</span> : <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>This property holds the window's title in the windowing system</p>
+<p>The window title might appear in the title area of the window decorations, depending on the windowing system and the window flags. It might also be used by the windowing system to identify the window in other contexts, such as in the task switcher.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>title</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setTitle</b></span>(<i>const QString &amp;</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>windowTitleChanged</b></span>(const QString &amp;<i>title</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qwindow.html#flags-prop">flags</a>().</p>
+<!-- @@@title -->
+<!-- $$$visibility-prop$$$visibility$$$setVisibilityQWindow::Visibility$$$visibilityChangedQWindow::Visibility -->
+<h3 class="fn" id="visibility-prop"><a name="visibility-prop"></a><span class="name">visibility</span> : <span class="type"><a href="qwindow.html#Visibility-enum">Visibility</a></span></h3>
+<p>This property holds the screen-occupation state of the window</p>
+<p>Visibility is whether the window should appear in the windowing system as normal, minimized, maximized, fullscreen or hidden.</p>
+<p>To set the visibility to <a href="qwindow.html#Visibility-enum">AutomaticVisibility</a> means to give the window a default visible state, which might be fullscreen or windowed depending on the platform. When reading the visibility property you will always get the actual state, never <a href="qwindow.html#Visibility-enum">AutomaticVisibility</a>.</p>
+<p>This property was introduced in  Qt 5.1.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QWindow::Visibility </td><td class="memItemRight bottomAlign"><span class="name"><b>visibility</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setVisibility</b></span>(QWindow::Visibility <i>v</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>visibilityChanged</b></span>(QWindow::Visibility <i>visibility</i>)</td></tr>
+</table></div>
+<!-- @@@visibility -->
+<!-- $$$visible-prop$$$isVisible$$$setVisiblebool$$$visibleChangedbool -->
+<h3 class="fn" id="visible-prop"><a name="visible-prop"></a><span class="name">visible</span> : <span class="type">bool</span></h3>
+<p>This property holds whether the window is visible or not</p>
+<p>This property controls the visibility of the window in the windowing system.</p>
+<p>By default, the window is not visible, you must call setVisible(true), or <a href="qwindow.html#show">show</a>() or similar to make it visible.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>isVisible</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setVisible</b></span>(bool <i>visible</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>visibleChanged</b></span>(bool <i>arg</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qwindow.html#show">show</a>().</p>
+<!-- @@@visible -->
+<!-- $$$width-prop$$$width$$$setWidthint$$$widthChangedint -->
+<h3 class="fn" id="width-prop"><a name="width-prop"></a><span class="name">width</span> : <span class="type">int</span></h3>
+<p>This property holds the width of the window's geometry</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>width</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setWidth</b></span>(int <i>arg</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>widthChanged</b></span>(int <i>arg</i>)</td></tr>
+</table></div>
+<!-- @@@width -->
+<!-- $$$x-prop$$$x$$$setXint$$$xChangedint -->
+<h3 class="fn" id="x-prop"><a name="x-prop"></a><span class="name">x</span> : <span class="type">int</span></h3>
+<p>This property holds the x position of the window's geometry</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>x</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setX</b></span>(int <i>arg</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>xChanged</b></span>(int <i>arg</i>)</td></tr>
+</table></div>
+<!-- @@@x -->
+<!-- $$$y-prop$$$y$$$setYint$$$yChangedint -->
+<h3 class="fn" id="y-prop"><a name="y-prop"></a><span class="name">y</span> : <span class="type">int</span></h3>
+<p>This property holds the y position of the window's geometry</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>y</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setY</b></span>(int <i>arg</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>yChanged</b></span>(int <i>arg</i>)</td></tr>
+</table></div>
+<!-- @@@y -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QWindow$$$QWindowQWindow* -->
+<h3 class="fn" id="QWindow-1"><a name="QWindow-1"></a>QWindow::<span class="name">QWindow</span>(<span class="type"><a href="qwindow.html#QWindow">QWindow</a></span> *<i>parent</i>)</h3>
+<p>Creates a window as a child of the given <i>parent</i> window.</p>
+<p>The window will be embedded inside the parent window, its coordinates relative to the parent.</p>
+<p>The screen is inherited from the parent.</p>
+<p><b>See also </b><a href="qwindow.html#setParent">setParent</a>().</p>
+<!-- @@@QWindow -->
+<!-- $$$QWindow[overload1]$$$QWindowQScreen* -->
+<h3 class="fn" id="QWindow"><a name="QWindow"></a>QWindow::<span class="name">QWindow</span>(<span class="type"><a href="qscreen.html">QScreen</a></span> *<i>targetScreen</i> = nullptr)</h3>
+<p>Creates a window as a top level on the <i>targetScreen</i>.</p>
+<p>The window is not shown until <a href="qwindow.html#visible-prop">setVisible</a>(true), <a href="qwindow.html#show">show</a>(), or similar is called.</p>
+<p><b>See also </b><a href="qwindow.html#setScreen">setScreen</a>().</p>
+<!-- @@@QWindow -->
+<!-- $$$alert[overload1]$$$alertint -->
+<h3 class="fn" id="alert"><a name="alert"></a><code>[slot] </code><span class="type">void</span> QWindow::<span class="name">alert</span>(<span class="type">int</span> <i>msec</i>)</h3>
+<p>Causes an alert to be shown for <i>msec</i> miliseconds. If <i>msec</i> is <code>0</code> (the default), then the alert is shown indefinitely until the window becomes active again. This function has no effect on an active window.</p>
+<p>In alert state, the window indicates that it demands attention, for example by flashing or bouncing the taskbar entry.</p>
+<p>This function was introduced in  Qt 5.1.</p>
+<!-- @@@alert -->
+<!-- $$$close[overload1]$$$close -->
+<h3 class="fn" id="close"><a name="close"></a><code>[slot] </code><span class="type">bool</span> QWindow::<span class="name">close</span>()</h3>
+<p>Close the window.</p>
+<p>This closes the window, effectively calling <a href="qwindow.html#destroy">destroy</a>(), and potentially quitting the application. Returns <code>true</code> on success, false if it has a parent window (in which case the top level window should be closed instead).</p>
+<p><b>See also </b><a href="qwindow.html#destroy">destroy</a>() and <a href="qguiapplication.html#quitOnLastWindowClosed-prop">QGuiApplication::quitOnLastWindowClosed</a>().</p>
+<!-- @@@close -->
+<!-- $$$focusObjectChanged[overload1]$$$focusObjectChangedQObject* -->
+<h3 class="fn" id="focusObjectChanged"><a name="focusObjectChanged"></a><code>[signal] </code><span class="type">void</span> QWindow::<span class="name">focusObjectChanged</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>object</i>)</h3>
+<p>This signal is emitted when the final receiver of events tied to focus is changed to <i>object</i>.</p>
+<p><b>See also </b><a href="qwindow.html#focusObject">focusObject</a>().</p>
+<!-- @@@focusObjectChanged -->
+<!-- $$$hide[overload1]$$$hide -->
+<h3 class="fn" id="hide"><a name="hide"></a><code>[slot] </code><span class="type">void</span> QWindow::<span class="name">hide</span>()</h3>
+<p>Hides the window.</p>
+<p>Equivalent to calling <a href="qwindow.html#visible-prop">setVisible</a>(false).</p>
+<p><b>See also </b><a href="qwindow.html#show">show</a>() and <a href="qwindow.html#visible-prop">setVisible</a>().</p>
+<!-- @@@hide -->
+<!-- $$$lower[overload1]$$$lower -->
+<h3 class="fn" id="lower"><a name="lower"></a><code>[slot] </code><span class="type">void</span> QWindow::<span class="name">lower</span>()</h3>
+<p>Lower the window in the windowing system.</p>
+<p>Requests that the window be lowered to appear below other windows.</p>
+<!-- @@@lower -->
+<!-- $$$modalityChanged -->
+<h3 class="fn" id="modalityChanged"><a name="modalityChanged"></a><code>[signal] </code><span class="type">void</span> QWindow::<span class="name">modalityChanged</span>(<span class="type"><a href="../qtcore/qt.html#WindowModality-enum">Qt::WindowModality</a></span> <i>modality</i>)</h3>
+<p>This signal is emitted when the Qwindow::modality property changes to <i>modality</i>.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qwindow.html#modality-prop">modality</a>. </p><!-- @@@modalityChanged -->
+<!-- $$$raise[overload1]$$$raise -->
+<h3 class="fn" id="raise"><a name="raise"></a><code>[slot] </code><span class="type">void</span> QWindow::<span class="name">raise</span>()</h3>
+<p>Raise the window in the windowing system.</p>
+<p>Requests that the window be raised to appear above other windows.</p>
+<!-- @@@raise -->
+<!-- $$$requestActivate[overload1]$$$requestActivate -->
+<h3 class="fn" id="requestActivate"><a name="requestActivate"></a><code>[slot] </code><span class="type">void</span> QWindow::<span class="name">requestActivate</span>()</h3>
+<p>Requests the window to be activated, i.e&#x2e; receive keyboard focus.</p>
+<p><b>See also </b><a href="qwindow.html#isActive">isActive</a>(), <a href="qguiapplication.html#focusWindow">QGuiApplication::focusWindow</a>(), and <a href="../qtplatformheaders/qwindowswindowfunctions.html#setWindowActivationBehavior">QWindowsWindowFunctions::setWindowActivationBehavior</a>().</p>
+<!-- @@@requestActivate -->
+<!-- $$$requestUpdate[overload1]$$$requestUpdate -->
+<h3 class="fn" id="requestUpdate"><a name="requestUpdate"></a><code>[slot] </code><span class="type">void</span> QWindow::<span class="name">requestUpdate</span>()</h3>
+<p>Schedules a <a href="../qtcore/qevent.html#Type-enum">QEvent::UpdateRequest</a> event to be delivered to this window.</p>
+<p>The event is delivered in sync with the display vsync on platforms where this is possible. Otherwise, the event is delivered after a delay of 5 ms. The additional time is there to give the event loop a bit of idle time to gather system events, and can be overridden using the QT_QPA_UPDATE_IDLE_TIME environment variable.</p>
+<p>When driving animations, this function should be called once after drawing has completed. Calling this function multiple times will result in a single event being delivered to the window.</p>
+<p>Subclasses of <a href="qwindow.html">QWindow</a> should reimplement <a href="qwindow.html#event">event</a>(), intercept the event and call the application's rendering code, then call the base class implementation.</p>
+<p><b>Note: </b>The subclass' reimplementation of <a href="qwindow.html#event">event</a>() must invoke the base class implementation, unless it is absolutely sure that the event does not need to be handled by the base class. For example, the default implementation of this function relies on <a href="../qtcore/qevent.html#Type-enum">QEvent::Timer</a> events. Filtering them away would therefore break the delivery of the update events.</p><p>This function was introduced in  Qt 5.5.</p>
+<!-- @@@requestUpdate -->
+<!-- $$$screenChanged[overload1]$$$screenChangedQScreen* -->
+<h3 class="fn" id="screenChanged"><a name="screenChanged"></a><code>[signal] </code><span class="type">void</span> QWindow::<span class="name">screenChanged</span>(<span class="type"><a href="qscreen.html">QScreen</a></span> *<i>screen</i>)</h3>
+<p>This signal is emitted when a window's <i>screen</i> changes, either by being set explicitly with <a href="qwindow.html#setScreen">setScreen</a>(), or automatically when the window's screen is removed.</p>
+<!-- @@@screenChanged -->
+<!-- $$$setGeometry$$$setGeometryconstQRect& -->
+<h3 class="fn" id="setGeometry-1"><a name="setGeometry-1"></a><code>[slot] </code><span class="type">void</span> QWindow::<span class="name">setGeometry</span>(const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> &amp;<i>rect</i>)</h3>
+<p>Sets the geometry of the window, excluding its window frame, to <i>rect</i>.</p>
+<p>The geometry is in relation to the virtualGeometry() of its screen.</p>
+<p><b>See also </b><a href="qwindow.html#geometry">geometry</a>().</p>
+<!-- @@@setGeometry -->
+<!-- $$$setGeometry[overload1]$$$setGeometryintintintint -->
+<h3 class="fn" id="setGeometry"><a name="setGeometry"></a><code>[slot] </code><span class="type">void</span> QWindow::<span class="name">setGeometry</span>(<span class="type">int</span> <i>posx</i>, <span class="type">int</span> <i>posy</i>, <span class="type">int</span> <i>w</i>, <span class="type">int</span> <i>h</i>)</h3>
+<p>Sets the geometry of the window, excluding its window frame, to a rectangle constructed from <i>posx</i>, <i>posy</i>, <i>w</i> and <i>h</i>.</p>
+<p>The geometry is in relation to the virtualGeometry() of its screen.</p>
+<p><b>See also </b><a href="qwindow.html#geometry">geometry</a>().</p>
+<!-- @@@setGeometry -->
+<!-- $$$show[overload1]$$$show -->
+<h3 class="fn" id="show"><a name="show"></a><code>[slot] </code><span class="type">void</span> QWindow::<span class="name">show</span>()</h3>
+<p>Shows the window.</p>
+<p>This is equivalent to calling <a href="qwindow.html#showFullScreen">showFullScreen</a>(), <a href="qwindow.html#showMaximized">showMaximized</a>(), or <a href="qwindow.html#showNormal">showNormal</a>(), depending on the platform's default behavior for the window type and flags.</p>
+<p><b>See also </b><a href="qwindow.html#showFullScreen">showFullScreen</a>(), <a href="qwindow.html#showMaximized">showMaximized</a>(), <a href="qwindow.html#showNormal">showNormal</a>(), <a href="qwindow.html#hide">hide</a>(), <a href="qstylehints.html#showIsFullScreen-prop">QStyleHints::showIsFullScreen</a>(), and <a href="qwindow.html#flags-prop">flags</a>().</p>
+<!-- @@@show -->
+<!-- $$$showFullScreen[overload1]$$$showFullScreen -->
+<h3 class="fn" id="showFullScreen"><a name="showFullScreen"></a><code>[slot] </code><span class="type">void</span> QWindow::<span class="name">showFullScreen</span>()</h3>
+<p>Shows the window as fullscreen.</p>
+<p>Equivalent to calling <a href="qwindow.html#setWindowStates">setWindowStates</a>(<a href="../qtcore/qt.html#WindowState-enum">Qt::WindowFullScreen</a>) and then <a href="qwindow.html#visible-prop">setVisible</a>(true).</p>
+<p><b>See also </b><a href="qwindow.html#setWindowStates">setWindowStates</a>() and <a href="qwindow.html#visible-prop">setVisible</a>().</p>
+<!-- @@@showFullScreen -->
+<!-- $$$showMaximized[overload1]$$$showMaximized -->
+<h3 class="fn" id="showMaximized"><a name="showMaximized"></a><code>[slot] </code><span class="type">void</span> QWindow::<span class="name">showMaximized</span>()</h3>
+<p>Shows the window as maximized.</p>
+<p>Equivalent to calling <a href="qwindow.html#setWindowStates">setWindowStates</a>(<a href="../qtcore/qt.html#WindowState-enum">Qt::WindowMaximized</a>) and then <a href="qwindow.html#visible-prop">setVisible</a>(true).</p>
+<p><b>See also </b><a href="qwindow.html#setWindowStates">setWindowStates</a>() and <a href="qwindow.html#visible-prop">setVisible</a>().</p>
+<!-- @@@showMaximized -->
+<!-- $$$showMinimized[overload1]$$$showMinimized -->
+<h3 class="fn" id="showMinimized"><a name="showMinimized"></a><code>[slot] </code><span class="type">void</span> QWindow::<span class="name">showMinimized</span>()</h3>
+<p>Shows the window as minimized.</p>
+<p>Equivalent to calling <a href="qwindow.html#setWindowStates">setWindowStates</a>(<a href="../qtcore/qt.html#WindowState-enum">Qt::WindowMinimized</a>) and then <a href="qwindow.html#visible-prop">setVisible</a>(true).</p>
+<p><b>See also </b><a href="qwindow.html#setWindowStates">setWindowStates</a>() and <a href="qwindow.html#visible-prop">setVisible</a>().</p>
+<!-- @@@showMinimized -->
+<!-- $$$showNormal[overload1]$$$showNormal -->
+<h3 class="fn" id="showNormal"><a name="showNormal"></a><code>[slot] </code><span class="type">void</span> QWindow::<span class="name">showNormal</span>()</h3>
+<p>Shows the window as normal, i.e&#x2e; neither maximized, minimized, nor fullscreen.</p>
+<p>Equivalent to calling <a href="qwindow.html#setWindowStates">setWindowStates</a>(<a href="../qtcore/qt.html#WindowState-enum">Qt::WindowNoState</a>) and then <a href="qwindow.html#visible-prop">setVisible</a>(true).</p>
+<p><b>See also </b><a href="qwindow.html#setWindowStates">setWindowStates</a>() and <a href="qwindow.html#visible-prop">setVisible</a>().</p>
+<!-- @@@showNormal -->
+<!-- $$$windowStateChanged[overload1]$$$windowStateChangedQt::WindowState -->
+<h3 class="fn" id="windowStateChanged"><a name="windowStateChanged"></a><code>[signal] </code><span class="type">void</span> QWindow::<span class="name">windowStateChanged</span>(<span class="type"><a href="../qtcore/qt.html#WindowState-enum">Qt::WindowState</a></span> <i>windowState</i>)</h3>
+<p>This signal is emitted when the <i>windowState</i> changes, either by being set explicitly with <a href="qwindow.html#setWindowStates">setWindowStates</a>(), or automatically when the user clicks one of the titlebar buttons or by other means.</p>
+<!-- @@@windowStateChanged -->
+<!-- $$$~QWindow[overload1]$$$~QWindow -->
+<h3 class="fn" id="dtor.QWindow"><a name="dtor.QWindow"></a><code>[virtual] </code>QWindow::<span class="name">~QWindow</span>()</h3>
+<p>Destroys the window.</p>
+<!-- @@@~QWindow -->
+<!-- $$$baseSize[overload1]$$$baseSize -->
+<h3 class="fn" id="baseSize"><a name="baseSize"></a><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QWindow::<span class="name">baseSize</span>() const</h3>
+<p>Returns the base size of the window.</p>
+<p><b>See also </b><a href="qwindow.html#setBaseSize">setBaseSize</a>().</p>
+<!-- @@@baseSize -->
+<!-- $$$create[overload1]$$$create -->
+<h3 class="fn" id="create"><a name="create"></a><span class="type">void</span> QWindow::<span class="name">create</span>()</h3>
+<p>Allocates the platform resources associated with the window.</p>
+<p>It is at this point that the surface format set using <a href="qwindow.html#setFormat">setFormat</a>() gets resolved into an actual native surface. However, the window remains hidden until <a href="qwindow.html#visible-prop">setVisible</a>() is called.</p>
+<p>Note that it is not usually necessary to call this function directly, as it will be implicitly called by <a href="qwindow.html#show">show</a>(), <a href="qwindow.html#visible-prop">setVisible</a>(), and other functions that require access to the platform resources.</p>
+<p>Call <a href="qwindow.html#destroy">destroy</a>() to free the platform resources if necessary.</p>
+<p><b>See also </b><a href="qwindow.html#destroy">destroy</a>().</p>
+<!-- @@@create -->
+<!-- $$$cursor[overload1]$$$cursor -->
+<h3 class="fn" id="cursor"><a name="cursor"></a><span class="type"><a href="qcursor.html">QCursor</a></span> QWindow::<span class="name">cursor</span>() const</h3>
+<p>the cursor shape for this window</p>
+<p><b>See also </b><a href="qwindow.html#setCursor">setCursor</a>() and <a href="qwindow.html#unsetCursor">unsetCursor</a>().</p>
+<!-- @@@cursor -->
+<!-- $$$destroy[overload1]$$$destroy -->
+<h3 class="fn" id="destroy"><a name="destroy"></a><span class="type">void</span> QWindow::<span class="name">destroy</span>()</h3>
+<p>Releases the native platform resources associated with this window.</p>
+<p><b>See also </b><a href="qwindow.html#create">create</a>().</p>
+<!-- @@@destroy -->
+<!-- $$$devicePixelRatio[overload1]$$$devicePixelRatio -->
+<h3 class="fn" id="devicePixelRatio"><a name="devicePixelRatio"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QWindow::<span class="name">devicePixelRatio</span>() const</h3>
+<p>Returns the ratio between physical pixels and device-independent pixels for the window. This value is dependent on the screen the window is on, and may change when the window is moved.</p>
+<p>Common values are 1.0 on normal displays and 2.0 on Apple &quot;retina&quot; displays.</p>
+<p><b>Note: </b>For windows not backed by a platform window, meaning that <a href="qwindow.html#create">create</a>() was not called, the function will fall back to the associated <a href="qscreen.html">QScreen</a>'s device pixel ratio.</p><p><b>See also </b><a href="qscreen.html#devicePixelRatio-prop">QScreen::devicePixelRatio</a>().</p>
+<!-- @@@devicePixelRatio -->
+<!-- $$$event[overload1]$$$eventQEvent* -->
+<h3 class="fn" id="event"><a name="event"></a><code>[override virtual protected] </code><span class="type">bool</span> QWindow::<span class="name">event</span>(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>ev</i>)</h3>
+<p>Reimplements: <a href="../qtcore/qobject.html#event">QObject::event</a>(QEvent *e).</p>
+<p>Override this to handle any event (<i>ev</i>) sent to the window. Return <code>true</code> if the event was recognized and processed.</p>
+<p>Remember to call the base class version if you wish for mouse events, key events, resize events, etc to be dispatched as usual.</p>
+<!-- @@@event -->
+<!-- $$$exposeEvent[overload1]$$$exposeEventQExposeEvent* -->
+<h3 class="fn" id="exposeEvent"><a name="exposeEvent"></a><code>[virtual protected] </code><span class="type">void</span> QWindow::<span class="name">exposeEvent</span>(<span class="type"><a href="qexposeevent.html">QExposeEvent</a></span> *<i>ev</i>)</h3>
+<p>The expose event (<i>ev</i>) is sent by the window system whenever an area of the window is invalidated, for example due to the exposure in the windowing system changing.</p>
+<p>The application can start rendering into the window with <a href="qbackingstore.html">QBackingStore</a> and <a href="qopenglcontext.html">QOpenGLContext</a> as soon as it gets an exposeEvent() such that <a href="qwindow.html#isExposed">isExposed</a>() is true.</p>
+<p>If the window is moved off screen, is made totally obscured by another window, iconified or similar, this function might be called and the value of <a href="qwindow.html#isExposed">isExposed</a>() might change to false. When this happens, an application should stop its rendering as it is no longer visible to the user.</p>
+<p>A resize event will always be sent before the expose event the first time a window is shown.</p>
+<p><b>See also </b><a href="qwindow.html#isExposed">isExposed</a>().</p>
+<!-- @@@exposeEvent -->
+<!-- $$$filePath[overload1]$$$filePath -->
+<h3 class="fn" id="filePath"><a name="filePath"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QWindow::<span class="name">filePath</span>() const</h3>
+<p>the file name this window is representing.</p>
+<p><b>See also </b><a href="qwindow.html#setFilePath">setFilePath</a>().</p>
+<!-- @@@filePath -->
+<!-- $$$focusInEvent[overload1]$$$focusInEventQFocusEvent* -->
+<h3 class="fn" id="focusInEvent"><a name="focusInEvent"></a><code>[virtual protected] </code><span class="type">void</span> QWindow::<span class="name">focusInEvent</span>(<span class="type"><a href="qfocusevent.html">QFocusEvent</a></span> *<i>ev</i>)</h3>
+<p>Override this to handle focus in events (<i>ev</i>).</p>
+<p>Focus in events are sent when the window receives keyboard focus.</p>
+<p><b>See also </b><a href="qwindow.html#focusOutEvent">focusOutEvent</a>().</p>
+<!-- @@@focusInEvent -->
+<!-- $$$focusObject[overload1]$$$focusObject -->
+<h3 class="fn" id="focusObject"><a name="focusObject"></a><code>[virtual] </code><span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *QWindow::<span class="name">focusObject</span>() const</h3>
+<p>Returns the <a href="../qtcore/qobject.html">QObject</a> that will be the final receiver of events tied focus, such as key events.</p>
+<!-- @@@focusObject -->
+<!-- $$$focusOutEvent[overload1]$$$focusOutEventQFocusEvent* -->
+<h3 class="fn" id="focusOutEvent"><a name="focusOutEvent"></a><code>[virtual protected] </code><span class="type">void</span> QWindow::<span class="name">focusOutEvent</span>(<span class="type"><a href="qfocusevent.html">QFocusEvent</a></span> *<i>ev</i>)</h3>
+<p>Override this to handle focus out events (<i>ev</i>).</p>
+<p>Focus out events are sent when the window loses keyboard focus.</p>
+<p><b>See also </b><a href="qwindow.html#focusInEvent">focusInEvent</a>().</p>
+<!-- @@@focusOutEvent -->
+<!-- $$$format[overload1]$$$format -->
+<h3 class="fn" id="format"><a name="format"></a><code>[override virtual] </code><span class="type"><a href="qsurfaceformat.html">QSurfaceFormat</a></span> QWindow::<span class="name">format</span>() const</h3>
+<p>Reimplements: <a href="qsurface.html#format">QSurface::format</a>() const.</p>
+<p>Returns the actual format of this window.</p>
+<p>After the window has been created, this function will return the actual surface format of the window. It might differ from the requested format if the requested format could not be fulfilled by the platform. It might also be a superset, for example certain buffer sizes may be larger than requested.</p>
+<p><b>Note: </b>Depending on the platform, certain values in this surface format may still contain the requested values, that is, the values that have been passed to <a href="qwindow.html#setFormat">setFormat</a>(). Typical examples are the OpenGL version, profile and options. These may not get updated during <a href="qwindow.html#create">create</a>() since these are context specific and a single window may be used together with multiple contexts over its lifetime. Use the <a href="qopenglcontext.html">QOpenGLContext</a>'s format() instead to query such values.</p><p><b>See also </b><a href="qwindow.html#setFormat">setFormat</a>(), <a href="qwindow.html#create">create</a>(), <a href="qwindow.html#requestedFormat">requestedFormat</a>(), and <a href="qopenglcontext.html#format">QOpenGLContext::format</a>().</p>
+<!-- @@@format -->
+<!-- $$$frameGeometry[overload1]$$$frameGeometry -->
+<h3 class="fn" id="frameGeometry"><a name="frameGeometry"></a><span class="type"><a href="../qtcore/qrect.html">QRect</a></span> QWindow::<span class="name">frameGeometry</span>() const</h3>
+<p>Returns the geometry of the window, including its window frame.</p>
+<p>The geometry is in relation to the virtualGeometry() of its screen.</p>
+<p><b>See also </b><a href="qwindow.html#geometry">geometry</a>() and <a href="qwindow.html#frameMargins">frameMargins</a>().</p>
+<!-- @@@frameGeometry -->
+<!-- $$$frameMargins[overload1]$$$frameMargins -->
+<h3 class="fn" id="frameMargins"><a name="frameMargins"></a><span class="type"><a href="../qtcore/qmargins.html">QMargins</a></span> QWindow::<span class="name">frameMargins</span>() const</h3>
+<p>Returns the window frame margins surrounding the window.</p>
+<p><b>See also </b><a href="qwindow.html#geometry">geometry</a>() and <a href="qwindow.html#frameGeometry">frameGeometry</a>().</p>
+<!-- @@@frameMargins -->
+<!-- $$$framePosition[overload1]$$$framePosition -->
+<h3 class="fn" id="framePosition"><a name="framePosition"></a><span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> QWindow::<span class="name">framePosition</span>() const</h3>
+<p>Returns the top left position of the window, including its window frame.</p>
+<p>This returns the same value as <a href="qwindow.html#frameGeometry">frameGeometry</a>().topLeft().</p>
+<p><b>See also </b><a href="qwindow.html#setFramePosition">setFramePosition</a>(), <a href="qwindow.html#geometry">geometry</a>(), and <a href="qwindow.html#frameGeometry">frameGeometry</a>().</p>
+<!-- @@@framePosition -->
+<!-- $$$fromWinId[overload1]$$$fromWinIdWId -->
+<h3 class="fn" id="fromWinId"><a name="fromWinId"></a><code>[static] </code><span class="type"><a href="qwindow.html#QWindow">QWindow</a></span> *QWindow::<span class="name">fromWinId</span>(<span class="type">WId</span> <i>id</i>)</h3>
+<p>Creates a local representation of a window created by another process or by using native libraries below Qt.</p>
+<p>Given the handle <i>id</i> to a native window, this method creates a <a href="qwindow.html">QWindow</a> object which can be used to represent the window when invoking methods like <a href="qwindow.html#setParent">setParent</a>() and setTransientParent().</p>
+<p>This can be used, on platforms which support it, to embed a <a href="qwindow.html">QWindow</a> inside a native window, or to embed a native window inside a <a href="qwindow.html">QWindow</a>.</p>
+<p>If foreign windows are not supported or embedding the native window failed in the platform plugin, this function returns <code>nullptr</code>.</p>
+<p><b>Note: </b>The resulting <a href="qwindow.html">QWindow</a> should not be used to manipulate the underlying native window (besides re-parenting), or to observe state changes of the native window. Any support for these kind of operations is incidental, highly platform dependent and untested.</p><p><b>See also </b><a href="qwindow.html#setParent">setParent</a>() and setTransientParent().</p>
+<!-- @@@fromWinId -->
+<!-- $$$geometry[overload1]$$$geometry -->
+<h3 class="fn" id="geometry"><a name="geometry"></a><span class="type"><a href="../qtcore/qrect.html">QRect</a></span> QWindow::<span class="name">geometry</span>() const</h3>
+<p>Returns the geometry of the window, excluding its window frame.</p>
+<p>The geometry is in relation to the virtualGeometry() of its screen.</p>
+<p><b>See also </b><a href="qwindow.html#setGeometry">setGeometry</a>(), <a href="qwindow.html#frameMargins">frameMargins</a>(), and <a href="qwindow.html#frameGeometry">frameGeometry</a>().</p>
+<!-- @@@geometry -->
+<!-- $$$hideEvent[overload1]$$$hideEventQHideEvent* -->
+<h3 class="fn" id="hideEvent"><a name="hideEvent"></a><code>[virtual protected] </code><span class="type">void</span> QWindow::<span class="name">hideEvent</span>(<span class="type"><a href="qhideevent.html">QHideEvent</a></span> *<i>ev</i>)</h3>
+<p>Override this to handle hide events (<i>ev</i>).</p>
+<p>The function is called when the window has requested being hidden in the windowing system.</p>
+<!-- @@@hideEvent -->
+<!-- $$$icon[overload1]$$$icon -->
+<h3 class="fn" id="icon"><a name="icon"></a><span class="type"><a href="qicon.html">QIcon</a></span> QWindow::<span class="name">icon</span>() const</h3>
+<p>Returns the window's icon in the windowing system</p>
+<p><b>See also </b><a href="qwindow.html#setIcon">setIcon</a>().</p>
+<!-- @@@icon -->
+<!-- $$$isActive -->
+<h3 class="fn" id="isActive"><a name="isActive"></a><span class="type">bool</span> QWindow::<span class="name">isActive</span>() const</h3>
+<p>Returns <code>true</code> if the window should appear active from a style perspective.</p>
+<p>This is the case for the window that has input focus as well as windows that are in the same parent / transient parent chain as the focus window.</p>
+<p>To get the window that currently has focus, use <a href="qguiapplication.html#focusWindow">QGuiApplication::focusWindow</a>().</p>
+<p><b>Note:</b> Getter function for property <a href="qwindow.html#active-prop">active</a>. </p><!-- @@@isActive -->
+<!-- $$$isAncestorOf[overload1]$$$isAncestorOfconstQWindow*QWindow::AncestorMode -->
+<h3 class="fn" id="isAncestorOf"><a name="isAncestorOf"></a><span class="type">bool</span> QWindow::<span class="name">isAncestorOf</span>(const <span class="type"><a href="qwindow.html#QWindow">QWindow</a></span> *<i>child</i>, <span class="type"><a href="qwindow.html#AncestorMode-enum">QWindow::AncestorMode</a></span> <i>mode</i> = IncludeTransients) const</h3>
+<p>Returns <code>true</code> if the window is an ancestor of the given <i>child</i>. If <i>mode</i> is <a href="qwindow.html#AncestorMode-enum">IncludeTransients</a>, then transient parents are also considered ancestors.</p>
+<!-- @@@isAncestorOf -->
+<!-- $$$isExposed[overload1]$$$isExposed -->
+<h3 class="fn" id="isExposed"><a name="isExposed"></a><span class="type">bool</span> QWindow::<span class="name">isExposed</span>() const</h3>
+<p>Returns if this window is exposed in the windowing system.</p>
+<p>When the window is not exposed, it is shown by the application but it is still not showing in the windowing system, so the application should minimize rendering and other graphical activities.</p>
+<p>An <a href="qwindow.html#exposeEvent">exposeEvent</a>() is sent every time this value changes.</p>
+<p><b>See also </b><a href="qwindow.html#exposeEvent">exposeEvent</a>().</p>
+<!-- @@@isExposed -->
+<!-- $$$isModal[overload1]$$$isModal -->
+<h3 class="fn" id="isModal"><a name="isModal"></a><span class="type">bool</span> QWindow::<span class="name">isModal</span>() const</h3>
+<p>Returns whether the window is modal.</p>
+<p>A modal window prevents other windows from getting any input.</p>
+<p><b>See also </b><a href="qwindow.html#modality-prop">QWindow::modality</a>.</p>
+<!-- @@@isModal -->
+<!-- $$$isTopLevel[overload1]$$$isTopLevel -->
+<h3 class="fn" id="isTopLevel"><a name="isTopLevel"></a><span class="type">bool</span> QWindow::<span class="name">isTopLevel</span>() const</h3>
+<p>Returns whether the window is top level, i.e&#x2e; has no parent window.</p>
+<!-- @@@isTopLevel -->
+<!-- $$$keyPressEvent[overload1]$$$keyPressEventQKeyEvent* -->
+<h3 class="fn" id="keyPressEvent"><a name="keyPressEvent"></a><code>[virtual protected] </code><span class="type">void</span> QWindow::<span class="name">keyPressEvent</span>(<span class="type"><a href="qkeyevent.html">QKeyEvent</a></span> *<i>ev</i>)</h3>
+<p>Override this to handle key press events (<i>ev</i>).</p>
+<p><b>See also </b><a href="qwindow.html#keyReleaseEvent">keyReleaseEvent</a>().</p>
+<!-- @@@keyPressEvent -->
+<!-- $$$keyReleaseEvent[overload1]$$$keyReleaseEventQKeyEvent* -->
+<h3 class="fn" id="keyReleaseEvent"><a name="keyReleaseEvent"></a><code>[virtual protected] </code><span class="type">void</span> QWindow::<span class="name">keyReleaseEvent</span>(<span class="type"><a href="qkeyevent.html">QKeyEvent</a></span> *<i>ev</i>)</h3>
+<p>Override this to handle key release events (<i>ev</i>).</p>
+<p><b>See also </b><a href="qwindow.html#keyPressEvent">keyPressEvent</a>().</p>
+<!-- @@@keyReleaseEvent -->
+<!-- $$$mapFromGlobal[overload1]$$$mapFromGlobalconstQPoint& -->
+<h3 class="fn" id="mapFromGlobal"><a name="mapFromGlobal"></a><span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> QWindow::<span class="name">mapFromGlobal</span>(const <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> &amp;<i>pos</i>) const</h3>
+<p>Translates the global screen coordinate <i>pos</i> to window coordinates.</p>
+<p><b>See also </b><a href="qwindow.html#mapToGlobal">mapToGlobal</a>().</p>
+<!-- @@@mapFromGlobal -->
+<!-- $$$mapToGlobal[overload1]$$$mapToGlobalconstQPoint& -->
+<h3 class="fn" id="mapToGlobal"><a name="mapToGlobal"></a><span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> QWindow::<span class="name">mapToGlobal</span>(const <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> &amp;<i>pos</i>) const</h3>
+<p>Translates the window coordinate <i>pos</i> to global screen coordinates. For example, <code>mapToGlobal(QPoint(0,0))</code> would give the global coordinates of the top-left pixel of the window.</p>
+<p><b>See also </b><a href="qwindow.html#mapFromGlobal">mapFromGlobal</a>().</p>
+<!-- @@@mapToGlobal -->
+<!-- $$$mask[overload1]$$$mask -->
+<h3 class="fn" id="mask"><a name="mask"></a><span class="type"><a href="qregion.html">QRegion</a></span> QWindow::<span class="name">mask</span>() const</h3>
+<p>Returns the mask set on the window.</p>
+<p>The mask is a hint to the windowing system that the application does not want to receive mouse or touch input outside the given region.</p>
+<p><b>See also </b><a href="qwindow.html#setMask">setMask</a>().</p>
+<!-- @@@mask -->
+<!-- $$$maximumSize[overload1]$$$maximumSize -->
+<h3 class="fn" id="maximumSize"><a name="maximumSize"></a><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QWindow::<span class="name">maximumSize</span>() const</h3>
+<p>Returns the maximum size of the window.</p>
+<p><b>See also </b><a href="qwindow.html#setMaximumSize">setMaximumSize</a>().</p>
+<!-- @@@maximumSize -->
+<!-- $$$minimumSize[overload1]$$$minimumSize -->
+<h3 class="fn" id="minimumSize"><a name="minimumSize"></a><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QWindow::<span class="name">minimumSize</span>() const</h3>
+<p>Returns the minimum size of the window.</p>
+<p><b>See also </b><a href="qwindow.html#setMinimumSize">setMinimumSize</a>().</p>
+<!-- @@@minimumSize -->
+<!-- $$$mouseDoubleClickEvent[overload1]$$$mouseDoubleClickEventQMouseEvent* -->
+<h3 class="fn" id="mouseDoubleClickEvent"><a name="mouseDoubleClickEvent"></a><code>[virtual protected] </code><span class="type">void</span> QWindow::<span class="name">mouseDoubleClickEvent</span>(<span class="type"><a href="qmouseevent.html">QMouseEvent</a></span> *<i>ev</i>)</h3>
+<p>Override this to handle mouse double click events (<i>ev</i>).</p>
+<p><b>See also </b><a href="qwindow.html#mousePressEvent">mousePressEvent</a>() and <a href="qstylehints.html#mouseDoubleClickInterval-prop">QStyleHints::mouseDoubleClickInterval</a>().</p>
+<!-- @@@mouseDoubleClickEvent -->
+<!-- $$$mouseMoveEvent[overload1]$$$mouseMoveEventQMouseEvent* -->
+<h3 class="fn" id="mouseMoveEvent"><a name="mouseMoveEvent"></a><code>[virtual protected] </code><span class="type">void</span> QWindow::<span class="name">mouseMoveEvent</span>(<span class="type"><a href="qmouseevent.html">QMouseEvent</a></span> *<i>ev</i>)</h3>
+<p>Override this to handle mouse move events (<i>ev</i>).</p>
+<!-- @@@mouseMoveEvent -->
+<!-- $$$mousePressEvent[overload1]$$$mousePressEventQMouseEvent* -->
+<h3 class="fn" id="mousePressEvent"><a name="mousePressEvent"></a><code>[virtual protected] </code><span class="type">void</span> QWindow::<span class="name">mousePressEvent</span>(<span class="type"><a href="qmouseevent.html">QMouseEvent</a></span> *<i>ev</i>)</h3>
+<p>Override this to handle mouse press events (<i>ev</i>).</p>
+<p><b>See also </b><a href="qwindow.html#mouseReleaseEvent">mouseReleaseEvent</a>().</p>
+<!-- @@@mousePressEvent -->
+<!-- $$$mouseReleaseEvent[overload1]$$$mouseReleaseEventQMouseEvent* -->
+<h3 class="fn" id="mouseReleaseEvent"><a name="mouseReleaseEvent"></a><code>[virtual protected] </code><span class="type">void</span> QWindow::<span class="name">mouseReleaseEvent</span>(<span class="type"><a href="qmouseevent.html">QMouseEvent</a></span> *<i>ev</i>)</h3>
+<p>Override this to handle mouse release events (<i>ev</i>).</p>
+<p><b>See also </b><a href="qwindow.html#mousePressEvent">mousePressEvent</a>().</p>
+<!-- @@@mouseReleaseEvent -->
+<!-- $$$moveEvent[overload1]$$$moveEventQMoveEvent* -->
+<h3 class="fn" id="moveEvent"><a name="moveEvent"></a><code>[virtual protected] </code><span class="type">void</span> QWindow::<span class="name">moveEvent</span>(<span class="type"><a href="qmoveevent.html">QMoveEvent</a></span> *<i>ev</i>)</h3>
+<p>Override this to handle window move events (<i>ev</i>).</p>
+<!-- @@@moveEvent -->
+<!-- $$$nativeEvent[overload1]$$$nativeEventconstQByteArray&void*long* -->
+<h3 class="fn" id="nativeEvent"><a name="nativeEvent"></a><code>[virtual protected] </code><span class="type">bool</span> QWindow::<span class="name">nativeEvent</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>eventType</i>, <span class="type">void</span> *<i>message</i>, <span class="type">long</span> *<i>result</i>)</h3>
+<p>Override this to handle platform dependent events. Will be given <i>eventType</i>, <i>message</i> and <i>result</i>.</p>
+<p>This might make your application non-portable.</p>
+<p>Should return true only if the event was handled.</p>
+<!-- @@@nativeEvent -->
+<!-- $$$parent[overload1]$$$parentQWindow::AncestorMode -->
+<h3 class="fn" id="parent"><a name="parent"></a><span class="type"><a href="qwindow.html#QWindow">QWindow</a></span> *QWindow::<span class="name">parent</span>(<span class="type"><a href="qwindow.html#AncestorMode-enum">QWindow::AncestorMode</a></span> <i>mode</i>) const</h3>
+<p>Returns the parent window, if any.</p>
+<p>If <i>mode</i> is <a href="qwindow.html#AncestorMode-enum">IncludeTransients</a>, then the transient parent is returned if there is no parent.</p>
+<p>A window without a parent is known as a top level window.</p>
+<p>This function was introduced in  Qt 5.9.</p>
+<p><b>See also </b><a href="qwindow.html#setParent">setParent</a>().</p>
+<!-- @@@parent -->
+<!-- $$$parent$$$parent -->
+<h3 class="fn" id="parent-1"><a name="parent-1"></a><span class="type"><a href="qwindow.html#QWindow">QWindow</a></span> *QWindow::<span class="name">parent</span>() const</h3>
+<p>Returns the parent window, if any.</p>
+<p>A window without a parent is known as a top level window.</p>
+<!-- @@@parent -->
+<!-- $$$position[overload1]$$$position -->
+<h3 class="fn" id="position"><a name="position"></a><span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> QWindow::<span class="name">position</span>() const</h3>
+<p>Returns the position of the window on the desktop excluding any window frame</p>
+<p><b>See also </b><a href="qwindow.html#setPosition">setPosition</a>().</p>
+<!-- @@@position -->
+<!-- $$$requestedFormat[overload1]$$$requestedFormat -->
+<h3 class="fn" id="requestedFormat"><a name="requestedFormat"></a><span class="type"><a href="qsurfaceformat.html">QSurfaceFormat</a></span> QWindow::<span class="name">requestedFormat</span>() const</h3>
+<p>Returns the requested surface format of this window.</p>
+<p>If the requested format was not supported by the platform implementation, the requestedFormat will differ from the actual window format.</p>
+<p>This is the value set with <a href="qwindow.html#setFormat">setFormat</a>().</p>
+<p><b>See also </b><a href="qwindow.html#setFormat">setFormat</a>() and <a href="qwindow.html#format">format</a>().</p>
+<!-- @@@requestedFormat -->
+<!-- $$$resize[overload1]$$$resizeconstQSize& -->
+<h3 class="fn" id="resize"><a name="resize"></a><span class="type">void</span> QWindow::<span class="name">resize</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>newSize</i>)</h3>
+<p>set the size of the window, excluding any window frame, to <i>newSize</i></p>
+<p><b>See also </b><a href="qwindow.html#size">size</a>() and <a href="qwindow.html#geometry">geometry</a>().</p>
+<!-- @@@resize -->
+<!-- $$$resize$$$resizeintint -->
+<h3 class="fn" id="resize-1"><a name="resize-1"></a><span class="type">void</span> QWindow::<span class="name">resize</span>(<span class="type">int</span> <i>w</i>, <span class="type">int</span> <i>h</i>)</h3>
+<p>set the size of the window, excluding any window frame, to a <a href="../qtcore/qsize.html">QSize</a> constructed from width <i>w</i> and height <i>h</i></p>
+<p><b>See also </b><a href="qwindow.html#size">size</a>() and <a href="qwindow.html#geometry">geometry</a>().</p>
+<!-- @@@resize -->
+<!-- $$$resizeEvent[overload1]$$$resizeEventQResizeEvent* -->
+<h3 class="fn" id="resizeEvent"><a name="resizeEvent"></a><code>[virtual protected] </code><span class="type">void</span> QWindow::<span class="name">resizeEvent</span>(<span class="type"><a href="qresizeevent.html">QResizeEvent</a></span> *<i>ev</i>)</h3>
+<p>Override this to handle resize events (<i>ev</i>).</p>
+<p>The resize event is called whenever the window is resized in the windowing system, either directly through the windowing system acknowledging a <a href="qwindow.html#setGeometry">setGeometry</a>() or <a href="qwindow.html#resize">resize</a>() request, or indirectly through the user resizing the window manually.</p>
+<!-- @@@resizeEvent -->
+<!-- $$$screen[overload1]$$$screen -->
+<h3 class="fn" id="screen"><a name="screen"></a><span class="type"><a href="qscreen.html">QScreen</a></span> *QWindow::<span class="name">screen</span>() const</h3>
+<p>Returns the screen on which the window is shown, or null if there is none.</p>
+<p>For child windows, this returns the screen of the corresponding top level window.</p>
+<p><b>See also </b><a href="qwindow.html#setScreen">setScreen</a>() and <a href="qscreen.html#virtualSiblings">QScreen::virtualSiblings</a>().</p>
+<!-- @@@screen -->
+<!-- $$$setBaseSize[overload1]$$$setBaseSizeconstQSize& -->
+<h3 class="fn" id="setBaseSize"><a name="setBaseSize"></a><span class="type">void</span> QWindow::<span class="name">setBaseSize</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>size</i>)</h3>
+<p>Sets the base <i>size</i> of the window.</p>
+<p>The base size is used to calculate a proper window size if the window defines <a href="qwindow.html#sizeIncrement">sizeIncrement</a>().</p>
+<p><b>See also </b><a href="qwindow.html#setMinimumSize">setMinimumSize</a>(), <a href="qwindow.html#setMaximumSize">setMaximumSize</a>(), <a href="qwindow.html#setSizeIncrement">setSizeIncrement</a>(), and <a href="qwindow.html#baseSize">baseSize</a>().</p>
+<!-- @@@setBaseSize -->
+<!-- $$$setCursor[overload1]$$$setCursorconstQCursor& -->
+<h3 class="fn" id="setCursor"><a name="setCursor"></a><span class="type">void</span> QWindow::<span class="name">setCursor</span>(const <span class="type"><a href="qcursor.html">QCursor</a></span> &amp;<i>cursor</i>)</h3>
+<p>set the cursor shape for this window</p>
+<p>The mouse <i>cursor</i> will assume this shape when it is over this window, unless an override cursor is set. See the <a href="../qtcore/qt.html#CursorShape-enum">list of predefined cursor objects</a> for a range of useful shapes.</p>
+<p>If no cursor has been set, or after a call to <a href="qwindow.html#unsetCursor">unsetCursor</a>(), the parent window's cursor is used.</p>
+<p>By default, the cursor has the <a href="../qtcore/qt.html#CursorShape-enum">Qt::ArrowCursor</a> shape.</p>
+<p>Some underlying window implementations will reset the cursor if it leaves a window even if the mouse is grabbed. If you want to have a cursor set for all windows, even when outside the window, consider <a href="qguiapplication.html#setOverrideCursor">QGuiApplication::setOverrideCursor</a>().</p>
+<p><b>See also </b><a href="qwindow.html#cursor">cursor</a>() and <a href="qguiapplication.html#setOverrideCursor">QGuiApplication::setOverrideCursor</a>().</p>
+<!-- @@@setCursor -->
+<!-- $$$setFilePath[overload1]$$$setFilePathconstQString& -->
+<h3 class="fn" id="setFilePath"><a name="setFilePath"></a><span class="type">void</span> QWindow::<span class="name">setFilePath</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>filePath</i>)</h3>
+<p>set the file name this window is representing.</p>
+<p>The windowing system might use <i>filePath</i> to display the path of the document this window is representing in the tile bar.</p>
+<p><b>See also </b><a href="qwindow.html#filePath">filePath</a>().</p>
+<!-- @@@setFilePath -->
+<!-- $$$setFlag[overload1]$$$setFlagQt::WindowTypebool -->
+<h3 class="fn" id="setFlag"><a name="setFlag"></a><span class="type">void</span> QWindow::<span class="name">setFlag</span>(<span class="type"><a href="../qtcore/qt.html#WindowType-enum">Qt::WindowType</a></span> <i>flag</i>, <span class="type">bool</span> <i>on</i> = true)</h3>
+<p>Sets the window flag <i>flag</i> on this window if <i>on</i> is true; otherwise clears the flag.</p>
+<p>This function was introduced in  Qt 5.9.</p>
+<p><b>See also </b><a href="qwindow.html#flags-prop">setFlags</a>(), <a href="qwindow.html#flags-prop">flags</a>(), and <a href="qwindow.html#type">type</a>().</p>
+<!-- @@@setFlag -->
+<!-- $$$setFormat[overload1]$$$setFormatconstQSurfaceFormat& -->
+<h3 class="fn" id="setFormat"><a name="setFormat"></a><span class="type">void</span> QWindow::<span class="name">setFormat</span>(const <span class="type"><a href="qsurfaceformat.html">QSurfaceFormat</a></span> &amp;<i>format</i>)</h3>
+<p>Sets the window's surface <i>format</i>.</p>
+<p>The format determines properties such as color depth, alpha, depth and stencil buffer size, etc. For example, to give a window a transparent background (provided that the window system supports compositing, and provided that other content in the window does not make it opaque again):</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qsurfaceformat.html">QSurfaceFormat</a></span> format;
+  format<span class="operator">.</span>setAlphaBufferSize(<span class="number">8</span>);
+  window<span class="operator">.</span>setFormat(format);
+
+</pre>
+<p>The surface format will be resolved in the <a href="qwindow.html#create">create</a>() function. Calling this function after <a href="qwindow.html#create">create</a>() has been called will not re-resolve the surface format of the native surface.</p>
+<p>When the format is not explicitly set via this function, the format returned by <a href="qsurfaceformat.html#defaultFormat">QSurfaceFormat::defaultFormat</a>() will be used. This means that when having multiple windows, individual calls to this function can be replaced by one single call to <a href="qsurfaceformat.html#setDefaultFormat">QSurfaceFormat::setDefaultFormat</a>() before creating the first window.</p>
+<p><b>See also </b><a href="qwindow.html#format">format</a>(), <a href="qwindow.html#create">create</a>(), <a href="qwindow.html#destroy">destroy</a>(), and <a href="qsurfaceformat.html#setDefaultFormat">QSurfaceFormat::setDefaultFormat</a>().</p>
+<!-- @@@setFormat -->
+<!-- $$$setFramePosition[overload1]$$$setFramePositionconstQPoint& -->
+<h3 class="fn" id="setFramePosition"><a name="setFramePosition"></a><span class="type">void</span> QWindow::<span class="name">setFramePosition</span>(const <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> &amp;<i>point</i>)</h3>
+<p>Sets the upper left position of the window (<i>point</i>) including its window frame.</p>
+<p>The position is in relation to the virtualGeometry() of its screen.</p>
+<p><b>See also </b><a href="qwindow.html#framePosition">framePosition</a>(), <a href="qwindow.html#setGeometry">setGeometry</a>(), and <a href="qwindow.html#frameGeometry">frameGeometry</a>().</p>
+<!-- @@@setFramePosition -->
+<!-- $$$setIcon[overload1]$$$setIconconstQIcon& -->
+<h3 class="fn" id="setIcon"><a name="setIcon"></a><span class="type">void</span> QWindow::<span class="name">setIcon</span>(const <span class="type"><a href="qicon.html">QIcon</a></span> &amp;<i>icon</i>)</h3>
+<p>Sets the window's <i>icon</i> in the windowing system</p>
+<p>The window icon might be used by the windowing system for example to decorate the window, and/or in the task switcher.</p>
+<p><b>Note: </b>On <a href="../qtdoc/internationalization.html#macos">macOS</a>, the window title bar icon is meant for windows representing documents, and will only show up if a file path is also set.</p><p><b>See also </b><a href="qwindow.html#icon">icon</a>() and <a href="qwindow.html#setFilePath">setFilePath</a>().</p>
+<!-- @@@setIcon -->
+<!-- $$$setKeyboardGrabEnabled[overload1]$$$setKeyboardGrabEnabledbool -->
+<h3 class="fn" id="setKeyboardGrabEnabled"><a name="setKeyboardGrabEnabled"></a><span class="type">bool</span> QWindow::<span class="name">setKeyboardGrabEnabled</span>(<span class="type">bool</span> <i>grab</i>)</h3>
+<p>Sets whether keyboard grab should be enabled or not (<i>grab</i>).</p>
+<p>If the return value is true, the window receives all key events until setKeyboardGrabEnabled(false) is called; other windows get no key events at all. Mouse events are not affected. Use <a href="qwindow.html#setMouseGrabEnabled">setMouseGrabEnabled</a>() if you want to grab that.</p>
+<p><b>See also </b><a href="qwindow.html#setMouseGrabEnabled">setMouseGrabEnabled</a>().</p>
+<!-- @@@setKeyboardGrabEnabled -->
+<!-- $$$setMask[overload1]$$$setMaskconstQRegion& -->
+<h3 class="fn" id="setMask"><a name="setMask"></a><span class="type">void</span> QWindow::<span class="name">setMask</span>(const <span class="type"><a href="qregion.html">QRegion</a></span> &amp;<i>region</i>)</h3>
+<p>Sets the mask of the window.</p>
+<p>The mask is a hint to the windowing system that the application does not want to receive mouse or touch input outside the given <i>region</i>.</p>
+<p>The window manager may or may not choose to display any areas of the window not included in the mask, thus it is the application's responsibility to clear to transparent the areas that are not part of the mask.</p>
+<p><b>See also </b><a href="qwindow.html#mask">mask</a>().</p>
+<!-- @@@setMask -->
+<!-- $$$setMaximumSize[overload1]$$$setMaximumSizeconstQSize& -->
+<h3 class="fn" id="setMaximumSize"><a name="setMaximumSize"></a><span class="type">void</span> QWindow::<span class="name">setMaximumSize</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>size</i>)</h3>
+<p>Sets the maximum size of the window.</p>
+<p>This is a hint to the window manager to prevent resizing above the specified <i>size</i>.</p>
+<p><b>See also </b><a href="qwindow.html#setMinimumSize">setMinimumSize</a>() and <a href="qwindow.html#maximumSize">maximumSize</a>().</p>
+<!-- @@@setMaximumSize -->
+<!-- $$$setMinimumSize[overload1]$$$setMinimumSizeconstQSize& -->
+<h3 class="fn" id="setMinimumSize"><a name="setMinimumSize"></a><span class="type">void</span> QWindow::<span class="name">setMinimumSize</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>size</i>)</h3>
+<p>Sets the minimum size of the window.</p>
+<p>This is a hint to the window manager to prevent resizing below the specified <i>size</i>.</p>
+<p><b>See also </b><a href="qwindow.html#setMaximumSize">setMaximumSize</a>() and <a href="qwindow.html#minimumSize">minimumSize</a>().</p>
+<!-- @@@setMinimumSize -->
+<!-- $$$setMouseGrabEnabled[overload1]$$$setMouseGrabEnabledbool -->
+<h3 class="fn" id="setMouseGrabEnabled"><a name="setMouseGrabEnabled"></a><span class="type">bool</span> QWindow::<span class="name">setMouseGrabEnabled</span>(<span class="type">bool</span> <i>grab</i>)</h3>
+<p>Sets whether mouse grab should be enabled or not (<i>grab</i>).</p>
+<p>If the return value is true, the window receives all mouse events until setMouseGrabEnabled(false) is called; other windows get no mouse events at all. Keyboard events are not affected. Use <a href="qwindow.html#setKeyboardGrabEnabled">setKeyboardGrabEnabled</a>() if you want to grab that.</p>
+<p><b>See also </b><a href="qwindow.html#setKeyboardGrabEnabled">setKeyboardGrabEnabled</a>().</p>
+<!-- @@@setMouseGrabEnabled -->
+<!-- $$$setParent[overload1]$$$setParentQWindow* -->
+<h3 class="fn" id="setParent"><a name="setParent"></a><span class="type">void</span> QWindow::<span class="name">setParent</span>(<span class="type"><a href="qwindow.html#QWindow">QWindow</a></span> *<i>parent</i>)</h3>
+<p>Sets the <i>parent</i> Window. This will lead to the windowing system managing the clip of the window, so it will be clipped to the <i>parent</i> window.</p>
+<p>Setting <i>parent</i> to be <code>nullptr</code> will make the window become a top level window.</p>
+<p>If <i>parent</i> is a window created by <a href="qwindow.html#fromWinId">fromWinId</a>(), then the current window will be embedded inside <i>parent</i>, if the platform supports it.</p>
+<p><b>See also </b><a href="qwindow.html#parent-1">parent</a>().</p>
+<!-- @@@setParent -->
+<!-- $$$setPosition[overload1]$$$setPositionconstQPoint& -->
+<h3 class="fn" id="setPosition"><a name="setPosition"></a><span class="type">void</span> QWindow::<span class="name">setPosition</span>(const <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> &amp;<i>pt</i>)</h3>
+<p>set the position of the window on the desktop to <i>pt</i></p>
+<p>The position is in relation to the virtualGeometry() of its screen.</p>
+<p><b>See also </b><a href="qwindow.html#position">position</a>().</p>
+<!-- @@@setPosition -->
+<!-- $$$setPosition$$$setPositionintint -->
+<h3 class="fn" id="setPosition-1"><a name="setPosition-1"></a><span class="type">void</span> QWindow::<span class="name">setPosition</span>(<span class="type">int</span> <i>posx</i>, <span class="type">int</span> <i>posy</i>)</h3>
+<p>set the position of the window on the desktop to <i>posx</i>, <i>posy</i></p>
+<p>The position is in relation to the virtualGeometry() of its screen.</p>
+<p><b>See also </b><a href="qwindow.html#position">position</a>().</p>
+<!-- @@@setPosition -->
+<!-- $$$setScreen[overload1]$$$setScreenQScreen* -->
+<h3 class="fn" id="setScreen"><a name="setScreen"></a><span class="type">void</span> QWindow::<span class="name">setScreen</span>(<span class="type"><a href="qscreen.html">QScreen</a></span> *<i>newScreen</i>)</h3>
+<p>Sets the screen on which the window should be shown.</p>
+<p>If the window has been created, it will be recreated on the <i>newScreen</i>.</p>
+<p><b>Note: </b>If the screen is part of a virtual desktop of multiple screens, the window will not move automatically to <i>newScreen</i>. To place the window relative to the screen, use the screen's topLeft() position.</p><p>This function only works for top level windows.</p>
+<p><b>See also </b><a href="qwindow.html#screen">screen</a>() and <a href="qscreen.html#virtualSiblings">QScreen::virtualSiblings</a>().</p>
+<!-- @@@setScreen -->
+<!-- $$$setSizeIncrement[overload1]$$$setSizeIncrementconstQSize& -->
+<h3 class="fn" id="setSizeIncrement"><a name="setSizeIncrement"></a><span class="type">void</span> QWindow::<span class="name">setSizeIncrement</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>size</i>)</h3>
+<p>Sets the size increment (<i>size</i>) of the window.</p>
+<p>When the user resizes the window, the size will move in steps of <a href="qwindow.html#sizeIncrement">sizeIncrement</a>().<a href="qwindow.html#width-prop">width</a>() pixels horizontally and <a href="qwindow.html#sizeIncrement">sizeIncrement</a>().<a href="qwindow.html#height-prop">height</a>() pixels vertically, with <a href="qwindow.html#baseSize">baseSize</a>() as the basis.</p>
+<p>By default, this property contains a size with zero width and height.</p>
+<p>The windowing system might not support size increments.</p>
+<p><b>See also </b><a href="qwindow.html#sizeIncrement">sizeIncrement</a>(), <a href="qwindow.html#setBaseSize">setBaseSize</a>(), <a href="qwindow.html#setMinimumSize">setMinimumSize</a>(), and <a href="qwindow.html#setMaximumSize">setMaximumSize</a>().</p>
+<!-- @@@setSizeIncrement -->
+<!-- $$$setSurfaceType[overload1]$$$setSurfaceTypeQSurface::SurfaceType -->
+<h3 class="fn" id="setSurfaceType"><a name="setSurfaceType"></a><span class="type">void</span> QWindow::<span class="name">setSurfaceType</span>(<span class="type"><a href="qsurface.html#SurfaceType-enum">QSurface::SurfaceType</a></span> <i>surfaceType</i>)</h3>
+<p>Sets the <i>surfaceType</i> of the window.</p>
+<p>Specifies whether the window is meant for raster rendering with <a href="qbackingstore.html">QBackingStore</a>, or OpenGL rendering with <a href="qopenglcontext.html">QOpenGLContext</a>.</p>
+<p>The <a href="qwindow.html#surfaceType">surfaceType</a> will be used when the native surface is created in the <a href="qwindow.html#create">create</a>() function. Calling this function after the native surface has been created requires calling <a href="qwindow.html#destroy">destroy</a>() and <a href="qwindow.html#create">create</a>() to release the old native surface and create a new one.</p>
+<p><b>See also </b><a href="qwindow.html#surfaceType">surfaceType</a>(), <a href="qbackingstore.html">QBackingStore</a>, <a href="qopenglcontext.html">QOpenGLContext</a>, <a href="qwindow.html#create">create</a>(), and <a href="qwindow.html#destroy">destroy</a>().</p>
+<!-- @@@setSurfaceType -->
+<!-- $$$setVulkanInstance[overload1]$$$setVulkanInstanceQVulkanInstance* -->
+<h3 class="fn" id="setVulkanInstance"><a name="setVulkanInstance"></a><span class="type">void</span> QWindow::<span class="name">setVulkanInstance</span>(<span class="type"><a href="qvulkaninstance.html">QVulkanInstance</a></span> *<i>instance</i>)</h3>
+<p>Associates this window with the specified Vulkan <i>instance</i>.</p>
+<p><i>instance</i> must stay valid as long as this <a href="qwindow.html">QWindow</a> instance exists.</p>
+<p><b>See also </b><a href="qwindow.html#vulkanInstance">vulkanInstance</a>().</p>
+<!-- @@@setVulkanInstance -->
+<!-- $$$setWindowState[overload1]$$$setWindowStateQt::WindowState -->
+<h3 class="fn" id="setWindowState"><a name="setWindowState"></a><span class="type">void</span> QWindow::<span class="name">setWindowState</span>(<span class="type"><a href="../qtcore/qt.html#WindowState-enum">Qt::WindowState</a></span> <i>state</i>)</h3>
+<p>set the screen-occupation state of the window</p>
+<p>The window <i>state</i> represents whether the window appears in the windowing system as maximized, minimized, fullscreen, or normal.</p>
+<p>The enum value <a href="../qtcore/qt.html#WindowState-enum">Qt::WindowActive</a> is not an accepted parameter.</p>
+<p><b>See also </b><a href="qwindow.html#windowState">windowState</a>(), <a href="qwindow.html#showNormal">showNormal</a>(), <a href="qwindow.html#showFullScreen">showFullScreen</a>(), <a href="qwindow.html#showMinimized">showMinimized</a>(), <a href="qwindow.html#showMaximized">showMaximized</a>(), and <a href="qwindow.html#setWindowStates">setWindowStates</a>().</p>
+<!-- @@@setWindowState -->
+<!-- $$$setWindowStates[overload1]$$$setWindowStatesQt::WindowStates -->
+<h3 class="fn" id="setWindowStates"><a name="setWindowStates"></a><span class="type">void</span> QWindow::<span class="name">setWindowStates</span>(<span class="type"><a href="../qtcore/qt.html#WindowState-enum">Qt::WindowStates</a></span> <i>state</i>)</h3>
+<p>set the screen-occupation state of the window</p>
+<p>The window <i>state</i> represents whether the window appears in the windowing system as maximized, minimized and/or fullscreen.</p>
+<p>The window can be in a combination of several states. For example, if the window is both minimized and maximized, the window will appear minimized, but clicking on the task bar entry will restore it to the maximized state.</p>
+<p>The enum value <a href="../qtcore/qt.html#WindowState-enum">Qt::WindowActive</a> should not be set.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<p><b>See also </b><a href="qwindow.html#windowStates">windowStates</a>(), <a href="qwindow.html#showNormal">showNormal</a>(), <a href="qwindow.html#showFullScreen">showFullScreen</a>(), <a href="qwindow.html#showMinimized">showMinimized</a>(), and <a href="qwindow.html#showMaximized">showMaximized</a>().</p>
+<!-- @@@setWindowStates -->
+<!-- $$$showEvent[overload1]$$$showEventQShowEvent* -->
+<h3 class="fn" id="showEvent"><a name="showEvent"></a><code>[virtual protected] </code><span class="type">void</span> QWindow::<span class="name">showEvent</span>(<span class="type"><a href="qshowevent.html">QShowEvent</a></span> *<i>ev</i>)</h3>
+<p>Override this to handle show events (<i>ev</i>).</p>
+<p>The function is called when the window has requested becoming visible.</p>
+<p>If the window is successfully shown by the windowing system, this will be followed by a resize and an expose event.</p>
+<!-- @@@showEvent -->
+<!-- $$$size[overload1]$$$size -->
+<h3 class="fn" id="size"><a name="size"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QWindow::<span class="name">size</span>() const</h3>
+<p>Reimplements: <a href="qsurface.html#size">QSurface::size</a>() const.</p>
+<p>Returns the size of the window excluding any window frame</p>
+<p><b>See also </b><a href="qwindow.html#resize">resize</a>().</p>
+<!-- @@@size -->
+<!-- $$$sizeIncrement[overload1]$$$sizeIncrement -->
+<h3 class="fn" id="sizeIncrement"><a name="sizeIncrement"></a><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QWindow::<span class="name">sizeIncrement</span>() const</h3>
+<p>Returns the size increment of the window.</p>
+<p><b>See also </b><a href="qwindow.html#setSizeIncrement">setSizeIncrement</a>().</p>
+<!-- @@@sizeIncrement -->
+<!-- $$$surfaceType[overload1]$$$surfaceType -->
+<h3 class="fn" id="surfaceType"><a name="surfaceType"></a><code>[override virtual] </code><span class="type"><a href="qsurface.html#SurfaceType-enum">QSurface::SurfaceType</a></span> QWindow::<span class="name">surfaceType</span>() const</h3>
+<p>Reimplements: <a href="qsurface.html#surfaceType">QSurface::surfaceType</a>() const.</p>
+<p>Returns the surface type of the window.</p>
+<p><b>See also </b><a href="qwindow.html#setSurfaceType">setSurfaceType</a>().</p>
+<!-- @@@surfaceType -->
+<!-- $$$tabletEvent[overload1]$$$tabletEventQTabletEvent* -->
+<h3 class="fn" id="tabletEvent"><a name="tabletEvent"></a><code>[virtual protected] </code><span class="type">void</span> QWindow::<span class="name">tabletEvent</span>(<span class="type"><a href="qtabletevent.html">QTabletEvent</a></span> *<i>ev</i>)</h3>
+<p>Override this to handle tablet press, move, and release events (<i>ev</i>).</p>
+<p>Proximity enter and leave events are not sent to windows, they are delivered to the application instance.</p>
+<!-- @@@tabletEvent -->
+<!-- $$$touchEvent[overload1]$$$touchEventQTouchEvent* -->
+<h3 class="fn" id="touchEvent"><a name="touchEvent"></a><code>[virtual protected] </code><span class="type">void</span> QWindow::<span class="name">touchEvent</span>(<span class="type"><a href="qtouchevent.html">QTouchEvent</a></span> *<i>ev</i>)</h3>
+<p>Override this to handle touch events (<i>ev</i>).</p>
+<!-- @@@touchEvent -->
+<!-- $$$type[overload1]$$$type -->
+<h3 class="fn" id="type"><a name="type"></a><span class="type"><a href="../qtcore/qt.html#WindowType-enum">Qt::WindowType</a></span> QWindow::<span class="name">type</span>() const</h3>
+<p>Returns the type of the window.</p>
+<p>This returns the part of the window flags that represents whether the window is a dialog, tooltip, popup, regular window, etc.</p>
+<p><b>See also </b><a href="qwindow.html#flags-prop">flags</a>() and <a href="qwindow.html#flags-prop">setFlags</a>().</p>
+<!-- @@@type -->
+<!-- $$$unsetCursor[overload1]$$$unsetCursor -->
+<h3 class="fn" id="unsetCursor"><a name="unsetCursor"></a><span class="type">void</span> QWindow::<span class="name">unsetCursor</span>()</h3>
+<p>Restores the default arrow cursor for this window.</p>
+<!-- @@@unsetCursor -->
+<!-- $$$vulkanInstance[overload1]$$$vulkanInstance -->
+<h3 class="fn" id="vulkanInstance"><a name="vulkanInstance"></a><span class="type"><a href="qvulkaninstance.html">QVulkanInstance</a></span> *QWindow::<span class="name">vulkanInstance</span>() const</h3>
+<p>Returns the associated Vulkan instance if any was set, otherwise <code>nullptr</code>.</p>
+<p><b>See also </b><a href="qwindow.html#setVulkanInstance">setVulkanInstance</a>().</p>
+<!-- @@@vulkanInstance -->
+<!-- $$$wheelEvent[overload1]$$$wheelEventQWheelEvent* -->
+<h3 class="fn" id="wheelEvent"><a name="wheelEvent"></a><code>[virtual protected] </code><span class="type">void</span> QWindow::<span class="name">wheelEvent</span>(<span class="type"><a href="qwheelevent.html">QWheelEvent</a></span> *<i>ev</i>)</h3>
+<p>Override this to handle mouse wheel or other wheel events (<i>ev</i>).</p>
+<!-- @@@wheelEvent -->
+<!-- $$$winId[overload1]$$$winId -->
+<h3 class="fn" id="winId"><a name="winId"></a><span class="type">WId</span> QWindow::<span class="name">winId</span>() const</h3>
+<p>Returns the window's platform id.</p>
+<p>For platforms where this id might be useful, the value returned will uniquely represent the window inside the corresponding screen.</p>
+<p><b>See also </b><a href="qwindow.html#screen">screen</a>().</p>
+<!-- @@@winId -->
+<!-- $$$windowState[overload1]$$$windowState -->
+<h3 class="fn" id="windowState"><a name="windowState"></a><span class="type"><a href="../qtcore/qt.html#WindowState-enum">Qt::WindowState</a></span> QWindow::<span class="name">windowState</span>() const</h3>
+<p>the screen-occupation state of the window</p>
+<p><b>See also </b><a href="qwindow.html#setWindowState">setWindowState</a>() and <a href="qwindow.html#windowStates">windowStates</a>().</p>
+<!-- @@@windowState -->
+<!-- $$$windowStates[overload1]$$$windowStates -->
+<h3 class="fn" id="windowStates"><a name="windowStates"></a><span class="type"><a href="../qtcore/qt.html#WindowState-enum">Qt::WindowStates</a></span> QWindow::<span class="name">windowStates</span>() const</h3>
+<p>the screen-occupation state of the window</p>
+<p>The window can be in a combination of several states. For example, if the window is both minimized and maximized, the window will appear minimized, but clicking on the task bar entry will restore it to the maximized state.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<p><b>See also </b><a href="qwindow.html#setWindowStates">setWindowStates</a>().</p>
+<!-- @@@windowStates -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

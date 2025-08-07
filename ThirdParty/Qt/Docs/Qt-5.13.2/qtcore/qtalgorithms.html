@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qalgorithms.qdoc -->
+  <title>&lt;QtAlgorithms&gt; - Generic Algorithms | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td >&lt;QtAlgorithms&gt; - Generic Algorithms</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#types-of-iterators">Types of Iterators</a></li>
+<li class="level2"><a href="#input-iterators">Input Iterators</a></li>
+<li class="level2"><a href="#output-iterators">Output Iterators</a></li>
+<li class="level2"><a href="#forward-iterators">Forward Iterators</a></li>
+<li class="level2"><a href="#bidirectional-iterators">Bidirectional Iterators</a></li>
+<li class="level2"><a href="#random-access-iterators">Random Access Iterators</a></li>
+<li class="level1"><a href="#qt-and-the-stl-algorithms">Qt and the STL Algorithms</a></li>
+<li class="level2"><a href="#porting-guidelines">Porting guidelines</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">&lt;QtAlgorithms&gt; - Generic Algorithms</h1>
+<!-- $$$<QtAlgorithms>-brief -->
+<p>The &lt;QtAlgorithms&gt; header includes the generic, template-based algorithms. <a href="#details">More...</a></p>
+<!-- @@@<QtAlgorithms> -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QtAlgorithms&gt;</span>
+</td></tr></table></div><ul>
+<li><a href="qtalgorithms-obsolete.html">Obsolete members</a></li>
+</ul>
+<a name="functions"></a>
+<h2 id="functions">Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qtalgorithms.html#qCountLeadingZeroBits">qCountLeadingZeroBits</a></b>(quint32 <i>v</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qtalgorithms.html#qCountLeadingZeroBits">qCountLeadingZeroBits</a></b>(quint8 <i>v</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qtalgorithms.html#qCountLeadingZeroBits-1">qCountLeadingZeroBits</a></b>(quint16 <i>v</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qtalgorithms.html#qCountLeadingZeroBits-2">qCountLeadingZeroBits</a></b>(quint64 <i>v</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qtalgorithms.html#qCountTrailingZeroBits">qCountTrailingZeroBits</a></b>(quint8 <i>v</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qtalgorithms.html#qCountTrailingZeroBits-1">qCountTrailingZeroBits</a></b>(quint32 <i>v</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qtalgorithms.html#qCountTrailingZeroBits-2">qCountTrailingZeroBits</a></b>(quint16 <i>v</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qtalgorithms.html#qCountTrailingZeroBits-3">qCountTrailingZeroBits</a></b>(quint64 <i>v</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtalgorithms.html#qDeleteAll">qDeleteAll</a></b>(ForwardIterator <i>begin</i>, ForwardIterator <i>end</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtalgorithms.html#qDeleteAll-1">qDeleteAll</a></b>(const Container &amp;<i>c</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qtalgorithms.html#qPopulationCount">qPopulationCount</a></b>(quint8 <i>v</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qtalgorithms.html#qPopulationCount-1">qPopulationCount</a></b>(quint32 <i>v</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qtalgorithms.html#qPopulationCount-2">qPopulationCount</a></b>(quint16 <i>v</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qtalgorithms.html#qPopulationCount-3">qPopulationCount</a></b>(quint64 <i>v</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$<QtAlgorithms>-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Qt provides a number of global template functions in <code>&lt;QtAlgorithms&gt;</code> that work on containers and perform small tasks to make life easier, such as <a href="qtalgorithms.html#qDeleteAll">qDeleteAll</a>(), which invokes <code>operator delete</code> on all items in a given container or in a given range. You can use these algorithms with any <a href="containers.html">container class</a> that provides STL-style iterators, including Qt's <a href="qlist.html">QList</a>, <a href="qlinkedlist.html">QLinkedList</a>, <a href="qvector.html">QVector</a>, <a href="qmap.html">QMap</a>, and <a href="qhash.html#qhash">QHash</a> classes.</p>
+<p>Most algorithms take <a href="containers.html#stl-style-iterators">STL-style iterators</a> as parameters. The algorithms are generic in the sense that they aren't bound to a specific iterator class; you can use them with any iterators that meet a certain set of requirements.</p>
+<p>Different algorithms can have different requirements for the iterators they accept. For example, qFill() accepts two <a href="qtalgorithms.html#forward-iterators">forward iterators</a>. The iterator types required are specified for each algorithm. If an iterator of the wrong type is passed (for example, if <a href="qlist.html#ConstIterator-typedef">QList::ConstIterator</a> is passed as an <a href="qtalgorithms.html#output-iterators">output iterator</a>), you will always get a compiler error, although not necessarily a very informative one.</p>
+<p>Some algorithms have special requirements on the value type stored in the containers. For example, <a href="qtalgorithms.html#qDeleteAll">qDeleteAll</a>() requires that the value type is a non-const pointer type (for example, <a href="../qtwidgets/qwidget.html">QWidget</a> *). The value type requirements are specified for each algorithm, and the compiler will produce an error if a requirement isn't met.</p>
+<p>The generic algorithms can be used on other container classes than those provided by Qt and STL. The syntax of STL-style iterators is modeled after C++ pointers, so it's possible to use plain arrays as containers and plain pointers as iterators. A common idiom is to use qBinaryFind() together with two static arrays: one that contains a list of keys, and another that contains a list of associated values. For example, the following code will look up an HTML entity (e.g&#x2e;, <code>&amp;amp</code>;) in the <code>name_table</code> array and return the corresponding Unicode value from the <code>value_table</code> if the entity is recognized:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qchar.html">QChar</a></span> resolveEntity(<span class="keyword">const</span> <span class="type"><a href="qstring.html">QString</a></span> <span class="operator">&amp;</span>entity)
+  {
+      <span class="keyword">static</span> <span class="keyword">const</span> QLatin1String name_table<span class="operator">[</span><span class="operator">]</span> <span class="operator">=</span> {
+          <span class="string">&quot;AElig&quot;</span><span class="operator">,</span> <span class="string">&quot;Aacute&quot;</span><span class="operator">,</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span><span class="operator">,</span> <span class="string">&quot;zwnj&quot;</span>
+      };
+      <span class="keyword">static</span> <span class="keyword">const</span> <span class="type"><a href="qtglobal.html#ushort-typedef">ushort</a></span> value_table<span class="operator">[</span><span class="operator">]</span> <span class="operator">=</span> {
+          <span class="number">0x0061</span><span class="operator">,</span> <span class="number">0x00c1</span><span class="operator">,</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span><span class="operator">,</span> <span class="number">0x200c</span>
+      };
+      <span class="type">int</span> N <span class="operator">=</span> <span class="keyword">sizeof</span>(name_table) <span class="operator">/</span> <span class="keyword">sizeof</span>(name_table<span class="operator">[</span><span class="number">0</span><span class="operator">]</span>);
+
+      <span class="keyword">const</span> QLatin1String <span class="operator">*</span>name <span class="operator">=</span> <a href="qtalgorithms-obsolete.html#qBinaryFind">qBinaryFind</a>(name_table<span class="operator">,</span> name_table <span class="operator">+</span> N<span class="operator">,</span>
+                                              entity);
+      <span class="type">int</span> index <span class="operator">=</span> name <span class="operator">-</span> name_table;
+      <span class="keyword">if</span> (index <span class="operator">=</span><span class="operator">=</span> N)
+          <span class="keyword">return</span> <span class="type"><a href="qchar.html">QChar</a></span>();
+
+      <span class="keyword">return</span> <span class="type"><a href="qchar.html">QChar</a></span>(value_table<span class="operator">[</span>index<span class="operator">]</span>);
+  }
+
+</pre>
+<p>This kind of code is for advanced users only; for most applications, a <a href="qmap.html">QMap</a>- or <a href="qhash.html#qhash">QHash</a>-based approach would work just as well:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qchar.html">QChar</a></span> resolveEntity(<span class="keyword">const</span> <span class="type"><a href="qstring.html">QString</a></span> <span class="operator">&amp;</span>entity)
+  {
+      <span class="keyword">static</span> <span class="type"><a href="qmap.html">QMap</a></span><span class="operator">&lt;</span><span class="type"><a href="qstring.html">QString</a></span><span class="operator">,</span> <span class="type">int</span><span class="operator">&gt;</span> entityMap;
+
+      <span class="keyword">if</span> (<span class="operator">!</span>entityMap) {
+          entityMap<span class="operator">.</span>insert(<span class="string">&quot;AElig&quot;</span><span class="operator">,</span> <span class="number">0x0061</span>);
+          entityMap<span class="operator">.</span>insert(<span class="string">&quot;Aacute&quot;</span><span class="operator">,</span> <span class="number">0x00c1</span>);
+          <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+          entityMap<span class="operator">.</span>insert(<span class="string">&quot;zwnj&quot;</span><span class="operator">,</span> <span class="number">0x200c</span>);
+      }
+      <span class="keyword">return</span> <span class="type"><a href="qchar.html">QChar</a></span>(entityMap<span class="operator">.</span>value(entity));
+  }
+
+</pre>
+<a name="types-of-iterators"></a>
+<h4 id="types-of-iterators">Types of Iterators</h4>
+<p>The algorithms have certain requirements on the iterator types they accept, and these are specified individually for each function. The compiler will produce an error if a requirement isn't met.</p>
+<a name="input-iterators"></a>
+<h5 id="input-iterators">Input Iterators</h5>
+<p>An <i>input iterator</i> is an iterator that can be used for reading data sequentially from a container. It must provide the following operators: <code>==</code> and <code>!=</code> for comparing two iterators, unary <code>*</code> for retrieving the value stored in the item, and prefix <code>++</code> for advancing to the next item.</p>
+<p>The Qt containers' iterator types (const and non-const) are all input iterators.</p>
+<a name="output-iterators"></a>
+<h5 id="output-iterators">Output Iterators</h5>
+<p>An output iterator is an iterator that can be used for writing data sequentially to a container or to some output stream. It must provide the following operators: unary <code>*</code> for writing a value (i.e&#x2e;, <code>*it = val</code>) and prefix <code>++</code> for advancing to the next item.</p>
+<p>The Qt containers' non-const iterator types are all output iterators.</p>
+<a name="forward-iterators"></a>
+<h5 id="forward-iterators">Forward Iterators</h5>
+<p>A <i>forward iterator</i> is an iterator that meets the requirements of both input iterators and output iterators.</p>
+<p>The Qt containers' non-const iterator types are all forward iterators.</p>
+<a name="bidirectional-iterators"></a>
+<h5 id="bidirectional-iterators">Bidirectional Iterators</h5>
+<p>A <i>bidirectional iterator</i> is an iterator that meets the requirements of forward iterators but that in addition supports prefix <code>--</code> for iterating backward.</p>
+<p>The Qt containers' non-const iterator types are all bidirectional iterators.</p>
+<a name="random-access-iterators"></a>
+<h5 id="random-access-iterators">Random Access Iterators</h5>
+<p>The last category, <i>random access iterators</i>, is the most powerful type of iterator. It supports all the requirements of a bidirectional iterator, and supports the following operations:</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><code>i += n</code></td><td >advances iterator <code>i</code> by <code>n</code> positions</td></tr>
+<tr valign="top" class="even"><td ><code>i -= n</code></td><td >moves iterator <code>i</code> back by <code>n</code> positions</td></tr>
+<tr valign="top" class="odd"><td ><code>i + n</code> or <code>n + i</code></td><td >returns the iterator for the item <code>n</code> positions ahead of iterator <code>i</code></td></tr>
+<tr valign="top" class="even"><td ><code>i - n</code></td><td >returns the iterator for the item <code>n</code> positions behind of iterator <code>i</code></td></tr>
+<tr valign="top" class="odd"><td ><code>i - j</code></td><td >returns the number of items between iterators <code>i</code> and <code>j</code></td></tr>
+<tr valign="top" class="even"><td ><code>i[n]</code></td><td >same as <code>*(i + n)</code></td></tr>
+<tr valign="top" class="odd"><td ><code>i &lt; j</code></td><td >returns <code>true</code> if iterator <code>j</code> comes after iterator <code>i</code></td></tr>
+</table></div>
+<p><a href="qlist.html">QList</a> and <a href="qvector.html">QVector</a>'s non-const iterator types are random access iterators.</p>
+<a name="qt-and-the-stl-algorithms"></a>
+<h4 id="qt-and-the-stl-algorithms">Qt and the STL Algorithms</h4>
+<p>Historically, Qt used to provide functions which were direct equivalents of many STL algorithmic functions. Starting with Qt 5.0, you are instead encouraged to use directly the implementations available in the STL; most of the Qt ones have been deprecated (although they are still available to keep the old code compiling).</p>
+<a name="porting-guidelines"></a>
+<h5 id="porting-guidelines">Porting guidelines</h5>
+<p>Most of the time, an application using the deprecated Qt algorithmic functions can be easily ported to use the equivalent STL functions. You need to:</p>
+<ol class="1" type="1"><li>add the <code>#include &lt;algorithm&gt;</code> preprocessor directive;</li>
+<li>replace the Qt functions with the STL counterparts, according to the table below.</li>
+</ol>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Qt function</th><th >STL function</th></tr></thead>
+<tr valign="top" class="odd"><td >qBinaryFind</td><td ><code>std::binary_search</code> or <code>std::lower_bound</code></td></tr>
+<tr valign="top" class="even"><td >qCopy</td><td ><code>std::copy</code></td></tr>
+<tr valign="top" class="odd"><td >qCopyBackward</td><td ><code>std::copy_backward</code></td></tr>
+<tr valign="top" class="even"><td >qEqual</td><td ><code>std::equal</code></td></tr>
+<tr valign="top" class="odd"><td >qFill</td><td ><code>std::fill</code></td></tr>
+<tr valign="top" class="even"><td >qFind</td><td ><code>std::find</code></td></tr>
+<tr valign="top" class="odd"><td >qCount</td><td ><code>std::count</code></td></tr>
+<tr valign="top" class="even"><td >qSort</td><td ><code>std::sort</code></td></tr>
+<tr valign="top" class="odd"><td >qStableSort</td><td ><code>std::stable_sort</code></td></tr>
+<tr valign="top" class="even"><td >qLowerBound</td><td ><code>std::lower_bound</code></td></tr>
+<tr valign="top" class="odd"><td >qUpperBound</td><td ><code>std::upper_bound</code></td></tr>
+<tr valign="top" class="even"><td >qLess</td><td ><code>std::less</code></td></tr>
+<tr valign="top" class="odd"><td >qGreater</td><td ><code>std::greater</code></td></tr>
+</table></div>
+<p>The only cases in which the port may not be straightforward is if the old code relied on template specializations of the qLess() and/or the qSwap() functions, which were used internally by the implementations of the Qt algorithmic functions, but are instead ignored by the STL ones.</p>
+<p>In case the old code relied on the specialization of the qLess() functor, then a workaround is explicitly passing an instance of the qLess() class to the STL function, for instance like this:</p>
+<pre class="cpp">
+
+  std<span class="operator">::</span>sort(container<span class="operator">.</span>begin()<span class="operator">,</span> container<span class="operator">.</span>end()<span class="operator">,</span> <a href="qtalgorithms-obsolete.html#qLess">qLess</a><span class="operator">&lt;</span>T<span class="operator">&gt;</span>());
+
+</pre>
+<p>Instead, since it's not possible to pass a custom swapper functor to STL functions, the only workaround for a template specialization for qSwap() is providing the same specialization for <code>std::swap()</code>.</p>
+</div>
+<p><b>See also </b><a href="containers.html">container classes</a> and <a href="qtglobal.html">&lt;QtGlobal&gt;</a>.</p>
+<!-- @@@<QtAlgorithms> -->
+<div class="func">
+<h2>Function Documentation</h2>
+<!-- $$$qCountLeadingZeroBits[overload1]$$$qCountLeadingZeroBitsquint32 -->
+<h3 class="fn" id="qCountLeadingZeroBits"><a name="qCountLeadingZeroBits"></a><span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <span class="name">qCountLeadingZeroBits</span>(<span class="type"><a href="qtglobal.html#quint32-typedef">quint32</a></span> <i>v</i>)</h3>
+<p>Returns the number of consecutive zero bits in <i>v</i>, when searching from the MSB. For example, qCountLeadingZeroBits(quint32(1)) returns 31 and qCountLeadingZeroBits(quint32(8)) returns 28.</p>
+<p>This function was introduced in  Qt 5.6.</p>
+<!-- @@@qCountLeadingZeroBits -->
+<!-- $$$qCountLeadingZeroBits[overload1]$$$qCountLeadingZeroBitsquint8 -->
+<h3 class="fn" id="qCountLeadingZeroBits"><a name="qCountLeadingZeroBits"></a><span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <span class="name">qCountLeadingZeroBits</span>(<span class="type"><a href="qtglobal.html#quint8-typedef">quint8</a></span> <i>v</i>)</h3>
+<p>Returns the number of consecutive zero bits in <i>v</i>, when searching from the MSB. For example, qCountLeadingZeroBits(quint8(1)) returns 7 and qCountLeadingZeroBits(quint8(8)) returns 4.</p>
+<p>This function was introduced in  Qt 5.6.</p>
+<!-- @@@qCountLeadingZeroBits -->
+<!-- $$$qCountLeadingZeroBits$$$qCountLeadingZeroBitsquint16 -->
+<h3 class="fn" id="qCountLeadingZeroBits-1"><a name="qCountLeadingZeroBits-1"></a><span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <span class="name">qCountLeadingZeroBits</span>(<span class="type"><a href="qtglobal.html#quint16-typedef">quint16</a></span> <i>v</i>)</h3>
+<p>Returns the number of consecutive zero bits in <i>v</i>, when searching from the MSB. For example, <a href="qtalgorithms.html#qCountLeadingZeroBits">qCountLeadingZeroBits</a>(quint16(1)) returns 15 and <a href="qtalgorithms.html#qCountLeadingZeroBits">qCountLeadingZeroBits</a>(quint16(8)) returns 12.</p>
+<p>This function was introduced in  Qt 5.6.</p>
+<!-- @@@qCountLeadingZeroBits -->
+<!-- $$$qCountLeadingZeroBits$$$qCountLeadingZeroBitsquint64 -->
+<h3 class="fn" id="qCountLeadingZeroBits-2"><a name="qCountLeadingZeroBits-2"></a><span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <span class="name">qCountLeadingZeroBits</span>(<span class="type"><a href="qtglobal.html#quint64-typedef">quint64</a></span> <i>v</i>)</h3>
+<p>Returns the number of consecutive zero bits in <i>v</i>, when searching from the MSB. For example, <a href="qtalgorithms.html#qCountLeadingZeroBits">qCountLeadingZeroBits</a>(quint64(1)) returns 63 and <a href="qtalgorithms.html#qCountLeadingZeroBits">qCountLeadingZeroBits</a>(quint64(8)) returns 60.</p>
+<p>This function was introduced in  Qt 5.6.</p>
+<!-- @@@qCountLeadingZeroBits -->
+<!-- $$$qCountTrailingZeroBits[overload1]$$$qCountTrailingZeroBitsquint8 -->
+<h3 class="fn" id="qCountTrailingZeroBits"><a name="qCountTrailingZeroBits"></a><span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <span class="name">qCountTrailingZeroBits</span>(<span class="type"><a href="qtglobal.html#quint8-typedef">quint8</a></span> <i>v</i>)</h3>
+<p>Returns the number of consecutive zero bits in <i>v</i>, when searching from the LSB. For example, qCountTrailingZeroBits(1) returns 0 and qCountTrailingZeroBits(8) returns 3.</p>
+<p>This function was introduced in  Qt 5.6.</p>
+<!-- @@@qCountTrailingZeroBits -->
+<!-- $$$qCountTrailingZeroBits$$$qCountTrailingZeroBitsquint32 -->
+<h3 class="fn" id="qCountTrailingZeroBits-1"><a name="qCountTrailingZeroBits-1"></a><span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <span class="name">qCountTrailingZeroBits</span>(<span class="type"><a href="qtglobal.html#quint32-typedef">quint32</a></span> <i>v</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>This function was introduced in  Qt 5.6.</p>
+<!-- @@@qCountTrailingZeroBits -->
+<!-- $$$qCountTrailingZeroBits$$$qCountTrailingZeroBitsquint16 -->
+<h3 class="fn" id="qCountTrailingZeroBits-2"><a name="qCountTrailingZeroBits-2"></a><span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <span class="name">qCountTrailingZeroBits</span>(<span class="type"><a href="qtglobal.html#quint16-typedef">quint16</a></span> <i>v</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>This function was introduced in  Qt 5.6.</p>
+<!-- @@@qCountTrailingZeroBits -->
+<!-- $$$qCountTrailingZeroBits$$$qCountTrailingZeroBitsquint64 -->
+<h3 class="fn" id="qCountTrailingZeroBits-3"><a name="qCountTrailingZeroBits-3"></a><span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <span class="name">qCountTrailingZeroBits</span>(<span class="type"><a href="qtglobal.html#quint64-typedef">quint64</a></span> <i>v</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>This function was introduced in  Qt 5.6.</p>
+<!-- @@@qCountTrailingZeroBits -->
+<!-- $$$qDeleteAll[overload1]$$$qDeleteAllForwardIteratorForwardIterator -->
+<h3 class="fn" id="qDeleteAll"><a name="qDeleteAll"></a><span class="type">void</span> <span class="name">qDeleteAll</span>(<span class="type">ForwardIterator</span> <i>begin</i>, <span class="type">ForwardIterator</span> <i>end</i>)</h3>
+<p>Deletes all the items in the range [<i>begin</i>, <i>end</i>) using the C++ <code>delete</code> operator. The item type must be a pointer type (for example, <code>QWidget *</code>).</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qlist.html">QList</a></span><span class="operator">&lt;</span>Employee <span class="operator">*</span><span class="operator">&gt;</span> list;
+  list<span class="operator">.</span>append(<span class="keyword">new</span> Employee(<span class="string">&quot;Blackpool&quot;</span><span class="operator">,</span> <span class="string">&quot;Stephen&quot;</span>));
+  list<span class="operator">.</span>append(<span class="keyword">new</span> Employee(<span class="string">&quot;Twist&quot;</span><span class="operator">,</span> <span class="string">&quot;Oliver&quot;</span>));
+
+  qDeleteAll(list<span class="operator">.</span>begin()<span class="operator">,</span> list<span class="operator">.</span>end());
+  list<span class="operator">.</span>clear();
+
+</pre>
+<p>Notice that qDeleteAll() doesn't remove the items from the container; it merely calls <code>delete</code> on them. In the example above, we call clear() on the container to remove the items.</p>
+<p>This function can also be used to delete items stored in associative containers, such as <a href="qmap.html">QMap</a> and <a href="qhash.html#qhash">QHash</a>. Only the objects stored in each container will be deleted by this function; objects used as keys will not be deleted.</p>
+<p><b>See also </b><a href="qtalgorithms.html#forward-iterators">forward iterators</a>.</p>
+<!-- @@@qDeleteAll -->
+<!-- $$$qDeleteAll$$$qDeleteAllconstContainer& -->
+<h3 class="fn" id="qDeleteAll-1"><a name="qDeleteAll-1"></a><span class="type">void</span> <span class="name">qDeleteAll</span>(const <span class="type">Container</span> &amp;<i>c</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>This is the same as <a href="qtalgorithms.html#qDeleteAll">qDeleteAll</a>(<i>c</i>.begin(), <i>c</i>.end()).</p>
+<!-- @@@qDeleteAll -->
+<!-- $$$qPopulationCount[overload1]$$$qPopulationCountquint8 -->
+<h3 class="fn" id="qPopulationCount"><a name="qPopulationCount"></a><span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <span class="name">qPopulationCount</span>(<span class="type"><a href="qtglobal.html#quint8-typedef">quint8</a></span> <i>v</i>)</h3>
+<p>Returns the number of bits set in <i>v</i>. This number is also called the Hamming Weight of <i>v</i>.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@qPopulationCount -->
+<!-- $$$qPopulationCount$$$qPopulationCountquint32 -->
+<h3 class="fn" id="qPopulationCount-1"><a name="qPopulationCount-1"></a><span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <span class="name">qPopulationCount</span>(<span class="type"><a href="qtglobal.html#quint32-typedef">quint32</a></span> <i>v</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@qPopulationCount -->
+<!-- $$$qPopulationCount$$$qPopulationCountquint16 -->
+<h3 class="fn" id="qPopulationCount-2"><a name="qPopulationCount-2"></a><span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <span class="name">qPopulationCount</span>(<span class="type"><a href="qtglobal.html#quint16-typedef">quint16</a></span> <i>v</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@qPopulationCount -->
+<!-- $$$qPopulationCount$$$qPopulationCountquint64 -->
+<h3 class="fn" id="qPopulationCount-3"><a name="qPopulationCount-3"></a><span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <span class="name">qPopulationCount</span>(<span class="type"><a href="qtglobal.html#quint64-typedef">quint64</a></span> <i>v</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@qPopulationCount -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

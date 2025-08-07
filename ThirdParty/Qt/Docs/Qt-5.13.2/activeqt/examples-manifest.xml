@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<instructionals module="ActiveQt">
+    <examples>
+        <example name="COM App Example (ActiveQt)" docUrl="qthelp://org.qt-project.activeqt.5132/activeqt/activeqt-activeqt-comapp-example.html" projectPath="activeqt/comapp/comapp.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[The COM App example shows how to use ActiveQt to develop a Qt application that can be automated via COM. Different QObject based classes are exposed as COM objects that communicate with the GUI of the running Qt application. The APIs of those COM objects has been designed to resemble the APIs of standard COM applications; i.e. those from Microsoft Office.]]></description>
+            <tags>active,activeqt,app,com</tags>
+            <fileToOpen mainFile="true">activeqt/comapp/main.cpp</fileToOpen>
+        </example>
+        <example name="Hierarchy Example (ActiveQt)" docUrl="qthelp://org.qt-project.activeqt.5132/activeqt/activeqt-activeqt-hierarchy-example.html" projectPath="activeqt/hierarchy/hierarchy.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[The Hierarchy example is shows how to write an in-process ActiveX control. The control is a QWidget subclass with child widgets that are accessible as sub-types.]]></description>
+            <tags>active,activeqt,hierarchy</tags>
+            <fileToOpen mainFile="true">activeqt/hierarchy/main.cpp</fileToOpen>
+        </example>
+        <example name="Media Player Example (ActiveQt)" docUrl="qthelp://org.qt-project.activeqt.5132/activeqt/activeqt-activeqt-mediaplayer-example.html" projectPath="activeqt/mediaplayer/mediaplayer.pro" imageUrl="qthelp://org.qt-project.activeqt.5132/activeqt/images/activeqt-mediaplayer-example.jpg">
+            <description><![CDATA[The Media Player example uses the Microsoft Media Player ActiveX control to implement a functional media player application.]]></description>
+            <tags>active,activeqt,media,player</tags>
+            <fileToOpen mainFile="true">activeqt/mediaplayer/main.cpp</fileToOpen>
+        </example>
+        <example name="Menus Example (ActiveQt)" docUrl="qthelp://org.qt-project.activeqt.5132/activeqt/activeqt-activeqt-menus-example.html" projectPath="activeqt/menus/menus.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[The Menus example demonstrates the use of QMenuBar and QStatusBar in a QMainWindow to implement an in-place active control.]]></description>
+            <tags>active,activeqt,menus</tags>
+            <fileToOpen>activeqt/menus/main.cpp</fileToOpen>
+            <fileToOpen>activeqt/menus/menus.h</fileToOpen>
+            <fileToOpen mainFile="true">activeqt/menus/menus.cpp</fileToOpen>
+        </example>
+        <example name="Multiple Example (ActiveQt)" docUrl="qthelp://org.qt-project.activeqt.5132/activeqt/activeqt-activeqt-multiple-example.html" projectPath="activeqt/multiple/multiple.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[The Multiple example demonstrates the implementation of a QAxFactory to provide multiple ActiveX controls in a single in process ActiveX server using the QAXFACTORY_EXPORT() macro. The ActiveX controls in this example are simple QWidget subclasses that reimplement QWidget::paintEvent().]]></description>
+            <tags>active,activeqt,multiple</tags>
+            <fileToOpen mainFile="true">activeqt/multiple/main.cpp</fileToOpen>
+        </example>
+        <example name="OpenGL Example (ActiveQt)" docUrl="qthelp://org.qt-project.activeqt.5132/activeqt/activeqt-activeqt-opengl-example.html" projectPath="activeqt/opengl/opengl.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[The OpenGL example demonstrates the use of the default factory and QAxFactory::isServer(), and the implementation of an additional COM interface using QAxBindable and QAxAggregated. The server executable can run both as an ActiveX server and as a stand-alone application.]]></description>
+            <tags>active,activeqt,opengl</tags>
+            <fileToOpen mainFile="true">activeqt/opengl/main.cpp</fileToOpen>
+        </example>
+        <example name="Qutlook Example (ActiveQt)" docUrl="qthelp://org.qt-project.activeqt.5132/activeqt/activeqt-activeqt-qutlook-example.html" projectPath="activeqt/qutlook/qutlook.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[The Qutlook example demonstrates the use of ActiveQt to automate Outlook. The example makes use of the dumpcpp tool to generate a C++ namespace for the type library describing the Outlook Object Model.]]></description>
+            <tags>active,activeqt,qutlook</tags>
+            <fileToOpen mainFile="true">activeqt/qutlook/main.cpp</fileToOpen>
+        </example>
+        <example name="Simple Example (ActiveQt)" docUrl="qthelp://org.qt-project.activeqt.5132/activeqt/activeqt-activeqt-simple-example.html" projectPath="activeqt/simple/simple.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[The Simple example demonstrates the use of QAxBindable and QAxFactory.]]></description>
+            <tags>active,activeqt,simple</tags>
+            <fileToOpen mainFile="true">activeqt/simple/main.cpp</fileToOpen>
+        </example>
+        <example name="Wrapper Example (ActiveQt)" docUrl="qthelp://org.qt-project.activeqt.5132/activeqt/activeqt-activeqt-wrapper-example.html" projectPath="activeqt/wrapper/wrapper.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[The Wrapper example demonstrates how to export existing QWidget classes as ActiveX controls, and the use of QAxFactory together with the QAXFACTORY_EXPORT() macro. ActiveX controls in this example are the standard button classes QPushButton, QCheckBox and QRadioButton as provided by Qt.]]></description>
+            <tags>active,activeqt,wrapper</tags>
+            <fileToOpen mainFile="true">activeqt/wrapper/main.cpp</fileToOpen>
+        </example>
+    </examples>
+</instructionals>

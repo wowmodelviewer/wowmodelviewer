@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-projects-autotools.qdoc -->
+  <title>Setting Up an Autotools Project | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Setting Up an Autotools Project</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-project-qbs.html" />
+  <link rel="next" href="creator-project-generic.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-project-qbs.html">Setting Up Qbs</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-project-generic.html">Setting Up a Generic Project</a>
+</p><p/>
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Setting Up an Autotools Project</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-projects-autotools.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The AutotoolsProjectManager is a plugin for autotools support. It is disabled by default. To enable the plugin, select <b>Help</b> &gt; <b>About Plugins</b> &gt; <b>Build Systems</b> &gt; <b>AutotoolsProjectManager</b>.</p>
+<p>To use the plugin, restart Qt Creator.</p>
+<p>To work with your Autotools project in Qt Creator:</p>
+<ol class="1" type="1"><li>Select <b>File</b> &gt; <b>Open File or Project</b>.</li>
+<li>Select the Makefile.am file from your project. This is the only way you can use the autotools plugin.</li>
+<li>Select the build directory. Only in-source building is currently supported.</li>
+<li>Select <b>Finish</b>. Qt Creator displays the project tree structure. The root node displays the project name. All project files are listed below it and you can open them from the list.<p class="centerAlign"><img src="images/qtcreator-autotools-buildrun.png" alt="" /></p></li>
+<li>Select <b>Run</b> to build and run the application. The predefined build steps (autogen.sh or autoreconf, configure, and make) are executed.<p>The first time you run the application you must choose the executable.</p>
+</li>
+<li>To check and edit autotools build steps, select <b>Projects</b> &gt; <b>Build Settings</b>.<p>You can add parameters to the predefined autotools build steps.</p>
+<p class="centerAlign"><img src="images/qtcreator-autotools-buildsettings.png" alt="" /></p></li>
+</ol>
+</div>
+<!-- @@@creator-projects-autotools.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-project-qbs.html">Setting Up Qbs</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-project-generic.html">Setting Up a Generic Project</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

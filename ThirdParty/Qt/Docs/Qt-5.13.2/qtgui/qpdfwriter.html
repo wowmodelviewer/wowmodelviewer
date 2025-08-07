@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qpdfwriter.cpp -->
+  <title>QPdfWriter Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QPdfWriter</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPdfWriter Class</h1>
+<!-- $$$QPdfWriter-brief -->
+<p>The <a href="qpdfwriter.html">QPdfWriter</a> class is a class to generate PDFs that can be used as a paint device. <a href="#details">More...</a></p>
+<!-- @@@QPdfWriter -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QPdfWriter&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a> and <a href="qpagedpaintdevice.html">QPagedPaintDevice</a></td></tr></table></div><ul>
+<li><a href="qpdfwriter-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpdfwriter.html#QPdfWriter-1">QPdfWriter</a></b>(QIODevice *<i>device</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpdfwriter.html#QPdfWriter">QPdfWriter</a></b>(const QString &amp;<i>filename</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qpdfwriter.html#dtor.QPdfWriter">~QPdfWriter</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qpdfwriter.html#creator">creator</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPageLayout </td><td class="memItemRight bottomAlign"><b><a href="qpdfwriter.html#pageLayout">pageLayout</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPagedPaintDevice::PdfVersion </td><td class="memItemRight bottomAlign"><b><a href="qpdfwriter.html#pdfVersion">pdfVersion</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qpdfwriter.html#resolution">resolution</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpdfwriter.html#setCreator">setCreator</a></b>(const QString &amp;<i>creator</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpdfwriter.html#setPageLayout">setPageLayout</a></b>(const QPageLayout &amp;<i>newPageLayout</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpdfwriter.html#setPageMargins">setPageMargins</a></b>(const QMarginsF &amp;<i>margins</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpdfwriter.html#setPageMargins-1">setPageMargins</a></b>(const QMarginsF &amp;<i>margins</i>, QPageLayout::Unit <i>units</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpdfwriter.html#setPageOrientation">setPageOrientation</a></b>(QPageLayout::Orientation <i>orientation</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpdfwriter.html#setPageSize">setPageSize</a></b>(const QPageSize &amp;<i>pageSize</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpdfwriter.html#setPdfVersion">setPdfVersion</a></b>(QPagedPaintDevice::PdfVersion <i>version</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpdfwriter.html#setResolution">setResolution</a></b>(int <i>resolution</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpdfwriter.html#setTitle">setTitle</a></b>(const QString &amp;<i>title</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qpdfwriter.html#title">title</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qpdfwriter.html#newPage">newPage</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> <code>(obsolete) </code>virtual void </td><td class="memItemRight bottomAlign"><b><a href="qpdfwriter-obsolete.html#setMargins">setMargins</a></b>(const QPagedPaintDevice::Margins &amp;<i>m</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> <code>(obsolete) </code>virtual void </td><td class="memItemRight bottomAlign"><b><a href="qpdfwriter-obsolete.html#setPageSize-1">setPageSize</a></b>(QPagedPaintDevice::PageSize <i>size</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> <code>(obsolete) </code>virtual void </td><td class="memItemRight bottomAlign"><b><a href="qpdfwriter-obsolete.html#setPageSizeMM">setPageSizeMM</a></b>(const QSizeF &amp;<i>size</i>) override</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QPaintEngine *</td><td class="memItemRight bottomAlign"><b><a href="qpdfwriter.html#paintEngine">paintEngine</a></b>() const override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPdfWriter-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qpdfwriter.html">QPdfWriter</a> generates PDF out of a series of drawing commands using <a href="qpainter.html">QPainter</a>. The <a href="qpdfwriter.html#newPage">newPage</a>() method can be used to create several pages.</p>
+</div>
+<!-- @@@QPdfWriter -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QPdfWriter$$$QPdfWriterQIODevice* -->
+<h3 class="fn" id="QPdfWriter-1"><a name="QPdfWriter-1"></a>QPdfWriter::<span class="name">QPdfWriter</span>(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span> *<i>device</i>)</h3>
+<p>Constructs a PDF writer that will write the pdf to <i>device</i>.</p>
+<!-- @@@QPdfWriter -->
+<!-- $$$QPdfWriter[overload1]$$$QPdfWriterconstQString& -->
+<h3 class="fn" id="QPdfWriter"><a name="QPdfWriter"></a>QPdfWriter::<span class="name">QPdfWriter</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>filename</i>)</h3>
+<p>Constructs a PDF writer that will write the pdf to <i>filename</i>.</p>
+<!-- @@@QPdfWriter -->
+<!-- $$$~QPdfWriter[overload1]$$$~QPdfWriter -->
+<h3 class="fn" id="dtor.QPdfWriter"><a name="dtor.QPdfWriter"></a><code>[virtual] </code>QPdfWriter::<span class="name">~QPdfWriter</span>()</h3>
+<p>Destroys the pdf writer.</p>
+<!-- @@@~QPdfWriter -->
+<!-- $$$creator[overload1]$$$creator -->
+<h3 class="fn" id="creator"><a name="creator"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPdfWriter::<span class="name">creator</span>() const</h3>
+<p>Returns the creator of the document.</p>
+<p><b>See also </b><a href="qpdfwriter.html#setCreator">setCreator</a>().</p>
+<!-- @@@creator -->
+<!-- $$$newPage[overload1]$$$newPage -->
+<h3 class="fn" id="newPage"><a name="newPage"></a><code>[override virtual] </code><span class="type">bool</span> QPdfWriter::<span class="name">newPage</span>()</h3>
+<p>Reimplements: <a href="qpagedpaintdevice.html#newPage">QPagedPaintDevice::newPage</a>().</p>
+<!-- @@@newPage -->
+<!-- $$$pageLayout[overload1]$$$pageLayout -->
+<h3 class="fn" id="pageLayout"><a name="pageLayout"></a><span class="type"><a href="qpagelayout.html">QPageLayout</a></span> QPdfWriter::<span class="name">pageLayout</span>() const</h3>
+<p>Returns the current page layout. Use this method to access the current <a href="qpagesize.html">QPageSize</a>, <a href="qpagelayout.html#Orientation-enum">QPageLayout::Orientation</a>, <a href="../qtcore/qmarginsf.html">QMarginsF</a>, fullRect() and paintRect().</p>
+<p>Note that you cannot use the setters on the returned object, you must either call the individual <a href="qpdfwriter.html">QPdfWriter</a> methods or use <a href="qpdfwriter.html#setPageLayout">setPageLayout</a>().</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<p><b>See also </b><a href="qpdfwriter.html#setPageLayout">setPageLayout</a>(), <a href="qpdfwriter.html#setPageSize">setPageSize</a>(), <a href="qpdfwriter.html#setPageOrientation">setPageOrientation</a>(), and <a href="qpdfwriter.html#setPageMargins">setPageMargins</a>().</p>
+<!-- @@@pageLayout -->
+<!-- $$$paintEngine[overload1]$$$paintEngine -->
+<h3 class="fn" id="paintEngine"><a name="paintEngine"></a><code>[override virtual protected] </code><span class="type"><a href="qpaintengine.html">QPaintEngine</a></span> *QPdfWriter::<span class="name">paintEngine</span>() const</h3>
+<p>Reimplements: <a href="qpaintdevice.html#paintEngine">QPaintDevice::paintEngine</a>() const.</p>
+<!-- @@@paintEngine -->
+<!-- $$$pdfVersion[overload1]$$$pdfVersion -->
+<h3 class="fn" id="pdfVersion"><a name="pdfVersion"></a><span class="type"><a href="qpagedpaintdevice.html#PdfVersion-enum">QPagedPaintDevice::PdfVersion</a></span> QPdfWriter::<span class="name">pdfVersion</span>() const</h3>
+<p>Returns the PDF version for this writer. The default is <code>PdfVersion_1_4</code>.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<p><b>See also </b><a href="qpdfwriter.html#setPdfVersion">setPdfVersion</a>().</p>
+<!-- @@@pdfVersion -->
+<!-- $$$resolution[overload1]$$$resolution -->
+<h3 class="fn" id="resolution"><a name="resolution"></a><span class="type">int</span> QPdfWriter::<span class="name">resolution</span>() const</h3>
+<p>Returns the resolution of the PDF in DPI.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<p><b>See also </b><a href="qpdfwriter.html#setResolution">setResolution</a>().</p>
+<!-- @@@resolution -->
+<!-- $$$setCreator[overload1]$$$setCreatorconstQString& -->
+<h3 class="fn" id="setCreator"><a name="setCreator"></a><span class="type">void</span> QPdfWriter::<span class="name">setCreator</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>creator</i>)</h3>
+<p>Sets the creator of the document to <i>creator</i>.</p>
+<p><b>See also </b><a href="qpdfwriter.html#creator">creator</a>().</p>
+<!-- @@@setCreator -->
+<!-- $$$setPageLayout[overload1]$$$setPageLayoutconstQPageLayout& -->
+<h3 class="fn" id="setPageLayout"><a name="setPageLayout"></a><span class="type">bool</span> QPdfWriter::<span class="name">setPageLayout</span>(const <span class="type"><a href="qpagelayout.html">QPageLayout</a></span> &amp;<i>newPageLayout</i>)</h3>
+<p>Sets the PDF page layout to <i>newPageLayout</i>.</p>
+<p>You should call this before calling <a href="qpainter.html#begin">QPainter::begin</a>(), or immediately before calling <a href="qpdfwriter.html#newPage">newPage</a>() to apply the new page layout to a new page. You should not call any painting methods between a call to setPageLayout() and <a href="qpdfwriter.html#newPage">newPage</a>() as the wrong paint metrics may be used.</p>
+<p>Returns true if the page layout was successfully set to <i>newPageLayout</i>.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<p><b>See also </b><a href="qpdfwriter.html#pageLayout">pageLayout</a>().</p>
+<!-- @@@setPageLayout -->
+<!-- $$$setPageMargins[overload1]$$$setPageMarginsconstQMarginsF& -->
+<h3 class="fn" id="setPageMargins"><a name="setPageMargins"></a><span class="type">bool</span> QPdfWriter::<span class="name">setPageMargins</span>(const <span class="type"><a href="../qtcore/qmarginsf.html">QMarginsF</a></span> &amp;<i>margins</i>)</h3>
+<p>Set the PDF page <i>margins</i> in the current page layout units.</p>
+<p>You should call this before calling <a href="qpainter.html#begin">QPainter::begin</a>(), or immediately before calling <a href="qpdfwriter.html#newPage">newPage</a>() to apply the new margins to a new page. You should not call any painting methods between a call to setPageMargins() and <a href="qpdfwriter.html#newPage">newPage</a>() as the wrong paint metrics may be used.</p>
+<p>To get the current page margins use <a href="qpdfwriter.html#pageLayout">pageLayout</a>().pageMargins().</p>
+<p>Returns true if the page margins were successfully set to <i>margins</i>.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<p><b>See also </b><a href="qpdfwriter.html#pageLayout">pageLayout</a>().</p>
+<!-- @@@setPageMargins -->
+<!-- $$$setPageMargins$$$setPageMarginsconstQMarginsF&QPageLayout::Unit -->
+<h3 class="fn" id="setPageMargins-1"><a name="setPageMargins-1"></a><span class="type">bool</span> QPdfWriter::<span class="name">setPageMargins</span>(const <span class="type"><a href="../qtcore/qmarginsf.html">QMarginsF</a></span> &amp;<i>margins</i>, <span class="type"><a href="qpagelayout.html#Unit-enum">QPageLayout::Unit</a></span> <i>units</i>)</h3>
+<p>Set the PDF page <i>margins</i> defined in the given <i>units</i>.</p>
+<p>You should call this before calling <a href="qpainter.html#begin">QPainter::begin</a>(), or immediately before calling <a href="qpdfwriter.html#newPage">newPage</a>() to apply the new margins to a new page. You should not call any painting methods between a call to <a href="qpdfwriter.html#setPageMargins">setPageMargins</a>() and <a href="qpdfwriter.html#newPage">newPage</a>() as the wrong paint metrics may be used.</p>
+<p>To get the current page margins use <a href="qpdfwriter.html#pageLayout">pageLayout</a>().pageMargins().</p>
+<p>Returns true if the page margins were successfully set to <i>margins</i>.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<p><b>See also </b><a href="qpdfwriter.html#pageLayout">pageLayout</a>().</p>
+<!-- @@@setPageMargins -->
+<!-- $$$setPageOrientation[overload1]$$$setPageOrientationQPageLayout::Orientation -->
+<h3 class="fn" id="setPageOrientation"><a name="setPageOrientation"></a><span class="type">bool</span> QPdfWriter::<span class="name">setPageOrientation</span>(<span class="type"><a href="qpagelayout.html#Orientation-enum">QPageLayout::Orientation</a></span> <i>orientation</i>)</h3>
+<p>Sets the PDF page <i>orientation</i>.</p>
+<p>The page orientation is used to define the orientation of the page size when obtaining the page rect.</p>
+<p>You should call this before calling <a href="qpainter.html#begin">QPainter::begin</a>(), or immediately before calling <a href="qpdfwriter.html#newPage">newPage</a>() to apply the new orientation to a new page. You should not call any painting methods between a call to setPageOrientation() and <a href="qpdfwriter.html#newPage">newPage</a>() as the wrong paint metrics may be used.</p>
+<p>To get the current <a href="qpagelayout.html#Orientation-enum">QPageLayout::Orientation</a> use <a href="qpdfwriter.html#pageLayout">pageLayout</a>().pageOrientation().</p>
+<p>Returns true if the page orientation was successfully set to <i>orientation</i>.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<p><b>See also </b><a href="qpdfwriter.html#pageLayout">pageLayout</a>().</p>
+<!-- @@@setPageOrientation -->
+<!-- $$$setPageSize[overload1]$$$setPageSizeconstQPageSize& -->
+<h3 class="fn" id="setPageSize"><a name="setPageSize"></a><span class="type">bool</span> QPdfWriter::<span class="name">setPageSize</span>(const <span class="type"><a href="qpagesize.html">QPageSize</a></span> &amp;<i>pageSize</i>)</h3>
+<p>Sets the PDF page size to <i>pageSize</i>.</p>
+<p>To get the current <a href="qpagesize.html">QPageSize</a> use <a href="qpdfwriter.html#pageLayout">pageLayout</a>().<a href="qpagedpaintdevice.html#pageSize">pageSize</a>().</p>
+<p>You should call this before calling <a href="qpainter.html#begin">QPainter::begin</a>(), or immediately before calling <a href="qpdfwriter.html#newPage">newPage</a>() to apply the new page size to a new page. You should not call any painting methods between a call to setPageSize() and <a href="qpdfwriter.html#newPage">newPage</a>() as the wrong paint metrics may be used.</p>
+<p>Returns true if the page size was successfully set to <i>pageSize</i>.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<p><b>See also </b><a href="qpdfwriter.html#pageLayout">pageLayout</a>().</p>
+<!-- @@@setPageSize -->
+<!-- $$$setPdfVersion[overload1]$$$setPdfVersionQPagedPaintDevice::PdfVersion -->
+<h3 class="fn" id="setPdfVersion"><a name="setPdfVersion"></a><span class="type">void</span> QPdfWriter::<span class="name">setPdfVersion</span>(<span class="type"><a href="qpagedpaintdevice.html#PdfVersion-enum">QPagedPaintDevice::PdfVersion</a></span> <i>version</i>)</h3>
+<p>Sets the PDF version for this writer to <i>version</i>.</p>
+<p>If <i>version</i> is the same value as currently set then no change will be made.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<p><b>See also </b><a href="qpdfwriter.html#pdfVersion">pdfVersion</a>().</p>
+<!-- @@@setPdfVersion -->
+<!-- $$$setResolution[overload1]$$$setResolutionint -->
+<h3 class="fn" id="setResolution"><a name="setResolution"></a><span class="type">void</span> QPdfWriter::<span class="name">setResolution</span>(<span class="type">int</span> <i>resolution</i>)</h3>
+<p>Sets the PDF <i>resolution</i> in DPI.</p>
+<p>This setting affects the coordinate system as returned by, for example <a href="qpainter.html#viewport">QPainter::viewport</a>().</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<p><b>See also </b><a href="qpdfwriter.html#resolution">resolution</a>().</p>
+<!-- @@@setResolution -->
+<!-- $$$setTitle[overload1]$$$setTitleconstQString& -->
+<h3 class="fn" id="setTitle"><a name="setTitle"></a><span class="type">void</span> QPdfWriter::<span class="name">setTitle</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>title</i>)</h3>
+<p>Sets the title of the document being created to <i>title</i>.</p>
+<p><b>See also </b><a href="qpdfwriter.html#title">title</a>().</p>
+<!-- @@@setTitle -->
+<!-- $$$title[overload1]$$$title -->
+<h3 class="fn" id="title"><a name="title"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPdfWriter::<span class="name">title</span>() const</h3>
+<p>Returns the title of the document.</p>
+<p><b>See also </b><a href="qpdfwriter.html#setTitle">setTitle</a>().</p>
+<!-- @@@title -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

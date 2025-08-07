@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickspringanimation.cpp -->
+  <title>SpringAnimation QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >SpringAnimation QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">SpringAnimation QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$SpringAnimation-brief -->
+<p>Allows a property to track a value in a spring-like motion. <a href="#details">More...</a></p>
+<!-- @@@SpringAnimation -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-numberanimation.html">NumberAnimation</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-springanimation-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-springanimation.html#damping-prop">damping</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-springanimation.html#epsilon-prop">epsilon</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-springanimation.html#mass-prop">mass</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-springanimation.html#modulus-prop">modulus</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-springanimation.html#spring-prop">spring</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-springanimation.html#velocity-prop">velocity</a></b></b> : real</li>
+</ul>
+<!-- $$$SpringAnimation-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><a href="qml-qtquick-springanimation.html">SpringAnimation</a> mimics the oscillatory behavior of a spring, with the appropriate <a href="qml-qtquick-springanimation.html#spring-prop">spring</a> constant to control the acceleration and the <a href="qml-qtquick-springanimation.html#damping-prop">damping</a> to control how quickly the effect dies away.</p>
+<p>You can also limit the maximum <a href="qml-qtquick-springanimation.html#velocity-prop">velocity</a> of the animation.</p>
+<p>The following <a href="qml-qtquick-rectangle.html">Rectangle</a> moves to the position of the mouse using a <a href="qml-qtquick-springanimation.html">SpringAnimation</a> when the mouse is clicked. The use of the <a href="qml-qtquick-behavior.html">Behavior</a> on the <code>x</code> and <code>y</code> values indicates that whenever these values are changed, a <a href="qml-qtquick-springanimation.html">SpringAnimation</a> should be applied.</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="qml-qtquick-item.html">Item</a></span> {
+      <span class="name">width</span>: <span class="number">300</span>; <span class="name">height</span>: <span class="number">300</span>
+
+      <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">rect</span>
+          <span class="name">width</span>: <span class="number">50</span>; <span class="name">height</span>: <span class="number">50</span>
+          <span class="name">color</span>: <span class="string">&quot;red&quot;</span>
+
+          Behavior on <span class="name">x</span> { <span class="type"><a href="qml-qtquick-springanimation.html">SpringAnimation</a></span> { <span class="name">spring</span>: <span class="number">2</span>; <span class="name">damping</span>: <span class="number">0.2</span> } }
+          Behavior on <span class="name">y</span> { <span class="type"><a href="qml-qtquick-springanimation.html">SpringAnimation</a></span> { <span class="name">spring</span>: <span class="number">2</span>; <span class="name">damping</span>: <span class="number">0.2</span> } }
+      }
+
+      <span class="type"><a href="qml-qtquick-mousearea.html">MouseArea</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">onClicked</span>: {
+              <span class="name">rect</span>.<span class="name">x</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">x</span> <span class="operator">-</span> <span class="name">rect</span>.<span class="name">width</span><span class="operator">/</span><span class="number">2</span>
+              <span class="name">rect</span>.<span class="name">y</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">y</span> <span class="operator">-</span> <span class="name">rect</span>.<span class="name">height</span><span class="operator">/</span><span class="number">2</span>
+          }
+      }
+  }
+
+</pre>
+<p>Like any other animation type, a <a href="qml-qtquick-springanimation.html">SpringAnimation</a> can be applied in a number of ways, including transitions, behaviors and property value sources. The <a href="qtquick-statesanimations-animations.html">Animation and Transitions in Qt Quick</a> documentation shows a variety of methods for creating animations.</p>
+<p><b>See also </b><a href="qml-qtquick-smoothedanimation.html">SmoothedAnimation</a>, <a href="qtquick-statesanimations-animations.html">Animation and Transitions in Qt Quick</a>, <a href="qtquick-animation-example.html">Qt Quick Examples - Animation</a>, and <a href="../qtdoc/qtdoc-demos-clocks-example.html">Qt Quick Demo - Clocks</a>.</p>
+<!-- @@@SpringAnimation -->
+<h2>Property Documentation</h2>
+<!-- $$$damping -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="damping-prop"></a><span class="name">damping</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the spring damping value.</p>
+<p>This value describes how quickly the spring-like motion comes to rest. The default value is 0.</p>
+<p>The useful value range is 0 - 1.0&#x2e; The lower the value, the faster it comes to rest.</p>
+</div></div><!-- @@@damping -->
+<br/>
+<!-- $$$epsilon -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="epsilon-prop"></a><span class="name">epsilon</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the spring epsilon.</p>
+<p>The epsilon is the rate and amount of change in the value which is close enough to 0 to be considered equal to zero. This will depend on the usage of the value. For pixel positions, 0.25 would suffice. For scale, 0.005 will suffice.</p>
+<p>The default is 0.01. Tuning this value can provide small performance improvements.</p>
+</div></div><!-- @@@epsilon -->
+<br/>
+<!-- $$$mass -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="mass-prop"></a><span class="name">mass</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the &quot;mass&quot; of the property being moved.</p>
+<p>The value is 1.0 by default.</p>
+<p>A greater mass causes slower movement and a greater spring-like motion when an item comes to rest.</p>
+</div></div><!-- @@@mass -->
+<br/>
+<!-- $$$modulus -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="modulus-prop"></a><span class="name">modulus</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the modulus value. The default value is 0.</p>
+<p>Setting a <i>modulus</i> forces the target value to &quot;wrap around&quot; at the modulus. For example, setting the modulus to 360 will cause a value of 370 to wrap around to 10.</p>
+</div></div><!-- @@@modulus -->
+<br/>
+<!-- $$$spring -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="spring-prop"></a><span class="name">spring</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property describes how strongly the target is pulled towards the source. The default value is 0 (that is, the spring-like motion is disabled).</p>
+<p>The useful value range is 0 - 5.0&#x2e;</p>
+<p>When this property is set and the <a href="qml-qtquick-springanimation.html#velocity-prop">velocity</a> value is greater than 0, the <a href="qml-qtquick-springanimation.html#velocity-prop">velocity</a> limits the maximum speed.</p>
+</div></div><!-- @@@spring -->
+<br/>
+<!-- $$$velocity -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="velocity-prop"></a><span class="name">velocity</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the maximum velocity allowed when tracking the source.</p>
+<p>The default value is 0 (no maximum velocity).</p>
+</div></div><!-- @@@velocity -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

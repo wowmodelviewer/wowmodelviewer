@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qlogicaldevice.cpp -->
+  <title>QLogicalDevice Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QLogicalDevice</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QLogicalDevice Class</h1>
+<span class="small-subtitle">(<a href="qt3dinput-qlogicaldevice.html">Qt3DInput::QLogicalDevice</a>)<br/></span>
+<!-- $$$QLogicalDevice-brief -->
+<p><a href="qt3dinput-qlogicaldevice.html">QLogicalDevice</a> allows the user to define a set of actions that they wish to use within an application. <a href="#details">More...</a></p>
+<!-- @@@QLogicalDevice -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QLogicalDevice&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3dinput</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.6</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-input-logicaldevice.html">LogicalDevice</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3dcore-qcomponent.html">Qt3DCore::QComponent</a></td></tr></table></div><p>This class was introduced in  Qt 5.6.</p>
+<ul>
+<li><a href="qt3dinput-qlogicaldevice-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qlogicaldevice.html#QLogicalDevice">QLogicalDevice</a></b>(Qt3DCore::QNode *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;Qt3DInput::QAction *&gt; </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qlogicaldevice.html#actions">actions</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qlogicaldevice.html#addAction">addAction</a></b>(Qt3DInput::QAction *<i>action</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qlogicaldevice.html#addAxis">addAxis</a></b>(Qt3DInput::QAxis *<i>axis</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;Qt3DInput::QAxis *&gt; </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qlogicaldevice.html#axes">axes</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qlogicaldevice.html#removeAction">removeAction</a></b>(Qt3DInput::QAction *<i>action</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qlogicaldevice.html#removeAxis">removeAxis</a></b>(Qt3DInput::QAxis *<i>axis</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QLogicalDevice-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QLogicalDevice -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QLogicalDevice[overload1]$$$QLogicalDeviceQt3DCore::QNode* -->
+<h3 class="fn" id="QLogicalDevice"><a name="QLogicalDevice"></a>QLogicalDevice::<span class="name">QLogicalDevice</span>(<span class="type"><a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new <a href="qt3dinput-qlogicaldevice.html">QLogicalDevice</a> instance with parent <i>parent</i>.</p>
+<!-- @@@QLogicalDevice -->
+<!-- $$$actions[overload1]$$$actions -->
+<h3 class="fn" id="actions"><a name="actions"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="qt3dinput-qaction.html">Qt3DInput::QAction</a></span> *&gt; QLogicalDevice::<span class="name">actions</span>() const</h3>
+<p>Returns the list of actions.</p>
+<!-- @@@actions -->
+<!-- $$$addAction[overload1]$$$addActionQt3DInput::QAction* -->
+<h3 class="fn" id="addAction"><a name="addAction"></a><span class="type">void</span> QLogicalDevice::<span class="name">addAction</span>(<span class="type"><a href="qt3dinput-qaction.html">Qt3DInput::QAction</a></span> *<i>action</i>)</h3>
+<p>Add an <i>action</i> to the list of actions.</p>
+<!-- @@@addAction -->
+<!-- $$$addAxis[overload1]$$$addAxisQt3DInput::QAxis* -->
+<h3 class="fn" id="addAxis"><a name="addAxis"></a><span class="type">void</span> QLogicalDevice::<span class="name">addAxis</span>(<span class="type"><a href="qt3dinput-qaxis.html">Qt3DInput::QAxis</a></span> *<i>axis</i>)</h3>
+<p>Add an <i>axis</i> to the list of axis.</p>
+<!-- @@@addAxis -->
+<!-- $$$axes[overload1]$$$axes -->
+<h3 class="fn" id="axes"><a name="axes"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="qt3dinput-qaxis.html">Qt3DInput::QAxis</a></span> *&gt; QLogicalDevice::<span class="name">axes</span>() const</h3>
+<p>Returns the list of axis.</p>
+<!-- @@@axes -->
+<!-- $$$removeAction[overload1]$$$removeActionQt3DInput::QAction* -->
+<h3 class="fn" id="removeAction"><a name="removeAction"></a><span class="type">void</span> QLogicalDevice::<span class="name">removeAction</span>(<span class="type"><a href="qt3dinput-qaction.html">Qt3DInput::QAction</a></span> *<i>action</i>)</h3>
+<p>Remove an <i>action</i> from the list of actions.</p>
+<!-- @@@removeAction -->
+<!-- $$$removeAxis[overload1]$$$removeAxisQt3DInput::QAxis* -->
+<h3 class="fn" id="removeAxis"><a name="removeAxis"></a><span class="type">void</span> QLogicalDevice::<span class="name">removeAxis</span>(<span class="type"><a href="qt3dinput-qaxis.html">Qt3DInput::QAxis</a></span> *<i>axis</i>)</h3>
+<p>Remove an <i>axis</i> drom the list of axis.</p>
+<!-- @@@removeAxis -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qshaderprogrambuilder.cpp -->
+  <title>QShaderProgramBuilder Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QShaderProgramBuilder</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QShaderProgramBuilder Class</h1>
+<span class="small-subtitle">(<a href="qt3drender-qshaderprogrambuilder.html">Qt3DRender::QShaderProgramBuilder</a>)<br/></span>
+<!-- $$$QShaderProgramBuilder-brief -->
+<p>Generates a Shader Program content from loaded graphs. <a href="#details">More...</a></p>
+<!-- @@@QShaderProgramBuilder -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QShaderProgramBuilder&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3drender</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.10</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-shaderprogrambuilder.html">ShaderProgramBuilder</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></td></tr></table></div><p>This class was introduced in  Qt 5.10.</p>
+<ul>
+<li><a href="qt3drender-qshaderprogrambuilder-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qt3drender-qshaderprogrambuilder.html#computeShaderGraph-prop">computeShaderGraph</a></b> : QUrl</li>
+<li class="fn"><b><a href="qt3drender-qshaderprogrambuilder.html#enabledLayers-prop">enabledLayers</a></b> : QStringList</li>
+<li class="fn"><b><a href="qt3drender-qshaderprogrambuilder.html#fragmentShaderGraph-prop">fragmentShaderGraph</a></b> : QUrl</li>
+<li class="fn"><b><a href="qt3drender-qshaderprogrambuilder.html#geometryShaderGraph-prop">geometryShaderGraph</a></b> : QUrl</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qt3drender-qshaderprogrambuilder.html#shaderProgram-prop">shaderProgram</a></b> : Qt3DRender::QShaderProgram*</li>
+<li class="fn"><b><a href="qt3drender-qshaderprogrambuilder.html#tessellationControlShaderGraph-prop">tessellationControlShaderGraph</a></b> : QUrl</li>
+<li class="fn"><b><a href="qt3drender-qshaderprogrambuilder.html#tessellationEvaluationShaderGraph-prop">tessellationEvaluationShaderGraph</a></b> : QUrl</li>
+<li class="fn"><b><a href="qt3drender-qshaderprogrambuilder.html#vertexShaderGraph-prop">vertexShaderGraph</a></b> : QUrl</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#computeShaderCode-prop">computeShaderCode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QUrl </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#computeShaderGraph-prop">computeShaderGraph</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#enabledLayers-prop">enabledLayers</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#fragmentShaderCode-prop">fragmentShaderCode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QUrl </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#fragmentShaderGraph-prop">fragmentShaderGraph</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#geometryShaderCode-prop">geometryShaderCode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QUrl </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#geometryShaderGraph-prop">geometryShaderGraph</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QShaderProgram *</td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#shaderProgram-prop">shaderProgram</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#tessellationControlShaderCode-prop">tessellationControlShaderCode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QUrl </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#tessellationControlShaderGraph-prop">tessellationControlShaderGraph</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#tessellationEvaluationShaderCode-prop">tessellationEvaluationShaderCode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QUrl </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#tessellationEvaluationShaderGraph-prop">tessellationEvaluationShaderGraph</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#vertexShaderCode-prop">vertexShaderCode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QUrl </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#vertexShaderGraph-prop">vertexShaderGraph</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#computeShaderGraph-prop">setComputeShaderGraph</a></b>(const QUrl &amp;<i>computeShaderGraph</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#enabledLayers-prop">setEnabledLayers</a></b>(const QStringList &amp;<i>layers</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#fragmentShaderGraph-prop">setFragmentShaderGraph</a></b>(const QUrl &amp;<i>fragmentShaderGraph</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#geometryShaderGraph-prop">setGeometryShaderGraph</a></b>(const QUrl &amp;<i>geometryShaderGraph</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#shaderProgram-prop">setShaderProgram</a></b>(Qt3DRender::QShaderProgram *<i>program</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#tessellationControlShaderGraph-prop">setTessellationControlShaderGraph</a></b>(const QUrl &amp;<i>tessellationControlShaderGraph</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#tessellationEvaluationShaderGraph-prop">setTessellationEvaluationShaderGraph</a></b>(const QUrl &amp;<i>tessellationEvaluationShaderGraph</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#vertexShaderGraph-prop">setVertexShaderGraph</a></b>(const QUrl &amp;<i>vertexShaderGraph</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#computeShaderCode-prop">computeShaderCodeChanged</a></b>(const QByteArray &amp;<i>computeShaderCode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#computeShaderGraph-prop">computeShaderGraphChanged</a></b>(const QUrl &amp;<i>computeShaderGraph</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#enabledLayers-prop">enabledLayersChanged</a></b>(const QStringList &amp;<i>layers</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#fragmentShaderCode-prop">fragmentShaderCodeChanged</a></b>(const QByteArray &amp;<i>fragmentShaderCode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#fragmentShaderGraph-prop">fragmentShaderGraphChanged</a></b>(const QUrl &amp;<i>fragmentShaderGraph</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#geometryShaderCode-prop">geometryShaderCodeChanged</a></b>(const QByteArray &amp;<i>geometryShaderCode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#geometryShaderGraph-prop">geometryShaderGraphChanged</a></b>(const QUrl &amp;<i>geometryShaderGraph</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#shaderProgram-prop">shaderProgramChanged</a></b>(Qt3DRender::QShaderProgram *<i>shaderProgram</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#tessellationControlShaderCode-prop">tessellationControlShaderCodeChanged</a></b>(const QByteArray &amp;<i>tessellationControlShaderCode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#tessellationControlShaderGraph-prop">tessellationControlShaderGraphChanged</a></b>(const QUrl &amp;<i>tessellationControlShaderGraph</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#tessellationEvaluationShaderCode-prop">tessellationEvaluationShaderCodeChanged</a></b>(const QByteArray &amp;<i>tessellationEvaluationShaderCode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#tessellationEvaluationShaderGraph-prop">tessellationEvaluationShaderGraphChanged</a></b>(const QUrl &amp;<i>tessellationEvaluationShaderGraph</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#vertexShaderCode-prop">vertexShaderCodeChanged</a></b>(const QByteArray &amp;<i>vertexShaderCode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qshaderprogrambuilder.html#vertexShaderGraph-prop">vertexShaderGraphChanged</a></b>(const QUrl &amp;<i>vertexShaderGraph</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QShaderProgramBuilder-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A shader program builder consists of several different shader graphs used to generate shader code.</p>
+</div>
+<!-- @@@QShaderProgramBuilder -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$computeShaderGraph-prop$$$computeShaderGraph$$$setComputeShaderGraphconstQUrl&$$$computeShaderGraphChangedconstQUrl& -->
+<h3 class="fn" id="computeShaderGraph-prop"><a name="computeShaderGraph-prop"></a><span class="name">computeShaderGraph</span> : <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span></h3>
+<p>Holds the URL to the compute shader graph used by this shader program builder.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QUrl </td><td class="memItemRight bottomAlign"><span class="name"><b>computeShaderGraph</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setComputeShaderGraph</b></span>(const QUrl &amp;<i>computeShaderGraph</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>computeShaderGraphChanged</b></span>(const QUrl &amp;<i>computeShaderGraph</i>)</td></tr>
+</table></div>
+<!-- @@@computeShaderGraph -->
+<!-- $$$enabledLayers-prop$$$enabledLayers$$$setEnabledLayersconstQStringList&$$$enabledLayersChangedconstQStringList& -->
+<h3 class="fn" id="enabledLayers-prop"><a name="enabledLayers-prop"></a><span class="name">enabledLayers</span> : <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span></h3>
+<p>Holds the list of layers this builder will activate on the shader graphs during code generation.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QStringList </td><td class="memItemRight bottomAlign"><span class="name"><b>enabledLayers</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setEnabledLayers</b></span>(const QStringList &amp;<i>layers</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>enabledLayersChanged</b></span>(const QStringList &amp;<i>layers</i>)</td></tr>
+</table></div>
+<!-- @@@enabledLayers -->
+<!-- $$$fragmentShaderGraph-prop$$$fragmentShaderGraph$$$setFragmentShaderGraphconstQUrl&$$$fragmentShaderGraphChangedconstQUrl& -->
+<h3 class="fn" id="fragmentShaderGraph-prop"><a name="fragmentShaderGraph-prop"></a><span class="name">fragmentShaderGraph</span> : <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span></h3>
+<p>Holds the URL to the fragment shader graph used by this shader program builder.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QUrl </td><td class="memItemRight bottomAlign"><span class="name"><b>fragmentShaderGraph</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setFragmentShaderGraph</b></span>(const QUrl &amp;<i>fragmentShaderGraph</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>fragmentShaderGraphChanged</b></span>(const QUrl &amp;<i>fragmentShaderGraph</i>)</td></tr>
+</table></div>
+<!-- @@@fragmentShaderGraph -->
+<!-- $$$geometryShaderGraph-prop$$$geometryShaderGraph$$$setGeometryShaderGraphconstQUrl&$$$geometryShaderGraphChangedconstQUrl& -->
+<h3 class="fn" id="geometryShaderGraph-prop"><a name="geometryShaderGraph-prop"></a><span class="name">geometryShaderGraph</span> : <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span></h3>
+<p>Holds the URL to the geometry shader graph used by this shader program builder.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QUrl </td><td class="memItemRight bottomAlign"><span class="name"><b>geometryShaderGraph</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setGeometryShaderGraph</b></span>(const QUrl &amp;<i>geometryShaderGraph</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>geometryShaderGraphChanged</b></span>(const QUrl &amp;<i>geometryShaderGraph</i>)</td></tr>
+</table></div>
+<!-- @@@geometryShaderGraph -->
+<!-- $$$shaderProgram-prop$$$shaderProgram$$$setShaderProgramQt3DRender::QShaderProgram*$$$shaderProgramChangedQt3DRender::QShaderProgram* -->
+<h3 class="fn" id="shaderProgram-prop"><a name="shaderProgram-prop"></a><span class="name">shaderProgram</span> : <span class="type"><a href="qt3drender-qshaderprogram.html">Qt3DRender::QShaderProgram</a></span>*</h3>
+<p>Holds the shader program on which this builder generates code.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QShaderProgram *</td><td class="memItemRight bottomAlign"><span class="name"><b>shaderProgram</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setShaderProgram</b></span>(Qt3DRender::QShaderProgram *<i>program</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>shaderProgramChanged</b></span>(Qt3DRender::QShaderProgram *<i>shaderProgram</i>)</td></tr>
+</table></div>
+<!-- @@@shaderProgram -->
+<!-- $$$tessellationControlShaderGraph-prop$$$tessellationControlShaderGraph$$$setTessellationControlShaderGraphconstQUrl&$$$tessellationControlShaderGraphChangedconstQUrl& -->
+<h3 class="fn" id="tessellationControlShaderGraph-prop"><a name="tessellationControlShaderGraph-prop"></a><span class="name">tessellationControlShaderGraph</span> : <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span></h3>
+<p>Holds the URL to the tesselation control shader graph used by this shader program builder.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QUrl </td><td class="memItemRight bottomAlign"><span class="name"><b>tessellationControlShaderGraph</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setTessellationControlShaderGraph</b></span>(const QUrl &amp;<i>tessellationControlShaderGraph</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>tessellationControlShaderGraphChanged</b></span>(const QUrl &amp;<i>tessellationControlShaderGraph</i>)</td></tr>
+</table></div>
+<!-- @@@tessellationControlShaderGraph -->
+<!-- $$$tessellationEvaluationShaderGraph-prop$$$tessellationEvaluationShaderGraph$$$setTessellationEvaluationShaderGraphconstQUrl&$$$tessellationEvaluationShaderGraphChangedconstQUrl& -->
+<h3 class="fn" id="tessellationEvaluationShaderGraph-prop"><a name="tessellationEvaluationShaderGraph-prop"></a><span class="name">tessellationEvaluationShaderGraph</span> : <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span></h3>
+<p>Holds the URL to the tesselation evaluation shader graph used by this shader program builder.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QUrl </td><td class="memItemRight bottomAlign"><span class="name"><b>tessellationEvaluationShaderGraph</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setTessellationEvaluationShaderGraph</b></span>(const QUrl &amp;<i>tessellationEvaluationShaderGraph</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>tessellationEvaluationShaderGraphChanged</b></span>(const QUrl &amp;<i>tessellationEvaluationShaderGraph</i>)</td></tr>
+</table></div>
+<!-- @@@tessellationEvaluationShaderGraph -->
+<!-- $$$vertexShaderGraph-prop$$$vertexShaderGraph$$$setVertexShaderGraphconstQUrl&$$$vertexShaderGraphChangedconstQUrl& -->
+<h3 class="fn" id="vertexShaderGraph-prop"><a name="vertexShaderGraph-prop"></a><span class="name">vertexShaderGraph</span> : <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span></h3>
+<p>Holds the URL to the vertex shader graph used by this shader program builder.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QUrl </td><td class="memItemRight bottomAlign"><span class="name"><b>vertexShaderGraph</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setVertexShaderGraph</b></span>(const QUrl &amp;<i>vertexShaderGraph</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>vertexShaderGraphChanged</b></span>(const QUrl &amp;<i>vertexShaderGraph</i>)</td></tr>
+</table></div>
+<!-- @@@vertexShaderGraph -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

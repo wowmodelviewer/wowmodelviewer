@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcborvalue.cpp -->
+  <title>QCborParserError Struct | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QCborParserError</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-variables">Public Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCborParserError Struct</h1>
+<!-- $$$QCborParserError-brief -->
+<p>The <a href="qcborparsererror.html">QCborParserError</a> is used by <a href="qcborvalue.html">QCborValue</a> to report a parsing error. <a href="#details">More...</a></p>
+<!-- @@@QCborParserError -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QCborParserError&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.12</td></tr></table></div><p>This struct was introduced in  Qt 5.12.</p>
+<ul>
+<li><a href="qcborparsererror-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this struct are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qcborparsererror.html#errorString">errorString</a></b>() const</td></tr>
+</table></div>
+<a name="public-variables"></a>
+<h2 id="public-variables">Public Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QCborError </td><td class="memItemRight bottomAlign"><b><a href="qcborparsererror.html#error-var">error</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint64 </td><td class="memItemRight bottomAlign"><b><a href="qcborparsererror.html#offset-var">offset</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCborParserError-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This class is used by <a href="qcborvalue.html#fromCbor-1">QCborValue::fromCbor</a>(const QByteArray &amp;ba, QCborParserError *error) to report a parser error and the byte offset where the error was detected.</p>
+</div>
+<p><b>See also </b><a href="qcborvalue.html">QCborValue</a> and <a href="qcborerror.html">QCborError</a>.</p>
+<!-- @@@QCborParserError -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$errorString[overload1]$$$errorString -->
+<h3 class="fn" id="errorString"><a name="errorString"></a><span class="type"><a href="qstring.html">QString</a></span> QCborParserError::<span class="name">errorString</span>() const</h3>
+<p>Returns a string representation of the error code. This string is not translated.</p>
+<p><b>See also </b><a href="qcborerror.html#toString">QCborError::toString</a>() and <a href="qcborvalue.html#fromCbor">QCborValue::fromCbor</a>().</p>
+<!-- @@@errorString -->
+</div>
+<div class="vars">
+<h2>Member Variable Documentation</h2>
+<!-- $$$error -->
+<h3 class="fn" id="error-var"><a name="error-var"></a><span class="type"><a href="qcborerror.html">QCborError</a></span> QCborParserError::<span class="name">error</span></h3>
+<p>This field contains the error code that indicates what decoding problem was found.</p>
+<p><b>See also </b><a href="qcborvalue.html#fromCbor">QCborValue::fromCbor</a>().</p>
+<!-- @@@error -->
+<!-- $$$offset -->
+<h3 class="fn" id="offset-var"><a name="offset-var"></a><span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> QCborParserError::<span class="name">offset</span></h3>
+<p>This field contains the offset from the beginning of the data where the error was detected. The offset should point to the beginning of the item that contained the error, even if the error itself was elsewhere (for example, for UTF-8 decoding issues).</p>
+<p><b>See also </b><a href="qcborvalue.html#fromCbor">QCborValue::fromCbor</a>().</p>
+<!-- @@@offset -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

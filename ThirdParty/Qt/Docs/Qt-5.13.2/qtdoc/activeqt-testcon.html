@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- activeqt-testcon.qdoc -->
+  <title>testcon - An ActiveX Test Container (ActiveQt) | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >testcon - An ActiveX Test Container (ActiveQt)</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">testcon - An ActiveX Test Container (ActiveQt)</h1>
+<span class="subtitle"></span>
+<!-- $$$activeqt-testcon.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>This application implements a generic test container for ActiveX controls. You can insert ActiveX controls installed on your system, and execute methods and modify properties. The container will log information about events and property changes as well as debug output in the log window.</p>
+<p>Parts of the code use internals of the Qt meta object and <a href="../activeqt/activeqt-index.html">ActiveQt</a> framework and are not recommended to be used in application code.</p>
+<p>Use the application to view the slots, signals and porperties available through the <a href="../activeqt/qaxwidget.html">QAxWidget</a> class when instantiated with a certain ActiveX, and to test ActiveX controls you implement or want to use in your Qt application.</p>
+<p>The application can load and execute script files in JavaScript, VBScript, Perl and Python (if installed) to automate the controls loaded. Example script files using the QAxWidget2 class are available in the <code>scripts</code> subdirectory.</p>
+<p>Note that the qmake project of this example includes a resource file <code>testcon.rc</code> with a version resource. This is required by some ActiveX controls (ie. Shockwave ActiveX Controls), which might crash or misbehave otherwise if such version information is missing.</p>
+<p>To build the tool you must first build the <a href="../activeqt/qaxcontainer-module.html">QAxContainer</a> and the <a href="../activeqt/qaxserver-module.html">QAxServer</a> libraries. Then run your make tool in <code>tools/testcon</code> and run the resulting <code>testcon.exe</code>.</p>
+</div>
+<!-- @@@activeqt-testcon.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

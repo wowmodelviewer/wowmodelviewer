@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qsgtexture.cpp -->
+  <title>QSGTexture Class | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-module.html">C++ Classes</a></td><td >QSGTexture</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#texture-atlasses">Texture Atlasses</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSGTexture Class</h1>
+<!-- $$$QSGTexture-brief -->
+<p>The <a href="qsgtexture.html">QSGTexture</a> class is a baseclass for textures used in the scene graph. <a href="#details">More...</a></p>
+<!-- @@@QSGTexture -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QSGTexture&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += quick</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qsgdynamictexture.html">QSGDynamicTexture</a></p>
+</td></tr></table></div><ul>
+<li><a href="qsgtexture-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#AnisotropyLevel-enum">AnisotropyLevel</a></b> { AnisotropyNone, Anisotropy2x, Anisotropy4x, Anisotropy8x, Anisotropy16x }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#Filtering-enum">Filtering</a></b> { None, Nearest, Linear }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#WrapMode-enum">WrapMode</a></b> { Repeat, ClampToEdge, MirroredRepeat }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#QSGTexture">QSGTexture</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#dtor.QSGTexture">~QSGTexture</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSGTexture::AnisotropyLevel </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#anisotropyLevel">anisotropyLevel</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#bind">bind</a></b>() = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRectF </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#convertToNormalizedSourceRect">convertToNormalizedSourceRect</a></b>(const QRectF &amp;<i>rect</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSGTexture::Filtering </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#filtering">filtering</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#hasAlphaChannel">hasAlphaChannel</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#hasMipmaps">hasMipmaps</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSGTexture::WrapMode </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#horizontalWrapMode">horizontalWrapMode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#isAtlasTexture">isAtlasTexture</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSGTexture::Filtering </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#mipmapFiltering">mipmapFiltering</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QRectF </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#normalizedTextureSubRect">normalizedTextureSubRect</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSGTexture *</td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#removedFromAtlas">removedFromAtlas</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#setAnisotropyLevel">setAnisotropyLevel</a></b>(QSGTexture::AnisotropyLevel <i>level</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#setFiltering">setFiltering</a></b>(QSGTexture::Filtering <i>filter</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#setHorizontalWrapMode">setHorizontalWrapMode</a></b>(QSGTexture::WrapMode <i>hwrap</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#setMipmapFiltering">setMipmapFiltering</a></b>(QSGTexture::Filtering <i>filter</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#setVerticalWrapMode">setVerticalWrapMode</a></b>(QSGTexture::WrapMode <i>vwrap</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#textureId">textureId</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSize </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#textureSize">textureSize</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#updateBindOptions">updateBindOptions</a></b>(bool <i>force</i> = false)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSGTexture::WrapMode </td><td class="memItemRight bottomAlign"><b><a href="qsgtexture.html#verticalWrapMode">verticalWrapMode</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSGTexture-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Users can freely implement their own texture classes to support arbitrary input textures, such as YUV video frames or 8 bit alpha masks. The scene graph backend provides a default implementation of normal color textures. As the implementation of these may be hardware specific, they are constructed via the factory function <a href="qquickwindow.html#createTextureFromImage">QQuickWindow::createTextureFromImage</a>().</p>
+<p>The texture is a wrapper around an OpenGL texture, which texture id is given by <a href="qsgtexture.html#textureId">textureId</a>() and which size in pixels is given by <a href="qsgtexture.html#textureSize">textureSize</a>(). <a href="qsgtexture.html#hasAlphaChannel">hasAlphaChannel</a>() reports if the texture contains opacity values and <a href="qsgtexture.html#hasMipmaps">hasMipmaps</a>() reports if the texture contains mipmap levels.</p>
+<p>To use a texture, call the <a href="qsgtexture.html#bind">bind</a>() function. The texture parameters specifying how the texture is bound, can be specified with <a href="qsgtexture.html#setMipmapFiltering">setMipmapFiltering</a>(), <a href="qsgtexture.html#setFiltering">setFiltering</a>(), <a href="qsgtexture.html#setHorizontalWrapMode">setHorizontalWrapMode</a>() and <a href="qsgtexture.html#setVerticalWrapMode">setVerticalWrapMode</a>(). The texture will internally try to store these values to minimize the OpenGL state changes when the texture is bound.</p>
+<a name="texture-atlasses"></a>
+<h3 id="texture-atlasses">Texture Atlasses</h3>
+<p>Some scene graph backends use texture atlasses, grouping multiple small textures into one large texture. If this is the case, the function <a href="qsgtexture.html#isAtlasTexture">isAtlasTexture</a>() will return true. Atlasses are used to aid the rendering algorithm to do better sorting which increases performance. The location of the texture inside the atlas is given with the <a href="qsgtexture.html#normalizedTextureSubRect">normalizedTextureSubRect</a>() function.</p>
+<p>If the texture is used in such a way that atlas is not preferable, the function <a href="qsgtexture.html#removedFromAtlas">removedFromAtlas</a>() can be used to extract a non-atlassed copy.</p>
+<p><b>Note: </b>All classes with QSG prefix should be used solely on the scene graph's rendering thread. See <a href="qtquick-visualcanvas-scenegraph.html#scene-graph-and-rendering">Scene Graph and Rendering</a> for more information.</p></div>
+<p><b>See also </b><a href="qtquick-scenegraph-textureinsgnode-example.html">Scene Graph - Rendering FBOs</a> and <a href="qtquick-scenegraph-textureinthread-example.html">Scene Graph - Rendering FBOs in a thread</a>.</p>
+<!-- @@@QSGTexture -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$AnisotropyLevel$$$AnisotropyNone$$$Anisotropy2x$$$Anisotropy4x$$$Anisotropy8x$$$Anisotropy16x -->
+<h3 class="fn" id="AnisotropyLevel-enum"><a name="AnisotropyLevel-enum"></a>enum QSGTexture::<span class="name">AnisotropyLevel</span></h3>
+<p>Specifies the anisotropic filtering level to be used when the texture is not screen aligned.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QSGTexture::AnisotropyNone</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">No anisotropic filtering.</td></tr>
+<tr><td class="topAlign"><code>QSGTexture::Anisotropy2x</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">2x anisotropic filtering.</td></tr>
+<tr><td class="topAlign"><code>QSGTexture::Anisotropy4x</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">4x anisotropic filtering.</td></tr>
+<tr><td class="topAlign"><code>QSGTexture::Anisotropy8x</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">8x anisotropic filtering.</td></tr>
+<tr><td class="topAlign"><code>QSGTexture::Anisotropy16x</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">16x anisotropic filtering.</td></tr>
+</table></div>
+<p>This enum was introduced or modified in  Qt 5.9.</p>
+<!-- @@@AnisotropyLevel -->
+<!-- $$$Filtering$$$None$$$Nearest$$$Linear -->
+<h3 class="fn" id="Filtering-enum"><a name="Filtering-enum"></a>enum QSGTexture::<span class="name">Filtering</span></h3>
+<p>Specifies how sampling of texels should filter when texture coordinates are not pixel aligned.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QSGTexture::None</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">No filtering should occur. This value is only used together with <a href="qsgtexture.html#setMipmapFiltering">setMipmapFiltering</a>().</td></tr>
+<tr><td class="topAlign"><code>QSGTexture::Nearest</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Sampling returns the nearest texel.</td></tr>
+<tr><td class="topAlign"><code>QSGTexture::Linear</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Sampling returns a linear interpolation of the neighboring texels.</td></tr>
+</table></div>
+<!-- @@@Filtering -->
+<!-- $$$WrapMode$$$Repeat$$$ClampToEdge$$$MirroredRepeat -->
+<h3 class="fn" id="WrapMode-enum"><a name="WrapMode-enum"></a>enum QSGTexture::<span class="name">WrapMode</span></h3>
+<p>Specifies how the texture should treat texture coordinates.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QSGTexture::Repeat</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Only the fractional part of the texture coordinate is used, causing values above 1 and below 0 to repeat.</td></tr>
+<tr><td class="topAlign"><code>QSGTexture::ClampToEdge</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Values above 1 are clamped to 1 and values below 0 are clamped to 0.</td></tr>
+<tr><td class="topAlign"><code>QSGTexture::MirroredRepeat</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">When the texture coordinate is even, only the fractional part is used. When odd, the texture coordinate is set to <code>1 - fractional part</code>. This value has been introduced in Qt 5.10.</td></tr>
+</table></div>
+<!-- @@@WrapMode -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QSGTexture[overload1]$$$QSGTexture -->
+<h3 class="fn" id="QSGTexture"><a name="QSGTexture"></a>QSGTexture::<span class="name">QSGTexture</span>()</h3>
+<p>Constructs the <a href="qsgtexture.html">QSGTexture</a> base class.</p>
+<!-- @@@QSGTexture -->
+<!-- $$$~QSGTexture[overload1]$$$~QSGTexture -->
+<h3 class="fn" id="dtor.QSGTexture"><a name="dtor.QSGTexture"></a><code>[override virtual] </code>QSGTexture::<span class="name">~QSGTexture</span>()</h3>
+<p>Destroys the <a href="qsgtexture.html">QSGTexture</a>.</p>
+<!-- @@@~QSGTexture -->
+<!-- $$$anisotropyLevel[overload1]$$$anisotropyLevel -->
+<h3 class="fn" id="anisotropyLevel"><a name="anisotropyLevel"></a><span class="type"><a href="qsgtexture.html#AnisotropyLevel-enum">QSGTexture::AnisotropyLevel</a></span> QSGTexture::<span class="name">anisotropyLevel</span>() const</h3>
+<p>Returns the anisotropy level in use for filtering this texture.</p>
+<p>This function was introduced in  Qt 5.9.</p>
+<p><b>See also </b><a href="qsgtexture.html#setAnisotropyLevel">setAnisotropyLevel</a>().</p>
+<!-- @@@anisotropyLevel -->
+<!-- $$$bind[overload1]$$$bind -->
+<h3 class="fn" id="bind"><a name="bind"></a><code>[pure virtual] </code><span class="type">void</span> QSGTexture::<span class="name">bind</span>()</h3>
+<p>Call this function to bind this texture to the current texture target.</p>
+<p>Binding a texture may also include uploading the texture data from a previously set <a href="../qtgui/qimage.html">QImage</a>.</p>
+<p><b>Warning:</b> This function can only be called from the rendering thread.</p>
+<!-- @@@bind -->
+<!-- $$$convertToNormalizedSourceRect[overload1]$$$convertToNormalizedSourceRectconstQRectF& -->
+<h3 class="fn" id="convertToNormalizedSourceRect"><a name="convertToNormalizedSourceRect"></a><span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> QSGTexture::<span class="name">convertToNormalizedSourceRect</span>(const <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> &amp;<i>rect</i>) const</h3>
+<p>Returns <i>rect</i> converted to normalized coordinates.</p>
+<p><b>See also </b><a href="qsgtexture.html#normalizedTextureSubRect">normalizedTextureSubRect</a>().</p>
+<!-- @@@convertToNormalizedSourceRect -->
+<!-- $$$filtering[overload1]$$$filtering -->
+<h3 class="fn" id="filtering"><a name="filtering"></a><span class="type"><a href="qsgtexture.html#Filtering-enum">QSGTexture::Filtering</a></span> QSGTexture::<span class="name">filtering</span>() const</h3>
+<p>Returns the sampling mode to be used for this texture.</p>
+<p><b>See also </b><a href="qsgtexture.html#setFiltering">setFiltering</a>().</p>
+<!-- @@@filtering -->
+<!-- $$$hasAlphaChannel[overload1]$$$hasAlphaChannel -->
+<h3 class="fn" id="hasAlphaChannel"><a name="hasAlphaChannel"></a><code>[pure virtual] </code><span class="type">bool</span> QSGTexture::<span class="name">hasAlphaChannel</span>() const</h3>
+<p>Returns true if the texture data contains an alpha channel.</p>
+<!-- @@@hasAlphaChannel -->
+<!-- $$$hasMipmaps[overload1]$$$hasMipmaps -->
+<h3 class="fn" id="hasMipmaps"><a name="hasMipmaps"></a><code>[pure virtual] </code><span class="type">bool</span> QSGTexture::<span class="name">hasMipmaps</span>() const</h3>
+<p>Returns true if the texture data contains mipmap levels.</p>
+<!-- @@@hasMipmaps -->
+<!-- $$$horizontalWrapMode[overload1]$$$horizontalWrapMode -->
+<h3 class="fn" id="horizontalWrapMode"><a name="horizontalWrapMode"></a><span class="type"><a href="qsgtexture.html#WrapMode-enum">QSGTexture::WrapMode</a></span> QSGTexture::<span class="name">horizontalWrapMode</span>() const</h3>
+<p>Returns the horizontal wrap mode to be used for this texture.</p>
+<p><b>See also </b><a href="qsgtexture.html#setHorizontalWrapMode">setHorizontalWrapMode</a>().</p>
+<!-- @@@horizontalWrapMode -->
+<!-- $$$isAtlasTexture[overload1]$$$isAtlasTexture -->
+<h3 class="fn" id="isAtlasTexture"><a name="isAtlasTexture"></a><code>[virtual] </code><span class="type">bool</span> QSGTexture::<span class="name">isAtlasTexture</span>() const</h3>
+<p>Returns weither this texture is part of an atlas or not.</p>
+<p>The default implementation returns false.</p>
+<!-- @@@isAtlasTexture -->
+<!-- $$$mipmapFiltering[overload1]$$$mipmapFiltering -->
+<h3 class="fn" id="mipmapFiltering"><a name="mipmapFiltering"></a><span class="type"><a href="qsgtexture.html#Filtering-enum">QSGTexture::Filtering</a></span> QSGTexture::<span class="name">mipmapFiltering</span>() const</h3>
+<p>Returns whether mipmapping should be used when sampling from this texture.</p>
+<p><b>See also </b><a href="qsgtexture.html#setMipmapFiltering">setMipmapFiltering</a>().</p>
+<!-- @@@mipmapFiltering -->
+<!-- $$$normalizedTextureSubRect[overload1]$$$normalizedTextureSubRect -->
+<h3 class="fn" id="normalizedTextureSubRect"><a name="normalizedTextureSubRect"></a><code>[virtual] </code><span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> QSGTexture::<span class="name">normalizedTextureSubRect</span>() const</h3>
+<p>Returns the rectangle inside <a href="qsgtexture.html#textureSize">textureSize</a>() that this texture represents in normalized coordinates.</p>
+<p>The default implementation returns a rect at position (0, 0) with width and height of 1.</p>
+<!-- @@@normalizedTextureSubRect -->
+<!-- $$$removedFromAtlas[overload1]$$$removedFromAtlas -->
+<h3 class="fn" id="removedFromAtlas"><a name="removedFromAtlas"></a><code>[virtual] </code><span class="type"><a href="qsgtexture.html#QSGTexture">QSGTexture</a></span> *QSGTexture::<span class="name">removedFromAtlas</span>() const</h3>
+<p>This function returns a copy of the current texture which is removed from its atlas.</p>
+<p>The current texture remains unchanged, so texture coordinates do not need to be updated.</p>
+<p>Removing a texture from an atlas is primarily useful when passing it to a shader that operates on the texture coordinates 0-1 instead of the texture subrect inside the atlas.</p>
+<p>If the texture is not part of a texture atlas, this function returns <code>nullptr</code>.</p>
+<p>Implementations of this function are recommended to return the same instance for multiple calls to limit memory usage.</p>
+<p><b>Warning:</b> This function can only be called from the rendering thread.</p>
+<!-- @@@removedFromAtlas -->
+<!-- $$$setAnisotropyLevel[overload1]$$$setAnisotropyLevelQSGTexture::AnisotropyLevel -->
+<h3 class="fn" id="setAnisotropyLevel"><a name="setAnisotropyLevel"></a><span class="type">void</span> QSGTexture::<span class="name">setAnisotropyLevel</span>(<span class="type"><a href="qsgtexture.html#AnisotropyLevel-enum">QSGTexture::AnisotropyLevel</a></span> <i>level</i>)</h3>
+<p>Sets the level of anisotropic filtering to be used for the upcoming <a href="qsgtexture.html#bind">bind</a>() call to <i>level</i>. The default value is <a href="qsgtexture.html#AnisotropyLevel-enum">QSGTexture::AnisotropyNone</a>, which means no anisotropic filtering is enabled.</p>
+<p>This function was introduced in  Qt 5.9.</p>
+<p><b>See also </b><a href="qsgtexture.html#anisotropyLevel">anisotropyLevel</a>().</p>
+<!-- @@@setAnisotropyLevel -->
+<!-- $$$setFiltering[overload1]$$$setFilteringQSGTexture::Filtering -->
+<h3 class="fn" id="setFiltering"><a name="setFiltering"></a><span class="type">void</span> QSGTexture::<span class="name">setFiltering</span>(<span class="type"><a href="qsgtexture.html#Filtering-enum">QSGTexture::Filtering</a></span> <i>filter</i>)</h3>
+<p>Sets the sampling mode to be used for the upcoming <a href="qsgtexture.html#bind">bind</a>() call to <i>filter</i>.</p>
+<p><b>See also </b><a href="qsgtexture.html#filtering">filtering</a>().</p>
+<!-- @@@setFiltering -->
+<!-- $$$setHorizontalWrapMode[overload1]$$$setHorizontalWrapModeQSGTexture::WrapMode -->
+<h3 class="fn" id="setHorizontalWrapMode"><a name="setHorizontalWrapMode"></a><span class="type">void</span> QSGTexture::<span class="name">setHorizontalWrapMode</span>(<span class="type"><a href="qsgtexture.html#WrapMode-enum">QSGTexture::WrapMode</a></span> <i>hwrap</i>)</h3>
+<p>Sets the horizontal wrap mode to be used for the upcoming <a href="qsgtexture.html#bind">bind</a>() call to <i>hwrap</i></p>
+<p><b>See also </b><a href="qsgtexture.html#horizontalWrapMode">horizontalWrapMode</a>().</p>
+<!-- @@@setHorizontalWrapMode -->
+<!-- $$$setMipmapFiltering[overload1]$$$setMipmapFilteringQSGTexture::Filtering -->
+<h3 class="fn" id="setMipmapFiltering"><a name="setMipmapFiltering"></a><span class="type">void</span> QSGTexture::<span class="name">setMipmapFiltering</span>(<span class="type"><a href="qsgtexture.html#Filtering-enum">QSGTexture::Filtering</a></span> <i>filter</i>)</h3>
+<p>Sets the mipmap sampling mode to be used for the upcoming <a href="qsgtexture.html#bind">bind</a>() call to <i>filter</i>.</p>
+<p>Setting the mipmap filtering has no effect it the texture does not have mipmaps.</p>
+<p><b>See also </b><a href="qsgtexture.html#mipmapFiltering">mipmapFiltering</a>() and <a href="qsgtexture.html#hasMipmaps">hasMipmaps</a>().</p>
+<!-- @@@setMipmapFiltering -->
+<!-- $$$setVerticalWrapMode[overload1]$$$setVerticalWrapModeQSGTexture::WrapMode -->
+<h3 class="fn" id="setVerticalWrapMode"><a name="setVerticalWrapMode"></a><span class="type">void</span> QSGTexture::<span class="name">setVerticalWrapMode</span>(<span class="type"><a href="qsgtexture.html#WrapMode-enum">QSGTexture::WrapMode</a></span> <i>vwrap</i>)</h3>
+<p>Sets the vertical wrap mode to be used for the upcoming <a href="qsgtexture.html#bind">bind</a>() call to <i>vwrap</i></p>
+<p><b>See also </b><a href="qsgtexture.html#verticalWrapMode">verticalWrapMode</a>().</p>
+<!-- @@@setVerticalWrapMode -->
+<!-- $$$textureId[overload1]$$$textureId -->
+<h3 class="fn" id="textureId"><a name="textureId"></a><code>[pure virtual] </code><span class="type">int</span> QSGTexture::<span class="name">textureId</span>() const</h3>
+<p>Returns the OpenGL texture id for this texture.</p>
+<p>The default value is 0, indicating that it is an invalid texture id.</p>
+<p>The function should at all times return the correct texture id.</p>
+<p><b>Warning:</b> This function can only be called from the rendering thread.</p>
+<!-- @@@textureId -->
+<!-- $$$textureSize[overload1]$$$textureSize -->
+<h3 class="fn" id="textureSize"><a name="textureSize"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QSGTexture::<span class="name">textureSize</span>() const</h3>
+<p>Returns the size of the texture.</p>
+<!-- @@@textureSize -->
+<!-- $$$updateBindOptions[overload1]$$$updateBindOptionsbool -->
+<h3 class="fn" id="updateBindOptions"><a name="updateBindOptions"></a><span class="type">void</span> QSGTexture::<span class="name">updateBindOptions</span>(<span class="type">bool</span> <i>force</i> = false)</h3>
+<p>Update the texture state to match the filtering, mipmap and wrap options currently set.</p>
+<p>If <i>force</i> is true, all properties will be updated regardless of weither they have changed or not.</p>
+<!-- @@@updateBindOptions -->
+<!-- $$$verticalWrapMode[overload1]$$$verticalWrapMode -->
+<h3 class="fn" id="verticalWrapMode"><a name="verticalWrapMode"></a><span class="type"><a href="qsgtexture.html#WrapMode-enum">QSGTexture::WrapMode</a></span> QSGTexture::<span class="name">verticalWrapMode</span>() const</h3>
+<p>Returns the vertical wrap mode to be used for this texture.</p>
+<p><b>See also </b><a href="qsgtexture.html#setVerticalWrapMode">setVerticalWrapMode</a>().</p>
+<!-- @@@verticalWrapMode -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

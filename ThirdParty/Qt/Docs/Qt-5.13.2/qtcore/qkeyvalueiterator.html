@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qiterator.qdoc -->
+  <title>QKeyValueIterator Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QKeyValueIterator</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QKeyValueIterator Class</h1>
+<!-- $$$QKeyValueIterator-brief -->
+<p>Iterator over the key/value pairs of an associative container. <a href="#details">More...</a></p>
+<!-- @@@QKeyValueIterator -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QKeyValueIterator&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.10</td></tr></table></div><p>This class was introduced in  Qt 5.10.</p>
+<ul>
+<li><a href="qkeyvalueiterator-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qkeyvalueiterator.html#QKeyValueIterator-1">QKeyValueIterator</a></b>(Iterator <i>o</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qkeyvalueiterator.html#QKeyValueIterator">QKeyValueIterator</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Iterator </td><td class="memItemRight bottomAlign"><b><a href="qkeyvalueiterator.html#base">base</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> std::pair&lt;Key, T&gt; </td><td class="memItemRight bottomAlign"><b><a href="qkeyvalueiterator.html#operator-2a">operator*</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QKeyValueIterator&lt;Key, T, Iterator&gt; &amp;</td><td class="memItemRight bottomAlign"><b><a href="qkeyvalueiterator.html#operator-2b-2b">operator++</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QKeyValueIterator&lt;Key, T, Iterator&gt; </td><td class="memItemRight bottomAlign"><b><a href="qkeyvalueiterator.html#operator-2b-2b-1">operator++</a></b>(<i>int</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QKeyValueIterator&lt;Key, T, Iterator&gt; &amp;</td><td class="memItemRight bottomAlign"><b><a href="qkeyvalueiterator.html#operator--">operator--</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QKeyValueIterator&lt;Key, T, Iterator&gt; </td><td class="memItemRight bottomAlign"><b><a href="qkeyvalueiterator.html#operator---1">operator--</a></b>(<i>int</i>)</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qkeyvalueiterator.html#operator-not-eq">operator!=</a></b>(QKeyValueIterator&lt;Key, T, Iterator&gt; <i>lhs</i>, QKeyValueIterator&lt;Key, T, Iterator&gt; <i>rhs</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qkeyvalueiterator.html#operator-eq-eq">operator==</a></b>(QKeyValueIterator&lt;Key, T, Iterator&gt; <i>lhs</i>, QKeyValueIterator&lt;Key, T, Iterator&gt; <i>rhs</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QKeyValueIterator-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qkeyvalueiterator.html">QKeyValueIterator</a> class provides an STL-style iterator for returning key/value pairs from associative containers like <a href="qhash.html#qhash">QHash</a> and <a href="qmap.html">QMap</a>. It supports the same API as the STL associative containers, i.e&#x2e; getting a key/value pair when iterating through the container.</p>
+<p>This will allow for better interoperability between <a href="qmap.html">QMap</a>, <a href="qhash.html#qhash">QHash</a> and friends and STL-style algorithms.</p>
+<p><b>Warning:</b> Iterators on implicitly shared containers do not work exactly like STL-iterators. You should avoid copying a container while iterators are active on that container. For more information, read <a href="containers.html#implicit-sharing-iterator-problem">Implicit sharing iterator problem</a>.</p>
+</div>
+<!-- @@@QKeyValueIterator -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QKeyValueIterator$$$QKeyValueIteratorIterator -->
+<h3 class="fn" id="QKeyValueIterator-1"><a name="QKeyValueIterator-1"></a>QKeyValueIterator::<span class="name">QKeyValueIterator</span>(<span class="type">Iterator</span> <i>o</i>)</h3>
+<p>Constructs a <a href="qkeyvalueiterator.html">QKeyValueIterator</a> on top of <i>o</i>.</p>
+<!-- @@@QKeyValueIterator -->
+<!-- $$$QKeyValueIterator[overload1]$$$QKeyValueIterator -->
+<h3 class="fn" id="QKeyValueIterator"><a name="QKeyValueIterator"></a>QKeyValueIterator::<span class="name">QKeyValueIterator</span>()</h3>
+<p>Constructs a default <a href="qkeyvalueiterator.html">QKeyValueIterator</a>.</p>
+<!-- @@@QKeyValueIterator -->
+<!-- $$$base[overload1]$$$base -->
+<h3 class="fn" id="base"><a name="base"></a><span class="type">Iterator</span> QKeyValueIterator::<span class="name">base</span>() const</h3>
+<p>Returns the underlying iterator this <a href="qkeyvalueiterator.html">QKeyValueIterator</a> is based on.</p>
+<!-- @@@base -->
+<!-- $$$operator*[overload1]$$$operator* -->
+<h3 class="fn" id="operator-2a"><a name="operator-2a"></a><span class="type">std::pair</span>&lt;<span class="type">Key</span>, <span class="type">T</span>&gt; QKeyValueIterator::<span class="name">operator*</span>() const</h3>
+<p>Returns the current entry as a pair.</p>
+<!-- @@@operator* -->
+<!-- $$$operator++[overload1]$$$operator++ -->
+<h3 class="fn" id="operator-2b-2b"><a name="operator-2b-2b"></a><span class="type"><a href="qkeyvalueiterator.html#QKeyValueIterator">QKeyValueIterator</a></span>&lt;<span class="type">Key</span>, <span class="type">T</span>, <span class="type">Iterator</span>&gt; &amp;QKeyValueIterator::<span class="name">operator++</span>()</h3>
+<p>The prefix ++ operator (<code>++i</code>) advances the iterator to the next item in the container and returns the iterator.</p>
+<p><b>Note: </b>Advancing the iterator past its container's end() constitutes undefined behavior.</p><p><b>See also </b><a href="qkeyvalueiterator.html#operator--">operator--</a>().</p>
+<!-- @@@operator++ -->
+<!-- $$$operator++$$$operator++int -->
+<h3 class="fn" id="operator-2b-2b-1"><a name="operator-2b-2b-1"></a><span class="type"><a href="qkeyvalueiterator.html#QKeyValueIterator">QKeyValueIterator</a></span>&lt;<span class="type">Key</span>, <span class="type">T</span>, <span class="type">Iterator</span>&gt; QKeyValueIterator::<span class="name">operator++</span>(<i>int</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>The postfix ++ operator (<code>i++</code>) advances the iterator to the next item in the container and returns the iterator's prior value.</p>
+<p><b>Note: </b>Advancing the iterator past its container's end() constitutes undefined behavior.</p><!-- @@@operator++ -->
+<!-- $$$operator--[overload1]$$$operator-- -->
+<h3 class="fn" id="operator--"><a name="operator--"></a><span class="type"><a href="qkeyvalueiterator.html#QKeyValueIterator">QKeyValueIterator</a></span>&lt;<span class="type">Key</span>, <span class="type">T</span>, <span class="type">Iterator</span>&gt; &amp;QKeyValueIterator::<span class="name">operator--</span>()</h3>
+<p>The prefix -- operator (<code>--i</code>) backs the iterator up to the previous item in the container and returns the iterator.</p>
+<p><b>Note: </b>Backing up an iterator to before its container's begin() constitutes undefined behavior.</p><p><b>See also </b><a href="qkeyvalueiterator.html#operator-2b-2b">operator++</a>().</p>
+<!-- @@@operator-- -->
+<!-- $$$operator--$$$operator--int -->
+<h3 class="fn" id="operator---1"><a name="operator---1"></a><span class="type"><a href="qkeyvalueiterator.html#QKeyValueIterator">QKeyValueIterator</a></span>&lt;<span class="type">Key</span>, <span class="type">T</span>, <span class="type">Iterator</span>&gt; QKeyValueIterator::<span class="name">operator--</span>(<i>int</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>The postfix -- operator (<code>i--</code>) backs the iterator up to the previous item in the container and returns the iterator's prior value.</p>
+<p><b>Note: </b>Backing up an iterator to before its container's begin() constitutes undefined behavior.</p><!-- @@@operator-- -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$operator!=[overload1]$$$operator!=QKeyValueIterator<Key,T,Iterator>QKeyValueIterator<Key,T,Iterator> -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> <span class="name">operator!=</span>(<span class="type"><a href="qkeyvalueiterator.html#QKeyValueIterator">QKeyValueIterator</a></span>&lt;<span class="type">Key</span>, <span class="type">T</span>, <span class="type">Iterator</span>&gt; <i>lhs</i>, <span class="type"><a href="qkeyvalueiterator.html#QKeyValueIterator">QKeyValueIterator</a></span>&lt;<span class="type">Key</span>, <span class="type">T</span>, <span class="type">Iterator</span>&gt; <i>rhs</i>)</h3>
+<p>Returns <code>true</code> if <i>rhs</i> points to a different item than <i>lhs</i> otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qkeyvalueiterator.html#operator-eq-eq">operator==</a>().</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==QKeyValueIterator<Key,T,Iterator>QKeyValueIterator<Key,T,Iterator> -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> <span class="name">operator==</span>(<span class="type"><a href="qkeyvalueiterator.html#QKeyValueIterator">QKeyValueIterator</a></span>&lt;<span class="type">Key</span>, <span class="type">T</span>, <span class="type">Iterator</span>&gt; <i>lhs</i>, <span class="type"><a href="qkeyvalueiterator.html#QKeyValueIterator">QKeyValueIterator</a></span>&lt;<span class="type">Key</span>, <span class="type">T</span>, <span class="type">Iterator</span>&gt; <i>rhs</i>)</h3>
+<p>Returns <code>true</code> if <i>rhs</i> points to the same item as <i>lhs</i> otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qkeyvalueiterator.html#operator-not-eq">operator!=</a>().</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

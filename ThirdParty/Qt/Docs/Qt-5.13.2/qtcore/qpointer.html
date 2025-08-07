@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qpointer.cpp -->
+  <title>QPointer Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QPointer</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPointer Class</h1>
+<!-- $$$QPointer-brief -->
+<p>The <a href="qpointer.html">QPointer</a> class is a template class that provides guarded pointers to <a href="qobject.html">QObject</a>. <a href="#details">More...</a></p>
+<!-- @@@QPointer -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QPointer&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr></table></div><ul>
+<li><a href="qpointer-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpointer.html#QPointer-1">QPointer</a></b>(T *<i>p</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpointer.html#QPointer">QPointer</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpointer.html#dtor.QPointer">~QPointer</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpointer.html#clear">clear</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> T *</td><td class="memItemRight bottomAlign"><b><a href="qpointer.html#data">data</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpointer.html#isNull">isNull</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpointer.html#swap">swap</a></b>(QPointer&lt;T&gt; &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> T *</td><td class="memItemRight bottomAlign"><b><a href="qpointer.html#operator-T--2a">operator T *</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> T &amp;</td><td class="memItemRight bottomAlign"><b><a href="qpointer.html#operator-2a">operator*</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> T *</td><td class="memItemRight bottomAlign"><b><a href="qpointer.html#operator--gt">operator-&gt;</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPointer&lt;T&gt; &amp;</td><td class="memItemRight bottomAlign"><b><a href="qpointer.html#operator-eq">operator=</a></b>(T *<i>p</i>)</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpointer.html#operator-not-eq">operator!=</a></b>(const T *<i>o</i>, const QPointer&lt;T&gt; &amp;<i>p</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpointer.html#operator-not-eq-1">operator!=</a></b>(const QPointer&lt;T&gt; &amp;<i>p</i>, const T *<i>o</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpointer.html#operator-not-eq-2">operator!=</a></b>(T *<i>o</i>, const QPointer&lt;T&gt; &amp;<i>p</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpointer.html#operator-not-eq-3">operator!=</a></b>(const QPointer&lt;T&gt; &amp;<i>p</i>, T *<i>o</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpointer.html#operator-not-eq-4">operator!=</a></b>(const QPointer&lt;T&gt; &amp;<i>p1</i>, const QPointer&lt;T&gt; &amp;<i>p2</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpointer.html#operator-eq-eq">operator==</a></b>(const T *<i>o</i>, const QPointer&lt;T&gt; &amp;<i>p</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpointer.html#operator-eq-eq-1">operator==</a></b>(const QPointer&lt;T&gt; &amp;<i>p</i>, const T *<i>o</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpointer.html#operator-eq-eq-2">operator==</a></b>(T *<i>o</i>, const QPointer&lt;T&gt; &amp;<i>p</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpointer.html#operator-eq-eq-3">operator==</a></b>(const QPointer&lt;T&gt; &amp;<i>p</i>, T *<i>o</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpointer.html#operator-eq-eq-4">operator==</a></b>(const QPointer&lt;T&gt; &amp;<i>p1</i>, const QPointer&lt;T&gt; &amp;<i>p2</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPointer-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A guarded pointer, <a href="qpointer.html">QPointer</a>&lt;T&gt;, behaves like a normal C++ pointer <code>T *</code>, except that it is automatically cleared when the referenced object is destroyed (unlike normal C++ pointers, which become &quot;dangling pointers&quot; in such cases). <code>T</code> must be a subclass of <a href="qobject.html">QObject</a>.</p>
+<p>Guarded pointers are useful whenever you need to store a pointer to a <a href="qobject.html">QObject</a> that is owned by someone else, and therefore might be destroyed while you still hold a reference to it. You can safely test the pointer for validity.</p>
+<p>Note that Qt 5 introduces a slight change in behavior when using <a href="qpointer.html">QPointer</a>.</p>
+<ul>
+<li>When using <a href="qpointer.html">QPointer</a> on a <a href="../qtwidgets/qwidget.html">QWidget</a> (or a subclass of <a href="../qtwidgets/qwidget.html">QWidget</a>), previously the <a href="qpointer.html">QPointer</a> would be cleared by the <a href="../qtwidgets/qwidget.html">QWidget</a> destructor. Now, the <a href="qpointer.html">QPointer</a> is cleared by the <a href="qobject.html">QObject</a> destructor (since this is when <a href="qweakpointer.html">QWeakPointer</a> objects are cleared). Any QPointers tracking a widget will <b>NOT</b> be cleared before the <a href="../qtwidgets/qwidget.html">QWidget</a> destructor destroys the children for the widget being tracked.</li>
+</ul>
+<p>Qt also provides <a href="qsharedpointer.html">QSharedPointer</a>, an implementation of a reference-counted shared pointer object, which can be used to maintain a collection of references to an individual pointer.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qpointer.html#QPointer">QPointer</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtwidgets/qlabel.html">QLabel</a></span><span class="operator">&gt;</span> label <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qlabel.html">QLabel</a></span>;
+      label<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="string">&quot;&amp;Status:&quot;</span>);
+      ...
+      <span class="keyword">if</span> (label)
+          label<span class="operator">-</span><span class="operator">&gt;</span>show();
+
+</pre>
+<p>If the <a href="../qtwidgets/qlabel.html">QLabel</a> is deleted in the meantime, the <code>label</code> variable will hold <code>nullptr</code> instead of an invalid address, and the last line will never be executed.</p>
+<p>The functions and operators available with a <a href="qpointer.html">QPointer</a> are the same as those available with a normal unguarded pointer, except the pointer arithmetic operators (<code>+</code>, <code>-</code>, <code>++</code>, and <code>--</code>), which are normally used only with arrays of objects.</p>
+<p>Use QPointers like normal pointers and you will not need to read this class documentation.</p>
+<p>For creating guarded pointers, you can construct or assign to them from a T* or from another guarded pointer of the same type. You can compare them with each other using operator==() and operator!=(), or test for <code>nullptr</code> with <a href="qpointer.html#isNull">isNull</a>(). You can dereference them using either the <code>*x</code> or the <code>x-&gt;member</code> notation.</p>
+<p>A guarded pointer will automatically cast to a <code>T</code> *, so you can freely mix guarded and unguarded pointers. This means that if you have a <a href="qpointer.html">QPointer</a>&lt;<a href="../qtwidgets/qwidget.html">QWidget</a>&gt;, you can pass it to a function that requires a <a href="../qtwidgets/qwidget.html">QWidget</a> *. For this reason, it is of little value to declare functions to take a <a href="qpointer.html">QPointer</a> as a parameter; just use normal pointers. Use a <a href="qpointer.html">QPointer</a> when you are storing a pointer over time.</p>
+<p>Note that class <code>T</code> must inherit <a href="qobject.html">QObject</a>, or a compilation or link error will result.</p>
+</div>
+<p><b>See also </b><a href="qsharedpointer.html">QSharedPointer</a>, <a href="qobject.html">QObject</a>, and <a href="qobjectcleanuphandler.html">QObjectCleanupHandler</a>.</p>
+<!-- @@@QPointer -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QPointer$$$QPointerT* -->
+<h3 class="fn" id="QPointer-1"><a name="QPointer-1"></a>QPointer::<span class="name">QPointer</span>(<span class="type">T</span> *<i>p</i>)</h3>
+<p>Constructs a guarded pointer that points to the same object that <i>p</i> points to.</p>
+<!-- @@@QPointer -->
+<!-- $$$QPointer[overload1]$$$QPointer -->
+<h3 class="fn" id="QPointer"><a name="QPointer"></a>QPointer::<span class="name">QPointer</span>()</h3>
+<p>Constructs a guarded pointer with value <code>nullptr</code>.</p>
+<p><b>See also </b><a href="qpointer.html#isNull">isNull</a>().</p>
+<!-- @@@QPointer -->
+<!-- $$$~QPointer[overload1]$$$~QPointer -->
+<h3 class="fn" id="dtor.QPointer"><a name="dtor.QPointer"></a>QPointer::<span class="name">~QPointer</span>()</h3>
+<p>Destroys the guarded pointer. Just like a normal pointer, destroying a guarded pointer does <i>not</i> destroy the object being pointed to.</p>
+<!-- @@@~QPointer -->
+<!-- $$$clear[overload1]$$$clear -->
+<h3 class="fn" id="clear"><a name="clear"></a><span class="type">void</span> QPointer::<span class="name">clear</span>()</h3>
+<p>Clears this <a href="qpointer.html">QPointer</a> object.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qpointer.html#isNull">isNull</a>().</p>
+<!-- @@@clear -->
+<!-- $$$data[overload1]$$$data -->
+<h3 class="fn" id="data"><a name="data"></a><span class="type">T</span> *QPointer::<span class="name">data</span>() const</h3>
+<p>Returns the pointer to the object being guarded.</p>
+<p>This function was introduced in  Qt 4.4.</p>
+<!-- @@@data -->
+<!-- $$$isNull[overload1]$$$isNull -->
+<h3 class="fn" id="isNull"><a name="isNull"></a><span class="type">bool</span> QPointer::<span class="name">isNull</span>() const</h3>
+<p>Returns <code>true</code> if the referenced object has been destroyed or if there is no referenced object; otherwise returns <code>false</code>.</p>
+<!-- @@@isNull -->
+<!-- $$$swap[overload1]$$$swapQPointer<T>& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QPointer::<span class="name">swap</span>(<span class="type"><a href="qpointer.html#QPointer">QPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>other</i>)</h3>
+<p>Swaps the contents of this <a href="qpointer.html">QPointer</a> with the contents of <i>other</i>. This operation is very fast and never fails.</p>
+<p>This function was introduced in  Qt 5.6.</p>
+<!-- @@@swap -->
+<!-- $$$operator T *[overload1]$$$operator T * -->
+<h3 class="fn" id="operator-T--2a"><a name="operator-T--2a"></a><span class="type">T</span> *QPointer::<span class="name">operator T *</span>() const</h3>
+<p>Cast operator; implements pointer semantics. Because of this function you can pass a <a href="qpointer.html">QPointer</a>&lt;T&gt; to a function where a T* is required.</p>
+<!-- @@@operator T * -->
+<!-- $$$operator*[overload1]$$$operator* -->
+<h3 class="fn" id="operator-2a"><a name="operator-2a"></a><span class="type">T</span> &amp;QPointer::<span class="name">operator*</span>() const</h3>
+<p>Dereference operator; implements pointer semantics. Just use this operator as you would with a normal C++ pointer.</p>
+<!-- @@@operator* -->
+<!-- $$$operator->[overload1]$$$operator-> -->
+<h3 class="fn" id="operator--gt"><a name="operator--gt"></a><span class="type">T</span> *QPointer::<span class="name">operator-&gt;</span>() const</h3>
+<p>Overloaded arrow operator; implements pointer semantics. Just use this operator as you would with a normal C++ pointer.</p>
+<!-- @@@operator-> -->
+<!-- $$$operator=[overload1]$$$operator=T* -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qpointer.html#QPointer">QPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;QPointer::<span class="name">operator=</span>(<span class="type">T</span> *<i>p</i>)</h3>
+<p>Assignment operator. This guarded pointer will now point to the same object that <i>p</i> points to.</p>
+<!-- @@@operator= -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$operator!=[overload1]$$$operator!=constT*constQPointer<T>& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> <span class="name">operator!=</span>(const <span class="type">T</span> *<i>o</i>, const <span class="type"><a href="qpointer.html#QPointer">QPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>p</i>)</h3>
+<p>Inequality operator. Returns <code>true</code> if <i>o</i> and the guarded pointer <i>p</i> are not pointing to the same object, otherwise returns <code>false</code>.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator!=$$$operator!=constQPointer<T>&constT* -->
+<h3 class="fn" id="operator-not-eq-1"><a name="operator-not-eq-1"></a><span class="type">bool</span> <span class="name">operator!=</span>(const <span class="type"><a href="qpointer.html#QPointer">QPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>p</i>, const <span class="type">T</span> *<i>o</i>)</h3>
+<p>Inequality operator. Returns <code>true</code> if <i>o</i> and the guarded pointer <i>p</i> are not pointing to the same object, otherwise returns <code>false</code>.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator!=$$$operator!=T*constQPointer<T>& -->
+<h3 class="fn" id="operator-not-eq-2"><a name="operator-not-eq-2"></a><span class="type">bool</span> <span class="name">operator!=</span>(<span class="type">T</span> *<i>o</i>, const <span class="type"><a href="qpointer.html#QPointer">QPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>p</i>)</h3>
+<p>Inequality operator. Returns <code>true</code> if <i>o</i> and the guarded pointer <i>p</i> are not pointing to the same object, otherwise returns <code>false</code>.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator!=$$$operator!=constQPointer<T>&T* -->
+<h3 class="fn" id="operator-not-eq-3"><a name="operator-not-eq-3"></a><span class="type">bool</span> <span class="name">operator!=</span>(const <span class="type"><a href="qpointer.html#QPointer">QPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>p</i>, <span class="type">T</span> *<i>o</i>)</h3>
+<p>Inequality operator. Returns <code>true</code> if <i>o</i> and the guarded pointer <i>p</i> are not pointing to the same object, otherwise returns <code>false</code>.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator!=$$$operator!=constQPointer<T>&constQPointer<T>& -->
+<h3 class="fn" id="operator-not-eq-4"><a name="operator-not-eq-4"></a><span class="type">bool</span> <span class="name">operator!=</span>(const <span class="type"><a href="qpointer.html#QPointer">QPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>p1</i>, const <span class="type"><a href="qpointer.html#QPointer">QPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>p2</i>)</h3>
+<p>Inequality operator. Returns <code>true</code> if the guarded pointers <i>p1</i> and <i>p2</i> are not pointing to the same object, otherwise returns <code>false</code>.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constT*constQPointer<T>& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> <span class="name">operator==</span>(const <span class="type">T</span> *<i>o</i>, const <span class="type"><a href="qpointer.html#QPointer">QPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>p</i>)</h3>
+<p>Equality operator. Returns <code>true</code> if <i>o</i> and the guarded pointer <i>p</i> are pointing to the same object, otherwise returns <code>false</code>.</p>
+<!-- @@@operator== -->
+<!-- $$$operator==$$$operator==constQPointer<T>&constT* -->
+<h3 class="fn" id="operator-eq-eq-1"><a name="operator-eq-eq-1"></a><span class="type">bool</span> <span class="name">operator==</span>(const <span class="type"><a href="qpointer.html#QPointer">QPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>p</i>, const <span class="type">T</span> *<i>o</i>)</h3>
+<p>Equality operator. Returns <code>true</code> if <i>o</i> and the guarded pointer <i>p</i> are pointing to the same object, otherwise returns <code>false</code>.</p>
+<!-- @@@operator== -->
+<!-- $$$operator==$$$operator==T*constQPointer<T>& -->
+<h3 class="fn" id="operator-eq-eq-2"><a name="operator-eq-eq-2"></a><span class="type">bool</span> <span class="name">operator==</span>(<span class="type">T</span> *<i>o</i>, const <span class="type"><a href="qpointer.html#QPointer">QPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>p</i>)</h3>
+<p>Equality operator. Returns <code>true</code> if <i>o</i> and the guarded pointer <i>p</i> are pointing to the same object, otherwise returns <code>false</code>.</p>
+<!-- @@@operator== -->
+<!-- $$$operator==$$$operator==constQPointer<T>&T* -->
+<h3 class="fn" id="operator-eq-eq-3"><a name="operator-eq-eq-3"></a><span class="type">bool</span> <span class="name">operator==</span>(const <span class="type"><a href="qpointer.html#QPointer">QPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>p</i>, <span class="type">T</span> *<i>o</i>)</h3>
+<p>Equality operator. Returns <code>true</code> if <i>o</i> and the guarded pointer <i>p</i> are pointing to the same object, otherwise returns <code>false</code>.</p>
+<!-- @@@operator== -->
+<!-- $$$operator==$$$operator==constQPointer<T>&constQPointer<T>& -->
+<h3 class="fn" id="operator-eq-eq-4"><a name="operator-eq-eq-4"></a><span class="type">bool</span> <span class="name">operator==</span>(const <span class="type"><a href="qpointer.html#QPointer">QPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>p1</i>, const <span class="type"><a href="qpointer.html#QPointer">QPointer</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>p2</i>)</h3>
+<p>Equality operator. Returns <code>true</code> if the guarded pointers <i>p1</i> and <i>p2</i> are pointing to the same object, otherwise returns <code>false</code>.</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

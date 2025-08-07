@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickdialog.cpp -->
+  <title>Dialog QML Type | Qt Quick Dialogs 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickdialogs-index.html">Qt Quick Dialogs</a></td><td ><a href="qtquick-dialogs-qmlmodule.html">QML Types</a></td><td >Dialog QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickdialogs-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Dialog QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Dialog-brief -->
+<p>A generic <a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a> dialog wrapper with standard buttons. <a href="#details">More...</a></p>
+<!-- @@@Dialog -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Dialogs 1.3</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.3</td></tr></table></div><ul>
+<li><a href="qml-qtquick-dialogs-dialog-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-dialog.html#clickedButton-prop">clickedButton</a></b></b> : StandardButton</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-dialog.html#contentItem-prop">contentItem</a></b></b> : QObject</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-dialog.html#modality-prop">modality</a></b></b> : Qt::WindowModality</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-dialog.html#standardButtons-prop">standardButtons</a></b></b> : StandardButtons</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-dialog.html#title-prop">title</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-dialog.html#visible-prop">visible</a></b></b> : bool</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-dialog.html#accepted-signal">accepted</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-dialog.html#actionChosen-signal">actionChosen</a></b></b>(<i>action</i>)</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-dialog.html#apply-signal">apply</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-dialog.html#discard-signal">discard</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-dialog.html#help-signal">help</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-dialog.html#no-signal">no</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-dialog.html#rejected-signal">rejected</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-dialog.html#reset-signal">reset</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-dialog.html#yes-signal">yes</a></b></b>()</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtquick-dialogs-dialog.html#close-method">close</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtquick-dialogs-dialog.html#open-method">open</a></b></b>()</li>
+</ul>
+<!-- $$$Dialog-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The purpose of Dialog is to wrap arbitrary content into a <i>dialog window</i> including a row of platform-tailored buttons.</p>
+<p>The <a href="qml-qtquick-dialogs-dialog.html#contentItem-prop">contentItem</a> is the default property (the only allowed child element), and items declared inside the Dialog will actually be children of another Item inside the <code>contentItem</code>. The row of <a href="qml-qtquick-dialogs-dialog.html#standardButtons-prop">standardButtons</a> will also be inside <code>contentItem</code> below the declared content, and Dialog will attempt to size itself to fit the content and the buttons.</p>
+<p>Alternatively it is possible to bind <a href="qml-qtquick-dialogs-dialog.html#contentItem-prop">contentItem</a> to a custom Item, in which case there will be no buttons, no margins, and the custom content will fill the whole dialog. This is much like creating a <a href="../qtquick/qml-qtquick-window-window.html">Window</a>, except that on platforms which do not support showing multiple windows, the window borders will be simulated and it will be shown in same scene.</p>
+<p><b>Note: </b>do not attempt to bind the width or height of the dialog to the width or height of its content, because Dialog already tries to size itself to the content. If your goal is to change or eliminate the margins, you must override <a href="qml-qtquick-dialogs-dialog.html#contentItem-prop">contentItem</a>. If your goal is simply to show a window (whether modal or not), and your platform supports it, it is simpler to use <a href="../qtquick/qml-qtquick-window-window.html">Window</a> instead.</p><!-- @@@Dialog -->
+<h2>Property Documentation</h2>
+<!-- $$$clickedButton -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="clickedButton-prop"></a><span class="name">clickedButton</span> : <span class="type">StandardButton</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the button pressed by the user. Its value is one of the flags set for the <a href="qml-qtquick-dialogs-dialog.html#standardButtons-prop">standardButtons</a> property.</p>
+</div></div><!-- @@@clickedButton -->
+<br/>
+<!-- $$$contentItem -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="contentItem-prop"></a><span class="name">contentItem</span> : <span class="type">QObject</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The QML object which implements the dialog contents. Should be an <a href="../qtquick/qml-qtquick-item.html">Item</a>.</p>
+<p>For example the following dialog will show custom content and no buttons:</p>
+<pre class="qml">
+
+  import QtQuick 2.3
+  import QtQuick.Controls 1.2
+  import QtQuick.Dialogs 1.2
+
+  <span class="type"><a href="qml-qtquick-dialogs-dialog.html">Dialog</a></span> {
+      <span class="name">visible</span>: <span class="number">true</span>
+      <span class="name">title</span>: <span class="string">&quot;Blue sky dialog&quot;</span>
+
+      <span class="name">contentItem</span>: <span class="name">Rectangle</span> {
+          <span class="name">color</span>: <span class="string">&quot;lightskyblue&quot;</span>
+          <span class="name">implicitWidth</span>: <span class="number">400</span>
+          <span class="name">implicitHeight</span>: <span class="number">100</span>
+          <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+              <span class="name">text</span>: <span class="string">&quot;Hello blue sky!&quot;</span>
+              <span class="name">color</span>: <span class="string">&quot;navy&quot;</span>
+              <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+          }
+      }
+  }
+
+</pre>
+</div></div><!-- @@@contentItem -->
+<br/>
+<!-- $$$modality -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="modality-prop"></a><span class="name">modality</span> : <span class="type">Qt::WindowModality</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether the dialog should be shown modal with respect to the window containing the dialog's parent Item, modal with respect to the whole application, or non-modal.</p>
+<p>By default it is <code>Qt.WindowModal</code>.</p>
+<p>Modality does not mean that there are any blocking calls to wait for the dialog to be accepted or rejected: only that the user will be prevented from interacting with the parent window or the application windows until the dialog is dismissed.</p>
+</div></div><!-- @@@modality -->
+<br/>
+<!-- $$$standardButtons -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="standardButtons-prop"></a><span class="name">standardButtons</span> : <span class="type">StandardButtons</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Dialog has a row of buttons along the bottom, each of which has a <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">ButtonRole</a> that determines which signal will be emitted when the button is pressed. You can also find out which specific button was pressed after the fact via the <a href="qml-qtquick-dialogs-dialog.html#clickedButton-prop">clickedButton</a> property. You can control which buttons are available by setting standardButtons to a bitwise-or combination of the following flags:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>StandardButton.Ok</code></td><td class="topAlign">An <b>OK</b> button defined with the <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">AcceptRole</a>.</td></tr>
+<tr><td class="topAlign"><code>StandardButton.Open</code></td><td class="topAlign">An <b>Open</b> button defined with the <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">AcceptRole</a>.</td></tr>
+<tr><td class="topAlign"><code>StandardButton.Save</code></td><td class="topAlign">A <b>Save</b> button defined with the <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">AcceptRole</a>.</td></tr>
+<tr><td class="topAlign"><code>StandardButton.Cancel</code></td><td class="topAlign">A <b>Cancel</b> button defined with the <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">RejectRole</a>.</td></tr>
+<tr><td class="topAlign"><code>StandardButton.Close</code></td><td class="topAlign">A <b>Close</b> button defined with the <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">RejectRole</a>.</td></tr>
+<tr><td class="topAlign"><code>StandardButton.Discard</code></td><td class="topAlign">A <b>Discard</b> or <b>Don't Save</b> button, depending on the platform, defined with the <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">DestructiveRole</a>.</td></tr>
+<tr><td class="topAlign"><code>StandardButton.Apply</code></td><td class="topAlign">An <b>Apply</b> button defined with the <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">ApplyRole</a>.</td></tr>
+<tr><td class="topAlign"><code>StandardButton.Reset</code></td><td class="topAlign">A <b>Reset</b> button defined with the <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">ResetRole</a>.</td></tr>
+<tr><td class="topAlign"><code>StandardButton.RestoreDefaults</code></td><td class="topAlign">A <b>Restore Defaults</b> button defined with the <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">ResetRole</a>.</td></tr>
+<tr><td class="topAlign"><code>StandardButton.Help</code></td><td class="topAlign">A <b>Help</b> button defined with the <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">HelpRole</a>.</td></tr>
+<tr><td class="topAlign"><code>StandardButton.SaveAll</code></td><td class="topAlign">A <b>Save All</b> button defined with the <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">AcceptRole</a>.</td></tr>
+<tr><td class="topAlign"><code>StandardButton.Yes</code></td><td class="topAlign">A <b>Yes</b> button defined with the <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">YesRole</a>.</td></tr>
+<tr><td class="topAlign"><code>StandardButton.YesToAll</code></td><td class="topAlign">A <b>Yes to All</b> button defined with the <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">YesRole</a>.</td></tr>
+<tr><td class="topAlign"><code>StandardButton.No</code></td><td class="topAlign">A <b>No</b> button defined with the <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">NoRole</a>.</td></tr>
+<tr><td class="topAlign"><code>StandardButton.NoToAll</code></td><td class="topAlign">A <b>No to All</b> button defined with the <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">NoRole</a>.</td></tr>
+<tr><td class="topAlign"><code>StandardButton.Abort</code></td><td class="topAlign">An <b>Abort</b> button defined with the <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">RejectRole</a>.</td></tr>
+<tr><td class="topAlign"><code>StandardButton.Retry</code></td><td class="topAlign">A <b>Retry</b> button defined with the <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">AcceptRole</a>.</td></tr>
+<tr><td class="topAlign"><code>StandardButton.Ignore</code></td><td class="topAlign">An <b>Ignore</b> button defined with the <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">AcceptRole</a>.</td></tr>
+</table></div>
+<p>For example the following dialog will show a calendar with the ability to save or cancel a date:</p>
+<pre class="qml">
+
+  import QtQuick 2.3
+  import QtQuick.Controls 1.2
+  import QtQuick.Dialogs 1.2
+
+  <span class="type"><a href="qml-qtquick-dialogs-dialog.html">Dialog</a></span> {
+      <span class="name">id</span>: <span class="name">dateDialog</span>
+      <span class="name">visible</span>: <span class="number">true</span>
+      <span class="name">title</span>: <span class="string">&quot;Choose a date&quot;</span>
+      <span class="name">standardButtons</span>: <span class="name">StandardButton</span>.<span class="name">Save</span> <span class="operator">|</span> <span class="name">StandardButton</span>.<span class="name">Cancel</span>
+
+      <span class="name">onAccepted</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Saving the date &quot;</span> <span class="operator">+</span>
+          <span class="name">calendar</span>.<span class="name">selectedDate</span>.<span class="name">toLocaleDateString</span>())
+
+      <span class="type">Calendar</span> {
+          <span class="name">id</span>: <span class="name">calendar</span>
+          <span class="name">onDoubleClicked</span>: <span class="name">dateDialog</span>.<span class="name">click</span>(<span class="name">StandardButton</span>.<span class="name">Save</span>)
+      }
+  }
+
+</pre>
+<p>The default is <code>StandardButton.Ok</code>.</p>
+<p>The enum values are the same as in <a href="../qtwidgets/qmessagebox.html#StandardButton-enum">QMessageBox::StandardButtons</a>.</p>
+</div></div><!-- @@@standardButtons -->
+<br/>
+<!-- $$$title -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="title-prop"></a><span class="name">title</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The title of the dialog window.</p>
+</div></div><!-- @@@title -->
+<br/>
+<!-- $$$visible -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="visible-prop"></a><span class="name">visible</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the dialog is visible. By default this is <code>false</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-dialogs-dialog.html#modality-prop">modality</a>.</p>
+</div></div><!-- @@@visible -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$accepted[overload1]$$$accepted -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="accepted-signal"></a><span class="name">accepted</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the user has pressed any button which has the <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">AcceptRole</a>: <b>OK</b>, <b>Open</b>, <b>Save</b>, <b>Save All</b>, <b>Retry</b> or <b>Ignore</b>.</p>
+<p>The corresponding handler is <code>onAccepted</code>.</p>
+</div></div><!-- @@@accepted -->
+<br/>
+<!-- $$$actionChosen[overload1]$$$actionChosen -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="actionChosen-signal"></a><span class="name">actionChosen</span>(<i>action</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the user has pressed any button or a key associated with some role (such as the Enter or Escape keys). The <i>action</i> parameter carries information about the event:</p>
+<ul>
+<li>StandardButton button - The role of the button which was pressed. If a key was pressed instead, this will be <code>StandardButton.Ok</code> if accepted and <code>StandardButton.Cancel</code> if rejected.</li>
+<li>Qt.Key key - The key which was pressed, or <code>0</code> if none</li>
+<li>bool accepted - Set this to <code>false</code> to stop the event from triggering its predefined action</li>
+</ul>
+<p>By handling this signal and setting the <code>action.accepted</code> field to <code>false</code>, it's possible to implement some validation on the dialog contents before accepting it, for example.</p>
+<p>The corresponding handler is <code>onActionChosen</code>.</p>
+<p>This signal was introduced in  QtQuick.Controls 1.8.</p>
+</div></div><!-- @@@actionChosen -->
+<br/>
+<!-- $$$apply[overload1]$$$apply -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="apply-signal"></a><span class="name">apply</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the user has pressed the <b>Apply</b> button.</p>
+<p>The corresponding handler is <code>onApply</code>.</p>
+</div></div><!-- @@@apply -->
+<br/>
+<!-- $$$discard[overload1]$$$discard -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="discard-signal"></a><span class="name">discard</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the user has pressed the <b>Discard</b> button.</p>
+<p>The corresponding handler is <code>onDiscard</code>.</p>
+</div></div><!-- @@@discard -->
+<br/>
+<!-- $$$help[overload1]$$$help -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="help-signal"></a><span class="name">help</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the user has pressed the <b>Help</b> button. Depending on platform, the dialog may not be automatically dismissed because the help that your application provides may need to be relevant to the text shown in this dialog in order to assist the user in making a decision. However on other platforms it's not possible to show a dialog and a help window at the same time. If you want to be sure that the dialog will close, you can set <a href="qml-qtquick-dialogs-dialog.html#visible-prop">visible</a> to <code>false</code> in your handler.</p>
+<p>The corresponding handler is <code>onHelp</code>.</p>
+</div></div><!-- @@@help -->
+<br/>
+<!-- $$$no[overload1]$$$no -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="no-signal"></a><span class="name">no</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the user has pressed any button which has the <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">NoRole</a>: <b>No</b> or <b>No to All</b>.</p>
+<p>The corresponding handler is <code>onNo</code>.</p>
+</div></div><!-- @@@no -->
+<br/>
+<!-- $$$rejected[overload1]$$$rejected -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="rejected-signal"></a><span class="name">rejected</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the user has dismissed the dialog, by closing the dialog window, by pressing a <b>Cancel</b>, <b>Close</b> or <b>Abort</b> button on the dialog, or by pressing the back button or the escape key.</p>
+<p>The corresponding handler is <code>onRejected</code>.</p>
+</div></div><!-- @@@rejected -->
+<br/>
+<!-- $$$reset[overload1]$$$reset -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="reset-signal"></a><span class="name">reset</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the user has pressed any button which has the <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">ResetRole</a>: <b>Reset</b> or <b>Restore Defaults</b>.</p>
+<p>The corresponding handler is <code>onReset</code>.</p>
+</div></div><!-- @@@reset -->
+<br/>
+<!-- $$$yes[overload1]$$$yes -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="yes-signal"></a><span class="name">yes</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the user has pressed any button which has the <a href="../qtwidgets/qmessagebox.html#ButtonRole-enum">YesRole</a>: <b>Yes</b> or <b>Yes to All</b>.</p>
+<p>The corresponding handler is <code>onYes</code>.</p>
+</div></div><!-- @@@yes -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$close[overload1]$$$close -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="close-method"></a><span class="type">void</span> <span class="name">close</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Closes the dialog.</p>
+</div></div><!-- @@@close -->
+<br/>
+<!-- $$$open[overload1]$$$open -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="open-method"></a><span class="type">void</span> <span class="name">open</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Shows the dialog to the user. It is equivalent to setting <a href="qml-qtquick-dialogs-dialog.html#visible-prop">visible</a> to <code>true</code>.</p>
+</div></div><!-- @@@open -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

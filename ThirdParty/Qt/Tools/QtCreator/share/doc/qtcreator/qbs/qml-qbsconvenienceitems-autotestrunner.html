@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- autotestrunner.qdoc -->
+  <title>AutotestRunner QML Type | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="qml-qbsconvenienceitems-applicationextension.html" />
+  <link rel="next" href="qml-qbsconvenienceitems-cppapplication.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="qml-qbsconvenienceitems-applicationextension.html">ApplicationExtension</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qml-qbsconvenienceitems-cppapplication.html">CppApplication</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">AutotestRunner QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$AutotestRunner-brief -->
+<p>Product that runs all autotests in the project. <a href="#details">More...</a></p>
+<!-- @@@AutotestRunner -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QbsConvenienceItems .</td></tr></table></div><ul>
+<li><a href="qml-qbsconvenienceitems-autotestrunner-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qbsconvenienceitems-autotestrunner.html#arguments-prop">arguments</a></b></b> : stringList</li>
+<li class="fn"><b><b><a href="qml-qbsconvenienceitems-autotestrunner.html#auxiliaryInputs-prop">auxiliaryInputs</a></b></b> : stringList</li>
+<li class="fn"><b><b><a href="qml-qbsconvenienceitems-autotestrunner.html#environment-prop">environment</a></b></b> : stringList</li>
+<li class="fn"><b><b><a href="qml-qbsconvenienceitems-autotestrunner.html#limitToSubProject-prop">limitToSubProject</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsconvenienceitems-autotestrunner.html#workingDir-prop">workingDir</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsconvenienceitems-autotestrunner.html#wrapper-prop">wrapper</a></b></b> : stringList</li>
+</ul>
+<!-- $$$AutotestRunner-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>An <a href="qml-qbsconvenienceitems-autotestrunner.html">AutotestRunner</a> has a dependency on all <a href="qml-qbslanguageitems-product.html">products</a> with the <a href="qml-qbslanguageitems-product.html#type-prop">type</a> <code>&quot;autotest&quot;</code>. Building the <a href="qml-qbsconvenienceitems-autotestrunner.html">AutotestRunner</a> product will then run the respective executables. The <a href="qml-qbslanguageitems-product.html#builtByDefault-prop">builtByDefault</a> property is set to <code>false</code> by default, so running the autotests has to be explicitly requested. The default name of the product is <code>&quot;autotest-runner&quot;</code>.</p>
+<p>To use this feature:</p>
+<ol class="1" type="1"><li>Attach the <code>&quot;autotest&quot;</code> type to your autotests:<pre class="cpp">
+
+  CppApplication {
+      name: <span class="string">&quot;tst_mytest&quot;</span>
+      type: <span class="operator">[</span><span class="string">&quot;application&quot;</span><span class="operator">,</span> <span class="string">&quot;autotest&quot;</span><span class="operator">]</span>
+      <span class="comment">// ...</span>
+  }
+
+</pre>
+</li>
+<li>Instantiate exactly one <a href="qml-qbsconvenienceitems-autotestrunner.html">AutotestRunner</a> in your project, typically at the top level:<pre class="cpp">
+
+  Project {
+      <span class="comment">// ...</span>
+      AutotestRunner { }
+      <span class="comment">// ...</span>
+  }
+
+</pre>
+</li>
+<li>Trigger the autotest execution by building the product:<pre class="cpp">
+
+  qbs build <span class="operator">-</span>p autotest<span class="operator">-</span>runner
+
+</pre>
+</li>
+</ol>
+<!-- @@@AutotestRunner -->
+<h2>Property Documentation</h2>
+<!-- $$$arguments -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="arguments-prop"></a><span class="name">arguments</span> : <span class="type">stringList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The list of arguments to invoke the autotest with. A test can override this by setting the <a href="qml-qbsmodules-autotest.html#arguments-prop">arguments</a> property of the <a href="qml-qbsmodules-autotest.html">autotest</a> module.</p>
+<p>Default: <code>[]</code></p>
+</div></div><!-- @@@arguments -->
+<br/>
+<!-- $$$auxiliaryInputs -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="auxiliaryInputs-prop"></a><span class="name">auxiliaryInputs</span> : <span class="type">stringList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property can contain arbitrary file tags. The <a href="qml-qbsconvenienceitems-autotestrunner.html">AutotestRunner</a> will get dependencies on all products whose type matches at least one of these tags, and invocation of the test executables will happen only after all of the respective artifacts have been built. Set this property if your test executables have run-time dependencies on other products.</p>
+<p>Default: Undefined</p>
+<p>This property was introduced in  Qbs 1.12.</p>
+</div></div><!-- @@@auxiliaryInputs -->
+<br/>
+<!-- $$$environment -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="environment-prop"></a><span class="name">environment</span> : <span class="type">stringList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>A list of environment variables that are added to the run environment. They are provided as a list of strings in the form <code>&quot;varName=value&quot;</code>.</p>
+<p>Default: DYLD_LIBRARY_PATH, DYLD_FRAMEWORK_PATH, and DYLD_ROOT_PATH are set on macOS, or an empty list for other platforms.</p>
+</div></div><!-- @@@environment -->
+<br/>
+<!-- $$$limitToSubProject -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="limitToSubProject-prop"></a><span class="name">limitToSubProject</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>By default, only those autotests are considered that are in the same sub-project that <a href="qml-qbsconvenienceitems-autotestrunner.html">AutotestRunner</a> was instantiated in. If you want to run all autotests regardless of their location in the project hierarchy, set this property to <code>false</code>.</p>
+<p>Default: <code>true</code></p>
+</div></div><!-- @@@limitToSubProject -->
+<br/>
+<!-- $$$workingDir -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="workingDir-prop"></a><span class="name">workingDir</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If this property is set, it will be the working directory for all invoked test executables. Otherwise, the working directory will the the parent directory of the respective executable. A test can override this by setting the <a href="qml-qbsmodules-autotest.html#workingDir-prop">workingDir</a> property of the <a href="qml-qbsmodules-autotest.html">autotest</a> module.</p>
+<p>Default: Undefined</p>
+<p>This property was introduced in  Qbs 1.12.</p>
+</div></div><!-- @@@workingDir -->
+<br/>
+<!-- $$$wrapper -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="wrapper-prop"></a><span class="name">wrapper</span> : <span class="type">stringList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Wrapper binary and its arguments for wrapping autotest calls. This is useful for tools like Valgrind and alike.</p>
+<p>Default: empty</p>
+</div></div><!-- @@@wrapper -->
+<br/>
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="qml-qbsconvenienceitems-applicationextension.html">ApplicationExtension</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qml-qbsconvenienceitems-cppapplication.html">CppApplication</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

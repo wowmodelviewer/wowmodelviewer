@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmodbusdataunit.cpp -->
+  <title>QModbusDataUnit Class | Qt Serial Bus 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtserialbus-index.html">Qt Serial Bus</a></td><td ><a href="qtserialbus-module.html">C++ Classes</a></td><td >QModbusDataUnit</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtserialbus-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QModbusDataUnit Class</h1>
+<!-- $$$QModbusDataUnit-brief -->
+<p><a href="qmodbusdataunit.html">QModbusDataUnit</a> is a container class representing single bit and <code>16</code> bit word entries in the Modbus register. <a href="#details">More...</a></p>
+<!-- @@@QModbusDataUnit -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QModbusDataUnit&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += serialbus</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr></table></div><p>This class was introduced in  Qt 5.8.</p>
+<ul>
+<li><a href="qmodbusdataunit-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdataunit.html#RegisterType-enum">RegisterType</a></b> { Invalid, DiscreteInputs, Coils, InputRegisters, HoldingRegisters }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdataunit.html#QModbusDataUnit-3">QModbusDataUnit</a></b>(QModbusDataUnit::RegisterType <i>type</i>, int <i>address</i>, const QVector&lt;quint16&gt; &amp;<i>data</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdataunit.html#QModbusDataUnit-2">QModbusDataUnit</a></b>(QModbusDataUnit::RegisterType <i>type</i>, int <i>address</i>, quint16 <i>size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdataunit.html#QModbusDataUnit-1">QModbusDataUnit</a></b>(QModbusDataUnit::RegisterType <i>type</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdataunit.html#QModbusDataUnit">QModbusDataUnit</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdataunit.html#isValid">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QModbusDataUnit::RegisterType </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdataunit.html#registerType">registerType</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdataunit.html#setRegisterType">setRegisterType</a></b>(QModbusDataUnit::RegisterType <i>type</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdataunit.html#setStartAddress">setStartAddress</a></b>(int <i>address</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdataunit.html#setValue">setValue</a></b>(int <i>index</i>, quint16 <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdataunit.html#setValueCount">setValueCount</a></b>(uint <i>newCount</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdataunit.html#setValues">setValues</a></b>(const QVector&lt;quint16&gt; &amp;<i>values</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdataunit.html#startAddress">startAddress</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> quint16 </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdataunit.html#value">value</a></b>(int <i>index</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdataunit.html#valueCount">valueCount</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;quint16&gt; </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdataunit.html#values">values</a></b>() const</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdataunit.html#QModbusDataUnitMap-typedef">QModbusDataUnitMap</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QModbusDataUnit-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qmodbusdataunit.html">QModbusDataUnit</a> can be used for read and write operations. The entries are addressed via <a href="qmodbusdataunit.html#startAddress">startAddress</a>() and the <a href="qmodbusdataunit.html#valueCount">valueCount</a>() number of contiguous entries. <a href="qmodbusdataunit.html#registerType">registerType</a>() determines which register is used for the operations. Note that some registers are read-only registers.</p>
+<p>The actual <a href="qmodbusdataunit.html#values">values</a>() are either single bit or <code>16</code> bit based. <a href="qmodbusdataunit.html#RegisterType-enum">QModbusDataUnit::DiscreteInputs</a> and <a href="qmodbusdataunit.html#RegisterType-enum">QModbusDataUnit::Coils</a> only accept single bits. Therefore <code>0</code> is interpreted as <code>0</code> and anything else <code>1</code>.</p>
+</div>
+<!-- @@@QModbusDataUnit -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$RegisterType$$$Invalid$$$DiscreteInputs$$$Coils$$$InputRegisters$$$HoldingRegisters -->
+<h3 class="fn" id="RegisterType-enum"><a name="RegisterType-enum"></a>enum QModbusDataUnit::<span class="name">RegisterType</span></h3>
+<p>This enum describes all supported register types.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QModbusDataUnit::Invalid</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Set by the default constructor, do not use.</td></tr>
+<tr><td class="topAlign"><code>QModbusDataUnit::DiscreteInputs</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">This type of data can be provided by an I/O system.</td></tr>
+<tr><td class="topAlign"><code>QModbusDataUnit::Coils</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">This type of data can be alterable by an application program.</td></tr>
+<tr><td class="topAlign"><code>QModbusDataUnit::InputRegisters</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">This type of data can be provided by an I/O system.</td></tr>
+<tr><td class="topAlign"><code>QModbusDataUnit::HoldingRegisters</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">This type of data can be alterable by an application program.</td></tr>
+</table></div>
+<!-- @@@RegisterType -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QModbusDataUnit$$$QModbusDataUnitQModbusDataUnit::RegisterTypeintconstQVector<quint16>& -->
+<h3 class="fn" id="QModbusDataUnit-3"><a name="QModbusDataUnit-3"></a>QModbusDataUnit::<span class="name">QModbusDataUnit</span>(<span class="type"><a href="qmodbusdataunit.html#RegisterType-enum">QModbusDataUnit::RegisterType</a></span> <i>type</i>, <span class="type">int</span> <i>address</i>, const <span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span>&gt; &amp;<i>data</i>)</h3>
+<p>Constructs a unit of data for register<i>type</i>. Start address of the data is set to <i>address</i> and the unit's values to <i>data</i>. The value count is implied by the <i>data</i> size.</p>
+<!-- @@@QModbusDataUnit -->
+<!-- $$$QModbusDataUnit$$$QModbusDataUnitQModbusDataUnit::RegisterTypeintquint16 -->
+<h3 class="fn" id="QModbusDataUnit-2"><a name="QModbusDataUnit-2"></a>QModbusDataUnit::<span class="name">QModbusDataUnit</span>(<span class="type"><a href="qmodbusdataunit.html#RegisterType-enum">QModbusDataUnit::RegisterType</a></span> <i>type</i>, <span class="type">int</span> <i>address</i>, <span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> <i>size</i>)</h3>
+<p>Constructs a unit of data for register<i>type</i>. Start address of the data is set to <i>address</i> and the size of the unit to <i>size</i>. The entries of <a href="qmodbusdataunit.html#values">values</a>() are initialized with <code>0</code>.</p>
+<!-- @@@QModbusDataUnit -->
+<!-- $$$QModbusDataUnit$$$QModbusDataUnitQModbusDataUnit::RegisterType -->
+<h3 class="fn" id="QModbusDataUnit-1"><a name="QModbusDataUnit-1"></a>QModbusDataUnit::<span class="name">QModbusDataUnit</span>(<span class="type"><a href="qmodbusdataunit.html#RegisterType-enum">QModbusDataUnit::RegisterType</a></span> <i>type</i>)</h3>
+<p>Constructs a unit of data for register <i>type</i>. Start address is set to <code>0</code>, data range and data values are empty.</p>
+<!-- @@@QModbusDataUnit -->
+<!-- $$$QModbusDataUnit[overload1]$$$QModbusDataUnit -->
+<h3 class="fn" id="QModbusDataUnit"><a name="QModbusDataUnit"></a>QModbusDataUnit::<span class="name">QModbusDataUnit</span>()</h3>
+<p>Constructs an empty, invalid <a href="qmodbusdataunit.html">QModbusDataUnit</a>. Start address is set to <code>-1</code> and the <a href="qmodbusdataunit.html#registerType">registerType</a> is set to <a href="qmodbusdataunit.html#RegisterType-enum">QModbusDataUnit::Invalid</a>.</p>
+<!-- @@@QModbusDataUnit -->
+<!-- $$$isValid[overload1]$$$isValid -->
+<h3 class="fn" id="isValid"><a name="isValid"></a><span class="type">bool</span> QModbusDataUnit::<span class="name">isValid</span>() const</h3>
+<p>Returns <code>true</code> if the <code>QModbusDataUnit</code> is valid; otherwise <code>false</code>. A <code>QModbusDataUnit</code> is considered valid if the <a href="qmodbusdataunit.html#registerType">registerType</a>() is not <a href="qmodbusdataunit.html#RegisterType-enum">QModbusDataUnit::Invalid</a> and the <a href="qmodbusdataunit.html#startAddress">startAddress</a>() is greater than or equal to <code>0</code>.</p>
+<!-- @@@isValid -->
+<!-- $$$registerType[overload1]$$$registerType -->
+<h3 class="fn" id="registerType"><a name="registerType"></a><span class="type"><a href="qmodbusdataunit.html#RegisterType-enum">QModbusDataUnit::RegisterType</a></span> QModbusDataUnit::<span class="name">registerType</span>() const</h3>
+<p>Returns the type of the register.</p>
+<p><b>See also </b><a href="qmodbusdataunit.html#setRegisterType">setRegisterType</a>() and <a href="qmodbusdataunit.html#RegisterType-enum">QModbusDataUnit::RegisterType</a>.</p>
+<!-- @@@registerType -->
+<!-- $$$setRegisterType[overload1]$$$setRegisterTypeQModbusDataUnit::RegisterType -->
+<h3 class="fn" id="setRegisterType"><a name="setRegisterType"></a><span class="type">void</span> QModbusDataUnit::<span class="name">setRegisterType</span>(<span class="type"><a href="qmodbusdataunit.html#RegisterType-enum">QModbusDataUnit::RegisterType</a></span> <i>type</i>)</h3>
+<p>Sets the register <i>type</i>.</p>
+<p><b>See also </b><a href="qmodbusdataunit.html#registerType">registerType</a>() and <a href="qmodbusdataunit.html#RegisterType-enum">QModbusDataUnit::RegisterType</a>.</p>
+<!-- @@@setRegisterType -->
+<!-- $$$setStartAddress[overload1]$$$setStartAddressint -->
+<h3 class="fn" id="setStartAddress"><a name="setStartAddress"></a><span class="type">void</span> QModbusDataUnit::<span class="name">setStartAddress</span>(<span class="type">int</span> <i>address</i>)</h3>
+<p>Sets the start <i>address</i> of the data unit.</p>
+<p><b>See also </b><a href="qmodbusdataunit.html#startAddress">startAddress</a>().</p>
+<!-- @@@setStartAddress -->
+<!-- $$$setValue[overload1]$$$setValueintquint16 -->
+<h3 class="fn" id="setValue"><a name="setValue"></a><span class="type">void</span> QModbusDataUnit::<span class="name">setValue</span>(<span class="type">int</span> <i>index</i>, <span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> <i>value</i>)</h3>
+<p>Sets the register at position <i>index</i> to <i>value</i>.</p>
+<p><b>See also </b><a href="qmodbusdataunit.html#value">value</a>().</p>
+<!-- @@@setValue -->
+<!-- $$$setValueCount[overload1]$$$setValueCountuint -->
+<h3 class="fn" id="setValueCount"><a name="setValueCount"></a><span class="type">void</span> QModbusDataUnit::<span class="name">setValueCount</span>(<span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> <i>newCount</i>)</h3>
+<p>Sets the size of the requested register's data block to <i>newCount</i>.</p>
+<p>This may be different from <a href="qmodbusdataunit.html#values">values</a>() size as this function is used to indicated the size of a data request. Only once the data request has been processed <a href="qmodbusdataunit.html#valueCount">valueCount</a>() is equal to the size of <a href="qmodbusdataunit.html#values">values</a>().</p>
+<p><b>See also </b><a href="qmodbusdataunit.html#valueCount">valueCount</a>().</p>
+<!-- @@@setValueCount -->
+<!-- $$$setValues[overload1]$$$setValuesconstQVector<quint16>& -->
+<h3 class="fn" id="setValues"><a name="setValues"></a><span class="type">void</span> QModbusDataUnit::<span class="name">setValues</span>(const <span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span>&gt; &amp;<i>values</i>)</h3>
+<p>Sets the <i>values</i> of the data unit. <a href="qmodbusdataunit.html#RegisterType-enum">QModbusDataUnit::DiscreteInputs</a> and <a href="qmodbusdataunit.html#RegisterType-enum">QModbusDataUnit::Coils</a> tables only accept single bit value, so <code>0</code> is interpreted as <code>0</code> and anything else as <code>1</code>.</p>
+<p><b>See also </b><a href="qmodbusdataunit.html#values">values</a>().</p>
+<!-- @@@setValues -->
+<!-- $$$startAddress[overload1]$$$startAddress -->
+<h3 class="fn" id="startAddress"><a name="startAddress"></a><span class="type">int</span> QModbusDataUnit::<span class="name">startAddress</span>() const</h3>
+<p>Returns the start address of data unit in the register.</p>
+<p><b>See also </b><a href="qmodbusdataunit.html#setStartAddress">setStartAddress</a>().</p>
+<!-- @@@startAddress -->
+<!-- $$$value[overload1]$$$valueint -->
+<h3 class="fn" id="value"><a name="value"></a><span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> QModbusDataUnit::<span class="name">value</span>(<span class="type">int</span> <i>index</i>) const</h3>
+<p>Return the value at position <i>index</i>.</p>
+<p><b>See also </b><a href="qmodbusdataunit.html#setValue">setValue</a>().</p>
+<!-- @@@value -->
+<!-- $$$valueCount[overload1]$$$valueCount -->
+<h3 class="fn" id="valueCount"><a name="valueCount"></a><span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> QModbusDataUnit::<span class="name">valueCount</span>() const</h3>
+<p>Returns the size of the requested register's data block or the size of data read from the device.</p>
+<p>This function may not always return a count that equals <a href="qmodbusdataunit.html#values">values</a>() size. Since this class is used to request data from the remote data register, the valueCount() can be used to indicate the size of the requested register's data block. Once the request has been processed, the valueCount() is equal to the size of <a href="qmodbusdataunit.html#values">values</a>().</p>
+<p><b>See also </b><a href="qmodbusdataunit.html#setValueCount">setValueCount</a>().</p>
+<!-- @@@valueCount -->
+<!-- $$$values[overload1]$$$values -->
+<h3 class="fn" id="values"><a name="values"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span>&gt; QModbusDataUnit::<span class="name">values</span>() const</h3>
+<p>Returns the data in the data unit. <a href="qmodbusdataunit.html#RegisterType-enum">QModbusDataUnit::DiscreteInputs</a> and <a href="qmodbusdataunit.html#RegisterType-enum">QModbusDataUnit::Coils</a> tables only accept single bit value, so <code>0</code> is interpreted as <code>0</code> and anything else as <code>1</code>.</p>
+<p><b>See also </b><a href="qmodbusdataunit.html#setValues">setValues</a>().</p>
+<!-- @@@values -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$QModbusDataUnitMap -->
+<h3 class="fn" id="QModbusDataUnitMap-typedef"><a name="QModbusDataUnitMap-typedef"></a>typedef <span class="name">QModbusDataUnitMap</span></h3>
+<p>Synonym for <a href="../qtcore/qmap.html">QMap</a>&lt;<a href="qmodbusdataunit.html#RegisterType-enum">QModbusDataUnit::RegisterType</a>, <a href="qmodbusdataunit.html">QModbusDataUnit</a>&gt;.</p>
+<p>This typedef was introduced in  Qt 5.8.</p>
+<!-- @@@QModbusDataUnitMap -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

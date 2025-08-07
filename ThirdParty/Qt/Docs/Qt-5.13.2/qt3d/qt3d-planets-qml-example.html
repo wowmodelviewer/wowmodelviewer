@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- planets-qml.qdoc -->
+  <title>Qt 3D: Planets QML Example | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td >Qt 3D: Planets QML Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+<li class="level1"><a href="#qt-quick-2d-implementation">Qt Quick 2D Implementation</a></li>
+<li class="level1"><a href="#qt-3d-implementation">Qt 3D Implementation</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt 3D: Planets QML Example</h1>
+<span class="subtitle"></span>
+<!-- $$$planets-qml-brief -->
+<p>Demonstrates combining Qt 3D rendering and Qt Quick 2 elements.</p>
+<!-- @@@planets-qml -->
+<!-- $$$planets-qml-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/planets-qml-example.jpg" alt="" /></p><p><i>Planets</i> demonstrates how to implement an application that combines the use of Qt 3D rendering with Qt Quick 2D elements. The example shows the eight planets of our Solar System with the Sun.</p>
+<p>Planet texture maps are Copyright (c) by James Hastings-Trew <a href="http://planetpixelemporium.com/planets.html">http://planetpixelemporium.com/planets.html</a> used with permission.</p>
+<p>The planets are rotating around the Sun based on their orbit at a given time. The rotation starts at 2000 Jan 0.0 UT. The planet positions are calculated based on the formulas found here: <a href="http://www.stjarnhimlen.se/comp/ppcomp.html">http://www.stjarnhimlen.se/comp/ppcomp.html</a> and <a href="http://www.davidcolarusso.com/astro/">http://www.davidcolarusso.com/astro/</a>.</p>
+<a name="running-the-example"></a>
+<h4 id="running-the-example">Running the Example</h4>
+<p>To run the example from <a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a>, open the <b>Welcome</b> mode and select the example from <b>Examples</b>. For more information, visit <a href="http://doc.qt.io/qtcreator/creator-build-example-application.html">Building and Running an Example</a>.</p>
+<a name="qt-quick-2d-implementation"></a>
+<h4 id="qt-quick-2d-implementation">Qt Quick 2D Implementation</h4>
+<p>The Qt Quick Implementation PlanetsMain.qml of the example renders the 3D content using the <code>Scene3D</code> type.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-scene3d-scene3d.html">Scene3D</a></span> {
+      <span class="name">anchors</span>.fill: <span class="name">parent</span>
+      <span class="name">aspects</span>: [<span class="string">&quot;render&quot;</span>, <span class="string">&quot;logic&quot;</span>, <span class="string">&quot;input&quot;</span>]
+
+      <span class="type">SolarSystem</span> { <span class="name">id</span>: <span class="name">solarsystem</span> }
+  }
+
+</pre>
+<p>The planet related information is stored into a <code>ListModel</code>. The selection buttons for the planets and the information sheet are created based on the model. The 2D elements, selection buttons and sliders, are implemented in the PlanetsMain.qml.</p>
+<p>The selection buttons change the <code>focusedPlanet</code> property of the <code>mainview</code>. As the property changes, the planet information is updated, and the camera is animated to the new position.</p>
+<pre class="qml">
+
+  <span class="name">onFocusedPlanetChanged</span>: {
+      <span class="keyword">if</span> (<span class="name">focusedPlanet</span> <span class="operator">==</span> <span class="number">100</span>) {
+          <span class="name">info</span>.<span class="name">opacity</span> <span class="operator">=</span> <span class="number">0</span>
+          <span class="name">updatePlanetInfo</span>()
+      } <span class="keyword">else</span> {
+          <span class="name">updatePlanetInfo</span>()
+          <span class="name">info</span>.<span class="name">opacity</span> <span class="operator">=</span> <span class="number">1</span>
+      }
+
+      <span class="name">solarsystem</span>.<span class="name">changePlanetFocus</span>(<span class="name">oldPlanet</span>, <span class="name">focusedPlanet</span>)
+      <span class="name">oldPlanet</span> <span class="operator">=</span> <span class="name">focusedPlanet</span>
+  }
+
+</pre>
+<p>The camera position and the camera look at point are updated based on values that are animated in the SolarSystem.qml, triggered from the <code>changePlanetFocus()</code> function.</p>
+<pre class="qml">
+
+  <span class="type">QQ2</span>.NumberAnimation {
+      <span class="name">id</span>: <span class="name">lookAtOffsetAnimation</span>
+      <span class="name">target</span>: <span class="name">sceneRoot</span>
+      <span class="name">properties</span>: <span class="string">&quot;xLookAtOffset, yLookAtOffset, zLookAtOffset&quot;</span>
+      <span class="name">to</span>: <span class="number">0</span>
+      <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutQuint</span>
+      <span class="name">duration</span>: <span class="number">1250</span>
+  }
+
+  <span class="type">QQ2</span>.NumberAnimation {
+      <span class="name">id</span>: <span class="name">cameraOffsetAnimation</span>
+      <span class="name">target</span>: <span class="name">sceneRoot</span>
+      <span class="name">properties</span>: <span class="string">&quot;xCameraOffset, yCameraOffset, zCameraOffset&quot;</span>
+      <span class="name">to</span>: <span class="number">0</span>
+      <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutQuint</span>
+      <span class="name">duration</span>: <span class="number">2500</span>
+  }
+
+</pre>
+<p>The sliders are used to adjust the rotation speed, the planet size, and the viewing distance. When a slider value changes, a JavaScript function in SolarSystem.qml is called to adjust the given property. For example, changing the value of the <i>Viewing Distance</i> slider calls the <code>changeCameraDistance()</code> method.</p>
+<pre class="qml">
+
+  <span class="name">onValueChanged</span>: <span class="name">solarsystem</span>.<span class="name">changeCameraDistance</span>(<span class="name">value</span>)
+
+</pre>
+<a name="qt-3d-implementation"></a>
+<h4 id="qt-3d-implementation">Qt 3D Implementation</h4>
+<p>The main part of the implementation, including the movement and rotation maths for the planets, is done in the SolarSystem.qml.</p>
+<p>First, a <code>Camera</code>, a <code>Light</code>, and a <code>Configuration</code> are added, followed by <code>Effect</code>s for the planet <code>Material</code>s, and finally the planets themselves. For example, Earth is constructed as follows:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+      <span class="name">id</span>: <span class="name">earthEntity</span>
+
+      <span class="type">Planet</span> {
+          <span class="name">id</span>: <span class="name">earth</span>
+          <span class="name">tilt</span>: <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">EARTH</span>].<span class="name">tilt</span>
+      }
+
+      <span class="type">PlanetMaterial</span> {
+          <span class="name">id</span>: <span class="name">materialEarth</span>
+          <span class="name">effect</span>: <span class="name">effectDSB</span>
+          <span class="name">ambientLight</span>: <span class="name">ambientStrengthPlanet</span>
+          <span class="name">diffuseMap</span>: <span class="string">&quot;qrc:/images/solarsystemscope/earthmap2k.jpg&quot;</span>
+          <span class="name">specularMap</span>: <span class="string">&quot;qrc:/images/solarsystemscope/earthspec2k.jpg&quot;</span>
+          <span class="name">normalMap</span>: <span class="string">&quot;qrc:/images/solarsystemscope/earthnormal2k.jpg&quot;</span>
+          <span class="name">shininess</span>: <span class="name">shininessSpecularMap</span>
+      }
+
+      property <span class="type"><a href="qml-qt3d-core-transform.html">Transform</a></span> <span class="name">transformEarth</span>: <span class="name">Transform</span> {
+          <span class="name">matrix</span>: {
+              var m = <span class="name">Qt</span>.<span class="name">matrix4x4</span>()
+              <span class="name">m</span>.<span class="name">translate</span>(<span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">earth</span>.<span class="name">x</span>, <span class="name">earth</span>.<span class="name">y</span>, <span class="name">earth</span>.<span class="name">z</span>))
+              <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">earth</span>.<span class="name">tilt</span>, <span class="name">tiltAxis</span>)
+              <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">earth</span>.<span class="name">roll</span>, <span class="name">rollAxis</span>)
+              <span class="name">m</span>.<span class="name">scale</span>(<span class="name">earth</span>.<span class="name">r</span>)
+              <span class="keyword">return</span> <span class="name">m</span>
+          }
+      }
+
+      <span class="name">components</span>: [ <span class="name">earth</span>, <span class="name">materialEarth</span>, <span class="name">transformEarth</span> ]
+  }
+
+</pre>
+<p>Planet data, which is needed for the movement and rotation calculations, among other things, is constructed with JavaScript in planets.js by calling <code>loadPlanetData()</code> as the component completes. Other initializations, such as inserting the planets into an array for easier handling, calculating the ring radii for Saturn and Uranus rings, and setting the default scale, speed, and camera offset, are done as well:</p>
+<pre class="qml">
+
+  <span class="name">QQ2</span>.Component.onCompleted: {
+      <span class="name">planetData</span> <span class="operator">=</span> <span class="name">Planets</span>.<span class="name">loadPlanetData</span>()
+      <span class="comment">// Push in the correct order</span>
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">sun</span>)
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">mercury</span>)
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">venus</span>)
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">earth</span>)
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">mars</span>)
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">jupiter</span>)
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">saturn</span>)
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">uranus</span>)
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">neptune</span>)
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">moon</span>)
+      <span class="comment">// TODO: Once support for creating meshes from arrays is implemented take these into use</span>
+      <span class="comment">//saturnRing.makeRing()</span>
+      <span class="comment">//uranusRing.makeRing()</span>
+      <span class="name">saturnRingOuterRadius</span> <span class="operator">=</span> <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">SATURN</span>].<span class="name">radius</span> <span class="operator">+</span> <span class="name">Planets</span>.<span class="name">saturnOuterRadius</span>
+      <span class="name">saturnRingInnerRadius</span> <span class="operator">=</span> <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">SATURN</span>].<span class="name">radius</span> <span class="operator">+</span> <span class="number">6.630</span>
+      <span class="name">uranusRingOuterRadius</span> <span class="operator">=</span> <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">URANUS</span>].<span class="name">radius</span> <span class="operator">+</span> <span class="name">Planets</span>.<span class="name">uranusOuterRadius</span>
+      <span class="name">uranusRingInnerRadius</span> <span class="operator">=</span> <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">URANUS</span>].<span class="name">radius</span> <span class="operator">+</span> <span class="number">2</span>
+      <span class="name">ready</span> <span class="operator">=</span> <span class="number">true</span>
+      <span class="name">changeScale</span>(<span class="number">1200</span>)
+      <span class="name">changeSpeed</span>(<span class="number">0.2</span>)
+      <span class="name">setLookAtOffset</span>(<span class="name">Planets</span>.<span class="name">SUN</span>)
+  }
+
+</pre>
+<p>The scene is animated by calling the <code>animate()</code> function. That is also the place where the time is advanced, and the new positions for all of the planets are calculated. The planets are rotated in the <code>positionPlanet()</code> function based on their axial tilt and their sidereal rotation period. Finally, the new camera position is calculated in the <code>updateCamera()</code> function.</p>
+<pre class="qml">
+
+  <span class="keyword">function</span> <span class="name">animate</span>(focusedPlanet) {
+      <span class="keyword">if</span> (!<span class="name">ready</span>)
+          <span class="keyword">return</span>
+
+      <span class="name">advanceTime</span>(<span class="name">focusedPlanet</span>)
+      <span class="keyword">for</span> (var i = 0; <span class="name">i</span> <span class="operator">&lt;=</span> <span class="name">Planets</span>.<span class="name">NUM_SELECTABLE_PLANETS</span>; i++)
+          <span class="name">positionPlanet</span>(<span class="name">i</span>)
+
+      <span class="name">updateCamera</span>(<span class="name">focusedPlanet</span>)
+  }
+
+</pre>
+<p><a href="https://code.qt.io/cgit/qt/qt3d.git/tree/examples/qt3d/planets-qml?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@planets-qml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

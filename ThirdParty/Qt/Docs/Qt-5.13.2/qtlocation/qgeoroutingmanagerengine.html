@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qgeoroutingmanagerengine.cpp -->
+  <title>QGeoRoutingManagerEngine Class | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-module.html">C++ Classes</a></td><td >QGeoRoutingManagerEngine</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QGeoRoutingManagerEngine Class</h1>
+<!-- $$$QGeoRoutingManagerEngine-brief -->
+<p>The <a href="qgeoroutingmanagerengine.html">QGeoRoutingManagerEngine</a> class provides an interface and convenience methods to implementers of <a href="qgeoserviceprovider.html">QGeoServiceProvider</a> plugins who want to provide access to geographic routing information. <a href="#details">More...</a></p>
+<!-- @@@QGeoRoutingManagerEngine -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QGeoRoutingManagerEngine&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += location</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.6</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.6.</p>
+<ul>
+<li><a href="qgeoroutingmanagerengine-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#QGeoRoutingManagerEngine">QGeoRoutingManagerEngine</a></b>(const QVariantMap &amp;<i>parameters</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#dtor.QGeoRoutingManagerEngine">~QGeoRoutingManagerEngine</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QGeoRouteReply *</td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#calculateRoute">calculateRoute</a></b>(const QGeoRouteRequest &amp;<i>request</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QLocale </td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#locale">locale</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#managerName">managerName</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#managerVersion">managerVersion</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QLocale::MeasurementSystem </td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#measurementSystem">measurementSystem</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#setLocale">setLocale</a></b>(const QLocale &amp;<i>locale</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#setMeasurementSystem">setMeasurementSystem</a></b>(QLocale::MeasurementSystem <i>system</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoRouteRequest::FeatureTypes </td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#supportedFeatureTypes">supportedFeatureTypes</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoRouteRequest::FeatureWeights </td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#supportedFeatureWeights">supportedFeatureWeights</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoRouteRequest::ManeuverDetails </td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#supportedManeuverDetails">supportedManeuverDetails</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoRouteRequest::RouteOptimizations </td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#supportedRouteOptimizations">supportedRouteOptimizations</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoRouteRequest::SegmentDetails </td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#supportedSegmentDetails">supportedSegmentDetails</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoRouteRequest::TravelModes </td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#supportedTravelModes">supportedTravelModes</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QGeoRouteReply *</td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#updateRoute">updateRoute</a></b>(const QGeoRoute &amp;<i>route</i>, const QGeoCoordinate &amp;<i>position</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#error">error</a></b>(QGeoRouteReply *<i>reply</i>, QGeoRouteReply::Error <i>error</i>, QString <i>errorString</i> = QString())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#finished">finished</a></b>(QGeoRouteReply *<i>reply</i>)</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#setSupportedFeatureTypes">setSupportedFeatureTypes</a></b>(QGeoRouteRequest::FeatureTypes <i>featureTypes</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#setSupportedFeatureWeights">setSupportedFeatureWeights</a></b>(QGeoRouteRequest::FeatureWeights <i>featureWeights</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#setSupportedManeuverDetails">setSupportedManeuverDetails</a></b>(QGeoRouteRequest::ManeuverDetails <i>maneuverDetails</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#setSupportedRouteOptimizations">setSupportedRouteOptimizations</a></b>(QGeoRouteRequest::RouteOptimizations <i>optimizations</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#setSupportedSegmentDetails">setSupportedSegmentDetails</a></b>(QGeoRouteRequest::SegmentDetails <i>segmentDetails</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeoroutingmanagerengine.html#setSupportedTravelModes">setSupportedTravelModes</a></b>(QGeoRouteRequest::TravelModes <i>travelModes</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QGeoRoutingManagerEngine-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Subclasses of <a href="qgeoroutingmanagerengine.html">QGeoRoutingManagerEngine</a> need to provide an implementation of <a href="qgeoroutingmanagerengine.html#calculateRoute">calculateRoute</a>().</p>
+<p>In the default implementation, supportsRouteUpdates() returns false and <a href="qgeoroutingmanagerengine.html#updateRoute">updateRoute</a>() returns a <a href="qgeoroutereply.html">QGeoRouteReply</a> object containing a <a href="qgeoroutereply.html#Error-enum">QGeoRouteReply::UnsupportedOptionError</a>.</p>
+<p>If the routing service supports updating routes as they are being traveled, the subclass should provide an implementation of <a href="qgeoroutingmanagerengine.html#updateRoute">updateRoute</a>() and call setSupportsRouteUpdates(true) at some point in time before <a href="qgeoroutingmanagerengine.html#updateRoute">updateRoute</a>() is called.</p>
+<p>The function setSupportsRouteUpdates() is one of several functions which configure the reported capabilities of the engine. If the capabilities of an engine differ from the default values these functions should be used so that the reported capabilities are accurate.</p>
+<p>It is important that this is done before <a href="qgeoroutingmanagerengine.html#calculateRoute">calculateRoute</a>(), <a href="qgeoroutingmanagerengine.html#updateRoute">updateRoute</a>() or any of the capability reporting functions are used to prevent incorrect or inconsistent behavior.</p>
+<p>A subclass of QGeoRouteManagerEngine will often make use of a subclass fo <a href="qgeoroutereply.html">QGeoRouteReply</a> internally, in order to add any engine-specific data (such as a <a href="../qtnetwork/qnetworkreply.html">QNetworkReply</a> object for network-based services) to the <a href="qgeoroutereply.html">QGeoRouteReply</a> instances used by the engine.</p>
+</div>
+<p><b>See also </b><a href="qgeoroutingmanager.html">QGeoRoutingManager</a>.</p>
+<!-- @@@QGeoRoutingManagerEngine -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QGeoRoutingManagerEngine[overload1]$$$QGeoRoutingManagerEngineconstQVariantMap&QObject* -->
+<h3 class="fn" id="QGeoRoutingManagerEngine"><a name="QGeoRoutingManagerEngine"></a>QGeoRoutingManagerEngine::<span class="name">QGeoRoutingManagerEngine</span>(const <span class="type"><a href="../qtcore/qvariant.html#QVariantMap-typedef">QVariantMap</a></span> &amp;<i>parameters</i>, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new engine with the specified <i>parent</i>, using <i>parameters</i> to pass any implementation specific data to the engine.</p>
+<!-- @@@QGeoRoutingManagerEngine -->
+<!-- $$$error[overload1]$$$errorQGeoRouteReply*QGeoRouteReply::ErrorQString -->
+<h3 class="fn" id="error"><a name="error"></a><code>[signal] </code><span class="type">void</span> QGeoRoutingManagerEngine::<span class="name">error</span>(<span class="type"><a href="qgeoroutereply.html">QGeoRouteReply</a></span> *<i>reply</i>, <span class="type"><a href="qgeoroutereply.html#Error-enum">QGeoRouteReply::Error</a></span> <i>error</i>, <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <i>errorString</i> = QString())</h3>
+<p>This signal is emitted when an error has been detected in the processing of <i>reply</i>. The <a href="qgeoroutingmanagerengine.html#finished">QGeoRoutingManagerEngine::finished</a>() signal will probably follow.</p>
+<p>The error will be described by the error code <i>error</i>. If <i>errorString</i> is not empty it will contain a textual description of the error.</p>
+<p>This signal and <a href="qgeoroutereply.html#error">QGeoRouteReply::error</a>() will be emitted at the same time.</p>
+<p><b>Note: </b>Do not delete the <i>reply</i> object in the slot connected to this signal. Use <a href="../qtcore/qobject.html#deleteLater">deleteLater</a>() instead.</p><!-- @@@error -->
+<!-- $$$finished[overload1]$$$finishedQGeoRouteReply* -->
+<h3 class="fn" id="finished"><a name="finished"></a><code>[signal] </code><span class="type">void</span> QGeoRoutingManagerEngine::<span class="name">finished</span>(<span class="type"><a href="qgeoroutereply.html">QGeoRouteReply</a></span> *<i>reply</i>)</h3>
+<p>This signal is emitted when <i>reply</i> has finished processing.</p>
+<p>If reply::error() equals <a href="qgeoroutereply.html#Error-enum">QGeoRouteReply::NoError</a> then the processing finished successfully.</p>
+<p>This signal and <a href="qgeoroutereply.html#finished">QGeoRouteReply::finished</a>() will be emitted at the same time.</p>
+<p><b>Note: </b>Do not delete the <i>reply</i> object in the slot connected to this signal. Use <a href="../qtcore/qobject.html#deleteLater">deleteLater</a>() instead.</p><!-- @@@finished -->
+<!-- $$$~QGeoRoutingManagerEngine[overload1]$$$~QGeoRoutingManagerEngine -->
+<h3 class="fn" id="dtor.QGeoRoutingManagerEngine"><a name="dtor.QGeoRoutingManagerEngine"></a><code>[virtual] </code>QGeoRoutingManagerEngine::<span class="name">~QGeoRoutingManagerEngine</span>()</h3>
+<p>Destroys this engine.</p>
+<!-- @@@~QGeoRoutingManagerEngine -->
+<!-- $$$calculateRoute[overload1]$$$calculateRouteconstQGeoRouteRequest& -->
+<h3 class="fn" id="calculateRoute"><a name="calculateRoute"></a><code>[pure virtual] </code><span class="type"><a href="qgeoroutereply.html">QGeoRouteReply</a></span> *QGeoRoutingManagerEngine::<span class="name">calculateRoute</span>(const <span class="type"><a href="qgeorouterequest.html">QGeoRouteRequest</a></span> &amp;<i>request</i>)</h3>
+<p>Begins the calculation of the route specified by <i>request</i>.</p>
+<p>A <a href="qgeoroutereply.html">QGeoRouteReply</a> object will be returned, which can be used to manage the routing operation and to return the results of the operation.</p>
+<p>This engine and the returned <a href="qgeoroutereply.html">QGeoRouteReply</a> object will emit signals indicating if the operation completes or if errors occur.</p>
+<p>Once the operation has completed, <a href="qgeoroutereply.html#routes">QGeoRouteReply::routes</a> can be used to retrieve the calculated route or routes.</p>
+<p>If <i>request</i> includes features which are not supported by this engine, as reported by the methods in this engine, then a <a href="qgeoroutereply.html#Error-enum">QGeoRouteReply::UnsupportedOptionError</a> will occur.</p>
+<p>The user is responsible for deleting the returned reply object, although this can be done in the slot connected to <a href="qgeoroutingmanagerengine.html#finished">QGeoRoutingManagerEngine::finished</a>(), <a href="qgeoroutingmanagerengine.html#error">QGeoRoutingManagerEngine::error</a>(), <a href="qgeoroutereply.html#finished">QGeoRouteReply::finished</a>() or <a href="qgeoroutereply.html#error">QGeoRouteReply::error</a>() with <a href="../qtcore/qobject.html#deleteLater">deleteLater</a>().</p>
+<!-- @@@calculateRoute -->
+<!-- $$$locale[overload1]$$$locale -->
+<h3 class="fn" id="locale"><a name="locale"></a><span class="type"><a href="../qtcore/qlocale.html">QLocale</a></span> QGeoRoutingManagerEngine::<span class="name">locale</span>() const</h3>
+<p>Returns the locale used to hint to this routing manager about what language to use for addresses and instructions.</p>
+<p><b>See also </b><a href="qgeoroutingmanagerengine.html#setLocale">setLocale</a>().</p>
+<!-- @@@locale -->
+<!-- $$$managerName[overload1]$$$managerName -->
+<h3 class="fn" id="managerName"><a name="managerName"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QGeoRoutingManagerEngine::<span class="name">managerName</span>() const</h3>
+<p>Returns the name which this engine implementation uses to distinguish itself from the implementations provided by other plugins.</p>
+<p>The combination of managerName() and <a href="qgeoroutingmanagerengine.html#managerVersion">managerVersion</a>() should be unique amongst plugin implementations.</p>
+<!-- @@@managerName -->
+<!-- $$$managerVersion[overload1]$$$managerVersion -->
+<h3 class="fn" id="managerVersion"><a name="managerVersion"></a><span class="type">int</span> QGeoRoutingManagerEngine::<span class="name">managerVersion</span>() const</h3>
+<p>Returns the version of this engine implementation.</p>
+<p>The combination of <a href="qgeoroutingmanagerengine.html#managerName">managerName</a>() and managerVersion() should be unique amongst plugin implementations.</p>
+<!-- @@@managerVersion -->
+<!-- $$$measurementSystem[overload1]$$$measurementSystem -->
+<h3 class="fn" id="measurementSystem"><a name="measurementSystem"></a><span class="type"><a href="../qtcore/qlocale.html#MeasurementSystem-enum">QLocale::MeasurementSystem</a></span> QGeoRoutingManagerEngine::<span class="name">measurementSystem</span>() const</h3>
+<p>Returns the measurement system used by this manager.</p>
+<p>If <a href="qgeoroutingmanagerengine.html#setMeasurementSystem">setMeasurementSystem</a>() has been called then the value returned by this function may be different to that returned by <a href="qgeoroutingmanagerengine.html#locale">locale</a>().<a href="../qtcore/qlocale.html#measurementSystem">measurementSystem()</a>. In which case the value returned by this function is what will be used by the manager.</p>
+<p><b>See also </b><a href="qgeoroutingmanagerengine.html#setMeasurementSystem">setMeasurementSystem</a>() and <a href="qgeoroutingmanagerengine.html#setLocale">setLocale</a>().</p>
+<!-- @@@measurementSystem -->
+<!-- $$$setLocale[overload1]$$$setLocaleconstQLocale& -->
+<h3 class="fn" id="setLocale"><a name="setLocale"></a><span class="type">void</span> QGeoRoutingManagerEngine::<span class="name">setLocale</span>(const <span class="type"><a href="../qtcore/qlocale.html">QLocale</a></span> &amp;<i>locale</i>)</h3>
+<p>Sets the locale to be used by this manager to <i>locale</i>.</p>
+<p>If this routing manager supports returning addresses and instructions in different languages, they will be returned in the language of <i>locale</i>.</p>
+<p>The locale used defaults to the system locale if this is not set.</p>
+<p><b>See also </b><a href="qgeoroutingmanagerengine.html#locale">locale</a>().</p>
+<!-- @@@setLocale -->
+<!-- $$$setMeasurementSystem[overload1]$$$setMeasurementSystemQLocale::MeasurementSystem -->
+<h3 class="fn" id="setMeasurementSystem"><a name="setMeasurementSystem"></a><span class="type">void</span> QGeoRoutingManagerEngine::<span class="name">setMeasurementSystem</span>(<span class="type"><a href="../qtcore/qlocale.html#MeasurementSystem-enum">QLocale::MeasurementSystem</a></span> <i>system</i>)</h3>
+<p>Sets the measurement system used by this manager to <i>system</i>.</p>
+<p>The measurement system can be set independently of the locale. Both <a href="qgeoroutingmanagerengine.html#setLocale">setLocale</a>() and this function set the measurement system. The value set by the last function called will be used.</p>
+<p><b>See also </b><a href="qgeoroutingmanagerengine.html#measurementSystem">measurementSystem</a>(), <a href="qgeoroutingmanagerengine.html#locale">locale</a>(), and <a href="qgeoroutingmanagerengine.html#setLocale">setLocale</a>().</p>
+<!-- @@@setMeasurementSystem -->
+<!-- $$$setSupportedFeatureTypes[overload1]$$$setSupportedFeatureTypesQGeoRouteRequest::FeatureTypes -->
+<h3 class="fn" id="setSupportedFeatureTypes"><a name="setSupportedFeatureTypes"></a><code>[protected] </code><span class="type">void</span> QGeoRoutingManagerEngine::<span class="name">setSupportedFeatureTypes</span>(<span class="type"><a href="qgeorouterequest.html#FeatureType-enum">QGeoRouteRequest::FeatureTypes</a></span> <i>featureTypes</i>)</h3>
+<p>Sets the types of features that this engine can take into account during route planning to <i>featureTypes</i>.</p>
+<p>It is important that subclasses use this method to ensure that the engine reports its capabilities correctly. If this function is not used the engine will report that it supports no feature types at all.</p>
+<p><b>See also </b><a href="qgeoroutingmanagerengine.html#supportedFeatureTypes">supportedFeatureTypes</a>().</p>
+<!-- @@@setSupportedFeatureTypes -->
+<!-- $$$setSupportedFeatureWeights[overload1]$$$setSupportedFeatureWeightsQGeoRouteRequest::FeatureWeights -->
+<h3 class="fn" id="setSupportedFeatureWeights"><a name="setSupportedFeatureWeights"></a><code>[protected] </code><span class="type">void</span> QGeoRoutingManagerEngine::<span class="name">setSupportedFeatureWeights</span>(<span class="type"><a href="qgeorouterequest.html#FeatureWeight-enum">QGeoRouteRequest::FeatureWeights</a></span> <i>featureWeights</i>)</h3>
+<p>Sets the weightings which this engine can apply to different features during route planning to <i>featureWeights</i>.</p>
+<p>It is important that subclasses use this method to ensure that the engine reports its capabilities correctly. If this function is not used the engine will report that it supports no feature weights at all.</p>
+<p><b>See also </b><a href="qgeoroutingmanagerengine.html#supportedFeatureWeights">supportedFeatureWeights</a>().</p>
+<!-- @@@setSupportedFeatureWeights -->
+<!-- $$$setSupportedManeuverDetails[overload1]$$$setSupportedManeuverDetailsQGeoRouteRequest::ManeuverDetails -->
+<h3 class="fn" id="setSupportedManeuverDetails"><a name="setSupportedManeuverDetails"></a><code>[protected] </code><span class="type">void</span> QGeoRoutingManagerEngine::<span class="name">setSupportedManeuverDetails</span>(<span class="type"><a href="qgeorouterequest.html#ManeuverDetail-enum">QGeoRouteRequest::ManeuverDetails</a></span> <i>maneuverDetails</i>)</h3>
+<p>Sets the levels of detail for navigation maneuvers which can be requested by this engine to <i>maneuverDetails</i>.</p>
+<p>It is important that subclasses use this method to ensure that the engine reports its capabilities correctly. If this function is not used the engine will report that it supports no maneuver details at all.</p>
+<p><b>See also </b><a href="qgeoroutingmanagerengine.html#supportedManeuverDetails">supportedManeuverDetails</a>().</p>
+<!-- @@@setSupportedManeuverDetails -->
+<!-- $$$setSupportedRouteOptimizations[overload1]$$$setSupportedRouteOptimizationsQGeoRouteRequest::RouteOptimizations -->
+<h3 class="fn" id="setSupportedRouteOptimizations"><a name="setSupportedRouteOptimizations"></a><code>[protected] </code><span class="type">void</span> QGeoRoutingManagerEngine::<span class="name">setSupportedRouteOptimizations</span>(<span class="type"><a href="qgeorouterequest.html#RouteOptimization-enum">QGeoRouteRequest::RouteOptimizations</a></span> <i>optimizations</i>)</h3>
+<p>Sets the route optimizations supported by this engine to <i>optimizations</i>.</p>
+<p>It is important that subclasses use this method to ensure that the engine reports its capabilities correctly. If this function is not used the engine will report that it supports no route optimizations at all.</p>
+<p><b>See also </b><a href="qgeoroutingmanagerengine.html#supportedRouteOptimizations">supportedRouteOptimizations</a>().</p>
+<!-- @@@setSupportedRouteOptimizations -->
+<!-- $$$setSupportedSegmentDetails[overload1]$$$setSupportedSegmentDetailsQGeoRouteRequest::SegmentDetails -->
+<h3 class="fn" id="setSupportedSegmentDetails"><a name="setSupportedSegmentDetails"></a><code>[protected] </code><span class="type">void</span> QGeoRoutingManagerEngine::<span class="name">setSupportedSegmentDetails</span>(<span class="type"><a href="qgeorouterequest.html#SegmentDetail-enum">QGeoRouteRequest::SegmentDetails</a></span> <i>segmentDetails</i>)</h3>
+<p>Sets the levels of detail for routing segments which can be requested by this engine to <i>segmentDetails</i>.</p>
+<p>It is important that subclasses use this method to ensure that the engine reports its capabilities correctly. If this function is not used the engine will report that it supports no segment detail at all.</p>
+<p><b>See also </b><a href="qgeoroutingmanagerengine.html#supportedSegmentDetails">supportedSegmentDetails</a>().</p>
+<!-- @@@setSupportedSegmentDetails -->
+<!-- $$$setSupportedTravelModes[overload1]$$$setSupportedTravelModesQGeoRouteRequest::TravelModes -->
+<h3 class="fn" id="setSupportedTravelModes"><a name="setSupportedTravelModes"></a><code>[protected] </code><span class="type">void</span> QGeoRoutingManagerEngine::<span class="name">setSupportedTravelModes</span>(<span class="type"><a href="qgeorouterequest.html#TravelMode-enum">QGeoRouteRequest::TravelModes</a></span> <i>travelModes</i>)</h3>
+<p>Sets the travel modes supported by this engine to <i>travelModes</i>.</p>
+<p>It is important that subclasses use this method to ensure that the engine reports its capabilities correctly. If this function is not used the engine will report that it supports no travel modes at all.</p>
+<p><b>See also </b><a href="qgeoroutingmanagerengine.html#supportedTravelModes">supportedTravelModes</a>().</p>
+<!-- @@@setSupportedTravelModes -->
+<!-- $$$supportedFeatureTypes[overload1]$$$supportedFeatureTypes -->
+<h3 class="fn" id="supportedFeatureTypes"><a name="supportedFeatureTypes"></a><span class="type"><a href="qgeorouterequest.html#FeatureType-enum">QGeoRouteRequest::FeatureTypes</a></span> QGeoRoutingManagerEngine::<span class="name">supportedFeatureTypes</span>() const</h3>
+<p>Returns the types of features that this engine can take into account during route planning.</p>
+<p><b>See also </b><a href="qgeoroutingmanagerengine.html#setSupportedFeatureTypes">setSupportedFeatureTypes</a>().</p>
+<!-- @@@supportedFeatureTypes -->
+<!-- $$$supportedFeatureWeights[overload1]$$$supportedFeatureWeights -->
+<h3 class="fn" id="supportedFeatureWeights"><a name="supportedFeatureWeights"></a><span class="type"><a href="qgeorouterequest.html#FeatureWeight-enum">QGeoRouteRequest::FeatureWeights</a></span> QGeoRoutingManagerEngine::<span class="name">supportedFeatureWeights</span>() const</h3>
+<p>Returns the weightings which this engine can apply to different features during route planning.</p>
+<p><b>See also </b><a href="qgeoroutingmanagerengine.html#setSupportedFeatureWeights">setSupportedFeatureWeights</a>().</p>
+<!-- @@@supportedFeatureWeights -->
+<!-- $$$supportedManeuverDetails[overload1]$$$supportedManeuverDetails -->
+<h3 class="fn" id="supportedManeuverDetails"><a name="supportedManeuverDetails"></a><span class="type"><a href="qgeorouterequest.html#ManeuverDetail-enum">QGeoRouteRequest::ManeuverDetails</a></span> QGeoRoutingManagerEngine::<span class="name">supportedManeuverDetails</span>() const</h3>
+<p>Returns the levels of detail for navigation maneuvers which can be requested by this engine.</p>
+<p><b>See also </b><a href="qgeoroutingmanagerengine.html#setSupportedManeuverDetails">setSupportedManeuverDetails</a>().</p>
+<!-- @@@supportedManeuverDetails -->
+<!-- $$$supportedRouteOptimizations[overload1]$$$supportedRouteOptimizations -->
+<h3 class="fn" id="supportedRouteOptimizations"><a name="supportedRouteOptimizations"></a><span class="type"><a href="qgeorouterequest.html#RouteOptimization-enum">QGeoRouteRequest::RouteOptimizations</a></span> QGeoRoutingManagerEngine::<span class="name">supportedRouteOptimizations</span>() const</h3>
+<p>Returns the route optimizations supported by this engine.</p>
+<p><b>See also </b><a href="qgeoroutingmanagerengine.html#setSupportedRouteOptimizations">setSupportedRouteOptimizations</a>().</p>
+<!-- @@@supportedRouteOptimizations -->
+<!-- $$$supportedSegmentDetails[overload1]$$$supportedSegmentDetails -->
+<h3 class="fn" id="supportedSegmentDetails"><a name="supportedSegmentDetails"></a><span class="type"><a href="qgeorouterequest.html#SegmentDetail-enum">QGeoRouteRequest::SegmentDetails</a></span> QGeoRoutingManagerEngine::<span class="name">supportedSegmentDetails</span>() const</h3>
+<p>Returns the levels of detail for routing segments which can be requested by this engine.</p>
+<p><b>See also </b><a href="qgeoroutingmanagerengine.html#setSupportedSegmentDetails">setSupportedSegmentDetails</a>().</p>
+<!-- @@@supportedSegmentDetails -->
+<!-- $$$supportedTravelModes[overload1]$$$supportedTravelModes -->
+<h3 class="fn" id="supportedTravelModes"><a name="supportedTravelModes"></a><span class="type"><a href="qgeorouterequest.html#TravelMode-enum">QGeoRouteRequest::TravelModes</a></span> QGeoRoutingManagerEngine::<span class="name">supportedTravelModes</span>() const</h3>
+<p>Returns the travel modes supported by this engine.</p>
+<p><b>See also </b><a href="qgeoroutingmanagerengine.html#setSupportedTravelModes">setSupportedTravelModes</a>().</p>
+<!-- @@@supportedTravelModes -->
+<!-- $$$updateRoute[overload1]$$$updateRouteconstQGeoRoute&constQGeoCoordinate& -->
+<h3 class="fn" id="updateRoute"><a name="updateRoute"></a><code>[virtual] </code><span class="type"><a href="qgeoroutereply.html">QGeoRouteReply</a></span> *QGeoRoutingManagerEngine::<span class="name">updateRoute</span>(const <span class="type"><a href="qgeoroute.html">QGeoRoute</a></span> &amp;<i>route</i>, const <span class="type"><a href="../qtpositioning/qgeocoordinate.html">QGeoCoordinate</a></span> &amp;<i>position</i>)</h3>
+<p>Begins the process of updating <i>route</i> based on the current position <i>position</i>.</p>
+<p>A <a href="qgeoroutereply.html">QGeoRouteReply</a> object will be returned, which can be used to manage the routing operation and to return the results of the operation.</p>
+<p>This engine and the returned <a href="qgeoroutereply.html">QGeoRouteReply</a> object will emit signals indicating if the operation completes or if errors occur.</p>
+<p>If supportsRouteUpdates() returns false an <a href="qgeoroutereply.html#Error-enum">QGeoRouteReply::UnsupportedOptionError</a> will occur.</p>
+<p>Once the operation has completed, <a href="qgeoroutereply.html#routes">QGeoRouteReply::routes</a> can be used to retrieve the updated route.</p>
+<p>The returned route could be entirely different to the original route, especially if <i>position</i> is far enough away from the initial route. Otherwise the route will be similar, although the remaining time and distance will be updated and any segments of the original route which have been traversed will be removed.</p>
+<p>The user is responsible for deleting the returned reply object, although this can be done in the slot connected to <a href="qgeoroutingmanagerengine.html#finished">QGeoRoutingManagerEngine::finished</a>(), <a href="qgeoroutingmanagerengine.html#error">QGeoRoutingManagerEngine::error</a>(), <a href="qgeoroutereply.html#finished">QGeoRouteReply::finished</a>() or <a href="qgeoroutereply.html#error">QGeoRouteReply::error</a>() with <a href="../qtcore/qobject.html#deleteLater">deleteLater</a>().</p>
+<!-- @@@updateRoute -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

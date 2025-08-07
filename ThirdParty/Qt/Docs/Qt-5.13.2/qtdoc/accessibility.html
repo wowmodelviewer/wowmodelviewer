@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- accessible.qdoc -->
+  <title>Accessibility Classes | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Accessibility Classes</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Accessibility Classes</h1>
+<span class="subtitle"></span>
+<!-- $$$accessibility-description -->
+<div class="descr"> <a name="details"></a>
+</div>
+<!-- @@@accessibility -->
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qaccessible.html">QAccessible</a></p></td><td class="tblDescr"><p>Enums and static functions related to accessibility</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qaccessibleactioninterface.html">QAccessibleActionInterface</a></p></td><td class="tblDescr"><p>Implements support for invocable actions in the interface</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qaccessibleeditabletextinterface.html">QAccessibleEditableTextInterface</a></p></td><td class="tblDescr"><p>Implements support for objects with editable text</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qaccessibleevent.html">QAccessibleEvent</a></p></td><td class="tblDescr"><p>The base class for accessibility notifications</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qaccessibleinterface.html">QAccessibleInterface</a></p></td><td class="tblDescr"><p>Defines an interface that exposes information about accessible objects</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qaccessiblestatechangeevent.html">QAccessibleStateChangeEvent</a></p></td><td class="tblDescr"><p>Notfies the accessibility framework that the state of an object has changed</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qaccessibletablecellinterface.html">QAccessibleTableCellInterface</a></p></td><td class="tblDescr"><p>Implements support for the IAccessibleTable2 Cell interface</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qaccessibletableinterface.html">QAccessibleTableInterface</a></p></td><td class="tblDescr"><p>Implements support for the IAccessibleTable2 interface</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qaccessibletablemodelchangeevent.html">QAccessibleTableModelChangeEvent</a></p></td><td class="tblDescr"><p>Signifies a change in a table, list, or tree where cells are added or removed. If the change affected a number of rows, firstColumn and lastColumn will return -1. Likewise for columns, the row functions may return -1</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qaccessibletextcursorevent.html">QAccessibleTextCursorEvent</a></p></td><td class="tblDescr"><p>Notifies of cursor movements</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qaccessibletextinsertevent.html">QAccessibleTextInsertEvent</a></p></td><td class="tblDescr"><p>Notifies of text being inserted</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qaccessibletextinterface.html">QAccessibleTextInterface</a></p></td><td class="tblDescr"><p>Implements support for text handling</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qaccessibletextremoveevent.html">QAccessibleTextRemoveEvent</a></p></td><td class="tblDescr"><p>Notifies of text being deleted</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qaccessibletextselectionevent.html">QAccessibleTextSelectionEvent</a></p></td><td class="tblDescr"><p>Signals a change in the text selection of an object</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qaccessibletextupdateevent.html">QAccessibleTextUpdateEvent</a></p></td><td class="tblDescr"><p>Notifies about text changes. This is for accessibles that support editable text such as line edits. This event occurs for example when a portion of selected text gets replaced by pasting a new text or in override mode of editors</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qaccessiblevaluechangeevent.html">QAccessibleValueChangeEvent</a></p></td><td class="tblDescr"><p>Describes a change in value for an accessible object</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qaccessiblevalueinterface.html">QAccessibleValueInterface</a></p></td><td class="tblDescr"><p>Implements support for objects that manipulate a value</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qaccessibleobject.html">QAccessibleObject</a></p></td><td class="tblDescr"><p>Implements parts of the QAccessibleInterface for QObjects</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qaccessibleplugin.html">QAccessiblePlugin</a></p></td><td class="tblDescr"><p>Abstract base class for plugins provinding accessibility information for user interface elements</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtwidgets/qaccessiblewidget.html">QAccessibleWidget</a></p></td><td class="tblDescr"><p>Implements the QAccessibleInterface for QWidgets</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtquick/qml-qtquick-accessible.html">Accessible</a></p></td><td class="tblDescr"><p>Enables accessibility of QML items</p></td></tr>
+</table></div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

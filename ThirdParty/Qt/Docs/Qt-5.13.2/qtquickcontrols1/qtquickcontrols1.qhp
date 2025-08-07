@@ -1,0 +1,970 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+    <namespace>org.qt-project.qtquickcontrols1.5132</namespace>
+    <virtualFolder>qtquickcontrols1</virtualFolder>
+    <metaData name="version" value="5.13.2"/>
+    <customFilter name="QtQuickControls1 5.13.2">
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtquickcontrols1</filterAttribute>
+    </customFilter>
+    <filterSection>
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtquickcontrols1</filterAttribute>
+        <filterAttribute>qtrefdoc</filterAttribute>
+        <toc>
+            <section ref="qtquickcontrols1-index.html" title="Qt Quick Controls 1">
+                <section ref="qtquick-controls-qmlmodule.html" title="Controls 1 QML Types"/>
+                <section ref="qtquick-controls-styles-qmlmodule.html" title="Controls 1 Styles QML Types">
+                    <section ref="qml-qtquick-controls-styles-applicationwindowstyle.html" title="ApplicationWindowStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-applicationwindowstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-busyindicatorstyle.html" title="BusyIndicatorStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-busyindicatorstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-buttonstyle.html" title="ButtonStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-buttonstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-calendarstyle.html" title="CalendarStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-calendarstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-checkboxstyle.html" title="CheckBoxStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-checkboxstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-circulargaugestyle.html" title="CircularGaugeStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-circulargaugestyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-comboboxstyle.html" title="ComboBoxStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-comboboxstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-delaybuttonstyle.html" title="DelayButtonStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-delaybuttonstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-dialstyle.html" title="DialStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-dialstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-gaugestyle.html" title="GaugeStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-gaugestyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-groupboxstyle.html" title="GroupBoxStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-groupboxstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-menubarstyle.html" title="MenuBarStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-menubarstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-menustyle.html" title="MenuStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-menustyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-piemenustyle.html" title="PieMenuStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-piemenustyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-progressbarstyle.html" title="ProgressBarStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-progressbarstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-radiobuttonstyle.html" title="RadioButtonStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-radiobuttonstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-scrollviewstyle.html" title="ScrollViewStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-scrollviewstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-sliderstyle.html" title="SliderStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-sliderstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-spinboxstyle.html" title="SpinBoxStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-spinboxstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-statusbarstyle.html" title="StatusBarStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-statusbarstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-statusindicatorstyle.html" title="StatusIndicatorStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-statusindicatorstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-switchstyle.html" title="SwitchStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-switchstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-tabviewstyle.html" title="TabViewStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-tabviewstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-tableviewstyle.html" title="TableViewStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-tableviewstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-textareastyle.html" title="TextAreaStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-textareastyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-textfieldstyle.html" title="TextFieldStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-textfieldstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-togglebuttonstyle.html" title="ToggleButtonStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-togglebuttonstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-toolbarstyle.html" title="ToolBarStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-toolbarstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-toolbuttonstyle.html" title="ToolButtonStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-toolbuttonstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-treeviewstyle.html" title="TreeViewStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-treeviewstyle-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-controls-styles-tumblerstyle.html" title="TumblerStyle Type Reference">
+                        <section ref="qml-qtquick-controls-styles-tumblerstyle-members.html" title="List of all members"/>
+                        <section ref="qml-qtquick-controls-styles-tumblerstyle-obsolete.html" title="Obsolete members"/>
+                    </section>
+                </section>
+                <section ref="qtquickcontrols-examples.html" title="Examples and Tutorials">
+                    <section ref="styling-circulargauge.html" title="Styling CircularGauge"/>
+                    <section ref="styling-gauge.html" title="Styling Gauge"/>
+                </section>
+            </section>
+        </toc>
+        <keywords>
+            <keyword name="Action" id="QML.Action" ref="qml-qtquick-controls-action.html"/>
+            <keyword name="Application Navigation and Views" id="Application Navigation and Views" ref="views.html"/>
+            <keyword name="Application Window" id="Application Window" ref="applicationwindow.html"/>
+            <keyword name="ApplicationWindow" id="QML.ApplicationWindow" ref="qml-qtquick-controls-applicationwindow.html"/>
+            <keyword name="ApplicationWindowStyle" id="QML.ApplicationWindowStyle" ref="qml-qtquick-controls-styles-applicationwindowstyle.html"/>
+            <keyword name="BusyIndicator" id="QML.BusyIndicator" ref="qml-qtquick-controls-busyindicator.html"/>
+            <keyword name="BusyIndicatorStyle" id="QML.BusyIndicatorStyle" ref="qml-qtquick-controls-styles-busyindicatorstyle.html"/>
+            <keyword name="Button" id="QML.Button" ref="qml-qtquick-controls-button.html"/>
+            <keyword name="ButtonStyle" id="QML.ButtonStyle" ref="qml-qtquick-controls-styles-buttonstyle.html"/>
+            <keyword name="Buttons and Controls" id="Buttons and Controls" ref="controls.html"/>
+            <keyword name="Calendar" id="QML.Calendar" ref="qml-qtquick-controls-calendar.html"/>
+            <keyword name="CalendarStyle" id="QML.CalendarStyle" ref="qml-qtquick-controls-styles-calendarstyle.html"/>
+            <keyword name="CheckBox" id="QML.CheckBox" ref="qml-qtquick-controls-checkbox.html"/>
+            <keyword name="CheckBoxStyle" id="QML.CheckBoxStyle" ref="qml-qtquick-controls-styles-checkboxstyle.html"/>
+            <keyword name="CircularGaugeStyle" id="QML.CircularGaugeStyle" ref="qml-qtquick-controls-styles-circulargaugestyle.html"/>
+            <keyword name="ComboBox" id="QML.ComboBox" ref="qml-qtquick-controls-combobox.html"/>
+            <keyword name="ComboBoxStyle" id="QML.ComboBoxStyle" ref="qml-qtquick-controls-styles-comboboxstyle.html"/>
+            <keyword name="DelayButtonStyle" id="QML.DelayButtonStyle" ref="qml-qtquick-controls-styles-delaybuttonstyle.html"/>
+            <keyword name="DialStyle" id="QML.DialStyle" ref="qml-qtquick-controls-styles-dialstyle.html"/>
+            <keyword name="ExclusiveGroup" id="QML.ExclusiveGroup" ref="qml-qtquick-controls-exclusivegroup.html"/>
+            <keyword name="GaugeStyle" id="QML.GaugeStyle" ref="qml-qtquick-controls-styles-gaugestyle.html"/>
+            <keyword name="GroupBox" id="QML.GroupBox" ref="qml-qtquick-controls-groupbox.html"/>
+            <keyword name="Label" id="QML.Label" ref="qml-qtquick-controls-label.html"/>
+            <keyword name="Menu" id="QML.Menu" ref="qml-qtquick-controls-menu.html"/>
+            <keyword name="MenuBar" id="QML.MenuBar" ref="qml-qtquick-controls-menubar.html"/>
+            <keyword name="MenuBarStyle" id="QML.MenuBarStyle" ref="qml-qtquick-controls-styles-menubarstyle.html"/>
+            <keyword name="MenuItem" id="QML.MenuItem" ref="qml-qtquick-controls-menuitem.html"/>
+            <keyword name="MenuSeparator" id="QML.MenuSeparator" ref="qml-qtquick-controls-menuseparator.html"/>
+            <keyword name="MenuStyle" id="QML.MenuStyle" ref="qml-qtquick-controls-styles-menustyle.html"/>
+            <keyword name="Menus" id="Menus" ref="menus.html"/>
+            <keyword name="PieMenuStyle" id="QML.PieMenuStyle" ref="qml-qtquick-controls-styles-piemenustyle.html"/>
+            <keyword name="ProgressBar" id="QML.ProgressBar" ref="qml-qtquick-controls-progressbar.html"/>
+            <keyword name="ProgressBarStyle" id="QML.ProgressBarStyle" ref="qml-qtquick-controls-styles-progressbarstyle.html"/>
+            <keyword name="Qt Quick Controls 1" id="Qt Quick Controls 1" ref="qtquickcontrols1-index.html"/>
+            <keyword name="Qt Quick Controls 1 Examples" id="Qt Quick Controls 1 Examples" ref="qtquickcontrols-examples.html"/>
+            <keyword name="Qt Quick Controls 1 Overview" id="Qt Quick Controls 1 Overview" ref="qtquickcontrols-overview.html"/>
+            <keyword name="Qt Quick Controls 1 Platform Notes" id="Qt Quick Controls 1 Platform Notes" ref="qtquickcontrols-platformnotes.html"/>
+            <keyword name="Qt Quick Controls 1 QML Types" id="Qt Quick Controls 1 QML Types" ref="qtquick-controls-qmlmodule.html"/>
+            <keyword name="Qt Quick Controls 1 Styles" id="Qt Quick Controls 1 Styles" ref="qtquickcontrolsstyles-index.html"/>
+            <keyword name="Qt Quick Controls 1 Styles QML Types" id="Qt Quick Controls 1 Styles QML Types" ref="qtquick-controls-styles-qmlmodule.html"/>
+            <keyword name="RadioButton" id="QML.RadioButton" ref="qml-qtquick-controls-radiobutton.html"/>
+            <keyword name="RadioButtonStyle" id="QML.RadioButtonStyle" ref="qml-qtquick-controls-styles-radiobuttonstyle.html"/>
+            <keyword name="ScrollView" id="QML.ScrollView" ref="qml-qtquick-controls-scrollview.html"/>
+            <keyword name="ScrollViewStyle" id="QML.ScrollViewStyle" ref="qml-qtquick-controls-styles-scrollviewstyle.html"/>
+            <keyword name="Slider" id="QML.Slider" ref="qml-qtquick-controls-slider.html"/>
+            <keyword name="SliderStyle" id="QML.SliderStyle" ref="qml-qtquick-controls-styles-sliderstyle.html"/>
+            <keyword name="SpinBox" id="QML.SpinBox" ref="qml-qtquick-controls-spinbox.html"/>
+            <keyword name="SpinBoxStyle" id="QML.SpinBoxStyle" ref="qml-qtquick-controls-styles-spinboxstyle.html"/>
+            <keyword name="SplitView" id="QML.SplitView" ref="qml-qtquick-controls-splitview.html"/>
+            <keyword name="Stack" id="QML.Stack" ref="qml-qtquick-controls-stack.html"/>
+            <keyword name="StackView" id="QML.StackView" ref="qml-qtquick-controls-stackview.html"/>
+            <keyword name="StackViewDelegate" id="QML.StackViewDelegate" ref="qml-qtquick-controls-stackviewdelegate.html"/>
+            <keyword name="StatusBar" id="QML.StatusBar" ref="qml-qtquick-controls-statusbar.html"/>
+            <keyword name="StatusBarStyle" id="QML.StatusBarStyle" ref="qml-qtquick-controls-styles-statusbarstyle.html"/>
+            <keyword name="StatusIndicatorStyle" id="QML.StatusIndicatorStyle" ref="qml-qtquick-controls-styles-statusindicatorstyle.html"/>
+            <keyword name="Styling CircularGauge" id="Styling CircularGauge" ref="styling-circulargauge.html"/>
+            <keyword name="Styling Controls" id="Styling Controls" ref="controlsstyling.html"/>
+            <keyword name="Styling Gauge" id="Styling Gauge" ref="styling-gauge.html"/>
+            <keyword name="Styling Tutorials" id="Styling Tutorials" ref="stylingtutorials.html"/>
+            <keyword name="Styling Views" id="Styling Views" ref="viewsstyling.html"/>
+            <keyword name="Switch" id="QML.Switch" ref="qml-qtquick-controls-switch.html"/>
+            <keyword name="SwitchStyle" id="QML.SwitchStyle" ref="qml-qtquick-controls-styles-switchstyle.html"/>
+            <keyword name="Tab" id="QML.Tab" ref="qml-qtquick-controls-tab.html"/>
+            <keyword name="TabView" id="QML.TabView" ref="qml-qtquick-controls-tabview.html"/>
+            <keyword name="TabViewStyle" id="QML.TabViewStyle" ref="qml-qtquick-controls-styles-tabviewstyle.html"/>
+            <keyword name="TableView" id="QML.TableView" ref="qml-qtquick-controls-tableview.html"/>
+            <keyword name="TableViewColumn" id="QML.TableViewColumn" ref="qml-qtquick-controls-tableviewcolumn.html"/>
+            <keyword name="TableViewStyle" id="QML.TableViewStyle" ref="qml-qtquick-controls-styles-tableviewstyle.html"/>
+            <keyword name="TextArea" id="QML.TextArea" ref="qml-qtquick-controls-textarea.html"/>
+            <keyword name="TextAreaStyle" id="QML.TextAreaStyle" ref="qml-qtquick-controls-styles-textareastyle.html"/>
+            <keyword name="TextField" id="QML.TextField" ref="qml-qtquick-controls-textfield.html"/>
+            <keyword name="TextFieldStyle" id="QML.TextFieldStyle" ref="qml-qtquick-controls-styles-textfieldstyle.html"/>
+            <keyword name="ToggleButtonStyle" id="QML.ToggleButtonStyle" ref="qml-qtquick-controls-styles-togglebuttonstyle.html"/>
+            <keyword name="ToolBar" id="QML.ToolBar" ref="qml-qtquick-controls-toolbar.html"/>
+            <keyword name="ToolBarStyle" id="QML.ToolBarStyle" ref="qml-qtquick-controls-styles-toolbarstyle.html"/>
+            <keyword name="ToolButton" id="QML.ToolButton" ref="qml-qtquick-controls-toolbutton.html"/>
+            <keyword name="TreeView" id="QML.TreeView" ref="qml-qtquick-controls-treeview.html"/>
+            <keyword name="TreeViewStyle" id="QML.TreeViewStyle" ref="qml-qtquick-controls-styles-treeviewstyle.html"/>
+            <keyword name="TumblerStyle" id="QML.TumblerStyle" ref="qml-qtquick-controls-styles-tumblerstyle.html"/>
+            <keyword name="aboutToHide" id="Menu::aboutToHide" ref="qml-qtquick-controls-menu.html#aboutToHide-signal"/>
+            <keyword name="aboutToShow" id="Menu::aboutToShow" ref="qml-qtquick-controls-menu.html#aboutToShow-signal"/>
+            <keyword name="acceptableInput" id="ComboBox::acceptableInput" ref="qml-qtquick-controls-combobox.html#acceptableInput-prop"/>
+            <keyword name="acceptableInput" id="TextField::acceptableInput" ref="qml-qtquick-controls-textfield.html#acceptableInput-prop"/>
+            <keyword name="accepted" id="ComboBox::accepted" ref="qml-qtquick-controls-combobox.html#accepted-signal"/>
+            <keyword name="accepted" id="TextField::accepted" ref="qml-qtquick-controls-textfield.html#accepted-signal"/>
+            <keyword name="action" id="MenuItem::action" ref="qml-qtquick-controls-menuitem.html#action-prop"/>
+            <keyword name="activated" id="ComboBox::activated" ref="qml-qtquick-controls-combobox.html#activated-signal"/>
+            <keyword name="activated" id="TableView::activated" ref="qml-qtquick-controls-tableview.html#activated-signal"/>
+            <keyword name="activated" id="TreeView::activated" ref="qml-qtquick-controls-treeview.html#activated-signal"/>
+            <keyword name="activeFocusOnPress" id="ComboBox::activeFocusOnPress" ref="qml-qtquick-controls-combobox.html#activeFocusOnPress-prop"/>
+            <keyword name="activeFocusOnPress" id="Slider::activeFocusOnPress" ref="qml-qtquick-controls-slider.html#activeFocusOnPress-prop"/>
+            <keyword name="activeFocusOnPress" id="SpinBox::activeFocusOnPress" ref="qml-qtquick-controls-spinbox.html#activeFocusOnPress-prop"/>
+            <keyword name="activeFocusOnPress" id="Switch::activeFocusOnPress" ref="qml-qtquick-controls-switch.html#activeFocusOnPress-prop"/>
+            <keyword name="activeFocusOnPress" id="TextArea::activeFocusOnPress" ref="qml-qtquick-controls-textarea.html#activeFocusOnPress-prop"/>
+            <keyword name="activeFocusOnPress" id="TextField::activeFocusOnPress" ref="qml-qtquick-controls-textfield.html#activeFocusOnPress-prop"/>
+            <keyword name="addItem" id="Menu::addItem" ref="qml-qtquick-controls-menu.html#addItem-method"/>
+            <keyword name="addItem" id="SplitView::addItem" ref="qml-qtquick-controls-splitview.html#addItem-method"/>
+            <keyword name="addSeparator" id="Menu::addSeparator" ref="qml-qtquick-controls-menu.html#addSeparator-method"/>
+            <keyword name="addTab" id="TabView::addTab" ref="qml-qtquick-controls-tabview.html#addTab-method"/>
+            <keyword name="angleRange" id="CircularGaugeStyle::angleRange" ref="qml-qtquick-controls-styles-circulargaugestyle.html#angleRange-prop"/>
+            <keyword name="append" id="TextArea::append" ref="qml-qtquick-controls-textarea.html#append-method"/>
+            <keyword name="background" id="ApplicationWindowStyle::background" ref="qml-qtquick-controls-styles-applicationwindowstyle.html#background-prop"/>
+            <keyword name="background" id="ButtonStyle::background" ref="qml-qtquick-controls-styles-buttonstyle.html#background-prop"/>
+            <keyword name="background" id="CalendarStyle::background" ref="qml-qtquick-controls-styles-calendarstyle.html#background-prop"/>
+            <keyword name="background" id="CheckBoxStyle::background" ref="qml-qtquick-controls-styles-checkboxstyle.html#background-prop"/>
+            <keyword name="background" id="CircularGaugeStyle::background" ref="qml-qtquick-controls-styles-circulargaugestyle.html#background-prop"/>
+            <keyword name="background" id="ComboBoxStyle::background" ref="qml-qtquick-controls-styles-comboboxstyle.html#background-prop"/>
+            <keyword name="background" id="DialStyle::background" ref="qml-qtquick-controls-styles-dialstyle.html#background-prop"/>
+            <keyword name="background" id="GaugeStyle::background" ref="qml-qtquick-controls-styles-gaugestyle.html#background-prop"/>
+            <keyword name="background" id="MenuBarStyle::background" ref="qml-qtquick-controls-styles-menubarstyle.html#background-prop"/>
+            <keyword name="background" id="PieMenuStyle::background" ref="qml-qtquick-controls-styles-piemenustyle.html#background-prop"/>
+            <keyword name="background" id="ProgressBarStyle::background" ref="qml-qtquick-controls-styles-progressbarstyle.html#background-prop"/>
+            <keyword name="background" id="RadioButtonStyle::background" ref="qml-qtquick-controls-styles-radiobuttonstyle.html#background-prop"/>
+            <keyword name="background" id="SpinBoxStyle::background" ref="qml-qtquick-controls-styles-spinboxstyle.html#background-prop"/>
+            <keyword name="background" id="StatusBarStyle::background" ref="qml-qtquick-controls-styles-statusbarstyle.html#background-prop"/>
+            <keyword name="background" id="TextFieldStyle::background" ref="qml-qtquick-controls-styles-textfieldstyle.html#background-prop"/>
+            <keyword name="background" id="ToolBarStyle::background" ref="qml-qtquick-controls-styles-toolbarstyle.html#background-prop"/>
+            <keyword name="background" id="TumblerStyle::background" ref="qml-qtquick-controls-styles-tumblerstyle.html#background-prop"/>
+            <keyword name="backgroundColor" id="PieMenuStyle::backgroundColor" ref="qml-qtquick-controls-styles-piemenustyle.html#backgroundColor-prop"/>
+            <keyword name="backgroundColor" id="TextAreaStyle::backgroundColor" ref="qml-qtquick-controls-styles-textareastyle.html#backgroundColor-prop"/>
+            <keyword name="backgroundVisible" id="TextArea::backgroundVisible" ref="qml-qtquick-controls-textarea.html#backgroundVisible-prop"/>
+            <keyword name="baseUrl" id="TextArea::baseUrl" ref="qml-qtquick-controls-textarea.html#baseUrl-prop"/>
+            <keyword name="bindCheckable" id="ExclusiveGroup::bindCheckable" ref="qml-qtquick-controls-exclusivegroup.html#bindCheckable-method"/>
+            <keyword name="branchDelegate" id="TreeViewStyle::branchDelegate" ref="qml-qtquick-controls-styles-treeviewstyle.html#branchDelegate-prop"/>
+            <keyword name="busy" id="StackView::busy" ref="qml-qtquick-controls-stackview.html#busy-prop"/>
+            <keyword name="canPaste" id="TextArea::canPaste" ref="qml-qtquick-controls-textarea.html#canPaste-prop"/>
+            <keyword name="canPaste" id="TextField::canPaste" ref="qml-qtquick-controls-textfield.html#canPaste-prop"/>
+            <keyword name="canRedo" id="TextArea::canRedo" ref="qml-qtquick-controls-textarea.html#canRedo-prop"/>
+            <keyword name="canRedo" id="TextField::canRedo" ref="qml-qtquick-controls-textfield.html#canRedo-prop"/>
+            <keyword name="canUndo" id="TextArea::canUndo" ref="qml-qtquick-controls-textarea.html#canUndo-prop"/>
+            <keyword name="canUndo" id="TextField::canUndo" ref="qml-qtquick-controls-textfield.html#canUndo-prop"/>
+            <keyword name="cancel" id="PieMenuStyle::cancel" ref="qml-qtquick-controls-styles-piemenustyle.html#cancel-prop"/>
+            <keyword name="cancelRadius" id="PieMenuStyle::cancelRadius" ref="qml-qtquick-controls-styles-piemenustyle.html#cancelRadius-prop"/>
+            <keyword name="checkable" id="Action::checkable" ref="qml-qtquick-controls-action.html#checkable-prop"/>
+            <keyword name="checkable" id="GroupBox::checkable" ref="qml-qtquick-controls-groupbox.html#checkable-prop"/>
+            <keyword name="checkable" id="MenuItem::checkable" ref="qml-qtquick-controls-menuitem.html#checkable-prop"/>
+            <keyword name="checked" id="Action::checked" ref="qml-qtquick-controls-action.html#checked-prop"/>
+            <keyword name="checked" id="GroupBox::checked" ref="qml-qtquick-controls-groupbox.html#checked-prop"/>
+            <keyword name="checked" id="MenuItem::checked" ref="qml-qtquick-controls-menuitem.html#checked-prop"/>
+            <keyword name="checked" id="Switch::checked" ref="qml-qtquick-controls-switch.html#checked-prop"/>
+            <keyword name="checkedDropShadowColor" id="ToggleButtonStyle::checkedDropShadowColor" ref="qml-qtquick-controls-styles-togglebuttonstyle.html#checkedDropShadowColor-prop"/>
+            <keyword name="checkedGradient" id="ToggleButtonStyle::checkedGradient" ref="qml-qtquick-controls-styles-togglebuttonstyle.html#checkedGradient-prop"/>
+            <keyword name="checkedState" id="CheckBox::checkedState" ref="qml-qtquick-controls-checkbox.html#checkedState-prop"/>
+            <keyword name="clear" id="StackView::clear" ref="qml-qtquick-controls-stackview.html#clear-method"/>
+            <keyword name="clicked" id="Calendar::clicked" ref="qml-qtquick-controls-calendar.html#clicked-signal"/>
+            <keyword name="clicked" id="Switch::clicked" ref="qml-qtquick-controls-switch.html#clicked-signal"/>
+            <keyword name="clicked" id="TableView::clicked" ref="qml-qtquick-controls-tableview.html#clicked-signal"/>
+            <keyword name="clicked" id="TreeView::clicked" ref="qml-qtquick-controls-treeview.html#clicked-signal"/>
+            <keyword name="collapse" id="TreeView::collapse" ref="qml-qtquick-controls-treeview.html#collapse-method"/>
+            <keyword name="collapsed" id="TreeView::collapsed" ref="qml-qtquick-controls-treeview.html#collapsed-signal"/>
+            <keyword name="color" id="StatusIndicatorStyle::color" ref="qml-qtquick-controls-styles-statusindicatorstyle.html#color-prop"/>
+            <keyword name="columnForeground" id="TumblerStyle::columnForeground" ref="qml-qtquick-controls-styles-tumblerstyle.html#columnForeground-prop"/>
+            <keyword name="completeTransition" id="StackView::completeTransition" ref="qml-qtquick-controls-stackview.html#completeTransition-method"/>
+            <keyword name="contentHeight" id="TextArea::contentHeight" ref="qml-qtquick-controls-textarea.html#contentHeight-prop"/>
+            <keyword name="contentItem" id="ApplicationWindow::contentItem" ref="qml-qtquick-controls-applicationwindow.html#contentItem-prop"/>
+            <keyword name="contentItem" id="GroupBox::contentItem" ref="qml-qtquick-controls-groupbox.html#contentItem-prop"/>
+            <keyword name="contentItem" id="ScrollView::contentItem" ref="qml-qtquick-controls-scrollview.html#contentItem-prop"/>
+            <keyword name="contentItem" id="StatusBar::contentItem" ref="qml-qtquick-controls-statusbar.html#contentItem-prop"/>
+            <keyword name="contentItem" id="TabView::contentItem" ref="qml-qtquick-controls-tabview.html#contentItem-prop"/>
+            <keyword name="contentItem" id="ToolBar::contentItem" ref="qml-qtquick-controls-toolbar.html#contentItem-prop"/>
+            <keyword name="contentWidth" id="TextArea::contentWidth" ref="qml-qtquick-controls-textarea.html#contentWidth-prop"/>
+            <keyword name="control" id="ApplicationWindowStyle::control" ref="qml-qtquick-controls-styles-applicationwindowstyle.html#control-prop"/>
+            <keyword name="control" id="BusyIndicatorStyle::control" ref="qml-qtquick-controls-styles-busyindicatorstyle.html#control-prop"/>
+            <keyword name="control" id="ButtonStyle::control" ref="qml-qtquick-controls-styles-buttonstyle.html#control-prop"/>
+            <keyword name="control" id="CalendarStyle::control" ref="qml-qtquick-controls-styles-calendarstyle.html#control-prop"/>
+            <keyword name="control" id="CheckBoxStyle::control" ref="qml-qtquick-controls-styles-checkboxstyle.html#control-prop"/>
+            <keyword name="control" id="CircularGaugeStyle::control" ref="qml-qtquick-controls-styles-circulargaugestyle.html#control-prop"/>
+            <keyword name="control" id="ComboBoxStyle::control" ref="qml-qtquick-controls-styles-comboboxstyle.html#control-prop"/>
+            <keyword name="control" id="DelayButtonStyle::control" ref="qml-qtquick-controls-styles-delaybuttonstyle.html#control-prop"/>
+            <keyword name="control" id="DialStyle::control" ref="qml-qtquick-controls-styles-dialstyle.html#control-prop"/>
+            <keyword name="control" id="GaugeStyle::control" ref="qml-qtquick-controls-styles-gaugestyle.html#control-prop"/>
+            <keyword name="control" id="PieMenuStyle::control" ref="qml-qtquick-controls-styles-piemenustyle.html#control-prop"/>
+            <keyword name="control" id="ProgressBarStyle::control" ref="qml-qtquick-controls-styles-progressbarstyle.html#control-prop"/>
+            <keyword name="control" id="RadioButtonStyle::control" ref="qml-qtquick-controls-styles-radiobuttonstyle.html#control-prop"/>
+            <keyword name="control" id="ScrollViewStyle::control" ref="qml-qtquick-controls-styles-scrollviewstyle.html#control-prop"/>
+            <keyword name="control" id="SliderStyle::control" ref="qml-qtquick-controls-styles-sliderstyle.html#control-prop"/>
+            <keyword name="control" id="SpinBoxStyle::control" ref="qml-qtquick-controls-styles-spinboxstyle.html#control-prop"/>
+            <keyword name="control" id="StatusIndicatorStyle::control" ref="qml-qtquick-controls-styles-statusindicatorstyle.html#control-prop"/>
+            <keyword name="control" id="TabViewStyle::control" ref="qml-qtquick-controls-styles-tabviewstyle.html#control-prop"/>
+            <keyword name="control" id="TableViewStyle::control" ref="qml-qtquick-controls-styles-tableviewstyle.html#control-prop"/>
+            <keyword name="control" id="TextAreaStyle::control" ref="qml-qtquick-controls-styles-textareastyle.html#control-prop"/>
+            <keyword name="control" id="TextFieldStyle::control" ref="qml-qtquick-controls-styles-textfieldstyle.html#control-prop"/>
+            <keyword name="control" id="ToggleButtonStyle::control" ref="qml-qtquick-controls-styles-togglebuttonstyle.html#control-prop"/>
+            <keyword name="control" id="TreeViewStyle::control" ref="qml-qtquick-controls-styles-treeviewstyle.html#control-prop"/>
+            <keyword name="control" id="TumblerStyle::control" ref="qml-qtquick-controls-styles-tumblerstyle.html#control-prop"/>
+            <keyword name="copy" id="TextArea::copy" ref="qml-qtquick-controls-textarea.html#copy-method"/>
+            <keyword name="copy" id="TextField::copy" ref="qml-qtquick-controls-textfield.html#copy-method"/>
+            <keyword name="corner" id="ScrollViewStyle::corner" ref="qml-qtquick-controls-styles-scrollviewstyle.html#corner-prop"/>
+            <keyword name="count" id="ComboBox::count" ref="qml-qtquick-controls-combobox.html#count-prop"/>
+            <keyword name="count" id="TabView::count" ref="qml-qtquick-controls-tabview.html#count-prop"/>
+            <keyword name="current" id="ExclusiveGroup::current" ref="qml-qtquick-controls-exclusivegroup.html#current-prop"/>
+            <keyword name="currentIndex" id="ComboBox::currentIndex" ref="qml-qtquick-controls-combobox.html#currentIndex-prop"/>
+            <keyword name="currentIndex" id="TabView::currentIndex" ref="qml-qtquick-controls-tabview.html#currentIndex-prop"/>
+            <keyword name="currentIndex" id="TreeView::currentIndex" ref="qml-qtquick-controls-treeview.html#currentIndex-prop"/>
+            <keyword name="currentItem" id="StackView::currentItem" ref="qml-qtquick-controls-stackview.html#currentItem-prop"/>
+            <keyword name="currentProgress" id="ProgressBarStyle::currentProgress" ref="qml-qtquick-controls-styles-progressbarstyle.html#currentProgress-prop"/>
+            <keyword name="currentRow" id="TableView::currentRow" ref="qml-qtquick-controls-tableview.html#currentRow-prop"/>
+            <keyword name="currentText" id="ComboBox::currentText" ref="qml-qtquick-controls-combobox.html#currentText-prop"/>
+            <keyword name="cursorPosition" id="SpinBox::cursorPosition" ref="qml-qtquick-controls-spinbox.html#cursorPosition-prop"/>
+            <keyword name="cursorPosition" id="TextArea::cursorPosition" ref="qml-qtquick-controls-textarea.html#cursorPosition-prop"/>
+            <keyword name="cursorPosition" id="TextField::cursorPosition" ref="qml-qtquick-controls-textfield.html#cursorPosition-prop"/>
+            <keyword name="cursorRectangle" id="TextArea::cursorRectangle" ref="qml-qtquick-controls-textarea.html#cursorRectangle-prop"/>
+            <keyword name="cursorRectangle" id="TextField::cursorRectangle" ref="qml-qtquick-controls-textfield.html#cursorRectangle-prop"/>
+            <keyword name="cut" id="TextArea::cut" ref="qml-qtquick-controls-textarea.html#cut-method"/>
+            <keyword name="cut" id="TextField::cut" ref="qml-qtquick-controls-textfield.html#cut-method"/>
+            <keyword name="dayDelegate" id="CalendarStyle::dayDelegate" ref="qml-qtquick-controls-styles-calendarstyle.html#dayDelegate-prop"/>
+            <keyword name="dayOfWeekDelegate" id="CalendarStyle::dayOfWeekDelegate" ref="qml-qtquick-controls-styles-calendarstyle.html#dayOfWeekDelegate-prop"/>
+            <keyword name="dayOfWeekFormat" id="Calendar::dayOfWeekFormat" ref="qml-qtquick-controls-calendar.html#dayOfWeekFormat-prop"/>
+            <keyword name="decimals" id="SpinBox::decimals" ref="qml-qtquick-controls-spinbox.html#decimals-prop"/>
+            <keyword name="decrementControl" id="ScrollViewStyle::decrementControl" ref="qml-qtquick-controls-styles-scrollviewstyle.html#decrementControl-prop"/>
+            <keyword name="decrementControl" id="SpinBoxStyle::decrementControl" ref="qml-qtquick-controls-styles-spinboxstyle.html#decrementControl-prop"/>
+            <keyword name="delegate" id="StackView::delegate" ref="qml-qtquick-controls-stackview.html#delegate-prop"/>
+            <keyword name="delegate" id="TableViewColumn::delegate" ref="qml-qtquick-controls-tableviewcolumn.html#delegate-prop"/>
+            <keyword name="delegate" id="TumblerStyle::delegate" ref="qml-qtquick-controls-styles-tumblerstyle.html#delegate-prop"/>
+            <keyword name="depth" id="StackView::depth" ref="qml-qtquick-controls-stackview.html#depth-prop"/>
+            <keyword name="deselect" id="TextArea::deselect" ref="qml-qtquick-controls-textarea.html#deselect-method"/>
+            <keyword name="deselect" id="TextField::deselect" ref="qml-qtquick-controls-textfield.html#deselect-method"/>
+            <keyword name="displayText" id="TextField::displayText" ref="qml-qtquick-controls-textfield.html#displayText-prop"/>
+            <keyword name="doubleClicked" id="Calendar::doubleClicked" ref="qml-qtquick-controls-calendar.html#doubleClicked-signal"/>
+            <keyword name="doubleClicked" id="TableView::doubleClicked" ref="qml-qtquick-controls-tableview.html#doubleClicked-signal"/>
+            <keyword name="doubleClicked" id="TreeView::doubleClicked" ref="qml-qtquick-controls-treeview.html#doubleClicked-signal"/>
+            <keyword name="dropDownButtonWidth" id="ComboBoxStyle::dropDownButtonWidth" ref="qml-qtquick-controls-styles-comboboxstyle.html#dropDownButtonWidth-prop"/>
+            <keyword name="echoMode" id="TextField::echoMode" ref="qml-qtquick-controls-textfield.html#echoMode-prop"/>
+            <keyword name="editText" id="ComboBox::editText" ref="qml-qtquick-controls-combobox.html#editText-prop"/>
+            <keyword name="editable" id="ComboBox::editable" ref="qml-qtquick-controls-combobox.html#editable-prop"/>
+            <keyword name="editingFinished" id="SpinBox::editingFinished" ref="qml-qtquick-controls-spinbox.html#editingFinished-signal"/>
+            <keyword name="editingFinished" id="TextArea::editingFinished" ref="qml-qtquick-controls-textarea.html#editingFinished-signal"/>
+            <keyword name="editingFinished" id="TextField::editingFinished" ref="qml-qtquick-controls-textfield.html#editingFinished-signal"/>
+            <keyword name="effectiveHorizontalAlignment" id="TextArea::effectiveHorizontalAlignment" ref="qml-qtquick-controls-textarea.html#effectiveHorizontalAlignment-prop"/>
+            <keyword name="effectiveHorizontalAlignment" id="TextField::effectiveHorizontalAlignment" ref="qml-qtquick-controls-textfield.html#effectiveHorizontalAlignment-prop"/>
+            <keyword name="elideMode" id="TableViewColumn::elideMode" ref="qml-qtquick-controls-tableviewcolumn.html#elideMode-prop"/>
+            <keyword name="enabled" id="Action::enabled" ref="qml-qtquick-controls-action.html#enabled-prop"/>
+            <keyword name="enabled" id="Menu::enabled" ref="qml-qtquick-controls-menu.html#enabled-prop"/>
+            <keyword name="enabled" id="MenuItem::enabled" ref="qml-qtquick-controls-menuitem.html#enabled-prop"/>
+            <keyword name="endAngle" id="PieMenuStyle::endAngle" ref="qml-qtquick-controls-styles-piemenustyle.html#endAngle-prop"/>
+            <keyword name="exclusiveGroup" id="Action::exclusiveGroup" ref="qml-qtquick-controls-action.html#exclusiveGroup-prop"/>
+            <keyword name="exclusiveGroup" id="MenuItem::exclusiveGroup" ref="qml-qtquick-controls-menuitem.html#exclusiveGroup-prop"/>
+            <keyword name="exclusiveGroup" id="Switch::exclusiveGroup" ref="qml-qtquick-controls-switch.html#exclusiveGroup-prop"/>
+            <keyword name="expand" id="TreeView::expand" ref="qml-qtquick-controls-treeview.html#expand-method"/>
+            <keyword name="expanded" id="TreeView::expanded" ref="qml-qtquick-controls-treeview.html#expanded-signal"/>
+            <keyword name="find" id="ComboBox::find" ref="qml-qtquick-controls-combobox.html#find-method"/>
+            <keyword name="find" id="StackView::find" ref="qml-qtquick-controls-stackview.html#find-method"/>
+            <keyword name="flat" id="GroupBox::flat" ref="qml-qtquick-controls-groupbox.html#flat-prop"/>
+            <keyword name="flickableItem" id="ScrollView::flickableItem" ref="qml-qtquick-controls-scrollview.html#flickableItem-prop"/>
+            <keyword name="font" id="ComboBoxStyle::font" ref="qml-qtquick-controls-styles-comboboxstyle.html#font-prop"/>
+            <keyword name="font" id="MenuBarStyle::font" ref="qml-qtquick-controls-styles-menubarstyle.html#font-prop"/>
+            <keyword name="font" id="MenuStyle::font" ref="qml-qtquick-controls-styles-menustyle.html#font-prop"/>
+            <keyword name="font" id="SpinBox::font" ref="qml-qtquick-controls-spinbox.html#font-prop"/>
+            <keyword name="font" id="SpinBoxStyle::font" ref="qml-qtquick-controls-styles-spinboxstyle.html#font-prop"/>
+            <keyword name="font" id="TextArea::font" ref="qml-qtquick-controls-textarea.html#font-prop"/>
+            <keyword name="font" id="TextAreaStyle::font" ref="qml-qtquick-controls-styles-textareastyle.html#font-prop"/>
+            <keyword name="font" id="TextField::font" ref="qml-qtquick-controls-textfield.html#font-prop"/>
+            <keyword name="font" id="TextFieldStyle::font" ref="qml-qtquick-controls-styles-textfieldstyle.html#font-prop"/>
+            <keyword name="foreground" id="CircularGaugeStyle::foreground" ref="qml-qtquick-controls-styles-circulargaugestyle.html#foreground-prop"/>
+            <keyword name="foreground" id="DelayButtonStyle::foreground" ref="qml-qtquick-controls-styles-delaybuttonstyle.html#foreground-prop"/>
+            <keyword name="foreground" id="GaugeStyle::foreground" ref="qml-qtquick-controls-styles-gaugestyle.html#foreground-prop"/>
+            <keyword name="foreground" id="TumblerStyle::foreground" ref="qml-qtquick-controls-styles-tumblerstyle.html#foreground-prop"/>
+            <keyword name="formatMnemonic" id="MenuBarStyle::formatMnemonic" ref="qml-qtquick-controls-styles-menubarstyle.html#formatMnemonic-method"/>
+            <keyword name="formatMnemonic" id="MenuStyle::formatMnemonic" ref="qml-qtquick-controls-styles-menustyle.html#formatMnemonic-method"/>
+            <keyword name="frame" id="MenuStyle::frame" ref="qml-qtquick-controls-styles-menustyle.html#frame-prop"/>
+            <keyword name="frame" id="ScrollViewStyle::frame" ref="qml-qtquick-controls-styles-scrollviewstyle.html#frame-prop"/>
+            <keyword name="frame" id="TabViewStyle::frame" ref="qml-qtquick-controls-styles-tabviewstyle.html#frame-prop"/>
+            <keyword name="frame" id="TumblerStyle::frame" ref="qml-qtquick-controls-styles-tumblerstyle.html#frame-prop"/>
+            <keyword name="frameOverlap" id="TabViewStyle::frameOverlap" ref="qml-qtquick-controls-styles-tabviewstyle.html#frameOverlap-prop"/>
+            <keyword name="frameVisible" id="Calendar::frameVisible" ref="qml-qtquick-controls-calendar.html#frameVisible-prop"/>
+            <keyword name="frameVisible" id="ScrollView::frameVisible" ref="qml-qtquick-controls-scrollview.html#frameVisible-prop"/>
+            <keyword name="frameVisible" id="TabView::frameVisible" ref="qml-qtquick-controls-tabview.html#frameVisible-prop"/>
+            <keyword name="get" id="StackView::get" ref="qml-qtquick-controls-stackview.html#get-method"/>
+            <keyword name="getFormattedText" id="TextArea::getFormattedText" ref="qml-qtquick-controls-textarea.html#getFormattedText-method"/>
+            <keyword name="getTab" id="TabView::getTab" ref="qml-qtquick-controls-tabview.html#getTab-method"/>
+            <keyword name="getText" id="TextArea::getText" ref="qml-qtquick-controls-textarea.html#getText-method"/>
+            <keyword name="getText" id="TextField::getText" ref="qml-qtquick-controls-textfield.html#getText-method"/>
+            <keyword name="getTransition" id="StackViewDelegate::getTransition" ref="qml-qtquick-controls-stackviewdelegate.html#getTransition-method"/>
+            <keyword name="gridColor" id="CalendarStyle::gridColor" ref="qml-qtquick-controls-styles-calendarstyle.html#gridColor-prop"/>
+            <keyword name="gridVisible" id="CalendarStyle::gridVisible" ref="qml-qtquick-controls-styles-calendarstyle.html#gridVisible-prop"/>
+            <keyword name="groove" id="SliderStyle::groove" ref="qml-qtquick-controls-styles-sliderstyle.html#groove-prop"/>
+            <keyword name="groove" id="SwitchStyle::groove" ref="qml-qtquick-controls-styles-switchstyle.html#groove-prop"/>
+            <keyword name="handle" id="DialStyle::handle" ref="qml-qtquick-controls-styles-dialstyle.html#handle-prop"/>
+            <keyword name="handle" id="ScrollViewStyle::handle" ref="qml-qtquick-controls-styles-scrollviewstyle.html#handle-prop"/>
+            <keyword name="handle" id="SliderStyle::handle" ref="qml-qtquick-controls-styles-sliderstyle.html#handle-prop"/>
+            <keyword name="handle" id="SwitchStyle::handle" ref="qml-qtquick-controls-styles-switchstyle.html#handle-prop"/>
+            <keyword name="handleDelegate" id="SplitView::handleDelegate" ref="qml-qtquick-controls-splitview.html#handleDelegate-prop"/>
+            <keyword name="handleInset" id="DialStyle::handleInset" ref="qml-qtquick-controls-styles-dialstyle.html#handleInset-prop"/>
+            <keyword name="handleOverlap" id="ScrollViewStyle::handleOverlap" ref="qml-qtquick-controls-styles-scrollviewstyle.html#handleOverlap-prop"/>
+            <keyword name="headerDelegate" id="TableViewStyle::headerDelegate" ref="qml-qtquick-controls-styles-tableviewstyle.html#headerDelegate-prop"/>
+            <keyword name="headerDelegate" id="TreeViewStyle::headerDelegate" ref="qml-qtquick-controls-styles-treeviewstyle.html#headerDelegate-prop"/>
+            <keyword name="highlight" id="TumblerStyle::highlight" ref="qml-qtquick-controls-styles-tumblerstyle.html#highlight-prop"/>
+            <keyword name="highlightOnFocus" id="ScrollView::highlightOnFocus" ref="qml-qtquick-controls-scrollview.html#highlightOnFocus-prop"/>
+            <keyword name="horizontalAlignment" id="SpinBox::horizontalAlignment" ref="qml-qtquick-controls-spinbox.html#horizontalAlignment-prop"/>
+            <keyword name="horizontalAlignment" id="SpinBoxStyle::horizontalAlignment" ref="qml-qtquick-controls-styles-spinboxstyle.html#horizontalAlignment-prop"/>
+            <keyword name="horizontalAlignment" id="TableViewColumn::horizontalAlignment" ref="qml-qtquick-controls-tableviewcolumn.html#horizontalAlignment-prop"/>
+            <keyword name="horizontalAlignment" id="TextArea::horizontalAlignment" ref="qml-qtquick-controls-textarea.html#horizontalAlignment-prop"/>
+            <keyword name="horizontalAlignment" id="TextField::horizontalAlignment" ref="qml-qtquick-controls-textfield.html#horizontalAlignment-prop"/>
+            <keyword name="horizontalScrollBarPolicy" id="ScrollView::horizontalScrollBarPolicy" ref="qml-qtquick-controls-scrollview.html#horizontalScrollBarPolicy-prop"/>
+            <keyword name="hovered" id="Calendar::hovered" ref="qml-qtquick-controls-calendar.html#hovered-signal"/>
+            <keyword name="hovered" id="ComboBox::hovered" ref="qml-qtquick-controls-combobox.html#hovered-prop"/>
+            <keyword name="hovered" id="ProgressBar::hovered" ref="qml-qtquick-controls-progressbar.html#hovered-prop"/>
+            <keyword name="hovered" id="Slider::hovered" ref="qml-qtquick-controls-slider.html#hovered-prop"/>
+            <keyword name="hovered" id="SpinBox::hovered" ref="qml-qtquick-controls-spinbox.html#hovered-prop"/>
+            <keyword name="hovered" id="TextField::hovered" ref="qml-qtquick-controls-textfield.html#hovered-prop"/>
+            <keyword name="hoveredLink" id="TextArea::hoveredLink" ref="qml-qtquick-controls-textarea.html#hoveredLink-prop"/>
+            <keyword name="iconName" id="Action::iconName" ref="qml-qtquick-controls-action.html#iconName-prop"/>
+            <keyword name="iconName" id="Menu::iconName" ref="qml-qtquick-controls-menu.html#iconName-prop"/>
+            <keyword name="iconName" id="MenuItem::iconName" ref="qml-qtquick-controls-menuitem.html#iconName-prop"/>
+            <keyword name="iconSource" id="Action::iconSource" ref="qml-qtquick-controls-action.html#iconSource-prop"/>
+            <keyword name="iconSource" id="Menu::iconSource" ref="qml-qtquick-controls-menu.html#iconSource-prop"/>
+            <keyword name="iconSource" id="MenuItem::iconSource" ref="qml-qtquick-controls-menuitem.html#iconSource-prop"/>
+            <keyword name="inactiveGradient" id="ToggleButtonStyle::inactiveGradient" ref="qml-qtquick-controls-styles-togglebuttonstyle.html#inactiveGradient-prop"/>
+            <keyword name="incrementControl" id="ScrollViewStyle::incrementControl" ref="qml-qtquick-controls-styles-scrollviewstyle.html#incrementControl-prop"/>
+            <keyword name="incrementControl" id="SpinBoxStyle::incrementControl" ref="qml-qtquick-controls-styles-spinboxstyle.html#incrementControl-prop"/>
+            <keyword name="indentation" id="TreeViewStyle::indentation" ref="qml-qtquick-controls-styles-treeviewstyle.html#indentation-prop"/>
+            <keyword name="indeterminate" id="ProgressBar::indeterminate" ref="qml-qtquick-controls-progressbar.html#indeterminate-prop"/>
+            <keyword name="index" id="Stack::index" ref="qml-qtquick-controls-stack.html#index-attached-prop"/>
+            <keyword name="indexAt" id="TreeView::indexAt" ref="qml-qtquick-controls-treeview.html#indexAt-method"/>
+            <keyword name="indicator" id="BusyIndicatorStyle::indicator" ref="qml-qtquick-controls-styles-busyindicatorstyle.html#indicator-prop"/>
+            <keyword name="indicator" id="CheckBoxStyle::indicator" ref="qml-qtquick-controls-styles-checkboxstyle.html#indicator-prop"/>
+            <keyword name="indicator" id="RadioButtonStyle::indicator" ref="qml-qtquick-controls-styles-radiobuttonstyle.html#indicator-prop"/>
+            <keyword name="indicator" id="StatusIndicatorStyle::indicator" ref="qml-qtquick-controls-styles-statusindicatorstyle.html#indicator-prop"/>
+            <keyword name="initialItem" id="StackView::initialItem" ref="qml-qtquick-controls-stackview.html#initialItem-prop"/>
+            <keyword name="inputMask" id="TextField::inputMask" ref="qml-qtquick-controls-textfield.html#inputMask-prop"/>
+            <keyword name="inputMethodComposing" id="ComboBox::inputMethodComposing" ref="qml-qtquick-controls-combobox.html#inputMethodComposing-prop"/>
+            <keyword name="inputMethodComposing" id="SpinBox::inputMethodComposing" ref="qml-qtquick-controls-spinbox.html#inputMethodComposing-prop"/>
+            <keyword name="inputMethodComposing" id="TextArea::inputMethodComposing" ref="qml-qtquick-controls-textarea.html#inputMethodComposing-prop"/>
+            <keyword name="inputMethodComposing" id="TextField::inputMethodComposing" ref="qml-qtquick-controls-textfield.html#inputMethodComposing-prop"/>
+            <keyword name="inputMethodHints" id="ComboBox::inputMethodHints" ref="qml-qtquick-controls-combobox.html#inputMethodHints-prop"/>
+            <keyword name="inputMethodHints" id="TextArea::inputMethodHints" ref="qml-qtquick-controls-textarea.html#inputMethodHints-prop"/>
+            <keyword name="inputMethodHints" id="TextField::inputMethodHints" ref="qml-qtquick-controls-textfield.html#inputMethodHints-prop"/>
+            <keyword name="insert" id="TextArea::insert" ref="qml-qtquick-controls-textarea.html#insert-method"/>
+            <keyword name="insert" id="TextField::insert" ref="qml-qtquick-controls-textfield.html#insert-method"/>
+            <keyword name="insertItem" id="Menu::insertItem" ref="qml-qtquick-controls-menu.html#insertItem-method"/>
+            <keyword name="insertSeparator" id="Menu::insertSeparator" ref="qml-qtquick-controls-menu.html#insertSeparator-method"/>
+            <keyword name="insertTab" id="TabView::insertTab" ref="qml-qtquick-controls-tabview.html#insertTab-method"/>
+            <keyword name="isDefault" id="Button::isDefault" ref="qml-qtquick-controls-button.html#isDefault-prop"/>
+            <keyword name="isExpanded" id="TreeView::isExpanded" ref="qml-qtquick-controls-treeview.html#isExpanded-method"/>
+            <keyword name="isRightToLeft" id="TextArea::isRightToLeft" ref="qml-qtquick-controls-textarea.html#isRightToLeft-method"/>
+            <keyword name="isRightToLeft" id="TextField::isRightToLeft" ref="qml-qtquick-controls-textfield.html#isRightToLeft-method"/>
+            <keyword name="itemDelegate" id="MenuBarStyle::itemDelegate" ref="qml-qtquick-controls-styles-menubarstyle.html#itemDelegate-prop"/>
+            <keyword name="itemDelegate" id="MenuStyle::itemDelegate" ref="qml-qtquick-controls-styles-menustyle.html#itemDelegate-prop"/>
+            <keyword name="itemDelegate" id="TableView::itemDelegate" ref="qml-qtquick-controls-tableview.html#itemDelegate-prop"/>
+            <keyword name="itemDelegate" id="TableViewStyle::itemDelegate" ref="qml-qtquick-controls-styles-tableviewstyle.html#itemDelegate-prop"/>
+            <keyword name="itemDelegate" id="TreeView::itemDelegate" ref="qml-qtquick-controls-treeview.html#itemDelegate-prop"/>
+            <keyword name="itemDelegate" id="TreeViewStyle::itemDelegate" ref="qml-qtquick-controls-styles-treeviewstyle.html#itemDelegate-prop"/>
+            <keyword name="items" id="Menu::items" ref="qml-qtquick-controls-menu.html#items-prop"/>
+            <keyword name="label" id="ButtonStyle::label" ref="qml-qtquick-controls-styles-buttonstyle.html#label-prop"/>
+            <keyword name="label" id="CheckBoxStyle::label" ref="qml-qtquick-controls-styles-checkboxstyle.html#label-prop"/>
+            <keyword name="label" id="ComboBoxStyle::label" ref="qml-qtquick-controls-styles-comboboxstyle.html#label-prop"/>
+            <keyword name="label" id="RadioButtonStyle::label" ref="qml-qtquick-controls-styles-radiobuttonstyle.html#label-prop"/>
+            <keyword name="labelCount" id="CircularGaugeStyle::labelCount" ref="qml-qtquick-controls-styles-circulargaugestyle.html#labelCount-prop"/>
+            <keyword name="labelCount" id="DialStyle::labelCount" ref="qml-qtquick-controls-styles-dialstyle.html#labelCount-prop"/>
+            <keyword name="labelInset" id="CircularGaugeStyle::labelInset" ref="qml-qtquick-controls-styles-circulargaugestyle.html#labelInset-prop"/>
+            <keyword name="labelInset" id="DialStyle::labelInset" ref="qml-qtquick-controls-styles-dialstyle.html#labelInset-prop"/>
+            <keyword name="labelStepSize" id="CircularGaugeStyle::labelStepSize" ref="qml-qtquick-controls-styles-circulargaugestyle.html#labelStepSize-prop"/>
+            <keyword name="labelStepSize" id="DialStyle::labelStepSize" ref="qml-qtquick-controls-styles-dialstyle.html#labelStepSize-prop"/>
+            <keyword name="leftCorner" id="TabViewStyle::leftCorner" ref="qml-qtquick-controls-styles-tabviewstyle.html#leftCorner-prop"/>
+            <keyword name="length" id="TextArea::length" ref="qml-qtquick-controls-textarea.html#length-prop"/>
+            <keyword name="length" id="TextField::length" ref="qml-qtquick-controls-textfield.html#length-prop"/>
+            <keyword name="lineCount" id="TextArea::lineCount" ref="qml-qtquick-controls-textarea.html#lineCount-prop"/>
+            <keyword name="linkActivated" id="TextArea::linkActivated" ref="qml-qtquick-controls-textarea.html#linkActivated-signal"/>
+            <keyword name="linkHovered" id="TextArea::linkHovered" ref="qml-qtquick-controls-textarea.html#linkHovered-signal"/>
+            <keyword name="locale" id="Calendar::locale" ref="qml-qtquick-controls-calendar.html#locale-prop"/>
+            <keyword name="maximumDate" id="Calendar::maximumDate" ref="qml-qtquick-controls-calendar.html#maximumDate-prop"/>
+            <keyword name="maximumLength" id="TextField::maximumLength" ref="qml-qtquick-controls-textfield.html#maximumLength-prop"/>
+            <keyword name="maximumValue" id="ProgressBar::maximumValue" ref="qml-qtquick-controls-progressbar.html#maximumValue-prop"/>
+            <keyword name="maximumValue" id="Slider::maximumValue" ref="qml-qtquick-controls-slider.html#maximumValue-prop"/>
+            <keyword name="maximumValue" id="SpinBox::maximumValue" ref="qml-qtquick-controls-spinbox.html#maximumValue-prop"/>
+            <keyword name="maximumValueAngle" id="CircularGaugeStyle::maximumValueAngle" ref="qml-qtquick-controls-styles-circulargaugestyle.html#maximumValueAngle-prop"/>
+            <keyword name="menu" id="Button::menu" ref="qml-qtquick-controls-button.html#menu-prop"/>
+            <keyword name="menu" id="ComboBox::menu" ref="qml-qtquick-controls-combobox.html#menu-prop"/>
+            <keyword name="menu" id="SpinBox::menu" ref="qml-qtquick-controls-spinbox.html#menu-prop"/>
+            <keyword name="menu" id="TextArea::menu" ref="qml-qtquick-controls-textarea.html#menu-prop"/>
+            <keyword name="menu" id="TextField::menu" ref="qml-qtquick-controls-textfield.html#menu-prop"/>
+            <keyword name="menuBar" id="ApplicationWindow::menuBar" ref="qml-qtquick-controls-applicationwindow.html#menuBar-prop"/>
+            <keyword name="menuButton" id="ToolBarStyle::menuButton" ref="qml-qtquick-controls-styles-toolbarstyle.html#menuButton-prop"/>
+            <keyword name="menuItem" id="PieMenuStyle::menuItem" ref="qml-qtquick-controls-styles-piemenustyle.html#menuItem-prop"/>
+            <keyword name="menuStyle" id="MenuBarStyle::menuStyle" ref="qml-qtquick-controls-styles-menubarstyle.html#menuStyle-prop"/>
+            <keyword name="menus" id="MenuBar::menus" ref="qml-qtquick-controls-menubar.html#menus-prop"/>
+            <keyword name="minimumDate" id="Calendar::minimumDate" ref="qml-qtquick-controls-calendar.html#minimumDate-prop"/>
+            <keyword name="minimumHandleLength" id="ScrollViewStyle::minimumHandleLength" ref="qml-qtquick-controls-styles-scrollviewstyle.html#minimumHandleLength-prop"/>
+            <keyword name="minimumValue" id="ProgressBar::minimumValue" ref="qml-qtquick-controls-progressbar.html#minimumValue-prop"/>
+            <keyword name="minimumValue" id="Slider::minimumValue" ref="qml-qtquick-controls-slider.html#minimumValue-prop"/>
+            <keyword name="minimumValue" id="SpinBox::minimumValue" ref="qml-qtquick-controls-spinbox.html#minimumValue-prop"/>
+            <keyword name="minimumValueAngle" id="CircularGaugeStyle::minimumValueAngle" ref="qml-qtquick-controls-styles-circulargaugestyle.html#minimumValueAngle-prop"/>
+            <keyword name="minorTickmark" id="CircularGaugeStyle::minorTickmark" ref="qml-qtquick-controls-styles-circulargaugestyle.html#minorTickmark-prop"/>
+            <keyword name="minorTickmark" id="DialStyle::minorTickmark" ref="qml-qtquick-controls-styles-dialstyle.html#minorTickmark-prop"/>
+            <keyword name="minorTickmark" id="GaugeStyle::minorTickmark" ref="qml-qtquick-controls-styles-gaugestyle.html#minorTickmark-prop"/>
+            <keyword name="minorTickmarkCount" id="CircularGaugeStyle::minorTickmarkCount" ref="qml-qtquick-controls-styles-circulargaugestyle.html#minorTickmarkCount-prop"/>
+            <keyword name="minorTickmarkCount" id="DialStyle::minorTickmarkCount" ref="qml-qtquick-controls-styles-dialstyle.html#minorTickmarkCount-prop"/>
+            <keyword name="minorTickmarkInset" id="CircularGaugeStyle::minorTickmarkInset" ref="qml-qtquick-controls-styles-circulargaugestyle.html#minorTickmarkInset-prop"/>
+            <keyword name="minorTickmarkInset" id="DialStyle::minorTickmarkInset" ref="qml-qtquick-controls-styles-dialstyle.html#minorTickmarkInset-prop"/>
+            <keyword name="model" id="ComboBox::model" ref="qml-qtquick-controls-combobox.html#model-prop"/>
+            <keyword name="model" id="TableView::model" ref="qml-qtquick-controls-tableview.html#model-prop"/>
+            <keyword name="model" id="TreeView::model" ref="qml-qtquick-controls-treeview.html#model-prop"/>
+            <keyword name="movable" id="TableViewColumn::movable" ref="qml-qtquick-controls-tableviewcolumn.html#movable-prop"/>
+            <keyword name="moveCursorSelection" id="TextArea::moveCursorSelection" ref="qml-qtquick-controls-textarea.html#moveCursorSelection-method"/>
+            <keyword name="moveTab" id="TabView::moveTab" ref="qml-qtquick-controls-tabview.html#moveTab-method"/>
+            <keyword name="navigationBar" id="CalendarStyle::navigationBar" ref="qml-qtquick-controls-styles-calendarstyle.html#navigationBar-prop"/>
+            <keyword name="navigationBarVisible" id="Calendar::navigationBarVisible" ref="qml-qtquick-controls-calendar.html#navigationBarVisible-prop"/>
+            <keyword name="needle" id="CircularGaugeStyle::needle" ref="qml-qtquick-controls-styles-circulargaugestyle.html#needle-prop"/>
+            <keyword name="needleRotation" id="CircularGaugeStyle::needleRotation" ref="qml-qtquick-controls-styles-circulargaugestyle.html#needleRotation-prop"/>
+            <keyword name="orientation" id="ProgressBar::orientation" ref="qml-qtquick-controls-progressbar.html#orientation-prop"/>
+            <keyword name="orientation" id="Slider::orientation" ref="qml-qtquick-controls-slider.html#orientation-prop"/>
+            <keyword name="orientation" id="SplitView::orientation" ref="qml-qtquick-controls-splitview.html#orientation-prop"/>
+            <keyword name="outerRadius" id="CircularGaugeStyle::outerRadius" ref="qml-qtquick-controls-styles-circulargaugestyle.html#outerRadius-prop"/>
+            <keyword name="outerRadius" id="DialStyle::outerRadius" ref="qml-qtquick-controls-styles-dialstyle.html#outerRadius-prop"/>
+            <keyword name="panel" id="ProgressBarStyle::panel" ref="qml-qtquick-controls-styles-progressbarstyle.html#panel-prop"/>
+            <keyword name="panel" id="SliderStyle::panel" ref="qml-qtquick-controls-styles-sliderstyle.html#panel-prop"/>
+            <keyword name="panel" id="StatusBarStyle::panel" ref="qml-qtquick-controls-styles-statusbarstyle.html#panel-prop"/>
+            <keyword name="panel" id="ToolBarStyle::panel" ref="qml-qtquick-controls-styles-toolbarstyle.html#panel-prop"/>
+            <keyword name="partiallyCheckedEnabled" id="CheckBox::partiallyCheckedEnabled" ref="qml-qtquick-controls-checkbox.html#partiallyCheckedEnabled-prop"/>
+            <keyword name="passwordCharacter" id="TextFieldStyle::passwordCharacter" ref="qml-qtquick-controls-styles-textfieldstyle.html#passwordCharacter-prop"/>
+            <keyword name="paste" id="TextArea::paste" ref="qml-qtquick-controls-textarea.html#paste-method"/>
+            <keyword name="paste" id="TextField::paste" ref="qml-qtquick-controls-textfield.html#paste-method"/>
+            <keyword name="placeholderText" id="TextField::placeholderText" ref="qml-qtquick-controls-textfield.html#placeholderText-prop"/>
+            <keyword name="placeholderTextColor" id="TextFieldStyle::placeholderTextColor" ref="qml-qtquick-controls-styles-textfieldstyle.html#placeholderTextColor-prop"/>
+            <keyword name="pop" id="StackView::pop" ref="qml-qtquick-controls-stackview.html#pop-method"/>
+            <keyword name="popTransition" id="StackViewDelegate::popTransition" ref="qml-qtquick-controls-stackviewdelegate.html#popTransition-prop"/>
+            <keyword name="popup" id="Menu::popup" ref="qml-qtquick-controls-menu.html#popup-method"/>
+            <keyword name="positionAt" id="TextArea::positionAt" ref="qml-qtquick-controls-textarea.html#positionAt-method"/>
+            <keyword name="positionToRectangle" id="TextArea::positionToRectangle" ref="qml-qtquick-controls-textarea.html#positionToRectangle-method"/>
+            <keyword name="positionViewAtRow" id="TableView::positionViewAtRow" ref="qml-qtquick-controls-tableview.html#positionViewAtRow-method"/>
+            <keyword name="prefix" id="SpinBox::prefix" ref="qml-qtquick-controls-spinbox.html#prefix-prop"/>
+            <keyword name="pressAndHold" id="Calendar::pressAndHold" ref="qml-qtquick-controls-calendar.html#pressAndHold-signal"/>
+            <keyword name="pressAndHold" id="TableView::pressAndHold" ref="qml-qtquick-controls-tableview.html#pressAndHold-signal"/>
+            <keyword name="pressAndHold" id="TreeView::pressAndHold" ref="qml-qtquick-controls-treeview.html#pressAndHold-signal"/>
+            <keyword name="pressed" id="Calendar::pressed" ref="qml-qtquick-controls-calendar.html#pressed-signal"/>
+            <keyword name="pressed" id="ComboBox::pressed" ref="qml-qtquick-controls-combobox.html#pressed-prop"/>
+            <keyword name="pressed" id="Slider::pressed" ref="qml-qtquick-controls-slider.html#pressed-prop"/>
+            <keyword name="pressed" id="Switch::pressed" ref="qml-qtquick-controls-switch.html#pressed-prop"/>
+            <keyword name="progress" id="ProgressBarStyle::progress" ref="qml-qtquick-controls-styles-progressbarstyle.html#progress-prop"/>
+            <keyword name="progressBarDropShadowColor" id="DelayButtonStyle::progressBarDropShadowColor" ref="qml-qtquick-controls-styles-delaybuttonstyle.html#progressBarDropShadowColor-prop"/>
+            <keyword name="progressBarGradient" id="DelayButtonStyle::progressBarGradient" ref="qml-qtquick-controls-styles-delaybuttonstyle.html#progressBarGradient-prop"/>
+            <keyword name="push" id="StackView::push" ref="qml-qtquick-controls-stackview.html#push-method"/>
+            <keyword name="pushTransition" id="StackViewDelegate::pushTransition" ref="qml-qtquick-controls-stackviewdelegate.html#pushTransition-prop"/>
+            <keyword name="radius" id="PieMenuStyle::radius" ref="qml-qtquick-controls-styles-piemenustyle.html#radius-prop"/>
+            <keyword name="readOnly" id="TextArea::readOnly" ref="qml-qtquick-controls-textarea.html#readOnly-prop"/>
+            <keyword name="readOnly" id="TextField::readOnly" ref="qml-qtquick-controls-textfield.html#readOnly-prop"/>
+            <keyword name="redo" id="TextArea::redo" ref="qml-qtquick-controls-textarea.html#redo-method"/>
+            <keyword name="redo" id="TextField::redo" ref="qml-qtquick-controls-textfield.html#redo-method"/>
+            <keyword name="released" id="Calendar::released" ref="qml-qtquick-controls-calendar.html#released-signal"/>
+            <keyword name="remove" id="TextArea::remove" ref="qml-qtquick-controls-textarea.html#remove-method"/>
+            <keyword name="remove" id="TextField::remove" ref="qml-qtquick-controls-textfield.html#remove-method"/>
+            <keyword name="removeItem" id="Menu::removeItem" ref="qml-qtquick-controls-menu.html#removeItem-method"/>
+            <keyword name="removeItem" id="SplitView::removeItem" ref="qml-qtquick-controls-splitview.html#removeItem-method"/>
+            <keyword name="removeTab" id="TabView::removeTab" ref="qml-qtquick-controls-tabview.html#removeTab-method"/>
+            <keyword name="renderType" id="ComboBoxStyle::renderType" ref="qml-qtquick-controls-styles-comboboxstyle.html#renderType-prop"/>
+            <keyword name="renderType" id="SpinBoxStyle::renderType" ref="qml-qtquick-controls-styles-spinboxstyle.html#renderType-prop"/>
+            <keyword name="renderType" id="TextAreaStyle::renderType" ref="qml-qtquick-controls-styles-textareastyle.html#renderType-prop"/>
+            <keyword name="renderType" id="TextFieldStyle::renderType" ref="qml-qtquick-controls-styles-textfieldstyle.html#renderType-prop"/>
+            <keyword name="replaceTransition" id="StackViewDelegate::replaceTransition" ref="qml-qtquick-controls-stackviewdelegate.html#replaceTransition-prop"/>
+            <keyword name="resizable" id="TableViewColumn::resizable" ref="qml-qtquick-controls-tableviewcolumn.html#resizable-prop"/>
+            <keyword name="resizeToContents" id="TableViewColumn::resizeToContents" ref="qml-qtquick-controls-tableviewcolumn.html#resizeToContents-method"/>
+            <keyword name="resizing" id="SplitView::resizing" ref="qml-qtquick-controls-splitview.html#resizing-prop"/>
+            <keyword name="rightCorner" id="TabViewStyle::rightCorner" ref="qml-qtquick-controls-styles-tabviewstyle.html#rightCorner-prop"/>
+            <keyword name="role" id="TableViewColumn::role" ref="qml-qtquick-controls-tableviewcolumn.html#role-prop"/>
+            <keyword name="rootIndex" id="TreeView::rootIndex" ref="qml-qtquick-controls-treeview.html#rootIndex-prop"/>
+            <keyword name="rowAt" id="TableView::rowAt" ref="qml-qtquick-controls-tableview.html#rowAt-method"/>
+            <keyword name="rowCount" id="TableView::rowCount" ref="qml-qtquick-controls-tableview.html#rowCount-prop"/>
+            <keyword name="rowDelegate" id="TableViewStyle::rowDelegate" ref="qml-qtquick-controls-styles-tableviewstyle.html#rowDelegate-prop"/>
+            <keyword name="rowDelegate" id="TreeViewStyle::rowDelegate" ref="qml-qtquick-controls-styles-treeviewstyle.html#rowDelegate-prop"/>
+            <keyword name="running" id="BusyIndicator::running" ref="qml-qtquick-controls-busyindicator.html#running-prop"/>
+            <keyword name="scrollBarBackground" id="ScrollViewStyle::scrollBarBackground" ref="qml-qtquick-controls-styles-scrollviewstyle.html#scrollBarBackground-prop"/>
+            <keyword name="scrollIndicator" id="MenuStyle::scrollIndicator" ref="qml-qtquick-controls-styles-menustyle.html#scrollIndicator-prop"/>
+            <keyword name="scrollToClickedPosition" id="ScrollViewStyle::scrollToClickedPosition" ref="qml-qtquick-controls-styles-scrollviewstyle.html#scrollToClickedPosition-prop"/>
+            <keyword name="section.criteria" id="TableView::section.criteria" ref="qml-qtquick-controls-tableview.html#section.criteria-prop"/>
+            <keyword name="section.criteria" id="TreeView::section.criteria" ref="qml-qtquick-controls-treeview.html#section.criteria-prop"/>
+            <keyword name="section.delegate" id="TableView::section.delegate" ref="qml-qtquick-controls-tableview.html#section.delegate-prop"/>
+            <keyword name="section.delegate" id="TreeView::section.delegate" ref="qml-qtquick-controls-treeview.html#section.delegate-prop"/>
+            <keyword name="section.labelPositioning" id="TableView::section.labelPositioning" ref="qml-qtquick-controls-tableview.html#section.labelPositioning-prop"/>
+            <keyword name="section.labelPositioning" id="TreeView::section.labelPositioning" ref="qml-qtquick-controls-treeview.html#section.labelPositioning-prop"/>
+            <keyword name="section.property" id="TableView::section.property" ref="qml-qtquick-controls-tableview.html#section.property-prop"/>
+            <keyword name="section.property" id="TreeView::section.property" ref="qml-qtquick-controls-treeview.html#section.property-prop"/>
+            <keyword name="sectionCenterAngle" id="PieMenuStyle::sectionCenterAngle" ref="qml-qtquick-controls-styles-piemenustyle.html#sectionCenterAngle-method"/>
+            <keyword name="sectionEndAngle" id="PieMenuStyle::sectionEndAngle" ref="qml-qtquick-controls-styles-piemenustyle.html#sectionEndAngle-method"/>
+            <keyword name="sectionStartAngle" id="PieMenuStyle::sectionStartAngle" ref="qml-qtquick-controls-styles-piemenustyle.html#sectionStartAngle-method"/>
+            <keyword name="select" id="TextArea::select" ref="qml-qtquick-controls-textarea.html#select-method"/>
+            <keyword name="select" id="TextField::select" ref="qml-qtquick-controls-textfield.html#select-method"/>
+            <keyword name="selectAll" id="ComboBox::selectAll" ref="qml-qtquick-controls-combobox.html#selectAll-method"/>
+            <keyword name="selectAll" id="TextArea::selectAll" ref="qml-qtquick-controls-textarea.html#selectAll-method"/>
+            <keyword name="selectAll" id="TextField::selectAll" ref="qml-qtquick-controls-textfield.html#selectAll-method"/>
+            <keyword name="selectByKeyboard" id="TextArea::selectByKeyboard" ref="qml-qtquick-controls-textarea.html#selectByKeyboard-prop"/>
+            <keyword name="selectByMouse" id="ComboBox::selectByMouse" ref="qml-qtquick-controls-combobox.html#selectByMouse-prop"/>
+            <keyword name="selectByMouse" id="SpinBox::selectByMouse" ref="qml-qtquick-controls-spinbox.html#selectByMouse-prop"/>
+            <keyword name="selectByMouse" id="TextArea::selectByMouse" ref="qml-qtquick-controls-textarea.html#selectByMouse-prop"/>
+            <keyword name="selectByMouse" id="TextField::selectByMouse" ref="qml-qtquick-controls-textfield.html#selectByMouse-prop"/>
+            <keyword name="selectWord" id="TextArea::selectWord" ref="qml-qtquick-controls-textarea.html#selectWord-method"/>
+            <keyword name="selectWord" id="TextField::selectWord" ref="qml-qtquick-controls-textfield.html#selectWord-method"/>
+            <keyword name="selectedDate" id="Calendar::selectedDate" ref="qml-qtquick-controls-calendar.html#selectedDate-prop"/>
+            <keyword name="selectedText" id="TextArea::selectedText" ref="qml-qtquick-controls-textarea.html#selectedText-prop"/>
+            <keyword name="selectedText" id="TextField::selectedText" ref="qml-qtquick-controls-textfield.html#selectedText-prop"/>
+            <keyword name="selectedTextColor" id="ComboBoxStyle::selectedTextColor" ref="qml-qtquick-controls-styles-comboboxstyle.html#selectedTextColor-prop"/>
+            <keyword name="selectedTextColor" id="SpinBoxStyle::selectedTextColor" ref="qml-qtquick-controls-styles-spinboxstyle.html#selectedTextColor-prop"/>
+            <keyword name="selectedTextColor" id="TextAreaStyle::selectedTextColor" ref="qml-qtquick-controls-styles-textareastyle.html#selectedTextColor-prop"/>
+            <keyword name="selectedTextColor" id="TextFieldStyle::selectedTextColor" ref="qml-qtquick-controls-styles-textfieldstyle.html#selectedTextColor-prop"/>
+            <keyword name="selection" id="TableView::selection" ref="qml-qtquick-controls-tableview.html#selection-prop"/>
+            <keyword name="selection" id="TreeView::selection" ref="qml-qtquick-controls-treeview.html#selection-prop"/>
+            <keyword name="selectionColor" id="ComboBoxStyle::selectionColor" ref="qml-qtquick-controls-styles-comboboxstyle.html#selectionColor-prop"/>
+            <keyword name="selectionColor" id="PieMenuStyle::selectionColor" ref="qml-qtquick-controls-styles-piemenustyle.html#selectionColor-prop"/>
+            <keyword name="selectionColor" id="SpinBoxStyle::selectionColor" ref="qml-qtquick-controls-styles-spinboxstyle.html#selectionColor-prop"/>
+            <keyword name="selectionColor" id="TextAreaStyle::selectionColor" ref="qml-qtquick-controls-styles-textareastyle.html#selectionColor-prop"/>
+            <keyword name="selectionColor" id="TextFieldStyle::selectionColor" ref="qml-qtquick-controls-styles-textfieldstyle.html#selectionColor-prop"/>
+            <keyword name="selectionEnd" id="TextArea::selectionEnd" ref="qml-qtquick-controls-textarea.html#selectionEnd-prop"/>
+            <keyword name="selectionEnd" id="TextField::selectionEnd" ref="qml-qtquick-controls-textfield.html#selectionEnd-prop"/>
+            <keyword name="selectionStart" id="TextArea::selectionStart" ref="qml-qtquick-controls-textarea.html#selectionStart-prop"/>
+            <keyword name="selectionStart" id="TextField::selectionStart" ref="qml-qtquick-controls-textfield.html#selectionStart-prop"/>
+            <keyword name="separator" id="MenuStyle::separator" ref="qml-qtquick-controls-styles-menustyle.html#separator-prop"/>
+            <keyword name="separator" id="TumblerStyle::separator" ref="qml-qtquick-controls-styles-tumblerstyle.html#separator-prop"/>
+            <keyword name="shadowColor" id="PieMenuStyle::shadowColor" ref="qml-qtquick-controls-styles-piemenustyle.html#shadowColor-prop"/>
+            <keyword name="shadowRadius" id="PieMenuStyle::shadowRadius" ref="qml-qtquick-controls-styles-piemenustyle.html#shadowRadius-prop"/>
+            <keyword name="shadowSpread" id="PieMenuStyle::shadowSpread" ref="qml-qtquick-controls-styles-piemenustyle.html#shadowSpread-prop"/>
+            <keyword name="shortcut" id="Action::shortcut" ref="qml-qtquick-controls-action.html#shortcut-prop"/>
+            <keyword name="shortcut" id="MenuItem::shortcut" ref="qml-qtquick-controls-menuitem.html#shortcut-prop"/>
+            <keyword name="showNextMonth" id="Calendar::showNextMonth" ref="qml-qtquick-controls-calendar.html#showNextMonth-method"/>
+            <keyword name="showNextYear" id="Calendar::showNextYear" ref="qml-qtquick-controls-calendar.html#showNextYear-method"/>
+            <keyword name="showPreviousMonth" id="Calendar::showPreviousMonth" ref="qml-qtquick-controls-calendar.html#showPreviousMonth-method"/>
+            <keyword name="showPreviousYear" id="Calendar::showPreviousYear" ref="qml-qtquick-controls-calendar.html#showPreviousYear-method"/>
+            <keyword name="spacing" id="CheckBoxStyle::spacing" ref="qml-qtquick-controls-styles-checkboxstyle.html#spacing-prop"/>
+            <keyword name="spacing" id="RadioButtonStyle::spacing" ref="qml-qtquick-controls-styles-radiobuttonstyle.html#spacing-prop"/>
+            <keyword name="spacing" id="TumblerStyle::spacing" ref="qml-qtquick-controls-styles-tumblerstyle-obsolete.html#spacing-prop"/>
+            <keyword name="startAngle" id="PieMenuStyle::startAngle" ref="qml-qtquick-controls-styles-piemenustyle.html#startAngle-prop"/>
+            <keyword name="status" id="Stack::status" ref="qml-qtquick-controls-stack.html#status-attached-prop"/>
+            <keyword name="statusBar" id="ApplicationWindow::statusBar" ref="qml-qtquick-controls-applicationwindow.html#statusBar-prop"/>
+            <keyword name="stepSize" id="Slider::stepSize" ref="qml-qtquick-controls-slider.html#stepSize-prop"/>
+            <keyword name="stepSize" id="SpinBox::stepSize" ref="qml-qtquick-controls-spinbox.html#stepSize-prop"/>
+            <keyword name="style" id="ApplicationWindow::style" ref="qml-qtquick-controls-applicationwindow.html#style-prop"/>
+            <keyword name="style" id="Menu::style" ref="qml-qtquick-controls-menu.html#style-prop"/>
+            <keyword name="style" id="MenuBar::style" ref="qml-qtquick-controls-menubar.html#style-prop"/>
+            <keyword name="style" id="ScrollView::style" ref="qml-qtquick-controls-scrollview.html#style-prop"/>
+            <keyword name="style" id="StatusBar::style" ref="qml-qtquick-controls-statusbar.html#style-prop"/>
+            <keyword name="submenuOverlap" id="MenuStyle::submenuOverlap" ref="qml-qtquick-controls-styles-menustyle.html#submenuOverlap-prop"/>
+            <keyword name="submenuPopupDelay" id="MenuStyle::submenuPopupDelay" ref="qml-qtquick-controls-styles-menustyle.html#submenuPopupDelay-prop"/>
+            <keyword name="suffix" id="SpinBox::suffix" ref="qml-qtquick-controls-spinbox.html#suffix-prop"/>
+            <keyword name="tab" id="TabViewStyle::tab" ref="qml-qtquick-controls-styles-tabviewstyle.html#tab-prop"/>
+            <keyword name="tabBar" id="TabViewStyle::tabBar" ref="qml-qtquick-controls-styles-tabviewstyle.html#tabBar-prop"/>
+            <keyword name="tabChangesFocus" id="TextArea::tabChangesFocus" ref="qml-qtquick-controls-textarea.html#tabChangesFocus-prop"/>
+            <keyword name="tabOverlap" id="TabViewStyle::tabOverlap" ref="qml-qtquick-controls-styles-tabviewstyle.html#tabOverlap-prop"/>
+            <keyword name="tabPosition" id="TabView::tabPosition" ref="qml-qtquick-controls-tabview.html#tabPosition-prop"/>
+            <keyword name="tabsAlignment" id="TabViewStyle::tabsAlignment" ref="qml-qtquick-controls-styles-tabviewstyle.html#tabsAlignment-prop"/>
+            <keyword name="tabsMovable" id="TabViewStyle::tabsMovable" ref="qml-qtquick-controls-styles-tabviewstyle.html#tabsMovable-prop"/>
+            <keyword name="tabsVisible" id="TabView::tabsVisible" ref="qml-qtquick-controls-tabview.html#tabsVisible-prop"/>
+            <keyword name="text" id="Action::text" ref="qml-qtquick-controls-action.html#text-prop"/>
+            <keyword name="text" id="MenuItem::text" ref="qml-qtquick-controls-menuitem.html#text-prop"/>
+            <keyword name="text" id="TextArea::text" ref="qml-qtquick-controls-textarea.html#text-prop"/>
+            <keyword name="text" id="TextField::text" ref="qml-qtquick-controls-textfield.html#text-prop"/>
+            <keyword name="textAt" id="ComboBox::textAt" ref="qml-qtquick-controls-combobox.html#textAt-method"/>
+            <keyword name="textColor" id="ComboBoxStyle::textColor" ref="qml-qtquick-controls-styles-comboboxstyle.html#textColor-prop"/>
+            <keyword name="textColor" id="SpinBoxStyle::textColor" ref="qml-qtquick-controls-styles-spinboxstyle.html#textColor-prop"/>
+            <keyword name="textColor" id="TextArea::textColor" ref="qml-qtquick-controls-textarea.html#textColor-prop"/>
+            <keyword name="textColor" id="TextAreaStyle::textColor" ref="qml-qtquick-controls-styles-textareastyle.html#textColor-prop"/>
+            <keyword name="textColor" id="TextField::textColor" ref="qml-qtquick-controls-textfield.html#textColor-prop"/>
+            <keyword name="textColor" id="TextFieldStyle::textColor" ref="qml-qtquick-controls-styles-textfieldstyle.html#textColor-prop"/>
+            <keyword name="textDocument" id="TextArea::textDocument" ref="qml-qtquick-controls-textarea.html#textDocument-prop"/>
+            <keyword name="textFormat" id="TextArea::textFormat" ref="qml-qtquick-controls-textarea.html#textFormat-prop"/>
+            <keyword name="textMargin" id="TextArea::textMargin" ref="qml-qtquick-controls-textarea.html#textMargin-prop"/>
+            <keyword name="textMargin" id="TextAreaStyle::textMargin" ref="qml-qtquick-controls-styles-textareastyle.html#textMargin-prop"/>
+            <keyword name="textRole" id="ComboBox::textRole" ref="qml-qtquick-controls-combobox.html#textRole-prop"/>
+            <keyword name="tickmark" id="CircularGaugeStyle::tickmark" ref="qml-qtquick-controls-styles-circulargaugestyle.html#tickmark-prop"/>
+            <keyword name="tickmark" id="DialStyle::tickmark" ref="qml-qtquick-controls-styles-dialstyle.html#tickmark-prop"/>
+            <keyword name="tickmark" id="GaugeStyle::tickmark" ref="qml-qtquick-controls-styles-gaugestyle.html#tickmark-prop"/>
+            <keyword name="tickmarkCount" id="CircularGaugeStyle::tickmarkCount" ref="qml-qtquick-controls-styles-circulargaugestyle.html#tickmarkCount-prop"/>
+            <keyword name="tickmarkCount" id="DialStyle::tickmarkCount" ref="qml-qtquick-controls-styles-dialstyle.html#tickmarkCount-prop"/>
+            <keyword name="tickmarkInset" id="CircularGaugeStyle::tickmarkInset" ref="qml-qtquick-controls-styles-circulargaugestyle.html#tickmarkInset-prop"/>
+            <keyword name="tickmarkInset" id="DialStyle::tickmarkInset" ref="qml-qtquick-controls-styles-dialstyle.html#tickmarkInset-prop"/>
+            <keyword name="tickmarkLabel" id="CircularGaugeStyle::tickmarkLabel" ref="qml-qtquick-controls-styles-circulargaugestyle.html#tickmarkLabel-prop"/>
+            <keyword name="tickmarkLabel" id="DialStyle::tickmarkLabel" ref="qml-qtquick-controls-styles-dialstyle.html#tickmarkLabel-prop"/>
+            <keyword name="tickmarkLabel" id="GaugeStyle::tickmarkLabel" ref="qml-qtquick-controls-styles-gaugestyle.html#tickmarkLabel-prop"/>
+            <keyword name="tickmarkStepSize" id="CircularGaugeStyle::tickmarkStepSize" ref="qml-qtquick-controls-styles-circulargaugestyle.html#tickmarkStepSize-prop"/>
+            <keyword name="tickmarkStepSize" id="DialStyle::tickmarkStepSize" ref="qml-qtquick-controls-styles-dialstyle.html#tickmarkStepSize-prop"/>
+            <keyword name="tickmarks" id="SliderStyle::tickmarks" ref="qml-qtquick-controls-styles-sliderstyle.html#tickmarks-prop"/>
+            <keyword name="tickmarksEnabled" id="Slider::tickmarksEnabled" ref="qml-qtquick-controls-slider.html#tickmarksEnabled-prop"/>
+            <keyword name="title" id="GroupBox::title" ref="qml-qtquick-controls-groupbox.html#title-prop"/>
+            <keyword name="title" id="Menu::title" ref="qml-qtquick-controls-menu.html#title-prop"/>
+            <keyword name="title" id="PieMenuStyle::title" ref="qml-qtquick-controls-styles-piemenustyle.html#title-prop"/>
+            <keyword name="title" id="Tab::title" ref="qml-qtquick-controls-tab.html#title-prop"/>
+            <keyword name="title" id="TableViewColumn::title" ref="qml-qtquick-controls-tableviewcolumn.html#title-prop"/>
+            <keyword name="toggled" id="Action::toggled" ref="qml-qtquick-controls-action.html#toggled-signal"/>
+            <keyword name="toggled" id="MenuItem::toggled" ref="qml-qtquick-controls-menuitem.html#toggled-signal"/>
+            <keyword name="toolBar" id="ApplicationWindow::toolBar" ref="qml-qtquick-controls-applicationwindow.html#toolBar-prop"/>
+            <keyword name="tooltip" id="Action::tooltip" ref="qml-qtquick-controls-action.html#tooltip-prop"/>
+            <keyword name="transientScrollBars" id="ScrollViewStyle::transientScrollBars" ref="qml-qtquick-controls-styles-scrollviewstyle.html#transientScrollBars-prop"/>
+            <keyword name="transitionFinished" id="StackViewDelegate::transitionFinished" ref="qml-qtquick-controls-stackviewdelegate.html#transitionFinished-method"/>
+            <keyword name="trigger" id="Action::trigger" ref="qml-qtquick-controls-action.html#trigger-method"/>
+            <keyword name="trigger" id="MenuItem::trigger" ref="qml-qtquick-controls-menuitem.html#trigger-method"/>
+            <keyword name="triggered" id="Action::triggered" ref="qml-qtquick-controls-action.html#triggered-signal"/>
+            <keyword name="triggered" id="MenuItem::triggered" ref="qml-qtquick-controls-menuitem.html#triggered-signal"/>
+            <keyword name="type" id="Menu::type" ref="qml-qtquick-controls-menu.html#type-prop"/>
+            <keyword name="type" id="MenuItem::type" ref="qml-qtquick-controls-menuitem.html#type-prop"/>
+            <keyword name="type" id="MenuSeparator::type" ref="qml-qtquick-controls-menuseparator.html#type-prop"/>
+            <keyword name="unbindCheckable" id="ExclusiveGroup::unbindCheckable" ref="qml-qtquick-controls-exclusivegroup.html#unbindCheckable-method"/>
+            <keyword name="uncheckedDropShadowColor" id="ToggleButtonStyle::uncheckedDropShadowColor" ref="qml-qtquick-controls-styles-togglebuttonstyle.html#uncheckedDropShadowColor-prop"/>
+            <keyword name="uncheckedGradient" id="ToggleButtonStyle::uncheckedGradient" ref="qml-qtquick-controls-styles-togglebuttonstyle.html#uncheckedGradient-prop"/>
+            <keyword name="undo" id="TextArea::undo" ref="qml-qtquick-controls-textarea.html#undo-method"/>
+            <keyword name="undo" id="TextField::undo" ref="qml-qtquick-controls-textfield.html#undo-method"/>
+            <keyword name="updateValueWhileDragging" id="Slider::updateValueWhileDragging" ref="qml-qtquick-controls-slider.html#updateValueWhileDragging-prop"/>
+            <keyword name="validator" id="ComboBox::validator" ref="qml-qtquick-controls-combobox.html#validator-prop"/>
+            <keyword name="validator" id="TextField::validator" ref="qml-qtquick-controls-textfield.html#validator-prop"/>
+            <keyword name="value" id="ProgressBar::value" ref="qml-qtquick-controls-progressbar.html#value-prop"/>
+            <keyword name="value" id="Slider::value" ref="qml-qtquick-controls-slider.html#value-prop"/>
+            <keyword name="value" id="SpinBox::value" ref="qml-qtquick-controls-spinbox.html#value-prop"/>
+            <keyword name="valueBar" id="GaugeStyle::valueBar" ref="qml-qtquick-controls-styles-gaugestyle.html#valueBar-prop"/>
+            <keyword name="valuePosition" id="GaugeStyle::valuePosition" ref="qml-qtquick-controls-styles-gaugestyle.html#valuePosition-prop"/>
+            <keyword name="valueToAngle" id="CircularGaugeStyle::valueToAngle" ref="qml-qtquick-controls-styles-circulargaugestyle.html#valueToAngle-method"/>
+            <keyword name="valueToAngle" id="DialStyle::valueToAngle" ref="qml-qtquick-controls-styles-dialstyle.html#valueToAngle-method"/>
+            <keyword name="verticalAlignment" id="TextArea::verticalAlignment" ref="qml-qtquick-controls-textarea.html#verticalAlignment-prop"/>
+            <keyword name="verticalAlignment" id="TextField::verticalAlignment" ref="qml-qtquick-controls-textfield.html#verticalAlignment-prop"/>
+            <keyword name="verticalScrollBarPolicy" id="ScrollView::verticalScrollBarPolicy" ref="qml-qtquick-controls-scrollview.html#verticalScrollBarPolicy-prop"/>
+            <keyword name="view" id="Stack::view" ref="qml-qtquick-controls-stack.html#view-attached-prop"/>
+            <keyword name="viewport" id="ScrollView::viewport" ref="qml-qtquick-controls-scrollview.html#viewport-prop"/>
+            <keyword name="visible" id="Menu::visible" ref="qml-qtquick-controls-menu.html#visible-prop"/>
+            <keyword name="visible" id="MenuItem::visible" ref="qml-qtquick-controls-menuitem.html#visible-prop"/>
+            <keyword name="visible" id="MenuSeparator::visible" ref="qml-qtquick-controls-menuseparator.html#visible-prop"/>
+            <keyword name="visible" id="TableViewColumn::visible" ref="qml-qtquick-controls-tableviewcolumn.html#visible-prop"/>
+            <keyword name="visibleItemCount" id="TumblerStyle::visibleItemCount" ref="qml-qtquick-controls-styles-tumblerstyle.html#visibleItemCount-prop"/>
+            <keyword name="visibleMonth" id="Calendar::visibleMonth" ref="qml-qtquick-controls-calendar.html#visibleMonth-prop"/>
+            <keyword name="visibleYear" id="Calendar::visibleYear" ref="qml-qtquick-controls-calendar.html#visibleYear-prop"/>
+            <keyword name="weekNumberDelegate" id="CalendarStyle::weekNumberDelegate" ref="qml-qtquick-controls-styles-calendarstyle.html#weekNumberDelegate-prop"/>
+            <keyword name="weekNumbersVisible" id="Calendar::weekNumbersVisible" ref="qml-qtquick-controls-calendar.html#weekNumbersVisible-prop"/>
+            <keyword name="wheelEnabled" id="Slider::wheelEnabled" ref="qml-qtquick-controls-slider.html#wheelEnabled-prop"/>
+            <keyword name="width" id="TableViewColumn::width" ref="qml-qtquick-controls-tableviewcolumn.html#width-prop"/>
+            <keyword name="wrapMode" id="TextArea::wrapMode" ref="qml-qtquick-controls-textarea.html#wrapMode-prop"/>
+        </keywords>
+        <files>
+            <file>applicationwindow.html</file>
+            <file>controls.html</file>
+            <file>controlsstyling.html</file>
+            <file>images/applicationwindow.png</file>
+            <file>images/arrow_bc.png</file>
+            <file>images/bgrContent.png</file>
+            <file>images/btn_next.png</file>
+            <file>images/btn_prev.png</file>
+            <file>images/bullet_dn.png</file>
+            <file>images/bullet_sq.png</file>
+            <file>images/busyindicator.png</file>
+            <file>images/button.png</file>
+            <file>images/calendar.png</file>
+            <file>images/calendarstyle-components-week-numbers.png</file>
+            <file>images/checkbox.png</file>
+            <file>images/circulargauge-angles.png</file>
+            <file>images/circulargauge-needle-example-2.png</file>
+            <file>images/circulargauge-needle.png</file>
+            <file>images/circulargauge-reversed.png</file>
+            <file>images/circulargauge-tickmark-indices-values.png</file>
+            <file>images/combobox.png</file>
+            <file>images/gauge-minorTickmark-example.png</file>
+            <file>images/gauge-temperature.png</file>
+            <file>images/gauge-tickmark-example.png</file>
+            <file>images/groupbox.png</file>
+            <file>images/home.png</file>
+            <file>images/ico_note.png</file>
+            <file>images/ico_note_attention.png</file>
+            <file>images/ico_out.png</file>
+            <file>images/label.png</file>
+            <file>images/logo.png</file>
+            <file>images/menu.png</file>
+            <file>images/menubar-action.png</file>
+            <file>images/menubar.png</file>
+            <file>images/piemenu-menuitem-example.png</file>
+            <file>images/progressbar.png</file>
+            <file>images/qtquickcontrols-example-calendar.png</file>
+            <file>images/qtquickcontrols-example-filesystembrowser.png</file>
+            <file>images/qtquickcontrols-example-gallery-android-dark.png</file>
+            <file>images/qtquickcontrols-example-gallery-android.png</file>
+            <file>images/qtquickcontrols-example-gallery-osx.png</file>
+            <file>images/qtquickcontrols-example-styles.png</file>
+            <file>images/qtquickcontrols-example-tableview.png</file>
+            <file>images/qtquickcontrols-example-text.png</file>
+            <file>images/qtquickcontrols-example-touch.png</file>
+            <file>images/qtquickcontrols-example-uiforms.png</file>
+            <file>images/radiobutton.png</file>
+            <file>images/scrollview.png</file>
+            <file>images/slider.png</file>
+            <file>images/spinbox.png</file>
+            <file>images/splitview.png</file>
+            <file>images/square-blue.png</file>
+            <file>images/square-green.png</file>
+            <file>images/square-red.png</file>
+            <file>images/square-white.png</file>
+            <file>images/square-yellow.png</file>
+            <file>images/stackview.png</file>
+            <file>images/styling-circulargauge-background-example.png</file>
+            <file>images/styling-circulargauge-knob-example.png</file>
+            <file>images/styling-circulargauge-minorTickmark-example.png</file>
+            <file>images/styling-circulargauge-needle-example.png</file>
+            <file>images/styling-circulargauge-tickmark-example.png</file>
+            <file>images/styling-circulargauge-tickmarkLabel-example.png</file>
+            <file>images/styling-gauge-font-size.png</file>
+            <file>images/styling-gauge-foreground.png</file>
+            <file>images/styling-gauge-minorTickmark.png</file>
+            <file>images/styling-gauge-tickmark.png</file>
+            <file>images/styling-gauge-valueBar.png</file>
+            <file>images/switch.png</file>
+            <file>images/tableview.png</file>
+            <file>images/tabview.png</file>
+            <file>images/textarea.png</file>
+            <file>images/textfield.png</file>
+            <file>images/toolbar.png</file>
+            <file>images/treeview.png</file>
+            <file>images/tumbler-flat-style.png</file>
+            <file>images/tumbler.png</file>
+            <file>menus.html</file>
+            <file>qml-qtquick-controls-action-members.html</file>
+            <file>qml-qtquick-controls-action.html</file>
+            <file>qml-qtquick-controls-applicationwindow-members.html</file>
+            <file>qml-qtquick-controls-applicationwindow.html</file>
+            <file>qml-qtquick-controls-busyindicator-members.html</file>
+            <file>qml-qtquick-controls-busyindicator.html</file>
+            <file>qml-qtquick-controls-button-members.html</file>
+            <file>qml-qtquick-controls-button.html</file>
+            <file>qml-qtquick-controls-calendar-members.html</file>
+            <file>qml-qtquick-controls-calendar.html</file>
+            <file>qml-qtquick-controls-checkbox-members.html</file>
+            <file>qml-qtquick-controls-checkbox.html</file>
+            <file>qml-qtquick-controls-combobox-members.html</file>
+            <file>qml-qtquick-controls-combobox.html</file>
+            <file>qml-qtquick-controls-exclusivegroup-members.html</file>
+            <file>qml-qtquick-controls-exclusivegroup.html</file>
+            <file>qml-qtquick-controls-groupbox-members.html</file>
+            <file>qml-qtquick-controls-groupbox.html</file>
+            <file>qml-qtquick-controls-label-members.html</file>
+            <file>qml-qtquick-controls-label.html</file>
+            <file>qml-qtquick-controls-menu-members.html</file>
+            <file>qml-qtquick-controls-menu.html</file>
+            <file>qml-qtquick-controls-menubar-members.html</file>
+            <file>qml-qtquick-controls-menubar.html</file>
+            <file>qml-qtquick-controls-menuitem-members.html</file>
+            <file>qml-qtquick-controls-menuitem.html</file>
+            <file>qml-qtquick-controls-menuseparator-members.html</file>
+            <file>qml-qtquick-controls-menuseparator.html</file>
+            <file>qml-qtquick-controls-progressbar-members.html</file>
+            <file>qml-qtquick-controls-progressbar.html</file>
+            <file>qml-qtquick-controls-radiobutton-members.html</file>
+            <file>qml-qtquick-controls-radiobutton.html</file>
+            <file>qml-qtquick-controls-scrollview-members.html</file>
+            <file>qml-qtquick-controls-scrollview.html</file>
+            <file>qml-qtquick-controls-slider-members.html</file>
+            <file>qml-qtquick-controls-slider.html</file>
+            <file>qml-qtquick-controls-spinbox-members.html</file>
+            <file>qml-qtquick-controls-spinbox.html</file>
+            <file>qml-qtquick-controls-splitview-members.html</file>
+            <file>qml-qtquick-controls-splitview.html</file>
+            <file>qml-qtquick-controls-stack-members.html</file>
+            <file>qml-qtquick-controls-stack.html</file>
+            <file>qml-qtquick-controls-stackview-members.html</file>
+            <file>qml-qtquick-controls-stackview.html</file>
+            <file>qml-qtquick-controls-stackviewdelegate-members.html</file>
+            <file>qml-qtquick-controls-stackviewdelegate.html</file>
+            <file>qml-qtquick-controls-statusbar-members.html</file>
+            <file>qml-qtquick-controls-statusbar.html</file>
+            <file>qml-qtquick-controls-styles-applicationwindowstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-applicationwindowstyle.html</file>
+            <file>qml-qtquick-controls-styles-busyindicatorstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-busyindicatorstyle.html</file>
+            <file>qml-qtquick-controls-styles-buttonstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-buttonstyle.html</file>
+            <file>qml-qtquick-controls-styles-calendarstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-calendarstyle.html</file>
+            <file>qml-qtquick-controls-styles-checkboxstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-checkboxstyle.html</file>
+            <file>qml-qtquick-controls-styles-circulargaugestyle-members.html</file>
+            <file>qml-qtquick-controls-styles-circulargaugestyle.html</file>
+            <file>qml-qtquick-controls-styles-comboboxstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-comboboxstyle.html</file>
+            <file>qml-qtquick-controls-styles-delaybuttonstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-delaybuttonstyle.html</file>
+            <file>qml-qtquick-controls-styles-dialstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-dialstyle.html</file>
+            <file>qml-qtquick-controls-styles-gaugestyle-members.html</file>
+            <file>qml-qtquick-controls-styles-gaugestyle.html</file>
+            <file>qml-qtquick-controls-styles-menubarstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-menubarstyle.html</file>
+            <file>qml-qtquick-controls-styles-menustyle-members.html</file>
+            <file>qml-qtquick-controls-styles-menustyle.html</file>
+            <file>qml-qtquick-controls-styles-piemenustyle-members.html</file>
+            <file>qml-qtquick-controls-styles-piemenustyle.html</file>
+            <file>qml-qtquick-controls-styles-progressbarstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-progressbarstyle.html</file>
+            <file>qml-qtquick-controls-styles-radiobuttonstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-radiobuttonstyle.html</file>
+            <file>qml-qtquick-controls-styles-scrollviewstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-scrollviewstyle.html</file>
+            <file>qml-qtquick-controls-styles-sliderstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-sliderstyle.html</file>
+            <file>qml-qtquick-controls-styles-spinboxstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-spinboxstyle.html</file>
+            <file>qml-qtquick-controls-styles-statusbarstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-statusbarstyle.html</file>
+            <file>qml-qtquick-controls-styles-statusindicatorstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-statusindicatorstyle.html</file>
+            <file>qml-qtquick-controls-styles-switchstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-switchstyle.html</file>
+            <file>qml-qtquick-controls-styles-tableviewstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-tableviewstyle.html</file>
+            <file>qml-qtquick-controls-styles-tabviewstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-tabviewstyle.html</file>
+            <file>qml-qtquick-controls-styles-textareastyle-members.html</file>
+            <file>qml-qtquick-controls-styles-textareastyle.html</file>
+            <file>qml-qtquick-controls-styles-textfieldstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-textfieldstyle.html</file>
+            <file>qml-qtquick-controls-styles-togglebuttonstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-togglebuttonstyle.html</file>
+            <file>qml-qtquick-controls-styles-toolbarstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-toolbarstyle.html</file>
+            <file>qml-qtquick-controls-styles-treeviewstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-treeviewstyle.html</file>
+            <file>qml-qtquick-controls-styles-tumblerstyle-members.html</file>
+            <file>qml-qtquick-controls-styles-tumblerstyle-obsolete.html</file>
+            <file>qml-qtquick-controls-styles-tumblerstyle.html</file>
+            <file>qml-qtquick-controls-switch-members.html</file>
+            <file>qml-qtquick-controls-switch.html</file>
+            <file>qml-qtquick-controls-tab-members.html</file>
+            <file>qml-qtquick-controls-tab.html</file>
+            <file>qml-qtquick-controls-tableview-members.html</file>
+            <file>qml-qtquick-controls-tableview.html</file>
+            <file>qml-qtquick-controls-tableviewcolumn-members.html</file>
+            <file>qml-qtquick-controls-tableviewcolumn.html</file>
+            <file>qml-qtquick-controls-tabview-members.html</file>
+            <file>qml-qtquick-controls-tabview.html</file>
+            <file>qml-qtquick-controls-textarea-members.html</file>
+            <file>qml-qtquick-controls-textarea.html</file>
+            <file>qml-qtquick-controls-textfield-members.html</file>
+            <file>qml-qtquick-controls-textfield.html</file>
+            <file>qml-qtquick-controls-toolbar-members.html</file>
+            <file>qml-qtquick-controls-toolbar.html</file>
+            <file>qml-qtquick-controls-toolbutton-members.html</file>
+            <file>qml-qtquick-controls-toolbutton.html</file>
+            <file>qml-qtquick-controls-treeview-members.html</file>
+            <file>qml-qtquick-controls-treeview.html</file>
+            <file>qtquick-controls-qmlmodule.html</file>
+            <file>qtquick-controls-styles-qmlmodule.html</file>
+            <file>qtquickcontrols-examples.html</file>
+            <file>qtquickcontrols-overview.html</file>
+            <file>qtquickcontrols-platformnotes.html</file>
+            <file>qtquickcontrols1-calendar-example.html</file>
+            <file>qtquickcontrols1-filesystembrowser-example.html</file>
+            <file>qtquickcontrols1-gallery-example.html</file>
+            <file>qtquickcontrols1-index.html</file>
+            <file>qtquickcontrols1-styles-example.html</file>
+            <file>qtquickcontrols1-tableview-example.html</file>
+            <file>qtquickcontrols1-texteditor-example.html</file>
+            <file>qtquickcontrols1-touch-example.html</file>
+            <file>qtquickcontrols1-uiforms-example.html</file>
+            <file>qtquickcontrolsstyles-index.html</file>
+            <file>style/offline-simple.css</file>
+            <file>style/offline.css</file>
+            <file>styling-circulargauge.html</file>
+            <file>styling-gauge.html</file>
+            <file>stylingtutorials.html</file>
+            <file>views.html</file>
+            <file>viewsstyling.html</file>
+        </files>
+    </filterSection>
+</QtHelpProject>

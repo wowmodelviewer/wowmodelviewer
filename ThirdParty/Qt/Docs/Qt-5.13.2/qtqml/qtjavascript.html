@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtjavascript.qdoc -->
+  <title>Making Applications Scriptable | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td >Making Applications Scriptable</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#scripting-classes">Scripting Classes</a></li>
+<li class="level1"><a href="#basic-usage">Basic Usage</a></li>
+<li class="level1"><a href="#making-a-qobject-available-to-the-script-engine">Making a QObject Available to the Script Engine</a></li>
+<li class="level1"><a href="#implications-for-application-security">Implications for Application Security</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Making Applications Scriptable</h1>
+<span class="subtitle"></span>
+<!-- $$$qtjavascript.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Qt provides support for application scripting with JavaScript. The following guides and references cover aspects of programming with JavaScript and Qt.</p>
+<a name="scripting-classes"></a>
+<h2 id="scripting-classes">Scripting Classes</h2>
+<p>The following classes add scripting capabilities to Qt applications.</p>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qjsengine.html">QJSEngine</a></p></td><td class="tblDescr"><p>Environment for evaluating JavaScript code</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qjsvalue.html">QJSValue</a></p></td><td class="tblDescr"><p>Acts as a container for Qt/JavaScript data types</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qjsvalueiterator.html">QJSValueIterator</a></p></td><td class="tblDescr"><p>Java-style iterator for QJSValue</p></td></tr>
+</table></div>
+<a name="basic-usage"></a>
+<h2 id="basic-usage">Basic Usage</h2>
+<p>To evaluate script code, you create a <a href="qjsengine.html">QJSEngine</a> and call its evaluate() function, passing the script code (text) to evaluate as argument.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qjsengine.html">QJSEngine</a></span> engine;
+  <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;the magic number is:&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> engine<span class="operator">.</span>evaluate(<span class="string">&quot;1 + 2&quot;</span>)<span class="operator">.</span>toNumber();
+
+</pre>
+<p>The return value will be the result of the evaluation (represented as a <a href="qjsvalue.html">QJSValue</a> object); this can be converted to standard C++ and Qt types.</p>
+<p>Custom properties can be made available to scripts by registering them with the script engine. This is most easily done by setting properties of the script engine's <i>Global Object</i>:</p>
+<pre class="cpp">
+
+  engine<span class="operator">.</span>globalObject()<span class="operator">.</span>setProperty(<span class="string">&quot;foo&quot;</span><span class="operator">,</span> <span class="number">123</span>);
+  <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;foo times two is:&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> engine<span class="operator">.</span>evaluate(<span class="string">&quot;foo * 2&quot;</span>)<span class="operator">.</span>toNumber();
+
+</pre>
+<p>This places the properties in the script environment, thus making them available to script code.</p>
+<a name="making-a-qobject-available-to-the-script-engine"></a>
+<h2 id="making-a-qobject-available-to-the-script-engine">Making a QObject Available to the Script Engine</h2>
+<p>Any <a href="../qtcore/qobject.html">QObject</a>-based instance can be made available for use with scripts.</p>
+<p>When a <a href="../qtcore/qobject.html">QObject</a> is passed to the <a href="qjsengine.html#newQObject">QJSEngine::newQObject</a>() function, a Qt Script wrapper object is created that can be used to make the <a href="../qtcore/qobject.html">QObject</a>'s signals, slots, properties, and child objects available to scripts.</p>
+<p>Here's an example of making an instance of a <a href="../qtcore/qobject.html">QObject</a> subclass available to script code under the name <code>&quot;myObject&quot;</code>:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qjsengine.html">QJSEngine</a></span> engine;
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>someObject <span class="operator">=</span> <span class="keyword">new</span> MyObject;
+  <span class="type"><a href="qjsvalue.html">QJSValue</a></span> objectValue <span class="operator">=</span> engine<span class="operator">.</span>newQObject(someObject);
+  engine<span class="operator">.</span>globalObject()<span class="operator">.</span>setProperty(<span class="string">&quot;myObject&quot;</span><span class="operator">,</span> objectValue);
+
+</pre>
+<p>This will create a global variable called <code>myObject</code> in the script environment. The variable serves as a proxy to the underlying C++ object. Note that the name of the script variable can be anything; i.e&#x2e;, it is not dependent upon <a href="../qtcore/qobject.html#objectName-prop">QObject::objectName</a>().</p>
+<a name="implications-for-application-security"></a>
+<h2 id="implications-for-application-security">Implications for Application Security</h2>
+<p>The security model of application scripting with JavaScript follows the same model as for C++ code: the user installs scripts to run that they trust in the same way as they install Qt applications.</p>
+<p>In order to preserve the trust of users, application developers should not evaluate arbitrary JavaScript code. The JavaScript engine's sandbox is only a semantic barrier. The script is evaluated in the same process and with the same privileges as the rest of the application and shares the same memory. As a consequence, C++ objects exposed to scripts are accessible without additional security guards.</p>
+</div>
+<!-- @@@qtjavascript.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

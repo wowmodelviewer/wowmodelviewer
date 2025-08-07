@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- ico-module.qdoc -->
+  <title>ico QML Type | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<p class="naviNextPrevious headerNavi">
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#relevant-file-tags">Relevant File Tags</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">ico QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$ico-brief -->
+<p>Provides support for building ICO (.ico) and CUR (.cur) files. <a href="#details">More...</a></p>
+<!-- @@@ico -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QbsModules .</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qbs 1.11</td></tr></table></div><ul>
+<li><a href="qml-qbsmodules-ico-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qbsmodules-ico.html#cursorHotspotX-prop">cursorHotspotX</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-ico.html#cursorHotspotY-prop">cursorHotspotY</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-ico.html#icotoolFilePath-prop">icotoolFilePath</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-ico.html#raw-prop">raw</a></b></b> : bool</li>
+</ul>
+<!-- $$$ico-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The <code>ico</code> module contains properties and rules for building Microsoft Windows Icon (.ico) and Microsoft Windows Cursor (.cur) files.</p>
+<p><b>Note: </b>This module relies on the <code>icotool</code> command-line tool from the <code>icotools</code> package, which must be installed separately and found in the <code>PATH</code> or an appropriate system binaries directory for your system (for example, <code>/usr/bin</code> or <code>/usr/local/bin</code>).</p><a name="relevant-file-tags"></a>
+<h3 id="relevant-file-tags">Relevant File Tags</h3>
+<a name="filetags-ico"></a><div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Tag</th><th >Auto-tagged File Names</th><th >Since</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>&quot;cur&quot;</code></td><td >n/a</td><td >1.11</td><td >The rule that creates cursor (.cur) files attaches this tag to its output artifact.</td></tr>
+<tr valign="top" class="even"><td ><code>&quot;ico&quot;</code></td><td >n/a</td><td >1.11</td><td >The rule that creates icon (.ico) files attaches this tag to its output artifact.</td></tr>
+<tr valign="top" class="odd"><td ><code>&quot;png&quot;</code></td><td ><code>&quot;*.png&quot;</code></td><td >1.11</td><td >Source files with this tag indicate PNG files which are used as inputs to create icon or cursor files.</td></tr>
+</table></div>
+<!-- @@@ico -->
+<h2>Property Documentation</h2>
+<!-- $$$cursorHotspotX -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="cursorHotspotX-prop"></a><span class="name">cursorHotspotX</span> : <span class="type">int</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The cursor hotspot x coordinate. Only relevant when building .cur files.</p>
+<p>This property must be set individually for each input PNG file.</p>
+<p><b>Note: </b><code>icoutils</code> version 0.32 or greater is required to set the hotspot in cursor files with multiple images.</p><p>Default: Undefined</p>
+</div></div><!-- @@@cursorHotspotX -->
+<br/>
+<!-- $$$cursorHotspotY -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="cursorHotspotY-prop"></a><span class="name">cursorHotspotY</span> : <span class="type">int</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The cursor hotspot y coordinate. Only relevant when building .cur files.</p>
+<p>This property must be set individually for each input PNG file.</p>
+<p><b>Note: </b><code>icoutils</code> version 0.32 or greater is required to set the hotspot in cursor files with multiple images.</p><p>Default: Undefined</p>
+</div></div><!-- @@@cursorHotspotY -->
+<br/>
+<!-- $$$icotoolFilePath -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="icotoolFilePath-prop"></a><span class="name">icotoolFilePath</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The full path of the <code>icotool</code> binary.</p>
+<p>This property should not normally need to be changed if Qbs was able to automatically detect it.</p>
+<p>Default: Determined automatically.</p>
+</div></div><!-- @@@icotoolFilePath -->
+<br/>
+<!-- $$$raw -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="raw-prop"></a><span class="name">raw</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to store the input file as a raw PNG, as supported in Windows Vista.</p>
+<p>Only relevant when building .ico files.</p>
+<p>This property must be set individually for each input PNG file.</p>
+<p>It is recommended to set this value only for icon sizes larger than or equal to 256x256.</p>
+<p>Default: <code>false</code></p>
+</div></div><!-- @@@raw -->
+<br/>
+<p class="naviNextPrevious footerNavi">
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

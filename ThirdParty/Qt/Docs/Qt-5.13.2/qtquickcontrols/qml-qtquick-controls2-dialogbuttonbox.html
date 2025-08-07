@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickdialogbuttonbox.cpp -->
+  <title>DialogButtonBox QML Type | Qt Quick Controls 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td ><a href="qtquick-controls2-qmlmodule.html">QML Types</a></td><td >DialogButtonBox QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#attached-properties">Attached Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">DialogButtonBox QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$DialogButtonBox-brief -->
+<p>A button box used in dialogs. <a href="#details">More...</a></p>
+<!-- @@@DialogButtonBox -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Controls 2.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-controls2-container.html">Container</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-controls2-dialogbuttonbox-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dialogbuttonbox.html#alignment-prop">alignment</a></b></b> : flags</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dialogbuttonbox.html#buttonLayout-prop">buttonLayout</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dialogbuttonbox.html#delegate-prop">delegate</a></b></b> : Component</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dialogbuttonbox.html#position-prop">position</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dialogbuttonbox.html#standardButtons-prop">standardButtons</a></b></b> : enumeration</li>
+</ul>
+<a name="attached-properties"></a>
+<h2 id="attached-properties">Attached Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dialogbuttonbox.html#buttonBox-attached-prop">buttonBox</a></b></b> : DialogButtonBox</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dialogbuttonbox.html#buttonRole-attached-prop">buttonRole</a></b></b> : enumeration</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dialogbuttonbox.html#accepted-signal">accepted</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dialogbuttonbox.html#applied-signal">applied</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dialogbuttonbox.html#clicked-signal">clicked</a></b></b>(<i>button</i>)</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dialogbuttonbox.html#discarded-signal">discarded</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dialogbuttonbox.html#helpRequested-signal">helpRequested</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dialogbuttonbox.html#rejected-signal">rejected</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dialogbuttonbox.html#reset-signal">reset</a></b></b>()</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">AbstractButton <b><b><a href="qml-qtquick-controls2-dialogbuttonbox.html#standardButton-method">standardButton</a></b></b>(<i>button</i>)</li>
+</ul>
+<!-- $$$DialogButtonBox-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>Dialogs and message boxes typically present buttons in an order that conforms to the interface guidelines for that platform. Invariably, different platforms have their dialog buttons in different orders. <a href="qml-qtquick-controls2-dialogbuttonbox.html">DialogButtonBox</a> allows a developer to add buttons to it and will automatically use the appropriate order for the user's platform.</p>
+<p>Most buttons for a dialog follow certain roles. Such roles include:</p>
+<ul>
+<li>Accepting or rejecting the dialog.</li>
+<li>Asking for help.</li>
+<li>Performing actions on the dialog itself (such as resetting fields or applying changes).</li>
+</ul>
+<p>There can also be alternate ways of dismissing the dialog which may cause destructive results.</p>
+<p>Most dialogs have buttons that can almost be considered standard (e.g&#x2e; <b>OK</b> and <b>Cancel</b> buttons). It is sometimes convenient to create these buttons in a standard way.</p>
+<p>There are a couple ways of using <a href="qml-qtquick-controls2-dialogbuttonbox.html">DialogButtonBox</a>. One way is to specify the standard buttons (e.g&#x2e; <b>OK</b>, <b>Cancel</b>, <b>Save</b>) and let the button box setup the buttons.</p>
+<p class="centerAlign"><img src="images/qtquickcontrols2-dialogbuttonbox.png" alt="" /></p><pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls2-dialogbuttonbox.html">DialogButtonBox</a></span> {
+      <span class="name">standardButtons</span>: <span class="name">DialogButtonBox</span>.<span class="name">Ok</span> <span class="operator">|</span> <span class="name">DialogButtonBox</span>.<span class="name">Cancel</span>
+
+      <span class="name">onAccepted</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Ok clicked&quot;</span>)
+      <span class="name">onRejected</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Cancel clicked&quot;</span>)
+  }
+
+</pre>
+<p>Alternatively, buttons and their roles can be specified by hand:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls2-dialogbuttonbox.html">DialogButtonBox</a></span> {
+      <span class="type"><a href="qml-qtquick-controls2-button.html">Button</a></span> {
+          <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Save&quot;</span>)
+          <span class="name">DialogButtonBox</span>.buttonRole: <span class="name">DialogButtonBox</span>.<span class="name">AcceptRole</span>
+      }
+      <span class="type"><a href="qml-qtquick-controls2-button.html">Button</a></span> {
+          <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Close&quot;</span>)
+          <span class="name">DialogButtonBox</span>.buttonRole: <span class="name">DialogButtonBox</span>.<span class="name">DestructiveRole</span>
+      }
+  }
+
+</pre>
+<p>You can also mix and match normal buttons and standard buttons.</p>
+<p>When a button is clicked in the button box, the <a href="qml-qtquick-controls2-dialogbuttonbox.html#clicked-signal">clicked()</a> signal is emitted for the actual button that is pressed. In addition, the following signals are automatically emitted when a button with the respective role(s) is pressed:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Role</th><th >Signal</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>AcceptRole</code>, <code>YesRole</code></td><td ><a href="qml-qtquick-controls2-dialogbuttonbox.html#accepted-signal">accepted()</a></td></tr>
+<tr valign="top" class="even"><td ><code>ApplyRole</code></td><td ><a href="qml-qtquick-controls2-dialogbuttonbox.html#applied-signal">applied()</a></td></tr>
+<tr valign="top" class="odd"><td ><code>DiscardRole</code></td><td ><a href="qml-qtquick-controls2-dialogbuttonbox.html#discarded-signal">discarded()</a></td></tr>
+<tr valign="top" class="even"><td ><code>HelpRole</code></td><td ><a href="qml-qtquick-controls2-dialogbuttonbox.html#helpRequested-signal">helpRequested()</a></td></tr>
+<tr valign="top" class="odd"><td ><code>RejectRole</code>, <code>NoRole</code></td><td ><a href="qml-qtquick-controls2-dialogbuttonbox.html#rejected-signal">rejected()</a></td></tr>
+<tr valign="top" class="even"><td ><code>ResetRole</code></td><td ><a href="qml-qtquick-controls2-dialogbuttonbox.html#reset-signal">reset()</a></td></tr>
+</table></div>
+<p><b>See also </b><a href="qml-qtquick-controls2-dialog.html">Dialog</a>.</p>
+<!-- @@@DialogButtonBox -->
+<h2>Property Documentation</h2>
+<!-- $$$alignment -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="alignment-prop"></a><span class="name">alignment</span> : <span class="type">flags</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the alignment of the buttons.</p>
+<p>Possible values:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>undefined</code></td><td class="topAlign">The buttons are resized to fill the available space.</td></tr>
+<tr><td class="topAlign"><code>Qt.AlignLeft</code></td><td class="topAlign">The buttons are aligned to the left.</td></tr>
+<tr><td class="topAlign"><code>Qt.AlignHCenter</code></td><td class="topAlign">The buttons are horizontally centered.</td></tr>
+<tr><td class="topAlign"><code>Qt.AlignRight</code></td><td class="topAlign">The buttons are aligned to the right.</td></tr>
+<tr><td class="topAlign"><code>Qt.AlignTop</code></td><td class="topAlign">The buttons are aligned to the top.</td></tr>
+<tr><td class="topAlign"><code>Qt.AlignVCenter</code></td><td class="topAlign">The buttons are vertically centered.</td></tr>
+<tr><td class="topAlign"><code>Qt.AlignBottom</code></td><td class="topAlign">The buttons are aligned to the bottom.</td></tr>
+</table></div>
+</div></div><!-- @@@alignment -->
+<br/>
+<!-- $$$buttonLayout -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="buttonLayout-prop"></a><span class="name">buttonLayout</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the button layout policy to be used when arranging the buttons contained in the button box. The default value is platform-specific.</p>
+<p>Available values:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.WinLayout</code></td><td class="topAlign">Use a policy appropriate for applications on Windows.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.MacLayout</code></td><td class="topAlign">Use a policy appropriate for applications on <a href="../qtdoc/internationalization.html#macos">macOS</a>.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.KdeLayout</code></td><td class="topAlign">Use a policy appropriate for applications on KDE.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.GnomeLayout</code></td><td class="topAlign">Use a policy appropriate for applications on GNOME.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.AndroidLayout</code></td><td class="topAlign">Use a policy appropriate for applications on Android.</td></tr>
+</table></div>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+</div></div><!-- @@@buttonLayout -->
+<br/>
+<!-- $$$delegate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="delegate-prop"></a><span class="name">delegate</span> : <span class="type"><a href="../qtqml/qml-qtqml-component.html">Component</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds a delegate for creating standard buttons.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-dialogbuttonbox.html#standardButtons-prop">standardButtons</a>.</p>
+</div></div><!-- @@@delegate -->
+<br/>
+<!-- $$$position -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="position-prop"></a><span class="name">position</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the position of the button box.</p>
+<p><b>Note: </b>If the button box is assigned as a header or footer of <a href="qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a> or Page, the appropriate position is set automatically.</p><p>Possible values:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.Header</code></td><td class="topAlign">The button box is at the top, as a window or page header.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.Footer</code></td><td class="topAlign">The button box is at the bottom, as a window or page header.</td></tr>
+</table></div>
+<p>The default value is <code>Footer</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-dialog.html#header-prop">Dialog::header</a> and <a href="qml-qtquick-controls2-dialog.html#footer-prop">Dialog::footer</a>.</p>
+</div></div><!-- @@@position -->
+<br/>
+<!-- $$$standardButtons -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="standardButtons-prop"></a><span class="name">standardButtons</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds a combination of standard buttons that are used by the button box.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls2-dialogbuttonbox.html">DialogButtonBox</a></span> {
+      <span class="name">standardButtons</span>: <span class="name">DialogButtonBox</span>.<span class="name">Ok</span> <span class="operator">|</span> <span class="name">DialogButtonBox</span>.<span class="name">Cancel</span>
+
+      <span class="name">onAccepted</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Ok clicked&quot;</span>)
+      <span class="name">onRejected</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Cancel clicked&quot;</span>)
+  }
+
+</pre>
+<p>The buttons will be positioned in the appropriate order for the user's platform.</p>
+<p>Possible flags:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.Ok</code></td><td class="topAlign">An &quot;OK&quot; button defined with the <code>AcceptRole</code>.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.Open</code></td><td class="topAlign">An &quot;Open&quot; button defined with the <code>AcceptRole</code>.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.Save</code></td><td class="topAlign">A &quot;Save&quot; button defined with the <code>AcceptRole</code>.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.Cancel</code></td><td class="topAlign">A &quot;Cancel&quot; button defined with the <code>RejectRole</code>.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.Close</code></td><td class="topAlign">A &quot;Close&quot; button defined with the <code>RejectRole</code>.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.Discard</code></td><td class="topAlign">A &quot;Discard&quot; or &quot;Don't Save&quot; button, depending on the platform, defined with the <code>DestructiveRole</code>.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.Apply</code></td><td class="topAlign">An &quot;Apply&quot; button defined with the <code>ApplyRole</code>.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.Reset</code></td><td class="topAlign">A &quot;Reset&quot; button defined with the <code>ResetRole</code>.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.RestoreDefaults</code></td><td class="topAlign">A &quot;Restore Defaults&quot; button defined with the <code>ResetRole</code>.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.Help</code></td><td class="topAlign">A &quot;Help&quot; button defined with the <code>HelpRole</code>.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.SaveAll</code></td><td class="topAlign">A &quot;Save All&quot; button defined with the <code>AcceptRole</code>.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.Yes</code></td><td class="topAlign">A &quot;Yes&quot; button defined with the <code>YesRole</code>.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.YesToAll</code></td><td class="topAlign">A &quot;Yes to All&quot; button defined with the <code>YesRole</code>.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.No</code></td><td class="topAlign">A &quot;No&quot; button defined with the <code>NoRole</code>.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.NoToAll</code></td><td class="topAlign">A &quot;No to All&quot; button defined with the <code>NoRole</code>.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.Abort</code></td><td class="topAlign">An &quot;Abort&quot; button defined with the <code>RejectRole</code>.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.Retry</code></td><td class="topAlign">A &quot;Retry&quot; button defined with the <code>AcceptRole</code>.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.Ignore</code></td><td class="topAlign">An &quot;Ignore&quot; button defined with the <code>AcceptRole</code>.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.NoButton</code></td><td class="topAlign">An invalid button.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qml-qtquick-controls2-dialogbuttonbox.html#standardButton-method">standardButton()</a>.</p>
+</div></div><!-- @@@standardButtons -->
+<br/>
+<h2>Attached Property Documentation</h2>
+<!-- $$$buttonBox -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="buttonBox-attached-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">DialogButtonBox.buttonBox</span> : <span class="type"><a href="qml-qtquick-controls2-dialogbuttonbox.html">DialogButtonBox</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This attached property holds the button box that manages this button, or <code>null</code> if the button is not in a button box.</p>
+</div></div><!-- @@@buttonBox -->
+<br/>
+<!-- $$$buttonRole -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="buttonRole-attached-prop"></a><span class="name">DialogButtonBox.buttonRole</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This attached property holds the role of each button in a button box.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls2-dialogbuttonbox.html">DialogButtonBox</a></span> {
+      <span class="type"><a href="qml-qtquick-controls2-button.html">Button</a></span> {
+          <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Save&quot;</span>)
+          <span class="name">DialogButtonBox</span>.buttonRole: <span class="name">DialogButtonBox</span>.<span class="name">AcceptRole</span>
+      }
+      <span class="type"><a href="qml-qtquick-controls2-button.html">Button</a></span> {
+          <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Close&quot;</span>)
+          <span class="name">DialogButtonBox</span>.buttonRole: <span class="name">DialogButtonBox</span>.<span class="name">DestructiveRole</span>
+      }
+  }
+
+</pre>
+<p>Available values:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.InvalidRole</code></td><td class="topAlign">The button is invalid.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.AcceptRole</code></td><td class="topAlign">Clicking the button causes the dialog to be accepted (e.g&#x2e; <b>OK</b>).</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.RejectRole</code></td><td class="topAlign">Clicking the button causes the dialog to be rejected (e.g&#x2e; <b>Cancel</b>).</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.DestructiveRole</code></td><td class="topAlign">Clicking the button causes a destructive change (e.g&#x2e; for discarding changes) and closes the dialog.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.ActionRole</code></td><td class="topAlign">Clicking the button causes changes to the elements within the dialog.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.HelpRole</code></td><td class="topAlign">The button can be clicked to request help.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.YesRole</code></td><td class="topAlign">The button is a &quot;Yes&quot;-like button.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.NoRole</code></td><td class="topAlign">The button is a &quot;No&quot;-like button.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.ResetRole</code></td><td class="topAlign">The button resets the dialog's fields to default values.</td></tr>
+<tr><td class="topAlign"><code>DialogButtonBox.ApplyRole</code></td><td class="topAlign">The button applies current changes.</td></tr>
+</table></div>
+</div></div><!-- @@@buttonRole -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$accepted[overload1]$$$accepted -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="accepted-signal"></a><span class="name">accepted</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when a button defined with the <code>AcceptRole</code> or <code>YesRole</code> is clicked.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-dialogbuttonbox.html#rejected-signal">rejected()</a>, <a href="qml-qtquick-controls2-dialogbuttonbox.html#clicked-signal">clicked()</a>, and <a href="qml-qtquick-controls2-dialogbuttonbox.html#helpRequested-signal">helpRequested()</a>.</p>
+</div></div><!-- @@@accepted -->
+<br/>
+<!-- $$$applied[overload1]$$$applied -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="applied-signal"></a><span class="name">applied</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when a button defined with the <code>ApplyRole</code> is clicked.</p>
+<p>This signal was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-dialogbuttonbox.html#discarded-signal">discarded()</a> and <a href="qml-qtquick-controls2-dialogbuttonbox.html#reset-signal">reset()</a>.</p>
+</div></div><!-- @@@applied -->
+<br/>
+<!-- $$$clicked[overload1]$$$clicked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="clicked-signal"></a><span class="name">clicked</span>(<i>button</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when a <i>button</i> inside the button box is clicked.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-dialogbuttonbox.html#accepted-signal">accepted()</a>, <a href="qml-qtquick-controls2-dialogbuttonbox.html#rejected-signal">rejected()</a>, and <a href="qml-qtquick-controls2-dialogbuttonbox.html#helpRequested-signal">helpRequested()</a>.</p>
+</div></div><!-- @@@clicked -->
+<br/>
+<!-- $$$discarded[overload1]$$$discarded -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="discarded-signal"></a><span class="name">discarded</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when a button defined with the <code>DiscardRole</code> is clicked.</p>
+<p>This signal was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-dialogbuttonbox.html#reset-signal">reset()</a> and <a href="qml-qtquick-controls2-dialogbuttonbox.html#applied-signal">applied()</a>.</p>
+</div></div><!-- @@@discarded -->
+<br/>
+<!-- $$$helpRequested[overload1]$$$helpRequested -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="helpRequested-signal"></a><span class="name">helpRequested</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when a button defined with the <code>HelpRole</code> is clicked.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-dialogbuttonbox.html#accepted-signal">accepted()</a>, <a href="qml-qtquick-controls2-dialogbuttonbox.html#rejected-signal">rejected()</a>, and <a href="qml-qtquick-controls2-dialogbuttonbox.html#clicked-signal">clicked()</a>.</p>
+</div></div><!-- @@@helpRequested -->
+<br/>
+<!-- $$$rejected[overload1]$$$rejected -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="rejected-signal"></a><span class="name">rejected</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when a button defined with the <code>RejectRole</code> or <code>NoRole</code> is clicked.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-dialogbuttonbox.html#accepted-signal">accepted()</a>, <a href="qml-qtquick-controls2-dialogbuttonbox.html#helpRequested-signal">helpRequested()</a>, and <a href="qml-qtquick-controls2-dialogbuttonbox.html#clicked-signal">clicked()</a>.</p>
+</div></div><!-- @@@rejected -->
+<br/>
+<!-- $$$reset[overload1]$$$reset -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="reset-signal"></a><span class="name">reset</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when a button defined with the <code>ResetRole</code> is clicked.</p>
+<p>This signal was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-dialogbuttonbox.html#discarded-signal">discarded()</a> and <a href="qml-qtquick-controls2-dialogbuttonbox.html#applied-signal">applied()</a>.</p>
+</div></div><!-- @@@reset -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$standardButton[overload1]$$$standardButton -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="standardButton-method"></a><span class="type"><a href="qml-qtquick-controls2-abstractbutton.html">AbstractButton</a></span> <span class="name">standardButton</span>(<i>button</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the specified standard <i>button</i>, or <code>null</code> if it does not exist.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-dialogbuttonbox.html#standardButtons-prop">standardButtons</a>.</p>
+</div></div><!-- @@@standardButton -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmltypereference.qdoc -->
+  <title>Qt Quick QML Types | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td >Qt Quick QML Types</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#submodules">Submodules</a></li>
+<li class="level1"><a href="#basic-types">Basic Types</a></li>
+<li class="level1"><a href="#object-types">Object Types</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Quick QML Types</h1>
+<span class="subtitle"></span>
+<!-- $$$QtQuick-description -->
+<div class="descr"> <a name="details"></a>
+<p>The <a href="qtquick-index.html">Qt Quick</a> module provides graphical primitive types. These types are only available in a QML document if that document imports the <code>QtQuick</code> namespace.</p>
+<p>The current version of the <code>QtQuick</code> module is version 13, and thus it may be imported via the following statement:</p>
+<pre class="qml">
+
+  import QtQuick 2.13
+
+</pre>
+<p>Visit the <a href="qtquick-index.html">Qt Quick</a> module documentation for more information about the concepts which are central to <code>QtQuick</code>.</p>
+<a name="submodules"></a>
+<h2 id="submodules">Submodules</h2>
+<p>Qt Quick includes several submodules which contain additional types.</p>
+<ul>
+<li><a href="../qtxmlpatterns/qtquick-xmllistmodel-qmlmodule.html">Xml List Model</a> - contains types for creating models from XML data</li>
+<li><a href="qtquick-localstorage-qmlmodule.html">Local Storage</a> - a submodule containing a JavaScript interface for an <a href="../qtsql/qtsql-attribution-sqlite.html#sqlite">SQLite</a> database</li>
+<li><a href="qtquick-particles-qmlmodule.html">Particles</a> - provides a particle system for QML applications</li>
+<li><a href="qtquick-window-qmlmodule.html">Window</a> - contains types for creating top-level windows and accessing screen information</li>
+<li><a href="../qtquickdialogs/qtquick-dialogs-qmlmodule.html">Dialogs</a> - contains types for creating and interacting with system dialogs</li>
+<li><a href="../qtquickcontrols/qtquick-controls2-qmlmodule.html">Controls</a> - provides a set of reusable UI components</li>
+<li><a href="qtquick-layouts-qmlmodule.html">Layouts</a> - contains types that are used to arrange items in the user interface</li>
+<li><a href="../qtqmltest/qttest-qmlmodule.html">Tests</a> - types for testing QML applications.</li>
+</ul>
+<a name="basic-types"></a><a name="basic-types"></a>
+<h2 id="basic-types">Basic Types</h2>
+<p>There are a number of basic types that are <a href="../qtqml/qtqml-typesystem-basictypes.html">supported by default in the QML language</a>.</p>
+<p>In addition, the <code>QtQuick</code> import provides the following basic types: <div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-color.html">color</a></p></td><td class="tblDescr"><p>ARGB color value.  The color type refers to an ARGB color value. It can be specified in a number of ways:</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-font.html">font</a></p></td><td class="tblDescr"><p>Font value with the properties of QFont.  The font type refers to a font value with the properties of QFont</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-matrix4x4.html">matrix4x4</a></p></td><td class="tblDescr"><p>A matrix4x4 type is a 4-row and 4-column matrix</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-quaternion.html">quaternion</a></p></td><td class="tblDescr"><p>A quaternion type has scalar, x, y, and z attributes</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-vector2d.html">vector2d</a></p></td><td class="tblDescr"><p>A vector2d type has x and y attributes</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-vector3d.html">vector3d</a></p></td><td class="tblDescr"><p>Value with x, y, and z attributes</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-vector4d.html">vector4d</a></p></td><td class="tblDescr"><p>A vector4d type has x, y, z and w attributes</p></td></tr>
+</table></div>
+</p>
+<a name="object-types"></a>
+<h2 id="object-types">Object Types</h2>
+<p>Most object types provided by the <code>QtQuick</code> import are based on the <a href="qml-qtquick-item.html">Item</a> type, which itself derives from <a href="../qtqml/qml-qtqml-qtobject.html">QtObject</a>. <a href="../qtqml/qtqml-qmlmodule.html#object-types">QML object types</a> provided by the Qt QML module (such as <a href="../qtqml/qml-qtqml-qtobject.html">QtObject</a> and <a href="../qtqml/qml-qtqml-component.html">Component</a>) are also available when you import <code>QtQuick</code>.</p>
+</div>
+<!-- @@@QtQuick -->
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-accessible.html">Accessible</a></p></td><td class="tblDescr"><p>Enables accessibility of QML items</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-anchoranimation.html">AnchorAnimation</a></p></td><td class="tblDescr"><p>Animates changes in anchor values</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-anchorchanges.html">AnchorChanges</a></p></td><td class="tblDescr"><p>Specifies how to change the anchors of an item in a state</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-animatedimage.html">AnimatedImage</a></p></td><td class="tblDescr"><p>Plays animations stored as a series of images</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-animatedsprite.html">AnimatedSprite</a></p></td><td class="tblDescr"><p>Draws a sprite animation</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-animation.html">Animation</a></p></td><td class="tblDescr"><p>Is the base of all QML animations</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-animationcontroller.html">AnimationController</a></p></td><td class="tblDescr"><p>Enables manual control of animations</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-animator.html">Animator</a></p></td><td class="tblDescr"><p>Is the base of all QML animators</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-behavior.html">Behavior</a></p></td><td class="tblDescr"><p>Defines a default animation for a property change</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-borderimage.html">BorderImage</a></p></td><td class="tblDescr"><p>Paints a border based on an image</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-borderimagemesh.html">BorderImageMesh</a></p></td><td class="tblDescr"><p>Defines a mesh with vertices arranged like those of a BorderImage</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-canvas.html">Canvas</a></p></td><td class="tblDescr"><p>Provides a 2D canvas item enabling drawing via JavaScript</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-canvasgradient.html">CanvasGradient</a></p></td><td class="tblDescr"><p>Provides an opaque CanvasGradient interface</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-canvasimagedata.html">CanvasImageData</a></p></td><td class="tblDescr"><p>Contains image pixel data in RGBA order</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-canvaspixelarray.html">CanvasPixelArray</a></p></td><td class="tblDescr"><p>Provides ordered and indexed access to the components of each pixel in image data</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-coloranimation.html">ColorAnimation</a></p></td><td class="tblDescr"><p>Animates changes in color values</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-column.html">Column</a></p></td><td class="tblDescr"><p>Positions its children in a column</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-context2d.html">Context2D</a></p></td><td class="tblDescr"><p>Provides 2D context for shapes on a Canvas item</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-doublevalidator.html">DoubleValidator</a></p></td><td class="tblDescr"><p>Defines a validator for non-integer numbers</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-drag.html">Drag</a></p></td><td class="tblDescr"><p>For specifying drag and drop events for moved Items</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-dragevent.html">DragEvent</a></p></td><td class="tblDescr"><p>Provides information about a drag event</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-draghandler.html">DragHandler</a></p></td><td class="tblDescr"><p>Handler for dragging</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-droparea.html">DropArea</a></p></td><td class="tblDescr"><p>For specifying drag and drop handling in an area</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-enterkey.html">EnterKey</a></p></td><td class="tblDescr"><p>Provides a property to manipulate the appearance of Enter key on an on-screen keyboard</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-eventpoint.html">EventPoint</a></p></td><td class="tblDescr"><p>Provides information about an individual point within a PointerEvent</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-eventtouchpoint.html">EventTouchPoint</a></p></td><td class="tblDescr"><p>Provides information about an individual touch point within a PointerEvent</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-flickable.html">Flickable</a></p></td><td class="tblDescr"><p>Provides a surface that can be &quot;flicked&quot;</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-flipable.html">Flipable</a></p></td><td class="tblDescr"><p>Provides a surface that can be flipped</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-flow.html">Flow</a></p></td><td class="tblDescr"><p>Positions its children side by side, wrapping as necessary</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-focusscope.html">FocusScope</a></p></td><td class="tblDescr"><p>Explicitly creates a focus scope</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-fontloader.html">FontLoader</a></p></td><td class="tblDescr"><p>Allows fonts to be loaded by name or URL</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-fontmetrics.html">FontMetrics</a></p></td><td class="tblDescr"><p>Provides metrics for a given font</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-gestureevent.html">GestureEvent</a></p></td><td class="tblDescr"><p>Parameter given with the gestureStarted signal</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-gradient.html">Gradient</a></p></td><td class="tblDescr"><p>Defines a gradient fill</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-gradientstop.html">GradientStop</a></p></td><td class="tblDescr"><p>Defines the color at a position in a Gradient</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-graphicsinfo.html">GraphicsInfo</a></p></td><td class="tblDescr"><p>Provides information about the used Qt Quick backend</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-grid.html">Grid</a></p></td><td class="tblDescr"><p>Positions its children in grid formation</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-gridmesh.html">GridMesh</a></p></td><td class="tblDescr"><p>Defines a mesh with vertices arranged in a grid</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-gridview.html">GridView</a></p></td><td class="tblDescr"><p>For specifying a grid view of items provided by a model</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-handlerpoint.html">HandlerPoint</a></p></td><td class="tblDescr"><p>An event point</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-hoverhandler.html">HoverHandler</a></p></td><td class="tblDescr"><p>Handler for mouse and tablet hover</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-image.html">Image</a></p></td><td class="tblDescr"><p>Displays an image</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-intvalidator.html">IntValidator</a></p></td><td class="tblDescr"><p>Defines a validator for integer values</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-item.html">Item</a></p></td><td class="tblDescr"><p>A basic visual QML type</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-itemgrabresult.html">ItemGrabResult</a></p></td><td class="tblDescr"><p>Contains the results from a call to Item::grabToImage()</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-keyevent.html">KeyEvent</a></p></td><td class="tblDescr"><p>Provides information about a key event</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-keynavigation.html">KeyNavigation</a></p></td><td class="tblDescr"><p>Supports key navigation by arrow keys</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-keys.html">Keys</a></p></td><td class="tblDescr"><p>Provides key handling to Items</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-layoutmirroring.html">LayoutMirroring</a></p></td><td class="tblDescr"><p>Property used to mirror layout behavior</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-listview.html">ListView</a></p></td><td class="tblDescr"><p>Provides a list view of items provided by a model</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-loader.html">Loader</a></p></td><td class="tblDescr"><p>Allows dynamic loading of a subtree from a URL or Component</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-matrix4x4.html">Matrix4x4</a></p></td><td class="tblDescr"><p>Provides a way to apply a 4x4 tranformation matrix to an Item</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-mousearea.html">MouseArea</a></p></td><td class="tblDescr"><p>Enables simple mouse handling</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-mouseevent.html">MouseEvent</a></p></td><td class="tblDescr"><p>Provides information about a mouse event</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-multipointhandler.html">MultiPointHandler</a></p></td><td class="tblDescr"><p>Abstract handler for multi-point Pointer Events</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-multipointtoucharea.html">MultiPointTouchArea</a></p></td><td class="tblDescr"><p>Enables handling of multiple touch points</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-numberanimation.html">NumberAnimation</a></p></td><td class="tblDescr"><p>Animates changes in qreal-type values</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-opacityanimator.html">OpacityAnimator</a></p></td><td class="tblDescr"><p>Type animates the opacity of an Item</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-parallelanimation.html">ParallelAnimation</a></p></td><td class="tblDescr"><p>Enables animations to be run in parallel</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-parentanimation.html">ParentAnimation</a></p></td><td class="tblDescr"><p>Animates changes in parent values</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-parentchange.html">ParentChange</a></p></td><td class="tblDescr"><p>Specifies how to reparent an Item in a state change</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-path.html">Path</a></p></td><td class="tblDescr"><p>Defines a path for use by PathView and Shape</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-pathanglearc.html">PathAngleArc</a></p></td><td class="tblDescr"><p>Defines an arc with the given radii and center</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-pathanimation.html">PathAnimation</a></p></td><td class="tblDescr"><p>Animates an item along a path</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-patharc.html">PathArc</a></p></td><td class="tblDescr"><p>Defines an arc with the given radius</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-pathattribute.html">PathAttribute</a></p></td><td class="tblDescr"><p>Specifies how to set an attribute at a given position in a Path</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-pathcubic.html">PathCubic</a></p></td><td class="tblDescr"><p>Defines a cubic Bezier curve with two control points</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-pathcurve.html">PathCurve</a></p></td><td class="tblDescr"><p>Defines a point on a Catmull-Rom curve</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-pathelement.html">PathElement</a></p></td><td class="tblDescr"><p>The base path type</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-pathinterpolator.html">PathInterpolator</a></p></td><td class="tblDescr"><p>Specifies how to manually animate along a path</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-pathline.html">PathLine</a></p></td><td class="tblDescr"><p>Defines a straight line</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-pathmove.html">PathMove</a></p></td><td class="tblDescr"><p>Moves the Path's position</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-pathpercent.html">PathPercent</a></p></td><td class="tblDescr"><p>Manipulates the way a path is interpreted</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-pathquad.html">PathQuad</a></p></td><td class="tblDescr"><p>Defines a quadratic Bezier curve with a control point</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-pathsvg.html">PathSvg</a></p></td><td class="tblDescr"><p>Defines a path using an SVG path data string</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-pathview.html">PathView</a></p></td><td class="tblDescr"><p>Lays out model-provided items on a path</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-pauseanimation.html">PauseAnimation</a></p></td><td class="tblDescr"><p>Provides a pause for an animation</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-pincharea.html">PinchArea</a></p></td><td class="tblDescr"><p>Enables simple pinch gesture handling</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-pinchevent.html">PinchEvent</a></p></td><td class="tblDescr"><p>For specifying information about a pinch event</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-pinchhandler.html">PinchHandler</a></p></td><td class="tblDescr"><p>Handler for pinch gestures</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-pointhandler.html">PointHandler</a></p></td><td class="tblDescr"><p>Handler for reacting to a single touchpoint</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-pointerdevice.html">PointerDevice</a></p></td><td class="tblDescr"><p>Provides information about a pointing device</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-pointerdevicehandler.html">PointerDeviceHandler</a></p></td><td class="tblDescr"><p>Abstract handler for pointer events with device-specific constraints</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-pointerevent.html">PointerEvent</a></p></td><td class="tblDescr"><p>Provides information about an event from a pointing device</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-pointerhandler.html">PointerHandler</a></p></td><td class="tblDescr"><p>Abstract handler for pointer events</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-positioner.html">Positioner</a></p></td><td class="tblDescr"><p>Provides attached properties that contain details on where an item exists in a positioner</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-propertyaction.html">PropertyAction</a></p></td><td class="tblDescr"><p>Specifies immediate property changes during animation</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-propertyanimation.html">PropertyAnimation</a></p></td><td class="tblDescr"><p>Animates changes in property values</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-propertychanges.html">PropertyChanges</a></p></td><td class="tblDescr"><p>Describes new property bindings or values for a state</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-rectangle.html">Rectangle</a></p></td><td class="tblDescr"><p>Paints a filled rectangle with an optional border</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-regexpvalidator.html">RegExpValidator</a></p></td><td class="tblDescr"><p>Provides a string validator</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-repeater.html">Repeater</a></p></td><td class="tblDescr"><p>Instantiates a number of Item-based components using a provided model</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-rotation.html">Rotation</a></p></td><td class="tblDescr"><p>Provides a way to rotate an Item</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-rotationanimation.html">RotationAnimation</a></p></td><td class="tblDescr"><p>Animates changes in rotation values</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-rotationanimator.html">RotationAnimator</a></p></td><td class="tblDescr"><p>Type animates the rotation of an Item</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-row.html">Row</a></p></td><td class="tblDescr"><p>Positions its children in a row</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-scale.html">Scale</a></p></td><td class="tblDescr"><p>Provides a way to scale an Item</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-scaleanimator.html">ScaleAnimator</a></p></td><td class="tblDescr"><p>Type animates the scale factor of an Item</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-scriptaction.html">ScriptAction</a></p></td><td class="tblDescr"><p>Defines scripts to be run during an animation</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-sequentialanimation.html">SequentialAnimation</a></p></td><td class="tblDescr"><p>Allows animations to be run sequentially</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-shadereffect.html">ShaderEffect</a></p></td><td class="tblDescr"><p>Applies custom shaders to a rectangle</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-shadereffectsource.html">ShaderEffectSource</a></p></td><td class="tblDescr"><p>Renders a Qt Quick item into a texture and displays it</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-shortcut.html">Shortcut</a></p></td><td class="tblDescr"><p>Provides keyboard shortcuts</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-singlepointhandler.html">SinglePointHandler</a></p></td><td class="tblDescr"><p>Abstract handler for single-point Pointer Events</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-smoothedanimation.html">SmoothedAnimation</a></p></td><td class="tblDescr"><p>Allows a property to smoothly track a value</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-springanimation.html">SpringAnimation</a></p></td><td class="tblDescr"><p>Allows a property to track a value in a spring-like motion</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-sprite.html">Sprite</a></p></td><td class="tblDescr"><p>Specifies sprite animations</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-spritesequence.html">SpriteSequence</a></p></td><td class="tblDescr"><p>Draws a sprite animation</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-state.html">State</a></p></td><td class="tblDescr"><p>Defines configurations of objects and properties</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-statechangescript.html">StateChangeScript</a></p></td><td class="tblDescr"><p>Specifies how to run a script in a state</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-stategroup.html">StateGroup</a></p></td><td class="tblDescr"><p>Provides built-in state support for non-Item types</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-systempalette.html">SystemPalette</a></p></td><td class="tblDescr"><p>Provides access to the Qt palettes</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-tableview.html">TableView</a></p></td><td class="tblDescr"><p>Provides a table view of items provided by the model</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-taphandler.html">TapHandler</a></p></td><td class="tblDescr"><p>Handler for taps and clicks</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-text.html">Text</a></p></td><td class="tblDescr"><p>Specifies how to add formatted text to a scene</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-textedit.html">TextEdit</a></p></td><td class="tblDescr"><p>Displays multiple lines of editable formatted text</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-textinput.html">TextInput</a></p></td><td class="tblDescr"><p>Displays an editable line of text</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-textmetrics.html">TextMetrics</a></p></td><td class="tblDescr"><p>Provides metrics for a given font and text</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-touchpoint.html">TouchPoint</a></p></td><td class="tblDescr"><p>Describes a touch point in a MultiPointTouchArea</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-transform.html">Transform</a></p></td><td class="tblDescr"><p>For specifying advanced transformations on Items</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-transition.html">Transition</a></p></td><td class="tblDescr"><p>Defines animated transitions that occur on state changes</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-translate.html">Translate</a></p></td><td class="tblDescr"><p>Provides a way to move an Item without changing its x or y properties</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-uniformanimator.html">UniformAnimator</a></p></td><td class="tblDescr"><p>Type animates a uniform of a ShaderEffect</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-vector3danimation.html">Vector3dAnimation</a></p></td><td class="tblDescr"><p>Animates changes in QVector3d values</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-viewtransition.html">ViewTransition</a></p></td><td class="tblDescr"><p>Specifies items under transition in a view</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-wheelevent.html">WheelEvent</a></p></td><td class="tblDescr"><p>Provides information about a mouse wheel event</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtquick-xanimator.html">XAnimator</a></p></td><td class="tblDescr"><p>Type animates the x position of an Item</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtquick-yanimator.html">YAnimator</a></p></td><td class="tblDescr"><p>Type animates the y position of an Item</p></td></tr>
+</table></div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

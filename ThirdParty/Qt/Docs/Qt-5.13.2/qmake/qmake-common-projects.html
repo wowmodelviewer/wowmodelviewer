@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmake-manual.qdoc -->
+  <title>Building Common Project Types | qmake Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qmake-manual.html">qmake Manual</a></td><td >Building Common Project Types</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qmake-manual.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="qmake-project-files.html" />
+  <link rel="next" href="qmake-running.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="qmake-project-files.html">Creating Project Files</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qmake-running.html">Running qmake</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#building-an-application">Building an Application</a></li>
+<li class="level1"><a href="#building-a-testcase">Building a Testcase</a></li>
+<li class="level1"><a href="#building-a-library">Building a Library</a></li>
+<li class="level1"><a href="#building-a-plugin">Building a Plugin</a></li>
+<li class="level2"><a href="#building-a-qt-designer-plugin">Building a Qt Designer Plugin</a></li>
+<li class="level1"><a href="#building-and-installing-in-debug-and-release-modes">Building and Installing in Debug and Release Modes</a></li>
+<li class="level2"><a href="#building-in-both-modes">Building in Both Modes</a></li>
+<li class="level2"><a href="#installing-in-both-modes">Installing in Both Modes</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Building Common Project Types</h1>
+<span class="subtitle"></span>
+<!-- $$$qmake-common-projects.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>This chapter describes how to set up qmake project files for three common project types that are based on Qt: application, library, and plugin. Although all project types use many of the same variables, each of them uses project-specific variables to customize output files.</p>
+<p>Platform-specific variables are not described here. For more information, see <a href="../qtdoc/windows-deployment.html">Qt for Windows - Deployment</a> and <a href="../qtdoc/macos.html">Qt for macOS</a>.</p>
+<a name="application"></a><a name="building-an-application"></a>
+<h2 id="building-an-application">Building an Application</h2>
+<p>The <code>app</code> template tells qmake to generate a Makefile that will build an application. With this template, the type of application can be specified by adding one of the following options to the <a href="qmake-variable-reference.html#config">CONFIG</a> variable definition:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Option</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >windows</td><td >The application is a Windows GUI application.</td></tr>
+<tr valign="top" class="even"><td >console</td><td ><code>app</code> template only: the application is a Windows console application.</td></tr>
+<tr valign="top" class="odd"><td >testcase</td><td >The application is <a href="qmake-common-projects.html#building-a-testcase">an automated test</a>.</td></tr>
+</table></div>
+<p>When using this template, the following qmake system variables are recognized. You should use these in your .pro file to specify information about your application. For additional platform-dependent system variables, you could have a look at the <a href="qmake-platform-notes.html">Platform Notes</a>.</p>
+<ul>
+<li><a href="qmake-variable-reference.html#headers">HEADERS</a> - A list of header files for the application.</li>
+<li><a href="qmake-variable-reference.html#sources">SOURCES</a> - A list of C++ source files for the application.</li>
+<li><a href="qmake-variable-reference.html#forms">FORMS</a> - A list of UI files for the application (created using Qt Designer).</li>
+<li><a href="qmake-variable-reference.html#lexsources">LEXSOURCES</a> - A list of Lex source files for the application.</li>
+<li><a href="qmake-variable-reference.html#yaccsources">YACCSOURCES</a> - A list of Yacc source files for the application.</li>
+<li><a href="qmake-variable-reference.html#target">TARGET</a> - Name of the executable for the application. This defaults to the name of the project file. (The extension, if any, is added automatically).</li>
+<li><a href="qmake-variable-reference.html#destdir">DESTDIR</a> - The directory in which the target executable is placed.</li>
+<li><a href="qmake-variable-reference.html#defines">DEFINES</a> - A list of any additional pre-processor defines needed for the application.</li>
+<li><a href="qmake-variable-reference.html#includepath">INCLUDEPATH</a> - A list of any additional include paths needed for the application.</li>
+<li><a href="qmake-variable-reference.html#dependpath">DEPENDPATH</a> - The dependency search path for the application.</li>
+<li><a href="qmake-variable-reference.html#vpath">VPATH</a> - The search path to find supplied files.</li>
+<li><a href="qmake-variable-reference.html#def-file">DEF_FILE</a> - Windows only: A .def file to be linked against for the application.</li>
+</ul>
+<p>You only need to use the system variables that you have values for. For example, if you do not have any extra INCLUDEPATHs then you do not need to specify any. qmake will add the necessary default values. An example project file might look like this:</p>
+<pre class="cpp">
+
+  TEMPLATE = app
+  DESTDIR  = c:/helloapp
+  HEADERS += hello.h
+  SOURCES += hello.cpp
+  SOURCES += main.cpp
+  DEFINES += USE_MY_STUFF
+  CONFIG  += release
+
+</pre>
+<p>For items that are single valued, such as the template or the destination directory, we use &quot;=&quot;; but for multi-valued items we use &quot;+=&quot; to <i>add</i> to the existing items of that type. Using &quot;=&quot; replaces the variable value with the new value. For example, if we write <code>DEFINES=USE_MY_STUFF</code>, all other definitions are deleted.</p>
+<a name="building-a-testcase"></a>
+<h2 id="building-a-testcase">Building a Testcase</h2>
+<p>A testcase project is an <code>app</code> project intended to be run as an automated test. Any <code>app</code> may be marked as a testcase by adding the value <code>testcase</code> to the <code>CONFIG</code> variable.</p>
+<p>For testcase projects, qmake will insert a <code>check</code> target into the generated Makefile. This target will run the application. The test is considered to pass if it terminates with an exit code equal to zero.</p>
+<p>The <code>check</code> target automatically recurses through <a href="qmake-variable-reference.html#subdirs">SUBDIRS</a> projects. This means it is possible to issue a <code>make check</code> command from within a SUBDIRS project to run an entire test suite.</p>
+<p>The execution of the <code>check</code> target may be customized by certain Makefile variables. These variables are:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Variable</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >TESTRUNNER</td><td >A command or shell fragment prepended to each test command. An example use-case is a &quot;timeout&quot; script which will terminate a test if it does not complete within a specified time.</td></tr>
+<tr valign="top" class="even"><td >TESTARGS</td><td >Additional arguments appended to each test command. For example, it may be useful to pass additional arguments to set the output file and format from the test (such as the <code>-o filename,format</code> option supported by <a href="../qttestlib/qtest-overview.html">QTestLib</a>).</td></tr>
+</table></div>
+<p><b>Note: </b>The variables must be set while invoking the <code>make</code> tool, not in the .pro file. Most <code>make</code> tools support the setting of Makefile variables directly on the command-line:</p><pre class="cpp">
+
+  <span class="preprocessor"># Run tests through test-wrapper and use xunitxml output format.</span>
+  <span class="preprocessor"># In this example, test-wrapper is a fictional wrapper script which terminates</span>
+  <span class="preprocessor"># a test if it does not complete within the amount of seconds set by &quot;--timeout&quot;.</span>
+  <span class="preprocessor"># The &quot;-o result.xml,xunitxml&quot; options are interpreted by QTestLib.</span>
+  make check TESTRUNNER<span class="operator">=</span><span class="string">&quot;test-wrapper --timeout 120&quot;</span> TESTARGS<span class="operator">=</span><span class="string">&quot;-o result.xml,xunitxml&quot;</span>
+
+</pre>
+<p>Testcase projects may be further customized with the following <code>CONFIG</code> options:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Option</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >insignificant_test</td><td >The exit code of the test will be ignored during <code>make check</code>.</td></tr>
+</table></div>
+<p>Testcases will often be written with <a href="../qttestlib/qtest.html">QTest</a> or <a href="testcase-qmlmodule.html">TestCase</a>, but that is not a requirement to make use of <code>CONFIG+=testcase</code> and <code>make check</code>. The only primary requirement is that the test program exit with a zero exit code on success, and a non-zero exit code on failure.</p>
+<a name="library"></a><a name="building-a-library"></a>
+<h2 id="building-a-library">Building a Library</h2>
+<p>The <code>lib</code> template tells qmake to generate a Makefile that will build a library. When using this template, the <a href="qmake-variable-reference.html#version">VERSION</a> variable is supported, in addition to the system variables that the <code>app</code> template supports. Use the variables in your .pro file to specify information about the library.</p>
+<p>When using the <code>lib</code> template, the following options can be added to the <a href="qmake-variable-reference.html#config">CONFIG</a> variable to determine the type of library that is built:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Option</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >dll</td><td >The library is a shared library (dll).</td></tr>
+<tr valign="top" class="even"><td >staticlib</td><td >The library is a static library.</td></tr>
+<tr valign="top" class="odd"><td >plugin</td><td >The library is a plugin.</td></tr>
+</table></div>
+<p>The following option can also be defined to provide additional information about the library.</p>
+<ul>
+<li>VERSION - The version number of the target library. For example, 2.3&#x2e;1&#x2e;</li>
+</ul>
+<p>The target file name for the library is platform-dependent. For example, on X11, <a href="../qtdoc/internationalization.html#macos">macOS</a>, and iOS, the library name will be prefixed by <code>lib</code>. On Windows, no prefix is added to the file name.</p>
+<a name="plugin"></a><a name="building-a-plugin"></a>
+<h2 id="building-a-plugin">Building a Plugin</h2>
+<p>Plugins are built using the <code>lib</code> template, as described in the previous section. This tells qmake to generate a Makefile for the project that will build a plugin in a suitable form for each platform, usually in the form of a library. As with ordinary libraries, the <a href="qmake-variable-reference.html#version">VERSION</a> variable is used to specify information about the plugin.</p>
+<ul>
+<li>VERSION - The version number of the target library. For example, 2.3&#x2e;1&#x2e;</li>
+</ul>
+<a name="building-a-qt-designer-plugin"></a>
+<h3 id="building-a-qt-designer-plugin">Building a Qt Designer Plugin</h3>
+<p><i>Qt Designer</i> plugins are built using a specific set of configuration settings that depend on the way Qt was configured for your system. For convenience, these settings can be enabled by adding <code>designer</code> to the <a href="qmake-variable-reference.html#qt">QT</a> variable. For example:</p>
+<pre class="cpp">
+
+  QT          <span class="operator">+</span><span class="operator">=</span> widgets designer
+
+</pre>
+<p>See the <a href="../qtdesigner/examples-designer.html">Qt Designer Examples</a> for more examples of plugin-based projects.</p>
+<a name="building-and-installing-in-debug-and-release-modes"></a>
+<h2 id="building-and-installing-in-debug-and-release-modes">Building and Installing in Debug and Release Modes</h2>
+<p>Sometimes, it is necessary to build a project in both debug and release modes. Although the <a href="qmake-variable-reference.html#config">CONFIG</a> variable can hold both <code>debug</code> and <code>release</code> options, only the option that is specified last is applied.</p>
+<a name="building-in-both-modes"></a>
+<h3 id="building-in-both-modes">Building in Both Modes</h3>
+<p>To enable a project to be built in both modes, you must add the <code>debug_and_release</code> option to the <code>CONFIG</code> variable:</p>
+<pre class="cpp">
+
+  CONFIG += debug_and_release
+
+  CONFIG(debug, debug|release) {
+      TARGET = debug_binary
+  } else {
+      TARGET = release_binary
+  }
+
+</pre>
+<p>The scope in the above snippet modifies the build target in each mode to ensure that the resulting targets have different names. Providing different names for targets ensures that one will not overwrite the other.</p>
+<p>When qmake processes the project file, it will generate a Makefile rule to allow the project to be built in both modes. This can be invoked in the following way:</p>
+<pre class="cpp">
+
+  make all
+
+</pre>
+<p>The <code>build_all</code> option can be added to the <code>CONFIG</code> variable in the project file to ensure that the project is built in both modes by default:</p>
+<pre class="cpp">
+
+  CONFIG += build_all
+
+</pre>
+<p>This allows the Makefile to be processed using the default rule:</p>
+<pre class="cpp">
+
+  make
+
+</pre>
+<a name="installing-in-both-modes"></a>
+<h3 id="installing-in-both-modes">Installing in Both Modes</h3>
+<p>The <code>build_all</code> option also ensures that both versions of the target will be installed when the installation rule is invoked:</p>
+<pre class="cpp">
+
+  make install
+
+</pre>
+<p>It is possible to customize the names of the build targets depending on the target platform. For example, a library or plugin may be named using a different convention on Windows from the one used on Unix platforms:</p>
+<pre class="cpp">
+
+  CONFIG(debug, debug|release) {
+      mac: TARGET = $$join(TARGET,,,_debug)
+      win32: TARGET = $$join(TARGET,,d)
+  }
+
+</pre>
+<p>The default behavior in the above snippet is to modify the name used for the build target when building in debug mode. An <code>else</code> clause could be added to the scope to do the same for release mode. Left as it is, the target name remains unmodified.</p>
+</div>
+<!-- @@@qmake-common-projects.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="qmake-project-files.html">Creating Project Files</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qmake-running.html">Running qmake</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

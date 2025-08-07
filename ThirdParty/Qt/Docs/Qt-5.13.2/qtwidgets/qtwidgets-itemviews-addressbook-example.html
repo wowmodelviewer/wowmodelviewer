@@ -1,0 +1,799 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- addressbook.qdoc -->
+  <title>Address Book Example | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Address Book Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#overview">Overview</a></li>
+<li class="level1"><a href="#tablemodel-class-definition">TableModel Class Definition</a></li>
+<li class="level1"><a href="#tablemodel-class-implementation">TableModel Class Implementation</a></li>
+<li class="level1"><a href="#addresswidget-class-definition">AddressWidget Class Definition</a></li>
+<li class="level1"><a href="#addresswidget-class-implementation">AddressWidget Class Implementation</a></li>
+<li class="level1"><a href="#newaddresstab-class-definition">NewAddressTab Class Definition</a></li>
+<li class="level1"><a href="#newaddresstab-class-implementation">NewAddressTab Class Implementation</a></li>
+<li class="level1"><a href="#adddialog-class-definition">AddDialog Class Definition</a></li>
+<li class="level1"><a href="#adddialog-class-implementation">AddDialog Class Implementation</a></li>
+<li class="level1"><a href="#mainwindow-class-definition">MainWindow Class Definition</a></li>
+<li class="level1"><a href="#mainwindow-class-implementation">MainWindow Class Implementation</a></li>
+<li class="level1"><a href="#main-function">main() Function</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Address Book Example</h1>
+<span class="subtitle"></span>
+<!-- $$$itemviews/addressbook-brief -->
+<p>The address book example shows how to use proxy models to display different views onto data from a single model.</p>
+<!-- @@@itemviews/addressbook -->
+<!-- $$$itemviews/addressbook-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/addressbook-example.png" alt="Screenshot of the Address Book example" /></p><p>This example provides an address book that allows contacts to be grouped alphabetically into 9 groups: ABC, DEF, GHI, ..&#x2e; , VW, ..&#x2e;, XYZ. This is achieved by using multiple views on the same model, each of which is filtered using an instance of the <a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a> class.</p>
+<a name="overview"></a>
+<h4 id="overview">Overview</h4>
+<p>The address book contains 5 classes: <code>MainWindow</code>, <code>AddressWidget</code>, <code>TableModel</code>, <code>NewAddressTab</code> and <code>AddDialog</code>. The <code>MainWindow</code> class uses <code>AddressWidget</code> as its central widget and provides <b>File</b> and <b>Tools</b> menus.</p>
+<p class="centerAlign"><img src="images/addressbook-classes.png" alt="Diagram for Address Book Example" /></p><p>The <code>AddressWidget</code> class is a <a href="qtabwidget.html">QTabWidget</a> subclass that is used to manipulate the 10 tabs displayed in the example: the 9 alphabet group tabs and an instance of <code>NewAddressTab</code>. The <code>NewAddressTab</code> class is a subclass of <a href="qwidget.html">QWidget</a> that is only used whenever the address book is empty, prompting the user to add some contacts. <code>AddressWidget</code> also interacts with an instance of <code>TableModel</code> to add, edit and remove entries to the address book.</p>
+<p><code>TableModel</code> is a subclass of <a href="../qtcore/qabstracttablemodel.html">QAbstractTableModel</a> that provides the standard model/view API to access data. It holds a list of added contacts. However, this data is not all visible in a single tab. Instead, <a href="qtableview.html">QTableView</a> is used to provide 9 different views of the same data, according to the alphabet groups.</p>
+<p><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a> is the class responsible for filtering the contacts for each group of contacts. Each proxy model uses a <a href="../qtcore/qregexp.html">QRegExp</a> to filter out contacts that do not belong in the corresponding alphabetical group. The <code>AddDialog</code> class is used to obtain information from the user for the address book. This <a href="qdialog.html">QDialog</a> subclass is instantiated by <code>NewAddressTab</code> to add contacts, and by <code>AddressWidget</code> to add and edit contacts.</p>
+<p>We begin by looking at the <code>TableModel</code> implementation.</p>
+<a name="tablemodel-class-definition"></a>
+<h4 id="tablemodel-class-definition">TableModel Class Definition</h4>
+<p>The <code>TableModel</code> class provides standard API to access data in its list of contacts by subclassing <a href="../qtcore/qabstracttablemodel.html">QAbstractTableModel</a>. The basic functions that must be implemented in order to do so are: <code>rowCount()</code>, <code>columnCount()</code>, <code>data()</code>, <code>headerData()</code>. For TableModel to be editable, it has to provide implementations <code>insertRows()</code>, <code>removeRows()</code>, <code>setData()</code> and <code>flags()</code> functions.</p>
+<pre class="cpp">
+
+  <span class="keyword">struct</span> Contact
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> name;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> address;
+
+      bool <span class="keyword">operator</span><span class="operator">=</span><span class="operator">=</span>(<span class="keyword">const</span> Contact <span class="operator">&amp;</span>other) <span class="keyword">const</span>
+      {
+          <span class="keyword">return</span> name <span class="operator">=</span><span class="operator">=</span> other<span class="operator">.</span>name <span class="operator">&amp;</span><span class="operator">&amp;</span> address <span class="operator">=</span><span class="operator">=</span> other<span class="operator">.</span>address;
+      }
+  };
+
+  <span class="keyword">inline</span> <span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> <span class="operator">&amp;</span><span class="keyword">operator</span><span class="operator">&lt;</span><span class="operator">&lt;</span>(<span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> <span class="operator">&amp;</span>stream<span class="operator">,</span> <span class="keyword">const</span> Contact <span class="operator">&amp;</span>contact)
+  {
+      <span class="keyword">return</span> stream <span class="operator">&lt;</span><span class="operator">&lt;</span> contact<span class="operator">.</span>name <span class="operator">&lt;</span><span class="operator">&lt;</span> contact<span class="operator">.</span>address;
+  }
+
+  <span class="keyword">inline</span> <span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> <span class="operator">&amp;</span><span class="keyword">operator</span><span class="operator">&gt;</span><span class="operator">&gt;</span>(<span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> <span class="operator">&amp;</span>stream<span class="operator">,</span> Contact <span class="operator">&amp;</span>contact)
+  {
+      <span class="keyword">return</span> stream <span class="operator">&gt;</span><span class="operator">&gt;</span> contact<span class="operator">.</span>name <span class="operator">&gt;</span><span class="operator">&gt;</span> contact<span class="operator">.</span>address;
+  }
+
+  <span class="keyword">class</span> TableModel : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qabstracttablemodel.html">QAbstractTableModel</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      TableModel(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+      TableModel(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span>Contact<span class="operator">&gt;</span> <span class="operator">&amp;</span>contacts<span class="operator">,</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+
+      <span class="type">int</span> rowCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span> override;
+      <span class="type">int</span> columnCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> data(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> headerData(<span class="type">int</span> section<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Orientation orientation<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemFlags flags(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span> override;
+      bool setData(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> <span class="operator">&amp;</span>value<span class="operator">,</span> <span class="type">int</span> role <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole) override;
+      bool insertRows(<span class="type">int</span> position<span class="operator">,</span> <span class="type">int</span> rows<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index <span class="operator">=</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()) override;
+      bool removeRows(<span class="type">int</span> position<span class="operator">,</span> <span class="type">int</span> rows<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index <span class="operator">=</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()) override;
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span>Contact<span class="operator">&gt;</span> <span class="operator">&amp;</span>getContacts() <span class="keyword">const</span>;
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span>Contact<span class="operator">&gt;</span> contacts;
+  };
+
+</pre>
+<p>Two constructors are used, a default constructor which uses <code>TableModel</code>'s own <code>QVector&lt;Contact&gt;</code> and one that takes <code>QVector&lt;Contact&gt;</code> as an argument, for convenience.</p>
+<a name="tablemodel-class-implementation"></a>
+<h4 id="tablemodel-class-implementation">TableModel Class Implementation</h4>
+<p>We implement the two constructors as defined in the header file. The second constructor initializes the list of contacts in the model, with the parameter value.</p>
+<pre class="cpp">
+
+  TableModel<span class="operator">::</span>TableModel(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtcore/qabstracttablemodel.html">QAbstractTableModel</a></span>(parent)
+  {
+  }
+
+  TableModel<span class="operator">::</span>TableModel(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span>Contact<span class="operator">&gt;</span> <span class="operator">&amp;</span>contacts<span class="operator">,</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtcore/qabstracttablemodel.html">QAbstractTableModel</a></span>(parent)<span class="operator">,</span>
+        contacts(contacts)
+  {
+  }
+
+</pre>
+<p>The <code>rowCount()</code> and <code>columnCount()</code> functions return the dimensions of the model. Whereas, <code>rowCount()</code>'s value will vary depending on the number of contacts added to the address book, <code>columnCount()</code>'s value is always 2 because we only need space for the <b>Name</b> and <b>Address</b> columns.</p>
+<pre class="cpp">
+
+  <span class="type">int</span> TableModel<span class="operator">::</span>rowCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> parent<span class="operator">.</span>isValid() <span class="operator">?</span> <span class="number">0</span> : contacts<span class="operator">.</span>size();
+  }
+
+  <span class="type">int</span> TableModel<span class="operator">::</span>columnCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> parent<span class="operator">.</span>isValid() <span class="operator">?</span> <span class="number">0</span> : <span class="number">2</span>;
+  }
+
+</pre>
+<p>The <code>data()</code> function returns either a <b>Name</b> or <b>Address</b>, based on the contents of the model index supplied. The row number stored in the model index is used to reference an item in the list of contacts. Selection is handled by the <a href="../qtcore/qitemselectionmodel.html">QItemSelectionModel</a>, which will be explained with <code>AddressWidget</code>.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> TableModel<span class="operator">::</span>data(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+
+      <span class="keyword">if</span> (index<span class="operator">.</span>row() <span class="operator">&gt;</span><span class="operator">=</span> contacts<span class="operator">.</span>size() <span class="operator">|</span><span class="operator">|</span> index<span class="operator">.</span>row() <span class="operator">&lt;</span> <span class="number">0</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+
+      <span class="keyword">if</span> (role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole) {
+          <span class="keyword">const</span> <span class="keyword">auto</span> <span class="operator">&amp;</span>contact <span class="operator">=</span> contacts<span class="operator">.</span>at(index<span class="operator">.</span>row());
+
+          <span class="keyword">switch</span> (index<span class="operator">.</span>column()) {
+              <span class="keyword">case</span> <span class="number">0</span>:
+                  <span class="keyword">return</span> contact<span class="operator">.</span>name;
+              <span class="keyword">case</span> <span class="number">1</span>:
+                  <span class="keyword">return</span> contact<span class="operator">.</span>address;
+              <span class="keyword">default</span>:
+                  <span class="keyword">break</span>;
+          }
+      }
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+  }
+
+</pre>
+<p>The <code>headerData()</code> function displays the table's header, <b>Name</b> and <b>Address</b>. If you require numbered entries for your address book, you can use a vertical header which we have hidden in this example (see the <code>AddressWidget</code> implementation).</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> TableModel<span class="operator">::</span>headerData(<span class="type">int</span> section<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Orientation orientation<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (role <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+
+      <span class="keyword">if</span> (orientation <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal) {
+          <span class="keyword">switch</span> (section) {
+              <span class="keyword">case</span> <span class="number">0</span>:
+                  <span class="keyword">return</span> tr(<span class="string">&quot;Name&quot;</span>);
+              <span class="keyword">case</span> <span class="number">1</span>:
+                  <span class="keyword">return</span> tr(<span class="string">&quot;Address&quot;</span>);
+              <span class="keyword">default</span>:
+                  <span class="keyword">break</span>;
+          }
+      }
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+  }
+
+</pre>
+<p>The <code>insertRows()</code> function is called before new data is added, otherwise the data will not be displayed. The <code>beginInsertRows()</code> and <code>endInsertRows()</code> functions are called to ensure all connected views are aware of the changes.</p>
+<pre class="cpp">
+
+  bool TableModel<span class="operator">::</span>insertRows(<span class="type">int</span> position<span class="operator">,</span> <span class="type">int</span> rows<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index)
+  {
+      Q_UNUSED(index);
+      beginInsertRows(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()<span class="operator">,</span> position<span class="operator">,</span> position <span class="operator">+</span> rows <span class="operator">-</span> <span class="number">1</span>);
+
+      <span class="keyword">for</span> (<span class="type">int</span> row <span class="operator">=</span> <span class="number">0</span>; row <span class="operator">&lt;</span> rows; <span class="operator">+</span><span class="operator">+</span>row)
+          contacts<span class="operator">.</span>insert(position<span class="operator">,</span> { <span class="type"><a href="../qtcore/qstring.html">QString</a></span>()<span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>() });
+
+      endInsertRows();
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+</pre>
+<p>The <code>removeRows()</code> function is called to remove data. Again, <a href="../qtcore/qabstractitemmodel.html#beginRemoveRows">beginRemoveRows()</a> and <a href="../qtcore/qabstractitemmodel.html#endRemoveRows">endRemoveRows()</a> are called to ensure all connected views are aware of the changes.</p>
+<pre class="cpp">
+
+  bool TableModel<span class="operator">::</span>removeRows(<span class="type">int</span> position<span class="operator">,</span> <span class="type">int</span> rows<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index)
+  {
+      Q_UNUSED(index);
+      beginRemoveRows(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()<span class="operator">,</span> position<span class="operator">,</span> position <span class="operator">+</span> rows <span class="operator">-</span> <span class="number">1</span>);
+
+      <span class="keyword">for</span> (<span class="type">int</span> row <span class="operator">=</span> <span class="number">0</span>; row <span class="operator">&lt;</span> rows; <span class="operator">+</span><span class="operator">+</span>row)
+          contacts<span class="operator">.</span>removeAt(position);
+
+      endRemoveRows();
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+</pre>
+<p>The <code>setData()</code> function is the function that inserts data into the table, item by item and not row by row. This means that to fill a row in the address book, <code>setData()</code> must be called twice, as each row has 2 columns. It is important to emit the <a href="../qtcore/qabstractitemmodel.html#dataChanged">dataChanged()</a> signal as it tells all connected views to update their displays.</p>
+<pre class="cpp">
+
+  bool TableModel<span class="operator">::</span>setData(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> <span class="operator">&amp;</span>value<span class="operator">,</span> <span class="type">int</span> role)
+  {
+      <span class="keyword">if</span> (index<span class="operator">.</span>isValid() <span class="operator">&amp;</span><span class="operator">&amp;</span> role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole) {
+          <span class="keyword">const</span> <span class="type">int</span> row <span class="operator">=</span> index<span class="operator">.</span>row();
+          <span class="keyword">auto</span> contact <span class="operator">=</span> contacts<span class="operator">.</span>value(row);
+
+          <span class="keyword">switch</span> (index<span class="operator">.</span>column()) {
+              <span class="keyword">case</span> <span class="number">0</span>:
+                  contact<span class="operator">.</span>name <span class="operator">=</span> value<span class="operator">.</span>toString();
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="number">1</span>:
+                  contact<span class="operator">.</span>address <span class="operator">=</span> value<span class="operator">.</span>toString();
+                  <span class="keyword">break</span>;
+              <span class="keyword">default</span>:
+                  <span class="keyword">return</span> <span class="keyword">false</span>;
+          }
+          contacts<span class="operator">.</span>replace(row<span class="operator">,</span> contact);
+          <span class="keyword">emit</span> dataChanged(index<span class="operator">,</span> index<span class="operator">,</span> {<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole});
+
+          <span class="keyword">return</span> <span class="keyword">true</span>;
+      }
+
+      <span class="keyword">return</span> <span class="keyword">false</span>;
+  }
+
+</pre>
+<p>The <code>flags()</code> function returns the item flags for the given index.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemFlags TableModel<span class="operator">::</span>flags(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemIsEnabled;
+
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qabstracttablemodel.html">QAbstractTableModel</a></span><span class="operator">::</span>flags(index) <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemIsEditable;
+  }
+
+</pre>
+<p>We set the <a href="../qtcore/qt.html#ItemFlag-enum">Qt::ItemIsEditable</a> flag because we want to allow the <code>TableModel</code> to be edited. Although for this example we don't use the editing features of the <a href="qtableview.html">QTableView</a> object, we enable them here so that we can reuse the model in other programs.</p>
+<p>The last function in <code>TableModel</code>, <code>getContacts()</code> returns the <a href="../qtcore/qvector.html">QVector</a>&lt;Contact&gt; object that holds all the contacts in the address book. We use this function later to obtain the list of contacts to check for existing entries, write the contacts to a file and read them back. Further explanation is given with <code>AddressWidget</code>.</p>
+<pre class="cpp">
+
+  <span class="keyword">const</span> <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span>Contact<span class="operator">&gt;</span> <span class="operator">&amp;</span>TableModel<span class="operator">::</span>getContacts() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> contacts;
+  }
+
+</pre>
+<a name="addresswidget-class-definition"></a>
+<h4 id="addresswidget-class-definition">AddressWidget Class Definition</h4>
+<p>The <code>AddressWidget</code> class is technically the main class involved in this example as it provides functions to add, edit and remove contacts, to save the contacts to a file and to load them from a file.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> AddressWidget : <span class="keyword">public</span> <span class="type"><a href="qtabwidget.html">QTabWidget</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      AddressWidget(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+      <span class="type">void</span> readFromFile(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName);
+      <span class="type">void</span> writeToFile(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName);
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> showAddEntryDialog();
+      <span class="type">void</span> addEntry(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>name<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>address);
+      <span class="type">void</span> editEntry();
+      <span class="type">void</span> removeEntry();
+
+  <span class="keyword">signals</span>:
+      <span class="type">void</span> selectionChanged (<span class="keyword">const</span> <span class="type"><a href="../qtcore/qitemselection.html">QItemSelection</a></span> <span class="operator">&amp;</span>selected);
+
+  <span class="keyword">private</span>:
+      <span class="type">void</span> setupTabs();
+
+      TableModel <span class="operator">*</span>table;
+      NewAddressTab <span class="operator">*</span>newAddressTab;
+  };
+
+</pre>
+<p><code>AddressWidget</code> extends <a href="qtabwidget.html">QTabWidget</a> in order to hold 10 tabs (<code>NewAddressTab</code> and the 9 alphabet group tabs) and also manipulates <code>table</code>, the <code>TableModel</code> object, <code>proxyModel</code>, the <a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a> object that we use to filter the entries, and <code>tableView</code>, the <a href="qtableview.html">QTableView</a> object.</p>
+<a name="addresswidget-class-implementation"></a>
+<h4 id="addresswidget-class-implementation">AddressWidget Class Implementation</h4>
+<p>The <code>AddressWidget</code> constructor accepts a parent widget and instantiates <code>NewAddressTab</code>, <code>TableModel</code> and <a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a>. The <code>NewAddressTab</code> object, which is used to indicate that the address book is empty, is added and the rest of the 9 tabs are set up with <code>setupTabs()</code>.</p>
+<pre class="cpp">
+
+  AddressWidget<span class="operator">::</span>AddressWidget(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qtabwidget.html">QTabWidget</a></span>(parent)<span class="operator">,</span>
+        table(<span class="keyword">new</span> TableModel(<span class="keyword">this</span>))<span class="operator">,</span>
+        newAddressTab(<span class="keyword">new</span> NewAddressTab(<span class="keyword">this</span>))
+  {
+      connect(newAddressTab<span class="operator">,</span> <span class="operator">&amp;</span>NewAddressTab<span class="operator">::</span>sendDetails<span class="operator">,</span>
+          <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>AddressWidget<span class="operator">::</span>addEntry);
+
+      addTab(newAddressTab<span class="operator">,</span> tr(<span class="string">&quot;Address Book&quot;</span>));
+
+      setupTabs();
+  }
+
+</pre>
+<p>The <code>setupTabs()</code> function is used to set up the 9 alphabet group tabs, table views and proxy models in <code>AddressWidget</code>. Each proxy model in turn is set to filter contact names according to the relevant alphabet group using a <a href="../qtcore/qt.html#CaseSensitivity-enum">case-insensitive</a> <a href="../qtcore/qregexp.html">QRegExp</a> object. The table views are also sorted in ascending order using the corresponding proxy model's <a href="../qtcore/qsortfilterproxymodel.html#sort">sort()</a> function.</p>
+<p>Each table view's <a href="qabstractitemview.html#selectionMode-prop">selectionMode</a> is set to <a href="qabstractitemview.html#SelectionMode-enum">QAbstractItemView::SingleSelection</a> and <a href="qabstractitemview.html#selectionBehavior-prop">selectionBehavior</a> is set to <a href="qabstractitemview.html#SelectionBehavior-enum">QAbstractItemView::SelectRows</a>, allowing the user to select all the items in one row at the same time. Each <a href="qtableview.html">QTableView</a> object is automatically given a <a href="../qtcore/qitemselectionmodel.html">QItemSelectionModel</a> that keeps track of the selected indexes.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> AddressWidget<span class="operator">::</span>setupTabs()
+  {
+      <span class="keyword">const</span> <span class="keyword">auto</span> groups <span class="operator">=</span> { <span class="string">&quot;ABC&quot;</span><span class="operator">,</span> <span class="string">&quot;DEF&quot;</span><span class="operator">,</span> <span class="string">&quot;GHI&quot;</span><span class="operator">,</span> <span class="string">&quot;JKL&quot;</span><span class="operator">,</span> <span class="string">&quot;MNO&quot;</span><span class="operator">,</span> <span class="string">&quot;PQR&quot;</span><span class="operator">,</span> <span class="string">&quot;STU&quot;</span><span class="operator">,</span> <span class="string">&quot;VW&quot;</span><span class="operator">,</span> <span class="string">&quot;XYZ&quot;</span> };
+
+      <span class="keyword">for</span> (<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>str : groups) {
+          <span class="keyword">const</span> <span class="keyword">auto</span> regExp <span class="operator">=</span> <span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span>(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;^[%1].*&quot;</span>)<span class="operator">.</span>arg(str)<span class="operator">,</span>
+                                                 <span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>CaseInsensitiveOption);
+
+          <span class="keyword">auto</span> proxyModel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a></span>(<span class="keyword">this</span>);
+          proxyModel<span class="operator">-</span><span class="operator">&gt;</span>setSourceModel(table);
+          proxyModel<span class="operator">-</span><span class="operator">&gt;</span>setFilterRegularExpression(regExp);
+          proxyModel<span class="operator">-</span><span class="operator">&gt;</span>setFilterKeyColumn(<span class="number">0</span>);
+
+          <span class="type"><a href="qtableview.html">QTableView</a></span> <span class="operator">*</span>tableView <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtableview.html">QTableView</a></span>;
+          tableView<span class="operator">-</span><span class="operator">&gt;</span>setModel(proxyModel);
+          tableView<span class="operator">-</span><span class="operator">&gt;</span>setSelectionBehavior(<span class="type"><a href="qabstractitemview.html">QAbstractItemView</a></span><span class="operator">::</span>SelectRows);
+          tableView<span class="operator">-</span><span class="operator">&gt;</span>horizontalHeader()<span class="operator">-</span><span class="operator">&gt;</span>setStretchLastSection(<span class="keyword">true</span>);
+          tableView<span class="operator">-</span><span class="operator">&gt;</span>verticalHeader()<span class="operator">-</span><span class="operator">&gt;</span>hide();
+          tableView<span class="operator">-</span><span class="operator">&gt;</span>setEditTriggers(<span class="type"><a href="qabstractitemview.html">QAbstractItemView</a></span><span class="operator">::</span>NoEditTriggers);
+          tableView<span class="operator">-</span><span class="operator">&gt;</span>setSelectionMode(<span class="type"><a href="qabstractitemview.html">QAbstractItemView</a></span><span class="operator">::</span>SingleSelection);
+          tableView<span class="operator">-</span><span class="operator">&gt;</span>setSortingEnabled(<span class="keyword">true</span>);
+
+          connect(tableView<span class="operator">-</span><span class="operator">&gt;</span>selectionModel()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtcore/qitemselectionmodel.html">QItemSelectionModel</a></span><span class="operator">::</span>selectionChanged<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>AddressWidget<span class="operator">::</span>selectionChanged);
+
+          connect(<span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qtabwidget.html">QTabWidget</a></span><span class="operator">::</span>currentChanged<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">[</span><span class="keyword">this</span><span class="operator">,</span> tableView<span class="operator">]</span>(<span class="type">int</span> tabIndex) {
+              <span class="keyword">if</span> (widget(tabIndex) <span class="operator">=</span><span class="operator">=</span> tableView)
+                  <span class="keyword">emit</span> selectionChanged(tableView<span class="operator">-</span><span class="operator">&gt;</span>selectionModel()<span class="operator">-</span><span class="operator">&gt;</span>selection());
+          });
+
+          addTab(tableView<span class="operator">,</span> str);
+      }
+  }
+
+</pre>
+<p>The <a href="../qtcore/qitemselectionmodel.html">QItemSelectionModel</a> class provides a <a href="../qtcore/qitemselectionmodel.html#selectionChanged">selectionChanged</a> signal that is connected to <code>AddressWidget</code>'s <code>selectionChanged()</code> signal. We also connect <a href="qtabwidget.html#currentChanged">QTabWidget::currentChanged</a>() signal to the lambda expression which emits <code>AddressWidget</code>'s <code>selectionChanged()</code> as well. These connections are necessary to enable the <b>Edit Entry..&#x2e;</b> and <b>Remove Entry</b> actions in <code>MainWindow</code>'s Tools menu. It is further explained in <code>MainWindow</code>'s implementation.</p>
+<p>Each table view in the address book is added as a tab to the <a href="qtabwidget.html">QTabWidget</a> with the relevant label, obtained from the <a href="../qtcore/qstringlist.html">QStringList</a> of groups.</p>
+<p class="centerAlign"><img src="images/addressbook-signals.png" alt="Signals and Slots Connections" /></p><p>We provide two <code>addEntry()</code> functions: One which is intended to be used to accept user input, and the other which performs the actual task of adding new entries to the address book. We divide the responsibility of adding entries into two parts to allow <code>newAddressTab</code> to insert data without having to popup a dialog.</p>
+<p>The first <code>addEntry()</code> function is a slot connected to the <code>MainWindow</code>'s <b>Add Entry..&#x2e;</b> action. This function creates an <code>AddDialog</code> object and then calls the second <code>addEntry()</code> function to actually add the contact to <code>table</code>.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> AddressWidget<span class="operator">::</span>showAddEntryDialog()
+  {
+      AddDialog aDialog;
+
+      <span class="keyword">if</span> (aDialog<span class="operator">.</span>exec())
+          addEntry(aDialog<span class="operator">.</span>name()<span class="operator">,</span> aDialog<span class="operator">.</span>address());
+  }
+
+</pre>
+<p>Basic validation is done in the second <code>addEntry()</code> function to prevent duplicate entries in the address book. As mentioned with <code>TableModel</code>, this is part of the reason why we require the getter method <code>getContacts()</code>.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> AddressWidget<span class="operator">::</span>addEntry(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>name<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>address)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>table<span class="operator">-</span><span class="operator">&gt;</span>getContacts()<span class="operator">.</span>contains({ name<span class="operator">,</span> address })) {
+          table<span class="operator">-</span><span class="operator">&gt;</span>insertRows(<span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>());
+
+          <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> index <span class="operator">=</span> table<span class="operator">-</span><span class="operator">&gt;</span>index(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>());
+          table<span class="operator">-</span><span class="operator">&gt;</span>setData(index<span class="operator">,</span> name<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole);
+          index <span class="operator">=</span> table<span class="operator">-</span><span class="operator">&gt;</span>index(<span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>());
+          table<span class="operator">-</span><span class="operator">&gt;</span>setData(index<span class="operator">,</span> address<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole);
+          removeTab(indexOf(newAddressTab));
+      } <span class="keyword">else</span> {
+          <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>information(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Duplicate Name&quot;</span>)<span class="operator">,</span>
+              tr(<span class="string">&quot;The name \&quot;%1\&quot; already exists.&quot;</span>)<span class="operator">.</span>arg(name));
+      }
+  }
+
+</pre>
+<p>If the model does not already contain an entry with the same name, we call <code>setData()</code> to insert the name and address into the first and second columns. Otherwise, we display a <a href="qmessagebox.html">QMessageBox</a> to inform the user.</p>
+<p><b>Note: </b>The <code>newAddressTab</code> is removed once a contact is added as the address book is no longer empty.</p><p>Editing an entry is a way to update the contact's address only, as the example does not allow the user to change the name of an existing contact.</p>
+<p>Firstly, we obtain the active tab's <a href="qtableview.html">QTableView</a> object using <a href="qtabwidget.html#currentWidget">QTabWidget::currentWidget</a>(). Then we extract the <code>selectionModel</code> from the <code>tableView</code> to obtain the selected indexes.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> AddressWidget<span class="operator">::</span>editEntry()
+  {
+      <span class="type"><a href="qtableview.html">QTableView</a></span> <span class="operator">*</span>temp <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="qtableview.html">QTableView</a></span><span class="operator">*</span><span class="operator">&gt;</span>(currentWidget());
+      <span class="type"><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a></span> <span class="operator">*</span>proxy <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a></span><span class="operator">*</span><span class="operator">&gt;</span>(temp<span class="operator">-</span><span class="operator">&gt;</span>model());
+      <span class="type"><a href="../qtcore/qitemselectionmodel.html">QItemSelectionModel</a></span> <span class="operator">*</span>selectionModel <span class="operator">=</span> temp<span class="operator">-</span><span class="operator">&gt;</span>selectionModel();
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html#QModelIndexList-typedef">QModelIndexList</a></span> indexes <span class="operator">=</span> selectionModel<span class="operator">-</span><span class="operator">&gt;</span>selectedRows();
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> name;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> address;
+      <span class="type">int</span> row <span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>;
+
+      <span class="keyword">for</span> (<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index : indexes) {
+          row <span class="operator">=</span> proxy<span class="operator">-</span><span class="operator">&gt;</span>mapToSource(index)<span class="operator">.</span>row();
+          <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> nameIndex <span class="operator">=</span> table<span class="operator">-</span><span class="operator">&gt;</span>index(row<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>());
+          <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> varName <span class="operator">=</span> table<span class="operator">-</span><span class="operator">&gt;</span>data(nameIndex<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole);
+          name <span class="operator">=</span> varName<span class="operator">.</span>toString();
+
+          <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> addressIndex <span class="operator">=</span> table<span class="operator">-</span><span class="operator">&gt;</span>index(row<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>());
+          <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> varAddr <span class="operator">=</span> table<span class="operator">-</span><span class="operator">&gt;</span>data(addressIndex<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole);
+          address <span class="operator">=</span> varAddr<span class="operator">.</span>toString();
+      }
+
+</pre>
+<p>Next we extract data from the row the user intends to edit. This data is displayed in an instance of <code>AddDialog</code> with a different window title. The <code>table</code> is only updated if changes have been made to data in <code>aDialog</code>.</p>
+<pre class="cpp">
+
+      AddDialog aDialog;
+      aDialog<span class="operator">.</span>setWindowTitle(tr(<span class="string">&quot;Edit a Contact&quot;</span>));
+      aDialog<span class="operator">.</span>editAddress(name<span class="operator">,</span> address);
+
+      <span class="keyword">if</span> (aDialog<span class="operator">.</span>exec()) {
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> newAddress <span class="operator">=</span> aDialog<span class="operator">.</span>address();
+          <span class="keyword">if</span> (newAddress <span class="operator">!</span><span class="operator">=</span> address) {
+              <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> index <span class="operator">=</span> table<span class="operator">-</span><span class="operator">&gt;</span>index(row<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>());
+              table<span class="operator">-</span><span class="operator">&gt;</span>setData(index<span class="operator">,</span> newAddress<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole);
+          }
+      }
+  }
+
+</pre>
+<p class="centerAlign"><img src="images/addressbook-editdialog.png" alt="Screenshot of Dialog to Edit a Contact" /></p><p>Entries are removed using the <code>removeEntry()</code> function. The selected row is removed by accessing it through the <a href="../qtcore/qitemselectionmodel.html">QItemSelectionModel</a> object, <code>selectionModel</code>. The <code>newAddressTab</code> is re-added to the <code>AddressWidget</code> only if the user removes all the contacts in the address book.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> AddressWidget<span class="operator">::</span>removeEntry()
+  {
+      <span class="type"><a href="qtableview.html">QTableView</a></span> <span class="operator">*</span>temp <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="qtableview.html">QTableView</a></span><span class="operator">*</span><span class="operator">&gt;</span>(currentWidget());
+      <span class="type"><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a></span> <span class="operator">*</span>proxy <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a></span><span class="operator">*</span><span class="operator">&gt;</span>(temp<span class="operator">-</span><span class="operator">&gt;</span>model());
+      <span class="type"><a href="../qtcore/qitemselectionmodel.html">QItemSelectionModel</a></span> <span class="operator">*</span>selectionModel <span class="operator">=</span> temp<span class="operator">-</span><span class="operator">&gt;</span>selectionModel();
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html#QModelIndexList-typedef">QModelIndexList</a></span> indexes <span class="operator">=</span> selectionModel<span class="operator">-</span><span class="operator">&gt;</span>selectedRows();
+
+      <span class="keyword">for</span> (<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> index : indexes) {
+          <span class="type">int</span> row <span class="operator">=</span> proxy<span class="operator">-</span><span class="operator">&gt;</span>mapToSource(index)<span class="operator">.</span>row();
+          table<span class="operator">-</span><span class="operator">&gt;</span>removeRows(row<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>());
+      }
+
+      <span class="keyword">if</span> (table<span class="operator">-</span><span class="operator">&gt;</span>rowCount(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()) <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+          insertTab(<span class="number">0</span><span class="operator">,</span> newAddressTab<span class="operator">,</span> tr(<span class="string">&quot;Address Book&quot;</span>));
+  }
+
+</pre>
+<p>The <code>writeToFile()</code> function is used to save a file containing all the contacts in the address book. The file is saved in a custom <code>.dat</code> format. The contents of the list of contacts are written to <code>file</code> using <a href="../qtcore/qdatastream.html">QDataStream</a>. If the file cannot be opened, a <a href="qmessagebox.html">QMessageBox</a> is displayed with the related error message.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> AddressWidget<span class="operator">::</span>writeToFile(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName)
+  {
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(fileName);
+
+      <span class="keyword">if</span> (<span class="operator">!</span>file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>WriteOnly)) {
+          <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>information(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Unable to open file&quot;</span>)<span class="operator">,</span> file<span class="operator">.</span>errorString());
+          <span class="keyword">return</span>;
+      }
+
+      <span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> out(<span class="operator">&amp;</span>file);
+      out <span class="operator">&lt;</span><span class="operator">&lt;</span> table<span class="operator">-</span><span class="operator">&gt;</span>getContacts();
+  }
+
+</pre>
+<p>The <code>readFromFile()</code> function loads a file containing all the contacts in the address book, previously saved using <code>writeToFile()</code>. <a href="../qtcore/qdatastream.html">QDataStream</a> is used to read the contents of a <code>.dat</code> file into a list of contacts and each of these is added using <code>addEntry()</code>.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> AddressWidget<span class="operator">::</span>readFromFile(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName)
+  {
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(fileName);
+
+      <span class="keyword">if</span> (<span class="operator">!</span>file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly)) {
+          <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>information(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Unable to open file&quot;</span>)<span class="operator">,</span>
+              file<span class="operator">.</span>errorString());
+          <span class="keyword">return</span>;
+      }
+
+      <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span>Contact<span class="operator">&gt;</span> contacts;
+      <span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> in(<span class="operator">&amp;</span>file);
+      in <span class="operator">&gt;</span><span class="operator">&gt;</span> contacts;
+
+      <span class="keyword">if</span> (contacts<span class="operator">.</span>isEmpty()) {
+          <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>information(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;No contacts in file&quot;</span>)<span class="operator">,</span>
+                                   tr(<span class="string">&quot;The file you are attempting to open contains no contacts.&quot;</span>));
+      } <span class="keyword">else</span> {
+          <span class="keyword">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span> <span class="operator">&amp;</span>contact: <a href="../qtcore/qtglobal.html#qAsConst">qAsConst</a>(contacts))
+              addEntry(contact<span class="operator">.</span>name<span class="operator">,</span> contact<span class="operator">.</span>address);
+      }
+  }
+
+</pre>
+<a name="newaddresstab-class-definition"></a>
+<h4 id="newaddresstab-class-definition">NewAddressTab Class Definition</h4>
+<p>The <code>NewAddressTab</code> class provides an informative tab telling the user that the address book is empty. It appears and disappears according to the contents of the address book, as mentioned in <code>AddressWidget</code>'s implementation.</p>
+<p class="centerAlign"><img src="images/addressbook-newaddresstab.png" alt="Screenshot of NewAddressTab" /></p><p>The <code>NewAddressTab</code> class extends <a href="qwidget.html">QWidget</a> and contains a <a href="qlabel.html">QLabel</a> and <a href="qpushbutton.html">QPushButton</a>.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> NewAddressTab : <span class="keyword">public</span> <span class="type"><a href="qwidget.html">QWidget</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      NewAddressTab(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> addEntry();
+
+  <span class="keyword">signals</span>:
+      <span class="type">void</span> sendDetails(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>name<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>address);
+  };
+
+</pre>
+<a name="newaddresstab-class-implementation"></a>
+<h4 id="newaddresstab-class-implementation">NewAddressTab Class Implementation</h4>
+<p>The constructor instantiates the <code>addButton</code>, <code>descriptionLabel</code> and connects the <code>addButton</code>'s signal to the <code>addEntry()</code> slot.</p>
+<pre class="cpp">
+
+  NewAddressTab<span class="operator">::</span>NewAddressTab(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qwidget.html">QWidget</a></span>(parent)
+  {
+      <span class="keyword">auto</span> descriptionLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;There are currently no contacts in your address book. &quot;</span>
+                                            <span class="string">&quot;\nClick Add to add new contacts.&quot;</span>));
+
+      <span class="keyword">auto</span> addButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;Add&quot;</span>));
+
+      connect(addButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qabstractbutton.html">QAbstractButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>NewAddressTab<span class="operator">::</span>addEntry);
+
+      <span class="keyword">auto</span> mainLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(descriptionLabel);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(addButton<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignCenter);
+
+      setLayout(mainLayout);
+  }
+
+</pre>
+<p>The <code>addEntry()</code> function is similar to <code>AddressWidget</code>'s <code>addEntry()</code> in the sense that both functions instantiate an <code>AddDialog</code> object. Data from the dialog is extracted and sent to <code>AddressWidget</code>'s <code>addEntry()</code> slot by emitting the <code>sendDetails()</code> signal.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> NewAddressTab<span class="operator">::</span>addEntry()
+  {
+      AddDialog aDialog;
+
+      <span class="keyword">if</span> (aDialog<span class="operator">.</span>exec())
+          <span class="keyword">emit</span> sendDetails(aDialog<span class="operator">.</span>name()<span class="operator">,</span> aDialog<span class="operator">.</span>address());
+  }
+
+</pre>
+<p class="centerAlign"><img src="images/signals-n-slots-aw-nat.png" alt="" /></p><a name="adddialog-class-definition"></a>
+<h4 id="adddialog-class-definition">AddDialog Class Definition</h4>
+<p>The <code>AddDialog</code> class extends <a href="qdialog.html">QDialog</a> and provides the user with a <a href="qlineedit.html">QLineEdit</a> and a <a href="qtextedit.html">QTextEdit</a> to input data into the address book.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> AddDialog : <span class="keyword">public</span> <span class="type"><a href="qdialog.html">QDialog</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      AddDialog(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> name() <span class="keyword">const</span>;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> address() <span class="keyword">const</span>;
+      <span class="type">void</span> editAddress(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>name<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>address);
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="qlineedit.html">QLineEdit</a></span> <span class="operator">*</span>nameText;
+      <span class="type"><a href="qtextedit.html">QTextEdit</a></span> <span class="operator">*</span>addressText;
+  };
+
+</pre>
+<p class="centerAlign"><img src="images/addressbook-adddialog.png" alt="" /></p><a name="adddialog-class-implementation"></a>
+<h4 id="adddialog-class-implementation">AddDialog Class Implementation</h4>
+<p>The <code>AddDialog</code>'s constructor sets up the user interface, creating the necessary widgets and placing them into layouts.</p>
+<pre class="cpp">
+
+  AddDialog<span class="operator">::</span>AddDialog(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qdialog.html">QDialog</a></span>(parent)<span class="operator">,</span>
+        nameText(<span class="keyword">new</span> <span class="type"><a href="qlineedit.html">QLineEdit</a></span>)<span class="operator">,</span>
+        addressText(<span class="keyword">new</span> <span class="type"><a href="qtextedit.html">QTextEdit</a></span>)
+  {
+      <span class="keyword">auto</span> nameLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Name&quot;</span>));
+      <span class="keyword">auto</span> addressLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Address&quot;</span>));
+      <span class="keyword">auto</span> okButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;OK&quot;</span>));
+      <span class="keyword">auto</span> cancelButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;Cancel&quot;</span>));
+
+      <span class="keyword">auto</span> gLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>;
+      gLayout<span class="operator">-</span><span class="operator">&gt;</span>setColumnStretch(<span class="number">1</span><span class="operator">,</span> <span class="number">2</span>);
+      gLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(nameLabel<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+      gLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(nameText<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span>);
+
+      gLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(addressLabel<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignLeft<span class="operator">|</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignTop);
+      gLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(addressText<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignLeft);
+
+      <span class="keyword">auto</span> buttonLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span>;
+      buttonLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(okButton);
+      buttonLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(cancelButton);
+
+      gLayout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(buttonLayout<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignRight);
+
+      <span class="keyword">auto</span> mainLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(gLayout);
+      setLayout(mainLayout);
+
+      connect(okButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qabstractbutton.html">QAbstractButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qdialog.html">QDialog</a></span><span class="operator">::</span>accept);
+      connect(cancelButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qabstractbutton.html">QAbstractButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qdialog.html">QDialog</a></span><span class="operator">::</span>reject);
+
+      setWindowTitle(tr(<span class="string">&quot;Add a Contact&quot;</span>));
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> AddDialog<span class="operator">::</span>name() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> nameText<span class="operator">-</span><span class="operator">&gt;</span>text();
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> AddDialog<span class="operator">::</span>address() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> addressText<span class="operator">-</span><span class="operator">&gt;</span>toPlainText();
+  }
+
+  <span class="type">void</span> AddDialog<span class="operator">::</span>editAddress(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>name<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>address)
+  {
+      nameText<span class="operator">-</span><span class="operator">&gt;</span>setReadOnly(<span class="keyword">true</span>);
+      nameText<span class="operator">-</span><span class="operator">&gt;</span>setText(name);
+      addressText<span class="operator">-</span><span class="operator">&gt;</span>setPlainText(address);
+  }
+
+</pre>
+<p>To give the dialog the desired behavior, we connect the <b>OK</b> and <b>Cancel</b> buttons to the dialog's <a href="qdialog.html#accept">accept()</a> and <a href="qdialog.html#reject">reject()</a> slots. Since the dialog only acts as a container for name and address information, we do not need to implement any other functions for it.</p>
+<a name="mainwindow-class-definition"></a>
+<h4 id="mainwindow-class-definition">MainWindow Class Definition</h4>
+<p>The <code>MainWindow</code> class extends <a href="qmainwindow.html">QMainWindow</a> and implements the menus and actions necessary to manipulate the address book.</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><img src="images/addressbook-filemenu.png" alt="" /></td><td ><img src="images/addressbook-toolsmenu.png" alt="" /></td></tr>
+</table></div>
+<pre class="cpp">
+
+  <span class="keyword">class</span> MainWindow : <span class="keyword">public</span> <span class="type"><a href="qmainwindow.html">QMainWindow</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      MainWindow();
+
+  <span class="keyword">private</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> updateActions(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qitemselection.html">QItemSelection</a></span> <span class="operator">&amp;</span>selection);
+      <span class="type">void</span> openFile();
+      <span class="type">void</span> saveFile();
+
+  <span class="keyword">private</span>:
+      <span class="type">void</span> createMenus();
+
+      AddressWidget <span class="operator">*</span>addressWidget;
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>editAct;
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>removeAct;
+  };
+
+</pre>
+<p>The <code>MainWindow</code> class uses an <code>AddressWidget</code> as its central widget and provides the File menu with <b>Open</b>, <b>Close</b> and <b>Exit</b> actions, as well as the <b>Tools</b> menu with <b>Add Entry..&#x2e;</b>, <b>Edit Entry..&#x2e;</b> and <b>Remove Entry</b> actions.</p>
+<a name="mainwindow-class-implementation"></a>
+<h4 id="mainwindow-class-implementation">MainWindow Class Implementation</h4>
+<p>The constructor for <code>MainWindow</code> instantiates AddressWidget, sets it as its central widget and calls the <code>createMenus()</code> function.</p>
+<pre class="cpp">
+
+  MainWindow<span class="operator">::</span>MainWindow()
+      : <span class="type"><a href="qmainwindow.html">QMainWindow</a></span>()<span class="operator">,</span>
+        addressWidget(<span class="keyword">new</span> AddressWidget)
+  {
+      setCentralWidget(addressWidget);
+      createMenus();
+      setWindowTitle(tr(<span class="string">&quot;Address Book&quot;</span>));
+  }
+
+</pre>
+<p>The <code>createMenus()</code> function sets up the <b>File</b> and <b>Tools</b> menus, connecting the actions to their respective slots. Both the <b>Edit Entry..&#x2e;</b> and <b>Remove Entry</b> actions are disabled by default as such actions cannot be carried out on an empty address book. They are only enabled when one or more contacts are added.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>createMenus()
+  {
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>fileMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;File&quot;</span>));
+
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>openAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;&amp;Open...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(openAct);
+      connect(openAct<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>openFile);
+      ...
+
+      editAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;&amp;Edit Entry...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      editAct<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+      toolMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(editAct);
+      connect(editAct<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> addressWidget<span class="operator">,</span> <span class="operator">&amp;</span>AddressWidget<span class="operator">::</span>editEntry);
+
+      toolMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+
+      removeAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;&amp;Remove Entry&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      removeAct<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+      toolMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(removeAct);
+      connect(removeAct<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> addressWidget<span class="operator">,</span> <span class="operator">&amp;</span>AddressWidget<span class="operator">::</span>removeEntry);
+
+      connect(addressWidget<span class="operator">,</span> <span class="operator">&amp;</span>AddressWidget<span class="operator">::</span>selectionChanged<span class="operator">,</span>
+          <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>updateActions);
+  }
+
+</pre>
+<p>Apart from connecting all the actions' signals to their respective slots, we also connect <code>AddressWidget</code>'s <code>selectionChanged()</code> signal to its <code>updateActions()</code> slot.</p>
+<p>The <code>openFile()</code> function allows the user to choose a file with the <a href="qfiledialog.html#getOpenFileName">open file dialog</a>. The chosen file has to be a custom <code>.dat</code> file that contains address book contacts. This function is a slot connected to <code>openAct</code> in the <b>File</b> menu.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>openFile()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getOpenFileName(<span class="keyword">this</span>);
+      <span class="keyword">if</span> (<span class="operator">!</span>fileName<span class="operator">.</span>isEmpty())
+          addressWidget<span class="operator">-</span><span class="operator">&gt;</span>readFromFile(fileName);
+  }
+
+</pre>
+<p>The <code>saveFile()</code> function allows the user to save a file with the <a href="qfiledialog.html#getSaveFileName">save file dialog</a>. This function is a slot connected to <code>saveAct</code> in the <b>File</b> menu.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>saveFile()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getSaveFileName(<span class="keyword">this</span>);
+      <span class="keyword">if</span> (<span class="operator">!</span>fileName<span class="operator">.</span>isEmpty())
+          addressWidget<span class="operator">-</span><span class="operator">&gt;</span>writeToFile(fileName);
+  }
+
+</pre>
+<p>The <code>updateActions()</code> function enables and disables <b>Edit Entry..&#x2e;</b> and <b>Remove Entry</b> depending on the contents of the address book. If the address book is empty, these actions are disabled; otherwise, they are enabled. This function is a slot is connected to the <code>AddressWidget</code>'s <code>selectionChanged()</code> signal.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>updateActions(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qitemselection.html">QItemSelection</a></span> <span class="operator">&amp;</span>selection)
+  {
+      <span class="type"><a href="../qtcore/qmodelindex.html#QModelIndexList-typedef">QModelIndexList</a></span> indexes <span class="operator">=</span> selection<span class="operator">.</span>indexes();
+
+      <span class="keyword">if</span> (<span class="operator">!</span>indexes<span class="operator">.</span>isEmpty()) {
+          removeAct<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+          editAct<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+      } <span class="keyword">else</span> {
+          removeAct<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+          editAct<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+      }
+  }
+
+</pre>
+<a name="main-function"></a>
+<h4 id="main-function">main() Function</h4>
+<p>The main function for the address book instantiates <a href="qapplication.html">QApplication</a> and opens a <code>MainWindow</code> before running the event loop.</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type"><a href="qapplication.html">QApplication</a></span> app(argc<span class="operator">,</span> argv);
+      MainWindow mw;
+      mw<span class="operator">.</span>show();
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/itemviews/addressbook?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@itemviews/addressbook -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

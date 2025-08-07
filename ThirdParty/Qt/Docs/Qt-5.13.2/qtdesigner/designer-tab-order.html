@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- designer-manual.qdoc -->
+  <title>Qt Designer's Tab Order Editing Mode | Qt Designer Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtdesigner-manual.html">Qt Designer Manual</a></td><td >Qt Designer's Tab Order Editing Mode</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtdesigner-manual.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="designer-buddy-mode.html" />
+  <link rel="next" href="designer-using-containers.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="designer-buddy-mode.html">Qt Designer's Buddy Editing Mode</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="designer-using-containers.html">Using Containers in Qt Designer</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#setting-the-tab-order">Setting the Tab Order</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Designer's Tab Order Editing Mode</h1>
+<span class="subtitle"></span>
+<!-- $$$designer-tab-order.html-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/designer-tab-order-mode.png" alt="" /></p><p>Many users expect to be able to navigate between widgets and controls using only the keyboard. Qt lets the user navigate between input widgets with the <b>Tab</b> and <b>Shift+Tab</b> keyboard shortcuts. The default <i>tab order</i> is based on the order in which widgets are constructed. Although this order may be sufficient for many users, it is often better to explicitly specify the tab order to make your application easier to use.</p>
+<a name="setting-the-tab-order"></a>
+<h2 id="setting-the-tab-order">Setting the Tab Order</h2>
+<p>To enter tab order editing mode, open the <b>Edit</b> menu and select <b>Edit Tab Order</b>. In this mode, each input widget in the form is shown with a number indicating its position in the tab order. So, if the user gives the first input widget the input focus and then presses the tab key, the focus will move to the second input widget, and so on.</p>
+<p>The tab order is defined by clicking on each of the numbers in the correct order. The first number you click will change to red, indicating the currently edited position in the tab order chain. The widget associated with the number will become the first one in the tab order chain. Clicking on another widget will make it the second in the tab order, and so on.</p>
+<p>Repeat this process until you are satisfied with the tab order in the form -- you do not need to click every input widget if you see that the remaining widgets are already in the correct order. Numbers, for which you already set the order, change to green, while those which are not clicked yet, remain blue.</p>
+<p>If you make a mistake, simply double click outside of any number or choose <b>Restart</b> from the form's context menu to start again. If you have many widgets on your form and would like to change the tab order in the middle or at the end of the tab order chain, you can edit it at any position. Press <b>Ctrl</b> and click the number from which you want to start. Alternatively, choose <b>Start from Here</b> in the context menu.</p>
+</div>
+<!-- @@@designer-tab-order.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="designer-buddy-mode.html">Qt Designer's Buddy Editing Mode</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="designer-using-containers.html">Using Containers in Qt Designer</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickaction.cpp -->
+  <title>Action QML Type | Qt Quick Controls 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td ><a href="qtquick-controls2-qmlmodule.html">QML Types</a></td><td >Action QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Action QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Action-brief -->
+<p>Abstract user interface action. <a href="#details">More...</a></p>
+<!-- @@@Action -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Controls 2.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.10</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="../qtqml/qml-qtqml-qtobject.html">QtObject</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-controls2-action-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-action.html#checkable-prop">checkable</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-action.html#checked-prop">checked</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-action.html#enabled-prop">enabled</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-action.html#icon-prop">icon</a></b></b><ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-action.html#icon.name-prop">icon.name</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-action.html#icon.source-prop">icon.source</a></b></b> : url</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-action.html#icon.width-prop">icon.width</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-action.html#icon.height-prop">icon.height</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-action.html#icon.color-prop">icon.color</a></b></b> : color</li>
+</ul>
+</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-action.html#shortcut-prop">shortcut</a></b></b> : keysequence</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-action.html#text-prop">text</a></b></b> : string</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-action.html#toggled-signal">toggled</a></b></b>(<i>source</i>)</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-action.html#triggered-signal">triggered</a></b></b>(<i>source</i>)</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-action.html#toggle-method">toggle</a></b></b>(QtObject source = <i>null</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-action.html#trigger-method">trigger</a></b></b>(QtObject source = <i>null</i>)</li>
+</ul>
+<!-- $$$Action-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>Action represents an abstract user interface action that can have shortcuts and can be assigned to menu items and toolbar buttons.</p>
+<p>Actions may contain <a href="qml-qtquick-controls2-action.html#text-prop">text</a>, an <a href="qml-qtquick-controls2-action.html#icon-prop">icon</a>, and a <a href="qml-qtquick-controls2-action.html#shortcut-prop">shortcut</a>. Actions are normally <a href="qml-qtquick-controls2-action.html#triggered-signal">triggered</a> by the user via menu items, toolbar buttons, or keyboard shortcuts. A <a href="qml-qtquick-controls2-action.html#checkable-prop">checkable</a> Action toggles its <a href="qml-qtquick-controls2-action.html#checked-prop">checked</a> state when triggered.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls2-action.html">Action</a></span> {
+      <span class="name">id</span>: <span class="name">copyAction</span>
+      <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;&amp;Copy&quot;</span>)
+      <span class="name">icon</span>.name: <span class="string">&quot;edit-copy&quot;</span>
+      <span class="name">shortcut</span>: <span class="name">StandardKey</span>.<span class="name">Copy</span>
+      <span class="name">onTriggered</span>: <span class="name">window</span>.<span class="name">activeFocusItem</span>.<span class="name">copy</span>()
+  }
+
+</pre>
+<p>Action is commonly used to implement application commands that can be invoked via menu items, toolbar buttons, and keyboard shortcuts. Since the user expects the commands to be performed in the same way, regardless of the user interface used, it is useful to represent the commands as shareable actions.</p>
+<p>Action can be also used to separate the logic and the visual presentation. For example, when declaring buttons and menu items in <code>.ui.qml</code> files, actions can be declared elsewhere and assigned from the outside.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls2-toolbutton.html">ToolButton</a></span> {
+      <span class="name">id</span>: <span class="name">toolButton</span>
+      <span class="name">action</span>: <span class="name">copyAction</span>
+  }
+
+</pre>
+<p>When an action is paired with buttons and menu items, the <code>enabled</code>, <code>checkable</code>, and <code>checked</code> states are synced automatically. For example, in a word processor, if the user clicks a &quot;Bold&quot; toolbar button, the &quot;Bold&quot; menu item will automatically be checked. Buttons and menu items get their <code>text</code> and <code>icon</code> from the action by default. An action-specific <code>text</code> or <code>icon</code> can be overridden for a specific control by specifying <code>text</code> or <code>icon</code> directly on the control.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls2-menuitem.html">MenuItem</a></span> {
+      <span class="name">id</span>: <span class="name">menuItem</span>
+      <span class="name">action</span>: <span class="name">copyAction</span>
+      <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;&amp;Copy selected Text&quot;</span>)
+  }
+
+</pre>
+<p>Since Action presents a user interface action, it is intended to be assigned to a <a href="qml-qtquick-controls2-menuitem.html">MenuItem</a>, <a href="qml-qtquick-controls2-toolbutton.html">ToolButton</a>, or any other control that inherits <a href="qml-qtquick-controls2-abstractbutton.html">AbstractButton</a>. For keyboard shortcuts, the simpler <a href="../qtquick/qml-qtquick-shortcut.html">Shortcut</a> type is more appropriate.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-menuitem.html">MenuItem</a>, <a href="qml-qtquick-controls2-toolbutton.html">ToolButton</a>, and <a href="../qtquick/qml-qtquick-shortcut.html">Shortcut</a>.</p>
+<!-- @@@Action -->
+<h2>Property Documentation</h2>
+<!-- $$$checkable -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="checkable-prop"></a><span class="name">checkable</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the action is checkable. The default value is <code>false</code>.</p>
+<p>A checkable action toggles between checked (on) and unchecked (off) when triggered.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-action.html#checked-prop">checked</a>.</p>
+</div></div><!-- @@@checkable -->
+<br/>
+<!-- $$$checked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="checked-prop"></a><span class="name">checked</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the action is checked.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-action.html#checkable-prop">checkable</a>.</p>
+</div></div><!-- @@@checked -->
+<br/>
+<!-- $$$enabled -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="enabled-prop"></a><span class="name">enabled</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the action is enabled. The default value is <code>true</code>.</p>
+</div></div><!-- @@@enabled -->
+<br/>
+<!-- $$$icon -->
+<div class="qmlitem"><div class="qmlproto"><div class="table"><table class="qmlname"><tr valign="top" class="even" id="icon-prop"><th class="centerAlign"><p><a name="icon-prop"></a><b>icon group</b></p></th></tr><tr valign="top" class="odd" id="icon.name-prop"><td class="tblQmlPropNode"><p><a name="icon.name-prop"></a><span class="name">icon.name</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr><tr valign="top" class="odd" id="icon.source-prop"><td class="tblQmlPropNode"><p><a name="icon.source-prop"></a><span class="name">icon.source</span> : <span class="type"><a href="../qtqml/qml-url.html">url</a></span></p></td></tr><tr valign="top" class="odd" id="icon.width-prop"><td class="tblQmlPropNode"><p><a name="icon.width-prop"></a><span class="name">icon.width</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr><tr valign="top" class="odd" id="icon.height-prop"><td class="tblQmlPropNode"><p><a name="icon.height-prop"></a><span class="name">icon.height</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr><tr valign="top" class="odd" id="icon.color-prop"><td class="tblQmlPropNode"><p><a name="icon.color-prop"></a><span class="name">icon.color</span> : <span class="type"><a href="../qtquick/qml-color.html">color</a></span></p></td></tr></table></div></div><div class="qmldoc"><div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Name</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >name</td><td >This property holds the name of the icon to use.<p>The icon will be loaded from the platform theme. If the icon is found in the theme, it will always be used; even if <a href="qml-qtquick-controls2-action.html#icon.source-prop">icon.source</a> is also set. If the icon is not found, <a href="qml-qtquick-controls2-action.html#icon.source-prop">icon.source</a> will be used instead.</p>
+<p>For more information on theme icons, see <a href="../qtgui/qicon.html#fromTheme">QIcon::fromTheme()</a>.</p>
+</td></tr>
+<tr valign="top" class="even"><td >source</td><td >This property holds the name of the icon to use.<p>The icon will be loaded as a regular image.</p>
+<p>If <a href="qml-qtquick-controls2-action.html#icon.name-prop">icon.name</a> is set and refers to a valid theme icon, it will always be used instead of this property.</p>
+</td></tr>
+<tr valign="top" class="odd"><td >width</td><td >This property holds the width of the icon.<p>The icon's width will never exceed this value, though it will shrink when necessary.</p>
+</td></tr>
+<tr valign="top" class="even"><td >height</td><td >This property holds the height of the icon.<p>The icon's height will never exceed this value, though it will shrink when necessary.</p>
+</td></tr>
+<tr valign="top" class="odd"><td >color</td><td >This property holds the color of the icon.<p>The icon is tinted with the specified color, unless the color is set to <code>&quot;transparent&quot;</code>.</p>
+</td></tr>
+<tr valign="top" class="even"><td >cache</td><td >This property specifies whether the icon should be cached.<p>The default value is true.</p>
+</td></tr>
+</table></div>
+</div></div><!-- @@@icon -->
+<br/>
+<!-- $$$shortcut -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="shortcut-prop"></a><span class="name">shortcut</span> : <span class="type">keysequence</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the action's shortcut. The key sequence can be set to one of the <a href="../qtgui/qkeysequence.html#StandardKey-enum">standard keyboard shortcuts</a>, or it can be described with a string containing a sequence of up to four key presses that are needed to trigger the shortcut.</p>
+<pre class="cpp">
+
+  Action {
+      shortcut: <span class="string">&quot;Ctrl+E,Ctrl+W&quot;</span>
+      onTriggered: edit<span class="operator">.</span>wrapMode <span class="operator">=</span> TextEdit<span class="operator">.</span>Wrap
+  }
+
+</pre>
+</div></div><!-- @@@shortcut -->
+<br/>
+<!-- $$$text -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="text-prop"></a><span class="name">text</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds a textual description of the action.</p>
+</div></div><!-- @@@text -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$toggled[overload1]$$$toggled -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="toggled-signal"></a><span class="name">toggled</span>(<i>source</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the action is toggled. The <i>source</i> argument identifies the object that toggled the action.</p>
+<p>For example, if the action is assigned to a menu item and a toolbar button, the action is toggled when the control is toggled, the shortcut is activated, or when <a href="qml-qtquick-controls2-action.html#toggle-method">toggle()</a> is called directly.</p>
+</div></div><!-- @@@toggled -->
+<br/>
+<!-- $$$triggered[overload1]$$$triggered -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="triggered-signal"></a><span class="name">triggered</span>(<i>source</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the action is triggered. The <i>source</i> argument identifies the object that triggered the action.</p>
+<p>For example, if the action is assigned to a menu item and a toolbar button, the action is triggered when the control is clicked, the shortcut is activated, or when <a href="qml-qtquick-controls2-action.html#trigger-method">trigger()</a> is called directly.</p>
+</div></div><!-- @@@triggered -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$toggle[overload1]$$$toggleQtObjectsource= -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="toggle-method"></a><span class="type">void</span> <span class="name">toggle</span>(<span class="type"><a href="../qtqml/qml-qtqml-qtobject.html">QtObject</a></span> <span class="type">source</span> = <i>null</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Toggles the action and emits <a href="qml-qtquick-controls2-action.html#toggled-signal">toggled()</a> if enabled, with an optional <i>source</i> object defined.</p>
+</div></div><!-- @@@toggle -->
+<br/>
+<!-- $$$trigger[overload1]$$$triggerQtObjectsource= -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="trigger-method"></a><span class="type">void</span> <span class="name">trigger</span>(<span class="type"><a href="../qtqml/qml-qtqml-qtobject.html">QtObject</a></span> <span class="type">source</span> = <i>null</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Triggers the action and emits <a href="qml-qtquick-controls2-action.html#triggered-signal">triggered()</a> if enabled, with an optional <i>source</i> object defined.</p>
+</div></div><!-- @@@trigger -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

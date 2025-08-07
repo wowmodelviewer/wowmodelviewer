@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickshadereffect.cpp -->
+  <title>ShaderEffect QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >ShaderEffect QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#opengl-and-glsl">OpenGL and GLSL</a></li>
+<li class="level2"><a href="#direct3d-and-hlsl">Direct3D and HLSL</a></li>
+<li class="level2"><a href="#cross-platform-cross-api-shadereffect-items">Cross-platform, Cross-API ShaderEffect Items</a></li>
+<li class="level2"><a href="#shadereffect-and-item-layers">ShaderEffect and Item Layers</a></li>
+<li class="level2"><a href="#other-notes">Other Notes</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">ShaderEffect QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$ShaderEffect-brief -->
+<p>Applies custom shaders to a rectangle. <a href="#details">More...</a></p>
+<!-- @@@ShaderEffect -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-item.html">Item</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-shadereffect-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-shadereffect.html#blending-prop">blending</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-shadereffect.html#cullMode-prop">cullMode</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-shadereffect.html#fragmentShader-prop">fragmentShader</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-shadereffect.html#log-prop">log</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-shadereffect.html#mesh-prop">mesh</a></b></b> : variant</li>
+<li class="fn"><b><b><a href="qml-qtquick-shadereffect.html#status-prop">status</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-shadereffect.html#supportsAtlasTextures-prop">supportsAtlasTextures</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-shadereffect.html#vertexShader-prop">vertexShader</a></b></b> : string</li>
+</ul>
+<!-- $$$ShaderEffect-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qml-qtquick-shadereffect.html">ShaderEffect</a> type applies a custom <a href="qml-qtquick-shadereffect.html#vertexShader-prop">vertex</a> and <a href="qml-qtquick-shadereffect.html#fragmentShader-prop">fragment (pixel)</a> shader to a rectangle. It allows you to write effects such as drop shadow, blur, colorize and page curl directly in QML.</p>
+<p><b>Note: </b>Depending on the Qt Quick scenegraph backend in use, the <a href="qml-qtquick-shadereffect.html">ShaderEffect</a> type may not be supported (for example, with the software backend), or may use a different shading language with rules and expectations different from OpenGL and GLSL.</p><a name="opengl-and-glsl"></a>
+<h2 id="opengl-and-glsl">OpenGL and GLSL</h2>
+<p>There are two types of input to the <a href="qml-qtquick-shadereffect.html#vertexShader-prop">vertexShader</a>: uniform variables and attributes. Some are predefined:</p>
+<ul>
+<li>uniform mat4 qt_Matrix - combined transformation matrix, the product of the matrices from the root item to this <a href="qml-qtquick-shadereffect.html">ShaderEffect</a>, and an orthogonal projection.</li>
+<li>uniform float qt_Opacity - combined opacity, the product of the opacities from the root item to this <a href="qml-qtquick-shadereffect.html">ShaderEffect</a>.</li>
+<li>attribute vec4 qt_Vertex - vertex position, the top-left vertex has position (0, 0), the bottom-right (<a href="qml-qtquick-item.html#width-prop">width</a>, <a href="qml-qtquick-item.html#height-prop">height</a>).</li>
+<li>attribute vec2 qt_MultiTexCoord0 - texture coordinate, the top-left coordinate is (0, 0), the bottom-right (1, 1). If <a href="qml-qtquick-shadereffect.html#supportsAtlasTextures-prop">supportsAtlasTextures</a> is true, coordinates will be based on position in the atlas instead.</li>
+</ul>
+<p>In addition, any property that can be mapped to an OpenGL Shading Language (GLSL) type is available as a uniform variable. The following list shows how properties are mapped to GLSL uniform variables:</p>
+<ul>
+<li>bool, int, qreal -&gt; bool, int, float - If the type in the shader is not the same as in QML, the value is converted automatically.</li>
+<li><a href="../qtgui/qcolor.html">QColor</a> -&gt; vec4 - When colors are passed to the shader, they are first premultiplied. Thus Qt.rgba(0.2, 0.6, 1.0, 0.5) becomes vec4(0.1, 0.3, 0.5, 0.5) in the shader, for example.</li>
+<li><a href="../qtcore/qrect.html">QRect</a>, <a href="../qtcore/qrectf.html">QRectF</a> -&gt; vec4 - Qt.rect(x, y, w, h) becomes vec4(x, y, w, h) in the shader.</li>
+<li><a href="../qtcore/qpoint.html">QPoint</a>, <a href="../qtcore/qpointf.html">QPointF</a>, <a href="../qtcore/qsize.html">QSize</a>, <a href="../qtcore/qsizef.html">QSizeF</a> -&gt; vec2</li>
+<li><a href="../qtgui/qvector3d.html">QVector3D</a> -&gt; vec3</li>
+<li><a href="../qtgui/qvector4d.html">QVector4D</a> -&gt; vec4</li>
+<li><a href="../qtgui/qtransform.html">QTransform</a> -&gt; mat3</li>
+<li><a href="../qtgui/qmatrix4x4.html">QMatrix4x4</a> -&gt; mat4</li>
+<li><a href="../qtgui/qquaternion.html">QQuaternion</a> -&gt; vec4, scalar value is <code>w</code>.</li>
+<li><a href="qml-qtquick-image.html">Image</a> -&gt; sampler2D - Origin is in the top-left corner, and the color values are premultiplied. The texture is provided as is, excluding the Image item's fillMode. To include fillMode, use a <a href="qml-qtquick-shadereffectsource.html">ShaderEffectSource</a> or Image::layer::enabled.</li>
+<li><a href="qml-qtquick-shadereffectsource.html">ShaderEffectSource</a> -&gt; sampler2D - Origin is in the top-left corner, and the color values are premultiplied.</li>
+</ul>
+<p>The QML scene graph back-end may choose to allocate textures in texture atlases. If a texture allocated in an atlas is passed to a <a href="qml-qtquick-shadereffect.html">ShaderEffect</a>, it is by default copied from the texture atlas into a stand-alone texture so that the texture coordinates span from 0 to 1, and you get the expected wrap modes. However, this will increase the memory usage. To avoid the texture copy, set <a href="qml-qtquick-shadereffect.html#supportsAtlasTextures-prop">supportsAtlasTextures</a> for simple shaders using qt_MultiTexCoord0, or for each &quot;uniform sampler2D &lt;name&gt;&quot; declare a &quot;uniform vec4 qt_SubRect_&lt;name&gt;&quot; which will be assigned the texture's normalized source rectangle. For stand-alone textures, the source rectangle is [0, 1]x[0, 1]. For textures in an atlas, the source rectangle corresponds to the part of the texture atlas where the texture is stored. The correct way to calculate the texture coordinate for a texture called &quot;source&quot; within a texture atlas is &quot;qt_SubRect_source.xy + qt_SubRect_source.zw * qt_MultiTexCoord0&quot;.</p>
+<p>The output from the <a href="qml-qtquick-shadereffect.html#fragmentShader-prop">fragmentShader</a> should be premultiplied. If <a href="qml-qtquick-shadereffect.html#blending-prop">blending</a> is enabled, source-over blending is used. However, additive blending can be achieved by outputting zero in the alpha channel.</p>
+<div class="table"><table class="generic" width="70%">
+ <tr valign="top" class="odd"><td ><p class="centerAlign"><img src="images/declarative-shadereffectitem.png" alt="" /></p></td><td ><pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">width</span>: <span class="number">200</span>; <span class="name">height</span>: <span class="number">100</span>
+      <span class="type"><a href="qml-qtquick-row.html">Row</a></span> {
+          <span class="type"><a href="qml-qtquick-image.html">Image</a></span> { <span class="name">id</span>: <span class="name">img</span>;
+                  <span class="type">sourceSize</span> { <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span> } <span class="name">source</span>: <span class="string">&quot;qt-logo.png&quot;</span> }
+          <span class="type"><a href="qml-qtquick-shadereffect.html">ShaderEffect</a></span> {
+              <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span>
+              property <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span> <span class="name">src</span>: <span class="name">img</span>
+              <span class="name">vertexShader</span>: <span class="string">&quot;
+                  uniform highp mat4 qt_Matrix;
+                  attribute highp vec4 qt_Vertex;
+                  attribute highp vec2 qt_MultiTexCoord0;
+                  varying highp vec2 coord;
+                  void main() {
+                      coord = qt_MultiTexCoord0;
+                      gl_Position = qt_Matrix * qt_Vertex;
+                  }&quot;</span>
+              <span class="name">fragmentShader</span>: <span class="string">&quot;
+                  varying highp vec2 coord;
+                  uniform sampler2D src;
+                  uniform lowp float qt_Opacity;
+                  void main() {
+                      lowp vec4 tex = texture2D(src, coord);
+                      gl_FragColor = vec4(vec3(dot(tex.rgb,
+                                          vec3(0.344, 0.5, 0.156))),
+                                               tex.a) * qt_Opacity;
+                  }&quot;</span>
+          }
+      }
+  }
+
+</pre>
+</td></tr>
+</table></div>
+<p><b>Note: </b>Scene Graph textures have origin in the top-left corner rather than bottom-left which is common in OpenGL.</p><p>For information about the GLSL version being used, see <a href="qml-qtquick-graphicsinfo.html">QtQuick::GraphicsInfo</a>.</p>
+<p>Starting from Qt 5.8 <a href="qml-qtquick-shadereffect.html">ShaderEffect</a> also supports reading the GLSL source code from files. Whenever the <a href="qml-qtquick-shadereffect.html#fragmentShader-prop">fragmentShader</a> or <a href="qml-qtquick-shadereffect.html#vertexShader-prop">vertexShader</a> property value is a URL with the <code>file</code> or <code>qrc</code> schema, it is treated as a file reference and the source code is read from the specified file.</p>
+<a name="direct3d-and-hlsl"></a>
+<h2 id="direct3d-and-hlsl">Direct3D and HLSL</h2>
+<p>Direct3D backends provide <a href="qml-qtquick-shadereffect.html">ShaderEffect</a> support with HLSL. The Direct3D 12 backend requires using at least Shader Model 5.0 both for vertex and pixel shaders. When necessary, <a href="qml-qtquick-graphicsinfo.html">GraphicsInfo</a>.shaderType can be used to decide at runtime what kind of value to assign to <a href="qml-qtquick-shadereffect.html#fragmentShader-prop">fragmentShader</a> or <a href="qml-qtquick-shadereffect.html#vertexShader-prop">vertexShader</a>.</p>
+<p>All concepts described above for OpenGL and GLSL apply to Direct3D and HLSL as well. There are however a number of notable practical differences, which are the following:</p>
+<p>Instead of uniforms, HLSL shaders are expected to use a single constant buffer, assigned to register <code>b0</code>. The special names <code>qt_Matrix</code>, <code>qt_Opacity</code>, and <code>qt_SubRect_&lt;name&gt;</code> function the same way as with GLSL. All other members of the buffer are expected to map to properties in the <a href="qml-qtquick-shadereffect.html">ShaderEffect</a> item.</p>
+<p><b>Note: </b>The buffer layout must be compatible for both shaders. This means that application-provided shaders must make sure <code>qt_Matrix</code> and <code>qt_Opacity</code> are included in the buffer, starting at offset 0, when custom code is provided for one type of shader only, leading to <a href="qml-qtquick-shadereffect.html">ShaderEffect</a> providing the other shader. This is due to <a href="qml-qtquick-shadereffect.html">ShaderEffect</a>'s built-in shader code declaring a constant buffer containing <code>float4x4 qt_Matrix; float qt_Opacity;</code>.</p><p>Unlike GLSL's attributes, no names are used for vertex input elements. Therefore qt_Vertex and qt_MultiTexCoord0 are not relevant. Instead, the standard Direct3D semantics, <code>POSITION</code> and <code>TEXCOORD</code> (or <code>TEXCOORD0</code>) are used for identifying the correct input layout.</p>
+<p>Unlike GLSL's samplers, texture and sampler objects are separate in HLSL. Shaders are expected to expect 2D, non-array, non-multisample textures. Both the texture and sampler binding points are expected to be sequential and start from 0 (meaning registers <code>t0, t1, ..&#x2e;</code>, and <code>s0, s1, ..&#x2e;</code>, respectively). Unlike with OpenGL, samplers are not mapped to Qt Quick item properties and therefore the name of the sampler is not relevant. Instead, it is the textures that map to properties referencing <a href="qml-qtquick-image.html">Image</a> or <a href="qml-qtquick-shadereffectsource.html">ShaderEffectSource</a> items.</p>
+<p>Unlike OpenGL, backends for modern APIs will typically prefer offline compilation and shipping pre-compiled bytecode with applications instead of inlined shader source strings. In this case the string properties for vertex and fragment shaders are treated as URLs referring to local files or files shipped via the Qt resource system.</p>
+<p>To check at runtime what is supported, use the <a href="qml-qtquick-graphicsinfo.html">GraphicsInfo</a>.shaderSourceType and <a href="qml-qtquick-graphicsinfo.html">GraphicsInfo</a>.shaderCompilationType properties. Note that these are bitmasks, because some backends may support multiple approaches.</p>
+<p>In case of Direct3D 12, all combinations are supported. If the <a href="qml-qtquick-shadereffect.html#vertexShader-prop">vertexShader</a> and <a href="qml-qtquick-shadereffect.html#fragmentShader-prop">fragmentShader</a> properties form a valid URL with the <code>file</code> or <code>qrc</code> schema, the bytecode or HLSL source code is read from the specified file. The type of the file contents is detected automatically. Otherwise, the string is treated as HLSL source code and is compiled at runtime, assuming Shader Model 5.0 and an entry point of <code>&quot;main&quot;</code>. This allows dynamically constructing shader strings. However, whenever the shader source code is static, it is strongly recommended to pre-compile to bytecode using the <code>fxc</code> tool and refer to these files from QML. This will be a lot more efficient at runtime and allows catching syntax errors in the shaders at compile time.</p>
+<p>Unlike OpenGL, the Direct3D backend is able to perform runtime shader compilation on dedicated threads. This is managed transparently to the applications, and means that <a href="qml-qtquick-shadereffect.html">ShaderEffect</a> items that contain HLSL source strings do not block the rendering or other parts of the application until the bytecode is ready.</p>
+<p>Using files with bytecode is more flexible also when it comes to the entry point name (it can be anything, not limited to <code>main</code>) and the shader model (it can be something newer than 5.0, for instance 5.1).</p>
+<div class="table"><table class="generic" width="70%">
+ <tr valign="top" class="odd"><td ><pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">width</span>: <span class="number">200</span>; <span class="name">height</span>: <span class="number">100</span>
+      <span class="type"><a href="qml-qtquick-row.html">Row</a></span> {
+          <span class="type"><a href="qml-qtquick-image.html">Image</a></span> { <span class="name">id</span>: <span class="name">img</span>;
+                  <span class="type">sourceSize</span> { <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span> } <span class="name">source</span>: <span class="string">&quot;qt-logo.png&quot;</span> }
+          <span class="type"><a href="qml-qtquick-shadereffect.html">ShaderEffect</a></span> {
+              <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span>
+              property <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span> <span class="name">src</span>: <span class="name">img</span>
+              <span class="name">fragmentShader</span>: <span class="string">&quot;qrc:/effect_ps.cso&quot;</span>
+          }
+      }
+  }
+
+</pre>
+</td></tr>
+<tr valign="top" class="even"><td >where <code>effect_ps.cso</code> is the compiled bytecode for the following HLSL shader:<pre class="cpp">
+
+  cbuffer ConstantBuffer : <span class="keyword">register</span>(b0)
+  {
+      float4x4 qt_Matrix;
+      <span class="type">float</span> qt_Opacity;
+  };
+  Texture2D src : <span class="keyword">register</span>(t0);
+  SamplerState srcSampler : <span class="keyword">register</span>(s0);
+  float4 ExamplePixelShader(float4 position : SV_POSITION<span class="operator">,</span> float2 coord : TEXCOORD0) : SV_TARGET
+  {
+      float4 tex <span class="operator">=</span> src<span class="operator">.</span>Sample(srcSampler<span class="operator">,</span> coord);
+      float3 col <span class="operator">=</span> dot(tex<span class="operator">.</span>rgb<span class="operator">,</span> float3(<span class="number">0.344</span><span class="operator">,</span> <span class="number">0.5</span><span class="operator">,</span> <span class="number">0.156</span>));
+      <span class="keyword">return</span> float4(col<span class="operator">,</span> tex<span class="operator">.</span>a) <span class="operator">*</span> qt_Opacity;
+  }
+
+</pre>
+</td></tr>
+</table></div>
+<p>The above is equivalent to the OpenGL example presented earlier. The vertex shader is provided implicitly by <a href="qml-qtquick-shadereffect.html">ShaderEffect</a>. Note that the output of the pixel shader is using premultiplied alpha and that <code>qt_Matrix</code> is present in the constant buffer at offset 0, even though the pixel shader does not use the value.</p>
+<p>If desired, the HLSL source code can be placed directly into the QML source, similarly to how its done with GLSL. The only difference in this case is the entry point name, which must be <code>main</code> when using inline source strings.</p>
+<p>Alternatively, we could also have referred to a file containing the source of the effect instead of the compiled bytecode version.</p>
+<p>Some effects will want to provide a vertex shader as well. Below is a similar effect with both the vertex and fragment shader provided by the application. This time the colorization factor is provided by the QML item instead of hardcoding it in the shader. This can allow, among others, animating the value using QML's and Qt Quick's standard facilities.</p>
+<div class="table"><table class="generic" width="70%">
+ <tr valign="top" class="odd"><td ><pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">width</span>: <span class="number">200</span>; <span class="name">height</span>: <span class="number">100</span>
+      <span class="type"><a href="qml-qtquick-row.html">Row</a></span> {
+          <span class="type"><a href="qml-qtquick-image.html">Image</a></span> { <span class="name">id</span>: <span class="name">img</span>;
+                  <span class="type">sourceSize</span> { <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span> } <span class="name">source</span>: <span class="string">&quot;qt-logo.png&quot;</span> }
+          <span class="type"><a href="qml-qtquick-shadereffect.html">ShaderEffect</a></span> {
+              <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span>
+              property <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span> <span class="name">src</span>: <span class="name">img</span>
+              property <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span> <span class="name">color</span>: <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="number">0.344</span>, <span class="number">0.5</span>, <span class="number">0.156</span>)
+              <span class="name">vertexShader</span>: <span class="string">&quot;qrc:/effect_vs.cso&quot;</span>
+              <span class="name">fragmentShader</span>: <span class="string">&quot;qrc:/effect_ps.cso&quot;</span>
+          }
+      }
+  }
+
+</pre>
+</td></tr>
+<tr valign="top" class="even"><td >where <code>effect_vs.cso</code> and <code>effect_ps.cso</code> are the compiled bytecode for <code>ExampleVertexShader</code> and <code>ExamplePixelShader</code>. The source code is presented as one snippet here, the shaders can however be placed in separate source files as well.<pre class="cpp">
+
+  cbuffer ConstantBuffer : <span class="keyword">register</span>(b0)
+  {
+      float4x4 qt_Matrix;
+      <span class="type">float</span> qt_Opacity;
+      float3 color;
+  };
+  Texture2D src : <span class="keyword">register</span>(t0);
+  SamplerState srcSampler : <span class="keyword">register</span>(s0);
+  <span class="keyword">struct</span> PSInput
+  {
+      float4 position : SV_POSITION;
+      float2 coord : TEXCOORD0;
+  };
+  PSInput ExampleVertexShader(float4 position : POSITION<span class="operator">,</span> float2 coord : TEXCOORD0)
+  {
+      PSInput result;
+      result<span class="operator">.</span>position <span class="operator">=</span> mul(qt_Matrix<span class="operator">,</span> position);
+      result<span class="operator">.</span>coord <span class="operator">=</span> coord;
+      <span class="keyword">return</span> result;
+  }
+  float4 ExamplePixelShader(PSInput input) : SV_TARGET
+  {
+      float4 tex <span class="operator">=</span> src<span class="operator">.</span>Sample(srcSampler<span class="operator">,</span> coord);
+      float3 col <span class="operator">=</span> dot(tex<span class="operator">.</span>rgb<span class="operator">,</span> color);
+      <span class="keyword">return</span> float4(col<span class="operator">,</span> tex<span class="operator">.</span>a) <span class="operator">*</span> qt_Opacity;
+  }
+
+</pre>
+</td></tr>
+</table></div>
+<p><b>Note: </b>With OpenGL the <code>y</code> coordinate runs from bottom to top whereas with Direct 3D it goes top to bottom. For shader effect sources Qt Quick hides the difference by treating <a href="qml-qtquick-shadereffectsource.html#textureMirroring-prop">QtQuick::ShaderEffectSource::textureMirroring</a> as appropriate, meaning texture coordinates in HLSL version of the shaders will not need any adjustments compared to the equivalent GLSL code.</p><a name="cross-platform-cross-api-shadereffect-items"></a>
+<h2 id="cross-platform-cross-api-shadereffect-items">Cross-platform, Cross-API ShaderEffect Items</h2>
+<p>Some applications will want to be functional with multiple accelerated graphics backends. This has consequences for <a href="qml-qtquick-shadereffect.html">ShaderEffect</a> items because the supported shading languages may vary from backend to backend.</p>
+<p>There are two approaches to handle this: either write conditional property values based on <a href="qml-qtquick-graphicsinfo.html">GraphicsInfo</a>.shaderType, or use file selectors. In practice the latter is strongly recommended as it leads to more concise and cleaner application code. The only case it is not suitable is when the source strings are constructed dynamically.</p>
+<div class="table"><table class="generic" width="70%">
+ <tr valign="top" class="odd"><td ><pre class="qml">
+
+  import QtQuick 2.8 <span class="comment">// for GraphicsInfo</span>
+
+  <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">width</span>: <span class="number">200</span>; <span class="name">height</span>: <span class="number">100</span>
+      <span class="type"><a href="qml-qtquick-row.html">Row</a></span> {
+          <span class="type"><a href="qml-qtquick-image.html">Image</a></span> { <span class="name">id</span>: <span class="name">img</span>;
+                  <span class="type">sourceSize</span> { <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span> } <span class="name">source</span>: <span class="string">&quot;qt-logo.png&quot;</span> }
+          <span class="type"><a href="qml-qtquick-shadereffect.html">ShaderEffect</a></span> {
+              <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span>
+              property <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span> <span class="name">src</span>: <span class="name">img</span>
+              property <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span> <span class="name">color</span>: <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="number">0.344</span>, <span class="number">0.5</span>, <span class="number">0.156</span>)
+              <span class="name">fragmentShader</span>: <span class="name">GraphicsInfo</span>.<span class="name">shaderType</span> <span class="operator">===</span> <span class="name">GraphicsInfo</span>.<span class="name">GLSL</span> ?
+                  <span class="string">&quot;varying highp vec2 coord;
+                  uniform sampler2D src;
+                  uniform lowp float qt_Opacity;
+                  void main() {
+                      lowp vec4 tex = texture2D(src, coord);
+                      gl_FragColor = vec4(vec3(dot(tex.rgb,
+                                          vec3(0.344, 0.5, 0.156))),
+                                               tex.a) * qt_Opacity;&quot;</span>
+              : <span class="name">GraphicsInfo</span>.<span class="name">shaderType</span> <span class="operator">===</span> <span class="name">GraphicsInfo</span>.<span class="name">HLSL</span> ?
+                  <span class="string">&quot;cbuffer ConstantBuffer : register(b0)
+                  {
+                      float4x4 qt_Matrix;
+                      float qt_Opacity;
+                  };
+                  Texture2D src : register(t0);
+                  SamplerState srcSampler : register(s0);
+                  float4 ExamplePixelShader(float4 position : SV_POSITION, float2 coord : TEXCOORD0) : SV_TARGET
+                  {
+                      float4 tex = src.Sample(srcSampler, coord);
+                      float3 col = dot(tex.rgb, float3(0.344, 0.5, 0.156));
+                      return float4(col, tex.a) * qt_Opacity;
+                  }&quot;</span>
+              : <span class="string">&quot;&quot;</span>
+          }
+      }
+  }
+
+</pre>
+</td></tr>
+<tr valign="top" class="even"><td >This is the first approach based on <a href="qml-qtquick-graphicsinfo.html">GraphicsInfo</a>. Note that the value reported by <a href="qml-qtquick-graphicsinfo.html">GraphicsInfo</a> is not up-to-date until the <a href="qml-qtquick-shadereffect.html">ShaderEffect</a> item gets associated with a <a href="qquickwindow.html">QQuickWindow</a>. Before that, the reported value is <a href="qml-qtquick-graphicsinfo.html">GraphicsInfo</a>.UnknownShadingLanguage. The alternative is to place the GLSL source code and the compiled D3D bytecode into the files <code>shaders/effect.frag</code> and <code>shaders/+hlsl/effect.frag</code>, include them in the Qt resource system, and let the <a href="qml-qtquick-shadereffect.html">ShaderEffect</a>'s internal <a href="../qtcore/qfileselector.html">QFileSelector</a> do its job. The selector-less version is the GLSL source, while the <code>hlsl</code> selector is used when running on the D3D12 backend. The file under <code>+hlsl</code> can then contain either HLSL source code or compiled bytecode from the <code>fxc</code> tool. Additionally, when using a version 3.2 or newer core profile context with OpenGL, GLSL sources with a core profile compatible syntax can be placed under <code>+glslcore</code>.<pre class="qml">
+
+  import QtQuick 2.8 <span class="comment">// for GraphicsInfo</span>
+
+  <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">width</span>: <span class="number">200</span>; <span class="name">height</span>: <span class="number">100</span>
+      <span class="type"><a href="qml-qtquick-row.html">Row</a></span> {
+          <span class="type"><a href="qml-qtquick-image.html">Image</a></span> { <span class="name">id</span>: <span class="name">img</span>;
+                  <span class="type">sourceSize</span> { <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span> } <span class="name">source</span>: <span class="string">&quot;qt-logo.png&quot;</span> }
+          <span class="type"><a href="qml-qtquick-shadereffect.html">ShaderEffect</a></span> {
+              <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span>
+              property <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span> <span class="name">src</span>: <span class="name">img</span>
+              property <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span> <span class="name">color</span>: <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="number">0.344</span>, <span class="number">0.5</span>, <span class="number">0.156</span>)
+              <span class="name">fragmentShader</span>: <span class="string">&quot;qrc:shaders/effect.frag&quot;</span> <span class="comment">// selects the correct variant automatically</span>
+          }
+      }
+  }
+
+</pre>
+</td></tr>
+</table></div>
+<a name="shadereffect-and-item-layers"></a>
+<h2 id="shadereffect-and-item-layers">ShaderEffect and Item Layers</h2>
+<p>The <a href="qml-qtquick-shadereffect.html">ShaderEffect</a> type can be combined with <a href="qml-qtquick-item.html#item-layers">layered items</a>.</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><b>Layer with effect disabled</b> <img src="images/qml-shadereffect-nolayereffect.png" alt="" /></td><td ><b>Layer with effect enabled</b> <img src="images/qml-shadereffect-layereffect.png" alt="" /></td></tr>
+<tr valign="top" class="even"><td ><pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">layerRoot</span>
+      <span class="name">layer</span>.enabled: <span class="number">true</span>
+      <span class="name">layer</span>.effect: <span class="name">ShaderEffect</span> {
+          <span class="name">fragmentShader</span>: <span class="string">&quot;
+              uniform lowp sampler2D source; // this item
+              uniform lowp float qt_Opacity; // inherited opacity of this item
+              varying highp vec2 qt_TexCoord0;
+              void main() {
+                  lowp vec4 p = texture2D(source, qt_TexCoord0);
+                  lowp float g = dot(p.xyz, vec3(0.344, 0.5, 0.156));
+                  gl_FragColor = vec4(g, g, g, p.a) * qt_Opacity;
+              }&quot;</span>
+      }
+
+</pre>
+</td></tr>
+</table></div>
+<p>It is also possible to combine multiple layered items:</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><img src="images/qml-shadereffect-opacitymask.png" alt="" /></td></tr>
+<tr valign="top" class="even"><td ><pre class="qml">
+
+      <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">gradientRect</span>;
+          <span class="name">width</span>: <span class="number">10</span>
+          <span class="name">height</span>: <span class="number">10</span>
+          <span class="name">gradient</span>: <span class="name">Gradient</span> {
+              <span class="type"><a href="qml-qtquick-gradientstop.html">GradientStop</a></span> { <span class="name">position</span>: <span class="number">0</span>; <span class="name">color</span>: <span class="string">&quot;white&quot;</span> }
+              <span class="type"><a href="qml-qtquick-gradientstop.html">GradientStop</a></span> { <span class="name">position</span>: <span class="number">1</span>; <span class="name">color</span>: <span class="string">&quot;steelblue&quot;</span> }
+          }
+          <span class="name">visible</span>: <span class="number">false</span>; <span class="comment">// should not be visible on screen.</span>
+          <span class="name">layer</span>.enabled: <span class="number">true</span>;
+          <span class="name">layer</span>.smooth: <span class="number">true</span>
+      }
+
+      <span class="type"><a href="qml-qtquick-text.html">Text</a></span> {
+          <span class="name">id</span>: <span class="name">textItem</span>
+          <span class="name">font</span>.pixelSize: <span class="number">48</span>
+          <span class="name">text</span>: <span class="string">&quot;Gradient Text&quot;</span>
+          <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+          <span class="name">layer</span>.enabled: <span class="number">true</span>
+          <span class="comment">// This item should be used as the 'mask'</span>
+          <span class="name">layer</span>.samplerName: <span class="string">&quot;maskSource&quot;</span>
+          <span class="name">layer</span>.effect: <span class="name">ShaderEffect</span> {
+              property <span class="type"><a href="../qtqml/qml-var.html">var</a></span> <span class="name">colorSource</span>: <span class="name">gradientRect</span>;
+              <span class="name">fragmentShader</span>: <span class="string">&quot;
+                  uniform lowp sampler2D colorSource;
+                  uniform lowp sampler2D maskSource;
+                  uniform lowp float qt_Opacity;
+                  varying highp vec2 qt_TexCoord0;
+                  void main() {
+                      gl_FragColor =
+                          texture2D(colorSource, qt_TexCoord0)
+                          * texture2D(maskSource, qt_TexCoord0).a
+                          * qt_Opacity;
+                  }
+              &quot;</span>
+          }
+      }
+
+</pre>
+</td></tr>
+</table></div>
+<a name="other-notes"></a>
+<h2 id="other-notes">Other Notes</h2>
+<p>By default, the <a href="qml-qtquick-shadereffect.html">ShaderEffect</a> consists of four vertices, one for each corner. For non-linear vertex transformations, like page curl, you can specify a fine grid of vertices by specifying a <a href="qml-qtquick-shadereffect.html#mesh-prop">mesh</a> resolution.</p>
+<p>The <a href="../qtgraphicaleffects/qtgraphicaleffects-index.html">Qt Graphical Effects</a> module contains several ready-made effects for using with Qt Quick applications.</p>
+<p><b>See also </b><a href="qml-qtquick-item.html#item-layers">Item Layers</a>.</p>
+<!-- @@@ShaderEffect -->
+<h2>Property Documentation</h2>
+<!-- $$$blending -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="blending-prop"></a><span class="name">blending</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If this property is true, the output from the <a href="qml-qtquick-shadereffect.html#fragmentShader-prop">fragmentShader</a> is blended with the background using source-over blend mode. If false, the background is disregarded. Blending decreases the performance, so you should set this property to false when blending is not needed. The default value is true.</p>
+</div></div><!-- @@@blending -->
+<br/>
+<!-- $$$cullMode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="cullMode-prop"></a><span class="name">cullMode</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property defines which sides of the item should be visible.</p>
+<ul>
+<li><a href="qml-qtquick-shadereffect.html">ShaderEffect</a>.NoCulling - Both sides are visible</li>
+<li><a href="qml-qtquick-shadereffect.html">ShaderEffect</a>.BackFaceCulling - only front side is visible</li>
+<li><a href="qml-qtquick-shadereffect.html">ShaderEffect</a>.FrontFaceCulling - only back side is visible</li>
+</ul>
+<p>The default is NoCulling.</p>
+</div></div><!-- @@@cullMode -->
+<br/>
+<!-- $$$fragmentShader -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="fragmentShader-prop"></a><span class="name">fragmentShader</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the fragment (pixel) shader's source code or a reference to the pre-compiled bytecode. Some APIs, like OpenGL, always support runtime compilation and therefore the traditional Qt Quick way of inlining shader source strings is functional. Qt Quick backends for other APIs may however limit support to pre-compiled bytecode like SPIR-V or D3D shader bytecode. There the string is simply a filename, which may be a file in the filesystem or bundled with the executable via Qt's resource system.</p>
+<p>With GLSL the default shader expects the texture coordinate to be passed from the vertex shader as <code>varying highp vec2 qt_TexCoord0</code>, and it samples from a sampler2D named <code>source</code>. With HLSL the texture is named <code>source</code>, while the vertex shader is expected to provide <code>float2 coord : TEXCOORD0</code> in its output in addition to <code>float4 position : SV_POSITION</code> (names can differ since linking is done based on the semantics).</p>
+<p><b>See also </b><a href="qml-qtquick-shadereffect.html#vertexShader-prop">vertexShader</a> and <a href="qml-qtquick-graphicsinfo.html">GraphicsInfo</a>.</p>
+</div></div><!-- @@@fragmentShader -->
+<br/>
+<!-- $$$log -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="log-prop"></a><span class="name">log</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds a log of warnings and errors from the latest attempt at compiling and linking the OpenGL shader program. It is updated at the same time <a href="qml-qtquick-shadereffect.html#status-prop">status</a> is set to Compiled or Error.</p>
+<p><b>See also </b><a href="qml-qtquick-shadereffect.html#status-prop">status</a>.</p>
+</div></div><!-- @@@log -->
+<br/>
+<!-- $$$mesh -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="mesh-prop"></a><span class="name">mesh</span> : <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property defines the mesh used to draw the <a href="qml-qtquick-shadereffect.html">ShaderEffect</a>. It can hold any <a href="qml-qtquick-gridmesh.html">GridMesh</a> object. If a size value is assigned to this property, the <a href="qml-qtquick-shadereffect.html">ShaderEffect</a> implicitly uses a <a href="qml-qtquick-gridmesh.html">GridMesh</a> with the value as <a href="qml-qtquick-gridmesh.html#resolution-prop">mesh resolution</a>. By default, this property is the size 1x1.</p>
+<p><b>See also </b><a href="qml-qtquick-gridmesh.html">GridMesh</a>.</p>
+</div></div><!-- @@@mesh -->
+<br/>
+<!-- $$$status -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="status-prop"></a><span class="name">status</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property tells the current status of the OpenGL shader program.</p>
+<ul>
+<li><a href="qml-qtquick-shadereffect.html">ShaderEffect</a>.Compiled - the shader program was successfully compiled and linked.</li>
+<li><a href="qml-qtquick-shadereffect.html">ShaderEffect</a>.Uncompiled - the shader program has not yet been compiled.</li>
+<li><a href="qml-qtquick-shadereffect.html">ShaderEffect</a>.Error - the shader program failed to compile or link.</li>
+</ul>
+<p>When setting the fragment or vertex shader source code, the status will become Uncompiled. The first time the <a href="qml-qtquick-shadereffect.html">ShaderEffect</a> is rendered with new shader source code, the shaders are compiled and linked, and the status is updated to Compiled or Error.</p>
+<p>When runtime compilation is not in use and the shader properties refer to files with bytecode, the status is always Compiled. The contents of the shader is not examined (apart from basic reflection to discover vertex input elements and constant buffer data) until later in the rendering pipeline so potential errors (like layout or root signature mismatches) will only be detected at a later point.</p>
+<p><b>See also </b><a href="qml-qtquick-shadereffect.html#log-prop">log</a>.</p>
+</div></div><!-- @@@status -->
+<br/>
+<!-- $$$supportsAtlasTextures -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="supportsAtlasTextures-prop"></a><span class="name">supportsAtlasTextures</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Set this property true to confirm that your shader code doesn't rely on qt_MultiTexCoord0 ranging from (0,0) to (1,1) relative to the mesh. In this case the range of qt_MultiTexCoord0 will rather be based on the position of the texture within the atlas. This property currently has no effect if there is less, or more, than one sampler uniform used as input to your shader.</p>
+<p>This differs from providing qt_SubRect_&lt;name&gt; uniforms in that the latter allows drawing one or more textures from the atlas in a single <a href="qml-qtquick-shadereffect.html">ShaderEffect</a> item, while supportsAtlasTextures allows multiple instances of a <a href="qml-qtquick-shadereffect.html">ShaderEffect</a> component using a different source image from the atlas to be batched in a single draw. Both prevent a texture from being copied out of the atlas when referenced by a <a href="qml-qtquick-shadereffect.html">ShaderEffect</a>.</p>
+<p>The default value is false.</p>
+<p>This property was introduced in  QtQuick 2.4.</p>
+</div></div><!-- @@@supportsAtlasTextures -->
+<br/>
+<!-- $$$vertexShader -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="vertexShader-prop"></a><span class="name">vertexShader</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the vertex shader's source code or a reference to the pre-compiled bytecode. Some APIs, like OpenGL, always support runtime compilation and therefore the traditional Qt Quick way of inlining shader source strings is functional. Qt Quick backends for other APIs may however limit support to pre-compiled bytecode like SPIR-V or D3D shader bytecode. There the string is simply a filename, which may be a file in the filesystem or bundled with the executable via Qt's resource system.</p>
+<p>With GLSL the default shader passes the texture coordinate along to the fragment shader as <code>varying highp vec2 qt_TexCoord0</code>. With HLSL it is enough to use the standard <code>TEXCOORD0</code> semantic, for example <code>float2 coord : TEXCOORD0</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-shadereffect.html#fragmentShader-prop">fragmentShader</a> and <a href="qml-qtquick-graphicsinfo.html">GraphicsInfo</a>.</p>
+</div></div><!-- @@@vertexShader -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

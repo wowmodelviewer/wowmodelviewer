@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qt-conf.qdoc -->
+  <title>Using qt.conf | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Using qt.conf</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#format-and-location">Format and Location</a></li>
+<li class="level1"><a href="#overriding-paths">Overriding Paths</a></li>
+<li class="level1"><a href="#configuring-arguments-to-the-platform-plugins">Configuring Arguments to the Platform Plugins</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Using qt.conf</h1>
+<span class="subtitle"></span>
+<!-- $$$qt-conf.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>You can use the <code>qt.conf</code> file to override paths or to specify arguments to be passed to the platform plugins.</p>
+<a name="format-and-location"></a>
+<h2 id="format-and-location">Format and Location</h2>
+<p>The <code>qt.conf</code> file is an INI text file, as described in the <a href="../qtcore/qsettings.html#Format-enum">QSettings</a> documentation.</p>
+<p><a href="../qtcore/qlibraryinfo.html">QLibraryInfo</a> will load <code>qt.conf</code> from one of the following locations:</p>
+<ol class="1" type="1"><li><code>:/qt/etc/qt.conf</code> using the resource system</li>
+<li>on macOS, in the Resource directory inside the application bundle, for example <code>assistant.app/Contents/Resources/qt.conf</code></li>
+<li>in the directory containing the application executable, i.e&#x2e; <a href="../qtcore/qcoreapplication.html#applicationDirPath">QCoreApplication::applicationDirPath</a>() + <a href="../qtcore/qdir.html#separator">QDir::separator</a>() + &quot;qt.conf&quot;</li>
+</ol>
+<a name="overriding-paths"></a>
+<h2 id="overriding-paths">Overriding Paths</h2>
+<p>The <code>qt.conf</code> file can be used to override the hard-coded paths that are compiled into the Qt library. These paths are accessible using the <a href="../qtcore/qlibraryinfo.html">QLibraryInfo</a> class. Without <code>qt.conf</code>, the functions in <a href="../qtcore/qlibraryinfo.html">QLibraryInfo</a> return these hard-coded paths; otherwise they return the paths as specified in <code>qt.conf</code>.</p>
+<p>Without <code>qt.conf</code>, the Qt libraries will use the hard-coded paths to look for plugins, translations, and so on. These paths may not exist on the target system, or they may not be accessible. Because of this, you may need <code>qt.conf</code> to make the Qt libraries look elsewhere.</p>
+<p>The file should have a <code>Paths</code> group which contains the entries that correspond to each value of the <a href="../qtcore/qlibraryinfo.html#LibraryLocation-enum">QLibraryInfo::LibraryLocation</a> enum. See the <a href="../qtcore/qlibraryinfo.html">QLibraryInfo</a> documentation for details on the meaning of the various locations.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Entry</th><th >Default Value</th></tr></thead>
+<tr valign="top" class="odd"><td >Prefix</td><td ><a href="../qtcore/qcoreapplication.html#applicationDirPath">QCoreApplication::applicationDirPath</a>()</td></tr>
+<tr valign="top" class="even"><td >Documentation</td><td ><code>doc</code></td></tr>
+<tr valign="top" class="odd"><td >Headers</td><td ><code>include</code></td></tr>
+<tr valign="top" class="even"><td >Libraries</td><td ><code>lib</code></td></tr>
+<tr valign="top" class="odd"><td >LibraryExecutables</td><td ><code>libexec</code></td></tr>
+<tr valign="top" class="even"><td >Binaries</td><td ><code>bin</code></td></tr>
+<tr valign="top" class="odd"><td >Plugins</td><td ><code>plugins</code></td></tr>
+<tr valign="top" class="even"><td >Imports</td><td ><code>imports</code></td></tr>
+<tr valign="top" class="odd"><td >Qml2Imports</td><td ><code>qml</code></td></tr>
+<tr valign="top" class="even"><td >ArchData</td><td ><code>.</code></td></tr>
+<tr valign="top" class="odd"><td >Data</td><td ><code>.</code></td></tr>
+<tr valign="top" class="even"><td >Translations</td><td ><code>translations</code></td></tr>
+<tr valign="top" class="odd"><td >Examples</td><td ><code>examples</code></td></tr>
+<tr valign="top" class="even"><td >Tests</td><td ><code>tests</code></td></tr>
+<tr valign="top" class="odd"><td >Settings</td><td ><code>.</code></td></tr>
+</table></div>
+<p>Absolute paths are used as specified in the <code>qt.conf</code> file. All paths are relative to the <code>Prefix</code>. On Windows and X11, the <code>Prefix</code> is relative to the directory containing the application executable (<a href="../qtcore/qcoreapplication.html#applicationDirPath">QCoreApplication::applicationDirPath</a>()). On macOS, the <code>Prefix</code> is relative to the <code>Contents</code> in the application bundle. For example, <code>application.app/Contents/plugins/</code> is the default location for loading Qt plugins. Note that the plugins need to be placed in specific sub-directories under the <code>plugins</code> directory (see <a href="plugins-howto.html">How to Create Qt Plugins</a> for details).</p>
+<p>For example, a <code>qt.conf</code> file could contain the following:</p>
+<pre class="cpp">
+
+  <span class="operator">[</span>Paths<span class="operator">]</span>
+  Prefix <span class="operator">=</span> <span class="operator">/</span>some<span class="operator">/</span>path
+  Translations <span class="operator">=</span> i18n
+
+</pre>
+<p><b>Note: </b>The backslash character is treated as a special character in INI files (see <a href="../qtcore/qsettings.html">QSettings</a>). It is therefore recommended to use forward slashes for paths on Windows as well. Otherwise, an escape character is required:</p><pre class="cpp">
+
+  Prefix <span class="operator">=</span> c:\\SomePath
+
+</pre>
+<a name="configuring-arguments-to-the-platform-plugins"></a>
+<h2 id="configuring-arguments-to-the-platform-plugins">Configuring Arguments to the Platform Plugins</h2>
+<p>The <code>qt.conf</code> may contain a <code>Platforms</code> group, whose keys are comma-delimited lists of arguments to be passed to the platform plugin. The key name is the name of the platform plugin with the first letter upper-cased followed by <code>Arguments</code>.</p>
+<p>For example:</p>
+<pre class="cpp">
+
+  <span class="operator">[</span>Platforms<span class="operator">]</span>
+  WindowsArguments <span class="operator">=</span> fontengine<span class="operator">=</span>freetype
+
+</pre>
+<p>would cause the Windows platform plugin to use the <a href="qt-embedded-fonts.html#freetype">FreeType</a> font engine.</p>
+</div>
+<!-- @@@qt-conf.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- jsextension-process.qdoc -->
+  <title>Process Service | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td><td >Process Service</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<p class="naviNextPrevious headerNavi">
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#available-operations">Available Operations</a></li>
+<li class="level2"><a href="#constructor">Constructor</a></li>
+<li class="level2"><a href="#close">close</a></li>
+<li class="level2"><a href="#closewritechannel">closeWriteChannel</a></li>
+<li class="level2"><a href="#exec">exec</a></li>
+<li class="level2"><a href="#exitcode">exitCode</a></li>
+<li class="level2"><a href="#getenv">getEnv</a></li>
+<li class="level2"><a href="#kill">kill</a></li>
+<li class="level2"><a href="#readline">readLine</a></li>
+<li class="level2"><a href="#atend">atEnd</a></li>
+<li class="level2"><a href="#readstderr">readStdErr</a></li>
+<li class="level2"><a href="#readstdout">readStdOut</a></li>
+<li class="level2"><a href="#setcodec">setCodec</a></li>
+<li class="level2"><a href="#setenv">setEnv</a></li>
+<li class="level2"><a href="#setworkingdirectory">setWorkingDirectory</a></li>
+<li class="level2"><a href="#start">start</a></li>
+<li class="level2"><a href="#terminate">terminate</a></li>
+<li class="level2"><a href="#waitforfinished">waitForFinished</a></li>
+<li class="level2"><a href="#workingdirectory">workingDirectory</a></li>
+<li class="level2"><a href="#write">write</a></li>
+<li class="level2"><a href="#writeline">writeLine</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Process Service</h1>
+<span class="subtitle"></span>
+<!-- $$$jsextension-process.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The <code>Process</code> service allows you to start processes, track their output, and so on.</p>
+<a name="available-operations"></a>
+<h2 id="available-operations">Available Operations</h2>
+<a name="constructor"></a>
+<h3 id="constructor">Constructor</h3>
+<pre class="cpp">
+
+  Process()
+
+</pre>
+<p>Allocates and returns a new Process object.</p>
+<a name="close"></a>
+<h3 id="close">close</h3>
+<pre class="cpp">
+
+  close(): <span class="type">void</span>
+
+</pre>
+<p>Frees the resources associated with the process. It is recommended to always call this function as soon as you are finished with the process.</p>
+<a name="closewritechannel"></a>
+<h3 id="closewritechannel">closeWriteChannel</h3>
+<pre class="cpp">
+
+  closeWriteChannel(): <span class="type">void</span>
+
+</pre>
+<p>Schedules the stdin channel of process to be closed. The channel will close once all data has been written to the process. After calling this function, any attempts to write to the process will do nothing. See <code>QProcess::closeWriteChannel()</code> for more details.</p>
+<a name="exec"></a>
+<h3 id="exec">exec</h3>
+<pre class="cpp">
+
+  exec(filePath: string<span class="operator">,</span> arguments: string<span class="operator">[</span><span class="operator">]</span><span class="operator">,</span> throwOnError: boolean): number
+
+</pre>
+<p>Executes the program at <code>filePath</code> with the given argument list and blocks until the process is finished. If an error occurs (for example, there is no executable file at <code>filePath</code>) and <code>throwOnError</code> is true, then a JavaScript exception will be thrown. Otherwise (the default), -1 will be returned in case of an error. The normal return code is the exit code of the process.</p>
+<a name="exitcode"></a>
+<h3 id="exitcode">exitCode</h3>
+<pre class="cpp">
+
+  exitCode(): number
+
+</pre>
+<p>Returns the exit code of the process. This is needed for retrieving the exit code from processes started via <code>start()</code>, rather than <code>exec()</code>.</p>
+<a name="getenv"></a>
+<h3 id="getenv">getEnv</h3>
+<pre class="cpp">
+
+  getEnv(varName: string): string
+
+</pre>
+<p>Returns the value of the variable <code>varName</code> in the process' environment.</p>
+<a name="kill"></a>
+<h3 id="kill">kill</h3>
+<pre class="cpp">
+
+  kill(): <span class="type">void</span>
+
+</pre>
+<p>Kills the process, causing it to exit immediately.</p>
+<a name="readline"></a>
+<h3 id="readline">readLine</h3>
+<pre class="cpp">
+
+  readLine(): string
+
+</pre>
+<p>Reads and returns one line of text from the process output, without the newline character(s).</p>
+<a name="atend"></a>
+<h3 id="atend">atEnd</h3>
+<pre class="cpp">
+
+  atEnd(): boolean
+
+</pre>
+<p>Returns true if there is no more data to be read from the process output, otherwise returns false.</p>
+<a name="readstderr"></a>
+<h3 id="readstderr">readStdErr</h3>
+<pre class="cpp">
+
+  readStdErr(): string
+
+</pre>
+<p>Reads and returns all data from the process' standard error channel.</p>
+<a name="readstdout"></a>
+<h3 id="readstdout">readStdOut</h3>
+<pre class="cpp">
+
+  readStdOut(): string
+
+</pre>
+<p>Reads and returns all data from the process' standard output channel.</p>
+<a name="setcodec"></a>
+<h3 id="setcodec">setCodec</h3>
+<pre class="cpp">
+
+  setCodec(codec)
+
+</pre>
+<p>Sets the text codec to <code>codec</code>. The codec is used for reading and writing from and to the process, respectively. The supported codecs are the same as for <code>QTextCodec</code>, for example: &quot;UTF-8&quot;, &quot;UTF-16&quot;, and &quot;ISO 8859-1&quot;.</p>
+<a name="setenv"></a>
+<h3 id="setenv">setEnv</h3>
+<pre class="cpp">
+
+  setEnv(varName: string<span class="operator">,</span> varValue: string): string
+
+</pre>
+<p>Sets the value of variable <code>varName</code> to <code>varValue</code> in the process environment. This only has an effect if called before the process is started.</p>
+<a name="setworkingdirectory"></a>
+<h3 id="setworkingdirectory">setWorkingDirectory</h3>
+<pre class="cpp">
+
+  setWorkingDirectory(path: string): <span class="type">void</span>
+
+</pre>
+<p>Sets the directory the process will be started in. This only has an effect if called before the process is started.</p>
+<a name="start"></a>
+<h3 id="start">start</h3>
+<pre class="cpp">
+
+  start(filePath: string<span class="operator">,</span> arguments: string<span class="operator">[</span><span class="operator">]</span>): boolean
+
+</pre>
+<p>Starts the program at <code>filePath</code> with the given list of arguments. Returns <code>true</code> if the process could be started and <code>false</code> otherwise.</p>
+<p><b>Note: </b>This call returns right after starting the process and should be used only if you need to interact with the process while it is running. Most of the time, you want to use <code>exec()</code> instead.</p><a name="terminate"></a>
+<h3 id="terminate">terminate</h3>
+<pre class="cpp">
+
+  terminate(): <span class="type">void</span>
+
+</pre>
+<p>Tries to terminate the process. This is not guaranteed to make the process exit immediately; if you need that, use <code>kill()</code>.</p>
+<a name="waitforfinished"></a>
+<h3 id="waitforfinished">waitForFinished</h3>
+<pre class="cpp">
+
+  waitForFinished(timeout: number): boolean
+
+</pre>
+<p>Blocks until the process has finished or <code>timeout</code> milliseconds have passed (default is 30000). Returns true if the process has finished and false if the operation has timed out. Calling this function only makes sense for processes started via <code>start()</code> (as opposed to <code>exec()</code>).</p>
+<a name="workingdirectory"></a>
+<h3 id="workingdirectory">workingDirectory</h3>
+<pre class="cpp">
+
+  workingDirectory(): string
+
+</pre>
+<p>Returns the directory the process will be started in.</p>
+<a name="write"></a>
+<h3 id="write">write</h3>
+<pre class="cpp">
+
+  write(data: string): <span class="type">void</span>
+
+</pre>
+<p>Writes <code>data</code> into the process' input channel.</p>
+<a name="writeline"></a>
+<h3 id="writeline">writeLine</h3>
+<pre class="cpp">
+
+  writeLine(data: string): <span class="type">void</span>
+
+</pre>
+<p>Writes <code>data</code>, followed by the newline character(s), into the process' input channel.</p>
+</div>
+<!-- @@@jsextension-process.html -->
+<p class="naviNextPrevious footerNavi">
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

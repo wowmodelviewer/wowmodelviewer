@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwaylandview.cpp -->
+  <title>QWaylandView Class | Qt Wayland Compositor 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwaylandcompositor-index.html">Qt Wayland Compositor</a></td><td ><a href="qtwaylandcompositor-module.html">C++ Classes</a></td><td >QWaylandView</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwaylandcompositor-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QWaylandView Class</h1>
+<!-- $$$QWaylandView-brief -->
+<p>The <a href="qwaylandview.html">QWaylandView</a> class represents a view of a surface on an output. <a href="#details">More...</a></p>
+<!-- @@@QWaylandView -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QWaylandView&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += waylandcompositor</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.8.</p>
+<ul>
+<li><a href="qwaylandview-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qwaylandview.html#allowDiscardFrontBuffer-prop">allowDiscardFrontBuffer</a></b> : bool</li>
+<li class="fn"><b><a href="qwaylandview.html#bufferLocked-prop">bufferLocked</a></b> : bool</li>
+<li class="fn"><b><a href="qwaylandview.html#output-prop">output</a></b> : QWaylandOutput*</li>
+<li class="fn"><b><a href="qwaylandview.html#surface-prop">surface</a></b> : QWaylandSurface*</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwaylandview.html#QWaylandView">QWaylandView</a></b>(QObject *<i>renderObject</i> = nullptr, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qwaylandview.html#dtor.QWaylandView">~QWaylandView</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qwaylandview.html#advance">advance</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwaylandview.html#allowDiscardFrontBuffer-prop">allowDiscardFrontBuffer</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandview.html#bufferCommitted">bufferCommitted</a></b>(const QWaylandBufferRef &amp;<i>buffer</i>, const QRegion &amp;<i>damage</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QWaylandBufferRef </td><td class="memItemRight bottomAlign"><b><a href="qwaylandview.html#currentBuffer">currentBuffer</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QRegion </td><td class="memItemRight bottomAlign"><b><a href="qwaylandview.html#currentDamage">currentDamage</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandview.html#discardCurrentBuffer">discardCurrentBuffer</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwaylandview.html#bufferLocked-prop">isBufferLocked</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwaylandview.html#isPrimary">isPrimary</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandOutput *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandview.html#output-prop">output</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandview.html#allowDiscardFrontBuffer-prop">setAllowDiscardFrontBuffer</a></b>(bool <i>discard</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandview.html#bufferLocked-prop">setBufferLocked</a></b>(bool <i>locked</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandview.html#output-prop">setOutput</a></b>(QWaylandOutput *<i>output</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandview.html#setPrimary">setPrimary</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandview.html#surface-prop">setSurface</a></b>(QWaylandSurface *<i>surface</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandSurface *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandview.html#surface-prop">surface</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> struct wl_resource *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandview.html#surfaceResource">surfaceResource</a></b>() const</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandview.html#allowDiscardFrontBuffer-prop">allowDiscardFrontBufferChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandview.html#bufferLocked-prop">bufferLockedChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandview.html#output-prop">outputChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandview.html#surface-prop">surfaceChanged</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QWaylandView-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qwaylandview.html">QWaylandView</a> corresponds to the presentation of a surface on a specific output, managing the buffers that contain the contents to be rendered. You can have several views into the same surface.</p>
+</div>
+<!-- @@@QWaylandView -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$allowDiscardFrontBuffer-prop$$$allowDiscardFrontBuffer$$$setAllowDiscardFrontBufferbool$$$allowDiscardFrontBufferChanged -->
+<h3 class="fn" id="allowDiscardFrontBuffer-prop"><a name="allowDiscardFrontBuffer-prop"></a><span class="name">allowDiscardFrontBuffer</span> : <span class="type">bool</span></h3>
+<p>By default, the view locks the current buffer until <a href="qwaylandview.html#advance">advance</a>() is called. Set this property to <code>true</code> to allow Qt to release the buffer when the primary view is no longer using it.</p>
+<p>This can be used to avoid the situation where a secondary view that updates on a lower frequency will throttle the frame rate of the client application.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>allowDiscardFrontBuffer</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setAllowDiscardFrontBuffer</b></span>(bool <i>discard</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>allowDiscardFrontBufferChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@allowDiscardFrontBuffer -->
+<!-- $$$bufferLocked-prop$$$isBufferLocked$$$setBufferLockedbool$$$bufferLockedChanged -->
+<h3 class="fn" id="bufferLocked-prop"><a name="bufferLocked-prop"></a><span class="name">bufferLocked</span> : <span class="type">bool</span></h3>
+<p>This property holds whether the view's buffer is currently locked. When the buffer is locked, <a href="qwaylandview.html#advance">advance</a>() will not advance to the next buffer and returns <code>false</code>.</p>
+<p>The default is <code>false</code>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>isBufferLocked</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setBufferLocked</b></span>(bool <i>locked</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>bufferLockedChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@bufferLocked -->
+<!-- $$$output-prop$$$output$$$setOutputQWaylandOutput*$$$outputChanged -->
+<h3 class="fn" id="output-prop"><a name="output-prop"></a><span class="name">output</span> : <span class="type"><a href="qwaylandoutput.html">QWaylandOutput</a></span>*</h3>
+<p>This property holds the output on which this view displays its surface.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QWaylandOutput *</td><td class="memItemRight bottomAlign"><span class="name"><b>output</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setOutput</b></span>(QWaylandOutput *<i>output</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>outputChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@output -->
+<!-- $$$surface-prop$$$surface$$$setSurfaceQWaylandSurface*$$$surfaceChanged -->
+<h3 class="fn" id="surface-prop"><a name="surface-prop"></a><span class="name">surface</span> : <span class="type"><a href="qwaylandsurface.html">QWaylandSurface</a></span>*</h3>
+<p>This property holds the surface viewed by this <a href="qwaylandview.html">QWaylandView</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QWaylandSurface *</td><td class="memItemRight bottomAlign"><span class="name"><b>surface</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setSurface</b></span>(QWaylandSurface *<i>surface</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>surfaceChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@surface -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QWaylandView[overload1]$$$QWaylandViewQObject*QObject* -->
+<h3 class="fn" id="QWaylandView"><a name="QWaylandView"></a>QWaylandView::<span class="name">QWaylandView</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>renderObject</i> = nullptr, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a <a href="qwaylandview.html">QWaylandView</a> with the given <i>renderObject</i> and <i>parent</i>.</p>
+<!-- @@@QWaylandView -->
+<!-- $$$~QWaylandView[overload1]$$$~QWaylandView -->
+<h3 class="fn" id="dtor.QWaylandView"><a name="dtor.QWaylandView"></a><code>[override virtual] </code>QWaylandView::<span class="name">~QWaylandView</span>()</h3>
+<p>Destroys the <a href="qwaylandview.html">QWaylandView</a>.</p>
+<!-- @@@~QWaylandView -->
+<!-- $$$advance[overload1]$$$advance -->
+<h3 class="fn" id="advance"><a name="advance"></a><code>[virtual] </code><span class="type">bool</span> QWaylandView::<span class="name">advance</span>()</h3>
+<p>Updates the current buffer and damage region to the latest version committed by the client. Returns true if new content was committed since the previous call to advance(). Otherwise returns false.</p>
+<p><b>See also </b><a href="qwaylandview.html#currentBuffer">currentBuffer</a>() and <a href="qwaylandview.html#currentDamage">currentDamage</a>().</p>
+<!-- @@@advance -->
+<!-- $$$bufferCommitted[overload1]$$$bufferCommittedconstQWaylandBufferRef&constQRegion& -->
+<h3 class="fn" id="bufferCommitted"><a name="bufferCommitted"></a><code>[virtual] </code><span class="type">void</span> QWaylandView::<span class="name">bufferCommitted</span>(const <span class="type"><a href="qwaylandbufferref.html">QWaylandBufferRef</a></span> &amp;<i>buffer</i>, const <span class="type"><a href="../qtgui/qregion.html">QRegion</a></span> &amp;<i>damage</i>)</h3>
+<p>This function is called when a new <i>buffer</i> is committed to this view's surface. <i>damage</i> contains the region that is different from the current buffer, i.e&#x2e; the region that needs to be updated. The new <i>buffer</i> will become current on the next call to <a href="qwaylandview.html#advance">advance</a>().</p>
+<p>Subclasses that reimplement this function <i>must</i> call the base implementation.</p>
+<!-- @@@bufferCommitted -->
+<!-- $$$currentBuffer[overload1]$$$currentBuffer -->
+<h3 class="fn" id="currentBuffer"><a name="currentBuffer"></a><code>[virtual] </code><span class="type"><a href="qwaylandbufferref.html">QWaylandBufferRef</a></span> QWaylandView::<span class="name">currentBuffer</span>()</h3>
+<p>Returns a reference to this view's current buffer.</p>
+<!-- @@@currentBuffer -->
+<!-- $$$currentDamage[overload1]$$$currentDamage -->
+<h3 class="fn" id="currentDamage"><a name="currentDamage"></a><code>[virtual] </code><span class="type"><a href="../qtgui/qregion.html">QRegion</a></span> QWaylandView::<span class="name">currentDamage</span>()</h3>
+<p>Returns the current damage region of this view.</p>
+<!-- @@@currentDamage -->
+<!-- $$$discardCurrentBuffer[overload1]$$$discardCurrentBuffer -->
+<h3 class="fn" id="discardCurrentBuffer"><a name="discardCurrentBuffer"></a><code>[virtual] </code><span class="type">void</span> QWaylandView::<span class="name">discardCurrentBuffer</span>()</h3>
+<p>Force the view to discard its current buffer, to allow it to be reused on the client side.</p>
+<!-- @@@discardCurrentBuffer -->
+<!-- $$$isPrimary[overload1]$$$isPrimary -->
+<h3 class="fn" id="isPrimary"><a name="isPrimary"></a><span class="type">bool</span> QWaylandView::<span class="name">isPrimary</span>() const</h3>
+<p>Returns true if this <a href="qwaylandview.html">QWaylandView</a> is the primary view for the <a href="qwaylandsurface.html">QWaylandSurface</a></p>
+<p><b>See also </b><a href="qwaylandsurface.html#primaryView">QWaylandSurface::primaryView</a>.</p>
+<!-- @@@isPrimary -->
+<!-- $$$setPrimary[overload1]$$$setPrimary -->
+<h3 class="fn" id="setPrimary"><a name="setPrimary"></a><span class="type">void</span> QWaylandView::<span class="name">setPrimary</span>()</h3>
+<p>Makes this <a href="qwaylandview.html">QWaylandView</a> the primary view for the surface.</p>
+<p>It has no effect if this <a href="qwaylandview.html">QWaylandView</a> is not holding any <a href="qwaylandsurface.html">QWaylandSurface</a></p>
+<p><b>See also </b><a href="qwaylandview.html#isPrimary">isPrimary</a>() and <a href="qwaylandsurface.html#primaryView">QWaylandSurface::primaryView</a>.</p>
+<!-- @@@setPrimary -->
+<!-- $$$surfaceResource[overload1]$$$surfaceResource -->
+<h3 class="fn" id="surfaceResource"><a name="surfaceResource"></a><span class="type">struct</span> <span class="type">wl_resource</span> *QWaylandView::<span class="name">surfaceResource</span>() const</h3>
+<p>Returns the Wayland surface resource for this <a href="qwaylandview.html">QWaylandView</a>.</p>
+<!-- @@@surfaceResource -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

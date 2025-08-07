@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickview.cpp -->
+  <title>QQuickView Class | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-module.html">C++ Classes</a></td><td >QQuickView</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QQuickView Class</h1>
+<!-- $$$QQuickView-brief -->
+<p>The <a href="qquickview.html">QQuickView</a> class provides a window for displaying a Qt Quick user interface. <a href="#details">More...</a></p>
+<!-- @@@QQuickView -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QQuickView&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += quick</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.0</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qquickwindow.html">QQuickWindow</a></td></tr></table></div><p>This class was introduced in  Qt 5.0.</p>
+<ul>
+<li><a href="qquickview-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qquickview.html#ResizeMode-enum">ResizeMode</a></b> { SizeViewToRootObject, SizeRootObjectToView }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qquickview.html#Status-enum">Status</a></b> { Null, Ready, Loading, Error }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qquickview.html#resizeMode-prop">resizeMode</a></b> : ResizeMode</li>
+<li class="fn"><b><a href="qquickview.html#source-prop">source</a></b> : QUrl</li>
+<li class="fn"><b><a href="qquickview.html#status-prop">status</a></b> : const Status</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qquickview.html#QQuickView-2">QQuickView</a></b>(const QUrl &amp;<i>source</i>, QWindow *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qquickview.html#QQuickView-1">QQuickView</a></b>(QQmlEngine *<i>engine</i>, QWindow *<i>parent</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qquickview.html#QQuickView">QQuickView</a></b>(QWindow *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qquickview.html#dtor.QQuickView">~QQuickView</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQmlEngine *</td><td class="memItemRight bottomAlign"><b><a href="qquickview.html#engine">engine</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QQmlError&gt; </td><td class="memItemRight bottomAlign"><b><a href="qquickview.html#errors">errors</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qquickview.html#initialSize">initialSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQuickView::ResizeMode </td><td class="memItemRight bottomAlign"><b><a href="qquickview.html#resizeMode-prop">resizeMode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQmlContext *</td><td class="memItemRight bottomAlign"><b><a href="qquickview.html#rootContext">rootContext</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQuickItem *</td><td class="memItemRight bottomAlign"><b><a href="qquickview.html#rootObject">rootObject</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickview.html#resizeMode-prop">setResizeMode</a></b>(<i>QQuickView::ResizeMode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QUrl </td><td class="memItemRight bottomAlign"><b><a href="qquickview.html#source">source</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQuickView::Status </td><td class="memItemRight bottomAlign"><b><a href="qquickview.html#status-prop">status</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickview.html#setSource">setSource</a></b>(const QUrl &amp;<i>url</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickview.html#statusChanged">statusChanged</a></b>(QQuickView::Status <i>status</i>)</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qquickview.html#keyPressEvent">keyPressEvent</a></b>(QKeyEvent *<i>e</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qquickview.html#keyReleaseEvent">keyReleaseEvent</a></b>(QKeyEvent *<i>e</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qquickview.html#mouseMoveEvent">mouseMoveEvent</a></b>(QMouseEvent *<i>e</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qquickview.html#mousePressEvent">mousePressEvent</a></b>(QMouseEvent *<i>e</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qquickview.html#mouseReleaseEvent">mouseReleaseEvent</a></b>(QMouseEvent *<i>e</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QQuickView-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This is a convenience subclass of <a href="qquickwindow.html">QQuickWindow</a> which will automatically load and display a QML scene when given the URL of the main source file. Alternatively, you can instantiate your own objects using <a href="../qtqml/qqmlcomponent.html">QQmlComponent</a> and place them in a manually setup <a href="qquickwindow.html">QQuickWindow</a>.</p>
+<p>Typical usage:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      <span class="type"><a href="qquickview.html#QQuickView">QQuickView</a></span> <span class="operator">*</span>view <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qquickview.html#QQuickView">QQuickView</a></span>;
+      view<span class="operator">-</span><span class="operator">&gt;</span>setSource(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>fromLocalFile(<span class="string">&quot;myqmlfile.qml&quot;</span>));
+      view<span class="operator">-</span><span class="operator">&gt;</span>show();
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p>To receive errors related to loading and executing QML with <a href="qquickview.html">QQuickView</a>, you can connect to the <a href="qquickview.html#statusChanged">statusChanged</a>() signal and monitor for <a href="qquickview.html#Status-enum">QQuickView::Error</a>. The errors are available via <a href="qquickview.html#errors">QQuickView::errors</a>().</p>
+<p><a href="qquickview.html">QQuickView</a> also manages sizing of the view and root object. By default, the <a href="qquickview.html#resizeMode-prop">resizeMode</a> is <a href="qquickview.html#ResizeMode-enum">SizeViewToRootObject</a>, which will load the component and resize it to the size of the view. Alternatively the <a href="qquickview.html#resizeMode-prop">resizeMode</a> may be set to <a href="qquickview.html#ResizeMode-enum">SizeRootObjectToView</a> which will resize the view to the size of the root object.</p>
+</div>
+<p><b>See also </b><a href="../qtqml/qtqml-cppintegration-exposecppattributes.html">Exposing Attributes of C++ Types to QML</a> and <a href="qquickwidget.html">QQuickWidget</a>.</p>
+<!-- @@@QQuickView -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$ResizeMode$$$SizeViewToRootObject$$$SizeRootObjectToView -->
+<h3 class="fn" id="ResizeMode-enum"><a name="ResizeMode-enum"></a>enum QQuickView::<span class="name">ResizeMode</span></h3>
+<p>This enum specifies how to resize the view.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QQuickView::SizeViewToRootObject</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The view resizes with the root item in the QML.</td></tr>
+<tr><td class="topAlign"><code>QQuickView::SizeRootObjectToView</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The view will automatically resize the root item to the size of the view.</td></tr>
+</table></div>
+<!-- @@@ResizeMode -->
+<!-- $$$Status$$$Null$$$Ready$$$Loading$$$Error -->
+<h3 class="fn" id="Status-enum"><a name="Status-enum"></a>enum QQuickView::<span class="name">Status</span></h3>
+<p>Specifies the loading status of the <a href="qquickview.html">QQuickView</a>.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QQuickView::Null</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">This <a href="qquickview.html">QQuickView</a> has no source set.</td></tr>
+<tr><td class="topAlign"><code>QQuickView::Ready</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">This <a href="qquickview.html">QQuickView</a> has loaded and created the QML component.</td></tr>
+<tr><td class="topAlign"><code>QQuickView::Loading</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">This <a href="qquickview.html">QQuickView</a> is loading network data.</td></tr>
+<tr><td class="topAlign"><code>QQuickView::Error</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">One or more errors has occurred. Call <a href="qquickview.html#errors">errors</a>() to retrieve a list of errors.</td></tr>
+</table></div>
+<!-- @@@Status -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$resizeMode-prop$$$resizeMode$$$setResizeModeQQuickView::ResizeMode -->
+<h3 class="fn" id="resizeMode-prop"><a name="resizeMode-prop"></a><span class="name">resizeMode</span> : <span class="type"><a href="qquickview.html#ResizeMode-enum">ResizeMode</a></span></h3>
+<p>This property holds whether the view should resize the window contents</p>
+<p>If this property is set to <a href="qquickview.html#ResizeMode-enum">SizeViewToRootObject</a> (the default), the view resizes to the size of the root item in the QML.</p>
+<p>If this property is set to <a href="qquickview.html#ResizeMode-enum">SizeRootObjectToView</a>, the view will automatically resize the root item to the size of the view.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QQuickView::ResizeMode </td><td class="memItemRight bottomAlign"><span class="name"><b>resizeMode</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setResizeMode</b></span>(<i>QQuickView::ResizeMode</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qquickview.html#initialSize">initialSize</a>().</p>
+<!-- @@@resizeMode -->
+<!-- $$$source-prop$$$source$$$setSourceconstQUrl& -->
+<h3 class="fn" id="source-prop"><a name="source-prop"></a><span class="name">source</span> : <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span></h3>
+<p>This property holds the URL of the source of the QML component.</p>
+<p>Ensure that the URL provided is full and correct, in particular, use <a href="../qtcore/qurl.html#fromLocalFile">QUrl::fromLocalFile</a>() when loading a file from the local filesystem.</p>
+<p>Note that setting a source URL will result in the QML component being instantiated, even if the URL is unchanged from the current value.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QUrl </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qquickview.html#source">source</a></b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qquickview.html#setSource">setSource</a></b></span>(const QUrl &amp;<i>url</i>)</td></tr>
+</table></div>
+<!-- @@@source -->
+<!-- $$$status-prop$$$status$$$statusChangedQQuickView::Status -->
+<h3 class="fn" id="status-prop"><a name="status-prop"></a><span class="name">status</span> : const <span class="type"><a href="qquickview.html#Status-enum">Status</a></span></h3>
+<p>The component's current <a href="qquickview.html#Status-enum">status</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QQuickView::Status </td><td class="memItemRight bottomAlign"><span class="name"><b>status</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qquickview.html#statusChanged">statusChanged</a></b></span>(QQuickView::Status <i>status</i>)</td></tr>
+</table></div>
+<!-- @@@status -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QQuickView$$$QQuickViewconstQUrl&QWindow* -->
+<h3 class="fn" id="QQuickView-2"><a name="QQuickView-2"></a>QQuickView::<span class="name">QQuickView</span>(const <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> &amp;<i>source</i>, <span class="type"><a href="../qtgui/qwindow.html#QWindow">QWindow</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a <a href="qquickview.html">QQuickView</a> with the given QML <i>source</i> and <i>parent</i>. The default value of <i>parent</i> is 0.</p>
+<!-- @@@QQuickView -->
+<!-- $$$QQuickView$$$QQuickViewQQmlEngine*QWindow* -->
+<h3 class="fn" id="QQuickView-1"><a name="QQuickView-1"></a>QQuickView::<span class="name">QQuickView</span>(<span class="type"><a href="../qtqml/qqmlengine.html">QQmlEngine</a></span> *<i>engine</i>, <span class="type"><a href="../qtgui/qwindow.html#QWindow">QWindow</a></span> *<i>parent</i>)</h3>
+<p>Constructs a <a href="qquickview.html">QQuickView</a> with the given QML <i>engine</i> and <i>parent</i>.</p>
+<p>Note: In this case, the <a href="qquickview.html">QQuickView</a> does not own the given <i>engine</i> object; it is the caller's responsibility to destroy the engine. If the <i>engine</i> is deleted before the view, <a href="qquickview.html#status-prop">status</a>() will return <a href="qquickview.html#Status-enum">QQuickView::Error</a>.</p>
+<p><b>See also </b><a href="qquickview.html#Status-enum">Status</a>, <a href="qquickview.html#status-prop">status</a>(), and <a href="qquickview.html#errors">errors</a>().</p>
+<!-- @@@QQuickView -->
+<!-- $$$QQuickView[overload1]$$$QQuickViewQWindow* -->
+<h3 class="fn" id="QQuickView"><a name="QQuickView"></a>QQuickView::<span class="name">QQuickView</span>(<span class="type"><a href="../qtgui/qwindow.html#QWindow">QWindow</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a <a href="qquickview.html">QQuickView</a> with the given <i>parent</i>. The default value of <i>parent</i> is 0.</p>
+<!-- @@@QQuickView -->
+<!-- $$$setSource -->
+<h3 class="fn" id="setSource"><a name="setSource"></a><code>[slot] </code><span class="type">void</span> QQuickView::<span class="name">setSource</span>(const <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> &amp;<i>url</i>)</h3>
+<p>Sets the source to the <i>url</i>, loads the QML component and instantiates it.</p>
+<p>Ensure that the URL provided is full and correct, in particular, use <a href="../qtcore/qurl.html#fromLocalFile">QUrl::fromLocalFile</a>() when loading a file from the local filesystem.</p>
+<p>Calling this method multiple times with the same url will result in the QML component being reinstantiated.</p>
+<p><b>Note:</b> Setter function for property <a href="qquickview.html#source-prop">source</a>. </p><p><b>See also </b><a href="qquickview.html#source">source</a>().</p>
+<!-- @@@setSource -->
+<!-- $$$statusChanged -->
+<h3 class="fn" id="statusChanged"><a name="statusChanged"></a><code>[signal] </code><span class="type">void</span> QQuickView::<span class="name">statusChanged</span>(<span class="type"><a href="qquickview.html#Status-enum">QQuickView::Status</a></span> <i>status</i>)</h3>
+<p>This signal is emitted when the component's current <i>status</i> changes.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qquickview.html#status-prop">status</a>. </p><!-- @@@statusChanged -->
+<!-- $$$~QQuickView[overload1]$$$~QQuickView -->
+<h3 class="fn" id="dtor.QQuickView"><a name="dtor.QQuickView"></a><code>[override virtual] </code>QQuickView::<span class="name">~QQuickView</span>()</h3>
+<p>Destroys the <a href="qquickview.html">QQuickView</a>.</p>
+<!-- @@@~QQuickView -->
+<!-- $$$engine[overload1]$$$engine -->
+<h3 class="fn" id="engine"><a name="engine"></a><span class="type"><a href="../qtqml/qqmlengine.html">QQmlEngine</a></span> *QQuickView::<span class="name">engine</span>() const</h3>
+<p>Returns a pointer to the <a href="../qtqml/qqmlengine.html">QQmlEngine</a> used for instantiating QML Components.</p>
+<!-- @@@engine -->
+<!-- $$$errors[overload1]$$$errors -->
+<h3 class="fn" id="errors"><a name="errors"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="../qtqml/qqmlerror.html">QQmlError</a></span>&gt; QQuickView::<span class="name">errors</span>() const</h3>
+<p>Return the list of errors that occurred during the last compile or create operation. When the status is not Error, an empty list is returned.</p>
+<!-- @@@errors -->
+<!-- $$$initialSize[overload1]$$$initialSize -->
+<h3 class="fn" id="initialSize"><a name="initialSize"></a><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QQuickView::<span class="name">initialSize</span>() const</h3>
+<p>Returns the initial size of the root object.</p>
+<p>If <a href="qquickview.html#resizeMode-prop">resizeMode</a> is QQuickItem::SizeRootObjectToView the root object will be resized to the size of the view. initialSize contains the size of the root object before it was resized.</p>
+<!-- @@@initialSize -->
+<!-- $$$keyPressEvent[overload1]$$$keyPressEventQKeyEvent* -->
+<h3 class="fn" id="keyPressEvent"><a name="keyPressEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QQuickView::<span class="name">keyPressEvent</span>(<span class="type"><a href="../qtgui/qkeyevent.html">QKeyEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="qquickwindow.html#keyPressEvent">QQuickWindow::keyPressEvent</a>(QKeyEvent *e).</p>
+<!-- @@@keyPressEvent -->
+<!-- $$$keyReleaseEvent[overload1]$$$keyReleaseEventQKeyEvent* -->
+<h3 class="fn" id="keyReleaseEvent"><a name="keyReleaseEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QQuickView::<span class="name">keyReleaseEvent</span>(<span class="type"><a href="../qtgui/qkeyevent.html">QKeyEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="qquickwindow.html#keyReleaseEvent">QQuickWindow::keyReleaseEvent</a>(QKeyEvent *e).</p>
+<!-- @@@keyReleaseEvent -->
+<!-- $$$mouseMoveEvent[overload1]$$$mouseMoveEventQMouseEvent* -->
+<h3 class="fn" id="mouseMoveEvent"><a name="mouseMoveEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QQuickView::<span class="name">mouseMoveEvent</span>(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="qquickwindow.html#mouseMoveEvent">QQuickWindow::mouseMoveEvent</a>(QMouseEvent *event).</p>
+<!-- @@@mouseMoveEvent -->
+<!-- $$$mousePressEvent[overload1]$$$mousePressEventQMouseEvent* -->
+<h3 class="fn" id="mousePressEvent"><a name="mousePressEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QQuickView::<span class="name">mousePressEvent</span>(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="qquickwindow.html#mousePressEvent">QQuickWindow::mousePressEvent</a>(QMouseEvent *event).</p>
+<!-- @@@mousePressEvent -->
+<!-- $$$mouseReleaseEvent[overload1]$$$mouseReleaseEventQMouseEvent* -->
+<h3 class="fn" id="mouseReleaseEvent"><a name="mouseReleaseEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QQuickView::<span class="name">mouseReleaseEvent</span>(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="qquickwindow.html#mouseReleaseEvent">QQuickWindow::mouseReleaseEvent</a>(QMouseEvent *event).</p>
+<!-- @@@mouseReleaseEvent -->
+<!-- $$$rootContext[overload1]$$$rootContext -->
+<h3 class="fn" id="rootContext"><a name="rootContext"></a><span class="type"><a href="../qtqml/qqmlcontext.html">QQmlContext</a></span> *QQuickView::<span class="name">rootContext</span>() const</h3>
+<p>This function returns the root of the context hierarchy. Each QML component is instantiated in a <a href="../qtqml/qqmlcontext.html">QQmlContext</a>. <a href="../qtqml/qqmlcontext.html">QQmlContext</a>'s are essential for passing data to QML components. In QML, contexts are arranged hierarchically and this hierarchy is managed by the <a href="../qtqml/qqmlengine.html">QQmlEngine</a>.</p>
+<!-- @@@rootContext -->
+<!-- $$$rootObject[overload1]$$$rootObject -->
+<h3 class="fn" id="rootObject"><a name="rootObject"></a><span class="type"><a href="qquickitem.html">QQuickItem</a></span> *QQuickView::<span class="name">rootObject</span>() const</h3>
+<p>Returns the view's root <a href="qquickitem.html">item</a>.</p>
+<!-- @@@rootObject -->
+<!-- $$$source -->
+<h3 class="fn" id="source"><a name="source"></a><span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> QQuickView::<span class="name">source</span>() const</h3>
+<p>Returns the source URL, if set.</p>
+<p><b>Note:</b> Getter function for property <a href="qquickview.html#source-prop">source</a>. </p><p><b>See also </b><a href="qquickview.html#setSource">setSource</a>().</p>
+<!-- @@@source -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

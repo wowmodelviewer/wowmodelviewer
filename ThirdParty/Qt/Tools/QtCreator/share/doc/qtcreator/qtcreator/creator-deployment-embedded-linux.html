@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-deployment-embedded-linux.qdoc -->
+  <title>Deploying Applications to Embedded Linux Devices | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Deploying Applications to Embedded Linux Devices</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-deploying-android.html" />
+  <link rel="next" href="creator-deployment-qnx.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-deploying-android.html">Deploying Applications to Android Devices</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-deployment-qnx.html">Deploying Applications to QNX Neutrino Devices</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#generic-deployment-steps">Generic Deployment Steps</a></li>
+<li class="level1"><a href="#qt-for-device-creation-deployment-steps">Qt for Device Creation Deployment Steps</a></li>
+<li class="level2"><a href="#developing-with-qt-5-8-or-earlier">Developing with Qt 5.8 or Earlier</a></li>
+<li class="level2"><a href="#developing-with-qt-5-9-or-later">Developing with Qt 5.9 or Later</a></li>
+<li class="level1"><a href="#deploying-cmake-projects-to-embedded-linux-devices">Deploying CMake Projects to Embedded Linux Devices</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Deploying Applications to Embedded Linux Devices</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-deployment-embedded-linux.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>You can specify settings for deploying applications to generic Linux devices in the project .pro file. You can view the settings in the <b>Run Settings</b>.</p>
+<p class="centerAlign"><img src="images/qtcreator-embedded-linux-deployment-overview.png" alt="&quot;Deploy to device&quot;" /></p><p>The files to be installed are listed in the <b>Deployment</b> step, the <b>Files to deploy</b> field. The <b>Local File Path</b> field displays the location of the file on the development PC. The <b>Remote Directory</b> field displays the folder where the file is installed on the device. Text in red color indicates that the information is missing. Edit the qmake <a href="http://doc.qt.io/qt-5/qmake-variable-reference.html#installs">INSTALLS variable</a> in the project <code>.pro</code> file to add the missing files.</p>
+<p>When you run the application, Qt Creator copies the necessary files to the device and starts the application on it.</p>
+<p>For example, adding</p>
+<pre class="cpp">
+
+  target<span class="operator">.</span>path <span class="operator">=</span> <span class="operator">/</span>root
+  INSTALLS <span class="operator">+</span><span class="operator">=</span> target
+
+</pre>
+<p>to the project .pro file will copy the binary of your project to <code>/root</code> on the remote device. Additional files can be deployed by adding them to further targets and adding those to <code>INSTALLS</code> as well.</p>
+<a name="generic-deployment-steps"></a>
+<h2 id="generic-deployment-steps">Generic Deployment Steps</h2>
+<p class="centerAlign"><img src="images/qtcreator-embedded-linux-deployment-details.png" alt="&quot;Deploy to embedded Linux&quot;" /></p><p>When you run the application on the device, Qt Creator deploys the application as specified by the deploy steps. By default, Qt Creator copies the application files to the device by using the SSH file transfer protocol (SFTP), as specified by the <b>Upload files via SFTP</b> step.</p>
+<p>If you have a lot of data to copy, select <b>Details</b> in the <b>Upload Files via SFTP</b> step, and then select the <b>Incremental deployment</b> check box. Qt Creator takes note of the deployment time and only copies files that have changed since the last deployment. However, when you make major changes on the device, such as removing files from the device manually or flashing a new disk image, or when you use another device with the same IP address, deselect the check box once, to have Qt Creator deploy all files again.</p>
+<p>To only create a tarball and not copy the files to the device, select <b>Add Deploy Step</b> &gt; <b>Create tarball</b>. Then remove all other deploy steps.</p>
+<p>The <b>Deploy tarball via SFTP upload</b> step specifies that Qt Creator uploads the tarball to the device and extracts it.</p>
+<p>The <b>Check for free disk space</b> step is by default the first deploy step. Use it to find out whether the remote file system has enough space left to deploy your project. Errors due to lack of disk space can otherwise be hard to detect.</p>
+<p><b>Note: </b>If the SFTP upload fails, make sure that the remote device has SFTP enabled in its SSH daemon. Some versions of Dropbear that come without SFTP support will crash when an SFTP upload is being attempted. This is not a bug in Qt Creator.</p><a name="qt-for-device-creation-deployment-steps"></a>
+<h2 id="qt-for-device-creation-deployment-steps">Qt for Device Creation Deployment Steps</h2>
+<p>The deployment steps depend on the Qt for Device Creation version specified in the kit.</p>
+<a name="developing-with-qt-5-8-or-earlier"></a>
+<h3 id="developing-with-qt-5-8-or-earlier">Developing with Qt 5.8 or Earlier</h3>
+<p>The generic deployment steps are not available when developing with Qt for Device Creation version 5.8 or earlier.</p>
+<p class="centerAlign"><img src="images/qtcreator-deployment-steps-b2qt-58.png" alt="" /></p><p>By default, Qt Creator pushes the files to the device incrementally over an ADB connection. When developing on Windows, executable permissions are set for executable files after they are deployed to the device.</p>
+<p>To execute custom commands, select <b>Add Deploy Step</b> &gt; <b>Custom Remote Command (via adb shell)</b> and enter the command to execute.</p>
+<p><b>Note: </b>You can add custom commands also as <a href="creator-build-settings.html#build-steps">build steps</a>, to have them executed when the application is built.</p><p>To have your application launch on boot, select <b>Add Deploy Step</b> &gt; <b>Make this application the default one</b>.</p>
+<a name="developing-with-qt-5-9-or-later"></a>
+<h3 id="developing-with-qt-5-9-or-later">Developing with Qt 5.9 or Later</h3>
+<p>When developing with Qt for Device Creation version 5.9 or later, you can specify the deployment steps described in this section in addition to the generic deployment steps. To execute custom commands when the application is deployed to the device, select <b>Add Deploy Step</b> &gt; <b>Run Custom Remote Command</b> and enter the command to execute.</p>
+<p>To have your application launch on boot, select <b>Add Deploy Step</b> &gt; <b>Change Default Application</b>.</p>
+<a name="deploying-cmake-projects-to-embedded-linux-devices"></a>
+<h2 id="deploying-cmake-projects-to-embedded-linux-devices">Deploying CMake Projects to Embedded Linux Devices</h2>
+<p>Qt Creator cannot directly extract files to be installed from a CMake project. Therefore, a special deploy step is created that installs the project into a local directory. The files in that directory are then deployed to the remote device. Alternatively, you can provide a <code>QtCreatorDeployment.txt</code> file in which you must specify all files to be deployed which are not executables or libraries. You place this file in either the root directory of the CMake project or the build directory of the active build configuration. Currently, Qt Creator first checks the root directory and only if no <code>QtCreatorDeployment.txt</code> exists it checks the active build directory.</p>
+<p>Use the following syntax in the file:</p>
+<pre class="cpp">
+
+  <span class="operator">&lt;</span>deployment<span class="operator">/</span>prefix<span class="operator">&gt;</span>
+  <span class="operator">&lt;</span>relative<span class="operator">/</span>source<span class="operator">/</span>file1<span class="operator">&gt;</span>:<span class="operator">&lt;</span>relative<span class="operator">/</span>destination<span class="operator">/</span>dir1<span class="operator">&gt;</span>
+  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  <span class="operator">&lt;</span>relative<span class="operator">/</span>source<span class="operator">/</span>filen<span class="operator">&gt;</span>:<span class="operator">&lt;</span>relative<span class="operator">/</span>destination<span class="operator">/</span>dirn<span class="operator">&gt;</span>
+
+</pre>
+<p>Where:</p>
+<ul>
+<li><code>&lt;deployment/prefix&gt;</code> is the (absolute) path prefix to where files are copied on the remote machine.</li>
+<li><code>&lt;relative/source/file&gt;</code> is the file path relative to the CMake project root. No directories or wildcards are allowed in this value.</li>
+<li><code>&lt;relative/destination/dir&gt;</code> is the destination directory path relative to <code>deployment/prefix</code>.</li>
+</ul>
+<p>To automate the creation of <code>QtCreatorDeployment.txt</code> file:</p>
+<ol class="1" type="1"><li>Define the following macros in the top level <code>CMakeLists.txt</code> file:<pre class="cpp">
+
+  file(WRITE <span class="string">&quot;${CMAKE_SOURCE_DIR}/QtCreatorDeployment.txt&quot;</span> <span class="string">&quot;&lt;deployment/prefix&gt;\n&quot;</span>)
+
+  macro(add_deployment_file SRC DEST)
+      file(RELATIVE_PATH path ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+      file(APPEND <span class="string">&quot;${CMAKE_SOURCE_DIR}/QtCreatorDeployment.txt&quot;</span> <span class="string">&quot;${path}/${SRC}:${DEST}\n&quot;</span>)
+  endmacro()
+
+  macro(add_deployment_directory SRC DEST)
+      file(GLOB_RECURSE files RELATIVE <span class="string">&quot;${CMAKE_CURRENT_SOURCE_DIR}&quot;</span> <span class="string">&quot;${SRC}/*&quot;</span>)
+      foreach(filename ${files})
+          get_filename_component(path ${filename} PATH)
+          add_deployment_file(<span class="string">&quot;${filename}&quot;</span> <span class="string">&quot;${DEST}/${path}&quot;</span>)
+      endforeach(filename)
+  endmacro()
+
+</pre>
+</li>
+<li>Use <code>add_deployment_file(&lt;file/name&gt;)</code> to add files and <code>add_deployment_directory(&lt;folder/name&gt;)</code> to add directories (including subdirectories) to the <code>QtCreatorDeployment.txt</code> file.</li>
+<li>Re-run <code>cmake</code> after you add or remove files using the macros.</li>
+</ol>
+</div>
+<!-- @@@creator-deployment-embedded-linux.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-deploying-android.html">Deploying Applications to Android Devices</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-deployment-qnx.html">Deploying Applications to QNX Neutrino Devices</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

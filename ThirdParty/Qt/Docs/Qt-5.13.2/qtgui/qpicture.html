@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qpicture.cpp -->
+  <title>QPicture Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QPicture</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPicture Class</h1>
+<!-- $$$QPicture-brief -->
+<p>The <a href="qpicture.html">QPicture</a> class is a paint device that records and replays <a href="qpainter.html">QPainter</a> commands. <a href="#details">More...</a></p>
+<!-- @@@QPicture -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QPicture&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qpaintdevice.html">QPaintDevice</a></td></tr></table></div><ul>
+<li><a href="qpicture-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpicture.html#QPicture-1">QPicture</a></b>(const QPicture &amp;<i>pic</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpicture.html#QPicture">QPicture</a></b>(int <i>formatVersion</i> = -1)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPicture &amp;</td><td class="memItemRight bottomAlign"><b><a href="qpicture.html#operator-eq-1">operator=</a></b>(QPicture &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPicture &amp;</td><td class="memItemRight bottomAlign"><b><a href="qpicture.html#operator-eq">operator=</a></b>(const QPicture &amp;<i>p</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qpicture.html#dtor.QPicture">~QPicture</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRect </td><td class="memItemRight bottomAlign"><b><a href="qpicture.html#boundingRect">boundingRect</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const char *</td><td class="memItemRight bottomAlign"><b><a href="qpicture.html#data">data</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpicture.html#isNull">isNull</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpicture.html#load">load</a></b>(const QString &amp;<i>fileName</i>, const char *<i>format</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpicture.html#load-1">load</a></b>(QIODevice *<i>dev</i>, const char *<i>format</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpicture.html#play">play</a></b>(QPainter *<i>painter</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpicture.html#save">save</a></b>(const QString &amp;<i>fileName</i>, const char *<i>format</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpicture.html#save-1">save</a></b>(QIODevice *<i>dev</i>, const char *<i>format</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpicture.html#setBoundingRect">setBoundingRect</a></b>(const QRect &amp;<i>r</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qpicture.html#setData">setData</a></b>(const char *<i>data</i>, uint <i>size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qpicture.html#size">size</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpicture.html#swap">swap</a></b>(QPicture &amp;<i>other</i>)</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QDataStream &amp;</td><td class="memItemRight bottomAlign"><b><a href="qpicture.html#operator-lt-lt">operator&lt;&lt;</a></b>(QDataStream &amp;<i>s</i>, const QPicture &amp;<i>r</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDataStream &amp;</td><td class="memItemRight bottomAlign"><b><a href="qpicture.html#operator-gt-gt">operator&gt;&gt;</a></b>(QDataStream &amp;<i>s</i>, QPicture &amp;<i>r</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPicture-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A picture serializes painter commands to an IO device in a platform-independent format. They are sometimes referred to as meta-files.</p>
+<p>Qt pictures use a proprietary binary format. Unlike native picture (meta-file) formats on many window systems, Qt pictures have no limitations regarding their contents. Everything that can be painted on a widget or pixmap (e.g&#x2e;, fonts, pixmaps, regions, transformed graphics, etc.) can also be stored in a picture.</p>
+<p><a href="qpicture.html">QPicture</a> is resolution independent, i.e&#x2e; a <a href="qpicture.html">QPicture</a> can be displayed on different devices (for example svg, pdf, ps, printer and screen) looking the same. This is, for instance, needed for WYSIWYG print preview. <a href="qpicture.html">QPicture</a> runs in the default system dpi, and scales the painter to match differences in resolution depending on the window system.</p>
+<p>Example of how to record a picture:</p>
+<pre class="cpp">
+
+          <span class="type"><a href="qpicture.html#QPicture">QPicture</a></span> picture;
+          <span class="type"><a href="qpainter.html">QPainter</a></span> painter;
+          painter<span class="operator">.</span>begin(<span class="operator">&amp;</span>picture);           <span class="comment">// paint in picture</span>
+          painter<span class="operator">.</span>drawEllipse(<span class="number">10</span><span class="operator">,</span><span class="number">20</span><span class="operator">,</span> <span class="number">80</span><span class="operator">,</span><span class="number">70</span>); <span class="comment">// draw an ellipse</span>
+          painter<span class="operator">.</span>end();                     <span class="comment">// painting done</span>
+          picture<span class="operator">.</span>save(<span class="string">&quot;drawing.pic&quot;</span>);       <span class="comment">// save picture</span>
+
+</pre>
+<p>Note that the list of painter commands is reset on each call to the <a href="qpainter.html#begin">QPainter::begin</a>() function.</p>
+<p>Example of how to replay a picture:</p>
+<pre class="cpp">
+
+          <span class="type"><a href="qpicture.html#QPicture">QPicture</a></span> picture;
+          picture<span class="operator">.</span>load(<span class="string">&quot;drawing.pic&quot;</span>);           <span class="comment">// load picture</span>
+          <span class="type"><a href="qpainter.html">QPainter</a></span> painter;
+          painter<span class="operator">.</span>begin(<span class="operator">&amp;</span>myImage);               <span class="comment">// paint in myImage</span>
+          painter<span class="operator">.</span>drawPicture(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> picture);    <span class="comment">// draw the picture at (0,0)</span>
+          painter<span class="operator">.</span>end();                         <span class="comment">// painting done</span>
+
+</pre>
+<p>Pictures can also be drawn using <a href="qpicture.html#play">play</a>(). Some basic data about a picture is available, for example, <a href="qpicture.html#size">size</a>(), <a href="qpicture.html#isNull">isNull</a>() and <a href="qpicture.html#boundingRect">boundingRect</a>().</p>
+</div>
+<p><b>See also </b><a href="qmovie.html">QMovie</a>.</p>
+<!-- @@@QPicture -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QPicture$$$QPictureconstQPicture& -->
+<h3 class="fn" id="QPicture-1"><a name="QPicture-1"></a>QPicture::<span class="name">QPicture</span>(const <span class="type"><a href="qpicture.html#QPicture">QPicture</a></span> &amp;<i>pic</i>)</h3>
+<p>Constructs a copy of <i>pic</i>.</p>
+<p>This constructor is fast thanks to <a href="../qtcore/implicit-sharing.html">implicit sharing</a>.</p>
+<!-- @@@QPicture -->
+<!-- $$$QPicture[overload1]$$$QPictureint -->
+<h3 class="fn" id="QPicture"><a name="QPicture"></a>QPicture::<span class="name">QPicture</span>(<span class="type">int</span> <i>formatVersion</i> = -1)</h3>
+<p>Constructs an empty picture.</p>
+<p>The <i>formatVersion</i> parameter may be used to <i>create</i> a <a href="qpicture.html">QPicture</a> that can be read by applications that are compiled with earlier versions of Qt.</p>
+<p>Note that the default formatVersion is -1 which signifies the current release, i.e&#x2e; for Qt 4.0 a formatVersion of 7 is the same as the default formatVersion of -1.</p>
+<p>Reading pictures generated by earlier versions of Qt is not supported in Qt 4.0&#x2e;</p>
+<!-- @@@QPicture -->
+<!-- $$$operator=$$$operator=QPicture&& -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type"><a href="qpicture.html#QPicture">QPicture</a></span> &amp;QPicture::<span class="name">operator=</span>(<span class="type"><a href="qpicture.html#QPicture">QPicture</a></span> &amp;&amp;<i>other</i>)</h3>
+<p>Move-assigns <i>other</i> to this <a href="qpicture.html">QPicture</a> instance.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@operator= -->
+<!-- $$$operator=[overload1]$$$operator=constQPicture& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qpicture.html#QPicture">QPicture</a></span> &amp;QPicture::<span class="name">operator=</span>(const <span class="type"><a href="qpicture.html#QPicture">QPicture</a></span> &amp;<i>p</i>)</h3>
+<p>Assigns picture <i>p</i> to this picture and returns a reference to this picture.</p>
+<!-- @@@operator= -->
+<!-- $$$~QPicture[overload1]$$$~QPicture -->
+<h3 class="fn" id="dtor.QPicture"><a name="dtor.QPicture"></a><code>[virtual] </code>QPicture::<span class="name">~QPicture</span>()</h3>
+<p>Destroys the picture.</p>
+<!-- @@@~QPicture -->
+<!-- $$$boundingRect[overload1]$$$boundingRect -->
+<h3 class="fn" id="boundingRect"><a name="boundingRect"></a><span class="type"><a href="../qtcore/qrect.html">QRect</a></span> QPicture::<span class="name">boundingRect</span>() const</h3>
+<p>Returns the picture's bounding rectangle or an invalid rectangle if the picture contains no data.</p>
+<p><b>See also </b><a href="qpicture.html#setBoundingRect">setBoundingRect</a>().</p>
+<!-- @@@boundingRect -->
+<!-- $$$data[overload1]$$$data -->
+<h3 class="fn" id="data"><a name="data"></a>const <span class="type">char</span> *QPicture::<span class="name">data</span>() const</h3>
+<p>Returns a pointer to the picture data. The pointer is only valid until the next non-const function is called on this picture. The returned pointer is 0 if the picture contains no data.</p>
+<p><b>See also </b><a href="qpicture.html#setData">setData</a>(), <a href="qpicture.html#size">size</a>(), and <a href="qpicture.html#isNull">isNull</a>().</p>
+<!-- @@@data -->
+<!-- $$$isNull[overload1]$$$isNull -->
+<h3 class="fn" id="isNull"><a name="isNull"></a><span class="type">bool</span> QPicture::<span class="name">isNull</span>() const</h3>
+<p>Returns <code>true</code> if the picture contains no data; otherwise returns false.</p>
+<!-- @@@isNull -->
+<!-- $$$load[overload1]$$$loadconstQString&constchar* -->
+<h3 class="fn" id="load"><a name="load"></a><span class="type">bool</span> QPicture::<span class="name">load</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>fileName</i>, const <span class="type">char</span> *<i>format</i> = nullptr)</h3>
+<p>Loads a picture from the file specified by <i>fileName</i> and returns true if successful; otherwise invalidates the picture and returns <code>false</code>.</p>
+<p>Please note that the <i>format</i> parameter has been deprecated and will have no effect.</p>
+<p><b>See also </b><a href="qpicture.html#save">save</a>().</p>
+<!-- @@@load -->
+<!-- $$$load$$$loadQIODevice*constchar* -->
+<h3 class="fn" id="load-1"><a name="load-1"></a><span class="type">bool</span> QPicture::<span class="name">load</span>(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span> *<i>dev</i>, const <span class="type">char</span> *<i>format</i> = nullptr)</h3>
+<p>This is an overloaded function.</p>
+<p><i>dev</i> is the device to use for loading.</p>
+<!-- @@@load -->
+<!-- $$$play[overload1]$$$playQPainter* -->
+<h3 class="fn" id="play"><a name="play"></a><span class="type">bool</span> QPicture::<span class="name">play</span>(<span class="type"><a href="qpainter.html">QPainter</a></span> *<i>painter</i>)</h3>
+<p>Replays the picture using <i>painter</i>, and returns <code>true</code> if successful; otherwise returns <code>false</code>.</p>
+<p>This function does exactly the same as <a href="qpainter.html#drawPicture">QPainter::drawPicture</a>() with (x, y) = (0, 0).</p>
+<!-- @@@play -->
+<!-- $$$save[overload1]$$$saveconstQString&constchar* -->
+<h3 class="fn" id="save"><a name="save"></a><span class="type">bool</span> QPicture::<span class="name">save</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>fileName</i>, const <span class="type">char</span> *<i>format</i> = nullptr)</h3>
+<p>Saves a picture to the file specified by <i>fileName</i> and returns true if successful; otherwise returns <code>false</code>.</p>
+<p>Please note that the <i>format</i> parameter has been deprecated and will have no effect.</p>
+<p><b>See also </b><a href="qpicture.html#load">load</a>().</p>
+<!-- @@@save -->
+<!-- $$$save$$$saveQIODevice*constchar* -->
+<h3 class="fn" id="save-1"><a name="save-1"></a><span class="type">bool</span> QPicture::<span class="name">save</span>(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span> *<i>dev</i>, const <span class="type">char</span> *<i>format</i> = nullptr)</h3>
+<p>This is an overloaded function.</p>
+<p><i>dev</i> is the device to use for saving.</p>
+<!-- @@@save -->
+<!-- $$$setBoundingRect[overload1]$$$setBoundingRectconstQRect& -->
+<h3 class="fn" id="setBoundingRect"><a name="setBoundingRect"></a><span class="type">void</span> QPicture::<span class="name">setBoundingRect</span>(const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> &amp;<i>r</i>)</h3>
+<p>Sets the picture's bounding rectangle to <i>r</i>. The automatically calculated value is overridden.</p>
+<p><b>See also </b><a href="qpicture.html#boundingRect">boundingRect</a>().</p>
+<!-- @@@setBoundingRect -->
+<!-- $$$setData[overload1]$$$setDataconstchar*uint -->
+<h3 class="fn" id="setData"><a name="setData"></a><code>[virtual] </code><span class="type">void</span> QPicture::<span class="name">setData</span>(const <span class="type">char</span> *<i>data</i>, <span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> <i>size</i>)</h3>
+<p>Sets the picture data directly from <i>data</i> and <i>size</i>. This function copies the input data.</p>
+<p><b>See also </b><a href="qpicture.html#data">data</a>() and <a href="qpicture.html#size">size</a>().</p>
+<!-- @@@setData -->
+<!-- $$$size[overload1]$$$size -->
+<h3 class="fn" id="size"><a name="size"></a><span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> QPicture::<span class="name">size</span>() const</h3>
+<p>Returns the size of the picture data.</p>
+<p><b>See also </b><a href="qpicture.html#data">data</a>().</p>
+<!-- @@@size -->
+<!-- $$$swap[overload1]$$$swapQPicture& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QPicture::<span class="name">swap</span>(<span class="type"><a href="qpicture.html#QPicture">QPicture</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps picture <i>other</i> with this picture. This operation is very fast and never fails.</p>
+<p>This function was introduced in  Qt 4.8.</p>
+<!-- @@@swap -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$operator<<[overload1]$$$operator<<QDataStream&constQPicture& -->
+<h3 class="fn" id="operator-lt-lt"><a name="operator-lt-lt"></a><span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> &amp;<span class="name">operator&lt;&lt;</span>(<span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> &amp;<i>s</i>, const <span class="type"><a href="qpicture.html#QPicture">QPicture</a></span> &amp;<i>r</i>)</h3>
+<p>Writes picture <i>r</i> to the stream <i>s</i> and returns a reference to the stream.</p>
+<!-- @@@operator<< -->
+<!-- $$$operator>>[overload1]$$$operator>>QDataStream&QPicture& -->
+<h3 class="fn" id="operator-gt-gt"><a name="operator-gt-gt"></a><span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> &amp;<span class="name">operator&gt;&gt;</span>(<span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> &amp;<i>s</i>, <span class="type"><a href="qpicture.html#QPicture">QPicture</a></span> &amp;<i>r</i>)</h3>
+<p>Reads a picture from the stream <i>s</i> into picture <i>r</i> and returns a reference to the stream.</p>
+<!-- @@@operator>> -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

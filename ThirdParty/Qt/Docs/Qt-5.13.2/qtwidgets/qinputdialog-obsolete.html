@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qinputdialog.cpp -->
+  <title>Obsolete Members for QInputDialog | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QInputDialog</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Obsolete Members for QInputDialog</h1>
+<p><b>The following members of class <a href="qinputdialog.html">QInputDialog</a> are obsolete.</b> They are provided to keep old source code working. We strongly advise against using them in new code.</p>
+<h2>Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>int </td><td class="memItemRight bottomAlign"><b><a href="qinputdialog-obsolete.html#getInteger">getInteger</a></b>(QWidget *<i>parent</i>, const QString &amp;<i>title</i>, const QString &amp;<i>label</i>, int <i>value</i> = 0, int <i>min</i> = -2147483647, int <i>max</i> = 2147483647, int <i>step</i> = 1, bool *<i>ok</i> = nullptr, Qt::WindowFlags <i>flags</i> = Qt::WindowFlags())</td></tr>
+</table></div>
+<h2>Member Function Documentation</h2>
+<!-- $$$getInteger[overload1]$$$getIntegerQWidget*constQString&constQString&intintintintbool*Qt::WindowFlags -->
+<h3 class="fn" id="getInteger"><a name="getInteger"></a><code>[static] </code><span class="type">int</span> QInputDialog::<span class="name">getInteger</span>(<span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>title</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>label</i>, <span class="type">int</span> <i>value</i> = 0, <span class="type">int</span> <i>min</i> = -2147483647, <span class="type">int</span> <i>max</i> = 2147483647, <span class="type">int</span> <i>step</i> = 1, <span class="type">bool</span> *<i>ok</i> = nullptr, <span class="type"><a href="../qtcore/qt.html#WindowType-enum">Qt::WindowFlags</a></span> <i>flags</i> = Qt::WindowFlags())</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Static convenience function to get an integer input from the user.</p>
+<p><i>title</i> is the text which is displayed in the title bar of the dialog. <i>label</i> is the text which is shown to the user (it should say what should be entered). <i>value</i> is the default integer which the spinbox will be set to. <i>min</i> and <i>max</i> are the minimum and maximum values the user may choose. <i>step</i> is the amount by which the values change as the user presses the arrow buttons to increment or decrement the value.</p>
+<p>If <i>ok</i> is nonnull *<i>ok</i> will be set to true if the user pressed <b>OK</b> and to false if the user pressed <b>Cancel</b>. The dialog's parent is <i>parent</i>. The dialog will be modal and uses the widget <i>flags</i>.</p>
+<p>On success, this function returns the integer which has been entered by the user; on failure, it returns the initial <i>value</i>.</p>
+<p>Use this static function like this:</p>
+<pre class="cpp">
+
+      bool ok;
+      <span class="type">int</span> i <span class="operator">=</span> <span class="type"><a href="qinputdialog.html#QInputDialog">QInputDialog</a></span><span class="operator">::</span>getInt(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;QInputDialog::getInteger()&quot;</span>)<span class="operator">,</span>
+                                   tr(<span class="string">&quot;Percentage:&quot;</span>)<span class="operator">,</span> <span class="number">25</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">100</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="operator">&amp;</span>ok);
+      <span class="keyword">if</span> (ok)
+          integerLabel<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;%1%&quot;</span>)<span class="operator">.</span>arg(i));
+
+</pre>
+<p><b>See also </b><a href="qinputdialog.html#getText">getText</a>(), <a href="qinputdialog.html#getDouble">getDouble</a>(), <a href="qinputdialog.html#getItem">getItem</a>(), and <a href="qinputdialog.html#getMultiLineText">getMultiLineText</a>().</p>
+<!-- @@@getInteger -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

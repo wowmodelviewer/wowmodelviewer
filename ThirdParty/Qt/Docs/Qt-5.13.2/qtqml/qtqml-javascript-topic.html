@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- topic.qdoc -->
+  <title>Integrating QML and JavaScript | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td >Integrating QML and JavaScript</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#javascript-expressions">JavaScript Expressions</a></li>
+<li class="level1"><a href="#javascript-resources">JavaScript Resources</a></li>
+<li class="level1"><a href="#javascript-imports">JavaScript Imports</a></li>
+<li class="level1"><a href="#javascript-host-environment">JavaScript Host Environment</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Integrating QML and JavaScript</h1>
+<span class="subtitle"></span>
+<!-- $$$qtqml-javascript-topic.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The QML language uses a JSON-like syntax and allows various expressions and methods to be defined as JavaScript functions. It also allows users to import JavaScript files and use the functionality those imports provide.</p>
+<p>This allows developers and designers to leverage the knowledge they have of JavaScript to quickly develop both user-interfaces and application logic.</p>
+<a name="javascript-expressions"></a>
+<h2 id="javascript-expressions">JavaScript Expressions</h2>
+<p>QML has a deep JavaScript integration, and allows <a href="qtqml-syntax-objectattributes.html#signal-attributes">signal handlers</a> and <a href="qtqml-syntax-objectattributes.html#method-attributes">methods</a> to be defined in JavaScript. Another core feature of QML is the ability to specify and enforce relationships between object properties using <a href="qtqml-syntax-propertybinding.html">property bindings</a>, which are also defined using JavaScript.</p>
+<p>See the documentation page titled <a href="qtqml-javascript-expressions.html">JavaScript Expressions in QML Documents</a> for more information about using JavaScript expressions in QML.</p>
+<a name="javascript-resources"></a>
+<h2 id="javascript-resources">JavaScript Resources</h2>
+<p>Application logic defined in JavaScript functions may be separated into separate JavaScript files known as JavaScript resources. There are several different kinds of JavaScript resources, with different semantics.</p>
+<p>See the documentation page titled <a href="qtqml-javascript-resources.html">Defining JavaScript Resources In QML</a> for more information about defining JavaScript resources for QML.</p>
+<a name="javascript-imports"></a>
+<h2 id="javascript-imports">JavaScript Imports</h2>
+<p>A QML document may import JavaScript resources, and JavaScript resources may import other JavaScript resources as well as QML modules. This allows an application developer to provide application logic in modular, self-contained files.</p>
+<p>See the documentation page titled <a href="qtqml-javascript-imports.html">Importing JavaScript Resources</a> for more information on how to import JavaScript resources and how to use the functionality they provide.</p>
+<a name="javascript-host-environment"></a>
+<h2 id="javascript-host-environment">JavaScript Host Environment</h2>
+<p>The QML engine provides a JavaScript environment that has some differences to the JavaScript environment provided by a web browser. Certain limitations apply to code running in the environment, and the QML engine provides various objects in the root context which may be unfamiliar to JavaScript developers.</p>
+<p>These limitations and extensions are documented in the description of the <a href="qtqml-javascript-hostenvironment.html">JavaScript Host Environment</a> provided by the QML engine.</p>
+</div>
+<!-- @@@qtqml-javascript-topic.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

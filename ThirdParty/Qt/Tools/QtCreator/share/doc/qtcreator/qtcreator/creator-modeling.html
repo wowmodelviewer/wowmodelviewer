@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-modeling.qdoc -->
+  <title>Modeling | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Modeling</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-mime-types.html" />
+  <link rel="next" href="creator-scxml.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-mime-types.html">Editing MIME Types</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-scxml.html">Editing State Charts</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#using-the-model-editor">Using the Model Editor</a></li>
+<li class="level1"><a href="#creating-models">Creating Models</a></li>
+<li class="level1"><a href="#creating-package-diagrams">Creating Package Diagrams</a></li>
+<li class="level1"><a href="#creating-class-diagrams">Creating Class Diagrams</a></li>
+<li class="level2"><a href="#adding-relations">Adding Relations</a></li>
+<li class="level2"><a href="#specifying-members">Specifying Members</a></li>
+<li class="level1"><a href="#creating-component-diagrams">Creating Component Diagrams</a></li>
+<li class="level1"><a href="#adding-custom-elements">Adding Custom Elements</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Modeling</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-modeling.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>You can use the model editor to create Universal Modeling Language (UML) style models with structured and behavioral diagrams that provide different views of your system. However, the editor uses a variant of UML and only a subset of properties are provided for specifying the appearance of model elements.</p>
+<p>Structural diagrams represent the static aspect of the system and are therefore stable, whereas behavioral diagrams have both static and dynamic aspects.</p>
+<p>You can create the following types of structural diagrams:</p>
+<ul>
+<li>Package diagrams, which consist of packages and their relationships, and visualize how the system is packaged.</li>
+<li>Class diagrams, which consists of classes, dependencies, inheritance, associations, aggregation, and composition, and provide an object-oriented view of a system.</li>
+<li>Component diagrams, which represent a set of components and their relationships, and provide an implementation view of a system.</li>
+<li>Deployment diagrams, which represent a set of software and hardware components and their relationships, and visualize the deployment of a system.</li>
+</ul>
+<p>You can create the following types of behavioral diagrams:</p>
+<ul>
+<li>Use case diagrams, which consists of actors, use cases, and their relationships, and represent a particular functionality of a system.</li>
+<li>Activity diagrams, which visualize the flow from one activity to another.</li>
+<li>Sequence diagrams, which consist of instances and specify where the instances are activated and destroyed and where their lifeline ends.</li>
+</ul>
+<a name="using-the-model-editor"></a>
+<h2 id="using-the-model-editor">Using the Model Editor</h2>
+<p>You can create models that contain several different structural or behavioral diagrams. You can add elements to the diagrams and specify properties for them. You can either use standard model elements or add your own elements with custom icons.</p>
+<p class="centerAlign"><img src="images/qtcreator-modeleditor.png" alt="" /></p><p>You can add model elements to diagrams in the following ways:</p>
+<ul>
+<li>Drag and drop model elements from the element tool bar (1) to the editor (2).</li>
+<li>Select tool bar buttons (3) to add elements to the element tree (4).</li>
+<li>Drag elements from the element tree to the editor to add them and all their relations to the diagram.</li>
+<li>Drag and drop source files from the sidebar views to the editor to add C++ classes or components to diagrams.</li>
+</ul>
+<p>You can group elements by surrounding them with a boundary. When you move the boundary, all elements within it are moved together. Similary, drag a swimlane to the diagram. When you move the swimlane, all elements right to the swimlane (for vertical swimlanes) or below it (for horizontal swimlanes) will be moved together. A vertical swimlane is created when you drop the swimlane icon on the top border of the diagram and a horizontal swimlane is created when you drop the icon near the left border.</p>
+<p>Classes or other objects that you lay on packages are moved with the packages. You can move individual elements and modify their properties (5) by selecting them. You can also use <i>multiselection</i> to group elements temporarily.</p>
+<p>To align elements in the editor, select several elements and right-click to open a context menu. Select actions in the <b>Align Objects</b> menu to align elements horizontally or vertically or to adjust their width and height.</p>
+<p>Drag the mouse over elements to select them and apply actions such as changing their <i>stereotype</i> or color. A stereotype is a classifier for elements, such as <i>entity</i>, <i>control</i>, <i>interface</i>, or <i>boundary</i>. An entity is usually a class that is used to store data. For some stereotypes, a custom icon is defined. You can assign several comma-separated stereotypes to one element.</p>
+<p>To add related elements to a diagram, select an element in the editor, and then select <b>Add Related Elements</b> in the context menu.</p>
+<p>By default, when you select an element in a diagram, it is highlighted also in the <b>Structure</b> view. To change this behavior so that selecting an element in the <b>Structure</b> makes it highlighted also in the diagram, click and hold the <img src="images/linkicon.png" alt="" /> button, and then select <b>Synchronize Diagram with Structure</b>. To keep the selections in the diagram and the <b>Structure</b> view synchronized, select <b>Keep Synchronized</b>.</p>
+<p>To zoom into diagrams, select the <b>Zoom In</b> toolbar button, press <b>Ctrl++</b>, or press <b>Ctrl</b> and roll the mouse wheel up. To zoom out of diagrams, select <b>Zoom Out</b>, press <b>Ctrl+-</b>, or press <b>Ctrl</b> and roll the mouse wheel down. To reset the diagram size to 100%, select <b>Reset Zoom</b> or press <b>Ctrl+0</b>.</p>
+<p>To print diagrams, press <b>Ctrl+C</b> when no elements are selected in the editor to copy all elements to the clipboard by using 300 dpi. Then paste the diagram to an application that can print images.</p>
+<p>If you copy a selection of elements in the editor, only those elements and their relations will be copied to the clipboard as an image.</p>
+<p>To save diagrams as images, select <b>File</b> &gt; <b>Export Diagram</b>. To save only the selected parts of a diagram, select <b>Export Selected Elements</b>.</p>
+<a name="creating-models"></a>
+<h2 id="creating-models">Creating Models</h2>
+<p>You can use wizards to create models and <i>scratch models</i>. A scratch model can be used to quickly put a temporary diagram together. The wizard creates the model file in a temporary folder without any input from you. Therefore, you can assign a <a href="creator-keyboard-shortcuts.html#">keyboard shortcut</a> to the wizard and use it to create and open models with empty diagrams.</p>
+<p>To create models:</p>
+<ol class="1" type="1"><li>Select <b>File</b> &gt; <b>New File or Project</b> &gt; <b>Modeling</b> &gt; <b>Model</b> &gt; or <b>Scratch Model</b> &gt; <b>Choose</b> to create a model or a scratch model.</li>
+<li>Drag and drop model elements to the editor and select them to specify properties for them:<ol class="1" type="1"><li>In the <b>Stereotypes</b> field, enter the stereotype to apply to the model element or select a predefined stereotype from the list.</li>
+<li>In the <b>Name</b> field, give a name to the model element.</li>
+<li>Select the <b>Auto sized</b> check box to reset the element to its default size after you have changed the element size by dragging its borders.</li>
+<li>In the <b>Color</b> field, select the color of the model element.</li>
+<li>In the <b>Role</b> field, select a <i>role</i> to make the model element color lighter, darker, or softer. You can also remove color and draw the element outline or flatten the element by removing gradients.</li>
+<li>Select the <b>Emphasized</b> check box to draw the model element with a thicker line.</li>
+<li>In the <b>Stereotype display</b> field, select:<ul>
+<li><b>Smart</b> to display the stereotype as a <b>Label</b>, a <b>Decoration</b>, or an <b>Icon</b>, depending on the properties of the element. For example, if a class has the stereotype <b>interface</b>, it is displayed as an icon until it becomes displayed members, after which it is displayed as a decoration.</li>
+<li><b>None</b> to suppress the displaying of the stereotype.</li>
+<li><b>Label</b> to display the stereotype as a line of text using the standard form above the element name even if the stereotype defines a custom icon.</li>
+<li><b>Decoration</b> to show the standard form of the element with the stereotype as a small icon placed top right if the stereotype defines a custom icon.</li>
+<li><b>Icon</b> to display the element using the custom icon.</li>
+</ul>
+</li>
+</ol>
+</li>
+<li>To create a relation between two elements, select the arrow icon next to an element and drag it to the end point of the relation.</li>
+<li>Select the relation to specify settings for it, according to its type: inheritance, association, or dependency. You can specify the following settings for dependency relations, which are available for all element types:<ol class="1" type="1"><li>In the <b>Stereotypes</b> field, select the <i>stereotype</i> to apply to the relation.</li>
+<li>In the <b>Name</b> field, give a name to the relation.</li>
+<li>In the <b>Direction</b> field, you can change the direction of the connection or make it bidirectional.</li>
+</ol>
+</li>
+<li>To move the end of a relation to a different element, grab the end point and drop it over another element that accepts relations of that type. For example, only classes accept inheritances and associations.</li>
+<li>To create <i>sampling points</i> that divide a relation into two connected lines, select a relation and press <b>Shift</b> and click on the relation line.<p>If possible, the end point of a relation is moved automatically to draw the line to the next sampling point either vertically or horizontally.</p>
+</li>
+<li>To remove a sampling point, press <b>Ctrl</b> and click the sampling point.</li>
+<li>To group elements, drag and drop a <b>Boundary</b> element to the editor and resize it to enclose the elements in the group.</li>
+</ol>
+<a name="creating-package-diagrams"></a>
+<h2 id="creating-package-diagrams">Creating Package Diagrams</h2>
+<p>You can add nested package elements to a package diagram. The depth of the elements in the diagram corresponds to the depth of the structured model. Elements stacked on other elements of the same type are automatically drawn in a darker shade of the selected color.</p>
+<p class="centerAlign"><img src="images/qtcreator-modeleditor-packages.png" alt="" /></p><p>Right-click a package to open a context menu, where you can select <b>Create Diagram</b> to create a new package diagram within the model. You can drag and drop items from the element tree to the diagram.</p>
+<p>To update the include dependencies of the package, select <b>Update Include Dependencies</b>.</p>
+<a name="creating-class-diagrams"></a>
+<h2 id="creating-class-diagrams">Creating Class Diagrams</h2>
+<p class="centerAlign"><img src="images/qtcreator-modeleditor-classes.png" alt="" /></p><p>To create class diagrams:</p>
+<ol class="1" type="1"><li>To add C++ classes to class diagrams, drag and drop files from <b>Projects</b> to the editor, and select <b>Add Class</b>.</li>
+<li>In addition to the common element properties, you can specify the following properties:<ul>
+<li>In the <b>Template</b> field, specify the template to use.</li>
+<li>In the <b>Template display</b> field, select the display format for the template:<ul>
+<li><b>Smart</b> displays the template as <b>Box</b> or <b>Angle brackets</b>, depending on the class properties.</li>
+<li><b>Box</b> displays the template in a small box with a dotted border in the top right corner of the class icon.</li>
+<li><b>Angle brackets</b> writes the template in angle brackets behind the class name using the C++ syntax.</li>
+</ul>
+</li>
+<li>In the <b>Members</b> field, specify members for the class, as described in <a href="#specifying-members">Specifying Members</a>.</li>
+<li>Select <b>Clean Up</b> to format the contents of the <b>Members</b> field depending on their visibility (private, protected, public) and following the rules set for whitespace, line breaks, and so on.</li>
+<li>Select the <b>Show members</b> check box to show the members in the diagram.</li>
+</ul>
+</li>
+</ol>
+<p>To navigate from a class in a diagram to the source code, double-click the class in the editor or select <b>Show Definition</b> in the context menu.</p>
+<a name="adding-relations"></a>
+<h3 id="adding-relations">Adding Relations</h3>
+<p>Elements in class diagrams can have the following types of relations: inheritance, association, and dependency. The end points of association relations can have the following properties: role, cardinality, navigable, and relationship.</p>
+<p>To create self-relations, start creating a new association and press <b>Shift</b> to create a new <i>sampling point</i> while dragging the association. Create another sampling point and drop the association at the same class.</p>
+<p>To add more points, press <b>Shift</b> and click a relation. To delete a point, press <b>Ctrl</b> and click a point.</p>
+<a name="specifying-members"></a>
+<h3 id="specifying-members">Specifying Members</h3>
+<p>To specify members for the class, enter each member on a separate line using a C++ like syntax. For example, the following lines define the method <code>m</code> that is private, virtual, and constant:</p>
+<pre class="cpp">
+
+  <span class="keyword">private</span>:
+  <span class="keyword">virtual</span> <span class="type">int</span> m(string a) <span class="keyword">const</span>;
+
+</pre>
+<p>You may group members:</p>
+<pre class="cpp">
+
+  <span class="operator">[</span>Geometry<span class="operator">]</span>
+  <span class="type"><a href="http://doc.qt.io/qt-5/qpointf.html">QPointF</a></span> position;
+  <span class="type"><a href="http://doc.qt.io/qt-5/qsizef.html">QSizeF</a></span> size;
+
+</pre>
+<p>You may add stereotypes to members:</p>
+<pre class="cpp">
+
+  <span class="operator">&lt;</span><span class="operator">&lt;</span>setter<span class="operator">&gt;</span><span class="operator">&gt;</span> setPosition(<span class="keyword">const</span> <span class="type"><a href="http://doc.qt.io/qt-5/qpointf.html">QPointF</a></span> <span class="operator">&amp;</span>pos);
+
+</pre>
+<p>There are some limitations of the parser:</p>
+<ul>
+<li>Multi-line declarations work only if lines are wrapped within nested brackets:<pre class="cpp">
+
+  <span class="type">void</span> setSize(<span class="type">int</span> width<span class="operator">,</span>
+               <span class="type">int</span> height);
+
+</pre>
+</li>
+<li>Preprocessor macros will not be translated. Some Qt keywords are recognized (for example <a href="http://doc.qt.io/qt-5/qobject.html#Q_SLOT">Q_SLOT</a>).</li>
+<li>Function pointer declarations are interpreted as methods.</li>
+<li><code>throw()</code> and <code>noexpect()</code> specifiers are not ignored but will make the declaration a method.</li>
+</ul>
+<a name="creating-component-diagrams"></a>
+<h2 id="creating-component-diagrams">Creating Component Diagrams</h2>
+<p>You can add source code components, such as libraries, databases, programs, and architectural layers to a component diagram. To add components to component diagrams, drag and drop source code from <b>Projects</b> to the editor, and select <b>Add Component</b>.</p>
+<p>To navigate from a component in a diagram to the source code, double-click the component in the editor or select <b>Show Definition</b> in the context menu.</p>
+<a name="adding-custom-elements"></a>
+<h2 id="adding-custom-elements">Adding Custom Elements</h2>
+<p>The model editor provides the following built-in element types: package, component, class, and item. For package, component, and class elements, you can specify custom icons. The color, size, and form of the icon are determined by a stereotype. If you attach the stereotype to an element, the element icon is replaced by the custom icon. For example, you can attach the entity and interface stereotypes to classes and the database stereotype to components.</p>
+<p>The use case and activity diagrams are examples of using the built-in <i>item</i> element type to add custom elements. The item element has the form of a simple rectangle. The use case illustrates how to use a custom icon for an item. The attached stereotype is called <i>usecase</i> but it is hidden. Therefore, if you drag the use case to the diagram, it is shown as a use case but no stereotype appears to be defined and you can attach an additional stereotype to the use case.</p>
+<p>Color and icons are attached to elements in use case and activity diagrams by using a simple definition file format. For example, the following code adds the <code>UseCase</code> custom element:</p>
+<pre class="cpp">
+
+  Icon {
+      id: UseCase
+      title: <span class="string">&quot;Use-Case&quot;</span>
+      elements: item
+      stereotype: <span class="char">'usecase'</span>
+      display: icon
+      width: <span class="number">40</span>
+      height: <span class="number">20</span>
+      baseColor: <span class="preprocessor">#5fb4f0</span>
+      Shape {
+          Ellipse { x: <span class="number">20</span><span class="operator">,</span> y: <span class="number">10</span><span class="operator">,</span> radiusX: <span class="number">20</span><span class="operator">,</span> radiusY: <span class="number">10</span> }
+      }
+  }
+
+</pre>
+<p>For more information about the available options, see <i>standard.def</i> in the <i>share/qtcreator/modeleditor</i> directory in the Qt Creator installation directory. It describes also how to define custom relation types and templates for existing types (such as a composition relation that can be drawn between classes).</p>
+<p>You can add your own definition file and save it with the file extension <i>.def</i> to add custom colors and icons for stereotypes, elements, or tool bars. Either store this file in the the same directory as the <i>standard.def</i> file or select the root element of a model and apply your <i>.def</i> file to the property <b>Config path</b>.</p>
+</div>
+<!-- @@@creator-modeling.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-mime-types.html">Editing MIME Types</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-scxml.html">Editing State Charts</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

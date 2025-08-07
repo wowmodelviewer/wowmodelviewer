@@ -1,0 +1,1093 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- icons.qdoc -->
+  <title>Icons Example | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Icons Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#qicon-overview">QIcon Overview</a></li>
+<li class="level1"><a href="#overview-of-the-icons-application">Overview of the Icons Application</a></li>
+<li class="level1"><a href="#line-by-line-walkthrough">Line-by-Line Walkthrough</a></li>
+<li class="level2"><a href="#iconpreviewarea-class-definition">IconPreviewArea Class Definition</a></li>
+<li class="level2"><a href="#iconpreviewarea-class-implementation">IconPreviewArea Class Implementation</a></li>
+<li class="level2"><a href="#mainwindow-class-definition">MainWindow Class Definition</a></li>
+<li class="level2"><a href="#mainwindow-class-implementation">MainWindow Class Implementation</a></li>
+<li class="level2"><a href="#iconsizespinbox-class-definition">IconSizeSpinBox Class Definition</a></li>
+<li class="level2"><a href="#iconsizespinbox-class-implementation">IconSizeSpinBox Class Implementation</a></li>
+<li class="level2"><a href="#imagedelegate-class-definition">ImageDelegate Class Definition</a></li>
+<li class="level2"><a href="#imagedelegate-class-implementation">ImageDelegate Class Implementation</a></li>
+<li class="level2"><a href="#the-implementation-of-the-function-main">The Implementation of the Function main()</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Icons Example</h1>
+<span class="subtitle"></span>
+<!-- $$$widgets/icons-brief -->
+<p>The Icons example shows how <a href="../qtgui/qicon.html">QIcon</a> can generate pixmaps reflecting an icon's state, mode and size.</p>
+<!-- @@@widgets/icons -->
+<!-- $$$widgets/icons-description -->
+<div class="descr"> <a name="details"></a>
+<p>These pixmaps are generated from the set of pixmaps made available to the icon, and are used by Qt widgets to show an icon representing a particular action.</p>
+<p class="centerAlign"><img src="images/icons-example.png" alt="Screenshot of the Icons example" /></p><p>Contents:</p>
+<a name="qicon-overview"></a>
+<h4 id="qicon-overview">QIcon Overview</h4>
+<p>The <a href="../qtgui/qicon.html">QIcon</a> class provides scalable icons in different modes and states. An icon's state and mode are depending on the intended use of the icon. Qt currently defines four modes:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Mode</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><a href="../qtgui/qicon.html#Mode-enum">QIcon::Normal</a></td><td >Display the pixmap when the user is not interacting with the icon, but the functionality represented by the icon is available.</td></tr>
+<tr valign="top" class="even"><td ><a href="../qtgui/qicon.html#Mode-enum">QIcon::Active</a></td><td >Display the pixmap when the functionality represented by the icon is available and the user is interacting with the icon, for example, moving the mouse over it or clicking it.</td></tr>
+<tr valign="top" class="odd"><td ><a href="../qtgui/qicon.html#Mode-enum">QIcon::Disabled</a></td><td >Display the pixmap when the functionality represented by the icon is not available.</td></tr>
+<tr valign="top" class="even"><td ><a href="../qtgui/qicon.html#Mode-enum">QIcon::Selected</a></td><td >Display the pixmap when the icon is selected.</td></tr>
+</table></div>
+<p><a href="../qtgui/qicon.html">QIcon</a>'s states are <a href="../qtgui/qicon.html#State-enum">QIcon::On</a> and <a href="../qtgui/qicon.html#State-enum">QIcon::Off</a>, which will display the pixmap when the widget is in the respective state. The most common usage of <a href="../qtgui/qicon.html">QIcon</a>'s states are when displaying checkable tool buttons or menu entries (see <a href="qabstractbutton.html#checkable-prop">QAbstractButton::setCheckable</a>() and <a href="qaction.html#checkable-prop">QAction::setCheckable</a>()). When a tool button or menu entry is checked, the <a href="../qtgui/qicon.html">QIcon</a>'s state is <a href="../qtgui/qicon.html#State-enum">On</a>, otherwise it's <a href="../qtgui/qicon.html#State-enum">Off</a>. You can, for example, use the <a href="../qtgui/qicon.html">QIcon</a>'s states to display differing pixmaps depending on whether the tool button or menu entry is checked or not.</p>
+<p>A <a href="../qtgui/qicon.html">QIcon</a> can generate smaller, larger, active, disabled, and selected pixmaps from the set of pixmaps it is given. Such pixmaps are used by Qt widgets to show an icon representing a particular action.</p>
+<a name="overview-of-the-icons-application"></a>
+<h4 id="overview-of-the-icons-application">Overview of the Icons Application</h4>
+<p>With the Icons application you get a preview of an icon's generated pixmaps reflecting its different states, modes and size.</p>
+<p>When an image is loaded into the application, it is converted into a pixmap and becomes a part of the set of pixmaps available to the icon. An image can be excluded from this set by checking off the related checkbox. The application provides a sub directory containing sets of images explicitly designed to illustrate how Qt renders an icon in different modes and states.</p>
+<p>The application allows you to manipulate the icon size with some predefined sizes and a spin box. The predefined sizes are style dependent, but most of the styles have the same values. Only the <a href="../qtdoc/internationalization.html#macos">macOS</a> style differs by using 32 pixels instead of 16 pixels for toolbar buttons. You can navigate between the available styles using the <b>View</b> menu.</p>
+<p class="centerAlign"><img src="images/icons-view-menu.png" alt="Screenshot of the View menu" /></p><p>The <b>View</b> menu also provide the option to make the application guess the icon state and mode from an image's file name. The <b>File</b> menu provide the options of adding an image and removing all images. These last options are also available through a context menu that appears if you press the right mouse button within the table of image files. In addition, the <b>File</b> menu provide an <b>Exit</b> option, and the <b>Help</b> menu provide information about the example and about Qt.</p>
+<p class="centerAlign"><img src="images/icons_find_normal.png" alt="Screenshot of the Find Files" /></p><p>The screenshot above shows the application with one image file loaded. The <b>Guess Image Mode/State</b> is enabled and the style is Plastique.</p>
+<p>When <a href="../qtgui/qicon.html">QIcon</a> is provided with only one available pixmap, that pixmap is used for all the states and modes. In this case the pixmap's icon mode is set to normal, and the generated pixmaps for the normal and active modes will look the same. But in disabled and selected mode, Qt will generate a slightly different pixmap.</p>
+<p>The next screenshot shows the application with an additional file loaded, providing <a href="../qtgui/qicon.html">QIcon</a> with two available pixmaps. Note that the new image file's mode is set to disabled. When rendering the <b>Disabled</b> mode pixmaps, Qt will now use the new image. We can see the difference: The generated disabled pixmap in the first screenshot is slightly darker than the pixmap with the originally set disabled mode in the second screenshot.</p>
+<p class="centerAlign"><img src="images/icons_find_normal_disabled.png" alt="Screenshot of the Find Files" /></p><p>When Qt renders the icon's pixmaps it searches through the set of available pixmaps following a particular algorithm. The algorithm is documented in <a href="../qtgui/qicon.html">QIcon</a>, but we will describe some particular cases below.</p>
+<p class="centerAlign"><img src="images/icons_monkey_active.png" alt="Screenshot of the Find Files" /></p><p>In the screenshot above, we have set <code>monkey_on_32x32</code> to be an Active/On pixmap and <code>monkey_off_64x64</code> to be Normal/Off. To render the other six mode/state combinations, <a href="../qtgui/qicon.html">QIcon</a> uses the search algorithm described in the table below:</p>
+<div class="table"><table class="generic" width="100%">
+ <thead><tr class="qt-style"><th  colspan="2">Requested Pixmap</th><th  colspan="8">Preferred Alternatives (mode/state)</th></tr>
+<tr class="qt-style"><th >Mode</th><th >State</th><th >1</th><th >2</th><th >3</th><th >4</th><th >5</th><th >6</th><th >7</th><th >8</th></tr></thead>
+<tr valign="top" class="odd"><td  rowspan="2">Normal</td><td >Off</td><td ><b>N0</b></td><td >A0</td><td >N1</td><td >A1</td><td >D0</td><td >S0</td><td >D1</td><td >S1</td></tr>
+<tr valign="top" class="even"><td >On</td><td >N1</td><td ><b>A1</b></td><td >N0</td><td >A0</td><td >D1</td><td >S1</td><td >D0</td><td >S0</td></tr>
+<tr valign="top" class="odd"><td  rowspan="2">Active</td><td >Off</td><td >A0</td><td ><b>N0</b></td><td >A1</td><td >N1</td><td >D0</td><td >S0</td><td >D1</td><td >S1</td></tr>
+<tr valign="top" class="even"><td >On</td><td ><b>A1</b></td><td >N1</td><td >A0</td><td >N0</td><td >D1</td><td >S1</td><td >D0</td><td >S0</td></tr>
+<tr valign="top" class="odd"><td  rowspan="2">Disabled</td><td >Off</td><td >D0</td><td ><b>N0'</b></td><td >A0'</td><td >D1</td><td >N1'</td><td >A1'</td><td >S0'</td><td >S1'</td></tr>
+<tr valign="top" class="even"><td >On</td><td >D1</td><td >N1'</td><td ><b>A1'</b></td><td >D0</td><td >N0'</td><td >A0'</td><td >S1'</td><td >S0'</td></tr>
+<tr valign="top" class="odd"><td  rowspan="2">Selected</td><td >Off</td><td >S0</td><td ><b>N0''</b></td><td >A0''</td><td >S1</td><td >N1''</td><td >A1''</td><td >D0''</td><td >D1''</td></tr>
+<tr valign="top" class="even"><td >On</td><td >S1</td><td >N1''</td><td ><b>A1''</b></td><td >S0</td><td >N0''</td><td >A0''</td><td >D1''</td><td >D0''</td></tr>
+</table></div>
+<p>In the table, &quot;0&quot; and &quot;1&quot; stand for Off&quot; and &quot;On&quot;, respectively. Single quotes indicates that <a href="../qtgui/qicon.html">QIcon</a> generates a disabled (&quot;grayed out&quot;) version of the pixmap; similarly, double quuote indicate that <a href="../qtgui/qicon.html">QIcon</a> generates a selected (&quot;blued out&quot;) version of the pixmap.</p>
+<p>The alternatives used in the screenshot above are shown in bold. For example, the Disabled/Off pixmap is derived by graying out the Normal/Off pixmap (<code>monkey_off_64x64</code>).</p>
+<p>In the next screenshots, we loaded the whole set of monkey images. By checking or unchecking file names from the image list, we get different results:</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><img src="images/icons_monkey.png" alt="Screenshot of the Monkey Files" /></td><td ><img src="images/icons_monkey_mess.png" alt="Screenshot of the Monkey Files" /></td></tr>
+</table></div>
+<p>For any given mode/state combination, it is possible to specify several images at different resolutions. When rendering an icon, <a href="../qtgui/qicon.html">QIcon</a> will automatically pick the most suitable image and scale it down if necessary. (<a href="../qtgui/qicon.html">QIcon</a> never scales up images, because this rarely looks good.)</p>
+<p>The screenshots below shows what happens when we provide <a href="../qtgui/qicon.html">QIcon</a> with three images (<code>qt_extended_16x16.png</code>, <code>qt_extended_32x32.png</code>, <code>qt_extended_48x48.png</code>) and try to render the <a href="../qtgui/qicon.html">QIcon</a> at various resolutions:</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ></td><td ><img src="images/icons_qt_extended_8x8.png" alt="Qt Extended icon at 8 x 8" /></td><td ><img src="images/icons_qt_extended_16x16.png" alt="Qt Extended icon at 16 x 16" /></td><td ><img src="images/icons_qt_extended_17x17.png" alt="Qt Extended icon at 17 x 17" /></td></tr>
+<tr valign="top" class="even"><td ></td><td >8 x 8</td><td ><b>16 x 16</b></td><td >17 x 17</td></tr>
+<tr valign="top" class="odd"><td ><img src="images/icons_qt_extended_32x32.png" alt="Qt Extended icon at 32 x 32" /></td><td ><img src="images/icons_qt_extended_33x33.png" alt="Qt Extended icon at 33 x 33" /></td><td ><img src="images/icons_qt_extended_48x48.png" alt="Qt Extended icon at 48 x 48" /></td><td ><img src="images/icons_qt_extended_64x64.png" alt="Qt Extended icon at 64 x 64" /></td></tr>
+<tr valign="top" class="even"><td ><b>32 x 32</b></td><td >33 x 33</td><td ><b>48 x 48</b></td><td >64 x 64</td></tr>
+</table></div>
+<p>For sizes up to 16 x 16, <a href="../qtgui/qicon.html">QIcon</a> uses <code>qt_extended_16x16.png</code> and scales it down if necessary. For sizes between 17 x 17 and 32 x 32, it uses <code>qt_extended_32x32.png</code>. For sizes above 32 x 32, it uses <code>qt_extended_48x48.png</code>.</p>
+<a name="line-by-line-walkthrough"></a>
+<h4 id="line-by-line-walkthrough">Line-by-Line Walkthrough</h4>
+<p>The Icons example consists of four classes:</p>
+<ul>
+<li><code>MainWindow</code> inherits <a href="qmainwindow.html">QMainWindow</a> and is the main application window.</li>
+<li><code>IconPreviewArea</code> is a custom widget that displays all combinations of states and modes for a given icon.</li>
+<li><code>IconSizeSpinBox</code> is a subclass of <a href="qspinbox.html">QSpinBox</a> that lets the user enter icon sizes (e.g&#x2e;, &quot;48 x 48&quot;).</li>
+<li><code>ImageDelegate</code> is a subclass of <a href="qitemdelegate.html">QItemDelegate</a> that provides comboboxes for letting the user set the mode and state associated with an image.</li>
+</ul>
+<p>We will start by reviewing the <code>IconPreviewArea</code> class before we take a look at the <code>MainWindow</code> class. Finally, we will review the <code>IconSizeSpinBox</code> and <code>ImageDelegate</code> classes.</p>
+<a name="iconpreviewarea-class-definition"></a>
+<h5 id="iconpreviewarea-class-definition">IconPreviewArea Class Definition</h5>
+<p>An <code>IconPreviewArea</code> widget consists of a group box containing a grid of <a href="qlabel.html">QLabel</a> widgets displaying headers and pixmaps.</p>
+<p class="centerAlign"><img src="images/icons_preview_area.png" alt="Screenshot of IconPreviewArea." /></p><pre class="cpp">
+
+  <span class="keyword">class</span> IconPreviewArea : <span class="keyword">public</span> <span class="type"><a href="qwidget.html">QWidget</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> IconPreviewArea(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+
+      <span class="type">void</span> setIcon(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> <span class="operator">&amp;</span>icon);
+      <span class="type">void</span> setSize(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> <span class="operator">&amp;</span>size);
+
+      <span class="keyword">static</span> <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Mode<span class="operator">&gt;</span> iconModes();
+      <span class="keyword">static</span> <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>State<span class="operator">&gt;</span> iconStates();
+      <span class="keyword">static</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> iconModeNames();
+      <span class="keyword">static</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> iconStateNames();
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>createHeaderLabel(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>text);
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>createPixmapLabel();
+      <span class="type">void</span> updatePixmapLabels();
+
+      <span class="keyword">enum</span> { NumModes <span class="operator">=</span> <span class="number">4</span><span class="operator">,</span> NumStates <span class="operator">=</span> <span class="number">2</span> };
+
+      <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> icon;
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> size;
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>stateLabels<span class="operator">[</span>NumStates<span class="operator">]</span>;
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>modeLabels<span class="operator">[</span>NumModes<span class="operator">]</span>;
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>pixmapLabels<span class="operator">[</span>NumModes<span class="operator">]</span><span class="operator">[</span>NumStates<span class="operator">]</span>;
+  };
+
+</pre>
+<p>The <code>IconPreviewArea</code> class inherits <a href="qwidget.html">QWidget</a>. It displays the generated pixmaps corresponding to an icon's possible states and modes at a given size.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Mode<span class="operator">&gt;</span> IconPreviewArea<span class="operator">::</span>iconModes()
+  {
+      <span class="keyword">static</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Mode<span class="operator">&gt;</span> result <span class="operator">=</span> {<span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Normal<span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Active<span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Disabled<span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Selected};
+      <span class="keyword">return</span> result;
+  }
+
+  <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>State<span class="operator">&gt;</span> IconPreviewArea<span class="operator">::</span>iconStates()
+  {
+      <span class="keyword">static</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>State<span class="operator">&gt;</span> result <span class="operator">=</span> {<span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Off<span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>On};
+      <span class="keyword">return</span> result;
+  }
+
+  <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> IconPreviewArea<span class="operator">::</span>iconModeNames()
+  {
+      <span class="keyword">static</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> result <span class="operator">=</span> {tr(<span class="string">&quot;Normal&quot;</span>)<span class="operator">,</span> tr(<span class="string">&quot;Active&quot;</span>)<span class="operator">,</span> tr(<span class="string">&quot;Disabled&quot;</span>)<span class="operator">,</span> tr(<span class="string">&quot;Selected&quot;</span>)};
+      <span class="keyword">return</span> result;
+  }
+
+  <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> IconPreviewArea<span class="operator">::</span>iconStateNames()
+  {
+      <span class="keyword">static</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> result <span class="operator">=</span> {tr(<span class="string">&quot;Off&quot;</span>)<span class="operator">,</span> tr(<span class="string">&quot;On&quot;</span>)};
+      <span class="keyword">return</span> result;
+  }
+
+</pre>
+<p>We would like the table columns to be in the order <a href="../qtgui/qicon.html#Mode-enum">QIcon::Normal</a>, <a href="../qtgui/qicon.html#Mode-enum">QIcon::Active</a>, <a href="../qtgui/qicon.html#Mode-enum">QIcon::Disabled</a>, <a href="../qtgui/qicon.html#Mode-enum">QIcon::Selected</a> and the rows in the order <a href="../qtgui/qicon.html#State-enum">QIcon::Off</a>, <a href="../qtgui/qicon.html#State-enum">QIcon::On</a>, which does not match the enumeration. The above code provides arrays allowing to map from enumeration value to row/column (by using <a href="../qtcore/qvector.html#indexOf">QVector::indexOf</a>()) and back by using the array index and lists of the matching strings. Qt's containers can be easily populated by using C++ 11 initializer lists. If the compiler does not provide that feature, a pattern like</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Mode<span class="operator">&gt;</span> IconPreviewArea<span class="operator">::</span>iconModes()
+  {
+      <span class="keyword">static</span> <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Mode<span class="operator">&gt;</span> result;
+      <span class="keyword">if</span> (result<span class="operator">.</span>isEmpty())
+          result <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Normal <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Active <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Disabled <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Selected;
+      <span class="keyword">return</span> result;
+  }
+
+</pre>
+<p>can be used.</p>
+<p>We need two public functions to set the current icon and the icon's size. In addition the class has three private functions: We use the <code>createHeaderLabel()</code> and <code>createPixmapLabel()</code> functions when constructing the preview area, and we need the <code>updatePixmapLabels()</code> function to update the preview area when the icon or the icon's size has changed.</p>
+<p>The <code>NumModes</code> and <code>NumStates</code> constants reflect <a href="../qtgui/qicon.html">QIcon</a>'s number of currently defined modes and states.</p>
+<a name="iconpreviewarea-class-implementation"></a>
+<h5 id="iconpreviewarea-class-implementation">IconPreviewArea Class Implementation</h5>
+<pre class="cpp">
+
+  IconPreviewArea<span class="operator">::</span>IconPreviewArea(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qwidget.html">QWidget</a></span>(parent)
+  {
+      <span class="type"><a href="qgridlayout.html">QGridLayout</a></span> <span class="operator">*</span>mainLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>(<span class="keyword">this</span>);
+
+      <span class="keyword">for</span> (<span class="type">int</span> row <span class="operator">=</span> <span class="number">0</span>; row <span class="operator">&lt;</span> NumStates; <span class="operator">+</span><span class="operator">+</span>row) {
+          stateLabels<span class="operator">[</span>row<span class="operator">]</span> <span class="operator">=</span> createHeaderLabel(IconPreviewArea<span class="operator">::</span>iconStateNames()<span class="operator">.</span>at(row));
+          mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(stateLabels<span class="operator">[</span>row<span class="operator">]</span><span class="operator">,</span> row <span class="operator">+</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>);
+      }
+      Q_ASSERT(NumStates <span class="operator">=</span><span class="operator">=</span> <span class="number">2</span>);
+
+      <span class="keyword">for</span> (<span class="type">int</span> column <span class="operator">=</span> <span class="number">0</span>; column <span class="operator">&lt;</span> NumModes; <span class="operator">+</span><span class="operator">+</span>column) {
+          modeLabels<span class="operator">[</span>column<span class="operator">]</span> <span class="operator">=</span> createHeaderLabel(IconPreviewArea<span class="operator">::</span>iconModeNames()<span class="operator">.</span>at(column));
+          mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(modeLabels<span class="operator">[</span>column<span class="operator">]</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> column <span class="operator">+</span> <span class="number">1</span>);
+      }
+      Q_ASSERT(NumModes <span class="operator">=</span><span class="operator">=</span> <span class="number">4</span>);
+
+      <span class="keyword">for</span> (<span class="type">int</span> column <span class="operator">=</span> <span class="number">0</span>; column <span class="operator">&lt;</span> NumModes; <span class="operator">+</span><span class="operator">+</span>column) {
+          <span class="keyword">for</span> (<span class="type">int</span> row <span class="operator">=</span> <span class="number">0</span>; row <span class="operator">&lt;</span> NumStates; <span class="operator">+</span><span class="operator">+</span>row) {
+              pixmapLabels<span class="operator">[</span>column<span class="operator">]</span><span class="operator">[</span>row<span class="operator">]</span> <span class="operator">=</span> createPixmapLabel();
+              mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(pixmapLabels<span class="operator">[</span>column<span class="operator">]</span><span class="operator">[</span>row<span class="operator">]</span><span class="operator">,</span> row <span class="operator">+</span> <span class="number">1</span><span class="operator">,</span> column <span class="operator">+</span> <span class="number">1</span>);
+          }
+      }
+  }
+
+</pre>
+<p>In the constructor we create the labels displaying the headers and the icon's generated pixmaps, and add them to a grid layout.</p>
+<p>When creating the header labels, we make sure the enums <code>NumModes</code> and <code>NumStates</code> defined in the <code>.h</code> file, correspond with the number of labels that we create. Then if the enums at some point are changed, the <code>Q_ASSERT()</code> macro will alert that this part of the <code>.cpp</code> file needs to be updated as well.</p>
+<p>If the application is built in debug mode, the <code>Q_ASSERT()</code> macro will expand to</p>
+<pre class="cpp">
+
+  <span class="keyword">if</span> (<span class="operator">!</span>condition)
+     <a href="../qtcore/qtglobal.html#qFatal">qFatal</a>(<span class="string">&quot;ASSERT: &quot;</span>condition<span class="string">&quot; in file ...&quot;</span>);
+
+</pre>
+<p>In release mode, the macro simply disappear. The mode can be set in the application's <code>.pro</code> file. One way to do so is to add an option to <code>qmake</code> when building the application:</p>
+<pre class="cpp">
+
+  qmake <span class="string">&quot;CONFIG += debug&quot;</span> icons<span class="operator">.</span>pro
+
+</pre>
+<p>or</p>
+<pre class="cpp">
+
+  qmake <span class="string">&quot;CONFIG += release&quot;</span> icons<span class="operator">.</span>pro
+
+</pre>
+<p>Another approach is to add this line directly to the <code>.pro</code> file.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> IconPreviewArea<span class="operator">::</span>setIcon(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> <span class="operator">&amp;</span>icon)
+  {
+      <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>icon <span class="operator">=</span> icon;
+      updatePixmapLabels();
+  }
+
+  <span class="type">void</span> IconPreviewArea<span class="operator">::</span>setSize(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> <span class="operator">&amp;</span>size)
+  {
+      <span class="keyword">if</span> (size <span class="operator">!</span><span class="operator">=</span> <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>size) {
+          <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>size <span class="operator">=</span> size;
+          updatePixmapLabels();
+      }
+  }
+
+</pre>
+<p>The public <code>setIcon()</code> and <code>setSize()</code> functions change the icon or the icon size, and make sure that the generated pixmaps are updated.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>IconPreviewArea<span class="operator">::</span>createHeaderLabel(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>text)
+  {
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>label <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;&lt;b&gt;%1&lt;/b&gt;&quot;</span>)<span class="operator">.</span>arg(text));
+      label<span class="operator">-</span><span class="operator">&gt;</span>setAlignment(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignCenter);
+      <span class="keyword">return</span> label;
+  }
+
+  <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>IconPreviewArea<span class="operator">::</span>createPixmapLabel()
+  {
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>label <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>;
+      label<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+      label<span class="operator">-</span><span class="operator">&gt;</span>setAlignment(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignCenter);
+      label<span class="operator">-</span><span class="operator">&gt;</span>setFrameShape(<span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>Box);
+      label<span class="operator">-</span><span class="operator">&gt;</span>setSizePolicy(<span class="type"><a href="qsizepolicy.html">QSizePolicy</a></span><span class="operator">::</span>Expanding<span class="operator">,</span> <span class="type"><a href="qsizepolicy.html">QSizePolicy</a></span><span class="operator">::</span>Expanding);
+      label<span class="operator">-</span><span class="operator">&gt;</span>setBackgroundRole(<span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>Base);
+      label<span class="operator">-</span><span class="operator">&gt;</span>setAutoFillBackground(<span class="keyword">true</span>);
+      label<span class="operator">-</span><span class="operator">&gt;</span>setMinimumSize(<span class="number">132</span><span class="operator">,</span> <span class="number">132</span>);
+      <span class="keyword">return</span> label;
+  }
+
+</pre>
+<p>We use the <code>createHeaderLabel()</code> and <code>createPixmapLabel()</code> functions to create the preview area's labels displaying the headers and the icon's generated pixmaps. Both functions return the <a href="qlabel.html">QLabel</a> that is created.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> IconPreviewArea<span class="operator">::</span>updatePixmapLabels()
+  {
+      <span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> <span class="operator">*</span>window <span class="operator">=</span> nullptr;
+      <span class="keyword">if</span> (<span class="keyword">const</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>nativeParent <span class="operator">=</span> nativeParentWidget())
+          window <span class="operator">=</span> nativeParent<span class="operator">-</span><span class="operator">&gt;</span>windowHandle();
+      <span class="keyword">for</span> (<span class="type">int</span> column <span class="operator">=</span> <span class="number">0</span>; column <span class="operator">&lt;</span> NumModes; <span class="operator">+</span><span class="operator">+</span>column) {
+          <span class="keyword">for</span> (<span class="type">int</span> row <span class="operator">=</span> <span class="number">0</span>; row <span class="operator">&lt;</span> NumStates; <span class="operator">+</span><span class="operator">+</span>row) {
+              <span class="keyword">const</span> <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> pixmap <span class="operator">=</span>
+                  icon<span class="operator">.</span>pixmap(window<span class="operator">,</span> size<span class="operator">,</span> IconPreviewArea<span class="operator">::</span>iconModes()<span class="operator">.</span>at(column)<span class="operator">,</span>
+                              IconPreviewArea<span class="operator">::</span>iconStates()<span class="operator">.</span>at(row));
+              <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>pixmapLabel <span class="operator">=</span> pixmapLabels<span class="operator">[</span>column<span class="operator">]</span><span class="operator">[</span>row<span class="operator">]</span>;
+              pixmapLabel<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(pixmap);
+              pixmapLabel<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="operator">!</span>pixmap<span class="operator">.</span>isNull());
+              <span class="type"><a href="../qtcore/qstring.html">QString</a></span> toolTip;
+              <span class="keyword">if</span> (<span class="operator">!</span>pixmap<span class="operator">.</span>isNull()) {
+                  <span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> actualSize <span class="operator">=</span> icon<span class="operator">.</span>actualSize(size);
+                  toolTip <span class="operator">=</span>
+                      tr(<span class="string">&quot;Size: %1x%2\nActual size: %3x%4\nDevice pixel ratio: %5&quot;</span>)
+                          <span class="operator">.</span>arg(size<span class="operator">.</span>width())<span class="operator">.</span>arg(size<span class="operator">.</span>height())
+                          <span class="operator">.</span>arg(actualSize<span class="operator">.</span>width())<span class="operator">.</span>arg(actualSize<span class="operator">.</span>height())
+                          <span class="operator">.</span>arg(pixmap<span class="operator">.</span>devicePixelRatioF());
+              }
+              pixmapLabel<span class="operator">-</span><span class="operator">&gt;</span>setToolTip(toolTip);
+          }
+      }
+  }
+
+</pre>
+<p>We use the private <code>updatePixmapLabel()</code> function to update the generated pixmaps displayed in the preview area.</p>
+<p>For each mode, and for each state, we retrieve a pixmap using the <a href="../qtgui/qicon.html#pixmap">QIcon::pixmap</a>() function, which generates a pixmap corresponding to the given state, mode and size. We pass the QWindows instance obtained by calling <a href="qwidget.html#windowHandle">QWidget::windowHandle</a>() on the top level widget (<a href="qwidget.html#nativeParentWidget">QWidget::nativeParentWidget</a>()) in order to retrieve the pixmap that matches best. We format a tooltip displaying size, actual size and device pixel ratio.</p>
+<a name="mainwindow-class-definition"></a>
+<h5 id="mainwindow-class-definition">MainWindow Class Definition</h5>
+<p>The <code>MainWindow</code> widget consists of three main elements: an images group box, an icon size group box and a preview area.</p>
+<p class="centerAlign"><img src="images/icons-example.png" alt="Screenshot of the Icons example" /></p><pre class="cpp">
+
+  <span class="keyword">class</span> MainWindow : <span class="keyword">public</span> <span class="type"><a href="qmainwindow.html">QMainWindow</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      MainWindow(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+
+      <span class="type">void</span> loadImages(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> <span class="operator">&amp;</span>fileNames);
+
+      <span class="type">void</span> show();
+
+  <span class="keyword">private</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> about();
+      <span class="type">void</span> changeStyle(bool checked);
+      <span class="type">void</span> changeSize(<span class="type">int</span><span class="operator">,</span> bool);
+      <span class="type">void</span> triggerChangeSize();
+      <span class="type">void</span> changeIcon();
+      <span class="type">void</span> addSampleImages();
+      <span class="type">void</span> addOtherImages();
+      <span class="type">void</span> removeAllImages();
+      <span class="type">void</span> useHighDpiPixmapsChanged(<span class="type">int</span> checkState);
+      <span class="type">void</span> screenChanged();
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>createImagesGroupBox();
+      <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>createIconSizeGroupBox();
+      <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>createHighDpiIconSizeGroupBox();
+      <span class="type">void</span> createActions();
+      <span class="type">void</span> createContextMenu();
+      <span class="type">void</span> checkCurrentStyle();
+      <span class="type">void</span> addImages(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>directory);
+
+      IconPreviewArea <span class="operator">*</span>previewArea;
+
+      <span class="type"><a href="qtablewidget.html">QTableWidget</a></span> <span class="operator">*</span>imagesTable;
+
+      <span class="type"><a href="qbuttongroup.html">QButtonGroup</a></span> <span class="operator">*</span>sizeButtonGroup;
+      IconSizeSpinBox <span class="operator">*</span>otherSpinBox;
+
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>devicePixelRatioLabel;
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>screenNameLabel;
+
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>addOtherImagesAct;
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>addSampleImagesAct;
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>removeAllImagesAct;
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>guessModeStateAct;
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>nativeFileDialogAct;
+      <span class="type"><a href="qactiongroup.html">QActionGroup</a></span> <span class="operator">*</span>styleActionGroup;
+  };
+
+</pre>
+<p>The <a href="../qtdesigner/designer-to-know.html#mainwindow">MainWindow</a> class inherits from <a href="qmainwindow.html">QMainWindow</a>. We reimplement the constructor, and declare several private slots:</p>
+<ul>
+<li>The <code>about()</code> slot simply provides information about the example.</li>
+<li>The <code>changeStyle()</code> slot changes the application's GUI style and adjust the style dependent size options.</li>
+<li>The <code>changeSize()</code> slot changes the size of the preview area's icon.</li>
+<li>The <code>changeIcon()</code> slot updates the set of pixmaps available to the icon displayed in the preview area.</li>
+<li>The <code>addSampleImages()</code> slot allows the user to load a new image from the samples provided into the application.</li>
+<li>The <code>addOtherImages()</code> slot allows the user to load a new image from the directory obtained by calling <a href="../qtcore/qstandardpaths.html#standardLocations">QStandardPaths::standardLocations</a>(<a href="../qtcore/qstandardpaths.html#StandardLocation-enum">QStandardPaths::PicturesLocation</a>).</li>
+<li>The <code>screenChanged()</code> updates the display in the <b>High DPI</b> group box to correctly display the parameters of the current screen the window is located on.</li>
+</ul>
+<p>In addition we declare several private functions to simplify the constructor.</p>
+<a name="mainwindow-class-implementation"></a>
+<h5 id="mainwindow-class-implementation">MainWindow Class Implementation</h5>
+<pre class="cpp">
+
+  MainWindow<span class="operator">::</span>MainWindow(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qmainwindow.html">QMainWindow</a></span>(parent)
+  {
+      <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>centralWidget <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qwidget.html">QWidget</a></span>(<span class="keyword">this</span>);
+      setCentralWidget(centralWidget);
+
+      createActions();
+
+      <span class="type"><a href="qgridlayout.html">QGridLayout</a></span> <span class="operator">*</span>mainLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>(centralWidget);
+
+      <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>previewGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;Preview&quot;</span>));
+      previewArea <span class="operator">=</span> <span class="keyword">new</span> IconPreviewArea(previewGroupBox);
+      <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>previewLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>(previewGroupBox);
+      previewLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(previewArea);
+
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(previewGroupBox<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">2</span>);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(createImagesGroupBox()<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>);
+      <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>vBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+      vBox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(createIconSizeGroupBox());
+      vBox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(createHighDpiIconSizeGroupBox());
+      vBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="keyword">new</span> <span class="type"><a href="qspaceritem.html">QSpacerItem</a></span>(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="type"><a href="qsizepolicy.html">QSizePolicy</a></span><span class="operator">::</span>Ignored<span class="operator">,</span> <span class="type"><a href="qsizepolicy.html">QSizePolicy</a></span><span class="operator">::</span>MinimumExpanding));
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(vBox<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span>);
+      createContextMenu();
+
+      setWindowTitle(tr(<span class="string">&quot;Icons&quot;</span>));
+      checkCurrentStyle();
+      sizeButtonGroup<span class="operator">-</span><span class="operator">&gt;</span>button(OtherSize)<span class="operator">-</span><span class="operator">&gt;</span>click();
+  }
+
+</pre>
+<p>In the constructor we first create the main window's central widget and its child widgets, and put them in a grid layout. Then we create the menus with their associated entries and actions.</p>
+<p>We set the window title and determine the current style for the application. We also enable the icon size spin box by clicking the associated radio button, making the current value of the spin box the icon's initial size.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>about()
+  {
+      <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>about(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;About Icons&quot;</span>)<span class="operator">,</span>
+              tr(<span class="string">&quot;The &lt;b&gt;Icons&lt;/b&gt; example illustrates how Qt renders an icon in &quot;</span>
+                 <span class="string">&quot;different modes (active, normal, disabled, and selected) and &quot;</span>
+                 <span class="string">&quot;states (on and off) based on a set of images.&quot;</span>));
+  }
+
+</pre>
+<p>The <code>about()</code> slot displays a message box using the static <a href="qmessagebox.html#about">QMessageBox::about</a>() function. In this example it displays a simple box with information about the example.</p>
+<p>The <code>about()</code> function looks for a suitable icon in four locations: It prefers its parent's icon if that exists. If it doesn't, the function tries the top-level widget containing parent, and if that fails, it tries the active window. As a last resort it uses the <a href="qmessagebox.html">QMessageBox</a>'s Information icon.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>changeStyle(bool checked)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>checked)
+          <span class="keyword">return</span>;
+
+      <span class="keyword">const</span> <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>action <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(sender());
+
+</pre>
+<p>In the <code>changeStyle()</code> slot we first check the slot's parameter. If it is false we immediately return, otherwise we find out which style to change to, i.e&#x2e; which action that triggered the slot, using the <a href="../qtcore/qobject.html#sender">QObject::sender</a>() function.</p>
+<p>This function returns the sender as a <a href="../qtcore/qobject.html">QObject</a> pointer. Since we know that the sender is a <a href="qaction.html">QAction</a> object, we can safely cast the <a href="../qtcore/qobject.html">QObject</a>. We could have used a C-style cast or a C++ <code>static_cast()</code>, but as a defensive programming technique we use a <a href="../qtcore/qobject.html#qobject_cast">qobject_cast</a>(). The advantage is that if the object has the wrong type, a null pointer is returned. Crashes due to null pointers are much easier to diagnose than crashes due to unsafe casts.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qstyle.html">QStyle</a></span> <span class="operator">*</span>style <span class="operator">=</span> <span class="type"><a href="qstylefactory.html">QStyleFactory</a></span><span class="operator">::</span>create(action<span class="operator">-</span><span class="operator">&gt;</span>data()<span class="operator">.</span>toString());
+      Q_ASSERT(style);
+      <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>setStyle(style);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qabstractbutton.html">QAbstractButton</a></span><span class="operator">*</span><span class="operator">&gt;</span> buttons <span class="operator">=</span> sizeButtonGroup<span class="operator">-</span><span class="operator">&gt;</span>buttons();
+      <span class="keyword">for</span> (<span class="type"><a href="qabstractbutton.html">QAbstractButton</a></span> <span class="operator">*</span>button : buttons) {
+          <span class="keyword">const</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PixelMetric metric <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PixelMetric<span class="operator">&gt;</span>(sizeButtonGroup<span class="operator">-</span><span class="operator">&gt;</span>id(button));
+          <span class="keyword">const</span> <span class="type">int</span> value <span class="operator">=</span> style<span class="operator">-</span><span class="operator">&gt;</span>pixelMetric(metric);
+          <span class="keyword">switch</span> (metric) {
+          <span class="keyword">case</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PM_SmallIconSize:
+              button<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;Small (%1 x %1)&quot;</span>)<span class="operator">.</span>arg(value));
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PM_LargeIconSize:
+              button<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;Large (%1 x %1)&quot;</span>)<span class="operator">.</span>arg(value));
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PM_ToolBarIconSize:
+              button<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;Toolbars (%1 x %1)&quot;</span>)<span class="operator">.</span>arg(value));
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PM_ListViewIconSize:
+              button<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;List views (%1 x %1)&quot;</span>)<span class="operator">.</span>arg(value));
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PM_IconViewIconSize:
+              button<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;Icon views (%1 x %1)&quot;</span>)<span class="operator">.</span>arg(value));
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PM_TabBarIconSize:
+              button<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;Tab bars (%1 x %1)&quot;</span>)<span class="operator">.</span>arg(value));
+              <span class="keyword">break</span>;
+          <span class="keyword">default</span>:
+              <span class="keyword">break</span>;
+          }
+      }
+
+      triggerChangeSize();
+  }
+
+</pre>
+<p>Once we have the action, we extract the style name using <a href="qaction.html#data">QAction::data</a>(). Then we create a <a href="qstyle.html">QStyle</a> object using the static <a href="qstylefactory.html#create">QStyleFactory::create</a>() function.</p>
+<p>Although we can assume that the style is supported by the <a href="qstylefactory.html">QStyleFactory</a>: To be on the safe side, we use the <code>Q_ASSERT()</code> macro to check if the created style is valid before we use the <a href="qapplication.html#setStyle">QApplication::setStyle</a>() function to set the application's GUI style to the new style. <a href="qapplication.html">QApplication</a> will automatically delete the style object when a new style is set or when the application exits.</p>
+<p>The predefined icon size options provided in the application are style dependent, so we need to update the labels in the icon size group box and in the end call the <code>changeSize()</code> slot to update the icon's size.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>changeSize(<span class="type">int</span> id<span class="operator">,</span> bool checked)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>checked)
+          <span class="keyword">return</span>;
+
+      <span class="keyword">const</span> bool other <span class="operator">=</span> id <span class="operator">=</span><span class="operator">=</span> <span class="type">int</span>(OtherSize);
+      <span class="keyword">const</span> <span class="type">int</span> extent <span class="operator">=</span> other
+          <span class="operator">?</span> otherSpinBox<span class="operator">-</span><span class="operator">&gt;</span>value()
+          : <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>style()<span class="operator">-</span><span class="operator">&gt;</span>pixelMetric(<span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PixelMetric<span class="operator">&gt;</span>(id));
+
+      previewArea<span class="operator">-</span><span class="operator">&gt;</span>setSize(<span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(extent<span class="operator">,</span> extent));
+      otherSpinBox<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(other);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>triggerChangeSize()
+  {
+      changeSize(sizeButtonGroup<span class="operator">-</span><span class="operator">&gt;</span>checkedId()<span class="operator">,</span> <span class="keyword">true</span>);
+  }
+
+</pre>
+<p>The <code>changeSize()</code> slot sets the size for the preview area's icon.</p>
+<p>It is invoked by the <a href="qbuttongroup.html">QButtonGroup</a> whose members are radio buttons for controlling the icon size. In <code>createIconSizeGroupBox()</code>, each button is assigned a <a href="qstyle.html#PixelMetric-enum">QStyle::PixelMetric</a> value as an id, which is passed as a parameter to the slot.</p>
+<p>The special value <code>OtherSize</code> indicates that the spin box is enabled. If it is, we extract the extent of the new size from the box. If it's not, we query the style for the metric. Then we create a <a href="../qtcore/qsize.html">QSize</a> object based on the extent, and use that object to set the size of the preview area's icon.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>addImages(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>directory)
+  {
+      <span class="type"><a href="qfiledialog.html">QFileDialog</a></span> fileDialog(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Open Images&quot;</span>)<span class="operator">,</span> directory);
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> mimeTypeFilters;
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> mimeTypes <span class="operator">=</span> <span class="type"><a href="../qtgui/qimagereader.html">QImageReader</a></span><span class="operator">::</span>supportedMimeTypes();
+      <span class="keyword">for</span> (<span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>mimeTypeName : mimeTypes)
+          mimeTypeFilters<span class="operator">.</span>append(mimeTypeName);
+      mimeTypeFilters<span class="operator">.</span>sort();
+      fileDialog<span class="operator">.</span>setMimeTypeFilters(mimeTypeFilters);
+      fileDialog<span class="operator">.</span>selectMimeTypeFilter(QLatin1String(<span class="string">&quot;image/png&quot;</span>));
+      fileDialog<span class="operator">.</span>setAcceptMode(<span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>AcceptOpen);
+      fileDialog<span class="operator">.</span>setFileMode(<span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>ExistingFiles);
+      <span class="keyword">if</span> (<span class="operator">!</span>nativeFileDialogAct<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          fileDialog<span class="operator">.</span>setOption(<span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>DontUseNativeDialog);
+      <span class="keyword">if</span> (fileDialog<span class="operator">.</span>exec() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qdialog.html">QDialog</a></span><span class="operator">::</span>Accepted)
+          loadImages(fileDialog<span class="operator">.</span>selectedFiles());
+
+</pre>
+<p>The function <code>addImages()</code> is called by the slot addSampleImages() passing the samples directory, or by the slot addOtherImages() passing the directory obtained by querying <a href="../qtcore/qstandardpaths.html#standardLocations">QStandardPaths::standardLocations</a>().</p>
+<p>The first thing we do is to show a file dialog to the user. We initialize it to show the filters returned by <a href="../qtgui/qimagereader.html#supportedMimeTypes">QImageReader::supportedMimeTypes</a>().</p>
+<p>For each of the files the file dialog returns, we add a row to the table widget. The table widget is listing the images the user has loaded into the application.</p>
+<pre class="cpp">
+
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span> fileInfo(fileName);
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> imageName <span class="operator">=</span> fileInfo<span class="operator">.</span>baseName();
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName2x <span class="operator">=</span> fileInfo<span class="operator">.</span>absolutePath()
+              <span class="operator">+</span> QLatin1Char(<span class="char">'/'</span>) <span class="operator">+</span> imageName <span class="operator">+</span> QLatin1String(<span class="string">&quot;@2x.&quot;</span>) <span class="operator">+</span> fileInfo<span class="operator">.</span>suffix();
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span> fileInfo2x(fileName2x);
+          <span class="keyword">const</span> <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> image(fileName);
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> toolTip <span class="operator">=</span>
+              tr(<span class="string">&quot;Directory: %1\nFile: %2\nFile@2x: %3\nSize: %4x%5&quot;</span>)
+                 <span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>toNativeSeparators(fileInfo<span class="operator">.</span>absolutePath())<span class="operator">,</span> fileInfo<span class="operator">.</span>fileName())
+                 <span class="operator">.</span>arg(fileInfo2x<span class="operator">.</span>exists() <span class="operator">?</span> fileInfo2x<span class="operator">.</span>fileName() : tr(<span class="string">&quot;&lt;None&gt;&quot;</span>))
+                 <span class="operator">.</span>arg(image<span class="operator">.</span>width())<span class="operator">.</span>arg(image<span class="operator">.</span>height());
+          <span class="type"><a href="qtablewidgetitem.html">QTableWidgetItem</a></span> <span class="operator">*</span>fileItem <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtablewidgetitem.html">QTableWidgetItem</a></span>(imageName);
+          fileItem<span class="operator">-</span><span class="operator">&gt;</span>setData(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole<span class="operator">,</span> fileName);
+          fileItem<span class="operator">-</span><span class="operator">&gt;</span>setIcon(<span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span><span class="operator">::</span>fromImage(image));
+          fileItem<span class="operator">-</span><span class="operator">&gt;</span>setFlags((fileItem<span class="operator">-</span><span class="operator">&gt;</span>flags() <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemIsUserCheckable) <span class="operator">&amp;</span> <span class="operator">~</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemIsEditable);
+          fileItem<span class="operator">-</span><span class="operator">&gt;</span>setToolTip(toolTip);
+
+</pre>
+<p>We retrieve the image name using the <a href="../qtcore/qfileinfo.html#baseName">QFileInfo::baseName</a>() function that returns the base name of the file without the path, and create the first table widget item in the row. We check if a high resolution version of the image exists (identified by the suffix <code>@2x</code> on the base name) and display that along with the size in the tooltip.</p>
+<p>We add the file's complete name to the item's data. Since an item can hold several information pieces, we need to assign the file name a role that will distinguish it from other data. This role can be <a href="../qtcore/qt.html#ItemDataRole-enum">Qt::UserRole</a> or any value above it.</p>
+<p>We also make sure that the item is not editable by removing the <a href="../qtcore/qt.html#ItemFlag-enum">Qt::ItemIsEditable</a> flag. Table items are editable by default.</p>
+<pre class="cpp">
+
+          <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Mode mode <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Normal;
+          <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>State state <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Off;
+          <span class="keyword">if</span> (guessModeStateAct<span class="operator">-</span><span class="operator">&gt;</span>isChecked()) {
+              <span class="keyword">if</span> (imageName<span class="operator">.</span>contains(QLatin1String(<span class="string">&quot;_act&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CaseInsensitive))
+                  mode <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Active;
+              <span class="keyword">else</span> <span class="keyword">if</span> (imageName<span class="operator">.</span>contains(QLatin1String(<span class="string">&quot;_dis&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CaseInsensitive))
+                  mode <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Disabled;
+              <span class="keyword">else</span> <span class="keyword">if</span> (imageName<span class="operator">.</span>contains(QLatin1String(<span class="string">&quot;_sel&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CaseInsensitive))
+                  mode <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Selected;
+
+              <span class="keyword">if</span> (imageName<span class="operator">.</span>contains(QLatin1String(<span class="string">&quot;_on&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CaseInsensitive))
+                  state <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>On;
+          }
+
+</pre>
+<p>Then we create the second and third items in the row making the default mode Normal and the default state Off. But if the <b>Guess Image Mode/State</b> option is checked, and the file name contains &quot;_act&quot;, &quot;_dis&quot;, or &quot;_sel&quot;, the modes are changed to Active, Disabled, or Selected. And if the file name contains &quot;_on&quot;, the state is changed to On. The sample files in the example's <code>images</code> subdirectory respect this naming convention.</p>
+<pre class="cpp">
+
+          imagesTable<span class="operator">-</span><span class="operator">&gt;</span>setItem(row<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> fileItem);
+          <span class="type"><a href="qtablewidgetitem.html">QTableWidgetItem</a></span> <span class="operator">*</span>modeItem <span class="operator">=</span>
+              <span class="keyword">new</span> <span class="type"><a href="qtablewidgetitem.html">QTableWidgetItem</a></span>(IconPreviewArea<span class="operator">::</span>iconModeNames()<span class="operator">.</span>at(IconPreviewArea<span class="operator">::</span>iconModes()<span class="operator">.</span>indexOf(mode)));
+          modeItem<span class="operator">-</span><span class="operator">&gt;</span>setToolTip(toolTip);
+          imagesTable<span class="operator">-</span><span class="operator">&gt;</span>setItem(row<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> modeItem);
+          <span class="type"><a href="qtablewidgetitem.html">QTableWidgetItem</a></span> <span class="operator">*</span>stateItem <span class="operator">=</span>
+              <span class="keyword">new</span> <span class="type"><a href="qtablewidgetitem.html">QTableWidgetItem</a></span>(IconPreviewArea<span class="operator">::</span>iconStateNames()<span class="operator">.</span>at(IconPreviewArea<span class="operator">::</span>iconStates()<span class="operator">.</span>indexOf(state)));
+          stateItem<span class="operator">-</span><span class="operator">&gt;</span>setToolTip(toolTip);
+          imagesTable<span class="operator">-</span><span class="operator">&gt;</span>setItem(row<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> stateItem);
+          imagesTable<span class="operator">-</span><span class="operator">&gt;</span>openPersistentEditor(modeItem);
+          imagesTable<span class="operator">-</span><span class="operator">&gt;</span>openPersistentEditor(stateItem);
+
+          fileItem<span class="operator">-</span><span class="operator">&gt;</span>setCheckState(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Checked);
+      }
+  }
+
+</pre>
+<p>In the end we add the items to the associated row, and use the <a href="qtablewidget.html#openPersistentEditor">QTableWidget::openPersistentEditor</a>() function to create comboboxes for the mode and state columns of the items.</p>
+<p>Due to the connection between the table widget's <a href="qtablewidget.html#itemChanged">itemChanged()</a> signal and the <code>changeIcon()</code> slot, the new image is automatically converted into a pixmap and made part of the set of pixmaps available to the icon in the preview area. So, corresponding to this fact, we need to make sure that the new image's check box is enabled.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>changeIcon()
+  {
+      <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> icon;
+
+      <span class="keyword">for</span> (<span class="type">int</span> row <span class="operator">=</span> <span class="number">0</span>; row <span class="operator">&lt;</span> imagesTable<span class="operator">-</span><span class="operator">&gt;</span>rowCount(); <span class="operator">+</span><span class="operator">+</span>row) {
+          <span class="keyword">const</span> <span class="type"><a href="qtablewidgetitem.html">QTableWidgetItem</a></span> <span class="operator">*</span>fileItem <span class="operator">=</span> imagesTable<span class="operator">-</span><span class="operator">&gt;</span>item(row<span class="operator">,</span> <span class="number">0</span>);
+          <span class="keyword">const</span> <span class="type"><a href="qtablewidgetitem.html">QTableWidgetItem</a></span> <span class="operator">*</span>modeItem <span class="operator">=</span> imagesTable<span class="operator">-</span><span class="operator">&gt;</span>item(row<span class="operator">,</span> <span class="number">1</span>);
+          <span class="keyword">const</span> <span class="type"><a href="qtablewidgetitem.html">QTableWidgetItem</a></span> <span class="operator">*</span>stateItem <span class="operator">=</span> imagesTable<span class="operator">-</span><span class="operator">&gt;</span>item(row<span class="operator">,</span> <span class="number">2</span>);
+
+          <span class="keyword">if</span> (fileItem<span class="operator">-</span><span class="operator">&gt;</span>checkState() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Checked) {
+              <span class="keyword">const</span> <span class="type">int</span> modeIndex <span class="operator">=</span> IconPreviewArea<span class="operator">::</span>iconModeNames()<span class="operator">.</span>indexOf(modeItem<span class="operator">-</span><span class="operator">&gt;</span>text());
+              Q_ASSERT(modeIndex <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">0</span>);
+              <span class="keyword">const</span> <span class="type">int</span> stateIndex <span class="operator">=</span> IconPreviewArea<span class="operator">::</span>iconStateNames()<span class="operator">.</span>indexOf(stateItem<span class="operator">-</span><span class="operator">&gt;</span>text());
+              Q_ASSERT(stateIndex <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">0</span>);
+              <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>Mode mode <span class="operator">=</span> IconPreviewArea<span class="operator">::</span>iconModes()<span class="operator">.</span>at(modeIndex);
+              <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>State state <span class="operator">=</span> IconPreviewArea<span class="operator">::</span>iconStates()<span class="operator">.</span>at(stateIndex);
+
+</pre>
+<p>The <code>changeIcon()</code> slot is called when the user alters the set of images listed in the <a href="qtablewidget.html">QTableWidget</a>, to update the <a href="../qtgui/qicon.html">QIcon</a> object rendered by the <code>IconPreviewArea</code>.</p>
+<p>We first create a <a href="../qtgui/qicon.html">QIcon</a> object, and then we run through the <a href="qtablewidget.html">QTableWidget</a>, which lists the images the user has loaded into the application.</p>
+<pre class="cpp">
+
+              <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> fileItem<span class="operator">-</span><span class="operator">&gt;</span>data(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole)<span class="operator">.</span>toString();
+              <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> image(fileName);
+              <span class="keyword">if</span> (<span class="operator">!</span>image<span class="operator">.</span>isNull())
+                  icon<span class="operator">.</span>addPixmap(<span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span><span class="operator">::</span>fromImage(image)<span class="operator">,</span> mode<span class="operator">,</span> state);
+          }
+      }
+
+</pre>
+<p>We also extract the image file's name using the <a href="qtablewidgetitem.html#data">QTableWidgetItem::data</a>() function. This function takes a Qt::DataItemRole as an argument to retrieve the right data (remember that an item can hold several pieces of information) and returns it as a <a href="../qtcore/qvariant.html">QVariant</a>. Then we use the <a href="../qtcore/qvariant.html#toString">QVariant::toString</a>() function to get the file name as a <a href="../qtcore/qstring.html">QString</a>.</p>
+<p>To create a pixmap from the file, we need to first create an image and then convert this image into a pixmap using <a href="../qtgui/qpixmap.html#fromImage">QPixmap::fromImage</a>(). Once we have the final pixmap, we add it, with its associated mode and state, to the <a href="../qtgui/qicon.html">QIcon</a>'s set of available pixmaps.</p>
+<pre class="cpp">
+
+      previewArea<span class="operator">-</span><span class="operator">&gt;</span>setIcon(icon);
+  }
+
+</pre>
+<p>After running through the entire list of images, we change the icon of the preview area to the one we just created.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>removeAllImages()
+  {
+      imagesTable<span class="operator">-</span><span class="operator">&gt;</span>setRowCount(<span class="number">0</span>);
+      changeIcon();
+  }
+
+</pre>
+<p>In the <code>removeAllImages()</code> slot, we simply set the table widget's row count to zero, automatically removing all the images the user has loaded into the application. Then we update the set of pixmaps available to the preview area's icon using the <code>changeIcon()</code> slot.</p>
+<p class="centerAlign"><img src="images/icons_images_groupbox.png" alt="Screenshot of the images group box" /></p><p>The <code>createImagesGroupBox()</code> function is implemented to simplify the constructor. The main purpose of the function is to create a <a href="qtablewidget.html">QTableWidget</a> that will keep track of the images the user has loaded into the application.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>MainWindow<span class="operator">::</span>createImagesGroupBox()
+  {
+      <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>imagesGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;Images&quot;</span>));
+
+      imagesTable <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtablewidget.html">QTableWidget</a></span>;
+      imagesTable<span class="operator">-</span><span class="operator">&gt;</span>setSelectionMode(<span class="type"><a href="qabstractitemview.html">QAbstractItemView</a></span><span class="operator">::</span>NoSelection);
+      imagesTable<span class="operator">-</span><span class="operator">&gt;</span>setItemDelegate(<span class="keyword">new</span> ImageDelegate(<span class="keyword">this</span>));
+
+</pre>
+<p>First we create a group box that will contain the table widget. Then we create a <a href="qtablewidget.html">QTableWidget</a> and customize it to suit our purposes.</p>
+<p>We call <a href="qabstractitemview.html#selectionMode-prop">QAbstractItemView::setSelectionMode</a>() to prevent the user from selecting items.</p>
+<p>The <a href="qabstractitemview.html#setItemDelegate">QAbstractItemView::setItemDelegate</a>() call sets the item delegate for the table widget. We create a <code>ImageDelegate</code> that we make the item delegate for our view.</p>
+<p>The <a href="qitemdelegate.html">QItemDelegate</a> class can be used to provide an editor for an item view class that is subclassed from <a href="qabstractitemview.html">QAbstractItemView</a>. Using a delegate for this purpose allows the editing mechanism to be customized and developed independently from the model and view.</p>
+<p>In this example we derive <code>ImageDelegate</code> from <a href="qitemdelegate.html">QItemDelegate</a>. <a href="qitemdelegate.html">QItemDelegate</a> usually provides line editors, while our subclass <code>ImageDelegate</code>, provides comboboxes for the mode and state fields.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> labels;
+      labels <span class="operator">&lt;</span><span class="operator">&lt;</span> tr(<span class="string">&quot;Image&quot;</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> tr(<span class="string">&quot;Mode&quot;</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> tr(<span class="string">&quot;State&quot;</span>);
+
+      imagesTable<span class="operator">-</span><span class="operator">&gt;</span>horizontalHeader()<span class="operator">-</span><span class="operator">&gt;</span>setDefaultSectionSize(<span class="number">90</span>);
+      imagesTable<span class="operator">-</span><span class="operator">&gt;</span>setColumnCount(<span class="number">3</span>);
+      imagesTable<span class="operator">-</span><span class="operator">&gt;</span>setHorizontalHeaderLabels(labels);
+      imagesTable<span class="operator">-</span><span class="operator">&gt;</span>horizontalHeader()<span class="operator">-</span><span class="operator">&gt;</span>setSectionResizeMode(<span class="number">0</span><span class="operator">,</span> <span class="type"><a href="qheaderview.html">QHeaderView</a></span><span class="operator">::</span>Stretch);
+      imagesTable<span class="operator">-</span><span class="operator">&gt;</span>horizontalHeader()<span class="operator">-</span><span class="operator">&gt;</span>setSectionResizeMode(<span class="number">1</span><span class="operator">,</span> <span class="type"><a href="qheaderview.html">QHeaderView</a></span><span class="operator">::</span>Fixed);
+      imagesTable<span class="operator">-</span><span class="operator">&gt;</span>horizontalHeader()<span class="operator">-</span><span class="operator">&gt;</span>setSectionResizeMode(<span class="number">2</span><span class="operator">,</span> <span class="type"><a href="qheaderview.html">QHeaderView</a></span><span class="operator">::</span>Fixed);
+      imagesTable<span class="operator">-</span><span class="operator">&gt;</span>verticalHeader()<span class="operator">-</span><span class="operator">&gt;</span>hide();
+
+</pre>
+<p>Then we customize the <a href="qtablewidget.html">QTableWidget</a>'s horizontal header, and hide the vertical header.</p>
+<pre class="cpp">
+
+      connect(imagesTable<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qtablewidget.html">QTableWidget</a></span><span class="operator">::</span>itemChanged<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>changeIcon);
+
+      <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>(imagesGroupBox);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(imagesTable);
+      <span class="keyword">return</span> imagesGroupBox;
+  }
+
+</pre>
+<p>At the end, we connect the <a href="qtablewidget.html#itemChanged">QTableWidget::itemChanged</a>() signal to the <code>changeIcon()</code> slot to ensure that the preview area is in sync with the image table.</p>
+<p class="centerAlign"><img src="images/icons_size_groupbox.png" alt="Screenshot of the icon size group box" /></p><p>The <code>createIconSizeGroupBox()</code> function is called from the constructor. It creates the widgets controlling the size of the preview area's icon.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>MainWindow<span class="operator">::</span>createIconSizeGroupBox()
+  {
+      <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>iconSizeGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;Icon Size&quot;</span>));
+
+      sizeButtonGroup <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qbuttongroup.html">QButtonGroup</a></span>(<span class="keyword">this</span>);
+      sizeButtonGroup<span class="operator">-</span><span class="operator">&gt;</span>setExclusive(<span class="keyword">true</span>);
+
+      connect(sizeButtonGroup<span class="operator">,</span> <span class="type">QOverload</span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> bool<span class="operator">&gt;</span><span class="operator">::</span>of(<span class="operator">&amp;</span><span class="type"><a href="qbuttongroup.html">QButtonGroup</a></span><span class="operator">::</span>buttonToggled)<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>changeSize);
+
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>smallRadioButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qradiobutton.html">QRadioButton</a></span>;
+      sizeButtonGroup<span class="operator">-</span><span class="operator">&gt;</span>addButton(smallRadioButton<span class="operator">,</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PM_SmallIconSize);
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>largeRadioButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qradiobutton.html">QRadioButton</a></span>;
+      sizeButtonGroup<span class="operator">-</span><span class="operator">&gt;</span>addButton(largeRadioButton<span class="operator">,</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PM_LargeIconSize);
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>toolBarRadioButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qradiobutton.html">QRadioButton</a></span>;
+      sizeButtonGroup<span class="operator">-</span><span class="operator">&gt;</span>addButton(toolBarRadioButton<span class="operator">,</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PM_ToolBarIconSize);
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>listViewRadioButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qradiobutton.html">QRadioButton</a></span>;
+      sizeButtonGroup<span class="operator">-</span><span class="operator">&gt;</span>addButton(listViewRadioButton<span class="operator">,</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PM_ListViewIconSize);
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>iconViewRadioButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qradiobutton.html">QRadioButton</a></span>;
+      sizeButtonGroup<span class="operator">-</span><span class="operator">&gt;</span>addButton(iconViewRadioButton<span class="operator">,</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PM_IconViewIconSize);
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>tabBarRadioButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qradiobutton.html">QRadioButton</a></span>;
+      sizeButtonGroup<span class="operator">-</span><span class="operator">&gt;</span>addButton(tabBarRadioButton<span class="operator">,</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PM_TabBarIconSize);
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>otherRadioButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qradiobutton.html">QRadioButton</a></span>(tr(<span class="string">&quot;Other:&quot;</span>));
+      sizeButtonGroup<span class="operator">-</span><span class="operator">&gt;</span>addButton(otherRadioButton<span class="operator">,</span> OtherSize);
+      otherSpinBox <span class="operator">=</span> <span class="keyword">new</span> IconSizeSpinBox;
+      otherSpinBox<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="number">8</span><span class="operator">,</span> <span class="number">256</span>);
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> spinBoxToolTip <span class="operator">=</span>
+          tr(<span class="string">&quot;Enter a custom size within %1..%2&quot;</span>)
+             <span class="operator">.</span>arg(otherSpinBox<span class="operator">-</span><span class="operator">&gt;</span>minimum())<span class="operator">.</span>arg(otherSpinBox<span class="operator">-</span><span class="operator">&gt;</span>maximum());
+      otherSpinBox<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="number">64</span>);
+      otherSpinBox<span class="operator">-</span><span class="operator">&gt;</span>setToolTip(spinBoxToolTip);
+      otherRadioButton<span class="operator">-</span><span class="operator">&gt;</span>setToolTip(spinBoxToolTip);
+
+</pre>
+<p>First we create a group box that will contain all the widgets; then we create the radio buttons and the spin box. We add the radio buttons to an instance of <a href="qbuttongroup.html">QButtonGroup</a>, using the value of the <a href="qstyle.html#PixelMetric-enum">QStyle::PixelMetric</a> they represent as an integer id.</p>
+<pre class="cpp">
+
+  <span class="keyword">enum</span> { OtherSize <span class="operator">=</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PM_CustomBase };
+
+</pre>
+<p>We introduce an enumeration constant <code>OtherSize</code> to represent a custom size.</p>
+<p>The spin box is not a regular <a href="qspinbox.html">QSpinBox</a> but an <code>IconSizeSpinBox</code>. The <code>IconSizeSpinBox</code> class inherits <a href="qspinbox.html">QSpinBox</a> and reimplements two functions: <a href="qspinbox.html#textFromValue">QSpinBox::textFromValue</a>() and <a href="qspinbox.html#valueFromText">QSpinBox::valueFromText</a>(). The <code>IconSizeSpinBox</code> is designed to handle icon sizes, e.g&#x2e;, &quot;32 x 32&quot;, instead of plain integer values.</p>
+<pre class="cpp">
+
+      connect(otherSpinBox<span class="operator">,</span> <span class="type">QOverload</span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span><span class="operator">::</span>of(<span class="operator">&amp;</span><span class="type"><a href="qspinbox.html">QSpinBox</a></span><span class="operator">::</span>valueChanged)<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>triggerChangeSize);
+
+      <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span> <span class="operator">*</span>otherSizeLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span>;
+      otherSizeLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(otherRadioButton);
+      otherSizeLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(otherSpinBox);
+      otherSizeLayout<span class="operator">-</span><span class="operator">&gt;</span>addStretch();
+
+      <span class="type"><a href="qgridlayout.html">QGridLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>(iconSizeGroupBox);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(smallRadioButton<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(largeRadioButton<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(toolBarRadioButton<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">0</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(listViewRadioButton<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(iconViewRadioButton<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(tabBarRadioButton<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">1</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(otherSizeLayout<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">2</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>setRowStretch(<span class="number">4</span><span class="operator">,</span> <span class="number">1</span>);
+      <span class="keyword">return</span> iconSizeGroupBox;
+  }
+
+</pre>
+<p>Then we connect all of the radio buttons <a href="qabstractbutton.html#toggled">toggled()</a> signals and the spin box's <a href="qspinbox.html#valueChanged">valueChanged()</a> signal to the <code>changeSize()</code> slot to make sure that the size of the preview area's icon is updated whenever the user changes the icon size. In the end we put the widgets in a layout that we install on the group box.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>createActions()
+  {
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>fileMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;File&quot;</span>));
+
+      addSampleImagesAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Add &amp;Sample Images...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      addSampleImagesAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(tr(<span class="string">&quot;Ctrl+A&quot;</span>));
+      connect(addSampleImagesAct<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>addSampleImages);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(addSampleImagesAct);
+
+      addOtherImagesAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;&amp;Add Images...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      addOtherImagesAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Open);
+      connect(addOtherImagesAct<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>addOtherImages);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(addOtherImagesAct);
+
+      removeAllImagesAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;&amp;Remove All Images&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      removeAllImagesAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(tr(<span class="string">&quot;Ctrl+R&quot;</span>));
+      connect(removeAllImagesAct<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>removeAllImages);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(removeAllImagesAct);
+
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>exitAct <span class="operator">=</span> fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Quit&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qwidget.html">QWidget</a></span><span class="operator">::</span>close);
+      exitAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Quit);
+
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>viewMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;View&quot;</span>));
+
+      styleActionGroup <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qactiongroup.html">QActionGroup</a></span>(<span class="keyword">this</span>);
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> styleKeys <span class="operator">=</span> <span class="type"><a href="qstylefactory.html">QStyleFactory</a></span><span class="operator">::</span>keys();
+      <span class="keyword">for</span> (<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>styleName : styleKeys) {
+          <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>action <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;%1 Style&quot;</span>)<span class="operator">.</span>arg(styleName)<span class="operator">,</span> styleActionGroup);
+          action<span class="operator">-</span><span class="operator">&gt;</span>setData(styleName);
+          action<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+          connect(action<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>changeStyle);
+          viewMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(action);
+      }
+
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>settingsMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;Settings&quot;</span>));
+
+      guessModeStateAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;&amp;Guess Image Mode/State&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      guessModeStateAct<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      guessModeStateAct<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      settingsMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(guessModeStateAct);
+
+      nativeFileDialogAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;&amp;Use Native File Dialog&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      nativeFileDialogAct<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      nativeFileDialogAct<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      settingsMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(nativeFileDialogAct);
+
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>helpMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;Help&quot;</span>));
+      helpMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;About&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>about);
+      helpMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;About &amp;Qt&quot;</span>)<span class="operator">,</span> <a href="qapplication.html#qApp">qApp</a><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>aboutQt);
+  }
+
+</pre>
+<p>In the <code>createActions()</code> function we create and customize all the actions needed to implement the functionality associated with the menu entries in the application.</p>
+<p>In particular we create the <code>styleActionGroup</code> based on the currently available GUI styles using <a href="qstylefactory.html">QStyleFactory</a>. <a href="qstylefactory.html#keys">QStyleFactory::keys</a>() returns a list of valid keys, typically including &quot;windows&quot; and &quot;fusion&quot;. Depending on the platform, &quot;windowsvista&quot; and &quot;macintosh&quot; may be available.</p>
+<p>We create one action for each key, and adds the action to the action group. Also, for each action, we call <a href="qaction.html#setData">QAction::setData</a>() with the style name. We will retrieve it later using <a href="qaction.html#data">QAction::data</a>().</p>
+<p>As we go along, we create the <b>File</b>, <b>View</b> and <b>Help</b> menus and add the actions to them.</p>
+<p>The <a href="qmenu.html">QMenu</a> class provides a menu widget for use in menu bars, context menus, and other popup menus. We put each menu in the application's menu bar, which we retrieve using <a href="qmainwindow.html#menuBar">QMainWindow::menuBar</a>().</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>createContextMenu()
+  {
+      imagesTable<span class="operator">-</span><span class="operator">&gt;</span>setContextMenuPolicy(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ActionsContextMenu);
+      imagesTable<span class="operator">-</span><span class="operator">&gt;</span>addAction(addSampleImagesAct);
+      imagesTable<span class="operator">-</span><span class="operator">&gt;</span>addAction(addOtherImagesAct);
+      imagesTable<span class="operator">-</span><span class="operator">&gt;</span>addAction(removeAllImagesAct);
+  }
+
+</pre>
+<p>QWidgets have a <a href="qwidget.html#contextMenuPolicy-prop">contextMenuPolicy</a> property that controls how the widget should behave when the user requests a context menu (e.g&#x2e;, by right-clicking). We set the <a href="qtablewidget.html">QTableWidget</a>'s context menu policy to <a href="../qtcore/qt.html#ContextMenuPolicy-enum">Qt::ActionsContextMenu</a>, meaning that the <a href="qaction.html">QAction</a>s associated with the widget should appear in its context menu.</p>
+<p>Then we add the <b>Add Image</b> and <b>Remove All Images</b> actions to the table widget. They will then appear in the table widget's context menu.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>checkCurrentStyle()
+  {
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span><span class="operator">&gt;</span> actions <span class="operator">=</span> styleActionGroup<span class="operator">-</span><span class="operator">&gt;</span>actions();
+      <span class="keyword">for</span> (<span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>action : actions) {
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> styleName <span class="operator">=</span> action<span class="operator">-</span><span class="operator">&gt;</span>data()<span class="operator">.</span>toString();
+          <span class="type"><a href="../qtcore/qscopedpointer.html">QScopedPointer</a></span><span class="operator">&lt;</span><span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">&gt;</span> candidate(<span class="type"><a href="qstylefactory.html">QStyleFactory</a></span><span class="operator">::</span>create(styleName));
+          Q_ASSERT(<span class="operator">!</span>candidate<span class="operator">.</span>isNull());
+          <span class="keyword">if</span> (candidate<span class="operator">-</span><span class="operator">&gt;</span>metaObject()<span class="operator">-</span><span class="operator">&gt;</span>className()
+                  <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>style()<span class="operator">-</span><span class="operator">&gt;</span>metaObject()<span class="operator">-</span><span class="operator">&gt;</span>className()) {
+              action<span class="operator">-</span><span class="operator">&gt;</span>trigger();
+              <span class="keyword">return</span>;
+          }
+      }
+  }
+
+</pre>
+<p>In the <code>checkCurrentStyle()</code> function we go through the group of style actions, looking for the current GUI style.</p>
+<p>For each action, we first extract the style name using <a href="qaction.html#data">QAction::data</a>(). Since this is only a <a href="qstylefactory.html">QStyleFactory</a> key (e.g&#x2e;, &quot;macintosh&quot;), we cannot compare it directly to the current style's class name. We need to create a <a href="qstyle.html">QStyle</a> object using the static <a href="qstylefactory.html#create">QStyleFactory::create</a>() function and compare the class name of the created <a href="qstyle.html">QStyle</a> object with that of the current style. As soon as we are done with a <a href="qstyle.html">QStyle</a> candidate, we delete it.</p>
+<p>For all <a href="../qtcore/qobject.html">QObject</a> subclasses that use the <code>Q_OBJECT</code> macro, the class name of an object is available through its <a href="../qtcore/qobject.html#metaObject">meta-object</a>.</p>
+<p>We can assume that the style is supported by <a href="qstylefactory.html">QStyleFactory</a>, but to be on the safe side we use the <code>Q_ASSERT()</code> macro to make sure that <a href="qstylefactory.html#create">QStyleFactory::create</a>() returned a valid pointer.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>show()
+  {
+      <span class="type"><a href="qmainwindow.html">QMainWindow</a></span><span class="operator">::</span>show();
+      connect(windowHandle()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span><span class="operator">::</span>screenChanged<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>screenChanged);
+      screenChanged();
+  }
+
+</pre>
+<p>We overload the show() function to set up the updating of the current screen in <code>screenChanged()</code>. After calling <a href="qwidget.html#show">QWidget::show</a>(), the <a href="../qtgui/qwindow.html">QWindow</a> associated with the <a href="qwidget.html">QWidget</a> is created and we can connect to its <a href="../qtgui/qwindow.html#screenChanged">QWindow::screenChanged</a>() signal.</p>
+<a name="iconsizespinbox-class-definition"></a>
+<h5 id="iconsizespinbox-class-definition">IconSizeSpinBox Class Definition</h5>
+<pre class="cpp">
+
+  <span class="keyword">class</span> IconSizeSpinBox : <span class="keyword">public</span> <span class="type"><a href="qspinbox.html">QSpinBox</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> IconSizeSpinBox(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+
+      <span class="type">int</span> valueFromText(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>text) <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> textFromValue(<span class="type">int</span> value) <span class="keyword">const</span> override;
+  };
+
+</pre>
+<p>The <code>IconSizeSpinBox</code> class is a subclass of <a href="qspinbox.html">QSpinBox</a>. A plain <a href="qspinbox.html">QSpinBox</a> can only handle integers. But since we want to display the spin box's values in a more sophisticated way, we need to subclass <a href="qspinbox.html">QSpinBox</a> and reimplement the <a href="qspinbox.html#textFromValue">QSpinBox::textFromValue</a>() and <a href="qspinbox.html#valueFromText">QSpinBox::valueFromText</a>() functions.</p>
+<p class="centerAlign"><img src="images/icons_size_spinbox.png" alt="Screenshot of the icon size spinbox" /></p><a name="iconsizespinbox-class-implementation"></a>
+<h5 id="iconsizespinbox-class-implementation">IconSizeSpinBox Class Implementation</h5>
+<pre class="cpp">
+
+  IconSizeSpinBox<span class="operator">::</span>IconSizeSpinBox(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qspinbox.html">QSpinBox</a></span>(parent)
+  {
+  }
+
+</pre>
+<p>The constructor is trivial.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> IconSizeSpinBox<span class="operator">::</span>textFromValue(<span class="type">int</span> value) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> tr(<span class="string">&quot;%1 x %1&quot;</span>)<span class="operator">.</span>arg(value);
+  }
+
+</pre>
+<p><a href="qspinbox.html#textFromValue">QSpinBox::textFromValue</a>() is used by the spin box whenever it needs to display a value. The default implementation returns a base 10 representation of the <code>value</code> parameter.</p>
+<p>Our reimplementation returns a <a href="../qtcore/qstring.html">QString</a> of the form &quot;32 x 32&quot;.</p>
+<pre class="cpp">
+
+  <span class="type">int</span> IconSizeSpinBox<span class="operator">::</span>valueFromText(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>text) <span class="keyword">const</span>
+  {
+      <span class="keyword">static</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span> regExp(tr(<span class="string">&quot;(\\d+)(\\s*[xx]\\s*\\d+)?&quot;</span>));
+      Q_ASSERT(regExp<span class="operator">.</span>isValid());
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qregularexpressionmatch.html">QRegularExpressionMatch</a></span> match <span class="operator">=</span> regExp<span class="operator">.</span>match(text);
+      <span class="keyword">if</span> (match<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> match<span class="operator">.</span>captured(<span class="number">1</span>)<span class="operator">.</span>toInt();
+      <span class="keyword">return</span> <span class="number">0</span>;
+  }
+
+</pre>
+<p>The <a href="qspinbox.html#valueFromText">QSpinBox::valueFromText</a>() function is used by the spin box whenever it needs to interpret text typed in by the user. Since we reimplement the <code>textFromValue()</code> function we also need to reimplement the <code>valueFromText()</code> function to interpret the parameter text and return the associated int value.</p>
+<p>We parse the text using a regular expression (a <a href="../qtcore/qregularexpression.html">QRegularExpression</a>). We define an expression that matches one or several digits, optionally followed by whitespace, an &quot;x&quot; or the times symbol, whitespace and one or several digits again.</p>
+<p>The first digits of the regular expression are captured using parentheses. This enables us to use the <a href="../qtcore/qregularexpressionmatch.html#captured">QRegularExpressionMatch::captured</a>() or <a href="../qtcore/qregularexpressionmatch.html#capturedTexts">QRegularExpressionMatch::capturedTexts</a>() functions to extract the matched characters. If the first and second numbers of the spin box value differ (e.g&#x2e;, &quot;16 x 24&quot;), we use the first number.</p>
+<p>When the user presses <b>Enter</b>, <a href="qspinbox.html">QSpinBox</a> first calls <a href="qspinbox.html#valueFromText">QSpinBox::valueFromText</a>() to interpret the text typed by the user, then <a href="qspinbox.html#textFromValue">QSpinBox::textFromValue</a>() to present it in a canonical format (e.g&#x2e;, &quot;16 x 16&quot;).</p>
+<a name="imagedelegate-class-definition"></a>
+<h5 id="imagedelegate-class-definition">ImageDelegate Class Definition</h5>
+<pre class="cpp">
+
+  <span class="keyword">class</span> ImageDelegate : <span class="keyword">public</span> <span class="type"><a href="qitemdelegate.html">QItemDelegate</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> ImageDelegate(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+
+</pre>
+<p>The <code>ImageDelegate</code> class is a subclass of <a href="qitemdelegate.html">QItemDelegate</a>. The <a href="qitemdelegate.html">QItemDelegate</a> class provides display and editing facilities for data items from a model. A single <a href="qitemdelegate.html">QItemDelegate</a> object is responsible for all items displayed in a item view (in our case, a <a href="qtablewidget.html">QTableWidget</a>).</p>
+<p>A <a href="qitemdelegate.html">QItemDelegate</a> can be used to provide an editor for an item view class that is subclassed from <a href="qabstractitemview.html">QAbstractItemView</a>. Using a delegate for this purpose allows the editing mechanism to be customized and developed independently from the model and view.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>createEditor(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a></span> <span class="operator">&amp;</span>option<span class="operator">,</span>
+                            <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span> override;
+      <span class="type">void</span> setEditorData(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>editor<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span> override;
+      <span class="type">void</span> setModelData(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>editor<span class="operator">,</span> <span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span> <span class="operator">*</span>model<span class="operator">,</span>
+                        <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span> override;
+
+</pre>
+<p>The default implementation of <a href="qitemdelegate.html">QItemDelegate</a> creates a <a href="qlineedit.html">QLineEdit</a>. Since we want the editor to be a <a href="qcombobox.html">QComboBox</a>, we need to subclass <a href="qitemdelegate.html">QItemDelegate</a> and reimplement the <a href="qitemdelegate.html#createEditor">QItemDelegate::createEditor</a>(), <a href="qitemdelegate.html#setEditorData">QItemDelegate::setEditorData</a>() and <a href="qitemdelegate.html#setModelData">QItemDelegate::setModelData</a>() functions.</p>
+<pre class="cpp">
+
+  <span class="keyword">private</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> emitCommitData();
+  };
+
+</pre>
+<p>The <code>emitCommitData()</code> slot is used to emit the QImageDelegate::commitData() signal with the appropriate argument.</p>
+<a name="imagedelegate-class-implementation"></a>
+<h5 id="imagedelegate-class-implementation">ImageDelegate Class Implementation</h5>
+<pre class="cpp">
+
+  ImageDelegate<span class="operator">::</span>ImageDelegate(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qitemdelegate.html">QItemDelegate</a></span>(parent)
+  {
+  }
+
+</pre>
+<p>The constructor is trivial.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>ImageDelegate<span class="operator">::</span>createEditor(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent<span class="operator">,</span>
+                                       <span class="keyword">const</span> <span class="type"><a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a></span> <span class="operator">&amp;</span> <span class="comment">/* option */</span><span class="operator">,</span>
+                                       <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span>
+  {
+      <span class="type"><a href="qcombobox.html">QComboBox</a></span> <span class="operator">*</span>comboBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcombobox.html">QComboBox</a></span>(parent);
+      <span class="keyword">if</span> (index<span class="operator">.</span>column() <span class="operator">=</span><span class="operator">=</span> <span class="number">1</span>)
+          comboBox<span class="operator">-</span><span class="operator">&gt;</span>addItems(IconPreviewArea<span class="operator">::</span>iconModeNames());
+      <span class="keyword">else</span> <span class="keyword">if</span> (index<span class="operator">.</span>column() <span class="operator">=</span><span class="operator">=</span> <span class="number">2</span>)
+          comboBox<span class="operator">-</span><span class="operator">&gt;</span>addItems(IconPreviewArea<span class="operator">::</span>iconStateNames());
+
+      connect(comboBox<span class="operator">,</span> <span class="type">QOverload</span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span><span class="operator">::</span>of(<span class="operator">&amp;</span><span class="type"><a href="qcombobox.html">QComboBox</a></span><span class="operator">::</span>activated)<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ImageDelegate<span class="operator">::</span>emitCommitData);
+
+      <span class="keyword">return</span> comboBox;
+  }
+
+</pre>
+<p>The default <a href="qitemdelegate.html#createEditor">QItemDelegate::createEditor</a>() implementation returns the widget used to edit the item specified by the model and item index for editing. The parent widget and style option are used to control the appearance of the editor widget.</p>
+<p>Our reimplementation creates and populates a combobox instead of the default line edit. The contents of the combobox depends on the column in the table for which the editor is requested. Column 1 contains the <a href="../qtgui/qicon.html">QIcon</a> modes, whereas column 2 contains the <a href="../qtgui/qicon.html">QIcon</a> states.</p>
+<p>In addition, we connect the combobox's <a href="qcombobox.html#activated">activated()</a> signal to the <code>emitCommitData()</code> slot to emit the <a href="qabstractitemdelegate.html#commitData">QAbstractItemDelegate::commitData</a>() signal whenever the user chooses an item using the combobox. This ensures that the rest of the application notices the change and updates itself.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> ImageDelegate<span class="operator">::</span>setEditorData(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>editor<span class="operator">,</span>
+                                    <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span>
+  {
+      <span class="type"><a href="qcombobox.html">QComboBox</a></span> <span class="operator">*</span>comboBox <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="qcombobox.html">QComboBox</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(editor);
+      <span class="keyword">if</span> (<span class="operator">!</span>comboBox)
+          <span class="keyword">return</span>;
+
+      <span class="type">int</span> pos <span class="operator">=</span> comboBox<span class="operator">-</span><span class="operator">&gt;</span>findText(index<span class="operator">.</span>model()<span class="operator">-</span><span class="operator">&gt;</span>data(index)<span class="operator">.</span>toString()<span class="operator">,</span>
+                                   <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>MatchExactly);
+      comboBox<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(pos);
+  }
+
+</pre>
+<p>The <a href="qitemdelegate.html#setEditorData">QItemDelegate::setEditorData</a>() function is used by <a href="qtablewidget.html">QTableWidget</a> to transfer data from a <a href="qtablewidgetitem.html">QTableWidgetItem</a> to the editor. The data is stored as a string; we use <a href="qcombobox.html#findText">QComboBox::findText</a>() to locate it in the combobox.</p>
+<p>Delegates work in terms of models, not items. This makes it possible to use them with any item view class (e.g&#x2e;, <a href="qlistview.html">QListView</a>, <a href="qlistwidget.html">QListWidget</a>, <a href="qtreeview.html">QTreeView</a>, etc.)&#x2e; The transition between model and items is done implicitly by <a href="qtablewidget.html">QTableWidget</a>; we don't need to worry about it.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> ImageDelegate<span class="operator">::</span>setModelData(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>editor<span class="operator">,</span> <span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span> <span class="operator">*</span>model<span class="operator">,</span>
+                                   <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span>
+  {
+      <span class="type"><a href="qcombobox.html">QComboBox</a></span> <span class="operator">*</span>comboBox <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="qcombobox.html">QComboBox</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(editor);
+      <span class="keyword">if</span> (<span class="operator">!</span>comboBox)
+          <span class="keyword">return</span>;
+
+      model<span class="operator">-</span><span class="operator">&gt;</span>setData(index<span class="operator">,</span> comboBox<span class="operator">-</span><span class="operator">&gt;</span>currentText());
+  }
+
+</pre>
+<p>The <a href="qitemdelegate.html#setEditorData">QItemDelegate::setEditorData</a>() function is used by <a href="qtablewidget.html">QTableWidget</a> to transfer data back from the editor to the <a href="qtablewidgetitem.html">QTableWidgetItem</a>.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> ImageDelegate<span class="operator">::</span>emitCommitData()
+  {
+      <span class="keyword">emit</span> commitData(qobject_cast<span class="operator">&lt;</span><span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(sender()));
+  }
+
+</pre>
+<p>The <code>emitCommitData()</code> slot simply emit the <a href="qabstractitemdelegate.html#commitData">QAbstractItemDelegate::commitData</a>() signal for the editor that triggered the slot. This signal must be emitted when the editor widget has completed editing the data, and wants to write it back into the model.</p>
+<a name="the-implementation-of-the-function-main"></a>
+<h5 id="the-implementation-of-the-function-main">The Implementation of the Function main()</h5>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type"><a href="qapplication.html">QApplication</a></span> app(argc<span class="operator">,</span> argv);
+      <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>setApplicationName(MainWindow<span class="operator">::</span>tr(<span class="string">&quot;Icons&quot;</span>));
+      <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>setApplicationVersion(QT_VERSION_STR);
+      <span class="type"><a href="../qtcore/qcommandlineparser.html">QCommandLineParser</a></span> commandLineParser;
+      commandLineParser<span class="operator">.</span>setSingleDashWordOptionMode(<span class="type"><a href="../qtcore/qcommandlineparser.html">QCommandLineParser</a></span><span class="operator">::</span>ParseAsLongOptions);
+      commandLineParser<span class="operator">.</span>addHelpOption();
+      commandLineParser<span class="operator">.</span>addVersionOption();
+      <span class="type"><a href="../qtcore/qcommandlineoption.html">QCommandLineOption</a></span> noHighDpiPixmapOption(<span class="string">&quot;no-highdpi-pixmaps&quot;</span><span class="operator">,</span>
+                                               <span class="string">&quot;Disable High DPI image loading (Qt::AA_UseHighDpiPixmaps)&quot;</span>);
+      commandLineParser<span class="operator">.</span>addOption(noHighDpiPixmapOption);
+          commandLineParser<span class="operator">.</span>addPositionalArgument(MainWindow<span class="operator">::</span>tr(<span class="string">&quot;[file]&quot;</span>)<span class="operator">,</span> MainWindow<span class="operator">::</span>tr(<span class="string">&quot;Icon file(s) to open.&quot;</span>));
+      commandLineParser<span class="operator">.</span>process(<span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>arguments());
+
+      <span class="keyword">if</span> (<span class="operator">!</span>commandLineParser<span class="operator">.</span>isSet(noHighDpiPixmapOption))
+          <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>setAttribute(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AA_UseHighDpiPixmaps);
+
+      MainWindow mainWin;
+      <span class="keyword">if</span> (<span class="operator">!</span>commandLineParser<span class="operator">.</span>positionalArguments()<span class="operator">.</span>isEmpty())
+          mainWin<span class="operator">.</span>loadImages(commandLineParser<span class="operator">.</span>positionalArguments());
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> availableGeometry <span class="operator">=</span> <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>desktop()<span class="operator">-</span><span class="operator">&gt;</span>availableGeometry(<span class="operator">&amp;</span>mainWin);
+      mainWin<span class="operator">.</span>resize(availableGeometry<span class="operator">.</span>width() <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> availableGeometry<span class="operator">.</span>height() <span class="operator">*</span> <span class="number">2</span> <span class="operator">/</span> <span class="number">3</span>);
+      mainWin<span class="operator">.</span>move((availableGeometry<span class="operator">.</span>width() <span class="operator">-</span> mainWin<span class="operator">.</span>width()) <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> (availableGeometry<span class="operator">.</span>height() <span class="operator">-</span> mainWin<span class="operator">.</span>height()) <span class="operator">/</span> <span class="number">2</span>);
+
+      mainWin<span class="operator">.</span>show();
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p>We use <a href="../qtcore/qcommandlineparser.html">QCommandLineParser</a> to handle any command line options or parameters passed to the application. Then, we resize the main window according to the available screen geometry and show it.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/widgets/icons?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@widgets/icons -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

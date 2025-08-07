@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qvariantanimation.cpp -->
+  <title>QVariantAnimation Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QVariantAnimation</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QVariantAnimation Class</h1>
+<!-- $$$QVariantAnimation-brief -->
+<p>The <a href="qvariantanimation.html">QVariantAnimation</a> class provides a base class for animations. <a href="#details">More...</a></p>
+<!-- @@@QVariantAnimation -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QVariantAnimation&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.6</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qabstractanimation.html">QAbstractAnimation</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qpropertyanimation.html">QPropertyAnimation</a></p>
+</td></tr></table></div><p>This class was introduced in  Qt 4.6.</p>
+<ul>
+<li><a href="qvariantanimation-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#KeyValue-typedef">KeyValue</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#KeyValues-typedef">KeyValues</a></b></td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qvariantanimation.html#currentValue-prop">currentValue</a></b> : const QVariant</li>
+<li class="fn"><b><a href="qvariantanimation.html#duration-prop">duration</a></b> : int</li>
+<li class="fn"><b><a href="qvariantanimation.html#easingCurve-prop">easingCurve</a></b> : QEasingCurve</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qvariantanimation.html#endValue-prop">endValue</a></b> : QVariant</li>
+<li class="fn"><b><a href="qvariantanimation.html#startValue-prop">startValue</a></b> : QVariant</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#QVariantAnimation">QVariantAnimation</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#dtor.QVariantAnimation">~QVariantAnimation</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariant </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#currentValue-prop">currentValue</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QEasingCurve </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#easingCurve-prop">easingCurve</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariant </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#endValue-prop">endValue</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariant </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#keyValueAt">keyValueAt</a></b>(qreal <i>step</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariantAnimation::KeyValues </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#keyValues">keyValues</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#duration-prop">setDuration</a></b>(int <i>msecs</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#easingCurve-prop">setEasingCurve</a></b>(const QEasingCurve &amp;<i>easing</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#endValue-prop">setEndValue</a></b>(const QVariant &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#setKeyValueAt">setKeyValueAt</a></b>(qreal <i>step</i>, const QVariant &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#setKeyValues">setKeyValues</a></b>(const QVariantAnimation::KeyValues &amp;<i>keyValues</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#startValue-prop">setStartValue</a></b>(const QVariant &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariant </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#startValue-prop">startValue</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#duration-prop">duration</a></b>() const override</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#valueChanged">valueChanged</a></b>(const QVariant &amp;<i>value</i>)</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QVariant </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#interpolated">interpolated</a></b>(const QVariant &amp;<i>from</i>, const QVariant &amp;<i>to</i>, qreal <i>progress</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#updateCurrentValue">updateCurrentValue</a></b>(const QVariant &amp;<i>value</i>)</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#event">event</a></b>(QEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#updateCurrentTime">updateCurrentTime</a></b>(<i>int</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#updateState">updateState</a></b>(QAbstractAnimation::State <i>newState</i>, QAbstractAnimation::State <i>oldState</i>) override</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvariantanimation.html#qRegisterAnimationInterpolator">qRegisterAnimationInterpolator</a></b>(QVariant (*)(const T &amp;, const T &amp;, qreal) <i>func</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QVariantAnimation-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This class is part of <a href="animation-overview.html">The Animation Framework</a>. It serves as a base class for property and item animations, with functions for shared functionality.</p>
+<p>The class performs interpolation over <a href="qvariant.html">QVariant</a>s, but leaves using the interpolated values to its subclasses. Currently, Qt provides <a href="qpropertyanimation.html">QPropertyAnimation</a>, which animates Qt <a href="properties.html">properties</a>. See the <a href="qpropertyanimation.html">QPropertyAnimation</a> class description if you wish to animate such properties.</p>
+<p>You can then set start and end values for the property by calling <a href="qvariantanimation.html#startValue-prop">setStartValue</a>() and <a href="qvariantanimation.html#endValue-prop">setEndValue</a>(), and finally call <a href="qabstractanimation.html#start">start</a>() to start the animation. <a href="qvariantanimation.html">QVariantAnimation</a> will interpolate the property of the target object and emit <a href="qvariantanimation.html#valueChanged">valueChanged</a>(). To react to a change in the current value you have to reimplement the <a href="qvariantanimation.html#updateCurrentValue">updateCurrentValue</a>() virtual function or connect to said signal.</p>
+<p>It is also possible to set values at specified steps situated between the start and end value. The interpolation will then touch these points at the specified steps. Note that the start and end values are defined as the key values at 0.0 and 1.0&#x2e;</p>
+<p>There are two ways to affect how <a href="qvariantanimation.html">QVariantAnimation</a> interpolates the values. You can set an easing curve by calling <a href="qvariantanimation.html#easingCurve-prop">setEasingCurve</a>(), and configure the duration by calling <a href="qvariantanimation.html#duration-prop">setDuration</a>(). You can change how the <a href="qvariant.html">QVariant</a>s are interpolated by creating a subclass of <a href="qvariantanimation.html">QVariantAnimation</a>, and reimplementing the virtual <a href="qvariantanimation.html#interpolated">interpolated</a>() function.</p>
+<p>Subclassing <a href="qvariantanimation.html">QVariantAnimation</a> can be an alternative if you have <a href="qvariant.html">QVariant</a>s that you do not wish to declare as Qt properties. Note, however, that you in most cases will be better off declaring your <a href="qvariant.html">QVariant</a> as a property.</p>
+<p>Not all <a href="qvariant.html">QVariant</a> types are supported. Below is a list of currently supported <a href="qvariant.html">QVariant</a> types:</p>
+<ul>
+<li><a href="qmetatype.html#Type-enum">Int</a></li>
+<li><a href="qmetatype.html#Type-enum">UInt</a></li>
+<li><a href="qmetatype.html#Type-enum">Double</a></li>
+<li><a href="qmetatype.html#Type-enum">Float</a></li>
+<li><a href="qmetatype.html#Type-enum">QLine</a></li>
+<li><a href="qmetatype.html#Type-enum">QLineF</a></li>
+<li><a href="qmetatype.html#Type-enum">QPoint</a></li>
+<li><a href="qmetatype.html#Type-enum">QPointF</a></li>
+<li><a href="qmetatype.html#Type-enum">QSize</a></li>
+<li><a href="qmetatype.html#Type-enum">QSizeF</a></li>
+<li><a href="qmetatype.html#Type-enum">QRect</a></li>
+<li><a href="qmetatype.html#Type-enum">QRectF</a></li>
+<li><a href="qmetatype.html#Type-enum">QColor</a></li>
+</ul>
+<p>If you need to interpolate other variant types, including custom types, you have to implement interpolation for these yourself. To do this, you can register an interpolator function for a given type. This function takes 3 parameters: the start value, the end value, and the current progress.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qvariant.html">QVariant</a></span> myColorInterpolator(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> <span class="operator">&amp;</span>start<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> <span class="operator">&amp;</span>end<span class="operator">,</span> <span class="type"><a href="qtglobal.html#qreal-typedef">qreal</a></span> progress)
+      {
+          <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+          <span class="keyword">return</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>);
+      }
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+      <a href="qvariantanimation.html#qRegisterAnimationInterpolator">qRegisterAnimationInterpolator</a><span class="operator">&lt;</span><span class="type"><a href="../qtgui/qcolor.html">QColor</a></span><span class="operator">&gt;</span>(myColorInterpolator);
+
+</pre>
+<p>Another option is to reimplement <a href="qvariantanimation.html#interpolated">interpolated</a>(), which returns interpolation values for the value being interpolated.</p>
+</div>
+<p><b>See also </b><a href="qpropertyanimation.html">QPropertyAnimation</a>, <a href="qabstractanimation.html">QAbstractAnimation</a>, and <a href="animation-overview.html">The Animation Framework</a>.</p>
+<!-- @@@QVariantAnimation -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$KeyValue -->
+<h3 class="fn" id="KeyValue-typedef"><a name="KeyValue-typedef"></a>typedef QVariantAnimation::<span class="name">KeyValue</span></h3>
+<p>This is a typedef for <a href="qpair.html">QPair</a>&lt;qreal, <a href="qvariant.html">QVariant</a>&gt;.</p>
+<!-- @@@KeyValue -->
+<!-- $$$KeyValues -->
+<h3 class="fn" id="KeyValues-typedef"><a name="KeyValues-typedef"></a>typedef QVariantAnimation::<span class="name">KeyValues</span></h3>
+<p>This is a typedef for <a href="qvector.html">QVector</a>&lt;<a href="qvariantanimation.html#KeyValue-typedef">KeyValue</a>&gt;</p>
+<!-- @@@KeyValues -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$currentValue-prop$$$currentValue$$$valueChangedconstQVariant& -->
+<h3 class="fn" id="currentValue-prop"><a name="currentValue-prop"></a><span class="name">currentValue</span> : const <span class="type"><a href="qvariant.html">QVariant</a></span></h3>
+<p>This property holds the current value of the animation.</p>
+<p>This property describes the current value; an interpolated value between the <a href="qvariantanimation.html#startValue-prop">start value</a> and the <a href="qvariantanimation.html#endValue-prop">end value</a>, using the current time for progress. The value itself is obtained from <a href="qvariantanimation.html#interpolated">interpolated</a>(), which is called repeatedly as the animation is running.</p>
+<p><a href="qvariantanimation.html">QVariantAnimation</a> calls the virtual <a href="qvariantanimation.html#updateCurrentValue">updateCurrentValue</a>() function when the current value changes. This is particularly useful for subclasses that need to track updates. For example, <a href="qpropertyanimation.html">QPropertyAnimation</a> uses this function to animate Qt <a href="properties.html">properties</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QVariant </td><td class="memItemRight bottomAlign"><span class="name"><b>currentValue</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qvariantanimation.html#valueChanged">valueChanged</a></b></span>(const QVariant &amp;<i>value</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qvariantanimation.html#startValue-prop">startValue</a> and <a href="qvariantanimation.html#endValue-prop">endValue</a>.</p>
+<!-- @@@currentValue -->
+<!-- $$$duration-prop$$$duration$$$setDurationint -->
+<h3 class="fn" id="duration-prop"><a name="duration-prop"></a><span class="name">duration</span> : <span class="type">int</span></h3>
+<p>This property holds the duration of the animation</p>
+<p>This property describes the duration in milliseconds of the animation. The default duration is 250 milliseconds.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> virtual int </td><td class="memItemRight bottomAlign"><span class="name"><b>duration</b></span>() const override</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setDuration</b></span>(int <i>msecs</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qabstractanimation.html#duration">QAbstractAnimation::duration</a>().</p>
+<!-- @@@duration -->
+<!-- $$$easingCurve-prop$$$easingCurve$$$setEasingCurveconstQEasingCurve& -->
+<h3 class="fn" id="easingCurve-prop"><a name="easingCurve-prop"></a><span class="name">easingCurve</span> : <span class="type"><a href="qeasingcurve.html">QEasingCurve</a></span></h3>
+<p>This property holds the easing curve of the animation</p>
+<p>This property defines the easing curve of the animation. By default, a linear easing curve is used, resulting in linear interpolation. Other curves are provided, for instance, <a href="qeasingcurve.html#Type-enum">QEasingCurve::InCirc</a>, which provides a circular entry curve. Another example is <a href="qeasingcurve.html#Type-enum">QEasingCurve::InOutElastic</a>, which provides an elastic effect on the values of the interpolated variant.</p>
+<p><a href="qvariantanimation.html">QVariantAnimation</a> will use the <a href="qeasingcurve.html#valueForProgress">QEasingCurve::valueForProgress</a>() to transform the &quot;normalized progress&quot; (<a href="qabstractanimation.html#currentTime-prop">currentTime</a> / <a href="qabstractanimation.html#totalDuration">totalDuration</a>) of the animation into the effective progress actually used by the animation. It is this effective progress that will be the progress when <a href="qvariantanimation.html#interpolated">interpolated</a>() is called. Also, the steps in the <a href="qvariantanimation.html#keyValues">keyValues</a> are referring to this effective progress.</p>
+<p>The easing curve is used with the interpolator, the <a href="qvariantanimation.html#interpolated">interpolated</a>() virtual function, and the animation's duration to control how the current value changes as the animation progresses.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QEasingCurve </td><td class="memItemRight bottomAlign"><span class="name"><b>easingCurve</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setEasingCurve</b></span>(const QEasingCurve &amp;<i>easing</i>)</td></tr>
+</table></div>
+<!-- @@@easingCurve -->
+<!-- $$$endValue-prop$$$endValue$$$setEndValueconstQVariant& -->
+<h3 class="fn" id="endValue-prop"><a name="endValue-prop"></a><span class="name">endValue</span> : <span class="type"><a href="qvariant.html">QVariant</a></span></h3>
+<p>This property holds the end value of the animation</p>
+<p>This property describes the end value of the animation.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QVariant </td><td class="memItemRight bottomAlign"><span class="name"><b>endValue</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setEndValue</b></span>(const QVariant &amp;<i>value</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qvariantanimation.html#startValue-prop">startValue</a>.</p>
+<!-- @@@endValue -->
+<!-- $$$startValue-prop$$$startValue$$$setStartValueconstQVariant& -->
+<h3 class="fn" id="startValue-prop"><a name="startValue-prop"></a><span class="name">startValue</span> : <span class="type"><a href="qvariant.html">QVariant</a></span></h3>
+<p>This property holds the optional start value of the animation</p>
+<p>This property describes the optional start value of the animation. If omitted, or if a null <a href="qvariant.html">QVariant</a> is assigned as the start value, the animation will use the current position of the end when the animation is started.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QVariant </td><td class="memItemRight bottomAlign"><span class="name"><b>startValue</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setStartValue</b></span>(const QVariant &amp;<i>value</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qvariantanimation.html#endValue-prop">endValue</a>.</p>
+<!-- @@@startValue -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QVariantAnimation[overload1]$$$QVariantAnimationQObject* -->
+<h3 class="fn" id="QVariantAnimation"><a name="QVariantAnimation"></a>QVariantAnimation::<span class="name">QVariantAnimation</span>(<span class="type"><a href="qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Construct a <a href="qvariantanimation.html">QVariantAnimation</a> object. <i>parent</i> is passed to <a href="qabstractanimation.html">QAbstractAnimation</a>'s constructor.</p>
+<!-- @@@QVariantAnimation -->
+<!-- $$$valueChanged -->
+<h3 class="fn" id="valueChanged"><a name="valueChanged"></a><code>[signal] </code><span class="type">void</span> QVariantAnimation::<span class="name">valueChanged</span>(const <span class="type"><a href="qvariant.html">QVariant</a></span> &amp;<i>value</i>)</h3>
+<p><a href="qvariantanimation.html">QVariantAnimation</a> emits this signal whenever the current <i>value</i> changes.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qvariantanimation.html#currentValue-prop">currentValue</a>. </p><p><b>See also </b><a href="qvariantanimation.html#currentValue-prop">currentValue</a>, <a href="qvariantanimation.html#startValue-prop">startValue</a>, and <a href="qvariantanimation.html#endValue-prop">endValue</a>.</p>
+<!-- @@@valueChanged -->
+<!-- $$$~QVariantAnimation[overload1]$$$~QVariantAnimation -->
+<h3 class="fn" id="dtor.QVariantAnimation"><a name="dtor.QVariantAnimation"></a><code>[virtual] </code>QVariantAnimation::<span class="name">~QVariantAnimation</span>()</h3>
+<p>Destroys the animation.</p>
+<!-- @@@~QVariantAnimation -->
+<!-- $$$event[overload1]$$$eventQEvent* -->
+<h3 class="fn" id="event"><a name="event"></a><code>[override virtual protected] </code><span class="type">bool</span> QVariantAnimation::<span class="name">event</span>(<span class="type"><a href="qevent.html">QEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qabstractanimation.html#event">QAbstractAnimation::event</a>(QEvent *event).</p>
+<!-- @@@event -->
+<!-- $$$interpolated[overload1]$$$interpolatedconstQVariant&constQVariant&qreal -->
+<h3 class="fn" id="interpolated"><a name="interpolated"></a><code>[virtual protected] </code><span class="type"><a href="qvariant.html">QVariant</a></span> QVariantAnimation::<span class="name">interpolated</span>(const <span class="type"><a href="qvariant.html">QVariant</a></span> &amp;<i>from</i>, const <span class="type"><a href="qvariant.html">QVariant</a></span> &amp;<i>to</i>, <span class="type"><a href="qtglobal.html#qreal-typedef">qreal</a></span> <i>progress</i>) const</h3>
+<p>This virtual function returns the linear interpolation between variants <i>from</i> and <i>to</i>, at <i>progress</i>, usually a value between 0 and 1. You can reimplement this function in a subclass of <a href="qvariantanimation.html">QVariantAnimation</a> to provide your own interpolation algorithm.</p>
+<p>Note that in order for the interpolation to work with a <a href="qeasingcurve.html">QEasingCurve</a> that return a value smaller than 0 or larger than 1 (such as <a href="qeasingcurve.html#Type-enum">QEasingCurve::InBack</a>) you should make sure that it can extrapolate. If the semantic of the datatype does not allow extrapolation this function should handle that gracefully.</p>
+<p>You should call the <a href="qvariantanimation.html">QVariantAnimation</a> implementation of this function if you want your class to handle the types already supported by Qt (see class <a href="qvariantanimation.html">QVariantAnimation</a> description for a list of supported types).</p>
+<p><b>See also </b><a href="qeasingcurve.html">QEasingCurve</a>.</p>
+<!-- @@@interpolated -->
+<!-- $$$keyValueAt[overload1]$$$keyValueAtqreal -->
+<h3 class="fn" id="keyValueAt"><a name="keyValueAt"></a><span class="type"><a href="qvariant.html">QVariant</a></span> QVariantAnimation::<span class="name">keyValueAt</span>(<span class="type"><a href="qtglobal.html#qreal-typedef">qreal</a></span> <i>step</i>) const</h3>
+<p>Returns the key frame value for the given <i>step</i>. The given <i>step</i> must be in the range 0 to 1. If there is no <a href="qvariantanimation.html#KeyValue-typedef">KeyValue</a> for <i>step</i>, it returns an invalid <a href="qvariant.html">QVariant</a>.</p>
+<p><b>See also </b><a href="qvariantanimation.html#keyValues">keyValues</a>() and <a href="qvariantanimation.html#setKeyValueAt">setKeyValueAt</a>().</p>
+<!-- @@@keyValueAt -->
+<!-- $$$keyValues[overload1]$$$keyValues -->
+<h3 class="fn" id="keyValues"><a name="keyValues"></a><span class="type"><a href="qvariantanimation.html#KeyValues-typedef">QVariantAnimation::KeyValues</a></span> QVariantAnimation::<span class="name">keyValues</span>() const</h3>
+<p>Returns the key frames of this animation.</p>
+<p><b>See also </b><a href="qvariantanimation.html#keyValueAt">keyValueAt</a>() and <a href="qvariantanimation.html#setKeyValues">setKeyValues</a>().</p>
+<!-- @@@keyValues -->
+<!-- $$$setKeyValueAt[overload1]$$$setKeyValueAtqrealconstQVariant& -->
+<h3 class="fn" id="setKeyValueAt"><a name="setKeyValueAt"></a><span class="type">void</span> QVariantAnimation::<span class="name">setKeyValueAt</span>(<span class="type"><a href="qtglobal.html#qreal-typedef">qreal</a></span> <i>step</i>, const <span class="type"><a href="qvariant.html">QVariant</a></span> &amp;<i>value</i>)</h3>
+<p>Creates a key frame at the given <i>step</i> with the given <i>value</i>. The given <i>step</i> must be in the range 0 to 1.</p>
+<p><b>See also </b><a href="qvariantanimation.html#setKeyValues">setKeyValues</a>() and <a href="qvariantanimation.html#keyValueAt">keyValueAt</a>().</p>
+<!-- @@@setKeyValueAt -->
+<!-- $$$setKeyValues[overload1]$$$setKeyValuesconstQVariantAnimation::KeyValues& -->
+<h3 class="fn" id="setKeyValues"><a name="setKeyValues"></a><span class="type">void</span> QVariantAnimation::<span class="name">setKeyValues</span>(const <span class="type"><a href="qvariantanimation.html#KeyValues-typedef">QVariantAnimation::KeyValues</a></span> &amp;<i>keyValues</i>)</h3>
+<p>Replaces the current set of key frames with the given <i>keyValues</i>. the step of the key frames must be in the range 0 to 1.</p>
+<p><b>See also </b><a href="qvariantanimation.html#keyValues">keyValues</a>() and <a href="qvariantanimation.html#keyValueAt">keyValueAt</a>().</p>
+<!-- @@@setKeyValues -->
+<!-- $$$updateCurrentTime[overload1]$$$updateCurrentTimeint -->
+<h3 class="fn" id="updateCurrentTime"><a name="updateCurrentTime"></a><code>[override virtual protected] </code><span class="type">void</span> QVariantAnimation::<span class="name">updateCurrentTime</span>(<i>int</i>)</h3>
+<p>Reimplements: <a href="qabstractanimation.html#updateCurrentTime">QAbstractAnimation::updateCurrentTime</a>(int currentTime).</p>
+<!-- @@@updateCurrentTime -->
+<!-- $$$updateCurrentValue[overload1]$$$updateCurrentValueconstQVariant& -->
+<h3 class="fn" id="updateCurrentValue"><a name="updateCurrentValue"></a><code>[virtual protected] </code><span class="type">void</span> QVariantAnimation::<span class="name">updateCurrentValue</span>(const <span class="type"><a href="qvariant.html">QVariant</a></span> &amp;<i>value</i>)</h3>
+<p>This virtual function is called every time the animation's current value changes. The <i>value</i> argument is the new current value.</p>
+<p>The base class implementation does nothing.</p>
+<p><b>See also </b><a href="qvariantanimation.html#currentValue-prop">currentValue</a>.</p>
+<!-- @@@updateCurrentValue -->
+<!-- $$$updateState[overload1]$$$updateStateQAbstractAnimation::StateQAbstractAnimation::State -->
+<h3 class="fn" id="updateState"><a name="updateState"></a><code>[override virtual protected] </code><span class="type">void</span> QVariantAnimation::<span class="name">updateState</span>(<span class="type"><a href="qabstractanimation.html#State-enum">QAbstractAnimation::State</a></span> <i>newState</i>, <span class="type"><a href="qabstractanimation.html#State-enum">QAbstractAnimation::State</a></span> <i>oldState</i>)</h3>
+<p>Reimplements: <a href="qabstractanimation.html#updateState">QAbstractAnimation::updateState</a>(QAbstractAnimation::State newState, QAbstractAnimation::State oldState).</p>
+<!-- @@@updateState -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$qRegisterAnimationInterpolator[overload1]$$$qRegisterAnimationInterpolatorQVariant(*)(constT&,constT&,qreal) -->
+<h3 class="fn" id="qRegisterAnimationInterpolator"><a name="qRegisterAnimationInterpolator"></a><span class="type">void</span> <span class="name">qRegisterAnimationInterpolator</span>(<span class="type"><a href="qvariant.html">QVariant</a></span> (*)(const <span class="type">T</span> &amp;, const <span class="type">T</span> &amp;, <span class="type"><a href="qtglobal.html#qreal-typedef">qreal</a></span>) <i>func</i>)</h3>
+<p>Registers a custom interpolator <i>func</i> for the template type <code>T</code>. The interpolator has to be registered before the animation is constructed. To unregister (and use the default interpolator) set <i>func</i> to <code>nullptr</code>.</p>
+<p><b>Note:</b> This function is <a href="../qtdoc/threads-reentrancy.html">thread-safe</a>.</p>
+<!-- @@@qRegisterAnimationInterpolator -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

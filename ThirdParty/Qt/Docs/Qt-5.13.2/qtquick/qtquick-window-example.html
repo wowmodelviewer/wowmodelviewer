@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- window.qdoc -->
+  <title>Qt Quick Examples - Window and Screen | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td >Qt Quick Examples - Window and Screen</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+<li class="level1"><a href="#window-implementation">Window Implementation</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Quick Examples - Window and Screen</h1>
+<span class="subtitle"></span>
+<!-- $$$window-brief -->
+<p>This example demonstrates the Window and Screen types in QML.</p>
+<!-- @@@window -->
+<!-- $$$window-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/qml-window-example.png" alt="" /></p><p><i>Window and Screen</i> shows how to:</p>
+<ul>
+<li>create a window in QML</li>
+<li>control its <a href="../qtgui/qwindow.html#visibility-prop">visibility</a></li>
+<li>present a splash screen during application startup</li>
+<li>access the properties of the <a href="qml-qtquick-window-screen.html">Screen</a></li>
+</ul>
+<p>It also demonstrates how to package QML into <a href="../qtcore/resources.html">resources</a> and provide an <a href="../qtdoc/appicon.html">icon</a> to create a standalone QML desktop application.</p>
+<a name="running-the-example"></a>
+<h4 id="running-the-example">Running the Example</h4>
+<p>To run the example from <a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a>, open the <b>Welcome</b> mode and select the example from <b>Examples</b>. For more information, visit <a href="http://doc.qt.io/qtcreator/creator-build-example-application.html">Building and Running an Example</a>.</p>
+<a name="window-implementation"></a>
+<h4 id="window-implementation">Window Implementation</h4>
+<p>A splash screen can be created with the <a href="../qtcore/qt.html#WindowType-enum">Qt.SplashScreen</a> flag, and should be <a href="../qtcore/qt.html#WindowModality-enum">ApplicationModal</a> to prevent interaction with the main window. If the splash window is also transparent, and showing a partially transparent image, then it will look like a shaped window.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-window-window.html">Window</a></span> {
+      <span class="name">id</span>: <span class="name">splash</span>
+      <span class="name">color</span>: <span class="string">&quot;transparent&quot;</span>
+      <span class="name">title</span>: <span class="string">&quot;Splash Window&quot;</span>
+      <span class="name">modality</span>: <span class="name">Qt</span>.<span class="name">ApplicationModal</span>
+      <span class="name">flags</span>: <span class="name">Qt</span>.<span class="name">SplashScreen</span>
+      property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">timeoutInterval</span>: <span class="number">2000</span>
+      signal <span class="type">timeout</span>
+
+</pre>
+<p>In this example a <a href="../qtqml/qml-qtqml-timer.html">Timer</a> will automatically dismiss the splash screen, but in a real application you might want to connect to a signal from the application logic to hide the splash when initialization is complete.</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtqml/qml-qtqml-timer.html">Timer</a></span> {
+      <span class="name">interval</span>: <span class="name">timeoutInterval</span>; <span class="name">running</span>: <span class="number">true</span>; <span class="name">repeat</span>: <span class="number">false</span>
+      <span class="name">onTriggered</span>: {
+          <span class="name">visible</span> <span class="operator">=</span> <span class="number">false</span>
+          <span class="name">splash</span>.<span class="name">timeout</span>()
+      }
+  }
+
+</pre>
+<p>The main window in this example is the control window, with some buttons and checkboxes to control and provide feedback on the state of a secondary window. Each checkbox has a binding to the property whose state it is displaying, and also an onClicked handler to change the state. This is the typical pattern to create a two-way binding while avoiding binding loops.</p>
+<pre class="qml">
+
+  <span class="type">Shared</span>.CheckBox {
+      <span class="name">text</span>: <span class="string">&quot;Windowed&quot;</span>
+      <span class="name">height</span>: <span class="name">showButton</span>.<span class="name">height</span>
+      <span class="name">width</span>: <span class="name">col</span>.<span class="name">cellWidth</span>
+      Binding on <span class="name">checked</span> { <span class="name">value</span>: <span class="name">testWindow</span>.<span class="name">visibility</span> <span class="operator">===</span> <span class="name">Window</span>.<span class="name">Windowed</span> }
+      <span class="name">onClicked</span>: <span class="name">testWindow</span>.<span class="name">visibility</span> <span class="operator">=</span> <span class="name">Window</span>.<span class="name">Windowed</span>
+  }
+
+</pre>
+<p><a href="qml-qtquick-window-screen.html">Screen</a> has several properties which are generally useful to applications which need to rotate some content when the screen orientation changes, to position windows on the screen or to convert real units to logical pixel units. CurrentScreen.qml (which is displayed inline in window.qml, or can be run by itself with qmlscene) simply displays the property values, while the splash screen uses them to center the window on the screen.</p>
+<pre class="qml">
+
+      <span class="name">x</span>: (<span class="name">Screen</span>.<span class="name">width</span> <span class="operator">-</span> <span class="name">splashImage</span>.<span class="name">width</span>) <span class="operator">/</span> <span class="number">2</span>
+      <span class="name">y</span>: (<span class="name">Screen</span>.<span class="name">height</span> <span class="operator">-</span> <span class="name">splashImage</span>.<span class="name">height</span>) <span class="operator">/</span> <span class="number">2</span>
+
+</pre>
+<p>If a <a href="qml-qtquick-window-window.html">Window</a> is nested inside an <a href="qml-qtquick-item.html">Item</a> or another Window, the inner window becomes <i>transient for</i> the outer one (see <a href="qml-qtquick-window-window.html">Window</a> for more explanation). But if you want to create multiple top-level windows as unrelated peers, you can create them inside a non-visual <a href="../qtqml/qml-qtqml-qtobject.html">QtObject</a> root item, as this example does.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtdeclarative.git/tree/examples/quick/window?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@window -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

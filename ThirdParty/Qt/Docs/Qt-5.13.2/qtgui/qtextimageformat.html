@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtextformat.cpp -->
+  <title>QTextImageFormat Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QTextImageFormat</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QTextImageFormat Class</h1>
+<!-- $$$QTextImageFormat-brief -->
+<p>The <a href="qtextimageformat.html">QTextImageFormat</a> class provides formatting information for images in a <a href="qtextdocument.html">QTextDocument</a>. <a href="#details">More...</a></p>
+<!-- @@@QTextImageFormat -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QTextImageFormat&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qtextcharformat.html">QTextCharFormat</a></td></tr></table></div><ul>
+<li><a href="qtextimageformat-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtextimageformat.html#QTextImageFormat">QTextImageFormat</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qtextimageformat.html#height">height</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qtextimageformat.html#isValid">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qtextimageformat.html#name">name</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qtextimageformat.html#quality">quality</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtextimageformat.html#setHeight">setHeight</a></b>(qreal <i>height</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtextimageformat.html#setName">setName</a></b>(const QString &amp;<i>name</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtextimageformat.html#setQuality">setQuality</a></b>(int <i>quality</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtextimageformat.html#setWidth">setWidth</a></b>(qreal <i>width</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qtextimageformat.html#width">width</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QTextImageFormat-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Inline images are represented by a Unicode value U+FFFC (OBJECT REPLACEMENT CHARACTER) which has an associated <a href="qtextimageformat.html">QTextImageFormat</a>. The image format specifies a name with <a href="qtextimageformat.html#setName">setName</a>() that is used to locate the image. The size of the rectangle that the image will occupy is specified in pixels using <a href="qtextimageformat.html#setWidth">setWidth</a>() and <a href="qtextimageformat.html#setHeight">setHeight</a>(). The desired image quality may be set with <a href="qtextimageformat.html#setQuality">setQuality</a>().</p>
+<p>Images can be supplied in any format for which Qt has an image reader, so SVG drawings can be included alongside PNG, TIFF and other bitmap formats.</p>
+</div>
+<p><b>See also </b><a href="qimage.html">QImage</a> and <a href="qimagereader.html">QImageReader</a>.</p>
+<!-- @@@QTextImageFormat -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QTextImageFormat[overload1]$$$QTextImageFormat -->
+<h3 class="fn" id="QTextImageFormat"><a name="QTextImageFormat"></a>QTextImageFormat::<span class="name">QTextImageFormat</span>()</h3>
+<p>Creates a new image format object.</p>
+<!-- @@@QTextImageFormat -->
+<!-- $$$height[overload1]$$$height -->
+<h3 class="fn" id="height"><a name="height"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QTextImageFormat::<span class="name">height</span>() const</h3>
+<p>Returns the height of the rectangle occupied by the image.</p>
+<p><b>See also </b><a href="qtextimageformat.html#width">width</a>() and <a href="qtextimageformat.html#setHeight">setHeight</a>().</p>
+<!-- @@@height -->
+<!-- $$$isValid[overload1]$$$isValid -->
+<h3 class="fn" id="isValid"><a name="isValid"></a><span class="type">bool</span> QTextImageFormat::<span class="name">isValid</span>() const</h3>
+<p>Returns <code>true</code> if this image format is valid; otherwise returns <code>false</code>.</p>
+<!-- @@@isValid -->
+<!-- $$$name[overload1]$$$name -->
+<h3 class="fn" id="name"><a name="name"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QTextImageFormat::<span class="name">name</span>() const</h3>
+<p>Returns the name of the image. The name refers to an entry in the application's resources file.</p>
+<p><b>See also </b><a href="qtextimageformat.html#setName">setName</a>().</p>
+<!-- @@@name -->
+<!-- $$$quality[overload1]$$$quality -->
+<h3 class="fn" id="quality"><a name="quality"></a><span class="type">int</span> QTextImageFormat::<span class="name">quality</span>() const</h3>
+<p>Returns the value set by <a href="qtextimageformat.html#setQuality">setQuality</a>().</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<p><b>See also </b><a href="qtextimageformat.html#setQuality">setQuality</a>().</p>
+<!-- @@@quality -->
+<!-- $$$setHeight[overload1]$$$setHeightqreal -->
+<h3 class="fn" id="setHeight"><a name="setHeight"></a><span class="type">void</span> QTextImageFormat::<span class="name">setHeight</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>height</i>)</h3>
+<p>Sets the <i>height</i> of the rectangle occupied by the image.</p>
+<p><b>See also </b><a href="qtextimageformat.html#height">height</a>() and <a href="qtextimageformat.html#setWidth">setWidth</a>().</p>
+<!-- @@@setHeight -->
+<!-- $$$setName[overload1]$$$setNameconstQString& -->
+<h3 class="fn" id="setName"><a name="setName"></a><span class="type">void</span> QTextImageFormat::<span class="name">setName</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>)</h3>
+<p>Sets the <i>name</i> of the image. The <i>name</i> is used to locate the image in the application's resources.</p>
+<p><b>See also </b><a href="qtextimageformat.html#name">name</a>().</p>
+<!-- @@@setName -->
+<!-- $$$setQuality[overload1]$$$setQualityint -->
+<h3 class="fn" id="setQuality"><a name="setQuality"></a><span class="type">void</span> QTextImageFormat::<span class="name">setQuality</span>(<span class="type">int</span> <i>quality</i> = ...)</h3>
+<p>Sets the quality that should be used by exporters when exporting the image. <a href="qtextdocumentwriter.html">QTextDocumentWriter</a> will export jpg images with the <i>quality</i> set here when exporting to ODF files if <i>quality</i> is set to a value between 0 and 100. Or it will export png images if <i>quality</i> is set to 100 (default) or greater.</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<p><b>See also </b><a href="qtextimageformat.html#quality">quality</a>().</p>
+<!-- @@@setQuality -->
+<!-- $$$setWidth[overload1]$$$setWidthqreal -->
+<h3 class="fn" id="setWidth"><a name="setWidth"></a><span class="type">void</span> QTextImageFormat::<span class="name">setWidth</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>width</i>)</h3>
+<p>Sets the <i>width</i> of the rectangle occupied by the image.</p>
+<p><b>See also </b><a href="qtextimageformat.html#width">width</a>() and <a href="qtextimageformat.html#setHeight">setHeight</a>().</p>
+<!-- @@@setWidth -->
+<!-- $$$width[overload1]$$$width -->
+<h3 class="fn" id="width"><a name="width"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QTextImageFormat::<span class="name">width</span>() const</h3>
+<p>Returns the width of the rectangle occupied by the image.</p>
+<p><b>See also </b><a href="qtextimageformat.html#height">height</a>() and <a href="qtextimageformat.html#setWidth">setWidth</a>().</p>
+<!-- @@@width -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

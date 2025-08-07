@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qplaceimage.cpp -->
+  <title>QPlaceImage Class | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-module.html">C++ Classes</a></td><td >QPlaceImage</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPlaceImage Class</h1>
+<!-- $$$QPlaceImage-brief -->
+<p>The <a href="qplaceimage.html">QPlaceImage</a> class represents a reference to an image. <a href="#details">More...</a></p>
+<!-- @@@QPlaceImage -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QPlaceImage&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += location</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.6</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qplacecontent.html">QPlaceContent</a></td></tr></table></div><p>This class was introduced in  Qt 5.6.</p>
+<ul>
+<li><a href="qplaceimage-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qplaceimage.html#QPlaceImage-1">QPlaceImage</a></b>(const QPlaceContent &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qplaceimage.html#QPlaceImage">QPlaceImage</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qplaceimage.html#dtor.QPlaceImage">~QPlaceImage</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qplaceimage.html#imageId">imageId</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qplaceimage.html#mimeType">mimeType</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplaceimage.html#setImageId">setImageId</a></b>(const QString &amp;<i>identifier</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplaceimage.html#setMimeType">setMimeType</a></b>(const QString &amp;<i>type</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplaceimage.html#setUrl">setUrl</a></b>(const QUrl &amp;<i>url</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QUrl </td><td class="memItemRight bottomAlign"><b><a href="qplaceimage.html#url">url</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPlaceImage-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Each <a href="qplaceimage.html">QPlaceImage</a> represents a set of metadata about an image such as it's url, identifier and MIME type. These are properties in addition to those provided by <a href="qplacecontent.html">QPlaceContent</a>.</p>
+<p>Note: The Places API only supports images as 'retrieve-only' objects. Submitting images to a provider is not a supported use case.</p>
+</div>
+<p><b>See also </b><a href="qplacecontent.html">QPlaceContent</a>.</p>
+<!-- @@@QPlaceImage -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QPlaceImage$$$QPlaceImageconstQPlaceContent& -->
+<h3 class="fn" id="QPlaceImage-1"><a name="QPlaceImage-1"></a>QPlaceImage::<span class="name">QPlaceImage</span>(const <span class="type"><a href="qplacecontent.html#QPlaceContent">QPlaceContent</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a copy of <i>other</i> if possible, otherwise constructs a default image.</p>
+<!-- @@@QPlaceImage -->
+<!-- $$$QPlaceImage[overload1]$$$QPlaceImage -->
+<h3 class="fn" id="QPlaceImage"><a name="QPlaceImage"></a>QPlaceImage::<span class="name">QPlaceImage</span>()</h3>
+<p>Constructs an new <a href="qplaceimage.html">QPlaceImage</a>.</p>
+<!-- @@@QPlaceImage -->
+<!-- $$$~QPlaceImage[overload1]$$$~QPlaceImage -->
+<h3 class="fn" id="dtor.QPlaceImage"><a name="dtor.QPlaceImage"></a><code>[virtual] </code>QPlaceImage::<span class="name">~QPlaceImage</span>()</h3>
+<p>Destructor.</p>
+<!-- @@@~QPlaceImage -->
+<!-- $$$imageId[overload1]$$$imageId -->
+<h3 class="fn" id="imageId"><a name="imageId"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPlaceImage::<span class="name">imageId</span>() const</h3>
+<p>Returns the image's identifier.</p>
+<p><b>See also </b><a href="qplaceimage.html#setImageId">setImageId</a>().</p>
+<!-- @@@imageId -->
+<!-- $$$mimeType[overload1]$$$mimeType -->
+<h3 class="fn" id="mimeType"><a name="mimeType"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPlaceImage::<span class="name">mimeType</span>() const</h3>
+<p>Returns the image's MIME type.</p>
+<p><b>See also </b><a href="qplaceimage.html#setMimeType">setMimeType</a>().</p>
+<!-- @@@mimeType -->
+<!-- $$$setImageId[overload1]$$$setImageIdconstQString& -->
+<h3 class="fn" id="setImageId"><a name="setImageId"></a><span class="type">void</span> QPlaceImage::<span class="name">setImageId</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>identifier</i>)</h3>
+<p>Sets image's <i>identifier</i>.</p>
+<p><b>See also </b><a href="qplaceimage.html#imageId">imageId</a>().</p>
+<!-- @@@setImageId -->
+<!-- $$$setMimeType[overload1]$$$setMimeTypeconstQString& -->
+<h3 class="fn" id="setMimeType"><a name="setMimeType"></a><span class="type">void</span> QPlaceImage::<span class="name">setMimeType</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>type</i>)</h3>
+<p>Sets image's MIME <i>type</i>.</p>
+<p><b>See also </b><a href="qplaceimage.html#mimeType">mimeType</a>().</p>
+<!-- @@@setMimeType -->
+<!-- $$$setUrl[overload1]$$$setUrlconstQUrl& -->
+<h3 class="fn" id="setUrl"><a name="setUrl"></a><span class="type">void</span> QPlaceImage::<span class="name">setUrl</span>(const <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> &amp;<i>url</i>)</h3>
+<p>Sets the image's <i>url</i>.</p>
+<p><b>See also </b><a href="qplaceimage.html#url">url</a>().</p>
+<!-- @@@setUrl -->
+<!-- $$$url[overload1]$$$url -->
+<h3 class="fn" id="url"><a name="url"></a><span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> QPlaceImage::<span class="name">url</span>() const</h3>
+<p>Returns the image's url.</p>
+<p><b>See also </b><a href="qplaceimage.html#setUrl">setUrl</a>().</p>
+<!-- @@@url -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- jsextension-file.qdoc -->
+  <title>File Service | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td><td >File Service</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<p class="naviNextPrevious headerNavi">
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#available-operations">Available Operations</a></li>
+<li class="level2"><a href="#copy">copy</a></li>
+<li class="level2"><a href="#exists">exists</a></li>
+<li class="level2"><a href="#directoryentries">directoryEntries</a></li>
+<li class="level2"><a href="#lastmodified">lastModified</a></li>
+<li class="level2"><a href="#makepath">makePath</a></li>
+<li class="level2"><a href="#move">move</a></li>
+<li class="level2"><a href="#remove">remove</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">File Service</h1>
+<span class="subtitle"></span>
+<!-- $$$jsextension-file.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The <code>File</code> service offers limited access to the file system for operations such as copying or removing files.</p>
+<a name="available-operations"></a>
+<h2 id="available-operations">Available Operations</h2>
+<a name="copy"></a>
+<h3 id="copy">copy</h3>
+<pre class="cpp">
+
+  File<span class="operator">.</span>copy(sourceFilePath: string<span class="operator">,</span> targetFilePath: string): boolean
+
+</pre>
+<p>Copies <code>sourceFilePath</code> to <code>targetFilePath</code>. Any directory components in <code>targetFilePath</code> that do not yet exist will be created. If <code>sourceFilePath</code> is a directory, a recursive copy will be made. If an error occurs, a JavaScript exception will be thrown.</p>
+<p><b>Note: </b><code>targetFilePath</code> must be the counterpart of <code>sourceFilePath</code> at the new location, <b>not</b> the new parent directory. This allows the copy to have a different name and is true even if <code>sourceFilePath</code> is a directory.</p><a name="exists"></a>
+<h3 id="exists">exists</h3>
+<pre class="cpp">
+
+  File<span class="operator">.</span>exists(filePath: string): boolean
+
+</pre>
+<p>Returns true if and only if there is a file at <code>filePath</code>.</p>
+<a name="directoryentries"></a>
+<h3 id="directoryentries">directoryEntries</h3>
+<pre class="cpp">
+
+  File<span class="operator">.</span>directoryEntries(path: string<span class="operator">,</span> filter: File<span class="operator">.</span>Filter): string<span class="operator">[</span><span class="operator">]</span>
+
+</pre>
+<p>Returns a sorted list of the directory <code>path</code>'s contents non-recursively, filtered by <code>filter</code>. The values of <code>filter</code> are equivalent to Qt's <code>QDir::Filter</code>.</p>
+<a name="lastmodified"></a>
+<h3 id="lastmodified">lastModified</h3>
+<pre class="cpp">
+
+  File<span class="operator">.</span>lastModified(filePath: string): number
+
+</pre>
+<p>Returns the time of last modification for the file at <code>filePath</code>. The concrete semantics of the returned value are platform-specific. You should only rely on the property that a smaller value indicates an older timestamp.</p>
+<a name="makepath"></a>
+<h3 id="makepath">makePath</h3>
+<pre class="cpp">
+
+  File<span class="operator">.</span>makePath(path: string): boolean
+
+</pre>
+<p>Makes the directory at <code>path</code>, creating intermediate directories if necessary. Conceptually equivalent to <code>mkdir -p</code></p>
+<a name="move"></a>
+<h3 id="move">move</h3>
+<pre class="cpp">
+
+  File<span class="operator">.</span>move(oldPath: string<span class="operator">,</span> newPath: string<span class="operator">,</span> overwrite: boolean <span class="operator">=</span> <span class="keyword">true</span>): boolean
+
+</pre>
+<p>Renames the file <code>oldPath</code> to <code>newPath</code>. Returns <code>true</code> if successful; otherwise returns <code>false</code>. If a file with the name <code>newPath</code> already exists, and <code>overwrite</code> is <code>false</code>, <code>move()</code> returns <code>false</code> (that is, the file will not be overwritten).</p>
+<a name="remove"></a>
+<h3 id="remove">remove</h3>
+<pre class="cpp">
+
+  File<span class="operator">.</span>remove(filePath: string): boolean
+
+</pre>
+<p>Removes the file at <code>filePath</code>. In case of a directory, it will be removed recursively.</p>
+</div>
+<!-- @@@jsextension-file.html -->
+<p class="naviNextPrevious footerNavi">
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

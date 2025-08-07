@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qt-modules.qdoc -->
+  <title>Qt Modules | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td><td >Qt Modules</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<p class="naviNextPrevious headerNavi">
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#creating-dependencies-to-qt-modules">Creating Dependencies to Qt Modules</a></li>
+<li class="level1"><a href="#qt-specific-module-provider-properties">Qt-specific Module Provider Properties</a></li>
+<li class="level1"><a href="#list-of-submodules">List of Submodules</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Modules</h1>
+<span class="subtitle"></span>
+<!-- $$$qt-modules.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The <code>Qt.*</code> modules contain properties and rules for Qt.</p>
+<a name="creating-dependencies-to-qt-modules"></a>
+<h2 id="creating-dependencies-to-qt-modules">Creating Dependencies to Qt Modules</h2>
+<p>The Qt modules are grouped using the prefix <code>Qt</code>. If your product depends on the Qt.core and Qt.network modules, you could write:</p>
+<pre class="cpp">
+
+  Depends { name: <span class="string">&quot;Qt.core&quot;</span> }
+  Depends { name: <span class="string">&quot;Qt.network&quot;</span> }
+
+</pre>
+<p>Or, alternatively:</p>
+<pre class="cpp">
+
+  Depends { name: <span class="string">&quot;Qt&quot;</span>; submodules: <span class="operator">[</span> <span class="string">&quot;core&quot;</span><span class="operator">,</span> <span class="string">&quot;network&quot;</span> <span class="operator">]</span> }
+
+</pre>
+<p>The Qt modules that have properties and relevant file tags are described in separate topics.</p>
+<a name="qt-specific-module-provider-properties"></a>
+<h2 id="qt-specific-module-provider-properties">Qt-specific Module Provider Properties</h2>
+<p>Looking up a Qt installation happens via a <a href="module-providers.html#">module provider</a>. By default, if a dependency to a Qt module is encountered, Qbs collects all Qt installations it can find. This lookup happens by searching for <code>qmake</code> executables in the <code>PATH</code> environment variable. Alternatively, you can explicitly tell Qbs which Qt installations it should consider by setting the <code>Qt.qmakeFilePaths</code> <a href="module-providers.html#parameterizing-module-providers">module provider property</a>. In that case, the environment will be ignored. For instance, with the following Linux command line, Qbs will build the project against a custom Qt instead of the standard one in <code>/usr/bin</code>:</p>
+<pre class="cpp">
+
+  $ qbs moduleProviders<span class="operator">.</span><span class="type">Qt</span><span class="operator">.</span>qmakeFilePaths:<span class="operator">/</span>opt<span class="operator">/</span>myqt<span class="operator">/</span>bin<span class="operator">/</span>qmake
+
+</pre>
+<p>You can also set the module provider property in a profile. The simplest way to do this is via the <a href="cli-setup-qt.html#">setup-qt</a> tool.</p>
+<a name="list-of-submodules"></a>
+<h2 id="list-of-submodules">List of Submodules</h2>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Submodule Name</th><th >Qt Module Name</th><th >Notes</th></tr></thead>
+<tr valign="top" class="odd"><td >axcontainer</td><td >QAxContainer</td><td >This module is only available on Windows.</td></tr>
+<tr valign="top" class="even"><td >axserver</td><td >QAxServer</td><td >This module is only available on Windows.</td></tr>
+<tr valign="top" class="odd"><td >concurrent</td><td >Qt Concurrent</td><td ></td></tr>
+<tr valign="top" class="even"><td ><a href="qml-qbsmodules-qt-core.html">core</a></td><td >Qt Core</td><td >For more information, see <a href="qml-qbsmodules-qt-core.html">Qt.core</a>.</td></tr>
+<tr valign="top" class="odd"><td ><a href="qml-qbsmodules-qt-dbus.html">dbus</a></td><td >Qt D-Bus</td><td >For more information, see <a href="qml-qbsmodules-qt-dbus.html">Qt.dbus</a>.</td></tr>
+<tr valign="top" class="even"><td ><a href="qml-qbsmodules-qt-declarative.html">declarative</a></td><td >Qt Quick 1</td><td >Provides the <code>Qt Quick 1</code> module. For more information, see <a href="qml-qbsmodules-qt-declarative.html">Qt.declarative</a>.</td></tr>
+<tr valign="top" class="odd"><td >designer</td><td >Qt Designer</td><td ></td></tr>
+<tr valign="top" class="even"><td >enginio</td><td >Qt Enginio</td><td ></td></tr>
+<tr valign="top" class="odd"><td ><a href="qml-qbsmodules-qt-gui.html">gui</a></td><td >Qt GUI</td><td >For more information, see <a href="qml-qbsmodules-qt-gui.html">Qt.gui</a>.</td></tr>
+<tr valign="top" class="even"><td >help</td><td >Qt Help</td><td >You do not need this module for building <code>qdoc</code> documentation, because that functionality is part of the Qt.core module. This module is for using Qt classes such as <code>QHelpEngine</code>.</td></tr>
+<tr valign="top" class="odd"><td >multimedia</td><td >Qt Multimedia</td><td ></td></tr>
+<tr valign="top" class="even"><td >multimediawidgets</td><td >Qt Multimedia Widgets</td><td ></td></tr>
+<tr valign="top" class="odd"><td >network</td><td >Qt Network</td><td ></td></tr>
+<tr valign="top" class="even"><td >opengl</td><td >Qt OpenGL</td><td ></td></tr>
+<tr valign="top" class="odd"><td >phonon</td><td >Phonon (Qt 4 only)</td><td ></td></tr>
+<tr valign="top" class="even"><td >printsupport</td><td >Qt Print Support</td><td ></td></tr>
+<tr valign="top" class="odd"><td ><a href="qml-qbsmodules-qt-quick.html">quick</a></td><td >Qt Quick 2</td><td >Provides the <code>Qt Quick</code> module (Qt Quick 2). For more information, see <a href="qml-qbsmodules-qt-quick.html">Qt.quick</a>.</td></tr>
+<tr valign="top" class="even"><td >quickcontrols2</td><td >Qt Quick Controls 2</td></tr>
+<tr valign="top" class="odd"><td ><a href="qml-qbsmodules-qt-qml.html">qml</a></td><td >Qt QML</td><td >For more information, see <a href="qml-qbsmodules-qt-qml.html">Qt.qml</a>.</td></tr>
+<tr valign="top" class="even"><td >qmltest</td><td >Qt Quick Test</td><td ></td></tr>
+<tr valign="top" class="odd"><td >script</td><td >Qt Script</td><td ></td></tr>
+<tr valign="top" class="even"><td ><a href="qml-qbsmodules-qt-scxml.html">scxml</a></td><td >Qt Scxml</td><td >For more information, see <a href="qml-qbsmodules-qt-scxml.html">Qt.scxml</a>.</td></tr>
+<tr valign="top" class="odd"><td >sql</td><td >Qt SQL</td><td ></td></tr>
+<tr valign="top" class="even"><td >svg</td><td >Qt SVG</td><td ></td></tr>
+<tr valign="top" class="odd"><td >testlib</td><td >Qt Test</td><td ></td></tr>
+<tr valign="top" class="even"><td >webkit</td><td >Qt WebKit</td><td ></td></tr>
+<tr valign="top" class="odd"><td >webkitwidgets</td><td >Qt WebKit Widgets</td><td ></td></tr>
+<tr valign="top" class="even"><td >widgets</td><td >Qt Widgets</td><td ></td></tr>
+<tr valign="top" class="odd"><td >xml</td><td >Qt XML</td><td >You do not need this module for the <code>QXmlStreamReader</code> and <code>QXmlStreamWriter</code> classes, because those classes are a part of the <code>Qt.core</code> module. This module provides the deprecated DOM and SAX classes.</td></tr>
+<tr valign="top" class="even"><td >xmlpatterns</td><td >Qt XML Patterns</td><td ></td><td ></td></tr>
+</table></div>
+</div>
+<!-- @@@qt-modules.html -->
+<p class="naviNextPrevious footerNavi">
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

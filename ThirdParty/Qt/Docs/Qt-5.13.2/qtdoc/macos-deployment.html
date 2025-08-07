@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- macos.qdoc -->
+  <title>Qt for macOS - Deployment | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Qt for macOS - Deployment</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#the-bundle">The Bundle</a></li>
+<li class="level1"><a href="#static-linking">Static Linking</a></li>
+<li class="level2"><a href="#building-qt-statically">Building Qt Statically</a></li>
+<li class="level2"><a href="#linking-the-application-to-the-static-version-of-qt">Linking the Application to the Static Version of Qt</a></li>
+<li class="level1"><a href="#frameworks">Frameworks</a></li>
+<li class="level2"><a href="#building-qt-as-frameworks">Building Qt as Frameworks</a></li>
+<li class="level2"><a href="#linking-the-application-to-qt-as-frameworks">Linking the Application to Qt as Frameworks</a></li>
+<li class="level2"><a href="#creating-the-application-package">Creating the Application Package</a></li>
+<li class="level1"><a href="#application-dependencies">Application Dependencies</a></li>
+<li class="level2"><a href="#qt-plugins">Qt Plugins</a></li>
+<li class="level2"><a href="#additional-libraries">Additional Libraries</a></li>
+<li class="level2"><a href="#macos-version-dependencies">macOS Version Dependencies</a></li>
+<li class="level1"><a href="#the-mac-deployment-tool">The Mac Deployment Tool</a></li>
+<li class="level1"><a href="#volume-name">Volume Name</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt for macOS - Deployment</h1>
+<span class="subtitle"></span>
+<!-- $$$macos-deployment.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>This document describes how to create a <a href="macos.html">macOS</a> bundle and make sure that the application finds the resources it needs at run-time. We demonstrate the procedures in terms of deploying the <a href="../qtwidgets/qtwidgets-tools-plugandpaint-app-example.html">Plug &amp; Paint</a> example application that comes with the Qt installation package.</p>
+<p>The Qt installers for macOS include a <a href="macos-deployment.html#macdeploy">deployment tool</a> that automates the procedures described here.</p>
+<a name="the-bundle"></a>
+<h2 id="the-bundle">The Bundle</h2>
+<p>On macOS, a GUI application must be built and run from a bundle, which is a directory structure that appears as a single entity when viewed in the Finder. A bundle for an application typically contains the executable and all the resources it needs. Here is the snapshot of an application bundle structure:</p>
+<p class="centerAlign"><img src="images/deployment-mac-bundlestructure.png" alt="" /></p><p>The bundle provides many advantages to the user:</p>
+<ul>
+<li>It is easily installable as it is identified as a single entity.</li>
+<li>Information about a bundle is accessible from code.</li>
+</ul>
+<p>This is specific to macOS and beyond the scope of this document. For more information about bundles, see <a href="http://developer.apple.com/documentation/CoreFoundation/Conceptual/CFBundles/index.html">Apple's Developer Website</a>.</p>
+<p><code>qmake</code> automatically generates a bundle for your application. To disable this, add the following statement to your application's project file (<code>.pro</code>):</p>
+<pre class="cpp">
+
+  CONFIG-=app_bundle
+
+</pre>
+<a name="static-linking"></a>
+<h2 id="static-linking">Static Linking</h2>
+<p>If you want to keep things simple and have a few files to deploy, you must build your application with statically linked libraries.</p>
+<a name="building-qt-statically"></a>
+<h3 id="building-qt-statically">Building Qt Statically</h3>
+<p>Start by installing a static version of the Qt library. Remember that you cannot use plugins and that you must build the dependent libraries such as image formats, SQL drivers, and so on with static linking.</p>
+<pre class="cpp">
+
+  cd <span class="operator">/</span>path<span class="operator">/</span>to<span class="operator">/</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span>
+  <span class="operator">.</span><span class="operator">/</span>configure <span class="operator">-</span><span class="keyword">static</span> <span class="operator">&lt;</span>other parameters<span class="operator">&gt;</span>
+  make sub<span class="operator">-</span>src
+
+</pre>
+<p>You can check the various options that are available by running <code>configure</code> -help.</p>
+<a name="linking-the-application-to-the-static-version-of-qt"></a>
+<h3 id="linking-the-application-to-the-static-version-of-qt">Linking the Application to the Static Version of Qt</h3>
+<p>Once Qt is built statically, the next step is to regenerate the makefile and rebuild the application. First, we must go into the directory that contains the application:</p>
+<pre class="cpp">
+
+  cd <span class="operator">/</span>path<span class="operator">/</span>to<span class="operator">/</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">/</span>examples<span class="operator">/</span>widgets<span class="operator">/</span>tools<span class="operator">/</span>plugandpaint<span class="operator">/</span>app
+
+</pre>
+<p>Now run <code>qmake</code> to create a new makefile for the application, and do a clean build to create the statically linked executable:</p>
+<pre class="cpp">
+
+  make clean
+  qmake <span class="operator">-</span>config release
+  make
+
+</pre>
+<p>You probably want to link against the release libraries, and you can specify this when invoking <code>qmake</code>. If you have Xcode Tools 1.5 or higher installed, you may want to take advantage of &quot;dead code stripping&quot; to reduce the size of your binary even more. You can do this by passing <code>LIBS+= -dead_strip</code> to <code>qmake</code> in addition to the <code>-config release</code> parameter.</p>
+<p>Now, provided that everything compiled and linked without any errors, we should have a <code>plugandpaint.app</code> bundle ready for deployment. Try installing the bundle on a machine running macOS that does not have Qt or any Qt applications installed.</p>
+<p>You can check what other libraries your application links to using the <code>otool</code>:</p>
+<pre class="cpp">
+
+  otool <span class="operator">-</span>L plugandpaint<span class="operator">.</span>app<span class="operator">/</span>Contents<span class="operator">/</span>MacOs<span class="operator">/</span>plugandpaint
+
+</pre>
+<p>Here is what the output looks like for the statically linked <a href="../qtwidgets/qtwidgets-tools-plugandpaint-app-example.html">Plug &amp; Paint</a>:</p>
+<pre class="cpp">
+
+  plugandpaint<span class="operator">.</span>app<span class="operator">/</span>Contents<span class="operator">/</span>MacOS<span class="operator">/</span>plugandpaint:
+  <span class="operator">/</span>System<span class="operator">/</span>Library<span class="operator">/</span>Frameworks<span class="operator">/</span>Carbon<span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span>A<span class="operator">/</span>Carbon
+          (compatibility version <span class="number">2.0.0</span><span class="operator">,</span> current version <span class="number">128.0.0</span>)
+  <span class="operator">/</span>System<span class="operator">/</span>Library<span class="operator">/</span>Frameworks<span class="operator">/</span>QuickTime<span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span>A<span class="operator">/</span>QuickTime
+          (compatibility version <span class="number">1.0.0</span><span class="operator">,</span> current version <span class="number">10.0.0</span>)
+  <span class="operator">/</span>usr<span class="operator">/</span>lib<span class="operator">/</span>libz<span class="operator">.</span><span class="number">1.dylib</span>
+          (compatibility version <span class="number">1.0.0</span><span class="operator">,</span> current version <span class="number">1.2.3</span>)
+  <span class="operator">/</span>System<span class="operator">/</span>Library<span class="operator">/</span>Frameworks<span class="operator">/</span>ApplicationServices<span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span>A<span class="operator">/</span>ApplicationServices
+          (compatibility version <span class="number">1.0.0</span><span class="operator">,</span> current version <span class="number">22.0.0</span>)
+  <span class="operator">/</span>usr<span class="operator">/</span>lib<span class="operator">/</span>libstdc<span class="operator">+</span><span class="operator">+</span><span class="operator">.</span><span class="number">6.dylib</span>
+          (compatibility version <span class="number">7.0.0</span><span class="operator">,</span> current version <span class="number">7.3.0</span>)
+  <span class="operator">/</span>usr<span class="operator">/</span>lib<span class="operator">/</span>libgcc_s<span class="operator">.</span><span class="number">1.dylib</span>
+          (compatibility version <span class="number">1.0.0</span><span class="operator">,</span> current version <span class="number">1.0.0</span>)
+  <span class="operator">/</span>usr<span class="operator">/</span>lib<span class="operator">/</span>libmx<span class="operator">.</span>A<span class="operator">.</span>dylib
+          (compatibility version <span class="number">1.0.0</span><span class="operator">,</span> current version <span class="number">92.0.0</span>)
+  <span class="operator">/</span>usr<span class="operator">/</span>lib<span class="operator">/</span>libSystem<span class="operator">.</span>B<span class="operator">.</span>dylib
+          (compatibility version <span class="number">1.0.0</span><span class="operator">,</span> current version <span class="number">88.0.0</span>)
+
+</pre>
+<p>If you see <i>Qt</i> libraries in the output, it probably means that you have both dynamic and static Qt libraries installed on your machine. The linker always chooses dynamic linking over static. If you want to use only static libraries, you can either:</p>
+<ul>
+<li>move your Qt dynamic libraries (<code>.dylibs</code>) away to another directory while you link the application and then move them back,</li>
+<li>or edit the <code>Makefile</code> and replace link lines for the Qt libraries with the absolute path to the static libraries.</li>
+</ul>
+<p>For example, replace the following:</p>
+<pre class="cpp">
+
+  <span class="operator">-</span>lQtGui
+
+</pre>
+<p>with this:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span>where<span class="operator">/</span><span class="keyword">static</span><span class="operator">/</span>qt<span class="operator">/</span>lib<span class="operator">/</span>is<span class="operator">/</span>libQtGui<span class="operator">.</span>a
+
+</pre>
+<p>The <a href="../qtwidgets/qtwidgets-tools-plugandpaint-app-example.html">Plug &amp; Paint</a> example consists of several components: The core application (<a href="../qtwidgets/qtwidgets-tools-plugandpaint-app-example.html">Plug &amp; Paint</a>), and the <a href="../qtwidgets/qtwidgets-tools-plugandpaint-plugins-basictools-example.html">Basic Tools</a> and <a href="../qtwidgets/qtwidgets-tools-plugandpaint-plugins-extrafilters-example.html">Extra Filters</a> plugins. As we cannot deploy plugins using the static linking approach, the bundle we have prepared so far is incomplete. The application will run, but the functionality will be disabled due to the missing plugins. To deploy plugin-based applications we should use the framework approach, which is specific to macOS.</p>
+<a name="frameworks"></a>
+<h2 id="frameworks">Frameworks</h2>
+<p>In this approach, ensure that the Qt runtime is redistributed correctly with the application bundle, and that the plugins are installed in the correct location so that the application finds them.</p>
+<p>There are two ways to distribute Qt with your application in the frameworks approach:</p>
+<ul>
+<li>Private framework within your application bundle.</li>
+<li>Standard framework (alternatively use the Qt frameworks in the installed binary).</li>
+</ul>
+<p>The former is good if you have Qt built in a special way, or want to make sure the framework is there. It just comes down to where you place the Qt frameworks.</p>
+<p>The latter option is good if you have many Qt applications and you want them use a single Qt framework rather than multiple versions of it.</p>
+<a name="building-qt-as-frameworks"></a>
+<h3 id="building-qt-as-frameworks">Building Qt as Frameworks</h3>
+<p>We assume that you already have installed Qt as frameworks, which is the default when installing Qt, in the /path/to/Qt directory. For more information on how to build Qt without Frameworks, visit the <a href="macos-issues.html">Qt for macOS - Specific Issues</a> documentation.</p>
+<p>When installing, the identification name of the frameworks is set. This name is used by the dynamic linker (<code>dyld</code>) to find the libraries for your application.</p>
+<a name="linking-the-application-to-qt-as-frameworks"></a>
+<h3 id="linking-the-application-to-qt-as-frameworks">Linking the Application to Qt as Frameworks</h3>
+<p>After building Qt as frameworks, we can build the <a href="../qtwidgets/qtwidgets-tools-plugandpaint-app-example.html">Plug &amp; Paint</a> application. First, we must go to the directory that contains the application:</p>
+<pre class="cpp">
+
+  cd <span class="operator">/</span>path<span class="operator">/</span>to<span class="operator">/</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">/</span>examples<span class="operator">/</span>widgets<span class="operator">/</span>tools<span class="operator">/</span>plugandpaint<span class="operator">/</span>app
+
+</pre>
+<p>Run <code>qmake</code> to create a new makefile for the application, and do a clean build to create the dynamically linked executable:</p>
+<pre class="cpp">
+
+  make clean
+  qmake <span class="operator">-</span>config release
+  make
+
+</pre>
+<p>This builds the core application. Use the following to build the plugins:</p>
+<pre class="cpp">
+
+  cd <span class="operator">.</span><span class="operator">.</span><span class="operator">/</span>plugandpaint<span class="operator">/</span>plugins
+  make clean
+  qmake <span class="operator">-</span>config release
+  make
+
+</pre>
+<p>Now run the <code>otool</code> for the Qt frameworks, for example Qt Gui:</p>
+<pre class="cpp">
+
+  otool <span class="operator">-</span>L <span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span><span class="operator">.</span>framework<span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span>
+
+</pre>
+<p>You would get the following output:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span><span class="operator">.</span>framework<span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span>:
+  <span class="operator">/</span>path<span class="operator">/</span>to<span class="operator">/</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">/</span>lib<span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span>
+          (compatibility version <span class="number">4.0.0</span><span class="operator">,</span> current version <span class="number">4.0.1</span>)
+  <span class="operator">/</span>System<span class="operator">/</span>Library<span class="operator">/</span>Frameworks<span class="operator">/</span>Carbon<span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span>A<span class="operator">/</span>Carbon
+          (compatibility version <span class="number">2.0.0</span><span class="operator">,</span> current version <span class="number">128.0.0</span>)
+  <span class="operator">/</span>System<span class="operator">/</span>Library<span class="operator">/</span>Frameworks<span class="operator">/</span>QuickTime<span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span>A<span class="operator">/</span>QuickTime
+          (compatibility version <span class="number">1.0.0</span><span class="operator">,</span> current version <span class="number">10.0.0</span>)
+  <span class="operator">/</span>path<span class="operator">/</span>to<span class="operator">/</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span>
+          (compatibility version <span class="number">4.0.0</span><span class="operator">,</span> current version <span class="number">4.0.1</span>)
+  <span class="operator">/</span>usr<span class="operator">/</span>lib<span class="operator">/</span>libz<span class="operator">.</span><span class="number">1.dylib</span>
+          (compatibility version <span class="number">1.0.0</span><span class="operator">,</span> current version <span class="number">1.2.3</span>)
+  <span class="operator">/</span>System<span class="operator">/</span>Library<span class="operator">/</span>Frameworks<span class="operator">/</span>ApplicationServices<span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span>A<span class="operator">/</span>ApplicationServices
+          (compatibility version <span class="number">1.0.0</span><span class="operator">,</span> current version <span class="number">22.0.0</span>)
+  <span class="operator">/</span>usr<span class="operator">/</span>lib<span class="operator">/</span>libstdc<span class="operator">+</span><span class="operator">+</span><span class="operator">.</span><span class="number">6.dylib</span>
+          (compatibility version <span class="number">7.0.0</span><span class="operator">,</span> current version <span class="number">7.3.0</span>)
+  <span class="operator">/</span>usr<span class="operator">/</span>lib<span class="operator">/</span>libgcc_s<span class="operator">.</span><span class="number">1.dylib</span>
+          (compatibility version <span class="number">1.0.0</span><span class="operator">,</span> current version <span class="number">1.0.0</span>)
+  <span class="operator">/</span>usr<span class="operator">/</span>lib<span class="operator">/</span>libmx<span class="operator">.</span>A<span class="operator">.</span>dylib
+          (compatibility version <span class="number">1.0.0</span><span class="operator">,</span> current version <span class="number">92.0.0</span>)
+  <span class="operator">/</span>usr<span class="operator">/</span>lib<span class="operator">/</span>libSystem<span class="operator">.</span>B<span class="operator">.</span>dylib
+          (compatibility version <span class="number">1.0.0</span><span class="operator">,</span> current version <span class="number">88.0.0</span>)
+
+</pre>
+<p>For the Qt frameworks, the first line (i.e&#x2e; <code>path/to/Qt/lib/QtGui.framework/Versions/4/QtGui (compatibility version 4.0&#x2e;0, current version 4.0&#x2e;1)</code>) becomes the framework's identification name which is used by the dynamic linker (<code>dyld</code>).</p>
+<p>But when you are deploying the application, your users may not have the Qt frameworks installed in the specified location. For that reason, you must either provide the frameworks in an agreed location, or store the frameworks in the bundle. Regardless of which solution you choose, you must make sure that the frameworks return the proper identification name for themselves, and that the application looks for these names. Luckily we can control this with the <code>install_name_tool</code> command-line tool.</p>
+<p>The <code>install_name_tool</code> works in two modes, <code>-id</code> and <code>-change</code>. The <code>-id</code> mode is for libraries and frameworks, and allows us to specify a new identification name. We use the <code>-change</code> mode to change the paths in the application.</p>
+<p>Let's test this out by copying the Qt frameworks into the Plug &amp; Paint bundle. Looking at <code>otool</code>'s output for the bundle, we can see that we must copy both the <a href="../qtcore/qtcore-module.html">QtCore</a> and <a href="../qtgui/qtgui-module.html">QtGui</a> frameworks into the bundle. We will assume that we are in the directory where we built the bundle.</p>
+<pre class="cpp">
+
+  mkdir plugandpaint<span class="operator">.</span>app<span class="operator">/</span>Contents<span class="operator">/</span>Frameworks
+  cp <span class="operator">-</span>R <span class="operator">/</span>path<span class="operator">/</span>to<span class="operator">/</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">/</span>lib<span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span><span class="operator">.</span>framework
+          plugandpaint<span class="operator">.</span>app<span class="operator">/</span>Contents<span class="operator">/</span>Frameworks
+  cp <span class="operator">-</span>R <span class="operator">/</span>path<span class="operator">/</span>to<span class="operator">/</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">/</span>lib<span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span><span class="operator">.</span>framework
+         plugandpaint<span class="operator">.</span>app<span class="operator">/</span>Contents<span class="operator">/</span>Frameworks
+
+</pre>
+<p>First we create a <code>Frameworks</code> directory inside the bundle. This follows the macOS application convention. We then copy the frameworks into the new directory. As frameworks contain symbolic links, we use the <code>-R</code> option.</p>
+<pre class="cpp">
+
+  install_name_tool <span class="operator">-</span>id @executable_path<span class="operator">/</span><span class="operator">.</span><span class="operator">.</span><span class="operator">/</span>Frameworks<span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span>
+         plugandpaint<span class="operator">.</span>app<span class="operator">/</span>Contents<span class="operator">/</span>Frameworks<span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span>
+  install_name_tool <span class="operator">-</span>id @executable_path<span class="operator">/</span><span class="operator">.</span><span class="operator">.</span><span class="operator">/</span>Frameworks<span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span>
+         plugandpaint<span class="operator">.</span>app<span class="operator">/</span>Contents<span class="operator">/</span>Frameworks<span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span>
+
+</pre>
+<p>Then we run <code>install_name_tool</code> to set the identification names for the frameworks. The first argument after <code>-id</code> is the new name, and the second argument is the framework that we want to rename. The text <code>@executable_path</code> is a special <code>dyld</code> variable telling <code>dyld</code> to start looking where the executable is located. The new names specifies that these frameworks are located in the directory directly under the <code>Frameworks</code> directory.</p>
+<pre class="cpp">
+
+  install_name_tool <span class="operator">-</span>change path<span class="operator">/</span>to<span class="operator">/</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">/</span>lib<span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span>
+          @executable_path<span class="operator">/</span><span class="operator">.</span><span class="operator">.</span><span class="operator">/</span>Frameworks<span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span>
+          plugandpaint<span class="operator">.</span>app<span class="operator">/</span>Contents<span class="operator">/</span>MacOs<span class="operator">/</span>plugandpaint
+  install_name_tool <span class="operator">-</span>change path<span class="operator">/</span>to<span class="operator">/</span>qt<span class="operator">/</span>lib<span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span>
+          @executable_path<span class="operator">/</span><span class="operator">.</span><span class="operator">.</span><span class="operator">/</span>Frameworks<span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span>
+          plugandpaint<span class="operator">.</span>app<span class="operator">/</span>Contents<span class="operator">/</span>MacOs<span class="operator">/</span>plugandpaint
+
+</pre>
+<p>Now, the dynamic linker knows where to look for <a href="../qtcore/qtcore-module.html">QtCore</a> and <a href="../qtgui/qtgui-module.html">QtGui</a>. We must ensure that the application also knows where to find the library, using <code>install_name_tool</code>'s <code>-change</code> mode. This basically comes down to string replacement, to match the identification names that we set earlier to the frameworks.</p>
+<p>Finally, the <a href="../qtgui/qtgui-module.html">QtGui</a> framework depends on <a href="../qtcore/qtcore-module.html">QtCore</a>, so we must remember to change the reference for <a href="../qtgui/qtgui-module.html">QtGui</a>:</p>
+<pre class="cpp">
+
+  install_name_tool <span class="operator">-</span>change path<span class="operator">/</span>to<span class="operator">/</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">/</span>lib<span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span>
+          @executable_path<span class="operator">/</span><span class="operator">.</span><span class="operator">.</span><span class="operator">/</span>Frameworks<span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span>
+          plugandpaint<span class="operator">.</span>app<span class="operator">/</span>Contents<span class="operator">/</span>Frameworks<span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span>
+
+</pre>
+<p>After this, we run <code>otool</code> again and see that the application can find the libraries.</p>
+<p>The plugins for the <a href="../qtwidgets/qtwidgets-tools-plugandpaint-app-example.html">Plug &amp; Paint</a> example makes it interesting. The basic steps we need to follow with plugins are:</p>
+<ul>
+<li>put the plugins inside the bundle,</li>
+<li>run the <code>install_name_tool</code> to check whether the plugins are using the correct library,</li>
+<li>and ensure that the application knows where to look for the plugins.</li>
+</ul>
+<p>We can put the plugins anywhere we want in the bundle, but the best location is to put them under Contents/Plugins. When we built the Plug &amp; Paint plugins, based on the <code>DESTDIR</code> variable in their <code>.pro</code> file, the plugins' <code>.dylib</code> files are in the <code>plugins</code> subdirectory under the <code>plugandpaint</code> directory. We just have to move this directory to the correct location.</p>
+<pre class="cpp">
+
+  mv plugins plugandpaint<span class="operator">.</span>app<span class="operator">/</span>Contents
+
+</pre>
+<p>For example, If we run <code>otool</code> on the <a href="../qtwidgets/qtwidgets-tools-plugandpaint-plugins-basictools-example.html">Basic Tools</a> plugin's <code>.dylib</code> file, we get the following information.</p>
+<pre class="cpp">
+
+  libpnp_basictools<span class="operator">.</span>dylib:
+  libpnp_basictools<span class="operator">.</span>dylib
+         (compatibility version <span class="number">0.0.0</span><span class="operator">,</span> current version <span class="number">0.0.0</span>)
+  <span class="operator">/</span>path<span class="operator">/</span>to<span class="operator">/</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">/</span>lib<span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span>
+         (compatibility version <span class="number">4.0.0</span><span class="operator">,</span> current version <span class="number">4.0.1</span>)
+  <span class="operator">/</span>System<span class="operator">/</span>Library<span class="operator">/</span>Frameworks<span class="operator">/</span>Carbon<span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span>A<span class="operator">/</span>Carbon
+         (compatibility version <span class="number">2.0.0</span><span class="operator">,</span> current version <span class="number">128.0.0</span>)
+  <span class="operator">/</span>System<span class="operator">/</span>Library<span class="operator">/</span>Frameworks<span class="operator">/</span>QuickTime<span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span>A<span class="operator">/</span>QuickTime
+         (compatibility version <span class="number">1.0.0</span><span class="operator">,</span> current version <span class="number">10.0.0</span>)
+  <span class="operator">/</span>path<span class="operator">/</span>to<span class="operator">/</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">/</span>lib<span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span>
+         (compatibility version <span class="number">4.0.0</span><span class="operator">,</span> current version <span class="number">4.0.1</span>)
+  <span class="operator">/</span>usr<span class="operator">/</span>lib<span class="operator">/</span>libz<span class="operator">.</span><span class="number">1.dylib</span>
+         (compatibility version <span class="number">1.0.0</span><span class="operator">,</span> current version <span class="number">1.2.3</span>)
+  <span class="operator">/</span>System<span class="operator">/</span>Library<span class="operator">/</span>Frameworks<span class="operator">/</span>ApplicationServices<span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span>A<span class="operator">/</span>ApplicationServices
+         (compatibility version <span class="number">1.0.0</span><span class="operator">,</span> current version <span class="number">22.0.0</span>)
+  <span class="operator">/</span>usr<span class="operator">/</span>lib<span class="operator">/</span>libstdc<span class="operator">+</span><span class="operator">+</span><span class="operator">.</span><span class="number">6.dylib</span>
+         (compatibility version <span class="number">7.0.0</span><span class="operator">,</span> current version <span class="number">7.3.0</span>)
+  <span class="operator">/</span>usr<span class="operator">/</span>lib<span class="operator">/</span>libgcc_s<span class="operator">.</span><span class="number">1.dylib</span>
+         (compatibility version <span class="number">1.0.0</span><span class="operator">,</span> current version <span class="number">1.0.0</span>)
+  <span class="operator">/</span>usr<span class="operator">/</span>lib<span class="operator">/</span>libmx<span class="operator">.</span>A<span class="operator">.</span>dylib
+         (compatibility version <span class="number">1.0.0</span><span class="operator">,</span> current version <span class="number">92.0.0</span>)
+  <span class="operator">/</span>usr<span class="operator">/</span>lib<span class="operator">/</span>libSystem<span class="operator">.</span>B<span class="operator">.</span>dylib
+         (compatibility version <span class="number">1.0.0</span><span class="operator">,</span> current version <span class="number">88.0.0</span>)
+
+</pre>
+<p>Then we can see that the plugin links to the Qt frameworks it was built against. As we want the plugins to use the framework in the application bundle, we change them the same way as we did for the application. For example for the Basic Tools plugin:</p>
+<pre class="cpp">
+
+  install_name_tool <span class="operator">-</span>change <span class="operator">/</span>path<span class="operator">/</span>to<span class="operator">/</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">/</span>lib<span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span>
+          @executable_path<span class="operator">/</span><span class="operator">.</span><span class="operator">.</span><span class="operator">/</span>Frameworks<span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span>
+          plugandpaint<span class="operator">.</span>app<span class="operator">/</span>Contents<span class="operator">/</span>plugins<span class="operator">/</span>libpnp_basictools<span class="operator">.</span>dylib
+  install_name_tool <span class="operator">-</span>change <span class="operator">/</span>path<span class="operator">/</span>to<span class="operator">/</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">/</span>lib<span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span>
+          @executable_path<span class="operator">/</span><span class="operator">.</span><span class="operator">.</span><span class="operator">/</span>Frameworks<span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span>
+          plugandpaint<span class="operator">.</span>app<span class="operator">/</span>Contents<span class="operator">/</span>plugins<span class="operator">/</span>libpnp_basictools<span class="operator">.</span>dylib
+
+</pre>
+<p>We must also modify the code in <code>tools/plugandpaint/mainwindow.cpp</code> to <a href="../qtcore/qdir.html#cdUp">cdUp()</a> to ensure that the application finds the plugins. Add the following code to the <code>mainwindow.cpp</code> file:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#elif defined(Q_OS_MAC)</span>
+  <span class="keyword">if</span> (pluginsDir<span class="operator">.</span>dirName() <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;MacOS&quot;</span>) {
+      pluginsDir<span class="operator">.</span>cdUp();
+  }
+  <span class="preprocessor">#endif</span>
+
+</pre>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><img src="images/deployment-mac-application.png" alt="" /></td><td >The additional code in <code>tools/plugandpaint/mainwindow.cpp</code> also enables us to view the plugins in the Finder, as shown in the image.<p>We can also add plugins extending Qt, for example adding SQL drivers or image formats. We just need to follow the directory structure outlined in plugin documentation, and make sure they are included in the <a href="../qtcore/qcoreapplication.html#libraryPaths">QCoreApplication::libraryPaths</a>(). Let's quickly do this with the image formats, following the procedure outlined earlier.</p>
+<p>Copy Qt's image format plugins into the bundle:</p>
+<pre class="cpp">
+
+  cp <span class="operator">-</span>R <span class="operator">/</span>path<span class="operator">/</span>to<span class="operator">/</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">/</span>plugins<span class="operator">/</span>imageformats
+          pluginandpaint<span class="operator">.</span>app<span class="operator">/</span>Contents<span class="operator">/</span>plugins
+
+</pre>
+<p>Use <code>install_name_tool</code> to link the plugins to the frameworks in the bundle:</p>
+<pre class="cpp">
+
+  install_name_tool <span class="operator">-</span>change <span class="operator">/</span>path<span class="operator">/</span>to<span class="operator">/</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">/</span>lib<span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span>
+          @executable_path<span class="operator">/</span><span class="operator">.</span><span class="operator">.</span><span class="operator">/</span>Frameworks<span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtgui/qtgui-module.html">QtGui</a></span>
+          plugandpaint<span class="operator">.</span>app<span class="operator">/</span>Contents<span class="operator">/</span>plugins<span class="operator">/</span>imageformats<span class="operator">/</span>libqjpeg<span class="operator">.</span>dylib
+  install_name_tool <span class="operator">-</span>change <span class="operator">/</span>path<span class="operator">/</span>to<span class="operator">/</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">/</span>lib<span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span>
+          @executable_path<span class="operator">/</span><span class="operator">.</span><span class="operator">.</span><span class="operator">/</span>Frameworks<span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span><span class="operator">.</span>framework<span class="operator">/</span>Versions<span class="operator">/</span><span class="number">4.0</span><span class="operator">/</span><span class="type"><a href="../qtcore/qtcore-module.html">QtCore</a></span>
+          plugandpaint<span class="operator">.</span>app<span class="operator">/</span>Contents<span class="operator">/</span>plugins<span class="operator">/</span>imageformats<span class="operator">/</span>libqjpeg<span class="operator">.</span>dylib
+
+</pre>
+<p>Update the source code in <code>tools/plugandpaint/main.cpp</code> to look for the new plugins. After constructing the <a href="../qtwidgets/qapplication.html">QApplication</a>, we add the following code:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qdir.html">QDir</a></span> dir(<span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>applicationDirPath());
+  dir<span class="operator">.</span>cdUp();
+  dir<span class="operator">.</span>cd(<span class="string">&quot;plugins&quot;</span>);
+  <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>setLibraryPaths(<span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span>(dir<span class="operator">.</span>absolutePath()));
+
+</pre>
+<p>First, we tell the application to only look for plugins in this directory. In our case, we want the application to look for only those plugins that we distribute with the bundle. If we were part of a bigger Qt installation we could have used <a href="../qtcore/qcoreapplication.html#addLibraryPath">QCoreApplication::addLibraryPath</a>() instead.</p>
+</td></tr>
+</table></div>
+<p><b>Warning:</b> While deploying plugins, we make changes to the source code and that resets the default identification names when the application is rebuilt. So you must repeat the process of making your application link to the correct Qt frameworks in the bundle using <code>install_name_tool</code>.</p>
+<p>Now you should be able to move the application to another macOS machine and run it without Qt installed. Alternatively, you can move your frameworks that live outside of the bundle to another directory and see if the application still runs.</p>
+<p>If you store the frameworks in another location outside the bundle, the technique of linking your application is similar; you must make sure that the application and the frameworks agree where to be looking for the Qt libraries as well as the plugins.</p>
+<a name="creating-the-application-package"></a>
+<h3 id="creating-the-application-package">Creating the Application Package</h3>
+<p>When you are done linking your application to Qt, either statically or as frameworks, the application is ready to be distributed. For more information, refer to the <a href="https://developer.apple.com/">Apple Developer</a> website.</p>
+<p>Although the process of deploying an application do have some pitfalls, once you know the various issues you can easily create packages that all your macOS users will enjoy.</p>
+<a name="application-dependencies"></a>
+<h2 id="application-dependencies">Application Dependencies</h2>
+<a name="qt-plugins"></a>
+<h3 id="qt-plugins">Qt Plugins</h3>
+<p>All Qt GUI applications require a plugin that implements the <a href="qpa.html">Qt Platform Abstraction</a> (QPA) layer in Qt 5. For macOS, the name of the platform plugin is <code>libqcocoa.dylib</code>. This file must be located within a specific subdirectory (by default, <code>platforms</code>) under your distribution directory. Alternatively, it is possible to adjust the search path Qt uses to find its plugins, as described below.</p>
+<p>Your application may also depend on one or more Qt plugins, such as the JPEG image format plugin or a SQL driver plugin. Be sure to distribute any Qt plugins that you need with your application. Similar to the platform plugin, each type of plugin must be located within a specific subdirectory (such as <code>imageformats</code> or <code>sqldrivers</code>) in your distribution directory.</p>
+<p>The search path for Qt plugins (as well as a few other paths) is hard-coded into the <a href="../qtcore/qtcore-module.html">QtCore</a> library. By default, the first plugin search path will be hard-coded as <code>/path/to/Qt/plugins</code>. But using pre-determined paths has certain disadvantages. For example, they may not exist on the target machine. So you must check various alternatives to ensure that the Qt plugins are found:</p>
+<ul>
+<li><a href="qt-conf.html">Using <code>qt.conf</code></a>. This is the recommended approach as it provides the most flexibility.</li>
+<li>Using <a href="../qtcore/qcoreapplication.html#addLibraryPath">QApplication::addLibraryPath</a>() or <a href="../qtcore/qcoreapplication.html#setLibraryPaths">QApplication::setLibraryPaths</a>().</li>
+<li>Using a third party installation utility to change the hard-coded paths in the <a href="../qtcore/qtcore-module.html">QtCore</a> library.</li>
+</ul>
+<p>The <a href="plugins-howto.html">How to Create Qt Plugins</a> document outlines the issues you need to pay attention to when building and deploying plugins for Qt applications.</p>
+<a name="additional-libraries"></a>
+<h3 id="additional-libraries">Additional Libraries</h3>
+<p>You can check which libraries your application is linking against by using <code>otool</code>. Run this with the application path as an argument:</p>
+<pre class="cpp">
+
+  otool <span class="operator">-</span>L MyApp<span class="operator">.</span>app<span class="operator">/</span>Contents<span class="operator">/</span>MacOS<span class="operator">/</span>MyApp
+
+</pre>
+<p>Compiler-specific libraries rarely have to be redistributed with your application. But there are several ways to deploy applications, as Qt can be configured, built, and installed in several ways on macOS. Typically your goals help determine how you are going to deploy the application. The last sections describe a few things that you must be aware of while deploying your application.</p>
+<a name="macos-version-dependencies"></a>
+<h3 id="macos-version-dependencies">macOS Version Dependencies</h3>
+<p>Apple platforms have a built-in way to express the OS versions that an application supports, which allows older versions of the platforms to automatically display a user friendly error message prompting the user to update their OS, as opposed to crashing and displaying a stack trace.</p>
+<p>The main concepts involved in expressing support for a particular range of OS versions are:</p>
+<ul>
+<li><i>Deployment target</i> specifies the <i>hard</i> minimum version of macOS, iOS, tvOS, or watchOS that your application supports.</li>
+<li><i>SDK version</i> specifies the <i>soft</i> maximum version of macOS, iOS, tvOS, or watchOS that your application supports.</li>
+</ul>
+<p>When you develop an application for an Apple platform, you should always use the latest version of Xcode and the latest SDK available at the time of development. On some platforms, like iOS, you will actually be rejected from the App Store if you do not. Therefore, the SDK version is always greater than or equal to the deployment target.</p>
+<p>When you develop an application for an Apple platform, you must set the deployment target. Various build tools within the Xcode toolchain all have a flag which you can use to set this value, including but not limited to the compiler and linker. By setting the deployment target value, you are explicitly declaring that your application must work on at least that version, and will not work with any earlier versions of the OS. It is then up to you to ensure that your use of the system APIs matches what you have declared. Since the compiler knows what you have declared, it can help in enforcing that.</p>
+<p>The SDK version is considered a <i>soft</i> maximum version of the OS that an application is compatible with in the way that if the application is built with an SDK, it will continue to use the behaviors of that SDK even on newer OS versions, because the OS checks the binary's load commands and emulates backwards compatibility with the older OS. For example, if an application is built with the macOS 10.12 SDK, it will continue to use 10.12 behaviors even on 10.13 and above.</p>
+<p>However, Mach-O binaries are inherently forward compatible. For example, an application built with the iOS 9 SDK will run just fine on iOS 10, but might not be opted into whatever behavior changes may have been made to certain functionality on the new release, until that application is recompiled against that newer SDK.</p>
+<p>The minimum OS version can be expressed to the system by the compiler and linker flags that embed it into the Mach-O binary. In addition, the <code>LSMinimumSystemVersion</code> key must be set in the application's app bundle. This value must be equal to the value passed to the compiler and linker, because on macOS it will allow the OS to display a user friendly error dialog that says the application requires a newer version of the OS as opposed to a crash dialog. The <code>LSMinimumSystemVersion</code> is also the key that the App Store uses to display the required OS version; the compiler and linker flags have no power there.</p>
+<p>For the most part, Qt applications will work without problems. For example, in qmake, the Qt mkspecs set <a href="../qmake/qmake-variable-reference.html#qmake-ios-deployment-target">QMAKE_IOS_DEPLOYMENT_TARGET</a>, <a href="../qmake/qmake-variable-reference.html#qmake-macosx-deployment-target">QMAKE_MACOSX_DEPLOYMENT_TARGET</a>, <a href="../qmake/qmake-variable-reference.html#qmake-tvos-deployment-target">QMAKE_TVOS_DEPLOYMENT_TARGET</a>, or <a href="../qmake/qmake-variable-reference.html#qmake-watchos-deployment-target">QMAKE_WATCHOS_DEPLOYMENT_TARGET</a> to the minimum version that Qt itself supports. Similarly, in Qbs, the Qt modules set <code>cpp.minimumIosVersion</code>, <code>cpp.minimumMacosVersion</code>, <code>cpp.minimumTvosVersion</code>, or <code>cpp.minimumWatchosVersion</code> to the minimum version that Qt itself supports.</p>
+<p>However, you must take care when you manually set your own target version. If you set it to a value higher than what Qt requires and supply your own <code>Info.plist</code> file, you must add an <code>LSMinimumSystemVersion</code> entry to the <code>Info.plist</code> that matches the value of the deployment target, because the OS will use the <code>LSMinimumSystemVersion</code> value as the authoritative one.</p>
+<p>If you specify a deployment target value lower than what Qt requires, the application will almost certainly crash somewhere in the Qt libraries when run on an older version than Qt supports. Therefore, make sure that the actual build system code reflects the minimum OS version that is actually required.</p>
+<a name="the-mac-deployment-tool"></a>
+<h2 id="the-mac-deployment-tool">The Mac Deployment Tool</h2>
+<a name="macdeploy"></a><p>The Mac deployment tool can be found in QTDIR/bin/macdeployqt. It is designed to automate the process of creating a deployable application bundle that contains the Qt libraries as private frameworks.</p>
+<p>The mac deployment tool also deploys the Qt plugins, according to the following rules (unless <code>-no-plugins</code> option is used):</p>
+<ul>
+<li>The platform plugin is always deployed.</li>
+<li>Debug versions of the plugins are not deployed.</li>
+<li>The designer plugins are not deployed.</li>
+<li>The image format plugins are always deployed.</li>
+<li>The print support plugin is always deployed.</li>
+<li>SQL driver plugins are deployed if the application uses the <a href="../qtsql/qtsql-index.html">Qt SQL</a> module.</li>
+<li>Script plugins are deployed if the application uses the <a href="../qtscript/qtscript-index.html">Qt Script</a> module.</li>
+<li>The SVG icon plugin is deployed if the application uses the <a href="../qtsvg/qtsvg-index.html">Qt SVG</a> module.</li>
+<li>The accessibility plugin is always deployed.</li>
+</ul>
+<p>To include a 3rd party library in the application bundle, copy the library into the bundle manually, after the bundle is created.</p>
+<p><code>macdeployqt</code> supports the following options:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Option</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>-verbose=&lt;0-3&gt;</code></td><td >0 = no output, 1 = error/warning (default), 2 = normal, 3 = debug</td></tr>
+<tr valign="top" class="even"><td ><code>-no-plugins</code></td><td >Skip plugin deployment</td></tr>
+<tr valign="top" class="odd"><td ><code>-dmg</code></td><td >Create a .dmg disk image</td></tr>
+<tr valign="top" class="even"><td ><code>-no-strip</code></td><td >Don't run 'strip' on the binaries</td></tr>
+<tr valign="top" class="odd"><td ><code>-use-debug-libs</code></td><td >Deploy with debug versions of frameworks and plugins (implies <code>-no-strip</code>)</td></tr>
+<tr valign="top" class="even"><td ><code>-executable=&lt;path&gt;</code></td><td >Let the given executable also use the deployed frameworks</td></tr>
+<tr valign="top" class="odd"><td ><code>-qmldir=&lt;path&gt;</code></td><td >Deploy imports used by .qml files in the given path</td></tr>
+<tr valign="top" class="even"><td ><code>-qmlimport=&lt;path&gt;</code></td><td >Add the given path to the QML imports search locations</td></tr>
+<tr valign="top" class="odd"><td ><code>-always-overwrite</code></td><td >Copy files even if the target file exists</td></tr>
+<tr valign="top" class="even"><td ><code>-codesign=&lt;ident&gt;</code></td><td >Run <code>codesign</code> with the given identity on all executables</td></tr>
+<tr valign="top" class="odd"><td ><code>-appstore-compliant</code></td><td >Skip deployment of components that use private API</td></tr>
+<tr valign="top" class="even"><td ><code>-libpath=&lt;path&gt;</code></td><td >Add the given path to the library search path</td></tr>
+<tr valign="top" class="odd"><td ><code>-fs=&lt;filesystem&gt;</code></td><td >Set the filesystem used for the .dmg disk image (defaults to HFS+)</td></tr>
+</table></div>
+<p><b>Note: </b>macOS High Sierra introduced the new Apple File System (APFS). Older versions of macOS cannot read .dmg files that are formatted with APFS. By default, <code>macdeployqt</code> uses the older HFS+ file system for compatibility with all versions of macOS currently supported by Qt. Use the <code>-fs</code> option to specify a different file system.</p><a name="volume-name"></a>
+<h2 id="volume-name">Volume Name</h2>
+<p>The volume name of a disk image (the text displayed in the window title of an opened <code>.dmg</code> file) created with <code>-dmg</code> is based on the path to the application when <code>macdeployqt</code> is run. For example, consider the following command that creates a disk image for a Qt Quick application:</p>
+<pre class="cpp plain">
+
+  macdeployqt /Users/foo/myapp-build/MyApp.app -qmldir=/Users/foo/myapp/qml -dmg
+
+</pre>
+<p>The resulting volume name will be:</p>
+<pre class="cpp plain">
+
+  /Users/foo/myapp-build/MyApp.app
+
+</pre>
+<p>To ensure that the volume name only contains the application name and not the path on the deployment machine, run <code>macdeployqt</code> in the same directory:</p>
+<pre class="cpp plain">
+
+  cd /Users/foo/myapp-build
+  macdeployqt MyApp.app -qmldir=/Users/foo/myapp/qml -dmg
+
+</pre>
+<p>The resulting volume name will then be:</p>
+<pre class="cpp plain">
+
+  MyApp.app
+
+</pre>
+</div>
+<!-- @@@macos-deployment.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

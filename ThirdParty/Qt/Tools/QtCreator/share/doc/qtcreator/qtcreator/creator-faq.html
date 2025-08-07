@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtcreator-faq.qdoc -->
+  <title>FAQ | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >FAQ</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-help.html" />
+  <link rel="next" href="creator-tips.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-help.html">Using the Help Mode</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-tips.html">Tips and Tricks</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#general-questions">General Questions</a></li>
+<li class="level1"><a href="#qt-designer-integration-questions">Qt Designer Integration Questions</a></li>
+<li class="level1"><a href="#qml-and-qt-quick-questions">QML and Qt Quick Questions</a></li>
+<li class="level1"><a href="#help-questions">Help Questions</a></li>
+<li class="level1"><a href="#debugger-questions">Debugger Questions</a></li>
+<li class="level1"><a href="#compiler-questions">Compiler Questions</a></li>
+<li class="level1"><a href="#qt-installation-questions">Qt Installation Questions</a></li>
+<li class="level1"><a href="#platform-related-questions">Platform Related Questions</a></li>
+<li class="level1"><a href="#questions-about-new-features">Questions about New Features</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">FAQ</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-faq.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>This section contains answers to some frequently asked questions about Qt Creator. You might also find answers to your questions in the <a href="creator-known-issues.html#">Known Issues</a> and <a href="creator-tips.html#">Tips and Tricks</a> sections, or the Troubleshooting sections for a special area, such as <a href="creator-troubleshooting-debugging.html#">debugging</a>.</p>
+<a name="general-questions"></a>
+<h2 id="general-questions">General Questions</h2>
+<p><b>How do I reset all Qt Creator settings?</b></p>
+<p>Remove the settings files created by Qt Creator.</p>
+<p>For more information about where the files are located on each supported platform, see <a href="creator-quick-tour.html#location-of-settings-files">Location of Settings Files</a>.</p>
+<p><b>Qt Creator comes with <a href="https://mingw-w64.org/">MinGW</a>, should I use this version with Qt?</b></p>
+<p>Use the version that was built against the Qt version.</p>
+<p><b>Qt Creator does not find a helper application, such as Git or a compiler. What should I do?</b></p>
+<p>Make sure that the application is in your system PATH when starting Qt Creator. Also select <b>Tools &gt; Options</b> to check the settings specified for the application. Many plugins specify either the path to the tool they need or the environment they run in.</p>
+<p>This is especially relevant for the macOS where <code>/usr/local/bin</code> might not be in the path when Qt Creator is started.</p>
+<p><b>How do I change the interface language for Qt Creator?</b></p>
+<p>Qt Creator has been localized into several languages. If the system language is one of the supported languages, it is automatically selected. To change the language, select <b>Tools &gt; Options &gt; Environment</b> and select a language in the <b>Language</b> field. The change takes effect after you restart Qt Creator.</p>
+<p><b>Has a reported issue been addressed?</b></p>
+<p>You can look up any issue in the <a href="https://bugreports.qt.io/">Qt bug tracker</a>.</p>
+<a name="qt-designer-integration-questions"></a>
+<h2 id="qt-designer-integration-questions">Qt Designer Integration Questions</h2>
+<p><b>Why are custom widgets not loaded in Design mode even though it works in standalone Qt Designer?</b></p>
+<p>Qt Designer fetches plugins from standard locations and loads the plugins that match its build key. The locations are different for standalone and integrated Qt Designer.</p>
+<p>For more information, see <a href="adding-plugins.html#">Adding Qt Designer Plugins</a>.</p>
+<a name="qml-and-qt-quick-questions"></a>
+<h2 id="qml-and-qt-quick-questions">QML and Qt Quick Questions</h2>
+<p><b>Why is there a red line below my QML import, even though I have the module?</b></p>
+<p>By default, Qt Creator looks in the QML import path of Qt for QML modules. Sometimes, it does not get it right and you need to tell it where the modules are by specifying the <code>QML_IMPORT_PATH</code> in the <code>.pro</code> file of your application.</p>
+<p>This also enables code completion of QML code and removes error messages.</p>
+<p>The following example illustrates how to specify the import path so that it works when switching between build and run kits for different target platforms:</p>
+<pre class="cpp">
+
+  TEMPNAME <span class="operator">=</span> $${QMAKE_QMAKE}
+  MY_QTPATH <span class="operator">=</span> $$dirname(TEMPNAME)
+  QML_IMPORT_PATH <span class="operator">+</span><span class="operator">=</span> $$MY_QTPATH<span class="operator">/</span><span class="operator">.</span><span class="operator">.</span><span class="operator">/</span>qml
+  message(<span class="string">&quot;my QML Import Path: &quot;</span>$$QML_IMPORT_PATH)
+
+</pre>
+<p>For more information about how to set the import path when using CMake, see <a href="creator-qml-modules-with-plugins.html#importing-qml-modules">Importing QML Modules</a>.</p>
+<p><b>What should I do when Qt Creator complains about missing OpenGL support?</b></p>
+<p>Some parts of Qt Creator, such as the Design mode and QML Profiler, use Qt Quick 2, which relies on OpenGL API for drawing. Unfortunately, the use of OpenGL can cause problems, especially in remote setups and with outdated drivers. In these cases, Qt Creator displays OpenGL-related error messages on the console or records them in the Windows debugger log.</p>
+<p>The fixes and workarounds differ, depending on your setup. As a last resort, you can disable the affected plugins.</p>
+<p><i>Virtual Machines</i></p>
+<p>Try to enable <i>3D acceleration</i> in your virtual machine's settings. For VirtualBox, also make sure you have installed the Guest Addons, including experimental <i>Direct3D support</i>.</p>
+<p><i>Windows</i></p>
+<p>Check whether Qt Creator has been compiled with OpenGL/Desktop, or ANGLE as a backend. The official binaries are always built with ANGLE (a library that maps OpenGL ES API to DirectX).</p>
+<ul>
+<li>ANGLE backend: This requires a Windows version newer than Windows XP. If you have problems, try updating your graphics drivers or update your DirectX version. Run <code>dxdiag.exe</code> to check whether <i>Direct3D Acceleration</i> is indeed enabled.</li>
+<li>OpenGL backend: Make sure your graphics driver supports OpenGL 2.1 or newer. Try to update your graphics driver.</li>
+</ul>
+<p><i>Unix</i></p>
+<p>Run <code>glxgears</code> for a quick check whether OpenGL works in general. Check the output of <code>glxinfo</code> to get more details like the OpenGL driver and renderer (search for <i>OpenGL</i> in the application's output).</p>
+<p>If you are using the Mesa driver, you can force OpenGL to be rendered in software by setting the <code>LIBGL_ALWAYS_SOFTWARE</code> environment variable.</p>
+<p><i>Disabling plugins</i></p>
+<p>You can disable the Qt Creator plugins, at the expense of losing functionality:</p>
+<ul>
+<li>Launch Qt Creator from command line, with the <code>-noload QmlProfiler -noload QuickDesigner</code> arguments.</li>
+<li>Disable the plugins permanently by selecting <b>Help</b> &gt; <b>About Plugins</b>.</li>
+</ul>
+<a name="help-questions"></a>
+<h2 id="help-questions">Help Questions</h2>
+<p><b>The Qt API Reference Documentation is missing and context help does not find topics. What can I do?</b></p>
+<p>Qt Creator comes fully integrated with Qt documentation and examples using the Qt Help plugin. The integrated Qt Reference Documentation is available for Qt 4.4 and later. Qt Creator and other Qt deliverables contain documentation as .qch files. All the documentation is accessible in the <b>Help</b> mode.</p>
+<p>To view the documentation that is available and to add documentation, select <b>Tools &gt; Options &gt; Help &gt; Documentation</b>. For more information, see <a href="creator-help.html#adding-external-documentation">Adding External Documentation</a>.</p>
+<a name="debugger-questions"></a>
+<h2 id="debugger-questions">Debugger Questions</h2>
+<p>For information on troubleshooting debugger, see <a href="creator-troubleshooting-debugging.html#">Troubleshooting Debugger</a>.</p>
+<p><b>If I have a choice of GDB versions, which should I use?</b></p>
+<p>On Linux and Windows, use the Python-enabled GDB versions that are installed when you install Qt Creator and Qt. On macOS, GDB is no longer officially supported. To build your own Python-enabled GDB, follow the instructions in <a href="https://wiki.qt.io/QtCreator_Build_Gdb">Building GDB</a>.</p>
+<p>You must use Python version 2.6 or 2.7&#x2e;</p>
+<p>For more information on setting up debugger, see <a href="creator-debugger-engines.html#">Setting Up Debugger</a>.</p>
+<p><b>How do I generate a core file in Qt Creator?</b></p>
+<p>To trigger the GDB command that generates a core file while debugging, select <b>Window &gt; Views &gt; Debugger Log</b>. In the <b>Command</b> field, type <code>gcore</code> and press <b>Enter</b>. The core file is created in the current working directory. You can specify another location for the file, including a relative or absolute path, as an argument of the command.</p>
+<a name="compiler-questions"></a>
+<h2 id="compiler-questions">Compiler Questions</h2>
+<p><b>How can I make use of my multi-core CPU with Qt Creator?</b></p>
+<p>On Linux and macOS, go to <b>Project</b> mode, select your configuration in the <b>Build Settings</b>, locate the <b>Build Steps</b>, and add the following value, where <code>&lt;num&gt;</code> is the amount of cores in your CPU: <code>-j &lt;num&gt;</code></p>
+<p>On Windows, nmake does not support the <code>-j</code> parameter. Instead, we provide a drop-in replacement called jom. You can download a precompiled version of jom from <a href="https://download.qt.io/official_releases/jom/">Qt Downloads</a>. Put jom.exe in a location in the %PATH%. Go to the <b>Build Settings</b> and set jom.exe as the make command.</p>
+<p><b>Note: </b>Unlike GNU make, jom automatically detects your cores and spawns as many parallel processes as your CPU has cores. You can override this behavior by using the <code>-j</code> parameter as described above.</p><a name="qt-installation-questions"></a>
+<h2 id="qt-installation-questions">Qt Installation Questions</h2>
+<p><b>I cannot use QSslSocket with the Qt I installed from binary packages. What should I do?</b></p>
+<p>The Qt in the binary packages is built with QT_NO_OPENSSL defined. Rebuilding it is possible. For more information, see <a href="http://www.qtcentre.org/threads/19222-Qssl">http://www.qtcentre.org/threads/19222-Qssl</a>.</p>
+<p><b>Which development packages from the distribution are needed on Ubuntu or Debian?</b></p>
+<pre class="cpp">
+
+  sudo apt<span class="operator">-</span>get install libglib2<span class="operator">.</span><span class="number">0</span><span class="operator">-</span>dev libSM<span class="operator">-</span>dev libxrender<span class="operator">-</span>dev libfontconfig1<span class="operator">-</span>dev libxext<span class="operator">-</span>dev
+
+</pre>
+<p>If you use QtOpenGL, you also need:</p>
+<pre class="cpp">
+
+  sudo apt<span class="operator">-</span>get install libgl<span class="operator">-</span>dev libglu<span class="operator">-</span>dev
+
+</pre>
+<a name="platform-related-questions"></a>
+<h2 id="platform-related-questions">Platform Related Questions</h2>
+<p><b>Where is application output shown in Qt Creator?</b></p>
+<p><b>On Unix (Linux and macOS):</b> <code>qDebug()</code> and related functions use the standard output and error output. When you run or debug the application, you can view the output in the <b>Application Output</b> pane.</p>
+<p>For console applications that require input, select <b>Projects</b> &gt; <b>Run Settings</b> &gt; <b>Run in terminal</b>. To specify the terminal to use, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Environment</b> &gt; <b>System</b>.</p>
+<p><b>On Windows:</b> Output is displayed differently for <i>console applications</i> and <i>GUI applications</i>.</p>
+<p>The setting <code>CONFIG += console</code> in the .pro file specifies that the application is built as a console application using some other runtime. When you run a console application, you can view the output in the console window of the calling application. If the calling application is a GUI application (for example, a release-built version of Qt Creator), a new console window is opened. For this type of application, <code>qDebug()</code> and related functions use standard output and error output.</p>
+<p>We recommend that you select <b>Projects &gt; Run Settings &gt; Run in terminal</b> for console applications.</p>
+<p>For GUI applications, <code>qDebug()</code> and related functions use the Windows API function <code>OutputDebugString()</code>. The output is displayed in the <b>Application Output</b> pane. However, only one output pane tab may be open at a time or the output is not displayed correctly. You can use an external debug output viewer, such as the <a href="http://technet.microsoft.com/en-us/sysinternals/bb896647">DebugView for Windows</a> to display output from GUI applications.</p>
+<a name="questions-about-new-features"></a>
+<h2 id="questions-about-new-features">Questions about New Features</h2>
+<p><b>Will a requested feature be implemented?</b></p>
+<p>If it is a scheduled feature, you can see this in the task tracker. If a feature already has been implemented, it is mentioned in the <a href="https://code.qt.io/cgit/qt-creator/qt-creator.git/tree/dist">changes file</a> for the upcoming release.</p>
+<p><b>Why does Qt Creator not use tabs for editors?</b></p>
+<p>This question comes up from time to time, so we have considered it carefully. Here are our main reasons for not using tabs:</p>
+<ul>
+<li>Tabs do not scale. They work fine if you have 5 to 6 editors open, they become cumbersome with 10, and if you need more horizontal space than the tab bar, the interface does not work at all.</li>
+<li>Tabs do not adapt to your working set.</li>
+<li>The common solution is to give the user the ability to reorder tabs. Now user has to manage tabs instead of writing code.</li>
+<li>Tabs force you to limit the amount of open editors, because otherwise you get confused.</li>
+</ul>
+<p>Consider the following use case: <i>Developers want to switch editors.</i></p>
+<p>In fact, developers do not want to switch editors, but might have to do so to accomplish their tasks. We need to figure out what the tasks are to provide developers with better ways to navigate while performing the tasks.</p>
+<p>One common factor in many use cases is switching editors while working on a set of open files. While working on files A and B, users sometimes need to look at file C. They can press <b>Ctrl+Tab</b> to move between the files and have the files open in the correct editor according to file type. The list is sorted by last used.</p>
+<p>Typically, users also work on multiple classes or functions that are related, even though they are defined or declared in different files. Qt Creator provides two shortcuts for that: <b>F2</b> to follow the symbol under cursor and <b>Ctrl+Shift+U</b> to find references to it.</p>
+<p>In addition, developers can:</p>
+<ul>
+<li>Press <b>F4</b> to switch between header and source.</li>
+<li>Press <b>Alt+Left</b> to move backwards in the navigation history.</li>
+<li>Use the locator (Ctrl+K) to simply tell Qt Creator where to go.</li>
+</ul>
+<p>The locator can be used to open files, but opening files is also just a step on the way to accomplish a task. For example, consider the following use case: <i>Fix AFunction in SomeClass which comes from someclass.cpp/someclass.h</i>.</p>
+<p>With a tabbed user interface, developers would search for someclass.cpp in the tab bar, and then search for <code>::AFunction</code>, only to find out that the function is not located in that file. They would then search for someclass.h in the tab bar, find our that the function is inline, fix the problem, and forget where they came from.</p>
+<p>With Qt Creator, developers can type <code>Ctrl+K m AFun</code> to find the function. Typically, they only need to type 3 to 4 characters of the function name. They can then fix the problem and press <b>Alt+Back</b> to go back to where they were.</p>
+<p>Other locator filters include <code>c</code> for classes, <code>:</code> for all symbols, and (thanks to a community contribution) <code>.</code> for symbols in the current file.</p>
+</div>
+<!-- @@@creator-faq.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-help.html">Using the Help Mode</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-tips.html">Tips and Tricks</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

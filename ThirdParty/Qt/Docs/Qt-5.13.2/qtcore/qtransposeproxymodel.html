@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtransposeproxymodel.cpp -->
+  <title>QTransposeProxyModel Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QTransposeProxyModel</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QTransposeProxyModel Class</h1>
+<!-- $$$QTransposeProxyModel-brief -->
+<p>This proxy transposes the source model. <a href="#details">More...</a></p>
+<!-- @@@QTransposeProxyModel -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QTransposeProxyModel&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qabstractproxymodel.html">QAbstractProxyModel</a></td></tr></table></div><p>This class was introduced in  Qt 5.13.</p>
+<ul>
+<li><a href="qtransposeproxymodel-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtransposeproxymodel.html#QTransposeProxyModel-1">QTransposeProxyModel</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qtransposeproxymodel.html#dtor.QTransposeProxyModel">~QTransposeProxyModel</a></b>()</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qtransposeproxymodel.html#columnCount">columnCount</a></b>(const QModelIndex &amp;<i>parent</i> = QModelIndex()) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QVariant </td><td class="memItemRight bottomAlign"><b><a href="qtransposeproxymodel.html#headerData">headerData</a></b>(int <i>section</i>, Qt::Orientation <i>orientation</i>, int <i>role</i> = Qt::DisplayRole) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QModelIndex </td><td class="memItemRight bottomAlign"><b><a href="qtransposeproxymodel.html#index">index</a></b>(int <i>row</i>, int <i>column</i>, const QModelIndex &amp;<i>parent</i> = QModelIndex()) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qtransposeproxymodel.html#insertColumns">insertColumns</a></b>(int <i>column</i>, int <i>count</i>, const QModelIndex &amp;<i>parent</i> = QModelIndex()) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qtransposeproxymodel.html#insertRows">insertRows</a></b>(int <i>row</i>, int <i>count</i>, const QModelIndex &amp;<i>parent</i> = QModelIndex()) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QMap&lt;int, QVariant&gt; </td><td class="memItemRight bottomAlign"><b><a href="qtransposeproxymodel.html#itemData">itemData</a></b>(const QModelIndex &amp;<i>index</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QModelIndex </td><td class="memItemRight bottomAlign"><b><a href="qtransposeproxymodel.html#mapFromSource">mapFromSource</a></b>(const QModelIndex &amp;<i>sourceIndex</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QModelIndex </td><td class="memItemRight bottomAlign"><b><a href="qtransposeproxymodel.html#mapToSource">mapToSource</a></b>(const QModelIndex &amp;<i>proxyIndex</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qtransposeproxymodel.html#moveColumns">moveColumns</a></b>(const QModelIndex &amp;<i>sourceParent</i>, int <i>sourceRow</i>, int <i>count</i>, const QModelIndex &amp;<i>destinationParent</i>, int <i>destinationChild</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qtransposeproxymodel.html#moveRows">moveRows</a></b>(const QModelIndex &amp;<i>sourceParent</i>, int <i>sourceRow</i>, int <i>count</i>, const QModelIndex &amp;<i>destinationParent</i>, int <i>destinationChild</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QModelIndex </td><td class="memItemRight bottomAlign"><b><a href="qtransposeproxymodel.html#parent">parent</a></b>(const QModelIndex &amp;<i>index</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qtransposeproxymodel.html#removeColumns">removeColumns</a></b>(int <i>column</i>, int <i>count</i>, const QModelIndex &amp;<i>parent</i> = QModelIndex()) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qtransposeproxymodel.html#removeRows">removeRows</a></b>(int <i>row</i>, int <i>count</i>, const QModelIndex &amp;<i>parent</i> = QModelIndex()) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qtransposeproxymodel.html#rowCount">rowCount</a></b>(const QModelIndex &amp;<i>parent</i> = QModelIndex()) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qtransposeproxymodel.html#setHeaderData">setHeaderData</a></b>(int <i>section</i>, Qt::Orientation <i>orientation</i>, const QVariant &amp;<i>value</i>, int <i>role</i> = Qt::EditRole) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qtransposeproxymodel.html#setItemData">setItemData</a></b>(const QModelIndex &amp;<i>index</i>, const QMap&lt;int, QVariant&gt; &amp;<i>roles</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qtransposeproxymodel.html#setSourceModel">setSourceModel</a></b>(QAbstractItemModel *<i>newSourceModel</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qtransposeproxymodel.html#sort">sort</a></b>(int <i>column</i>, Qt::SortOrder <i>order</i> = Qt::AscendingOrder) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSize </td><td class="memItemRight bottomAlign"><b><a href="qtransposeproxymodel.html#span">span</a></b>(const QModelIndex &amp;<i>index</i>) const override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QTransposeProxyModel-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This model will make the rows of the source model become columns of the proxy model and vice-versa.</p>
+<p>If the model is a tree, the parents will be transposed as well. For example, if an index in the source model had parent `index(2,0)`, it will have parent `index(0,2)` in the proxy.</p>
+</div>
+<!-- @@@QTransposeProxyModel -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QTransposeProxyModel$$$QTransposeProxyModelQObject* -->
+<h3 class="fn" id="QTransposeProxyModel-1"><a name="QTransposeProxyModel-1"></a>QTransposeProxyModel::<span class="name">QTransposeProxyModel</span>(<span class="type"><a href="qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new proxy model with the given <i>parent</i>.</p>
+<!-- @@@QTransposeProxyModel -->
+<!-- $$$~QTransposeProxyModel[overload1]$$$~QTransposeProxyModel -->
+<h3 class="fn" id="dtor.QTransposeProxyModel"><a name="dtor.QTransposeProxyModel"></a><code>[virtual] </code>QTransposeProxyModel::<span class="name">~QTransposeProxyModel</span>()</h3>
+<p>Destructs the proxy model.</p>
+<!-- @@@~QTransposeProxyModel -->
+<!-- $$$columnCount[overload1]$$$columnCountconstQModelIndex& -->
+<h3 class="fn" id="columnCount"><a name="columnCount"></a><code>[override virtual] </code><span class="type">int</span> QTransposeProxyModel::<span class="name">columnCount</span>(const <span class="type"><a href="qmodelindex.html">QModelIndex</a></span> &amp;<i>parent</i> = QModelIndex()) const</h3>
+<p>Reimplements: <a href="qabstractitemmodel.html#columnCount">QAbstractItemModel::columnCount</a>(const QModelIndex &amp;parent) const.</p>
+<!-- @@@columnCount -->
+<!-- $$$headerData[overload1]$$$headerDataintQt::Orientationint -->
+<h3 class="fn" id="headerData"><a name="headerData"></a><code>[override virtual] </code><span class="type"><a href="qvariant.html">QVariant</a></span> QTransposeProxyModel::<span class="name">headerData</span>(<span class="type">int</span> <i>section</i>, <span class="type"><a href="qt.html#Orientation-enum">Qt::Orientation</a></span> <i>orientation</i>, <span class="type">int</span> <i>role</i> = Qt::DisplayRole) const</h3>
+<p>Reimplements: <a href="qabstractproxymodel.html#headerData">QAbstractProxyModel::headerData</a>(int section, Qt::Orientation orientation, int role) const.</p>
+<p><b>See also </b><a href="qtransposeproxymodel.html#setHeaderData">setHeaderData</a>().</p>
+<!-- @@@headerData -->
+<!-- $$$index[overload1]$$$indexintintconstQModelIndex& -->
+<h3 class="fn" id="index"><a name="index"></a><code>[override virtual] </code><span class="type"><a href="qmodelindex.html">QModelIndex</a></span> QTransposeProxyModel::<span class="name">index</span>(<span class="type">int</span> <i>row</i>, <span class="type">int</span> <i>column</i>, const <span class="type"><a href="qmodelindex.html">QModelIndex</a></span> &amp;<i>parent</i> = QModelIndex()) const</h3>
+<p>Reimplements: <a href="qabstractitemmodel.html#index">QAbstractItemModel::index</a>(int row, int column, const QModelIndex &amp;parent) const.</p>
+<!-- @@@index -->
+<!-- $$$insertColumns[overload1]$$$insertColumnsintintconstQModelIndex& -->
+<h3 class="fn" id="insertColumns"><a name="insertColumns"></a><code>[override virtual] </code><span class="type">bool</span> QTransposeProxyModel::<span class="name">insertColumns</span>(<span class="type">int</span> <i>column</i>, <span class="type">int</span> <i>count</i>, const <span class="type"><a href="qmodelindex.html">QModelIndex</a></span> &amp;<i>parent</i> = QModelIndex())</h3>
+<p>Reimplements: <a href="qabstractitemmodel.html#insertColumns">QAbstractItemModel::insertColumns</a>(int column, int count, const QModelIndex &amp;parent).</p>
+<!-- @@@insertColumns -->
+<!-- $$$insertRows[overload1]$$$insertRowsintintconstQModelIndex& -->
+<h3 class="fn" id="insertRows"><a name="insertRows"></a><code>[override virtual] </code><span class="type">bool</span> QTransposeProxyModel::<span class="name">insertRows</span>(<span class="type">int</span> <i>row</i>, <span class="type">int</span> <i>count</i>, const <span class="type"><a href="qmodelindex.html">QModelIndex</a></span> &amp;<i>parent</i> = QModelIndex())</h3>
+<p>Reimplements: <a href="qabstractitemmodel.html#insertRows">QAbstractItemModel::insertRows</a>(int row, int count, const QModelIndex &amp;parent).</p>
+<!-- @@@insertRows -->
+<!-- $$$itemData[overload1]$$$itemDataconstQModelIndex& -->
+<h3 class="fn" id="itemData"><a name="itemData"></a><code>[override virtual] </code><span class="type"><a href="qmap.html">QMap</a></span>&lt;<span class="type">int</span>, <span class="type"><a href="qvariant.html">QVariant</a></span>&gt; QTransposeProxyModel::<span class="name">itemData</span>(const <span class="type"><a href="qmodelindex.html">QModelIndex</a></span> &amp;<i>index</i>) const</h3>
+<p>Reimplements: <a href="qabstractproxymodel.html#itemData">QAbstractProxyModel::itemData</a>(const QModelIndex &amp;proxyIndex) const.</p>
+<p><b>See also </b><a href="qtransposeproxymodel.html#setItemData">setItemData</a>().</p>
+<!-- @@@itemData -->
+<!-- $$$mapFromSource[overload1]$$$mapFromSourceconstQModelIndex& -->
+<h3 class="fn" id="mapFromSource"><a name="mapFromSource"></a><code>[override virtual] </code><span class="type"><a href="qmodelindex.html">QModelIndex</a></span> QTransposeProxyModel::<span class="name">mapFromSource</span>(const <span class="type"><a href="qmodelindex.html">QModelIndex</a></span> &amp;<i>sourceIndex</i>) const</h3>
+<p>Reimplements: <a href="qabstractproxymodel.html#mapFromSource">QAbstractProxyModel::mapFromSource</a>(const QModelIndex &amp;sourceIndex) const.</p>
+<!-- @@@mapFromSource -->
+<!-- $$$mapToSource[overload1]$$$mapToSourceconstQModelIndex& -->
+<h3 class="fn" id="mapToSource"><a name="mapToSource"></a><code>[override virtual] </code><span class="type"><a href="qmodelindex.html">QModelIndex</a></span> QTransposeProxyModel::<span class="name">mapToSource</span>(const <span class="type"><a href="qmodelindex.html">QModelIndex</a></span> &amp;<i>proxyIndex</i>) const</h3>
+<p>Reimplements: <a href="qabstractproxymodel.html#mapToSource">QAbstractProxyModel::mapToSource</a>(const QModelIndex &amp;proxyIndex) const.</p>
+<!-- @@@mapToSource -->
+<!-- $$$moveColumns[overload1]$$$moveColumnsconstQModelIndex&intintconstQModelIndex&int -->
+<h3 class="fn" id="moveColumns"><a name="moveColumns"></a><code>[override virtual] </code><span class="type">bool</span> QTransposeProxyModel::<span class="name">moveColumns</span>(const <span class="type"><a href="qmodelindex.html">QModelIndex</a></span> &amp;<i>sourceParent</i>, <span class="type">int</span> <i>sourceRow</i>, <span class="type">int</span> <i>count</i>, const <span class="type"><a href="qmodelindex.html">QModelIndex</a></span> &amp;<i>destinationParent</i>, <span class="type">int</span> <i>destinationChild</i>)</h3>
+<p>Reimplements: <a href="qabstractitemmodel.html#moveColumns">QAbstractItemModel::moveColumns</a>(const QModelIndex &amp;sourceParent, int sourceColumn, int count, const QModelIndex &amp;destinationParent, int destinationChild).</p>
+<!-- @@@moveColumns -->
+<!-- $$$moveRows[overload1]$$$moveRowsconstQModelIndex&intintconstQModelIndex&int -->
+<h3 class="fn" id="moveRows"><a name="moveRows"></a><code>[override virtual] </code><span class="type">bool</span> QTransposeProxyModel::<span class="name">moveRows</span>(const <span class="type"><a href="qmodelindex.html">QModelIndex</a></span> &amp;<i>sourceParent</i>, <span class="type">int</span> <i>sourceRow</i>, <span class="type">int</span> <i>count</i>, const <span class="type"><a href="qmodelindex.html">QModelIndex</a></span> &amp;<i>destinationParent</i>, <span class="type">int</span> <i>destinationChild</i>)</h3>
+<p>Reimplements: <a href="qabstractitemmodel.html#moveRows">QAbstractItemModel::moveRows</a>(const QModelIndex &amp;sourceParent, int sourceRow, int count, const QModelIndex &amp;destinationParent, int destinationChild).</p>
+<!-- @@@moveRows -->
+<!-- $$$parent[overload1]$$$parentconstQModelIndex& -->
+<h3 class="fn" id="parent"><a name="parent"></a><code>[override virtual] </code><span class="type"><a href="qmodelindex.html">QModelIndex</a></span> QTransposeProxyModel::<span class="name">parent</span>(const <span class="type"><a href="qmodelindex.html">QModelIndex</a></span> &amp;<i>index</i>) const</h3>
+<p>Reimplements: <a href="qabstractitemmodel.html#parent">QAbstractItemModel::parent</a>(const QModelIndex &amp;index) const.</p>
+<!-- @@@parent -->
+<!-- $$$removeColumns[overload1]$$$removeColumnsintintconstQModelIndex& -->
+<h3 class="fn" id="removeColumns"><a name="removeColumns"></a><code>[override virtual] </code><span class="type">bool</span> QTransposeProxyModel::<span class="name">removeColumns</span>(<span class="type">int</span> <i>column</i>, <span class="type">int</span> <i>count</i>, const <span class="type"><a href="qmodelindex.html">QModelIndex</a></span> &amp;<i>parent</i> = QModelIndex())</h3>
+<p>Reimplements: <a href="qabstractitemmodel.html#removeColumns">QAbstractItemModel::removeColumns</a>(int column, int count, const QModelIndex &amp;parent).</p>
+<!-- @@@removeColumns -->
+<!-- $$$removeRows[overload1]$$$removeRowsintintconstQModelIndex& -->
+<h3 class="fn" id="removeRows"><a name="removeRows"></a><code>[override virtual] </code><span class="type">bool</span> QTransposeProxyModel::<span class="name">removeRows</span>(<span class="type">int</span> <i>row</i>, <span class="type">int</span> <i>count</i>, const <span class="type"><a href="qmodelindex.html">QModelIndex</a></span> &amp;<i>parent</i> = QModelIndex())</h3>
+<p>Reimplements: <a href="qabstractitemmodel.html#removeRows">QAbstractItemModel::removeRows</a>(int row, int count, const QModelIndex &amp;parent).</p>
+<!-- @@@removeRows -->
+<!-- $$$rowCount[overload1]$$$rowCountconstQModelIndex& -->
+<h3 class="fn" id="rowCount"><a name="rowCount"></a><code>[override virtual] </code><span class="type">int</span> QTransposeProxyModel::<span class="name">rowCount</span>(const <span class="type"><a href="qmodelindex.html">QModelIndex</a></span> &amp;<i>parent</i> = QModelIndex()) const</h3>
+<p>Reimplements: <a href="qabstractitemmodel.html#rowCount">QAbstractItemModel::rowCount</a>(const QModelIndex &amp;parent) const.</p>
+<!-- @@@rowCount -->
+<!-- $$$setHeaderData[overload1]$$$setHeaderDataintQt::OrientationconstQVariant&int -->
+<h3 class="fn" id="setHeaderData"><a name="setHeaderData"></a><code>[override virtual] </code><span class="type">bool</span> QTransposeProxyModel::<span class="name">setHeaderData</span>(<span class="type">int</span> <i>section</i>, <span class="type"><a href="qt.html#Orientation-enum">Qt::Orientation</a></span> <i>orientation</i>, const <span class="type"><a href="qvariant.html">QVariant</a></span> &amp;<i>value</i>, <span class="type">int</span> <i>role</i> = Qt::EditRole)</h3>
+<p>Reimplements: <a href="qabstractproxymodel.html#setHeaderData">QAbstractProxyModel::setHeaderData</a>(int section, Qt::Orientation orientation, const QVariant &amp;value, int role).</p>
+<p><b>See also </b><a href="qtransposeproxymodel.html#headerData">headerData</a>().</p>
+<!-- @@@setHeaderData -->
+<!-- $$$setItemData[overload1]$$$setItemDataconstQModelIndex&constQMap<int,QVariant>& -->
+<h3 class="fn" id="setItemData"><a name="setItemData"></a><code>[override virtual] </code><span class="type">bool</span> QTransposeProxyModel::<span class="name">setItemData</span>(const <span class="type"><a href="qmodelindex.html">QModelIndex</a></span> &amp;<i>index</i>, const <span class="type"><a href="qmap.html">QMap</a></span>&lt;<span class="type">int</span>, <span class="type"><a href="qvariant.html">QVariant</a></span>&gt; &amp;<i>roles</i>)</h3>
+<p>Reimplements: <a href="qabstractproxymodel.html#setItemData">QAbstractProxyModel::setItemData</a>(const QModelIndex &amp;index, const QMap&lt;int, QVariant&gt; &amp;roles).</p>
+<p><b>See also </b><a href="qtransposeproxymodel.html#itemData">itemData</a>().</p>
+<!-- @@@setItemData -->
+<!-- $$$setSourceModel[overload1]$$$setSourceModelQAbstractItemModel* -->
+<h3 class="fn" id="setSourceModel"><a name="setSourceModel"></a><code>[override virtual] </code><span class="type">void</span> QTransposeProxyModel::<span class="name">setSourceModel</span>(<span class="type"><a href="qabstractitemmodel.html#QAbstractItemModel">QAbstractItemModel</a></span> *<i>newSourceModel</i>)</h3>
+<p>Reimplements: <a href="qabstractproxymodel.html#setSourceModel">QAbstractProxyModel::setSourceModel</a>(QAbstractItemModel *sourceModel).</p>
+<!-- @@@setSourceModel -->
+<!-- $$$sort[overload1]$$$sortintQt::SortOrder -->
+<h3 class="fn" id="sort"><a name="sort"></a><code>[override virtual] </code><span class="type">void</span> QTransposeProxyModel::<span class="name">sort</span>(<span class="type">int</span> <i>column</i>, <span class="type"><a href="qt.html#SortOrder-enum">Qt::SortOrder</a></span> <i>order</i> = Qt::AscendingOrder)</h3>
+<p>Reimplements: <a href="qabstractproxymodel.html#sort">QAbstractProxyModel::sort</a>(int column, Qt::SortOrder order).</p>
+<p>This method will perform no action. Use a <a href="qsortfilterproxymodel.html">QSortFilterProxyModel</a> on top of this one if you require sorting.</p>
+<!-- @@@sort -->
+<!-- $$$span[overload1]$$$spanconstQModelIndex& -->
+<h3 class="fn" id="span"><a name="span"></a><code>[override virtual] </code><span class="type"><a href="qsize.html">QSize</a></span> QTransposeProxyModel::<span class="name">span</span>(const <span class="type"><a href="qmodelindex.html">QModelIndex</a></span> &amp;<i>index</i>) const</h3>
+<p>Reimplements: <a href="qabstractproxymodel.html#span">QAbstractProxyModel::span</a>(const QModelIndex &amp;index) const.</p>
+<!-- @@@span -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

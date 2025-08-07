@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- ios.qdoc -->
+  <title>Porting to iOS | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Porting to iOS</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Porting to iOS</h1>
+<span class="subtitle"></span>
+<!-- $$$porting-to-ios.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>In this section, we are going to port an existing Qt application to <a href="ios.html">iOS</a> and deploy it to the device.</p>
+<p>Most Qt applications should be portable to iOS with ease, unless they depend on a specific hardware or software feature not supported on iOS. A major part of the porting effort consists of ensuring that all the application's assets (for example, QML files, images, and icons) are deployed correctly to the device.</p>
+<p>Like most UI applications, Qt applications also depend on resources such as images, icons, translation files, and so on. These resources must be made available on the device as they are required for the application to function correctly.</p>
+<p>The most convenient option is to bundle the resources into a qrc file, which gets built into the application binary. This approach reduces the porting effort considerably and provides faster access to the resources. It is also a cross-platform approach, which makes porting to other platforms easier.</p>
+<p>By default, all Qt applications can access the contents of a qrc file using the &quot;:/&quot; prefix or the URL scheme prefix, &quot;qrc:&quot;. To know more about qrc files and how they are handled, see <a href="../qtcore/resources.html">the Qt Resource System</a>.</p>
+<p>The following step-by-step instructions guide you to port an existing Qt Quick application to iOS using the qrc approach:</p>
+<ol class="1" type="1"><li>Open the existing project in Qt Creator and configure it with <i>iOS</i> or <i>iOS Simulator</i> kit. For more information, see <a href="http://doc.qt.io/qtcreator/creator-configuring-projects.html">Qt Creator: Configuring Projects</a>.</li>
+<li>Update all local directory imports in the <code>qml</code> files to use a local namespace. For example, to import the QML documents in the &quot;contents&quot; directory relative to <code>main.qml</code>, use the following import statement:<pre class="cpp">
+
+  import <span class="string">&quot;contents&quot;</span> as Contents
+
+</pre>
+</li>
+<li>Identify all the resources used by your application and add them to one or more qrc files. Qt Creator updates your qmake project file with the <code>RESOURCES</code> variable, listing the qrc files you added.</li>
+<li>To load or refer to the resources in the qrc file from a C++ file, use the &quot;<code>qrc:</code>&quot; prefix for the URL. For example:<pre class="cpp">
+
+  <span class="type"><a href="../qtquick/qquickview.html">QQuickView</a></span> viewer;
+  viewer<span class="operator">.</span>setSource(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="string">&quot;qrc:qml/main.qml&quot;</span>));
+  viewer<span class="operator">.</span>show();
+
+</pre>
+<p><b>Note: </b>QML documents can refer to files in the resources simply by using the relative path to the document. Such references do not require the &quot;<code>qrc:</code>&quot; or &quot;<code>:/</code>&quot; prefix.</p></li>
+<li>Update the &quot;Run&quot; settings for your project as described in the <a href="http://doc.qt.io/qtcreator/creator-run-settings.html">Qt Creator: Specifying Run Settings</a></li>
+<li>If your application uses imports or plugins which depend on special Qt modules, these Qt modules should be added to the .pro file. For example, if your application uses the <a href="../qtmultimedia/qtmultimedia-index.html">Qt Multimedia</a> import in QML, you should add the following to your .pro file:<pre class="cpp plain">
+
+  QT += multimedia
+
+</pre>
+<p>In Qt for iOS, everything is compiled statically and placed into the application bundle. The applications are &quot;sandboxed&quot; inside their bundles and cannot make use of shared object files. Because of this, also the plugins used by the Qt modules need to be statically linked. To do this, define the required plugins using the <a href="../qmake/qmake-variable-reference.html#qtplugin">QTPLUGIN</a> variable. For example, to use the camera APIs from Qt Multimedia:</p>
+<pre class="cpp plain">
+
+  QTPLUGIN += qavfcamera
+
+</pre>
+<p>See <a href="http://wiki.qt.io/QtMultimedia_iOS">Qt Multimedia on iOS</a> for information on other Qt Multimedia plugins. If your project uses APIs from <a href="../qtsensors/qtsensors-index.html">Qt Sensors</a>, use the following:</p>
+<pre class="cpp plain">
+
+  QT += sensors
+  QTPLUGIN += qtsensors_ios
+
+</pre>
+</li>
+<li>Save the changes to your project and run the application.</li>
+</ol>
+<p>Qt Creator deploys your application on the iOS device, if the device is detected and configured correctly in Xcode. It is also possible to test the application in iOS Simulator. For more information, see <a href="http://doc.qt.io/qtcreator/creator-developing-ios.html">Connecting iOS Devices</a>.</p>
+</div>
+<p><b>See also </b><a href="ios-platform-notes.html">Platform Notes - iOS</a>.</p>
+<!-- @@@porting-to-ios.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

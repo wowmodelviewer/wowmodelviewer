@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qqmlnetworkaccessmanagerfactory.cpp -->
+  <title>QQmlNetworkAccessManagerFactory Class | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td ><a href="qtqml-module.html">C++ Classes</a></td><td >QQmlNetworkAccessManagerFactory</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QQmlNetworkAccessManagerFactory Class</h1>
+<!-- $$$QQmlNetworkAccessManagerFactory-brief -->
+<p>The <a href="qqmlnetworkaccessmanagerfactory.html">QQmlNetworkAccessManagerFactory</a> class creates QNetworkAccessManager instances for a QML engine. <a href="#details">More...</a></p>
+<!-- @@@QQmlNetworkAccessManagerFactory -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QQmlNetworkAccessManagerFactory&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += qml</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.0</td></tr></table></div><p>This class was introduced in  Qt 5.0.</p>
+<ul>
+<li><a href="qqmlnetworkaccessmanagerfactory-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qqmlnetworkaccessmanagerfactory.html#dtor.QQmlNetworkAccessManagerFactory">~QQmlNetworkAccessManagerFactory</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QNetworkAccessManager *</td><td class="memItemRight bottomAlign"><b><a href="qqmlnetworkaccessmanagerfactory.html#create">create</a></b>(QObject *<i>parent</i>) = 0</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QQmlNetworkAccessManagerFactory-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A QML engine uses QNetworkAccessManager for all network access. By implementing a factory, it is possible to provide the QML engine with custom QNetworkAccessManager instances with specialized caching, proxy and cookies support.</p>
+<p>To implement a factory, subclass <a href="qqmlnetworkaccessmanagerfactory.html">QQmlNetworkAccessManagerFactory</a> and implement the virtual <a href="qqmlnetworkaccessmanagerfactory.html#create">create</a>() method, then assign it to the relevant QML engine using <a href="qqmlengine.html#setNetworkAccessManagerFactory">QQmlEngine::setNetworkAccessManagerFactory</a>().</p>
+<p>Note the QML engine may create QNetworkAccessManager instances from multiple threads. Because of this, the implementation of the <a href="qqmlnetworkaccessmanagerfactory.html#create">create</a>() method must be <a href="../qtcore/qrandomgenerator.html#reentrancy-and-thread-safety">reentrant</a>. In addition, the developer should be careful if the signals of the object to be returned from <a href="qqmlnetworkaccessmanagerfactory.html#create">create</a>() are connected to the slots of an object that may be created in a different thread:</p>
+<ul>
+<li>The QML engine internally handles all requests, and cleans up any QNetworkReply objects it creates. Receiving the QNetworkAccessManager::finished() signal in another thread may not provide the receiver with a valid reply object if it has already been deleted.</li>
+<li>Authentication details provided to QNetworkAccessManager::authenticationRequired() must be provided immediately, so this signal cannot be connected as a <a href="../qtcore/qt.html#ConnectionType-enum">Qt::QueuedConnection</a> (or as the default <a href="../qtcore/qt.html#ConnectionType-enum">Qt::AutoConnection</a> from another thread).</li>
+</ul>
+<p>For more information about signals and threads, see <a href="../qtdoc/threads-qobject.html">Threads and QObjects</a> and <a href="../qtdoc/threads-qobject.html#signals-and-slots-across-threads">Signals and Slots Across Threads</a>.</p>
+</div>
+<p><b>See also </b><a href="qtqml-networkaccessmanagerfactory-example.html">Network Access Manager Factory Example</a>.</p>
+<!-- @@@QQmlNetworkAccessManagerFactory -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$~QQmlNetworkAccessManagerFactory[overload1]$$$~QQmlNetworkAccessManagerFactory -->
+<h3 class="fn" id="dtor.QQmlNetworkAccessManagerFactory"><a name="dtor.QQmlNetworkAccessManagerFactory"></a><code>[virtual] </code>QQmlNetworkAccessManagerFactory::<span class="name">~QQmlNetworkAccessManagerFactory</span>()</h3>
+<p>Destroys the factory. The default implementation does nothing.</p>
+<!-- @@@~QQmlNetworkAccessManagerFactory -->
+<!-- $$$create[overload1]$$$createQObject* -->
+<h3 class="fn" id="create"><a name="create"></a><code>[pure virtual] </code><span class="type">QNetworkAccessManager</span> *QQmlNetworkAccessManagerFactory::<span class="name">create</span>(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> *<i>parent</i>)</h3>
+<p>Creates and returns a network access manager with the specified <i>parent</i>. This method must return a new QNetworkAccessManager instance each time it is called.</p>
+<p>Note: this method may be called by multiple threads, so ensure the implementation of this method is reentrant.</p>
+<!-- @@@create -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

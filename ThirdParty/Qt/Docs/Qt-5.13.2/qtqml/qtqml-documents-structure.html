@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- structure.qdoc -->
+  <title>Structure of a QML Document | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td >Structure of a QML Document</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#imports">Imports</a></li>
+<li class="level1"><a href="#the-root-object-declaration">The Root Object Declaration</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Structure of a QML Document</h1>
+<span class="subtitle"></span>
+<!-- $$$qtqml-documents-structure.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>A QML document is a self contained piece of QML source code that consists of two parts:</p>
+<ul>
+<li>Its <i>import</i> statements</li>
+<li>A single root object declaration</li>
+</ul>
+<p>By convention, a single empty line separates the imports from the object hierarchy definition.</p>
+<p>QML documents are always encoded in UTF-8 format.</p>
+<a name="imports"></a>
+<h2 id="imports">Imports</h2>
+<p>A document must import the necessary modules or type namespaces to enable the engine to load the QML object types referenced within the document. By default, a document can access any QML object types that have been defined through <code>.qml</code> files in the same directory; if a document needs to refer to any other object types, it must import the type namespace into which those types have been registered.</p>
+<p>QML does <i>not</i> have a preprocessor that modifies the document prior to presentation to the <a href="qqmlengine.html">QML engine</a>, unlike C or C++. The <code>import</code> statements do not copy and prepend the code in the document, but instead instruct the QML engine on how to resolve type references found in the document. Any type reference present in a QML document - such as <code>Rectangle</code> and <code>ListView</code> - including those made within a <a href="qtqml-javascript-expressions.html">JavaScript block</a> or <a href="qtqml-syntax-propertybinding.html">property bindings</a>, are <i>resolved</i> based exclusively on the import statements. At least one <code>import</code> statement must be present such as <code>import QtQuick 2.0</code>.</p>
+<p>Please see the <a href="qtqml-syntax-imports.html">QML Syntax - Import Statements</a> documentation for in-depth information about QML imports.</p>
+<a name="the-root-object-declaration"></a>
+<h2 id="the-root-object-declaration">The Root Object Declaration</h2>
+<p>A QML document describes a hierarchy of objects which can be instantiated. Each object definition has a certain structure; it has a type, it can have an id and an object name, it can have properties, it can have methods, it can have signals and it can have signal handlers.</p>
+<p>A QML file must only contain <b>a single root object definition</b>. The following is invalid and will generate an error:</p>
+<pre class="cpp">
+
+  <span class="comment">// MyQmlFile.qml</span>
+  import <span class="type">QtQuick</span> <span class="number">2.0</span>
+
+  Rectangle { width: <span class="number">200</span>; height: <span class="number">200</span>; color: <span class="string">&quot;red&quot;</span> }
+  Rectangle { width: <span class="number">200</span>; height: <span class="number">200</span>; color: <span class="string">&quot;blue&quot;</span> }    <span class="comment">// invalid!</span>
+
+</pre>
+<p>This is because a .qml file automatically defines a QML type, which encapsulates a <i>single</i> QML object definition. This is discussed further in <a href="qtqml-documents-definetypes.html">Documents as QML object type definitions</a>.</p>
+</div>
+<!-- @@@qtqml-documents-structure.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

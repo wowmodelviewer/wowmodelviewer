@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qaccessible.cpp -->
+  <title>QAccessibleTextInsertEvent Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QAccessibleTextInsertEvent</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAccessibleTextInsertEvent Class</h1>
+<!-- $$$QAccessibleTextInsertEvent-brief -->
+<p>The <a href="qaccessibletextinsertevent.html">QAccessibleTextInsertEvent</a> class notifies of text being inserted. <a href="#details">More...</a></p>
+<!-- @@@QAccessibleTextInsertEvent -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAccessibleTextInsertEvent&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qaccessibletextcursorevent.html">QAccessibleTextCursorEvent</a></td></tr></table></div><ul>
+<li><a href="qaccessibletextinsertevent-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qaccessibletextinsertevent.html#QAccessibleTextInsertEvent-1">QAccessibleTextInsertEvent</a></b>(QAccessibleInterface *<i>iface</i>, int <i>position</i>, const QString &amp;<i>text</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qaccessibletextinsertevent.html#QAccessibleTextInsertEvent">QAccessibleTextInsertEvent</a></b>(QObject *<i>object</i>, int <i>position</i>, const QString &amp;<i>text</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qaccessibletextinsertevent.html#changePosition">changePosition</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qaccessibletextinsertevent.html#textInserted">textInserted</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAccessibleTextInsertEvent-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This class is used with <a href="qaccessible-obsolete.html#updateAccessibility">QAccessible::updateAccessibility</a>().</p>
+</div>
+<!-- @@@QAccessibleTextInsertEvent -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QAccessibleTextInsertEvent$$$QAccessibleTextInsertEventQAccessibleInterface*intconstQString& -->
+<h3 class="fn" id="QAccessibleTextInsertEvent-1"><a name="QAccessibleTextInsertEvent-1"></a>QAccessibleTextInsertEvent::<span class="name">QAccessibleTextInsertEvent</span>(<span class="type"><a href="qaccessibleinterface.html">QAccessibleInterface</a></span> *<i>iface</i>, <span class="type">int</span> <i>position</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>text</i>)</h3>
+<p>Constructs a new <a href="qaccessibletextinsertevent.html">QAccessibleTextInsertEvent</a> event for <i>iface</i>. The text has been inserted at <i>position</i>.</p>
+<!-- @@@QAccessibleTextInsertEvent -->
+<!-- $$$QAccessibleTextInsertEvent[overload1]$$$QAccessibleTextInsertEventQObject*intconstQString& -->
+<h3 class="fn" id="QAccessibleTextInsertEvent"><a name="QAccessibleTextInsertEvent"></a>QAccessibleTextInsertEvent::<span class="name">QAccessibleTextInsertEvent</span>(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> *<i>object</i>, <span class="type">int</span> <i>position</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>text</i>)</h3>
+<p>Constructs a new <a href="qaccessibletextinsertevent.html">QAccessibleTextInsertEvent</a> event for <i>object</i>. The <i>text</i> has been inserted at <i>position</i>. By default, it is assumed that the cursor has moved to the end of the selection. If that is not the case, one needs to manually set it with <a href="qaccessibletextcursorevent.html#setCursorPosition">QAccessibleTextCursorEvent::setCursorPosition</a>() for this event.</p>
+<!-- @@@QAccessibleTextInsertEvent -->
+<!-- $$$changePosition[overload1]$$$changePosition -->
+<h3 class="fn" id="changePosition"><a name="changePosition"></a><span class="type">int</span> QAccessibleTextInsertEvent::<span class="name">changePosition</span>() const</h3>
+<p>Returns the position where the text was inserted.</p>
+<!-- @@@changePosition -->
+<!-- $$$textInserted[overload1]$$$textInserted -->
+<h3 class="fn" id="textInserted"><a name="textInserted"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QAccessibleTextInsertEvent::<span class="name">textInserted</span>() const</h3>
+<p>Returns the text that has been inserted.</p>
+<!-- @@@textInserted -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

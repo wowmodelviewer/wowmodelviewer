@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- dynamicpropertysheet.qdoc -->
+  <title>QDesignerDynamicPropertySheetExtension Class | Qt Designer Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtdesigner-manual.html">Qt Designer Manual</a></td><td ><a href="qtdesigner-module.html">C++ Classes</a></td><td >QDesignerDynamicPropertySheetExtension</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtdesigner-manual.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QDesignerDynamicPropertySheetExtension Class</h1>
+<!-- $$$QDesignerDynamicPropertySheetExtension-brief -->
+<p>The <a href="qdesignerdynamicpropertysheetextension.html">QDesignerDynamicPropertySheetExtension</a> class allows you to manipulate a widget's dynamic properties in Qt Designer's property editor. <a href="#details">More...</a></p>
+<!-- @@@QDesignerDynamicPropertySheetExtension -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QDesignerDynamicPropertySheetExtension&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += designer</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.3</td></tr></table></div><p>This class was introduced in  Qt 4.3.</p>
+<ul>
+<li><a href="qdesignerdynamicpropertysheetextension-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qdesignerdynamicpropertysheetextension.html#dtor.QDesignerDynamicPropertySheetExtension">~QDesignerDynamicPropertySheetExtension</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qdesignerdynamicpropertysheetextension.html#addDynamicProperty">addDynamicProperty</a></b>(const QString &amp;<i>propertyName</i>, const QVariant &amp;<i>value</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qdesignerdynamicpropertysheetextension.html#canAddDynamicProperty">canAddDynamicProperty</a></b>(const QString &amp;<i>propertyName</i>) const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qdesignerdynamicpropertysheetextension.html#dynamicPropertiesAllowed">dynamicPropertiesAllowed</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qdesignerdynamicpropertysheetextension.html#isDynamicProperty">isDynamicProperty</a></b>(int <i>index</i>) const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qdesignerdynamicpropertysheetextension.html#removeDynamicProperty">removeDynamicProperty</a></b>(int <i>index</i>) = 0</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QDesignerDynamicPropertySheetExtension-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<p><b>See also </b><a href="qdesignerpropertysheetextension.html">QDesignerPropertySheetExtension</a> and <a href="../qtcore/qobject.html#dynamic-properties">Dynamic Properties</a>.</p>
+<!-- @@@QDesignerDynamicPropertySheetExtension -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$~QDesignerDynamicPropertySheetExtension[overload1]$$$~QDesignerDynamicPropertySheetExtension -->
+<h3 class="fn" id="dtor.QDesignerDynamicPropertySheetExtension"><a name="dtor.QDesignerDynamicPropertySheetExtension"></a><code>[virtual] </code>QDesignerDynamicPropertySheetExtension::<span class="name">~QDesignerDynamicPropertySheetExtension</span>()</h3>
+<p>Destroys the dynamic property sheet extension.</p>
+<!-- @@@~QDesignerDynamicPropertySheetExtension -->
+<!-- $$$addDynamicProperty[overload1]$$$addDynamicPropertyconstQString&constQVariant& -->
+<h3 class="fn" id="addDynamicProperty"><a name="addDynamicProperty"></a><code>[pure virtual] </code><span class="type">int</span> QDesignerDynamicPropertySheetExtension::<span class="name">addDynamicProperty</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>propertyName</i>, const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>value</i>)</h3>
+<p>Adds a dynamic property named <i>propertyName</i> and sets its value to <i>value</i>. Returns the index of the property if it was added successfully; otherwise returns -1 to indicate failure.</p>
+<!-- @@@addDynamicProperty -->
+<!-- $$$canAddDynamicProperty[overload1]$$$canAddDynamicPropertyconstQString& -->
+<h3 class="fn" id="canAddDynamicProperty"><a name="canAddDynamicProperty"></a><code>[pure virtual] </code><span class="type">bool</span> QDesignerDynamicPropertySheetExtension::<span class="name">canAddDynamicProperty</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>propertyName</i>) const</h3>
+<p>Returns true if <i>propertyName</i> is a valid, unique name for a dynamic property; otherwise returns false.</p>
+<!-- @@@canAddDynamicProperty -->
+<!-- $$$dynamicPropertiesAllowed[overload1]$$$dynamicPropertiesAllowed -->
+<h3 class="fn" id="dynamicPropertiesAllowed"><a name="dynamicPropertiesAllowed"></a><code>[pure virtual] </code><span class="type">bool</span> QDesignerDynamicPropertySheetExtension::<span class="name">dynamicPropertiesAllowed</span>() const</h3>
+<p>Returns true if the widget supports dynamic properties; otherwise returns false.</p>
+<!-- @@@dynamicPropertiesAllowed -->
+<!-- $$$isDynamicProperty[overload1]$$$isDynamicPropertyint -->
+<h3 class="fn" id="isDynamicProperty"><a name="isDynamicProperty"></a><code>[pure virtual] </code><span class="type">bool</span> QDesignerDynamicPropertySheetExtension::<span class="name">isDynamicProperty</span>(<span class="type">int</span> <i>index</i>) const</h3>
+<p>Returns true if the property at the given <i>index</i> is a dynamic property; otherwise returns false.</p>
+<!-- @@@isDynamicProperty -->
+<!-- $$$removeDynamicProperty[overload1]$$$removeDynamicPropertyint -->
+<h3 class="fn" id="removeDynamicProperty"><a name="removeDynamicProperty"></a><code>[pure virtual] </code><span class="type">bool</span> QDesignerDynamicPropertySheetExtension::<span class="name">removeDynamicProperty</span>(<span class="type">int</span> <i>index</i>)</h3>
+<p>Removes the dynamic property at the given <i>index</i>. Returns true if the operation succeeds; otherwise returns false.</p>
+<!-- @@@removeDynamicProperty -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

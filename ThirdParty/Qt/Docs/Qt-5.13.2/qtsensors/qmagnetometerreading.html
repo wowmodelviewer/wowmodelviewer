@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmagnetometer.cpp -->
+  <title>QMagnetometerReading Class | Qt Sensors 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtsensors-index.html">Qt Sensors</a></td><td ><a href="qtsensors-module.html">C++ Classes</a></td><td >QMagnetometerReading</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtsensors-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#qmagnetometerreading-units">QMagnetometerReading Units</a></li>
+<li class="level2"><a href="#calibration">Calibration</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QMagnetometerReading Class</h1>
+<!-- $$$QMagnetometerReading-brief -->
+<p>The <a href="qmagnetometerreading.html">QMagnetometerReading</a> class represents one reading from the magnetometer. <a href="#details">More...</a></p>
+<!-- @@@QMagnetometerReading -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QMagnetometerReading&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += sensors</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.1</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qsensorreading.html">QSensorReading</a></td></tr></table></div><p>This class was introduced in  Qt 5.1.</p>
+<ul>
+<li><a href="qmagnetometerreading-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qmagnetometerreading.html#calibrationLevel-prop">calibrationLevel</a></b> : const qreal</li>
+<li class="fn"><b><a href="qmagnetometerreading.html#x-prop">x</a></b> : const qreal</li>
+<li class="fn"><b><a href="qmagnetometerreading.html#y-prop">y</a></b> : const qreal</li>
+<li class="fn"><b><a href="qmagnetometerreading.html#z-prop">z</a></b> : const qreal</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qmagnetometerreading.html#calibrationLevel-prop">calibrationLevel</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmagnetometerreading.html#setCalibrationLevel">setCalibrationLevel</a></b>(qreal <i>calibrationLevel</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmagnetometerreading.html#setX">setX</a></b>(qreal <i>x</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmagnetometerreading.html#setY">setY</a></b>(qreal <i>y</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmagnetometerreading.html#setZ">setZ</a></b>(qreal <i>z</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qmagnetometerreading.html#x-prop">x</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qmagnetometerreading.html#y-prop">y</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qmagnetometerreading.html#z-prop">z</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QMagnetometerReading-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<a name="qmagnetometerreading-units"></a>
+<h4 id="qmagnetometerreading-units">QMagnetometerReading Units</h4>
+<p>The magnetometer returns magnetic flux density values along 3 axes. The scale of the values is teslas. The axes are arranged as follows.</p>
+<p class="centerAlign"><img src="images/sensors-coordinates2.jpg" alt="" /></p><p>The magnetometer can report on either raw magnetic flux values or geomagnetic flux values. By default it returns raw magnetic flux values. The <a href="qmagnetometer.html#returnGeoValues-prop">QMagnetometer::returnGeoValues</a> property must be set to return geomagnetic flux values.</p>
+<p>The primary difference between raw and geomagnetic values is that extra processing is done to eliminate local magnetic interference from the geomagnetic values so they represent only the effect of the Earth's magnetic field. This process is not perfect and the accuracy of each reading may change.</p>
+<p>The image below shows the difference between geomagnetic (on the left) and raw (on the right) readings for a phone that is being subjected to magnetic interference.</p>
+<p class="centerAlign"><img src="images/sensors-geo-vs-raw-magnetism.jpg" alt="" /></p><p>The accuracy of each reading is measured as a number from 0 to 1. A value of 1 is the highest level that the device can support and 0 is the worst.</p>
+<a name="calibration"></a>
+<h4 id="calibration">Calibration</h4>
+<p>If the device is reporting low accuracy, then calibration might be needed before acceptable measurements can be provided. Basic calibration can usually be done by either rotating your device in a figure of eight, or by rotating the device along each of its three axes. For more information, check your device's documentation on how to calibrate the magnetic sensor.</p>
+</div>
+<!-- @@@QMagnetometerReading -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$calibrationLevel-prop$$$calibrationLevel -->
+<h3 class="fn" id="calibrationLevel-prop"><a name="calibrationLevel-prop"></a><span class="name">calibrationLevel</span> : const <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span></h3>
+<p>This property holds the accuracy of the reading.</p>
+<p>Measured as a value from 0 to 1 with higher values being better.</p>
+<p>Note that this only changes when measuring geomagnetic flux density. Raw magnetic flux readings will always have a value of 1.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qreal </td><td class="memItemRight bottomAlign"><span class="name"><b>calibrationLevel</b></span>() const</td></tr>
+</table></div>
+<p><b>See also </b><a href="qmagnetometerreading.html#qmagnetometerreading-units">QMagnetometerReading Units</a> and <a href="qmagnetometerreading.html#calibration">Calibration</a>.</p>
+<!-- @@@calibrationLevel -->
+<!-- $$$x-prop$$$x -->
+<h3 class="fn" id="x-prop"><a name="x-prop"></a><span class="name">x</span> : const <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span></h3>
+<p>This property holds the raw magnetic flux density on the X axis.</p>
+<p>Measured as teslas.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qreal </td><td class="memItemRight bottomAlign"><span class="name"><b>x</b></span>() const</td></tr>
+</table></div>
+<p><b>See also </b><a href="qmagnetometerreading.html#qmagnetometerreading-units">QMagnetometerReading Units</a>.</p>
+<!-- @@@x -->
+<!-- $$$y-prop$$$y -->
+<h3 class="fn" id="y-prop"><a name="y-prop"></a><span class="name">y</span> : const <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span></h3>
+<p>This property holds the raw magnetic flux density on the Y axis.</p>
+<p>Measured as teslas.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qreal </td><td class="memItemRight bottomAlign"><span class="name"><b>y</b></span>() const</td></tr>
+</table></div>
+<p><b>See also </b><a href="qmagnetometerreading.html#qmagnetometerreading-units">QMagnetometerReading Units</a>.</p>
+<!-- @@@y -->
+<!-- $$$z-prop$$$z -->
+<h3 class="fn" id="z-prop"><a name="z-prop"></a><span class="name">z</span> : const <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span></h3>
+<p>This property holds the raw magnetic flux density on the Z axis.</p>
+<p>Measured as teslas.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qreal </td><td class="memItemRight bottomAlign"><span class="name"><b>z</b></span>() const</td></tr>
+</table></div>
+<p><b>See also </b><a href="qmagnetometerreading.html#qmagnetometerreading-units">QMagnetometerReading Units</a>.</p>
+<!-- @@@z -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$setCalibrationLevel[overload1]$$$setCalibrationLevelqreal -->
+<h3 class="fn" id="setCalibrationLevel"><a name="setCalibrationLevel"></a><span class="type">void</span> QMagnetometerReading::<span class="name">setCalibrationLevel</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>calibrationLevel</i>)</h3>
+<p>Sets the accuracy of the reading to <i>calibrationLevel</i>.</p>
+<p><b>See also </b><a href="qmagnetometerreading.html#calibrationLevel-prop">calibrationLevel</a>().</p>
+<!-- @@@setCalibrationLevel -->
+<!-- $$$setX[overload1]$$$setXqreal -->
+<h3 class="fn" id="setX"><a name="setX"></a><span class="type">void</span> QMagnetometerReading::<span class="name">setX</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>x</i>)</h3>
+<p>Sets the raw magnetic flux density on the X axis to <i>x</i>.</p>
+<p><b>See also </b><a href="qmagnetometerreading.html#x-prop">x</a>().</p>
+<!-- @@@setX -->
+<!-- $$$setY[overload1]$$$setYqreal -->
+<h3 class="fn" id="setY"><a name="setY"></a><span class="type">void</span> QMagnetometerReading::<span class="name">setY</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>y</i>)</h3>
+<p>Sets the raw magnetic flux density on the Y axis to <i>y</i>.</p>
+<p><b>See also </b><a href="qmagnetometerreading.html#y-prop">y</a>().</p>
+<!-- @@@setY -->
+<!-- $$$setZ[overload1]$$$setZqreal -->
+<h3 class="fn" id="setZ"><a name="setZ"></a><span class="type">void</span> QMagnetometerReading::<span class="name">setZ</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>z</i>)</h3>
+<p>Sets the raw magnetic flux density on the Z axis to <i>z</i>.</p>
+<p><b>See also </b><a href="qmagnetometerreading.html#z-prop">z</a>().</p>
+<!-- @@@setZ -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

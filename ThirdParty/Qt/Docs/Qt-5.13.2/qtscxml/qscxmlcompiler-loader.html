@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qscxmlcompiler.cpp -->
+  <title>Loader Class | Qt SCXML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtscxml-index.html">Qt SCXML</a></td><td ><a href="qtscxml-module.html">C++ Classes</a></td><td >Loader</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtscxml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Loader Class</h1>
+<span class="small-subtitle">Class Loader is declared in class <a href="qscxmlcompiler.html">QScxmlCompiler</a>.<br/></span>
+<!-- $$$Loader-brief -->
+<p>The Loader class is a URI resolver and resource loader for an SCXML compiler. <a href="#details">More...</a></p>
+<!-- @@@Loader -->
+<p>This class was introduced in  Qt 5.8.</p>
+<ul>
+<li><a href="qscxmlcompiler-loader-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qscxmlcompiler-loader.html#Loader">Loader</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qscxmlcompiler-loader.html#dtor.Loader">~Loader</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qscxmlcompiler-loader.html#load">load</a></b>(const QString &amp;<i>name</i>, const QString &amp;<i>baseDir</i>, QStringList *<i>errors</i>) = 0</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$Loader-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@Loader -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$Loader[overload1]$$$Loader -->
+<h3 class="fn" id="Loader"><a name="Loader"></a>Loader::<span class="name">Loader</span>()</h3>
+<p>Creates a new loader.</p>
+<!-- @@@Loader -->
+<!-- $$$~Loader[overload1]$$$~Loader -->
+<h3 class="fn" id="dtor.Loader"><a name="dtor.Loader"></a><code>[virtual] </code>Loader::<span class="name">~Loader</span>()</h3>
+<p>Destroys the loader.</p>
+<!-- @@@~Loader -->
+<!-- $$$load[overload1]$$$loadconstQString&constQString&QStringList* -->
+<h3 class="fn" id="load"><a name="load"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> Loader::<span class="name">load</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>baseDir</i>, <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> *<i>errors</i>)</h3>
+<p>Resolves the URI <i>name</i> and loads an SCXML file from the directory specified by <i>baseDir</i>. <i>errors</i> contains information about the errors that might have occurred.</p>
+<p>Returns a <a href="../qtcore/qbytearray.html">QByteArray</a> that stores the contents of the file.</p>
+<!-- @@@load -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

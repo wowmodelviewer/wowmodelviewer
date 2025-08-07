@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- exporter-qbs-module.qdoc -->
+  <title>Exporter.qbs QML Type | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<p class="naviNextPrevious headerNavi">
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#relevant-file-tags">Relevant File Tags</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Exporter.qbs QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Exporter.qbs-brief -->
+<p>Provides support for generating Qbs modules from products. <a href="#details">More...</a></p>
+<!-- @@@Exporter.qbs -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QbsModules .</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qbs 1.12</td></tr></table></div><ul>
+<li><a href="qml-qbsmodules-exporter-qbs-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qbsmodules-exporter-qbs.html#additionalContent-prop">additionalContent</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-exporter-qbs.html#artifactTypes-prop">artifactTypes</a></b></b> : stringList</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-exporter-qbs.html#excludedDependencies-prop">excludedDependencies</a></b></b> : stringList</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-exporter-qbs.html#fileName-prop">fileName</a></b></b> : string</li>
+</ul>
+<!-- $$$Exporter.qbs-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The Exporter.qbs module contains the properties and rules to create a Qbs module from the <a href="qml-qbslanguageitems-export.html">Export</a> item of a <a href="qml-qbslanguageitems-product.html">Product</a>.</p>
+<p>Such a module acts as your product's interface to other projects written in Qbs. For instance, suppose you are creating a library. To allow other products both within and outside of your project to make use of it, you would write something like the following:</p>
+<pre class="cpp">
+
+  DynamicLibrary {
+      name: <span class="string">&quot;mylibrary&quot;</span>
+      qbs<span class="operator">.</span>installPrefix: <span class="string">&quot;/opt/mylibrary&quot;</span>
+      Depends { name: <span class="string">&quot;Exporter.qbs&quot;</span> }
+      property string headersInstallDir: <span class="string">&quot;include&quot;</span>
+      <span class="comment">// ...</span>
+      Group {
+          name: <span class="string">&quot;API headers&quot;</span>
+          files: <span class="operator">[</span><span class="string">&quot;mylib.h&quot;</span><span class="operator">]</span>
+          qbs<span class="operator">.</span>install: <span class="keyword">true</span>
+          qbs<span class="operator">.</span>installDir: headersInstallDir
+      }
+      Group {
+          fileTagsFilter: <span class="operator">[</span><span class="string">&quot;Exporter.qbs.module&quot;</span><span class="operator">]</span>
+          qbs<span class="operator">.</span>installDir: <span class="string">&quot;qbs/modules/mylibrary&quot;</span>
+      }
+      Export {
+          Depends { name: <span class="string">&quot;cpp&quot;</span> }
+          cpp<span class="operator">.</span>includePaths: <span class="operator">[</span>product<span class="operator">.</span>sourceDirectory<span class="operator">]</span>
+          prefixMapping: <span class="operator">[</span>{
+                  prefix: product<span class="operator">.</span>sourceDirectory<span class="operator">,</span>
+                  replacement: FileInfo<span class="operator">.</span>joinPaths(qbs<span class="operator">.</span>installPrefix<span class="operator">,</span> product<span class="operator">.</span>headersInstallDir)
+              }<span class="operator">]</span>
+      }
+  }
+
+</pre>
+<p>To build against this library, from within your project or any other one, you simply declare a <a href="qml-qbslanguageitems-depends.html">dependency</a>:</p>
+<pre class="cpp">
+
+  Depends { name: <span class="string">&quot;mylibrary&quot;</span> }
+
+</pre>
+<a name="relevant-file-tags"></a>
+<h3 id="relevant-file-tags">Relevant File Tags</h3>
+<a name="filetags-exporter-qbs"></a><div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Tag</th><th >Since</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>&quot;Exporter.qbs.module&quot;</code></td><td >1.12.0</td><td >This tag is attached to the generated module file.</td></tr>
+</table></div>
+<!-- @@@Exporter.qbs -->
+<h2>Property Documentation</h2>
+<!-- $$$additionalContent -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="additionalContent-prop"></a><span class="name">additionalContent</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The value of this property will be copied verbatim into the generated module.</p>
+<p>Default: <code>undefined</code></p>
+</div></div><!-- @@@additionalContent -->
+<br/>
+<!-- $$$artifactTypes -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="artifactTypes-prop"></a><span class="name">artifactTypes</span> : <span class="type">stringList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Artifacts that match these tags will become <a href="qml-qbslanguageitems-group.html#filesAreTargets-prop">target artifacts</a> of the generated module, so they can get picked up by the rules of depending products.</p>
+<p>If you do not specify anything here, all installed artifacts of the product are considered.</p>
+<p><b>Note: </b>You can only limit the default set of artifacts by setting this property, but you cannot extend it, because only artifacts that are to be installed are considered.</p><p>Default: <code>undefined</code></p>
+</div></div><!-- @@@artifactTypes -->
+<br/>
+<!-- $$$excludedDependencies -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="excludedDependencies-prop"></a><span class="name">excludedDependencies</span> : <span class="type">stringList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Normally, all <a href="qml-qbslanguageitems-depends.html">Depends</a> items in the <a href="qml-qbslanguageitems-export.html">Export</a> item are copied into the generated module. However, if there are any exported dependencies that only make sense for products in the same project, then you can enter their names into this array, and they will get filtered out.</p>
+<p><b>Note: </b>You should strive to structure your projects in such a way that you do not need to set this property.</p><p>Default: <code>undefined</code></p>
+</div></div><!-- @@@excludedDependencies -->
+<br/>
+<!-- $$$fileName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="fileName-prop"></a><span class="name">fileName</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The name of the generated module file.</p>
+<p>Default: <code>product.targetName + &quot;.qbs&quot;</code></p>
+</div></div><!-- @@@fileName -->
+<br/>
+<p class="naviNextPrevious footerNavi">
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

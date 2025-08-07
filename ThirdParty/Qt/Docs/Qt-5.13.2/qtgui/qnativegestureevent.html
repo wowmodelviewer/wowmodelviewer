@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qevent.cpp -->
+  <title>QNativeGestureEvent Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QNativeGestureEvent</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QNativeGestureEvent Class</h1>
+<!-- $$$QNativeGestureEvent-brief -->
+<p>The <a href="qnativegestureevent.html">QNativeGestureEvent</a> class contains parameters that describe a gesture event. <a href="#details">More...</a></p>
+<!-- @@@QNativeGestureEvent -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QNativeGestureEvent&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.2</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qinputevent.html">QInputEvent</a></td></tr></table></div><p>This class was introduced in  Qt 5.2.</p>
+<ul>
+<li><a href="qnativegestureevent-members.html">List of all members, including inherited members</a></li>
+<li><a href="qnativegestureevent-obsolete.html">Obsolete members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qnativegestureevent.html#QNativeGestureEvent-1">QNativeGestureEvent</a></b>(Qt::NativeGestureType <i>type</i>, const QTouchDevice *<i>device</i>, const QPointF &amp;<i>localPos</i>, const QPointF &amp;<i>windowPos</i>, const QPointF &amp;<i>screenPos</i>, qreal <i>realValue</i>, ulong <i>sequenceId</i>, quint64 <i>intValue</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QTouchDevice *</td><td class="memItemRight bottomAlign"><b><a href="qnativegestureevent.html#device">device</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::NativeGestureType </td><td class="memItemRight bottomAlign"><b><a href="qnativegestureevent.html#gestureType">gestureType</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QPoint </td><td class="memItemRight bottomAlign"><b><a href="qnativegestureevent.html#globalPos">globalPos</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QPointF &amp;</td><td class="memItemRight bottomAlign"><b><a href="qnativegestureevent.html#localPos">localPos</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QPoint </td><td class="memItemRight bottomAlign"><b><a href="qnativegestureevent.html#pos">pos</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QPointF &amp;</td><td class="memItemRight bottomAlign"><b><a href="qnativegestureevent.html#screenPos">screenPos</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qnativegestureevent.html#value">value</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QPointF &amp;</td><td class="memItemRight bottomAlign"><b><a href="qnativegestureevent.html#windowPos">windowPos</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QNativeGestureEvent-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Native gesture events are generated by the operating system, typically by interpreting touch events. Gesture events are high-level events such as zoom or rotate.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Event Type</th><th >Description</th><th >Touch sequence</th></tr></thead>
+<tr valign="top" class="odd"><td ><a href="../qtcore/qt.html#NativeGestureType-enum">Qt::ZoomNativeGesture</a></td><td >Magnification delta in percent.</td><td ><a href="../qtdoc/internationalization.html#macos">macOS</a>: Two-finger pinch.</td></tr>
+<tr valign="top" class="even"><td ><a href="../qtcore/qt.html#NativeGestureType-enum">Qt::SmartZoomNativeGesture</a></td><td >Boolean magnification state.</td><td ><a href="../qtdoc/internationalization.html#macos">macOS</a>: Two-finger douple tap (trackpad) / One-finger douple tap (magic mouse).</td></tr>
+<tr valign="top" class="odd"><td ><a href="../qtcore/qt.html#NativeGestureType-enum">Qt::RotateNativeGesture</a></td><td >Rotation delta in degrees.</td><td ><a href="../qtdoc/internationalization.html#macos">macOS</a>: Two-finger rotate.</td></tr>
+</table></div>
+<p>In addition, BeginNativeGesture and EndNativeGesture are sent before and after gesture event streams:</p>
+<p>BeginNativeGesture ZoomNativeGesture ZoomNativeGesture ZoomNativeGesture EndNativeGesture</p>
+</div>
+<p><b>See also </b><a href="../qtcore/qt.html#NativeGestureType-enum">Qt::NativeGestureType</a> and <a href="../qtwidgets/qgestureevent.html">QGestureEvent</a>.</p>
+<!-- @@@QNativeGestureEvent -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QNativeGestureEvent$$$QNativeGestureEventQt::NativeGestureTypeconstQTouchDevice*constQPointF&constQPointF&constQPointF&qrealulongquint64 -->
+<h3 class="fn" id="QNativeGestureEvent-1"><a name="QNativeGestureEvent-1"></a>QNativeGestureEvent::<span class="name">QNativeGestureEvent</span>(<span class="type"><a href="../qtcore/qt.html#NativeGestureType-enum">Qt::NativeGestureType</a></span> <i>type</i>, const <span class="type"><a href="qtouchdevice.html">QTouchDevice</a></span> *<i>device</i>, const <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> &amp;<i>localPos</i>, const <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> &amp;<i>windowPos</i>, const <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> &amp;<i>screenPos</i>, <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>realValue</i>, <span class="type"><a href="../qtcore/qtglobal.html#ulong-typedef">ulong</a></span> <i>sequenceId</i>, <span class="type"><a href="../qtcore/qtglobal.html#quint64-typedef">quint64</a></span> <i>intValue</i>)</h3>
+<p>Constructs a native gesture event of type <i>type</i> originating from <i>device</i>.</p>
+<p>The points <i>localPos</i>, <i>windowPos</i> and <i>screenPos</i> specify the gesture position relative to the receiving widget or item, window, and screen, respectively.</p>
+<p><i>realValue</i> is the <a href="../qtdoc/internationalization.html#macos">macOS</a> event parameter, <i>sequenceId</i> and <i>intValue</i> are the Windows event parameters.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<!-- @@@QNativeGestureEvent -->
+<!-- $$$device[overload1]$$$device -->
+<h3 class="fn" id="device"><a name="device"></a>const <span class="type"><a href="qtouchdevice.html">QTouchDevice</a></span> *QNativeGestureEvent::<span class="name">device</span>() const</h3>
+<p>Returns the device.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<!-- @@@device -->
+<!-- $$$gestureType[overload1]$$$gestureType -->
+<h3 class="fn" id="gestureType"><a name="gestureType"></a><span class="type"><a href="../qtcore/qt.html#NativeGestureType-enum">Qt::NativeGestureType</a></span> QNativeGestureEvent::<span class="name">gestureType</span>() const</h3>
+<p>Returns the gesture type.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@gestureType -->
+<!-- $$$globalPos[overload1]$$$globalPos -->
+<h3 class="fn" id="globalPos"><a name="globalPos"></a>const <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> QNativeGestureEvent::<span class="name">globalPos</span>() const</h3>
+<p>Returns the position of the gesture as a <a href="../qtcore/qpointf.html">QPointF</a> in screen coordinates</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@globalPos -->
+<!-- $$$localPos[overload1]$$$localPos -->
+<h3 class="fn" id="localPos"><a name="localPos"></a>const <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> &amp;QNativeGestureEvent::<span class="name">localPos</span>() const</h3>
+<p>Returns the position of the gesture as a <a href="../qtcore/qpointf.html">QPointF</a>, relative to the widget or item that received the event.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@localPos -->
+<!-- $$$pos[overload1]$$$pos -->
+<h3 class="fn" id="pos"><a name="pos"></a>const <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> QNativeGestureEvent::<span class="name">pos</span>() const</h3>
+<p>Returns the position of the mouse cursor, relative to the widget or item that received the event.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@pos -->
+<!-- $$$screenPos[overload1]$$$screenPos -->
+<h3 class="fn" id="screenPos"><a name="screenPos"></a>const <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> &amp;QNativeGestureEvent::<span class="name">screenPos</span>() const</h3>
+<p>Returns the position of the gesture as a <a href="../qtcore/qpointf.html">QPointF</a> in screen coordinates.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@screenPos -->
+<!-- $$$value[overload1]$$$value -->
+<h3 class="fn" id="value"><a name="value"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QNativeGestureEvent::<span class="name">value</span>() const</h3>
+<p>Returns the gesture value. The value should be interpreted based on the gesture type. For example, a Zoom gesture provides a scale factor while a Rotate gesture provides a rotation delta.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<p><b>See also </b><a href="qnativegestureevent.html">QNativeGestureEvent</a> and <a href="qnativegestureevent.html#gestureType">gestureType</a>().</p>
+<!-- @@@value -->
+<!-- $$$windowPos[overload1]$$$windowPos -->
+<h3 class="fn" id="windowPos"><a name="windowPos"></a>const <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> &amp;QNativeGestureEvent::<span class="name">windowPos</span>() const</h3>
+<p>Returns the position of the gesture as a <a href="../qtcore/qpointf.html">QPointF</a>, relative to the window that received the event.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@windowPos -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

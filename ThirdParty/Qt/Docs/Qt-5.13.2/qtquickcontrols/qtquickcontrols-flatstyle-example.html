@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtquickcontrols2-flatstyle.qdoc -->
+  <title>Qt Quick Controls - Flat Style | Qt Quick Controls 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td >Qt Quick Controls - Flat Style</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#qml-plugin">QML Plugin</a></li>
+<li class="level1"><a href="#implementing-custom-controls">Implementing Custom Controls</a></li>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Quick Controls - Flat Style</h1>
+<span class="subtitle"></span>
+<!-- $$$flatstyle-brief -->
+<p>A QML app using Qt Quick Controls and a QML plugin with customized controls.</p>
+<!-- @@@flatstyle -->
+<!-- $$$flatstyle-description -->
+<div class="descr"> <a name="details"></a>
+<p><i>Flat</i> Style shows how to integrate customized controls into Qt Quick Designer. The example uses a pure QML plugin to define constants in a singleton. For the declarative parts of the UI, <code>.ui.qml</code> files are used. These can be edited visually in Qt Quick Designer.</p>
+<div class="border"><p class="centerAlign"><img src="images/qtquickcontrols2-flatstyle.png" alt="" /></p></div><a name="qml-plugin"></a>
+<h4 id="qml-plugin">QML Plugin</h4>
+<p>The example contains a plugin called Theme. The plugin consists of a QML file <code>Theme.qml</code> and a <code>qmldir</code> file. The plugin is located in the imports subdirectory and added as a resource. To ensure the plugin is found by QML, we add the import directory to the import paths of the engine in <code>main.cpp</code>.</p>
+<pre class="cpp">
+
+  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  engine<span class="operator">.</span>addImportPath(<span class="string">&quot;:/imports&quot;</span>);
+  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+</pre>
+<p>To ensure the code model and Qt Quick Designer can find the plugin, we add the following line to <i>flatstyle.pro</i>.</p>
+<pre class="cpp">
+
+  QML_IMPORT_PATH <span class="operator">=</span> $$PWD<span class="operator">/</span>imports
+
+</pre>
+<p>All colors, font parameters, and size constants that are used in this example are defined as properties in the singleton called <i>Theme.qml</i>. Usually such attribute values are defined as constants as they are not suppose to change at run time. In this example, we allow the user to change some attributes like the main color, the size parameter, and some font parameters while the application is running.</p>
+<p>Defining these attribute values in a singleton makes it easy to maintain and change them. This pattern makes it easy to implement theming.</p>
+<a name="implementing-custom-controls"></a>
+<h4 id="implementing-custom-controls">Implementing Custom Controls</h4>
+<p>The plugin also contains a style for a couple of controls that implement a custom look and feel. This style is located in <code>Flat</code> and is set as the style for the application in <code>qtquickcontrols2.conf</code>.</p>
+<p>The example uses the states of a Qt Quick Item to implement the different states of a control. This has the advantage that we can define the custom look in Qt Quick Designer and we can easily verify the different states of a control. To edit the indicator of a switch in Qt Quick Designer we can open Switch.qml and then enter the implementation of the indicator called <code>switchHandle</code> using the combo box on the top next to the combo box for the open documents.</p>
+<div class="border"><p class="centerAlign"><img src="images/qtquickcontrols2-flatstyle-creator.png" alt="" /></p></div><p>The application itself is just a simple form that allows the user to adjust a couple of parameters of the custom controls. The user can choose another main color, set the font to bold or underline, and increase the size of the controls by toggling a switch.</p>
+<p><i>MainForm.ui.qml</i> is just the pure declarative definition of the form, while <i>flatstyle.qml</i> instantiates the form and implements the logic.</p>
+<a name="running-the-example"></a>
+<h4 id="running-the-example">Running the Example</h4>
+<p>To run the example from <a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a>, open the <b>Welcome</b> mode and select the example from <b>Examples</b>. For more information, visit <a href="http://doc.qt.io/qtcreator/creator-build-example-application.html">Building and Running an Example</a>.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtquickcontrols2.git/tree/examples/quickcontrols2/flatstyle?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@flatstyle -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

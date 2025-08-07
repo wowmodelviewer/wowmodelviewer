@@ -1,0 +1,690 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- gettingstartedqml.qdoc -->
+  <title>Getting Started Programming with Qt Quick | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Getting Started Programming with Qt Quick</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#creating-the-alarms-project">Creating the Alarms Project</a></li>
+<li class="level1"><a href="#qt-creator">Qt Creator</a></li>
+<li class="level1"><a href="#additional-source-files">Additional source files</a></li>
+<li class="level2"><a href="#qtquickcontrols2-op-op-conf"><code>qtquickcontrols2.conf</code></a></li>
+<li class="level2"><a href="#main-op-op-qml"><code>main.qml</code></a></li>
+<li class="level2"><a href="#alarmdialog-op-op-qml"><code>AlarmDialog.qml</code></a></li>
+<li class="level2"><a href="#alarmdelegate-op-op-qml"><code>AlarmDelegate.qml</code></a></li>
+<li class="level2"><a href="#alarmmodel-op-op-qml"><code>AlarmModel.qml</code></a></li>
+<li class="level2"><a href="#tumblerdelegate-qml">TumblerDelegate.qml</a></li>
+<li class="level1"><a href="#entering-new-alarms">Entering new alarms</a></li>
+<li class="level1"><a href="#editing-alarms">Editing alarms</a></li>
+<li class="level1"><a href="#deleting-alarms">Deleting alarms</a></li>
+<li class="level2"><a href="#summary">Summary</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Getting Started Programming with Qt Quick</h1>
+<span class="subtitle"></span>
+<!-- $$$tutorials/alarms-brief -->
+<p>A tutorial for Qt Quick based on an alarms application.</p>
+<!-- @@@tutorials/alarms -->
+<!-- $$$tutorials/alarms-description -->
+<div class="descr"> <a name="details"></a>
+<p>This tutorial shows how to develop a simple alarm application as an introduction to Qt Quick and Qt Quick Controls2.</p>
+<p>This application is similar to the alarm application usually found on an Android phone. Its features let you enter, edit, or delete alarms. An alarm can trigger on a given date, and you can set it to repeat on a series of subsequent days.</p>
+<p>The main screen shows the list of saved alarms:</p>
+<p class="centerAlign"><img src="images/mainscreen.png" alt="&quot;Alarms application&quot;" /></p><p>The detail screen lets you edit or delete existing alarms:</p>
+<p class="centerAlign"><img src="images/detailscreen.png" alt="&quot;Detail screen&quot;" /></p><p>The dialog screen is used for adding new alarms. It pops up when you click on the &quot;+&quot; <a href="../qtquickcontrols/qml-qtquick-controls2-roundbutton.html">RoundButton</a> on the bottom of the main screen:</p>
+<p class="centerAlign"><img src="images/addalarms.png" alt="&quot;Add alarms&quot;" /></p><p>The source files are located in the qtdoc repository. You can either fetch the Qt 5 sources from the Qt Project, or install them as part of Qt 5. The application is also available in the example list of Qt Creator's Welcome mode.</p>
+<a name="creating-the-alarms-project"></a>
+<h4 id="creating-the-alarms-project">Creating the Alarms Project</h4>
+<p>This section shows how to create the project in Qt Creator. It discusses the files generated automatically by Qt Creator, and the two files the programmer has to create in Qt Creator or some other editor. The latter two files are included with the source code for this tutorial.</p>
+<a name="qt-creator"></a>
+<h4 id="qt-creator">Qt Creator</h4>
+<p>Setting up a new project in Qt Creator is aided by a wizard that guides you step-by-step through the project creation process. The wizard prompts you to enter the settings needed for that particular type of project and creates the project for you.</p>
+<p>To create the Alarms project, select <b>File</b> &gt; <b>New File or Project</b> &gt; <b>Application</b> &gt; <b>Qt Quick Application - Empty</b> &gt; <b>Choose</b>. Type &quot;alarms&quot; in the <b>Name</b> field, and follow the instructions of the wizard.</p>
+<p class="centerAlign"><img src="images/alarms2.png" alt="&quot;Qt Creator New File or Project dialog&quot;" /></p><p class="centerAlign"><img src="images/alarms3.png" alt="&quot;Project Location&quot;" /></p><p>The Qt Quick application wizard creates a project that contains the following source files:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Source file</th><th >Purpose</th></tr></thead>
+<tr valign="top" class="odd"><td >alarms.pro</td><td >The project file</td></tr>
+<tr valign="top" class="even"><td >main.cpp</td><td >The main C++ code file for the application.</td></tr>
+<tr valign="top" class="odd"><td >qml.qrc</td><td >The resource file, which contains the names of the source files, except main.cpp and the project file.</td></tr>
+</table></div>
+<p>The wizard generates the code in the main.cpp file below. This code block enables High DPI scaling and declares <code>app</code> and <code>engine</code>. The engine then loads our main QML file.</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>setAttribute(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AA_EnableHighDpiScaling);
+
+      <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      <span class="type"><a href="../qtqml/qqmlapplicationengine.html">QQmlApplicationEngine</a></span> engine;
+      engine<span class="operator">.</span>load(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;qrc:/main.qml&quot;</span>)));
+      <span class="keyword">if</span> (engine<span class="operator">.</span>rootObjects()<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span> <span class="operator">-</span><span class="number">1</span>;
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<a name="additional-source-files"></a>
+<h4 id="additional-source-files">Additional source files</h4>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Source file</th><th >Purpose</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>qtquickcontrols2.conf</code></td><td >Selects the <code>Material</code> style with the <code>Dark</code> theme.</td></tr>
+<tr valign="top" class="even"><td ><code>main.qml</code></td><td >The QML code that links AlarmDialog.qml, AlarmModel.qml, AlarmDelegate.qml and TumblerDelegate.qml</td></tr>
+<tr valign="top" class="odd"><td ><code>AlarmDialog.qml</code></td><td >Defines the dialog for adding new alarms.</td></tr>
+<tr valign="top" class="even"><td ><code>AlarmDelegate.qml</code></td><td >Defines the layout of the main screen of the app.</td></tr>
+<tr valign="top" class="odd"><td ><code>AlarmModel.qml</code></td><td >Defines the <a href="../qtqml/qml-qtqml-models-listmodel.html">ListModel</a> used for storing the alarms' data.</td></tr>
+<tr valign="top" class="even"><td ><code>TumblerDelegate.qml</code></td><td >Defines the graphical layout of the Tumblers</td></tr>
+</table></div>
+<a name="qtquickcontrols2-op-op-conf"></a>
+<h5 id="qtquickcontrols2-op-op-conf"><code>qtquickcontrols2.conf</code></h5>
+<p>The following snippet shows how to set the <code>Dark</code> theme in the <code>Material</code> style:</p>
+<pre class="cpp">
+
+  [Controls]
+  Style=Material
+  [Material]
+  Theme=Dark
+  Accent=Red
+
+</pre>
+<a name="main-op-op-qml"></a>
+<h5 id="main-op-op-qml"><code>main.qml</code></h5>
+<p><code>mainWindow</code>, an <a href="../qtquickcontrols/qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a> QML type, is the root item in this app.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a></span> {
+      <span class="name">id</span>: <span class="name">window</span>
+      <span class="name">width</span>: <span class="number">400</span>
+      <span class="name">height</span>: <span class="number">500</span>
+      <span class="name">visible</span>: <span class="number">true</span>
+
+</pre>
+<p>The <a href="../qtquick/qml-qtquick-listview.html">ListView</a> <code>alarmListView</code> combines the data from <code>alarmModel</code> with the layout defined in <code>alarmDelegate</code>.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+          <span class="name">id</span>: <span class="name">alarmListView</span>
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">model</span>: <span class="name">AlarmModel</span> {}
+          <span class="name">delegate</span>: <span class="name">AlarmDelegate</span> {}
+      }
+
+</pre>
+<p>New alarms can be added by clicking <a href="../qtquickcontrols/qml-qtquick-controls2-roundbutton.html">RoundButton</a> <code>addAlarmButton</code>. Clicking it opens a <a href="../qtquickcontrols/qml-qtquick-controls2-dialog.html">Dialog</a> screen <code>alarmDialog</code>.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-roundbutton.html">RoundButton</a></span> {
+          <span class="name">id</span>: <span class="name">addAlarmButton</span>
+          <span class="name">text</span>: <span class="string">&quot;+&quot;</span>
+          <span class="name">anchors</span>.bottom: <span class="name">alarmListView</span>.<span class="name">bottom</span>
+          <span class="name">anchors</span>.bottomMargin: <span class="number">8</span>
+          <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+          <span class="name">onClicked</span>: <span class="name">alarmDialog</span>.<span class="name">open</span>()
+      }
+
+      <span class="type">AlarmDialog</span> {
+          <span class="name">id</span>: <span class="name">alarmDialog</span>
+          <span class="name">x</span>: <span class="name">Math</span>.<span class="name">round</span>((<span class="name">parent</span>.<span class="name">width</span> <span class="operator">-</span> <span class="name">width</span>) <span class="operator">/</span> <span class="number">2</span>)
+          <span class="name">y</span>: <span class="name">Math</span>.<span class="name">round</span>((<span class="name">parent</span>.<span class="name">height</span> <span class="operator">-</span> <span class="name">height</span>) <span class="operator">/</span> <span class="number">2</span>)
+          <span class="name">alarmModel</span>: <span class="name">alarmListView</span>.<span class="name">model</span>
+      }
+
+</pre>
+<a name="alarmdialog-op-op-qml"></a>
+<h5 id="alarmdialog-op-op-qml"><code>AlarmDialog.qml</code></h5>
+<p>This dialog screen has a <a href="../qtquick/qml-qtquick-layouts-rowlayout.html">RowLayout</a> with a <a href="../qtquickcontrols/qml-qtquick-controls2-tumbler.html">Tumbler</a> each for hours and minutes, and another <a href="../qtquick/qml-qtquick-layouts-rowlayout.html">RowLayout</a> with a Tumbler each for day, month, and year.</p>
+<pre class="cpp">
+
+      <span class="name">contentItem</span>: <span class="name">RowLayout</span> {
+          <span class="type"><a href="../qtquick/qml-qtquick-layouts-rowlayout.html">RowLayout</a></span> {
+              <span class="name">id</span>: <span class="name">rowTumbler</span>
+
+              <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-tumbler.html">Tumbler</a></span> {
+                  <span class="name">id</span>: <span class="name">hoursTumbler</span>
+                  <span class="name">model</span>: <span class="number">24</span>
+                  <span class="name">delegate</span>: <span class="name">TumblerDelegate</span> {
+                      <span class="name">text</span>: <span class="name">formatNumber</span>(<span class="name">modelData</span>)
+                  }
+              }
+              <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-tumbler.html">Tumbler</a></span> {
+                  <span class="name">id</span>: <span class="name">minutesTumbler</span>
+                  <span class="name">model</span>: <span class="number">60</span>
+                  <span class="name">delegate</span>: <span class="name">TumblerDelegate</span> {
+                      <span class="name">text</span>: <span class="name">formatNumber</span>(<span class="name">modelData</span>)
+                  }
+              }
+          }
+
+          <span class="type"><a href="../qtquick/qml-qtquick-layouts-rowlayout.html">RowLayout</a></span> {
+              <span class="name">id</span>: <span class="name">datePicker</span>
+
+              <span class="name">Layout</span>.leftMargin: <span class="number">20</span>
+
+              property <span class="type">alias</span> <span class="name">dayTumbler</span>: <span class="name">dayTumbler</span>
+              property <span class="type">alias</span> <span class="name">monthTumbler</span>: <span class="name">monthTumbler</span>
+              property <span class="type">alias</span> <span class="name">yearTumbler</span>: <span class="name">yearTumbler</span>
+
+              readonly property <span class="type">var</span> <span class="name">days</span>: [<span class="number">31</span>, <span class="number">29</span>, <span class="number">31</span>, <span class="number">30</span>, <span class="number">31</span>, <span class="number">30</span>, <span class="number">31</span>, <span class="number">31</span>, <span class="number">30</span>, <span class="number">31</span>, <span class="number">30</span>, <span class="number">31</span>]
+
+              <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-tumbler.html">Tumbler</a></span> {
+                  <span class="name">id</span>: <span class="name">dayTumbler</span>
+
+                  <span class="keyword">function</span> <span class="name">updateModel</span>() {
+                      <span class="comment">// Populate the model with days of the month. For example: [0, ..., 30]</span>
+                      var previousIndex = <span class="name">dayTumbler</span>.<span class="name">currentIndex</span>
+                      var array = []
+                      var newDays = <span class="name">datePicker</span>.<span class="name">days</span>[<span class="name">monthTumbler</span>.<span class="name">currentIndex</span>]
+                      <span class="keyword">for</span> (var i = 1; <span class="name">i</span> <span class="operator">&lt;=</span> <span class="name">newDays</span>; ++<span class="name">i</span>)
+                          <span class="name">array</span>.<span class="name">push</span>(<span class="name">i</span>)
+                      <span class="name">dayTumbler</span>.<span class="name">model</span> <span class="operator">=</span> <span class="name">array</span>
+                      <span class="name">dayTumbler</span>.<span class="name">currentIndex</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">min</span>(<span class="name">newDays</span> <span class="operator">-</span> <span class="number">1</span>, <span class="name">previousIndex</span>)
+                  }
+
+                  <span class="name">Component</span>.onCompleted: <span class="name">updateModel</span>()
+
+                  <span class="name">delegate</span>: <span class="name">TumblerDelegate</span> {
+                      <span class="name">text</span>: <span class="name">formatNumber</span>(<span class="name">modelData</span>)
+                  }
+              }
+              <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-tumbler.html">Tumbler</a></span> {
+                  <span class="name">id</span>: <span class="name">monthTumbler</span>
+
+                  <span class="name">onCurrentIndexChanged</span>: <span class="name">dayTumbler</span>.<span class="name">updateModel</span>()
+
+                  <span class="name">model</span>: <span class="number">12</span>
+                  <span class="name">delegate</span>: <span class="name">TumblerDelegate</span> {
+                      <span class="name">text</span>: <span class="name">window</span>.<span class="name">locale</span>.<span class="name">standaloneMonthName</span>(<span class="name">modelData</span>, <span class="name">Locale</span>.<span class="name">ShortFormat</span>)
+                  }
+              }
+              <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-tumbler.html">Tumbler</a></span> {
+                  <span class="name">id</span>: <span class="name">yearTumbler</span>
+
+                  <span class="comment">// This array is populated with the next three years. For example: [2018, 2019, 2020]</span>
+                  readonly property <span class="type">var</span> <span class="name">years</span>: (<span class="keyword">function</span>() {
+                      var currentYear = new <span class="name">Date</span>().<span class="name">getFullYear</span>()
+                      <span class="keyword">return</span> [<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>].<span class="name">map</span>(<span class="keyword">function</span>(value) { <span class="keyword">return</span> <span class="name">value</span> <span class="operator">+</span> <span class="name">currentYear</span>; })
+                  })()
+
+                  <span class="name">model</span>: <span class="name">years</span>
+                  <span class="name">delegate</span>: <span class="name">TumblerDelegate</span> {
+                      <span class="name">text</span>: <span class="name">formatNumber</span>(<span class="name">modelData</span>)
+                  }
+              }
+          }
+      }
+  }
+
+</pre>
+<p>If you click on <b>OK</b> in the dialog, the entered data will be added to <code>alarmModel</code>:</p>
+<pre class="cpp">
+
+      <span class="name">onAccepted</span>: {
+          <span class="name">alarmModel</span>.<span class="name">append</span>({
+              &quot;hour&quot;: <span class="name">hoursTumbler</span>.<span class="name">currentIndex</span>,
+              &quot;minute&quot;: <span class="name">minutesTumbler</span>.<span class="name">currentIndex</span>,
+              &quot;day&quot;: <span class="name">dayTumbler</span>.<span class="name">currentIndex</span> <span class="operator">+</span> <span class="number">1</span>,
+              &quot;month&quot;: <span class="name">monthTumbler</span>.<span class="name">currentIndex</span> <span class="operator">+</span> <span class="number">1</span>,
+              &quot;year&quot;: <span class="name">yearTumbler</span>.<span class="name">years</span>[<span class="name">yearTumbler</span>.<span class="name">currentIndex</span>],
+              &quot;activated&quot;: <span class="number">true</span>,
+              &quot;label&quot;: <span class="string">&quot;&quot;</span>,
+              &quot;repeat&quot;: <span class="number">false</span>,
+              &quot;daysToRepeat&quot;: [
+                  { &quot;dayOfWeek&quot;: <span class="number">0</span>, &quot;repeat&quot;: <span class="number">false</span> },
+                  { &quot;dayOfWeek&quot;: <span class="number">1</span>, &quot;repeat&quot;: <span class="number">false</span> },
+                  { &quot;dayOfWeek&quot;: <span class="number">2</span>, &quot;repeat&quot;: <span class="number">false</span> },
+                  { &quot;dayOfWeek&quot;: <span class="number">3</span>, &quot;repeat&quot;: <span class="number">false</span> },
+                  { &quot;dayOfWeek&quot;: <span class="number">4</span>, &quot;repeat&quot;: <span class="number">false</span> },
+                  { &quot;dayOfWeek&quot;: <span class="number">5</span>, &quot;repeat&quot;: <span class="number">false</span> },
+                  { &quot;dayOfWeek&quot;: <span class="number">6</span>, &quot;repeat&quot;: <span class="number">false</span> }
+              ],
+          })
+      }
+      <span class="name">onRejected</span>: <span class="name">alarmDialog</span>.<span class="name">close</span>()
+
+</pre>
+<a name="alarmdelegate-op-op-qml"></a>
+<h5 id="alarmdelegate-op-op-qml"><code>AlarmDelegate.qml</code></h5>
+<p>Each alarm in the main screen is an <a href="../qtquickcontrols/qml-qtquick-controls2-itemdelegate.html">ItemDelegate</a>. The <a href="../qtquickcontrols/qml-qtquick-controls2-itemdelegate.html">ItemDelegate</a> <code>root</code> contains all fields on the main screen and the detail screen. The detail screen's fields are only visible after an alarm has been clicked on, i.e&#x2e; when <code>root.checked</code> is <code>true</code>.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-itemdelegate.html">ItemDelegate</a></span> {
+      <span class="name">id</span>: <span class="name">root</span>
+      <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+      <span class="name">checkable</span>: <span class="number">true</span>
+
+      <span class="name">onClicked</span>: <span class="name">ListView</span>.<span class="name">view</span>.<span class="name">currentIndex</span> <span class="operator">=</span> <span class="name">index</span>
+
+      <span class="name">contentItem</span>: <span class="name">ColumnLayout</span> {
+          <span class="name">spacing</span>: <span class="number">0</span>
+
+          <span class="type"><a href="../qtquick/qml-qtquick-layouts-rowlayout.html">RowLayout</a></span> {
+              <span class="type"><a href="../qtquick/qml-qtquick-layouts-columnlayout.html">ColumnLayout</a></span> {
+                  <span class="name">id</span>: <span class="name">dateColumn</span>
+
+                  readonly property <span class="type">date</span> <span class="name">alarmDate</span>: new <span class="name">Date</span>(
+                      <span class="name">model</span>.<span class="name">year</span>, <span class="name">model</span>.<span class="name">month</span> <span class="operator">-</span> <span class="number">1</span>, <span class="name">model</span>.<span class="name">day</span>, <span class="name">model</span>.<span class="name">hour</span>, <span class="name">model</span>.<span class="name">minute</span>)
+
+                  <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-label.html">Label</a></span> {
+                      <span class="name">id</span>: <span class="name">timeLabel</span>
+                      <span class="name">font</span>.pixelSize: <span class="name">Qt</span>.<span class="name">application</span>.<span class="name">font</span>.<span class="name">pixelSize</span> <span class="operator">*</span> <span class="number">2</span>
+                      <span class="name">text</span>: <span class="name">dateColumn</span>.<span class="name">alarmDate</span>.<span class="name">toLocaleTimeString</span>(<span class="name">window</span>.<span class="name">locale</span>, <span class="name">Locale</span>.<span class="name">ShortFormat</span>)
+                  }
+                  <span class="type"><a href="../qtquick/qml-qtquick-layouts-rowlayout.html">RowLayout</a></span> {
+                      <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-label.html">Label</a></span> {
+                          <span class="name">id</span>: <span class="name">dateLabel</span>
+                          <span class="name">text</span>: <span class="name">dateColumn</span>.<span class="name">alarmDate</span>.<span class="name">toLocaleDateString</span>(<span class="name">window</span>.<span class="name">locale</span>, <span class="name">Locale</span>.<span class="name">ShortFormat</span>)
+                      }
+                      <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-label.html">Label</a></span> {
+                          <span class="name">id</span>: <span class="name">alarmAbout</span>
+                          <span class="name">text</span>: <span class="string">&quot;⸱ &quot;</span> <span class="operator">+</span> <span class="name">model</span>.<span class="name">label</span>
+                          <span class="name">visible</span>: <span class="name">model</span>.<span class="name">label</span>.<span class="name">length</span> <span class="operator">&gt;</span> <span class="number">0</span> <span class="operator">&amp;&amp;</span> !<span class="name">root</span>.<span class="name">checked</span>
+                      }
+                  }
+              }
+              <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+                  <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+              }
+              <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-switch.html">Switch</a></span> {
+                  <span class="name">checked</span>: <span class="name">model</span>.<span class="name">activated</span>
+                  <span class="name">Layout</span>.alignment: <span class="name">Qt</span>.<span class="name">AlignTop</span>
+                  <span class="name">onClicked</span>: <span class="name">model</span>.<span class="name">activated</span> <span class="operator">=</span> <span class="name">checked</span>
+              }
+          }
+          <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-checkbox.html">CheckBox</a></span> {
+              <span class="name">id</span>: <span class="name">alarmRepeat</span>
+              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Repeat&quot;</span>)
+              <span class="name">checked</span>: <span class="name">model</span>.<span class="name">repeat</span>
+              <span class="name">visible</span>: <span class="name">root</span>.<span class="name">checked</span>
+              <span class="name">onToggled</span>: <span class="name">model</span>.<span class="name">repeat</span> <span class="operator">=</span> <span class="name">checked</span>
+          }
+          <span class="type"><a href="../qtquick/qml-qtquick-flow.html">Flow</a></span> {
+              <span class="name">visible</span>: <span class="name">root</span>.<span class="name">checked</span> <span class="operator">&amp;&amp;</span> <span class="name">model</span>.<span class="name">repeat</span>
+              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+
+              <span class="type"><a href="../qtquick/qml-qtquick-repeater.html">Repeater</a></span> {
+                  <span class="name">id</span>: <span class="name">dayRepeater</span>
+                  <span class="name">model</span>: <span class="name">daysToRepeat</span>
+                  <span class="name">delegate</span>: <span class="name">RoundButton</span> {
+                      <span class="name">text</span>: <span class="name">Qt</span>.<span class="name">locale</span>().<span class="name">dayName</span>(<span class="name">model</span>.<span class="name">dayOfWeek</span>, <span class="name">Locale</span>.<span class="name">NarrowFormat</span>)
+                      <span class="name">flat</span>: <span class="number">true</span>
+                      <span class="name">checked</span>: <span class="name">model</span>.<span class="name">repeat</span>
+                      <span class="name">checkable</span>: <span class="number">true</span>
+                      <span class="name">Material</span>.background: <span class="name">checked</span> ? <span class="name">Material</span>.<span class="name">accent</span> : <span class="string">&quot;transparent&quot;</span>
+                      <span class="name">onToggled</span>: <span class="name">model</span>.<span class="name">repeat</span> <span class="operator">=</span> <span class="name">checked</span>
+                  }
+              }
+          }
+
+          <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-textfield.html">TextField</a></span> {
+              <span class="name">id</span>: <span class="name">alarmDescriptionTextField</span>
+              <span class="name">placeholderText</span>: <span class="name">qsTr</span>(<span class="string">&quot;Enter description here&quot;</span>)
+              <span class="name">cursorVisible</span>: <span class="number">true</span>
+              <span class="name">visible</span>: <span class="name">root</span>.<span class="name">checked</span>
+              <span class="name">text</span>: <span class="name">model</span>.<span class="name">label</span>
+              <span class="name">onTextEdited</span>: <span class="name">model</span>.<span class="name">label</span> <span class="operator">=</span> <span class="name">text</span>
+          }
+          <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-button.html">Button</a></span> {
+              <span class="name">id</span>: <span class="name">deleteAlarmButton</span>
+              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Delete&quot;</span>)
+              <span class="name">width</span>: <span class="number">40</span>
+              <span class="name">height</span>: <span class="number">40</span>
+              <span class="name">visible</span>: <span class="name">root</span>.<span class="name">checked</span>
+              <span class="name">onClicked</span>: <span class="name">root</span>.<span class="name">ListView</span>.<span class="name">view</span>.<span class="name">model</span>.<span class="name">remove</span>(<span class="name">root</span>.<span class="name">ListView</span>.<span class="name">view</span>.<span class="name">currentIndex</span>, <span class="number">1</span>)
+          }
+      }
+  }
+
+</pre>
+<a name="alarmmodel-op-op-qml"></a>
+<h5 id="alarmmodel-op-op-qml"><code>AlarmModel.qml</code></h5>
+<p>This QML file contains the definition of <code>alarmModel</code>, the <a href="../qtqml/qml-qtqml-models-listmodel.html">ListModel</a> that manages the alarm data.</p>
+<p>It creates five <a href="../qtqml/qml-qtqml-models-listelement.html">ListElements</a> with example alarms.</p>
+<pre class="cpp">
+
+  import QtQuick 2.11
+
+  <span class="comment">// Populate the model with some sample data.</span>
+  <span class="type"><a href="../qtqml/qml-qtqml-models-listmodel.html">ListModel</a></span> {
+      <span class="name">id</span>: <span class="name">alarmModel</span>
+
+      <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> {
+          <span class="name">hour</span>: <span class="number">6</span>
+          <span class="name">minute</span>: <span class="number">0</span>
+          <span class="name">day</span>: <span class="number">2</span>
+          <span class="name">month</span>: <span class="number">8</span>
+          <span class="name">year</span>: <span class="number">2018</span>
+          <span class="name">activated</span>: <span class="number">true</span>
+          <span class="name">label</span>: <span class="string">&quot;Wake up&quot;</span>
+          <span class="name">repeat</span>: <span class="number">true</span>
+          <span class="name">daysToRepeat</span>: [
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">0</span>; <span class="name">repeat</span>: <span class="number">false</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">1</span>; <span class="name">repeat</span>: <span class="number">false</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">2</span>; <span class="name">repeat</span>: <span class="number">false</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">3</span>; <span class="name">repeat</span>: <span class="number">false</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">4</span>; <span class="name">repeat</span>: <span class="number">false</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">5</span>; <span class="name">repeat</span>: <span class="number">false</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">6</span>; <span class="name">repeat</span>: <span class="number">false</span> }
+          ]
+      }
+      <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> {
+          <span class="name">hour</span>: <span class="number">6</span>
+          <span class="name">minute</span>: <span class="number">0</span>
+          <span class="name">day</span>: <span class="number">3</span>
+          <span class="name">month</span>: <span class="number">8</span>
+          <span class="name">year</span>: <span class="number">2018</span>
+          <span class="name">activated</span>: <span class="number">true</span>
+          <span class="name">label</span>: <span class="string">&quot;Wake up&quot;</span>
+          <span class="name">repeat</span>: <span class="number">true</span>
+          <span class="name">daysToRepeat</span>: [
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">0</span>; <span class="name">repeat</span>: <span class="number">true</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">1</span>; <span class="name">repeat</span>: <span class="number">true</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">2</span>; <span class="name">repeat</span>: <span class="number">true</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">3</span>; <span class="name">repeat</span>: <span class="number">true</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">4</span>; <span class="name">repeat</span>: <span class="number">true</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">5</span>; <span class="name">repeat</span>: <span class="number">false</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">6</span>; <span class="name">repeat</span>: <span class="number">false</span> }
+          ]
+      }
+      <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> {
+          <span class="name">hour</span>: <span class="number">7</span>
+          <span class="name">minute</span>: <span class="number">0</span>
+          <span class="name">day</span>: <span class="number">3</span>
+          <span class="name">month</span>: <span class="number">8</span>
+          <span class="name">year</span>: <span class="number">2018</span>
+          <span class="name">activated</span>: <span class="number">false</span>
+          <span class="name">label</span>: <span class="string">&quot;Exercise&quot;</span>
+          <span class="name">repeat</span>: <span class="number">true</span>
+          <span class="name">daysToRepeat</span>: [
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">0</span>; <span class="name">repeat</span>: <span class="number">true</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">1</span>; <span class="name">repeat</span>: <span class="number">true</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">2</span>; <span class="name">repeat</span>: <span class="number">true</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">3</span>; <span class="name">repeat</span>: <span class="number">true</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">4</span>; <span class="name">repeat</span>: <span class="number">true</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">5</span>; <span class="name">repeat</span>: <span class="number">true</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">6</span>; <span class="name">repeat</span>: <span class="number">true</span> }
+          ]
+      }
+      <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> {
+          <span class="name">hour</span>: <span class="number">5</span>
+          <span class="name">minute</span>: <span class="number">15</span>
+          <span class="name">day</span>: <span class="number">1</span>
+          <span class="name">month</span>: <span class="number">9</span>
+          <span class="name">year</span>: <span class="number">2018</span>
+          <span class="name">activated</span>: <span class="number">true</span>
+          <span class="name">label</span>: <span class="string">&quot;&quot;</span>
+          <span class="name">repeat</span>: <span class="number">false</span>
+          <span class="name">daysToRepeat</span>: [
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">0</span>; <span class="name">repeat</span>: <span class="number">false</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">1</span>; <span class="name">repeat</span>: <span class="number">false</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">2</span>; <span class="name">repeat</span>: <span class="number">false</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">3</span>; <span class="name">repeat</span>: <span class="number">false</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">4</span>; <span class="name">repeat</span>: <span class="number">false</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">5</span>; <span class="name">repeat</span>: <span class="number">false</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">6</span>; <span class="name">repeat</span>: <span class="number">false</span> }
+          ]
+      }
+      <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> {
+          <span class="name">hour</span>: <span class="number">5</span>
+          <span class="name">minute</span>: <span class="number">45</span>
+          <span class="name">day</span>: <span class="number">3</span>
+          <span class="name">month</span>: <span class="number">9</span>
+          <span class="name">year</span>: <span class="number">2018</span>
+          <span class="name">activated</span>: <span class="number">false</span>
+          <span class="name">label</span>: <span class="string">&quot;&quot;</span>
+          <span class="name">repeat</span>: <span class="number">false</span>
+          <span class="name">daysToRepeat</span>: [
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">0</span>; <span class="name">repeat</span>: <span class="number">false</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">1</span>; <span class="name">repeat</span>: <span class="number">false</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">2</span>; <span class="name">repeat</span>: <span class="number">false</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">3</span>; <span class="name">repeat</span>: <span class="number">false</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">4</span>; <span class="name">repeat</span>: <span class="number">false</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">5</span>; <span class="name">repeat</span>: <span class="number">false</span> },
+              <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">dayOfWeek</span>: <span class="number">6</span>; <span class="name">repeat</span>: <span class="number">false</span> }
+          ]
+      }
+  }
+
+</pre>
+<a name="tumblerdelegate-qml"></a>
+<h5 id="tumblerdelegate-qml">TumblerDelegate.qml</h5>
+<p>TumblerDelegate defines the graphical properties of the Tumblers.</p>
+<pre class="cpp">
+
+  import QtQuick 2.11
+  import QtQuick.Controls 2.4
+  import QtQuick.Controls.Material 2.4
+
+  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+      <span class="name">text</span>: <span class="name">modelData</span>
+      <span class="name">color</span>: <span class="name">Tumbler</span>.<span class="name">tumbler</span>.<span class="name">Material</span>.<span class="name">foreground</span>
+      <span class="name">font</span>: <span class="name">Tumbler</span>.<span class="name">tumbler</span>.<span class="name">font</span>
+      <span class="name">opacity</span>: <span class="number">1.0</span> <span class="operator">-</span> <span class="name">Math</span>.<span class="name">abs</span>(<span class="name">Tumbler</span>.<span class="name">displacement</span>) <span class="operator">/</span> (<span class="name">Tumbler</span>.<span class="name">tumbler</span>.<span class="name">visibleItemCount</span> <span class="operator">/</span> <span class="number">2</span>)
+      <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+      <span class="name">verticalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignVCenter</span>
+  }
+
+</pre>
+<a name="entering-new-alarms"></a>
+<h4 id="entering-new-alarms">Entering new alarms</h4>
+<p>At the bottom of the startup screen, you can see a Button for adding alarms. Click it to open the <b>Add new alarm</b> dialog.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-roundbutton.html">RoundButton</a></span> {
+          <span class="name">id</span>: <span class="name">addAlarmButton</span>
+          <span class="name">text</span>: <span class="string">&quot;+&quot;</span>
+          <span class="name">anchors</span>.bottom: <span class="name">alarmListView</span>.<span class="name">bottom</span>
+          <span class="name">anchors</span>.bottomMargin: <span class="number">8</span>
+          <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+          <span class="name">onClicked</span>: <span class="name">alarmDialog</span>.<span class="name">open</span>()
+      }
+
+</pre>
+<p>The dialog for new alarms:</p>
+<p class="centerAlign"><img src="images/addalarms.png" alt="&quot;Add alarms&quot;" /></p><p>All fields are entered using <a href="../qtquickcontrols/qml-qtquick-controls2-tumbler.html">Tumbler</a> QML types. If you press <code>OK</code>, the values selected in the Tumblers are written to <code>alarmModel</code>.</p>
+<pre class="cpp">
+
+      <span class="name">contentItem</span>: <span class="name">RowLayout</span> {
+          <span class="type"><a href="../qtquick/qml-qtquick-layouts-rowlayout.html">RowLayout</a></span> {
+              <span class="name">id</span>: <span class="name">rowTumbler</span>
+
+              <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-tumbler.html">Tumbler</a></span> {
+                  <span class="name">id</span>: <span class="name">hoursTumbler</span>
+                  <span class="name">model</span>: <span class="number">24</span>
+                  <span class="name">delegate</span>: <span class="name">TumblerDelegate</span> {
+                      <span class="name">text</span>: <span class="name">formatNumber</span>(<span class="name">modelData</span>)
+                  }
+              }
+              <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-tumbler.html">Tumbler</a></span> {
+                  <span class="name">id</span>: <span class="name">minutesTumbler</span>
+                  <span class="name">model</span>: <span class="number">60</span>
+                  <span class="name">delegate</span>: <span class="name">TumblerDelegate</span> {
+                      <span class="name">text</span>: <span class="name">formatNumber</span>(<span class="name">modelData</span>)
+                  }
+              }
+          }
+
+          <span class="type"><a href="../qtquick/qml-qtquick-layouts-rowlayout.html">RowLayout</a></span> {
+              <span class="name">id</span>: <span class="name">datePicker</span>
+
+              <span class="name">Layout</span>.leftMargin: <span class="number">20</span>
+
+              property <span class="type">alias</span> <span class="name">dayTumbler</span>: <span class="name">dayTumbler</span>
+              property <span class="type">alias</span> <span class="name">monthTumbler</span>: <span class="name">monthTumbler</span>
+              property <span class="type">alias</span> <span class="name">yearTumbler</span>: <span class="name">yearTumbler</span>
+
+              readonly property <span class="type">var</span> <span class="name">days</span>: [<span class="number">31</span>, <span class="number">29</span>, <span class="number">31</span>, <span class="number">30</span>, <span class="number">31</span>, <span class="number">30</span>, <span class="number">31</span>, <span class="number">31</span>, <span class="number">30</span>, <span class="number">31</span>, <span class="number">30</span>, <span class="number">31</span>]
+
+              <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-tumbler.html">Tumbler</a></span> {
+                  <span class="name">id</span>: <span class="name">dayTumbler</span>
+
+                  <span class="keyword">function</span> <span class="name">updateModel</span>() {
+                      <span class="comment">// Populate the model with days of the month. For example: [0, ..., 30]</span>
+                      var previousIndex = <span class="name">dayTumbler</span>.<span class="name">currentIndex</span>
+                      var array = []
+                      var newDays = <span class="name">datePicker</span>.<span class="name">days</span>[<span class="name">monthTumbler</span>.<span class="name">currentIndex</span>]
+                      <span class="keyword">for</span> (var i = 1; <span class="name">i</span> <span class="operator">&lt;=</span> <span class="name">newDays</span>; ++<span class="name">i</span>)
+                          <span class="name">array</span>.<span class="name">push</span>(<span class="name">i</span>)
+                      <span class="name">dayTumbler</span>.<span class="name">model</span> <span class="operator">=</span> <span class="name">array</span>
+                      <span class="name">dayTumbler</span>.<span class="name">currentIndex</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">min</span>(<span class="name">newDays</span> <span class="operator">-</span> <span class="number">1</span>, <span class="name">previousIndex</span>)
+                  }
+
+                  <span class="name">Component</span>.onCompleted: <span class="name">updateModel</span>()
+
+                  <span class="name">delegate</span>: <span class="name">TumblerDelegate</span> {
+                      <span class="name">text</span>: <span class="name">formatNumber</span>(<span class="name">modelData</span>)
+                  }
+              }
+              <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-tumbler.html">Tumbler</a></span> {
+                  <span class="name">id</span>: <span class="name">monthTumbler</span>
+
+                  <span class="name">onCurrentIndexChanged</span>: <span class="name">dayTumbler</span>.<span class="name">updateModel</span>()
+
+                  <span class="name">model</span>: <span class="number">12</span>
+                  <span class="name">delegate</span>: <span class="name">TumblerDelegate</span> {
+                      <span class="name">text</span>: <span class="name">window</span>.<span class="name">locale</span>.<span class="name">standaloneMonthName</span>(<span class="name">modelData</span>, <span class="name">Locale</span>.<span class="name">ShortFormat</span>)
+                  }
+              }
+              <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-tumbler.html">Tumbler</a></span> {
+                  <span class="name">id</span>: <span class="name">yearTumbler</span>
+
+                  <span class="comment">// This array is populated with the next three years. For example: [2018, 2019, 2020]</span>
+                  readonly property <span class="type">var</span> <span class="name">years</span>: (<span class="keyword">function</span>() {
+                      var currentYear = new <span class="name">Date</span>().<span class="name">getFullYear</span>()
+                      <span class="keyword">return</span> [<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>].<span class="name">map</span>(<span class="keyword">function</span>(value) { <span class="keyword">return</span> <span class="name">value</span> <span class="operator">+</span> <span class="name">currentYear</span>; })
+                  })()
+
+                  <span class="name">model</span>: <span class="name">years</span>
+                  <span class="name">delegate</span>: <span class="name">TumblerDelegate</span> {
+                      <span class="name">text</span>: <span class="name">formatNumber</span>(<span class="name">modelData</span>)
+                  }
+              }
+          }
+      }
+  }
+
+</pre>
+<a name="editing-alarms"></a>
+<h4 id="editing-alarms">Editing alarms</h4>
+<p>If you click on a particular alarm, you can edit it in the detail screen.</p>
+<p class="centerAlign"><img src="images/detailscreen.png" alt="" /></p><p>Clicking on an alarm sets <code>root.checked</code> to <code>true</code>, which makes visible the fields of the detail screen.</p>
+<pre class="cpp">
+
+  visible: root<span class="operator">.</span>checked
+
+</pre>
+<p>If you want the alarm to trigger also on other days, check <code>alarmRepeat</code>. The Repeater will display a checkable <a href="../qtquickcontrols/qml-qtquick-controls2-roundbutton.html">RoundButton</a> for each day of the week.</p>
+<pre class="cpp">
+
+          <span class="type"><a href="../qtquick/qml-qtquick-flow.html">Flow</a></span> {
+              <span class="name">visible</span>: <span class="name">root</span>.<span class="name">checked</span> <span class="operator">&amp;&amp;</span> <span class="name">model</span>.<span class="name">repeat</span>
+              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+
+              <span class="type"><a href="../qtquick/qml-qtquick-repeater.html">Repeater</a></span> {
+                  <span class="name">id</span>: <span class="name">dayRepeater</span>
+                  <span class="name">model</span>: <span class="name">daysToRepeat</span>
+                  <span class="name">delegate</span>: <span class="name">RoundButton</span> {
+                      <span class="name">text</span>: <span class="name">Qt</span>.<span class="name">locale</span>().<span class="name">dayName</span>(<span class="name">model</span>.<span class="name">dayOfWeek</span>, <span class="name">Locale</span>.<span class="name">NarrowFormat</span>)
+                      <span class="name">flat</span>: <span class="number">true</span>
+                      <span class="name">checked</span>: <span class="name">model</span>.<span class="name">repeat</span>
+                      <span class="name">checkable</span>: <span class="number">true</span>
+                      <span class="name">Material</span>.background: <span class="name">checked</span> ? <span class="name">Material</span>.<span class="name">accent</span> : <span class="string">&quot;transparent&quot;</span>
+                      <span class="name">onToggled</span>: <span class="name">model</span>.<span class="name">repeat</span> <span class="operator">=</span> <span class="name">checked</span>
+                  }
+              }
+          }
+
+</pre>
+<p>If you modify the description of the alarm, it will be reflected in the main screen afterwards.</p>
+<pre class="cpp">
+
+          <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-textfield.html">TextField</a></span> {
+              <span class="name">id</span>: <span class="name">alarmDescriptionTextField</span>
+              <span class="name">placeholderText</span>: <span class="name">qsTr</span>(<span class="string">&quot;Enter description here&quot;</span>)
+              <span class="name">cursorVisible</span>: <span class="number">true</span>
+              <span class="name">visible</span>: <span class="name">root</span>.<span class="name">checked</span>
+              <span class="name">text</span>: <span class="name">model</span>.<span class="name">label</span>
+              <span class="name">onTextEdited</span>: <span class="name">model</span>.<span class="name">label</span> <span class="operator">=</span> <span class="name">text</span>
+          }
+
+</pre>
+<a name="deleting-alarms"></a>
+<h4 id="deleting-alarms">Deleting alarms</h4>
+<p>The detail screen (see above) has a Button for deleting alarms. When <code>onClicked</code> is emitted, the current <a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a> is deleted from <code>alarmModel</code>.</p>
+<pre class="cpp">
+
+          <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-button.html">Button</a></span> {
+              <span class="name">id</span>: <span class="name">deleteAlarmButton</span>
+              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Delete&quot;</span>)
+              <span class="name">width</span>: <span class="number">40</span>
+              <span class="name">height</span>: <span class="number">40</span>
+              <span class="name">visible</span>: <span class="name">root</span>.<span class="name">checked</span>
+              <span class="name">onClicked</span>: <span class="name">root</span>.<span class="name">ListView</span>.<span class="name">view</span>.<span class="name">model</span>.<span class="name">remove</span>(<span class="name">root</span>.<span class="name">ListView</span>.<span class="name">view</span>.<span class="name">currentIndex</span>, <span class="number">1</span>)
+          }
+
+</pre>
+<a name="summary"></a>
+<h5 id="summary">Summary</h5>
+<p>The app has no code for adding sound or vibration to the alarm, nor does it store the alarms in any format or database. Maybe it could be an interesting coding project to add those features. Adding sound to this program can be realized with <a href="../qtmultimedia/qtmultimedia-qmlmodule.html">Qt Multimedia QML Types</a>. Storing the data could be done quickly and easily in <a href="../qtcore/json.html">JSON format</a>.</p>
+<p>Files:</p>
+<ul>
+<li><a href="qtdoc-tutorials-alarms-alarmdelegate-qml.html">tutorials/alarms/AlarmDelegate.qml</a></li>
+<li><a href="qtdoc-tutorials-alarms-alarmdialog-qml.html">tutorials/alarms/AlarmDialog.qml</a></li>
+<li><a href="qtdoc-tutorials-alarms-alarmmodel-qml.html">tutorials/alarms/AlarmModel.qml</a></li>
+<li><a href="qtdoc-tutorials-alarms-tumblerdelegate-qml.html">tutorials/alarms/TumblerDelegate.qml</a></li>
+<li><a href="qtdoc-tutorials-alarms-alarms-pro.html">tutorials/alarms/alarms.pro</a></li>
+<li><a href="qtdoc-tutorials-alarms-main-cpp.html">tutorials/alarms/main.cpp</a></li>
+<li><a href="qtdoc-tutorials-alarms-main-qml.html">tutorials/alarms/main.qml</a></li>
+<li><a href="qtdoc-tutorials-alarms-qml-qrc.html">tutorials/alarms/qml.qrc</a></li>
+</ul>
+</div>
+<p><b>See also </b><a href="../qtmultimedia/qtmultimedia-qmlmodule.html">Qt Multimedia QML Types</a> and <a href="../qtcore/json.html">JSON Support in Qt</a>.</p>
+<!-- @@@tutorials/alarms -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

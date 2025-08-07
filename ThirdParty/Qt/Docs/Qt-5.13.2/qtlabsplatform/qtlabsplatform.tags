@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tagfile>
+    <compound kind="class">
+        <name>Qt.labs.platform.MenuItem</name>
+        <filename>qml-qt-labs-platform-menuitem.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>triggered</name>
+            <anchorfile>qml-qt-labs-platform-menuitem.html</anchorfile>
+            <anchor>triggered-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>hovered</name>
+            <anchorfile>qml-qt-labs-platform-menuitem.html</anchorfile>
+            <anchor>hovered-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>toggle</name>
+            <anchorfile>qml-qt-labs-platform-menuitem.html</anchorfile>
+            <anchor>toggle-method</anchor>
+            <arglist>()</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>Qt.labs.platform.FolderDialog</name>
+        <filename>qml-qt-labs-platform-folderdialog.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>Qt.labs.platform.ColorDialog</name>
+        <filename>qml-qt-labs-platform-colordialog.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>Qt.labs.platform.Dialog</name>
+        <filename>qml-qt-labs-platform-dialog.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>accepted</name>
+            <anchorfile>qml-qt-labs-platform-dialog.html</anchorfile>
+            <anchor>accepted-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>rejected</name>
+            <anchorfile>qml-qt-labs-platform-dialog.html</anchorfile>
+            <anchor>rejected-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>open</name>
+            <anchorfile>qml-qt-labs-platform-dialog.html</anchorfile>
+            <anchor>open-method</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>close</name>
+            <anchorfile>qml-qt-labs-platform-dialog.html</anchorfile>
+            <anchor>close-method</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>accept</name>
+            <anchorfile>qml-qt-labs-platform-dialog.html</anchorfile>
+            <anchor>accept-method</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>reject</name>
+            <anchorfile>qml-qt-labs-platform-dialog.html</anchorfile>
+            <anchor>reject-method</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>done</name>
+            <anchorfile>qml-qt-labs-platform-dialog.html</anchorfile>
+            <anchor>done-method</anchor>
+            <arglist>( result)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>Qt.labs.platform.FontDialog</name>
+        <filename>qml-qt-labs-platform-fontdialog.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>Qt.labs.platform.MenuBar</name>
+        <filename>qml-qt-labs-platform-menubar.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>addMenu</name>
+            <anchorfile>qml-qt-labs-platform-menubar.html</anchorfile>
+            <anchor>addMenu-method</anchor>
+            <arglist>( menu)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>insertMenu</name>
+            <anchorfile>qml-qt-labs-platform-menubar.html</anchorfile>
+            <anchor>insertMenu-method</anchor>
+            <arglist>( index,  Menu menu)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>removeMenu</name>
+            <anchorfile>qml-qt-labs-platform-menubar.html</anchorfile>
+            <anchor>removeMenu-method</anchor>
+            <arglist>( menu)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>clear</name>
+            <anchorfile>qml-qt-labs-platform-menubar.html</anchorfile>
+            <anchor>clear-method</anchor>
+            <arglist>()</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>Qt.labs.platform.Menu</name>
+        <filename>qml-qt-labs-platform-menu.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>aboutToShow</name>
+            <anchorfile>qml-qt-labs-platform-menu.html</anchorfile>
+            <anchor>aboutToShow-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>aboutToHide</name>
+            <anchorfile>qml-qt-labs-platform-menu.html</anchorfile>
+            <anchor>aboutToHide-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>addItem</name>
+            <anchorfile>qml-qt-labs-platform-menu.html</anchorfile>
+            <anchor>addItem-method</anchor>
+            <arglist>( item)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>insertItem</name>
+            <anchorfile>qml-qt-labs-platform-menu.html</anchorfile>
+            <anchor>insertItem-method</anchor>
+            <arglist>( index,  MenuItem item)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>removeItem</name>
+            <anchorfile>qml-qt-labs-platform-menu.html</anchorfile>
+            <anchor>removeItem-method</anchor>
+            <arglist>( item)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>addMenu</name>
+            <anchorfile>qml-qt-labs-platform-menu.html</anchorfile>
+            <anchor>addMenu-method</anchor>
+            <arglist>( submenu)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>insertMenu</name>
+            <anchorfile>qml-qt-labs-platform-menu.html</anchorfile>
+            <anchor>insertMenu-method</anchor>
+            <arglist>( index,  Menu submenu)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>removeMenu</name>
+            <anchorfile>qml-qt-labs-platform-menu.html</anchorfile>
+            <anchor>removeMenu-method</anchor>
+            <arglist>( submenu)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>clear</name>
+            <anchorfile>qml-qt-labs-platform-menu.html</anchorfile>
+            <anchor>clear-method</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>open</name>
+            <anchorfile>qml-qt-labs-platform-menu.html</anchorfile>
+            <anchor>open-method</anchor>
+            <arglist>( item)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>open</name>
+            <anchorfile>qml-qt-labs-platform-menu.html</anchorfile>
+            <anchor>open-method</anchor>
+            <arglist>( target,  MenuItem item)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>close</name>
+            <anchorfile>qml-qt-labs-platform-menu.html</anchorfile>
+            <anchor>close-method</anchor>
+            <arglist>()</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>Qt.labs.platform.MenuSeparator</name>
+        <filename>qml-qt-labs-platform-menuseparator.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>Qt.labs.platform.MessageDialog</name>
+        <filename>qml-qt-labs-platform-messagedialog.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>clicked</name>
+            <anchorfile>qml-qt-labs-platform-messagedialog.html</anchorfile>
+            <anchor>clicked-signal</anchor>
+            <arglist>( button)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>okClicked</name>
+            <anchorfile>qml-qt-labs-platform-messagedialog.html</anchorfile>
+            <anchor>okClicked-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>saveClicked</name>
+            <anchorfile>qml-qt-labs-platform-messagedialog.html</anchorfile>
+            <anchor>saveClicked-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>saveAllClicked</name>
+            <anchorfile>qml-qt-labs-platform-messagedialog.html</anchorfile>
+            <anchor>saveAllClicked-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>openClicked</name>
+            <anchorfile>qml-qt-labs-platform-messagedialog.html</anchorfile>
+            <anchor>openClicked-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>yesClicked</name>
+            <anchorfile>qml-qt-labs-platform-messagedialog.html</anchorfile>
+            <anchor>yesClicked-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>yesToAllClicked</name>
+            <anchorfile>qml-qt-labs-platform-messagedialog.html</anchorfile>
+            <anchor>yesToAllClicked-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>noClicked</name>
+            <anchorfile>qml-qt-labs-platform-messagedialog.html</anchorfile>
+            <anchor>noClicked-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>noToAllClicked</name>
+            <anchorfile>qml-qt-labs-platform-messagedialog.html</anchorfile>
+            <anchor>noToAllClicked-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>abortClicked</name>
+            <anchorfile>qml-qt-labs-platform-messagedialog.html</anchorfile>
+            <anchor>abortClicked-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>retryClicked</name>
+            <anchorfile>qml-qt-labs-platform-messagedialog.html</anchorfile>
+            <anchor>retryClicked-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>ignoreClicked</name>
+            <anchorfile>qml-qt-labs-platform-messagedialog.html</anchorfile>
+            <anchor>ignoreClicked-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>closeClicked</name>
+            <anchorfile>qml-qt-labs-platform-messagedialog.html</anchorfile>
+            <anchor>closeClicked-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>cancelClicked</name>
+            <anchorfile>qml-qt-labs-platform-messagedialog.html</anchorfile>
+            <anchor>cancelClicked-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>discardClicked</name>
+            <anchorfile>qml-qt-labs-platform-messagedialog.html</anchorfile>
+            <anchor>discardClicked-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>helpClicked</name>
+            <anchorfile>qml-qt-labs-platform-messagedialog.html</anchorfile>
+            <anchor>helpClicked-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>applyClicked</name>
+            <anchorfile>qml-qt-labs-platform-messagedialog.html</anchorfile>
+            <anchor>applyClicked-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>resetClicked</name>
+            <anchorfile>qml-qt-labs-platform-messagedialog.html</anchorfile>
+            <anchor>resetClicked-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>restoreDefaultsClicked</name>
+            <anchorfile>qml-qt-labs-platform-messagedialog.html</anchorfile>
+            <anchor>restoreDefaultsClicked-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>Qt.labs.platform.StandardPaths</name>
+        <filename>qml-qt-labs-platform-standardpaths.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>string</type>
+            <name>displayName</name>
+            <anchorfile>qml-qt-labs-platform-standardpaths.html</anchorfile>
+            <anchor>displayName-method</anchor>
+            <arglist>( type)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>url</type>
+            <name>findExecutable</name>
+            <anchorfile>qml-qt-labs-platform-standardpaths.html</anchorfile>
+            <anchor>findExecutable-method</anchor>
+            <arglist>( executableName,  list&lt;string&gt; paths)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>url</type>
+            <name>locate</name>
+            <anchorfile>qml-qt-labs-platform-standardpaths.html</anchorfile>
+            <anchor>locate-method</anchor>
+            <arglist>( type,  string fileName,  LocateOptions options = LocateFile)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>list&lt;url&gt;</type>
+            <name>locateAll</name>
+            <anchorfile>qml-qt-labs-platform-standardpaths.html</anchorfile>
+            <anchor>locateAll-method</anchor>
+            <arglist>( type,  string fileName,  LocateOptions options = LocateFile)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setTestModeEnabled</name>
+            <anchorfile>qml-qt-labs-platform-standardpaths.html</anchorfile>
+            <anchor>setTestModeEnabled-method</anchor>
+            <arglist>( testMode)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>list&lt;url&gt;</type>
+            <name>standardLocations</name>
+            <anchorfile>qml-qt-labs-platform-standardpaths.html</anchorfile>
+            <anchor>standardLocations-method</anchor>
+            <arglist>( type)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>url</type>
+            <name>writableLocation</name>
+            <anchorfile>qml-qt-labs-platform-standardpaths.html</anchorfile>
+            <anchor>writableLocation-method</anchor>
+            <arglist>( type)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>Qt.labs.platform.SystemTrayIcon</name>
+        <filename>qml-qt-labs-platform-systemtrayicon.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>activated</name>
+            <anchorfile>qml-qt-labs-platform-systemtrayicon.html</anchorfile>
+            <anchor>activated-signal</anchor>
+            <arglist>( reason)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>messageClicked</name>
+            <anchorfile>qml-qt-labs-platform-systemtrayicon.html</anchorfile>
+            <anchor>messageClicked-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>show</name>
+            <anchorfile>qml-qt-labs-platform-systemtrayicon.html</anchorfile>
+            <anchor>show-method</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>hide</name>
+            <anchorfile>qml-qt-labs-platform-systemtrayicon.html</anchorfile>
+            <anchor>hide-method</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>showMessage</name>
+            <anchorfile>qml-qt-labs-platform-systemtrayicon.html</anchorfile>
+            <anchor>showMessage-method</anchor>
+            <arglist>( title,  string message,  MessageIcon icon,  int msecs)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>Qt.labs.platform.MenuItemGroup</name>
+        <filename>qml-qt-labs-platform-menuitemgroup.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>triggered</name>
+            <anchorfile>qml-qt-labs-platform-menuitemgroup.html</anchorfile>
+            <anchor>triggered-signal</anchor>
+            <arglist>( item)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>hovered</name>
+            <anchorfile>qml-qt-labs-platform-menuitemgroup.html</anchorfile>
+            <anchor>hovered-signal</anchor>
+            <arglist>( item)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>addItem</name>
+            <anchorfile>qml-qt-labs-platform-menuitemgroup.html</anchorfile>
+            <anchor>addItem-method</anchor>
+            <arglist>( item)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>removeItem</name>
+            <anchorfile>qml-qt-labs-platform-menuitemgroup.html</anchorfile>
+            <anchor>removeItem-method</anchor>
+            <arglist>( item)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>clear</name>
+            <anchorfile>qml-qt-labs-platform-menuitemgroup.html</anchorfile>
+            <anchor>clear-method</anchor>
+            <arglist>()</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>Qt.labs.platform.FileDialog</name>
+        <filename>qml-qt-labs-platform-filedialog.html</filename>
+    </compound>
+</tagfile>

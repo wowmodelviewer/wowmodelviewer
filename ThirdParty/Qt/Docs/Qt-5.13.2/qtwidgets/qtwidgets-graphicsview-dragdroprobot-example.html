@@ -1,0 +1,536 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- dragdroprobot.qdoc -->
+  <title>Drag and Drop Robot Example | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Drag and Drop Robot Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#robot-class-definition">Robot Class Definition</a></li>
+<li class="level1"><a href="#coloritem-class-definition">ColorItem Class Definition</a></li>
+<li class="level1"><a href="#the-main-function">The main() Function</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Drag and Drop Robot Example</h1>
+<span class="subtitle"></span>
+<!-- $$$graphicsview/dragdroprobot-brief -->
+<p>Demonstrates how to drag and drop items in a graphics view.</p>
+<!-- @@@graphicsview/dragdroprobot -->
+<!-- $$$graphicsview/dragdroprobot-description -->
+<div class="descr"> <a name="details"></a>
+<p>The Drag and Drop Robot example shows how to implement Drag and Drop in a <a href="qgraphicsitem.html">QGraphicsItem</a> subclass, as well as how to animate items using Qt's <a href="../qtcore/animation.html">Animation Framework</a>.</p>
+<p class="centerAlign"><img src="images/dragdroprobot-example.png" alt="" /></p><p>Graphics View provides the <a href="qgraphicsscene.html">QGraphicsScene</a> class for managing and interacting with a large number of custom-made 2D graphical items derived from the <a href="qgraphicsitem.html">QGraphicsItem</a> class, and a <a href="qgraphicsview.html">QGraphicsView</a> widget for visualizing the items, with support for zooming and rotation.</p>
+<p>This example consists of a <code>Robot</code> class, a <code>ColorItem</code> class, and a main function: the <code>Robot</code> class describes a simple robot consisting of several <code>RobotPart</code> derived limbs, including <code>RobotHead</code> and <code>RobotLimb</code>, the <code>ColorItem</code> class provides a draggable colored ellipse, and the <code>main()</code> function provides the main application window.</p>
+<p>We will first review the <code>Robot</code> class to see how to assemble the different parts so that they can be individually rotated and animated using <a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a>, and we will then review the <code>ColorItem</code> class to demonstrate how to implement Drag and Drop between items. Finally we will review the main() function to see how we can put all the pieces together, to form the final application.</p>
+<a name="robot-class-definition"></a>
+<h4 id="robot-class-definition">Robot Class Definition</h4>
+<p>The robot consists of three main classes: the <code>RobotHead</code>, the <code>RobotTorso</code>, and the <code>RobotLimb</code>, which is used for the upper and lower arms and legs. All parts derive from the <code>RobotPart</code> class, which in turn inherits <code>QGraphicsObject</code>. The <code>Robot</code> class itself has no visual appearance and serves only as a root node for the robot.</p>
+<p>Let's start with the <code>RobotPart</code> class declaration.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> RobotPart : <span class="keyword">public</span> <span class="type"><a href="qgraphicsobject.html">QGraphicsObject</a></span>
+  {
+  <span class="keyword">public</span>:
+      RobotPart(<span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+
+  <span class="keyword">protected</span>:
+      <span class="type">void</span> dragEnterEvent(<span class="type"><a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a></span> <span class="operator">*</span>event) override;
+      <span class="type">void</span> dragLeaveEvent(<span class="type"><a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a></span> <span class="operator">*</span>event) override;
+      <span class="type">void</span> dropEvent(<span class="type"><a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a></span> <span class="operator">*</span>event) override;
+
+      <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> color;
+      bool dragOver;
+  };
+
+</pre>
+<p>This base class inherits <a href="qgraphicsobject.html">QGraphicsObject</a>. <a href="qgraphicsobject.html">QGraphicsObject</a> provides signals and slots through inheriting <a href="../qtcore/qobject.html">QObject</a>, and it also declares <a href="qgraphicsitem.html">QGraphicsItem</a>'s properties using <a href="../qtcore/qobject.html#Q_PROPERTY">Q_PROPERTY</a>, which makes the properties accessible for <a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a>.</p>
+<p>RobotPart also implements the three most important event handlers for accepting drop events: <a href="qgraphicsitem.html#dragEnterEvent">dragEnterEvent()</a>, <a href="qgraphicsitem.html#dragLeaveEvent">dragLeaveEvent()</a>, and <a href="qgraphicsitem.html#dropEvent">dropEvent()</a>.</p>
+<p>The color is stored as a member variable, along with the <code>dragOver</code> variable, which we will use later to indicate visually that the limb can accept colors that are is dragged onto it.</p>
+<pre class="cpp">
+
+  RobotPart<span class="operator">::</span>RobotPart(<span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qgraphicsobject.html">QGraphicsObject</a></span>(parent)<span class="operator">,</span> color(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>lightGray)<span class="operator">,</span> dragOver(<span class="keyword">false</span>)
+  {
+      setAcceptDrops(<span class="keyword">true</span>);
+  }
+
+</pre>
+<p><code>RobotPart</code>'s constructor initializes the dragOver member and sets the color to <a href="../qtcore/qt.html#GlobalColor-enum">Qt::lightGray</a>. In the constructor body we enable support for accepting drop events by calling <a href="qgraphicsitem.html#setAcceptDrops">setAcceptDrops(true)</a>.</p>
+<p>The rest of this class's implementation is to support Drag and Drop.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> RobotPart<span class="operator">::</span>dragEnterEvent(<span class="type"><a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (event<span class="operator">-</span><span class="operator">&gt;</span>mimeData()<span class="operator">-</span><span class="operator">&gt;</span>hasColor()) {
+          event<span class="operator">-</span><span class="operator">&gt;</span>setAccepted(<span class="keyword">true</span>);
+          dragOver <span class="operator">=</span> <span class="keyword">true</span>;
+          update();
+      } <span class="keyword">else</span> {
+          event<span class="operator">-</span><span class="operator">&gt;</span>setAccepted(<span class="keyword">false</span>);
+      }
+  }
+
+</pre>
+<p>The <a href="qgraphicsitem.html#dragEnterEvent">dragEnterEvent()</a> handler is called when a Drag and Drop element is dragged into the robot part's area.</p>
+<p>The handler implementation determines whether or not this item as a whole can accept the mime data assiciated with the incoming drag object. <code>RobotPart</code> provides a base behavior for all parts that accepts color drops. So if the incoming drag object contains a color, the event is accepted, we set <code>dragOver</code> to <code>true</code> and call update() to help provide positive visual feedback to the user; otherwise the event is ignored, which in turn allows the event to propagate to parent elements.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> RobotPart<span class="operator">::</span>dragLeaveEvent(<span class="type"><a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a></span> <span class="operator">*</span>event)
+  {
+      Q_UNUSED(event);
+      dragOver <span class="operator">=</span> <span class="keyword">false</span>;
+      update();
+  }
+
+</pre>
+<p>The <a href="qgraphicsitem.html#dragLeaveEvent">dragLeaveEvent()</a> handler is called when a Drag and Drop element is dragged away from the robot part's area. Our implementation simply resets <i>dragOver</i> to false and calls <a href="qgraphicsitem.html#update">update()</a> to help provide visual feedback that the drag has left this item.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> RobotPart<span class="operator">::</span>dropEvent(<span class="type"><a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a></span> <span class="operator">*</span>event)
+  {
+      dragOver <span class="operator">=</span> <span class="keyword">false</span>;
+      <span class="keyword">if</span> (event<span class="operator">-</span><span class="operator">&gt;</span>mimeData()<span class="operator">-</span><span class="operator">&gt;</span>hasColor())
+          color <span class="operator">=</span> qvariant_cast<span class="operator">&lt;</span><span class="type"><a href="../qtgui/qcolor.html">QColor</a></span><span class="operator">&gt;</span>(event<span class="operator">-</span><span class="operator">&gt;</span>mimeData()<span class="operator">-</span><span class="operator">&gt;</span>colorData());
+      update();
+  }
+
+</pre>
+<p>The <a href="qgraphicsitem.html#dropEvent">dropEvent()</a> handler is called when a Drag and Drop element is dropped onto an item (i.e&#x2e;, when the mouse button is released over the item while dragging).</p>
+<p>We reset <code>dragOver</code> to false, assign the item's new color, and call <a href="qgraphicsitem.html#update">update()</a>.</p>
+<p>The declaration and implementation of <code>RobotHead</code>, <code>RobotTorso</code>, and <code>RobotLimb</code> are practically identical. We will review <code>RobotHead</code> in detail, as this class has one minor difference, and leave the other classes as an exercise for the reader.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> RobotHead : <span class="keyword">public</span> RobotPart
+  {
+  <span class="keyword">public</span>:
+      RobotHead(<span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+
+      <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> boundingRect() <span class="keyword">const</span> override;
+      <span class="type">void</span> paint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">*</span>painter<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qstyleoptiongraphicsitem.html">QStyleOptionGraphicsItem</a></span> <span class="operator">*</span>option<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>widget <span class="operator">=</span> <span class="number">0</span>) override;
+
+  <span class="keyword">protected</span>:
+      <span class="type">void</span> dragEnterEvent(<span class="type"><a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a></span> <span class="operator">*</span>event) override;
+      <span class="type">void</span> dropEvent(<span class="type"><a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a></span> <span class="operator">*</span>event) override;
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> pixmap;
+  };
+
+</pre>
+<p>The <code>RobotHead</code> class inherits <code>RobotPart</code> and provides the necessary implementations of <a href="qgraphicsitem.html#boundingRect">boundingRect()</a> and <a href="qgraphicsitem.html#paint">paint()</a>. It also reimplements <a href="qgraphicsitem.html#dragEnterEvent">dragEnterEvent()</a> and dropEvent() to provide special handling of image drops.</p>
+<p>The class contains a private pixmap member that we can use to implement support for accepting image drops.</p>
+<pre class="cpp">
+
+  RobotHead<span class="operator">::</span>RobotHead(<span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span>parent)
+      : RobotPart(parent)
+  {
+  }
+
+</pre>
+<p><code>RobotHead</code> has a rather plain constructor that simply forwards to <code>RobotPart</code>'s constructor.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> RobotHead<span class="operator">::</span>boundingRect() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span>(<span class="operator">-</span><span class="number">15</span><span class="operator">,</span> <span class="operator">-</span><span class="number">50</span><span class="operator">,</span> <span class="number">30</span><span class="operator">,</span> <span class="number">50</span>);
+  }
+
+</pre>
+<p>The <a href="qgraphicsitem.html#boundingRect">boundingRect()</a> reimplementation returns the extents for the head. Because we want the center of rotation to be the bottom center of the item, we have chosen a bounding rectangle that starts at (-15, -50) and extends to 30 units wide and 50 units tall. When rotating the head, the &quot;neck&quot; will stay still while the top of the head tilts from side to side.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> RobotHead<span class="operator">::</span>paint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">*</span>painter<span class="operator">,</span>
+             <span class="keyword">const</span> <span class="type"><a href="qstyleoptiongraphicsitem.html">QStyleOptionGraphicsItem</a></span> <span class="operator">*</span>option<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>widget)
+  {
+      Q_UNUSED(option);
+      Q_UNUSED(widget);
+      <span class="keyword">if</span> (pixmap<span class="operator">.</span>isNull()) {
+          painter<span class="operator">-</span><span class="operator">&gt;</span>setBrush(dragOver <span class="operator">?</span> color<span class="operator">.</span>lighter(<span class="number">130</span>) : color);
+          painter<span class="operator">-</span><span class="operator">&gt;</span>drawRoundedRect(<span class="operator">-</span><span class="number">10</span><span class="operator">,</span> <span class="operator">-</span><span class="number">30</span><span class="operator">,</span> <span class="number">20</span><span class="operator">,</span> <span class="number">30</span><span class="operator">,</span> <span class="number">25</span><span class="operator">,</span> <span class="number">25</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RelativeSize);
+          painter<span class="operator">-</span><span class="operator">&gt;</span>setBrush(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>white);
+          painter<span class="operator">-</span><span class="operator">&gt;</span>drawEllipse(<span class="operator">-</span><span class="number">7</span><span class="operator">,</span> <span class="operator">-</span><span class="number">3</span> <span class="operator">-</span> <span class="number">20</span><span class="operator">,</span> <span class="number">7</span><span class="operator">,</span> <span class="number">7</span>);
+          painter<span class="operator">-</span><span class="operator">&gt;</span>drawEllipse(<span class="number">0</span><span class="operator">,</span> <span class="operator">-</span><span class="number">3</span> <span class="operator">-</span> <span class="number">20</span><span class="operator">,</span> <span class="number">7</span><span class="operator">,</span> <span class="number">7</span>);
+          painter<span class="operator">-</span><span class="operator">&gt;</span>setBrush(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black);
+          painter<span class="operator">-</span><span class="operator">&gt;</span>drawEllipse(<span class="operator">-</span><span class="number">5</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span> <span class="operator">-</span> <span class="number">20</span><span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">2</span>);
+          painter<span class="operator">-</span><span class="operator">&gt;</span>drawEllipse(<span class="number">2</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span> <span class="operator">-</span> <span class="number">20</span><span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">2</span>);
+          painter<span class="operator">-</span><span class="operator">&gt;</span>setPen(<span class="type"><a href="../qtgui/qpen.html">QPen</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black<span class="operator">,</span> <span class="number">2</span>));
+          painter<span class="operator">-</span><span class="operator">&gt;</span>setBrush(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoBrush);
+          painter<span class="operator">-</span><span class="operator">&gt;</span>drawArc(<span class="operator">-</span><span class="number">6</span><span class="operator">,</span> <span class="operator">-</span><span class="number">2</span> <span class="operator">-</span> <span class="number">20</span><span class="operator">,</span> <span class="number">12</span><span class="operator">,</span> <span class="number">15</span><span class="operator">,</span> <span class="number">190</span> <span class="operator">*</span> <span class="number">16</span><span class="operator">,</span> <span class="number">160</span> <span class="operator">*</span> <span class="number">16</span>);
+      } <span class="keyword">else</span> {
+          painter<span class="operator">-</span><span class="operator">&gt;</span>scale(<span class="operator">.</span><span class="number">2272</span><span class="operator">,</span> <span class="operator">.</span><span class="number">2824</span>);
+          painter<span class="operator">-</span><span class="operator">&gt;</span>drawPixmap(<span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>(<span class="operator">-</span><span class="number">15</span> <span class="operator">*</span> <span class="number">4.4</span><span class="operator">,</span> <span class="operator">-</span><span class="number">50</span> <span class="operator">*</span> <span class="number">3.54</span>)<span class="operator">,</span> pixmap);
+      }
+  }
+
+</pre>
+<p>In <a href="qgraphicsitem.html#paint">paint()</a> we draw the actual head. The implementation is split into two sections; if an image has been dropped onto the head, we draw the image, otherwise we draw a round rectangular robot head with simple vector graphics.</p>
+<p>For performance reasons, depending on the complexity of what is painted, it can often be faster to draw the head as an image rather than using a sequence of vector operations.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> RobotHead<span class="operator">::</span>dragEnterEvent(<span class="type"><a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (event<span class="operator">-</span><span class="operator">&gt;</span>mimeData()<span class="operator">-</span><span class="operator">&gt;</span>hasImage()) {
+          event<span class="operator">-</span><span class="operator">&gt;</span>setAccepted(<span class="keyword">true</span>);
+          dragOver <span class="operator">=</span> <span class="keyword">true</span>;
+          update();
+      } <span class="keyword">else</span> {
+          RobotPart<span class="operator">::</span>dragEnterEvent(event);
+      }
+  }
+
+</pre>
+<p>The robot head can accept image drops. In order to support this, its reimplementation of <a href="qgraphicsitem.html#dragEnterEvent">dragEnterEvent()</a> checks if the drag object contains image data, and if it does, then the event is accepted. Otherwise we fall back to the base <code>RobotPart</code> implementation.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> RobotHead<span class="operator">::</span>dropEvent(<span class="type"><a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (event<span class="operator">-</span><span class="operator">&gt;</span>mimeData()<span class="operator">-</span><span class="operator">&gt;</span>hasImage()) {
+          dragOver <span class="operator">=</span> <span class="keyword">false</span>;
+          pixmap <span class="operator">=</span> qvariant_cast<span class="operator">&lt;</span><span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span><span class="operator">&gt;</span>(event<span class="operator">-</span><span class="operator">&gt;</span>mimeData()<span class="operator">-</span><span class="operator">&gt;</span>imageData());
+          update();
+      } <span class="keyword">else</span> {
+          RobotPart<span class="operator">::</span>dropEvent(event);
+      }
+  }
+
+</pre>
+<p>To follow up on image support, we must also implement <a href="qgraphicsitem.html#dropEvent">dropEvent()</a>. We check if the drag object contains image data, and if it does, we store this data as a member pixmap and call <a href="qgraphicsitem.html#update">update()</a>. This pixmap is used inside the <a href="qgraphicsitem.html#paint">paint()</a> implementation that we reviewed before.</p>
+<p><code>RobotTorso</code> and <code>RobotLimb</code> are similar to <code>RobotHead</code>, so let's skip directly to the <code>Robot</code> class.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> Robot : <span class="keyword">public</span> RobotPart
+  {
+  <span class="keyword">public</span>:
+      Robot(<span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+
+      <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> boundingRect() <span class="keyword">const</span> override;
+      <span class="type">void</span> paint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">*</span>painter<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qstyleoptiongraphicsitem.html">QStyleOptionGraphicsItem</a></span> <span class="operator">*</span>option<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>widget <span class="operator">=</span> <span class="number">0</span>) override;
+  };
+
+</pre>
+<p>The <code>Robot</code> class also inherits <code>RobotPart</code>, and like the other parts it also implements <a href="qgraphicsitem.html#boundingRect">boundingRect()</a> and <a href="qgraphicsitem.html#paint">paint()</a>. It provides a rather special implementation, though:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> Robot<span class="operator">::</span>boundingRect() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span>();
+  }
+
+  <span class="type">void</span> Robot<span class="operator">::</span>paint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">*</span>painter<span class="operator">,</span>
+                    <span class="keyword">const</span> <span class="type"><a href="qstyleoptiongraphicsitem.html">QStyleOptionGraphicsItem</a></span> <span class="operator">*</span>option<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>widget)
+  {
+      Q_UNUSED(painter);
+      Q_UNUSED(option);
+      Q_UNUSED(widget);
+  }
+
+</pre>
+<p>Because the <code>Robot</code> class is only used as a base node for the rest of the robot, it has no visual representation. Its <a href="qgraphicsitem.html#boundingRect">boundingRect()</a> implementation can therefore return a null <a href="../qtcore/qrectf.html">QRectF</a>, and its paint() function does nothing.</p>
+<pre class="cpp">
+
+  Robot<span class="operator">::</span>Robot(<span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span>parent)
+      : RobotPart(parent)
+  {
+      setFlag(ItemHasNoContents);
+
+      <span class="type"><a href="qgraphicsobject.html">QGraphicsObject</a></span> <span class="operator">*</span>torsoItem <span class="operator">=</span> <span class="keyword">new</span> RobotTorso(<span class="keyword">this</span>);
+      <span class="type"><a href="qgraphicsobject.html">QGraphicsObject</a></span> <span class="operator">*</span>headItem <span class="operator">=</span> <span class="keyword">new</span> RobotHead(torsoItem);
+      <span class="type"><a href="qgraphicsobject.html">QGraphicsObject</a></span> <span class="operator">*</span>upperLeftArmItem <span class="operator">=</span> <span class="keyword">new</span> RobotLimb(torsoItem);
+      <span class="type"><a href="qgraphicsobject.html">QGraphicsObject</a></span> <span class="operator">*</span>lowerLeftArmItem <span class="operator">=</span> <span class="keyword">new</span> RobotLimb(upperLeftArmItem);
+      <span class="type"><a href="qgraphicsobject.html">QGraphicsObject</a></span> <span class="operator">*</span>upperRightArmItem <span class="operator">=</span> <span class="keyword">new</span> RobotLimb(torsoItem);
+      <span class="type"><a href="qgraphicsobject.html">QGraphicsObject</a></span> <span class="operator">*</span>lowerRightArmItem <span class="operator">=</span> <span class="keyword">new</span> RobotLimb(upperRightArmItem);
+      <span class="type"><a href="qgraphicsobject.html">QGraphicsObject</a></span> <span class="operator">*</span>upperRightLegItem <span class="operator">=</span> <span class="keyword">new</span> RobotLimb(torsoItem);
+      <span class="type"><a href="qgraphicsobject.html">QGraphicsObject</a></span> <span class="operator">*</span>lowerRightLegItem <span class="operator">=</span> <span class="keyword">new</span> RobotLimb(upperRightLegItem);
+      <span class="type"><a href="qgraphicsobject.html">QGraphicsObject</a></span> <span class="operator">*</span>upperLeftLegItem <span class="operator">=</span> <span class="keyword">new</span> RobotLimb(torsoItem);
+      <span class="type"><a href="qgraphicsobject.html">QGraphicsObject</a></span> <span class="operator">*</span>lowerLeftLegItem <span class="operator">=</span> <span class="keyword">new</span> RobotLimb(upperLeftLegItem);
+
+</pre>
+<p>The constructor starts by setting the flag <a href="qgraphicsitem.html#GraphicsItemFlag-enum">ItemHasNoContents</a>, which is a minor optimization for items that have no visual appearance.</p>
+<p>We then construct all the robot parts (head, torso, and upper/lower arms and legs). The stacking order is very important, and we use the parent-child hierarchy to ensure the elements rotate and move properly. We construct the torso first, as this is the root element. We then construct the head and pass the torso to <code>HeadItem</code>'s constructor. This will make the head a child of the torso; if you rotate the torso, the head will follow. The same pattern is applied to the rest of the limbs.</p>
+<pre class="cpp">
+
+      headItem<span class="operator">-</span><span class="operator">&gt;</span>setPos(<span class="number">0</span><span class="operator">,</span> <span class="operator">-</span><span class="number">18</span>);
+      upperLeftArmItem<span class="operator">-</span><span class="operator">&gt;</span>setPos(<span class="operator">-</span><span class="number">15</span><span class="operator">,</span> <span class="operator">-</span><span class="number">10</span>);
+      lowerLeftArmItem<span class="operator">-</span><span class="operator">&gt;</span>setPos(<span class="number">30</span><span class="operator">,</span> <span class="number">0</span>);
+      upperRightArmItem<span class="operator">-</span><span class="operator">&gt;</span>setPos(<span class="number">15</span><span class="operator">,</span> <span class="operator">-</span><span class="number">10</span>);
+      lowerRightArmItem<span class="operator">-</span><span class="operator">&gt;</span>setPos(<span class="number">30</span><span class="operator">,</span> <span class="number">0</span>);
+      upperRightLegItem<span class="operator">-</span><span class="operator">&gt;</span>setPos(<span class="number">10</span><span class="operator">,</span> <span class="number">32</span>);
+      lowerRightLegItem<span class="operator">-</span><span class="operator">&gt;</span>setPos(<span class="number">30</span><span class="operator">,</span> <span class="number">0</span>);
+      upperLeftLegItem<span class="operator">-</span><span class="operator">&gt;</span>setPos(<span class="operator">-</span><span class="number">10</span><span class="operator">,</span> <span class="number">32</span>);
+      lowerLeftLegItem<span class="operator">-</span><span class="operator">&gt;</span>setPos(<span class="number">30</span><span class="operator">,</span> <span class="number">0</span>);
+
+</pre>
+<p>Each robot part is carefully positioned. For example, the upper left arm is moved precisely to the top-left area of the torso, and the upper right arm is moved to the top-right area.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="../qtcore/qparallelanimationgroup.html">QParallelAnimationGroup</a></span> <span class="operator">*</span>animation <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qparallelanimationgroup.html">QParallelAnimationGroup</a></span>(<span class="keyword">this</span>);
+
+      <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span> <span class="operator">*</span>headAnimation <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span>(headItem<span class="operator">,</span> <span class="string">&quot;rotation&quot;</span>);
+      headAnimation<span class="operator">-</span><span class="operator">&gt;</span>setStartValue(<span class="number">20</span>);
+      headAnimation<span class="operator">-</span><span class="operator">&gt;</span>setEndValue(<span class="operator">-</span><span class="number">20</span>);
+      <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span> <span class="operator">*</span>headScaleAnimation <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span>(headItem<span class="operator">,</span> <span class="string">&quot;scale&quot;</span>);
+      headScaleAnimation<span class="operator">-</span><span class="operator">&gt;</span>setEndValue(<span class="number">1.1</span>);
+      animation<span class="operator">-</span><span class="operator">&gt;</span>addAnimation(headAnimation);
+      animation<span class="operator">-</span><span class="operator">&gt;</span>addAnimation(headScaleAnimation);
+
+</pre>
+<p>The next section creates all animation objects. This snippet shows the two animations that operate on the head's scale and rotation. The two <a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a> instances simply set the object, property, and respective start and end values.</p>
+<p>All animations are controlled by one top-level parallel animation group. The scale and rotation animations are added to this group.</p>
+<p>The rest of the animations are defined in a similar way.</p>
+<pre class="cpp">
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> animation<span class="operator">-</span><span class="operator">&gt;</span>animationCount(); <span class="operator">+</span><span class="operator">+</span>i) {
+          <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span> <span class="operator">*</span>anim <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(animation<span class="operator">-</span><span class="operator">&gt;</span>animationAt(i));
+          anim<span class="operator">-</span><span class="operator">&gt;</span>setEasingCurve(<span class="type"><a href="../qtcore/qeasingcurve.html">QEasingCurve</a></span><span class="operator">::</span>SineCurve);
+          anim<span class="operator">-</span><span class="operator">&gt;</span>setDuration(<span class="number">2000</span>);
+      }
+
+      animation<span class="operator">-</span><span class="operator">&gt;</span>setLoopCount(<span class="operator">-</span><span class="number">1</span>);
+      animation<span class="operator">-</span><span class="operator">&gt;</span>start();
+
+</pre>
+<p>Finally we set an easing curve and duration on each animation, ensure the toplevel animation group loops forever, and start the toplevel animation.</p>
+<a name="coloritem-class-definition"></a>
+<h4 id="coloritem-class-definition">ColorItem Class Definition</h4>
+<p>The <code>ColorItem</code> class represents a circular item that can be pressed to drag colors onto robot parts.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> ColorItem : <span class="keyword">public</span> <span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span>
+  {
+  <span class="keyword">public</span>:
+      ColorItem();
+
+      <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> boundingRect() <span class="keyword">const</span> override;
+      <span class="type">void</span> paint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">*</span>painter<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qstyleoptiongraphicsitem.html">QStyleOptionGraphicsItem</a></span> <span class="operator">*</span>option<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>widget) override;
+
+  <span class="keyword">protected</span>:
+      <span class="type">void</span> mousePressEvent(<span class="type"><a href="qgraphicsscenemouseevent.html">QGraphicsSceneMouseEvent</a></span> <span class="operator">*</span>event) override;
+      <span class="type">void</span> mouseMoveEvent(<span class="type"><a href="qgraphicsscenemouseevent.html">QGraphicsSceneMouseEvent</a></span> <span class="operator">*</span>event) override;
+      <span class="type">void</span> mouseReleaseEvent(<span class="type"><a href="qgraphicsscenemouseevent.html">QGraphicsSceneMouseEvent</a></span> <span class="operator">*</span>event) override;
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> color;
+  };
+
+</pre>
+<p>This class is very simple. It does not use animations, and has no need for properties nor signals and slots, so to save resources, it's most natural that it inherits <a href="qgraphicsitem.html">QGraphicsItem</a> (as opposed to <a href="qgraphicsobject.html">QGraphicsObject</a>).</p>
+<p>It declares the mandatory <a href="qgraphicsitem.html#boundingRect">boundingRect()</a> and <a href="qgraphicsitem.html#paint">paint()</a> functions, and adds reimplementations of <a href="qgraphicsitem.html#mousePressEvent">mousePressEvent()</a>, <a href="qgraphicsitem.html#mouseMoveEvent">mouseMoveEvent()</a>, and <a href="qgraphicsitem.html#mouseReleaseEvent">mouseReleaseEvent()</a>. It contains a single private color member.</p>
+<p>Let's take a look at its implementation.</p>
+<pre class="cpp">
+
+  ColorItem<span class="operator">::</span>ColorItem()
+      : color(<span class="type"><a href="../qtcore/qrandomgenerator.html">QRandomGenerator</a></span><span class="operator">::</span>global()<span class="operator">-</span><span class="operator">&gt;</span>bounded(<span class="number">256</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qrandomgenerator.html">QRandomGenerator</a></span><span class="operator">::</span>global()<span class="operator">-</span><span class="operator">&gt;</span>bounded(<span class="number">256</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qrandomgenerator.html">QRandomGenerator</a></span><span class="operator">::</span>global()<span class="operator">-</span><span class="operator">&gt;</span>bounded(<span class="number">256</span>))
+  {
+      setToolTip(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;QColor(%1, %2, %3)\n%4&quot;</span>)
+                <span class="operator">.</span>arg(color<span class="operator">.</span>red())<span class="operator">.</span>arg(color<span class="operator">.</span>green())<span class="operator">.</span>arg(color<span class="operator">.</span>blue())
+                <span class="operator">.</span>arg(<span class="string">&quot;Click and drag this color onto the robot!&quot;</span>));
+      setCursor(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>OpenHandCursor);
+      setAcceptedMouseButtons(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftButton);
+  }
+
+</pre>
+<p><code>ColorItem</code>'s constructor assigns an opaque random color to its color member by making use of <a href="../qtcore/qrandomgenerator.html">QRandomGenerator</a>. For improved usability, it assigns a tooltip that provides a useful hint to the user, and it also sets a suitable cursor. This ensures that the cursor will chance to <a href="../qtcore/qt.html#CursorShape-enum">Qt::OpenHandCursor</a> when the mouse pointer hovers over the item.</p>
+<p>Finally, we call <a href="qgraphicsitem.html#setAcceptedMouseButtons">setAcceptedMouseButtons()</a> to ensure that this item can only process <a href="../qtcore/qt.html#MouseButton-enum">Qt::LeftButton</a>. This simplifies the mouse event handlers greatly, as we can always assume that only the left mouse button is pressed and released.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> ColorItem<span class="operator">::</span>boundingRect() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span>(<span class="operator">-</span><span class="number">15.5</span><span class="operator">,</span> <span class="operator">-</span><span class="number">15.5</span><span class="operator">,</span> <span class="number">34</span><span class="operator">,</span> <span class="number">34</span>);
+  }
+
+</pre>
+<p>The item's bounding rect is a fixed 30x30 units centered around the item's origin (0, 0), and adjusted by 0.5 units in all directions to allow a scalable pen to draw its outline. For a final visual touch the bounds also compensate with a few units down and to the right to make room for a simple dropshadow.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> ColorItem<span class="operator">::</span>paint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">*</span>painter<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qstyleoptiongraphicsitem.html">QStyleOptionGraphicsItem</a></span> <span class="operator">*</span>option<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>widget)
+  {
+      Q_UNUSED(option);
+      Q_UNUSED(widget);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setPen(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoPen);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setBrush(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>darkGray);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawEllipse(<span class="operator">-</span><span class="number">12</span><span class="operator">,</span> <span class="operator">-</span><span class="number">12</span><span class="operator">,</span> <span class="number">30</span><span class="operator">,</span> <span class="number">30</span>);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setPen(<span class="type"><a href="../qtgui/qpen.html">QPen</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black<span class="operator">,</span> <span class="number">1</span>));
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setBrush(<span class="type"><a href="../qtgui/qbrush.html">QBrush</a></span>(color));
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawEllipse(<span class="operator">-</span><span class="number">15</span><span class="operator">,</span> <span class="operator">-</span><span class="number">15</span><span class="operator">,</span> <span class="number">30</span><span class="operator">,</span> <span class="number">30</span>);
+  }
+
+</pre>
+<p>The <a href="qgraphicsitem.html#paint">paint()</a> implementation draws an ellipse with a 1-unit black outline, a plain color fill, and a dark gray dropshadow.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> ColorItem<span class="operator">::</span>mousePressEvent(<span class="type"><a href="qgraphicsscenemouseevent.html">QGraphicsSceneMouseEvent</a></span> <span class="operator">*</span>)
+  {
+      setCursor(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ClosedHandCursor);
+  }
+
+</pre>
+<p>The <a href="qgraphicsitem.html#mousePressEvent">mousePressEvent()</a> handler is called when you press the mouse button inside the item's area. Our implementation simply sets the cursor to <a href="../qtcore/qt.html#CursorShape-enum">Qt::ClosedHandCursor</a>.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> ColorItem<span class="operator">::</span>mouseReleaseEvent(<span class="type"><a href="qgraphicsscenemouseevent.html">QGraphicsSceneMouseEvent</a></span> <span class="operator">*</span>)
+  {
+      setCursor(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>OpenHandCursor);
+  }
+
+</pre>
+<p>The <a href="qgraphicsitem.html#mouseReleaseEvent">mouseReleaseEvent()</a> handler is called when you release the mouse button after having pressed it inside an item's area. Our implementation sets the cursor back to <a href="../qtcore/qt.html#CursorShape-enum">Qt::OpenHandCursor</a>. The mouse press and release event handlers together provide useful visual feedback to the user: when you move the mouse pointer over a <code>CircleItem</code>, the cursor changes to an open hand. Pressing the item will show a closed hand cursor. Releasing will restore to an open hand cursor again.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> ColorItem<span class="operator">::</span>mouseMoveEvent(<span class="type"><a href="qgraphicsscenemouseevent.html">QGraphicsSceneMouseEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (<span class="type"><a href="../qtcore/qlinef.html">QLineF</a></span>(event<span class="operator">-</span><span class="operator">&gt;</span>screenPos()<span class="operator">,</span> event<span class="operator">-</span><span class="operator">&gt;</span>buttonDownScreenPos(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftButton))
+          <span class="operator">.</span>length() <span class="operator">&lt;</span> <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>startDragDistance()) {
+          <span class="keyword">return</span>;
+      }
+
+      <span class="type"><a href="../qtgui/qdrag.html">QDrag</a></span> <span class="operator">*</span>drag <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtgui/qdrag.html">QDrag</a></span>(event<span class="operator">-</span><span class="operator">&gt;</span>widget());
+      <span class="type"><a href="../qtcore/qmimedata.html">QMimeData</a></span> <span class="operator">*</span>mime <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qmimedata.html">QMimeData</a></span>;
+      drag<span class="operator">-</span><span class="operator">&gt;</span>setMimeData(mime);
+
+</pre>
+<p>The <a href="qgraphicsitem.html#mouseMoveEvent">mouseMoveEvent()</a> handler is called when you move the mouse around after pressing the mouse button inside the <code>ColorItem</code>'s area. This implementation provides the most important piece of logic for <code>CircleItem</code>: the code that starts and manages drags.</p>
+<p>The implementation starts by checking if the mouse has been dragged far enough to eliminate mouse jitter noise. We only want to start a drag if the mouse has been dragged farther than the application start drag distance.</p>
+<p>Continuing, we create a <a href="../qtgui/qdrag.html">QDrag</a> object, passing the event <a href="qgraphicssceneevent.html#widget">widget</a> (i.e&#x2e;, the <a href="qgraphicsview.html">QGraphicsView</a> viewport) to its constructor. Qt will ensure that this object is deleted at the right time. We also create a <a href="../qtcore/qmimedata.html">QMimeData</a> instance that can contain our color or image data, and assign this to the drag object.</p>
+<pre class="cpp">
+
+      <span class="keyword">static</span> <span class="type">int</span> n <span class="operator">=</span> <span class="number">0</span>;
+      <span class="keyword">if</span> (n<span class="operator">+</span><span class="operator">+</span> <span class="operator">&gt;</span> <span class="number">2</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qrandomgenerator.html">QRandomGenerator</a></span><span class="operator">::</span>global()<span class="operator">-</span><span class="operator">&gt;</span>bounded(<span class="number">3</span>) <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>) {
+          <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> image(<span class="string">&quot;:/images/head.png&quot;</span>);
+          mime<span class="operator">-</span><span class="operator">&gt;</span>setImageData(image);
+
+          drag<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(<span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span><span class="operator">::</span>fromImage(image)<span class="operator">.</span>scaled(<span class="number">30</span><span class="operator">,</span> <span class="number">40</span>));
+          drag<span class="operator">-</span><span class="operator">&gt;</span>setHotSpot(<span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(<span class="number">15</span><span class="operator">,</span> <span class="number">30</span>));
+
+</pre>
+<p>This snippet has a somewhat random outcome: once in a while, a special image is assigned to the drag object's mime data. The pixmap is also assiged as the drag object's pixmap. This will ensure that you can see the image that is being dragged as a pixmap under the mouse cursor.</p>
+<pre class="cpp">
+
+      } <span class="keyword">else</span> {
+          mime<span class="operator">-</span><span class="operator">&gt;</span>setColorData(color);
+          mime<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;#%1%2%3&quot;</span>)
+                        <span class="operator">.</span>arg(color<span class="operator">.</span>red()<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">16</span><span class="operator">,</span> QLatin1Char(<span class="char">'0'</span>))
+                        <span class="operator">.</span>arg(color<span class="operator">.</span>green()<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">16</span><span class="operator">,</span> QLatin1Char(<span class="char">'0'</span>))
+                        <span class="operator">.</span>arg(color<span class="operator">.</span>blue()<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">16</span><span class="operator">,</span> QLatin1Char(<span class="char">'0'</span>)));
+
+          <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> pixmap(<span class="number">34</span><span class="operator">,</span> <span class="number">34</span>);
+          pixmap<span class="operator">.</span>fill(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>white);
+
+          <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> painter(<span class="operator">&amp;</span>pixmap);
+          painter<span class="operator">.</span>translate(<span class="number">15</span><span class="operator">,</span> <span class="number">15</span>);
+          painter<span class="operator">.</span>setRenderHint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>Antialiasing);
+          paint(<span class="operator">&amp;</span>painter<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+          painter<span class="operator">.</span>end();
+
+          pixmap<span class="operator">.</span>setMask(pixmap<span class="operator">.</span>createHeuristicMask());
+
+          drag<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(pixmap);
+          drag<span class="operator">-</span><span class="operator">&gt;</span>setHotSpot(<span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(<span class="number">15</span><span class="operator">,</span> <span class="number">20</span>));
+      }
+
+</pre>
+<p>Otherwise, and this is the most common outcome, a simple color is assigned to the drag object's mime data. We render this <code>ColorItem</code> into a new pixmap to give the user visual feedback that the color is being &quot;dragged&quot;.</p>
+<pre class="cpp">
+
+      drag<span class="operator">-</span><span class="operator">&gt;</span>exec();
+      setCursor(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>OpenHandCursor);
+  }
+
+</pre>
+<p>Finally we execute the drag. <a href="../qtgui/qdrag.html#exec">QDrag::exec</a>() will reenter the event loop, and only exit if the drag has either been dropped, or canceled. In any case we reset the cursor to <a href="../qtcore/qt.html#CursorShape-enum">Qt::OpenHandCursor</a>.</p>
+<a name="the-main-function"></a>
+<h4 id="the-main-function">The main() Function</h4>
+<p>Now that the <code>Robot</code> and <code>ColorItem</code> classes are complete, we can put all the pieces together inside the main() function.</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span><span class="operator">*</span>argv)
+  {
+      <span class="type"><a href="qapplication.html">QApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+</pre>
+<p>We start off by constructing <a href="qapplication.html">QApplication</a>, and initializing the random number generator. This ensures that the color items have different colors every time the application starts.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qgraphicsscene.html">QGraphicsScene</a></span> scene(<span class="operator">-</span><span class="number">200</span><span class="operator">,</span> <span class="operator">-</span><span class="number">200</span><span class="operator">,</span> <span class="number">400</span><span class="operator">,</span> <span class="number">400</span>);
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> <span class="number">10</span>; <span class="operator">+</span><span class="operator">+</span>i) {
+          ColorItem <span class="operator">*</span>item <span class="operator">=</span> <span class="keyword">new</span> ColorItem;
+          item<span class="operator">-</span><span class="operator">&gt;</span>setPos(<span class="operator">::</span>sin((i <span class="operator">*</span> <span class="number">6.28</span>) <span class="operator">/</span> <span class="number">10.0</span>) <span class="operator">*</span> <span class="number">150</span><span class="operator">,</span>
+                       <span class="operator">::</span>cos((i <span class="operator">*</span> <span class="number">6.28</span>) <span class="operator">/</span> <span class="number">10.0</span>) <span class="operator">*</span> <span class="number">150</span>);
+
+          scene<span class="operator">.</span>addItem(item);
+      }
+
+      Robot <span class="operator">*</span>robot <span class="operator">=</span> <span class="keyword">new</span> Robot;
+      robot<span class="operator">-</span><span class="operator">&gt;</span>setTransform(<span class="type"><a href="../qtgui/qtransform.html">QTransform</a></span><span class="operator">::</span>fromScale(<span class="number">1.2</span><span class="operator">,</span> <span class="number">1.2</span>)<span class="operator">,</span> <span class="keyword">true</span>);
+      robot<span class="operator">-</span><span class="operator">&gt;</span>setPos(<span class="number">0</span><span class="operator">,</span> <span class="operator">-</span><span class="number">20</span>);
+      scene<span class="operator">.</span>addItem(robot);
+
+</pre>
+<p>We construct a fixed size scene, and create 10 <code>ColorItem</code> instances arranged in a circle. Each item is added to the scene.</p>
+<p>In the center of this circle we create one <code>Robot</code> instance. The robot is scaled and moved up a few units. It is then added to the scene.</p>
+<pre class="cpp">
+
+      GraphicsView view(<span class="operator">&amp;</span>scene);
+      view<span class="operator">.</span>setRenderHint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>Antialiasing);
+      view<span class="operator">.</span>setViewportUpdateMode(<span class="type"><a href="qgraphicsview.html">QGraphicsView</a></span><span class="operator">::</span>BoundingRectViewportUpdate);
+      view<span class="operator">.</span>setBackgroundBrush(<span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="number">230</span><span class="operator">,</span> <span class="number">200</span><span class="operator">,</span> <span class="number">167</span>));
+      view<span class="operator">.</span>setWindowTitle(<span class="string">&quot;Drag and Drop Robot&quot;</span>);
+       view<span class="operator">.</span>show();
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p>Finally we create a <a href="qgraphicsview.html">QGraphicsView</a> window, and assign the scene to it.</p>
+<p>For increased visual quality, we enable antialiasing. We also choose to use bounding rectangle updates to simplify visual update handling. The view is given a fixed sand-colored background, and a window title.</p>
+<p>We then show the view. The animations start immediately after control enters the event loop.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/graphicsview/dragdroprobot?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@graphicsview/dragdroprobot -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

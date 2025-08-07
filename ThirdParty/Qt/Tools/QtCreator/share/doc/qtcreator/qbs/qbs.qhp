@@ -1,0 +1,1127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+    <namespace>org.qt-project.qbs.1140</namespace>
+    <virtualFolder>doc</virtualFolder>
+    <metaData name="version" value=""/>
+    <customFilter name="Qbs 1.14.0">
+        <filterAttribute>1.14.0</filterAttribute>
+        <filterAttribute>qbs</filterAttribute>
+    </customFilter>
+    <filterSection>
+        <filterAttribute>1.14.0</filterAttribute>
+        <filterAttribute>qbs</filterAttribute>
+        <toc>
+            <section ref="index.html" title="Qbs">
+                <section ref="overview.html" title="Introduction"/>
+                <section ref="setup.html" title="Setup">
+                    <section ref="installing.html" title="Installing"/>
+                    <section ref="configuring.html" title="Configuring Profiles and Preferences"/>
+                    <section ref="qt-versions.html" title="Managing Qt Versions"/>
+                </section>
+                <section ref="usage.html" title="Usage">
+                    <section ref="language-introduction.html" title="Language Introduction"/>
+                    <section ref="building-applications.html" title="Building Applications"/>
+                    <section ref="running-applications.html" title="Running Applications"/>
+                    <section ref="installing-files.html" title="Installing Files"/>
+                    <section ref="platforms.html" title="Target Platforms"/>
+                    <section ref="shell.html" title="Using the Shell"/>
+                    <section ref="generators.html" title="Generators"/>
+                    <section ref="multiplexing.html" title="Multiplexing"/>
+                    <section ref="custom-modules.html" title="Custom Modules and Items"/>
+                    <section ref="module-providers.html" title="Module Providers"/>
+                </section>
+                <section ref="howtos.html" title="How-tos"/>
+                <section ref="reference.html" title="Reference">
+                    <section ref="list-of-items.html" title="List of All Items">
+                        <section ref="qbslanguageitems-qmlmodule.html" title="List of Language Items"/>
+                        <section ref="qbsconvenienceitems-qmlmodule.html" title="List of Convenience Items"/>
+                        <section ref="list-of-probes.html" title="List of Probes"/>
+                    </section>
+                    <section ref="list-of-builtin-services.html" title="List of Built-in Services"/>
+                    <section ref="cli.html" title="Command-Line Interface"/>
+                    <section ref="qbsmodules-qmlmodule.html" title="List of Modules"/>
+                    <section ref="commands.html" title="Command and JavaScriptCommand"/>
+                </section>
+                <section ref="building-qbs.html" title="Appendix A: Building Qbs"/>
+                <section ref="porting-to-qbs.html" title="Appendix B: Migrating from Other Build Systems"/>
+                <section ref="attributions.html" title="Appendix C: Licenses and Code Attributions"/>
+            </section>
+        </toc>
+        <keywords>
+            <keyword name="Android.ndk" id="QML.Android.ndk" ref="qml-qbsmodules-android-ndk.html"/>
+            <keyword name="Android.sdk" id="QML.Android.sdk" ref="qml-qbsmodules-android-sdk.html"/>
+            <keyword name="Appendix A: Building Qbs" id="Appendix A: Building Qbs" ref="building-qbs.html"/>
+            <keyword name="Appendix B: Migrating from Other Build Systems" id="Appendix B: Migrating from Other Build Systems" ref="porting-to-qbs.html"/>
+            <keyword name="Appendix C: Licenses and Code Attributions" id="Appendix C: Licenses and Code Attributions" ref="attributions.html"/>
+            <keyword name="AppleApplicationDiskImage" id="QML.AppleApplicationDiskImage" ref="qml-qbsconvenienceitems-appleapplicationdiskimage.html"/>
+            <keyword name="AppleDiskImage" id="QML.AppleDiskImage" ref="qml-qbsconvenienceitems-applediskimage.html"/>
+            <keyword name="Application" id="QML.Application" ref="qml-qbsconvenienceitems-application.html"/>
+            <keyword name="ApplicationExtension" id="QML.ApplicationExtension" ref="qml-qbsconvenienceitems-applicationextension.html"/>
+            <keyword name="Artifact" id="QML.Artifact" ref="qml-qbslanguageitems-artifact.html"/>
+            <keyword name="AutotestRunner" id="QML.AutotestRunner" ref="qml-qbsconvenienceitems-autotestrunner.html"/>
+            <keyword name="BinaryFile Service" id="BinaryFile Service" ref="jsextension-binaryfile.html"/>
+            <keyword name="BinaryProbe" id="QML.BinaryProbe" ref="qml-binaryprobe.html"/>
+            <keyword name="Building Applications" id="Building Applications" ref="building-applications.html"/>
+            <keyword name="Building for Android" id="Building for Android" ref="qbs-target-android.html"/>
+            <keyword name="Building for INTEGRITY" id="Building for INTEGRITY" ref="qbs-target-integrity.html"/>
+            <keyword name="Building for Linux" id="Building for Linux" ref="qbs-target-linux.html"/>
+            <keyword name="Building for QNX" id="Building for QNX" ref="qbs-target-qnx.html"/>
+            <keyword name="Building for VxWorks" id="Building for VxWorks" ref="qbs-target-vxworks.html"/>
+            <keyword name="Building for Windows" id="Building for Windows" ref="qbs-target-windows.html"/>
+            <keyword name="Building for iOS" id="Building for iOS" ref="qbs-target-ios.html"/>
+            <keyword name="Building for macOS" id="Building for macOS" ref="qbs-target-macos.html"/>
+            <keyword name="Building for tvOS" id="Building for tvOS" ref="qbs-target-tvos.html"/>
+            <keyword name="Building for watchOS" id="Building for watchOS" ref="qbs-target-watchos.html"/>
+            <keyword name="Command and JavaScriptCommand" id="Command and JavaScriptCommand" ref="commands.html"/>
+            <keyword name="Command-Line Interface" id="Command-Line Interface" ref="cli.html"/>
+            <keyword name="Configuring Profiles and Preferences" id="Configuring Profiles and Preferences" ref="configuring.html"/>
+            <keyword name="CppApplication" id="QML.CppApplication" ref="qml-qbsconvenienceitems-cppapplication.html"/>
+            <keyword name="Custom Modules and Items" id="Custom Modules and Items" ref="custom-modules.html"/>
+            <keyword name="Depends" id="QML.Depends" ref="qml-qbslanguageitems-depends.html"/>
+            <keyword name="DynamicLibrary" id="QML.DynamicLibrary" ref="qml-qbsconvenienceitems-dynamiclibrary.html"/>
+            <keyword name="Environment Service" id="Environment Service" ref="jsextension-environment.html"/>
+            <keyword name="Export" id="QML.Export" ref="qml-qbslanguageitems-export.html"/>
+            <keyword name="Exporter.pkgconfig" id="QML.Exporter.pkgconfig" ref="qml-qbsmodules-exporter-pkgconfig.html"/>
+            <keyword name="Exporter.qbs" id="QML.Exporter.qbs" ref="qml-qbsmodules-exporter-qbs.html"/>
+            <keyword name="File Service" id="File Service" ref="jsextension-file.html"/>
+            <keyword name="FileInfo Service" id="FileInfo Service" ref="jsextension-fileinfo.html"/>
+            <keyword name="FileTagger" id="QML.FileTagger" ref="qml-qbslanguageitems-filetagger.html"/>
+            <keyword name="FrameworkProbe" id="QML.FrameworkProbe" ref="qml-frameworkprobe.html"/>
+            <keyword name="General Services" id="General Services" ref="jsextensions-general.html"/>
+            <keyword name="Generators" id="Generators" ref="generators.html"/>
+            <keyword name="Group" id="QML.Group" ref="qml-qbslanguageitems-group.html"/>
+            <keyword name="How-tos" id="How-tos" ref="howtos.html"/>
+            <keyword name="IncludeProbe" id="QML.IncludeProbe" ref="qml-includeprobe.html"/>
+            <keyword name="InnoSetup" id="QML.InnoSetup" ref="qml-qbsconvenienceitems-innosetup.html"/>
+            <keyword name="InstallPackage" id="QML.InstallPackage" ref="qml-qbsconvenienceitems-installpackage.html"/>
+            <keyword name="Installing" id="Installing" ref="installing.html"/>
+            <keyword name="Installing Files" id="Installing Files" ref="installing-files.html"/>
+            <keyword name="Introduction" id="Introduction" ref="overview.html"/>
+            <keyword name="JavaClassCollection" id="QML.JavaClassCollection" ref="qml-qbsconvenienceitems-javaclasscollection.html"/>
+            <keyword name="JavaJarFile" id="QML.JavaJarFile" ref="qml-qbsconvenienceitems-javajarfile.html"/>
+            <keyword name="JobLimit" id="QML.JobLimit" ref="qml-qbslanguageitems-joblimit.html"/>
+            <keyword name="Language Introduction" id="Language Introduction" ref="language-introduction.html"/>
+            <keyword name="List of All Items" id="List of All Items" ref="list-of-items.html"/>
+            <keyword name="List of Built-in Services" id="List of Built-in Services" ref="list-of-builtin-services.html"/>
+            <keyword name="List of Convenience Items" id="List of Convenience Items" ref="qbsconvenienceitems-qmlmodule.html"/>
+            <keyword name="List of Language Items" id="List of Language Items" ref="qbslanguageitems-qmlmodule.html"/>
+            <keyword name="List of Modules" id="List of Modules" ref="qbsmodules-qmlmodule.html"/>
+            <keyword name="List of Probes" id="List of Probes" ref="list-of-probes.html"/>
+            <keyword name="LoadableModule" id="QML.LoadableModule" ref="qml-qbsconvenienceitems-loadablemodule.html"/>
+            <keyword name="Managing Qt Versions" id="Managing Qt Versions" ref="qt-versions.html"/>
+            <keyword name="Module" id="QML.Module" ref="qml-qbslanguageitems-module.html"/>
+            <keyword name="Module Providers" id="Module Providers" ref="module-providers.html"/>
+            <keyword name="ModuleProvider" id="QML.ModuleProvider" ref="qml-qbslanguageitems-moduleprovider.html"/>
+            <keyword name="Multiplexing" id="Multiplexing" ref="multiplexing.html"/>
+            <keyword name="Parameter" id="QML.Parameter" ref="qml-qbslanguageitems-parameter.html"/>
+            <keyword name="Parameters" id="QML.Parameters" ref="qml-qbslanguageitems-parameters.html"/>
+            <keyword name="PathProbe" id="QML.PathProbe" ref="qml-pathprobe.html"/>
+            <keyword name="PkgConfigProbe" id="QML.PkgConfigProbe" ref="qml-pkgconfigprobe.html"/>
+            <keyword name="Probe" id="QML.Probe" ref="qml-qbslanguageitems-probe.html"/>
+            <keyword name="Process Service" id="Process Service" ref="jsextension-process.html"/>
+            <keyword name="Product" id="QML.Product" ref="qml-qbslanguageitems-product.html"/>
+            <keyword name="Profile" id="QML.Profile" ref="qml-qbslanguageitems-profile.html"/>
+            <keyword name="Project" id="QML.Project" ref="qml-qbslanguageitems-project.html"/>
+            <keyword name="Properties" id="QML.Properties" ref="qml-qbslanguageitems-properties.html"/>
+            <keyword name="PropertyList Service" id="PropertyList Service" ref="jsextension-propertylist.html"/>
+            <keyword name="PropertyOptions" id="QML.PropertyOptions" ref="qml-qbslanguageitems-propertyoptions.html"/>
+            <keyword name="QML.AppleApplicationDiskImage" id="QML.AppleApplicationDiskImage" ref="qml-qbsconvenienceitems-appleapplicationdiskimage.html"/>
+            <keyword name="QML.AppleDiskImage" id="QML.AppleDiskImage" ref="qml-qbsconvenienceitems-applediskimage.html"/>
+            <keyword name="QML.Application" id="QML.Application" ref="qml-qbsconvenienceitems-application.html"/>
+            <keyword name="QML.ApplicationExtension" id="QML.ApplicationExtension" ref="qml-qbsconvenienceitems-applicationextension.html"/>
+            <keyword name="QML.Artifact" id="QML.Artifact" ref="qml-qbslanguageitems-artifact.html"/>
+            <keyword name="QML.AutotestRunner" id="QML.AutotestRunner" ref="qml-qbsconvenienceitems-autotestrunner.html"/>
+            <keyword name="QML.BinaryProbe" id="QML.BinaryProbe" ref="qml-binaryprobe.html"/>
+            <keyword name="QML.CppApplication" id="QML.CppApplication" ref="qml-qbsconvenienceitems-cppapplication.html"/>
+            <keyword name="QML.Depends" id="QML.Depends" ref="qml-qbslanguageitems-depends.html"/>
+            <keyword name="QML.DynamicLibrary" id="QML.DynamicLibrary" ref="qml-qbsconvenienceitems-dynamiclibrary.html"/>
+            <keyword name="QML.Export" id="QML.Export" ref="qml-qbslanguageitems-export.html"/>
+            <keyword name="QML.FileTagger" id="QML.FileTagger" ref="qml-qbslanguageitems-filetagger.html"/>
+            <keyword name="QML.FrameworkProbe" id="QML.FrameworkProbe" ref="qml-frameworkprobe.html"/>
+            <keyword name="QML.Group" id="QML.Group" ref="qml-qbslanguageitems-group.html"/>
+            <keyword name="QML.IncludeProbe" id="QML.IncludeProbe" ref="qml-includeprobe.html"/>
+            <keyword name="QML.InnoSetup" id="QML.InnoSetup" ref="qml-qbsconvenienceitems-innosetup.html"/>
+            <keyword name="QML.InstallPackage" id="QML.InstallPackage" ref="qml-qbsconvenienceitems-installpackage.html"/>
+            <keyword name="QML.JavaClassCollection" id="QML.JavaClassCollection" ref="qml-qbsconvenienceitems-javaclasscollection.html"/>
+            <keyword name="QML.JavaJarFile" id="QML.JavaJarFile" ref="qml-qbsconvenienceitems-javajarfile.html"/>
+            <keyword name="QML.JobLimit" id="QML.JobLimit" ref="qml-qbslanguageitems-joblimit.html"/>
+            <keyword name="QML.LoadableModule" id="QML.LoadableModule" ref="qml-qbsconvenienceitems-loadablemodule.html"/>
+            <keyword name="QML.Module" id="QML.Module" ref="qml-qbslanguageitems-module.html"/>
+            <keyword name="QML.ModuleProvider" id="QML.ModuleProvider" ref="qml-qbslanguageitems-moduleprovider.html"/>
+            <keyword name="QML.Parameter" id="QML.Parameter" ref="qml-qbslanguageitems-parameter.html"/>
+            <keyword name="QML.Parameters" id="QML.Parameters" ref="qml-qbslanguageitems-parameters.html"/>
+            <keyword name="QML.PathProbe" id="QML.PathProbe" ref="qml-pathprobe.html"/>
+            <keyword name="QML.PkgConfigProbe" id="QML.PkgConfigProbe" ref="qml-pkgconfigprobe.html"/>
+            <keyword name="QML.Probe" id="QML.Probe" ref="qml-qbslanguageitems-probe.html"/>
+            <keyword name="QML.Product" id="QML.Product" ref="qml-qbslanguageitems-product.html"/>
+            <keyword name="QML.Profile" id="QML.Profile" ref="qml-qbslanguageitems-profile.html"/>
+            <keyword name="QML.Project" id="QML.Project" ref="qml-qbslanguageitems-project.html"/>
+            <keyword name="QML.Properties" id="QML.Properties" ref="qml-qbslanguageitems-properties.html"/>
+            <keyword name="QML.PropertyOptions" id="QML.PropertyOptions" ref="qml-qbslanguageitems-propertyoptions.html"/>
+            <keyword name="QML.QtApplication" id="QML.QtApplication" ref="qml-qbsconvenienceitems-qtapplication.html"/>
+            <keyword name="QML.QtGuiApplication" id="QML.QtGuiApplication" ref="qml-qbsconvenienceitems-qtguiapplication.html"/>
+            <keyword name="QML.Rule" id="QML.Rule" ref="qml-qbslanguageitems-rule.html"/>
+            <keyword name="QML.Scanner" id="QML.Scanner" ref="qml-qbslanguageitems-scanner.html"/>
+            <keyword name="QML.StaticLibrary" id="QML.StaticLibrary" ref="qml-qbsconvenienceitems-staticlibrary.html"/>
+            <keyword name="QML.SubProject" id="QML.SubProject" ref="qml-qbslanguageitems-subproject.html"/>
+            <keyword name="QML.XPCService" id="QML.XPCService" ref="qml-qbsconvenienceitems-xpcservice.html"/>
+            <keyword name="Qbs Manual" id="Qbs Manual" ref="index.html"/>
+            <keyword name="Qt Modules" id="Qt Modules" ref="qt-modules.html"/>
+            <keyword name="Qt.android_support" id="QML.Qt.android_support" ref="qml-qbsmodules-qt-android-support.html"/>
+            <keyword name="Qt.core" id="QML.Qt.core" ref="qml-qbsmodules-qt-core.html"/>
+            <keyword name="Qt.dbus" id="QML.Qt.dbus" ref="qml-qbsmodules-qt-dbus.html"/>
+            <keyword name="Qt.declarative" id="QML.Qt.declarative" ref="qml-qbsmodules-qt-declarative.html"/>
+            <keyword name="Qt.gui" id="QML.Qt.gui" ref="qml-qbsmodules-qt-gui.html"/>
+            <keyword name="Qt.plugin_support" id="QML.Qt.plugin_support" ref="qml-qbsmodules-qt-plugin-support.html"/>
+            <keyword name="Qt.qml" id="QML.Qt.qml" ref="qml-qbsmodules-qt-qml.html"/>
+            <keyword name="Qt.quick" id="QML.Qt.quick" ref="qml-qbsmodules-qt-quick.html"/>
+            <keyword name="Qt.scxml" id="QML.Qt.scxml" ref="qml-qbsmodules-qt-scxml.html"/>
+            <keyword name="QtApplication" id="QML.QtApplication" ref="qml-qbsconvenienceitems-qtapplication.html"/>
+            <keyword name="QtGuiApplication" id="QML.QtGuiApplication" ref="qml-qbsconvenienceitems-qtguiapplication.html"/>
+            <keyword name="Reference" id="Reference" ref="reference.html"/>
+            <keyword name="Rule" id="QML.Rule" ref="qml-qbslanguageitems-rule.html"/>
+            <keyword name="Running Applications" id="Running Applications" ref="running-applications.html"/>
+            <keyword name="Scanner" id="QML.Scanner" ref="qml-qbslanguageitems-scanner.html"/>
+            <keyword name="Setup" id="Setup" ref="setup.html"/>
+            <keyword name="StaticLibrary" id="QML.StaticLibrary" ref="qml-qbsconvenienceitems-staticlibrary.html"/>
+            <keyword name="SubProject" id="QML.SubProject" ref="qml-qbslanguageitems-subproject.html"/>
+            <keyword name="Target Platforms" id="Target Platforms" ref="platforms.html"/>
+            <keyword name="TemporaryDir Service" id="TemporaryDir Service" ref="jsextension-temporarydir.html"/>
+            <keyword name="TextFile Service" id="TextFile Service" ref="jsextension-textfile.html"/>
+            <keyword name="Usage" id="Usage" ref="usage.html"/>
+            <keyword name="Using the Shell" id="Using the Shell" ref="shell.html"/>
+            <keyword name="Utilities Service" id="Utilities Service" ref="jsextension-utilities.html"/>
+            <keyword name="XPCService" id="QML.XPCService" ref="qml-qbsconvenienceitems-xpcservice.html"/>
+            <keyword name="Xml Service" id="Xml Service" ref="jsextension-xml.html"/>
+            <keyword name="abi" id="Android.ndk::abi" ref="qml-qbsmodules-android-ndk.html#abi-prop"/>
+            <keyword name="actoolName" id="ib::actoolName" ref="qml-qbsmodules-ib.html#actoolName-prop"/>
+            <keyword name="actoolPath" id="ib::actoolPath" ref="qml-qbsmodules-ib.html#actoolPath-prop"/>
+            <keyword name="additionalClassPaths" id="java::additionalClassPaths" ref="qml-qbsmodules-java.html#additionalClassPaths-prop"/>
+            <keyword name="additionalCompilerFlags" id="java::additionalCompilerFlags" ref="qml-qbsmodules-java.html#additionalCompilerFlags-prop"/>
+            <keyword name="additionalContent" id="Exporter.qbs::additionalContent" ref="qml-qbsmodules-exporter-qbs.html#additionalContent-prop"/>
+            <keyword name="additionalJarFlags" id="java::additionalJarFlags" ref="qml-qbsmodules-java.html#additionalJarFlags-prop"/>
+            <keyword name="additionalProductTypes" id="Module::additionalProductTypes" ref="qml-qbslanguageitems-module.html#additionalProductTypes-prop"/>
+            <keyword name="aggregate" id="Product::aggregate" ref="qml-qbslanguageitems-product.html#aggregate-prop"/>
+            <keyword name="aidlSearchPaths" id="Android.sdk::aidlSearchPaths" ref="qml-qbsmodules-android-sdk.html#aidlSearchPaths-prop"/>
+            <keyword name="allPluginsByType" id="Qt.plugin_support::allPluginsByType" ref="qml-qbsmodules-qt-plugin-support.html#allPluginsByType-prop"/>
+            <keyword name="allResults" id="PathProbe::allResults" ref="qml-pathprobe.html#allResults-prop"/>
+            <keyword name="allowFailure" id="autotest::allowFailure" ref="qml-qbsmodules-autotest.html#allowFailure-prop"/>
+            <keyword name="allowUnresolvedSymbols" id="cpp::allowUnresolvedSymbols" ref="qml-qbsmodules-cpp.html#allowUnresolvedSymbols-prop"/>
+            <keyword name="allowedValues" id="PropertyOptions::allowedValues" ref="qml-qbslanguageitems-propertyoptions.html#allowedValues-prop"/>
+            <keyword name="alwaysRun" id="Rule::alwaysRun" ref="qml-qbslanguageitems-rule.html#alwaysRun-prop"/>
+            <keyword name="alwaysUpdated" id="Artifact::alwaysUpdated" ref="qml-qbslanguageitems-artifact.html#alwaysUpdated-prop"/>
+            <keyword name="alwaysUseLipo" id="cpp::alwaysUseLipo" ref="qml-qbsmodules-cpp.html#alwaysUseLipo-prop"/>
+            <keyword name="apkBaseName" id="Android.sdk::apkBaseName" ref="qml-qbsmodules-android-sdk.html#apkBaseName-prop"/>
+            <keyword name="appIconName" id="ib::appIconName" ref="qml-qbsmodules-ib.html#appIconName-prop"/>
+            <keyword name="appStl" id="Android.ndk::appStl" ref="qml-qbsmodules-android-ndk.html#appStl-prop"/>
+            <keyword name="architecture" id="cpp::architecture" ref="qml-qbsmodules-cpp.html#architecture-prop"/>
+            <keyword name="architecture" id="qbs::architecture" ref="qml-qbsmodules-qbs.html#architecture-prop"/>
+            <keyword name="architectures" id="qbs::architectures" ref="qml-qbsmodules-qbs.html#architectures-prop"/>
+            <keyword name="archiveBaseName" id="archiver::archiveBaseName" ref="qml-qbsmodules-archiver.html#archiveBaseName-prop"/>
+            <keyword name="archiver" id="QML.archiver" ref="qml-qbsmodules-archiver.html"/>
+            <keyword name="archiverName" id="cpp::archiverName" ref="qml-qbsmodules-cpp.html#archiverName-prop"/>
+            <keyword name="archiverPath" id="cpp::archiverPath" ref="qml-qbsmodules-cpp.html#archiverPath-prop"/>
+            <keyword name="arguments" id="AutotestRunner::arguments" ref="qml-qbsconvenienceitems-autotestrunner.html#arguments-prop"/>
+            <keyword name="arguments" id="autotest::arguments" ref="qml-qbsmodules-autotest.html#arguments-prop"/>
+            <keyword name="arm_neon" id="cpufeatures::arm_neon" ref="qml-qbsmodules-cpufeatures.html#arm_neon-prop"/>
+            <keyword name="arm_vfpv4" id="cpufeatures::arm_vfpv4" ref="qml-qbsmodules-cpufeatures.html#arm_vfpv4-prop"/>
+            <keyword name="artifactTypes" id="Exporter.qbs::artifactTypes" ref="qml-qbsmodules-exporter-qbs.html#artifactTypes-prop"/>
+            <keyword name="assemblerFlags" id="cpp::assemblerFlags" ref="qml-qbsmodules-cpp.html#assemblerFlags-prop"/>
+            <keyword name="assemblerName" id="cpp::assemblerName" ref="qml-qbsmodules-cpp.html#assemblerName-prop"/>
+            <keyword name="assemblerPath" id="cpp::assemblerPath" ref="qml-qbsmodules-cpp.html#assemblerPath-prop"/>
+            <keyword name="assetsDir" id="Android.sdk::assetsDir" ref="qml-qbsmodules-android-sdk.html#assetsDir-prop"/>
+            <keyword name="autoActivateCustomFonts" id="ib::autoActivateCustomFonts" ref="qml-qbsmodules-ib.html#autoActivateCustomFonts-prop"/>
+            <keyword name="autoDetect" id="Exporter.pkgconfig::autoDetect" ref="qml-qbsmodules-exporter-pkgconfig.html#autoDetect-prop"/>
+            <keyword name="automaticReferenceCounting" id="cpp::automaticReferenceCounting" ref="qml-qbsmodules-cpp.html#automaticReferenceCounting-prop"/>
+            <keyword name="automaticSources" id="Android.sdk::automaticSources" ref="qml-qbsmodules-android-sdk.html#automaticSources-prop"/>
+            <keyword name="autotest" id="QML.autotest" ref="qml-qbsmodules-autotest.html"/>
+            <keyword name="auxiliaryInputs" id="AutotestRunner::auxiliaryInputs" ref="qml-qbsconvenienceitems-autotestrunner.html#auxiliaryInputs-prop"/>
+            <keyword name="auxiliaryInputs" id="Rule::auxiliaryInputs" ref="qml-qbslanguageitems-rule.html#auxiliaryInputs-prop"/>
+            <keyword name="availableBuildVariants" id="Qt.core::availableBuildVariants" ref="qml-qbsmodules-qt-core.html#availableBuildVariants-prop"/>
+            <keyword name="availableSdkNames" id="xcode::availableSdkNames" ref="qml-qbsmodules-xcode.html#availableSdkNames-prop"/>
+            <keyword name="availableSdkVersions" id="xcode::availableSdkVersions" ref="qml-qbsmodules-xcode.html#availableSdkVersions-prop"/>
+            <keyword name="backgroundColor" id="dmg::backgroundColor" ref="qml-qbsmodules-dmg.html#backgroundColor-prop"/>
+            <keyword name="badgeVolumeIcon" id="dmg::badgeVolumeIcon" ref="qml-qbsmodules-dmg.html#badgeVolumeIcon-prop"/>
+            <keyword name="baseProfile" id="Profile::baseProfile" ref="qml-qbslanguageitems-profile.html#baseProfile-prop"/>
+            <keyword name="binPath" id="Qt.core::binPath" ref="qml-qbsmodules-qt-core.html#binPath-prop"/>
+            <keyword name="biplist" id="biplist" ref="qbs-attribution-biplist.html"/>
+            <keyword name="bootClassPaths" id="java::bootClassPaths" ref="qml-qbsmodules-java.html#bootClassPaths-prop"/>
+            <keyword name="build" id="build" ref="cli-build.html"/>
+            <keyword name="buildDirectory" id="Product::buildDirectory" ref="qml-qbslanguageitems-product.html#buildDirectory-prop"/>
+            <keyword name="buildDirectory" id="Project::buildDirectory" ref="qml-qbslanguageitems-project.html#buildDirectory-prop"/>
+            <keyword name="buildToolsVersion" id="Android.sdk::buildToolsVersion" ref="qml-qbsmodules-android-sdk.html#buildToolsVersion-prop"/>
+            <keyword name="buildVariant" id="qbs::buildVariant" ref="qml-qbsmodules-qbs.html#buildVariant-prop"/>
+            <keyword name="buildVariants" id="qbs::buildVariants" ref="qml-qbsmodules-qbs.html#buildVariants-prop"/>
+            <keyword name="builtByDefault" id="Product::builtByDefault" ref="qml-qbslanguageitems-product.html#builtByDefault-prop"/>
+            <keyword name="bundle" id="QML.bundle" ref="qml-qbsmodules-bundle.html"/>
+            <keyword name="bundleName" id="bundle::bundleName" ref="qml-qbsmodules-bundle.html#bundleName-prop"/>
+            <keyword name="cFlags" id="cpp::cFlags" ref="qml-qbsmodules-cpp.html#cFlags-prop"/>
+            <keyword name="cLanguageVersion" id="cpp::cLanguageVersion" ref="qml-qbsmodules-cpp.html#cLanguageVersion-prop"/>
+            <keyword name="cacheFilesInstallDir" id="Qt.qml::cacheFilesInstallDir" ref="qml-qbsmodules-qt-qml.html#cacheFilesInstallDir-prop"/>
+            <keyword name="cachingEnabled" id="Qt.qml::cachingEnabled" ref="qml-qbsmodules-qt-qml.html#cachingEnabled-prop"/>
+            <keyword name="candidateFilter" id="PathProbe::candidateFilter" ref="qml-pathprobe.html#candidateFilter-prop"/>
+            <keyword name="candidatePaths" id="PathProbe::candidatePaths" ref="qml-pathprobe.html#candidatePaths-prop"/>
+            <keyword name="cflagsEntry" id="Exporter.pkgconfig::cflagsEntry" ref="qml-qbsmodules-exporter-pkgconfig.html#cflagsEntry-prop"/>
+            <keyword name="className" id="Qt.scxml::className" ref="qml-qbsmodules-qt-scxml.html#className-prop"/>
+            <keyword name="clean" id="clean" ref="cli-clean.html"/>
+            <keyword name="combineCSources" id="cpp::combineCSources" ref="qml-qbsmodules-cpp.html#combineCSources-prop"/>
+            <keyword name="combineCxxSources" id="cpp::combineCxxSources" ref="qml-qbsmodules-cpp.html#combineCxxSources-prop"/>
+            <keyword name="combineMocOutput" id="Qt.core::combineMocOutput" ref="qml-qbsmodules-qt-core.html#combineMocOutput-prop"/>
+            <keyword name="combineObjcSources" id="cpp::combineObjcSources" ref="qml-qbsmodules-cpp.html#combineObjcSources-prop"/>
+            <keyword name="combineObjcxxSources" id="cpp::combineObjcxxSources" ref="qml-qbsmodules-cpp.html#combineObjcxxSources-prop"/>
+            <keyword name="command" id="archiver::command" ref="qml-qbsmodules-archiver.html#command-prop"/>
+            <keyword name="commonCompilerFlags" id="cpp::commonCompilerFlags" ref="qml-qbsmodules-cpp.html#commonCompilerFlags-prop"/>
+            <keyword name="compilerAvailable" id="Qt.quick::compilerAvailable" ref="qml-qbsmodules-qt-quick.html#compilerAvailable-prop"/>
+            <keyword name="compilerDefinesByLanguage" id="cpp::compilerDefinesByLanguage" ref="qml-qbsmodules-cpp.html#compilerDefinesByLanguage-prop"/>
+            <keyword name="compilerFilePath" id="java::compilerFilePath" ref="qml-qbsmodules-java.html#compilerFilePath-prop"/>
+            <keyword name="compilerFlags" id="PkgConfigProbe::compilerFlags" ref="qml-pkgconfigprobe.html#compilerFlags-prop"/>
+            <keyword name="compilerFlags" id="innosetup::compilerFlags" ref="qml-qbsmodules-innosetup.html#compilerFlags-prop"/>
+            <keyword name="compilerFlags" id="nsis::compilerFlags" ref="qml-qbsmodules-nsis.html#compilerFlags-prop"/>
+            <keyword name="compilerFlags" id="typescript::compilerFlags" ref="qml-qbsmodules-typescript.html#compilerFlags-prop"/>
+            <keyword name="compilerFlags" id="wix::compilerFlags" ref="qml-qbsmodules-wix.html#compilerFlags-prop"/>
+            <keyword name="compilerFrameworkPaths" id="cpp::compilerFrameworkPaths" ref="qml-qbsmodules-cpp.html#compilerFrameworkPaths-prop"/>
+            <keyword name="compilerIncludePaths" id="cpp::compilerIncludePaths" ref="qml-qbsmodules-cpp.html#compilerIncludePaths-prop"/>
+            <keyword name="compilerLibraryPaths" id="cpp::compilerLibraryPaths" ref="qml-qbsmodules-cpp.html#compilerLibraryPaths-prop"/>
+            <keyword name="compilerName" id="cpp::compilerName" ref="qml-qbsmodules-cpp.html#compilerName-prop"/>
+            <keyword name="compilerName" id="innosetup::compilerName" ref="qml-qbsmodules-innosetup.html#compilerName-prop"/>
+            <keyword name="compilerName" id="java::compilerName" ref="qml-qbsmodules-java.html#compilerName-prop"/>
+            <keyword name="compilerName" id="nsis::compilerName" ref="qml-qbsmodules-nsis.html#compilerName-prop"/>
+            <keyword name="compilerName" id="typescript::compilerName" ref="qml-qbsmodules-typescript.html#compilerName-prop"/>
+            <keyword name="compilerName" id="wix::compilerName" ref="qml-qbsmodules-wix.html#compilerName-prop"/>
+            <keyword name="compilerPath" id="cpp::compilerPath" ref="qml-qbsmodules-cpp.html#compilerPath-prop"/>
+            <keyword name="compilerPath" id="innosetup::compilerPath" ref="qml-qbsmodules-innosetup.html#compilerPath-prop"/>
+            <keyword name="compilerPath" id="nsis::compilerPath" ref="qml-qbsmodules-nsis.html#compilerPath-prop"/>
+            <keyword name="compilerPath" id="typescript::compilerPath" ref="qml-qbsmodules-typescript.html#compilerPath-prop"/>
+            <keyword name="compilerPath" id="wix::compilerPath" ref="qml-qbsmodules-wix.html#compilerPath-prop"/>
+            <keyword name="compilerPathByLanguage" id="cpp::compilerPathByLanguage" ref="qml-qbsmodules-cpp.html#compilerPathByLanguage-prop"/>
+            <keyword name="compilerVersionMajor" id="cpp::compilerVersionMajor" ref="qml-qbsmodules-cpp.html#compilerVersionMajor-prop"/>
+            <keyword name="compilerVersionMinor" id="cpp::compilerVersionMinor" ref="qml-qbsmodules-cpp.html#compilerVersionMinor-prop"/>
+            <keyword name="compilerVersionPatch" id="cpp::compilerVersionPatch" ref="qml-qbsmodules-cpp.html#compilerVersionPatch-prop"/>
+            <keyword name="compilerWrapper" id="cpp::compilerWrapper" ref="qml-qbsmodules-cpp.html#compilerWrapper-prop"/>
+            <keyword name="compressPngs" id="ib::compressPngs" ref="qml-qbsmodules-ib.html#compressPngs-prop"/>
+            <keyword name="compressionLevel" id="archiver::compressionLevel" ref="qml-qbsmodules-archiver.html#compressionLevel-prop"/>
+            <keyword name="compressionLevel" id="dmg::compressionLevel" ref="qml-qbsmodules-dmg.html#compressionLevel-prop"/>
+            <keyword name="compressionType" id="archiver::compressionType" ref="qml-qbsmodules-archiver.html#compressionType-prop"/>
+            <keyword name="compressor" id="nsis::compressor" ref="qml-qbsmodules-nsis.html#compressor-prop"/>
+            <keyword name="condition" id="Depends::condition" ref="qml-qbslanguageitems-depends.html#condition-prop"/>
+            <keyword name="condition" id="Group::condition" ref="qml-qbslanguageitems-group.html#condition-prop"/>
+            <keyword name="condition" id="JobLimit::condition" ref="qml-qbslanguageitems-joblimit.html#condition-prop"/>
+            <keyword name="condition" id="Module::condition" ref="qml-qbslanguageitems-module.html#condition-prop"/>
+            <keyword name="condition" id="Probe::condition" ref="qml-qbslanguageitems-probe.html#condition-prop"/>
+            <keyword name="condition" id="Product::condition" ref="qml-qbslanguageitems-product.html#condition-prop"/>
+            <keyword name="condition" id="Profile::condition" ref="qml-qbslanguageitems-profile.html#condition-prop"/>
+            <keyword name="condition" id="Project::condition" ref="qml-qbslanguageitems-project.html#condition-prop"/>
+            <keyword name="condition" id="Properties::condition" ref="qml-qbslanguageitems-properties.html#condition-prop"/>
+            <keyword name="condition" id="Rule::condition" ref="qml-qbslanguageitems-rule.html#condition-prop"/>
+            <keyword name="condition" id="Scanner::condition" ref="qml-qbslanguageitems-scanner.html#condition-prop"/>
+            <keyword name="config" id="Qt.core::config" ref="qml-qbsmodules-qt-core.html#config-prop"/>
+            <keyword name="config" id="config" ref="cli-config.html"/>
+            <keyword name="config-ui" id="config-ui" ref="cli-config-ui.html"/>
+            <keyword name="configurationDir" id="qnx::configurationDir" ref="qml-qbsmodules-qnx.html#configurationDir-prop"/>
+            <keyword name="configurationName" id="qbs::configurationName" ref="qml-qbsmodules-qbs.html#configurationName-prop"/>
+            <keyword name="configure" id="Probe::configure" ref="qml-qbslanguageitems-probe.html#configure-prop"/>
+            <keyword name="conflictsEntry" id="Exporter.pkgconfig::conflictsEntry" ref="qml-qbsmodules-exporter-pkgconfig.html#conflictsEntry-prop"/>
+            <keyword name="consoleApplication" id="Product::consoleApplication" ref="qml-qbslanguageitems-product.html#consoleApplication-prop"/>
+            <keyword name="contentsFolderPath" id="bundle::contentsFolderPath" ref="qml-qbsmodules-bundle.html#contentsFolderPath-prop"/>
+            <keyword name="cpp" id="QML.cpp" ref="qml-qbsmodules-cpp.html"/>
+            <keyword name="cppFlags" id="cpp::cppFlags" ref="qml-qbsmodules-cpp.html#cppFlags-prop"/>
+            <keyword name="cpufeatures" id="QML.cpufeatures" ref="qml-qbsmodules-cpufeatures.html"/>
+            <keyword name="create-project" id="create-project" ref="cli-create-project.html"/>
+            <keyword name="cultures" id="wix::cultures" ref="qml-qbsmodules-wix.html#cultures-prop"/>
+            <keyword name="cursorHotspotX" id="ico::cursorHotspotX" ref="qml-qbsmodules-ico.html#cursorHotspotX-prop"/>
+            <keyword name="cursorHotspotY" id="ico::cursorHotspotY" ref="qml-qbsmodules-ico.html#cursorHotspotY-prop"/>
+            <keyword name="customVariables" id="Exporter.pkgconfig::customVariables" ref="qml-qbsmodules-exporter-pkgconfig.html#customVariables-prop"/>
+            <keyword name="cxxFlags" id="cpp::cxxFlags" ref="qml-qbsmodules-cpp.html#cxxFlags-prop"/>
+            <keyword name="cxxLanguageVersion" id="cpp::cxxLanguageVersion" ref="qml-qbsmodules-cpp.html#cxxLanguageVersion-prop"/>
+            <keyword name="cxxStandardLibrary" id="cpp::cxxStandardLibrary" ref="qml-qbsmodules-cpp.html#cxxStandardLibrary-prop"/>
+            <keyword name="debugInformation" id="cpp::debugInformation" ref="qml-qbsmodules-cpp.html#debugInformation-prop"/>
+            <keyword name="debugInformation" id="qbs::debugInformation" ref="qml-qbsmodules-qbs.html#debugInformation-prop"/>
+            <keyword name="debugInformation" id="wix::debugInformation" ref="qml-qbsmodules-wix.html#debugInformation-prop"/>
+            <keyword name="defaultLicenseLocale" id="dmg::defaultLicenseLocale" ref="qml-qbsmodules-dmg.html#defaultLicenseLocale-prop"/>
+            <keyword name="defaultPluginsByType" id="Qt.plugin_support::defaultPluginsByType" ref="qml-qbsmodules-qt-plugin-support.html#defaultPluginsByType-prop"/>
+            <keyword name="defines" id="PkgConfigProbe::defines" ref="qml-pkgconfigprobe.html#defines-prop"/>
+            <keyword name="defines" id="cpp::defines" ref="qml-qbsmodules-cpp.html#defines-prop"/>
+            <keyword name="defines" id="innosetup::defines" ref="qml-qbsmodules-innosetup.html#defines-prop"/>
+            <keyword name="defines" id="nsis::defines" ref="qml-qbsmodules-nsis.html#defines-prop"/>
+            <keyword name="defines" id="wix::defines" ref="qml-qbsmodules-wix.html#defines-prop"/>
+            <keyword name="deploymentDependencies" id="Qt.android_support::deploymentDependencies" ref="qml-qbsmodules-qt-android-support.html#deploymentDependencies-prop"/>
+            <keyword name="description" id="PropertyOptions::description" ref="qml-qbslanguageitems-propertyoptions.html#description-prop"/>
+            <keyword name="destinationDirectory" id="Product::destinationDirectory" ref="qml-qbslanguageitems-product.html#destinationDirectory-prop"/>
+            <keyword name="developerPath" id="xcode::developerPath" ref="qml-qbsmodules-xcode.html#developerPath-prop"/>
+            <keyword name="dict" id="texttemplate::dict" ref="qml-qbsmodules-texttemplate.html#dict-prop"/>
+            <keyword name="disableConfig" id="nsis::disableConfig" ref="qml-qbsmodules-nsis.html#disableConfig-prop"/>
+            <keyword name="discardUnusedData" id="cpp::discardUnusedData" ref="qml-qbsmodules-cpp.html#discardUnusedData-prop"/>
+            <keyword name="distributionFrameworkPaths" id="cpp::distributionFrameworkPaths" ref="qml-qbsmodules-cpp.html#distributionFrameworkPaths-prop"/>
+            <keyword name="distributionIncludePaths" id="cpp::distributionIncludePaths" ref="qml-qbsmodules-cpp.html#distributionIncludePaths-prop"/>
+            <keyword name="distributionLibraryPaths" id="cpp::distributionLibraryPaths" ref="qml-qbsmodules-cpp.html#distributionLibraryPaths-prop"/>
+            <keyword name="dmg" id="QML.dmg" ref="qml-qbsmodules-dmg.html"/>
+            <keyword name="dmgSuffix" id="dmg::dmgSuffix" ref="qml-qbsmodules-dmg.html#dmgSuffix-prop"/>
+            <keyword name="dmgbuild" id="dmgbuild" ref="qbs-attribution-dmgbuild.html"/>
+            <keyword name="docPath" id="Qt.core::docPath" ref="qml-qbsmodules-qt-core.html#docPath-prop"/>
+            <keyword name="documentationFolderPath" id="bundle::documentationFolderPath" ref="qml-qbsmodules-bundle.html#documentationFolderPath-prop"/>
+            <keyword name="driverFlags" id="cpp::driverFlags" ref="qml-qbsmodules-cpp.html#driverFlags-prop"/>
+            <keyword name="driverLinkerFlags" id="cpp::driverLinkerFlags" ref="qml-qbsmodules-cpp.html#driverLinkerFlags-prop"/>
+            <keyword name="ds_store" id="ds_store" ref="qbs-attribution-ds-store.html"/>
+            <keyword name="dsymutilFlags" id="cpp::dsymutilFlags" ref="qml-qbsmodules-cpp.html#dsymutilFlags-prop"/>
+            <keyword name="dsymutilPath" id="cpp::dsymutilPath" ref="qml-qbsmodules-cpp.html#dsymutilPath-prop"/>
+            <keyword name="dump-nodes-tree" id="dump-nodes-tree" ref="cli-dump-nodes-tree.html"/>
+            <keyword name="dynamicLibraries" id="cpp::dynamicLibraries" ref="qml-qbsmodules-cpp.html#dynamicLibraries-prop"/>
+            <keyword name="embedInfoPlist" id="bundle::embedInfoPlist" ref="qml-qbsmodules-bundle.html#embedInfoPlist-prop"/>
+            <keyword name="embedJar" id="Android.sdk::embedJar" ref="qml-qbsmodules-android-sdk.html#embedJar-prop"/>
+            <keyword name="enableBigResources" id="Qt.core::enableBigResources" ref="qml-qbsmodules-qt-core.html#enableBigResources-prop"/>
+            <keyword name="enableCompilerDefinesByLanguage" id="cpp::enableCompilerDefinesByLanguage" ref="qml-qbsmodules-cpp.html#enableCompilerDefinesByLanguage-prop"/>
+            <keyword name="enableCompilerWarnings" id="lex_yacc::enableCompilerWarnings" ref="qml-qbsmodules-lex-yacc.html#enableCompilerWarnings-prop"/>
+            <keyword name="enableDebugCode" id="qbs::enableDebugCode" ref="qml-qbsmodules-qbs.html#enableDebugCode-prop"/>
+            <keyword name="enableExceptions" id="cpp::enableExceptions" ref="qml-qbsmodules-cpp.html#enableExceptions-prop"/>
+            <keyword name="enableFallback" id="Depends::enableFallback" ref="qml-qbslanguageitems-depends.html#enableFallback-prop"/>
+            <keyword name="enableKeywords" id="Qt.core::enableKeywords" ref="qml-qbsmodules-qt-core.html#enableKeywords-prop"/>
+            <keyword name="enableQbsDefines" id="nsis::enableQbsDefines" ref="qml-qbsmodules-nsis.html#enableQbsDefines-prop"/>
+            <keyword name="enableQbsDefines" id="wix::enableQbsDefines" ref="qml-qbsmodules-wix.html#enableQbsDefines-prop"/>
+            <keyword name="enableReproducibleBuilds" id="cpp::enableReproducibleBuilds" ref="qml-qbsmodules-cpp.html#enableReproducibleBuilds-prop"/>
+            <keyword name="enableRtti" id="cpp::enableRtti" ref="qml-qbsmodules-cpp.html#enableRtti-prop"/>
+            <keyword name="enableWarnings" id="java::enableWarnings" ref="qml-qbsmodules-java.html#enableWarnings-prop"/>
+            <keyword name="endianness" id="cpp::endianness" ref="qml-qbsmodules-cpp.html#endianness-prop"/>
+            <keyword name="entryPoint" id="JavaJarFile::entryPoint" ref="qml-qbsconvenienceitems-javajarfile.html#entryPoint-prop"/>
+            <keyword name="entryPoint" id="cpp::entryPoint" ref="qml-qbsmodules-cpp.html#entryPoint-prop"/>
+            <keyword name="environment" id="AutotestRunner::environment" ref="qml-qbsconvenienceitems-autotestrunner.html#environment-prop"/>
+            <keyword name="environmentPaths" id="PathProbe::environmentPaths" ref="qml-pathprobe.html#environmentPaths-prop"/>
+            <keyword name="errors" id="ib::errors" ref="qml-qbsmodules-ib.html#errors-prop"/>
+            <keyword name="exactVersion" id="PkgConfigProbe::exactVersion" ref="qml-pkgconfigprobe.html#exactVersion-prop"/>
+            <keyword name="exceptionHandlingModel" id="cpp::exceptionHandlingModel" ref="qml-qbsmodules-cpp.html#exceptionHandlingModel-prop"/>
+            <keyword name="excludeFiles" id="Group::excludeFiles" ref="qml-qbslanguageitems-group.html#excludeFiles-prop"/>
+            <keyword name="excludeFiles" id="Product::excludeFiles" ref="qml-qbslanguageitems-product.html#excludeFiles-prop"/>
+            <keyword name="excludedDependencies" id="Exporter.pkgconfig::excludedDependencies" ref="qml-qbsmodules-exporter-pkgconfig.html#excludedDependencies-prop"/>
+            <keyword name="excludedDependencies" id="Exporter.qbs::excludedDependencies" ref="qml-qbsmodules-exporter-qbs.html#excludedDependencies-prop"/>
+            <keyword name="excludedInputs" id="Rule::excludedInputs" ref="qml-qbslanguageitems-rule.html#excludedInputs-prop"/>
+            <keyword name="executable" id="PkgConfigProbe::executable" ref="qml-pkgconfigprobe.html#executable-prop"/>
+            <keyword name="executableFilePath" id="pkgconfig::executableFilePath" ref="qml-qbsmodules-pkgconfig.html#executableFilePath-prop"/>
+            <keyword name="executableFolderPath" id="bundle::executableFolderPath" ref="qml-qbsmodules-bundle.html#executableFolderPath-prop"/>
+            <keyword name="executablePath" id="bundle::executablePath" ref="qml-qbsmodules-bundle.html#executablePath-prop"/>
+            <keyword name="executablesFolderPath" id="bundle::executablesFolderPath" ref="qml-qbsmodules-bundle.html#executablesFolderPath-prop"/>
+            <keyword name="explicitlyDependsOn" id="Rule::explicitlyDependsOn" ref="qml-qbslanguageitems-rule.html#explicitlyDependsOn-prop"/>
+            <keyword name="explicitlyDependsOnFromDependencies" id="Rule::explicitlyDependsOnFromDependencies" ref="qml-qbslanguageitems-rule.html#explicitlyDependsOnFromDependencies-prop"/>
+            <keyword name="exportedSymbolsCheckMode" id="cpp::exportedSymbolsCheckMode" ref="qml-qbsmodules-cpp.html#exportedSymbolsCheckMode-prop"/>
+            <keyword name="extension" id="bundle::extension" ref="qml-qbsmodules-bundle.html#extension-prop"/>
+            <keyword name="extensions" id="wix::extensions" ref="qml-qbsmodules-wix.html#extensions-prop"/>
+            <keyword name="extraLibs" id="Qt.android_support::extraLibs" ref="qml-qbsmodules-qt-android-support.html#extraLibs-prop"/>
+            <keyword name="extraPlugins" id="Qt.android_support::extraPlugins" ref="qml-qbsmodules-qt-android-support.html#extraPlugins-prop"/>
+            <keyword name="fileName" id="Exporter.pkgconfig::fileName" ref="qml-qbsmodules-exporter-pkgconfig.html#fileName-prop"/>
+            <keyword name="fileName" id="Exporter.qbs::fileName" ref="qml-qbsmodules-exporter-qbs.html#fileName-prop"/>
+            <keyword name="fileName" id="PathProbe::fileName" ref="qml-pathprobe.html#fileName-prop"/>
+            <keyword name="filePath" id="Artifact::filePath" ref="qml-qbslanguageitems-artifact.html#filePath-prop"/>
+            <keyword name="filePath" id="PathProbe::filePath" ref="qml-pathprobe.html#filePath-prop"/>
+            <keyword name="filePath" id="SubProject::filePath" ref="qml-qbslanguageitems-subproject.html#filePath-prop"/>
+            <keyword name="fileTags" id="Artifact::fileTags" ref="qml-qbslanguageitems-artifact.html#fileTags-prop"/>
+            <keyword name="fileTags" id="FileTagger::fileTags" ref="qml-qbslanguageitems-filetagger.html#fileTags-prop"/>
+            <keyword name="fileTags" id="Group::fileTags" ref="qml-qbslanguageitems-group.html#fileTags-prop"/>
+            <keyword name="fileTagsFilter" id="Group::fileTagsFilter" ref="qml-qbslanguageitems-group.html#fileTagsFilter-prop"/>
+            <keyword name="files" id="Group::files" ref="qml-qbslanguageitems-group.html#files-prop"/>
+            <keyword name="files" id="Product::files" ref="qml-qbslanguageitems-product.html#files-prop"/>
+            <keyword name="filesAreTargets" id="Group::filesAreTargets" ref="qml-qbslanguageitems-group.html#filesAreTargets-prop"/>
+            <keyword name="flags" id="archiver::flags" ref="qml-qbsmodules-archiver.html#flags-prop"/>
+            <keyword name="flags" id="ib::flags" ref="qml-qbsmodules-ib.html#flags-prop"/>
+            <keyword name="flatten" id="ib::flatten" ref="qml-qbsmodules-ib.html#flatten-prop"/>
+            <keyword name="forStaticBuild" id="PkgConfigProbe::forStaticBuild" ref="qml-pkgconfigprobe.html#forStaticBuild-prop"/>
+            <keyword name="format" id="dmg::format" ref="qml-qbsmodules-dmg.html#format-prop"/>
+            <keyword name="found" id="Probe::found" ref="qml-qbslanguageitems-probe.html#found-prop"/>
+            <keyword name="frameworkBuild" id="Qt.core::frameworkBuild" ref="qml-qbsmodules-qt-core.html#frameworkBuild-prop"/>
+            <keyword name="frameworkPath" id="protobuf.objc::frameworkPath" ref="qml-qbsmodules-protobuf-objc.html#frameworkPath-prop"/>
+            <keyword name="frameworkPaths" id="cpp::frameworkPaths" ref="qml-qbsmodules-cpp.html#frameworkPaths-prop"/>
+            <keyword name="frameworkVersion" id="bundle::frameworkVersion" ref="qml-qbsmodules-bundle.html#frameworkVersion-prop"/>
+            <keyword name="frameworks" id="cpp::frameworks" ref="qml-qbsmodules-cpp.html#frameworks-prop"/>
+            <keyword name="frameworksFolderPath" id="bundle::frameworksFolderPath" ref="qml-qbsmodules-bundle.html#frameworksFolderPath-prop"/>
+            <keyword name="generate" id="generate" ref="cli-generate.html"/>
+            <keyword name="generateCacheFiles" id="Qt.qml::generateCacheFiles" ref="qml-qbsmodules-qt-qml.html#generateCacheFiles-prop"/>
+            <keyword name="generateDeclarations" id="typescript::generateDeclarations" ref="qml-qbsmodules-typescript.html#generateDeclarations-prop"/>
+            <keyword name="generateManifestFile" id="cpp::generateManifestFile" ref="qml-qbsmodules-cpp.html#generateManifestFile-prop"/>
+            <keyword name="generateMapFile" id="cpp::generateMapFile" ref="qml-qbsmodules-cpp.html#generateMapFile-prop"/>
+            <keyword name="generatePackageInfo" id="bundle::generatePackageInfo" ref="qml-qbsmodules-bundle.html#generatePackageInfo-prop"/>
+            <keyword name="generateSourceMaps" id="typescript::generateSourceMaps" ref="qml-qbsmodules-typescript.html#generateSourceMaps-prop"/>
+            <keyword name="generateStateMethods" id="Qt.scxml::generateStateMethods" ref="qml-qbsmodules-qt-scxml.html#generateStateMethods-prop"/>
+            <keyword name="grpcIncludePath" id="protobuf.cpp::grpcIncludePath" ref="qml-qbsmodules-protobuf-cpp.html#grpcIncludePath-prop"/>
+            <keyword name="grpcLibraryPath" id="protobuf.cpp::grpcLibraryPath" ref="qml-qbsmodules-protobuf-cpp.html#grpcLibraryPath-prop"/>
+            <keyword name="hdiutilPath" id="dmg::hdiutilPath" ref="qml-qbsmodules-dmg.html#hdiutilPath-prop"/>
+            <keyword name="headerFileName" id="vcs::headerFileName" ref="qml-qbsmodules-vcs.html#headerFileName-prop"/>
+            <keyword name="help" id="help" ref="cli-help.html"/>
+            <keyword name="hostDir" id="qnx::hostDir" ref="qml-qbsmodules-qnx.html#hostDir-prop"/>
+            <keyword name="hostOS" id="qbs::hostOS" ref="qml-qbsmodules-qbs.html#hostOS-prop"/>
+            <keyword name="hostOSBuildVersion" id="qbs::hostOSBuildVersion" ref="qml-qbsmodules-qbs.html#hostOSBuildVersion-prop"/>
+            <keyword name="hostOSVersion" id="qbs::hostOSVersion" ref="qml-qbsmodules-qbs.html#hostOSVersion-prop"/>
+            <keyword name="hostOSVersionMajor" id="qbs::hostOSVersionMajor" ref="qml-qbsmodules-qbs.html#hostOSVersionMajor-prop"/>
+            <keyword name="hostOSVersionMinor" id="qbs::hostOSVersionMinor" ref="qml-qbsmodules-qbs.html#hostOSVersionMinor-prop"/>
+            <keyword name="hostOSVersionParts" id="qbs::hostOSVersionParts" ref="qml-qbsmodules-qbs.html#hostOSVersionParts-prop"/>
+            <keyword name="hostOSVersionPatch" id="qbs::hostOSVersionPatch" ref="qml-qbsmodules-qbs.html#hostOSVersionPatch-prop"/>
+            <keyword name="hostPlatform" id="qbs::hostPlatform" ref="qml-qbsmodules-qbs.html#hostPlatform-prop"/>
+            <keyword name="ib" id="QML.ib" ref="qml-qbsmodules-ib.html"/>
+            <keyword name="ibtoolName" id="ib::ibtoolName" ref="qml-qbsmodules-ib.html#ibtoolName-prop"/>
+            <keyword name="ibtoolPath" id="ib::ibtoolPath" ref="qml-qbsmodules-ib.html#ibtoolPath-prop"/>
+            <keyword name="ico" id="QML.ico" ref="qml-qbsmodules-ico.html"/>
+            <keyword name="iconPositions" id="dmg::iconPositions" ref="qml-qbsmodules-dmg.html#iconPositions-prop"/>
+            <keyword name="iconSize" id="dmg::iconSize" ref="qml-qbsmodules-dmg.html#iconSize-prop"/>
+            <keyword name="iconX" id="dmg::iconX" ref="qml-qbsmodules-dmg.html#iconX-prop"/>
+            <keyword name="iconY" id="dmg::iconY" ref="qml-qbsmodules-dmg.html#iconY-prop"/>
+            <keyword name="iconutilName" id="ib::iconutilName" ref="qml-qbsmodules-ib.html#iconutilName-prop"/>
+            <keyword name="iconutilPath" id="ib::iconutilPath" ref="qml-qbsmodules-ib.html#iconutilPath-prop"/>
+            <keyword name="icotoolFilePath" id="ico::icotoolFilePath" ref="qml-qbsmodules-ico.html#icotoolFilePath-prop"/>
+            <keyword name="identifier" id="bundle::identifier" ref="qml-qbsmodules-bundle.html#identifier-prop"/>
+            <keyword name="identifierPrefix" id="bundle::identifierPrefix" ref="qml-qbsmodules-bundle.html#identifierPrefix-prop"/>
+            <keyword name="importLibInstallDir" id="DynamicLibrary::importLibInstallDir" ref="qml-qbsconvenienceitems-dynamiclibrary.html#importLibInstallDir-prop"/>
+            <keyword name="importPaths" id="protobuf.cpp::importPaths" ref="qml-qbsmodules-protobuf-cpp.html#importPaths-prop"/>
+            <keyword name="importPaths" id="protobuf.objc::importPaths" ref="qml-qbsmodules-protobuf-objc.html#importPaths-prop"/>
+            <keyword name="incPath" id="Qt.core::incPath" ref="qml-qbsmodules-qt-core.html#incPath-prop"/>
+            <keyword name="includePath" id="protobuf.cpp::includePath" ref="qml-qbsmodules-protobuf-cpp.html#includePath-prop"/>
+            <keyword name="includePath" id="protobuf.objc::includePath" ref="qml-qbsmodules-protobuf-objc.html#includePath-prop"/>
+            <keyword name="includePaths" id="PkgConfigProbe::includePaths" ref="qml-pkgconfigprobe.html#includePaths-prop"/>
+            <keyword name="includePaths" id="cpp::includePaths" ref="qml-qbsmodules-cpp.html#includePaths-prop"/>
+            <keyword name="includePaths" id="innosetup::includePaths" ref="qml-qbsmodules-innosetup.html#includePaths-prop"/>
+            <keyword name="includePaths" id="wix::includePaths" ref="qml-qbsmodules-wix.html#includePaths-prop"/>
+            <keyword name="infoPlist" id="bundle::infoPlist" ref="qml-qbsmodules-bundle.html#infoPlist-prop"/>
+            <keyword name="infoPlistFormat" id="bundle::infoPlistFormat" ref="qml-qbsmodules-bundle.html#infoPlistFormat-prop"/>
+            <keyword name="infoPlistPath" id="bundle::infoPlistPath" ref="qml-qbsmodules-bundle.html#infoPlistPath-prop"/>
+            <keyword name="infoStringsPath" id="bundle::infoStringsPath" ref="qml-qbsmodules-bundle.html#infoStringsPath-prop"/>
+            <keyword name="inheritProperties" id="SubProject::inheritProperties" ref="qml-qbslanguageitems-subproject.html#inheritProperties-prop"/>
+            <keyword name="innosetup" id="QML.innosetup" ref="qml-qbsmodules-innosetup.html"/>
+            <keyword name="inputs" id="Rule::inputs" ref="qml-qbslanguageitems-rule.html#inputs-prop"/>
+            <keyword name="inputs" id="Scanner::inputs" ref="qml-qbslanguageitems-scanner.html#inputs-prop"/>
+            <keyword name="inputsFromDependencies" id="Rule::inputsFromDependencies" ref="qml-qbslanguageitems-rule.html#inputsFromDependencies-prop"/>
+            <keyword name="install" id="Application::install" ref="qml-qbsconvenienceitems-application.html#install-prop"/>
+            <keyword name="install" id="DynamicLibrary::install" ref="qml-qbsconvenienceitems-dynamiclibrary.html#install-prop"/>
+            <keyword name="install" id="StaticLibrary::install" ref="qml-qbsconvenienceitems-staticlibrary.html#install-prop"/>
+            <keyword name="install" id="install" ref="cli-install.html"/>
+            <keyword name="install" id="qbs::install" ref="qml-qbsmodules-qbs.html#install-prop"/>
+            <keyword name="installDir" id="Application::installDir" ref="qml-qbsconvenienceitems-application.html#installDir-prop"/>
+            <keyword name="installDir" id="DynamicLibrary::installDir" ref="qml-qbsconvenienceitems-dynamiclibrary.html#installDir-prop"/>
+            <keyword name="installDir" id="StaticLibrary::installDir" ref="qml-qbsconvenienceitems-staticlibrary.html#installDir-prop"/>
+            <keyword name="installDir" id="qbs::installDir" ref="qml-qbsmodules-qbs.html#installDir-prop"/>
+            <keyword name="installImportLib" id="DynamicLibrary::installImportLib" ref="qml-qbsconvenienceitems-dynamiclibrary.html#installImportLib-prop"/>
+            <keyword name="installPrefix" id="qbs::installPrefix" ref="qml-qbsmodules-qbs.html#installPrefix-prop"/>
+            <keyword name="installRoot" id="qbs::installRoot" ref="qml-qbsmodules-qbs.html#installRoot-prop"/>
+            <keyword name="installSourceBase" id="qbs::installSourceBase" ref="qml-qbsmodules-qbs.html#installSourceBase-prop"/>
+            <keyword name="interpreterFilePath" id="java::interpreterFilePath" ref="qml-qbsmodules-java.html#interpreterFilePath-prop"/>
+            <keyword name="interpreterName" id="java::interpreterName" ref="qml-qbsmodules-java.html#interpreterName-prop"/>
+            <keyword name="isBundle" id="bundle::isBundle" ref="qml-qbsmodules-bundle.html#isBundle-prop"/>
+            <keyword name="isShallow" id="bundle::isShallow" ref="qml-qbsmodules-bundle.html#isShallow-prop"/>
+            <keyword name="jarFilePath" id="java::jarFilePath" ref="qml-qbsmodules-java.html#jarFilePath-prop"/>
+            <keyword name="jarName" id="java::jarName" ref="qml-qbsmodules-java.html#jarName-prop"/>
+            <keyword name="java" id="QML.java" ref="qml-qbsmodules-java.html"/>
+            <keyword name="javaFolderPath" id="bundle::javaFolderPath" ref="qml-qbsmodules-bundle.html#javaFolderPath-prop"/>
+            <keyword name="jdkIncludePaths" id="java::jdkIncludePaths" ref="qml-qbsmodules-java.html#jdkIncludePaths-prop"/>
+            <keyword name="jdkPath" id="java::jdkPath" ref="qml-qbsmodules-java.html#jdkPath-prop"/>
+            <keyword name="jobCount" id="JobLimit::jobCount" ref="qml-qbslanguageitems-joblimit.html#jobCount-prop"/>
+            <keyword name="jobPool" id="JobLimit::jobPool" ref="qml-qbslanguageitems-joblimit.html#jobPool-prop"/>
+            <keyword name="languageVersion" id="java::languageVersion" ref="qml-qbsmodules-java.html#languageVersion-prop"/>
+            <keyword name="latestSdkName" id="xcode::latestSdkName" ref="qml-qbsmodules-xcode.html#latestSdkName-prop"/>
+            <keyword name="latestSdkVersion" id="xcode::latestSdkVersion" ref="qml-qbsmodules-xcode.html#latestSdkVersion-prop"/>
+            <keyword name="launchImageName" id="ib::launchImageName" ref="qml-qbsmodules-ib.html#launchImageName-prop"/>
+            <keyword name="lexBinary" id="lex_yacc::lexBinary" ref="qml-qbsmodules-lex-yacc.html#lexBinary-prop"/>
+            <keyword name="lexFlags" id="lex_yacc::lexFlags" ref="qml-qbsmodules-lex-yacc.html#lexFlags-prop"/>
+            <keyword name="lexOutputFilePath" id="lex_yacc::lexOutputFilePath" ref="qml-qbsmodules-lex-yacc.html#lexOutputFilePath-prop"/>
+            <keyword name="lex_yacc" id="QML.lex_yacc" ref="qml-qbsmodules-lex-yacc.html"/>
+            <keyword name="libDirs" id="PkgConfigProbe::libDirs" ref="qml-pkgconfigprobe.html#libDirs-prop"/>
+            <keyword name="libDirs" id="pkgconfig::libDirs" ref="qml-qbsmodules-pkgconfig.html#libDirs-prop"/>
+            <keyword name="libInfix" id="Qt.core::libInfix" ref="qml-qbsmodules-qt-core.html#libInfix-prop"/>
+            <keyword name="libPath" id="Qt.core::libPath" ref="qml-qbsmodules-qt-core.html#libPath-prop"/>
+            <keyword name="libraries" id="PkgConfigProbe::libraries" ref="qml-pkgconfigprobe.html#libraries-prop"/>
+            <keyword name="libraryPath" id="protobuf.cpp::libraryPath" ref="qml-qbsmodules-protobuf-cpp.html#libraryPath-prop"/>
+            <keyword name="libraryPath" id="protobuf.objc::libraryPath" ref="qml-qbsmodules-protobuf-objc.html#libraryPath-prop"/>
+            <keyword name="libraryPaths" id="PkgConfigProbe::libraryPaths" ref="qml-pkgconfigprobe.html#libraryPaths-prop"/>
+            <keyword name="libraryPaths" id="cpp::libraryPaths" ref="qml-qbsmodules-cpp.html#libraryPaths-prop"/>
+            <keyword name="libsEntry" id="Exporter.pkgconfig::libsEntry" ref="qml-qbsmodules-exporter-pkgconfig.html#libsEntry-prop"/>
+            <keyword name="libsPrivateEntry" id="Exporter.pkgconfig::libsPrivateEntry" ref="qml-qbsmodules-exporter-pkgconfig.html#libsPrivateEntry-prop"/>
+            <keyword name="licenseAgreeButtonText" id="dmg::licenseAgreeButtonText" ref="qml-qbsmodules-dmg.html#licenseAgreeButtonText-prop"/>
+            <keyword name="licenseDisagreeButtonText" id="dmg::licenseDisagreeButtonText" ref="qml-qbsmodules-dmg.html#licenseDisagreeButtonText-prop"/>
+            <keyword name="licenseInstructionText" id="dmg::licenseInstructionText" ref="qml-qbsmodules-dmg.html#licenseInstructionText-prop"/>
+            <keyword name="licenseLanguageName" id="dmg::licenseLanguageName" ref="qml-qbsmodules-dmg.html#licenseLanguageName-prop"/>
+            <keyword name="licenseLocale" id="dmg::licenseLocale" ref="qml-qbsmodules-dmg.html#licenseLocale-prop"/>
+            <keyword name="licensePrintButtonText" id="dmg::licensePrintButtonText" ref="qml-qbsmodules-dmg.html#licensePrintButtonText-prop"/>
+            <keyword name="licenseSaveButtonText" id="dmg::licenseSaveButtonText" ref="qml-qbsmodules-dmg.html#licenseSaveButtonText-prop"/>
+            <keyword name="limitToSubProject" id="AutotestRunner::limitToSubProject" ref="qml-qbsconvenienceitems-autotestrunner.html#limitToSubProject-prop"/>
+            <keyword name="limitToSubProject" id="Depends::limitToSubProject" ref="qml-qbslanguageitems-depends.html#limitToSubProject-prop"/>
+            <keyword name="linkPlugins" id="Qt.plugin_support::linkPlugins" ref="qml-qbsmodules-qt-plugin-support.html#linkPlugins-prop"/>
+            <keyword name="linkerFlags" id="PkgConfigProbe::linkerFlags" ref="qml-pkgconfigprobe.html#linkerFlags-prop"/>
+            <keyword name="linkerFlags" id="cpp::linkerFlags" ref="qml-qbsmodules-cpp.html#linkerFlags-prop"/>
+            <keyword name="linkerFlags" id="wix::linkerFlags" ref="qml-qbsmodules-wix.html#linkerFlags-prop"/>
+            <keyword name="linkerMode" id="cpp::linkerMode" ref="qml-qbsmodules-cpp.html#linkerMode-prop"/>
+            <keyword name="linkerName" id="cpp::linkerName" ref="qml-qbsmodules-cpp.html#linkerName-prop"/>
+            <keyword name="linkerName" id="wix::linkerName" ref="qml-qbsmodules-wix.html#linkerName-prop"/>
+            <keyword name="linkerPath" id="cpp::linkerPath" ref="qml-qbsmodules-cpp.html#linkerPath-prop"/>
+            <keyword name="linkerPath" id="wix::linkerPath" ref="qml-qbsmodules-wix.html#linkerPath-prop"/>
+            <keyword name="linkerVariant" id="cpp::linkerVariant" ref="qml-qbsmodules-cpp.html#linkerVariant-prop"/>
+            <keyword name="linkerWrapper" id="cpp::linkerWrapper" ref="qml-qbsmodules-cpp.html#linkerWrapper-prop"/>
+            <keyword name="lipoPath" id="cpp::lipoPath" ref="qml-qbsmodules-cpp.html#lipoPath-prop"/>
+            <keyword name="list-products" id="list-products" ref="cli-list-products.html"/>
+            <keyword name="localizedResourcesFolderPath" id="bundle::localizedResourcesFolderPath" ref="qml-qbsmodules-bundle.html#localizedResourcesFolderPath-prop"/>
+            <keyword name="lreleaseMultiplexMode" id="Qt.core::lreleaseMultiplexMode" ref="qml-qbsmodules-qt-core.html#lreleaseMultiplexMode-prop"/>
+            <keyword name="lreleaseName" id="Qt.core::lreleaseName" ref="qml-qbsmodules-qt-core.html#lreleaseName-prop"/>
+            <keyword name="mac_alias" id="mac_alias" ref="qbs-attribution-mac-alias.html"/>
+            <keyword name="manifest" id="java::manifest" ref="qml-qbsmodules-java.html#manifest-prop"/>
+            <keyword name="manifestClassPath" id="java::manifestClassPath" ref="qml-qbsmodules-java.html#manifestClassPath-prop"/>
+            <keyword name="manifestFile" id="Android.sdk::manifestFile" ref="qml-qbsmodules-android-sdk.html#manifestFile-prop"/>
+            <keyword name="maxVersion" id="PkgConfigProbe::maxVersion" ref="qml-pkgconfigprobe.html#maxVersion-prop"/>
+            <keyword name="minVersion" id="PkgConfigProbe::minVersion" ref="qml-pkgconfigprobe.html#minVersion-prop"/>
+            <keyword name="minimumIosVersion" id="cpp::minimumIosVersion" ref="qml-qbsmodules-cpp.html#minimumIosVersion-prop"/>
+            <keyword name="minimumMacosVersion" id="cpp::minimumMacosVersion" ref="qml-qbsmodules-cpp.html#minimumMacosVersion-prop"/>
+            <keyword name="minimumOsxVersion" id="cpp::minimumOsxVersion" ref="qml-qbsmodules-cpp-obsolete.html#minimumOsxVersion-prop"/>
+            <keyword name="minimumQbsVersion" id="Project::minimumQbsVersion" ref="qml-qbslanguageitems-project.html#minimumQbsVersion-prop"/>
+            <keyword name="minimumTvosVersion" id="cpp::minimumTvosVersion" ref="qml-qbsmodules-cpp.html#minimumTvosVersion-prop"/>
+            <keyword name="minimumWatchosVersion" id="cpp::minimumWatchosVersion" ref="qml-qbsmodules-cpp.html#minimumWatchosVersion-prop"/>
+            <keyword name="minimumWindowsVersion" id="cpp::minimumWindowsVersion" ref="qml-qbsmodules-cpp.html#minimumWindowsVersion-prop"/>
+            <keyword name="mips_dsp" id="cpufeatures::mips_dsp" ref="qml-qbsmodules-cpufeatures.html#mips_dsp-prop"/>
+            <keyword name="mips_dspr2" id="cpufeatures::mips_dspr2" ref="qml-qbsmodules-cpufeatures.html#mips_dspr2-prop"/>
+            <keyword name="mkspecPath" id="Qt.core::mkspecPath" ref="qml-qbsmodules-qt-core.html#mkspecPath-prop"/>
+            <keyword name="mocFlags" id="Qt.core::mocFlags" ref="qml-qbsmodules-qt-core.html#mocFlags-prop"/>
+            <keyword name="mocName" id="Qt.core::mocName" ref="qml-qbsmodules-qt-core.html#mocName-prop"/>
+            <keyword name="module" id="ib::module" ref="qml-qbsmodules-ib.html#module-prop"/>
+            <keyword name="moduleLoader" id="typescript::moduleLoader" ref="qml-qbsmodules-typescript.html#moduleLoader-prop"/>
+            <keyword name="modversion" id="PkgConfigProbe::modversion" ref="qml-pkgconfigprobe.html#modversion-prop"/>
+            <keyword name="multiplex" id="Rule::multiplex" ref="qml-qbslanguageitems-rule.html#multiplex-prop"/>
+            <keyword name="multiplexByQbsProperties" id="Product::multiplexByQbsProperties" ref="qml-qbslanguageitems-product.html#multiplexByQbsProperties-prop"/>
+            <keyword name="multiplexedType" id="Product::multiplexedType" ref="qml-qbslanguageitems-product.html#multiplexedType-prop"/>
+            <keyword name="name" id="Depends::name" ref="qml-qbslanguageitems-depends.html#name-prop"/>
+            <keyword name="name" id="Group::name" ref="qml-qbslanguageitems-group.html#name-prop"/>
+            <keyword name="name" id="ModuleProvider::name" ref="qml-qbslanguageitems-moduleprovider.html#name-prop"/>
+            <keyword name="name" id="PkgConfigProbe::name" ref="qml-pkgconfigprobe.html#name-prop"/>
+            <keyword name="name" id="Product::name" ref="qml-qbslanguageitems-product.html#name-prop"/>
+            <keyword name="name" id="Profile::name" ref="qml-qbslanguageitems-profile.html#name-prop"/>
+            <keyword name="name" id="Project::name" ref="qml-qbslanguageitems-project.html#name-prop"/>
+            <keyword name="name" id="PropertyOptions::name" ref="qml-qbslanguageitems-propertyoptions.html#name-prop"/>
+            <keyword name="nameEntry" id="Exporter.pkgconfig::nameEntry" ref="qml-qbsmodules-exporter-pkgconfig.html#nameEntry-prop"/>
+            <keyword name="nameFilter" id="PathProbe::nameFilter" ref="qml-pathprobe.html#nameFilter-prop"/>
+            <keyword name="nameSuffixes" id="PathProbe::nameSuffixes" ref="qml-pathprobe.html#nameSuffixes-prop"/>
+            <keyword name="names" id="PathProbe::names" ref="qml-pathprobe.html#names-prop"/>
+            <keyword name="namespace" id="Qt.core::namespace" ref="qml-qbsmodules-qt-core.html#namespace-prop"/>
+            <keyword name="namespace" id="Qt.scxml::namespace" ref="qml-qbsmodules-qt-scxml.html#namespace-prop"/>
+            <keyword name="ndkDir" id="Android.ndk::ndkDir" ref="qml-qbsmodules-android-ndk.html#ndkDir-prop"/>
+            <keyword name="ndkDir" id="Android.sdk::ndkDir" ref="qml-qbsmodules-android-sdk.html#ndkDir-prop"/>
+            <keyword name="nmName" id="cpp::nmName" ref="qml-qbsmodules-cpp.html#nmName-prop"/>
+            <keyword name="nmPath" id="cpp::nmPath" ref="qml-qbsmodules-cpp.html#nmPath-prop"/>
+            <keyword name="nodejs" id="QML.nodejs" ref="qml-qbsmodules-nodejs.html"/>
+            <keyword name="notices" id="ib::notices" ref="qml-qbsmodules-ib.html#notices-prop"/>
+            <keyword name="nsis" id="QML.nsis" ref="qml-qbsmodules-nsis.html"/>
+            <keyword name="nullDevice" id="qbs::nullDevice" ref="qml-qbsmodules-qbs.html#nullDevice-prop"/>
+            <keyword name="objcFlags" id="cpp::objcFlags" ref="qml-qbsmodules-cpp.html#objcFlags-prop"/>
+            <keyword name="objcopyName" id="cpp::objcopyName" ref="qml-qbsmodules-cpp.html#objcopyName-prop"/>
+            <keyword name="objcopyPath" id="cpp::objcopyPath" ref="qml-qbsmodules-cpp.html#objcopyPath-prop"/>
+            <keyword name="objcxxFlags" id="cpp::objcxxFlags" ref="qml-qbsmodules-cpp.html#objcxxFlags-prop"/>
+            <keyword name="optimization" id="cpp::optimization" ref="qml-qbsmodules-cpp.html#optimization-prop"/>
+            <keyword name="optimization" id="qbs::optimization" ref="qml-qbsmodules-qbs.html#optimization-prop"/>
+            <keyword name="outputArtifacts" id="Rule::outputArtifacts" ref="qml-qbslanguageitems-rule.html#outputArtifacts-prop"/>
+            <keyword name="outputBaseDir" id="ModuleProvider::outputBaseDir" ref="qml-qbslanguageitems-moduleprovider.html#outputBaseDir-prop"/>
+            <keyword name="outputDirectory" id="archiver::outputDirectory" ref="qml-qbsmodules-archiver.html#outputDirectory-prop"/>
+            <keyword name="outputFileName" id="texttemplate::outputFileName" ref="qml-qbsmodules-texttemplate.html#outputFileName-prop"/>
+            <keyword name="outputFileTags" id="Rule::outputFileTags" ref="qml-qbslanguageitems-rule.html#outputFileTags-prop"/>
+            <keyword name="outputTag" id="lex_yacc::outputTag" ref="qml-qbsmodules-lex-yacc.html#outputTag-prop"/>
+            <keyword name="outputTag" id="texttemplate::outputTag" ref="qml-qbsmodules-texttemplate.html#outputTag-prop"/>
+            <keyword name="overrideListProperties" id="Properties::overrideListProperties" ref="qml-qbslanguageitems-properties.html#overrideListProperties-prop"/>
+            <keyword name="overrideTags" id="Group::overrideTags" ref="qml-qbslanguageitems-group.html#overrideTags-prop"/>
+            <keyword name="packageName" id="Android.sdk::packageName" ref="qml-qbsmodules-android-sdk.html#packageName-prop"/>
+            <keyword name="packageNames" id="PkgConfigProbe::packageNames" ref="qml-pkgconfigprobe.html#packageNames-prop"/>
+            <keyword name="packageType" id="bundle::packageType" ref="qml-qbsmodules-bundle.html#packageType-prop"/>
+            <keyword name="path" id="PathProbe::path" ref="qml-pathprobe.html#path-prop"/>
+            <keyword name="pathListSeparator" id="qbs::pathListSeparator" ref="qml-qbsmodules-qbs.html#pathListSeparator-prop"/>
+            <keyword name="pathSuffixes" id="PathProbe::pathSuffixes" ref="qml-pathprobe.html#pathSuffixes-prop"/>
+            <keyword name="patterns" id="FileTagger::patterns" ref="qml-qbslanguageitems-filetagger.html#patterns-prop"/>
+            <keyword name="pkgInfoPath" id="bundle::pkgInfoPath" ref="qml-qbsmodules-bundle.html#pkgInfoPath-prop"/>
+            <keyword name="pkgconfig" id="QML.pkgconfig" ref="qml-qbsmodules-pkgconfig.html"/>
+            <keyword name="platform" id="Android.ndk::platform" ref="qml-qbsmodules-android-ndk.html#platform-prop"/>
+            <keyword name="platform" id="Android.sdk::platform" ref="qml-qbsmodules-android-sdk.html#platform-prop"/>
+            <keyword name="platformDefines" id="cpp::platformDefines" ref="qml-qbsmodules-cpp.html#platformDefines-prop"/>
+            <keyword name="platformEnvironmentPaths" id="PathProbe::platformEnvironmentPaths" ref="qml-pathprobe.html#platformEnvironmentPaths-prop"/>
+            <keyword name="platformPath" id="xcode::platformPath" ref="qml-qbsmodules-xcode.html#platformPath-prop"/>
+            <keyword name="platformSearchPaths" id="PathProbe::platformSearchPaths" ref="qml-pathprobe.html#platformSearchPaths-prop"/>
+            <keyword name="pluginMetaData" id="Qt.core::pluginMetaData" ref="qml-qbsmodules-qt-core.html#pluginMetaData-prop"/>
+            <keyword name="pluginPath" id="Qt.core::pluginPath" ref="qml-qbsmodules-qt-core.html#pluginPath-prop"/>
+            <keyword name="pluginsByType" id="Qt.plugin_support::pluginsByType" ref="qml-qbsmodules-qt-plugin-support.html#pluginsByType-prop"/>
+            <keyword name="pluginsFolderPath" id="bundle::pluginsFolderPath" ref="qml-qbsmodules-bundle.html#pluginsFolderPath-prop"/>
+            <keyword name="positionIndependentCode" id="cpp::positionIndependentCode" ref="qml-qbsmodules-cpp.html#positionIndependentCode-prop"/>
+            <keyword name="prefix" id="Group::prefix" ref="qml-qbslanguageitems-group.html#prefix-prop"/>
+            <keyword name="prefixHeaders" id="cpp::prefixHeaders" ref="qml-qbsmodules-cpp.html#prefixHeaders-prop"/>
+            <keyword name="prefixMapping" id="Export::prefixMapping" ref="qml-qbslanguageitems-export.html#prefixMapping-prop"/>
+            <keyword name="prepare" id="Rule::prepare" ref="qml-qbslanguageitems-rule.html#prepare-prop"/>
+            <keyword name="present" id="Module::present" ref="qml-qbslanguageitems-module.html#present-prop"/>
+            <keyword name="priority" id="FileTagger::priority" ref="qml-qbslanguageitems-filetagger.html#priority-prop"/>
+            <keyword name="priority" id="Module::priority" ref="qml-qbslanguageitems-module.html#priority-prop"/>
+            <keyword name="privateHeaders" id="bundle::privateHeaders" ref="qml-qbsmodules-bundle.html#privateHeaders-prop"/>
+            <keyword name="privateHeadersFolderPath" id="bundle::privateHeadersFolderPath" ref="qml-qbsmodules-bundle.html#privateHeadersFolderPath-prop"/>
+            <keyword name="processInfoPlist" id="bundle::processInfoPlist" ref="qml-qbsmodules-bundle.html#processInfoPlist-prop"/>
+            <keyword name="productTypes" id="Depends::productTypes" ref="qml-qbslanguageitems-depends.html#productTypes-prop"/>
+            <keyword name="profile" id="Project::profile" ref="qml-qbslanguageitems-project.html#profile-prop"/>
+            <keyword name="profiles" id="Depends::profiles" ref="qml-qbslanguageitems-depends.html#profiles-prop"/>
+            <keyword name="profiles" id="qbs::profiles" ref="qml-qbsmodules-qbs.html#profiles-prop"/>
+            <keyword name="protobuf.cpp" id="QML.protobuf.cpp" ref="qml-qbsmodules-protobuf-cpp.html"/>
+            <keyword name="protobuf.objc" id="QML.protobuf.objc" ref="qml-qbsmodules-protobuf-objc.html"/>
+            <keyword name="protocBinary" id="protobuf.cpp::protocBinary" ref="qml-qbsmodules-protobuf-cpp.html#protocBinary-prop"/>
+            <keyword name="protocBinary" id="protobuf.objc::protocBinary" ref="qml-qbsmodules-protobuf-objc.html#protocBinary-prop"/>
+            <keyword name="publicHeaders" id="bundle::publicHeaders" ref="qml-qbsmodules-bundle.html#publicHeaders-prop"/>
+            <keyword name="publicHeadersFolderPath" id="bundle::publicHeadersFolderPath" ref="qml-qbsmodules-bundle.html#publicHeadersFolderPath-prop"/>
+            <keyword name="qbs" id="QML.qbs" ref="qml-qbsmodules-qbs.html"/>
+            <keyword name="qbsSearchPaths" id="Product::qbsSearchPaths" ref="qml-qbslanguageitems-product.html#qbsSearchPaths-prop"/>
+            <keyword name="qbsSearchPaths" id="Project::qbsSearchPaths" ref="qml-qbslanguageitems-project.html#qbsSearchPaths-prop"/>
+            <keyword name="qdocEnvironment" id="Qt.core::qdocEnvironment" ref="qml-qbsmodules-qt-core.html#qdocEnvironment-prop"/>
+            <keyword name="qdocName" id="Qt.core::qdocName" ref="qml-qbsmodules-qt-core.html#qdocName-prop"/>
+            <keyword name="qmBaseName" id="Qt.core::qmBaseName" ref="qml-qbsmodules-qt-core.html#qmBaseName-prop"/>
+            <keyword name="qmlCacheGenPath" id="Qt.qml::qmlCacheGenPath" ref="qml-qbsmodules-qt-qml.html#qmlCacheGenPath-prop"/>
+            <keyword name="qmlDebugging" id="Qt.declarative::qmlDebugging" ref="qml-qbsmodules-qt-declarative.html#qmlDebugging-prop"/>
+            <keyword name="qmlDebugging" id="Qt.quick::qmlDebugging" ref="qml-qbsmodules-qt-quick.html#qmlDebugging-prop"/>
+            <keyword name="qmlImportScannerName" id="Qt.qml::qmlImportScannerName" ref="qml-qbsmodules-qt-qml.html#qmlImportScannerName-prop"/>
+            <keyword name="qmlImportsPath" id="Qt.declarative::qmlImportsPath" ref="qml-qbsmodules-qt-declarative.html#qmlImportsPath-prop"/>
+            <keyword name="qmlImportsPath" id="Qt.quick::qmlImportsPath" ref="qml-qbsmodules-qt-quick.html#qmlImportsPath-prop"/>
+            <keyword name="qmlPath" id="Qt.declarative::qmlPath" ref="qml-qbsmodules-qt-declarative.html#qmlPath-prop"/>
+            <keyword name="qmlPath" id="Qt.qml::qmlPath" ref="qml-qbsmodules-qt-qml.html#qmlPath-prop"/>
+            <keyword name="qmlPath" id="Qt.quick::qmlPath" ref="qml-qbsmodules-qt-quick.html#qmlPath-prop"/>
+            <keyword name="qmlRootDir" id="Qt.android_support::qmlRootDir" ref="qml-qbsmodules-qt-android-support.html#qmlRootDir-prop"/>
+            <keyword name="qnx" id="QML.qnx" ref="qml-qbsmodules-qnx.html"/>
+            <keyword name="qscxmlcName" id="Qt.scxml::qscxmlcName" ref="qml-qbsmodules-qt-scxml.html#qscxmlcName-prop"/>
+            <keyword name="qtBuildVariant" id="Qt.core::qtBuildVariant" ref="qml-qbsmodules-qt-core.html#qtBuildVariant-prop"/>
+            <keyword name="qtConfig" id="Qt.core::qtConfig" ref="qml-qbsmodules-qt-core.html#qtConfig-prop"/>
+            <keyword name="raw" id="ico::raw" ref="qml-qbsmodules-ico.html#raw-prop"/>
+            <keyword name="recursive" id="Scanner::recursive" ref="qml-qbslanguageitems-scanner.html#recursive-prop"/>
+            <keyword name="references" id="Project::references" ref="qml-qbslanguageitems-project.html#references-prop"/>
+            <keyword name="relativeSearchPaths" id="ModuleProvider::relativeSearchPaths" ref="qml-qbslanguageitems-moduleprovider.html#relativeSearchPaths-prop"/>
+            <keyword name="repoDir" id="vcs::repoDir" ref="qml-qbsmodules-vcs.html#repoDir-prop"/>
+            <keyword name="repoState" id="vcs::repoState" ref="qml-qbsmodules-vcs.html#repoState-prop"/>
+            <keyword name="requireAppContainer" id="cpp::requireAppContainer" ref="qml-qbsmodules-cpp.html#requireAppContainer-prop"/>
+            <keyword name="requireAppExtensionSafeApi" id="cpp::requireAppExtensionSafeApi" ref="qml-qbsmodules-cpp.html#requireAppExtensionSafeApi-prop"/>
+            <keyword name="required" id="Depends::required" ref="qml-qbslanguageitems-depends.html#required-prop"/>
+            <keyword name="requiresEntry" id="Exporter.pkgconfig::requiresEntry" ref="qml-qbsmodules-exporter-pkgconfig.html#requiresEntry-prop"/>
+            <keyword name="requiresInputs" id="Rule::requiresInputs" ref="qml-qbslanguageitems-rule.html#requiresInputs-prop"/>
+            <keyword name="requiresPrivateEntry" id="Exporter.pkgconfig::requiresPrivateEntry" ref="qml-qbsmodules-exporter-pkgconfig.html#requiresPrivateEntry-prop"/>
+            <keyword name="resolve" id="resolve" ref="cli-resolve.html"/>
+            <keyword name="resourceFileBaseName" id="Qt.core::resourceFileBaseName" ref="qml-qbsmodules-qt-core.html#resourceFileBaseName-prop"/>
+            <keyword name="resourcePrefix" id="Qt.core::resourcePrefix" ref="qml-qbsmodules-qt-core.html#resourcePrefix-prop"/>
+            <keyword name="resourceSourceBase" id="Qt.core::resourceSourceBase" ref="qml-qbsmodules-qt-core.html#resourceSourceBase-prop"/>
+            <keyword name="resources" id="bundle::resources" ref="qml-qbsmodules-bundle.html#resources-prop"/>
+            <keyword name="resourcesDir" id="Android.sdk::resourcesDir" ref="qml-qbsmodules-android-sdk.html#resourcesDir-prop"/>
+            <keyword name="rpathOrigin" id="cpp::rpathOrigin" ref="qml-qbsmodules-cpp.html#rpathOrigin-prop"/>
+            <keyword name="rpaths" id="cpp::rpaths" ref="qml-qbsmodules-cpp.html#rpaths-prop"/>
+            <keyword name="run" id="run" ref="cli-run.html"/>
+            <keyword name="runtimeLibrary" id="cpp::runtimeLibrary" ref="qml-qbsmodules-cpp.html#runtimeLibrary-prop"/>
+            <keyword name="runtimeVersion" id="java::runtimeVersion" ref="qml-qbsmodules-java.html#runtimeVersion-prop"/>
+            <keyword name="scan" id="Scanner::scan" ref="qml-qbslanguageitems-scanner.html#scan-prop"/>
+            <keyword name="scriptsFolderPath" id="bundle::scriptsFolderPath" ref="qml-qbsmodules-bundle.html#scriptsFolderPath-prop"/>
+            <keyword name="sdk" id="xcode::sdk" ref="qml-qbsmodules-xcode.html#sdk-prop"/>
+            <keyword name="sdkDir" id="Android.sdk::sdkDir" ref="qml-qbsmodules-android-sdk.html#sdkDir-prop"/>
+            <keyword name="sdkDir" id="qnx::sdkDir" ref="qml-qbsmodules-qnx.html#sdkDir-prop"/>
+            <keyword name="sdkName" id="xcode::sdkName" ref="qml-qbsmodules-xcode.html#sdkName-prop"/>
+            <keyword name="sdkPath" id="xcode::sdkPath" ref="qml-qbsmodules-xcode.html#sdkPath-prop"/>
+            <keyword name="sdkVersion" id="xcode::sdkVersion" ref="qml-qbsmodules-xcode.html#sdkVersion-prop"/>
+            <keyword name="searchPaths" id="PathProbe::searchPaths" ref="qml-pathprobe.html#searchPaths-prop"/>
+            <keyword name="searchPaths" id="Scanner::searchPaths" ref="qml-qbslanguageitems-scanner.html#searchPaths-prop"/>
+            <keyword name="selectors" id="PathProbe::selectors" ref="qml-pathprobe.html#selectors-prop"/>
+            <keyword name="separateDebugInformation" id="cpp::separateDebugInformation" ref="qml-qbsmodules-cpp.html#separateDebugInformation-prop"/>
+            <keyword name="setup-android" id="setup-android" ref="cli-setup-android.html"/>
+            <keyword name="setup-qt" id="setup-qt" ref="cli-setup-qt.html"/>
+            <keyword name="setup-toolchains" id="setup-toolchains" ref="cli-setup-toolchains.html"/>
+            <keyword name="setupBuildEnvironment" id="Module::setupBuildEnvironment" ref="qml-qbslanguageitems-module.html#setupBuildEnvironment-prop"/>
+            <keyword name="setupRunEnvironment" id="Module::setupRunEnvironment" ref="qml-qbslanguageitems-module.html#setupRunEnvironment-prop"/>
+            <keyword name="sharedFrameworksFolderPath" id="bundle::sharedFrameworksFolderPath" ref="qml-qbsmodules-bundle.html#sharedFrameworksFolderPath-prop"/>
+            <keyword name="sharedSupportFolderPath" id="bundle::sharedSupportFolderPath" ref="qml-qbsmodules-bundle.html#sharedSupportFolderPath-prop"/>
+            <keyword name="shell" id="shell" ref="cli-shell.html"/>
+            <keyword name="shellPath" id="qbs::shellPath" ref="qml-qbsmodules-qbs.html#shellPath-prop"/>
+            <keyword name="show-version" id="show-version" ref="cli-version.html"/>
+            <keyword name="signature" id="bundle::signature" ref="qml-qbsmodules-bundle.html#signature-prop"/>
+            <keyword name="singleFile" id="typescript::singleFile" ref="qml-qbsmodules-typescript.html#singleFile-prop"/>
+            <keyword name="soVersion" id="cpp::soVersion" ref="qml-qbsmodules-cpp.html#soVersion-prop"/>
+            <keyword name="sonamePrefix" id="cpp::sonamePrefix" ref="qml-qbsmodules-cpp.html#sonamePrefix-prop"/>
+            <keyword name="sourceBase" id="AppleApplicationDiskImage::sourceBase" ref="qml-qbsconvenienceitems-appleapplicationdiskimage.html#sourceBase-prop"/>
+            <keyword name="sourceBase" id="dmg::sourceBase" ref="qml-qbsmodules-dmg.html#sourceBase-prop"/>
+            <keyword name="sourceDirectory" id="Product::sourceDirectory" ref="qml-qbslanguageitems-product.html#sourceDirectory-prop"/>
+            <keyword name="sourceDirectory" id="Project::sourceDirectory" ref="qml-qbslanguageitems-project.html#sourceDirectory-prop"/>
+            <keyword name="sourcesDir" id="Android.sdk::sourcesDir" ref="qml-qbsmodules-android-sdk.html#sourcesDir-prop"/>
+            <keyword name="staticBuild" id="Qt.core::staticBuild" ref="qml-qbsmodules-qt-core.html#staticBuild-prop"/>
+            <keyword name="staticLibraries" id="cpp::staticLibraries" ref="qml-qbsmodules-cpp.html#staticLibraries-prop"/>
+            <keyword name="staticMode" id="pkgconfig::staticMode" ref="qml-qbsmodules-pkgconfig.html#staticMode-prop"/>
+            <keyword name="status" id="status" ref="cli-status.html"/>
+            <keyword name="stripComments" id="typescript::stripComments" ref="qml-qbsmodules-typescript.html#stripComments-prop"/>
+            <keyword name="stripName" id="cpp::stripName" ref="qml-qbsmodules-cpp.html#stripName-prop"/>
+            <keyword name="stripPath" id="cpp::stripPath" ref="qml-qbsmodules-cpp.html#stripPath-prop"/>
+            <keyword name="submodules" id="Depends::submodules" ref="qml-qbslanguageitems-depends.html#submodules-prop"/>
+            <keyword name="symlinks" id="AppleApplicationDiskImage::symlinks" ref="qml-qbsconvenienceitems-appleapplicationdiskimage.html#symlinks-prop"/>
+            <keyword name="sysroot" id="PkgConfigProbe::sysroot" ref="qml-pkgconfigprobe.html#sysroot-prop"/>
+            <keyword name="sysroot" id="pkgconfig::sysroot" ref="qml-qbsmodules-pkgconfig.html#sysroot-prop"/>
+            <keyword name="sysroot" id="qbs::sysroot" ref="qml-qbsmodules-qbs.html#sysroot-prop"/>
+            <keyword name="systemFrameworkPaths" id="cpp::systemFrameworkPaths" ref="qml-qbsmodules-cpp.html#systemFrameworkPaths-prop"/>
+            <keyword name="systemIncludePaths" id="cpp::systemIncludePaths" ref="qml-qbsmodules-cpp.html#systemIncludePaths-prop"/>
+            <keyword name="systemRunPaths" id="cpp::systemRunPaths" ref="qml-qbsmodules-cpp.html#systemRunPaths-prop"/>
+            <keyword name="targetDevices" id="xcode::targetDevices" ref="qml-qbsmodules-xcode.html#targetDevices-prop"/>
+            <keyword name="targetDir" id="qnx::targetDir" ref="qml-qbsmodules-qnx.html#targetDir-prop"/>
+            <keyword name="targetName" id="Product::targetName" ref="qml-qbslanguageitems-product.html#targetName-prop"/>
+            <keyword name="targetOS" id="qbs::targetOS" ref="qml-qbsmodules-qbs.html#targetOS-prop"/>
+            <keyword name="targetPlatform" id="qbs::targetPlatform" ref="qml-qbsmodules-qbs.html#targetPlatform-prop"/>
+            <keyword name="targetVersion" id="typescript::targetVersion" ref="qml-qbsmodules-typescript.html#targetVersion-prop"/>
+            <keyword name="texttemplate" id="QML.texttemplate" ref="qml-qbsmodules-texttemplate.html"/>
+            <keyword name="textutilPath" id="dmg::textutilPath" ref="qml-qbsmodules-dmg.html#textutilPath-prop"/>
+            <keyword name="toolFilePath" id="vcs::toolFilePath" ref="qml-qbsmodules-vcs.html#toolFilePath-prop"/>
+            <keyword name="toolchain" id="qbs::toolchain" ref="qml-qbsmodules-qbs.html#toolchain-prop"/>
+            <keyword name="toolchainInstallPath" id="cpp::toolchainInstallPath" ref="qml-qbsmodules-cpp.html#toolchainInstallPath-prop"/>
+            <keyword name="toolchainInstallPath" id="innosetup::toolchainInstallPath" ref="qml-qbsmodules-innosetup.html#toolchainInstallPath-prop"/>
+            <keyword name="toolchainInstallPath" id="nsis::toolchainInstallPath" ref="qml-qbsmodules-nsis.html#toolchainInstallPath-prop"/>
+            <keyword name="toolchainInstallPath" id="typescript::toolchainInstallPath" ref="qml-qbsmodules-typescript.html#toolchainInstallPath-prop"/>
+            <keyword name="toolchainInstallPath" id="wix::toolchainInstallPath" ref="qml-qbsmodules-wix.html#toolchainInstallPath-prop"/>
+            <keyword name="toolchainInstallRoot" id="wix::toolchainInstallRoot" ref="qml-qbsmodules-wix.html#toolchainInstallRoot-prop"/>
+            <keyword name="toolchainType" id="qbs::toolchainType" ref="qml-qbsmodules-qbs.html#toolchainType-prop"/>
+            <keyword name="transformFunction" id="Exporter.pkgconfig::transformFunction" ref="qml-qbsmodules-exporter-pkgconfig.html#transformFunction-prop"/>
+            <keyword name="treatSystemHeadersAsDependencies" id="cpp::treatSystemHeadersAsDependencies" ref="qml-qbsmodules-cpp.html#treatSystemHeadersAsDependencies-prop"/>
+            <keyword name="treatWarningsAsErrors" id="cpp::treatWarningsAsErrors" ref="qml-qbsmodules-cpp.html#treatWarningsAsErrors-prop"/>
+            <keyword name="treatWarningsAsErrors" id="wix::treatWarningsAsErrors" ref="qml-qbsmodules-wix.html#treatWarningsAsErrors-prop"/>
+            <keyword name="type" id="Product::type" ref="qml-qbslanguageitems-product.html#type-prop"/>
+            <keyword name="type" id="archiver::type" ref="qml-qbsmodules-archiver.html#type-prop"/>
+            <keyword name="type" id="vcs::type" ref="qml-qbsmodules-vcs.html#type-prop"/>
+            <keyword name="typescript" id="QML.typescript" ref="qml-qbsmodules-typescript.html"/>
+            <keyword name="uicName" id="Qt.gui::uicName" ref="qml-qbsmodules-qt-gui.html#uicName-prop"/>
+            <keyword name="uniqueSymbolPrefix" id="lex_yacc::uniqueSymbolPrefix" ref="qml-qbsmodules-lex-yacc.html#uniqueSymbolPrefix-prop"/>
+            <keyword name="unlocalizedResourcesFolderPath" id="bundle::unlocalizedResourcesFolderPath" ref="qml-qbsmodules-bundle.html#unlocalizedResourcesFolderPath-prop"/>
+            <keyword name="update-timestamps" id="update-timestamps" ref="cli-update-timestamps.html"/>
+            <keyword name="urlEntry" id="Exporter.pkgconfig::urlEntry" ref="qml-qbsmodules-exporter-pkgconfig.html#urlEntry-prop"/>
+            <keyword name="useCPrecompiledHeader" id="cpp::useCPrecompiledHeader" ref="qml-qbsmodules-cpp.html#useCPrecompiledHeader-prop"/>
+            <keyword name="useCompiler" id="Qt.quick::useCompiler" ref="qml-qbsmodules-qt-quick.html#useCompiler-prop"/>
+            <keyword name="useCxxPrecompiledHeader" id="cpp::useCxxPrecompiledHeader" ref="qml-qbsmodules-cpp.html#useCxxPrecompiledHeader-prop"/>
+            <keyword name="useGrpc" id="protobuf.cpp::useGrpc" ref="qml-qbsmodules-protobuf-cpp.html#useGrpc-prop"/>
+            <keyword name="useLanguageVersionFallback" id="cpp::useLanguageVersionFallback" ref="qml-qbsmodules-cpp.html#useLanguageVersionFallback-prop"/>
+            <keyword name="useMinistro" id="Qt.android_support::useMinistro" ref="qml-qbsmodules-qt-android-support.html#useMinistro-prop"/>
+            <keyword name="useObjcPrecompiledHeader" id="cpp::useObjcPrecompiledHeader" ref="qml-qbsmodules-cpp.html#useObjcPrecompiledHeader-prop"/>
+            <keyword name="useObjcxxPrecompiledHeader" id="cpp::useObjcxxPrecompiledHeader" ref="qml-qbsmodules-cpp.html#useObjcxxPrecompiledHeader-prop"/>
+            <keyword name="useRPathLink" id="cpp::useRPathLink" ref="qml-qbsmodules-cpp.html#useRPathLink-prop"/>
+            <keyword name="useRPaths" id="cpp::useRPaths" ref="qml-qbsmodules-cpp.html#useRPaths-prop"/>
+            <keyword name="validate" id="Module::validate" ref="qml-qbslanguageitems-module.html#validate-prop"/>
+            <keyword name="variantSuffix" id="cpp::variantSuffix" ref="qml-qbsmodules-cpp.html#variantSuffix-prop"/>
+            <keyword name="vcs" id="QML.vcs" ref="qml-qbsmodules-vcs.html"/>
+            <keyword name="verboseAndroidDeployQt" id="Qt.android_support::verboseAndroidDeployQt" ref="qml-qbsmodules-qt-android-support.html#verboseAndroidDeployQt-prop"/>
+            <keyword name="verboseOutput" id="innosetup::verboseOutput" ref="qml-qbsmodules-innosetup.html#verboseOutput-prop"/>
+            <keyword name="verboseOutput" id="wix::verboseOutput" ref="qml-qbsmodules-wix.html#verboseOutput-prop"/>
+            <keyword name="version" id="Module::version" ref="qml-qbslanguageitems-module.html#version-prop"/>
+            <keyword name="version" id="Product::version" ref="qml-qbslanguageitems-product.html#version-prop"/>
+            <keyword name="version" id="Qt.core::version" ref="qml-qbsmodules-qt-core.html#version-prop"/>
+            <keyword name="version" id="innosetup::version" ref="qml-qbsmodules-innosetup.html#version-prop"/>
+            <keyword name="version" id="nsis::version" ref="qml-qbsmodules-nsis.html#version-prop"/>
+            <keyword name="version" id="qbs::version" ref="qml-qbsmodules-qbs.html#version-prop"/>
+            <keyword name="version" id="typescript::version" ref="qml-qbsmodules-typescript.html#version-prop"/>
+            <keyword name="version" id="wix::version" ref="qml-qbsmodules-wix.html#version-prop"/>
+            <keyword name="versionAtLeast" id="Depends::versionAtLeast" ref="qml-qbslanguageitems-depends.html#versionAtLeast-prop"/>
+            <keyword name="versionBelow" id="Depends::versionBelow" ref="qml-qbslanguageitems-depends.html#versionBelow-prop"/>
+            <keyword name="versionBuild" id="nsis::versionBuild" ref="qml-qbsmodules-nsis.html#versionBuild-prop"/>
+            <keyword name="versionBuild" id="typescript::versionBuild" ref="qml-qbsmodules-typescript.html#versionBuild-prop"/>
+            <keyword name="versionBuild" id="wix::versionBuild" ref="qml-qbsmodules-wix.html#versionBuild-prop"/>
+            <keyword name="versionCode" id="Android.sdk::versionCode" ref="qml-qbsmodules-android-sdk.html#versionCode-prop"/>
+            <keyword name="versionEntry" id="Exporter.pkgconfig::versionEntry" ref="qml-qbsmodules-exporter-pkgconfig.html#versionEntry-prop"/>
+            <keyword name="versionMajor" id="Qt.core::versionMajor" ref="qml-qbsmodules-qt-core.html#versionMajor-prop"/>
+            <keyword name="versionMajor" id="innosetup::versionMajor" ref="qml-qbsmodules-innosetup.html#versionMajor-prop"/>
+            <keyword name="versionMajor" id="nsis::versionMajor" ref="qml-qbsmodules-nsis.html#versionMajor-prop"/>
+            <keyword name="versionMajor" id="qbs::versionMajor" ref="qml-qbsmodules-qbs.html#versionMajor-prop"/>
+            <keyword name="versionMajor" id="typescript::versionMajor" ref="qml-qbsmodules-typescript.html#versionMajor-prop"/>
+            <keyword name="versionMajor" id="wix::versionMajor" ref="qml-qbsmodules-wix.html#versionMajor-prop"/>
+            <keyword name="versionMinor" id="Qt.core::versionMinor" ref="qml-qbsmodules-qt-core.html#versionMinor-prop"/>
+            <keyword name="versionMinor" id="innosetup::versionMinor" ref="qml-qbsmodules-innosetup.html#versionMinor-prop"/>
+            <keyword name="versionMinor" id="nsis::versionMinor" ref="qml-qbsmodules-nsis.html#versionMinor-prop"/>
+            <keyword name="versionMinor" id="qbs::versionMinor" ref="qml-qbsmodules-qbs.html#versionMinor-prop"/>
+            <keyword name="versionMinor" id="typescript::versionMinor" ref="qml-qbsmodules-typescript.html#versionMinor-prop"/>
+            <keyword name="versionMinor" id="wix::versionMinor" ref="qml-qbsmodules-wix.html#versionMinor-prop"/>
+            <keyword name="versionName" id="Android.sdk::versionName" ref="qml-qbsmodules-android-sdk.html#versionName-prop"/>
+            <keyword name="versionParts" id="Qt.core::versionParts" ref="qml-qbsmodules-qt-core.html#versionParts-prop"/>
+            <keyword name="versionParts" id="innosetup::versionParts" ref="qml-qbsmodules-innosetup.html#versionParts-prop"/>
+            <keyword name="versionParts" id="nsis::versionParts" ref="qml-qbsmodules-nsis.html#versionParts-prop"/>
+            <keyword name="versionParts" id="typescript::versionParts" ref="qml-qbsmodules-typescript.html#versionParts-prop"/>
+            <keyword name="versionParts" id="wix::versionParts" ref="qml-qbsmodules-wix.html#versionParts-prop"/>
+            <keyword name="versionPatch" id="Qt.core::versionPatch" ref="qml-qbsmodules-qt-core.html#versionPatch-prop"/>
+            <keyword name="versionPatch" id="innosetup::versionPatch" ref="qml-qbsmodules-innosetup.html#versionPatch-prop"/>
+            <keyword name="versionPatch" id="nsis::versionPatch" ref="qml-qbsmodules-nsis.html#versionPatch-prop"/>
+            <keyword name="versionPatch" id="qbs::versionPatch" ref="qml-qbsmodules-qbs.html#versionPatch-prop"/>
+            <keyword name="versionPatch" id="typescript::versionPatch" ref="qml-qbsmodules-typescript.html#versionPatch-prop"/>
+            <keyword name="versionPatch" id="wix::versionPatch" ref="qml-qbsmodules-wix.html#versionPatch-prop"/>
+            <keyword name="versionPlistPath" id="bundle::versionPlistPath" ref="qml-qbsmodules-bundle.html#versionPlistPath-prop"/>
+            <keyword name="versionsFolderPath" id="bundle::versionsFolderPath" ref="qml-qbsmodules-bundle.html#versionsFolderPath-prop"/>
+            <keyword name="visibility" id="cpp::visibility" ref="qml-qbsmodules-cpp.html#visibility-prop"/>
+            <keyword name="visualStudioCompatibility" id="wix::visualStudioCompatibility" ref="qml-qbsmodules-wix.html#visualStudioCompatibility-prop"/>
+            <keyword name="volumeName" id="dmg::volumeName" ref="qml-qbsmodules-dmg.html#volumeName-prop"/>
+            <keyword name="warningLevel" id="cpp::warningLevel" ref="qml-qbsmodules-cpp.html#warningLevel-prop"/>
+            <keyword name="warningLevel" id="nsis::warningLevel" ref="qml-qbsmodules-nsis.html#warningLevel-prop"/>
+            <keyword name="warningLevel" id="typescript::warningLevel" ref="qml-qbsmodules-typescript.html#warningLevel-prop"/>
+            <keyword name="warningLevel" id="wix::warningLevel" ref="qml-qbsmodules-wix.html#warningLevel-prop"/>
+            <keyword name="warnings" id="ib::warnings" ref="qml-qbsmodules-ib.html#warnings-prop"/>
+            <keyword name="warningsAsErrors" id="java::warningsAsErrors" ref="qml-qbsmodules-java.html#warningsAsErrors-prop"/>
+            <keyword name="weakFrameworks" id="cpp::weakFrameworks" ref="qml-qbsmodules-cpp.html#weakFrameworks-prop"/>
+            <keyword name="windowHeight" id="dmg::windowHeight" ref="qml-qbsmodules-dmg.html#windowHeight-prop"/>
+            <keyword name="windowWidth" id="dmg::windowWidth" ref="qml-qbsmodules-dmg.html#windowWidth-prop"/>
+            <keyword name="windowX" id="dmg::windowX" ref="qml-qbsmodules-dmg.html#windowX-prop"/>
+            <keyword name="windowY" id="dmg::windowY" ref="qml-qbsmodules-dmg.html#windowY-prop"/>
+            <keyword name="windowsApiAdditionalPartitions" id="cpp::windowsApiAdditionalPartitions" ref="qml-qbsmodules-cpp.html#windowsApiAdditionalPartitions-prop"/>
+            <keyword name="windowsApiCharacterSet" id="cpp::windowsApiCharacterSet" ref="qml-qbsmodules-cpp.html#windowsApiCharacterSet-prop"/>
+            <keyword name="windowsApiFamily" id="cpp::windowsApiFamily" ref="qml-qbsmodules-cpp.html#windowsApiFamily-prop"/>
+            <keyword name="wix" id="QML.wix" ref="qml-qbsmodules-wix.html"/>
+            <keyword name="workingDir" id="AutotestRunner::workingDir" ref="qml-qbsconvenienceitems-autotestrunner.html#workingDir-prop"/>
+            <keyword name="workingDir" id="autotest::workingDir" ref="qml-qbsmodules-autotest.html#workingDir-prop"/>
+            <keyword name="workingDirectory" id="archiver::workingDirectory" ref="qml-qbsmodules-archiver.html#workingDirectory-prop"/>
+            <keyword name="wrapper" id="AutotestRunner::wrapper" ref="qml-qbsconvenienceitems-autotestrunner.html#wrapper-prop"/>
+            <keyword name="x86_avx" id="cpufeatures::x86_avx" ref="qml-qbsmodules-cpufeatures.html#x86_avx-prop"/>
+            <keyword name="x86_avx2" id="cpufeatures::x86_avx2" ref="qml-qbsmodules-cpufeatures.html#x86_avx2-prop"/>
+            <keyword name="x86_avx512bw" id="cpufeatures::x86_avx512bw" ref="qml-qbsmodules-cpufeatures.html#x86_avx512bw-prop"/>
+            <keyword name="x86_avx512cd" id="cpufeatures::x86_avx512cd" ref="qml-qbsmodules-cpufeatures.html#x86_avx512cd-prop"/>
+            <keyword name="x86_avx512dq" id="cpufeatures::x86_avx512dq" ref="qml-qbsmodules-cpufeatures.html#x86_avx512dq-prop"/>
+            <keyword name="x86_avx512er" id="cpufeatures::x86_avx512er" ref="qml-qbsmodules-cpufeatures.html#x86_avx512er-prop"/>
+            <keyword name="x86_avx512f" id="cpufeatures::x86_avx512f" ref="qml-qbsmodules-cpufeatures.html#x86_avx512f-prop"/>
+            <keyword name="x86_avx512ifma" id="cpufeatures::x86_avx512ifma" ref="qml-qbsmodules-cpufeatures.html#x86_avx512ifma-prop"/>
+            <keyword name="x86_avx512pf" id="cpufeatures::x86_avx512pf" ref="qml-qbsmodules-cpufeatures.html#x86_avx512pf-prop"/>
+            <keyword name="x86_avx512vbmi" id="cpufeatures::x86_avx512vbmi" ref="qml-qbsmodules-cpufeatures.html#x86_avx512vbmi-prop"/>
+            <keyword name="x86_avx512vl" id="cpufeatures::x86_avx512vl" ref="qml-qbsmodules-cpufeatures.html#x86_avx512vl-prop"/>
+            <keyword name="x86_f16c" id="cpufeatures::x86_f16c" ref="qml-qbsmodules-cpufeatures.html#x86_f16c-prop"/>
+            <keyword name="x86_sse2" id="cpufeatures::x86_sse2" ref="qml-qbsmodules-cpufeatures.html#x86_sse2-prop"/>
+            <keyword name="x86_sse3" id="cpufeatures::x86_sse3" ref="qml-qbsmodules-cpufeatures.html#x86_sse3-prop"/>
+            <keyword name="x86_sse4_1" id="cpufeatures::x86_sse4_1" ref="qml-qbsmodules-cpufeatures.html#x86_sse4_1-prop"/>
+            <keyword name="x86_sse4_2" id="cpufeatures::x86_sse4_2" ref="qml-qbsmodules-cpufeatures.html#x86_sse4_2-prop"/>
+            <keyword name="x86_ssse3" id="cpufeatures::x86_ssse3" ref="qml-qbsmodules-cpufeatures.html#x86_ssse3-prop"/>
+            <keyword name="xcode" id="QML.xcode" ref="qml-qbsmodules-xcode.html"/>
+            <keyword name="xml2CppHeaderFlags" id="Qt.dbus::xml2CppHeaderFlags" ref="qml-qbsmodules-qt-dbus.html#xml2CppHeaderFlags-prop"/>
+            <keyword name="xml2CppSourceFlags" id="Qt.dbus::xml2CppSourceFlags" ref="qml-qbsmodules-qt-dbus.html#xml2CppSourceFlags-prop"/>
+            <keyword name="xml2cppName" id="Qt.dbus::xml2cppName" ref="qml-qbsmodules-qt-dbus.html#xml2cppName-prop"/>
+            <keyword name="yaccBinary" id="lex_yacc::yaccBinary" ref="qml-qbsmodules-lex-yacc.html#yaccBinary-prop"/>
+            <keyword name="yaccFlags" id="lex_yacc::yaccFlags" ref="qml-qbsmodules-lex-yacc.html#yaccFlags-prop"/>
+            <keyword name="yaccOutputFilePath" id="lex_yacc::yaccOutputFilePath" ref="qml-qbsmodules-lex-yacc.html#yaccOutputFilePath-prop"/>
+        </keywords>
+        <files>
+            <file>attributions.html</file>
+            <file>building-applications.html</file>
+            <file>building-qbs.html</file>
+            <file>cli-build.html</file>
+            <file>cli-clean.html</file>
+            <file>cli-config-ui.html</file>
+            <file>cli-config.html</file>
+            <file>cli-create-project.html</file>
+            <file>cli-dump-nodes-tree.html</file>
+            <file>cli-generate.html</file>
+            <file>cli-help.html</file>
+            <file>cli-install.html</file>
+            <file>cli-list-products.html</file>
+            <file>cli-resolve.html</file>
+            <file>cli-run.html</file>
+            <file>cli-setup-android.html</file>
+            <file>cli-setup-qt.html</file>
+            <file>cli-setup-toolchains.html</file>
+            <file>cli-shell.html</file>
+            <file>cli-status.html</file>
+            <file>cli-update-timestamps.html</file>
+            <file>cli-version.html</file>
+            <file>cli.html</file>
+            <file>commands.html</file>
+            <file>configuring.html</file>
+            <file>custom-modules.html</file>
+            <file>generators.html</file>
+            <file>howtos.html</file>
+            <file>images/arrow_bc.png</file>
+            <file>images/bgrContent.png</file>
+            <file>images/btn_next.png</file>
+            <file>images/btn_prev.png</file>
+            <file>images/bullet_dn.png</file>
+            <file>images/bullet_sq.png</file>
+            <file>images/home.png</file>
+            <file>images/ico_note.png</file>
+            <file>images/ico_note_attention.png</file>
+            <file>images/ico_out.png</file>
+            <file>images/logo.png</file>
+            <file>images/qbs-build-process.png</file>
+            <file>images/qbs-dmg.png</file>
+            <file>images/qbs-settings-gui.png</file>
+            <file>index.html</file>
+            <file>installing-files.html</file>
+            <file>installing.html</file>
+            <file>jsextension-binaryfile.html</file>
+            <file>jsextension-environment.html</file>
+            <file>jsextension-file.html</file>
+            <file>jsextension-fileinfo.html</file>
+            <file>jsextension-process.html</file>
+            <file>jsextension-propertylist.html</file>
+            <file>jsextension-temporarydir.html</file>
+            <file>jsextension-textfile.html</file>
+            <file>jsextension-utilities.html</file>
+            <file>jsextension-xml.html</file>
+            <file>jsextensions-general.html</file>
+            <file>language-introduction.html</file>
+            <file>list-of-builtin-services.html</file>
+            <file>list-of-items.html</file>
+            <file>list-of-probes.html</file>
+            <file>module-providers.html</file>
+            <file>multiplexing.html</file>
+            <file>overview.html</file>
+            <file>platforms.html</file>
+            <file>porting-to-qbs.html</file>
+            <file>qbs-attribution-biplist.html</file>
+            <file>qbs-attribution-dmgbuild.html</file>
+            <file>qbs-attribution-ds-store.html</file>
+            <file>qbs-attribution-mac-alias.html</file>
+            <file>qbs-target-android.html</file>
+            <file>qbs-target-integrity.html</file>
+            <file>qbs-target-ios.html</file>
+            <file>qbs-target-linux.html</file>
+            <file>qbs-target-macos.html</file>
+            <file>qbs-target-qnx.html</file>
+            <file>qbs-target-tvos.html</file>
+            <file>qbs-target-vxworks.html</file>
+            <file>qbs-target-watchos.html</file>
+            <file>qbs-target-windows.html</file>
+            <file>qbsconvenienceitems-qmlmodule.html</file>
+            <file>qbslanguageitems-qmlmodule.html</file>
+            <file>qbsmodules-qmlmodule.html</file>
+            <file>qml-binaryprobe-members.html</file>
+            <file>qml-binaryprobe.html</file>
+            <file>qml-frameworkprobe-members.html</file>
+            <file>qml-frameworkprobe.html</file>
+            <file>qml-includeprobe-members.html</file>
+            <file>qml-includeprobe.html</file>
+            <file>qml-pathprobe-members.html</file>
+            <file>qml-pathprobe.html</file>
+            <file>qml-pkgconfigprobe-members.html</file>
+            <file>qml-pkgconfigprobe.html</file>
+            <file>qml-qbsconvenienceitems-appleapplicationdiskimage-members.html</file>
+            <file>qml-qbsconvenienceitems-appleapplicationdiskimage.html</file>
+            <file>qml-qbsconvenienceitems-applediskimage-members.html</file>
+            <file>qml-qbsconvenienceitems-applediskimage.html</file>
+            <file>qml-qbsconvenienceitems-application-members.html</file>
+            <file>qml-qbsconvenienceitems-application.html</file>
+            <file>qml-qbsconvenienceitems-applicationextension-members.html</file>
+            <file>qml-qbsconvenienceitems-applicationextension.html</file>
+            <file>qml-qbsconvenienceitems-autotestrunner-members.html</file>
+            <file>qml-qbsconvenienceitems-autotestrunner.html</file>
+            <file>qml-qbsconvenienceitems-cppapplication-members.html</file>
+            <file>qml-qbsconvenienceitems-cppapplication.html</file>
+            <file>qml-qbsconvenienceitems-dynamiclibrary-members.html</file>
+            <file>qml-qbsconvenienceitems-dynamiclibrary.html</file>
+            <file>qml-qbsconvenienceitems-innosetup-members.html</file>
+            <file>qml-qbsconvenienceitems-innosetup.html</file>
+            <file>qml-qbsconvenienceitems-installpackage-members.html</file>
+            <file>qml-qbsconvenienceitems-installpackage.html</file>
+            <file>qml-qbsconvenienceitems-javaclasscollection-members.html</file>
+            <file>qml-qbsconvenienceitems-javaclasscollection.html</file>
+            <file>qml-qbsconvenienceitems-javajarfile-members.html</file>
+            <file>qml-qbsconvenienceitems-javajarfile.html</file>
+            <file>qml-qbsconvenienceitems-loadablemodule-members.html</file>
+            <file>qml-qbsconvenienceitems-loadablemodule.html</file>
+            <file>qml-qbsconvenienceitems-qtapplication-members.html</file>
+            <file>qml-qbsconvenienceitems-qtapplication.html</file>
+            <file>qml-qbsconvenienceitems-qtguiapplication-members.html</file>
+            <file>qml-qbsconvenienceitems-qtguiapplication.html</file>
+            <file>qml-qbsconvenienceitems-staticlibrary-members.html</file>
+            <file>qml-qbsconvenienceitems-staticlibrary.html</file>
+            <file>qml-qbsconvenienceitems-xpcservice-members.html</file>
+            <file>qml-qbsconvenienceitems-xpcservice.html</file>
+            <file>qml-qbslanguageitems-artifact-members.html</file>
+            <file>qml-qbslanguageitems-artifact.html</file>
+            <file>qml-qbslanguageitems-depends-members.html</file>
+            <file>qml-qbslanguageitems-depends.html</file>
+            <file>qml-qbslanguageitems-export-members.html</file>
+            <file>qml-qbslanguageitems-export.html</file>
+            <file>qml-qbslanguageitems-filetagger-members.html</file>
+            <file>qml-qbslanguageitems-filetagger.html</file>
+            <file>qml-qbslanguageitems-group-members.html</file>
+            <file>qml-qbslanguageitems-group.html</file>
+            <file>qml-qbslanguageitems-joblimit-members.html</file>
+            <file>qml-qbslanguageitems-joblimit.html</file>
+            <file>qml-qbslanguageitems-module-members.html</file>
+            <file>qml-qbslanguageitems-module.html</file>
+            <file>qml-qbslanguageitems-moduleprovider-members.html</file>
+            <file>qml-qbslanguageitems-moduleprovider.html</file>
+            <file>qml-qbslanguageitems-parameter-members.html</file>
+            <file>qml-qbslanguageitems-parameter.html</file>
+            <file>qml-qbslanguageitems-parameters-members.html</file>
+            <file>qml-qbslanguageitems-parameters.html</file>
+            <file>qml-qbslanguageitems-probe-members.html</file>
+            <file>qml-qbslanguageitems-probe.html</file>
+            <file>qml-qbslanguageitems-product-members.html</file>
+            <file>qml-qbslanguageitems-product.html</file>
+            <file>qml-qbslanguageitems-profile-members.html</file>
+            <file>qml-qbslanguageitems-profile.html</file>
+            <file>qml-qbslanguageitems-project-members.html</file>
+            <file>qml-qbslanguageitems-project.html</file>
+            <file>qml-qbslanguageitems-properties-members.html</file>
+            <file>qml-qbslanguageitems-properties.html</file>
+            <file>qml-qbslanguageitems-propertyoptions-members.html</file>
+            <file>qml-qbslanguageitems-propertyoptions.html</file>
+            <file>qml-qbslanguageitems-rule-members.html</file>
+            <file>qml-qbslanguageitems-rule.html</file>
+            <file>qml-qbslanguageitems-scanner-members.html</file>
+            <file>qml-qbslanguageitems-scanner.html</file>
+            <file>qml-qbslanguageitems-subproject-members.html</file>
+            <file>qml-qbslanguageitems-subproject.html</file>
+            <file>qml-qbsmodules-android-ndk-members.html</file>
+            <file>qml-qbsmodules-android-ndk.html</file>
+            <file>qml-qbsmodules-android-sdk-members.html</file>
+            <file>qml-qbsmodules-android-sdk.html</file>
+            <file>qml-qbsmodules-archiver-members.html</file>
+            <file>qml-qbsmodules-archiver.html</file>
+            <file>qml-qbsmodules-autotest-members.html</file>
+            <file>qml-qbsmodules-autotest.html</file>
+            <file>qml-qbsmodules-bundle-members.html</file>
+            <file>qml-qbsmodules-bundle.html</file>
+            <file>qml-qbsmodules-cpp-members.html</file>
+            <file>qml-qbsmodules-cpp-obsolete.html</file>
+            <file>qml-qbsmodules-cpp.html</file>
+            <file>qml-qbsmodules-cpufeatures-members.html</file>
+            <file>qml-qbsmodules-cpufeatures.html</file>
+            <file>qml-qbsmodules-dmg-members.html</file>
+            <file>qml-qbsmodules-dmg.html</file>
+            <file>qml-qbsmodules-exporter-pkgconfig-members.html</file>
+            <file>qml-qbsmodules-exporter-pkgconfig.html</file>
+            <file>qml-qbsmodules-exporter-qbs-members.html</file>
+            <file>qml-qbsmodules-exporter-qbs.html</file>
+            <file>qml-qbsmodules-ib-members.html</file>
+            <file>qml-qbsmodules-ib.html</file>
+            <file>qml-qbsmodules-ico-members.html</file>
+            <file>qml-qbsmodules-ico.html</file>
+            <file>qml-qbsmodules-innosetup-members.html</file>
+            <file>qml-qbsmodules-innosetup.html</file>
+            <file>qml-qbsmodules-java-members.html</file>
+            <file>qml-qbsmodules-java.html</file>
+            <file>qml-qbsmodules-lex-yacc-members.html</file>
+            <file>qml-qbsmodules-lex-yacc.html</file>
+            <file>qml-qbsmodules-nodejs-members.html</file>
+            <file>qml-qbsmodules-nodejs.html</file>
+            <file>qml-qbsmodules-nsis-members.html</file>
+            <file>qml-qbsmodules-nsis.html</file>
+            <file>qml-qbsmodules-pkgconfig-members.html</file>
+            <file>qml-qbsmodules-pkgconfig.html</file>
+            <file>qml-qbsmodules-protobuf-cpp-members.html</file>
+            <file>qml-qbsmodules-protobuf-cpp.html</file>
+            <file>qml-qbsmodules-protobuf-objc-members.html</file>
+            <file>qml-qbsmodules-protobuf-objc.html</file>
+            <file>qml-qbsmodules-qbs-members.html</file>
+            <file>qml-qbsmodules-qbs.html</file>
+            <file>qml-qbsmodules-qnx-members.html</file>
+            <file>qml-qbsmodules-qnx.html</file>
+            <file>qml-qbsmodules-qt-android-support-members.html</file>
+            <file>qml-qbsmodules-qt-android-support.html</file>
+            <file>qml-qbsmodules-qt-core-members.html</file>
+            <file>qml-qbsmodules-qt-core.html</file>
+            <file>qml-qbsmodules-qt-dbus-members.html</file>
+            <file>qml-qbsmodules-qt-dbus.html</file>
+            <file>qml-qbsmodules-qt-declarative-members.html</file>
+            <file>qml-qbsmodules-qt-declarative.html</file>
+            <file>qml-qbsmodules-qt-gui-members.html</file>
+            <file>qml-qbsmodules-qt-gui.html</file>
+            <file>qml-qbsmodules-qt-plugin-support-members.html</file>
+            <file>qml-qbsmodules-qt-plugin-support.html</file>
+            <file>qml-qbsmodules-qt-qml-members.html</file>
+            <file>qml-qbsmodules-qt-qml.html</file>
+            <file>qml-qbsmodules-qt-quick-members.html</file>
+            <file>qml-qbsmodules-qt-quick.html</file>
+            <file>qml-qbsmodules-qt-scxml-members.html</file>
+            <file>qml-qbsmodules-qt-scxml.html</file>
+            <file>qml-qbsmodules-texttemplate-members.html</file>
+            <file>qml-qbsmodules-texttemplate.html</file>
+            <file>qml-qbsmodules-typescript-members.html</file>
+            <file>qml-qbsmodules-typescript.html</file>
+            <file>qml-qbsmodules-vcs-members.html</file>
+            <file>qml-qbsmodules-vcs.html</file>
+            <file>qml-qbsmodules-wix-members.html</file>
+            <file>qml-qbsmodules-wix.html</file>
+            <file>qml-qbsmodules-xcode-members.html</file>
+            <file>qml-qbsmodules-xcode.html</file>
+            <file>qt-modules.html</file>
+            <file>qt-versions.html</file>
+            <file>reference.html</file>
+            <file>running-applications.html</file>
+            <file>setup.html</file>
+            <file>shell.html</file>
+            <file>style/offline-simple.css</file>
+            <file>style/offline.css</file>
+            <file>usage.html</file>
+        </files>
+    </filterSection>
+</QtHelpProject>

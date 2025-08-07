@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qpropertyvalueremovedchangebase.cpp -->
+  <title>QPropertyValueRemovedChangeBase Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QPropertyValueRemovedChangeBase</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPropertyValueRemovedChangeBase Class</h1>
+<span class="small-subtitle">(<a href="qt3dcore-qpropertyvalueremovedchangebase.html">Qt3DCore::QPropertyValueRemovedChangeBase</a>)<br/></span>
+<!-- $$$QPropertyValueRemovedChangeBase-brief -->
+<p>The <a href="qt3dcore-qpropertyvalueremovedchangebase.html">QPropertyValueRemovedChangeBase</a> class is the base class for all <a href="qt3dcore-qscenechange.html#ChangeFlag-enum">PropertyValueRemoved</a> <a href="qt3dcore-qscenechange.html">QSceneChange</a> events. <a href="#details">More...</a></p>
+<!-- @@@QPropertyValueRemovedChangeBase -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;Qt3DCore/QPropertyValueRemovedChangeBase&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3dcore</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3dcore-qscenechange.html">Qt3DCore::QSceneChange</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qt3dcore-qstaticpropertyvalueremovedchangebase.html">Qt3DCore::QStaticPropertyValueRemovedChangeBase</a></p>
+</td></tr></table></div><ul>
+<li><a href="qt3dcore-qpropertyvalueremovedchangebase-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qpropertyvalueremovedchangebase.html#QPropertyValueRemovedChangeBase">QPropertyValueRemovedChangeBase</a></b>(Qt3DCore::QNodeId <i>subjectId</i>)</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qpropertyvalueremovedchangebase.html#QPropertyValueRemovedChangeBasePtr-typedef">QPropertyValueRemovedChangeBasePtr</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPropertyValueRemovedChangeBase-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qt3dcore-qpropertyvalueremovedchangebase.html">QPropertyValueRemovedChangeBase</a> class is the base class for all <a href="qt3dcore-qscenechange.html">QSceneChange</a> events that have the changeType() <a href="qt3dcore-qscenechange.html#ChangeFlag-enum">PropertyValueRemoved</a>. You should not need to instantiate this class. Usually you should be using one of its subclasses such as <a href="qt3dcore-qpropertynoderemovedchange.html">QPropertyNodeRemovedChange</a>.</p>
+<p>You can subclass this to create your own node Removed types for communication between your <a href="qt3dcore-qnode.html">QNode</a> and <a href="qt3dcore-qbackendnode.html">QBackendNode</a> subclasses when writing your own aspects.</p>
+</div>
+<!-- @@@QPropertyValueRemovedChangeBase -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QPropertyValueRemovedChangeBase[overload1]$$$QPropertyValueRemovedChangeBaseQt3DCore::QNodeId -->
+<h3 class="fn" id="QPropertyValueRemovedChangeBase"><a name="QPropertyValueRemovedChangeBase"></a><code>[protected] </code>QPropertyValueRemovedChangeBase::<span class="name">QPropertyValueRemovedChangeBase</span>(<span class="type"><a href="qt3dcore-qnodeid.html">Qt3DCore::QNodeId</a></span> <i>subjectId</i>)</h3>
+<p>Constructs a new <a href="qt3dcore-qpropertyvalueremovedchangebase.html">QPropertyValueRemovedChangeBase</a> with <i>subjectId</i></p>
+<!-- @@@QPropertyValueRemovedChangeBase -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$QPropertyValueRemovedChangeBasePtr -->
+<h3 class="fn" id="QPropertyValueRemovedChangeBasePtr-typedef"><a name="QPropertyValueRemovedChangeBasePtr-typedef"></a>typedef <span class="name">QPropertyValueRemovedChangeBasePtr</span></h3>
+<p>A shared pointer for <a href="qt3dcore-qpropertyvalueremovedchangebase.html">QPropertyValueRemovedChangeBase</a>.</p>
+<!-- @@@QPropertyValueRemovedChangeBasePtr -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

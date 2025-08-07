@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- maroon.qdoc -->
+  <title>Qt Quick Demo - Maroon in Trouble | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Qt Quick Demo - Maroon in Trouble</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<h1 class="title">Qt Quick Demo - Maroon in Trouble</h1>
+<span class="subtitle"></span>
+<pre class="js">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2017 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  .pragma library // Shared game state
+  .import QtQuick 2.0 as QQ
+
+  // Game Stuff
+  var gameState <span class="comment">// Local reference</span>
+  <span class="keyword">function</span> <span class="name">getGameState</span>() { <span class="keyword">return</span> <span class="name">gameState</span>; }
+
+  var towerData = [ <span class="comment">// Name and cost, stats are in the delegate per instance</span>
+      { &quot;name&quot;: <span class="string">&quot;Melee&quot;</span>, &quot;cost&quot;: <span class="number">20</span> },
+      { &quot;name&quot;: <span class="string">&quot;Ranged&quot;</span>, &quot;cost&quot;: <span class="number">50</span> },
+      { &quot;name&quot;: <span class="string">&quot;Bomb&quot;</span>, &quot;cost&quot;: <span class="number">75</span> },
+      { &quot;name&quot;: <span class="string">&quot;Factory&quot;</span>, &quot;cost&quot;: <span class="number">25</span> }
+  ]
+
+  var waveBaseData = [<span class="number">300</span>, <span class="number">290</span>, <span class="number">280</span>, <span class="number">270</span>, <span class="number">220</span>, <span class="number">180</span>, <span class="number">160</span>, <span class="number">80</span>, <span class="number">80</span>, <span class="number">80</span>, <span class="number">30</span>, <span class="number">30</span>, <span class="number">30</span>, <span class="number">30</span>];
+  var waveData = [];
+
+  var towerComponents = new <span class="name">Array</span>(<span class="name">towerData</span>.<span class="name">length</span>);
+  var mobComponent = <span class="name">Qt</span>.<span class="name">createComponent</span>(<span class="string">&quot;mobs/MobBase.qml&quot;</span>);
+
+  <span class="keyword">function</span> <span class="name">endGame</span>()
+  {
+      <span class="name">gameState</span>.<span class="name">gameRunning</span> <span class="operator">=</span> <span class="number">false</span>;
+      <span class="name">gameState</span>.<span class="name">gameOver</span> <span class="operator">=</span> <span class="number">true</span>;
+      <span class="keyword">for</span> (var i = 0; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">gameState</span>.<span class="name">cols</span>; i++) {
+          <span class="keyword">for</span> (var j = 0; <span class="name">j</span> <span class="operator">&lt;</span> <span class="name">gameState</span>.<span class="name">rows</span>; j++) {
+              <span class="keyword">if</span> (<span class="name">gameState</span>.<span class="name">towers</span>[<span class="name">towerIdx</span>(<span class="name">i</span>, <span class="name">j</span>)]) {
+                  <span class="name">gameState</span>.<span class="name">towers</span>[<span class="name">towerIdx</span>(<span class="name">i</span>, <span class="name">j</span>)].<span class="name">destroy</span>();
+                  <span class="name">gameState</span>.<span class="name">towers</span>[<span class="name">towerIdx</span>(<span class="name">i</span>, <span class="name">j</span>)] <span class="operator">=</span> <span class="number">null</span>;
+              }
+          }
+          <span class="keyword">for</span> (var j in <span class="name">gameState</span>.<span class="name">mobs</span>[<span class="name">i</span>])
+              <span class="name">gameState</span>.<span class="name">mobs</span>[<span class="name">i</span>][<span class="name">j</span>].<span class="name">destroy</span>();
+          <span class="name">gameState</span>.<span class="name">mobs</span>[<span class="name">i</span>].<span class="name">splice</span>(<span class="number">0</span>,<span class="name">gameState</span>.<span class="name">mobs</span>[<span class="name">i</span>].<span class="name">length</span>); <span class="comment">//Leaves queue reusable</span>
+      }
+  }
+
+  <span class="keyword">function</span> <span class="name">startGame</span>(gameCanvas)
+  {
+      <span class="name">waveData</span> <span class="operator">=</span> new <span class="name">Array</span>();
+      <span class="keyword">for</span> (var i in <span class="name">waveBaseData</span>)
+          <span class="name">waveData</span>[<span class="name">i</span>] <span class="operator">=</span> <span class="name">waveBaseData</span>[<span class="name">i</span>];
+      <span class="name">gameState</span>.<span class="name">freshState</span>();
+      <span class="keyword">for</span> (var i = 0; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">gameCanvas</span>.<span class="name">cols</span>; i++) {
+          <span class="keyword">for</span> (var j = 0; <span class="name">j</span> <span class="operator">&lt;</span> <span class="name">gameCanvas</span>.<span class="name">rows</span>; j++)
+              <span class="name">gameState</span>.<span class="name">towers</span>[<span class="name">towerIdx</span>(<span class="name">i</span>, <span class="name">j</span>)] <span class="operator">=</span> <span class="number">null</span>;
+          <span class="name">gameState</span>.<span class="name">mobs</span>[<span class="name">i</span>] <span class="operator">=</span> new <span class="name">Array</span>();
+      }
+      <span class="name">gameState</span>.<span class="name">towers</span>[<span class="name">towerIdx</span>(<span class="number">0</span>, <span class="number">0</span>)] <span class="operator">=</span> <span class="name">newTower</span>(<span class="number">3</span>, <span class="number">0</span>, <span class="number">0</span>);<span class="comment">//Start with a starfish in the corner</span>
+      <span class="name">gameState</span>.<span class="name">gameRunning</span> <span class="operator">=</span> <span class="number">true</span>;
+      <span class="name">gameState</span>.<span class="name">gameOver</span> <span class="operator">=</span> <span class="number">false</span>;
+  }
+
+  <span class="keyword">function</span> <span class="name">newGameState</span>(gameCanvas)
+  {
+      <span class="keyword">for</span> (var i = 0; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">towerComponents</span>.<span class="name">length</span>; i++) {
+          <span class="name">towerComponents</span>[<span class="name">i</span>] <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">createComponent</span>(<span class="string">&quot;towers/&quot;</span> <span class="operator">+</span> <span class="name">towerData</span>[<span class="name">i</span>].<span class="name">name</span> <span class="operator">+</span> <span class="string">&quot;.qml&quot;</span>);
+          <span class="keyword">if</span> (<span class="name">towerComponents</span>[<span class="name">i</span>].<span class="name">status</span> <span class="operator">==</span> <span class="name">QQ</span>.<span class="name">Component</span>.<span class="name">Error</span>) {
+              <span class="name">gameCanvas</span>.<span class="name">errored</span> <span class="operator">=</span> <span class="number">true</span>;
+              <span class="name">gameCanvas</span>.<span class="name">errorString</span> <span class="operator">+=</span> <span class="string">&quot;Loading Tower &quot;</span> <span class="operator">+</span> <span class="name">towerData</span>[<span class="name">i</span>].<span class="name">name</span> <span class="operator">+</span> <span class="string">&quot;\n&quot;</span> <span class="operator">+</span> (<span class="name">towerComponents</span>[<span class="name">i</span>].<span class="name">errorString</span>());
+              <span class="name">console</span>.<span class="name">log</span>(<span class="name">towerComponents</span>[<span class="name">i</span>].<span class="name">errorString</span>());
+          }
+      }
+      <span class="name">gameState</span> <span class="operator">=</span> <span class="name">gameCanvas</span>;
+      <span class="name">gameState</span>.<span class="name">freshState</span>();
+      <span class="name">gameState</span>.<span class="name">towers</span> <span class="operator">=</span> new <span class="name">Array</span>(<span class="name">gameCanvas</span>.<span class="name">rows</span> <span class="operator">*</span> <span class="name">gameCanvas</span>.<span class="name">cols</span>);
+      <span class="name">gameState</span>.<span class="name">mobs</span> <span class="operator">=</span> new <span class="name">Array</span>(<span class="name">gameCanvas</span>.<span class="name">cols</span>);
+      <span class="keyword">return</span> <span class="name">gameState</span>;
+  }
+
+  <span class="keyword">function</span> <span class="name">row</span>(y)
+  {
+      <span class="keyword">return</span> <span class="name">Math</span>.<span class="name">floor</span>(<span class="name">y</span> <span class="operator">/</span> <span class="name">gameState</span>.<span class="name">squareSize</span>);
+  }
+
+  <span class="keyword">function</span> <span class="name">col</span>(x)
+  {
+      <span class="keyword">return</span> <span class="name">Math</span>.<span class="name">floor</span>(<span class="name">x</span> <span class="operator">/</span> <span class="name">gameState</span>.<span class="name">squareSize</span>);
+  }
+
+  <span class="keyword">function</span> <span class="name">towerIdx</span>(x, y)
+  {
+      <span class="keyword">return</span> <span class="name">y</span> <span class="operator">+</span> (<span class="name">x</span> <span class="operator">*</span> <span class="name">gameState</span>.<span class="name">rows</span>);
+  }
+
+  <span class="keyword">function</span> <span class="name">newMob</span>(col)
+  {
+      var ret = <span class="name">mobComponent</span>.<span class="name">createObject</span>(<span class="name">gameState</span>.<span class="name">canvas</span>,
+          { &quot;col&quot; : <span class="name">col</span>,
+            &quot;speed&quot; : (<span class="name">Math</span>.<span class="name">min</span>(<span class="number">2.0</span>, <span class="number">0.10</span> <span class="operator">*</span> (<span class="name">gameState</span>.<span class="name">waveNumber</span> <span class="operator">+</span> <span class="number">1</span>))),
+            &quot;y&quot; : <span class="name">gameState</span>.<span class="name">canvas</span>.<span class="name">height</span> });
+      <span class="name">gameState</span>.<span class="name">mobs</span>[<span class="name">col</span>].<span class="name">push</span>(<span class="name">ret</span>);
+      <span class="keyword">return</span> <span class="name">ret</span>;
+  }
+
+  <span class="keyword">function</span> <span class="name">newTower</span>(type, row, col)
+  {
+      var ret = <span class="name">towerComponents</span>[<span class="name">type</span>].<span class="name">createObject</span>(<span class="name">gameState</span>.<span class="name">canvas</span>);
+      <span class="name">ret</span>.<span class="name">row</span> <span class="operator">=</span> <span class="name">row</span>;
+      <span class="name">ret</span>.<span class="name">col</span> <span class="operator">=</span> <span class="name">col</span>;
+      <span class="name">ret</span>.<span class="name">fireCounter</span> <span class="operator">=</span> <span class="name">ret</span>.<span class="name">rof</span>;
+      <span class="name">ret</span>.<span class="name">spawn</span>();
+      <span class="keyword">return</span> <span class="name">ret</span>;
+  }
+
+  <span class="keyword">function</span> <span class="name">buildTower</span>(type, x, y)
+  {
+      <span class="keyword">if</span> (<span class="name">gameState</span>.<span class="name">towers</span>[<span class="name">towerIdx</span>(<span class="name">x</span>,<span class="name">y</span>)] <span class="operator">!=</span> <span class="number">null</span>) {
+          <span class="keyword">if</span> (<span class="name">type</span> <span class="operator">&lt;=</span> <span class="number">0</span>) {
+              <span class="name">gameState</span>.<span class="name">towers</span>[<span class="name">towerIdx</span>(<span class="name">x</span>,<span class="name">y</span>)].<span class="name">sell</span>();
+              <span class="name">gameState</span>.<span class="name">towers</span>[<span class="name">towerIdx</span>(<span class="name">x</span>,<span class="name">y</span>)] <span class="operator">=</span> <span class="number">null</span>;
+          }
+      } <span class="keyword">else</span> {
+          <span class="keyword">if</span> (<span class="name">gameState</span>.<span class="name">coins</span> <span class="operator">&lt;</span> <span class="name">towerData</span>[<span class="name">type</span> <span class="operator">-</span> <span class="number">1</span>].<span class="name">cost</span>)
+              <span class="keyword">return</span>;
+          <span class="name">gameState</span>.<span class="name">towers</span>[<span class="name">towerIdx</span>(<span class="name">x</span>, <span class="name">y</span>)] <span class="operator">=</span> <span class="name">newTower</span>(<span class="name">type</span> <span class="operator">-</span> <span class="number">1</span>, <span class="name">y</span>, <span class="name">x</span>);
+          <span class="name">gameState</span>.<span class="name">coins</span> <span class="operator">-=</span> <span class="name">towerData</span>[<span class="name">type</span> <span class="operator">-</span> <span class="number">1</span>].<span class="name">cost</span>;
+      }
+  }
+
+  <span class="keyword">function</span> <span class="name">killMob</span>(col, mob)
+  {
+      <span class="keyword">if</span> (!<span class="name">mob</span>)
+          <span class="keyword">return</span>;
+      var idx = <span class="name">gameState</span>.<span class="name">mobs</span>[<span class="name">col</span>].<span class="name">indexOf</span>(<span class="name">mob</span>);
+      <span class="keyword">if</span> (<span class="name">idx</span> <span class="operator">==</span> -<span class="number">1</span> <span class="operator">||</span> !<span class="name">mob</span>.<span class="name">hp</span>)
+          <span class="keyword">return</span>;
+      <span class="name">mob</span>.<span class="name">hp</span> <span class="operator">=</span> <span class="number">0</span>;
+      <span class="name">mob</span>.<span class="name">die</span>();
+      <span class="name">gameState</span>.<span class="name">mobs</span>[<span class="name">col</span>].<span class="name">splice</span>(<span class="name">idx</span>,<span class="number">1</span>);
+  }
+
+  <span class="keyword">function</span> <span class="name">killTower</span>(row, col)
+  {
+      var tower = <span class="name">gameState</span>.<span class="name">towers</span>[<span class="name">towerIdx</span>(<span class="name">col</span>, <span class="name">row</span>)];
+      <span class="keyword">if</span> (!<span class="name">tower</span>)
+          <span class="keyword">return</span>;
+      <span class="name">tower</span>.<span class="name">hp</span> <span class="operator">=</span> <span class="number">0</span>;
+      <span class="name">tower</span>.<span class="name">die</span>();
+      <span class="name">gameState</span>.<span class="name">towers</span>[<span class="name">towerIdx</span>(<span class="name">col</span>, <span class="name">row</span>)] <span class="operator">=</span> <span class="number">null</span>;
+  }
+
+  <span class="keyword">function</span> <span class="name">tick</span>()
+  {
+      <span class="keyword">if</span> (!<span class="name">gameState</span>.<span class="name">gameRunning</span>)
+          <span class="keyword">return</span>;
+
+      <span class="comment">// Spawn</span>
+      <span class="name">gameState</span>.<span class="name">waveProgress</span> <span class="operator">+=</span> <span class="number">1</span>;
+      var i = <span class="name">gameState</span>.<span class="name">waveProgress</span>;
+      var j = <span class="number">0</span>;
+      <span class="keyword">while</span> (<span class="name">i</span> <span class="operator">&gt;</span> <span class="number">0</span> <span class="operator">&amp;&amp;</span> <span class="name">j</span> <span class="operator">&lt;</span> <span class="name">waveData</span>.<span class="name">length</span>)
+          <span class="name">i</span> <span class="operator">-=</span> <span class="name">waveData</span>[j++];
+      <span class="keyword">if</span> ( <span class="name">i</span> <span class="operator">==</span> <span class="number">0</span> ) <span class="comment">// Spawn a mob</span>
+          <span class="name">newMob</span>(<span class="name">Math</span>.<span class="name">floor</span>(<span class="name">Math</span>.<span class="name">random</span>() <span class="operator">*</span> <span class="name">gameState</span>.<span class="name">cols</span>));
+      <span class="keyword">if</span> ( <span class="name">j</span> <span class="operator">==</span> <span class="name">waveData</span>.<span class="name">length</span> ) { <span class="comment">// Next Wave</span>
+          <span class="name">gameState</span>.<span class="name">waveNumber</span> <span class="operator">+=</span> <span class="number">1</span>;
+          <span class="name">gameState</span>.<span class="name">waveProgress</span> <span class="operator">=</span> <span class="number">0</span>;
+          var waveModifier = <span class="number">10</span>; <span class="comment">// Constant governing how much faster the next wave is to spawn (not fish speed)</span>
+          <span class="keyword">for</span> (var k in <span class="name">waveData</span> ) <span class="comment">// Slightly faster</span>
+              <span class="keyword">if</span> (<span class="name">waveData</span>[<span class="name">k</span>] <span class="operator">&gt;</span> <span class="name">waveModifier</span>)
+                  <span class="name">waveData</span>[<span class="name">k</span>] <span class="operator">-=</span> <span class="name">waveModifier</span>;
+      }
+
+      <span class="comment">// Towers Attack</span>
+      <span class="keyword">for</span> (var j in <span class="name">gameState</span>.<span class="name">towers</span>) {
+          var tower = <span class="name">gameState</span>.<span class="name">towers</span>[<span class="name">j</span>];
+          <span class="keyword">if</span> (<span class="name">tower</span> <span class="operator">==</span> <span class="number">null</span>)
+              <span class="keyword">continue</span>;
+          <span class="keyword">if</span> (<span class="name">tower</span>.<span class="name">fireCounter</span> <span class="operator">&gt;</span> <span class="number">0</span>) {
+              <span class="name">tower</span>.<span class="name">fireCounter</span> <span class="operator">-=</span> <span class="number">1</span>;
+              <span class="keyword">continue</span>;
+          }
+          var column = <span class="name">tower</span>.<span class="name">col</span>;
+          <span class="keyword">for</span> (var k in <span class="name">gameState</span>.<span class="name">mobs</span>[<span class="name">column</span>]) {
+              var conflict = <span class="name">gameState</span>.<span class="name">mobs</span>[<span class="name">column</span>][<span class="name">k</span>];
+              <span class="keyword">if</span> (<span class="name">conflict</span>.<span class="name">y</span> <span class="operator">&lt;=</span> <span class="name">gameState</span>.<span class="name">canvas</span>.<span class="name">height</span> <span class="operator">&amp;&amp;</span> <span class="name">conflict</span>.<span class="name">y</span> <span class="operator">+</span> <span class="name">conflict</span>.<span class="name">height</span> <span class="operator">&gt;</span> <span class="name">tower</span>.<span class="name">y</span>
+                  <span class="operator">&amp;&amp;</span> <span class="name">conflict</span>.<span class="name">y</span> <span class="operator">-</span> ((<span class="name">tower</span>.<span class="name">row</span> <span class="operator">+</span> <span class="number">1</span>) <span class="operator">*</span> <span class="name">gameState</span>.<span class="name">squareSize</span>) <span class="operator">&lt;</span> <span class="name">gameState</span>.<span class="name">squareSize</span> <span class="operator">*</span> <span class="name">tower</span>.<span class="name">range</span>) { <span class="comment">// In Range</span>
+                  <span class="name">tower</span>.<span class="name">fire</span>();
+                  <span class="name">tower</span>.<span class="name">fireCounter</span> <span class="operator">=</span> <span class="name">tower</span>.<span class="name">rof</span>;
+                  <span class="name">conflict</span>.<span class="name">hit</span>(<span class="name">tower</span>.<span class="name">damage</span>);
+              }
+          }
+
+          <span class="comment">// Income</span>
+          <span class="keyword">if</span> (<span class="name">tower</span>.<span class="name">income</span>) {
+              <span class="name">gameState</span>.<span class="name">coins</span> <span class="operator">+=</span> <span class="name">tower</span>.<span class="name">income</span>;
+              <span class="name">tower</span>.<span class="name">fire</span>();
+              <span class="name">tower</span>.<span class="name">fireCounter</span> <span class="operator">=</span> <span class="name">tower</span>.<span class="name">rof</span>;
+          }
+      }
+
+      <span class="comment">// Mobs move</span>
+      <span class="keyword">for</span> (var i = 0; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">gameState</span>.<span class="name">cols</span>; i++) {
+          <span class="keyword">for</span> (var j = 0; <span class="name">j</span> <span class="operator">&lt;</span> <span class="name">gameState</span>.<span class="name">mobs</span>[<span class="name">i</span>].<span class="name">length</span>; j++) {
+              var mob = <span class="name">gameState</span>.<span class="name">mobs</span>[<span class="name">i</span>][<span class="name">j</span>];
+              var newPos = <span class="name">gameState</span>.<span class="name">mobs</span>[<span class="name">i</span>][<span class="name">j</span>].<span class="name">y</span> <span class="operator">-</span> <span class="name">gameState</span>.<span class="name">mobs</span>[<span class="name">i</span>][<span class="name">j</span>].<span class="name">speed</span>;
+              <span class="keyword">if</span> (<span class="name">newPos</span> <span class="operator">&lt;</span> <span class="number">0</span>) {
+                  <span class="name">gameState</span>.<span class="name">lives</span> <span class="operator">-=</span> <span class="number">1</span>;
+                  <span class="name">killMob</span>(<span class="name">i</span>, <span class="name">mob</span>);
+                  <span class="keyword">if</span> (<span class="name">gameState</span>.<span class="name">lives</span> <span class="operator">&lt;=</span> <span class="number">0</span>)
+                      <span class="name">endGame</span>();
+                  <span class="keyword">continue</span>;
+              }
+              var conflict = <span class="name">gameState</span>.<span class="name">towers</span>[<span class="name">towerIdx</span>(<span class="name">i</span>, <span class="name">row</span>(<span class="name">newPos</span>))];
+              <span class="keyword">if</span> (<span class="name">conflict</span> <span class="operator">!=</span> <span class="number">null</span>) {
+                  <span class="keyword">if</span> (<span class="name">mob</span>.<span class="name">y</span> <span class="operator">&lt;</span> <span class="name">conflict</span>.<span class="name">y</span> <span class="operator">+</span> <span class="name">gameState</span>.<span class="name">squareSize</span>)
+                      <span class="name">gameState</span>.<span class="name">mobs</span>[<span class="name">i</span>][<span class="name">j</span>].<span class="name">y</span> <span class="operator">+=</span> <span class="name">gameState</span>.<span class="name">mobs</span>[<span class="name">i</span>][<span class="name">j</span>].<span class="name">speed</span> <span class="operator">*</span> <span class="number">10</span>; <span class="comment">// Moved inside tower, now hurry back out</span>
+                  <span class="keyword">if</span> (<span class="name">mob</span>.<span class="name">fireCounter</span> <span class="operator">&gt;</span> <span class="number">0</span>) {
+                      mob.fireCounter--;
+                  } <span class="keyword">else</span> {
+                      <span class="name">gameState</span>.<span class="name">mobs</span>[<span class="name">i</span>][<span class="name">j</span>].<span class="name">fire</span>();
+                      <span class="name">conflict</span>.<span class="name">hp</span> <span class="operator">-=</span> <span class="name">mob</span>.<span class="name">damage</span>;
+                      <span class="keyword">if</span> (<span class="name">conflict</span>.<span class="name">hp</span> <span class="operator">&lt;=</span> <span class="number">0</span>)
+                          <span class="name">killTower</span>(<span class="name">conflict</span>.<span class="name">row</span>, <span class="name">conflict</span>.<span class="name">col</span>);
+                      <span class="name">mob</span>.<span class="name">fireCounter</span> <span class="operator">=</span> <span class="name">mob</span>.<span class="name">rof</span>;
+                  }
+              } <span class="keyword">else</span> {
+                  <span class="name">gameState</span>.<span class="name">mobs</span>[<span class="name">i</span>][<span class="name">j</span>].<span class="name">y</span> <span class="operator">=</span> <span class="name">newPos</span>;
+              }
+          }
+      }
+
+  }
+
+</pre>

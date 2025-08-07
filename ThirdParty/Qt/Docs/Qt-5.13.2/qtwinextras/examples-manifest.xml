@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<instructionals module="QtWinExtras">
+    <examples>
+        <example name="Icon Extractor" docUrl="qthelp://org.qt-project.qtwinextras.5132/qtwinextras/qtwinextras-iconextractor-example.html" projectPath="winextras/iconextractor/iconextractor.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[Demonstrates accessing icons contained in Windows binaries.]]></description>
+            <tags>extractor,extras,icon,win</tags>
+            <fileToOpen mainFile="true">winextras/iconextractor/main.cpp</fileToOpen>
+        </example>
+        <example name="Music Player" docUrl="qthelp://org.qt-project.qtwinextras.5132/qtwinextras/qtwinextras-musicplayer-example.html" projectPath="winextras/musicplayer/musicplayer.pro" imageUrl="qthelp://org.qt-project.qtwinextras.5132/qtwinextras/images/qtwinextras-musicplayer-composited.png">
+            <description><![CDATA[Demonstrates managing Windows DWM features, jump lists, taskbar button overlay, and thumbnail toolbar.]]></description>
+            <tags>extras,music,player,win</tags>
+            <fileToOpen>winextras/musicplayer/main.cpp</fileToOpen>
+            <fileToOpen>winextras/musicplayer/musicplayer.h</fileToOpen>
+            <fileToOpen mainFile="true">winextras/musicplayer/musicplayer.cpp</fileToOpen>
+        </example>
+        <example name="Quick Player" docUrl="qthelp://org.qt-project.qtwinextras.5132/qtwinextras/qtwinextras-quickplayer-example.html" projectPath="winextras/quickplayer/quickplayer.pro" imageUrl="qthelp://org.qt-project.qtwinextras.5132/qtwinextras/images/qtwinextras-quickplayer-composited.png">
+            <description><![CDATA[Demonstrates using QtWinExtras in Qt Quick.]]></description>
+            <tags>extras,player,quick,win</tags>
+            <fileToOpen>winextras/quickplayer/main.cpp</fileToOpen>
+            <fileToOpen mainFile="true">winextras/quickplayer/qml/main.qml</fileToOpen>
+        </example>
+    </examples>
+</instructionals>

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-projects-compilers.qdoc -->
+  <title>Adding Compilers | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Adding Compilers</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-project-qmake.html" />
+  <link rel="next" href="creator-debuggers.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-project-qmake.html">Adding Qt Versions</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-debuggers.html">Adding Debuggers</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#redetecting-compilers">Redetecting Compilers</a></li>
+<li class="level1"><a href="#specifying-compiler-settings">Specifying Compiler Settings</a></li>
+<li class="level1"><a href="#adding-nim-compilers">Adding Nim Compilers</a></li>
+<li class="level1"><a href="#adding-custom-compilers">Adding Custom Compilers</a></li>
+<li class="level1"><a href="#troubleshooting-mingw-compilation-errors">Troubleshooting MinGW Compilation Errors</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Adding Compilers</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-tool-chains.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Qt is supported on a variety of 32-bit and 64-bit platforms, and can usually be built on each platform with GCC, a vendor-supplied compiler, or a third party compiler. In Qt Creator, a <a href="creator-glossary.html#glossary-buildandrun-kit">kit</a> specifies the compiler and other necessary tools for building an application for and running it on a particular platform.</p>
+<p>Qt Creator automatically detects the compilers that are registered by your system or by an installer and lists them in <b>Tools</b> &gt; <b>Options</b> &gt; <b>Kits</b> &gt; <b>Compilers</b>:</p>
+<p class="centerAlign"><img src="images/qtcreator-toolchains.png" alt="" /></p><p>You can add the following compilers to build applications by using other compilers or by using additional versions of the automatically detected compilers:</p>
+<ul>
+<li>GNU Compiler Collection (GCC) is a compiler for Linux and macOS.</li>
+<li><a href="https://mingw-w64.org/">MinGW</a> (Minimalist GNU for Windows) is a native software port of GCC and GNU Binutils for use in the development of native Microsoft Windows applications on Windows. <a href="https://mingw-w64.org/">MinGW</a> is distributed together with Qt Creator and Qt installers for Windows.</li>
+<li>Linux ICC (Intel C++ Compiler) is a group of C and C++ compilers for Linux.</li>
+<li>Clang is a C, C++, Objective C, and Objective C++ front-end for the LLVM compiler for Windows, Linux, and macOS.</li>
+<li><a href="https://clang.llvm.org/docs/UsersManual.html#clang-cl">clang-cl</a> is an alternative command-line interface to Clang that is compatible with the Visual C++ compiler, <code>cl.exe</code>.</li>
+<li>Nim is the Nim Compiler for Windows, Linux, and macOS.</li>
+<li>QCC is the interface for compiling C++ applications for QNX.</li>
+</ul>
+<p>In addition, the Qt Creator Bare Metal Device plugin provides support for the following compilers:</p>
+<ul>
+<li><a href="https://www.iar.com/iar-embedded-workbench/">IAREW</a> is a group of C and C++ bare-metal compilers from the various IAR Embedded Workbench development environments.<p><b>Note: </b>Currently supported architectures are <code>8051</code>, <code>AVR</code>, and <code>ARM</code>.</p></li>
+<li><a href="https://www.keil.com">KEIL</a> is a group of C and C++ bare-metal compilers from the various KEIL development environments.<p><b>Note: </b>Currently supported architectures are <code>8051</code> and <code>ARM</code>.</p></li>
+<li><a href="https://sdcc.sourceforge.net">SDCC</a> is a retargetable, optimizing C bare-metal compiler for various architectures.<p><b>Note: </b>Currently supported architecture is <code>8051</code>.</p></li>
+</ul>
+<a name="redetecting-compilers"></a>
+<h2 id="redetecting-compilers">Redetecting Compilers</h2>
+<p>When Qt Creator finds an x86_64 GCC compiler, it sets up an instance for the native x86_64 target. If you plan to create also 32-bit x86 binaries without using a dedicated cross-compiler, select <b>Auto-detection Settings</b> &gt; <b>Detect x86_64 GCC compilers as x86_64 and x86</b>. Then select <b>Re-detect</b> to refresh the list of automatically detected compilers.</p>
+<p>To remove manually added compilers, select <b>Remove</b> or <b>Remove All</b>.</p>
+<a name="specifying-compiler-settings"></a>
+<h2 id="specifying-compiler-settings">Specifying Compiler Settings</h2>
+<p>To build an application using GCC, <a href="https://mingw-w64.org/">MinGW</a>, Clang, or QCC, specify the path to the directory where the compiler is located and select the application binary interface (ABI) version from the list of available versions. You can also create a custom ABI definition. For QCC, also specify the path to the QNX Software Development Platform (SDP).</p>
+<p>To enable Microsoft Visual C++ Compilers (MSVC) and clang-cl to find system headers, libraries, and the linker, Qt Creator executes them inside a command prompt where the environment has been set up using <code>vcvarsall.bat</code>. For these compilers, you also specify the path to the script that sets up the command prompt.</p>
+<p>You specify the compiler to use for each kit in <b>Tools</b> &gt; <b>Options</b> &gt; <b>Kits</b>.</p>
+<p>To add C or C++ compilers:</p>
+<ol class="1" type="1"><li>Select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Kits</b> &gt; <b>Compilers</b> &gt; <b>Add</b>, then select a compiler in the list, and then select <b>C</b> or <b>C++</b> to add a C or C++ compiler.<p>To clone the selected compiler, select <b>Clone</b>.</p>
+</li>
+<li>In the <b>Name</b> field, enter a name for the compiler to identify it in Qt Creator.</li>
+<li>In the <b>Compiler path</b> field, enter the path to the directory where the compiler is located.</li>
+<li>In the <b>Platform codegen flags</b> field, check the flags passed to the compiler that specify the architecture on the target platform.</li>
+<li>In the <b>Platform linker flags</b> field, check the flags passed to the linker that specify the architecture on the target platform. The linker flags are used only when building with Qbs.<p>The other settings to specify depend on the compiler.</p>
+</li>
+<li>In the <b>ABI</b> field, provide an identification for the target architecture. This is used to warn about ABI mismatches within the kits.</li>
+</ol>
+<a name="adding-nim-compilers"></a>
+<h2 id="adding-nim-compilers">Adding Nim Compilers</h2>
+<p>To build an application using the Nim Compiler, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Kits</b> &gt; <b>Compilers</b> &gt; <b>Add</b> &gt; <b>Nim</b>, and specify the path to the directory where the compiler is located.</p>
+<a name="adding-custom-compilers"></a>
+<h2 id="adding-custom-compilers">Adding Custom Compilers</h2>
+<p>To add a compiler that is not listed above or a remote compiler, use the <b>Custom</b> option and specify the paths to the directories where the compiler and make tool are located and options for the compiler.</p>
+<p class="centerAlign"><img src="images/creator-compilers-custom.png" alt="" /></p><p>To add other compilers:</p>
+<ol class="1" type="1"><li>Select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Kits</b> &gt; <b>Compilers</b> &gt; <b>Add</b> &gt; <b>Custom</b> &gt; <b>C</b> or <b>C++</b>.</li>
+<li>In the <b>Name</b> field, enter a name for the compiler.</li>
+<li>In the <b>Compiler path</b> field, enter the path to the directory where the compiler is located.</li>
+<li>In the <b>Make path</b> field, enter the path to the directory where the make tool is located.</li>
+<li>In the <b>ABI</b> field, specify the ABI version.</li>
+<li>In the <b>Predefined macros</b> field, specify the macros that the compiler enables by default. Specify each macro on a separate line, in the following format: MACRO[=value].</li>
+<li>In the <b>Header paths</b> field, specify the paths to directories that the compiler checks for headers. Specify each path on a separate line.</li>
+<li>In the <b>C++11 flags</b> field, specify the flags that turn on C++11 support in the compiler.</li>
+<li>In the <b>Qt mkspecs</b> field, specify the path to the directory where mkspecs are located. Usually, the path is specified relative to the Qt mkspecs directory.</li>
+<li>In the <b>Error parser</b> field, select the error parser to use. Select <b>Custom</b>, and then select <b>Customer Parser Settings</b> to specify settings for a custom parser:<p class="centerAlign"><img src="images/qtcreator-custom-parser.png" alt="" /></p><p>The custom error parser enables you to capture errors and warnings separately. You can configure the error parser in the <b>Error</b> tab and the warning parser in the <b>Warning</b> tab:</p>
+<ol class="1" type="1"><li>In the <b>Error message capture pattern</b> field, specify a regular expression to define what is an error. The custom parser matches the compile output line by line against the regular expression and displays errors in the <b>Issues</b> output pane. Create regular expression groups that contain the file name, line number and error message.</li>
+<li>In the <b>Capture Positions</b> field, map the regular expression groups to <b>File name</b>, <b>Line number</b>, and <b>Message</b>.</li>
+<li>In the <b>Capture Output Channels</b> field, specify whether messages from standard output, standard error, or both channels should be captured.</li>
+<li>In the <b>Test</b> group, you can test how the message that you enter in the <b>Error message</b> field is matched when using the current settings.</li>
+</ol>
+</li>
+</ol>
+<a name="troubleshooting-mingw-compilation-errors"></a>
+<h2 id="troubleshooting-mingw-compilation-errors">Troubleshooting MinGW Compilation Errors</h2>
+<p>If error messages displayed in the <b>Compile Output</b> pane contain paths where slashes are missing (for example, <code>C:QtSDK</code>), check your PATH variable. At the command line, enter the following commands:</p>
+<pre class="cpp">
+
+  where sh<span class="operator">.</span>exe
+  where make<span class="operator">.</span>exe
+  where mingw32<span class="operator">-</span>make<span class="operator">.</span>exe
+
+</pre>
+<p>If these commands show paths, they have been added to the global PATH variable during the installation of a tool chain based on Cygwin or <a href="https://mingw-w64.org/">MinGW</a>, even though this is against Windows conventions.</p>
+<p>To keep working with the third-party tool chain, create a new shell link that adds the required paths (as Visual Studio and Qt do). The shell link must point to cmd.exe, as illustrated by the following example:</p>
+<p><code>C:\Windows\System32\cmd.exe /K C:\path_to\myenv.bat</code></p>
+<p>where the /K parameter carries out the command specified in the bat file.</p>
+<p>Create the myenv.bat file at <i>path_to</i>, which should be in a convenient location. In the file, specify the paths to the tool chains. For example,</p>
+<p><code>set PATH=C:\path1;C:\path2;%PATH%</code></p>
+<p>where <i>path1</i> and <i>path2</i> are paths to the tool chains.</p>
+<p>Finally, remove the paths from the global PATH, reboot the computer, and run the <code>where</code> commands again to verify that the global PATH is now clean.</p>
+<p>You can use the shell link to run the tools in the third-party tool chains.</p>
+</div>
+<!-- @@@creator-tool-chains.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-project-qmake.html">Adding Qt Versions</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-debuggers.html">Adding Debuggers</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

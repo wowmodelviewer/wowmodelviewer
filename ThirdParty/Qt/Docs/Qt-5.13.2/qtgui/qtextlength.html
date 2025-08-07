@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtextformat.cpp -->
+  <title>QTextLength Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QTextLength</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QTextLength Class</h1>
+<!-- $$$QTextLength-brief -->
+<p>The <a href="qtextlength.html">QTextLength</a> class encapsulates the different types of length used in a <a href="qtextdocument.html">QTextDocument</a>. <a href="#details">More...</a></p>
+<!-- @@@QTextLength -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QTextLength&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr></table></div><ul>
+<li><a href="qtextlength-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qtextlength.html#Type-enum">Type</a></b> { VariableLength, FixedLength, PercentageLength }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtextlength.html#QTextLength-1">QTextLength</a></b>(QTextLength::Type <i>type</i>, qreal <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtextlength.html#QTextLength">QTextLength</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qtextlength.html#rawValue">rawValue</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QTextLength::Type </td><td class="memItemRight bottomAlign"><b><a href="qtextlength.html#type">type</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qtextlength.html#value">value</a></b>(qreal <i>maximumLength</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariant </td><td class="memItemRight bottomAlign"><b><a href="qtextlength.html#operator-QVariant">operator QVariant</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qtextlength.html#operator-not-eq">operator!=</a></b>(const QTextLength &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qtextlength.html#operator-eq-eq">operator==</a></b>(const QTextLength &amp;<i>other</i>) const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QTextLength-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>When we specify a value for the length of an element in a text document, we often need to provide some other information so that the length is used in the way we expect. For example, when we specify a table width, the value can represent a fixed number of pixels, or it can be a percentage value. This information changes both the meaning of the value and the way it is used.</p>
+<p>Generally, this class is used to specify table widths. These can be specified either as a fixed amount of pixels, as a percentage of the containing frame's width, or by a variable width that allows it to take up just the space it requires.</p>
+</div>
+<p><b>See also </b><a href="qtexttable.html">QTextTable</a>.</p>
+<!-- @@@QTextLength -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Type$$$VariableLength$$$FixedLength$$$PercentageLength -->
+<h3 class="fn" id="Type-enum"><a name="Type-enum"></a>enum QTextLength::<span class="name">Type</span></h3>
+<p>This enum describes the different types a length object can have.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QTextLength::VariableLength</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The width of the object is variable</td></tr>
+<tr><td class="topAlign"><code>QTextLength::FixedLength</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The width of the object is fixed</td></tr>
+<tr><td class="topAlign"><code>QTextLength::PercentageLength</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The width of the object is in percentage of the maximum width</td></tr>
+</table></div>
+<p><b>See also </b><a href="qtextlength.html#type">type</a>().</p>
+<!-- @@@Type -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QTextLength$$$QTextLengthQTextLength::Typeqreal -->
+<h3 class="fn" id="QTextLength-1"><a name="QTextLength-1"></a>QTextLength::<span class="name">QTextLength</span>(<span class="type"><a href="qtextlength.html#Type-enum">QTextLength::Type</a></span> <i>type</i>, <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>value</i>)</h3>
+<p>Constructs a new length object of the given <i>type</i> and <i>value</i>.</p>
+<!-- @@@QTextLength -->
+<!-- $$$QTextLength[overload1]$$$QTextLength -->
+<h3 class="fn" id="QTextLength"><a name="QTextLength"></a>QTextLength::<span class="name">QTextLength</span>()</h3>
+<p>Constructs a new length object which represents a variable size.</p>
+<!-- @@@QTextLength -->
+<!-- $$$rawValue[overload1]$$$rawValue -->
+<h3 class="fn" id="rawValue"><a name="rawValue"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QTextLength::<span class="name">rawValue</span>() const</h3>
+<p>Returns the constraint value that is specific for the type of the length. If the length is <a href="qtextlength.html#Type-enum">QTextLength::PercentageLength</a> then the raw value is in percent, in the range of 0 to 100. If the length is <a href="qtextlength.html#Type-enum">QTextLength::FixedLength</a> then that fixed amount is returned. For variable lengths, zero is returned.</p>
+<!-- @@@rawValue -->
+<!-- $$$type[overload1]$$$type -->
+<h3 class="fn" id="type"><a name="type"></a><span class="type"><a href="qtextlength.html#Type-enum">QTextLength::Type</a></span> QTextLength::<span class="name">type</span>() const</h3>
+<p>Returns the type of this length object.</p>
+<p><b>See also </b><a href="qtextlength.html#Type-enum">QTextLength::Type</a>.</p>
+<!-- @@@type -->
+<!-- $$$value[overload1]$$$valueqreal -->
+<h3 class="fn" id="value"><a name="value"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QTextLength::<span class="name">value</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>maximumLength</i>) const</h3>
+<p>Returns the effective length, constrained by the type of the length object and the specified <i>maximumLength</i>.</p>
+<p><b>See also </b><a href="qtextlength.html#type">type</a>().</p>
+<!-- @@@value -->
+<!-- $$$operator QVariant[overload1]$$$operator QVariant -->
+<h3 class="fn" id="operator-QVariant"><a name="operator-QVariant"></a><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QTextLength::<span class="name">operator QVariant</span>() const</h3>
+<p>Returns the text length as a <a href="../qtcore/qvariant.html">QVariant</a></p>
+<!-- @@@operator QVariant -->
+<!-- $$$operator!=[overload1]$$$operator!=constQTextLength& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> QTextLength::<span class="name">operator!=</span>(const <span class="type"><a href="qtextlength.html#QTextLength">QTextLength</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns <code>true</code> if this text length is different from the <i>other</i> text length.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQTextLength& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> QTextLength::<span class="name">operator==</span>(const <span class="type"><a href="qtextlength.html#QTextLength">QTextLength</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns <code>true</code> if this text length is the same as the <i>other</i> text length.</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

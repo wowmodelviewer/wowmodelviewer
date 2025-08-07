@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- systemdialogs.qdoc -->
+  <title>Qt Quick System Dialog Examples | Qt Quick Dialogs 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickdialogs-index.html">Qt Quick Dialogs</a></td><td >Qt Quick System Dialog Examples</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickdialogs-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Quick System Dialog Examples</h1>
+<span class="subtitle"></span>
+<!-- $$$systemdialogs-brief -->
+<p>This example demonstrates the system dialog types in QML.</p>
+<!-- @@@systemdialogs -->
+<!-- $$$systemdialogs-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/systemdialogs-example.jpg" alt="" /></p><p>This example demonstrates the system dialogs in the <a href="qtquickdialogs-index.html">Qt Quick Dialogs</a> module. The appearance and behavior is platform-dependent.</p>
+<p>A <a href="qml-qtquick-dialogs-filedialog.html">FileDialog</a> is used to choose a single file, multiple files or a single directory, depending on how it is configured.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-dialogs-filedialog.html">FileDialog</a></span> {
+      <span class="name">id</span>: <span class="name">fileDialog</span>
+      <span class="name">visible</span>: <span class="name">fileDialogVisible</span>.<span class="name">checked</span>
+      <span class="name">modality</span>: <span class="name">fileDialogModal</span>.<span class="name">checked</span> ? <span class="name">Qt</span>.<span class="name">WindowModal</span> : <span class="name">Qt</span>.<span class="name">NonModal</span>
+      <span class="name">title</span>: <span class="name">fileDialogSelectFolder</span>.<span class="name">checked</span> ? <span class="string">&quot;Choose a folder&quot;</span> :
+          (<span class="name">fileDialogSelectMultiple</span>.<span class="name">checked</span> ? <span class="string">&quot;Choose some files&quot;</span> : <span class="string">&quot;Choose a file&quot;</span>)
+      <span class="name">selectExisting</span>: <span class="name">fileDialogSelectExisting</span>.<span class="name">checked</span>
+      <span class="name">selectMultiple</span>: <span class="name">fileDialogSelectMultiple</span>.<span class="name">checked</span>
+      <span class="name">selectFolder</span>: <span class="name">fileDialogSelectFolder</span>.<span class="name">checked</span>
+      <span class="name">nameFilters</span>: [ <span class="string">&quot;Image files (*.png *.jpg)&quot;</span>, <span class="string">&quot;All files (*)&quot;</span> ]
+      <span class="name">selectedNameFilter</span>: <span class="string">&quot;All files (*)&quot;</span>
+      <span class="name">sidebarVisible</span>: <span class="name">fileDialogSidebarVisible</span>.<span class="name">checked</span>
+      <span class="name">onAccepted</span>: {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Accepted: &quot;</span> <span class="operator">+</span> <span class="name">fileUrls</span>)
+          <span class="keyword">if</span> (<span class="name">fileDialogOpenFiles</span>.<span class="name">checked</span>)
+              <span class="keyword">for</span> (var i = 0; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">fileUrls</span>.<span class="name">length</span>; ++<span class="name">i</span>)
+                  <span class="name">Qt</span>.<span class="name">openUrlExternally</span>(<span class="name">fileUrls</span>[<span class="name">i</span>])
+      }
+      <span class="name">onRejected</span>: { <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Rejected&quot;</span>) }
+  }
+
+</pre>
+<p>A <a href="qml-qtquick-dialogs-colordialog.html">ColorDialog</a> is used to choose a color, with or without alpha (transparency) depending on how it is configured.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-dialogs-colordialog.html">ColorDialog</a></span> {
+      <span class="name">id</span>: <span class="name">colorDialog</span>
+      <span class="name">visible</span>: <span class="name">colorDialogVisible</span>.<span class="name">checked</span>
+      <span class="name">modality</span>: <span class="name">colorDialogModal</span>.<span class="name">checked</span> ? <span class="name">Qt</span>.<span class="name">WindowModal</span> : <span class="name">Qt</span>.<span class="name">NonModal</span>
+      <span class="name">title</span>: <span class="string">&quot;Choose a color&quot;</span>
+      <span class="name">color</span>: <span class="string">&quot;green&quot;</span>
+      <span class="name">showAlphaChannel</span>: <span class="name">colorDialogAlpha</span>.<span class="name">checked</span>
+      <span class="name">onAccepted</span>: { <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Accepted: &quot;</span> <span class="operator">+</span> <span class="name">color</span>) }
+      <span class="name">onRejected</span>: { <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Rejected&quot;</span>) }
+  }
+
+</pre>
+<p>The example can be built as a standalone executable, but each type of dialog is demonstrated in a separate QML file which can also be run separately with qmlscene.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtquickcontrols.git/tree/examples/quickcontrols/dialogs/systemdialogs?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@systemdialogs -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

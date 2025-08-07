@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qandroidjnienvironment.cpp -->
+  <title>QAndroidJniEnvironment Class | Qt Android Extras 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtandroidextras-index.html">Qt Android Extras</a></td><td ><a href="qtandroidextras-module.html">C++ Classes</a></td><td >QAndroidJniEnvironment</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtandroidextras-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAndroidJniEnvironment Class</h1>
+<!-- $$$QAndroidJniEnvironment-brief -->
+<p>The <a href="qandroidjnienvironment.html">QAndroidJniEnvironment</a> provides access to the JNI Environment. <a href="#details">More...</a></p>
+<!-- @@@QAndroidJniEnvironment -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAndroidJniEnvironment&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += androidextras</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.2</td></tr></table></div><p>This class was introduced in  Qt 5.2.</p>
+<ul>
+<li><a href="qandroidjnienvironment-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qandroidjnienvironment.html#QAndroidJniEnvironment">QAndroidJniEnvironment</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qandroidjnienvironment.html#dtor.QAndroidJniEnvironment">~QAndroidJniEnvironment</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> jclass </td><td class="memItemRight bottomAlign"><b><a href="qandroidjnienvironment.html#findClass">findClass</a></b>(const char *<i>className</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> JNIEnv *</td><td class="memItemRight bottomAlign"><b><a href="qandroidjnienvironment.html#operator-JNIEnv--2a">operator JNIEnv *</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> JNIEnv *</td><td class="memItemRight bottomAlign"><b><a href="qandroidjnienvironment.html#operator--gt">operator-&gt;</a></b>()</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int *</td><td class="memItemRight bottomAlign"><b><a href="qandroidjnienvironment.html#javaVM">javaVM</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAndroidJniEnvironment-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QAndroidJniEnvironment -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QAndroidJniEnvironment[overload1]$$$QAndroidJniEnvironment -->
+<h3 class="fn" id="QAndroidJniEnvironment"><a name="QAndroidJniEnvironment"></a>QAndroidJniEnvironment::<span class="name">QAndroidJniEnvironment</span>()</h3>
+<p>Constructs a new <a href="qandroidjnienvironment.html">QAndroidJniEnvironment</a> object and attach the current thread to the Java VM.</p>
+<pre class="cpp">
+
+  bool exceptionCheck()
+  {
+      <span class="comment">/*
+        The QAndroidJniEnvironment attaches the current thread to the JavaVM on
+        creation and detach when it goes out of scope.
+       */</span>
+      <span class="type">QAndroidJniEnvironment</span> qjniEnv;
+      <span class="keyword">return</span> qjniEnv<span class="operator">-</span><span class="operator">&gt;</span>ExceptionCheck();
+  }
+
+</pre>
+<!-- @@@QAndroidJniEnvironment -->
+<!-- $$$~QAndroidJniEnvironment[overload1]$$$~QAndroidJniEnvironment -->
+<h3 class="fn" id="dtor.QAndroidJniEnvironment"><a name="dtor.QAndroidJniEnvironment"></a>QAndroidJniEnvironment::<span class="name">~QAndroidJniEnvironment</span>()</h3>
+<p>Detaches the current thread from the Java VM and destroys the <a href="qandroidjnienvironment.html">QAndroidJniEnvironment</a> object.</p>
+<!-- @@@~QAndroidJniEnvironment -->
+<!-- $$$findClass[overload1]$$$findClassconstchar* -->
+<h3 class="fn" id="findClass"><a name="findClass"></a><span class="type">jclass</span> QAndroidJniEnvironment::<span class="name">findClass</span>(const <span class="type">char</span> *<i>className</i>)</h3>
+<p>Searches for <i>className</i> using all available class loaders. Qt on Android uses a custom class loader to load all the .jar files and it must be used to find any classes that are created by that class loader because these classes are not visible in the default class loader.</p>
+<p>Returns the class pointer or null if is not found.</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<!-- @@@findClass -->
+<!-- $$$javaVM[overload1]$$$javaVM -->
+<h3 class="fn" id="javaVM"><a name="javaVM"></a><code>[static] </code><span class="type">int</span> *QAndroidJniEnvironment::<span class="name">javaVM</span>()</h3>
+<p>Returns the Java VM interface.</p>
+<!-- @@@javaVM -->
+<!-- $$$operator JNIEnv *[overload1]$$$operator JNIEnv * -->
+<h3 class="fn" id="operator-JNIEnv--2a"><a name="operator-JNIEnv--2a"></a><span class="type">JNIEnv</span> *QAndroidJniEnvironment::<span class="name">operator JNIEnv *</span>() const</h3>
+<p>Returns the JNI Environment pointer.</p>
+<!-- @@@operator JNIEnv * -->
+<!-- $$$operator->[overload1]$$$operator-> -->
+<h3 class="fn" id="operator--gt"><a name="operator--gt"></a><span class="type">JNIEnv</span> *QAndroidJniEnvironment::<span class="name">operator-&gt;</span>()</h3>
+<p>Provides access to the <a href="qandroidjnienvironment.html">QAndroidJniEnvironment</a>'s JNIEnv pointer.</p>
+<!-- @@@operator-> -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

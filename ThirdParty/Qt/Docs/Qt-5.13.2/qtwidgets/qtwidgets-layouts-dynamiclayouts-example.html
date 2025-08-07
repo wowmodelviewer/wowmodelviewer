@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- dynamiclayouts.qdoc -->
+  <title>Dynamic Layouts Example | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Dynamic Layouts Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#dialog-constructor">Dialog Constructor</a></li>
+<li class="level1"><a href="#creating-the-main-widgets">Creating the Main Widgets</a></li>
+<li class="level1"><a href="#adding-options">Adding Options</a></li>
+<li class="level1"><a href="#adding-buttons">Adding Buttons</a></li>
+<li class="level1"><a href="#rotating-the-widgets">Rotating the Widgets</a></li>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Dynamic Layouts Example</h1>
+<span class="subtitle"></span>
+<!-- $$$layouts/dynamiclayouts-brief -->
+<p>Shows how to re-orient widgets in running applications.</p>
+<!-- @@@layouts/dynamiclayouts -->
+<!-- $$$layouts/dynamiclayouts-description -->
+<div class="descr"> <a name="details"></a>
+<p><i>Dynamic Layouts</i> implements dynamically placed widgets within running applications. The widget placement depends on whether <code>Horizontal</code> or <code>Vertical</code> is chosen.</p>
+<div class="border"><p class="centerAlign"><img src="images/dynamiclayouts-example.png" alt="" /></p></div><p>For more information, visit the <a href="layout.html">Layout Management</a> page.</p>
+<a name="dialog-constructor"></a>
+<h4 id="dialog-constructor">Dialog Constructor</h4>
+<p>To begin with, the application creates the UI components by calling the following methods:</p>
+<ul>
+<li>createRotatableGroupBox()</li>
+<li>createOptionsGroupBox()</li>
+<li>createButtonBox()</li>
+</ul>
+<p>It then adds the UI components to a <a href="../qtquick/qml-qtquick-layouts-gridlayout.html">GridLayout</a> (<code>mainLayout</code>).</p>
+<p>Finally, <code>Dialog::rotateWidgets()</code> is called.</p>
+<pre class="cpp">
+
+      createOptionsGroupBox();
+      createButtonBox();
+
+      mainLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>;
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(rotatableGroupBox<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(optionsGroupBox<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(buttonBox<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">0</span>);
+      setLayout(mainLayout);
+
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>setSizeConstraint(<span class="type"><a href="qlayout.html">QLayout</a></span><span class="operator">::</span>SetMinimumSize);
+
+      setWindowTitle(tr(<span class="string">&quot;Dynamic Layouts&quot;</span>));
+
+</pre>
+<a name="creating-the-main-widgets"></a>
+<h4 id="creating-the-main-widgets">Creating the Main Widgets</h4>
+<p>The <code>createRotatableGroupBox()</code> method creates a rotatable group box, then adds a series of widgets:</p>
+<ul>
+<li><a href="qspinbox.html">QSpinBox</a></li>
+<li><a href="qslider.html">QSlider</a></li>
+<li><a href="qdial.html">QDial</a></li>
+<li><a href="qprogressbar.html">QProgressBar</a></li>
+</ul>
+<p>It goes on to add signals and slots to each widget, and assigns a <a href="qgridlayout.html">QGridLayout</a> called <i>rotatableLayout</i>.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> Dialog<span class="operator">::</span>createRotatableGroupBox()
+  {
+      rotatableGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;Rotatable Widgets&quot;</span>));
+
+      rotatableWidgets<span class="operator">.</span>enqueue(<span class="keyword">new</span> <span class="type"><a href="qspinbox.html">QSpinBox</a></span>);
+      rotatableWidgets<span class="operator">.</span>enqueue(<span class="keyword">new</span> <span class="type"><a href="qslider.html">QSlider</a></span>);
+      rotatableWidgets<span class="operator">.</span>enqueue(<span class="keyword">new</span> <span class="type"><a href="qdial.html">QDial</a></span>);
+      rotatableWidgets<span class="operator">.</span>enqueue(<span class="keyword">new</span> <span class="type"><a href="qprogressbar.html">QProgressBar</a></span>);
+
+      <span class="type">int</span> n <span class="operator">=</span> rotatableWidgets<span class="operator">.</span>count();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> n; <span class="operator">+</span><span class="operator">+</span>i) {
+          connect(rotatableWidgets<span class="operator">[</span>i<span class="operator">]</span><span class="operator">,</span> SIGNAL(valueChanged(<span class="type">int</span>))<span class="operator">,</span>
+                  rotatableWidgets<span class="operator">[</span>(i <span class="operator">+</span> <span class="number">1</span>) <span class="operator">%</span> n<span class="operator">]</span><span class="operator">,</span> SLOT(setValue(<span class="type">int</span>)));
+      }
+
+      rotatableLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>;
+      rotatableGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(rotatableLayout);
+
+      rotateWidgets();
+  }
+
+</pre>
+<a name="adding-options"></a>
+<h4 id="adding-options">Adding Options</h4>
+<p><code>createOptionsGroupBox()</code> creates the following widgets:</p>
+<ul>
+<li><code>optionsGroupBox</code></li>
+<li><code>buttonsOrientationLabel</code></li>
+<li><code>buttonsOrientationComboBox</code>. The orientation of the ComboBox is either <code>horizontal</code> (default value) or <code>vertical</code>. These two values are added during the startup of the application. It is not possible to leave the option empty.</li>
+</ul>
+<pre class="cpp">
+
+  <span class="type">void</span> Dialog<span class="operator">::</span>createOptionsGroupBox()
+  {
+      optionsGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;Options&quot;</span>));
+
+      buttonsOrientationLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Orientation of buttons:&quot;</span>));
+
+      buttonsOrientationComboBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcombobox.html">QComboBox</a></span>;
+      buttonsOrientationComboBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Horizontal&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal);
+      buttonsOrientationComboBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Vertical&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Vertical);
+
+      connect(buttonsOrientationComboBox<span class="operator">,</span>
+              <span class="type">QOverload</span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span><span class="operator">::</span>of(<span class="operator">&amp;</span><span class="type"><a href="qcombobox.html">QComboBox</a></span><span class="operator">::</span>currentIndexChanged)<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span>
+              <span class="operator">&amp;</span>Dialog<span class="operator">::</span>buttonsOrientationChanged);
+
+      optionsLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>;
+      optionsLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(buttonsOrientationLabel<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+      optionsLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(buttonsOrientationComboBox<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span>);
+      optionsLayout<span class="operator">-</span><span class="operator">&gt;</span>setColumnStretch(<span class="number">2</span><span class="operator">,</span> <span class="number">1</span>);
+      optionsGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(optionsLayout);
+  }
+
+</pre>
+<a name="adding-buttons"></a>
+<h4 id="adding-buttons">Adding Buttons</h4>
+<p>createButtonBox() constructs a <a href="qdialogbuttonbox.html">QDialogButtonBox</a> called <code>buttonBox</code> to which are added a <code>closeButton</code>, a <code>helpButton</code> and a <code>rotateWidgetsButton</code>. It then assigns a signal and a slot to each button in <code>buttonBox</code>.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> Dialog<span class="operator">::</span>createButtonBox()
+  {
+      buttonBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span>;
+
+      closeButton <span class="operator">=</span> buttonBox<span class="operator">-</span><span class="operator">&gt;</span>addButton(<span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span><span class="operator">::</span>Close);
+      helpButton <span class="operator">=</span> buttonBox<span class="operator">-</span><span class="operator">&gt;</span>addButton(<span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span><span class="operator">::</span>Help);
+      rotateWidgetsButton <span class="operator">=</span> buttonBox<span class="operator">-</span><span class="operator">&gt;</span>addButton(tr(<span class="string">&quot;Rotate &amp;Widgets&quot;</span>)<span class="operator">,</span>
+                                                 <span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span><span class="operator">::</span>ActionRole);
+
+      connect(rotateWidgetsButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qpushbutton.html">QPushButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>Dialog<span class="operator">::</span>rotateWidgets);
+      connect(closeButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qpushbutton.html">QPushButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>Dialog<span class="operator">::</span>close);
+      connect(helpButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qpushbutton.html">QPushButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>Dialog<span class="operator">::</span>help);
+  }
+
+</pre>
+<a name="rotating-the-widgets"></a>
+<h4 id="rotating-the-widgets">Rotating the Widgets</h4>
+<p>Removes the current widgets and activates the next widget.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> Dialog<span class="operator">::</span>rotateWidgets()
+  {
+      Q_ASSERT(rotatableWidgets<span class="operator">.</span>count() <span class="operator">%</span> <span class="number">2</span> <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>);
+
+      <span class="keyword">for</span> (<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>widget : <a href="../qtcore/qtglobal.html#qAsConst">qAsConst</a>(rotatableWidgets))
+          rotatableLayout<span class="operator">-</span><span class="operator">&gt;</span>removeWidget(widget);
+
+      rotatableWidgets<span class="operator">.</span>enqueue(rotatableWidgets<span class="operator">.</span>dequeue());
+
+      <span class="keyword">const</span> <span class="type">int</span> n <span class="operator">=</span> rotatableWidgets<span class="operator">.</span>count();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> n <span class="operator">/</span> <span class="number">2</span>; <span class="operator">+</span><span class="operator">+</span>i) {
+          rotatableLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(rotatableWidgets<span class="operator">[</span>n <span class="operator">-</span> i <span class="operator">-</span> <span class="number">1</span><span class="operator">]</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> i);
+          rotatableLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(rotatableWidgets<span class="operator">[</span>i<span class="operator">]</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> i);
+      }
+  }
+
+</pre>
+<a name="running-the-example"></a>
+<h4 id="running-the-example">Running the Example</h4>
+<p>To run the example from <a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a>, open the <b>Welcome</b> mode and select the example from <b>Examples</b>. For more information, visit <a href="http://doc.qt.io/qtcreator/creator-build-example-application.html">Building and Running an Example</a>.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/layouts/dynamiclayouts?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@layouts/dynamiclayouts -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

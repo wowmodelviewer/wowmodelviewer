@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickpainteditem.cpp -->
+  <title>QQuickPaintedItem Class | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-module.html">C++ Classes</a></td><td >QQuickPaintedItem</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QQuickPaintedItem Class</h1>
+<!-- $$$QQuickPaintedItem-brief -->
+<p>The <a href="qquickpainteditem.html">QQuickPaintedItem</a> class provides a way to use the <a href="../qtgui/qpainter.html">QPainter</a> API in the QML Scene Graph. <a href="#details">More...</a></p>
+<!-- @@@QQuickPaintedItem -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QQuickPaintedItem&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += quick</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qquickitem.html">QQuickItem</a></td></tr></table></div><ul>
+<li><a href="qquickpainteditem-members.html">List of all members, including inherited members</a></li>
+<li><a href="qquickpainteditem-obsolete.html">Obsolete members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#PerformanceHint-enum">PerformanceHint</a></b> { FastFBOResizing }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#PerformanceHint-enum">PerformanceHints</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#RenderTarget-enum">RenderTarget</a></b> { Image, FramebufferObject, InvertedYFramebufferObject }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qquickpainteditem.html#fillColor-prop">fillColor</a></b> : QColor</li>
+<li class="fn"><b><a href="qquickpainteditem.html#renderTarget-prop">renderTarget</a></b> : RenderTarget</li>
+<li class="fn"><b><a href="qquickpainteditem.html#textureSize-prop">textureSize</a></b> : QSize</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#QQuickPaintedItem">QQuickPaintedItem</a></b>(QQuickItem *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#dtor.QQuickPaintedItem">~QQuickPaintedItem</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#antialiasing">antialiasing</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QColor </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#fillColor-prop">fillColor</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#mipmap">mipmap</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#opaquePainting">opaquePainting</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#paint">paint</a></b>(QPainter *<i>painter</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQuickPaintedItem::PerformanceHints </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#performanceHints">performanceHints</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQuickPaintedItem::RenderTarget </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#renderTarget-prop">renderTarget</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#setAntialiasing">setAntialiasing</a></b>(bool <i>enable</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#fillColor-prop">setFillColor</a></b>(<i>const QColor &amp;</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#setMipmap">setMipmap</a></b>(bool <i>enable</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#setOpaquePainting">setOpaquePainting</a></b>(bool <i>opaque</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#setPerformanceHint">setPerformanceHint</a></b>(QQuickPaintedItem::PerformanceHint <i>hint</i>, bool <i>enabled</i> = true)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#setPerformanceHints">setPerformanceHints</a></b>(QQuickPaintedItem::PerformanceHints <i>hints</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#renderTarget-prop">setRenderTarget</a></b>(QQuickPaintedItem::RenderTarget <i>target</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#textureSize-prop">setTextureSize</a></b>(const QSize &amp;<i>size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#textureSize-prop">textureSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#update">update</a></b>(const QRect &amp;<i>rect</i> = QRect())</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#isTextureProvider">isTextureProvider</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSGTextureProvider *</td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#textureProvider">textureProvider</a></b>() const override</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#fillColor-prop">fillColorChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#renderTarget-prop">renderTargetChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#textureSize-prop">textureSizeChanged</a></b>()</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#itemChange">itemChange</a></b>(QQuickItem::ItemChange <i>change</i>, const QQuickItem::ItemChangeData &amp;<i>value</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#releaseResources">releaseResources</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSGNode *</td><td class="memItemRight bottomAlign"><b><a href="qquickpainteditem.html#updatePaintNode">updatePaintNode</a></b>(QSGNode *<i>oldNode</i>, QQuickItem::UpdatePaintNodeData *<i>data</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QQuickPaintedItem-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qquickpainteditem.html">QQuickPaintedItem</a> makes it possible to use the <a href="../qtgui/qpainter.html">QPainter</a> API with the QML Scene Graph. It sets up a textured rectangle in the Scene Graph and uses a <a href="../qtgui/qpainter.html">QPainter</a> to paint onto the texture. The render target can be either a <a href="../qtgui/qimage.html">QImage</a> or, when OpenGL is in use, a <a href="../qtgui/qopenglframebufferobject.html">QOpenGLFramebufferObject</a>. When the render target is a <a href="../qtgui/qimage.html">QImage</a>, <a href="../qtgui/qpainter.html">QPainter</a> first renders into the image then the content is uploaded to the texture. When a <a href="../qtgui/qopenglframebufferobject.html">QOpenGLFramebufferObject</a> is used, <a href="../qtgui/qpainter.html">QPainter</a> paints directly onto the texture. Call <a href="qquickpainteditem.html#update">update</a>() to trigger a repaint.</p>
+<p>To enable <a href="../qtgui/qpainter.html">QPainter</a> to do anti-aliased rendering, use <a href="qquickpainteditem.html#setAntialiasing">setAntialiasing</a>().</p>
+<p>To write your own painted item, you first create a subclass of <a href="qquickpainteditem.html">QQuickPaintedItem</a>, and then start by implementing its only pure virtual public function: <a href="qquickpainteditem.html#paint">paint</a>(), which implements the actual painting. The painting will be inside the rectangle spanning from 0,0 to <a href="qquickitem.html#width-prop">width</a>(),<a href="qquickitem.html#height-prop">height</a>().</p>
+<p><b>Note: </b>It important to understand the performance implications such items can incur. See <a href="qquickpainteditem.html#RenderTarget-enum">QQuickPaintedItem::RenderTarget</a> and <a href="qquickpainteditem.html#renderTarget-prop">QQuickPaintedItem::renderTarget</a>.</p></div>
+<!-- @@@QQuickPaintedItem -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$PerformanceHint$$$FastFBOResizing -->
+<h3 class="flags" id="PerformanceHint-enum"><a name="PerformanceHint-enum"></a>enum QQuickPaintedItem::<span class="name">PerformanceHint</span><br/>flags QQuickPaintedItem::<span class="name">PerformanceHints</span></h3>
+<p>This enum describes flags that you can enable to improve rendering performance in <a href="qquickpainteditem.html">QQuickPaintedItem</a>. By default, none of these flags are set.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QQuickPaintedItem::FastFBOResizing</code></td><td class="topAlign tblval"><code>0x1</code></td><td class="topAlign">Resizing an FBO can be a costly operation on a few OpenGL driver implementations. To work around this, one can set this flag to let the <a href="qquickpainteditem.html">QQuickPaintedItem</a> allocate one large framebuffer object and instead draw into a subregion of it. This saves the resize at the cost of using more memory. Please note that this is not a common problem.</td></tr>
+</table></div>
+<p>The PerformanceHints type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;PerformanceHint&gt;. It stores an OR combination of PerformanceHint values.</p>
+<!-- @@@PerformanceHint -->
+<!-- $$$RenderTarget$$$Image$$$FramebufferObject$$$InvertedYFramebufferObject -->
+<h3 class="fn" id="RenderTarget-enum"><a name="RenderTarget-enum"></a>enum QQuickPaintedItem::<span class="name">RenderTarget</span></h3>
+<p>This enum describes <a href="qquickpainteditem.html">QQuickPaintedItem</a>'s render targets. The render target is the surface <a href="../qtgui/qpainter.html">QPainter</a> paints onto before the item is rendered on screen.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QQuickPaintedItem::Image</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The default; <a href="../qtgui/qpainter.html">QPainter</a> paints into a <a href="../qtgui/qimage.html">QImage</a> using the raster paint engine. The image's content needs to be uploaded to graphics memory afterward, this operation can potentially be slow if the item is large. This render target allows high quality anti-aliasing and fast item resizing.</td></tr>
+<tr><td class="topAlign"><code>QQuickPaintedItem::FramebufferObject</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign"><a href="../qtgui/qpainter.html">QPainter</a> paints into a <a href="../qtgui/qopenglframebufferobject.html">QOpenGLFramebufferObject</a> using the GL paint engine. Painting can be faster as no texture upload is required, but anti-aliasing quality is not as good as if using an image. This render target allows faster rendering in some cases, but you should avoid using it if the item is resized often.</td></tr>
+<tr><td class="topAlign"><code>QQuickPaintedItem::InvertedYFramebufferObject</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Exactly as for FramebufferObject above, except once the painting is done, prior to rendering the painted image is flipped about the x-axis so that the top-most pixels are now at the bottom. Since this is done with the OpenGL texture coordinates it is a much faster way to achieve this effect than using a painter transform.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qquickpainteditem.html#renderTarget-prop">setRenderTarget</a>().</p>
+<!-- @@@RenderTarget -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$fillColor-prop$$$fillColor$$$setFillColorconstQColor&$$$fillColorChanged -->
+<h3 class="fn" id="fillColor-prop"><a name="fillColor-prop"></a><span class="name">fillColor</span> : <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span></h3>
+<p>This property holds the item's background fill color.</p>
+<p>By default, the fill color is set to <a href="../qtcore/qt.html#GlobalColor-enum">Qt::transparent</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QColor </td><td class="memItemRight bottomAlign"><span class="name"><b>fillColor</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setFillColor</b></span>(<i>const QColor &amp;</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>fillColorChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@fillColor -->
+<!-- $$$renderTarget-prop$$$renderTarget$$$setRenderTargetQQuickPaintedItem::RenderTarget$$$renderTargetChanged -->
+<h3 class="fn" id="renderTarget-prop"><a name="renderTarget-prop"></a><span class="name">renderTarget</span> : <span class="type"><a href="qquickpainteditem.html#RenderTarget-enum">RenderTarget</a></span></h3>
+<p>This property holds the item's render target.</p>
+<p>This property defines which render target the <a href="../qtgui/qpainter.html">QPainter</a> renders into, it can be either <a href="qquickpainteditem.html#RenderTarget-enum">QQuickPaintedItem::Image</a>, <a href="qquickpainteditem.html#RenderTarget-enum">QQuickPaintedItem::FramebufferObject</a> or <a href="qquickpainteditem.html#RenderTarget-enum">QQuickPaintedItem::InvertedYFramebufferObject</a>.</p>
+<p>Each has certain benefits, typically performance versus quality. Using a framebuffer object avoids a costly upload of the image contents to the texture in graphics memory, while using an image enables high quality anti-aliasing.</p>
+<p><b>Warning:</b> Resizing a framebuffer object is a costly operation, avoid using the <a href="qquickpainteditem.html#RenderTarget-enum">QQuickPaintedItem::FramebufferObject</a> render target if the item gets resized often.</p>
+<p>By default, the render target is <a href="qquickpainteditem.html#RenderTarget-enum">QQuickPaintedItem::Image</a>.</p>
+<p><b>Note: </b>Some Qt Quick backends may not support all render target options. For example, it is likely that non-OpenGL backends will lack support for <a href="qquickpainteditem.html#RenderTarget-enum">QQuickPaintedItem::FramebufferObject</a> and <a href="qquickpainteditem.html#RenderTarget-enum">QQuickPaintedItem::InvertedYFramebufferObject</a>. Requesting these will then be ignored.</p><p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QQuickPaintedItem::RenderTarget </td><td class="memItemRight bottomAlign"><span class="name"><b>renderTarget</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setRenderTarget</b></span>(QQuickPaintedItem::RenderTarget <i>target</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>renderTargetChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@renderTarget -->
+<!-- $$$textureSize-prop$$$textureSize$$$setTextureSizeconstQSize&$$$textureSizeChanged -->
+<h3 class="fn" id="textureSize-prop"><a name="textureSize-prop"></a><span class="name">textureSize</span> : <span class="type"><a href="../qtcore/qsize.html">QSize</a></span></h3>
+<p>Defines the size of the texture.</p>
+<p>Changing the texture's size does not affect the coordinate system used in <a href="qquickpainteditem.html#paint">paint</a>(). A scale factor is instead applied so painting should still happen inside 0,0 to <a href="qquickitem.html#width-prop">width</a>(),<a href="qquickitem.html#height-prop">height</a>().</p>
+<p>By default, the texture size will have the same size as this item.</p>
+<p><b>Note: </b>If the item is on a window with a device pixel ratio different from 1, this scale factor will be implicitly applied to the texture size.</p><p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QSize </td><td class="memItemRight bottomAlign"><span class="name"><b>textureSize</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setTextureSize</b></span>(const QSize &amp;<i>size</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>textureSizeChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@textureSize -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QQuickPaintedItem[overload1]$$$QQuickPaintedItemQQuickItem* -->
+<h3 class="fn" id="QQuickPaintedItem"><a name="QQuickPaintedItem"></a>QQuickPaintedItem::<span class="name">QQuickPaintedItem</span>(<span class="type"><a href="qquickitem.html#QQuickItem">QQuickItem</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a <a href="qquickpainteditem.html">QQuickPaintedItem</a> with the given <i>parent</i> item.</p>
+<!-- @@@QQuickPaintedItem -->
+<!-- $$$~QQuickPaintedItem[overload1]$$$~QQuickPaintedItem -->
+<h3 class="fn" id="dtor.QQuickPaintedItem"><a name="dtor.QQuickPaintedItem"></a><code>[override virtual] </code>QQuickPaintedItem::<span class="name">~QQuickPaintedItem</span>()</h3>
+<p>Destroys the <a href="qquickpainteditem.html">QQuickPaintedItem</a>.</p>
+<!-- @@@~QQuickPaintedItem -->
+<!-- $$$antialiasing[overload1]$$$antialiasing -->
+<h3 class="fn" id="antialiasing"><a name="antialiasing"></a><span class="type">bool</span> QQuickPaintedItem::<span class="name">antialiasing</span>() const</h3>
+<p>Returns true if antialiased painting is enabled; otherwise, false is returned.</p>
+<p>By default, antialiasing is not enabled.</p>
+<p><b>See also </b><a href="qquickpainteditem.html#setAntialiasing">setAntialiasing</a>().</p>
+<!-- @@@antialiasing -->
+<!-- $$$isTextureProvider[overload1]$$$isTextureProvider -->
+<h3 class="fn" id="isTextureProvider"><a name="isTextureProvider"></a><code>[override virtual] </code><span class="type">bool</span> QQuickPaintedItem::<span class="name">isTextureProvider</span>() const</h3>
+<p>Reimplements: <a href="qquickitem.html#isTextureProvider">QQuickItem::isTextureProvider</a>() const.</p>
+<!-- @@@isTextureProvider -->
+<!-- $$$itemChange[overload1]$$$itemChangeQQuickItem::ItemChangeconstQQuickItem::ItemChangeData& -->
+<h3 class="fn" id="itemChange"><a name="itemChange"></a><code>[override virtual protected] </code><span class="type">void</span> QQuickPaintedItem::<span class="name">itemChange</span>(<span class="type"><a href="qquickitem.html#ItemChange-enum">QQuickItem::ItemChange</a></span> <i>change</i>, const <span class="type"><a href="qquickitem-itemchangedata.html">QQuickItem::ItemChangeData</a></span> &amp;<i>value</i>)</h3>
+<p>Reimplements: <a href="qquickitem.html#itemChange">QQuickItem::itemChange</a>(QQuickItem::ItemChange change, const QQuickItem::ItemChangeData &amp;value).</p>
+<!-- @@@itemChange -->
+<!-- $$$mipmap[overload1]$$$mipmap -->
+<h3 class="fn" id="mipmap"><a name="mipmap"></a><span class="type">bool</span> QQuickPaintedItem::<span class="name">mipmap</span>() const</h3>
+<p>Returns true if mipmaps are enabled; otherwise, false is returned.</p>
+<p>By default, mipmapping is not enabled.</p>
+<p><b>See also </b><a href="qquickpainteditem.html#setMipmap">setMipmap</a>().</p>
+<!-- @@@mipmap -->
+<!-- $$$opaquePainting[overload1]$$$opaquePainting -->
+<h3 class="fn" id="opaquePainting"><a name="opaquePainting"></a><span class="type">bool</span> QQuickPaintedItem::<span class="name">opaquePainting</span>() const</h3>
+<p>Returns true if this item is opaque; otherwise, false is returned.</p>
+<p>By default, painted items are not opaque.</p>
+<p><b>See also </b><a href="qquickpainteditem.html#setOpaquePainting">setOpaquePainting</a>().</p>
+<!-- @@@opaquePainting -->
+<!-- $$$paint[overload1]$$$paintQPainter* -->
+<h3 class="fn" id="paint"><a name="paint"></a><code>[pure virtual] </code><span class="type">void</span> QQuickPaintedItem::<span class="name">paint</span>(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> *<i>painter</i>)</h3>
+<p>This function, which is usually called by the QML Scene Graph, paints the contents of an item in local coordinates.</p>
+<p>The underlying texture will have a size defined by <a href="qquickpainteditem.html#textureSize-prop">textureSize</a> when set, or the item's size, multiplied by the window's device pixel ratio.</p>
+<p>The function is called after the item has been filled with the <a href="qquickpainteditem.html#fillColor-prop">fillColor</a>.</p>
+<p>Reimplement this function in a <a href="qquickpainteditem.html">QQuickPaintedItem</a> subclass to provide the item's painting implementation, using <i>painter</i>.</p>
+<p><b>Note: </b>The QML Scene Graph uses two separate threads, the main thread does things such as processing events or updating animations while a second thread does the actual OpenGL rendering. As a consequence, paint() is not called from the main GUI thread but from the GL enabled renderer thread. At the moment paint() is called, the GUI thread is blocked and this is therefore thread-safe.</p><p><b>Warning:</b> Extreme caution must be used when creating QObjects, emitting signals, starting timers and similar inside this function as these will have affinity to the rendering thread.</p>
+<p><b>See also </b><a href="qquickitem.html#width-prop">width</a>(), <a href="qquickitem.html#height-prop">height</a>(), and <a href="qquickpainteditem.html#textureSize-prop">textureSize</a>.</p>
+<!-- @@@paint -->
+<!-- $$$performanceHints[overload1]$$$performanceHints -->
+<h3 class="fn" id="performanceHints"><a name="performanceHints"></a><span class="type"><a href="qquickpainteditem.html#PerformanceHint-enum">QQuickPaintedItem::PerformanceHints</a></span> QQuickPaintedItem::<span class="name">performanceHints</span>() const</h3>
+<p>Returns the performance hints.</p>
+<p>By default, no performance hint is enabled.</p>
+<p><b>See also </b><a href="qquickpainteditem.html#setPerformanceHint">setPerformanceHint</a>() and <a href="qquickpainteditem.html#setPerformanceHints">setPerformanceHints</a>().</p>
+<!-- @@@performanceHints -->
+<!-- $$$releaseResources[overload1]$$$releaseResources -->
+<h3 class="fn" id="releaseResources"><a name="releaseResources"></a><code>[override virtual protected] </code><span class="type">void</span> QQuickPaintedItem::<span class="name">releaseResources</span>()</h3>
+<p>Reimplements: <a href="qquickitem.html#releaseResources">QQuickItem::releaseResources</a>().</p>
+<!-- @@@releaseResources -->
+<!-- $$$setAntialiasing[overload1]$$$setAntialiasingbool -->
+<h3 class="fn" id="setAntialiasing"><a name="setAntialiasing"></a><span class="type">void</span> QQuickPaintedItem::<span class="name">setAntialiasing</span>(<span class="type">bool</span> <i>enable</i>)</h3>
+<p>If <i>enable</i> is true, antialiased painting is enabled.</p>
+<p>By default, antialiasing is not enabled.</p>
+<p><b>See also </b><a href="qquickpainteditem.html#antialiasing">antialiasing</a>().</p>
+<!-- @@@setAntialiasing -->
+<!-- $$$setMipmap[overload1]$$$setMipmapbool -->
+<h3 class="fn" id="setMipmap"><a name="setMipmap"></a><span class="type">void</span> QQuickPaintedItem::<span class="name">setMipmap</span>(<span class="type">bool</span> <i>enable</i>)</h3>
+<p>If <i>enable</i> is true, mipmapping is enabled on the associated texture.</p>
+<p>Mipmapping increases rendering speed and reduces aliasing artifacts when the item is scaled down.</p>
+<p>By default, mipmapping is not enabled.</p>
+<p><b>See also </b><a href="qquickpainteditem.html#mipmap">mipmap</a>().</p>
+<!-- @@@setMipmap -->
+<!-- $$$setOpaquePainting[overload1]$$$setOpaquePaintingbool -->
+<h3 class="fn" id="setOpaquePainting"><a name="setOpaquePainting"></a><span class="type">void</span> QQuickPaintedItem::<span class="name">setOpaquePainting</span>(<span class="type">bool</span> <i>opaque</i>)</h3>
+<p>If <i>opaque</i> is true, the item is opaque; otherwise, it is considered as translucent.</p>
+<p>Opaque items are not blended with the rest of the scene, you should set this to true if the content of the item is opaque to speed up rendering.</p>
+<p>By default, painted items are not opaque.</p>
+<p><b>See also </b><a href="qquickpainteditem.html#opaquePainting">opaquePainting</a>().</p>
+<!-- @@@setOpaquePainting -->
+<!-- $$$setPerformanceHint[overload1]$$$setPerformanceHintQQuickPaintedItem::PerformanceHintbool -->
+<h3 class="fn" id="setPerformanceHint"><a name="setPerformanceHint"></a><span class="type">void</span> QQuickPaintedItem::<span class="name">setPerformanceHint</span>(<span class="type"><a href="qquickpainteditem.html#PerformanceHint-enum">QQuickPaintedItem::PerformanceHint</a></span> <i>hint</i>, <span class="type">bool</span> <i>enabled</i> = true)</h3>
+<p>Sets the given performance <i>hint</i> on the item if <i>enabled</i> is true; otherwise clears the performance hint.</p>
+<p>By default, no performance hint is enabled/</p>
+<p><b>See also </b><a href="qquickpainteditem.html#setPerformanceHints">setPerformanceHints</a>() and <a href="qquickpainteditem.html#performanceHints">performanceHints</a>().</p>
+<!-- @@@setPerformanceHint -->
+<!-- $$$setPerformanceHints[overload1]$$$setPerformanceHintsQQuickPaintedItem::PerformanceHints -->
+<h3 class="fn" id="setPerformanceHints"><a name="setPerformanceHints"></a><span class="type">void</span> QQuickPaintedItem::<span class="name">setPerformanceHints</span>(<span class="type"><a href="qquickpainteditem.html#PerformanceHint-enum">QQuickPaintedItem::PerformanceHints</a></span> <i>hints</i>)</h3>
+<p>Sets the performance hints to <i>hints</i></p>
+<p>By default, no performance hint is enabled/</p>
+<p><b>See also </b><a href="qquickpainteditem.html#setPerformanceHint">setPerformanceHint</a>() and <a href="qquickpainteditem.html#performanceHints">performanceHints</a>().</p>
+<!-- @@@setPerformanceHints -->
+<!-- $$$textureProvider[overload1]$$$textureProvider -->
+<h3 class="fn" id="textureProvider"><a name="textureProvider"></a><code>[override virtual] </code><span class="type"><a href="qsgtextureprovider.html">QSGTextureProvider</a></span> *QQuickPaintedItem::<span class="name">textureProvider</span>() const</h3>
+<p>Reimplements: <a href="qquickitem.html#textureProvider">QQuickItem::textureProvider</a>() const.</p>
+<!-- @@@textureProvider -->
+<!-- $$$update[overload1]$$$updateconstQRect& -->
+<h3 class="fn" id="update"><a name="update"></a><span class="type">void</span> QQuickPaintedItem::<span class="name">update</span>(const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> &amp;<i>rect</i> = QRect())</h3>
+<p>Schedules a redraw of the area covered by <i>rect</i> in this item. You can call this function whenever your item needs to be redrawn, such as if it changes appearance or size.</p>
+<p>This function does not cause an immediate paint; instead it schedules a paint request that is processed by the QML Scene Graph when the next frame is rendered. The item will only be redrawn if it is visible.</p>
+<p><b>See also </b><a href="qquickpainteditem.html#paint">paint</a>().</p>
+<!-- @@@update -->
+<!-- $$$updatePaintNode[overload1]$$$updatePaintNodeQSGNode*QQuickItem::UpdatePaintNodeData* -->
+<h3 class="fn" id="updatePaintNode"><a name="updatePaintNode"></a><code>[override virtual protected] </code><span class="type"><a href="qsgnode.html">QSGNode</a></span> *QQuickPaintedItem::<span class="name">updatePaintNode</span>(<span class="type"><a href="qsgnode.html">QSGNode</a></span> *<i>oldNode</i>, <span class="type">QQuickItem::UpdatePaintNodeData</span> *<i>data</i>)</h3>
+<p>Reimplements: <a href="qquickitem.html#updatePaintNode">QQuickItem::updatePaintNode</a>(QSGNode *oldNode, QQuickItem::UpdatePaintNodeData *updatePaintNodeData).</p>
+<!-- @@@updatePaintNode -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

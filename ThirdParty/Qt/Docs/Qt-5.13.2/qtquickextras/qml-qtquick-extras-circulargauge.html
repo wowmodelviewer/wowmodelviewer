@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- CircularGauge.qml -->
+  <title>CircularGauge QML Type | Qt Quick Extras 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickextras-index.html">Qt Quick Extras</a></td><td ><a href="qtquick-extras-qmlmodule.html">QML Types</a></td><td >CircularGauge QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickextras-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">CircularGauge QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$CircularGauge-brief -->
+<p>A gauge that displays a value within a range along an arc. <a href="#details">More...</a></p>
+<!-- @@@CircularGauge -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Extras 1.4</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.5</td></tr></table></div><ul>
+<li><a href="qml-qtquick-extras-circulargauge-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-extras-circulargauge.html#maximumValue-prop">maximumValue</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-extras-circulargauge.html#minimumValue-prop">minimumValue</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-extras-circulargauge.html#stepSize-prop">stepSize</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-extras-circulargauge.html#tickmarksVisible-prop">tickmarksVisible</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-extras-circulargauge.html#value-prop">value</a></b></b> : alias</li>
+</ul>
+<!-- $$$CircularGauge-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p class="centerAlign"><img src="images/circulargauge.png" alt="CircularGauge" /></p><p>The <a href="qml-qtquick-extras-circulargauge.html">CircularGauge</a> is similar to traditional mechanical gauges that use a needle to display a value from some input, such as the speed of a vehicle or air pressure, for example.</p>
+<p>The minimum and maximum values displayable by the gauge can be set with the <a href="qml-qtquick-extras-circulargauge.html#minimumValue-prop">minimumValue</a> and <a href="qml-qtquick-extras-circulargauge.html#maximumValue-prop">maximumValue</a> properties. The angle at which these values are displayed can be set with the <a href="../qtquickcontrols1/qml-qtquick-controls-styles-circulargaugestyle.html#minimumValueAngle-prop">minimumValueAngle</a> and <a href="../qtquickcontrols1/qml-qtquick-controls-styles-circulargaugestyle.html#maximumValueAngle-prop">maximumValueAngle</a> properties of <a href="../qtquickcontrols1/qml-qtquick-controls-styles-circulargaugestyle.html">CircularGaugeStyle</a>.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  CircularGauge {
+      value: accelerating <span class="operator">?</span> maximumValue : <span class="number">0</span>
+      anchors<span class="operator">.</span>centerIn: parent
+
+      property bool accelerating: <span class="keyword">false</span>
+
+      Keys<span class="operator">.</span>onSpacePressed: accelerating <span class="operator">=</span> <span class="keyword">true</span>
+      Keys<span class="operator">.</span>onReleased: {
+          <span class="keyword">if</span> (event<span class="operator">.</span>key <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>Key_Space) {
+              accelerating <span class="operator">=</span> <span class="keyword">false</span>;
+              event<span class="operator">.</span>accepted <span class="operator">=</span> <span class="keyword">true</span>;
+          }
+      }
+
+      Component<span class="operator">.</span>onCompleted: forceActiveFocus()
+
+      Behavior on value {
+          NumberAnimation {
+              duration: <span class="number">1000</span>
+          }
+      }
+  }
+
+</pre>
+<p>You can create a custom appearance for a <a href="qml-qtquick-extras-circulargauge.html">CircularGauge</a> by assigning a <a href="../qtquickcontrols1/qml-qtquick-controls-styles-circulargaugestyle.html">CircularGaugeStyle</a>.</p>
+<!-- @@@CircularGauge -->
+<h2>Property Documentation</h2>
+<!-- $$$maximumValue -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="maximumValue-prop"></a><span class="name">maximumValue</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the largest value displayed by the gauge.</p>
+</div></div><!-- @@@maximumValue -->
+<br/>
+<!-- $$$minimumValue -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="minimumValue-prop"></a><span class="name">minimumValue</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the smallest value displayed by the gauge.</p>
+</div></div><!-- @@@minimumValue -->
+<br/>
+<!-- $$$stepSize -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="stepSize-prop"></a><span class="name">stepSize</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the size of the value increments that the needle displays.</p>
+<p>For example, when stepSize is <code>10</code> and value is <code>0</code>, adding <code>5</code> to <a href="qml-qtquick-extras-circulargauge.html#value-prop">value</a> will have no visible effect on the needle, although <a href="qml-qtquick-extras-circulargauge.html#value-prop">value</a> will still be incremented. Adding an extra <code>5</code> to <a href="qml-qtquick-extras-circulargauge.html#value-prop">value</a> will then cause the needle to point to <code>10</code>.</p>
+</div></div><!-- @@@stepSize -->
+<br/>
+<!-- $$$tickmarksVisible -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="tickmarksVisible-prop"></a><span class="name">tickmarksVisible</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property determines whether or not the gauge displays tickmarks, minor tickmarks, and labels.</p>
+<p>For more fine-grained control over what is displayed, the following style components of <a href="../qtquickcontrols1/qml-qtquick-controls-styles-circulargaugestyle.html">CircularGaugeStyle</a> can be used:</p>
+<ul>
+<li><a href="../qtquickcontrols1/qml-qtquick-controls-styles-circulargaugestyle.html#tickmark-prop">tickmark</a></li>
+<li><a href="../qtquickcontrols1/qml-qtquick-controls-styles-circulargaugestyle.html#minorTickmark-prop">minorTickmark</a></li>
+<li><a href="../qtquickcontrols1/qml-qtquick-controls-styles-circulargaugestyle.html#tickmarkLabel-prop">tickmarkLabel</a></li>
+</ul>
+</div></div><!-- @@@tickmarksVisible -->
+<br/>
+<!-- $$$value -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="value-prop"></a><span class="name">value</span> : <span class="type">alias</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the current value displayed by the gauge, which will always be between <a href="qml-qtquick-extras-circulargauge.html#minimumValue-prop">minimumValue</a> and <a href="qml-qtquick-extras-circulargauge.html#maximumValue-prop">maximumValue</a>, inclusive.</p>
+</div></div><!-- @@@value -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

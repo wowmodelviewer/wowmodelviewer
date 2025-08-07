@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qvulkanfunctions.cpp -->
+  <title>QVulkanFunctions Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QVulkanFunctions</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QVulkanFunctions Class</h1>
+<!-- $$$QVulkanFunctions-brief -->
+<p>The <a href="qvulkanfunctions.html">QVulkanFunctions</a> class provides cross-platform access to the instance level core Vulkan 1.0 API. <a href="#details">More...</a></p>
+<!-- @@@QVulkanFunctions -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QVulkanFunctions&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.10</td></tr></table></div><p>This class was introduced in  Qt 5.10.</p>
+<ul>
+</ul>
+<a name="details"></a>
+<!-- $$$QVulkanFunctions-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Qt and Qt applications do not link to any Vulkan libraries by default. Instead, all functions are resolved dynamically at run time. Each <a href="qvulkaninstance.html">QVulkanInstance</a> provides a <a href="qvulkanfunctions.html">QVulkanFunctions</a> object retrievable via <a href="qvulkaninstance.html#functions">QVulkanInstance::functions</a>(). This does not contain device level functions in order to avoid the potential overhead of an internal dispatching. Instead, functions that rely on a device, or a dispatchable child object of a device, are exposed via <a href="qvulkandevicefunctions.html">QVulkanDeviceFunctions</a> and <a href="qvulkaninstance.html#deviceFunctions">QVulkanInstance::deviceFunctions</a>(). <a href="qvulkanfunctions.html">QVulkanFunctions</a> and <a href="qvulkandevicefunctions.html">QVulkanDeviceFunctions</a> together provides access to the full core Vulkan API, excluding any extensions.</p>
+<p><b>Note: </b><a href="qvulkanfunctions.html">QVulkanFunctions</a> instances cannot be constructed directly.</p><p>The typical usage is the following:</p>
+<pre class="cpp">
+
+      <span class="type">void</span> Window<span class="operator">::</span>render()
+      {
+          <span class="type"><a href="qvulkaninstance.html">QVulkanInstance</a></span> <span class="operator">*</span>inst <span class="operator">=</span> vulkanInstance();
+          <span class="type">QVulkanFunctions</span> <span class="operator">*</span>f <span class="operator">=</span> inst<span class="operator">-</span><span class="operator">&gt;</span>functions();
+          <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+          VkResult err <span class="operator">=</span> f<span class="operator">-</span><span class="operator">&gt;</span>vkAllocateCommandBuffers(device<span class="operator">,</span> <span class="operator">&amp;</span>cmdBufInfo<span class="operator">,</span> <span class="operator">&amp;</span>cmdBuf);
+          <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+      }
+
+</pre>
+<p><b>Note: </b>Windowing system interface (WSI) specifics and extensions are excluded. This class only covers core Vulkan commands, with the exception of instance creation, destruction, and function resolving, since such functionality is covered by <a href="qvulkaninstance.html">QVulkanInstance</a> itself.</p><p>To access additional functions, applications can use <a href="qvulkaninstance.html#getInstanceProcAddr">QVulkanInstance::getInstanceProcAddr</a>() and vkGetDeviceProcAddr(). Applications can also decide to link to a Vulkan library directly, as platforms with an appropriate loader will typically export function symbols for the core commands. See <a href="https://www.khronos.org/registry/vulkan/specs/1.0/man/html/vkGetInstanceProcAddr.html">the man page for vkGetInstanceProcAddr</a> for more information.</p>
+</div>
+<p><b>See also </b><a href="qvulkaninstance.html">QVulkanInstance</a>, <a href="qvulkandevicefunctions.html">QVulkanDeviceFunctions</a>, <a href="qwindow.html#setVulkanInstance">QWindow::setVulkanInstance</a>(), and <a href="qwindow.html#setSurfaceType">QWindow::setSurfaceType</a>().</p>
+<!-- @@@QVulkanFunctions -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+    <namespace>org.qt-project.qtremoteobjects.5132</namespace>
+    <virtualFolder>remoteobjects</virtualFolder>
+    <metaData name="version" value="5.13.2"/>
+    <customFilter name="QtRemoteObjects 5.13.2">
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtremoteobjects</filterAttribute>
+    </customFilter>
+    <filterSection>
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtrefdoc</filterAttribute>
+        <filterAttribute>qtremoteobjects</filterAttribute>
+        <toc>
+            <section ref="qtremoteobjects-index.html" title="Qt Remote Objects">
+                <section ref="qtremoteobjects-gettingstarted.html" title="Getting Started">
+                    <section ref="remoteobjects-example-static-source.html" title="Example 1: Direct Connection using a Static Source"/>
+                    <section ref="remoteobjects-example-dynamic-replica.html" title="Example 2: Direct Connection with a Dynamic Replica"/>
+                    <section ref="remoteobjects-example-registry.html" title="Example 3: Connections to Remote Nodes using a Registry"/>
+                    <section ref="qtremoteobjects-gettingstarted.html" title="Getting Started with Qt Remote Objects"/>
+                    <section ref="qtremoteobjects-index.html" title="Qt Remote Objects"/>
+                    <section ref="qtremoteobjects-external-schemas.html" title="Qt Remote Objects - External QIODevices"/>
+                    <section ref="qtremoteobjects-repc.html" title="Qt Remote Objects Compiler"/>
+                    <section ref="qtremoteobjects-node.html" title="Qt Remote Objects Nodes"/>
+                    <section ref="qtremoteobjects-compatibility.html" title="Qt Remote Objects Protocol Versioning"/>
+                    <section ref="qtremoteobjects-registry.html" title="Qt Remote Objects Registry"/>
+                    <section ref="qtremoteobjects-replica.html" title="Qt Remote Objects Replica"/>
+                    <section ref="qtremoteobjects-source.html" title="Qt Remote Objects Source"/>
+                    <section ref="qtremoteobjects-troubleshooting.html" title="Troubleshooting Qt Remote Objects"/>
+                </section>
+                <section ref="qtremoteobjects-module.html" title="C++ Classes">
+                    <section ref="qremoteobjectabstractpersistedstore.html" title="QRemoteObjectAbstractPersistedStore Class Reference">
+                        <section ref="qremoteobjectabstractpersistedstore-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qremoteobjectdynamicreplica.html" title="QRemoteObjectDynamicReplica Class Reference">
+                        <section ref="qremoteobjectdynamicreplica-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qremoteobjecthost.html" title="QRemoteObjectHost Class Reference">
+                        <section ref="qremoteobjecthost-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qremoteobjecthostbase.html" title="QRemoteObjectHostBase Class Reference">
+                        <section ref="qremoteobjecthostbase-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qremoteobjectnode.html" title="QRemoteObjectNode Class Reference">
+                        <section ref="qremoteobjectnode-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qremoteobjectregistry.html" title="QRemoteObjectRegistry Class Reference">
+                        <section ref="qremoteobjectregistry-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qremoteobjectregistryhost.html" title="QRemoteObjectRegistryHost Class Reference">
+                        <section ref="qremoteobjectregistryhost-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qremoteobjectreplica.html" title="QRemoteObjectReplica Class Reference">
+                        <section ref="qremoteobjectreplica-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qtroclientfactory.html" title="QtROClientFactory Class Reference">
+                        <section ref="qtroclientfactory-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qtroserverfactory.html" title="QtROServerFactory Class Reference">
+                        <section ref="qtroserverfactory-members.html" title="List of all members"/>
+                    </section>
+                </section>
+                <section ref="" title="">
+                    <section ref="qremoteobjectdynamicreplica.html" title="QRemoteObjectDynamicReplica Class Reference">
+                        <section ref="qremoteobjectdynamicreplica-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qremoteobjectabstractpersistedstore.html" title="QRemoteObjectAbstractPersistedStore Class Reference">
+                        <section ref="qremoteobjectabstractpersistedstore-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qremoteobjecthost.html" title="QRemoteObjectHost Class Reference">
+                        <section ref="qremoteobjecthost-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qremoteobjecthostbase.html" title="QRemoteObjectHostBase Class Reference">
+                        <section ref="qremoteobjecthostbase-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qremoteobjectnode.html" title="QRemoteObjectNode Class Reference">
+                        <section ref="qremoteobjectnode-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qremoteobjectregistryhost.html" title="QRemoteObjectRegistryHost Class Reference">
+                        <section ref="qremoteobjectregistryhost-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qtremoteobjects-interaction.html" title=""/>
+                    <section ref="qtroclientfactory.html" title="QtROClientFactory Class Reference">
+                        <section ref="qtroclientfactory-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qtroserverfactory.html" title="QtROServerFactory Class Reference">
+                        <section ref="qtroserverfactory-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="remoteobjects-example-static-source.html" title="Example 1: Direct Connection using a Static Source"/>
+                    <section ref="remoteobjects-example-dynamic-replica.html" title="Example 2: Direct Connection with a Dynamic Replica"/>
+                    <section ref="remoteobjects-example-registry.html" title="Example 3: Connections to Remote Nodes using a Registry"/>
+                    <section ref="qtremoteobjects-gettingstarted.html" title="Getting Started with Qt Remote Objects"/>
+                    <section ref="qml-qtremoteobjects-node.html" title="Node Type Reference">
+                        <section ref="qml-qtremoteobjects-node-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qtremoteobjects-index.html" title="Qt Remote Objects"/>
+                    <section ref="qtremoteobjects-external-schemas.html" title="Qt Remote Objects - External QIODevices"/>
+                    <section ref="qtremoteobjects-module.html" title="Qt Remote Objects C++ Classes"/>
+                    <section ref="qtremoteobjects-repc.html" title="Qt Remote Objects Compiler"/>
+                    <section ref="qtremoteobjects-node.html" title="Qt Remote Objects Nodes"/>
+                    <section ref="qtremoteobjects-compatibility.html" title="Qt Remote Objects Protocol Versioning"/>
+                    <section ref="qtremoteobjects-qmlmodule.html" title="Qt Remote Objects QML Types"/>
+                    <section ref="qtremoteobjects-registry.html" title="Qt Remote Objects Registry"/>
+                    <section ref="qtremoteobjects-replica.html" title="Qt Remote Objects Replica"/>
+                    <section ref="qtremoteobjects-source.html" title="Qt Remote Objects Source"/>
+                    <section ref="qtremoteobjects-troubleshooting.html" title="Troubleshooting Qt Remote Objects"/>
+                    <section ref="qremoteobjectregistry.html" title="QRemoteObjectRegistry Class Reference">
+                        <section ref="qremoteobjectregistry-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qremoteobjectreplica.html" title="QRemoteObjectReplica Class Reference">
+                        <section ref="qremoteobjectreplica-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtremoteobjects-settingsstore.html" title="SettingsStore Type Reference">
+                        <section ref="qml-qtremoteobjects-settingsstore-members.html" title="List of all members"/>
+                    </section>
+                </section>
+            </section>
+        </toc>
+        <keywords>
+            <keyword name="Example 1: Direct Connection using a Static Source" id="Example 1: Direct Connection using a Static Source" ref="remoteobjects-example-static-source.html"/>
+            <keyword name="Example 2: Direct Connection with a Dynamic Replica" id="Example 2: Direct Connection with a Dynamic Replica" ref="remoteobjects-example-dynamic-replica.html"/>
+            <keyword name="Example 3: Connections to Remote Nodes using a Registry" id="Example 3: Connections to Remote Nodes using a Registry" ref="remoteobjects-example-registry.html"/>
+            <keyword name="Getting Started with Qt Remote Objects" id="Getting Started with Qt Remote Objects" ref="qtremoteobjects-gettingstarted.html"/>
+            <keyword name="Node" id="QML.Node" ref="qml-qtremoteobjects-node.html"/>
+            <keyword name="QRemoteObjectAbstractPersistedStore" id="QRemoteObjectAbstractPersistedStore" ref="qremoteobjectabstractpersistedstore.html"/>
+            <keyword name="QRemoteObjectDynamicReplica" id="QRemoteObjectDynamicReplica" ref="qremoteobjectdynamicreplica.html"/>
+            <keyword name="QRemoteObjectHost" id="QRemoteObjectHost" ref="qremoteobjecthost.html"/>
+            <keyword name="QRemoteObjectHostBase" id="QRemoteObjectHostBase" ref="qremoteobjecthostbase.html"/>
+            <keyword name="QRemoteObjectHostBase::AllowExternalRegistration" id="QRemoteObjectHostBase::AllowExternalRegistration" ref="qremoteobjecthostbase.html#AllowedSchemas-enum"/>
+            <keyword name="QRemoteObjectHostBase::AllowedSchemas" id="QRemoteObjectHostBase::AllowedSchemas" ref="qremoteobjecthostbase.html#AllowedSchemas-enum"/>
+            <keyword name="QRemoteObjectHostBase::BuiltInSchemasOnly" id="QRemoteObjectHostBase::BuiltInSchemasOnly" ref="qremoteobjecthostbase.html#AllowedSchemas-enum"/>
+            <keyword name="QRemoteObjectNode" id="QRemoteObjectNode" ref="qremoteobjectnode.html"/>
+            <keyword name="QRemoteObjectNode::ErrorCode" id="QRemoteObjectNode::ErrorCode" ref="qremoteobjectnode.html#ErrorCode-enum"/>
+            <keyword name="QRemoteObjectNode::HostUrlInvalid" id="QRemoteObjectNode::HostUrlInvalid" ref="qremoteobjectnode.html#ErrorCode-enum"/>
+            <keyword name="QRemoteObjectNode::ListenFailed" id="QRemoteObjectNode::ListenFailed" ref="qremoteobjectnode.html#ErrorCode-enum"/>
+            <keyword name="QRemoteObjectNode::MissingObjectName" id="QRemoteObjectNode::MissingObjectName" ref="qremoteobjectnode.html#ErrorCode-enum"/>
+            <keyword name="QRemoteObjectNode::NoError" id="QRemoteObjectNode::NoError" ref="qremoteobjectnode.html#ErrorCode-enum"/>
+            <keyword name="QRemoteObjectNode::NodeIsNoServer" id="QRemoteObjectNode::NodeIsNoServer" ref="qremoteobjectnode.html#ErrorCode-enum"/>
+            <keyword name="QRemoteObjectNode::OperationNotValidOnClientNode" id="QRemoteObjectNode::OperationNotValidOnClientNode" ref="qremoteobjectnode.html#ErrorCode-enum"/>
+            <keyword name="QRemoteObjectNode::ProtocolMismatch" id="QRemoteObjectNode::ProtocolMismatch" ref="qremoteobjectnode.html#ErrorCode-enum"/>
+            <keyword name="QRemoteObjectNode::RegistryAlreadyHosted" id="QRemoteObjectNode::RegistryAlreadyHosted" ref="qremoteobjectnode.html#ErrorCode-enum"/>
+            <keyword name="QRemoteObjectNode::RegistryNotAcquired" id="QRemoteObjectNode::RegistryNotAcquired" ref="qremoteobjectnode.html#ErrorCode-enum"/>
+            <keyword name="QRemoteObjectNode::RemoteObjectSchemaHandler" id="QRemoteObjectNode::RemoteObjectSchemaHandler" ref="qremoteobjectnode.html#RemoteObjectSchemaHandler-typedef"/>
+            <keyword name="QRemoteObjectNode::ServerAlreadyCreated" id="QRemoteObjectNode::ServerAlreadyCreated" ref="qremoteobjectnode.html#ErrorCode-enum"/>
+            <keyword name="QRemoteObjectNode::SourceNotRegistered" id="QRemoteObjectNode::SourceNotRegistered" ref="qremoteobjectnode.html#ErrorCode-enum"/>
+            <keyword name="QRemoteObjectNode::UnintendedRegistryHosting" id="QRemoteObjectNode::UnintendedRegistryHosting" ref="qremoteobjectnode.html#ErrorCode-enum"/>
+            <keyword name="QRemoteObjectRegistry" id="QRemoteObjectRegistry" ref="qremoteobjectregistry.html"/>
+            <keyword name="QRemoteObjectRegistryHost" id="QRemoteObjectRegistryHost" ref="qremoteobjectregistryhost.html"/>
+            <keyword name="QRemoteObjectReplica" id="QRemoteObjectReplica" ref="qremoteobjectreplica.html"/>
+            <keyword name="QRemoteObjectReplica::Default" id="QRemoteObjectReplica::Default" ref="qremoteobjectreplica.html#State-enum"/>
+            <keyword name="QRemoteObjectReplica::SignatureMismatch" id="QRemoteObjectReplica::SignatureMismatch" ref="qremoteobjectreplica.html#State-enum"/>
+            <keyword name="QRemoteObjectReplica::State" id="QRemoteObjectReplica::State" ref="qremoteobjectreplica.html#State-enum"/>
+            <keyword name="QRemoteObjectReplica::Suspect" id="QRemoteObjectReplica::Suspect" ref="qremoteobjectreplica.html#State-enum"/>
+            <keyword name="QRemoteObjectReplica::Uninitialized" id="QRemoteObjectReplica::Uninitialized" ref="qremoteobjectreplica.html#State-enum"/>
+            <keyword name="QRemoteObjectReplica::Valid" id="QRemoteObjectReplica::Valid" ref="qremoteobjectreplica.html#State-enum"/>
+            <keyword name="Qt Remote Objects" id="Qt Remote Objects" ref="qtremoteobjects-index.html"/>
+            <keyword name="Qt Remote Objects - External QIODevices" id="Qt Remote Objects - External QIODevices" ref="qtremoteobjects-external-schemas.html"/>
+            <keyword name="Qt Remote Objects C++ Classes" id="Qt Remote Objects C++ Classes" ref="qtremoteobjects-module.html"/>
+            <keyword name="Qt Remote Objects Compiler" id="Qt Remote Objects Compiler" ref="qtremoteobjects-repc.html"/>
+            <keyword name="Qt Remote Objects Nodes" id="Qt Remote Objects Nodes" ref="qtremoteobjects-node.html"/>
+            <keyword name="Qt Remote Objects Protocol Versioning" id="Qt Remote Objects Protocol Versioning" ref="qtremoteobjects-compatibility.html"/>
+            <keyword name="Qt Remote Objects QML Types" id="Qt Remote Objects QML Types" ref="qtremoteobjects-qmlmodule.html"/>
+            <keyword name="Qt Remote Objects Registry" id="Qt Remote Objects Registry" ref="qtremoteobjects-registry.html"/>
+            <keyword name="Qt Remote Objects Replica" id="Qt Remote Objects Replica" ref="qtremoteobjects-replica.html"/>
+            <keyword name="Qt Remote Objects Source" id="Qt Remote Objects Source" ref="qtremoteobjects-source.html"/>
+            <keyword name="QtROClientFactory" id="QtROClientFactory" ref="qtroclientfactory.html"/>
+            <keyword name="QtROServerFactory" id="QtROServerFactory" ref="qtroserverfactory.html"/>
+            <keyword name="SettingsStore" id="QML.SettingsStore" ref="qml-qtremoteobjects-settingsstore.html"/>
+            <keyword name="Troubleshooting Qt Remote Objects" id="Troubleshooting Qt Remote Objects" ref="qtremoteobjects-troubleshooting.html"/>
+            <keyword name="acquire" id="QRemoteObjectNode::acquire" ref="qremoteobjectnode.html#acquire"/>
+            <keyword name="acquireDynamic" id="QRemoteObjectNode::acquireDynamic" ref="qremoteobjectnode.html#acquireDynamic"/>
+            <keyword name="acquireModel" id="QRemoteObjectNode::acquireModel" ref="qremoteobjectnode.html#acquireModel"/>
+            <keyword name="addClientSideConnection" id="QRemoteObjectNode::addClientSideConnection" ref="qremoteobjectnode.html#addClientSideConnection"/>
+            <keyword name="addHostSideConnection" id="QRemoteObjectHostBase::addHostSideConnection" ref="qremoteobjecthostbase.html#addHostSideConnection"/>
+            <keyword name="connectToNode" id="QRemoteObjectNode::connectToNode" ref="qremoteobjectnode.html#connectToNode"/>
+            <keyword name="disableRemoting" id="QRemoteObjectHostBase::disableRemoting" ref="qremoteobjecthostbase.html#disableRemoting"/>
+            <keyword name="enableRemoting" id="QRemoteObjectHostBase::enableRemoting" ref="qremoteobjecthostbase.html#enableRemoting"/>
+            <keyword name="heartbeatInterval" id="Node::heartbeatInterval" ref="qml-qtremoteobjects-node.html#heartbeatInterval-prop"/>
+            <keyword name="heartbeatInterval" id="QRemoteObjectNode::heartbeatInterval" ref="qremoteobjectnode.html#heartbeatInterval-prop"/>
+            <keyword name="heartbeatInterval" id="QRemoteObjectNode::heartbeatInterval" ref="qremoteobjectnode.html#heartbeatInterval-prop"/>
+            <keyword name="heartbeatIntervalChanged" id="QRemoteObjectNode::heartbeatIntervalChanged" ref="qremoteobjectnode.html#heartbeatInterval-prop"/>
+            <keyword name="hostUrl" id="QRemoteObjectHost::hostUrl" ref="qremoteobjecthost.html#hostUrl"/>
+            <keyword name="initialized" id="QRemoteObjectReplica::initialized" ref="qremoteobjectreplica.html#initialized"/>
+            <keyword name="instances" id="QRemoteObjectNode::instances" ref="qremoteobjectnode.html#instances"/>
+            <keyword name="isInitialized" id="QRemoteObjectReplica::isInitialized" ref="qremoteobjectreplica.html#isInitialized"/>
+            <keyword name="isReplicaValid" id="QRemoteObjectReplica::isReplicaValid" ref="qremoteobjectreplica.html#isReplicaValid"/>
+            <keyword name="lastError" id="QRemoteObjectNode::lastError" ref="qremoteobjectnode.html#lastError"/>
+            <keyword name="node" id="QRemoteObjectReplica::node" ref="qremoteobjectreplica.html#node-prop"/>
+            <keyword name="node" id="QRemoteObjectReplica::node" ref="qremoteobjectreplica.html#node-prop"/>
+            <keyword name="persistedStore" id="Node::persistedStore" ref="qml-qtremoteobjects-node.html#persistedStore-prop"/>
+            <keyword name="persistedStore" id="QRemoteObjectNode::persistedStore" ref="qremoteobjectnode.html#persistedStore-prop"/>
+            <keyword name="persistedStore" id="QRemoteObjectNode::persistedStore" ref="qremoteobjectnode.html#persistedStore-prop"/>
+            <keyword name="proxy" id="QRemoteObjectHostBase::proxy" ref="qremoteobjecthostbase.html#proxy"/>
+            <keyword name="qRegisterRemoteObjectsClient" id="qRegisterRemoteObjectsClient" ref="qtroclientfactory.html#qRegisterRemoteObjectsClient"/>
+            <keyword name="qRegisterRemoteObjectsServer" id="qRegisterRemoteObjectsServer" ref="qtroserverfactory.html#qRegisterRemoteObjectsServer"/>
+            <keyword name="registerExternalSchema" id="QRemoteObjectNode::registerExternalSchema" ref="qremoteobjectnode.html#registerExternalSchema"/>
+            <keyword name="registry" id="QRemoteObjectNode::registry" ref="qremoteobjectnode.html#registry"/>
+            <keyword name="registryUrl" id="Node::registryUrl" ref="qml-qtremoteobjects-node.html#registryUrl-prop"/>
+            <keyword name="registryUrl" id="QRemoteObjectNode::registryUrl" ref="qremoteobjectnode.html#registryUrl-prop"/>
+            <keyword name="registryUrl" id="QRemoteObjectNode::registryUrl" ref="qremoteobjectnode.html#registryUrl-prop"/>
+            <keyword name="remoteObjectAdded" id="QRemoteObjectNode::remoteObjectAdded" ref="qremoteobjectnode.html#remoteObjectAdded"/>
+            <keyword name="remoteObjectAdded" id="QRemoteObjectRegistry::remoteObjectAdded" ref="qremoteobjectregistry.html#remoteObjectAdded"/>
+            <keyword name="remoteObjectRemoved" id="QRemoteObjectRegistry::remoteObjectRemoved" ref="qremoteobjectregistry.html#remoteObjectRemoved"/>
+            <keyword name="repc" id="repc" ref="qtremoteobjects-repc.html"/>
+            <keyword name="restoreProperties" id="QRemoteObjectAbstractPersistedStore::restoreProperties" ref="qremoteobjectabstractpersistedstore.html#restoreProperties"/>
+            <keyword name="reverseProxy" id="QRemoteObjectHostBase::reverseProxy" ref="qremoteobjecthostbase.html#reverseProxy"/>
+            <keyword name="saveProperties" id="QRemoteObjectAbstractPersistedStore::saveProperties" ref="qremoteobjectabstractpersistedstore.html#saveProperties"/>
+            <keyword name="setHeartbeatInterval" id="QRemoteObjectNode::setHeartbeatInterval" ref="qremoteobjectnode.html#heartbeatInterval-prop"/>
+            <keyword name="setHostUrl" id="QRemoteObjectHost::setHostUrl" ref="qremoteobjecthost.html#setHostUrl"/>
+            <keyword name="setName" id="QRemoteObjectHostBase::setName" ref="qremoteobjecthostbase.html#setName"/>
+            <keyword name="setName" id="QRemoteObjectNode::setName" ref="qremoteobjectnode.html#setName"/>
+            <keyword name="setNode" id="QRemoteObjectReplica::setNode" ref="qremoteobjectreplica.html#node-prop"/>
+            <keyword name="setPersistedStore" id="QRemoteObjectNode::setPersistedStore" ref="qremoteobjectnode.html#persistedStore-prop"/>
+            <keyword name="setRegistryUrl" id="QRemoteObjectNode::setRegistryUrl" ref="qremoteobjectnode.html#registryUrl-prop"/>
+            <keyword name="setRegistryUrl" id="QRemoteObjectRegistryHost::setRegistryUrl" ref="qremoteobjectregistryhost.html#setRegistryUrl"/>
+            <keyword name="sourceLocations" id="QRemoteObjectRegistry::sourceLocations" ref="qremoteobjectregistry.html#sourceLocations"/>
+            <keyword name="sourceLocations" id="QRemoteObjectRegistry::sourceLocations" ref="qremoteobjectregistry.html#sourceLocations-prop"/>
+            <keyword name="state" id="QRemoteObjectReplica::state" ref="qremoteobjectreplica.html#state"/>
+            <keyword name="state" id="QRemoteObjectReplica::state" ref="qremoteobjectreplica.html#state-prop"/>
+            <keyword name="stateChanged" id="QRemoteObjectReplica::stateChanged" ref="qremoteobjectreplica.html#stateChanged"/>
+            <keyword name="timerEvent" id="QRemoteObjectNode::timerEvent" ref="qremoteobjectnode.html#timerEvent"/>
+            <keyword name="waitForRegistry" id="QRemoteObjectNode::waitForRegistry" ref="qremoteobjectnode.html#waitForRegistry"/>
+            <keyword name="waitForSource" id="QRemoteObjectReplica::waitForSource" ref="qremoteobjectreplica.html#waitForSource"/>
+            <keyword name="~QRemoteObjectDynamicReplica" id="QRemoteObjectDynamicReplica::~QRemoteObjectDynamicReplica" ref="qremoteobjectdynamicreplica.html#dtor.QRemoteObjectDynamicReplica"/>
+            <keyword name="~QRemoteObjectRegistry" id="QRemoteObjectRegistry::~QRemoteObjectRegistry" ref="qremoteobjectregistry.html#dtor.QRemoteObjectRegistry"/>
+        </keywords>
+        <files>
+            <file>images/DirectConnectClientServerOutput.png</file>
+            <file>images/DirectConnectServerOutput.png</file>
+            <file>images/arrow_bc.png</file>
+            <file>images/bgrContent.png</file>
+            <file>images/btn_next.png</file>
+            <file>images/btn_prev.png</file>
+            <file>images/bullet_dn.png</file>
+            <file>images/bullet_sq.png</file>
+            <file>images/home.png</file>
+            <file>images/ico_note.png</file>
+            <file>images/ico_note_attention.png</file>
+            <file>images/ico_out.png</file>
+            <file>images/logo.png</file>
+            <file>qml-qtremoteobjects-node-members.html</file>
+            <file>qml-qtremoteobjects-node.html</file>
+            <file>qml-qtremoteobjects-settingsstore-members.html</file>
+            <file>qml-qtremoteobjects-settingsstore.html</file>
+            <file>qremoteobjectabstractpersistedstore-members.html</file>
+            <file>qremoteobjectabstractpersistedstore.html</file>
+            <file>qremoteobjectdynamicreplica-members.html</file>
+            <file>qremoteobjectdynamicreplica.html</file>
+            <file>qremoteobjecthost-members.html</file>
+            <file>qremoteobjecthost.html</file>
+            <file>qremoteobjecthostbase-members.html</file>
+            <file>qremoteobjecthostbase.html</file>
+            <file>qremoteobjectnode-members.html</file>
+            <file>qremoteobjectnode.html</file>
+            <file>qremoteobjectregistry-members.html</file>
+            <file>qremoteobjectregistry.html</file>
+            <file>qremoteobjectregistryhost-members.html</file>
+            <file>qremoteobjectregistryhost.html</file>
+            <file>qremoteobjectreplica-members.html</file>
+            <file>qremoteobjectreplica.html</file>
+            <file>qtremoteobjects-compatibility.html</file>
+            <file>qtremoteobjects-external-schemas.html</file>
+            <file>qtremoteobjects-gettingstarted.html</file>
+            <file>qtremoteobjects-index.html</file>
+            <file>qtremoteobjects-interaction.html</file>
+            <file>qtremoteobjects-module.html</file>
+            <file>qtremoteobjects-node.html</file>
+            <file>qtremoteobjects-qmlmodule.html</file>
+            <file>qtremoteobjects-registry.html</file>
+            <file>qtremoteobjects-repc.html</file>
+            <file>qtremoteobjects-replica.html</file>
+            <file>qtremoteobjects-source.html</file>
+            <file>qtremoteobjects-troubleshooting.html</file>
+            <file>qtroclientfactory.html</file>
+            <file>qtroserverfactory.html</file>
+            <file>remoteobjects-example-dynamic-replica.html</file>
+            <file>remoteobjects-example-registry.html</file>
+            <file>remoteobjects-example-static-source.html</file>
+            <file>style/offline-simple.css</file>
+            <file>style/offline.css</file>
+        </files>
+    </filterSection>
+</QtHelpProject>

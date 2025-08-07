@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qbs-target-macos.qdoc -->
+  <title>Building for macOS | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td><td >Building for macOS</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<p class="naviNextPrevious headerNavi">
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#building-user-interfaces">Building User Interfaces</a></li>
+<li class="level1"><a href="#creating-app-bundles">Creating App Bundles</a></li>
+<li class="level1"><a href="#multiple-architectures-and-build-variants">Multiple Architectures and Build Variants</a></li>
+<li class="level1"><a href="#building-macos-disk-images">Building macOS Disk Images</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Building for macOS</h1>
+<span class="subtitle"></span>
+<!-- $$$qbs-target-macos.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>This topic describes the Qbs features specific to macOS.</p>
+<p><b>Note: </b>Qbs does not yet support the Swift programming language.</p><p>The <a href="qml-qbsmodules-xcode.html">xcode</a> module contains properties and rules for Xcode-based development.</p>
+<a name="building-user-interfaces"></a>
+<h2 id="building-user-interfaces">Building User Interfaces</h2>
+<p>The <a href="qml-qbsmodules-ib.html">ib</a> module contains properties and rules for building Interface Builder documents, storyboards, asset catalogs, and icon sets.</p>
+<a name="creating-app-bundles"></a>
+<h2 id="creating-app-bundles">Creating App Bundles</h2>
+<p>The <a href="qml-qbsmodules-bundle.html">bundle</a> module contains properties and rules for building and working with Core Foundation bundles (application bundles and frameworks) on Apple platforms.</p>
+<p>To build an application product as a bundle, or a dynamic or static library product as a framework, add a dependency on the bundle module and set the <a href="qml-qbsmodules-bundle.html#isBundle-prop">bundle.isBundle</a> property to <code>true</code>:</p>
+<pre class="cpp">
+
+  Depends { name: <span class="string">&quot;bundle&quot;</span> }
+  bundle<span class="operator">.</span>isBundle: <span class="keyword">true</span>
+
+</pre>
+<p>Qbs also provides a number of powerful features to assist in creating the Info.plist file that is part of your bundle. In fact, you do not need to provide an Info.plist file at all. Instead, Qbs will generate one automatically with the necessary keys, based on the values of module properties set in the product.</p>
+<p>If you do specify an Info.plist file, Qbs may still inject additional keys into the final output from other sources. One notable source of Info.plist keys are <i>partial</i> Info.plist files which are generated as a result of compiling other resources like asset catalogs, XIBs/NIBs, and storyboards.</p>
+<p>You may also use the <code>bundle.infoPlist</code> property to apply a set of key-value pairs to be added to the final Info.plist. This can be used instead of or in addition to an actual Info.plist file on disk.</p>
+<a name="multiple-architectures-and-build-variants"></a>
+<h2 id="multiple-architectures-and-build-variants">Multiple Architectures and Build Variants</h2>
+<p>Qbs uses <a href="multiplexing.html#">multiplexing</a> to create multi-architecture <i>fat</i> binaries and multi-variant frameworks, where a single framework can contain both a release and debug build of a library on Apple platforms.</p>
+<p>You can set the <code>qbs.architectures</code> property to a list of CPU architectures (such as <code>x86</code>, <code>x86_64</code>, <code>armv7a</code>, <code>armv7k</code>, and <code>arm64</code>), and the <code>qbs.buildVariants</code> property to a list of build variants (such as <code>debug</code> and <code>release</code>), and Qbs will transparently perform the necessary steps to produce the various artifacts and combine them into a single bundle.</p>
+<p>Since the individual build configurations are completely independent of one another, you can continue to use conditional branches in your projects such as the following:</p>
+<pre class="cpp">
+
+  Properties {
+      condition: qbs<span class="operator">.</span>buildVariant <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;release&quot;</span>
+      cpp<span class="operator">.</span>optimization: <span class="string">&quot;small&quot;</span>
+  }
+
+</pre>
+<a name="building-macos-disk-images"></a>
+<h2 id="building-macos-disk-images">Building macOS Disk Images</h2>
+<p>The <a href="qml-qbsconvenienceitems-applediskimage.html">AppleDiskImage</a> and <a href="qml-qbsconvenienceitems-appleapplicationdiskimage.html">AppleApplicationDiskImage</a> items have a dependency on the <a href="qml-qbsmodules-dmg.html">dmg</a> module. The former represents a product that is a basic Apple disk image, while the latter extends the former to create a drag 'n' drop disk image installer used for installing single application bundles.</p>
+<p>For example, the following code snippet creates a macOS disk image with a custom background and icon layout:</p>
+<pre class="cpp">
+
+  AppleApplicationDiskImage {
+      targetName: <span class="string">&quot;cocoa-application-&quot;</span> <span class="operator">+</span> version
+      version: <span class="string">&quot;1.0&quot;</span>
+
+      files: <span class="operator">[</span>
+          <span class="string">&quot;CocoaApplication/dmg.iconset&quot;</span><span class="operator">,</span>
+          <span class="string">&quot;CocoaApplication/en_US.lproj/LICENSE&quot;</span><span class="operator">,</span>
+          <span class="comment">// comment out the following line to use a solid-color background</span>
+          <span class="comment">// (see dmg.backgroundColor below)</span>
+          <span class="string">&quot;CocoaApplication/background*&quot;</span>
+      <span class="operator">]</span>
+
+      dmg<span class="operator">.</span>backgroundColor: <span class="string">&quot;#41cd52&quot;</span>
+      dmg<span class="operator">.</span>badgeVolumeIcon: <span class="keyword">true</span>
+      dmg<span class="operator">.</span>iconPositions: <span class="operator">[</span>
+          {<span class="string">&quot;x&quot;</span>: <span class="number">200</span><span class="operator">,</span> <span class="string">&quot;y&quot;</span>: <span class="number">200</span><span class="operator">,</span> <span class="string">&quot;path&quot;</span>: <span class="string">&quot;Cocoa Application.app&quot;</span>}<span class="operator">,</span>
+          {<span class="string">&quot;x&quot;</span>: <span class="number">400</span><span class="operator">,</span> <span class="string">&quot;y&quot;</span>: <span class="number">200</span><span class="operator">,</span> <span class="string">&quot;path&quot;</span>: <span class="string">&quot;Applications&quot;</span>}
+      <span class="operator">]</span>
+      dmg<span class="operator">.</span>windowX: <span class="number">420</span>
+      dmg<span class="operator">.</span>windowY: <span class="number">250</span>
+      dmg<span class="operator">.</span>windowWidth: <span class="number">600</span>
+      dmg<span class="operator">.</span>windowHeight: <span class="number">422</span> <span class="comment">// this includes the macOS title bar height of 22</span>
+      dmg<span class="operator">.</span>iconSize: <span class="number">64</span>
+  }
+
+</pre>
+<p class="centerAlign"><img src="images/qbs-dmg.png" alt="" /></p><p>In addition, Qbs supports multi-language license agreement prompts that appear when the DMG is opened, with full Unicode and rich-text formatting support.</p>
+</div>
+<!-- @@@qbs-target-macos.html -->
+<p class="naviNextPrevious footerNavi">
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- signals.qdoc -->
+  <title>Signal and Handler Event System | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td >Signal and Handler Event System</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#receiving-signals-with-signal-handlers">Receiving signals with signal handlers</a></li>
+<li class="level2"><a href="#property-change-signal-handlers">Property change signal handlers</a></li>
+<li class="level2"><a href="#using-the-connections-type">Using the Connections type</a></li>
+<li class="level2"><a href="#attached-signal-handlers">Attached signal handlers</a></li>
+<li class="level1"><a href="#adding-signals-to-custom-qml-types">Adding signals to custom QML types</a></li>
+<li class="level1"><a href="#connecting-signals-to-methods-and-signals">Connecting signals to methods and signals</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Signal and Handler Event System</h1>
+<span class="subtitle"></span>
+<!-- $$$qtqml-syntax-signals.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Application and user interface components need to communicate with each other. For example, a button needs to know that the user has clicked on it. The button may change colors to indicate its state or perform some logic. As well, application needs to know whether the user is clicking the button. The application may need to relay this clicking event to other applications.</p>
+<p>QML has a signal and handler mechanism, where the <i>signal</i> is the event and the signal is responded to through a <i>signal handler</i>. When a signal is emitted, the corresponding signal handler is invoked. Placing logic such as a script or other operations in the handler allows the component to respond to the event.</p>
+<a name="qml-signals-and-handlers"></a><a name="receiving-signals-with-signal-handlers"></a>
+<h2 id="receiving-signals-with-signal-handlers">Receiving signals with signal handlers</h2>
+<p>To receive a notification when a particular signal is emitted for a particular object, the object definition should declare a signal handler named <i>on&lt;Signal&gt;</i>, where <i>&lt;Signal&gt;</i> is the name of the signal, with the first letter capitalized. The signal handler should contain the JavaScript code to be executed when the signal handler is invoked.</p>
+<p>For example, the <a href="../qtquickcontrols/qml-qtquick-controls2-button.html">Button</a> type from the <a href="../qtquickcontrols/qtquickcontrols-index.html">Qt Quick Controls</a> module has a <code>clicked</code> signal, which is emitted whenever the button is clicked. In this case, the signal handler for receiving this signal should be <code>onClicked</code>. In the example below, whenever the button is clicked, the <code>onClicked</code> handler is invoked, applying a random color to the parent <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a>:</p>
+<pre class="qml">
+
+  import QtQuick 2.13
+  import QtQuick.Controls 2.13
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">rect</span>
+      <span class="name">width</span>: <span class="number">250</span>; <span class="name">height</span>: <span class="number">250</span>
+
+      <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-button.html">Button</a></span> {
+          <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+          <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+          <span class="name">text</span>: <span class="string">&quot;Change color!&quot;</span>
+          <span class="name">onClicked</span>: {
+              <span class="name">rect</span>.<span class="name">color</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">rgba</span>(<span class="name">Math</span>.<span class="name">random</span>(), <span class="name">Math</span>.<span class="name">random</span>(), <span class="name">Math</span>.<span class="name">random</span>(), <span class="number">1</span>);
+          }
+      }
+  }
+
+</pre>
+<a name="property-change-signal-handlers"></a>
+<h3 id="property-change-signal-handlers">Property change signal handlers</h3>
+<p>A signal is automatically emitted when the value of a QML property changes. This type of signal is a <i>property change signal</i> and signal handlers for these signals are written in the form <i>on&lt;Property&gt;Changed</i>, where <i>&lt;Property&gt;</i> is the name of the property, with the first letter capitalized.</p>
+<p>For example, the <a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a> type has a <a href="../qtquick/qml-qtquick-mousearea.html#pressed-signal">pressed</a> property. To receive a notification whenever this property changes, write a signal handler named <code>onPressedChanged</code>:</p>
+<pre class="qml">
+
+  import QtQuick 2.13
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">rect</span>
+      <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-taphandler.html">TapHandler</a></span> {
+          <span class="name">onPressedChanged</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;taphandler pressed?&quot;</span>, <span class="name">pressed</span>)
+      }
+  }
+
+</pre>
+<p>Even though the <a href="../qtquick/qml-qtquick-taphandler.html">TapHandler</a> documentation does not document a signal handler named <code>onPressedChanged</code>, the signal is implicitly provided by the fact that the <code>pressed</code> property exists.</p>
+<a name="using-the-connections-type"></a>
+<h3 id="using-the-connections-type">Using the Connections type</h3>
+<p>In some cases it may be desirable to access a signal outside of the object that emits it. For these purposes, the <code>QtQuick</code> module provides the <a href="qml-qtqml-connections.html">Connections</a> type for connecting to signals of arbitrary objects. A <a href="qml-qtqml-connections.html">Connections</a> object can receive any signal from its specified <a href="qml-qtqml-connections.html#target-prop">target</a>.</p>
+<p>For example, the <code>onClicked</code> handler in the earlier example could have been received by the root <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> instead, by placing the <code>onClicked</code> handler in a <a href="qml-qtqml-connections.html">Connections</a> object that has its <a href="qml-qtqml-connections.html#target-prop">target</a> set to the <code>button</code>:</p>
+<pre class="qml">
+
+  import QtQuick 2.13
+  import QtQuick.Controls 2.13
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">rect</span>
+      <span class="name">width</span>: <span class="number">250</span>; <span class="name">height</span>: <span class="number">250</span>
+
+      <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-button.html">Button</a></span> {
+          <span class="name">id</span>: <span class="name">button</span>
+          <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+          <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+          <span class="name">text</span>: <span class="string">&quot;Change color!&quot;</span>
+      }
+
+      <span class="type"><a href="qml-qtqml-connections.html">Connections</a></span> {
+          <span class="name">target</span>: <span class="name">button</span>
+          <span class="name">onClicked</span>: {
+              <span class="name">rect</span>.<span class="name">color</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">rgba</span>(<span class="name">Math</span>.<span class="name">random</span>(), <span class="name">Math</span>.<span class="name">random</span>(), <span class="name">Math</span>.<span class="name">random</span>(), <span class="number">1</span>);
+          }
+      }
+  }
+
+</pre>
+<a name="attached-signal-handlers"></a>
+<h3 id="attached-signal-handlers">Attached signal handlers</h3>
+<p>An <a href="qtqml-syntax-objectattributes.html#attached-properties-and-attached-signal-handlers">attached signal handler</a> receives a signal from an <i>attaching type</i> rather than the object within which the handler is declared.</p>
+<p>For example, <a href="qml-qtqml-component.html#completed-signal">Component.onCompleted</a> is an attached signal handler. It is often used to execute some JavaScript code when its creation process is complete. Here is an example:</p>
+<pre class="qml">
+
+  import QtQuick 2.13
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">width</span>: <span class="number">200</span>; <span class="name">height</span>: <span class="number">200</span>
+      <span class="name">color</span>: <span class="name">Qt</span>.<span class="name">rgba</span>(<span class="name">Qt</span>.<span class="name">random</span>(), <span class="name">Qt</span>.<span class="name">random</span>(), <span class="name">Qt</span>.<span class="name">random</span>(), <span class="number">1</span>)
+
+      <span class="name">Component</span>.onCompleted: {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;The rectangle's color is&quot;</span>, <span class="name">color</span>)
+      }
+  }
+
+</pre>
+<p>The <code>onCompleted</code> handler is not responding to a <code>completed</code> signal from the <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> type. Instead, an object of the <code>Component</code> <i>attaching type</i> with a <code>completed</code> signal has automatically been <i>attached</i> to the <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> object by the QML engine. The engine emits this signal when the Rectangle object is created, thus triggering the <code>Component.onCompleted</code> signal handler.</p>
+<p>Attached signal handlers allow objects to be notified of particular signals that are significant to each individual object. If there was no <code>Component.onCompleted</code> attached signal handler, for example, an object could not receive this notification without registering for some special signal from some special object. The <i>attached signal handler</i> mechanism enables objects to receive particular signals without extra code.</p>
+<p>See <a href="qtqml-syntax-objectattributes.html#attached-properties-and-attached-signal-handlers">Attached properties and attached signal handlers</a> for more information on attached signal handlers.</p>
+<a name="adding-signals-to-custom-qml-types"></a>
+<h2 id="adding-signals-to-custom-qml-types">Adding signals to custom QML types</h2>
+<p>Signals can be added to custom QML types through the <code>signal</code> keyword.</p>
+<p>The syntax for defining a new signal is:</p>
+<p><code>signal &lt;name&gt;[([&lt;type&gt; &lt;parameter name&gt;[, ..&#x2e;]])]</code></p>
+<p>A signal is emitted by invoking the signal as a method.</p>
+<p>For example, the code below is defined in a file named <code>SquareButton.qml</code>. The root <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> object has an <code>activated</code> signal, which is emitted whenever the child <a href="../qtquick/qml-qtquick-taphandler.html">TapHandler</a> is <code>tapped</code>. In this particular example the activated signal is emitted with the x and y coordinates of the mouse click:</p>
+<pre class="qml">
+
+  <span class="comment">// SquareButton.qml</span>
+  import QtQuick 2.13
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">root</span>
+
+      signal <span class="type">activated</span>(real xPosition, real yPosition)
+      property <span class="type"><a href="qml-point.html">point</a></span> <span class="name">mouseXY</span>
+      property <span class="type"><a href="qml-int.html">int</a></span> <span class="name">side</span>: <span class="number">100</span>
+      <span class="name">width</span>: <span class="name">side</span>; <span class="name">height</span>: <span class="name">side</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-taphandler.html">TapHandler</a></span> {
+          <span class="name">id</span>: <span class="name">handler</span>
+          <span class="name">onTapped</span>: <span class="name">root</span>.<span class="name">activated</span>(<span class="name">mouseXY</span>.<span class="name">x</span>, <span class="name">mouseXY</span>.<span class="name">y</span>)
+          <span class="name">onPressedChanged</span>: <span class="name">mouseXY</span> <span class="operator">=</span> <span class="name">handler</span>.<span class="name">point</span>.<span class="name">position</span>
+      }
+  }
+
+</pre>
+<p>Now any objects of the <code>SquareButton</code> can connect to the <code>activated</code> signal using an <code>onActivated</code> signal handler:</p>
+<pre class="qml">
+
+  <span class="comment">// myapplication.qml</span>
+  <span class="type">SquareButton</span> {
+      <span class="name">onActivated</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Activated at &quot;</span> <span class="operator">+</span> <span class="name">xPosition</span> <span class="operator">+</span> <span class="string">&quot;,&quot;</span> <span class="operator">+</span> <span class="name">yPosition</span>)
+  }
+
+</pre>
+<p>See <a href="qtqml-syntax-objectattributes.html#signal-attributes">Signal Attributes</a> for more details on writing signals for custom QML types.</p>
+<a name="qml-connect-signals-to-method"></a><a name="connecting-signals-to-methods-and-signals"></a>
+<h2 id="connecting-signals-to-methods-and-signals">Connecting signals to methods and signals</h2>
+<p>Signal objects have a <code>connect()</code> method to a connect a signal either to a method or another signal. When a signal is connected to a method, the method is automatically invoked whenever the signal is emitted. This mechanism enables a signal to be received by a method instead of a signal handler.</p>
+<p>Below, the <code>messageReceived</code> signal is connected to three methods using the <code>connect()</code> method:</p>
+<pre class="qml">
+
+  import QtQuick 2.13
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">relay</span>
+
+      signal <span class="type">messageReceived</span>(string person, string notice)
+
+      <span class="name">Component</span>.onCompleted: {
+          <span class="name">relay</span>.<span class="name">messageReceived</span>.<span class="name">connect</span>(<span class="name">sendToPost</span>)
+          <span class="name">relay</span>.<span class="name">messageReceived</span>.<span class="name">connect</span>(<span class="name">sendToTelegraph</span>)
+          <span class="name">relay</span>.<span class="name">messageReceived</span>.<span class="name">connect</span>(<span class="name">sendToEmail</span>)
+          <span class="name">relay</span>.<span class="name">messageReceived</span>(<span class="string">&quot;Tom&quot;</span>, <span class="string">&quot;Happy Birthday&quot;</span>)
+      }
+
+      <span class="keyword">function</span> <span class="name">sendToPost</span>(person, notice) {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Sending to post: &quot;</span> <span class="operator">+</span> <span class="name">person</span> <span class="operator">+</span> <span class="string">&quot;, &quot;</span> <span class="operator">+</span> <span class="name">notice</span>)
+      }
+      <span class="keyword">function</span> <span class="name">sendToTelegraph</span>(person, notice) {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Sending to telegraph: &quot;</span> <span class="operator">+</span> <span class="name">person</span> <span class="operator">+</span> <span class="string">&quot;, &quot;</span> <span class="operator">+</span> <span class="name">notice</span>)
+      }
+      <span class="keyword">function</span> <span class="name">sendToEmail</span>(person, notice) {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Sending to email: &quot;</span> <span class="operator">+</span> <span class="name">person</span> <span class="operator">+</span> <span class="string">&quot;, &quot;</span> <span class="operator">+</span> <span class="name">notice</span>)
+      }
+  }
+
+</pre>
+<p>In many cases it is sufficient to receive signals through signal handlers rather than using the connect() function. However, using the <code>connect</code> method allows a signal to be received by multiple methods as shown earlier, which would not be possible with signal handlers as they must be uniquely named. Also, the <code>connect</code> method is useful when connecting signals to <a href="qtqml-javascript-dynamicobjectcreation.html">dynamically created objects</a>.</p>
+<p>There is a corresponding <code>disconnect()</code> method for removing connected signals:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">relay</span>
+      <span class="comment">//...</span>
+
+      <span class="keyword">function</span> <span class="name">removeTelegraphSignal</span>() {
+          <span class="name">relay</span>.<span class="name">messageReceived</span>.<span class="name">disconnect</span>(<span class="name">sendToTelegraph</span>)
+      }
+  }
+
+</pre>
+<a name="signal-to-signal-connect"></a>
+<h4 id="signal-to-signal-connect">Signal to signal connect</h4>
+<p>By connecting signals to other signals, the <code>connect()</code> method can form different signal chains.</p>
+<pre class="qml">
+
+  import QtQuick 2.13
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">forwarder</span>
+      <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span>
+
+      signal <span class="type">send</span>()
+      <span class="name">onSend</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Send clicked&quot;</span>)
+
+      <span class="type"><a href="../qtquick/qml-qtquick-taphandler.html">TapHandler</a></span> {
+          <span class="name">id</span>: <span class="name">mousearea</span>
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">onTapped</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Mouse clicked&quot;</span>)
+      }
+
+      <span class="name">Component</span>.onCompleted: {
+          <span class="name">mousearea</span>.<span class="name">tapped</span>.<span class="name">connect</span>(<span class="name">send</span>)
+      }
+  }
+
+</pre>
+<p>Whenever the <a href="../qtquick/qml-qtquick-taphandler.html">TapHandler</a>'s <code>tapped</code> signal is emitted, the <code>send</code> signal will automatically be emitted as well.</p>
+<pre class="cpp">
+
+  output:
+      MouseArea clicked
+      Send clicked
+
+</pre>
+</div>
+<!-- @@@qtqml-syntax-signals.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

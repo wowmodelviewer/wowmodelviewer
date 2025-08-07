@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- widgets-tutorial.qdoc -->
+  <title>Widgets Tutorial | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Widgets Tutorial</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#introduction">Introduction</a></li>
+<li class="level1"><a href="#writing-a-main-function">Writing a Main Function</a></li>
+<li class="level1"><a href="#simple-widget-examples">Simple Widget Examples</a></li>
+<li class="level1"><a href="#real-world-widget-examples">Real World Widget Examples</a></li>
+<li class="level1"><a href="#building-the-examples">Building The Examples</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Widgets Tutorial</h1>
+<span class="subtitle"></span>
+<!-- $$$widgets-tutorial.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="introduction"></a>
+<h2 id="introduction">Introduction</h2>
+<p>Widgets are the basic building blocks for graphical user interface (GUI) applications built with Qt. Each GUI component (e.g&#x2e; buttons, labels, text editors) is a <a href="qwidget.html">widget</a> that is placed somewhere within a user interface window, or is displayed as an independent window. Each type of widget is provided by a subclass of <a href="qwidget.html">QWidget</a>, which is itself a subclass of <a href="../qtcore/qobject.html">QObject</a>.</p>
+<p><a href="qwidget.html">QWidget</a> is not an abstract class. It can be used as a container for other widgets, and it can be subclassed with minimal effort to create new, custom widgets. <a href="qwidget.html">QWidget</a> is often used to create a window inside which other <a href="qwidget.html">QWidget</a>s are placed.</p>
+<p>As with <a href="../qtcore/qobject.html">QObject</a>s, <a href="qwidget.html">QWidget</a>s can be created with parent objects to indicate ownership, ensuring that objects are deleted when they are no longer used. With widgets, these parent-child relationships have an additional meaning: each child widget is displayed within the screen area occupied by its parent widget. This means that when you delete a window widget, all the child widgets it contains are also deleted.</p>
+<a name="writing-a-main-function"></a>
+<h2 id="writing-a-main-function">Writing a Main Function</h2>
+<p>Many of the GUI examples provided with Qt follow the pattern of having a <code>main.cpp</code> file, which contains the standard code to initialize the application, plus any number of other source/header files that contain the application logic and custom GUI components.</p>
+<p>A typical <code>main()</code> function in <code>main.cpp</code> looks like this:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+
+  <span class="comment">// Include header files for application components.</span>
+  <span class="comment">// ...</span>
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type"><a href="qapplication.html">QApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      <span class="comment">// Set up and show widgets.</span>
+      <span class="comment">// ...</span>
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p>First, a <a href="qapplication.html">QApplication</a> object is constructed, which can be configured with arguments passed in from the command line. After the widgets have been created and shown, <a href="qapplication.html#exec">QApplication::exec</a>() is called to start Qt's event loop. Control passes to Qt until this function returns. Finally, <code>main()</code> returns the value returned by <a href="qapplication.html#exec">QApplication::exec</a>().</p>
+<a name="simple-widget-examples"></a>
+<h2 id="simple-widget-examples">Simple Widget Examples</h2>
+<p>Each of theses simple widget examples is written entirely within the <code>main()</code> function.</p>
+<ul>
+<li><a href="qtwidgets-tutorials-widgets-toplevel-example.html">Creating a window</a></li>
+<li><a href="qtwidgets-tutorials-widgets-childwidget-example.html">Creating child widgets</a></li>
+<li><a href="qtwidgets-tutorials-widgets-windowlayout-example.html">Using layouts</a></li>
+<li><a href="qtwidgets-tutorials-widgets-nestedlayouts-example.html">Nested layouts</a></li>
+</ul>
+<a name="real-world-widget-examples"></a>
+<h2 id="real-world-widget-examples">Real World Widget Examples</h2>
+<p>In these <a href="examples-widgets.html">more advanced examples</a>, the code that creates the widgets and layouts is stored in other files. For example, the GUI for a main window may be created in the constructor of a <a href="qmainwindow.html">QMainWindow</a> subclass.</p>
+<a name="building-the-examples"></a>
+<h2 id="building-the-examples">Building The Examples</h2>
+<p>If you installed a binary package to get Qt, or if you compiled Qt yourself, the examples described in this tutorial should already be built and ready to run. If you wish to modify and recompile them, follow these steps:</p>
+<ol class="1" type="1"><li>From a command prompt, enter the directory containing the example you have modified.</li>
+<li>Type <code>qmake</code> and press <b>Return</b>. If this doesn't work, make sure that the executable is on your path, or enter its full location.</li>
+<li>On Linux/Unix and <a href="../qtdoc/internationalization.html#macos">macOS</a>, type <code>make</code> and press <b>Return</b>; on Windows with Visual Studio, type <code>nmake</code> and press <b>Return</b>.</li>
+</ol>
+<p>An executable file is created in the current directory. On Windows, this file may be located in a <code>debug</code> or <code>release</code> subdirectory. You can run this executable to see the example code at work.</p>
+</div>
+<!-- @@@widgets-tutorial.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

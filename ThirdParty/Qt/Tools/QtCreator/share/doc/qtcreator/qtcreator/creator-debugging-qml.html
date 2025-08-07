@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtquick-debugging.qdoc -->
+  <title>Debugging Qt Quick Projects | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Debugging Qt Quick Projects</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-debugging-helpers.html" />
+  <link rel="next" href="creator-debugging-example.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-debugging-helpers.html">Using Debugging Helpers</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-debugging-example.html">Debugging a C++ Example Application</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#setting-up-qml-debugging">Setting Up QML Debugging</a></li>
+<li class="level1"><a href="#mixed-c-qml-debugging">Mixed C++/QML Debugging</a></li>
+<li class="level1"><a href="#starting-qml-debugging">Starting QML Debugging</a></li>
+<li class="level1"><a href="#debugging-javascript-functions">Debugging JavaScript Functions</a></li>
+<li class="level1"><a href="#inspecting-items">Inspecting Items</a></li>
+<li class="level1"><a href="#inspecting-user-interfaces">Inspecting User Interfaces</a></li>
+<li class="level1"><a href="#executing-javascript-expressions">Executing JavaScript Expressions</a></li>
+<li class="level1"><a href="#applying-qml-changes-at-runtime">Applying QML Changes at Runtime</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Debugging Qt Quick Projects</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-debugging-qml.html-description -->
+<div class="descr"> <a name="details"></a>
+<p><b>Note: </b>You need Qt 5.0 or later to debug Qt Quick projects. For an example of how to debug Qt Quick Projects, see <a href="creator-qml-debugging-example.html#">Debugging a Qt Quick Example Application</a>.</p><a name="setting-up-qml-debugging"></a>
+<h2 id="setting-up-qml-debugging">Setting Up QML Debugging</h2>
+<p>The process of setting up debugging for Qt Quick projects depends on the <a href="quick-projects.html#">type of the project</a>: Qt Quick UI or Qt Quick Application, and the Qt version used. To debug Qt Quick UI projects, select the <b>Enable QML</b> check box in the <b>Debugger Settings</b> in <b>Projects</b> mode <b>Run Settings</b>.</p>
+<p>To debug Qt Quick Applications:</p>
+<ol class="1" type="1"><li>Debugging is enabled by default for Qt 5.0, or later.<p class="centerAlign"><img src="images/qml-link-debugging-library.png" alt="&quot;Build Steps&quot;" /></p><p><b>Note: </b>Debugging requires opening a socket at a TCP port, which presents a security risk. Anyone on the Internet could connect to the application that you are debugging and execute any JavaScript functions. Therefore, you must make sure that the port is properly protected by a firewall.</p></li>
+<li>In the <b>Run Settings</b>, <b>Debugger Settings</b> section, select the <b>Enable QML</b> check box to enable QML debugging.</li>
+<li>Select <b>Build &gt; Rebuild Project</b> to clean and rebuild the project.</li>
+<li>To debug applications on <a href="creator-glossary.html#glossary-device">devices</a>, check that Qt 5.0, or later, libraries are installed on the device and <a href="creator-running-targets.html#">select the corresponding kit for the device</a> before you start debugging.</li>
+</ol>
+<a name="mixed-c-qml-debugging"></a>
+<h2 id="mixed-c-qml-debugging">Mixed C++/QML Debugging</h2>
+<p>To debug both the C++ and QML parts of your application at the same time, select the <b>Enable C++</b> and <b>Enable QML</b> checkboxes for both languages in the <b>Debugger Settings</b> section in the project <b>Run Settings</b>.</p>
+<p class="centerAlign"><img src="images/qtquick-debugging-settings.png" alt="" /></p><a name="starting-qml-debugging"></a>
+<h2 id="starting-qml-debugging">Starting QML Debugging</h2>
+<p>To start the application, choose <b>Debug</b> &gt; <b>Start Debugging</b> &gt; <b>Start Debugging of Startup Project</b> or press <b>F5</b>. Once the application starts running, it behaves and performs as usual. You can then perform the following tasks:</p>
+<ul>
+<li>Debug JavaScript functions</li>
+<li>Execute JavaScript expressions to get information about the state of the application</li>
+<li>Inspect QML properties and JavaScript variables and change them temporarily at runtime</li>
+</ul>
+<p>To debug already running applications:</p>
+<ol class="1" type="1"><li>Build the application by using the appropriate configuration parameters (if you build the application with Qt Creator, it automatically uses the correct configuration):<p><code>CONFIG+=qml_debug</code></p>
+</li>
+<li>Start the application with the following arguments:<p><code>qmljsdebugger=port:&lt;port&gt;[,host:&lt;ip address&gt;][,block]</code></p>
+<p>Where <code>port</code> (mandatory) specifies the debugging port, <code>ip address</code> (optional) specifies the IP address of the host where the application is running, and <code>block</code> (optional) prevents the application from running until the debug client connects to the server. This enables debugging from the start.</p>
+</li>
+<li>Select <b>Debug &gt; Start Debugging &gt; Attach to QML Port</b>.<p>Choose the kit configured for the device where the application to be debugged is running. The port number to use is displayed in the standard output when the application starts.</p>
+</li>
+</ol>
+<a name="debugging-javascript-functions"></a>
+<h2 id="debugging-javascript-functions">Debugging JavaScript Functions</h2>
+<p>You can use the Qt Creator <b>Debug</b> mode to inspect the state of your application while debugging. You can interact with the debugger by:</p>
+<ul>
+<li><a href="creator-debug-mode.html#setting-breakpoints">Setting breakpoints</a></li>
+<li><a href="creator-debug-mode.html#viewing-call-stack-trace">Viewing call stack trace</a></li>
+<li><a href="creator-debug-mode.html#local-variables-and-function-parameters">Viewing local variables and function parameters</a></li>
+<li><a href="creator-debug-mode.html#evaluating-expressions">Evaluating Expressions</a></li>
+</ul>
+<a name="inspecting-items"></a>
+<h2 id="inspecting-items">Inspecting Items</h2>
+<p>While the application is running, you can use the <b>Locals</b> view to explore the QML item structure.</p>
+<p class="centerAlign"><img src="images/qml-observer-view.png" alt="&quot;QML item tree&quot;" /></p><p>To keep the application visible while you interact with the debugger, select <b>Debug</b> &gt; <b>Show Application on Top</b>.</p>
+<p>You can view a QML item in the <b>Locals</b> view in the following ways:</p>
+<ul>
+<li>Expand the item in the object tree.</li>
+<li>Select the item in the code editor.</li>
+<li>Select <b>Debug</b> &gt; <b>Select</b> to activate selection mode and then click an item in the running application.</li>
+</ul>
+<p>To change property values temporarily, without editing the source, double-click them and enter the new values. You can view the results in the running application.</p>
+<a name="inspecting-user-interfaces"></a>
+<h2 id="inspecting-user-interfaces">Inspecting User Interfaces</h2>
+<p>When you debug complex applications, you can jump to the position in code where an item is defined.</p>
+<p>In the selection mode, you can click items in the running application to jump to their definitions in the code. The properties of the selected item are displayed in the <b>Locals</b> view.</p>
+<p>The <b>Select</b> tool will be enabled either if your application is using Qt 5.7 or later, or if your application is using an earlier version of Qt and is based on the <code>QQuickView</code> class. You can also view the item hierarchy in the running application:</p>
+<p>Double-click an item in the running application to cycle through the item stack at the cursor position.</p>
+<p>To switch out of the selection mode, toggle the <b>Select</b> menu item.</p>
+<p>To move the application running in Qt QML Viewer to the front, select <b>Debug</b> &gt; <b>Show Application on Top</b>.</p>
+<a name="executing-javascript-expressions"></a>
+<h2 id="executing-javascript-expressions">Executing JavaScript Expressions</h2>
+<p>When the application is interrupted by a breakpoint, you can use the <b>QML Debugger Console</b> to execute JavaScript expressions in the current context. To open it, choose <b>Window</b> &gt; <b>Output Panes</b> &gt; <b>QML Debugger Console</b>.</p>
+<p class="centerAlign"><img src="images/qml-script-console.png" alt="&quot;QML Debugger Console&quot;" /></p><p>You can change property values temporarily, without editing the source, and view the results in the running application. You can change the property values permanently in the <b>Properties</b> view in the Design mode.</p>
+<a name="applying-qml-changes-at-runtime"></a>
+<h2 id="applying-qml-changes-at-runtime">Applying QML Changes at Runtime</h2>
+<p>When you change property values in the <b>QML Debugger Console</b> or in the <b>Locals</b> or <b>Expression</b> view, they are immediately updated in the running application, but not in the source code.</p>
+</div>
+<!-- @@@creator-debugging-qml.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-debugging-helpers.html">Using Debugging Helpers</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-debugging-example.html">Debugging a C++ Example Application</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmltypereference.qdoc -->
+  <title>color QML Basic Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >color QML Basic Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#svg-color-reference">SVG Color Reference</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">color QML Basic Type</h1>
+<span class="subtitle"></span>
+<!-- $$$color-description -->
+<div class="descr"> <a name="details"></a>
+<ul>
+<li>By a <a href="qml-color.html#svg-color-reference">SVG color name</a>, such as &quot;red&quot;, &quot;green&quot; or &quot;lightsteelblue&quot;.</li>
+<li>By a hexadecimal triplet or quad in the form <code>&quot;#RRGGBB&quot;</code> and <code>&quot;#AARRGGBB&quot;</code> respectively. For example, the color red corresponds to a triplet of <code>&quot;#FF0000&quot;</code> and a slightly transparent blue to a quad of <code>&quot;#800000FF&quot;</code>.</li>
+<li>Using the <a href="../qtqml/qml-qtqml-qt.html#rgba-method">Qt.rgba()</a>, <a href="../qtqml/qml-qtqml-qt.html#hsva-method">Qt.hsva()</a>, <a href="../qtqml/qml-qtqml-qt.html#hsla-method">Qt.hsla()</a>, <a href="../qtqml/qml-qtqml-qt.html#darker-method">Qt.darker()</a>, <a href="../qtqml/qml-qtqml-qt.html#lighter-method">Qt.lighter()</a> or <a href="../qtqml/qml-qtqml-qt.html#tint-method">Qt.tint()</a> functions.</li>
+</ul>
+<p>Example:</p>
+<div float-right><p><img src="images/declarative-colors.png" alt="" /></p>
+</div><pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">color</span>: <span class="string">&quot;steelblue&quot;</span>
+      <span class="name">width</span>: <span class="number">40</span>; <span class="name">height</span>: <span class="number">40</span>
+  }
+  <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">color</span>: <span class="string">&quot;transparent&quot;</span>
+      <span class="name">y</span>: <span class="number">40</span>; <span class="name">width</span>: <span class="number">40</span>; <span class="name">height</span>: <span class="number">40</span>
+  }
+  <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">color</span>: <span class="string">&quot;#FF0000&quot;</span>
+      <span class="name">y</span>: <span class="number">80</span>; <span class="name">width</span>: <span class="number">40</span>; <span class="name">height</span>: <span class="number">40</span>
+  }
+  <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">color</span>: <span class="string">&quot;#800000FF&quot;</span>
+      <span class="name">y</span>: <span class="number">120</span>; <span class="name">width</span>: <span class="number">40</span>; <span class="name">height</span>: <span class="number">40</span>
+  }
+  <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">color</span>: <span class="string">&quot;#00000000&quot;</span>    <span class="comment">// ARGB fully transparent</span>
+      <span class="name">y</span>: <span class="number">160</span>
+      <span class="name">width</span>: <span class="number">40</span>; <span class="name">height</span>: <span class="number">40</span>
+  }
+
+</pre>
+<p>A color type has <code>r</code>, <code>g</code>, <code>b</code> and <code>a</code> properties that refer to the red, green, blue and alpha values of the color, respectively. Additionally it has <code>hsvHue</code>, <code>hsvSaturation</code>, <code>hsvValue</code> and <code>hslHue</code>, <code>hslSaturation</code>, <code>hslLightness</code> properties, which allow access to color values in HSV and HSL color models accordingly:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-text.html">Text</a></span> {
+      <span class="name">color</span>: <span class="string">&quot;red&quot;</span>
+
+      <span class="comment">// prints &quot;1 0 0 1&quot;</span>
+      <span class="name">Component</span>.onCompleted: <span class="name">console</span>.<span class="name">log</span>(<span class="name">color</span>.<span class="name">r</span>, <span class="name">color</span>.<span class="name">g</span>, <span class="name">color</span>.<span class="name">b</span>, <span class="name">color</span>.<span class="name">a</span>)
+  }
+
+</pre>
+<p>To test color values for equality, use the <a href="../qtqml/qml-qtqml-qt.html#colorEqual-method">Qt.colorEqual()</a> function. This allows colors to be accurately compared whether they are in property form or in any of the acceptable string specification forms.</p>
+<p>When integrating with C++, note that any <a href="../qtgui/qcolor.html">QColor</a> value <a href="../qtqml/qtqml-cppintegration-data.html">passed into QML from C++</a> is automatically converted into a <code>color</code> value, and vice-versa.</p>
+<p>This basic type is provided by the <a href="qtquick-module.html">QtQuick</a> import.</p>
+<a name="svg-color-reference"></a>
+<h2 id="svg-color-reference">SVG Color Reference</h2>
+<p>The following table lists the available <a href="http://www.w3.org/TR/SVG/types.html#ColorKeywords">SVG colors</a>:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Name</th><th >Hex</th><th >Color</th></tr></thead>
+<tr valign="top" class="odd"><td >aliceblue</td><td >#f0f8ff</td><td ><div style="padding:10px;color:#fff;background:#f0f8ff;"></div></td></tr>
+<tr valign="top" class="even"><td >antiquewhite</td><td >#faebd7</td><td ><div style="padding:10px;color:#fff;background:#faebd7;"></div></td></tr>
+<tr valign="top" class="odd"><td >aqua</td><td >#00ffff</td><td ><div style="padding:10px;color:#fff;background:#00ffff;"></div></td></tr>
+<tr valign="top" class="even"><td >aquamarine</td><td >#7fffd4</td><td ><div style="padding:10px;color:#fff;background:#7fffd4;"></div></td></tr>
+<tr valign="top" class="odd"><td >azure</td><td >#f0ffff</td><td ><div style="padding:10px;color:#fff;background:#f0ffff;"></div></td></tr>
+<tr valign="top" class="even"><td >beige</td><td >#f5f5dc</td><td ><div style="padding:10px;color:#fff;background:#f5f5dc;"></div></td></tr>
+<tr valign="top" class="odd"><td >bisque</td><td >#ffe4c4</td><td ><div style="padding:10px;color:#fff;background:#ffe4c4;"></div></td></tr>
+<tr valign="top" class="even"><td >black</td><td >#000000</td><td ><div style="padding:10px;color:#fff;background:#000000;"></div></td></tr>
+<tr valign="top" class="odd"><td >blanchedalmond</td><td >#ffebcd</td><td ><div style="padding:10px;color:#fff;background:#ffebcd;"></div></td></tr>
+<tr valign="top" class="even"><td >blue</td><td >#0000ff</td><td ><div style="padding:10px;color:#fff;background:#0000ff;"></div></td></tr>
+<tr valign="top" class="odd"><td >blueviolet</td><td >#8a2be2</td><td ><div style="padding:10px;color:#fff;background:#8a2be2;"></div></td></tr>
+<tr valign="top" class="even"><td >brown</td><td >#a52a2a</td><td ><div style="padding:10px;color:#fff;background:#a52a2a;"></div></td></tr>
+<tr valign="top" class="odd"><td >burlywood</td><td >#deb887</td><td ><div style="padding:10px;color:#fff;background:#deb887;"></div></td></tr>
+<tr valign="top" class="even"><td >cadetblue</td><td >#5f9ea0</td><td ><div style="padding:10px;color:#fff;background:#5f9ea0;"></div></td></tr>
+<tr valign="top" class="odd"><td >chartreuse</td><td >#7fff00</td><td ><div style="padding:10px;color:#fff;background:#7fff00;"></div></td></tr>
+<tr valign="top" class="even"><td >chocolate</td><td >#d2691e</td><td ><div style="padding:10px;color:#fff;background:#d2691e;"></div></td></tr>
+<tr valign="top" class="odd"><td >coral</td><td >#ff7f50</td><td ><div style="padding:10px;color:#fff;background:#ff7f50;"></div></td></tr>
+<tr valign="top" class="even"><td >cornflowerblue</td><td >#6495ed</td><td ><div style="padding:10px;color:#fff;background:#6495ed;"></div></td></tr>
+<tr valign="top" class="odd"><td >cornsilk</td><td >#fff8dc</td><td ><div style="padding:10px;color:#fff;background:#fff8dc;"></div></td></tr>
+<tr valign="top" class="even"><td >crimson</td><td >#dc143c</td><td ><div style="padding:10px;color:#fff;background:#dc143c;"></div></td></tr>
+<tr valign="top" class="odd"><td >cyan</td><td >#00ffff</td><td ><div style="padding:10px;color:#fff;background:#00ffff;"></div></td></tr>
+<tr valign="top" class="even"><td >darkblue</td><td >#00008b</td><td ><div style="padding:10px;color:#fff;background:#00008b;"></div></td></tr>
+<tr valign="top" class="odd"><td >darkcyan</td><td >#008b8b</td><td ><div style="padding:10px;color:#fff;background:#008b8b;"></div></td></tr>
+<tr valign="top" class="even"><td >darkgoldenrod</td><td >#b8860b</td><td ><div style="padding:10px;color:#fff;background:#b8860b;"></div></td></tr>
+<tr valign="top" class="odd"><td >darkgray</td><td >#a9a9a9</td><td ><div style="padding:10px;color:#fff;background:#a9a9a9;"></div></td></tr>
+<tr valign="top" class="even"><td >darkgreen</td><td >#006400</td><td ><div style="padding:10px;color:#fff;background:#006400;"></div></td></tr>
+<tr valign="top" class="odd"><td >darkgrey</td><td >#a9a9a9</td><td ><div style="padding:10px;color:#fff;background:#a9a9a9;"></div></td></tr>
+<tr valign="top" class="even"><td >darkkhaki</td><td >#bdb76b</td><td ><div style="padding:10px;color:#fff;background:#bdb76b;"></div></td></tr>
+<tr valign="top" class="odd"><td >darkmagenta</td><td >#8b008b</td><td ><div style="padding:10px;color:#fff;background:#8b008b;"></div></td></tr>
+<tr valign="top" class="even"><td >darkolivegreen</td><td >#556b2f</td><td ><div style="padding:10px;color:#fff;background:#556b2f;"></div></td></tr>
+<tr valign="top" class="odd"><td >darkorange</td><td >#ff8c00</td><td ><div style="padding:10px;color:#fff;background:#ff8c00;"></div></td></tr>
+<tr valign="top" class="even"><td >darkorchid</td><td >#9932cc</td><td ><div style="padding:10px;color:#fff;background:#9932cc;"></div></td></tr>
+<tr valign="top" class="odd"><td >darkred</td><td >#8b0000</td><td ><div style="padding:10px;color:#fff;background:#8b0000;"></div></td></tr>
+<tr valign="top" class="even"><td >darksalmon</td><td >#e9967a</td><td ><div style="padding:10px;color:#fff;background:#e9967a;"></div></td></tr>
+<tr valign="top" class="odd"><td >darkseagreen</td><td >#8fbc8f</td><td ><div style="padding:10px;color:#fff;background:#8fbc8f;"></div></td></tr>
+<tr valign="top" class="even"><td >darkslateblue</td><td >#483d8b</td><td ><div style="padding:10px;color:#fff;background:#483d8b;"></div></td></tr>
+<tr valign="top" class="odd"><td >darkslategray</td><td >#2f4f4f</td><td ><div style="padding:10px;color:#fff;background:#2f4f4f;"></div></td></tr>
+<tr valign="top" class="even"><td >darkslategrey</td><td >#2f4f4f</td><td ><div style="padding:10px;color:#fff;background:#2f4f4f;"></div></td></tr>
+<tr valign="top" class="odd"><td >darkturquoise</td><td >#00ced1</td><td ><div style="padding:10px;color:#fff;background:#00ced1;"></div></td></tr>
+<tr valign="top" class="even"><td >darkviolet</td><td >#9400d3</td><td ><div style="padding:10px;color:#fff;background:#9400d3;"></div></td></tr>
+<tr valign="top" class="odd"><td >deeppink</td><td >#ff1493</td><td ><div style="padding:10px;color:#fff;background:#ff1493;"></div></td></tr>
+<tr valign="top" class="even"><td >deepskyblue</td><td >#00bfff</td><td ><div style="padding:10px;color:#fff;background:#00bfff;"></div></td></tr>
+<tr valign="top" class="odd"><td >dimgray</td><td >#696969</td><td ><div style="padding:10px;color:#fff;background:#696969;"></div></td></tr>
+<tr valign="top" class="even"><td >dimgrey</td><td >#696969</td><td ><div style="padding:10px;color:#fff;background:#696969;"></div></td></tr>
+<tr valign="top" class="odd"><td >dodgerblue</td><td >#1e90ff</td><td ><div style="padding:10px;color:#fff;background:#1e90ff;"></div></td></tr>
+<tr valign="top" class="even"><td >firebrick</td><td >#b22222</td><td ><div style="padding:10px;color:#fff;background:#b22222;"></div></td></tr>
+<tr valign="top" class="odd"><td >floralwhite</td><td >#fffaf0</td><td ><div style="padding:10px;color:#fff;background:#fffaf0;"></div></td></tr>
+<tr valign="top" class="even"><td >forestgreen</td><td >#228b22</td><td ><div style="padding:10px;color:#fff;background:#228b22;"></div></td></tr>
+<tr valign="top" class="odd"><td >fuchsia</td><td >#ff00ff</td><td ><div style="padding:10px;color:#fff;background:#ff00ff;"></div></td></tr>
+<tr valign="top" class="even"><td >gainsboro</td><td >#dcdcdc</td><td ><div style="padding:10px;color:#fff;background:#dcdcdc;"></div></td></tr>
+<tr valign="top" class="odd"><td >ghostwhite</td><td >#f8f8ff</td><td ><div style="padding:10px;color:#fff;background:#f8f8ff;"></div></td></tr>
+<tr valign="top" class="even"><td >gold</td><td >#ffd700</td><td ><div style="padding:10px;color:#fff;background:#ffd700;"></div></td></tr>
+<tr valign="top" class="odd"><td >goldenrod</td><td >#daa520</td><td ><div style="padding:10px;color:#fff;background:#daa520;"></div></td></tr>
+<tr valign="top" class="even"><td >gray</td><td >#808080</td><td ><div style="padding:10px;color:#fff;background:#808080;"></div></td></tr>
+<tr valign="top" class="odd"><td >grey</td><td >#808080</td><td ><div style="padding:10px;color:#fff;background:#808080;"></div></td></tr>
+<tr valign="top" class="even"><td >green</td><td >#008000</td><td ><div style="padding:10px;color:#fff;background:#008000;"></div></td></tr>
+<tr valign="top" class="odd"><td >greenyellow</td><td >#adff2f</td><td ><div style="padding:10px;color:#fff;background:#adff2f;"></div></td></tr>
+<tr valign="top" class="even"><td >honeydew</td><td >#f0fff0</td><td ><div style="padding:10px;color:#fff;background:#f0fff0;"></div></td></tr>
+<tr valign="top" class="odd"><td >hotpink</td><td >#ff69b4</td><td ><div style="padding:10px;color:#fff;background:#ff69b4;"></div></td></tr>
+<tr valign="top" class="even"><td >indianred</td><td >#cd5c5c</td><td ><div style="padding:10px;color:#fff;background:#cd5c5c;"></div></td></tr>
+<tr valign="top" class="odd"><td >indigo</td><td >#4b0082</td><td ><div style="padding:10px;color:#fff;background:#4b0082;"></div></td></tr>
+<tr valign="top" class="even"><td >ivory</td><td >#fffff0</td><td ><div style="padding:10px;color:#fff;background:#fffff0;"></div></td></tr>
+<tr valign="top" class="odd"><td >khaki</td><td >#f0e68c</td><td ><div style="padding:10px;color:#fff;background:#f0e68c;"></div></td></tr>
+<tr valign="top" class="even"><td >lavender</td><td >#e6e6fa</td><td ><div style="padding:10px;color:#fff;background:#e6e6fa;"></div></td></tr>
+<tr valign="top" class="odd"><td >lavenderblush</td><td >#fff0f5</td><td ><div style="padding:10px;color:#fff;background:#fff0f5;"></div></td></tr>
+<tr valign="top" class="even"><td >lawngreen</td><td >#7cfc00</td><td ><div style="padding:10px;color:#fff;background:#7cfc00;"></div></td></tr>
+<tr valign="top" class="odd"><td >lemonchiffon</td><td >#fffacd</td><td ><div style="padding:10px;color:#fff;background:#fffacd;"></div></td></tr>
+<tr valign="top" class="even"><td >lightblue</td><td >#add8e6</td><td ><div style="padding:10px;color:#fff;background:#add8e6;"></div></td></tr>
+<tr valign="top" class="odd"><td >lightcoral</td><td >#f08080</td><td ><div style="padding:10px;color:#fff;background:#f08080;"></div></td></tr>
+<tr valign="top" class="even"><td >lightcyan</td><td >#e0ffff</td><td ><div style="padding:10px;color:#fff;background:#e0ffff;"></div></td></tr>
+<tr valign="top" class="odd"><td >lightgoldenrodyellow</td><td >#fafad2</td><td ><div style="padding:10px;color:#fff;background:#fafad2;"></div></td></tr>
+<tr valign="top" class="even"><td >lightgray</td><td >#d3d3d3</td><td ><div style="padding:10px;color:#fff;background:#d3d3d3;"></div></td></tr>
+<tr valign="top" class="odd"><td >lightgreen</td><td >#90ee90</td><td ><div style="padding:10px;color:#fff;background:#90ee90;"></div></td></tr>
+<tr valign="top" class="even"><td >lightgrey</td><td >#d3d3d3</td><td ><div style="padding:10px;color:#fff;background:#d3d3d3;"></div></td></tr>
+<tr valign="top" class="odd"><td >lightpink</td><td >#ffb6c1</td><td ><div style="padding:10px;color:#fff;background:#ffb6c1;"></div></td></tr>
+<tr valign="top" class="even"><td >lightsalmon</td><td >#ffa07a</td><td ><div style="padding:10px;color:#fff;background:#ffa07a;"></div></td></tr>
+<tr valign="top" class="odd"><td >lightseagreen</td><td >#20b2aa</td><td ><div style="padding:10px;color:#fff;background:#20b2aa;"></div></td></tr>
+<tr valign="top" class="even"><td >lightskyblue</td><td >#87cefa</td><td ><div style="padding:10px;color:#fff;background:#87cefa;"></div></td></tr>
+<tr valign="top" class="odd"><td >lightslategray</td><td >#778899</td><td ><div style="padding:10px;color:#fff;background:#778899;"></div></td></tr>
+<tr valign="top" class="even"><td >lightslategrey</td><td >#778899</td><td ><div style="padding:10px;color:#fff;background:#778899;"></div></td></tr>
+<tr valign="top" class="odd"><td >lightsteelblue</td><td >#b0c4de</td><td ><div style="padding:10px;color:#fff;background:#b0c4de;"></div></td></tr>
+<tr valign="top" class="even"><td >lightyellow</td><td >#ffffe0</td><td ><div style="padding:10px;color:#fff;background:#ffffe0;"></div></td></tr>
+<tr valign="top" class="odd"><td >lime</td><td >#00ff00</td><td ><div style="padding:10px;color:#fff;background:#00ff00;"></div></td></tr>
+<tr valign="top" class="even"><td >limegreen</td><td >#32cd32</td><td ><div style="padding:10px;color:#fff;background:#32cd32;"></div></td></tr>
+<tr valign="top" class="odd"><td >linen</td><td >#faf0e6</td><td ><div style="padding:10px;color:#fff;background:#faf0e6;"></div></td></tr>
+<tr valign="top" class="even"><td >magenta</td><td >#ff00ff</td><td ><div style="padding:10px;color:#fff;background:#ff00ff;"></div></td></tr>
+<tr valign="top" class="odd"><td >maroon</td><td >#800000</td><td ><div style="padding:10px;color:#fff;background:#800000;"></div></td></tr>
+<tr valign="top" class="even"><td >mediumaquamarine</td><td >#66cdaa</td><td ><div style="padding:10px;color:#fff;background:#66cdaa;"></div></td></tr>
+<tr valign="top" class="odd"><td >mediumblue</td><td >#0000cd</td><td ><div style="padding:10px;color:#fff;background:#0000cd;"></div></td></tr>
+<tr valign="top" class="even"><td >mediumorchid</td><td >#ba55d3</td><td ><div style="padding:10px;color:#fff;background:#ba55d3;"></div></td></tr>
+<tr valign="top" class="odd"><td >mediumpurple</td><td >#9370db</td><td ><div style="padding:10px;color:#fff;background:#9370db;"></div></td></tr>
+<tr valign="top" class="even"><td >mediumseagreen</td><td >#3cb371</td><td ><div style="padding:10px;color:#fff;background:#3cb371;"></div></td></tr>
+<tr valign="top" class="odd"><td >mediumslateblue</td><td >#7b68ee</td><td ><div style="padding:10px;color:#fff;background:#7b68ee;"></div></td></tr>
+<tr valign="top" class="even"><td >mediumspringgreen</td><td >#00fa9a</td><td ><div style="padding:10px;color:#fff;background:#00fa9a;"></div></td></tr>
+<tr valign="top" class="odd"><td >mediumturquoise</td><td >#48d1cc</td><td ><div style="padding:10px;color:#fff;background:#48d1cc;"></div></td></tr>
+<tr valign="top" class="even"><td >mediumvioletred</td><td >#c71585</td><td ><div style="padding:10px;color:#fff;background:#c71585;"></div></td></tr>
+<tr valign="top" class="odd"><td >midnightblue</td><td >#191970</td><td ><div style="padding:10px;color:#fff;background:#191970;"></div></td></tr>
+<tr valign="top" class="even"><td >mintcream</td><td >#f5fffa</td><td ><div style="padding:10px;color:#fff;background:#f5fffa;"></div></td></tr>
+<tr valign="top" class="odd"><td >mistyrose</td><td >#ffe4e1</td><td ><div style="padding:10px;color:#fff;background:#ffe4e1;"></div></td></tr>
+<tr valign="top" class="even"><td >moccasin</td><td >#ffe4b5</td><td ><div style="padding:10px;color:#fff;background:#ffe4b5;"></div></td></tr>
+<tr valign="top" class="odd"><td >navajowhite</td><td >#ffdead</td><td ><div style="padding:10px;color:#fff;background:#ffdead;"></div></td></tr>
+<tr valign="top" class="even"><td >navy</td><td >#000080</td><td ><div style="padding:10px;color:#fff;background:#000080;"></div></td></tr>
+<tr valign="top" class="odd"><td >oldlace</td><td >#fdf5e6</td><td ><div style="padding:10px;color:#fff;background:#fdf5e6;"></div></td></tr>
+<tr valign="top" class="even"><td >olive</td><td >#808000</td><td ><div style="padding:10px;color:#fff;background:#808000;"></div></td></tr>
+<tr valign="top" class="odd"><td >olivedrab</td><td >#6b8e23</td><td ><div style="padding:10px;color:#fff;background:#6b8e23;"></div></td></tr>
+<tr valign="top" class="even"><td >orange</td><td >#ffa500</td><td ><div style="padding:10px;color:#fff;background:#ffa500;"></div></td></tr>
+<tr valign="top" class="odd"><td >orangered</td><td >#ff4500</td><td ><div style="padding:10px;color:#fff;background:#ff4500;"></div></td></tr>
+<tr valign="top" class="even"><td >orchid</td><td >#da70d6</td><td ><div style="padding:10px;color:#fff;background:#da70d6;"></div></td></tr>
+<tr valign="top" class="odd"><td >palegoldenrod</td><td >#eee8aa</td><td ><div style="padding:10px;color:#fff;background:#eee8aa;"></div></td></tr>
+<tr valign="top" class="even"><td >palegreen</td><td >#98fb98</td><td ><div style="padding:10px;color:#fff;background:#98fb98;"></div></td></tr>
+<tr valign="top" class="odd"><td >paleturquoise</td><td >#afeeee</td><td ><div style="padding:10px;color:#fff;background:#afeeee;"></div></td></tr>
+<tr valign="top" class="even"><td >palevioletred</td><td >#db7093</td><td ><div style="padding:10px;color:#fff;background:#db7093;"></div></td></tr>
+<tr valign="top" class="odd"><td >papayawhip</td><td >#ffefd5</td><td ><div style="padding:10px;color:#fff;background:#ffefd5;"></div></td></tr>
+<tr valign="top" class="even"><td >peachpuff</td><td >#ffdab9</td><td ><div style="padding:10px;color:#fff;background:#ffdab9;"></div></td></tr>
+<tr valign="top" class="odd"><td >peru</td><td >#cd853f</td><td ><div style="padding:10px;color:#fff;background:#cd853f;"></div></td></tr>
+<tr valign="top" class="even"><td >pink</td><td >#ffc0cb</td><td ><div style="padding:10px;color:#fff;background:#ffc0cb;"></div></td></tr>
+<tr valign="top" class="odd"><td >plum</td><td >#dda0dd</td><td ><div style="padding:10px;color:#fff;background:#dda0dd;"></div></td></tr>
+<tr valign="top" class="even"><td >powderblue</td><td >#b0e0e6</td><td ><div style="padding:10px;color:#fff;background:#b0e0e6;"></div></td></tr>
+<tr valign="top" class="odd"><td >purple</td><td >#800080</td><td ><div style="padding:10px;color:#fff;background:#800080;"></div></td></tr>
+<tr valign="top" class="even"><td >red</td><td >#ff0000</td><td ><div style="padding:10px;color:#fff;background:#ff0000;"></div></td></tr>
+<tr valign="top" class="odd"><td >rosybrown</td><td >#bc8f8f</td><td ><div style="padding:10px;color:#fff;background:#bc8f8f;"></div></td></tr>
+<tr valign="top" class="even"><td >royalblue</td><td >#4169e1</td><td ><div style="padding:10px;color:#fff;background:#4169e1;"></div></td></tr>
+<tr valign="top" class="odd"><td >saddlebrown</td><td >#8b4513</td><td ><div style="padding:10px;color:#fff;background:#8b4513;"></div></td></tr>
+<tr valign="top" class="even"><td >salmon</td><td >#fa8072</td><td ><div style="padding:10px;color:#fff;background:#fa8072;"></div></td></tr>
+<tr valign="top" class="odd"><td >sandybrown</td><td >#f4a460</td><td ><div style="padding:10px;color:#fff;background:#f4a460;"></div></td></tr>
+<tr valign="top" class="even"><td >seagreen</td><td >#2e8b57</td><td ><div style="padding:10px;color:#fff;background:#2e8b57;"></div></td></tr>
+<tr valign="top" class="odd"><td >seashell</td><td >#fff5ee</td><td ><div style="padding:10px;color:#fff;background:#fff5ee;"></div></td></tr>
+<tr valign="top" class="even"><td >sienna</td><td >#a0522d</td><td ><div style="padding:10px;color:#fff;background:#a0522d;"></div></td></tr>
+<tr valign="top" class="odd"><td >silver</td><td >#c0c0c0</td><td ><div style="padding:10px;color:#fff;background:#c0c0c0;"></div></td></tr>
+<tr valign="top" class="even"><td >skyblue</td><td >#87ceeb</td><td ><div style="padding:10px;color:#fff;background:#87ceeb;"></div></td></tr>
+<tr valign="top" class="odd"><td >slateblue</td><td >#6a5acd</td><td ><div style="padding:10px;color:#fff;background:#6a5acd;"></div></td></tr>
+<tr valign="top" class="even"><td >slategray</td><td >#708090</td><td ><div style="padding:10px;color:#fff;background:#708090;"></div></td></tr>
+<tr valign="top" class="odd"><td >slategrey</td><td >#708090</td><td ><div style="padding:10px;color:#fff;background:#708090;"></div></td></tr>
+<tr valign="top" class="even"><td >snow</td><td >#fffafa</td><td ><div style="padding:10px;color:#fff;background:#fffafa;"></div></td></tr>
+<tr valign="top" class="odd"><td >springgreen</td><td >#00ff7f</td><td ><div style="padding:10px;color:#fff;background:#00ff7f;"></div></td></tr>
+<tr valign="top" class="even"><td >steelblue</td><td >#4682b4</td><td ><div style="padding:10px;color:#fff;background:#4682b4;"></div></td></tr>
+<tr valign="top" class="odd"><td >tan</td><td >#d2b48c</td><td ><div style="padding:10px;color:#fff;background:#d2b48c;"></div></td></tr>
+<tr valign="top" class="even"><td >teal</td><td >#008080</td><td ><div style="padding:10px;color:#fff;background:#008080;"></div></td></tr>
+<tr valign="top" class="odd"><td >thistle</td><td >#d8bfd8</td><td ><div style="padding:10px;color:#fff;background:#d8bfd8;"></div></td></tr>
+<tr valign="top" class="even"><td >tomato</td><td >#ff6347</td><td ><div style="padding:10px;color:#fff;background:#ff6347;"></div></td></tr>
+<tr valign="top" class="odd"><td >turquoise</td><td >#40e0d0</td><td ><div style="padding:10px;color:#fff;background:#40e0d0;"></div></td></tr>
+<tr valign="top" class="even"><td >violet</td><td >#ee82ee</td><td ><div style="padding:10px;color:#fff;background:#ee82ee;"></div></td></tr>
+<tr valign="top" class="odd"><td >wheat</td><td >#f5deb3</td><td ><div style="padding:10px;color:#fff;background:#f5deb3;"></div></td></tr>
+<tr valign="top" class="even"><td >white</td><td >#ffffff</td><td ><div style="padding:10px;color:#fff;background:#ffffff;"></div></td></tr>
+<tr valign="top" class="odd"><td >whitesmoke</td><td >#f5f5f5</td><td ><div style="padding:10px;color:#fff;background:#f5f5f5;"></div></td></tr>
+<tr valign="top" class="even"><td >yellow</td><td >#ffff00</td><td ><div style="padding:10px;color:#fff;background:#ffff00;"></div></td></tr>
+<tr valign="top" class="odd"><td >yellowgreen</td><td >#9acd32</td><td ><div style="padding:10px;color:#fff;background:#9acd32;"></div></td></tr>
+</table></div>
+</div>
+<p><b>See also </b><a href="../qtqml/qtqml-typesystem-basictypes.html">QML Basic Types</a>.</p>
+<!-- @@@color -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- reference.qdoc -->
+  <title>List of Built-in Services | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td><td >List of Built-in Services</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<p class="naviNextPrevious headerNavi">
+</p><p/>
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">List of Built-in Services</h1>
+<span class="subtitle"></span>
+<!-- $$$list-of-builtin-services-description -->
+<div class="descr"> <a name="details"></a>
+<p>Qbs provides the following built-in JavaScript extensions to simplify operations that are expected to be needed often in project files.</p>
+<p>To gain access to the operations provided by a particular Service - for example, the File service - use the following statement at the top of your Qbs project file:</p>
+<pre class="cpp">
+
+  import qbs<span class="operator">.</span>File
+
+</pre>
+<p>If you instead need to access the service from a JavaScript file, import it using the following statement at the top of your JavaScript file:</p>
+<pre class="cpp">
+
+  var File <span class="operator">=</span> require(<span class="string">&quot;qbs.File&quot;</span>);
+
+</pre>
+</div>
+<!-- @@@list-of-builtin-services -->
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="jsextension-binaryfile.html#">BinaryFile Service</a></p></td><td class="tblDescr"><p>Provides read and write operations on binary files.</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="jsextension-environment.html#">Environment Service</a></p></td><td class="tblDescr"><p>Provides operations on the system environment.</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="jsextension-file.html#">File Service</a></p></td><td class="tblDescr"><p>Provides operations on the file system.</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="jsextension-fileinfo.html#">FileInfo Service</a></p></td><td class="tblDescr"><p>Provides operations on file paths.</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="jsextensions-general.html#">General Services</a></p></td><td class="tblDescr"><p>Provides various operations.</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="jsextension-process.html#">Process Service</a></p></td><td class="tblDescr"><p>Allows you to start external processes.</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="jsextension-propertylist.html#">PropertyList Service</a></p></td><td class="tblDescr"><p>Provides read, write and convert operations on property list files.</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="jsextension-temporarydir.html#">TemporaryDir Service</a></p></td><td class="tblDescr"><p>Creates a unique directory for temporary use.</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="jsextension-textfile.html#">TextFile Service</a></p></td><td class="tblDescr"><p>Provides read and write operations on text files.</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="jsextension-utilities.html#">Utilities Service</a></p></td><td class="tblDescr"><p>Provides miscellaneous operations.</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="jsextension-xml.html#">Xml Service</a></p></td><td class="tblDescr"><p>Provides a DOM parser and generator to JavaScript.</p></td></tr>
+</table></div>
+<p class="naviNextPrevious footerNavi">
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

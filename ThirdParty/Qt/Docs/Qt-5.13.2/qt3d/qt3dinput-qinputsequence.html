@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qinputsequence.cpp -->
+  <title>QInputSequence Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QInputSequence</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QInputSequence Class</h1>
+<span class="small-subtitle">(<a href="qt3dinput-qinputsequence.html">Qt3DInput::QInputSequence</a>)<br/></span>
+<!-- $$$QInputSequence-brief -->
+<p><a href="qt3dinput-qinputsequence.html">QInputSequence</a> represents a set of <a href="qt3dinput-qabstractactioninput.html">QAbstractActionInput</a>'s that must be triggerd one after the other. <a href="#details">More...</a></p>
+<!-- @@@QInputSequence -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QInputSequence&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3dinput</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-input-inputsequence.html">InputSequence</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3dinput-qabstractactioninput.html">Qt3DInput::QAbstractActionInput</a></td></tr></table></div><p>This class was introduced in  Qt 5.7.</p>
+<ul>
+<li><a href="qt3dinput-qinputsequence-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qt3dinput-qinputsequence.html#buttonInterval-prop">buttonInterval</a></b> : int</li>
+<li class="fn"><b><a href="qt3dinput-qinputsequence.html#timeout-prop">timeout</a></b> : int</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qinputsequence.html#QInputSequence">QInputSequence</a></b>(Qt3DCore::QNode *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qinputsequence.html#addSequence">addSequence</a></b>(Qt3DInput::QAbstractActionInput *<i>input</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qinputsequence.html#buttonInterval">buttonInterval</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qinputsequence.html#removeSequence">removeSequence</a></b>(Qt3DInput::QAbstractActionInput *<i>input</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;Qt3DInput::QAbstractActionInput *&gt; </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qinputsequence.html#sequences">sequences</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qinputsequence.html#timeout">timeout</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qinputsequence.html#buttonInterval-prop">setButtonInterval</a></b>(int <i>buttonInterval</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qinputsequence.html#timeout-prop">setTimeout</a></b>(int <i>timeout</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qinputsequence.html#buttonInterval-prop">buttonIntervalChanged</a></b>(int <i>buttonInterval</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qinputsequence.html#timeout-prop">timeoutChanged</a></b>(int <i>timeout</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QInputSequence-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QInputSequence -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$buttonInterval-prop$$$buttonInterval$$$setButtonIntervalint$$$buttonIntervalChangedint -->
+<h3 class="fn" id="buttonInterval-prop"><a name="buttonInterval-prop"></a><span class="name">buttonInterval</span> : <span class="type">int</span></h3>
+<p>The maximum time in between consecutive <a href="qt3dinput-qabstractactioninput.html">QAbstractActionInput</a>'s in the input sequence. The time is in milliseconds.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3dinput-qinputsequence.html#buttonInterval">buttonInterval</a></b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setButtonInterval</b></span>(int <i>buttonInterval</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonIntervalChanged</b></span>(int <i>buttonInterval</i>)</td></tr>
+</table></div>
+<!-- @@@buttonInterval -->
+<!-- $$$timeout-prop$$$timeout$$$setTimeoutint$$$timeoutChangedint -->
+<h3 class="fn" id="timeout-prop"><a name="timeout-prop"></a><span class="name">timeout</span> : <span class="type">int</span></h3>
+<p>The time in which all <a href="qt3dinput-qabstractactioninput.html">QAbstractActionInput</a>'s in the input sequence must triggered within. The time is in milliseconds.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3dinput-qinputsequence.html#timeout">timeout</a></b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setTimeout</b></span>(int <i>timeout</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>timeoutChanged</b></span>(int <i>timeout</i>)</td></tr>
+</table></div>
+<!-- @@@timeout -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QInputSequence[overload1]$$$QInputSequenceQt3DCore::QNode* -->
+<h3 class="fn" id="QInputSequence"><a name="QInputSequence"></a>QInputSequence::<span class="name">QInputSequence</span>(<span class="type"><a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new <a href="qt3dinput-qinputsequence.html">QInputSequence</a> with parent <i>parent</i>.</p>
+<!-- @@@QInputSequence -->
+<!-- $$$addSequence[overload1]$$$addSequenceQt3DInput::QAbstractActionInput* -->
+<h3 class="fn" id="addSequence"><a name="addSequence"></a><span class="type">void</span> QInputSequence::<span class="name">addSequence</span>(<span class="type"><a href="qt3dinput-qabstractactioninput.html">Qt3DInput::QAbstractActionInput</a></span> *<i>input</i>)</h3>
+<p>Append the <a href="qt3dinput-qabstractactioninput.html">QAbstractActionInput</a> <i>input</i> to the end of this <a href="qt3dinput-qinputsequence.html">QInputSequence</a>'s sequence vector.</p>
+<p><b>See also </b><a href="qt3dinput-qinputsequence.html#removeSequence">removeSequence</a>.</p>
+<!-- @@@addSequence -->
+<!-- $$$buttonInterval -->
+<h3 class="fn" id="buttonInterval"><a name="buttonInterval"></a><span class="type">int</span> QInputSequence::<span class="name">buttonInterval</span>() const</h3>
+<p>Returns the maximum time in between consecutive <a href="qt3dinput-qabstractactioninput.html">QAbstractActionInput</a>'s in the input sequence. The time is in milliseconds</p>
+<p><b>Note:</b> Getter function for property <a href="qt3dinput-qinputsequence.html#buttonInterval-prop">buttonInterval</a>. </p><p><b>See also </b><a href="qt3dinput-qinputsequence.html#buttonInterval-prop">setButtonInterval</a>().</p>
+<!-- @@@buttonInterval -->
+<!-- $$$removeSequence[overload1]$$$removeSequenceQt3DInput::QAbstractActionInput* -->
+<h3 class="fn" id="removeSequence"><a name="removeSequence"></a><span class="type">void</span> QInputSequence::<span class="name">removeSequence</span>(<span class="type"><a href="qt3dinput-qabstractactioninput.html">Qt3DInput::QAbstractActionInput</a></span> *<i>input</i>)</h3>
+<p>Remove the <a href="qt3dinput-qabstractactioninput.html">QAbstractActionInput</a> <i>input</i> from this <a href="qt3dinput-qinputsequence.html">QInputSequence</a>'s sequence vector.</p>
+<p><b>See also </b><a href="qt3dinput-qinputsequence.html#addSequence">addSequence</a>.</p>
+<!-- @@@removeSequence -->
+<!-- $$$sequences[overload1]$$$sequences -->
+<h3 class="fn" id="sequences"><a name="sequences"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="qt3dinput-qabstractactioninput.html">Qt3DInput::QAbstractActionInput</a></span> *&gt; QInputSequence::<span class="name">sequences</span>() const</h3>
+<p>Returns the <a href="qt3dinput-qinputsequence.html">QInputSequence</a>'s sequence vector.</p>
+<!-- @@@sequences -->
+<!-- $$$timeout -->
+<h3 class="fn" id="timeout"><a name="timeout"></a><span class="type">int</span> QInputSequence::<span class="name">timeout</span>() const</h3>
+<p>Returns the time in which all <a href="qt3dinput-qabstractactioninput.html">QAbstractActionInput</a>'s in the input sequence must triggered within. The time is in milliseconds</p>
+<p><b>Note:</b> Getter function for property <a href="qt3dinput-qinputsequence.html#timeout-prop">timeout</a>. </p><p><b>See also </b><a href="qt3dinput-qinputsequence.html#timeout-prop">setTimeout</a>().</p>
+<!-- @@@timeout -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

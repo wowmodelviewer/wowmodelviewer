@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qrandom.cpp -->
+  <title>QRandomGenerator Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QRandomGenerator</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#seeding-and-determinism">Seeding and determinism</a></li>
+<li class="level2"><a href="#bulk-data">Bulk data</a></li>
+<li class="level2"><a href="#system-wide-random-number-generator">System-wide random number generator</a></li>
+<li class="level2"><a href="#reentrancy-and-thread-safety">Reentrancy and thread-safety</a></li>
+<li class="level2"><a href="#standard-c-library-compatibility">Standard C++ Library compatibility</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QRandomGenerator Class</h1>
+<!-- $$$QRandomGenerator-brief -->
+<p>The <a href="qrandomgenerator.html">QRandomGenerator</a> class allows one to obtain random values from a high-quality Random Number Generator. <a href="#details">More...</a></p>
+<!-- @@@QRandomGenerator -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QRandomGenerator&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.10</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qrandomgenerator64.html">QRandomGenerator64</a></p>
+</td></tr></table></div><p>This class was introduced in  Qt 5.10.</p>
+<ul>
+<li><a href="qrandomgenerator-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<p><b>Note:</b> These functions are also <a href="../qtdoc/threads-reentrancy.html">thread-safe</a>:</p>
+<ul>
+<li><a href="qrandomgenerator.html#system">system</a>()</li>
+<li><a href="qrandomgenerator.html#global">global</a>()</li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#result_type-typedef">result_type</a></b></td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#QRandomGenerator-5">QRandomGenerator</a></b>(const QRandomGenerator &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#QRandomGenerator-4">QRandomGenerator</a></b>(const quint32 *<i>begin</i>, const quint32 *<i>end</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#QRandomGenerator-3">QRandomGenerator</a></b>(std::seed_seq &amp;<i>sseq</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#QRandomGenerator-2">QRandomGenerator</a></b>(const quint32 *<i>seedBuffer</i>, qsizetype <i>len</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#QRandomGenerator-1">QRandomGenerator</a></b>(const quint32 (&amp;)[N] <i>seedBuffer</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></b>(quint32 <i>seedValue</i> = 1)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#bounded">bounded</a></b>(double <i>highest</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> quint32 </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#bounded-1">bounded</a></b>(quint32 <i>highest</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> quint32 </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#bounded-2">bounded</a></b>(quint32 <i>lowest</i>, quint32 <i>highest</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#bounded-3">bounded</a></b>(int <i>highest</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#bounded-4">bounded</a></b>(int <i>lowest</i>, int <i>highest</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#discard">discard</a></b>(unsigned long long <i>z</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#fillRange">fillRange</a></b>(UInt *<i>buffer</i>, qsizetype <i>count</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#fillRange-1">fillRange</a></b>(UInt (&amp;)[N] <i>buffer</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> quint64 </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#generate64">generate64</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> quint32 </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#generate">generate</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#generate-1">generate</a></b>(ForwardIterator <i>begin</i>, ForwardIterator <i>end</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#generateDouble">generateDouble</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#seed">seed</a></b>(quint32 <i>seed</i> = 1)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#seed-1">seed</a></b>(std::seed_seq &amp;<i>seed</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRandomGenerator::result_type </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#operator-28-29">operator()</a></b>()</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QRandomGenerator *</td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#global">global</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRandomGenerator::result_type </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#max">max</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRandomGenerator::result_type </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#min">min</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRandomGenerator </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#securelySeeded">securelySeeded</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRandomGenerator *</td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#system">system</a></b>()</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#operator-not-eq">operator!=</a></b>(const QRandomGenerator &amp;<i>rng1</i>, const QRandomGenerator &amp;<i>rng2</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qrandomgenerator.html#operator-eq-eq">operator==</a></b>(const QRandomGenerator &amp;<i>rng1</i>, const QRandomGenerator &amp;<i>rng2</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QRandomGenerator-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qrandomgenerator.html">QRandomGenerator</a> may be used to generate random values from a high-quality random number generator. Like the C++ random engines, <a href="qrandomgenerator.html">QRandomGenerator</a> can be seeded with user-provided values through the constructor. When seeded, the sequence of numbers generated by this class is deterministic. That is to say, given the same seed data, <a href="qrandomgenerator.html">QRandomGenerator</a> will generate the same sequence of numbers. But given different seeds, the results should be considerably different.</p>
+<p><a href="qrandomgenerator.html#securelySeeded">QRandomGenerator::securelySeeded</a>() can be used to create a <a href="qrandomgenerator.html">QRandomGenerator</a> that is securely seeded with <a href="qrandomgenerator.html#system">QRandomGenerator::system</a>(), meaning that the sequence of numbers it generates cannot be easily predicted. Additionally, <a href="qrandomgenerator.html#global">QRandomGenerator::global</a>() returns a global instance of <a href="qrandomgenerator.html">QRandomGenerator</a> that Qt will ensure to be securely seeded. This object is thread-safe, may be shared for most uses, and is always seeded from <a href="qrandomgenerator.html#system">QRandomGenerator::system</a>()</p>
+<p><a href="qrandomgenerator.html#system">QRandomGenerator::system</a>() may be used to access the system's cryptographically-safe random generator. On Unix systems, it's equivalent to reading from <code>/dev/urandom</code> or the <code>getrandom()</code> or <code>getentropy()</code> system calls.</p>
+<p>The class can generate 32-bit or 64-bit quantities, or fill an array of those. The most common way of generating new values is to call the <a href="qrandomgenerator.html#generate">generate</a>(), <a href="qrandomgenerator.html#generate64">generate64</a>() or <a href="qrandomgenerator.html#fillRange">fillRange</a>() functions. One would use it as:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qtglobal.html#quint32-typedef">quint32</a></span> value <span class="operator">=</span> <span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span><span class="operator">::</span>global()<span class="operator">-</span><span class="operator">&gt;</span>generate();
+
+</pre>
+<p>Additionally, it provides a floating-point function <a href="qrandomgenerator.html#generateDouble">generateDouble</a>() that returns a number in the range [0, 1) (that is, inclusive of zero and exclusive of 1). There's also a set of convenience functions that facilitate obtaining a random number in a bounded, integral range.</p>
+<a name="seeding-and-determinism"></a>
+<h3 id="seeding-and-determinism">Seeding and determinism</h3>
+<p><a href="qrandomgenerator.html">QRandomGenerator</a> may be seeded with specific seed data. When that is done, the numbers generated by the object will always be the same, as in the following example:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span> prng1(<span class="number">1234</span>)<span class="operator">,</span> prng2(<span class="number">1234</span>);
+      Q_ASSERT(prng1<span class="operator">.</span>generate() <span class="operator">=</span><span class="operator">=</span> prng2<span class="operator">.</span>generate());
+      Q_ASSERT(prng1<span class="operator">.</span>generate64() <span class="operator">=</span><span class="operator">=</span> prng2<span class="operator">.</span>generate64());
+
+</pre>
+<p>The seed data takes the form of one or more 32-bit words. The ideal seed size is approximately equal to the size of the <a href="qrandomgenerator.html">QRandomGenerator</a> class itself. Due to mixing of the seed data, <a href="qrandomgenerator.html">QRandomGenerator</a> cannot guarantee that distinct seeds will produce different sequences.</p>
+<p><a href="qrandomgenerator.html#global">QRandomGenerator::global</a>(), like all generators created by <a href="qrandomgenerator.html#securelySeeded">QRandomGenerator::securelySeeded</a>(), is always seeded from <a href="qrandomgenerator.html#system">QRandomGenerator::system</a>(), so it's not possible to make it produce identical sequences.</p>
+<a name="bulk-data"></a>
+<h3 id="bulk-data">Bulk data</h3>
+<p>When operating in deterministic mode, <a href="qrandomgenerator.html">QRandomGenerator</a> may be used for bulk data generation. In fact, applications that do not need cryptographically-secure or true random data are advised to use a regular <a href="qrandomgenerator.html">QRandomGenerator</a> instead of <a href="qrandomgenerator.html#system">QRandomGenerator::system</a>() for their random data needs.</p>
+<p>For ease of use, <a href="qrandomgenerator.html">QRandomGenerator</a> provides a global object that can be easily used, as in the following example:</p>
+<pre class="cpp">
+
+      <span class="type">int</span> x <span class="operator">=</span> <span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span><span class="operator">::</span>global()<span class="operator">-</span><span class="operator">&gt;</span>generate();
+      <span class="type">int</span> y <span class="operator">=</span> <span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span><span class="operator">::</span>global()<span class="operator">-</span><span class="operator">&gt;</span>generate();
+      <span class="type">int</span> w <span class="operator">=</span> <span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span><span class="operator">::</span>global()<span class="operator">-</span><span class="operator">&gt;</span>bounded(<span class="number">16384</span>);
+      <span class="type">int</span> h <span class="operator">=</span> <span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span><span class="operator">::</span>global()<span class="operator">-</span><span class="operator">&gt;</span>bounded(<span class="number">16384</span>);
+
+</pre>
+<a name="system-wide-random-number-generator"></a>
+<h3 id="system-wide-random-number-generator">System-wide random number generator</h3>
+<p><a href="qrandomgenerator.html#system">QRandomGenerator::system</a>() may be used to access the system-wide random number generator, which is cryptographically-safe on all systems that Qt runs on. This function will use hardware facilities to generate random numbers where available. On such systems, those facilities are true Random Number Generators. However, if they are true RNGs, those facilities have finite entropy sources and thus may fail to produce any results if their entropy pool is exhausted.</p>
+<p>If that happens, first the operating system then <a href="qrandomgenerator.html">QRandomGenerator</a> will fall back to Pseudo Random Number Generators of decreasing qualities (Qt's fallback generator being the simplest). Whether those generators are still of cryptographic quality is implementation-defined. Therefore, <a href="qrandomgenerator.html#system">QRandomGenerator::system</a>() should not be used for high-frequency random number generation, lest the entropy pool become empty. As a rule of thumb, this class should not be called upon to generate more than a kilobyte per second of random data (note: this may vary from system to system).</p>
+<p>If an application needs true RNG data in bulk, it should use the operating system facilities (such as <code>/dev/random</code> on Linux) directly and wait for entropy to become available. If the application requires PRNG engines of cryptographic quality but not of true randomness, <a href="qrandomgenerator.html#system">QRandomGenerator::system</a>() may still be used (see section below).</p>
+<p>If neither a true RNG nor a cryptographically secure PRNG are required, applications should instead use PRNG engines like <a href="qrandomgenerator.html">QRandomGenerator</a>'s deterministic mode and those from the C++ Standard Library. <a href="qrandomgenerator.html#system">QRandomGenerator::system</a>() can be used to seed those.</p>
+<a name="fallback-quality"></a>
+<h4 id="fallback-quality">Fallback quality</h4>
+<p><a href="qrandomgenerator.html#system">QRandomGenerator::system</a>() uses the operating system facilities to obtain random numbers, which attempt to collect real entropy from the surrounding environment to produce true random numbers. However, it's possible that the entropy pool becomes exhausted, in which case the operating system will fall back to a pseudo-random engine for a time. Under no circumstances will <a href="qrandomgenerator.html#system">QRandomGenerator::system</a>() block, waiting for more entropy to be collected.</p>
+<p>The following operating systems guarantee that the results from their random-generation API will be of at least cryptographically-safe quality, even if the entropy pool is exhausted: Apple OSes (Darwin), BSDs, Linux, Windows. Barring a system installation problem (such as <code>/dev/urandom</code> not being readable by the current process), <a href="qrandomgenerator.html#system">QRandomGenerator::system</a>() will therefore have the same guarantees.</p>
+<p>On other operating systems, <a href="qrandomgenerator.html">QRandomGenerator</a> will fall back to a PRNG of good numeric distribution, but it cannot guarantee proper seeding in all cases. Please consult the OS documentation for more information.</p>
+<p>Applications that require <a href="qrandomgenerator.html">QRandomGenerator</a> not to fall back to non-cryptographic quality generators are advised to check their operating system documentation or restrict their deployment to one of the above.</p>
+<a name="reentrancy-and-thread-safety"></a>
+<h3 id="reentrancy-and-thread-safety">Reentrancy and thread-safety</h3>
+<p><a href="qrandomgenerator.html">QRandomGenerator</a> is reentrant, meaning that multiple threads can operate on this class at the same time, so long as they operate on different objects. If multiple threads need to share one PRNG sequence, external locking by a mutex is required.</p>
+<p>The exceptions are the objects returned by <a href="qrandomgenerator.html#global">QRandomGenerator::global</a>() and <a href="qrandomgenerator.html#system">QRandomGenerator::system</a>(): those objects are thread-safe and may be used by any thread without external locking. Note that thread-safety does not extend to copying those objects: they should always be used by reference.</p>
+<a name="standard-c-library-compatibility"></a>
+<h3 id="standard-c-library-compatibility">Standard C++ Library compatibility</h3>
+<p><a href="qrandomgenerator.html">QRandomGenerator</a> is modeled after the requirements for random number engines in the C++ Standard Library and may be used in almost all contexts that the Standard Library engines can. Exceptions to the requirements are the following:</p>
+<ul>
+<li><a href="qrandomgenerator.html">QRandomGenerator</a> does not support seeding from another seed sequence-like class besides std::seed_seq itself;</li>
+<li><a href="qrandomgenerator.html">QRandomGenerator</a> is not comparable (but is copyable) or streamable to <code>std::ostream</code> or from <code>std::istream</code>.</li>
+</ul>
+<p><a href="qrandomgenerator.html">QRandomGenerator</a> is also compatible with the uniform distribution classes <code>std::uniform_int_distribution</code> and <code>std:uniform_real_distribution</code>, as well as the free function <code>std::generate_canonical</code>. For example, the following code may be used to generate a floating-point number in the range [1, 2.5):</p>
+<pre class="cpp">
+
+      std<span class="operator">::</span>uniform_real_distribution dist(<span class="number">1</span><span class="operator">,</span> <span class="number">2.5</span>);
+      <span class="keyword">return</span> dist(<span class="operator">*</span><span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span><span class="operator">::</span>global());
+
+</pre>
+</div>
+<p><b>See also </b><a href="qrandomgenerator64.html">QRandomGenerator64</a> and <a href="qtglobal-obsolete.html#qrand">qrand</a>().</p>
+<!-- @@@QRandomGenerator -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$result_type -->
+<h3 class="fn" id="result_type-typedef"><a name="result_type-typedef"></a>typedef QRandomGenerator::<span class="name">result_type</span></h3>
+<p>A typedef to the type that <a href="qrandomgenerator.html#operator-28-29">operator</a>() returns. That is, quint32.</p>
+<p><b>See also </b><a href="qrandomgenerator.html#operator-28-29">operator</a>().</p>
+<!-- @@@result_type -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QRandomGenerator$$$QRandomGeneratorconstQRandomGenerator& -->
+<h3 class="fn" id="QRandomGenerator-5"><a name="QRandomGenerator-5"></a>QRandomGenerator::<span class="name">QRandomGenerator</span>(const <span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span> &amp;<i>other</i>)</h3>
+<p>Creates a copy of the generator state in the <i>other</i> object. If <i>other</i> is <a href="qrandomgenerator.html#system">QRandomGenerator::system</a>() or a copy of that, this object will also read from the operating system random-generating facilities. In that case, the sequences generated by the two objects will be different.</p>
+<p>In all other cases, the new <a href="qrandomgenerator.html">QRandomGenerator</a> object will start at the same position in the deterministic sequence as the <i>other</i> object was. Both objects will generate the same sequence from this point on.</p>
+<p>For that reason, it is not adviseable to create a copy of <a href="qrandomgenerator.html#global">QRandomGenerator::global</a>(). If one needs an exclusive deterministic generator, consider instead using <a href="qrandomgenerator.html#securelySeeded">securelySeeded</a>() to obtain a new object that shares no relationship with the <a href="qrandomgenerator.html#global">QRandomGenerator::global</a>().</p>
+<!-- @@@QRandomGenerator -->
+<!-- $$$QRandomGenerator$$$QRandomGeneratorconstquint32*constquint32* -->
+<h3 class="fn" id="QRandomGenerator-4"><a name="QRandomGenerator-4"></a>QRandomGenerator::<span class="name">QRandomGenerator</span>(const <span class="type"><a href="qtglobal.html#quint32-typedef">quint32</a></span> *<i>begin</i>, const <span class="type"><a href="qtglobal.html#quint32-typedef">quint32</a></span> *<i>end</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Initializes this <a href="qrandomgenerator.html">QRandomGenerator</a> object with the values found in the range from <i>begin</i> to <i>end</i> as the seed. Two objects constructed or reseeded with the same seed value will produce the same number sequence.</p>
+<p>This constructor is equivalent to:</p>
+<pre class="cpp">
+
+      std<span class="operator">::</span>seed_seq sseq(begin<span class="operator">,</span> end);
+      <span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span> generator(sseq);
+
+</pre>
+<p><b>See also </b><a href="qrandomgenerator.html#seed">seed</a>() and <a href="qrandomgenerator.html#securelySeeded">securelySeeded</a>().</p>
+<!-- @@@QRandomGenerator -->
+<!-- $$$QRandomGenerator$$$QRandomGeneratorstd::seed_seq& -->
+<h3 class="fn" id="QRandomGenerator-3"><a name="QRandomGenerator-3"></a>QRandomGenerator::<span class="name">QRandomGenerator</span>(<span class="type">std::seed_seq</span> &amp;<i>sseq</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Initializes this <a href="qrandomgenerator.html">QRandomGenerator</a> object with the seed sequence <i>sseq</i> as the seed. Two objects constructed or reseeded with the same seed value will produce the same number sequence.</p>
+<p><b>See also </b><a href="qrandomgenerator.html#seed">seed</a>() and <a href="qrandomgenerator.html#securelySeeded">securelySeeded</a>().</p>
+<!-- @@@QRandomGenerator -->
+<!-- $$$QRandomGenerator$$$QRandomGeneratorconstquint32*qsizetype -->
+<h3 class="fn" id="QRandomGenerator-2"><a name="QRandomGenerator-2"></a>QRandomGenerator::<span class="name">QRandomGenerator</span>(const <span class="type"><a href="qtglobal.html#quint32-typedef">quint32</a></span> *<i>seedBuffer</i>, <span class="type">qsizetype</span> <i>len</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Initializes this <a href="qrandomgenerator.html">QRandomGenerator</a> object with <i>len</i> values found in the array <i>seedBuffer</i> as the seed. Two objects constructed or reseeded with the same seed value will produce the same number sequence.</p>
+<p>This constructor is equivalent to:</p>
+<pre class="cpp">
+
+      std<span class="operator">::</span>seed_seq sseq(seedBuffer<span class="operator">,</span> seedBuffer <span class="operator">+</span> len);
+      <span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span> generator(sseq);
+
+</pre>
+<p><b>See also </b><a href="qrandomgenerator.html#seed">seed</a>() and <a href="qrandomgenerator.html#securelySeeded">securelySeeded</a>().</p>
+<!-- @@@QRandomGenerator -->
+<!-- $$$QRandomGenerator$$$QRandomGeneratorconstquint32(&)[N] -->
+<h3 class="fn" id="QRandomGenerator-1"><a name="QRandomGenerator-1"></a>QRandomGenerator::<span class="name">QRandomGenerator</span>(const <span class="type"><a href="qtglobal.html#quint32-typedef">quint32</a></span> (&amp;)[<span class="type">N</span>] <i>seedBuffer</i> = ...)</h3>
+<p>This is an overloaded function.</p>
+<p>Initializes this <a href="qrandomgenerator.html">QRandomGenerator</a> object with the values found in the array <i>seedBuffer</i> as the seed. Two objects constructed or reseeded with the same seed value will produce the same number sequence.</p>
+<p><b>See also </b><a href="qrandomgenerator.html#seed">seed</a>() and <a href="qrandomgenerator.html#securelySeeded">securelySeeded</a>().</p>
+<!-- @@@QRandomGenerator -->
+<!-- $$$QRandomGenerator[overload1]$$$QRandomGeneratorquint32 -->
+<h3 class="fn" id="QRandomGenerator"><a name="QRandomGenerator"></a>QRandomGenerator::<span class="name">QRandomGenerator</span>(<span class="type"><a href="qtglobal.html#quint32-typedef">quint32</a></span> <i>seedValue</i> = 1)</h3>
+<p>Initializes this <a href="qrandomgenerator.html">QRandomGenerator</a> object with the value <i>seedValue</i> as the seed. Two objects constructed or reseeded with the same seed value will produce the same number sequence.</p>
+<p><b>See also </b><a href="qrandomgenerator.html#seed">seed</a>() and <a href="qrandomgenerator.html#securelySeeded">securelySeeded</a>().</p>
+<!-- @@@QRandomGenerator -->
+<!-- $$$bounded[overload1]$$$boundeddouble -->
+<h3 class="fn" id="bounded"><a name="bounded"></a><span class="type">double</span> QRandomGenerator::<span class="name">bounded</span>(<span class="type">double</span> <i>highest</i>)</h3>
+<p>Generates one random double in the range between 0 (inclusive) and <i>highest</i> (exclusive). This function is equivalent to and is implemented as:</p>
+<pre class="cpp">
+
+      <span class="keyword">return</span> generateDouble() <span class="operator">*</span> highest;
+
+</pre>
+<p>If the <i>highest</i> parameter is negative, the result will be negative too; if it is infinite or NaN, the result will be infinite or NaN too (that is, not random).</p>
+<p><b>See also </b><a href="qrandomgenerator.html#generateDouble">generateDouble</a>() and bounded().</p>
+<!-- @@@bounded -->
+<!-- $$$bounded$$$boundedquint32 -->
+<h3 class="fn" id="bounded-1"><a name="bounded-1"></a><span class="type"><a href="qtglobal.html#quint32-typedef">quint32</a></span> QRandomGenerator::<span class="name">bounded</span>(<span class="type"><a href="qtglobal.html#quint32-typedef">quint32</a></span> <i>highest</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Generates one random 32-bit quantity in the range between 0 (inclusive) and <i>highest</i> (exclusive). The same result may also be obtained by using <a href="http://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution"><code>std::uniform_int_distribution</code></a> with parameters 0 and <code>highest - 1</code>. That class can also be used to obtain quantities larger than 32 bits.</p>
+<p>For example, to obtain a value between 0 and 255 (inclusive), one would write:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qtglobal.html#quint32-typedef">quint32</a></span> v <span class="operator">=</span> <span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span><span class="operator">::</span>bounded(<span class="number">256</span>);
+
+</pre>
+<p>Naturally, the same could also be obtained by masking the result of <a href="qrandomgenerator.html#generate">generate</a>() to only the lower 8 bits. Either solution is as efficient.</p>
+<p>Note that this function cannot be used to obtain values in the full 32-bit range of quint32. Instead, use <a href="qrandomgenerator.html#generate">generate</a>().</p>
+<p><b>See also </b><a href="qrandomgenerator.html#generate">generate</a>(), <a href="qrandomgenerator.html#generate64">generate64</a>(), and <a href="qrandomgenerator.html#generateDouble">generateDouble</a>().</p>
+<!-- @@@bounded -->
+<!-- $$$bounded$$$boundedquint32quint32 -->
+<h3 class="fn" id="bounded-2"><a name="bounded-2"></a><span class="type"><a href="qtglobal.html#quint32-typedef">quint32</a></span> QRandomGenerator::<span class="name">bounded</span>(<span class="type"><a href="qtglobal.html#quint32-typedef">quint32</a></span> <i>lowest</i>, <span class="type"><a href="qtglobal.html#quint32-typedef">quint32</a></span> <i>highest</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Generates one random 32-bit quantity in the range between <i>lowest</i> (inclusive) and <i>highest</i> (exclusive). The <i>highest</i> parameter must be greater than <i>lowest</i>.</p>
+<p>The same result may also be obtained by using <a href="http://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution"><code>std::uniform_int_distribution</code></a> with parameters <i>lowest</i> and <code>\a highest - 1</code>. That class can also be used to obtain quantities larger than 32 bits.</p>
+<p>For example, to obtain a value between 1000 (incl.) and 2000 (excl.), one would write:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qtglobal.html#quint32-typedef">quint32</a></span> v <span class="operator">=</span> <span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span><span class="operator">::</span>bounded(<span class="number">1000</span><span class="operator">,</span> <span class="number">2000</span>);
+
+</pre>
+<p>Note that this function cannot be used to obtain values in the full 32-bit range of quint32. Instead, use <a href="qrandomgenerator.html#generate">generate</a>().</p>
+<p><b>See also </b><a href="qrandomgenerator.html#generate">generate</a>(), <a href="qrandomgenerator.html#generate64">generate64</a>(), and <a href="qrandomgenerator.html#generateDouble">generateDouble</a>().</p>
+<!-- @@@bounded -->
+<!-- $$$bounded$$$boundedint -->
+<h3 class="fn" id="bounded-3"><a name="bounded-3"></a><span class="type">int</span> QRandomGenerator::<span class="name">bounded</span>(<span class="type">int</span> <i>highest</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Generates one random 32-bit quantity in the range between 0 (inclusive) and <i>highest</i> (exclusive). <i>highest</i> must be positive.</p>
+<p>Note that this function cannot be used to obtain values in the full 32-bit range of int. Instead, use <a href="qrandomgenerator.html#generate">generate</a>() and cast to int.</p>
+<p><b>See also </b><a href="qrandomgenerator.html#generate">generate</a>(), <a href="qrandomgenerator.html#generate64">generate64</a>(), and <a href="qrandomgenerator.html#generateDouble">generateDouble</a>().</p>
+<!-- @@@bounded -->
+<!-- $$$bounded$$$boundedintint -->
+<h3 class="fn" id="bounded-4"><a name="bounded-4"></a><span class="type">int</span> QRandomGenerator::<span class="name">bounded</span>(<span class="type">int</span> <i>lowest</i>, <span class="type">int</span> <i>highest</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Generates one random 32-bit quantity in the range between <i>lowest</i> (inclusive) and <i>highest</i> (exclusive), both of which may be negative, but <i>highest</i> must be greater than <i>lowest</i>.</p>
+<p>Note that this function cannot be used to obtain values in the full 32-bit range of int. Instead, use <a href="qrandomgenerator.html#generate">generate</a>() and cast to int.</p>
+<p><b>See also </b><a href="qrandomgenerator.html#generate">generate</a>(), <a href="qrandomgenerator.html#generate64">generate64</a>(), and <a href="qrandomgenerator.html#generateDouble">generateDouble</a>().</p>
+<!-- @@@bounded -->
+<!-- $$$discard[overload1]$$$discardunsignedlonglong -->
+<h3 class="fn" id="discard"><a name="discard"></a><span class="type">void</span> QRandomGenerator::<span class="name">discard</span>(<span class="type">unsigned</span> <span class="type">long</span> <span class="type">long</span> <i>z</i>)</h3>
+<p>Discards the next <i>z</i> entries from the sequence. This method is equivalent to calling <a href="qrandomgenerator.html#generate">generate</a>() <i>z</i> times and discarding the result, as in:</p>
+<pre class="cpp">
+
+      <span class="keyword">while</span> (z<span class="operator">-</span><span class="operator">-</span>)
+          generator<span class="operator">.</span>generate();
+
+</pre>
+<!-- @@@discard -->
+<!-- $$$fillRange[overload1]$$$fillRangeUInt*qsizetype -->
+<h3 class="fn" id="fillRange"><a name="fillRange"></a><span class="type">void</span> QRandomGenerator::<span class="name">fillRange</span>(<span class="type">UInt</span> *<i>buffer</i>, <span class="type">qsizetype</span> <i>count</i>)</h3>
+<p>Generates <i>count</i> 32- or 64-bit quantities (depending on the type <code>UInt</code>) and stores them in the buffer pointed by <i>buffer</i>. This is the most efficient way to obtain more than one quantity at a time, as it reduces the number of calls into the Random Number Generator source.</p>
+<p>For example, to fill a vector of 16 entries with random values, one may write:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="qtglobal.html#quint32-typedef">quint32</a></span><span class="operator">&gt;</span> vector;
+      vector<span class="operator">.</span>resize(<span class="number">16</span>);
+      <span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span><span class="operator">::</span>fillRange(vector<span class="operator">.</span>data()<span class="operator">,</span> vector<span class="operator">.</span>size());
+
+</pre>
+<p><b>See also </b><a href="qrandomgenerator.html#generate">generate</a>().</p>
+<!-- @@@fillRange -->
+<!-- $$$fillRange$$$fillRangeUInt(&)[N] -->
+<h3 class="fn" id="fillRange-1"><a name="fillRange-1"></a><span class="type">void</span> QRandomGenerator::<span class="name">fillRange</span>(<span class="type">UInt</span> (&amp;)[<span class="type">N</span>] <i>buffer</i> = ...)</h3>
+<p>Generates <code>N</code> 32- or 64-bit quantities (depending on the type <code>UInt</code>) and stores them in the <i>buffer</i> array. This is the most efficient way to obtain more than one quantity at a time, as it reduces the number of calls into the Random Number Generator source.</p>
+<p>For example, to fill generate two 32-bit quantities, one may write:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qtglobal.html#quint32-typedef">quint32</a></span> array<span class="operator">[</span><span class="number">2</span><span class="operator">]</span>;
+      <span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span><span class="operator">::</span>fillRange(array);
+
+</pre>
+<p>It would have also been possible to make one call to <a href="qrandomgenerator.html#generate64">generate64</a>() and then split the two halves of the 64-bit value.</p>
+<p><b>See also </b><a href="qrandomgenerator.html#generate">generate</a>().</p>
+<!-- @@@fillRange -->
+<!-- $$$generate64[overload1]$$$generate64 -->
+<h3 class="fn" id="generate64"><a name="generate64"></a><span class="type"><a href="qtglobal.html#quint64-typedef">quint64</a></span> QRandomGenerator::<span class="name">generate64</span>()</h3>
+<p>Generates a 64-bit random quantity and returns it.</p>
+<p><b>See also </b><a href="qrandomgenerator.html#operator-28-29">operator</a>()() and <a href="qrandomgenerator.html#generate">generate</a>().</p>
+<!-- @@@generate64 -->
+<!-- $$$generate[overload1]$$$generate -->
+<h3 class="fn" id="generate"><a name="generate"></a><span class="type"><a href="qtglobal.html#quint32-typedef">quint32</a></span> QRandomGenerator::<span class="name">generate</span>()</h3>
+<p>Generates a 32-bit random quantity and returns it.</p>
+<p><b>See also </b><a href="qrandomgenerator.html#operator-28-29">operator</a>()() and <a href="qrandomgenerator.html#generate64">generate64</a>().</p>
+<!-- @@@generate -->
+<!-- $$$generate$$$generateForwardIteratorForwardIterator -->
+<h3 class="fn" id="generate-1"><a name="generate-1"></a><span class="type">void</span> QRandomGenerator::<span class="name">generate</span>(<span class="type">ForwardIterator</span> <i>begin</i>, <span class="type">ForwardIterator</span> <i>end</i>)</h3>
+<p>Generates 32-bit quantities and stores them in the range between <i>begin</i> and <i>end</i>. This function is equivalent to (and is implemented as):</p>
+<pre class="cpp">
+
+      std<span class="operator">::</span>generate(begin<span class="operator">,</span> end<span class="operator">,</span> <span class="operator">[</span><span class="keyword">this</span><span class="operator">]</span>() { <span class="keyword">return</span> generate(); });
+
+</pre>
+<p>This function complies with the requirements for the function <a href="http://en.cppreference.com/w/cpp/numeric/random/seed_seq/generate"><code>std::seed_seq::generate</code></a>, which requires unsigned 32-bit integer values.</p>
+<p>Note that if the [begin, end) range refers to an area that can store more than 32 bits per element, the elements will still be initialized with only 32 bits of data. Any other bits will be zero. To fill the range with 64 bit quantities, one can write:</p>
+<pre class="cpp">
+
+      std<span class="operator">::</span>generate(begin<span class="operator">,</span> end<span class="operator">,</span> <span class="operator">[</span><span class="operator">]</span>() { <span class="keyword">return</span> <span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span><span class="operator">::</span>global()<span class="operator">-</span><span class="operator">&gt;</span>generate64(); });
+
+</pre>
+<p>If the range refers to contiguous memory (such as an array or the data from a <a href="qvector.html">QVector</a>), the <a href="qrandomgenerator.html#fillRange">fillRange</a>() function may be used too.</p>
+<p><b>See also </b><a href="qrandomgenerator.html#fillRange">fillRange</a>().</p>
+<!-- @@@generate -->
+<!-- $$$generateDouble[overload1]$$$generateDouble -->
+<h3 class="fn" id="generateDouble"><a name="generateDouble"></a><span class="type">double</span> QRandomGenerator::<span class="name">generateDouble</span>()</h3>
+<p>Generates one random qreal in the canonical range [0, 1) (that is, inclusive of zero and exclusive of 1).</p>
+<p>This function is equivalent to:</p>
+<pre class="cpp">
+
+      QRandomGenerator64 rd;
+      <span class="keyword">return</span> std<span class="operator">::</span>generate_canonical<span class="operator">&lt;</span><span class="type"><a href="qtglobal.html#qreal-typedef">qreal</a></span><span class="operator">,</span> std<span class="operator">::</span>numeric_limits<span class="operator">&lt;</span><span class="type"><a href="qtglobal.html#qreal-typedef">qreal</a></span><span class="operator">&gt;</span><span class="operator">::</span>digits<span class="operator">&gt;</span>(rd);
+
+</pre>
+<p>The same may also be obtained by using <a href="http://en.cppreference.com/w/cpp/numeric/random/uniform_real_distribution"><code>std::uniform_real_distribution</code></a> with parameters 0 and 1.</p>
+<p><b>See also </b><a href="qrandomgenerator.html#generate">generate</a>(), <a href="qrandomgenerator.html#generate64">generate64</a>(), and <a href="qrandomgenerator.html#bounded">bounded</a>().</p>
+<!-- @@@generateDouble -->
+<!-- $$$global[overload1]$$$global -->
+<h3 class="fn" id="global"><a name="global"></a><code>[static] </code><span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span> *QRandomGenerator::<span class="name">global</span>()</h3>
+<p>Returns a pointer to a shared <a href="qrandomgenerator.html">QRandomGenerator</a> that was seeded using <a href="qrandomgenerator.html#securelySeeded">securelySeeded</a>(). This function should be used to create random data without the expensive creation of a securely-seeded <a href="qrandomgenerator.html">QRandomGenerator</a> for a specific use or storing the rather large <a href="qrandomgenerator.html">QRandomGenerator</a> object.</p>
+<p>For example, the following creates a random RGB color:</p>
+<pre class="cpp">
+
+      <span class="keyword">return</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span><span class="operator">::</span>fromRgb(<span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span><span class="operator">::</span>global()<span class="operator">-</span><span class="operator">&gt;</span>generate());
+
+</pre>
+<p>Accesses to this object are thread-safe and it may therefore be used in any thread without locks. The object may also be copied and the sequence produced by the copy will be the same as the shared object will produce. Note, however, that if there are other threads accessing the global object, those threads may obtain samples at unpredictable intervals.</p>
+<p><b>Note:</b> This function is <a href="../qtdoc/threads-reentrancy.html">thread-safe</a>.</p>
+<p><b>See also </b><a href="qrandomgenerator.html#securelySeeded">securelySeeded</a>() and <a href="qrandomgenerator.html#system">system</a>().</p>
+<!-- @@@global -->
+<!-- $$$max[overload1]$$$max -->
+<h3 class="fn" id="max"><a name="max"></a><code>[static] </code><span class="type"><a href="qrandomgenerator.html#result_type-typedef">QRandomGenerator::result_type</a></span> QRandomGenerator::<span class="name">max</span>()</h3>
+<p>Returns the maximum value that <a href="qrandomgenerator.html">QRandomGenerator</a> may ever generate. That is, <code>std::numeric_limits&lt;result_type&gt;::max()</code>.</p>
+<p><b>See also </b><a href="qrandomgenerator.html#min">min</a>() and QRandomGenerator64::max().</p>
+<!-- @@@max -->
+<!-- $$$min[overload1]$$$min -->
+<h3 class="fn" id="min"><a name="min"></a><code>[static] </code><span class="type"><a href="qrandomgenerator.html#result_type-typedef">QRandomGenerator::result_type</a></span> QRandomGenerator::<span class="name">min</span>()</h3>
+<p>Returns the minimum value that <a href="qrandomgenerator.html">QRandomGenerator</a> may ever generate. That is, 0.</p>
+<p><b>See also </b><a href="qrandomgenerator.html#max">max</a>() and QRandomGenerator64::min().</p>
+<!-- @@@min -->
+<!-- $$$securelySeeded[overload1]$$$securelySeeded -->
+<h3 class="fn" id="securelySeeded"><a name="securelySeeded"></a><code>[static] </code><span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span> QRandomGenerator::<span class="name">securelySeeded</span>()</h3>
+<p>Returns a new <a href="qrandomgenerator.html">QRandomGenerator</a> object that was securely seeded with <a href="qrandomgenerator.html#system">QRandomGenerator::system</a>(). This function will obtain the ideal seed size for the algorithm that <a href="qrandomgenerator.html">QRandomGenerator</a> uses and is therefore the recommended way for creating a new <a href="qrandomgenerator.html">QRandomGenerator</a> object that will be kept for some time.</p>
+<p>Given the amount of data required to securely seed the deterministic engine, this function is somewhat expensive and should not be used for short-term uses of <a href="qrandomgenerator.html">QRandomGenerator</a> (using it to generate fewer than 2600 bytes of random data is effectively a waste of resources). If the use doesn't require that much data, consider using <a href="qrandomgenerator.html#global">QRandomGenerator::global</a>() and not storing a <a href="qrandomgenerator.html">QRandomGenerator</a> object instead.</p>
+<p><b>See also </b><a href="qrandomgenerator.html#global">global</a>() and <a href="qrandomgenerator.html#system">system</a>().</p>
+<!-- @@@securelySeeded -->
+<!-- $$$seed[overload1]$$$seedquint32 -->
+<h3 class="fn" id="seed"><a name="seed"></a><span class="type">void</span> QRandomGenerator::<span class="name">seed</span>(<span class="type"><a href="qtglobal.html#quint32-typedef">quint32</a></span> <i>seed</i> = 1)</h3>
+<p>Reseeds this object using the value <i>seed</i> as the seed.</p>
+<!-- @@@seed -->
+<!-- $$$seed$$$seedstd::seed_seq& -->
+<h3 class="fn" id="seed-1"><a name="seed-1"></a><span class="type">void</span> QRandomGenerator::<span class="name">seed</span>(<span class="type">std::seed_seq</span> &amp;<i>seed</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Reseeds this object using the seed sequence <i>seed</i> as the seed.</p>
+<!-- @@@seed -->
+<!-- $$$system[overload1]$$$system -->
+<h3 class="fn" id="system"><a name="system"></a><code>[static] </code><span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span> *QRandomGenerator::<span class="name">system</span>()</h3>
+<p>Returns a pointer to a shared <a href="qrandomgenerator.html">QRandomGenerator</a> that always uses the facilities provided by the operating system to generate random numbers. The system facilities are considered to be cryptographically safe on at least the following operating systems: Apple OSes (Darwin), BSDs, Linux, Windows. That may also be the case on other operating systems.</p>
+<p>They are also possibly backed by a true hardware random number generator. For that reason, the <a href="qrandomgenerator.html">QRandomGenerator</a> returned by this function should not be used for bulk data generation. Instead, use it to seed <a href="qrandomgenerator.html">QRandomGenerator</a> or a random engine from the &lt;random&gt; header.</p>
+<p>The object returned by this function is thread-safe and may be used in any thread without locks. It may also be copied and the resulting <a href="qrandomgenerator.html">QRandomGenerator</a> will also access the operating system facilities, but they will not generate the same sequence.</p>
+<p><b>Note:</b> This function is <a href="../qtdoc/threads-reentrancy.html">thread-safe</a>.</p>
+<p><b>See also </b><a href="qrandomgenerator.html#securelySeeded">securelySeeded</a>() and <a href="qrandomgenerator.html#global">global</a>().</p>
+<!-- @@@system -->
+<!-- $$$operator()[overload1]$$$operator() -->
+<h3 class="fn" id="operator-28-29"><a name="operator-28-29"></a><span class="type"><a href="qrandomgenerator.html#result_type-typedef">QRandomGenerator::result_type</a></span> QRandomGenerator::<span class="name">operator()</span>()</h3>
+<p>Generates a 32-bit random quantity and returns it.</p>
+<p><b>See also </b><a href="qrandomgenerator.html#generate">generate</a>() and <a href="qrandomgenerator.html#generate64">generate64</a>().</p>
+<!-- @@@operator() -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$operator!=[overload1]$$$operator!=constQRandomGenerator&constQRandomGenerator& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> <span class="name">operator!=</span>(const <span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span> &amp;<i>rng1</i>, const <span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span> &amp;<i>rng2</i>)</h3>
+<p>Returns true if the two the two engines <i>rng1</i> and <i>rng2</i> are at different states or if one of them is reading from the operating system facilities and the other is not, false otherwise.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQRandomGenerator&constQRandomGenerator& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> <span class="name">operator==</span>(const <span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span> &amp;<i>rng1</i>, const <span class="type"><a href="qrandomgenerator.html#QRandomGenerator">QRandomGenerator</a></span> &amp;<i>rng2</i>)</h3>
+<p>Returns true if the two the two engines <i>rng1</i> and <i>rng2</i> are at the same state or if they are both reading from the operating system facilities, false otherwise.</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

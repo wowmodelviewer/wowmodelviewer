@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qevent.cpp -->
+  <title>QScrollPrepareEvent Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QScrollPrepareEvent</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QScrollPrepareEvent Class</h1>
+<!-- $$$QScrollPrepareEvent-brief -->
+<p>The <a href="qscrollprepareevent.html">QScrollPrepareEvent</a> class is sent in preparation of scrolling. <a href="#details">More...</a></p>
+<!-- @@@QScrollPrepareEvent -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QScrollPrepareEvent&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.8</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qevent.html">QEvent</a></td></tr></table></div><p>This class was introduced in  Qt 4.8.</p>
+<ul>
+<li><a href="qscrollprepareevent-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qscrollprepareevent.html#QScrollPrepareEvent">QScrollPrepareEvent</a></b>(const QPointF &amp;<i>startPos</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qscrollprepareevent.html#dtor.QScrollPrepareEvent">~QScrollPrepareEvent</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPointF </td><td class="memItemRight bottomAlign"><b><a href="qscrollprepareevent.html#contentPos">contentPos</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRectF </td><td class="memItemRight bottomAlign"><b><a href="qscrollprepareevent.html#contentPosRange">contentPosRange</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qscrollprepareevent.html#setContentPos">setContentPos</a></b>(const QPointF &amp;<i>pos</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qscrollprepareevent.html#setContentPosRange">setContentPosRange</a></b>(const QRectF &amp;<i>rect</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qscrollprepareevent.html#setViewportSize">setViewportSize</a></b>(const QSizeF &amp;<i>size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPointF </td><td class="memItemRight bottomAlign"><b><a href="qscrollprepareevent.html#startPos">startPos</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSizeF </td><td class="memItemRight bottomAlign"><b><a href="qscrollprepareevent.html#viewportSize">viewportSize</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QScrollPrepareEvent-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The scroll prepare event is sent before scrolling (usually by <a href="../qtwidgets/qscroller.html">QScroller</a>) is started. The object receiving this event should set <a href="qscrollprepareevent.html#viewportSize">viewportSize</a>, maxContentPos and <a href="qscrollprepareevent.html#contentPos">contentPos</a>. It also should accept this event to indicate that scrolling should be started.</p>
+<p>It is not guaranteed that a <a href="qscrollevent.html">QScrollEvent</a> will be sent after an acceepted <a href="qscrollprepareevent.html">QScrollPrepareEvent</a>, e.g&#x2e; in a case where the maximum content position is (0,0).</p>
+</div>
+<p><b>See also </b><a href="qscrollevent.html">QScrollEvent</a> and <a href="../qtwidgets/qscroller.html">QScroller</a>.</p>
+<!-- @@@QScrollPrepareEvent -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QScrollPrepareEvent[overload1]$$$QScrollPrepareEventconstQPointF& -->
+<h3 class="fn" id="QScrollPrepareEvent"><a name="QScrollPrepareEvent"></a>QScrollPrepareEvent::<span class="name">QScrollPrepareEvent</span>(const <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> &amp;<i>startPos</i>)</h3>
+<p>Creates new <a href="qscrollprepareevent.html">QScrollPrepareEvent</a> The <i>startPos</i> is the position of a touch or mouse event that started the scrolling.</p>
+<!-- @@@QScrollPrepareEvent -->
+<!-- $$$~QScrollPrepareEvent[overload1]$$$~QScrollPrepareEvent -->
+<h3 class="fn" id="dtor.QScrollPrepareEvent"><a name="dtor.QScrollPrepareEvent"></a><code>[virtual] </code>QScrollPrepareEvent::<span class="name">~QScrollPrepareEvent</span>()</h3>
+<p>Destroys <a href="qscrollevent.html">QScrollEvent</a>.</p>
+<!-- @@@~QScrollPrepareEvent -->
+<!-- $$$contentPos[overload1]$$$contentPos -->
+<h3 class="fn" id="contentPos"><a name="contentPos"></a><span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> QScrollPrepareEvent::<span class="name">contentPos</span>() const</h3>
+<p>Returns the current position of the content as set by <a href="qscrollprepareevent.html#setContentPos">setContentPos</a>.</p>
+<p><b>See also </b><a href="qscrollprepareevent.html#setContentPos">setContentPos</a>().</p>
+<!-- @@@contentPos -->
+<!-- $$$contentPosRange[overload1]$$$contentPosRange -->
+<h3 class="fn" id="contentPosRange"><a name="contentPosRange"></a><span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> QScrollPrepareEvent::<span class="name">contentPosRange</span>() const</h3>
+<p>Returns the range of coordinates for the content as set by <a href="qscrollprepareevent.html#setContentPosRange">setContentPosRange</a>().</p>
+<p><b>See also </b><a href="qscrollprepareevent.html#setContentPosRange">setContentPosRange</a>().</p>
+<!-- @@@contentPosRange -->
+<!-- $$$setContentPos[overload1]$$$setContentPosconstQPointF& -->
+<h3 class="fn" id="setContentPos"><a name="setContentPos"></a><span class="type">void</span> QScrollPrepareEvent::<span class="name">setContentPos</span>(const <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> &amp;<i>pos</i>)</h3>
+<p>Sets the current content position to <i>pos</i>.</p>
+<p><b>See also </b><a href="qscrollprepareevent.html#contentPos">contentPos</a>().</p>
+<!-- @@@setContentPos -->
+<!-- $$$setContentPosRange[overload1]$$$setContentPosRangeconstQRectF& -->
+<h3 class="fn" id="setContentPosRange"><a name="setContentPosRange"></a><span class="type">void</span> QScrollPrepareEvent::<span class="name">setContentPosRange</span>(const <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> &amp;<i>rect</i>)</h3>
+<p>Sets the range of content coordinates to <i>rect</i>.</p>
+<p><b>See also </b><a href="qscrollprepareevent.html#contentPosRange">contentPosRange</a>().</p>
+<!-- @@@setContentPosRange -->
+<!-- $$$setViewportSize[overload1]$$$setViewportSizeconstQSizeF& -->
+<h3 class="fn" id="setViewportSize"><a name="setViewportSize"></a><span class="type">void</span> QScrollPrepareEvent::<span class="name">setViewportSize</span>(const <span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span> &amp;<i>size</i>)</h3>
+<p>Sets the size of the area that is to be scrolled to <i>size</i>.</p>
+<p><b>See also </b><a href="qscrollprepareevent.html#viewportSize">viewportSize</a>().</p>
+<!-- @@@setViewportSize -->
+<!-- $$$startPos[overload1]$$$startPos -->
+<h3 class="fn" id="startPos"><a name="startPos"></a><span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> QScrollPrepareEvent::<span class="name">startPos</span>() const</h3>
+<p>Returns the position of the touch or mouse event that started the scrolling.</p>
+<!-- @@@startPos -->
+<!-- $$$viewportSize[overload1]$$$viewportSize -->
+<h3 class="fn" id="viewportSize"><a name="viewportSize"></a><span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span> QScrollPrepareEvent::<span class="name">viewportSize</span>() const</h3>
+<p>Returns size of the area that is to be scrolled as set by <a href="qscrollprepareevent.html#setViewportSize">setViewportSize</a></p>
+<p><b>See also </b><a href="qscrollprepareevent.html#setViewportSize">setViewportSize</a>().</p>
+<!-- @@@viewportSize -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

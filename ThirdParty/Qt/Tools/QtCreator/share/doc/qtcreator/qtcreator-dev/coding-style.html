@@ -1,0 +1,1138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- coding-style.qdoc -->
+  <title>Qt Creator Coding Rules | Extending Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="extending-index.html#">Extending Qt Creator Manual</a></td><td >Qt Creator Coding Rules</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="extending-index.html#">Extending Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="qtcreator-ui-text.html" />
+  <link rel="next" href="qtcreator-api.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="qtcreator-ui-text.html">User Interface Text Guidelines</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qtcreator-api.html">Qt Creator API Reference</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#submitting-code">Submitting Code</a></li>
+<li class="level1"><a href="#binary-and-source-compatibility">Binary and Source Compatibility</a></li>
+<li class="level1"><a href="#code-constructs">Code Constructs</a></li>
+<li class="level1"><a href="#formatting">Formatting</a></li>
+<li class="level2"><a href="#capitalizing-identifiers">Capitalizing Identifiers</a></li>
+<li class="level2"><a href="#whitespace">Whitespace</a></li>
+<li class="level2"><a href="#braces">Braces</a></li>
+<li class="level2"><a href="#parentheses">Parentheses</a></li>
+<li class="level2"><a href="#line-breaks">Line Breaks</a></li>
+<li class="level2"><a href="#declarations">Declarations</a></li>
+<li class="level2"><a href="#namespaces">Namespaces</a></li>
+<li class="level1"><a href="#patterns-and-practices">Patterns and Practices</a></li>
+<li class="level2"><a href="#namespacing">Namespacing</a></li>
+<li class="level2"><a href="#passing-file-names">Passing File Names</a></li>
+<li class="level2"><a href="#plugin-extension-points">Plugin Extension Points</a></li>
+<li class="level2"><a href="#using-the-global-object-pool">Using the Global Object Pool</a></li>
+<li class="level2"><a href="#c-features">C++ Features</a></li>
+<li class="level2"><a href="#c-11-and-c-14-features">C++11 and C++14 Features</a></li>
+<li class="level2"><a href="#using-qobject">Using QObject</a></li>
+<li class="level2"><a href="#file-headers">File Headers</a></li>
+<li class="level2"><a href="#including-headers">Including Headers</a></li>
+<li class="level2"><a href="#casting">Casting</a></li>
+<li class="level2"><a href="#compiler-and-platform-specific-issues">Compiler and Platform-specific Issues</a></li>
+<li class="level2"><a href="#esthetics">Esthetics</a></li>
+<li class="level2"><a href="#inheriting-from-template-or-tool-classes">Inheriting from Template or Tool Classes</a></li>
+<li class="level2"><a href="#inheritance-versus-aggregation">Inheritance Versus Aggregation</a></li>
+<li class="level2"><a href="#conventions-for-public-header-files">Conventions for Public Header Files</a></li>
+<li class="level1"><a href="#class-member-names">Class Member Names</a></li>
+<li class="level1"><a href="#documentation">Documentation</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Creator Coding Rules</h1>
+<span class="subtitle"></span>
+<!-- $$$coding-style.html-description -->
+<div class="descr"> <a name="details"></a>
+<p><b>Note: </b>This document is work in progress.</p><p>The coding rules aim to guide Qt Creator developers, to help them write understandable and maintainable code, and to minimize confusion and surprises.</p>
+<p>As usual, rules are not set in stone. If you have a good reason to break one, do so. But first make sure that at least some other developers agree with you.</p>
+<p>To contribute to the main Qt Creator source, you should comply to the following rules:</p>
+<ul>
+<li>The most important rule is: KISS (keep it short and simple). Always choose the simpler implementation option over the more complicated one. This makes maintenance a lot easier.</li>
+<li>Write good C++ code. That is, readable, well commented when necessary, and object-oriented.</li>
+<li>Take advantage of Qt. Do not re-invent the wheel. Think about which parts of your code are generic enough that they might be incorporated into Qt instead of Qt Creator.</li>
+<li>Adapt the code to the existing structures in Qt Creator. If you have improvement ideas, discuss them with other developers before writing the code.</li>
+<li>Follow the guidelines in <a href="#code-constructs">Code Constructs</a>, <a href="#formatting">Formatting</a>, and <a href="#patterns-and-practices">Patterns and Practices</a>.</li>
+<li>Document interfaces. Right now we use qdoc, but changing to doxygen is being considered.</li>
+</ul>
+<a name="submitting-code"></a>
+<h2 id="submitting-code">Submitting Code</h2>
+<p>To submit code to Qt Creator, you must understand the tools and mechanics as well as the philosophy behind Qt development. For more information about how to set up the development environment for working on Qt Creator and how to submit code and documentation for inclusion, see <a href="https://wiki.qt.io/Qt_Contribution_Guidelines">Qt Contribution Guidelines</a>.</p>
+<a name="binary-and-source-compatibility"></a>
+<h2 id="binary-and-source-compatibility">Binary and Source Compatibility</h2>
+<p>The following list describes how the releases are numbered and defines <i>binary compatibility</i> and <i>source code compatibility</i> between releases:</p>
+<ul>
+<li>Qt Creator 3.0&#x2e;0 is a <i>major release</i>, Qt Creator 3.1&#x2e;0 is a <i>minor release</i>, and Qt Creator 3.1&#x2e;3 is a <i>patch release</i>.</li>
+<li><i>Backward binary compatibility</i> means that code linked to an earlier version of the library still works.</li>
+<li><i>Forward binary compatibility</i> means that code linked to a newer version of the library works with an older library.</li>
+<li><i>Source code compatibility</i> means that code compiles without modification.</li>
+</ul>
+<p>We do not currently guarantee binary nor source code compatibility between major releases and minor releases.</p>
+<p>However, we try to preserve backward binary compatibility and backward source code compatibility for patch releases within the same minor release:</p>
+<ul>
+<li>Soft API freeze: Starting shortly after the beta release of a minor release, we start keeping backward source code compatibility within that minor release, including its patch releases. This means that from that point, code that uses Qt Creator API will compile against the API of all coming versions of this minor release, including its patch releases. There still might be occasional exceptions to this rule, which should be properly communicated.</li>
+<li>Hard API freeze: Starting with the release candidate of a minor release, we keep backward source code compatibility within that minor release, including its patch releases. We also start keeping backward binary compatibility, with the exception that this will not be reflected in the plugins' compatVersion setting. So, Qt Creator plugins written against the release candidate will not actually load in the final release or later versions, even though the binary compatibility of the libraries would theoretically allow for it. See the section about plugin specs below.</li>
+<li>Hard ABI freeze: Starting with the final release of a minor release, we keep backward source code and binary compatibility for this release and all its patch releases.</li>
+</ul>
+<p>For preserving backward compatibility:</p>
+<ul>
+<li>Do not add or remove any public API (for example global functions, public/protected/private member functions).</li>
+<li>Do not reimplement functions (not even inlines, nor protected or private functions).</li>
+<li>Check <a href="https://wiki.qt.io/Binary_Compatibility_Workarounds">Binary Compatibility Workarounds</a> for ways to preserve binary compatibility.</li>
+</ul>
+<p>For more information on binary compatibility, see <a href="http://techbase.kde.org/Policies/Binary_Compatibility_Issues_With_C++">Binary Compatibility Issues With C++</a>.</p>
+<p>From the viewpoint of Plugin Specifications this means that</p>
+<ul>
+<li>Qt Creator plugins in patch releases will have the minor release as <code>compatVersion</code>. For example the plugins from version 3.1&#x2e;2 will have <code>compatVersion=&quot;3.1&#x2e;0&quot;</code>.</li>
+<li>Pre-releases of the minor release, including the release candidate, will still have themselves as the <code>compatVersion</code>, meaning that plugins compiled against the final release will not load in the pre-releases.</li>
+<li>Qt Creator plugin developers can decide if their plugin requires a certain patch release (or later) of other Qt Creator plugins, or if they work with all patch releases of this minor version, by setting the corresponding <code>version</code> when declaring the dependency on the other plugin. The default for Qt Creator plugins provided by the Qt Project is to require the latest patch release.</li>
+</ul>
+<p>For example, the <code>Find</code> plugin in Qt Creator 3.1 beta (internal version number 3.0&#x2e;82) will have</p>
+<pre class="cpp">
+
+  <span class="operator">&lt;</span>plugin name<span class="operator">=</span><span class="string">&quot;Find&quot;</span> version<span class="operator">=</span><span class="string">&quot;3.0.82&quot;</span> compatVersion<span class="operator">=</span><span class="string">&quot;3.0.82&quot;</span><span class="operator">&gt;</span>
+    <span class="operator">&lt;</span>dependencyList<span class="operator">&gt;</span>
+      <span class="operator">&lt;</span>dependency name<span class="operator">=</span><span class="string">&quot;Core&quot;</span> version<span class="operator">=</span><span class="string">&quot;3.0.82&quot;</span><span class="operator">/</span><span class="operator">&gt;</span>
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+</pre>
+<p>The <code>Find</code> plugin in Qt Creator 3.1&#x2e;0 final will have</p>
+<pre class="cpp">
+
+  <span class="operator">&lt;</span>plugin name<span class="operator">=</span><span class="string">&quot;Find&quot;</span> version<span class="operator">=</span><span class="string">&quot;3.1.0&quot;</span> compatVersion<span class="operator">=</span><span class="string">&quot;3.1.0&quot;</span><span class="operator">&gt;</span>
+    <span class="operator">&lt;</span>dependencyList<span class="operator">&gt;</span>
+      <span class="operator">&lt;</span>dependency name<span class="operator">=</span><span class="string">&quot;Core&quot;</span> version<span class="operator">=</span><span class="string">&quot;3.1.0&quot;</span><span class="operator">/</span><span class="operator">&gt;</span>
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+</pre>
+<p>The <code>Find</code> plugin in Qt Creator 3.1&#x2e;1 patch release will have version 3.1&#x2e;1, will be backward binary compatible with <code>Find</code> plugin version 3.1&#x2e;0 (<code>compatVersion=&quot;3.1&#x2e;0&quot;</code>), and will require a <code>Core</code> plugin that is binary backward compatible with <code>Core</code> plugin version 3.1&#x2e;1:</p>
+<pre class="cpp">
+
+  <span class="operator">&lt;</span>plugin name<span class="operator">=</span><span class="string">&quot;Find&quot;</span> version<span class="operator">=</span><span class="string">&quot;3.1.1&quot;</span> compatVersion<span class="operator">=</span><span class="string">&quot;3.1.0&quot;</span><span class="operator">&gt;</span>
+    <span class="operator">&lt;</span>dependencyList<span class="operator">&gt;</span>
+      <span class="operator">&lt;</span>dependency name<span class="operator">=</span><span class="string">&quot;Core&quot;</span> version<span class="operator">=</span><span class="string">&quot;3.1.1&quot;</span><span class="operator">/</span><span class="operator">&gt;</span>
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+</pre>
+<a name="code-constructs"></a>
+<h2 id="code-constructs">Code Constructs</h2>
+<p>Follow the guidelines for code constructs to make the code faster and clearer. In addition, the guidelines allow you to take advantage of the strong type checking in C++.</p>
+<ul>
+<li>Prefer preincrement to postincrement whenever possible. Preincrement is potentially faster than postincrement. Just think about the obvious implementations of pre/post-increment. This rule applies to decrement too:<pre class="cpp">
+
+  <span class="operator">+</span><span class="operator">+</span>T;
+  <span class="operator">-</span><span class="operator">-</span>U;
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  T<span class="operator">+</span><span class="operator">+</span>;
+  U<span class="operator">-</span><span class="operator">-</span>;
+
+</pre>
+</li>
+<li>Try to minimize evaluation of the same code over and over. This is aimed especially at loops:<pre class="cpp">
+
+  Container<span class="operator">::</span>iterator end <span class="operator">=</span> large<span class="operator">.</span>end();
+  <span class="keyword">for</span> (Container<span class="operator">::</span>iterator it <span class="operator">=</span> large<span class="operator">.</span>begin(); it <span class="operator">!</span><span class="operator">=</span> end; <span class="operator">+</span><span class="operator">+</span>it) {
+          <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>;
+  }
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="keyword">for</span> (Container<span class="operator">::</span>iterator it <span class="operator">=</span> large<span class="operator">.</span>begin();
+       it <span class="operator">!</span><span class="operator">=</span> large<span class="operator">.</span>end(); <span class="operator">+</span><span class="operator">+</span>it) {
+          <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>;
+  }
+
+</pre>
+</li>
+<li>You can use the Qt <code>foreach</code> loop in non-time-critical code with a Qt container. It is a nice way to keep line noise down and to give the loop variable a proper name:<pre class="cpp">
+
+  foreach (<span class="type">QWidget</span> <span class="operator">*</span>widget<span class="operator">,</span> container)
+      doSomething(widget);
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  Container<span class="operator">::</span>iterator end <span class="operator">=</span> container<span class="operator">.</span>end();
+  <span class="keyword">for</span> (Container<span class="operator">::</span>iterator it <span class="operator">=</span> container<span class="operator">.</span>begin(); it <span class="operator">!</span><span class="operator">=</span> end; <span class="operator">+</span><span class="operator">+</span>it)
+      doSomething(<span class="operator">*</span>it);
+
+</pre>
+<p>Make the loop variable const, if possible. This might prevent unnecessary detaching of shared data:</p>
+<pre class="cpp">
+
+  foreach (<span class="keyword">const</span> <span class="type">QString</span> <span class="operator">&amp;</span>name<span class="operator">,</span> someListOfNames)
+      doSomething(name);
+
+  <span class="operator">-</span> NOT <span class="operator">-</span>
+
+  foreach (<span class="type">QString</span> name<span class="operator">,</span> someListOfNames)
+      doSomething(name);
+
+</pre>
+</li>
+</ul>
+<a name="formatting"></a>
+<h2 id="formatting">Formatting</h2>
+<a name="capitalizing-identifiers"></a>
+<h3 id="capitalizing-identifiers">Capitalizing Identifiers</h3>
+<p>Use <a href="http://en.wikipedia.org/wiki/CamelCase">camel case</a> in identifiers.</p>
+<p>Capitalize the first word in an identifier as follows:</p>
+<ul>
+<li>Class names begin with a capital letter.</li>
+<li>Function names begin with a lower case letter.</li>
+<li>Variable names begin with a lower case letter.</li>
+<li>Enum names and values begin with a capital letter. Unscoped Enum values contain some part of the name of the enum type.</li>
+</ul>
+<a name="whitespace"></a>
+<h3 id="whitespace">Whitespace</h3>
+<ul>
+<li>Use four spaces for indentation, no tabs.</li>
+<li>Use blank lines to group statements together where suited.</li>
+<li>Always use only one blank line.</li>
+</ul>
+<a name="pointers-and-references"></a>
+<h4 id="pointers-and-references">Pointers and References</h4>
+<p>For pointers or references, always use a single space before an asterisk (*) or an ampersand (&amp;), but never after. Avoid C-style casts when possible:</p>
+<pre class="cpp">
+
+  <span class="type">char</span> <span class="operator">*</span>blockOfMemory <span class="operator">=</span> (<span class="type">char</span> <span class="operator">*</span>)malloc(data<span class="operator">.</span>size());
+  <span class="type">char</span> <span class="operator">*</span>blockOfMemory <span class="operator">=</span> <span class="keyword">reinterpret_cast</span><span class="operator">&lt;</span><span class="type">char</span> <span class="operator">*</span><span class="operator">&gt;</span>(malloc(data<span class="operator">.</span>size()));
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="type">char</span><span class="operator">*</span> blockOfMemory <span class="operator">=</span> (<span class="type">char</span><span class="operator">*</span> ) malloc(data<span class="operator">.</span>size());
+
+</pre>
+<p>Of course, in this particulare case, using <code>new</code> might be an even better option.</p>
+<a name="operator-names-and-parentheses"></a>
+<h4 id="operator-names-and-parentheses">Operator Names and Parentheses</h4>
+<p>Do not use spaces between operator names and parentheses. The equation marks (==) are a part of the operator name, and therefore, spaces make the declaration look like an expression:</p>
+<pre class="cpp">
+
+  <span class="keyword">operator</span><span class="operator">=</span><span class="operator">=</span>(type)
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="keyword">operator</span> <span class="operator">=</span><span class="operator">=</span> (type)
+
+</pre>
+<a name="function-names-and-parentheses"></a>
+<h4 id="function-names-and-parentheses">Function Names and Parentheses</h4>
+<p>Do not use spaces between function names and parentheses:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> mangle()
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="type">void</span> mangle ()
+
+</pre>
+<a name="keywords"></a>
+<h4 id="keywords">Keywords</h4>
+<p>Always use a single space after a keyword, and before a curly brace:</p>
+<pre class="cpp">
+
+  <span class="keyword">if</span> (foo) {
+  }
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="keyword">if</span>(foo){
+  }
+
+</pre>
+<a name="comments"></a>
+<h4 id="comments">Comments</h4>
+<p>In general, put one space after &quot;//&quot;. To align text in multiline comments, you can insert multiple spaces.</p>
+<a name="braces"></a>
+<h3 id="braces">Braces</h3>
+<p>As a base rule, place the left curly brace on the same line as the start of the statement:</p>
+<pre class="cpp">
+
+  <span class="keyword">if</span> (codec) {
+  }
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="keyword">if</span> (codec)
+  {
+  }
+
+</pre>
+<p>Exception: Function implementations and class declarations always have the left brace in the beginning of a line:</p>
+<pre class="cpp">
+
+  <span class="keyword">static</span> <span class="type">void</span> foo(<span class="type">int</span> g)
+  {
+      <a href="http://doc.qt.io/qt-5/#qDebug">qDebug</a>(<span class="string">&quot;foo: %i&quot;</span><span class="operator">,</span> g);
+  }
+
+  <span class="keyword">class</span> Moo
+  {
+  };
+
+</pre>
+<p>Use curly braces when the body of a conditional statement contains more than one line, and also if a single line statement is somewhat complex. Otherwise, omit them:</p>
+<pre class="cpp">
+
+  <span class="keyword">if</span> (address<span class="operator">.</span>isEmpty())
+      <span class="keyword">return</span> <span class="keyword">false</span>;
+
+  <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> <span class="number">10</span>; <span class="operator">+</span><span class="operator">+</span>i)
+      <a href="http://doc.qt.io/qt-5/#qDebug">qDebug</a>(<span class="string">&quot;%i&quot;</span><span class="operator">,</span> i);
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="keyword">if</span> (address<span class="operator">.</span>isEmpty()) {
+      <span class="keyword">return</span> <span class="keyword">false</span>;
+  }
+
+  <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> <span class="number">10</span>; <span class="operator">+</span><span class="operator">+</span>i) {
+      <a href="http://doc.qt.io/qt-5/#qDebug">qDebug</a>(<span class="string">&quot;%i&quot;</span><span class="operator">,</span> i);
+  }
+
+</pre>
+<p>Exception 1: Use braces also if the parent statement covers several lines or if it wraps:</p>
+<pre class="cpp">
+
+  <span class="keyword">if</span> (address<span class="operator">.</span>isEmpty()
+          <span class="operator">|</span><span class="operator">|</span> <span class="operator">!</span>isValid()
+          <span class="operator">|</span><span class="operator">|</span> <span class="operator">!</span>codec) {
+      <span class="keyword">return</span> <span class="keyword">false</span>;
+  }
+
+</pre>
+<p><b>Note: </b>This could be re-written as:</p><pre class="cpp">
+
+  <span class="keyword">if</span> (address<span class="operator">.</span>isEmpty())
+      <span class="keyword">return</span> <span class="keyword">false</span>;
+
+  <span class="keyword">if</span> (<span class="operator">!</span>isValid())
+      <span class="keyword">return</span> <span class="keyword">false</span>;
+
+  <span class="keyword">if</span> (<span class="operator">!</span>codec)
+      <span class="keyword">return</span> <span class="keyword">false</span>;
+
+</pre>
+<p>Exception 2: Use braces also in if-then-else blocks where either the if-code or the else-code covers several lines:</p>
+<pre class="cpp">
+
+  <span class="keyword">if</span> (address<span class="operator">.</span>isEmpty()) {
+      <span class="operator">-</span><span class="operator">-</span>it;
+  } <span class="keyword">else</span> {
+      <a href="http://doc.qt.io/qt-5/#qDebug">qDebug</a>(<span class="string">&quot;%s&quot;</span><span class="operator">,</span> <a href="http://doc.qt.io/qt-5/#qPrintable">qPrintable</a>(address));
+      <span class="operator">+</span><span class="operator">+</span>it;
+  }
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="keyword">if</span> (address<span class="operator">.</span>isEmpty())
+      <span class="operator">-</span><span class="operator">-</span>it;
+  <span class="keyword">else</span> {
+      <a href="http://doc.qt.io/qt-5/#qDebug">qDebug</a>(<span class="string">&quot;%s&quot;</span><span class="operator">,</span> <a href="http://doc.qt.io/qt-5/#qPrintable">qPrintable</a>(address));
+      <span class="operator">+</span><span class="operator">+</span>it;
+  }
+
+</pre>
+<pre class="cpp">
+
+  <span class="keyword">if</span> (a) {
+      <span class="keyword">if</span> (b)
+          <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+      <span class="keyword">else</span>
+          <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  }
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="keyword">if</span> (a)
+      <span class="keyword">if</span> (b)
+          <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+      <span class="keyword">else</span>
+          <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+</pre>
+<p>Use curly braces when the body of a conditional statement is empty:</p>
+<pre class="cpp">
+
+  <span class="keyword">while</span> (a) {}
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="keyword">while</span> (a);
+
+</pre>
+<a name="parentheses"></a>
+<h3 id="parentheses">Parentheses</h3>
+<p>Use parentheses to group expressions:</p>
+<pre class="cpp">
+
+  <span class="keyword">if</span> ((a <span class="operator">&amp;</span><span class="operator">&amp;</span> b) <span class="operator">|</span><span class="operator">|</span> c)
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="keyword">if</span> (a <span class="operator">&amp;</span><span class="operator">&amp;</span> b <span class="operator">|</span><span class="operator">|</span> c)
+
+</pre>
+<pre class="cpp">
+
+  (a <span class="operator">+</span> b) <span class="operator">&amp;</span> c
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  a <span class="operator">+</span> b <span class="operator">&amp;</span> c
+
+</pre>
+<a name="line-breaks"></a>
+<h3 id="line-breaks">Line Breaks</h3>
+<ul>
+<li>Keep lines shorter than 100 characters.</li>
+<li>Insert line breaks if necessary.</li>
+<li>Commas go at the end of a broken line.</li>
+<li>Operators start at the beginning of the new line.<pre class="cpp">
+
+  <span class="keyword">if</span> (longExpression
+      <span class="operator">|</span><span class="operator">|</span> otherLongExpression
+      <span class="operator">|</span><span class="operator">|</span> otherOtherLongExpression) {
+  }
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="keyword">if</span> (longExpression <span class="operator">|</span><span class="operator">|</span>
+      otherLongExpression <span class="operator">|</span><span class="operator">|</span>
+      otherOtherLongExpression) {
+  }
+
+</pre>
+</li>
+</ul>
+<a name="declarations"></a>
+<h3 id="declarations">Declarations</h3>
+<ul>
+<li>Use this order for the access sections of your class: public, protected, private. The public section is interesting for every user of the class. The private section is only of interest for the implementors of the class (you).</li>
+<li>Avoid declaring global objects in the declaration file of the class. If the same variable is used for all objects, use a static member.</li>
+<li>Use <code>class</code> instead of <code>struct</code>. Some compilers mangle that difference into the symbol names and spit out warnings if a struct declaration is followed by a class definition. To avoid ongoing changes from one to the other we declare <code>class</code> the preferred way.</li>
+</ul>
+<a name="declaring-variables"></a>
+<h4 id="declaring-variables">Declaring Variables</h4>
+<ul>
+<li>Avoid global variables of class type to rule out initialization order problems. Consider using <code>Q_GLOBAL_STATIC</code> if they cannot be avoided.</li>
+<li>Declare global string literals as<pre class="cpp">
+
+  <span class="keyword">const</span> <span class="type">char</span> aString<span class="operator">[</span><span class="operator">]</span> <span class="operator">=</span> <span class="string">&quot;Hello&quot;</span>;
+
+</pre>
+</li>
+<li>Avoid short names (such as, a, rbarr, nughdeget) whenever possible. Use single-character variable names only for counters and temporaries, where the purpose of the variable is obvious.</li>
+<li>Declare each variable on a separate line:<pre class="cpp">
+
+  <span class="type">QString</span> a <span class="operator">=</span> <span class="string">&quot;Joe&quot;</span>;
+  <span class="type">QString</span> b <span class="operator">=</span> <span class="string">&quot;Foo&quot;</span>;
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="type">QString</span> a <span class="operator">=</span> <span class="string">&quot;Joe&quot;</span><span class="operator">,</span> b <span class="operator">=</span> <span class="string">&quot;Foo&quot;</span>;
+
+</pre>
+<p><b>Note: </b><code>QString a = &quot;Joe&quot;</code> formally calls a copy constructor on a temporary that is constructed from a string literal. Therefore, it is potentially more expensive than direct construction by <code>QString a(&quot;Joe&quot;)</code>. However, the compiler is allowed to elide the copy (even if this has side effects), and modern compilers typically do so. Given these equal costs, Qt Creator code favours the '=' idiom as it is in line with the traditional C-style initialization, it cannot be mistaken as function declaration, and it reduces the level of nested parantheses in more initializations.</p></li>
+<li>Avoid abbreviations:<pre class="cpp">
+
+  <span class="type">int</span> height;
+  <span class="type">int</span> width;
+  <span class="type">char</span> <span class="operator">*</span>nameOfThis;
+  <span class="type">char</span> <span class="operator">*</span>nameOfThat;
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="type">int</span> a<span class="operator">,</span> b;
+  <span class="type">char</span> <span class="operator">*</span>c<span class="operator">,</span> <span class="operator">*</span>d;
+
+</pre>
+</li>
+<li>Wait with declaring a variable until it is needed. This is especially important when initialization is done at the same time.</li>
+</ul>
+<a name="namespaces"></a>
+<h3 id="namespaces">Namespaces</h3>
+<ul>
+<li>Put the left curly brace on the same line as the <code>namespace</code> keyword.</li>
+<li>Do not indent declarations or definitions inside.</li>
+<li>Optional, but recommended if the namespaces spans more than a few lines: Add a comment after the right curly brace repeating the namespace.<pre class="cpp">
+
+  <span class="keyword">namespace</span> MyPlugin {
+
+  <span class="type">void</span> someFunction() { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
+
+      }  <span class="comment">// namespace MyPlugin</span>
+
+</pre>
+</li>
+<li>As an exception, if there is only a single class declaration inside the namespace, all can go on a single line:<pre class="cpp">
+
+  <span class="keyword">namespace</span> MyPlugin { <span class="keyword">class</span> MyClass; }
+
+</pre>
+</li>
+<li>Do not use using-directives in header files.</li>
+<li>Do not rely on using-directives when defining classes and functions, instead define it in a properly named declarative region.</li>
+<li>Do not rely on using-directives when accessing global functions.</li>
+<li>In other cases, you are encouraged to use using-directives, as they help you avoid cluttering the code. Prefer putting all using-directives near the top of the file, after all includes.<pre class="cpp">
+
+  <span class="operator">[</span>in foo<span class="operator">.</span>cpp<span class="operator">]</span>
+  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  <span class="preprocessor">#include &quot;foos.h&quot;</span>
+  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  <span class="preprocessor">#include &lt;utils/filename.h&gt;</span>
+  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  <span class="keyword">using</span> <span class="keyword">namespace</span> Utils;
+
+  <span class="keyword">namespace</span> Foo {
+  <span class="keyword">namespace</span> Internal {
+
+  <span class="type">void</span> SomeThing<span class="operator">::</span>bar()
+  {
+      FileName f;              <span class="comment">// or Utils::FileName f</span>
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  }
+  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  } <span class="comment">// namespace Internal      // or only // Internal</span>
+  } <span class="comment">// namespace Foo           // or only // Foo</span>
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="operator">[</span>in foo<span class="operator">.</span>h<span class="operator">]</span>
+  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  <span class="keyword">using</span> <span class="keyword">namespace</span> Utils;       <span class="comment">// Wrong: no using-directives in headers</span>
+
+  <span class="keyword">class</span> SomeThing
+  {
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  };
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="operator">[</span>in foo<span class="operator">.</span>cpp<span class="operator">]</span>
+  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  <span class="keyword">using</span> <span class="keyword">namespace</span> Utils;
+
+  <span class="preprocessor">#include &quot;bar.h&quot;             // Wrong: #include after using-directive</span>
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="operator">[</span>in foo<span class="operator">.</span>cpp<span class="operator">]</span>
+  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  <span class="keyword">using</span> namepace Foo;
+
+  <span class="type">void</span> SomeThing<span class="operator">::</span>bar()        <span class="comment">// Wrong if Something is in namespace Foo</span>
+  {
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  }
+
+</pre>
+</li>
+</ul>
+<a name="patterns-and-practices"></a>
+<h2 id="patterns-and-practices">Patterns and Practices</h2>
+<a name="coding-rules-namespacing"></a><a name="namespacing"></a>
+<h3 id="namespacing">Namespacing</h3>
+<p>Read <a href="https://wiki.qt.io/Qt_In_Namespace">Qt In Namespace</a> and keep in mind that all of Qt Creator is <i>namespace aware</i> code.</p>
+<p>The namespacing policy within Qt Creator is as follows:</p>
+<ul>
+<li>Classes/Symbols of a library or plugin that are exported for use of other libraries or plugins are in a namespace specific to that library/plugin, e.g&#x2e; <code>MyPlugin</code>.</li>
+<li>Classes/Symbols of a library or plugin that are not exported are in an additional <code>Internal</code> namespace, e.g&#x2e; <code>MyPlugin::Internal</code>.</li>
+</ul>
+<a name="passing-file-names"></a>
+<h3 id="passing-file-names">Passing File Names</h3>
+<p>Qt Creator API expects file names in portable format, that is, with slashes (/) instead of backslashes (\) even on Windows. To pass a file name from the user to the API, convert it with <a href="http://doc.qt.io/qt-5/qdir.html#fromNativeSeparators">QDir::fromNativeSeparators</a> first. To present a file name to the user, convert it back to native format with <a href="http://doc.qt.io/qt-5/qdir.html#toNativeSeparators">QDir::toNativeSeparators</a>. Consider using Utils::FileName::fromUserInput(<a href="http://doc.qt.io/qt-5/qstring.html">QString</a>) and Utils::FileName::toUserOutput() for these tasks.</p>
+<p>Use Utils::FileName when comparing file names, because that takes case sensitivity into account. Also make sure that you compare clean paths (<a href="http://doc.qt.io/qt-5/qdir.html#cleanPath">QDir::cleanPath</a>()).</p>
+<a name="plugin-extension-points"></a>
+<h3 id="plugin-extension-points">Plugin Extension Points</h3>
+<p>A plugin extension point is an interface that is provided by one plugin to be implemented by others. The plugin then retrieves all implementations of the interface and uses them. That is, they <i>extend</i> the functionality of the plugin. Typically, the implementations of the interface are put into the global object pool during plugin initialization, and the plugin retrieves them from the object pool at the end of plugin initialization.</p>
+<p>For example, the Find plugin provides the FindFilter interface for other plugins to implement. With the FindFilter interface, additional search scopes can be added, that appear in the <b>Advanced Search</b> dialog. The Find plugin retrieves all FindFilter implementations from the global object pool and presents them in the dialog. The plugin forwards the actual search request to the correct FindFilter implementation, which then performs the search.</p>
+<a name="using-the-global-object-pool"></a>
+<h3 id="using-the-global-object-pool">Using the Global Object Pool</h3>
+<p>You can add objects to the global object pool via ExtensionSystem::PluginManager::addObject(), and retrieve objects of a specific type again via ExtensionSystem::PluginManager::getObjects(). This should mostly be used for implementations of <a href="#plugin-extension-points">Plugin Extension Points</a>.</p>
+<p><b>Note: </b>Do not put a singleton into the pool, and do not retrieve it from there. Use the singleton pattern instead.</p><a name="c-features"></a>
+<h3 id="c-features">C++ Features</h3>
+<ul>
+<li>Prefer <code>#pragma once</code> over header guards.</li>
+<li>Do not use exceptions, unless you know what you do.</li>
+<li>Do not use RTTI (Run-Time Type Information; that is, the typeinfo struct, the dynamic_cast or the typeid operators, including throwing exceptions), unless you know what you do.</li>
+<li>Do not use virtual inheritance, unless you know what you do.</li>
+<li>Use templates wisely, not just because you can.<p>Hint: Use the compile autotest to see whether a C++ feature is supported by all compilers in the test farm.</p>
+</li>
+<li>All code is ASCII only (7-bit characters only, run <code>man ascii</code> if unsure)<ul>
+<li>Rationale: We have too many locales inhouse and an unhealthy mix of UTF-8 and Latin1 systems. Usually, characters &gt; 127 can be broken without you even knowing by clicking Save in your favourite editor.</li>
+<li>For strings: Use \nnn (where nnn is the octal representation of whatever locale you want your string in) or \xnn (where nn is hexadecimal). For example: <a href="http://doc.qt.io/qt-5/qstring.html">QString</a> s = <a href="http://doc.qt.io/qt-5/qstring.html#fromUtf8">QString::fromUtf8</a>(&quot;\213\005&quot;);</li>
+<li>For umlauts in documentation, or other non-ASCII characters, either use the qdoc <code>\unicode</code> command or use the relevant macro. For example: <code>\uuml</code> for &uuml;.</li>
+</ul>
+</li>
+<li>Use static keywords instead of anonymous namespaces whenever possible. A name localized to the compilation unit with static is guaranteed to have internal linkage. For names declared in anonymous namespaces, the C++ standard unfortunately mandates external linkage (ISO/IEC 14882, 7.1&#x2e;1/6, or see various discussions about this on the gcc mailing lists).</li>
+</ul>
+<a name="null-pointers"></a>
+<h4 id="null-pointers">Null Pointers</h4>
+<p>Use nullptr for null pointer constants.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> <span class="operator">*</span>p <span class="operator">=</span> nullptr;
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="type">void</span> <span class="operator">*</span>p <span class="operator">=</span> NULL;
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="type">void</span> <span class="operator">*</span>p <span class="operator">=</span> <span class="char">'\0'</span>;
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="type">void</span> <span class="operator">*</span>p <span class="operator">=</span> <span class="number">42</span> <span class="operator">-</span> <span class="number">7</span> <span class="operator">*</span> <span class="number">6</span>;
+
+</pre>
+<p><b>Note: </b>As an exception, imported third party code as well as code interfacing the native APIs (src/support/os_*) can use NULL or 0.</p><a name="c-11-and-c-14-features"></a>
+<h3 id="c-11-and-c-14-features">C++11 and C++14 Features</h3>
+<p>Code should compile with Microsoft Visual Studio 2013, g++ 4.7, and Clang 3.1&#x2e;</p>
+<a name="lambdas"></a>
+<h4 id="lambdas">Lambdas</h4>
+<p>When using lambdas, note the following:</p>
+<ul>
+<li>You do not have to explicitly specify the return type. If you are not using one of the previously mentioned compilers, do note that this is a C++14 feature and you might need to enable C++14 support in your compiler.<pre class="cpp">
+
+  <span class="operator">[</span><span class="operator">]</span>() {
+      Foo <span class="operator">*</span>foo <span class="operator">=</span> activeFoo();
+      <span class="keyword">return</span> foo <span class="operator">?</span> foo<span class="operator">-</span><span class="operator">&gt;</span>displayName() : <span class="type">QString</span>();
+  });
+
+</pre>
+</li>
+<li>If you use static functions from the class that the lambda is located in, you have to explicitly capture <code>this</code>. Otherwise it does not compile with g++ 4.7 and earlier.<pre class="cpp">
+
+  <span class="type">void</span> Foo<span class="operator">::</span>something()
+  {
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+      <span class="operator">[</span><span class="keyword">this</span><span class="operator">]</span>() { Foo<span class="operator">::</span>someStaticFunction(); }
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  }
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="type">void</span> Foo<span class="operator">::</span>something()
+  {
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+      <span class="operator">[</span><span class="operator">]</span>() { Foo<span class="operator">::</span>someStaticFunction(); }
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  }
+
+</pre>
+</li>
+</ul>
+<p>Format the lambda according to the following rules:</p>
+<ul>
+<li>Place the capture-list, parameter list, return type, and opening brace on the first line, the body indented on the following lines, and the closing brace on a new line.<pre class="cpp">
+
+  <span class="operator">[</span><span class="operator">]</span>() <span class="operator">-</span><span class="operator">&gt;</span> bool {
+      something();
+      <span class="keyword">return</span> isSomethingElse();
+  }
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="operator">[</span><span class="operator">]</span>() <span class="operator">-</span><span class="operator">&gt;</span> bool { something();
+  somethingElse(); }
+
+</pre>
+</li>
+<li>Place a closing parenthesis and semicolon of an enclosing function call on the same line as the closing brace of the lambda.<pre class="cpp">
+
+  foo(<span class="operator">[</span><span class="operator">]</span>() {
+      something();
+  });
+
+</pre>
+</li>
+<li>If you are using a lambda in an 'if' statement, start the lambda on a new line, to avoid confusion between the opening brace for the lambda and the opening brace for the 'if' statement.<pre class="cpp">
+
+  <span class="keyword">if</span> (anyOf(fooList<span class="operator">,</span>
+          <span class="operator">[</span><span class="operator">]</span>(Foo foo) {
+              <span class="keyword">return</span> foo<span class="operator">.</span>isGreat();
+          }) {
+      <span class="keyword">return</span>;
+  }
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="keyword">if</span> (anyOf(fooList<span class="operator">,</span> <span class="operator">[</span><span class="operator">]</span>(Foo foo) {
+              <span class="keyword">return</span> foo<span class="operator">.</span>isGreat();
+          }) {
+      <span class="keyword">return</span>;
+  }
+
+</pre>
+</li>
+<li>Optionally, place the lambda completely on one line if it fits.<pre class="cpp">
+
+  foo(<span class="operator">[</span><span class="operator">]</span> { <span class="keyword">return</span> <span class="keyword">true</span>; });
+
+  <span class="keyword">if</span> (foo(<span class="operator">[</span><span class="operator">]</span> { <span class="keyword">return</span> <span class="keyword">true</span>; })) {
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  }
+
+</pre>
+</li>
+</ul>
+<a name="keyword-auto-keyword-keyword"></a>
+<h4 id="keyword-auto-keyword-keyword"><code>auto</code> Keyword</h4>
+<p>Optionally, you can use the <code>auto</code> keyword in the following cases. If in doubt, for example if using <code>auto</code> could make the code less readable, do not use <code>auto</code>. Keep in mind that code is read much more often than written.</p>
+<ul>
+<li>When it avoids repetition of a type in the same statement.<pre class="cpp">
+
+  <span class="keyword">auto</span> something <span class="operator">=</span> <span class="keyword">new</span> MyCustomType;
+  <span class="keyword">auto</span> keyEvent <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="http://doc.qt.io/qt-5/qkeyevent.html">QKeyEvent</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(event);
+  <span class="keyword">auto</span> myList <span class="operator">=</span> <span class="type">QStringList</span>({ <span class="string">&quot;FooThing&quot;</span><span class="operator">,</span>  <span class="string">&quot;BarThing&quot;</span> });
+
+</pre>
+</li>
+<li>When assigning iterator types.<pre class="cpp">
+
+  <span class="keyword">auto</span> it <span class="operator">=</span> myList<span class="operator">.</span>const_iterator();
+
+</pre>
+</li>
+</ul>
+<a name="scoped-enums"></a>
+<h4 id="scoped-enums">Scoped enums</h4>
+<p>You can use scoped enums in places where the implicit conversion to int of unscoped enums is undesired or the additional scope is useful.</p>
+<a name="delegating-constructors"></a>
+<h4 id="delegating-constructors">Delegating constructors</h4>
+<p>Use delegating constructors if multiple constructors use essentially the same code.</p>
+<a name="initializer-list"></a>
+<h4 id="initializer-list">Initializer list</h4>
+<p>Use initializer lists to initialize containers, for example:</p>
+<pre class="cpp">
+
+  <span class="keyword">const</span> <span class="type"><a href="http://doc.qt.io/qt-5/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span> values <span class="operator">=</span> {<span class="number">1</span><span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> <span class="number">5</span>};
+
+</pre>
+<a name="initialization-with-curly-brackets"></a>
+<h4 id="initialization-with-curly-brackets">Initialization with Curly Brackets</h4>
+<p>If you use initialization with curly brackets, follow the same rules as with round brackets. For example:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> Values <span class="comment">// the following code is quite useful for test fixtures</span>
+  {
+      <span class="type">float</span> floatValue <span class="operator">=</span> <span class="number">4</span>; <span class="comment">// prefer that for simple types</span>
+      <span class="type"><a href="http://doc.qt.io/qt-5/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span> values <span class="operator">=</span> {<span class="number">1</span><span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> integerValue}; <span class="comment">// prefer that syntax for initializer lists</span>
+      SomeValues someValues{<span class="string">&quot;One&quot;</span><span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">3.4</span>}; <span class="comment">// not an initializer_list</span>
+      SomeValues <span class="operator">&amp;</span>someValuesReference <span class="operator">=</span> someValues;
+      ComplexType complexType{values<span class="operator">,</span> otherValues} <span class="comment">// constructor call</span>
+  }
+
+  object<span class="operator">.</span>setEntry({<span class="string">&quot;SectionA&quot;</span><span class="operator">,</span> value<span class="operator">,</span> doubleValue}); <span class="comment">// calls a constructor</span>
+  object<span class="operator">.</span>setEntry({}); <span class="comment">// calls default constructor</span>
+
+</pre>
+<p>But be careful not to overuse it, to not obfuscate your code.</p>
+<a name="non-static-data-member-initialization"></a>
+<h4 id="non-static-data-member-initialization">Non-Static Data Member Initialization</h4>
+<p>Use non-static data member initialization for trivial initializations, except in public exported classes.</p>
+<a name="defaulted-and-deleted-functions"></a>
+<h4 id="defaulted-and-deleted-functions">Defaulted and Deleted Functions</h4>
+<p>Consider using <code>=default</code> and <code>=delete</code> to control the special functions.</p>
+<a name="override"></a>
+<h4 id="override">Override</h4>
+<p>It is recommended to use the <code>override</code> keyword when overriding virtual functions. Do not use virtual on overridden functions.</p>
+<p>Make sure that a class uses <code>override</code> consistently, either for all overridden functions or for none.</p>
+<a name="nullptr"></a>
+<h4 id="nullptr">Nullptr</h4>
+<p>All compilers support <code>nullptr</code>, but there is no consensus on using it. If in doubt, ask the maintainer of the module whether they prefer using <code>nullptr</code>.</p>
+<a name="range-based-for-loop"></a>
+<h4 id="range-based-for-loop">Range-Based for-Loop</h4>
+<p>You may use range-based for-loops, but beware of the spurious detachment problem. If the for-loop only reads the container and it is not obvious whether the container is const or unshared, use <code>std::cref()</code> to ensure that the container is not unnecessarily detached.</p>
+<a name="using-qobject"></a>
+<h3 id="using-qobject">Using QObject</h3>
+<ul>
+<li>Remember to add the <a href="http://doc.qt.io/qt-5/qobject.html#Q_OBJECT">Q_OBJECT</a> macro to <a href="http://doc.qt.io/qt-5/qobject.html">QObject</a> subclasses that rely on the meta object system. Meta object system related features are the definition of signals and slots, the use of <code>qobject_cast&lt;&gt;</code>, and others. See also <a href="#casting">Casting</a>.</li>
+<li>Prefer Qt5-style <code>connect()</code> calls over Qt4-style.</li>
+<li>When using Qt4-style <code>connect()</code> calls, normalize the arguments for signals and slots inside connect statements to safely make signal and slot lookup a few cycles faster. You can use $QTDIR/util/normalize to normalize existing code. For more information, see <a href="http://doc.qt.io/qt-5/qmetaobject.html#normalizedSignature">QMetaObject::normalizedSignature</a>.</li>
+</ul>
+<a name="file-headers"></a>
+<h3 id="file-headers">File Headers</h3>
+<p>If you create a new file, the top of the file should include a header comment equal to the one found in other source files of Qt Creator.</p>
+<a name="including-headers"></a>
+<h3 id="including-headers">Including Headers</h3>
+<ul>
+<li>Use the following format to include Qt headers: <code>#include &lt;QWhatEver&gt;</code>. Do not include the module as it might have changed between Qt4 and Qt5.</li>
+<li>Arrange includes in an order that goes from specific to generic to ensure that the headers are self-contained. For example:<ul>
+<li><code>#include &quot;myclass.h&quot;</code></li>
+<li><code>#include &quot;otherclassinplugin.h&quot;</code></li>
+<li><code>#include &lt;otherplugin/someclass.h&gt;</code></li>
+<li><code>#include &lt;QtClass&gt;</code></li>
+<li><code>#include &lt;stdthing&gt;</code></li>
+<li><code>#include &lt;system.h&gt;</code></li>
+</ul>
+</li>
+<li>Enclose headers from other plugins in square brackets (&lt;&gt;) rather than quotation marks (&quot;&quot;) to make it easier to spot external dependencies in the sources.</li>
+<li>Add empty lines between long blocks of <i>peer</i> headers and try to arrange the headers in alphabetic order within a block.</li>
+</ul>
+<a name="casting"></a>
+<h3 id="casting">Casting</h3>
+<ul>
+<li>Avoid C casts, prefer C++ casts (<code>static_cast</code>, <code>const_cast</code>, <code>reinterpret_cast</code>) Both <code>reinterpret_cast</code> and C-style casts are dangerous, but at least <code>reinterpret_cast</code> will not remove the const modifier.</li>
+<li>Do not use <code>dynamic_cast</code>, use <code>qobject_cast</code> for QObjects, or refactor your design, for example by introducing a <code>type()</code> function (see <a href="http://doc.qt.io/qt-5/qlistwidgetitem.html">QListWidgetItem</a>), unless you know what you do.</li>
+</ul>
+<a name="compiler-and-platform-specific-issues"></a>
+<h3 id="compiler-and-platform-specific-issues">Compiler and Platform-specific Issues</h3>
+<ul>
+<li>Be extremely careful when using the question mark operator. If the returned types are not identical, some compilers generate code that crashes at runtime (you will not even get a compiler warning):<pre class="cpp">
+
+  <span class="type">QString</span> s;
+  <span class="comment">// crash at runtime - QString vs. const char *</span>
+  <span class="keyword">return</span> condition <span class="operator">?</span> s : <span class="string">&quot;nothing&quot;</span>;
+
+</pre>
+</li>
+<li>Be extremely careful about alignment.<p>Whenever a pointer is cast such that the required alignment of the target is increased, the resulting code might crash at runtime on some architectures. For example, if a <code>const char *</code> is cast to a <code>const int *</code>, it will crash on machines where integers have to be aligned at two-byte or four-byte boundaries.</p>
+<p>Use a union to force the compiler to align variables correctly. In the example below, you can be sure that all instances of AlignHelper are aligned at integer-boundaries:</p>
+<pre class="cpp">
+
+  <span class="keyword">union</span> AlignHelper
+  {
+      <span class="type">char</span> c;
+      <span class="type">int</span> i;
+  };
+
+</pre>
+</li>
+<li>Stick to integral types, arrays of integral types, and structs thereof for static declarations in headers. For example, <code>static float i[SIZE_CONSTANT];</code> will not be optimized and copied in every plugin in most cases, it would be good to avoid it.</li>
+<li>Anything that has a constructor or needs to run code to be initialized cannot be used as global object in library code, since it is undefined when that constructor or code will be run (on first usage, on library load, before <code>main()</code> or not at all).<p>Even if the execution time of the initializer is defined for shared libraries, you will get into trouble when moving that code in a plugin or if the library is compiled statically:</p>
+<pre class="cpp">
+
+  <span class="comment">// global scope</span>
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="comment">// Default constructor needs to be run to initialize x:</span>
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">QString</span> x;
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="comment">// Constructor that takes a const char * has to be run:</span>
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">QString</span> y <span class="operator">=</span> <span class="string">&quot;Hello&quot;</span>;
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="type">QString</span> z;
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="comment">// Call time of foo() undefined, might not be called at all:</span>
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">int</span> i <span class="operator">=</span> foo();
+
+</pre>
+<p>Things you can do:</p>
+<pre class="cpp">
+
+  <span class="comment">// global scope</span>
+  <span class="comment">// No constructor must be run, x set at compile time:</span>
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">char</span> x<span class="operator">[</span><span class="operator">]</span> <span class="operator">=</span> <span class="string">&quot;someText&quot;</span>;
+
+  <span class="comment">// y will be set at compile time:</span>
+  <span class="keyword">static</span> <span class="type">int</span> y <span class="operator">=</span> <span class="number">7</span>;
+
+  <span class="comment">// Will be initialized statically, no code being run.</span>
+  <span class="keyword">static</span> MyStruct s <span class="operator">=</span> {<span class="number">1</span><span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">3</span>};
+
+  <span class="comment">// Pointers to objects are OK, no code needed to be run to</span>
+  <span class="comment">// initialize ptr:</span>
+  <span class="keyword">static</span> <span class="type">QString</span> <span class="operator">*</span>ptr <span class="operator">=</span> <span class="number">0</span>;
+
+  <span class="comment">// Use Q_GLOBAL_STATIC to create static global objects instead:</span>
+
+  Q_GLOBAL_STATIC(<span class="type">QString</span><span class="operator">,</span> s)
+
+  <span class="type">void</span> foo()
+  {
+      s()<span class="operator">-</span><span class="operator">&gt;</span>append(<span class="string">&quot;moo&quot;</span>);
+  }
+
+</pre>
+<p><b>Note: </b>Static objects in function scope are no problem. The constructor will be run the first time the function is entered. The code is not reentrant, though.</p></li>
+<li>A <code>char</code> is signed or unsigned dependent on the architecture. Use signed <code>char</code> or <code>uchar</code> if you explicitly want a signed or unsigned char. The following code will break on PowerPC, for example:<pre class="cpp">
+
+  <span class="comment">// Condition is always true on platforms where the</span>
+  <span class="comment">// default is unsigned:</span>
+  <span class="keyword">if</span> (c <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">0</span>) {
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  }
+
+</pre>
+</li>
+<li>Avoid 64-bit enum values. The AAPCS (Procedure Call Standard for the ARM Architecture) embedded ABI hard codes all enum values to a 32-bit integer.</li>
+<li>Do not mix const and non-const iterators. This will silently crash on broken compilers.<pre class="cpp">
+
+  <span class="keyword">for</span> (Container<span class="operator">::</span>const_iterator it <span class="operator">=</span> c<span class="operator">.</span>constBegin(); it <span class="operator">!</span><span class="operator">=</span> c<span class="operator">.</span>constEnd(); <span class="operator">+</span><span class="operator">+</span>it)
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="keyword">for</span> (Container<span class="operator">::</span>const_iterator it <span class="operator">=</span> c<span class="operator">.</span>begin(); it <span class="operator">!</span><span class="operator">=</span> c<span class="operator">.</span>end(); <span class="operator">+</span><span class="operator">+</span>it)
+
+</pre>
+</li>
+<li>Do not inline virtual destructors in exported classes. This leads to duplicated vtables in dependent plugins and this can also break RTTI. See <a href="https://bugreports.qt.io/browse/QTBUG-45582">QTBUG-45582</a>.</li>
+</ul>
+<a name="esthetics"></a>
+<h3 id="esthetics">Esthetics</h3>
+<ul>
+<li>Prefer unscoped enums to define const over static const int or defines. Enumeration values will be replaced by the compiler at compile time, resulting in faster code. Defines are not namespace safe.</li>
+<li>Prefer verbose argument names in headers. Qt Creator will show the argument names in their completion box. It will look better in the documentation.</li>
+</ul>
+<a name="inheriting-from-template-or-tool-classes"></a>
+<h3 id="inheriting-from-template-or-tool-classes">Inheriting from Template or Tool Classes</h3>
+<p>Inheriting from template or tool classes has the following potential pitfalls:</p>
+<ul>
+<li>The destructors are not virtual, which can lead to memory leaks.</li>
+<li>The symbols are not exported (and mostly inline), which can lead to symbol clashes.</li>
+</ul>
+<p>For example, library A has class <code>Q_EXPORT X: public QList&lt;QVariant&gt; {};</code> and library B has class <code>Q_EXPORT Y: public QList&lt;QVariant&gt; {};</code>. Suddenly, <a href="http://doc.qt.io/qt-5/qlist.html">QList</a> symbols are exported from two libraries which results in a clash.</p>
+<a name="inheritance-versus-aggregation"></a>
+<h3 id="inheritance-versus-aggregation">Inheritance Versus Aggregation</h3>
+<ul>
+<li>Use inheritance if there is a clear <i>is-a</i> relation.</li>
+<li>Use aggregation for re-use of orthogonal building blocks.</li>
+<li>Prefer aggregation over inheritance if there is a choice.</li>
+</ul>
+<a name="conventions-for-public-header-files"></a>
+<h3 id="conventions-for-public-header-files">Conventions for Public Header Files</h3>
+<p>Our public header files have to survive the strict settings of some of our users. All installed headers have to follow these rules:</p>
+<ul>
+<li>No C style casts (<code>-Wold-style-cast</code>). Use <code>static_cast</code>, <code>const_cast</code> or <code>reinterpret_cast</code>, for basic types, use the constructor form: <code>int(a)</code> instead of <code>(int)a</code>. For more information, see <a href="#casting">Casting</a>.</li>
+<li>No float comparisons (<code>-Wfloat-equal</code>). Use <code>qFuzzyCompare</code> to compare values with a delta. Use <code>qIsNull</code> to check whether a float is binary 0, instead of comparing it to 0.0, or, preferred, move such code into an implementation file.</li>
+<li>Do not hide virtual functions in subclasses ({-Woverloaded-virtual}). If the baseclass A has a virtual <code>int val()</code> and subclass B an overload with the same name, <code>int val(int x)</code>, the A <code>val</code> function is hidden. Use the <code>using</code> keyword to make it visible again, and add the following silly workaround for broken compilers:<pre class="cpp">
+
+  <span class="keyword">class</span> B: <span class="keyword">public</span> A
+  {
+  <span class="preprocessor">#ifdef Q_NO_USING_KEYWORD</span>
+  <span class="keyword">inline</span> <span class="type">int</span> val() { <span class="keyword">return</span> A<span class="operator">::</span>val(); }
+  <span class="preprocessor">#else</span>
+  <span class="keyword">using</span> A<span class="operator">::</span>val;
+  <span class="preprocessor">#endif</span>
+  };
+
+</pre>
+</li>
+<li>Do not shadow variables (<code>-Wshadow</code>).</li>
+<li>Avoid things like <code>this-&gt;x = x;</code> if possible.</li>
+<li>Do not give variables the same name as functions declared in your class.</li>
+<li>To improve code readability, always check whether a preprocessor variable is defined before probing its value (<code>-Wundef</code>).<pre class="cpp">
+
+  <span class="preprocessor">#if defined(Foo) &amp;&amp; Foo == 0</span>
+
+    <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="preprocessor">#if Foo == 0</span>
+
+  <span class="operator">-</span>NOT<span class="operator">-</span>
+
+  <span class="preprocessor">#if Foo - 0 == 0</span>
+
+</pre>
+</li>
+<li>When checking for a preprocessor define using the <code>defined</code> operator, always include the variable name in parentheses.<pre class="cpp">
+
+  <span class="preprocessor">#if defined(Foo)</span>
+
+    <span class="operator">-</span>NOT<span class="operator">-</span>
+
+    <span class="preprocessor">#if defined Foo</span>
+
+</pre>
+</li>
+</ul>
+<a name="class-member-names"></a>
+<h2 id="class-member-names">Class Member Names</h2>
+<p>We use the &quot;m_&quot; prefix convention, except for public struct members (typically in *Private classes and the very rare cases of really public structures). The <code>d</code> and <code>q</code> pointers are exempt from the &quot;m_&quot; rule.</p>
+<p>The <code>d</code> pointers (&quot;Pimpls&quot;) are named &quot;d&quot;, not &quot;m_d&quot;. The type of the <code>d</code> pointer in <code>class Foo</code> is <code>FooPrivate *</code>, where <code>FooPrivate</code> is declared in the same namespace as <code>Foo</code>, or if <code>Foo</code> is exported, in the corresponding {Internal} namespace.</p>
+<p>If needed (for example when the private object needs to emit signals of the proper class), <code>FooPrivate</code> can be a friend of <code>Foo</code>.</p>
+<p>If the private class needs a backreference to the real class, the pointer is named <code>q</code>, and its type is <code>Foo *</code>. (Same convention as in Qt: &quot;q&quot; looks like an inverted &quot;d&quot;.)</p>
+<p>Do not use smart pointers to guard the <code>d</code> pointer as it imposes a compile and link time overhead and creates fatter object code with more symbols, leading, for instance to slowed down debugger startup:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">############### bar.h</span>
+
+  <span class="preprocessor">#include &lt;QScopedPointer&gt;</span>
+  <span class="comment">//#include &lt;memory&gt;</span>
+
+  <span class="keyword">struct</span> BarPrivate;
+
+  <span class="keyword">struct</span> Bar
+  {
+      Bar();
+      <span class="operator">~</span>Bar();
+      <span class="type">int</span> value() <span class="keyword">const</span>;
+
+      <span class="type"><a href="http://doc.qt.io/qt-5/qscopedpointer.html">QScopedPointer</a></span><span class="operator">&lt;</span>BarPrivate<span class="operator">&gt;</span> d;
+      <span class="comment">//std::unique_ptr&lt;BarPrivate&gt; d;</span>
+  };
+
+  <span class="preprocessor">############### bar.cpp</span>
+
+  <span class="preprocessor">#include &quot;bar.h&quot;</span>
+
+  <span class="keyword">struct</span> BarPrivate { BarPrivate() : i(<span class="number">23</span>) {} <span class="type">int</span> i; };
+
+  Bar<span class="operator">::</span>Bar() : d(<span class="keyword">new</span> BarPrivate) {}
+
+  Bar<span class="operator">::</span><span class="operator">~</span>Bar() {}
+
+  <span class="type">int</span> Bar<span class="operator">::</span>value() <span class="keyword">const</span> { <span class="keyword">return</span> d<span class="operator">-</span><span class="operator">&gt;</span>i; }
+
+  <span class="preprocessor">############### baruser.cpp</span>
+
+  <span class="preprocessor">#include &quot;bar.h&quot;</span>
+
+  <span class="type">int</span> barUser() { Bar b; <span class="keyword">return</span> b<span class="operator">.</span>value(); }
+
+  <span class="preprocessor">############### baz.h</span>
+
+  <span class="keyword">struct</span> BazPrivate;
+
+  <span class="keyword">struct</span> Baz
+  {
+      Baz();
+      <span class="operator">~</span>Baz();
+      <span class="type">int</span> value() <span class="keyword">const</span>;
+
+      BazPrivate <span class="operator">*</span>d;
+  };
+
+  <span class="preprocessor">############### baz.cpp</span>
+
+  <span class="preprocessor">#include &quot;baz.h&quot;</span>
+
+  <span class="keyword">struct</span> BazPrivate { BazPrivate() : i(<span class="number">23</span>) {} <span class="type">int</span> i; };
+
+  Baz<span class="operator">::</span>Baz() : d(<span class="keyword">new</span> BazPrivate) {}
+
+  Baz<span class="operator">::</span><span class="operator">~</span>Baz() { <span class="keyword">delete</span> d; }
+
+  <span class="type">int</span> Baz<span class="operator">::</span>value() <span class="keyword">const</span> { <span class="keyword">return</span> d<span class="operator">-</span><span class="operator">&gt;</span>i; }
+
+  <span class="preprocessor">############### bazuser.cpp</span>
+
+  <span class="preprocessor">#include &quot;baz.h&quot;</span>
+
+  <span class="type">int</span> bazUser() { Baz b; <span class="keyword">return</span> b<span class="operator">.</span>value(); }
+
+  <span class="preprocessor">############### main.cpp</span>
+
+  <span class="type">int</span> barUser();
+  <span class="type">int</span> bazUser();
+
+  <span class="type">int</span> main() { <span class="keyword">return</span> barUser() <span class="operator">+</span> bazUser(); }
+
+</pre>
+<p>Results:</p>
+<pre class="cpp">
+
+  Object file size:
+
+   <span class="number">14428</span> bar<span class="operator">.</span>o
+    <span class="number">4744</span> baz<span class="operator">.</span>o
+
+    <span class="number">8508</span> baruser<span class="operator">.</span>o
+    <span class="number">2952</span> bazuser<span class="operator">.</span>o
+
+  Symbols in bar<span class="operator">.</span>o:
+
+      <span class="number">00000000</span> W _ZN3Foo10BarPrivateC1Ev
+      <span class="number">00000036</span> T _ZN3Foo3BarC1Ev
+      <span class="number">00000000</span> T _ZN3Foo3BarC2Ev
+      <span class="number">00000080</span> T _ZN3Foo3BarD1Ev
+      <span class="number">0000006c</span> T _ZN3Foo3BarD2Ev
+      <span class="number">00000000</span> W _ZN14QScopedPointerIN3Foo10BarPrivateENS_21QScopedPointerDeleterIS2_EEEC1EPS2_
+      <span class="number">00000000</span> W _ZN14QScopedPointerIN3Foo10BarPrivateENS_21QScopedPointerDeleterIS2_EEED1Ev
+      <span class="number">00000000</span> W _ZN21QScopedPointerDeleterIN3Foo10BarPrivateEE7cleanupEPS2_
+      <span class="number">00000000</span> W _ZN7qt_noopEv
+               U _ZN9qt_assertEPKcS1_i
+      <span class="number">00000094</span> T _ZNK3Foo3Bar5valueEv
+      <span class="number">00000000</span> W _ZNK14QScopedPointerIN3Foo10BarPrivateENS_21QScopedPointerDeleterIS2_EEEptEv
+               U _ZdlPv
+               U _Znwj
+               U __gxx_personality_v0
+
+  Symbols in baz<span class="operator">.</span>o:
+
+      <span class="number">00000000</span> W _ZN3Foo10BazPrivateC1Ev
+      <span class="number">0000002c</span> T _ZN3Foo3BazC1Ev
+      <span class="number">00000000</span> T _ZN3Foo3BazC2Ev
+      <span class="number">0000006e</span> T _ZN3Foo3BazD1Ev
+      <span class="number">00000058</span> T _ZN3Foo3BazD2Ev
+      <span class="number">00000084</span> T _ZNK3Foo3Baz5valueEv
+               U _ZdlPv
+               U _Znwj
+               U __gxx_personality_v0
+
+</pre>
+<a name="documentation"></a>
+<h2 id="documentation">Documentation</h2>
+<p>The documentation is generated from source and header files. You document for the other developers, not for yourself. In the header files, document interfaces. That is, what the function does, not the implementation.</p>
+<p>In the .cpp files, you can document the implementation if the implementation is not obvious.</p>
+</div>
+<!-- @@@coding-style.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="qtcreator-ui-text.html">User Interface Text Guidelines</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qtcreator-api.html">Qt Creator API Reference</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

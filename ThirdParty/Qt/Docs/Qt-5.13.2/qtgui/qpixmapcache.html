@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qpixmapcache.cpp -->
+  <title>QPixmapCache Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QPixmapCache</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPixmapCache Class</h1>
+<!-- $$$QPixmapCache-brief -->
+<p>The <a href="qpixmapcache.html">QPixmapCache</a> class provides an application-wide cache for pixmaps. <a href="#details">More...</a></p>
+<!-- @@@QPixmapCache -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QPixmapCache&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr></table></div><ul>
+<li><a href="qpixmapcache-members.html">List of all members, including inherited members</a></li>
+<li><a href="qpixmapcache-obsolete.html">Obsolete members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> class </td><td class="memItemRight bottomAlign"><b><a href="qpixmapcache-key.html">Key</a></b></td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qpixmapcache.html#cacheLimit">cacheLimit</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpixmapcache.html#clear">clear</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpixmapcache.html#find-2">find</a></b>(const QString &amp;<i>key</i>, QPixmap *<i>pixmap</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpixmapcache.html#find-3">find</a></b>(const QPixmapCache::Key &amp;<i>key</i>, QPixmap *<i>pixmap</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpixmapcache.html#insert">insert</a></b>(const QString &amp;<i>key</i>, const QPixmap &amp;<i>pixmap</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPixmapCache::Key </td><td class="memItemRight bottomAlign"><b><a href="qpixmapcache.html#insert-1">insert</a></b>(const QPixmap &amp;<i>pixmap</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpixmapcache.html#remove">remove</a></b>(const QString &amp;<i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpixmapcache.html#remove-1">remove</a></b>(const QPixmapCache::Key &amp;<i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpixmapcache.html#replace">replace</a></b>(const QPixmapCache::Key &amp;<i>key</i>, const QPixmap &amp;<i>pixmap</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpixmapcache.html#setCacheLimit">setCacheLimit</a></b>(int <i>n</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPixmapCache-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This class is a tool for optimized drawing with <a href="qpixmap.html">QPixmap</a>. You can use it to store temporary pixmaps that are expensive to generate without using more storage space than <a href="qpixmapcache.html#cacheLimit">cacheLimit</a>(). Use <a href="qpixmapcache.html#insert">insert</a>() to insert pixmaps, find() to find them, and <a href="qpixmapcache.html#clear">clear</a>() to empty the cache.</p>
+<p><a href="qpixmapcache.html">QPixmapCache</a> contains no member data, only static functions to access the global pixmap cache. It creates an internal <a href="../qtcore/qcache.html">QCache</a> object for caching the pixmaps.</p>
+<p>The cache associates a pixmap with a user-provided string as a key, or with a <a href="qpixmapcache-key.html">QPixmapCache::Key</a> that the cache generates. Using <a href="qpixmapcache-key.html">QPixmapCache::Key</a> for keys is faster than using strings. The string API is very convenient for complex keys but the <a href="qpixmapcache-key.html">QPixmapCache::Key</a> API will be very efficient and convenient for a one-to-one object-to-pixmap mapping - in this case, you can store the keys as members of an object.</p>
+<p>If two pixmaps are inserted into the cache using equal keys then the last pixmap will replace the first pixmap in the cache. This follows the behavior of the <a href="../qtcore/qhash.html#qhash">QHash</a> and <a href="../qtcore/qcache.html">QCache</a> classes.</p>
+<p>The cache becomes full when the total size of all pixmaps in the cache exceeds <a href="qpixmapcache.html#cacheLimit">cacheLimit</a>(). The initial cache limit is 10240 KB (10 MB); you can change this by calling <a href="qpixmapcache.html#setCacheLimit">setCacheLimit</a>() with the required value. A pixmap takes roughly (<i>width</i> * <i>height</i> * <i>depth</i>)/8 bytes of memory.</p>
+<p>The <i>Qt Quarterly</i> article <a href="http://doc.qt.io/archives/qq/qq12-qpixmapcache.html">Optimizing with QPixmapCache</a> explains how to use <a href="qpixmapcache.html">QPixmapCache</a> to speed up applications by caching the results of painting.</p>
+<p><b>Note: </b><a href="qpixmapcache.html">QPixmapCache</a> is only usable from the application's main thread. Access from other threads will be ignored and return failure.</p></div>
+<p><b>See also </b><a href="../qtcore/qcache.html">QCache</a> and <a href="qpixmap.html">QPixmap</a>.</p>
+<!-- @@@QPixmapCache -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$cacheLimit[overload1]$$$cacheLimit -->
+<h3 class="fn" id="cacheLimit"><a name="cacheLimit"></a><code>[static] </code><span class="type">int</span> QPixmapCache::<span class="name">cacheLimit</span>()</h3>
+<p>Returns the cache limit (in kilobytes).</p>
+<p>The default cache limit is 10240 KB.</p>
+<p><b>See also </b><a href="qpixmapcache.html#setCacheLimit">setCacheLimit</a>().</p>
+<!-- @@@cacheLimit -->
+<!-- $$$clear[overload1]$$$clear -->
+<h3 class="fn" id="clear"><a name="clear"></a><code>[static] </code><span class="type">void</span> QPixmapCache::<span class="name">clear</span>()</h3>
+<p>Removes all pixmaps from the cache.</p>
+<!-- @@@clear -->
+<!-- $$$find$$$findconstQString&QPixmap* -->
+<h3 class="fn" id="find-2"><a name="find-2"></a><code>[static] </code><span class="type">bool</span> QPixmapCache::<span class="name">find</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>key</i>, <span class="type"><a href="qpixmap.html">QPixmap</a></span> *<i>pixmap</i>)</h3>
+<p>Looks for a cached pixmap associated with the given <i>key</i> in the cache. If the pixmap is found, the function sets <i>pixmap</i> to that pixmap and returns <code>true</code>; otherwise it leaves <i>pixmap</i> alone and returns <code>false</code>.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qpixmap.html">QPixmap</a></span> pm;
+  <span class="keyword">if</span> (<span class="operator">!</span><span class="type"><a href="qpixmapcache.html">QPixmapCache</a></span><span class="operator">::</span>find(<span class="string">&quot;my_big_image&quot;</span><span class="operator">,</span> <span class="operator">&amp;</span>pm)) {
+      pm<span class="operator">.</span>load(<span class="string">&quot;bigimage.png&quot;</span>);
+      <span class="type"><a href="qpixmapcache.html">QPixmapCache</a></span><span class="operator">::</span>insert(<span class="string">&quot;my_big_image&quot;</span><span class="operator">,</span> pm);
+  }
+  painter<span class="operator">-</span><span class="operator">&gt;</span>drawPixmap(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> pm);
+
+</pre>
+<p>This function was introduced in  Qt 4.6.</p>
+<!-- @@@find -->
+<!-- $$$find$$$findconstQPixmapCache::Key&QPixmap* -->
+<h3 class="fn" id="find-3"><a name="find-3"></a><code>[static] </code><span class="type">bool</span> QPixmapCache::<span class="name">find</span>(const <span class="type"><a href="qpixmapcache-key.html">QPixmapCache::Key</a></span> &amp;<i>key</i>, <span class="type"><a href="qpixmap.html">QPixmap</a></span> *<i>pixmap</i>)</h3>
+<p>Looks for a cached pixmap associated with the given <i>key</i> in the cache. If the pixmap is found, the function sets <i>pixmap</i> to that pixmap and returns <code>true</code>; otherwise it leaves <i>pixmap</i> alone and returns <code>false</code>. If the pixmap is not found, it means that the <i>key</i> is no longer valid, so it will be released for the next insertion.</p>
+<p>This function was introduced in  Qt 4.6.</p>
+<!-- @@@find -->
+<!-- $$$insert[overload1]$$$insertconstQString&constQPixmap& -->
+<h3 class="fn" id="insert"><a name="insert"></a><code>[static] </code><span class="type">bool</span> QPixmapCache::<span class="name">insert</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>key</i>, const <span class="type"><a href="qpixmap.html">QPixmap</a></span> &amp;<i>pixmap</i>)</h3>
+<p>Inserts a copy of the pixmap <i>pixmap</i> associated with the <i>key</i> into the cache.</p>
+<p>All pixmaps inserted by the Qt library have a key starting with &quot;$qt&quot;, so your own pixmap keys should never begin &quot;$qt&quot;.</p>
+<p>When a pixmap is inserted and the cache is about to exceed its limit, it removes pixmaps until there is enough room for the pixmap to be inserted.</p>
+<p>The oldest pixmaps (least recently accessed in the cache) are deleted when more space is needed.</p>
+<p>The function returns <code>true</code> if the object was inserted into the cache; otherwise it returns <code>false</code>.</p>
+<p><b>See also </b><a href="qpixmapcache.html#setCacheLimit">setCacheLimit</a>().</p>
+<!-- @@@insert -->
+<!-- $$$insert$$$insertconstQPixmap& -->
+<h3 class="fn" id="insert-1"><a name="insert-1"></a><code>[static] </code><span class="type"><a href="qpixmapcache-key.html">QPixmapCache::Key</a></span> QPixmapCache::<span class="name">insert</span>(const <span class="type"><a href="qpixmap.html">QPixmap</a></span> &amp;<i>pixmap</i>)</h3>
+<p>Inserts a copy of the given <i>pixmap</i> into the cache and returns a key that can be used to retrieve it.</p>
+<p>When a pixmap is inserted and the cache is about to exceed its limit, it removes pixmaps until there is enough room for the pixmap to be inserted.</p>
+<p>The oldest pixmaps (least recently accessed in the cache) are deleted when more space is needed.</p>
+<p>This function was introduced in  Qt 4.6.</p>
+<p><b>See also </b><a href="qpixmapcache.html#setCacheLimit">setCacheLimit</a>() and <a href="qpixmapcache.html#replace">replace</a>().</p>
+<!-- @@@insert -->
+<!-- $$$remove[overload1]$$$removeconstQString& -->
+<h3 class="fn" id="remove"><a name="remove"></a><code>[static] </code><span class="type">void</span> QPixmapCache::<span class="name">remove</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>key</i>)</h3>
+<p>Removes the pixmap associated with <i>key</i> from the cache.</p>
+<!-- @@@remove -->
+<!-- $$$remove$$$removeconstQPixmapCache::Key& -->
+<h3 class="fn" id="remove-1"><a name="remove-1"></a><code>[static] </code><span class="type">void</span> QPixmapCache::<span class="name">remove</span>(const <span class="type"><a href="qpixmapcache-key.html">QPixmapCache::Key</a></span> &amp;<i>key</i>)</h3>
+<p>Removes the pixmap associated with <i>key</i> from the cache and releases the key for a future insertion.</p>
+<p>This function was introduced in  Qt 4.6.</p>
+<!-- @@@remove -->
+<!-- $$$replace[overload1]$$$replaceconstQPixmapCache::Key&constQPixmap& -->
+<h3 class="fn" id="replace"><a name="replace"></a><code>[static] </code><span class="type">bool</span> QPixmapCache::<span class="name">replace</span>(const <span class="type"><a href="qpixmapcache-key.html">QPixmapCache::Key</a></span> &amp;<i>key</i>, const <span class="type"><a href="qpixmap.html">QPixmap</a></span> &amp;<i>pixmap</i>)</h3>
+<p>Replaces the pixmap associated with the given <i>key</i> with the <i>pixmap</i> specified. Returns <code>true</code> if the <i>pixmap</i> has been correctly inserted into the cache; otherwise returns <code>false</code>.</p>
+<p>This function was introduced in  Qt 4.6.</p>
+<p><b>See also </b><a href="qpixmapcache.html#setCacheLimit">setCacheLimit</a>() and <a href="qpixmapcache.html#insert">insert</a>().</p>
+<!-- @@@replace -->
+<!-- $$$setCacheLimit[overload1]$$$setCacheLimitint -->
+<h3 class="fn" id="setCacheLimit"><a name="setCacheLimit"></a><code>[static] </code><span class="type">void</span> QPixmapCache::<span class="name">setCacheLimit</span>(<span class="type">int</span> <i>n</i>)</h3>
+<p>Sets the cache limit to <i>n</i> kilobytes.</p>
+<p>The default setting is 10240 KB.</p>
+<p><b>See also </b><a href="qpixmapcache.html#cacheLimit">cacheLimit</a>().</p>
+<!-- @@@setCacheLimit -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

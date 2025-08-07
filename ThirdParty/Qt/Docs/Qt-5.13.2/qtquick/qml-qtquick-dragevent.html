@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickdroparea.cpp -->
+  <title>DragEvent QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >DragEvent QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">DragEvent QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$DragEvent-brief -->
+<p>Provides information about a drag event. <a href="#details">More...</a></p>
+<!-- @@@DragEvent -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick 2.13</td></tr></table></div><ul>
+<li><a href="qml-qtquick-dragevent-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-dragevent.html#accepted-prop">accepted</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-dragevent.html#action-prop">action</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-dragevent.html#colorData-prop">colorData</a></b></b> : color</li>
+<li class="fn"><b><b><a href="qml-qtquick-dragevent.html#drag.source-prop">drag.source</a></b></b> : Object</li>
+<li class="fn"><b><b><a href="qml-qtquick-dragevent.html#formats-prop">formats</a></b></b> : stringlist</li>
+<li class="fn"><b><b><a href="qml-qtquick-dragevent.html#hasColor-prop">hasColor</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-dragevent.html#hasHtml-prop">hasHtml</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-dragevent.html#hasText-prop">hasText</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-dragevent.html#hasUrls-prop">hasUrls</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-dragevent.html#html-prop">html</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-dragevent.html#keys-prop">keys</a></b></b> : stringlist</li>
+<li class="fn"><b><b><a href="qml-qtquick-dragevent.html#proposedAction-prop">proposedAction</a></b></b> : flags</li>
+<li class="fn"><b><b><a href="qml-qtquick-dragevent.html#supportedActions-prop">supportedActions</a></b></b> : flags</li>
+<li class="fn"><b><b><a href="qml-qtquick-dragevent.html#text-prop">text</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-dragevent.html#urls-prop">urls</a></b></b> : urllist</li>
+<li class="fn"><b><b><a href="qml-qtquick-dragevent.html#x-prop">x</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-dragevent.html#y-prop">y</a></b></b> : real</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-dragevent.html#accept-method-1">accept</a></b></b>(<i>action</i>)</li>
+<li class="fn"><b><b><a href="qml-qtquick-dragevent.html#accept-method">accept</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-dragevent.html#acceptProposedAction-method">acceptProposedAction</a></b></b>()</li>
+<li class="fn">string <b><b><a href="qml-qtquick-dragevent.html#getDataAsArrayBuffer-method">getDataAsArrayBuffer</a></b></b>(<i>format</i>)</li>
+<li class="fn">string <b><b><a href="qml-qtquick-dragevent.html#getDataAsString-method">getDataAsString</a></b></b>(<i>format</i>)</li>
+</ul>
+<!-- $$$DragEvent-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The position of the drag event can be obtained from the <a href="qml-qtquick-dragevent.html#x-prop">x</a> and <a href="qml-qtquick-dragevent.html#y-prop">y</a> properties, and the <a href="qml-qtquick-dragevent.html#keys-prop">keys</a> property identifies the drag keys of the event <a href="qml-qtquick-dragevent.html#drag.source-prop">source</a>.</p>
+<p>The existence of specific drag types can be determined using the <a href="qml-qtquick-dragevent.html#hasColor-prop">hasColor</a>, <a href="qml-qtquick-dragevent.html#hasHtml-prop">hasHtml</a>, <a href="qml-qtquick-dragevent.html#hasText-prop">hasText</a>, and <a href="qml-qtquick-dragevent.html#hasUrls-prop">hasUrls</a> properties.</p>
+<p>The list of all supplied formats can be determined using the <a href="qml-qtquick-dragevent.html#formats-prop">formats</a> property.</p>
+<p>Specific drag types can be obtained using the <a href="qml-qtquick-dragevent.html#colorData-prop">colorData</a>, <a href="qml-qtquick-dragevent.html#html-prop">html</a>, <a href="qml-qtquick-dragevent.html#text-prop">text</a>, and <a href="qml-qtquick-dragevent.html#urls-prop">urls</a> properties.</p>
+<p>A string version of any available mimeType can be obtained using <a href="qml-qtquick-dragevent.html#getDataAsString-method">getDataAsString</a>.</p>
+<!-- @@@DragEvent -->
+<h2>Property Documentation</h2>
+<!-- $$$accepted -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="accepted-prop"></a><span class="name">accepted</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the drag event was accepted by a handler.</p>
+<p>The default value is true.</p>
+</div></div><!-- @@@accepted -->
+<br/>
+<!-- $$$action -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="action-prop"></a><span class="name">action</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the action that the <a href="qml-qtquick-dragevent.html#drag.source-prop">source</a> is to perform on an accepted drop.</p>
+<p>The drop action may be one of:</p>
+<ul>
+<li>Qt.CopyAction Copy the data to the target.</li>
+<li>Qt.MoveAction Move the data from the source to the target.</li>
+<li>Qt.LinkAction Create a link from the source to the target.</li>
+<li>Qt.IgnoreAction Ignore the action (do nothing with the data).</li>
+</ul>
+</div></div><!-- @@@action -->
+<br/>
+<!-- $$$colorData -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="colorData-prop"></a><span class="name">colorData</span> : <span class="type"><a href="qml-color.html">color</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds color data, if any.</p>
+<p>This property was introduced in  Qt 5.2.</p>
+</div></div><!-- @@@colorData -->
+<br/>
+<!-- $$$drag.source -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="drag.source-prop"></a><span class="name">drag.source</span> : <span class="type">Object</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the source of a drag event.</p>
+</div></div><!-- @@@drag.source -->
+<br/>
+<!-- $$$formats -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="formats-prop"></a><span class="name">formats</span> : <span class="type">stringlist</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds a list of mime type formats contained in the drag data.</p>
+<p>This property was introduced in  Qt 5.2.</p>
+</div></div><!-- @@@formats -->
+<br/>
+<!-- $$$hasColor -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="hasColor-prop"></a><span class="name">hasColor</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the drag event contains a color item.</p>
+<p>This property was introduced in  Qt 5.2.</p>
+</div></div><!-- @@@hasColor -->
+<br/>
+<!-- $$$hasHtml -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="hasHtml-prop"></a><span class="name">hasHtml</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the drag event contains a html item.</p>
+<p>This property was introduced in  Qt 5.2.</p>
+</div></div><!-- @@@hasHtml -->
+<br/>
+<!-- $$$hasText -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="hasText-prop"></a><span class="name">hasText</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the drag event contains a text item.</p>
+<p>This property was introduced in  Qt 5.2.</p>
+</div></div><!-- @@@hasText -->
+<br/>
+<!-- $$$hasUrls -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="hasUrls-prop"></a><span class="name">hasUrls</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the drag event contains one or more url items.</p>
+<p>This property was introduced in  Qt 5.2.</p>
+</div></div><!-- @@@hasUrls -->
+<br/>
+<!-- $$$html -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="html-prop"></a><span class="name">html</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds html data, if any.</p>
+<p>This property was introduced in  Qt 5.2.</p>
+</div></div><!-- @@@html -->
+<br/>
+<!-- $$$keys -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="keys-prop"></a><span class="name">keys</span> : <span class="type">stringlist</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds a list of keys identifying the data type or source of a drag event.</p>
+</div></div><!-- @@@keys -->
+<br/>
+<!-- $$$proposedAction -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="proposedAction-prop"></a><span class="name">proposedAction</span> : <span class="type">flags</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the set of <a href="qml-qtquick-dragevent.html#action-prop">actions</a> proposed by the drag source.</p>
+<p>This property was introduced in  Qt 5.2.</p>
+</div></div><!-- @@@proposedAction -->
+<br/>
+<!-- $$$supportedActions -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="supportedActions-prop"></a><span class="name">supportedActions</span> : <span class="type">flags</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the set of <a href="qml-qtquick-dragevent.html#action-prop">actions</a> supported by the drag source.</p>
+</div></div><!-- @@@supportedActions -->
+<br/>
+<!-- $$$text -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="text-prop"></a><span class="name">text</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds text data, if any.</p>
+<p>This property was introduced in  Qt 5.2.</p>
+</div></div><!-- @@@text -->
+<br/>
+<!-- $$$urls -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="urls-prop"></a><span class="name">urls</span> : <span class="type">urllist</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds a list of urls, if any.</p>
+<p>This property was introduced in  Qt 5.2.</p>
+</div></div><!-- @@@urls -->
+<br/>
+<!-- $$$x -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="x-prop"></a><span class="name">x</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the x coordinate of a drag event.</p>
+</div></div><!-- @@@x -->
+<br/>
+<!-- $$$y -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="y-prop"></a><span class="name">y</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the y coordinate of a drag event.</p>
+</div></div><!-- @@@y -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$ -->
+<div class="qmlitem"><div class="fngroup">
+<div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="accept-method"></a><span class="name">accept</span>()</p></td></tr>
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="accept-method-1"></a><span class="name">accept</span>(<i>action</i>)</p></td></tr>
+</table></div>
+</div></div><div class="qmldoc"><p>Accepts the drag event.</p>
+<p>If an <i>action</i> is specified it will overwrite the value of the <a href="qml-qtquick-dragevent.html#action-prop">action</a> property.</p>
+</div></div><!-- @@@ -->
+<br/>
+<!-- $$$acceptProposedAction[overload1]$$$acceptProposedAction -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="acceptProposedAction-method"></a><span class="name">acceptProposedAction</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Accepts the drag event with the <a href="qml-qtquick-dragevent.html#proposedAction-prop">proposedAction</a>.</p>
+<p>This method was introduced in  Qt 5.2.</p>
+</div></div><!-- @@@acceptProposedAction -->
+<br/>
+<!-- $$$getDataAsArrayBuffer[overload1]$$$getDataAsArrayBuffer -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="getDataAsArrayBuffer-method"></a><span class="type"><a href="../qtqml/qml-string.html">string</a></span> <span class="name">getDataAsArrayBuffer</span>(<i>format</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the data for the given <i>format</i> into an ArrayBuffer, which can easily be translated into a <a href="../qtcore/qbytearray.html">QByteArray</a>. <i>format</i> should be one contained in the <a href="qml-qtquick-dragevent.html#formats-prop">formats</a> property.</p>
+<p>This method was introduced in  Qt 5.5.</p>
+</div></div><!-- @@@getDataAsArrayBuffer -->
+<br/>
+<!-- $$$getDataAsString[overload1]$$$getDataAsString -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="getDataAsString-method"></a><span class="type"><a href="../qtqml/qml-string.html">string</a></span> <span class="name">getDataAsString</span>(<i>format</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the data for the given <i>format</i> converted to a string. <i>format</i> should be one contained in the <a href="qml-qtquick-dragevent.html#formats-prop">formats</a> property.</p>
+<p>This method was introduced in  Qt 5.2.</p>
+</div></div><!-- @@@getDataAsString -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

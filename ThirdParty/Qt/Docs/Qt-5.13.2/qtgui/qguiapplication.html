@@ -1,0 +1,708 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qguiapplication.cpp -->
+  <title>QGuiApplication Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QGuiApplication</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#macros">Macros</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QGuiApplication Class</h1>
+<!-- $$$QGuiApplication-brief -->
+<p>The <a href="qguiapplication.html">QGuiApplication</a> class manages the GUI application's control flow and main settings. <a href="#details">More...</a></p>
+<!-- @@@QGuiApplication -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QGuiApplication&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.0</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qcoreapplication.html">QCoreApplication</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="../qtwidgets/qapplication.html">QApplication</a></p>
+</td></tr></table></div><p>This class was introduced in  Qt 5.0.</p>
+<ul>
+<li><a href="qguiapplication-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qguiapplication.html#applicationDisplayName-prop">applicationDisplayName</a></b> : QString</li>
+<li class="fn"><b><a href="qguiapplication.html#desktopFileName-prop">desktopFileName</a></b> : QString</li>
+<li class="fn"><b><a href="qguiapplication.html#layoutDirection-prop">layoutDirection</a></b> : Qt::LayoutDirection</li>
+<li class="fn"><b><a href="qguiapplication.html#platformName-prop">platformName</a></b> : const QString</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qguiapplication.html#primaryScreen-prop">primaryScreen</a></b> : QScreen* const</li>
+<li class="fn"><b><a href="qguiapplication.html#quitOnLastWindowClosed-prop">quitOnLastWindowClosed</a></b> : bool</li>
+<li class="fn"><b><a href="qguiapplication.html#windowIcon-prop">windowIcon</a></b> : QIcon</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#QGuiApplication">QGuiApplication</a></b>(int &amp;<i>argc</i>, char **<i>argv</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#dtor.QGuiApplication">~QGuiApplication</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#devicePixelRatio">devicePixelRatio</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#isSavingSession">isSavingSession</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#isSessionRestored">isSessionRestored</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#sessionId">sessionId</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#sessionKey">sessionKey</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#notify">notify</a></b>(QObject *<i>object</i>, QEvent *<i>event</i>) override</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#applicationDisplayName-prop">applicationDisplayNameChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#applicationStateChanged">applicationStateChanged</a></b>(Qt::ApplicationState <i>state</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#commitDataRequest">commitDataRequest</a></b>(QSessionManager &amp;<i>manager</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#focusObjectChanged">focusObjectChanged</a></b>(QObject *<i>focusObject</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#focusWindowChanged">focusWindowChanged</a></b>(QWindow *<i>focusWindow</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#fontChanged">fontChanged</a></b>(const QFont &amp;<i>font</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#fontDatabaseChanged">fontDatabaseChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#lastWindowClosed">lastWindowClosed</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#layoutDirection-prop">layoutDirectionChanged</a></b>(Qt::LayoutDirection <i>direction</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#paletteChanged">paletteChanged</a></b>(const QPalette &amp;<i>palette</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#primaryScreen-prop">primaryScreenChanged</a></b>(QScreen *<i>screen</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#saveStateRequest">saveStateRequest</a></b>(QSessionManager &amp;<i>manager</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#screenAdded">screenAdded</a></b>(QScreen *<i>screen</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#screenRemoved">screenRemoved</a></b>(QScreen *<i>screen</i>)</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QWindowList </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#allWindows">allWindows</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#applicationDisplayName-prop">applicationDisplayName</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::ApplicationState </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#applicationState">applicationState</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#changeOverrideCursor">changeOverrideCursor</a></b>(const QCursor &amp;<i>cursor</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QClipboard *</td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#clipboard">clipboard</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#desktopFileName-prop">desktopFileName</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#desktopSettingsAware">desktopSettingsAware</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#exec">exec</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QObject *</td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#focusObject">focusObject</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWindow *</td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#focusWindow">focusWindow</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QFont </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#font">font</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QInputMethod *</td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#inputMethod">inputMethod</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#isFallbackSessionManagementEnabled">isFallbackSessionManagementEnabled</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#isLeftToRight">isLeftToRight</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#isRightToLeft">isRightToLeft</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::KeyboardModifiers </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#keyboardModifiers">keyboardModifiers</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::LayoutDirection </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#layoutDirection-prop">layoutDirection</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWindow *</td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#modalWindow">modalWindow</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::MouseButtons </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#mouseButtons">mouseButtons</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCursor *</td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#overrideCursor">overrideCursor</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPalette </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#palette">palette</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QFunctionPointer </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#platformFunction">platformFunction</a></b>(const QByteArray &amp;<i>function</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#platformName-prop">platformName</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPlatformNativeInterface *</td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#platformNativeInterface">platformNativeInterface</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QScreen *</td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#primaryScreen-prop">primaryScreen</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::KeyboardModifiers </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#queryKeyboardModifiers">queryKeyboardModifiers</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#quitOnLastWindowClosed-prop">quitOnLastWindowClosed</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#restoreOverrideCursor">restoreOverrideCursor</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QScreen *</td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#screenAt">screenAt</a></b>(const QPoint &amp;<i>point</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QScreen *&gt; </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#screens">screens</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#applicationDisplayName-prop">setApplicationDisplayName</a></b>(const QString &amp;<i>name</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#desktopFileName-prop">setDesktopFileName</a></b>(const QString &amp;<i>name</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#setDesktopSettingsAware">setDesktopSettingsAware</a></b>(bool <i>on</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#setFallbackSessionManagementEnabled">setFallbackSessionManagementEnabled</a></b>(bool <i>enabled</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#setFont">setFont</a></b>(const QFont &amp;<i>font</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#layoutDirection-prop">setLayoutDirection</a></b>(Qt::LayoutDirection <i>direction</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#setOverrideCursor">setOverrideCursor</a></b>(const QCursor &amp;<i>cursor</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#setPalette">setPalette</a></b>(const QPalette &amp;<i>pal</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#quitOnLastWindowClosed-prop">setQuitOnLastWindowClosed</a></b>(bool <i>quit</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#windowIcon-prop">setWindowIcon</a></b>(const QIcon &amp;<i>icon</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStyleHints *</td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#styleHints">styleHints</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#sync">sync</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWindow *</td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#topLevelAt">topLevelAt</a></b>(const QPoint &amp;<i>pos</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWindowList </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#topLevelWindows">topLevelWindows</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QIcon </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#windowIcon-prop">windowIcon</a></b>()</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#event">event</a></b>(QEvent *<i>e</i>) override</td></tr>
+</table></div>
+<a name="macros"></a>
+<h2 id="macros">Macros</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qguiapplication.html#qGuiApp">qGuiApp</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QGuiApplication-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qguiapplication.html">QGuiApplication</a> contains the main event loop, where all events from the window system and other sources are processed and dispatched. It also handles the application's initialization and finalization, and provides session management. In addition, <a href="qguiapplication.html">QGuiApplication</a> handles most of the system-wide and application-wide settings.</p>
+<p>For any GUI application using Qt, there is precisely <b>one</b> <a href="qguiapplication.html">QGuiApplication</a> object no matter whether the application has 0, 1, 2 or more windows at any given time. For non-GUI Qt applications, use <a href="../qtcore/qcoreapplication.html">QCoreApplication</a> instead, as it does not depend on the Qt GUI module. For <a href="../qtwidgets/qwidget.html">QWidget</a> based Qt applications, use <a href="../qtwidgets/qapplication.html">QApplication</a> instead, as it provides some functionality needed for creating <a href="../qtwidgets/qwidget.html">QWidget</a> instances.</p>
+<p>The <a href="qguiapplication.html">QGuiApplication</a> object is accessible through the <a href="../qtcore/qcoreapplication.html#instance">instance</a>() function, which returns a pointer equivalent to the global <a href="../qtwidgets/qapplication.html#qApp">qApp</a> pointer.</p>
+<p><a href="qguiapplication.html">QGuiApplication</a>'s main areas of responsibility are:</p>
+<ul>
+<li>It initializes the application with the user's desktop settings, such as <a href="qguiapplication.html#palette">palette</a>(), <a href="qguiapplication.html#font">font</a>() and <a href="qguiapplication.html#styleHints">styleHints</a>(). It keeps track of these properties in case the user changes the desktop globally, for example, through some kind of control panel.</li>
+<li>It performs event handling, meaning that it receives events from the underlying window system and dispatches them to the relevant widgets. You can send your own events to windows by using <a href="../qtcore/qcoreapplication.html#sendEvent">sendEvent</a>() and <a href="../qtcore/qcoreapplication.html#postEvent">postEvent</a>().</li>
+<li>It parses common command line arguments and sets its internal state accordingly. See the <a href="qguiapplication.html#QGuiApplication">constructor documentation</a> below for more details.</li>
+<li>It provides localization of strings that are visible to the user via <a href="../qtcore/qcoreapplication.html#translate">translate</a>().</li>
+<li>It provides some magical objects like the <a href="qguiapplication.html#clipboard">clipboard</a>().</li>
+<li>It knows about the application's windows. You can ask which window is at a certain position using <a href="qguiapplication.html#topLevelAt">topLevelAt</a>(), get a list of <a href="qguiapplication.html#topLevelWindows">topLevelWindows</a>(), etc.</li>
+<li>It manages the application's mouse cursor handling, see <a href="qguiapplication.html#setOverrideCursor">setOverrideCursor</a>()</li>
+<li>It provides support for sophisticated <a href="../qtdoc/ipc.html#session-management">session management</a>. This makes it possible for applications to terminate gracefully when the user logs out, to cancel a shutdown process if termination isn't possible and even to preserve the entire application's state for a future session. See <a href="qguiapplication.html#isSessionRestored">isSessionRestored</a>(), <a href="qguiapplication.html#sessionId">sessionId</a>() and <a href="qguiapplication.html#commitDataRequest">commitDataRequest</a>() and <a href="qguiapplication.html#saveStateRequest">saveStateRequest</a>() for details.</li>
+</ul>
+<p>Since the <a href="qguiapplication.html">QGuiApplication</a> object does so much initialization, it <i>must</i> be created before any other objects related to the user interface are created. <a href="qguiapplication.html">QGuiApplication</a> also deals with common command line arguments. Hence, it is usually a good idea to create it <i>before</i> any interpretation or modification of <code>argv</code> is done in the application itself.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th  colspan="2">Groups of functions</th></tr></thead>
+<tr valign="top" class="odd"><td >System settings</td><td ><a href="qguiapplication.html#desktopSettingsAware">desktopSettingsAware</a>(), <a href="qguiapplication.html#setDesktopSettingsAware">setDesktopSettingsAware</a>(), <a href="qguiapplication.html#styleHints">styleHints</a>(), <a href="qguiapplication.html#palette">palette</a>(), <a href="qguiapplication.html#setPalette">setPalette</a>(), <a href="qguiapplication.html#font">font</a>(), <a href="qguiapplication.html#setFont">setFont</a>().</td></tr>
+<tr valign="top" class="even"><td >Event handling</td><td ><a href="qguiapplication.html#exec">exec</a>(), <a href="../qtcore/qcoreapplication.html#processEvents">processEvents</a>(), <a href="../qtcore/qcoreapplication.html#exit">exit</a>(), <a href="../qtcore/qcoreapplication.html#quit">quit</a>(). <a href="../qtcore/qcoreapplication.html#sendEvent">sendEvent</a>(), <a href="../qtcore/qcoreapplication.html#postEvent">postEvent</a>(), <a href="../qtcore/qcoreapplication.html#sendPostedEvents">sendPostedEvents</a>(), <a href="../qtcore/qcoreapplication.html#removePostedEvents">removePostedEvents</a>(), hasPendingEvents(), <a href="qguiapplication.html#notify">notify</a>().</td></tr>
+<tr valign="top" class="odd"><td >Windows</td><td ><a href="qguiapplication.html#allWindows">allWindows</a>(), <a href="qguiapplication.html#topLevelWindows">topLevelWindows</a>(), <a href="qguiapplication.html#focusWindow">focusWindow</a>(), <a href="qguiapplication.html#clipboard">clipboard</a>(), <a href="qguiapplication.html#topLevelAt">topLevelAt</a>().</td></tr>
+<tr valign="top" class="even"><td >Advanced cursor handling</td><td ><a href="qguiapplication.html#overrideCursor">overrideCursor</a>(), <a href="qguiapplication.html#setOverrideCursor">setOverrideCursor</a>(), <a href="qguiapplication.html#restoreOverrideCursor">restoreOverrideCursor</a>().</td></tr>
+<tr valign="top" class="odd"><td >Session management</td><td ><a href="qguiapplication.html#isSessionRestored">isSessionRestored</a>(), <a href="qguiapplication.html#sessionId">sessionId</a>(), <a href="qguiapplication.html#commitDataRequest">commitDataRequest</a>(), <a href="qguiapplication.html#saveStateRequest">saveStateRequest</a>().</td></tr>
+<tr valign="top" class="even"><td >Miscellaneous</td><td ><a href="../qtcore/qcoreapplication.html#startingUp">startingUp</a>(), <a href="../qtcore/qcoreapplication.html#closingDown">closingDown</a>().</td></tr>
+</table></div>
+</div>
+<p><b>See also </b><a href="../qtcore/qcoreapplication.html">QCoreApplication</a>, <a href="../qtcore/qabstracteventdispatcher.html">QAbstractEventDispatcher</a>, and <a href="../qtcore/qeventloop.html">QEventLoop</a>.</p>
+<!-- @@@QGuiApplication -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$applicationDisplayName-prop$$$applicationDisplayName$$$setApplicationDisplayNameconstQString&$$$applicationDisplayNameChanged -->
+<h3 class="fn" id="applicationDisplayName-prop"><a name="applicationDisplayName-prop"></a><span class="name">applicationDisplayName</span> : <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>This property holds the user-visible name of this application</p>
+<p>This name is shown to the user, for instance in window titles. It can be translated, if necessary.</p>
+<p>If not set, the application display name defaults to the application name.</p>
+<p>This property was introduced in  Qt 5.0.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>applicationDisplayName</b></span>()</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setApplicationDisplayName</b></span>(const QString &amp;<i>name</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>applicationDisplayNameChanged</b></span>()</td></tr>
+</table></div>
+<p><b>See also </b><a href="../qtcore/qcoreapplication.html#applicationName-prop">applicationName</a>.</p>
+<!-- @@@applicationDisplayName -->
+<!-- $$$desktopFileName-prop$$$desktopFileName$$$setDesktopFileNameconstQString& -->
+<h3 class="fn" id="desktopFileName-prop"><a name="desktopFileName-prop"></a><span class="name">desktopFileName</span> : <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>This property holds the base name of the desktop entry for this application</p>
+<p>This is the file name, without the full path, of the desktop entry that represents this application according to the freedesktop desktop entry specification.</p>
+<p>This property gives a precise indication of what desktop entry represents the application and it is needed by the windowing system to retrieve such information without resorting to imprecise heuristics.</p>
+<p>The latest version of the freedesktop desktop entry specification can be obtained <a href="http://standards.freedesktop.org/desktop-entry-spec/latest/">here</a>.</p>
+<p>This property was introduced in  Qt 5.7.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>desktopFileName</b></span>()</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setDesktopFileName</b></span>(const QString &amp;<i>name</i>)</td></tr>
+</table></div>
+<!-- @@@desktopFileName -->
+<!-- $$$layoutDirection-prop$$$layoutDirection$$$setLayoutDirectionQt::LayoutDirection$$$layoutDirectionChangedQt::LayoutDirection -->
+<h3 class="fn" id="layoutDirection-prop"><a name="layoutDirection-prop"></a><span class="name">layoutDirection</span> : <span class="type"><a href="../qtcore/qt.html#LayoutDirection-enum">Qt::LayoutDirection</a></span></h3>
+<p>This property holds the default layout direction for this application</p>
+<p>On system start-up, the default layout direction depends on the application's language.</p>
+<p>The notifier signal was introduced in Qt 5.4&#x2e;</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt::LayoutDirection </td><td class="memItemRight bottomAlign"><span class="name"><b>layoutDirection</b></span>()</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setLayoutDirection</b></span>(Qt::LayoutDirection <i>direction</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>layoutDirectionChanged</b></span>(Qt::LayoutDirection <i>direction</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="../qtwidgets/qwidget.html#layoutDirection-prop">QWidget::layoutDirection</a>, <a href="qguiapplication.html#isLeftToRight">isLeftToRight</a>(), and <a href="qguiapplication.html#isRightToLeft">isRightToLeft</a>().</p>
+<!-- @@@layoutDirection -->
+<!-- $$$platformName-prop$$$platformName -->
+<h3 class="fn" id="platformName-prop"><a name="platformName-prop"></a><span class="name">platformName</span> : const <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>This property holds the name of the underlying platform plugin.</p>
+<p>The QPA platform plugins are located in <code>qtbase\src\plugins\platforms</code>. At the time of writing, the following platform plugin names are supported:</p>
+<ul>
+<li><code>android</code></li>
+<li><code>cocoa</code> is a platform plugin for <a href="../qtdoc/internationalization.html#macos">macOS</a>.</li>
+<li><code>directfb</code></li>
+<li><code>eglfs</code> is a platform plugin for running Qt5 applications on top of EGL and OpenGL ES 2.0 without an actual windowing system (like X11 or Wayland). For more information, see <a href="../qtdoc/vxworks.html#eglfs">EGLFS</a>.</li>
+<li><code>ios</code> (also used for tvOS)</li>
+<li><code>kms</code> is an experimental platform plugin using kernel modesetting and <a href="http://dri.freedesktop.org/wiki/DRM">DRM</a> (Direct Rendering Manager).</li>
+<li><code>linuxfb</code> writes directly to the framebuffer. For more information, see <a href="../qtdoc/embedded-linux.html#linuxfb">LinuxFB</a>.</li>
+<li><code>minimal</code> is provided as an examples for developers who want to write their own platform plugins. However, you can use the plugin to run GUI applications in environments without a GUI, such as servers.</li>
+<li><code>minimalegl</code> is an example plugin.</li>
+<li><code>offscreen</code></li>
+<li><code>openwfd</code></li>
+<li><code>qnx</code></li>
+<li><code>windows</code></li>
+<li><code>wayland</code> is a platform plugin for modern Linux desktops and some embedded systems.</li>
+<li><code>xcb</code> is the X11 plugin used on regular desktop Linux platforms.</li>
+</ul>
+<p>For more information about the platform plugins for embedded Linux devices, see <a href="../qtdoc/embedded-linux.html">Qt for Embedded Linux</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>platformName</b></span>()</td></tr>
+</table></div>
+<!-- @@@platformName -->
+<!-- $$$primaryScreen-prop$$$primaryScreen$$$primaryScreenChangedQScreen* -->
+<h3 class="fn" id="primaryScreen-prop"><a name="primaryScreen-prop"></a><span class="name">primaryScreen</span> : <span class="type"><a href="qscreen.html">QScreen</a></span>* const</h3>
+<p>This property holds the primary (or default) screen of the application.</p>
+<p>This will be the screen where QWindows are initially shown, unless otherwise specified.</p>
+<p>The primaryScreenChanged signal was introduced in Qt 5.6&#x2e;</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QScreen *</td><td class="memItemRight bottomAlign"><span class="name"><b>primaryScreen</b></span>()</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>primaryScreenChanged</b></span>(QScreen *<i>screen</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qguiapplication.html#screens">screens</a>().</p>
+<!-- @@@primaryScreen -->
+<!-- $$$quitOnLastWindowClosed-prop$$$quitOnLastWindowClosed$$$setQuitOnLastWindowClosedbool -->
+<h3 class="fn" id="quitOnLastWindowClosed-prop"><a name="quitOnLastWindowClosed-prop"></a><span class="name">quitOnLastWindowClosed</span> : <span class="type">bool</span></h3>
+<p>This property holds whether the application implicitly quits when the last window is closed.</p>
+<p>The default is <code>true</code>.</p>
+<p>If this property is <code>true</code>, the applications quits when the last visible primary window (i.e&#x2e; window with no parent) is closed.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>quitOnLastWindowClosed</b></span>()</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setQuitOnLastWindowClosed</b></span>(bool <i>quit</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="../qtcore/qcoreapplication.html#quit">quit</a>() and <a href="qwindow.html#close">QWindow::close</a>().</p>
+<!-- @@@quitOnLastWindowClosed -->
+<!-- $$$windowIcon-prop$$$windowIcon$$$setWindowIconconstQIcon& -->
+<h3 class="fn" id="windowIcon-prop"><a name="windowIcon-prop"></a><span class="name">windowIcon</span> : <span class="type"><a href="qicon.html">QIcon</a></span></h3>
+<p>This property holds the default window icon</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QIcon </td><td class="memItemRight bottomAlign"><span class="name"><b>windowIcon</b></span>()</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setWindowIcon</b></span>(const QIcon &amp;<i>icon</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qwindow.html#setIcon">QWindow::setIcon</a>() and <a href="../qtdoc/appicon.html">Setting the Application Icon</a>.</p>
+<!-- @@@windowIcon -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QGuiApplication[overload1]$$$QGuiApplicationint&char** -->
+<h3 class="fn" id="QGuiApplication"><a name="QGuiApplication"></a>QGuiApplication::<span class="name">QGuiApplication</span>(<span class="type">int</span> &amp;<i>argc</i>, <span class="type">char</span> **<i>argv</i>)</h3>
+<p>Initializes the window system and constructs an application object with <i>argc</i> command line arguments in <i>argv</i>.</p>
+<p><b>Warning:</b> The data referred to by <i>argc</i> and <i>argv</i> must stay valid for the entire lifetime of the <a href="qguiapplication.html">QGuiApplication</a> object. In addition, <i>argc</i> must be greater than zero and <i>argv</i> must contain at least one valid character string.</p>
+<p>The global <code>qApp</code> pointer refers to this application object. Only one application object should be created.</p>
+<p>This application object must be constructed before any <a href="qpaintdevice.html">paint devices</a> (including pixmaps, bitmaps etc.)&#x2e;</p>
+<p><b>Note: </b><i>argc</i> and <i>argv</i> might be changed as Qt removes command line arguments that it recognizes.</p><a name="supported-command-line-options"></a>
+<h4 id="supported-command-line-options">Supported Command Line Options</h4>
+<p>All Qt programs automatically support a set of command-line options that allow modifying the way Qt will interact with the windowing system. Some of the options are also accessible via environment variables, which are the preferred form if the application can launch GUI sub-processes or other applications (environment variables will be inherited by child processes). When in doubt, use the environment variables.</p>
+<p>The options currently supported are the following:</p>
+<ul>
+<li><code>-platform</code> <i><a href="qguiapplication.html#platformName-prop">platformName</a>[:options]</i>, specifies the <a href="../qtdoc/qt5-intro.html#qt-platform-abstraction">Qt Platform Abstraction</a> (QPA) plugin.<p>Overrides the <code>QT_QPA_PLATFORM</code> environment variable.</p>
+</li>
+<li><code>-platformpluginpath</code> <i>path</i>, specifies the path to platform plugins.<p>Overrides the <code>QT_QPA_PLATFORM_PLUGIN_PATH</code> environment variable.</p>
+</li>
+<li><code>-platformtheme</code> <i>platformTheme</i>, specifies the platform theme.<p>Overrides the <code>QT_QPA_PLATFORMTHEME</code> environment variable.</p>
+</li>
+<li><code>-plugin</code> <i>plugin</i>, specifies additional plugins to load. The argument may appear multiple times.<p>Concatenated with the plugins in the <code>QT_QPA_GENERIC_PLUGINS</code> environment variable.</p>
+</li>
+<li><code>-qmljsdebugger=</code>, activates the QML/JS debugger with a specified port. The value must be of format <code>port:1234</code><i>[,block]</i>, where <i>block</i> is optional and will make the application wait until a debugger connects to it.</li>
+<li><code>-qwindowgeometry</code> <i>geometry</i>, specifies window geometry for the main window using the X11-syntax. For example: <code>-qwindowgeometry 100x100+50+50</code></li>
+<li><code>-qwindowicon</code>, sets the default window icon</li>
+<li><code>-qwindowtitle</code>, sets the title of the first window</li>
+<li><code>-reverse</code>, sets the application's layout direction to <a href="../qtcore/qt.html#LayoutDirection-enum">Qt::RightToLeft</a>. This option is intended to aid debugging and should not be used in production. The default value is automatically detected from the user's locale (see also <a href="../qtcore/qlocale.html#textDirection">QLocale::textDirection</a>()).</li>
+<li><code>-session</code> <i>session</i>, restores the application from an earlier <a href="../qtdoc/ipc.html#session-management">session</a>.</li>
+</ul>
+<p>The following standard command line options are available for X11:</p>
+<ul>
+<li><code>-display</code> <i>hostname:screen_number</i>, switches displays on X11.<p>Overrides the <code>DISPLAY</code> environment variable.</p>
+</li>
+<li><code>-geometry</code> <i>geometry</i>, same as <code>-qwindowgeometry</code>.</li>
+</ul>
+<a name="platform-specific-arguments"></a>
+<h4 id="platform-specific-arguments">Platform-Specific Arguments</h4>
+<p>You can specify platform-specific arguments for the <code>-platform</code> option. Place them after the platform plugin name following a colon as a comma-separated list. For example, <code>-platform windows:dialogs=xp,fontengine=freetype</code>.</p>
+<p>The following parameters are available for <code>-platform windows</code>:</p>
+<ul>
+<li><code>dialogs=[xp|none]</code>, <code>xp</code> uses XP-style native dialogs and <code>none</code> disables them.</li>
+<li><code>fontengine=freetype</code>, uses the <a href="qtgui-attribution-freetype.html#freetype">FreeType</a> font engine.</li>
+<li><code>menus=[native|none]</code>, controls the use of native menus.<p>Native menus are implemented using Win32 API and are simpler than <a href="../qtwidgets/qmenu.html">QMenu</a>-based menus in for example that they do allow for placing widgets on them or changing properties like fonts and do not provide hover signals. They are mainly intended for Qt Quick. By default, they will be used if the application is not an instance of <a href="../qtwidgets/qapplication.html">QApplication</a> or for Qt Quick Controls 2 applications.</p>
+</li>
+<li><code>altgr</code>, detect the key <code>AltGr</code> found on some keyboards as <a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::GroupSwitchModifier</a>.</li>
+</ul>
+<p>The following parameter is available for <code>-platform cocoa</code> (on <a href="../qtdoc/internationalization.html#macos">macOS</a>):</p>
+<ul>
+<li><code>fontengine=freetype</code>, uses the <a href="qtgui-attribution-freetype.html#freetype">FreeType</a> font engine.</li>
+</ul>
+<p>For more information about the platform-specific arguments available for embedded Linux platforms, see <a href="../qtdoc/embedded-linux.html">Qt for Embedded Linux</a>.</p>
+<p><b>See also </b><a href="../qtcore/qcoreapplication.html#arguments">arguments</a>() and <a href="qguiapplication.html#platformName-prop">QGuiApplication::platformName</a>.</p>
+<!-- @@@QGuiApplication -->
+<!-- $$$applicationStateChanged[overload1]$$$applicationStateChangedQt::ApplicationState -->
+<h3 class="fn" id="applicationStateChanged"><a name="applicationStateChanged"></a><code>[signal] </code><span class="type">void</span> QGuiApplication::<span class="name">applicationStateChanged</span>(<span class="type"><a href="../qtcore/qt.html#ApplicationState-enum">Qt::ApplicationState</a></span> <i>state</i>)</h3>
+<p>This signal is emitted when the <i>state</i> of the application changes.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<p><b>See also </b><a href="qguiapplication.html#applicationState">applicationState</a>().</p>
+<!-- @@@applicationStateChanged -->
+<!-- $$$commitDataRequest[overload1]$$$commitDataRequestQSessionManager& -->
+<h3 class="fn" id="commitDataRequest"><a name="commitDataRequest"></a><code>[signal] </code><span class="type">void</span> QGuiApplication::<span class="name">commitDataRequest</span>(<span class="type"><a href="qsessionmanager.html">QSessionManager</a></span> &amp;<i>manager</i>)</h3>
+<p>This signal deals with <a href="../qtdoc/ipc.html#session-management">session management</a>. It is emitted when the <a href="qsessionmanager.html">QSessionManager</a> wants the application to commit all its data.</p>
+<p>Usually this means saving all open files, after getting permission from the user. Furthermore you may want to provide a means by which the user can cancel the shutdown.</p>
+<p>You should not exit the application within this signal. Instead, the session manager may or may not do this afterwards, depending on the context.</p>
+<p><b>Warning:</b> Within this signal, no user interaction is possible, <i>unless</i> you ask the <i>manager</i> for explicit permission. See <a href="qsessionmanager.html#allowsInteraction">QSessionManager::allowsInteraction</a>() and <a href="qsessionmanager.html#allowsErrorInteraction">QSessionManager::allowsErrorInteraction</a>() for details and example usage.</p>
+<p><b>Note: </b>You should use <a href="../qtcore/qt.html#ConnectionType-enum">Qt::DirectConnection</a> when connecting to this signal.</p><p>This function was introduced in  Qt 4.2.</p>
+<p><b>See also </b><a href="qguiapplication.html#setFallbackSessionManagementEnabled">setFallbackSessionManagementEnabled</a>(), <a href="qguiapplication.html#isSessionRestored">isSessionRestored</a>(), <a href="qguiapplication.html#sessionId">sessionId</a>(), <a href="qguiapplication.html#saveStateRequest">saveStateRequest</a>(), and <a href="../qtdoc/ipc.html#session-management">Session Management</a>.</p>
+<!-- @@@commitDataRequest -->
+<!-- $$$focusObjectChanged[overload1]$$$focusObjectChangedQObject* -->
+<h3 class="fn" id="focusObjectChanged"><a name="focusObjectChanged"></a><code>[signal] </code><span class="type">void</span> QGuiApplication::<span class="name">focusObjectChanged</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>focusObject</i>)</h3>
+<p>This signal is emitted when final receiver of events tied to focus is changed. <i>focusObject</i> is the new receiver.</p>
+<p><b>See also </b><a href="qguiapplication.html#focusObject">focusObject</a>().</p>
+<!-- @@@focusObjectChanged -->
+<!-- $$$focusWindowChanged[overload1]$$$focusWindowChangedQWindow* -->
+<h3 class="fn" id="focusWindowChanged"><a name="focusWindowChanged"></a><code>[signal] </code><span class="type">void</span> QGuiApplication::<span class="name">focusWindowChanged</span>(<span class="type"><a href="qwindow.html">QWindow</a></span> *<i>focusWindow</i>)</h3>
+<p>This signal is emitted when the focused window changes. <i>focusWindow</i> is the new focused window.</p>
+<p><b>See also </b><a href="qguiapplication.html#focusWindow">focusWindow</a>().</p>
+<!-- @@@focusWindowChanged -->
+<!-- $$$fontChanged[overload1]$$$fontChangedconstQFont& -->
+<h3 class="fn" id="fontChanged"><a name="fontChanged"></a><code>[signal] </code><span class="type">void</span> QGuiApplication::<span class="name">fontChanged</span>(const <span class="type"><a href="qfont.html">QFont</a></span> &amp;<i>font</i>)</h3>
+<p>This signal is emitted when the <i>font</i> of the application changes.</p>
+<p>This function was introduced in  Qt 5.11.</p>
+<p><b>See also </b><a href="qguiapplication.html#font">font</a>().</p>
+<!-- @@@fontChanged -->
+<!-- $$$fontDatabaseChanged[overload1]$$$fontDatabaseChanged -->
+<h3 class="fn" id="fontDatabaseChanged"><a name="fontDatabaseChanged"></a><code>[signal] </code><span class="type">void</span> QGuiApplication::<span class="name">fontDatabaseChanged</span>()</h3>
+<p>This signal is emitted when application fonts are loaded or removed.</p>
+<p><b>See also </b><a href="qfontdatabase.html#addApplicationFont">QFontDatabase::addApplicationFont</a>(), <a href="qfontdatabase.html#addApplicationFontFromData">QFontDatabase::addApplicationFontFromData</a>(), <a href="qfontdatabase.html#removeAllApplicationFonts">QFontDatabase::removeAllApplicationFonts</a>(), and <a href="qfontdatabase.html#removeApplicationFont">QFontDatabase::removeApplicationFont</a>().</p>
+<!-- @@@fontDatabaseChanged -->
+<!-- $$$lastWindowClosed[overload1]$$$lastWindowClosed -->
+<h3 class="fn" id="lastWindowClosed"><a name="lastWindowClosed"></a><code>[signal] </code><span class="type">void</span> QGuiApplication::<span class="name">lastWindowClosed</span>()</h3>
+<p>This signal is emitted from <a href="qguiapplication.html#exec">exec</a>() when the last visible primary window (i.e&#x2e; window with no parent) is closed.</p>
+<p>By default, <a href="qguiapplication.html">QGuiApplication</a> quits after this signal is emitted. This feature can be turned off by setting <a href="qguiapplication.html#quitOnLastWindowClosed-prop">quitOnLastWindowClosed</a> to <code>false</code>.</p>
+<p><b>See also </b><a href="qwindow.html#close">QWindow::close</a>() and <a href="qwindow.html#isTopLevel">QWindow::isTopLevel</a>().</p>
+<!-- @@@lastWindowClosed -->
+<!-- $$$paletteChanged[overload1]$$$paletteChangedconstQPalette& -->
+<h3 class="fn" id="paletteChanged"><a name="paletteChanged"></a><code>[signal] </code><span class="type">void</span> QGuiApplication::<span class="name">paletteChanged</span>(const <span class="type"><a href="qpalette.html">QPalette</a></span> &amp;<i>palette</i>)</h3>
+<p>This signal is emitted when the <i>palette</i> of the application changes.</p>
+<p>This function was introduced in  Qt 5.4.</p>
+<p><b>See also </b><a href="qguiapplication.html#palette">palette</a>().</p>
+<!-- @@@paletteChanged -->
+<!-- $$$saveStateRequest[overload1]$$$saveStateRequestQSessionManager& -->
+<h3 class="fn" id="saveStateRequest"><a name="saveStateRequest"></a><code>[signal] </code><span class="type">void</span> QGuiApplication::<span class="name">saveStateRequest</span>(<span class="type"><a href="qsessionmanager.html">QSessionManager</a></span> &amp;<i>manager</i>)</h3>
+<p>This signal deals with <a href="../qtdoc/ipc.html#session-management">session management</a>. It is invoked when the <a href="qsessionmanager.html">session manager</a> wants the application to preserve its state for a future session.</p>
+<p>For example, a text editor would create a temporary file that includes the current contents of its edit buffers, the location of the cursor and other aspects of the current editing session.</p>
+<p>You should never exit the application within this signal. Instead, the session manager may or may not do this afterwards, depending on the context. Furthermore, most session managers will very likely request a saved state immediately after the application has been started. This permits the session manager to learn about the application's restart policy.</p>
+<p><b>Warning:</b> Within this signal, no user interaction is possible, <i>unless</i> you ask the <i>manager</i> for explicit permission. See <a href="qsessionmanager.html#allowsInteraction">QSessionManager::allowsInteraction</a>() and <a href="qsessionmanager.html#allowsErrorInteraction">QSessionManager::allowsErrorInteraction</a>() for details.</p>
+<p><b>Note: </b>You should use <a href="../qtcore/qt.html#ConnectionType-enum">Qt::DirectConnection</a> when connecting to this signal.</p><p>This function was introduced in  Qt 4.2.</p>
+<p><b>See also </b><a href="qguiapplication.html#isSessionRestored">isSessionRestored</a>(), <a href="qguiapplication.html#sessionId">sessionId</a>(), <a href="qguiapplication.html#commitDataRequest">commitDataRequest</a>(), and <a href="../qtdoc/ipc.html#session-management">Session Management</a>.</p>
+<!-- @@@saveStateRequest -->
+<!-- $$$screenAdded[overload1]$$$screenAddedQScreen* -->
+<h3 class="fn" id="screenAdded"><a name="screenAdded"></a><code>[signal] </code><span class="type">void</span> QGuiApplication::<span class="name">screenAdded</span>(<span class="type"><a href="qscreen.html">QScreen</a></span> *<i>screen</i>)</h3>
+<p>This signal is emitted whenever a new screen <i>screen</i> has been added to the system.</p>
+<p><b>See also </b><a href="qguiapplication.html#screens">screens</a>(), <a href="qguiapplication.html#primaryScreen-prop">primaryScreen</a>, and <a href="qguiapplication.html#screenRemoved">screenRemoved</a>().</p>
+<!-- @@@screenAdded -->
+<!-- $$$screenRemoved[overload1]$$$screenRemovedQScreen* -->
+<h3 class="fn" id="screenRemoved"><a name="screenRemoved"></a><code>[signal] </code><span class="type">void</span> QGuiApplication::<span class="name">screenRemoved</span>(<span class="type"><a href="qscreen.html">QScreen</a></span> *<i>screen</i>)</h3>
+<p>This signal is emitted whenever a <i>screen</i> is removed from the system. It provides an opportunity to manage the windows on the screen before Qt falls back to moving them to the primary screen.</p>
+<p>This function was introduced in  Qt 5.4.</p>
+<p><b>See also </b><a href="qguiapplication.html#screens">screens</a>(), <a href="qguiapplication.html#screenAdded">screenAdded</a>(), <a href="../qtcore/qobject.html#destroyed">QObject::destroyed</a>(), and <a href="qwindow.html#setScreen">QWindow::setScreen</a>().</p>
+<!-- @@@screenRemoved -->
+<!-- $$$~QGuiApplication[overload1]$$$~QGuiApplication -->
+<h3 class="fn" id="dtor.QGuiApplication"><a name="dtor.QGuiApplication"></a><code>[virtual] </code>QGuiApplication::<span class="name">~QGuiApplication</span>()</h3>
+<p>Destructs the application.</p>
+<!-- @@@~QGuiApplication -->
+<!-- $$$allWindows[overload1]$$$allWindows -->
+<h3 class="fn" id="allWindows"><a name="allWindows"></a><code>[static] </code><span class="type">QWindowList</span> QGuiApplication::<span class="name">allWindows</span>()</h3>
+<p>Returns a list of all the windows in the application.</p>
+<p>The list is empty if there are no windows.</p>
+<p><b>See also </b><a href="qguiapplication.html#topLevelWindows">topLevelWindows</a>().</p>
+<!-- @@@allWindows -->
+<!-- $$$applicationState[overload1]$$$applicationState -->
+<h3 class="fn" id="applicationState"><a name="applicationState"></a><code>[static] </code><span class="type"><a href="../qtcore/qt.html#ApplicationState-enum">Qt::ApplicationState</a></span> QGuiApplication::<span class="name">applicationState</span>()</h3>
+<p>Returns the current state of the application.</p>
+<p>You can react to application state changes to perform actions such as stopping/resuming CPU-intensive tasks, freeing/loading resources or saving/restoring application data.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@applicationState -->
+<!-- $$$changeOverrideCursor[overload1]$$$changeOverrideCursorconstQCursor& -->
+<h3 class="fn" id="changeOverrideCursor"><a name="changeOverrideCursor"></a><code>[static] </code><span class="type">void</span> QGuiApplication::<span class="name">changeOverrideCursor</span>(const <span class="type"><a href="qcursor.html">QCursor</a></span> &amp;<i>cursor</i>)</h3>
+<p>Changes the currently active application override cursor to <i>cursor</i>.</p>
+<p>This function has no effect if <a href="qguiapplication.html#setOverrideCursor">setOverrideCursor</a>() was not called.</p>
+<p><b>See also </b><a href="qguiapplication.html#setOverrideCursor">setOverrideCursor</a>(), <a href="qguiapplication.html#overrideCursor">overrideCursor</a>(), <a href="qguiapplication.html#restoreOverrideCursor">restoreOverrideCursor</a>(), and <a href="../qtwidgets/qwidget.html#cursor-prop">QWidget::setCursor</a>().</p>
+<!-- @@@changeOverrideCursor -->
+<!-- $$$clipboard[overload1]$$$clipboard -->
+<h3 class="fn" id="clipboard"><a name="clipboard"></a><code>[static] </code><span class="type"><a href="qclipboard.html">QClipboard</a></span> *QGuiApplication::<span class="name">clipboard</span>()</h3>
+<p>Returns the object for interacting with the clipboard.</p>
+<!-- @@@clipboard -->
+<!-- $$$desktopSettingsAware[overload1]$$$desktopSettingsAware -->
+<h3 class="fn" id="desktopSettingsAware"><a name="desktopSettingsAware"></a><code>[static] </code><span class="type">bool</span> QGuiApplication::<span class="name">desktopSettingsAware</span>()</h3>
+<p>Returns <code>true</code> if Qt is set to use the system's standard colors, fonts, etc.; otherwise returns <code>false</code>. The default is <code>true</code>.</p>
+<p><b>See also </b><a href="qguiapplication.html#setDesktopSettingsAware">setDesktopSettingsAware</a>().</p>
+<!-- @@@desktopSettingsAware -->
+<!-- $$$devicePixelRatio[overload1]$$$devicePixelRatio -->
+<h3 class="fn" id="devicePixelRatio"><a name="devicePixelRatio"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QGuiApplication::<span class="name">devicePixelRatio</span>() const</h3>
+<p>Returns the highest screen device pixel ratio found on the system. This is the ratio between physical pixels and device-independent pixels.</p>
+<p>Use this function only when you don't know which window you are targeting. If you do know the target window, use <a href="qwindow.html#devicePixelRatio">QWindow::devicePixelRatio</a>() instead.</p>
+<p><b>See also </b><a href="qwindow.html#devicePixelRatio">QWindow::devicePixelRatio</a>().</p>
+<!-- @@@devicePixelRatio -->
+<!-- $$$event[overload1]$$$eventQEvent* -->
+<h3 class="fn" id="event"><a name="event"></a><code>[override virtual protected] </code><span class="type">bool</span> QGuiApplication::<span class="name">event</span>(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="../qtcore/qcoreapplication.html#event">QCoreApplication::event</a>(QEvent *e).</p>
+<!-- @@@event -->
+<!-- $$$exec[overload1]$$$exec -->
+<h3 class="fn" id="exec"><a name="exec"></a><code>[static] </code><span class="type">int</span> QGuiApplication::<span class="name">exec</span>()</h3>
+<p>Enters the main event loop and waits until <a href="../qtcore/qcoreapplication.html#exit">exit</a>() is called, and then returns the value that was set to <a href="../qtcore/qcoreapplication.html#exit">exit</a>() (which is 0 if <a href="../qtcore/qcoreapplication.html#exit">exit</a>() is called via <a href="../qtcore/qcoreapplication.html#quit">quit</a>()).</p>
+<p>It is necessary to call this function to start event handling. The main event loop receives events from the window system and dispatches these to the application widgets.</p>
+<p>Generally, no user interaction can take place before calling exec().</p>
+<p>To make your application perform idle processing, e.g&#x2e;, executing a special function whenever there are no pending events, use a <a href="../qtcore/qtimer.html">QTimer</a> with 0 timeout. More advanced idle processing schemes can be achieved using <a href="../qtcore/qcoreapplication.html#processEvents">processEvents</a>().</p>
+<p>We recommend that you connect clean-up code to the <a href="../qtcore/qcoreapplication.html#aboutToQuit">aboutToQuit()</a> signal, instead of putting it in your application's <code>main()</code> function. This is because, on some platforms, the <a href="../qtwidgets/qapplication.html#exec">QApplication::exec</a>() call may not return.</p>
+<p><b>See also </b><a href="qguiapplication.html#quitOnLastWindowClosed-prop">quitOnLastWindowClosed</a>, <a href="../qtcore/qcoreapplication.html#quit">quit</a>(), <a href="../qtcore/qcoreapplication.html#exit">exit</a>(), <a href="../qtcore/qcoreapplication.html#processEvents">processEvents</a>(), and <a href="../qtcore/qcoreapplication.html#exec">QCoreApplication::exec</a>().</p>
+<!-- @@@exec -->
+<!-- $$$focusObject[overload1]$$$focusObject -->
+<h3 class="fn" id="focusObject"><a name="focusObject"></a><code>[static] </code><span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *QGuiApplication::<span class="name">focusObject</span>()</h3>
+<p>Returns the <a href="../qtcore/qobject.html">QObject</a> in currently active window that will be final receiver of events tied to focus, such as key events.</p>
+<!-- @@@focusObject -->
+<!-- $$$focusWindow[overload1]$$$focusWindow -->
+<h3 class="fn" id="focusWindow"><a name="focusWindow"></a><code>[static] </code><span class="type"><a href="qwindow.html">QWindow</a></span> *QGuiApplication::<span class="name">focusWindow</span>()</h3>
+<p>Returns the <a href="qwindow.html">QWindow</a> that receives events tied to focus, such as key events.</p>
+<!-- @@@focusWindow -->
+<!-- $$$font[overload1]$$$font -->
+<h3 class="fn" id="font"><a name="font"></a><code>[static] </code><span class="type"><a href="qfont.html">QFont</a></span> QGuiApplication::<span class="name">font</span>()</h3>
+<p>Returns the default application font.</p>
+<p><b>See also </b><a href="qguiapplication.html#setFont">setFont</a>().</p>
+<!-- @@@font -->
+<!-- $$$inputMethod[overload1]$$$inputMethod -->
+<h3 class="fn" id="inputMethod"><a name="inputMethod"></a><code>[static] </code><span class="type"><a href="qinputmethod.html">QInputMethod</a></span> *QGuiApplication::<span class="name">inputMethod</span>()</h3>
+<p>returns the input method.</p>
+<p>The input method returns properties about the state and position of the virtual keyboard. It also provides information about the position of the current focused input element.</p>
+<p><b>See also </b><a href="qinputmethod.html">QInputMethod</a>.</p>
+<!-- @@@inputMethod -->
+<!-- $$$isFallbackSessionManagementEnabled[overload1]$$$isFallbackSessionManagementEnabled -->
+<h3 class="fn" id="isFallbackSessionManagementEnabled"><a name="isFallbackSessionManagementEnabled"></a><code>[static] </code><span class="type">bool</span> QGuiApplication::<span class="name">isFallbackSessionManagementEnabled</span>()</h3>
+<p>Returns whether <a href="qguiapplication.html">QGuiApplication</a> will use fallback session management.</p>
+<p>The default is <code>true</code>.</p>
+<p>If this is <code>true</code> and the session manager allows user interaction, <a href="qguiapplication.html">QGuiApplication</a> will try to close toplevel windows after <a href="qguiapplication.html#commitDataRequest">commitDataRequest</a>() has been emitted. If a window cannot be closed, session shutdown will be canceled and the application will keep running.</p>
+<p>Fallback session management only benefits applications that have an &quot;are you sure you want to close this window?&quot; feature or other logic that prevents closing a toplevel window depending on certain conditions, and that do nothing to explicitly implement session management. In applications that <i>do</i> implement session management using the proper session management API, fallback session management interferes and may break session management logic.</p>
+<p><b>Warning:</b> If all windows <i>are</i> closed due to fallback session management and <a href="qguiapplication.html#quitOnLastWindowClosed-prop">quitOnLastWindowClosed</a>() is <code>true</code>, the application will quit before it is explicitly instructed to quit through the platform's session management protocol. That violation of protocol may prevent the platform session manager from saving application state.</p>
+<p>This function was introduced in  Qt 5.6.</p>
+<p><b>See also </b><a href="qguiapplication.html#setFallbackSessionManagementEnabled">setFallbackSessionManagementEnabled</a>(), <a href="qsessionmanager.html#allowsInteraction">QSessionManager::allowsInteraction</a>(), <a href="qguiapplication.html#saveStateRequest">saveStateRequest</a>(), <a href="qguiapplication.html#commitDataRequest">commitDataRequest</a>(), and <a href="../qtdoc/ipc.html#session-management">Session Management</a>.</p>
+<!-- @@@isFallbackSessionManagementEnabled -->
+<!-- $$$isLeftToRight[overload1]$$$isLeftToRight -->
+<h3 class="fn" id="isLeftToRight"><a name="isLeftToRight"></a><code>[static] </code><span class="type">bool</span> QGuiApplication::<span class="name">isLeftToRight</span>()</h3>
+<p>Returns <code>true</code> if the application's layout direction is <a href="../qtcore/qt.html#LayoutDirection-enum">Qt::LeftToRight</a>; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qguiapplication.html#layoutDirection-prop">layoutDirection</a>() and <a href="qguiapplication.html#isRightToLeft">isRightToLeft</a>().</p>
+<!-- @@@isLeftToRight -->
+<!-- $$$isRightToLeft[overload1]$$$isRightToLeft -->
+<h3 class="fn" id="isRightToLeft"><a name="isRightToLeft"></a><code>[static] </code><span class="type">bool</span> QGuiApplication::<span class="name">isRightToLeft</span>()</h3>
+<p>Returns <code>true</code> if the application's layout direction is <a href="../qtcore/qt.html#LayoutDirection-enum">Qt::RightToLeft</a>; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qguiapplication.html#layoutDirection-prop">layoutDirection</a>() and <a href="qguiapplication.html#isLeftToRight">isLeftToRight</a>().</p>
+<!-- @@@isRightToLeft -->
+<!-- $$$isSavingSession[overload1]$$$isSavingSession -->
+<h3 class="fn" id="isSavingSession"><a name="isSavingSession"></a><span class="type">bool</span> QGuiApplication::<span class="name">isSavingSession</span>() const</h3>
+<p>Returns <code>true</code> if the application is currently saving the <a href="../qtdoc/ipc.html#session-management">session</a>; otherwise returns <code>false</code>.</p>
+<p>This is <code>true</code> when <a href="qguiapplication.html#commitDataRequest">commitDataRequest</a>() and <a href="qguiapplication.html#saveStateRequest">saveStateRequest</a>() are emitted, but also when the windows are closed afterwards by session management.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qguiapplication.html#sessionId">sessionId</a>(), <a href="qguiapplication.html#commitDataRequest">commitDataRequest</a>(), and <a href="qguiapplication.html#saveStateRequest">saveStateRequest</a>().</p>
+<!-- @@@isSavingSession -->
+<!-- $$$isSessionRestored[overload1]$$$isSessionRestored -->
+<h3 class="fn" id="isSessionRestored"><a name="isSessionRestored"></a><span class="type">bool</span> QGuiApplication::<span class="name">isSessionRestored</span>() const</h3>
+<p>Returns <code>true</code> if the application has been restored from an earlier <a href="../qtdoc/ipc.html#session-management">session</a>; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qguiapplication.html#sessionId">sessionId</a>(), <a href="qguiapplication.html#commitDataRequest">commitDataRequest</a>(), and <a href="qguiapplication.html#saveStateRequest">saveStateRequest</a>().</p>
+<!-- @@@isSessionRestored -->
+<!-- $$$keyboardModifiers[overload1]$$$keyboardModifiers -->
+<h3 class="fn" id="keyboardModifiers"><a name="keyboardModifiers"></a><code>[static] </code><span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> QGuiApplication::<span class="name">keyboardModifiers</span>()</h3>
+<p>Returns the current state of the modifier keys on the keyboard. The current state is updated sychronously as the event queue is emptied of events that will spontaneously change the keyboard state (<a href="../qtcore/qevent.html#Type-enum">QEvent::KeyPress</a> and <a href="../qtcore/qevent.html#Type-enum">QEvent::KeyRelease</a> events).</p>
+<p>It should be noted this may not reflect the actual keys held on the input device at the time of calling but rather the modifiers as last reported in one of the above events. If no keys are being held <a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::NoModifier</a> is returned.</p>
+<p><b>See also </b><a href="qguiapplication.html#mouseButtons">mouseButtons</a>() and <a href="qguiapplication.html#queryKeyboardModifiers">queryKeyboardModifiers</a>().</p>
+<!-- @@@keyboardModifiers -->
+<!-- $$$modalWindow[overload1]$$$modalWindow -->
+<h3 class="fn" id="modalWindow"><a name="modalWindow"></a><code>[static] </code><span class="type"><a href="qwindow.html">QWindow</a></span> *QGuiApplication::<span class="name">modalWindow</span>()</h3>
+<p>Returns the most recently shown modal window. If no modal windows are visible, this function returns zero.</p>
+<p>A modal window is a window which has its <a href="qwindow.html#modality-prop">modality</a> property set to <a href="../qtcore/qt.html#WindowModality-enum">Qt::WindowModal</a> or <a href="../qtcore/qt.html#WindowModality-enum">Qt::ApplicationModal</a>. A modal window must be closed before the user can continue with other parts of the program.</p>
+<p>Modal window are organized in a stack. This function returns the modal window at the top of the stack.</p>
+<p><b>See also </b><a href="../qtcore/qt.html#WindowModality-enum">Qt::WindowModality</a> and <a href="qwindow.html#modality-prop">QWindow::setModality</a>().</p>
+<!-- @@@modalWindow -->
+<!-- $$$mouseButtons[overload1]$$$mouseButtons -->
+<h3 class="fn" id="mouseButtons"><a name="mouseButtons"></a><code>[static] </code><span class="type"><a href="../qtcore/qt.html#MouseButton-enum">Qt::MouseButtons</a></span> QGuiApplication::<span class="name">mouseButtons</span>()</h3>
+<p>Returns the current state of the buttons on the mouse. The current state is updated synchronously as the event queue is emptied of events that will spontaneously change the mouse state (<a href="../qtcore/qevent.html#Type-enum">QEvent::MouseButtonPress</a> and <a href="../qtcore/qevent.html#Type-enum">QEvent::MouseButtonRelease</a> events).</p>
+<p>It should be noted this may not reflect the actual buttons held on the input device at the time of calling but rather the mouse buttons as last reported in one of the above events. If no mouse buttons are being held <a href="../qtcore/qt.html#MouseButton-enum">Qt::NoButton</a> is returned.</p>
+<p><b>See also </b><a href="qguiapplication.html#keyboardModifiers">keyboardModifiers</a>().</p>
+<!-- @@@mouseButtons -->
+<!-- $$$notify[overload1]$$$notifyQObject*QEvent* -->
+<h3 class="fn" id="notify"><a name="notify"></a><code>[override virtual] </code><span class="type">bool</span> QGuiApplication::<span class="name">notify</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>object</i>, <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="../qtcore/qcoreapplication.html#notify">QCoreApplication::notify</a>(QObject *receiver, QEvent *event).</p>
+<!-- @@@notify -->
+<!-- $$$overrideCursor[overload1]$$$overrideCursor -->
+<h3 class="fn" id="overrideCursor"><a name="overrideCursor"></a><code>[static] </code><span class="type"><a href="qcursor.html">QCursor</a></span> *QGuiApplication::<span class="name">overrideCursor</span>()</h3>
+<p>Returns the active application override cursor.</p>
+<p>This function returns <code>nullptr</code> if no application cursor has been defined (i.e&#x2e; the internal cursor stack is empty).</p>
+<p><b>See also </b><a href="qguiapplication.html#setOverrideCursor">setOverrideCursor</a>() and <a href="qguiapplication.html#restoreOverrideCursor">restoreOverrideCursor</a>().</p>
+<!-- @@@overrideCursor -->
+<!-- $$$palette[overload1]$$$palette -->
+<h3 class="fn" id="palette"><a name="palette"></a><code>[static] </code><span class="type"><a href="qpalette.html">QPalette</a></span> QGuiApplication::<span class="name">palette</span>()</h3>
+<p>Returns the default application palette.</p>
+<p><b>See also </b><a href="qguiapplication.html#setPalette">setPalette</a>().</p>
+<!-- @@@palette -->
+<!-- $$$platformFunction[overload1]$$$platformFunctionconstQByteArray& -->
+<h3 class="fn" id="platformFunction"><a name="platformFunction"></a><code>[static] </code><span class="type"><a href="../qtcore/qtglobal.html#QFunctionPointer-typedef">QFunctionPointer</a></span> QGuiApplication::<span class="name">platformFunction</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>function</i>)</h3>
+<p>Returns a function pointer from the platformplugin matching <i>function</i></p>
+<!-- @@@platformFunction -->
+<!-- $$$platformNativeInterface[overload1]$$$platformNativeInterface -->
+<h3 class="fn" id="platformNativeInterface"><a name="platformNativeInterface"></a><code>[static] </code><span class="type">QPlatformNativeInterface</span> *QGuiApplication::<span class="name">platformNativeInterface</span>()</h3>
+<p>Returns the platform's native interface, for platform specific functionality.</p>
+<!-- @@@platformNativeInterface -->
+<!-- $$$queryKeyboardModifiers[overload1]$$$queryKeyboardModifiers -->
+<h3 class="fn" id="queryKeyboardModifiers"><a name="queryKeyboardModifiers"></a><code>[static] </code><span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> QGuiApplication::<span class="name">queryKeyboardModifiers</span>()</h3>
+<p>Queries and returns the state of the modifier keys on the keyboard. Unlike <a href="qguiapplication.html#keyboardModifiers">keyboardModifiers</a>, this method returns the actual keys held on the input device at the time of calling the method.</p>
+<p>It does not rely on the keypress events having been received by this process, which makes it possible to check the modifiers while moving a window, for instance. Note that in most cases, you should use <a href="qguiapplication.html#keyboardModifiers">keyboardModifiers</a>(), which is faster and more accurate since it contains the state of the modifiers as they were when the currently processed event was received.</p>
+<p><b>See also </b><a href="qguiapplication.html#keyboardModifiers">keyboardModifiers</a>().</p>
+<!-- @@@queryKeyboardModifiers -->
+<!-- $$$restoreOverrideCursor[overload1]$$$restoreOverrideCursor -->
+<h3 class="fn" id="restoreOverrideCursor"><a name="restoreOverrideCursor"></a><code>[static] </code><span class="type">void</span> QGuiApplication::<span class="name">restoreOverrideCursor</span>()</h3>
+<p>Undoes the last <a href="qguiapplication.html#setOverrideCursor">setOverrideCursor</a>().</p>
+<p>If <a href="qguiapplication.html#setOverrideCursor">setOverrideCursor</a>() has been called twice, calling restoreOverrideCursor() will activate the first cursor set. Calling this function a second time restores the original widgets' cursors.</p>
+<p><b>See also </b><a href="qguiapplication.html#setOverrideCursor">setOverrideCursor</a>() and <a href="qguiapplication.html#overrideCursor">overrideCursor</a>().</p>
+<!-- @@@restoreOverrideCursor -->
+<!-- $$$screenAt[overload1]$$$screenAtconstQPoint& -->
+<h3 class="fn" id="screenAt"><a name="screenAt"></a><code>[static] </code><span class="type"><a href="qscreen.html">QScreen</a></span> *QGuiApplication::<span class="name">screenAt</span>(const <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> &amp;<i>point</i>)</h3>
+<p>Returns the screen at <i>point</i>, or <code>nullptr</code> if outside of any screen.</p>
+<p>The <i>point</i> is in relation to the virtualGeometry() of each set of virtual siblings. If the point maps to more than one set of virtual siblings the first match is returned.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<!-- @@@screenAt -->
+<!-- $$$screens[overload1]$$$screens -->
+<h3 class="fn" id="screens"><a name="screens"></a><code>[static] </code><span class="type">QList</span>&lt;<span class="type"><a href="qscreen.html">QScreen</a></span> *&gt; QGuiApplication::<span class="name">screens</span>()</h3>
+<p>Returns a list of all the screens associated with the windowing system the application is connected to.</p>
+<!-- @@@screens -->
+<!-- $$$sessionId[overload1]$$$sessionId -->
+<h3 class="fn" id="sessionId"><a name="sessionId"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QGuiApplication::<span class="name">sessionId</span>() const</h3>
+<p>Returns the current <a href="../qtdoc/ipc.html#session-management">session's</a> identifier.</p>
+<p>If the application has been restored from an earlier session, this identifier is the same as it was in that previous session. The session identifier is guaranteed to be unique both for different applications and for different instances of the same application.</p>
+<p><b>See also </b><a href="qguiapplication.html#isSessionRestored">isSessionRestored</a>(), <a href="qguiapplication.html#sessionKey">sessionKey</a>(), <a href="qguiapplication.html#commitDataRequest">commitDataRequest</a>(), and <a href="qguiapplication.html#saveStateRequest">saveStateRequest</a>().</p>
+<!-- @@@sessionId -->
+<!-- $$$sessionKey[overload1]$$$sessionKey -->
+<h3 class="fn" id="sessionKey"><a name="sessionKey"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QGuiApplication::<span class="name">sessionKey</span>() const</h3>
+<p>Returns the session key in the current <a href="../qtdoc/ipc.html#session-management">session</a>.</p>
+<p>If the application has been restored from an earlier session, this key is the same as it was when the previous session ended.</p>
+<p>The session key changes every time the session is saved. If the shutdown process is cancelled, another session key will be used when shutting down again.</p>
+<p><b>See also </b><a href="qguiapplication.html#isSessionRestored">isSessionRestored</a>(), <a href="qguiapplication.html#sessionId">sessionId</a>(), <a href="qguiapplication.html#commitDataRequest">commitDataRequest</a>(), and <a href="qguiapplication.html#saveStateRequest">saveStateRequest</a>().</p>
+<!-- @@@sessionKey -->
+<!-- $$$setDesktopSettingsAware[overload1]$$$setDesktopSettingsAwarebool -->
+<h3 class="fn" id="setDesktopSettingsAware"><a name="setDesktopSettingsAware"></a><code>[static] </code><span class="type">void</span> QGuiApplication::<span class="name">setDesktopSettingsAware</span>(<span class="type">bool</span> <i>on</i>)</h3>
+<p>Sets whether Qt should use the system's standard colors, fonts, etc., to <i>on</i>. By default, this is <code>true</code>.</p>
+<p>This function must be called before creating the <a href="qguiapplication.html">QGuiApplication</a> object, like this:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span><span class="operator">::</span>setDesktopSettingsAware(<span class="keyword">false</span>);
+      <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> app(argc<span class="operator">,</span> argv);
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p><b>See also </b><a href="qguiapplication.html#desktopSettingsAware">desktopSettingsAware</a>().</p>
+<!-- @@@setDesktopSettingsAware -->
+<!-- $$$setFallbackSessionManagementEnabled[overload1]$$$setFallbackSessionManagementEnabledbool -->
+<h3 class="fn" id="setFallbackSessionManagementEnabled"><a name="setFallbackSessionManagementEnabled"></a><code>[static] </code><span class="type">void</span> QGuiApplication::<span class="name">setFallbackSessionManagementEnabled</span>(<span class="type">bool</span> <i>enabled</i>)</h3>
+<p>Sets whether <a href="qguiapplication.html">QGuiApplication</a> will use fallback session management to <i>enabled</i>.</p>
+<p>This function was introduced in  Qt 5.6.</p>
+<p><b>See also </b><a href="qguiapplication.html#isFallbackSessionManagementEnabled">isFallbackSessionManagementEnabled</a>().</p>
+<!-- @@@setFallbackSessionManagementEnabled -->
+<!-- $$$setFont[overload1]$$$setFontconstQFont& -->
+<h3 class="fn" id="setFont"><a name="setFont"></a><code>[static] </code><span class="type">void</span> QGuiApplication::<span class="name">setFont</span>(const <span class="type"><a href="qfont.html">QFont</a></span> &amp;<i>font</i>)</h3>
+<p>Changes the default application font to <i>font</i>.</p>
+<p><b>See also </b><a href="qguiapplication.html#font">font</a>().</p>
+<!-- @@@setFont -->
+<!-- $$$setOverrideCursor[overload1]$$$setOverrideCursorconstQCursor& -->
+<h3 class="fn" id="setOverrideCursor"><a name="setOverrideCursor"></a><code>[static] </code><span class="type">void</span> QGuiApplication::<span class="name">setOverrideCursor</span>(const <span class="type"><a href="qcursor.html">QCursor</a></span> &amp;<i>cursor</i>)</h3>
+<p>Sets the application override cursor to <i>cursor</i>.</p>
+<p>Application override cursors are intended for showing the user that the application is in a special state, for example during an operation that might take some time.</p>
+<p>This cursor will be displayed in all the application's widgets until <a href="qguiapplication.html#restoreOverrideCursor">restoreOverrideCursor</a>() or another setOverrideCursor() is called.</p>
+<p>Application cursors are stored on an internal stack. setOverrideCursor() pushes the cursor onto the stack, and <a href="qguiapplication.html#restoreOverrideCursor">restoreOverrideCursor</a>() pops the active cursor off the stack. <a href="qguiapplication.html#changeOverrideCursor">changeOverrideCursor</a>() changes the curently active application override cursor.</p>
+<p>Every setOverrideCursor() must eventually be followed by a corresponding <a href="qguiapplication.html#restoreOverrideCursor">restoreOverrideCursor</a>(), otherwise the stack will never be emptied.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qguiapplication.html#QGuiApplication">QGuiApplication</a></span><span class="operator">::</span>setOverrideCursor(<span class="type"><a href="qcursor.html">QCursor</a></span>(<span class="type">Qt</span><span class="operator">::</span>WaitCursor));
+  calculateHugeMandelbrot();              <span class="comment">// lunch time...</span>
+  <span class="type"><a href="qguiapplication.html#QGuiApplication">QGuiApplication</a></span><span class="operator">::</span>restoreOverrideCursor();
+
+</pre>
+<p><b>See also </b><a href="qguiapplication.html#overrideCursor">overrideCursor</a>(), <a href="qguiapplication.html#restoreOverrideCursor">restoreOverrideCursor</a>(), <a href="qguiapplication.html#changeOverrideCursor">changeOverrideCursor</a>(), and <a href="../qtwidgets/qwidget.html#cursor-prop">QWidget::setCursor</a>().</p>
+<!-- @@@setOverrideCursor -->
+<!-- $$$setPalette[overload1]$$$setPaletteconstQPalette& -->
+<h3 class="fn" id="setPalette"><a name="setPalette"></a><code>[static] </code><span class="type">void</span> QGuiApplication::<span class="name">setPalette</span>(const <span class="type"><a href="qpalette.html">QPalette</a></span> &amp;<i>pal</i>)</h3>
+<p>Changes the default application palette to <i>pal</i>.</p>
+<p><b>See also </b><a href="qguiapplication.html#palette">palette</a>().</p>
+<!-- @@@setPalette -->
+<!-- $$$styleHints[overload1]$$$styleHints -->
+<h3 class="fn" id="styleHints"><a name="styleHints"></a><code>[static] </code><span class="type"><a href="qstylehints.html">QStyleHints</a></span> *QGuiApplication::<span class="name">styleHints</span>()</h3>
+<p>Returns the application's style hints.</p>
+<p>The style hints encapsulate a set of platform dependent properties such as double click intervals, full width selection and others.</p>
+<p>The hints can be used to integrate tighter with the underlying platform.</p>
+<p><b>See also </b><a href="qstylehints.html">QStyleHints</a>.</p>
+<!-- @@@styleHints -->
+<!-- $$$sync[overload1]$$$sync -->
+<h3 class="fn" id="sync"><a name="sync"></a><code>[static] </code><span class="type">void</span> QGuiApplication::<span class="name">sync</span>()</h3>
+<p>Function that can be used to sync Qt state with the Window Systems state.</p>
+<p>This function will first empty Qts events by calling <a href="../qtcore/qcoreapplication.html#processEvents">QCoreApplication::processEvents</a>(), then the platform plugin will sync up with the windowsystem, and finally Qts events will be delived by another call to <a href="../qtcore/qcoreapplication.html#processEvents">QCoreApplication::processEvents</a>();</p>
+<p>This function is timeconsuming and its use is discouraged.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@sync -->
+<!-- $$$topLevelAt[overload1]$$$topLevelAtconstQPoint& -->
+<h3 class="fn" id="topLevelAt"><a name="topLevelAt"></a><code>[static] </code><span class="type"><a href="qwindow.html">QWindow</a></span> *QGuiApplication::<span class="name">topLevelAt</span>(const <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> &amp;<i>pos</i>)</h3>
+<p>Returns the top level window at the given position <i>pos</i>, if any.</p>
+<!-- @@@topLevelAt -->
+<!-- $$$topLevelWindows[overload1]$$$topLevelWindows -->
+<h3 class="fn" id="topLevelWindows"><a name="topLevelWindows"></a><code>[static] </code><span class="type">QWindowList</span> QGuiApplication::<span class="name">topLevelWindows</span>()</h3>
+<p>Returns a list of the top-level windows in the application.</p>
+<p><b>See also </b><a href="qguiapplication.html#allWindows">allWindows</a>().</p>
+<!-- @@@topLevelWindows -->
+</div>
+<div class="macros">
+<h2>Macro Documentation</h2>
+<!-- $$$qGuiApp[overload1]$$$qGuiApp -->
+<h3 class="fn" id="qGuiApp"><a name="qGuiApp"></a><span class="name">qGuiApp</span></h3>
+<p>A global pointer referring to the unique application object. Only valid for use when that object is a <a href="qguiapplication.html">QGuiApplication</a>.</p>
+<p><b>See also </b><a href="../qtcore/qcoreapplication.html#instance">QCoreApplication::instance</a>() and <a href="../qtwidgets/qapplication.html#qApp">qApp</a>.</p>
+<!-- @@@qGuiApp -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

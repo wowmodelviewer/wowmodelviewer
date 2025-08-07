@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquicktextarea.cpp -->
+  <title>TextArea QML Type | Qt Quick Controls 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td ><a href="qtquick-controls2-qmlmodule.html">QML Types</a></td><td >TextArea QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#attached-properties">Attached Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#scrollable-textarea">Scrollable TextArea</a></li>
+<li class="level2"><a href="#tab-focus">Tab Focus</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">TextArea QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$TextArea-brief -->
+<p>Multi-line text input area. <a href="#details">More...</a></p>
+<!-- @@@TextArea -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Controls 2.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="../qtquick/qml-qtquick-textedit.html">TextEdit</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-controls2-textarea-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-textarea.html#background-prop">background</a></b></b> : Item</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-textarea.html#bottomInset-prop">bottomInset</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-textarea.html#focusReason-prop">focusReason</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-textarea.html#hoverEnabled-prop">hoverEnabled</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-textarea.html#hovered-prop">hovered</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-textarea.html#implicitBackgroundHeight-prop">implicitBackgroundHeight</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-textarea.html#implicitBackgroundWidth-prop">implicitBackgroundWidth</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-textarea.html#leftInset-prop">leftInset</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-textarea.html#palette-prop">palette</a></b></b> : palette</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-textarea.html#placeholderText-prop">placeholderText</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-textarea.html#placeholderTextColor-prop">placeholderTextColor</a></b></b> : color</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-textarea.html#rightInset-prop">rightInset</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-textarea.html#topInset-prop">topInset</a></b></b> : real</li>
+</ul>
+<a name="attached-properties"></a>
+<h2 id="attached-properties">Attached Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-textarea.html#flickable-attached-prop">flickable</a></b></b> : TextArea</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-textarea.html#pressAndHold-signal">pressAndHold</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-textarea.html#pressed-signal">pressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-textarea.html#released-signal">released</a></b></b>(<i>event</i>)</li>
+</ul>
+<!-- $$$TextArea-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><a href="qml-qtquick-controls2-textarea.html">TextArea</a> is a multi-line text editor. <a href="qml-qtquick-controls2-textarea.html">TextArea</a> extends <a href="../qtquick/qml-qtquick-textedit.html">TextEdit</a> with a <a href="qml-qtquick-controls2-textarea.html#placeholderText-prop">placeholder text</a> functionality, and adds decoration.</p>
+<p class="centerAlign"><img src="images/qtquickcontrols2-textarea.png" alt="" /></p><pre class="cpp">
+
+  TextArea {
+      placeholderText: qsTr(<span class="string">&quot;Enter description&quot;</span>)
+  }
+
+</pre>
+<p><a href="qml-qtquick-controls2-textarea.html">TextArea</a> is not scrollable by itself. Especially on screen-size constrained platforms, it is often preferable to make entire application pages scrollable. On such a scrollable page, a non-scrollable <a href="qml-qtquick-controls2-textarea.html">TextArea</a> might behave better than nested scrollable controls. Notice, however, that in such a scenario, the background decoration of the <a href="qml-qtquick-controls2-textarea.html">TextArea</a> scrolls together with the rest of the scrollable content.</p>
+<a name="scrollable-textarea"></a>
+<h3 id="scrollable-textarea">Scrollable TextArea</h3>
+<p>If you want to make a <a href="qml-qtquick-controls2-textarea.html">TextArea</a> scrollable, for example, when it covers an entire application page, it can be placed inside a <a href="qml-qtquick-controls2-scrollview.html">ScrollView</a>.</p>
+<p class="centerAlign"><img src="images/qtquickcontrols2-textarea-scrollable.png" alt="" /></p><pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls2-scrollview.html">ScrollView</a></span> {
+      <span class="name">id</span>: <span class="name">view</span>
+      <span class="name">anchors</span>.fill: <span class="name">parent</span>
+
+      <span class="type"><a href="qml-qtquick-controls2-textarea.html">TextArea</a></span> {
+          <span class="name">text</span>: <span class="string">&quot;TextArea\n...\n...\n...\n...\n...\n...\n&quot;</span>
+      }
+  }
+
+</pre>
+<p>A <a href="qml-qtquick-controls2-textarea.html">TextArea</a> that is placed inside a <a href="qml-qtquick-controls2-scrollview.html">ScrollView</a> does the following:</p>
+<ul>
+<li>Sets the content size automatically</li>
+<li>Ensures that the background decoration stays in place</li>
+<li>Clips the content</li>
+</ul>
+<a name="tab-focus"></a>
+<h3 id="tab-focus">Tab Focus</h3>
+<p>By default, pressing the tab key while <a href="qml-qtquick-controls2-textarea.html">TextArea</a> has <a href="../qtquick/qml-qtquick-item.html#activeFocus-prop">active focus</a> results in a tab character being input into the control itself. To make tab pass active focus onto another item, use the attached <a href="../qtquick/qml-qtquick-keynavigation.html">KeyNavigation</a> properties:</p>
+<pre class="cpp">
+
+  TextField {
+      id: textField
+  }
+
+  TextArea {
+      KeyNavigation<span class="operator">.</span>priority: KeyNavigation<span class="operator">.</span>BeforeItem
+      KeyNavigation<span class="operator">.</span>tab: textField
+  }
+
+</pre>
+<p><b>See also </b><a href="qml-qtquick-controls2-textfield.html">TextField</a>, <a href="qtquickcontrols2-customize.html#customizing-textarea">Customizing TextArea</a>, and <a href="qtquickcontrols2-input.html">Input Controls</a>.</p>
+<!-- @@@TextArea -->
+<h2>Property Documentation</h2>
+<!-- $$$background -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="background-prop"></a><span class="name">background</span> : <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the background item.</p>
+<p><b>Note: </b>If the background item has no explicit size specified, it automatically follows the control's size. In most cases, there is no need to specify width or height for a background item.</p><p><b>Note: </b>Most controls use the implicit size of the background item to calculate the implicit size of the control itself. If you replace the background item with a custom one, you should also consider providing a sensible implicit size for it (unless it is an item like <a href="../qtquick/qml-qtquick-image.html">Image</a> which has its own implicit size).</p><p><b>See also </b><a href="qtquickcontrols2-customize.html#customizing-textarea">Customizing TextArea</a>.</p>
+</div></div><!-- @@@background -->
+<br/>
+<!-- $$$bottomInset -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="bottomInset-prop"></a><span class="name">bottomInset</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the bottom inset for the background.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-control.html#control-layout">Control Layout</a> and <a href="qml-qtquick-controls2-textarea.html#topInset-prop">topInset</a>.</p>
+</div></div><!-- @@@bottomInset -->
+<br/>
+<!-- $$$focusReason -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="focusReason-prop"></a><span class="name">focusReason</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the reason of the last focus change.</p>
+<p><b>Note: </b>This property does not indicate whether the control has <a href="../qtquick/qml-qtquick-item.html#activeFocus-prop">active focus</a>, but the reason why the control either gained or lost focus.</p><div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Qt.MouseFocusReason</code></td><td class="topAlign">A mouse action occurred.</td></tr>
+<tr><td class="topAlign"><code>Qt.TabFocusReason</code></td><td class="topAlign">The Tab key was pressed.</td></tr>
+<tr><td class="topAlign"><code>Qt.BacktabFocusReason</code></td><td class="topAlign">A Backtab occurred. The input for this may include the Shift or Control keys; e.g&#x2e; Shift+Tab.</td></tr>
+<tr><td class="topAlign"><code>Qt.ActiveWindowFocusReason</code></td><td class="topAlign">The window system made this window either active or inactive.</td></tr>
+<tr><td class="topAlign"><code>Qt.PopupFocusReason</code></td><td class="topAlign">The application opened/closed a pop-up that grabbed/released the keyboard focus.</td></tr>
+<tr><td class="topAlign"><code>Qt.ShortcutFocusReason</code></td><td class="topAlign">The user typed a label's buddy shortcut</td></tr>
+<tr><td class="topAlign"><code>Qt.MenuBarFocusReason</code></td><td class="topAlign">The menu bar took focus.</td></tr>
+<tr><td class="topAlign"><code>Qt.OtherFocusReason</code></td><td class="topAlign">Another reason, usually application-specific.</td></tr>
+</table></div>
+<p><b>See also </b><a href="../qtquick/qml-qtquick-item.html#activeFocus-prop">Item::activeFocus</a>.</p>
+</div></div><!-- @@@focusReason -->
+<br/>
+<!-- $$$hoverEnabled -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="hoverEnabled-prop"></a><span class="name">hoverEnabled</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property determines whether the text area accepts hover events. The default value is <code>true</code>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.1 (Qt 5.8).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-textarea.html#hovered-prop">hovered</a>.</p>
+</div></div><!-- @@@hoverEnabled -->
+<br/>
+<!-- $$$hovered -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="hovered-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">hovered</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the text area is hovered.</p>
+<p>This property was introduced in  QtQuick.Controls 2.1 (Qt 5.8).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-textarea.html#hoverEnabled-prop">hoverEnabled</a>.</p>
+</div></div><!-- @@@hovered -->
+<br/>
+<!-- $$$implicitBackgroundHeight -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="implicitBackgroundHeight-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">implicitBackgroundHeight</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the implicit background height.</p>
+<p>The value is equal to <code>background ? background.implicitHeight : 0</code>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-textarea.html#implicitBackgroundWidth-prop">implicitBackgroundWidth</a>.</p>
+</div></div><!-- @@@implicitBackgroundHeight -->
+<br/>
+<!-- $$$implicitBackgroundWidth -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="implicitBackgroundWidth-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">implicitBackgroundWidth</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the implicit background width.</p>
+<p>The value is equal to <code>background ? background.implicitWidth : 0</code>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-textarea.html#implicitBackgroundHeight-prop">implicitBackgroundHeight</a>.</p>
+</div></div><!-- @@@implicitBackgroundWidth -->
+<br/>
+<!-- $$$leftInset -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="leftInset-prop"></a><span class="name">leftInset</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the left inset for the background.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-control.html#control-layout">Control Layout</a> and <a href="qml-qtquick-controls2-textarea.html#rightInset-prop">rightInset</a>.</p>
+</div></div><!-- @@@leftInset -->
+<br/>
+<!-- $$$palette -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="palette-prop"></a><span class="name">palette</span> : <span class="type"><a href="qml-palette.html">palette</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the palette currently set for the text area.</p>
+<p>This property was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-control.html#palette-prop">Control::palette</a>.</p>
+</div></div><!-- @@@palette -->
+<br/>
+<!-- $$$placeholderText -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="placeholderText-prop"></a><span class="name">placeholderText</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the short hint that is displayed in the text area before the user enters a value.</p>
+</div></div><!-- @@@placeholderText -->
+<br/>
+<!-- $$$placeholderTextColor -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="placeholderTextColor-prop"></a><span class="name">placeholderTextColor</span> : <span class="type"><a href="../qtquick/qml-color.html">color</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the color of <a href="qml-qtquick-controls2-textarea.html#placeholderText-prop">placeholderText</a>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-textarea.html#placeholderText-prop">placeholderText</a>.</p>
+</div></div><!-- @@@placeholderTextColor -->
+<br/>
+<!-- $$$rightInset -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="rightInset-prop"></a><span class="name">rightInset</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the right inset for the background.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-control.html#control-layout">Control Layout</a> and <a href="qml-qtquick-controls2-textarea.html#leftInset-prop">leftInset</a>.</p>
+</div></div><!-- @@@rightInset -->
+<br/>
+<!-- $$$topInset -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="topInset-prop"></a><span class="name">topInset</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the top inset for the background.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-control.html#control-layout">Control Layout</a> and <a href="qml-qtquick-controls2-textarea.html#bottomInset-prop">bottomInset</a>.</p>
+</div></div><!-- @@@topInset -->
+<br/>
+<h2>Attached Property Documentation</h2>
+<!-- $$$flickable -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="flickable-attached-prop"></a><span class="name">TextArea.flickable</span> : <span class="type"><a href="qml-qtquick-controls2-textarea.html">TextArea</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property attaches a text area to a <a href="../qtquick/qml-qtquick-flickable.html">Flickable</a>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-scrollbar.html">ScrollBar</a>, <a href="qml-qtquick-controls2-scrollindicator.html">ScrollIndicator</a>, and <a href="qml-qtquick-controls2-textarea.html#scrollable-textarea">Scrollable TextArea</a>.</p>
+</div></div><!-- @@@flickable -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$pressAndHold[overload1]$$$pressAndHold -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="pressAndHold-signal"></a><span class="name">pressAndHold</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when there is a long press (the delay depends on the platform plugin). The <a href="../qtquick/qml-qtquick-mouseevent.html">event</a> parameter provides information about the press, including the x and y position of the press, and which button is pressed.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-textarea.html#pressed-signal">pressed</a> and <a href="qml-qtquick-controls2-textarea.html#released-signal">released</a>.</p>
+</div></div><!-- @@@pressAndHold -->
+<br/>
+<!-- $$$pressed[overload1]$$$pressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="pressed-signal"></a><span class="name">pressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the text area is pressed by the user. The <a href="../qtquick/qml-qtquick-mouseevent.html">event</a> parameter provides information about the press, including the x and y position of the press, and which button is pressed.</p>
+<p>This signal was introduced in  QtQuick.Controls 2.1 (Qt 5.8).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-textarea.html#released-signal">released</a> and <a href="qml-qtquick-controls2-textarea.html#pressAndHold-signal">pressAndHold</a>.</p>
+</div></div><!-- @@@pressed -->
+<br/>
+<!-- $$$released[overload1]$$$released -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="released-signal"></a><span class="name">released</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the text area is released by the user. The <a href="../qtquick/qml-qtquick-mouseevent.html">event</a> parameter provides information about the release, including the x and y position of the press, and which button is pressed.</p>
+<p>This signal was introduced in  QtQuick.Controls 2.1 (Qt 5.8).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-textarea.html#pressed-signal">pressed</a> and <a href="qml-qtquick-controls2-textarea.html#pressAndHold-signal">pressAndHold</a>.</p>
+</div></div><!-- @@@released -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

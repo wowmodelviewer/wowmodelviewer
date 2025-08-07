@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcamerafocuscontrol.cpp -->
+  <title>QCameraFocusControl Class | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-modules.html">C++ Classes</a></td><td >QCameraFocusControl</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#macros">Macros</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCameraFocusControl Class</h1>
+<!-- $$$QCameraFocusControl-brief -->
+<p>The <a href="qcamerafocuscontrol.html">QCameraFocusControl</a> class supplies control for focusing related camera parameters. <a href="#details">More...</a></p>
+<!-- @@@QCameraFocusControl -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QCameraFocusControl&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += multimedia</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qmediacontrol.html">QMediaControl</a></td></tr></table></div><ul>
+<li><a href="qcamerafocuscontrol-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocuscontrol.html#dtor.QCameraFocusControl">~QCameraFocusControl</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QPointF </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocuscontrol.html#customFocusPoint">customFocusPoint</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QCameraFocus::FocusModes </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocuscontrol.html#focusMode">focusMode</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QCameraFocus::FocusPointMode </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocuscontrol.html#focusPointMode">focusPointMode</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QCameraFocusZoneList </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocuscontrol.html#focusZones">focusZones</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocuscontrol.html#isFocusModeSupported">isFocusModeSupported</a></b>(QCameraFocus::FocusModes <i>mode</i>) const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocuscontrol.html#isFocusPointModeSupported">isFocusPointModeSupported</a></b>(QCameraFocus::FocusPointMode <i>mode</i>) const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocuscontrol.html#setCustomFocusPoint">setCustomFocusPoint</a></b>(const QPointF &amp;<i>point</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocuscontrol.html#setFocusMode">setFocusMode</a></b>(QCameraFocus::FocusModes <i>mode</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocuscontrol.html#setFocusPointMode">setFocusPointMode</a></b>(QCameraFocus::FocusPointMode <i>mode</i>) = 0</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocuscontrol.html#customFocusPointChanged">customFocusPointChanged</a></b>(const QPointF &amp;<i>point</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocuscontrol.html#focusModeChanged">focusModeChanged</a></b>(QCameraFocus::FocusModes <i>mode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocuscontrol.html#focusPointModeChanged">focusPointModeChanged</a></b>(QCameraFocus::FocusPointMode <i>mode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocuscontrol.html#focusZonesChanged">focusZonesChanged</a></b>()</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocuscontrol.html#QCameraFocusControl">QCameraFocusControl</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+</table></div>
+<a name="macros"></a>
+<h2 id="macros">Macros</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocuscontrol.html#QCameraFocusControl_iid">QCameraFocusControl_iid</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCameraFocusControl-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The interface name of <a href="qcamerafocuscontrol.html">QCameraFocusControl</a> is <code>org.qt-project.qt.camerafocuscontrol/5.0</code> as defined in <a href="qcamerafocuscontrol.html#QCameraFocusControl_iid">QCameraFocusControl_iid</a>.</p>
+</div>
+<p><b>See also </b><a href="qmediaservice.html#requestControl-1">QMediaService::requestControl</a>() and <a href="qcamera.html">QCamera</a>.</p>
+<!-- @@@QCameraFocusControl -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QCameraFocusControl[overload1]$$$QCameraFocusControlQObject* -->
+<h3 class="fn" id="QCameraFocusControl"><a name="QCameraFocusControl"></a><code>[protected] </code>QCameraFocusControl::<span class="name">QCameraFocusControl</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a camera control object with <i>parent</i>.</p>
+<!-- @@@QCameraFocusControl -->
+<!-- $$$customFocusPointChanged[overload1]$$$customFocusPointChangedconstQPointF& -->
+<h3 class="fn" id="customFocusPointChanged"><a name="customFocusPointChanged"></a><code>[signal] </code><span class="type">void</span> QCameraFocusControl::<span class="name">customFocusPointChanged</span>(const <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> &amp;<i>point</i>)</h3>
+<p>Signal is emitted when the custom focus <i>point</i> is changed.</p>
+<p><b>See also </b><a href="qcamerafocuscontrol.html#customFocusPoint">QCameraFocusControl::customFocusPoint</a>() and <a href="qcamerafocuscontrol.html#setCustomFocusPoint">QCameraFocusControl::setCustomFocusPoint</a>().</p>
+<!-- @@@customFocusPointChanged -->
+<!-- $$$focusModeChanged[overload1]$$$focusModeChangedQCameraFocus::FocusModes -->
+<h3 class="fn" id="focusModeChanged"><a name="focusModeChanged"></a><code>[signal] </code><span class="type">void</span> QCameraFocusControl::<span class="name">focusModeChanged</span>(<span class="type"><a href="qcamerafocus.html#FocusMode-enum">QCameraFocus::FocusModes</a></span> <i>mode</i>)</h3>
+<p>Signal is emitted when the focus <i>mode</i> is changed, usually in result of <a href="qcamerafocuscontrol.html#setFocusMode">QCameraFocusControl::setFocusMode</a> call or capture mode changes.</p>
+<p><b>See also </b><a href="qcamerafocuscontrol.html#focusMode">QCameraFocusControl::focusMode</a>() and <a href="qcamerafocuscontrol.html#setFocusMode">QCameraFocusControl::setFocusMode</a>().</p>
+<!-- @@@focusModeChanged -->
+<!-- $$$focusPointModeChanged[overload1]$$$focusPointModeChangedQCameraFocus::FocusPointMode -->
+<h3 class="fn" id="focusPointModeChanged"><a name="focusPointModeChanged"></a><code>[signal] </code><span class="type">void</span> QCameraFocusControl::<span class="name">focusPointModeChanged</span>(<span class="type"><a href="qcamerafocus.html#FocusPointMode-enum">QCameraFocus::FocusPointMode</a></span> <i>mode</i>)</h3>
+<p>Signal is emitted when the focus point <i>mode</i> is changed, usually in result of <a href="qcamerafocuscontrol.html#setFocusPointMode">QCameraFocusControl::setFocusPointMode</a> call or capture mode changes.</p>
+<p><b>See also </b><a href="qcamerafocuscontrol.html#focusPointMode">QCameraFocusControl::focusPointMode</a>() and <a href="qcamerafocuscontrol.html#setFocusPointMode">QCameraFocusControl::setFocusPointMode</a>().</p>
+<!-- @@@focusPointModeChanged -->
+<!-- $$$focusZonesChanged[overload1]$$$focusZonesChanged -->
+<h3 class="fn" id="focusZonesChanged"><a name="focusZonesChanged"></a><code>[signal] </code><span class="type">void</span> QCameraFocusControl::<span class="name">focusZonesChanged</span>()</h3>
+<p>Signal is emitted when the set of zones, camera focused on is changed.</p>
+<p>Usually the zones list is changed when the camera is focused.</p>
+<p><b>See also </b><a href="qcamerafocuscontrol.html#focusZones">QCameraFocusControl::focusZones</a>().</p>
+<!-- @@@focusZonesChanged -->
+<!-- $$$~QCameraFocusControl[overload1]$$$~QCameraFocusControl -->
+<h3 class="fn" id="dtor.QCameraFocusControl"><a name="dtor.QCameraFocusControl"></a><code>[virtual] </code>QCameraFocusControl::<span class="name">~QCameraFocusControl</span>()</h3>
+<p>Destruct the camera control object.</p>
+<!-- @@@~QCameraFocusControl -->
+<!-- $$$customFocusPoint[overload1]$$$customFocusPoint -->
+<h3 class="fn" id="customFocusPoint"><a name="customFocusPoint"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> QCameraFocusControl::<span class="name">customFocusPoint</span>() const</h3>
+<p>Return the position of custom focus point, in relative frame coordinates: <a href="../qtcore/qpointf.html">QPointF</a>(0,0) points to the left top frame point, <a href="../qtcore/qpointf.html">QPointF</a>(0.5,0.5) points to the frame center.</p>
+<p>Custom focus point is used only in FocusPointCustom focus mode.</p>
+<p><b>See also </b><a href="qcamerafocuscontrol.html#setCustomFocusPoint">setCustomFocusPoint</a>().</p>
+<!-- @@@customFocusPoint -->
+<!-- $$$focusMode[overload1]$$$focusMode -->
+<h3 class="fn" id="focusMode"><a name="focusMode"></a><code>[pure virtual] </code><span class="type"><a href="qcamerafocus.html#FocusMode-enum">QCameraFocus::FocusModes</a></span> QCameraFocusControl::<span class="name">focusMode</span>() const</h3>
+<p>Returns the focus mode being used.</p>
+<p><b>See also </b><a href="qcamerafocuscontrol.html#setFocusMode">setFocusMode</a>().</p>
+<!-- @@@focusMode -->
+<!-- $$$focusPointMode[overload1]$$$focusPointMode -->
+<h3 class="fn" id="focusPointMode"><a name="focusPointMode"></a><code>[pure virtual] </code><span class="type"><a href="qcamerafocus.html#FocusPointMode-enum">QCameraFocus::FocusPointMode</a></span> QCameraFocusControl::<span class="name">focusPointMode</span>() const</h3>
+<p>Returns the camera focus point selection mode.</p>
+<p><b>See also </b><a href="qcamerafocuscontrol.html#setFocusPointMode">setFocusPointMode</a>().</p>
+<!-- @@@focusPointMode -->
+<!-- $$$focusZones[overload1]$$$focusZones -->
+<h3 class="fn" id="focusZones"><a name="focusZones"></a><code>[pure virtual] </code><span class="type">QCameraFocusZoneList</span> QCameraFocusControl::<span class="name">focusZones</span>() const</h3>
+<p>Returns the list of zones, the camera is using for focusing or focused on.</p>
+<!-- @@@focusZones -->
+<!-- $$$isFocusModeSupported[overload1]$$$isFocusModeSupportedQCameraFocus::FocusModes -->
+<h3 class="fn" id="isFocusModeSupported"><a name="isFocusModeSupported"></a><code>[pure virtual] </code><span class="type">bool</span> QCameraFocusControl::<span class="name">isFocusModeSupported</span>(<span class="type"><a href="qcamerafocus.html#FocusMode-enum">QCameraFocus::FocusModes</a></span> <i>mode</i>) const</h3>
+<p>Returns true if focus <i>mode</i> is supported.</p>
+<!-- @@@isFocusModeSupported -->
+<!-- $$$isFocusPointModeSupported[overload1]$$$isFocusPointModeSupportedQCameraFocus::FocusPointMode -->
+<h3 class="fn" id="isFocusPointModeSupported"><a name="isFocusPointModeSupported"></a><code>[pure virtual] </code><span class="type">bool</span> QCameraFocusControl::<span class="name">isFocusPointModeSupported</span>(<span class="type"><a href="qcamerafocus.html#FocusPointMode-enum">QCameraFocus::FocusPointMode</a></span> <i>mode</i>) const</h3>
+<p>Returns true if the camera focus point <i>mode</i> is supported.</p>
+<!-- @@@isFocusPointModeSupported -->
+<!-- $$$setCustomFocusPoint[overload1]$$$setCustomFocusPointconstQPointF& -->
+<h3 class="fn" id="setCustomFocusPoint"><a name="setCustomFocusPoint"></a><code>[pure virtual] </code><span class="type">void</span> QCameraFocusControl::<span class="name">setCustomFocusPoint</span>(const <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> &amp;<i>point</i>)</h3>
+<p>Sets the custom focus <i>point</i>.</p>
+<p>If camera supports fixed set of focus points, it should use the nearest supported focus point, and return the actual focus point with <a href="qcamerafocuscontrol.html#focusZones">QCameraFocusControl::focusZones</a>().</p>
+<p><b>See also </b><a href="qcamerafocuscontrol.html#customFocusPoint">QCameraFocusControl::customFocusPoint</a>() and <a href="qcamerafocuscontrol.html#focusZones">QCameraFocusControl::focusZones</a>().</p>
+<!-- @@@setCustomFocusPoint -->
+<!-- $$$setFocusMode[overload1]$$$setFocusModeQCameraFocus::FocusModes -->
+<h3 class="fn" id="setFocusMode"><a name="setFocusMode"></a><code>[pure virtual] </code><span class="type">void</span> QCameraFocusControl::<span class="name">setFocusMode</span>(<span class="type"><a href="qcamerafocus.html#FocusMode-enum">QCameraFocus::FocusModes</a></span> <i>mode</i>)</h3>
+<p>Set the focus mode to <i>mode</i>.</p>
+<p><b>See also </b><a href="qcamerafocuscontrol.html#focusMode">focusMode</a>().</p>
+<!-- @@@setFocusMode -->
+<!-- $$$setFocusPointMode[overload1]$$$setFocusPointModeQCameraFocus::FocusPointMode -->
+<h3 class="fn" id="setFocusPointMode"><a name="setFocusPointMode"></a><code>[pure virtual] </code><span class="type">void</span> QCameraFocusControl::<span class="name">setFocusPointMode</span>(<span class="type"><a href="qcamerafocus.html#FocusPointMode-enum">QCameraFocus::FocusPointMode</a></span> <i>mode</i>)</h3>
+<p>Sets the camera focus point selection <i>mode</i>.</p>
+<p><b>See also </b><a href="qcamerafocuscontrol.html#focusPointMode">focusPointMode</a>().</p>
+<!-- @@@setFocusPointMode -->
+</div>
+<div class="macros">
+<h2>Macro Documentation</h2>
+<!-- $$$QCameraFocusControl_iid[overload1]$$$QCameraFocusControl_iid -->
+<h3 class="fn" id="QCameraFocusControl_iid"><a name="QCameraFocusControl_iid"></a><span class="name">QCameraFocusControl_iid</span></h3>
+<p><code>org.qt-project.qt.camerafocuscontrol/5.0</code></p>
+<p>Defines the interface name of the <a href="qcamerafocuscontrol.html">QCameraFocusControl</a> class.</p>
+<!-- @@@QCameraFocusControl_iid -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

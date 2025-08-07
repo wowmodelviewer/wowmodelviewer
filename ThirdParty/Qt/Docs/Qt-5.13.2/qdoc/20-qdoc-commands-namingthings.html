@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdoc-manual-contextcmds.qdoc -->
+  <title>Naming Things | QDoc Manual 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qdoc-index.html">QDoc Manual</a></td><td >Naming Things</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qdoc-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="19-qdoc-commands-grouping.html" />
+  <link rel="next" href="03-qdoc-commands-markup.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="19-qdoc-commands-grouping.html">Grouping Things</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="03-qdoc-commands-markup.html">Markup Commands</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#commands">Commands</a></li>
+<li class="level2"><a href="#title">\title</a></li>
+<li class="level2"><a href="#subtitle">\subtitle</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Naming Things</h1>
+<span class="subtitle"></span>
+<!-- $$$20-qdoc-commands-namingthings.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>In general, a title command considers everything that follows it until the first line break as its argument. If the title is so long it must span multiple lines, end each line (except the last one) with a backslash.</p>
+<a name="commands"></a>
+<h2 id="commands">Commands</h2>
+<a name="title-command"></a><a name="title"></a>
+<h3 id="title">\title</h3>
+<p>The \title command sets the title for a documentation page, or allows you to override it.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \page signalandslots<span class="operator">.</span>html
+
+      \title Signals <span class="operator">&amp;</span> Slots
+
+      Signals and <span class="keyword">slots</span> are used <span class="keyword">for</span> communication between
+      objects<span class="operator">.</span> The <span class="keyword">signals</span> and <span class="keyword">slots</span> mechanism is a central
+      feature of <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">,</span> and probably the part that differs most
+      from the features provided by other frameworks<span class="operator">.</span>
+
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote>            <h1><center>Signal and Slots</center></h1>
+        <p>Signals and slots are used for communication between objects. The signals and slots mechanism is a central feature of Qt and probably the part that differs most from the features provided by other frameworks. &#x2e;.&#x2e;</p>
+</blockquote>
+<p>See also <a href="20-qdoc-commands-namingthings.html#subtitle-command">\subtitle</a>.</p>
+<a name="subtitle-command"></a><a name="subtitle"></a>
+<h3 id="subtitle">\subtitle</h3>
+<p>The \subtitle command sets a subtitle for a documentation page.</p>
+<pre class="cpp">
+
+  \beginqdoc
+      \page qtopiacore<span class="operator">-</span>overview<span class="operator">.</span>html
+
+      \title Qtopia Core
+      \subtitle <span class="type"><a href="../qtcore/qt.html">Qt</a></span> <span class="keyword">for</span> Embedded Linux
+
+      <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">/</span>Embedded<span class="operator">,</span> the embedded Linux port of <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">,</span> is a
+      complete and self<span class="operator">-</span>contained C<span class="operator">+</span><span class="operator">+</span> GUI and platform
+      development tool <span class="keyword">for</span> Linux<span class="operator">-</span>based embedded development<span class="operator">.</span>
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  \endqdoc
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote>            <h1><center>Qtopia Core</center></h1>
+            <h2><center>Qt for Embedded Linux</center></h2>
+        <p>Qt/Embedded, the embedded Linux port of Qt, is a complete and self-contained C++ GUI and platform development tool for Linux-based embedded development. &#x2e;.&#x2e;</p>
+</blockquote>
+<p>See also <a href="20-qdoc-commands-namingthings.html#title-command">\title</a>.</p>
+</div>
+<!-- @@@20-qdoc-commands-namingthings.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="19-qdoc-commands-grouping.html">Grouping Things</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="03-qdoc-commands-markup.html">Markup Commands</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

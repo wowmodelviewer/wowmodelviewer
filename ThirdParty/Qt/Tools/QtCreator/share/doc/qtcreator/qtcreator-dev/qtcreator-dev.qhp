@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+    <namespace>org.qt-project.qtcreator.developer.4101</namespace>
+    <virtualFolder>doc</virtualFolder>
+    <metaData name="version" value=""/>
+    <customFilter name="Qt Creator 4.10.1">
+        <filterAttribute>4.10.1</filterAttribute>
+        <filterAttribute>qtcreator</filterAttribute>
+    </customFilter>
+    <filterSection>
+        <filterAttribute>4.10.1</filterAttribute>
+        <filterAttribute>qtcreator</filterAttribute>
+        <toc>
+            <section ref="extending-index.html" title="Extending Qt Creator Manual">
+                <section ref="" title="">
+                    <section ref="qtcreator-documentation.html" title="Writing Documentation"/>
+                    <section ref="coding-style.html" title="Qt Creator Coding Rules"/>
+                    <section ref="qtcreator-api.html" title="Qt Creator API Reference"/>
+                </section>
+            </section>
+        </toc>
+        <keywords>
+            <keyword name="Common Extension Tasks" id="Common Extension Tasks" ref="common-extension-tasks.html"/>
+            <keyword name="Creating Plugins" id="Creating Plugins" ref="creating-plugins.html"/>
+            <keyword name="Creating Wizards in Code" id="Creating Wizards in Code" ref="qtcreator-dev-wizards.html"/>
+            <keyword name="Creating Your First Plugin" id="Creating Your First Plugin" ref="first-plugin.html"/>
+            <keyword name="Extending Qt Creator Manual" id="Extending Qt Creator Manual" ref="extending-index.html"/>
+            <keyword name="External Tool Specification Files" id="External Tool Specification Files" ref="external-tool-spec.html"/>
+            <keyword name="Getting and Building Qt Creator" id="Getting and Building Qt Creator" ref="getting-and-building.html"/>
+            <keyword name="Plugin Life Cycle" id="Plugin Life Cycle" ref="plugin-lifecycle.html"/>
+            <keyword name="Plugin Meta Data" id="Plugin Meta Data" ref="plugin-meta-data.html"/>
+            <keyword name="Qt Creator API Reference" id="Qt Creator API Reference" ref="qtcreator-api.html"/>
+            <keyword name="Qt Creator Classes" id="Qt Creator Classes" ref="classes.html"/>
+            <keyword name="Qt Creator Coding Rules" id="Qt Creator Coding Rules" ref="coding-style.html"/>
+            <keyword name="Qt Creator Functions" id="Qt Creator Functions" ref="functions.html"/>
+            <keyword name="Qt Creator Main Classes" id="Qt Creator Main Classes" ref="mainclasses.html"/>
+            <keyword name="Qt Creator Namespaces" id="Qt Creator Namespaces" ref="namespaces.html"/>
+            <keyword name="The Plugin Manager, the Object Pool, and Registered Objects" id="The Plugin Manager, the Object Pool, and Registered Objects" ref="pluginmanager.html"/>
+            <keyword name="User Interface Text Guidelines" id="User Interface Text Guidelines" ref="qtcreator-ui-text.html"/>
+            <keyword name="Utils" id="Utils" ref="utils.html"/>
+            <keyword name="Writing Documentation" id="Writing Documentation" ref="qtcreator-documentation.html"/>
+        </keywords>
+        <files>
+            <file>classes.html</file>
+            <file>coding-style.html</file>
+            <file>common-extension-tasks.html</file>
+            <file>creating-plugins.html</file>
+            <file>extending-index.html</file>
+            <file>external-tool-spec.html</file>
+            <file>first-plugin.html</file>
+            <file>functions.html</file>
+            <file>getting-and-building.html</file>
+            <file>images/arrow_bc.png</file>
+            <file>images/bgrContent.png</file>
+            <file>images/btn_next.png</file>
+            <file>images/btn_prev.png</file>
+            <file>images/bullet_dn.png</file>
+            <file>images/bullet_sq.png</file>
+            <file>images/firstplugin-kitselection.png</file>
+            <file>images/firstplugin-menuitem.png</file>
+            <file>images/firstplugin-nameandpath.png</file>
+            <file>images/firstplugin-pluginsetup.png</file>
+            <file>images/firstplugin-runsettings.png</file>
+            <file>images/firstplugin-summary.png</file>
+            <file>images/firstplugin-wizard.png</file>
+            <file>images/home.png</file>
+            <file>images/ico_note.png</file>
+            <file>images/ico_note_attention.png</file>
+            <file>images/ico_out.png</file>
+            <file>images/logo.png</file>
+            <file>images/qtcreator-context-menu.png</file>
+            <file>images/qtcreator-debugger-views.png</file>
+            <file>images/qtcreator-dialog.png</file>
+            <file>images/qtcreator-error-message.png</file>
+            <file>images/qtcreator-locator.png</file>
+            <file>images/qtcreator-menu-item.png</file>
+            <file>images/qtcreator-menu.png</file>
+            <file>images/qtcreator-mode-selector.png</file>
+            <file>images/qtcreator-output-pane.png</file>
+            <file>images/qtcreator-sidebar-menu.png</file>
+            <file>images/qtcreator-tooltip-long.png</file>
+            <file>images/qtcreator-tooltip.png</file>
+            <file>images/riot.png</file>
+            <file>mainclasses.html</file>
+            <file>namespaces.html</file>
+            <file>plugin-lifecycle.html</file>
+            <file>plugin-meta-data.html</file>
+            <file>pluginmanager.html</file>
+            <file>qtcreator-api.html</file>
+            <file>qtcreator-dev-wizards.html</file>
+            <file>qtcreator-documentation.html</file>
+            <file>qtcreator-ui-text.html</file>
+            <file>style/offline-simple.css</file>
+            <file>style/offline.css</file>
+            <file>utils.html</file>
+        </files>
+    </filterSection>
+</QtHelpProject>

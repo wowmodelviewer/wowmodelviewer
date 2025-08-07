@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tagfile>
+    <compound kind="class">
+        <name>Qt.labs.calendar.DayOfWeekRow</name>
+        <filename>qml-qt-labs-calendar-dayofweekrow.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>Qt.labs.calendar.MonthGrid</name>
+        <filename>qml-qt-labs-calendar-monthgrid.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>pressed</name>
+            <anchorfile>qml-qt-labs-calendar-monthgrid.html</anchorfile>
+            <anchor>pressed-signal</anchor>
+            <arglist>( date)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>released</name>
+            <anchorfile>qml-qt-labs-calendar-monthgrid.html</anchorfile>
+            <anchor>released-signal</anchor>
+            <arglist>( date)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>clicked</name>
+            <anchorfile>qml-qt-labs-calendar-monthgrid.html</anchorfile>
+            <anchor>clicked-signal</anchor>
+            <arglist>( date)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>pressAndHold</name>
+            <anchorfile>qml-qt-labs-calendar-monthgrid.html</anchorfile>
+            <anchor>pressAndHold-signal</anchor>
+            <arglist>( date)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>Qt.labs.calendar.WeekNumberColumn</name>
+        <filename>qml-qt-labs-calendar-weeknumbercolumn.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>Qt.labs.calendar.Calendar</name>
+        <filename>qml-qt-labs-calendar-calendar.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>Qt.labs.calendar.CalendarModel</name>
+        <filename>qml-qt-labs-calendar-calendarmodel.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>monthAt</name>
+            <anchorfile>qml-qt-labs-calendar-calendarmodel.html</anchorfile>
+            <anchor>monthAt-method</anchor>
+            <arglist>( index)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>yearAt</name>
+            <anchorfile>qml-qt-labs-calendar-calendarmodel.html</anchorfile>
+            <anchor>yearAt-method</anchor>
+            <arglist>( index)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>indexOf</name>
+            <anchorfile>qml-qt-labs-calendar-calendarmodel.html</anchorfile>
+            <anchor>indexOf-method</anchor>
+            <arglist>( date)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>indexOf</name>
+            <anchorfile>qml-qt-labs-calendar-calendarmodel.html</anchorfile>
+            <anchor>indexOf-method</anchor>
+            <arglist>( year,  int month)</arglist>
+        </member>
+    </compound>
+</tagfile>

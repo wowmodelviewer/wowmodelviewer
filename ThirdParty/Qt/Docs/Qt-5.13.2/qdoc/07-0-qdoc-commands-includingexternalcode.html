@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdoc-manual-markupcmds.qdoc -->
+  <title>Including External Code | QDoc Manual 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qdoc-index.html">QDoc Manual</a></td><td >Including External Code</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qdoc-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="06-qdoc-commands-includecodeinline.html" />
+  <link rel="next" href="08-qdoc-commands-creatinglinks.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="06-qdoc-commands-includecodeinline.html">Including Code Inline</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="08-qdoc-commands-creatinglinks.html">Creating Links</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#quotefile">\quotefile</a></li>
+<li class="level1"><a href="#quotefromfile">\quotefromfile</a></li>
+<li class="level1"><a href="#printline">\printline</a></li>
+<li class="level1"><a href="#printto">\printto</a></li>
+<li class="level1"><a href="#printuntil">\printuntil</a></li>
+<li class="level1"><a href="#skipline">\skipline</a></li>
+<li class="level1"><a href="#skipto">\skipto</a></li>
+<li class="level1"><a href="#skipuntil">\skipuntil</a></li>
+<li class="level1"><a href="#dots">\dots</a></li>
+<li class="level1"><a href="#snippet">\snippet</a></li>
+<li class="level1"><a href="#codeline">\codeline</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Including External Code</h1>
+<span class="subtitle"></span>
+<!-- $$$07-0-qdoc-commands-includingexternalcode.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The following commands enable you to include code snippets from external files. You can make QDoc include the complete contents of a file, or you can quote specific parts of the file and skip others. The typical use of the latter is to quote a file chunk by chunk.</p>
+<p><b>Note: </b>Although all these commands can be used for rendering C++ code, the <a href="07-0-qdoc-commands-includingexternalcode.html#snippet-command">\snippet</a> and <a href="07-0-qdoc-commands-includingexternalcode.html#codeline-command">\codeline</a> commands are preferred over the others. These commands allow equivalent code snippets for other Qt language bindings to be substituted for the C++ snippets in the documentation.</p><a name="quotefile-command"></a><a name="quotefile"></a>
+<h2 id="quotefile">\quotefile</h2>
+<p>The \quotefile command expands to the complete contents of the file given as argument.</p>
+<p>The command considers the rest of the line as part of its argument, make sure to follow the file name with a line break.</p>
+<p>The file's contents is rendered in a separate paragraph, using a monospace font and the standard indentation. The code is shown verbatim.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      This is a simple <span class="string">&quot;Hello world&quot;</span> example:
+
+      \quotefile examples<span class="operator">/</span>main<span class="operator">.</span>cpp
+
+      It contains only the bare minimum you need
+      to get a <span class="type"><a href="../qtcore/qt.html">Qt</a></span> application up and running<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p>This is a simple &quot;Hello world&quot; example:</p>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the tools applications of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:GPL-EXCEPT$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 3 as published by the Free Software
+  ** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
+  ** included in the packaging of this file. Please review the following
+  ** information to ensure the GNU General Public License requirements will
+  ** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QPushButton&gt;</span>
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> hello(<span class="string">&quot;Hello world!&quot;</span>);
+      hello<span class="operator">.</span>resize(<span class="number">100</span><span class="operator">,</span> <span class="number">30</span>);
+
+      hello<span class="operator">.</span>show();
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p>It contains only the bare minimum you need to get a Qt application up and running.</p>
+</blockquote>
+<p>See also <a href="07-0-qdoc-commands-includingexternalcode.html#quotefromfile-command">\quotefromfile</a> and <a href="06-qdoc-commands-includecodeinline.html#code-command">\code</a>.</p>
+<a name="quotefromfile-command"></a><a name="quotefromfile"></a>
+<h2 id="quotefromfile">\quotefromfile</h2>
+<p>The \quotefromfile command opens the file given as argument for quoting.</p>
+<p>The command considers the rest of the line as part of its argument, make sure to follow the file name with a line break.</p>
+<p>The command is intended for use when quoting parts from file with the walkthrough commands: <a href="07-0-qdoc-commands-includingexternalcode.html#printline-command">\printline</a>, <a href="07-0-qdoc-commands-includingexternalcode.html#printto-command">\printto</a>, <a href="07-0-qdoc-commands-includingexternalcode.html#printuntil-command">\printuntil</a>, <a href="07-0-qdoc-commands-includingexternalcode.html#skipline-command">\skipline</a>, <a href="07-0-qdoc-commands-includingexternalcode.html#skipto-command">\skipto</a>, <a href="07-0-qdoc-commands-includingexternalcode.html#skipuntil-command">\skipuntil</a>. This enables you to quote specific portions of a file.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      The whole application is contained within
+      the \c main() function:
+
+      \quotefromfile examples<span class="operator">/</span>main<span class="operator">.</span>cpp
+
+      \skipto main
+      \printuntil app(argc<span class="operator">,</span> argv)
+
+      First we create a <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> object <span class="keyword">using</span>
+      the \c argc and \c argv parameters<span class="operator">.</span>
+
+      \skipto <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>
+      \printuntil resize
+
+      Then we create a <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span><span class="operator">,</span> and give it a reasonable
+      size <span class="keyword">using</span> the <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span><span class="operator">::</span>resize() function<span class="operator">.</span>
+
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p>The whole application is contained within the <code>main()</code> function:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+</pre>
+<p>First we create a <a href="../qtwidgets/qapplication.html">QApplication</a> object using the <code>argc</code> and <code>argv</code> parameters.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> hello(<span class="string">&quot;Hello world!&quot;</span>);
+      hello<span class="operator">.</span>resize(<span class="number">100</span><span class="operator">,</span> <span class="number">30</span>);
+
+</pre>
+<p>Then we create a <a href="../qtwidgets/qpushbutton.html">QPushButton</a>, and give it a reasonable size using the <a href="../qtwidgets/qwidget.html#size-prop">QWidget::resize</a>() function.</p>
+<p>...</p>
+</blockquote>
+<p>QDoc remembers which file it is quoting from, and the current position in that file (see <a href="07-0-qdoc-commands-includingexternalcode.html#file">\printline</a> for more information). There is no need to &quot;close&quot; the file.</p>
+<p>See also <a href="07-0-qdoc-commands-includingexternalcode.html#quotefile-command">\quotefile</a>, <a href="06-qdoc-commands-includecodeinline.html#code-command">\code</a> and <a href="07-0-qdoc-commands-includingexternalcode.html#dots">\dots</a>.</p>
+<a name="printline-command"></a><a name="printline"></a>
+<h2 id="printline">\printline</h2>
+<p>The \printline command expands to the line from the current position to the next non-blank line of the current source file.</p>
+<p>To ensure that the documentation remains synchronized with the source file, a substring of the line must be specified as an argument to the command. Note that the command considers the rest of the line as part of its argument, make sure to follow the substring with a line break.</p>
+<p>The line from the source file is rendered as a separate paragraph, using a monospace font and the standard indentation. The code is shown verbatim.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      There has to be exactly one <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> object
+      in every GUI application that uses <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">.</span>
+
+      \quotefromfile examples<span class="operator">/</span>main<span class="operator">.</span>cpp
+
+      \printline <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span>
+
+      This line includes the <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> <span class="keyword">class</span>
+      definition<span class="operator">.</span> <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> manages various
+      application<span class="operator">-</span>wide resources<span class="operator">,</span> such as the
+      <span class="keyword">default</span> font and cursor<span class="operator">.</span>
+
+      \printline <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>
+
+      This line includes the <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> <span class="keyword">class</span>
+      definition<span class="operator">.</span> The <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> widget provides a command
+      button<span class="operator">.</span>
+
+      \printline main
+
+      The main function<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p>There has to be exactly one <a href="../qtwidgets/qapplication.html">QApplication</a> object in every GUI application that uses Qt.</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QApplication&gt;</span>
+
+</pre>
+<p>This line includes the <a href="../qtwidgets/qapplication.html">QApplication</a> class definition. <a href="../qtwidgets/qapplication.html">QApplication</a> manages various application-wide resources, such as the default font and cursor.</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QPushButton&gt;</span>
+
+</pre>
+<p>This line includes the <a href="../qtwidgets/qpushbutton.html">QPushButton</a> class definition. The <a href="../qtwidgets/qpushbutton.html">QPushButton</a> widget provides a command button.</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+
+</pre>
+<p>The main function..&#x2e;</p>
+</blockquote>
+<a name="file"></a><p>QDoc reads the file sequentially. To move the current position forward you can use either of the <a href="07-0-qdoc-commands-includingexternalcode.html#skipline-command">\skip..&#x2e;</a> commands. To move the current position backward, you can use the <a href="07-0-qdoc-commands-includingexternalcode.html#quotefromfile-command">\quotefromfile</a> command again.</p>
+<a name="substring"></a><p>If the substring argument is surrounded by slashes it is interpreted as a <a href="../qtcore/qregexp.html">regular expression</a>.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \quotefromfile examples<span class="operator">/</span>mainwindow<span class="operator">.</span>cpp
+
+      \skipto closeEvent
+      \printuntil <span class="operator">/</span><span class="operator">^</span>\}<span class="operator">/</span>
+
+      Close events are sent to widgets that the users want to
+      close<span class="operator">,</span> usually by clicking \c File<span class="operator">|</span>Exit <span class="keyword">or</span> by clicking
+      the \c X title bar button<span class="operator">.</span> By reimplementing the event
+      handler<span class="operator">,</span> we can intercept attempts to close the
+      application<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><pre class="cpp">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>closeEvent(<span class="type"><a href="../qtgui/qcloseevent.html">QCloseEvent</a></span> <span class="operator">*</span>event)
+  <span class="comment">//! [1] //! [2]</span>
+  {
+      <span class="keyword">if</span> (maybeSave()) {
+          event<span class="operator">-</span><span class="operator">&gt;</span>accept();
+      } <span class="keyword">else</span> {
+          event<span class="operator">-</span><span class="operator">&gt;</span>ignore();
+      }
+  }
+
+</pre>
+<p>Close events are sent to widgets that the users want to close, usually by clicking <code>File|Exit</code> or by clicking the <code>X</code> title bar button. By reimplementing the event handler, we can intercept attempts to close the application.</p>
+</blockquote>
+<p>(<a href="../qtwidgets/qtwidgets-widgets-scribble-example.html">The complete example file..&#x2e;</a>)</p>
+<p>The regular expression <code>/^\</code>}/ makes QDoc print until the first '}' character occurring at the beginning of the line without indentation. /..&#x2e;/ encloses the regular expression, and '^' means the beginning of the line. The '}' character must be escaped since it is a special character in regular expressions.</p>
+<p>QDoc will emit a warning if the specified substring or regular expression cannot be located, i.e&#x2e; if the source code has changed.</p>
+<p>See also <a href="07-0-qdoc-commands-includingexternalcode.html#printto-command">\printto</a> and <a href="07-0-qdoc-commands-includingexternalcode.html#printuntil-command">\printuntil</a>.</p>
+<a name="printto-command"></a><a name="printto"></a>
+<h2 id="printto">\printto</h2>
+<p>The \printto command expands to all the lines from the current position up to and <i>excluding</i> the next line containing a given substring.</p>
+<p>The command considers the rest of the line as part of its argument, make sure to follow the substring with a line break. The command also follows the same conventions for <a href="07-0-qdoc-commands-includingexternalcode.html#file">positioning</a> and <a href="07-0-qdoc-commands-includingexternalcode.html#substring">argument</a> as the <a href="07-0-qdoc-commands-includingexternalcode.html#printline-command">\printline</a> command.</p>
+<p>The lines from the source file are rendered in a separate paragraph, using a monospace font and the standard indentation. The code is shown verbatim.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      The whole application is contained within the
+      \c main() function:
+
+      \quotefromfile examples<span class="operator">/</span>main<span class="operator">.</span>cpp
+      \printto hello
+
+      First we create a <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> object <span class="keyword">using</span> the \c argc and
+      \c argv parameters<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p>The whole application is contained within the <code>main()</code> function:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+</pre>
+<p>First we create a <a href="../qtwidgets/qapplication.html">QApplication</a> object using the <code>argc</code> and <code>argv</code> parameters..&#x2e;</p>
+</blockquote>
+<p>See also <a href="07-0-qdoc-commands-includingexternalcode.html#printline-command">\printline</a> and <a href="07-0-qdoc-commands-includingexternalcode.html#printuntil-command">\printuntil</a>.</p>
+<a name="printuntil-command"></a><a name="printuntil"></a>
+<h2 id="printuntil">\printuntil</h2>
+<p>The \printuntil command expands to all the lines from the current position up to and <i>including</i> the next line containing a given substring.</p>
+<p>The command considers the rest of the line as part of its argument, make sure to follow the substring with a line break. The command also follows the same conventions for <a href="07-0-qdoc-commands-includingexternalcode.html#file">positioning</a> and <a href="07-0-qdoc-commands-includingexternalcode.html#substring">argument</a> as the <a href="07-0-qdoc-commands-includingexternalcode.html#printline-command">\printline</a> command.</p>
+<p>If \printuntil is used without an argument, it expands to all the lines from the current position to the end of the quoted file.</p>
+<p>The lines from the source file are rendered in a separate paragraph, using a monospace font and the standard indentation. The code is shown verbatim.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      The whole application is contained within the
+      \c main() function:
+
+      \quotefromfile examples<span class="operator">/</span>main<span class="operator">.</span>cpp
+      \skipto main
+      \printuntil hello
+
+      First we create a <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> object <span class="keyword">using</span> the
+      \c argc and \c argv parameters<span class="operator">,</span> then we create
+      a <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span><span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p>The whole application is contained within the <code>main()</code> function:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> hello(<span class="string">&quot;Hello world!&quot;</span>);
+
+</pre>
+<p>First we create a <a href="http://doc.qt.io/qt-5/qapplication.html">QApplication</a> object using the <code>argc</code> and <code>argv</code> parameters, then we create a <a href="http://doc.qt.io/qt-5/qpushbutton.html">QPushButton</a>.</p>
+</blockquote>
+<p>See also <a href="07-0-qdoc-commands-includingexternalcode.html#printline-command">\printline</a> and <a href="07-0-qdoc-commands-includingexternalcode.html#printto-command">\printto</a>.</p>
+<a name="skipline-command"></a><a name="skipline"></a>
+<h2 id="skipline">\skipline</h2>
+<p>The \skipline command ignores the next non-blank line in the current source file.</p>
+<p>Doc reads the file sequentially, and the \skipline command is used to move the current position (omitting a line of the source file). See the remark about <a href="07-0-qdoc-commands-includingexternalcode.html#file">file positioning</a> above.</p>
+<p>The command considers the rest of the line as part of its argument, make sure to follow the substring with a line break. The command also follows the same conventions for <a href="07-0-qdoc-commands-includingexternalcode.html#substring">argument</a> as the <a href="07-0-qdoc-commands-includingexternalcode.html#printline-command">\printline</a> command, and it is used in conjunction with the <a href="07-0-qdoc-commands-includingexternalcode.html#quotefromfile-command">\quotefromfile</a> command.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> is a GUI push button that the user
+      can press and release<span class="operator">.</span>
+
+      \quotefromfile examples<span class="operator">/</span>main<span class="operator">.</span>cpp
+      \skipline <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span>
+      \printline <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>
+
+      This line includes the <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> <span class="keyword">class</span>
+      definition<span class="operator">.</span> For each <span class="keyword">class</span> that is part of the
+      <span class="keyword">public</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span> API<span class="operator">,</span> there exists a header file of
+      the same name that contains its definition<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p><a href="../qtwidgets/qpushbutton.html">QPushButton</a> is a GUI push button that the user can press and release.</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QPushButton&gt;</span>
+
+</pre>
+<p>This line includes the <a href="../qtwidgets/qpushbutton.html">QPushButton</a> class definition. For each class that is part of the public Qt API, there exists a header file of the same name that contains its definition.</p>
+</blockquote>
+<p>See also <a href="07-0-qdoc-commands-includingexternalcode.html#skipto-command">\skipto</a>, <a href="07-0-qdoc-commands-includingexternalcode.html#skipuntil-command">\skipuntil</a> and <a href="07-0-qdoc-commands-includingexternalcode.html#dots">\dots</a>.</p>
+<a name="skipto-command"></a><a name="skipto"></a>
+<h2 id="skipto">\skipto</h2>
+<p>The \skipto command ignores all the lines from the current position up to and <i>excluding</i> the next line containing a given substring.</p>
+<p>QDoc reads the file sequentially, and the \skipto command is used to move the current position (omitting one or several lines of the source file). See the remark about <a href="07-0-qdoc-commands-includingexternalcode.html#file">file positioning</a> above.</p>
+<p>The command considers the rest of the line as part of its argument, make sure to follow the substring with a line break.</p>
+<p>The command also follows the same conventions for <a href="07-0-qdoc-commands-includingexternalcode.html#substring">argument</a> as the <a href="07-0-qdoc-commands-includingexternalcode.html#printline-command">\printline</a> command, and it is used in conjunction with the <a href="07-0-qdoc-commands-includingexternalcode.html#quotefromfile-command">\quotefromfile</a> command.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      The whole application is contained within
+      the \c main() function:
+
+      \quotefromfile examples<span class="operator">/</span>main<span class="operator">.</span>cpp
+      \skipto main
+      \printuntil }
+
+      First we create a <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> object<span class="operator">.</span> There
+      has to be exactly one such object in
+      every GUI application that uses <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">.</span> Then
+      we create a <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span><span class="operator">,</span> resize it to a reasonable
+      size<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p>The whole application is contained within the <code>main()</code> function:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> hello(<span class="string">&quot;Hello world!&quot;</span>);
+      hello<span class="operator">.</span>resize(<span class="number">100</span><span class="operator">,</span> <span class="number">30</span>);
+
+      hello<span class="operator">.</span>show();
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p>First we create a <a href="../qtwidgets/qapplication.html">QApplication</a> object. There has to be exactly one such object in every GUI application that uses Qt. Then we create a <a href="../qtwidgets/qpushbutton.html">QPushButton</a>, resize it to a reasonable size ..&#x2e;</p>
+</blockquote>
+<p>See also <a href="07-0-qdoc-commands-includingexternalcode.html#skipline-command">\skipline</a>, <a href="07-0-qdoc-commands-includingexternalcode.html#skipuntil-command">\skipuntil</a> and <a href="07-0-qdoc-commands-includingexternalcode.html#dots">\dots</a>.</p>
+<a name="skipuntil-command"></a><a name="skipuntil"></a>
+<h2 id="skipuntil">\skipuntil</h2>
+<p>The \skipuntil command ignores all the lines from the current position up to and <i>including</i> the next line containing a given substring.</p>
+<p>QDoc reads the file sequentially, and the \skipuntil command is used to move the current position (omitting one or several lines of the source file). See the remark about <a href="07-0-qdoc-commands-includingexternalcode.html#file">file positioning</a> above.</p>
+<p>The command considers the rest of the line as part of its argument, make sure to follow the substring with a line break.</p>
+<p>The command also follows the same conventions for <a href="07-0-qdoc-commands-includingexternalcode.html#substring">argument</a> as the <a href="07-0-qdoc-commands-includingexternalcode.html#printline-command">\printline</a> command, and it is used in conjunction with the <a href="07-0-qdoc-commands-includingexternalcode.html#quotefromfile-command">\quotefromfile</a> command.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      The first thing we did in the \c main() function
+      was to create a <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> object \c app<span class="operator">.</span>
+
+      \quotefromfile examples<span class="operator">/</span>main<span class="operator">.</span>cpp
+      \skipuntil show
+      \dots
+      \printuntil }
+
+      In the end we must remember to make \c main() pass the
+      control to <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">.</span> <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>exec() will <span class="keyword">return</span> when
+      the application exits<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p>The first thing we did in the <code>main()</code> function was to create a <a href="../qtwidgets/qapplication.html">QApplication</a> object <code>app</code>.</p>
+<pre class="cpp">
+
+      ...
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p>In the end we must remember to make <code>main()</code> pass the control to Qt. <a href="../qtcore/qcoreapplication.html#exec">QCoreApplication::exec</a>() will return when the application exits..&#x2e;</p>
+</blockquote>
+<p>See also <a href="07-0-qdoc-commands-includingexternalcode.html#skipline-command">\skipline</a>, <a href="07-0-qdoc-commands-includingexternalcode.html#skipto-command">\skipto</a> and <a href="07-0-qdoc-commands-includingexternalcode.html#dots">\dots</a>.</p>
+<a name="dots-command"></a><a name="dots"></a>
+<h2 id="dots">\dots</h2>
+<p>The \dots command indicates that parts of the source file have been omitted when quoting a file.</p>
+<p>The command is used in conjunction with the <a href="07-0-qdoc-commands-includingexternalcode.html#quotefromfile-command">\quotefromfile</a> command, and should be stated on its own line. The dots are rendered on a new line, using a monospace font.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \quotefromfile examples<span class="operator">/</span>main<span class="operator">.</span>cpp
+      \skipto main
+      \printuntil {
+      \dots
+      \skipuntil exec
+      \printline }
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      ...
+  }
+
+</pre>
+<p>The default indentation is 4 spaces, but this can be adjusted using the command's optional argument.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \dots <span class="number">0</span>
+      \dots
+      \dots <span class="number">8</span>
+      \dots <span class="number">12</span>
+      \dots <span class="number">16</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<pre class="cpp">
+
+  ...
+      ...
+          ...
+              ...
+                  ...
+
+</pre>
+<p>See also <a href="07-0-qdoc-commands-includingexternalcode.html#skipline-command">\skipline</a>, <a href="07-0-qdoc-commands-includingexternalcode.html#skipto-command">\skipto</a> and <a href="07-0-qdoc-commands-includingexternalcode.html#skipuntil-command">\skipuntil</a>.</p>
+<a name="snippet-command"></a><a name="snippet"></a>
+<h2 id="snippet">\snippet</h2>
+<p>The \snippet command causes a code snippet to be included verbatim as preformatted text, which may be syntax highlighted.</p>
+<p>Each code snippet is referenced by the file that holds it and by a unique identifier for that file. Snippet files are typically stored in a <code>snippets</code> directory inside the documentation directory (for example, <code>$QTDIR/doc/src/snippets</code>).</p>
+<p>For example, the following documentation references a snippet in a file residing in a subdirectory of the documentation directory:</p>
+<pre class="cpp">
+
+  \snippet snippets<span class="operator">/</span>textdocument<span class="operator">-</span>resources<span class="operator">/</span>main<span class="operator">.</span>cpp Adding a resource
+
+</pre>
+<p>The text following the file name is the unique identifier for the snippet. This is used to delimit the quoted code in the relevant snippet file, as shown in the following example that corresponds to the above <code>\snippet</code> command:</p>
+<pre class="cpp">
+
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+      <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> image(<span class="number">64</span><span class="operator">,</span> <span class="number">64</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qimage.html">QImage</a></span><span class="operator">::</span>Format_RGB32);
+      image<span class="operator">.</span>fill(<a href="../qtgui/qcolor.html#qRgb">qRgb</a>(<span class="number">255</span><span class="operator">,</span> <span class="number">160</span><span class="operator">,</span> <span class="number">128</span>));
+
+  <span class="comment">//! [Adding a resource]</span>
+      document<span class="operator">-</span><span class="operator">&gt;</span>addResource(<span class="type"><a href="../qtgui/qtextdocument.html">QTextDocument</a></span><span class="operator">::</span>ImageResource<span class="operator">,</span>
+          <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="string">&quot;mydata://image.png&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(image));
+  <span class="comment">//! [Adding a resource]</span>
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+</pre>
+<p>By default, qdoc looks for <code>//!</code> as a code snippet marker. For <code>.pro</code>, <code>.py</code>, <code>.cmake</code>, and <code>CMakeLists.txt</code> files, <code>#!</code> is detected. Finally, <code>&lt;!--</code> is accepted in <code>.html</code>, <code>.qrc</code>, <code>.ui</code>, <code>.xml</code>, <code>.dita</code>, and <code>.xq</code> files.</p>
+<a name="codeline-command"></a><a name="codeline"></a>
+<h2 id="codeline">\codeline</h2>
+<p>The \codeline command inserts a blank line of preformatted text. It is used to insert gaps between snippets without closing the current preformatted text area and opening a new one.</p>
+</div>
+<!-- @@@07-0-qdoc-commands-includingexternalcode.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="06-qdoc-commands-includecodeinline.html">Including Code Inline</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="08-qdoc-commands-creatinglinks.html">Creating Links</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

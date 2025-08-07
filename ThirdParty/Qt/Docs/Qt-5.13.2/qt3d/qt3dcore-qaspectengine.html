@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qaspectengine.cpp -->
+  <title>QAspectEngine Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QAspectEngine</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAspectEngine Class</h1>
+<span class="small-subtitle">(<a href="qt3dcore-qaspectengine.html">Qt3DCore::QAspectEngine</a>)<br/></span>
+<!-- $$$QAspectEngine-brief -->
+<p>Responsible for handling all the <a href="qt3dcore-qabstractaspect.html">QAbstractAspect</a> subclasses that have been registered with the scene. <a href="#details">More...</a></p>
+<!-- @@@QAspectEngine -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;Qt3DCore/QAspectEngine&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3dcore</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><ul>
+<li><a href="qt3dcore-qaspectengine-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qaspectengine.html#QAspectEngine">QAspectEngine</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qaspectengine.html#dtor.QAspectEngine">~QAspectEngine</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;Qt3DCore::QAbstractAspect *&gt; </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qaspectengine.html#aspects">aspects</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariant </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qaspectengine.html#executeCommand">executeCommand</a></b>(const QString &amp;<i>command</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qaspectengine.html#registerAspect">registerAspect</a></b>(Qt3DCore::QAbstractAspect *<i>aspect</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qaspectengine.html#registerAspect-1">registerAspect</a></b>(const QString &amp;<i>name</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DCore::QEntityPtr </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qaspectengine.html#rootEntity">rootEntity</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qaspectengine.html#setRootEntity">setRootEntity</a></b>(Qt3DCore::QEntityPtr <i>root</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qaspectengine.html#unregisterAspect">unregisterAspect</a></b>(Qt3DCore::QAbstractAspect *<i>aspect</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qaspectengine.html#unregisterAspect-1">unregisterAspect</a></b>(const QString &amp;<i>name</i>)</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qaspectengine.html#QEntityPtr-typedef">QEntityPtr</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAspectEngine-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The Qt3D run loop is controlled by the Qt3DRender::QAspectEngine.</p>
+<p><a href="qt3dcore-qabstractaspect.html">Qt3DCore::QAbstractAspect</a> subclasses can be registered by calling Qt3DCore::QAspectEngine::registerAspect() which will take care of registering the aspect and in turn that will call Qt3DCore::QAbstractAspect::onRegistered();</p>
+<p>The simulation loop is launched as soon as a root <a href="qt3dcore-qentity.html">Qt3DCore::QEntity</a> is set on the <a href="qt3dcore-qaspectengine.html">Qt3DCore::QAspectEngine</a>. This is followed by a call to onEngineStartup() on each aspect so that they can start their simulation work.</p>
+<p>The simulation loop is stopped when the root entity is set to Qt3DCore::QEntityPtr(). This calls onEngineShutdown() on each aspect so that they can stop performing their simulation work.</p>
+<p>Setting a new valid root entity would restart the simulation loop again.</p>
+</div>
+<!-- @@@QAspectEngine -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QAspectEngine[overload1]$$$QAspectEngineQObject* -->
+<h3 class="fn" id="QAspectEngine"><a name="QAspectEngine"></a>QAspectEngine::<span class="name">QAspectEngine</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new <a href="qt3dcore-qaspectengine.html">QAspectEngine</a> with <i>parent</i>.</p>
+<!-- @@@QAspectEngine -->
+<!-- $$$~QAspectEngine[overload1]$$$~QAspectEngine -->
+<h3 class="fn" id="dtor.QAspectEngine"><a name="dtor.QAspectEngine"></a><code>[virtual] </code>QAspectEngine::<span class="name">~QAspectEngine</span>()</h3>
+<p>Destroys the engine.</p>
+<!-- @@@~QAspectEngine -->
+<!-- $$$aspects[overload1]$$$aspects -->
+<h3 class="fn" id="aspects"><a name="aspects"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="qt3dcore-qabstractaspect.html">Qt3DCore::QAbstractAspect</a></span> *&gt; QAspectEngine::<span class="name">aspects</span>() const</h3>
+<p>Returns the aspects owned by the aspect engine.</p>
+<!-- @@@aspects -->
+<!-- $$$executeCommand[overload1]$$$executeCommandconstQString& -->
+<h3 class="fn" id="executeCommand"><a name="executeCommand"></a><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QAspectEngine::<span class="name">executeCommand</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>command</i>)</h3>
+<p>Executes the given <i>command</i> on aspect engine. Valid commands are:</p>
+<ul>
+<li>&quot;list aspects&quot;</li>
+</ul>
+<p>Returns the reply for the command.</p>
+<!-- @@@executeCommand -->
+<!-- $$$registerAspect[overload1]$$$registerAspectQt3DCore::QAbstractAspect* -->
+<h3 class="fn" id="registerAspect"><a name="registerAspect"></a><span class="type">void</span> QAspectEngine::<span class="name">registerAspect</span>(<span class="type"><a href="qt3dcore-qabstractaspect.html">Qt3DCore::QAbstractAspect</a></span> *<i>aspect</i>)</h3>
+<p>Registers a new <i>aspect</i> to the AspectManager. The <a href="qt3dcore-qaspectengine.html">QAspectEngine</a> takes ownership of the aspect and will delete it when the aspect is unregistered.</p>
+<!-- @@@registerAspect -->
+<!-- $$$registerAspect$$$registerAspectconstQString& -->
+<h3 class="fn" id="registerAspect-1"><a name="registerAspect-1"></a><span class="type">void</span> QAspectEngine::<span class="name">registerAspect</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>)</h3>
+<p>Registers a new aspect to the AspectManager based on its <i>name</i> Uses the currently set aspect factory to create the actual aspect instance.</p>
+<!-- @@@registerAspect -->
+<!-- $$$rootEntity[overload1]$$$rootEntity -->
+<h3 class="fn" id="rootEntity"><a name="rootEntity"></a><span class="type"><a href="qt3dcore-qaspectengine.html#QEntityPtr-typedef">Qt3DCore::QEntityPtr</a></span> QAspectEngine::<span class="name">rootEntity</span>() const</h3>
+<p>Returns the root entity of the aspect engine.</p>
+<p><b>See also </b><a href="qt3dcore-qaspectengine.html#setRootEntity">setRootEntity</a>().</p>
+<!-- @@@rootEntity -->
+<!-- $$$setRootEntity[overload1]$$$setRootEntityQt3DCore::QEntityPtr -->
+<h3 class="fn" id="setRootEntity"><a name="setRootEntity"></a><span class="type">void</span> QAspectEngine::<span class="name">setRootEntity</span>(<span class="type"><a href="qt3dcore-qaspectengine.html#QEntityPtr-typedef">Qt3DCore::QEntityPtr</a></span> <i>root</i>)</h3>
+<p>Sets the <i>root</i> entity for the aspect engine.</p>
+<p><b>See also </b><a href="qt3dcore-qaspectengine.html#rootEntity">rootEntity</a>().</p>
+<!-- @@@setRootEntity -->
+<!-- $$$unregisterAspect[overload1]$$$unregisterAspectQt3DCore::QAbstractAspect* -->
+<h3 class="fn" id="unregisterAspect"><a name="unregisterAspect"></a><span class="type">void</span> QAspectEngine::<span class="name">unregisterAspect</span>(<span class="type"><a href="qt3dcore-qabstractaspect.html">Qt3DCore::QAbstractAspect</a></span> *<i>aspect</i>)</h3>
+<p>Unregisters and deletes the given <i>aspect</i>.</p>
+<!-- @@@unregisterAspect -->
+<!-- $$$unregisterAspect$$$unregisterAspectconstQString& -->
+<h3 class="fn" id="unregisterAspect-1"><a name="unregisterAspect-1"></a><span class="type">void</span> QAspectEngine::<span class="name">unregisterAspect</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>)</h3>
+<p>Unregisters and deletes the aspect with the given <i>name</i>.</p>
+<!-- @@@unregisterAspect -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$QEntityPtr -->
+<h3 class="fn" id="QEntityPtr-typedef"><a name="QEntityPtr-typedef"></a>typedef <span class="name">QEntityPtr</span></h3>
+<p>A shared pointer for <a href="qt3dcore-qentity.html">QEntity</a>.</p>
+<!-- @@@QEntityPtr -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

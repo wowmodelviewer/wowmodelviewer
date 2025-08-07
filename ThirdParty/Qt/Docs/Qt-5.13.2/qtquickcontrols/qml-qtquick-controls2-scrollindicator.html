@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickscrollindicator.cpp -->
+  <title>ScrollIndicator QML Type | Qt Quick Controls 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td ><a href="qtquick-controls2-qmlmodule.html">QML Types</a></td><td >ScrollIndicator QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#attached-properties">Attached Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#attaching-scrollindicator-to-a-flickable">Attaching ScrollIndicator to a Flickable</a></li>
+<li class="level2"><a href="#binding-the-active-state-of-horizontal-and-vertical-scroll-indicators">Binding the Active State of Horizontal and Vertical Scroll Indicators</a></li>
+<li class="level2"><a href="#non-attached-scroll-indicators">Non-attached Scroll Indicators</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">ScrollIndicator QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$ScrollIndicator-brief -->
+<p>Vertical or horizontal non-interactive scroll indicator. <a href="#details">More...</a></p>
+<!-- @@@ScrollIndicator -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Controls 2.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-controls2-control.html">Control</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-controls2-scrollindicator-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-scrollindicator.html#active-prop">active</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-scrollindicator.html#horizontal-prop">horizontal</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-scrollindicator.html#minimumSize-prop">minimumSize</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-scrollindicator.html#orientation-prop">orientation</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-scrollindicator.html#position-prop">position</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-scrollindicator.html#size-prop">size</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-scrollindicator.html#vertical-prop">vertical</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-scrollindicator.html#visualPosition-prop">visualPosition</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-scrollindicator.html#visualSize-prop">visualSize</a></b></b> : real</li>
+</ul>
+<a name="attached-properties"></a>
+<h2 id="attached-properties">Attached Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-scrollindicator.html#horizontal-attached-prop">horizontal</a></b></b> : ScrollIndicator</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-scrollindicator.html#vertical-attached-prop">vertical</a></b></b> : ScrollIndicator</li>
+</ul>
+<!-- $$$ScrollIndicator-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p class="centerAlign"><img src="images/qtquickcontrols2-scrollindicator.gif" alt="" /></p><p><a href="qml-qtquick-controls2-scrollindicator.html">ScrollIndicator</a> is a non-interactive indicator that indicates the current scroll position. A scroll indicator can be either <a href="qml-qtquick-controls2-scrollindicator.html#vertical-attached-prop">vertical</a> or <a href="qml-qtquick-controls2-scrollindicator.html#horizontal-attached-prop">horizontal</a>, and can be attached to any <a href="../qtquick/qml-qtquick-flickable.html">Flickable</a>, such as <a href="../qtquick/qml-qtquick-listview.html">ListView</a> and <a href="../qtquick/qml-qtquick-gridview.html">GridView</a>.</p>
+<pre class="cpp">
+
+  Flickable {
+      <span class="comment">// ...</span>
+      ScrollIndicator<span class="operator">.</span>vertical: ScrollIndicator { }
+  }
+
+</pre>
+<a name="attaching-scrollindicator-to-a-flickable"></a>
+<h2 id="attaching-scrollindicator-to-a-flickable">Attaching ScrollIndicator to a Flickable</h2>
+<p><b>Note: </b>When <a href="qml-qtquick-controls2-scrollindicator.html">ScrollIndicator</a> is attached <a href="qml-qtquick-controls2-scrollindicator.html#vertical-attached-prop">vertically</a> or <a href="qml-qtquick-controls2-scrollindicator.html#horizontal-attached-prop">horizontally</a> to a Flickable, its geometry and the following properties are automatically set and updated as appropriate:</p><ul>
+<li><a href="qml-qtquick-controls2-scrollindicator.html#orientation-prop">orientation</a></li>
+<li><a href="qml-qtquick-controls2-scrollindicator.html#position-prop">position</a></li>
+<li><a href="qml-qtquick-controls2-stackview.html#size">size</a></li>
+<li><a href="qml-qtquick-controls2-scrollindicator.html#active-prop">active</a></li>
+</ul>
+<p>An attached <a href="qml-qtquick-controls2-scrollindicator.html">ScrollIndicator</a> re-parents itself to the target Flickable. A vertically attached <a href="qml-qtquick-controls2-scrollindicator.html">ScrollIndicator</a> resizes itself to the height of the Flickable, and positions itself to either side of it based on the <a href="qml-qtquick-controls2-control.html#mirrored-prop">layout direction</a>. A horizontally attached <a href="qml-qtquick-controls2-scrollindicator.html">ScrollIndicator</a> resizes itself to the width of the Flickable, and positions itself to the bottom. The automatic geometry management can be disabled by specifying another parent for the attached <a href="qml-qtquick-controls2-scrollindicator.html">ScrollIndicator</a>. This can be useful, for example, if the <a href="qml-qtquick-controls2-scrollindicator.html">ScrollIndicator</a> should be placed outside a clipping Flickable. This is demonstrated by the following example:</p>
+<pre class="cpp">
+
+  Flickable {
+      id: flickable
+      clip: <span class="keyword">true</span>
+      <span class="comment">// ...</span>
+      ScrollIndicator<span class="operator">.</span>vertical: ScrollIndicator {
+          parent: flickable<span class="operator">.</span>parent
+          anchors<span class="operator">.</span>top: flickable<span class="operator">.</span>top
+          anchors<span class="operator">.</span>left: flickable<span class="operator">.</span>right
+          anchors<span class="operator">.</span>bottom: flickable<span class="operator">.</span>bottom
+      }
+  }
+
+</pre>
+<a name="binding-the-active-state-of-horizontal-and-vertical-scroll-indicators"></a>
+<h2 id="binding-the-active-state-of-horizontal-and-vertical-scroll-indicators">Binding the Active State of Horizontal and Vertical Scroll Indicators</h2>
+<p>Horizontal and vertical scroll indicators do not share the <a href="qml-qtquick-controls2-scrollindicator.html#active-prop">active</a> state with each other by default. In order to keep both indicators visible whilst scrolling to either direction, establish a two-way binding between the active states as presented by the following example:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-flickable.html">Flickable</a></span> {
+      <span class="name">anchors</span>.fill: <span class="name">parent</span>
+
+      <span class="name">contentWidth</span>: <span class="name">parent</span>.<span class="name">width</span> <span class="operator">*</span> <span class="number">2</span>
+      <span class="name">contentHeight</span>: <span class="name">parent</span>.<span class="name">height</span> <span class="operator">*</span> <span class="number">2</span>
+
+      <span class="name">ScrollIndicator</span>.horizontal: <span class="name">ScrollIndicator</span> { <span class="name">id</span>: <span class="name">hbar</span>; <span class="name">active</span>: <span class="name">vbar</span>.<span class="name">active</span> }
+      <span class="name">ScrollIndicator</span>.vertical: <span class="name">ScrollIndicator</span> { <span class="name">id</span>: <span class="name">vbar</span>; <span class="name">active</span>: <span class="name">hbar</span>.<span class="name">active</span> }
+  }
+
+</pre>
+<a name="non-attached-scroll-indicators"></a>
+<h2 id="non-attached-scroll-indicators">Non-attached Scroll Indicators</h2>
+<p>It is possible to create an instance of <a href="qml-qtquick-controls2-scrollindicator.html">ScrollIndicator</a> without using the attached property API. This is useful when the behavior of the attached scoll indicator is not sufficient or a <a href="../qtquick/qml-qtquick-flickable.html">Flickable</a> is not in use. In the following example, horizontal and vertical scroll indicators are used to indicate how far the user has scrolled over the text (using <a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a> instead of <a href="../qtquick/qml-qtquick-flickable.html">Flickable</a>):</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">frame</span>
+      <span class="name">clip</span>: <span class="number">true</span>
+      <span class="name">width</span>: <span class="number">160</span>
+      <span class="name">height</span>: <span class="number">160</span>
+      <span class="name">border</span>.color: <span class="string">&quot;black&quot;</span>
+      <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+          <span class="name">id</span>: <span class="name">content</span>
+          <span class="name">text</span>: <span class="string">&quot;ABC&quot;</span>
+          <span class="name">font</span>.pixelSize: <span class="number">169</span>
+
+          <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+              <span class="name">id</span>: <span class="name">mouseArea</span>
+              <span class="name">drag</span>.target: <span class="name">content</span>
+              <span class="name">drag</span>.minimumX: <span class="name">frame</span>.<span class="name">width</span> <span class="operator">-</span> <span class="name">width</span>
+              <span class="name">drag</span>.minimumY: <span class="name">frame</span>.<span class="name">height</span> <span class="operator">-</span> <span class="name">height</span>
+              <span class="name">drag</span>.maximumX: <span class="number">0</span>
+              <span class="name">drag</span>.maximumY: <span class="number">0</span>
+              <span class="name">anchors</span>.fill: <span class="name">content</span>
+          }
+      }
+
+      <span class="type"><a href="qml-qtquick-controls2-scrollindicator.html">ScrollIndicator</a></span> {
+          <span class="name">id</span>: <span class="name">verticalIndicator</span>
+          <span class="name">active</span>: <span class="name">mouseArea</span>.<span class="name">pressed</span>
+          <span class="name">orientation</span>: <span class="name">Qt</span>.<span class="name">Vertical</span>
+          <span class="name">size</span>: <span class="name">frame</span>.<span class="name">height</span> <span class="operator">/</span> <span class="name">content</span>.<span class="name">height</span>
+          <span class="name">position</span>: -<span class="name">content</span>.<span class="name">y</span> <span class="operator">/</span> <span class="name">content</span>.<span class="name">height</span>
+          <span class="type">anchors</span> { <span class="name">top</span>: <span class="name">parent</span>.<span class="name">top</span>; <span class="name">right</span>: <span class="name">parent</span>.<span class="name">right</span>; <span class="name">bottom</span>: <span class="name">parent</span>.<span class="name">bottom</span> }
+      }
+
+      <span class="type"><a href="qml-qtquick-controls2-scrollindicator.html">ScrollIndicator</a></span> {
+          <span class="name">id</span>: <span class="name">horizontalIndicator</span>
+          <span class="name">active</span>: <span class="name">mouseArea</span>.<span class="name">pressed</span>
+          <span class="name">orientation</span>: <span class="name">Qt</span>.<span class="name">Horizontal</span>
+          <span class="name">size</span>: <span class="name">frame</span>.<span class="name">width</span> <span class="operator">/</span> <span class="name">content</span>.<span class="name">width</span>
+          <span class="name">position</span>: -<span class="name">content</span>.<span class="name">x</span> <span class="operator">/</span> <span class="name">content</span>.<span class="name">width</span>
+          <span class="type">anchors</span> { <span class="name">left</span>: <span class="name">parent</span>.<span class="name">left</span>; <span class="name">right</span>: <span class="name">parent</span>.<span class="name">right</span>; <span class="name">bottom</span>: <span class="name">parent</span>.<span class="name">bottom</span> }
+      }
+  }
+
+</pre>
+<p class="centerAlign"><img src="images/qtquickcontrols2-scrollindicator-non-attached.png" alt="" /></p><p><b>See also </b><a href="qml-qtquick-controls2-scrollbar.html">ScrollBar</a>, <a href="qtquickcontrols2-customize.html#customizing-scrollindicator">Customizing ScrollIndicator</a>, and <a href="qtquickcontrols2-indicators.html">Indicator Controls</a>.</p>
+<!-- @@@ScrollIndicator -->
+<h2>Property Documentation</h2>
+<!-- $$$active -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="active-prop"></a><span class="name">active</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the indicator is active, that is, when the attached Flickable is <a href="../qtquick/qml-qtquick-flickable.html#moving-prop">moving</a>.</p>
+<p>It is possible to keep <a href="qml-qtquick-controls2-scrollindicator.html#binding-the-active-state-of-horizontal-and-vertical-scroll-indicators">both horizontal and vertical indicators visible</a> while scrolling in either direction.</p>
+<p>This property is automatically set when the scroll indicator is <a href="qml-qtquick-controls2-scrollindicator.html#attaching-scrollindicator-to-a-flickable">attached to a flickable</a>.</p>
+</div></div><!-- @@@active -->
+<br/>
+<!-- $$$horizontal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="horizontal-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">horizontal</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the scroll indicator is horizontal.</p>
+<p>This property was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-scrollindicator.html#orientation-prop">orientation</a>.</p>
+</div></div><!-- @@@horizontal -->
+<br/>
+<!-- $$$minimumSize -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="minimumSize-prop"></a><span class="name">minimumSize</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the minimum size of the indicator, scaled to <code>0.0 - 1.0</code>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.4 (Qt 5.11).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-stackview.html#size">size</a>, <a href="qml-qtquick-controls2-scrollindicator.html#visualSize-prop">visualSize</a>, and <a href="qml-qtquick-controls2-scrollindicator.html#visualPosition-prop">visualPosition</a>.</p>
+</div></div><!-- @@@minimumSize -->
+<br/>
+<!-- $$$orientation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="orientation-prop"></a><span class="name">orientation</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the orientation of the indicator.</p>
+<p>Possible values:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Qt.Horizontal</code></td><td class="topAlign">Horizontal</td></tr>
+<tr><td class="topAlign"><code>Qt.Vertical</code></td><td class="topAlign">Vertical (default)</td></tr>
+</table></div>
+<p>This property is automatically set when the scroll indicator is <a href="qml-qtquick-controls2-scrollindicator.html#attaching-scrollindicator-to-a-flickable">attached to a flickable</a>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-scrollindicator.html#horizontal-attached-prop">horizontal</a> and <a href="qml-qtquick-controls2-scrollindicator.html#vertical-attached-prop">vertical</a>.</p>
+</div></div><!-- @@@orientation -->
+<br/>
+<!-- $$$position -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="position-prop"></a><span class="name">position</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the position of the indicator, scaled to <code>0.0 - 1.0</code>.</p>
+<p>This property is automatically set when the scroll indicator is <a href="qml-qtquick-controls2-scrollindicator.html#attaching-scrollindicator-to-a-flickable">attached to a flickable</a>.</p>
+<p><b>See also </b><a href="../qtquick/qml-qtquick-flickable.html#visibleArea.yPosition-prop">Flickable::visibleArea</a> and <a href="qml-qtquick-controls2-scrollindicator.html#visualPosition-prop">visualPosition</a>.</p>
+</div></div><!-- @@@position -->
+<br/>
+<!-- $$$size -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="size-prop"></a><span class="name">size</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the size of the indicator, scaled to <code>0.0 - 1.0</code>.</p>
+<p>This property is automatically set when the scroll indicator is <a href="qml-qtquick-controls2-scrollindicator.html#attaching-scrollindicator-to-a-flickable">attached to a flickable</a>.</p>
+<p><b>See also </b><a href="../qtquick/qml-qtquick-flickable.html#visibleArea.heightRatio-prop">Flickable::visibleArea</a>, <a href="qml-qtquick-controls2-scrollindicator.html#minimumSize-prop">minimumSize</a>, and <a href="qml-qtquick-controls2-scrollindicator.html#visualSize-prop">visualSize</a>.</p>
+</div></div><!-- @@@size -->
+<br/>
+<!-- $$$vertical -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="vertical-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">vertical</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the scroll indicator is vertical.</p>
+<p>This property was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-scrollindicator.html#orientation-prop">orientation</a>.</p>
+</div></div><!-- @@@vertical -->
+<br/>
+<!-- $$$visualPosition -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="visualPosition-prop"></a><span class="name">visualPosition</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the effective visual position of the indicator, which may be limited by the <a href="qml-qtquick-controls2-scrollindicator.html#minimumSize-prop">minimum size</a>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.4 (Qt 5.11).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-scrollindicator.html#position-prop">position</a> and <a href="qml-qtquick-controls2-scrollindicator.html#minimumSize-prop">minimumSize</a>.</p>
+</div></div><!-- @@@visualPosition -->
+<br/>
+<!-- $$$visualSize -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="visualSize-prop"></a><span class="name">visualSize</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the effective visual size of the indicator, which may be limited by the <a href="qml-qtquick-controls2-scrollindicator.html#minimumSize-prop">minimum size</a>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.4 (Qt 5.11).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-stackview.html#size">size</a> and <a href="qml-qtquick-controls2-scrollindicator.html#minimumSize-prop">minimumSize</a>.</p>
+</div></div><!-- @@@visualSize -->
+<br/>
+<h2>Attached Property Documentation</h2>
+<!-- $$$horizontal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="horizontal-attached-prop"></a><span class="name">ScrollIndicator.horizontal</span> : <span class="type"><a href="qml-qtquick-controls2-scrollindicator.html">ScrollIndicator</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property attaches a horizontal scroll indicator to a <a href="../qtquick/qml-qtquick-flickable.html">Flickable</a>.</p>
+<pre class="cpp">
+
+  Flickable {
+      contentWidth: <span class="number">2000</span>
+      ScrollIndicator<span class="operator">.</span>horizontal: ScrollIndicator { }
+  }
+
+</pre>
+<p><b>See also </b><a href="qml-qtquick-controls2-scrollindicator.html#attaching-scrollindicator-to-a-flickable">Attaching ScrollIndicator to a Flickable</a>.</p>
+</div></div><!-- @@@horizontal -->
+<br/>
+<!-- $$$vertical -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="vertical-attached-prop"></a><span class="name">ScrollIndicator.vertical</span> : <span class="type"><a href="qml-qtquick-controls2-scrollindicator.html">ScrollIndicator</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property attaches a vertical scroll indicator to a <a href="../qtquick/qml-qtquick-flickable.html">Flickable</a>.</p>
+<pre class="cpp">
+
+  Flickable {
+      contentHeight: <span class="number">2000</span>
+      ScrollIndicator<span class="operator">.</span>vertical: ScrollIndicator { }
+  }
+
+</pre>
+<p><b>See also </b><a href="qml-qtquick-controls2-scrollindicator.html#attaching-scrollindicator-to-a-flickable">Attaching ScrollIndicator to a Flickable</a>.</p>
+</div></div><!-- @@@vertical -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

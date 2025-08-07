@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qstorageinfo.cpp -->
+  <title>QStorageInfo Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QStorageInfo</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QStorageInfo Class</h1>
+<!-- $$$QStorageInfo-brief -->
+<p>Provides information about currently mounted storage and drives. <a href="#details">More...</a></p>
+<!-- @@@QStorageInfo -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QStorageInfo&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.4</td></tr></table></div><p>This class was introduced in  Qt 5.4.</p>
+<ul>
+<li><a href="qstorageinfo-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#QStorageInfo-3">QStorageInfo</a></b>(const QStorageInfo &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#QStorageInfo-2">QStorageInfo</a></b>(const QDir &amp;<i>dir</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#QStorageInfo-1">QStorageInfo</a></b>(const QString &amp;<i>path</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#QStorageInfo">QStorageInfo</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStorageInfo &amp;</td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#operator-eq-1">operator=</a></b>(QStorageInfo &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStorageInfo &amp;</td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#operator-eq">operator=</a></b>(const QStorageInfo &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#dtor.QStorageInfo">~QStorageInfo</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#blockSize">blockSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint64 </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#bytesAvailable">bytesAvailable</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint64 </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#bytesFree">bytesFree</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint64 </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#bytesTotal">bytesTotal</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#device">device</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#displayName">displayName</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#fileSystemType">fileSystemType</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#isReadOnly">isReadOnly</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#isReady">isReady</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#isRoot">isRoot</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#isValid">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#name">name</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#refresh">refresh</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#rootPath">rootPath</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#setPath">setPath</a></b>(const QString &amp;<i>path</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#subvolume">subvolume</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#swap">swap</a></b>(QStorageInfo &amp;<i>other</i>)</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QStorageInfo&gt; </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#mountedVolumes">mountedVolumes</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStorageInfo </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#root">root</a></b>()</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#operator-not-eq">operator!=</a></b>(const QStorageInfo &amp;<i>first</i>, const QStorageInfo &amp;<i>second</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstorageinfo.html#operator-eq-eq">operator==</a></b>(const QStorageInfo &amp;<i>first</i>, const QStorageInfo &amp;<i>second</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QStorageInfo-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Allows retrieving information about the volume's space, its mount point, label, and filesystem name.</p>
+<p>You can create an instance of <a href="qstorageinfo.html">QStorageInfo</a> by passing the path to the volume's mount point as a constructor parameter, or you can set it using the <a href="qstorageinfo.html#setPath">setPath</a>() method. The static <a href="qstorageinfo.html#mountedVolumes">mountedVolumes</a>() method can be used to get the list of all mounted filesystems.</p>
+<p><a href="qstorageinfo.html">QStorageInfo</a> always caches the retrieved information, but you can call <a href="qstorageinfo.html#refresh">refresh</a>() to invalidate the cache.</p>
+<p>The following example retrieves the most common information about the root volume of the system, and prints information about it.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qstorageinfo.html#QStorageInfo">QStorageInfo</a></span> storage <span class="operator">=</span> <span class="type"><a href="qstorageinfo.html#QStorageInfo">QStorageInfo</a></span><span class="operator">::</span>root();
+
+      <a href="qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> storage<span class="operator">.</span>rootPath();
+      <span class="keyword">if</span> (storage<span class="operator">.</span>isReadOnly())
+          <a href="qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;isReadOnly:&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> storage<span class="operator">.</span>isReadOnly();
+
+      <a href="qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;name:&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> storage<span class="operator">.</span>name();
+      <a href="qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;fileSystemType:&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> storage<span class="operator">.</span>fileSystemType();
+      <a href="qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;size:&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> storage<span class="operator">.</span>bytesTotal()<span class="operator">/</span><span class="number">1000</span><span class="operator">/</span><span class="number">1000</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;MB&quot;</span>;
+      <a href="qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;availableSize:&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> storage<span class="operator">.</span>bytesAvailable()<span class="operator">/</span><span class="number">1000</span><span class="operator">/</span><span class="number">1000</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;MB&quot;</span>;
+
+</pre>
+</div>
+<!-- @@@QStorageInfo -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QStorageInfo$$$QStorageInfoconstQStorageInfo& -->
+<h3 class="fn" id="QStorageInfo-3"><a name="QStorageInfo-3"></a>QStorageInfo::<span class="name">QStorageInfo</span>(const <span class="type"><a href="qstorageinfo.html#QStorageInfo">QStorageInfo</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a new <a href="qstorageinfo.html">QStorageInfo</a> object that is a copy of the <i>other</i> <a href="qstorageinfo.html">QStorageInfo</a> object.</p>
+<!-- @@@QStorageInfo -->
+<!-- $$$QStorageInfo$$$QStorageInfoconstQDir& -->
+<h3 class="fn" id="QStorageInfo-2"><a name="QStorageInfo-2"></a>QStorageInfo::<span class="name">QStorageInfo</span>(const <span class="type"><a href="qdir.html">QDir</a></span> &amp;<i>dir</i>)</h3>
+<p>Constructs a new <a href="qstorageinfo.html">QStorageInfo</a> object that gives information about the volume containing the <i>dir</i> folder.</p>
+<!-- @@@QStorageInfo -->
+<!-- $$$QStorageInfo$$$QStorageInfoconstQString& -->
+<h3 class="fn" id="QStorageInfo-1"><a name="QStorageInfo-1"></a>QStorageInfo::<span class="name">QStorageInfo</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>path</i>)</h3>
+<p>Constructs a new <a href="qstorageinfo.html">QStorageInfo</a> object that gives information about the volume mounted at <i>path</i>.</p>
+<p>If you pass a directory or file, the <a href="qstorageinfo.html">QStorageInfo</a> object will refer to the volume where this directory or file is located. You can check if the created object is correct using the <a href="qstorageinfo.html#isValid">isValid</a>() method.</p>
+<p>The following example shows how to get the volume on which the application is located. It is recommended to always check that the volume is ready and valid.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qstorageinfo.html#QStorageInfo">QStorageInfo</a></span> storage(<a href="../qtwidgets/qapplication.html#qApp">qApp</a><span class="operator">-</span><span class="operator">&gt;</span>applicationDirPath());
+      <span class="keyword">if</span> (storage<span class="operator">.</span>isValid() <span class="operator">&amp;</span><span class="operator">&amp;</span> storage<span class="operator">.</span>isReady()) {
+          <span class="comment">// ...</span>
+      }
+
+</pre>
+<p><b>See also </b><a href="qstorageinfo.html#setPath">setPath</a>().</p>
+<!-- @@@QStorageInfo -->
+<!-- $$$QStorageInfo[overload1]$$$QStorageInfo -->
+<h3 class="fn" id="QStorageInfo"><a name="QStorageInfo"></a>QStorageInfo::<span class="name">QStorageInfo</span>()</h3>
+<p>Constructs an empty <a href="qstorageinfo.html">QStorageInfo</a> object.</p>
+<p>Objects created with the default constructor will be invalid and therefore not ready for use.</p>
+<p><b>See also </b><a href="qstorageinfo.html#setPath">setPath</a>(), <a href="qstorageinfo.html#isReady">isReady</a>(), and <a href="qstorageinfo.html#isValid">isValid</a>().</p>
+<!-- @@@QStorageInfo -->
+<!-- $$$operator=$$$operator=QStorageInfo&& -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type"><a href="qstorageinfo.html#QStorageInfo">QStorageInfo</a></span> &amp;QStorageInfo::<span class="name">operator=</span>(<span class="type"><a href="qstorageinfo.html#QStorageInfo">QStorageInfo</a></span> &amp;&amp;<i>other</i>)</h3>
+<p>Assigns <i>other</i> to this <a href="qstorageinfo.html">QStorageInfo</a> instance.</p>
+<!-- @@@operator= -->
+<!-- $$$operator=[overload1]$$$operator=constQStorageInfo& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qstorageinfo.html#QStorageInfo">QStorageInfo</a></span> &amp;QStorageInfo::<span class="name">operator=</span>(const <span class="type"><a href="qstorageinfo.html#QStorageInfo">QStorageInfo</a></span> &amp;<i>other</i>)</h3>
+<p>Makes a copy of the <a href="qstorageinfo.html">QStorageInfo</a> object <i>other</i> and assigns it to this <a href="qstorageinfo.html">QStorageInfo</a> object.</p>
+<!-- @@@operator= -->
+<!-- $$$~QStorageInfo[overload1]$$$~QStorageInfo -->
+<h3 class="fn" id="dtor.QStorageInfo"><a name="dtor.QStorageInfo"></a>QStorageInfo::<span class="name">~QStorageInfo</span>()</h3>
+<p>Destroys the <a href="qstorageinfo.html">QStorageInfo</a> object and frees its resources.</p>
+<!-- @@@~QStorageInfo -->
+<!-- $$$blockSize[overload1]$$$blockSize -->
+<h3 class="fn" id="blockSize"><a name="blockSize"></a><span class="type">int</span> QStorageInfo::<span class="name">blockSize</span>() const</h3>
+<p>Returns the optimal transfer block size for this filesystem.</p>
+<p>Returns -1 if <a href="qstorageinfo.html">QStorageInfo</a> could not determine the size or if the <a href="qstorageinfo.html">QStorageInfo</a> object is not valid.</p>
+<p>This function was introduced in  Qt 5.6.</p>
+<!-- @@@blockSize -->
+<!-- $$$bytesAvailable[overload1]$$$bytesAvailable -->
+<h3 class="fn" id="bytesAvailable"><a name="bytesAvailable"></a><span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> QStorageInfo::<span class="name">bytesAvailable</span>() const</h3>
+<p>Returns the size (in bytes) available for the current user. It returns the total size available if the user is the root user or a system administrator.</p>
+<p>This size can be less than or equal to the free size returned by <a href="qstorageinfo.html#bytesFree">bytesFree</a>() function.</p>
+<p>Returns -1 if <a href="qstorageinfo.html">QStorageInfo</a> object is not valid.</p>
+<p><b>See also </b><a href="qstorageinfo.html#bytesTotal">bytesTotal</a>() and <a href="qstorageinfo.html#bytesFree">bytesFree</a>().</p>
+<!-- @@@bytesAvailable -->
+<!-- $$$bytesFree[overload1]$$$bytesFree -->
+<h3 class="fn" id="bytesFree"><a name="bytesFree"></a><span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> QStorageInfo::<span class="name">bytesFree</span>() const</h3>
+<p>Returns the number of free bytes in a volume. Note that if there are quotas on the filesystem, this value can be larger than the value returned by <a href="qstorageinfo.html#bytesAvailable">bytesAvailable</a>().</p>
+<p>Returns -1 if <a href="qstorageinfo.html">QStorageInfo</a> object is not valid.</p>
+<p><b>See also </b><a href="qstorageinfo.html#bytesTotal">bytesTotal</a>() and <a href="qstorageinfo.html#bytesAvailable">bytesAvailable</a>().</p>
+<!-- @@@bytesFree -->
+<!-- $$$bytesTotal[overload1]$$$bytesTotal -->
+<h3 class="fn" id="bytesTotal"><a name="bytesTotal"></a><span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> QStorageInfo::<span class="name">bytesTotal</span>() const</h3>
+<p>Returns the total volume size in bytes.</p>
+<p>Returns -1 if <a href="qstorageinfo.html">QStorageInfo</a> object is not valid.</p>
+<p><b>See also </b><a href="qstorageinfo.html#bytesFree">bytesFree</a>() and <a href="qstorageinfo.html#bytesAvailable">bytesAvailable</a>().</p>
+<!-- @@@bytesTotal -->
+<!-- $$$device[overload1]$$$device -->
+<h3 class="fn" id="device"><a name="device"></a><span class="type"><a href="qbytearray.html">QByteArray</a></span> QStorageInfo::<span class="name">device</span>() const</h3>
+<p>Returns the device for this volume.</p>
+<p>For example, on Unix filesystems (including <a href="../qtdoc/internationalization.html#macos">macOS</a>), this returns the devpath like <code>/dev/sda0</code> for local storages. On Windows, it returns the UNC path starting with <code>\\\\?\\</code> for local storages (in other words, the volume GUID).</p>
+<p><b>See also </b><a href="qstorageinfo.html#rootPath">rootPath</a>() and <a href="qstorageinfo.html#subvolume">subvolume</a>().</p>
+<!-- @@@device -->
+<!-- $$$displayName[overload1]$$$displayName -->
+<h3 class="fn" id="displayName"><a name="displayName"></a><span class="type"><a href="qstring.html">QString</a></span> QStorageInfo::<span class="name">displayName</span>() const</h3>
+<p>Returns the volume's name, if available, or the root path if not.</p>
+<!-- @@@displayName -->
+<!-- $$$fileSystemType[overload1]$$$fileSystemType -->
+<h3 class="fn" id="fileSystemType"><a name="fileSystemType"></a><span class="type"><a href="qbytearray.html">QByteArray</a></span> QStorageInfo::<span class="name">fileSystemType</span>() const</h3>
+<p>Returns the type name of the filesystem.</p>
+<p>This is a platform-dependent function, and filesystem names can vary between different operating systems. For example, on Windows filesystems they can be named <code>NTFS</code>, and on Linux they can be named <code>ntfs-3g</code> or <code>fuseblk</code>.</p>
+<p><b>See also </b><a href="qstorageinfo.html#name">name</a>().</p>
+<!-- @@@fileSystemType -->
+<!-- $$$isReadOnly[overload1]$$$isReadOnly -->
+<h3 class="fn" id="isReadOnly"><a name="isReadOnly"></a><span class="type">bool</span> QStorageInfo::<span class="name">isReadOnly</span>() const</h3>
+<p>Returns true if the current filesystem is protected from writing; false otherwise.</p>
+<!-- @@@isReadOnly -->
+<!-- $$$isReady[overload1]$$$isReady -->
+<h3 class="fn" id="isReady"><a name="isReady"></a><span class="type">bool</span> QStorageInfo::<span class="name">isReady</span>() const</h3>
+<p>Returns true if the current filesystem is ready to work; false otherwise. For example, false is returned if the CD volume is not inserted.</p>
+<p>Note that <a href="qstorageinfo.html#fileSystemType">fileSystemType</a>(), <a href="qstorageinfo.html#name">name</a>(), <a href="qstorageinfo.html#bytesTotal">bytesTotal</a>(), <a href="qstorageinfo.html#bytesFree">bytesFree</a>(), and <a href="qstorageinfo.html#bytesAvailable">bytesAvailable</a>() will return invalid data until the volume is ready.</p>
+<p><b>See also </b><a href="qstorageinfo.html#isValid">isValid</a>().</p>
+<!-- @@@isReady -->
+<!-- $$$isRoot[overload1]$$$isRoot -->
+<h3 class="fn" id="isRoot"><a name="isRoot"></a><span class="type">bool</span> QStorageInfo::<span class="name">isRoot</span>() const</h3>
+<p>Returns true if this <a href="qstorageinfo.html">QStorageInfo</a> represents the system root volume; false otherwise.</p>
+<p>On Unix filesystems, the root volume is a volume mounted on <code>/</code>. On Windows, the root volume is the volume where the OS is installed.</p>
+<p><b>See also </b><a href="qstorageinfo.html#root">root</a>().</p>
+<!-- @@@isRoot -->
+<!-- $$$isValid[overload1]$$$isValid -->
+<h3 class="fn" id="isValid"><a name="isValid"></a><span class="type">bool</span> QStorageInfo::<span class="name">isValid</span>() const</h3>
+<p>Returns true if the <a href="qstorageinfo.html">QStorageInfo</a> specified by <a href="qstorageinfo.html#rootPath">rootPath</a> exists and is mounted correctly.</p>
+<p><b>See also </b><a href="qstorageinfo.html#isReady">isReady</a>().</p>
+<!-- @@@isValid -->
+<!-- $$$mountedVolumes[overload1]$$$mountedVolumes -->
+<h3 class="fn" id="mountedVolumes"><a name="mountedVolumes"></a><code>[static] </code><span class="type"><a href="qlist.html">QList</a></span>&lt;<span class="type"><a href="qstorageinfo.html#QStorageInfo">QStorageInfo</a></span>&gt; QStorageInfo::<span class="name">mountedVolumes</span>()</h3>
+<p>Returns the list of <a href="qstorageinfo.html">QStorageInfo</a> objects that corresponds to the list of currently mounted filesystems.</p>
+<p>On Windows, this returns the drives visible in the <b>My Computer</b> folder. On Unix operating systems, it returns the list of all mounted filesystems (except for pseudo filesystems).</p>
+<p>Returns all currently mounted filesystems by default.</p>
+<p>The example shows how to retrieve all available filesystems, skipping read-only ones.</p>
+<pre class="cpp">
+
+      foreach (<span class="keyword">const</span> <span class="type"><a href="qstorageinfo.html#QStorageInfo">QStorageInfo</a></span> <span class="operator">&amp;</span>storage<span class="operator">,</span> <span class="type"><a href="qstorageinfo.html#QStorageInfo">QStorageInfo</a></span><span class="operator">::</span>mountedVolumes()) {
+          <span class="keyword">if</span> (storage<span class="operator">.</span>isValid() <span class="operator">&amp;</span><span class="operator">&amp;</span> storage<span class="operator">.</span>isReady()) {
+              <span class="keyword">if</span> (<span class="operator">!</span>storage<span class="operator">.</span>isReadOnly()) {
+                  <span class="comment">// ...</span>
+              }
+          }
+      }
+
+</pre>
+<p><b>See also </b><a href="qstorageinfo.html#root">root</a>().</p>
+<!-- @@@mountedVolumes -->
+<!-- $$$name[overload1]$$$name -->
+<h3 class="fn" id="name"><a name="name"></a><span class="type"><a href="qstring.html">QString</a></span> QStorageInfo::<span class="name">name</span>() const</h3>
+<p>Returns the human-readable name of a filesystem, usually called <code>label</code>.</p>
+<p>Not all filesystems support this feature. In this case, the value returned by this method could be empty. An empty string is returned if the file system does not support labels, or if no label is set.</p>
+<p>On Linux, retrieving the volume's label requires <code>udev</code> to be present in the system.</p>
+<p><b>See also </b><a href="qstorageinfo.html#fileSystemType">fileSystemType</a>().</p>
+<!-- @@@name -->
+<!-- $$$refresh[overload1]$$$refresh -->
+<h3 class="fn" id="refresh"><a name="refresh"></a><span class="type">void</span> QStorageInfo::<span class="name">refresh</span>()</h3>
+<p>Resets <a href="qstorageinfo.html">QStorageInfo</a>'s internal cache.</p>
+<p><a href="qstorageinfo.html">QStorageInfo</a> caches information about storage to speed up performance. <a href="qstorageinfo.html">QStorageInfo</a> retrieves information during object construction and/or when calling the <a href="qstorageinfo.html#setPath">setPath</a>() method. You have to manually reset the cache by calling this function to update storage information.</p>
+<!-- @@@refresh -->
+<!-- $$$root[overload1]$$$root -->
+<h3 class="fn" id="root"><a name="root"></a><code>[static] </code><span class="type"><a href="qstorageinfo.html#QStorageInfo">QStorageInfo</a></span> QStorageInfo::<span class="name">root</span>()</h3>
+<p>Returns a <a href="qstorageinfo.html">QStorageInfo</a> object that represents the system root volume.</p>
+<p>On Unix systems this call returns the root ('/') volume; in Windows the volume where the operating system is installed.</p>
+<p><b>See also </b><a href="qstorageinfo.html#isRoot">isRoot</a>().</p>
+<!-- @@@root -->
+<!-- $$$rootPath[overload1]$$$rootPath -->
+<h3 class="fn" id="rootPath"><a name="rootPath"></a><span class="type"><a href="qstring.html">QString</a></span> QStorageInfo::<span class="name">rootPath</span>() const</h3>
+<p>Returns the mount point of the filesystem this <a href="qstorageinfo.html">QStorageInfo</a> object represents.</p>
+<p>On Windows, it returns the volume letter in case the volume is not mounted to a directory.</p>
+<p>Note that the value returned by rootPath() is the real mount point of a volume, and may not be equal to the value passed to the constructor or <a href="qstorageinfo.html#setPath">setPath</a>() method. For example, if you have only the root volume in the system, and pass '/directory' to <a href="qstorageinfo.html#setPath">setPath</a>(), then this method will return '/'.</p>
+<p><b>See also </b><a href="qstorageinfo.html#setPath">setPath</a>() and <a href="qstorageinfo.html#device">device</a>().</p>
+<!-- @@@rootPath -->
+<!-- $$$setPath[overload1]$$$setPathconstQString& -->
+<h3 class="fn" id="setPath"><a name="setPath"></a><span class="type">void</span> QStorageInfo::<span class="name">setPath</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>path</i>)</h3>
+<p>Sets this <a href="qstorageinfo.html">QStorageInfo</a> object to the filesystem mounted where <i>path</i> is located.</p>
+<p><i>path</i> can either be a root path of the filesystem, a directory, or a file within that filesystem.</p>
+<p><b>See also </b><a href="qstorageinfo.html#rootPath">rootPath</a>().</p>
+<!-- @@@setPath -->
+<!-- $$$subvolume[overload1]$$$subvolume -->
+<h3 class="fn" id="subvolume"><a name="subvolume"></a><span class="type"><a href="qbytearray.html">QByteArray</a></span> QStorageInfo::<span class="name">subvolume</span>() const</h3>
+<p>Returns the subvolume name for this volume.</p>
+<p>Some filesystem types allow multiple subvolumes inside one device, which may be mounted in different paths. If the subvolume could be detected, it is returned here. The format of the subvolume name is specific to each filesystem type.</p>
+<p>If this volume was not mounted from a subvolume of a larger filesystem or if the subvolume could not be detected, this function returns an empty byte array.</p>
+<p>This function was introduced in  Qt 5.9.</p>
+<p><b>See also </b><a href="qstorageinfo.html#device">device</a>().</p>
+<!-- @@@subvolume -->
+<!-- $$$swap[overload1]$$$swapQStorageInfo& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QStorageInfo::<span class="name">swap</span>(<span class="type"><a href="qstorageinfo.html#QStorageInfo">QStorageInfo</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps this volume info with <i>other</i>. This function is very fast and never fails.</p>
+<!-- @@@swap -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$operator!=[overload1]$$$operator!=constQStorageInfo&constQStorageInfo& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> <span class="name">operator!=</span>(const <span class="type"><a href="qstorageinfo.html#QStorageInfo">QStorageInfo</a></span> &amp;<i>first</i>, const <span class="type"><a href="qstorageinfo.html#QStorageInfo">QStorageInfo</a></span> &amp;<i>second</i>)</h3>
+<p>Returns true if the <i>first</i> <a href="qstorageinfo.html">QStorageInfo</a> object refers to a different drive or volume than the <i>second</i>; otherwise returns false.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQStorageInfo&constQStorageInfo& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> <span class="name">operator==</span>(const <span class="type"><a href="qstorageinfo.html#QStorageInfo">QStorageInfo</a></span> &amp;<i>first</i>, const <span class="type"><a href="qstorageinfo.html#QStorageInfo">QStorageInfo</a></span> &amp;<i>second</i>)</h3>
+<p>Returns true if the <i>first</i> <a href="qstorageinfo.html">QStorageInfo</a> object refers to the same drive or volume as the <i>second</i>; otherwise it returns false.</p>
+<p>Note that the result of comparing two invalid <a href="qstorageinfo.html">QStorageInfo</a> objects is always positive.</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- multimedia.qdoc -->
+  <title>Multimedia | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td >Multimedia</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#features">Features</a></li>
+<li class="level1"><a href="#multimedia-components">Multimedia Components</a></li>
+<li class="level1"><a href="#multimedia-recipes">Multimedia Recipes</a></li>
+<li class="level1"><a href="#limitations">Limitations</a></li>
+<li class="level1"><a href="#advanced-usage">Advanced Usage</a></li>
+<li class="level1"><a href="#changes-from-previous-versions">Changes from Previous Versions</a></li>
+<li class="level1"><a href="#reference-documentation">Reference Documentation</a></li>
+<li class="level2"><a href="#qml-types">QML Types</a></li>
+<li class="level2"><a href="#multimedia-classes">Multimedia Classes</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Multimedia</h1>
+<span class="subtitle"></span>
+<!-- $$$multimediaoverview.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Multimedia support in Qt is provided by the <a href="qtmultimedia-index.html">Qt Multimedia</a> module. The Qt Multimedia module provides a rich feature set that enables you to easily take advantage of a platform's multimedia capabilities such as media playback and the use of camera and radio devices.</p>
+<a name="features"></a>
+<h2 id="features">Features</h2>
+<p>Here are some examples of what can be done with Qt Multimedia APIs:</p>
+<ul>
+<li>Access raw audio devices for input and output</li>
+<li>Play low latency sound effects</li>
+<li>Play media files in playlists (such as compressed audio or video files)</li>
+<li>Record audio and compress it</li>
+<li>Tune and listen to radio stations</li>
+<li>Use a camera, including viewfinder, image capture, and movie recording</li>
+<li>Play 3D positional audio with <a href="qtaudioengine-qmlmodule.html">Qt Audio Engine</a></li>
+<li>Decode audio media files into memory for processing</li>
+<li>Accessing video frames or audio buffers as they are played or recorded</li>
+</ul>
+<a name="multimedia-components"></a>
+<h2 id="multimedia-components">Multimedia Components</h2>
+<p>Qt's multimedia APIs are categorized into four main components. More information (including background information and class references) is available here:</p>
+<ul>
+<li><a href="audiooverview.html">Audio Overview</a></li>
+<li><a href="videooverview.html">Video Overview</a></li>
+<li><a href="cameraoverview.html">Camera Overview</a></li>
+<li><a href="radiooverview.html">Radio Overview</a></li>
+</ul>
+<a name="multimedia-recipes"></a>
+<h2 id="multimedia-recipes">Multimedia Recipes</h2>
+<p>For some quick recipes, look at the overviews above and consult this table:</p>
+<div class="table"><table class="generic" width="70%">
+ <thead><tr class="qt-style"><th >Use case</th><th >Examples</th><th >QML Types</th><th >C++ Classes</th></tr></thead>
+<tr valign="top" class="odd"><td >Playing a sound effect</td><td ></td><td ></td><td ><a href="qsoundeffect.html">QSoundEffect</a></td></tr>
+<tr valign="top" class="even"><td >Playing low latency audio</td><td ><a href="qtmultimedia-multimedia-audioinput-example.html">audioinput</a>, <a href="qtmultimedia-multimedia-spectrum-example.html">spectrum</a></td><td ></td><td ><a href="qaudiooutput.html">QAudioOutput</a></td></tr>
+<tr valign="top" class="odd"><td >Playing encoded audio (MP3, AAC etc)</td><td ><a href="qtmultimedia-multimediawidgets-player-example.html">player</a></td><td ><a href="qml-multimedia.html#audio">Audio</a>, <a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a></td><td ><a href="qmediaplayer.html">QMediaPlayer</a></td></tr>
+<tr valign="top" class="even"><td >Accessing raw audio input data</td><td ><a href="qtmultimedia-multimedia-spectrum-example.html">spectrum</a>, <a href="qtmultimedia-multimedia-audioinput-example.html">audioinput</a></td><td ></td><td ><a href="qaudioinput.html">QAudioInput</a></td></tr>
+<tr valign="top" class="odd"><td >Recording encoded audio data</td><td ><a href="qtmultimedia-multimedia-audiorecorder-example.html">audiorecorder</a></td><td ></td><td ><a href="qaudiorecorder.html">QAudioRecorder</a></td></tr>
+<tr valign="top" class="even"><td >Discovering raw audio devices</td><td ><a href="qtmultimedia-multimedia-audiodevices-example.html">audiodevices</a></td><td ></td><td ><a href="qaudiodeviceinfo.html">QAudioDeviceInfo</a></td></tr>
+<tr valign="top" class="odd"><td >Video Playback</td><td ><a href="qtmultimedia-multimediawidgets-player-example.html">player</a>, <a href="qtmultimedia-multimedia-video-qmlvideo-example.html">qmlvideo</a>, <a href="qtmultimedia-multimedia-video-qmlvideofx-example.html">qmlvideofx</a></td><td ><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>, <a href="qml-qtmultimedia-videooutput.html">VideoOutput</a>, <a href="qml-multimedia.html#video">Video</a></td><td ><a href="qmediaplayer.html">QMediaPlayer</a>, <a href="qvideowidget.html">QVideoWidget</a>, <a href="qgraphicsvideoitem.html">QGraphicsVideoItem</a></td></tr>
+<tr valign="top" class="even"><td >Video Processing</td><td ><a href="qtmultimedia-multimedia-video-qmlvideo-example.html">qmlvideofx</a></td><td ><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a>, <a href="qml-qtmultimedia-videooutput.html">VideoOutput</a></td><td ><a href="qmediaplayer.html">QMediaPlayer</a>, <a href="qabstractvideosurface.html">QAbstractVideoSurface</a>, <a href="qvideoframe.html">QVideoFrame</a></td></tr>
+<tr valign="top" class="odd"><td >Listening to the radio</td><td ><a href="qtmultimedia-multimedia-declarative-radio-example.html">declarative-radio</a></td><td ><a href="qml-qtmultimedia-radio.html">Radio</a>, <a href="qml-qtmultimedia-radiodata.html">RadioData</a></td><td ><a href="qradiotuner.html">QRadioTuner</a>, <a href="qradiodata.html">QRadioData</a></td></tr>
+<tr valign="top" class="even"><td >Accessing camera viewfinder</td><td ><a href="qtmultimedia-multimediawidgets-camera-example.html">camera</a>, <a href="qtmultimedia-multimedia-declarative-camera-example.html">declarative-camera</a></td><td ><a href="qml-multimedia.html#camera">Camera</a>, <a href="qml-qtmultimedia-videooutput.html">VideoOutput</a></td><td ><a href="qcamera.html">QCamera</a>, <a href="qvideowidget.html">QVideoWidget</a>, <a href="qgraphicsvideoitem.html">QGraphicsVideoItem</a></td></tr>
+<tr valign="top" class="odd"><td >Viewfinder processing</td><td ></td><td ><a href="qml-multimedia.html#camera">Camera</a>, <a href="qml-qtmultimedia-videooutput.html">VideoOutput</a></td><td ><a href="qcamera.html">QCamera</a>, <a href="qabstractvideosurface.html">QAbstractVideoSurface</a>, <a href="qvideoframe.html">QVideoFrame</a></td></tr>
+<tr valign="top" class="even"><td >Capturing photos</td><td ><a href="qtmultimedia-multimediawidgets-camera-example.html">camera</a>, <a href="qtmultimedia-multimedia-declarative-camera-example.html">declarative-camera</a></td><td ><a href="qml-multimedia.html#camera">Camera</a></td><td ><a href="qcamera.html">QCamera</a>, <a href="qcameraimagecapture.html">QCameraImageCapture</a></td></tr>
+<tr valign="top" class="odd"><td >Capturing movies</td><td ><a href="qtmultimedia-multimediawidgets-camera-example.html">camera</a>, <a href="qtmultimedia-multimedia-declarative-camera-example.html">declarative-camera</a></td><td ><a href="qml-multimedia.html#camera">Camera</a></td><td ><a href="qcamera.html">QCamera</a>, <a href="qmediarecorder.html">QMediaRecorder</a></td></tr>
+<tr valign="top" class="even"><td >3D sound sources</td><td ></td><td ><a href="qtmultimedia-multimedia-audioengine-example.html">Audio Engine</a></td><td ><a href="qml-qtaudioengine-audioengine.html">AudioEngine</a>, <a href="qml-qtaudioengine-sound.html">Sound</a></td><td ></td></tr>
+</table></div>
+<a name="limitations"></a>
+<h2 id="limitations">Limitations</h2>
+<p>The Qt Multimedia APIs build upon the multimedia framework of the underlying platform. This can mean that support for various codecs or containers can vary between machines, depending on what the end user has installed.</p>
+<a name="advanced-usage"></a>
+<h2 id="advanced-usage">Advanced Usage</h2>
+<p>For developers wishing to access some platform specific settings, or to port the Qt Multimedia APIs to a new platform or technology, see <a href="multimediabackend.html">Multimedia Backend Development</a>.</p>
+<a name="changes-from-previous-versions"></a>
+<h2 id="changes-from-previous-versions">Changes from Previous Versions</h2>
+<p>If you previously used Qt Multimedia in Qt 4, or used Qt Multimedia Kit in Qt Mobility, please see <a href="changes.html">Changes in Qt Multimedia</a> for more information on what changed, and what you might need to change when porting code.</p>
+<a name="reference-documentation"></a>
+<h2 id="reference-documentation">Reference Documentation</h2>
+<a name="qml-types"></a>
+<h3 id="qml-types">QML Types</h3>
+<p>The QML types are accessed by using:</p>
+<pre class="cpp">
+
+  import <span class="type">QtMultimedia</span> <span class="number">5.8</span>
+
+</pre>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-audio.html">Audio</a></p></td><td class="tblDescr"><p>Add audio playback to a scene</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-camera.html">Camera</a></p></td><td class="tblDescr"><p>Access viewfinder frames, and take photos and movies</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-cameracapture.html">CameraCapture</a></p></td><td class="tblDescr"><p>An interface for capturing camera images</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-cameraexposure.html">CameraExposure</a></p></td><td class="tblDescr"><p>An interface for exposure related camera settings</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-cameraflash.html">CameraFlash</a></p></td><td class="tblDescr"><p>An interface for flash related camera settings</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-camerafocus.html">CameraFocus</a></p></td><td class="tblDescr"><p>An interface for focus related camera settings</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-cameraimageprocessing.html">CameraImageProcessing</a></p></td><td class="tblDescr"><p>An interface for camera capture related settings</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-camerarecorder.html">CameraRecorder</a></p></td><td class="tblDescr"><p>Controls video recording with the Camera</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a></p></td><td class="tblDescr"><p>Add media playback to a scene</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-playlist.html">Playlist</a></p></td><td class="tblDescr"><p>For specifying a list of media to be played</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-playlistitem.html">PlaylistItem</a></p></td><td class="tblDescr"><p>Defines an item in a Playlist</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-qtmultimedia.html">QtMultimedia</a></p></td><td class="tblDescr"><p>Provides a global object with useful functions from Qt Multimedia</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-radio.html">Radio</a></p></td><td class="tblDescr"><p>Access radio functionality from a QML application</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-radiodata.html">RadioData</a></p></td><td class="tblDescr"><p>Access RDS data from a QML application</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-soundeffect.html">SoundEffect</a></p></td><td class="tblDescr"><p>Type provides a way to play sound effects in QML</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-torch.html">Torch</a></p></td><td class="tblDescr"><p>Simple control over torch functionality</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-video.html">Video</a></p></td><td class="tblDescr"><p>A convenience type for showing a specified video</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-videooutput.html">VideoOutput</a></p></td><td class="tblDescr"><p>Render video or camera viewfinder</p></td></tr>
+</table></div>
+<p>The following types are accessed by using <a href="qtaudioengine-qmlmodule.html">Qt Audio Engine</a>:</p>
+<pre class="qml">
+
+  import QtAudioEngine 1.13
+
+</pre>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtaudioengine-attenuationmodelinverse.html">AttenuationModelInverse</a></p></td><td class="tblDescr"><p>Defines a non-linear attenuation curve for a Sound</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtaudioengine-attenuationmodellinear.html">AttenuationModelLinear</a></p></td><td class="tblDescr"><p>Defines a linear attenuation curve for a Sound</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtaudioengine-audiocategory.html">AudioCategory</a></p></td><td class="tblDescr"><p>Control all active sound instances by group</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtaudioengine-audioengine.html">AudioEngine</a></p></td><td class="tblDescr"><p>Organize all your 3d audio content in one place</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtaudioengine-audiolistener.html">AudioListener</a></p></td><td class="tblDescr"><p>Control global listener parameters</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtaudioengine-audiosample.html">AudioSample</a></p></td><td class="tblDescr"><p>Load audio samples, mostly .wav</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtaudioengine-playvariation.html">PlayVariation</a></p></td><td class="tblDescr"><p>Define a playback variation for sounds. So each time the playback of the same sound can be a slightly different even with the same AudioSample</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtaudioengine-sound.html">Sound</a></p></td><td class="tblDescr"><p>Define a variety of samples and parameters to be used for SoundInstance</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtaudioengine-soundinstance.html">SoundInstance</a></p></td><td class="tblDescr"><p>Play 3d audio content</p></td></tr>
+</table></div>
+<a name="multimedia-classes"></a>
+<h3 id="multimedia-classes">Multimedia Classes</h3>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qstatictext.html">QStaticText</a></p></td><td class="tblDescr"><p>Enables optimized drawing of text when the text and its layout is updated rarely</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qaudio.html">QAudio</a></p></td><td class="tblDescr"><p>Contains enums used by the audio classes</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qaudiobuffer.html">QAudioBuffer</a></p></td><td class="tblDescr"><p>Represents a collection of audio samples with a specific format and sample rate</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qaudiobuffer-stereoframe.html">QAudioBuffer::StereoFrame</a></p></td><td class="tblDescr"><p>Simple wrapper for a stereo audio frame</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qaudiodecoder.html">QAudioDecoder</a></p></td><td class="tblDescr"><p>Allows decoding audio</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qaudiodeviceinfo.html">QAudioDeviceInfo</a></p></td><td class="tblDescr"><p>Interface to query audio devices and their functionality</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qaudioformat.html">QAudioFormat</a></p></td><td class="tblDescr"><p>Stores audio stream parameter information</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qaudioinput.html">QAudioInput</a></p></td><td class="tblDescr"><p>Interface for receiving audio data from an audio input device</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qaudiooutput.html">QAudioOutput</a></p></td><td class="tblDescr"><p>Interface for sending audio data to an audio output device</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qaudioprobe.html">QAudioProbe</a></p></td><td class="tblDescr"><p>Allows you to monitor audio being played or recorded</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qabstractaudiodeviceinfo.html">QAbstractAudioDeviceInfo</a></p></td><td class="tblDescr"><p>Base class for audio backends</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qabstractaudioinput.html">QAbstractAudioInput</a></p></td><td class="tblDescr"><p>Access for QAudioInput to access the audio device provided by the plugin</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qabstractaudiooutput.html">QAbstractAudioOutput</a></p></td><td class="tblDescr"><p>Base class for audio backends</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qaudiosystemplugin.html">QAudioSystemPlugin</a></p></td><td class="tblDescr"><p>Abstract base for audio plugins</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qsound.html">QSound</a></p></td><td class="tblDescr"><p>Method to play .wav sound files</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qsoundeffect.html">QSoundEffect</a></p></td><td class="tblDescr"><p>Way to play low latency sound effects</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qcamera.html">QCamera</a></p></td><td class="tblDescr"><p>Interface for system camera devices</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qcamera-frameraterange.html">QCamera::FrameRateRange</a></p></td><td class="tblDescr"><p>A FrameRateRange represents a range of frame rates as minimum and maximum rate</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qcameraexposure.html">QCameraExposure</a></p></td><td class="tblDescr"><p>Interface for exposure related camera settings</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qcamerafocus.html">QCameraFocus</a></p></td><td class="tblDescr"><p>Interface for focus and zoom related camera settings</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qcamerafocuszone.html">QCameraFocusZone</a></p></td><td class="tblDescr"><p>Information on zones used for autofocusing a camera</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qcameraimagecapture.html">QCameraImageCapture</a></p></td><td class="tblDescr"><p>Used for the recording of media content</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qcameraimageprocessing.html">QCameraImageProcessing</a></p></td><td class="tblDescr"><p>Interface for image processing related camera settings</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qcamerainfo.html">QCameraInfo</a></p></td><td class="tblDescr"><p>General information about camera devices</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qcameraviewfindersettings.html">QCameraViewfinderSettings</a></p></td><td class="tblDescr"><p>Set of viewfinder settings</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qmediacontent.html">QMediaContent</a></p></td><td class="tblDescr"><p>Access to the resource relating to a media content</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qmediaplayer.html">QMediaPlayer</a></p></td><td class="tblDescr"><p>Allows the playing of a media source</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qmediaplaylist.html">QMediaPlaylist</a></p></td><td class="tblDescr"><p>List of media content to play</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qmediabindableinterface.html">QMediaBindableInterface</a></p></td><td class="tblDescr"><p>The base class for objects extending media objects functionality</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qmediacontrol.html">QMediaControl</a></p></td><td class="tblDescr"><p>Base interface for media service controls</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qmediametadata.html">QMediaMetaData</a></p></td><td class="tblDescr"><p>Provides identifiers for meta-data attributes</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qmediaobject.html">QMediaObject</a></p></td><td class="tblDescr"><p>Common base for multimedia objects</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qmediaservice.html">QMediaService</a></p></td><td class="tblDescr"><p>Common base class for media service implementations</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qmediatimeinterval.html">QMediaTimeInterval</a></p></td><td class="tblDescr"><p>Represents a time interval with integer precision</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qmediatimerange.html">QMediaTimeRange</a></p></td><td class="tblDescr"><p>Represents a set of zero or more disjoint time intervals</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qmultimedia.html">QMultimedia</a></p></td><td class="tblDescr"><p>Contains miscellaneous identifiers used throughout the Qt Multimedia library</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qradiodata.html">QRadioData</a></p></td><td class="tblDescr"><p>Interfaces to the RDS functionality of the system radio</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qradiotuner.html">QRadioTuner</a></p></td><td class="tblDescr"><p>Interface to the systems analog radio device</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qaudiorecorder.html">QAudioRecorder</a></p></td><td class="tblDescr"><p>Used for the recording of audio</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qaudioencodersettings.html">QAudioEncoderSettings</a></p></td><td class="tblDescr"><p>Set of audio encoder settings</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qimageencodersettings.html">QImageEncoderSettings</a></p></td><td class="tblDescr"><p>Set of image encoder settings</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qvideoencodersettings.html">QVideoEncoderSettings</a></p></td><td class="tblDescr"><p>Set of video encoder settings</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qmediarecorder.html">QMediaRecorder</a></p></td><td class="tblDescr"><p>Used for the recording of media content</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qabstractplanarvideobuffer.html">QAbstractPlanarVideoBuffer</a></p></td><td class="tblDescr"><p>Abstraction for planar video data</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qabstractvideobuffer.html">QAbstractVideoBuffer</a></p></td><td class="tblDescr"><p>Abstraction for video data</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qabstractvideofilter.html">QAbstractVideoFilter</a></p></td><td class="tblDescr"><p>Represents a filter that is applied to the video frames received by a VideoOutput type</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qvideofilterrunnable.html">QVideoFilterRunnable</a></p></td><td class="tblDescr"><p>Represents the implementation of a filter that owns all graphics and computational resources, and performs the actual filtering or calculations</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qabstractvideosurface.html">QAbstractVideoSurface</a></p></td><td class="tblDescr"><p>Base class for video presentation surfaces</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qvideoframe.html">QVideoFrame</a></p></td><td class="tblDescr"><p>Represents a frame of video data</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qvideoprobe.html">QVideoProbe</a></p></td><td class="tblDescr"><p>Allows you to monitor video frames being played or recorded</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qvideosurfaceformat.html">QVideoSurfaceFormat</a></p></td><td class="tblDescr"><p>Specifies the stream format of a video presentation surface</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qgraphicsvideoitem.html">QGraphicsVideoItem</a></p></td><td class="tblDescr"><p>Graphics item which display video produced by a QMediaObject</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qvideowidget.html">QVideoWidget</a></p></td><td class="tblDescr"><p>Widget which presents video produced by a media object</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtwidgets/qgraphicseffect.html">QGraphicsEffect</a></p></td><td class="tblDescr"><p>The base class for all graphics effects</p></td></tr>
+</table></div>
+</div>
+<!-- @@@multimediaoverview.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

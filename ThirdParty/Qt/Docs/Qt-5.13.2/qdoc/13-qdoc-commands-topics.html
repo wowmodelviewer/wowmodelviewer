@@ -1,0 +1,1113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdoc-manual-topiccmds.qdoc -->
+  <title>Topic Commands | QDoc Manual 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qdoc-index.html">QDoc Manual</a></td><td >Topic Commands</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qdoc-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="27-qdoc-commands-alphabetical.html" />
+  <link rel="next" href="14-qdoc-commands-contextcommands.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="27-qdoc-commands-alphabetical.html">Command Index</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="14-qdoc-commands-contextcommands.html">Context Commands</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#class">\class</a></li>
+<li class="level1"><a href="#enum">\enum</a></li>
+<li class="level1"><a href="#example">\example</a></li>
+<li class="level1"><a href="#externalpage">\externalpage</a></li>
+<li class="level1"><a href="#fn-function">\fn (function)</a></li>
+<li class="level1"><a href="#group">\group</a></li>
+<li class="level1"><a href="#headerfile">\headerfile</a></li>
+<li class="level1"><a href="#macro">\macro</a></li>
+<li class="level1"><a href="#module">\module</a></li>
+<li class="level1"><a href="#namespace">\namespace</a></li>
+<li class="level1"><a href="#page">\page</a></li>
+<li class="level1"><a href="#property">\property</a></li>
+<li class="level1"><a href="#qmlattachedproperty">\qmlattachedproperty</a></li>
+<li class="level1"><a href="#qmlattachedsignal">\qmlattachedsignal</a></li>
+<li class="level1"><a href="#qmlbasictype">\qmlbasictype</a></li>
+<li class="level1"><a href="#qmlclass">\qmlclass</a></li>
+<li class="level1"><a href="#qmlmethod">\qmlmethod</a></li>
+<li class="level1"><a href="#qmltype">\qmltype</a></li>
+<li class="level1"><a href="#qmlproperty">\qmlproperty</a></li>
+<li class="level1"><a href="#qmlsignal">\qmlsignal</a></li>
+<li class="level1"><a href="#qmlmodule">\qmlmodule</a></li>
+<li class="level1"><a href="#inqmlmodule">\inqmlmodule</a></li>
+<li class="level1"><a href="#instantiates">\instantiates</a></li>
+<li class="level1"><a href="#typedef">\typedef</a></li>
+<li class="level1"><a href="#variable">\variable</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Topic Commands</h1>
+<span class="subtitle"></span>
+<!-- $$$13-qdoc-commands-topics.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>A topic command tells QDoc which source code element is being documented. Some topic commands allow you to create documentation pages that aren't tied to any underlying source code element.</p>
+<p>When QDoc processes a QDoc comment, it tries to connect the comment to an element in the source code by first looking for a topic command that names the source code element. If there is no topic command, QDoc tries to connect the comment to the source code element that immediately follows the comment. If it can't do either of these and if there is no topic command that indicates the comment does not have an underlying source code element (e.g&#x2e; <a href="13-qdoc-commands-topics.html#page-command">\page</a>), then the comment is discarded.</p>
+<a name="topic-argument"></a><p>The name of the entity being documented is usually the only argument for a topic command. Use the complete name. Sometimes there can be a second parameter in the argument. See e.g&#x2e; <a href="13-qdoc-commands-topics.html#page-command">\page</a>.</p>
+<pre class="cpp">
+
+  \<span class="keyword">enum</span> <span class="type"><a href="../qtwidgets/qcombobox.html">QComboBox</a></span><span class="operator">::</span>InsertPolicy
+
+</pre>
+<p>The <a href="13-qdoc-commands-topics.html#fn-command">\fn</a> command is a special case. For the <a href="13-qdoc-commands-topics.html#fn-command">\fn</a> command, use the function's signature including the class qualifier.</p>
+<pre class="cpp">
+
+  \fn <span class="type">void</span> <span class="type"><a href="../qtwidgets/qgraphicswidget.html">QGraphicsWidget</a></span><span class="operator">::</span>setWindowFlags(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowFlags wFlags)
+
+</pre>
+<p>A topic command can appear anywhere in a comment but must stand alone on its own line. It is good practice is to let the topic command be the first line of the comment. If the argument spans several lines, make sure that each line (except the last one) is ended with a backslash. Moreover, QDoc counts parentheses, which means that if it encounters a '(' it considers everything until the closing ')' as its argument.</p>
+<p>If a topic command is repeated with different arguments, the same documentation will appear for both the units.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \fn <span class="type">void</span> PreviewWindow<span class="operator">::</span>setWindowFlags()
+      \fn <span class="type">void</span> ControllerWindow<span class="operator">::</span>setWindowFlags()
+
+      Sets the widgets flags <span class="keyword">using</span> the <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span><span class="operator">::</span>setWindowFlags()
+      function<span class="operator">.</span>
+
+      Then runs through the available window flags<span class="operator">,</span> creating a text
+      that contains the names of the flags that matches the flags
+      parameter<span class="operator">,</span> displaying the text in the widgets text editor<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>The <code>PreviewWindow::setWindowFlags()</code> and <code>ControllerWindow::setWindowFlags()</code> functions will get the same documentation.</p>
+<a name="class-command"></a><a name="class"></a>
+<h2 id="class">\class</h2>
+<p>The \class command is for documenting a C++ class. The argument is the complete name of the class. The command tells QDoc that a class is part of the public API, and lets you enter a detailed description.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \<span class="keyword">class</span> <span class="type"><a href="../qtcore/qmap.html">QMap</a></span><span class="operator">::</span>iterator
+
+      \brief The <span class="type"><a href="../qtcore/qmap.html">QMap</a></span><span class="operator">::</span>iterator <span class="keyword">class</span> provides an STL<span class="operator">-</span>style
+      non<span class="operator">-</span><span class="keyword">const</span> iterator <span class="keyword">for</span> <span class="type"><a href="../qtcore/qmap.html">QMap</a></span> and <span class="type"><a href="../qtcore/qmultimap.html">QMultiMap</a></span><span class="operator">.</span>
+
+      <span class="type"><a href="../qtcore/qmap.html">QMap</a></span> features both \l{STL<span class="operator">-</span>style iterators} and
+      \l{Java<span class="operator">-</span>style iterators}<span class="operator">.</span> The STL<span class="operator">-</span>style iterators <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>The HTML documentation for the named class is written to a <code>.html</code> file named from the class name, in lower case, and with the double colon qualifier(s) replaced with '-'. For example, the documentation for the <code>QMap::Iterator</code> class is written to <code>qmap-iterator.html</code>.</p>
+<a name="framework"></a><p>The file contains the class description from the \class comment, plus the documentation generated from QDoc comments for all the class members: a list of the class's types, properties, functions, signals, and slots.</p>
+<p>In addition to the detailed description of the class, the \class comment typically contains a <a href="11-qdoc-commands-specialcontent.html#brief-command">\brief</a> command and one or more <a href="03-qdoc-commands-markup.html">Markup Commands</a>. See the \class command for any of the Qt class for examples. Here is a very simple example:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \<span class="keyword">class</span> PreviewWindow
+      \brief The PreviewWindow <span class="keyword">class</span> is a custom widget<span class="operator">.</span>
+             displaying the names of its currently set
+             window flags in a read<span class="operator">-</span>only text editor<span class="operator">.</span>
+
+      \ingroup miscellaneous
+
+      The PreviewWindow <span class="keyword">class</span> inherits <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span><span class="operator">.</span> The widget
+      displays the names of its window flags set with the \l
+      {function} {setWindowFlags()} function<span class="operator">.</span> It is also
+      provided with a <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> that closes the window<span class="operator">.</span>
+
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+      \sa <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>The way QDoc renders this \class will depend a lot on your <code>style.css</code> file, but the general outline of the class reference page will look like this:</p>
+<blockquote>            <h1>PreviewWindow Class Reference</h1>
+        <p>The PreviewWindow class is a custom widget displaying the names of its currently set window flags in a read-only text editor. <a href="13-qdoc-commands-topics.html#preview-window">More..&#x2e;</a></p>
+            <h3>Properties</h3>
+        <ul>
+<li>52 properties inherited from <a href="../qtwidgets/qwidget.html">QWidget</a></li>
+<li>1 property inherited from <a href="../qtcore/qobject.html">QObject</a></li>
+</ul>
+            <h3>Public Functions</h3>
+        <ul>
+<li><a href="13-qdoc-commands-topics.html#constructor">PreviewWindow</a>(<a href="../qtwidgets/qwidget.html">QWidget</a> *parent = 0)</li>
+<li>void <a href="13-qdoc-commands-topics.html#function">setWindowFlags</a>(<a href="../qtcore/qt.html#WindowType-enum">Qt::WindowFlags</a> flags)</li>
+</ul>
+<ul>
+<li>183 public functions inherited from <a href="../qtwidgets/qwidget.html">QWidget</a></li>
+<li>28 public functions inherited from <a href="../qtcore/qobject.html">QObject</a></li>
+</ul>
+           <h3>Public Slots</h3>
+        <ul>
+<li>17 public slots inherited from <a href="../qtwidgets/qwidget.html">QWidget</a></li>
+<li>1 public slot inherited from <a href="../qtcore/qobject.html">QObject</a></li>
+</ul>
+            <h3>Additional Inherited Members</h3>
+        <ul>
+<li>1 signal inherited from <a href="../qtwidgets/qwidget.html">QWidget</a></li>
+<li>1 signal inherited from <a href="../qtcore/qobject.html">QObject</a></li>
+<li>4 static public members inherited from <a href="../qtwidgets/qwidget.html">QWidget</a></li>
+<li>4 static public members inherited from <a href="../qtcore/qobject.html">QObject</a></li>
+<li>39 protected functions inherited from <a href="../qtwidgets/qwidget.html">QWidget</a></li>
+<li>7 protected functions inherited from <a href="../qtcore/qobject.html">QObject</a></li>
+</ul>
+<a name="preview-window"></a>            <hr />
+            <h2>Detailed Description</h2>
+        <p>The PreviewWindow class is a custom widget displaying the names of its currently set window flags in a read-only text editor.</p>
+<p>The PreviewWindow class inherits <a href="../qtwidgets/qwidget.html">QWidget</a>. The widget displays the names of its window flags set with the <a href="13-qdoc-commands-topics.html#function">setWindowFlags()</a> function. It is also provided with a <a href="../qtwidgets/qpushbutton.html">QPushButton</a> that closes the window.</p>
+<p>...</p>
+<p>See also <a href="../qtwidgets/qwidget.html">QWidget</a>.</p>
+            <hr />
+            <h2>Member Function Documentation</h2>
+        <a name="constructor"></a>           <h3>PreviewWindow(QWidget *parent = 0)</h3>
+        <p>Constructs a preview window widget with <i>parent</i>.</p>
+<a name="function"></a>            <h3>setWindowFlags(Qt::WindowFlags flags)</h3>
+        <p>Sets the widgets flags using the <a href="../qtwidgets/qwidget.html#windowFlags-prop">QWidget::setWindowFlags</a>() function.</p>
+<p>Then runs through the available window flags, creating a text that contains the names of the flags that matches the flags parameter, displaying the text in the widgets text editor.</p>
+</blockquote>
+<a name="enum-command"></a><a name="enum"></a>
+<h2 id="enum">\enum</h2>
+<p>The \enum command is for documenting a C++ enum type. The argument is the full name of the enum type.</p>
+<p>The enum values are documented in the \enum comment using the <a href="10-qdoc-commands-tablesandlists.html#value-command">\value</a> command. If an enum value is not documented with \value, QDoc emits a warning. These warnings can be avoided using the <a href="10-qdoc-commands-tablesandlists.html#omitvalue-command">\omitvalue</a> command to tell QDoc that an enum value should not be documented. The enum documentation will be included on the class reference page, header file page, or namespace page where the enum type is defined. For example, consider the enum type <code>Corner</code> in the Qt namespace:</p>
+<pre class="cpp">
+
+  <span class="keyword">enum</span> Corner {
+      TopLeftCorner <span class="operator">=</span> <span class="number">0x00000</span><span class="operator">,</span>
+      TopRightCorner <span class="operator">=</span> <span class="number">0x00001</span><span class="operator">,</span>
+      BottomLeftCorner <span class="operator">=</span> <span class="number">0x00002</span><span class="operator">,</span>
+      BottomRightCorner <span class="operator">=</span> <span class="number">0x00003</span>
+  <span class="preprocessor">#if defined(QT3_SUPPORT) &amp;&amp; !defined(Q_MOC_RUN)</span>
+      <span class="operator">,</span>TopLeft <span class="operator">=</span> TopLeftCorner<span class="operator">,</span>
+      TopRight <span class="operator">=</span> TopRightCorner<span class="operator">,</span>
+      BottomLeft <span class="operator">=</span> BottomLeftCorner<span class="operator">,</span>
+      BottomRight <span class="operator">=</span> BottomRightCorner
+  <span class="preprocessor">#endif</span>
+  };
+
+</pre>
+<p>This enum can be cocumented this way:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \<span class="keyword">enum</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Corner
+
+      This <span class="keyword">enum</span> type specifies a corner in a rectangle:
+
+      \value TopLeftCorner
+             The top<span class="operator">-</span>left corner of the rectangle<span class="operator">.</span>
+      \value TopRightCorner
+             The top<span class="operator">-</span>right corner of the rectangle<span class="operator">.</span>
+      \value BottomLeftCorner
+             The bottom<span class="operator">-</span>left corner of the rectangle<span class="operator">.</span>
+      \value BottomRightCorner
+             The bottom<span class="operator">-</span>right corner of the rectangle<span class="operator">.</span>
+
+      \omitvalue TopLeft
+      \omitvalue TopRight
+      \omitvalue BottomLeft
+      \omitvalue BottomRight
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>Note the inclusion of the namespace qualifier. QDoc will render this enum type in <code>qt.html</code> like this:</p>
+<blockquote>               <h3 class="fn"><a name="Corner-enum"></a>enum Qt::Corner</h3>
+
+               <p>This enum type specifies a corner in a rectangle:</p>
+
+               <table border="1" cellpadding="2" cellspacing="1" width="100%">
+               <tr>
+               <th width="25%">Constant</th>
+               <th width="15%">Value</th>
+               <th width="60%">Description</th>
+               </tr>
+
+               <tr>
+               <td valign="top"><tt>Qt::TopLeftCorner</tt></td>
+               <td align="center" valign="top"><tt>0x00000</tt></td>
+               <td valign="top">The top-left corner of the rectangle.</td>
+               </tr>
+
+               <tr>
+               <td valign="top"><tt>Qt::TopRightCorner</tt></td>
+               <td align="center" valign="top"><tt>0x00001</tt></td>
+               <td valign="top">The top-right corner of the rectangle.</td>
+               </tr>
+
+               <tr>
+               <td valign="top"><tt>Qt::BottomLeftCorner</tt></td>
+               <td align="center" valign="top"><tt>0x00002</tt></td>
+               <td valign="top">The bottom-left corner of the rectangle.</td>
+               </tr>
+
+               <tr>
+               <td valign="top"><tt>Qt::BottomRightCorner</tt></td>
+               <td align="center" valign="top"><tt>0x00003</tt></td>
+               <td valign="top">The bottom-right corner of the rectangle.</td>
+               </tr>
+
+               </table>
+           </blockquote>
+<p>See also <a href="10-qdoc-commands-tablesandlists.html#value-command">\value</a> and <a href="10-qdoc-commands-tablesandlists.html#omitvalue-command">\omitvalue</a>.</p>
+<a name="example-command"></a><a name="example"></a>
+<h2 id="example">\example</h2>
+<p>The \example command is for documenting an example. The argument is the example's path relative to one of the paths listed in the <a href="22-qdoc-configuration-generalvariables.html#exampledirs-variable">exampledirs</a> variable in the QDoc configuration file.</p>
+<p>The documentation page will be output to <code>modulename-path-to-example</code>.html. QDoc will add a list of all the example's source and images files at the end of the page, unless <a href="12-0-qdoc-commands-miscellaneous.html#noautolist-command">\noautolist</a> command is used or the configuration variable <a href="25-qdoc-configuration-derivedprojects.html#url-examples-variable">url.examples</a> is defined for the project.</p>
+<p>For example, if <a href="22-qdoc-configuration-generalvariables.html#exampledirs-variable">exampledirs</a> contains <code>$QTDIR/examples/widgets/imageviewer</code>, then</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \example widgets<span class="operator">/</span>imageviewer
+      \title ImageViewer Example
+      \subtitle
+
+      The example shows how to combine <span class="type"><a href="../qtwidgets/qlabel.html">QLabel</a></span> and <span class="type"><a href="../qtwidgets/qscrollarea.html">QScrollArea</a></span>
+      to display an image<span class="operator">.</span>
+
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this example in widgets-imageviewer.html:</p>
+<blockquote>        <center><h1>Image Viewer Example</h1></center>
+        <p>The example shows how to combine <a href="../qtwidgets/qlabel.html">QLabel</a> and <a href="../qtwidgets/qscrollarea.html">QScrollArea</a> to display an image.</p>
+<p>Files:</p>
+<ul>
+<li><a href="http://doc.qt.io/qt-5/qtwidgets-widgets-imageviewer-imageviewer-cpp.html">widgets/imageviewer/imageviewer.cpp</a></li>
+<li><a href="http://doc.qt.io/qt-5/qtwidgets-widgets-imageviewer-imageviewer-h.html">widgets/imageviewer/imageviewer.h</a></li>
+<li><a href="http://doc.qt.io/qt-5/qtwidgets-widgets-imageviewer-main-cpp.html">widgets/imageviewer/main.cpp</a></li>
+</ul>
+<p>...</p>
+</blockquote>
+<p><b>See also:</b> <a href="12-0-qdoc-commands-miscellaneous.html#generatelist-command">\generatelist examplefiles</a>, <a href="12-0-qdoc-commands-miscellaneous.html#noautolist-command">\noautolist</a>, <a href="25-qdoc-configuration-derivedprojects.html#url-examples-variable">url.examples</a>, <a href="12-0-qdoc-commands-miscellaneous.html#meta-command">\meta</a></p>
+<a name="externalpage-command"></a><a name="externalpage"></a>
+<h2 id="externalpage">\externalpage</h2>
+<p>The \externalpage command assigns a title to an external URL.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \externalpage http:<span class="comment">//doc.qt.io/</span>
+      \title <span class="type"><a href="../qtcore/qt.html">Qt</a></span> Documentation Site
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>This allows you to include a link to the external page in your documentation this way:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      At the \l {<span class="type"><a href="../qtcore/qt.html">Qt</a></span> Documentation Site} you can find the latest
+      documentation <span class="keyword">for</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span> Creator<span class="operator">,</span> the <span class="type"><a href="../qtcore/qt.html">Qt</a></span> SDK and much more<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p>At the <a href="http://doc.qt.io/">Qt Documentation Site</a> you can find the latest documentation for Qt, Qt Creator, the Qt SDK and much more.</p>
+</blockquote>
+<p>To achieve the same result without using the \externalpage command, you would have to hard-code the address into your documentation:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      At the \l {http:<span class="comment">//doc.qt.io/}{Qt Documentation Site}</span>
+      you can find the latest documentation <span class="keyword">for</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span> Creator<span class="operator">,</span> the <span class="type"><a href="../qtcore/qt.html">Qt</a></span> SDK
+      and much more<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>The \externalpage command makes it easier to maintain the documentation. If the address changes, you only need to change the argument of the \externalpage command.</p>
+<a name="fn-command"></a><a name="fn-function"></a>
+<h2 id="fn-function">\fn (function)</h2>
+<p>The \fn command is for documenting a function. The argument is the function's signature, including its return type, const-ness, and list of formal arguments with types. If the named function doesn't exist, QDoc emits a warning.</p>
+<p><b>Note: </b>The \fn command is QDoc's default command: when no topic command can be found in a QDoc comment, QDoc tries to tie the documentation to the following code as if it is the documentation for a function. Hence, it is normally not necessary to include this command when documenting a function, if the function's QDoc comment is written immediately above the function implementation in the <code>.cpp</code> file. But it must be present when documenting an inline function in the <code>.cpp</code> file that is implemented in the <code>.h</code> file.</p><pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \fn bool <span class="type"><a href="../qtwidgets/qtoolbar.html">QToolBar</a></span><span class="operator">::</span>isAreaAllowed(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ToolBarArea area) <span class="keyword">const</span>
+
+      Returns \c <span class="keyword">true</span> <span class="keyword">if</span> <span class="keyword">this</span> toolbar is dockable in the given
+      \a area; otherwise returns \c <span class="keyword">false</span><span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote>           <h3>bool QToolBar::isAreaAllowed(Qt::ToolBarArea area) const
+           </h3>
+        <p>Returns <code>true</code> if this toolbar is dockable in the given <i>area</i>; otherwise returns <code>false</code>.</p>
+</blockquote>
+<p>See also <a href="18-qdoc-commands-relating.html#overload-command">\overload</a>.</p>
+<a name="group-command"></a><a name="group"></a>
+<h2 id="group">\group</h2>
+<p>The \group command creates a separate page that lists the classes belonging to the group. The argument is the group name.</p>
+<p>A class is included in a group by using the <a href="19-qdoc-commands-grouping.html#ingroup-command">\ingroup</a> command. Overview pages can also be related to a group using the same command, but the list of overview pages must be requested explicitly using the <a href="12-0-qdoc-commands-miscellaneous.html#generatelist-command">\generatelist</a> command (see example below).</p>
+<p>The \group command is typically followed by a <a href="20-qdoc-commands-namingthings.html#title-command">\title</a> command and a short introduction to the group. The HTML page for the group is written to a <code>.html</code> file put in &lt;lower-case&gt;<i>group</i>.html.</p>
+<p>Each class name is listed as a link to the class reference page followed by the text from the class's <a href="11-qdoc-commands-specialcontent.html#brief-command">\brief</a> texts.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \group io
+
+      \title Input<span class="operator">/</span>Output and Networking
+
+      These classes are used to handle input and output to
+      and from external devices<span class="operator">,</span> processes<span class="operator">,</span> files etc<span class="operator">.</span><span class="operator">,</span> as
+      well as manipulating files and directories<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc generates a group page in <code>io.html</code> that will look like this:</p>
+<blockquote>         <h1>Input/Output and Networking</h1>
+
+         <p>These classes are used to handle input and output
+         to and from external devices, processes, files etc., as
+         well as manipulating files and directories.</p>
+
+         <p>
+         <table width="100%">
+             <tr valign="top" bgcolor="#e0e0e0">
+             <td><b>
+             <a href="http://doc.qt.io/qt-5/qabstractsocket.html">QAbstractSocket</a>
+             </b></td>
+             <td>
+             The base functionality common to all socket types
+             </td></tr>
+
+             <tr valign="top" bgcolor="#e0e0e0">
+             <td><b>
+             <a href="http://doc.qt.io/qt-5/qbuffer.html">QBuffer</a>
+             </b></td>
+             <td>
+             QIODevice interface for a QByteArray
+             </td></tr>
+
+             <tr valign="top" bgcolor="#e0e0e0">
+             <td><b>
+             <a href="http://doc.qt.io/qt-5/qclipboard.html">QClipboard</a>
+             </b></td>
+             <td>
+             Access to the window system clipboard
+             </td></tr>
+         </table>
+         </blockquote>
+<p>Note that overview pages related to the group, must be listed explicitly using the <a href="12-0-qdoc-commands-miscellaneous.html#generatelist-command">\generatelist</a> command with the <code>related</code> argument.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \group architecture
+
+      \title Architecture
+
+      These documents describe aspects of <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="char">'s architecture
+      and design, including overviews of core Qt features and
+      technologies.
+
+      \generatelist{related}
+  * /
+  </span>
+
+</pre>
+<p>See also <a href="19-qdoc-commands-grouping.html#ingroup-command">\ingroup</a> and <a href="12-0-qdoc-commands-miscellaneous.html#generatelist-command">\generatelist</a>.</p>
+<a name="headerfile-command"></a><a name="headerfile"></a>
+<h2 id="headerfile">\headerfile</h2>
+<p>The \headerfile command is for documenting the global functions, types and macros that are declared in a header file, but not in a namespace. The argument is the name of the header file. The HTML page is written to a <code>.html</code> file constructed from the header file argument.</p>
+<p>The documentation for a function, type, or macro that is declared in the header file being documented, is included in the header file page using the <a href="18-qdoc-commands-relating.html#relates-command">\relates</a> command.</p>
+<p>If the argument doesn't exist as a header file, the \headerfile command creates a documentation page for the header file anyway.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \headerfile <span class="operator">&lt;</span><span class="type">QtAlgorithms</span><span class="operator">&gt;</span>
+
+      \title Generic Algorithms
+
+      \brief The <span class="operator">&lt;</span><span class="type">QtAlgorithms</span><span class="operator">&gt;</span> header file provides
+       generic <span class="keyword">template</span><span class="operator">-</span>based algorithms<span class="operator">.</span>
+
+      <span class="type"><a href="../qtcore/qt.html">Qt</a></span> provides a number of global <span class="keyword">template</span> functions in \c
+      <span class="operator">&lt;</span><span class="type">QtAlgorithms</span><span class="operator">&gt;</span> that work on containers and perform
+      well<span class="operator">-</span>know algorithms<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc generates a header file page <code>qtalgorithms.html</code> that looks like this:</p>
+<blockquote>               <center><h1>&lt;QtAlgorithms&gt; -
+                           Generic Algorithms</h1></center>
+               <p>The <QtAlgorithms> header file provides generic
+               template-based algorithms.
+               <a href="13-qdoc-commands-topics.html#header-command">More...</a>
+               </p>
+
+               <h3>Functions</h3>
+               <ul>
+               <li>RandomAccessIterator
+               <a href="http://doc.qt.io/qt-5/qtalgorithms-obsolete.html#qBinaryFind">qBinaryFind</a></b>
+               (RandomAccessIterator begin, RandomAccessIterator end,
+               const T & value)</li>
+               <li>...</li></ul>
+               <hr />
+               <a name="header"></a>               <h2>Detailed Description</h2>
+               <p>The <QtAlgorithms> header file provides generic
+               template-based algorithms. </p>
+               <p>Qt provides a number of global template functions in <code>&lt;QtAlgorithms&gt;</code> that work on containers and perform well-know algorithms.</p>
+<p>...</p>
+</blockquote>
+<a name="macro-command"></a><a name="macro"></a>
+<h2 id="macro">\macro</h2>
+<p>The \macro command is for documenting a C++ macro. The argument is the macro in one of three styles: function-like macros like <a href="../qtcore/qtglobal.html#Q_ASSERT">Q_ASSERT</a>(), declaration-style macros like <a href="../qtcore/qobject.html#Q_PROPERTY">Q_PROPERTY</a>(), and macros without parentheses like <a href="../qtcore/qobject.html#Q_OBJECT">Q_OBJECT</a>.</p>
+<p>The \macro comment must contain a <a href="18-qdoc-commands-relating.html#relates-command">\relates</a> command that attaches the macro comment to a class, header file, or namespace. Otherwise, the documentation will be lost. Here are three example macro comments followed by what they might look like in <code>qtglobal.html</code> or <code>qobject.html</code>:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \macro <span class="type">void</span> Q_ASSERT(bool test)
+      \relates <span class="operator">&lt;</span><span class="type">QtGlobal</span><span class="operator">&gt;</span>
+
+      Prints a warning message containing the source code
+      file name and line number <span class="keyword">if</span> \a test is <span class="keyword">false</span><span class="operator">.</span>
+
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+      \sa Q_ASSERT_X()<span class="operator">,</span> <a href="../qtcore/qtglobal.html#qFatal">qFatal</a>()<span class="operator">,</span> {Debugging Techniques}
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<blockquote>        <h3>void Q_ASSERT ( bool <i>test</i> )</h3>
+        <p>Prints a warning message containing the source code file name and line number if <i>test</i> is false.</p>
+<p>...</p>
+<p>See also <a href="../qtcore/qtglobal.html#Q_ASSERT_X">Q_ASSERT_X</a>(), <a href="../qtcore/qtglobal.html#qFatal">qFatal</a>() and <a href="../qtdoc/testing-and-debugging.html#debugging-techniques">Debugging Techniques</a>.</p>
+</blockquote>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \macro Q_PROPERTY(<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>)
+      \relates <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>
+
+      This macro declares a <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> property<span class="operator">.</span> The syntax is:
+
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+      \sa {<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="char">'s Property System}
+  * /
+  </span>
+
+</pre>
+<blockquote>        <h3>Q_PROPERTY ( ... )</h3>
+        <p>This macro declares a <a href="../qtcore/qobject.html">QObject</a> property. The syntax is:</p>
+<p>...</p>
+<p>See also <a href="../qtcore/properties.html">Qt's Property System</a>.</p>
+</blockquote>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \macro Q_OBJECT
+      \relates <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>
+
+      The Q_OBJECT macro must appear in the <span class="keyword">private</span> section
+      of a <span class="keyword">class</span> definition that declares its own <span class="keyword">signals</span> and
+      <span class="keyword">slots</span><span class="operator">,</span> <span class="keyword">or</span> that uses other services provided by <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="char">'s
+      meta-object system.
+
+      ...
+
+      \sa {Meta-Object System}, {Signals and Slots}, {Qt'</span>s
+      Property System}
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<blockquote>        <h3>Q_OBJECT</h3>
+        <p>The <a href="../qtcore/qobject.html#Q_OBJECT">Q_OBJECT</a> macro must appear in the private section of a class definition that declares its own signals and slots or that uses other services provided by Qt's meta-object system.</p>
+<p>...</p>
+<p>See also <a href="../qtcore/metaobjects.html">Meta-Object System</a>, <a href="../qtcore/signalsandslots.html">Signals &amp; Slots</a> and <a href="../qtcore/properties.html">Qt's Property System</a>.</p>
+</blockquote>
+<a name="module-command"></a><a name="module"></a>
+<h2 id="module">\module</h2>
+<p>The \module creates a page that lists the classes belonging to the module specified by the command's argument. A class included in the module by including the <a href="19-qdoc-commands-grouping.html#inmodule-command">\inmodule</a> command in the \class comment.</p>
+<p>The \module command is typically followed by a <a href="20-qdoc-commands-namingthings.html#title-command">\title</a> and a <a href="11-qdoc-commands-specialcontent.html#brief-command">\brief</a> command. Each class is listed as a link to the class reference page followed by the text from the class's <a href="11-qdoc-commands-specialcontent.html#brief-command">\brief</a> command. For example:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \module <span class="type"><a href="../qtnetwork/qtnetwork-module.html">QtNetwork</a></span>
+
+      \title <span class="type"><a href="../qtcore/qt.html">Qt</a></span> Network Module
+
+      \brief Contains classes <span class="keyword">for</span> writing TCP<span class="operator">/</span>IP clients and servers<span class="operator">.</span>
+
+      The network module provides classes to make network
+      programming easier and portable<span class="operator">.</span> It offers both
+      high<span class="operator">-</span>level classes such as <span class="type"><a href="../qtnetwork/qnetworkaccessmanager.html">QNetworkAccessManager</a></span> that
+      implements application<span class="operator">-</span>level protocols<span class="operator">,</span> and
+      lower<span class="operator">-</span>level classes such as <span class="type"><a href="../qtnetwork/qtcpsocket.html">QTcpSocket</a></span><span class="operator">,</span> <span class="type"><a href="../qtnetwork/qtcpserver.html">QTcpServer</a></span><span class="operator">,</span> and
+      <span class="type"><a href="../qtnetwork/qudpsocket.html">QUdpSocket</a></span><span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this in <code>qtnetwork.html</code> like this:</p>
+<blockquote>               <h1><center>Qt Network Module</center></h1>
+               <p>The Qt Network module offers classes that allow you to write TCP/IP clients and servers.<a href="13-qdoc-commands-topics.html#module-details">More..&#x2e;</a></p>
+               <p>
+               <table width="100%">
+                   <tr valign="top" bgcolor="#d0d0d0">
+                   <td><b>
+                   <a href="http://doc.qt.io/qt-5/qabstractsocket.html">QAbstractSocket</a>
+                   </b></td>
+                   <td>
+                   The base functionality common to all socket types
+                   </td></tr>
+
+                   <tr valign="top" bgcolor="#d0d0d0">
+                   <td><b>
+                   <a href="http://doc.qt.io/archives/qt-4.7/qftp.html">QFtp</a>
+                   </b></td>
+                   <td>
+                   Implementation of the FTP protocol
+                   </td></tr>
+
+                   <tr valign="top" bgcolor="#d0d0d0">
+                   <td>...</td>
+                   <td>...</td>
+                   </tr>
+               </table>
+
+               <p><hr /></p>
+               <a name="module-details"></a>               <h2>Detailed Description</h2>
+
+               <p>
+               The Qt Network module offers classes that allow you to
+               write TCP/IP clients and servers.
+               </p>
+
+               <p>
+               The network module provides classes to make network
+               programming easier and portable. It offers both
+               high-level classes such as QNetworkAccessManager that
+               implements application-level protocols, and
+               lower-level classes such as QTcpSocket, QTcpServer, and
+               QUdpSocket.
+               </p>
+               <p>...</p>
+</blockquote>
+<p>The <a href="12-0-qdoc-commands-miscellaneous.html#noautolist-command">\noautolist</a> command can be used here to omit the automatically generated list of classes at the end.</p>
+<p>See also <a href="19-qdoc-commands-grouping.html#inmodule-command">\inmodule</a></p>
+<a name="namespace-command"></a><a name="namespace"></a>
+<h2 id="namespace">\namespace</h2>
+<p>The \namespace command is for documenting the contents of the C++ namespace named as its argument. The reference page QDoc generates for a namespace is similar to the reference page it generates for a C++ class.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \<span class="keyword">namespace</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span>
+
+      \brief Contains miscellaneous identifiers used throughout the <span class="type"><a href="../qtcore/qt.html">Qt</a></span> library<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this in <code>qt.html</code> like this:</p>
+<blockquote>               <center><h1>Qt Namespace Reference</h1></center>
+               <p>The Qt namespace contains miscellaneous
+               identifiers used throughout the Qt library.
+               <a href="13-qdoc-commands-topics.html#name">More...</a>
+               </p>
+
+               <pre>#include &lt;Qt&gt;</pre>
+               <ul>
+               <li>
+               <a href="http://doc.qt.io/archives/qt-4.7/qt-qt3.html">
+                   Qt 3 support members</a></li>
+               </ul>
+
+
+               <h3>Types</h3>
+               <ul>
+               <li>flags
+               <a href="http://doc.qt.io/archives/qt-4.7/qt.html#AlignmentFlag-enum">Alignment</a></b></li>
+               <li>...</li></ul>
+               <hr />
+               <a name="name"></a>               <h2>Detailed Description</h2>
+               <p>Contains miscellaneous identifiers
+               used throughout the Qt library.</p>
+               <p>...</p>
+</blockquote>
+<p>Note that in C++, a particular namespace can be used in more than one module, but when C++ elements from different modules are declared in the same namespace, the namespace itself must be documented in one module only. For example, namespace Qt in the example above contains types and functions from both <a href="../qtcore/qtcore-module.html">QtCore</a> and <a href="../qtgui/qtgui-module.html">QtGui</a>, but it is documented with the \namespace command only in <a href="../qtcore/qtcore-module.html">QtCore</a>.</p>
+<a name="page-command"></a><a name="page"></a>
+<h2 id="page">\page</h2>
+<p>The \page command is for creating a stand-alone documentation page. The argument can consist of two parts separated by a space. The first part is the name of the file where QDoc should store the page. The second part, if present, is a word that specifies the page type. Currently, the second part can be one of the following list of words:</p>
+<ul>
+<li>faq - A frequently asked question.</li>
+<li>howto - A user guide on how to use some components of the software.</li>
+<li>example - A page that describes a working example.</li>
+<li>overview - For text pages that provide an overview of some important subject.</li>
+<li>tutorial - For text pages that are part of a tutorial.</li>
+<li>api - This is the type of page used for C++ class references and QML type references. You should never use this one for the pages you write, because this one is reserved for qdoc.</li>
+</ul>
+<p>The page title is set using the <a href="20-qdoc-commands-namingthings.html#title-command">\title</a> command.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \page aboutqt<span class="operator">.</span>html
+
+      \title About <span class="type"><a href="../qtcore/qt.html">Qt</a></span>
+
+      <span class="type"><a href="../qtcore/qt.html">Qt</a></span> is a C<span class="operator">+</span><span class="operator">+</span> toolkit <span class="keyword">for</span> cross<span class="operator">-</span>platform GUI
+      application development<span class="operator">.</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span> provides single<span class="operator">-</span>source
+      portability across Microsoft Windows<span class="operator">,</span> macOS<span class="operator">,</span> Linux<span class="operator">,</span>
+      and all major commercial Unix variants<span class="operator">.</span>
+
+      <span class="type"><a href="../qtcore/qt.html">Qt</a></span> provides application developers with all the
+      functionality needed to build applications with
+      state<span class="operator">-</span>of<span class="operator">-</span>the<span class="operator">-</span>art graphical user interfaces<span class="operator">.</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span> is fully
+      object<span class="operator">-</span>oriented<span class="operator">,</span> easily extensible<span class="operator">,</span> and allows <span class="keyword">true</span>
+      component programming<span class="operator">.</span>
+
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+   <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this page in <code>aboutqt.html</code>.</p>
+<a name="property-command"></a><a name="property"></a>
+<h2 id="property">\property</h2>
+<p>The \property command is for documenting a Qt property. The argument is the full property name.</p>
+<p>A property is defined using the <a href="../qtcore/qobject.html#Q_PROPERTY">Q_PROPERTY</a>() macro. The macro takes as arguments the property's name and its set, reset and get functions.</p>
+<pre class="cpp">
+
+  Q_PROPERTY(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> state READ state WRITE setState)
+
+</pre>
+<p>The set, reset and get functions don't need to be documented, documenting the property is sufficient. QDoc will generate a list of the access function that will appear in the property documentation which in turn will be located in the documentation of the class that defines the property.</p>
+<p>The \property command comment typically includes a <a href="11-qdoc-commands-specialcontent.html#brief-command">\brief</a> command. For properties the <a href="11-qdoc-commands-specialcontent.html#brief-command">\brief</a> command's argument is a sentence fragment that will be included in a one line description of the property. The command follows the same rules for the <a href="11-qdoc-commands-specialcontent.html#brief-property">description</a> as the <a href="13-qdoc-commands-topics.html#variable-command">\variable</a> command.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \property <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span><span class="operator">::</span>flat
+      \brief Whether the border is disabled<span class="operator">.</span>
+
+      This property<span class="char">'s default is false.
+  * /
+  </span>
+
+</pre>
+<p>QDoc includes this in <code>qpushbutton.html</code> like this:</p>
+<blockquote>        <h3>flat : bool</h3>
+        <p>This property holds whether the border is disabled.</p>
+<p>This property's default is false.</p>
+<p>Access functions:</p>
+<ul>
+<li><b> bool isFlat () const</b></li>
+<li><b> void setFlat ( bool )</b></li>
+</ul>
+</blockquote>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \property <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span><span class="operator">::</span>width
+      \brief The width of the widget excluding any window frame<span class="operator">.</span>
+
+      See the \l {Window Geometry} documentation <span class="keyword">for</span> an
+      overview of window geometry<span class="operator">.</span>
+
+      \sa geometry<span class="operator">,</span> height<span class="operator">,</span> size
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc includes this in <code>qwidget.html</code> like this:</p>
+<blockquote>        <h3>width : const int</h3>
+        <p>This property holds the width of the widget excluding any window frame.</p>
+<p>See the <a href="../qtwidgets/application-windows.html#window-geometry">Window Geometry</a> documentation for an overview of window geometry.</p>
+<p>Access functions:</p>
+<ul>
+<li><b> int width () const</b></li>
+</ul>
+<p>See also <a href="../qtwidgets/qwidget.html#geometry-prop">geometry</a>, <a href="../qtwidgets/qwidget.html#height-prop">height</a>, and <a href="../qtwidgets/qwidget.html#size-prop">size</a>.</p>
+</blockquote>
+<a name="qmlattachedproperty-command"></a><a name="qmlattachedproperty"></a>
+<h2 id="qmlattachedproperty">\qmlattachedproperty</h2>
+<p>The \qmlattachedproperty command is for documenting a QML property that will be attached to some QML type. See <a href="http://doc.qt.io/qt-5/qtqml-syntax-objectattributes.html#attached-properties-and-attached-signal-handlers">Attached Properties</a>. The argument is the rest of the line. The argument text should be the property type, followed by the QML element name where the property is being declared, the <code>::</code> qualifier, and finally the property name. If we have a QML attached property named <code>isCurrentItem</code> in QML <code>ListView</code>, and the property has type <code>bool</code>, the \qmlattachedproperty for it would look like this:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \qmlattachedproperty bool ListView<span class="operator">::</span>isCurrentItem
+      This attached property is \c <span class="keyword">true</span> <span class="keyword">if</span> <span class="keyword">this</span> delegate is the current
+  item; otherwise <span class="keyword">false</span><span class="operator">.</span>
+
+      It is attached to each instance of the delegate<span class="operator">.</span>
+
+      This property may be used to adjust the appearance of the current
+  item<span class="operator">,</span> <span class="keyword">for</span> example:
+
+      \snippet doc<span class="operator">/</span>src<span class="operator">/</span>snippets<span class="operator">/</span>declarative<span class="operator">/</span>listview<span class="operator">/</span>listview<span class="operator">.</span>qml isCurrentItem
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc includes this attached property on the QML reference page for the <a href="http://doc.qt.io/qt-5/qml-qtquick-listview.html#isCurrentItem-attached-prop">ListView</a> element.</p>
+<a name="qmlattachedsignal-command"></a><a name="qmlattachedsignal"></a>
+<h2 id="qmlattachedsignal">\qmlattachedsignal</h2>
+<p>The \qmlattachedsignal command is for documenting an attachable <a href="../qtqml/qtqml-syntax-signals.html">signal</a>. The \qmlattachedsignal command is used just like the <a href="13-qdoc-commands-topics.html#qmlsignal-command">\qmlsignal</a> command.</p>
+<p>The argument is the rest of the line. It should be the name of the QML type where the signal is declared, the <code>::</code> qualifier, and finally the signal name. For example, a QML attached signal named <code>add()</code> in the <code>GridView</code> element is documented like this:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \qmlattachedsignal GridView<span class="operator">::</span>add()
+      This attached signal is emitted immediately after an item is added to the view<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc includes this documentation on the QML reference page for the <a href="../qtquick/qml-qtquick-gridview.html">GridView</a> element.</p>
+<a name="qmlbasictype-command"></a><a name="qmlbasictype"></a>
+<h2 id="qmlbasictype">\qmlbasictype</h2>
+<p>The \qmlbasictype command is for documenting a basic type for QML. The argument is the type name. The type must be included in the QML basic types group using the <a href="19-qdoc-commands-grouping.html#ingroup-command">\ingroup</a> command as shown below. This will cause QDoc to include the documentation for the type on the <a href="http://doc.qt.io/qt-5/qtqml-typesystem-basictypes.html">QML Basic Types</a> page. The <a href="11-qdoc-commands-specialcontent.html#brief-command">\brief</a> command is also required, because it appears on the <a href="http://doc.qt.io/qt-5/qtqml-typesystem-basictypes.html">QML Basic Types</a> page as well.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \qmlbasictype <span class="type">int</span>
+      \ingroup qmlbasictypes
+
+      \brief An integer is a whole number<span class="operator">,</span> <span class="keyword">for</span> example <span class="number">0</span><span class="operator">,</span> <span class="number">10</span><span class="operator">,</span> <span class="keyword">or</span> <span class="operator">-</span><span class="number">20.</span>
+
+      An integer is a whole number<span class="operator">,</span> e<span class="operator">.</span>g<span class="operator">.</span> <span class="number">0</span><span class="operator">,</span> <span class="number">10</span><span class="operator">,</span> <span class="keyword">or</span> <span class="operator">-</span><span class="number">20.</span> The possible
+      \c <span class="type">int</span> values range from around <span class="operator">-</span><span class="number">2000000000</span> to around
+      <span class="number">2000000000</span><span class="operator">,</span> although most elements will only accept a reduced
+      range (which they mention in their documentation)<span class="operator">.</span>
+
+      Example:
+      \qml
+      Item { width: <span class="number">100</span>; height: <span class="number">200</span> }
+      \endqml
+
+      \sa {QML Basic Types}
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc outputs this as <a href="http://doc.qt.io/qt-5/qml-int.html">qml-int.html</a>.</p>
+<a name="qmlclass-command"></a><a name="qmlclass"></a>
+<h2 id="qmlclass">\qmlclass</h2>
+<p>This command is deprecated. Use <a href="13-qdoc-commands-topics.html#qmltype-command">\qmltype</a> instead.</p>
+<p>The \qmlclass command is for documenting a QML type that is instantiated by a C++ class. The command has two arguments. The first argument is the name of the QML type. The second argument is the name of the C++ class that instantiates the QML type.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \qmlclass Transform <span class="type"><a href="../qtwidgets/qgraphicstransform.html">QGraphicsTransform</a></span>
+      \ingroup qml<span class="operator">-</span>transform<span class="operator">-</span>elements
+      \since <span class="number">4.7</span>
+      \brief Provides a way of building advanced transformations on Items<span class="operator">.</span>
+
+      The Transform element is a base type which cannot be
+      instantiated directly<span class="operator">.</span> The following concrete Transform types
+      are available:
+
+      \list
+        \li \l Rotation
+        \li \l Scale
+        \li \l Translate
+      \endlist
+
+      The Transform elements let you create and control advanced
+      transformations that can be configured independently <span class="keyword">using</span>
+      specialized properties<span class="operator">.</span>
+
+      You can assign any number of Transform elements to an \l
+      Item<span class="operator">.</span> Each Transform is applied in order<span class="operator">,</span> one at a time<span class="operator">.</span>
+
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>This example generates the <a href="http://qt-project.org/doc/qt-4.7/qml-transform.html">QML Transform</a> page. The \qmlclass comment should include the <a href="16-qdoc-commands-status.html#since-command">\since</a> command, because all QML types are new. It should also include the <a href="11-qdoc-commands-specialcontent.html#brief-command">\brief</a> command. If a type is a member of a group of QML types, it should also include one or more <a href="19-qdoc-commands-grouping.html#ingroup-command">\ingroup</a> commands.</p>
+<a name="qmlmethod-command"></a><a name="qmlmethod"></a>
+<h2 id="qmlmethod">\qmlmethod</h2>
+<p>The \qmlmethod command is for documenting a QML method. The argument is the complete method signature, including return type and parameter names and types.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \qmlmethod <span class="type">void</span> TextInput<span class="operator">::</span>select(<span class="type">int</span> start<span class="operator">,</span> <span class="type">int</span> end)
+
+      Causes the text from \a start to \a end to be selected<span class="operator">.</span>
+
+      If either start <span class="keyword">or</span> end is out of range<span class="operator">,</span> the selection is <span class="keyword">not</span> changed<span class="operator">.</span>
+
+      After having called <span class="keyword">this</span><span class="operator">,</span> selectionStart will become the lesser<span class="operator">,</span> and
+      selectionEnd the greater (regardless of the order passed to <span class="keyword">this</span> method)<span class="operator">.</span>
+
+     \sa selectionStart<span class="operator">,</span> selectionEnd
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc includes this documentation on the element reference page for the <a href="http://doc.qt.io/qt-5/qml-qtquick-textinput.html#select-method">TextInput</a> element.</p>
+<a name="qmltype-command"></a><a name="qmltype"></a>
+<h2 id="qmltype">\qmltype</h2>
+<p>The \qmltype command is for documenting a QML type. The command has one argument, which is the name of the QML type.</p>
+<p>If the QML type is instantiated by a C++ class, that class must be specified using the <a href="13-qdoc-commands-topics.html#instantiates-command">\instantiates</a> context command.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \qmltype Transform
+      \instantiates <span class="type"><a href="../qtwidgets/qgraphicstransform.html">QGraphicsTransform</a></span>
+      \ingroup qml<span class="operator">-</span>transform<span class="operator">-</span>elements
+      \since <span class="number">4.7</span>
+      \brief The Transform elements provide a way to build
+      advanced transformations on Items<span class="operator">.</span>
+
+      The Transform element is a base type which cannot be
+      instantiated directly<span class="operator">.</span> The concrete Transform types are:
+
+      \list
+        \li \l Rotation
+        \li \l Scale
+        \li \l Translate
+      \endlist
+
+      The Transform elements let you create and control advanced
+      transformations that can be configured independently <span class="keyword">using</span>
+      specialized properties<span class="operator">.</span>
+
+      You can assign any number of Transform elements to an \l
+      Item<span class="operator">.</span> Each Transform is applied in order<span class="operator">,</span> one at a time<span class="operator">.</span>
+
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>The example generates the <a href="http://qt-project.org/doc/qt-4.7/qml-transform.html">QML Transform</a> page. The <i>\qmltype</i> comment includes <a href="13-qdoc-commands-topics.html#instantiates-command">\instantiates</a> to specify that a Transform is instantiated by the C++ class <a href="../qtwidgets/qgraphicstransform.html">QGraphicsTransform</a>. A \qmltype comment should always include a <a href="16-qdoc-commands-status.html#since-command">\since</a> command, because all QML types are new. It should also include a <a href="11-qdoc-commands-specialcontent.html#brief-command">\brief</a> description. If a QML type is a member of a QML type group, the \qmltype comment should include one or more <a href="19-qdoc-commands-grouping.html#ingroup-command">\ingroup</a> commands.</p>
+<a name="qmlproperty-command"></a><a name="qmlproperty"></a>
+<h2 id="qmlproperty">\qmlproperty</h2>
+<p>The \qmlproperty command is for documenting a QML property. The argument is the rest of the line. The argument text should be the property type, followed by the QML type name, the <code>::</code> qualifier, and finally the property name. If we have a QML property named <code>x</code> in QML type <code>Translate</code>, and the property has type <code>real</code>, the \qmlproperty for it would look like this:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \qmlproperty real Translate<span class="operator">::</span>x
+
+      The translation along the X axis<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc includes this QML property on the QML reference page for the <a href="http://doc.qt.io/qt-5/qml-qtquick-translate.html">Translate</a> element.</p>
+<p>If the QML property is of enumeration type, or it holds a bit-wise combination of flags, the <a href="10-qdoc-commands-tablesandlists.html#value-command">\value</a> command can be used to document the acceptable values.</p>
+<a name="qmlsignal-command"></a><a name="qmlsignal"></a>
+<h2 id="qmlsignal">\qmlsignal</h2>
+<p>The \qmlsignal command is for documenting a QML signal. The argument is the rest of the line. The arguments should be: the QML type where the signal is declared, the <code>::</code> qualifier, and finally the signal name. If we have a QML signal named <code>clicked()</code>, the documentation for it would look like this:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+  \qmlsignal <span class="type"><a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a></span><span class="operator">::</span>MouseArea<span class="operator">::</span>clicked(MouseEvent mouse)
+  This signal is emitted when there is a click<span class="operator">.</span> A click is defined as a
+  press followed by a release<span class="operator">,</span> both inside the MouseArea<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc includes this documentation on the QML reference page for the <a href="http://doc.qt.io/qt-5/qml-qtquick-mousearea.html#clicked-signal">MouseArea</a> element.</p>
+<a name="qmlmodule-command"></a><a name="qmlmodule"></a>
+<h2 id="qmlmodule">\qmlmodule</h2>
+<p>Insert the <code>\\qmlmodule</code> command to create a <code>QML</code> module page. A QML module is a collection of QML types or any related material. This command is similar to the <a href="13-qdoc-commands-topics.html#group-command">group-command</a>.</p>
+<p>A QML class may belong to a module by inserting the <a href="13-qdoc-commands-topics.html#inqmlmodule-command">\inqmlmodule</a> command as a topic command. Every member of a group must be linked to using the module name and two colons (<code>::</code>).</p>
+<pre class="cpp">
+
+  \beginqdoc
+      A link to the TabWidget of the UI Component is \l {UIComponent<span class="operator">::</span>TabWidget}<span class="operator">.</span>
+  \endqdoc
+
+</pre>
+<p>QDoc will generate a page for the module with a listing of the members of the module.</p>
+<pre class="cpp">
+
+  \qmlmodule ClickableComponents
+
+  This is a list of the Clickable Components set<span class="operator">.</span> A Clickable component
+  responds to a \c clicked() event<span class="operator">.</span>
+
+</pre>
+<p>The UIComponents example demonstrates proper usage of QDoc commands to document QML types and QML modules.</p>
+<a name="inqmlmodule-command"></a><a name="inqmlmodule"></a>
+<h2 id="inqmlmodule">\inqmlmodule</h2>
+<p>A QML class may belong to a <a href="13-qdoc-commands-topics.html#qmlmodule-command">QML module</a> by inserting the <a href="13-qdoc-commands-topics.html#inqmlmodule-command">\inqmlmodule</a> command as a topic command, with the module name (without a version number) as the only argument. Every member of a group must be linked to using the module name and two colons (<code>::</code>).</p>
+<pre class="cpp">
+
+  \qmltype ClickableButton
+  \inqmlmodule ClickableComponents
+
+  A clickable button that responds to the \c click() event<span class="operator">.</span>
+
+</pre>
+<p>To link to the <code>ClickableButton</code>, use the <code>\l ClickableComponents::ClickableButton</code> format.</p>
+<p>The UIComponents example demonstrates proper usage of QDoc commands to document QML types and QML modules.</p>
+<p>The <a href="12-0-qdoc-commands-miscellaneous.html#noautolist-command">\noautolist</a> command can be used here to omit the automatically generated list of types at the end.</p>
+<a name="instantiates-command"></a><a name="instantiates"></a>
+<h2 id="instantiates">\instantiates</h2>
+<p>The \instantiates command is used in the <a href="13-qdoc-commands-topics.html#qmltype-command">QML type</a> comment of an elemental QML type to specify the name of the C++ class that instantiates the QML type.</p>
+<p>If the QML type is not instantiated by a C++ class, this command is not used.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \qmltype Transform
+      \instantiates <span class="type"><a href="../qtwidgets/qgraphicstransform.html">QGraphicsTransform</a></span>
+      \ingroup qml<span class="operator">-</span>transform<span class="operator">-</span>elements
+      \since <span class="number">4.7</span>
+      \brief Provides elements provide a way to build
+      advanced transformations on Items<span class="operator">.</span>
+
+      The Transform element is a base type which cannot be
+      instantiated directly<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>The example generates the <a href="http://qt-project.org/doc/qt-4.7/qml-transform.html">QML Transform</a> page. The <i>\qmltype</i> comment includes <a href="13-qdoc-commands-topics.html#instantiates-command">\instantiates</a> to specify that a Transform is instantiated by the C++ class <a href="../qtwidgets/qgraphicstransform.html">QGraphicsTransform</a>. A \qmltype comment should</p>
+<a name="typedef-command"></a><a name="typedef"></a>
+<h2 id="typedef">\typedef</h2>
+<p>The \typedef command is for documenting a C++ typedef. The argument is the name of the typedef. The documentation for the typedef will be included in the reference documentation for the class, namespace, or header file in which the typedef is declared. To relate the \typedef to a class, namespace, or header file, the \typedef comment must contain a <a href="18-qdoc-commands-relating.html#relates-command">\relates</a> command.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \<span class="keyword">typedef</span> <span class="type"><a href="../qtcore/qobject.html#QObjectList-typedef">QObjectList</a></span>
+      \relates <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>
+
+      Synonym <span class="keyword">for</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">&gt;</span><span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc includes this in <code>qobject.html</code> as:</p>
+<blockquote>        <h3>typedef QObjectList</h3>
+        <p>Synonym for <a href="../qtcore/qlist.html">QList</a>&lt;<a href="../qtcore/qobject.html">QObject</a>&gt;.</p>
+</blockquote>
+<p>Another, although more rare, example:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \<span class="keyword">typedef</span> <span class="type">QMsgHandler</span>
+      \relates <span class="type">QtGlobal</span>
+
+      This is a <span class="keyword">typedef</span> <span class="keyword">for</span> a pointer to a function with the
+      following signature:
+
+      \code
+          <span class="type">void</span> myMsgHandler(<span class="type"><a href="../qtcore/qtglobal.html#QtMsgType-enum">QtMsgType</a></span><span class="operator">,</span> <span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>);
+      \ endcode
+
+      \sa <span class="type"><a href="../qtcore/qtglobal.html#QtMsgType-enum">QtMsgType</a></span><span class="operator">,</span> <a href="../qtcore/qtglobal-obsolete.html#qInstallMsgHandler">qInstallMsgHandler</a>()
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc includes this in <code>qtglobal.html</code> as:</p>
+<blockquote>        <h3>typedef QtMsgHandler</h3>
+        <p>This is a typedef for a pointer to a function with the following signature:</p>
+        <tt>
+        <pre>    void myMsgHandler(QtMsgType, const char *);</pre>
+        </tt>
+        <p>See also <a href="../qtcore/qtglobal.html#QtMsgType-enum">QtMsgType</a> and qInstallMsgHandler().</p>
+</blockquote>
+<p>Other typedefs are located on the reference page for the class that defines them.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \<span class="keyword">typedef</span> <span class="type"><a href="../qtcore/qlinkedlist.html">QLinkedList</a></span><span class="operator">::</span>Iterator
+
+      <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">-</span>style synonym <span class="keyword">for</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">::</span>iterator<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc includes this one on the reference page for class <a href="../qtcore/qlinkedlist.html">QLinkedList</a> as:</p>
+<blockquote>        <h3>typedef QLinkedList::Iterator</h3>
+        <p>Qt-style synonym for <a href="../qtcore/qlist-iterator.html">QList::iterator</a>.</p>
+</blockquote>
+<a name="variable-command"></a><a name="variable"></a>
+<h2 id="variable">\variable</h2>
+<p>The \variable command is for documenting a class member variable or a constant. The argument is the variable or constant name. The \variable command comment includes a <a href="11-qdoc-commands-specialcontent.html#brief-command">\brief</a> command. QDoc generates the documentation based on the text from \brief command.</p>
+<p>The documentation will be located in the in the associated class, header file, or namespace documentation.</p>
+<p>In case of a member variable:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \variable <span class="type"><a href="../qtwidgets/qstyleoption.html">QStyleOption</a></span><span class="operator">::</span>palette
+      \brief The palette that should be used when painting
+             the control
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc includes this in qstyleoption.html as:</p>
+<blockquote>        <h3>
+            <a href="http://doc.qt.io/qt-5/qpalette.html">
+                QPalette
+            </a>
+            QStyleOption::palette
+        </h3>
+        <p>This variable holds the palette that should be used when painting the control.</p>
+</blockquote>
+<p>You can also document constants with the \variable command. For example, suppose you have the <code>Type</code> and <code>UserType</code> constants in the <a href="../qtwidgets/qtreewidgetitem.html">QTreeWidgetItem</a> class:</p>
+<pre class="cpp">
+
+  <span class="keyword">enum</span> { Type <span class="operator">=</span> <span class="number">0</span><span class="operator">,</span> UserType <span class="operator">=</span> <span class="number">1000</span> };
+
+</pre>
+<p>For these, the \variable command can be used this way:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \variable <span class="type"><a href="../qtwidgets/qtreewidgetitem.html">QTreeWidgetItem</a></span><span class="operator">::</span>Type
+
+      The <span class="keyword">default</span> type <span class="keyword">for</span> tree widget items<span class="operator">.</span>
+
+      \sa UserType<span class="operator">,</span> type()
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \variable <span class="type"><a href="../qtwidgets/qtreewidgetitem.html">QTreeWidgetItem</a></span><span class="operator">::</span>UserType
+
+      The minimum value <span class="keyword">for</span> custom types<span class="operator">.</span> Values below
+      UserType are reserved by <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">.</span>
+
+      \sa Type<span class="operator">,</span> type()
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc includes these in qtreewidget.html as:</p>
+<blockquote>        <h3>
+        const int QTreeWidgetItem::Type
+        </h3>
+        <p>The default type for tree widget items.</p>
+<p>See also <a href="../qtwidgets/qtreewidgetitem.html#ItemType-enum">UserType</a> and <a href="../qtwidgets/qtreewidgetitem.html#type">type()</a>.</p>
+        <h3>
+        const int QTreeWidgetItem::UserType
+        </h3>
+        <p>The minimum value for custom types. Values below UserType are reserved by Qt.</p>
+<p>See also <a href="../qtwidgets/qtreewidgetitem.html#ItemType-enum">Type</a> and <a href="../qtwidgets/qtreewidgetitem.html#type">type()</a>.</p>
+</blockquote>
+</div>
+<!-- @@@13-qdoc-commands-topics.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="27-qdoc-commands-alphabetical.html">Command Index</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="14-qdoc-commands-contextcommands.html">Context Commands</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

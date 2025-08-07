@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickstack.cpp -->
+  <title>Stack QML Type | Qt Quick Controls 1 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols1-index.html">Qt Quick Controls 1</a></td><td ><a href="qtquick-controls-qmlmodule.html">QML Types</a></td><td >Stack QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols1-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#attached-properties">Attached Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Stack QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Stack-brief -->
+<p>Provides attached properties for items pushed onto a <a href="qml-qtquick-controls-stackview.html">StackView</a>. <a href="#details">More...</a></p>
+<!-- @@@Stack -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Controls 1.4</td></tr></table></div><ul>
+<li><a href="qml-qtquick-controls-stack-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="attached-properties"></a>
+<h2 id="attached-properties">Attached Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls-stack.html#index-attached-prop">index</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls-stack.html#status-attached-prop">status</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls-stack.html#view-attached-prop">view</a></b></b> : StackView</li>
+</ul>
+<!-- $$$Stack-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The Stack type provides attached properties for items pushed onto a <a href="qml-qtquick-controls-stackview.html">StackView</a>. It gives specific information about the item, such as its <a href="qml-qtquick-controls-stack.html#status-attached-prop">status</a> and <a href="qml-qtquick-controls-stack.html#index-attached-prop">index</a> in the stack <a href="qml-qtquick-controls-stack.html#view-attached-prop">view</a> the item is in.</p>
+<p><b>See also </b><a href="qml-qtquick-controls-stackview.html">StackView</a>.</p>
+<!-- @@@Stack -->
+<h2>Attached Property Documentation</h2>
+<!-- $$$index -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="index-attached-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">Stack.index</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the index of the item inside <a href="qml-qtquick-controls-stack.html#view-attached-prop">StackView</a>, so that <a href="qml-qtquick-controls-stackview.html#get-method">StackView.get(index)</a> will return the item itself. If <a href="qml-qtquick-controls-stack.html#view-attached-prop">view</a> is <code>null</code>, <i>index</i> will be <code>-1</code>.</p>
+</div></div><!-- @@@index -->
+<br/>
+<!-- $$$status -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="status-attached-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">Stack.status</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the status of the item. It can have one of the following values:</p>
+<ul>
+<li><code>Stack.Inactive</code>: the item is not visible</li>
+<li><code>Stack.Activating</code>: the item is transitioning into becoming an active item on the stack</li>
+<li><code>Stack.Active</code>: the item is on top of the stack</li>
+<li><code>Stack.Deactivating</code>: the item is transitioning into becoming inactive</li>
+</ul>
+</div></div><!-- @@@status -->
+<br/>
+<!-- $$$view -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="view-attached-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">Stack.view</span> : <span class="type"><a href="qml-qtquick-controls-stackview.html">StackView</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the <a href="qml-qtquick-controls-stackview.html">StackView</a> the item is in. If the item is not inside a <a href="qml-qtquick-controls-stackview.html">StackView</a>, <i>view</i> will be <code>null</code>.</p>
+</div></div><!-- @@@view -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

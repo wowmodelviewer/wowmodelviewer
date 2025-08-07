@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- fetchmore.qdoc -->
+  <title>Fetch More Example | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Fetch More Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#filelistmodel-class-definition">FileListModel Class Definition</a></li>
+<li class="level1"><a href="#filelistmodel-class-implementation">FileListModel Class Implementation</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Fetch More Example</h1>
+<span class="subtitle"></span>
+<!-- $$$itemviews/fetchmore-brief -->
+<p>The Fetch More example shows how to add items to an item view model on demand.</p>
+<!-- @@@itemviews/fetchmore -->
+<!-- $$$itemviews/fetchmore-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/fetchmore-example.png" alt="" /></p><p>This example consists of a dialog where you can enter a directory name in the <b>Directory</b> edit field. The application loads and visualizes all files it finds as you are typing. It is not required to press [Enter] to launch the search.</p>
+<p>When you have large - or perhaps even infinite - data sets, you will need to add items to the model in batches, and preferably only when the items are needed by the view (i.e&#x2e;, when they are visible in the view).</p>
+<p>In this example, we implement <code>FileListModel</code> - an item view model containing the entries of a directory. We also have <code>Window</code>, which sets up the GUI and feeds the model with directories.</p>
+<p>Let's take a tour of <code>FileListModel</code>'s code.</p>
+<a name="filelistmodel-class-definition"></a>
+<h4 id="filelistmodel-class-definition">FileListModel Class Definition</h4>
+<p>The <code>FileListModel</code> inherits <a href="../qtcore/qabstractlistmodel.html">QAbstractListModel</a> and contains the contents of a directory. It will add items to itself only when requested to do so by the view.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> FileListModel : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qabstractlistmodel.html">QAbstractListModel</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      FileListModel(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+
+      <span class="type">int</span> rowCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent <span class="operator">=</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()) <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> data(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="type">int</span> role <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole) <span class="keyword">const</span> override;
+
+  <span class="keyword">signals</span>:
+      <span class="type">void</span> numberPopulated(<span class="type">int</span> number);
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> setDirPath(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>path);
+
+  <span class="keyword">protected</span>:
+      bool canFetchMore(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span> override;
+      <span class="type">void</span> fetchMore(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) override;
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> fileList;
+      <span class="type">int</span> fileCount;
+  };
+
+</pre>
+<p>The secret lies in the reimplementation of <a href="../qtcore/qabstractitemmodel.html#fetchMore">fetchMore()</a> and <a href="../qtcore/qabstractitemmodel.html#canFetchMore">canFetchMore()</a> from <a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a>. These functions are called by the item view when it needs more items.</p>
+<p>The <code>setDirPath()</code> function sets the directory the model will work on. We emit <code>numberPopulated()</code> each time we add a batch of items to the model.</p>
+<p>We keep all directory entries in <code>fileList</code>. <code>fileCount</code> is the number of items that have been added to the model.</p>
+<a name="filelistmodel-class-implementation"></a>
+<h4 id="filelistmodel-class-implementation">FileListModel Class Implementation</h4>
+<p>We start by checking out the <code>setDirPath()</code>.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> FileListModel<span class="operator">::</span>setDirPath(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>path)
+  {
+      <span class="type"><a href="../qtcore/qdir.html">QDir</a></span> dir(path);
+
+      beginResetModel();
+      fileList <span class="operator">=</span> dir<span class="operator">.</span>entryList();
+      fileCount <span class="operator">=</span> <span class="number">0</span>;
+      endResetModel();
+  }
+
+</pre>
+<p>We use a <a href="../qtcore/qdir.html">QDir</a> to get the contents of the directory. We need to inform <a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a> that we want to remove all items - if any - from the model.</p>
+<pre class="cpp">
+
+  bool FileListModel<span class="operator">::</span>canFetchMore(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (parent<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      <span class="keyword">return</span> (fileCount <span class="operator">&lt;</span> fileList<span class="operator">.</span>size());
+  }
+
+</pre>
+<p>The <code>canFetchMore()</code> function is called by the view when it needs more items. We return true if there still are entries that we have not added to the model; otherwise, we return false.</p>
+<p>And now, the <code>fetchMore()</code> function itself:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> FileListModel<span class="operator">::</span>fetchMore(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent)
+  {
+      <span class="keyword">if</span> (parent<span class="operator">.</span>isValid())
+          <span class="keyword">return</span>;
+      <span class="type">int</span> remainder <span class="operator">=</span> fileList<span class="operator">.</span>size() <span class="operator">-</span> fileCount;
+      <span class="type">int</span> itemsToFetch <span class="operator">=</span> <a href="../qtcore/qtglobal.html#qMin">qMin</a>(<span class="number">100</span><span class="operator">,</span> remainder);
+
+      <span class="keyword">if</span> (itemsToFetch <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">0</span>)
+          <span class="keyword">return</span>;
+
+      beginInsertRows(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()<span class="operator">,</span> fileCount<span class="operator">,</span> fileCount <span class="operator">+</span> itemsToFetch <span class="operator">-</span> <span class="number">1</span>);
+
+      fileCount <span class="operator">+</span><span class="operator">=</span> itemsToFetch;
+
+      endInsertRows();
+
+      <span class="keyword">emit</span> numberPopulated(itemsToFetch);
+  }
+
+</pre>
+<p>We first calculate the number of items to fetch. <a href="../qtcore/qabstractitemmodel.html#beginInsertRows">beginInsertRows()</a> and <a href="../qtcore/qabstractitemmodel.html#endInsertRows">endInsertRows()</a> are mandatory for <a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a> to keep up with the row insertions. Finally, we emit <code>numberPopulated()</code>, which is picked up by <code>Window</code>.</p>
+<p>To complete the tour, we also look at <code>rowCount()</code> and <code>data()</code>.</p>
+<pre class="cpp">
+
+  <span class="type">int</span> FileListModel<span class="operator">::</span>rowCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> parent<span class="operator">.</span>isValid() <span class="operator">?</span> <span class="number">0</span> : fileCount;
+  }
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> FileListModel<span class="operator">::</span>data(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+
+      <span class="keyword">if</span> (index<span class="operator">.</span>row() <span class="operator">&gt;</span><span class="operator">=</span> fileList<span class="operator">.</span>size() <span class="operator">|</span><span class="operator">|</span> index<span class="operator">.</span>row() <span class="operator">&lt;</span> <span class="number">0</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+
+      <span class="keyword">if</span> (role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole) {
+          <span class="keyword">return</span> fileList<span class="operator">.</span>at(index<span class="operator">.</span>row());
+      } <span class="keyword">else</span> <span class="keyword">if</span> (role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>BackgroundRole) {
+          <span class="type">int</span> batch <span class="operator">=</span> (index<span class="operator">.</span>row() <span class="operator">/</span> <span class="number">100</span>) <span class="operator">%</span> <span class="number">2</span>;
+          <span class="keyword">if</span> (batch <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+              <span class="keyword">return</span> <a href="qapplication.html#qApp">qApp</a><span class="operator">-</span><span class="operator">&gt;</span>palette()<span class="operator">.</span>base();
+          <span class="keyword">else</span>
+              <span class="keyword">return</span> <a href="qapplication.html#qApp">qApp</a><span class="operator">-</span><span class="operator">&gt;</span>palette()<span class="operator">.</span>alternateBase();
+      }
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+  }
+
+</pre>
+<p>Notice that the row count is only the items we have added so far, i.e&#x2e;, not the number of entries in the directory.</p>
+<p>In <code>data()</code>, we return the appropriate entry from the <code>fileList</code>. We also separate the batches with a different background color.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/itemviews/fetchmore?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@itemviews/fetchmore -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

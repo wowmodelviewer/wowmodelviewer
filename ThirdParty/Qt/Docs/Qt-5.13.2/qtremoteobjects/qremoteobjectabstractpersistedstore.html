@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qremoteobjectnode.cpp -->
+  <title>QRemoteObjectAbstractPersistedStore Class | Qt Remote Objects 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtremoteobjects-index.html">Qt Remote Objects</a></td><td ><a href="qtremoteobjects-module.html">C++ Classes</a></td><td >QRemoteObjectAbstractPersistedStore</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtremoteobjects-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QRemoteObjectAbstractPersistedStore Class</h1>
+<!-- $$$QRemoteObjectAbstractPersistedStore-brief -->
+<p>A class which provides the methods for setting PROP values of a replica to value they had the last time the replica was used. <a href="#details">More...</a></p>
+<!-- @@@QRemoteObjectAbstractPersistedStore -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QRemoteObjectAbstractPersistedStore&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += remoteobjects</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><ul>
+<li><a href="qremoteobjectabstractpersistedstore-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectabstractpersistedstore.html#QRemoteObjectAbstractPersistedStore">QRemoteObjectAbstractPersistedStore</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QVariantList </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectabstractpersistedstore.html#restoreProperties">restoreProperties</a></b>(const QString &amp;<i>repName</i>, const QByteArray &amp;<i>repSig</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectabstractpersistedstore.html#saveProperties">saveProperties</a></b>(const QString &amp;<i>repName</i>, const QByteArray &amp;<i>repSig</i>, const QVariantList &amp;<i>values</i>) = 0</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QRemoteObjectAbstractPersistedStore-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This can be used to provide a &quot;reasonable&quot; value to be displayed until the connection to the source is established and current values are available.</p>
+<p>This class must be overridden to provide an implementation for saving (<a href="qremoteobjectabstractpersistedstore.html#saveProperties">QRemoteObjectAbstractPersistedStore::saveProperties</a>) and restoring (<a href="qremoteobjectabstractpersistedstore.html#restoreProperties">QRemoteObjectAbstractPersistedStore::restoreProperties</a>) PROP values. The derived type can then be set for a node, and any replica acquired from that node will then automatically store PERSISTED properties when the replica destructor is called, and retrieve the values when the replica is instantiated.</p>
+</div>
+<!-- @@@QRemoteObjectAbstractPersistedStore -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QRemoteObjectAbstractPersistedStore[overload1]$$$QRemoteObjectAbstractPersistedStoreQObject* -->
+<h3 class="fn" id="QRemoteObjectAbstractPersistedStore"><a name="QRemoteObjectAbstractPersistedStore"></a>QRemoteObjectAbstractPersistedStore::<span class="name">QRemoteObjectAbstractPersistedStore</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a <a href="qremoteobjectabstractpersistedstore.html">QRemoteObjectAbstractPersistedStore</a> with the given <i>parent</i>. The default value of <i>parent</i> is <code>nullptr</code>.</p>
+<!-- @@@QRemoteObjectAbstractPersistedStore -->
+<!-- $$$restoreProperties[overload1]$$$restorePropertiesconstQString&constQByteArray& -->
+<h3 class="fn" id="restoreProperties"><a name="restoreProperties"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qvariant.html#QVariantList-typedef">QVariantList</a></span> QRemoteObjectAbstractPersistedStore::<span class="name">restoreProperties</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>repName</i>, const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>repSig</i>)</h3>
+<p>This method will be provided the replica class's <i>repName</i> and <i>repSig</i> when the replica is being initialized. It is the responsibility of the inheriting class to get the last values persisted by <a href="qremoteobjectabstractpersistedstore.html#saveProperties">QRemoteObjectAbstractPersistedStore::saveProperties</a> and return them. An empty <a href="../qtcore/qvariant.html#QVariantList-typedef">QVariantList</a> should be returned if no values are available.</p>
+<p><b>See also </b><a href="qremoteobjectabstractpersistedstore.html#saveProperties">QRemoteObjectAbstractPersistedStore::saveProperties</a>.</p>
+<!-- @@@restoreProperties -->
+<!-- $$$saveProperties[overload1]$$$savePropertiesconstQString&constQByteArray&constQVariantList& -->
+<h3 class="fn" id="saveProperties"><a name="saveProperties"></a><code>[pure virtual] </code><span class="type">void</span> QRemoteObjectAbstractPersistedStore::<span class="name">saveProperties</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>repName</i>, const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>repSig</i>, const <span class="type"><a href="../qtcore/qvariant.html#QVariantList-typedef">QVariantList</a></span> &amp;<i>values</i>)</h3>
+<p>This method will be provided the replica class's <i>repName</i>, <i>repSig</i> and the list of <i>values</i> that PERSISTED properties have when the replica destructor was called. It is the responsibility of the inheriting class to store the information in a manner consistent for <a href="qremoteobjectabstractpersistedstore.html#restoreProperties">QRemoteObjectAbstractPersistedStore::restoreProperties</a> to retrieve.</p>
+<p><b>See also </b><a href="qremoteobjectabstractpersistedstore.html#restoreProperties">QRemoteObjectAbstractPersistedStore::restoreProperties</a>.</p>
+<!-- @@@saveProperties -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- rcc.qdoc -->
+  <title>Resource Compiler (rcc) | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Resource Compiler (rcc)</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Resource Compiler (rcc)</h1>
+<span class="subtitle"></span>
+<!-- $$$rcc.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The <code>rcc</code> tool is used to embed resources into a Qt application during the build process. It works by generating a C++ source file containing data specified in a Qt resource (.qrc) file.</p>
+<p>Usage:</p>
+<pre class="cpp">
+
+  rcc <span class="operator">[</span>options<span class="operator">]</span> <span class="operator">&lt;</span>inputs<span class="operator">&gt;</span>
+
+</pre>
+<p>RCC accepts the following command line options:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Option</th><th >Argument</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>-o</code></td><td ><code>file</code></td><td >Write output to <code>file</code> rather than to stdout.</td></tr>
+<tr valign="top" class="even"><td ><code>-name</code></td><td ><code>name</code></td><td >Create an external initialization function with <code>name</code>.</td></tr>
+<tr valign="top" class="odd"><td ><code>-threshold</code></td><td ><code>level</code></td><td >Specifies a threshold <code>level</code> (as a percentage) to use when deciding whether to compress a file. If the reduction in the file size is greater than the threshold <code>level</code>, it is compressed; otherwise, the uncompressed data is stored instead. The default threshold level is 70%, meaning that compressed files which are 30% or less of their original size are stored as compressed data.</td></tr>
+<tr valign="top" class="even"><td ><code>-compress-algo</code></td><td ><code>algorithm</code></td><td >The algorithm to compress files with. Supported algorithms are <code>zstd</code>, <code>zlib</code>, and <code>none</code>, which respectively mean to compress the content using the <a href="https://zstd.net">Zstandard</a> library, <a href="https://zlib.net">zlib</a> library, and no compression. The default is <code>zstd</code> if that library was found at compile time, <code>zlib</code> if not.</td></tr>
+<tr valign="top" class="odd"><td ><code>-compress</code></td><td ><code>level</code></td><td >Compress input files to the given compression <code>level</code>, which is algorithm-dependent. If the algorithm is <code>zstd</code>, the valid levels are 1 to 19, with the special values of 0 and -1 meaning <code>libzstd</code>'s and <code>rcc</code>'s default compressions. If the algorithm is <code>zlib</code>, the level is an integer in the range 1 to 9. For both algorithms, level 1 does the least compression but is fastest. Levels 9 or 19 do the most compression but are slowest. To turn off compression, use <code>-no-compress</code>. The default value for <code>level</code> is -1.</td></tr>
+<tr valign="top" class="even"><td ><code>-root</code></td><td ><code>path</code></td><td >Prefix the resource access path with <code>path</code>. The default is no prefix.</td></tr>
+<tr valign="top" class="odd"><td ><code>-no-compress</code></td><td ></td><td >Disable compression.</td></tr>
+<tr valign="top" class="even"><td ><code>-binary</code></td><td ></td><td >Output a binary file for use as a dynamic resource.</td></tr>
+<tr valign="top" class="odd"><td ><code>-version</code></td><td ></td><td >Display version information.</td></tr>
+<tr valign="top" class="even"><td ><code>-help</code></td><td ></td><td >Display usage information.</td></tr>
+<tr valign="top" class="odd"><td ><code>-t, --temp &lt;file&gt;</code></td><td ></td><td >Use temporary &lt;file&gt; for big resources.</td></tr>
+<tr valign="top" class="even"><td ><code>--namespace</code></td><td ></td><td >Turn off namespace macros.</td></tr>
+<tr valign="top" class="odd"><td ><code>--verbose</code></td><td ></td><td >Enable verbose mode.</td></tr>
+<tr valign="top" class="even"><td ><code>--list</code></td><td ></td><td >Only list .qrc file entries, do not generate code.</td></tr>
+<tr valign="top" class="odd"><td ><code>-project</code></td><td ></td><td >Output a resource file containing all files from the current directory.</td></tr>
+</table></div>
+<p>See also <a href="../qtcore/resources.html">The Qt Resource System</a> for more information about embedding resources in Qt applications.</p>
+</div>
+<!-- @@@rcc.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

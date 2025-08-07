@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- filestorage.qdoc -->
+  <title>File and Datastream Functions | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td >File and Datastream Functions</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">File and Datastream Functions</h1>
+<span class="subtitle"></span>
+<!-- $$$io-functions.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The <a href="qiodevice.html">QIODevice</a> class is the base interface class of all I/O devices in <a href="qtcore-index.html">Qt Core</a>. <a href="qiodevice.html">QIODevice</a> provides both a common implementation and an abstract interface for devices that support reading and writing of blocks of data. The device can be a memory buffer, a file, or a datastream.</p>
+<p>Some subclasses like <a href="qfile.html">QFile</a> have been implemented using a memory buffer for intermediate storing of data. This speeds up programs by reducing read/write operations. Buffering makes functions like <a href="qiodevice.html#getChar">getChar()</a> and <a href="qiodevice.html#putChar">putChar()</a> fast, as they can operate on the memory buffer instead of directly on the device itself.</p>
+<p>The <a href="qfile.html">QFile</a> class provides functions for reading from and writing to files. A <a href="qfile.html">QFile</a> may be used by itself or, more conveniently, with a <a href="qtextstream.html">QTextStream</a> or <a href="qdatastream.html">QDataStream</a>.</p>
+<p><a href="qbuffer.html">QBuffer</a> allows you to access a <a href="qbytearray.html">QByteArray</a> using the <a href="qiodevice.html">QIODevice</a> interface. The <a href="qbytearray.html">QByteArray</a> is treated just as a standard random-accessed file. An example:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qbuffer.html">QBuffer</a></span> buffer;
+  <span class="type">char</span> ch;
+
+  buffer<span class="operator">.</span>open(<span class="type"><a href="qbuffer.html">QBuffer</a></span><span class="operator">::</span>ReadWrite);
+  buffer<span class="operator">.</span>write(<span class="string">&quot;Qt rocks!&quot;</span>);
+  buffer<span class="operator">.</span>seek(<span class="number">0</span>);
+  buffer<span class="operator">.</span>getChar(<span class="operator">&amp;</span>ch);  <span class="comment">// ch == 'Q'</span>
+  buffer<span class="operator">.</span>getChar(<span class="operator">&amp;</span>ch);  <span class="comment">// ch == 't'</span>
+  buffer<span class="operator">.</span>getChar(<span class="operator">&amp;</span>ch);  <span class="comment">// ch == ' '</span>
+  buffer<span class="operator">.</span>getChar(<span class="operator">&amp;</span>ch);  <span class="comment">// ch == 'r'</span>
+
+</pre>
+<p>Call <a href="qbuffer.html#open">open()</a> to open the buffer. Then call <a href="qiodevice.html#write">write()</a> or <a href="qiodevice.html#putChar">putChar()</a> to write to the buffer, and <a href="qiodevice.html#read">read()</a>, <a href="qiodevice.html#readLine">readLine()</a>, <a href="qiodevice.html#readAll">readAll()</a>, or <a href="qiodevice.html#getChar">getChar()</a> to read from it. <a href="qbuffer.html#size">size()</a> returns the current size of the buffer, and you can seek to arbitrary positions in the buffer by calling <a href="qbuffer.html#seek">seek()</a>. When you are done with accessing the buffer, call <a href="qbuffer.html#close">close()</a>.</p>
+<p>The <a href="qdatastream.html">QDataStream</a> class provides serialization of binary data to a <a href="qiodevice.html">QIODevice</a>. A data stream is a binary stream of encoded information which is 100% inde- pendent of the host computer's operating system, CPU or byte order. For example, a data stream that is written by a PC under Windows can be read by a Sun SPARC running Solaris. You can also use a data stream to read/write raw unencoded binary data.</p>
+<p>For more details on the datatypes that <a href="qdatastream.html">QDataStream</a> can serialize, see <a href="datastreamformat.html">Serializing Qt Data Types</a>.</p>
+<p>The <a href="qtextstream.html">QTextStream</a> class provides a convenient interface for reading and writing text. <a href="qtextstream.html">QTextStream</a> can operate on a <a href="qiodevice.html">QIODevice</a>, a <a href="qbytearray.html">QByteArray</a> or a <a href="qstring.html">QString</a>. Using <a href="qtextstream.html">QTextStream</a>'s streaming operators, you can conveniently read and write words, lines and numbers. It's also common to use <a href="qtextstream.html">QTextStream</a> to read console input and write console output.</p>
+<p>There are three general ways to use <a href="qtextstream.html">QTextStream</a> when reading text files:</p>
+<ul>
+<li>Chunk by chunk, by calling <a href="qiodevice.html#readLine">readLine()</a> or <a href="qiodevice.html#readAll">readAll()</a>.</li>
+<li>Word by word. <a href="qtextstream.html">QTextStream</a> supports streaming into <a href="qstring.html">QString</a>s, <a href="qbytearray.html">QByteArray</a>s and char* buffers. Words are delimited by space, and leading white space is automatically skipped.</li>
+<li>Character by character, by streaming into <a href="qchar.html">QChar</a> or char types. This method is often used for convenient input handling when parsing files, independent of character encoding and end-of-line semantics. To skip white space, call <a href="qtextstream.html#skipWhiteSpace">skipWhiteSpace()</a>.</li>
+</ul>
+<p><a href="qbytearray.html">QByteArray</a> can be used to store both raw bytes (including <code>\0</code>) and traditional 8-bit '\0'-terminated strings. Using <a href="qbytearray.html">QByteArray</a> is much more convenient than using const char *. It always ensures that the data is followed by a '\0' terminator, and uses <a href="implicit-sharing.html">implicitly shared classes</a> (copy-on-write) to reduce memory usage and avoid needless copying of data.</p>
+<p>In addition to <a href="qbytearray.html">QByteArray</a>, Qt also provides the <a href="qstring.html">QString</a> class to store string data. For most purposes, <a href="qstring.html">QString</a> is the most appropriate class to use. It stores 16-bit Unicode characters. It is, however, a good idea to use <a href="qbytearray.html">QByteArray</a> when you need to store raw binary data, and when memory conservation is critical (for example, with Qt for Embedded Linux).</p>
+</div>
+<!-- @@@io-functions.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

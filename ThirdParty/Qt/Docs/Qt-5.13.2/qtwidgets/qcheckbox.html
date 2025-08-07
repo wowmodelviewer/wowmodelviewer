@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcheckbox.cpp -->
+  <title>QCheckBox Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QCheckBox</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCheckBox Class</h1>
+<!-- $$$QCheckBox-brief -->
+<p>The <a href="qcheckbox.html">QCheckBox</a> widget provides a checkbox with a text label. <a href="#details">More...</a></p>
+<!-- @@@QCheckBox -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QCheckBox&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qabstractbutton.html">QAbstractButton</a></td></tr></table></div><ul>
+<li><a href="qcheckbox-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qcheckbox.html#tristate-prop">tristate</a></b> : bool</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcheckbox.html#QCheckBox-1">QCheckBox</a></b>(const QString &amp;<i>text</i>, QWidget *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcheckbox.html#QCheckBox">QCheckBox</a></b>(QWidget *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qcheckbox.html#dtor.QCheckBox">~QCheckBox</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::CheckState </td><td class="memItemRight bottomAlign"><b><a href="qcheckbox.html#checkState">checkState</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcheckbox.html#tristate-prop">isTristate</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcheckbox.html#setCheckState">setCheckState</a></b>(Qt::CheckState <i>state</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcheckbox.html#tristate-prop">setTristate</a></b>(bool <i>y</i> = true)</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSize </td><td class="memItemRight bottomAlign"><b><a href="qcheckbox.html#minimumSizeHint">minimumSizeHint</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSize </td><td class="memItemRight bottomAlign"><b><a href="qcheckbox.html#sizeHint">sizeHint</a></b>() const override</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcheckbox.html#stateChanged">stateChanged</a></b>(int <i>state</i>)</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcheckbox.html#initStyleOption">initStyleOption</a></b>(QStyleOptionButton *<i>option</i>) const</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcheckbox.html#checkStateSet">checkStateSet</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qcheckbox.html#event">event</a></b>(QEvent *<i>e</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qcheckbox.html#hitButton">hitButton</a></b>(const QPoint &amp;<i>pos</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcheckbox.html#mouseMoveEvent">mouseMoveEvent</a></b>(QMouseEvent *<i>e</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcheckbox.html#nextCheckState">nextCheckState</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcheckbox.html#paintEvent">paintEvent</a></b>(<i>QPaintEvent *</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCheckBox-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p class="centerAlign"><img src="images/windows-checkbox.png" alt="" /></p><p>A <a href="qcheckbox.html">QCheckBox</a> is an option button that can be switched on (checked) or off (unchecked). Checkboxes are typically used to represent features in an application that can be enabled or disabled without affecting others. Different types of behavior can be implemented. For example, a <a href="qbuttongroup.html">QButtonGroup</a> can be used to group check buttons logically, allowing exclusive checkboxes. However, <a href="qbuttongroup.html">QButtonGroup</a> does not provide any visual representation.</p>
+<p>The image below further illustrates the differences between exclusive and non-exclusive checkboxes.</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><img src="images/checkboxes-exclusive.png" alt="" /></td><td ><img src="images/checkboxes-non-exclusive.png" alt="" /></td></tr>
+</table></div>
+<p>Whenever a checkbox is checked or cleared, it emits the signal <a href="qcheckbox.html#stateChanged">stateChanged</a>(). Connect to this signal if you want to trigger an action each time the checkbox changes state. You can use <a href="qabstractbutton.html#checked-prop">isChecked</a>() to query whether or not a checkbox is checked.</p>
+<p>In addition to the usual checked and unchecked states, <a href="qcheckbox.html">QCheckBox</a> optionally provides a third state to indicate &quot;no change&quot;. This is useful whenever you need to give the user the option of neither checking nor unchecking a checkbox. If you need this third state, enable it with <a href="qcheckbox.html#tristate-prop">setTristate</a>(), and use <a href="qcheckbox.html#checkState">checkState</a>() to query the current toggle state.</p>
+<p>Just like <a href="qpushbutton.html">QPushButton</a>, a checkbox displays text, and optionally a small icon. The icon is set with <a href="qabstractbutton.html#icon-prop">setIcon</a>(). The text can be set in the constructor or with <a href="qabstractbutton.html#text-prop">setText</a>(). A shortcut key can be specified by preceding the preferred character with an ampersand. For example:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qcheckbox.html#QCheckBox">QCheckBox</a></span> <span class="operator">*</span>checkbox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html#QCheckBox">QCheckBox</a></span>(<span class="string">&quot;C&amp;ase sensitive&quot;</span><span class="operator">,</span> <span class="keyword">this</span>);
+
+</pre>
+<p>In this example, the shortcut is <i>Alt+A</i>. See the <a href="qshortcut.html#mnemonic">QShortcut</a> documentation for details. To display an actual ampersand, use '&amp;&amp;'.</p>
+<p>Important inherited functions: <a href="qabstractbutton.html#text-prop">text</a>(), <a href="qabstractbutton.html#text-prop">setText</a>(), <a href="qabstractbutton.html#text-prop">text</a>(), pixmap(), setPixmap(), accel(), setAccel(), isToggleButton(), <a href="qabstractbutton.html#down-prop">setDown</a>(), <a href="qabstractbutton.html#down-prop">isDown</a>(), isOn(), <a href="qcheckbox.html#checkState">checkState</a>(), <a href="qabstractbutton.html#autoRepeat-prop">autoRepeat</a>(), isExclusiveToggle(), <a href="qabstractbutton.html#group">group</a>(), <a href="qabstractbutton.html#autoRepeat-prop">setAutoRepeat</a>(), <a href="qabstractbutton.html#toggle">toggle</a>(), <a href="qabstractbutton.html#pressed">pressed</a>(), <a href="qabstractbutton.html#released">released</a>(), <a href="qabstractbutton.html#clicked">clicked</a>(), <a href="qabstractbutton.html#toggled">toggled</a>(), <a href="qcheckbox.html#checkState">checkState</a>(), and <a href="qcheckbox.html#stateChanged">stateChanged</a>().</p>
+</div>
+<p><b>See also </b><a href="qabstractbutton.html">QAbstractButton</a>, <a href="qradiobutton.html">QRadioButton</a>, and <a href="guibooks.html#fowler">GUI Design Handbook: Check Box</a>.</p>
+<!-- @@@QCheckBox -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$tristate-prop$$$isTristate$$$setTristatebool -->
+<h3 class="fn" id="tristate-prop"><a name="tristate-prop"></a><span class="name">tristate</span> : <span class="type">bool</span></h3>
+<p>This property holds whether the checkbox is a tri-state checkbox</p>
+<p>The default is false, i.e&#x2e;, the checkbox has only two states.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>isTristate</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setTristate</b></span>(bool <i>y</i> = true)</td></tr>
+</table></div>
+<!-- @@@tristate -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QCheckBox$$$QCheckBoxconstQString&QWidget* -->
+<h3 class="fn" id="QCheckBox-1"><a name="QCheckBox-1"></a>QCheckBox::<span class="name">QCheckBox</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>text</i>, <span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a checkbox with the given <i>parent</i> and <i>text</i>.</p>
+<p><i>parent</i> is passed on to the <a href="qabstractbutton.html">QAbstractButton</a> constructor.</p>
+<!-- @@@QCheckBox -->
+<!-- $$$QCheckBox[overload1]$$$QCheckBoxQWidget* -->
+<h3 class="fn" id="QCheckBox"><a name="QCheckBox"></a>QCheckBox::<span class="name">QCheckBox</span>(<span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a checkbox with the given <i>parent</i>, but with no text.</p>
+<p><i>parent</i> is passed on to the <a href="qabstractbutton.html">QAbstractButton</a> constructor.</p>
+<!-- @@@QCheckBox -->
+<!-- $$$stateChanged[overload1]$$$stateChangedint -->
+<h3 class="fn" id="stateChanged"><a name="stateChanged"></a><code>[signal] </code><span class="type">void</span> QCheckBox::<span class="name">stateChanged</span>(<span class="type">int</span> <i>state</i>)</h3>
+<p>This signal is emitted whenever the checkbox's state changes, i.e&#x2e;, whenever the user checks or unchecks it.</p>
+<p><i>state</i> contains the checkbox's new <a href="../qtcore/qt.html#CheckState-enum">Qt::CheckState</a>.</p>
+<!-- @@@stateChanged -->
+<!-- $$$~QCheckBox[overload1]$$$~QCheckBox -->
+<h3 class="fn" id="dtor.QCheckBox"><a name="dtor.QCheckBox"></a><code>[virtual] </code>QCheckBox::<span class="name">~QCheckBox</span>()</h3>
+<p>Destructor.</p>
+<!-- @@@~QCheckBox -->
+<!-- $$$checkState[overload1]$$$checkState -->
+<h3 class="fn" id="checkState"><a name="checkState"></a><span class="type"><a href="../qtcore/qt.html#CheckState-enum">Qt::CheckState</a></span> QCheckBox::<span class="name">checkState</span>() const</h3>
+<p>Returns the checkbox's check state. If you do not need tristate support, you can also use <a href="qabstractbutton.html#checked-prop">QAbstractButton::isChecked</a>(), which returns a boolean.</p>
+<p><b>See also </b><a href="qcheckbox.html#setCheckState">setCheckState</a>() and <a href="../qtcore/qt.html#CheckState-enum">Qt::CheckState</a>.</p>
+<!-- @@@checkState -->
+<!-- $$$checkStateSet[overload1]$$$checkStateSet -->
+<h3 class="fn" id="checkStateSet"><a name="checkStateSet"></a><code>[override virtual protected] </code><span class="type">void</span> QCheckBox::<span class="name">checkStateSet</span>()</h3>
+<p>Reimplements: <a href="qabstractbutton.html#checkStateSet">QAbstractButton::checkStateSet</a>().</p>
+<!-- @@@checkStateSet -->
+<!-- $$$event[overload1]$$$eventQEvent* -->
+<h3 class="fn" id="event"><a name="event"></a><code>[override virtual protected] </code><span class="type">bool</span> QCheckBox::<span class="name">event</span>(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="qabstractbutton.html#event">QAbstractButton::event</a>(QEvent *e).</p>
+<!-- @@@event -->
+<!-- $$$hitButton[overload1]$$$hitButtonconstQPoint& -->
+<h3 class="fn" id="hitButton"><a name="hitButton"></a><code>[override virtual protected] </code><span class="type">bool</span> QCheckBox::<span class="name">hitButton</span>(const <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> &amp;<i>pos</i>) const</h3>
+<p>Reimplements: <a href="qabstractbutton.html#hitButton">QAbstractButton::hitButton</a>(const QPoint &amp;pos) const.</p>
+<!-- @@@hitButton -->
+<!-- $$$initStyleOption[overload1]$$$initStyleOptionQStyleOptionButton* -->
+<h3 class="fn" id="initStyleOption"><a name="initStyleOption"></a><code>[protected] </code><span class="type">void</span> QCheckBox::<span class="name">initStyleOption</span>(<span class="type"><a href="qstyleoptionbutton.html">QStyleOptionButton</a></span> *<i>option</i>) const</h3>
+<p>Initializes <i>option</i> with the values from this <a href="qcheckbox.html">QCheckBox</a>. This method is useful for subclasses that require a <a href="qstyleoptionbutton.html">QStyleOptionButton</a>, but do not want to fill in all the information themselves.</p>
+<p><b>See also </b><a href="qstyleoption.html#initFrom">QStyleOption::initFrom</a>().</p>
+<!-- @@@initStyleOption -->
+<!-- $$$minimumSizeHint[overload1]$$$minimumSizeHint -->
+<h3 class="fn" id="minimumSizeHint"><a name="minimumSizeHint"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QCheckBox::<span class="name">minimumSizeHint</span>() const</h3>
+<p>Reimplements an access function for property: <a href="qwidget.html#minimumSizeHint-prop">QWidget::minimumSizeHint</a>.</p>
+<!-- @@@minimumSizeHint -->
+<!-- $$$mouseMoveEvent[overload1]$$$mouseMoveEventQMouseEvent* -->
+<h3 class="fn" id="mouseMoveEvent"><a name="mouseMoveEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QCheckBox::<span class="name">mouseMoveEvent</span>(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="qabstractbutton.html#mouseMoveEvent">QAbstractButton::mouseMoveEvent</a>(QMouseEvent *e).</p>
+<!-- @@@mouseMoveEvent -->
+<!-- $$$nextCheckState[overload1]$$$nextCheckState -->
+<h3 class="fn" id="nextCheckState"><a name="nextCheckState"></a><code>[override virtual protected] </code><span class="type">void</span> QCheckBox::<span class="name">nextCheckState</span>()</h3>
+<p>Reimplements: <a href="qabstractbutton.html#nextCheckState">QAbstractButton::nextCheckState</a>().</p>
+<!-- @@@nextCheckState -->
+<!-- $$$paintEvent[overload1]$$$paintEventQPaintEvent* -->
+<h3 class="fn" id="paintEvent"><a name="paintEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QCheckBox::<span class="name">paintEvent</span>(<i>QPaintEvent *</i>)</h3>
+<p>Reimplements: <a href="qabstractbutton.html#paintEvent">QAbstractButton::paintEvent</a>(QPaintEvent *e).</p>
+<!-- @@@paintEvent -->
+<!-- $$$setCheckState[overload1]$$$setCheckStateQt::CheckState -->
+<h3 class="fn" id="setCheckState"><a name="setCheckState"></a><span class="type">void</span> QCheckBox::<span class="name">setCheckState</span>(<span class="type"><a href="../qtcore/qt.html#CheckState-enum">Qt::CheckState</a></span> <i>state</i>)</h3>
+<p>Sets the checkbox's check state to <i>state</i>. If you do not need tristate support, you can also use <a href="qabstractbutton.html#checked-prop">QAbstractButton::setChecked</a>(), which takes a boolean.</p>
+<p><b>See also </b><a href="qcheckbox.html#checkState">checkState</a>() and <a href="../qtcore/qt.html#CheckState-enum">Qt::CheckState</a>.</p>
+<!-- @@@setCheckState -->
+<!-- $$$sizeHint[overload1]$$$sizeHint -->
+<h3 class="fn" id="sizeHint"><a name="sizeHint"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QCheckBox::<span class="name">sizeHint</span>() const</h3>
+<p>Reimplements an access function for property: <a href="qwidget.html#sizeHint-prop">QWidget::sizeHint</a>.</p>
+<!-- @@@sizeHint -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

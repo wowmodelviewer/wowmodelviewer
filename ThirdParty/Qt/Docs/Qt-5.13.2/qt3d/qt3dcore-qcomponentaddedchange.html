@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcomponentaddedchange.cpp -->
+  <title>QComponentAddedChange Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QComponentAddedChange</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QComponentAddedChange Class</h1>
+<span class="small-subtitle">(<a href="qt3dcore-qcomponentaddedchange.html">Qt3DCore::QComponentAddedChange</a>)<br/></span>
+<!-- $$$QComponentAddedChange-brief -->
+<p>The <a href="qt3dcore-qcomponentaddedchange.html">QComponentAddedChange</a> class is used to notify when a component is added to an entity. <a href="#details">More...</a></p>
+<!-- @@@QComponentAddedChange -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;Qt3DCore/QComponentAddedChange&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3dcore</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3dcore-qscenechange.html">Qt3DCore::QSceneChange</a></td></tr></table></div><ul>
+<li><a href="qt3dcore-qcomponentaddedchange-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qcomponentaddedchange.html#QComponentAddedChange-1">QComponentAddedChange</a></b>(const Qt3DCore::QComponent *<i>component</i>, const Qt3DCore::QEntity *<i>entity</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qcomponentaddedchange.html#QComponentAddedChange">QComponentAddedChange</a></b>(const Qt3DCore::QEntity *<i>entity</i>, const Qt3DCore::QComponent *<i>component</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DCore::QNodeId </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qcomponentaddedchange.html#componentId">componentId</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QMetaObject *</td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qcomponentaddedchange.html#componentMetaObject">componentMetaObject</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DCore::QNodeId </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qcomponentaddedchange.html#entityId">entityId</a></b>() const</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qcomponentaddedchange.html#QComponentAddedChangePtr-typedef">QComponentAddedChangePtr</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QComponentAddedChange-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QComponentAddedChange -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QComponentAddedChange$$$QComponentAddedChangeconstQt3DCore::QComponent*constQt3DCore::QEntity* -->
+<h3 class="fn" id="QComponentAddedChange-1"><a name="QComponentAddedChange-1"></a>QComponentAddedChange::<span class="name">QComponentAddedChange</span>(const <span class="type"><a href="qt3dcore-qcomponent.html">Qt3DCore::QComponent</a></span> *<i>component</i>, const <span class="type"><a href="qt3dcore-qentity.html">Qt3DCore::QEntity</a></span> *<i>entity</i>)</h3>
+<p>Constructs a new <a href="qt3dcore-qcomponentaddedchange.html">QComponentAddedChange</a> which will notify <i>component</i> that it was added to <i>entity</i></p>
+<!-- @@@QComponentAddedChange -->
+<!-- $$$QComponentAddedChange[overload1]$$$QComponentAddedChangeconstQt3DCore::QEntity*constQt3DCore::QComponent* -->
+<h3 class="fn" id="QComponentAddedChange"><a name="QComponentAddedChange"></a>QComponentAddedChange::<span class="name">QComponentAddedChange</span>(const <span class="type"><a href="qt3dcore-qentity.html">Qt3DCore::QEntity</a></span> *<i>entity</i>, const <span class="type"><a href="qt3dcore-qcomponent.html">Qt3DCore::QComponent</a></span> *<i>component</i>)</h3>
+<p>Constructs a new <a href="qt3dcore-qcomponentaddedchange.html">QComponentAddedChange</a> which will notify <i>entity</i> that <i>component</i> was added</p>
+<!-- @@@QComponentAddedChange -->
+<!-- $$$componentId[overload1]$$$componentId -->
+<h3 class="fn" id="componentId"><a name="componentId"></a><span class="type"><a href="qt3dcore-qnodeid.html">Qt3DCore::QNodeId</a></span> QComponentAddedChange::<span class="name">componentId</span>() const</h3>
+<p>Returns the id of the component added.</p>
+<!-- @@@componentId -->
+<!-- $$$componentMetaObject[overload1]$$$componentMetaObject -->
+<h3 class="fn" id="componentMetaObject"><a name="componentMetaObject"></a>const <span class="type"><a href="../qtcore/qmetaobject.html">QMetaObject</a></span> *QComponentAddedChange::<span class="name">componentMetaObject</span>() const</h3>
+<p>Returns the metaobject.</p>
+<!-- @@@componentMetaObject -->
+<!-- $$$entityId[overload1]$$$entityId -->
+<h3 class="fn" id="entityId"><a name="entityId"></a><span class="type"><a href="qt3dcore-qnodeid.html">Qt3DCore::QNodeId</a></span> QComponentAddedChange::<span class="name">entityId</span>() const</h3>
+<p>Returns the id of the entity the component was added to.</p>
+<!-- @@@entityId -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$QComponentAddedChangePtr -->
+<h3 class="fn" id="QComponentAddedChangePtr-typedef"><a name="QComponentAddedChangePtr-typedef"></a>typedef <span class="name">QComponentAddedChangePtr</span></h3>
+<p>A shared pointer for <a href="qt3dcore-qcomponentaddedchange.html">QComponentAddedChange</a>.</p>
+<!-- @@@QComponentAddedChangePtr -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qrendertargetoutput.cpp -->
+  <title>RenderTargetOutput QML Type | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-qml.html">QML Types</a></td><td >RenderTargetOutput QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">RenderTargetOutput QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$RenderTargetOutput-brief -->
+<p>The <a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a> type allows the specification of an attachment of a render target (whether it is a color texture, a depth texture, etc..&#x2e; ). <a href="#details">More...</a></p>
+<!-- @@@RenderTargetOutput -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import Qt3D.Render 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiates:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-rendertargetoutput.html"><a href="qt3drender-qrendertargetoutput.html">QRenderTargetOutput</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qt3d-core-node.html">Node</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qt3d-render-rendertargetoutput-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qt3d-render-rendertargetoutput.html#attachmentPoint-prop">attachmentPoint</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-rendertargetoutput.html#face-prop">face</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-rendertargetoutput.html#layer-prop">layer</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-rendertargetoutput.html#mipLevel-prop">mipLevel</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-rendertargetoutput.html#texture-prop">texture</a></b></b> : Texture</li>
+</ul>
+<!-- $$$RenderTargetOutput-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>A <a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a> specifies the attachment point and parameters for texture that is attached to render target. In addition to the attachment point, texture miplevel, layer and cubemap face can be specified. The texture attached to the <a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a> must be compatible with the given parameters.</p>
+<!-- @@@RenderTargetOutput -->
+<h2>Property Documentation</h2>
+<!-- $$$attachmentPoint -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="attachmentPoint-prop"></a><span class="name">attachmentPoint</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the attachment point of the <a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a>.</p>
+<ul>
+<li><a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a>.Color0</li>
+<li><a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a>.Color1</li>
+<li><a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a>.Color2</li>
+<li><a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a>.Color3</li>
+<li><a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a>.Color4</li>
+<li><a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a>.Color5</li>
+<li><a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a>.Color6</li>
+<li><a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a>.Color7</li>
+<li><a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a>.Color8</li>
+<li><a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a>.Color9</li>
+<li><a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a>.Color10</li>
+<li><a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a>.Color11</li>
+<li><a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a>.Color12</li>
+<li><a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a>.Color13</li>
+<li><a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a>.Color14</li>
+<li><a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a>.Color15</li>
+<li><a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a>.Depth</li>
+<li><a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a>.Stencil</li>
+<li><a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a>.DepthStencil</li>
+</ul>
+<p><b>See also </b><a href="qt3drender-qrendertargetoutput.html#AttachmentPoint-enum">Qt3DRender::QRenderTargetOutput::AttachmentPoint</a>.</p>
+</div></div><!-- @@@attachmentPoint -->
+<br/>
+<!-- $$$face -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="face-prop"></a><span class="name">face</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the face of the attached cubemap texture the rendering is directed to.</p>
+<ul>
+<li>Texture.CubeMapPositiveX</li>
+<li>Texture.CubeMapNegativeX</li>
+<li>Texture.CubeMapPositiveY</li>
+<li>Texture.CubeMapNegativeY</li>
+<li>Texture.CubeMapPositiveZ</li>
+<li>Texture.CubeMapNegativeZ</li>
+</ul>
+<p><b>See also </b><a href="qt3drender-qabstracttexture.html#CubeMapFace-enum">Qt3DRender::QAbstractTexture::CubeMapFace</a>.</p>
+</div></div><!-- @@@face -->
+<br/>
+<!-- $$$layer -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="layer-prop"></a><span class="name">layer</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the layer of the attached texture the rendering is directed to.</p>
+</div></div><!-- @@@layer -->
+<br/>
+<!-- $$$mipLevel -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="mipLevel-prop"></a><span class="name">mipLevel</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the miplevel of the attached texture the rendering is directed to.</p>
+</div></div><!-- @@@mipLevel -->
+<br/>
+<!-- $$$texture -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="texture-prop"></a><span class="name">texture</span> : <span class="type">Texture</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the texture attached to the attachment point.</p>
+</div></div><!-- @@@texture -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

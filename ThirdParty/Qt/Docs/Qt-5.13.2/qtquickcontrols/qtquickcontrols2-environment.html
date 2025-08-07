@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtquickcontrols2-environment.qdoc -->
+  <title>Supported Environment Variables in Qt Quick Controls | Qt Quick Controls 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td >Supported Environment Variables in Qt Quick Controls</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#related-information">Related Information</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Supported Environment Variables in Qt Quick Controls</h1>
+<span class="subtitle"></span>
+<!-- $$$qtquickcontrols2-environment.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>This page contains a list of all environment variables that Qt Quick Controls supports. The environment variables are primarily meant for testing purposes, but they can also be used to set system-wide defaults.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Variable</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>QT_QUICK_CONTROLS_STYLE</code></td><td >Specifies the default <a href="qtquickcontrols2-styles.html">Qt Quick Controls style</a>. The value can be either one of the built-in styles, for example <code>&quot;Material&quot;</code>, or the path to a custom style such as <code>&quot;:/mystyle&quot;</code>.</td></tr>
+<tr valign="top" class="even"><td ><code>QT_QUICK_CONTROLS_FALLBACK_STYLE</code></td><td >Specifies a fallback style for <a href="qtquickcontrols2-customize.html#creating-a-custom-style">custom styles</a>. The value can be one of the built-in styles, for example <code>&quot;Material&quot;</code>,</td></tr>
+<tr valign="top" class="odd"><td ><code>QT_QUICK_CONTROLS_STYLE_PATH</code></td><td >Specifies a list of additional paths that are used to lookup <a href="qtquickcontrols2-styles.html">Qt Quick Controls styles</a>. Multiple path entries must be <a href="../qtcore/qdir.html#listSeparator">separated</a> by <code>':'</code> under Unix and <code>';'</code> under Windows. By default, styles are looked up from <code>$QML2_IMPORT_PATH/QtQuick/Controls.2</code>.</td></tr>
+<tr valign="top" class="even"><td ><code>QT_QUICK_CONTROLS_CONF</code></td><td >Specifies the location of the <a href="qtquickcontrols2-configuration.html">Qt Quick Controls configuration file</a>. By default, the configuration file is loaded from the application's resources in <code>&quot;:/qtquickcontrols2.conf&quot;</code>.</td></tr>
+<tr valign="top" class="odd"><td ><code>QT_QUICK_CONTROLS_HOVER_ENABLED</code></td><td >Specifies whether Qt Quick Controls use <a href="qml-qtquick-controls2-control.html#hoverEnabled-prop">hover effects</a>. The value can be set to <code>0</code> or <code>1</code> to disable or enable hover effects, respectively.</td></tr>
+</table></div>
+<p><a href="qtquickcontrols2-imagine.html">Imagine style</a> specific environment variables:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Variable</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>QT_QUICK_CONTROLS_IMAGINE_PATH</code></td><td >Specifies the path to the directory that contains the Imagine style assets. If not specified, the built-in assets are used.<p>For example, to specify a path to a directory stored in the <a href="../qtcore/resources.html">resource system</a>:</p>
+<pre class="cpp plain">
+
+  QT_QUICK_CONTROLS_IMAGINE_PATH=:/imagine-assets
+
+</pre>
+<p>To specify a relative path to a local directory:</p>
+<pre class="cpp plain">
+
+  QT_QUICK_CONTROLS_IMAGINE_PATH=imagine-assets
+
+</pre>
+<p><b>Note: </b>Due to a technical limitation, the path should not be named <i>&quot;imagine&quot;</i> if it is relative to the <code>qtquickcontrols2.conf</code> file.</p></td></tr>
+</table></div>
+<p><a href="qtquickcontrols2-material.html">Material style</a> specific environment variables:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Variable</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>QT_QUICK_CONTROLS_MATERIAL_THEME</code></td><td >Specifies the default <a href="qtquickcontrols2-material.html#material-theme-attached-prop">Material theme</a>. The value can be one of the available themes, for example <code>&quot;Dark&quot;</code>.</td></tr>
+<tr valign="top" class="even"><td ><code>QT_QUICK_CONTROLS_MATERIAL_VARIANT</code></td><td >Specifies the Material variant. The Material Design has two variants: a normal variant designed for touch devices, and a dense variant for desktop. The dense variant uses smaller sizes for controls and their fonts.<p>The value can be <code>&quot;Normal&quot;</code> or <code>&quot;Dense&quot;</code>.</p>
+</td></tr>
+<tr valign="top" class="odd"><td ><code>QT_QUICK_CONTROLS_MATERIAL_ACCENT</code></td><td >Specifies the default <a href="qtquickcontrols2-material.html#material-accent-attached-prop">Material accent color</a>. The value can be any <a href="../qtquick/qml-color.html#colorbasictypedocs">color</a>, but it is recommended to use one of the <a href="qtquickcontrols2-material.html#pre-defined-material-colors">pre-defined Material colors</a>, for example <code>&quot;Teal&quot;</code>.</td></tr>
+<tr valign="top" class="even"><td ><code>QT_QUICK_CONTROLS_MATERIAL_PRIMARY</code></td><td >Specifies the default <a href="qtquickcontrols2-material.html#material-primary-attached-prop">Material primary color</a>. The value can be any <a href="../qtquick/qml-color.html#colorbasictypedocs">color</a>, but it is recommended to use one of the <a href="qtquickcontrols2-material.html#pre-defined-material-colors">pre-defined Material colors</a>, for example <code>&quot;BlueGrey&quot;</code>.</td></tr>
+<tr valign="top" class="odd"><td ><code>QT_QUICK_CONTROLS_MATERIAL_FOREGROUND</code></td><td >Specifies the default <a href="qtquickcontrols2-material.html#material-foreground-attached-prop">Material foreground color</a>. The value can be any <a href="../qtquick/qml-color.html#colorbasictypedocs">color</a>, or one of the <a href="qtquickcontrols2-material.html#pre-defined-material-colors">pre-defined Material colors</a>, for example <code>&quot;Brown&quot;</code>.</td></tr>
+<tr valign="top" class="even"><td ><code>QT_QUICK_CONTROLS_MATERIAL_BACKGROUND</code></td><td >Specifies the default <a href="qtquickcontrols2-material.html#material-background-attached-prop">Material background color</a>. The value can be any <a href="../qtquick/qml-color.html#colorbasictypedocs">color</a>, or one of the <a href="qtquickcontrols2-material.html#pre-defined-material-colors">pre-defined Material colors</a>, for example <code>&quot;Grey&quot;</code>.</td></tr>
+</table></div>
+<p><a href="qtquickcontrols2-universal.html">Universal style</a> specific environment variables:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Variable</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>QT_QUICK_CONTROLS_UNIVERSAL_THEME</code></td><td >Specifies the default <a href="qtquickcontrols2-universal.html#universal-theme-attached-prop">Universal theme</a>. The value can be one of the available themes, for example <code>&quot;Dark&quot;</code>.</td></tr>
+<tr valign="top" class="even"><td ><code>QT_QUICK_CONTROLS_UNIVERSAL_ACCENT</code></td><td >Specifies the default <a href="qtquickcontrols2-universal.html#universal-accent-attached-prop">Universal accent color</a>. The value can be any <a href="../qtquick/qml-color.html#colorbasictypedocs">color</a>, but it is recommended to use one of the <a href="qtquickcontrols2-universal.html#pre-defined-universal-colors">pre-defined Universal colors</a>, for example <code>&quot;Violet&quot;</code>.</td></tr>
+<tr valign="top" class="odd"><td ><code>QT_QUICK_CONTROLS_UNIVERSAL_FOREGROUND</code></td><td >Specifies the default <a href="qtquickcontrols2-universal.html#universal-foreground-attached-prop">Universal foreground color</a>. The value can be any <a href="../qtquick/qml-color.html#colorbasictypedocs">color</a>, or one of the <a href="qtquickcontrols2-universal.html#pre-defined-universal-colors">pre-defined Universal colors</a>, for example <code>&quot;Brown&quot;</code>.</td></tr>
+<tr valign="top" class="even"><td ><code>QT_QUICK_CONTROLS_UNIVERSAL_BACKGROUND</code></td><td >Specifies the default <a href="qtquickcontrols2-universal.html#universal-background-attached-prop">Universal background color</a>. The value can be any <a href="../qtquick/qml-color.html#colorbasictypedocs">color</a>, or one of the <a href="qtquickcontrols2-universal.html#pre-defined-universal-colors">pre-defined Universal colors</a>, for example <code>&quot;Steel&quot;</code>.</td></tr>
+</table></div>
+<a name="related-information"></a>
+<h2 id="related-information">Related Information</h2>
+<ul>
+<li><a href="qtquickcontrols2-styles.html">Styling Qt Quick Controls</a></li>
+<li><a href="qtquickcontrols2-configuration.html">Qt Quick Controls Configuration File</a></li>
+</ul>
+</div>
+<!-- @@@qtquickcontrols2-environment.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

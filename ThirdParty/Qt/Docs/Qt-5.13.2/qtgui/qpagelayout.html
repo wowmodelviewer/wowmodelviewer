@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qpagelayout.cpp -->
+  <title>QPageLayout Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QPageLayout</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPageLayout Class</h1>
+<!-- $$$QPageLayout-brief -->
+<p>Describes the size, orientation and margins of a page. <a href="#details">More...</a></p>
+<!-- @@@QPageLayout -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QPageLayout&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.3</td></tr></table></div><p>This class was introduced in  Qt 5.3.</p>
+<ul>
+<li><a href="qpagelayout-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#Mode-enum">Mode</a></b> { StandardMode, FullPageMode }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#Orientation-enum">Orientation</a></b> { Portrait, Landscape }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#Unit-enum">Unit</a></b> { Millimeter, Point, Inch, Pica, Didot, Cicero }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#QPageLayout-2">QPageLayout</a></b>(const QPageLayout &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#QPageLayout-1">QPageLayout</a></b>(const QPageSize &amp;<i>pageSize</i>, QPageLayout::Orientation <i>orientation</i>, const QMarginsF &amp;<i>margins</i>, QPageLayout::Unit <i>units</i> = Point, const QMarginsF &amp;<i>minMargins</i> = QMarginsF(0, 0, 0, 0))</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#QPageLayout">QPageLayout</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPageLayout &amp;</td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#operator-eq-1">operator=</a></b>(const QPageLayout &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPageLayout &amp;</td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#operator-eq">operator=</a></b>(QPageLayout &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#dtor.QPageLayout">~QPageLayout</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRectF </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#fullRect">fullRect</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRectF </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#fullRect-1">fullRect</a></b>(QPageLayout::Unit <i>units</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRect </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#fullRectPixels">fullRectPixels</a></b>(int <i>resolution</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRect </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#fullRectPoints">fullRectPoints</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#isEquivalentTo">isEquivalentTo</a></b>(const QPageLayout &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#isValid">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMarginsF </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#margins">margins</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMarginsF </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#margins-1">margins</a></b>(QPageLayout::Unit <i>units</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMargins </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#marginsPixels">marginsPixels</a></b>(int <i>resolution</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMargins </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#marginsPoints">marginsPoints</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMarginsF </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#maximumMargins">maximumMargins</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMarginsF </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#minimumMargins">minimumMargins</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPageLayout::Mode </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#mode">mode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPageLayout::Orientation </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#orientation">orientation</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPageSize </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#pageSize">pageSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRectF </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#paintRect">paintRect</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRectF </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#paintRect-1">paintRect</a></b>(QPageLayout::Unit <i>units</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRect </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#paintRectPixels">paintRectPixels</a></b>(int <i>resolution</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRect </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#paintRectPoints">paintRectPoints</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#setBottomMargin">setBottomMargin</a></b>(qreal <i>bottomMargin</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#setLeftMargin">setLeftMargin</a></b>(qreal <i>leftMargin</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#setMargins">setMargins</a></b>(const QMarginsF &amp;<i>margins</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#setMinimumMargins">setMinimumMargins</a></b>(const QMarginsF &amp;<i>minMargins</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#setMode">setMode</a></b>(QPageLayout::Mode <i>mode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#setOrientation">setOrientation</a></b>(QPageLayout::Orientation <i>orientation</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#setPageSize">setPageSize</a></b>(const QPageSize &amp;<i>pageSize</i>, const QMarginsF &amp;<i>minMargins</i> = QMarginsF(0, 0, 0, 0))</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#setRightMargin">setRightMargin</a></b>(qreal <i>rightMargin</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#setTopMargin">setTopMargin</a></b>(qreal <i>topMargin</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#setUnits">setUnits</a></b>(QPageLayout::Unit <i>units</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#swap">swap</a></b>(QPageLayout &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPageLayout::Unit </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#units">units</a></b>() const</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#operator-not-eq">operator!=</a></b>(const QPageLayout &amp;<i>lhs</i>, const QPageLayout &amp;<i>rhs</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qpagelayout.html#operator-eq-eq">operator==</a></b>(const QPageLayout &amp;<i>lhs</i>, const QPageLayout &amp;<i>rhs</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPageLayout-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qpagelayout.html">QPageLayout</a> class defines the layout of a page in a paged document, with the page size, orientation and margins able to be set and the full page and paintable page rectangles defined by those attributes able to be queried in a variety of units.</p>
+<p>The page size is defined by the <a href="qpagesize.html">QPageSize</a> class which can be queried for page size attributes. Note that the <a href="qpagesize.html">QPageSize</a> itself is always defined in a Portrait orientation.</p>
+<p>The minimum margins can be defined for the layout but normally default to 0. When used in conjunction with Qt's printing support the minimum margins will reflect the minimum printable area defined by the printer.</p>
+<p>In the default <a href="qpagelayout.html#Mode-enum">StandardMode</a> the current margins and minimum margins are always taken into account. The paintable rectangle is the full page rectangle less the current margins, and the current margins can only be set to values between the minimum margins and the maximum margins allowed by the full page size.</p>
+<p>In <a href="qpagelayout.html#Mode-enum">FullPageMode</a> the current margins and minimum margins are not taken into account. The paintable rectangle is the full page rectangle, and the current margins can be set to any values regardless of the minimum margins and page size.</p>
+</div>
+<p><b>See also </b><a href="qpagesize.html">QPageSize</a>.</p>
+<!-- @@@QPageLayout -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Mode$$$StandardMode$$$FullPageMode -->
+<h3 class="fn" id="Mode-enum"><a name="Mode-enum"></a>enum QPageLayout::<span class="name">Mode</span></h3>
+<p>Defines the page layout mode</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QPageLayout::StandardMode</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Paint Rect includes margins, margins must fall between the minimum and maximum.</td></tr>
+<tr><td class="topAlign"><code>QPageLayout::FullPageMode</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Paint Rect excludes margins, margins can be any value and must be managed manually.</td></tr>
+</table></div>
+<!-- @@@Mode -->
+<!-- $$$Orientation$$$Portrait$$$Landscape -->
+<h3 class="fn" id="Orientation-enum"><a name="Orientation-enum"></a>enum QPageLayout::<span class="name">Orientation</span></h3>
+<p>This enum type defines the page orientation</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QPageLayout::Portrait</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The page size is used in its default orientation</td></tr>
+<tr><td class="topAlign"><code>QPageLayout::Landscape</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The page size is rotated through 90 degrees</td></tr>
+</table></div>
+<p>Note that some standard page sizes are defined with a width larger than their height, hence the orientation is defined relative to the standard page size and not using the relative page dimensions.</p>
+<!-- @@@Orientation -->
+<!-- $$$Unit$$$Millimeter$$$Point$$$Inch$$$Pica$$$Didot$$$Cicero -->
+<h3 class="fn" id="Unit-enum"><a name="Unit-enum"></a>enum QPageLayout::<span class="name">Unit</span></h3>
+<p>This enum type is used to specify the measurement unit for page layout and margins.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QPageLayout::Millimeter</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageLayout::Point</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">1/72th of an inch</td></tr>
+<tr><td class="topAlign"><code>QPageLayout::Inch</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">&nbsp;</td></tr>
+<tr><td class="topAlign"><code>QPageLayout::Pica</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">1/72th of a foot, 1/6th of an inch, 12 Points</td></tr>
+<tr><td class="topAlign"><code>QPageLayout::Didot</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">1/72th of a French inch, 0.375 mm</td></tr>
+<tr><td class="topAlign"><code>QPageLayout::Cicero</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">1/6th of a French inch, 12 Didot, 4.5mm</td></tr>
+</table></div>
+<!-- @@@Unit -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QPageLayout$$$QPageLayoutconstQPageLayout& -->
+<h3 class="fn" id="QPageLayout-2"><a name="QPageLayout-2"></a>QPageLayout::<span class="name">QPageLayout</span>(const <span class="type"><a href="qpagelayout.html#QPageLayout">QPageLayout</a></span> &amp;<i>other</i>)</h3>
+<p>Copy constructor, copies <i>other</i> to this.</p>
+<!-- @@@QPageLayout -->
+<!-- $$$QPageLayout$$$QPageLayoutconstQPageSize&QPageLayout::OrientationconstQMarginsF&QPageLayout::UnitconstQMarginsF& -->
+<h3 class="fn" id="QPageLayout-1"><a name="QPageLayout-1"></a>QPageLayout::<span class="name">QPageLayout</span>(const <span class="type"><a href="qpagesize.html">QPageSize</a></span> &amp;<i>pageSize</i>, <span class="type"><a href="qpagelayout.html#Orientation-enum">QPageLayout::Orientation</a></span> <i>orientation</i>, const <span class="type"><a href="../qtcore/qmarginsf.html">QMarginsF</a></span> &amp;<i>margins</i>, <span class="type"><a href="qpagelayout.html#Unit-enum">QPageLayout::Unit</a></span> <i>units</i> = Point, const <span class="type"><a href="../qtcore/qmarginsf.html">QMarginsF</a></span> &amp;<i>minMargins</i> = QMarginsF(0, 0, 0, 0))</h3>
+<p>Creates a <a href="qpagelayout.html">QPageLayout</a> with the given <i>pageSize</i>, <i>orientation</i> and <i>margins</i> in the given <i>units</i>.</p>
+<p>Optionally define the minimum allowed margins <i>minMargins</i>, e.g&#x2e; the minimum margins able to be printed by a physical print device.</p>
+<p>The constructed <a href="qpagelayout.html">QPageLayout</a> will be in <a href="qpagelayout.html#Mode-enum">StandardMode</a>.</p>
+<p>The <i>margins</i> given will be clamped to the minimum margins and the maximum margins allowed by the page size.</p>
+<!-- @@@QPageLayout -->
+<!-- $$$QPageLayout[overload1]$$$QPageLayout -->
+<h3 class="fn" id="QPageLayout"><a name="QPageLayout"></a>QPageLayout::<span class="name">QPageLayout</span>()</h3>
+<p>Creates an invalid <a href="qpagelayout.html">QPageLayout</a>.</p>
+<!-- @@@QPageLayout -->
+<!-- $$$operator=$$$operator=constQPageLayout& -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type"><a href="qpagelayout.html#QPageLayout">QPageLayout</a></span> &amp;QPageLayout::<span class="name">operator=</span>(const <span class="type"><a href="qpagelayout.html#QPageLayout">QPageLayout</a></span> &amp;<i>other</i>)</h3>
+<p>Assignment operator, assigns <i>other</i> to this.</p>
+<!-- @@@operator= -->
+<!-- $$$operator=[overload1]$$$operator=QPageLayout&& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qpagelayout.html#QPageLayout">QPageLayout</a></span> &amp;QPageLayout::<span class="name">operator=</span>(<span class="type"><a href="qpagelayout.html#QPageLayout">QPageLayout</a></span> &amp;&amp;<i>other</i>)</h3>
+<p>Move-assigns <i>other</i> to this <a href="qpagelayout.html">QPageLayout</a> instance, transferring the ownership of the managed pointer to this instance.</p>
+<!-- @@@operator= -->
+<!-- $$$~QPageLayout[overload1]$$$~QPageLayout -->
+<h3 class="fn" id="dtor.QPageLayout"><a name="dtor.QPageLayout"></a>QPageLayout::<span class="name">~QPageLayout</span>()</h3>
+<p>Destroys the page layout.</p>
+<!-- @@@~QPageLayout -->
+<!-- $$$fullRect[overload1]$$$fullRect -->
+<h3 class="fn" id="fullRect"><a name="fullRect"></a><span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> QPageLayout::<span class="name">fullRect</span>() const</h3>
+<p>Returns the full page rectangle in the current layout units.</p>
+<p>The page rectangle takes into account the page size and page orientation, but not the page margins.</p>
+<p><b>See also </b><a href="qpagelayout.html#paintRect">paintRect</a>() and <a href="qpagelayout.html#units">units</a>().</p>
+<!-- @@@fullRect -->
+<!-- $$$fullRect$$$fullRectQPageLayout::Unit -->
+<h3 class="fn" id="fullRect-1"><a name="fullRect-1"></a><span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> QPageLayout::<span class="name">fullRect</span>(<span class="type"><a href="qpagelayout.html#Unit-enum">QPageLayout::Unit</a></span> <i>units</i>) const</h3>
+<p>Returns the full page rectangle in the required <i>units</i>.</p>
+<p>The page rectangle takes into account the page size and page orientation, but not the page margins.</p>
+<p><b>See also </b><a href="qpagelayout.html#paintRect">paintRect</a>().</p>
+<!-- @@@fullRect -->
+<!-- $$$fullRectPixels[overload1]$$$fullRectPixelsint -->
+<h3 class="fn" id="fullRectPixels"><a name="fullRectPixels"></a><span class="type"><a href="../qtcore/qrect.html">QRect</a></span> QPageLayout::<span class="name">fullRectPixels</span>(<span class="type">int</span> <i>resolution</i>) const</h3>
+<p>Returns the full page rectangle in device pixels for the given <i>resolution</i>.</p>
+<p>The page rectangle takes into account the page size and page orientation, but not the page margins.</p>
+<p><b>See also </b><a href="qpagelayout.html#paintRect">paintRect</a>().</p>
+<!-- @@@fullRectPixels -->
+<!-- $$$fullRectPoints[overload1]$$$fullRectPoints -->
+<h3 class="fn" id="fullRectPoints"><a name="fullRectPoints"></a><span class="type"><a href="../qtcore/qrect.html">QRect</a></span> QPageLayout::<span class="name">fullRectPoints</span>() const</h3>
+<p>Returns the full page rectangle in Postscript Points (1/72 of an inch).</p>
+<p>The page rectangle takes into account the page size and page orientation, but not the page margins.</p>
+<p><b>See also </b><a href="qpagelayout.html#paintRect">paintRect</a>().</p>
+<!-- @@@fullRectPoints -->
+<!-- $$$isEquivalentTo[overload1]$$$isEquivalentToconstQPageLayout& -->
+<h3 class="fn" id="isEquivalentTo"><a name="isEquivalentTo"></a><span class="type">bool</span> QPageLayout::<span class="name">isEquivalentTo</span>(const <span class="type"><a href="qpagelayout.html#QPageLayout">QPageLayout</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns <code>true</code> if this page layout is equivalent to the <i>other</i> page layout, i.e&#x2e; if the page has the same size, margins and orientation.</p>
+<!-- @@@isEquivalentTo -->
+<!-- $$$isValid[overload1]$$$isValid -->
+<h3 class="fn" id="isValid"><a name="isValid"></a><span class="type">bool</span> QPageLayout::<span class="name">isValid</span>() const</h3>
+<p>Returns <code>true</code> if this page layout is valid.</p>
+<!-- @@@isValid -->
+<!-- $$$margins[overload1]$$$margins -->
+<h3 class="fn" id="margins"><a name="margins"></a><span class="type"><a href="../qtcore/qmarginsf.html">QMarginsF</a></span> QPageLayout::<span class="name">margins</span>() const</h3>
+<p>Returns the margins of the page layout using the currently set units.</p>
+<p><b>See also </b><a href="qpagelayout.html#setMargins">setMargins</a>() and <a href="qpagelayout.html#units">units</a>().</p>
+<!-- @@@margins -->
+<!-- $$$margins$$$marginsQPageLayout::Unit -->
+<h3 class="fn" id="margins-1"><a name="margins-1"></a><span class="type"><a href="../qtcore/qmarginsf.html">QMarginsF</a></span> QPageLayout::<span class="name">margins</span>(<span class="type"><a href="qpagelayout.html#Unit-enum">QPageLayout::Unit</a></span> <i>units</i>) const</h3>
+<p>Returns the margins of the page layout using the requested <i>units</i>.</p>
+<p><b>See also </b><a href="qpagelayout.html#setMargins">setMargins</a>() and <a href="qpagelayout.html#margins">margins</a>().</p>
+<!-- @@@margins -->
+<!-- $$$marginsPixels[overload1]$$$marginsPixelsint -->
+<h3 class="fn" id="marginsPixels"><a name="marginsPixels"></a><span class="type"><a href="../qtcore/qmargins.html">QMargins</a></span> QPageLayout::<span class="name">marginsPixels</span>(<span class="type">int</span> <i>resolution</i>) const</h3>
+<p>Returns the margins of the page layout in device pixels for the given <i>resolution</i>.</p>
+<p><b>See also </b><a href="qpagelayout.html#setMargins">setMargins</a>().</p>
+<!-- @@@marginsPixels -->
+<!-- $$$marginsPoints[overload1]$$$marginsPoints -->
+<h3 class="fn" id="marginsPoints"><a name="marginsPoints"></a><span class="type"><a href="../qtcore/qmargins.html">QMargins</a></span> QPageLayout::<span class="name">marginsPoints</span>() const</h3>
+<p>Returns the margins of the page layout in Postscript Points (1/72 of an inch).</p>
+<p><b>See also </b><a href="qpagelayout.html#setMargins">setMargins</a>() and <a href="qpagelayout.html#margins">margins</a>().</p>
+<!-- @@@marginsPoints -->
+<!-- $$$maximumMargins[overload1]$$$maximumMargins -->
+<h3 class="fn" id="maximumMargins"><a name="maximumMargins"></a><span class="type"><a href="../qtcore/qmarginsf.html">QMarginsF</a></span> QPageLayout::<span class="name">maximumMargins</span>() const</h3>
+<p>Returns the maximum margins that would be applied if the page layout was in <a href="qpagelayout.html#Mode-enum">StandardMode</a>.</p>
+<p>The maximum margins allowed are calculated as the full size of the page minus the minimum margins set. For example, if the page width is 100 points and the minimum right margin is 10 points, then the maximum left margin will be 90 points.</p>
+<p><b>See also </b><a href="qpagelayout.html#setMinimumMargins">setMinimumMargins</a>() and <a href="qpagelayout.html#minimumMargins">minimumMargins</a>().</p>
+<!-- @@@maximumMargins -->
+<!-- $$$minimumMargins[overload1]$$$minimumMargins -->
+<h3 class="fn" id="minimumMargins"><a name="minimumMargins"></a><span class="type"><a href="../qtcore/qmarginsf.html">QMarginsF</a></span> QPageLayout::<span class="name">minimumMargins</span>() const</h3>
+<p>Returns the minimum margins of the page layout.</p>
+<p><b>See also </b><a href="qpagelayout.html#setMinimumMargins">setMinimumMargins</a>() and <a href="qpagelayout.html#maximumMargins">maximumMargins</a>().</p>
+<!-- @@@minimumMargins -->
+<!-- $$$mode[overload1]$$$mode -->
+<h3 class="fn" id="mode"><a name="mode"></a><span class="type"><a href="qpagelayout.html#Mode-enum">QPageLayout::Mode</a></span> QPageLayout::<span class="name">mode</span>() const</h3>
+<p>Returns the page layout mode.</p>
+<p><b>See also </b><a href="qpagelayout.html#setMode">setMode</a>().</p>
+<!-- @@@mode -->
+<!-- $$$orientation[overload1]$$$orientation -->
+<h3 class="fn" id="orientation"><a name="orientation"></a><span class="type"><a href="qpagelayout.html#Orientation-enum">QPageLayout::Orientation</a></span> QPageLayout::<span class="name">orientation</span>() const</h3>
+<p>Returns the page orientation of the page layout.</p>
+<p><b>See also </b><a href="qpagelayout.html#setOrientation">setOrientation</a>().</p>
+<!-- @@@orientation -->
+<!-- $$$pageSize[overload1]$$$pageSize -->
+<h3 class="fn" id="pageSize"><a name="pageSize"></a><span class="type"><a href="qpagesize.html">QPageSize</a></span> QPageLayout::<span class="name">pageSize</span>() const</h3>
+<p>Returns the page size of the page layout.</p>
+<p>Note that the <a href="qpagesize.html">QPageSize</a> is always defined in a Portrait orientation. To obtain a size that takes the set orientation into account you must use <a href="qpagelayout.html#fullRect">fullRect</a>().</p>
+<p><b>See also </b><a href="qpagelayout.html#setPageSize">setPageSize</a>().</p>
+<!-- @@@pageSize -->
+<!-- $$$paintRect[overload1]$$$paintRect -->
+<h3 class="fn" id="paintRect"><a name="paintRect"></a><span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> QPageLayout::<span class="name">paintRect</span>() const</h3>
+<p>Returns the page rectangle in the current layout units.</p>
+<p>The paintable rectangle takes into account the page size, orientation and margins.</p>
+<p>If the <a href="qpagelayout.html#Mode-enum">FullPageMode</a> mode is set then the <a href="qpagelayout.html#fullRect">fullRect</a>() is returned and the margins must be manually managed.</p>
+<!-- @@@paintRect -->
+<!-- $$$paintRect$$$paintRectQPageLayout::Unit -->
+<h3 class="fn" id="paintRect-1"><a name="paintRect-1"></a><span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> QPageLayout::<span class="name">paintRect</span>(<span class="type"><a href="qpagelayout.html#Unit-enum">QPageLayout::Unit</a></span> <i>units</i>) const</h3>
+<p>Returns the page rectangle in the required <i>units</i>.</p>
+<p>The paintable rectangle takes into account the page size, orientation and margins.</p>
+<p>If the <a href="qpagelayout.html#Mode-enum">FullPageMode</a> mode is set then the <a href="qpagelayout.html#fullRect">fullRect</a>() is returned and the margins must be manually managed.</p>
+<!-- @@@paintRect -->
+<!-- $$$paintRectPixels[overload1]$$$paintRectPixelsint -->
+<h3 class="fn" id="paintRectPixels"><a name="paintRectPixels"></a><span class="type"><a href="../qtcore/qrect.html">QRect</a></span> QPageLayout::<span class="name">paintRectPixels</span>(<span class="type">int</span> <i>resolution</i>) const</h3>
+<p>Returns the paintable rectangle in rounded device pixels for the given <i>resolution</i>.</p>
+<p>The paintable rectangle takes into account the page size, orientation and margins.</p>
+<p>If the <a href="qpagelayout.html#Mode-enum">FullPageMode</a> mode is set then the <a href="qpagelayout.html#fullRect">fullRect</a>() is returned and the margins must be manually managed.</p>
+<!-- @@@paintRectPixels -->
+<!-- $$$paintRectPoints[overload1]$$$paintRectPoints -->
+<h3 class="fn" id="paintRectPoints"><a name="paintRectPoints"></a><span class="type"><a href="../qtcore/qrect.html">QRect</a></span> QPageLayout::<span class="name">paintRectPoints</span>() const</h3>
+<p>Returns the paintable rectangle in rounded Postscript Points (1/72 of an inch).</p>
+<p>The paintable rectangle takes into account the page size, orientation and margins.</p>
+<p>If the <a href="qpagelayout.html#Mode-enum">FullPageMode</a> mode is set then the <a href="qpagelayout.html#fullRect">fullRect</a>() is returned and the margins must be manually managed.</p>
+<!-- @@@paintRectPoints -->
+<!-- $$$setBottomMargin[overload1]$$$setBottomMarginqreal -->
+<h3 class="fn" id="setBottomMargin"><a name="setBottomMargin"></a><span class="type">bool</span> QPageLayout::<span class="name">setBottomMargin</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>bottomMargin</i>)</h3>
+<p>Sets the bottom page margin of the page layout to <i>bottomMargin</i>. Returns true if the margin was successfully set.</p>
+<p>The units used are those currently defined for the layout. To use different units call <a href="qpagelayout.html#setUnits">setUnits</a>() first.</p>
+<p>If in the default <a href="qpagelayout.html#Mode-enum">StandardMode</a> then the new margin must fall between the minimum margin set and the maximum margin allowed by the page size, otherwise the margin will not be set.</p>
+<p>If in <a href="qpagelayout.html#Mode-enum">FullPageMode</a> then any margin values will be accepted.</p>
+<p><b>See also </b><a href="qpagelayout.html#setMargins">setMargins</a>() and <a href="qpagelayout.html#margins">margins</a>().</p>
+<!-- @@@setBottomMargin -->
+<!-- $$$setLeftMargin[overload1]$$$setLeftMarginqreal -->
+<h3 class="fn" id="setLeftMargin"><a name="setLeftMargin"></a><span class="type">bool</span> QPageLayout::<span class="name">setLeftMargin</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>leftMargin</i>)</h3>
+<p>Sets the left page margin of the page layout to <i>leftMargin</i>. Returns true if the margin was successfully set.</p>
+<p>The units used are those currently defined for the layout. To use different units call <a href="qpagelayout.html#setUnits">setUnits</a>() first.</p>
+<p>If in the default <a href="qpagelayout.html#Mode-enum">StandardMode</a> then the new margin must fall between the minimum margin set and the maximum margin allowed by the page size, otherwise the margin will not be set.</p>
+<p>If in <a href="qpagelayout.html#Mode-enum">FullPageMode</a> then any margin values will be accepted.</p>
+<p><b>See also </b><a href="qpagelayout.html#setMargins">setMargins</a>() and <a href="qpagelayout.html#margins">margins</a>().</p>
+<!-- @@@setLeftMargin -->
+<!-- $$$setMargins[overload1]$$$setMarginsconstQMarginsF& -->
+<h3 class="fn" id="setMargins"><a name="setMargins"></a><span class="type">bool</span> QPageLayout::<span class="name">setMargins</span>(const <span class="type"><a href="../qtcore/qmarginsf.html">QMarginsF</a></span> &amp;<i>margins</i>)</h3>
+<p>Sets the page margins of the page layout to <i>margins</i> Returns true if the margins were successfully set.</p>
+<p>The units used are those currently defined for the layout. To use different units then call <a href="qpagelayout.html#setUnits">setUnits</a>() first.</p>
+<p>If in the default <a href="qpagelayout.html#Mode-enum">StandardMode</a> then all the new margins must fall between the minimum margins set and the maximum margins allowed by the page size, otherwise the margins will not be set.</p>
+<p>If in <a href="qpagelayout.html#Mode-enum">FullPageMode</a> then any margin values will be accepted.</p>
+<p><b>See also </b><a href="qpagelayout.html#margins">margins</a>() and <a href="qpagelayout.html#units">units</a>().</p>
+<!-- @@@setMargins -->
+<!-- $$$setMinimumMargins[overload1]$$$setMinimumMarginsconstQMarginsF& -->
+<h3 class="fn" id="setMinimumMargins"><a name="setMinimumMargins"></a><span class="type">void</span> QPageLayout::<span class="name">setMinimumMargins</span>(const <span class="type"><a href="../qtcore/qmarginsf.html">QMarginsF</a></span> &amp;<i>minMargins</i>)</h3>
+<p>Sets the minimum page margins of the page layout to <i>minMargins</i>.</p>
+<p>It is not recommended to override the default values set for a page size as this may be the minimum printable area for a physical print device.</p>
+<p>If the <a href="qpagelayout.html#Mode-enum">StandardMode</a> mode is set then the existing margins will be clamped to the new <i>minMargins</i> and the maximum allowed by the page size. If the <a href="qpagelayout.html#Mode-enum">FullPageMode</a> is set then the existing margins will be unchanged.</p>
+<p><b>See also </b><a href="qpagelayout.html#minimumMargins">minimumMargins</a>() and <a href="qpagelayout.html#setMargins">setMargins</a>().</p>
+<!-- @@@setMinimumMargins -->
+<!-- $$$setMode[overload1]$$$setModeQPageLayout::Mode -->
+<h3 class="fn" id="setMode"><a name="setMode"></a><span class="type">void</span> QPageLayout::<span class="name">setMode</span>(<span class="type"><a href="qpagelayout.html#Mode-enum">QPageLayout::Mode</a></span> <i>mode</i>)</h3>
+<p>Sets a page layout mode to <i>mode</i>.</p>
+<p><b>See also </b><a href="qpagelayout.html#mode">mode</a>().</p>
+<!-- @@@setMode -->
+<!-- $$$setOrientation[overload1]$$$setOrientationQPageLayout::Orientation -->
+<h3 class="fn" id="setOrientation"><a name="setOrientation"></a><span class="type">void</span> QPageLayout::<span class="name">setOrientation</span>(<span class="type"><a href="qpagelayout.html#Orientation-enum">QPageLayout::Orientation</a></span> <i>orientation</i>)</h3>
+<p>Sets the page orientation of the page layout to <i>orientation</i>.</p>
+<p>Changing the orientation does not affect the current margins or the minimum margins.</p>
+<p><b>See also </b><a href="qpagelayout.html#orientation">orientation</a>().</p>
+<!-- @@@setOrientation -->
+<!-- $$$setPageSize[overload1]$$$setPageSizeconstQPageSize&constQMarginsF& -->
+<h3 class="fn" id="setPageSize"><a name="setPageSize"></a><span class="type">void</span> QPageLayout::<span class="name">setPageSize</span>(const <span class="type"><a href="qpagesize.html">QPageSize</a></span> &amp;<i>pageSize</i>, const <span class="type"><a href="../qtcore/qmarginsf.html">QMarginsF</a></span> &amp;<i>minMargins</i> = QMarginsF(0, 0, 0, 0))</h3>
+<p>Sets the page size of the page layout to <i>pageSize</i>.</p>
+<p>Optionally define the minimum allowed margins <i>minMargins</i>, e.g&#x2e; the minimum margins able to be printed by a physical print device, otherwise the minimum margins will default to 0.</p>
+<p>If <a href="qpagelayout.html#Mode-enum">StandardMode</a> is set then the existing margins will be clamped to the new minimum margins and the maximum margins allowed by the page size. If <a href="qpagelayout.html#Mode-enum">FullPageMode</a> is set then the existing margins will be unchanged.</p>
+<p><b>See also </b><a href="qpagelayout.html#pageSize">pageSize</a>().</p>
+<!-- @@@setPageSize -->
+<!-- $$$setRightMargin[overload1]$$$setRightMarginqreal -->
+<h3 class="fn" id="setRightMargin"><a name="setRightMargin"></a><span class="type">bool</span> QPageLayout::<span class="name">setRightMargin</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>rightMargin</i>)</h3>
+<p>Sets the right page margin of the page layout to <i>rightMargin</i>. Returns true if the margin was successfully set.</p>
+<p>The units used are those currently defined for the layout. To use different units call <a href="qpagelayout.html#setUnits">setUnits</a>() first.</p>
+<p>If in the default <a href="qpagelayout.html#Mode-enum">StandardMode</a> then the new margin must fall between the minimum margin set and the maximum margin allowed by the page size, otherwise the margin will not be set.</p>
+<p>If in <a href="qpagelayout.html#Mode-enum">FullPageMode</a> then any margin values will be accepted.</p>
+<p><b>See also </b><a href="qpagelayout.html#setMargins">setMargins</a>() and <a href="qpagelayout.html#margins">margins</a>().</p>
+<!-- @@@setRightMargin -->
+<!-- $$$setTopMargin[overload1]$$$setTopMarginqreal -->
+<h3 class="fn" id="setTopMargin"><a name="setTopMargin"></a><span class="type">bool</span> QPageLayout::<span class="name">setTopMargin</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>topMargin</i>)</h3>
+<p>Sets the top page margin of the page layout to <i>topMargin</i>. Returns true if the margin was successfully set.</p>
+<p>The units used are those currently defined for the layout. To use different units call <a href="qpagelayout.html#setUnits">setUnits</a>() first.</p>
+<p>If in the default <a href="qpagelayout.html#Mode-enum">StandardMode</a> then the new margin must fall between the minimum margin set and the maximum margin allowed by the page size, otherwise the margin will not be set.</p>
+<p>If in <a href="qpagelayout.html#Mode-enum">FullPageMode</a> then any margin values will be accepted.</p>
+<p><b>See also </b><a href="qpagelayout.html#setMargins">setMargins</a>() and <a href="qpagelayout.html#margins">margins</a>().</p>
+<!-- @@@setTopMargin -->
+<!-- $$$setUnits[overload1]$$$setUnitsQPageLayout::Unit -->
+<h3 class="fn" id="setUnits"><a name="setUnits"></a><span class="type">void</span> QPageLayout::<span class="name">setUnits</span>(<span class="type"><a href="qpagelayout.html#Unit-enum">QPageLayout::Unit</a></span> <i>units</i>)</h3>
+<p>Sets the <i>units</i> used to define the page layout.</p>
+<p><b>See also </b><a href="qpagelayout.html#units">units</a>().</p>
+<!-- @@@setUnits -->
+<!-- $$$swap[overload1]$$$swapQPageLayout& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QPageLayout::<span class="name">swap</span>(<span class="type"><a href="qpagelayout.html#QPageLayout">QPageLayout</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps this page layout with <i>other</i>. This function is very fast and never fails.</p>
+<!-- @@@swap -->
+<!-- $$$units[overload1]$$$units -->
+<h3 class="fn" id="units"><a name="units"></a><span class="type"><a href="qpagelayout.html#Unit-enum">QPageLayout::Unit</a></span> QPageLayout::<span class="name">units</span>() const</h3>
+<p>Returns the units the page layout is currently defined in.</p>
+<p><b>See also </b><a href="qpagelayout.html#setUnits">setUnits</a>().</p>
+<!-- @@@units -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$operator!=[overload1]$$$operator!=constQPageLayout&constQPageLayout& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> <span class="name">operator!=</span>(const <span class="type"><a href="qpagelayout.html#QPageLayout">QPageLayout</a></span> &amp;<i>lhs</i>, const <span class="type"><a href="qpagelayout.html#QPageLayout">QPageLayout</a></span> &amp;<i>rhs</i>)</h3>
+<p>Returns <code>true</code> if page layout <i>lhs</i> is not equal to page layout <i>rhs</i>, i.e&#x2e; if any of the attributes differ.</p>
+<p>Note that this is a strict equality, especially for page size where the <a href="qpagesize.html">QPageSize</a> ID, name and size must exactly match, and the margins where the units must match.</p>
+<p><b>See also </b><a href="qpagelayout.html#isEquivalentTo">QPageLayout::isEquivalentTo</a>().</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQPageLayout&constQPageLayout& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> <span class="name">operator==</span>(const <span class="type"><a href="qpagelayout.html#QPageLayout">QPageLayout</a></span> &amp;<i>lhs</i>, const <span class="type"><a href="qpagelayout.html#QPageLayout">QPageLayout</a></span> &amp;<i>rhs</i>)</h3>
+<p>Returns <code>true</code> if page layout <i>lhs</i> is equal to page layout <i>rhs</i>, i.e&#x2e; if all the attributes are exactly equal.</p>
+<p>Note that this is a strict equality, especially for page size where the <a href="qpagesize.html">QPageSize</a> ID, name and size must exactly match, and the margins where the units must match.</p>
+<p><b>See also </b><a href="qpagelayout.html#isEquivalentTo">QPageLayout::isEquivalentTo</a>().</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

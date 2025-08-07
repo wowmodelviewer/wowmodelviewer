@@ -1,0 +1,757 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qregularexpression.cpp -->
+  <title>QRegularExpression Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QRegularExpression</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#introduction">Introduction</a></li>
+<li class="level2"><a href="#pattern-options">Pattern Options</a></li>
+<li class="level2"><a href="#match-type-and-match-options">Match Type and Match Options</a></li>
+<li class="level2"><a href="#normal-matching">Normal Matching</a></li>
+<li class="level2"><a href="#global-matching">Global Matching</a></li>
+<li class="level2"><a href="#partial-matching">Partial Matching</a></li>
+<li class="level2"><a href="#error-handling">Error Handling</a></li>
+<li class="level2"><a href="#unsupported-perl-compatible-regular-expressions-features">Unsupported Perl-compatible Regular Expressions Features</a></li>
+<li class="level2"><a href="#notes-for-qregexp-users">Notes for QRegExp Users</a></li>
+<li class="level2"><a href="#debugging-code-that-uses-qregularexpression">Debugging Code that Uses QRegularExpression</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QRegularExpression Class</h1>
+<!-- $$$QRegularExpression-brief -->
+<p>The <a href="qregularexpression.html">QRegularExpression</a> class provides pattern matching using regular expressions. <a href="#details">More...</a></p>
+<!-- @@@QRegularExpression -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QRegularExpression&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.0</td></tr></table></div><p>This class was introduced in  Qt 5.0.</p>
+<ul>
+<li><a href="qregularexpression-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#MatchOption-enum">MatchOption</a></b> { NoMatchOption, AnchoredMatchOption, DontCheckSubjectStringMatchOption }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#MatchOption-enum">MatchOptions</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#MatchType-enum">MatchType</a></b> { NormalMatch, PartialPreferCompleteMatch, PartialPreferFirstMatch, NoMatch }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#PatternOption-enum">PatternOption</a></b> { NoPatternOption, CaseInsensitiveOption, DotMatchesEverythingOption, MultilineOption, ..., DontAutomaticallyOptimizeOption }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#PatternOption-enum">PatternOptions</a></b></td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#QRegularExpression-2">QRegularExpression</a></b>(const QRegularExpression &amp;<i>re</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#QRegularExpression-1">QRegularExpression</a></b>(const QString &amp;<i>pattern</i>, QRegularExpression::PatternOptions <i>options</i> = NoPatternOption)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRegularExpression &amp;</td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#operator-eq-1">operator=</a></b>(QRegularExpression &amp;&amp;<i>re</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRegularExpression &amp;</td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#operator-eq">operator=</a></b>(const QRegularExpression &amp;<i>re</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#dtor.QRegularExpression">~QRegularExpression</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#captureCount">captureCount</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#errorString">errorString</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRegularExpressionMatchIterator </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#globalMatch">globalMatch</a></b>(const QString &amp;<i>subject</i>, int <i>offset</i> = 0, QRegularExpression::MatchType <i>matchType</i> = NormalMatch, QRegularExpression::MatchOptions <i>matchOptions</i> = NoMatchOption) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRegularExpressionMatchIterator </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#globalMatch-1">globalMatch</a></b>(const QStringRef &amp;<i>subjectRef</i>, int <i>offset</i> = 0, QRegularExpression::MatchType <i>matchType</i> = NormalMatch, QRegularExpression::MatchOptions <i>matchOptions</i> = NoMatchOption) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#isValid">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRegularExpressionMatch </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#match">match</a></b>(const QString &amp;<i>subject</i>, int <i>offset</i> = 0, QRegularExpression::MatchType <i>matchType</i> = NormalMatch, QRegularExpression::MatchOptions <i>matchOptions</i> = NoMatchOption) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRegularExpressionMatch </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#match-1">match</a></b>(const QStringRef &amp;<i>subjectRef</i>, int <i>offset</i> = 0, QRegularExpression::MatchType <i>matchType</i> = NormalMatch, QRegularExpression::MatchOptions <i>matchOptions</i> = NoMatchOption) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#namedCaptureGroups">namedCaptureGroups</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#optimize">optimize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#pattern">pattern</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#patternErrorOffset">patternErrorOffset</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRegularExpression::PatternOptions </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#patternOptions">patternOptions</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#setPattern">setPattern</a></b>(const QString &amp;<i>pattern</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#setPatternOptions">setPatternOptions</a></b>(QRegularExpression::PatternOptions <i>options</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#swap">swap</a></b>(QRegularExpression &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#operator-not-eq">operator!=</a></b>(const QRegularExpression &amp;<i>re</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#operator-eq-eq">operator==</a></b>(const QRegularExpression &amp;<i>re</i>) const</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#anchoredPattern">anchoredPattern</a></b>(const QString &amp;<i>expression</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#escape">escape</a></b>(const QString &amp;<i>str</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#wildcardToRegularExpression">wildcardToRegularExpression</a></b>(const QString &amp;<i>pattern</i>)</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#qHash">qHash</a></b>(const QRegularExpression &amp;<i>key</i>, uint <i>seed</i> = 0)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDataStream &amp;</td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#operator-lt-lt">operator&lt;&lt;</a></b>(QDataStream &amp;<i>out</i>, const QRegularExpression &amp;<i>re</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDebug </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#operator-lt-lt-1">operator&lt;&lt;</a></b>(QDebug <i>debug</i>, const QRegularExpression &amp;<i>re</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDebug </td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#operator-lt-lt-2">operator&lt;&lt;</a></b>(QDebug <i>debug</i>, QRegularExpression::PatternOptions <i>patternOptions</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDataStream &amp;</td><td class="memItemRight bottomAlign"><b><a href="qregularexpression.html#operator-gt-gt-1">operator&gt;&gt;</a></b>(QDataStream &amp;<i>in</i>, QRegularExpression &amp;<i>re</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QRegularExpression-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Regular expressions, or <i>regexps</i>, are a very powerful tool to handle strings and texts. This is useful in many contexts, e.g&#x2e;,</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td >Validation</td><td >A regexp can test whether a substring meets some criteria, e.g&#x2e; is an integer or contains no whitespace.</td></tr>
+<tr valign="top" class="even"><td >Searching</td><td >A regexp provides more powerful pattern matching than simple substring matching, e.g&#x2e;, match one of the words <i>mail</i>, <i>letter</i> or <i>correspondence</i>, but none of the words <i>email</i>, <i>mailman</i>, <i>mailer</i>, <i>letterbox</i>, etc.</td></tr>
+<tr valign="top" class="odd"><td >Search and Replace</td><td >A regexp can replace all occurrences of a substring with a different substring, e.g&#x2e;, replace all occurrences of <i>&amp;</i> with <i>&amp;amp;</i> except where the <i>&amp;</i> is already followed by an <i>amp;</i>.</td></tr>
+<tr valign="top" class="even"><td >String Splitting</td><td >A regexp can be used to identify where a string should be split apart, e.g&#x2e; splitting tab-delimited strings.</td></tr>
+</table></div>
+<p>This document is by no means a complete reference to pattern matching using regular expressions, and the following parts will require the reader to have some basic knowledge about Perl-like regular expressions and their pattern syntax.</p>
+<p>Good references about regular expressions include:</p>
+<ul>
+<li><i>Mastering Regular Expressions</i> (Third Edition) by Jeffrey E. F. Friedl, ISBN 0-596-52812-4;</li>
+<li>the <a href="http://pcre.org/pcre.txt">pcrepattern</a>(3) man page, describing the pattern syntax supported by PCRE (the reference implementation of Perl-compatible regular expressions);</li>
+<li>the <a href="http://perldoc.perl.org/perlre.html">Perl's regular expression documentation</a> and the <a href="http://perldoc.perl.org/perlretut.html">Perl's regular expression tutorial</a>.</li>
+</ul>
+<a name="introduction"></a>
+<h3 id="introduction">Introduction</h3>
+<p><a href="qregularexpression.html">QRegularExpression</a> implements Perl-compatible regular expressions. It fully supports Unicode. For an overview of the regular expression syntax supported by <a href="qregularexpression.html">QRegularExpression</a>, please refer to the aforementioned pcrepattern(3) man page. A regular expression is made up of two things: a <b>pattern string</b> and a set of <b>pattern options</b> that change the meaning of the pattern string.</p>
+<p>You can set the pattern string by passing a string to the <a href="qregularexpression.html">QRegularExpression</a> constructor:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re(<span class="string">&quot;a pattern&quot;</span>);
+
+</pre>
+<p>This sets the pattern string to <code>a pattern</code>. You can also use the <a href="qregularexpression.html#setPattern">setPattern</a>() function to set a pattern on an existing <a href="qregularexpression.html">QRegularExpression</a> object:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re;
+  re<span class="operator">.</span>setPattern(<span class="string">&quot;another pattern&quot;</span>);
+
+</pre>
+<p>Note that due to C++ literal strings rules, you must escape all backslashes inside the pattern string with another backslash:</p>
+<pre class="cpp">
+
+  <span class="comment">// matches two digits followed by a space and a word</span>
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re(<span class="string">&quot;\\d\\d \\w+&quot;</span>);
+
+  <span class="comment">// matches a backslash</span>
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re2(<span class="string">&quot;\\\\&quot;</span>);
+
+</pre>
+<p>The <a href="qregularexpression.html#pattern">pattern</a>() function returns the pattern that is currently set for a <a href="qregularexpression.html">QRegularExpression</a> object:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re(<span class="string">&quot;a third pattern&quot;</span>);
+  <span class="type"><a href="qstring.html">QString</a></span> pattern <span class="operator">=</span> re<span class="operator">.</span>pattern(); <span class="comment">// pattern == &quot;a third pattern&quot;</span>
+
+</pre>
+<a name="pattern-options"></a>
+<h3 id="pattern-options">Pattern Options</h3>
+<p>The meaning of the pattern string can be modified by setting one or more <i>pattern options</i>. For instance, it is possible to set a pattern to match case insensitively by setting the <a href="qregularexpression.html#PatternOption-enum">QRegularExpression::CaseInsensitiveOption</a>.</p>
+<p>You can set the options by passing them to the <a href="qregularexpression.html">QRegularExpression</a> constructor, as in:</p>
+<pre class="cpp">
+
+  <span class="comment">// matches &quot;Qt rocks&quot;, but also &quot;QT rocks&quot;, &quot;QT ROCKS&quot;, &quot;qT rOcKs&quot;, etc.</span>
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re(<span class="string">&quot;Qt rocks&quot;</span><span class="operator">,</span> <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span><span class="operator">::</span>CaseInsensitiveOption);
+
+</pre>
+<p>Alternatively, you can use the <a href="qregularexpression.html#setPatternOptions">setPatternOptions</a>() function on an existing QRegularExpressionObject:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re(<span class="string">&quot;^\\d+$&quot;</span>);
+  re<span class="operator">.</span>setPatternOptions(<span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span><span class="operator">::</span>MultilineOption);
+  <span class="comment">// re matches any line in the subject string that contains only digits (but at least one)</span>
+
+</pre>
+<p>It is possible to get the pattern options currently set on a <a href="qregularexpression.html">QRegularExpression</a> object by using the <a href="qregularexpression.html#patternOptions">patternOptions</a>() function:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re <span class="operator">=</span> <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span>(<span class="string">&quot;^two.*words$&quot;</span><span class="operator">,</span> <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span><span class="operator">::</span>MultilineOption
+                                                             <span class="operator">|</span> <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span><span class="operator">::</span>DotMatchesEverythingOption);
+
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span><span class="operator">::</span>PatternOptions options <span class="operator">=</span> re<span class="operator">.</span>patternOptions();
+  <span class="comment">// options == QRegularExpression::MultilineOption | QRegularExpression::DotMatchesEverythingOption</span>
+
+</pre>
+<p>Please refer to the <a href="qregularexpression.html#PatternOption-enum">QRegularExpression::PatternOption</a> enum documentation for more information about each pattern option.</p>
+<a name="match-type-and-match-options"></a>
+<h3 id="match-type-and-match-options">Match Type and Match Options</h3>
+<p>The last two arguments of the <a href="qregularexpression.html#match">match</a>() and the <a href="qregularexpression.html#globalMatch">globalMatch</a>() functions set the match type and the match options. The match type is a value of the <a href="qregularexpression.html#MatchType-enum">QRegularExpression::MatchType</a> enum; the &quot;traditional&quot; matching algorithm is chosen by using the <a href="qregularexpression.html#MatchType-enum">NormalMatch</a> match type (the default). It is also possible to enable partial matching of the regular expression against a subject string: see the <a href="qregularexpression.html#partial-matching">partial matching</a> section for more details.</p>
+<p>The match options are a set of one or more <a href="qregularexpression.html#MatchOption-enum">QRegularExpression::MatchOption</a> values. They change the way a specific match of a regular expression against a subject string is done. Please refer to the <a href="qregularexpression.html#MatchOption-enum">QRegularExpression::MatchOption</a> enum documentation for more details.</p>
+<a name="normal-matching"></a><a name="normal-matching"></a>
+<h3 id="normal-matching">Normal Matching</h3>
+<p>In order to perform a match you can simply invoke the <a href="qregularexpression.html#match">match</a>() function passing a string to match against. We refer to this string as the <i>subject string</i>. The result of the <a href="qregularexpression.html#match">match</a>() function is a <a href="qregularexpressionmatch.html">QRegularExpressionMatch</a> object that can be used to inspect the results of the match. For instance:</p>
+<pre class="cpp">
+
+  <span class="comment">// match two digits followed by a space and a word</span>
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re(<span class="string">&quot;\\d\\d \\w+&quot;</span>);
+  <span class="type"><a href="qregularexpressionmatch.html">QRegularExpressionMatch</a></span> match <span class="operator">=</span> re<span class="operator">.</span>match(<span class="string">&quot;abc123 def&quot;</span>);
+  bool hasMatch <span class="operator">=</span> match<span class="operator">.</span>hasMatch(); <span class="comment">// true</span>
+
+</pre>
+<p>If a match is successful, the (implicit) capturing group number 0 can be used to retrieve the substring matched by the entire pattern (see also the section about <a href="qregularexpression.html#extracting-captured-substrings">extracting captured substrings</a>):</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re(<span class="string">&quot;\\d\\d \\w+&quot;</span>);
+  <span class="type"><a href="qregularexpressionmatch.html">QRegularExpressionMatch</a></span> match <span class="operator">=</span> re<span class="operator">.</span>match(<span class="string">&quot;abc123 def&quot;</span>);
+  <span class="keyword">if</span> (match<span class="operator">.</span>hasMatch()) {
+      <span class="type"><a href="qstring.html">QString</a></span> matched <span class="operator">=</span> match<span class="operator">.</span>captured(<span class="number">0</span>); <span class="comment">// matched == &quot;23 def&quot;</span>
+      <span class="comment">// ...</span>
+  }
+
+</pre>
+<p>It's also possible to start a match at an arbitrary offset inside the subject string by passing the offset as an argument of the <a href="qregularexpression.html#match">match</a>() function. In the following example <code>&quot;12 abc&quot;</code> is not matched because the match is started at offset 1:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re(<span class="string">&quot;\\d\\d \\w+&quot;</span>);
+  <span class="type"><a href="qregularexpressionmatch.html">QRegularExpressionMatch</a></span> match <span class="operator">=</span> re<span class="operator">.</span>match(<span class="string">&quot;12 abc 45 def&quot;</span><span class="operator">,</span> <span class="number">1</span>);
+  <span class="keyword">if</span> (match<span class="operator">.</span>hasMatch()) {
+      <span class="type"><a href="qstring.html">QString</a></span> matched <span class="operator">=</span> match<span class="operator">.</span>captured(<span class="number">0</span>); <span class="comment">// matched == &quot;45 def&quot;</span>
+      <span class="comment">// ...</span>
+  }
+
+</pre>
+<a name="extracting-captured-substrings"></a><a name="extracting-captured-substrings"></a>
+<h4 id="extracting-captured-substrings">Extracting captured substrings</h4>
+<p>The <a href="qregularexpressionmatch.html">QRegularExpressionMatch</a> object contains also information about the substrings captured by the capturing groups in the pattern string. The <a href="qregularexpressionmatch.html#captured">captured()</a> function will return the string captured by the n-th capturing group:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re(<span class="string">&quot;^(\\d\\d)/(\\d\\d)/(\\d\\d\\d\\d)$&quot;</span>);
+  <span class="type"><a href="qregularexpressionmatch.html">QRegularExpressionMatch</a></span> match <span class="operator">=</span> re<span class="operator">.</span>match(<span class="string">&quot;08/12/1985&quot;</span>);
+  <span class="keyword">if</span> (match<span class="operator">.</span>hasMatch()) {
+      <span class="type"><a href="qstring.html">QString</a></span> day <span class="operator">=</span> match<span class="operator">.</span>captured(<span class="number">1</span>); <span class="comment">// day == &quot;08&quot;</span>
+      <span class="type"><a href="qstring.html">QString</a></span> month <span class="operator">=</span> match<span class="operator">.</span>captured(<span class="number">2</span>); <span class="comment">// month == &quot;12&quot;</span>
+      <span class="type"><a href="qstring.html">QString</a></span> year <span class="operator">=</span> match<span class="operator">.</span>captured(<span class="number">3</span>); <span class="comment">// year == &quot;1985&quot;</span>
+      <span class="comment">// ...</span>
+  }
+
+</pre>
+<p>Capturing groups in the pattern are numbered starting from 1, and the implicit capturing group 0 is used to capture the substring that matched the entire pattern.</p>
+<p>It's also possible to retrieve the starting and the ending offsets (inside the subject string) of each captured substring, by using the <a href="qregularexpressionmatch.html#capturedStart">capturedStart()</a> and the <a href="qregularexpressionmatch.html#capturedEnd">capturedEnd()</a> functions:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re(<span class="string">&quot;abc(\\d+)def&quot;</span>);
+  <span class="type"><a href="qregularexpressionmatch.html">QRegularExpressionMatch</a></span> match <span class="operator">=</span> re<span class="operator">.</span>match(<span class="string">&quot;XYZabc123defXYZ&quot;</span>);
+  <span class="keyword">if</span> (match<span class="operator">.</span>hasMatch()) {
+      <span class="type">int</span> startOffset <span class="operator">=</span> match<span class="operator">.</span>capturedStart(<span class="number">1</span>); <span class="comment">// startOffset == 6</span>
+      <span class="type">int</span> endOffset <span class="operator">=</span> match<span class="operator">.</span>capturedEnd(<span class="number">1</span>); <span class="comment">// endOffset == 9</span>
+      <span class="comment">// ...</span>
+  }
+
+</pre>
+<p>All of these functions have an overload taking a <a href="qstring.html">QString</a> as a parameter in order to extract <i>named</i> captured substrings. For instance:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re(<span class="string">&quot;^(?&lt;date&gt;\\d\\d)/(?&lt;month&gt;\\d\\d)/(?&lt;year&gt;\\d\\d\\d\\d)$&quot;</span>);
+  <span class="type"><a href="qregularexpressionmatch.html">QRegularExpressionMatch</a></span> match <span class="operator">=</span> re<span class="operator">.</span>match(<span class="string">&quot;08/12/1985&quot;</span>);
+  <span class="keyword">if</span> (match<span class="operator">.</span>hasMatch()) {
+      <span class="type"><a href="qstring.html">QString</a></span> date <span class="operator">=</span> match<span class="operator">.</span>captured(<span class="string">&quot;date&quot;</span>); <span class="comment">// date == &quot;08&quot;</span>
+      <span class="type"><a href="qstring.html">QString</a></span> month <span class="operator">=</span> match<span class="operator">.</span>captured(<span class="string">&quot;month&quot;</span>); <span class="comment">// month == &quot;12&quot;</span>
+      <span class="type"><a href="qstring.html">QString</a></span> year <span class="operator">=</span> match<span class="operator">.</span>captured(<span class="string">&quot;year&quot;</span>); <span class="comment">// year == 1985</span>
+  }
+
+</pre>
+<a name="global-matching"></a><a name="global-matching"></a>
+<h3 id="global-matching">Global Matching</h3>
+<p><i>Global matching</i> is useful to find all the occurrences of a given regular expression inside a subject string. Suppose that we want to extract all the words from a given string, where a word is a substring matching the pattern <code>\w+</code>.</p>
+<p><a href="qregularexpression.html#globalMatch">QRegularExpression::globalMatch</a> returns a <a href="qregularexpressionmatchiterator.html">QRegularExpressionMatchIterator</a>, which is a Java-like forward iterator that can be used to iterate over the results. For instance:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re(<span class="string">&quot;(\\w+)&quot;</span>);
+  <span class="type"><a href="qregularexpressionmatchiterator.html">QRegularExpressionMatchIterator</a></span> i <span class="operator">=</span> re<span class="operator">.</span>globalMatch(<span class="string">&quot;the quick fox&quot;</span>);
+
+</pre>
+<p>Since it's a Java-like iterator, the <a href="qregularexpressionmatchiterator.html">QRegularExpressionMatchIterator</a> will point immediately before the first result. Every result is returned as a <a href="qregularexpressionmatch.html">QRegularExpressionMatch</a> object. The <a href="qregularexpressionmatchiterator.html#hasNext">hasNext()</a> function will return true if there's at least one more result, and <a href="qregularexpressionmatchiterator.html#next">next()</a> will return the next result and advance the iterator. Continuing from the previous example:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qstringlist.html">QStringList</a></span> words;
+  <span class="keyword">while</span> (i<span class="operator">.</span>hasNext()) {
+      <span class="type"><a href="qregularexpressionmatch.html">QRegularExpressionMatch</a></span> match <span class="operator">=</span> i<span class="operator">.</span>next();
+      <span class="type"><a href="qstring.html">QString</a></span> word <span class="operator">=</span> match<span class="operator">.</span>captured(<span class="number">1</span>);
+      words <span class="operator">&lt;</span><span class="operator">&lt;</span> word;
+  }
+  <span class="comment">// words contains &quot;the&quot;, &quot;quick&quot;, &quot;fox&quot;</span>
+
+</pre>
+<p>You can also use <a href="qregularexpressionmatchiterator.html#peekNext">peekNext()</a> to get the next result without advancing the iterator.</p>
+<p>It is possible to pass a starting offset and one or more match options to the <a href="qregularexpression.html#globalMatch">globalMatch</a>() function, exactly like normal matching with <a href="qregularexpression.html#match">match</a>().</p>
+<a name="partial-matching"></a><a name="partial-matching"></a>
+<h3 id="partial-matching">Partial Matching</h3>
+<p>A <i>partial match</i> is obtained when the end of the subject string is reached, but more characters are needed to successfully complete the match. Note that a partial match is usually much more inefficient than a normal match because many optimizations of the matching algorithm cannot be employed.</p>
+<p>A partial match must be explicitly requested by specifying a match type of <a href="qregularexpression.html#MatchType-enum">PartialPreferCompleteMatch</a> or <a href="qregularexpression.html#MatchType-enum">PartialPreferFirstMatch</a> when calling <a href="qregularexpression.html#match">QRegularExpression::match</a> or <a href="qregularexpression.html#globalMatch">QRegularExpression::globalMatch</a>. If a partial match is found, then calling the <a href="qregularexpressionmatch.html#hasMatch">hasMatch()</a> function on the <a href="qregularexpressionmatch.html">QRegularExpressionMatch</a> object returned by <a href="qregularexpression.html#match">match</a>() will return <code>false</code>, but <a href="qregularexpressionmatch.html#hasPartialMatch">hasPartialMatch()</a> will return <code>true</code>.</p>
+<p>When a partial match is found, no captured substrings are returned, and the (implicit) capturing group 0 corresponding to the whole match captures the partially matched substring of the subject string.</p>
+<p>Note that asking for a partial match can still lead to a complete match, if one is found; in this case, <a href="qregularexpressionmatch.html#hasMatch">hasMatch()</a> will return <code>true</code> and <a href="qregularexpressionmatch.html#hasPartialMatch">hasPartialMatch()</a> <code>false</code>. It never happens that a <a href="qregularexpressionmatch.html">QRegularExpressionMatch</a> reports both a partial and a complete match.</p>
+<p>Partial matching is mainly useful in two scenarios: validating user input in real time and incremental/multi-segment matching.</p>
+<a name="validating-user-input"></a><a name="validating-user-input"></a>
+<h4 id="validating-user-input">Validating user input</h4>
+<p>Suppose that we would like the user to input a date in a specific format, for instance &quot;MMM dd, yyyy&quot;. We can check the input validity with a pattern like:</p>
+<p><code>^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d\d?, \d\d\d\d$</code></p>
+<p>(This pattern doesn't catch invalid days, but let's keep it for the example's purposes).</p>
+<p>We would like to validate the input with this regular expression <i>while</i> the user is typing it, so that we can report an error in the input as soon as it is committed (for instance, the user typed the wrong key). In order to do so we must distinguish three cases:</p>
+<ul>
+<li>the input cannot possibly match the regular expression;</li>
+<li>the input does match the regular expression;</li>
+<li>the input does not match the regular expression right now, but it will if more characters will be added to it.</li>
+</ul>
+<p>Note that these three cases represent exactly the possible states of a <a href="../qtgui/qvalidator.html">QValidator</a> (see the <a href="../qtgui/qvalidator.html#State-enum">QValidator::State</a> enum).</p>
+<p>In particular, in the last case we want the regular expression engine to report a partial match: we are successfully matching the pattern against the subject string but the matching cannot continue because the end of the subject is encountered. Notice, however, that the matching algorithm should continue and try all possibilities, and in case a complete (non-partial) match is found, then this one should be reported, and the input string accepted as fully valid.</p>
+<p>This behaviour is implemented by the <a href="qregularexpression.html#MatchType-enum">PartialPreferCompleteMatch</a> match type. For instance:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qstring.html">QString</a></span> pattern(<span class="string">&quot;^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \\d\\d?, \\d\\d\\d\\d$&quot;</span>);
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re(pattern);
+
+  <span class="type"><a href="qstring.html">QString</a></span> input(<span class="string">&quot;Jan 21,&quot;</span>);
+  <span class="type"><a href="qregularexpressionmatch.html">QRegularExpressionMatch</a></span> match <span class="operator">=</span> re<span class="operator">.</span>match(input<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span><span class="operator">::</span>PartialPreferCompleteMatch);
+  bool hasMatch <span class="operator">=</span> match<span class="operator">.</span>hasMatch(); <span class="comment">// false</span>
+  bool hasPartialMatch <span class="operator">=</span> match<span class="operator">.</span>hasPartialMatch(); <span class="comment">// true</span>
+
+</pre>
+<p>If matching the same regular expression against the subject string leads to a complete match, it is reported as usual:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qstring.html">QString</a></span> input(<span class="string">&quot;Dec 8, 1985&quot;</span>);
+  <span class="type"><a href="qregularexpressionmatch.html">QRegularExpressionMatch</a></span> match <span class="operator">=</span> re<span class="operator">.</span>match(input<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span><span class="operator">::</span>PartialPreferCompleteMatch);
+  bool hasMatch <span class="operator">=</span> match<span class="operator">.</span>hasMatch(); <span class="comment">// true</span>
+  bool hasPartialMatch <span class="operator">=</span> match<span class="operator">.</span>hasPartialMatch(); <span class="comment">// false</span>
+
+</pre>
+<p>Another example with a different pattern, showing the behaviour of preferring a complete match over a partial one:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re(<span class="string">&quot;abc\\w+X|def&quot;</span>);
+  <span class="type"><a href="qregularexpressionmatch.html">QRegularExpressionMatch</a></span> match <span class="operator">=</span> re<span class="operator">.</span>match(<span class="string">&quot;abcdef&quot;</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span><span class="operator">::</span>PartialPreferCompleteMatch);
+  bool hasMatch <span class="operator">=</span> match<span class="operator">.</span>hasMatch(); <span class="comment">// true</span>
+  bool hasPartialMatch <span class="operator">=</span> match<span class="operator">.</span>hasPartialMatch(); <span class="comment">// false</span>
+  <span class="type"><a href="qstring.html">QString</a></span> captured <span class="operator">=</span> match<span class="operator">.</span>captured(<span class="number">0</span>); <span class="comment">// captured == &quot;def&quot;</span>
+
+</pre>
+<p>In this case, the subpattern <code>abc\\w+X</code> partially matches the subject string; however, the subpattern <code>def</code> matches the subject string completely, and therefore a complete match is reported.</p>
+<p>If multiple partial matches are found when matching (but no complete match), then the <a href="qregularexpressionmatch.html">QRegularExpressionMatch</a> object will report the first one that is found. For instance:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re(<span class="string">&quot;abc\\w+X|defY&quot;</span>);
+  <span class="type"><a href="qregularexpressionmatch.html">QRegularExpressionMatch</a></span> match <span class="operator">=</span> re<span class="operator">.</span>match(<span class="string">&quot;abcdef&quot;</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span><span class="operator">::</span>PartialPreferCompleteMatch);
+  bool hasMatch <span class="operator">=</span> match<span class="operator">.</span>hasMatch(); <span class="comment">// false</span>
+  bool hasPartialMatch <span class="operator">=</span> match<span class="operator">.</span>hasPartialMatch(); <span class="comment">// true</span>
+  <span class="type"><a href="qstring.html">QString</a></span> captured <span class="operator">=</span> match<span class="operator">.</span>captured(<span class="number">0</span>); <span class="comment">// captured == &quot;abcdef&quot;</span>
+
+</pre>
+<a name="incremental-multi-segment-matching"></a>
+<h4 id="incremental-multi-segment-matching">Incremental/multi-segment matching</h4>
+<p>Incremental matching is another use case of partial matching. Suppose that we want to find the occurrences of a regular expression inside a large text (that is, substrings matching the regular expression). In order to do so we would like to &quot;feed&quot; the large text to the regular expression engines in smaller chunks. The obvious problem is what happens if the substring that matches the regular expression spans across two or more chunks.</p>
+<p>In this case, the regular expression engine should report a partial match, so that we can match again adding new data and (eventually) get a complete match. This implies that the regular expression engine may assume that there are other characters <i>beyond the end</i> of the subject string. This is not to be taken literally -- the engine will never try to access any character after the last one in the subject.</p>
+<p><a href="qregularexpression.html">QRegularExpression</a> implements this behaviour when using the <a href="qregularexpression.html#MatchType-enum">PartialPreferFirstMatch</a> match type. This match type reports a partial match as soon as it is found, and other match alternatives are not tried (even if they could lead to a complete match). For instance:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re(<span class="string">&quot;abc|ab&quot;</span>);
+  <span class="type"><a href="qregularexpressionmatch.html">QRegularExpressionMatch</a></span> match <span class="operator">=</span> re<span class="operator">.</span>match(<span class="string">&quot;ab&quot;</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span><span class="operator">::</span>PartialPreferFirstMatch);
+  bool hasMatch <span class="operator">=</span> match<span class="operator">.</span>hasMatch(); <span class="comment">// false</span>
+  bool hasPartialMatch <span class="operator">=</span> match<span class="operator">.</span>hasPartialMatch(); <span class="comment">// true</span>
+
+</pre>
+<p>This happens because when matching the first branch of the alternation operator a partial match is found, and therefore matching stops, without trying the second branch. Another example:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re(<span class="string">&quot;abc(def)?&quot;</span>);
+  <span class="type"><a href="qregularexpressionmatch.html">QRegularExpressionMatch</a></span> match <span class="operator">=</span> re<span class="operator">.</span>match(<span class="string">&quot;abc&quot;</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span><span class="operator">::</span>PartialPreferFirstMatch);
+  bool hasMatch <span class="operator">=</span> match<span class="operator">.</span>hasMatch(); <span class="comment">// false</span>
+  bool hasPartialMatch <span class="operator">=</span> match<span class="operator">.</span>hasPartialMatch(); <span class="comment">// true</span>
+
+</pre>
+<p>This shows what could seem a counterintuitve behaviour of quantifiers: since <code>?</code> is greedy, then the engine tries first to continue the match after having matched <code>&quot;abc&quot;</code>; but then the matching reaches the end of the subject string, and therefore a partial match is reported. This is even more surprising in the following example:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re(<span class="string">&quot;(abc)*&quot;</span>);
+  <span class="type"><a href="qregularexpressionmatch.html">QRegularExpressionMatch</a></span> match <span class="operator">=</span> re<span class="operator">.</span>match(<span class="string">&quot;abc&quot;</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span><span class="operator">::</span>PartialPreferFirstMatch);
+  bool hasMatch <span class="operator">=</span> match<span class="operator">.</span>hasMatch(); <span class="comment">// false</span>
+  bool hasPartialMatch <span class="operator">=</span> match<span class="operator">.</span>hasPartialMatch(); <span class="comment">// true</span>
+
+</pre>
+<p>It's easy to understand this behaviour if we remember that the engine expects the subject string to be only a substring of the whole text we're looking for a match into (that is, how we said before, that the engine assumes that there are other characters beyond the end of the subject string).</p>
+<p>Since the <code>*</code> quantifier is greedy, then reporting a complete match could be an error, because after the current subject <code>&quot;abc&quot;</code> there may be other occurrences of <code>&quot;abc&quot;</code>. For instance, the complete text could have been &quot;abcabcX&quot;, and therefore the <i>right</i> match to report (in the complete text) would have been <code>&quot;abcabc&quot;</code>; by matching only against the leading <code>&quot;abc&quot;</code> we instead get a partial match.</p>
+<a name="error-handling"></a>
+<h3 id="error-handling">Error Handling</h3>
+<p>It is possible for a <a href="qregularexpression.html">QRegularExpression</a> object to be invalid because of syntax errors in the pattern string. The <a href="qregularexpression.html#isValid">isValid</a>() function will return true if the regular expression is valid, or false otherwise:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> invalidRe(<span class="string">&quot;(unmatched|parenthesis&quot;</span>);
+  bool isValid <span class="operator">=</span> invalidRe<span class="operator">.</span>isValid(); <span class="comment">// false</span>
+
+</pre>
+<p>You can get more information about the specific error by calling the <a href="qregularexpression.html#errorString">errorString</a>() function; moreover, the <a href="qregularexpression.html#patternErrorOffset">patternErrorOffset</a>() function will return the offset inside the pattern string</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> invalidRe(<span class="string">&quot;(unmatched|parenthesis&quot;</span>);
+  <span class="keyword">if</span> (<span class="operator">!</span>invalidRe<span class="operator">.</span>isValid()) {
+      <span class="type"><a href="qstring.html">QString</a></span> errorString <span class="operator">=</span> invalidRe<span class="operator">.</span>errorString(); <span class="comment">// errorString == &quot;missing )&quot;</span>
+      <span class="type">int</span> errorOffset <span class="operator">=</span> invalidRe<span class="operator">.</span>patternErrorOffset(); <span class="comment">// errorOffset == 22</span>
+      <span class="comment">// ...</span>
+  }
+
+</pre>
+<p>If a match is attempted with an invalid <a href="qregularexpression.html">QRegularExpression</a>, then the returned <a href="qregularexpressionmatch.html">QRegularExpressionMatch</a> object will be invalid as well (that is, its <a href="qregularexpressionmatch.html#isValid">isValid()</a> function will return false). The same applies for attempting a global match.</p>
+<a name="unsupported-perl-compatible-regular-expressions-features"></a>
+<h3 id="unsupported-perl-compatible-regular-expressions-features">Unsupported Perl-compatible Regular Expressions Features</h3>
+<p><a href="qregularexpression.html">QRegularExpression</a> does not support all the features available in Perl-compatible regular expressions. The most notable one is the fact that duplicated names for capturing groups are not supported, and using them can lead to undefined behaviour.</p>
+<p>This may change in a future version of Qt.</p>
+<a name="notes-for-qregexp-users"></a>
+<h3 id="notes-for-qregexp-users">Notes for QRegExp Users</h3>
+<p>The <a href="qregularexpression.html">QRegularExpression</a> class introduced in Qt 5 is a big improvement upon <a href="qregexp.html">QRegExp</a>, in terms of APIs offered, supported pattern syntax and speed of execution. The biggest difference is that <a href="qregularexpression.html">QRegularExpression</a> simply holds a regular expression, and it's <i>not</i> modified when a match is requested. Instead, a <a href="qregularexpressionmatch.html">QRegularExpressionMatch</a> object is returned, in order to check the result of a match and extract the captured substring. The same applies with global matching and <a href="qregularexpressionmatchiterator.html">QRegularExpressionMatchIterator</a>.</p>
+<p>Other differences are outlined below.</p>
+<a name="porting-from-qregexp-exactmatch"></a>
+<h4 id="porting-from-qregexp-exactmatch">Porting from QRegExp::exactMatch()</h4>
+<p><a href="qregexp.html#exactMatch">QRegExp::exactMatch</a>() in Qt 4 served two purposes: it exactly matched a regular expression against a subject string, and it implemented partial matching.</p>
+<a name="porting-from-qregexp-s-exact-matching"></a>
+<h5 id="porting-from-qregexp-s-exact-matching">Porting from QRegExp's Exact Matching</h5>
+<p>Exact matching indicates whether the regular expression matches the entire subject string. For example, the classes yield on the subject string <code>&quot;abc123&quot;</code>:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th ></th><th ><a href="qregexp.html#exactMatch">QRegExp::exactMatch</a>()</th><th ><a href="qregularexpressionmatch.html#hasMatch">QRegularExpressionMatch::hasMatch</a>()</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>&quot;\\d+&quot;</code></td><td ><b>false</b></td><td ><b>true</b></td></tr>
+<tr valign="top" class="even"><td ><code>&quot;[a-z]+\\d+&quot;</code></td><td ><b>true</b></td><td ><b>true</b></td></tr>
+</table></div>
+<p>Exact matching is not reflected in <a href="qregularexpression.html">QRegularExpression</a>. If you want to be sure that the subject string matches the regular expression exactly, you can wrap the pattern between a couple of anchoring expressions. Simply putting the pattern between the <code>^</code> and the <code>$</code> anchors is enough in most cases:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re(<span class="string">&quot;^this pattern must match exactly$&quot;</span>);
+
+</pre>
+<p>However, remember that the <code>$</code> anchor not only matches at the end of the string, but also at a newline character right before the end of the string; that is, the previous pattern matches against the string &quot;this pattern must match exactly\n&quot;. Also, the behaviour of both the <code>^</code> and the <code>$</code> anchors changes if the MultiLineOption is set either explicitly (as a pattern option) or implicitly (as a directive inside the pattern string).</p>
+<p>Therefore, in the most general case, you should wrap the pattern between the <code>\A</code> and the <code>\z</code> anchors:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qstring.html">QString</a></span> p(<span class="string">&quot;a .*|pattern&quot;</span>);
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re(<span class="string">&quot;\\A(?:&quot;</span> <span class="operator">+</span> p <span class="operator">+</span> <span class="string">&quot;)\\z&quot;</span>); <span class="comment">// re matches exactly the pattern string p</span>
+
+</pre>
+<p>Note the usage of the non-capturing group in order to preserve the meaning of the branch operator inside the pattern.</p>
+<p>The <a href="qregularexpression.html#anchoredPattern">QRegularExpression::anchoredPattern</a>() helper method does exactly that for you.</p>
+<a name="porting-from-qregexp-s-partial-matching"></a>
+<h5 id="porting-from-qregexp-s-partial-matching">Porting from QRegExp's Partial Matching</h5>
+<p>When using <a href="qregexp.html#exactMatch">QRegExp::exactMatch</a>(), if an exact match was not found, one could still find out how much of the subject string was matched by the regular expression by calling <a href="qregexp.html#matchedLength">QRegExp::matchedLength</a>(). If the returned length was equal to the subject string's length, then one could conclude that a partial match was found.</p>
+<p><a href="qregularexpression.html">QRegularExpression</a> supports partial matching explicitly by means of the appropriate <a href="qregularexpression.html#MatchType-enum">MatchType</a>.</p>
+<a name="global-matching"></a>
+<h4 id="global-matching">Global matching</h4>
+<p>Due to limitations of the <a href="qregexp.html">QRegExp</a> API it was impossible to implement global matching correctly (that is, like Perl does). In particular, patterns that can match 0 characters (like <code>&quot;a*&quot;</code>) are problematic.</p>
+<p><a href="qregularexpression.html#globalMatch">QRegularExpression::globalMatch</a>() implements Perl global match correctly, and the returned iterator can be used to examine each result.</p>
+<a name="unicode-properties-support"></a>
+<h4 id="unicode-properties-support">Unicode properties support</h4>
+<p>When using <a href="qregexp.html">QRegExp</a>, character classes such as <code>\w</code>, <code>\d</code>, etc. match characters with the corresponding Unicode property: for instance, <code>\d</code> matches any character with the Unicode Nd (decimal digit) property.</p>
+<p>Those character classes only match ASCII characters by default when using <a href="qregularexpression.html">QRegularExpression</a>: for instance, <code>\d</code> matches exactly a character in the <code>0-9</code> ASCII range. It is possible to change this behaviour by using the <a href="qregularexpression.html#PatternOption-enum">UseUnicodePropertiesOption</a> pattern option.</p>
+<a name="wildcard-matching"></a>
+<h4 id="wildcard-matching">Wildcard matching</h4>
+<p>There is no direct way to do wildcard matching in <a href="qregularexpression.html">QRegularExpression</a>. However, the <a href="qregularexpression.html#wildcardToRegularExpression">wildcardToRegularExpression</a> method is provided to translate glob patterns into a Perl-compatible regular expression that can be used for that purpose.</p>
+<a name="other-pattern-syntaxes"></a>
+<h4 id="other-pattern-syntaxes">Other pattern syntaxes</h4>
+<p><a href="qregularexpression.html">QRegularExpression</a> supports only Perl-compatible regular expressions.</p>
+<a name="minimal-matching"></a>
+<h4 id="minimal-matching">Minimal matching</h4>
+<p><a href="qregexp.html#setMinimal">QRegExp::setMinimal</a>() implemented minimal matching by simply reversing the greediness of the quantifiers (<a href="qregexp.html">QRegExp</a> did not support lazy quantifiers, like <code>*?</code>, <code>+?</code>, etc.)&#x2e; <a href="qregularexpression.html">QRegularExpression</a> instead does support greedy, lazy and possessive quantifiers. The <a href="qregularexpression.html#PatternOption-enum">InvertedGreedinessOption</a> pattern option can be useful to emulate the effects of <a href="qregexp.html#setMinimal">QRegExp::setMinimal</a>(): if enabled, it inverts the greediness of quantifiers (greedy ones become lazy and vice versa).</p>
+<a name="caret-modes"></a>
+<h4 id="caret-modes">Caret modes</h4>
+<p>The <a href="qregularexpression.html#MatchOption-enum">AnchoredMatchOption</a> match option can be used to emulate the <a href="qregexp.html#CaretMode-enum">QRegExp::CaretAtOffset</a> behaviour. There is no equivalent for the other <a href="qregexp.html#CaretMode-enum">QRegExp::CaretMode</a> modes.</p>
+<a name="debugging-code-that-uses-qregularexpression"></a>
+<h3 id="debugging-code-that-uses-qregularexpression">Debugging Code that Uses QRegularExpression</h3>
+<p><a href="qregularexpression.html">QRegularExpression</a> internally uses a just in time compiler (JIT) to optimize the execution of the matching algorithm. The JIT makes extensive usage of self-modifying code, which can lead debugging tools such as Valgrind to crash. You must enable all checks for self-modifying code if you want to debug programs using <a href="qregularexpression.html">QRegularExpression</a> (f.i&#x2e;, see Valgrind's <code>--smc-check</code> command line option). The downside of enabling such checks is that your program will run considerably slower.</p>
+<p>To avoid that, the JIT is disabled by default if you compile Qt in debug mode. It is possible to override the default and enable or disable the JIT usage (both in debug or release mode) by setting the <code>QT_ENABLE_REGEXP_JIT</code> environment variable to a non-zero or zero value respectively.</p>
+</div>
+<p><b>See also </b><a href="qregularexpression.html#anchoredPattern">anchoredPattern</a>, <a href="qregularexpressionmatch.html">QRegularExpressionMatch</a>, and <a href="qregularexpressionmatchiterator.html">QRegularExpressionMatchIterator</a>.</p>
+<!-- @@@QRegularExpression -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$MatchOption$$$NoMatchOption$$$AnchoredMatchOption$$$DontCheckSubjectStringMatchOption -->
+<h3 class="flags" id="MatchOption-enum"><a name="MatchOption-enum"></a>enum QRegularExpression::<span class="name">MatchOption</span><br/>flags QRegularExpression::<span class="name">MatchOptions</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QRegularExpression::NoMatchOption</code></td><td class="topAlign tblval"><code>0x0000</code></td><td class="topAlign">No match options are set.</td></tr>
+<tr><td class="topAlign"><code>QRegularExpression::AnchoredMatchOption</code></td><td class="topAlign tblval"><code>0x0001</code></td><td class="topAlign">The match is constrained to start exactly at the offset passed to <a href="qregularexpression.html#match">match</a>() in order to be successful, even if the pattern string does not contain any metacharacter that anchors the match at that point.</td></tr>
+<tr><td class="topAlign"><code>QRegularExpression::DontCheckSubjectStringMatchOption</code></td><td class="topAlign tblval"><code>0x0002</code></td><td class="topAlign">The subject string is not checked for UTF-16 validity before attempting a match. Use this option with extreme caution, as attempting to match an invalid string may crash the program and/or constitute a security issue. This enum value has been introduced in Qt 5.4&#x2e;</td></tr>
+</table></div>
+<p>The MatchOptions type is a typedef for <a href="qflags.html">QFlags</a>&lt;MatchOption&gt;. It stores an OR combination of MatchOption values.</p>
+<!-- @@@MatchOption -->
+<!-- $$$MatchType$$$NormalMatch$$$PartialPreferCompleteMatch$$$PartialPreferFirstMatch$$$NoMatch -->
+<h3 class="fn" id="MatchType-enum"><a name="MatchType-enum"></a>enum QRegularExpression::<span class="name">MatchType</span></h3>
+<p>The MatchType enum defines the type of the match that should be attempted against the subject string.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QRegularExpression::NormalMatch</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">A normal match is done.</td></tr>
+<tr><td class="topAlign"><code>QRegularExpression::PartialPreferCompleteMatch</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The pattern string is matched partially against the subject string. If a partial match is found, then it is recorded, and other matching alternatives are tried as usual. If a complete match is then found, then it's preferred to the partial match; in this case only the complete match is reported. If instead no complete match is found (but only the partial one), then the partial one is reported.</td></tr>
+<tr><td class="topAlign"><code>QRegularExpression::PartialPreferFirstMatch</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The pattern string is matched partially against the subject string. If a partial match is found, then matching stops and the partial match is reported. In this case, other matching alternatives (potentially leading to a complete match) are not tried. Moreover, this match type assumes that the subject string only a substring of a larger text, and that (in this text) there are other characters beyond the end of the subject string. This can lead to surprising results; see the discussion in the <a href="qregularexpression.html#partial-matching">partial matching</a> section for more details.</td></tr>
+<tr><td class="topAlign"><code>QRegularExpression::NoMatch</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">No matching is done. This value is returned as the match type by a default constructed <a href="qregularexpressionmatch.html">QRegularExpressionMatch</a> or <a href="qregularexpressionmatchiterator.html">QRegularExpressionMatchIterator</a>. Using this match type is not very useful for the user, as no matching ever happens. This enum value has been introduced in Qt 5.1&#x2e;</td></tr>
+</table></div>
+<!-- @@@MatchType -->
+<!-- $$$PatternOption$$$NoPatternOption$$$CaseInsensitiveOption$$$DotMatchesEverythingOption$$$MultilineOption$$$ExtendedPatternSyntaxOption$$$InvertedGreedinessOption$$$DontCaptureOption$$$UseUnicodePropertiesOption$$$OptimizeOnFirstUsageOption$$$DontAutomaticallyOptimizeOption -->
+<h3 class="flags" id="PatternOption-enum"><a name="PatternOption-enum"></a>enum QRegularExpression::<span class="name">PatternOption</span><br/>flags QRegularExpression::<span class="name">PatternOptions</span></h3>
+<p>The PatternOption enum defines modifiers to the way the pattern string should be interpreted, and therefore the way the pattern matches against a subject string.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QRegularExpression::NoPatternOption</code></td><td class="topAlign tblval"><code>0x0000</code></td><td class="topAlign">No pattern options are set.</td></tr>
+<tr><td class="topAlign"><code>QRegularExpression::CaseInsensitiveOption</code></td><td class="topAlign tblval"><code>0x0001</code></td><td class="topAlign">The pattern should match against the subject string in a case insensitive way. This option corresponds to the /i modifier in Perl regular expressions.</td></tr>
+<tr><td class="topAlign"><code>QRegularExpression::DotMatchesEverythingOption</code></td><td class="topAlign tblval"><code>0x0002</code></td><td class="topAlign">The dot metacharacter (<code>.</code>) in the pattern string is allowed to match any character in the subject string, including newlines (normally, the dot does not match newlines). This option corresponds to the <code>/s</code> modifier in Perl regular expressions.</td></tr>
+<tr><td class="topAlign"><code>QRegularExpression::MultilineOption</code></td><td class="topAlign tblval"><code>0x0004</code></td><td class="topAlign">The caret (<code>^</code>) and the dollar (<code>$</code>) metacharacters in the pattern string are allowed to match, respectively, immediately after and immediately before any newline in the subject string, as well as at the very beginning and at the very end of the subject string. This option corresponds to the <code>/m</code> modifier in Perl regular expressions.</td></tr>
+<tr><td class="topAlign"><code>QRegularExpression::ExtendedPatternSyntaxOption</code></td><td class="topAlign tblval"><code>0x0008</code></td><td class="topAlign">Any whitespace in the pattern string which is not escaped and outside a character class is ignored. Moreover, an unescaped sharp (<b>#</b>) outside a character class causes all the following characters, until the first newline (included), to be ignored. This can be used to increase the readability of a pattern string as well as put comments inside regular expressions; this is particulary useful if the pattern string is loaded from a file or written by the user, because in C++ code it is always possible to use the rules for string literals to put comments outside the pattern string. This option corresponds to the <code>/x</code> modifier in Perl regular expressions.</td></tr>
+<tr><td class="topAlign"><code>QRegularExpression::InvertedGreedinessOption</code></td><td class="topAlign tblval"><code>0x0010</code></td><td class="topAlign">The greediness of the quantifiers is inverted: <code>*</code>, <code>+</code>, <code>?</code>, <code>{m,n}</code>, etc. become lazy, while their lazy versions (<code>*?</code>, <code>+?</code>, <code>??</code>, <code>{m,n}?</code>, etc.) become greedy. There is no equivalent for this option in Perl regular expressions.</td></tr>
+<tr><td class="topAlign"><code>QRegularExpression::DontCaptureOption</code></td><td class="topAlign tblval"><code>0x0020</code></td><td class="topAlign">The non-named capturing groups do not capture substrings; named capturing groups still work as intended, as well as the implicit capturing group number 0 corresponding to the entire match. There is no equivalent for this option in Perl regular expressions.</td></tr>
+<tr><td class="topAlign"><code>QRegularExpression::UseUnicodePropertiesOption</code></td><td class="topAlign tblval"><code>0x0040</code></td><td class="topAlign">The meaning of the <code>\w</code>, <code>\d</code>, etc., character classes, as well as the meaning of their counterparts (<code>\W</code>, <code>\D</code>, etc.), is changed from matching ASCII characters only to matching any character with the corresponding Unicode property. For instance, <code>\d</code> is changed to match any character with the Unicode Nd (decimal digit) property; <code>\w</code> to match any character with either the Unicode L (letter) or N (digit) property, plus underscore, and so on. This option corresponds to the <code>/u</code> modifier in Perl regular expressions.</td></tr>
+<tr><td class="topAlign"><code>QRegularExpression::OptimizeOnFirstUsageOption</code></td><td class="topAlign tblval"><code>0x0080</code></td><td class="topAlign">This option is ignored. A regular expression is automatically optimized (including JIT compiling) the first time it is used. This enum value was introduced in Qt 5.4&#x2e;</td></tr>
+<tr><td class="topAlign"><code>QRegularExpression::DontAutomaticallyOptimizeOption</code></td><td class="topAlign tblval"><code>0x0100</code></td><td class="topAlign">This option is ignored. A regular expression is automatically optimized (including JIT compiling) the first time it is used. This enum value was introduced in Qt 5.4&#x2e;</td></tr>
+</table></div>
+<p>The PatternOptions type is a typedef for <a href="qflags.html">QFlags</a>&lt;PatternOption&gt;. It stores an OR combination of PatternOption values.</p>
+<!-- @@@PatternOption -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QRegularExpression$$$QRegularExpressionconstQRegularExpression& -->
+<h3 class="fn" id="QRegularExpression-2"><a name="QRegularExpression-2"></a>QRegularExpression::<span class="name">QRegularExpression</span>(const <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> &amp;<i>re</i>)</h3>
+<p>Constructs a <a href="qregularexpression.html">QRegularExpression</a> object as a copy of <i>re</i>.</p>
+<p><b>See also </b><a href="qregularexpression.html#operator-eq">operator=</a>().</p>
+<!-- @@@QRegularExpression -->
+<!-- $$$QRegularExpression$$$QRegularExpressionconstQString&QRegularExpression::PatternOptions -->
+<h3 class="fn" id="QRegularExpression-1"><a name="QRegularExpression-1"></a>QRegularExpression::<span class="name">QRegularExpression</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>pattern</i>, <span class="type"><a href="qregularexpression.html#PatternOption-enum">QRegularExpression::PatternOptions</a></span> <i>options</i> = NoPatternOption)</h3>
+<p>Constructs a <a href="qregularexpression.html">QRegularExpression</a> object using the given <i>pattern</i> as pattern and the <i>options</i> as the pattern options.</p>
+<p><b>See also </b><a href="qregularexpression.html#setPattern">setPattern</a>() and <a href="qregularexpression.html#setPatternOptions">setPatternOptions</a>().</p>
+<!-- @@@QRegularExpression -->
+<!-- $$$QRegularExpression[overload1]$$$QRegularExpression -->
+<h3 class="fn" id="QRegularExpression"><a name="QRegularExpression"></a>QRegularExpression::<span class="name">QRegularExpression</span>()</h3>
+<p>Constructs a <a href="qregularexpression.html">QRegularExpression</a> object with an empty pattern and no pattern options.</p>
+<p><b>See also </b><a href="qregularexpression.html#setPattern">setPattern</a>() and <a href="qregularexpression.html#setPatternOptions">setPatternOptions</a>().</p>
+<!-- @@@QRegularExpression -->
+<!-- $$$operator=$$$operator=QRegularExpression&& -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> &amp;QRegularExpression::<span class="name">operator=</span>(<span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> &amp;&amp;<i>re</i>)</h3>
+<p>Move-assigns the regular expression <i>re</i> to this object, and returns a reference to the copy. Both the pattern and the pattern options are copied.</p>
+<!-- @@@operator= -->
+<!-- $$$operator=[overload1]$$$operator=constQRegularExpression& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> &amp;QRegularExpression::<span class="name">operator=</span>(const <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> &amp;<i>re</i>)</h3>
+<p>Assigns the regular expression <i>re</i> to this object, and returns a reference to the copy. Both the pattern and the pattern options are copied.</p>
+<!-- @@@operator= -->
+<!-- $$$~QRegularExpression[overload1]$$$~QRegularExpression -->
+<h3 class="fn" id="dtor.QRegularExpression"><a name="dtor.QRegularExpression"></a>QRegularExpression::<span class="name">~QRegularExpression</span>()</h3>
+<p>Destroys the <a href="qregularexpression.html">QRegularExpression</a> object.</p>
+<!-- @@@~QRegularExpression -->
+<!-- $$$anchoredPattern[overload1]$$$anchoredPatternconstQString& -->
+<h3 class="fn" id="anchoredPattern"><a name="anchoredPattern"></a><code>[static] </code><span class="type"><a href="qstring.html">QString</a></span> QRegularExpression::<span class="name">anchoredPattern</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>expression</i>)</h3>
+<p>Returns the <i>expression</i> wrapped between the <code>\A</code> and <code>\z</code> anchors to be used for exact matching.</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<p><b>See also </b><a href="qregularexpression.html#porting-from-qregexp-s-exact-matching">Porting from QRegExp's Exact Matching</a>.</p>
+<!-- @@@anchoredPattern -->
+<!-- $$$captureCount[overload1]$$$captureCount -->
+<h3 class="fn" id="captureCount"><a name="captureCount"></a><span class="type">int</span> QRegularExpression::<span class="name">captureCount</span>() const</h3>
+<p>Returns the number of capturing groups inside the pattern string, or -1 if the regular expression is not valid.</p>
+<p><b>Note: </b>The implicit capturing group 0 is <i>not</i> included in the returned number.</p><p><b>See also </b><a href="qregularexpression.html#isValid">isValid</a>().</p>
+<!-- @@@captureCount -->
+<!-- $$$errorString[overload1]$$$errorString -->
+<h3 class="fn" id="errorString"><a name="errorString"></a><span class="type"><a href="qstring.html">QString</a></span> QRegularExpression::<span class="name">errorString</span>() const</h3>
+<p>Returns a textual description of the error found when checking the validity of the regular expression, or &quot;no error&quot; if no error was found.</p>
+<p><b>See also </b><a href="qregularexpression.html#isValid">isValid</a>() and <a href="qregularexpression.html#patternErrorOffset">patternErrorOffset</a>().</p>
+<!-- @@@errorString -->
+<!-- $$$escape[overload1]$$$escapeconstQString& -->
+<h3 class="fn" id="escape"><a name="escape"></a><code>[static] </code><span class="type"><a href="qstring.html">QString</a></span> QRegularExpression::<span class="name">escape</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>str</i>)</h3>
+<p>Escapes all characters of <i>str</i> so that they no longer have any special meaning when used as a regular expression pattern string, and returns the escaped string. For instance:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qstring.html">QString</a></span> escaped <span class="operator">=</span> <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span><span class="operator">::</span>escape(<span class="string">&quot;a(x) = f(x) + g(x)&quot;</span>);
+  <span class="comment">// escaped == &quot;a\\(x\\)\\ \\=\\ f\\(x\\)\\ \\+\\ g\\(x\\)&quot;</span>
+
+</pre>
+<p>This is very convenient in order to build patterns from arbitrary strings:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qstring.html">QString</a></span> pattern <span class="operator">=</span> <span class="string">&quot;(&quot;</span> <span class="operator">+</span> <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span><span class="operator">::</span>escape(name) <span class="operator">+</span>
+                    <span class="string">&quot;|&quot;</span> <span class="operator">+</span> <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span><span class="operator">::</span>escape(nickname) <span class="operator">+</span> <span class="string">&quot;)&quot;</span>;
+  <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> re(pattern);
+
+</pre>
+<p><b>Note: </b>This function implements Perl's quotemeta algorithm and escapes with a backslash all characters in <i>str</i>, except for the characters in the <code>[A-Z]</code>, <code>[a-z]</code> and <code>[0-9]</code> ranges, as well as the underscore (<code>_</code>) character. The only difference with Perl is that a literal NUL inside <i>str</i> is escaped with the sequence <code>&quot;\\0&quot;</code> (backslash + <code>'0'</code>), instead of <code>&quot;\\\0&quot;</code> (backslash + <code>NUL</code>).</p><!-- @@@escape -->
+<!-- $$$globalMatch[overload1]$$$globalMatchconstQString&intQRegularExpression::MatchTypeQRegularExpression::MatchOptions -->
+<h3 class="fn" id="globalMatch"><a name="globalMatch"></a><span class="type"><a href="qregularexpressionmatchiterator.html">QRegularExpressionMatchIterator</a></span> QRegularExpression::<span class="name">globalMatch</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>subject</i>, <span class="type">int</span> <i>offset</i> = 0, <span class="type"><a href="qregularexpression.html#MatchType-enum">QRegularExpression::MatchType</a></span> <i>matchType</i> = NormalMatch, <span class="type"><a href="qregularexpression.html#MatchOption-enum">QRegularExpression::MatchOptions</a></span> <i>matchOptions</i> = NoMatchOption) const</h3>
+<p>Attempts to perform a global match of the regular expression against the given <i>subject</i> string, starting at the position <i>offset</i> inside the subject, using a match of type <i>matchType</i> and honoring the given <i>matchOptions</i>.</p>
+<p>The returned <a href="qregularexpressionmatchiterator.html">QRegularExpressionMatchIterator</a> is positioned before the first match result (if any).</p>
+<p><b>See also </b><a href="qregularexpressionmatchiterator.html">QRegularExpressionMatchIterator</a> and <a href="qregularexpression.html#global-matching">global matching</a>.</p>
+<!-- @@@globalMatch -->
+<!-- $$$globalMatch$$$globalMatchconstQStringRef&intQRegularExpression::MatchTypeQRegularExpression::MatchOptions -->
+<h3 class="fn" id="globalMatch-1"><a name="globalMatch-1"></a><span class="type"><a href="qregularexpressionmatchiterator.html">QRegularExpressionMatchIterator</a></span> QRegularExpression::<span class="name">globalMatch</span>(const <span class="type"><a href="qstringref.html">QStringRef</a></span> &amp;<i>subjectRef</i>, <span class="type">int</span> <i>offset</i> = 0, <span class="type"><a href="qregularexpression.html#MatchType-enum">QRegularExpression::MatchType</a></span> <i>matchType</i> = NormalMatch, <span class="type"><a href="qregularexpression.html#MatchOption-enum">QRegularExpression::MatchOptions</a></span> <i>matchOptions</i> = NoMatchOption) const</h3>
+<p>This is an overloaded function.</p>
+<p>Attempts to perform a global match of the regular expression against the given <i>subjectRef</i> string reference, starting at the position <i>offset</i> inside the subject, using a match of type <i>matchType</i> and honoring the given <i>matchOptions</i>.</p>
+<p>The returned <a href="qregularexpressionmatchiterator.html">QRegularExpressionMatchIterator</a> is positioned before the first match result (if any).</p>
+<p>This function was introduced in  Qt 5.5.</p>
+<p><b>See also </b><a href="qregularexpressionmatchiterator.html">QRegularExpressionMatchIterator</a> and <a href="qregularexpression.html#global-matching">global matching</a>.</p>
+<!-- @@@globalMatch -->
+<!-- $$$isValid[overload1]$$$isValid -->
+<h3 class="fn" id="isValid"><a name="isValid"></a><span class="type">bool</span> QRegularExpression::<span class="name">isValid</span>() const</h3>
+<p>Returns <code>true</code> if the regular expression is a valid regular expression (that is, it contains no syntax errors, etc.), or false otherwise. Use <a href="qregularexpression.html#errorString">errorString</a>() to obtain a textual description of the error.</p>
+<p><b>See also </b><a href="qregularexpression.html#errorString">errorString</a>() and <a href="qregularexpression.html#patternErrorOffset">patternErrorOffset</a>().</p>
+<!-- @@@isValid -->
+<!-- $$$match[overload1]$$$matchconstQString&intQRegularExpression::MatchTypeQRegularExpression::MatchOptions -->
+<h3 class="fn" id="match"><a name="match"></a><span class="type"><a href="qregularexpressionmatch.html">QRegularExpressionMatch</a></span> QRegularExpression::<span class="name">match</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>subject</i>, <span class="type">int</span> <i>offset</i> = 0, <span class="type"><a href="qregularexpression.html#MatchType-enum">QRegularExpression::MatchType</a></span> <i>matchType</i> = NormalMatch, <span class="type"><a href="qregularexpression.html#MatchOption-enum">QRegularExpression::MatchOptions</a></span> <i>matchOptions</i> = NoMatchOption) const</h3>
+<p>Attempts to match the regular expression against the given <i>subject</i> string, starting at the position <i>offset</i> inside the subject, using a match of type <i>matchType</i> and honoring the given <i>matchOptions</i>.</p>
+<p>The returned <a href="qregularexpressionmatch.html">QRegularExpressionMatch</a> object contains the results of the match.</p>
+<p><b>See also </b><a href="qregularexpressionmatch.html">QRegularExpressionMatch</a> and <a href="qregularexpression.html#normal-matching">normal matching</a>.</p>
+<!-- @@@match -->
+<!-- $$$match$$$matchconstQStringRef&intQRegularExpression::MatchTypeQRegularExpression::MatchOptions -->
+<h3 class="fn" id="match-1"><a name="match-1"></a><span class="type"><a href="qregularexpressionmatch.html">QRegularExpressionMatch</a></span> QRegularExpression::<span class="name">match</span>(const <span class="type"><a href="qstringref.html">QStringRef</a></span> &amp;<i>subjectRef</i>, <span class="type">int</span> <i>offset</i> = 0, <span class="type"><a href="qregularexpression.html#MatchType-enum">QRegularExpression::MatchType</a></span> <i>matchType</i> = NormalMatch, <span class="type"><a href="qregularexpression.html#MatchOption-enum">QRegularExpression::MatchOptions</a></span> <i>matchOptions</i> = NoMatchOption) const</h3>
+<p>This is an overloaded function.</p>
+<p>Attempts to match the regular expression against the given <i>subjectRef</i> string reference, starting at the position <i>offset</i> inside the subject, using a match of type <i>matchType</i> and honoring the given <i>matchOptions</i>.</p>
+<p>The returned <a href="qregularexpressionmatch.html">QRegularExpressionMatch</a> object contains the results of the match.</p>
+<p>This function was introduced in  Qt 5.5.</p>
+<p><b>See also </b><a href="qregularexpressionmatch.html">QRegularExpressionMatch</a> and <a href="qregularexpression.html#normal-matching">normal matching</a>.</p>
+<!-- @@@match -->
+<!-- $$$namedCaptureGroups[overload1]$$$namedCaptureGroups -->
+<h3 class="fn" id="namedCaptureGroups"><a name="namedCaptureGroups"></a><span class="type"><a href="qstringlist.html">QStringList</a></span> QRegularExpression::<span class="name">namedCaptureGroups</span>() const</h3>
+<p>Returns a list of <a href="qregularexpression.html#captureCount">captureCount</a>() + 1 elements, containing the names of the named capturing groups in the pattern string. The list is sorted such that the element of the list at position <code>i</code> is the name of the <code>i</code>-th capturing group, if it has a name, or an empty string if that capturing group is unnamed.</p>
+<p>For instance, given the regular expression</p>
+<pre class="cpp">
+
+      (<span class="operator">?</span><span class="operator">&lt;</span>day<span class="operator">&gt;</span>\d\d)<span class="operator">-</span>(<span class="operator">?</span><span class="operator">&lt;</span>month<span class="operator">&gt;</span>\d\d)<span class="operator">-</span>(<span class="operator">?</span><span class="operator">&lt;</span>year<span class="operator">&gt;</span>\d\d\d\d) (\w<span class="operator">+</span>) (<span class="operator">?</span><span class="operator">&lt;</span>name<span class="operator">&gt;</span>\w<span class="operator">+</span>)
+
+</pre>
+<p>namedCaptureGroups() will return the following list:</p>
+<pre class="cpp">
+
+      (<span class="string">&quot;&quot;</span><span class="operator">,</span> <span class="string">&quot;day&quot;</span><span class="operator">,</span> <span class="string">&quot;month&quot;</span><span class="operator">,</span> <span class="string">&quot;year&quot;</span><span class="operator">,</span> <span class="string">&quot;&quot;</span><span class="operator">,</span> <span class="string">&quot;name&quot;</span>)
+
+</pre>
+<p>which corresponds to the fact that the capturing group #0 (corresponding to the whole match) has no name, the capturing group #1 has name &quot;day&quot;, the capturing group #2 has name &quot;month&quot;, etc.</p>
+<p>If the regular expression is not valid, returns an empty list.</p>
+<p>This function was introduced in  Qt 5.1.</p>
+<p><b>See also </b><a href="qregularexpression.html#isValid">isValid</a>(), <a href="qregularexpressionmatch.html#captured">QRegularExpressionMatch::captured</a>(), and <a href="qstring.html#isEmpty">QString::isEmpty</a>().</p>
+<!-- @@@namedCaptureGroups -->
+<!-- $$$optimize[overload1]$$$optimize -->
+<h3 class="fn" id="optimize"><a name="optimize"></a><span class="type">void</span> QRegularExpression::<span class="name">optimize</span>() const</h3>
+<p>Compiles the pattern immediately, including JIT compiling it (if the JIT is enabled) for optimization.</p>
+<p>This function was introduced in  Qt 5.4.</p>
+<p><b>See also </b><a href="qregularexpression.html#isValid">isValid</a>() and <a href="qregularexpression.html#debugging-code-that-uses-qregularexpression">Debugging Code that Uses QRegularExpression</a>.</p>
+<!-- @@@optimize -->
+<!-- $$$pattern[overload1]$$$pattern -->
+<h3 class="fn" id="pattern"><a name="pattern"></a><span class="type"><a href="qstring.html">QString</a></span> QRegularExpression::<span class="name">pattern</span>() const</h3>
+<p>Returns the pattern string of the regular expression.</p>
+<p><b>See also </b><a href="qregularexpression.html#setPattern">setPattern</a>() and <a href="qregularexpression.html#patternOptions">patternOptions</a>().</p>
+<!-- @@@pattern -->
+<!-- $$$patternErrorOffset[overload1]$$$patternErrorOffset -->
+<h3 class="fn" id="patternErrorOffset"><a name="patternErrorOffset"></a><span class="type">int</span> QRegularExpression::<span class="name">patternErrorOffset</span>() const</h3>
+<p>Returns the offset, inside the pattern string, at which an error was found when checking the validity of the regular expression. If no error was found, then -1 is returned.</p>
+<p><b>See also </b><a href="qregularexpression.html#pattern">pattern</a>(), <a href="qregularexpression.html#isValid">isValid</a>(), and <a href="qregularexpression.html#errorString">errorString</a>().</p>
+<!-- @@@patternErrorOffset -->
+<!-- $$$patternOptions[overload1]$$$patternOptions -->
+<h3 class="fn" id="patternOptions"><a name="patternOptions"></a><span class="type"><a href="qregularexpression.html#PatternOption-enum">QRegularExpression::PatternOptions</a></span> QRegularExpression::<span class="name">patternOptions</span>() const</h3>
+<p>Returns the pattern options for the regular expression.</p>
+<p><b>See also </b><a href="qregularexpression.html#setPatternOptions">setPatternOptions</a>() and <a href="qregularexpression.html#pattern">pattern</a>().</p>
+<!-- @@@patternOptions -->
+<!-- $$$setPattern[overload1]$$$setPatternconstQString& -->
+<h3 class="fn" id="setPattern"><a name="setPattern"></a><span class="type">void</span> QRegularExpression::<span class="name">setPattern</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>pattern</i>)</h3>
+<p>Sets the pattern string of the regular expression to <i>pattern</i>. The pattern options are left unchanged.</p>
+<p><b>See also </b><a href="qregularexpression.html#pattern">pattern</a>() and <a href="qregularexpression.html#setPatternOptions">setPatternOptions</a>().</p>
+<!-- @@@setPattern -->
+<!-- $$$setPatternOptions[overload1]$$$setPatternOptionsQRegularExpression::PatternOptions -->
+<h3 class="fn" id="setPatternOptions"><a name="setPatternOptions"></a><span class="type">void</span> QRegularExpression::<span class="name">setPatternOptions</span>(<span class="type"><a href="qregularexpression.html#PatternOption-enum">QRegularExpression::PatternOptions</a></span> <i>options</i>)</h3>
+<p>Sets the given <i>options</i> as the pattern options of the regular expression. The pattern string is left unchanged.</p>
+<p><b>See also </b><a href="qregularexpression.html#patternOptions">patternOptions</a>() and <a href="qregularexpression.html#setPattern">setPattern</a>().</p>
+<!-- @@@setPatternOptions -->
+<!-- $$$swap[overload1]$$$swapQRegularExpression& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QRegularExpression::<span class="name">swap</span>(<span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps the regular expression <i>other</i> with this regular expression. This operation is very fast and never fails.</p>
+<!-- @@@swap -->
+<!-- $$$wildcardToRegularExpression[overload1]$$$wildcardToRegularExpressionconstQString& -->
+<h3 class="fn" id="wildcardToRegularExpression"><a name="wildcardToRegularExpression"></a><code>[static] </code><span class="type"><a href="qstring.html">QString</a></span> QRegularExpression::<span class="name">wildcardToRegularExpression</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>pattern</i>)</h3>
+<p>Returns a regular expression representation of the given glob <i>pattern</i>. The transformation is targeting file path globbing, which means in particular that path separators receive special treatment. This implies that it is not just a basic translation from &quot;*&quot; to &quot;.*&quot;.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qstring.html">QString</a></span> wildcard <span class="operator">=</span> <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span><span class="operator">::</span>wildcardToRegularExpression(<span class="string">&quot;*.jpeg&quot;</span>);
+  <span class="comment">// Will match files with names like:</span>
+  <span class="comment">//    foo.jpeg</span>
+  <span class="comment">//    f_o_o.jpeg</span>
+  <span class="comment">//    föö.jpeg</span>
+
+</pre>
+<p><b>Warning:</b> Unlike <a href="qregexp.html">QRegExp</a>, this implementation follows closely the definition of wildcard for glob patterns:</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><b>c</b></td><td >Any character represents itself apart from those mentioned below. Thus <b>c</b> matches the character <i>c</i>.</td></tr>
+<tr valign="top" class="even"><td ><b>?</b></td><td >Matches any single character. It is the same as <b>.</b> in full regexps.</td></tr>
+<tr valign="top" class="odd"><td ><b>*</b></td><td >Matches zero or more of any characters. It is the same as <b>.*</b> in full regexps.</td></tr>
+<tr valign="top" class="even"><td ><b>[abc]</b></td><td >Matches one character given in the bracket.</td></tr>
+<tr valign="top" class="odd"><td ><b>[a-c]</b></td><td >Matches one character from the range given in the bracket.</td></tr>
+<tr valign="top" class="even"><td ><b>[!abc]</b></td><td >Matches one character that is not given in the bracket. It is the same as <b>[^abc]</b> in full regexp.</td></tr>
+<tr valign="top" class="odd"><td ><b>[!a-c]</b></td><td >Matches one character that is not from the range given in the bracket. It is the same as <b>[^a-c]</b> in full regexp.</td></tr>
+</table></div>
+<p><b>Note: </b>The backslash (\) character is <i>not</i> an escape char in this context. In order to match one of the special characters, place it in square brackets (for example, &quot;[?]&quot;).</p><p>More information about the implementation can be found in:</p>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Glob_(programming)">The Wikipedia Glob article</a></li>
+<li><code>man</code> 7 glob</li>
+</ul>
+<p>This function was introduced in  Qt 5.12.</p>
+<p><b>See also </b><a href="qregularexpression.html#escape">escape</a>().</p>
+<!-- @@@wildcardToRegularExpression -->
+<!-- $$$operator!=[overload1]$$$operator!=constQRegularExpression& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> QRegularExpression::<span class="name">operator!=</span>(const <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> &amp;<i>re</i>) const</h3>
+<p>Returns <code>true</code> if the regular expression is different from <i>re</i>, or false otherwise.</p>
+<p><b>See also </b><a href="qregularexpression.html#operator-eq-eq">operator==</a>().</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQRegularExpression& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> QRegularExpression::<span class="name">operator==</span>(const <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> &amp;<i>re</i>) const</h3>
+<p>Returns <code>true</code> if the regular expression is equal to <i>re</i>, or false otherwise. Two <a href="qregularexpression.html">QRegularExpression</a> objects are equal if they have the same pattern string and the same pattern options.</p>
+<p><b>See also </b><a href="qregularexpression.html#operator-not-eq">operator!=</a>().</p>
+<!-- @@@operator== -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$qHash[overload1]$$$qHashconstQRegularExpression&uint -->
+<h3 class="fn" id="qHash"><a name="qHash"></a><span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <span class="name">qHash</span>(const <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> &amp;<i>key</i>, <span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <i>seed</i> = 0)</h3>
+<p>Returns the hash value for <i>key</i>, using <i>seed</i> to seed the calculation.</p>
+<p>This function was introduced in  Qt 5.6.</p>
+<!-- @@@qHash -->
+<!-- $$$operator<<[overload1]$$$operator<<QDataStream&constQRegularExpression& -->
+<h3 class="fn" id="operator-lt-lt"><a name="operator-lt-lt"></a><span class="type"><a href="qdatastream.html">QDataStream</a></span> &amp;<span class="name">operator&lt;&lt;</span>(<span class="type"><a href="qdatastream.html">QDataStream</a></span> &amp;<i>out</i>, const <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> &amp;<i>re</i>)</h3>
+<p>Writes the regular expression <i>re</i> to stream <i>out</i>.</p>
+<p><b>See also </b><a href="datastreamformat.html">Serializing Qt Data Types</a>.</p>
+<!-- @@@operator<< -->
+<!-- $$$operator<<$$$operator<<QDebugconstQRegularExpression& -->
+<h3 class="fn" id="operator-lt-lt-1"><a name="operator-lt-lt-1"></a><span class="type"><a href="qdebug.html">QDebug</a></span> <span class="name">operator&lt;&lt;</span>(<span class="type"><a href="qdebug.html">QDebug</a></span> <i>debug</i>, const <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> &amp;<i>re</i>)</h3>
+<p>Writes the regular expression <i>re</i> into the debug object <i>debug</i> for debugging purposes.</p>
+<p><b>See also </b><a href="../qtdoc/testing-and-debugging.html#debugging-techniques">Debugging Techniques</a>.</p>
+<!-- @@@operator<< -->
+<!-- $$$operator<<$$$operator<<QDebugQRegularExpression::PatternOptions -->
+<h3 class="fn" id="operator-lt-lt-2"><a name="operator-lt-lt-2"></a><span class="type"><a href="qdebug.html">QDebug</a></span> <span class="name">operator&lt;&lt;</span>(<span class="type"><a href="qdebug.html">QDebug</a></span> <i>debug</i>, <span class="type"><a href="qregularexpression.html#PatternOption-enum">QRegularExpression::PatternOptions</a></span> <i>patternOptions</i>)</h3>
+<p>Writes the pattern options <i>patternOptions</i> into the debug object <i>debug</i> for debugging purposes.</p>
+<p><b>See also </b><a href="../qtdoc/testing-and-debugging.html#debugging-techniques">Debugging Techniques</a>.</p>
+<!-- @@@operator<< -->
+<!-- $$$operator>>$$$operator>>QDataStream&QRegularExpression& -->
+<h3 class="fn" id="operator-gt-gt-1"><a name="operator-gt-gt-1"></a><span class="type"><a href="qdatastream.html">QDataStream</a></span> &amp;<span class="name">operator&gt;&gt;</span>(<span class="type"><a href="qdatastream.html">QDataStream</a></span> &amp;<i>in</i>, <span class="type"><a href="qregularexpression.html#QRegularExpression">QRegularExpression</a></span> &amp;<i>re</i>)</h3>
+<p>Reads a regular expression from stream <i>in</i> into <i>re</i>.</p>
+<p><b>See also </b><a href="datastreamformat.html">Serializing Qt Data Types</a>.</p>
+<!-- @@@operator>> -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

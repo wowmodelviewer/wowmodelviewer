@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdbuscontext.cpp -->
+  <title>QDBusContext Class | Qt D-Bus</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtdbus-index.html">Qt D-Bus</a></td><td ><a href="qtdbus-module.html">C++ Classes</a></td><td >QDBusContext</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtdbus-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QDBusContext Class</h1>
+<!-- $$$QDBusContext-brief -->
+<p>The <a href="qdbuscontext.html">QDBusContext</a> class allows slots to determine the D-Bus context of the calls. <a href="#details">More...</a></p>
+<!-- @@@QDBusContext -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QDBusContext&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += dbus</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.3</td></tr></table></div><p>This class was introduced in  Qt 4.3.</p>
+<ul>
+<li><a href="qdbuscontext-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdbuscontext.html#QDBusContext">QDBusContext</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdbuscontext.html#dtor.QDBusContext">~QDBusContext</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qdbuscontext.html#calledFromDBus">calledFromDBus</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDBusConnection </td><td class="memItemRight bottomAlign"><b><a href="qdbuscontext.html#connection">connection</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qdbuscontext.html#isDelayedReply">isDelayedReply</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QDBusMessage &amp;</td><td class="memItemRight bottomAlign"><b><a href="qdbuscontext.html#message">message</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdbuscontext.html#sendErrorReply">sendErrorReply</a></b>(const QString &amp;<i>name</i>, const QString &amp;<i>msg</i> = QString()) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdbuscontext.html#sendErrorReply-1">sendErrorReply</a></b>(QDBusError::ErrorType <i>type</i>, const QString &amp;<i>msg</i> = QString()) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdbuscontext.html#setDelayedReply">setDelayedReply</a></b>(bool <i>enable</i>) const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QDBusContext-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>When a slot is called in an object due to a signal delivery or due to a remote method call, it is sometimes necessary to know the context in which that happened. In particular, if the slot determines that it wants to send the reply at a later opportunity or if it wants to reply with an error, the context is needed.</p>
+<p>The <a href="qdbuscontext.html">QDBusContext</a> class is an alternative to accessing the context that doesn't involve modifying the code generated by the <a href="qdbusxml2cpp.html">Qt D-Bus XML compiler (qdbusxml2cpp)</a>.</p>
+<p><a href="qdbuscontext.html">QDBusContext</a> is used by subclassing it from the objects being exported using <a href="qdbusconnection.html#registerObject">QDBusConnection::registerObject</a>(). The following example illustrates the usage:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> MyObject: <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">,</span>
+                  <span class="keyword">protected</span> <span class="type"><a href="qdbuscontext.html#QDBusContext">QDBusContext</a></span>
+  {
+      Q_OBJECT
+      <span class="type"><a href="qdbusconnection.html">QDBusConnection</a></span> conn;
+      <span class="type"><a href="qdbusmessage.html">QDBusMessage</a></span> msg;
+
+  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+  <span class="keyword">protected</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> process();
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> methodWithError();
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> methodWithDelayedReply();
+  };
+
+  <span class="type">void</span> MyObject<span class="operator">::</span>methodWithError()
+  {
+      sendErrorReply(<span class="type"><a href="qdbuserror.html">QDBusError</a></span><span class="operator">::</span>NotSupported<span class="operator">,</span>
+                     <span class="string">&quot;The method call 'methodWithError()' is not supported&quot;</span>);
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> MyObject<span class="operator">::</span>methodWithDelayedReply()
+  {
+      conn <span class="operator">=</span> connection();
+      msg <span class="operator">=</span> message();
+      setDelayedReply(<span class="keyword">true</span>);
+      <span class="type"><a href="../qtcore/qmetaobject.html">QMetaObject</a></span><span class="operator">::</span>invokeMethod(<span class="keyword">this</span><span class="operator">,</span> <span class="string">&quot;process&quot;</span><span class="operator">,</span> <span class="type">Qt</span><span class="operator">::</span>QueuedConnection);
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>();
+  }
+
+</pre>
+<p>The example illustrates the two typical uses, that of sending error replies and that of delayed replies.</p>
+<p>Note: do not subclass <a href="qdbuscontext.html">QDBusContext</a> and <a href="qdbusabstractadaptor.html">QDBusAbstractAdaptor</a> at the same time. <a href="qdbuscontext.html">QDBusContext</a> should appear in the real object, not the adaptor. If it's necessary from the adaptor code to determine the context, use a public inheritance and access the functions via <a href="../qtcore/qobject.html#parent">QObject::parent</a>().</p>
+</div>
+<!-- @@@QDBusContext -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QDBusContext[overload1]$$$QDBusContext -->
+<h3 class="fn" id="QDBusContext"><a name="QDBusContext"></a>QDBusContext::<span class="name">QDBusContext</span>()</h3>
+<p>Constructs an empty <a href="qdbuscontext.html">QDBusContext</a>.</p>
+<!-- @@@QDBusContext -->
+<!-- $$$~QDBusContext[overload1]$$$~QDBusContext -->
+<h3 class="fn" id="dtor.QDBusContext"><a name="dtor.QDBusContext"></a>QDBusContext::<span class="name">~QDBusContext</span>()</h3>
+<p>An empty destructor.</p>
+<!-- @@@~QDBusContext -->
+<!-- $$$calledFromDBus[overload1]$$$calledFromDBus -->
+<h3 class="fn" id="calledFromDBus"><a name="calledFromDBus"></a><span class="type">bool</span> QDBusContext::<span class="name">calledFromDBus</span>() const</h3>
+<p>Returns <code>true</code> if we are processing a D-Bus call. If this function returns <code>true</code>, the rest of the functions in this class are available.</p>
+<p>Accessing those functions when this function returns <code>false</code> is undefined and may lead to crashes.</p>
+<!-- @@@calledFromDBus -->
+<!-- $$$connection[overload1]$$$connection -->
+<h3 class="fn" id="connection"><a name="connection"></a><span class="type"><a href="qdbusconnection.html">QDBusConnection</a></span> QDBusContext::<span class="name">connection</span>() const</h3>
+<p>Returns the connection from which this call was received.</p>
+<!-- @@@connection -->
+<!-- $$$isDelayedReply[overload1]$$$isDelayedReply -->
+<h3 class="fn" id="isDelayedReply"><a name="isDelayedReply"></a><span class="type">bool</span> QDBusContext::<span class="name">isDelayedReply</span>() const</h3>
+<p>Returns <code>true</code> if this call will have a delayed reply.</p>
+<p><b>See also </b><a href="qdbuscontext.html#setDelayedReply">setDelayedReply</a>().</p>
+<!-- @@@isDelayedReply -->
+<!-- $$$message[overload1]$$$message -->
+<h3 class="fn" id="message"><a name="message"></a>const <span class="type"><a href="qdbusmessage.html">QDBusMessage</a></span> &amp;QDBusContext::<span class="name">message</span>() const</h3>
+<p>Returns the message that generated this call.</p>
+<!-- @@@message -->
+<!-- $$$sendErrorReply[overload1]$$$sendErrorReplyconstQString&constQString& -->
+<h3 class="fn" id="sendErrorReply"><a name="sendErrorReply"></a><span class="type">void</span> QDBusContext::<span class="name">sendErrorReply</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>msg</i> = QString()) const</h3>
+<p>Sends an error <i>name</i> as a reply to the caller. The optional <i>msg</i> parameter is a human-readable text explaining the failure.</p>
+<p>If an error is sent, the return value and any output parameters from the called slot will be ignored by Qt D-Bus.</p>
+<!-- @@@sendErrorReply -->
+<!-- $$$sendErrorReply$$$sendErrorReplyQDBusError::ErrorTypeconstQString& -->
+<h3 class="fn" id="sendErrorReply-1"><a name="sendErrorReply-1"></a><span class="type">void</span> QDBusContext::<span class="name">sendErrorReply</span>(<span class="type"><a href="qdbuserror.html#ErrorType-enum">QDBusError::ErrorType</a></span> <i>type</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>msg</i> = QString()) const</h3>
+<p>This is an overloaded function.</p>
+<p>Sends an error <i>type</i> as a reply to the caller. The optional <i>msg</i> parameter is a human-readable text explaining the failure.</p>
+<p>If an error is sent, the return value and any output parameters from the called slot will be ignored by Qt D-Bus.</p>
+<!-- @@@sendErrorReply -->
+<!-- $$$setDelayedReply[overload1]$$$setDelayedReplybool -->
+<h3 class="fn" id="setDelayedReply"><a name="setDelayedReply"></a><span class="type">void</span> QDBusContext::<span class="name">setDelayedReply</span>(<span class="type">bool</span> <i>enable</i>) const</h3>
+<p>Sets whether this call will have a delayed reply or not.</p>
+<p>If <i>enable</i> is false, Qt D-Bus will automatically generate a reply back to the caller, if needed, as soon as the called slot returns.</p>
+<p>If <i>enable</i> is true, Qt D-Bus will not generate automatic replies. It will also ignore the return value from the slot and any output parameters. Instead, the called object is responsible for storing the incoming message and send a reply or error at a later time.</p>
+<p>Failing to send a reply will result in an automatic timeout error being generated by D-Bus.</p>
+<p><b>See also </b><a href="qdbuscontext.html#isDelayedReply">isDelayedReply</a>().</p>
+<!-- @@@setDelayedReply -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

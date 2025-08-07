@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickevents.cpp -->
+  <title>EventTouchPoint QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >EventTouchPoint QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">EventTouchPoint QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$EventTouchPoint-brief -->
+<p>Provides information about an individual touch point within a <a href="qml-qtquick-pointerevent.html">PointerEvent</a>. <a href="#details">More...</a></p>
+<!-- @@@EventTouchPoint -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick 2.13</td></tr></table></div><ul>
+<li><a href="qml-qtquick-eventtouchpoint-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-eventtouchpoint.html#ellipseDiameters-prop">ellipseDiameters</a></b></b> : size</li>
+<li class="fn"><b><b><a href="qml-qtquick-eventtouchpoint.html#pressure-prop">pressure</a></b></b> : qreal</li>
+<li class="fn"><b><b><a href="qml-qtquick-eventtouchpoint.html#rotation-prop">rotation</a></b></b> : qreal</li>
+<li class="fn"><b><b><a href="qml-qtquick-eventtouchpoint.html#uniqueId-prop">uniqueId</a></b></b> : QPointerUniqueId</li>
+</ul>
+<!-- $$$EventTouchPoint-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><b>See also </b><a href="qml-qtquick-pointerevent.html">PointerEvent</a> and <a href="qml-qtquick-pointerhandler.html">PointerHandler</a>.</p>
+<!-- @@@EventTouchPoint -->
+<h2>Property Documentation</h2>
+<!-- $$$ellipseDiameters -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="ellipseDiameters-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">ellipseDiameters</span> : <span class="type"><a href="../qtqml/qml-size.html">size</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the diameters of the contact patch, if the event comes from a touchpoint and the <a href="qml-qtquick-pointerevent.html#device-prop">device</a> provides this information.</p>
+<p>A touchpoint is modeled as an elliptical area where the finger is pressed against the touchscreen. (In fact, it could also be modeled as a bitmap; but in that case we expect an elliptical bounding estimate to be fitted to the contact patch before the event is sent.) The harder the user presses, the larger the contact patch; so, these diameters provide an alternate way of detecting pressure, in case the device does not include a separate pressure sensor. The ellipse is centered on <a href="qml-qtquick-eventpoint.html#scenePosition-prop">scenePosition</a> (<a href="qml-qtquick-eventpoint.html#position-prop">position</a> in the <a href="qml-qtquick-pointerhandler.html">PointerHandler</a>'s Item's local coordinates). The <a href="qml-qtquick-eventtouchpoint.html#rotation-prop">rotation</a> property provides the rotation of the ellipse, if known. It is expected that if the <a href="qml-qtquick-eventtouchpoint.html#rotation-prop">rotation</a> is zero, the verticalDiameter of the ellipse is the larger one (the major axis), because of the usual hand position, reaching upward or outward across the surface.</p>
+<p>If the contact patch is unknown, or the <a href="qml-qtquick-pointerevent.html#device-prop">device</a> is not a touchscreen, these values will be zero.</p>
+</div></div><!-- @@@ellipseDiameters -->
+<br/>
+<!-- $$$pressure -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="pressure-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">pressure</span> : <span class="type">qreal</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property tells how hard the user is pressing the stylus on a graphics tablet or the finger against a touchscreen, in the range from <code>0</code> (no measurable pressure) to <code>1.0</code> (maximum pressure which the device can measure).</p>
+<p>It is valid only with certain tablets and touchscreens that can measure pressure. Otherwise, it will be <code>1.0</code> when pressed.</p>
+</div></div><!-- @@@pressure -->
+<br/>
+<!-- $$$rotation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="rotation-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">rotation</span> : <span class="type">qreal</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the rotation angle of the stylus on a graphics tablet or the contact patch of a touchpoint on a touchscreen.</p>
+<p>It is valid only with certain tablet stylus devices and touchscreens that can measure the rotation angle. Otherwise, it will be zero.</p>
+</div></div><!-- @@@rotation -->
+<br/>
+<!-- $$$uniqueId -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="uniqueId-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">uniqueId</span> : <span class="type">QPointerUniqueId</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the unique ID of the fiducial or stylus in use, if any.</p>
+<p>On touchscreens that can track physical objects (such as knobs or game pieces) in addition to fingers, each object usually has a unique ID. Likewise, each stylus that can be used with a graphics tablet usually has a unique serial number. Qt so far only supports numeric IDs. You can get the actual number as uniqueId.numeric, but that is a device-specific detail. In the future, there may be support for non-numeric IDs, so you should not assume that the number is meaningful.</p>
+<p>If you need to identify specific objects, your application should provide UI for registering objects and mapping them to functionality: allow the user to select a meaning, virtual tool, or action, prompt the user to bring the object into proximity, and store a mapping from uniqueId to its purpose, for example in <a href="qml-qt-labs-settings-settings.html">Settings</a>.</p>
+</div></div><!-- @@@uniqueId -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmodbusreply.cpp -->
+  <title>QModbusReply Class | Qt Serial Bus 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtserialbus-index.html">Qt Serial Bus</a></td><td ><a href="qtserialbus-module.html">C++ Classes</a></td><td >QModbusReply</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtserialbus-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QModbusReply Class</h1>
+<!-- $$$QModbusReply-brief -->
+<p>The <a href="qmodbusreply.html">QModbusReply</a> class contains the data for a request sent with a <a href="qmodbusclient.html">QModbusClient</a> derived class. <a href="#details">More...</a></p>
+<!-- @@@QModbusReply -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QModbusReply&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += serialbus</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.8.</p>
+<ul>
+<li><a href="qmodbusreply-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qmodbusreply.html#ReplyType-enum">ReplyType</a></b> { Raw, Common, Broadcast }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmodbusreply.html#QModbusReply">QModbusReply</a></b>(QModbusReply::ReplyType <i>type</i>, int <i>serverAddress</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QModbusDevice::Error </td><td class="memItemRight bottomAlign"><b><a href="qmodbusreply.html#error">error</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qmodbusreply.html#errorString">errorString</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmodbusreply.html#isFinished">isFinished</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QModbusResponse </td><td class="memItemRight bottomAlign"><b><a href="qmodbusreply.html#rawResult">rawResult</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QModbusDataUnit </td><td class="memItemRight bottomAlign"><b><a href="qmodbusreply.html#result">result</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmodbusreply.html#serverAddress">serverAddress</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QModbusReply::ReplyType </td><td class="memItemRight bottomAlign"><b><a href="qmodbusreply.html#type">type</a></b>() const</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmodbusreply.html#errorOccurred">errorOccurred</a></b>(QModbusDevice::Error <i>error</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmodbusreply.html#finished">finished</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QModbusReply-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QModbusReply -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$ReplyType$$$Raw$$$Common$$$Broadcast -->
+<h3 class="fn" id="ReplyType-enum"><a name="ReplyType-enum"></a>enum QModbusReply::<span class="name">ReplyType</span></h3>
+<p>This enum describes the possible reply type.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QModbusReply::Raw</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The reply originates from a raw Modbus request. See <a href="qmodbusclient.html#sendRawRequest">QModbusClient::sendRawRequest</a></td></tr>
+<tr><td class="topAlign"><code>QModbusReply::Common</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The reply originates from a common read, write or read/write request. See <a href="qmodbusclient.html#sendReadRequest">QModbusClient::sendReadRequest</a>, <a href="qmodbusclient.html#sendWriteRequest">QModbusClient::sendWriteRequest</a> and <a href="qmodbusclient.html#sendReadWriteRequest">QModbusClient::sendReadWriteRequest</a></td></tr>
+<tr><td class="topAlign"><code>QModbusReply::Broadcast</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The reply originates from a Modbus broadcast request. The <a href="qmodbusreply.html#serverAddress">serverAddress</a>() will return <code>0</code> and the <a href="qmodbusreply.html#finished">finished</a>() signal will be emitted immediately.</td></tr>
+</table></div>
+<!-- @@@ReplyType -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QModbusReply[overload1]$$$QModbusReplyQModbusReply::ReplyTypeintQObject* -->
+<h3 class="fn" id="QModbusReply"><a name="QModbusReply"></a>QModbusReply::<span class="name">QModbusReply</span>(<span class="type"><a href="qmodbusreply.html#ReplyType-enum">QModbusReply::ReplyType</a></span> <i>type</i>, <span class="type">int</span> <i>serverAddress</i>, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a <a href="qmodbusreply.html">QModbusReply</a> object with a given <i>type</i> and the specified <i>parent</i>.</p>
+<p>The reply will be send to the Modbus client represented by <i>serverAddress</i>.</p>
+<!-- @@@QModbusReply -->
+<!-- $$$errorOccurred[overload1]$$$errorOccurredQModbusDevice::Error -->
+<h3 class="fn" id="errorOccurred"><a name="errorOccurred"></a><code>[signal] </code><span class="type">void</span> QModbusReply::<span class="name">errorOccurred</span>(<span class="type"><a href="qmodbusdevice.html#Error-enum">QModbusDevice::Error</a></span> <i>error</i>)</h3>
+<p>This signal is emitted when an error has been detected in the processing of this reply. The <a href="qmodbusreply.html#finished">finished</a>() signal will probably follow.</p>
+<p>The error will be described by the error code <i>error</i>. If <a href="qmodbusreply.html#errorString">errorString</a> is not empty it will contain a textual description of the error. In case of a <a href="qmodbusdevice.html#Error-enum">QModbusDevice::ProtocolError</a> the <a href="qmodbusreply.html#rawResult">rawResult</a>() function can be used to obtain the original Modbus exception response to get the exception code.</p>
+<p>Note: Do not delete this reply object in the slot connected to this signal. Use <a href="../qtcore/qobject.html#deleteLater">deleteLater</a>() instead.</p>
+<p><b>See also </b><a href="qmodbusreply.html#error">error</a>() and <a href="qmodbusreply.html#errorString">errorString</a>().</p>
+<!-- @@@errorOccurred -->
+<!-- $$$finished[overload1]$$$finished -->
+<h3 class="fn" id="finished"><a name="finished"></a><code>[signal] </code><span class="type">void</span> QModbusReply::<span class="name">finished</span>()</h3>
+<p>This signal is emitted when the reply has finished processing. The reply may still have returned with an error.</p>
+<p>After this signal is emitted, there will be no more updates to the reply's data.</p>
+<p><b>Note: </b>Do not delete the object in the slot connected to this signal. Use <a href="../qtcore/qobject.html#deleteLater">deleteLater</a>().</p><p>You can also use <a href="qmodbusreply.html#isFinished">isFinished</a>() to check if a QNetworkReply has finished even before you receive the finished() signal.</p>
+<p><b>See also </b><a href="qmodbusreply.html#isFinished">isFinished</a>() and <a href="qmodbusreply.html#error">error</a>().</p>
+<!-- @@@finished -->
+<!-- $$$error[overload1]$$$error -->
+<h3 class="fn" id="error"><a name="error"></a><span class="type"><a href="qmodbusdevice.html#Error-enum">QModbusDevice::Error</a></span> QModbusReply::<span class="name">error</span>() const</h3>
+<p>Returns the error state of this reply.</p>
+<p><b>See also </b><a href="qmodbusreply.html#errorString">errorString</a>() and <a href="qmodbusreply.html#errorOccurred">errorOccurred</a>().</p>
+<!-- @@@error -->
+<!-- $$$errorString[overload1]$$$errorString -->
+<h3 class="fn" id="errorString"><a name="errorString"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QModbusReply::<span class="name">errorString</span>() const</h3>
+<p>Returns the textual representation of the error state of this reply.</p>
+<p>If no error has occurred this will return an empty string. It is possible that an error occurred which has no associated textual representation, in which case this will also return an empty string.</p>
+<p><b>See also </b><a href="qmodbusreply.html#error">error</a>() and <a href="qmodbusreply.html#errorOccurred">errorOccurred</a>().</p>
+<!-- @@@errorString -->
+<!-- $$$isFinished[overload1]$$$isFinished -->
+<h3 class="fn" id="isFinished"><a name="isFinished"></a><span class="type">bool</span> QModbusReply::<span class="name">isFinished</span>() const</h3>
+<p>Returns <code>true</code> when the reply has finished or was aborted.</p>
+<p><b>See also </b><a href="qmodbusreply.html#finished">finished</a>() and <a href="qmodbusreply.html#error">error</a>().</p>
+<!-- @@@isFinished -->
+<!-- $$$rawResult[overload1]$$$rawResult -->
+<h3 class="fn" id="rawResult"><a name="rawResult"></a><span class="type"><a href="qmodbusresponse.html">QModbusResponse</a></span> QModbusReply::<span class="name">rawResult</span>() const</h3>
+<p>Returns the raw response of a Modbus request.</p>
+<p>If the request has not finished then the returned <a href="qmodbusresponse.html">QModbusResponse</a> instance is invalid.</p>
+<p><b>See also </b><a href="qmodbusreply.html#type">type</a>() and <a href="qmodbusreply.html#result">result</a>().</p>
+<!-- @@@rawResult -->
+<!-- $$$result[overload1]$$$result -->
+<h3 class="fn" id="result"><a name="result"></a><span class="type"><a href="qmodbusdataunit.html">QModbusDataUnit</a></span> QModbusReply::<span class="name">result</span>() const</h3>
+<p>Returns the preprocessed result of a Modbus request.</p>
+<p>For read requests as well as combined read/write requests send via <a href="qmodbusclient.html#sendReadWriteRequest">QModbusClient::sendReadWriteRequest</a>() it contains the values read from the server instance.</p>
+<p>If the request has not finished, has failed with an error or was a write request then the returned <a href="qmodbusdataunit.html">QModbusDataUnit</a> instance is invalid.</p>
+<p><b>Note: </b>If the <a href="qmodbusreply.html#type">type</a>() of the reply is <a href="qmodbusreply.html#ReplyType-enum">QModbusReply::Raw</a>, the return value will always be invalid.</p><p><b>See also </b><a href="qmodbusreply.html#type">type</a>() and <a href="qmodbusreply.html#rawResult">rawResult</a>().</p>
+<!-- @@@result -->
+<!-- $$$serverAddress[overload1]$$$serverAddress -->
+<h3 class="fn" id="serverAddress"><a name="serverAddress"></a><span class="type">int</span> QModbusReply::<span class="name">serverAddress</span>() const</h3>
+<p>Returns the server address that this reply object targets.</p>
+<!-- @@@serverAddress -->
+<!-- $$$type[overload1]$$$type -->
+<h3 class="fn" id="type"><a name="type"></a><span class="type"><a href="qmodbusreply.html#ReplyType-enum">QModbusReply::ReplyType</a></span> QModbusReply::<span class="name">type</span>() const</h3>
+<p>Returns the type of the reply.</p>
+<p><b>Note: </b>If the type of the reply is <a href="qmodbusreply.html#ReplyType-enum">QModbusReply::Raw</a>, the return value of <a href="qmodbusreply.html#result">result</a>() will always be invalid.</p><p><b>See also </b><a href="qmodbusreply.html#result">result</a>() and <a href="qmodbusreply.html#rawResult">rawResult</a>().</p>
+<!-- @@@type -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

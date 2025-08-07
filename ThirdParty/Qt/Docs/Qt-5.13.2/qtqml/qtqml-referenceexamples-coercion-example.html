@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qml-extending.qdoc -->
+  <title>Extending QML - Inheritance and Coercion Example | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td >Extending QML - Inheritance and Coercion Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#declare-boy-and-girl">Declare Boy and Girl</a></li>
+<li class="level2"><a href="#define-people-as-a-base-class">Define People as a Base Class</a></li>
+<li class="level2"><a href="#define-boy-and-girl">Define Boy and Girl</a></li>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Extending QML - Inheritance and Coercion Example</h1>
+<span class="subtitle"></span>
+<!-- $$$referenceexamples/coercion-brief -->
+<p>C++ Inheritance and Coercion.</p>
+<!-- @@@referenceexamples/coercion -->
+<!-- $$$referenceexamples/coercion-description -->
+<div class="descr"> <a name="details"></a>
+<p>This example builds on:</p>
+<ul>
+<li><a href="qtqml-referenceexamples-properties-example.html">Extending QML - Object and List Property Types Example</a></li>
+<li><a href="qtqml-referenceexamples-adding-example.html">Extending QML - Adding Types Example</a></li>
+</ul>
+<p>The Inheritance and Coercion Example shows how to use base classes to assign types of more than one type to a property. It specializes the Person type developed in the previous examples into two types - a <code>Boy</code> and a <code>Girl</code>.</p>
+<pre class="qml">
+
+  <span class="type">BirthdayParty</span> {
+      <span class="name">host</span>: <span class="name">Boy</span> {
+          <span class="name">name</span>: <span class="string">&quot;Bob Jones&quot;</span>
+          <span class="name">shoeSize</span>: <span class="number">12</span>
+      }
+      <span class="name">guests</span>: [
+          <span class="type">Boy</span> { <span class="name">name</span>: <span class="string">&quot;Leo Hodges&quot;</span> },
+          <span class="type">Boy</span> { <span class="name">name</span>: <span class="string">&quot;Jack Smith&quot;</span> },
+          <span class="type">Girl</span> { <span class="name">name</span>: <span class="string">&quot;Anne Brown&quot;</span> }
+      ]
+  }
+
+</pre>
+<a name="declare-boy-and-girl"></a>
+<h4 id="declare-boy-and-girl">Declare Boy and Girl</h4>
+<pre class="cpp">
+
+  <span class="keyword">class</span> Boy : <span class="keyword">public</span> Person
+  {
+      Q_OBJECT
+  <span class="keyword">public</span>:
+      Boy(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span> parent <span class="operator">=</span> <span class="number">0</span>);
+  };
+
+  <span class="keyword">class</span> Girl : <span class="keyword">public</span> Person
+  {
+      Q_OBJECT
+  <span class="keyword">public</span>:
+      Girl(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span> parent <span class="operator">=</span> <span class="number">0</span>);
+  };
+
+</pre>
+<p>The Person class remains unaltered in this example and the Boy and Girl C++ classes are trivial extensions of it. As an example, the inheritance used here is a little contrived, but in real applications it is likely that the two extensions would add additional properties or modify the Person classes behavior.</p>
+<a name="define-people-as-a-base-class"></a>
+<h5 id="define-people-as-a-base-class">Define People as a Base Class</h5>
+<p>The implementation of the People class itself has not changed since the previous example. However, as we have repurposed the People class as a common base for Boy and Girl, we want to prevent it from being instantiated from QML directly - an explicit Boy or Girl should be instantiated instead.</p>
+<pre class="cpp">
+
+  qmlRegisterType<span class="operator">&lt;</span>Person<span class="operator">&gt;</span>();
+
+</pre>
+<p>While we want to disallow instantiating Person from within QML, it still needs to be registered with the QML engine, so that it can be used as a property type and other types can be coerced to it.</p>
+<a name="define-boy-and-girl"></a>
+<h5 id="define-boy-and-girl">Define Boy and Girl</h5>
+<p>The implementation of Boy and Girl is trivial.</p>
+<pre class="cpp">
+
+  Boy<span class="operator">::</span>Boy(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span> parent)
+  : Person(parent)
+  {
+  }
+
+  Girl<span class="operator">::</span>Girl(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span> parent)
+  : Person(parent)
+  {
+  }
+
+</pre>
+<p>All that is necessary is to implement the constructor, and to register the types and their QML name with the QML engine.</p>
+<a name="running-the-example"></a>
+<h4 id="running-the-example">Running the Example</h4>
+<p>The BirthdayParty type has not changed since the previous example. The celebrant and guests property still use the People type.</p>
+<pre class="cpp">
+
+      Q_PROPERTY(Person <span class="operator">*</span>host READ host WRITE setHost)
+      Q_PROPERTY(<span class="type"><a href="qqmllistproperty.html">QQmlListProperty</a></span><span class="operator">&lt;</span>Person<span class="operator">&gt;</span> guests READ guests)
+
+</pre>
+<p>However, as all three types, Person, Boy and Girl, have been registered with the QML system, on assignment QML automatically (and type-safely) converts the Boy and Girl objects into a Person.</p>
+<p>The main.cpp file in the example includes a simple shell application that loads and runs the QML snippet shown at the beginning of this page.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtdeclarative.git/tree/examples/qml/referenceexamples/coercion?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@referenceexamples/coercion -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

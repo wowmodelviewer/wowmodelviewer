@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-debugger-setup.qdoc -->
+  <title>Setting Up Debugger | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Setting Up Debugger</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-debugging.html" />
+  <link rel="next" href="creator-debugger-operating-modes.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-debugging.html">Debugging</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-debugger-operating-modes.html">Launching the Debugger</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#supported-native-debugger-versions">Supported Native Debugger Versions</a></li>
+<li class="level2"><a href="#supported-gdb-versions">Supported GDB Versions</a></li>
+<li class="level2"><a href="#supported-cdb-versions">Supported CDB Versions</a></li>
+<li class="level2"><a href="#supported-lldb-versions">Supported LLDB Versions</a></li>
+<li class="level1"><a href="#installing-native-debuggers">Installing Native Debuggers</a></li>
+<li class="level2"><a href="#gdb">GDB</a></li>
+<li class="level2"><a href="#debugging-tools-for-windows">Debugging Tools for Windows</a></li>
+<li class="level2"><a href="#debugging-tools-for-macos">Debugging Tools for macOS</a></li>
+<li class="level2"><a href="#lldb">LLDB</a></li>
+<li class="level1"><a href="#mapping-source-paths">Mapping Source Paths</a></li>
+<li class="level1"><a href="#setting-cdb-paths-on-windows">Setting CDB Paths on Windows</a></li>
+<li class="level1"><a href="#setting-up-fsf-gdb-for-macos">Setting up FSF GDB for macOS</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Setting Up Debugger</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-debugger-engines.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The main debugger settings are associated with the <a href="creator-glossary.html#glossary-buildandrun-kit">kit</a> you build and run your project with. To specify the debugger and compiler to use for each kit, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Kits</b>.</p>
+<p>You need to set up the debugger only if the automatic setup fails, because the native debugger is missing (as is usually the case for the CDB debugger on Windows, which you always must install yourself) or because the installed version is not supported (for example, when your system contains no, or an outdated version of GDB and you want to use a locally installed replacement instead).</p>
+<p><b>Note: </b>If you need to change the debugger to use for an automatically detected <a href="creator-glossary.html#glossary-buildandrun-kit">kit</a>, you can <b>Clone</b> the kit and change the parameters in the clone. Make sure to select the cloned kit for your project.</p><p>If the debugger you want to use is not automatically detected, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Kits</b> &gt; <b>Debuggers</b> &gt; <b>Add</b> to add it.</p>
+<p><b>Note: </b>To use the debugging tools for Windows, you must install them and add the Symbol Server provided by Microsoft to the symbol search path of the debugger. For more information, see <a href="#setting-cdb-paths-on-windows">Setting CDB Paths on Windows</a>.</p><p><b>Note: </b>To use the Free Software Foundation (FSF) version of GDB on macOS, you must sign it and modify your <a href="creator-glossary.html#glossary-buildandrun-kit">kit</a> settings.</p><p>This section explains the options you have for debugging C++ code and provides installation notes for the supported native debuggers. It also applies for code in other compiled languages such as C, FORTRAN, Ada.</p>
+<p>For more information on the debugger modes, see <a href="creator-debugger-operating-modes.html#launching-the-debugger-in-different-modes">Launching the Debugger in Different Modes</a>.</p>
+<a name="supported-native-debugger-versions"></a>
+<h2 id="supported-native-debugger-versions">Supported Native Debugger Versions</h2>
+<p>Qt Creator supports native debuggers when working with compiled code. On most supported platforms, the GNU Symbolic Debugger GDB can be used. On Microsoft Windows, when using the Microsoft tool chain, the Microsoft Console Debugger CDB is needed. On macOS and Linux, the LLDB debugger can be used.</p>
+<p>The following table summarizes the support for debugging C++ code:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Platform</th><th >Compiler</th><th >Native Debugger</th></tr></thead>
+<tr valign="top" class="odd"><td >Linux</td><td >GCC, ICC</td><td >GDB, LLDB</td></tr>
+<tr valign="top" class="even"><td >Unix</td><td >GCC, ICC</td><td >GDB</td></tr>
+<tr valign="top" class="odd"><td >macOS</td><td >GCC, Clang</td><td >LLDB, FSF GDB (experimental)</td></tr>
+<tr valign="top" class="even"><td >Windows/<a href="https://mingw-w64.org/">MinGW</a></td><td >GCC</td><td >GDB</td></tr>
+<tr valign="top" class="odd"><td >Windows/MSVC</td><td >Microsoft Visual C++ Compiler</td><td >Debugging Tools for Windows/CDB</td></tr>
+</table></div>
+<a name="supported-gdb-versions"></a>
+<h3 id="supported-gdb-versions">Supported GDB Versions</h3>
+<p>Starting with version 3.1, Qt Creator requires the Python scripting extension. GDB builds without Python scripting are not supported anymore and will not work. The minimum supported version is GDB 7.5 using Python version 2.7, or 3.3, or newer.</p>
+<p>For remote debugging using GDB and GDB server, the minimum supported version of GDB server on the target <a href="creator-glossary.html#glossary-device">device</a> is 7.0&#x2e;</p>
+<a name="supported-cdb-versions"></a>
+<h3 id="supported-cdb-versions">Supported CDB Versions</h3>
+<p>All versions of CDB targeting platforms supported by Qt are supported by Qt Creator.</p>
+<a name="supported-lldb-versions"></a>
+<h3 id="supported-lldb-versions">Supported LLDB Versions</h3>
+<p>The LLDB native debugger has similar functionality to the GDB debugger. LLDB is the default debugger in Xcode on macOS for supporting C++ on the desktop. LLDB is typically used with the Clang compiler (even though you can use it with GCC, too).</p>
+<p>On macOS you can use the LLDB version delivered with Xcode or build from source. The minimum supported version is LLDB 320.4&#x2e;</p>
+<p>On Linux, the minimum supported version is LLDB 3.8&#x2e;</p>
+<a name="installing-native-debuggers"></a>
+<h2 id="installing-native-debuggers">Installing Native Debuggers</h2>
+<p>The following sections provide information about installing native debuggers.</p>
+<a name="gdb"></a>
+<h3 id="gdb">GDB</h3>
+<p>On Windows, use the Python-enabled GDB version that is bundled with the Qt package or comes with recent versions of <a href="https://mingw-w64.org/">MinGW</a>. On most Linux distributions, the GDB builds shipped with the system are sufficient.</p>
+<p>You can also build your own GDB, as instructed in <a href="http://wiki.qt.io/QtCreator_Build_Gdb">Building GDB</a>.</p>
+<p>Builds of GDB shipped with Xcode on macOS are no longer supported.</p>
+<a name="debugging-tools-for-windows"></a>
+<h3 id="debugging-tools-for-windows">Debugging Tools for Windows</h3>
+<p>To use the CDB debugger, you must install the <i>Debugging tools for Windows</i>. You can download them from <a href="https://developer.microsoft.com/windows/downloads/windows-10-sdk">Download and Install Debugging Tools for Windows</a> as part of the Windows SDK.</p>
+<p><b>Note: </b>Visual Studio does not include the Debugging tools needed, and therefore, you must install them separately.</p><p>In addition, you must select <b>Qt Creator CDB Debugger Support</b> (in <b>Qt</b> &gt; <b>Tools</b> &gt; <b>Qt Creator</b>) when you install Qt or the stand-alone Qt Creator.</p>
+<p>When manually building Qt Creator using the Microsoft Visual C++ Compiler, the build process checks for the required files in <code>&quot;%ProgramFiles%\Debugging Tools for Windows&quot;</code>.</p>
+<p>It is highly recommended that you add the Symbol Server provided by Microsoft to the symbol search path of the debugger. The Symbol Server provides you with debugging informaton for the operating system libraries for debugging Windows applications. For more information, see <a href="#setting-cdb-paths-on-windows">Setting CDB Paths on Windows</a>.</p>
+<a name="debugging-tools-for-macos"></a>
+<h3 id="debugging-tools-for-macos">Debugging Tools for macOS</h3>
+<p>The Qt binary distribution contains both debug and release variants of the libraries. But you have to explicitly tell the runtime linker that you want to use the debug libraries even if your application is compiled as debug, as release is the default library.</p>
+<p>If you use a qmake based project in Qt Creator, you can set a flag in your <a href="creator-glossary.html#glossary-run-config">run configuration</a>, in <b>Projects</b> mode. In the run configuration, select <b>Use debug version of frameworks</b>.</p>
+<p>For more detailed information about debugging on macOS, see: <a href="http://developer.apple.com/library/mac/#technotes/tn2124/_index.html#//apple_ref/doc/uid/DTS10003391">Mac OS X Debugging Magic</a>.</p>
+<a name="lldb"></a>
+<h3 id="lldb">LLDB</h3>
+<p>We recommend using the LLDB version that is delivered with the latest Xcode.</p>
+<a name="mapping-source-paths"></a>
+<h2 id="mapping-source-paths">Mapping Source Paths</h2>
+<p>To enable the debugger to step into the code and display the source code when using a copy of the source tree at a location different from the one at which the libraries were built, map the source paths to target paths:</p>
+<ol class="1" type="1"><li>Select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Debugger</b> &gt; <b>General</b> &gt; <b>Add</b>.</li>
+<li>In the <b>Source path</b> field, specify the source path in the debug information of the executable as reported by the debugger.</li>
+<li>In the <b>Target path</b> field, specify the actual location of the source tree on the local machine.</li>
+</ol>
+<a name="setting-cdb-paths-on-windows"></a>
+<h2 id="setting-cdb-paths-on-windows">Setting CDB Paths on Windows</h2>
+<p>To obtain debugging information for the operating system libraries for debugging Windows applications, add the Symbol Server provided by Microsoft to the symbol search path of the debugger:</p>
+<ol class="1" type="1"><li>Select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Debugger</b> &gt; <b>CDB Paths</b>.<p class="centerAlign"><img src="images/qtcreator-debugger-cdb-paths.png" alt="" /></p></li>
+<li>In the <b>Symbol Paths</b> group, select <b>Insert</b>.</li>
+<li>Select the directory where you want to store the cached information.<p>Use a subfolder in a temporary directory, such as <code>C:\temp\symbolcache</code>.</p>
+</li>
+<li>Select <b>OK</b>.</li>
+</ol>
+<p><b>Note: </b>Populating the cache might take a long time on a slow network connection.</p><p>To use the Source Server infrastructure for fetching missing source files directly from version control or the web, enter the following string in the <b>Source Paths</b> field: <code>srv*</code>.</p>
+<a name="setting-up-fsf-gdb-for-macos"></a>
+<h2 id="setting-up-fsf-gdb-for-macos">Setting up FSF GDB for macOS</h2>
+<p>To use FSF GDB on macOS, you must sign it and add it to the Qt Creator <a href="creator-glossary.html#glossary-buildandrun-kit">kits</a>.</p>
+<ol class="1" type="1"><li>To create a key for signing FSF GDB, select <b>Keychain Access</b> &gt; <b>Certificate Assistant</b> &gt; <b>Create a Certificate</b>:<ol class="1" type="1"><li>In the <b>Name</b> field, input <b>fsfgdb</b> to replace the existing content.</li>
+<li>In the <b>Certificate Type</b> field, select <b>Code Signing</b>.</li>
+<li>Select the <b>Let me override defaults</b> check box.</li>
+<li>Select <b>Continue</b>, and follow the instructions of the wizard (use the default settings), until the <b>Specify a Location For The Certificate</b> dialog opens.</li>
+<li>In the <b>Keychain</b> field, select <b>System</b>.</li>
+<li>Select <b>Keychain Access</b> &gt; <b>System</b>, and locate the certificate.</li>
+<li>Double click the certificate to view certificate information.</li>
+<li>In the <b>Trust</b> section, select <b>Always Trust</b> in the <b>When using this certificate</b> field, and then close the dialog.</li>
+</ol>
+</li>
+<li>To sign the binary, enter the following command in the terminal:<pre class="cpp">
+
+  codesign <span class="operator">-</span>f <span class="operator">-</span>s <span class="string">&quot;fsfgdb&quot;</span> $INSTALL_LOCATION<span class="operator">/</span>fsfgdb
+
+</pre>
+</li>
+<li>In Qt Creator, select <b>Qt Creator</b> &gt; <b>Preferences</b> &gt; <b>Kits</b> &gt; <b>Add</b> to create a kit that uses FSF GDB.</li>
+<li>In the <b>Debugger</b> field, specify the path to FSF GDB (<code>$HOME/gdb72/bin/fsfgdb</code>, but with an explicit value for <code>$HOME</code>).</li>
+<li>To use the debugger, add the kit in the <b>Build Settings</b> of the project.</li>
+</ol>
+</div>
+<!-- @@@creator-debugger-engines.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-debugging.html">Debugging</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-debugger-operating-modes.html">Launching the Debugger</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

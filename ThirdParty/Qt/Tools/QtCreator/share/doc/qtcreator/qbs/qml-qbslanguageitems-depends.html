@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- depends.qdoc -->
+  <title>Depends QML Type | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="qml-qbslanguageitems-artifact.html" />
+  <link rel="next" href="qml-qbslanguageitems-export.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="qml-qbslanguageitems-artifact.html">Artifact</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qml-qbslanguageitems-export.html">Export</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#dependency-parameters">Dependency Parameters</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Depends QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Depends-brief -->
+<p>Represents dependencies between products and modules. <a href="#details">More...</a></p>
+<!-- @@@Depends -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QbsLanguageItems .</td></tr></table></div><ul>
+<li><a href="qml-qbslanguageitems-depends-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-depends.html#condition-prop">condition</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-depends.html#enableFallback-prop">enableFallback</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-depends.html#limitToSubProject-prop">limitToSubProject</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-depends.html#name-prop">name</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-depends.html#productTypes-prop">productTypes</a></b></b> : stringList</li>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-depends.html#profiles-prop">profiles</a></b></b> : stringList</li>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-depends.html#required-prop">required</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-depends.html#submodules-prop">submodules</a></b></b> : stringList</li>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-depends.html#versionAtLeast-prop">versionAtLeast</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-depends.html#versionBelow-prop">versionBelow</a></b></b> : string</li>
+</ul>
+<!-- $$$Depends-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>A Depends item can appear inside a <a href="qml-qbslanguageitems-product.html">Product</a> or <a href="qml-qbslanguageitems-module.html">Module</a> item.</p>
+<p>For example, the following product will load the <a href="qml-qbsmodules-cpp.html">cpp</a> module. In addition, it will try to load modules that may or may not exist, and pass this information on to the compiler.</p>
+<pre class="cpp">
+
+  Product {
+      Depends { name: <span class="string">&quot;cpp&quot;</span> }
+      Depends {
+          name: <span class="string">&quot;optional_module&quot;</span>
+          versionAtLeast: <span class="string">&quot;2.0&quot;</span>
+          required: <span class="keyword">false</span>
+      }
+
+      Properties {
+          condition: optional_module<span class="operator">.</span>present
+          cpp<span class="operator">.</span>defines: <span class="string">&quot;HAS_OPTIONAL_MODULE&quot;</span>
+      }
+
+      <span class="comment">// ...</span>
+  }
+
+</pre>
+<a name="dependency-parameters"></a>
+<h2 id="dependency-parameters">Dependency Parameters</h2>
+<p>Sometimes it is desirable to have certain dependencies handled differently than others. For example, one might want to depend on a dynamic library without linking it.</p>
+<p>This can be done by setting the <a href="qml-qbsmodules-cpp.html#dependency-parameters-cpp">cpp.link</a> dependency parameter to <code>true</code> in the dynamic library dependency:</p>
+<pre class="cpp">
+
+  Product {
+      Depends { name: <span class="string">&quot;cpp&quot;</span> }
+      Depends { name: <span class="string">&quot;some_dynamic_lib&quot;</span>; cpp<span class="operator">.</span>link: <span class="keyword">false</span> }
+
+      <span class="comment">// ...</span>
+  }
+
+</pre>
+<p>Dependency parameters are a special type of property that can only be set within Depends and <a href="qml-qbslanguageitems-parameters.html">Parameters</a> items. Dependency parameters are declared in the modules they belong to.</p>
+<p>In the example above, the <a href="qml-qbsmodules-cpp.html">cpp</a> module declares the parameter <code>link</code>. The Depends item for <code>some_dynamic_lib</code> sets <code>cpp.link</code> to <code>false</code>, which tells the linker rule to ignore this particular dependency.</p>
+<!-- @@@Depends -->
+<h2>Property Documentation</h2>
+<!-- $$$condition -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="condition-prop"></a><span class="name">condition</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Determines whether the dependency will actually be applied.</p>
+<p>Default: <code>true</code></p>
+</div></div><!-- @@@condition -->
+<br/>
+<!-- $$$enableFallback -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="enableFallback-prop"></a><span class="name">enableFallback</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to fall back to a pkg-config based <a href="module-providers.html#">module provider</a> if the dependency is not found.</p>
+<p>Default: <code>true</code></p>
+</div></div><!-- @@@enableFallback -->
+<br/>
+<!-- $$$limitToSubProject -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="limitToSubProject-prop"></a><span class="name">limitToSubProject</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If <a href="qml-qbslanguageitems-depends.html#productTypes-prop">productTypes</a> is set and this property is <code>true</code>, only products that are in the same sub-project as the product containing the Depends item are considered.</p>
+<p>Default: <code>false</code></p>
+</div></div><!-- @@@limitToSubProject -->
+<br/>
+<!-- $$$name -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="name-prop"></a><span class="name">name</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The name of the dependent product or module.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@name -->
+<br/>
+<!-- $$$productTypes -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="productTypes-prop"></a><span class="name">productTypes</span> : <span class="type">stringList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>A list of product types. Any enabled product in the project that has a matching type will become a dependency of the product containing the Depends item.</p>
+<p>This property is mutually exclusive with the <a href="qml-qbslanguageitems-depends.html#name-prop">name</a> and <a href="qml-qbslanguageitems-depends.html#submodules-prop">submodules</a> properties.</p>
+<p>The <a href="qml-qbslanguageitems-depends.html#required-prop">required</a> and <a href="qml-qbslanguageitems-depends.html#profiles-prop">profiles</a> properties are ignored if this property is set.</p>
+<p>Product types attached via <a href="qml-qbslanguageitems-module.html#additionalProductTypes-prop">Module::additionalProductTypes</a> are not considered.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@productTypes -->
+<br/>
+<!-- $$$profiles -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="profiles-prop"></a><span class="name">profiles</span> : <span class="type">stringList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>A list of profiles.</p>
+<p>If the dependency is on a product and that product is going to be built for more than one profile, you can specify here which instance of the product the dependency is on.</p>
+<p>See the <a href="qml-qbsmodules-qbs.html#profiles-prop">qbs.profiles</a> property for more information. An empty list means a dependency on all instances of the product with the given name, regardless of their profile.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@profiles -->
+<br/>
+<!-- $$$required -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="required-prop"></a><span class="name">required</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Setting this property to <code>false</code> creates a <i>soft dependency</i>, meaning that it is not considered an error if the given module cannot be found. In such a case, an instance of the respective module will be created, but only the <a href="qml-qbslanguageitems-module.html#present-prop">Module.present</a> property will be available for querying, and it will be set to <code>false</code>.</p>
+<p>Default: <code>true</code></p>
+</div></div><!-- @@@required -->
+<br/>
+<!-- $$$submodules -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="submodules-prop"></a><span class="name">submodules</span> : <span class="type">stringList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>A list of submodules of the module to depend on, if applicable.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@submodules -->
+<br/>
+<!-- $$$versionAtLeast -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="versionAtLeast-prop"></a><span class="name">versionAtLeast</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The minimum value that the dependency's <code>version</code> property needs to have. If the actual version is lower than that, loading the dependency will fail. The value consists of integers separated by dots.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@versionAtLeast -->
+<br/>
+<!-- $$$versionBelow -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="versionBelow-prop"></a><span class="name">versionBelow</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>A value that the dependency's <code>version</code> property must be lower than. If the actual version is equal to or higher than that, loading the dependency will fail. The value consists of integers separated by dots.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@versionBelow -->
+<br/>
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="qml-qbslanguageitems-artifact.html">Artifact</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qml-qbslanguageitems-export.html">Export</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

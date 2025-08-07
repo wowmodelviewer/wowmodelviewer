@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tagfile>
+    <compound kind="class">
+        <name>QtGraphicalEffects.DirectionalBlur</name>
+        <filename>qml-qtgraphicaleffects-directionalblur.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.Blend</name>
+        <filename>qml-qtgraphicaleffects-blend.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.BrightnessContrast</name>
+        <filename>qml-qtgraphicaleffects-brightnesscontrast.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.ColorOverlay</name>
+        <filename>qml-qtgraphicaleffects-coloroverlay.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.Colorize</name>
+        <filename>qml-qtgraphicaleffects-colorize.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.ConicalGradient</name>
+        <filename>qml-qtgraphicaleffects-conicalgradient.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.Desaturate</name>
+        <filename>qml-qtgraphicaleffects-desaturate.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.Displace</name>
+        <filename>qml-qtgraphicaleffects-displace.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.DropShadow</name>
+        <filename>qml-qtgraphicaleffects-dropshadow.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.Glow</name>
+        <filename>qml-qtgraphicaleffects-glow.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.FastBlur</name>
+        <filename>qml-qtgraphicaleffects-fastblur.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.GammaAdjust</name>
+        <filename>qml-qtgraphicaleffects-gammaadjust.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.RadialBlur</name>
+        <filename>qml-qtgraphicaleffects-radialblur.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.OpacityMask</name>
+        <filename>qml-qtgraphicaleffects-opacitymask.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.GaussianBlur</name>
+        <filename>qml-qtgraphicaleffects-gaussianblur.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>_rebuildShaders</name>
+            <anchorfile>qml-qtgraphicaleffects-gaussianblur.html</anchorfile>
+            <anchor>_rebuildShaders-method</anchor>
+            <arglist>()</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.LevelAdjust</name>
+        <filename>qml-qtgraphicaleffects-leveladjust.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.InnerShadow</name>
+        <filename>qml-qtgraphicaleffects-innershadow.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.HueSaturation</name>
+        <filename>qml-qtgraphicaleffects-huesaturation.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.LinearGradient</name>
+        <filename>qml-qtgraphicaleffects-lineargradient.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.MaskedBlur</name>
+        <filename>qml-qtgraphicaleffects-maskedblur.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.ZoomBlur</name>
+        <filename>qml-qtgraphicaleffects-zoomblur.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.RadialGradient</name>
+        <filename>qml-qtgraphicaleffects-radialgradient.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.RectangularGlow</name>
+        <filename>qml-qtgraphicaleffects-rectangularglow.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.RecursiveBlur</name>
+        <filename>qml-qtgraphicaleffects-recursiveblur.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtGraphicalEffects.ThresholdMask</name>
+        <filename>qml-qtgraphicaleffects-thresholdmask.html</filename>
+    </compound>
+</tagfile>

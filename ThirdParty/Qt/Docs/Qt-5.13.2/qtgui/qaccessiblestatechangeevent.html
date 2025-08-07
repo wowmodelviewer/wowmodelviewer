@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qaccessible.cpp -->
+  <title>QAccessibleStateChangeEvent Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QAccessibleStateChangeEvent</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAccessibleStateChangeEvent Class</h1>
+<!-- $$$QAccessibleStateChangeEvent-brief -->
+<p>The <a href="qaccessiblestatechangeevent.html">QAccessibleStateChangeEvent</a> notfies the accessibility framework that the state of an object has changed. <a href="#details">More...</a></p>
+<!-- @@@QAccessibleStateChangeEvent -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAccessibleStateChangeEvent&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qaccessibleevent.html">QAccessibleEvent</a></td></tr></table></div><ul>
+<li><a href="qaccessiblestatechangeevent-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qaccessiblestatechangeevent.html#QAccessibleStateChangeEvent-1">QAccessibleStateChangeEvent</a></b>(QAccessibleInterface *<i>iface</i>, QAccessible::State <i>state</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qaccessiblestatechangeevent.html#QAccessibleStateChangeEvent">QAccessibleStateChangeEvent</a></b>(QObject *<i>object</i>, QAccessible::State <i>state</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QAccessible::State </td><td class="memItemRight bottomAlign"><b><a href="qaccessiblestatechangeevent.html#changedStates">changedStates</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAccessibleStateChangeEvent-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This class is used with <a href="qaccessible-obsolete.html#updateAccessibility">QAccessible::updateAccessibility</a>().</p>
+</div>
+<p><b>See also </b><a href="qaccessibleinterface.html#state">QAccessibleInterface::state</a>().</p>
+<!-- @@@QAccessibleStateChangeEvent -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QAccessibleStateChangeEvent$$$QAccessibleStateChangeEventQAccessibleInterface*QAccessible::State -->
+<h3 class="fn" id="QAccessibleStateChangeEvent-1"><a name="QAccessibleStateChangeEvent-1"></a>QAccessibleStateChangeEvent::<span class="name">QAccessibleStateChangeEvent</span>(<span class="type"><a href="qaccessibleinterface.html">QAccessibleInterface</a></span> *<i>iface</i>, <span class="type"><a href="qaccessible-state.html">QAccessible::State</a></span> <i>state</i>)</h3>
+<p>Constructs a new <a href="qaccessiblestatechangeevent.html">QAccessibleStateChangeEvent</a>. <i>iface</i> is the interface associated with the event <i>state</i> is the state of the accessible object.</p>
+<!-- @@@QAccessibleStateChangeEvent -->
+<!-- $$$QAccessibleStateChangeEvent[overload1]$$$QAccessibleStateChangeEventQObject*QAccessible::State -->
+<h3 class="fn" id="QAccessibleStateChangeEvent"><a name="QAccessibleStateChangeEvent"></a>QAccessibleStateChangeEvent::<span class="name">QAccessibleStateChangeEvent</span>(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> *<i>object</i>, <span class="type"><a href="qaccessible-state.html">QAccessible::State</a></span> <i>state</i>)</h3>
+<p>Constructs a new <a href="qaccessiblestatechangeevent.html">QAccessibleStateChangeEvent</a> for <i>object</i>. The difference to the object's previous state is in <i>state</i>.</p>
+<!-- @@@QAccessibleStateChangeEvent -->
+<!-- $$$changedStates[overload1]$$$changedStates -->
+<h3 class="fn" id="changedStates"><a name="changedStates"></a><span class="type"><a href="qaccessible-state.html">QAccessible::State</a></span> QAccessibleStateChangeEvent::<span class="name">changedStates</span>() const</h3>
+<p>Returns the states that have been changed.</p>
+<p>Keep in mind that the returned states are the ones that have changed. To find out about the state of an object, use <a href="qaccessibleinterface.html#state">QAccessibleInterface::state</a>().</p>
+<p>For example, if an object used to have the focus but loses it, the object's state will have focused set to <code>false</code>. This event on the other hand tells about the change and has focused set to <code>true</code> since the focus state is changed from <code>true</code> to <code>false</code>.</p>
+<!-- @@@changedStates -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

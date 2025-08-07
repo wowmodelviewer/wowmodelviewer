@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qextrudedtextgeometry.cpp -->
+  <title>QExtrudedTextGeometry Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QExtrudedTextGeometry</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QExtrudedTextGeometry Class</h1>
+<span class="small-subtitle">(<a href="qt3dextras-qextrudedtextgeometry.html">Qt3DExtras::QExtrudedTextGeometry</a>)<br/></span>
+<!-- $$$QExtrudedTextGeometry-brief -->
+<p>The <a href="qt3dextras-qextrudedtextgeometry.html">QExtrudedTextGeometry</a> class allows creation of a 3D extruded text in 3D space. <a href="#details">More...</a></p>
+<!-- @@@QExtrudedTextGeometry -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;Qt3DExtras/QExtrudedTextGeometry&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3dextras</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.9</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-extras-extrudedtextgeometry.html">ExtrudedTextGeometry</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3drender-qgeometry.html">Qt3DRender::QGeometry</a></td></tr></table></div><p>This class was introduced in  Qt 5.9.</p>
+<ul>
+<li><a href="qt3dextras-qextrudedtextgeometry-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qt3dextras-qextrudedtextgeometry.html#extrusionLength-prop">extrusionLength</a></b> : float</li>
+<li class="fn"><b><a href="qt3dextras-qextrudedtextgeometry.html#font-prop">font</a></b> : QFont</li>
+<li class="fn"><b><a href="qt3dextras-qextrudedtextgeometry.html#indexAttribute-prop">indexAttribute</a></b> : Qt3DRender::QAttribute* const</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qt3dextras-qextrudedtextgeometry.html#normalAttribute-prop">normalAttribute</a></b> : Qt3DRender::QAttribute* const</li>
+<li class="fn"><b><a href="qt3dextras-qextrudedtextgeometry.html#positionAttribute-prop">positionAttribute</a></b> : Qt3DRender::QAttribute* const</li>
+<li class="fn"><b><a href="qt3dextras-qextrudedtextgeometry.html#text-prop">text</a></b> : QString</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qextrudedtextgeometry.html#QExtrudedTextGeometry">QExtrudedTextGeometry</a></b>(Qt3DCore::QNode *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> float </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qextrudedtextgeometry.html#extrusionLength-prop">extrusionLength</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QFont </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qextrudedtextgeometry.html#font-prop">font</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QAttribute *</td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qextrudedtextgeometry.html#indexAttribute-prop">indexAttribute</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QAttribute *</td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qextrudedtextgeometry.html#normalAttribute-prop">normalAttribute</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QAttribute *</td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qextrudedtextgeometry.html#positionAttribute-prop">positionAttribute</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qextrudedtextgeometry.html#text-prop">text</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qextrudedtextgeometry.html#extrusionLength-prop">setDepth</a></b>(float <i>extrusionLength</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qextrudedtextgeometry.html#font-prop">setFont</a></b>(const QFont &amp;<i>font</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qextrudedtextgeometry.html#text-prop">setText</a></b>(const QString &amp;<i>text</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qextrudedtextgeometry.html#extrusionLength-prop">depthChanged</a></b>(float <i>extrusionLength</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qextrudedtextgeometry.html#font-prop">fontChanged</a></b>(const QFont &amp;<i>font</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dextras-qextrudedtextgeometry.html#text-prop">textChanged</a></b>(const QString &amp;<i>text</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QExtrudedTextGeometry-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qt3dextras-qextrudedtextgeometry.html">QExtrudedTextGeometry</a> class is most commonly used internally by the QText3DMesh but can also be used in custom <a href="qt3drender-qgeometryrenderer.html">Qt3DRender::QGeometryRenderer</a> subclasses.</p>
+</div>
+<!-- @@@QExtrudedTextGeometry -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$extrusionLength-prop$$$extrusionLength$$$setDepthfloat$$$depthChangedfloat -->
+<h3 class="fn" id="extrusionLength-prop"><a name="extrusionLength-prop"></a><span class="name">extrusionLength</span> : <span class="type">float</span></h3>
+<p>Holds the extrusion length of the text.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> float </td><td class="memItemRight bottomAlign"><span class="name"><b>extrusionLength</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setDepth</b></span>(float <i>extrusionLength</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>depthChanged</b></span>(float <i>extrusionLength</i>)</td></tr>
+</table></div>
+<!-- @@@extrusionLength -->
+<!-- $$$font-prop$$$font$$$setFontconstQFont&$$$fontChangedconstQFont& -->
+<h3 class="fn" id="font-prop"><a name="font-prop"></a><span class="name">font</span> : <span class="type"><a href="../qtgui/qfont.html">QFont</a></span></h3>
+<p>Holds the font of the text.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QFont </td><td class="memItemRight bottomAlign"><span class="name"><b>font</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setFont</b></span>(const QFont &amp;<i>font</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>fontChanged</b></span>(const QFont &amp;<i>font</i>)</td></tr>
+</table></div>
+<!-- @@@font -->
+<!-- $$$indexAttribute-prop$$$indexAttribute -->
+<h3 class="fn" id="indexAttribute-prop"><a name="indexAttribute-prop"></a><span class="name">indexAttribute</span> : <span class="type"><a href="qt3drender-qattribute.html">Qt3DRender::QAttribute</a></span>* const</h3>
+<p>Holds the geometry index attribute.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QAttribute *</td><td class="memItemRight bottomAlign"><span class="name"><b>indexAttribute</b></span>() const</td></tr>
+</table></div>
+<!-- @@@indexAttribute -->
+<!-- $$$normalAttribute-prop$$$normalAttribute -->
+<h3 class="fn" id="normalAttribute-prop"><a name="normalAttribute-prop"></a><span class="name">normalAttribute</span> : <span class="type"><a href="qt3drender-qattribute.html">Qt3DRender::QAttribute</a></span>* const</h3>
+<p>Holds the geometry normal attribute.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QAttribute *</td><td class="memItemRight bottomAlign"><span class="name"><b>normalAttribute</b></span>() const</td></tr>
+</table></div>
+<!-- @@@normalAttribute -->
+<!-- $$$positionAttribute-prop$$$positionAttribute -->
+<h3 class="fn" id="positionAttribute-prop"><a name="positionAttribute-prop"></a><span class="name">positionAttribute</span> : <span class="type"><a href="qt3drender-qattribute.html">Qt3DRender::QAttribute</a></span>* const</h3>
+<p>Holds the geometry position attribute.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QAttribute *</td><td class="memItemRight bottomAlign"><span class="name"><b>positionAttribute</b></span>() const</td></tr>
+</table></div>
+<!-- @@@positionAttribute -->
+<!-- $$$text-prop$$$text$$$setTextconstQString&$$$textChangedconstQString& -->
+<h3 class="fn" id="text-prop"><a name="text-prop"></a><span class="name">text</span> : <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>Holds the text used for the mesh.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>text</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setText</b></span>(const QString &amp;<i>text</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>textChanged</b></span>(const QString &amp;<i>text</i>)</td></tr>
+</table></div>
+<!-- @@@text -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QExtrudedTextGeometry[overload1]$$$QExtrudedTextGeometryQt3DCore::QNode* -->
+<h3 class="fn" id="QExtrudedTextGeometry"><a name="QExtrudedTextGeometry"></a>QExtrudedTextGeometry::<span class="name">QExtrudedTextGeometry</span>(<span class="type"><a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new <a href="qt3dextras-qextrudedtextgeometry.html">QExtrudedTextGeometry</a> with <i>parent</i>.</p>
+<!-- @@@QExtrudedTextGeometry -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

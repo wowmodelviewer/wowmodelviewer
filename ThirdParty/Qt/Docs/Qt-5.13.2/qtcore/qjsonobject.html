@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qjsonobject.cpp -->
+  <title>QJsonObject Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QJsonObject</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QJsonObject Class</h1>
+<!-- $$$QJsonObject-brief -->
+<p>The <a href="qjsonobject.html">QJsonObject</a> class encapsulates a JSON object. <a href="#details">More...</a></p>
+<!-- @@@QJsonObject -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QJsonObject&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.0</td></tr></table></div><p>This class was introduced in  Qt 5.0.</p>
+<ul>
+<li><a href="qjsonobject-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> class </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject-const-iterator.html">const_iterator</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> class </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject-iterator.html">iterator</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#ConstIterator-typedef">ConstIterator</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#Iterator-typedef">Iterator</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#key_type-typedef">key_type</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#mapped_type-typedef">mapped_type</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#size_type-typedef">size_type</a></b></td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#QJsonObject-3">QJsonObject</a></b>(QJsonObject &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#QJsonObject-2">QJsonObject</a></b>(const QJsonObject &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#QJsonObject-1">QJsonObject</a></b>(std::initializer_list&lt;QPair&lt;QString, QJsonValue&gt; &gt; <i>args</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#QJsonObject">QJsonObject</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonObject &amp;</td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#operator-eq-1">operator=</a></b>(QJsonObject &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonObject &amp;</td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#operator-eq">operator=</a></b>(const QJsonObject &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#dtor.QJsonObject">~QJsonObject</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonObject::iterator </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#begin">begin</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonObject::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#begin-1">begin</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonObject::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#constBegin">constBegin</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonObject::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#constEnd">constEnd</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonObject::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#constFind">constFind</a></b>(const QString &amp;<i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonObject::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#constFind-1">constFind</a></b>(QLatin1String <i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#contains">contains</a></b>(const QString &amp;<i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#contains-1">contains</a></b>(QLatin1String <i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#count">count</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#empty">empty</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonObject::iterator </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#end">end</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonObject::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#end-1">end</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonObject::iterator </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#erase">erase</a></b>(QJsonObject::iterator <i>it</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonObject::iterator </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#find">find</a></b>(const QString &amp;<i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonObject::iterator </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#find-1">find</a></b>(QLatin1String <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonObject::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#find-2">find</a></b>(const QString &amp;<i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonObject::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#find-3">find</a></b>(QLatin1String <i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonObject::iterator </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#insert">insert</a></b>(const QString &amp;<i>key</i>, const QJsonValue &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#isEmpty">isEmpty</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#keys">keys</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#length">length</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#remove">remove</a></b>(const QString &amp;<i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#size">size</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#swap">swap</a></b>(QJsonObject &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonValue </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#take">take</a></b>(const QString &amp;<i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariantHash </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#toVariantHash">toVariantHash</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariantMap </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#toVariantMap">toVariantMap</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonValue </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#value">value</a></b>(const QString &amp;<i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonValue </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#value-1">value</a></b>(QLatin1String <i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#operator-not-eq">operator!=</a></b>(const QJsonObject &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#operator-eq-eq">operator==</a></b>(const QJsonObject &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonValue </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#operator-5b-5d">operator[]</a></b>(const QString &amp;<i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonValue </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#operator-5b-5d-1">operator[]</a></b>(QLatin1String <i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonValueRef </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#operator-5b-5d-2">operator[]</a></b>(const QString &amp;<i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonValueRef </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#operator-5b-5d-3">operator[]</a></b>(QLatin1String <i>key</i>)</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonObject </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#fromVariantHash">fromVariantHash</a></b>(const QVariantHash &amp;<i>hash</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QJsonObject </td><td class="memItemRight bottomAlign"><b><a href="qjsonobject.html#fromVariantMap">fromVariantMap</a></b>(const QVariantMap &amp;<i>map</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QJsonObject-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A JSON object is a list of key value pairs, where the keys are unique strings and the values are represented by a <a href="qjsonvalue.html">QJsonValue</a>.</p>
+<p>A <a href="qjsonobject.html">QJsonObject</a> can be converted to and from a <a href="qvariant.html#QVariantMap-typedef">QVariantMap</a>. You can query the number of (key, value) pairs with <a href="qjsonobject.html#size">size</a>(), <a href="qjsonobject.html#insert">insert</a>(), and <a href="qjsonobject.html#remove">remove</a>() entries from it and iterate over its content using the standard C++ iterator pattern.</p>
+<p><a href="qjsonobject.html">QJsonObject</a> is an implicitly shared class, and shares the data with the document it has been created from as long as it is not being modified.</p>
+<p>You can convert the object to and from text based JSON through <a href="qjsondocument.html">QJsonDocument</a>.</p>
+</div>
+<p><b>See also </b><a href="json.html">JSON Support in Qt</a> and <a href="qtcore-serialization-savegame-example.html">JSON Save Game Example</a>.</p>
+<!-- @@@QJsonObject -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$ConstIterator -->
+<h3 class="fn" id="ConstIterator-typedef"><a name="ConstIterator-typedef"></a>typedef QJsonObject::<span class="name">ConstIterator</span></h3>
+<p>Qt-style synonym for <a href="qjsonobject-const-iterator.html">QJsonObject::const_iterator</a>.</p>
+<!-- @@@ConstIterator -->
+<!-- $$$Iterator -->
+<h3 class="fn" id="Iterator-typedef"><a name="Iterator-typedef"></a>typedef QJsonObject::<span class="name">Iterator</span></h3>
+<p>Qt-style synonym for <a href="qjsonobject-iterator.html">QJsonObject::iterator</a>.</p>
+<!-- @@@Iterator -->
+<!-- $$$key_type -->
+<h3 class="fn" id="key_type-typedef"><a name="key_type-typedef"></a>typedef QJsonObject::<span class="name">key_type</span></h3>
+<p>Typedef for <a href="qstring.html">QString</a>. Provided for STL compatibility.</p>
+<!-- @@@key_type -->
+<!-- $$$mapped_type -->
+<h3 class="fn" id="mapped_type-typedef"><a name="mapped_type-typedef"></a>typedef QJsonObject::<span class="name">mapped_type</span></h3>
+<p>Typedef for <a href="qjsonvalue.html">QJsonValue</a>. Provided for STL compatibility.</p>
+<!-- @@@mapped_type -->
+<!-- $$$size_type -->
+<h3 class="fn" id="size_type-typedef"><a name="size_type-typedef"></a>typedef QJsonObject::<span class="name">size_type</span></h3>
+<p>Typedef for int. Provided for STL compatibility.</p>
+<!-- @@@size_type -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QJsonObject$$$QJsonObjectQJsonObject&& -->
+<h3 class="fn" id="QJsonObject-3"><a name="QJsonObject-3"></a>QJsonObject::<span class="name">QJsonObject</span>(<span class="type"><a href="qjsonobject.html#QJsonObject">QJsonObject</a></span> &amp;&amp;<i>other</i>)</h3>
+<p>Move-constructs a <a href="qjsonobject.html">QJsonObject</a> from <i>other</i>.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<!-- @@@QJsonObject -->
+<!-- $$$QJsonObject$$$QJsonObjectconstQJsonObject& -->
+<h3 class="fn" id="QJsonObject-2"><a name="QJsonObject-2"></a>QJsonObject::<span class="name">QJsonObject</span>(const <span class="type"><a href="qjsonobject.html#QJsonObject">QJsonObject</a></span> &amp;<i>other</i>)</h3>
+<p>Creates a copy of <i>other</i>.</p>
+<p>Since <a href="qjsonobject.html">QJsonObject</a> is implicitly shared, the copy is shallow as long as the object does not get modified.</p>
+<!-- @@@QJsonObject -->
+<!-- $$$QJsonObject$$$QJsonObjectstd::initializer_list<QPair<QString,QJsonValue>> -->
+<h3 class="fn" id="QJsonObject-1"><a name="QJsonObject-1"></a>QJsonObject::<span class="name">QJsonObject</span>(<span class="type">std::initializer_list</span>&lt;<span class="type"><a href="qpair.html">QPair</a></span>&lt;<span class="type"><a href="qstring.html">QString</a></span>, <span class="type"><a href="qjsonvalue.html">QJsonValue</a></span>&gt; &gt; <i>args</i>)</h3>
+<p>Constructs a <a href="qjsonobject.html">QJsonObject</a> instance initialized from <i>args</i> initialization list. For example:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qjsonobject.html#QJsonObject">QJsonObject</a></span> object
+  {
+      {<span class="string">&quot;property1&quot;</span><span class="operator">,</span> <span class="number">1</span>}<span class="operator">,</span>
+      {<span class="string">&quot;property2&quot;</span><span class="operator">,</span> <span class="number">2</span>}
+  };
+
+</pre>
+<p>This function was introduced in  Qt 5.4.</p>
+<!-- @@@QJsonObject -->
+<!-- $$$QJsonObject[overload1]$$$QJsonObject -->
+<h3 class="fn" id="QJsonObject"><a name="QJsonObject"></a>QJsonObject::<span class="name">QJsonObject</span>()</h3>
+<p>Constructs an empty JSON object.</p>
+<p><b>See also </b><a href="qjsonobject.html#isEmpty">isEmpty</a>().</p>
+<!-- @@@QJsonObject -->
+<!-- $$$operator=$$$operator=QJsonObject&& -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type"><a href="qjsonobject.html#QJsonObject">QJsonObject</a></span> &amp;QJsonObject::<span class="name">operator=</span>(<span class="type"><a href="qjsonobject.html#QJsonObject">QJsonObject</a></span> &amp;&amp;<i>other</i>)</h3>
+<p>Move-assigns <i>other</i> to this object.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<!-- @@@operator= -->
+<!-- $$$operator=[overload1]$$$operator=constQJsonObject& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qjsonobject.html#QJsonObject">QJsonObject</a></span> &amp;QJsonObject::<span class="name">operator=</span>(const <span class="type"><a href="qjsonobject.html#QJsonObject">QJsonObject</a></span> &amp;<i>other</i>)</h3>
+<p>Assigns <i>other</i> to this object.</p>
+<!-- @@@operator= -->
+<!-- $$$~QJsonObject[overload1]$$$~QJsonObject -->
+<h3 class="fn" id="dtor.QJsonObject"><a name="dtor.QJsonObject"></a>QJsonObject::<span class="name">~QJsonObject</span>()</h3>
+<p>Destroys the object.</p>
+<!-- @@@~QJsonObject -->
+<!-- $$$begin[overload1]$$$begin -->
+<h3 class="fn" id="begin"><a name="begin"></a><span class="type"><a href="qjsonobject-iterator.html">QJsonObject::iterator</a></span> QJsonObject::<span class="name">begin</span>()</h3>
+<p>Returns an <a href="containers.html#stl-style-iterators">STL-style iterator</a> pointing to the first item in the object.</p>
+<p><b>See also </b><a href="qjsonobject.html#constBegin">constBegin</a>() and <a href="qjsonobject.html#end">end</a>().</p>
+<!-- @@@begin -->
+<!-- $$$begin$$$begin -->
+<h3 class="fn" id="begin-1"><a name="begin-1"></a><span class="type"><a href="qjsonobject-const-iterator.html">QJsonObject::const_iterator</a></span> QJsonObject::<span class="name">begin</span>() const</h3>
+<p>This is an overloaded function.</p>
+<!-- @@@begin -->
+<!-- $$$constBegin[overload1]$$$constBegin -->
+<h3 class="fn" id="constBegin"><a name="constBegin"></a><span class="type"><a href="qjsonobject-const-iterator.html">QJsonObject::const_iterator</a></span> QJsonObject::<span class="name">constBegin</span>() const</h3>
+<p>Returns a const <a href="containers.html#stl-style-iterators">STL-style iterator</a> pointing to the first item in the object.</p>
+<p><b>See also </b><a href="qjsonobject.html#begin">begin</a>() and <a href="qjsonobject.html#constEnd">constEnd</a>().</p>
+<!-- @@@constBegin -->
+<!-- $$$constEnd[overload1]$$$constEnd -->
+<h3 class="fn" id="constEnd"><a name="constEnd"></a><span class="type"><a href="qjsonobject-const-iterator.html">QJsonObject::const_iterator</a></span> QJsonObject::<span class="name">constEnd</span>() const</h3>
+<p>Returns a const <a href="containers.html#stl-style-iterators">STL-style iterator</a> pointing to the imaginary item after the last item in the object.</p>
+<p><b>See also </b><a href="qjsonobject.html#constBegin">constBegin</a>() and <a href="qjsonobject.html#end">end</a>().</p>
+<!-- @@@constEnd -->
+<!-- $$$constFind[overload1]$$$constFindconstQString& -->
+<h3 class="fn" id="constFind"><a name="constFind"></a><span class="type"><a href="qjsonobject-const-iterator.html">QJsonObject::const_iterator</a></span> QJsonObject::<span class="name">constFind</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>) const</h3>
+<p>Returns a const iterator pointing to the item with key <i>key</i> in the map.</p>
+<p>If the map contains no item with key <i>key</i>, the function returns <a href="qjsonobject.html#constEnd">constEnd</a>().</p>
+<!-- @@@constFind -->
+<!-- $$$constFind$$$constFindQLatin1String -->
+<h3 class="fn" id="constFind-1"><a name="constFind-1"></a><span class="type"><a href="qjsonobject-const-iterator.html">QJsonObject::const_iterator</a></span> QJsonObject::<span class="name">constFind</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>key</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>This function was introduced in  Qt 5.7.</p>
+<!-- @@@constFind -->
+<!-- $$$contains[overload1]$$$containsconstQString& -->
+<h3 class="fn" id="contains"><a name="contains"></a><span class="type">bool</span> QJsonObject::<span class="name">contains</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>) const</h3>
+<p>Returns <code>true</code> if the object contains key <i>key</i>.</p>
+<p><b>See also </b><a href="qjsonobject.html#insert">insert</a>(), <a href="qjsonobject.html#remove">remove</a>(), and <a href="qjsonobject.html#take">take</a>().</p>
+<!-- @@@contains -->
+<!-- $$$contains$$$containsQLatin1String -->
+<h3 class="fn" id="contains-1"><a name="contains-1"></a><span class="type">bool</span> QJsonObject::<span class="name">contains</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>key</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>This function was introduced in  Qt 5.7.</p>
+<!-- @@@contains -->
+<!-- $$$count[overload1]$$$count -->
+<h3 class="fn" id="count"><a name="count"></a><span class="type">int</span> QJsonObject::<span class="name">count</span>() const</h3>
+<p>This is an overloaded function.</p>
+<p>Same as <a href="qjsonobject.html#size">size</a>().</p>
+<!-- @@@count -->
+<!-- $$$empty[overload1]$$$empty -->
+<h3 class="fn" id="empty"><a name="empty"></a><span class="type">bool</span> QJsonObject::<span class="name">empty</span>() const</h3>
+<p>This function is provided for STL compatibility. It is equivalent to <a href="qjsonobject.html#isEmpty">isEmpty</a>(), returning <code>true</code> if the object is empty; otherwise returning <code>false</code>.</p>
+<!-- @@@empty -->
+<!-- $$$end[overload1]$$$end -->
+<h3 class="fn" id="end"><a name="end"></a><span class="type"><a href="qjsonobject-iterator.html">QJsonObject::iterator</a></span> QJsonObject::<span class="name">end</span>()</h3>
+<p>Returns an <a href="containers.html#stl-style-iterators">STL-style iterator</a> pointing to the imaginary item after the last item in the object.</p>
+<p><b>See also </b><a href="qjsonobject.html#begin">begin</a>() and <a href="qjsonobject.html#constEnd">constEnd</a>().</p>
+<!-- @@@end -->
+<!-- $$$end$$$end -->
+<h3 class="fn" id="end-1"><a name="end-1"></a><span class="type"><a href="qjsonobject-const-iterator.html">QJsonObject::const_iterator</a></span> QJsonObject::<span class="name">end</span>() const</h3>
+<p>This is an overloaded function.</p>
+<!-- @@@end -->
+<!-- $$$erase[overload1]$$$eraseQJsonObject::iterator -->
+<h3 class="fn" id="erase"><a name="erase"></a><span class="type"><a href="qjsonobject-iterator.html">QJsonObject::iterator</a></span> QJsonObject::<span class="name">erase</span>(<span class="type"><a href="qjsonobject-iterator.html">QJsonObject::iterator</a></span> <i>it</i>)</h3>
+<p>Removes the (key, value) pair pointed to by the iterator <i>it</i> from the map, and returns an iterator to the next item in the map.</p>
+<p><b>See also </b><a href="qjsonobject.html#remove">remove</a>().</p>
+<!-- @@@erase -->
+<!-- $$$find[overload1]$$$findconstQString& -->
+<h3 class="fn" id="find"><a name="find"></a><span class="type"><a href="qjsonobject-iterator.html">QJsonObject::iterator</a></span> QJsonObject::<span class="name">find</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>)</h3>
+<p>Returns an iterator pointing to the item with key <i>key</i> in the map.</p>
+<p>If the map contains no item with key <i>key</i>, the function returns <a href="qjsonobject.html#end">end</a>().</p>
+<!-- @@@find -->
+<!-- $$$find$$$findQLatin1String -->
+<h3 class="fn" id="find-1"><a name="find-1"></a><span class="type"><a href="qjsonobject-iterator.html">QJsonObject::iterator</a></span> QJsonObject::<span class="name">find</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>key</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>This function was introduced in  Qt 5.7.</p>
+<!-- @@@find -->
+<!-- $$$find$$$findconstQString& -->
+<h3 class="fn" id="find-2"><a name="find-2"></a><span class="type"><a href="qjsonobject-const-iterator.html">QJsonObject::const_iterator</a></span> QJsonObject::<span class="name">find</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>) const</h3>
+<p>This is an overloaded function.</p>
+<!-- @@@find -->
+<!-- $$$find$$$findQLatin1String -->
+<h3 class="fn" id="find-3"><a name="find-3"></a><span class="type"><a href="qjsonobject-const-iterator.html">QJsonObject::const_iterator</a></span> QJsonObject::<span class="name">find</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>key</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>This function was introduced in  Qt 5.7.</p>
+<!-- @@@find -->
+<!-- $$$fromVariantHash[overload1]$$$fromVariantHashconstQVariantHash& -->
+<h3 class="fn" id="fromVariantHash"><a name="fromVariantHash"></a><code>[static] </code><span class="type"><a href="qjsonobject.html#QJsonObject">QJsonObject</a></span> QJsonObject::<span class="name">fromVariantHash</span>(const <span class="type"><a href="qvariant.html#QVariantHash-typedef">QVariantHash</a></span> &amp;<i>hash</i>)</h3>
+<p>Converts the variant hash <i>hash</i> to a <a href="qjsonobject.html">QJsonObject</a>.</p>
+<p>The keys in <i>hash</i> will be used as the keys in the JSON object, and the <a href="qvariant.html">QVariant</a> values will be converted to JSON values.</p>
+<p>This function was introduced in  Qt 5.5.</p>
+<p><b>See also </b><a href="qjsonobject.html#fromVariantMap">fromVariantMap</a>(), <a href="qjsonobject.html#toVariantHash">toVariantHash</a>(), and <a href="qjsonvalue.html#fromVariant">QJsonValue::fromVariant</a>().</p>
+<!-- @@@fromVariantHash -->
+<!-- $$$fromVariantMap[overload1]$$$fromVariantMapconstQVariantMap& -->
+<h3 class="fn" id="fromVariantMap"><a name="fromVariantMap"></a><code>[static] </code><span class="type"><a href="qjsonobject.html#QJsonObject">QJsonObject</a></span> QJsonObject::<span class="name">fromVariantMap</span>(const <span class="type"><a href="qvariant.html#QVariantMap-typedef">QVariantMap</a></span> &amp;<i>map</i>)</h3>
+<p>Converts the variant map <i>map</i> to a <a href="qjsonobject.html">QJsonObject</a>.</p>
+<p>The keys in <i>map</i> will be used as the keys in the JSON object, and the <a href="qvariant.html">QVariant</a> values will be converted to JSON values.</p>
+<p><b>See also </b><a href="qjsonobject.html#fromVariantHash">fromVariantHash</a>(), <a href="qjsonobject.html#toVariantMap">toVariantMap</a>(), and <a href="qjsonvalue.html#fromVariant">QJsonValue::fromVariant</a>().</p>
+<!-- @@@fromVariantMap -->
+<!-- $$$insert[overload1]$$$insertconstQString&constQJsonValue& -->
+<h3 class="fn" id="insert"><a name="insert"></a><span class="type"><a href="qjsonobject-iterator.html">QJsonObject::iterator</a></span> QJsonObject::<span class="name">insert</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>, const <span class="type"><a href="qjsonvalue.html">QJsonValue</a></span> &amp;<i>value</i>)</h3>
+<p>Inserts a new item with the key <i>key</i> and a value of <i>value</i>.</p>
+<p>If there is already an item with the key <i>key</i>, then that item's value is replaced with <i>value</i>.</p>
+<p>Returns an iterator pointing to the inserted item.</p>
+<p>If the value is <a href="qjsonvalue.html#Type-enum">QJsonValue::Undefined</a>, it will cause the key to get removed from the object. The returned iterator will then point to <a href="qjsonobject.html#end">end</a>().</p>
+<p><b>See also </b><a href="qjsonobject.html#remove">remove</a>(), <a href="qjsonobject.html#take">take</a>(), <a href="qjsonobject-iterator.html">QJsonObject::iterator</a>, and <a href="qjsonobject.html#end">end</a>().</p>
+<!-- @@@insert -->
+<!-- $$$isEmpty[overload1]$$$isEmpty -->
+<h3 class="fn" id="isEmpty"><a name="isEmpty"></a><span class="type">bool</span> QJsonObject::<span class="name">isEmpty</span>() const</h3>
+<p>Returns <code>true</code> if the object is empty. This is the same as <a href="qjsonobject.html#size">size</a>() == 0.</p>
+<p><b>See also </b><a href="qjsonobject.html#size">size</a>().</p>
+<!-- @@@isEmpty -->
+<!-- $$$keys[overload1]$$$keys -->
+<h3 class="fn" id="keys"><a name="keys"></a><span class="type"><a href="qstringlist.html">QStringList</a></span> QJsonObject::<span class="name">keys</span>() const</h3>
+<p>Returns a list of all keys in this object.</p>
+<p>The list is sorted lexographically.</p>
+<!-- @@@keys -->
+<!-- $$$length[overload1]$$$length -->
+<h3 class="fn" id="length"><a name="length"></a><span class="type">int</span> QJsonObject::<span class="name">length</span>() const</h3>
+<p>This is an overloaded function.</p>
+<p>Same as <a href="qjsonobject.html#size">size</a>().</p>
+<!-- @@@length -->
+<!-- $$$remove[overload1]$$$removeconstQString& -->
+<h3 class="fn" id="remove"><a name="remove"></a><span class="type">void</span> QJsonObject::<span class="name">remove</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>)</h3>
+<p>Removes <i>key</i> from the object.</p>
+<p><b>See also </b><a href="qjsonobject.html#insert">insert</a>() and <a href="qjsonobject.html#take">take</a>().</p>
+<!-- @@@remove -->
+<!-- $$$size[overload1]$$$size -->
+<h3 class="fn" id="size"><a name="size"></a><span class="type">int</span> QJsonObject::<span class="name">size</span>() const</h3>
+<p>Returns the number of (key, value) pairs stored in the object.</p>
+<!-- @@@size -->
+<!-- $$$swap[overload1]$$$swapQJsonObject& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QJsonObject::<span class="name">swap</span>(<span class="type"><a href="qjsonobject.html#QJsonObject">QJsonObject</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps the object <i>other</i> with this. This operation is very fast and never fails.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<!-- @@@swap -->
+<!-- $$$take[overload1]$$$takeconstQString& -->
+<h3 class="fn" id="take"><a name="take"></a><span class="type"><a href="qjsonvalue.html">QJsonValue</a></span> QJsonObject::<span class="name">take</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>)</h3>
+<p>Removes <i>key</i> from the object.</p>
+<p>Returns a <a href="qjsonvalue.html">QJsonValue</a> containing the value referenced by <i>key</i>. If <i>key</i> was not contained in the object, the returned <a href="qjsonvalue.html">QJsonValue</a> is <a href="qjsonvalue.html#Type-enum">QJsonValue::Undefined</a>.</p>
+<p><b>See also </b><a href="qjsonobject.html#insert">insert</a>(), <a href="qjsonobject.html#remove">remove</a>(), and <a href="qjsonvalue.html">QJsonValue</a>.</p>
+<!-- @@@take -->
+<!-- $$$toVariantHash[overload1]$$$toVariantHash -->
+<h3 class="fn" id="toVariantHash"><a name="toVariantHash"></a><span class="type"><a href="qvariant.html#QVariantHash-typedef">QVariantHash</a></span> QJsonObject::<span class="name">toVariantHash</span>() const</h3>
+<p>Converts this object to a <a href="qvariant.html#QVariantHash-typedef">QVariantHash</a>.</p>
+<p>Returns the created hash.</p>
+<p>This function was introduced in  Qt 5.5.</p>
+<p><b>See also </b><a href="qjsonobject.html#toVariantMap">toVariantMap</a>().</p>
+<!-- @@@toVariantHash -->
+<!-- $$$toVariantMap[overload1]$$$toVariantMap -->
+<h3 class="fn" id="toVariantMap"><a name="toVariantMap"></a><span class="type"><a href="qvariant.html#QVariantMap-typedef">QVariantMap</a></span> QJsonObject::<span class="name">toVariantMap</span>() const</h3>
+<p>Converts this object to a <a href="qvariant.html#QVariantMap-typedef">QVariantMap</a>.</p>
+<p>Returns the created map.</p>
+<p><b>See also </b><a href="qjsonobject.html#toVariantHash">toVariantHash</a>().</p>
+<!-- @@@toVariantMap -->
+<!-- $$$value[overload1]$$$valueconstQString& -->
+<h3 class="fn" id="value"><a name="value"></a><span class="type"><a href="qjsonvalue.html">QJsonValue</a></span> QJsonObject::<span class="name">value</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>) const</h3>
+<p>Returns a <a href="qjsonvalue.html">QJsonValue</a> representing the value for the key <i>key</i>.</p>
+<p>The returned <a href="qjsonvalue.html">QJsonValue</a> is <a href="qjsonvalue.html#Type-enum">QJsonValue::Undefined</a> if the key does not exist.</p>
+<p><b>See also </b><a href="qjsonvalue.html">QJsonValue</a> and <a href="qjsonvalue.html#isUndefined">QJsonValue::isUndefined</a>().</p>
+<!-- @@@value -->
+<!-- $$$value$$$valueQLatin1String -->
+<h3 class="fn" id="value-1"><a name="value-1"></a><span class="type"><a href="qjsonvalue.html">QJsonValue</a></span> QJsonObject::<span class="name">value</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>key</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>This function was introduced in  Qt 5.7.</p>
+<!-- @@@value -->
+<!-- $$$operator!=[overload1]$$$operator!=constQJsonObject& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> QJsonObject::<span class="name">operator!=</span>(const <span class="type"><a href="qjsonobject.html#QJsonObject">QJsonObject</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns <code>true</code> if <i>other</i> is not equal to this object.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQJsonObject& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> QJsonObject::<span class="name">operator==</span>(const <span class="type"><a href="qjsonobject.html#QJsonObject">QJsonObject</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns <code>true</code> if <i>other</i> is equal to this object.</p>
+<!-- @@@operator== -->
+<!-- $$$operator[][overload1]$$$operator[]constQString& -->
+<h3 class="fn" id="operator-5b-5d"><a name="operator-5b-5d"></a><span class="type"><a href="qjsonvalue.html">QJsonValue</a></span> QJsonObject::<span class="name">operator[]</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>) const</h3>
+<p>Returns a <a href="qjsonvalue.html">QJsonValue</a> representing the value for the key <i>key</i>.</p>
+<p>This does the same as <a href="qjsonobject.html#value">value</a>().</p>
+<p>The returned <a href="qjsonvalue.html">QJsonValue</a> is <a href="qjsonvalue.html#Type-enum">QJsonValue::Undefined</a> if the key does not exist.</p>
+<p><b>See also </b><a href="qjsonobject.html#value">value</a>(), <a href="qjsonvalue.html">QJsonValue</a>, and <a href="qjsonvalue.html#isUndefined">QJsonValue::isUndefined</a>().</p>
+<!-- @@@operator[] -->
+<!-- $$$operator[]$$$operator[]QLatin1String -->
+<h3 class="fn" id="operator-5b-5d-1"><a name="operator-5b-5d-1"></a><span class="type"><a href="qjsonvalue.html">QJsonValue</a></span> QJsonObject::<span class="name">operator[]</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>key</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>This function was introduced in  Qt 5.7.</p>
+<!-- @@@operator[] -->
+<!-- $$$operator[]$$$operator[]constQString& -->
+<h3 class="fn" id="operator-5b-5d-2"><a name="operator-5b-5d-2"></a><span class="type">QJsonValueRef</span> QJsonObject::<span class="name">operator[]</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>)</h3>
+<p>Returns a reference to the value for <i>key</i>.</p>
+<p>The return value is of type <a href="qjsonvalue.html#qjsonvalueref">QJsonValueRef</a>, a helper class for <a href="qjsonarray.html">QJsonArray</a> and <a href="qjsonobject.html">QJsonObject</a>. When you get an object of type <a href="qjsonvalue.html#qjsonvalueref">QJsonValueRef</a>, you can use it as if it were a reference to a <a href="qjsonvalue.html">QJsonValue</a>. If you assign to it, the assignment will apply to the element in the <a href="qjsonarray.html">QJsonArray</a> or <a href="qjsonobject.html">QJsonObject</a> from which you got the reference.</p>
+<p><b>See also </b><a href="qjsonobject.html#value">value</a>().</p>
+<!-- @@@operator[] -->
+<!-- $$$operator[]$$$operator[]QLatin1String -->
+<h3 class="fn" id="operator-5b-5d-3"><a name="operator-5b-5d-3"></a><span class="type">QJsonValueRef</span> QJsonObject::<span class="name">operator[]</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>key</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>This function was introduced in  Qt 5.7.</p>
+<!-- @@@operator[] -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

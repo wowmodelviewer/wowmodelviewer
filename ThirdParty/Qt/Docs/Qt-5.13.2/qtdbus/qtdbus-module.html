@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtdbus-module.qdoc -->
+  <title>Qt D-Bus C++ Classes | Qt D-Bus</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtdbus-index.html">Qt D-Bus</a></td><td >Qt D-Bus C++ Classes</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtdbus-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#namespaces">Namespaces</a></li>
+<li class="level1"><a href="#classes">Classes</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt D-Bus C++ Classes</h1>
+<span class="subtitle"></span>
+<!-- $$$QtDBus-brief -->
+<p>The Qt D-Bus module is a Unix-only library that you can use to perform Inter-Process Communication using the <a href="qtdbus-index.html">D-Bus</a> protocol. <a href="#details">More...</a></p>
+<!-- @@@QtDBus -->
+<a name="namespaces"></a>
+<h2 id="namespaces">Namespaces</h2>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qdbus.html">QDBus</a></p></td><td class="tblDescr"><p>Contains miscellaneous identifiers used throughout the Qt D-Bus module</p></td></tr>
+</table></div>
+<a name="classes"></a>
+<h2 id="classes">Classes</h2>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qdbusabstractinterface.html">QDBusAbstractInterface</a></p></td><td class="tblDescr"><p>The base class for all D-Bus interfaces in the Qt D-Bus binding, allowing access to remote interfaces</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qdbusargument.html">QDBusArgument</a></p></td><td class="tblDescr"><p>Used to marshall and demarshall D-Bus arguments</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qdbusabstractadaptor.html">QDBusAbstractAdaptor</a></p></td><td class="tblDescr"><p>The base class of D-Bus adaptor classes</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qdbusconnection.html">QDBusConnection</a></p></td><td class="tblDescr"><p>Represents a connection to the D-Bus bus daemon</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qdbusconnectioninterface.html">QDBusConnectionInterface</a></p></td><td class="tblDescr"><p>Access to the D-Bus bus daemon service</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qdbuscontext.html">QDBusContext</a></p></td><td class="tblDescr"><p>Allows slots to determine the D-Bus context of the calls</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qdbuserror.html">QDBusError</a></p></td><td class="tblDescr"><p>Represents an error received from the D-Bus bus or from remote applications found in the bus</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qdbusobjectpath.html">QDBusObjectPath</a></p></td><td class="tblDescr"><p>Enables the programmer to identify the OBJECT_PATH type provided by the D-Bus typesystem</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qdbussignature.html">QDBusSignature</a></p></td><td class="tblDescr"><p>Enables the programmer to identify the SIGNATURE type provided by the D-Bus typesystem</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qdbusvariant.html">QDBusVariant</a></p></td><td class="tblDescr"><p>Enables the programmer to identify the variant type provided by the D-Bus typesystem</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qdbusinterface.html">QDBusInterface</a></p></td><td class="tblDescr"><p>Proxy for interfaces on remote objects</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qdbusmessage.html">QDBusMessage</a></p></td><td class="tblDescr"><p>Represents one message sent or received over the D-Bus bus</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qdbuspendingcall.html">QDBusPendingCall</a></p></td><td class="tblDescr"><p>Refers to one pending asynchronous call</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qdbuspendingcallwatcher.html">QDBusPendingCallWatcher</a></p></td><td class="tblDescr"><p>Convenient way for waiting for asynchronous replies</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qdbuspendingreply.html">QDBusPendingReply</a></p></td><td class="tblDescr"><p>Contains the reply to an asynchronous method call</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qdbusreply.html">QDBusReply</a></p></td><td class="tblDescr"><p>Stores the reply for a method call to a remote object</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qdbusserver.html">QDBusServer</a></p></td><td class="tblDescr"><p>Peer-to-peer communication between processes on the same computer</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qdbusservicewatcher.html">QDBusServiceWatcher</a></p></td><td class="tblDescr"><p>Allows the user to watch for a bus service change</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qdbusunixfiledescriptor.html">QDBusUnixFileDescriptor</a></p></td><td class="tblDescr"><p>Holds one Unix file descriptor</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qdbusvirtualobject.html">QDBusVirtualObject</a></p></td><td class="tblDescr"><p>Used to handle several DBus paths with one class</p></td></tr>
+</table></div>
+<!-- $$$QtDBus-description -->
+<a name="details"></a>
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Applications using the Qt D-Bus module can provide services to other, remote applications by exporting objects, as well as use services exported by those applications by placing calls and accessing properties.</p>
+<p>The Qt D-Bus module provides an interface that extends the Qt <a href="../qtcore/signalsandslots.html">Signals and Slots</a> mechanism, allowing one to connect to a signal emitted remotely as well as to connect a local signal to remote slot.</p>
+<p>To use this module, use the following code in your application:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QtDBus&gt;</span>
+
+</pre>
+<p>If you're using qmake to build your application, you can add this line to your .pro file to make it link against the Qt D-Bus libraries:</p>
+<pre class="cpp">
+
+  QT += dbus
+
+</pre>
+<p><b>Note: </b>The source code for this module is located in the <code>src/qdbus</code> directory. When installing Qt from source, this module is built when Qt's tools are built. See the <a href="qtdbus-index.html">D-Bus</a> page for detailed information on how to use this module.</p></div>
+<!-- @@@QtDBus -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

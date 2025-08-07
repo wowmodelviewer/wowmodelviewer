@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qpropertyvalueaddedchange.cpp -->
+  <title>QPropertyValueAddedChange Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QPropertyValueAddedChange</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPropertyValueAddedChange Class</h1>
+<span class="small-subtitle">(<a href="qt3dcore-qpropertyvalueaddedchange.html">Qt3DCore::QPropertyValueAddedChange</a>)<br/></span>
+<!-- $$$QPropertyValueAddedChange-brief -->
+<p>Used to notify when a value is added to a property. <a href="#details">More...</a></p>
+<!-- @@@QPropertyValueAddedChange -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;Qt3DCore/QPropertyValueAddedChange&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3dcore</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3dcore-qstaticpropertyvalueaddedchangebase.html">Qt3DCore::QStaticPropertyValueAddedChangeBase</a></td></tr></table></div><ul>
+<li><a href="qt3dcore-qpropertyvalueaddedchange-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qpropertyvalueaddedchange.html#QPropertyValueAddedChange">QPropertyValueAddedChange</a></b>(Qt3DCore::QNodeId <i>subjectId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariant </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qpropertyvalueaddedchange.html#addedValue">addedValue</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qpropertyvalueaddedchange.html#setAddedValue">setAddedValue</a></b>(const QVariant &amp;<i>value</i>)</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qpropertyvalueaddedchange.html#QPropertyValueAddedChangePtr-typedef">QPropertyValueAddedChangePtr</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPropertyValueAddedChange-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QPropertyValueAddedChange -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QPropertyValueAddedChange[overload1]$$$QPropertyValueAddedChangeQt3DCore::QNodeId -->
+<h3 class="fn" id="QPropertyValueAddedChange"><a name="QPropertyValueAddedChange"></a>QPropertyValueAddedChange::<span class="name">QPropertyValueAddedChange</span>(<span class="type"><a href="qt3dcore-qnodeid.html">Qt3DCore::QNodeId</a></span> <i>subjectId</i>)</h3>
+<p>Constructs a new <a href="qt3dcore-qpropertyvalueaddedchange.html">QPropertyValueAddedChange</a> with <i>subjectId</i>.</p>
+<!-- @@@QPropertyValueAddedChange -->
+<!-- $$$addedValue[overload1]$$$addedValue -->
+<h3 class="fn" id="addedValue"><a name="addedValue"></a><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QPropertyValueAddedChange::<span class="name">addedValue</span>() const</h3>
+<p>Returns the value added to the property.</p>
+<p><b>See also </b><a href="qt3dcore-qpropertyvalueaddedchange.html#setAddedValue">setAddedValue</a>().</p>
+<!-- @@@addedValue -->
+<!-- $$$setAddedValue[overload1]$$$setAddedValueconstQVariant& -->
+<h3 class="fn" id="setAddedValue"><a name="setAddedValue"></a><span class="type">void</span> QPropertyValueAddedChange::<span class="name">setAddedValue</span>(const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>value</i>)</h3>
+<p>Sets the value added to the property to <i>value</i>.</p>
+<p><b>See also </b><a href="qt3dcore-qpropertyvalueaddedchange.html#addedValue">addedValue</a>().</p>
+<!-- @@@setAddedValue -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$QPropertyValueAddedChangePtr -->
+<h3 class="fn" id="QPropertyValueAddedChangePtr-typedef"><a name="QPropertyValueAddedChangePtr-typedef"></a>typedef <span class="name">QPropertyValueAddedChangePtr</span></h3>
+<p>A shared pointer for <a href="qt3dcore-qpropertyvalueaddedchange.html">QPropertyValueAddedChange</a>.</p>
+<!-- @@@QPropertyValueAddedChangePtr -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

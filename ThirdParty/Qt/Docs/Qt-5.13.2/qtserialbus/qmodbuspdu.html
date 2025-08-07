@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmodbuspdu.cpp -->
+  <title>QModbusPdu Class | Qt Serial Bus 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtserialbus-index.html">Qt Serial Bus</a></td><td ><a href="qtserialbus-module.html">C++ Classes</a></td><td >QModbusPdu</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtserialbus-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QModbusPdu Class</h1>
+<!-- $$$QModbusPdu-brief -->
+<p><a href="qmodbuspdu.html">QModbusPdu</a> is a abstract container class containing the function code and payload that is stored inside a Modbus ADU. <a href="#details">More...</a></p>
+<!-- @@@QModbusPdu -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QModbusPdu&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += serialbus</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qmodbusrequest.html">QModbusRequest</a> and <a href="qmodbusresponse.html">QModbusResponse</a></p>
+</td></tr></table></div><p>This class was introduced in  Qt 5.8.</p>
+<ul>
+<li><a href="qmodbuspdu-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qmodbuspdu.html#ExceptionCode-enum">ExceptionCode</a></b> { IllegalFunction, IllegalDataAddress, IllegalDataValue, ServerDeviceFailure, ..., ExtendedException }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qmodbuspdu.html#FunctionCode-enum">FunctionCode</a></b> { Invalid, ReadCoils, ReadDiscreteInputs, ReadHoldingRegisters, ..., UndefinedFunctionCode }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmodbuspdu.html#QModbusPdu">QModbusPdu</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qmodbuspdu.html#dtor.QModbusPdu">~QModbusPdu</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qmodbuspdu.html#data">data</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint16 </td><td class="memItemRight bottomAlign"><b><a href="qmodbuspdu.html#dataSize">dataSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmodbuspdu.html#decodeData">decodeData</a></b>(Args &amp;&amp;... <i>data</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmodbuspdu.html#encodeData">encodeData</a></b>(Args... <i>data</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QModbusPdu::ExceptionCode </td><td class="memItemRight bottomAlign"><b><a href="qmodbuspdu.html#exceptionCode">exceptionCode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QModbusPdu::FunctionCode </td><td class="memItemRight bottomAlign"><b><a href="qmodbuspdu.html#functionCode">functionCode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmodbuspdu.html#isException">isException</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmodbuspdu.html#isValid">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmodbuspdu.html#setData">setData</a></b>(const QByteArray &amp;<i>data</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qmodbuspdu.html#setFunctionCode">setFunctionCode</a></b>(QModbusPdu::FunctionCode <i>code</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint16 </td><td class="memItemRight bottomAlign"><b><a href="qmodbuspdu.html#size">size</a></b>() const</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> const quint8 </td><td class="memItemRight bottomAlign"><b><a href="qmodbuspdu.html#ExceptionByte-var">ExceptionByte</a></b></td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmodbuspdu.html#QModbusPdu-2">QModbusPdu</a></b>(const QModbusPdu &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmodbuspdu.html#QModbusPdu-1">QModbusPdu</a></b>(QModbusPdu::FunctionCode <i>code</i>, const QByteArray &amp;<i>data</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QModbusPdu &amp;</td><td class="memItemRight bottomAlign"><b><a href="qmodbuspdu.html#operator-eq">operator=</a></b>(const QModbusPdu &amp;<i>other</i>)</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QDebug </td><td class="memItemRight bottomAlign"><b><a href="qmodbuspdu.html#operator-lt-lt">operator&lt;&lt;</a></b>(QDebug <i>debug</i>, const QModbusPdu &amp;<i>pdu</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDataStream &amp;</td><td class="memItemRight bottomAlign"><b><a href="qmodbuspdu.html#operator-lt-lt-1">operator&lt;&lt;</a></b>(QDataStream &amp;<i>stream</i>, const QModbusPdu &amp;<i>pdu</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QModbusPdu-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The class provides access to the raw Modbus protocol packets as defined by the Modbus Application Protocol Specification 1.1b.</p>
+</div>
+<!-- @@@QModbusPdu -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$ExceptionCode$$$IllegalFunction$$$IllegalDataAddress$$$IllegalDataValue$$$ServerDeviceFailure$$$Acknowledge$$$ServerDeviceBusy$$$NegativeAcknowledge$$$MemoryParityError$$$GatewayPathUnavailable$$$GatewayTargetDeviceFailedToRespond$$$ExtendedException -->
+<h3 class="fn" id="ExceptionCode-enum"><a name="ExceptionCode-enum"></a>enum QModbusPdu::<span class="name">ExceptionCode</span></h3>
+<p>This enum describes all the possible error conditions as defined by Modbus Exception Codes. They are set by the server after checking the appropriate error conditions in the reply to a request and must be decoded by the client to operate on the exception code.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QModbusPdu::IllegalFunction</code></td><td class="topAlign tblval"><code>0x01</code></td><td class="topAlign">Function code is not supported by device.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::IllegalDataAddress</code></td><td class="topAlign tblval"><code>0x02</code></td><td class="topAlign">The received data address in the query is not an allowable address for the Modbus server.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::IllegalDataValue</code></td><td class="topAlign tblval"><code>0x03</code></td><td class="topAlign">The contained value in the request data field is not an allowable value for the Modbus server.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::ServerDeviceFailure</code></td><td class="topAlign tblval"><code>0x04</code></td><td class="topAlign">An irrecoverable error occurred while the server was attempting to perform the requested action.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::Acknowledge</code></td><td class="topAlign tblval"><code>0x05</code></td><td class="topAlign">Specialized use in conjunction with programming commands.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::ServerDeviceBusy</code></td><td class="topAlign tblval"><code>0x06</code></td><td class="topAlign">The server is engaged in processing a long duration program command.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::NegativeAcknowledge</code></td><td class="topAlign tblval"><code>0x07</code></td><td class="topAlign">The server cannot perform the program function received in the query. This code is returned for an unsuccessful programming request. The client should request diagnostic or error information from the server.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::MemoryParityError</code></td><td class="topAlign tblval"><code>0x08</code></td><td class="topAlign">Indicates that the extended file area failed to pass a consistency check. Used in conjunction with function codes 20 and 21. The exception code does not refer to any parity settings of the transmission line but only to the servers' internal memory of file records.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::GatewayPathUnavailable</code></td><td class="topAlign tblval"><code>0x0A</code></td><td class="topAlign">Indicates that the gateway was unable to allocate an internal communication path from the input port to the output port for processing the request.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::GatewayTargetDeviceFailedToRespond</code></td><td class="topAlign tblval"><code>0x0B</code></td><td class="topAlign">Indicates that no response was obtained from the target device behind a gateway. Usually this means the target device is not online on the network.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::ExtendedException</code></td><td class="topAlign tblval"><code>0xFF</code></td><td class="topAlign">This is an extended exception as per Modbus specification. Generally this code is used to describe an exception that is otherwise further described.</td></tr>
+</table></div>
+<!-- @@@ExceptionCode -->
+<!-- $$$FunctionCode$$$Invalid$$$ReadCoils$$$ReadDiscreteInputs$$$ReadHoldingRegisters$$$ReadInputRegisters$$$WriteSingleCoil$$$WriteSingleRegister$$$ReadExceptionStatus$$$Diagnostics$$$GetCommEventCounter$$$GetCommEventLog$$$WriteMultipleCoils$$$WriteMultipleRegisters$$$ReportServerId$$$ReadFileRecord$$$WriteFileRecord$$$MaskWriteRegister$$$ReadWriteMultipleRegisters$$$ReadFifoQueue$$$EncapsulatedInterfaceTransport$$$UndefinedFunctionCode -->
+<h3 class="fn" id="FunctionCode-enum"><a name="FunctionCode-enum"></a>enum QModbusPdu::<span class="name">FunctionCode</span></h3>
+<p>Defines the function code and the implicit type of action required by the server. Not all Modbus devices can handle the same set of function codes.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QModbusPdu::Invalid</code></td><td class="topAlign tblval"><code>0x00</code></td><td class="topAlign">Set by the default constructor, do not use.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::ReadCoils</code></td><td class="topAlign tblval"><code>0x01</code></td><td class="topAlign">Requests the status of one or more coils from a device.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::ReadDiscreteInputs</code></td><td class="topAlign tblval"><code>0x02</code></td><td class="topAlign">Requests the status of one or more input registers from a device.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::ReadHoldingRegisters</code></td><td class="topAlign tblval"><code>0x03</code></td><td class="topAlign">Requests the status of one or more holding register values from a device.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::ReadInputRegisters</code></td><td class="topAlign tblval"><code>0x04</code></td><td class="topAlign">Requests the status of one or more input register values from a device.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::WriteSingleCoil</code></td><td class="topAlign tblval"><code>0x05</code></td><td class="topAlign">Requests to write a single coil on a device.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::WriteSingleRegister</code></td><td class="topAlign tblval"><code>0x06</code></td><td class="topAlign">Requests to write a single holding register on a device.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::ReadExceptionStatus</code></td><td class="topAlign tblval"><code>0x07</code></td><td class="topAlign">Requests the status of the eight Exception Status outputs on a device.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::Diagnostics</code></td><td class="topAlign tblval"><code>0x08</code></td><td class="topAlign">Used to provide a series of tests for checking the client server communication system, or checking internal</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::GetCommEventCounter</code></td><td class="topAlign tblval"><code>0x0B</code></td><td class="topAlign">Requests a status word and an event count from the device's communication event counter.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::GetCommEventLog</code></td><td class="topAlign tblval"><code>0x0C</code></td><td class="topAlign">Requests a status word, event count, message count, and a field of event bytes from a device.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::WriteMultipleCoils</code></td><td class="topAlign tblval"><code>0x0F</code></td><td class="topAlign">Requests to write one or more coils on a device.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::WriteMultipleRegisters</code></td><td class="topAlign tblval"><code>0x10</code></td><td class="topAlign">Requests to write one or more holding registers on a device.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::ReportServerId</code></td><td class="topAlign tblval"><code>0x11</code></td><td class="topAlign">Requests the description of the type, the current status, and other information specific to a device.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::ReadFileRecord</code></td><td class="topAlign tblval"><code>0x14</code></td><td class="topAlign">Requests a file record read.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::WriteFileRecord</code></td><td class="topAlign tblval"><code>0x15</code></td><td class="topAlign">Requests a file record write.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::MaskWriteRegister</code></td><td class="topAlign tblval"><code>0x16</code></td><td class="topAlign">Requests to modify the contents of a specified holding register using a combination of an AND or OR mask, and the register's current contents.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::ReadWriteMultipleRegisters</code></td><td class="topAlign tblval"><code>0x17</code></td><td class="topAlign">Requests the status of one or more holding register and at the same time to write one or more holding registers on a device.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::ReadFifoQueue</code></td><td class="topAlign tblval"><code>0x18</code></td><td class="topAlign">Requests to read the contents of a First-In-First-Out (FIFO) queue of register in a remote device.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::EncapsulatedInterfaceTransport</code></td><td class="topAlign tblval"><code>0x2B</code></td><td class="topAlign">Please refer to Annex A of the Modbus specification.</td></tr>
+<tr><td class="topAlign"><code>QModbusPdu::UndefinedFunctionCode</code></td><td class="topAlign tblval"><code>0x100</code></td><td class="topAlign">Do not use.</td></tr>
+</table></div>
+<!-- @@@FunctionCode -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QModbusPdu$$$QModbusPduconstQModbusPdu& -->
+<h3 class="fn" id="QModbusPdu-2"><a name="QModbusPdu-2"></a><code>[protected] </code>QModbusPdu::<span class="name">QModbusPdu</span>(const <span class="type"><a href="qmodbuspdu.html#QModbusPdu">QModbusPdu</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a <a href="qmodbuspdu.html">QModbusPdu</a> that is a copy of <i>other</i>.</p>
+<!-- @@@QModbusPdu -->
+<!-- $$$QModbusPdu$$$QModbusPduQModbusPdu::FunctionCodeconstQByteArray& -->
+<h3 class="fn" id="QModbusPdu-1"><a name="QModbusPdu-1"></a><code>[protected] </code>QModbusPdu::<span class="name">QModbusPdu</span>(<span class="type"><a href="qmodbuspdu.html#FunctionCode-enum">QModbusPdu::FunctionCode</a></span> <i>code</i>, const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>data</i>)</h3>
+<p>Constructs a <a href="qmodbuspdu.html">QModbusPdu</a> with function code set to <i>code</i> and payload set to <i>data</i>. The data is expected to be stored in big-endian byte order already.</p>
+<!-- @@@QModbusPdu -->
+<!-- $$$QModbusPdu[overload1]$$$QModbusPdu -->
+<h3 class="fn" id="QModbusPdu"><a name="QModbusPdu"></a>QModbusPdu::<span class="name">QModbusPdu</span>()</h3>
+<p>Constructs an invalid <a href="qmodbuspdu.html">QModbusPdu</a>.</p>
+<!-- @@@QModbusPdu -->
+<!-- $$$operator=[overload1]$$$operator=constQModbusPdu& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><code>[protected] </code><span class="type"><a href="qmodbuspdu.html#QModbusPdu">QModbusPdu</a></span> &amp;QModbusPdu::<span class="name">operator=</span>(const <span class="type"><a href="qmodbuspdu.html#QModbusPdu">QModbusPdu</a></span> &amp;<i>other</i>)</h3>
+<p>Makes a copy of the <i>other</i> and assigns it to this <a href="qmodbuspdu.html">QModbusPdu</a> object.</p>
+<!-- @@@operator= -->
+<!-- $$$~QModbusPdu[overload1]$$$~QModbusPdu -->
+<h3 class="fn" id="dtor.QModbusPdu"><a name="dtor.QModbusPdu"></a><code>[virtual] </code>QModbusPdu::<span class="name">~QModbusPdu</span>()</h3>
+<p>Destroys a <a href="qmodbuspdu.html">QModbusPdu</a>.</p>
+<!-- @@@~QModbusPdu -->
+<!-- $$$data[overload1]$$$data -->
+<h3 class="fn" id="data"><a name="data"></a><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> QModbusPdu::<span class="name">data</span>() const</h3>
+<p>Returns the PDU's payload, excluding the function code. The payload is stored in big-endian byte order.</p>
+<p><b>See also </b><a href="qmodbuspdu.html#setData">setData</a>().</p>
+<!-- @@@data -->
+<!-- $$$dataSize[overload1]$$$dataSize -->
+<h3 class="fn" id="dataSize"><a name="dataSize"></a><span class="type"><a href="../qtcore/qtglobal.html#qint16-typedef">qint16</a></span> QModbusPdu::<span class="name">dataSize</span>() const</h3>
+<p>Returns the PDU's data size, excluding the function code.</p>
+<!-- @@@dataSize -->
+<!-- $$$decodeData[overload1]$$$decodeDataArgs&&... -->
+<h3 class="fn" id="decodeData"><a name="decodeData"></a><span class="type">void</span> QModbusPdu::<span class="name">decodeData</span>(<span class="type">Args</span> &amp;&amp;... <i>data</i>) const</h3>
+<p>Converts the payload into host endianness and reads it into <i>data</i>. Data can be a variable length argument list.</p>
+<pre class="cpp">
+
+  <span class="type">QModbusResponsePdu</span> response(<span class="type"><a href="qmodbuspdu.html#QModbusPdu">QModbusPdu</a></span><span class="operator">::</span>ReportServerId);
+  response<span class="operator">.</span>encodeData(<span class="type"><a href="../qtcore/qtglobal.html#quint8-typedef">quint8</a></span>(<span class="number">0x02</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qtglobal.html#quint8-typedef">quint8</a></span>(<span class="number">0x01</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qtglobal.html#quint8-typedef">quint8</a></span>(<span class="number">0xff</span>));
+  <span class="type"><a href="../qtcore/qtglobal.html#quint8-typedef">quint8</a></span> count<span class="operator">,</span> id<span class="operator">,</span> run;
+  response<span class="operator">.</span>decodeData(<span class="operator">&amp;</span>count<span class="operator">,</span> <span class="operator">&amp;</span>id<span class="operator">,</span> <span class="operator">&amp;</span>run);
+
+</pre>
+<p><b>Note: </b>Usage is limited <code>quint8</code> and <code>quint16</code> only. This is because <code>QDataStream</code> stream operators will not only append raw data, but also e.g&#x2e; size, count, etc. for complex types.</p><!-- @@@decodeData -->
+<!-- $$$encodeData[overload1]$$$encodeDataArgs... -->
+<h3 class="fn" id="encodeData"><a name="encodeData"></a><span class="type">void</span> QModbusPdu::<span class="name">encodeData</span>(<span class="type">Args</span>... <i>data</i>)</h3>
+<p>Sets the payload to <i>data</i>. The data is converted and stored in big-endian byte order.</p>
+<pre class="cpp">
+
+  <span class="type">QModbusRequestPdu</span> request(<span class="type"><a href="qmodbuspdu.html#QModbusPdu">QModbusPdu</a></span><span class="operator">::</span>ReadCoils);
+  <span class="comment">// starting address and quantity of coils</span>
+  request<span class="operator">.</span>encodeData(<span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span>(<span class="number">0x0c</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span>(<span class="number">0x0a</span>));
+
+</pre>
+<p><b>Note: </b>Usage is limited <code>quint8</code> and <code>quint16</code> only. This is because <code>QDataStream</code> stream operators will not only append raw data, but also e.g&#x2e; size, count, etc. for complex types.</p><!-- @@@encodeData -->
+<!-- $$$exceptionCode[overload1]$$$exceptionCode -->
+<h3 class="fn" id="exceptionCode"><a name="exceptionCode"></a><span class="type"><a href="qmodbuspdu.html#ExceptionCode-enum">QModbusPdu::ExceptionCode</a></span> QModbusPdu::<span class="name">exceptionCode</span>() const</h3>
+<p>Returns the response's exception code.</p>
+<!-- @@@exceptionCode -->
+<!-- $$$functionCode[overload1]$$$functionCode -->
+<h3 class="fn" id="functionCode"><a name="functionCode"></a><span class="type"><a href="qmodbuspdu.html#FunctionCode-enum">QModbusPdu::FunctionCode</a></span> QModbusPdu::<span class="name">functionCode</span>() const</h3>
+<p>Returns the PDU's function code.</p>
+<p><b>See also </b><a href="qmodbuspdu.html#setFunctionCode">setFunctionCode</a>().</p>
+<!-- @@@functionCode -->
+<!-- $$$isException[overload1]$$$isException -->
+<h3 class="fn" id="isException"><a name="isException"></a><span class="type">bool</span> QModbusPdu::<span class="name">isException</span>() const</h3>
+<p>Returns true if the PDU contains an exception code; otherwise false.</p>
+<!-- @@@isException -->
+<!-- $$$isValid[overload1]$$$isValid -->
+<h3 class="fn" id="isValid"><a name="isValid"></a><span class="type">bool</span> QModbusPdu::<span class="name">isValid</span>() const</h3>
+<p>Returns true if the PDU is valid; otherwise false.</p>
+<p>A PDU is considered valid if the message code is in the range of 1 to 255 decimal and the PDU's compound size (function code + data) does not exceed 253 bytes. A default constructed PDU is invalid.</p>
+<!-- @@@isValid -->
+<!-- $$$setData[overload1]$$$setDataconstQByteArray& -->
+<h3 class="fn" id="setData"><a name="setData"></a><span class="type">void</span> QModbusPdu::<span class="name">setData</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>data</i>)</h3>
+<p>Sets the PDU's function payload to <i>data</i>. The data is expected to be stored in big-endian byte order already.</p>
+<p><b>See also </b><a href="qmodbuspdu.html#data">data</a>().</p>
+<!-- @@@setData -->
+<!-- $$$setFunctionCode[overload1]$$$setFunctionCodeQModbusPdu::FunctionCode -->
+<h3 class="fn" id="setFunctionCode"><a name="setFunctionCode"></a><code>[virtual] </code><span class="type">void</span> QModbusPdu::<span class="name">setFunctionCode</span>(<span class="type"><a href="qmodbuspdu.html#FunctionCode-enum">QModbusPdu::FunctionCode</a></span> <i>code</i>)</h3>
+<p>Sets the PDU's function code to <i>code</i>.</p>
+<p><b>See also </b><a href="qmodbuspdu.html#functionCode">functionCode</a>().</p>
+<!-- @@@setFunctionCode -->
+<!-- $$$size[overload1]$$$size -->
+<h3 class="fn" id="size"><a name="size"></a><span class="type"><a href="../qtcore/qtglobal.html#qint16-typedef">qint16</a></span> QModbusPdu::<span class="name">size</span>() const</h3>
+<p>Returns the PDU's full size, including function code and data size.</p>
+<!-- @@@size -->
+</div>
+<div class="vars">
+<h2>Member Variable Documentation</h2>
+<!-- $$$ExceptionByte -->
+<h3 class="fn" id="ExceptionByte-var"><a name="ExceptionByte-var"></a>const <span class="type"><a href="../qtcore/qtglobal.html#quint8-typedef">quint8</a></span> QModbusPdu::<span class="name">ExceptionByte</span></h3>
+<p>The variable is initialized to 0x80.</p>
+<p>Exceptions are reported in a defined packet format. A function code is returned to the requesting client equal to the original function code, except with its most significant bit set. This is equivalent to adding 0x80 to the value of the original function code.</p>
+<p>This field may be used to mask the exception bit in the function field of a raw Modbus packet.</p>
+<!-- @@@ExceptionByte -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$operator<<[overload1]$$$operator<<QDebugconstQModbusPdu& -->
+<h3 class="fn" id="operator-lt-lt"><a name="operator-lt-lt"></a><span class="type"><a href="../qtcore/qdebug.html">QDebug</a></span> <span class="name">operator&lt;&lt;</span>(<span class="type"><a href="../qtcore/qdebug.html">QDebug</a></span> <i>debug</i>, const <span class="type"><a href="qmodbuspdu.html#QModbusPdu">QModbusPdu</a></span> &amp;<i>pdu</i>)</h3>
+<p>Writes the Modbus <i>pdu</i> to the <i>debug</i> stream.</p>
+<!-- @@@operator<< -->
+<!-- $$$operator<<$$$operator<<QDataStream&constQModbusPdu& -->
+<h3 class="fn" id="operator-lt-lt-1"><a name="operator-lt-lt-1"></a><span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> &amp;<span class="name">operator&lt;&lt;</span>(<span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> &amp;<i>stream</i>, const <span class="type"><a href="qmodbuspdu.html#QModbusPdu">QModbusPdu</a></span> &amp;<i>pdu</i>)</h3>
+<p>Writes a <i>pdu</i> to the <i>stream</i> and returns a reference to the stream.</p>
+<!-- @@@operator<< -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

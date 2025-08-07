@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qeglnativecontext.qdoc -->
+  <title>QEGLNativeContext Struct | Qt Platform Headers 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtplatformheaders-index.html">Qt Platform Headers</a></td><td ><a href="qtplatformheaders-module.html">C++ Classes</a></td><td >QEGLNativeContext</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtplatformheaders-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QEGLNativeContext Struct</h1>
+<!-- $$$QEGLNativeContext-brief -->
+<p>A class encapsulating an EGL context and display handle. <a href="#details">More...</a></p>
+<!-- @@@QEGLNativeContext -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QEGLNativeContext&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.4</td></tr></table></div><p>This struct was introduced in  Qt 5.4.</p>
+<ul>
+<li><a href="qeglnativecontext-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qeglnativecontext.html#QEGLNativeContext-1">QEGLNativeContext</a></b>(EGLContext <i>ctx</i>, EGLDisplay <i>dpy</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qeglnativecontext.html#QEGLNativeContext">QEGLNativeContext</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> EGLContext </td><td class="memItemRight bottomAlign"><b><a href="qeglnativecontext.html#context">context</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> EGLDisplay </td><td class="memItemRight bottomAlign"><b><a href="qeglnativecontext.html#display">display</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QEGLNativeContext-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><b>Note: </b>There is no binary compatibility guarantee for this class, meaning that an application using it is only guaranteed to work with the Qt version it was developed against.</p><p><b>Note: </b>Due to being public while relying on otherwise hidden EGL types, this header itself does not include <code>EGL/egl.h</code>. It is the application's responsibility to include egl.h with any appropriate defines (for example, <code>MESA_EGL_NO_X11_HEADERS</code> or other vendor-specific defines controlling the typedefs for EGL's native resources) before this header.</p></div>
+<p><b>See also </b><a href="../qtgui/qopenglcontext.html#setNativeHandle">QOpenGLContext::setNativeHandle</a>() and <a href="../qtgui/qopenglcontext.html#nativeHandle">QOpenGLContext::nativeHandle</a>().</p>
+<!-- @@@QEGLNativeContext -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QEGLNativeContext$$$QEGLNativeContextEGLContextEGLDisplay -->
+<h3 class="fn" id="QEGLNativeContext-1"><a name="QEGLNativeContext-1"></a>QEGLNativeContext::<span class="name">QEGLNativeContext</span>(<span class="type">EGLContext</span> <i>ctx</i>, <span class="type">EGLDisplay</span> <i>dpy</i>)</h3>
+<p>Constructs a new instance with the provided <i>ctx</i> and <i>dpy</i> handles.</p>
+<!-- @@@QEGLNativeContext -->
+<!-- $$$QEGLNativeContext[overload1]$$$QEGLNativeContext -->
+<h3 class="fn" id="QEGLNativeContext"><a name="QEGLNativeContext"></a>QEGLNativeContext::<span class="name">QEGLNativeContext</span>()</h3>
+<p>Construct a new instance with no handles.</p>
+<!-- @@@QEGLNativeContext -->
+<!-- $$$context[overload1]$$$context -->
+<h3 class="fn" id="context"><a name="context"></a><span class="type">EGLContext</span> QEGLNativeContext::<span class="name">context</span>() const</h3>
+<p>Returns the EGL context.</p>
+<!-- @@@context -->
+<!-- $$$display[overload1]$$$display -->
+<h3 class="fn" id="display"><a name="display"></a><span class="type">EGLDisplay</span> QEGLNativeContext::<span class="name">display</span>() const</h3>
+<p>Returns the EGL display.</p>
+<!-- @@@display -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

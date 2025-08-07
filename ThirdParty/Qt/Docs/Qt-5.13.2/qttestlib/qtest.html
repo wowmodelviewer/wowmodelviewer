@@ -1,0 +1,1300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtestcase.qdoc -->
+  <title>QTest Namespace | Qt Test 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qttest-index.html">Qt Test</a></td><td >QTest Namespace</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qttest-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#classes">Classes</a></li>
+<li class="level1"><a href="#types">Types</a></li>
+<li class="level1"><a href="#functions">Functions</a></li>
+<li class="level1"><a href="#macros">Macros</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QTest Namespace</h1>
+<!-- $$$QTest-brief -->
+<p>The <a href="qtest.html">QTest</a> namespace contains all the functions and declarations that are related to Qt Test. <a href="#details">More...</a></p>
+<!-- @@@QTest -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QTest&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += testlib</td></tr></table></div><ul>
+<li><a href="qtest-obsolete.html">Obsolete members</a></li>
+</ul>
+<a name="classes"></a>
+<h2 id="classes">Classes</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> class </td><td class="memItemRight bottomAlign"><b><a href="qtest-qtoucheventsequence.html">QTouchEventSequence</a></b></td></tr>
+</table></div>
+<a name="types"></a>
+<h2 id="types">Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#AttributeIndex-enum">AttributeIndex</a></b> { AI_Undefined, AI_Name, AI_Result, AI_Tests, ..., AI_Iterations }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#KeyAction-enum">KeyAction</a></b> { Press, Release, Click, Shortcut }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#LogElementType-enum">LogElementType</a></b> { LET_Undefined, LET_Property, LET_Properties, LET_Failure, ..., LET_SystemError }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#MouseAction-enum">MouseAction</a></b> { MousePress, MouseRelease, MouseClick, MouseDClick, MouseMove }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QBenchmarkMetric-enum">QBenchmarkMetric</a></b> { FramesPerSecond, BitsPerSecond, BytesPerSecond, WalltimeMilliseconds, ..., EmulationFaults }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#TestFailMode-enum">TestFailMode</a></b> { Abort, Continue }</td></tr>
+</table></div>
+<a name="functions"></a>
+<h2 id="functions">Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#addColumn">addColumn</a></b>(const char *<i>name</i>, T *<i>dummy</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QTestData &amp;</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#addRow">addRow</a></b>(const char *<i>format</i>, <i>...</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#benchmarkMetricName">benchmarkMetricName</a></b>(QTest::QBenchmarkMetric <i>metric</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#benchmarkMetricUnit">benchmarkMetricUnit</a></b>(QTest::QBenchmarkMetric <i>metric</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QTouchDevice *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#createTouchDevice">createTouchDevice</a></b>(QTouchDevice::DeviceType <i>devType</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#currentAppName">currentAppName</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#currentDataTag">currentDataTag</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#currentTestFailed">currentTestFailed</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#currentTestFunction">currentTestFunction</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#ignoreMessage">ignoreMessage</a></b>(QtMsgType <i>type</i>, const char *<i>message</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#ignoreMessage-1">ignoreMessage</a></b>(QtMsgType <i>type</i>, const QRegularExpression &amp;<i>messagePattern</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#keyClick">keyClick</a></b>(QWidget *<i>widget</i>, Qt::Key <i>key</i>, Qt::KeyboardModifiers <i>modifier</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#keyClick-1">keyClick</a></b>(QWindow *<i>window</i>, Qt::Key <i>key</i>, Qt::KeyboardModifiers <i>modifier</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#keyClick-2">keyClick</a></b>(QWindow *<i>window</i>, char <i>key</i>, Qt::KeyboardModifiers <i>modifier</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#keyClick-3">keyClick</a></b>(QWidget *<i>widget</i>, char <i>key</i>, Qt::KeyboardModifiers <i>modifier</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#keyClicks">keyClicks</a></b>(QWidget *<i>widget</i>, const QString &amp;<i>sequence</i>, Qt::KeyboardModifiers <i>modifier</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#keyEvent">keyEvent</a></b>(QTest::KeyAction <i>action</i>, QWidget *<i>widget</i>, Qt::Key <i>key</i>, Qt::KeyboardModifiers <i>modifier</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#keyEvent-1">keyEvent</a></b>(QTest::KeyAction <i>action</i>, QWindow *<i>window</i>, char <i>ascii</i>, Qt::KeyboardModifiers <i>modifier</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#keyEvent-2">keyEvent</a></b>(QTest::KeyAction <i>action</i>, QWindow *<i>window</i>, Qt::Key <i>key</i>, Qt::KeyboardModifiers <i>modifier</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#keyEvent-3">keyEvent</a></b>(QTest::KeyAction <i>action</i>, QWidget *<i>widget</i>, char <i>ascii</i>, Qt::KeyboardModifiers <i>modifier</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#keyPress">keyPress</a></b>(QWidget *<i>widget</i>, Qt::Key <i>key</i>, Qt::KeyboardModifiers <i>modifier</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#keyPress-1">keyPress</a></b>(QWindow *<i>window</i>, char <i>key</i>, Qt::KeyboardModifiers <i>modifier</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#keyPress-2">keyPress</a></b>(QWindow *<i>window</i>, Qt::Key <i>key</i>, Qt::KeyboardModifiers <i>modifier</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#keyPress-3">keyPress</a></b>(QWidget *<i>widget</i>, char <i>key</i>, Qt::KeyboardModifiers <i>modifier</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#keyRelease">keyRelease</a></b>(QWidget *<i>widget</i>, Qt::Key <i>key</i>, Qt::KeyboardModifiers <i>modifier</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#keyRelease-1">keyRelease</a></b>(QWindow *<i>window</i>, char <i>key</i>, Qt::KeyboardModifiers <i>modifier</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#keyRelease-2">keyRelease</a></b>(QWindow *<i>window</i>, Qt::Key <i>key</i>, Qt::KeyboardModifiers <i>modifier</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#keyRelease-3">keyRelease</a></b>(QWidget *<i>widget</i>, char <i>key</i>, Qt::KeyboardModifiers <i>modifier</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#keySequence">keySequence</a></b>(QWindow *<i>window</i>, const QKeySequence &amp;<i>keySequence</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#keySequence-1">keySequence</a></b>(QWidget *<i>widget</i>, const QKeySequence &amp;<i>keySequence</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#mouseClick">mouseClick</a></b>(QWidget *<i>widget</i>, Qt::MouseButton <i>button</i>, Qt::KeyboardModifiers <i>modifier</i> = ..., QPoint <i>pos</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#mouseClick-1">mouseClick</a></b>(QWindow *<i>window</i>, Qt::MouseButton <i>button</i>, Qt::KeyboardModifiers <i>stateKey</i> = ..., QPoint <i>pos</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#mouseDClick">mouseDClick</a></b>(QWidget *<i>widget</i>, Qt::MouseButton <i>button</i>, Qt::KeyboardModifiers <i>modifier</i> = ..., QPoint <i>pos</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#mouseDClick-1">mouseDClick</a></b>(QWindow *<i>window</i>, Qt::MouseButton <i>button</i>, Qt::KeyboardModifiers <i>stateKey</i> = ..., QPoint <i>pos</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#mouseMove">mouseMove</a></b>(QWidget *<i>widget</i>, QPoint <i>pos</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#mouseMove-1">mouseMove</a></b>(QWindow *<i>window</i>, QPoint <i>pos</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#mousePress">mousePress</a></b>(QWidget *<i>widget</i>, Qt::MouseButton <i>button</i>, Qt::KeyboardModifiers <i>modifier</i> = ..., QPoint <i>pos</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#mousePress-1">mousePress</a></b>(QWindow *<i>window</i>, Qt::MouseButton <i>button</i>, Qt::KeyboardModifiers <i>stateKey</i> = ..., QPoint <i>pos</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#mouseRelease">mouseRelease</a></b>(QWidget *<i>widget</i>, Qt::MouseButton <i>button</i>, Qt::KeyboardModifiers <i>modifier</i> = ..., QPoint <i>pos</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#mouseRelease-1">mouseRelease</a></b>(QWindow *<i>window</i>, Qt::MouseButton <i>button</i>, Qt::KeyboardModifiers <i>stateKey</i> = ..., QPoint <i>pos</i> = ..., int <i>delay</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QTestData &amp;</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#newRow">newRow</a></b>(const char *<i>dataTag</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#qExec">qExec</a></b>(QObject *<i>testObject</i>, int <i>argc</i> = 0, char **<i>argv</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#qExec-1">qExec</a></b>(QObject *<i>testObject</i>, const QStringList &amp;<i>arguments</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSharedPointer&lt;QTemporaryDir&gt; </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#qExtractTestData">qExtractTestData</a></b>(const QString &amp;<i>dirName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#qSleep">qSleep</a></b>(int <i>ms</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#qWait">qWait</a></b>(int <i>ms</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#qWaitFor">qWaitFor</a></b>(Functor <i>predicate</i>, int <i>timeout</i> = 5000)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#qWaitForWindowActive">qWaitForWindowActive</a></b>(QWindow *<i>window</i>, int <i>timeout</i> = 5000)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#qWaitForWindowActive-1">qWaitForWindowActive</a></b>(QWidget *<i>widget</i>, int <i>timeout</i> = 5000)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#qWaitForWindowExposed">qWaitForWindowExposed</a></b>(QWindow *<i>window</i>, int <i>timeout</i> = 5000)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#qWaitForWindowExposed-1">qWaitForWindowExposed</a></b>(QWidget *<i>widget</i>, int <i>timeout</i> = 5000)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#setBenchmarkResult">setBenchmarkResult</a></b>(qreal <i>result</i>, QTest::QBenchmarkMetric <i>metric</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toHexRepresentation">toHexRepresentation</a></b>(const char *<i>ba</i>, int <i>length</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString">toString</a></b>(const T &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-1">toString</a></b>(const QPair&lt;T1, T2&gt; &amp;<i>pair</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-36">toString</a></b>(QSizePolicy::ControlType <i>ct</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-37">toString</a></b>(QSizePolicy <i>sp</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-2">toString</a></b>(const std::pair&lt;T1, T2&gt; &amp;<i>pair</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-3">toString</a></b>(const std::tuple&lt;Types...&gt; &amp;<i>tuple</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-4">toString</a></b>(const QStringView &amp;<i>string</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-5">toString</a></b>(const QString &amp;<i>string</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-6">toString</a></b>(const QLatin1String &amp;<i>string</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-7">toString</a></b>(const QByteArray &amp;<i>ba</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-8">toString</a></b>(const QTime &amp;<i>time</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-9">toString</a></b>(const QDate &amp;<i>date</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-10">toString</a></b>(const QDateTime &amp;<i>dateTime</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-11">toString</a></b>(const QCborError &amp;<i>c</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-12">toString</a></b>(const QChar &amp;<i>character</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-14">toString</a></b>(const QPoint &amp;<i>point</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-15">toString</a></b>(const QSize &amp;<i>size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-16">toString</a></b>(const QRect &amp;<i>rectangle</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-17">toString</a></b>(const QPointF &amp;<i>point</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-18">toString</a></b>(const QSizeF &amp;<i>size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-19">toString</a></b>(const QRectF &amp;<i>rectangle</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-20">toString</a></b>(const QUrl &amp;<i>url</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-21">toString</a></b>(const QUuid &amp;<i>uuid</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-22">toString</a></b>(const QVariant &amp;<i>variant</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-24">toString</a></b>(<i>std::nullptr_t</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-31">toString</a></b>(const QVector2D &amp;<i>v</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-32">toString</a></b>(const QVector3D &amp;<i>v</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-33">toString</a></b>(const QVector4D &amp;<i>v</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-34">toString</a></b>(QSizePolicy::Policy <i>p</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> char *</td><td class="memItemRight bottomAlign"><b><a href="qtest.html#toString-35">toString</a></b>(QSizePolicy::ControlTypes <i>cts</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QTest::QTouchEventSequence </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#touchEvent">touchEvent</a></b>(QWidget *<i>widget</i>, QTouchDevice *<i>device</i>, bool <i>autoCommit</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QTest::QTouchEventSequence </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#touchEvent-1">touchEvent</a></b>(QWindow *<i>window</i>, QTouchDevice *<i>device</i>, bool <i>autoCommit</i>)</td></tr>
+</table></div>
+<a name="macros"></a>
+<h2 id="macros">Macros</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QBENCHMARK">QBENCHMARK</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QBENCHMARK_ONCE">QBENCHMARK_ONCE</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QCOMPARE">QCOMPARE</a></b>(<i>actual</i>, <i>expected</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QEXPECT_FAIL">QEXPECT_FAIL</a></b>(<i>dataIndex</i>, <i>comment</i>, <i>mode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QFAIL">QFAIL</a></b>(<i>message</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QFETCH">QFETCH</a></b>(<i>type</i>, <i>name</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QFINDTESTDATA">QFINDTESTDATA</a></b>(<i>filename</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QSKIP">QSKIP</a></b>(<i>description</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QTEST">QTEST</a></b>(<i>actual</i>, <i>testElement</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QTEST_APPLESS_MAIN">QTEST_APPLESS_MAIN</a></b>(<i>TestClass</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QTEST_GUILESS_MAIN">QTEST_GUILESS_MAIN</a></b>(<i>TestClass</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QTEST_MAIN">QTEST_MAIN</a></b>(<i>TestClass</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QTRY_COMPARE">QTRY_COMPARE</a></b>(<i>actual</i>, <i>expected</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QTRY_COMPARE_WITH_TIMEOUT">QTRY_COMPARE_WITH_TIMEOUT</a></b>(<i>actual</i>, <i>expected</i>, <i>timeout</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QTRY_VERIFY2">QTRY_VERIFY2</a></b>(<i>condition</i>, <i>message</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QTRY_VERIFY">QTRY_VERIFY</a></b>(<i>condition</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QTRY_VERIFY2_WITH_TIMEOUT">QTRY_VERIFY2_WITH_TIMEOUT</a></b>(<i>condition</i>, <i>message</i>, <i>timeout</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QTRY_VERIFY_WITH_TIMEOUT">QTRY_VERIFY_WITH_TIMEOUT</a></b>(<i>condition</i>, <i>timeout</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QVERIFY2">QVERIFY2</a></b>(<i>condition</i>, <i>message</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QVERIFY">QVERIFY</a></b>(<i>condition</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QVERIFY_EXCEPTION_THROWN">QVERIFY_EXCEPTION_THROWN</a></b>(<i>expression</i>, <i>exceptiontype</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtest.html#QWARN">QWARN</a></b>(<i>message</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QTest-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>See the <a href="qtest-overview.html">Qt Test Overview</a> for information about how to write unit tests.</p>
+</div>
+<!-- @@@QTest -->
+<div class="classes">
+<h2>Classes</h2>
+<h3> class <a href="qtest-qtoucheventsequence.html">QTouchEventSequence</a></h3><!-- $$$QTouchEventSequence-brief -->
+<p>The <a href="qtest-qtoucheventsequence.html">QTouchEventSequence</a> class is used to simulate a sequence of touch events. <a href="qtest-qtoucheventsequence.html#details">More...</a></p>
+<!-- @@@QTouchEventSequence -->
+</div>
+<div class="types">
+<h2>Type Documentation</h2>
+<!-- $$$AttributeIndex$$$AI_Undefined$$$AI_Name$$$AI_Result$$$AI_Tests$$$AI_Failures$$$AI_Errors$$$AI_Type$$$AI_Description$$$AI_PropertyValue$$$AI_QTestVersion$$$AI_QtVersion$$$AI_File$$$AI_Line$$$AI_Metric$$$AI_Tag$$$AI_Value$$$AI_Iterations -->
+<h3 class="fn" id="AttributeIndex-enum"><a name="AttributeIndex-enum"></a>enum QTest::<span class="name">AttributeIndex</span></h3>
+<p>This enum numbers the different tests.</p>
+<div class="table"><table class="valuelist"><tr><th class="tblConst">Constant</th><th class="tblVal">Value</th></tr>
+<tr><td class="topAlign"><code>QTest::AI_Undefined</code></td><td class="topAlign tblval"><code>-1</code></td></tr>
+<tr><td class="topAlign"><code>QTest::AI_Name</code></td><td class="topAlign tblval"><code>0</code></td></tr>
+<tr><td class="topAlign"><code>QTest::AI_Result</code></td><td class="topAlign tblval"><code>1</code></td></tr>
+<tr><td class="topAlign"><code>QTest::AI_Tests</code></td><td class="topAlign tblval"><code>2</code></td></tr>
+<tr><td class="topAlign"><code>QTest::AI_Failures</code></td><td class="topAlign tblval"><code>3</code></td></tr>
+<tr><td class="topAlign"><code>QTest::AI_Errors</code></td><td class="topAlign tblval"><code>4</code></td></tr>
+<tr><td class="topAlign"><code>QTest::AI_Type</code></td><td class="topAlign tblval"><code>5</code></td></tr>
+<tr><td class="topAlign"><code>QTest::AI_Description</code></td><td class="topAlign tblval"><code>6</code></td></tr>
+<tr><td class="topAlign"><code>QTest::AI_PropertyValue</code></td><td class="topAlign tblval"><code>7</code></td></tr>
+<tr><td class="topAlign"><code>QTest::AI_QTestVersion</code></td><td class="topAlign tblval"><code>8</code></td></tr>
+<tr><td class="topAlign"><code>QTest::AI_QtVersion</code></td><td class="topAlign tblval"><code>9</code></td></tr>
+<tr><td class="topAlign"><code>QTest::AI_File</code></td><td class="topAlign tblval"><code>10</code></td></tr>
+<tr><td class="topAlign"><code>QTest::AI_Line</code></td><td class="topAlign tblval"><code>11</code></td></tr>
+<tr><td class="topAlign"><code>QTest::AI_Metric</code></td><td class="topAlign tblval"><code>12</code></td></tr>
+<tr><td class="topAlign"><code>QTest::AI_Tag</code></td><td class="topAlign tblval"><code>13</code></td></tr>
+<tr><td class="topAlign"><code>QTest::AI_Value</code></td><td class="topAlign tblval"><code>14</code></td></tr>
+<tr><td class="topAlign"><code>QTest::AI_Iterations</code></td><td class="topAlign tblval"><code>15</code></td></tr>
+</table></div>
+<!-- @@@AttributeIndex -->
+<!-- $$$KeyAction$$$Press$$$Release$$$Click$$$Shortcut -->
+<h3 class="fn" id="KeyAction-enum"><a name="KeyAction-enum"></a>enum QTest::<span class="name">KeyAction</span></h3>
+<p>This enum describes possible actions for key handling.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QTest::Press</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The key is pressed.</td></tr>
+<tr><td class="topAlign"><code>QTest::Release</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The key is released.</td></tr>
+<tr><td class="topAlign"><code>QTest::Click</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The key is clicked (pressed and released).</td></tr>
+<tr><td class="topAlign"><code>QTest::Shortcut</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">A shortcut is activated. This value has been added in Qt 5.6&#x2e;</td></tr>
+</table></div>
+<!-- @@@KeyAction -->
+<!-- $$$LogElementType$$$LET_Undefined$$$LET_Property$$$LET_Properties$$$LET_Failure$$$LET_Error$$$LET_TestCase$$$LET_TestSuite$$$LET_Benchmark$$$LET_SystemError -->
+<h3 class="fn" id="LogElementType-enum"><a name="LogElementType-enum"></a>enum QTest::<span class="name">LogElementType</span></h3>
+<p>The enum specifies the kinds of test log messages.</p>
+<div class="table"><table class="valuelist"><tr><th class="tblConst">Constant</th><th class="tblVal">Value</th></tr>
+<tr><td class="topAlign"><code>QTest::LET_Undefined</code></td><td class="topAlign tblval"><code>-1</code></td></tr>
+<tr><td class="topAlign"><code>QTest::LET_Property</code></td><td class="topAlign tblval"><code>0</code></td></tr>
+<tr><td class="topAlign"><code>QTest::LET_Properties</code></td><td class="topAlign tblval"><code>1</code></td></tr>
+<tr><td class="topAlign"><code>QTest::LET_Failure</code></td><td class="topAlign tblval"><code>2</code></td></tr>
+<tr><td class="topAlign"><code>QTest::LET_Error</code></td><td class="topAlign tblval"><code>3</code></td></tr>
+<tr><td class="topAlign"><code>QTest::LET_TestCase</code></td><td class="topAlign tblval"><code>4</code></td></tr>
+<tr><td class="topAlign"><code>QTest::LET_TestSuite</code></td><td class="topAlign tblval"><code>5</code></td></tr>
+<tr><td class="topAlign"><code>QTest::LET_Benchmark</code></td><td class="topAlign tblval"><code>6</code></td></tr>
+<tr><td class="topAlign"><code>QTest::LET_SystemError</code></td><td class="topAlign tblval"><code>7</code></td></tr>
+</table></div>
+<!-- @@@LogElementType -->
+<!-- $$$MouseAction$$$MousePress$$$MouseRelease$$$MouseClick$$$MouseDClick$$$MouseMove -->
+<h3 class="fn" id="MouseAction-enum"><a name="MouseAction-enum"></a>enum QTest::<span class="name">MouseAction</span></h3>
+<p>This enum describes possible actions for mouse handling.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QTest::MousePress</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">A mouse button is pressed.</td></tr>
+<tr><td class="topAlign"><code>QTest::MouseRelease</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">A mouse button is released.</td></tr>
+<tr><td class="topAlign"><code>QTest::MouseClick</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">A mouse button is clicked (pressed and released).</td></tr>
+<tr><td class="topAlign"><code>QTest::MouseDClick</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">A mouse button is double clicked (pressed and released twice).</td></tr>
+<tr><td class="topAlign"><code>QTest::MouseMove</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">The mouse pointer has moved.</td></tr>
+</table></div>
+<!-- @@@MouseAction -->
+<!-- $$$QBenchmarkMetric$$$FramesPerSecond$$$BitsPerSecond$$$BytesPerSecond$$$WalltimeMilliseconds$$$CPUTicks$$$InstructionReads$$$Events$$$WalltimeNanoseconds$$$BytesAllocated$$$CPUMigrations$$$CPUCycles$$$BusCycles$$$StalledCycles$$$Instructions$$$BranchInstructions$$$BranchMisses$$$CacheReferences$$$CacheReads$$$CacheWrites$$$CachePrefetches$$$CacheMisses$$$CacheReadMisses$$$CacheWriteMisses$$$CachePrefetchMisses$$$ContextSwitches$$$PageFaults$$$MinorPageFaults$$$MajorPageFaults$$$AlignmentFaults$$$EmulationFaults$$$RefCPUCycles -->
+<h3 class="fn" id="QBenchmarkMetric-enum"><a name="QBenchmarkMetric-enum"></a>enum QTest::<span class="name">QBenchmarkMetric</span></h3>
+<p>This enum lists all the things that can be benchmarked.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QTest::FramesPerSecond</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Frames per second</td></tr>
+<tr><td class="topAlign"><code>QTest::BitsPerSecond</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Bits per second</td></tr>
+<tr><td class="topAlign"><code>QTest::BytesPerSecond</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Bytes per second</td></tr>
+<tr><td class="topAlign"><code>QTest::WalltimeMilliseconds</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">Clock time in milliseconds</td></tr>
+<tr><td class="topAlign"><code>QTest::WalltimeNanoseconds</code></td><td class="topAlign tblval"><code>7</code></td><td class="topAlign">Clock time in nanoseconds</td></tr>
+<tr><td class="topAlign"><code>QTest::BytesAllocated</code></td><td class="topAlign tblval"><code>8</code></td><td class="topAlign">Memory usage in bytes</td></tr>
+<tr><td class="topAlign"><code>QTest::Events</code></td><td class="topAlign tblval"><code>6</code></td><td class="topAlign">Event count</td></tr>
+<tr><td class="topAlign"><code>QTest::CPUTicks</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">CPU time</td></tr>
+<tr><td class="topAlign"><code>QTest::CPUMigrations</code></td><td class="topAlign tblval"><code>9</code></td><td class="topAlign">Process migrations between CPUs</td></tr>
+<tr><td class="topAlign"><code>QTest::CPUCycles</code></td><td class="topAlign tblval"><code>10</code></td><td class="topAlign">CPU cycles</td></tr>
+<tr><td class="topAlign"><code>QTest::RefCPUCycles</code></td><td class="topAlign tblval"><code>30</code></td><td class="topAlign">Reference CPU cycles</td></tr>
+<tr><td class="topAlign"><code>QTest::BusCycles</code></td><td class="topAlign tblval"><code>11</code></td><td class="topAlign">Bus cycles</td></tr>
+<tr><td class="topAlign"><code>QTest::StalledCycles</code></td><td class="topAlign tblval"><code>12</code></td><td class="topAlign">Cycles stalled</td></tr>
+<tr><td class="topAlign"><code>QTest::InstructionReads</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">Instruction reads</td></tr>
+<tr><td class="topAlign"><code>QTest::Instructions</code></td><td class="topAlign tblval"><code>13</code></td><td class="topAlign">Instructions executed</td></tr>
+<tr><td class="topAlign"><code>QTest::BranchInstructions</code></td><td class="topAlign tblval"><code>14</code></td><td class="topAlign">Branch-type instructions</td></tr>
+<tr><td class="topAlign"><code>QTest::BranchMisses</code></td><td class="topAlign tblval"><code>15</code></td><td class="topAlign">Branch instructions that were mispredicted</td></tr>
+<tr><td class="topAlign"><code>QTest::CacheReferences</code></td><td class="topAlign tblval"><code>16</code></td><td class="topAlign">Cache accesses of any type</td></tr>
+<tr><td class="topAlign"><code>QTest::CacheMisses</code></td><td class="topAlign tblval"><code>20</code></td><td class="topAlign">Cache misses of any type</td></tr>
+<tr><td class="topAlign"><code>QTest::CacheReads</code></td><td class="topAlign tblval"><code>17</code></td><td class="topAlign">Cache reads / loads</td></tr>
+<tr><td class="topAlign"><code>QTest::CacheReadMisses</code></td><td class="topAlign tblval"><code>21</code></td><td class="topAlign">Cache read / load misses</td></tr>
+<tr><td class="topAlign"><code>QTest::CacheWrites</code></td><td class="topAlign tblval"><code>18</code></td><td class="topAlign">Cache writes / stores</td></tr>
+<tr><td class="topAlign"><code>QTest::CacheWriteMisses</code></td><td class="topAlign tblval"><code>22</code></td><td class="topAlign">Cache write / store misses</td></tr>
+<tr><td class="topAlign"><code>QTest::CachePrefetches</code></td><td class="topAlign tblval"><code>19</code></td><td class="topAlign">Cache prefetches</td></tr>
+<tr><td class="topAlign"><code>QTest::CachePrefetchMisses</code></td><td class="topAlign tblval"><code>23</code></td><td class="topAlign">Cache prefetch misses</td></tr>
+<tr><td class="topAlign"><code>QTest::ContextSwitches</code></td><td class="topAlign tblval"><code>24</code></td><td class="topAlign">Context switches</td></tr>
+<tr><td class="topAlign"><code>QTest::PageFaults</code></td><td class="topAlign tblval"><code>25</code></td><td class="topAlign">Page faults of any type</td></tr>
+<tr><td class="topAlign"><code>QTest::MinorPageFaults</code></td><td class="topAlign tblval"><code>26</code></td><td class="topAlign">Minor page faults</td></tr>
+<tr><td class="topAlign"><code>QTest::MajorPageFaults</code></td><td class="topAlign tblval"><code>27</code></td><td class="topAlign">Major page faults</td></tr>
+<tr><td class="topAlign"><code>QTest::AlignmentFaults</code></td><td class="topAlign tblval"><code>28</code></td><td class="topAlign">Faults caused due to misalignment</td></tr>
+<tr><td class="topAlign"><code>QTest::EmulationFaults</code></td><td class="topAlign tblval"><code>29</code></td><td class="topAlign">Faults that needed software emulation</td></tr>
+</table></div>
+<p>Note that <code>WalltimeNanoseconds</code> and <code>BytesAllocated</code> are only provided for use via <a href="qtest.html#setBenchmarkResult">setBenchmarkResult</a>(), and results in those metrics are not able to be provided automatically by the <a href="qtest.html">QTest</a> framework.</p>
+<p>This enum was introduced or modified in  Qt 4.7.</p>
+<p><b>See also </b><a href="qtest.html#benchmarkMetricName">QTest::benchmarkMetricName</a>() and <a href="qtest.html#benchmarkMetricUnit">QTest::benchmarkMetricUnit</a>().</p>
+<!-- @@@QBenchmarkMetric -->
+<!-- $$$TestFailMode$$$Abort$$$Continue -->
+<h3 class="fn" id="TestFailMode-enum"><a name="TestFailMode-enum"></a>enum QTest::<span class="name">TestFailMode</span></h3>
+<p>This enum describes the modes for handling an expected failure of the <a href="qtest.html#QVERIFY">QVERIFY</a>() or <a href="qtest.html#QCOMPARE">QCOMPARE</a>() macros.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QTest::Abort</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Aborts the execution of the test. Use this mode when it doesn't make sense to execute the test any further after the expected failure.</td></tr>
+<tr><td class="topAlign"><code>QTest::Continue</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Continues execution of the test after the expected failure.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qtest.html#QEXPECT_FAIL">QEXPECT_FAIL</a>().</p>
+<!-- @@@TestFailMode -->
+</div>
+<div class="func">
+<h2>Function Documentation</h2>
+<!-- $$$addColumn[overload1]$$$addColumnconstchar*T* -->
+<h3 class="fn" id="addColumn"><a name="addColumn"></a><span class="type">void</span> QTest::<span class="name">addColumn</span>(const <span class="type">char</span> *<i>name</i>, <span class="type">T</span> *<i>dummy</i> = ...)</h3>
+<p>Adds a column with type <code>T</code> to the current test data. <i>name</i> is the name of the column. <i>dummy</i> is a workaround for buggy compilers and can be ignored.</p>
+<p>To populate the column with values, <a href="qtest.html#newRow">newRow</a>() can be used. Use <a href="qtest.html#QFETCH">QFETCH</a>() to fetch the data in the actual test.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> myTestFunction_data() {
+      <span class="type">QTest</span><span class="operator">::</span>addColumn<span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span>(<span class="string">&quot;intval&quot;</span>);
+      <span class="type">QTest</span><span class="operator">::</span>addColumn<span class="operator">&lt;</span><span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">&gt;</span>(<span class="string">&quot;str&quot;</span>);
+      <span class="type">QTest</span><span class="operator">::</span>addColumn<span class="operator">&lt;</span><span class="type">double</span><span class="operator">&gt;</span>(<span class="string">&quot;dbl&quot;</span>);
+
+      <span class="type">QTest</span><span class="operator">::</span>newRow(<span class="string">&quot;row1&quot;</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">1</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;hello&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">1.5</span>;
+  }
+
+</pre>
+<p>To add custom types to the testdata, the type must be registered with <a href="../qtcore/qmetatype.html">QMetaType</a> via <a href="../qtcore/qmetatype.html#Q_DECLARE_METATYPE">Q_DECLARE_METATYPE</a>().</p>
+<p><b>Note:</b> This macro can only be used in a test's data function that is invoked by the test framework.</p>
+<p>See <a href="qttestlib-tutorial2-example.html">Data Driven Testing</a> for a more extensive example.</p>
+<p><b>See also </b><a href="qtest.html#newRow">QTest::newRow</a>(), <a href="qtest.html#QFETCH">QFETCH</a>(), and <a href="../qtcore/qmetatype.html">QMetaType</a>.</p>
+<!-- @@@addColumn -->
+<!-- $$$addRow[overload1]$$$addRowconstchar*... -->
+<h3 class="fn" id="addRow"><a name="addRow"></a><span class="type">QTestData</span> &amp;QTest::<span class="name">addRow</span>(const <span class="type">char</span> *<i>format</i>, <i>...</i>)</h3>
+<p>Appends a new row to the current test data. The function's arguments are passed to <a href="../qtcore/qbytearray.html#qsnprintf">qsnprintf</a>() for formatting according to <i>format</i>. See the <a href="../qtcore/qbytearray.html#qvsnprintf">qvsnprintf</a>() documentation for caveats and limitations.</p>
+<p>The formatted string will appear as the name of this test data in the test output.</p>
+<p>Returns a QTestData reference that can be used to stream in data.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> myTestFunction_data()
+  {
+      <span class="type">QTest</span><span class="operator">::</span>addColumn<span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span>(<span class="string">&quot;input&quot;</span>);
+      <span class="type">QTest</span><span class="operator">::</span>addColumn<span class="operator">&lt;</span><span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">&gt;</span>(<span class="string">&quot;output&quot;</span>);
+      <span class="type">QTest</span><span class="operator">::</span>addRow(<span class="string">&quot;%d&quot;</span><span class="operator">,</span> <span class="number">0</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;0&quot;</span>);
+      <span class="type">QTest</span><span class="operator">::</span>addRow(<span class="string">&quot;%d&quot;</span><span class="operator">,</span> <span class="number">1</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">1</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;1&quot;</span>);
+  }
+
+</pre>
+<p><b>Note:</b> This function can only be used in a test's data function that is invoked by the test framework.</p>
+<p>See <a href="qttestlib-tutorial2-example.html">Data Driven Testing</a> for a more extensive example.</p>
+<p>This function was introduced in  Qt 5.9.</p>
+<p><b>See also </b><a href="qtest.html#addColumn">addColumn</a>() and <a href="qtest.html#QFETCH">QFETCH</a>().</p>
+<!-- @@@addRow -->
+<!-- $$$benchmarkMetricName[overload1]$$$benchmarkMetricNameQTest::QBenchmarkMetric -->
+<h3 class="fn" id="benchmarkMetricName"><a name="benchmarkMetricName"></a>const <span class="type">char</span> *QTest::<span class="name">benchmarkMetricName</span>(<span class="type"><a href="qtest.html#QBenchmarkMetric-enum">QTest::QBenchmarkMetric</a></span> <i>metric</i>)</h3>
+<p>Returns the enum value <i>metric</i> as a character string.</p>
+<p>This function was introduced in  Qt 4.7.</p>
+<!-- @@@benchmarkMetricName -->
+<!-- $$$benchmarkMetricUnit[overload1]$$$benchmarkMetricUnitQTest::QBenchmarkMetric -->
+<h3 class="fn" id="benchmarkMetricUnit"><a name="benchmarkMetricUnit"></a>const <span class="type">char</span> *QTest::<span class="name">benchmarkMetricUnit</span>(<span class="type"><a href="qtest.html#QBenchmarkMetric-enum">QTest::QBenchmarkMetric</a></span> <i>metric</i>)</h3>
+<p>Retuns the units of measure for the specified <i>metric</i>.</p>
+<p>This function was introduced in  Qt 4.7.</p>
+<!-- @@@benchmarkMetricUnit -->
+<!-- $$$createTouchDevice[overload1]$$$createTouchDeviceQTouchDevice::DeviceType -->
+<h3 class="fn" id="createTouchDevice"><a name="createTouchDevice"></a><span class="type"><a href="../qtgui/qtouchdevice.html">QTouchDevice</a></span> *QTest::<span class="name">createTouchDevice</span>(<span class="type"><a href="../qtgui/qtouchdevice.html#DeviceType-enum">QTouchDevice::DeviceType</a></span> <i>devType</i> = ...)</h3>
+<p>Creates a dummy touch device of type <i>devType</i> for simulation of touch events.</p>
+<p>The touch device will be registered with the QPA window system interface, and deleted automatically when the <a href="../qtcore/qcoreapplication.html">QCoreApplication</a> is deleted. So you should typically use createTouchDevice() to initialize a <a href="../qtgui/qtouchdevice.html">QTouchDevice</a> member variable in your test case class, and use the same instance for all tests.</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<p><b>See also </b><a href="qtest-qtoucheventsequence.html">QTest::QTouchEventSequence</a>.</p>
+<!-- @@@createTouchDevice -->
+<!-- $$$currentAppName[overload1]$$$currentAppName -->
+<h3 class="fn" id="currentAppName"><a name="currentAppName"></a>const <span class="type">char</span> *QTest::<span class="name">currentAppName</span>()</h3>
+<p>Returns the name of the binary that is currently executed.</p>
+<!-- @@@currentAppName -->
+<!-- $$$currentDataTag[overload1]$$$currentDataTag -->
+<h3 class="fn" id="currentDataTag"><a name="currentDataTag"></a>const <span class="type">char</span> *QTest::<span class="name">currentDataTag</span>()</h3>
+<p>Returns the name of the current test data. If the test doesn't have any assigned testdata, the function returns 0.</p>
+<!-- @@@currentDataTag -->
+<!-- $$$currentTestFailed[overload1]$$$currentTestFailed -->
+<h3 class="fn" id="currentTestFailed"><a name="currentTestFailed"></a><span class="type">bool</span> QTest::<span class="name">currentTestFailed</span>()</h3>
+<p>Returns <code>true</code> if the current test function failed, otherwise false.</p>
+<!-- @@@currentTestFailed -->
+<!-- $$$currentTestFunction[overload1]$$$currentTestFunction -->
+<h3 class="fn" id="currentTestFunction"><a name="currentTestFunction"></a>const <span class="type">char</span> *QTest::<span class="name">currentTestFunction</span>()</h3>
+<p>Returns the name of the test function that is currently executed.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MyTestClass<span class="operator">::</span>cleanup()
+  {
+      <span class="keyword">if</span> (qstrcmp(currentTestFunction()<span class="operator">,</span> <span class="string">&quot;myDatabaseTest&quot;</span>) <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>) {
+          <span class="comment">// clean up all database connections</span>
+          closeAllDatabases();
+      }
+  }
+
+</pre>
+<!-- @@@currentTestFunction -->
+<!-- $$$ignoreMessage[overload1]$$$ignoreMessageQtMsgTypeconstchar* -->
+<h3 class="fn" id="ignoreMessage"><a name="ignoreMessage"></a><span class="type">void</span> QTest::<span class="name">ignoreMessage</span>(<span class="type"><a href="../qtcore/qtglobal.html#QtMsgType-enum">QtMsgType</a></span> <i>type</i>, const <span class="type">char</span> *<i>message</i>)</h3>
+<p>Ignores messages created by <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>(), <a href="../qtcore/qtglobal.html#qInfo">qInfo</a>() or <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>(). If the <i>message</i> with the corresponding <i>type</i> is outputted, it will be removed from the test log. If the test finished and the <i>message</i> was not outputted, a test failure is appended to the test log.</p>
+<p><b>Note:</b> Invoking this function will only ignore one message. If the message you want to ignore is outputted twice, you have to call ignoreMessage() twice, too.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qdir.html">QDir</a></span> dir;
+
+  <span class="type">QTest</span><span class="operator">::</span>ignoreMessage(<span class="type"><a href="../qtcore/qtglobal.html#QtMsgType-enum">QtWarningMsg</a></span><span class="operator">,</span> <span class="string">&quot;QDir::mkdir: Empty or null file name(s)&quot;</span>);
+  dir<span class="operator">.</span>mkdir(<span class="string">&quot;&quot;</span>);
+
+</pre>
+<p>The example above tests that <a href="../qtcore/qdir.html#mkdir">QDir::mkdir</a>() outputs the right warning when invoked with an invalid file name.</p>
+<!-- @@@ignoreMessage -->
+<!-- $$$ignoreMessage$$$ignoreMessageQtMsgTypeconstQRegularExpression& -->
+<h3 class="fn" id="ignoreMessage-1"><a name="ignoreMessage-1"></a><span class="type">void</span> QTest::<span class="name">ignoreMessage</span>(<span class="type"><a href="../qtcore/qtglobal.html#QtMsgType-enum">QtMsgType</a></span> <i>type</i>, const <span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span> &amp;<i>messagePattern</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Ignores messages created by <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>(), <a href="../qtcore/qtglobal.html#qInfo">qInfo</a>() or <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>(). If the message matching <i>messagePattern</i> with the corresponding <i>type</i> is outputted, it will be removed from the test log. If the test finished and the message was not outputted, a test failure is appended to the test log.</p>
+<p><b>Note:</b> Invoking this function will only ignore one message. If the message you want to ignore is outputted twice, you have to call <a href="qtest.html#ignoreMessage">ignoreMessage</a>() twice, too.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<!-- @@@ignoreMessage -->
+<!-- $$$keyClick[overload1]$$$keyClickQWidget*Qt::KeyQt::KeyboardModifiersint -->
+<h3 class="fn" id="keyClick"><a name="keyClick"></a><span class="type">void</span> QTest::<span class="name">keyClick</span>(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> *<i>widget</i>, <span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>modifier</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>Simulates clicking of <i>key</i> with an optional <i>modifier</i> on a <i>widget</i>. If <i>delay</i> is larger than 0, the test will wait for <i>delay</i> milliseconds before clicking the key.</p>
+<p>Examples:</p>
+<pre class="cpp">
+
+  <span class="type">QTest</span><span class="operator">::</span>keyClick(myWidget<span class="operator">,</span> <span class="type">Qt</span><span class="operator">::</span>Key_Escape);
+
+  <span class="type">QTest</span><span class="operator">::</span>keyClick(myWidget<span class="operator">,</span> <span class="type">Qt</span><span class="operator">::</span>Key_Escape<span class="operator">,</span> <span class="type">Qt</span><span class="operator">::</span>ShiftModifier<span class="operator">,</span> <span class="number">200</span>);
+
+</pre>
+<p>The first example above simulates clicking the <code>escape</code> key on <code>myWidget</code> without any keyboard modifiers and without delay. The second example simulates clicking <code>shift-escape</code> on <code>myWidget</code> following a 200 ms delay of the test.</p>
+<p><b>See also </b><a href="qtest.html#keyClicks">QTest::keyClicks</a>().</p>
+<!-- @@@keyClick -->
+<!-- $$$keyClick$$$keyClickQWindow*Qt::KeyQt::KeyboardModifiersint -->
+<h3 class="fn" id="keyClick-1"><a name="keyClick-1"></a><span class="type">void</span> QTest::<span class="name">keyClick</span>(<span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> *<i>window</i>, <span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>modifier</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>This is an overloaded function.</p>
+<p>Simulates clicking of <i>key</i> with an optional <i>modifier</i> on a <i>window</i>. If <i>delay</i> is larger than 0, the test will wait for <i>delay</i> milliseconds before clicking the key.</p>
+<p>Examples:</p>
+<pre class="cpp">
+
+  <span class="type">QTest</span><span class="operator">::</span>keyClick(myWindow<span class="operator">,</span> <span class="type">Qt</span><span class="operator">::</span>Key_Escape);
+
+  <span class="type">QTest</span><span class="operator">::</span>keyClick(myWindow<span class="operator">,</span> <span class="type">Qt</span><span class="operator">::</span>Key_Escape<span class="operator">,</span> <span class="type">Qt</span><span class="operator">::</span>ShiftModifier<span class="operator">,</span> <span class="number">200</span>);
+
+</pre>
+<p>The first example above simulates clicking the <code>escape</code> key on <code>myWindow</code> without any keyboard modifiers and without delay. The second example simulates clicking <code>shift-escape</code> on <code>myWindow</code> following a 200 ms delay of the test.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qtest.html#keyClicks">QTest::keyClicks</a>().</p>
+<!-- @@@keyClick -->
+<!-- $$$keyClick$$$keyClickQWindow*charQt::KeyboardModifiersint -->
+<h3 class="fn" id="keyClick-2"><a name="keyClick-2"></a><span class="type">void</span> QTest::<span class="name">keyClick</span>(<span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> *<i>window</i>, <span class="type">char</span> <i>key</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>modifier</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>This is an overloaded function.</p>
+<p>Simulates clicking of <i>key</i> with an optional <i>modifier</i> on a <i>window</i>. If <i>delay</i> is larger than 0, the test will wait for <i>delay</i> milliseconds before clicking the key.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="type">QTest</span><span class="operator">::</span>keyClick(myWindow<span class="operator">,</span> <span class="char">'a'</span>);
+
+</pre>
+<p>The example above simulates clicking <code>a</code> on <code>myWindow</code> without any keyboard modifiers and without delay of the test.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qtest.html#keyClicks">QTest::keyClicks</a>().</p>
+<!-- @@@keyClick -->
+<!-- $$$keyClick$$$keyClickQWidget*charQt::KeyboardModifiersint -->
+<h3 class="fn" id="keyClick-3"><a name="keyClick-3"></a><span class="type">void</span> QTest::<span class="name">keyClick</span>(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> *<i>widget</i>, <span class="type">char</span> <i>key</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>modifier</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>This is an overloaded function.</p>
+<p>Simulates clicking of <i>key</i> with an optional <i>modifier</i> on a <i>widget</i>. If <i>delay</i> is larger than 0, the test will wait for <i>delay</i> milliseconds before clicking the key.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="type">QTest</span><span class="operator">::</span>keyClick(myWidget<span class="operator">,</span> <span class="char">'a'</span>);
+
+</pre>
+<p>The example above simulates clicking <code>a</code> on <code>myWidget</code> without any keyboard modifiers and without delay of the test.</p>
+<p><b>See also </b><a href="qtest.html#keyClicks">QTest::keyClicks</a>().</p>
+<!-- @@@keyClick -->
+<!-- $$$keyClicks[overload1]$$$keyClicksQWidget*constQString&Qt::KeyboardModifiersint -->
+<h3 class="fn" id="keyClicks"><a name="keyClicks"></a><span class="type">void</span> QTest::<span class="name">keyClicks</span>(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> *<i>widget</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>sequence</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>modifier</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>Simulates clicking a <i>sequence</i> of keys on a <i>widget</i>. Optionally, a keyboard <i>modifier</i> can be specified as well as a <i>delay</i> (in milliseconds) of the test before each key click.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="type">QTest</span><span class="operator">::</span>keyClicks(myWidget<span class="operator">,</span> <span class="string">&quot;hello world&quot;</span>);
+
+</pre>
+<p>The example above simulates clicking the sequence of keys representing &quot;hello world&quot; on <code>myWidget</code> without any keyboard modifiers and without delay of the test.</p>
+<p><b>See also </b><a href="qtest.html#keyClick">QTest::keyClick</a>().</p>
+<!-- @@@keyClicks -->
+<!-- $$$keyEvent[overload1]$$$keyEventQTest::KeyActionQWidget*Qt::KeyQt::KeyboardModifiersint -->
+<h3 class="fn" id="keyEvent"><a name="keyEvent"></a><span class="type">void</span> QTest::<span class="name">keyEvent</span>(<span class="type"><a href="qtest.html#KeyAction-enum">QTest::KeyAction</a></span> <i>action</i>, <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> *<i>widget</i>, <span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>modifier</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>Sends a Qt key event to <i>widget</i> with the given <i>key</i> and an associated <i>action</i>. Optionally, a keyboard <i>modifier</i> can be specified, as well as a <i>delay</i> (in milliseconds) of the test before sending the event.</p>
+<!-- @@@keyEvent -->
+<!-- $$$keyEvent$$$keyEventQTest::KeyActionQWindow*charQt::KeyboardModifiersint -->
+<h3 class="fn" id="keyEvent-1"><a name="keyEvent-1"></a><span class="type">void</span> QTest::<span class="name">keyEvent</span>(<span class="type"><a href="qtest.html#KeyAction-enum">QTest::KeyAction</a></span> <i>action</i>, <span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> *<i>window</i>, <span class="type">char</span> <i>ascii</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>modifier</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>This is an overloaded function.</p>
+<p>Sends a Qt key event to <i>window</i> with the given key <i>ascii</i> and an associated <i>action</i>. Optionally, a keyboard <i>modifier</i> can be specified, as well as a <i>delay</i> (in milliseconds) of the test before sending the event.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@keyEvent -->
+<!-- $$$keyEvent$$$keyEventQTest::KeyActionQWindow*Qt::KeyQt::KeyboardModifiersint -->
+<h3 class="fn" id="keyEvent-2"><a name="keyEvent-2"></a><span class="type">void</span> QTest::<span class="name">keyEvent</span>(<span class="type"><a href="qtest.html#KeyAction-enum">QTest::KeyAction</a></span> <i>action</i>, <span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> *<i>window</i>, <span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>modifier</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>This is an overloaded function.</p>
+<p>Sends a Qt key event to <i>window</i> with the given <i>key</i> and an associated <i>action</i>. Optionally, a keyboard <i>modifier</i> can be specified, as well as a <i>delay</i> (in milliseconds) of the test before sending the event.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@keyEvent -->
+<!-- $$$keyEvent$$$keyEventQTest::KeyActionQWidget*charQt::KeyboardModifiersint -->
+<h3 class="fn" id="keyEvent-3"><a name="keyEvent-3"></a><span class="type">void</span> QTest::<span class="name">keyEvent</span>(<span class="type"><a href="qtest.html#KeyAction-enum">QTest::KeyAction</a></span> <i>action</i>, <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> *<i>widget</i>, <span class="type">char</span> <i>ascii</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>modifier</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>This is an overloaded function.</p>
+<p>Sends a Qt key event to <i>widget</i> with the given key <i>ascii</i> and an associated <i>action</i>. Optionally, a keyboard <i>modifier</i> can be specified, as well as a <i>delay</i> (in milliseconds) of the test before sending the event.</p>
+<!-- @@@keyEvent -->
+<!-- $$$keyPress[overload1]$$$keyPressQWidget*Qt::KeyQt::KeyboardModifiersint -->
+<h3 class="fn" id="keyPress"><a name="keyPress"></a><span class="type">void</span> QTest::<span class="name">keyPress</span>(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> *<i>widget</i>, <span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>modifier</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>Simulates pressing a <i>key</i> with an optional <i>modifier</i> on a <i>widget</i>. If <i>delay</i> is larger than 0, the test will wait for <i>delay</i> milliseconds before pressing the key.</p>
+<p><b>Note:</b> At some point you should release the key using <a href="qtest.html#keyRelease">keyRelease</a>().</p>
+<p><b>See also </b><a href="qtest.html#keyRelease">QTest::keyRelease</a>() and <a href="qtest.html#keyClick">QTest::keyClick</a>().</p>
+<!-- @@@keyPress -->
+<!-- $$$keyPress$$$keyPressQWindow*charQt::KeyboardModifiersint -->
+<h3 class="fn" id="keyPress-1"><a name="keyPress-1"></a><span class="type">void</span> QTest::<span class="name">keyPress</span>(<span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> *<i>window</i>, <span class="type">char</span> <i>key</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>modifier</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>This is an overloaded function.</p>
+<p>Simulates pressing a <i>key</i> with an optional <i>modifier</i> on a <i>window</i>. If <i>delay</i> is larger than 0, the test will wait for <i>delay</i> milliseconds before pressing the key.</p>
+<p><b>Note:</b> At some point you should release the key using <a href="qtest.html#keyRelease">keyRelease</a>().</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qtest.html#keyRelease">QTest::keyRelease</a>() and <a href="qtest.html#keyClick">QTest::keyClick</a>().</p>
+<!-- @@@keyPress -->
+<!-- $$$keyPress$$$keyPressQWindow*Qt::KeyQt::KeyboardModifiersint -->
+<h3 class="fn" id="keyPress-2"><a name="keyPress-2"></a><span class="type">void</span> QTest::<span class="name">keyPress</span>(<span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> *<i>window</i>, <span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>modifier</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>This is an overloaded function.</p>
+<p>Simulates pressing a <i>key</i> with an optional <i>modifier</i> on a <i>window</i>. If <i>delay</i> is larger than 0, the test will wait for <i>delay</i> milliseconds before pressing the key.</p>
+<p><b>Note:</b> At some point you should release the key using <a href="qtest.html#keyRelease">keyRelease</a>().</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qtest.html#keyRelease">QTest::keyRelease</a>() and <a href="qtest.html#keyClick">QTest::keyClick</a>().</p>
+<!-- @@@keyPress -->
+<!-- $$$keyPress$$$keyPressQWidget*charQt::KeyboardModifiersint -->
+<h3 class="fn" id="keyPress-3"><a name="keyPress-3"></a><span class="type">void</span> QTest::<span class="name">keyPress</span>(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> *<i>widget</i>, <span class="type">char</span> <i>key</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>modifier</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>This is an overloaded function.</p>
+<p>Simulates pressing a <i>key</i> with an optional <i>modifier</i> on a <i>widget</i>. If <i>delay</i> is larger than 0, the test will wait for <i>delay</i> milliseconds before pressing the key.</p>
+<p><b>Note:</b> At some point you should release the key using <a href="qtest.html#keyRelease">keyRelease</a>().</p>
+<p><b>See also </b><a href="qtest.html#keyRelease">QTest::keyRelease</a>() and <a href="qtest.html#keyClick">QTest::keyClick</a>().</p>
+<!-- @@@keyPress -->
+<!-- $$$keyRelease[overload1]$$$keyReleaseQWidget*Qt::KeyQt::KeyboardModifiersint -->
+<h3 class="fn" id="keyRelease"><a name="keyRelease"></a><span class="type">void</span> QTest::<span class="name">keyRelease</span>(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> *<i>widget</i>, <span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>modifier</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>Simulates releasing a <i>key</i> with an optional <i>modifier</i> on a <i>widget</i>. If <i>delay</i> is larger than 0, the test will wait for <i>delay</i> milliseconds before releasing the key.</p>
+<p><b>See also </b><a href="qtest.html#keyPress">QTest::keyPress</a>() and <a href="qtest.html#keyClick">QTest::keyClick</a>().</p>
+<!-- @@@keyRelease -->
+<!-- $$$keyRelease$$$keyReleaseQWindow*charQt::KeyboardModifiersint -->
+<h3 class="fn" id="keyRelease-1"><a name="keyRelease-1"></a><span class="type">void</span> QTest::<span class="name">keyRelease</span>(<span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> *<i>window</i>, <span class="type">char</span> <i>key</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>modifier</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>This is an overloaded function.</p>
+<p>Simulates releasing a <i>key</i> with an optional <i>modifier</i> on a <i>window</i>. If <i>delay</i> is larger than 0, the test will wait for <i>delay</i> milliseconds before releasing the key.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qtest.html#keyClick">QTest::keyClick</a>().</p>
+<!-- @@@keyRelease -->
+<!-- $$$keyRelease$$$keyReleaseQWindow*Qt::KeyQt::KeyboardModifiersint -->
+<h3 class="fn" id="keyRelease-2"><a name="keyRelease-2"></a><span class="type">void</span> QTest::<span class="name">keyRelease</span>(<span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> *<i>window</i>, <span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>modifier</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>This is an overloaded function.</p>
+<p>Simulates releasing a <i>key</i> with an optional <i>modifier</i> on a <i>window</i>. If <i>delay</i> is larger than 0, the test will wait for <i>delay</i> milliseconds before releasing the key.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qtest.html#keyPress">QTest::keyPress</a>() and <a href="qtest.html#keyClick">QTest::keyClick</a>().</p>
+<!-- @@@keyRelease -->
+<!-- $$$keyRelease$$$keyReleaseQWidget*charQt::KeyboardModifiersint -->
+<h3 class="fn" id="keyRelease-3"><a name="keyRelease-3"></a><span class="type">void</span> QTest::<span class="name">keyRelease</span>(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> *<i>widget</i>, <span class="type">char</span> <i>key</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>modifier</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>This is an overloaded function.</p>
+<p>Simulates releasing a <i>key</i> with an optional <i>modifier</i> on a <i>widget</i>. If <i>delay</i> is larger than 0, the test will wait for <i>delay</i> milliseconds before releasing the key.</p>
+<p><b>See also </b><a href="qtest.html#keyClick">QTest::keyClick</a>().</p>
+<!-- @@@keyRelease -->
+<!-- $$$keySequence[overload1]$$$keySequenceQWindow*constQKeySequence& -->
+<h3 class="fn" id="keySequence"><a name="keySequence"></a><span class="type">void</span> QTest::<span class="name">keySequence</span>(<span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> *<i>window</i>, const <span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span> &amp;<i>keySequence</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Simulates typing of <i>keySequence</i> into a <i>window</i>.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<p><b>See also </b><a href="qtest.html#keyClick">QTest::keyClick</a>() and <a href="qtest.html#keyClicks">QTest::keyClicks</a>().</p>
+<!-- @@@keySequence -->
+<!-- $$$keySequence$$$keySequenceQWidget*constQKeySequence& -->
+<h3 class="fn" id="keySequence-1"><a name="keySequence-1"></a><span class="type">void</span> QTest::<span class="name">keySequence</span>(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> *<i>widget</i>, const <span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span> &amp;<i>keySequence</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Simulates typing of <i>keySequence</i> into a <i>widget</i>.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<p><b>See also </b><a href="qtest.html#keyClick">QTest::keyClick</a>() and <a href="qtest.html#keyClicks">QTest::keyClicks</a>().</p>
+<!-- @@@keySequence -->
+<!-- $$$mouseClick[overload1]$$$mouseClickQWidget*Qt::MouseButtonQt::KeyboardModifiersQPointint -->
+<h3 class="fn" id="mouseClick"><a name="mouseClick"></a><span class="type">void</span> QTest::<span class="name">mouseClick</span>(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> *<i>widget</i>, <span class="type"><a href="../qtcore/qt.html#MouseButton-enum">Qt::MouseButton</a></span> <i>button</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>modifier</i> = ..., <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <i>pos</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>Simulates clicking a mouse <i>button</i> with an optional <i>modifier</i> on a <i>widget</i>. The position of the click is defined by <i>pos</i>; the default position is the center of the widget. If <i>delay</i> is specified, the test will wait for the specified amount of milliseconds before pressing and before releasing the button.</p>
+<p><b>See also </b><a href="qtest.html#mousePress">QTest::mousePress</a>() and <a href="qtest.html#mouseRelease">QTest::mouseRelease</a>().</p>
+<!-- @@@mouseClick -->
+<!-- $$$mouseClick$$$mouseClickQWindow*Qt::MouseButtonQt::KeyboardModifiersQPointint -->
+<h3 class="fn" id="mouseClick-1"><a name="mouseClick-1"></a><span class="type">void</span> QTest::<span class="name">mouseClick</span>(<span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> *<i>window</i>, <span class="type"><a href="../qtcore/qt.html#MouseButton-enum">Qt::MouseButton</a></span> <i>button</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>stateKey</i> = ..., <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <i>pos</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>This is an overloaded function.</p>
+<p>Simulates clicking a mouse <i>button</i> with an optional <i>stateKey</i> modifier on a <i>window</i>. The position of the click is defined by <i>pos</i>; the default position is the center of the window. If <i>delay</i> is specified, the test will wait for the specified amount of milliseconds before pressing and before releasing the button.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qtest.html#mousePress">QTest::mousePress</a>() and <a href="qtest.html#mouseRelease">QTest::mouseRelease</a>().</p>
+<!-- @@@mouseClick -->
+<!-- $$$mouseDClick[overload1]$$$mouseDClickQWidget*Qt::MouseButtonQt::KeyboardModifiersQPointint -->
+<h3 class="fn" id="mouseDClick"><a name="mouseDClick"></a><span class="type">void</span> QTest::<span class="name">mouseDClick</span>(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> *<i>widget</i>, <span class="type"><a href="../qtcore/qt.html#MouseButton-enum">Qt::MouseButton</a></span> <i>button</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>modifier</i> = ..., <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <i>pos</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>Simulates double clicking a mouse <i>button</i> with an optional <i>modifier</i> on a <i>widget</i>. The position of the click is defined by <i>pos</i>; the default position is the center of the widget. If <i>delay</i> is specified, the test will wait for the specified amount of milliseconds before each press and release.</p>
+<p><b>See also </b><a href="qtest.html#mouseClick">QTest::mouseClick</a>().</p>
+<!-- @@@mouseDClick -->
+<!-- $$$mouseDClick$$$mouseDClickQWindow*Qt::MouseButtonQt::KeyboardModifiersQPointint -->
+<h3 class="fn" id="mouseDClick-1"><a name="mouseDClick-1"></a><span class="type">void</span> QTest::<span class="name">mouseDClick</span>(<span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> *<i>window</i>, <span class="type"><a href="../qtcore/qt.html#MouseButton-enum">Qt::MouseButton</a></span> <i>button</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>stateKey</i> = ..., <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <i>pos</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>This is an overloaded function.</p>
+<p>Simulates double clicking a mouse <i>button</i> with an optional <i>stateKey</i> modifier on a <i>window</i>. The position of the click is defined by <i>pos</i>; the default position is the center of the window. If <i>delay</i> is specified, the test will wait for the specified amount of milliseconds before each press and release.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qtest.html#mouseClick">QTest::mouseClick</a>().</p>
+<!-- @@@mouseDClick -->
+<!-- $$$mouseMove[overload1]$$$mouseMoveQWidget*QPointint -->
+<h3 class="fn" id="mouseMove"><a name="mouseMove"></a><span class="type">void</span> QTest::<span class="name">mouseMove</span>(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> *<i>widget</i>, <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <i>pos</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>Moves the mouse pointer to a <i>widget</i>. If <i>pos</i> is not specified, the mouse pointer moves to the center of the widget. If a <i>delay</i> (in milliseconds) is given, the test will wait before moving the mouse pointer.</p>
+<!-- @@@mouseMove -->
+<!-- $$$mouseMove$$$mouseMoveQWindow*QPointint -->
+<h3 class="fn" id="mouseMove-1"><a name="mouseMove-1"></a><span class="type">void</span> QTest::<span class="name">mouseMove</span>(<span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> *<i>window</i>, <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <i>pos</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>This is an overloaded function.</p>
+<p>Moves the mouse pointer to a <i>window</i>. If <i>pos</i> is not specified, the mouse pointer moves to the center of the window. If a <i>delay</i> (in milliseconds) is given, the test will wait before moving the mouse pointer.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@mouseMove -->
+<!-- $$$mousePress[overload1]$$$mousePressQWidget*Qt::MouseButtonQt::KeyboardModifiersQPointint -->
+<h3 class="fn" id="mousePress"><a name="mousePress"></a><span class="type">void</span> QTest::<span class="name">mousePress</span>(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> *<i>widget</i>, <span class="type"><a href="../qtcore/qt.html#MouseButton-enum">Qt::MouseButton</a></span> <i>button</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>modifier</i> = ..., <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <i>pos</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>Simulates pressing a mouse <i>button</i> with an optional <i>modifier</i> on a <i>widget</i>. The position is defined by <i>pos</i>; the default position is the center of the widget. If <i>delay</i> is specified, the test will wait for the specified amount of milliseconds before the press.</p>
+<p><b>See also </b><a href="qtest.html#mouseRelease">QTest::mouseRelease</a>() and <a href="qtest.html#mouseClick">QTest::mouseClick</a>().</p>
+<!-- @@@mousePress -->
+<!-- $$$mousePress$$$mousePressQWindow*Qt::MouseButtonQt::KeyboardModifiersQPointint -->
+<h3 class="fn" id="mousePress-1"><a name="mousePress-1"></a><span class="type">void</span> QTest::<span class="name">mousePress</span>(<span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> *<i>window</i>, <span class="type"><a href="../qtcore/qt.html#MouseButton-enum">Qt::MouseButton</a></span> <i>button</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>stateKey</i> = ..., <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <i>pos</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>This is an overloaded function.</p>
+<p>Simulates pressing a mouse <i>button</i> with an optional <i>stateKey</i> modifier on a <i>window</i>. The position is defined by <i>pos</i>; the default position is the center of the window. If <i>delay</i> is specified, the test will wait for the specified amount of milliseconds before the press.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qtest.html#mouseRelease">QTest::mouseRelease</a>() and <a href="qtest.html#mouseClick">QTest::mouseClick</a>().</p>
+<!-- @@@mousePress -->
+<!-- $$$mouseRelease[overload1]$$$mouseReleaseQWidget*Qt::MouseButtonQt::KeyboardModifiersQPointint -->
+<h3 class="fn" id="mouseRelease"><a name="mouseRelease"></a><span class="type">void</span> QTest::<span class="name">mouseRelease</span>(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> *<i>widget</i>, <span class="type"><a href="../qtcore/qt.html#MouseButton-enum">Qt::MouseButton</a></span> <i>button</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>modifier</i> = ..., <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <i>pos</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>Simulates releasing a mouse <i>button</i> with an optional <i>modifier</i> on a <i>widget</i>. The position of the release is defined by <i>pos</i>; the default position is the center of the widget. If <i>delay</i> is specified, the test will wait for the specified amount of milliseconds before releasing the button.</p>
+<p><b>See also </b><a href="qtest.html#mousePress">QTest::mousePress</a>() and <a href="qtest.html#mouseClick">QTest::mouseClick</a>().</p>
+<!-- @@@mouseRelease -->
+<!-- $$$mouseRelease$$$mouseReleaseQWindow*Qt::MouseButtonQt::KeyboardModifiersQPointint -->
+<h3 class="fn" id="mouseRelease-1"><a name="mouseRelease-1"></a><span class="type">void</span> QTest::<span class="name">mouseRelease</span>(<span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> *<i>window</i>, <span class="type"><a href="../qtcore/qt.html#MouseButton-enum">Qt::MouseButton</a></span> <i>button</i>, <span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> <i>stateKey</i> = ..., <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <i>pos</i> = ..., <span class="type">int</span> <i>delay</i> = ...)</h3>
+<p>This is an overloaded function.</p>
+<p>Simulates releasing a mouse <i>button</i> with an optional <i>stateKey</i> modifier on a <i>window</i>. The position of the release is defined by <i>pos</i>; the default position is the center of the window. If <i>delay</i> is specified, the test will wait for the specified amount of milliseconds before releasing the button.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qtest.html#mousePress">QTest::mousePress</a>() and <a href="qtest.html#mouseClick">QTest::mouseClick</a>().</p>
+<!-- @@@mouseRelease -->
+<!-- $$$newRow[overload1]$$$newRowconstchar* -->
+<h3 class="fn" id="newRow"><a name="newRow"></a><span class="type">QTestData</span> &amp;QTest::<span class="name">newRow</span>(const <span class="type">char</span> *<i>dataTag</i>)</h3>
+<p>Appends a new row to the current test data. <i>dataTag</i> is the name of the testdata that will appear in the test output. Returns a QTestData reference that can be used to stream in data.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> myTestFunction_data()
+  {
+      <span class="type">QTest</span><span class="operator">::</span>addColumn<span class="operator">&lt;</span><span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">&gt;</span>(<span class="string">&quot;aString&quot;</span>);
+      <span class="type">QTest</span><span class="operator">::</span>newRow(<span class="string">&quot;just hello&quot;</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;hello&quot;</span>);
+      <span class="type">QTest</span><span class="operator">::</span>newRow(<span class="string">&quot;a null string&quot;</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>();
+  }
+
+</pre>
+<p><b>Note:</b> This macro can only be used in a test's data function that is invoked by the test framework.</p>
+<p>See <a href="qttestlib-tutorial2-example.html">Data Driven Testing</a> for a more extensive example.</p>
+<p><b>See also </b><a href="qtest.html#addColumn">addColumn</a>() and <a href="qtest.html#QFETCH">QFETCH</a>().</p>
+<!-- @@@newRow -->
+<!-- $$$qExec[overload1]$$$qExecQObject*intchar** -->
+<h3 class="fn" id="qExec"><a name="qExec"></a><span class="type">int</span> QTest::<span class="name">qExec</span>(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> *<i>testObject</i>, <span class="type">int</span> <i>argc</i> = 0, <span class="type">char</span> **<i>argv</i> = nullptr)</h3>
+<p>Executes tests declared in <i>testObject</i>. In addition, the private slots <code>initTestCase()</code>, <code>cleanupTestCase()</code>, <code>init()</code> and <code>cleanup()</code> are executed if they exist. See <a href="qtest-overview.html#creating-a-test">Creating a Test</a> for more details.</p>
+<p>Optionally, the command line arguments <i>argc</i> and <i>argv</i> can be provided. For a list of recognized arguments, read <a href="qtest-overview.html#qt-test-command-line-arguments">Qt Test Command Line Arguments</a>.</p>
+<p>The following example will run all tests in <code>MyTestObject</code>:</p>
+<pre class="cpp">
+
+  MyTestObject test1;
+  <span class="type">QTest</span><span class="operator">::</span>qExec(<span class="operator">&amp;</span>test1);
+
+</pre>
+<p>This function returns 0 if no tests failed, or a value other than 0 if one or more tests failed or in case of unhandled exceptions. (Skipped tests do not influence the return value.)</p>
+<p>For stand-alone test applications, the convenience macro <a href="qtest.html#QTEST_MAIN">QTEST_MAIN</a>() can be used to declare a main() function that parses the command line arguments and executes the tests, avoiding the need to call this function explicitly.</p>
+<p>The return value from this function is also the exit code of the test application when the <a href="qtest.html#QTEST_MAIN">QTEST_MAIN</a>() macro is used.</p>
+<p>For stand-alone test applications, this function should not be called more than once, as command-line options for logging test output to files and executing individual test functions will not behave correctly.</p>
+<p>Note: This function is not reentrant, only one test can run at a time. A test that was executed with qExec() can't run another test via qExec() and threads are not allowed to call qExec() simultaneously.</p>
+<p>If you have programatically created the arguments, as opposed to getting them from the arguments in <code>main()</code>, it is likely of interest to use QTest::qExec(<a href="../qtcore/qobject.html">QObject</a> *, const <a href="../qtcore/qstringlist.html">QStringList</a> &amp;) since it is Unicode safe.</p>
+<p><b>See also </b><a href="qtest.html#QTEST_MAIN">QTEST_MAIN</a>().</p>
+<!-- @@@qExec -->
+<!-- $$$qExec$$$qExecQObject*constQStringList& -->
+<h3 class="fn" id="qExec-1"><a name="qExec-1"></a><span class="type">int</span> QTest::<span class="name">qExec</span>(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> *<i>testObject</i>, const <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> &amp;<i>arguments</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Behaves identically to <a href="qtest.html#qExec">qExec</a>(<a href="../qtcore/qobject.html">QObject</a> *, int, char**) but takes a <a href="../qtcore/qstringlist.html">QStringList</a> of <i>arguments</i> instead of a <code>char**</code> list.</p>
+<p>This function was introduced in  Qt 4.4.</p>
+<!-- @@@qExec -->
+<!-- $$$qExtractTestData[overload1]$$$qExtractTestDataconstQString& -->
+<h3 class="fn" id="qExtractTestData"><a name="qExtractTestData"></a><span class="type"><a href="../qtcore/qsharedpointer.html">QSharedPointer</a></span>&lt;<span class="type"><a href="../qtcore/qtemporarydir.html">QTemporaryDir</a></span>&gt; QTest::<span class="name">qExtractTestData</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>dirName</i>)</h3>
+<p>Extracts a directory from resources to disk. The content is extracted recursively to a temporary folder. The extracted content is removed automatically once the last reference to the return value goes out of scope.</p>
+<p><i>dirName</i> is the name of the directory to extract from resources.</p>
+<p>Returns the temporary directory where the data was extracted or null in case of errors.</p>
+<!-- @@@qExtractTestData -->
+<!-- $$$qSleep[overload1]$$$qSleepint -->
+<h3 class="fn" id="qSleep"><a name="qSleep"></a><span class="type">void</span> QTest::<span class="name">qSleep</span>(<span class="type">int</span> <i>ms</i>)</h3>
+<p>Sleeps for <i>ms</i> milliseconds, blocking execution of the test. qSleep() will not do any event processing and leave your test unresponsive. Network communication might time out while sleeping. Use <a href="qtest.html#qWait">QTest::qWait</a>() to do non-blocking sleeping.</p>
+<p><i>ms</i> must be greater than 0.</p>
+<p><b>Note:</b> The qSleep() function calls either <code>nanosleep()</code> on unix or <code>Sleep()</code> on windows, so the accuracy of time spent in qSleep() depends on the operating system.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="type">QTest</span><span class="operator">::</span>qSleep(<span class="number">250</span>);
+
+</pre>
+<p><b>See also </b><a href="qtest.html#qWait">QTest::qWait</a>().</p>
+<!-- @@@qSleep -->
+<!-- $$$qWait[overload1]$$$qWaitint -->
+<h3 class="fn" id="qWait"><a name="qWait"></a><span class="type">void</span> QTest::<span class="name">qWait</span>(<span class="type">int</span> <i>ms</i>)</h3>
+<p>Waits for <i>ms</i> milliseconds. While waiting, events will be processed and your test will stay responsive to user interface events or network communication.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+      <span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>;
+      <span class="keyword">while</span> (myNetworkServerNotResponding() <span class="operator">&amp;</span><span class="operator">&amp;</span> i<span class="operator">+</span><span class="operator">+</span> <span class="operator">&lt;</span> <span class="number">50</span>)
+          <span class="type">QTest</span><span class="operator">::</span>qWait(<span class="number">250</span>);
+
+</pre>
+<p>The code above will wait until the network server is responding for a maximum of about 12.5 seconds.</p>
+<p><b>See also </b><a href="qtest.html#qSleep">QTest::qSleep</a>() and <a href="qsignalspy.html#wait">QSignalSpy::wait</a>().</p>
+<!-- @@@qWait -->
+<!-- $$$qWaitFor[overload1]$$$qWaitForFunctorint -->
+<h3 class="fn" id="qWaitFor"><a name="qWaitFor"></a><span class="type">bool</span> QTest::<span class="name">qWaitFor</span>(<span class="type">Functor</span> <i>predicate</i>, <span class="type">int</span> <i>timeout</i> = 5000)</h3>
+<p>Waits for <i>timeout</i> milliseconds or until the <i>predicate</i> returns true.</p>
+<p>Returns <code>true</code> if the <i>predicate</i> returned true at any point, otherwise returns <code>false</code>.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+      MyObject obj;
+      obj<span class="operator">.</span>startup();
+      <span class="type">QTest</span><span class="operator">::</span>qWaitFor(<span class="operator">[</span><span class="operator">&amp;</span><span class="operator">]</span>() {
+          <span class="keyword">return</span> obj<span class="operator">.</span>isReady();
+      }<span class="operator">,</span> <span class="number">3000</span>);
+
+</pre>
+<p>The code above will wait for the object to become ready, for a maximum of three seconds.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<!-- @@@qWaitFor -->
+<!-- $$$qWaitForWindowActive[overload1]$$$qWaitForWindowActiveQWindow*int -->
+<h3 class="fn" id="qWaitForWindowActive"><a name="qWaitForWindowActive"></a><span class="type">bool</span> QTest::<span class="name">qWaitForWindowActive</span>(<span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> *<i>window</i>, <span class="type">int</span> <i>timeout</i> = 5000)</h3>
+<p>Waits for <i>timeout</i> milliseconds or until the <i>window</i> is active.</p>
+<p>Returns <code>true</code> if <code>window</code> is active within <i>timeout</i> milliseconds, otherwise returns <code>false</code>.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qtest.html#qWaitForWindowExposed">qWaitForWindowExposed</a>() and <a href="../qtgui/qwindow.html#isActive">QWindow::isActive</a>().</p>
+<!-- @@@qWaitForWindowActive -->
+<!-- $$$qWaitForWindowActive$$$qWaitForWindowActiveQWidget*int -->
+<h3 class="fn" id="qWaitForWindowActive-1"><a name="qWaitForWindowActive-1"></a><span class="type">bool</span> QTest::<span class="name">qWaitForWindowActive</span>(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> *<i>widget</i>, <span class="type">int</span> <i>timeout</i> = 5000)</h3>
+<p>Waits for <i>timeout</i> milliseconds or until the <i>widget</i>'s window is active.</p>
+<p>Returns <code>true</code> if <code>widget</code>'s window is active within <i>timeout</i> milliseconds, otherwise returns <code>false</code>.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qtest.html#qWaitForWindowExposed">qWaitForWindowExposed</a>() and <a href="../qtwidgets/qwidget.html#isActiveWindow-prop">QWidget::isActiveWindow</a>().</p>
+<!-- @@@qWaitForWindowActive -->
+<!-- $$$qWaitForWindowExposed[overload1]$$$qWaitForWindowExposedQWindow*int -->
+<h3 class="fn" id="qWaitForWindowExposed"><a name="qWaitForWindowExposed"></a><span class="type">bool</span> QTest::<span class="name">qWaitForWindowExposed</span>(<span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> *<i>window</i>, <span class="type">int</span> <i>timeout</i> = 5000)</h3>
+<p>Waits for <i>timeout</i> milliseconds or until the <i>window</i> is exposed. Returns <code>true</code> if <code>window</code> is exposed within <i>timeout</i> milliseconds, otherwise returns <code>false</code>.</p>
+<p>This is mainly useful for asynchronous systems like X11, where a window will be mapped to screen some time after being asked to show itself on the screen.</p>
+<p>Note that a window that is mapped to screen may still not be considered exposed if the window client area is completely covered by other windows, or if the window is otherwise not visible. This function will then time out when waiting for such a window.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qtest.html#qWaitForWindowActive">qWaitForWindowActive</a>() and <a href="../qtgui/qwindow.html#isExposed">QWindow::isExposed</a>().</p>
+<!-- @@@qWaitForWindowExposed -->
+<!-- $$$qWaitForWindowExposed$$$qWaitForWindowExposedQWidget*int -->
+<h3 class="fn" id="qWaitForWindowExposed-1"><a name="qWaitForWindowExposed-1"></a><span class="type">bool</span> QTest::<span class="name">qWaitForWindowExposed</span>(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> *<i>widget</i>, <span class="type">int</span> <i>timeout</i> = 5000)</h3>
+<p>Waits for <i>timeout</i> milliseconds or until the <i>widget</i>'s window is exposed. Returns <code>true</code> if <code>widget</code>'s window is exposed within <i>timeout</i> milliseconds, otherwise returns <code>false</code>.</p>
+<p>This is mainly useful for asynchronous systems like X11, where a window will be mapped to screen some time after being asked to show itself on the screen.</p>
+<p>Note that a window that is mapped to screen may still not be considered exposed if the window client area is completely covered by other windows, or if the window is otherwise not visible. This function will then time out when waiting for such a window.</p>
+<p>A specific configuration where this happens is when using QGLWidget as a viewport widget on <a href="../qtdoc/internationalization.html#macos">macOS</a>: The viewport widget gets the expose event, not the parent widget.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qtest.html#qWaitForWindowActive">qWaitForWindowActive</a>().</p>
+<!-- @@@qWaitForWindowExposed -->
+<!-- $$$setBenchmarkResult[overload1]$$$setBenchmarkResultqrealQTest::QBenchmarkMetric -->
+<h3 class="fn" id="setBenchmarkResult"><a name="setBenchmarkResult"></a><span class="type">void</span> QTest::<span class="name">setBenchmarkResult</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>result</i>, <span class="type"><a href="qtest.html#QBenchmarkMetric-enum">QTest::QBenchmarkMetric</a></span> <i>metric</i>)</h3>
+<p>Sets the benchmark result for this test function to <i>result</i>.</p>
+<p>Use this function if you want to report benchmark results without using the QBENCHMARK macro. Use <i>metric</i> to specify how Qt Test should interpret the results.</p>
+<p>The context for the result will be the test function name and any data tag from the _data function. This function can only be called once in each test function, subsequent calls will replace the earlier reported results.</p>
+<p>Note that the -iterations command line argument has no effect on test functions without the QBENCHMARK macro.</p>
+<p>This function was introduced in  Qt 4.7.</p>
+<!-- @@@setBenchmarkResult -->
+<!-- $$$toHexRepresentation[overload1]$$$toHexRepresentationconstchar*int -->
+<h3 class="fn" id="toHexRepresentation"><a name="toHexRepresentation"></a><span class="type">char</span> *QTest::<span class="name">toHexRepresentation</span>(const <span class="type">char</span> *<i>ba</i>, <span class="type">int</span> <i>length</i>)</h3>
+<p>Returns a pointer to a string that is the string <i>ba</i> represented as a space-separated sequence of hex characters. If the input is considered too long, it is truncated. A trucation is indicated in the returned string as an ellipsis at the end. The caller has ownership of the returned pointer and must ensure it is later passed to operator delete[].</p>
+<p><i>length</i> is the length of the string <i>ba</i>.</p>
+<!-- @@@toHexRepresentation -->
+<!-- $$$toString[overload1]$$$toStringconstT& -->
+<h3 class="fn" id="toString"><a name="toString"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type">T</span> &amp;<i>value</i>)</h3>
+<p>Returns a textual representation of <i>value</i>. This function is used by <a href="qtest.html#QCOMPARE">QCOMPARE</a>() to output verbose information in case of a test failure.</p>
+<p>You can add specializations or overloads of this function to your test to enable verbose output.</p>
+<p><b>Note:</b> Starting with Qt 5.5, you should prefer to provide a toString() function in the type's namespace instead of specializing this template. If your code needs to continue to work with the <a href="qtest-overview.html">QTestLib</a> from Qt 5.4 or earlier, you need to continue to use specialization.</p>
+<p><b>Note:</b> The caller of toString() must delete the returned data using <code>delete[]</code>. Your implementation should return a string created with <code>new[]</code> or <a href="../qtcore/qbytearray.html#qstrdup">qstrdup</a>(). The easiest way to do so is to create a <a href="../qtcore/qbytearray.html">QByteArray</a> or <a href="../qtcore/qstring.html">QString</a> and calling QTest::toString() on it (see second example below).</p>
+<p>Example for specializing (Qt ≤ 5.4):</p>
+<pre class="cpp">
+
+  <span class="keyword">namespace</span> <span class="type">QTest</span> {
+      <span class="keyword">template</span><span class="operator">&lt;</span><span class="operator">&gt;</span>
+      <span class="type">char</span> <span class="operator">*</span>toString(<span class="keyword">const</span> MyPoint <span class="operator">&amp;</span>point)
+      {
+          <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> ba <span class="operator">=</span> <span class="string">&quot;MyPoint(&quot;</span>;
+          ba <span class="operator">+</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">::</span>number(point<span class="operator">.</span>x()) <span class="operator">+</span> <span class="string">&quot;, &quot;</span> <span class="operator">+</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">::</span>number(point<span class="operator">.</span>y());
+          ba <span class="operator">+</span><span class="operator">=</span> <span class="char">')'</span>;
+          <span class="keyword">return</span> qstrdup(ba<span class="operator">.</span>data());
+      }
+  }
+
+</pre>
+<p>The example above defines a toString() specialization for a class called <code>MyPoint</code>. Whenever a comparison of two instances of <code>MyPoint</code> fails, <a href="qtest.html#QCOMPARE">QCOMPARE</a>() will call this function to output the contents of <code>MyPoint</code> to the test log.</p>
+<p>Same example, but with overloading (Qt ≥ 5.5):</p>
+<pre class="cpp">
+
+  <span class="keyword">namespace</span> MyNamespace {
+      <span class="type">char</span> <span class="operator">*</span>toString(<span class="keyword">const</span> MyPoint <span class="operator">&amp;</span>point)
+      {
+          <span class="comment">// bring QTest::toString overloads into scope:</span>
+          <span class="keyword">using</span> <span class="type">QTest</span><span class="operator">::</span>toString;
+          <span class="comment">// delegate char* handling to QTest::toString(QByteArray):</span>
+          <span class="keyword">return</span> toString(<span class="string">&quot;MyPoint(&quot;</span> <span class="operator">+</span>
+                          <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">::</span>number(point<span class="operator">.</span>x()) <span class="operator">+</span> <span class="string">&quot;, &quot;</span> <span class="operator">+</span>
+                          <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">::</span>number(point<span class="operator">.</span>y()) <span class="operator">+</span> <span class="char">')'</span>);
+      }
+  }
+
+</pre>
+<p><b>See also </b><a href="qtest.html#QCOMPARE">QCOMPARE</a>().</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconstQPair<T1,T2>& -->
+<h3 class="fn" id="toString-1"><a name="toString-1"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type"><a href="../qtcore/qpair.html">QPair</a></span>&lt;<span class="type">T1</span>, <span class="type">T2</span>&gt; &amp;<i>pair</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the <i>pair</i>.</p>
+<p>This function was introduced in  Qt 5.11.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringQSizePolicy::ControlType -->
+<h3 class="fn" id="toString-36"><a name="toString-36"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(<span class="type"><a href="../qtwidgets/qsizepolicy.html#ControlType-enum">QSizePolicy::ControlType</a></span> <i>ct</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of control type <i>ct</i>.</p>
+<p>This function was introduced in  Qt 5.5.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringQSizePolicy -->
+<h3 class="fn" id="toString-37"><a name="toString-37"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(<span class="type"><a href="../qtwidgets/qsizepolicy.html">QSizePolicy</a></span> <i>sp</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of size policy <i>sp</i>.</p>
+<p>This function was introduced in  Qt 5.5.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconststd::pair<T1,T2>& -->
+<h3 class="fn" id="toString-2"><a name="toString-2"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type">std::pair</span>&lt;<span class="type">T1</span>, <span class="type">T2</span>&gt; &amp;<i>pair</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the <i>pair</i>.</p>
+<p>This function was introduced in  Qt 5.11.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconststd::tuple<Types...>& -->
+<h3 class="fn" id="toString-3"><a name="toString-3"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type">std::tuple</span>&lt;<span class="type">Types</span>...&gt; &amp;<i>tuple</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the given <i>tuple</i>.</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconstQStringView& -->
+<h3 class="fn" id="toString-4"><a name="toString-4"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type"><a href="../qtcore/qstringview.html">QStringView</a></span> &amp;<i>string</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the given <i>string</i>.</p>
+<p>This function was introduced in  Qt 5.11.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconstQString& -->
+<h3 class="fn" id="toString-5"><a name="toString-5"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>string</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the given <i>string</i>.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconstQLatin1String& -->
+<h3 class="fn" id="toString-6"><a name="toString-6"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type"><a href="../qtcore/qlatin1string.html">QLatin1String</a></span> &amp;<i>string</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the given <i>string</i>.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconstQByteArray& -->
+<h3 class="fn" id="toString-7"><a name="toString-7"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>ba</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the byte array <i>ba</i>.</p>
+<p><b>See also </b><a href="qtest.html#toHexRepresentation">QTest::toHexRepresentation</a>().</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconstQTime& -->
+<h3 class="fn" id="toString-8"><a name="toString-8"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type"><a href="../qtcore/qtime.html">QTime</a></span> &amp;<i>time</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the given <i>time</i>.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconstQDate& -->
+<h3 class="fn" id="toString-9"><a name="toString-9"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type"><a href="../qtcore/qdate.html">QDate</a></span> &amp;<i>date</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the given <i>date</i>.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconstQDateTime& -->
+<h3 class="fn" id="toString-10"><a name="toString-10"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> &amp;<i>dateTime</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the date and time specified by <i>dateTime</i>.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconstQCborError& -->
+<h3 class="fn" id="toString-11"><a name="toString-11"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type"><a href="../qtcore/qcborerror.html">QCborError</a></span> &amp;<i>c</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the given CBOR error <i>c</i>.</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconstQChar& -->
+<h3 class="fn" id="toString-12"><a name="toString-12"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type"><a href="../qtcore/qchar.html">QChar</a></span> &amp;<i>character</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the given <i>character</i>.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconstQPoint& -->
+<h3 class="fn" id="toString-14"><a name="toString-14"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> &amp;<i>point</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the given <i>point</i>.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconstQSize& -->
+<h3 class="fn" id="toString-15"><a name="toString-15"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>size</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the given <i>size</i>.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconstQRect& -->
+<h3 class="fn" id="toString-16"><a name="toString-16"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> &amp;<i>rectangle</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the given <i>rectangle</i>.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconstQPointF& -->
+<h3 class="fn" id="toString-17"><a name="toString-17"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> &amp;<i>point</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the given <i>point</i>.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconstQSizeF& -->
+<h3 class="fn" id="toString-18"><a name="toString-18"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span> &amp;<i>size</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the given <i>size</i>.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconstQRectF& -->
+<h3 class="fn" id="toString-19"><a name="toString-19"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> &amp;<i>rectangle</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the given <i>rectangle</i>.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconstQUrl& -->
+<h3 class="fn" id="toString-20"><a name="toString-20"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> &amp;<i>url</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the given <i>url</i>.</p>
+<p>This function was introduced in  Qt 4.4.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconstQUuid& -->
+<h3 class="fn" id="toString-21"><a name="toString-21"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type"><a href="../qtcore/quuid.html">QUuid</a></span> &amp;<i>uuid</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the given <i>uuid</i>.</p>
+<p>This function was introduced in  Qt 5.11.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconstQVariant& -->
+<h3 class="fn" id="toString-22"><a name="toString-22"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>variant</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the given <i>variant</i>.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringstd::nullptr_t -->
+<h3 class="fn" id="toString-24"><a name="toString-24"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(<i>std::nullptr_t</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a string containing <code>nullptr</code>.</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconstQVector2D& -->
+<h3 class="fn" id="toString-31"><a name="toString-31"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type"><a href="../qtgui/qvector2d.html">QVector2D</a></span> &amp;<i>v</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the 2D vector <i>v</i>.</p>
+<p>This function was introduced in  Qt 5.11.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconstQVector3D& -->
+<h3 class="fn" id="toString-32"><a name="toString-32"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type"><a href="../qtgui/qvector3d.html">QVector3D</a></span> &amp;<i>v</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the 3D vector <i>v</i>.</p>
+<p>This function was introduced in  Qt 5.11.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringconstQVector4D& -->
+<h3 class="fn" id="toString-33"><a name="toString-33"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(const <span class="type"><a href="../qtgui/qvector4d.html">QVector4D</a></span> &amp;<i>v</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of the 4D vector <i>v</i>.</p>
+<p>This function was introduced in  Qt 5.11.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringQSizePolicy::Policy -->
+<h3 class="fn" id="toString-34"><a name="toString-34"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(<span class="type"><a href="../qtwidgets/qsizepolicy.html#Policy-enum">QSizePolicy::Policy</a></span> <i>p</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of policy <i>p</i>.</p>
+<p>This function was introduced in  Qt 5.5.</p>
+<!-- @@@toString -->
+<!-- $$$toString$$$toStringQSizePolicy::ControlTypes -->
+<h3 class="fn" id="toString-35"><a name="toString-35"></a><span class="type">char</span> *QTest::<span class="name">toString</span>(<span class="type"><a href="../qtwidgets/qsizepolicy.html#ControlType-enum">QSizePolicy::ControlTypes</a></span> <i>cts</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a textual representation of control types <i>cts</i>.</p>
+<p>This function was introduced in  Qt 5.5.</p>
+<!-- @@@toString -->
+<!-- $$$touchEvent[overload1]$$$touchEventQWidget*QTouchDevice*bool -->
+<h3 class="fn" id="touchEvent"><a name="touchEvent"></a><span class="type"><a href="qtest-qtoucheventsequence.html">QTest::QTouchEventSequence</a></span> QTest::<span class="name">touchEvent</span>(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> *<i>widget</i>, <span class="type"><a href="../qtgui/qtouchdevice.html">QTouchDevice</a></span> *<i>device</i>, <span class="type">bool</span> <i>autoCommit</i>)</h3>
+<p>Creates and returns a <a href="qtest-qtoucheventsequence.html">QTouchEventSequence</a> for the <i>device</i> to simulate events for <i>widget</i>.</p>
+<p>When adding touch events to the sequence, <i>widget</i> will also be used to translate the position provided to screen coordinates, unless another widget is provided in the respective calls to press(), move() etc.</p>
+<p>The touch events are committed to the event system when the destructor of the <a href="qtest-qtoucheventsequence.html">QTouchEventSequence</a> is called (ie when the object returned runs out of scope), unless <i>autoCommit</i> is set to false. When <i>autoCommit</i> is false, commit() has to be called manually.</p>
+<!-- @@@touchEvent -->
+<!-- $$$touchEvent$$$touchEventQWindow*QTouchDevice*bool -->
+<h3 class="fn" id="touchEvent-1"><a name="touchEvent-1"></a><span class="type"><a href="qtest-qtoucheventsequence.html">QTest::QTouchEventSequence</a></span> QTest::<span class="name">touchEvent</span>(<span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> *<i>window</i>, <span class="type"><a href="../qtgui/qtouchdevice.html">QTouchDevice</a></span> *<i>device</i>, <span class="type">bool</span> <i>autoCommit</i>)</h3>
+<p>Creates and returns a <a href="qtest-qtoucheventsequence.html">QTouchEventSequence</a> for the <i>device</i> to simulate events for <i>window</i>.</p>
+<p>When adding touch events to the sequence, <i>window</i> will also be used to translate the position provided to screen coordinates, unless another window is provided in the respective calls to press(), move() etc.</p>
+<p>The touch events are committed to the event system when the destructor of the <a href="qtest-qtoucheventsequence.html">QTouchEventSequence</a> is called (ie when the object returned runs out of scope), unless <i>autoCommit</i> is set to false. When <i>autoCommit</i> is false, commit() has to be called manually.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@touchEvent -->
+</div>
+<div class="macros">
+<h2>Macro Documentation</h2>
+<!-- $$$QBENCHMARK[overload1]$$$QBENCHMARK -->
+<h3 class="fn" id="QBENCHMARK"><a name="QBENCHMARK"></a><span class="name">QBENCHMARK</span></h3>
+<p>This macro is used to measure the performance of code within a test. The code to be benchmarked is contained within a code block following this macro.</p>
+<p>For example:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> TestBenchmark<span class="operator">::</span>simple()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> str1 <span class="operator">=</span> QLatin1String(<span class="string">&quot;This is a test string&quot;</span>);
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> str2 <span class="operator">=</span> QLatin1String(<span class="string">&quot;This is a test string&quot;</span>);
+
+      QCOMPARE(str1<span class="operator">.</span>localeAwareCompare(str2)<span class="operator">,</span> <span class="number">0</span>);
+
+      QBENCHMARK {
+          str1<span class="operator">.</span>localeAwareCompare(str2);
+      }
+  }
+
+</pre>
+<p><b>See also </b><a href="qtest-overview.html#creating-a-benchmark">Creating a Benchmark</a> and <a href="qttestlib-tutorial5-example.html">Writing a Benchmark</a>.</p>
+<!-- @@@QBENCHMARK -->
+<!-- $$$QBENCHMARK_ONCE[overload1]$$$QBENCHMARK_ONCE -->
+<h3 class="fn" id="QBENCHMARK_ONCE"><a name="QBENCHMARK_ONCE"></a><span class="name">QBENCHMARK_ONCE</span></h3>
+<p>The QBENCHMARK_ONCE macro is for measuring performance of a code block by running it once.</p>
+<p>This macro is used to measure the performance of code within a test. The code to be benchmarked is contained within a code block following this macro.</p>
+<p>Unlike QBENCHMARK, the contents of the contained code block is only run once. The elapsed time will be reported as &quot;0&quot; if it's to short to be measured by the selected backend. (Use)</p>
+<p>This function was introduced in  Qt 4.6.</p>
+<p><b>See also </b><a href="qtest-overview.html#creating-a-benchmark">Creating a Benchmark</a> and <a href="qttestlib-tutorial5-example.html">Writing a Benchmark</a>.</p>
+<!-- @@@QBENCHMARK_ONCE -->
+<!-- $$$QCOMPARE[overload1]$$$QCOMPARE -->
+<h3 class="fn" id="QCOMPARE"><a name="QCOMPARE"></a><span class="name">QCOMPARE</span>(<i>actual</i>, <i>expected</i>)</h3>
+<p>The QCOMPARE macro compares an <i>actual</i> value to an <i>expected</i> value using the equals operator. If <i>actual</i> and <i>expected</i> are identical, execution continues. If not, a failure is recorded in the test log and the test won't be executed further.</p>
+<p>In the case of comparing floats and doubles, <a href="../qtcore/qtglobal.html#qFuzzyCompare">qFuzzyCompare</a>() is used for comparing. This means that comparing to 0 will likely fail. One solution to this is to compare to 1, and add 1 to the produced output.</p>
+<p>QCOMPARE tries to output the contents of the values if the comparison fails, so it is visible from the test log why the comparison failed.</p>
+<p>For your own classes, you can use <a href="qtest.html#toString">QTest::toString</a>() to format values for outputting into the test log.</p>
+<p><b>Note: </b>This macro can only be used in a test function that is invoked by the test framework.</p><p>Example:</p>
+<pre class="cpp">
+
+  QCOMPARE(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;hello&quot;</span>)<span class="operator">.</span>toUpper()<span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;HELLO&quot;</span>));
+
+</pre>
+<p><b>See also </b><a href="qtest.html#QVERIFY">QVERIFY</a>(), <a href="qtest.html#QTRY_COMPARE">QTRY_COMPARE</a>(), and <a href="qtest.html#toString">QTest::toString</a>().</p>
+<!-- @@@QCOMPARE -->
+<!-- $$$QEXPECT_FAIL[overload1]$$$QEXPECT_FAIL -->
+<h3 class="fn" id="QEXPECT_FAIL"><a name="QEXPECT_FAIL"></a><span class="name">QEXPECT_FAIL</span>(<i>dataIndex</i>, <i>comment</i>, <i>mode</i>)</h3>
+<p>The QEXPECT_FAIL() macro marks the next <a href="qtest.html#QCOMPARE">QCOMPARE</a>() or <a href="qtest.html#QVERIFY">QVERIFY</a>() as an expected failure. Instead of adding a failure to the test log, an expected failure will be reported.</p>
+<p>If a <a href="qtest.html#QVERIFY">QVERIFY</a>() or <a href="qtest.html#QCOMPARE">QCOMPARE</a>() is marked as an expected failure, but passes instead, an unexpected pass (XPASS) is written to the test log.</p>
+<p>The parameter <i>dataIndex</i> describes for which entry in the test data the failure is expected. Pass an empty string (<code>&quot;&quot;</code>) if the failure is expected for all entries or if no test data exists.</p>
+<p><i>comment</i> will be appended to the test log for the expected failure.</p>
+<p><i>mode</i> is a <a href="qtest.html#TestFailMode-enum">QTest::TestFailMode</a> and sets whether the test should continue to execute or not.</p>
+<p><b>Note:</b> This macro can only be used in a test function that is invoked by the test framework.</p>
+<p>Example 1:</p>
+<pre class="cpp">
+
+  QEXPECT_FAIL(<span class="string">&quot;&quot;</span><span class="operator">,</span> <span class="string">&quot;Will fix in the next release&quot;</span><span class="operator">,</span> Continue);
+  QCOMPARE(i<span class="operator">,</span> <span class="number">42</span>);
+  QCOMPARE(j<span class="operator">,</span> <span class="number">43</span>);
+
+</pre>
+<p>In the example above, an expected fail will be written into the test output if the variable <code>i</code> is not 42. If the variable <code>i</code> is 42, an unexpected pass is written instead. The QEXPECT_FAIL() has no influence on the second <a href="qtest.html#QCOMPARE">QCOMPARE</a>() statement in the example.</p>
+<p>Example 2:</p>
+<pre class="cpp">
+
+  QEXPECT_FAIL(<span class="string">&quot;data27&quot;</span><span class="operator">,</span> <span class="string">&quot;Oh my, this is soooo broken&quot;</span><span class="operator">,</span> Abort);
+  QCOMPARE(i<span class="operator">,</span> <span class="number">42</span>);
+
+</pre>
+<p>The above testfunction will not continue executing for the test data entry <code>data27</code>.</p>
+<p><b>See also </b><a href="qtest.html#TestFailMode-enum">QTest::TestFailMode</a>, <a href="qtest.html#QVERIFY">QVERIFY</a>(), and <a href="qtest.html#QCOMPARE">QCOMPARE</a>().</p>
+<!-- @@@QEXPECT_FAIL -->
+<!-- $$$QFAIL[overload1]$$$QFAIL -->
+<h3 class="fn" id="QFAIL"><a name="QFAIL"></a><span class="name">QFAIL</span>(<i>message</i>)</h3>
+<p>This macro can be used to force a test failure. The test stops executing and the failure <i>message</i> is appended to the test log.</p>
+<p><b>Note:</b> This macro can only be used in a test function that is invoked by the test framework.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="keyword">if</span> (<span class="keyword">sizeof</span>(<span class="type">int</span>) <span class="operator">!</span><span class="operator">=</span> <span class="number">4</span>)
+      QFAIL(<span class="string">&quot;This test has not been ported to this platform yet.&quot;</span>);
+
+</pre>
+<!-- @@@QFAIL -->
+<!-- $$$QFETCH[overload1]$$$QFETCH -->
+<h3 class="fn" id="QFETCH"><a name="QFETCH"></a><span class="name">QFETCH</span>(<i>type</i>, <i>name</i>)</h3>
+<p>The fetch macro creates a local variable named <i>name</i> with the type <i>type</i> on the stack. <i>name</i> has to match the element name from the test's data. If no such element exists, the test will assert.</p>
+<p>Assuming a test has the following data:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> TestQString<span class="operator">::</span>toInt_data()
+  {
+      <span class="type">QTest</span><span class="operator">::</span>addColumn<span class="operator">&lt;</span><span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">&gt;</span>(<span class="string">&quot;aString&quot;</span>);
+      <span class="type">QTest</span><span class="operator">::</span>addColumn<span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span>(<span class="string">&quot;expected&quot;</span>);
+
+      <span class="type">QTest</span><span class="operator">::</span>newRow(<span class="string">&quot;positive value&quot;</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;42&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">42</span>;
+      <span class="type">QTest</span><span class="operator">::</span>newRow(<span class="string">&quot;negative value&quot;</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;-42&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="operator">-</span><span class="number">42</span>;
+      <span class="type">QTest</span><span class="operator">::</span>newRow(<span class="string">&quot;zero&quot;</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;0&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">0</span>;
+  }
+
+</pre>
+<p>The test data has two elements, a <a href="../qtcore/qstring.html">QString</a> called <code>aString</code> and an integer called <code>expected</code>. To fetch these values in the actual test:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> TestQString<span class="operator">::</span>toInt()
+  {
+       QFETCH(<span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">,</span> aString);
+       QFETCH(<span class="type">int</span><span class="operator">,</span> expected);
+
+       QCOMPARE(aString<span class="operator">.</span>toInt()<span class="operator">,</span> expected);
+  }
+
+</pre>
+<p><code>aString</code> and <code>expected</code> are variables on the stack that are initialized with the current test data.</p>
+<p><b>Note:</b> This macro can only be used in a test function that is invoked by the test framework. The test function must have a _data function.</p>
+<!-- @@@QFETCH -->
+<!-- $$$QFINDTESTDATA[overload1]$$$QFINDTESTDATA -->
+<h3 class="fn" id="QFINDTESTDATA"><a name="QFINDTESTDATA"></a><span class="name">QFINDTESTDATA</span>(<i>filename</i>)</h3>
+<p>Returns a <a href="../qtcore/qstring.html">QString</a> for the testdata file referred to by <i>filename</i>, or an empty <a href="../qtcore/qstring.html">QString</a> if the testdata file could not be found.</p>
+<p>This macro allows the test to load data from an external file without hardcoding an absolute filename into the test, or using relative paths which may be error prone.</p>
+<p>The returned path will be the first path from the following list which resolves to an existing file or directory:</p>
+<ul>
+<li><i>filename</i> relative to <a href="../qtcore/qcoreapplication.html#applicationDirPath">QCoreApplication::applicationDirPath</a>() (only if a <a href="../qtcore/qcoreapplication.html">QCoreApplication</a> or <a href="../qtwidgets/qapplication.html">QApplication</a> object has been created).</li>
+<li><i>filename</i> relative to the test's standard install directory (<a href="../qtcore/qlibraryinfo.html#LibraryLocation-enum">QLibraryInfo::TestsPath</a> with the lowercased testcase name appended).</li>
+<li><i>filename</i> relative to the directory containing the source file from which QFINDTESTDATA is invoked.</li>
+</ul>
+<p>If the named file/directory does not exist at any of these locations, a warning is printed to the test log.</p>
+<p>For example, in this code:</p>
+<pre class="cpp">
+
+  <span class="comment">// Source: /home/user/sources/myxmlparser/tests/tst_myxmlparser/tst_myxmlparser.cpp</span>
+  <span class="comment">// Build:  /home/user/build/myxmlparser/tests/tst_myxmlparser</span>
+  <span class="comment">// Qt:     /usr/local/Qt-5.0.0</span>
+  <span class="type">void</span> tst_MyXmlParser<span class="operator">::</span>parse()
+  {
+      MyXmlParser parser;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> input <span class="operator">=</span> QFINDTESTDATA(<span class="string">&quot;testxml/simple1.xml&quot;</span>);
+      QVERIFY(parser<span class="operator">.</span>parse(input));
+  }
+
+</pre>
+<p>The testdata file will be resolved as the first existing file from:</p>
+<ul>
+<li><code>/home/user/build/myxmlparser/tests/tst_myxmlparser/testxml/simple1.xml</code></li>
+<li><code>/usr/local/Qt-5.0&#x2e;0/tests/tst_myxmlparser/testxml/simple1.xml</code></li>
+<li><code>/home/user/sources/myxmlparser/tests/tst_myxmlparser/testxml/simple1.xml</code></li>
+</ul>
+<p>This allows the test to find its testdata regardless of whether the test has been installed, and regardless of whether the test's build tree is equal to the test's source tree.</p>
+<p><b>Note:</b> reliable detection of testdata from the source directory requires either that qmake is used, or the <code>QT_TESTCASE_BUILDDIR</code> macro is defined to point to the working directory from which the compiler is invoked, or only absolute paths to the source files are passed to the compiler. Otherwise, the absolute path of the source directory cannot be determined.</p>
+<p><b>Note:</b> For tests that use the <a href="qtest.html#QTEST_APPLESS_MAIN">QTEST_APPLESS_MAIN</a>() macro to generate a <code>main()</code> function, <code>QFINDTESTDATA</code> will not attempt to find test data relative to <a href="../qtcore/qcoreapplication.html#applicationDirPath">QCoreApplication::applicationDirPath</a>(). In practice, this means that tests using <code>QTEST_APPLESS_MAIN()</code> will fail to find their test data if run from a shadow build tree.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@QFINDTESTDATA -->
+<!-- $$$QSKIP[overload1]$$$QSKIP -->
+<h3 class="fn" id="QSKIP"><a name="QSKIP"></a><span class="name">QSKIP</span>(<i>description</i>)</h3>
+<p>If called from a test function, the QSKIP() macro stops execution of the test without adding a failure to the test log. You can use it to skip tests that wouldn't make sense in the current configuration. The text <i>description</i> is appended to the test log and should contain an explanation of why the test couldn't be executed.</p>
+<p>If the test is data-driven, each call to QSKIP() will skip only the current row of test data, so an unconditional call to QSKIP will produce one skip message in the test log for each row of test data.</p>
+<p>If called from an _data function, the QSKIP() macro will stop execution of the _data function and will prevent execution of the associated test function.</p>
+<p>If called from initTestCase() or initTestCase_data(), the QSKIP() macro will skip all test and _data functions.</p>
+<p><b>Note:</b> This macro can only be used in a test function or _data function that is invoked by the test framework.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="keyword">if</span> (<span class="operator">!</span><span class="type">QSqlDatabase</span><span class="operator">::</span>drivers()<span class="operator">.</span>contains(<span class="string">&quot;SQLITE&quot;</span>))
+      QSKIP(<span class="string">&quot;This test requires the SQLITE database driver&quot;</span>);
+
+</pre>
+<!-- @@@QSKIP -->
+<!-- $$$QTEST[overload1]$$$QTEST -->
+<h3 class="fn" id="QTEST"><a name="QTEST"></a><span class="name">QTEST</span>(<i>actual</i>, <i>testElement</i>)</h3>
+<p>QTEST() is a convenience macro for <a href="qtest.html#QCOMPARE">QCOMPARE</a>() that compares the value <i>actual</i> with the element <i>testElement</i> from the test's data. If there is no such element, the test asserts.</p>
+<p>Apart from that, QTEST() behaves exactly as <a href="qtest.html#QCOMPARE">QCOMPARE</a>().</p>
+<p>Instead of writing:</p>
+<pre class="cpp">
+
+  QFETCH(<span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">,</span> myString);
+  QCOMPARE(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;hello&quot;</span>)<span class="operator">.</span>toUpper()<span class="operator">,</span> myString);
+
+</pre>
+<p>you can write:</p>
+<pre class="cpp">
+
+  QTEST(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;hello&quot;</span>)<span class="operator">.</span>toUpper()<span class="operator">,</span> <span class="string">&quot;myString&quot;</span>);
+
+</pre>
+<p><b>See also </b><a href="qtest.html#QCOMPARE">QCOMPARE</a>().</p>
+<!-- @@@QTEST -->
+<!-- $$$QTEST_APPLESS_MAIN[overload1]$$$QTEST_APPLESS_MAIN -->
+<h3 class="fn" id="QTEST_APPLESS_MAIN"><a name="QTEST_APPLESS_MAIN"></a><span class="name">QTEST_APPLESS_MAIN</span>(<i>TestClass</i>)</h3>
+<p>Implements a main() function that executes all tests in <i>TestClass</i>.</p>
+<p>Behaves like <a href="qtest.html#QTEST_MAIN">QTEST_MAIN</a>(), but doesn't instantiate a <a href="../qtwidgets/qapplication.html">QApplication</a> object. Use this macro for really simple stand-alone non-GUI tests.</p>
+<p><b>See also </b><a href="qtest.html#QTEST_MAIN">QTEST_MAIN</a>().</p>
+<!-- @@@QTEST_APPLESS_MAIN -->
+<!-- $$$QTEST_GUILESS_MAIN[overload1]$$$QTEST_GUILESS_MAIN -->
+<h3 class="fn" id="QTEST_GUILESS_MAIN"><a name="QTEST_GUILESS_MAIN"></a><span class="name">QTEST_GUILESS_MAIN</span>(<i>TestClass</i>)</h3>
+<p>Implements a main() function that instantiates a <a href="../qtcore/qcoreapplication.html">QCoreApplication</a> object and the <i>TestClass</i>, and executes all tests in the order they were defined. Use this macro to build stand-alone executables.</p>
+<p>Behaves like <a href="qtest.html#QTEST_MAIN">QTEST_MAIN</a>(), but instantiates a <a href="../qtcore/qcoreapplication.html">QCoreApplication</a> instead of the <a href="../qtwidgets/qapplication.html">QApplication</a> object. Use this macro if your test case doesn't need functionality offered by <a href="../qtwidgets/qapplication.html">QApplication</a>, but the event loop is still necessary.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qtest.html#QTEST_MAIN">QTEST_MAIN</a>().</p>
+<!-- @@@QTEST_GUILESS_MAIN -->
+<!-- $$$QTEST_MAIN[overload1]$$$QTEST_MAIN -->
+<h3 class="fn" id="QTEST_MAIN"><a name="QTEST_MAIN"></a><span class="name">QTEST_MAIN</span>(<i>TestClass</i>)</h3>
+<p>Implements a main() function that instantiates an application object and the <i>TestClass</i>, and executes all tests in the order they were defined. Use this macro to build stand-alone executables.</p>
+<p>If <code>QT_WIDGETS_LIB</code> is defined, the application object will be a <a href="../qtwidgets/qapplication.html">QApplication</a>, if <code>QT_GUI_LIB</code> is defined, the application object will be a <a href="../qtgui/qguiapplication.html">QGuiApplication</a>, otherwise it will be a <a href="../qtcore/qcoreapplication.html">QCoreApplication</a>. If qmake is used and the configuration includes <code>QT += widgets</code>, then <code>QT_WIDGETS_LIB</code> will be defined automatically. Similarly, if qmake is used and the configuration includes <code>QT += gui</code>, then <code>QT_GUI_LIB</code> will be defined automatically.</p>
+<p><b>Note:</b> On platforms that have keypad navigation enabled by default, this macro will forcefully disable it if <code>QT_WIDGETS_LIB</code> is defined. This is done to simplify the usage of key events when writing autotests. If you wish to write a test case that uses keypad navigation, you should enable it either in the <code>initTestCase()</code> or <code>init()</code> functions of your test case by calling <a href="../qtwidgets/qapplication.html#setNavigationMode">QApplication::setNavigationMode</a>().</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> TestQString: <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> };
+  QTEST_MAIN(TestQString)
+
+</pre>
+<p><b>See also </b><a href="qtest.html#QTEST_APPLESS_MAIN">QTEST_APPLESS_MAIN</a>(), <a href="qtest.html#QTEST_GUILESS_MAIN">QTEST_GUILESS_MAIN</a>(), <a href="qtest.html#qExec">QTest::qExec</a>(), and <a href="../qtwidgets/qapplication.html#setNavigationMode">QApplication::setNavigationMode</a>().</p>
+<!-- @@@QTEST_MAIN -->
+<!-- $$$QTRY_COMPARE[overload1]$$$QTRY_COMPARE -->
+<h3 class="fn" id="QTRY_COMPARE"><a name="QTRY_COMPARE"></a><span class="name">QTRY_COMPARE</span>(<i>actual</i>, <i>expected</i>)</h3>
+<p>Performs a comparison of the <i>actual</i> and <i>expected</i> values by invoking <a href="qtest.html#QTRY_COMPARE_WITH_TIMEOUT">QTRY_COMPARE_WITH_TIMEOUT</a>() with a timeout of five seconds.</p>
+<p><b>Note: </b>This macro can only be used in a test function that is invoked by the test framework.</p><p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qtest.html#QTRY_COMPARE_WITH_TIMEOUT">QTRY_COMPARE_WITH_TIMEOUT</a>(), <a href="qtest.html#QCOMPARE">QCOMPARE</a>(), <a href="qtest.html#QVERIFY">QVERIFY</a>(), and <a href="qtest.html#QTRY_VERIFY">QTRY_VERIFY</a>().</p>
+<!-- @@@QTRY_COMPARE -->
+<!-- $$$QTRY_COMPARE_WITH_TIMEOUT[overload1]$$$QTRY_COMPARE_WITH_TIMEOUT -->
+<h3 class="fn" id="QTRY_COMPARE_WITH_TIMEOUT"><a name="QTRY_COMPARE_WITH_TIMEOUT"></a><span class="name">QTRY_COMPARE_WITH_TIMEOUT</span>(<i>actual</i>, <i>expected</i>, <i>timeout</i>)</h3>
+<p>The QTRY_COMPARE_WITH_TIMEOUT() macro is similar to <a href="qtest.html#QCOMPARE">QCOMPARE</a>(), but performs the comparison of the <i>actual</i> and <i>expected</i> values repeatedly, until either the two values are equal or the <i>timeout</i> (in milliseconds) is reached. Between each comparison, events will be processed. If the timeout is reached, a failure is recorded in the test log and the test won't be executed further.</p>
+<p><b>Note: </b>This macro can only be used in a test function that is invoked by the test framework.</p><p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qtest.html#QTRY_COMPARE">QTRY_COMPARE</a>(), <a href="qtest.html#QCOMPARE">QCOMPARE</a>(), <a href="qtest.html#QVERIFY">QVERIFY</a>(), and <a href="qtest.html#QTRY_VERIFY">QTRY_VERIFY</a>().</p>
+<!-- @@@QTRY_COMPARE_WITH_TIMEOUT -->
+<!-- $$$QTRY_VERIFY2[overload1]$$$QTRY_VERIFY2 -->
+<h3 class="fn" id="QTRY_VERIFY2"><a name="QTRY_VERIFY2"></a><span class="name">QTRY_VERIFY2</span>(<i>condition</i>, <i>message</i>)</h3>
+<p>Checks the <i>condition</i> by invoking <a href="qtest.html#QTRY_VERIFY2_WITH_TIMEOUT">QTRY_VERIFY2_WITH_TIMEOUT</a>() with a timeout of five seconds. If <i>condition</i> is then still false, <i>message</i> is output. The <i>message</i> is a plain C string.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  QTRY_VERIFY2_WITH_TIMEOUT(list<span class="operator">.</span>size() <span class="operator">&gt;</span> <span class="number">2</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">::</span>number(list<span class="operator">.</span>size())<span class="operator">.</span>constData());
+
+</pre>
+<p><b>Note: </b>This macro can only be used in a test function that is invoked by the test framework.</p><p>This function was introduced in  Qt 5.6.</p>
+<p><b>See also </b><a href="qtest.html#QTRY_VERIFY2_WITH_TIMEOUT">QTRY_VERIFY2_WITH_TIMEOUT</a>(), QTRY_VERIFY2(), <a href="qtest.html#QVERIFY">QVERIFY</a>(), <a href="qtest.html#QCOMPARE">QCOMPARE</a>(), and <a href="qtest.html#QTRY_COMPARE">QTRY_COMPARE</a>().</p>
+<!-- @@@QTRY_VERIFY2 -->
+<!-- $$$QTRY_VERIFY[overload1]$$$QTRY_VERIFY -->
+<h3 class="fn" id="QTRY_VERIFY"><a name="QTRY_VERIFY"></a><span class="name">QTRY_VERIFY</span>(<i>condition</i>)</h3>
+<p>Checks the <i>condition</i> by invoking <a href="qtest.html#QTRY_VERIFY_WITH_TIMEOUT">QTRY_VERIFY_WITH_TIMEOUT</a>() with a timeout of five seconds.</p>
+<p><b>Note: </b>This macro can only be used in a test function that is invoked by the test framework.</p><p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qtest.html#QTRY_VERIFY_WITH_TIMEOUT">QTRY_VERIFY_WITH_TIMEOUT</a>(), <a href="qtest.html#QTRY_VERIFY2">QTRY_VERIFY2</a>(), <a href="qtest.html#QVERIFY">QVERIFY</a>(), <a href="qtest.html#QCOMPARE">QCOMPARE</a>(), and <a href="qtest.html#QTRY_COMPARE">QTRY_COMPARE</a>().</p>
+<!-- @@@QTRY_VERIFY -->
+<!-- $$$QTRY_VERIFY2_WITH_TIMEOUT[overload1]$$$QTRY_VERIFY2_WITH_TIMEOUT -->
+<h3 class="fn" id="QTRY_VERIFY2_WITH_TIMEOUT"><a name="QTRY_VERIFY2_WITH_TIMEOUT"></a><span class="name">QTRY_VERIFY2_WITH_TIMEOUT</span>(<i>condition</i>, <i>message</i>, <i>timeout</i>)</h3>
+<p>The QTRY_VERIFY2_WITH_TIMEOUT macro is similar to <a href="qtest.html#QTRY_VERIFY_WITH_TIMEOUT">QTRY_VERIFY_WITH_TIMEOUT</a>() except that it outputs a verbose <i>message</i> when <i>condition</i> is still false after the specified <i>timeout</i> (in milliseconds). The <i>message</i> is a plain C string.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  QTRY_VERIFY2_WITH_TIMEOUT(list<span class="operator">.</span>size() <span class="operator">&gt;</span> <span class="number">2</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">::</span>number(list<span class="operator">.</span>size())<span class="operator">.</span>constData()<span class="operator">,</span> <span class="number">10000</span>);
+
+</pre>
+<p><b>Note: </b>This macro can only be used in a test function that is invoked by the test framework.</p><p>This function was introduced in  Qt 5.6.</p>
+<p><b>See also </b><a href="qtest.html#QTRY_VERIFY">QTRY_VERIFY</a>(), <a href="qtest.html#QTRY_VERIFY_WITH_TIMEOUT">QTRY_VERIFY_WITH_TIMEOUT</a>(), <a href="qtest.html#QVERIFY">QVERIFY</a>(), <a href="qtest.html#QCOMPARE">QCOMPARE</a>(), and <a href="qtest.html#QTRY_COMPARE">QTRY_COMPARE</a>().</p>
+<!-- @@@QTRY_VERIFY2_WITH_TIMEOUT -->
+<!-- $$$QTRY_VERIFY_WITH_TIMEOUT[overload1]$$$QTRY_VERIFY_WITH_TIMEOUT -->
+<h3 class="fn" id="QTRY_VERIFY_WITH_TIMEOUT"><a name="QTRY_VERIFY_WITH_TIMEOUT"></a><span class="name">QTRY_VERIFY_WITH_TIMEOUT</span>(<i>condition</i>, <i>timeout</i>)</h3>
+<p>The QTRY_VERIFY_WITH_TIMEOUT() macro is similar to <a href="qtest.html#QVERIFY">QVERIFY</a>(), but checks the <i>condition</i> repeatedly, until either the condition becomes true or the <i>timeout</i> (in milliseconds) is reached. Between each evaluation, events will be processed. If the timeout is reached, a failure is recorded in the test log and the test won't be executed further.</p>
+<p><b>Note: </b>This macro can only be used in a test function that is invoked by the test framework.</p><p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qtest.html#QTRY_VERIFY">QTRY_VERIFY</a>(), <a href="qtest.html#QTRY_VERIFY2_WITH_TIMEOUT">QTRY_VERIFY2_WITH_TIMEOUT</a>(), <a href="qtest.html#QVERIFY">QVERIFY</a>(), <a href="qtest.html#QCOMPARE">QCOMPARE</a>(), and <a href="qtest.html#QTRY_COMPARE">QTRY_COMPARE</a>().</p>
+<!-- @@@QTRY_VERIFY_WITH_TIMEOUT -->
+<!-- $$$QVERIFY2[overload1]$$$QVERIFY2 -->
+<h3 class="fn" id="QVERIFY2"><a name="QVERIFY2"></a><span class="name">QVERIFY2</span>(<i>condition</i>, <i>message</i>)</h3>
+<p>The QVERIFY2() macro behaves exactly like <a href="qtest.html#QVERIFY">QVERIFY</a>(), except that it outputs a verbose <i>message</i> when <i>condition</i> is false. The <i>message</i> is a plain C string.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  QVERIFY2(<span class="number">1</span> <span class="operator">+</span> <span class="number">1</span> <span class="operator">=</span><span class="operator">=</span> <span class="number">2</span><span class="operator">,</span> <span class="string">&quot;A breach in basic arithmetic occurred.&quot;</span>);
+
+</pre>
+<p><b>See also </b><a href="qtest.html#QVERIFY">QVERIFY</a>() and <a href="qtest.html#QCOMPARE">QCOMPARE</a>().</p>
+<!-- @@@QVERIFY2 -->
+<!-- $$$QVERIFY[overload1]$$$QVERIFY -->
+<h3 class="fn" id="QVERIFY"><a name="QVERIFY"></a><span class="name">QVERIFY</span>(<i>condition</i>)</h3>
+<p>The QVERIFY() macro checks whether the <i>condition</i> is true or not. If it is true, execution continues. If not, a failure is recorded in the test log and the test won't be executed further.</p>
+<p><b>Note:</b> This macro can only be used in a test function that is invoked by the test framework.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  QVERIFY(<span class="number">1</span> <span class="operator">+</span> <span class="number">1</span> <span class="operator">=</span><span class="operator">=</span> <span class="number">2</span>);
+
+</pre>
+<p><b>See also </b><a href="qtest.html#QCOMPARE">QCOMPARE</a>() and <a href="qtest.html#QTRY_VERIFY">QTRY_VERIFY</a>().</p>
+<!-- @@@QVERIFY -->
+<!-- $$$QVERIFY_EXCEPTION_THROWN[overload1]$$$QVERIFY_EXCEPTION_THROWN -->
+<h3 class="fn" id="QVERIFY_EXCEPTION_THROWN"><a name="QVERIFY_EXCEPTION_THROWN"></a><span class="name">QVERIFY_EXCEPTION_THROWN</span>(<i>expression</i>, <i>exceptiontype</i>)</h3>
+<p>The QVERIFY_EXCEPTION_THROWN macro executes an <i>expression</i> and tries to catch an exception thrown from the <i>expression</i>. If the <i>expression</i> throws an exception and its type is the same as <i>exceptiontype</i> or <i>exceptiontype</i> is substitutable with the type of thrown exception (i.e&#x2e; usually the type of thrown exception is publicly derived from <i>exceptiontype</i>) then execution will be continued. If not-substitutable type of exception is thrown or the <i>expression</i> doesn't throw an exception at all, then a failure will be recorded in the test log and the test won't be executed further.</p>
+<p><b>Note: </b>This macro can only be used in a test function that is invoked by the test framework.</p><p>This function was introduced in  Qt 5.3.</p>
+<!-- @@@QVERIFY_EXCEPTION_THROWN -->
+<!-- $$$QWARN[overload1]$$$QWARN -->
+<h3 class="fn" id="QWARN"><a name="QWARN"></a><span class="name">QWARN</span>(<i>message</i>)</h3>
+<p>Appends <i>message</i> as a warning to the test log. This macro can be used anywhere in your tests.</p>
+<p><b>Note:</b> This function is <a href="../qtdoc/threads-reentrancy.html">thread-safe</a>.</p>
+<!-- @@@QWARN -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

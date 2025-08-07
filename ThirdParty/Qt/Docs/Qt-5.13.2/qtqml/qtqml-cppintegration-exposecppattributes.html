@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- exposecppattributes.qdoc -->
+  <title>Exposing Attributes of C++ Types to QML | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td >Exposing Attributes of C++ Types to QML</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#data-type-handling-and-ownership">Data Type Handling and Ownership</a></li>
+<li class="level1"><a href="#exposing-properties">Exposing Properties</a></li>
+<li class="level2"><a href="#properties-with-object-types">Properties with Object Types</a></li>
+<li class="level2"><a href="#properties-with-object-list-types">Properties with Object-List Types</a></li>
+<li class="level2"><a href="#grouped-properties">Grouped Properties</a></li>
+<li class="level1"><a href="#exposing-methods-including-qt-slots">Exposing Methods (Including Qt Slots)</a></li>
+<li class="level1"><a href="#exposing-signals">Exposing Signals</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Exposing Attributes of C++ Types to QML</h1>
+<span class="subtitle"></span>
+<!-- $$$qtqml-cppintegration-exposecppattributes.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>QML can easily be extended with functionality defined in C++ code. Due to the tight integration of the QML engine with the <a href="../qtcore/metaobjects.html">Qt meta-object system</a>, any functionality that is appropriately exposed by a <a href="../qtcore/qobject.html">QObject</a>-derived class is accessible from QML code. This enables C++ data and functions to be accessible directly from QML, often with little or no modification.</p>
+<p>The QML engine has the ability to introspect <a href="../qtcore/qobject.html">QObject</a> instances through the meta-object system. This means any QML code can access the following members of an instance of a <a href="../qtcore/qobject.html">QObject</a>-derived class:</p>
+<ul>
+<li>Properties</li>
+<li>Methods (providing they are public slots or flagged with <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>)</li>
+<li>Signals</li>
+</ul>
+<p>(Additionally, enums are available if they have been declared with Q_ENUMS. See <a href="qtqml-cppintegration-data.html">Data Type Conversion Between QML and C++</a> for more details.)</p>
+<p>In general, these are accessible from QML regardless of whether a <a href="../qtcore/qobject.html">QObject</a>-derived class has been <a href="qtqml-cppintegration-definetypes.html#registering-c-types-with-the-qml-type-system">registered with the QML type system</a>. However, if a class is to be used in a way that requires the engine to access additional type information — for example, if the class itself is to be used as a method parameter or property, or if one of its enum types is to be used in this way — then the class may need to be registered.</p>
+<p>Also note that a number of the important concepts covered in this document are demonstrated in the <a href="qtqml-tutorials-extending-qml-example.html">Writing QML Extensions with C++</a> tutorial.</p>
+<a name="data-type-handling-and-ownership"></a>
+<h2 id="data-type-handling-and-ownership">Data Type Handling and Ownership</h2>
+<p>Any data that is transferred from C++ to QML, whether as a property value, a method parameter or return value, or a signal parameter value, must be of a type that is supported by the QML engine.</p>
+<p>By default, the engine supports a number of Qt C++ types and can automatically convert them as appropriately when used from QML. Additionally, C++ classes that are <a href="qtqml-cppintegration-definetypes.html#registering-c-types-with-the-qml-type-system">registered</a> with the QML type system can be used as data types, as can their enums if appropriately registered. See <a href="qtqml-cppintegration-data.html">Data Type Conversion Between QML and C++</a> for further information.</p>
+<p>Additionally, data ownership rules are taken into consideration when data is transferred from C++ to QML. See <a href="qtqml-cppintegration-data.html#data-ownership">Data Ownership</a> for more details.</p>
+<a name="exposing-properties"></a>
+<h2 id="exposing-properties">Exposing Properties</h2>
+<p>A <i>property</i> can be specified for any <a href="../qtcore/qobject.html">QObject</a>-derived class using the <a href="../qtcore/qobject.html#Q_PROPERTY">Q_PROPERTY</a>() macro. A property is a class data member with an associated read function and optional write function.</p>
+<p>All properties of a <a href="../qtcore/qobject.html">QObject</a>-derived class are accessible from QML.</p>
+<p>For example, below is a <code>Message</code> class with an <code>author</code> property. As specified by the <a href="../qtcore/qobject.html#Q_PROPERTY">Q_PROPERTY</a> macro call, this property is readable through the <code>author()</code> method, and writable through the <code>setAuthor()</code> method:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> Message : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>
+  {
+      Q_OBJECT
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> author READ author WRITE setAuthor NOTIFY authorChanged)
+  <span class="keyword">public</span>:
+      <span class="type">void</span> setAuthor(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>a) {
+          <span class="keyword">if</span> (a <span class="operator">!</span><span class="operator">=</span> m_author) {
+              m_author <span class="operator">=</span> a;
+              <span class="keyword">emit</span> authorChanged();
+          }
+      }
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> author() <span class="keyword">const</span> {
+          <span class="keyword">return</span> m_author;
+      }
+  <span class="keyword">signals</span>:
+      <span class="type">void</span> authorChanged();
+  <span class="keyword">private</span>:
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> m_author;
+  };
+
+</pre>
+<p>If an instance of this class was <a href="qtqml-cppintegration-contextproperties.html">set as a context property</a> when loading a file named <code>MyItem.qml</code> from C++:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>) {
+      <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      <span class="type"><a href="../qtquick/qquickview.html">QQuickView</a></span> view;
+      Message msg;
+      view<span class="operator">.</span>engine()<span class="operator">-</span><span class="operator">&gt;</span>rootContext()<span class="operator">-</span><span class="operator">&gt;</span>setContextProperty(<span class="string">&quot;msg&quot;</span><span class="operator">,</span> <span class="operator">&amp;</span>msg);
+      view<span class="operator">.</span>setSource(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>fromLocalFile(<span class="string">&quot;MyItem.qml&quot;</span>));
+      view<span class="operator">.</span>show();
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p>Then, the <code>author</code> property could be read from <code>MyItem.qml</code>:</p>
+<pre class="qml">
+
+  <span class="comment">// MyItem.qml</span>
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+      <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span>
+      <span class="name">text</span>: <span class="name">msg</span>.<span class="name">author</span>    <span class="comment">// invokes Message::author() to get this value</span>
+
+      <span class="name">Component</span>.onCompleted: {
+          <span class="name">msg</span>.<span class="name">author</span> <span class="operator">=</span> <span class="string">&quot;Jonah&quot;</span>  <span class="comment">// invokes Message::setAuthor()</span>
+      }
+  }
+
+</pre>
+<p>For maximum interoperability with QML, <b>any property that is writable should have an associated NOTIFY signal</b> that is emitted whenever the property value has changed. This allows the property to be used with <a href="qtqml-syntax-propertybinding.html">property binding</a>, which is an essential feature of QML that enforces relationships between properties by automatically updating a property whenever any of its dependencies change in value.</p>
+<p>In the above example, the associated NOTIFY signal for the <code>author</code> property is <code>authorChanged</code>, as specified in the <a href="../qtcore/qobject.html#Q_PROPERTY">Q_PROPERTY</a>() macro call. This means that whenever the signal is emitted — as it is when the author changes in Message::setAuthor() — this notifies the QML engine that any bindings involving the <code>author</code> property must be updated, and in turn, the engine will update the <code>text</code> property by calling <code>Message::author()</code> again.</p>
+<p>If the <code>author</code> property was writable but did not have an associated NOTIFY signal, the <code>text</code> value would be initialized with the initial value returned by <code>Message::author()</code> but would not be updated with any later changes to this property. In addition, any attempts to bind to the property from QML will produce a runtime warning from the engine.</p>
+<p><b>Note: </b>It is recommended that the NOTIFY signal be named <i>&lt;property&gt;Changed</i> where <code>&lt;property&gt;</code> is the name of the property. The associated property change signal handler generated by the QML engine will always take the form <code>on&lt;Property&gt;Changed</code>, regardless of the name of the related C++ signal, so it is recommended that the signal name follows this convention to avoid any confusion.</p><a name="notes-on-use-of-notify-signals"></a>
+<h4 id="notes-on-use-of-notify-signals">Notes on Use of Notify Signals</h4>
+<p>To prevent loops or excessive evaluation, developers should ensure that the property change signal is only emitted when the property value has actually changed. Also, if a property or group of properties is infrequently used, it is permitted to use the same NOTIFY signal for several properties. This should be done with care to ensure that performance doesn't suffer.</p>
+<p>The presence of a NOTIFY signal does incur a small overhead. There are cases where a property's value is set at object construction time, and does not subsequently change. The most common case of this is when a type uses <a href="qtqml-syntax-objectattributes.html#grouped-properties">Grouped Properties</a>, and the grouped property object is allocated once, and only freed when the object is deleted. In these cases, the CONSTANT attribute may be added to the property declaration instead of a NOTIFY signal.</p>
+<p>The CONSTANT attribute should only be used for properties whose value is set, and finalized, only in the class constructor. All other properties that want to be used in bindings should have a NOTIFY signal instead.</p>
+<a name="properties-with-object-types"></a>
+<h3 id="properties-with-object-types">Properties with Object Types</h3>
+<p>Object-type properties are accessible from QML providing that the object type has been appropriately <a href="qtqml-cppintegration-definetypes.html#registering-c-types-with-the-qml-type-system">registered</a> with the QML type system.</p>
+<p>For example, the <code>Message</code> type might have a <code>body</code> property of type <code>MessageBody*</code>:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> Message : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>
+  {
+      Q_OBJECT
+      Q_PROPERTY(MessageBody<span class="operator">*</span> body READ body WRITE setBody NOTIFY bodyChanged)
+  <span class="keyword">public</span>:
+      MessageBody<span class="operator">*</span> body() <span class="keyword">const</span>;
+      <span class="type">void</span> setBody(MessageBody<span class="operator">*</span> body);
+  };
+
+  <span class="keyword">class</span> MessageBody : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>
+  {
+      Q_OBJECT
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> text READ text WRITE text NOTIFY textChanged)
+  <span class="comment">// ...</span>
+  }
+
+</pre>
+<p>Suppose the <code>Message</code> type was <a href="qtqml-cppintegration-definetypes.html#registering-c-types-with-the-qml-type-system">registered</a> with the QML type system, allowing it to be used as an object type from QML code:</p>
+<pre class="qml">
+
+  <span class="type">Message</span> {
+      <span class="comment">// ...</span>
+  }
+
+</pre>
+<p>If the <code>MessageBody</code> type was also registered with the type system, it would be possible to assign <code>MessageBody</code> to the <code>body</code> property of a <code>Message</code>, all from within QML code:</p>
+<pre class="qml">
+
+  <span class="type">Message</span> {
+      <span class="name">body</span>: <span class="name">MessageBody</span> {
+          <span class="name">text</span>: <span class="string">&quot;Hello, world!&quot;</span>
+      }
+  }
+
+</pre>
+<a name="properties-with-object-list-types"></a>
+<h3 id="properties-with-object-list-types">Properties with Object-List Types</h3>
+<p>Properties containing lists of <a href="../qtcore/qobject.html">QObject</a>-derived types can also be exposed to QML. For this purpose, however, one should use <a href="qqmllistproperty.html">QQmlListProperty</a> rather than <a href="../qtcore/qlist.html">QList</a>&lt;T&gt; as the property type. This is because <a href="../qtcore/qlist.html">QList</a> is not a <a href="../qtcore/qobject.html">QObject</a>-derived type, and so cannot provide the necessary QML property characteristics through the Qt meta object system, such as signal notifications when a list is modified.</p>
+<p>For example, the <code>MessageBoard</code> class below has a <code>messages</code> property of type <a href="qqmllistproperty.html">QQmlListProperty</a> that stores a list of <code>Message</code> instances:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> MessageBoard : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>
+  {
+      Q_OBJECT
+      Q_PROPERTY(<span class="type"><a href="qqmllistproperty.html">QQmlListProperty</a></span><span class="operator">&lt;</span>Message<span class="operator">&gt;</span> messages READ messages)
+  <span class="keyword">public</span>:
+      <span class="type"><a href="qqmllistproperty.html">QQmlListProperty</a></span><span class="operator">&lt;</span>Message<span class="operator">&gt;</span> messages();
+
+  <span class="keyword">private</span>:
+      <span class="keyword">static</span> <span class="type">void</span> append_message(<span class="type"><a href="qqmllistproperty.html">QQmlListProperty</a></span><span class="operator">&lt;</span>Message<span class="operator">&gt;</span> <span class="operator">*</span>list<span class="operator">,</span> Message <span class="operator">*</span>msg);
+
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>Message <span class="operator">*</span><span class="operator">&gt;</span> m_messages;
+  };
+
+</pre>
+<p>The MessageBoard::messages() function simply creates and returns a <a href="qqmllistproperty.html">QQmlListProperty</a> from its <a href="../qtcore/qlist.html">QList</a>&lt;T&gt; <code>m_messages</code> member, passing the appropriate list modification functions as required by the <a href="qqmllistproperty.html">QQmlListProperty</a> constructor:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qqmllistproperty.html">QQmlListProperty</a></span><span class="operator">&lt;</span>Message<span class="operator">&gt;</span> MessageBoard<span class="operator">::</span>messages()
+  {
+      <span class="keyword">return</span> <span class="type"><a href="qqmllistproperty.html">QQmlListProperty</a></span><span class="operator">&lt;</span>Message<span class="operator">&gt;</span>(<span class="keyword">this</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="operator">&amp;</span>MessageBoard<span class="operator">::</span>append_message);
+  }
+
+  <span class="type">void</span> MessageBoard<span class="operator">::</span>append_message(<span class="type"><a href="qqmllistproperty.html">QQmlListProperty</a></span><span class="operator">&lt;</span>Message<span class="operator">&gt;</span> <span class="operator">*</span>list<span class="operator">,</span> Message <span class="operator">*</span>msg)
+  {
+      MessageBoard <span class="operator">*</span>msgBoard <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span>MessageBoard <span class="operator">*</span><span class="operator">&gt;</span>(list<span class="operator">-</span><span class="operator">&gt;</span>object);
+      <span class="keyword">if</span> (msg)
+          msgBoard<span class="operator">-</span><span class="operator">&gt;</span>m_messages<span class="operator">.</span>append(msg);
+  }
+
+</pre>
+<p>Note that the template class type for the <a href="qqmllistproperty.html">QQmlListProperty</a> — in this case, <code>Message</code> — must be <a href="qtqml-cppintegration-definetypes.html#registering-c-types-with-the-qml-type-system">registered</a> with the QML type system.</p>
+<a name="grouped-properties"></a>
+<h3 id="grouped-properties">Grouped Properties</h3>
+<p>Any read-only object-type property is accessible from QML code as a <i>grouped property</i>. This can be used to expose a group of related properties that describe a set of attributes for a type.</p>
+<p>For example, suppose the <code>Message::author</code> property was of type <code>MessageAuthor</code> rather than a simple string, with sub-properties of <code>name</code> and <code>email</code>:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> MessageAuthor : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>
+  {
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> name READ name WRITE setName)
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> email READ email WRITE setEmail)
+  <span class="keyword">public</span>:
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  };
+
+  <span class="keyword">class</span> Message : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>
+  {
+      Q_OBJECT
+      Q_PROPERTY(MessageAuthor<span class="operator">*</span> author READ author)
+  <span class="keyword">public</span>:
+      Message(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+          : <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>(parent)<span class="operator">,</span> m_author(<span class="keyword">new</span> MessageAuthor(<span class="keyword">this</span>))
+      {
+      }
+      MessageAuthor <span class="operator">*</span>author() <span class="keyword">const</span> {
+          <span class="keyword">return</span> m_author;
+      }
+  <span class="keyword">private</span>:
+      MessageAuthor <span class="operator">*</span>m_author;
+  };
+
+</pre>
+<p>The <code>author</code> property could be written to using the <a href="qtqml-syntax-objectattributes.html#grouped-properties">grouped property syntax</a> in QML, like this:</p>
+<pre class="qml">
+
+  <span class="type">Message</span> {
+      <span class="name">author</span>.name: <span class="string">&quot;Alexandra&quot;</span>
+      <span class="name">author</span>.email: <span class="string">&quot;alexandra@mail.com&quot;</span>
+  }
+
+</pre>
+<p>A type that is exposed as a grouped property differs from an <a href="qtqml-cppintegration-exposecppattributes.html#properties-with-object-types">object-type property</a> in that the grouped property is read-only, and is initialized to a valid value by the parent object at construction. The grouped property's sub-properties may be modified from QML but the grouped property object itself will never change, whereas an object-type property may be assigned a new object value from QML at any time. Thus, the lifetime of a grouped property object is controlled strictly by the C++ parent implementation, whereas an object-type property can be freely created and destroyed through QML code.</p>
+<a name="exposing-methods-including-qt-slots"></a>
+<h2 id="exposing-methods-including-qt-slots">Exposing Methods (Including Qt Slots)</h2>
+<p>Any method of a <a href="../qtcore/qobject.html">QObject</a>-derived type is accessible from QML code if it is:</p>
+<ul>
+<li>A public method flagged with the <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>() macro</li>
+<li>A method that is a public Qt <a href="../qtcore/signalsandslots.html">slot</a></li>
+</ul>
+<p>For example, the <code>MessageBoard</code> class below has a <code>postMessage()</code> method that has been flagged with the <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a> macro, as well as a <code>refresh()</code> method that is a public slot:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> MessageBoard : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>
+  {
+      Q_OBJECT
+  <span class="keyword">public</span>:
+      Q_INVOKABLE bool postMessage(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>msg) {
+          <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Called the C++ method with&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> msg;
+          <span class="keyword">return</span> <span class="keyword">true</span>;
+      }
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> refresh() {
+          <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Called the C++ slot&quot;</span>;
+      }
+  };
+
+</pre>
+<p>If an instance of <code>MessageBoard</code> was set as the context data for a file <code>MyItem.qml</code>, then <code>MyItem.qml</code> could invoke the two methods as shown in the examples below:</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td >C++</td><td ><pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>) {
+      <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      MessageBoard msgBoard;
+      <span class="type"><a href="../qtquick/qquickview.html">QQuickView</a></span> view;
+      view<span class="operator">.</span>engine()<span class="operator">-</span><span class="operator">&gt;</span>rootContext()<span class="operator">-</span><span class="operator">&gt;</span>setContextProperty(<span class="string">&quot;msgBoard&quot;</span><span class="operator">,</span> <span class="operator">&amp;</span>msgBoard);
+      view<span class="operator">.</span>setSource(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>fromLocalFile(<span class="string">&quot;MyItem.qml&quot;</span>));
+      view<span class="operator">.</span>show();
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+</td></tr>
+<tr valign="top" class="even"><td >QML</td><td ><pre class="qml">
+
+  <span class="comment">// MyItem.qml</span>
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">onClicked</span>: {
+              var result = <span class="name">msgBoard</span>.<span class="name">postMessage</span>(<span class="string">&quot;Hello from QML&quot;</span>)
+              <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Result of postMessage():&quot;</span>, <span class="name">result</span>)
+              <span class="name">msgBoard</span>.<span class="name">refresh</span>();
+          }
+      }
+  }
+
+</pre>
+</td></tr>
+</table></div>
+<p>If a C++ method has a parameter with a <code>QObject*</code> type, the parameter value can be passed from QML using an object <code>id</code> or a JavaScript <a href="qml-var.html">var</a> value that references the object.</p>
+<p>QML supports the calling of overloaded C++ functions. If there are multiple C++ functions with the same name but different arguments, the correct function will be called according to the number and the types of arguments that are provided.</p>
+<p>Values returned from C++ methods are converted to JavaScript values when accessed from JavaScript expressions in QML.</p>
+<a name="exposing-signals"></a>
+<h2 id="exposing-signals">Exposing Signals</h2>
+<p>Any public <a href="../qtcore/signalsandslots.html">signal</a> of a <a href="../qtcore/qobject.html">QObject</a>-derived type is accessible from QML code.</p>
+<p>The QML engine automatically creates a <a href="qtqml-syntax-signals.html">signal handler</a> for any signal of a <a href="../qtcore/qobject.html">QObject</a>-derived type that is used from QML. Signal handlers are always named <i>on&lt;Signal&gt;</i> where <code>&lt;Signal&gt;</code> is the name of the signal, with the first letter capitalized. All parameters passed by the signal are available in the signal handler through the parameter names.</p>
+<p>For example, suppose the <code>MessageBoard</code> class has a <code>newMessagePosted()</code> signal with a single parameter, <code>subject</code>:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> MessageBoard : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>
+  {
+      Q_OBJECT
+  <span class="keyword">public</span>:
+     <span class="comment">// ...</span>
+  <span class="keyword">signals</span>:
+     <span class="type">void</span> newMessagePosted(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>subject);
+  };
+
+</pre>
+<p>If the <code>MessageBoard</code> type was <a href="qtqml-cppintegration-definetypes.html#registering-c-types-with-the-qml-type-system">registered</a> with the QML type system, then a <code>MessageBoard</code> object declared in QML could receive the <code>newMessagePosted()</code> signal using a signal handler named <code>onNewMessagePosted</code>, and examine the <code>subject</code> parameter value:</p>
+<pre class="qml">
+
+  <span class="type">MessageBoard</span> {
+      <span class="name">onNewMessagePosted</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;New message received:&quot;</span>, <span class="name">subject</span>)
+  }
+
+</pre>
+<p>As with property values and method parameters, a signal parameter must have a type that is supported by the QML engine; see <a href="qtqml-cppintegration-data.html">Data Type Conversion Between QML and C++</a>. (Using an unregistered type will not generate an error, but the parameter value will not be accessible from the handler.)</p>
+<p>Classes may have multiple signals with the same name, but only the final signal is accessible as a QML signal. Note that signals with the same name but different parameters cannot be distinguished from one another.</p>
+</div>
+<!-- @@@qtqml-cppintegration-exposecppattributes.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

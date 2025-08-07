@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qopenglcontext.cpp -->
+  <title>QOpenGLContextGroup Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QOpenGLContextGroup</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QOpenGLContextGroup Class</h1>
+<!-- $$$QOpenGLContextGroup-brief -->
+<p>The <a href="qopenglcontextgroup.html">QOpenGLContextGroup</a> class represents a group of contexts sharing OpenGL resources. <a href="#details">More...</a></p>
+<!-- @@@QOpenGLContextGroup -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QOpenGLContextGroup&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.0</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.0.</p>
+<ul>
+<li><a href="qopenglcontextgroup-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QOpenGLContext *&gt; </td><td class="memItemRight bottomAlign"><b><a href="qopenglcontextgroup.html#shares">shares</a></b>() const</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QOpenGLContextGroup *</td><td class="memItemRight bottomAlign"><b><a href="qopenglcontextgroup.html#currentContextGroup">currentContextGroup</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QOpenGLContextGroup-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qopenglcontextgroup.html">QOpenGLContextGroup</a> is automatically created and managed by <a href="qopenglcontext.html">QOpenGLContext</a> instances. Its purpose is to identify all the contexts that are sharing resources.</p>
+</div>
+<p><b>See also </b><a href="qopenglcontext.html#shareGroup">QOpenGLContext::shareGroup</a>().</p>
+<!-- @@@QOpenGLContextGroup -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$currentContextGroup[overload1]$$$currentContextGroup -->
+<h3 class="fn" id="currentContextGroup"><a name="currentContextGroup"></a><code>[static] </code><span class="type">QOpenGLContextGroup</span> *QOpenGLContextGroup::<span class="name">currentContextGroup</span>()</h3>
+<p>Returns the <a href="qopenglcontextgroup.html">QOpenGLContextGroup</a> corresponding to the current context.</p>
+<p><b>See also </b><a href="qopenglcontext.html#currentContext">QOpenGLContext::currentContext</a>().</p>
+<!-- @@@currentContextGroup -->
+<!-- $$$shares[overload1]$$$shares -->
+<h3 class="fn" id="shares"><a name="shares"></a><span class="type">QList</span>&lt;<span class="type"><a href="qopenglcontext.html">QOpenGLContext</a></span> *&gt; QOpenGLContextGroup::<span class="name">shares</span>() const</h3>
+<p>Returns all the <a href="qopenglcontext.html">QOpenGLContext</a> objects in this share group.</p>
+<!-- @@@shares -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

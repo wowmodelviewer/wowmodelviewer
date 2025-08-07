@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-clang-static-analyzer.qdoc -->
+  <title>Using Clang Tools | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Using Clang Tools</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-running-valgrind-remotely.html" />
+  <link rel="next" href="creator-heob.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-running-valgrind-remotely.html">Running Valgrind Tools on External Applications</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-heob.html">Detecting Memory Leaks with Heob</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#running-clang-tools">Running Clang Tools</a></li>
+<li class="level1"><a href="#configuring-clang-tools">Configuring Clang Tools</a></li>
+<li class="level2"><a href="#selecting-clazy-check-levels">Selecting Clazy Check Levels</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Using Clang Tools</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-clang-tools.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Qt Creator integrates the following Clang tools for finding problems in C, C++, and Objective-C source code by using static analysis:</p>
+<ul>
+<li><a href="https://clang.llvm.org/extra/clang-tidy/">Clang-Tidy</a>, which provides diagnostics and fixes for typical programming errors, such as style violations or interface misuse.</li>
+<li><a href="https://github.com/KDE/clazy/blob/master/README.md">Clazy</a>, which helps Clang understand Qt semantics. It displays Qt related compiler warnings, ranging from unnecessary memory allocation to misuse of API and provides refactoring actions for fixing some of the issues.</li>
+</ul>
+<p><b>Note: </b>The Clang static analyzer checks are a part of Clang-Tidy. To use the checks you must create a custom configuration for the Clang tools and enable them for Clang-Tidy.</p><p>Clang tools are delivered and installed with Qt Creator, and therefore you do not need to set them up separately.</p>
+<a name="running-clang-tools"></a>
+<h2 id="running-clang-tools">Running Clang Tools</h2>
+<p>To run the Clang tools to analyze an open project:</p>
+<ol class="1" type="1"><li>Select <b>Analyze</b> &gt; <b>Clang-Tidy and Clazy</b>.<p class="centerAlign"><img src="images/qtcreator-files-to-analyze.png" alt="&quot;Analyzer Configuration dialog&quot;" /></p></li>
+<li>In the <b>General</b> group, select <b>Custom Settings</b> to modify the analyzer configuration.</li>
+<li>To build the project before running the Clang tools, select the <b>Build the project before analysis</b> check box. The Clang tools do not require the project to be built before analysis, but they might display misleading warnings about files missing that are generated during the build. For big projects, not building the project might save some time.</li>
+<li>In the <b>Diagnostic configuration</b> field, select a Clang configuration in the list of pre-defined configurations (1). For more information about creating a custom configuration, see <a href="#configuring-clang-tools">Configuring Clang Tools</a>.</li>
+<li>In the <b>Files to Analyze</b> group, select the files to apply the checks to.</li>
+<li>Select <b>Analyze</b> to start the checks.</li>
+</ol>
+<p>If you select <b>Debug</b> in the mode selector to open the <b>Debug</b> mode and then select <b>Clang-Tidy and Clazy</b>, you must select the <img src="images/qtcreator-analyze-start-button.png" alt="" /> (<b>Start</b>) button to open the <b>Analyzer Configuration</b> dialog.</p>
+<p>The found issues are displayed in the <b>Clang-Tidy and Clazy</b> view:</p>
+<p class="centerAlign"><img src="images/qtcreator-clang-tools.png" alt="&quot;Clang-Tidy and Clazy view&quot;" /></p><p>Double-click an issue to move to the location where the issue appears in the code editor.</p>
+<p>If a fixit exists for an issue, you can select the check box next to the issue to schedule it for fixing. You can see the status of the issue by hovering the mouse pointer over the icon next to the check box.</p>
+<a name="configuring-clang-tools"></a>
+<h2 id="configuring-clang-tools">Configuring Clang Tools</h2>
+<p>To configure Clang diagnostics globally for Clang tools:</p>
+<ol class="1" type="1"><li>Select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Analyzer</b> &gt; <b>Clang Tools</b>.<p class="centerAlign"><img src="images/qtcreator-clang-tools-options.png" alt="&quot;Clang Tools options tab&quot;" /></p></li>
+<li>To build the project before running the Clang tools, select the <b>Build the project before analysis</b> check box. The Clang tools do not require the project to be built before analysis, but they might display misleading warnings about files missing that are generated during the build. For big projects, not building the project might save some time.</li>
+<li>In the <b>Simultaneous processes</b> field, select the number of processes to run simultaneously to make the analysis faster on multi-core processors.</li>
+<li>In the <b>Diagnostic Configuration</b> group, select <b>Manage</b> to create or edit a custom configuration.</li>
+<li>Select <b>Copy</b> to create a custom Clang configuration.<p class="centerAlign"><img src="images/qtcreator-diagnostics-configuration.png" alt="&quot;Diagnostics Configuration dialog&quot;" /></p></li>
+<li>In the <b>Diagnostic configuration name</b> field, give the configuration a name, and then select <b>OK</b>.</li>
+<li>In the <b>Clang</b> tab, select the <b>Use diagnostic flags from the build system</b> check box to forward diagnostic flags, such as warning flags, from the build system to the Clang code model for displaying annotations in the code editor.</li>
+<li>In the <b>Clang-Tidy</b> tab, select <b>Select Checks</b> to select the checks to perform, <b>Use .clang-tidy Config File</b> to read them from a Clang-Tidy configuration file, or <b>Disable</b> to disable them.<p class="centerAlign"><img src="images/qtcreator-clang-tidy.png" alt="&quot;Clang-Tidy tab&quot;" /></p></li>
+<li>Select the <b>Web Page</b> link to view more information about the available checkers in the <a href="https://clang-analyzer.llvm.org/available_checks.html">Clang Static Analyzer documentation</a>.</li>
+<li>To edit the selected check as plain text, select <b>Edit Checks as String</b>.</li>
+<li>In the <b>Clazy</b> tab, select the level of Clazy checks to perform.<p class="centerAlign"><img src="images/qtcreator-clazy.png" alt="&quot;Clazy tab&quot;" /></p></li>
+<li>In the <b>Topic Filter</b> field, select a topic to view only checks related to that area in the <b>Checks</b> field.</li>
+<li>To view all checks again, select <b>Reset to All</b>.</li>
+<li>To view more information about the checks online, select the <b>Web Page</b> links next to them.</li>
+</ol>
+<p>To suppress diagnostics, select <b>Suppress This Diagnostic</b> in the context menu. To view the suppression list for a project and to remove diagnostics from it, select <b>Projects</b> &gt; <b>Project Settings</b> &gt; <b>Clang Tools</b>.</p>
+<a name="selecting-clazy-check-levels"></a>
+<h3 id="selecting-clazy-check-levels">Selecting Clazy Check Levels</h3>
+<p>The Clazy checks are divided into levels from 0 to 3. The checks at level 0 are very stable and provide hardly any false positives, while the checks at level 3 can be considered experimental. You can select the checks to perform at each level. To include the checks from the lower levels automatically, select the <b>Enable lower levels automatically</b> check box.</p>
+</div>
+<!-- @@@creator-clang-tools.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-running-valgrind-remotely.html">Running Valgrind Tools on External Applications</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-heob.html">Detecting Memory Leaks with Heob</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

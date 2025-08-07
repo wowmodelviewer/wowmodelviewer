@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qplacesearchreply.cpp -->
+  <title>QPlaceSearchReply Class | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-module.html">C++ Classes</a></td><td >QPlaceSearchReply</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPlaceSearchReply Class</h1>
+<!-- $$$QPlaceSearchReply-brief -->
+<p>The <a href="qplacesearchreply.html">QPlaceSearchReply</a> class manages a place search operation started by an instance of <a href="qplacemanager.html">QPlaceManager</a>. <a href="#details">More...</a></p>
+<!-- @@@QPlaceSearchReply -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QPlaceSearchReply&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += location</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.6</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qplacereply.html">QPlaceReply</a></td></tr></table></div><p>This class was introduced in  Qt 5.6.</p>
+<ul>
+<li><a href="qplacesearchreply-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qplacesearchreply.html#QPlaceSearchReply">QPlaceSearchReply</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qplacesearchreply.html#dtor.QPlaceSearchReply">~QPlaceSearchReply</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPlaceSearchRequest </td><td class="memItemRight bottomAlign"><b><a href="qplacesearchreply.html#nextPageRequest">nextPageRequest</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPlaceSearchRequest </td><td class="memItemRight bottomAlign"><b><a href="qplacesearchreply.html#previousPageRequest">previousPageRequest</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPlaceSearchRequest </td><td class="memItemRight bottomAlign"><b><a href="qplacesearchreply.html#request">request</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QPlaceSearchResult&gt; </td><td class="memItemRight bottomAlign"><b><a href="qplacesearchreply.html#results">results</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QPlaceReply::Type </td><td class="memItemRight bottomAlign"><b><a href="qplacesearchreply.html#type">type</a></b>() const override</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacesearchreply.html#setNextPageRequest">setNextPageRequest</a></b>(const QPlaceSearchRequest &amp;<i>next</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacesearchreply.html#setPreviousPageRequest">setPreviousPageRequest</a></b>(const QPlaceSearchRequest &amp;<i>previous</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacesearchreply.html#setRequest">setRequest</a></b>(const QPlaceSearchRequest &amp;<i>request</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacesearchreply.html#setResults">setResults</a></b>(const QList&lt;QPlaceSearchResult&gt; &amp;<i>results</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPlaceSearchReply-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>See <a href="location-places-cpp.html#discovery-search">Discovery/Search</a> for an example on how to use a search reply.</p>
+</div>
+<p><b>See also </b><a href="qplacesearchrequest.html">QPlaceSearchRequest</a> and <a href="qplacemanager.html">QPlaceManager</a>.</p>
+<!-- @@@QPlaceSearchReply -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QPlaceSearchReply[overload1]$$$QPlaceSearchReplyQObject* -->
+<h3 class="fn" id="QPlaceSearchReply"><a name="QPlaceSearchReply"></a>QPlaceSearchReply::<span class="name">QPlaceSearchReply</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a search reply with a given <i>parent</i>.</p>
+<!-- @@@QPlaceSearchReply -->
+<!-- $$$~QPlaceSearchReply[overload1]$$$~QPlaceSearchReply -->
+<h3 class="fn" id="dtor.QPlaceSearchReply"><a name="dtor.QPlaceSearchReply"></a><code>[virtual] </code>QPlaceSearchReply::<span class="name">~QPlaceSearchReply</span>()</h3>
+<p>Destroys the search reply.</p>
+<!-- @@@~QPlaceSearchReply -->
+<!-- $$$nextPageRequest[overload1]$$$nextPageRequest -->
+<h3 class="fn" id="nextPageRequest"><a name="nextPageRequest"></a><span class="type"><a href="qplacesearchrequest.html">QPlaceSearchRequest</a></span> QPlaceSearchReply::<span class="name">nextPageRequest</span>() const</h3>
+<p>Returns a place search request which can be used to request the next page of search results. An empty place search request is returned if there is no next page of results.</p>
+<p><b>See also </b><a href="qplacesearchreply.html#previousPageRequest">previousPageRequest</a>() and <a href="qplacesearchreply.html#setNextPageRequest">setNextPageRequest</a>().</p>
+<!-- @@@nextPageRequest -->
+<!-- $$$previousPageRequest[overload1]$$$previousPageRequest -->
+<h3 class="fn" id="previousPageRequest"><a name="previousPageRequest"></a><span class="type"><a href="qplacesearchrequest.html">QPlaceSearchRequest</a></span> QPlaceSearchReply::<span class="name">previousPageRequest</span>() const</h3>
+<p>Returns a place search request which can be used to request the previous page of search results. An empty place search request is returned if there is no previous page of results.</p>
+<p><b>See also </b><a href="qplacesearchreply.html#nextPageRequest">nextPageRequest</a>() and <a href="qplacesearchreply.html#setPreviousPageRequest">setPreviousPageRequest</a>().</p>
+<!-- @@@previousPageRequest -->
+<!-- $$$request[overload1]$$$request -->
+<h3 class="fn" id="request"><a name="request"></a><span class="type"><a href="qplacesearchrequest.html">QPlaceSearchRequest</a></span> QPlaceSearchReply::<span class="name">request</span>() const</h3>
+<p>Returns the search request that was used to generate this reply.</p>
+<p><b>See also </b><a href="qplacesearchreply.html#setRequest">setRequest</a>().</p>
+<!-- @@@request -->
+<!-- $$$results[overload1]$$$results -->
+<h3 class="fn" id="results"><a name="results"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qplacesearchresult.html">QPlaceSearchResult</a></span>&gt; QPlaceSearchReply::<span class="name">results</span>() const</h3>
+<p>Returns a list of search results;</p>
+<p><b>See also </b><a href="qplacesearchreply.html#setResults">setResults</a>().</p>
+<!-- @@@results -->
+<!-- $$$setNextPageRequest[overload1]$$$setNextPageRequestconstQPlaceSearchRequest& -->
+<h3 class="fn" id="setNextPageRequest"><a name="setNextPageRequest"></a><code>[protected] </code><span class="type">void</span> QPlaceSearchReply::<span class="name">setNextPageRequest</span>(const <span class="type"><a href="qplacesearchrequest.html">QPlaceSearchRequest</a></span> &amp;<i>next</i>)</h3>
+<p>Sets the next page of search results request to <i>next</i>.</p>
+<p><b>See also </b><a href="qplacesearchreply.html#nextPageRequest">nextPageRequest</a>().</p>
+<!-- @@@setNextPageRequest -->
+<!-- $$$setPreviousPageRequest[overload1]$$$setPreviousPageRequestconstQPlaceSearchRequest& -->
+<h3 class="fn" id="setPreviousPageRequest"><a name="setPreviousPageRequest"></a><code>[protected] </code><span class="type">void</span> QPlaceSearchReply::<span class="name">setPreviousPageRequest</span>(const <span class="type"><a href="qplacesearchrequest.html">QPlaceSearchRequest</a></span> &amp;<i>previous</i>)</h3>
+<p>Sets the previous page of search results request to <i>previous</i>.</p>
+<p><b>See also </b><a href="qplacesearchreply.html#previousPageRequest">previousPageRequest</a>().</p>
+<!-- @@@setPreviousPageRequest -->
+<!-- $$$setRequest[overload1]$$$setRequestconstQPlaceSearchRequest& -->
+<h3 class="fn" id="setRequest"><a name="setRequest"></a><code>[protected] </code><span class="type">void</span> QPlaceSearchReply::<span class="name">setRequest</span>(const <span class="type"><a href="qplacesearchrequest.html">QPlaceSearchRequest</a></span> &amp;<i>request</i>)</h3>
+<p>Sets the search <i>request</i> used to generate this reply.</p>
+<p><b>See also </b><a href="qplacesearchreply.html#request">request</a>().</p>
+<!-- @@@setRequest -->
+<!-- $$$setResults[overload1]$$$setResultsconstQList<QPlaceSearchResult>& -->
+<h3 class="fn" id="setResults"><a name="setResults"></a><code>[protected] </code><span class="type">void</span> QPlaceSearchReply::<span class="name">setResults</span>(const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qplacesearchresult.html">QPlaceSearchResult</a></span>&gt; &amp;<i>results</i>)</h3>
+<p>Sets the list of search <i>results</i>.</p>
+<p><b>See also </b><a href="qplacesearchreply.html#results">results</a>().</p>
+<!-- @@@setResults -->
+<!-- $$$type[overload1]$$$type -->
+<h3 class="fn" id="type"><a name="type"></a><code>[override virtual] </code><span class="type"><a href="qplacereply.html#Type-enum">QPlaceReply::Type</a></span> QPlaceSearchReply::<span class="name">type</span>() const</h3>
+<p>Reimplements: <a href="qplacereply.html#type">QPlaceReply::type</a>() const.</p>
+<p>Returns the type of reply.</p>
+<!-- @@@type -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

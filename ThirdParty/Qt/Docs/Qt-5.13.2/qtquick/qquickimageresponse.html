@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickimageprovider.cpp -->
+  <title>QQuickImageResponse Class | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-module.html">C++ Classes</a></td><td >QQuickImageResponse</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QQuickImageResponse Class</h1>
+<!-- $$$QQuickImageResponse-brief -->
+<p>The <a href="qquickimageresponse.html">QQuickImageResponse</a> class provides an interface for asynchronous image loading in <a href="qquickasyncimageprovider.html">QQuickAsyncImageProvider</a>. <a href="#details">More...</a></p>
+<!-- @@@QQuickImageResponse -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QQuickImageResponse&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += quick</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.6</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.6.</p>
+<ul>
+<li><a href="qquickimageresponse-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qquickimageresponse.html#QQuickImageResponse">QQuickImageResponse</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qquickimageresponse.html#dtor.QQuickImageResponse">~QQuickImageResponse</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QString </td><td class="memItemRight bottomAlign"><b><a href="qquickimageresponse.html#errorString">errorString</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QQuickTextureFactory *</td><td class="memItemRight bottomAlign"><b><a href="qquickimageresponse.html#textureFactory">textureFactory</a></b>() const = 0</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qquickimageresponse.html#cancel">cancel</a></b>()</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickimageresponse.html#finished">finished</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QQuickImageResponse-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The purpose of an image response is to provide a way for image provider jobs to be executed in an asynchronous way.</p>
+<p>Responses are deleted via <a href="../qtcore/qobject.html#deleteLater">deleteLater</a> once the <a href="qquickimageresponse.html#finished">finished</a>() signal has been emitted. If you are using <a href="../qtcore/qrunnable.html">QRunnable</a> as base for your <a href="qquickimageresponse.html">QQuickImageResponse</a> ensure automatic deletion is disabled.</p>
+<p>See the <a href="qtquick-imageresponseprovider-example.html">Image Response Provider Example</a> for a complete implementation.</p>
+</div>
+<p><b>See also </b><a href="qquickimageprovider.html">QQuickImageProvider</a>.</p>
+<!-- @@@QQuickImageResponse -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QQuickImageResponse[overload1]$$$QQuickImageResponse -->
+<h3 class="fn" id="QQuickImageResponse"><a name="QQuickImageResponse"></a>QQuickImageResponse::<span class="name">QQuickImageResponse</span>()</h3>
+<p>Constructs the image response</p>
+<!-- @@@QQuickImageResponse -->
+<!-- $$$cancel[overload1]$$$cancel -->
+<h3 class="fn" id="cancel"><a name="cancel"></a><code>[virtual slot] </code><span class="type">void</span> QQuickImageResponse::<span class="name">cancel</span>()</h3>
+<p>This method is used to communicate that the response is no longer required by the engine.</p>
+<p>It may be reimplemented to cancel a request in the provider side, however, it is not mandatory.</p>
+<p>A cancelled <a href="qquickimageresponse.html">QQuickImageResponse</a> still needs to emit <a href="qquickimageresponse.html#finished">finished</a>() so that the engine may clean up the <a href="qquickimageresponse.html">QQuickImageResponse</a>.</p>
+<p><b>Note: </b><a href="qquickimageresponse.html#finished">finished</a>() should not be emitted until the response is complete, regardless of whether or not cancel() was called. If it is called prematurely, the engine may destroy the response while it is still active, leading to a crash.</p><!-- @@@cancel -->
+<!-- $$$finished[overload1]$$$finished -->
+<h3 class="fn" id="finished"><a name="finished"></a><code>[signal] </code><span class="type">void</span> QQuickImageResponse::<span class="name">finished</span>()</h3>
+<p>Signals that the job execution has finished (be it successfully, because an error happened or because it was cancelled).</p>
+<p><b>Note: </b>Emission of this signal must be the final action the response performs: once the signal is received, the response will subsequently be destroyed by the engine.</p><!-- @@@finished -->
+<!-- $$$~QQuickImageResponse[overload1]$$$~QQuickImageResponse -->
+<h3 class="fn" id="dtor.QQuickImageResponse"><a name="dtor.QQuickImageResponse"></a><code>[override virtual] </code>QQuickImageResponse::<span class="name">~QQuickImageResponse</span>()</h3>
+<p>Destructs the image response</p>
+<!-- @@@~QQuickImageResponse -->
+<!-- $$$errorString[overload1]$$$errorString -->
+<h3 class="fn" id="errorString"><a name="errorString"></a><code>[virtual] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QQuickImageResponse::<span class="name">errorString</span>() const</h3>
+<p>Returns the error string for the job execution. An empty string means no error.</p>
+<!-- @@@errorString -->
+<!-- $$$textureFactory[overload1]$$$textureFactory -->
+<h3 class="fn" id="textureFactory"><a name="textureFactory"></a><code>[pure virtual] </code><span class="type"><a href="qquicktexturefactory.html">QQuickTextureFactory</a></span> *QQuickImageResponse::<span class="name">textureFactory</span>() const</h3>
+<p>Returns the texture factory for the job. You can use <a href="qquicktexturefactory.html#textureFactoryForImage">QQuickTextureFactory::textureFactoryForImage</a> if your provider works with <a href="../qtgui/qimage.html">QImage</a>. The engine takes ownership of the returned <a href="qquicktexturefactory.html">QQuickTextureFactory</a>.</p>
+<p><b>Note: </b>This method will be called only when needed. For example, it may not be called if there is an error or the job is cancelled. Therefore, allocate the <a href="qquicktexturefactory.html">QQuickTextureFactory</a> instance only in this method or otherwise ensure its deletion.</p><!-- @@@textureFactory -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

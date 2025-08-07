@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qandroidfunctions.cpp -->
+  <title>QtAndroid Namespace | Qt Android Extras 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtandroidextras-index.html">Qt Android Extras</a></td><td >QtAndroid Namespace</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtandroidextras-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#types">Types</a></li>
+<li class="level1"><a href="#functions">Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QtAndroid Namespace</h1>
+<!-- $$$QtAndroid-brief -->
+<p>The <a href="qtandroid.html">QtAndroid</a> namespace provides miscellaneous functions to aid Android development. <a href="#details">More...</a></p>
+<!-- @@@QtAndroid -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QtAndroid&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += androidextras</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.3</td></tr></table></div><p>This namespace was introduced in  Qt 5.3.</p>
+<ul>
+</ul>
+<a name="types"></a>
+<h2 id="types">Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#BindFlag-enum">BindFlag</a></b> { None, AutoCreate, DebugUnbind, NotForeground, ..., ExternalService }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#BindFlag-enum">BindFlags</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#PermissionResult-enum">PermissionResult</a></b> { Granted, Denied }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#PermissionResultCallback-typedef">PermissionResultCallback</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#PermissionResultMap-typedef">PermissionResultMap</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#Runnable-typedef">Runnable</a></b></td></tr>
+</table></div>
+<a name="functions"></a>
+<h2 id="functions">Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QAndroidJniObject </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#androidActivity">androidActivity</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QAndroidJniObject </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#androidContext">androidContext</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#androidSdkVersion">androidSdkVersion</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QAndroidJniObject </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#androidService">androidService</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#bindService">bindService</a></b>(const QAndroidIntent &amp;<i>serviceIntent</i>, const QAndroidServiceConnection &amp;<i>serviceConnection</i>, QtAndroid::BindFlags <i>flags</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QtAndroid::PermissionResult </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#checkPermission">checkPermission</a></b>(const QString &amp;<i>permission</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#hideSplashScreen">hideSplashScreen</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#hideSplashScreen-1">hideSplashScreen</a></b>(int <i>duration</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#requestPermissions">requestPermissions</a></b>(const QStringList &amp;<i>permissions</i>, const QtAndroid::PermissionResultCallback &amp;<i>callbackFunc</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QtAndroid::PermissionResultMap </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#requestPermissionsSync">requestPermissionsSync</a></b>(const QStringList &amp;<i>permissions</i>, int <i>timeoutMs</i> = INT_MAX)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#runOnAndroidThread">runOnAndroidThread</a></b>(const QtAndroid::Runnable &amp;<i>runnable</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#runOnAndroidThreadSync">runOnAndroidThreadSync</a></b>(const QtAndroid::Runnable &amp;<i>runnable</i>, int <i>timeoutMs</i> = INT_MAX)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#shouldShowRequestPermissionRationale">shouldShowRequestPermissionRationale</a></b>(const QString &amp;<i>permission</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#startActivity">startActivity</a></b>(const QAndroidJniObject &amp;<i>intent</i>, int <i>receiverRequestCode</i>, QAndroidActivityResultReceiver *<i>resultReceiver</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#startActivity-1">startActivity</a></b>(const QAndroidIntent &amp;<i>intent</i>, int <i>receiverRequestCode</i>, QAndroidActivityResultReceiver *<i>resultReceiver</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#startActivity-2">startActivity</a></b>(const QAndroidJniObject &amp;<i>intent</i>, int <i>receiverRequestCode</i>, std::function&lt;void (int, int, const QAndroidJniObject &amp;)&gt; <i>callbackFunc</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtandroid.html#startIntentSender">startIntentSender</a></b>(const QAndroidJniObject &amp;<i>intentSender</i>, int <i>receiverRequestCode</i>, QAndroidActivityResultReceiver *<i>resultReceiver</i> = nullptr)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QtAndroid-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QtAndroid -->
+<div class="types">
+<h2>Type Documentation</h2>
+<!-- $$$BindFlag$$$None$$$AutoCreate$$$DebugUnbind$$$NotForeground$$$AboveClient$$$AllowOomManagement$$$WaivePriority$$$Important$$$AdjustWithActivity$$$ExternalService -->
+<h3 class="flags" id="BindFlag-enum"><a name="BindFlag-enum"></a>enum QtAndroid::<span class="name">BindFlag</span><br/>flags QtAndroid::<span class="name">BindFlags</span></h3>
+<p>This enum is used with <a href="qtandroid.html#bindService">QtAndroid::bindService</a> to describe the mode in which the binding is performed.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QtAndroid::None</code></td><td class="topAlign tblval"><code>0x00000000</code></td><td class="topAlign">No options.</td></tr>
+<tr><td class="topAlign"><code>QtAndroid::AutoCreate</code></td><td class="topAlign tblval"><code>0x00000001</code></td><td class="topAlign">Automatically creates the service as long as the binding exist. See <a href="https://developer.android.com/reference/android/content/Context.html#BIND_AUTO_CREATE">BIND_AUTO_CREATE</a> documentation for more details.</td></tr>
+<tr><td class="topAlign"><code>QtAndroid::DebugUnbind</code></td><td class="topAlign tblval"><code>0x00000002</code></td><td class="topAlign">Include debugging help for mismatched calls to unbind. See <a href="https://developer.android.com/reference/android/content/Context.html#BIND_DEBUG_UNBIND">BIND_DEBUG_UNBIND</a> documentation for more details.</td></tr>
+<tr><td class="topAlign"><code>QtAndroid::NotForeground</code></td><td class="topAlign tblval"><code>0x00000004</code></td><td class="topAlign">Don't allow this binding to raise the target service's process to the foreground scheduling priority. See <a href="https://developer.android.com/reference/android/content/Context.html#BIND_NOT_FOREGROUND">BIND_NOT_FOREGROUND</a> documentation for more details.</td></tr>
+<tr><td class="topAlign"><code>QtAndroid::AboveClient</code></td><td class="topAlign tblval"><code>0x00000008</code></td><td class="topAlign">Indicates that the client application binding to this service considers the service to be more important than the app itself. See <a href="https://developer.android.com/reference/android/content/Context.html#BIND_ABOVE_CLIENT">BIND_ABOVE_CLIENT</a> documentation for more details.</td></tr>
+<tr><td class="topAlign"><code>QtAndroid::AllowOomManagement</code></td><td class="topAlign tblval"><code>0x00000010</code></td><td class="topAlign">Allow the process hosting the bound service to go through its normal memory management. See <a href="https://developer.android.com/reference/android/content/Context.html#BIND_ALLOW_OOM_MANAGEMENT">BIND_ALLOW_OOM_MANAGEMENT</a> documentation for more details.</td></tr>
+<tr><td class="topAlign"><code>QtAndroid::WaivePriority</code></td><td class="topAlign tblval"><code>0x00000020</code></td><td class="topAlign">Don't impact the scheduling or memory management priority of the target service's hosting process. See <a href="https://developer.android.com/reference/android/content/Context.html#BIND_WAIVE_PRIORITY">BIND_WAIVE_PRIORITY</a> documentation for more details.</td></tr>
+<tr><td class="topAlign"><code>QtAndroid::Important</code></td><td class="topAlign tblval"><code>0x00000040</code></td><td class="topAlign">This service is assigned a higher priority so that it is available to the client when needed. See <a href="https://developer.android.com/reference/android/content/Context.html#BIND_IMPORTANT">BIND_IMPORTANT</a> documentation for more details.</td></tr>
+<tr><td class="topAlign"><code>QtAndroid::AdjustWithActivity</code></td><td class="topAlign tblval"><code>0x00000080</code></td><td class="topAlign">If binding from an activity, allow the target service's process importance to be raised based on whether the activity is visible to the user. See <a href="https://developer.android.com/reference/android/content/Context.html#BIND_ADJUST_WITH_ACTIVITY">BIND_ADJUST_WITH_ACTIVITY</a> documentation for more details.</td></tr>
+<tr><td class="topAlign"><code>QtAndroid::ExternalService</code></td><td class="topAlign tblval"><code>-2147483648</code></td><td class="topAlign">The service being bound is an isolated, external service. See <a href="https://developer.android.com/reference/android/content/Context.html#BIND_EXTERNAL_SERVICE">BIND_EXTERNAL_SERVICE</a> documentation for more details.</td></tr>
+</table></div>
+<p>This enum was introduced or modified in  Qt 5.10.</p>
+<p>The BindFlags type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;BindFlag&gt;. It stores an OR combination of BindFlag values.</p>
+<!-- @@@BindFlag -->
+<!-- $$$PermissionResult$$$Granted$$$Denied -->
+<h3 class="fn" id="PermissionResult-enum"><a name="PermissionResult-enum"></a>enum QtAndroid::<span class="name">PermissionResult</span></h3>
+<p>This enum is used to describe the permission status.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QtAndroid::Granted</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The permission was granted.</td></tr>
+<tr><td class="topAlign"><code>QtAndroid::Denied</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The permission was denied.</td></tr>
+</table></div>
+<p>This enum was introduced or modified in  Qt 5.10.</p>
+<!-- @@@PermissionResult -->
+<!-- $$$PermissionResultCallback -->
+<h3 class="fn" id="PermissionResultCallback-typedef"><a name="PermissionResultCallback-typedef"></a>typedef QtAndroid::<span class="name">PermissionResultCallback</span></h3>
+<p>Synonym for std::function&lt;void(const <a href="qtandroid.html#PermissionResultMap-typedef">PermissionResultMap</a> &amp;)&gt;.</p>
+<!-- @@@PermissionResultCallback -->
+<!-- $$$PermissionResultMap -->
+<h3 class="fn" id="PermissionResultMap-typedef"><a name="PermissionResultMap-typedef"></a>typedef QtAndroid::<span class="name">PermissionResultMap</span></h3>
+<p>Synonym for <a href="../qtcore/qhash.html#qhash">QHash</a>&lt;<a href="../qtcore/qstring.html">QString</a>, <a href="qtandroid.html#PermissionResult-enum">PermissionResult</a>&gt;.</p>
+<!-- @@@PermissionResultMap -->
+<!-- $$$Runnable -->
+<h3 class="fn" id="Runnable-typedef"><a name="Runnable-typedef"></a>typedef QtAndroid::<span class="name">Runnable</span></h3>
+<p>Synonym for std::function&lt;void()&gt;.</p>
+<!-- @@@Runnable -->
+</div>
+<div class="func">
+<h2>Function Documentation</h2>
+<!-- $$$androidActivity[overload1]$$$androidActivity -->
+<h3 class="fn" id="androidActivity"><a name="androidActivity"></a><span class="type"><a href="qandroidjniobject.html">QAndroidJniObject</a></span> QtAndroid::<span class="name">androidActivity</span>()</h3>
+<p>Returns a handle to this application's main Activity</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<p><b>See also </b><a href="qandroidjniobject.html">QAndroidJniObject</a>, <a href="qtandroid.html#androidService">androidService</a>(), and <a href="qtandroid.html#androidContext">androidContext</a>().</p>
+<!-- @@@androidActivity -->
+<!-- $$$androidContext[overload1]$$$androidContext -->
+<h3 class="fn" id="androidContext"><a name="androidContext"></a><span class="type"><a href="qandroidjniobject.html">QAndroidJniObject</a></span> QtAndroid::<span class="name">androidContext</span>()</h3>
+<p>Returns a handle to this application's main Context. Depending on the nature of the application the Context object is either the main Service or Activity object.</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<p><b>See also </b><a href="qandroidjniobject.html">QAndroidJniObject</a>, <a href="qtandroid.html#androidActivity">androidActivity</a>(), and <a href="qtandroid.html#androidService">androidService</a>().</p>
+<!-- @@@androidContext -->
+<!-- $$$androidSdkVersion[overload1]$$$androidSdkVersion -->
+<h3 class="fn" id="androidSdkVersion"><a name="androidSdkVersion"></a><span class="type">int</span> QtAndroid::<span class="name">androidSdkVersion</span>()</h3>
+<p>Returns the Android SDK version. This is also known as the API level.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<!-- @@@androidSdkVersion -->
+<!-- $$$androidService[overload1]$$$androidService -->
+<h3 class="fn" id="androidService"><a name="androidService"></a><span class="type"><a href="qandroidjniobject.html">QAndroidJniObject</a></span> QtAndroid::<span class="name">androidService</span>()</h3>
+<p>Returns a handle to this application's main Service</p>
+<p>This function was introduced in  Qt 5.7.</p>
+<p><b>See also </b><a href="qandroidjniobject.html">QAndroidJniObject</a>, <a href="qtandroid.html#androidActivity">androidActivity</a>(), and <a href="qtandroid.html#androidContext">androidContext</a>().</p>
+<!-- @@@androidService -->
+<!-- $$$bindService[overload1]$$$bindServiceconstQAndroidIntent&constQAndroidServiceConnection&QtAndroid::BindFlags -->
+<h3 class="fn" id="bindService"><a name="bindService"></a><span class="type">bool</span> QtAndroid::<span class="name">bindService</span>(const <span class="type"><a href="qandroidintent.html">QAndroidIntent</a></span> &amp;<i>serviceIntent</i>, const <span class="type"><a href="qandroidserviceconnection.html">QAndroidServiceConnection</a></span> &amp;<i>serviceConnection</i>, <span class="type"><a href="qtandroid.html#BindFlag-enum">QtAndroid::BindFlags</a></span> <i>flags</i> = ...)</h3>
+<p>Binds the service given by <i>serviceIntent</i>, <i>serviceConnection</i> and <i>flags</i>. The <i>serviceIntent</i> object identifies the service to connect to. The <i>serviceConnection</i> is a listener that receives the information as the service is started and stopped.</p>
+<p>Returns true on success</p>
+<p>See <a href="https://developer.android.com/reference/android/content/Context.html#bindService%28android.content.Intent,%20android.content.ServiceConnection,%20int%29">Android documentation</a> documentation for more details.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<p><b>See also </b><a href="qandroidintent.html">QAndroidIntent</a>, <a href="qandroidserviceconnection.html">QAndroidServiceConnection</a>, and <a href="qtandroid.html#BindFlag-enum">BindFlag</a>.</p>
+<!-- @@@bindService -->
+<!-- $$$checkPermission[overload1]$$$checkPermissionconstQString& -->
+<h3 class="fn" id="checkPermission"><a name="checkPermission"></a><span class="type"><a href="qtandroid.html#PermissionResult-enum">QtAndroid::PermissionResult</a></span> QtAndroid::<span class="name">checkPermission</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>permission</i>)</h3>
+<p>Checks if the <i>permission</i> was granted or not. This function should be called every time when the application starts for needed permissions, as the users might disable them from Android Settings.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<!-- @@@checkPermission -->
+<!-- $$$hideSplashScreen[overload1]$$$hideSplashScreen -->
+<h3 class="fn" id="hideSplashScreen"><a name="hideSplashScreen"></a><span class="type">void</span> QtAndroid::<span class="name">hideSplashScreen</span>()</h3>
+<p>Hides the splash screen immediately.</p>
+<p>This function was introduced in  Qt 5.7.</p>
+<!-- @@@hideSplashScreen -->
+<!-- $$$hideSplashScreen$$$hideSplashScreenint -->
+<h3 class="fn" id="hideSplashScreen-1"><a name="hideSplashScreen-1"></a><span class="type">void</span> QtAndroid::<span class="name">hideSplashScreen</span>(<span class="type">int</span> <i>duration</i>)</h3>
+<p>Hides the splash screen, fading it for <i>duration</i> milliseconds.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<!-- @@@hideSplashScreen -->
+<!-- $$$requestPermissions[overload1]$$$requestPermissionsconstQStringList&constQtAndroid::PermissionResultCallback& -->
+<h3 class="fn" id="requestPermissions"><a name="requestPermissions"></a><span class="type">void</span> QtAndroid::<span class="name">requestPermissions</span>(const <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> &amp;<i>permissions</i>, const <span class="type"><a href="qtandroid.html#PermissionResultCallback-typedef">QtAndroid::PermissionResultCallback</a></span> &amp;<i>callbackFunc</i>)</h3>
+<p>Asynchronously requests <i>permissions</i> to be granted to this application, <i>callbackFunc</i> will be called with the results.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<!-- @@@requestPermissions -->
+<!-- $$$requestPermissionsSync[overload1]$$$requestPermissionsSyncconstQStringList&int -->
+<h3 class="fn" id="requestPermissionsSync"><a name="requestPermissionsSync"></a><span class="type"><a href="qtandroid.html#PermissionResultMap-typedef">QtAndroid::PermissionResultMap</a></span> QtAndroid::<span class="name">requestPermissionsSync</span>(const <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> &amp;<i>permissions</i>, <span class="type">int</span> <i>timeoutMs</i> = INT_MAX)</h3>
+<p>Synchronously requests <i>permissions</i> to be granted to this application, waits <i>timeoutMs</i> to complete.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<!-- @@@requestPermissionsSync -->
+<!-- $$$runOnAndroidThread[overload1]$$$runOnAndroidThreadconstQtAndroid::Runnable& -->
+<h3 class="fn" id="runOnAndroidThread"><a name="runOnAndroidThread"></a><span class="type">void</span> QtAndroid::<span class="name">runOnAndroidThread</span>(const <span class="type"><a href="qtandroid.html#Runnable-typedef">QtAndroid::Runnable</a></span> &amp;<i>runnable</i>)</h3>
+<p>Posts the given <i>runnable</i> on the android thread. The <i>runnable</i> will be queued and executed on the Android UI thread, unless it called on the Android UI thread, in which case the runnable will be executed immediately.</p>
+<p>This function is useful to set asynchronously properties of objects that must be set on on Android UI thread.</p>
+<p>This function was introduced in  Qt 5.7.</p>
+<!-- @@@runOnAndroidThread -->
+<!-- $$$runOnAndroidThreadSync[overload1]$$$runOnAndroidThreadSyncconstQtAndroid::Runnable&int -->
+<h3 class="fn" id="runOnAndroidThreadSync"><a name="runOnAndroidThreadSync"></a><span class="type">void</span> QtAndroid::<span class="name">runOnAndroidThreadSync</span>(const <span class="type"><a href="qtandroid.html#Runnable-typedef">QtAndroid::Runnable</a></span> &amp;<i>runnable</i>, <span class="type">int</span> <i>timeoutMs</i> = INT_MAX)</h3>
+<p>Posts the <i>runnable</i> on the Android UI thread and waits until the runnable is executed, or until <i>timeoutMs</i> has passed</p>
+<p>This function is useful to create objects, or get properties on Android UI thread:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qandroidjniobject.html">QAndroidJniObject</a></span> javaControl;
+  <span class="type">QtAndroid</span><span class="operator">::</span>runOnAndroidThreadSync(<span class="operator">[</span><span class="operator">&amp;</span>javaControl<span class="operator">]</span>(){
+
+      <span class="comment">// create our Java control on Android UI thread.</span>
+      javaControl <span class="operator">=</span> <span class="type"><a href="qandroidjniobject.html">QAndroidJniObject</a></span>(<span class="string">&quot;android/webkit/WebView&quot;</span><span class="operator">,</span>
+                                                  <span class="string">&quot;(Landroid/content/Context;)V&quot;</span><span class="operator">,</span>
+                                                  <span class="type">QtAndroid</span><span class="operator">::</span>androidActivity()<span class="operator">.</span>object<span class="operator">&lt;</span>jobject<span class="operator">&gt;</span>());
+      javaControl<span class="operator">.</span>callMethod<span class="operator">&lt;</span><span class="type">void</span><span class="operator">&gt;</span>(<span class="string">&quot;setWebViewClient&quot;</span><span class="operator">,</span>
+                                     <span class="string">&quot;(Landroid/webkit/WebViewClient;)V&quot;</span><span class="operator">,</span>
+                                     <span class="type"><a href="qandroidjniobject.html">QAndroidJniObject</a></span>(<span class="string">&quot;android/webkit/WebViewClient&quot;</span>)<span class="operator">.</span>object());
+  });
+
+  <span class="comment">// Continue the execution normally</span>
+  <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> javaControl<span class="operator">.</span>isValid();
+
+</pre>
+<p>This function was introduced in  Qt 5.7.</p>
+<!-- @@@runOnAndroidThreadSync -->
+<!-- $$$shouldShowRequestPermissionRationale[overload1]$$$shouldShowRequestPermissionRationaleconstQString& -->
+<h3 class="fn" id="shouldShowRequestPermissionRationale"><a name="shouldShowRequestPermissionRationale"></a><span class="type">bool</span> QtAndroid::<span class="name">shouldShowRequestPermissionRationale</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>permission</i>)</h3>
+<p>Returns <code>true</code> if you should show UI with a rationale for requesting a <i>permission</i>.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<!-- @@@shouldShowRequestPermissionRationale -->
+<!-- $$$startActivity[overload1]$$$startActivityconstQAndroidJniObject&intQAndroidActivityResultReceiver* -->
+<h3 class="fn" id="startActivity"><a name="startActivity"></a><span class="type">void</span> QtAndroid::<span class="name">startActivity</span>(const <span class="type"><a href="qandroidjniobject.html">QAndroidJniObject</a></span> &amp;<i>intent</i>, <span class="type">int</span> <i>receiverRequestCode</i>, <span class="type"><a href="qandroidactivityresultreceiver.html">QAndroidActivityResultReceiver</a></span> *<i>resultReceiver</i> = nullptr)</h3>
+<p>Starts the activity given by <i>intent</i> and provides the result asynchronously through the <i>resultReceiver</i> if this is non-null.</p>
+<p>If <i>resultReceiver</i> is null, then the <code>startActivity()</code> method in the <code>androidActivity()</code> will be called. Otherwise <code>startActivityForResult()</code> will be called.</p>
+<p>The <i>receiverRequestCode</i> is a request code unique to the <i>resultReceiver</i>, and will be returned along with the result, making it possible to use the same receiver for more than one intent.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<!-- @@@startActivity -->
+<!-- $$$startActivity$$$startActivityconstQAndroidIntent&intQAndroidActivityResultReceiver* -->
+<h3 class="fn" id="startActivity-1"><a name="startActivity-1"></a><span class="type">void</span> QtAndroid::<span class="name">startActivity</span>(const <span class="type"><a href="qandroidintent.html">QAndroidIntent</a></span> &amp;<i>intent</i>, <span class="type">int</span> <i>receiverRequestCode</i>, <span class="type"><a href="qandroidactivityresultreceiver.html">QAndroidActivityResultReceiver</a></span> *<i>resultReceiver</i> = nullptr)</h3>
+<p>Starts the activity given by <i>intent</i> and provides the result asynchronously through the <i>resultReceiver</i> if this is non-null.</p>
+<p>If <i>resultReceiver</i> is null, then the <code>startActivity()</code> method in the <code>androidActivity()</code> will be called. Otherwise <code>startActivityForResult()</code> will be called.</p>
+<p>The <i>receiverRequestCode</i> is a request code unique to the <i>resultReceiver</i>, and will be returned along with the result, making it possible to use the same receiver for more than one intent.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@startActivity -->
+<!-- $$$startActivity$$$startActivityconstQAndroidJniObject&intstd::function<void(int,int,constQAndroidJniObject&)> -->
+<h3 class="fn" id="startActivity-2"><a name="startActivity-2"></a><span class="type">void</span> QtAndroid::<span class="name">startActivity</span>(const <span class="type"><a href="qandroidjniobject.html">QAndroidJniObject</a></span> &amp;<i>intent</i>, <span class="type">int</span> <i>receiverRequestCode</i>, <span class="type">std::function</span>&lt;<span class="type">void</span> (<span class="type">int</span>, <span class="type">int</span>, const <span class="type"><a href="qandroidjniobject.html">QAndroidJniObject</a></span> &amp;)&gt; <i>callbackFunc</i>)</h3>
+<p>Starts the activity given by <i>intent</i> using <code>startActivityForResult()</code> and provides the result by calling callbackFunc.</p>
+<p>The <i>receiverRequestCode</i> is a request code unique to the <i>resultReceiver</i>, and will be returned along with the result, making it possible to use the same receiver for more than one intent.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@startActivity -->
+<!-- $$$startIntentSender[overload1]$$$startIntentSenderconstQAndroidJniObject&intQAndroidActivityResultReceiver* -->
+<h3 class="fn" id="startIntentSender"><a name="startIntentSender"></a><span class="type">void</span> QtAndroid::<span class="name">startIntentSender</span>(const <span class="type"><a href="qandroidjniobject.html">QAndroidJniObject</a></span> &amp;<i>intentSender</i>, <span class="type">int</span> <i>receiverRequestCode</i>, <span class="type"><a href="qandroidactivityresultreceiver.html">QAndroidActivityResultReceiver</a></span> *<i>resultReceiver</i> = nullptr)</h3>
+<p>Starts the activity given by <i>intentSender</i> and provides the result asynchronously through the <i>resultReceiver</i> if this is non-null.</p>
+<p>If <i>resultReceiver</i> is null, then the <code>startIntentSender()</code> method in the <code>androidActivity()</code> will be called. Otherwise <code>startIntentSenderForResult()</code> will be called.</p>
+<p>The <i>receiverRequestCode</i> is a request code unique to the <i>resultReceiver</i>, and will be returned along with the result, making it possible to use the same receiver for more than one intent.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<!-- @@@startIntentSender -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

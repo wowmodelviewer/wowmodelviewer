@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qrenderpass.cpp -->
+  <title>RenderPass QML Type | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-qml.html">QML Types</a></td><td >RenderPass QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">RenderPass QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$RenderPass-brief -->
+<p>Encapsulates a Render Pass. <a href="#details">More...</a></p>
+<!-- @@@RenderPass -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import Qt3D.Render 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiates:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-renderpass.html"><a href="qt3drender-qrenderpass.html">QRenderPass</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qt3d-core-node.html">Node</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qt3d-render-renderpass-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qt3d-render-renderpass.html#filterKeys-prop">filterKeys</a></b></b> : list&lt;FilterKey&gt;</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-renderpass.html#parameters-prop">parameters</a></b></b> : list&lt;Parameter&gt;</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-renderpass.html#renderStates-prop">renderStates</a></b></b> : list&lt;RenderState&gt;</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-renderpass.html#shaderProgram-prop">shaderProgram</a></b></b> : ShaderProgram</li>
+</ul>
+<!-- $$$RenderPass-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>A <a href="qml-qt3d-render-renderpass.html">RenderPass</a> specifies a single rendering pass - an instance of shader program execution - used by Technique. A Render pass consists of a <a href="qml-qt3d-render-shaderprogram.html">ShaderProgram</a> and a list of <a href="qml-qt3d-render-filterkey.html">FilterKey</a> objects, a list of <a href="qml-renderstate.html">RenderState</a> objects and a list of <a href="qml-qt3d-render-parameter.html">Parameter</a> objects.</p>
+<p><a href="qml-qt3d-render-renderpass.html">RenderPass</a> executes the <a href="qml-qt3d-render-shaderprogram.html">ShaderProgram</a> using the given <a href="qml-renderstate.html">RenderState</a> and Parameter nodes when at least one of <a href="qml-qt3d-render-filterkey.html">FilterKey</a> nodes being referenced matches any of the <a href="qml-qt3d-render-filterkey.html">FilterKey</a> nodes in <a href="qml-qt3d-render-renderpassfilter.html">RenderPassFilter</a> or when no <a href="qml-qt3d-render-filterkey.html">FilterKey</a> nodes are specified and no <a href="qml-qt3d-render-renderpassfilter.html">RenderPassFilter</a> is present in the FrameGraph.</p>
+<p>If the <a href="qml-qt3d-render-renderpass.html">RenderPass</a> defines a Parameter, it will be overridden by a Parameter with the same name if it exists in any of the Technique, Effect, Material, <a href="qml-qt3d-render-techniquefilter.html">TechniqueFilter</a>, <a href="qml-qt3d-render-renderpassfilter.html">RenderPassFilter</a> associated with the pass at runtime. This still can be useful to define sane default values.</p>
+<p>At render time, for each leaf node of the FrameGraph a base render state is recorded by accumulating states defined by all <a href="qml-qt3d-render-renderstateset.html">RenderStateSet</a> nodes in the FrameGraph branch. Each <a href="qml-qt3d-render-renderpass.html">RenderPass</a> can overload this base render state by specifying its own <a href="qml-renderstate.html">RenderState</a> nodes.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qt3d-render-technique.html">Technique</a></span> {
+      <span class="name">filterKeys</span>: [
+          <span class="type"><a href="qml-qt3d-render-filterkey.html">FilterKey</a></span> { <span class="name">name</span>: <span class="string">&quot;renderingStyle&quot;</span>; <span class="name">value</span>: <span class="string">&quot;forward&quot;</span> }
+      ]
+      <span class="name">graphicsApiFilter</span>: {
+          <span class="name">api</span>: <span class="name">GraphicsApiFilter</span>.<span class="name">OpenGL</span>
+          <span class="name">profile</span>: <span class="name">GraphicsApiFilter</span>.<span class="name">CoreProfile</span>
+          <span class="name">majorVersion</span>: <span class="number">3</span>
+          <span class="name">minorVersion</span>: <span class="number">1</span>
+      }
+      <span class="name">renderPasses</span>: [
+          <span class="type"><a href="qml-qt3d-render-renderpass.html">RenderPass</a></span> {
+              <span class="name">id</span>: <span class="name">pass</span>
+              <span class="name">shaderProgram</span>: <span class="name">ShaderProgram</span> {
+                  <span class="comment">// ...</span>
+              }
+              <span class="name">parameters</span>: [
+                  <span class="type"><a href="qml-qt3d-render-parameter.html">Parameter</a></span> { <span class="name">name</span>: <span class="string">&quot;color&quot;</span>; <span class="name">value</span>: <span class="string">&quot;red&quot;</span> }
+              ]
+              <span class="name">renderStates</span>: [
+                  <span class="type"><a href="qml-qt3d-render-depthtest.html">DepthTest</a></span> {}
+              ]
+          }
+      ]
+  }
+
+</pre>
+<p><b>See also </b><a href="qml-qt3d-render-renderpassfilter.html">RenderPassFilter</a>, <a href="qml-qt3d-render-filterkey.html">FilterKey</a>, <a href="qml-qt3d-render-parameter.html">Parameter</a>, <a href="qml-renderstate.html">RenderState</a>, <a href="qml-qt3d-render-effect.html">Effect</a>, and <a href="qml-qt3d-render-technique.html">Technique</a>.</p>
+<!-- @@@RenderPass -->
+<h2>Property Documentation</h2>
+<!-- $$$filterKeys -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="filterKeys-prop"></a><span class="name">filterKeys</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="qml-qt3d-render-filterkey.html">FilterKey</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the filter keys enabling the use of this render pass.</p>
+</div></div><!-- @@@filterKeys -->
+<br/>
+<!-- $$$parameters -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="parameters-prop"></a><span class="name">parameters</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="qml-qt3d-render-parameter.html">Parameter</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the shader parameter values used by the render pass.</p>
+</div></div><!-- @@@parameters -->
+<br/>
+<!-- $$$renderStates -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="renderStates-prop"></a><span class="name">renderStates</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="qml-renderstate.html">RenderState</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the render states used by the render pass.</p>
+</div></div><!-- @@@renderStates -->
+<br/>
+<!-- $$$shaderProgram -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="shaderProgram-prop"></a><span class="name">shaderProgram</span> : <span class="type"><a href="qml-qt3d-render-shaderprogram.html">ShaderProgram</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the shader program to be used for this render pass.</p>
+</div></div><!-- @@@shaderProgram -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

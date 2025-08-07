@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtransform.cpp -->
+  <title>Transform QML Type | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-qml.html">QML Types</a></td><td >Transform QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Transform QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Transform-brief -->
+<p>Used to perform transforms on meshes. <a href="#details">More...</a></p>
+<!-- @@@Transform -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import Qt3D.Core 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.6</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiates:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-core-transform.html"><a href="qt3dcore-qtransform.html">QTransform</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qt3d-core-component3d.html">Component3D</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qt3d-core-transform-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qt3d-core-transform.html#matrix-prop">matrix</a></b></b> : matrix4x4</li>
+<li class="fn"><b><b><a href="qml-qt3d-core-transform.html#rotation-prop">rotation</a></b></b> : quaternion</li>
+<li class="fn"><b><b><a href="qml-qt3d-core-transform.html#rotationX-prop">rotationX</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qt3d-core-transform.html#rotationY-prop">rotationY</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qt3d-core-transform.html#rotationZ-prop">rotationZ</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qt3d-core-transform.html#scale-prop">scale</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qt3d-core-transform.html#scale3D-prop">scale3D</a></b></b> : vector3d</li>
+<li class="fn"><b><b><a href="qml-qt3d-core-transform.html#translation-prop">translation</a></b></b> : vector3d</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">quaternion <b><b><a href="qml-qt3d-core-transform.html#fromAxesAndAngles-method-1">fromAxesAndAngles</a></b></b>(<i>axis1</i>,  real <i>angle1</i>,  vector3d <i>axis2</i>,  real <i>angle2</i>,  vector3d <i>axis3</i>,  real <i>angle3</i>)</li>
+<li class="fn">quaternion <b><b><a href="qml-qt3d-core-transform.html#fromAxesAndAngles-method">fromAxesAndAngles</a></b></b>(<i>axis1</i>,  real <i>angle1</i>,  vector3d <i>axis2</i>,  real <i>angle2</i>)</li>
+<li class="fn">quaternion <b><b><a href="qml-qt3d-core-transform.html#fromAxisAndAngle-method-1">fromAxisAndAngle</a></b></b>(<i>x</i>,  real <i>y</i>,  real <i>z</i>,  real <i>angle</i>)</li>
+<li class="fn">quaternion <b><b><a href="qml-qt3d-core-transform.html#fromAxisAndAngle-method">fromAxisAndAngle</a></b></b>(<i>axis</i>,  real <i>angle</i>)</li>
+<li class="fn">quaternion <b><b><a href="qml-qt3d-core-transform.html#fromEulerAngles-method-1">fromEulerAngles</a></b></b>(<i>pitch</i>,  real <i>yaw</i>,  real <i>roll</i>)</li>
+<li class="fn">quaternion <b><b><a href="qml-qt3d-core-transform.html#fromEulerAngles-method">fromEulerAngles</a></b></b>(<i>eulerAngles</i>)</li>
+<li class="fn">matrix4x4 <b><b><a href="qml-qt3d-core-transform.html#rotateAround-method">rotateAround</a></b></b>(<i>point</i>,  real <i>angle</i>,  vector3d <i>axis</i>)</li>
+</ul>
+<!-- $$$Transform-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The Transform component is not shareable between multiple Entity's. The transformation is held as vector3d scale, quaternion rotation and vector3d translation components. The transformations are applied to the mesh in that order. When <a href="qml-qt3d-core-transform.html#matrix-prop">Transform::matrix</a> property is set, it is decomposed to these transform components and corresponding transform signals are emitted.</p>
+<p>Several helper functions are provided to set up the Transform; <a href="qml-qt3d-core-transform.html#fromAxisAndAngle-method">fromAxisAndAngle</a> and <a href="qml-qt3d-core-transform.html#fromAxesAndAngles-method">fromAxesAndAngles</a> can be used to set the rotation around specific axes, <a href="qml-qt3d-core-transform.html#fromEulerAngles-method">fromEulerAngles</a> can be used to set the rotation based on euler angles and <a href="qml-qt3d-core-transform.html#rotateAround-method">rotateAround</a> can be used to rotate the object around specific point relative to local origin.</p>
+<!-- @@@Transform -->
+<h2>Property Documentation</h2>
+<!-- $$$matrix -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="matrix-prop"></a><span class="name">matrix</span> : <span class="type"><a href="../qtquick/qml-matrix4x4.html">matrix4x4</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the matrix4x4 of the transform.</p>
+<p><b>Note: </b>When the matrix property is set, it is decomposed to translation, rotation and scale components.</p></div></div><!-- @@@matrix -->
+<br/>
+<!-- $$$rotation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="rotation-prop"></a><span class="name">rotation</span> : <span class="type"><a href="../qtquick/qml-quaternion.html">quaternion</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the rotation of the transform as quaternion.</p>
+</div></div><!-- @@@rotation -->
+<br/>
+<!-- $$$rotationX -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="rotationX-prop"></a><span class="name">rotationX</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the x rotation of the transform as Euler angle.</p>
+</div></div><!-- @@@rotationX -->
+<br/>
+<!-- $$$rotationY -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="rotationY-prop"></a><span class="name">rotationY</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the y rotation of the transform as Euler angle.</p>
+</div></div><!-- @@@rotationY -->
+<br/>
+<!-- $$$rotationZ -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="rotationZ-prop"></a><span class="name">rotationZ</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the z rotation of the transform as Euler angle.</p>
+</div></div><!-- @@@rotationZ -->
+<br/>
+<!-- $$$scale -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="scale-prop"></a><span class="name">scale</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the uniform scale of the transform. If the scale has been set with <a href="qml-qt3d-core-transform.html#scale3D-prop">scale3D</a>, holds the x value only.</p>
+</div></div><!-- @@@scale -->
+<br/>
+<!-- $$$scale3D -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="scale3D-prop"></a><span class="name">scale3D</span> : <span class="type"><a href="../qtquick/qml-vector3d.html">vector3d</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the scale of the transform as vector3d.</p>
+</div></div><!-- @@@scale3D -->
+<br/>
+<!-- $$$translation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="translation-prop"></a><span class="name">translation</span> : <span class="type"><a href="../qtquick/qml-vector3d.html">vector3d</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the translation of the transform as vector3d.</p>
+</div></div><!-- @@@translation -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$fromAxesAndAngles$$$fromAxesAndAnglesrealvector3drealvector3dreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="fromAxesAndAngles-method-1"></a><span class="type"><a href="../qtquick/qml-quaternion.html">quaternion</a></span> <span class="name">fromAxesAndAngles</span>(<i>axis1</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>angle1</i>,  <span class="type"><a href="../qtquick/qml-vector3d.html">vector3d</a></span> <i>axis2</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>angle2</i>,  <span class="type"><a href="../qtquick/qml-vector3d.html">vector3d</a></span> <i>axis3</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>angle3</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a quaternion from <i>axis1</i>, <i>angle1</i>, <i>axis2</i>, <i>angle2</i>, <i>axis3</i>, and <i>angle3</i>. Returns the resulting quaternion.</p>
+</div></div><!-- @@@fromAxesAndAngles -->
+<br/>
+<!-- $$$fromAxesAndAngles[overload1]$$$fromAxesAndAnglesrealvector3dreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="fromAxesAndAngles-method"></a><span class="type"><a href="../qtquick/qml-quaternion.html">quaternion</a></span> <span class="name">fromAxesAndAngles</span>(<i>axis1</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>angle1</i>,  <span class="type"><a href="../qtquick/qml-vector3d.html">vector3d</a></span> <i>axis2</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>angle2</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a quaternion from <i>axis1</i>, <i>angle1</i>, <i>axis2</i>, and <i>angle2</i>. Returns the resulting quaternion.</p>
+</div></div><!-- @@@fromAxesAndAngles -->
+<br/>
+<!-- $$$fromAxisAndAngle$$$fromAxisAndAnglerealrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="fromAxisAndAngle-method-1"></a><span class="type"><a href="../qtquick/qml-quaternion.html">quaternion</a></span> <span class="name">fromAxisAndAngle</span>(<i>x</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>z</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>angle</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a quaternion from <i>x</i>, <i>y</i>, <i>z</i>, and <i>angle</i>. Returns the resulting quaternion.</p>
+</div></div><!-- @@@fromAxisAndAngle -->
+<br/>
+<!-- $$$fromAxisAndAngle[overload1]$$$fromAxisAndAnglereal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="fromAxisAndAngle-method"></a><span class="type"><a href="../qtquick/qml-quaternion.html">quaternion</a></span> <span class="name">fromAxisAndAngle</span>(<i>axis</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>angle</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a quaternion from <i>axis</i> and <i>angle</i>. Returns the resulting quaternion.</p>
+</div></div><!-- @@@fromAxisAndAngle -->
+<br/>
+<!-- $$$fromEulerAngles$$$fromEulerAnglesrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="fromEulerAngles-method-1"></a><span class="type"><a href="../qtquick/qml-quaternion.html">quaternion</a></span> <span class="name">fromEulerAngles</span>(<i>pitch</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>yaw</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>roll</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a quaternion from <i>pitch</i>, <i>yaw</i>, and <i>roll</i>. Returns the resulting quaternion.</p>
+</div></div><!-- @@@fromEulerAngles -->
+<br/>
+<!-- $$$fromEulerAngles[overload1]$$$fromEulerAngles -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="fromEulerAngles-method"></a><span class="type"><a href="../qtquick/qml-quaternion.html">quaternion</a></span> <span class="name">fromEulerAngles</span>(<i>eulerAngles</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a quaternion from <i>eulerAngles</i>. Returns the resulting quaternion.</p>
+</div></div><!-- @@@fromEulerAngles -->
+<br/>
+<!-- $$$rotateAround[overload1]$$$rotateAroundrealvector3d -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="rotateAround-method"></a><span class="type"><a href="../qtquick/qml-matrix4x4.html">matrix4x4</a></span> <span class="name">rotateAround</span>(<i>point</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>angle</i>,  <span class="type"><a href="../qtquick/qml-vector3d.html">vector3d</a></span> <i>axis</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a rotation matrix from <i>axis</i> and <i>angle</i> around <i>point</i> relative to local origin. Returns the resulting matrix4x4.</p>
+</div></div><!-- @@@rotateAround -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

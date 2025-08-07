@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcamerafocus.cpp -->
+  <title>QCameraFocus Class | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-modules.html">C++ Classes</a></td><td >QCameraFocus</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#some-notes-on-autofocus">Some notes on autofocus</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCameraFocus Class</h1>
+<!-- $$$QCameraFocus-brief -->
+<p>The <a href="qcamerafocus.html">QCameraFocus</a> class provides an interface for focus and zoom related camera settings. <a href="#details">More...</a></p>
+<!-- @@@QCameraFocus -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QCameraFocus&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += multimedia</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><ul>
+<li><a href="qcamerafocus-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#FocusMode-enum">FocusMode</a></b> { ManualFocus, HyperfocalFocus, InfinityFocus, AutoFocus, ContinuousFocus, MacroFocus }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#FocusMode-enum">FocusModes</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#FocusPointMode-enum">FocusPointMode</a></b> { FocusPointAuto, FocusPointCenter, FocusPointFaceDetection, FocusPointCustom }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qcamerafocus.html#customFocusPoint-prop">customFocusPoint</a></b> : QPointF</li>
+<li class="fn"><b><a href="qcamerafocus.html#digitalZoom-prop">digitalZoom</a></b> : const qreal</li>
+<li class="fn"><b><a href="qcamerafocus.html#focusMode-prop">focusMode</a></b> : FocusModes</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qcamerafocus.html#focusPointMode-prop">focusPointMode</a></b> : FocusPointMode</li>
+<li class="fn"><b><a href="qcamerafocus.html#focusZones-prop">focusZones</a></b> : const QCameraFocusZoneList</li>
+<li class="fn"><b><a href="qcamerafocus.html#opticalZoom-prop">opticalZoom</a></b> : const qreal</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QPointF </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#customFocusPoint-prop">customFocusPoint</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#digitalZoom-prop">digitalZoom</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCameraFocus::FocusModes </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#focusMode-prop">focusMode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCameraFocus::FocusPointMode </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#focusPointMode-prop">focusPointMode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCameraFocusZoneList </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#focusZones-prop">focusZones</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#isAvailable">isAvailable</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#isFocusModeSupported">isFocusModeSupported</a></b>(QCameraFocus::FocusModes <i>mode</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#isFocusPointModeSupported">isFocusPointModeSupported</a></b>(QCameraFocus::FocusPointMode <i>mode</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#maximumDigitalZoom">maximumDigitalZoom</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#maximumOpticalZoom">maximumOpticalZoom</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#opticalZoom-prop">opticalZoom</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#customFocusPoint-prop">setCustomFocusPoint</a></b>(const QPointF &amp;<i>point</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#focusMode-prop">setFocusMode</a></b>(QCameraFocus::FocusModes <i>mode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#focusPointMode-prop">setFocusPointMode</a></b>(QCameraFocus::FocusPointMode <i>mode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#zoomTo">zoomTo</a></b>(qreal <i>optical</i>, qreal <i>digital</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#digitalZoomChanged">digitalZoomChanged</a></b>(qreal <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#focusZonesChanged">focusZonesChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#maximumDigitalZoomChanged">maximumDigitalZoomChanged</a></b>(qreal <i>zoom</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#maximumOpticalZoomChanged">maximumOpticalZoomChanged</a></b>(qreal <i>zoom</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcamerafocus.html#opticalZoomChanged">opticalZoomChanged</a></b>(qreal <i>value</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCameraFocus-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>On hardware that supports it, this class lets you adjust the focus or zoom (both optical and digital). This also includes things like &quot;Macro&quot; mode for close up work (e.g&#x2e; reading barcodes, or recognising letters), or &quot;touch to focus&quot; - indicating an interesting area of the viewfinder for the hardware to attempt to focus on.</p>
+<pre class="cpp">
+
+  <span class="type">QCameraFocus</span> <span class="operator">*</span>focus <span class="operator">=</span> camera<span class="operator">-</span><span class="operator">&gt;</span>focus();
+  focus<span class="operator">-</span><span class="operator">&gt;</span>setFocusPointMode(<span class="type">QCameraFocus</span><span class="operator">::</span>FocusPointCustom);
+  focus<span class="operator">-</span><span class="operator">&gt;</span>setCustomFocusPoint(<span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>(<span class="number">0.25f</span><span class="operator">,</span> <span class="number">0.75f</span>)); <span class="comment">// A point near the bottom left, 25% away from the corner, near that shiny vase</span>
+
+</pre>
+<p>Zooming can be accomplished in a number of ways - usually the more expensive but higher quality approach is an optical zoom, which allows using the full extent of the camera sensor to gather image pixels. In addition it is possible to digitally zoom, which will generally just enlarge part of the sensor frame and throw away other parts. If the camera hardware supports optical zoom this should generally always be used first. The <a href="qcamerafocus.html#maximumOpticalZoom">maximumOpticalZoom</a>() method allows this to be checked. The <a href="qcamerafocus.html#zoomTo">zoomTo</a>() method allows changing both optical and digital zoom at once.</p>
+<pre class="cpp">
+
+  focus<span class="operator">-</span><span class="operator">&gt;</span>zoomTo(<span class="number">3.0</span><span class="operator">,</span> <span class="number">4.0</span>); <span class="comment">// Super zoom!</span>
+
+</pre>
+<a name="some-notes-on-autofocus"></a>
+<h4 id="some-notes-on-autofocus">Some notes on autofocus</h4>
+<p>Some hardware supports a movable focus lens assembly, and typically this hardware also supports automatically focusing via some heuristic. You can influence this via the <a href="qcamerafocus.html#FocusPointMode-enum">FocusPointMode</a> setting - typically the center of the frame is brought into focus, but some hardware also supports focusing on any faces detected in the frame, or on a specific point (usually provided by a user in a &quot;touch to focus&quot; scenario).</p>
+<p>This class (in combination with <a href="qcamerafocuszone.html">QCameraFocusZone</a>) can expose information on what parts of the camera sensor image are in focus or are being used for autofocusing via the <a href="qcamerafocus.html#focusZones-prop">focusZones</a>() property:</p>
+<pre class="cpp">
+
+  focus<span class="operator">-</span><span class="operator">&gt;</span>setFocusPointMode(<span class="type">QCameraFocus</span><span class="operator">::</span>FocusPointAuto);
+  <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qcamerafocuszone.html">QCameraFocusZone</a></span><span class="operator">&gt;</span> zones <span class="operator">=</span> focus<span class="operator">-</span><span class="operator">&gt;</span>focusZones();
+  foreach (<span class="type"><a href="qcamerafocuszone.html">QCameraFocusZone</a></span> zone<span class="operator">,</span> zones) {
+      <span class="keyword">if</span> (zone<span class="operator">.</span>status() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qcamerafocuszone.html">QCameraFocusZone</a></span><span class="operator">::</span>Focused) {
+          <span class="comment">// Draw a green box at zone.area()</span>
+      } <span class="keyword">else</span> <span class="keyword">if</span> (zone<span class="operator">.</span>status() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qcamerafocuszone.html">QCameraFocusZone</a></span><span class="operator">::</span>Selected) {
+          <span class="comment">// This area is selected for autofocusing, but is not in focus</span>
+          <span class="comment">// Draw a yellow box at zone.area()</span>
+      }
+  }
+
+</pre>
+</div>
+<p><b>See also </b><a href="qcamerafocuszone.html">QCameraFocusZone</a>.</p>
+<!-- @@@QCameraFocus -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$FocusMode$$$ManualFocus$$$HyperfocalFocus$$$InfinityFocus$$$AutoFocus$$$ContinuousFocus$$$MacroFocus -->
+<h3 class="flags" id="FocusMode-enum"><a name="FocusMode-enum"></a>enum QCameraFocus::<span class="name">FocusMode</span><br/>flags QCameraFocus::<span class="name">FocusModes</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QCameraFocus::ManualFocus</code></td><td class="topAlign tblval"><code>0x1</code></td><td class="topAlign">Manual or fixed focus mode.</td></tr>
+<tr><td class="topAlign"><code>QCameraFocus::HyperfocalFocus</code></td><td class="topAlign tblval"><code>0x02</code></td><td class="topAlign">Focus to hyperfocal distance, with the maximum depth of field achieved. All objects at distances from half of this distance out to infinity will be acceptably sharp.</td></tr>
+<tr><td class="topAlign"><code>QCameraFocus::InfinityFocus</code></td><td class="topAlign tblval"><code>0x04</code></td><td class="topAlign">Focus strictly to infinity.</td></tr>
+<tr><td class="topAlign"><code>QCameraFocus::AutoFocus</code></td><td class="topAlign tblval"><code>0x8</code></td><td class="topAlign">One-shot auto focus mode.</td></tr>
+<tr><td class="topAlign"><code>QCameraFocus::ContinuousFocus</code></td><td class="topAlign tblval"><code>0x10</code></td><td class="topAlign">Continuous auto focus mode.</td></tr>
+<tr><td class="topAlign"><code>QCameraFocus::MacroFocus</code></td><td class="topAlign tblval"><code>0x20</code></td><td class="topAlign">One shot auto focus to objects close to camera.</td></tr>
+</table></div>
+<p>The FocusModes type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;FocusMode&gt;. It stores an OR combination of FocusMode values.</p>
+<!-- @@@FocusMode -->
+<!-- $$$FocusPointMode$$$FocusPointAuto$$$FocusPointCenter$$$FocusPointFaceDetection$$$FocusPointCustom -->
+<h3 class="fn" id="FocusPointMode-enum"><a name="FocusPointMode-enum"></a>enum QCameraFocus::<span class="name">FocusPointMode</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QCameraFocus::FocusPointAuto</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Automatically select one or multiple focus points.</td></tr>
+<tr><td class="topAlign"><code>QCameraFocus::FocusPointCenter</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Focus to the frame center.</td></tr>
+<tr><td class="topAlign"><code>QCameraFocus::FocusPointFaceDetection</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Focus on faces in the frame.</td></tr>
+<tr><td class="topAlign"><code>QCameraFocus::FocusPointCustom</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">Focus to the custom point, defined by <a href="qcamerafocus.html#customFocusPoint-prop">QCameraFocus::customFocusPoint</a> property.</td></tr>
+</table></div>
+<!-- @@@FocusPointMode -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$customFocusPoint-prop$$$customFocusPoint$$$setCustomFocusPointconstQPointF& -->
+<h3 class="fn" id="customFocusPoint-prop"><a name="customFocusPoint-prop"></a><span class="name">customFocusPoint</span> : <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span></h3>
+<p>This property represents the position of the custom focus point, in relative frame coordinates: <a href="../qtcore/qpointf.html">QPointF</a>(0,0) points to the left top frame point, <a href="../qtcore/qpointf.html">QPointF</a>(0.5,0.5) points to the frame center.</p>
+<p>The custom focus point property is used only in <code>FocusPointCustom</code> focus mode.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QPointF </td><td class="memItemRight bottomAlign"><span class="name"><b>customFocusPoint</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setCustomFocusPoint</b></span>(const QPointF &amp;<i>point</i>)</td></tr>
+</table></div>
+<!-- @@@customFocusPoint -->
+<!-- $$$digitalZoom-prop$$$digitalZoom$$$digitalZoomChangedqreal -->
+<h3 class="fn" id="digitalZoom-prop"><a name="digitalZoom-prop"></a><span class="name">digitalZoom</span> : const <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span></h3>
+<p>This property holds the current digital zoom value.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qreal </td><td class="memItemRight bottomAlign"><span class="name"><b>digitalZoom</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qcamerafocus.html#digitalZoomChanged">digitalZoomChanged</a></b></span>(qreal <i>value</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qcamerafocus.html#opticalZoom-prop">QCameraFocus::opticalZoom</a>.</p>
+<!-- @@@digitalZoom -->
+<!-- $$$focusMode-prop$$$focusMode$$$setFocusModeQCameraFocus::FocusModes -->
+<h3 class="fn" id="focusMode-prop"><a name="focusMode-prop"></a><span class="name">focusMode</span> : <span class="type"><a href="qcamerafocus.html#FocusMode-enum">FocusModes</a></span></h3>
+<p>This property holds the current camera focus mode.</p>
+<p>This controls the way the camera lens assembly is configured.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QCameraFocus::FocusModes </td><td class="memItemRight bottomAlign"><span class="name"><b>focusMode</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setFocusMode</b></span>(QCameraFocus::FocusModes <i>mode</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qcamerafocus.html#isFocusModeSupported">QCameraFocus::isFocusModeSupported</a>().</p>
+<!-- @@@focusMode -->
+<!-- $$$focusPointMode-prop$$$focusPointMode$$$setFocusPointModeQCameraFocus::FocusPointMode -->
+<h3 class="fn" id="focusPointMode-prop"><a name="focusPointMode-prop"></a><span class="name">focusPointMode</span> : <span class="type"><a href="qcamerafocus.html#FocusPointMode-enum">FocusPointMode</a></span></h3>
+<p>This property holds the current camera focus point selection mode.</p>
+<p>If the camera focus mode is set to use an autofocusing mode, this property controls the way the camera will select areas of the frame to use for autofocusing.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QCameraFocus::FocusPointMode </td><td class="memItemRight bottomAlign"><span class="name"><b>focusPointMode</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setFocusPointMode</b></span>(QCameraFocus::FocusPointMode <i>mode</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qcamerafocus.html#isFocusPointModeSupported">QCameraFocus::isFocusPointModeSupported</a>().</p>
+<!-- @@@focusPointMode -->
+<!-- $$$focusZones-prop$$$focusZones$$$focusZonesChanged -->
+<h3 class="fn" id="focusZones-prop"><a name="focusZones-prop"></a><span class="name">focusZones</span> : const <span class="type">QCameraFocusZoneList</span></h3>
+<p>Returns the list of active focus zones.</p>
+<p>If QCamera::FocusPointAuto or QCamera::FocusPointFaceDetection focus mode is selected this method returns the list of zones the camera is actually focused on.</p>
+<p>The coordinates system is the same as for custom focus points: <a href="../qtcore/qpointf.html">QPointF</a>(0,0) points to the left top frame point, <a href="../qtcore/qpointf.html">QPointF</a>(0.5,0.5) points to the frame center.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QCameraFocusZoneList </td><td class="memItemRight bottomAlign"><span class="name"><b>focusZones</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qcamerafocus.html#focusZonesChanged">focusZonesChanged</a></b></span>()</td></tr>
+</table></div>
+<!-- @@@focusZones -->
+<!-- $$$opticalZoom-prop$$$opticalZoom$$$opticalZoomChangedqreal -->
+<h3 class="fn" id="opticalZoom-prop"><a name="opticalZoom-prop"></a><span class="name">opticalZoom</span> : const <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span></h3>
+<p>This property holds the current optical zoom value.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qreal </td><td class="memItemRight bottomAlign"><span class="name"><b>opticalZoom</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qcamerafocus.html#opticalZoomChanged">opticalZoomChanged</a></b></span>(qreal <i>value</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qcamerafocus.html#digitalZoom-prop">QCameraFocus::digitalZoom</a>.</p>
+<!-- @@@opticalZoom -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$digitalZoomChanged -->
+<h3 class="fn" id="digitalZoomChanged"><a name="digitalZoomChanged"></a><code>[signal] </code><span class="type">void</span> QCameraFocus::<span class="name">digitalZoomChanged</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>value</i>)</h3>
+<p>Signal emitted when digital zoom value changes to new <i>value</i>.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qcamerafocus.html#digitalZoom-prop">digitalZoom</a>. </p><!-- @@@digitalZoomChanged -->
+<!-- $$$focusZonesChanged -->
+<h3 class="fn" id="focusZonesChanged"><a name="focusZonesChanged"></a><code>[signal] </code><span class="type">void</span> QCameraFocus::<span class="name">focusZonesChanged</span>()</h3>
+<p>This signal is emitted when the set of zones used in autofocusing is changed.</p>
+<p>This can change when a zone is focused or loses focus, or new focus zones have been detected.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qcamerafocus.html#focusZones-prop">focusZones</a>. </p><!-- @@@focusZonesChanged -->
+<!-- $$$maximumDigitalZoomChanged[overload1]$$$maximumDigitalZoomChangedqreal -->
+<h3 class="fn" id="maximumDigitalZoomChanged"><a name="maximumDigitalZoomChanged"></a><code>[signal] </code><span class="type">void</span> QCameraFocus::<span class="name">maximumDigitalZoomChanged</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>zoom</i>)</h3>
+<p>Signal emitted when the maximum supported digital <i>zoom</i> value changed.</p>
+<p>The maximum supported zoom value can depend on other camera settings, like capture mode or resolution.</p>
+<!-- @@@maximumDigitalZoomChanged -->
+<!-- $$$maximumOpticalZoomChanged[overload1]$$$maximumOpticalZoomChangedqreal -->
+<h3 class="fn" id="maximumOpticalZoomChanged"><a name="maximumOpticalZoomChanged"></a><code>[signal] </code><span class="type">void</span> QCameraFocus::<span class="name">maximumOpticalZoomChanged</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>zoom</i>)</h3>
+<p>Signal emitted when the maximum supported optical <i>zoom</i> value changed.</p>
+<!-- @@@maximumOpticalZoomChanged -->
+<!-- $$$opticalZoomChanged -->
+<h3 class="fn" id="opticalZoomChanged"><a name="opticalZoomChanged"></a><code>[signal] </code><span class="type">void</span> QCameraFocus::<span class="name">opticalZoomChanged</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>value</i>)</h3>
+<p>Signal emitted when optical zoom value changes to new <i>value</i>.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qcamerafocus.html#opticalZoom-prop">opticalZoom</a>. </p><!-- @@@opticalZoomChanged -->
+<!-- $$$isAvailable[overload1]$$$isAvailable -->
+<h3 class="fn" id="isAvailable"><a name="isAvailable"></a><span class="type">bool</span> QCameraFocus::<span class="name">isAvailable</span>() const</h3>
+<p>Returns true if focus related settings are supported by this camera.</p>
+<p>You may need to also check if any specific features are supported.</p>
+<!-- @@@isAvailable -->
+<!-- $$$isFocusModeSupported[overload1]$$$isFocusModeSupportedQCameraFocus::FocusModes -->
+<h3 class="fn" id="isFocusModeSupported"><a name="isFocusModeSupported"></a><span class="type">bool</span> QCameraFocus::<span class="name">isFocusModeSupported</span>(<span class="type"><a href="qcamerafocus.html#FocusMode-enum">QCameraFocus::FocusModes</a></span> <i>mode</i>) const</h3>
+<p>Returns true if the focus <i>mode</i> is supported by camera.</p>
+<!-- @@@isFocusModeSupported -->
+<!-- $$$isFocusPointModeSupported[overload1]$$$isFocusPointModeSupportedQCameraFocus::FocusPointMode -->
+<h3 class="fn" id="isFocusPointModeSupported"><a name="isFocusPointModeSupported"></a><span class="type">bool</span> QCameraFocus::<span class="name">isFocusPointModeSupported</span>(<span class="type"><a href="qcamerafocus.html#FocusPointMode-enum">QCameraFocus::FocusPointMode</a></span> <i>mode</i>) const</h3>
+<p>Returns true if focus point <i>mode</i> is supported.</p>
+<!-- @@@isFocusPointModeSupported -->
+<!-- $$$maximumDigitalZoom[overload1]$$$maximumDigitalZoom -->
+<h3 class="fn" id="maximumDigitalZoom"><a name="maximumDigitalZoom"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QCameraFocus::<span class="name">maximumDigitalZoom</span>() const</h3>
+<p>Returns the maximum digital zoom</p>
+<p>This will be <code>1.0</code> on cameras that do not support digital zoom.</p>
+<!-- @@@maximumDigitalZoom -->
+<!-- $$$maximumOpticalZoom[overload1]$$$maximumOpticalZoom -->
+<h3 class="fn" id="maximumOpticalZoom"><a name="maximumOpticalZoom"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QCameraFocus::<span class="name">maximumOpticalZoom</span>() const</h3>
+<p>Returns the maximum optical zoom.</p>
+<p>This will be <code>1.0</code> on cameras that do not support optical zoom.</p>
+<!-- @@@maximumOpticalZoom -->
+<!-- $$$zoomTo[overload1]$$$zoomToqrealqreal -->
+<h3 class="fn" id="zoomTo"><a name="zoomTo"></a><span class="type">void</span> QCameraFocus::<span class="name">zoomTo</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>optical</i>, <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>digital</i>)</h3>
+<p>Set the camera <i>optical</i> and <i>digital</i> zoom values.</p>
+<p>Since there may be a physical component to move, the change in zoom value may not be instantaneous.</p>
+<!-- @@@zoomTo -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

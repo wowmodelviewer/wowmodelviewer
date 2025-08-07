@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- flowlayout.qdoc -->
+  <title>Flow Layout Example | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Flow Layout Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+<li class="level1"><a href="#flowlayout-class-definition">FlowLayout Class Definition</a></li>
+<li class="level1"><a href="#flowlayout-class-implementation">FlowLayout Class Implementation</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Flow Layout Example</h1>
+<span class="subtitle"></span>
+<!-- $$$layouts/flowlayout-brief -->
+<p>Shows how to arrange widgets for different window sizes.</p>
+<!-- @@@layouts/flowlayout -->
+<!-- $$$layouts/flowlayout-description -->
+<div class="descr"> <a name="details"></a>
+<p><i>Flow Layout</i> implements a layout that handles different window sizes. The widget placement changes depending on the width of the application window.</p>
+<p class="centerAlign"><img src="images/flowlayout-example.png" alt="Screenshot of the Flow Layout example" /></p><p>The Flowlayout class mainly uses <a href="qlayout.html">QLayout</a> and <a href="qwidgetitem.html">QWidgetItem</a>, while the Window uses <a href="qwidget.html">QWidget</a> and <a href="qlabel.html">QLabel</a>.</p>
+<p>For more information, visit the <a href="layout.html">Layout Management</a> page.</p>
+<a name="running-the-example"></a>
+<h4 id="running-the-example">Running the Example</h4>
+<p>To run the example from <a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a>, open the <b>Welcome</b> mode and select the example from <b>Examples</b>. For more information, visit <a href="http://doc.qt.io/qtcreator/creator-build-example-application.html">Building and Running an Example</a>.</p>
+<a name="flowlayout-class-definition"></a>
+<h4 id="flowlayout-class-definition">FlowLayout Class Definition</h4>
+<p>The <code>FlowLayout</code> class inherits <a href="qlayout.html">QLayout</a>. It is a custom layout class that arranges its child widgets horizontally and vertically.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> FlowLayout : <span class="keyword">public</span> <span class="type"><a href="qlayout.html">QLayout</a></span>
+  {
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> FlowLayout(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent<span class="operator">,</span> <span class="type">int</span> margin <span class="operator">=</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="type">int</span> hSpacing <span class="operator">=</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="type">int</span> vSpacing <span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>);
+      <span class="keyword">explicit</span> FlowLayout(<span class="type">int</span> margin <span class="operator">=</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="type">int</span> hSpacing <span class="operator">=</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="type">int</span> vSpacing <span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>);
+      <span class="operator">~</span>FlowLayout();
+
+      <span class="type">void</span> addItem(<span class="type"><a href="qlayoutitem.html">QLayoutItem</a></span> <span class="operator">*</span>item) override;
+      <span class="type">int</span> horizontalSpacing() <span class="keyword">const</span>;
+      <span class="type">int</span> verticalSpacing() <span class="keyword">const</span>;
+      <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Orientations expandingDirections() <span class="keyword">const</span> override;
+      bool hasHeightForWidth() <span class="keyword">const</span> override;
+      <span class="type">int</span> heightForWidth(<span class="type">int</span>) <span class="keyword">const</span> override;
+      <span class="type">int</span> count() <span class="keyword">const</span> override;
+      <span class="type"><a href="qlayoutitem.html">QLayoutItem</a></span> <span class="operator">*</span>itemAt(<span class="type">int</span> index) <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> minimumSize() <span class="keyword">const</span> override;
+      <span class="type">void</span> setGeometry(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> <span class="operator">&amp;</span>rect) override;
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> sizeHint() <span class="keyword">const</span> override;
+      <span class="type"><a href="qlayoutitem.html">QLayoutItem</a></span> <span class="operator">*</span>takeAt(<span class="type">int</span> index) override;
+
+  <span class="keyword">private</span>:
+      <span class="type">int</span> doLayout(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> <span class="operator">&amp;</span>rect<span class="operator">,</span> bool testOnly) <span class="keyword">const</span>;
+      <span class="type">int</span> smartSpacing(<span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PixelMetric pm) <span class="keyword">const</span>;
+
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qlayoutitem.html">QLayoutItem</a></span> <span class="operator">*</span><span class="operator">&gt;</span> itemList;
+      <span class="type">int</span> m_hSpace;
+      <span class="type">int</span> m_vSpace;
+  };
+
+</pre>
+<p>We reimplement functions inherited from <a href="qlayout.html">QLayout</a>. These functions add items to the layout and handle their orientation and geometry.</p>
+<p>We also declare two private methods, <code>doLayout()</code> and <code>smartSpacing()</code>. <code>doLayout()</code> lays out the layout items, while the <code>smartSpacing()</code> function calculates the spacing between them.</p>
+<a name="flowlayout-class-implementation"></a>
+<h4 id="flowlayout-class-implementation">FlowLayout Class Implementation</h4>
+<p>We start off by looking at the constructor:</p>
+<pre class="cpp">
+
+  FlowLayout<span class="operator">::</span>FlowLayout(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent<span class="operator">,</span> <span class="type">int</span> margin<span class="operator">,</span> <span class="type">int</span> hSpacing<span class="operator">,</span> <span class="type">int</span> vSpacing)
+      : <span class="type"><a href="qlayout.html">QLayout</a></span>(parent)<span class="operator">,</span> m_hSpace(hSpacing)<span class="operator">,</span> m_vSpace(vSpacing)
+  {
+      setContentsMargins(margin<span class="operator">,</span> margin<span class="operator">,</span> margin<span class="operator">,</span> margin);
+  }
+
+  FlowLayout<span class="operator">::</span>FlowLayout(<span class="type">int</span> margin<span class="operator">,</span> <span class="type">int</span> hSpacing<span class="operator">,</span> <span class="type">int</span> vSpacing)
+      : m_hSpace(hSpacing)<span class="operator">,</span> m_vSpace(vSpacing)
+  {
+      setContentsMargins(margin<span class="operator">,</span> margin<span class="operator">,</span> margin<span class="operator">,</span> margin);
+  }
+
+</pre>
+<p>In the constructor we call <code>setContentsMargins()</code> to set the left, top, right and bottom margin. By default, <a href="qlayout.html">QLayout</a> uses values provided by the current style (see <a href="qstyle.html#PixelMetric-enum">QStyle::PixelMetric</a>).</p>
+<pre class="cpp">
+
+  FlowLayout<span class="operator">::</span><span class="operator">~</span>FlowLayout()
+  {
+      <span class="type"><a href="qlayoutitem.html">QLayoutItem</a></span> <span class="operator">*</span>item;
+      <span class="keyword">while</span> ((item <span class="operator">=</span> takeAt(<span class="number">0</span>)))
+          <span class="keyword">delete</span> item;
+  }
+
+</pre>
+<p>In this example we reimplement <code>addItem()</code>, which is a pure virtual function. When using <code>addItem()</code> the ownership of the layout items is transferred to the layout, and it is therefore the layout's responsibility to delete them.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> FlowLayout<span class="operator">::</span>addItem(<span class="type"><a href="qlayoutitem.html">QLayoutItem</a></span> <span class="operator">*</span>item)
+  {
+      itemList<span class="operator">.</span>append(item);
+  }
+
+</pre>
+<p><code>addItem()</code> is implemented to add items to the layout.</p>
+<pre class="cpp">
+
+  <span class="type">int</span> FlowLayout<span class="operator">::</span>horizontalSpacing() <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (m_hSpace <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">0</span>) {
+          <span class="keyword">return</span> m_hSpace;
+      } <span class="keyword">else</span> {
+          <span class="keyword">return</span> smartSpacing(<span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PM_LayoutHorizontalSpacing);
+      }
+  }
+
+  <span class="type">int</span> FlowLayout<span class="operator">::</span>verticalSpacing() <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (m_vSpace <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">0</span>) {
+          <span class="keyword">return</span> m_vSpace;
+      } <span class="keyword">else</span> {
+          <span class="keyword">return</span> smartSpacing(<span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PM_LayoutVerticalSpacing);
+      }
+  }
+
+</pre>
+<p>We implement <code>horizontalSpacing()</code> and <code>verticalSpacing()</code> to get hold of the spacing between the widgets inside the layout. If the value is less than or equal to 0, this value will be used. If not, <code>smartSpacing()</code> will be called to calculate the spacing.</p>
+<pre class="cpp">
+
+  <span class="type">int</span> FlowLayout<span class="operator">::</span>count() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> itemList<span class="operator">.</span>size();
+  }
+
+  <span class="type"><a href="qlayoutitem.html">QLayoutItem</a></span> <span class="operator">*</span>FlowLayout<span class="operator">::</span>itemAt(<span class="type">int</span> index) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> itemList<span class="operator">.</span>value(index);
+  }
+
+  <span class="type"><a href="qlayoutitem.html">QLayoutItem</a></span> <span class="operator">*</span>FlowLayout<span class="operator">::</span>takeAt(<span class="type">int</span> index)
+  {
+      <span class="keyword">if</span> (index <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> index <span class="operator">&lt;</span> itemList<span class="operator">.</span>size())
+          <span class="keyword">return</span> itemList<span class="operator">.</span>takeAt(index);
+      <span class="keyword">return</span> nullptr;
+  }
+
+</pre>
+<p>We then implement <code>count()</code> to return the number of items in the layout. To navigate the list of items we use <code>itemAt()</code> and takeAt() to remove and return items from the list. If an item is removed, the remaining items will be renumbered. All three functions are pure virtual functions from <a href="qlayout.html">QLayout</a>.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Orientations FlowLayout<span class="operator">::</span>expandingDirections() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="number">0</span>;
+  }
+
+</pre>
+<p><code>expandingDirections()</code> returns the <a href="../qtcore/qt.html#Orientation-enum">Qt::Orientation</a>s in which the layout can make use of more space than its <code>sizeHint()</code>.</p>
+<pre class="cpp">
+
+  bool FlowLayout<span class="operator">::</span>hasHeightForWidth() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  <span class="type">int</span> FlowLayout<span class="operator">::</span>heightForWidth(<span class="type">int</span> width) <span class="keyword">const</span>
+  {
+      <span class="type">int</span> height <span class="operator">=</span> doLayout(<span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> width<span class="operator">,</span> <span class="number">0</span>)<span class="operator">,</span> <span class="keyword">true</span>);
+      <span class="keyword">return</span> height;
+  }
+
+</pre>
+<p>To adjust to widgets of which height is dependent on width, we implement <code>heightForWidth()</code>. The function <code>hasHeightForWidth()</code> is used to test for this dependency, and <code>heightForWidth()</code> passes the width on to <code>doLayout()</code> which in turn uses the width as an argument for the layout rect, i.e&#x2e;, the bounds in which the items are laid out. This rect does not include the layout margin().</p>
+<pre class="cpp">
+
+  <span class="type">void</span> FlowLayout<span class="operator">::</span>setGeometry(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> <span class="operator">&amp;</span>rect)
+  {
+      <span class="type"><a href="qlayout.html">QLayout</a></span><span class="operator">::</span>setGeometry(rect);
+      doLayout(rect<span class="operator">,</span> <span class="keyword">false</span>);
+  }
+
+  <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> FlowLayout<span class="operator">::</span>sizeHint() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> minimumSize();
+  }
+
+  <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> FlowLayout<span class="operator">::</span>minimumSize() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> size;
+      <span class="keyword">for</span> (<span class="keyword">const</span> <span class="type"><a href="qlayoutitem.html">QLayoutItem</a></span> <span class="operator">*</span>item : <a href="../qtcore/qtglobal.html#qAsConst">qAsConst</a>(itemList))
+          size <span class="operator">=</span> size<span class="operator">.</span>expandedTo(item<span class="operator">-</span><span class="operator">&gt;</span>minimumSize());
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmargins.html">QMargins</a></span> margins <span class="operator">=</span> contentsMargins();
+      size <span class="operator">+</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(margins<span class="operator">.</span>left() <span class="operator">+</span> margins<span class="operator">.</span>right()<span class="operator">,</span> margins<span class="operator">.</span>top() <span class="operator">+</span> margins<span class="operator">.</span>bottom());
+      <span class="keyword">return</span> size;
+  }
+
+</pre>
+<p><code>setGeometry()</code> is normally used to do the actual layout, i.e&#x2e;, calculate the geometry of the layout's items. In this example, it calls <code>doLayout()</code> and passes the layout rect.</p>
+<p><code>sizeHint()</code> returns the preferred size of the layout and <code>minimumSize()</code> returns the minimum size of the layout.</p>
+<pre class="cpp">
+
+  <span class="type">int</span> FlowLayout<span class="operator">::</span>doLayout(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> <span class="operator">&amp;</span>rect<span class="operator">,</span> bool testOnly) <span class="keyword">const</span>
+  {
+      <span class="type">int</span> left<span class="operator">,</span> top<span class="operator">,</span> right<span class="operator">,</span> bottom;
+      getContentsMargins(<span class="operator">&amp;</span>left<span class="operator">,</span> <span class="operator">&amp;</span>top<span class="operator">,</span> <span class="operator">&amp;</span>right<span class="operator">,</span> <span class="operator">&amp;</span>bottom);
+      <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> effectiveRect <span class="operator">=</span> rect<span class="operator">.</span>adjusted(<span class="operator">+</span>left<span class="operator">,</span> <span class="operator">+</span>top<span class="operator">,</span> <span class="operator">-</span>right<span class="operator">,</span> <span class="operator">-</span>bottom);
+      <span class="type">int</span> x <span class="operator">=</span> effectiveRect<span class="operator">.</span>x();
+      <span class="type">int</span> y <span class="operator">=</span> effectiveRect<span class="operator">.</span>y();
+      <span class="type">int</span> lineHeight <span class="operator">=</span> <span class="number">0</span>;
+
+</pre>
+<p><code>doLayout()</code> handles the layout if <code>horizontalSpacing()</code> or <code>verticalSpacing()</code> don't return the default value. It uses <code>getContentsMargins()</code> to calculate the area available to the layout items.</p>
+<pre class="cpp">
+
+      <span class="keyword">for</span> (<span class="type"><a href="qlayoutitem.html">QLayoutItem</a></span> <span class="operator">*</span>item : <a href="../qtcore/qtglobal.html#qAsConst">qAsConst</a>(itemList)) {
+          <span class="keyword">const</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>wid <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>widget();
+          <span class="type">int</span> spaceX <span class="operator">=</span> horizontalSpacing();
+          <span class="keyword">if</span> (spaceX <span class="operator">=</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>)
+              spaceX <span class="operator">=</span> wid<span class="operator">-</span><span class="operator">&gt;</span>style()<span class="operator">-</span><span class="operator">&gt;</span>layoutSpacing(
+                  <span class="type"><a href="qsizepolicy.html">QSizePolicy</a></span><span class="operator">::</span>PushButton<span class="operator">,</span> <span class="type"><a href="qsizepolicy.html">QSizePolicy</a></span><span class="operator">::</span>PushButton<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal);
+          <span class="type">int</span> spaceY <span class="operator">=</span> verticalSpacing();
+          <span class="keyword">if</span> (spaceY <span class="operator">=</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>)
+              spaceY <span class="operator">=</span> wid<span class="operator">-</span><span class="operator">&gt;</span>style()<span class="operator">-</span><span class="operator">&gt;</span>layoutSpacing(
+                  <span class="type"><a href="qsizepolicy.html">QSizePolicy</a></span><span class="operator">::</span>PushButton<span class="operator">,</span> <span class="type"><a href="qsizepolicy.html">QSizePolicy</a></span><span class="operator">::</span>PushButton<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Vertical);
+
+</pre>
+<p>It then sets the proper amount of spacing for each widget in the layout, based on the current style.</p>
+<pre class="cpp">
+
+          <span class="type">int</span> nextX <span class="operator">=</span> x <span class="operator">+</span> item<span class="operator">-</span><span class="operator">&gt;</span>sizeHint()<span class="operator">.</span>width() <span class="operator">+</span> spaceX;
+          <span class="keyword">if</span> (nextX <span class="operator">-</span> spaceX <span class="operator">&gt;</span> effectiveRect<span class="operator">.</span>right() <span class="operator">&amp;</span><span class="operator">&amp;</span> lineHeight <span class="operator">&gt;</span> <span class="number">0</span>) {
+              x <span class="operator">=</span> effectiveRect<span class="operator">.</span>x();
+              y <span class="operator">=</span> y <span class="operator">+</span> lineHeight <span class="operator">+</span> spaceY;
+              nextX <span class="operator">=</span> x <span class="operator">+</span> item<span class="operator">-</span><span class="operator">&gt;</span>sizeHint()<span class="operator">.</span>width() <span class="operator">+</span> spaceX;
+              lineHeight <span class="operator">=</span> <span class="number">0</span>;
+          }
+
+          <span class="keyword">if</span> (<span class="operator">!</span>testOnly)
+              item<span class="operator">-</span><span class="operator">&gt;</span>setGeometry(<span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(<span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(x<span class="operator">,</span> y)<span class="operator">,</span> item<span class="operator">-</span><span class="operator">&gt;</span>sizeHint()));
+
+          x <span class="operator">=</span> nextX;
+          lineHeight <span class="operator">=</span> <a href="../qtcore/qtglobal.html#qMax">qMax</a>(lineHeight<span class="operator">,</span> item<span class="operator">-</span><span class="operator">&gt;</span>sizeHint()<span class="operator">.</span>height());
+      }
+      <span class="keyword">return</span> y <span class="operator">+</span> lineHeight <span class="operator">-</span> rect<span class="operator">.</span>y() <span class="operator">+</span> bottom;
+  }
+
+</pre>
+<p>The position of each item in the layout is then calculated by adding the items width and the line height to the initial x and y coordinates. This in turn lets us find out whether the next item will fit on the current line or if it must be moved down to the next. We also find the height of the current line based on the widgets height.</p>
+<pre class="cpp">
+
+  <span class="type">int</span> FlowLayout<span class="operator">::</span>smartSpacing(<span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PixelMetric pm) <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>parent();
+      <span class="keyword">if</span> (<span class="operator">!</span>parent) {
+          <span class="keyword">return</span> <span class="operator">-</span><span class="number">1</span>;
+      } <span class="keyword">else</span> <span class="keyword">if</span> (parent<span class="operator">-</span><span class="operator">&gt;</span>isWidgetType()) {
+          <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>pw <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(parent);
+          <span class="keyword">return</span> pw<span class="operator">-</span><span class="operator">&gt;</span>style()<span class="operator">-</span><span class="operator">&gt;</span>pixelMetric(pm<span class="operator">,</span> nullptr<span class="operator">,</span> pw);
+      } <span class="keyword">else</span> {
+          <span class="keyword">return</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="qlayout.html">QLayout</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(parent)<span class="operator">-</span><span class="operator">&gt;</span>spacing();
+      }
+  }
+
+</pre>
+<p><code>smartSpacing()</code> is designed to get the default spacing for either the top-level layouts or the sublayouts. The default spacing for top-level layouts, when the parent is a <a href="qwidget.html">QWidget</a>, will be determined by querying the style. The default spacing for sublayouts, when the parent is a <a href="qlayout.html">QLayout</a>, will be determined by querying the spacing of the parent layout.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/layouts/flowlayout?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@layouts/flowlayout -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

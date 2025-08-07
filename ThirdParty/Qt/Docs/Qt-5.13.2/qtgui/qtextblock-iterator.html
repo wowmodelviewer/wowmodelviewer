@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtextobject.cpp -->
+  <title>iterator Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >iterator</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">iterator Class</h1>
+<span class="small-subtitle">Class iterator is declared in class <a href="qtextblock.html">QTextBlock</a>.<br/></span>
+<!-- $$$iterator-brief -->
+<p>The <a href="qtextblock-iterator.html">QTextBlock::iterator</a> class provides an iterator for reading the contents of a <a href="qtextblock.html">QTextBlock</a>. <a href="#details">More...</a></p>
+<!-- @@@iterator -->
+<ul>
+<li><a href="qtextblock-iterator-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtextblock-iterator.html#iterator-2">iterator</a></b>(const iterator &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtextblock-iterator.html#iterator-1">iterator</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qtextblock-iterator.html#atEnd">atEnd</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QTextFragment </td><td class="memItemRight bottomAlign"><b><a href="qtextblock-iterator.html#fragment">fragment</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qtextblock-iterator.html#operator-not-eq">operator!=</a></b>(const iterator &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> iterator &amp;</td><td class="memItemRight bottomAlign"><b><a href="qtextblock-iterator.html#operator-2b-2b">operator++</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> iterator </td><td class="memItemRight bottomAlign"><b><a href="qtextblock-iterator.html#operator-2b-2b-1">operator++</a></b>(<i>int</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> iterator &amp;</td><td class="memItemRight bottomAlign"><b><a href="qtextblock-iterator.html#operator--">operator--</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> iterator </td><td class="memItemRight bottomAlign"><b><a href="qtextblock-iterator.html#operator---1">operator--</a></b>(<i>int</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qtextblock-iterator.html#operator-eq-eq">operator==</a></b>(const iterator &amp;<i>other</i>) const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$iterator-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A block consists of a sequence of text fragments. This class provides a way to iterate over these, and read their contents. It does not provide a way to modify the internal structure or contents of the block.</p>
+<p>An iterator can be constructed and used to access the fragments within a text block in the following way:</p>
+<pre class="cpp">
+
+      <span class="type">QTextBlock</span><span class="operator">::</span>iterator it;
+      <span class="keyword">for</span> (it <span class="operator">=</span> currentBlock<span class="operator">.</span>begin(); <span class="operator">!</span>(it<span class="operator">.</span>atEnd()); <span class="operator">+</span><span class="operator">+</span>it) {
+          <span class="type"><a href="qtextfragment.html">QTextFragment</a></span> currentFragment <span class="operator">=</span> it<span class="operator">.</span>fragment();
+          <span class="keyword">if</span> (currentFragment<span class="operator">.</span>isValid())
+              processFragment(currentFragment);
+      }
+
+</pre>
+</div>
+<p><b>See also </b><a href="qtextfragment.html">QTextFragment</a>.</p>
+<!-- @@@iterator -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$iterator$$$iteratorconstiterator& -->
+<h3 class="fn" id="iterator-2"><a name="iterator-2"></a>iterator::<span class="name">iterator</span>(const <span class="type">iterator</span> &amp;<i>other</i>)</h3>
+<p>Copy constructor. Constructs a copy of the <i>other</i> iterator.</p>
+<!-- @@@iterator -->
+<!-- $$$iterator$$$iterator -->
+<h3 class="fn" id="iterator-1"><a name="iterator-1"></a>iterator::<span class="name">iterator</span>()</h3>
+<p>Constructs an iterator for this text block.</p>
+<!-- @@@iterator -->
+<!-- $$$atEnd[overload1]$$$atEnd -->
+<h3 class="fn" id="atEnd"><a name="atEnd"></a><span class="type">bool</span> iterator::<span class="name">atEnd</span>() const</h3>
+<p>Returns <code>true</code> if the current item is the last item in the text block.</p>
+<!-- @@@atEnd -->
+<!-- $$$fragment[overload1]$$$fragment -->
+<h3 class="fn" id="fragment"><a name="fragment"></a><span class="type"><a href="qtextfragment.html">QTextFragment</a></span> iterator::<span class="name">fragment</span>() const</h3>
+<p>Returns the text fragment the iterator currently points to.</p>
+<!-- @@@fragment -->
+<!-- $$$operator!=[overload1]$$$operator!=constiterator& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> iterator::<span class="name">operator!=</span>(const <span class="type">iterator</span> &amp;<i>other</i>) const</h3>
+<p>Retuns true if this iterator is different from the <i>other</i> iterator; otherwise returns <code>false</code>.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator++[overload1]$$$operator++ -->
+<h3 class="fn" id="operator-2b-2b"><a name="operator-2b-2b"></a><span class="type">iterator</span> &amp;iterator::<span class="name">operator++</span>()</h3>
+<p>The prefix ++ operator (<code>++i</code>) advances the iterator to the next item in the hash and returns an iterator to the new current item.</p>
+<!-- @@@operator++ -->
+<!-- $$$operator++$$$operator++int -->
+<h3 class="fn" id="operator-2b-2b-1"><a name="operator-2b-2b-1"></a><span class="type">iterator</span> iterator::<span class="name">operator++</span>(<i>int</i>)</h3>
+<p>The postfix ++ operator (<code>i++</code>) advances the iterator to the next item in the text block and returns an iterator to the old current item.</p>
+<!-- @@@operator++ -->
+<!-- $$$operator--[overload1]$$$operator-- -->
+<h3 class="fn" id="operator--"><a name="operator--"></a><span class="type">iterator</span> &amp;iterator::<span class="name">operator--</span>()</h3>
+<p>The prefix -- operator (<code>--i</code>) makes the preceding item current and returns an iterator pointing to the new current item.</p>
+<!-- @@@operator-- -->
+<!-- $$$operator--$$$operator--int -->
+<h3 class="fn" id="operator---1"><a name="operator---1"></a><span class="type">iterator</span> iterator::<span class="name">operator--</span>(<i>int</i>)</h3>
+<p>The postfix -- operator (<code>i--</code>) makes the preceding item current and returns an iterator to the old current item.</p>
+<!-- @@@operator-- -->
+<!-- $$$operator==[overload1]$$$operator==constiterator& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> iterator::<span class="name">operator==</span>(const <span class="type">iterator</span> &amp;<i>other</i>) const</h3>
+<p>Retuns true if this iterator is the same as the <i>other</i> iterator; otherwise returns <code>false</code>.</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

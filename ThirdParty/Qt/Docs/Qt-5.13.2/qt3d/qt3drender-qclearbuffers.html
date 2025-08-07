@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qclearbuffers.cpp -->
+  <title>QClearBuffers Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QClearBuffers</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QClearBuffers Class</h1>
+<span class="small-subtitle">(<a href="qt3drender-qclearbuffers.html">Qt3DRender::QClearBuffers</a>)<br/></span>
+<!-- $$$QClearBuffers-brief -->
+<p>Class to clear buffers. <a href="#details">More...</a></p>
+<!-- @@@QClearBuffers -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QClearBuffers&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3drender</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-clearbuffers.html">ClearBuffers</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3drender-qframegraphnode.html">Qt3DRender::QFrameGraphNode</a></td></tr></table></div><p>This class was introduced in  Qt 5.7.</p>
+<ul>
+<li><a href="qt3drender-qclearbuffers-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qclearbuffers.html#BufferType-enum">BufferType</a></b> { None, ColorBuffer, DepthBuffer, StencilBuffer, ..., AllBuffers }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qclearbuffers.html#BufferType-enum">BufferTypeFlags</a></b></td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qt3drender-qclearbuffers.html#buffers-prop">buffers</a></b> : BufferType</li>
+<li class="fn"><b><a href="qt3drender-qclearbuffers.html#clearColor-prop">clearColor</a></b> : QColor</li>
+<li class="fn"><b><a href="qt3drender-qclearbuffers.html#clearDepthValue-prop">clearDepthValue</a></b> : float</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qt3drender-qclearbuffers.html#clearStencilValue-prop">clearStencilValue</a></b> : int</li>
+<li class="fn"><b><a href="qt3drender-qclearbuffers.html#colorBuffer-prop">colorBuffer</a></b> : Qt3DRender::QRenderTargetOutput*</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qclearbuffers.html#QClearBuffers">QClearBuffers</a></b>(Qt3DCore::QNode *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QClearBuffers::BufferType </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qclearbuffers.html#buffers-prop">buffers</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QColor </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qclearbuffers.html#clearColor-prop">clearColor</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> float </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qclearbuffers.html#clearDepthValue-prop">clearDepthValue</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qclearbuffers.html#clearStencilValue-prop">clearStencilValue</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QRenderTargetOutput *</td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qclearbuffers.html#colorBuffer-prop">colorBuffer</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qclearbuffers.html#buffers-prop">setBuffers</a></b>(Qt3DRender::QClearBuffers::BufferType <i>buffers</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qclearbuffers.html#clearColor-prop">setClearColor</a></b>(const QColor &amp;<i>color</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qclearbuffers.html#clearDepthValue-prop">setClearDepthValue</a></b>(float <i>clearDepthValue</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qclearbuffers.html#clearStencilValue-prop">setClearStencilValue</a></b>(int <i>clearStencilValue</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qclearbuffers.html#colorBuffer-prop">setColorBuffer</a></b>(Qt3DRender::QRenderTargetOutput *<i>buffer</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qclearbuffers.html#buffers-prop">buffersChanged</a></b>(Qt3DRender::QClearBuffers::BufferType <i>buffers</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qclearbuffers.html#clearColor-prop">clearColorChanged</a></b>(const QColor &amp;<i>color</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qclearbuffers.html#clearDepthValue-prop">clearDepthValueChanged</a></b>(float <i>clearDepthValue</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qclearbuffers.html#clearStencilValue-prop">clearStencilValueChanged</a></b>(int <i>clearStencilValue</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qclearbuffers.html#colorBuffer-prop">colorBufferChanged</a></b>(Qt3DRender::QRenderTargetOutput *<i>buffer</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QClearBuffers-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A <a href="qt3drender-qclearbuffers.html">Qt3DRender::QClearBuffers</a> FrameGraph node enables clearing of the specific render target buffers with specific values.</p>
+</div>
+<!-- @@@QClearBuffers -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$BufferType$$$None$$$ColorBuffer$$$DepthBuffer$$$StencilBuffer$$$DepthStencilBuffer$$$ColorDepthBuffer$$$ColorDepthStencilBuffer$$$AllBuffers -->
+<h3 class="flags" id="BufferType-enum"><a name="BufferType-enum"></a>enum QClearBuffers::<span class="name">BufferType</span><br/>flags QClearBuffers::<span class="name">BufferTypeFlags</span></h3>
+<p>This enum type describes types of buffer to be cleared.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QClearBuffers::None</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">No buffers will be cleared</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QClearBuffers::ColorBuffer</code></td><td class="topAlign tblval"><code>(1 &lt;&lt; 0)</code></td><td class="topAlign">Clear color buffers</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QClearBuffers::DepthBuffer</code></td><td class="topAlign tblval"><code>(1 &lt;&lt; 1)</code></td><td class="topAlign">Clear depth buffer</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QClearBuffers::StencilBuffer</code></td><td class="topAlign tblval"><code>(1 &lt;&lt; 2)</code></td><td class="topAlign">Clear stencil buffer</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QClearBuffers::DepthStencilBuffer</code></td><td class="topAlign tblval"><code>DepthBuffer | StencilBuffer</code></td><td class="topAlign">Clear depth and stencil buffers</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QClearBuffers::ColorDepthBuffer</code></td><td class="topAlign tblval"><code>ColorBuffer | DepthBuffer</code></td><td class="topAlign">Clear color and depth buffers</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QClearBuffers::ColorDepthStencilBuffer</code></td><td class="topAlign tblval"><code>ColorBuffer | DepthStencilBuffer</code></td><td class="topAlign">Clear color, depth and stencil buffers</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QClearBuffers::AllBuffers</code></td><td class="topAlign tblval"><code>0xFFFFFFFF</code></td><td class="topAlign">Clear all buffers</td></tr>
+</table></div>
+<p>The BufferTypeFlags type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;BufferType&gt;. It stores an OR combination of BufferType values.</p>
+<!-- @@@BufferType -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$buffers-prop$$$buffers$$$setBuffersQt3DRender::QClearBuffers::BufferType$$$buffersChangedQt3DRender::QClearBuffers::BufferType -->
+<h3 class="fn" id="buffers-prop"><a name="buffers-prop"></a><span class="name">buffers</span> : <span class="type"><a href="qt3drender-qclearbuffers.html#BufferType-enum">BufferType</a></span></h3>
+<p>Specifies the buffer type to be used.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QClearBuffers::BufferType </td><td class="memItemRight bottomAlign"><span class="name"><b>buffers</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setBuffers</b></span>(Qt3DRender::QClearBuffers::BufferType <i>buffers</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>buffersChanged</b></span>(Qt3DRender::QClearBuffers::BufferType <i>buffers</i>)</td></tr>
+</table></div>
+<!-- @@@buffers -->
+<!-- $$$clearColor-prop$$$clearColor$$$setClearColorconstQColor&$$$clearColorChangedconstQColor& -->
+<h3 class="fn" id="clearColor-prop"><a name="clearColor-prop"></a><span class="name">clearColor</span> : <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span></h3>
+<p>Specifies the clear color to be used.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QColor </td><td class="memItemRight bottomAlign"><span class="name"><b>clearColor</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setClearColor</b></span>(const QColor &amp;<i>color</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>clearColorChanged</b></span>(const QColor &amp;<i>color</i>)</td></tr>
+</table></div>
+<!-- @@@clearColor -->
+<!-- $$$clearDepthValue-prop$$$clearDepthValue$$$setClearDepthValuefloat$$$clearDepthValueChangedfloat -->
+<h3 class="fn" id="clearDepthValue-prop"><a name="clearDepthValue-prop"></a><span class="name">clearDepthValue</span> : <span class="type">float</span></h3>
+<p>Specifies the clear depth value to be used.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> float </td><td class="memItemRight bottomAlign"><span class="name"><b>clearDepthValue</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setClearDepthValue</b></span>(float <i>clearDepthValue</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>clearDepthValueChanged</b></span>(float <i>clearDepthValue</i>)</td></tr>
+</table></div>
+<!-- @@@clearDepthValue -->
+<!-- $$$clearStencilValue-prop$$$clearStencilValue$$$setClearStencilValueint$$$clearStencilValueChangedint -->
+<h3 class="fn" id="clearStencilValue-prop"><a name="clearStencilValue-prop"></a><span class="name">clearStencilValue</span> : <span class="type">int</span></h3>
+<p>Specifies the stencil value to be used.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>clearStencilValue</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setClearStencilValue</b></span>(int <i>clearStencilValue</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>clearStencilValueChanged</b></span>(int <i>clearStencilValue</i>)</td></tr>
+</table></div>
+<!-- @@@clearStencilValue -->
+<!-- $$$colorBuffer-prop$$$colorBuffer$$$setColorBufferQt3DRender::QRenderTargetOutput*$$$colorBufferChangedQt3DRender::QRenderTargetOutput* -->
+<h3 class="fn" id="colorBuffer-prop"><a name="colorBuffer-prop"></a><span class="name">colorBuffer</span> : <span class="type"><a href="qt3drender-qrendertargetoutput.html">Qt3DRender::QRenderTargetOutput</a></span>*</h3>
+<p>Specifies a specific color buffer to clear. If set to NULL (default), and <a href="qt3drender-qclearbuffers.html#BufferType-enum">ColorBuffer</a> flag is set, all color buffers will be cleared.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QRenderTargetOutput *</td><td class="memItemRight bottomAlign"><span class="name"><b>colorBuffer</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setColorBuffer</b></span>(Qt3DRender::QRenderTargetOutput *<i>buffer</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>colorBufferChanged</b></span>(Qt3DRender::QRenderTargetOutput *<i>buffer</i>)</td></tr>
+</table></div>
+<!-- @@@colorBuffer -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QClearBuffers[overload1]$$$QClearBuffersQt3DCore::QNode* -->
+<h3 class="fn" id="QClearBuffers"><a name="QClearBuffers"></a>QClearBuffers::<span class="name">QClearBuffers</span>(<span class="type"><a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></span> *<i>parent</i> = nullptr)</h3>
+<p>The constructor creates an instance with the specified <i>parent</i>.</p>
+<!-- @@@QClearBuffers -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- remoteobjects-external-schemas.qdoc -->
+  <title>Qt Remote Objects - External QIODevices | Qt Remote Objects 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtremoteobjects-index.html">Qt Remote Objects</a></td><td >Qt Remote Objects - External QIODevices</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtremoteobjects-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#external-qiodevices">External QIODevices</a></li>
+<li class="level1"><a href="#external-schemas">External Schemas</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Remote Objects - External QIODevices</h1>
+<span class="subtitle"></span>
+<!-- $$$qtremoteobjects-external-schemas.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="external-qiodevices"></a>
+<h2 id="external-qiodevices">External QIODevices</h2>
+<p>Qt Remote Objects supports several communications channels out-of-the-box, such as the <a href="../qtnetwork/qtcpserver.html">QTcpServer</a> and <a href="../qtnetwork/qtcpsocket.html">QTcpSocket</a> pair. Given the desired <a href="../qtcore/qurl.html">QUrl</a> for tcp, or the desired name (for the <a href="../qtnetwork/qlocalserver.html">QLocalServer</a> and <a href="../qtnetwork/qlocalsocket.html">QLocalSocket</a> pair), the code needed to listen and connect are boilerplate and handled internally by Qt. Qt Remote Objects supports other types of <a href="../qtcore/qiodevice.html">QIODevice</a> as well, and the <a href="qremoteobjectnode.html">QRemoteObjectNode</a> classes provide additional methods to support cases where custom code is needed.</p>
+<p>A contrived example with TCP/IP is shown below. A more realistic example would use an SSL connection, which would require configuration of certificates, etc.</p>
+<pre class="cpp">
+
+  <span class="comment">// Create the server and listen outside of QtRO</span>
+  <span class="type"><a href="../qtnetwork/qtcpserver.html">QTcpServer</a></span> tcpServer;
+  tcpServer<span class="operator">.</span>listen(<span class="type"><a href="../qtnetwork/qhostaddress.html">QHostAddress</a></span>(<span class="number">127.0.0.1</span>)<span class="operator">,</span> <span class="number">65213</span>);
+
+  <span class="comment">// Create the host node.  We don't need a hostUrl unless we want to take</span>
+  <span class="comment">// advantage of external schemas (see next example).</span>
+  <span class="type"><a href="qremoteobjecthost.html">QRemoteObjectHost</a></span> srcNode();
+
+  <span class="comment">// Make sure any connections are handed to QtRO</span>
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(<span class="operator">&amp;</span>tcpServer<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtnetwork/qtcpserver.html">QTcpServer</a></span><span class="operator">::</span>newConnection<span class="operator">,</span> <span class="operator">&amp;</span>srcNode<span class="operator">,</span>
+                   <span class="operator">[</span><span class="operator">&amp;</span>srcNode<span class="operator">,</span> <span class="operator">&amp;</span>tcpServer<span class="operator">]</span>() {
+      srcNode<span class="operator">.</span>addHostSideConnection(tcpServer<span class="operator">.</span>nextPendingConnection());
+  });
+
+</pre>
+<p>The Replica side code needs to manually connect to the Host</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qremoteobjectnode.html">QRemoteObjectNode</a></span> repNode();
+  <span class="type"><a href="../qtnetwork/qtcpsocket.html">QTcpSocket</a></span> <span class="operator">*</span>socket <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtnetwork/qtcpsocket.html">QTcpSocket</a></span>(<span class="operator">&amp;</span>repNode);
+  connect(socket<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtnetwork/qtcpsocket.html">QTcpSocket</a></span><span class="operator">::</span>connected<span class="operator">,</span> <span class="operator">&amp;</span>repNode<span class="operator">,</span>
+          <span class="operator">[</span>socket<span class="operator">,</span> <span class="operator">&amp;</span>repNode<span class="operator">]</span>() {
+      repNode<span class="operator">.</span>addClientSideConnection(socket);
+  });
+  socket<span class="operator">-</span><span class="operator">&gt;</span>connectToHost(<span class="type"><a href="../qtnetwork/qhostaddress.html">QHostAddress</a></span>(<span class="number">127.0.0.1</span>)<span class="operator">,</span> <span class="number">65213</span>);
+  };
+
+</pre>
+<a name="external-schemas"></a>
+<h2 id="external-schemas">External Schemas</h2>
+<p>It is possible to create each side of the <a href="../qtcore/qiodevice.html">QIODevice</a> and call <a href="qremoteobjectnode.html#addClientSideConnection">QRemoteObjectNode::addClientSideConnection</a>(QIODevice *ioDevice) and <a href="qremoteobjecthostbase.html#addHostSideConnection">QRemoteObjectHostBase::addHostSideConnection</a>(QIODevice *ioDevice) as shown above. This is fully supported, but requires the client know how to establish the connection or have a way to discover that information. This is exactly the problem the registry was designed to solve.</p>
+<p>Qt Remote Objects also allows &quot;External Schemas&quot; to be used with the registry, which helps with connection setup. On the <a href="qremoteobjecthost.html">QRemoteObjectHost</a> side, the user must set the hostUrl with the desired schema.</p>
+<pre class="cpp">
+
+  <span class="comment">// Use standard tcp url for the registry</span>
+  <span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> registryUrl <span class="operator">=</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;tcp://127.0.0.1:65212&quot;</span>));
+  <span class="comment">// Use &quot;exttcp&quot; for the &quot;external&quot; interface</span>
+  <span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> extUrl <span class="operator">=</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;exttcp://127.0.0.1:65213&quot;</span>));
+
+  <span class="comment">// Create the server and listen outside of QtRO</span>
+  <span class="type"><a href="../qtnetwork/qtcpserver.html">QTcpServer</a></span> tcpServer;
+  tcpServer<span class="operator">.</span>listen(<span class="type"><a href="../qtnetwork/qhostaddress.html">QHostAddress</a></span>(extUrl<span class="operator">.</span>host())<span class="operator">,</span> extUrl<span class="operator">.</span>port());
+
+  <span class="comment">// We need a registry for everyone to connect to</span>
+  <span class="type"><a href="qremoteobjectregistryhost.html">QRemoteObjectRegistryHost</a></span> registry(registryUrl);
+
+  <span class="comment">// Finally, we create our host node and register &quot;exttcp&quot; as our schema.</span>
+  <span class="comment">// We need the AllowExternalRegistration parameter to prevent the node from</span>
+  <span class="comment">// setting a hostUrlInvalid error.</span>
+  <span class="type"><a href="qremoteobjecthost.html">QRemoteObjectHost</a></span> srcNode(extUrl<span class="operator">,</span> registryUrl<span class="operator">,</span> <span class="type"><a href="qremoteobjecthost.html">QRemoteObjectHost</a></span><span class="operator">::</span>AllowExternalRegistration);
+  <span class="comment">// From now on, when we call enableRemoting() from this node, the registry</span>
+  <span class="comment">// will be updated to show the Source object at extUrl.</span>
+
+</pre>
+<p>On the <a href="qtremoteobjects-replica.html#replica">Replica</a> side, the <a href="qremoteobjectnode.html">QRemoteObjectNode</a> needs to register a callback to be used when the external schema is detected. The callback must be a <a href="qremoteobjectnode.html#RemoteObjectSchemaHandler-typedef">RemoteObjectSchemaHandler</a>.</p>
+<pre class="cpp">
+
+  <span class="comment">// Use standard tcp url for the registry</span>
+  <span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> registryUrl <span class="operator">=</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;tcp://127.0.0.1:65212&quot;</span>));
+
+  <span class="comment">// This time create the node connected to the registry</span>
+  <span class="type"><a href="qremoteobjectnode.html">QRemoteObjectNode</a></span> repNode(registryUrl);
+
+  <span class="comment">// Create the RemoteObjectSchemaHandler callback</span>
+  <span class="type"><a href="qremoteobjectnode.html">QRemoteObjectNode</a></span><span class="operator">::</span>RemoteObjectSchemaHandler setupTcp <span class="operator">=</span> <span class="operator">[</span><span class="operator">&amp;</span>repNode<span class="operator">]</span>(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> url) {
+      <span class="type"><a href="../qtnetwork/qtcpsocket.html">QTcpSocket</a></span> <span class="operator">*</span>socket <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtnetwork/qtcpsocket.html">QTcpSocket</a></span>(<span class="operator">&amp;</span>repNode);
+      connect(socket<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtnetwork/qtcpsocket.html">QTcpSocket</a></span><span class="operator">::</span>connected<span class="operator">,</span>
+              <span class="operator">[</span>socket<span class="operator">,</span> <span class="operator">&amp;</span>repNode<span class="operator">]</span>() {
+          repNode<span class="operator">.</span>addClientSideConnection(socket);
+      });
+      connect(socket<span class="operator">,</span> <span class="type">QOverload</span><span class="operator">&lt;</span><span class="type"><a href="../qtnetwork/qabstractsocket.html">QAbstractSocket</a></span><span class="operator">::</span>SocketError<span class="operator">&gt;</span><span class="operator">::</span>of(<span class="operator">&amp;</span><span class="type"><a href="../qtnetwork/qsslsocket.html">QSslSocket</a></span><span class="operator">::</span>error)<span class="operator">,</span>
+              <span class="operator">[</span>socket<span class="operator">]</span>(<span class="type"><a href="../qtnetwork/qabstractsocket.html">QAbstractSocket</a></span><span class="operator">::</span>SocketError error) {
+          <span class="keyword">delete</span> socket;
+      });
+      socket<span class="operator">-</span><span class="operator">&gt;</span>connectToHost(url<span class="operator">.</span>host()<span class="operator">,</span> url<span class="operator">.</span>port());
+  };
+
+  <span class="comment">// Once we call registerExternalSchema, the above method will be called</span>
+  <span class="comment">// whenever the registry sees an object we are interested in on &quot;exttcp&quot;</span>
+  repNode<span class="operator">.</span>registerExternalSchema(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;exttcp&quot;</span>)<span class="operator">,</span> setupTcp);
+
+</pre>
+</div>
+<!-- @@@qtremoteobjects-external-schemas.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

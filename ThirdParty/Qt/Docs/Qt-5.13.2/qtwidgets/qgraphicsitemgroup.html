@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qgraphicsitem.cpp -->
+  <title>QGraphicsItemGroup Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QGraphicsItemGroup</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QGraphicsItemGroup Class</h1>
+<!-- $$$QGraphicsItemGroup-brief -->
+<p>The <a href="qgraphicsitemgroup.html">QGraphicsItemGroup</a> class provides a container that treats a group of items as a single item. <a href="#details">More...</a></p>
+<!-- @@@QGraphicsItemGroup -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QGraphicsItemGroup&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.2</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qgraphicsitem.html">QGraphicsItem</a></td></tr></table></div><p>This class was introduced in  Qt 4.2.</p>
+<ul>
+<li><a href="qgraphicsitemgroup-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsitemgroup.html#anonymous-enum">anonymous</a></b> { Type }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsitemgroup.html#QGraphicsItemGroup">QGraphicsItemGroup</a></b>(QGraphicsItem *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsitemgroup.html#dtor.QGraphicsItemGroup">~QGraphicsItemGroup</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsitemgroup.html#addToGroup">addToGroup</a></b>(QGraphicsItem *<i>item</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsitemgroup.html#removeFromGroup">removeFromGroup</a></b>(QGraphicsItem *<i>item</i>)</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QRectF </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsitemgroup.html#boundingRect">boundingRect</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsitemgroup.html#isObscuredBy">isObscuredBy</a></b>(const QGraphicsItem *<i>item</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QPainterPath </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsitemgroup.html#opaqueArea">opaqueArea</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsitemgroup.html#paint">paint</a></b>(QPainter *<i>painter</i>, const QStyleOptionGraphicsItem *<i>option</i>, QWidget *<i>widget</i> = nullptr) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsitemgroup.html#type">type</a></b>() const override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QGraphicsItemGroup-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A <a href="qgraphicsitemgroup.html">QGraphicsItemGroup</a> is a special type of compound item that treats itself and all its children as one item (i.e&#x2e;, all events and geometries for all children are merged together). It's common to use item groups in presentation tools, when the user wants to group several smaller items into one big item in order to simplify moving and copying of items.</p>
+<p>If all you want is to store items inside other items, you can use any <a href="qgraphicsitem.html">QGraphicsItem</a> directly by passing a suitable parent to <a href="qgraphicsitem.html#setParentItem">setParentItem</a>().</p>
+<p>The <a href="qgraphicsitemgroup.html#boundingRect">boundingRect</a>() function of <a href="qgraphicsitemgroup.html">QGraphicsItemGroup</a> returns the bounding rectangle of all items in the item group. <a href="qgraphicsitemgroup.html">QGraphicsItemGroup</a> ignores the <a href="qgraphicsitem.html#GraphicsItemFlag-enum">ItemIgnoresTransformations</a> flag on its children (i.e&#x2e;, with respect to the geometry of the group item, the children are treated as if they were transformable).</p>
+<p>There are two ways to construct an item group. The easiest and most common approach is to pass a list of items (e.g&#x2e;, all selected items) to <a href="qgraphicsscene.html#createItemGroup">QGraphicsScene::createItemGroup</a>(), which returns a new <a href="qgraphicsitemgroup.html">QGraphicsItemGroup</a> item. The other approach is to manually construct a <a href="qgraphicsitemgroup.html">QGraphicsItemGroup</a> item, add it to the scene calling <a href="qgraphicsscene.html#addItem">QGraphicsScene::addItem</a>(), and then add items to the group manually, one at a time by calling <a href="qgraphicsitemgroup.html#addToGroup">addToGroup</a>(). To dismantle (&quot;ungroup&quot;) an item group, you can either call <a href="qgraphicsscene.html#destroyItemGroup">QGraphicsScene::destroyItemGroup</a>(), or you can manually remove all items from the group by calling <a href="qgraphicsitemgroup.html#removeFromGroup">removeFromGroup</a>().</p>
+<pre class="cpp">
+
+  <span class="comment">// Group all selected items together</span>
+  <span class="type"><a href="qgraphicsitemgroup.html#QGraphicsItemGroup">QGraphicsItemGroup</a></span> <span class="operator">*</span>group <span class="operator">=</span> scene<span class="operator">-</span><span class="operator">&gt;</span>createItemGroup(scene<span class="operator">-</span><span class="operator">&gt;</span>selecteditems());
+
+  <span class="comment">// Destroy the group, and delete the group item</span>
+  scene<span class="operator">-</span><span class="operator">&gt;</span>destroyItemGroup(group);
+
+</pre>
+<p>The operation of adding and removing items preserves the items' scene-relative position and transformation, as opposed to calling <a href="qgraphicsitem.html#setParentItem">setParentItem</a>(), where only the child item's parent-relative position and transformation are kept.</p>
+<p>The addtoGroup() function reparents the target item to this item group, keeping the item's position and transformation intact relative to the scene. Visually, this means that items added via <a href="qgraphicsitemgroup.html#addToGroup">addToGroup</a>() will remain completely unchanged as a result of this operation, regardless of the item or the group's current position or transformation; although the item's position and matrix are likely to change.</p>
+<p>The <a href="qgraphicsitemgroup.html#removeFromGroup">removeFromGroup</a>() function has similar semantics to <a href="qgraphicsitem.html#setParentItem">setParentItem</a>(); it reparents the item to the parent item of the item group. As with <a href="qgraphicsitemgroup.html#addToGroup">addToGroup</a>(), the item's scene-relative position and transformation remain intact.</p>
+</div>
+<p><b>See also </b><a href="qgraphicsitem.html">QGraphicsItem</a> and <a href="graphicsview.html">Graphics View Framework</a>.</p>
+<!-- @@@QGraphicsItemGroup -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$anonymous$$$Type -->
+<h3 class="fn" id="anonymous-enum"><a name="anonymous-enum"></a>enum QGraphicsItemGroup::<span class="name">anonymous</span></h3>
+<p>The value returned by the virtual <a href="qgraphicsitemgroup.html#type">type</a>() function.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QGraphicsItemGroup::Type</code></td><td class="topAlign tblval"><code>10</code></td><td class="topAlign">A graphics item group</td></tr>
+</table></div>
+<!-- @@@anonymous -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QGraphicsItemGroup[overload1]$$$QGraphicsItemGroupQGraphicsItem* -->
+<h3 class="fn" id="QGraphicsItemGroup"><a name="QGraphicsItemGroup"></a>QGraphicsItemGroup::<span class="name">QGraphicsItemGroup</span>(<span class="type"><a href="qgraphicsitem.html#QGraphicsItem">QGraphicsItem</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a <a href="qgraphicsitemgroup.html">QGraphicsItemGroup</a>. <i>parent</i> is passed to <a href="qgraphicsitem.html">QGraphicsItem</a>'s constructor.</p>
+<p><b>See also </b><a href="qgraphicsscene.html#addItem">QGraphicsScene::addItem</a>().</p>
+<!-- @@@QGraphicsItemGroup -->
+<!-- $$$~QGraphicsItemGroup[overload1]$$$~QGraphicsItemGroup -->
+<h3 class="fn" id="dtor.QGraphicsItemGroup"><a name="dtor.QGraphicsItemGroup"></a><code>[virtual] </code>QGraphicsItemGroup::<span class="name">~QGraphicsItemGroup</span>()</h3>
+<p>Destroys the <a href="qgraphicsitemgroup.html">QGraphicsItemGroup</a>.</p>
+<!-- @@@~QGraphicsItemGroup -->
+<!-- $$$addToGroup[overload1]$$$addToGroupQGraphicsItem* -->
+<h3 class="fn" id="addToGroup"><a name="addToGroup"></a><span class="type">void</span> QGraphicsItemGroup::<span class="name">addToGroup</span>(<span class="type"><a href="qgraphicsitem.html#QGraphicsItem">QGraphicsItem</a></span> *<i>item</i>)</h3>
+<p>Adds the given <i>item</i> and item's child items to this item group. The item and child items will be reparented to this group, but its position and transformation relative to the scene will stay intact.</p>
+<p><b>See also </b><a href="qgraphicsitemgroup.html#removeFromGroup">removeFromGroup</a>() and <a href="qgraphicsscene.html#createItemGroup">QGraphicsScene::createItemGroup</a>().</p>
+<!-- @@@addToGroup -->
+<!-- $$$boundingRect[overload1]$$$boundingRect -->
+<h3 class="fn" id="boundingRect"><a name="boundingRect"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> QGraphicsItemGroup::<span class="name">boundingRect</span>() const</h3>
+<p>Reimplements: <a href="qgraphicsitem.html#boundingRect">QGraphicsItem::boundingRect</a>() const.</p>
+<p>Returns the bounding rect of this group item, and all its children.</p>
+<!-- @@@boundingRect -->
+<!-- $$$isObscuredBy[overload1]$$$isObscuredByconstQGraphicsItem* -->
+<h3 class="fn" id="isObscuredBy"><a name="isObscuredBy"></a><code>[override virtual] </code><span class="type">bool</span> QGraphicsItemGroup::<span class="name">isObscuredBy</span>(const <span class="type"><a href="qgraphicsitem.html#QGraphicsItem">QGraphicsItem</a></span> *<i>item</i>) const</h3>
+<p>Reimplements: <a href="qgraphicsitem.html#isObscuredBy">QGraphicsItem::isObscuredBy</a>(const QGraphicsItem *item) const.</p>
+<!-- @@@isObscuredBy -->
+<!-- $$$opaqueArea[overload1]$$$opaqueArea -->
+<h3 class="fn" id="opaqueArea"><a name="opaqueArea"></a><code>[override virtual] </code><span class="type"><a href="../qtgui/qpainterpath.html">QPainterPath</a></span> QGraphicsItemGroup::<span class="name">opaqueArea</span>() const</h3>
+<p>Reimplements: <a href="qgraphicsitem.html#opaqueArea">QGraphicsItem::opaqueArea</a>() const.</p>
+<!-- @@@opaqueArea -->
+<!-- $$$paint[overload1]$$$paintQPainter*constQStyleOptionGraphicsItem*QWidget* -->
+<h3 class="fn" id="paint"><a name="paint"></a><code>[override virtual] </code><span class="type">void</span> QGraphicsItemGroup::<span class="name">paint</span>(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> *<i>painter</i>, const <span class="type"><a href="qstyleoptiongraphicsitem.html">QStyleOptionGraphicsItem</a></span> *<i>option</i>, <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i> = nullptr)</h3>
+<p>Reimplements: <a href="qgraphicsitem.html#paint">QGraphicsItem::paint</a>(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget).</p>
+<!-- @@@paint -->
+<!-- $$$removeFromGroup[overload1]$$$removeFromGroupQGraphicsItem* -->
+<h3 class="fn" id="removeFromGroup"><a name="removeFromGroup"></a><span class="type">void</span> QGraphicsItemGroup::<span class="name">removeFromGroup</span>(<span class="type"><a href="qgraphicsitem.html#QGraphicsItem">QGraphicsItem</a></span> *<i>item</i>)</h3>
+<p>Removes the specified <i>item</i> from this group. The item will be reparented to this group's parent item, or to 0 if this group has no parent. Its position and transformation relative to the scene will stay intact.</p>
+<p><b>See also </b><a href="qgraphicsitemgroup.html#addToGroup">addToGroup</a>() and <a href="qgraphicsscene.html#destroyItemGroup">QGraphicsScene::destroyItemGroup</a>().</p>
+<!-- @@@removeFromGroup -->
+<!-- $$$type[overload1]$$$type -->
+<h3 class="fn" id="type"><a name="type"></a><code>[override virtual] </code><span class="type">int</span> QGraphicsItemGroup::<span class="name">type</span>() const</h3>
+<p>Reimplements: <a href="qgraphicsitem.html#type">QGraphicsItem::type</a>() const.</p>
+<!-- @@@type -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdial.cpp -->
+  <title>QDial Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QDial</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QDial Class</h1>
+<!-- $$$QDial-brief -->
+<p>The <a href="qdial.html">QDial</a> class provides a rounded range control (like a speedometer or potentiometer). <a href="#details">More...</a></p>
+<!-- @@@QDial -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QDial&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qabstractslider.html">QAbstractSlider</a></td></tr></table></div><ul>
+<li><a href="qdial-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qdial.html#notchSize-prop">notchSize</a></b> : const int</li>
+<li class="fn"><b><a href="qdial.html#notchTarget-prop">notchTarget</a></b> : qreal</li>
+<li class="fn"><b><a href="qdial.html#notchesVisible-prop">notchesVisible</a></b> : bool</li>
+<li class="fn"><b><a href="qdial.html#wrapping-prop">wrapping</a></b> : bool</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdial.html#QDial">QDial</a></b>(QWidget *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qdial.html#dtor.QDial">~QDial</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qdial.html#notchSize-prop">notchSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qdial.html#notchTarget-prop">notchTarget</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qdial.html#notchesVisible-prop">notchesVisible</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdial.html#notchTarget-prop">setNotchTarget</a></b>(double <i>target</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qdial.html#wrapping-prop">wrapping</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSize </td><td class="memItemRight bottomAlign"><b><a href="qdial.html#minimumSizeHint">minimumSizeHint</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSize </td><td class="memItemRight bottomAlign"><b><a href="qdial.html#sizeHint">sizeHint</a></b>() const override</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdial.html#notchesVisible-prop">setNotchesVisible</a></b>(bool <i>visible</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdial.html#wrapping-prop">setWrapping</a></b>(bool <i>on</i>)</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdial.html#initStyleOption">initStyleOption</a></b>(QStyleOptionSlider *<i>option</i>) const</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qdial.html#event">event</a></b>(QEvent *<i>e</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qdial.html#mouseMoveEvent">mouseMoveEvent</a></b>(QMouseEvent *<i>e</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qdial.html#mousePressEvent">mousePressEvent</a></b>(QMouseEvent *<i>e</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qdial.html#mouseReleaseEvent">mouseReleaseEvent</a></b>(QMouseEvent *<i>e</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qdial.html#paintEvent">paintEvent</a></b>(QPaintEvent *<i>pe</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qdial.html#resizeEvent">resizeEvent</a></b>(QResizeEvent *<i>e</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qdial.html#sliderChange">sliderChange</a></b>(QAbstractSlider::SliderChange <i>change</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QDial-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p class="centerAlign"><img src="images/windows-dial.png" alt="" /></p><p><a href="qdial.html">QDial</a> is used when the user needs to control a value within a program-definable range, and the range either wraps around (for example, with angles measured from 0 to 359 degrees) or the dialog layout needs a square widget.</p>
+<p>Since <a href="qdial.html">QDial</a> inherits from <a href="qabstractslider.html">QAbstractSlider</a>, the dial behaves in a similar way to a <a href="qslider.html">slider</a>. When <a href="qdial.html#wrapping-prop">wrapping</a>() is false (the default setting) there is no real difference between a slider and a dial. They both share the same signals, slots and member functions. Which one you use depends on the expectations of your users and on the type of application.</p>
+<p>The dial initially emits <a href="qabstractslider.html#valueChanged">valueChanged</a>() signals continuously while the slider is being moved; you can make it emit the signal less often by disabling the <a href="qabstractslider.html#tracking-prop">tracking</a> property. The <a href="qabstractslider.html#sliderMoved">sliderMoved</a>() signal is emitted continuously even when tracking is disabled.</p>
+<p>The dial also emits <a href="qabstractslider.html#sliderPressed">sliderPressed</a>() and <a href="qabstractslider.html#sliderReleased">sliderReleased</a>() signals when the mouse button is pressed and released. Note that the dial's value can change without these signals being emitted since the keyboard and wheel can also be used to change the value.</p>
+<p>Unlike the slider, <a href="qdial.html">QDial</a> attempts to draw a &quot;nice&quot; number of notches rather than one per line step. If possible, the number of notches drawn is one per line step, but if there aren't enough pixels to draw every one, <a href="qdial.html">QDial</a> will skip notches to try and draw a uniform set (e.g&#x2e; by drawing every second or third notch).</p>
+<p>Like the slider, the dial makes the <a href="qabstractslider.html">QAbstractSlider</a> function <a href="qabstractslider.html#value-prop">setValue</a>() available as a slot.</p>
+<p>The dial's keyboard interface is fairly simple: The <b>left</b>/<b>up</b> and <b>right</b>/<b>down</b> arrow keys adjust the dial's <a href="qabstractslider.html#value-prop">value</a> by the defined <a href="qabstractslider.html#singleStep-prop">singleStep</a>, <b>Page Up</b> and <b>Page Down</b> by the defined <a href="qabstractslider.html#pageStep-prop">pageStep</a>, and the <b>Home</b> and <b>End</b> keys set the value to the defined <a href="qabstractslider.html#minimum-prop">minimum</a> and <a href="qabstractslider.html#maximum-prop">maximum</a> values.</p>
+<p>If you are using the mouse wheel to adjust the dial, the increment value is determined by the lesser value of <a href="qapplication.html#wheelScrollLines-prop">wheelScrollLines</a> multipled by <a href="qabstractslider.html#singleStep-prop">singleStep</a>, and <a href="qabstractslider.html#pageStep-prop">pageStep</a>.</p>
+</div>
+<p><b>See also </b><a href="qscrollbar.html">QScrollBar</a>, <a href="qspinbox.html">QSpinBox</a>, <a href="qslider.html">QSlider</a>, <a href="guibooks.html#fowler">GUI Design Handbook: Slider</a>, and <a href="qtwidgets-widgets-sliders-example.html">Sliders Example</a>.</p>
+<!-- @@@QDial -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$notchSize-prop$$$notchSize -->
+<h3 class="fn" id="notchSize-prop"><a name="notchSize-prop"></a><span class="name">notchSize</span> : const <span class="type">int</span></h3>
+<p>This property holds the current notch size</p>
+<p>The notch size is in range control units, not pixels, and if possible it is a multiple of <a href="qabstractslider.html#singleStep-prop">singleStep</a>() that results in an on-screen notch size near <a href="qdial.html#notchTarget-prop">notchTarget</a>().</p>
+<p>By default, this property has a value of 1.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>notchSize</b></span>() const</td></tr>
+</table></div>
+<p><b>See also </b><a href="qdial.html#notchTarget-prop">notchTarget</a>() and <a href="qabstractslider.html#singleStep-prop">singleStep</a>().</p>
+<!-- @@@notchSize -->
+<!-- $$$notchTarget-prop$$$notchTarget$$$setNotchTargetdouble -->
+<h3 class="fn" id="notchTarget-prop"><a name="notchTarget-prop"></a><span class="name">notchTarget</span> : <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span></h3>
+<p>This property holds the target number of pixels between notches</p>
+<p>The notch target is the number of pixels <a href="qdial.html">QDial</a> attempts to put between each notch.</p>
+<p>The actual size may differ from the target size.</p>
+<p>The default notch target is 3.7 pixels.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qreal </td><td class="memItemRight bottomAlign"><span class="name"><b>notchTarget</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setNotchTarget</b></span>(double <i>target</i>)</td></tr>
+</table></div>
+<!-- @@@notchTarget -->
+<!-- $$$notchesVisible-prop$$$notchesVisible$$$setNotchesVisiblebool -->
+<h3 class="fn" id="notchesVisible-prop"><a name="notchesVisible-prop"></a><span class="name">notchesVisible</span> : <span class="type">bool</span></h3>
+<p>This property holds whether the notches are shown</p>
+<p>If the property is <code>true</code>, a series of notches are drawn around the dial to indicate the range of values available; otherwise no notches are shown.</p>
+<p>By default, this property is disabled.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>notchesVisible</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setNotchesVisible</b></span>(bool <i>visible</i>)</td></tr>
+</table></div>
+<!-- @@@notchesVisible -->
+<!-- $$$wrapping-prop$$$wrapping$$$setWrappingbool -->
+<h3 class="fn" id="wrapping-prop"><a name="wrapping-prop"></a><span class="name">wrapping</span> : <span class="type">bool</span></h3>
+<p>This property holds whether wrapping is enabled</p>
+<p>If true, wrapping is enabled; otherwise some space is inserted at the bottom of the dial to separate the ends of the range of valid values.</p>
+<p>If enabled, the arrow can be oriented at any angle on the dial. If disabled, the arrow will be restricted to the upper part of the dial; if it is rotated into the space at the bottom of the dial, it will be clamped to the closest end of the valid range of values.</p>
+<p>By default this property is <code>false</code>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>wrapping</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setWrapping</b></span>(bool <i>on</i>)</td></tr>
+</table></div>
+<!-- @@@wrapping -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QDial[overload1]$$$QDialQWidget* -->
+<h3 class="fn" id="QDial"><a name="QDial"></a>QDial::<span class="name">QDial</span>(<span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a dial.</p>
+<p>The <i>parent</i> argument is sent to the <a href="qabstractslider.html">QAbstractSlider</a> constructor.</p>
+<!-- @@@QDial -->
+<!-- $$$~QDial[overload1]$$$~QDial -->
+<h3 class="fn" id="dtor.QDial"><a name="dtor.QDial"></a><code>[virtual] </code>QDial::<span class="name">~QDial</span>()</h3>
+<p>Destroys the dial.</p>
+<!-- @@@~QDial -->
+<!-- $$$event[overload1]$$$eventQEvent* -->
+<h3 class="fn" id="event"><a name="event"></a><code>[override virtual protected] </code><span class="type">bool</span> QDial::<span class="name">event</span>(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="qabstractslider.html#event">QAbstractSlider::event</a>(QEvent *e).</p>
+<!-- @@@event -->
+<!-- $$$initStyleOption[overload1]$$$initStyleOptionQStyleOptionSlider* -->
+<h3 class="fn" id="initStyleOption"><a name="initStyleOption"></a><code>[protected] </code><span class="type">void</span> QDial::<span class="name">initStyleOption</span>(<span class="type"><a href="qstyleoptionslider.html">QStyleOptionSlider</a></span> *<i>option</i>) const</h3>
+<p>Initialize <i>option</i> with the values from this <a href="qdial.html">QDial</a>. This method is useful for subclasses when they need a <a href="qstyleoptionslider.html">QStyleOptionSlider</a>, but don't want to fill in all the information themselves.</p>
+<p><b>See also </b><a href="qstyleoption.html#initFrom">QStyleOption::initFrom</a>().</p>
+<!-- @@@initStyleOption -->
+<!-- $$$minimumSizeHint[overload1]$$$minimumSizeHint -->
+<h3 class="fn" id="minimumSizeHint"><a name="minimumSizeHint"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QDial::<span class="name">minimumSizeHint</span>() const</h3>
+<p>Reimplements an access function for property: <a href="qwidget.html#minimumSizeHint-prop">QWidget::minimumSizeHint</a>.</p>
+<!-- @@@minimumSizeHint -->
+<!-- $$$mouseMoveEvent[overload1]$$$mouseMoveEventQMouseEvent* -->
+<h3 class="fn" id="mouseMoveEvent"><a name="mouseMoveEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QDial::<span class="name">mouseMoveEvent</span>(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#mouseMoveEvent">QWidget::mouseMoveEvent</a>(QMouseEvent *event).</p>
+<!-- @@@mouseMoveEvent -->
+<!-- $$$mousePressEvent[overload1]$$$mousePressEventQMouseEvent* -->
+<h3 class="fn" id="mousePressEvent"><a name="mousePressEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QDial::<span class="name">mousePressEvent</span>(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#mousePressEvent">QWidget::mousePressEvent</a>(QMouseEvent *event).</p>
+<!-- @@@mousePressEvent -->
+<!-- $$$mouseReleaseEvent[overload1]$$$mouseReleaseEventQMouseEvent* -->
+<h3 class="fn" id="mouseReleaseEvent"><a name="mouseReleaseEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QDial::<span class="name">mouseReleaseEvent</span>(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#mouseReleaseEvent">QWidget::mouseReleaseEvent</a>(QMouseEvent *event).</p>
+<!-- @@@mouseReleaseEvent -->
+<!-- $$$paintEvent[overload1]$$$paintEventQPaintEvent* -->
+<h3 class="fn" id="paintEvent"><a name="paintEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QDial::<span class="name">paintEvent</span>(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span> *<i>pe</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#paintEvent">QWidget::paintEvent</a>(QPaintEvent *event).</p>
+<!-- @@@paintEvent -->
+<!-- $$$resizeEvent[overload1]$$$resizeEventQResizeEvent* -->
+<h3 class="fn" id="resizeEvent"><a name="resizeEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QDial::<span class="name">resizeEvent</span>(<span class="type"><a href="../qtgui/qresizeevent.html">QResizeEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#resizeEvent">QWidget::resizeEvent</a>(QResizeEvent *event).</p>
+<!-- @@@resizeEvent -->
+<!-- $$$sizeHint[overload1]$$$sizeHint -->
+<h3 class="fn" id="sizeHint"><a name="sizeHint"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QDial::<span class="name">sizeHint</span>() const</h3>
+<p>Reimplements an access function for property: <a href="qwidget.html#sizeHint-prop">QWidget::sizeHint</a>.</p>
+<!-- @@@sizeHint -->
+<!-- $$$sliderChange[overload1]$$$sliderChangeQAbstractSlider::SliderChange -->
+<h3 class="fn" id="sliderChange"><a name="sliderChange"></a><code>[override virtual protected] </code><span class="type">void</span> QDial::<span class="name">sliderChange</span>(<span class="type"><a href="qabstractslider.html#SliderChange-enum">QAbstractSlider::SliderChange</a></span> <i>change</i>)</h3>
+<p>Reimplements: <a href="qabstractslider.html#sliderChange">QAbstractSlider::sliderChange</a>(QAbstractSlider::SliderChange change).</p>
+<!-- @@@sliderChange -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

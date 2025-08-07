@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- tinycan.qdoc -->
+  <title>Using TinyCAN Plugin | Qt Serial Bus 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtserialbus-index.html">Qt Serial Bus</a></td><td >Using TinyCAN Plugin</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtserialbus-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#creating-can-bus-devices">Creating CAN Bus Devices</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Using TinyCAN Plugin</h1>
+<span class="subtitle"></span>
+<!-- $$$qtserialbus-tinycan-overview.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The TinyCAN plugin encapsulates the low-level API to work with the <a href="http://www.mhs-elektronik.de/">MHS Elektronik</a> CAN adapters.</p>
+<p><b>Note: </b>The TinyCAN adapters use virtual serial ports. To communicate with TinyCAN adapters in Linux, the user must have appropriate access rights. Usually these rights are given to all users in the group &quot;dialout&quot;.</p><a name="creating-can-bus-devices"></a>
+<h2 id="creating-can-bus-devices">Creating CAN Bus Devices</h2>
+<p>At first it is necessary to check that <a href="qcanbus.html">QCanBus</a> provides the desired plugin:</p>
+<pre class="cpp">
+
+  <span class="keyword">if</span> (<span class="type"><a href="qcanbus.html">QCanBus</a></span><span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>plugins()<span class="operator">.</span>contains(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;tinycan&quot;</span>))) {
+      <span class="comment">// plugin available</span>
+  }
+
+</pre>
+<p>Where <i>tinycan</i> is the plugin name.</p>
+<p>Next, a connection to a specific interface can be established:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qcanbusdevice.html">QCanBusDevice</a></span> <span class="operator">*</span>device <span class="operator">=</span> <span class="type"><a href="qcanbus.html">QCanBus</a></span><span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>createDevice(
+      <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;tinycan&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;can0.0&quot;</span>));
+  device<span class="operator">-</span><span class="operator">&gt;</span>connectDevice();
+
+</pre>
+<p>Where <i>can0.0</i> is the active CAN interface name. TinyCAN currently only provides the interface <i>can0.0</i>, which maps to INDEX_CAN_KANAL_A in the TinyCAN plugin.</p>
+<p><b>Note: </b>The function availableDevices() currently always returns one device &quot;can0.0&quot; as there is no way to detect the available CAN adapters for now.</p><p><b>Note: </b>Only the USB adapters are currently supported by this plugin.</p><p>The device is now open for writing and reading CAN frames:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qcanbusframe.html">QCanBusFrame</a></span> frame;
+  frame<span class="operator">.</span>setFrameId(<span class="number">8</span>);
+  <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> payload(<span class="string">&quot;A36E&quot;</span>);
+  frame<span class="operator">.</span>setPayload(payload);
+  device<span class="operator">-</span><span class="operator">&gt;</span>writeFrame(frame);
+
+</pre>
+<p>The reading can be done using the <a href="qcanbusdevice.html#readFrame">readFrame()</a> method. The <a href="qcanbusdevice.html#framesReceived">framesReceived()</a> signal is emitted when at least one new frame is available for reading:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qcanbusframe.html">QCanBusFrame</a></span> frame <span class="operator">=</span> device<span class="operator">-</span><span class="operator">&gt;</span>readFrame();
+
+</pre>
+<p>TinyCAN supports the following configurations that can be controlled through <a href="qcanbusdevice.html#setConfigurationParameter">setConfigurationParameter()</a>:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Configuration parameter key</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><a href="qcanbusdevice.html#ConfigurationKey-enum">QCanBusDevice::BitRateKey</a></td><td >Determines the bit rate of the CAN bus connection. The following bit rates are supported: 10000, 20000, 50000, 100000, 125000, 250000, 500000, 800000, 1000000.</td></tr>
+</table></div>
+</div>
+<!-- @@@qtserialbus-tinycan-overview.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

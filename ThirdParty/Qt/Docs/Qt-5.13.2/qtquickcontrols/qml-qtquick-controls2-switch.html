@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickswitch.cpp -->
+  <title>Switch QML Type | Qt Quick Controls 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td ><a href="qtquick-controls2-qmlmodule.html">QML Types</a></td><td >Switch QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Switch QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Switch-brief -->
+<p>Switch button that can be toggled on or off. <a href="#details">More...</a></p>
+<!-- @@@Switch -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Controls 2.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-controls2-abstractbutton.html">AbstractButton</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-controls2-switch-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-switch.html#position-prop">position</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-switch.html#visualPosition-prop">visualPosition</a></b></b> : real</li>
+</ul>
+<!-- $$$Switch-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p class="centerAlign"><img src="images/qtquickcontrols2-switch.gif" alt="" /></p><p>Switch is an option button that can be dragged or toggled on (checked) or off (unchecked). Switches are typically used to select between two states. For larger sets of options, such as those in a list, consider using <a href="qml-qtquick-controls2-switchdelegate.html">SwitchDelegate</a> instead.</p>
+<p>Switch inherits its API from <a href="qml-qtquick-controls2-abstractbutton.html">AbstractButton</a>. For instance, the state of the switch can be set with the <a href="qml-qtquick-controls2-abstractbutton.html#checked-prop">checked</a> property.</p>
+<pre class="cpp">
+
+  ColumnLayout {
+      Switch {
+          text: qsTr(<span class="string">&quot;Wi-Fi&quot;</span>)
+      }
+      Switch {
+          text: qsTr(<span class="string">&quot;Bluetooth&quot;</span>)
+      }
+  }
+
+</pre>
+<p><b>See also </b><a href="qtquickcontrols2-customize.html#customizing-switch">Customizing Switch</a> and <a href="qtquickcontrols2-buttons.html">Button Controls</a>.</p>
+<!-- @@@Switch -->
+<h2>Property Documentation</h2>
+<!-- $$$position -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="position-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">position</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the logical position of the thumb indicator.</p>
+<p>The position is expressed as a fraction of the indicator's size, in the range <code>0.0</code> - <code>1.0</code>. The position can be used for example to determine whether the thumb has been dragged past the halfway point. For visualizing a thumb indicator, the right-to-left aware <a href="qml-qtquick-controls2-switch.html#visualPosition-prop">visualPosition</a> should be used instead.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-switch.html#visualPosition-prop">visualPosition</a>.</p>
+</div></div><!-- @@@position -->
+<br/>
+<!-- $$$visualPosition -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="visualPosition-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">visualPosition</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the visual position of the thumb indicator.</p>
+<p>The position is expressed as a fraction of the indicator's size, in the range <code>0.0</code> - <code>1.0</code>. When the control is <a href="qml-qtquick-controls2-control.html#mirrored-prop">mirrored</a>, the value is equal to <code>1.0 - position</code>. This makes the value suitable for visualizing the thumb indicator taking right-to-left support into account. In order to for example determine whether the thumb has been dragged past the halfway point, the logical <a href="qml-qtquick-controls2-switch.html#position-prop">position</a> should be used instead.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-switch.html#position-prop">position</a>.</p>
+</div></div><!-- @@@visualPosition -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

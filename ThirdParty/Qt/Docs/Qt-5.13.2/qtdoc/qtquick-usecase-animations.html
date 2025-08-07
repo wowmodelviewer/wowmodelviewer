@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- animations.qdoc -->
+  <title>Use case - Animations In QML | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Use case - Animations In QML</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#fluid-uis">Fluid UIs</a></li>
+<li class="level2"><a href="#states-and-transitions">States and Transitions</a></li>
+<li class="level2"><a href="#animating-property-changes">Animating Property Changes.</a></li>
+<li class="level1"><a href="#other-animations">Other Animations</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Use case - Animations In QML</h1>
+<span class="subtitle"></span>
+<!-- $$$qtquick-usecase-animations.html-description -->
+<div class="descr"> <a name="details"></a>
+<p><a href="../qtquick/qtquick-index.html">Qt Quick</a> provides the ability to animate properties. Animating properties allows property values to move through intermediate values instead of immediately changing to the target value. To animate the position of an item, you can animate the properties that control the item's position, x and y for example, so that the item's position changes each frame on the way to the target position.</p>
+<a name="fluid-uis"></a>
+<h2 id="fluid-uis">Fluid UIs</h2>
+<p>QML was designed to facilitate the creation of fluid UIs. These are user interfaces where the UI components animate instead of appearing, disappearing, or jumping abruptly. Qt Quick provides two simple ways to have UI components move with animation instead of instantly appearing at their new location.</p>
+<a name="states-and-transitions"></a>
+<h3 id="states-and-transitions">States and Transitions</h3>
+<p>Qt Quick allows you to declare various UI states in <a href="../qtqml/qml-qtqml-statemachine-state.html">State</a> objects. These states are comprised of property changes from a base state, and can be a useful way of organizing your UI logic. Transitions are objects you can associate with an item to define how its properties will animate when they change due to a state change.</p>
+<p>States and transitions for an item can be declared with the <a href="../qtquick/qml-qtquick-item.html#states-prop">Item::states</a> and <a href="../qtquick/qml-qtquick-item.html#transitions-prop">Item::transitions</a> properties. States are declared inside the states list property of an item, usually the root item of the component. Transitions defined on the same item are used to animate the changes in the state. Here is an example.</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">container</span>
+      <span class="name">width</span>: <span class="number">320</span>
+      <span class="name">height</span>: <span class="number">120</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">rect</span>
+          <span class="name">color</span>: <span class="string">&quot;red&quot;</span>
+          <span class="name">width</span>: <span class="number">120</span>
+          <span class="name">height</span>: <span class="number">120</span>
+
+          <span class="type"><a href="../qtquick/qml-qtquick-taphandler.html">TapHandler</a></span> {
+              <span class="name">onTapped</span>: <span class="name">container</span>.<span class="name">state</span> <span class="operator">===</span> <span class="string">''</span> ? <span class="name">container</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">'other'</span> : <span class="name">container</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">''</span>
+          }
+      }
+      <span class="name">states</span>: [
+          <span class="comment">// This adds a second state to the container where the rectangle is farther to the right</span>
+
+          <span class="type"><a href="../qtqml/qml-qtqml-statemachine-state.html">State</a></span> { <span class="name">name</span>: <span class="string">&quot;other&quot;</span>
+
+              <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> {
+                  <span class="name">target</span>: <span class="name">rect</span>
+                  <span class="name">x</span>: <span class="number">200</span>
+              }
+          }
+      ]
+      <span class="name">transitions</span>: [
+          <span class="comment">// This adds a transition that defaults to applying to all state changes</span>
+
+          <span class="type"><a href="../qtquick/qml-qtquick-transition.html">Transition</a></span> {
+
+              <span class="comment">// This applies a default NumberAnimation to any changes a state change makes to x or y properties</span>
+              <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">properties</span>: <span class="string">&quot;x,y&quot;</span> }
+          }
+      ]
+  }
+
+</pre>
+<a name="animating-property-changes"></a>
+<h3 id="animating-property-changes">Animating Property Changes.</h3>
+<p>Behaviors can be used to specify an animation for a property to use when it changes. This is then applied to all changes, regardless of their source. The following example animates a button moving around the screen using behaviors.</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">width</span>: <span class="number">320</span>
+      <span class="name">height</span>: <span class="number">120</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">color</span>: <span class="string">&quot;green&quot;</span>
+          <span class="name">width</span>: <span class="number">120</span>
+          <span class="name">height</span>: <span class="number">120</span>
+
+          <span class="comment">// This is the behavior, and it applies a NumberAnimation to any attempt to set the x property</span>
+          Behavior on <span class="name">x</span> {
+
+              <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> {
+                  <span class="comment">//This specifies how long the animation takes</span>
+                  <span class="name">duration</span>: <span class="number">600</span>
+                  <span class="comment">//This selects an easing curve to interpolate with, the default is Easing.Linear</span>
+                  <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">OutBounce</span>
+              }
+          }
+
+          <span class="type"><a href="../qtquick/qml-qtquick-taphandler.html">TapHandler</a></span> {
+              <span class="name">onTapped</span>: <span class="name">parent</span>.<span class="name">x</span> <span class="operator">==</span> <span class="number">0</span> ? <span class="name">parent</span>.<span class="name">x</span> <span class="operator">=</span> <span class="number">200</span> : <span class="name">parent</span>.<span class="name">x</span> <span class="operator">=</span> <span class="number">0</span>
+          }
+      }
+  }
+
+</pre>
+<a name="other-animations"></a>
+<h2 id="other-animations">Other Animations</h2>
+<p>Not all animations have to be tied to a specific property or state. You can also create animations more generally, and specify target items and properties inside the animation. Here are some examples of different ways to do this:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">width</span>: <span class="number">320</span>
+      <span class="name">height</span>: <span class="number">120</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">color</span>: <span class="string">&quot;blue&quot;</span>
+          <span class="name">width</span>: <span class="number">120</span>
+          <span class="name">height</span>: <span class="number">120</span>
+
+          <span class="comment">// By setting this SequentialAnimation on x, it and animations within it will automatically animate</span>
+          <span class="comment">// the x property of this element</span>
+          SequentialAnimation on <span class="name">x</span> {
+              <span class="name">id</span>: <span class="name">xAnim</span>
+              <span class="comment">// Animations on properties start running by default</span>
+              <span class="name">running</span>: <span class="number">false</span>
+              <span class="name">loops</span>: <span class="name">Animation</span>.<span class="name">Infinite</span> <span class="comment">// The animation is set to loop indefinitely</span>
+              <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">from</span>: <span class="number">0</span>; <span class="name">to</span>: <span class="number">200</span>; <span class="name">duration</span>: <span class="number">500</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutQuad</span> }
+              <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">from</span>: <span class="number">200</span>; <span class="name">to</span>: <span class="number">0</span>; <span class="name">duration</span>: <span class="number">500</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutQuad</span> }
+              <span class="type"><a href="../qtquick/qml-qtquick-pauseanimation.html">PauseAnimation</a></span> { <span class="name">duration</span>: <span class="number">250</span> } <span class="comment">// This puts a bit of time between the loop</span>
+          }
+
+          <span class="type"><a href="../qtquick/qml-qtquick-taphandler.html">TapHandler</a></span> {
+              <span class="comment">// The animation starts running when you click within the rectangle</span>
+              <span class="name">onTapped</span>: <span class="name">xAnim</span>.<span class="name">running</span> <span class="operator">=</span> <span class="number">true</span>
+          }
+      }
+  }
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">width</span>: <span class="number">320</span>
+      <span class="name">height</span>: <span class="number">120</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">rectangle</span>
+          <span class="name">color</span>: <span class="string">&quot;yellow&quot;</span>
+          <span class="name">width</span>: <span class="number">120</span>
+          <span class="name">height</span>: <span class="number">120</span>
+
+          <span class="type"><a href="../qtquick/qml-qtquick-taphandler.html">TapHandler</a></span> {
+              <span class="comment">// The animation starts running when you click within the rectange</span>
+              <span class="name">onTapped</span>: <span class="name">anim</span>.<span class="name">running</span> <span class="operator">=</span> <span class="number">true</span>;
+          }
+      }
+
+      <span class="comment">// This animation specifically targets the Rectangle's properties to animate</span>
+      <span class="type"><a href="../qtquick/qml-qtquick-sequentialanimation.html">SequentialAnimation</a></span> {
+          <span class="name">id</span>: <span class="name">anim</span>
+          <span class="comment">// Animations on their own are not running by default</span>
+          <span class="comment">// The default number of loops is one, restart the animation to see it again</span>
+
+          <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">target</span>: <span class="name">rectangle</span>; <span class="name">property</span>: <span class="string">&quot;x&quot;</span>; <span class="name">from</span>: <span class="number">0</span>; <span class="name">to</span>: <span class="number">200</span>; <span class="name">duration</span>: <span class="number">500</span> }
+
+          <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">target</span>: <span class="name">rectangle</span>; <span class="name">property</span>: <span class="string">&quot;x&quot;</span>; <span class="name">from</span>: <span class="number">200</span>; <span class="name">to</span>: <span class="number">0</span>; <span class="name">duration</span>: <span class="number">500</span> }
+      }
+  }
+
+</pre>
+<p class="centerAlign"><img src="images/qml-uses-animation.png" alt="" /></p><p>More information about animations can be found on the <a href="../qtquick/qtquick-statesanimations-topic.html">Important Concepts in Qt Quick - States, Transitions and Animations</a> page.</p>
+</div>
+<!-- @@@qtquick-usecase-animations.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

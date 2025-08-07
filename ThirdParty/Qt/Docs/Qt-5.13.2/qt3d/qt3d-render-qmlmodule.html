@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qt3drender-module.qdoc -->
+  <title>Qt 3D Render QML Types | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td >Qt 3D Render QML Types</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt 3D Render QML Types</h1>
+<span class="subtitle"></span>
+<!-- $$$Qt3D.Render-description -->
+<div class="descr"> <a name="details"></a>
+<p>To import and use the module's QML types, use the following statement:</p>
+<pre class="qml">
+
+  import Qt3D.Render 2.13
+
+</pre>
+</div>
+<!-- @@@Qt3D.Render -->
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-abstractraycaster.html">AbstractRayCaster</a></p></td><td class="tblDescr"><p>An abstract base class for ray casting in 3d scenes</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-abstracttextureimage.html">AbstractTextureImage</a></p></td><td class="tblDescr"><p>Encapsulates the necessary information to create an OpenGL texture image</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-alphacoverage.html">AlphaCoverage</a></p></td><td class="tblDescr"><p>Enable alpha-to-coverage multisampling mode</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-alphatest.html">AlphaTest</a></p></td><td class="tblDescr"><p>Specify alpha reference test</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-attribute.html">Attribute</a></p></td><td class="tblDescr"><p>Defines an attribute and how data should be read from a Buffer</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-blendequation.html">BlendEquation</a></p></td><td class="tblDescr"><p>Specifies the equation used for both the RGB blend equation and the Alpha blend equation</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-blendequationarguments.html">BlendEquationArguments</a></p></td><td class="tblDescr"><p>Encapsulates blending information: specifies how the incoming values (what's going to be drawn) are going to affect the existing values (what is already drawn)</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-blitframebuffer.html">BlitFramebuffer</a></p></td><td class="tblDescr"><p>FrameGraph node to transfer a rectangle of pixel values from one region of a render target to another</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-buffer.html">Buffer</a></p></td><td class="tblDescr"><p>Provides a data store for raw data to later be used as vertices or uniforms</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-camera.html">Camera</a></p></td><td class="tblDescr"><p>Defines a view point through which the scene will be rendered</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-cameralens.html">CameraLens</a></p></td><td class="tblDescr"><p>Provides the projection matrix that is used to define a Camera for 3D scene</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-cameraselector.html">CameraSelector</a></p></td><td class="tblDescr"><p>Class to allow for selection of camera to be used</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-clearbuffers.html">ClearBuffers</a></p></td><td class="tblDescr"><p>Class to clear buffers</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-clipplane.html">ClipPlane</a></p></td><td class="tblDescr"><p>Enables an additional OpenGL clipping plane that can be in shaders using gl_ClipDistance</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-colormask.html">ColorMask</a></p></td><td class="tblDescr"><p>Allows specifying which color components should be written to the currently bound frame buffer</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-cullface.html">CullFace</a></p></td><td class="tblDescr"><p>Type specifies whether front or back face culling is enabled</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-depthtest.html">DepthTest</a></p></td><td class="tblDescr"><p>Type tests the fragment shader's depth value against the depth of a sample being written to</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-directionallight.html">DirectionalLight</a></p></td><td class="tblDescr"><p>Encapsulate a Directional Light object in a Qt 3D scene</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-dispatchcompute.html">DispatchCompute</a></p></td><td class="tblDescr"><p>FrameGraph node to issue work for the compute shader on GPU</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-dithering.html">Dithering</a></p></td><td class="tblDescr"><p>Enable dithering</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-effect.html">Effect</a></p></td><td class="tblDescr"><p>Base class for effects in a Qt 3D scene</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-environmentlight.html">EnvironmentLight</a></p></td><td class="tblDescr"><p>Encapsulate an environment light object in a Qt 3D scene</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-filterkey.html">FilterKey</a></p></td><td class="tblDescr"><p>Stores filter keys and their values</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-framegraphnode.html">FrameGraphNode</a></p></td><td class="tblDescr"><p>Base class of all FrameGraph configuration nodes</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-frontface.html">FrontFace</a></p></td><td class="tblDescr"><p>Type defines front and back facing polygons</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-frustumculling.html">FrustumCulling</a></p></td><td class="tblDescr"><p>Enable frustum culling for the FrameGraph</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-geometry.html">Geometry</a></p></td><td class="tblDescr"><p>Encapsulates geometry</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-geometryrenderer.html">GeometryRenderer</a></p></td><td class="tblDescr"><p>Encapsulates geometry rendering</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-graphicsapifilter.html">GraphicsApiFilter</a></p></td><td class="tblDescr"><p>For OpenGL identifies the API required for the attached technique</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-layer.html">Layer</a></p></td><td class="tblDescr"><p>Way of filtering which entities will be rendered</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-layerfilter.html">LayerFilter</a></p></td><td class="tblDescr"><p>Controls layers drawn in a frame graph branch</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-levelofdetail.html">LevelOfDetail</a></p></td><td class="tblDescr"><p>Way of controlling the complexity of rendered entities based on their size on the screen</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-levelofdetailboundingsphere.html">LevelOfDetailBoundingSphere</a></p></td><td class="tblDescr"><p>QML type provides a simple spherical volume, defined by its center and radius</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-levelofdetailloader.html">LevelOfDetailLoader</a></p></td><td class="tblDescr"><p>An entity loader that changes depending on distance to camera or screen size</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-levelofdetailswitch.html">LevelOfDetailSwitch</a></p></td><td class="tblDescr"><p>Provides a way of enabling child entities based on distance or screen size</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-light.html">Light</a></p></td><td class="tblDescr"><p>Encapsulate a QAbstractLight object in a Qt 3D scene</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-linewidth.html">LineWidth</a></p></td><td class="tblDescr"><p>Specifies the width of rasterized lines</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-material.html">Material</a></p></td><td class="tblDescr"><p>Non-creatable abstract base for materials</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-memorybarrier.html">MemoryBarrier</a></p></td><td class="tblDescr"><p>Class to place a memory barrier</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-mesh.html">Mesh</a></p></td><td class="tblDescr"><p>A custom mesh loader</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-multisampleantialiasing.html">MultiSampleAntiAliasing</a></p></td><td class="tblDescr"><p>Enable multisample antialiasing</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-nodepthmask.html">NoDepthMask</a></p></td><td class="tblDescr"><p>Disable depth write</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-nodraw.html">NoDraw</a></p></td><td class="tblDescr"><p>When a NoDraw node is present in a FrameGraph branch, this prevents the renderer from rendering any primitive</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-objectpicker.html">ObjectPicker</a></p></td><td class="tblDescr"><p>Instantiates a component that can be used to interact with an Entity by a process known as picking</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-parameter.html">Parameter</a></p></td><td class="tblDescr"><p>Provides storage for a name and value pair. This maps to a shader uniform</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-pickevent.html">PickEvent</a></p></td><td class="tblDescr"><p>Holds information when an object is picked. This is received as a parameter in most of the QObjectPicker component signals when picking succeeds</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-picklineevent.html">PickLineEvent</a></p></td><td class="tblDescr"><p>Holds information when a segment of a line is picked</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-pickpointevent.html">PickPointEvent</a></p></td><td class="tblDescr"><p>Holds information when a segment of a point cloud is picked</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-picktriangleevent.html">PickTriangleEvent</a></p></td><td class="tblDescr"><p>Holds information when a triangle is picked</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-pickingsettings.html">PickingSettings</a></p></td><td class="tblDescr"><p>Specifies how entity picking is handled</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-pointlight.html">PointLight</a></p></td><td class="tblDescr"><p>Encapsulate a Point Light object in a Qt 3D scene</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-pointsize.html">PointSize</a></p></td><td class="tblDescr"><p>Specifies the size of rasterized points. May either be set statically or by shader programs</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-polygonoffset.html">PolygonOffset</a></p></td><td class="tblDescr"><p>Type sets the scale and steps to calculate depth values for polygon offsets</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-proximityfilter.html">ProximityFilter</a></p></td><td class="tblDescr"><p>Select entities which are within a distance threshold of a target entity</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-raycaster.html">RayCaster</a></p></td><td class="tblDescr"><p>Used to perform ray casting tests in 3d world coordinates</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-rendercapture.html">RenderCapture</a></p></td><td class="tblDescr"><p>Capture rendering</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-rendercapturereply.html">RenderCaptureReply</a></p></td><td class="tblDescr"><p>Receives render capture result</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-renderpass.html">RenderPass</a></p></td><td class="tblDescr"><p>Encapsulates a Render Pass</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-renderpassfilter.html">RenderPassFilter</a></p></td><td class="tblDescr"><p>Provides storage for vectors of Filter Keys and Parameters</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-rendersettings.html">RenderSettings</a></p></td><td class="tblDescr"><p>Type holds settings related to rendering process and host the active FrameGraph</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-renderstateset.html">RenderStateSet</a></p></td><td class="tblDescr"><p>FrameGraph node offers a way of specifying a set of RenderState objects to be applied during the execution of a framegraph branch</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-rendersurfaceselector.html">RenderSurfaceSelector</a></p></td><td class="tblDescr"><p>Provides a way of specifying the render surface</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-rendertarget.html">RenderTarget</a></p></td><td class="tblDescr"><p>Encapsulates a target (usually a frame buffer object) which the renderer can render into</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-rendertargetoutput.html">RenderTargetOutput</a></p></td><td class="tblDescr"><p>Type allows the specification of an attachment of a render target (whether it is a color texture, a depth texture, etc..&#x2e; )</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-rendertargetselector.html">RenderTargetSelector</a></p></td><td class="tblDescr"><p>Provides a way of specifying a render target</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-sceneloader.html">SceneLoader</a></p></td><td class="tblDescr"><p>Provides the facility to load an existing Scene</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-scissortest.html">ScissorTest</a></p></td><td class="tblDescr"><p>Type discards fragments that fall outside of a certain rectangular portion of the screen</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-screenraycaster.html">ScreenRayCaster</a></p></td><td class="tblDescr"><p>Performe ray casting test based on screen coordinates</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-seamlesscubemap.html">SeamlessCubemap</a></p></td><td class="tblDescr"><p>Enables seamless cubemap texture filtering</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-shaderprogram.html">ShaderProgram</a></p></td><td class="tblDescr"><p>Encapsulates a Shader Program</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-shaderprogrambuilder.html">ShaderProgramBuilder</a></p></td><td class="tblDescr"><p>Generates a Shader Program content from loaded graphs</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-sharedgltexture.html">SharedGLTexture</a></p></td><td class="tblDescr"><p>Allows to use a textureId from a separate OpenGL context in a Qt 3D scene</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-sortpolicy.html">SortPolicy</a></p></td><td class="tblDescr"><p>Provides storage for the sort types to be used</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-spotlight.html">SpotLight</a></p></td><td class="tblDescr"><p>Encapsulate a Spot Light object in a Qt 3D scene</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-stencilmask.html">StencilMask</a></p></td><td class="tblDescr"><p>Type controls the front and back writing of individual bits in the stencil planes</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-stenciloperation.html">StencilOperation</a></p></td><td class="tblDescr"><p>Type specifies stencil operation</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-stenciloperationarguments.html">StencilOperationArguments</a></p></td><td class="tblDescr"><p>Type sets the actions to be taken when stencil and depth tests fail</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-stenciltest.html">StencilTest</a></p></td><td class="tblDescr"><p>Type specifies arguments for the stecil test</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-stenciltestarguments.html">StencilTestArguments</a></p></td><td class="tblDescr"><p>Type specifies arguments for stencil test</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-technique.html">Technique</a></p></td><td class="tblDescr"><p>Encapsulates a Technique</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-techniquefilter.html">TechniqueFilter</a></p></td><td class="tblDescr"><p>A FrameGraphNode used to select used Techniques</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-textureimage.html">TextureImage</a></p></td><td class="tblDescr"><p>Encapsulates the necessary information to create an OpenGL texture image from an image source</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qt3d-render-textureloader.html">TextureLoader</a></p></td><td class="tblDescr"><p>Handles the texture loading and setting the texture's properties</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qt3d-render-viewport.html">Viewport</a></p></td><td class="tblDescr"><p>A viewport on the Qt3D Scene</p></td></tr>
+</table></div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

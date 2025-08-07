@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcocoawindowfunctions.qdoc -->
+  <title>QCocoaWindowFunctions Class | Qt Platform Headers 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtplatformheaders-index.html">Qt Platform Headers</a></td><td ><a href="qtplatformheaders-module.html">C++ Classes</a></td><td >QCocoaWindowFunctions</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtplatformheaders-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCocoaWindowFunctions Class</h1>
+<!-- $$$QCocoaWindowFunctions-brief -->
+<p>The <a href="qcocoawindowfunctions.html">QCocoaWindowFunctions</a> class is an inline class containing miscellaneous functionality for NSWindow and NSView window specific functionality. <a href="#details">More...</a></p>
+<!-- @@@QCocoaWindowFunctions -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QCocoaWindowFunctions&gt;</span>
+</td></tr></table></div><ul>
+<li><a href="qcocoawindowfunctions-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qcocoawindowfunctions.html#BottomLeftClippedByNSWindowOffset-typedef">BottomLeftClippedByNSWindowOffset</a></b></td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QPoint </td><td class="memItemRight bottomAlign"><b><a href="qcocoawindowfunctions.html#bottomLeftClippedByNSWindowOffset">bottomLeftClippedByNSWindowOffset</a></b>(QWindow *<i>window</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qcocoawindowfunctions.html#bottomLeftClippedByNSWindowOffsetIdentifier">bottomLeftClippedByNSWindowOffsetIdentifier</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCocoaWindowFunctions-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><b>Note: </b>There is no binary compatibility guarantee for this class, meaning that an application using it is only guaranteed to work with the Qt version it was developed against.</p></div>
+<!-- @@@QCocoaWindowFunctions -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$BottomLeftClippedByNSWindowOffset -->
+<h3 class="fn" id="BottomLeftClippedByNSWindowOffset-typedef"><a name="BottomLeftClippedByNSWindowOffset-typedef"></a>typedef QCocoaWindowFunctions::<span class="name">BottomLeftClippedByNSWindowOffset</span></h3>
+<p>This is the typedef for the function returned by <a href="../qtgui/qguiapplication.html#platformFunction">QGuiApplication::platformFunction</a> when passed clippedByNSWindowIdentifier.</p>
+<!-- @@@BottomLeftClippedByNSWindowOffset -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$bottomLeftClippedByNSWindowOffset[overload1]$$$bottomLeftClippedByNSWindowOffsetQWindow* -->
+<h3 class="fn" id="bottomLeftClippedByNSWindowOffset"><a name="bottomLeftClippedByNSWindowOffset"></a><code>[static] </code><span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> QCocoaWindowFunctions::<span class="name">bottomLeftClippedByNSWindowOffset</span>(<span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> *<i>window</i>)</h3>
+<p>This is a convenience function that can be used directly instead of resolving the function pointer. <i>window</i> will be relayed to the function retrieved by <a href="../qtgui/qguiapplication.html">QGuiApplication</a></p>
+<!-- @@@bottomLeftClippedByNSWindowOffset -->
+<!-- $$$bottomLeftClippedByNSWindowOffsetIdentifier[overload1]$$$bottomLeftClippedByNSWindowOffsetIdentifier -->
+<h3 class="fn" id="bottomLeftClippedByNSWindowOffsetIdentifier"><a name="bottomLeftClippedByNSWindowOffsetIdentifier"></a><code>[static] </code>const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> QCocoaWindowFunctions::<span class="name">bottomLeftClippedByNSWindowOffsetIdentifier</span>()</h3>
+<p>This function returns the bytearray that can be used to query <a href="../qtgui/qguiapplication.html#platformFunction">QGuiApplication::platformFunction</a> to retrieve the <a href="qcocoawindowfunctions.html#BottomLeftClippedByNSWindowOffset-typedef">BottomLeftClippedByNSWindowOffset</a> function.</p>
+<!-- @@@bottomLeftClippedByNSWindowOffsetIdentifier -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

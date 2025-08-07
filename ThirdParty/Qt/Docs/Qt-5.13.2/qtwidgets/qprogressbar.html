@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qprogressbar.cpp -->
+  <title>QProgressBar Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QProgressBar</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QProgressBar Class</h1>
+<!-- $$$QProgressBar-brief -->
+<p>The <a href="qprogressbar.html">QProgressBar</a> widget provides a horizontal or vertical progress bar. <a href="#details">More...</a></p>
+<!-- @@@QProgressBar -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QProgressBar&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qwidget.html">QWidget</a></td></tr></table></div><ul>
+<li><a href="qprogressbar-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#Direction-enum">Direction</a></b> { TopToBottom, BottomToTop }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qprogressbar.html#alignment-prop">alignment</a></b> : Qt::Alignment</li>
+<li class="fn"><b><a href="qprogressbar.html#format-prop">format</a></b> : QString</li>
+<li class="fn"><b><a href="qprogressbar.html#invertedAppearance-prop">invertedAppearance</a></b> : bool</li>
+<li class="fn"><b><a href="qprogressbar.html#maximum-prop">maximum</a></b> : int</li>
+<li class="fn"><b><a href="qprogressbar.html#minimum-prop">minimum</a></b> : int</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qprogressbar.html#orientation-prop">orientation</a></b> : Qt::Orientation</li>
+<li class="fn"><b><a href="qprogressbar.html#text-prop">text</a></b> : const QString</li>
+<li class="fn"><b><a href="qprogressbar.html#textDirection-prop">textDirection</a></b> : Direction</li>
+<li class="fn"><b><a href="qprogressbar.html#textVisible-prop">textVisible</a></b> : bool</li>
+<li class="fn"><b><a href="qprogressbar.html#value-prop">value</a></b> : int</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#QProgressBar">QProgressBar</a></b>(QWidget *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#dtor.QProgressBar">~QProgressBar</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::Alignment </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#alignment-prop">alignment</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#format-prop">format</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#invertedAppearance-prop">invertedAppearance</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#textVisible-prop">isTextVisible</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#maximum-prop">maximum</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#minimum-prop">minimum</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::Orientation </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#orientation-prop">orientation</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#format-prop">resetFormat</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#alignment-prop">setAlignment</a></b>(Qt::Alignment <i>alignment</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#format-prop">setFormat</a></b>(const QString &amp;<i>format</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#invertedAppearance-prop">setInvertedAppearance</a></b>(bool <i>invert</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#textDirection-prop">setTextDirection</a></b>(QProgressBar::Direction <i>textDirection</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#textVisible-prop">setTextVisible</a></b>(bool <i>visible</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QString </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#text-prop">text</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QProgressBar::Direction </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#textDirection-prop">textDirection</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#value-prop">value</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSize </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#minimumSizeHint">minimumSizeHint</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSize </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#sizeHint">sizeHint</a></b>() const override</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#reset">reset</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#maximum-prop">setMaximum</a></b>(int <i>maximum</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#minimum-prop">setMinimum</a></b>(int <i>minimum</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#orientation-prop">setOrientation</a></b>(<i>Qt::Orientation</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#setRange">setRange</a></b>(int <i>minimum</i>, int <i>maximum</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#value-prop">setValue</a></b>(int <i>value</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#valueChanged">valueChanged</a></b>(int <i>value</i>)</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#initStyleOption">initStyleOption</a></b>(QStyleOptionProgressBar *<i>option</i>) const</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#event">event</a></b>(QEvent *<i>e</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qprogressbar.html#paintEvent">paintEvent</a></b>(<i>QPaintEvent *</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QProgressBar-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p class="centerAlign"><img src="images/windows-progressbar.png" alt="" /></p><p>A progress bar is used to give the user an indication of the progress of an operation and to reassure them that the application is still running.</p>
+<p>The progress bar uses the concept of <i>steps</i>. You set it up by specifying the minimum and maximum possible step values, and it will display the percentage of steps that have been completed when you later give it the current step value. The percentage is calculated by dividing the progress (<a href="qprogressbar.html#value-prop">value</a>() - <a href="qprogressbar.html#minimum-prop">minimum</a>()) divided by <a href="qprogressbar.html#maximum-prop">maximum</a>() - <a href="qprogressbar.html#minimum-prop">minimum</a>().</p>
+<p>You can specify the minimum and maximum number of steps with <a href="qprogressbar.html#minimum-prop">setMinimum</a>() and <a href="qprogressbar.html#maximum-prop">setMaximum</a>. The current number of steps is set with <a href="qprogressbar.html#value-prop">setValue</a>(). The progress bar can be rewound to the beginning with <a href="qprogressbar.html#reset">reset</a>().</p>
+<p>If minimum and maximum both are set to 0, the bar shows a busy indicator instead of a percentage of steps. This is useful, for example, when using QNetworkAccessManager to download items when they are unable to determine the size of the item being downloaded.</p>
+</div>
+<p><b>See also </b><a href="qprogressdialog.html">QProgressDialog</a> and <a href="guibooks.html#fowler">GUI Design Handbook: Progress Indicator</a>.</p>
+<!-- @@@QProgressBar -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Direction$$$TopToBottom$$$BottomToTop -->
+<h3 class="fn" id="Direction-enum"><a name="Direction-enum"></a>enum QProgressBar::<span class="name">Direction</span></h3>
+<p>Specifies the reading direction of the <a href="qprogressbar.html#text-prop">text</a> for vertical progress bars.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QProgressBar::TopToBottom</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The text is rotated 90 degrees clockwise.</td></tr>
+<tr><td class="topAlign"><code>QProgressBar::BottomToTop</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The text is rotated 90 degrees counter-clockwise.</td></tr>
+</table></div>
+<p>Note that whether or not the text is drawn is dependent on the style. Currently CleanLooks and Plastique draw the text. Mac, Windows and WindowsVista style do not.</p>
+<p>This enum was introduced or modified in  Qt 4.1.</p>
+<p><b>See also </b><a href="qprogressbar.html#textDirection-prop">textDirection</a>.</p>
+<!-- @@@Direction -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$alignment-prop$$$alignment$$$setAlignmentQt::Alignment -->
+<h3 class="fn" id="alignment-prop"><a name="alignment-prop"></a><span class="name">alignment</span> : <span class="type"><a href="../qtcore/qt.html#AlignmentFlag-enum">Qt::Alignment</a></span></h3>
+<p>This property holds the alignment of the progress bar</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt::Alignment </td><td class="memItemRight bottomAlign"><span class="name"><b>alignment</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setAlignment</b></span>(Qt::Alignment <i>alignment</i>)</td></tr>
+</table></div>
+<!-- @@@alignment -->
+<!-- $$$format-prop$$$format$$$setFormatconstQString&$$$resetFormat -->
+<h3 class="fn" id="format-prop"><a name="format-prop"></a><span class="name">format</span> : <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>This property holds the string used to generate the current text</p>
+<p>%p - is replaced by the percentage completed. %v - is replaced by the current value. %m - is replaced by the total number of steps.</p>
+<p>The default value is &quot;%p%&quot;.</p>
+<p>This property was introduced in  Qt 4.2.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>format</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setFormat</b></span>(const QString &amp;<i>format</i>)</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>resetFormat</b></span>()</td></tr>
+</table></div>
+<p><b>See also </b><a href="qprogressbar.html#text-prop">text</a>().</p>
+<!-- @@@format -->
+<!-- $$$invertedAppearance-prop$$$invertedAppearance$$$setInvertedAppearancebool -->
+<h3 class="fn" id="invertedAppearance-prop"><a name="invertedAppearance-prop"></a><span class="name">invertedAppearance</span> : <span class="type">bool</span></h3>
+<p>This property holds whether or not a progress bar shows its progress inverted</p>
+<p>If this property is <code>true</code>, the progress bar grows in the other direction (e.g&#x2e; from right to left). By default, the progress bar is not inverted.</p>
+<p>This property was introduced in  Qt 4.1.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>invertedAppearance</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setInvertedAppearance</b></span>(bool <i>invert</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qprogressbar.html#orientation-prop">orientation</a> and <a href="qwidget.html#layoutDirection-prop">layoutDirection</a>.</p>
+<!-- @@@invertedAppearance -->
+<!-- $$$maximum-prop$$$maximum$$$setMaximumint -->
+<h3 class="fn" id="maximum-prop"><a name="maximum-prop"></a><span class="name">maximum</span> : <span class="type">int</span></h3>
+<p>This property holds the progress bar's maximum value</p>
+<p>When setting this property, the <a href="qprogressbar.html#minimum-prop">minimum</a> is adjusted if necessary to ensure that the range remains valid. If the current value falls outside the new range, the progress bar is reset with <a href="qprogressbar.html#reset">reset</a>().</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>maximum</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setMaximum</b></span>(int <i>maximum</i>)</td></tr>
+</table></div>
+<!-- @@@maximum -->
+<!-- $$$minimum-prop$$$minimum$$$setMinimumint -->
+<h3 class="fn" id="minimum-prop"><a name="minimum-prop"></a><span class="name">minimum</span> : <span class="type">int</span></h3>
+<p>This property holds the progress bar's minimum value</p>
+<p>When setting this property, the <a href="qprogressbar.html#maximum-prop">maximum</a> is adjusted if necessary to ensure that the range remains valid. If the current value falls outside the new range, the progress bar is reset with <a href="qprogressbar.html#reset">reset</a>().</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>minimum</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setMinimum</b></span>(int <i>minimum</i>)</td></tr>
+</table></div>
+<!-- @@@minimum -->
+<!-- $$$orientation-prop$$$orientation$$$setOrientationQt::Orientation -->
+<h3 class="fn" id="orientation-prop"><a name="orientation-prop"></a><span class="name">orientation</span> : <span class="type"><a href="../qtcore/qt.html#Orientation-enum">Qt::Orientation</a></span></h3>
+<p>This property holds the orientation of the progress bar</p>
+<p>The orientation must be <a href="../qtcore/qt.html#Orientation-enum">Qt::Horizontal</a> (the default) or <a href="../qtcore/qt.html#Orientation-enum">Qt::Vertical</a>.</p>
+<p>This property was introduced in  Qt 4.1.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt::Orientation </td><td class="memItemRight bottomAlign"><span class="name"><b>orientation</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setOrientation</b></span>(<i>Qt::Orientation</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qprogressbar.html#invertedAppearance-prop">invertedAppearance</a> and <a href="qprogressbar.html#textDirection-prop">textDirection</a>.</p>
+<!-- @@@orientation -->
+<!-- $$$text-prop$$$text -->
+<h3 class="fn" id="text-prop"><a name="text-prop"></a><span class="name">text</span> : const <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>This property holds the descriptive text shown with the progress bar</p>
+<p>The text returned is the same as the text displayed in the center (or in some styles, to the left) of the progress bar.</p>
+<p>The progress shown in the text may be smaller than the minimum value, indicating that the progress bar is in the &quot;reset&quot; state before any progress is set.</p>
+<p>In the default implementation, the text either contains a percentage value that indicates the progress so far, or it is blank because the progress bar is in the reset state.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> virtual QString </td><td class="memItemRight bottomAlign"><span class="name"><b>text</b></span>() const</td></tr>
+</table></div>
+<!-- @@@text -->
+<!-- $$$textDirection-prop$$$textDirection$$$setTextDirectionQProgressBar::Direction -->
+<h3 class="fn" id="textDirection-prop"><a name="textDirection-prop"></a><span class="name">textDirection</span> : <span class="type"><a href="qprogressbar.html#Direction-enum">Direction</a></span></h3>
+<p>This property holds the reading direction of the <a href="qprogressbar.html#text-prop">text</a> for vertical progress bars</p>
+<p>This property has no impact on horizontal progress bars. By default, the reading direction is <a href="qprogressbar.html#Direction-enum">QProgressBar::TopToBottom</a>.</p>
+<p>This property was introduced in  Qt 4.1.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QProgressBar::Direction </td><td class="memItemRight bottomAlign"><span class="name"><b>textDirection</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setTextDirection</b></span>(QProgressBar::Direction <i>textDirection</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qprogressbar.html#orientation-prop">orientation</a> and <a href="qprogressbar.html#textVisible-prop">textVisible</a>.</p>
+<!-- @@@textDirection -->
+<!-- $$$textVisible-prop$$$isTextVisible$$$setTextVisiblebool -->
+<h3 class="fn" id="textVisible-prop"><a name="textVisible-prop"></a><span class="name">textVisible</span> : <span class="type">bool</span></h3>
+<p>This property holds whether the current completed percentage should be displayed</p>
+<p>This property may be ignored by the style (e.g&#x2e;, QMacStyle never draws the text).</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>isTextVisible</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setTextVisible</b></span>(bool <i>visible</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qprogressbar.html#textDirection-prop">textDirection</a>.</p>
+<!-- @@@textVisible -->
+<!-- $$$value-prop$$$value$$$setValueint$$$valueChangedint -->
+<h3 class="fn" id="value-prop"><a name="value-prop"></a><span class="name">value</span> : <span class="type">int</span></h3>
+<p>This property holds the progress bar's current value</p>
+<p>Attempting to change the current value to one outside the minimum-maximum range has no effect on the current value.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>value</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setValue</b></span>(int <i>value</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qprogressbar.html#valueChanged">valueChanged</a></b></span>(int <i>value</i>)</td></tr>
+</table></div>
+<!-- @@@value -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QProgressBar[overload1]$$$QProgressBarQWidget* -->
+<h3 class="fn" id="QProgressBar"><a name="QProgressBar"></a>QProgressBar::<span class="name">QProgressBar</span>(<span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a progress bar with the given <i>parent</i>.</p>
+<p>By default, the minimum step value is set to 0, and the maximum to 100.</p>
+<p><b>See also </b><a href="qprogressbar.html#setRange">setRange</a>().</p>
+<!-- @@@QProgressBar -->
+<!-- $$$reset[overload1]$$$reset -->
+<h3 class="fn" id="reset"><a name="reset"></a><code>[slot] </code><span class="type">void</span> QProgressBar::<span class="name">reset</span>()</h3>
+<p>Reset the progress bar. The progress bar &quot;rewinds&quot; and shows no progress.</p>
+<!-- @@@reset -->
+<!-- $$$setRange[overload1]$$$setRangeintint -->
+<h3 class="fn" id="setRange"><a name="setRange"></a><code>[slot] </code><span class="type">void</span> QProgressBar::<span class="name">setRange</span>(<span class="type">int</span> <i>minimum</i>, <span class="type">int</span> <i>maximum</i>)</h3>
+<p>Sets the progress bar's minimum and maximum values to <i>minimum</i> and <i>maximum</i> respectively.</p>
+<p>If <i>maximum</i> is smaller than <i>minimum</i>, <i>minimum</i> becomes the only legal value.</p>
+<p>If the current value falls outside the new range, the progress bar is reset with <a href="qprogressbar.html#reset">reset</a>().</p>
+<p>The <a href="qprogressbar.html">QProgressBar</a> can be set to undetermined state by using setRange(0, 0).</p>
+<p><b>See also </b><a href="qprogressbar.html#minimum-prop">minimum</a> and <a href="qprogressbar.html#maximum-prop">maximum</a>.</p>
+<!-- @@@setRange -->
+<!-- $$$valueChanged -->
+<h3 class="fn" id="valueChanged"><a name="valueChanged"></a><code>[signal] </code><span class="type">void</span> QProgressBar::<span class="name">valueChanged</span>(<span class="type">int</span> <i>value</i>)</h3>
+<p>This signal is emitted when the value shown in the progress bar changes. <i>value</i> is the new value shown by the progress bar.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qprogressbar.html#value-prop">value</a>. </p><!-- @@@valueChanged -->
+<!-- $$$~QProgressBar[overload1]$$$~QProgressBar -->
+<h3 class="fn" id="dtor.QProgressBar"><a name="dtor.QProgressBar"></a><code>[virtual] </code>QProgressBar::<span class="name">~QProgressBar</span>()</h3>
+<p>Destructor.</p>
+<!-- @@@~QProgressBar -->
+<!-- $$$event[overload1]$$$eventQEvent* -->
+<h3 class="fn" id="event"><a name="event"></a><code>[override virtual protected] </code><span class="type">bool</span> QProgressBar::<span class="name">event</span>(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#event">QWidget::event</a>(QEvent *event).</p>
+<!-- @@@event -->
+<!-- $$$initStyleOption[overload1]$$$initStyleOptionQStyleOptionProgressBar* -->
+<h3 class="fn" id="initStyleOption"><a name="initStyleOption"></a><code>[protected] </code><span class="type">void</span> QProgressBar::<span class="name">initStyleOption</span>(<span class="type"><a href="qstyleoptionprogressbar.html">QStyleOptionProgressBar</a></span> *<i>option</i>) const</h3>
+<p>Initialize <i>option</i> with the values from this <a href="qprogressbar.html">QProgressBar</a>. This method is useful for subclasses when they need a <a href="qstyleoptionprogressbar.html">QStyleOptionProgressBar</a>, but don't want to fill in all the information themselves.</p>
+<p><b>See also </b><a href="qstyleoption.html#initFrom">QStyleOption::initFrom</a>().</p>
+<!-- @@@initStyleOption -->
+<!-- $$$minimumSizeHint[overload1]$$$minimumSizeHint -->
+<h3 class="fn" id="minimumSizeHint"><a name="minimumSizeHint"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QProgressBar::<span class="name">minimumSizeHint</span>() const</h3>
+<p>Reimplements an access function for property: <a href="qwidget.html#minimumSizeHint-prop">QWidget::minimumSizeHint</a>.</p>
+<!-- @@@minimumSizeHint -->
+<!-- $$$paintEvent[overload1]$$$paintEventQPaintEvent* -->
+<h3 class="fn" id="paintEvent"><a name="paintEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QProgressBar::<span class="name">paintEvent</span>(<i>QPaintEvent *</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#paintEvent">QWidget::paintEvent</a>(QPaintEvent *event).</p>
+<!-- @@@paintEvent -->
+<!-- $$$sizeHint[overload1]$$$sizeHint -->
+<h3 class="fn" id="sizeHint"><a name="sizeHint"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QProgressBar::<span class="name">sizeHint</span>() const</h3>
+<p>Reimplements an access function for property: <a href="qwidget.html#sizeHint-prop">QWidget::sizeHint</a>.</p>
+<!-- @@@sizeHint -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

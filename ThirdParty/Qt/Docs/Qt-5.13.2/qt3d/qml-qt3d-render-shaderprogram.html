@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qshaderprogram.cpp -->
+  <title>ShaderProgram QML Type | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-qml.html">QML Types</a></td><td >ShaderProgram QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">ShaderProgram QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$ShaderProgram-brief -->
+<p>Encapsulates a Shader Program. <a href="#details">More...</a></p>
+<!-- @@@ShaderProgram -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import Qt3D.Render 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiates:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-shaderprogram.html"><a href="qt3drender-qshaderprogram.html">QShaderProgram</a></td></tr></table></div><ul>
+<li><a href="qml-qt3d-render-shaderprogram-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qt3d-render-shaderprogram.html#computeShaderCode-prop">computeShaderCode</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-shaderprogram.html#computeShaderGraph-prop">computeShaderGraph</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-shaderprogram.html#fragmentShaderCode-prop">fragmentShaderCode</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-shaderprogram.html#fragmentShaderGraph-prop">fragmentShaderGraph</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-shaderprogram.html#geometryShaderCode-prop">geometryShaderCode</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-shaderprogram.html#geometryShaderGraph-prop">geometryShaderGraph</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-shaderprogram.html#log-prop">log</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-shaderprogram.html#status-prop">status</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-shaderprogram.html#tessellationControlShaderCode-prop">tessellationControlShaderCode</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-shaderprogram.html#tessellationControlShaderGraph-prop">tessellationControlShaderGraph</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-shaderprogram.html#tessellationEvaluationShaderCode-prop">tessellationEvaluationShaderCode</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-shaderprogram.html#tessellationEvaluationShaderGraph-prop">tessellationEvaluationShaderGraph</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-shaderprogram.html#vertexShaderCode-prop">vertexShaderCode</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-shaderprogram.html#vertexShaderGraph-prop">vertexShaderGraph</a></b></b> : string</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">string <b><b><a href="qml-qt3d-render-shaderprogram.html#loadSource-method">loadSource</a></b></b>(<i>sourceUrl</i>)</li>
+</ul>
+<!-- $$$ShaderProgram-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><a href="qml-qt3d-render-shaderprogram.html">ShaderProgram</a> class encapsulates a shader program. A shader program consists of several different shaders, such as vertex and fragment shaders.</p>
+<p>Qt3D will automatically populate a set of default uniforms if they are encountered during the shader instrospection phase.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th  rowspan=" 1">Default Uniform</th><th  colspan="2" rowspan=" 1">Associated Qt3D Parameter name</th><th  colspan="3" rowspan=" 1">GLSL declaration</th></tr></thead>
+<tr valign="top" class="odd"><td  rowspan=" 1">ModelMatrix</td><td  colspan="2" rowspan=" 1">modelMatrix</td><td  colspan="3" rowspan=" 1">uniform mat4 modelMatrix;</td></tr>
+<tr valign="top" class="even"><td  rowspan=" 1">ViewMatrix</td><td  colspan="2" rowspan=" 1">viewMatrix</td><td  colspan="3" rowspan=" 1">uniform mat4 viewMatrix;</td></tr>
+<tr valign="top" class="odd"><td  rowspan=" 1">ProjectionMatrix</td><td  colspan="2" rowspan=" 1">projectionMatrix</td><td  colspan="3" rowspan=" 1">uniform mat4 projectionMatrix;</td></tr>
+<tr valign="top" class="even"><td  rowspan=" 1">ModelViewMatrix</td><td  colspan="2" rowspan=" 1">modelView</td><td  colspan="3" rowspan=" 1">uniform mat4 modelView;</td></tr>
+<tr valign="top" class="odd"><td  rowspan=" 1">ViewProjectionMatrix</td><td  colspan="2" rowspan=" 1">viewProjectionMatrix</td><td  colspan="3" rowspan=" 1">uniform mat4 viewProjectionMatrix;</td></tr>
+<tr valign="top" class="even"><td  rowspan=" 1">ModelViewProjectionMatrix</td><td  colspan="2" rowspan=" 1">modelViewProjection <br />
+ mvp</td><td  colspan="3" rowspan=" 1">uniform mat4 modelViewProjection; <br />
+ uniform mat4 mvp;</td></tr>
+<tr valign="top" class="odd"><td  rowspan=" 1">InverseModelMatrix</td><td  colspan="2" rowspan=" 1">inverseModelMatrix</td><td  colspan="3" rowspan=" 1">uniform mat4 inverseModelMatrix;</td></tr>
+<tr valign="top" class="even"><td  rowspan=" 1">InverseViewMatrix</td><td  colspan="2" rowspan=" 1">inverseViewMatrix</td><td  colspan="3" rowspan=" 1">uniform mat4 inverseViewMatrix;</td></tr>
+<tr valign="top" class="odd"><td  rowspan=" 1">InverseProjectionMatrix</td><td  colspan="2" rowspan=" 1">inverseProjectionMatrix</td><td  colspan="3" rowspan=" 1">uniform mat4 inverseProjectionMatrix;</td></tr>
+<tr valign="top" class="even"><td  rowspan=" 1">InverseModelViewMatrix</td><td  colspan="2" rowspan=" 1">inverseModelView</td><td  colspan="3" rowspan=" 1">uniform mat4 inverseModelView;</td></tr>
+<tr valign="top" class="odd"><td  rowspan=" 1">InverseViewProjectionMatrix</td><td  colspan="2" rowspan=" 1">inverseViewProjectionMatrix</td><td  colspan="3" rowspan=" 1">uniform mat4 inverseViewProjectionMatrix;</td></tr>
+<tr valign="top" class="even"><td  rowspan=" 1">InverseModelViewProjectionMatrix</td><td  colspan="2" rowspan=" 1">inverseModelViewProjection</td><td  colspan="3" rowspan=" 1">uniform mat4 inverseModelViewProjection;</td></tr>
+<tr valign="top" class="odd"><td  rowspan=" 1">ModelNormalMatrix</td><td  colspan="2" rowspan=" 1">modelNormalMatrix</td><td  colspan="3" rowspan=" 1">uniform mat3 modelNormalMatrix;</td></tr>
+<tr valign="top" class="even"><td  rowspan=" 1">ModelViewNormalMatrix</td><td  colspan="2" rowspan=" 1">modelViewNormal</td><td  colspan="3" rowspan=" 1">uniform mat3 modelViewNormal;</td></tr>
+<tr valign="top" class="odd"><td  rowspan=" 1">ViewportMatrix</td><td  colspan="2" rowspan=" 1">viewportMatrix</td><td  colspan="3" rowspan=" 1">uniform mat4 viewportMatrix;</td></tr>
+<tr valign="top" class="even"><td  rowspan=" 1">InverseViewportMatrix</td><td  colspan="2" rowspan=" 1">inverseViewportMatrix</td><td  colspan="3" rowspan=" 1">uniform mat4 inverseViewportMatrix;</td></tr>
+<tr valign="top" class="odd"><td  rowspan=" 1">AspectRatio <br />
+ (surface width / surface height)</td><td  colspan="2" rowspan=" 1">aspectRatio</td><td  colspan="3" rowspan=" 1">uniform float aspectRatio;</td></tr>
+<tr valign="top" class="even"><td  rowspan=" 1">Exposure</td><td  colspan="2" rowspan=" 1">exposure</td><td  colspan="3" rowspan=" 1">uniform float exposure;</td></tr>
+<tr valign="top" class="odd"><td  rowspan=" 1">Gamma</td><td  colspan="2" rowspan=" 1">gamma</td><td  colspan="3" rowspan=" 1">uniform float gamma;</td></tr>
+<tr valign="top" class="even"><td  rowspan=" 1">Time <br />
+ (in nano seconds)</td><td  colspan="2" rowspan=" 1">time</td><td  colspan="3" rowspan=" 1">uniform float time;</td></tr>
+<tr valign="top" class="odd"><td  rowspan=" 1">EyePosition</td><td  colspan="2" rowspan=" 1">eyePosition</td><td  colspan="3" rowspan=" 1">uniform vec3 eyePosition;</td></tr>
+<tr valign="top" class="even"><td  rowspan=" 1">SkinningPalette</td><td  colspan="2" rowspan=" 1">skinningPalette[0]</td><td  colspan="3" rowspan=" 1">const int maxJoints = 100; <br />
+ uniform mat4 skinningPalette[maxJoints];</td></tr>
+</table></div>
+<!-- @@@ShaderProgram -->
+<h2>Property Documentation</h2>
+<!-- $$$computeShaderCode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="computeShaderCode-prop"></a><span class="name">computeShaderCode</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the compute shader code used by this shader program.</p>
+</div></div><!-- @@@computeShaderCode -->
+<br/>
+<!-- $$$computeShaderGraph -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="computeShaderGraph-prop"></a><span class="name">computeShaderGraph</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the URL to the compute shader graph used by this shader program builder.</p>
+</div></div><!-- @@@computeShaderGraph -->
+<br/>
+<!-- $$$fragmentShaderCode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="fragmentShaderCode-prop"></a><span class="name">fragmentShaderCode</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the fragment shader code used by this shader program.</p>
+</div></div><!-- @@@fragmentShaderCode -->
+<br/>
+<!-- $$$fragmentShaderGraph -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="fragmentShaderGraph-prop"></a><span class="name">fragmentShaderGraph</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the URL to the fragment shader graph used by this shader program builder.</p>
+</div></div><!-- @@@fragmentShaderGraph -->
+<br/>
+<!-- $$$geometryShaderCode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="geometryShaderCode-prop"></a><span class="name">geometryShaderCode</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the geometry shader code used by this shader program.</p>
+</div></div><!-- @@@geometryShaderCode -->
+<br/>
+<!-- $$$geometryShaderGraph -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="geometryShaderGraph-prop"></a><span class="name">geometryShaderGraph</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the URL to the geometry shader graph used by this shader program builder.</p>
+</div></div><!-- @@@geometryShaderGraph -->
+<br/>
+<!-- $$$log -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="log-prop"></a><span class="name">log</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the log of the current shader program. This is useful to diagnose a compilation failure of the shader program.</p>
+</div></div><!-- @@@log -->
+<br/>
+<!-- $$$status -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="status-prop"></a><span class="name">status</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the status of the current shader program.</p>
+</div></div><!-- @@@status -->
+<br/>
+<!-- $$$tessellationControlShaderCode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="tessellationControlShaderCode-prop"></a><span class="name">tessellationControlShaderCode</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the tesselation control shader code used by this shader program.</p>
+</div></div><!-- @@@tessellationControlShaderCode -->
+<br/>
+<!-- $$$tessellationControlShaderGraph -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="tessellationControlShaderGraph-prop"></a><span class="name">tessellationControlShaderGraph</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the URL to the tesselation control shader graph used by this shader program builder.</p>
+</div></div><!-- @@@tessellationControlShaderGraph -->
+<br/>
+<!-- $$$tessellationEvaluationShaderCode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="tessellationEvaluationShaderCode-prop"></a><span class="name">tessellationEvaluationShaderCode</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the tesselation evaluation shader code used by this shader program.</p>
+</div></div><!-- @@@tessellationEvaluationShaderCode -->
+<br/>
+<!-- $$$tessellationEvaluationShaderGraph -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="tessellationEvaluationShaderGraph-prop"></a><span class="name">tessellationEvaluationShaderGraph</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the URL to the tesselation evaluation shader graph used by this shader program builder.</p>
+</div></div><!-- @@@tessellationEvaluationShaderGraph -->
+<br/>
+<!-- $$$vertexShaderCode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="vertexShaderCode-prop"></a><span class="name">vertexShaderCode</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the vertex shader code used by this shader program.</p>
+</div></div><!-- @@@vertexShaderCode -->
+<br/>
+<!-- $$$vertexShaderGraph -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="vertexShaderGraph-prop"></a><span class="name">vertexShaderGraph</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the URL to the vertex shader graph used by this shader program builder.</p>
+</div></div><!-- @@@vertexShaderGraph -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$loadSource[overload1]$$$loadSource -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="loadSource-method"></a><span class="type"><a href="../qtqml/qml-string.html">string</a></span> <span class="name">loadSource</span>(<i>sourceUrl</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the shader code loaded from <i>sourceUrl</i>.</p>
+</div></div><!-- @@@loadSource -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qaxaggregated.cpp -->
+  <title>QAxAggregated Class | Active Qt 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="activeqt-index.html">Active Qt</a></td><td >QAxAggregated</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="activeqt-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAxAggregated Class</h1>
+<!-- $$$QAxAggregated-brief -->
+<p>The <a href="qaxaggregated.html">QAxAggregated</a> class is an abstract base class for implementations of additional COM interfaces. <a href="#details">More...</a></p>
+<!-- @@@QAxAggregated -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAxAggregated&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += axserver</td></tr></table></div><ul>
+<li><a href="qaxaggregated-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual long </td><td class="memItemRight bottomAlign"><b><a href="qaxaggregated.html#queryInterface">queryInterface</a></b>(const QUuid &amp;<i>iid</i>, void **<i>iface</i>) = 0</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qaxaggregated.html#dtor.QAxAggregated">~QAxAggregated</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> IUnknown *</td><td class="memItemRight bottomAlign"><b><a href="qaxaggregated.html#controllingUnknown">controllingUnknown</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QObject *</td><td class="memItemRight bottomAlign"><b><a href="qaxaggregated.html#object">object</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWidget *</td><td class="memItemRight bottomAlign"><b><a href="qaxaggregated.html#widget">widget</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAxAggregated-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Create a subclass of <a href="qaxaggregated.html">QAxAggregated</a> and reimplement <a href="qaxaggregated.html#queryInterface">queryInterface</a>() to support additional COM interfaces. Use multiple inheritance from those COM interfaces. Implement the IUnknown interface of those COM interfaces by delegating the calls to <code>QueryInterface()</code>, <code>AddRef()</code> and <code>Release()</code> to the interface provided by <a href="qaxaggregated.html#controllingUnknown">controllingUnknown</a>().</p>
+<p>Use the <a href="qaxaggregated.html#widget">widget</a>() method if you need to make calls to the <a href="../qtwidgets/qwidget.html">QWidget</a> implementing the ActiveX control. You must not store that pointer in your subclass (unless you use <a href="../qtcore/qpointer.html">QPointer</a>), as the <a href="../qtwidgets/qwidget.html">QWidget</a> can be destroyed by the <a href="activeqt-index.html">ActiveQt</a> framework at any time.</p>
+</div>
+<p><b>See also </b><a href="qaxbindable.html">QAxBindable</a>, <a href="qaxfactory.html">QAxFactory</a>, and <a href="activeqt-index.html">Active Qt</a>.</p>
+<!-- @@@QAxAggregated -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$~QAxAggregated[overload1]$$$~QAxAggregated -->
+<h3 class="fn" id="dtor.QAxAggregated"><a name="dtor.QAxAggregated"></a><code>[virtual protected] </code>QAxAggregated::<span class="name">~QAxAggregated</span>()</h3>
+<p>The destructor is called internally by Qt.</p>
+<!-- @@@~QAxAggregated -->
+<!-- $$$controllingUnknown[overload1]$$$controllingUnknown -->
+<h3 class="fn" id="controllingUnknown"><a name="controllingUnknown"></a><code>[protected] </code><span class="type">IUnknown</span> *QAxAggregated::<span class="name">controllingUnknown</span>() const</h3>
+<p>Returns the <code>IUnknown</code> interface of the ActiveX control. Implement the <code>IUnknown</code> interface in your <a href="qaxaggregated.html">QAxAggregated</a> subclass to delegate calls to <code>QueryInterface()</code>, <code>AddRef()</code>, and <code>Release()</code> to the interface provided by this function.</p>
+<pre class="cpp">
+
+  HRESULT AxImpl<span class="operator">::</span>QueryInterface(REFIID iid<span class="operator">,</span> <span class="type">void</span> <span class="operator">*</span><span class="operator">*</span>iface)
+  {
+      <span class="keyword">return</span> controllingUnknown()<span class="operator">-</span><span class="operator">&gt;</span>QueryInterface(iid<span class="operator">,</span> iface);
+  }
+
+  <span class="type"><a href="../qtcore/qtglobal.html#ulong-typedef">ulong</a></span> AxImpl<span class="operator">::</span>AddRef()
+  {
+      <span class="keyword">return</span> controllingUnknown()<span class="operator">-</span><span class="operator">&gt;</span>AddRef();
+  }
+
+  <span class="type"><a href="../qtcore/qtglobal.html#ulong-typedef">ulong</a></span> AxImpl<span class="operator">::</span>Release()
+  {
+      <span class="keyword">return</span> controllingUnknown()<span class="operator">-</span><span class="operator">&gt;</span>Release();
+  }
+
+</pre>
+<p>Instead of declaring and implementing these three functions manually, you can use the <code>QAXAGG_IUNKNOWN</code> macro in the class declaration of your subclass.</p>
+<!-- @@@controllingUnknown -->
+<!-- $$$object[overload1]$$$object -->
+<h3 class="fn" id="object"><a name="object"></a><code>[protected] </code><span class="type"><a href="../qtcore/qobject.html">QObject</a></span> *QAxAggregated::<span class="name">object</span>() const</h3>
+<p>Returns a pointer to the <a href="../qtcore/qobject.html">QObject</a> subclass implementing the COM object. This function might return 0.</p>
+<p><b>Warning:</b> You must not store the returned pointer, unless you use a <a href="../qtcore/qpointer.html">QPointer</a>, since the <a href="../qtcore/qobject.html">QObject</a> can be destroyed by <a href="activeqt-index.html">ActiveQt</a> at any time.</p>
+<!-- @@@object -->
+<!-- $$$queryInterface[overload1]$$$queryInterfaceconstQUuid&void** -->
+<h3 class="fn" id="queryInterface"><a name="queryInterface"></a><code>[pure virtual] </code><span class="type">long</span> QAxAggregated::<span class="name">queryInterface</span>(const <span class="type"><a href="../qtcore/quuid.html">QUuid</a></span> &amp;<i>iid</i>, <span class="type">void</span> **<i>iface</i>)</h3>
+<p>Reimplement this pure virtual function to support additional COM interfaces. Set the value of <i>iface</i> to point to this object to support the interface <i>iid</i>. Note that you must cast the <code>this</code> pointer to the appropriate superclass.</p>
+<pre class="cpp">
+
+  <span class="type">long</span> AxImpl<span class="operator">::</span>queryInterface(<span class="keyword">const</span> <span class="type"><a href="../qtcore/quuid.html">QUuid</a></span> <span class="operator">&amp;</span>iid<span class="operator">,</span> <span class="type">void</span> <span class="operator">*</span><span class="operator">*</span>iface)
+  {
+      <span class="operator">*</span>iface <span class="operator">=</span> <span class="number">0</span>;
+      <span class="keyword">if</span> (iid <span class="operator">=</span><span class="operator">=</span> IID_ISomeCOMInterface)
+          <span class="operator">*</span>iface <span class="operator">=</span> (ISomeCOMInterface<span class="operator">*</span>)<span class="keyword">this</span>;
+      <span class="keyword">else</span>
+          <span class="keyword">return</span> E_NOINTERFACE;
+
+      AddRef();
+      <span class="keyword">return</span> S_OK;
+  }
+
+</pre>
+<p>Return the standard COM results <code>S_OK</code> (interface is supported) or <code>E_NOINTERFACE</code> (requested interface is not supported).</p>
+<p><b>Warning:</b> Even though you must implement the <code>IUnknown</code> interface if you implement any COM interface you must not support the <code>IUnknown</code> interface in your queryInterface() implementation.</p>
+<!-- @@@queryInterface -->
+<!-- $$$widget[overload1]$$$widget -->
+<h3 class="fn" id="widget"><a name="widget"></a><code>[protected] </code><span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> *QAxAggregated::<span class="name">widget</span>() const</h3>
+<p>Returns a pointer to the <a href="../qtwidgets/qwidget.html">QWidget</a> subclass implementing the ActiveX control. This function might return 0.</p>
+<p><b>Warning:</b> You must not store the returned pointer, unless you use a <a href="../qtcore/qpointer.html">QPointer</a>, since the <a href="../qtwidgets/qwidget.html">QWidget</a> can be destroyed by <a href="activeqt-index.html">ActiveQt</a> at any time.</p>
+<!-- @@@widget -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

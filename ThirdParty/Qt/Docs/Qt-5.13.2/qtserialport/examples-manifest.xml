@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<instructionals module="QtSerialPort">
+    <examples>
+        <example name="Blocking Master Example" docUrl="qthelp://org.qt-project.qtserialport.5132/qtserialport/qtserialport-blockingmaster-example.html" projectPath="serialport/blockingmaster/blockingmaster.pro" imageUrl="qthelp://org.qt-project.qtserialport.5132/qtserialport/images/blockingmaster-example.png">
+            <description><![CDATA[Shows how to use the synchronous API of QSerialPort in a worker thread.]]></description>
+            <tags>blocking,master,port,serial</tags>
+            <fileToOpen mainFile="true">serialport/blockingmaster/main.cpp</fileToOpen>
+        </example>
+        <example name="Blocking Slave Example" docUrl="qthelp://org.qt-project.qtserialport.5132/qtserialport/qtserialport-blockingslave-example.html" projectPath="serialport/blockingslave/blockingslave.pro" imageUrl="qthelp://org.qt-project.qtserialport.5132/qtserialport/images/blockingslave-example.png">
+            <description><![CDATA[Shows how to use the synchronous API of QSerialPort in a non-GUI thread.]]></description>
+            <tags>blocking,port,serial,slave</tags>
+            <fileToOpen mainFile="true">serialport/blockingslave/main.cpp</fileToOpen>
+        </example>
+        <example name="Command Line Enumerator Example" docUrl="qthelp://org.qt-project.qtserialport.5132/qtserialport/qtserialport-cenumerator-example.html" projectPath="serialport/cenumerator/cenumerator.pro" imageUrl="qthelp://org.qt-project.qtserialport.5132/qtserialport/images/cenumerator-example.png">
+            <description><![CDATA[Shows how to get information about serial devices in a system.]]></description>
+            <tags>command,enumerator,line,port,serial</tags>
+            <fileToOpen mainFile="true">serialport/cenumerator/main.cpp</fileToOpen>
+        </example>
+        <example name="Command Line Reader Async Example" docUrl="qthelp://org.qt-project.qtserialport.5132/qtserialport/qtserialport-creaderasync-example.html" projectPath="serialport/creaderasync/creaderasync.pro" imageUrl="qthelp://org.qt-project.qtserialport.5132/qtserialport/images/creaderasync-example.png">
+            <description><![CDATA[Shows how to receive data asynchronously over serial port.]]></description>
+            <tags>async,command,line,port,reader,serial</tags>
+            <fileToOpen mainFile="true">serialport/creaderasync/main.cpp</fileToOpen>
+        </example>
+        <example name="Command Line Reader Sync Example" docUrl="qthelp://org.qt-project.qtserialport.5132/qtserialport/qtserialport-creadersync-example.html" projectPath="serialport/creadersync/creadersync.pro" imageUrl="qthelp://org.qt-project.qtserialport.5132/qtserialport/images/creadersync-example.png">
+            <description><![CDATA[Shows how to receive data synchronously over serial port.]]></description>
+            <tags>command,line,port,reader,serial,sync</tags>
+            <fileToOpen mainFile="true">serialport/creadersync/main.cpp</fileToOpen>
+        </example>
+        <example name="Command Line Writer Async Example" docUrl="qthelp://org.qt-project.qtserialport.5132/qtserialport/qtserialport-cwriterasync-example.html" projectPath="serialport/cwriterasync/cwriterasync.pro" imageUrl="qthelp://org.qt-project.qtserialport.5132/qtserialport/images/cwriterasync-example.png">
+            <description><![CDATA[Shows how to send data asynchronously over serial port.]]></description>
+            <tags>async,command,line,port,serial,writer</tags>
+            <fileToOpen mainFile="true">serialport/cwriterasync/main.cpp</fileToOpen>
+        </example>
+        <example name="Command Line Writer Sync Example" docUrl="qthelp://org.qt-project.qtserialport.5132/qtserialport/qtserialport-cwritersync-example.html" projectPath="serialport/cwritersync/cwritersync.pro" imageUrl="qthelp://org.qt-project.qtserialport.5132/qtserialport/images/cwritersync-example.png">
+            <description><![CDATA[Shows how to send data synchronously over serial port.]]></description>
+            <tags>command,line,port,serial,sync,writer</tags>
+            <fileToOpen mainFile="true">serialport/cwritersync/main.cpp</fileToOpen>
+        </example>
+        <example name="Enumerator Example" docUrl="qthelp://org.qt-project.qtserialport.5132/qtserialport/qtserialport-enumerator-example.html" projectPath="serialport/enumerator/enumerator.pro" imageUrl="qthelp://org.qt-project.qtserialport.5132/qtserialport/images/enumerator-example.png">
+            <description><![CDATA[Shows how to display information about serial devices in a system.]]></description>
+            <tags>enumerator,port,serial</tags>
+            <fileToOpen mainFile="true">serialport/enumerator/main.cpp</fileToOpen>
+        </example>
+        <example name="Terminal Example" docUrl="qthelp://org.qt-project.qtserialport.5132/qtserialport/qtserialport-terminal-example.html" projectPath="serialport/terminal/terminal.pro" imageUrl="qthelp://org.qt-project.qtserialport.5132/qtserialport/images/terminal-example.png">
+            <description><![CDATA[Shows how to use various features of QSerialPort.]]></description>
+            <tags>port,serial,terminal</tags>
+            <fileToOpen mainFile="true">serialport/terminal/main.cpp</fileToOpen>
+        </example>
+    </examples>
+</instructionals>

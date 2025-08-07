@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qfuturewatcher.cpp -->
+  <title>QFutureWatcher Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QFutureWatcher</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QFutureWatcher Class</h1>
+<!-- $$$QFutureWatcher-brief -->
+<p>The <a href="qfuturewatcher.html">QFutureWatcher</a> class allows monitoring a <a href="qfuture.html">QFuture</a> using signals and slots. <a href="#details">More...</a></p>
+<!-- @@@QFutureWatcher -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QFutureWatcher&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.4</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> QFutureWatcherBase</td></tr></table></div><p>This class was introduced in  Qt 4.4.</p>
+<ul>
+<li><a href="qfuturewatcher-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#QFutureWatcher">QFutureWatcher</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#dtor.QFutureWatcher">~QFutureWatcher</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QFuture&lt;T&gt; </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#future">future</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#isCanceled">isCanceled</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#isFinished">isFinished</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#isPaused">isPaused</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#isRunning">isRunning</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#isStarted">isStarted</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#progressMaximum">progressMaximum</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#progressMinimum">progressMinimum</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#progressText">progressText</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#progressValue">progressValue</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> T </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#result">result</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> T </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#resultAt">resultAt</a></b>(int <i>index</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#setFuture">setFuture</a></b>(const QFuture&lt;T&gt; &amp;<i>future</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#setPendingResultsLimit">setPendingResultsLimit</a></b>(int <i>limit</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#waitForFinished">waitForFinished</a></b>()</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#cancel">cancel</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#pause">pause</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#resume">resume</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#setPaused">setPaused</a></b>(bool <i>paused</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#togglePaused">togglePaused</a></b>()</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#canceled">canceled</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#finished">finished</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#paused">paused</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#progressRangeChanged">progressRangeChanged</a></b>(int <i>minimum</i>, int <i>maximum</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#progressTextChanged">progressTextChanged</a></b>(const QString &amp;<i>progressText</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#progressValueChanged">progressValueChanged</a></b>(int <i>progressValue</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#resultReadyAt">resultReadyAt</a></b>(int <i>index</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#resultsReadyAt">resultsReadyAt</a></b>(int <i>beginIndex</i>, int <i>endIndex</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#resumed">resumed</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qfuturewatcher.html#started">started</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QFutureWatcher-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qfuturewatcher.html">QFutureWatcher</a> provides information and notifications about a <a href="qfuture.html">QFuture</a>. Use the <a href="qfuturewatcher.html#setFuture">setFuture</a>() function to start watching a particular <a href="qfuture.html">QFuture</a>. The <a href="qfuturewatcher.html#future">future</a>() function returns the future set with <a href="qfuturewatcher.html#setFuture">setFuture</a>().</p>
+<p>For convenience, several of <a href="qfuture.html">QFuture</a>'s functions are also available in <a href="qfuturewatcher.html">QFutureWatcher</a>: <a href="qfuturewatcher.html#progressValue">progressValue</a>(), <a href="qfuturewatcher.html#progressMinimum">progressMinimum</a>(), <a href="qfuturewatcher.html#progressMaximum">progressMaximum</a>(), <a href="qfuturewatcher.html#progressText">progressText</a>(), <a href="qfuturewatcher.html#isStarted">isStarted</a>(), <a href="qfuturewatcher.html#isFinished">isFinished</a>(), <a href="qfuturewatcher.html#isRunning">isRunning</a>(), <a href="qfuturewatcher.html#isCanceled">isCanceled</a>(), <a href="qfuturewatcher.html#isPaused">isPaused</a>(), <a href="qfuturewatcher.html#waitForFinished">waitForFinished</a>(), <a href="qfuturewatcher.html#result">result</a>(), and <a href="qfuturewatcher.html#resultAt">resultAt</a>(). The <a href="qfuturewatcher.html#cancel">cancel</a>(), <a href="qfuturewatcher.html#setPaused">setPaused</a>(), <a href="qfuturewatcher.html#pause">pause</a>(), <a href="qfuturewatcher.html#resume">resume</a>(), and <a href="qfuturewatcher.html#togglePaused">togglePaused</a>() functions are slots in <a href="qfuturewatcher.html">QFutureWatcher</a>.</p>
+<p>Status changes are reported via the <a href="qfuturewatcher.html#started">started</a>(), <a href="qfuturewatcher.html#finished">finished</a>(), <a href="qfuturewatcher.html#canceled">canceled</a>(), <a href="qfuturewatcher.html#paused">paused</a>(), <a href="qfuturewatcher.html#resumed">resumed</a>(), <a href="qfuturewatcher.html#resultReadyAt">resultReadyAt</a>(), and <a href="qfuturewatcher.html#resultsReadyAt">resultsReadyAt</a>() signals. Progress information is provided from the <a href="qfuturewatcher.html#progressRangeChanged">progressRangeChanged</a>(), void <a href="qfuturewatcher.html#progressValueChanged">progressValueChanged</a>(), and <a href="qfuturewatcher.html#progressTextChanged">progressTextChanged</a>() signals.</p>
+<p>Throttling control is provided by the <a href="qfuturewatcher.html#setPendingResultsLimit">setPendingResultsLimit</a>() function. When the number of pending <a href="qfuturewatcher.html#resultReadyAt">resultReadyAt</a>() or <a href="qfuturewatcher.html#resultsReadyAt">resultsReadyAt</a>() signals exceeds the limit, the computation represented by the future will be throttled automatically. The computation will resume once the number of pending signals drops below the limit.</p>
+<p>Example: Starting a computation and getting a slot callback when it's finished:</p>
+<pre class="cpp">
+
+  <span class="comment">// Instantiate the objects and connect to the finished signal.</span>
+  MyClass myObject;
+  <span class="type"><a href="qfuturewatcher.html#QFutureWatcher">QFutureWatcher</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span> watcher;
+  connect(<span class="operator">&amp;</span>watcher<span class="operator">,</span> SIGNAL(finished())<span class="operator">,</span> <span class="operator">&amp;</span>myObject<span class="operator">,</span> SLOT(handleFinished()));
+
+  <span class="comment">// Start the computation.</span>
+  <span class="type"><a href="qfuture.html">QFuture</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span> future <span class="operator">=</span> <span class="type">QtConcurrent</span><span class="operator">::</span>run(<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>);
+  watcher<span class="operator">.</span>setFuture(future);
+
+</pre>
+<p>Be aware that not all running asynchronous computations can be canceled or paused. For example, the future returned by <a href="../qtconcurrent/qtconcurrent.html#run">QtConcurrent::run</a>() cannot be canceled; but the future returned by <a href="../qtconcurrent/qtconcurrent.html#mappedReduced">QtConcurrent::mappedReduced</a>() can.</p>
+<p><a href="qfuturewatcher.html">QFutureWatcher</a>&lt;void&gt; is specialized to not contain any of the result fetching functions. Any <a href="qfuture.html">QFuture</a>&lt;T&gt; can be watched by a <a href="qfuturewatcher.html">QFutureWatcher</a>&lt;void&gt; as well. This is useful if only status or progress information is needed; not the actual result data.</p>
+</div>
+<p><b>See also </b><a href="qfuture.html">QFuture</a> and <a href="../qtconcurrent/qtconcurrent-index.html">Qt Concurrent</a>.</p>
+<!-- @@@QFutureWatcher -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QFutureWatcher[overload1]$$$QFutureWatcherQObject* -->
+<h3 class="fn" id="QFutureWatcher"><a name="QFutureWatcher"></a>QFutureWatcher::<span class="name">QFutureWatcher</span>(<span class="type"><a href="qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new <a href="qfuturewatcher.html">QFutureWatcher</a> with the given <i>parent</i>. Until a future is set with <a href="qfuturewatcher.html#setFuture">setFuture</a>(), the functions <a href="qfuturewatcher.html#isStarted">isStarted</a>(), <a href="qfuturewatcher.html#isCanceled">isCanceled</a>(), and <a href="qfuturewatcher.html#isFinished">isFinished</a>() return <code>true</code>.</p>
+<!-- @@@QFutureWatcher -->
+<!-- $$$cancel[overload1]$$$cancel -->
+<h3 class="fn" id="cancel"><a name="cancel"></a><code>[slot] </code><span class="type">void</span> QFutureWatcher::<span class="name">cancel</span>()</h3>
+<p>Cancels the asynchronous computation represented by the <a href="qfuturewatcher.html#future">future</a>(). Note that the cancelation is asynchronous. Use <a href="qfuturewatcher.html#waitForFinished">waitForFinished</a>() after calling cancel() when you need synchronous cancelation.</p>
+<p>Currently available results may still be accessed on a canceled <a href="qfuture.html">QFuture</a>, but new results will <i>not</i> become available after calling this function. Also, this <a href="qfuturewatcher.html">QFutureWatcher</a> will not deliver progress and result ready signals once canceled. This includes the <a href="qfuturewatcher.html#progressValueChanged">progressValueChanged</a>(), <a href="qfuturewatcher.html#progressRangeChanged">progressRangeChanged</a>(), <a href="qfuturewatcher.html#progressTextChanged">progressTextChanged</a>(), <a href="qfuturewatcher.html#resultReadyAt">resultReadyAt</a>(), and <a href="qfuturewatcher.html#resultsReadyAt">resultsReadyAt</a>() signals.</p>
+<p>Be aware that not all running asynchronous computations can be canceled. For example, the <a href="qfuture.html">QFuture</a> returned by <a href="../qtconcurrent/qtconcurrent.html#run">QtConcurrent::run</a>() cannot be canceled; but the <a href="qfuture.html">QFuture</a> returned by <a href="../qtconcurrent/qtconcurrent.html#mappedReduced">QtConcurrent::mappedReduced</a>() can.</p>
+<!-- @@@cancel -->
+<!-- $$$canceled[overload1]$$$canceled -->
+<h3 class="fn" id="canceled"><a name="canceled"></a><code>[signal] </code><span class="type">void</span> QFutureWatcher::<span class="name">canceled</span>()</h3>
+<p>This signal is emitted if the watched future is canceled.</p>
+<!-- @@@canceled -->
+<!-- $$$finished[overload1]$$$finished -->
+<h3 class="fn" id="finished"><a name="finished"></a><code>[signal] </code><span class="type">void</span> QFutureWatcher::<span class="name">finished</span>()</h3>
+<p>This signal is emitted when the watched future finishes.</p>
+<!-- @@@finished -->
+<!-- $$$pause[overload1]$$$pause -->
+<h3 class="fn" id="pause"><a name="pause"></a><code>[slot] </code><span class="type">void</span> QFutureWatcher::<span class="name">pause</span>()</h3>
+<p>Pauses the asynchronous computation represented by the <a href="qfuturewatcher.html#future">future</a>(). This is a convenience method that simply calls <a href="qfuturewatcher.html#setPaused">setPaused</a>(true).</p>
+<p><b>See also </b><a href="qfuturewatcher.html#resume">resume</a>().</p>
+<!-- @@@pause -->
+<!-- $$$paused[overload1]$$$paused -->
+<h3 class="fn" id="paused"><a name="paused"></a><code>[signal] </code><span class="type">void</span> QFutureWatcher::<span class="name">paused</span>()</h3>
+<p>This signal is emitted when the watched future is paused.</p>
+<p><b>See also </b><a href="qfuturewatcher.html#setPaused">setPaused</a>().</p>
+<!-- @@@paused -->
+<!-- $$$progressRangeChanged[overload1]$$$progressRangeChangedintint -->
+<h3 class="fn" id="progressRangeChanged"><a name="progressRangeChanged"></a><code>[signal] </code><span class="type">void</span> QFutureWatcher::<span class="name">progressRangeChanged</span>(<span class="type">int</span> <i>minimum</i>, <span class="type">int</span> <i>maximum</i>)</h3>
+<p>The progress range for the watched future has changed to <i>minimum</i> and <i>maximum</i></p>
+<!-- @@@progressRangeChanged -->
+<!-- $$$progressTextChanged[overload1]$$$progressTextChangedconstQString& -->
+<h3 class="fn" id="progressTextChanged"><a name="progressTextChanged"></a><code>[signal] </code><span class="type">void</span> QFutureWatcher::<span class="name">progressTextChanged</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>progressText</i>)</h3>
+<p>This signal is emitted when the watched future reports textual progress information, <i>progressText</i>.</p>
+<!-- @@@progressTextChanged -->
+<!-- $$$progressValueChanged[overload1]$$$progressValueChangedint -->
+<h3 class="fn" id="progressValueChanged"><a name="progressValueChanged"></a><code>[signal] </code><span class="type">void</span> QFutureWatcher::<span class="name">progressValueChanged</span>(<span class="type">int</span> <i>progressValue</i>)</h3>
+<p>This signal is emitted when the watched future reports progress, <i>progressValue</i> gives the current progress. In order to avoid overloading the GUI event loop, <a href="qfuturewatcher.html">QFutureWatcher</a> limits the progress signal emission rate. This means that listeners connected to this slot might not get all progress reports the future makes. The last progress update (where <i>progressValue</i> equals the maximum value) will always be delivered.</p>
+<!-- @@@progressValueChanged -->
+<!-- $$$resultReadyAt[overload1]$$$resultReadyAtint -->
+<h3 class="fn" id="resultReadyAt"><a name="resultReadyAt"></a><code>[signal] </code><span class="type">void</span> QFutureWatcher::<span class="name">resultReadyAt</span>(<span class="type">int</span> <i>index</i>)</h3>
+<p>This signal is emitted when the watched future reports a ready result at <i>index</i>. If the future reports multiple results, the index will indicate which one it is. Results can be reported out-of-order. To get the result, call <a href="qfuturewatcher.html#resultAt">resultAt</a>(index);</p>
+<!-- @@@resultReadyAt -->
+<!-- $$$resultsReadyAt[overload1]$$$resultsReadyAtintint -->
+<h3 class="fn" id="resultsReadyAt"><a name="resultsReadyAt"></a><code>[signal] </code><span class="type">void</span> QFutureWatcher::<span class="name">resultsReadyAt</span>(<span class="type">int</span> <i>beginIndex</i>, <span class="type">int</span> <i>endIndex</i>)</h3>
+<p>This signal is emitted when the watched future reports ready results. The results are indexed from <i>beginIndex</i> to <i>endIndex</i>.</p>
+<!-- @@@resultsReadyAt -->
+<!-- $$$resume[overload1]$$$resume -->
+<h3 class="fn" id="resume"><a name="resume"></a><code>[slot] </code><span class="type">void</span> QFutureWatcher::<span class="name">resume</span>()</h3>
+<p>Resumes the asynchronous computation represented by the <a href="qfuturewatcher.html#future">future</a>(). This is a convenience method that simply calls <a href="qfuturewatcher.html#setPaused">setPaused</a>(false).</p>
+<p><b>See also </b><a href="qfuturewatcher.html#pause">pause</a>().</p>
+<!-- @@@resume -->
+<!-- $$$resumed[overload1]$$$resumed -->
+<h3 class="fn" id="resumed"><a name="resumed"></a><code>[signal] </code><span class="type">void</span> QFutureWatcher::<span class="name">resumed</span>()</h3>
+<p>This signal is emitted when the watched future is resumed.</p>
+<!-- @@@resumed -->
+<!-- $$$setPaused[overload1]$$$setPausedbool -->
+<h3 class="fn" id="setPaused"><a name="setPaused"></a><code>[slot] </code><span class="type">void</span> QFutureWatcher::<span class="name">setPaused</span>(<span class="type">bool</span> <i>paused</i>)</h3>
+<p>If <i>paused</i> is true, this function pauses the asynchronous computation represented by the <a href="qfuturewatcher.html#future">future</a>(). If the computation is already paused, this function does nothing. This <a href="qfuturewatcher.html">QFutureWatcher</a> will stop delivering progress and result ready signals while the future is paused. Signal delivery will continue once the computation is resumed.</p>
+<p>If <i>paused</i> is false, this function resumes the asynchronous computation. If the computation was not previously paused, this function does nothing.</p>
+<p>Be aware that not all computations can be paused. For example, the <a href="qfuture.html">QFuture</a> returned by <a href="../qtconcurrent/qtconcurrent.html#run">QtConcurrent::run</a>() cannot be paused; but the <a href="qfuture.html">QFuture</a> returned by <a href="../qtconcurrent/qtconcurrent.html#mappedReduced">QtConcurrent::mappedReduced</a>() can.</p>
+<p><b>See also </b><a href="qfuturewatcher.html#paused">paused</a>(), <a href="qfuturewatcher.html#pause">pause</a>(), <a href="qfuturewatcher.html#resume">resume</a>(), and <a href="qfuturewatcher.html#togglePaused">togglePaused</a>().</p>
+<!-- @@@setPaused -->
+<!-- $$$started[overload1]$$$started -->
+<h3 class="fn" id="started"><a name="started"></a><code>[signal] </code><span class="type">void</span> QFutureWatcher::<span class="name">started</span>()</h3>
+<p>This signal is emitted when this <a href="qfuturewatcher.html">QFutureWatcher</a> starts watching the future set with <a href="qfuturewatcher.html#setFuture">setFuture</a>().</p>
+<!-- @@@started -->
+<!-- $$$togglePaused[overload1]$$$togglePaused -->
+<h3 class="fn" id="togglePaused"><a name="togglePaused"></a><code>[slot] </code><span class="type">void</span> QFutureWatcher::<span class="name">togglePaused</span>()</h3>
+<p>Toggles the paused state of the asynchronous computation. In other words, if the computation is currently paused, calling this function resumes it; if the computation is running, it becomes paused. This is a convenience method for calling <a href="qfuturewatcher.html#setPaused">setPaused</a>(!<a href="qfuturewatcher.html#isPaused">isPaused</a>()).</p>
+<p><b>See also </b><a href="qfuturewatcher.html#setPaused">setPaused</a>(), <a href="qfuturewatcher.html#pause">pause</a>(), and <a href="qfuturewatcher.html#resume">resume</a>().</p>
+<!-- @@@togglePaused -->
+<!-- $$$~QFutureWatcher[overload1]$$$~QFutureWatcher -->
+<h3 class="fn" id="dtor.QFutureWatcher"><a name="dtor.QFutureWatcher"></a><code>[virtual] </code>QFutureWatcher::<span class="name">~QFutureWatcher</span>()</h3>
+<p>Destroys the <a href="qfuturewatcher.html">QFutureWatcher</a>.</p>
+<!-- @@@~QFutureWatcher -->
+<!-- $$$future[overload1]$$$future -->
+<h3 class="fn" id="future"><a name="future"></a><span class="type"><a href="qfuture.html">QFuture</a></span>&lt;<span class="type">T</span>&gt; QFutureWatcher::<span class="name">future</span>() const</h3>
+<p>Returns the watched future.</p>
+<p><b>See also </b><a href="qfuturewatcher.html#setFuture">setFuture</a>().</p>
+<!-- @@@future -->
+<!-- $$$isCanceled[overload1]$$$isCanceled -->
+<h3 class="fn" id="isCanceled"><a name="isCanceled"></a><span class="type">bool</span> QFutureWatcher::<span class="name">isCanceled</span>() const</h3>
+<p>Returns <code>true</code> if the asynchronous computation has been canceled with the <a href="qfuturewatcher.html#cancel">cancel</a>() function, or if no future has been set; otherwise returns <code>false</code>.</p>
+<p>Be aware that the computation may still be running even though this function returns <code>true</code>. See <a href="qfuturewatcher.html#cancel">cancel</a>() for more details.</p>
+<!-- @@@isCanceled -->
+<!-- $$$isFinished[overload1]$$$isFinished -->
+<h3 class="fn" id="isFinished"><a name="isFinished"></a><span class="type">bool</span> QFutureWatcher::<span class="name">isFinished</span>() const</h3>
+<p>Returns <code>true</code> if the asynchronous computation represented by the <a href="qfuturewatcher.html#future">future</a>() has finished, or if no future has been set; otherwise returns <code>false</code>.</p>
+<!-- @@@isFinished -->
+<!-- $$$isPaused[overload1]$$$isPaused -->
+<h3 class="fn" id="isPaused"><a name="isPaused"></a><span class="type">bool</span> QFutureWatcher::<span class="name">isPaused</span>() const</h3>
+<p>Returns <code>true</code> if the asynchronous computation has been paused with the <a href="qfuturewatcher.html#pause">pause</a>() function; otherwise returns <code>false</code>.</p>
+<p>Be aware that the computation may still be running even though this function returns <code>true</code>. See <a href="qfuturewatcher.html#setPaused">setPaused</a>() for more details.</p>
+<p><b>See also </b><a href="qfuturewatcher.html#setPaused">setPaused</a>() and <a href="qfuturewatcher.html#togglePaused">togglePaused</a>().</p>
+<!-- @@@isPaused -->
+<!-- $$$isRunning[overload1]$$$isRunning -->
+<h3 class="fn" id="isRunning"><a name="isRunning"></a><span class="type">bool</span> QFutureWatcher::<span class="name">isRunning</span>() const</h3>
+<p>Returns <code>true</code> if the asynchronous computation represented by the <a href="qfuturewatcher.html#future">future</a>() is currently running; otherwise returns <code>false</code>.</p>
+<!-- @@@isRunning -->
+<!-- $$$isStarted[overload1]$$$isStarted -->
+<h3 class="fn" id="isStarted"><a name="isStarted"></a><span class="type">bool</span> QFutureWatcher::<span class="name">isStarted</span>() const</h3>
+<p>Returns <code>true</code> if the asynchronous computation represented by the <a href="qfuturewatcher.html#future">future</a>() has been started, or if no future has been set; otherwise returns <code>false</code>.</p>
+<!-- @@@isStarted -->
+<!-- $$$progressMaximum[overload1]$$$progressMaximum -->
+<h3 class="fn" id="progressMaximum"><a name="progressMaximum"></a><span class="type">int</span> QFutureWatcher::<span class="name">progressMaximum</span>() const</h3>
+<p>Returns the maximum <a href="qfuturewatcher.html#progressValue">progressValue</a>().</p>
+<p><b>See also </b><a href="qfuturewatcher.html#progressValue">progressValue</a>() and <a href="qfuturewatcher.html#progressMinimum">progressMinimum</a>().</p>
+<!-- @@@progressMaximum -->
+<!-- $$$progressMinimum[overload1]$$$progressMinimum -->
+<h3 class="fn" id="progressMinimum"><a name="progressMinimum"></a><span class="type">int</span> QFutureWatcher::<span class="name">progressMinimum</span>() const</h3>
+<p>Returns the minimum <a href="qfuturewatcher.html#progressValue">progressValue</a>().</p>
+<p><b>See also </b><a href="qfuturewatcher.html#progressValue">progressValue</a>() and <a href="qfuturewatcher.html#progressMaximum">progressMaximum</a>().</p>
+<!-- @@@progressMinimum -->
+<!-- $$$progressText[overload1]$$$progressText -->
+<h3 class="fn" id="progressText"><a name="progressText"></a><span class="type"><a href="qstring.html">QString</a></span> QFutureWatcher::<span class="name">progressText</span>() const</h3>
+<p>Returns the (optional) textual representation of the progress as reported by the asynchronous computation.</p>
+<p>Be aware that not all computations provide a textual representation of the progress, and as such, this function may return an empty string.</p>
+<!-- @@@progressText -->
+<!-- $$$progressValue[overload1]$$$progressValue -->
+<h3 class="fn" id="progressValue"><a name="progressValue"></a><span class="type">int</span> QFutureWatcher::<span class="name">progressValue</span>() const</h3>
+<p>Returns the current progress value, which is between the <a href="qfuturewatcher.html#progressMinimum">progressMinimum</a>() and <a href="qfuturewatcher.html#progressMaximum">progressMaximum</a>().</p>
+<p><b>See also </b><a href="qfuturewatcher.html#progressMinimum">progressMinimum</a>() and <a href="qfuturewatcher.html#progressMaximum">progressMaximum</a>().</p>
+<!-- @@@progressValue -->
+<!-- $$$result[overload1]$$$result -->
+<h3 class="fn" id="result"><a name="result"></a><span class="type">T</span> QFutureWatcher::<span class="name">result</span>() const</h3>
+<p>Returns the first result in the <a href="qfuturewatcher.html#future">future</a>(). If the result is not immediately available, this function will block and wait for the result to become available. This is a convenience method for calling <a href="qfuturewatcher.html#resultAt">resultAt</a>(0).</p>
+<p><b>See also </b><a href="qfuturewatcher.html#resultAt">resultAt</a>().</p>
+<!-- @@@result -->
+<!-- $$$resultAt[overload1]$$$resultAtint -->
+<h3 class="fn" id="resultAt"><a name="resultAt"></a><span class="type">T</span> QFutureWatcher::<span class="name">resultAt</span>(<span class="type">int</span> <i>index</i>) const</h3>
+<p>Returns the result at <i>index</i> in the <a href="qfuturewatcher.html#future">future</a>(). If the result is not immediately available, this function will block and wait for the result to become available.</p>
+<p><b>See also </b><a href="qfuturewatcher.html#result">result</a>().</p>
+<!-- @@@resultAt -->
+<!-- $$$setFuture[overload1]$$$setFutureconstQFuture<T>& -->
+<h3 class="fn" id="setFuture"><a name="setFuture"></a><span class="type">void</span> QFutureWatcher::<span class="name">setFuture</span>(const <span class="type"><a href="qfuture.html">QFuture</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>future</i>)</h3>
+<p>Starts watching the given <i>future</i>.</p>
+<p>One of the signals might be emitted for the current state of the <i>future</i>. For example, if the future is already stopped, the finished signal will be emitted.</p>
+<p>To avoid a race condition, it is important to call this function <i>after</i> doing the connections.</p>
+<p><b>See also </b><a href="qfuturewatcher.html#future">future</a>().</p>
+<!-- @@@setFuture -->
+<!-- $$$setPendingResultsLimit[overload1]$$$setPendingResultsLimitint -->
+<h3 class="fn" id="setPendingResultsLimit"><a name="setPendingResultsLimit"></a><span class="type">void</span> QFutureWatcher::<span class="name">setPendingResultsLimit</span>(<span class="type">int</span> <i>limit</i>)</h3>
+<p>The setPendingResultsLimit() provides throttling control. When the number of pending <a href="qfuturewatcher.html#resultReadyAt">resultReadyAt</a>() or <a href="qfuturewatcher.html#resultsReadyAt">resultsReadyAt</a>() signals exceeds the <i>limit</i>, the computation represented by the future will be throttled automatically. The computation will resume once the number of pending signals drops below the <i>limit</i>.</p>
+<!-- @@@setPendingResultsLimit -->
+<!-- $$$waitForFinished[overload1]$$$waitForFinished -->
+<h3 class="fn" id="waitForFinished"><a name="waitForFinished"></a><span class="type">void</span> QFutureWatcher::<span class="name">waitForFinished</span>()</h3>
+<p>Waits for the asynchronous computation to finish (including <a href="qfuturewatcher.html#cancel">cancel</a>()ed computations).</p>
+<!-- @@@waitForFinished -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

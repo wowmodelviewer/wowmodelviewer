@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtlocation-geoservices.qdoc -->
+  <title>Qt Location GeoServices | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td >Qt Location GeoServices</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#plugin-description">Plugin Description</a></li>
+<li class="level1"><a href="#implementing-plugins">Implementing Plugins</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Location GeoServices</h1>
+<span class="subtitle"></span>
+<!-- $$$qtlocation-geoservices.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The Qt Location provides the majority of its functionality through GeoService plugins. This document outlines how to develop a new GeoService plugin.</p>
+<a name="plugin-description"></a>
+<h2 id="plugin-description">Plugin Description</h2>
+<p>Each plugin is described by a json file. The json describes the plugins capabilities and version. Below is an example of a json file used by the OpenStreenMap plugin:</p>
+<pre class="cpp">
+
+  {
+      &quot;Keys&quot;: [&quot;osm&quot;],
+      &quot;Provider&quot;: &quot;osm&quot;,
+      &quot;Version&quot;: 100,
+      &quot;Experimental&quot;: false,
+      &quot;Features&quot;: [
+          &quot;OnlineMappingFeature&quot;,
+          &quot;OnlineGeocodingFeature&quot;,
+          &quot;ReverseGeocodingFeature&quot;,
+          &quot;OnlineRoutingFeature&quot;,
+          &quot;OnlinePlacesFeature&quot;
+      ]
+  }
+
+</pre>
+<p>The entries have the following meaning:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Key</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >Keys</td><td >The unique name/key of the plugin. Each GeoService plugin must have a unique name.</td></tr>
+<tr valign="top" class="even"><td >Provider</td><td >The provider name of the services. Multiple plugins may have the same name. In such cases the Version string will be used to further distinguish the plugins.</td></tr>
+<tr valign="top" class="odd"><td >Experimental</td><td >Marks the service plugin as experimental. API developers may choose to ignore such plugins when instanciating <a href="qgeoserviceprovider.html#QGeoServiceProvider">QGeoServiceProvider::QGeoServiceProvider</a>().</td></tr>
+<tr valign="top" class="even"><td >Version</td><td >The plugin version. If multiple plugins have the same provider name, the plugin with the higest version will be used.</td></tr>
+<tr valign="top" class="odd"><td >Features</td><td >List of features provided by the plugin/service. Each feature is a string representation of the corresponding features in <a href="qgeoserviceprovider.html">QGeoServiceProvider</a>. For more details see <a href="qgeoserviceprovider.html#routingFeatures">QGeoServiceProvider::routingFeatures</a>(), <a href="qgeoserviceprovider.html#geocodingFeatures">QGeoServiceProvider::geocodingFeatures</a>() and <a href="qgeoserviceprovider.html#placesFeatures">QGeoServiceProvider::placesFeatures</a>().</td></tr>
+</table></div>
+<a name="implementing-plugins"></a>
+<h2 id="implementing-plugins">Implementing Plugins</h2>
+<p>A plugin implementer needs to subclass QGeoServiceProviderFactory and as many of the ManagerEngine classes as they want to provide implementations for.</p>
+<p>Subclassing QGeoServiceProviderFactory will only involves overriding of one of the following methods:</p>
+<ul>
+<li><a href="qgeoserviceproviderfactory.html#createGeocodingManagerEngine">QGeoServiceProviderFactory::createGeocodingManagerEngine</a>()</li>
+<li><a href="qgeoserviceproviderfactory.html#createRoutingManagerEngine">QGeoServiceProviderFactory::createRoutingManagerEngine</a>()</li>
+<li><a href="qgeoserviceproviderfactory.html#createPlaceManagerEngine">QGeoServiceProviderFactory::createPlaceManagerEngine</a>()</li>
+</ul>
+<p>If a plugin does not provide an engine the relevant function should return 0.</p>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qgeocodingmanagerengine.html">QGeoCodingManagerEngine</a></p></td><td class="tblDescr"><p>Interface and convenience methods to implementers of QGeoServiceProvider plugins who want to provide support for geocoding operations</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qgeoroutingmanagerengine.html">QGeoRoutingManagerEngine</a></p></td><td class="tblDescr"><p>Interface and convenience methods to implementers of QGeoServiceProvider plugins who want to provide access to geographic routing information</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qgeoserviceproviderfactoryv2.html">QGeoServiceProviderFactoryV2</a></p></td><td class="tblDescr"><p>Factory class used as the plugin interface for services related to geographical information</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplacemanagerengine.html">QPlaceManagerEngine</a></p></td><td class="tblDescr"><p>Interface for implementers of QGeoServiceProvider plugins who want to provide access to place functionality</p></td></tr>
+</table></div>
+</div>
+<!-- @@@qtlocation-geoservices.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

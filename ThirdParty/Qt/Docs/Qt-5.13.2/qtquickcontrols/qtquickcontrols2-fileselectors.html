@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtquickcontrols2-fileselectors.qdoc -->
+  <title>Using File Selectors with Qt Quick Controls | Qt Quick Controls 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td >Using File Selectors with Qt Quick Controls</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#related-information">Related Information</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Using File Selectors with Qt Quick Controls</h1>
+<span class="subtitle"></span>
+<!-- $$$qtquickcontrols2-fileselectors.html-description -->
+<div class="descr"> <a name="details"></a>
+<p><a href="../qtcore/qfileselector.html">File selectors</a> provide a convenient way of selecting file variants. Qt offers the platform name and the locale as built-in selectors. Qt Quick Controls extends the built-in selectors with the name (lowercase) of the style that an application is running with.</p>
+<p>By using file selectors, style-specific tweaks can be applied without creating a hard dependency to a style. From the available file variants, only the selected QML file is loaded by the QML engine. Each file variant can assume the context, that is, a specific style. This typically leads to some code duplication, but on the other hand, cuts the aforementioned hard dependency to the style, and leads to simpler and more efficient QML code. The same technique is used to implement the <a href="qtquickcontrols2-styles.html">Qt Quick Controls styles</a>.</p>
+<p>The following example demonstrates a custom rounded button that has a styled drop shadow in the <a href="qtquickcontrols2-material.html">Material style</a>, and looks flat in other styles. The files are organized so that the Material version of <code>CustomButton.qml</code> is placed into a <code>+material</code> sub-directory.</p>
+<pre class="cpp">
+
+  :<span class="operator">/</span>main<span class="operator">.</span>qml
+  :<span class="operator">/</span>CustomButton<span class="operator">.</span>qml
+  :<span class="operator">/</span><span class="operator">+</span>material<span class="operator">/</span>CustomButton<span class="operator">.</span>qml
+
+</pre>
+<p>By default, <code>main.qml</code> will use <code>CustomButton.qml</code> for the <code>CustomButton</code> type. However, when the application is run with the Material style, the <code>material</code> selector will be present and the <code>+material/CustomButton.qml</code> version will be used instead.</p>
+<pre class="cpp">
+
+  <span class="comment">// main.qml</span>
+  import <span class="type"><a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a></span> <span class="number">2.13</span>
+  import <span class="type"><a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a></span><span class="operator">.</span>Controls <span class="number">2.13</span>
+
+  ApplicationWindow {
+      id: window
+      visible: <span class="keyword">true</span>
+
+      CustomButton {
+          text: <span class="string">&quot;Button&quot;</span>
+          anchors<span class="operator">.</span>centerIn: parent
+      }
+  }
+
+</pre>
+<p>The base implementation of the custom button is a simple rounded flat button.</p>
+<pre class="cpp">
+
+  <span class="comment">// CustomButton.qml</span>
+  import <span class="type"><a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a></span> <span class="number">2.13</span>
+  import <span class="type"><a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a></span><span class="operator">.</span>Controls <span class="number">2.13</span>
+
+  Button {
+      id: control
+
+      background: Rectangle {
+          radius: width <span class="operator">/</span> <span class="number">2</span>
+          implicitWidth: <span class="number">36</span>
+          implicitHeight: <span class="number">36</span>
+          color: control<span class="operator">.</span>pressed <span class="operator">?</span> <span class="string">&quot;#ccc&quot;</span> : <span class="string">&quot;#eee&quot;</span>
+      }
+  }
+
+</pre>
+<p>The Material style's implementation of the custom button imports the Material style, requests a dark theme to get light text, and creates a drop shadow for the background.</p>
+<pre class="cpp">
+
+  <span class="comment">// +material/CustomButton.qml</span>
+  import <span class="type"><a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a></span> <span class="number">2.13</span>
+  import <span class="type"><a href="qtgraphicaleffects-module.html">QtGraphicalEffects</a></span> <span class="number">1.13</span>
+  import <span class="type"><a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a></span><span class="operator">.</span>Controls <span class="number">2.13</span>
+  import <span class="type"><a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a></span><span class="operator">.</span>Controls<span class="operator">.</span>Material <span class="number">2.13</span>
+
+  Button {
+      id: control
+
+      Material<span class="operator">.</span>theme: Material<span class="operator">.</span>Dark
+
+      background: Rectangle {
+          implicitWidth: <span class="number">48</span>
+          implicitHeight: <span class="number">48</span>
+          color: Material<span class="operator">.</span>accentColor
+          radius: width <span class="operator">/</span> <span class="number">2</span>
+
+          layer<span class="operator">.</span>enabled: control<span class="operator">.</span>enabled
+          layer<span class="operator">.</span>effect: DropShadow {
+              verticalOffset: <span class="number">1</span>
+              color: Material<span class="operator">.</span>dropShadowColor
+              samples: control<span class="operator">.</span>pressed <span class="operator">?</span> <span class="number">20</span> : <span class="number">10</span>
+              spread: <span class="number">0.5</span>
+          }
+      }
+  }
+
+</pre>
+<p><b>Note: </b>It is recommended to use <a href="../qtqml/qqmlapplicationengine.html">QQmlApplicationEngine</a>, which internally creates a <a href="../qtqml/qqmlfileselector.html">QQmlFileSelector</a> instance. This is all that is needed to take QML file selectors into use.</p><a name="related-information"></a>
+<h2 id="related-information">Related Information</h2>
+<ul>
+<li><a href="../qtcore/qfileselector.html">QFileSelector</a></li>
+<li><a href="../qtqml/qqmlfileselector.html">QQmlFileSelector</a></li>
+<li><a href="qtquickcontrols2-styles.html">Styling Qt Quick Controls</a></li>
+</ul>
+</div>
+<!-- @@@qtquickcontrols2-fileselectors.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

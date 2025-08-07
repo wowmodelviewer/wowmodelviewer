@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qscenechange.cpp -->
+  <title>QSceneChange Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QSceneChange</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSceneChange Class</h1>
+<span class="small-subtitle">(<a href="qt3dcore-qscenechange.html">Qt3DCore::QSceneChange</a>)<br/></span>
+<!-- $$$QSceneChange-brief -->
+<p>The base class for changes that can be sent and received by Qt3D's change notification system. <a href="#details">More...</a></p>
+<!-- @@@QSceneChange -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;Qt3DCore/QSceneChange&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3dcore</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qt3dcore-qcomponentaddedchange.html">Qt3DCore::QComponentAddedChange</a>, <a href="qt3dcore-qcomponentremovedchange.html">Qt3DCore::QComponentRemovedChange</a>, <a href="qt3dcore-qnodecommand.html">Qt3DCore::QNodeCommand</a>, <a href="qt3dcore-qnodecreatedchangebase.html">Qt3DCore::QNodeCreatedChangeBase</a>, <a href="qt3dcore-qnodedestroyedchange.html">Qt3DCore::QNodeDestroyedChange</a>, <a href="qt3dcore-qpropertyupdatedchangebase.html">Qt3DCore::QPropertyUpdatedChangeBase</a>, <a href="qt3dcore-qpropertyvalueaddedchangebase.html">Qt3DCore::QPropertyValueAddedChangeBase</a>, and <a href="qt3dcore-qpropertyvalueremovedchangebase.html">Qt3DCore::QPropertyValueRemovedChangeBase</a></p>
+</td></tr></table></div><ul>
+<li><a href="qt3dcore-qscenechange-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qscenechange.html#DeliveryFlag-enum">DeliveryFlag</a></b> { BackendNodes, Nodes, DeliverToAll }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qscenechange.html#DeliveryFlag-enum">DeliveryFlags</a></b></td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DCore::QSceneChange::DeliveryFlags </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qscenechange.html#deliveryFlags">deliveryFlags</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qscenechange.html#setDeliveryFlags">setDeliveryFlags</a></b>(Qt3DCore::QSceneChange::DeliveryFlags <i>flags</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DCore::QNodeId </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qscenechange.html#subjectId">subjectId</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DCore::ChangeFlag </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qscenechange.html#type">type</a></b>() const</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qscenechange.html#QSceneChange">QSceneChange</a></b>(Qt3DCore::ChangeFlag <i>type</i>, Qt3DCore::QNodeId <i>subjectId</i>)</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qscenechange.html#ChangeFlag-enum">ChangeFlag</a></b> { NodeCreated, NodeDeleted, PropertyUpdated, PropertyValueAdded, ..., AllChanges }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qscenechange.html#QSceneChangePtr-typedef">QSceneChangePtr</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSceneChange-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QSceneChange -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$DeliveryFlag$$$BackendNodes$$$Nodes$$$DeliverToAll -->
+<h3 class="flags" id="DeliveryFlag-enum"><a name="DeliveryFlag-enum"></a>enum QSceneChange::<span class="name">DeliveryFlag</span><br/>flags QSceneChange::<span class="name">DeliveryFlags</span></h3>
+<p>The types of change that can be sent and received by Qt3D's change notification system.</p>
+<div class="table"><table class="valuelist"><tr><th class="tblConst">Constant</th><th class="tblVal">Value</th></tr>
+<tr><td class="topAlign"><code>Qt3DCore::QSceneChange::BackendNodes</code></td><td class="topAlign tblval"><code>0x0001</code></td></tr>
+<tr><td class="topAlign"><code>Qt3DCore::QSceneChange::Nodes</code></td><td class="topAlign tblval"><code>0x0010</code></td></tr>
+<tr><td class="topAlign"><code>Qt3DCore::QSceneChange::DeliverToAll</code></td><td class="topAlign tblval"><code>BackendNodes | Nodes</code></td></tr>
+</table></div>
+<p>The DeliveryFlags type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;DeliveryFlag&gt;. It stores an OR combination of DeliveryFlag values.</p>
+<!-- @@@DeliveryFlag -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QSceneChange[overload1]$$$QSceneChangeQt3DCore::ChangeFlagQt3DCore::QNodeId -->
+<h3 class="fn" id="QSceneChange"><a name="QSceneChange"></a><code>[protected] </code>QSceneChange::<span class="name">QSceneChange</span>(<span class="type"><a href="qt3dcore-qscenechange.html#ChangeFlag-enum">Qt3DCore::ChangeFlag</a></span> <i>type</i>, <span class="type"><a href="qt3dcore-qnodeid.html">Qt3DCore::QNodeId</a></span> <i>subjectId</i>)</h3>
+<p>Constructs a new <a href="qt3dcore-qscenechange.html">QSceneChange</a> with <i>type</i> and <i>subjectId</i>.</p>
+<!-- @@@QSceneChange -->
+<!-- $$$deliveryFlags[overload1]$$$deliveryFlags -->
+<h3 class="fn" id="deliveryFlags"><a name="deliveryFlags"></a><span class="type"><a href="qt3dcore-qscenechange.html#DeliveryFlag-enum">Qt3DCore::QSceneChange::DeliveryFlags</a></span> QSceneChange::<span class="name">deliveryFlags</span>() const</h3>
+<p>Returns the set delivery flags.</p>
+<p><b>See also </b><a href="qt3dcore-qscenechange.html#setDeliveryFlags">setDeliveryFlags</a>().</p>
+<!-- @@@deliveryFlags -->
+<!-- $$$setDeliveryFlags[overload1]$$$setDeliveryFlagsQt3DCore::QSceneChange::DeliveryFlags -->
+<h3 class="fn" id="setDeliveryFlags"><a name="setDeliveryFlags"></a><span class="type">void</span> QSceneChange::<span class="name">setDeliveryFlags</span>(<span class="type"><a href="qt3dcore-qscenechange.html#DeliveryFlag-enum">Qt3DCore::QSceneChange::DeliveryFlags</a></span> <i>flags</i>)</h3>
+<p>Sets the delivery flags of the change to <i>flags</i>.</p>
+<p><b>See also </b><a href="qt3dcore-qscenechange.html#deliveryFlags">deliveryFlags</a>().</p>
+<!-- @@@setDeliveryFlags -->
+<!-- $$$subjectId[overload1]$$$subjectId -->
+<h3 class="fn" id="subjectId"><a name="subjectId"></a><span class="type"><a href="qt3dcore-qnodeid.html">Qt3DCore::QNodeId</a></span> QSceneChange::<span class="name">subjectId</span>() const</h3>
+<p>Returns scene change subject id.</p>
+<!-- @@@subjectId -->
+<!-- $$$type[overload1]$$$type -->
+<h3 class="fn" id="type"><a name="type"></a><span class="type"><a href="qt3dcore-qscenechange.html#ChangeFlag-enum">Qt3DCore::ChangeFlag</a></span> QSceneChange::<span class="name">type</span>() const</h3>
+<p>Returns the scene change type.</p>
+<!-- @@@type -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$ChangeFlag$$$NodeCreated$$$NodeDeleted$$$PropertyUpdated$$$PropertyValueAdded$$$PropertyValueRemoved$$$ComponentAdded$$$ComponentRemoved$$$CommandRequested$$$CallbackTriggered$$$AllChanges -->
+<h3 class="flags" id="ChangeFlag-enum"><a name="ChangeFlag-enum"></a>enum <span class="name">ChangeFlag</span><br/>flags Qt3DCore::<span class="name">ChangeFlags</span></h3>
+<p>The types of change that can be sent and received by Qt3D's change notification system.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Qt3DCore::QSceneChange::NodeCreated</code></td><td class="topAlign tblval"><code>1 &lt;&lt; 0</code></td><td class="topAlign">A new instance of a <a href="qt3dcore-qnode.html">QNode</a> subclass has been created.</td></tr>
+<tr><td class="topAlign"><code>Qt3DCore::QSceneChange::NodeDeleted</code></td><td class="topAlign tblval"><code>1 &lt;&lt; 1</code></td><td class="topAlign">A <a href="qt3dcore-qnode.html">QNode</a> has been deleted.</td></tr>
+<tr><td class="topAlign"><code>Qt3DCore::QSceneChange::PropertyUpdated</code></td><td class="topAlign tblval"><code>1 &lt;&lt; 2</code></td><td class="topAlign">A <a href="qt3dcore-qnode.html">QNode</a> property has been updated.</td></tr>
+<tr><td class="topAlign"><code>Qt3DCore::QSceneChange::PropertyValueAdded</code></td><td class="topAlign tblval"><code>1 &lt;&lt; 3</code></td><td class="topAlign">A <a href="qt3dcore-qnode.html">QNode</a> has been added to the scene.</td></tr>
+<tr><td class="topAlign"><code>Qt3DCore::QSceneChange::PropertyValueRemoved</code></td><td class="topAlign tblval"><code>1 &lt;&lt; 4</code></td><td class="topAlign">A <a href="qt3dcore-qnode.html">QNode</a> has been removed from the scene.</td></tr>
+<tr><td class="topAlign"><code>Qt3DCore::QSceneChange::CommandRequested</code></td><td class="topAlign tblval"><code>1 &lt;&lt; 7</code></td><td class="topAlign">A <a href="qt3dcore-qnodecommand.html">QNodeCommand</a> has been sent between a node and its backend.</td></tr>
+<tr><td class="topAlign"><code>Qt3DCore::QSceneChange::ComponentAdded</code></td><td class="topAlign tblval"><code>1 &lt;&lt; 5</code></td><td class="topAlign">A <a href="qt3dcore-qcomponent.html">QComponent</a> has been added to a <a href="qt3dcore-qentity.html">QEntity</a>.</td></tr>
+<tr><td class="topAlign"><code>Qt3DCore::QSceneChange::ComponentRemoved</code></td><td class="topAlign tblval"><code>1 &lt;&lt; 6</code></td><td class="topAlign">A <a href="qt3dcore-qcomponent.html">QComponent</a> has been removed from a <a href="qt3dcore-qentity.html">QEntity</a>.</td></tr>
+<tr><td class="topAlign"><code>Qt3DCore::QSceneChange::CallbackTriggered</code></td><td class="topAlign tblval"><code>1 &lt;&lt; 8</code></td><td class="topAlign">A <a href="qt3dcore-qnode.html">QNode</a> triggered a callback.</td></tr>
+<tr><td class="topAlign"><code>Qt3DCore::QSceneChange::AllChanges</code></td><td class="topAlign tblval"><code>0xFFFFFFFF</code></td><td class="topAlign">Allows an observer to monitor for any of the above changes.</td></tr>
+</table></div>
+<p>The ChangeFlags type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;ChangeFlag&gt;. It stores an OR combination of ChangeFlag values.</p>
+<!-- @@@ChangeFlag -->
+<!-- $$$QSceneChangePtr -->
+<h3 class="fn" id="QSceneChangePtr-typedef"><a name="QSceneChangePtr-typedef"></a>typedef <span class="name">QSceneChangePtr</span></h3>
+<p>A shared pointer for <a href="qt3dcore-qscenechange.html">QSceneChange</a>.</p>
+<!-- @@@QSceneChangePtr -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qqmlfileselector.cpp -->
+  <title>QQmlFileSelector Class | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td ><a href="qtqml-module.html">C++ Classes</a></td><td >QQmlFileSelector</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QQmlFileSelector Class</h1>
+<!-- $$$QQmlFileSelector-brief -->
+<p>A class for applying a <a href="../qtcore/qfileselector.html">QFileSelector</a> to QML file loading. <a href="#details">More...</a></p>
+<!-- @@@QQmlFileSelector -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QQmlFileSelector&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += qml</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.2</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.2.</p>
+<ul>
+<li><a href="qqmlfileselector-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qqmlfileselector.html#QQmlFileSelector">QQmlFileSelector</a></b>(QQmlEngine *<i>engine</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qqmlfileselector.html#dtor.QQmlFileSelector">~QQmlFileSelector</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QFileSelector *</td><td class="memItemRight bottomAlign"><b><a href="qqmlfileselector.html#selector">selector</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlfileselector.html#setExtraSelectors">setExtraSelectors</a></b>(QStringList &amp;<i>strings</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlfileselector.html#setExtraSelectors-1">setExtraSelectors</a></b>(const QStringList &amp;<i>strings</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlfileselector.html#setSelector">setSelector</a></b>(QFileSelector *<i>selector</i>)</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QQmlFileSelector *</td><td class="memItemRight bottomAlign"><b><a href="qqmlfileselector.html#get">get</a></b>(QQmlEngine *<i>engine</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QQmlFileSelector-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qqmlfileselector.html">QQmlFileSelector</a> will automatically apply a <a href="../qtcore/qfileselector.html">QFileSelector</a> to qml file and asset paths.</p>
+<p>It is used as follows:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qqmlengine.html">QQmlEngine</a></span> engine;
+  <span class="type"><a href="qqmlfileselector.html#QQmlFileSelector">QQmlFileSelector</a></span><span class="operator">*</span> selector <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qqmlfileselector.html#QQmlFileSelector">QQmlFileSelector</a></span>(<span class="operator">&amp;</span>engine);
+
+</pre>
+<p>Then you can swap out files like so:</p>
+<pre class="cpp">
+
+  main<span class="operator">.</span>qml
+  Component<span class="operator">.</span>qml
+  asset<span class="operator">.</span>png
+  <span class="operator">+</span>unix<span class="operator">/</span>Component<span class="operator">.</span>qml
+  <span class="operator">+</span>mac<span class="operator">/</span>asset<span class="operator">.</span>png
+
+</pre>
+<p>In this example, main.qml will normally use Component.qml for the Component type. However on a unix platform, the unix selector will be present and the +unix/Component.qml version will be used instead. Note that this acts like swapping out Component.qml with +unix/Component.qml, so when using Component.qml you should not need to alter any paths based on which version was selected.</p>
+<p>For example, to pass the &quot;asset.png&quot; file path around you would refer to it just as &quot;asset.png&quot; in all of main.qml, Component.qml, and +linux/Component.qml. It will be replaced with +mac/asset.png on Mac platforms in all cases.</p>
+<p>For a list of available selectors, see <code>QFileSelector</code>.</p>
+<p>Your platform may also provide additional selectors for you to use. As specified by <a href="../qtcore/qfileselector.html">QFileSelector</a>, directories used for selection must start with a '+' character, so you will not accidentally trigger this feature unless you have directories with such names inside your project.</p>
+<p>If a new <a href="qqmlfileselector.html">QQmlFileSelector</a> is set on the engine, the old one will be replaced. Use <a href="qqmlfileselector.html#get">QQmlFileSelector::get</a>() to query or use the existing instance.</p>
+</div>
+<!-- @@@QQmlFileSelector -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QQmlFileSelector[overload1]$$$QQmlFileSelectorQQmlEngine*QObject* -->
+<h3 class="fn" id="QQmlFileSelector"><a name="QQmlFileSelector"></a>QQmlFileSelector::<span class="name">QQmlFileSelector</span>(<span class="type"><a href="qqmlengine.html">QQmlEngine</a></span> *<i>engine</i>, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Creates a new <a href="qqmlfileselector.html">QQmlFileSelector</a> with parent object <i>parent</i>, which includes its own <a href="../qtcore/qfileselector.html">QFileSelector</a>. <i>engine</i> is the <a href="qqmlengine.html">QQmlEngine</a> you wish to apply file selectors to. It will also take ownership of the <a href="qqmlfileselector.html">QQmlFileSelector</a>.</p>
+<!-- @@@QQmlFileSelector -->
+<!-- $$$~QQmlFileSelector[overload1]$$$~QQmlFileSelector -->
+<h3 class="fn" id="dtor.QQmlFileSelector"><a name="dtor.QQmlFileSelector"></a><code>[override virtual] </code>QQmlFileSelector::<span class="name">~QQmlFileSelector</span>()</h3>
+<p>Destroys the <a href="qqmlfileselector.html">QQmlFileSelector</a> object.</p>
+<!-- @@@~QQmlFileSelector -->
+<!-- $$$get[overload1]$$$getQQmlEngine* -->
+<h3 class="fn" id="get"><a name="get"></a><code>[static] </code><span class="type"><a href="qqmlfileselector.html#QQmlFileSelector">QQmlFileSelector</a></span> *QQmlFileSelector::<span class="name">get</span>(<span class="type"><a href="qqmlengine.html">QQmlEngine</a></span> *<i>engine</i>)</h3>
+<p>Gets the <a href="qqmlfileselector.html">QQmlFileSelector</a> currently active on the target <i>engine</i>.</p>
+<!-- @@@get -->
+<!-- $$$selector[overload1]$$$selector -->
+<h3 class="fn" id="selector"><a name="selector"></a><span class="type"><a href="../qtcore/qfileselector.html">QFileSelector</a></span> *QQmlFileSelector::<span class="name">selector</span>() const</h3>
+<p>Returns the <a href="../qtcore/qfileselector.html">QFileSelector</a> instance used by the <a href="qqmlfileselector.html">QQmlFileSelector</a>.</p>
+<p>This function was introduced in  Qt 5.7.</p>
+<p><b>See also </b><a href="qqmlfileselector.html#setSelector">setSelector</a>().</p>
+<!-- @@@selector -->
+<!-- $$$setExtraSelectors[overload1]$$$setExtraSelectorsQStringList& -->
+<h3 class="fn" id="setExtraSelectors"><a name="setExtraSelectors"></a><span class="type">void</span> QQmlFileSelector::<span class="name">setExtraSelectors</span>(<span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> &amp;<i>strings</i>)</h3>
+<p>Adds extra selectors contained in <i>strings</i> to the current <a href="../qtcore/qfileselector.html">QFileSelector</a> being used. Use this when extra selectors are all you need to avoid having to create your own <a href="../qtcore/qfileselector.html">QFileSelector</a> instance.</p>
+<!-- @@@setExtraSelectors -->
+<!-- $$$setExtraSelectors$$$setExtraSelectorsconstQStringList& -->
+<h3 class="fn" id="setExtraSelectors-1"><a name="setExtraSelectors-1"></a><span class="type">void</span> QQmlFileSelector::<span class="name">setExtraSelectors</span>(const <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> &amp;<i>strings</i>)</h3>
+<p>Adds extra selectors contained in <i>strings</i> to the current <a href="../qtcore/qfileselector.html">QFileSelector</a> being used. Use this when extra selectors are all you need to avoid having to create your own <a href="../qtcore/qfileselector.html">QFileSelector</a> instance.</p>
+<!-- @@@setExtraSelectors -->
+<!-- $$$setSelector[overload1]$$$setSelectorQFileSelector* -->
+<h3 class="fn" id="setSelector"><a name="setSelector"></a><span class="type">void</span> QQmlFileSelector::<span class="name">setSelector</span>(<span class="type"><a href="../qtcore/qfileselector.html">QFileSelector</a></span> *<i>selector</i>)</h3>
+<p>Sets the <a href="../qtcore/qfileselector.html">QFileSelector</a> instance for use by the <a href="qqmlfileselector.html">QQmlFileSelector</a> to <i>selector</i>. <a href="qqmlfileselector.html">QQmlFileSelector</a> does not take ownership of the new <a href="../qtcore/qfileselector.html">QFileSelector</a>. To reset <a href="qqmlfileselector.html">QQmlFileSelector</a> to use its internal <a href="../qtcore/qfileselector.html">QFileSelector</a> instance, call setSelector(0).</p>
+<p><b>See also </b><a href="qqmlfileselector.html#selector">selector</a>().</p>
+<!-- @@@setSelector -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- addressbook-tutorial.qdoc -->
+  <title>Part 6 - Loading and Saving | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Part 6 - Loading and Saving</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#defining-the-addressbook-class">Defining the AddressBook Class</a></li>
+<li class="level1"><a href="#implementing-the-addressbook-class">Implementing the AddressBook Class</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Part 6 - Loading and Saving</h1>
+<span class="subtitle"></span>
+<!-- $$$tutorials/addressbook/part6-brief -->
+<p>Describes how to add save and load functionality.</p>
+<!-- @@@tutorials/addressbook/part6 -->
+<!-- $$$tutorials/addressbook/part6-description -->
+<div class="descr"> <a name="details"></a>
+<p>This part covers the Qt file handling features we use to write loading and saving routines for the address book.</p>
+<p class="centerAlign"><img src="images/addressbook-tutorial-part6-screenshot.png" alt="" /></p><p>Although browsing and searching the contact list are useful features, our address book is not complete until we can save existing contacts and load them again at a later time.</p>
+<p>Qt provides a number of classes for <a href="../qtcore/io.html">input and output</a>, but we have chosen to use two which are simple to use in combination: <a href="../qtcore/qfile.html">QFile</a> and <a href="../qtcore/qdatastream.html">QDataStream</a>.</p>
+<p>A <a href="../qtcore/qfile.html">QFile</a> object represents a file on disk that can be read from and written to. <a href="../qtcore/qfile.html">QFile</a> is a subclass of the more general <a href="../qtcore/qiodevice.html">QIODevice</a> class which represents many different kinds of devices.</p>
+<p>A <a href="../qtcore/qdatastream.html">QDataStream</a> object is used to serialize binary data so that it can be stored in a <a href="../qtcore/qiodevice.html">QIODevice</a> and retrieved again later. Reading from a <a href="../qtcore/qiodevice.html">QIODevice</a> and writing to it is as simple as opening the stream - with the respective device as a parameter - and reading from or writing to it.</p>
+<a name="defining-the-addressbook-class"></a>
+<h4 id="defining-the-addressbook-class">Defining the AddressBook Class</h4>
+<p>We declare two public slots, <code>saveToFile()</code> and <code>loadFromFile()</code>, as well as two <a href="qpushbutton.html">QPushButton</a> objects, <code>loadButton</code> and <code>saveButton</code>.</p>
+<pre class="cpp">
+
+      <span class="type">void</span> saveToFile();
+      <span class="type">void</span> loadFromFile();
+      ...
+      <span class="type"><a href="qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>loadButton;
+      <span class="type"><a href="qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>saveButton;
+
+</pre>
+<a name="implementing-the-addressbook-class"></a>
+<h4 id="implementing-the-addressbook-class">Implementing the AddressBook Class</h4>
+<p>In our constructor, we instantiate <code>loadButton</code> and <code>saveButton</code>. Ideally, it would be more user-friendly to set the push buttons' labels to &quot;Load contacts from a file&quot; and &quot;Save contacts to a file&quot;. However, due to the size of our other push buttons, we set the labels to <b>Load..&#x2e;</b> and <b>Save..&#x2e;</b>. Fortunately, Qt provides a simple way to set tooltips with <a href="qwidget.html#toolTip-prop">setToolTip()</a> and we use it in the following way for our push buttons:</p>
+<pre class="cpp">
+
+      loadButton<span class="operator">-</span><span class="operator">&gt;</span>setToolTip(tr(<span class="string">&quot;Load contacts from a file&quot;</span>));
+      ...
+      saveButton<span class="operator">-</span><span class="operator">&gt;</span>setToolTip(tr(<span class="string">&quot;Save contacts to a file&quot;</span>));
+
+</pre>
+<p>Although it is not shown here, just like the other features we implemented, we add the push buttons to the layout panel on the right, <code>buttonLayout1</code>, and we connect the push buttons' <a href="qabstractbutton.html#clicked">clicked()</a> signals to their respective slots.</p>
+<p>For the saving feature, we first obtain <code>fileName</code> using <a href="qfiledialog.html#getSaveFileName">QFileDialog::getSaveFileName</a>(). This is a convenience function provided by <a href="qfiledialog.html">QFileDialog</a>, which pops up a modal file dialog and allows the user to enter a file name or select any existing <code>.abk</code> file. The <code>.abk</code> file is our Address Book extension that we create when we save contacts.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> AddressBook<span class="operator">::</span>saveToFile()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getSaveFileName(<span class="keyword">this</span><span class="operator">,</span>
+          tr(<span class="string">&quot;Save Address Book&quot;</span>)<span class="operator">,</span> <span class="string">&quot;&quot;</span><span class="operator">,</span>
+          tr(<span class="string">&quot;Address Book (*.abk);;All Files (*)&quot;</span>));
+
+</pre>
+<p>The file dialog that pops up is displayed in the screenshot below:</p>
+<p class="centerAlign"><img src="images/addressbook-tutorial-part6-save.png" alt="" /></p><p>If <code>fileName</code> is not empty, we create a <a href="../qtcore/qfile.html">QFile</a> object, <code>file</code>, with <code>fileName</code>. <a href="../qtcore/qfile.html">QFile</a> works with <a href="../qtcore/qdatastream.html">QDataStream</a> as <a href="../qtcore/qfile.html">QFile</a> is a <a href="../qtcore/qiodevice.html">QIODevice</a>.</p>
+<p>Next, we attempt to open the file in <a href="../qtcore/qiodevice.html#OpenModeFlag-enum">WriteOnly</a> mode. If this is unsuccessful, we display a <a href="qmessagebox.html">QMessageBox</a> to inform the user.</p>
+<pre class="cpp">
+
+      <span class="keyword">if</span> (fileName<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+      <span class="keyword">else</span> {
+          <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(fileName);
+          <span class="keyword">if</span> (<span class="operator">!</span>file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>WriteOnly)) {
+              <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>information(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Unable to open file&quot;</span>)<span class="operator">,</span>
+                  file<span class="operator">.</span>errorString());
+              <span class="keyword">return</span>;
+          }
+
+</pre>
+<p>Otherwise, we instantiate a <a href="../qtcore/qdatastream.html">QDataStream</a> object, <code>out</code>, to write the open file. <a href="../qtcore/qdatastream.html">QDataStream</a> requires that the same version of the stream is used for reading and writing. We ensure that this is the case by setting the version used to the <a href="../qtcore/qdatastream.html#Version-enum">version introduced with Qt 4.5</a> before serializing the data to <code>file</code>.</p>
+<pre class="cpp">
+
+          <span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> out(<span class="operator">&amp;</span>file);
+          out<span class="operator">.</span>setVersion(<span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span><span class="operator">::</span>Qt_4_5);
+          out <span class="operator">&lt;</span><span class="operator">&lt;</span> contacts;
+      }
+  }
+
+</pre>
+<p>For the loading feature, we also obtain <code>fileName</code> using <a href="qfiledialog.html#getOpenFileName">QFileDialog::getOpenFileName</a>(). This function, the counterpart to <a href="qfiledialog.html#getSaveFileName">QFileDialog::getSaveFileName</a>(), also pops up the modal file dialog and allows the user to enter a file name or select any existing <code>.abk</code> file to load it into the address book.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> AddressBook<span class="operator">::</span>loadFromFile()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getOpenFileName(<span class="keyword">this</span><span class="operator">,</span>
+          tr(<span class="string">&quot;Open Address Book&quot;</span>)<span class="operator">,</span> <span class="string">&quot;&quot;</span><span class="operator">,</span>
+          tr(<span class="string">&quot;Address Book (*.abk);;All Files (*)&quot;</span>));
+
+</pre>
+<p>On Windows, for example, this function pops up a native file dialog, as shown in the following screenshot.</p>
+<p class="centerAlign"><img src="images/addressbook-tutorial-part6-load.png" alt="" /></p><p>If <code>fileName</code> is not empty, again, we use a <a href="../qtcore/qfile.html">QFile</a> object, <code>file</code>, and attempt to open it in <a href="../qtcore/qiodevice.html#OpenModeFlag-enum">ReadOnly</a> mode. Similar to our implementation of <code>saveToFile()</code>, if this attempt is unsuccessful, we display a <a href="qmessagebox.html">QMessageBox</a> to inform the user.</p>
+<pre class="cpp">
+
+      <span class="keyword">if</span> (fileName<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+      <span class="keyword">else</span> {
+
+          <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(fileName);
+
+          <span class="keyword">if</span> (<span class="operator">!</span>file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly)) {
+              <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>information(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Unable to open file&quot;</span>)<span class="operator">,</span>
+                  file<span class="operator">.</span>errorString());
+              <span class="keyword">return</span>;
+          }
+
+          <span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> in(<span class="operator">&amp;</span>file);
+          in<span class="operator">.</span>setVersion(<span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span><span class="operator">::</span>Qt_4_5);
+          contacts<span class="operator">.</span>clear();   <span class="comment">// clear existing contacts</span>
+          in <span class="operator">&gt;</span><span class="operator">&gt;</span> contacts;
+
+</pre>
+<p>Otherwise, we instantiate a <a href="../qtcore/qdatastream.html">QDataStream</a> object, <code>in</code>, set its version as above and read the serialized data into the <code>contacts</code> data structure. The <code>contacts</code> object is emptied before data is read into it to simplify the file reading process. A more advanced method would be to read the contacts into a temporary <a href="../qtcore/qmap.html">QMap</a> object, and copy over non-duplicate contacts into <code>contacts</code>.</p>
+<pre class="cpp">
+
+          <span class="keyword">if</span> (contacts<span class="operator">.</span>isEmpty()) {
+              <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>information(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;No contacts in file&quot;</span>)<span class="operator">,</span>
+                  tr(<span class="string">&quot;The file you are attempting to open contains no contacts.&quot;</span>));
+          } <span class="keyword">else</span> {
+              <span class="type"><a href="../qtcore/qmap.html">QMap</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">&gt;</span><span class="operator">::</span>iterator i <span class="operator">=</span> contacts<span class="operator">.</span>begin();
+              nameLine<span class="operator">-</span><span class="operator">&gt;</span>setText(i<span class="operator">.</span>key());
+              addressText<span class="operator">-</span><span class="operator">&gt;</span>setText(i<span class="operator">.</span>value());
+          }
+      }
+
+      updateInterface(NavigationMode);
+  }
+
+</pre>
+<p>To display the contacts that have been read from the file, we must first validate the data obtained to ensure that the file we read from actually contains address book contacts. If it does, we display the first contact; otherwise, we display a <a href="qmessagebox.html">QMessageBox</a> to inform the user about the problem. Lastly, we update the interface to enable and disable the push buttons accordingly.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/tutorials/addressbook/part6?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@tutorials/addressbook/part6 -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

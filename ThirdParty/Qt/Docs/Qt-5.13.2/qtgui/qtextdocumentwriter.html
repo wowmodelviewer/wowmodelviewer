@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtextdocumentwriter.cpp -->
+  <title>QTextDocumentWriter Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QTextDocumentWriter</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QTextDocumentWriter Class</h1>
+<!-- $$$QTextDocumentWriter-brief -->
+<p>The <a href="qtextdocumentwriter.html">QTextDocumentWriter</a> class provides a format-independent interface for writing a <a href="qtextdocument.html">QTextDocument</a> to files or other devices. <a href="#details">More...</a></p>
+<!-- @@@QTextDocumentWriter -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QTextDocumentWriter&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.5</td></tr></table></div><p>This class was introduced in  Qt 4.5.</p>
+<ul>
+<li><a href="qtextdocumentwriter-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtextdocumentwriter.html#QTextDocumentWriter-2">QTextDocumentWriter</a></b>(const QString &amp;<i>fileName</i>, const QByteArray &amp;<i>format</i> = QByteArray())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtextdocumentwriter.html#QTextDocumentWriter-1">QTextDocumentWriter</a></b>(QIODevice *<i>device</i>, const QByteArray &amp;<i>format</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtextdocumentwriter.html#QTextDocumentWriter">QTextDocumentWriter</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtextdocumentwriter.html#dtor.QTextDocumentWriter">~QTextDocumentWriter</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QTextCodec *</td><td class="memItemRight bottomAlign"><b><a href="qtextdocumentwriter.html#codec">codec</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QIODevice *</td><td class="memItemRight bottomAlign"><b><a href="qtextdocumentwriter.html#device">device</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qtextdocumentwriter.html#fileName">fileName</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qtextdocumentwriter.html#format">format</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtextdocumentwriter.html#setCodec">setCodec</a></b>(QTextCodec *<i>codec</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtextdocumentwriter.html#setDevice">setDevice</a></b>(QIODevice *<i>device</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtextdocumentwriter.html#setFileName">setFileName</a></b>(const QString &amp;<i>fileName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtextdocumentwriter.html#setFormat">setFormat</a></b>(const QByteArray &amp;<i>format</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qtextdocumentwriter.html#write">write</a></b>(const QTextDocument *<i>document</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qtextdocumentwriter.html#write-1">write</a></b>(const QTextDocumentFragment &amp;<i>fragment</i>)</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QByteArray&gt; </td><td class="memItemRight bottomAlign"><b><a href="qtextdocumentwriter.html#supportedDocumentFormats">supportedDocumentFormats</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QTextDocumentWriter-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>To write a document, construct a <a href="qtextdocumentwriter.html">QTextDocumentWriter</a> object with either a file name or a device object, and specify the document format to be written. You can construct a writer and set the format using <a href="qtextdocumentwriter.html#setFormat">setFormat</a>() later.</p>
+<p>Call <a href="qtextdocumentwriter.html#write">write</a>() to write the document to the device. If the document is successfully written, this function returns <code>true</code>. However, if an error occurs when writing the document, it will return false.</p>
+<p>Call <a href="qtextdocumentwriter.html#supportedDocumentFormats">supportedDocumentFormats</a>() for a list of formats that <a href="qtextdocumentwriter.html">QTextDocumentWriter</a> can write.</p>
+<p>Since the capabilities of the supported output formats vary considerably, the writer simply outputs the appropriate subset of objects for each format. This typically includes the formatted text and images contained in a document.</p>
+</div>
+<!-- @@@QTextDocumentWriter -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QTextDocumentWriter$$$QTextDocumentWriterconstQString&constQByteArray& -->
+<h3 class="fn" id="QTextDocumentWriter-2"><a name="QTextDocumentWriter-2"></a>QTextDocumentWriter::<span class="name">QTextDocumentWriter</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>fileName</i>, const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>format</i> = QByteArray())</h3>
+<p>Constructs an <a href="qtextdocumentwriter.html">QTextDocumentWriter</a> object that will write to a file with the name <i>fileName</i>, using the document format specified by <i>format</i>. If <i>format</i> is not provided, <a href="qtextdocumentwriter.html">QTextDocumentWriter</a> will detect the document format by inspecting the extension of <i>fileName</i>.</p>
+<!-- @@@QTextDocumentWriter -->
+<!-- $$$QTextDocumentWriter$$$QTextDocumentWriterQIODevice*constQByteArray& -->
+<h3 class="fn" id="QTextDocumentWriter-1"><a name="QTextDocumentWriter-1"></a>QTextDocumentWriter::<span class="name">QTextDocumentWriter</span>(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span> *<i>device</i>, const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>format</i>)</h3>
+<p>Constructs a <a href="qtextdocumentwriter.html">QTextDocumentWriter</a> object to write to the given <i>device</i> in the document format specified by <i>format</i>.</p>
+<!-- @@@QTextDocumentWriter -->
+<!-- $$$QTextDocumentWriter[overload1]$$$QTextDocumentWriter -->
+<h3 class="fn" id="QTextDocumentWriter"><a name="QTextDocumentWriter"></a>QTextDocumentWriter::<span class="name">QTextDocumentWriter</span>()</h3>
+<p>Constructs an empty <a href="qtextdocumentwriter.html">QTextDocumentWriter</a> object. Before writing, you must call <a href="qtextdocumentwriter.html#setFormat">setFormat</a>() to set a document format, then <a href="qtextdocumentwriter.html#setDevice">setDevice</a>() or <a href="qtextdocumentwriter.html#setFileName">setFileName</a>().</p>
+<!-- @@@QTextDocumentWriter -->
+<!-- $$$~QTextDocumentWriter[overload1]$$$~QTextDocumentWriter -->
+<h3 class="fn" id="dtor.QTextDocumentWriter"><a name="dtor.QTextDocumentWriter"></a>QTextDocumentWriter::<span class="name">~QTextDocumentWriter</span>()</h3>
+<p>Destroys the <a href="qtextdocumentwriter.html">QTextDocumentWriter</a> object.</p>
+<!-- @@@~QTextDocumentWriter -->
+<!-- $$$codec[overload1]$$$codec -->
+<h3 class="fn" id="codec"><a name="codec"></a><span class="type"><a href="../qtcore/qtextcodec.html">QTextCodec</a></span> *QTextDocumentWriter::<span class="name">codec</span>() const</h3>
+<p>Returns the codec that is currently assigned to the writer.</p>
+<p><b>See also </b><a href="qtextdocumentwriter.html#setCodec">setCodec</a>().</p>
+<!-- @@@codec -->
+<!-- $$$device[overload1]$$$device -->
+<h3 class="fn" id="device"><a name="device"></a><span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span> *QTextDocumentWriter::<span class="name">device</span>() const</h3>
+<p>Returns the device currently assigned, or <code>nullptr</code> if no device has been assigned.</p>
+<p><b>See also </b><a href="qtextdocumentwriter.html#setDevice">setDevice</a>().</p>
+<!-- @@@device -->
+<!-- $$$fileName[overload1]$$$fileName -->
+<h3 class="fn" id="fileName"><a name="fileName"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QTextDocumentWriter::<span class="name">fileName</span>() const</h3>
+<p>If the currently assigned device is a <a href="../qtcore/qfile.html">QFile</a>, or if <a href="qtextdocumentwriter.html#setFileName">setFileName</a>() has been called, this function returns the name of the file to be written to. In all other cases, it returns an empty string.</p>
+<p><b>See also </b><a href="qtextdocumentwriter.html#setFileName">setFileName</a>() and <a href="qtextdocumentwriter.html#setDevice">setDevice</a>().</p>
+<!-- @@@fileName -->
+<!-- $$$format[overload1]$$$format -->
+<h3 class="fn" id="format"><a name="format"></a><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> QTextDocumentWriter::<span class="name">format</span>() const</h3>
+<p>Returns the format used for writing documents.</p>
+<p><b>See also </b><a href="qtextdocumentwriter.html#setFormat">setFormat</a>().</p>
+<!-- @@@format -->
+<!-- $$$setCodec[overload1]$$$setCodecQTextCodec* -->
+<h3 class="fn" id="setCodec"><a name="setCodec"></a><span class="type">void</span> QTextDocumentWriter::<span class="name">setCodec</span>(<span class="type"><a href="../qtcore/qtextcodec.html">QTextCodec</a></span> *<i>codec</i>)</h3>
+<p>Sets the codec for this stream to <i>codec</i>. The codec is used for encoding any data that is written. By default, <a href="qtextdocumentwriter.html">QTextDocumentWriter</a> uses UTF-8.</p>
+<p><b>See also </b><a href="qtextdocumentwriter.html#codec">codec</a>().</p>
+<!-- @@@setCodec -->
+<!-- $$$setDevice[overload1]$$$setDeviceQIODevice* -->
+<h3 class="fn" id="setDevice"><a name="setDevice"></a><span class="type">void</span> QTextDocumentWriter::<span class="name">setDevice</span>(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span> *<i>device</i>)</h3>
+<p>Sets the writer's device to the <i>device</i> specified. If a device has already been set, the old device is removed but otherwise left unchanged.</p>
+<p>If the device is not already open, <a href="qtextdocumentwriter.html">QTextDocumentWriter</a> will attempt to open the device in <a href="../qtcore/qiodevice.html#OpenModeFlag-enum">QIODevice::WriteOnly</a> mode by calling open().</p>
+<p><b>Note: </b>This will not work for certain devices, such as <a href="../qtcore/qprocess.html">QProcess</a>, <a href="../qtnetwork/qtcpsocket.html">QTcpSocket</a> and <a href="../qtnetwork/qudpsocket.html">QUdpSocket</a>, where some configuration is required before the device can be opened.</p><p><b>See also </b><a href="qtextdocumentwriter.html#device">device</a>() and <a href="qtextdocumentwriter.html#setFileName">setFileName</a>().</p>
+<!-- @@@setDevice -->
+<!-- $$$setFileName[overload1]$$$setFileNameconstQString& -->
+<h3 class="fn" id="setFileName"><a name="setFileName"></a><span class="type">void</span> QTextDocumentWriter::<span class="name">setFileName</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>fileName</i>)</h3>
+<p>Sets the name of the file to be written to <i>fileName</i>. Internally, <a href="qtextdocumentwriter.html">QTextDocumentWriter</a> will create a <a href="../qtcore/qfile.html">QFile</a> and open it in <a href="../qtcore/qiodevice.html#OpenModeFlag-enum">QIODevice::WriteOnly</a> mode, and use this file when writing the document.</p>
+<p><b>See also </b><a href="qtextdocumentwriter.html#fileName">fileName</a>() and <a href="qtextdocumentwriter.html#setDevice">setDevice</a>().</p>
+<!-- @@@setFileName -->
+<!-- $$$setFormat[overload1]$$$setFormatconstQByteArray& -->
+<h3 class="fn" id="setFormat"><a name="setFormat"></a><span class="type">void</span> QTextDocumentWriter::<span class="name">setFormat</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>format</i>)</h3>
+<p>Sets the format used to write documents to the <i>format</i> specified. <i>format</i> is a case insensitive text string. For example:</p>
+<pre class="cpp">
+
+          <span class="type"><a href="qtextdocumentwriter.html#QTextDocumentWriter">QTextDocumentWriter</a></span> writer;
+          writer<span class="operator">.</span>setFormat(<span class="string">&quot;odf&quot;</span>); <span class="comment">// same as writer.setFormat(&quot;ODF&quot;);</span>
+
+</pre>
+<p>You can call <a href="qtextdocumentwriter.html#supportedDocumentFormats">supportedDocumentFormats</a>() for the full list of formats <a href="qtextdocumentwriter.html">QTextDocumentWriter</a> supports.</p>
+<p><b>See also </b><a href="qtextdocumentwriter.html#format">format</a>().</p>
+<!-- @@@setFormat -->
+<!-- $$$supportedDocumentFormats[overload1]$$$supportedDocumentFormats -->
+<h3 class="fn" id="supportedDocumentFormats"><a name="supportedDocumentFormats"></a><code>[static] </code><span class="type">QList</span>&lt;<span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span>&gt; QTextDocumentWriter::<span class="name">supportedDocumentFormats</span>()</h3>
+<p>Returns the list of document formats supported by <a href="qtextdocumentwriter.html">QTextDocumentWriter</a>.</p>
+<p>By default, Qt can write the following formats:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Format</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >plaintext</td><td >Plain text</td></tr>
+<tr valign="top" class="even"><td >HTML</td><td >HyperText Markup Language</td></tr>
+<tr valign="top" class="odd"><td >ODF</td><td >OpenDocument Format</td></tr>
+</table></div>
+<p><b>See also </b><a href="qtextdocumentwriter.html#setFormat">setFormat</a>().</p>
+<!-- @@@supportedDocumentFormats -->
+<!-- $$$write[overload1]$$$writeconstQTextDocument* -->
+<h3 class="fn" id="write"><a name="write"></a><span class="type">bool</span> QTextDocumentWriter::<span class="name">write</span>(const <span class="type"><a href="qtextdocument.html">QTextDocument</a></span> *<i>document</i>)</h3>
+<p>Writes the given <i>document</i> to the assigned device or file and returns <code>true</code> if successful; otherwise returns <code>false</code>.</p>
+<!-- @@@write -->
+<!-- $$$write$$$writeconstQTextDocumentFragment& -->
+<h3 class="fn" id="write-1"><a name="write-1"></a><span class="type">bool</span> QTextDocumentWriter::<span class="name">write</span>(const <span class="type"><a href="qtextdocumentfragment.html">QTextDocumentFragment</a></span> &amp;<i>fragment</i>)</h3>
+<p>Writes the document fragment specified by <i>fragment</i> to the assigned device or file and returns <code>true</code> if successful; otherwise returns <code>false</code>.</p>
+<!-- @@@write -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

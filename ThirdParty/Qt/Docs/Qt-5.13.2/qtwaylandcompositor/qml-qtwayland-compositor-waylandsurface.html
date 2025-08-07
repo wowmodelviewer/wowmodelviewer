@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwaylandsurface.cpp -->
+  <title>WaylandSurface QML Type | Qt Wayland Compositor 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwaylandcompositor-index.html">Qt Wayland Compositor</a></td><td ><a href="qtwayland-compositor-qmlmodule.html">QML Types</a></td><td >WaylandSurface QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwaylandcompositor-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">WaylandSurface QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$WaylandSurface-brief -->
+<p>Represents a rectangular area on an output device. <a href="#details">More...</a></p>
+<!-- @@@WaylandSurface -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtWayland.Compositor 1.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr></table></div><ul>
+<li><a href="qml-qtwayland-compositor-waylandsurface-members.html">List of all members, including inherited members</a></li>
+<li><a href="qml-qtwayland-compositor-waylandsurface-obsolete.html">Obsolete members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-waylandsurface.html#bufferScale-prop">bufferScale</a></b></b> : size</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-waylandsurface.html#bufferSize-prop">bufferSize</a></b></b> : size</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-waylandsurface.html#client-prop">client</a></b></b> : WaylandClient</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-waylandsurface.html#contentOrientation-prop">contentOrientation</a></b></b> : enum</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-waylandsurface.html#cursorSurface-prop">cursorSurface</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-waylandsurface.html#destinationSize-prop">destinationSize</a></b></b> : size</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-waylandsurface.html#hasContent-prop">hasContent</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-waylandsurface.html#origin-prop">origin</a></b></b> : enum</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-waylandsurface.html#sourceGeometry-prop">sourceGeometry</a></b></b> : rect</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-waylandsurface.html#useTextureAlpha-prop">useTextureAlpha</a></b></b> : bool</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-waylandsurface.html#childAdded-signal">childAdded</a></b></b>(<i>child</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtwayland-compositor-waylandsurface.html#dragStarted-signal">dragStarted</a></b></b>(<i>drag</i>)</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-waylandsurface.html#surfaceDestroyed-signal">surfaceDestroyed</a></b></b>()</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtwayland-compositor-waylandsurface.html#destroy-method">destroy</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtwayland-compositor-waylandsurface.html#initialize-method">initialize</a></b></b>(<i>compositor</i>,  WaylandClient <i>client</i>,  int <i>id</i>,  int <i>version</i>)</li>
+<li class="fn">bool <b><b><a href="qml-qtwayland-compositor-waylandsurface.html#isDestroyed-method">isDestroyed</a></b></b>()</li>
+</ul>
+<!-- $$$WaylandSurface-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>This type encapsulates a rectangular area of pixels that is displayed on an output device. It corresponds to the interface <code>wl_surface</code> in the Wayland protocol.</p>
+<!-- @@@WaylandSurface -->
+<h2>Property Documentation</h2>
+<!-- $$$bufferScale -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="bufferScale-prop"></a><span class="name">bufferScale</span> : <span class="type"><a href="../qtqml/qml-size.html">size</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the <a href="qml-qtwayland-compositor-waylandsurface.html">WaylandSurface</a>'s buffer scale. The buffer scale lets a client supply higher resolution buffer data for use on high resolution outputs.</p>
+</div></div><!-- @@@bufferScale -->
+<br/>
+<!-- $$$bufferSize -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="bufferSize-prop"></a><span class="name">bufferSize</span> : <span class="type"><a href="../qtqml/qml-size.html">size</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the size of the current buffer of this <a href="qml-qtwayland-compositor-waylandsurface.html">WaylandSurface</a> in pixels, not in surface coordinates.</p>
+<p>For the size in surface coordinates, use <a href="qml-qtwayland-compositor-waylandsurface.html#destinationSize-prop">destinationSize</a> instead.</p>
+<p><b>See also </b><a href="qml-qtwayland-compositor-waylandsurface.html#destinationSize-prop">destinationSize</a> and <a href="qml-qtwayland-compositor-waylandsurface.html#bufferScale-prop">bufferScale</a>.</p>
+</div></div><!-- @@@bufferSize -->
+<br/>
+<!-- $$$client -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="client-prop"></a><span class="name">client</span> : <span class="type"><a href="qml-qtwayland-compositor-waylandclient.html">WaylandClient</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the client using this <a href="qml-qtwayland-compositor-waylandsurface.html">WaylandSurface</a>.</p>
+</div></div><!-- @@@client -->
+<br/>
+<!-- $$$contentOrientation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="contentOrientation-prop"></a><span class="name">contentOrientation</span> : <span class="type">enum</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the orientation of the <a href="qml-qtwayland-compositor-waylandsurface.html">WaylandSurface</a>'s contents.</p>
+<p><b>See also </b><a href="qml-qtwayland-compositor-waylandoutput.html#transform-prop">WaylandOutput.transform</a>.</p>
+</div></div><!-- @@@contentOrientation -->
+<br/>
+<!-- $$$cursorSurface -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="cursorSurface-prop"></a><span class="name">cursorSurface</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the <a href="qml-qtwayland-compositor-waylandsurface.html">WaylandSurface</a> is a cursor surface.</p>
+</div></div><!-- @@@cursorSurface -->
+<br/>
+<!-- $$$destinationSize -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="destinationSize-prop"></a><span class="name">destinationSize</span> : <span class="type"><a href="../qtqml/qml-size.html">size</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the size of this <a href="qml-qtwayland-compositor-waylandsurface.html">WaylandSurface</a> in surface coordinates.</p>
+<p>This property was introduced in  Qt 5.13.</p>
+<p><b>See also </b><a href="qml-qtwayland-compositor-waylandsurface.html#bufferScale-prop">bufferScale</a> and <a href="qml-qtwayland-compositor-waylandsurface.html#bufferSize-prop">bufferSize</a>.</p>
+</div></div><!-- @@@destinationSize -->
+<br/>
+<!-- $$$hasContent -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="hasContent-prop"></a><span class="name">hasContent</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the <a href="qml-qtwayland-compositor-waylandsurface.html">WaylandSurface</a> has content.</p>
+</div></div><!-- @@@hasContent -->
+<br/>
+<!-- $$$origin -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="origin-prop"></a><span class="name">origin</span> : <span class="type">enum</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the origin of the <a href="qml-qtwayland-compositor-waylandsurface.html">WaylandSurface</a>'s buffer, or <a href="qml-qtwayland-compositor-waylandsurface.html">WaylandSurface</a>.OriginTopLeft if the surface has no buffer.</p>
+<p>It can have the following values:</p>
+<ul>
+<li><a href="qml-qtwayland-compositor-waylandsurface.html">WaylandSurface</a>.OriginTopLeft The origin is the top left corner of the buffer.</li>
+<li><a href="qml-qtwayland-compositor-waylandsurface.html">WaylandSurface</a>.OriginBottomLeft The origin is the bottom left corner of the buffer.</li>
+</ul>
+</div></div><!-- @@@origin -->
+<br/>
+<!-- $$$sourceGeometry -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="sourceGeometry-prop"></a><span class="name">sourceGeometry</span> : <span class="type"><a href="../qtqml/qml-rect.html">rect</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property describes the portion of the attached Wayland buffer that should be drawn on the screen. The coordinates are from the corner of the buffer and are scaled by <a href="qml-qtwayland-compositor-waylandsurface.html#bufferScale-prop">bufferScale</a>.</p>
+<p>This property was introduced in  Qt 5.13.</p>
+<p><b>See also </b><a href="qml-qtwayland-compositor-waylandsurface.html#bufferScale-prop">bufferScale</a>, <a href="qml-qtwayland-compositor-waylandsurface.html#bufferSize-prop">bufferSize</a>, and <a href="qml-qtwayland-compositor-waylandsurface.html#destinationSize-prop">destinationSize</a>.</p>
+</div></div><!-- @@@sourceGeometry -->
+<br/>
+<!-- $$$useTextureAlpha -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="useTextureAlpha-prop"></a><span class="name">useTextureAlpha</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property specifies whether the surface should use texture alpha.</p>
+</div></div><!-- @@@useTextureAlpha -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$childAdded[overload1]$$$childAdded -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="childAdded-signal"></a><span class="name">childAdded</span>(<i>child</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when a wl_subsurface, <i>child</i>, has been added to the surface.</p>
+</div></div><!-- @@@childAdded -->
+<br/>
+<!-- $$$dragStarted[overload1]$$$dragStarted -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="dragStarted-signal"></a><span class="type">void</span> <span class="name">dragStarted</span>(<i>drag</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when a <i>drag</i> has started from this surface.</p>
+</div></div><!-- @@@dragStarted -->
+<br/>
+<!-- $$$surfaceDestroyed[overload1]$$$surfaceDestroyed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="surfaceDestroyed-signal"></a><span class="name">surfaceDestroyed</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the corresponding wl_surface is destroyed.</p>
+</div></div><!-- @@@surfaceDestroyed -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$destroy[overload1]$$$destroy -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="destroy-method"></a><span class="type">void</span> <span class="name">destroy</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Destroys the <a href="qml-qtwayland-compositor-waylandsurface.html">WaylandSurface</a>.</p>
+</div></div><!-- @@@destroy -->
+<br/>
+<!-- $$$initialize[overload1]$$$initializeWaylandClientintint -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="initialize-method"></a><span class="type">void</span> <span class="name">initialize</span>(<i>compositor</i>,  <span class="type"><a href="qml-qtwayland-compositor-waylandclient.html">WaylandClient</a></span> <i>client</i>,  <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <i>id</i>,  <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <i>version</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Initializes the <a href="qml-qtwayland-compositor-waylandsurface.html">WaylandSurface</a> with the given <i>compositor</i> and <i>client</i>, and with the given <i>id</i> and <i>version</i>.</p>
+</div></div><!-- @@@initialize -->
+<br/>
+<!-- $$$isDestroyed[overload1]$$$isDestroyed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="isDestroyed-method"></a><span class="type"><a href="../qtqml/qml-bool.html">bool</a></span> <span class="name">isDestroyed</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns <code>true</code> if the <a href="qml-qtwayland-compositor-waylandsurface.html">WaylandSurface</a> has been destroyed. Otherwise returns <code>false</code>.</p>
+</div></div><!-- @@@isDestroyed -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

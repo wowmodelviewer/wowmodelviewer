@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- webgl.qdoc -->
+  <title>Qt Quick WebGL | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Qt Quick WebGL</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level2"><a href="#using-qt-quick-webgl">Using Qt Quick WebGL</a></li>
+<li class="level2"><a href="#limitations">Limitations</a></li>
+<li class="level1"><a href="#licenses">Licenses</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Quick WebGL</h1>
+<span class="subtitle"></span>
+<!-- $$$webgl.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The <i>Qt Quick WebGL</i> is a <a href="qpa.html">platform plugin</a> that allows for single-user remote access by streaming <a href="../qtquick/qtquick-index.html">Qt Quick</a> user interfaces over the network. The UI is rendered in a <a href="https://www.khronos.org/webgl/">WebGL™</a>-enabled client browser.</p>
+<a name="using-qt-quick-webgl"></a>
+<h3 id="using-qt-quick-webgl">Using Qt Quick WebGL</h3>
+<p>Any Qt Quick application can be launched with the <i>webgl</i> platform plugin as follows:</p>
+<pre class="cpp plain">
+
+  ./qmlapplication -platform webgl
+
+</pre>
+<p>This starts a lightweight web server on port 8080, that the client can connect to with a web browser that supports WebGL. The listening port can be configured as follows:</p>
+<pre class="cpp plain">
+
+  ./qmlapplication -platform webgl:port=80
+
+</pre>
+<p>Keyboard, mouse, touch, and multi-touch events from the client are passed to the application.</p>
+<a name="limitations"></a>
+<h3 id="limitations">Limitations</h3>
+<ul>
+<li>Streaming OpenGL® commands over the network imposes an amount of delay compared to running the application locally.</li>
+<li>Desktop applications that use <a href="../qtwidgets/qtwidgets-index.html">Qt Widgets</a> are not supported by the plugin.</li>
+<li>Text elements may not display correctly when the <a href="../qtquick/qml-qtquick-text.html#renderType-prop">Text.NativeRendering</a> render type option is set.</li>
+<li>Only one active client per process is permitted. Subsequent clients attempting to connect to the server will see a loading indicator until the previous client disconnects.</li>
+<li>Streaming audio is not supported.</li>
+</ul>
+<p><b>Note: </b>The <code>webgl</code> plugin requires a <a href="../qtquick/qtquick-visualcanvas-scenegraph.html#scene-graph-and-rendering">threaded render loop</a>. On Windows and other platforms that use a different render loop by default, set the <code>QSG_RENDER_LOOP</code> environment variable accordingly:</p><pre class="cpp plain">
+
+  set QSG_RENDER_LOOP=threaded
+
+</pre>
+<a name="licenses"></a>
+<h2 id="licenses">Licenses</h2>
+<p>Qt Quick WebGL is available under commercial licenses from <a href="http://www.qt.io/about-us/">The Qt Company</a>. In addition, it is available under the <a href="http://www.gnu.org/licenses/gpl-3.0.html">GNU General Public License, version 3</a>. See <a href="licensing.html">Qt Licensing</a> for further details.</p>
+</div>
+<!-- @@@webgl.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

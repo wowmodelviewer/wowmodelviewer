@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- BrightnessContrast.qml -->
+  <title>BrightnessContrast QML Type | Qt Graphical Effects 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgraphicaleffects-index.html">Qt Graphical Effects</a></td><td ><a href="graphicaleffects.html">QML Types</a></td><td >BrightnessContrast QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgraphicaleffects-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#example">Example</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">BrightnessContrast QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$BrightnessContrast-brief -->
+<p>Adjusts brightness and contrast. <a href="#details">More...</a></p>
+<!-- @@@BrightnessContrast -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtGraphicalEffects 1.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  QtGraphicalEffects 1.0</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="../qtquick/qml-qtquick-item.html">Item</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtgraphicaleffects-brightnesscontrast-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtgraphicaleffects-brightnesscontrast.html#brightness-prop">brightness</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtgraphicaleffects-brightnesscontrast.html#cached-prop">cached</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtgraphicaleffects-brightnesscontrast.html#contrast-prop">contrast</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtgraphicaleffects-brightnesscontrast.html#source-prop">source</a></b></b> : variant</li>
+</ul>
+<!-- $$$BrightnessContrast-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>This effect adjusts the source item colors. Brightness adjustment changes the perceived luminance of the source item. Contrast adjustment increases or decreases the color and brightness variations.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Source</th><th >Effect applied</th></tr></thead>
+<tr valign="top" class="odd"><td ><p class="centerAlign"><img src="images/Original_bug.png" alt="" /></p></td><td ><p class="centerAlign"><img src="images/BrightnessContrast_bug.png" alt="" /></p></td></tr>
+</table></div>
+<p><b>Note: </b>This effect is available when running with OpenGL.</p><a name="example"></a>
+<h2 id="example">Example</h2>
+<p>The following example shows how to apply the effect.</p>
+<pre class="qml">
+
+  import QtQuick 2.12
+  import QtGraphicalEffects 1.12
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">width</span>: <span class="number">300</span>
+      <span class="name">height</span>: <span class="number">300</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+          <span class="name">id</span>: <span class="name">bug</span>
+          <span class="name">source</span>: <span class="string">&quot;images/bug.jpg&quot;</span>
+          <span class="name">sourceSize</span>: <span class="name">Qt</span>.<span class="name">size</span>(<span class="name">parent</span>.<span class="name">width</span>, <span class="name">parent</span>.<span class="name">height</span>)
+          <span class="name">smooth</span>: <span class="number">true</span>
+          <span class="name">visible</span>: <span class="number">false</span>
+      }
+
+      <span class="type"><a href="qml-qtgraphicaleffects-brightnesscontrast.html">BrightnessContrast</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">bug</span>
+          <span class="name">source</span>: <span class="name">bug</span>
+          <span class="name">brightness</span>: <span class="number">0.5</span>
+          <span class="name">contrast</span>: <span class="number">0.5</span>
+      }
+  }
+
+</pre>
+<!-- @@@BrightnessContrast -->
+<h2>Property Documentation</h2>
+<!-- $$$brightness -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="brightness-prop"></a><span class="name">brightness</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property defines how much the source brightness is increased or decreased.</p>
+<p>The value ranges from -1.0 to 1.0&#x2e; By default, the property is set to <code>0.0</code> (no change).</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Output examples with different brightness values</th><th ></th><th ></th></tr></thead>
+<tr valign="top" class="odd"><td ><p class="centerAlign"><img src="images/BrightnessContrast_brightness1.png" alt="" /></p></td><td ><p class="centerAlign"><img src="images/BrightnessContrast_brightness2.png" alt="" /></p></td><td ><p class="centerAlign"><img src="images/BrightnessContrast_brightness3.png" alt="" /></p></td></tr>
+<tr valign="top" class="even"><td ><b> brightness: -0.25 </b></td><td ><b> brightness: 0 </b></td><td ><b> brightness: 0.5 </b></td></tr>
+<tr valign="top" class="odd"><td ><a href="qml-qtgraphicaleffects-brightnesscontrast.html#contrast-prop">contrast</a>: 0</td><td ><a href="qml-qtgraphicaleffects-brightnesscontrast.html#contrast-prop">contrast</a>: 0</td><td ><a href="qml-qtgraphicaleffects-brightnesscontrast.html#contrast-prop">contrast</a>: 0</td></tr>
+</table></div>
+</div></div><!-- @@@brightness -->
+<br/>
+<!-- $$$cached -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="cached-prop"></a><span class="name">cached</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property allows the effect output pixels to be cached in order to improve the rendering performance.</p>
+<p>Every time the source or effect properties are changed, the pixels in the cache must be updated. Memory consumption is increased, because an extra buffer of memory is required for storing the effect output.</p>
+<p>It is recommended to disable the cache when the source or the effect properties are animated.</p>
+<p>By default, the property is set to <code>false</code>.</p>
+</div></div><!-- @@@cached -->
+<br/>
+<!-- $$$contrast -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="contrast-prop"></a><span class="name">contrast</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property defines how much the source contrast is increased or decreased. The decrease of the contrast is linear, but the increase is applied with a non-linear curve to allow very high contrast adjustment at the high end of the value range.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Contrast adjustment curve</th></tr></thead>
+<tr valign="top" class="odd"><td ><p class="centerAlign"><img src="images/BrightnessContrast_contrast_graph.png" alt="" /></p></td></tr>
+</table></div>
+<p>The value ranges from -1.0 to 1.0&#x2e; By default, the property is set to <code>0.0</code> (no change).</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Output examples with different contrast values</th><th ></th><th ></th></tr></thead>
+<tr valign="top" class="odd"><td ><p class="centerAlign"><img src="images/BrightnessContrast_contrast1.png" alt="" /></p></td><td ><p class="centerAlign"><img src="images/BrightnessContrast_contrast2.png" alt="" /></p></td><td ><p class="centerAlign"><img src="images/BrightnessContrast_contrast3.png" alt="" /></p></td></tr>
+<tr valign="top" class="even"><td ><b> contrast: -0.5 </b></td><td ><b> contrast: 0 </b></td><td ><b> contrast: 0.5 </b></td></tr>
+<tr valign="top" class="odd"><td ><a href="qml-qtgraphicaleffects-brightnesscontrast.html#brightness-prop">brightness</a>: 0</td><td ><a href="qml-qtgraphicaleffects-brightnesscontrast.html#brightness-prop">brightness</a>: 0</td><td ><a href="qml-qtgraphicaleffects-brightnesscontrast.html#brightness-prop">brightness</a>: 0</td></tr>
+</table></div>
+</div></div><!-- @@@contrast -->
+<br/>
+<!-- $$$source -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="source-prop"></a><span class="name">source</span> : <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property defines the source item that provides the source pixels for the effect.</p>
+<p><b>Note: </b>It is not supported to let the effect include itself, for instance by setting source to the effect's parent.</p></div></div><!-- @@@source -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

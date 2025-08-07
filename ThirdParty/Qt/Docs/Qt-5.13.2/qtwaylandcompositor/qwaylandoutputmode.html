@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwaylandoutputmode.cpp -->
+  <title>QWaylandOutputMode Class | Qt Wayland Compositor 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwaylandcompositor-index.html">Qt Wayland Compositor</a></td><td ><a href="qtwaylandcompositor-module.html">C++ Classes</a></td><td >QWaylandOutputMode</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwaylandcompositor-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QWaylandOutputMode Class</h1>
+<!-- $$$QWaylandOutputMode-brief -->
+<p>The <a href="qwaylandoutputmode.html">QWaylandOutputMode</a> class holds the resolution and refresh rate of an output. <a href="#details">More...</a></p>
+<!-- @@@QWaylandOutputMode -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QWaylandOutputMode&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += waylandcompositor</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr></table></div><p>This class was introduced in  Qt 5.8.</p>
+<ul>
+<li><a href="qwaylandoutputmode-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutputmode.html#isValid">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutputmode.html#refreshRate">refreshRate</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutputmode.html#size">size</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutputmode.html#operator-not-eq">operator!=</a></b>(const QWaylandOutputMode &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutputmode.html#operator-eq-eq">operator==</a></b>(const QWaylandOutputMode &amp;<i>other</i>) const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QWaylandOutputMode-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qwaylandoutputmode.html">QWaylandOutputMode</a> holds the resolution and refresh rate of an output. Resolution is expressed in pixels and refresh rate is measured in mHz.</p>
+</div>
+<p><b>See also </b><a href="qwaylandoutput.html">QWaylandOutput</a>.</p>
+<!-- @@@QWaylandOutputMode -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$isValid[overload1]$$$isValid -->
+<h3 class="fn" id="isValid"><a name="isValid"></a><span class="type">bool</span> QWaylandOutputMode::<span class="name">isValid</span>() const</h3>
+<p>Returns whether this mode contains a valid resolution and refresh rate.</p>
+<!-- @@@isValid -->
+<!-- $$$refreshRate[overload1]$$$refreshRate -->
+<h3 class="fn" id="refreshRate"><a name="refreshRate"></a><span class="type">int</span> QWaylandOutputMode::<span class="name">refreshRate</span>() const</h3>
+<p>Returns the refresh rate in mHz.</p>
+<!-- @@@refreshRate -->
+<!-- $$$size[overload1]$$$size -->
+<h3 class="fn" id="size"><a name="size"></a><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QWaylandOutputMode::<span class="name">size</span>() const</h3>
+<p>Returns the resolution in pixels.</p>
+<!-- @@@size -->
+<!-- $$$operator!=[overload1]$$$operator!=constQWaylandOutputMode& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> QWaylandOutputMode::<span class="name">operator!=</span>(const <span class="type">QWaylandOutputMode</span> &amp;<i>other</i>) const</h3>
+<p>Returns <code>true</code> if this mode is not equal to <i>other</i>, otherwise returns <code>false</code>.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQWaylandOutputMode& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> QWaylandOutputMode::<span class="name">operator==</span>(const <span class="type">QWaylandOutputMode</span> &amp;<i>other</i>) const</h3>
+<p>Returns <code>true</code> if this mode is equal to <i>other</i>, otherwise returns <code>false</code>.</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

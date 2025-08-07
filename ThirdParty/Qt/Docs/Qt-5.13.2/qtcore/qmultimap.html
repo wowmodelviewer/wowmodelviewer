@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmap.cpp -->
+  <title>QMultiMap Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QMultiMap</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QMultiMap Class</h1>
+<!-- $$$QMultiMap-brief -->
+<p>The <a href="qmultimap.html">QMultiMap</a> class is a convenience <a href="qmap.html">QMap</a> subclass that provides multi-valued maps. <a href="#details">More...</a></p>
+<!-- @@@QMultiMap -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QMultiMap&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qmap.html">QMap</a></td></tr></table></div><ul>
+<li><a href="qmultimap-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmultimap.html#QMultiMap-2">QMultiMap</a></b>(const QMap&lt;Key, T&gt; &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmultimap.html#QMultiMap-1">QMultiMap</a></b>(std::initializer_list&lt;std::pair&lt;Key, T&gt; &gt; <i>list</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmultimap.html#QMultiMap">QMultiMap</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typename QMap&lt;Key, T&gt;::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qmultimap.html#constFind">constFind</a></b>(const Key &amp;<i>key</i>, const T &amp;<i>value</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmultimap.html#contains">contains</a></b>(const Key &amp;<i>key</i>, const T &amp;<i>value</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmultimap.html#count">count</a></b>(const Key &amp;<i>key</i>, const T &amp;<i>value</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typename QMap&lt;Key, T&gt;::iterator </td><td class="memItemRight bottomAlign"><b><a href="qmultimap.html#find">find</a></b>(const Key &amp;<i>key</i>, const T &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typename QMap&lt;Key, T&gt;::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qmultimap.html#find-1">find</a></b>(const Key &amp;<i>key</i>, const T &amp;<i>value</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typename QMap&lt;Key, T&gt;::iterator </td><td class="memItemRight bottomAlign"><b><a href="qmultimap.html#insert">insert</a></b>(const Key &amp;<i>key</i>, const T &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typename QMap&lt;Key, T&gt;::iterator </td><td class="memItemRight bottomAlign"><b><a href="qmultimap.html#insert-1">insert</a></b>(typename QMap&lt;Key, T&gt;::const_iterator <i>pos</i>, const Key &amp;<i>key</i>, const T &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmultimap.html#remove">remove</a></b>(const Key &amp;<i>key</i>, const T &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typename QMap&lt;Key, T&gt;::iterator </td><td class="memItemRight bottomAlign"><b><a href="qmultimap.html#replace">replace</a></b>(const Key &amp;<i>key</i>, const T &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmultimap.html#swap">swap</a></b>(QMultiMap&lt;Key, T&gt; &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMultiMap&lt;K, V&gt; </td><td class="memItemRight bottomAlign"><b><a href="qmultimap.html#operator-2b">operator+</a></b>(const QMultiMap&lt;K, V&gt; &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMultiMap&lt;K, V&gt; &amp;</td><td class="memItemRight bottomAlign"><b><a href="qmultimap.html#operator-2b-eq">operator+=</a></b>(const QMultiMap&lt;K, V&gt; &amp;<i>other</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QMultiMap-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qmultimap.html">QMultiMap</a>&lt;Key, T&gt; is one of Qt's generic <a href="containers.html">container classes</a>. It inherits <a href="qmap.html">QMap</a> and extends it with a few convenience functions that make it more suitable than <a href="qmap.html">QMap</a> for storing multi-valued maps. A multi-valued map is a map that allows multiple values with the same key; <a href="qmap.html">QMap</a> normally doesn't allow that, unless you call <a href="qmap.html#insertMulti">QMap::insertMulti</a>().</p>
+<p>Because <a href="qmultimap.html">QMultiMap</a> inherits <a href="qmap.html">QMap</a>, all of <a href="qmap.html">QMap</a>'s functionality also applies to <a href="qmultimap.html">QMultiMap</a>. For example, you can use <a href="qmap.html#isEmpty">isEmpty</a>() to test whether the map is empty, and you can traverse a <a href="qmultimap.html">QMultiMap</a> using <a href="qmap.html">QMap</a>'s iterator classes (for example, <a href="qmapiterator.html">QMapIterator</a>). But in addition, it provides an <a href="qmultimap.html#insert">insert</a>() function that corresponds to <a href="qmap.html#insertMulti">QMap::insertMulti</a>(), and a <a href="qmultimap.html#replace">replace</a>() function that corresponds to <a href="qmap.html#insert">QMap::insert</a>(). It also provides convenient operator+() and operator+=().</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qmultimap.html#QMultiMap">QMultiMap</a></span><span class="operator">&lt;</span><span class="type"><a href="qstring.html">QString</a></span><span class="operator">,</span> <span class="type">int</span><span class="operator">&gt;</span> map1<span class="operator">,</span> map2<span class="operator">,</span> map3;
+
+  map1<span class="operator">.</span>insert(<span class="string">&quot;plenty&quot;</span><span class="operator">,</span> <span class="number">100</span>);
+  map1<span class="operator">.</span>insert(<span class="string">&quot;plenty&quot;</span><span class="operator">,</span> <span class="number">2000</span>);
+  <span class="comment">// map1.size() == 2</span>
+
+  map2<span class="operator">.</span>insert(<span class="string">&quot;plenty&quot;</span><span class="operator">,</span> <span class="number">5000</span>);
+  <span class="comment">// map2.size() == 1</span>
+
+  map3 <span class="operator">=</span> map1 <span class="operator">+</span> map2;
+  <span class="comment">// map3.size() == 3</span>
+
+</pre>
+<p>Unlike <a href="qmap.html">QMap</a>, <a href="qmultimap.html">QMultiMap</a> provides no operator[]. Use <a href="qmap.html#value">value</a>() or <a href="qmultimap.html#replace">replace</a>() if you want to access the most recently inserted item with a certain key.</p>
+<p>If you want to retrieve all the values for a single key, you can use values(const Key &amp;key), which returns a <a href="qlist.html">QList</a>&lt;T&gt;:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span> values <span class="operator">=</span> map<span class="operator">.</span>values(<span class="string">&quot;plenty&quot;</span>);
+  <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> values<span class="operator">.</span>size(); <span class="operator">+</span><span class="operator">+</span>i)
+      cout <span class="operator">&lt;</span><span class="operator">&lt;</span> values<span class="operator">.</span>at(i) <span class="operator">&lt;</span><span class="operator">&lt;</span> endl;
+
+</pre>
+<p>The items that share the same key are available from most recently to least recently inserted.</p>
+<p>If you prefer the STL-style iterators, you can call <a href="qmultimap.html#find">find</a>() to get the iterator for the first item with a key and iterate from there:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qmultimap.html#QMultiMap">QMultiMap</a></span><span class="operator">&lt;</span><span class="type"><a href="qstring.html">QString</a></span><span class="operator">,</span> <span class="type">int</span><span class="operator">&gt;</span><span class="operator">::</span>iterator i <span class="operator">=</span> map<span class="operator">.</span>find(<span class="string">&quot;plenty&quot;</span>);
+  <span class="keyword">while</span> (i <span class="operator">!</span><span class="operator">=</span> map<span class="operator">.</span>end() <span class="operator">&amp;</span><span class="operator">&amp;</span> i<span class="operator">.</span>key() <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;plenty&quot;</span>) {
+      cout <span class="operator">&lt;</span><span class="operator">&lt;</span> i<span class="operator">.</span>value() <span class="operator">&lt;</span><span class="operator">&lt;</span> endl;
+      <span class="operator">+</span><span class="operator">+</span>i;
+  }
+
+</pre>
+<p><a href="qmultimap.html">QMultiMap</a>'s key and value data types must be <a href="containers.html#assignable-data-types">assignable data types</a>. This covers most data types you are likely to encounter, but the compiler won't let you, for example, store a <a href="../qtwidgets/qwidget.html">QWidget</a> as a value; instead, store a <a href="../qtwidgets/qwidget.html">QWidget</a> *. In addition, <a href="qmultimap.html">QMultiMap</a>'s key type must provide operator&lt;(). See the <a href="qmap.html">QMap</a> documentation for details.</p>
+</div>
+<p><b>See also </b><a href="qmap.html">QMap</a>, <a href="qmapiterator.html">QMapIterator</a>, <a href="qmutablemapiterator.html">QMutableMapIterator</a>, and <a href="qmultihash.html">QMultiHash</a>.</p>
+<!-- @@@QMultiMap -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QMultiMap$$$QMultiMapconstQMap<Key,T>& -->
+<h3 class="fn" id="QMultiMap-2"><a name="QMultiMap-2"></a>QMultiMap::<span class="name">QMultiMap</span>(const <span class="type"><a href="qmap.html#QMap">QMap</a></span>&lt;<span class="type">Key</span>, <span class="type">T</span>&gt; &amp;<i>other</i>)</h3>
+<p>Constructs a copy of <i>other</i> (which can be a <a href="qmap.html">QMap</a> or a <a href="qmultimap.html">QMultiMap</a>).</p>
+<p><b>See also </b><a href="qmap.html#operator-eq">operator=</a>().</p>
+<!-- @@@QMultiMap -->
+<!-- $$$QMultiMap$$$QMultiMapstd::initializer_list<std::pair<Key,T>> -->
+<h3 class="fn" id="QMultiMap-1"><a name="QMultiMap-1"></a>QMultiMap::<span class="name">QMultiMap</span>(<span class="type">std::initializer_list</span>&lt;<span class="type">std::pair</span>&lt;<span class="type">Key</span>, <span class="type">T</span>&gt; &gt; <i>list</i>)</h3>
+<p>Constructs a multi-map with a copy of each of the elements in the initializer list <i>list</i>.</p>
+<p>This function is only available if the program is being compiled in C++11 mode.</p>
+<p>This function was introduced in  Qt 5.1.</p>
+<!-- @@@QMultiMap -->
+<!-- $$$QMultiMap[overload1]$$$QMultiMap -->
+<h3 class="fn" id="QMultiMap"><a name="QMultiMap"></a>QMultiMap::<span class="name">QMultiMap</span>()</h3>
+<p>Constructs an empty map.</p>
+<!-- @@@QMultiMap -->
+<!-- $$$constFind[overload1]$$$constFindconstKey&constT& -->
+<h3 class="fn" id="constFind"><a name="constFind"></a><span class="type">typename</span> <span class="type"><a href="qmap.html#QMap">QMap</a></span>&lt;<span class="type">Key</span>, <span class="type">T</span>&gt;<span class="type">::const_iterator</span> QMultiMap::<span class="name">constFind</span>(const <span class="type">Key</span> &amp;<i>key</i>, const <span class="type">T</span> &amp;<i>value</i>) const</h3>
+<p>Returns an iterator pointing to the item with key <i>key</i> and the value <i>value</i> in the map.</p>
+<p>If the map contains no such item, the function returns <a href="qmap.html#constEnd">constEnd</a>().</p>
+<p>This function was introduced in  Qt 4.3.</p>
+<p><b>See also </b><a href="qmap.html#constFind">QMap::constFind</a>().</p>
+<!-- @@@constFind -->
+<!-- $$$contains[overload1]$$$containsconstKey&constT& -->
+<h3 class="fn" id="contains"><a name="contains"></a><span class="type">bool</span> QMultiMap::<span class="name">contains</span>(const <span class="type">Key</span> &amp;<i>key</i>, const <span class="type">T</span> &amp;<i>value</i>) const</h3>
+<p>Returns <code>true</code> if the map contains an item with key <i>key</i> and value <i>value</i>; otherwise returns <code>false</code>.</p>
+<p>This function was introduced in  Qt 4.3.</p>
+<p><b>See also </b><a href="qmap.html#contains">QMap::contains</a>().</p>
+<!-- @@@contains -->
+<!-- $$$count[overload1]$$$countconstKey&constT& -->
+<h3 class="fn" id="count"><a name="count"></a><span class="type">int</span> QMultiMap::<span class="name">count</span>(const <span class="type">Key</span> &amp;<i>key</i>, const <span class="type">T</span> &amp;<i>value</i>) const</h3>
+<p>Returns the number of items with key <i>key</i> and value <i>value</i>.</p>
+<p>This function was introduced in  Qt 4.3.</p>
+<p><b>See also </b><a href="qmap.html#count-1">QMap::count</a>().</p>
+<!-- @@@count -->
+<!-- $$$find[overload1]$$$findconstKey&constT& -->
+<h3 class="fn" id="find"><a name="find"></a><span class="type">typename</span> <span class="type"><a href="qmap.html#QMap">QMap</a></span>&lt;<span class="type">Key</span>, <span class="type">T</span>&gt;<span class="type">::iterator</span> QMultiMap::<span class="name">find</span>(const <span class="type">Key</span> &amp;<i>key</i>, const <span class="type">T</span> &amp;<i>value</i>)</h3>
+<p>Returns an iterator pointing to the item with key <i>key</i> and value <i>value</i> in the map.</p>
+<p>If the map contains no such item, the function returns <a href="qmap.html#end">end</a>().</p>
+<p>If the map contains multiple items with key <i>key</i>, this function returns an iterator that points to the most recently inserted value.</p>
+<p>This function was introduced in  Qt 4.3.</p>
+<p><b>See also </b><a href="qmap.html#find">QMap::find</a>().</p>
+<!-- @@@find -->
+<!-- $$$find$$$findconstKey&constT& -->
+<h3 class="fn" id="find-1"><a name="find-1"></a><span class="type">typename</span> <span class="type"><a href="qmap.html#QMap">QMap</a></span>&lt;<span class="type">Key</span>, <span class="type">T</span>&gt;<span class="type">::const_iterator</span> QMultiMap::<span class="name">find</span>(const <span class="type">Key</span> &amp;<i>key</i>, const <span class="type">T</span> &amp;<i>value</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a const iterator pointing to the item with the given <i>key</i> and <i>value</i> in the map.</p>
+<p>If the map contains no such item, the function returns <a href="qmap.html#end">end</a>().</p>
+<p>If the map contains multiple items with the specified <i>key</i>, this function returns a const iterator that points to the most recently inserted value.</p>
+<p>This function was introduced in  Qt 4.3.</p>
+<p><b>See also </b><a href="qmap.html#find">QMap::find</a>().</p>
+<!-- @@@find -->
+<!-- $$$insert[overload1]$$$insertconstKey&constT& -->
+<h3 class="fn" id="insert"><a name="insert"></a><span class="type">typename</span> <span class="type"><a href="qmap.html#QMap">QMap</a></span>&lt;<span class="type">Key</span>, <span class="type">T</span>&gt;<span class="type">::iterator</span> QMultiMap::<span class="name">insert</span>(const <span class="type">Key</span> &amp;<i>key</i>, const <span class="type">T</span> &amp;<i>value</i>)</h3>
+<p>Inserts a new item with the key <i>key</i> and a value of <i>value</i>.</p>
+<p>If there is already an item with the same key in the map, this function will simply create a new one. (This behavior is different from <a href="qmultimap.html#replace">replace</a>(), which overwrites the value of an existing item.)</p>
+<p><b>See also </b><a href="qmultimap.html#replace">replace</a>().</p>
+<!-- @@@insert -->
+<!-- $$$insert$$$inserttypenameQMap<Key,T>::const_iteratorconstKey&constT& -->
+<h3 class="fn" id="insert-1"><a name="insert-1"></a><span class="type">typename</span> <span class="type"><a href="qmap.html#QMap">QMap</a></span>&lt;<span class="type">Key</span>, <span class="type">T</span>&gt;<span class="type">::iterator</span> QMultiMap::<span class="name">insert</span>(<span class="type">typename</span> <span class="type"><a href="qmap.html#QMap">QMap</a></span>&lt;<span class="type">Key</span>, <span class="type">T</span>&gt;<span class="type">::const_iterator</span> <i>pos</i>, const <span class="type">Key</span> &amp;<i>key</i>, const <span class="type">T</span> &amp;<i>value</i>)</h3>
+<p>Inserts a new item with the key <i>key</i> and value <i>value</i> and with hint <i>pos</i> suggesting where to do the insert.</p>
+<p>If <a href="qmap.html#constBegin">constBegin</a>() is used as hint it indicates that the <i>key</i> is less than any key in the map while <a href="qmap.html#constEnd">constEnd</a>() suggests that the <i>key</i> is larger than any key in the map. Otherwise the hint should meet the condition (<i>pos</i> - 1).<a href="qmap.html#key">key</a>() &lt; <i>key</i> &lt;= pos.<a href="qmap.html#key">key</a>(). If the hint <i>pos</i> is wrong it is ignored and a regular insert is done.</p>
+<p>If there is already an item with the same key in the map, this function will simply create a new one.</p>
+<p><b>Note:</b> Be careful with the hint. Providing an iterator from an older shared instance might crash but there is also a risk that it will silently corrupt both the map and the <i>pos</i> map.</p>
+<p>This function was introduced in  Qt 5.1.</p>
+<!-- @@@insert -->
+<!-- $$$remove[overload1]$$$removeconstKey&constT& -->
+<h3 class="fn" id="remove"><a name="remove"></a><span class="type">int</span> QMultiMap::<span class="name">remove</span>(const <span class="type">Key</span> &amp;<i>key</i>, const <span class="type">T</span> &amp;<i>value</i>)</h3>
+<p>Removes all the items that have the key <i>key</i> and the value <i>value</i> from the map. Returns the number of items removed.</p>
+<p>This function was introduced in  Qt 4.3.</p>
+<p><b>See also </b><a href="qmap.html#remove">QMap::remove</a>().</p>
+<!-- @@@remove -->
+<!-- $$$replace[overload1]$$$replaceconstKey&constT& -->
+<h3 class="fn" id="replace"><a name="replace"></a><span class="type">typename</span> <span class="type"><a href="qmap.html#QMap">QMap</a></span>&lt;<span class="type">Key</span>, <span class="type">T</span>&gt;<span class="type">::iterator</span> QMultiMap::<span class="name">replace</span>(const <span class="type">Key</span> &amp;<i>key</i>, const <span class="type">T</span> &amp;<i>value</i>)</h3>
+<p>Inserts a new item with the key <i>key</i> and a value of <i>value</i>.</p>
+<p>If there is already an item with the key <i>key</i>, that item's value is replaced with <i>value</i>.</p>
+<p>If there are multiple items with the key <i>key</i>, the most recently inserted item's value is replaced with <i>value</i>.</p>
+<p><b>See also </b><a href="qmultimap.html#insert">insert</a>().</p>
+<!-- @@@replace -->
+<!-- $$$swap[overload1]$$$swapQMultiMap<Key,T>& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QMultiMap::<span class="name">swap</span>(<span class="type"><a href="qmultimap.html#QMultiMap">QMultiMap</a></span>&lt;<span class="type">Key</span>, <span class="type">T</span>&gt; &amp;<i>other</i>)</h3>
+<p>Swaps map <i>other</i> with this map. This operation is very fast and never fails.</p>
+<p>This function was introduced in  Qt 4.8.</p>
+<!-- @@@swap -->
+<!-- $$$operator+[overload1]$$$operator+constQMultiMap<K,V>& -->
+<h3 class="fn" id="operator-2b"><a name="operator-2b"></a><span class="type"><a href="qmultimap.html#QMultiMap">QMultiMap</a></span>&lt;<span class="type">K</span>, <span class="type">V</span>&gt; QMultiMap::<span class="name">operator+</span>(const <span class="type"><a href="qmultimap.html#QMultiMap">QMultiMap</a></span>&lt;<span class="type">K</span>, <span class="type">V</span>&gt; &amp;<i>other</i>) const</h3>
+<p>Returns a map that contains all the items in this map in addition to all the items in <i>other</i>. If a key is common to both maps, the resulting map will contain the key multiple times.</p>
+<p><b>See also </b><a href="qmultimap.html#operator-2b-eq">operator+=</a>().</p>
+<!-- @@@operator+ -->
+<!-- $$$operator+=[overload1]$$$operator+=constQMultiMap<K,V>& -->
+<h3 class="fn" id="operator-2b-eq"><a name="operator-2b-eq"></a><span class="type"><a href="qmultimap.html#QMultiMap">QMultiMap</a></span>&lt;<span class="type">K</span>, <span class="type">V</span>&gt; &amp;QMultiMap::<span class="name">operator+=</span>(const <span class="type"><a href="qmultimap.html#QMultiMap">QMultiMap</a></span>&lt;<span class="type">K</span>, <span class="type">V</span>&gt; &amp;<i>other</i>)</h3>
+<p>Inserts all the items in the <i>other</i> map into this map and returns a reference to this map.</p>
+<p><b>See also </b><a href="qmultimap.html#insert">insert</a>() and <a href="qmultimap.html#operator-2b">operator+</a>().</p>
+<!-- @@@operator+= -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- analogclock.qdoc -->
+  <title>Analog Clock Example | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Analog Clock Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#analogclock-class-definition">AnalogClock Class Definition</a></li>
+<li class="level1"><a href="#analogclock-class-implementation">AnalogClock Class Implementation</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Analog Clock Example</h1>
+<span class="subtitle"></span>
+<!-- $$$widgets/analogclock-brief -->
+<p>The Analog Clock example shows how to draw the contents of a custom widget.</p>
+<!-- @@@widgets/analogclock -->
+<!-- $$$widgets/analogclock-description -->
+<div class="descr"> <a name="details"></a>
+<div class="border"><p class="centerAlign"><img src="images/analogclock-example.png" alt="" /></p></div><p class="figCaption">Screenshot of the Analog Clock example</p>
+<p>This example also demonstrates how the transformation and scaling features of <a href="../qtgui/qpainter.html">QPainter</a> can be used to make drawing custom widgets easier.</p>
+<a name="analogclock-class-definition"></a>
+<h4 id="analogclock-class-definition">AnalogClock Class Definition</h4>
+<p>The <code>AnalogClock</code> class provides a clock widget with hour and minute hands that is automatically updated every few seconds. We subclass <a href="qwidget.html">QWidget</a> and reimplement the standard <a href="qwidget.html#paintEvent">paintEvent()</a> function to draw the clock face:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> AnalogClock : <span class="keyword">public</span> <span class="type"><a href="qwidget.html">QWidget</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      AnalogClock(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+
+  <span class="keyword">protected</span>:
+      <span class="type">void</span> paintEvent(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span> <span class="operator">*</span>event) override;
+  };
+
+</pre>
+<a name="analogclock-class-implementation"></a>
+<h4 id="analogclock-class-implementation">AnalogClock Class Implementation</h4>
+<pre class="cpp">
+
+  AnalogClock<span class="operator">::</span>AnalogClock(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qwidget.html">QWidget</a></span>(parent)
+  {
+      <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span> <span class="operator">*</span>timer <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span>(<span class="keyword">this</span>);
+      connect(timer<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span><span class="operator">::</span>timeout<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="type">QOverload</span><span class="operator">&lt;</span><span class="operator">&gt;</span><span class="operator">::</span>of(<span class="operator">&amp;</span>AnalogClock<span class="operator">::</span>update));
+      timer<span class="operator">-</span><span class="operator">&gt;</span>start(<span class="number">1000</span>);
+
+      setWindowTitle(tr(<span class="string">&quot;Analog Clock&quot;</span>));
+      resize(<span class="number">200</span><span class="operator">,</span> <span class="number">200</span>);
+  }
+
+</pre>
+<p>When the widget is constructed, we set up a one-second timer to keep track of the current time, and we connect it to the standard <a href="qwidget.html#update">update()</a> slot so that the clock face is updated when the timer emits the <a href="../qtcore/qtimer.html#timeout">timeout()</a> signal.</p>
+<p>Finally, we resize the widget so that it is displayed at a reasonable size.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> AnalogClock<span class="operator">::</span>paintEvent(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span> <span class="operator">*</span>)
+  {
+      <span class="keyword">static</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> hourHand<span class="operator">[</span><span class="number">3</span><span class="operator">]</span> <span class="operator">=</span> {
+          <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(<span class="number">7</span><span class="operator">,</span> <span class="number">8</span>)<span class="operator">,</span>
+          <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(<span class="operator">-</span><span class="number">7</span><span class="operator">,</span> <span class="number">8</span>)<span class="operator">,</span>
+          <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(<span class="number">0</span><span class="operator">,</span> <span class="operator">-</span><span class="number">40</span>)
+      };
+      <span class="keyword">static</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> minuteHand<span class="operator">[</span><span class="number">3</span><span class="operator">]</span> <span class="operator">=</span> {
+          <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(<span class="number">7</span><span class="operator">,</span> <span class="number">8</span>)<span class="operator">,</span>
+          <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(<span class="operator">-</span><span class="number">7</span><span class="operator">,</span> <span class="number">8</span>)<span class="operator">,</span>
+          <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(<span class="number">0</span><span class="operator">,</span> <span class="operator">-</span><span class="number">70</span>)
+      };
+
+      <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> hourColor(<span class="number">127</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">127</span>);
+      <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> minuteColor(<span class="number">0</span><span class="operator">,</span> <span class="number">127</span><span class="operator">,</span> <span class="number">127</span><span class="operator">,</span> <span class="number">191</span>);
+
+      <span class="type">int</span> side <span class="operator">=</span> <a href="../qtcore/qtglobal.html#qMin">qMin</a>(width()<span class="operator">,</span> height());
+      <span class="type"><a href="../qtcore/qtime.html">QTime</a></span> time <span class="operator">=</span> <span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime();
+
+</pre>
+<p>The <code>paintEvent()</code> function is called whenever the widget's contents need to be updated. This happens when the widget is first shown, and when it is covered then exposed, but it is also executed when the widget's <a href="qwidget.html#update">update()</a> slot is called. Since we connected the timer's <a href="../qtcore/qtimer.html#timeout">timeout()</a> signal to this slot, it will be called at least once every five seconds.</p>
+<p>Before we set up the painter and draw the clock, we first define two lists of <a href="../qtcore/qpoint.html">QPoint</a>s and two <a href="../qtgui/qcolor.html">QColor</a>s that will be used for the hour and minute hands. The minute hand's color has an alpha component of 191, meaning that it's 75% opaque.</p>
+<p>We also determine the length of the widget's shortest side so that we can fit the clock face inside the widget. It is also useful to determine the current time before we start drawing.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> painter(<span class="keyword">this</span>);
+      painter<span class="operator">.</span>setRenderHint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>Antialiasing);
+      painter<span class="operator">.</span>translate(width() <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> height() <span class="operator">/</span> <span class="number">2</span>);
+      painter<span class="operator">.</span>scale(side <span class="operator">/</span> <span class="number">200.0</span><span class="operator">,</span> side <span class="operator">/</span> <span class="number">200.0</span>);
+
+</pre>
+<p>The contents of custom widgets are drawn with a <a href="../qtgui/qpainter.html">QPainter</a>. Painters can be used to draw on any <a href="../qtgui/qpaintdevice.html">QPaintDevice</a>, but they are usually used with widgets, so we pass the widget instance to the painter's constructor.</p>
+<p>We call <a href="../qtgui/qpainter.html#setRenderHint">QPainter::setRenderHint</a>() with <a href="../qtgui/qpainter.html#RenderHint-enum">QPainter::Antialiasing</a> to turn on antialiasing. This makes drawing of diagonal lines much smoother.</p>
+<p>The translation moves the origin to the center of the widget, and the scale operation ensures that the following drawing operations are scaled to fit within the widget. We use a scale factor that let's us use x and y coordinates between -100 and 100, and that ensures that these lie within the length of the widget's shortest side.</p>
+<p>To make our code simpler, we will draw a fixed size clock face that will be positioned and scaled so that it lies in the center of the widget.</p>
+<p>The painter takes care of all the transformations made during the paint event, and ensures that everything is drawn correctly. Letting the painter handle transformations is often easier than performing manual calculations just to draw the contents of a custom widget.</p>
+<p class="centerAlign"><img src="images/analogclock-viewport.png" alt="" /></p><p>We draw the hour hand first, using a formula that rotates the coordinate system counterclockwise by a number of degrees determined by the current hour and minute. This means that the hand will be shown rotated clockwise by the required amount.</p>
+<pre class="cpp">
+
+      painter<span class="operator">.</span>setPen(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoPen);
+      painter<span class="operator">.</span>setBrush(hourColor);
+
+</pre>
+<p>We set the pen to be <a href="../qtcore/qt.html#PenStyle-enum">Qt::NoPen</a> because we don't want any outline, and we use a solid brush with the color appropriate for displaying hours. Brushes are used when filling in polygons and other geometric shapes.</p>
+<pre class="cpp">
+
+      painter<span class="operator">.</span>save();
+      painter<span class="operator">.</span>rotate(<span class="number">30.0</span> <span class="operator">*</span> ((time<span class="operator">.</span>hour() <span class="operator">+</span> time<span class="operator">.</span>minute() <span class="operator">/</span> <span class="number">60.0</span>)));
+      painter<span class="operator">.</span>drawConvexPolygon(hourHand<span class="operator">,</span> <span class="number">3</span>);
+      painter<span class="operator">.</span>restore();
+
+</pre>
+<p>We save and restore the transformation matrix before and after the rotation because we want to place the minute hand without having to take into account any previous rotations.</p>
+<pre class="cpp">
+
+      painter<span class="operator">.</span>setPen(hourColor);
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> <span class="number">12</span>; <span class="operator">+</span><span class="operator">+</span>i) {
+          painter<span class="operator">.</span>drawLine(<span class="number">88</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">96</span><span class="operator">,</span> <span class="number">0</span>);
+          painter<span class="operator">.</span>rotate(<span class="number">30.0</span>);
+      }
+
+</pre>
+<p>We draw markers around the edge of the clock for each hour. We draw each marker then rotate the coordinate system so that the painter is ready for the next one.</p>
+<pre class="cpp">
+
+      painter<span class="operator">.</span>setPen(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoPen);
+      painter<span class="operator">.</span>setBrush(minuteColor);
+
+      painter<span class="operator">.</span>save();
+      painter<span class="operator">.</span>rotate(<span class="number">6.0</span> <span class="operator">*</span> (time<span class="operator">.</span>minute() <span class="operator">+</span> time<span class="operator">.</span>second() <span class="operator">/</span> <span class="number">60.0</span>));
+      painter<span class="operator">.</span>drawConvexPolygon(minuteHand<span class="operator">,</span> <span class="number">3</span>);
+      painter<span class="operator">.</span>restore();
+
+</pre>
+<p>The minute hand is rotated in a similar way to the hour hand.</p>
+<pre class="cpp">
+
+      painter<span class="operator">.</span>setPen(minuteColor);
+
+      <span class="keyword">for</span> (<span class="type">int</span> j <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span> <span class="number">60</span>; <span class="operator">+</span><span class="operator">+</span>j) {
+          <span class="keyword">if</span> ((j <span class="operator">%</span> <span class="number">5</span>) <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>)
+              painter<span class="operator">.</span>drawLine(<span class="number">92</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">96</span><span class="operator">,</span> <span class="number">0</span>);
+          painter<span class="operator">.</span>rotate(<span class="number">6.0</span>);
+      }
+  }
+
+</pre>
+<p>Again, we draw markers around the edge of the clock, but this time to indicate minutes. We skip multiples of 5 to avoid drawing minute markers on top of hour markers.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/widgets/analogclock?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@widgets/analogclock -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

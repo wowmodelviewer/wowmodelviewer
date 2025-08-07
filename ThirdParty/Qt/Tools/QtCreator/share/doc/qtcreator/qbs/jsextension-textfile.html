@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- jsextension-textfile.qdoc -->
+  <title>TextFile Service | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td><td >TextFile Service</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<p class="naviNextPrevious headerNavi">
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#related-declarations">Related Declarations</a></li>
+<li class="level2"><a href="#textfile-openmode">TextFile.OpenMode</a></li>
+<li class="level1"><a href="#available-operations">Available operations</a></li>
+<li class="level2"><a href="#constructor">Constructor</a></li>
+<li class="level2"><a href="#ateof">atEof</a></li>
+<li class="level2"><a href="#close">close</a></li>
+<li class="level2"><a href="#filepath">filePath</a></li>
+<li class="level2"><a href="#readall">readAll</a></li>
+<li class="level2"><a href="#readline">readLine</a></li>
+<li class="level2"><a href="#setcodec">setCodec</a></li>
+<li class="level2"><a href="#truncate">truncate</a></li>
+<li class="level2"><a href="#write">write</a></li>
+<li class="level2"><a href="#writeline">writeLine</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">TextFile Service</h1>
+<span class="subtitle"></span>
+<!-- $$$jsextension-textfile.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The <code>TextFile</code> service allows you to read from and write into text files.</p>
+<a name="related-declarations"></a>
+<h2 id="related-declarations">Related Declarations</h2>
+<a name="textfile-openmode"></a>
+<h3 id="textfile-openmode">TextFile.OpenMode</h3>
+<pre class="cpp">
+
+  <span class="keyword">enum</span> TextFile<span class="operator">.</span>OpenMode { ReadOnly<span class="operator">,</span> WriteOnly<span class="operator">,</span> ReadWrite<span class="operator">,</span> Append }
+
+</pre>
+<p>List of modes that a file may be opened in.</p>
+<p>The OpenMode values can be combined with the bitwise or operator.</p>
+<a name="available-operations"></a>
+<h2 id="available-operations">Available operations</h2>
+<a name="constructor"></a>
+<h3 id="constructor">Constructor</h3>
+<pre class="cpp">
+
+  TextFile(filePath: string<span class="operator">,</span> openMode: OpenMode <span class="operator">=</span> TextFile<span class="operator">.</span>ReadOnly)
+
+</pre>
+<p>Opens the file at <code>filePath</code> in the given mode and returns the object representing the file.</p>
+<p><b>Note: </b>The mode influences which of the operations listed below can actually be used on the file.</p><a name="ateof"></a>
+<h3 id="ateof">atEof</h3>
+<pre class="cpp">
+
+  atEof(): boolean
+
+</pre>
+<p>Returns <code>true</code> if no more data can be read from the file, <code>false</code> otherwise.</p>
+<a name="close"></a>
+<h3 id="close">close</h3>
+<pre class="cpp">
+
+  close(): <span class="type">void</span>
+
+</pre>
+<p>Closes the file. It is recommended to always call this function as soon as you are finished with the file, in order to keep the number of in-flight file descriptors as low as possible.</p>
+<a name="filepath"></a>
+<h3 id="filepath">filePath</h3>
+<pre class="cpp">
+
+  filePath(): string
+
+</pre>
+<p>The absolute path of the file represented by this object.</p>
+<a name="readall"></a>
+<h3 id="readall">readAll</h3>
+<pre class="cpp">
+
+  readAll(): string
+
+</pre>
+<p>Reads all data from the file and returns it.</p>
+<a name="readline"></a>
+<h3 id="readline">readLine</h3>
+<pre class="cpp">
+
+  readLine(): string
+
+</pre>
+<p>Reads one line of text from the file and returns it. The returned string does not contain the newline characters.</p>
+<a name="setcodec"></a>
+<h3 id="setcodec">setCodec</h3>
+<pre class="cpp">
+
+  setCodec(codec: string): <span class="type">void</span>
+
+</pre>
+<p>Sets the text codec to <code>codec</code>. The supported codecs are the same as for <code>QTextCodec</code>, for example: &quot;UTF-8&quot;, &quot;UTF-16&quot;, and &quot;ISO 8859-1&quot;.</p>
+<a name="truncate"></a>
+<h3 id="truncate">truncate</h3>
+<pre class="cpp">
+
+  truncate(): <span class="type">void</span>
+
+</pre>
+<p>Truncates the file, that is, gives it the size of zero, removing all content.</p>
+<a name="write"></a>
+<h3 id="write">write</h3>
+<pre class="cpp">
+
+  write(data: string): <span class="type">void</span>
+
+</pre>
+<p>Writes <code>data</code> into the file at the current position.</p>
+<a name="writeline"></a>
+<h3 id="writeline">writeLine</h3>
+<pre class="cpp">
+
+  writeLine(data: string): <span class="type">void</span>
+
+</pre>
+<p>Writes <code>data</code> into the file at the current position and appends the newline character(s).</p>
+</div>
+<!-- @@@jsextension-textfile.html -->
+<p class="naviNextPrevious footerNavi">
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

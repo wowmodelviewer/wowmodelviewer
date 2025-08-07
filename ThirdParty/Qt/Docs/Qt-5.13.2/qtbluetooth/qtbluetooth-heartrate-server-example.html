@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- heartrate-server.qdoc -->
+  <title>Bluetooth Low Energy Heart Rate Server Example | Qt Bluetooth 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtbluetooth-index.html">Qt Bluetooth</a></td><td >Bluetooth Low Energy Heart Rate Server Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtbluetooth-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#setting-up-advertising-data-and-parameters">Setting up Advertising Data and Parameters</a></li>
+<li class="level1"><a href="#setting-up-service-data">Setting up Service Data</a></li>
+<li class="level1"><a href="#advertising-and-listening-for-incoming-connections">Advertising and Listening for Incoming Connections</a></li>
+<li class="level1"><a href="#providing-the-heartrate">Providing the Heartrate</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Bluetooth Low Energy Heart Rate Server Example</h1>
+<span class="subtitle"></span>
+<!-- $$$heartrate-server-brief -->
+<p>An example demonstrating how to set up and advertise a GATT service. The example demonstrates the use of the Qt Bluetooth Low Energy classes related to peripheral (slave) functionality.</p>
+<!-- @@@heartrate-server -->
+<!-- $$$heartrate-server-description -->
+<div class="descr"> <a name="details"></a>
+<p>The Bluetooth Low Energy Heart Rate Server is a command-line application that shows how to develop a Bluetooth GATT server using the Qt Bluetooth API. The application covers setting up a service, advertising it and notifying clients about changes to characteristic values.</p>
+<p>The example makes use of the following Qt classes:</p>
+<ul>
+<li><a href="qlowenergyadvertisingdata.html">QLowEnergyAdvertisingData</a></li>
+<li><a href="qlowenergyadvertisingparameters.html">QLowEnergyAdvertisingParameters</a></li>
+<li><a href="qlowenergyservicedata.html">QLowEnergyServiceData</a></li>
+<li><a href="qlowenergycharacteristicdata.html">QLowEnergyCharacteristicData</a></li>
+<li><a href="qlowenergydescriptordata.html">QLowEnergyDescriptorData</a></li>
+<li><a href="qlowenergycontroller.html">QLowEnergyController</a></li>
+<li><a href="qlowenergyservice.html">QLowEnergyService</a></li>
+</ul>
+<p>The example implements a server application, which means it has no graphical user interface. To visualize what it is doing, you can use the <a href="qtbluetooth-heartrate-game-example.html">Heart Rate Game</a> example, which is basically the client-side counterpart to this application.</p>
+<p><b>Note: </b>On Linux, advertising requires privileged access, so you need to run the example as root, for instance via <code>sudo</code>.</p><a name="setting-up-advertising-data-and-parameters"></a>
+<h4 id="setting-up-advertising-data-and-parameters">Setting up Advertising Data and Parameters</h4>
+<p>Two classes are used to configure the advertising process: <a href="qlowenergyadvertisingdata.html">QLowEnergyAdvertisingData</a> to specify which information is to be broadcast, and <a href="qlowenergyadvertisingparameters.html">QLowEnergyAdvertisingParameters</a> for specific aspects such as setting the advertising interval or controlling which devices are allowed to connect. In our example, we simply use the default parameters.</p>
+<p>The information contained in the <a href="qlowenergyadvertisingdata.html">QLowEnergyAdvertisingData</a> will be visible to other devices that are currently scanning. They can use it to decide whether they want to establish a connection or not. In our example, we include the type of service we offer, a name that adequately describes our device to humans, and the transmit power level of the device. The latter is often useful to potential clients, because they can tell how far away our device is by comparing the received signal strength to the advertised one.</p>
+<p><b>Note: </b>Space for the advertising data is very limited (only 31 bytes in total), so variable-length data such as the device name should be kept as short as possible.</p><pre class="cpp">
+
+  <span class="type"><a href="qlowenergyadvertisingdata.html">QLowEnergyAdvertisingData</a></span> advertisingData;
+  advertisingData<span class="operator">.</span>setDiscoverability(<span class="type"><a href="qlowenergyadvertisingdata.html">QLowEnergyAdvertisingData</a></span><span class="operator">::</span>DiscoverabilityGeneral);
+  advertisingData<span class="operator">.</span>setIncludePowerLevel(<span class="keyword">true</span>);
+  advertisingData<span class="operator">.</span>setLocalName(<span class="string">&quot;HeartRateServer&quot;</span>);
+  advertisingData<span class="operator">.</span>setServices(<span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span><span class="operator">&gt;</span>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span><span class="operator">::</span>HeartRate);
+
+</pre>
+<a name="setting-up-service-data"></a>
+<h4 id="setting-up-service-data">Setting up Service Data</h4>
+<p>Next we configure the kind of service we want to offer. We use the <code>Heart Rate</code> service as defined in the Bluetooth specification in its minimal form, that is, consisting only of the <code>Heart Rate Measurement</code> characteristic. This characteristic must support the <code>Notify</code> property (and no others), and it needs to have a <code>Client Characteristic Configuration</code> descriptor, which enables clients to register to get notified about changes to characteristic values. We set the initial heart rate value to zero, as it cannot be read anyway (the only way the client can get at the value is via notifications).</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qlowenergycharacteristicdata.html">QLowEnergyCharacteristicData</a></span> charData;
+  charData<span class="operator">.</span>setUuid(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span><span class="operator">::</span>HeartRateMeasurement);
+  charData<span class="operator">.</span>setValue(<span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span>(<span class="number">2</span><span class="operator">,</span> <span class="number">0</span>));
+  charData<span class="operator">.</span>setProperties(<span class="type"><a href="qlowenergycharacteristic.html">QLowEnergyCharacteristic</a></span><span class="operator">::</span>Notify);
+  <span class="keyword">const</span> <span class="type"><a href="qlowenergydescriptordata.html">QLowEnergyDescriptorData</a></span> clientConfig(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span><span class="operator">::</span>ClientCharacteristicConfiguration<span class="operator">,</span>
+                                              <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span>(<span class="number">2</span><span class="operator">,</span> <span class="number">0</span>));
+  charData<span class="operator">.</span>addDescriptor(clientConfig);
+
+  <span class="type"><a href="qlowenergyservicedata.html">QLowEnergyServiceData</a></span> serviceData;
+  serviceData<span class="operator">.</span>setType(<span class="type"><a href="qlowenergyservicedata.html">QLowEnergyServiceData</a></span><span class="operator">::</span>ServiceTypePrimary);
+  serviceData<span class="operator">.</span>setUuid(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span><span class="operator">::</span>HeartRate);
+  serviceData<span class="operator">.</span>addCharacteristic(charData);
+
+</pre>
+<a name="advertising-and-listening-for-incoming-connections"></a>
+<h4 id="advertising-and-listening-for-incoming-connections">Advertising and Listening for Incoming Connections</h4>
+<p>Now that all the data has been set up, we can start advertising. First we create a <a href="qlowenergycontroller.html">QLowEnergyController</a> object in the <a href="qlowenergycontroller.html#Role-enum">peripheral role</a> and use it to create a (dynamic) <a href="qlowenergyservice.html">QLowEnergyService</a> object from our (static) <a href="qlowenergyservicedata.html">QLowEnergyServiceData</a>. Then we call <a href="qlowenergycontroller.html#startAdvertising">QLowEnergyController::startAdvertising</a>(). Note that we hand in our <a href="qlowenergyadvertisingdata.html">QLowEnergyAdvertisingData</a> twice: The first argument acts as the actual advertising data, the second one as the scan response data. They could transport different information, but here we don't have a need for that. We also pass a default-constructed instance of <a href="qlowenergyadvertisingparameters.html">QLowEnergyAdvertisingParameters</a>, because the default advertising parameters are fine for us. If a client is interested in the advertised service, it can now establish a connection to our device. When that happens, the device stops advertising and the <a href="qlowenergycontroller.html#connected">QLowEnergyController::connected</a>() signal is emitted.</p>
+<p><b>Note: </b>When a client disconnects, advertising does not resume automatically. If you want that to happen, you need to connect to the <a href="qlowenergycontroller.html#disconnected">QLowEnergyController::disconnected</a>() signal and call <a href="qlowenergycontroller.html#startAdvertising">QLowEnergyController::startAdvertising</a>() in the respective slot.</p><pre class="cpp">
+
+  <span class="keyword">const</span> <span class="type"><a href="../qtcore/qscopedpointer.html">QScopedPointer</a></span><span class="operator">&lt;</span><span class="type"><a href="qlowenergycontroller.html">QLowEnergyController</a></span><span class="operator">&gt;</span> leController(<span class="type"><a href="qlowenergycontroller.html">QLowEnergyController</a></span><span class="operator">::</span>createPeripheral());
+  <span class="type"><a href="../qtcore/qscopedpointer.html">QScopedPointer</a></span><span class="operator">&lt;</span><span class="type"><a href="qlowenergyservice.html">QLowEnergyService</a></span><span class="operator">&gt;</span> service(leController<span class="operator">-</span><span class="operator">&gt;</span>addService(serviceData));
+  leController<span class="operator">-</span><span class="operator">&gt;</span>startAdvertising(<span class="type"><a href="qlowenergyadvertisingparameters.html">QLowEnergyAdvertisingParameters</a></span>()<span class="operator">,</span> advertisingData<span class="operator">,</span>
+                                 advertisingData);
+
+</pre>
+<a name="providing-the-heartrate"></a>
+<h4 id="providing-the-heartrate">Providing the Heartrate</h4>
+<p>So far, so good. But how does a client actually get at the heart rate? This happens by regularly updating the value of the respective characteristic in the <a href="qlowenergyservice.html">QLowEnergyService</a> object that we received from the <a href="qlowenergycontroller.html">QLowEnergyController</a> in the code snippet above. The source of the heart rate would normally be some kind of sensor, but in our example, we just make up values that we let oscillate between 60 and 100. The most important part in the following code snippet is the call to <a href="qlowenergyservice.html#writeCharacteristic">QLowEnergyService::writeCharacteristic</a>. If a client is currently connected and has enabled notifications by writing to the aforementioned <code>Client Characteristic Configuration</code>, it will get notified about the new value.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span> heartbeatTimer;
+  <span class="type"><a href="../qtcore/qtglobal.html#quint8-typedef">quint8</a></span> currentHeartRate <span class="operator">=</span> <span class="number">60</span>;
+  <span class="keyword">enum</span> ValueChange { ValueUp<span class="operator">,</span> ValueDown } valueChange <span class="operator">=</span> ValueUp;
+  <span class="keyword">const</span> <span class="keyword">auto</span> heartbeatProvider <span class="operator">=</span> <span class="operator">[</span><span class="operator">&amp;</span>service<span class="operator">,</span> <span class="operator">&amp;</span>currentHeartRate<span class="operator">,</span> <span class="operator">&amp;</span>valueChange<span class="operator">]</span>() {
+      <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> value;
+      value<span class="operator">.</span>append(<span class="type">char</span>(<span class="number">0</span>)); <span class="comment">// Flags that specify the format of the value.</span>
+      value<span class="operator">.</span>append(<span class="type">char</span>(currentHeartRate)); <span class="comment">// Actual value.</span>
+      <span class="type"><a href="qlowenergycharacteristic.html">QLowEnergyCharacteristic</a></span> characteristic
+              <span class="operator">=</span> service<span class="operator">-</span><span class="operator">&gt;</span>characteristic(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span><span class="operator">::</span>HeartRateMeasurement);
+      Q_ASSERT(characteristic<span class="operator">.</span>isValid());
+      service<span class="operator">-</span><span class="operator">&gt;</span>writeCharacteristic(characteristic<span class="operator">,</span> value); <span class="comment">// Potentially causes notification.</span>
+      <span class="keyword">if</span> (currentHeartRate <span class="operator">=</span><span class="operator">=</span> <span class="number">60</span>)
+          valueChange <span class="operator">=</span> ValueUp;
+      <span class="keyword">else</span> <span class="keyword">if</span> (currentHeartRate <span class="operator">=</span><span class="operator">=</span> <span class="number">100</span>)
+          valueChange <span class="operator">=</span> ValueDown;
+      <span class="keyword">if</span> (valueChange <span class="operator">=</span><span class="operator">=</span> ValueUp)
+          <span class="operator">+</span><span class="operator">+</span>currentHeartRate;
+      <span class="keyword">else</span>
+          <span class="operator">-</span><span class="operator">-</span>currentHeartRate;
+  };
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(<span class="operator">&amp;</span>heartbeatTimer<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span><span class="operator">::</span>timeout<span class="operator">,</span> heartbeatProvider);
+  heartbeatTimer<span class="operator">.</span>start(<span class="number">1000</span>);
+
+</pre>
+<p><a href="https://code.qt.io/cgit/qt/qtconnectivity.git/tree/examples/bluetooth/heartrate-server?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@heartrate-server -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

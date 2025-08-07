@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qvalidator.cpp -->
+  <title>QRegExpValidator Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QRegExpValidator</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QRegExpValidator Class</h1>
+<!-- $$$QRegExpValidator-brief -->
+<p>The <a href="qregexpvalidator.html">QRegExpValidator</a> class is used to check a string against a regular expression. <a href="#details">More...</a></p>
+<!-- @@@QRegExpValidator -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QRegExpValidator&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qvalidator.html">QValidator</a></td></tr></table></div><ul>
+<li><a href="qregexpvalidator-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qregexpvalidator.html#regExp-prop">regExp</a></b> : QRegExp</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qregexpvalidator.html#QRegExpValidator-1">QRegExpValidator</a></b>(const QRegExp &amp;<i>rx</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qregexpvalidator.html#QRegExpValidator">QRegExpValidator</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qregexpvalidator.html#dtor.QRegExpValidator">~QRegExpValidator</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QRegExp &amp;</td><td class="memItemRight bottomAlign"><b><a href="qregexpvalidator.html#regExp-prop">regExp</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qregexpvalidator.html#regExp-prop">setRegExp</a></b>(const QRegExp &amp;<i>rx</i>)</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QValidator::State </td><td class="memItemRight bottomAlign"><b><a href="qregexpvalidator.html#validate">validate</a></b>(QString &amp;<i>input</i>, int &amp;<i>pos</i>) const override</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qregexpvalidator.html#regExp-prop">regExpChanged</a></b>(const QRegExp &amp;<i>regExp</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QRegExpValidator-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qregexpvalidator.html">QRegExpValidator</a> uses a regular expression (regexp) to determine whether an input string is <a href="qvalidator.html#State-enum">Acceptable</a>, <a href="qvalidator.html#State-enum">Intermediate</a>, or <a href="qvalidator.html#State-enum">Invalid</a>. The regexp can either be supplied when the <a href="qregexpvalidator.html">QRegExpValidator</a> is constructed, or at a later time.</p>
+<p>When <a href="qregexpvalidator.html">QRegExpValidator</a> determines whether a string is <a href="qvalidator.html#State-enum">Acceptable</a> or not, the regexp is treated as if it begins with the start of string assertion (<b>^</b>) and ends with the end of string assertion (<b>$</b>); the match is against the entire input string, or from the given position if a start position greater than zero is given.</p>
+<p>If a string is a prefix of an <a href="qvalidator.html#State-enum">Acceptable</a> string, it is considered <a href="qvalidator.html#State-enum">Intermediate</a>. For example, &quot;&quot; and &quot;A&quot; are <a href="qvalidator.html#State-enum">Intermediate</a> for the regexp <b>[A-Z][0-9]</b> (whereas &quot;_&quot; would be <a href="qvalidator.html#State-enum">Invalid</a>).</p>
+<p>For a brief introduction to Qt's regexp engine, see <a href="../qtcore/qregexp.html">QRegExp</a>.</p>
+<p>Example of use:</p>
+<pre class="cpp">
+
+  <span class="comment">// regexp: optional '-' followed by between 1 and 3 digits</span>
+  <span class="type"><a href="../qtcore/qregexp.html">QRegExp</a></span> rx(<span class="string">&quot;-?\\d{1,3}&quot;</span>);
+  <span class="type"><a href="qvalidator.html#QValidator">QValidator</a></span> <span class="operator">*</span>validator <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qregexpvalidator.html#QRegExpValidator">QRegExpValidator</a></span>(rx<span class="operator">,</span> <span class="keyword">this</span>);
+
+  <span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span> <span class="operator">*</span>edit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span>(<span class="keyword">this</span>);
+  edit<span class="operator">-</span><span class="operator">&gt;</span>setValidator(validator);
+
+</pre>
+<p>Below we present some examples of validators. In practice they would normally be associated with a widget as in the example above.</p>
+<pre class="cpp">
+
+  <span class="comment">// integers 1 to 9999</span>
+  <span class="type"><a href="../qtcore/qregexp.html">QRegExp</a></span> rx(<span class="string">&quot;[1-9]\\d{0,3}&quot;</span>);
+  <span class="comment">// the validator treats the regexp as &quot;^[1-9]\\d{0,3}$&quot;</span>
+  <span class="type"><a href="qregexpvalidator.html#QRegExpValidator">QRegExpValidator</a></span> v(rx<span class="operator">,</span> <span class="number">0</span>);
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> s;
+  <span class="type">int</span> pos <span class="operator">=</span> <span class="number">0</span>;
+
+  s <span class="operator">=</span> <span class="string">&quot;0&quot;</span>;     v<span class="operator">.</span>validate(s<span class="operator">,</span> pos);    <span class="comment">// returns Invalid</span>
+  s <span class="operator">=</span> <span class="string">&quot;12345&quot;</span>; v<span class="operator">.</span>validate(s<span class="operator">,</span> pos);    <span class="comment">// returns Invalid</span>
+  s <span class="operator">=</span> <span class="string">&quot;1&quot;</span>;     v<span class="operator">.</span>validate(s<span class="operator">,</span> pos);    <span class="comment">// returns Acceptable</span>
+
+  rx<span class="operator">.</span>setPattern(<span class="string">&quot;\\S+&quot;</span>);            <span class="comment">// one or more non-whitespace characters</span>
+  v<span class="operator">.</span>setRegExp(rx);
+  s <span class="operator">=</span> <span class="string">&quot;myfile.txt&quot;</span>;  v<span class="operator">.</span>validate(s<span class="operator">,</span> pos); <span class="comment">// Returns Acceptable</span>
+  s <span class="operator">=</span> <span class="string">&quot;my file.txt&quot;</span>; v<span class="operator">.</span>validate(s<span class="operator">,</span> pos); <span class="comment">// Returns Invalid</span>
+
+  <span class="comment">// A, B or C followed by exactly five digits followed by W, X, Y or Z</span>
+  rx<span class="operator">.</span>setPattern(<span class="string">&quot;[A-C]\\d{5}[W-Z]&quot;</span>);
+  v<span class="operator">.</span>setRegExp(rx);
+  s <span class="operator">=</span> <span class="string">&quot;a12345Z&quot;</span>; v<span class="operator">.</span>validate(s<span class="operator">,</span> pos);        <span class="comment">// Returns Invalid</span>
+  s <span class="operator">=</span> <span class="string">&quot;A12345Z&quot;</span>; v<span class="operator">.</span>validate(s<span class="operator">,</span> pos);        <span class="comment">// Returns Acceptable</span>
+  s <span class="operator">=</span> <span class="string">&quot;B12&quot;</span>;     v<span class="operator">.</span>validate(s<span class="operator">,</span> pos);        <span class="comment">// Returns Intermediate</span>
+
+  <span class="comment">// match most 'readme' files</span>
+  rx<span class="operator">.</span>setPattern(<span class="string">&quot;read\\S?me(\.(txt|asc|1st))?&quot;</span>);
+  rx<span class="operator">.</span>setCaseSensitive(<span class="keyword">false</span>);
+  v<span class="operator">.</span>setRegExp(rx);
+  s <span class="operator">=</span> <span class="string">&quot;readme&quot;</span>;      v<span class="operator">.</span>validate(s<span class="operator">,</span> pos); <span class="comment">// Returns Acceptable</span>
+  s <span class="operator">=</span> <span class="string">&quot;README.1ST&quot;</span>;  v<span class="operator">.</span>validate(s<span class="operator">,</span> pos); <span class="comment">// Returns Acceptable</span>
+  s <span class="operator">=</span> <span class="string">&quot;read me.txt&quot;</span>; v<span class="operator">.</span>validate(s<span class="operator">,</span> pos); <span class="comment">// Returns Invalid</span>
+  s <span class="operator">=</span> <span class="string">&quot;readm&quot;</span>;       v<span class="operator">.</span>validate(s<span class="operator">,</span> pos); <span class="comment">// Returns Intermediate</span>
+
+</pre>
+</div>
+<p><b>See also </b><a href="../qtcore/qregexp.html">QRegExp</a>, <a href="qintvalidator.html">QIntValidator</a>, <a href="qdoublevalidator.html">QDoubleValidator</a>, and <a href="../qtwidgets/qtwidgets-tools-settingseditor-example.html">Settings Editor Example</a>.</p>
+<!-- @@@QRegExpValidator -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$regExp-prop$$$regExp$$$setRegExpconstQRegExp&$$$regExpChangedconstQRegExp& -->
+<h3 class="fn" id="regExp-prop"><a name="regExp-prop"></a><span class="name">regExp</span> : <span class="type"><a href="../qtcore/qregexp.html">QRegExp</a></span></h3>
+<p>This property holds the regular expression used for validation</p>
+<p>By default, this property contains a regular expression with the pattern <code>.*</code> that matches any string.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> const QRegExp &amp;</td><td class="memItemRight bottomAlign"><span class="name"><b>regExp</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setRegExp</b></span>(const QRegExp &amp;<i>rx</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>regExpChanged</b></span>(const QRegExp &amp;<i>regExp</i>)</td></tr>
+</table></div>
+<!-- @@@regExp -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QRegExpValidator$$$QRegExpValidatorconstQRegExp&QObject* -->
+<h3 class="fn" id="QRegExpValidator-1"><a name="QRegExpValidator-1"></a>QRegExpValidator::<span class="name">QRegExpValidator</span>(const <span class="type"><a href="../qtcore/qregexp.html">QRegExp</a></span> &amp;<i>rx</i>, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a validator with a <i>parent</i> object that accepts all strings that match the regular expression <i>rx</i>.</p>
+<p>The match is made against the entire string; e.g&#x2e; if the regexp is <b>[A-Fa-f0-9]+</b> it will be treated as <b>^[A-Fa-f0-9]+$</b>.</p>
+<!-- @@@QRegExpValidator -->
+<!-- $$$QRegExpValidator[overload1]$$$QRegExpValidatorQObject* -->
+<h3 class="fn" id="QRegExpValidator"><a name="QRegExpValidator"></a>QRegExpValidator::<span class="name">QRegExpValidator</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a validator with a <i>parent</i> object that accepts any string (including an empty one) as valid.</p>
+<!-- @@@QRegExpValidator -->
+<!-- $$$~QRegExpValidator[overload1]$$$~QRegExpValidator -->
+<h3 class="fn" id="dtor.QRegExpValidator"><a name="dtor.QRegExpValidator"></a><code>[virtual] </code>QRegExpValidator::<span class="name">~QRegExpValidator</span>()</h3>
+<p>Destroys the validator.</p>
+<!-- @@@~QRegExpValidator -->
+<!-- $$$validate[overload1]$$$validateQString&int& -->
+<h3 class="fn" id="validate"><a name="validate"></a><code>[override virtual] </code><span class="type"><a href="qvalidator.html#State-enum">QValidator::State</a></span> QRegExpValidator::<span class="name">validate</span>(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>input</i>, <span class="type">int</span> &amp;<i>pos</i>) const</h3>
+<p>Reimplements: <a href="qvalidator.html#validate">QValidator::validate</a>(QString &amp;input, int &amp;pos) const.</p>
+<p>Returns <a href="qvalidator.html#State-enum">Acceptable</a> if <i>input</i> is matched by the regular expression for this validator, <a href="qvalidator.html#State-enum">Intermediate</a> if it has matched partially (i.e&#x2e; could be a valid match if additional valid characters are added), and <a href="qvalidator.html#State-enum">Invalid</a> if <i>input</i> is not matched.</p>
+<p>Additionally, if <i>input</i> is not matched, the <i>pos</i> parameter is set to the length of the <i>input</i> parameter.</p>
+<p>For example, if the regular expression is <b>\w\d\d</b> (word-character, digit, digit) then &quot;A57&quot; is <a href="qvalidator.html#State-enum">Acceptable</a>, &quot;E5&quot; is <a href="qvalidator.html#State-enum">Intermediate</a>, and &quot;+9&quot; is <a href="qvalidator.html#State-enum">Invalid</a>.</p>
+<p><b>See also </b><a href="../qtcore/qregexp.html#exactMatch">QRegExp::exactMatch</a>().</p>
+<!-- @@@validate -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcompressedhelpinfo.cpp -->
+  <title>QCompressedHelpInfo Class | Qt Help 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qthelp-index.html">Qt Help</a></td><td ><a href="qthelp-module.html">C++ Classes</a></td><td >QCompressedHelpInfo</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qthelp-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCompressedHelpInfo Class</h1>
+<!-- $$$QCompressedHelpInfo-brief -->
+<p>The <a href="qcompressedhelpinfo.html">QCompressedHelpInfo</a> class provides access to the details about a compressed help file. <a href="#details">More...</a></p>
+<!-- @@@QCompressedHelpInfo -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QCompressedHelpInfo&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += help</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.13</td></tr></table></div><p>This class was introduced in  Qt 5.13.</p>
+<ul>
+<li><a href="qcompressedhelpinfo-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcompressedhelpinfo.html#QCompressedHelpInfo-2">QCompressedHelpInfo</a></b>(QCompressedHelpInfo &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcompressedhelpinfo.html#QCompressedHelpInfo-1">QCompressedHelpInfo</a></b>(const QCompressedHelpInfo &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcompressedhelpinfo.html#QCompressedHelpInfo">QCompressedHelpInfo</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCompressedHelpInfo &amp;</td><td class="memItemRight bottomAlign"><b><a href="qcompressedhelpinfo.html#operator-eq-1">operator=</a></b>(QCompressedHelpInfo &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCompressedHelpInfo &amp;</td><td class="memItemRight bottomAlign"><b><a href="qcompressedhelpinfo.html#operator-eq">operator=</a></b>(const QCompressedHelpInfo &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcompressedhelpinfo.html#dtor.QCompressedHelpInfo">~QCompressedHelpInfo</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qcompressedhelpinfo.html#component">component</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qcompressedhelpinfo.html#namespaceName">namespaceName</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcompressedhelpinfo.html#swap">swap</a></b>(QCompressedHelpInfo &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVersionNumber </td><td class="memItemRight bottomAlign"><b><a href="qcompressedhelpinfo.html#version">version</a></b>() const</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QCompressedHelpInfo </td><td class="memItemRight bottomAlign"><b><a href="qcompressedhelpinfo.html#fromCompressedHelpFile">fromCompressedHelpFile</a></b>(const QString &amp;<i>documentationFileName</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCompressedHelpInfo-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The detailed information about the compressed help file can be fetched by calling the <a href="qcompressedhelpinfo.html#fromCompressedHelpFile">fromCompressedHelpFile</a>() static method, providing the path to the compressed help file.</p>
+<p>The class provides access to various information about a compressed help file. The namespace associated with the given compressed help file is <a href="qcompressedhelpinfo.html#namespaceName">namespaceName</a>(), the associated component name is <a href="qcompressedhelpinfo.html#component">component</a>() and <a href="qcompressedhelpinfo.html#version">version</a>() provides version information.</p>
+</div>
+<p><b>See also </b><a href="qhelpfilterengine.html">QHelpFilterEngine</a>.</p>
+<!-- @@@QCompressedHelpInfo -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QCompressedHelpInfo$$$QCompressedHelpInfoQCompressedHelpInfo&& -->
+<h3 class="fn" id="QCompressedHelpInfo-2"><a name="QCompressedHelpInfo-2"></a>QCompressedHelpInfo::<span class="name">QCompressedHelpInfo</span>(<span class="type"><a href="qcompressedhelpinfo.html#QCompressedHelpInfo">QCompressedHelpInfo</a></span> &amp;&amp;<i>other</i>)</h3>
+<p>Move-constructs a <a href="qcompressedhelpinfo.html">QCompressedHelpInfo</a> instance, making it point to the same object that <i>other</i> was pointing to, so that it contains the information the <i>other</i> used to contain.</p>
+<!-- @@@QCompressedHelpInfo -->
+<!-- $$$QCompressedHelpInfo$$$QCompressedHelpInfoconstQCompressedHelpInfo& -->
+<h3 class="fn" id="QCompressedHelpInfo-1"><a name="QCompressedHelpInfo-1"></a>QCompressedHelpInfo::<span class="name">QCompressedHelpInfo</span>(const <span class="type"><a href="qcompressedhelpinfo.html#QCompressedHelpInfo">QCompressedHelpInfo</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a copy of <i>other</i>.</p>
+<!-- @@@QCompressedHelpInfo -->
+<!-- $$$QCompressedHelpInfo[overload1]$$$QCompressedHelpInfo -->
+<h3 class="fn" id="QCompressedHelpInfo"><a name="QCompressedHelpInfo"></a>QCompressedHelpInfo::<span class="name">QCompressedHelpInfo</span>()</h3>
+<p>Constructs empty information about a compressed help file.</p>
+<!-- @@@QCompressedHelpInfo -->
+<!-- $$$operator=$$$operator=QCompressedHelpInfo&& -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type"><a href="qcompressedhelpinfo.html#QCompressedHelpInfo">QCompressedHelpInfo</a></span> &amp;QCompressedHelpInfo::<span class="name">operator=</span>(<span class="type"><a href="qcompressedhelpinfo.html#QCompressedHelpInfo">QCompressedHelpInfo</a></span> &amp;&amp;<i>other</i>)</h3>
+<p>Move-assigns <i>other</i> to this <a href="qcompressedhelpinfo.html">QCompressedHelpInfo</a> instance.</p>
+<!-- @@@operator= -->
+<!-- $$$operator=[overload1]$$$operator=constQCompressedHelpInfo& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qcompressedhelpinfo.html#QCompressedHelpInfo">QCompressedHelpInfo</a></span> &amp;QCompressedHelpInfo::<span class="name">operator=</span>(const <span class="type"><a href="qcompressedhelpinfo.html#QCompressedHelpInfo">QCompressedHelpInfo</a></span> &amp;<i>other</i>)</h3>
+<p>Makes this QHelpCollectionDetails into a copy of <i>other</i>, so the two are identical, and returns a reference to this QHelpCollectionDetails.</p>
+<!-- @@@operator= -->
+<!-- $$$~QCompressedHelpInfo[overload1]$$$~QCompressedHelpInfo -->
+<h3 class="fn" id="dtor.QCompressedHelpInfo"><a name="dtor.QCompressedHelpInfo"></a>QCompressedHelpInfo::<span class="name">~QCompressedHelpInfo</span>()</h3>
+<p>Destroys the <a href="qcompressedhelpinfo.html">QCompressedHelpInfo</a>.</p>
+<!-- @@@~QCompressedHelpInfo -->
+<!-- $$$component[overload1]$$$component -->
+<h3 class="fn" id="component"><a name="component"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QCompressedHelpInfo::<span class="name">component</span>() const</h3>
+<p>Returns the component of the compressed help file.</p>
+<!-- @@@component -->
+<!-- $$$fromCompressedHelpFile[overload1]$$$fromCompressedHelpFileconstQString& -->
+<h3 class="fn" id="fromCompressedHelpFile"><a name="fromCompressedHelpFile"></a><code>[static] </code><span class="type"><a href="qcompressedhelpinfo.html#QCompressedHelpInfo">QCompressedHelpInfo</a></span> QCompressedHelpInfo::<span class="name">fromCompressedHelpFile</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>documentationFileName</i>)</h3>
+<p>Returns the <a href="qcompressedhelpinfo.html">QCompressedHelpInfo</a> instance for the <i>documentationFileName</i> of the existing qch file.</p>
+<!-- @@@fromCompressedHelpFile -->
+<!-- $$$namespaceName[overload1]$$$namespaceName -->
+<h3 class="fn" id="namespaceName"><a name="namespaceName"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QCompressedHelpInfo::<span class="name">namespaceName</span>() const</h3>
+<p>Returns the namespace name of the compressed help file.</p>
+<!-- @@@namespaceName -->
+<!-- $$$swap[overload1]$$$swapQCompressedHelpInfo& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QCompressedHelpInfo::<span class="name">swap</span>(<span class="type"><a href="qcompressedhelpinfo.html#QCompressedHelpInfo">QCompressedHelpInfo</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps the compressed help file <i>other</i> with this compressed help file. This operation is very fast and never fails.</p>
+<!-- @@@swap -->
+<!-- $$$version[overload1]$$$version -->
+<h3 class="fn" id="version"><a name="version"></a><span class="type"><a href="../qtcore/qversionnumber.html">QVersionNumber</a></span> QCompressedHelpInfo::<span class="name">version</span>() const</h3>
+<p>Returns the version of the compressed help file.</p>
+<!-- @@@version -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

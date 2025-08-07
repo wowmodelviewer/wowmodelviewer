@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qblendedclipanimator.cpp -->
+  <title>QBlendedClipAnimator Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QBlendedClipAnimator</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QBlendedClipAnimator Class</h1>
+<span class="small-subtitle">(<a href="qt3danimation-qblendedclipanimator.html">Qt3DAnimation::QBlendedClipAnimator</a>)<br/></span>
+<!-- $$$QBlendedClipAnimator-brief -->
+<p><a href="qt3danimation-qblendedclipanimator.html">QBlendedClipAnimator</a> is a component providing animation playback capabilities of a tree of blend nodes. <a href="#details">More...</a></p>
+<!-- @@@QBlendedClipAnimator -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QBlendedClipAnimator&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3danimation</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.9</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-animation-blendedclipanimator.html">BlendedClipAnimator</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3danimation-qabstractclipanimator.html">Qt3DAnimation::QAbstractClipAnimator</a></td></tr></table></div><p>This class was introduced in  Qt 5.9.</p>
+<ul>
+<li><a href="qt3danimation-qblendedclipanimator-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qt3danimation-qblendedclipanimator.html#blendTree-prop">blendTree</a></b> : Qt3DAnimation::QAbstractClipBlendNode*</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DAnimation::QAbstractClipBlendNode *</td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qblendedclipanimator.html#blendTree-prop">blendTree</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qblendedclipanimator.html#blendTree-prop">setBlendTree</a></b>(Qt3DAnimation::QAbstractClipBlendNode *<i>blendTree</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qblendedclipanimator.html#blendTree-prop">blendTreeChanged</a></b>(Qt3DAnimation::QAbstractClipBlendNode *<i>blendTree</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QBlendedClipAnimator-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>An instance of <a href="qt3danimation-qblendedclipanimator.html">QBlendedClipAnimator</a> can be aggregated by a QEntity to add the ability to play back animation clips and to apply the calculated animation values to properties of QObjects.</p>
+<p>Whereas a <a href="qt3danimation-qclipanimator.html">QClipAnimator</a> gets its animation data from a single animation clip, <a href="qt3danimation-qblendedclipanimator.html">QBlendedClipAnimator</a> can blend together multiple clips. The animation data is obtained by evaluating a so called <i>blend tree</i>. A blend tree is a hierarchical tree structure where the leaf nodes are value nodes that encapsulate an animation clip (<a href="qt3danimation-qabstractanimationclip.html">QAbstractAnimationClip</a>); and the internal nodes represent blending operations that operate on the nodes pointed to by their operand properties.</p>
+<p>To associate a blend tree with a <a href="qt3danimation-qblendedclipanimator.html">QBlendedClipAnimator</a>, set the animator's <a href="qt3danimation-qblendedclipanimator.html#blendTree-prop">blendTree</a> property to point at the root node of your blend tree:</p>
+<pre class="cpp plain">
+
+  auto blendTreeRoot = new QAdditiveClipBlend();
+  ..&#x2e;
+  auto animator = new QBlendedClipAnimator();
+  animator-&gt;setBlendTree(blendTreeRoot);
+
+</pre>
+<p>A blend tree can be constructed from the following node types:</p>
+<p><b>Note: </b>The blend node tree should only be edited when the animator is not running.</p><ul>
+<li>Qt3DAnimation::QClipBlendValue</li>
+<li><a href="qt3danimation-qlerpclipblend.html">Qt3DAnimation::QLerpClipBlend</a></li>
+<li><a href="qt3danimation-qadditiveclipblend.html">Qt3DAnimation::QAdditiveClipBlend</a></li>
+</ul>
+<p>Additional node types will be added over time.</p>
+<p>As an example consider the following blend tree:</p>
+<pre class="cpp plain">
+
+  Clip0----
+          |
+          Lerp Node----
+          |           |
+  Clip1----           Additive Node
+                      |
+              Clip2----
+
+</pre>
+<p>This can be created and used as follows:</p>
+<pre class="cpp">
+
+  <span class="comment">// Create leaf nodes of blend tree</span>
+  <span class="keyword">auto</span> clip0 <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QClipBlendValue</span>(
+      <span class="keyword">new</span> <span class="type"><a href="qt3danimation-qanimationcliploader.html">QAnimationClipLoader</a></span>(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>fromLocalFile(<span class="string">&quot;walk.json&quot;</span>)));
+  <span class="keyword">auto</span> clip1 <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QClipBlendValue</span>(
+      <span class="keyword">new</span> <span class="type"><a href="qt3danimation-qanimationcliploader.html">QAnimationClipLoader</a></span>(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>fromLocalFile(<span class="string">&quot;run.json&quot;</span>)));
+  <span class="keyword">auto</span> clip2 <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QClipBlendValue</span>(
+      <span class="keyword">new</span> <span class="type"><a href="qt3danimation-qanimationcliploader.html">QAnimationClipLoader</a></span>(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>fromLocalFile(<span class="string">&quot;wave-arm.json&quot;</span>)));
+
+  <span class="comment">// Create blend tree inner nodes</span>
+  <span class="keyword">auto</span> lerpNode <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3danimation-qlerpclipblend.html">QLerpClipBlend</a></span>();
+  lerpNode<span class="operator">-</span><span class="operator">&gt;</span>setStartClip(clip0);
+  lerpNode<span class="operator">-</span><span class="operator">&gt;</span>setEndClip(clip1);
+  lerpNode<span class="operator">-</span><span class="operator">&gt;</span>setBlendFactor(<span class="number">0.5f</span>); <span class="comment">// Half-walk, half-run</span>
+
+  <span class="keyword">auto</span> additiveNode <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3danimation-qadditiveclipblend.html">QAdditiveClipBlend</a></span>();
+  additiveNode<span class="operator">-</span><span class="operator">&gt;</span>setBaseClip(lerpNode); <span class="comment">// Comes from lerp sub-tree</span>
+  additiveNode<span class="operator">-</span><span class="operator">&gt;</span>setAdditiveClip(clip2);
+  additiveNode<span class="operator">-</span><span class="operator">&gt;</span>setAdditiveFactor(<span class="number">1.0f</span>); <span class="comment">// Wave arm fully</span>
+
+  <span class="comment">// Run the animator</span>
+  <span class="keyword">auto</span> animator <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QBlendedClipAnimator</span>();
+  animator<span class="operator">-</span><span class="operator">&gt;</span>setBlendTree(additiveNode);
+  animator<span class="operator">-</span><span class="operator">&gt;</span>setChannelMapper(<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>);
+  animator<span class="operator">-</span><span class="operator">&gt;</span>setRunning(<span class="keyword">true</span>);
+
+</pre>
+<p>By authoring a set of animation clips and blending between them dynamically at runtime with a blend tree, we open up a huge set of possible resulting animations. As some simple examples of the above blend tree, where alpha is the additive factor and beta is the lerp blend factor we can get a 2D continuum of possible animations:</p>
+<pre class="cpp plain">
+
+  (alpha = 0, beta = 1) Running, No arm waving --- (alpha = 1, beta = 1) Running, Arm waving
+          |                                               |
+          |                                               |
+          |                                               |
+  (alpha = 0, beta = 0) Walking, No arm waving --- (alpha = 0, beta = 1) Running, No arm waving
+
+</pre>
+<p>More complex blend trees offer even more flexibility for combining your animation clips. Note that the values used to control the blend tree (alpha and beta above) are simple properties on the blend nodes. This means, that these properties themselves can also be controlled by the animation framework.</p>
+</div>
+<!-- @@@QBlendedClipAnimator -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$blendTree-prop$$$blendTree$$$setBlendTreeQt3DAnimation::QAbstractClipBlendNode*$$$blendTreeChangedQt3DAnimation::QAbstractClipBlendNode* -->
+<h3 class="fn" id="blendTree-prop"><a name="blendTree-prop"></a><span class="name">blendTree</span> : <span class="type"><a href="qt3danimation-qabstractclipblendnode.html">Qt3DAnimation::QAbstractClipBlendNode</a></span>*</h3>
+<p>This property holds the root of the animation blend tree that will be evaluated before being interpolated by the animator.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DAnimation::QAbstractClipBlendNode *</td><td class="memItemRight bottomAlign"><span class="name"><b>blendTree</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setBlendTree</b></span>(Qt3DAnimation::QAbstractClipBlendNode *<i>blendTree</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>blendTreeChanged</b></span>(Qt3DAnimation::QAbstractClipBlendNode *<i>blendTree</i>)</td></tr>
+</table></div>
+<!-- @@@blendTree -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

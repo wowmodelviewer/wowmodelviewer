@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquicktargetdirection.cpp -->
+  <title>TargetDirection QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >TargetDirection QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">TargetDirection QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$TargetDirection-brief -->
+<p>For specifying a direction towards the target point. <a href="#details">More...</a></p>
+<!-- @@@TargetDirection -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Particles 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-particles-direction.html">Direction</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-particles-targetdirection-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-particles-targetdirection.html#magnitude-prop">magnitude</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-targetdirection.html#magnitudeVariation-prop">magnitudeVariation</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-targetdirection.html#proportionalMagnitude-prop">proportionalMagnitude</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-targetdirection.html#targetItem-prop">targetItem</a></b></b> : Item</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-targetdirection.html#targetVariation-prop">targetVariation</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-targetdirection.html#targetX-prop">targetX</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-targetdirection.html#targetY-prop">targetY</a></b></b> : real</li>
+</ul>
+<!-- $$$TargetDirection-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<!-- @@@TargetDirection -->
+<h2>Property Documentation</h2>
+<!-- $$$magnitude -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="magnitude-prop"></a><span class="name">magnitude</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"></div></div><!-- @@@magnitude -->
+<br/>
+<!-- $$$magnitudeVariation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="magnitudeVariation-prop"></a><span class="name">magnitudeVariation</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"></div></div><!-- @@@magnitudeVariation -->
+<br/>
+<!-- $$$proportionalMagnitude -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="proportionalMagnitude-prop"></a><span class="name">proportionalMagnitude</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If true, then the value of magnitude and <a href="qml-qtquick-particles-targetdirection.html#magnitudeVariation-prop">magnitudeVariation</a> shall be interpreted as multiples of the distance between the source point and the target point, per second.</p>
+<p>If false(default), then the value of magnitude and <a href="qml-qtquick-particles-targetdirection.html#magnitudeVariation-prop">magnitudeVariation</a> shall be interpreted as pixels per second.</p>
+</div></div><!-- @@@proportionalMagnitude -->
+<br/>
+<!-- $$$targetItem -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="targetItem-prop"></a><span class="name">targetItem</span> : <span class="type"><a href="qml-qtquick-item.html">Item</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If specified, this will take precedence over <a href="qml-qtquick-particles-targetdirection.html#targetX-prop">targetX</a> and <a href="qml-qtquick-particles-targetdirection.html#targetY-prop">targetY</a>. The targeted point will be the center of the specified Item</p>
+</div></div><!-- @@@targetItem -->
+<br/>
+<!-- $$$targetVariation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="targetVariation-prop"></a><span class="name">targetVariation</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"></div></div><!-- @@@targetVariation -->
+<br/>
+<!-- $$$targetX -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="targetX-prop"></a><span class="name">targetX</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"></div></div><!-- @@@targetX -->
+<br/>
+<!-- $$$targetY -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="targetY-prop"></a><span class="name">targetY</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"></div></div><!-- @@@targetY -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

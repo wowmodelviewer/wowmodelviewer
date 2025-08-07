@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qandroidactivityresultreceiver.cpp -->
+  <title>QAndroidActivityResultReceiver Class | Qt Android Extras 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtandroidextras-index.html">Qt Android Extras</a></td><td ><a href="qtandroidextras-module.html">C++ Classes</a></td><td >QAndroidActivityResultReceiver</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtandroidextras-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAndroidActivityResultReceiver Class</h1>
+<!-- $$$QAndroidActivityResultReceiver-brief -->
+<p>Interface used for callbacks from onActivityResult() in the main Android activity. <a href="#details">More...</a></p>
+<!-- @@@QAndroidActivityResultReceiver -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAndroidActivityResultReceiver&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += androidextras</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.3</td></tr></table></div><p>This class was introduced in  Qt 5.3.</p>
+<ul>
+<li><a href="qandroidactivityresultreceiver-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qandroidactivityresultreceiver.html#handleActivityResult">handleActivityResult</a></b>(int <i>receiverRequestCode</i>, int <i>resultCode</i>, const QAndroidJniObject &amp;<i>data</i>) = 0</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAndroidActivityResultReceiver-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Create a subclass of this class to be notified of the results when using the <code>QtAndroid::startActivity()</code> and <code>QtAndroid::startIntentSender()</code> APIs.</p>
+</div>
+<!-- @@@QAndroidActivityResultReceiver -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$handleActivityResult[overload1]$$$handleActivityResultintintconstQAndroidJniObject& -->
+<h3 class="fn" id="handleActivityResult"><a name="handleActivityResult"></a><code>[pure virtual] </code><span class="type">void</span> QAndroidActivityResultReceiver::<span class="name">handleActivityResult</span>(<span class="type">int</span> <i>receiverRequestCode</i>, <span class="type">int</span> <i>resultCode</i>, const <span class="type"><a href="qandroidjniobject.html">QAndroidJniObject</a></span> &amp;<i>data</i>)</h3>
+<p>Reimplement this function to get activity results after starting an activity using either <a href="qtandroid.html#startActivity">QtAndroid::startActivity</a>() or <a href="qtandroid.html#startIntentSender">QtAndroid::startIntentSender</a>(). The <i>receiverRequestCode</i> is the request code unique to this receiver which was originally passed to the startActivity() or startIntentSender() functions. The <i>resultCode</i> is the result returned by the activity, and <i>data</i> is either null or a Java object of the class android.content.Intent. Both the last to arguments are identical to the arguments passed to onActivityResult().</p>
+<!-- @@@handleActivityResult -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- tweetsearch.qdoc -->
+  <title>Qt Quick Demo - Tweet Search | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Qt Quick Demo - Tweet Search</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<h1 class="title">Qt Quick Demo - Tweet Search</h1>
+<span class="subtitle"></span>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2017 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.0
+  import &quot;tweetsearch.mjs&quot; as Helper
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">wrapper</span>
+
+      <span class="comment">// Insert valid consumer key and secret tokens below</span>
+      <span class="comment">// See https://dev.twitter.com/apps</span>
+      property <span class="type"><a href="../qtqml/qml-string.html">string</a></span> <span class="name">consumerKey</span> : <span class="string">&quot;&quot;</span>
+      property <span class="type"><a href="../qtqml/qml-string.html">string</a></span> <span class="name">consumerSecret</span> : <span class="string">&quot;&quot;</span>
+      property <span class="type"><a href="../qtqml/qml-string.html">string</a></span> <span class="name">bearerToken</span> : <span class="string">&quot;&quot;</span>
+
+      property <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span> <span class="name">model</span>: <span class="name">tweets</span>
+      property <span class="type"><a href="../qtqml/qml-string.html">string</a></span> <span class="name">from</span> : <span class="string">&quot;&quot;</span>
+      property <span class="type"><a href="../qtqml/qml-string.html">string</a></span> <span class="name">phrase</span> : <span class="string">&quot;&quot;</span>
+
+      signal <span class="type">isLoaded</span>
+
+      <span class="type"><a href="../qtqml/qml-qtqml-models-listmodel.html">ListModel</a></span> { <span class="name">id</span>: <span class="name">tweets</span> }
+
+      <span class="keyword">function</span> <span class="name">encodePhrase</span>(x) { <span class="keyword">return</span> <span class="name">encodeURIComponent</span>(<span class="name">x</span>); }
+
+      <span class="keyword">function</span> <span class="name">reload</span>() {
+          <span class="name">tweets</span>.<span class="name">clear</span>()
+
+          <span class="keyword">if</span> (<span class="name">from</span> <span class="operator">==</span> <span class="string">&quot;&quot;</span> <span class="operator">&amp;&amp;</span> <span class="name">phrase</span> <span class="operator">==</span> <span class="string">&quot;&quot;</span>)
+              <span class="keyword">return</span>;
+
+          var req = new <span class="name">XMLHttpRequest</span>;
+          <span class="name">req</span>.<span class="name">open</span>(<span class="string">&quot;GET&quot;</span>, <span class="string">&quot;https://api.twitter.com/1.1/search/tweets.json?from=&quot;</span> <span class="operator">+</span> <span class="name">from</span> <span class="operator">+</span>
+                          <span class="string">&quot;&amp;count=10&amp;q=&quot;</span> <span class="operator">+</span> <span class="name">encodePhrase</span>(<span class="name">phrase</span>));
+          <span class="name">req</span>.<span class="name">setRequestHeader</span>(<span class="string">&quot;Authorization&quot;</span>, <span class="string">&quot;Bearer &quot;</span> <span class="operator">+</span> <span class="name">bearerToken</span>);
+          <span class="name">req</span>.<span class="name">onload</span> <span class="operator">=</span> <span class="keyword">function</span>() {
+              var objectArray = <span class="name">JSON</span>.<span class="name">parse</span>(<span class="name">req</span>.<span class="name">responseText</span>);
+              <span class="keyword">if</span> (<span class="name">objectArray</span>.<span class="name">errors</span> <span class="operator">!==</span> <span class="name">undefined</span>) {
+                  <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Error fetching tweets: &quot;</span> <span class="operator">+</span> <span class="name">objectArray</span>.<span class="name">errors</span>[<span class="number">0</span>].<span class="name">message</span>)
+              } <span class="keyword">else</span> {
+                  <span class="keyword">for</span> (var key in <span class="name">objectArray</span>.<span class="name">statuses</span>) {
+                      var jsonObject = <span class="name">objectArray</span>.<span class="name">statuses</span>[<span class="name">key</span>];
+                      <span class="name">tweets</span>.<span class="name">append</span>(<span class="name">jsonObject</span>);
+                  }
+              }
+              <span class="name">wrapper</span>.<span class="name">isLoaded</span>()
+          }
+          <span class="name">req</span>.<span class="name">send</span>();
+      }
+
+      <span class="name">onPhraseChanged</span>: <span class="name">reload</span>();
+      <span class="name">onFromChanged</span>: <span class="name">reload</span>();
+
+      <span class="name">Component</span>.onCompleted: {
+          <span class="keyword">if</span> (<span class="name">consumerKey</span> <span class="operator">===</span> <span class="string">&quot;&quot;</span> <span class="operator">||</span> <span class="name">consumerSecret</span> <span class="operator">==</span> <span class="string">&quot;&quot;</span>) {
+              <span class="name">bearerToken</span> <span class="operator">=</span> <span class="name">encodeURIComponent</span>(<span class="name">Helper</span>.<span class="name">demoToken</span>())
+              <span class="keyword">return</span>;
+          }
+
+          var authReq = new <span class="name">XMLHttpRequest</span>;
+          <span class="name">authReq</span>.<span class="name">open</span>(<span class="string">&quot;POST&quot;</span>, <span class="string">&quot;https://api.twitter.com/oauth2/token&quot;</span>);
+          <span class="name">authReq</span>.<span class="name">setRequestHeader</span>(<span class="string">&quot;Content-Type&quot;</span>, <span class="string">&quot;application/x-www-form-urlencoded;charset=UTF-8&quot;</span>);
+          <span class="name">authReq</span>.<span class="name">setRequestHeader</span>(<span class="string">&quot;Authorization&quot;</span>, <span class="string">&quot;Basic &quot;</span> <span class="operator">+</span> <span class="name">Qt</span>.<span class="name">btoa</span>(<span class="name">consumerKey</span> <span class="operator">+</span> <span class="string">&quot;:&quot;</span> <span class="operator">+</span> <span class="name">consumerSecret</span>));
+          <span class="name">authReq</span>.<span class="name">onreadystatechange</span> <span class="operator">=</span> <span class="keyword">function</span>() {
+              <span class="keyword">if</span> (<span class="name">authReq</span>.<span class="name">readyState</span> <span class="operator">===</span> <span class="name">XMLHttpRequest</span>.<span class="name">DONE</span>) {
+                  var jsonResponse = <span class="name">JSON</span>.<span class="name">parse</span>(<span class="name">authReq</span>.<span class="name">responseText</span>);
+                  <span class="keyword">if</span> (<span class="name">jsonResponse</span>.<span class="name">errors</span> <span class="operator">!==</span> <span class="name">undefined</span>)
+                      <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Authentication error: &quot;</span> <span class="operator">+</span> <span class="name">jsonResponse</span>.<span class="name">errors</span>[<span class="number">0</span>].<span class="name">message</span>)
+                  <span class="keyword">else</span>
+                      <span class="name">bearerToken</span> <span class="operator">=</span> <span class="name">jsonResponse</span>.<span class="name">access_token</span>;
+              }
+          }
+          <span class="name">authReq</span>.<span class="name">send</span>(<span class="string">&quot;grant_type=client_credentials&quot;</span>);
+      }
+
+  }
+
+</pre>

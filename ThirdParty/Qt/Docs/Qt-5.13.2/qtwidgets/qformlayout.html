@@ -1,0 +1,617 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qformlayout.cpp -->
+  <title>QFormLayout Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QFormLayout</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QFormLayout Class</h1>
+<!-- $$$QFormLayout-brief -->
+<p>The <a href="qformlayout.html">QFormLayout</a> class manages forms of input widgets and their associated labels. <a href="#details">More...</a></p>
+<!-- @@@QFormLayout -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QFormLayout&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.4</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qlayout.html">QLayout</a></td></tr></table></div><p>This class was introduced in  Qt 4.4.</p>
+<ul>
+<li><a href="qformlayout-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qformlayout-takerowresult.html">TakeRowResult</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#FieldGrowthPolicy-enum">FieldGrowthPolicy</a></b> { FieldsStayAtSizeHint, ExpandingFieldsGrow, AllNonFixedFieldsGrow }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#ItemRole-enum">ItemRole</a></b> { LabelRole, FieldRole, SpanningRole }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#RowWrapPolicy-enum">RowWrapPolicy</a></b> { DontWrapRows, WrapLongRows, WrapAllRows }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qformlayout.html#fieldGrowthPolicy-prop">fieldGrowthPolicy</a></b> : FieldGrowthPolicy</li>
+<li class="fn"><b><a href="qformlayout.html#formAlignment-prop">formAlignment</a></b> : Qt::Alignment</li>
+<li class="fn"><b><a href="qformlayout.html#horizontalSpacing-prop">horizontalSpacing</a></b> : int</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qformlayout.html#labelAlignment-prop">labelAlignment</a></b> : Qt::Alignment</li>
+<li class="fn"><b><a href="qformlayout.html#rowWrapPolicy-prop">rowWrapPolicy</a></b> : RowWrapPolicy</li>
+<li class="fn"><b><a href="qformlayout.html#verticalSpacing-prop">verticalSpacing</a></b> : int</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#QFormLayout">QFormLayout</a></b>(QWidget *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#dtor.QFormLayout">~QFormLayout</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#addRow">addRow</a></b>(QWidget *<i>label</i>, QWidget *<i>field</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#addRow-1">addRow</a></b>(QWidget *<i>label</i>, QLayout *<i>field</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#addRow-2">addRow</a></b>(const QString &amp;<i>labelText</i>, QWidget *<i>field</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#addRow-3">addRow</a></b>(const QString &amp;<i>labelText</i>, QLayout *<i>field</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#addRow-4">addRow</a></b>(QWidget *<i>widget</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#addRow-5">addRow</a></b>(QLayout *<i>layout</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QFormLayout::FieldGrowthPolicy </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#fieldGrowthPolicy-prop">fieldGrowthPolicy</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::Alignment </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#formAlignment-prop">formAlignment</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#getItemPosition">getItemPosition</a></b>(int <i>index</i>, int *<i>rowPtr</i>, QFormLayout::ItemRole *<i>rolePtr</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#getLayoutPosition">getLayoutPosition</a></b>(QLayout *<i>layout</i>, int *<i>rowPtr</i>, QFormLayout::ItemRole *<i>rolePtr</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#getWidgetPosition">getWidgetPosition</a></b>(QWidget *<i>widget</i>, int *<i>rowPtr</i>, QFormLayout::ItemRole *<i>rolePtr</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#horizontalSpacing-prop">horizontalSpacing</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#insertRow">insertRow</a></b>(int <i>row</i>, QWidget *<i>label</i>, QWidget *<i>field</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#insertRow-1">insertRow</a></b>(int <i>row</i>, QWidget *<i>label</i>, QLayout *<i>field</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#insertRow-2">insertRow</a></b>(int <i>row</i>, const QString &amp;<i>labelText</i>, QWidget *<i>field</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#insertRow-3">insertRow</a></b>(int <i>row</i>, const QString &amp;<i>labelText</i>, QLayout *<i>field</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#insertRow-4">insertRow</a></b>(int <i>row</i>, QWidget *<i>widget</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#insertRow-5">insertRow</a></b>(int <i>row</i>, QLayout *<i>layout</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QLayoutItem *</td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#itemAt">itemAt</a></b>(int <i>row</i>, QFormLayout::ItemRole <i>role</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::Alignment </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#labelAlignment-prop">labelAlignment</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWidget *</td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#labelForField">labelForField</a></b>(QWidget *<i>field</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWidget *</td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#labelForField-1">labelForField</a></b>(QLayout *<i>field</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#removeRow">removeRow</a></b>(int <i>row</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#removeRow-1">removeRow</a></b>(QWidget *<i>widget</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#removeRow-2">removeRow</a></b>(QLayout *<i>layout</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#rowCount">rowCount</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QFormLayout::RowWrapPolicy </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#rowWrapPolicy-prop">rowWrapPolicy</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#fieldGrowthPolicy-prop">setFieldGrowthPolicy</a></b>(QFormLayout::FieldGrowthPolicy <i>policy</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#formAlignment-prop">setFormAlignment</a></b>(Qt::Alignment <i>alignment</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#horizontalSpacing-prop">setHorizontalSpacing</a></b>(int <i>spacing</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#setItem">setItem</a></b>(int <i>row</i>, QFormLayout::ItemRole <i>role</i>, QLayoutItem *<i>item</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#labelAlignment-prop">setLabelAlignment</a></b>(Qt::Alignment <i>alignment</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#setLayout">setLayout</a></b>(int <i>row</i>, QFormLayout::ItemRole <i>role</i>, QLayout *<i>layout</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#rowWrapPolicy-prop">setRowWrapPolicy</a></b>(QFormLayout::RowWrapPolicy <i>policy</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#setSpacing">setSpacing</a></b>(int <i>spacing</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#verticalSpacing-prop">setVerticalSpacing</a></b>(int <i>spacing</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#setWidget">setWidget</a></b>(int <i>row</i>, QFormLayout::ItemRole <i>role</i>, QWidget *<i>widget</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#spacing">spacing</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QFormLayout::TakeRowResult </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#takeRow">takeRow</a></b>(int <i>row</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QFormLayout::TakeRowResult </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#takeRow-1">takeRow</a></b>(QWidget *<i>widget</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QFormLayout::TakeRowResult </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#takeRow-2">takeRow</a></b>(QLayout *<i>layout</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#verticalSpacing-prop">verticalSpacing</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#addItem">addItem</a></b>(QLayoutItem *<i>item</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#count">count</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual Qt::Orientations </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#expandingDirections">expandingDirections</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#hasHeightForWidth">hasHeightForWidth</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#heightForWidth">heightForWidth</a></b>(int <i>width</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#invalidate">invalidate</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QLayoutItem *</td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#itemAt-1">itemAt</a></b>(int <i>index</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSize </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#minimumSize">minimumSize</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#setGeometry">setGeometry</a></b>(const QRect &amp;<i>rect</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSize </td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#sizeHint">sizeHint</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QLayoutItem *</td><td class="memItemRight bottomAlign"><b><a href="qformlayout.html#takeAt">takeAt</a></b>(int <i>index</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QFormLayout-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qformlayout.html">QFormLayout</a> is a convenience layout class that lays out its children in a two-column form. The left column consists of labels and the right column consists of &quot;field&quot; widgets (line editors, spin boxes, etc.)&#x2e;</p>
+<p>Traditionally, such two-column form layouts were achieved using <a href="qgridlayout.html">QGridLayout</a>. <a href="qformlayout.html">QFormLayout</a> is a higher-level alternative that provides the following advantages:</p>
+<ul>
+<li><b>Adherence to the different platform's look and feel guidelines.</b><p>For example, the <a href="http://developer.apple.com/library/mac/#documentation/UserExperience/Conceptual/AppleHIGuidelines/Intro/Intro.html">macOS Aqua</a> and KDE guidelines specify that the labels should be right-aligned, whereas Windows and GNOME applications normally use left-alignment.</p>
+</li>
+<li><b>Support for wrapping long rows.</b><p>For devices with small displays, <a href="qformlayout.html">QFormLayout</a> can be set to <a href="qformlayout.html#RowWrapPolicy-enum">wrap long rows</a>, or even to <a href="qformlayout.html#RowWrapPolicy-enum">wrap all rows</a>.</p>
+</li>
+<li><b>Convenient API for creating label--field pairs.</b><p>The <a href="qformlayout.html#addRow">addRow</a>() overload that takes a <a href="../qtcore/qstring.html">QString</a> and a <a href="qwidget.html">QWidget</a> * creates a <a href="qlabel.html">QLabel</a> behind the scenes and automatically set up its buddy. We can then write code like this:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qformlayout.html#QFormLayout">QFormLayout</a></span> <span class="operator">*</span>formLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qformlayout.html#QFormLayout">QFormLayout</a></span>;
+  formLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(tr(<span class="string">&quot;&amp;Name:&quot;</span>)<span class="operator">,</span> nameLineEdit);
+  formLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(tr(<span class="string">&quot;&amp;Email:&quot;</span>)<span class="operator">,</span> emailLineEdit);
+  formLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(tr(<span class="string">&quot;&amp;Age:&quot;</span>)<span class="operator">,</span> ageSpinBox);
+  setLayout(formLayout);
+
+</pre>
+<p>Compare this with the following code, written using <a href="qgridlayout.html">QGridLayout</a>:</p>
+<pre class="cpp">
+
+  nameLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;&amp;Name:&quot;</span>));
+  nameLabel<span class="operator">-</span><span class="operator">&gt;</span>setBuddy(nameLineEdit);
+
+  emailLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;&amp;Name:&quot;</span>));
+  emailLabel<span class="operator">-</span><span class="operator">&gt;</span>setBuddy(emailLineEdit);
+
+  ageLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;&amp;Name:&quot;</span>));
+  ageLabel<span class="operator">-</span><span class="operator">&gt;</span>setBuddy(ageSpinBox);
+
+  <span class="type"><a href="qgridlayout.html">QGridLayout</a></span> <span class="operator">*</span>gridLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>;
+  gridLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(nameLabel<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+  gridLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(nameLineEdit<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span>);
+  gridLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(emailLabel<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>);
+  gridLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(emailLineEdit<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span>);
+  gridLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(ageLabel<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">0</span>);
+  gridLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(ageSpinBox<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">1</span>);
+  setLayout(gridLayout);
+
+</pre>
+</li>
+</ul>
+<p>The table below shows the default appearance in different styles.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th ><a href="qcommonstyle.html">QCommonStyle</a> derived styles (except QPlastiqueStyle)</th><th >QMacStyle</th><th >QPlastiqueStyle</th><th >Qt Extended styles</th></tr></thead>
+<tr valign="top" class="odd"><td ><img src="images/qformlayout-win.png" alt="" /></td><td ><img src="images/qformlayout-mac.png" alt="" /></td><td ><img src="images/qformlayout-kde.png" alt="" /></td><td ><img src="images/qformlayout-qpe.png" alt="" /></td></tr>
+<tr valign="top" class="even"><td >Traditional style used for Windows, GNOME, and earlier versions of KDE. Labels are left aligned, and expanding fields grow to fill the available space. (This normally corresponds to what we would get using a two-column <a href="qgridlayout.html">QGridLayout</a>.)</td><td >Style based on the <a href="http://developer.apple.com/library/mac/#documentation/UserExperience/Conceptual/AppleHIGuidelines/Intro/Intro.html">macOS Aqua</a> guidelines. Labels are right-aligned, the fields don't grow beyond their size hint, and the form is horizontally centered.</td><td >Recommended style for <a href="http://www.kdedevelopers.org/node/2345">KDE applications</a>. Similar to MacStyle, except that the form is left-aligned and all fields grow to fill the available space.</td><td >Default style for Qt Extended styles. Labels are right-aligned, expanding fields grow to fill the available space, and row wrapping is enabled for long lines.</td></tr>
+</table></div>
+<p>The form styles can be also be overridden individually by calling <a href="qformlayout.html#labelAlignment-prop">setLabelAlignment</a>(), <a href="qformlayout.html#formAlignment-prop">setFormAlignment</a>(), <a href="qformlayout.html#fieldGrowthPolicy-prop">setFieldGrowthPolicy</a>(), and <a href="qformlayout.html#rowWrapPolicy-prop">setRowWrapPolicy</a>(). For example, to simulate the form layout appearance of QMacStyle on all platforms, but with left-aligned labels, you could write:</p>
+<pre class="cpp">
+
+  formLayout<span class="operator">-</span><span class="operator">&gt;</span>setRowWrapPolicy(<span class="type"><a href="qformlayout.html#QFormLayout">QFormLayout</a></span><span class="operator">::</span>DontWrapRows);
+  formLayout<span class="operator">-</span><span class="operator">&gt;</span>setFieldGrowthPolicy(<span class="type"><a href="qformlayout.html#QFormLayout">QFormLayout</a></span><span class="operator">::</span>FieldsStayAtSizeHint);
+  formLayout<span class="operator">-</span><span class="operator">&gt;</span>setFormAlignment(<span class="type">Qt</span><span class="operator">::</span>AlignHCenter <span class="operator">|</span> <span class="type">Qt</span><span class="operator">::</span>AlignTop);
+  formLayout<span class="operator">-</span><span class="operator">&gt;</span>setLabelAlignment(<span class="type">Qt</span><span class="operator">::</span>AlignLeft);
+
+</pre>
+</div>
+<p><b>See also </b><a href="qgridlayout.html">QGridLayout</a>, <a href="qboxlayout.html">QBoxLayout</a>, and <a href="qstackedlayout.html">QStackedLayout</a>.</p>
+<!-- @@@QFormLayout -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$FieldGrowthPolicy$$$FieldsStayAtSizeHint$$$ExpandingFieldsGrow$$$AllNonFixedFieldsGrow -->
+<h3 class="fn" id="FieldGrowthPolicy-enum"><a name="FieldGrowthPolicy-enum"></a>enum QFormLayout::<span class="name">FieldGrowthPolicy</span></h3>
+<p>This enum specifies the different policies that can be used to control the way in which the form's fields grow.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QFormLayout::FieldsStayAtSizeHint</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The fields never grow beyond their <a href="qwidgetitem.html#sizeHint">effective size hint</a>. This is the default for QMacStyle.</td></tr>
+<tr><td class="topAlign"><code>QFormLayout::ExpandingFieldsGrow</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Fields with an horizontal <a href="qsizepolicy.html">size policy</a> of <a href="qsizepolicy.html#Policy-enum">Expanding</a> or <a href="qsizepolicy.html#Policy-enum">MinimumExpanding</a> will grow to fill the available space. The other fields will not grow beyond their effective size hint. This is the default policy for Plastique.</td></tr>
+<tr><td class="topAlign"><code>QFormLayout::AllNonFixedFieldsGrow</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">All fields with a size policy that allows them to grow will grow to fill the available space. This is the default policy for most styles.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qformlayout.html#fieldGrowthPolicy-prop">fieldGrowthPolicy</a>.</p>
+<!-- @@@FieldGrowthPolicy -->
+<!-- $$$ItemRole$$$LabelRole$$$FieldRole$$$SpanningRole -->
+<h3 class="fn" id="ItemRole-enum"><a name="ItemRole-enum"></a>enum QFormLayout::<span class="name">ItemRole</span></h3>
+<p>This enum specifies the types of widgets (or other layout items) that may appear in a row.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QFormLayout::LabelRole</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">A label widget.</td></tr>
+<tr><td class="topAlign"><code>QFormLayout::FieldRole</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">A field widget.</td></tr>
+<tr><td class="topAlign"><code>QFormLayout::SpanningRole</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">A widget that spans label and field columns.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qformlayout.html#itemAt">itemAt</a>() and <a href="qformlayout.html#getItemPosition">getItemPosition</a>().</p>
+<!-- @@@ItemRole -->
+<!-- $$$RowWrapPolicy$$$DontWrapRows$$$WrapLongRows$$$WrapAllRows -->
+<h3 class="fn" id="RowWrapPolicy-enum"><a name="RowWrapPolicy-enum"></a>enum QFormLayout::<span class="name">RowWrapPolicy</span></h3>
+<p>This enum specifies the different policies that can be used to control the way in which the form's rows wrap.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QFormLayout::DontWrapRows</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Fields are always laid out next to their label. This is the default policy for all styles except Qt Extended styles.</td></tr>
+<tr><td class="topAlign"><code>QFormLayout::WrapLongRows</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Labels are given enough horizontal space to fit the widest label, and the rest of the space is given to the fields. If the minimum size of a field pair is wider than the available space, the field is wrapped to the next line. This is the default policy for Qt Extended styles.</td></tr>
+<tr><td class="topAlign"><code>QFormLayout::WrapAllRows</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Fields are always laid out below their label.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qformlayout.html#rowWrapPolicy-prop">rowWrapPolicy</a>.</p>
+<!-- @@@RowWrapPolicy -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$fieldGrowthPolicy-prop$$$fieldGrowthPolicy$$$setFieldGrowthPolicyQFormLayout::FieldGrowthPolicy -->
+<h3 class="fn" id="fieldGrowthPolicy-prop"><a name="fieldGrowthPolicy-prop"></a><span class="name">fieldGrowthPolicy</span> : <span class="type"><a href="qformlayout.html#FieldGrowthPolicy-enum">FieldGrowthPolicy</a></span></h3>
+<p>This property holds the way in which the form's fields grow</p>
+<p>The default value depends on the widget or application style. For QMacStyle, the default is <a href="qformlayout.html#FieldGrowthPolicy-enum">FieldsStayAtSizeHint</a>; for <a href="qcommonstyle.html">QCommonStyle</a> derived styles (like Plastique and Windows), the default is <a href="qformlayout.html#FieldGrowthPolicy-enum">ExpandingFieldsGrow</a>; for Qt Extended styles, the default is <a href="qformlayout.html#FieldGrowthPolicy-enum">AllNonFixedFieldsGrow</a>.</p>
+<p>If none of the fields can grow and the form is resized, extra space is distributed according to the current <a href="qformlayout.html#formAlignment-prop">form alignment</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QFormLayout::FieldGrowthPolicy </td><td class="memItemRight bottomAlign"><span class="name"><b>fieldGrowthPolicy</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setFieldGrowthPolicy</b></span>(QFormLayout::FieldGrowthPolicy <i>policy</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qformlayout.html#formAlignment-prop">formAlignment</a> and <a href="qformlayout.html#rowWrapPolicy-prop">rowWrapPolicy</a>.</p>
+<!-- @@@fieldGrowthPolicy -->
+<!-- $$$formAlignment-prop$$$formAlignment$$$setFormAlignmentQt::Alignment -->
+<h3 class="fn" id="formAlignment-prop"><a name="formAlignment-prop"></a><span class="name">formAlignment</span> : <span class="type"><a href="../qtcore/qt.html#AlignmentFlag-enum">Qt::Alignment</a></span></h3>
+<p>This property holds the alignment of the form layout's contents within the layout's geometry</p>
+<p>The default value depends on the widget or application style. For QMacStyle, the default is <a href="../qtcore/qt.html#AlignmentFlag-enum">Qt::AlignHCenter</a> | <a href="../qtcore/qt.html#AlignmentFlag-enum">Qt::AlignTop</a>; for the other styles, the default is <a href="../qtcore/qt.html#AlignmentFlag-enum">Qt::AlignLeft</a> | <a href="../qtcore/qt.html#AlignmentFlag-enum">Qt::AlignTop</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt::Alignment </td><td class="memItemRight bottomAlign"><span class="name"><b>formAlignment</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setFormAlignment</b></span>(Qt::Alignment <i>alignment</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qformlayout.html#labelAlignment-prop">labelAlignment</a> and <a href="qformlayout.html#rowWrapPolicy-prop">rowWrapPolicy</a>.</p>
+<!-- @@@formAlignment -->
+<!-- $$$horizontalSpacing-prop$$$horizontalSpacing$$$setHorizontalSpacingint -->
+<h3 class="fn" id="horizontalSpacing-prop"><a name="horizontalSpacing-prop"></a><span class="name">horizontalSpacing</span> : <span class="type">int</span></h3>
+<p>This property holds the spacing between widgets that are laid out side by side</p>
+<p>By default, if no value is explicitly set, the layout's horizontal spacing is inherited from the parent layout, or from the style settings for the parent widget.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>horizontalSpacing</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setHorizontalSpacing</b></span>(int <i>spacing</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qformlayout.html#verticalSpacing-prop">verticalSpacing</a>, <a href="qstyle.html#pixelMetric">QStyle::pixelMetric</a>(), and <a href="qstyle.html#PixelMetric-enum">PM_LayoutHorizontalSpacing</a>.</p>
+<!-- @@@horizontalSpacing -->
+<!-- $$$labelAlignment-prop$$$labelAlignment$$$setLabelAlignmentQt::Alignment -->
+<h3 class="fn" id="labelAlignment-prop"><a name="labelAlignment-prop"></a><span class="name">labelAlignment</span> : <span class="type"><a href="../qtcore/qt.html#AlignmentFlag-enum">Qt::Alignment</a></span></h3>
+<p>This property holds the horizontal alignment of the labels</p>
+<p>The default value depends on the widget or application style. For <a href="qcommonstyle.html">QCommonStyle</a> derived styles, except for QPlastiqueStyle, the default is <a href="../qtcore/qt.html#AlignmentFlag-enum">Qt::AlignLeft</a>; for the other styles, the default is <a href="../qtcore/qt.html#AlignmentFlag-enum">Qt::AlignRight</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt::Alignment </td><td class="memItemRight bottomAlign"><span class="name"><b>labelAlignment</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setLabelAlignment</b></span>(Qt::Alignment <i>alignment</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qformlayout.html#formAlignment-prop">formAlignment</a>.</p>
+<!-- @@@labelAlignment -->
+<!-- $$$rowWrapPolicy-prop$$$rowWrapPolicy$$$setRowWrapPolicyQFormLayout::RowWrapPolicy -->
+<h3 class="fn" id="rowWrapPolicy-prop"><a name="rowWrapPolicy-prop"></a><span class="name">rowWrapPolicy</span> : <span class="type"><a href="qformlayout.html#RowWrapPolicy-enum">RowWrapPolicy</a></span></h3>
+<p>This property holds the way in which the form's rows wrap</p>
+<p>The default value depends on the widget or application style. For Qt Extended styles, the default is <a href="qformlayout.html#RowWrapPolicy-enum">WrapLongRows</a>; for the other styles, the default is <a href="qformlayout.html#RowWrapPolicy-enum">DontWrapRows</a>.</p>
+<p>If you want to display each label above its associated field (instead of next to it), set this property to <a href="qformlayout.html#RowWrapPolicy-enum">WrapAllRows</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QFormLayout::RowWrapPolicy </td><td class="memItemRight bottomAlign"><span class="name"><b>rowWrapPolicy</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setRowWrapPolicy</b></span>(QFormLayout::RowWrapPolicy <i>policy</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qformlayout.html#fieldGrowthPolicy-prop">fieldGrowthPolicy</a>.</p>
+<!-- @@@rowWrapPolicy -->
+<!-- $$$verticalSpacing-prop$$$verticalSpacing$$$setVerticalSpacingint -->
+<h3 class="fn" id="verticalSpacing-prop"><a name="verticalSpacing-prop"></a><span class="name">verticalSpacing</span> : <span class="type">int</span></h3>
+<p>This property holds the spacing between widgets that are laid out vertically</p>
+<p>By default, if no value is explicitly set, the layout's vertical spacing is inherited from the parent layout, or from the style settings for the parent widget.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>verticalSpacing</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setVerticalSpacing</b></span>(int <i>spacing</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qformlayout.html#horizontalSpacing-prop">horizontalSpacing</a>, <a href="qstyle.html#pixelMetric">QStyle::pixelMetric</a>(), and <a href="qstyle.html#PixelMetric-enum">PM_LayoutHorizontalSpacing</a>.</p>
+<!-- @@@verticalSpacing -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QFormLayout[overload1]$$$QFormLayoutQWidget* -->
+<h3 class="fn" id="QFormLayout"><a name="QFormLayout"></a>QFormLayout::<span class="name">QFormLayout</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new form layout with the given <i>parent</i> widget.</p>
+<p><b>See also </b><a href="qwidget.html#setLayout">QWidget::setLayout</a>().</p>
+<!-- @@@QFormLayout -->
+<!-- $$$~QFormLayout[overload1]$$$~QFormLayout -->
+<h3 class="fn" id="dtor.QFormLayout"><a name="dtor.QFormLayout"></a><code>[virtual] </code>QFormLayout::<span class="name">~QFormLayout</span>()</h3>
+<p>Destroys the form layout.</p>
+<!-- @@@~QFormLayout -->
+<!-- $$$addItem[overload1]$$$addItemQLayoutItem* -->
+<h3 class="fn" id="addItem"><a name="addItem"></a><code>[override virtual] </code><span class="type">void</span> QFormLayout::<span class="name">addItem</span>(<span class="type"><a href="qlayoutitem.html#QLayoutItem">QLayoutItem</a></span> *<i>item</i>)</h3>
+<p>Reimplements: <a href="qlayout.html#addItem">QLayout::addItem</a>(QLayoutItem *item).</p>
+<!-- @@@addItem -->
+<!-- $$$addRow[overload1]$$$addRowQWidget*QWidget* -->
+<h3 class="fn" id="addRow"><a name="addRow"></a><span class="type">void</span> QFormLayout::<span class="name">addRow</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>label</i>, <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>field</i>)</h3>
+<p>Adds a new row to the bottom of this form layout, with the given <i>label</i> and <i>field</i>.</p>
+<p><b>See also </b><a href="qformlayout.html#insertRow">insertRow</a>().</p>
+<!-- @@@addRow -->
+<!-- $$$addRow$$$addRowQWidget*QLayout* -->
+<h3 class="fn" id="addRow-1"><a name="addRow-1"></a><span class="type">void</span> QFormLayout::<span class="name">addRow</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>label</i>, <span class="type"><a href="qlayout.html#QLayout">QLayout</a></span> *<i>field</i>)</h3>
+<p>This is an overloaded function.</p>
+<!-- @@@addRow -->
+<!-- $$$addRow$$$addRowconstQString&QWidget* -->
+<h3 class="fn" id="addRow-2"><a name="addRow-2"></a><span class="type">void</span> QFormLayout::<span class="name">addRow</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>labelText</i>, <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>field</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>This overload automatically creates a <a href="qlabel.html">QLabel</a> behind the scenes with <i>labelText</i> as its text. The <i>field</i> is set as the new <a href="qlabel.html">QLabel</a>'s <a href="qlabel.html#setBuddy">buddy</a>.</p>
+<!-- @@@addRow -->
+<!-- $$$addRow$$$addRowconstQString&QLayout* -->
+<h3 class="fn" id="addRow-3"><a name="addRow-3"></a><span class="type">void</span> QFormLayout::<span class="name">addRow</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>labelText</i>, <span class="type"><a href="qlayout.html#QLayout">QLayout</a></span> *<i>field</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>This overload automatically creates a <a href="qlabel.html">QLabel</a> behind the scenes with <i>labelText</i> as its text.</p>
+<!-- @@@addRow -->
+<!-- $$$addRow$$$addRowQWidget* -->
+<h3 class="fn" id="addRow-4"><a name="addRow-4"></a><span class="type">void</span> QFormLayout::<span class="name">addRow</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Adds the specified <i>widget</i> at the end of this form layout. The <i>widget</i> spans both columns.</p>
+<!-- @@@addRow -->
+<!-- $$$addRow$$$addRowQLayout* -->
+<h3 class="fn" id="addRow-5"><a name="addRow-5"></a><span class="type">void</span> QFormLayout::<span class="name">addRow</span>(<span class="type"><a href="qlayout.html#QLayout">QLayout</a></span> *<i>layout</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Adds the specified <i>layout</i> at the end of this form layout. The <i>layout</i> spans both columns.</p>
+<!-- @@@addRow -->
+<!-- $$$count[overload1]$$$count -->
+<h3 class="fn" id="count"><a name="count"></a><code>[override virtual] </code><span class="type">int</span> QFormLayout::<span class="name">count</span>() const</h3>
+<p>Reimplements: <a href="qlayout.html#count">QLayout::count</a>() const.</p>
+<!-- @@@count -->
+<!-- $$$expandingDirections[overload1]$$$expandingDirections -->
+<h3 class="fn" id="expandingDirections"><a name="expandingDirections"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qt.html#Orientation-enum">Qt::Orientations</a></span> QFormLayout::<span class="name">expandingDirections</span>() const</h3>
+<p>Reimplements: <a href="qlayout.html#expandingDirections">QLayout::expandingDirections</a>() const.</p>
+<!-- @@@expandingDirections -->
+<!-- $$$getItemPosition[overload1]$$$getItemPositionintint*QFormLayout::ItemRole* -->
+<h3 class="fn" id="getItemPosition"><a name="getItemPosition"></a><span class="type">void</span> QFormLayout::<span class="name">getItemPosition</span>(<span class="type">int</span> <i>index</i>, <span class="type">int</span> *<i>rowPtr</i>, <span class="type"><a href="qformlayout.html#ItemRole-enum">QFormLayout::ItemRole</a></span> *<i>rolePtr</i>) const</h3>
+<p>Retrieves the row and role (column) of the item at the specified <i>index</i>. If <i>index</i> is out of bounds, *<i>rowPtr</i> is set to -1; otherwise the row is stored in *<i>rowPtr</i> and the role is stored in *<i>rolePtr</i>.</p>
+<p><b>See also </b><a href="qformlayout.html#itemAt">itemAt</a>(), <a href="qformlayout.html#count">count</a>(), <a href="qformlayout.html#getLayoutPosition">getLayoutPosition</a>(), and <a href="qformlayout.html#getWidgetPosition">getWidgetPosition</a>().</p>
+<!-- @@@getItemPosition -->
+<!-- $$$getLayoutPosition[overload1]$$$getLayoutPositionQLayout*int*QFormLayout::ItemRole* -->
+<h3 class="fn" id="getLayoutPosition"><a name="getLayoutPosition"></a><span class="type">void</span> QFormLayout::<span class="name">getLayoutPosition</span>(<span class="type"><a href="qlayout.html#QLayout">QLayout</a></span> *<i>layout</i>, <span class="type">int</span> *<i>rowPtr</i>, <span class="type"><a href="qformlayout.html#ItemRole-enum">QFormLayout::ItemRole</a></span> *<i>rolePtr</i>) const</h3>
+<p>Retrieves the row and role (column) of the specified child <i>layout</i>. If <i>layout</i> is not in the form layout, *<i>rowPtr</i> is set to -1; otherwise the row is stored in *<i>rowPtr</i> and the role is stored in *<i>rolePtr</i>.</p>
+<!-- @@@getLayoutPosition -->
+<!-- $$$getWidgetPosition[overload1]$$$getWidgetPositionQWidget*int*QFormLayout::ItemRole* -->
+<h3 class="fn" id="getWidgetPosition"><a name="getWidgetPosition"></a><span class="type">void</span> QFormLayout::<span class="name">getWidgetPosition</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i>, <span class="type">int</span> *<i>rowPtr</i>, <span class="type"><a href="qformlayout.html#ItemRole-enum">QFormLayout::ItemRole</a></span> *<i>rolePtr</i>) const</h3>
+<p>Retrieves the row and role (column) of the specified <i>widget</i> in the layout. If <i>widget</i> is not in the layout, *<i>rowPtr</i> is set to -1; otherwise the row is stored in *<i>rowPtr</i> and the role is stored in *<i>rolePtr</i>.</p>
+<p><b>See also </b><a href="qformlayout.html#getItemPosition">getItemPosition</a>() and <a href="qformlayout.html#itemAt">itemAt</a>().</p>
+<!-- @@@getWidgetPosition -->
+<!-- $$$hasHeightForWidth[overload1]$$$hasHeightForWidth -->
+<h3 class="fn" id="hasHeightForWidth"><a name="hasHeightForWidth"></a><code>[override virtual] </code><span class="type">bool</span> QFormLayout::<span class="name">hasHeightForWidth</span>() const</h3>
+<p>Reimplements: <a href="qlayoutitem.html#hasHeightForWidth">QLayoutItem::hasHeightForWidth</a>() const.</p>
+<!-- @@@hasHeightForWidth -->
+<!-- $$$heightForWidth[overload1]$$$heightForWidthint -->
+<h3 class="fn" id="heightForWidth"><a name="heightForWidth"></a><code>[override virtual] </code><span class="type">int</span> QFormLayout::<span class="name">heightForWidth</span>(<span class="type">int</span> <i>width</i>) const</h3>
+<p>Reimplements: <a href="qlayoutitem.html#heightForWidth">QLayoutItem::heightForWidth</a>(int ) const.</p>
+<!-- @@@heightForWidth -->
+<!-- $$$insertRow[overload1]$$$insertRowintQWidget*QWidget* -->
+<h3 class="fn" id="insertRow"><a name="insertRow"></a><span class="type">void</span> QFormLayout::<span class="name">insertRow</span>(<span class="type">int</span> <i>row</i>, <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>label</i>, <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>field</i>)</h3>
+<p>Inserts a new row at position <i>row</i> in this form layout, with the given <i>label</i> and <i>field</i>. If <i>row</i> is out of bounds, the new row is added at the end.</p>
+<p><b>See also </b><a href="qformlayout.html#addRow">addRow</a>().</p>
+<!-- @@@insertRow -->
+<!-- $$$insertRow$$$insertRowintQWidget*QLayout* -->
+<h3 class="fn" id="insertRow-1"><a name="insertRow-1"></a><span class="type">void</span> QFormLayout::<span class="name">insertRow</span>(<span class="type">int</span> <i>row</i>, <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>label</i>, <span class="type"><a href="qlayout.html#QLayout">QLayout</a></span> *<i>field</i>)</h3>
+<p>This is an overloaded function.</p>
+<!-- @@@insertRow -->
+<!-- $$$insertRow$$$insertRowintconstQString&QWidget* -->
+<h3 class="fn" id="insertRow-2"><a name="insertRow-2"></a><span class="type">void</span> QFormLayout::<span class="name">insertRow</span>(<span class="type">int</span> <i>row</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>labelText</i>, <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>field</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>This overload automatically creates a <a href="qlabel.html">QLabel</a> behind the scenes with <i>labelText</i> as its text. The <i>field</i> is set as the new <a href="qlabel.html">QLabel</a>'s <a href="qlabel.html#setBuddy">buddy</a>.</p>
+<!-- @@@insertRow -->
+<!-- $$$insertRow$$$insertRowintconstQString&QLayout* -->
+<h3 class="fn" id="insertRow-3"><a name="insertRow-3"></a><span class="type">void</span> QFormLayout::<span class="name">insertRow</span>(<span class="type">int</span> <i>row</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>labelText</i>, <span class="type"><a href="qlayout.html#QLayout">QLayout</a></span> *<i>field</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>This overload automatically creates a <a href="qlabel.html">QLabel</a> behind the scenes with <i>labelText</i> as its text.</p>
+<!-- @@@insertRow -->
+<!-- $$$insertRow$$$insertRowintQWidget* -->
+<h3 class="fn" id="insertRow-4"><a name="insertRow-4"></a><span class="type">void</span> QFormLayout::<span class="name">insertRow</span>(<span class="type">int</span> <i>row</i>, <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Inserts the specified <i>widget</i> at position <i>row</i> in this form layout. The <i>widget</i> spans both columns. If <i>row</i> is out of bounds, the widget is added at the end.</p>
+<!-- @@@insertRow -->
+<!-- $$$insertRow$$$insertRowintQLayout* -->
+<h3 class="fn" id="insertRow-5"><a name="insertRow-5"></a><span class="type">void</span> QFormLayout::<span class="name">insertRow</span>(<span class="type">int</span> <i>row</i>, <span class="type"><a href="qlayout.html#QLayout">QLayout</a></span> *<i>layout</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Inserts the specified <i>layout</i> at position <i>row</i> in this form layout. The <i>layout</i> spans both columns. If <i>row</i> is out of bounds, the widget is added at the end.</p>
+<!-- @@@insertRow -->
+<!-- $$$invalidate[overload1]$$$invalidate -->
+<h3 class="fn" id="invalidate"><a name="invalidate"></a><code>[override virtual] </code><span class="type">void</span> QFormLayout::<span class="name">invalidate</span>()</h3>
+<p>Reimplements: <a href="qlayout.html#invalidate">QLayout::invalidate</a>().</p>
+<!-- @@@invalidate -->
+<!-- $$$itemAt[overload1]$$$itemAtintQFormLayout::ItemRole -->
+<h3 class="fn" id="itemAt"><a name="itemAt"></a><span class="type"><a href="qlayoutitem.html#QLayoutItem">QLayoutItem</a></span> *QFormLayout::<span class="name">itemAt</span>(<span class="type">int</span> <i>row</i>, <span class="type"><a href="qformlayout.html#ItemRole-enum">QFormLayout::ItemRole</a></span> <i>role</i>) const</h3>
+<p>Returns the layout item in the given <i>row</i> with the specified <i>role</i> (column). Returns <code>nullptr</code> if there is no such item.</p>
+<p><b>See also </b><a href="qlayout.html#itemAt">QLayout::itemAt</a>() and <a href="qformlayout.html#setItem">setItem</a>().</p>
+<!-- @@@itemAt -->
+<!-- $$$itemAt$$$itemAtint -->
+<h3 class="fn" id="itemAt-1"><a name="itemAt-1"></a><code>[override virtual] </code><span class="type"><a href="qlayoutitem.html#QLayoutItem">QLayoutItem</a></span> *QFormLayout::<span class="name">itemAt</span>(<span class="type">int</span> <i>index</i>) const</h3>
+<p>Reimplements: <a href="qlayout.html#itemAt">QLayout::itemAt</a>(int index) const.</p>
+<!-- @@@itemAt -->
+<!-- $$$labelForField[overload1]$$$labelForFieldQWidget* -->
+<h3 class="fn" id="labelForField"><a name="labelForField"></a><span class="type"><a href="qwidget.html">QWidget</a></span> *QFormLayout::<span class="name">labelForField</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>field</i>) const</h3>
+<p>Returns the label associated with the given <i>field</i>.</p>
+<p><b>See also </b><a href="qformlayout.html#itemAt">itemAt</a>().</p>
+<!-- @@@labelForField -->
+<!-- $$$labelForField$$$labelForFieldQLayout* -->
+<h3 class="fn" id="labelForField-1"><a name="labelForField-1"></a><span class="type"><a href="qwidget.html">QWidget</a></span> *QFormLayout::<span class="name">labelForField</span>(<span class="type"><a href="qlayout.html#QLayout">QLayout</a></span> *<i>field</i>) const</h3>
+<p>This is an overloaded function.</p>
+<!-- @@@labelForField -->
+<!-- $$$minimumSize[overload1]$$$minimumSize -->
+<h3 class="fn" id="minimumSize"><a name="minimumSize"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QFormLayout::<span class="name">minimumSize</span>() const</h3>
+<p>Reimplements: <a href="qlayout.html#minimumSize">QLayout::minimumSize</a>() const.</p>
+<!-- @@@minimumSize -->
+<!-- $$$removeRow[overload1]$$$removeRowint -->
+<h3 class="fn" id="removeRow"><a name="removeRow"></a><span class="type">void</span> QFormLayout::<span class="name">removeRow</span>(<span class="type">int</span> <i>row</i>)</h3>
+<p>Deletes row <i>row</i> from this form layout.</p>
+<p><i>row</i> must be non-negative and less than <a href="qformlayout.html#rowCount">rowCount</a>().</p>
+<p>After this call, <a href="qformlayout.html#rowCount">rowCount</a>() is decremented by one. All widgets and nested layouts that occupied this row are deleted. That includes both the field widget(s) and the label, if any. All following rows are shifted up one row and the freed vertical space is redistributed amongst the remaining rows.</p>
+<p>You can use this function to undo a previous <a href="qformlayout.html#addRow">addRow</a>() or <a href="qformlayout.html#insertRow">insertRow</a>():</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qformlayout.html#QFormLayout">QFormLayout</a></span> <span class="operator">*</span>flay <span class="operator">=</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>;
+  <span class="type"><a href="../qtcore/qpointer.html">QPointer</a></span><span class="operator">&lt;</span><span class="type"><a href="qlineedit.html">QLineEdit</a></span><span class="operator">&gt;</span> le <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlineedit.html">QLineEdit</a></span>;
+  flay<span class="operator">-</span><span class="operator">&gt;</span>insertRow(<span class="number">2</span><span class="operator">,</span> <span class="string">&quot;User:&quot;</span><span class="operator">,</span> le);
+  <span class="comment">// later:</span>
+  flay<span class="operator">-</span><span class="operator">&gt;</span>removeRow(<span class="number">2</span>); <span class="comment">// le == nullptr at this point</span>
+
+</pre>
+<p>If you want to remove the row from the layout without deleting the widgets, use <a href="qformlayout.html#takeRow">takeRow</a>() instead.</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<p><b>See also </b><a href="qformlayout.html#takeRow">takeRow</a>().</p>
+<!-- @@@removeRow -->
+<!-- $$$removeRow$$$removeRowQWidget* -->
+<h3 class="fn" id="removeRow-1"><a name="removeRow-1"></a><span class="type">void</span> QFormLayout::<span class="name">removeRow</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Deletes the row corresponding to <i>widget</i> from this form layout.</p>
+<p>After this call, <a href="qformlayout.html#rowCount">rowCount</a>() is decremented by one. All widgets and nested layouts that occupied this row are deleted. That includes both the field widget(s) and the label, if any. All following rows are shifted up one row and the freed vertical space is redistributed amongst the remaining rows.</p>
+<p>You can use this function to undo a previous <a href="qformlayout.html#addRow">addRow</a>() or <a href="qformlayout.html#insertRow">insertRow</a>():</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qformlayout.html#QFormLayout">QFormLayout</a></span> <span class="operator">*</span>flay <span class="operator">=</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>;
+  <span class="type"><a href="../qtcore/qpointer.html">QPointer</a></span><span class="operator">&lt;</span><span class="type"><a href="qlineedit.html">QLineEdit</a></span><span class="operator">&gt;</span> le <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlineedit.html">QLineEdit</a></span>;
+  flay<span class="operator">-</span><span class="operator">&gt;</span>insertRow(<span class="number">2</span><span class="operator">,</span> <span class="string">&quot;User:&quot;</span><span class="operator">,</span> le);
+  <span class="comment">// later:</span>
+  flay<span class="operator">-</span><span class="operator">&gt;</span>removeRow(le); <span class="comment">// le == nullptr at this point</span>
+
+</pre>
+<p>If you want to remove the row from the layout without deleting the widgets, use <a href="qformlayout.html#takeRow">takeRow</a>() instead.</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<p><b>See also </b><a href="qformlayout.html#takeRow">takeRow</a>().</p>
+<!-- @@@removeRow -->
+<!-- $$$removeRow$$$removeRowQLayout* -->
+<h3 class="fn" id="removeRow-2"><a name="removeRow-2"></a><span class="type">void</span> QFormLayout::<span class="name">removeRow</span>(<span class="type"><a href="qlayout.html#QLayout">QLayout</a></span> *<i>layout</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Deletes the row corresponding to <i>layout</i> from this form layout.</p>
+<p>After this call, <a href="qformlayout.html#rowCount">rowCount</a>() is decremented by one. All widgets and nested layouts that occupied this row are deleted. That includes both the field widget(s) and the label, if any. All following rows are shifted up one row and the freed vertical space is redistributed amongst the remaining rows.</p>
+<p>You can use this function to undo a previous <a href="qformlayout.html#addRow">addRow</a>() or <a href="qformlayout.html#insertRow">insertRow</a>():</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qformlayout.html#QFormLayout">QFormLayout</a></span> <span class="operator">*</span>flay <span class="operator">=</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>;
+  <span class="type"><a href="../qtcore/qpointer.html">QPointer</a></span><span class="operator">&lt;</span><span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span><span class="operator">&gt;</span> vbl <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+  flay<span class="operator">-</span><span class="operator">&gt;</span>insertRow(<span class="number">2</span><span class="operator">,</span> <span class="string">&quot;User:&quot;</span><span class="operator">,</span> vbl);
+  <span class="comment">// later:</span>
+  flay<span class="operator">-</span><span class="operator">&gt;</span>removeRow(layout); <span class="comment">// vbl == nullptr at this point</span>
+
+</pre>
+<p>If you want to remove the row from the form layout without deleting the inserted layout, use <a href="qformlayout.html#takeRow">takeRow</a>() instead.</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<p><b>See also </b><a href="qformlayout.html#takeRow">takeRow</a>().</p>
+<!-- @@@removeRow -->
+<!-- $$$rowCount[overload1]$$$rowCount -->
+<h3 class="fn" id="rowCount"><a name="rowCount"></a><span class="type">int</span> QFormLayout::<span class="name">rowCount</span>() const</h3>
+<p>Returns the number of rows in the form.</p>
+<p><b>See also </b><a href="qlayout.html#count">QLayout::count</a>().</p>
+<!-- @@@rowCount -->
+<!-- $$$setGeometry[overload1]$$$setGeometryconstQRect& -->
+<h3 class="fn" id="setGeometry"><a name="setGeometry"></a><code>[override virtual] </code><span class="type">void</span> QFormLayout::<span class="name">setGeometry</span>(const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> &amp;<i>rect</i>)</h3>
+<p>Reimplements: <a href="qlayout.html#setGeometry">QLayout::setGeometry</a>(const QRect &amp;r).</p>
+<!-- @@@setGeometry -->
+<!-- $$$setItem[overload1]$$$setItemintQFormLayout::ItemRoleQLayoutItem* -->
+<h3 class="fn" id="setItem"><a name="setItem"></a><span class="type">void</span> QFormLayout::<span class="name">setItem</span>(<span class="type">int</span> <i>row</i>, <span class="type"><a href="qformlayout.html#ItemRole-enum">QFormLayout::ItemRole</a></span> <i>role</i>, <span class="type"><a href="qlayoutitem.html#QLayoutItem">QLayoutItem</a></span> *<i>item</i>)</h3>
+<p>Sets the item in the given <i>row</i> for the given <i>role</i> to <i>item</i>, extending the layout with empty rows if necessary.</p>
+<p>If the cell is already occupied, the <i>item</i> is not inserted and an error message is sent to the console. The <i>item</i> spans both columns.</p>
+<p><b>Warning:</b> Do not use this function to add child layouts or child widget items. Use <a href="qformlayout.html#setLayout">setLayout</a>() or <a href="qformlayout.html#setWidget">setWidget</a>() instead.</p>
+<p><b>See also </b><a href="qformlayout.html#setLayout">setLayout</a>().</p>
+<!-- @@@setItem -->
+<!-- $$$setLayout[overload1]$$$setLayoutintQFormLayout::ItemRoleQLayout* -->
+<h3 class="fn" id="setLayout"><a name="setLayout"></a><span class="type">void</span> QFormLayout::<span class="name">setLayout</span>(<span class="type">int</span> <i>row</i>, <span class="type"><a href="qformlayout.html#ItemRole-enum">QFormLayout::ItemRole</a></span> <i>role</i>, <span class="type"><a href="qlayout.html#QLayout">QLayout</a></span> *<i>layout</i>)</h3>
+<p>Sets the sub-layout in the given <i>row</i> for the given <i>role</i> to <i>layout</i>, extending the form layout with empty rows if necessary.</p>
+<p>If the cell is already occupied, the <i>layout</i> is not inserted and an error message is sent to the console.</p>
+<p><b>Note:</b> For most applications, <a href="qformlayout.html#addRow">addRow</a>() or <a href="qformlayout.html#insertRow">insertRow</a>() should be used instead of setLayout().</p>
+<p><b>See also </b><a href="qformlayout.html#setWidget">setWidget</a>().</p>
+<!-- @@@setLayout -->
+<!-- $$$setSpacing[overload1]$$$setSpacingint -->
+<h3 class="fn" id="setSpacing"><a name="setSpacing"></a><span class="type">void</span> QFormLayout::<span class="name">setSpacing</span>(<span class="type">int</span> <i>spacing</i>)</h3>
+<p>This function sets both the vertical and horizontal spacing to <i>spacing</i>.</p>
+<p><b>See also </b><a href="qformlayout.html#spacing">spacing</a>(), <a href="qformlayout.html#verticalSpacing-prop">setVerticalSpacing</a>(), and <a href="qformlayout.html#horizontalSpacing-prop">setHorizontalSpacing</a>().</p>
+<!-- @@@setSpacing -->
+<!-- $$$setWidget[overload1]$$$setWidgetintQFormLayout::ItemRoleQWidget* -->
+<h3 class="fn" id="setWidget"><a name="setWidget"></a><span class="type">void</span> QFormLayout::<span class="name">setWidget</span>(<span class="type">int</span> <i>row</i>, <span class="type"><a href="qformlayout.html#ItemRole-enum">QFormLayout::ItemRole</a></span> <i>role</i>, <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i>)</h3>
+<p>Sets the widget in the given <i>row</i> for the given <i>role</i> to <i>widget</i>, extending the layout with empty rows if necessary.</p>
+<p>If the cell is already occupied, the <i>widget</i> is not inserted and an error message is sent to the console.</p>
+<p><b>Note:</b> For most applications, <a href="qformlayout.html#addRow">addRow</a>() or <a href="qformlayout.html#insertRow">insertRow</a>() should be used instead of setWidget().</p>
+<p><b>See also </b><a href="qformlayout.html#setLayout">setLayout</a>().</p>
+<!-- @@@setWidget -->
+<!-- $$$sizeHint[overload1]$$$sizeHint -->
+<h3 class="fn" id="sizeHint"><a name="sizeHint"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QFormLayout::<span class="name">sizeHint</span>() const</h3>
+<p>Reimplements: <a href="qlayoutitem.html#sizeHint">QLayoutItem::sizeHint</a>() const.</p>
+<!-- @@@sizeHint -->
+<!-- $$$spacing[overload1]$$$spacing -->
+<h3 class="fn" id="spacing"><a name="spacing"></a><span class="type">int</span> QFormLayout::<span class="name">spacing</span>() const</h3>
+<p>If the vertical spacing is equal to the horizontal spacing, this function returns that value; otherwise it returns -1.</p>
+<p><b>See also </b><a href="qformlayout.html#setSpacing">setSpacing</a>(), <a href="qformlayout.html#verticalSpacing-prop">verticalSpacing</a>(), and <a href="qformlayout.html#horizontalSpacing-prop">horizontalSpacing</a>().</p>
+<!-- @@@spacing -->
+<!-- $$$takeAt[overload1]$$$takeAtint -->
+<h3 class="fn" id="takeAt"><a name="takeAt"></a><code>[override virtual] </code><span class="type"><a href="qlayoutitem.html#QLayoutItem">QLayoutItem</a></span> *QFormLayout::<span class="name">takeAt</span>(<span class="type">int</span> <i>index</i>)</h3>
+<p>Reimplements: <a href="qlayout.html#takeAt">QLayout::takeAt</a>(int index).</p>
+<!-- @@@takeAt -->
+<!-- $$$takeRow[overload1]$$$takeRowint -->
+<h3 class="fn" id="takeRow"><a name="takeRow"></a><span class="type"><a href="qformlayout-takerowresult.html">QFormLayout::TakeRowResult</a></span> QFormLayout::<span class="name">takeRow</span>(<span class="type">int</span> <i>row</i>)</h3>
+<p>Removes the specified <i>row</i> from this form layout.</p>
+<p><i>row</i> must be non-negative and less than <a href="qformlayout.html#rowCount">rowCount</a>().</p>
+<p><b>Note: </b>This function doesn't delete anything.</p><p>After this call, <a href="qformlayout.html#rowCount">rowCount</a>() is decremented by one. All following rows are shifted up one row and the freed vertical space is redistributed amongst the remaining rows.</p>
+<p>You can use this function to undo a previous <a href="qformlayout.html#addRow">addRow</a>() or <a href="qformlayout.html#insertRow">insertRow</a>():</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qformlayout.html#QFormLayout">QFormLayout</a></span> <span class="operator">*</span>flay <span class="operator">=</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>;
+  <span class="type"><a href="../qtcore/qpointer.html">QPointer</a></span><span class="operator">&lt;</span><span class="type"><a href="qlineedit.html">QLineEdit</a></span><span class="operator">&gt;</span> le <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlineedit.html">QLineEdit</a></span>;
+  flay<span class="operator">-</span><span class="operator">&gt;</span>insertRow(<span class="number">2</span><span class="operator">,</span> <span class="string">&quot;User:&quot;</span><span class="operator">,</span> le);
+  <span class="comment">// later:</span>
+  <span class="type"><a href="qformlayout.html#QFormLayout">QFormLayout</a></span><span class="operator">::</span>TakeRowResult result <span class="operator">=</span> flay<span class="operator">-</span><span class="operator">&gt;</span>takeRow(<span class="number">2</span>);
+
+</pre>
+<p>If you want to remove the row from the layout and delete the widgets, use <a href="qformlayout.html#removeRow">removeRow</a>() instead.</p>
+<p>Returns A structure containing both the widget and corresponding label layout items</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<p><b>See also </b><a href="qformlayout.html#removeRow">removeRow</a>().</p>
+<!-- @@@takeRow -->
+<!-- $$$takeRow$$$takeRowQWidget* -->
+<h3 class="fn" id="takeRow-1"><a name="takeRow-1"></a><span class="type"><a href="qformlayout-takerowresult.html">QFormLayout::TakeRowResult</a></span> QFormLayout::<span class="name">takeRow</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Removes the specified <i>widget</i> from this form layout.</p>
+<p><b>Note: </b>This function doesn't delete anything.</p><p>After this call, <a href="qformlayout.html#rowCount">rowCount</a>() is decremented by one. All following rows are shifted up one row and the freed vertical space is redistributed amongst the remaining rows.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qformlayout.html#QFormLayout">QFormLayout</a></span> <span class="operator">*</span>flay <span class="operator">=</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>;
+  <span class="type"><a href="../qtcore/qpointer.html">QPointer</a></span><span class="operator">&lt;</span><span class="type"><a href="qlineedit.html">QLineEdit</a></span><span class="operator">&gt;</span> le <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlineedit.html">QLineEdit</a></span>;
+  flay<span class="operator">-</span><span class="operator">&gt;</span>insertRow(<span class="number">2</span><span class="operator">,</span> <span class="string">&quot;User:&quot;</span><span class="operator">,</span> le);
+  <span class="comment">// later:</span>
+  <span class="type"><a href="qformlayout.html#QFormLayout">QFormLayout</a></span><span class="operator">::</span>TakeRowResult result <span class="operator">=</span> flay<span class="operator">-</span><span class="operator">&gt;</span>takeRow(widget);
+
+</pre>
+<p>If you want to remove the row from the layout and delete the widgets, use <a href="qformlayout.html#removeRow">removeRow</a>() instead.</p>
+<p>Returns A structure containing both the widget and corresponding label layout items</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<p><b>See also </b><a href="qformlayout.html#removeRow">removeRow</a>().</p>
+<!-- @@@takeRow -->
+<!-- $$$takeRow$$$takeRowQLayout* -->
+<h3 class="fn" id="takeRow-2"><a name="takeRow-2"></a><span class="type"><a href="qformlayout-takerowresult.html">QFormLayout::TakeRowResult</a></span> QFormLayout::<span class="name">takeRow</span>(<span class="type"><a href="qlayout.html#QLayout">QLayout</a></span> *<i>layout</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Removes the specified <i>layout</i> from this form layout.</p>
+<p><b>Note: </b>This function doesn't delete anything.</p><p>After this call, <a href="qformlayout.html#rowCount">rowCount</a>() is decremented by one. All following rows are shifted up one row and the freed vertical space is redistributed amongst the remaining rows.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qformlayout.html#QFormLayout">QFormLayout</a></span> <span class="operator">*</span>flay <span class="operator">=</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>;
+  <span class="type"><a href="../qtcore/qpointer.html">QPointer</a></span><span class="operator">&lt;</span><span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span><span class="operator">&gt;</span> vbl <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+  flay<span class="operator">-</span><span class="operator">&gt;</span>insertRow(<span class="number">2</span><span class="operator">,</span> <span class="string">&quot;User:&quot;</span><span class="operator">,</span> vbl);
+  <span class="comment">// later:</span>
+  <span class="type"><a href="qformlayout.html#QFormLayout">QFormLayout</a></span><span class="operator">::</span>TakeRowResult result <span class="operator">=</span> flay<span class="operator">-</span><span class="operator">&gt;</span>takeRow(widget);
+
+</pre>
+<p>If you want to remove the row from the form layout and delete the inserted layout, use <a href="qformlayout.html#removeRow">removeRow</a>() instead.</p>
+<p>Returns A structure containing both the widget and corresponding label layout items</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<p><b>See also </b><a href="qformlayout.html#removeRow">removeRow</a>().</p>
+<!-- @@@takeRow -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

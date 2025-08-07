@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdeclarativegeoserviceprovider.cpp -->
+  <title>Plugin QML Type | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-qmlmodule.html">QML Types</a></td><td >Plugin QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#example-usage">Example Usage</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Plugin QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Plugin-brief -->
+<p>The Plugin type describes a Location based services plugin. <a href="#details">More...</a></p>
+<!-- @@@Plugin -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtLocation 5.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  QtLocation 5.5</td></tr></table></div><ul>
+<li><a href="qml-qtlocation-plugin-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtlocation-plugin.html#allowExperimental-prop">allowExperimental</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtlocation-plugin.html#availableServiceProviders-prop">availableServiceProviders</a></b></b> : stringlist</li>
+<li class="fn"><b><b><a href="qml-qtlocation-plugin.html#isAttached-prop">isAttached</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtlocation-plugin.html#locales-prop">locales</a></b></b> : stringlist</li>
+<li class="fn"><b><b><a href="qml-qtlocation-plugin.html#name-prop">name</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtlocation-plugin.html#parameters-prop">parameters</a></b></b> : list&lt;PluginParameter&gt;</li>
+<li class="fn"><b><b><a href="qml-qtlocation-plugin.html#preferred-prop">preferred</a></b></b> : stringlist</li>
+<li class="fn"><b><b><a href="qml-qtlocation-plugin.html#required-prop">required</a></b></b> : enumeration</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">bool <b><b><a href="qml-qtlocation-plugin.html#supportsGeocoding-method">supportsGeocoding</a></b></b>(<i>features</i>)</li>
+<li class="fn">bool <b><b><a href="qml-qtlocation-plugin.html#supportsMapping-method">supportsMapping</a></b></b>(<i>features</i>)</li>
+<li class="fn">bool <b><b><a href="qml-qtlocation-plugin.html#supportsNavigation-method">supportsNavigation</a></b></b>(<i>features</i>)</li>
+<li class="fn">bool <b><b><a href="qml-qtlocation-plugin.html#supportsPlaces-method">supportsPlaces</a></b></b>(<i>features</i>)</li>
+<li class="fn">bool <b><b><a href="qml-qtlocation-plugin.html#supportsRouting-method">supportsRouting</a></b></b>(<i>features</i>)</li>
+</ul>
+<!-- $$$Plugin-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The Plugin type is used to declaratively specify which available GeoServices plugin should be used for various tasks in the Location API. Plugins are used by <a href="qml-qtlocation-map.html">Map</a>, <a href="qml-qtlocation-routemodel.html">RouteModel</a>, and <a href="qml-qtlocation-geocodemodel.html">GeocodeModel</a> types, as well as a variety of others.</p>
+<p>Plugins recognized by the system have a <a href="qml-qtlocation-plugin.html#name-prop">name</a> property, a simple string normally indicating the name of the service that the Plugin retrieves data from. They also have a variety of features, which can be test for using the <a href="qml-qtlocation-plugin.html#supportsRouting-method">supportsRouting()</a>, <a href="qml-qtlocation-plugin.html#supportsGeocoding-method">supportsGeocoding()</a>, <a href="qml-qtlocation-plugin.html#supportsMapping-method">supportsMapping()</a>, <a href="qml-qtlocation-plugin.html#supportsPlaces-method">supportsPlaces()</a> and <a href="qml-qtlocation-plugin.html#supportsNavigation-method">supportsNavigation()</a> methods.</p>
+<p>When a Plugin object is created, it is &quot;detached&quot; and not associated with any actual service plugin. Once it has received information via setting its <a href="qml-qtlocation-plugin.html#name-prop">name</a>, <a href="qml-qtlocation-plugin.html#preferred-prop">preferred</a>, or <a href="qml-qtlocation-plugin.html#required-prop">required</a> properties, it will choose an appropriate service plugin to attach to. Plugin objects can only be attached once; to use multiple plugins, create multiple Plugin objects.</p>
+<a name="example-usage"></a>
+<h3 id="example-usage">Example Usage</h3>
+<p>The following snippet shows a Plugin object being created with the <a href="qml-qtlocation-plugin.html#required-prop">required</a> and <a href="qml-qtlocation-plugin.html#preferred-prop">preferred</a> properties set. This Plugin will attach to the first found plugin that supports both mapping and geocoding, and will prefer plugins named &quot;here&quot; or &quot;osm&quot; to any others.</p>
+<pre class="cpp">
+
+  Plugin {
+      id: plugin
+      preferred: <span class="operator">[</span><span class="string">&quot;here&quot;</span><span class="operator">,</span> <span class="string">&quot;osm&quot;</span><span class="operator">]</span>
+      required: Plugin<span class="operator">.</span>AnyMappingFeatures <span class="operator">|</span> Plugin<span class="operator">.</span>AnyGeocodingFeatures
+  }
+
+</pre>
+<!-- @@@Plugin -->
+<h2>Property Documentation</h2>
+<!-- $$$allowExperimental -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="allowExperimental-prop"></a><span class="name">allowExperimental</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property indicates if experimental plugins can be used.</p>
+</div></div><!-- @@@allowExperimental -->
+<br/>
+<!-- $$$availableServiceProviders -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="availableServiceProviders-prop"></a><span class="name">availableServiceProviders</span> : <span class="type">stringlist</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds a list of all available service plugins' names. This can be used to manually enumerate the available plugins if the control provided by <a href="qml-qtlocation-plugin.html#name-prop">name</a> and <a href="qml-qtlocation-plugin.html#required-prop">required</a> is not sufficient for your needs.</p>
+</div></div><!-- @@@availableServiceProviders -->
+<br/>
+<!-- $$$isAttached -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="isAttached-prop"></a><span class="name">isAttached</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property indicates if the Plugin item is attached to a geoservice provider plugin.</p>
+</div></div><!-- @@@isAttached -->
+<br/>
+<!-- $$$locales -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="locales-prop"></a><span class="name">locales</span> : <span class="type">stringlist</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property contains an ordered list of preferred plugin locales. If the first locale cannot be accommodated, then the backend falls back to using the second, and so on. By default the locales property contains the system locale.</p>
+<p>The locales are specified as strings which have the format &quot;language[_script][_country]&quot; or &quot;C&quot;, where:</p>
+<ul>
+<li>language is a lowercase, two-letter, ISO 639 language code,</li>
+<li>script is a titlecase, four-letter, ISO 15924 script code,</li>
+<li>country is an uppercase, two- or three-letter, ISO 3166 country code (also &quot;419&quot; as defined by United Nations),</li>
+<li>the &quot;C&quot; locale is identical in behavior to English/UnitedStates as per <a href="../qtcore/qlocale.html">QLocale</a></li>
+</ul>
+<p>If the first specified locale cannot be accommodated, the <a href="location-places-qml.html#plugin">Plugin</a> falls back to the next and so forth. Some <a href="location-places-qml.html#plugin">Plugin</a> backends may not support a set of locales which are rigidly defined. An arbitrary example is that some <a href="qml-qtlocation-place.html">Place</a>'s in France could have French and English localizations, while certain areas in America may only have the English localization available. In the above scenario, the set of supported locales is context dependent on the search location.</p>
+<p>If the <a href="location-places-qml.html#plugin">Plugin</a> cannot accommodate any of the preferred locales, the manager falls back to using a supported language that is backend specific.</p>
+<p>For <a href="location-places-qml.html#plugin">Plugin</a>'s that do not support locales, the locales list is always empty.</p>
+<p>The following code demonstrates how to set a single and multiple locales:</p>
+<pre class="qml">
+
+  <span class="comment">//single locale</span>
+  <span class="type"><a href="qml-qtlocation-plugin.html">Plugin</a></span> {
+      <span class="name">locales</span>: <span class="string">&quot;en_US&quot;</span>
+  }
+
+  <span class="comment">//multiple locales</span>
+  <span class="type"><a href="qml-qtlocation-plugin.html">Plugin</a></span> {
+      <span class="name">locales</span>: [<span class="string">&quot;fr_FR&quot;</span>,<span class="string">&quot;en_US&quot;</span>]
+  }
+
+</pre>
+</div></div><!-- @@@locales -->
+<br/>
+<!-- $$$name -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="name-prop"></a><span class="name">name</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the name of the plugin. Setting this property will cause the Plugin to only attach to a plugin with exactly this name. The value of <a href="qml-qtlocation-plugin.html#required-prop">required</a> will be ignored.</p>
+</div></div><!-- @@@name -->
+<br/>
+<!-- $$$parameters -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="parameters-prop"></a><span class="qmldefault">[default] </span><span class="name">parameters</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="qml-qtlocation-pluginparameter.html">PluginParameter</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the list of plugin parameters.</p>
+</div></div><!-- @@@parameters -->
+<br/>
+<!-- $$$preferred -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="preferred-prop"></a><span class="name">preferred</span> : <span class="type">stringlist</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property contains an ordered list of preferred plugin names, which will be checked for the required features set in <a href="qml-qtlocation-plugin.html#required-prop">required</a> before any other available plugins are checked.</p>
+</div></div><!-- @@@preferred -->
+<br/>
+<!-- $$$required -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="required-prop"></a><span class="name">required</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property contains the set of features that will be required by the Plugin object when choosing which service plugin to attach to. If the <a href="qml-qtlocation-plugin.html#name-prop">name</a> property is set, this has no effect.</p>
+<p>Any of the following values or a bitwise combination of multiple values may be set:</p>
+<ul>
+<li>Plugin.NoFeatures</li>
+<li>Plugin.GeocodingFeature</li>
+<li>Plugin.ReverseGeocodingFeature</li>
+<li>Plugin.RoutingFeature</li>
+<li>Plugin.MappingFeature</li>
+<li>Plugin.AnyPlacesFeature</li>
+</ul>
+</div></div><!-- @@@required -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$supportsGeocoding[overload1]$$$supportsGeocoding -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="supportsGeocoding-method"></a><span class="type"><a href="../qtqml/qml-bool.html">bool</a></span> <span class="name">supportsGeocoding</span>(<i>features</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This method returns a boolean indicating whether the specified set of <i>features</i> are supported by the geo service provider plugin. <code>True</code> is returned if all specified <i>features</i> are supported; otherwise <code>false</code> is returned.</p>
+<p>The <i>features</i> parameter can be any flag combination of:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Feature</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >Plugin.NoGeocodingFeatures</td><td >No geocoding features are supported.</td></tr>
+<tr valign="top" class="even"><td >Plugin.OnlineGeocodingFeature</td><td >Online geocoding is supported.</td></tr>
+<tr valign="top" class="odd"><td >Plugin.OfflineGeocodingFeature</td><td >Offline geocoding is supported.</td></tr>
+<tr valign="top" class="even"><td >Plugin.ReverseGeocodingFeature</td><td >Reverse geocoding is supported.</td></tr>
+<tr valign="top" class="odd"><td >Plugin.LocalizedGeocodingFeature</td><td >Supports returning geocoding results with localized addresses.</td></tr>
+<tr valign="top" class="even"><td >Plugin.AnyGeocodingFeatures</td><td >Matches a geo service provider that provides any geocoding features.</td></tr>
+</table></div>
+</div></div><!-- @@@supportsGeocoding -->
+<br/>
+<!-- $$$supportsMapping[overload1]$$$supportsMapping -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="supportsMapping-method"></a><span class="type"><a href="../qtqml/qml-bool.html">bool</a></span> <span class="name">supportsMapping</span>(<i>features</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This method returns a boolean indicating whether the specified set of <i>features</i> are supported by the geo service provider plugin. True is returned if all specified <i>features</i> are supported; otherwise false is returned.</p>
+<p>The <i>features</i> parameter can be any flag combination of:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Feature</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >Plugin.NoMappingFeatures</td><td >No mapping features are supported.</td></tr>
+<tr valign="top" class="even"><td >Plugin.OnlineMappingFeature</td><td >Online mapping is supported.</td></tr>
+<tr valign="top" class="odd"><td >Plugin.OfflineMappingFeature</td><td >Offline mapping is supported.</td></tr>
+<tr valign="top" class="even"><td >Plugin.LocalizedMappingFeature</td><td >Supports returning localized map data.</td></tr>
+<tr valign="top" class="odd"><td >Plugin.AnyMappingFeatures</td><td >Matches a geo service provider that provides any mapping features.</td></tr>
+</table></div>
+</div></div><!-- @@@supportsMapping -->
+<br/>
+<!-- $$$supportsNavigation[overload1]$$$supportsNavigation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="supportsNavigation-method"></a><span class="type"><a href="../qtqml/qml-bool.html">bool</a></span> <span class="name">supportsNavigation</span>(<i>features</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This method returns a boolean indicating whether the specified set of <i>features</i> are supported by the geo service provider plugin. True is returned if all specified <i>features</i> are supported; otherwise false is returned.</p>
+<p>The <i>features</i> parameter can be any flag combination of:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Feature</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >Plugin.NoNavigationFeatures</td><td >No navigation features are supported.</td></tr>
+<tr valign="top" class="even"><td >Plugin.OnlineNavigationFeature</td><td >Online navigation is supported.</td></tr>
+<tr valign="top" class="odd"><td >Plugin.OfflineNavigationFeature</td><td >Offline navigation is supported.</td></tr>
+<tr valign="top" class="even"><td >Plugin.AnyNavigationFeatures</td><td >Matches a geo service provider that provides any navigation features.</td></tr>
+</table></div>
+</div></div><!-- @@@supportsNavigation -->
+<br/>
+<!-- $$$supportsPlaces[overload1]$$$supportsPlaces -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="supportsPlaces-method"></a><span class="type"><a href="../qtqml/qml-bool.html">bool</a></span> <span class="name">supportsPlaces</span>(<i>features</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This method returns a boolean indicating whether the specified set of <i>features</i> are supported by the geo service provider plugin. True is returned if all specified <i>features</i> are supported; otherwise false is returned.</p>
+<p>The <i>features</i> parameter can be any flag combination of:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Feature</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >Plugin.NoPlacesFeatures</td><td >No places features are supported.</td></tr>
+<tr valign="top" class="even"><td >Plugin.OnlinePlacesFeature</td><td >Online places is supported.</td></tr>
+<tr valign="top" class="odd"><td >Plugin.OfflinePlacesFeature</td><td >Offline places is supported.</td></tr>
+<tr valign="top" class="even"><td >Plugin.SavePlaceFeature</td><td >Saving categories is supported.</td></tr>
+<tr valign="top" class="odd"><td >Plugin.RemovePlaceFeature</td><td >Removing or deleting places is supported.</td></tr>
+<tr valign="top" class="even"><td >Plugin.PlaceRecommendationsFeature</td><td >Searching for recommended places similar to another place is supported.</td></tr>
+<tr valign="top" class="odd"><td >Plugin.SearchSuggestionsFeature</td><td >Search suggestions is supported.</td></tr>
+<tr valign="top" class="even"><td >Plugin.LocalizedPlacesFeature</td><td >Supports returning localized place data.</td></tr>
+<tr valign="top" class="odd"><td >Plugin.NotificationsFeature</td><td >Notifications of place and category changes is supported.</td></tr>
+<tr valign="top" class="even"><td >Plugin.PlaceMatchingFeature</td><td >Supports matching places from two different geo service providers.</td></tr>
+<tr valign="top" class="odd"><td >Plugin.AnyPlacesFeatures</td><td >Matches a geo service provider that provides any places features.</td></tr>
+</table></div>
+</div></div><!-- @@@supportsPlaces -->
+<br/>
+<!-- $$$supportsRouting[overload1]$$$supportsRouting -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="supportsRouting-method"></a><span class="type"><a href="../qtqml/qml-bool.html">bool</a></span> <span class="name">supportsRouting</span>(<i>features</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This method returns a boolean indicating whether the specified set of <i>features</i> are supported by the geo service provider plugin. True is returned if all specified <i>features</i> are supported; otherwise false is returned.</p>
+<p>The <i>features</i> parameter can be any flag combination of:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Feature</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >Plugin.NoRoutingFeatures</td><td >No routing features are supported.</td></tr>
+<tr valign="top" class="even"><td >Plugin.OnlineRoutingFeature</td><td >Online routing is supported.</td></tr>
+<tr valign="top" class="odd"><td >Plugin.OfflineRoutingFeature</td><td >Offline routing is supported.</td></tr>
+<tr valign="top" class="even"><td >Plugin.LocalizedRoutingFeature</td><td >Supports returning routes with localized addresses and instructions.</td></tr>
+<tr valign="top" class="odd"><td >Plugin.RouteUpdatesFeature</td><td >Updating an existing route based on the current position is supported.</td></tr>
+<tr valign="top" class="even"><td >Plugin.AlternativeRoutesFeature</td><td >Supports returning alternative routes.</td></tr>
+<tr valign="top" class="odd"><td >Plugin.ExcludeAreasRoutingFeature</td><td >Supports specifying a areas which the returned route must not cross.</td></tr>
+<tr valign="top" class="even"><td >Plugin.AnyRoutingFeatures</td><td >Matches a geo service provider that provides any routing features.</td></tr>
+</table></div>
+</div></div><!-- @@@supportsRouting -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

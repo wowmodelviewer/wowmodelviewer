@@ -1,0 +1,438 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qqmllocale.cpp -->
+  <title>Locale QML Type | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td ><a href="qtqml-qmlmodule.html">QML Types</a></td><td >Locale QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#locale-string-format-types">Locale String Format Types</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Locale QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Locale-brief -->
+<p>Provides locale specific properties and formatted data. <a href="#details">More...</a></p>
+<!-- @@@Locale -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQml 2.13</td></tr></table></div><ul>
+<li><a href="qml-qtqml-locale-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtqml-locale.html#amText-prop">amText</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtqml-locale.html#decimalPoint-prop">decimalPoint</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtqml-locale.html#exponential-prop">exponential</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtqml-locale.html#firstDayOfWeek-prop">firstDayOfWeek</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtqml-locale.html#groupSeparator-prop">groupSeparator</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtqml-locale.html#measurementSystem-prop">measurementSystem</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtqml-locale.html#name-prop">name</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtqml-locale.html#nativeCountryName-prop">nativeCountryName</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtqml-locale.html#nativeLanguageName-prop">nativeLanguageName</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtqml-locale.html#negativeSign-prop">negativeSign</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtqml-locale.html#percent-prop">percent</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtqml-locale.html#pmText-prop">pmText</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtqml-locale.html#positiveSign-prop">positiveSign</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtqml-locale.html#textDirection-prop">textDirection</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtqml-locale.html#uiLanguages-prop">uiLanguages</a></b></b> : Array&lt;string&gt;</li>
+<li class="fn"><b><b><a href="qml-qtqml-locale.html#weekDays-prop">weekDays</a></b></b> : Array&lt;int&gt;</li>
+<li class="fn"><b><b><a href="qml-qtqml-locale.html#zeroDigit-prop">zeroDigit</a></b></b> : string</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">string <b><b><a href="qml-qtqml-locale.html#currencySymbol-method">currencySymbol</a></b></b>(<i>format</i>)</li>
+<li class="fn">string <b><b><a href="qml-qtqml-locale.html#dateFormat-method">dateFormat</a></b></b>(<i>type</i>)</li>
+<li class="fn">string <b><b><a href="qml-qtqml-locale.html#dateTimeFormat-method">dateTimeFormat</a></b></b>(<i>type</i>)</li>
+<li class="fn">string <b><b><a href="qml-qtqml-locale.html#dayName-method">dayName</a></b></b>(<i>day</i>, <i>type</i>)</li>
+<li class="fn">string <b><b><a href="qml-qtqml-locale.html#monthName-method">monthName</a></b></b>(<i>month</i>, <i>type</i>)</li>
+<li class="fn">string <b><b><a href="qml-qtqml-locale.html#standaloneDayName-method">standaloneDayName</a></b></b>(<i>day</i>, <i>type</i>)</li>
+<li class="fn">string <b><b><a href="qml-qtqml-locale.html#standaloneMonthName-method">standaloneMonthName</a></b></b>(<i>month</i>, <i>type</i>)</li>
+<li class="fn">string <b><b><a href="qml-qtqml-locale.html#timeFormat-method">timeFormat</a></b></b>(<i>type</i>)</li>
+</ul>
+<!-- $$$Locale-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The Locale object may only be created via the <a href="qml-qtqml-qt.html#locale-method">Qt.locale()</a> function. It cannot be created directly.</p>
+<p>The <a href="qml-qtqml-qt.html#locale-method">Qt.locale()</a> function returns a JS Locale object representing the locale with the specified name, which has the format &quot;language[_territory][.codeset][@modifier]&quot; or &quot;C&quot;.</p>
+<p>Locale supports the concept of a default locale, which is determined from the system's locale settings at application startup. If no parameter is passed to Qt.locale() the default locale object is returned.</p>
+<p>The Locale object provides a number of functions and properties providing data for the specified locale.</p>
+<p>The Locale object may also be passed to the <a href="qml-qtqml-date.html">Date</a> and <a href="qml-qtqml-number.html">Number</a> toLocaleString() and fromLocaleString() methods in order to convert to/from strings using the specified locale.</p>
+<p>This example shows the current date formatted for the German locale:</p>
+<pre class="cpp">
+
+  import <span class="type">QtQuick</span> <span class="number">2.0</span>
+
+  Text {
+      text: <span class="string">&quot;The date is: &quot;</span> <span class="operator">+</span> Date()<span class="operator">.</span>toLocaleString(<span class="type"><a href="qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>locale(<span class="string">&quot;de_DE&quot;</span>))
+  }
+
+</pre>
+<p>The following example displays the specified number in the correct format for the default locale:</p>
+<pre class="cpp">
+
+  import <span class="type">QtQuick</span> <span class="number">2.0</span>
+
+  Text {
+      text: <span class="string">&quot;The value is: &quot;</span> <span class="operator">+</span> Number(<span class="number">23443.34</span>)<span class="operator">.</span>toLocaleString(<span class="type"><a href="qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>locale())
+  }
+
+</pre>
+<p>Qt Quick Locale's data is based on Common Locale Data Repository v1.8&#x2e;1&#x2e;</p>
+<a name="formattype"></a><a name="locale-string-format-types"></a>
+<h3 id="locale-string-format-types">Locale String Format Types</h3>
+<p>The <a href="qml-qtqml-locale.html#monthName-method">monthName()</a>, <a href="qml-qtqml-locale.html#standaloneMonthName-method">standaloneMonthName()</a>, <a href="qml-qtqml-locale.html#dayName-method">dayName()</a> and <a href="qml-qtqml-locale.html#standaloneDayName-method">standaloneDayName()</a> can use the following enumeration values to specify the formatting of the string representation for a Date object.</p>
+<ul>
+<li>Locale.LongFormat The long version of day and month names; for example, returning &quot;January&quot; as a month name.</li>
+<li>Locale.ShortFormat The short version of day and month names; for example, returning &quot;Jan&quot; as a month name.</li>
+<li>Locale.NarrowFormat A special version of day and month names for use when space is limited; for example, returning &quot;J&quot; as a month name. Note that the narrow format might contain the same text for different months and days or it can even be an empty string if the locale doesn't support narrow names, so you should avoid using it for date formatting. Also, for the system locale this format is the same as ShortFormat.</li>
+</ul>
+<p>Additionally the double-to-string and string-to-double conversion functions are covered by the following licenses:</p>
+<div class="LegaleseLeft"><p>Copyright (c) 1991 by AT&amp;T.</p>
+<p>Permission to use, copy, modify, and distribute this software for any purpose without fee is hereby granted, provided that this entire notice is included in all copies of any software which is or includes a copy or modification of this software and in all copies of the supporting documentation for such software.</p>
+<p>THIS SOFTWARE IS BEING PROVIDED &quot;AS IS&quot;, WITHOUT ANY EXPRESS OR IMPLIED WARRANTY. IN PARTICULAR, NEITHER THE AUTHOR NOR AT&amp;T MAKES ANY REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE MERCHANTABILITY OF THIS SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR PURPOSE.</p>
+<p>This product includes software developed by the University of California, Berkeley and its contributors.</p>
+</div><p><b>See also </b><a href="qml-qtqml-date.html">Date</a> and <a href="qml-qtqml-number.html">Number</a>.</p>
+<!-- @@@Locale -->
+<h2>Property Documentation</h2>
+<!-- $$$amText -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="amText-prop"></a><span class="name">amText</span> : <span class="type"><a href="qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The localized name of the &quot;AM&quot; suffix for times specified using the conventions of the 12-hour clock.</p>
+</div></div><!-- @@@amText -->
+<br/>
+<!-- $$$decimalPoint -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="decimalPoint-prop"></a><span class="name">decimalPoint</span> : <span class="type"><a href="qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the decimal point character of this locale.</p>
+</div></div><!-- @@@decimalPoint -->
+<br/>
+<!-- $$$exponential -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="exponential-prop"></a><span class="name">exponential</span> : <span class="type"><a href="qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the exponential character of this locale.</p>
+</div></div><!-- @@@exponential -->
+<br/>
+<!-- $$$firstDayOfWeek -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="firstDayOfWeek-prop"></a><span class="name">firstDayOfWeek</span> : <span class="type"><a href="qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the first day of the week according to the current locale.</p>
+<ul>
+<li>Locale.Sunday = 0</li>
+<li>Locale.Monday = 1</li>
+<li>Locale.Tuesday = 2</li>
+<li>Locale.Wednesday = 3</li>
+<li>Locale.Thursday = 4</li>
+<li>Locale.Friday = 5</li>
+<li>Locale.Saturday = 6</li>
+</ul>
+<p><b>Note: </b>that these values match the JS Date API which is different from the Qt C++ API where <a href="../qtcore/qt.html#DayOfWeek-enum">Qt::Sunday</a> = 7.</p></div></div><!-- @@@firstDayOfWeek -->
+<br/>
+<!-- $$$groupSeparator -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="groupSeparator-prop"></a><span class="name">groupSeparator</span> : <span class="type"><a href="qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the group separator character of this locale.</p>
+</div></div><!-- @@@groupSeparator -->
+<br/>
+<!-- $$$measurementSystem -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="measurementSystem-prop"></a><span class="name">measurementSystem</span> : <span class="type"><a href="qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property defines which units are used for measurement.</p>
+<ul>
+<li>Locale.MetricSystem This value indicates metric units, such as meters, centimeters and millimeters.</li>
+<li>Locale.ImperialUSSystem This value indicates imperial units, such as inches and miles as they are used in the United States.</li>
+<li>Locale.ImperialUKSystem This value indicates imperial units, such as inches and miles as they are used in the United Kingdom.</li>
+<li>Locale.ImperialSystem Provided for compatibility. The same as Locale.ImperialUSSystem.</li>
+</ul>
+</div></div><!-- @@@measurementSystem -->
+<br/>
+<!-- $$$name -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="name-prop"></a><span class="name">name</span> : <span class="type"><a href="qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the language and country of this locale as a string of the form &quot;language_country&quot;, where language is a lowercase, two-letter ISO 639 language code, and country is an uppercase, two- or three-letter ISO 3166 country code.</p>
+</div></div><!-- @@@name -->
+<br/>
+<!-- $$$nativeCountryName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="nativeCountryName-prop"></a><span class="name">nativeCountryName</span> : <span class="type"><a href="qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds a native name of the country for the locale. For example &quot;España&quot; for Spanish/Spain locale.</p>
+<p><b>See also </b><a href="qml-qtqml-locale.html#nativeLanguageName-prop">nativeLanguageName</a>.</p>
+</div></div><!-- @@@nativeCountryName -->
+<br/>
+<!-- $$$nativeLanguageName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="nativeLanguageName-prop"></a><span class="name">nativeLanguageName</span> : <span class="type"><a href="qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds a native name of the language for the locale. For example &quot;Schwiizertüütsch&quot; for Swiss-German locale.</p>
+<p><b>See also </b><a href="qml-qtqml-locale.html#nativeCountryName-prop">nativeCountryName</a>.</p>
+</div></div><!-- @@@nativeLanguageName -->
+<br/>
+<!-- $$$negativeSign -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="negativeSign-prop"></a><span class="name">negativeSign</span> : <span class="type"><a href="qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the negative sign character of this locale.</p>
+</div></div><!-- @@@negativeSign -->
+<br/>
+<!-- $$$percent -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="percent-prop"></a><span class="name">percent</span> : <span class="type"><a href="qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the percent character of this locale.</p>
+</div></div><!-- @@@percent -->
+<br/>
+<!-- $$$pmText -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="pmText-prop"></a><span class="name">pmText</span> : <span class="type"><a href="qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The localized name of the &quot;PM&quot; suffix for times specified using the conventions of the 12-hour clock.</p>
+</div></div><!-- @@@pmText -->
+<br/>
+<!-- $$$positiveSign -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="positiveSign-prop"></a><span class="name">positiveSign</span> : <span class="type"><a href="qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the positive sign character of this locale.</p>
+</div></div><!-- @@@positiveSign -->
+<br/>
+<!-- $$$textDirection -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="textDirection-prop"></a><span class="name">textDirection</span> : <span class="type"><a href="qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the text direction of the language:</p>
+<ul>
+<li>Qt.LeftToRight</li>
+<li>Qt.RightToLeft</li>
+</ul>
+</div></div><!-- @@@textDirection -->
+<br/>
+<!-- $$$uiLanguages -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="uiLanguages-prop"></a><span class="name">uiLanguages</span> : <span class="type">Array</span>&lt;<span class="type"><a href="qml-string.html">string</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns an ordered list of locale names for translation purposes in preference order.</p>
+<p>The return value represents locale names that the user expects to see the UI translation in.</p>
+<p>The first item in the list is the most preferred one.</p>
+</div></div><!-- @@@uiLanguages -->
+<br/>
+<!-- $$$weekDays -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="weekDays-prop"></a><span class="name">weekDays</span> : <span class="type">Array</span>&lt;<span class="type"><a href="qml-int.html">int</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds an array of days that are considered week days according to the current locale, where Sunday is 0 and Saturday is 6.</p>
+<p><b>See also </b><a href="qml-qtqml-locale.html#firstDayOfWeek-prop">firstDayOfWeek</a>.</p>
+</div></div><!-- @@@weekDays -->
+<br/>
+<!-- $$$zeroDigit -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="zeroDigit-prop"></a><span class="name">zeroDigit</span> : <span class="type"><a href="qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds Returns the zero digit character of this locale.</p>
+</div></div><!-- @@@zeroDigit -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$currencySymbol[overload1]$$$currencySymbol -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="currencySymbol-method"></a><span class="type"><a href="qml-string.html">string</a></span> <span class="name">currencySymbol</span>(<i>format</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the currency symbol for the specified <i>format</i>:</p>
+<ul>
+<li>Locale.CurrencyIsoCode a ISO-4217 code of the currency.</li>
+<li>Locale.CurrencySymbol a currency symbol.</li>
+<li>Locale.CurrencyDisplayName a user readable name of the currency.</li>
+</ul>
+<p><b>See also </b><a href="qml-qtqml-number.html#toLocaleCurrencyString-method">Number::toLocaleCurrencyString()</a>.</p>
+</div></div><!-- @@@currencySymbol -->
+<br/>
+<!-- $$$dateFormat[overload1]$$$dateFormat -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="dateFormat-method"></a><span class="type"><a href="qml-string.html">string</a></span> <span class="name">dateFormat</span>(<i>type</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the date format used for the current locale. <i>type</i> specifies the <a href="qml-qtqml-locale.html#formattype">FormatType</a> to return.</p>
+<p><b>See also </b><a href="qml-qtqml-date.html">Date</a>.</p>
+</div></div><!-- @@@dateFormat -->
+<br/>
+<!-- $$$dateTimeFormat[overload1]$$$dateTimeFormat -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="dateTimeFormat-method"></a><span class="type"><a href="qml-string.html">string</a></span> <span class="name">dateTimeFormat</span>(<i>type</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the date time format used for the current locale. <i>type</i> specifies the <a href="qml-qtqml-locale.html#formattype">FormatType</a> to return.</p>
+<p><b>See also </b><a href="qml-qtqml-date.html">Date</a>.</p>
+</div></div><!-- @@@dateTimeFormat -->
+<br/>
+<!-- $$$dayName[overload1]$$$dayName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="dayName-method"></a><span class="type"><a href="qml-string.html">string</a></span> <span class="name">dayName</span>(<i>day</i>, <i>type</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the localized name of the <i>day</i> (where 0 represents Sunday, 1 represents Monday and so on), in the optional <a href="qml-qtqml-locale.html#formattype">FormatType</a> specified by <i>type</i>.</p>
+<p><b>See also </b><a href="qml-qtqml-locale.html#monthName-method">monthName()</a> and <a href="qml-qtqml-locale.html#standaloneDayName-method">standaloneDayName()</a>.</p>
+</div></div><!-- @@@dayName -->
+<br/>
+<!-- $$$monthName[overload1]$$$monthName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="monthName-method"></a><span class="type"><a href="qml-string.html">string</a></span> <span class="name">monthName</span>(<i>month</i>, <i>type</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the localized name of <i>month</i> (0-11), in the optional <a href="qml-qtqml-locale.html#formattype">FormatType</a> specified by <i>type</i>.</p>
+<p><b>Note: </b>the <a href="../qtcore/qlocale.html">QLocale</a> C++ API expects a range of (1-12), however Locale.monthName() expects 0-11 as per the JS Date object.</p><p><b>See also </b><a href="qml-qtqml-locale.html#dayName-method">dayName()</a> and <a href="qml-qtqml-locale.html#standaloneMonthName-method">standaloneMonthName()</a>.</p>
+</div></div><!-- @@@monthName -->
+<br/>
+<!-- $$$standaloneDayName[overload1]$$$standaloneDayName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="standaloneDayName-method"></a><span class="type"><a href="qml-string.html">string</a></span> <span class="name">standaloneDayName</span>(<i>day</i>, <i>type</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the localized name of the <i>day</i> (where 0 represents Sunday, 1 represents Monday and so on) that is used as a standalone text, in the <a href="qml-qtqml-locale.html#formattype">FormatType</a> specified by <i>type</i>.</p>
+<p>If the locale information does not specify the standalone day name then return value is the same as in <a href="qml-qtqml-locale.html#dayName-method">dayName()</a>.</p>
+<p><b>See also </b><a href="qml-qtqml-locale.html#dayName-method">dayName()</a> and <a href="qml-qtqml-locale.html#standaloneMonthName-method">standaloneMonthName()</a>.</p>
+</div></div><!-- @@@standaloneDayName -->
+<br/>
+<!-- $$$standaloneMonthName[overload1]$$$standaloneMonthName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="standaloneMonthName-method"></a><span class="type"><a href="qml-string.html">string</a></span> <span class="name">standaloneMonthName</span>(<i>month</i>, <i>type</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the localized name of <i>month</i> (0-11) that is used as a standalone text, in the optional <a href="qml-qtqml-locale.html#formattype">FormatType</a> specified by <i>type</i>.</p>
+<p>If the locale information doesn't specify the standalone month name then return value is the same as in <a href="qml-qtqml-locale.html#monthName-method">monthName()</a>.</p>
+<p><b>Note: </b>the <a href="../qtcore/qlocale.html">QLocale</a> C++ API expects a range of (1-12), however Locale.standaloneMonthName() expects 0-11 as per the JS Date object.</p><p><b>See also </b><a href="qml-qtqml-locale.html#monthName-method">monthName()</a> and <a href="qml-qtqml-locale.html#standaloneDayName-method">standaloneDayName()</a>.</p>
+</div></div><!-- @@@standaloneMonthName -->
+<br/>
+<!-- $$$timeFormat[overload1]$$$timeFormat -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="timeFormat-method"></a><span class="type"><a href="qml-string.html">string</a></span> <span class="name">timeFormat</span>(<i>type</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the time format used for the current locale. <i>type</i> specifies the <a href="qml-qtqml-locale.html#formattype">FormatType</a> to return.</p>
+<p><b>See also </b><a href="qml-qtqml-date.html">Date</a>.</p>
+</div></div><!-- @@@timeFormat -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

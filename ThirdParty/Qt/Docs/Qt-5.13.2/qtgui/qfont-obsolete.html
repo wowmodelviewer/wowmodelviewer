@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qfont.cpp -->
+  <title>Obsolete Members for QFont | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QFont</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Obsolete Members for QFont</h1>
+<p><b>The following members of class <a href="qfont.html">QFont</a> are obsolete.</b> They are provided to keep old source code working. We strongly advise against using them in new code.</p>
+<h2>Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code></td><td class="memItemRight bottomAlign"><b><a href="qfont-obsolete.html#QFont-2">QFont</a></b>(const QFont &amp;<i>font</i>, QPaintDevice *<i>pd</i>)</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>QString </td><td class="memItemRight bottomAlign"><b><a href="qfont-obsolete.html#lastResortFamily">lastResortFamily</a></b>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>QString </td><td class="memItemRight bottomAlign"><b><a href="qfont-obsolete.html#lastResortFont">lastResortFont</a></b>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>bool </td><td class="memItemRight bottomAlign"><b><a href="qfont-obsolete.html#rawMode">rawMode</a></b>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>QString </td><td class="memItemRight bottomAlign"><b><a href="qfont-obsolete.html#rawName">rawName</a></b>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>void </td><td class="memItemRight bottomAlign"><b><a href="qfont-obsolete.html#setRawMode">setRawMode</a></b>(bool <i>enable</i>)</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>void </td><td class="memItemRight bottomAlign"><b><a href="qfont-obsolete.html#setRawName">setRawName</a></b>(const QString &amp;<i>name</i>)</td></tr>
+</table></div>
+<h2>Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>void </td><td class="memItemRight bottomAlign"><b><a href="qfont-obsolete.html#removeSubstitution">removeSubstitution</a></b>(const QString &amp;<i>familyName</i>)</td></tr>
+</table></div>
+<h2>Member Function Documentation</h2>
+<!-- $$$QFont$$$QFontconstQFont&QPaintDevice* -->
+<h3 class="fn" id="QFont-2"><a name="QFont-2"></a>QFont::<span class="name">QFont</span>(const <span class="type"><a href="qfont.html#QFont">QFont</a></span> &amp;<i>font</i>, <span class="type"><a href="qpaintdevice.html">QPaintDevice</a></span> *<i>pd</i>)</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Constructs a font from <i>font</i> for use on the paint device <i>pd</i>.</p>
+<!-- @@@QFont -->
+<!-- $$$lastResortFamily[overload1]$$$lastResortFamily -->
+<h3 class="fn" id="lastResortFamily"><a name="lastResortFamily"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QFont::<span class="name">lastResortFamily</span>() const</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>This function is deprecated and is not in use by the font selection algorithm in Qt 5. It always returns &quot;helvetica&quot;.</p>
+<p><b>See also </b><a href="qfont-obsolete.html#lastResortFont">lastResortFont</a>().</p>
+<!-- @@@lastResortFamily -->
+<!-- $$$lastResortFont[overload1]$$$lastResortFont -->
+<h3 class="fn" id="lastResortFont"><a name="lastResortFont"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QFont::<span class="name">lastResortFont</span>() const</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Deprecated function. Since Qt 5.0, this is not used by the font selection algorithm. For compatibility it remains in the API, but will always return the same value as <a href="qfont-obsolete.html#lastResortFamily">lastResortFamily</a>().</p>
+<!-- @@@lastResortFont -->
+<!-- $$$rawMode[overload1]$$$rawMode -->
+<h3 class="fn" id="rawMode"><a name="rawMode"></a><span class="type">bool</span> QFont::<span class="name">rawMode</span>() const</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Returns <code>true</code> if raw mode is used for font name matching; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qfont-obsolete.html#setRawMode">setRawMode</a>().</p>
+<!-- @@@rawMode -->
+<!-- $$$rawName[overload1]$$$rawName -->
+<h3 class="fn" id="rawName"><a name="rawName"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QFont::<span class="name">rawName</span>() const</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Returns the name of the font within the underlying window system.</p>
+<p>On X11, this function will return an empty string.</p>
+<p>Using the return value of this function is usually <i>not</i> <i>portable</i>.</p>
+<p><b>See also </b><a href="qfont-obsolete.html#setRawName">setRawName</a>().</p>
+<!-- @@@rawName -->
+<!-- $$$removeSubstitution[overload1]$$$removeSubstitutionconstQString& -->
+<h3 class="fn" id="removeSubstitution"><a name="removeSubstitution"></a><code>[static] </code><span class="type">void</span> QFont::<span class="name">removeSubstitution</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>familyName</i>)</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>This function is deprecated. Use <a href="qfont.html#removeSubstitutions">removeSubstitutions</a>() instead.</p>
+<!-- @@@removeSubstitution -->
+<!-- $$$setRawMode[overload1]$$$setRawModebool -->
+<h3 class="fn" id="setRawMode"><a name="setRawMode"></a><span class="type">void</span> QFont::<span class="name">setRawMode</span>(<span class="type">bool</span> <i>enable</i>)</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>If <i>enable</i> is true, turns raw mode on; otherwise turns raw mode off. This function only has an effect under X11.</p>
+<p>If raw mode is enabled, Qt will search for an X font with a complete font name matching the family name, ignoring all other values set for the <a href="qfont.html">QFont</a>. If the font name matches several fonts, Qt will use the first font returned by X. <a href="qfontinfo.html">QFontInfo</a> <i>cannot</i> be used to fetch information about a <a href="qfont.html">QFont</a> using raw mode (it will return the values set in the <a href="qfont.html">QFont</a> for all parameters, including the family name).</p>
+<p><b>Warning:</b> Enabling raw mode has no effect since Qt 5.0&#x2e;</p>
+<p><b>See also </b><a href="qfont-obsolete.html#rawMode">rawMode</a>().</p>
+<!-- @@@setRawMode -->
+<!-- $$$setRawName[overload1]$$$setRawNameconstQString& -->
+<h3 class="fn" id="setRawName"><a name="setRawName"></a><span class="type">void</span> QFont::<span class="name">setRawName</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>)</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Sets a font by its system specific name.</p>
+<p>A font set with setRawName() is still a full-featured <a href="qfont.html">QFont</a>. It can be queried (for example with <a href="qfont.html#italic">italic</a>()) or modified (for example with <a href="qfont.html#setItalic">setItalic</a>()) and is therefore also suitable for rendering rich text.</p>
+<p>If Qt's internal font database cannot resolve the raw name, the font becomes a raw font with <i>name</i> as its family.</p>
+<p><b>See also </b><a href="qfont-obsolete.html#rawName">rawName</a>() and <a href="qfont.html#setFamily">setFamily</a>().</p>
+<!-- @@@setRawName -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

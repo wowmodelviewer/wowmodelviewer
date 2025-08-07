@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qocspresponse.cpp -->
+  <title>QOcspResponse Class | Qt Network 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtnetwork-index.html">Qt Network</a></td><td ><a href="qtnetwork-module.html">C++ Classes</a></td><td >QOcspResponse</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtnetwork-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QOcspResponse Class</h1>
+<!-- $$$QOcspResponse-brief -->
+<p>This class represents Online Certificate Status Protocol response. <a href="#details">More...</a></p>
+<!-- @@@QOcspResponse -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QOcspResponse&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += network</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.13</td></tr></table></div><p>This class was introduced in  Qt 5.13.</p>
+<ul>
+<li><a href="qocspresponse-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qocspresponse.html#QOcspResponse-2">QOcspResponse</a></b>(QOcspResponse &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qocspresponse.html#QOcspResponse-1">QOcspResponse</a></b>(const QOcspResponse &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qocspresponse.html#QOcspResponse">QOcspResponse</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QOcspResponse &amp;</td><td class="memItemRight bottomAlign"><b><a href="qocspresponse.html#operator-eq-1">operator=</a></b>(QOcspResponse &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QOcspResponse &amp;</td><td class="memItemRight bottomAlign"><b><a href="qocspresponse.html#operator-eq">operator=</a></b>(const QOcspResponse &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qocspresponse.html#dtor.QOcspResponse">~QOcspResponse</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QOcspCertificateStatus </td><td class="memItemRight bottomAlign"><b><a href="qocspresponse.html#certificateStatus">certificateStatus</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> class QSslCertificate </td><td class="memItemRight bottomAlign"><b><a href="qocspresponse.html#responder">responder</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QOcspRevocationReason </td><td class="memItemRight bottomAlign"><b><a href="qocspresponse.html#revocationReason">revocationReason</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSslCertificate </td><td class="memItemRight bottomAlign"><b><a href="qocspresponse.html#subject">subject</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qocspresponse.html#swap">swap</a></b>(QOcspResponse &amp;<i>other</i>)</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qocspresponse.html#QOcspCertificateStatus-enum">QOcspCertificateStatus</a></b> { Good, Revoked, Unknown }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qocspresponse.html#QOcspRevocationReason-enum">QOcspRevocationReason</a></b> { None, Unspecified, KeyCompromise, CACompromise, ..., RemoveFromCRL }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qocspresponse.html#operator-not-eq">operator!=</a></b>(const QOcspResponse &amp;<i>lhs</i>, const QOcspResponse &amp;<i>rhs</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qocspresponse.html#operator-eq-eq">operator==</a></b>(const QOcspResponse &amp;<i>lhs</i>, const QOcspResponse &amp;<i>rhs</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QOcspResponse-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qocspresponse.html">QOcspResponse</a> class represents the revocation status of a server's certficate, received by the client-side socket during the TLS handshake. <a href="qsslsocket.html">QSslSocket</a> must be configured with OCSP stapling enabled.</p>
+</div>
+<p><b>See also </b><a href="qsslsocket.html">QSslSocket</a>, <a href="qsslsocket.html#ocspResponses">QSslSocket::ocspResponses</a>(), <a href="qocspresponse.html#certificateStatus">certificateStatus</a>(), <a href="qocspresponse.html#revocationReason">revocationReason</a>(), <a href="qocspresponse.html#responder">responder</a>(), <a href="qocspresponse.html#subject">subject</a>(), <a href="qocspresponse.html#QOcspCertificateStatus-enum">QOcspCertificateStatus</a>, <a href="qocspresponse.html#QOcspRevocationReason-enum">QOcspRevocationReason</a>, <a href="qsslconfiguration.html#setOcspStaplingEnabled">QSslConfiguration::setOcspStaplingEnabled</a>(), <a href="qsslconfiguration.html#ocspStaplingEnabled">QSslConfiguration::ocspStaplingEnabled</a>(), and <a href="qsslconfiguration.html#peerCertificate">QSslConfiguration::peerCertificate</a>().</p>
+<!-- @@@QOcspResponse -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QOcspResponse$$$QOcspResponseQOcspResponse&& -->
+<h3 class="fn" id="QOcspResponse-2"><a name="QOcspResponse-2"></a>QOcspResponse::<span class="name">QOcspResponse</span>(<span class="type"><a href="qocspresponse.html#QOcspResponse">QOcspResponse</a></span> &amp;&amp;<i>other</i>)</h3>
+<p>Move-constructs a <a href="qocspresponse.html">QOcspResponse</a> instance.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@QOcspResponse -->
+<!-- $$$QOcspResponse$$$QOcspResponseconstQOcspResponse& -->
+<h3 class="fn" id="QOcspResponse-1"><a name="QOcspResponse-1"></a>QOcspResponse::<span class="name">QOcspResponse</span>(const <span class="type"><a href="qocspresponse.html#QOcspResponse">QOcspResponse</a></span> &amp;<i>other</i>)</h3>
+<p>Copy-constructs a <a href="qocspresponse.html">QOcspResponse</a> instance.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@QOcspResponse -->
+<!-- $$$QOcspResponse[overload1]$$$QOcspResponse -->
+<h3 class="fn" id="QOcspResponse"><a name="QOcspResponse"></a>QOcspResponse::<span class="name">QOcspResponse</span>()</h3>
+<p>Creates a new response with status QOcspCertificateStatus::Unknown and revocation reason QOcspRevocationReason::None.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<p><b>See also </b><a href="qocspresponse.html#QOcspCertificateStatus-enum">QOcspCertificateStatus</a>.</p>
+<!-- @@@QOcspResponse -->
+<!-- $$$operator=$$$operator=QOcspResponse&& -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type"><a href="qocspresponse.html#QOcspResponse">QOcspResponse</a></span> &amp;QOcspResponse::<span class="name">operator=</span>(<span class="type"><a href="qocspresponse.html#QOcspResponse">QOcspResponse</a></span> &amp;&amp;<i>other</i>)</h3>
+<p>Move-assigns to this <a href="qocspresponse.html">QOcspResponse</a> instance.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@operator= -->
+<!-- $$$operator=[overload1]$$$operator=constQOcspResponse& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qocspresponse.html#QOcspResponse">QOcspResponse</a></span> &amp;QOcspResponse::<span class="name">operator=</span>(const <span class="type"><a href="qocspresponse.html#QOcspResponse">QOcspResponse</a></span> &amp;<i>other</i>)</h3>
+<p>Copy-assigns and returns a reference to this response.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@operator= -->
+<!-- $$$~QOcspResponse[overload1]$$$~QOcspResponse -->
+<h3 class="fn" id="dtor.QOcspResponse"><a name="dtor.QOcspResponse"></a>QOcspResponse::<span class="name">~QOcspResponse</span>()</h3>
+<p>Destroys the response.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@~QOcspResponse -->
+<!-- $$$certificateStatus[overload1]$$$certificateStatus -->
+<h3 class="fn" id="certificateStatus"><a name="certificateStatus"></a><span class="type"><a href="qocspresponse.html#QOcspCertificateStatus-enum">QOcspCertificateStatus</a></span> QOcspResponse::<span class="name">certificateStatus</span>() const</h3>
+<p>Returns the certificate status.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<p><b>See also </b><a href="qocspresponse.html#QOcspCertificateStatus-enum">QOcspCertificateStatus</a>.</p>
+<!-- @@@certificateStatus -->
+<!-- $$$responder[overload1]$$$responder -->
+<h3 class="fn" id="responder"><a name="responder"></a><span class="type">class</span> <span class="type"><a href="qsslcertificate.html">QSslCertificate</a></span> QOcspResponse::<span class="name">responder</span>() const</h3>
+<p>This function returns a certificate used to sign OCSP response.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@responder -->
+<!-- $$$revocationReason[overload1]$$$revocationReason -->
+<h3 class="fn" id="revocationReason"><a name="revocationReason"></a><span class="type"><a href="qocspresponse.html#QOcspRevocationReason-enum">QOcspRevocationReason</a></span> QOcspResponse::<span class="name">revocationReason</span>() const</h3>
+<p>Returns the reason for revocation.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@revocationReason -->
+<!-- $$$subject[overload1]$$$subject -->
+<h3 class="fn" id="subject"><a name="subject"></a><span class="type"><a href="qsslcertificate.html">QSslCertificate</a></span> QOcspResponse::<span class="name">subject</span>() const</h3>
+<p>This function returns a certificate, for which this response was issued.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@subject -->
+<!-- $$$swap[overload1]$$$swapQOcspResponse& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QOcspResponse::<span class="name">swap</span>(<span class="type"><a href="qocspresponse.html#QOcspResponse">QOcspResponse</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps this response with <i>other</i>.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@swap -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$QOcspCertificateStatus$$$Good$$$Revoked$$$Unknown -->
+<h3 class="fn" id="QOcspCertificateStatus-enum"><a name="QOcspCertificateStatus-enum"></a>enum <span class="name">QOcspCertificateStatus</span></h3>
+<p>Describes the Online Certificate Status</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QOcspResponse::Good</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The certificate is not revoked, but this does not necessarily mean that the certificate was ever issued or that the time at which the response was produced is within the certificate's validity interval.</td></tr>
+<tr><td class="topAlign"><code>QOcspResponse::Revoked</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">This state indicates that the certificate has been revoked (either permanently or temporarily - on hold).</td></tr>
+<tr><td class="topAlign"><code>QOcspResponse::Unknown</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">This state indicates that the responder doesn't know about the certificate being requested.</td></tr>
+</table></div>
+<p>This enum was introduced or modified in  Qt 5.13.</p>
+<p><b>See also </b><a href="qocspresponse.html#QOcspRevocationReason-enum">QOcspRevocationReason</a>.</p>
+<!-- @@@QOcspCertificateStatus -->
+<!-- $$$QOcspRevocationReason$$$None$$$Unspecified$$$KeyCompromise$$$CACompromise$$$AffiliationChanged$$$Superseded$$$CessationOfOperation$$$CertificateHold$$$RemoveFromCRL -->
+<h3 class="fn" id="QOcspRevocationReason-enum"><a name="QOcspRevocationReason-enum"></a>enum <span class="name">QOcspRevocationReason</span></h3>
+<p>Describes the reason for revocation</p>
+<p>This enumeration describes revocation reasons, defined in <a href="https://tools.ietf.org/html/rfc5280#section-5.3.1">RFC 5280, section 5.3&#x2e;1</a></p>
+<div class="table"><table class="valuelist"><tr><th class="tblConst">Constant</th><th class="tblVal">Value</th></tr>
+<tr><td class="topAlign"><code>QOcspResponse::None</code></td><td class="topAlign tblval"><code>-1</code></td></tr>
+<tr><td class="topAlign"><code>QOcspResponse::Unspecified</code></td><td class="topAlign tblval"><code>0</code></td></tr>
+<tr><td class="topAlign"><code>QOcspResponse::KeyCompromise</code></td><td class="topAlign tblval"><code>1</code></td></tr>
+<tr><td class="topAlign"><code>QOcspResponse::CACompromise</code></td><td class="topAlign tblval"><code>2</code></td></tr>
+<tr><td class="topAlign"><code>QOcspResponse::AffiliationChanged</code></td><td class="topAlign tblval"><code>3</code></td></tr>
+<tr><td class="topAlign"><code>QOcspResponse::Superseded</code></td><td class="topAlign tblval"><code>4</code></td></tr>
+<tr><td class="topAlign"><code>QOcspResponse::CessationOfOperation</code></td><td class="topAlign tblval"><code>5</code></td></tr>
+<tr><td class="topAlign"><code>QOcspResponse::CertificateHold</code></td><td class="topAlign tblval"><code>6</code></td></tr>
+<tr><td class="topAlign"><code>QOcspResponse::RemoveFromCRL</code></td><td class="topAlign tblval"><code>7</code></td></tr>
+</table></div>
+<p>This enum was introduced or modified in  Qt 5.13.</p>
+<!-- @@@QOcspRevocationReason -->
+<!-- $$$operator!=[overload1]$$$operator!=constQOcspResponse&constQOcspResponse& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> <span class="name">operator!=</span>(const <span class="type"><a href="qocspresponse.html#QOcspResponse">QOcspResponse</a></span> &amp;<i>lhs</i>, const <span class="type"><a href="qocspresponse.html#QOcspResponse">QOcspResponse</a></span> &amp;<i>rhs</i>)</h3>
+<p>Returns <code>true</code> if <i>lhs</i> and <i>rhs</i> are responses for different certificates, or signed by different responders, or have different revocation reasons, or different certificate statuses.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQOcspResponse&constQOcspResponse& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> <span class="name">operator==</span>(const <span class="type"><a href="qocspresponse.html#QOcspResponse">QOcspResponse</a></span> &amp;<i>lhs</i>, const <span class="type"><a href="qocspresponse.html#QOcspResponse">QOcspResponse</a></span> &amp;<i>rhs</i>)</h3>
+<p>Returns <code>true</code> if <i>lhs</i> and <i>rhs</i> are the responses for the same certificate, signed by the same responder, have the same revocation reason and the same certificate status.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

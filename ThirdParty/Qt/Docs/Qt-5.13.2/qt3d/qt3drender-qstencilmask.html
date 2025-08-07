@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qstencilmask.cpp -->
+  <title>QStencilMask Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QStencilMask</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QStencilMask Class</h1>
+<span class="small-subtitle">(<a href="qt3drender-qstencilmask.html">Qt3DRender::QStencilMask</a>)<br/></span>
+<!-- $$$QStencilMask-brief -->
+<p>The <a href="qt3drender-qstencilmask.html">QStencilMask</a> class controls the front and back writing of individual bits in the stencil planes. <a href="#details">More...</a></p>
+<!-- @@@QStencilMask -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QStencilMask&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3drender</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-stencilmask.html">StencilMask</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3drender-qrenderstate.html">Qt3DRender::QRenderState</a></td></tr></table></div><p>This class was introduced in  Qt 5.7.</p>
+<ul>
+<li><a href="qt3drender-qstencilmask-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qt3drender-qstencilmask.html#backOutputMask-prop">backOutputMask</a></b> : uint</li>
+<li class="fn"><b><a href="qt3drender-qstencilmask.html#frontOutputMask-prop">frontOutputMask</a></b> : uint</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qstencilmask.html#QStencilMask">QStencilMask</a></b>(Qt3DCore::QNode *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qstencilmask.html#backOutputMask-prop">backOutputMask</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qstencilmask.html#frontOutputMask-prop">frontOutputMask</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qstencilmask.html#backOutputMask-prop">setBackOutputMask</a></b>(uint <i>backOutputMask</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qstencilmask.html#frontOutputMask-prop">setFrontOutputMask</a></b>(uint <i>frontOutputMask</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qstencilmask.html#backOutputMask-prop">backOutputMaskChanged</a></b>(uint <i>backOutputMask</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qstencilmask.html#frontOutputMask-prop">frontOutputMaskChanged</a></b>(uint <i>frontOutputMask</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QStencilMask-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A <a href="qt3drender-qstencilmask.html">Qt3DRender::QStencilMask</a> class specifies a write mask for the stencil values after the stencil test. Mask can be specified separately for the front-facing and back-facing polygons. The fragment stencil value is and'd with the mask before it is written to the stencil buffer.</p>
+</div>
+<p><b>See also </b><a href="qt3drender-qstenciltest.html">Qt3DRender::QStencilTest</a>.</p>
+<!-- @@@QStencilMask -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$backOutputMask-prop$$$backOutputMask$$$setBackOutputMaskuint$$$backOutputMaskChangeduint -->
+<h3 class="fn" id="backOutputMask-prop"><a name="backOutputMask-prop"></a><span class="name">backOutputMask</span> : <span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span></h3>
+<p>Holds the write mask for the fragment stencil values for back-facing polygons.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> uint </td><td class="memItemRight bottomAlign"><span class="name"><b>backOutputMask</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setBackOutputMask</b></span>(uint <i>backOutputMask</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>backOutputMaskChanged</b></span>(uint <i>backOutputMask</i>)</td></tr>
+</table></div>
+<!-- @@@backOutputMask -->
+<!-- $$$frontOutputMask-prop$$$frontOutputMask$$$setFrontOutputMaskuint$$$frontOutputMaskChangeduint -->
+<h3 class="fn" id="frontOutputMask-prop"><a name="frontOutputMask-prop"></a><span class="name">frontOutputMask</span> : <span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span></h3>
+<p>Holds the write mask for the fragment stencil values for front-facing polygons.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> uint </td><td class="memItemRight bottomAlign"><span class="name"><b>frontOutputMask</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setFrontOutputMask</b></span>(uint <i>frontOutputMask</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>frontOutputMaskChanged</b></span>(uint <i>frontOutputMask</i>)</td></tr>
+</table></div>
+<!-- @@@frontOutputMask -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QStencilMask[overload1]$$$QStencilMaskQt3DCore::QNode* -->
+<h3 class="fn" id="QStencilMask"><a name="QStencilMask"></a>QStencilMask::<span class="name">QStencilMask</span>(<span class="type"><a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></span> *<i>parent</i> = nullptr)</h3>
+<p>The constructor creates a new <a href="qt3drender-qstencilmask.html">QStencilMask::QStencilMask</a> instance with the specified <i>parent</i>.</p>
+<!-- @@@QStencilMask -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

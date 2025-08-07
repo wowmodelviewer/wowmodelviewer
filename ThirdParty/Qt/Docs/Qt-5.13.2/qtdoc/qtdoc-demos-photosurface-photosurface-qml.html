@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- photosurface.qdoc -->
+  <title>Qt Quick Demo - Photo Surface | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Qt Quick Demo - Photo Surface</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<h1 class="title">Qt Quick Demo - Photo Surface</h1>
+<span class="subtitle"></span>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2017 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+  import QtQuick 2.6
+  import QtQuick.Dialogs 1.0
+  import QtQuick.Window 2.1
+  import Qt.labs.folderlistmodel 1.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-window-window.html">Window</a></span> {
+      <span class="name">id</span>: <span class="name">root</span>
+      <span class="name">visible</span>: <span class="number">true</span>
+      <span class="name">width</span>: <span class="number">1024</span>; <span class="name">height</span>: <span class="number">600</span>
+      <span class="name">color</span>: <span class="string">&quot;black&quot;</span>
+      property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">highestZ</span>: <span class="number">0</span>
+      property <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <span class="name">defaultSize</span>: <span class="number">200</span>
+      property <span class="type"><a href="../qtqml/qml-var.html">var</a></span> <span class="name">currentFrame</span>: <span class="name">undefined</span>
+      property <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <span class="name">surfaceViewportRatio</span>: <span class="number">1.5</span>
+
+      <span class="type"><a href="../qtquickdialogs/qml-qtquick-dialogs-filedialog.html">FileDialog</a></span> {
+          <span class="name">id</span>: <span class="name">fileDialog</span>
+          <span class="name">title</span>: <span class="string">&quot;Choose a folder with some images&quot;</span>
+          <span class="name">selectFolder</span>: <span class="number">true</span>
+          <span class="name">folder</span>: <span class="name">picturesLocation</span>
+          <span class="name">onAccepted</span>: <span class="name">folderModel</span>.<span class="name">folder</span> <span class="operator">=</span> <span class="name">fileUrl</span> <span class="operator">+</span> <span class="string">&quot;/&quot;</span>
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-flickable.html">Flickable</a></span> {
+          <span class="name">id</span>: <span class="name">flick</span>
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">contentWidth</span>: <span class="name">width</span> <span class="operator">*</span> <span class="name">surfaceViewportRatio</span>
+          <span class="name">contentHeight</span>: <span class="name">height</span> <span class="operator">*</span> <span class="name">surfaceViewportRatio</span>
+          <span class="type"><a href="../qtquick/qml-qtquick-repeater.html">Repeater</a></span> {
+              <span class="name">model</span>: <span class="name">FolderListModel</span> {
+                  <span class="name">id</span>: <span class="name">folderModel</span>
+                  <span class="name">objectName</span>: <span class="string">&quot;folderModel&quot;</span>
+                  <span class="name">showDirs</span>: <span class="number">false</span>
+                  <span class="name">nameFilters</span>: <span class="name">imageNameFilters</span>
+              }
+              <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+                  <span class="name">id</span>: <span class="name">photoFrame</span>
+                  <span class="name">width</span>: <span class="name">image</span>.<span class="name">width</span> <span class="operator">*</span> (<span class="number">1</span> <span class="operator">+</span> <span class="number">0.10</span> <span class="operator">*</span> <span class="name">image</span>.<span class="name">height</span> <span class="operator">/</span> <span class="name">image</span>.<span class="name">width</span>)
+                  <span class="name">height</span>: <span class="name">image</span>.<span class="name">height</span> <span class="operator">*</span> <span class="number">1.10</span>
+                  <span class="name">scale</span>: <span class="name">defaultSize</span> <span class="operator">/</span> <span class="name">Math</span>.<span class="name">max</span>(<span class="name">image</span>.<span class="name">sourceSize</span>.<span class="name">width</span>, <span class="name">image</span>.<span class="name">sourceSize</span>.<span class="name">height</span>)
+                  Behavior on <span class="name">scale</span> { <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">duration</span>: <span class="number">200</span> } }
+                  Behavior on <span class="name">x</span> { <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">duration</span>: <span class="number">200</span> } }
+                  Behavior on <span class="name">y</span> { <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">duration</span>: <span class="number">200</span> } }
+                  <span class="name">border</span>.color: <span class="string">&quot;black&quot;</span>
+                  <span class="name">border</span>.width: <span class="number">2</span>
+                  <span class="name">smooth</span>: <span class="number">true</span>
+                  <span class="name">antialiasing</span>: <span class="number">true</span>
+                  <span class="name">Component</span>.onCompleted: {
+                      <span class="name">x</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">random</span>() <span class="operator">*</span> <span class="name">root</span>.<span class="name">width</span> <span class="operator">-</span> <span class="name">width</span> <span class="operator">/</span> <span class="number">2</span>
+                      <span class="name">y</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">random</span>() <span class="operator">*</span> <span class="name">root</span>.<span class="name">height</span> <span class="operator">-</span> <span class="name">height</span> <span class="operator">/</span> <span class="number">2</span>
+                      <span class="name">rotation</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">random</span>() <span class="operator">*</span> <span class="number">13</span> <span class="operator">-</span> <span class="number">6</span>
+                  }
+                  <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+                      <span class="name">id</span>: <span class="name">image</span>
+                      <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+                      <span class="name">fillMode</span>: <span class="name">Image</span>.<span class="name">PreserveAspectFit</span>
+                      <span class="name">source</span>: <span class="name">folderModel</span>.<span class="name">folder</span> <span class="operator">+</span> <span class="name">fileName</span>
+                      <span class="name">antialiasing</span>: <span class="number">true</span>
+                  }
+                  <span class="type"><a href="../qtquick/qml-qtquick-pincharea.html">PinchArea</a></span> {
+                      <span class="name">anchors</span>.fill: <span class="name">parent</span>
+                      <span class="name">pinch</span>.target: <span class="name">photoFrame</span>
+                      <span class="name">pinch</span>.minimumRotation: -<span class="number">360</span>
+                      <span class="name">pinch</span>.maximumRotation: <span class="number">360</span>
+                      <span class="name">pinch</span>.minimumScale: <span class="number">0.1</span>
+                      <span class="name">pinch</span>.maximumScale: <span class="number">10</span>
+                      <span class="name">pinch</span>.dragAxis: <span class="name">Pinch</span>.<span class="name">XAndYAxis</span>
+                      <span class="name">onPinchStarted</span>: <span class="name">setFrameColor</span>();
+                      property <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <span class="name">zRestore</span>: <span class="number">0</span>
+                      <span class="name">onSmartZoom</span>: {
+                          <span class="keyword">if</span> (<span class="name">pinch</span>.<span class="name">scale</span> <span class="operator">&gt;</span> <span class="number">0</span>) {
+                              <span class="name">photoFrame</span>.<span class="name">rotation</span> <span class="operator">=</span> <span class="number">0</span>;
+                              <span class="name">photoFrame</span>.<span class="name">scale</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">min</span>(<span class="name">root</span>.<span class="name">width</span>, <span class="name">root</span>.<span class="name">height</span>) <span class="operator">/</span> <span class="name">Math</span>.<span class="name">max</span>(<span class="name">image</span>.<span class="name">sourceSize</span>.<span class="name">width</span>, <span class="name">image</span>.<span class="name">sourceSize</span>.<span class="name">height</span>) <span class="operator">*</span> <span class="number">0.85</span>
+                              <span class="name">photoFrame</span>.<span class="name">x</span> <span class="operator">=</span> <span class="name">flick</span>.<span class="name">contentX</span> <span class="operator">+</span> (<span class="name">flick</span>.<span class="name">width</span> <span class="operator">-</span> <span class="name">photoFrame</span>.<span class="name">width</span>) <span class="operator">/</span> <span class="number">2</span>
+                              <span class="name">photoFrame</span>.<span class="name">y</span> <span class="operator">=</span> <span class="name">flick</span>.<span class="name">contentY</span> <span class="operator">+</span> (<span class="name">flick</span>.<span class="name">height</span> <span class="operator">-</span> <span class="name">photoFrame</span>.<span class="name">height</span>) <span class="operator">/</span> <span class="number">2</span>
+                              <span class="name">zRestore</span> <span class="operator">=</span> <span class="name">photoFrame</span>.<span class="name">z</span>
+                              <span class="name">photoFrame</span>.<span class="name">z</span> <span class="operator">=</span> ++<span class="name">root</span>.<span class="name">highestZ</span>;
+                          } <span class="keyword">else</span> {
+                              <span class="name">photoFrame</span>.<span class="name">rotation</span> <span class="operator">=</span> <span class="name">pinch</span>.<span class="name">previousAngle</span>
+                              <span class="name">photoFrame</span>.<span class="name">scale</span> <span class="operator">=</span> <span class="name">pinch</span>.<span class="name">previousScale</span>
+                              <span class="name">photoFrame</span>.<span class="name">x</span> <span class="operator">=</span> <span class="name">pinch</span>.<span class="name">previousCenter</span>.<span class="name">x</span> <span class="operator">-</span> <span class="name">photoFrame</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">2</span>
+                              <span class="name">photoFrame</span>.<span class="name">y</span> <span class="operator">=</span> <span class="name">pinch</span>.<span class="name">previousCenter</span>.<span class="name">y</span> <span class="operator">-</span> <span class="name">photoFrame</span>.<span class="name">height</span> <span class="operator">/</span> <span class="number">2</span>
+                              <span class="name">photoFrame</span>.<span class="name">z</span> <span class="operator">=</span> <span class="name">zRestore</span>
+                              --<span class="name">root</span>.<span class="name">highestZ</span>
+                          }
+                      }
+
+                      <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+                          <span class="name">id</span>: <span class="name">dragArea</span>
+                          <span class="name">hoverEnabled</span>: <span class="number">true</span>
+                          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+                          <span class="name">drag</span>.target: <span class="name">photoFrame</span>
+                          <span class="name">scrollGestureEnabled</span>: <span class="number">false</span>  <span class="comment">// 2-finger-flick gesture should pass through to the Flickable</span>
+                          <span class="name">onPressed</span>: {
+                              <span class="name">photoFrame</span>.<span class="name">z</span> <span class="operator">=</span> ++<span class="name">root</span>.<span class="name">highestZ</span>;
+                              <span class="name">parent</span>.<span class="name">setFrameColor</span>();
+                          }
+                          <span class="name">onEntered</span>: <span class="name">parent</span>.<span class="name">setFrameColor</span>();
+                          <span class="name">onWheel</span>: {
+                              <span class="keyword">if</span> (<span class="name">wheel</span>.<span class="name">modifiers</span> <span class="operator">&amp;</span> <span class="name">Qt</span>.<span class="name">ControlModifier</span>) {
+                                  <span class="name">photoFrame</span>.<span class="name">rotation</span> <span class="operator">+=</span> <span class="name">wheel</span>.<span class="name">angleDelta</span>.<span class="name">y</span> <span class="operator">/</span> <span class="number">120</span> <span class="operator">*</span> <span class="number">5</span>;
+                                  <span class="keyword">if</span> (<span class="name">Math</span>.<span class="name">abs</span>(<span class="name">photoFrame</span>.<span class="name">rotation</span>) <span class="operator">&lt;</span> <span class="number">4</span>)
+                                      <span class="name">photoFrame</span>.<span class="name">rotation</span> <span class="operator">=</span> <span class="number">0</span>;
+                              } <span class="keyword">else</span> {
+                                  <span class="name">photoFrame</span>.<span class="name">rotation</span> <span class="operator">+=</span> <span class="name">wheel</span>.<span class="name">angleDelta</span>.<span class="name">x</span> <span class="operator">/</span> <span class="number">120</span>;
+                                  <span class="keyword">if</span> (<span class="name">Math</span>.<span class="name">abs</span>(<span class="name">photoFrame</span>.<span class="name">rotation</span>) <span class="operator">&lt;</span> <span class="number">0.6</span>)
+                                      <span class="name">photoFrame</span>.<span class="name">rotation</span> <span class="operator">=</span> <span class="number">0</span>;
+                                  var scaleBefore = <span class="name">photoFrame</span>.<span class="name">scale</span>;
+                                  <span class="name">photoFrame</span>.<span class="name">scale</span> <span class="operator">+=</span> <span class="name">photoFrame</span>.<span class="name">scale</span> <span class="operator">*</span> <span class="name">wheel</span>.<span class="name">angleDelta</span>.<span class="name">y</span> <span class="operator">/</span> <span class="number">120</span> <span class="operator">/</span> <span class="number">10</span>;
+                              }
+                          }
+                      }
+                      <span class="keyword">function</span> <span class="name">setFrameColor</span>() {
+                          <span class="keyword">if</span> (<span class="name">currentFrame</span>)
+                              <span class="name">currentFrame</span>.<span class="name">border</span>.<span class="name">color</span> <span class="operator">=</span> <span class="string">&quot;black&quot;</span>;
+                          <span class="name">currentFrame</span> <span class="operator">=</span> <span class="name">photoFrame</span>;
+                          <span class="name">currentFrame</span>.<span class="name">border</span>.<span class="name">color</span> <span class="operator">=</span> <span class="string">&quot;red&quot;</span>;
+                      }
+                  }
+              }
+          }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">verticalScrollDecorator</span>
+          <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+          <span class="name">anchors</span>.margins: <span class="number">2</span>
+          <span class="name">color</span>: <span class="string">&quot;cyan&quot;</span>
+          <span class="name">border</span>.color: <span class="string">&quot;black&quot;</span>
+          <span class="name">border</span>.width: <span class="number">1</span>
+          <span class="name">width</span>: <span class="number">5</span>
+          <span class="name">radius</span>: <span class="number">2</span>
+          <span class="name">antialiasing</span>: <span class="number">true</span>
+          <span class="name">height</span>: <span class="name">flick</span>.<span class="name">height</span> <span class="operator">*</span> (<span class="name">flick</span>.<span class="name">height</span> <span class="operator">/</span> <span class="name">flick</span>.<span class="name">contentHeight</span>) <span class="operator">-</span> (<span class="name">width</span> <span class="operator">-</span> <span class="name">anchors</span>.<span class="name">margins</span>) <span class="operator">*</span> <span class="number">2</span>
+          <span class="name">y</span>: (<span class="name">flick</span>.<span class="name">contentY</span> <span class="operator">-</span> <span class="name">flick</span>.<span class="name">originY</span>) <span class="operator">*</span> (<span class="name">flick</span>.<span class="name">height</span> <span class="operator">/</span> <span class="name">flick</span>.<span class="name">contentHeight</span>)
+          NumberAnimation on <span class="name">opacity</span> { <span class="name">id</span>: <span class="name">vfade</span>; <span class="name">to</span>: <span class="number">0</span>; <span class="name">duration</span>: <span class="number">500</span> }
+          <span class="name">onYChanged</span>: { <span class="name">opacity</span> <span class="operator">=</span> <span class="number">1.0</span>; <span class="name">scrollFadeTimer</span>.<span class="name">restart</span>() }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">horizontalScrollDecorator</span>
+          <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+          <span class="name">anchors</span>.margins: <span class="number">2</span>
+          <span class="name">color</span>: <span class="string">&quot;cyan&quot;</span>
+          <span class="name">border</span>.color: <span class="string">&quot;black&quot;</span>
+          <span class="name">border</span>.width: <span class="number">1</span>
+          <span class="name">height</span>: <span class="number">5</span>
+          <span class="name">radius</span>: <span class="number">2</span>
+          <span class="name">antialiasing</span>: <span class="number">true</span>
+          <span class="name">width</span>: <span class="name">flick</span>.<span class="name">width</span> <span class="operator">*</span> (<span class="name">flick</span>.<span class="name">width</span> <span class="operator">/</span> <span class="name">flick</span>.<span class="name">contentWidth</span>) <span class="operator">-</span> (<span class="name">height</span> <span class="operator">-</span> <span class="name">anchors</span>.<span class="name">margins</span>) <span class="operator">*</span> <span class="number">2</span>
+          <span class="name">x</span>: (<span class="name">flick</span>.<span class="name">contentX</span> <span class="operator">-</span> <span class="name">flick</span>.<span class="name">originY</span>) <span class="operator">*</span> (<span class="name">flick</span>.<span class="name">width</span> <span class="operator">/</span> <span class="name">flick</span>.<span class="name">contentWidth</span>)
+          NumberAnimation on <span class="name">opacity</span> { <span class="name">id</span>: <span class="name">hfade</span>; <span class="name">to</span>: <span class="number">0</span>; <span class="name">duration</span>: <span class="number">500</span> }
+          <span class="name">onXChanged</span>: { <span class="name">opacity</span> <span class="operator">=</span> <span class="number">1.0</span>; <span class="name">scrollFadeTimer</span>.<span class="name">restart</span>() }
+      }
+
+      <span class="type"><a href="../qtqml/qml-qtqml-timer.html">Timer</a></span> { <span class="name">id</span>: <span class="name">scrollFadeTimer</span>; <span class="name">interval</span>: <span class="number">1000</span>; <span class="name">onTriggered</span>: { <span class="name">hfade</span>.<span class="name">start</span>(); <span class="name">vfade</span>.<span class="name">start</span>() } }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+          <span class="name">anchors</span>.top: <span class="name">parent</span>.<span class="name">top</span>
+          <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+          <span class="name">anchors</span>.margins: <span class="number">10</span>
+          <span class="name">source</span>: <span class="string">&quot;resources/folder.png&quot;</span>
+          <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+              <span class="name">anchors</span>.fill: <span class="name">parent</span>
+              <span class="name">anchors</span>.margins: -<span class="number">10</span>
+              <span class="name">onClicked</span>: <span class="name">fileDialog</span>.<span class="name">open</span>()
+              <span class="name">hoverEnabled</span>: <span class="number">true</span>
+              <span class="name">onPositionChanged</span>: {
+                  <span class="name">tooltip</span>.<span class="name">visible</span> <span class="operator">=</span> <span class="number">false</span>
+                  <span class="name">hoverTimer</span>.<span class="name">start</span>()
+              }
+              <span class="name">onExited</span>: {
+                  <span class="name">tooltip</span>.<span class="name">visible</span> <span class="operator">=</span> <span class="number">false</span>
+                  <span class="name">hoverTimer</span>.<span class="name">stop</span>()
+              }
+              <span class="type"><a href="../qtqml/qml-qtqml-timer.html">Timer</a></span> {
+                  <span class="name">id</span>: <span class="name">hoverTimer</span>
+                  <span class="name">interval</span>: <span class="number">1000</span>
+                  <span class="name">onTriggered</span>: {
+                      <span class="name">tooltip</span>.<span class="name">x</span> <span class="operator">=</span> <span class="name">parent</span>.<span class="name">mouseX</span>
+                      <span class="name">tooltip</span>.<span class="name">y</span> <span class="operator">=</span> <span class="name">parent</span>.<span class="name">mouseY</span>
+                      <span class="name">tooltip</span>.<span class="name">visible</span> <span class="operator">=</span> <span class="number">true</span>
+                  }
+              }
+              <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+                  <span class="name">id</span>: <span class="name">tooltip</span>
+                  <span class="name">border</span>.color: <span class="string">&quot;black&quot;</span>
+                  <span class="name">color</span>: <span class="string">&quot;beige&quot;</span>
+                  <span class="name">width</span>: <span class="name">tooltipText</span>.<span class="name">implicitWidth</span> <span class="operator">+</span> <span class="number">8</span>
+                  <span class="name">height</span>: <span class="name">tooltipText</span>.<span class="name">implicitHeight</span> <span class="operator">+</span> <span class="number">8</span>
+                  <span class="name">visible</span>: <span class="number">false</span>
+                  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                      <span class="name">id</span>: <span class="name">tooltipText</span>
+                      <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+                      <span class="name">text</span>: <span class="string">&quot;Open an image directory (&quot;</span> <span class="operator">+</span> <span class="name">openShortcut</span>.<span class="name">sequenceString</span> <span class="operator">+</span> <span class="string">&quot;)&quot;</span>
+                  }
+              }
+          }
+          <span class="type"><a href="../qtquick/qml-qtquick-shortcut.html">Shortcut</a></span> {
+              <span class="name">id</span>: <span class="name">openShortcut</span>
+              <span class="name">sequence</span>: <span class="name">StandardKey</span>.<span class="name">Open</span>
+              <span class="name">onActivated</span>: <span class="name">fileDialog</span>.<span class="name">open</span>()
+          }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+          <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+          <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+          <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+          <span class="name">anchors</span>.margins: <span class="number">10</span>
+          <span class="name">color</span>: <span class="string">&quot;darkgrey&quot;</span>
+          <span class="name">wrapMode</span>: <span class="name">Text</span>.<span class="name">WordWrap</span>
+          <span class="name">font</span>.pointSize: <span class="number">8</span>
+          <span class="name">text</span>: <span class="string">&quot;On a touchscreen: use two fingers to zoom and rotate, one finger to drag\n&quot;</span> <span class="operator">+</span>
+                <span class="string">&quot;With a mouse: drag normally, use the vertical wheel to zoom, horizontal wheel to rotate, or hold Ctrl while using the vertical wheel to rotate&quot;</span>
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-shortcut.html">Shortcut</a></span> { <span class="name">sequence</span>: <span class="name">StandardKey</span>.<span class="name">Quit</span>; <span class="name">onActivated</span>: <span class="name">Qt</span>.<span class="name">quit</span>() }
+
+      <span class="name">Component</span>.onCompleted: {
+          <span class="keyword">if</span> (typeof <span class="name">contextInitialUrl</span> <span class="operator">!==</span> <span class="string">'undefined'</span>) {
+              <span class="comment">// Launched from C++ with context properties set.</span>
+              <span class="name">imageNameFilters</span> <span class="operator">=</span> <span class="name">contextImageNameFilters</span>;
+              <span class="name">picturesLocation</span> <span class="operator">=</span> <span class="name">contextPicturesLocation</span>;
+              <span class="keyword">if</span> (<span class="name">contextInitialUrl</span> <span class="operator">==</span> <span class="string">&quot;&quot;</span>)
+                  <span class="name">fileDialog</span>.<span class="name">open</span>();
+              <span class="keyword">else</span>
+                  <span class="name">folderModel</span>.<span class="name">folder</span> <span class="operator">=</span> <span class="name">contextInitialUrl</span> <span class="operator">+</span> <span class="string">&quot;/&quot;</span>;
+          } <span class="keyword">else</span> {
+              <span class="comment">// Launched via QML viewer without context properties set.</span>
+              <span class="name">fileDialog</span>.<span class="name">open</span>();
+          }
+      }
+
+      property <span class="type"><a href="../qtqml/qml-var.html">var</a></span> <span class="name">imageNameFilters</span> : [<span class="string">&quot;*.png&quot;</span>, <span class="string">&quot;*.jpg&quot;</span>, <span class="string">&quot;*.gif&quot;</span>];
+      property <span class="type"><a href="../qtqml/qml-string.html">string</a></span> <span class="name">picturesLocation</span> : <span class="string">&quot;&quot;</span>;
+  }
+
+</pre>

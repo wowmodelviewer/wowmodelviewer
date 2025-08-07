@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdrag.cpp -->
+  <title>Obsolete Members for QDrag | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QDrag</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Obsolete Members for QDrag</h1>
+<p><b>The following members of class <a href="qdrag.html">QDrag</a> are obsolete.</b> They are provided to keep old source code working. We strongly advise against using them in new code.</p>
+<h2>Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>Qt::DropAction </td><td class="memItemRight bottomAlign"><b><a href="qdrag-obsolete.html#start">start</a></b>(Qt::DropActions <i>request</i> = Qt::CopyAction)</td></tr>
+</table></div>
+<h2>Member Function Documentation</h2>
+<!-- $$$start[overload1]$$$startQt::DropActions -->
+<h3 class="fn" id="start"><a name="start"></a><span class="type"><a href="../qtcore/qt.html#DropAction-enum">Qt::DropAction</a></span> QDrag::<span class="name">start</span>(<span class="type"><a href="../qtcore/qt.html#DropAction-enum">Qt::DropActions</a></span> <i>request</i> = Qt::CopyAction)</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p><b>Note:</b> It is recommended to use <a href="qdrag.html#exec">exec</a>() instead of this function.</p>
+<p>Starts the drag and drop operation and returns a value indicating the requested drop action when it is completed. The drop actions that the user can choose from are specified in <i>request</i>. <a href="../qtcore/qt.html#DropAction-enum">Qt::CopyAction</a> is always allowed.</p>
+<p><b>Note:</b> Although the drag and drop operation can take some time, this function does not block the event loop. Other events are still delivered to the application while the operation is performed.</p>
+<p><b>See also </b><a href="qdrag.html#exec">exec</a>().</p>
+<!-- @@@start -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

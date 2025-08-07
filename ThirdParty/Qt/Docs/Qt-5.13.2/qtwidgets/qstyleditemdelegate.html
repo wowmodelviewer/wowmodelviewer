@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qstyleditemdelegate.cpp -->
+  <title>QStyledItemDelegate Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QStyledItemDelegate</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#subclassing-qstyleditemdelegate">Subclassing QStyledItemDelegate</a></li>
+<li class="level2"><a href="#qstyleditemdelegate-vs-qitemdelegate">QStyledItemDelegate vs. QItemDelegate</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QStyledItemDelegate Class</h1>
+<!-- $$$QStyledItemDelegate-brief -->
+<p>The <a href="qstyleditemdelegate.html">QStyledItemDelegate</a> class provides display and editing facilities for data items from a model. <a href="#details">More...</a></p>
+<!-- @@@QStyledItemDelegate -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QStyledItemDelegate&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.2)</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qabstractitemdelegate.html">QAbstractItemDelegate</a></td></tr></table></div><p>This class was introduced in  Qt 4.2).</p>
+<ul>
+<li><a href="qstyleditemdelegate-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstyleditemdelegate.html#QStyledItemDelegate">QStyledItemDelegate</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qstyleditemdelegate.html#dtor.QStyledItemDelegate">~QStyledItemDelegate</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QString </td><td class="memItemRight bottomAlign"><b><a href="qstyleditemdelegate.html#displayText">displayText</a></b>(const QVariant &amp;<i>value</i>, const QLocale &amp;<i>locale</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QItemEditorFactory *</td><td class="memItemRight bottomAlign"><b><a href="qstyleditemdelegate.html#itemEditorFactory">itemEditorFactory</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qstyleditemdelegate.html#setItemEditorFactory">setItemEditorFactory</a></b>(QItemEditorFactory *<i>factory</i>)</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QWidget *</td><td class="memItemRight bottomAlign"><b><a href="qstyleditemdelegate.html#createEditor">createEditor</a></b>(QWidget *<i>parent</i>, const QStyleOptionViewItem &amp;<i>option</i>, const QModelIndex &amp;<i>index</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qstyleditemdelegate.html#paint">paint</a></b>(QPainter *<i>painter</i>, const QStyleOptionViewItem &amp;<i>option</i>, const QModelIndex &amp;<i>index</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qstyleditemdelegate.html#setEditorData">setEditorData</a></b>(QWidget *<i>editor</i>, const QModelIndex &amp;<i>index</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qstyleditemdelegate.html#setModelData">setModelData</a></b>(QWidget *<i>editor</i>, QAbstractItemModel *<i>model</i>, const QModelIndex &amp;<i>index</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSize </td><td class="memItemRight bottomAlign"><b><a href="qstyleditemdelegate.html#sizeHint">sizeHint</a></b>(const QStyleOptionViewItem &amp;<i>option</i>, const QModelIndex &amp;<i>index</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qstyleditemdelegate.html#updateEditorGeometry">updateEditorGeometry</a></b>(QWidget *<i>editor</i>, const QStyleOptionViewItem &amp;<i>option</i>, const QModelIndex &amp;<i>index</i>) const override</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qstyleditemdelegate.html#initStyleOption">initStyleOption</a></b>(QStyleOptionViewItem *<i>option</i>, const QModelIndex &amp;<i>index</i>) const</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qstyleditemdelegate.html#editorEvent">editorEvent</a></b>(QEvent *<i>event</i>, QAbstractItemModel *<i>model</i>, const QStyleOptionViewItem &amp;<i>option</i>, const QModelIndex &amp;<i>index</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qstyleditemdelegate.html#eventFilter">eventFilter</a></b>(QObject *<i>editor</i>, QEvent *<i>event</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QStyledItemDelegate-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>When displaying data from models in Qt item views, e.g&#x2e;, a <a href="qtableview.html">QTableView</a>, the individual items are drawn by a delegate. Also, when an item is edited, it provides an editor widget, which is placed on top of the item view while editing takes place. <a href="qstyleditemdelegate.html">QStyledItemDelegate</a> is the default delegate for all Qt item views, and is installed upon them when they are created.</p>
+<p>The <a href="qstyleditemdelegate.html">QStyledItemDelegate</a> class is one of the <a href="model-view-programming.html#model-view-classes">Model/View Classes</a> and is part of Qt's <a href="model-view-programming.html">model/view framework</a>. The delegate allows the display and editing of items to be developed independently from the model and view.</p>
+<p>The data of items in models are assigned an <a href="../qtcore/qt.html#ItemDataRole-enum">ItemDataRole</a>; each item can store a <a href="../qtcore/qvariant.html">QVariant</a> for each role. <a href="qstyleditemdelegate.html">QStyledItemDelegate</a> implements display and editing for the most common datatypes expected by users, including booleans, integers, and strings.</p>
+<p>The data will be drawn differently depending on which role they have in the model. The following table describes the roles and the data types the delegate can handle for each of them. It is often sufficient to ensure that the model returns appropriate data for each of the roles to determine the appearance of items in views.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Role</th><th >Accepted Types</th></tr></thead>
+<tr valign="top" class="odd"><td ><a href="../qtcore/qt.html#ItemDataRole-enum">Qt::BackgroundRole</a></td><td ><a href="../qtgui/qbrush.html">QBrush</a> (</td></tr>
+<tr valign="top" class="even"><td ><a href="../qtcore/qt.html#ItemDataRole-enum">Qt::BackgroundColorRole</a></td><td ><a href="../qtgui/qcolor.html">QColor</a> (obsolete; use <a href="../qtcore/qt.html#ItemDataRole-enum">Qt::BackgroundRole</a> instead)</td></tr>
+<tr valign="top" class="odd"><td ><a href="../qtcore/qt.html#ItemDataRole-enum">Qt::CheckStateRole</a></td><td ><a href="../qtcore/qt.html#CheckState-enum">Qt::CheckState</a></td></tr>
+<tr valign="top" class="even"><td ><a href="../qtcore/qt.html#ItemDataRole-enum">Qt::DecorationRole</a></td><td ><a href="../qtgui/qicon.html">QIcon</a>, <a href="../qtgui/qpixmap.html">QPixmap</a>, <a href="../qtgui/qimage.html">QImage</a> and <a href="../qtgui/qcolor.html">QColor</a></td></tr>
+<tr valign="top" class="odd"><td ><a href="../qtcore/qt.html#ItemDataRole-enum">Qt::DisplayRole</a></td><td ><a href="../qtcore/qstring.html">QString</a> and types with a string representation</td></tr>
+<tr valign="top" class="even"><td ><a href="../qtcore/qt.html#ItemDataRole-enum">Qt::EditRole</a></td><td >See <a href="qitemeditorfactory.html">QItemEditorFactory</a> for details</td></tr>
+<tr valign="top" class="odd"><td ><a href="../qtcore/qt.html#ItemDataRole-enum">Qt::FontRole</a></td><td ><a href="../qtgui/qfont.html">QFont</a></td></tr>
+<tr valign="top" class="even"><td ><a href="../qtcore/qt.html#ItemDataRole-enum">Qt::SizeHintRole</a></td><td ><a href="../qtcore/qsize.html">QSize</a></td></tr>
+<tr valign="top" class="odd"><td ><a href="../qtcore/qt.html#ItemDataRole-enum">Qt::TextAlignmentRole</a></td><td ><a href="../qtcore/qt.html#AlignmentFlag-enum">Qt::Alignment</a></td></tr>
+<tr valign="top" class="even"><td ><a href="../qtcore/qt.html#ItemDataRole-enum">Qt::ForegroundRole</a></td><td ><a href="../qtgui/qbrush.html">QBrush</a> (</td></tr>
+<tr valign="top" class="odd"><td ><a href="../qtcore/qt.html#ItemDataRole-enum">Qt::TextColorRole</a></td><td ><a href="../qtgui/qcolor.html">QColor</a> (obsolete; use <a href="../qtcore/qt.html#ItemDataRole-enum">Qt::ForegroundRole</a> instead)</td></tr>
+</table></div>
+<p>Editors are created with a <a href="qitemeditorfactory.html">QItemEditorFactory</a>; a default static instance provided by <a href="qitemeditorfactory.html">QItemEditorFactory</a> is installed on all item delegates. You can set a custom factory using <a href="qstyleditemdelegate.html#setItemEditorFactory">setItemEditorFactory</a>() or set a new default factory with <a href="qitemeditorfactory.html#setDefaultFactory">QItemEditorFactory::setDefaultFactory</a>(). It is the data stored in the item model with the <a href="../qtcore/qt.html#ItemDataRole-enum">EditRole</a> that is edited. See the <a href="qitemeditorfactory.html">QItemEditorFactory</a> class for a more high-level introduction to item editor factories. The <a href="qtwidgets-itemviews-coloreditorfactory-example.html">Color Editor Factory</a> example shows how to create custom editors with a factory.</p>
+<a name="subclassing-qstyleditemdelegate"></a>
+<h3 id="subclassing-qstyleditemdelegate">Subclassing QStyledItemDelegate</h3>
+<p>If the delegate does not support painting of the data types you need or you want to customize the drawing of items, you need to subclass <a href="qstyleditemdelegate.html">QStyledItemDelegate</a>, and reimplement <a href="qstyleditemdelegate.html#paint">paint</a>() and possibly <a href="qstyleditemdelegate.html#sizeHint">sizeHint</a>(). The <a href="qstyleditemdelegate.html#paint">paint</a>() function is called individually for each item, and with <a href="qstyleditemdelegate.html#sizeHint">sizeHint</a>(), you can specify the hint for each of them.</p>
+<p>When reimplementing <a href="qstyleditemdelegate.html#paint">paint</a>(), one would typically handle the datatypes one would like to draw and use the superclass implementation for other types.</p>
+<p>The painting of check box indicators are performed by the current style. The style also specifies the size and the bounding rectangles in which to draw the data for the different data roles. The bounding rectangle of the item itself is also calculated by the style. When drawing already supported datatypes, it is therefore a good idea to ask the style for these bounding rectangles. The <a href="qstyle.html">QStyle</a> class description describes this in more detail.</p>
+<p>If you wish to change any of the bounding rectangles calculated by the style or the painting of check box indicators, you can subclass <a href="qstyle.html">QStyle</a>. Note, however, that the size of the items can also be affected by reimplementing <a href="qstyleditemdelegate.html#sizeHint">sizeHint</a>().</p>
+<p>It is possible for a custom delegate to provide editors without the use of an editor item factory. In this case, the following virtual functions must be reimplemented:</p>
+<ul>
+<li><a href="qstyleditemdelegate.html#createEditor">createEditor</a>() returns the widget used to change data from the model and can be reimplemented to customize editing behavior.</li>
+<li><a href="qstyleditemdelegate.html#setEditorData">setEditorData</a>() provides the widget with data to manipulate.</li>
+<li><a href="qstyleditemdelegate.html#updateEditorGeometry">updateEditorGeometry</a>() ensures that the editor is displayed correctly with respect to the item view.</li>
+<li><a href="qstyleditemdelegate.html#setModelData">setModelData</a>() returns updated data to the model.</li>
+</ul>
+<p>The <a href="qtwidgets-itemviews-stardelegate-example.html">Star Delegate</a> example creates editors by reimplementing these methods.</p>
+<a name="qstyleditemdelegate-vs-qitemdelegate"></a>
+<h3 id="qstyleditemdelegate-vs-qitemdelegate">QStyledItemDelegate vs. QItemDelegate</h3>
+<p>Since Qt 4.4, there are two delegate classes: <a href="qitemdelegate.html">QItemDelegate</a> and <a href="qstyleditemdelegate.html">QStyledItemDelegate</a>. However, the default delegate is <a href="qstyleditemdelegate.html">QStyledItemDelegate</a>. These two classes are independent alternatives to painting and providing editors for items in views. The difference between them is that <a href="qstyleditemdelegate.html">QStyledItemDelegate</a> uses the current style to paint its items. We therefore recommend using <a href="qstyleditemdelegate.html">QStyledItemDelegate</a> as the base class when implementing custom delegates or when working with Qt style sheets. The code required for either class should be equal unless the custom delegate needs to use the style for drawing.</p>
+<p>If you wish to customize the painting of item views, you should implement a custom style. Please see the <a href="qstyle.html">QStyle</a> class documentation for details.</p>
+</div>
+<p><b>See also </b><a href="model-view-programming.html#delegate-classes">Delegate Classes</a>, <a href="qitemdelegate.html">QItemDelegate</a>, <a href="qabstractitemdelegate.html">QAbstractItemDelegate</a>, <a href="qstyle.html">QStyle</a>, <a href="qtwidgets-itemviews-spinboxdelegate-example.html">Spin Box Delegate Example</a>, <a href="qtwidgets-itemviews-stardelegate-example.html">Star Delegate Example</a>, and <a href="qtwidgets-itemviews-coloreditorfactory-example.html">Color Editor Factory Example</a>.</p>
+<!-- @@@QStyledItemDelegate -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QStyledItemDelegate[overload1]$$$QStyledItemDelegateQObject* -->
+<h3 class="fn" id="QStyledItemDelegate"><a name="QStyledItemDelegate"></a>QStyledItemDelegate::<span class="name">QStyledItemDelegate</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs an item delegate with the given <i>parent</i>.</p>
+<!-- @@@QStyledItemDelegate -->
+<!-- $$$~QStyledItemDelegate[overload1]$$$~QStyledItemDelegate -->
+<h3 class="fn" id="dtor.QStyledItemDelegate"><a name="dtor.QStyledItemDelegate"></a><code>[virtual] </code>QStyledItemDelegate::<span class="name">~QStyledItemDelegate</span>()</h3>
+<p>Destroys the item delegate.</p>
+<!-- @@@~QStyledItemDelegate -->
+<!-- $$$createEditor[overload1]$$$createEditorQWidget*constQStyleOptionViewItem&constQModelIndex& -->
+<h3 class="fn" id="createEditor"><a name="createEditor"></a><code>[override virtual] </code><span class="type"><a href="qwidget.html">QWidget</a></span> *QStyledItemDelegate::<span class="name">createEditor</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>parent</i>, const <span class="type"><a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a></span> &amp;<i>option</i>, const <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> &amp;<i>index</i>) const</h3>
+<p>Reimplements: <a href="qabstractitemdelegate.html#createEditor">QAbstractItemDelegate::createEditor</a>(QWidget *parent, const QStyleOptionViewItem &amp;option, const QModelIndex &amp;index) const.</p>
+<p>Returns the widget used to edit the item specified by <i>index</i> for editing. The <i>parent</i> widget and style <i>option</i> are used to control how the editor widget appears.</p>
+<p><b>See also </b><a href="qabstractitemdelegate.html#createEditor">QAbstractItemDelegate::createEditor</a>().</p>
+<!-- @@@createEditor -->
+<!-- $$$displayText[overload1]$$$displayTextconstQVariant&constQLocale& -->
+<h3 class="fn" id="displayText"><a name="displayText"></a><code>[virtual] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QStyledItemDelegate::<span class="name">displayText</span>(const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>value</i>, const <span class="type"><a href="../qtcore/qlocale.html">QLocale</a></span> &amp;<i>locale</i>) const</h3>
+<p>This function returns the string that the delegate will use to display the <a href="../qtcore/qt.html#ItemDataRole-enum">Qt::DisplayRole</a> of the model in <i>locale</i>. <i>value</i> is the value of the <a href="../qtcore/qt.html#ItemDataRole-enum">Qt::DisplayRole</a> provided by the model.</p>
+<p>The default implementation uses the <a href="../qtcore/qlocale.html#toString">QLocale::toString</a> to convert <i>value</i> into a <a href="../qtcore/qstring.html">QString</a>.</p>
+<p>This function is not called for empty model indices, i.e&#x2e;, indices for which the model returns an invalid <a href="../qtcore/qvariant.html">QVariant</a>.</p>
+<p><b>See also </b><a href="../qtcore/qabstractitemmodel.html#data">QAbstractItemModel::data</a>().</p>
+<!-- @@@displayText -->
+<!-- $$$editorEvent[overload1]$$$editorEventQEvent*QAbstractItemModel*constQStyleOptionViewItem&constQModelIndex& -->
+<h3 class="fn" id="editorEvent"><a name="editorEvent"></a><code>[override virtual protected] </code><span class="type">bool</span> QStyledItemDelegate::<span class="name">editorEvent</span>(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>event</i>, <span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span> *<i>model</i>, const <span class="type"><a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a></span> &amp;<i>option</i>, const <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> &amp;<i>index</i>)</h3>
+<p>Reimplements: <a href="qabstractitemdelegate.html#editorEvent">QAbstractItemDelegate::editorEvent</a>(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &amp;option, const QModelIndex &amp;index).</p>
+<!-- @@@editorEvent -->
+<!-- $$$eventFilter[overload1]$$$eventFilterQObject*QEvent* -->
+<h3 class="fn" id="eventFilter"><a name="eventFilter"></a><code>[override virtual protected] </code><span class="type">bool</span> QStyledItemDelegate::<span class="name">eventFilter</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>editor</i>, <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="../qtcore/qobject.html#eventFilter">QObject::eventFilter</a>(QObject *watched, QEvent *event).</p>
+<p>Returns <code>true</code> if the given <i>editor</i> is a valid <a href="qwidget.html">QWidget</a> and the given <i>event</i> is handled; otherwise returns <code>false</code>. The following key press events are handled by default:</p>
+<ul>
+<li><b>Tab</b></li>
+<li><b>Backtab</b></li>
+<li><b>Enter</b></li>
+<li><b>Return</b></li>
+<li><b>Esc</b></li>
+</ul>
+<p>If the <i>editor</i>'s type is <a href="qtextedit.html">QTextEdit</a> or <a href="qplaintextedit.html">QPlainTextEdit</a> then <b>Enter</b> and <b>Return</b> keys are <i>not</i> handled.</p>
+<p>In the case of <b>Tab</b>, <b>Backtab</b>, <b>Enter</b> and <b>Return</b> key press events, the <i>editor</i>'s data is committed to the model and the editor is closed. If the <i>event</i> is a <b>Tab</b> key press the view will open an editor on the next item in the view. Likewise, if the <i>event</i> is a <b>Backtab</b> key press the view will open an editor on the <i>previous</i> item in the view.</p>
+<p>If the event is a <b>Esc</b> key press event, the <i>editor</i> is closed <i>without</i> committing its data.</p>
+<p><b>See also </b><a href="qabstractitemdelegate.html#commitData">commitData</a>() and <a href="qabstractitemdelegate.html#closeEditor">closeEditor</a>().</p>
+<!-- @@@eventFilter -->
+<!-- $$$initStyleOption[overload1]$$$initStyleOptionQStyleOptionViewItem*constQModelIndex& -->
+<h3 class="fn" id="initStyleOption"><a name="initStyleOption"></a><code>[virtual protected] </code><span class="type">void</span> QStyledItemDelegate::<span class="name">initStyleOption</span>(<span class="type"><a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a></span> *<i>option</i>, const <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> &amp;<i>index</i>) const</h3>
+<p>Initialize <i>option</i> with the values using the index <i>index</i>. This method is useful for subclasses when they need a <a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a>, but don't want to fill in all the information themselves.</p>
+<p><b>See also </b><a href="qstyleoption.html#initFrom">QStyleOption::initFrom</a>().</p>
+<!-- @@@initStyleOption -->
+<!-- $$$itemEditorFactory[overload1]$$$itemEditorFactory -->
+<h3 class="fn" id="itemEditorFactory"><a name="itemEditorFactory"></a><span class="type"><a href="qitemeditorfactory.html">QItemEditorFactory</a></span> *QStyledItemDelegate::<span class="name">itemEditorFactory</span>() const</h3>
+<p>Returns the editor factory used by the item delegate. If no editor factory is set, the function will return null.</p>
+<p><b>See also </b><a href="qstyleditemdelegate.html#setItemEditorFactory">setItemEditorFactory</a>().</p>
+<!-- @@@itemEditorFactory -->
+<!-- $$$paint[overload1]$$$paintQPainter*constQStyleOptionViewItem&constQModelIndex& -->
+<h3 class="fn" id="paint"><a name="paint"></a><code>[override virtual] </code><span class="type">void</span> QStyledItemDelegate::<span class="name">paint</span>(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> *<i>painter</i>, const <span class="type"><a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a></span> &amp;<i>option</i>, const <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> &amp;<i>index</i>) const</h3>
+<p>Reimplements: <a href="qabstractitemdelegate.html#paint">QAbstractItemDelegate::paint</a>(QPainter *painter, const QStyleOptionViewItem &amp;option, const QModelIndex &amp;index) const.</p>
+<p>Renders the delegate using the given <i>painter</i> and style <i>option</i> for the item specified by <i>index</i>.</p>
+<p>This function paints the item using the view's <a href="qstyle.html">QStyle</a>.</p>
+<p>When reimplementing paint in a subclass. Use the <a href="qstyleditemdelegate.html#initStyleOption">initStyleOption</a>() to set up the <i>option</i> in the same way as the <a href="qstyleditemdelegate.html">QStyledItemDelegate</a>.</p>
+<p>Whenever possible, use the <i>option</i> while painting. Especially its <a href="qstyleoption.html#rect-var">rect</a> variable to decide where to draw and its <a href="qstyleoption.html#state-var">state</a> to determine if it is enabled or selected.</p>
+<p>After painting, you should ensure that the painter is returned to the state it was supplied in when this function was called. For example, it may be useful to call <a href="../qtgui/qpainter.html#save">QPainter::save</a>() before painting and <a href="../qtgui/qpainter.html#restore">QPainter::restore</a>() afterwards.</p>
+<p><b>See also </b><a href="qitemdelegate.html#paint">QItemDelegate::paint</a>(), <a href="qstyle.html#drawControl">QStyle::drawControl</a>(), and <a href="qstyle.html#ControlElement-enum">QStyle::CE_ItemViewItem</a>.</p>
+<!-- @@@paint -->
+<!-- $$$setEditorData[overload1]$$$setEditorDataQWidget*constQModelIndex& -->
+<h3 class="fn" id="setEditorData"><a name="setEditorData"></a><code>[override virtual] </code><span class="type">void</span> QStyledItemDelegate::<span class="name">setEditorData</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>editor</i>, const <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> &amp;<i>index</i>) const</h3>
+<p>Reimplements: <a href="qabstractitemdelegate.html#setEditorData">QAbstractItemDelegate::setEditorData</a>(QWidget *editor, const QModelIndex &amp;index) const.</p>
+<p>Sets the data to be displayed and edited by the <i>editor</i> from the data model item specified by the model <i>index</i>.</p>
+<p>The default implementation stores the data in the <i>editor</i> widget's <a href="../qtcore/properties.html">user property</a>.</p>
+<p><b>See also </b><a href="../qtcore/qmetaproperty.html#isUser">QMetaProperty::isUser</a>().</p>
+<!-- @@@setEditorData -->
+<!-- $$$setItemEditorFactory[overload1]$$$setItemEditorFactoryQItemEditorFactory* -->
+<h3 class="fn" id="setItemEditorFactory"><a name="setItemEditorFactory"></a><span class="type">void</span> QStyledItemDelegate::<span class="name">setItemEditorFactory</span>(<span class="type"><a href="qitemeditorfactory.html">QItemEditorFactory</a></span> *<i>factory</i>)</h3>
+<p>Sets the editor factory to be used by the item delegate to be the <i>factory</i> specified. If no editor factory is set, the item delegate will use the default editor factory.</p>
+<p><b>See also </b><a href="qstyleditemdelegate.html#itemEditorFactory">itemEditorFactory</a>().</p>
+<!-- @@@setItemEditorFactory -->
+<!-- $$$setModelData[overload1]$$$setModelDataQWidget*QAbstractItemModel*constQModelIndex& -->
+<h3 class="fn" id="setModelData"><a name="setModelData"></a><code>[override virtual] </code><span class="type">void</span> QStyledItemDelegate::<span class="name">setModelData</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>editor</i>, <span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span> *<i>model</i>, const <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> &amp;<i>index</i>) const</h3>
+<p>Reimplements: <a href="qabstractitemdelegate.html#setModelData">QAbstractItemDelegate::setModelData</a>(QWidget *editor, QAbstractItemModel *model, const QModelIndex &amp;index) const.</p>
+<p>Gets data from the <i>editor</i> widget and stores it in the specified <i>model</i> at the item <i>index</i>.</p>
+<p>The default implementation gets the value to be stored in the data model from the <i>editor</i> widget's <a href="../qtcore/properties.html">user property</a>.</p>
+<p><b>See also </b><a href="../qtcore/qmetaproperty.html#isUser">QMetaProperty::isUser</a>().</p>
+<!-- @@@setModelData -->
+<!-- $$$sizeHint[overload1]$$$sizeHintconstQStyleOptionViewItem&constQModelIndex& -->
+<h3 class="fn" id="sizeHint"><a name="sizeHint"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QStyledItemDelegate::<span class="name">sizeHint</span>(const <span class="type"><a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a></span> &amp;<i>option</i>, const <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> &amp;<i>index</i>) const</h3>
+<p>Reimplements: <a href="qabstractitemdelegate.html#sizeHint">QAbstractItemDelegate::sizeHint</a>(const QStyleOptionViewItem &amp;option, const QModelIndex &amp;index) const.</p>
+<p>Returns the size needed by the delegate to display the item specified by <i>index</i>, taking into account the style information provided by <i>option</i>.</p>
+<p>This function uses the view's <a href="qstyle.html">QStyle</a> to determine the size of the item.</p>
+<p><b>See also </b><a href="qstyle.html#sizeFromContents">QStyle::sizeFromContents</a>() and <a href="qstyle.html#ContentsType-enum">QStyle::CT_ItemViewItem</a>.</p>
+<!-- @@@sizeHint -->
+<!-- $$$updateEditorGeometry[overload1]$$$updateEditorGeometryQWidget*constQStyleOptionViewItem&constQModelIndex& -->
+<h3 class="fn" id="updateEditorGeometry"><a name="updateEditorGeometry"></a><code>[override virtual] </code><span class="type">void</span> QStyledItemDelegate::<span class="name">updateEditorGeometry</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>editor</i>, const <span class="type"><a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a></span> &amp;<i>option</i>, const <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> &amp;<i>index</i>) const</h3>
+<p>Reimplements: <a href="qabstractitemdelegate.html#updateEditorGeometry">QAbstractItemDelegate::updateEditorGeometry</a>(QWidget *editor, const QStyleOptionViewItem &amp;option, const QModelIndex &amp;index) const.</p>
+<p>Updates the <i>editor</i> for the item specified by <i>index</i> according to the style <i>option</i> given.</p>
+<!-- @@@updateEditorGeometry -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

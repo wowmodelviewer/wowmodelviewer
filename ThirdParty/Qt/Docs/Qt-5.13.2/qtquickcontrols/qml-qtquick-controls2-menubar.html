@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickmenubar.cpp -->
+  <title>MenuBar QML Type | Qt Quick Controls 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td ><a href="qtquick-controls2-qmlmodule.html">QML Types</a></td><td >MenuBar QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">MenuBar QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$MenuBar-brief -->
+<p>Provides a window menu bar. <a href="#details">More...</a></p>
+<!-- @@@MenuBar -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Controls 2.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.10</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-controls2-container.html">Container</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-controls2-menubar-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-menubar.html#contentHeight-prop">contentHeight</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-menubar.html#contentWidth-prop">contentWidth</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-menubar.html#delegate-prop">delegate</a></b></b> : Component</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-menubar.html#menus-prop">menus</a></b></b> : list&lt;Menu&gt;</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-menubar.html#addMenu-method">addMenu</a></b></b>(<i>menu</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-menubar.html#insertMenu-method">insertMenu</a></b></b>(<i>index</i>,  Menu <i>menu</i>)</li>
+<li class="fn">Menu <b><b><a href="qml-qtquick-controls2-menubar.html#menuAt-method">menuAt</a></b></b>(<i>index</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-menubar.html#removeMenu-method">removeMenu</a></b></b>(<i>menu</i>)</li>
+<li class="fn">Menu <b><b><a href="qml-qtquick-controls2-menubar.html#takeMenu-method">takeMenu</a></b></b>(<i>index</i>)</li>
+</ul>
+<!-- $$$MenuBar-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p class="centerAlign"><img src="images/qtquickcontrols2-menubar.png" alt="" /></p><p><a href="qml-qtquick-controls2-menubar.html">MenuBar</a> consists of drop-down menus, and is normally located at the top edge of the window.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a></span> {
+      <span class="name">id</span>: <span class="name">window</span>
+      <span class="name">width</span>: <span class="number">320</span>
+      <span class="name">height</span>: <span class="number">260</span>
+      <span class="name">visible</span>: <span class="number">true</span>
+
+      <span class="name">menuBar</span>: <span class="name">MenuBar</span> {
+          <span class="type"><a href="qml-qtquick-controls2-menu.html">Menu</a></span> {
+              <span class="name">title</span>: <span class="name">qsTr</span>(<span class="string">&quot;&amp;File&quot;</span>)
+              <span class="type"><a href="qml-qtquick-controls2-action.html">Action</a></span> { <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;&amp;New...&quot;</span>) }
+              <span class="type"><a href="qml-qtquick-controls2-action.html">Action</a></span> { <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;&amp;Open...&quot;</span>) }
+              <span class="type"><a href="qml-qtquick-controls2-action.html">Action</a></span> { <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;&amp;Save&quot;</span>) }
+              <span class="type"><a href="qml-qtquick-controls2-action.html">Action</a></span> { <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Save &amp;As...&quot;</span>) }
+              <span class="type"><a href="qml-qtquick-controls2-menuseparator.html">MenuSeparator</a></span> { }
+              <span class="type"><a href="qml-qtquick-controls2-action.html">Action</a></span> { <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;&amp;Quit&quot;</span>) }
+          }
+          <span class="type"><a href="qml-qtquick-controls2-menu.html">Menu</a></span> {
+              <span class="name">title</span>: <span class="name">qsTr</span>(<span class="string">&quot;&amp;Edit&quot;</span>)
+              <span class="type"><a href="qml-qtquick-controls2-action.html">Action</a></span> { <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Cu&amp;t&quot;</span>) }
+              <span class="type"><a href="qml-qtquick-controls2-action.html">Action</a></span> { <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;&amp;Copy&quot;</span>) }
+              <span class="type"><a href="qml-qtquick-controls2-action.html">Action</a></span> { <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;&amp;Paste&quot;</span>) }
+          }
+          <span class="type"><a href="qml-qtquick-controls2-menu.html">Menu</a></span> {
+              <span class="name">title</span>: <span class="name">qsTr</span>(<span class="string">&quot;&amp;Help&quot;</span>)
+              <span class="type"><a href="qml-qtquick-controls2-action.html">Action</a></span> { <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;&amp;About&quot;</span>) }
+          }
+      }
+  }
+
+</pre>
+<p>Typically, menus are statically declared as children of the menu bar, but <a href="qml-qtquick-controls2-menubar.html">MenuBar</a> also provides API to <a href="qml-qtquick-controls2-menubar.html#addMenu-method">add</a>, <a href="qml-qtquick-controls2-menubar.html#insertMenu-method">insert</a>, <a href="qml-qtquick-controls2-menubar.html#removeMenu-method">remove</a>, and <a href="qml-qtquick-controls2-menubar.html#takeMenu-method">take</a> menus dynamically. The menus in a menu bar can be accessed using <a href="qml-qtquick-controls2-menubar.html#menuAt-method">menuAt()</a>.</p>
+<p><b>See also </b><a href="qtquickcontrols2-customize.html#customizing-menubar">Customizing MenuBar</a>, <a href="qml-qtquick-controls2-menu.html">Menu</a>, <a href="qml-qtquick-controls2-menubaritem.html">MenuBarItem</a>, <a href="qtquickcontrols2-menus.html">Menu Controls</a>, and <a href="qtquickcontrols2-focus.html">Focus Management in Qt Quick Controls</a>.</p>
+<!-- @@@MenuBar -->
+<h2>Property Documentation</h2>
+<!-- $$$contentHeight -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="contentHeight-prop"></a><span class="name">contentHeight</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the content height. It is used for calculating the total implicit height of the menu bar.</p>
+<p><b>Note: </b>This property is available in <a href="qml-qtquick-controls2-menubar.html">MenuBar</a> since <a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a>.Controls 2.3 (Qt 5.10), but it was promoted to the Container base type in <a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a>.Controls 2.5 (Qt 5.12).</p><p>This property was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-container.html#contentHeight-prop">Container::contentHeight</a>.</p>
+</div></div><!-- @@@contentHeight -->
+<br/>
+<!-- $$$contentWidth -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="contentWidth-prop"></a><span class="name">contentWidth</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the content width. It is used for calculating the total implicit width of the menu bar.</p>
+<p><b>Note: </b>This property is available in <a href="qml-qtquick-controls2-menubar.html">MenuBar</a> since <a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a>.Controls 2.3 (Qt 5.10), but it was promoted to the Container base type in <a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a>.Controls 2.5 (Qt 5.12).</p><p>This property was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-container.html#contentWidth-prop">Container::contentWidth</a>.</p>
+</div></div><!-- @@@contentWidth -->
+<br/>
+<!-- $$$delegate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="delegate-prop"></a><span class="name">delegate</span> : <span class="type"><a href="../qtqml/qml-qtqml-component.html">Component</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the component that is used to create menu bar items to present menus in the menu bar.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-menubaritem.html">MenuBarItem</a>.</p>
+</div></div><!-- @@@delegate -->
+<br/>
+<!-- $$$menus -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="menus-prop"></a><span class="name">menus</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="qml-qtquick-controls2-menu.html">Menu</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the list of menus.</p>
+<p>The list contains all menus that have been declared in QML as children of the menu bar, and also menus that have been dynamically added or inserted using the <a href="qml-qtquick-controls2-menubar.html#addMenu-method">addMenu()</a> and <a href="qml-qtquick-controls2-menubar.html#insertMenu-method">insertMenu()</a> methods, respectively.</p>
+</div></div><!-- @@@menus -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$addMenu[overload1]$$$addMenu -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="addMenu-method"></a><span class="type">void</span> <span class="name">addMenu</span>(<i>menu</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Adds <i>menu</i> to the end of the list of menus.</p>
+</div></div><!-- @@@addMenu -->
+<br/>
+<!-- $$$insertMenu[overload1]$$$insertMenuMenu -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="insertMenu-method"></a><span class="type">void</span> <span class="name">insertMenu</span>(<i>index</i>,  <span class="type"><a href="qml-qtquick-controls2-menu.html">Menu</a></span> <i>menu</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Inserts <i>menu</i> at <i>index</i>.</p>
+</div></div><!-- @@@insertMenu -->
+<br/>
+<!-- $$$menuAt[overload1]$$$menuAt -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="menuAt-method"></a><span class="type"><a href="qml-qtquick-controls2-menu.html">Menu</a></span> <span class="name">menuAt</span>(<i>index</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the menu at <i>index</i>, or <code>null</code> if it does not exist.</p>
+</div></div><!-- @@@menuAt -->
+<br/>
+<!-- $$$removeMenu[overload1]$$$removeMenu -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="removeMenu-method"></a><span class="type">void</span> <span class="name">removeMenu</span>(<i>menu</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Removes and destroys the specified <i>menu</i>.</p>
+</div></div><!-- @@@removeMenu -->
+<br/>
+<!-- $$$takeMenu[overload1]$$$takeMenu -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="takeMenu-method"></a><span class="type"><a href="qml-qtquick-controls2-menu.html">Menu</a></span> <span class="name">takeMenu</span>(<i>index</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Removes and returns the menu at <i>index</i>.</p>
+<p><b>Note: </b>The ownership of the item is transferred to the caller.</p></div></div><!-- @@@takeMenu -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

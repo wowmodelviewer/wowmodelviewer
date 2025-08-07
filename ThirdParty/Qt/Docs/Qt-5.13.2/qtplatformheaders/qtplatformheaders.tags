@@ -1,0 +1,519 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tagfile>
+    <compound kind="class">
+        <name>QWGLNativeContext</name>
+        <filename>qwglnativecontext.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QWGLNativeContext</name>
+            <anchorfile>qwglnativecontext.html</anchorfile>
+            <anchor>QWGLNativeContext</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QWGLNativeContext</name>
+            <anchorfile>qwglnativecontext.html</anchorfile>
+            <anchor>QWGLNativeContext-1</anchor>
+            <arglist>(HGLRC ctx, HWND wnd)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>HGLRC</type>
+            <name>context</name>
+            <anchorfile>qwglnativecontext.html</anchorfile>
+            <anchor>context</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>HWND</type>
+            <name>window</name>
+            <anchorfile>qwglnativecontext.html</anchorfile>
+            <anchor>window</anchor>
+            <arglist>() const const</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QLinuxFbFunctions</name>
+        <filename>qlinuxfbfunctions.html</filename>
+        <member kind="typedef" type="">
+            <name>LoadKeymapType</name>
+            <anchorfile>qlinuxfbfunctions.html</anchorfile>
+            <anchor>LoadKeymapType-typedef</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>QByteArray</type>
+            <name>loadKeymapTypeIdentifier</name>
+            <anchorfile>qlinuxfbfunctions.html</anchorfile>
+            <anchor>loadKeymapTypeIdentifier</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>void</type>
+            <name>loadKeymap</name>
+            <anchorfile>qlinuxfbfunctions.html</anchorfile>
+            <anchor>loadKeymap</anchor>
+            <arglist>(const QString &amp;filename)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>void</type>
+            <name>switchLang</name>
+            <anchorfile>qlinuxfbfunctions.html</anchorfile>
+            <anchor>switchLang</anchor>
+            <arglist>()</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QXcbWindowFunctions</name>
+        <filename>qxcbwindowfunctions.html</filename>
+        <member kind="enum">
+            <name>WmWindowType</name>
+            <anchor>WmWindowType-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Normal">
+            <anchor>WmWindowType-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Desktop">
+            <anchor>WmWindowType-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Dock">
+            <anchor>WmWindowType-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Toolbar">
+            <anchor>WmWindowType-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Menu">
+            <anchor>WmWindowType-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Utility">
+            <anchor>WmWindowType-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Splash">
+            <anchor>WmWindowType-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Dialog">
+            <anchor>WmWindowType-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="DropDownMenu">
+            <anchor>WmWindowType-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PopupMenu">
+            <anchor>WmWindowType-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Tooltip">
+            <anchor>WmWindowType-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Notification">
+            <anchor>WmWindowType-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Combo">
+            <anchor>WmWindowType-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Dnd">
+            <anchor>WmWindowType-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="KdeOverride">
+            <anchor>WmWindowType-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="typedef" type="QXcbWindowFunctions::WmWindowType">
+            <name>WmWindowTypes</name>
+            <anchorfile>qxcbwindowfunctions.html</anchorfile>
+            <anchor>WmWindowType-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="typedef" type="">
+            <name>SetWmWindowType</name>
+            <anchorfile>qxcbwindowfunctions.html</anchorfile>
+            <anchor>SetWmWindowType-typedef</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>const QByteArray</type>
+            <name>setWmWindowTypeIdentifier</name>
+            <anchorfile>qxcbwindowfunctions.html</anchorfile>
+            <anchor>setWmWindowTypeIdentifier</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>void</type>
+            <name>setWmWindowType</name>
+            <anchorfile>qxcbwindowfunctions.html</anchorfile>
+            <anchor>setWmWindowType</anchor>
+            <arglist>(QWindow *window, QXcbWindowFunctions::WmWindowType type)</arglist>
+        </member>
+        <member kind="typedef" type="">
+            <name>SetWmWindowRole</name>
+            <anchorfile>qxcbwindowfunctions.html</anchorfile>
+            <anchor>SetWmWindowRole-typedef</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>const QByteArray</type>
+            <name>setWmWindowRoleIdentifier</name>
+            <anchorfile>qxcbwindowfunctions.html</anchorfile>
+            <anchor>setWmWindowRoleIdentifier</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>void</type>
+            <name>setWmWindowRole</name>
+            <anchorfile>qxcbwindowfunctions.html</anchorfile>
+            <anchor>setWmWindowRole</anchor>
+            <arglist>(QWindow *window, const QByteArray &amp;role)</arglist>
+        </member>
+        <member kind="typedef" type="">
+            <name>SetWmWindowIconText</name>
+            <anchorfile>qxcbwindowfunctions.html</anchorfile>
+            <anchor>SetWmWindowIconText-typedef</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>const QByteArray</type>
+            <name>setWmWindowIconTextIdentifier</name>
+            <anchorfile>qxcbwindowfunctions.html</anchorfile>
+            <anchor>setWmWindowIconTextIdentifier</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>void</type>
+            <name>setWmWindowIconText</name>
+            <anchorfile>qxcbwindowfunctions.html</anchorfile>
+            <anchor>setWmWindowIconText</anchor>
+            <arglist>(QWindow *window, const QString &amp;text)</arglist>
+        </member>
+        <member kind="typedef" type="">
+            <name>VisualId</name>
+            <anchorfile>qxcbwindowfunctions.html</anchorfile>
+            <anchor>VisualId-typedef</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>const QByteArray</type>
+            <name>visualIdIdentifier</name>
+            <anchorfile>qxcbwindowfunctions.html</anchorfile>
+            <anchor>visualIdIdentifier</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>uint</type>
+            <name>visualId</name>
+            <anchorfile>qxcbwindowfunctions.html</anchorfile>
+            <anchor>visualId</anchor>
+            <arglist>(QWindow *window)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QWindowsWindowFunctions</name>
+        <filename>qwindowswindowfunctions.html</filename>
+        <member kind="enum">
+            <name>TouchWindowTouchType</name>
+            <anchor>TouchWindowTouchType-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="NormalTouch">
+            <anchor>TouchWindowTouchType-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="FineTouch">
+            <anchor>TouchWindowTouchType-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="WantPalmTouch">
+            <anchor>TouchWindowTouchType-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="typedef" type="QWindowsWindowFunctions::TouchWindowTouchType">
+            <name>TouchWindowTouchTypes</name>
+            <anchorfile>qwindowswindowfunctions.html</anchorfile>
+            <anchor>TouchWindowTouchType-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="enum">
+            <name>WindowActivationBehavior</name>
+            <anchor>WindowActivationBehavior-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="DefaultActivateWindow">
+            <anchor>WindowActivationBehavior-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="AlwaysActivateWindow">
+            <anchor>WindowActivationBehavior-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="typedef" type="">
+            <name>SetTouchWindowTouchType</name>
+            <anchorfile>qwindowswindowfunctions.html</anchorfile>
+            <anchor>SetTouchWindowTouchType-typedef</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>const QByteArray</type>
+            <name>setTouchWindowTouchTypeIdentifier</name>
+            <anchorfile>qwindowswindowfunctions.html</anchorfile>
+            <anchor>setTouchWindowTouchTypeIdentifier</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>void</type>
+            <name>setTouchWindowTouchType</name>
+            <anchorfile>qwindowswindowfunctions.html</anchorfile>
+            <anchor>setTouchWindowTouchType</anchor>
+            <arglist>(QWindow *window, QWindowsWindowFunctions::TouchWindowTouchTypes type)</arglist>
+        </member>
+        <member kind="typedef" type="">
+            <name>SetHasBorderInFullScreen</name>
+            <anchorfile>qwindowswindowfunctions.html</anchorfile>
+            <anchor>SetHasBorderInFullScreen-typedef</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>const QByteArray</type>
+            <name>setHasBorderInFullScreenIdentifier</name>
+            <anchorfile>qwindowswindowfunctions.html</anchorfile>
+            <anchor>setHasBorderInFullScreenIdentifier</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>void</type>
+            <name>setHasBorderInFullScreen</name>
+            <anchorfile>qwindowswindowfunctions.html</anchorfile>
+            <anchor>setHasBorderInFullScreen</anchor>
+            <arglist>(QWindow *window, bool border)</arglist>
+        </member>
+        <member kind="typedef" type="">
+            <name>SetHasBorderInFullScreenDefault</name>
+            <anchorfile>qwindowswindowfunctions.html</anchorfile>
+            <anchor>SetHasBorderInFullScreenDefault-typedef</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>const QByteArray</type>
+            <name>setHasBorderInFullScreenDefaultIdentifier</name>
+            <anchorfile>qwindowswindowfunctions.html</anchorfile>
+            <anchor>setHasBorderInFullScreenDefaultIdentifier</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>void</type>
+            <name>setHasBorderInFullScreenDefault</name>
+            <anchorfile>qwindowswindowfunctions.html</anchorfile>
+            <anchor>setHasBorderInFullScreenDefault</anchor>
+            <arglist>(bool border)</arglist>
+        </member>
+        <member kind="typedef" type="">
+            <name>SetWindowActivationBehaviorType</name>
+            <anchorfile>qwindowswindowfunctions.html</anchorfile>
+            <anchor>SetWindowActivationBehaviorType-typedef</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>const QByteArray</type>
+            <name>setWindowActivationBehaviorIdentifier</name>
+            <anchorfile>qwindowswindowfunctions.html</anchorfile>
+            <anchor>setWindowActivationBehaviorIdentifier</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>void</type>
+            <name>setWindowActivationBehavior</name>
+            <anchorfile>qwindowswindowfunctions.html</anchorfile>
+            <anchor>setWindowActivationBehavior</anchor>
+            <arglist>(QWindowsWindowFunctions::WindowActivationBehavior behavior)</arglist>
+        </member>
+        <member kind="typedef" type="">
+            <name>IsTabletModeType</name>
+            <anchorfile>qwindowswindowfunctions.html</anchorfile>
+            <anchor>IsTabletModeType-typedef</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>const QByteArray</type>
+            <name>isTabletModeIdentifier</name>
+            <anchorfile>qwindowswindowfunctions.html</anchorfile>
+            <anchor>isTabletModeIdentifier</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>bool</type>
+            <name>isTabletMode</name>
+            <anchorfile>qwindowswindowfunctions.html</anchorfile>
+            <anchor>isTabletMode</anchor>
+            <arglist>()</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QCocoaWindowFunctions</name>
+        <filename>qcocoawindowfunctions.html</filename>
+        <member kind="typedef" type="">
+            <name>BottomLeftClippedByNSWindowOffset</name>
+            <anchorfile>qcocoawindowfunctions.html</anchorfile>
+            <anchor>BottomLeftClippedByNSWindowOffset-typedef</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>const QByteArray</type>
+            <name>bottomLeftClippedByNSWindowOffsetIdentifier</name>
+            <anchorfile>qcocoawindowfunctions.html</anchorfile>
+            <anchor>bottomLeftClippedByNSWindowOffsetIdentifier</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>QPoint</type>
+            <name>bottomLeftClippedByNSWindowOffset</name>
+            <anchorfile>qcocoawindowfunctions.html</anchorfile>
+            <anchor>bottomLeftClippedByNSWindowOffset</anchor>
+            <arglist>(QWindow *window)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QEGLNativeContext</name>
+        <filename>qeglnativecontext.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QEGLNativeContext</name>
+            <anchorfile>qeglnativecontext.html</anchorfile>
+            <anchor>QEGLNativeContext</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QEGLNativeContext</name>
+            <anchorfile>qeglnativecontext.html</anchorfile>
+            <anchor>QEGLNativeContext-1</anchor>
+            <arglist>(EGLContext ctx, EGLDisplay dpy)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>EGLContext</type>
+            <name>context</name>
+            <anchorfile>qeglnativecontext.html</anchorfile>
+            <anchor>context</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>EGLDisplay</type>
+            <name>display</name>
+            <anchorfile>qeglnativecontext.html</anchorfile>
+            <anchor>display</anchor>
+            <arglist>() const const</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QGLXNativeContext</name>
+        <filename>qglxnativecontext.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QGLXNativeContext</name>
+            <anchorfile>qglxnativecontext.html</anchorfile>
+            <anchor>QGLXNativeContext</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QGLXNativeContext</name>
+            <anchorfile>qglxnativecontext.html</anchorfile>
+            <anchor>QGLXNativeContext-1</anchor>
+            <arglist>(GLXContext ctx, Display *dpy, Window wnd, VisualID vid)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>GLXContext</type>
+            <name>context</name>
+            <anchorfile>qglxnativecontext.html</anchorfile>
+            <anchor>context</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>Display *</type>
+            <name>display</name>
+            <anchorfile>qglxnativecontext.html</anchorfile>
+            <anchor>display</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>Window</type>
+            <name>window</name>
+            <anchorfile>qglxnativecontext.html</anchorfile>
+            <anchor>window</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>VisualID</type>
+            <name>visualId</name>
+            <anchorfile>qglxnativecontext.html</anchorfile>
+            <anchor>visualId</anchor>
+            <arglist>() const const</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QEglFSFunctions</name>
+        <filename>qeglfsfunctions.html</filename>
+        <member kind="typedef" type="">
+            <name>LoadKeymapType</name>
+            <anchorfile>qeglfsfunctions.html</anchorfile>
+            <anchor>LoadKeymapType-typedef</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>QByteArray</type>
+            <name>loadKeymapTypeIdentifier</name>
+            <anchorfile>qeglfsfunctions.html</anchorfile>
+            <anchor>loadKeymapTypeIdentifier</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>void</type>
+            <name>loadKeymap</name>
+            <anchorfile>qeglfsfunctions.html</anchorfile>
+            <anchor>loadKeymap</anchor>
+            <arglist>(const QString &amp;filename)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>void</type>
+            <name>switchLang</name>
+            <anchorfile>qeglfsfunctions.html</anchorfile>
+            <anchor>switchLang</anchor>
+            <arglist>()</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QCocoaNativeContext</name>
+        <filename>qcocoanativecontext.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QCocoaNativeContext</name>
+            <anchorfile>qcocoanativecontext.html</anchorfile>
+            <anchor>QCocoaNativeContext</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QCocoaNativeContext</name>
+            <anchorfile>qcocoanativecontext.html</anchorfile>
+            <anchor>QCocoaNativeContext-1</anchor>
+            <arglist>(NSOpenGLContext *ctx)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>NSOpenGLContext *</type>
+            <name>context</name>
+            <anchorfile>qcocoanativecontext.html</anchorfile>
+            <anchor>context</anchor>
+            <arglist>() const const</arglist>
+        </member>
+    </compound>
+</tagfile>

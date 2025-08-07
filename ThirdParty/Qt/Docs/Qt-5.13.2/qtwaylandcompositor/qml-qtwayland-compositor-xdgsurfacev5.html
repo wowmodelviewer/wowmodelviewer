@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwaylandxdgshellv5.cpp -->
+  <title>XdgSurfaceV5 QML Type | Qt Wayland Compositor 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwaylandcompositor-index.html">Qt Wayland Compositor</a></td><td ><a href="qtwayland-compositor-qmlmodule.html">QML Types</a></td><td >XdgSurfaceV5 QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwaylandcompositor-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">XdgSurfaceV5 QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$XdgSurfaceV5-brief -->
+<p>Provides a <code>xdg_surface</code> that offers desktop-style compositor-specific features to a surface. <a href="#details">More...</a></p>
+<!-- @@@XdgSurfaceV5 -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtWayland.Compositor 1.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr></table></div><ul>
+<li><a href="qml-qtwayland-compositor-xdgsurfacev5-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-xdgsurfacev5.html#parentSurface-prop">parentSurface</a></b></b> : XdgSurfaceV5</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-xdgsurfacev5.html#shell-prop">shell</a></b></b> : XdgShellV5</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-xdgsurfacev5.html#surface-prop">surface</a></b></b> : WaylandSurface</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-xdgsurfacev5.html#title-prop">title</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-xdgsurfacev5.html#windowType-prop">windowType</a></b></b> : enumeration</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtwayland-compositor-xdgsurfacev5.html#ackConfigure-signal">ackConfigure</a></b></b>(<i>serial</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtwayland-compositor-xdgsurfacev5.html#setFullscreen-signal">setFullscreen</a></b></b>(<i>output</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtwayland-compositor-xdgsurfacev5.html#setMaximized-signal">setMaximized</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtwayland-compositor-xdgsurfacev5.html#setMinimized-signal">setMinimized</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-xdgsurfacev5.html#setTopLevel-signal">setTopLevel</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-xdgsurfacev5.html#setTransient-signal">setTransient</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtwayland-compositor-xdgsurfacev5.html#showWindowMenu-signal">showWindowMenu</a></b></b>(<i>seat</i>,  point <i>localSurfacePosition</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtwayland-compositor-xdgsurfacev5.html#startMove-signal">startMove</a></b></b>(<i>seat</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtwayland-compositor-xdgsurfacev5.html#startResize-signal">startResize</a></b></b>(<i>seat</i>,  enumeration <i>edges</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtwayland-compositor-xdgsurfacev5.html#unsetFullscreen-signal">unsetFullscreen</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtwayland-compositor-xdgsurfacev5.html#unsetMaximized-signal">unsetMaximized</a></b></b>()</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtwayland-compositor-xdgsurfacev5.html#initialize-method">initialize</a></b></b>(<i>xdgShell</i>,  WaylandSurface <i>surface</i>,  WaylandResource <i>resource</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtwayland-compositor-xdgsurfacev5.html#sendClose-method">sendClose</a></b></b>()</li>
+<li class="fn">int <b><b><a href="qml-qtwayland-compositor-xdgsurfacev5.html#sendConfigure-method">sendConfigure</a></b></b>(<i>size</i>,  list&lt;uint&gt; <i>states</i>)</li>
+</ul>
+<!-- $$$XdgSurfaceV5-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>This type is part of the <a href="qml-qtwayland-compositor-xdgshellv5.html">XdgShellV5</a> extension and provides a way to extend the functionality of an existing <a href="qml-qtwayland-compositor-waylandsurface.html">WaylandSurface</a> with features specific to desktop-style compositors, such as resizing and moving the surface.</p>
+<p>It corresponds to the Wayland interface <code>xdg_surface</code> for the unstable xdg-shell protocol v5.</p>
+<!-- @@@XdgSurfaceV5 -->
+<h2>Property Documentation</h2>
+<!-- $$$parentSurface -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="parentSurface-prop"></a><span class="name">parentSurface</span> : <span class="type"><a href="qml-qtwayland-compositor-xdgsurfacev5.html">XdgSurfaceV5</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the <a href="qml-qtwayland-compositor-xdgsurfacev5.html" class="obsolete">XdgSurfaceV5</a> parent of this <a href="qml-qtwayland-compositor-xdgsurfacev5.html" class="obsolete">XdgSurfaceV5</a>. When a parent surface is set, the parentSurfaceChanged() signal is guaranteed to be emitted before <a href="qml-qtwayland-compositor-xdgsurfacev5.html#setTopLevel-signal">setTopLevel()</a> and <a href="qml-qtwayland-compositor-xdgsurfacev5.html#setTransient-signal">setTransient()</a>.</p>
+<p><b>See also </b><a href="qml-qtwayland-compositor-xdgsurfacev5.html#setTopLevel-signal">QtWaylandCompositor::XdgSurfaceV5::setTopLevel()</a> and <a href="qml-qtwayland-compositor-xdgsurfacev5.html#setTransient-signal">QtWaylandCompositor::XdgSurfaceV5::setTransient()</a>.</p>
+</div></div><!-- @@@parentSurface -->
+<br/>
+<!-- $$$shell -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="shell-prop"></a><span class="name">shell</span> : <span class="type"><a href="qml-qtwayland-compositor-xdgshellv5.html">XdgShellV5</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the shell associated with this <a href="qml-qtwayland-compositor-xdgsurfacev5.html" class="obsolete">XdgSurfaceV5</a>.</p>
+</div></div><!-- @@@shell -->
+<br/>
+<!-- $$$surface -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="surface-prop"></a><span class="name">surface</span> : <span class="type"><a href="qml-qtwayland-compositor-waylandsurface.html">WaylandSurface</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the surface associated with this <a href="qml-qtwayland-compositor-xdgsurfacev5.html" class="obsolete">XdgSurfaceV5</a>.</p>
+</div></div><!-- @@@surface -->
+<br/>
+<!-- $$$title -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="title-prop"></a><span class="name">title</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the title of the <a href="qml-qtwayland-compositor-xdgsurfacev5.html" class="obsolete">XdgSurfaceV5</a>.</p>
+</div></div><!-- @@@title -->
+<br/>
+<!-- $$$windowType -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="windowType-prop"></a><span class="name">windowType</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the window type of the <a href="qml-qtwayland-compositor-xdgsurfacev5.html" class="obsolete">XdgSurfaceV5</a>.</p>
+</div></div><!-- @@@windowType -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$ackConfigure[overload1]$$$ackConfigure -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="ackConfigure-signal"></a><span class="type">void</span> <span class="name">ackConfigure</span>(<i>serial</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the client has received configure events up to and including the configure event with serial <i>serial</i> and will draw its surface accordingly in the next committed buffer.</p>
+</div></div><!-- @@@ackConfigure -->
+<br/>
+<!-- $$$setFullscreen[overload1]$$$setFullscreen -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="setFullscreen-signal"></a><span class="type">void</span> <span class="name">setFullscreen</span>(<i>output</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the client wants the <code>xdg_surface</code> to be in full screen mode. The client may specify an <i>output</i> it wishes the <code>xdg_surface</code> to be shown on.</p>
+</div></div><!-- @@@setFullscreen -->
+<br/>
+<!-- $$$setMaximized[overload1]$$$setMaximized -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="setMaximized-signal"></a><span class="type">void</span> <span class="name">setMaximized</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the client wants the <code>xdg_surface</code> to be maximized.</p>
+</div></div><!-- @@@setMaximized -->
+<br/>
+<!-- $$$setMinimized[overload1]$$$setMinimized -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="setMinimized-signal"></a><span class="type">void</span> <span class="name">setMinimized</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the client wants the <code>xdg_surface</code> to be minimized.</p>
+</div></div><!-- @@@setMinimized -->
+<br/>
+<!-- $$$setTopLevel[overload1]$$$setTopLevel -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="setTopLevel-signal"></a><span class="name">setTopLevel</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the parent surface is unset, effectively making the window top level.</p>
+</div></div><!-- @@@setTopLevel -->
+<br/>
+<!-- $$$setTransient[overload1]$$$setTransient -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="setTransient-signal"></a><span class="name">setTransient</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the parent surface is set, effectively making the window transient.</p>
+</div></div><!-- @@@setTransient -->
+<br/>
+<!-- $$$showWindowMenu[overload1]$$$showWindowMenupoint -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="showWindowMenu-signal"></a><span class="type">void</span> <span class="name">showWindowMenu</span>(<i>seat</i>,  <span class="type"><a href="../qtqml/qml-point.html">point</a></span> <i>localSurfacePosition</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the client wants to show a context menu at <i>localSurfacePosition</i>, using the Wayland seat <i>seat</i>. It's typically emitted in response to the user right-clicking the window decorations.</p>
+</div></div><!-- @@@showWindowMenu -->
+<br/>
+<!-- $$$startMove[overload1]$$$startMove -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="startMove-signal"></a><span class="type">void</span> <span class="name">startMove</span>(<i>seat</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the client wants to start an interactive move of the <a href="qml-qtwayland-compositor-xdgsurfacev5.html" class="obsolete">XdgSurfaceV5</a>, typically in response to the window decorations being dragged by <i>seat</i>.</p>
+</div></div><!-- @@@startMove -->
+<br/>
+<!-- $$$startResize[overload1]$$$startResizeenumeration -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="startResize-signal"></a><span class="type">void</span> <span class="name">startResize</span>(<i>seat</i>,  <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span> <i>edges</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the client wants to start an interactive resize of the <a href="qml-qtwayland-compositor-xdgsurfacev5.html" class="obsolete">XdgSurfaceV5</a>, typically in response to the window decorations being dragged by <i>seat</i> on the window borders given by <i>edges</i>.</p>
+<p><b>See also </b>QWaylandXdgSurfaceV5::ResizeEdge.</p>
+</div></div><!-- @@@startResize -->
+<br/>
+<!-- $$$unsetFullscreen[overload1]$$$unsetFullscreen -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="unsetFullscreen-signal"></a><span class="type">void</span> <span class="name">unsetFullscreen</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the client doesn't want the <code>xdg_surface</code> to be in full screen mode anymore.</p>
+</div></div><!-- @@@unsetFullscreen -->
+<br/>
+<!-- $$$unsetMaximized[overload1]$$$unsetMaximized -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="unsetMaximized-signal"></a><span class="type">void</span> <span class="name">unsetMaximized</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the client doesn't want the <code>xdg_surface</code> to be maximized anymore.</p>
+</div></div><!-- @@@unsetMaximized -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$initialize[overload1]$$$initializeWaylandSurfaceWaylandResource -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="initialize-method"></a><span class="type">void</span> <span class="name">initialize</span>(<i>xdgShell</i>,  <span class="type"><a href="qml-qtwayland-compositor-waylandsurface.html">WaylandSurface</a></span> <i>surface</i>,  <span class="type">WaylandResource</span> <i>resource</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Initializes the <a href="qml-qtwayland-compositor-xdgsurfacev5.html" class="obsolete">XdgSurfaceV5</a>, associating it with the given <i>xdgShell</i>, <i>surface</i>, and <i>resource</i>.</p>
+</div></div><!-- @@@initialize -->
+<br/>
+<!-- $$$sendClose[overload1]$$$sendClose -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="sendClose-method"></a><span class="type">void</span> <span class="name">sendClose</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Sends a close event to the client.</p>
+</div></div><!-- @@@sendClose -->
+<br/>
+<!-- $$$sendConfigure[overload1]$$$sendConfigurelist<uint> -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="sendConfigure-method"></a><span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">sendConfigure</span>(<i>size</i>,  <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type">uint</span>&gt; <i>states</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Sends a configure event to the client. <i>size</i> contains the pixel size of the surface. Known <i>states</i> are enumerated in XdgSurfaceV5::State.</p>
+</div></div><!-- @@@sendConfigure -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

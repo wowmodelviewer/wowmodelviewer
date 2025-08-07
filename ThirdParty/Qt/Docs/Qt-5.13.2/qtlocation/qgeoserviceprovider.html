@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qgeoserviceprovider.cpp -->
+  <title>QGeoServiceProvider Class | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-module.html">C++ Classes</a></td><td >QGeoServiceProvider</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QGeoServiceProvider Class</h1>
+<!-- $$$QGeoServiceProvider-brief -->
+<p>The <a href="qgeoserviceprovider.html">QGeoServiceProvider</a> class aggregates access to services which provide geographical information. <a href="#details">More...</a></p>
+<!-- @@@QGeoServiceProvider -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QGeoServiceProvider&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += location</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.6</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.6.</p>
+<ul>
+<li><a href="qgeoserviceprovider-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#Error-enum">Error</a></b> { NoError, NotSupportedError, UnknownParameterError, MissingRequiredParameterError, ConnectionError, LoaderError }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#GeocodingFeature-enum">GeocodingFeature</a></b> { NoGeocodingFeatures, OnlineGeocodingFeature, OfflineGeocodingFeature, ReverseGeocodingFeature, LocalizedGeocodingFeature, AnyGeocodingFeatures }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#GeocodingFeature-enum">GeocodingFeatures</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#MappingFeature-enum">MappingFeature</a></b> { NoMappingFeatures, OnlineMappingFeature, OfflineMappingFeature, LocalizedMappingFeature, AnyMappingFeatures }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#MappingFeature-enum">MappingFeatures</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#NavigationFeature-enum">NavigationFeature</a></b> { NoNavigationFeatures, OnlineNavigationFeature, OfflineNavigationFeature, AnyNavigationFeatures }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#NavigationFeature-enum">NavigationFeatures</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#PlacesFeature-enum">PlacesFeature</a></b> { NoPlacesFeatures, OnlinePlacesFeature, OfflinePlacesFeature, SavePlaceFeature, ..., AnyPlacesFeatures }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#PlacesFeature-enum">PlacesFeatures</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#RoutingFeature-enum">RoutingFeature</a></b> { NoRoutingFeatures, OnlineRoutingFeature, OfflineRoutingFeature, LocalizedRoutingFeature, ..., AnyRoutingFeatures }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#RoutingFeature-enum">RoutingFeatures</a></b></td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#QGeoServiceProvider">QGeoServiceProvider</a></b>(const QString &amp;<i>providerName</i>, const QVariantMap &amp;<i>parameters</i> = QVariantMap(), bool <i>allowExperimental</i> = false)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#dtor.QGeoServiceProvider">~QGeoServiceProvider</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoServiceProvider::Error </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#error">error</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#errorString">errorString</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoServiceProvider::Error </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#geocodingError">geocodingError</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#geocodingErrorString">geocodingErrorString</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoServiceProvider::GeocodingFeatures </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#geocodingFeatures">geocodingFeatures</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoCodingManager *</td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#geocodingManager">geocodingManager</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoServiceProvider::Error </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#mappingError">mappingError</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#mappingErrorString">mappingErrorString</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoServiceProvider::MappingFeatures </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#mappingFeatures">mappingFeatures</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoServiceProvider::Error </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#navigationError">navigationError</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#navigationErrorString">navigationErrorString</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoServiceProvider::NavigationFeatures </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#navigationFeatures">navigationFeatures</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QNavigationManager *</td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#navigationManager">navigationManager</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPlaceManager *</td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#placeManager">placeManager</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoServiceProvider::Error </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#placesError">placesError</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#placesErrorString">placesErrorString</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoServiceProvider::PlacesFeatures </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#placesFeatures">placesFeatures</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoServiceProvider::Error </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#routingError">routingError</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#routingErrorString">routingErrorString</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoServiceProvider::RoutingFeatures </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#routingFeatures">routingFeatures</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoRoutingManager *</td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#routingManager">routingManager</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#setAllowExperimental">setAllowExperimental</a></b>(bool <i>allow</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#setLocale">setLocale</a></b>(const QLocale &amp;<i>locale</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#setParameters">setParameters</a></b>(const QVariantMap &amp;<i>parameters</i>)</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qgeoserviceprovider.html#availableServiceProviders">availableServiceProviders</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QGeoServiceProvider-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The Maps and Navigation API allows people to access various kinds of geographical information, including functionality to perform geocoding, routing and the display of maps. The <a href="qgeoserviceprovider.html">QGeoServiceProvider</a> aggregates the access to a set of these services that are provided by a single vendor.</p>
+<p>It is possible to mix and match service providers for the various domains, so that a geocoding manager from one service provider can be used with a geographic routing manager from another service provider.</p>
+<p>This is not recommended unless the client is able to verify that the data provided by the different services are compatible, as differences in the underlying data sets could cause serious incongruences between the services.</p>
+<p>Subclasses of <a href="qgeoserviceprovider.html">QGeoServiceProvider</a> guarantee that the different services that they provide are interoperable.</p>
+<p>At this point there are two GeoServices plugins packaged with Qt. They are accessible using their provider names:</p>
+<ul>
+<li>&quot;mapbox&quot; -&gt; <a href="location-plugin-mapbox.html">Mapbox service</a></li>
+<li>&quot;here&quot; -&gt; <a href="location-plugin-here.html">HERE Services</a></li>
+<li>&quot;osm&quot; -&gt; <a href="location-plugin-osm.html">OpenStreetMap Services</a></li>
+<li>&quot;esri&quot; -&gt; <a href="location-plugin-esri.html">ESRI Services</a></li>
+</ul>
+<p>Each service provider must follow a naming convention for their service specific parameter names/keys. They use the provider name as prefix for all their parameter names. For example, the <a href="location-plugin-here.html">HERE</a> service provider requires the <code>here.app_id</code> parameter. When a provider is loaded only those parameters are passed on whose parameter names start with the provider name. This avoids the sharing sensitive parameters such as confidential <code>token</code> or <code>app_id</code> parameters with other plugins.</p>
+<p>Please check the GeoServices plugin specific documentation to obtain a complete list of the available parameter names/keys and values.</p>
+</div>
+<!-- @@@QGeoServiceProvider -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Error$$$NoError$$$NotSupportedError$$$UnknownParameterError$$$MissingRequiredParameterError$$$ConnectionError$$$LoaderError -->
+<h3 class="fn" id="Error-enum"><a name="Error-enum"></a>enum QGeoServiceProvider::<span class="name">Error</span></h3>
+<p>Describes an error related to the loading and setup of a service provider plugin.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::NoError</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">No error has occurred.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::NotSupportedError</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The plugin does not support this functionality.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::UnknownParameterError</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The plugin did not recognize one of the parameters it was given.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::MissingRequiredParameterError</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">The plugin did not find one of the parameters it was expecting.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::ConnectionError</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">The plugin could not connect to its backend service or database.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::LoaderError</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">The plugin failed to load.</td></tr>
+</table></div>
+<!-- @@@Error -->
+<!-- $$$GeocodingFeature$$$NoGeocodingFeatures$$$OnlineGeocodingFeature$$$OfflineGeocodingFeature$$$ReverseGeocodingFeature$$$LocalizedGeocodingFeature$$$AnyGeocodingFeatures -->
+<h3 class="flags" id="GeocodingFeature-enum"><a name="GeocodingFeature-enum"></a>enum QGeoServiceProvider::<span class="name">GeocodingFeature</span><br/>flags QGeoServiceProvider::<span class="name">GeocodingFeatures</span></h3>
+<p>Describes the geocoding features supported by the geo service provider.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::NoGeocodingFeatures</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">No geocoding features are supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::OnlineGeocodingFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;0)</code></td><td class="topAlign">Online geocoding is supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::OfflineGeocodingFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;1)</code></td><td class="topAlign">Offline geocoding is supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::ReverseGeocodingFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;2)</code></td><td class="topAlign">Reverse geocoding is supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::LocalizedGeocodingFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;3)</code></td><td class="topAlign">Supports returning geocoding results with localized addresses.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::AnyGeocodingFeatures</code></td><td class="topAlign tblval"><code>~(0)</code></td><td class="topAlign">Matches a geo service provider that provides any geocoding features.</td></tr>
+</table></div>
+<p>The GeocodingFeatures type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;GeocodingFeature&gt;. It stores an OR combination of GeocodingFeature values.</p>
+<!-- @@@GeocodingFeature -->
+<!-- $$$MappingFeature$$$NoMappingFeatures$$$OnlineMappingFeature$$$OfflineMappingFeature$$$LocalizedMappingFeature$$$AnyMappingFeatures -->
+<h3 class="flags" id="MappingFeature-enum"><a name="MappingFeature-enum"></a>enum QGeoServiceProvider::<span class="name">MappingFeature</span><br/>flags QGeoServiceProvider::<span class="name">MappingFeatures</span></h3>
+<p>Describes the mapping features supported by the geo service provider.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::NoMappingFeatures</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">No mapping features are supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::OnlineMappingFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;0)</code></td><td class="topAlign">Online mapping is supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::OfflineMappingFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;1)</code></td><td class="topAlign">Offline mapping is supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::LocalizedMappingFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;2)</code></td><td class="topAlign">Supports returning localized map data.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::AnyMappingFeatures</code></td><td class="topAlign tblval"><code>~(0)</code></td><td class="topAlign">Matches a geo service provider that provides any mapping features.</td></tr>
+</table></div>
+<p>The MappingFeatures type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;MappingFeature&gt;. It stores an OR combination of MappingFeature values.</p>
+<!-- @@@MappingFeature -->
+<!-- $$$NavigationFeature$$$NoNavigationFeatures$$$OnlineNavigationFeature$$$OfflineNavigationFeature$$$AnyNavigationFeatures -->
+<h3 class="flags" id="NavigationFeature-enum"><a name="NavigationFeature-enum"></a>enum QGeoServiceProvider::<span class="name">NavigationFeature</span><br/>flags QGeoServiceProvider::<span class="name">NavigationFeatures</span></h3>
+<p>Describes the navigation features supported by the geo service provider.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::NoNavigationFeatures</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">No navigation features are supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::OnlineNavigationFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;0)</code></td><td class="topAlign">Online navigation is supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::OfflineNavigationFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;1)</code></td><td class="topAlign">Offline navigation is supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::AnyNavigationFeatures</code></td><td class="topAlign tblval"><code>~(0)</code></td><td class="topAlign">Matches a geo service provider that provides any navigation features.</td></tr>
+</table></div>
+<p>The NavigationFeatures type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;NavigationFeature&gt;. It stores an OR combination of NavigationFeature values.</p>
+<!-- @@@NavigationFeature -->
+<!-- $$$PlacesFeature$$$NoPlacesFeatures$$$OnlinePlacesFeature$$$OfflinePlacesFeature$$$SavePlaceFeature$$$RemovePlaceFeature$$$SaveCategoryFeature$$$RemoveCategoryFeature$$$PlaceRecommendationsFeature$$$SearchSuggestionsFeature$$$LocalizedPlacesFeature$$$NotificationsFeature$$$PlaceMatchingFeature$$$AnyPlacesFeatures -->
+<h3 class="flags" id="PlacesFeature-enum"><a name="PlacesFeature-enum"></a>enum QGeoServiceProvider::<span class="name">PlacesFeature</span><br/>flags QGeoServiceProvider::<span class="name">PlacesFeatures</span></h3>
+<p>Describes the places features supported by the geo service provider.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::NoPlacesFeatures</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">No places features are supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::OnlinePlacesFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;0)</code></td><td class="topAlign">Online places is supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::OfflinePlacesFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;1)</code></td><td class="topAlign">Offline places is supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::SavePlaceFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;2)</code></td><td class="topAlign">Saving places is supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::RemovePlaceFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;3)</code></td><td class="topAlign">Removing or deleting places is supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::SaveCategoryFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;4)</code></td><td class="topAlign">Saving categories is supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::RemoveCategoryFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;5)</code></td><td class="topAlign">Removing or deleting categories is supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::PlaceRecommendationsFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;6)</code></td><td class="topAlign">Searching for recommended places similar to another place is supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::SearchSuggestionsFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;7)</code></td><td class="topAlign">Search suggestions is supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::LocalizedPlacesFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;8)</code></td><td class="topAlign">Supports returning localized place data.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::NotificationsFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;9)</code></td><td class="topAlign">Notifications of place and category changes is supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::PlaceMatchingFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;10)</code></td><td class="topAlign">Supports matching places from two different geo service providers.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::AnyPlacesFeatures</code></td><td class="topAlign tblval"><code>~(0)</code></td><td class="topAlign">Matches a geo service provider that provides any places features.</td></tr>
+</table></div>
+<p>The PlacesFeatures type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;PlacesFeature&gt;. It stores an OR combination of PlacesFeature values.</p>
+<!-- @@@PlacesFeature -->
+<!-- $$$RoutingFeature$$$NoRoutingFeatures$$$OnlineRoutingFeature$$$OfflineRoutingFeature$$$LocalizedRoutingFeature$$$RouteUpdatesFeature$$$AlternativeRoutesFeature$$$ExcludeAreasRoutingFeature$$$AnyRoutingFeatures -->
+<h3 class="flags" id="RoutingFeature-enum"><a name="RoutingFeature-enum"></a>enum QGeoServiceProvider::<span class="name">RoutingFeature</span><br/>flags QGeoServiceProvider::<span class="name">RoutingFeatures</span></h3>
+<p>Describes the routing features supported by the geo service provider.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::NoRoutingFeatures</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">No routing features are supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::OnlineRoutingFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;0)</code></td><td class="topAlign">Online routing is supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::OfflineRoutingFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;1)</code></td><td class="topAlign">Offline routing is supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::LocalizedRoutingFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;2)</code></td><td class="topAlign">Supports returning routes with localized addresses and instructions.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::RouteUpdatesFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;3)</code></td><td class="topAlign">Updating an existing route based on the current position is supported.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::AlternativeRoutesFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;4)</code></td><td class="topAlign">Supports returning alternative routes.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::ExcludeAreasRoutingFeature</code></td><td class="topAlign tblval"><code>(1&lt;&lt;5)</code></td><td class="topAlign">Supports specifying a areas which the returned route must not cross.</td></tr>
+<tr><td class="topAlign"><code>QGeoServiceProvider::AnyRoutingFeatures</code></td><td class="topAlign tblval"><code>~(0)</code></td><td class="topAlign">Matches a geo service provider that provides any routing features.</td></tr>
+</table></div>
+<p>The RoutingFeatures type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;RoutingFeature&gt;. It stores an OR combination of RoutingFeature values.</p>
+<!-- @@@RoutingFeature -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QGeoServiceProvider[overload1]$$$QGeoServiceProviderconstQString&constQVariantMap&bool -->
+<h3 class="fn" id="QGeoServiceProvider"><a name="QGeoServiceProvider"></a>QGeoServiceProvider::<span class="name">QGeoServiceProvider</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>providerName</i>, const <span class="type"><a href="../qtcore/qvariant.html#QVariantMap-typedef">QVariantMap</a></span> &amp;<i>parameters</i> = QVariantMap(), <span class="type">bool</span> <i>allowExperimental</i> = false)</h3>
+<p>Constructs a <a href="qgeoserviceprovider.html">QGeoServiceProvider</a> whose backend has the name <i>providerName</i>, using the provided <i>parameters</i>.</p>
+<p>If multiple plugins have the same <i>providerName</i>, the plugin with the highest reported providerVersion() will be used.</p>
+<p>If <i>allowExperimental</i> is true then plugins marked as experimental may be used. By default experimental plugins are not considered.</p>
+<p>If no plugin matching <i>providerName</i> was able to be loaded then <a href="qgeoserviceprovider.html#error">error</a>() and <a href="qgeoserviceprovider.html#errorString">errorString</a>() will provide details about why this is the case.</p>
+<p><b>Note: </b>Before the list of <i>parameters</i> is passed on to the to-be-loaded provider plugin, the list is filtered to avoid the sharing of plugin specific parameters with unrelated provider plugins. Plugin specific parameter keys must be prefixed with the provider name (e.g&#x2e; <code>here.app_id</code>).</p><!-- @@@QGeoServiceProvider -->
+<!-- $$$~QGeoServiceProvider[overload1]$$$~QGeoServiceProvider -->
+<h3 class="fn" id="dtor.QGeoServiceProvider"><a name="dtor.QGeoServiceProvider"></a><code>[virtual] </code>QGeoServiceProvider::<span class="name">~QGeoServiceProvider</span>()</h3>
+<p>Destroys the service provider object.</p>
+<!-- @@@~QGeoServiceProvider -->
+<!-- $$$availableServiceProviders[overload1]$$$availableServiceProviders -->
+<h3 class="fn" id="availableServiceProviders"><a name="availableServiceProviders"></a><code>[static] </code><span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> QGeoServiceProvider::<span class="name">availableServiceProviders</span>()</h3>
+<p>Returns a list of names of the available service providers, for use with the <a href="qgeoserviceprovider.html">QGeoServiceProvider</a> constructors.</p>
+<!-- @@@availableServiceProviders -->
+<!-- $$$error[overload1]$$$error -->
+<h3 class="fn" id="error"><a name="error"></a><span class="type"><a href="qgeoserviceprovider.html#Error-enum">QGeoServiceProvider::Error</a></span> QGeoServiceProvider::<span class="name">error</span>() const</h3>
+<p>Returns an error code describing the error which occurred during the last operation that was performed by this class.</p>
+<!-- @@@error -->
+<!-- $$$errorString[overload1]$$$errorString -->
+<h3 class="fn" id="errorString"><a name="errorString"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QGeoServiceProvider::<span class="name">errorString</span>() const</h3>
+<p>Returns a string describing the error which occurred during the last operation that was performed by this class.</p>
+<!-- @@@errorString -->
+<!-- $$$geocodingError[overload1]$$$geocodingError -->
+<h3 class="fn" id="geocodingError"><a name="geocodingError"></a><span class="type"><a href="qgeoserviceprovider.html#Error-enum">QGeoServiceProvider::Error</a></span> QGeoServiceProvider::<span class="name">geocodingError</span>() const</h3>
+<p>Returns an error code describing the error which occurred during the last attempt to create a geocoding manager.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@geocodingError -->
+<!-- $$$geocodingErrorString[overload1]$$$geocodingErrorString -->
+<h3 class="fn" id="geocodingErrorString"><a name="geocodingErrorString"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QGeoServiceProvider::<span class="name">geocodingErrorString</span>() const</h3>
+<p>Returns a string describing the error which occurred during the last attempt to create a geocoding manager.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@geocodingErrorString -->
+<!-- $$$geocodingFeatures[overload1]$$$geocodingFeatures -->
+<h3 class="fn" id="geocodingFeatures"><a name="geocodingFeatures"></a><span class="type"><a href="qgeoserviceprovider.html#GeocodingFeature-enum">QGeoServiceProvider::GeocodingFeatures</a></span> QGeoServiceProvider::<span class="name">geocodingFeatures</span>() const</h3>
+<p>Returns the geocoding features supported by the geo service provider.</p>
+<!-- @@@geocodingFeatures -->
+<!-- $$$geocodingManager[overload1]$$$geocodingManager -->
+<h3 class="fn" id="geocodingManager"><a name="geocodingManager"></a><span class="type"><a href="qgeocodingmanager.html">QGeoCodingManager</a></span> *QGeoServiceProvider::<span class="name">geocodingManager</span>() const</h3>
+<p>Returns the <a href="qgeocodingmanager.html">QGeoCodingManager</a> made available by the service provider.</p>
+<p>This function will return 0 if the service provider does not provide any geocoding services.</p>
+<p>This function will attempt to construct a <a href="qgeocodingmanager.html">QGeoCodingManager</a> instance when it is called for the first time. If the attempt is successful the <a href="qgeocodingmanager.html">QGeoCodingManager</a> will be cached, otherwise each call of this function will attempt to construct a <a href="qgeocodingmanager.html">QGeoCodingManager</a> instance until the construction is successful.</p>
+<p>The <a href="qgeocodingmanager.html">QGeoCodingManager</a> is owned by this <a href="qgeoserviceprovider.html">QGeoServiceProvider</a> and should not be deleted separately. Users should assume that deleting the <a href="qgeoserviceprovider.html">QGeoServiceProvider</a> renders the pointer returned by this method invalid.</p>
+<p>After this function has been called, <a href="qgeoserviceprovider.html#error">error</a>() and <a href="qgeoserviceprovider.html#errorString">errorString</a>() will report any errors which occurred during the construction of the <a href="qgeocodingmanager.html">QGeoCodingManager</a>.</p>
+<!-- @@@geocodingManager -->
+<!-- $$$mappingError[overload1]$$$mappingError -->
+<h3 class="fn" id="mappingError"><a name="mappingError"></a><span class="type"><a href="qgeoserviceprovider.html#Error-enum">QGeoServiceProvider::Error</a></span> QGeoServiceProvider::<span class="name">mappingError</span>() const</h3>
+<p>Returns an error code describing the error which occurred during the last attempt to create a mapping manager.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@mappingError -->
+<!-- $$$mappingErrorString[overload1]$$$mappingErrorString -->
+<h3 class="fn" id="mappingErrorString"><a name="mappingErrorString"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QGeoServiceProvider::<span class="name">mappingErrorString</span>() const</h3>
+<p>Returns a string describing the error which occurred during the last attempt to create a mapping manager.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@mappingErrorString -->
+<!-- $$$mappingFeatures[overload1]$$$mappingFeatures -->
+<h3 class="fn" id="mappingFeatures"><a name="mappingFeatures"></a><span class="type"><a href="qgeoserviceprovider.html#MappingFeature-enum">QGeoServiceProvider::MappingFeatures</a></span> QGeoServiceProvider::<span class="name">mappingFeatures</span>() const</h3>
+<p>Returns the mapping features supported by the geo service provider.</p>
+<!-- @@@mappingFeatures -->
+<!-- $$$navigationError[overload1]$$$navigationError -->
+<h3 class="fn" id="navigationError"><a name="navigationError"></a><span class="type"><a href="qgeoserviceprovider.html#Error-enum">QGeoServiceProvider::Error</a></span> QGeoServiceProvider::<span class="name">navigationError</span>() const</h3>
+<p>Returns an error code describing the error which occurred during the last attempt to create a navigation manager.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@navigationError -->
+<!-- $$$navigationErrorString[overload1]$$$navigationErrorString -->
+<h3 class="fn" id="navigationErrorString"><a name="navigationErrorString"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QGeoServiceProvider::<span class="name">navigationErrorString</span>() const</h3>
+<p>Returns a string describing the error which occurred during the last attempt to create a navigation manager.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@navigationErrorString -->
+<!-- $$$navigationFeatures[overload1]$$$navigationFeatures -->
+<h3 class="fn" id="navigationFeatures"><a name="navigationFeatures"></a><span class="type"><a href="qgeoserviceprovider.html#NavigationFeature-enum">QGeoServiceProvider::NavigationFeatures</a></span> QGeoServiceProvider::<span class="name">navigationFeatures</span>() const</h3>
+<p>Returns the navigation features supported by the geo service provider.</p>
+<p>This function was introduced in  QtLocation 5.11.</p>
+<!-- @@@navigationFeatures -->
+<!-- $$$navigationManager[overload1]$$$navigationManager -->
+<h3 class="fn" id="navigationManager"><a name="navigationManager"></a><span class="type">QNavigationManager</span> *QGeoServiceProvider::<span class="name">navigationManager</span>() const</h3>
+<p>Returns a new QNavigationManager made available by the service provider.</p>
+<p>After this function has been called, <a href="qgeoserviceprovider.html#error">error</a>() and <a href="qgeoserviceprovider.html#errorString">errorString</a>() will report any errors which occurred during the construction of the QNavigationManagerEngine.</p>
+<!-- @@@navigationManager -->
+<!-- $$$placeManager[overload1]$$$placeManager -->
+<h3 class="fn" id="placeManager"><a name="placeManager"></a><span class="type"><a href="qplacemanager.html">QPlaceManager</a></span> *QGeoServiceProvider::<span class="name">placeManager</span>() const</h3>
+<p>Returns the <a href="qplacemanager.html">QPlaceManager</a> made available by the service provider.</p>
+<p>This function will attempt to construct a <a href="qplacemanager.html">QPlaceManager</a> instance when it is called for the first time. If the attempt is successful the <a href="qplacemanager.html">QPlaceManager</a> will be cached, otherwise each call of this function will attempt to construct a <a href="qplace.html">QPlace</a> instance until the construction is successful.</p>
+<p>The QGeoPlaceManager is owned by this <a href="qgeoserviceprovider.html">QGeoServiceProvider</a> and should not be deleted separately. Users should assume that deleting the <a href="qgeoserviceprovider.html">QGeoServiceProvider</a> renders the pointer returned by this method invalid.</p>
+<p>After this function has been called, <a href="qgeoserviceprovider.html#error">error</a>() and <a href="qgeoserviceprovider.html#errorString">errorString</a>() will report any errors which occurred during the construction of the <a href="qplacemanager.html">QPlaceManager</a>.</p>
+<!-- @@@placeManager -->
+<!-- $$$placesError[overload1]$$$placesError -->
+<h3 class="fn" id="placesError"><a name="placesError"></a><span class="type"><a href="qgeoserviceprovider.html#Error-enum">QGeoServiceProvider::Error</a></span> QGeoServiceProvider::<span class="name">placesError</span>() const</h3>
+<p>Returns an error code describing the error which occurred during the last attempt to create a places manager.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@placesError -->
+<!-- $$$placesErrorString[overload1]$$$placesErrorString -->
+<h3 class="fn" id="placesErrorString"><a name="placesErrorString"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QGeoServiceProvider::<span class="name">placesErrorString</span>() const</h3>
+<p>Returns a string describing the error which occurred during the last attempt to create a places manager.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@placesErrorString -->
+<!-- $$$placesFeatures[overload1]$$$placesFeatures -->
+<h3 class="fn" id="placesFeatures"><a name="placesFeatures"></a><span class="type"><a href="qgeoserviceprovider.html#PlacesFeature-enum">QGeoServiceProvider::PlacesFeatures</a></span> QGeoServiceProvider::<span class="name">placesFeatures</span>() const</h3>
+<p>Returns the places features supported by the geo service provider.</p>
+<!-- @@@placesFeatures -->
+<!-- $$$routingError[overload1]$$$routingError -->
+<h3 class="fn" id="routingError"><a name="routingError"></a><span class="type"><a href="qgeoserviceprovider.html#Error-enum">QGeoServiceProvider::Error</a></span> QGeoServiceProvider::<span class="name">routingError</span>() const</h3>
+<p>Returns an error code describing the error which occurred during the last attempt to create a routing manager.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@routingError -->
+<!-- $$$routingErrorString[overload1]$$$routingErrorString -->
+<h3 class="fn" id="routingErrorString"><a name="routingErrorString"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QGeoServiceProvider::<span class="name">routingErrorString</span>() const</h3>
+<p>Returns a string describing the error which occurred during the last attempt to create a routing manager.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@routingErrorString -->
+<!-- $$$routingFeatures[overload1]$$$routingFeatures -->
+<h3 class="fn" id="routingFeatures"><a name="routingFeatures"></a><span class="type"><a href="qgeoserviceprovider.html#RoutingFeature-enum">QGeoServiceProvider::RoutingFeatures</a></span> QGeoServiceProvider::<span class="name">routingFeatures</span>() const</h3>
+<p>Returns the routing features supported by the geo service provider.</p>
+<!-- @@@routingFeatures -->
+<!-- $$$routingManager[overload1]$$$routingManager -->
+<h3 class="fn" id="routingManager"><a name="routingManager"></a><span class="type"><a href="qgeoroutingmanager.html">QGeoRoutingManager</a></span> *QGeoServiceProvider::<span class="name">routingManager</span>() const</h3>
+<p>Returns the <a href="qgeoroutingmanager.html">QGeoRoutingManager</a> made available by the service provider.</p>
+<p>This function will return 0 if the service provider does not provide any geographic routing services.</p>
+<p>This function will attempt to construct a <a href="qgeoroutingmanager.html">QGeoRoutingManager</a> instance when it is called for the first time. If the attempt is successful the <a href="qgeoroutingmanager.html">QGeoRoutingManager</a> will be cached, otherwise each call of this function will attempt to construct a <a href="qgeoroutingmanager.html">QGeoRoutingManager</a> instance until the construction is successful.</p>
+<p>The <a href="qgeoroutingmanager.html">QGeoRoutingManager</a> is owned by this <a href="qgeoserviceprovider.html">QGeoServiceProvider</a> and should not be deleted separately. Users should assume that deleting the <a href="qgeoserviceprovider.html">QGeoServiceProvider</a> renders the pointer returned by this method invalid.</p>
+<p>After this function has been called, <a href="qgeoserviceprovider.html#error">error</a>() and <a href="qgeoserviceprovider.html#errorString">errorString</a>() will report any errors which occurred during the construction of the <a href="qgeoroutingmanager.html">QGeoRoutingManager</a>.</p>
+<!-- @@@routingManager -->
+<!-- $$$setAllowExperimental[overload1]$$$setAllowExperimentalbool -->
+<h3 class="fn" id="setAllowExperimental"><a name="setAllowExperimental"></a><span class="type">void</span> QGeoServiceProvider::<span class="name">setAllowExperimental</span>(<span class="type">bool</span> <i>allow</i>)</h3>
+<p>Sets whether experimental plugins are considered when locating the correct plugin library for this service provider to <i>allow</i>.</p>
+<p><b>Important:</b> this will destroy any existing managers held by this service provider instance. You should be sure not to attempt to use any pointers that you have previously retrieved after calling this method.</p>
+<!-- @@@setAllowExperimental -->
+<!-- $$$setLocale[overload1]$$$setLocaleconstQLocale& -->
+<h3 class="fn" id="setLocale"><a name="setLocale"></a><span class="type">void</span> QGeoServiceProvider::<span class="name">setLocale</span>(const <span class="type"><a href="../qtcore/qlocale.html">QLocale</a></span> &amp;<i>locale</i>)</h3>
+<p>Sets the locale used by this service provider to <i>locale</i>. If the relevant features (see <a href="qgeoserviceprovider.html#MappingFeature-enum">LocalizedMappingFeature</a> etc), this will change the languages, units and other locale-specific attributes of the provider's data.</p>
+<!-- @@@setLocale -->
+<!-- $$$setParameters[overload1]$$$setParametersconstQVariantMap& -->
+<h3 class="fn" id="setParameters"><a name="setParameters"></a><span class="type">void</span> QGeoServiceProvider::<span class="name">setParameters</span>(const <span class="type"><a href="../qtcore/qvariant.html#QVariantMap-typedef">QVariantMap</a></span> &amp;<i>parameters</i>)</h3>
+<p>Sets the parameters used to construct individual manager classes for this service provider to <i>parameters</i>.</p>
+<p>Before the list of <i>parameters</i> is passed on to the to-be-loaded service provider, the list is filtered to avoid the sharing of provider specific parameters with unrelated service providers. Provider specific parameter keys must be prefixed with the provider name (e.g&#x2e; <code>here.app_id</code>).</p>
+<p><b>Important:</b> this will destroy any existing managers held by this service provider instance. You should be sure not to attempt to use any pointers that you have previously retrieved after calling this method.</p>
+<!-- @@@setParameters -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<instructionals module="QtWebView">
+    <examples>
+        <example name="Qt WebView Examples - Minibrowser" docUrl="qthelp://org.qt-project.qtwebview.5132/qtwebview/qtwebview-minibrowser-example.html" projectPath="webview/minibrowser/minibrowser.pro" imageUrl="qthelp://org.qt-project.qtwebview.5132/qtwebview/images/webview-example.jpg">
+            <description><![CDATA[Minibrowser example demonstrates how to use the Qt WebView module with Qt Quick.]]></description>
+            <tags>minibrowser,view,web,webview</tags>
+            <fileToOpen>webview/minibrowser/main.cpp</fileToOpen>
+            <fileToOpen mainFile="true">webview/minibrowser/main.qml</fileToOpen>
+        </example>
+    </examples>
+</instructionals>

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdatetimeedit.cpp -->
+  <title>QDateEdit Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QDateEdit</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QDateEdit Class</h1>
+<!-- $$$QDateEdit-brief -->
+<p>The <a href="qdateedit.html">QDateEdit</a> class provides a widget for editing dates based on the <a href="qdatetimeedit.html">QDateTimeEdit</a> widget. <a href="#details">More...</a></p>
+<!-- @@@QDateEdit -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QDateEdit&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qdatetimeedit.html">QDateTimeEdit</a></td></tr></table></div><ul>
+<li><a href="qdateedit-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdateedit.html#QDateEdit-1">QDateEdit</a></b>(const QDate &amp;<i>date</i>, QWidget *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdateedit.html#QDateEdit">QDateEdit</a></b>(QWidget *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qdateedit.html#dtor.QDateEdit">~QDateEdit</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QDateEdit-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p class="centerAlign"><img src="images/windows-dateedit.png" alt="" /></p><p>Many of the properties and functions provided by <a href="qdateedit.html">QDateEdit</a> are implemented in <a href="qdatetimeedit.html">QDateTimeEdit</a>. These are the relevant properties of this class:</p>
+<ul>
+<li><a href="qdatetimeedit.html#date">date</a> holds the date displayed by the widget.</li>
+<li><a href="qdatetimeedit.html#minimumDate-prop">minimumDate</a> defines the minimum (earliest) date that can be set by the user.</li>
+<li><a href="qdatetimeedit.html#maximumDate-prop">maximumDate</a> defines the maximum (latest) date that can be set by the user.</li>
+<li><a href="qdatetimeedit.html#displayFormat-prop">displayFormat</a> contains a string that is used to format the date displayed in the widget.</li>
+</ul>
+</div>
+<p><b>See also </b><a href="qtimeedit.html">QTimeEdit</a> and <a href="qdatetimeedit.html">QDateTimeEdit</a>.</p>
+<!-- @@@QDateEdit -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QDateEdit$$$QDateEditconstQDate&QWidget* -->
+<h3 class="fn" id="QDateEdit-1"><a name="QDateEdit-1"></a>QDateEdit::<span class="name">QDateEdit</span>(const <span class="type"><a href="../qtcore/qdate.html">QDate</a></span> &amp;<i>date</i>, <span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs an empty date editor with a <i>parent</i>. The date is set to <i>date</i>.</p>
+<!-- @@@QDateEdit -->
+<!-- $$$QDateEdit[overload1]$$$QDateEditQWidget* -->
+<h3 class="fn" id="QDateEdit"><a name="QDateEdit"></a>QDateEdit::<span class="name">QDateEdit</span>(<span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs an empty date editor with a <i>parent</i>.</p>
+<!-- @@@QDateEdit -->
+<!-- $$$~QDateEdit[overload1]$$$~QDateEdit -->
+<h3 class="fn" id="dtor.QDateEdit"><a name="dtor.QDateEdit"></a><code>[virtual] </code>QDateEdit::<span class="name">~QDateEdit</span>()</h3>
+<p>Destructor.</p>
+<!-- @@@~QDateEdit -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

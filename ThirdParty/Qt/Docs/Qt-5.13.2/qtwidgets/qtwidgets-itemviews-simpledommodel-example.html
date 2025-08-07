@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- simpledommodel.qdoc -->
+  <title>Simple DOM Model Example | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Simple DOM Model Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#design-and-concepts">Design and Concepts</a></li>
+<li class="level1"><a href="#dommodel-class-definition">DomModel Class Definition</a></li>
+<li class="level1"><a href="#domitem-class-definition">DomItem Class Definition</a></li>
+<li class="level1"><a href="#domitem-class-implementation">DomItem Class Implementation</a></li>
+<li class="level1"><a href="#dommodel-class-implementation">DomModel Class Implementation</a></li>
+<li class="level2"><a href="#basic-properties-of-the-model">Basic Properties of The Model</a></li>
+<li class="level2"><a href="#navigating-the-document">Navigating The Document</a></li>
+<li class="level1"><a href="#implementation-notes">Implementation Notes</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Simple DOM Model Example</h1>
+<span class="subtitle"></span>
+<!-- $$$itemviews/simpledommodel-brief -->
+<p>The Simple DOM Model example shows how an existing class can be adapted for use with the model/view framework.</p>
+<!-- @@@itemviews/simpledommodel -->
+<!-- $$$itemviews/simpledommodel-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/simpledommodel-example.png" alt="" /></p><p>Qt provides two complementary sets of classes for reading XML files: The classes based around QXmlReader provide a SAX-style API for incremental reading of large files, and the classes based around QDomDocument enable developers to access the contents of XML files using a Document Object Model (DOM) API.</p>
+<p>In this example, we create a model that uses the DOM API to expose the structure and contents of XML documents to views via the standard QAbstractModel interface.</p>
+<a name="design-and-concepts"></a>
+<h4 id="design-and-concepts">Design and Concepts</h4>
+<p>Reading an XML document with Qt's DOM classes is a straightforward process. Typically, the contents of a file are supplied to QDomDocument, and nodes are accessed using the functions provided by QDomNode and its subclasses.</p>
+<p>The aim is to use the structure provided by QDomDocument by wrapping QDomNode objects in item objects similar to the <code>TreeItem</code> objects used in the <a href="qtwidgets-itemviews-simpletreemodel-example.html">Simple Tree Model</a> example.</p>
+<a name="dommodel-class-definition"></a>
+<h4 id="dommodel-class-definition">DomModel Class Definition</h4>
+<p>Let us begin by examining the <code>DomModel</code> class:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> DomModel : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> DomModel(<span class="keyword">const</span> <span class="type">QDomDocument</span> <span class="operator">&amp;</span>document<span class="operator">,</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+      <span class="operator">~</span>DomModel();
+
+      <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> data(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemFlags flags(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> headerData(<span class="type">int</span> section<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Orientation orientation<span class="operator">,</span>
+                          <span class="type">int</span> role <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole) <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> index(<span class="type">int</span> row<span class="operator">,</span> <span class="type">int</span> column<span class="operator">,</span>
+                        <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent <span class="operator">=</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()) <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> parent(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>child) <span class="keyword">const</span> override;
+      <span class="type">int</span> rowCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent <span class="operator">=</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()) <span class="keyword">const</span> override;
+      <span class="type">int</span> columnCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent <span class="operator">=</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()) <span class="keyword">const</span> override;
+
+  <span class="keyword">private</span>:
+      <span class="type">QDomDocument</span> domDocument;
+      DomItem <span class="operator">*</span>rootItem;
+  };
+
+</pre>
+<p>The class definition contains all the basic functions that are needed for a read-only model. Only the constructor and <code>document()</code> function are specific to this model. The private <code>domDocument</code> variable is used to hold the document that is exposed by the model; the <code>rootItem</code> variable contains a pointer to the root item in the model.</p>
+<a name="domitem-class-definition"></a>
+<h4 id="domitem-class-definition">DomItem Class Definition</h4>
+<p>The <code>DomItem</code> class is used to hold information about a specific QDomNode in the document:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> DomItem
+  {
+  <span class="keyword">public</span>:
+      DomItem(<span class="keyword">const</span> <span class="type">QDomNode</span> <span class="operator">&amp;</span>node<span class="operator">,</span> <span class="type">int</span> row<span class="operator">,</span> DomItem <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+      <span class="operator">~</span>DomItem();
+      DomItem <span class="operator">*</span>child(<span class="type">int</span> i);
+      DomItem <span class="operator">*</span>parent();
+      <span class="type">QDomNode</span> node() <span class="keyword">const</span>;
+      <span class="type">int</span> row() <span class="keyword">const</span>;
+
+  <span class="keyword">private</span>:
+      <span class="type">QDomNode</span> domNode;
+      <span class="type"><a href="../qtcore/qhash.html">QHash</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> DomItem <span class="operator">*</span><span class="operator">&gt;</span> childItems;
+      DomItem <span class="operator">*</span>parentItem;
+      <span class="type">int</span> rowNumber;
+  };
+
+</pre>
+<p>Each <code>DomItem</code> provides a wrapper for a QDomNode obtained from the underlying document which contains a reference to the node, it's location in the parent node's list of child nodes, and a pointer to a parent wrapper item.</p>
+<p>The <code>parent()</code>, <code>child()</code>, and <code>row()</code> functions are convenience functions for the <code>DomModel</code> to use that provide basic information about the item to be discovered quickly. The node() function provides access to the underlying QDomNode object.</p>
+<p>As well as the information supplied in the constructor, the class maintains a cache of information about any child items. This is used to provide a collection of persistent item objects that the model can identify consistently and improve the performance of the model when accessing child items.</p>
+<a name="domitem-class-implementation"></a>
+<h4 id="domitem-class-implementation">DomItem Class Implementation</h4>
+<p>Since the <code>DomItem</code> class is only a thin wrapper around QDomNode objects, with a few additional features to help improve performance and memory usage, we can provide a brief outline of the class before discussing the model itself.</p>
+<p>The constructor simply records details of the QDomNode that needs to be wrapped:</p>
+<pre class="cpp">
+
+  DomItem<span class="operator">::</span>DomItem(<span class="keyword">const</span> <span class="type">QDomNode</span> <span class="operator">&amp;</span>node<span class="operator">,</span> <span class="type">int</span> row<span class="operator">,</span> DomItem <span class="operator">*</span>parent)
+      : domNode(node)<span class="operator">,</span>
+        parentItem(parent)<span class="operator">,</span>
+        rowNumber(row)
+  {}
+
+</pre>
+<p>As a result, functions to provide the parent wrapper, the row number occupied by the item in its parent's list of children, and the underlying QDomNode for each item are straightforward to write:</p>
+<pre class="cpp">
+
+  DomItem <span class="operator">*</span>DomItem<span class="operator">::</span>parent()
+  {
+      <span class="keyword">return</span> parentItem;
+  }
+
+  <span class="type">int</span> DomItem<span class="operator">::</span>row() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> rowNumber;
+  }
+
+  <span class="type">QDomNode</span> DomItem<span class="operator">::</span>node() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> domNode;
+  }
+
+</pre>
+<p>It is necessary to maintain a collection of items which can be consistently identified by the model. For that reason, we maintain a hash of child wrapper items that, to minimize memory usage, is initially empty. The model uses the item's <code>child()</code> function to help create model indexes, and this constructs wrappers for the children of the item's QDomNode, relating the row number of each child to the newly-constructed wrapper:</p>
+<pre class="cpp">
+
+  DomItem <span class="operator">*</span>DomItem<span class="operator">::</span>child(<span class="type">int</span> i)
+  {
+      DomItem <span class="operator">*</span>childItem <span class="operator">=</span> childItems<span class="operator">.</span>value(i);
+      <span class="keyword">if</span> (childItem)
+          <span class="keyword">return</span> childItem;
+
+      <span class="comment">// if child does not yet exist, create it</span>
+      <span class="keyword">if</span> (i <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> i <span class="operator">&lt;</span> domNode<span class="operator">.</span>childNodes()<span class="operator">.</span>count()) {
+          <span class="type">QDomNode</span> childNode <span class="operator">=</span> domNode<span class="operator">.</span>childNodes()<span class="operator">.</span>item(i);
+          childItem <span class="operator">=</span> <span class="keyword">new</span> DomItem(childNode<span class="operator">,</span> i<span class="operator">,</span> <span class="keyword">this</span>);
+          childItems<span class="operator">[</span>i<span class="operator">]</span> <span class="operator">=</span> childItem;
+      }
+      <span class="keyword">return</span> childItem;
+  }
+
+</pre>
+<p>If a QDomNode was previously wrapped, the cached wrapper is returned; otherwise, a new wrapper is constructed and stored for valid children, and zero is returned for invalid ones.</p>
+<p>The class's destructor deletes all the child items of the wrapper:</p>
+<pre class="cpp">
+
+  DomItem<span class="operator">::</span><span class="operator">~</span>DomItem()
+  {
+      <a href="../qtcore/qtalgorithms.html#qDeleteAll">qDeleteAll</a>(childItems);
+  }
+
+</pre>
+<p>These, in turn, will delete their children and free any QDomNode objects in use.</p>
+<a name="dommodel-class-implementation"></a>
+<h4 id="dommodel-class-implementation">DomModel Class Implementation</h4>
+<p>The structure provided by the <code>DomItem</code> class makes the implementation of <code>DomModel</code> similar to the <code>TreeModel</code> shown in the <a href="qtwidgets-itemviews-simpletreemodel-example.html">Simple Tree Model</a> example.</p>
+<p>The constructor accepts an existing document and a parent object for the model:</p>
+<pre class="cpp">
+
+  DomModel<span class="operator">::</span>DomModel(<span class="keyword">const</span> <span class="type">QDomDocument</span> <span class="operator">&amp;</span>document<span class="operator">,</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span>(parent)<span class="operator">,</span>
+        domDocument(document)<span class="operator">,</span>
+        rootItem(<span class="keyword">new</span> DomItem(domDocument<span class="operator">,</span> <span class="number">0</span>))
+  {
+  }
+
+</pre>
+<p>A shallow copy of the document is stored for future reference, and a root item is created to provide a wrapper around the document. We assign the root item a row number of zero only to be consistent since the root item will have no siblings.</p>
+<p>Since the model only contains information about the root item, the destructor only needs to delete this one item:</p>
+<pre class="cpp">
+
+  DomModel<span class="operator">::</span><span class="operator">~</span>DomModel()
+  {
+      <span class="keyword">delete</span> rootItem;
+  }
+
+</pre>
+<p>All of the child items in the tree will be deleted by the <code>DomItem</code> destructor as their parent items are deleted.</p>
+<a name="basic-properties-of-the-model"></a>
+<h5 id="basic-properties-of-the-model">Basic Properties of The Model</h5>
+<p>Some aspects of the model do not depend on the structure of the underlying document, and these are simple to implement.</p>
+<p>The number of columns exposed by the model is returned by the <code>columnCount()</code> function:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> DomModel<span class="operator">::</span>columnCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      Q_UNUSED(parent);
+      <span class="keyword">return</span> <span class="number">3</span>;
+  }
+
+</pre>
+<p>This value is fixed, and does not depend on the location or type of the underlying node in the document. We will use these three columns to display different kinds of data from the underlying document.</p>
+<p>Since we only implement a read-only model, the <code>flags()</code> function is straightforward to write:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemFlags DomModel<span class="operator">::</span>flags(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoItemFlags;
+
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span><span class="operator">::</span>flags(index);
+  }
+
+</pre>
+<p>Since the model is intended for use in a tree view, the <code>headerData()</code> function only provides a horizontal header:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> DomModel<span class="operator">::</span>headerData(<span class="type">int</span> section<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Orientation orientation<span class="operator">,</span>
+                                <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (orientation <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal <span class="operator">&amp;</span><span class="operator">&amp;</span> role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole) {
+          <span class="keyword">switch</span> (section) {
+              <span class="keyword">case</span> <span class="number">0</span>:
+                  <span class="keyword">return</span> tr(<span class="string">&quot;Name&quot;</span>);
+              <span class="keyword">case</span> <span class="number">1</span>:
+                  <span class="keyword">return</span> tr(<span class="string">&quot;Attributes&quot;</span>);
+              <span class="keyword">case</span> <span class="number">2</span>:
+                  <span class="keyword">return</span> tr(<span class="string">&quot;Value&quot;</span>);
+              <span class="keyword">default</span>:
+                  <span class="keyword">break</span>;
+          }
+      }
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+  }
+
+</pre>
+<p>The model presents the names of nodes in the first column, element attributes in the second, and any node values in the third.</p>
+<a name="navigating-the-document"></a>
+<h5 id="navigating-the-document">Navigating The Document</h5>
+<p>The index() function creates a model index for the item with the given row, column, and parent in the model:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> DomModel<span class="operator">::</span>index(<span class="type">int</span> row<span class="operator">,</span> <span class="type">int</span> column<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>hasIndex(row<span class="operator">,</span> column<span class="operator">,</span> parent))
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+
+      DomItem <span class="operator">*</span>parentItem;
+
+      <span class="keyword">if</span> (<span class="operator">!</span>parent<span class="operator">.</span>isValid())
+          parentItem <span class="operator">=</span> rootItem;
+      <span class="keyword">else</span>
+          parentItem <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span>DomItem<span class="operator">*</span><span class="operator">&gt;</span>(parent<span class="operator">.</span>internalPointer());
+
+</pre>
+<p>The function first has to relate the parent index to an item that contains a node from the underlying document. If the parent index is invalid, it refers to the root node in the document, so we retrieve the root item that wraps it; otherwise, we obtain a pointer to the relevant item using the <a href="../qtcore/qmodelindex.html#internalPointer">QModelIndex::internalPointer</a>() function. We are able to extract a pointer in this way because any valid model index will have been created by this function, and we store pointers to item objects in any new indexes that we create with <a href="../qtcore/qabstractitemmodel.html#createIndex">QAbstractItemModel::createIndex</a>():</p>
+<pre class="cpp">
+
+      DomItem <span class="operator">*</span>childItem <span class="operator">=</span> parentItem<span class="operator">-</span><span class="operator">&gt;</span>child(row);
+      <span class="keyword">if</span> (childItem)
+          <span class="keyword">return</span> createIndex(row<span class="operator">,</span> column<span class="operator">,</span> childItem);
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+  }
+
+</pre>
+<p>A child item for the given row is provided by the parent item's <code>child()</code> function. If a suitable child item was found then we call <a href="../qtcore/qabstractitemmodel.html#createIndex">createIndex()</a> to produce a model index for the requested row and column, passing a pointer to the child item for it to store internally. If no suitable child item is found, an invalid model index is returned.</p>
+<p>Note that the items themselves maintain ownership of their child items. This means that the model does not need to keep track of the child items that have been created, and can let the items themselves tidy up when they are deleted.</p>
+<p>The number of rows beneath a given item in the model is returned by the <code>rowCount()</code> function, and is the number of child nodes contained by the node that corresponds to the specified model index:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> DomModel<span class="operator">::</span>rowCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (parent<span class="operator">.</span>column() <span class="operator">&gt;</span> <span class="number">0</span>)
+          <span class="keyword">return</span> <span class="number">0</span>;
+
+      DomItem <span class="operator">*</span>parentItem;
+
+      <span class="keyword">if</span> (<span class="operator">!</span>parent<span class="operator">.</span>isValid())
+          parentItem <span class="operator">=</span> rootItem;
+      <span class="keyword">else</span>
+          parentItem <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span>DomItem<span class="operator">*</span><span class="operator">&gt;</span>(parent<span class="operator">.</span>internalPointer());
+
+      <span class="keyword">return</span> parentItem<span class="operator">-</span><span class="operator">&gt;</span>node()<span class="operator">.</span>childNodes()<span class="operator">.</span>count();
+  }
+
+</pre>
+<p>To obtain the relevant node in the underlying document, we access the item via the internal pointer stored in the model index. If an invalid index is supplied, the root item is used instead. We use the item's <code>node()</code> function to access the node itself, and simply count the number of child nodes it contains.</p>
+<p>Since the model is used to represent a hierarchical data structure, it needs to provide an implementation for the <code>parent()</code> function. This returns a model index that corresponds to the parent of a child model index supplied as its argument:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> DomModel<span class="operator">::</span>parent(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>child) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>child<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+
+      DomItem <span class="operator">*</span>childItem <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span>DomItem<span class="operator">*</span><span class="operator">&gt;</span>(child<span class="operator">.</span>internalPointer());
+      DomItem <span class="operator">*</span>parentItem <span class="operator">=</span> childItem<span class="operator">-</span><span class="operator">&gt;</span>parent();
+
+      <span class="keyword">if</span> (<span class="operator">!</span>parentItem <span class="operator">|</span><span class="operator">|</span> parentItem <span class="operator">=</span><span class="operator">=</span> rootItem)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+
+      <span class="keyword">return</span> createIndex(parentItem<span class="operator">-</span><span class="operator">&gt;</span>row()<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> parentItem);
+  }
+
+</pre>
+<p>For valid indexes other than the index corresponding to the root item, we obtain a pointer to the relevant item using the method described in the <code>index()</code> function, and use the item's <code>parent()</code> function to obtain a pointer to the parent item.</p>
+<p>If no valid parent item exists, or if the parent item is the root item, we can simply follow convention and return an invalid model index. For all other parent items, we create a model index containing the appropriate row and column numbers, and a pointer to the parent item we just obtained.</p>
+<p>Data is provided by the <code>data()</code> function. For simplicity, we only provide data for the <a href="../qtcore/qt.html#ItemDataRole-enum">display role</a>, returning an invalid variant for all other requests:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> DomModel<span class="operator">::</span>data(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+
+      <span class="keyword">if</span> (role <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+
+      <span class="keyword">const</span> DomItem <span class="operator">*</span>item <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span>DomItem<span class="operator">*</span><span class="operator">&gt;</span>(index<span class="operator">.</span>internalPointer());
+
+      <span class="keyword">const</span> <span class="type">QDomNode</span> node <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>node();
+
+</pre>
+<p>As before, we obtain an item pointer for the index supplied, and use it to obtain the underlying document node. Depending on the column specified, the data we return is obtained in different ways:</p>
+<pre class="cpp">
+
+      <span class="keyword">switch</span> (index<span class="operator">.</span>column()) {
+          <span class="keyword">case</span> <span class="number">0</span>:
+              <span class="keyword">return</span> node<span class="operator">.</span>nodeName();
+          <span class="keyword">case</span> <span class="number">1</span>:
+          {
+              <span class="keyword">const</span> <span class="type">QDomNamedNodeMap</span> attributeMap <span class="operator">=</span> node<span class="operator">.</span>attributes();
+              <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> attributes;
+              <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> attributeMap<span class="operator">.</span>count(); <span class="operator">+</span><span class="operator">+</span>i) {
+                  <span class="type">QDomNode</span> attribute <span class="operator">=</span> attributeMap<span class="operator">.</span>item(i);
+                  attributes <span class="operator">&lt;</span><span class="operator">&lt;</span> attribute<span class="operator">.</span>nodeName() <span class="operator">+</span> <span class="string">&quot;=\&quot;&quot;</span>
+                                <span class="operator">+</span> attribute<span class="operator">.</span>nodeValue() <span class="operator">+</span> <span class="char">'&quot;'</span>;
+              }
+              <span class="keyword">return</span> attributes<span class="operator">.</span>join(<span class="char">' '</span>);
+          }
+          <span class="keyword">case</span> <span class="number">2</span>:
+              <span class="keyword">return</span> node<span class="operator">.</span>nodeValue()<span class="operator">.</span>split(<span class="char">'\n'</span>)<span class="operator">.</span>join(<span class="char">' '</span>);
+          <span class="keyword">default</span>:
+              <span class="keyword">break</span>;
+      }
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+  }
+
+</pre>
+<p>For the first column, we return the node's name. For the second column, we read any attributes that the node may have, and return a string that contains a space-separated list of attribute-value assignments. For the third column, we return any value that the node may have; this allows the contents of text nodes to be displayed in a view.</p>
+<p>If data from any other column is requested, an invalid variant is returned.</p>
+<a name="implementation-notes"></a>
+<h4 id="implementation-notes">Implementation Notes</h4>
+<p>Ideally, we would rely on the structure provided by QDomDocument to help us write the <a href="../qtcore/qabstractitemmodel.html#parent">parent()</a> and <a href="../qtcore/qabstractitemmodel.html#index">index()</a> functions that are required when subclassing <a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a>. However, since Qt's DOM classes use their own system for dynamically allocating memory for DOM nodes, we cannot guarantee that the QDomNode objects returned for a given piece of information will be the same for subsequent accesses to the document.</p>
+<p>We use item wrappers for each QDomNode to provide consistent pointers that the model can use to navigate the document structure.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/itemviews/simpledommodel?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@itemviews/simpledommodel -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

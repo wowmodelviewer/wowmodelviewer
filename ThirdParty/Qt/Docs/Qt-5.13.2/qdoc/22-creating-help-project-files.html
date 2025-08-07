@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdoc-manual-qdocconf.qdoc -->
+  <title>Creating Help Project Files | QDoc Manual 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qdoc-index.html">QDoc Manual</a></td><td >Creating Help Project Files</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qdoc-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="22-qdoc-configuration-generalvariables.html" />
+  <link rel="next" href="23-qdoc-configuration-cppvariables.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="22-qdoc-configuration-generalvariables.html">Generic Configuration Variables</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="23-qdoc-configuration-cppvariables.html">C++ Specific Configuration Variables</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#overview">Overview</a></li>
+<li class="level2"><a href="#using-selectors">Using Selectors</a></li>
+<li class="level2"><a href="#adding-table-of-contents">Adding Table of Contents</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Creating Help Project Files</h1>
+<span class="subtitle"></span>
+<!-- $$$22-creating-help-project-files.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="overview"></a>
+<h2 id="overview">Overview</h2>
+<p>Qt Assistant uses a system for managing Qt documentation that requires QDoc to generate inventories of files.</p>
+<p>QDoc allows configuration variables to be used to specify which pages are to be used in each documentation set it generates. These are specified as subvariables of the <code>qhp</code> variable with each set declared using a unique identifier as a subvariable.</p>
+<p>For example, the configuration file for the Qt Quick documentation set specifies information about the set as subvariables with the <code>qhp.QtQuick</code> prefix:</p>
+<pre class="cpp plain">
+
+  qhp.projects = QtQuick
+
+  qhp.QtQuick.file                = qtquick.qhp
+  qhp.QtQuick.namespace           = org.qt-project.qtquick.$QT_VERSION_TAG
+  qhp.QtQuick.virtualFolder       = qtquick
+  qhp.QtQuick.indexTitle          = Qt Quick
+  qhp.QtQuick.indexRoot           =
+
+  qhp.QtQuick.filterAttributes    = qtquick $QT_VERSION qtrefdoc
+  qhp.QtQuick.customFilters.Qt.name = QtQuick $QT_VERSION
+  qhp.QtQuick.customFilters.Qt.filterAttributes = qtquick $QT_VERSION
+
+  qhp.QtQuick.subprojects         = qmltypes classes examples
+
+  qhp.QtQuick.subprojects.qmltypes.title = QML Types
+  qhp.QtQuick.subprojects.qmltypes.indexTitle = Qt Quick QML Types
+  qhp.QtQuick.subprojects.qmltypes.selectors = qmlclass
+  qhp.QtQuick.subprojects.qmltypes.sortPages = true
+
+  qhp.QtQuick.subprojects.classes.title = Classes
+  qhp.QtQuick.subprojects.classes.title = C++ Classes
+  qhp.QtQuick.subprojects.classes.indexTitle = Qt Quick C++ Classes
+  qhp.QtQuick.subprojects.classes.selectors = class fake:headerfile
+  qhp.QtQuick.subprojects.classes.sortPages = true
+
+  qhp.QtQuick.subprojects.examples.title = Examples
+  qhp.QtQuick.subprojects.examples.indexTitle = Qt Quick Examples and Tutorials
+  qhp.QtQuick.subprojects.examples.selectors = fake:example
+
+</pre>
+<p>The documentation set may include one or more subprojects, which are added to the table of contents under the name specified by <code>title</code>. The page in the documentation referred to by the <code>indexTitle</code> acts as the index page for the subproject. The page types to list under the subproject are specified by <code>selectors</code>. The entries are alphabetically sorted if <code>sortPages</code> is set to <code>true</code>.</p>
+<a name="using-selectors"></a>
+<h3 id="using-selectors">Using Selectors</h3>
+<p>The <code>selectors</code> property specifies which page types are listed under the table of contents entry for a subproject. Multiple selectors can be listed, separated by whitespace.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Selector</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>namespace</code></td><td >Namespaces</td></tr>
+<tr valign="top" class="even"><td ><code>class</code></td><td >Classes</td></tr>
+<tr valign="top" class="odd"><td ><code>qmltype</code></td><td >QML Types</td></tr>
+<tr valign="top" class="even"><td ><code>qmlclass</code></td><td >Alias for <code>qmltype</code>.</td></tr>
+<tr valign="top" class="odd"><td ><code>module[:name]</code></td><td >C++ modules or members of the module with a specified name.</td></tr>
+<tr valign="top" class="even"><td ><code>qmlmodule[:name]</code></td><td >QML modules or members of the module with a specified name.</td></tr>
+<tr valign="top" class="odd"><td ><code>doc[:subtype]</code></td><td >Documentation pages with a specified <code>subtype</code>. Multiple subtypes can be listed as a comma-separated list.</td></tr>
+<tr valign="top" class="even"><td ><code>fake</code></td><td >Alias for <code>doc</code>.</td></tr>
+<tr valign="top" class="odd"><td ><code>group[:groupname]</code></td><td >Documentation pages for members of a specified group, as added using the <a href="19-qdoc-commands-grouping.html#ingroup-command">\ingroup</a> groupname command. Multiple group names can be listed as a comma-separated list. (Introduced in QDoc 5.6).</td></tr>
+</table></div>
+<p>Available subtypes for the <code>doc</code> selector:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Subtype</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>example</code></td><td >Examples</td></tr>
+<tr valign="top" class="even"><td ><code>headerfile</code></td><td >Header files</td></tr>
+<tr valign="top" class="odd"><td ><code>page</code></td><td >Documentation pages defined with the <a href="13-qdoc-commands-topics.html#page-command">\page</a> command.</td></tr>
+</table></div>
+<p>For example, the following configuration would select example pages and pages that include the <code>\ingroup tutorials</code> command:</p>
+<pre class="cpp plain">
+
+  qhp.QtQuickControls.subprojects = examples
+  qhp.QtQuickControls.subprojects.examples.title = Examples and Tutorials
+  qhp.QtQuickControls.subprojects.examples.indexTitle = Qt Quick Controls Examples
+  qhp.QtQuickControls.subprojects.examples.selectors = doc:example group:tutorials
+  qhp.QtQuickControls.subprojects.examples.sortPages = true
+
+</pre>
+<a name="adding-table-of-contents"></a>
+<h3 id="adding-table-of-contents">Adding Table of Contents</h3>
+<p>To create a table of contents for a manual, create a subproject with a <code>type</code> property and set it to <code>manual</code>. The page in the documentation referred to by the <code>indexTitle</code> property must contain a list of links that acts as a table of contents for the whole manual. QDoc will take the information in this list and create a table of contents for the subproject.</p>
+<p>For example, the configuration file for Qt Creator defines only one subproject for its documentation, including all the documentation in a single manual:</p>
+<pre class="cpp plain">
+
+  qhp.QtCreator.subprojects = manual
+  qhp.QtCreator.subprojects.manual.title = Qt Creator Manual
+  qhp.QtCreator.subprojects.manual.indexTitle = Qt Creator Manual
+  qhp.QtCreator.subprojects.manual.type = manual
+
+</pre>
+<p>In this example, the page entitled &quot;Qt Creator Manual&quot; contains a nested list of links to pages in the documentation which is duplicated in Qt Assistant's Contents tab.</p>
+</div>
+<!-- @@@22-creating-help-project-files.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="22-qdoc-configuration-generalvariables.html">Generic Configuration Variables</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="23-qdoc-configuration-cppvariables.html">C++ Specific Configuration Variables</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

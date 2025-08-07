@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qqmlitemselectionmodel.qdoc -->
+  <title>ItemSelectionModel QML Type | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td ><a href="qtqml-qmlmodule.html">QML Types</a></td><td >ItemSelectionModel QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">ItemSelectionModel QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$ItemSelectionModel-brief -->
+<p>Instantiates a <a href="../qtcore/qitemselectionmodel.html">QItemSelectionModel</a> to be used in conjunction with a <a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a> and any view supporting it. <a href="#details">More...</a></p>
+<!-- @@@ItemSelectionModel -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQml.Models 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiates:</td><td class="memItemRight bottomAlign"> <a href="qml-qtqml-models-itemselectionmodel.html"><a href="../qtcore/qitemselectionmodel.html">QItemSelectionModel</a></td></tr></table></div><ul>
+<li><a href="qml-qtqml-models-itemselectionmodel-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtqml-models-itemselectionmodel.html#currentIndex-prop">currentIndex</a></b></b> : QModelIndex</li>
+<li class="fn"><b><b><a href="qml-qtqml-models-itemselectionmodel.html#hasSelection-prop">hasSelection</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtqml-models-itemselectionmodel.html#model-prop">model</a></b></b> : QAbstractItemModel</li>
+<li class="fn"><b><b><a href="qml-qtqml-models-itemselectionmodel.html#selectedIndexes-prop">selectedIndexes</a></b></b> : QModelIndexList</li>
+<li class="fn"><b><b><a href="qml-qtqml-models-itemselectionmodel.html#selection-prop">selection</a></b></b> : object</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtqml-models-itemselectionmodel.html#currentChanged-signal">currentChanged</a></b></b>(<i>current</i>,  QModelIndex <i>previous</i>)</li>
+<li class="fn"><b><b><a href="qml-qtqml-models-itemselectionmodel.html#selectionChanged-signal">selectionChanged</a></b></b>(<i>selected</i>,  QItemSelection <i>deselected</i>)</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtqml-models-itemselectionmodel.html#clear-method">clear</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtqml-models-itemselectionmodel.html#clearCurrentIndex-method">clearCurrentIndex</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtqml-models-itemselectionmodel.html#clearSelection-method">clearSelection</a></b></b>()</li>
+<li class="fn">bool <b><b><a href="qml-qtqml-models-itemselectionmodel.html#columnIntersectsSelection-method">columnIntersectsSelection</a></b></b>(<i>column</i>,  QModelIndex <i>parent</i>)</li>
+<li class="fn">bool <b><b><a href="qml-qtqml-models-itemselectionmodel.html#isColumnSelected-method">isColumnSelected</a></b></b>(<i>column</i>,  QModelIndex <i>parent</i>)</li>
+<li class="fn">bool <b><b><a href="qml-qtqml-models-itemselectionmodel.html#isRowSelected-method">isRowSelected</a></b></b>(<i>row</i>,  QModelIndex <i>parent</i>)</li>
+<li class="fn">bool <b><b><a href="qml-qtqml-models-itemselectionmodel.html#isSelected-method">isSelected</a></b></b>(<i>index</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtqml-models-itemselectionmodel.html#reset-method">reset</a></b></b>()</li>
+<li class="fn">bool <b><b><a href="qml-qtqml-models-itemselectionmodel.html#rowIntersectsSelection-method">rowIntersectsSelection</a></b></b>(<i>row</i>,  QModelIndex <i>parent</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtqml-models-itemselectionmodel.html#select-method-1">select</a></b></b>(<i>selection</i>,  SelectionFlags <i>command</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtqml-models-itemselectionmodel.html#select-method">select</a></b></b>(<i>index</i>,  SelectionFlags <i>command</i>)</li>
+<li class="fn">QModelIndexList <b><b><a href="qml-qtqml-models-itemselectionmodel.html#selectedColumns-method">selectedColumns</a></b></b>(<i>row</i>)</li>
+<li class="fn">QModelIndexList <b><b><a href="qml-qtqml-models-itemselectionmodel.html#selectedRows-method">selectedRows</a></b></b>(<i>column</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtqml-models-itemselectionmodel.html#setCurrentIndex-method">setCurrentIndex</a></b></b>(<i>index</i>,  SelectionFlags <i>command</i>)</li>
+</ul>
+<!-- $$$ItemSelectionModel-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><b>See also </b><a href="../qtcore/qitemselectionmodel.html">QItemSelectionModel</a> and <a href="../qtquick/qtquick-modelviewsdata-modelview.html">Models and Views in Qt Quick</a>.</p>
+<!-- @@@ItemSelectionModel -->
+<h2>Property Documentation</h2>
+<!-- $$$currentIndex -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="currentIndex-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">currentIndex</span> : <span class="type">QModelIndex</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Use <a href="qml-qtqml-models-itemselectionmodel.html#setCurrentIndex-method">setCurrentIndex()</a> to set its value.</p>
+<p><b>See also </b><a href="qml-qtqml-models-itemselectionmodel.html#setCurrentIndex-method">setCurrentIndex()</a> and <a href="qml-qtqml-models-itemselectionmodel.html#currentChanged-signal">currentChanged()</a>.</p>
+</div></div><!-- @@@currentIndex -->
+<br/>
+<!-- $$$hasSelection -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="hasSelection-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">hasSelection</span> : <span class="type"><a href="qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>It will trigger property binding updates every time <a href="qml-qtqml-models-itemselectionmodel.html#selectionChanged-signal">selectionChanged()</a> is emitted, even though its value hasn't changed.</p>
+<p><b>See also </b><a href="qml-qtqml-models-itemselectionmodel.html#selection-prop">selection</a>, <a href="qml-qtqml-models-itemselectionmodel.html#selectedIndexes-prop">selectedIndexes</a>, <a href="qml-qtqml-models-itemselectionmodel.html#select-method">select()</a>, and <a href="qml-qtqml-models-itemselectionmodel.html#selectionChanged-signal">selectionChanged()</a>.</p>
+</div></div><!-- @@@hasSelection -->
+<br/>
+<!-- $$$model -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="model-prop"></a><span class="name">model</span> : <span class="type">QAbstractItemModel</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property's value must match the view's model.</p>
+</div></div><!-- @@@model -->
+<br/>
+<!-- $$$selectedIndexes -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="selectedIndexes-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">selectedIndexes</span> : <span class="type">QModelIndexList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Contains the list of all the indexes in the selection model.</p>
+</div></div><!-- @@@selectedIndexes -->
+<br/>
+<!-- $$$selection -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="selection-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">selection</span> : <span class="type">object</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the selection ranges stored in the selection model.</p>
+</div></div><!-- @@@selection -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$currentChanged[overload1]$$$currentChangedQModelIndex -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="currentChanged-signal"></a><span class="name">currentChanged</span>(<i>current</i>,  <span class="type">QModelIndex</span> <i>previous</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted whenever the current item changes. The <i>previous</i> model item index is replaced by the <i>current</i> index as the selection's current item.</p>
+<p>Note that this signal will not be emitted when the item model is reset.</p>
+<p><b>See also </b><a href="qml-qtqml-models-itemselectionmodel.html#currentIndex-prop">currentIndex</a>, <a href="qml-qtqml-models-itemselectionmodel.html#setCurrentIndex-method">setCurrentIndex()</a>, and <a href="qml-qtqml-models-itemselectionmodel.html#selectionChanged-signal">selectionChanged()</a>.</p>
+</div></div><!-- @@@currentChanged -->
+<br/>
+<!-- $$$selectionChanged[overload1]$$$selectionChangedQItemSelection -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="selectionChanged-signal"></a><span class="name">selectionChanged</span>(<i>selected</i>,  <span class="type">QItemSelection</span> <i>deselected</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted whenever the selection changes. The change in the selection is represented as an item selection of <i>deselected</i> items and an item selection of <i>selected</i> items.</p>
+<p>Note the that the current index changes independently from the selection. Also note that this signal will not be emitted when the item model is reset.</p>
+<p><b>See also </b><a href="qml-qtqml-models-itemselectionmodel.html#select-method">select()</a> and <a href="qml-qtqml-models-itemselectionmodel.html#currentChanged-signal">currentChanged()</a>.</p>
+</div></div><!-- @@@selectionChanged -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$clear[overload1]$$$clear -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="clear-method"></a><span class="type">void</span> <span class="name">clear</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Clears the selection model. Emits <a href="qml-qtqml-models-itemselectionmodel.html#selectionChanged-signal">selectionChanged()</a> and <a href="qml-qtqml-models-itemselectionmodel.html#currentChanged-signal">currentChanged()</a>.</p>
+</div></div><!-- @@@clear -->
+<br/>
+<!-- $$$clearCurrentIndex[overload1]$$$clearCurrentIndex -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="clearCurrentIndex-method"></a><span class="type">void</span> <span class="name">clearCurrentIndex</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Clears the current index. Emits <a href="qml-qtqml-models-itemselectionmodel.html#currentChanged-signal">currentChanged()</a>.</p>
+</div></div><!-- @@@clearCurrentIndex -->
+<br/>
+<!-- $$$clearSelection[overload1]$$$clearSelection -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="clearSelection-method"></a><span class="type">void</span> <span class="name">clearSelection</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Clears the selection in the selection model. Emits <a href="qml-qtqml-models-itemselectionmodel.html#selectionChanged-signal">selectionChanged()</a>.</p>
+</div></div><!-- @@@clearSelection -->
+<br/>
+<!-- $$$columnIntersectsSelection[overload1]$$$columnIntersectsSelectionQModelIndex -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="columnIntersectsSelection-method"></a><span class="type"><a href="qml-bool.html">bool</a></span> <span class="name">columnIntersectsSelection</span>(<i>column</i>,  <span class="type">QModelIndex</span> <i>parent</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns <code>true</code> if there are any items selected in the <i>column</i> with the given <i>parent</i>.</p>
+</div></div><!-- @@@columnIntersectsSelection -->
+<br/>
+<!-- $$$isColumnSelected[overload1]$$$isColumnSelectedQModelIndex -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="isColumnSelected-method"></a><span class="type"><a href="qml-bool.html">bool</a></span> <span class="name">isColumnSelected</span>(<i>column</i>,  <span class="type">QModelIndex</span> <i>parent</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns <code>true</code> if all items are selected in the <i>column</i> with the given <i>parent</i>.</p>
+<p>Note that this function is usually faster than calling <a href="qml-qtqml-models-itemselectionmodel.html#isSelected-method">isSelected()</a> on all items in the same column, and that unselectable items are ignored.</p>
+</div></div><!-- @@@isColumnSelected -->
+<br/>
+<!-- $$$isRowSelected[overload1]$$$isRowSelectedQModelIndex -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="isRowSelected-method"></a><span class="type"><a href="qml-bool.html">bool</a></span> <span class="name">isRowSelected</span>(<i>row</i>,  <span class="type">QModelIndex</span> <i>parent</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns <code>true</code> if all items are selected in the <i>row</i> with the given <i>parent</i>.</p>
+<p>Note that this function is usually faster than calling <a href="qml-qtqml-models-itemselectionmodel.html#isSelected-method">isSelected()</a> on all items in the same row, and that unselectable items are ignored.</p>
+</div></div><!-- @@@isRowSelected -->
+<br/>
+<!-- $$$isSelected[overload1]$$$isSelected -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="isSelected-method"></a><span class="type"><a href="qml-bool.html">bool</a></span> <span class="name">isSelected</span>(<i>index</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns <code>true</code> if the given model item <i>index</i> is selected.</p>
+</div></div><!-- @@@isSelected -->
+<br/>
+<!-- $$$reset[overload1]$$$reset -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="reset-method"></a><span class="type">void</span> <span class="name">reset</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Clears the selection model. Does not emit any signals.</p>
+</div></div><!-- @@@reset -->
+<br/>
+<!-- $$$rowIntersectsSelection[overload1]$$$rowIntersectsSelectionQModelIndex -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="rowIntersectsSelection-method"></a><span class="type"><a href="qml-bool.html">bool</a></span> <span class="name">rowIntersectsSelection</span>(<i>row</i>,  <span class="type">QModelIndex</span> <i>parent</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns <code>true</code> if there are any items selected in the <i>row</i> with the given <i>parent</i>.</p>
+</div></div><!-- @@@rowIntersectsSelection -->
+<br/>
+<!-- $$$select$$$selectSelectionFlags -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="select-method-1"></a><span class="type">void</span> <span class="name">select</span>(<i>selection</i>,  <span class="type">SelectionFlags</span> <i>command</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Selects the item <i>selection</i> using the specified <i>command</i>, and emits <a href="qml-qtqml-models-itemselectionmodel.html#selectionChanged-signal">selectionChanged()</a>.</p>
+<p>Valid <i>command</i> values are described in <a href="qml-qtqml-models-itemselectionmodel.html#select-method">select(<i>index</i>, <i>command</i>)</a>.</p>
+</div></div><!-- @@@select -->
+<br/>
+<!-- $$$select[overload1]$$$selectSelectionFlags -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="select-method"></a><span class="type">void</span> <span class="name">select</span>(<i>index</i>,  <span class="type">SelectionFlags</span> <i>command</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Selects the model item <i>index</i> using the specified <i>command</i>, and emits <a href="qml-qtqml-models-itemselectionmodel.html#selectionChanged-signal">selectionChanged()</a>.</p>
+<p>Valid values for the <i>command</i> parameter, are:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>NoUpdate</code></td><td class="topAlign">No selection will be made.</td></tr>
+<tr><td class="topAlign"><code>Clear</code></td><td class="topAlign">The complete selection will be cleared.</td></tr>
+<tr><td class="topAlign"><code>Select</code></td><td class="topAlign">All specified indexes will be selected.</td></tr>
+<tr><td class="topAlign"><code>Deselect</code></td><td class="topAlign">All specified indexes will be deselected.</td></tr>
+<tr><td class="topAlign"><code>Toggle</code></td><td class="topAlign">All specified indexes will be selected or deselected depending on their current state.</td></tr>
+<tr><td class="topAlign"><code>Current</code></td><td class="topAlign">The current selection will be updated.</td></tr>
+<tr><td class="topAlign"><code>Rows</code></td><td class="topAlign">All indexes will be expanded to span rows.</td></tr>
+<tr><td class="topAlign"><code>Columns</code></td><td class="topAlign">All indexes will be expanded to span columns.</td></tr>
+<tr><td class="topAlign"><code>SelectCurrent</code></td><td class="topAlign">A combination of Select and Current, provided for convenience.</td></tr>
+<tr><td class="topAlign"><code>ToggleCurrent</code></td><td class="topAlign">A combination of Toggle and Current, provided for convenience.</td></tr>
+<tr><td class="topAlign"><code>ClearAndSelect</code></td><td class="topAlign">A combination of Clear and Select, provided for convenience.</td></tr>
+</table></div>
+</div></div><!-- @@@select -->
+<br/>
+<!-- $$$selectedColumns[overload1]$$$selectedColumns -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="selectedColumns-method"></a><span class="type">QModelIndexList</span> <span class="name">selectedColumns</span>(<i>row</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the indexes in the given <i>row</i> for columns where all rows are selected.</p>
+<p><b>See also </b><a href="qml-qtqml-models-itemselectionmodel.html#selectedRows-method">selectedRows()</a>.</p>
+</div></div><!-- @@@selectedColumns -->
+<br/>
+<!-- $$$selectedRows[overload1]$$$selectedRows -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="selectedRows-method"></a><span class="type">QModelIndexList</span> <span class="name">selectedRows</span>(<i>column</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the indexes in the given <i>column</i> for the rows where all columns are selected.</p>
+<p><b>See also </b><a href="qml-qtqml-models-itemselectionmodel.html#selectedColumns-method">selectedColumns()</a>.</p>
+</div></div><!-- @@@selectedRows -->
+<br/>
+<!-- $$$setCurrentIndex[overload1]$$$setCurrentIndexSelectionFlags -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="setCurrentIndex-method"></a><span class="type">void</span> <span class="name">setCurrentIndex</span>(<i>index</i>,  <span class="type">SelectionFlags</span> <i>command</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Sets the model item <i>index</i> to be the current item, and emits <a href="qml-qtqml-models-itemselectionmodel.html#currentChanged-signal">currentChanged()</a>. The current item is used for keyboard navigation and focus indication; it is independent of any selected items, although a selected item can also be the current item.</p>
+<p>Depending on the specified <i>command</i>, the <i>index</i> can also become part of the current selection.</p>
+<p>Valid <i>command</i> values are described in <a href="qml-qtqml-models-itemselectionmodel.html#select-method">select(<i>index</i>, <i>command</i>)</a>.</p>
+<p><b>See also </b><a href="qml-qtqml-models-itemselectionmodel.html#select-method">select()</a>.</p>
+</div></div><!-- @@@setCurrentIndex -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

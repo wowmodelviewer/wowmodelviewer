@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qbuttonaxisinput.cpp -->
+  <title>QButtonAxisInput Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QButtonAxisInput</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QButtonAxisInput Class</h1>
+<span class="small-subtitle">(<a href="qt3dinput-qbuttonaxisinput.html">Qt3DInput::QButtonAxisInput</a>)<br/></span>
+<!-- $$$QButtonAxisInput-brief -->
+<p>An axis input controlled by buttons The axis value is controlled by buttons rather than a traditional analog input such as a joystick. <a href="#details">More...</a></p>
+<!-- @@@QButtonAxisInput -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;Qt3DInput/QButtonAxisInput&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3dinput</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-input-buttonaxisinput.html">ButtonAxisInput</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3dinput-qabstractaxisinput.html">Qt3DInput::QAbstractAxisInput</a></td></tr></table></div><p>This class was introduced in  Qt 5.7.</p>
+<ul>
+<li><a href="qt3dinput-qbuttonaxisinput-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qt3dinput-qbuttonaxisinput.html#acceleration-prop">acceleration</a></b> : float</li>
+<li class="fn"><b><a href="qt3dinput-qbuttonaxisinput.html#buttons-prop">buttons</a></b> : QVector&lt;int&gt;</li>
+<li class="fn"><b><a href="qt3dinput-qbuttonaxisinput.html#deceleration-prop">deceleration</a></b> : float</li>
+<li class="fn"><b><a href="qt3dinput-qbuttonaxisinput.html#scale-prop">scale</a></b> : float</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qbuttonaxisinput.html#QButtonAxisInput">QButtonAxisInput</a></b>(Qt3DCore::QNode *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> float </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qbuttonaxisinput.html#acceleration-prop">acceleration</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;int&gt; </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qbuttonaxisinput.html#buttons-prop">buttons</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> float </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qbuttonaxisinput.html#deceleration-prop">deceleration</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> float </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qbuttonaxisinput.html#scale-prop">scale</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qbuttonaxisinput.html#acceleration-prop">setAcceleration</a></b>(float <i>acceleration</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qbuttonaxisinput.html#buttons-prop">setButtons</a></b>(const QVector&lt;int&gt; &amp;<i>buttons</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qbuttonaxisinput.html#deceleration-prop">setDeceleration</a></b>(float <i>deceleration</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qbuttonaxisinput.html#scale-prop">setScale</a></b>(float <i>scale</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qbuttonaxisinput.html#acceleration-prop">accelerationChanged</a></b>(float <i>acceleration</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qbuttonaxisinput.html#buttons-prop">buttonsChanged</a></b>(const QVector&lt;int&gt; &amp;<i>buttons</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qbuttonaxisinput.html#deceleration-prop">decelerationChanged</a></b>(float <i>deceleration</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qbuttonaxisinput.html#scale-prop">scaleChanged</a></b>(float <i>scale</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QButtonAxisInput-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QButtonAxisInput -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$acceleration-prop$$$acceleration$$$setAccelerationfloat$$$accelerationChangedfloat -->
+<h3 class="fn" id="acceleration-prop"><a name="acceleration-prop"></a><span class="name">acceleration</span> : <span class="type">float</span></h3>
+<p>Specifies the rate at which the axis value changes when a button is held</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> float </td><td class="memItemRight bottomAlign"><span class="name"><b>acceleration</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setAcceleration</b></span>(float <i>acceleration</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>accelerationChanged</b></span>(float <i>acceleration</i>)</td></tr>
+</table></div>
+<!-- @@@acceleration -->
+<!-- $$$buttons-prop$$$buttons$$$setButtonsconstQVector<int>&$$$buttonsChangedconstQVector<int>& -->
+<h3 class="fn" id="buttons-prop"><a name="buttons-prop"></a><span class="name">buttons</span> : <span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type">int</span>&gt;</h3>
+<p>Specifies the buttons which control the axis</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QVector&lt;int&gt; </td><td class="memItemRight bottomAlign"><span class="name"><b>buttons</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setButtons</b></span>(const QVector&lt;int&gt; &amp;<i>buttons</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>buttonsChanged</b></span>(const QVector&lt;int&gt; &amp;<i>buttons</i>)</td></tr>
+</table></div>
+<!-- @@@buttons -->
+<!-- $$$deceleration-prop$$$deceleration$$$setDecelerationfloat$$$decelerationChangedfloat -->
+<h3 class="fn" id="deceleration-prop"><a name="deceleration-prop"></a><span class="name">deceleration</span> : <span class="type">float</span></h3>
+<p>Specifies the rate at which the axis value returns to normal when a button is released</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> float </td><td class="memItemRight bottomAlign"><span class="name"><b>deceleration</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setDeceleration</b></span>(float <i>deceleration</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>decelerationChanged</b></span>(float <i>deceleration</i>)</td></tr>
+</table></div>
+<!-- @@@deceleration -->
+<!-- $$$scale-prop$$$scale$$$setScalefloat$$$scaleChangedfloat -->
+<h3 class="fn" id="scale-prop"><a name="scale-prop"></a><span class="name">scale</span> : <span class="type">float</span></h3>
+<p>Specifies how the axis output value is scaled. No scaling is applied by default so it defaults to 1.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> float </td><td class="memItemRight bottomAlign"><span class="name"><b>scale</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setScale</b></span>(float <i>scale</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>scaleChanged</b></span>(float <i>scale</i>)</td></tr>
+</table></div>
+<!-- @@@scale -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QButtonAxisInput[overload1]$$$QButtonAxisInputQt3DCore::QNode* -->
+<h3 class="fn" id="QButtonAxisInput"><a name="QButtonAxisInput"></a>QButtonAxisInput::<span class="name">QButtonAxisInput</span>(<span class="type"><a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new <a href="qt3dinput-qbuttonaxisinput.html">QButtonAxisInput</a> instance with <i>parent</i>.</p>
+<!-- @@@QButtonAxisInput -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

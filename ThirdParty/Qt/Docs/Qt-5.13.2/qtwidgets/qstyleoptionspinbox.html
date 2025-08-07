@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qstyleoption.cpp -->
+  <title>QStyleOptionSpinBox Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QStyleOptionSpinBox</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-variables">Public Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QStyleOptionSpinBox Class</h1>
+<!-- $$$QStyleOptionSpinBox-brief -->
+<p>The <a href="qstyleoptionspinbox.html">QStyleOptionSpinBox</a> class is used to describe the parameters necessary for drawing a spin box. <a href="#details">More...</a></p>
+<!-- @@@QStyleOptionSpinBox -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QStyleOptionSpinBox&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qstyleoptioncomplex.html">QStyleOptionComplex</a></td></tr></table></div><ul>
+<li><a href="qstyleoptionspinbox-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptionspinbox.html#StyleOptionType-enum">StyleOptionType</a></b> { Type }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptionspinbox.html#StyleOptionVersion-enum">StyleOptionVersion</a></b> { Version }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptionspinbox.html#QStyleOptionSpinBox-1">QStyleOptionSpinBox</a></b>(const QStyleOptionSpinBox &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptionspinbox.html#QStyleOptionSpinBox">QStyleOptionSpinBox</a></b>()</td></tr>
+</table></div>
+<a name="public-variables"></a>
+<h2 id="public-variables">Public Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QAbstractSpinBox::ButtonSymbols </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptionspinbox.html#buttonSymbols-var">buttonSymbols</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptionspinbox.html#frame-var">frame</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QAbstractSpinBox::StepEnabled </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptionspinbox.html#stepEnabled-var">stepEnabled</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QStyleOptionSpinBox-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qstyleoptionspinbox.html">QStyleOptionSpinBox</a> contains all the information that <a href="qstyle.html">QStyle</a> functions need to draw <a href="qspinbox.html">QSpinBox</a> and <a href="qdatetimeedit.html">QDateTimeEdit</a>.</p>
+<p>For performance reasons, the access to the member variables is direct (i.e&#x2e;, using the <code>.</code> or <code>-&gt;</code> operator). This low-level feel makes the structures straightforward to use and emphasizes that these are simply parameters used by the style functions.</p>
+<p>For an example demonstrating how style options can be used, see the <a href="qtwidgets-widgets-styles-example.html">Styles</a> example.</p>
+</div>
+<p><b>See also </b><a href="qstyleoption.html">QStyleOption</a> and <a href="qstyleoptioncomplex.html">QStyleOptionComplex</a>.</p>
+<!-- @@@QStyleOptionSpinBox -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$StyleOptionType$$$Type -->
+<h3 class="fn" id="StyleOptionType-enum"><a name="StyleOptionType-enum"></a>enum QStyleOptionSpinBox::<span class="name">StyleOptionType</span></h3>
+<p>This enum is used to hold information about the type of the style option, and is defined for each <a href="qstyleoption.html">QStyleOption</a> subclass.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QStyleOptionSpinBox::Type</code></td><td class="topAlign tblval"><code>SO_SpinBox</code></td><td class="topAlign">The type of style option provided (<a href="qstyleoption.html#OptionType-enum">SO_SpinBox</a> for this class).</td></tr>
+</table></div>
+<p>The type is used internally by <a href="qstyleoption.html">QStyleOption</a>, its subclasses, and <a href="qstyleoption.html#qstyleoption_cast">qstyleoption_cast</a>() to determine the type of style option. In general you do not need to worry about this unless you want to create your own <a href="qstyleoption.html">QStyleOption</a> subclass and your own styles.</p>
+<p><b>See also </b><a href="qstyleoptionspinbox.html#StyleOptionVersion-enum">StyleOptionVersion</a>.</p>
+<!-- @@@StyleOptionType -->
+<!-- $$$StyleOptionVersion$$$Version -->
+<h3 class="fn" id="StyleOptionVersion-enum"><a name="StyleOptionVersion-enum"></a>enum QStyleOptionSpinBox::<span class="name">StyleOptionVersion</span></h3>
+<p>This enum is used to hold information about the version of the style option, and is defined for each <a href="qstyleoption.html">QStyleOption</a> subclass.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QStyleOptionSpinBox::Version</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">1</td></tr>
+</table></div>
+<p>The version is used by <a href="qstyleoption.html">QStyleOption</a> subclasses to implement extensions without breaking compatibility. If you use <a href="qstyleoption.html#qstyleoption_cast">qstyleoption_cast</a>(), you normally do not need to check it.</p>
+<p><b>See also </b><a href="qstyleoptionspinbox.html#StyleOptionType-enum">StyleOptionType</a>.</p>
+<!-- @@@StyleOptionVersion -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QStyleOptionSpinBox$$$QStyleOptionSpinBoxconstQStyleOptionSpinBox& -->
+<h3 class="fn" id="QStyleOptionSpinBox-1"><a name="QStyleOptionSpinBox-1"></a>QStyleOptionSpinBox::<span class="name">QStyleOptionSpinBox</span>(const <span class="type"><a href="qstyleoptionspinbox.html#QStyleOptionSpinBox">QStyleOptionSpinBox</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a copy of the <i>other</i> style option.</p>
+<!-- @@@QStyleOptionSpinBox -->
+<!-- $$$QStyleOptionSpinBox[overload1]$$$QStyleOptionSpinBox -->
+<h3 class="fn" id="QStyleOptionSpinBox"><a name="QStyleOptionSpinBox"></a>QStyleOptionSpinBox::<span class="name">QStyleOptionSpinBox</span>()</h3>
+<p>Constructs a <a href="qstyleoptionspinbox.html">QStyleOptionSpinBox</a>, initializing the members variables to their default values.</p>
+<!-- @@@QStyleOptionSpinBox -->
+</div>
+<div class="vars">
+<h2>Member Variable Documentation</h2>
+<!-- $$$buttonSymbols -->
+<h3 class="fn" id="buttonSymbols-var"><a name="buttonSymbols-var"></a><span class="type"><a href="qabstractspinbox.html#ButtonSymbols-enum">QAbstractSpinBox::ButtonSymbols</a></span> QStyleOptionSpinBox::<span class="name">buttonSymbols</span></h3>
+<p>This variable holds the type of button symbols to draw for the spin box</p>
+<p>The default value is <a href="qabstractspinbox.html#ButtonSymbols-enum">QAbstractSpinBox::UpDownArrows</a> specufying little arrows in the classic style.</p>
+<p><b>See also </b><a href="qabstractspinbox.html#ButtonSymbols-enum">QAbstractSpinBox::ButtonSymbols</a>.</p>
+<!-- @@@buttonSymbols -->
+<!-- $$$frame -->
+<h3 class="fn" id="frame-var"><a name="frame-var"></a><span class="type">bool</span> QStyleOptionSpinBox::<span class="name">frame</span></h3>
+<p>This variable holds whether the spin box has a frame</p>
+<p>The default value is false, i.e&#x2e; the spin box has no frame.</p>
+<!-- @@@frame -->
+<!-- $$$stepEnabled -->
+<h3 class="fn" id="stepEnabled-var"><a name="stepEnabled-var"></a><span class="type"><a href="qabstractspinbox.html#StepEnabledFlag-enum">QAbstractSpinBox::StepEnabled</a></span> QStyleOptionSpinBox::<span class="name">stepEnabled</span></h3>
+<p>This variable holds which buttons of the spin box that are enabled</p>
+<p>The default value is <a href="qabstractspinbox.html#StepEnabledFlag-enum">QAbstractSpinBox::StepNone</a>.</p>
+<p><b>See also </b><a href="qabstractspinbox.html#StepEnabledFlag-enum">QAbstractSpinBox::StepEnabled</a>.</p>
+<!-- @@@stepEnabled -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

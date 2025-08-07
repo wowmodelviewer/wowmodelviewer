@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickplatformmessagedialog.cpp -->
+  <title>MessageDialog QML Type | Qt Labs Platform 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlabsplatform-index.html">Qt Labs Platform</a></td><td ><a href="qt-labs-platform-qmlmodule.html">QML Types</a></td><td >MessageDialog QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlabsplatform-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">MessageDialog QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$MessageDialog-brief -->
+<p>A native message dialog. <a href="#details">More...</a></p>
+<!-- @@@MessageDialog -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import Qt.labs.platform 1.1</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qt-labs-platform-dialog.html">Dialog</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qt-labs-platform-messagedialog-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#buttons-prop">buttons</a></b></b> : flags</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#detailedText-prop">detailedText</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#informativeText-prop">informativeText</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#text-prop">text</a></b></b> : string</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#abortClicked-signal">abortClicked</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#applyClicked-signal">applyClicked</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#cancelClicked-signal">cancelClicked</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#clicked-signal">clicked</a></b></b>(<i>button</i>)</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#closeClicked-signal">closeClicked</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#discardClicked-signal">discardClicked</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#helpClicked-signal">helpClicked</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#ignoreClicked-signal">ignoreClicked</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#noClicked-signal">noClicked</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#noToAllClicked-signal">noToAllClicked</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#okClicked-signal">okClicked</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#openClicked-signal">openClicked</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#resetClicked-signal">resetClicked</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#restoreDefaultsClicked-signal">restoreDefaultsClicked</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#retryClicked-signal">retryClicked</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#saveAllClicked-signal">saveAllClicked</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#saveClicked-signal">saveClicked</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#yesClicked-signal">yesClicked</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qt-labs-platform-messagedialog.html#yesToAllClicked-signal">yesToAllClicked</a></b></b>()</li>
+</ul>
+<!-- $$$MessageDialog-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qml-qt-labs-platform-messagedialog.html">MessageDialog</a> type provides a QML API for native platform message dialogs.</p>
+<p class="centerAlign"><img src="images/qtlabsplatform-messagedialog-android.png" alt="" /></p><p>A message dialog is used to inform the user, or ask the user a question. A message dialog displays a primary <a href="qml-qt-labs-platform-messagedialog.html#text-prop">text</a> to alert the user to a situation, an <a href="qml-qt-labs-platform-messagedialog.html#informativeText-prop">informative text</a> to further explain the alert or to ask the user a question, and an optional <a href="qml-qt-labs-platform-messagedialog.html#detailedText-prop">detailed text</a> to provide even more data if the user requests it. A message box can also display a configurable set of <a href="qml-qt-labs-platform-messagedialog.html#buttons-prop">buttons</a> for accepting a user response.</p>
+<p>To show a message dialog, construct an instance of <a href="qml-qt-labs-platform-messagedialog.html">MessageDialog</a>, set the desired properties, and call <a href="qml-qt-labs-platform-dialog.html#open-method">open()</a>.</p>
+<pre class="cpp">
+
+  MessageDialog {
+      buttons: MessageDialog<span class="operator">.</span>Ok
+      text: <span class="string">&quot;The document has been modified.&quot;</span>
+  }
+
+</pre>
+<p>The user must click the <b>OK</b> button to dismiss the message dialog. A modal message dialog blocks the rest of the GUI until the message is dismissed.</p>
+<p>A more elaborate approach than just alerting the user to an event is to also ask the user what to do about it. Store the question in the <a href="qml-qt-labs-platform-messagedialog.html#informativeText-prop">informative text</a> property, and specify the <a href="qml-qt-labs-platform-messagedialog.html#buttons-prop">buttons</a> property to the set of buttons you want as the set of user responses. The buttons are specified by combining values using the bitwise OR operator. The display order for the buttons is platform dependent.</p>
+<pre class="cpp">
+
+  MessageDialog {
+      text: <span class="string">&quot;The document has been modified.&quot;</span>
+      informativeText: <span class="string">&quot;Do you want to save your changes?&quot;</span>
+      buttons: MessageDialog<span class="operator">.</span>Ok <span class="operator">|</span> MessageDialog<span class="operator">.</span>Cancel
+
+      onAccepted: document<span class="operator">.</span>save()
+  }
+
+</pre>
+<p class="centerAlign"><img src="images/qtlabsplatform-messagedialog-informative-android.png" alt="" /></p><p>The <a href="qml-qt-labs-platform-messagedialog.html#clicked-signal">clicked()</a> signal passes the information of which button was clicked.</p>
+<p>A native platform message dialog is currently available on the following platforms:</p>
+<ul>
+<li>iOS</li>
+<li>Android</li>
+<li>WinRT</li>
+</ul>
+<p>The Qt Labs Platform module uses Qt Widgets as a fallback on platforms that do not have a native implementation available. Therefore, applications that use types from the Qt Labs Platform module should link to <a href="../qtgui/qtwidgets-module.html">QtWidgets</a> and use <a href="../qtwidgets/qapplication.html">QApplication</a> instead of <a href="../qtgui/qguiapplication.html">QGuiApplication</a>.</p>
+<p>To link against the <a href="../qtgui/qtwidgets-module.html">QtWidgets</a> library, add the following to your qmake project file:</p>
+<pre class="cpp">
+
+  QT <span class="operator">+</span><span class="operator">=</span> widgets
+
+</pre>
+<p>Create an instance of <a href="../qtwidgets/qapplication.html">QApplication</a> in <code>main()</code>:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QQmlApplicationEngine&gt;</span>
+
+  <span class="type"><a href="../qtqml/qml-int.html">int</a></span> main(<span class="type"><a href="../qtqml/qml-int.html">int</a></span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type">QApplication</span><span class="operator">::</span>setAttribute(<span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">::</span>AA_EnableHighDpiScaling);
+      <span class="type">QApplication</span> app(argc<span class="operator">,</span> argv);
+      <span class="type">QQmlApplicationEngine</span> engine;
+      engine<span class="operator">.</span>load(<span class="type">QUrl</span>(<span class="type">QStringLiteral</span>(<span class="string">&quot;qrc:/main.qml&quot;</span>)));
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p><b>Note: </b><i>Types in Qt.labs modules are not guaranteed to remain compatible in future versions.</i></p><!-- @@@MessageDialog -->
+<h2>Property Documentation</h2>
+<!-- $$$buttons -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="buttons-prop"></a><span class="name">buttons</span> : <span class="type">flags</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds a combination of buttons that are used by the message dialog. The default value is <code>MessageDialog.NoButton</code>.</p>
+<p>Possible flags:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>MessageDialog.Ok</code></td><td class="topAlign">An &quot;OK&quot; button defined with the <code>AcceptRole</code>.</td></tr>
+<tr><td class="topAlign"><code>MessageDialog.Open</code></td><td class="topAlign">An &quot;Open&quot; button defined with the <code>AcceptRole</code>.</td></tr>
+<tr><td class="topAlign"><code>MessageDialog.Save</code></td><td class="topAlign">A &quot;Save&quot; button defined with the <code>AcceptRole</code>.</td></tr>
+<tr><td class="topAlign"><code>MessageDialog.Cancel</code></td><td class="topAlign">A &quot;Cancel&quot; button defined with the <code>RejectRole</code>.</td></tr>
+<tr><td class="topAlign"><code>MessageDialog.Close</code></td><td class="topAlign">A &quot;Close&quot; button defined with the <code>RejectRole</code>.</td></tr>
+<tr><td class="topAlign"><code>MessageDialog.Discard</code></td><td class="topAlign">A &quot;Discard&quot; or &quot;Don't Save&quot; button, depending on the platform, defined with the <code>DestructiveRole</code>.</td></tr>
+<tr><td class="topAlign"><code>MessageDialog.Apply</code></td><td class="topAlign">An &quot;Apply&quot; button defined with the <code>ApplyRole</code>.</td></tr>
+<tr><td class="topAlign"><code>MessageDialog.Reset</code></td><td class="topAlign">A &quot;Reset&quot; button defined with the <code>ResetRole</code>.</td></tr>
+<tr><td class="topAlign"><code>MessageDialog.RestoreDefaults</code></td><td class="topAlign">A &quot;Restore Defaults&quot; button defined with the <code>ResetRole</code>.</td></tr>
+<tr><td class="topAlign"><code>MessageDialog.Help</code></td><td class="topAlign">A &quot;Help&quot; button defined with the <code>HelpRole</code>.</td></tr>
+<tr><td class="topAlign"><code>MessageDialog.SaveAll</code></td><td class="topAlign">A &quot;Save All&quot; button defined with the <code>AcceptRole</code>.</td></tr>
+<tr><td class="topAlign"><code>MessageDialog.Yes</code></td><td class="topAlign">A &quot;Yes&quot; button defined with the <code>YesRole</code>.</td></tr>
+<tr><td class="topAlign"><code>MessageDialog.YesToAll</code></td><td class="topAlign">A &quot;Yes to All&quot; button defined with the <code>YesRole</code>.</td></tr>
+<tr><td class="topAlign"><code>MessageDialog.No</code></td><td class="topAlign">A &quot;No&quot; button defined with the <code>NoRole</code>.</td></tr>
+<tr><td class="topAlign"><code>MessageDialog.NoToAll</code></td><td class="topAlign">A &quot;No to All&quot; button defined with the <code>NoRole</code>.</td></tr>
+<tr><td class="topAlign"><code>MessageDialog.Abort</code></td><td class="topAlign">An &quot;Abort&quot; button defined with the <code>RejectRole</code>.</td></tr>
+<tr><td class="topAlign"><code>MessageDialog.Retry</code></td><td class="topAlign">A &quot;Retry&quot; button defined with the <code>AcceptRole</code>.</td></tr>
+<tr><td class="topAlign"><code>MessageDialog.Ignore</code></td><td class="topAlign">An &quot;Ignore&quot; button defined with the <code>AcceptRole</code>.</td></tr>
+<tr><td class="topAlign"><code>MessageDialog.NoButton</code></td><td class="topAlign">The dialog has no buttons.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qml-qt-labs-platform-messagedialog.html#clicked-signal">clicked()</a>.</p>
+</div></div><!-- @@@buttons -->
+<br/>
+<!-- $$$detailedText -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="detailedText-prop"></a><span class="name">detailedText</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the text to be displayed in the details area.</p>
+<p><b>See also </b><a href="qml-qt-labs-platform-messagedialog.html#text-prop">text</a> and <a href="qml-qt-labs-platform-messagedialog.html#informativeText-prop">informativeText</a>.</p>
+</div></div><!-- @@@detailedText -->
+<br/>
+<!-- $$$informativeText -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="informativeText-prop"></a><span class="name">informativeText</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the informative text that provides a fuller description for the message.</p>
+<p>Informative text can be used to expand upon the <a href="qml-qt-labs-platform-messagedialog.html#text-prop">text</a> to give more information to the user.</p>
+<p><b>See also </b><a href="qml-qt-labs-platform-messagedialog.html#text-prop">text</a> and <a href="qml-qt-labs-platform-messagedialog.html#detailedText-prop">detailedText</a>.</p>
+</div></div><!-- @@@informativeText -->
+<br/>
+<!-- $$$text -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="text-prop"></a><span class="name">text</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the text to be displayed on the message dialog.</p>
+<p><b>See also </b><a href="qml-qt-labs-platform-messagedialog.html#informativeText-prop">informativeText</a> and <a href="qml-qt-labs-platform-messagedialog.html#detailedText-prop">detailedText</a>.</p>
+</div></div><!-- @@@text -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$abortClicked[overload1]$$$abortClicked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="abortClicked-signal"></a><span class="name">abortClicked</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when <b>Abort</b> is clicked.</p>
+</div></div><!-- @@@abortClicked -->
+<br/>
+<!-- $$$applyClicked[overload1]$$$applyClicked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="applyClicked-signal"></a><span class="name">applyClicked</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when <b>Apply</b> is clicked.</p>
+</div></div><!-- @@@applyClicked -->
+<br/>
+<!-- $$$cancelClicked[overload1]$$$cancelClicked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="cancelClicked-signal"></a><span class="name">cancelClicked</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when <b>Cancel</b> is clicked.</p>
+</div></div><!-- @@@cancelClicked -->
+<br/>
+<!-- $$$clicked[overload1]$$$clicked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="clicked-signal"></a><span class="name">clicked</span>(<i>button</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when a dialog <i>button</i> is clicked.</p>
+<p><b>See also </b><a href="qml-qt-labs-platform-messagedialog.html#buttons-prop">buttons</a>.</p>
+</div></div><!-- @@@clicked -->
+<br/>
+<!-- $$$closeClicked[overload1]$$$closeClicked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="closeClicked-signal"></a><span class="name">closeClicked</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when <b>Close</b> is clicked.</p>
+</div></div><!-- @@@closeClicked -->
+<br/>
+<!-- $$$discardClicked[overload1]$$$discardClicked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="discardClicked-signal"></a><span class="name">discardClicked</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when <b>Discard</b> is clicked.</p>
+</div></div><!-- @@@discardClicked -->
+<br/>
+<!-- $$$helpClicked[overload1]$$$helpClicked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="helpClicked-signal"></a><span class="name">helpClicked</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when <b>Help</b> is clicked.</p>
+</div></div><!-- @@@helpClicked -->
+<br/>
+<!-- $$$ignoreClicked[overload1]$$$ignoreClicked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="ignoreClicked-signal"></a><span class="name">ignoreClicked</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when <b>Ignore</b> is clicked.</p>
+</div></div><!-- @@@ignoreClicked -->
+<br/>
+<!-- $$$noClicked[overload1]$$$noClicked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="noClicked-signal"></a><span class="name">noClicked</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when <b>No</b> is clicked.</p>
+</div></div><!-- @@@noClicked -->
+<br/>
+<!-- $$$noToAllClicked[overload1]$$$noToAllClicked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="noToAllClicked-signal"></a><span class="name">noToAllClicked</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when <b>No To All</b> is clicked.</p>
+</div></div><!-- @@@noToAllClicked -->
+<br/>
+<!-- $$$okClicked[overload1]$$$okClicked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="okClicked-signal"></a><span class="name">okClicked</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when <b>Ok</b> is clicked.</p>
+</div></div><!-- @@@okClicked -->
+<br/>
+<!-- $$$openClicked[overload1]$$$openClicked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="openClicked-signal"></a><span class="name">openClicked</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when <b>Open</b> is clicked.</p>
+</div></div><!-- @@@openClicked -->
+<br/>
+<!-- $$$resetClicked[overload1]$$$resetClicked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="resetClicked-signal"></a><span class="name">resetClicked</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when <b>Reset</b> is clicked.</p>
+</div></div><!-- @@@resetClicked -->
+<br/>
+<!-- $$$restoreDefaultsClicked[overload1]$$$restoreDefaultsClicked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="restoreDefaultsClicked-signal"></a><span class="name">restoreDefaultsClicked</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when <b>Restore Defaults</b> is clicked.</p>
+</div></div><!-- @@@restoreDefaultsClicked -->
+<br/>
+<!-- $$$retryClicked[overload1]$$$retryClicked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="retryClicked-signal"></a><span class="name">retryClicked</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when <b>Retry</b> is clicked.</p>
+</div></div><!-- @@@retryClicked -->
+<br/>
+<!-- $$$saveAllClicked[overload1]$$$saveAllClicked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="saveAllClicked-signal"></a><span class="name">saveAllClicked</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when <b>Save All</b> is clicked.</p>
+</div></div><!-- @@@saveAllClicked -->
+<br/>
+<!-- $$$saveClicked[overload1]$$$saveClicked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="saveClicked-signal"></a><span class="name">saveClicked</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when <b>Save</b> is clicked.</p>
+</div></div><!-- @@@saveClicked -->
+<br/>
+<!-- $$$yesClicked[overload1]$$$yesClicked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="yesClicked-signal"></a><span class="name">yesClicked</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when <b>Yes</b> is clicked.</p>
+</div></div><!-- @@@yesClicked -->
+<br/>
+<!-- $$$yesToAllClicked[overload1]$$$yesToAllClicked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="yesToAllClicked-signal"></a><span class="name">yesToAllClicked</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when <b>Yes To All</b> is clicked.</p>
+</div></div><!-- @@@yesToAllClicked -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

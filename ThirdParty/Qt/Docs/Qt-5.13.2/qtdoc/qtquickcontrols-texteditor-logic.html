@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- controls-texteditor.qdoc -->
+  <title>Qt Quick Text Editor Guide - Logic | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Qt Quick Text Editor Guide - Logic</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="qtquickcontrols-texteditor-ui.html" />
+  <link rel="next" href="qtquickcontrols-texteditor-action.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="qtquickcontrols-texteditor-ui.html">Qt Quick Text Editor Guide - UI</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qtquickcontrols-texteditor-action.html">Qt Quick Text Editor - Connecting Actions</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#implementing-the-logic-and-c-backend">Implementing the Logic and C++ Backend</a></li>
+<li class="level1"><a href="#creating-the-document-handler">Creating the Document Handler</a></li>
+<li class="level1"><a href="#registering-the-documenthandler-class">Registering the DocumentHandler Class</a></li>
+<li class="level1"><a href="#using-the-documenthandler-qml-type">Using the DocumentHandler QML type</a></li>
+<li class="level1"><a href="#example-files">Example Files</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Quick Text Editor Guide - Logic</h1>
+<span class="subtitle"></span>
+<!-- $$$qtquickcontrols-texteditor-logic.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>This part of the guide is about adding logic and backend to the text editor example. At this stage, the user interface is set up from the <a href="qtquickcontrols-texteditor-logic.html">previous</a> stage.</p>
+<a name="implementing-the-logic-and-c-backend"></a>
+<h2 id="implementing-the-logic-and-c-backend">Implementing the Logic and C++ Backend</h2>
+<p><i>Text Editor</i> has a QML user interface and a C++ backend to implement the document handling. To connect QML and C++, we need to create <i>actions</i> associated to the tool buttons, which will call the document handling logic in C++.</p>
+<a name="creating-the-document-handler"></a>
+<h2 id="creating-the-document-handler">Creating the Document Handler</h2>
+<p>The document handler implements the file loading and file saving logic with Qt's C++ APIs. First, we need to create the header file and the implementation file in Qt Creator's <b>Edit</b> mode.</p>
+<ul>
+<li>Right-click a folder, and select <b>Add New</b>.</li>
+<li>Follow the wizard and create a new <b>C++ Class</b>.</li>
+<li>Create a class called <b>DocumentHandler</b> and select <b>Inherits <a href="../qtcore/qobject.html">QObject</a></b> in the <b>Type information</b>.</li>
+<li>You can use default values for the rest and finish the wizard.</li>
+</ul>
+<p>The wizard creates a <b>DocumentHandler</b> class in two files, <i>documenthandler.h</i> and <i>documenthandler.cpp</i>.</p>
+<p>There are two functionalities we can expose to QML, the file loading and saving. We can do this by creating <i>properties</i> and binding them to C++ functions through the <a href="../qtcore/properties.html">Qt Property System</a>.</p>
+<p>In the <i>documenthandler.h</i> header file, add the following functions with their respective access modifier:</p>
+<pre class="cpp">
+
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> fileUrl READ fileUrl WRITE setFileUrl NOTIFY fileUrlChanged)
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> text READ text WRITE setText NOTIFY textChanged)
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> documentTitle READ documentTitle WRITE setDocumentTitle NOTIFY documentTitleChanged)
+
+  <span class="keyword">public</span>:
+      <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> fileUrl() <span class="keyword">const</span>;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> text() <span class="keyword">const</span>;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> documentTitle() <span class="keyword">const</span>;
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> setFileUrl(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span>arg);
+      <span class="type">void</span> setText(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>arg);
+      <span class="type">void</span> setDocumentTitle(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> arg);
+
+  <span class="keyword">signals</span>:
+      <span class="type">void</span> fileUrlChanged();
+      <span class="type">void</span> textChanged();
+      <span class="type">void</span> documentTitleChanged();
+
+</pre>
+<p>The lines with <code>Q_PROPERTY()</code> macro declares the <i>property</i> and its <i>write</i> and <i>read</i> methods as well as its <i>notify</i> signal. For example, setting the <code>fileUrl</code> property calls <code>setFileUrl()</code> and reading the property calls the <code>fileUrl()</code> function. Similarly, when the value of fileUrl changes the <code>fileUrlChanged()</code> function is called.</p>
+<p>Internally, the properties are represented by private member variables. For our needs, here are the three variables in <i>documenthandler.h</i> which correspond to the properties:</p>
+<pre class="cpp">
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> m_fileUrl;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> m_text;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> m_documentTitle;
+
+</pre>
+<p>Implementing the read functions is straightforward. They simply return the private member variables. For example, the implementation of <code>documentTitle()</code> in <i>documenthandler.cpp</i> is:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> DocumentHandler<span class="operator">::</span>documentTitle() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_documentTitle;
+  }
+
+</pre>
+<p>Implementing the write (<code>setText()</code>, for example) functions is also straightforward as they simply assign a value to a private member variable. They also handle basic error handling and they emit their respective notify signals. For example, the <code>setDocumentTitle()</code> function is implemented in <i>documenthandler.cpp</i> as:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> DocumentHandler<span class="operator">::</span>setDocumentTitle(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> arg)
+  {
+      <span class="keyword">if</span> (m_documentTitle <span class="operator">!</span><span class="operator">=</span> arg) {
+          m_documentTitle <span class="operator">=</span> arg;
+          <span class="keyword">emit</span> documentTitleChanged();
+      }
+  }
+
+</pre>
+<p>The opening of the file is done in the <code>setFileUrl()</code> function:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> DocumentHandler<span class="operator">::</span>setFileUrl(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span>arg)
+  {
+      <span class="keyword">if</span> (m_fileUrl <span class="operator">!</span><span class="operator">=</span> arg) {
+          m_fileUrl <span class="operator">=</span> arg;
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> arg<span class="operator">.</span>fileName();
+          <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(arg<span class="operator">.</span>toLocalFile());
+          <span class="keyword">if</span> (file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>ReadOnly)) {
+              setText(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(file<span class="operator">.</span>readAll()));
+              <span class="keyword">if</span> (fileName<span class="operator">.</span>isEmpty())
+                  m_documentTitle <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;untitled&quot;</span>);
+              <span class="keyword">else</span>
+                  m_documentTitle <span class="operator">=</span> fileName;
+              <span class="keyword">emit</span> textChanged();
+              <span class="keyword">emit</span> documentTitleChanged();
+          }
+          <span class="keyword">emit</span> fileUrlChanged();
+      }
+  }
+
+</pre>
+<p>Note how the function emits the notify signals with the <code>emit</code> keyword.</p>
+<p>Similarly, we use <a href="../qtcore/qfile.html">QFile</a> and text streams to save files. The function signature in <i>documenthandler.h</i> is placed under <code>public slots</code> because that is one way to expose functions to the QML engine. <code>saveFile()</code> is called from the QML file during saving.</p>
+<pre class="cpp">
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+
+      Q_INVOKABLE <span class="type">void</span> saveFile(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span>arg) <span class="keyword">const</span>;
+
+</pre>
+<p>The implementation of <code>saveFile()</code> is in documenthandler.cpp:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> DocumentHandler<span class="operator">::</span>saveFile(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span>arg) <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(arg<span class="operator">.</span>toLocalFile());
+      <span class="keyword">if</span> (file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>WriteOnly <span class="operator">|</span> <span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>Truncate)) {
+          <span class="type"><a href="../qtcore/qtextstream.html">QTextStream</a></span> out(<span class="operator">&amp;</span>file);
+          out <span class="operator">&lt;</span><span class="operator">&lt;</span> text();
+      }
+  }
+
+</pre>
+<p>For information about reading files and data storage, visit the <a href="../qtcore/qfile.html">QFile</a> and the <a href="topics-data-storage.html">Data Storage</a> documentation.</p>
+<a name="registering-the-documenthandler-class"></a>
+<h2 id="registering-the-documenthandler-class">Registering the DocumentHandler Class</h2>
+<p>We now need to let the QML engine know about the <code>DocumentHandler</code> and its type. The <code>qmlRegisterType()</code> function is called in the application's <code>main()</code> function in <i>main.cpp</i>:</p>
+<pre class="cpp">
+
+  qmlRegisterType<span class="operator">&lt;</span>DocumentHandler<span class="operator">&gt;</span>(<span class="string">&quot;org.qtproject.example&quot;</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;DocumentHandler&quot;</span>);
+
+</pre>
+<p>The <code>org.qtproject.example</code> is the library with the version <code>1.0</code> and the QML type registered is <code>DocumentHandler</code>. The import statement for the DocumentHandler QML type is then</p>
+<pre class="cpp">
+
+  import org<span class="operator">.</span>qtproject<span class="operator">.</span>example <span class="number">1.0</span>
+
+</pre>
+<p><b>Note: </b>The <code>qmlRegisterType()</code> function should be called before the engine loads the QML file.</p><a name="using-the-documenthandler-qml-type"></a>
+<h2 id="using-the-documenthandler-qml-type">Using the DocumentHandler QML type</h2>
+<p>With the basic loading implemented, we can use the functionalities in the QML file by creating an instance of the DocumentHandler class and by accessing its properties.</p>
+<p>The <a href="qtquickcontrols-texteditor-action.html">next page</a> is about using these C++ functions in QML files.</p>
+<a name="example-files"></a>
+<h2 id="example-files">Example Files</h2>
+<p>The accompanying examples files are found in the following page:</p>
+<ul>
+<li><a href="../qtquickcontrols1/qtquickcontrols1-texteditor-example.html">Qt Quick Controls 1 - Text Editor Example</a></li>
+</ul>
+</div>
+<!-- @@@qtquickcontrols-texteditor-logic.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="qtquickcontrols-texteditor-ui.html">Qt Quick Text Editor Guide - UI</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qtquickcontrols-texteditor-action.html">Qt Quick Text Editor - Connecting Actions</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdeclarativecameraexposure.cpp -->
+  <title>CameraExposure QML Type | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-qmlmodule.html">QML Types</a></td><td >CameraExposure QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">CameraExposure QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$CameraExposure-brief -->
+<p>An interface for exposure related camera settings. <a href="#details">More...</a></p>
+<!-- @@@CameraExposure -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtMultimedia 5.13</td></tr></table></div><ul>
+<li><a href="qml-qtmultimedia-cameraexposure-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraexposure.html#aperture-prop">aperture</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraexposure.html#exposureCompensation-prop">exposureCompensation</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraexposure.html#exposureMode-prop">exposureMode</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraexposure.html#iso-prop">iso</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraexposure.html#manualAperture-prop">manualAperture</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraexposure.html#manualIso-prop">manualIso</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraexposure.html#manualShutterSpeed-prop">manualShutterSpeed</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraexposure.html#meteringMode-prop">meteringMode</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraexposure.html#shutterSpeed-prop">shutterSpeed</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraexposure.html#spotMeteringPoint-prop">spotMeteringPoint</a></b></b> : QPointF</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraexposure.html#supportedExposureModes-prop">supportedExposureModes</a></b></b> : list&lt;ExposureMode&gt;</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraexposure.html#setAutoAperture-method">setAutoAperture</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraexposure.html#setAutoIsoSensitivity-method">setAutoIsoSensitivity</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraexposure.html#setAutoShutterSpeed-method">setAutoShutterSpeed</a></b></b>()</li>
+</ul>
+<!-- $$$CameraExposure-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><a href="qml-qtmultimedia-cameraexposure.html">CameraExposure</a> allows you to adjust exposure related settings like aperture and shutter speed, metering and ISO speed.</p>
+<p>It should not be constructed separately, instead the <code>exposure</code> property of the a <a href="qml-multimedia.html#camera">Camera</a> should be used.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtmultimedia-camera.html">Camera</a></span> {
+      <span class="name">id</span>: <span class="name">camera</span>
+
+      <span class="name">exposure</span>.exposureCompensation: -<span class="number">1.0</span>
+      <span class="name">exposure</span>.exposureMode: <span class="name">Camera</span>.<span class="name">ExposurePortrait</span>
+  }
+
+</pre>
+<p>Several settings have both an automatic and a manual mode. In the automatic modes the camera software itself will decide what a reasonable setting is, but in most cases these settings can be overridden with a specific manual setting.</p>
+<p>For example, to select automatic shutter speed selection:</p>
+<pre class="cpp">
+
+  camera<span class="operator">.</span>exposure<span class="operator">.</span>setAutoShutterSpeed()
+
+</pre>
+<p>Or for a specific shutter speed:</p>
+<pre class="cpp">
+
+  camera<span class="operator">.</span>exposure<span class="operator">.</span>manualShutterSpeed <span class="operator">=</span> <span class="number">0.01</span> <span class="comment">// 10ms</span>
+
+</pre>
+<p>You can only choose one or the other mode.</p>
+<!-- @@@CameraExposure -->
+<h2>Property Documentation</h2>
+<!-- $$$aperture -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="aperture-prop"></a><span class="name">aperture</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the current lens aperture as an F number (the ratio of the focal length to effective aperture diameter).</p>
+<p><b>See also </b><a href="qml-qtmultimedia-cameraexposure.html#manualAperture-prop">manualAperture</a> and <a href="qml-qtmultimedia-cameraexposure.html#setAutoAperture-method">setAutoAperture()</a>.</p>
+</div></div><!-- @@@aperture -->
+<br/>
+<!-- $$$exposureCompensation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="exposureCompensation-prop"></a><span class="name">exposureCompensation</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the adjustment value for the automatically calculated exposure. The value is in EV units.</p>
+</div></div><!-- @@@exposureCompensation -->
+<br/>
+<!-- $$$exposureMode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="exposureMode-prop"></a><span class="name">exposureMode</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the camera exposure mode.</p>
+<p>The mode can be one of the following:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Value</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >Camera.ExposureManual</td><td >Manual mode.</td></tr>
+<tr valign="top" class="even"><td >Camera.ExposureAuto</td><td >Automatic mode.</td></tr>
+<tr valign="top" class="odd"><td >Camera.ExposureNight</td><td >Night mode.</td></tr>
+<tr valign="top" class="even"><td >Camera.ExposureBacklight</td><td >Backlight exposure mode.</td></tr>
+<tr valign="top" class="odd"><td >Camera.ExposureSpotlight</td><td >Spotlight exposure mode.</td></tr>
+<tr valign="top" class="even"><td >Camera.ExposureSports</td><td >Spots exposure mode.</td></tr>
+<tr valign="top" class="odd"><td >Camera.ExposureSnow</td><td >Snow exposure mode.</td></tr>
+<tr valign="top" class="even"><td >Camera.ExposureBeach</td><td >Beach exposure mode.</td></tr>
+<tr valign="top" class="odd"><td >Camera.ExposureLargeAperture</td><td >Use larger aperture with small depth of field.</td></tr>
+<tr valign="top" class="even"><td >Camera.ExposureSmallAperture</td><td >Use smaller aperture.</td></tr>
+<tr valign="top" class="odd"><td >Camera.ExposurePortrait</td><td >Portrait exposure mode.</td></tr>
+<tr valign="top" class="even"><td >Camera.ExposureAction</td><td >Action exposure mode. Since 5.5</td></tr>
+<tr valign="top" class="odd"><td >Camera.ExposureLandscape</td><td >Landscape exposure mode. Since 5.5</td></tr>
+<tr valign="top" class="even"><td >Camera.ExposureNightPortrait</td><td >Night portrait exposure mode. Since 5.5</td></tr>
+<tr valign="top" class="odd"><td >Camera.ExposureTheatre</td><td >Theatre exposure mode. Since 5.5</td></tr>
+<tr valign="top" class="even"><td >Camera.ExposureSunset</td><td >Sunset exposure mode. Since 5.5</td></tr>
+<tr valign="top" class="odd"><td >Camera.ExposureSteadyPhoto</td><td >Steady photo exposure mode. Since 5.5</td></tr>
+<tr valign="top" class="even"><td >Camera.ExposureFireworks</td><td >Fireworks exposure mode. Since 5.5</td></tr>
+<tr valign="top" class="odd"><td >Camera.ExposureParty</td><td >Party exposure mode. Since 5.5</td></tr>
+<tr valign="top" class="even"><td >Camera.ExposureCandlelight</td><td >Candlelight exposure mode. Since 5.5</td></tr>
+<tr valign="top" class="odd"><td >Camera.ExposureBarcode</td><td >Barcode exposure mode. Since 5.5</td></tr>
+<tr valign="top" class="even"><td >Camera.ExposureModeVendor</td><td >The base value for device specific exposure modes.</td></tr>
+</table></div>
+</div></div><!-- @@@exposureMode -->
+<br/>
+<!-- $$$iso -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="iso-prop"></a><span class="name">iso</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the sensor's ISO sensitivity value.</p>
+</div></div><!-- @@@iso -->
+<br/>
+<!-- $$$manualAperture -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="manualAperture-prop"></a><span class="name">manualAperture</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the aperture (F number) value for capturing photos.</p>
+<p>If the value is less than zero, the camera automatically determines an appropriate aperture value.</p>
+<p><a href="qml-qtmultimedia-cameraexposure.html#aperture-prop">aperture</a>, <a href="qml-qtmultimedia-cameraexposure.html#setAutoAperture-method">setAutoAperture()</a></p>
+</div></div><!-- @@@manualAperture -->
+<br/>
+<!-- $$$manualIso -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="manualIso-prop"></a><span class="name">manualIso</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the ISO settings for capturing photos.</p>
+<p>If a negative value is specified, the camera will automatically determine an appropriate value.</p>
+<p><b>See also </b><a href="qml-qtmultimedia-cameraexposure.html#iso-prop">iso</a> and <a href="qml-qtmultimedia-cameraexposure.html#setAutoIsoSensitivity-method">setAutoIsoSensitivity()</a>.</p>
+</div></div><!-- @@@manualIso -->
+<br/>
+<!-- $$$manualShutterSpeed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="manualShutterSpeed-prop"></a><span class="name">manualShutterSpeed</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the shutter speed value (in seconds). If the value is less than zero, the camera automatically determines an appropriate shutter speed.</p>
+<p><a href="qml-qtmultimedia-cameraexposure.html#shutterSpeed-prop">shutterSpeed</a>, <a href="qml-qtmultimedia-cameraexposure.html#setAutoShutterSpeed-method">setAutoShutterSpeed()</a></p>
+</div></div><!-- @@@manualShutterSpeed -->
+<br/>
+<!-- $$$meteringMode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="meteringMode-prop"></a><span class="name">meteringMode</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the camera metering mode (how exposure is balanced).</p>
+<p>The mode can be one of the following:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Value</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >Camera.MeteringMatrix</td><td >A matrix of sample points is used to measure exposure.</td></tr>
+<tr valign="top" class="even"><td >Camera.MeteringAverage</td><td >An average is used to measure exposure.</td></tr>
+<tr valign="top" class="odd"><td >Camera.MeteringSpot</td><td >A specific location (<a href="qml-qtmultimedia-cameraexposure.html#spotMeteringPoint-prop">spotMeteringPoint</a>) is used to measure exposure.</td></tr>
+</table></div>
+</div></div><!-- @@@meteringMode -->
+<br/>
+<!-- $$$shutterSpeed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="shutterSpeed-prop"></a><span class="name">shutterSpeed</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the camera's current shutter speed value in seconds. To affect the shutter speed you can use the <a href="qml-qtmultimedia-cameraexposure.html#manualShutterSpeed-prop">manualShutterSpeed</a> property and <a href="qml-qtmultimedia-cameraexposure.html#setAutoShutterSpeed-method">setAutoShutterSpeed()</a>.</p>
+</div></div><!-- @@@shutterSpeed -->
+<br/>
+<!-- $$$spotMeteringPoint -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="spotMeteringPoint-prop"></a><span class="name">spotMeteringPoint</span> : <span class="type">QPointF</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The property holds the frame coordinates of the point to use for exposure metering. This point is only used in spot metering mode, and it typically defaults to the center <code>(0.5, 0.5)</code>.</p>
+</div></div><!-- @@@spotMeteringPoint -->
+<br/>
+<!-- $$$supportedExposureModes -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="supportedExposureModes-prop"></a><span class="name">supportedExposureModes</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type">ExposureMode</span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the supported exposure modes of the camera.</p>
+<p>This property was introduced in  Qt 5.11.</p>
+<p><b>See also </b><a href="qml-qtmultimedia-cameraexposure.html#exposureMode-prop">exposureMode</a>.</p>
+</div></div><!-- @@@supportedExposureModes -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$setAutoAperture[overload1]$$$setAutoAperture -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="setAutoAperture-method"></a><span class="name">setAutoAperture</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Turn on auto aperture selection. The manual aperture value is reset to -1.0</p>
+</div></div><!-- @@@setAutoAperture -->
+<br/>
+<!-- $$$setAutoIsoSensitivity[overload1]$$$setAutoIsoSensitivity -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="setAutoIsoSensitivity-method"></a><span class="name">setAutoIsoSensitivity</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Turn on auto ISO sensitivity selection. The manual ISO value is reset to -1.</p>
+</div></div><!-- @@@setAutoIsoSensitivity -->
+<br/>
+<!-- $$$setAutoShutterSpeed[overload1]$$$setAutoShutterSpeed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="setAutoShutterSpeed-method"></a><span class="name">setAutoShutterSpeed</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Turn on auto shutter speed selection. The manual shutter speed value is reset to -1.0</p>
+</div></div><!-- @@@setAutoShutterSpeed -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

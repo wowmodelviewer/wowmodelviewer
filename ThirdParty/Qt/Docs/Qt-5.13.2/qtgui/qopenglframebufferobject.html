@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qopenglframebufferobject.cpp -->
+  <title>QOpenGLFramebufferObject Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QOpenGLFramebufferObject</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QOpenGLFramebufferObject Class</h1>
+<!-- $$$QOpenGLFramebufferObject-brief -->
+<p>The <a href="qopenglframebufferobject.html">QOpenGLFramebufferObject</a> class encapsulates an OpenGL framebuffer object. <a href="#details">More...</a></p>
+<!-- @@@QOpenGLFramebufferObject -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QOpenGLFramebufferObject&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.0</td></tr></table></div><p>This class was introduced in  Qt 5.0.</p>
+<ul>
+<li><a href="qopenglframebufferobject-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#Attachment-enum">Attachment</a></b> { NoAttachment, CombinedDepthStencil, Depth }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#FramebufferRestorePolicy-enum">FramebufferRestorePolicy</a></b> { DontRestoreFramebufferBinding, RestoreFramebufferBindingToDefault, RestoreFrameBufferBinding }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#QOpenGLFramebufferObject-5">QOpenGLFramebufferObject</a></b>(int <i>width</i>, int <i>height</i>, const QOpenGLFramebufferObjectFormat &amp;<i>format</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#QOpenGLFramebufferObject-4">QOpenGLFramebufferObject</a></b>(const QSize &amp;<i>size</i>, const QOpenGLFramebufferObjectFormat &amp;<i>format</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#QOpenGLFramebufferObject-3">QOpenGLFramebufferObject</a></b>(int <i>width</i>, int <i>height</i>, QOpenGLFramebufferObject::Attachment <i>attachment</i>, GLenum <i>target</i> = GL_TEXTURE_2D, GLenum <i>internalFormat</i> = 0)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#QOpenGLFramebufferObject-2">QOpenGLFramebufferObject</a></b>(const QSize &amp;<i>size</i>, QOpenGLFramebufferObject::Attachment <i>attachment</i>, GLenum <i>target</i> = GL_TEXTURE_2D, GLenum <i>internalFormat</i> = 0)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#QOpenGLFramebufferObject-1">QOpenGLFramebufferObject</a></b>(int <i>width</i>, int <i>height</i>, GLenum <i>target</i> = GL_TEXTURE_2D)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#QOpenGLFramebufferObject">QOpenGLFramebufferObject</a></b>(const QSize &amp;<i>size</i>, GLenum <i>target</i> = GL_TEXTURE_2D)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#dtor.QOpenGLFramebufferObject">~QOpenGLFramebufferObject</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#addColorAttachment">addColorAttachment</a></b>(const QSize &amp;<i>size</i>, GLenum <i>internalFormat</i> = 0)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#addColorAttachment-1">addColorAttachment</a></b>(int <i>width</i>, int <i>height</i>, GLenum <i>internalFormat</i> = 0)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QOpenGLFramebufferObject::Attachment </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#attachment">attachment</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#bind">bind</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QOpenGLFramebufferObjectFormat </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#format">format</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> GLuint </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#handle">handle</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#height">height</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#isBound">isBound</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#isValid">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#release">release</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#setAttachment">setAttachment</a></b>(QOpenGLFramebufferObject::Attachment <i>attachment</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#size">size</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;QSize&gt; </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#sizes">sizes</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> GLuint </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#takeTexture">takeTexture</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> GLuint </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#takeTexture-1">takeTexture</a></b>(int <i>colorAttachmentIndex</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> GLuint </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#texture">texture</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;GLuint&gt; </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#textures">textures</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QImage </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#toImage">toImage</a></b>(bool <i>flipped</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QImage </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#toImage-1">toImage</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QImage </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#toImage-2">toImage</a></b>(bool <i>flipped</i>, int <i>colorAttachmentIndex</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#width">width</a></b>() const</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#bindDefault">bindDefault</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#blitFramebuffer">blitFramebuffer</a></b>(QOpenGLFramebufferObject *<i>target</i>, const QRect &amp;<i>targetRect</i>, QOpenGLFramebufferObject *<i>source</i>, const QRect &amp;<i>sourceRect</i>, GLbitfield <i>buffers</i>, GLenum <i>filter</i>, int <i>readColorAttachmentIndex</i>, int <i>drawColorAttachmentIndex</i>, QOpenGLFramebufferObject::FramebufferRestorePolicy <i>restorePolicy</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#blitFramebuffer-1">blitFramebuffer</a></b>(QOpenGLFramebufferObject *<i>target</i>, const QRect &amp;<i>targetRect</i>, QOpenGLFramebufferObject *<i>source</i>, const QRect &amp;<i>sourceRect</i>, GLbitfield <i>buffers</i>, GLenum <i>filter</i>, int <i>readColorAttachmentIndex</i>, int <i>drawColorAttachmentIndex</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#blitFramebuffer-2">blitFramebuffer</a></b>(QOpenGLFramebufferObject *<i>target</i>, const QRect &amp;<i>targetRect</i>, QOpenGLFramebufferObject *<i>source</i>, const QRect &amp;<i>sourceRect</i>, GLbitfield <i>buffers</i> = GL_COLOR_BUFFER_BIT, GLenum <i>filter</i> = GL_NEAREST)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#blitFramebuffer-3">blitFramebuffer</a></b>(QOpenGLFramebufferObject *<i>target</i>, QOpenGLFramebufferObject *<i>source</i>, GLbitfield <i>buffers</i> = GL_COLOR_BUFFER_BIT, GLenum <i>filter</i> = GL_NEAREST)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#hasOpenGLFramebufferBlit">hasOpenGLFramebufferBlit</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qopenglframebufferobject.html#hasOpenGLFramebufferObjects">hasOpenGLFramebufferObjects</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QOpenGLFramebufferObject-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qopenglframebufferobject.html">QOpenGLFramebufferObject</a> class encapsulates an OpenGL framebuffer object, defined by the <code>GL_EXT_framebuffer_object</code> extension. It provides a rendering surface that can be painted on with a <a href="qpainter.html">QPainter</a> with the help of <a href="qopenglpaintdevice.html">QOpenGLPaintDevice</a>, or rendered to using native OpenGL calls. This surface can be bound and used as a regular texture in your own OpenGL drawing code. By default, the <a href="qopenglframebufferobject.html">QOpenGLFramebufferObject</a> class generates a 2D OpenGL texture (using the <code>GL_TEXTURE_2D</code> target), which is used as the internal rendering target.</p>
+<p><b>It is important to have a current OpenGL context when creating a <a href="qopenglframebufferobject.html">QOpenGLFramebufferObject</a>, otherwise initialization will fail.</b></p>
+<p>Create the QOpenGLFrameBufferObject instance with the <a href="qopenglframebufferobject.html#Attachment-enum">CombinedDepthStencil</a> attachment if you want <a href="qpainter.html">QPainter</a> to render correctly. Note that you need to create a <a href="qopenglframebufferobject.html">QOpenGLFramebufferObject</a> with more than one sample per pixel for primitives to be antialiased when drawing using a <a href="qpainter.html">QPainter</a>. To create a multisample framebuffer object you should use one of the constructors that take a <a href="qopenglframebufferobjectformat.html">QOpenGLFramebufferObjectFormat</a> parameter, and set the <a href="qopenglframebufferobjectformat.html#samples">QOpenGLFramebufferObjectFormat::samples</a>() property to a non-zero value.</p>
+<p>For multisample framebuffer objects a color render buffer is created, otherwise a texture with the specified texture target is created. The color render buffer or texture will have the specified internal format, and will be bound to the <code>GL_COLOR_ATTACHMENT0</code> attachment in the framebuffer object.</p>
+<p>Multiple render targets are also supported, in case the OpenGL implementation supports this. Here there will be multiple textures (or, in case of multisampling, renderbuffers) present and each of them will get attached to <code>GL_COLOR_ATTACHMENT0</code>, <code>1</code>, <code>2</code>, ..&#x2e;</p>
+<p>If you want to use a framebuffer object with multisampling enabled as a texture, you first need to copy from it to a regular framebuffer object using QOpenGLContext::blitFramebuffer().</p>
+<p>It is possible to draw into a <a href="qopenglframebufferobject.html">QOpenGLFramebufferObject</a> using <a href="qpainter.html">QPainter</a> and <a href="qopenglpaintdevice.html">QOpenGLPaintDevice</a> in a separate thread.</p>
+</div>
+<!-- @@@QOpenGLFramebufferObject -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Attachment$$$NoAttachment$$$CombinedDepthStencil$$$Depth -->
+<h3 class="fn" id="Attachment-enum"><a name="Attachment-enum"></a>enum QOpenGLFramebufferObject::<span class="name">Attachment</span></h3>
+<p>This enum type is used to configure the depth and stencil buffers attached to the framebuffer object when it is created.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QOpenGLFramebufferObject::NoAttachment</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">No attachment is added to the framebuffer object. Note that the OpenGL depth and stencil tests won't work when rendering to a framebuffer object without any depth or stencil buffers. This is the default value.</td></tr>
+<tr><td class="topAlign"><code>QOpenGLFramebufferObject::CombinedDepthStencil</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">If the <code>GL_EXT_packed_depth_stencil</code> extension is present, a combined depth and stencil buffer is attached. If the extension is not present, only a depth buffer is attached.</td></tr>
+<tr><td class="topAlign"><code>QOpenGLFramebufferObject::Depth</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">A depth buffer is attached to the framebuffer object.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qopenglframebufferobject.html#attachment">attachment</a>().</p>
+<!-- @@@Attachment -->
+<!-- $$$FramebufferRestorePolicy$$$DontRestoreFramebufferBinding$$$RestoreFramebufferBindingToDefault$$$RestoreFrameBufferBinding -->
+<h3 class="fn" id="FramebufferRestorePolicy-enum"><a name="FramebufferRestorePolicy-enum"></a>enum QOpenGLFramebufferObject::<span class="name">FramebufferRestorePolicy</span></h3>
+<p>This enum type is used to configure the behavior related to restoring framebuffer bindings when calling <a href="qopenglframebufferobject.html#blitFramebuffer">blitFramebuffer</a>().</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QOpenGLFramebufferObject::DontRestoreFramebufferBinding</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Do not restore the previous framebuffer binding. The caller is responsible for tracking and setting the framebuffer binding as needed.</td></tr>
+<tr><td class="topAlign"><code>QOpenGLFramebufferObject::RestoreFramebufferBindingToDefault</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">After the blit operation, bind the default framebuffer.</td></tr>
+<tr><td class="topAlign"><code>QOpenGLFramebufferObject::RestoreFrameBufferBinding</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Restore the previously bound framebuffer. This is potentially expensive because of the need to query the currently bound framebuffer.</td></tr>
+</table></div>
+<p>This enum was introduced or modified in  Qt 5.7.</p>
+<p><b>See also </b><a href="qopenglframebufferobject.html#blitFramebuffer">blitFramebuffer</a>().</p>
+<!-- @@@FramebufferRestorePolicy -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QOpenGLFramebufferObject$$$QOpenGLFramebufferObjectintintconstQOpenGLFramebufferObjectFormat& -->
+<h3 class="fn" id="QOpenGLFramebufferObject-5"><a name="QOpenGLFramebufferObject-5"></a>QOpenGLFramebufferObject::<span class="name">QOpenGLFramebufferObject</span>(<span class="type">int</span> <i>width</i>, <span class="type">int</span> <i>height</i>, const <span class="type"><a href="qopenglframebufferobjectformat.html">QOpenGLFramebufferObjectFormat</a></span> &amp;<i>format</i>)</h3>
+<p>Constructs an OpenGL framebuffer object of the given <i>width</i> and <i>height</i> based on the supplied <i>format</i>.</p>
+<!-- @@@QOpenGLFramebufferObject -->
+<!-- $$$QOpenGLFramebufferObject$$$QOpenGLFramebufferObjectconstQSize&constQOpenGLFramebufferObjectFormat& -->
+<h3 class="fn" id="QOpenGLFramebufferObject-4"><a name="QOpenGLFramebufferObject-4"></a>QOpenGLFramebufferObject::<span class="name">QOpenGLFramebufferObject</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>size</i>, const <span class="type"><a href="qopenglframebufferobjectformat.html">QOpenGLFramebufferObjectFormat</a></span> &amp;<i>format</i>)</h3>
+<p>Constructs an OpenGL framebuffer object of the given <i>size</i> based on the supplied <i>format</i>.</p>
+<!-- @@@QOpenGLFramebufferObject -->
+<!-- $$$QOpenGLFramebufferObject$$$QOpenGLFramebufferObjectintintQOpenGLFramebufferObject::AttachmentGLenumGLenum -->
+<h3 class="fn" id="QOpenGLFramebufferObject-3"><a name="QOpenGLFramebufferObject-3"></a>QOpenGLFramebufferObject::<span class="name">QOpenGLFramebufferObject</span>(<span class="type">int</span> <i>width</i>, <span class="type">int</span> <i>height</i>, <span class="type"><a href="qopenglframebufferobject.html#Attachment-enum">QOpenGLFramebufferObject::Attachment</a></span> <i>attachment</i>, <span class="type">GLenum</span> <i>target</i> = GL_TEXTURE_2D, <span class="type">GLenum</span> <i>internalFormat</i> = 0)</h3>
+<p>Constructs an OpenGL framebuffer object and binds a texture to the buffer of the given <i>width</i> and <i>height</i>.</p>
+<p>The <i>attachment</i> parameter describes the depth/stencil buffer configuration, <i>target</i> the texture target and <i>internalFormat</i> the internal texture format. The default texture target is <code>GL_TEXTURE_2D</code>, while the default internal format is <code>GL_RGBA8</code> for desktop OpenGL and <code>GL_RGBA</code> for OpenGL/ES.</p>
+<p><b>See also </b><a href="qopenglframebufferobject.html#size">size</a>(), <a href="qopenglframebufferobject.html#texture">texture</a>(), and <a href="qopenglframebufferobject.html#attachment">attachment</a>().</p>
+<!-- @@@QOpenGLFramebufferObject -->
+<!-- $$$QOpenGLFramebufferObject$$$QOpenGLFramebufferObjectconstQSize&QOpenGLFramebufferObject::AttachmentGLenumGLenum -->
+<h3 class="fn" id="QOpenGLFramebufferObject-2"><a name="QOpenGLFramebufferObject-2"></a>QOpenGLFramebufferObject::<span class="name">QOpenGLFramebufferObject</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>size</i>, <span class="type"><a href="qopenglframebufferobject.html#Attachment-enum">QOpenGLFramebufferObject::Attachment</a></span> <i>attachment</i>, <span class="type">GLenum</span> <i>target</i> = GL_TEXTURE_2D, <span class="type">GLenum</span> <i>internalFormat</i> = 0)</h3>
+<p>Constructs an OpenGL framebuffer object and binds a texture to the buffer of the given <i>size</i>.</p>
+<p>The <i>attachment</i> parameter describes the depth/stencil buffer configuration, <i>target</i> the texture target and <i>internalFormat</i> the internal texture format. The default texture target is <code>GL_TEXTURE_2D</code>, while the default internal format is <code>GL_RGBA8</code> for desktop OpenGL and <code>GL_RGBA</code> for OpenGL/ES.</p>
+<p><b>See also </b><a href="qopenglframebufferobject.html#size">size</a>(), <a href="qopenglframebufferobject.html#texture">texture</a>(), and <a href="qopenglframebufferobject.html#attachment">attachment</a>().</p>
+<!-- @@@QOpenGLFramebufferObject -->
+<!-- $$$QOpenGLFramebufferObject$$$QOpenGLFramebufferObjectintintGLenum -->
+<h3 class="fn" id="QOpenGLFramebufferObject-1"><a name="QOpenGLFramebufferObject-1"></a>QOpenGLFramebufferObject::<span class="name">QOpenGLFramebufferObject</span>(<span class="type">int</span> <i>width</i>, <span class="type">int</span> <i>height</i>, <span class="type">GLenum</span> <i>target</i> = GL_TEXTURE_2D)</h3>
+<p>Constructs an OpenGL framebuffer object and binds a 2D OpenGL texture to the buffer of the given <i>width</i> and <i>height</i>.</p>
+<p><b>See also </b><a href="qopenglframebufferobject.html#size">size</a>() and <a href="qopenglframebufferobject.html#texture">texture</a>().</p>
+<!-- @@@QOpenGLFramebufferObject -->
+<!-- $$$QOpenGLFramebufferObject[overload1]$$$QOpenGLFramebufferObjectconstQSize&GLenum -->
+<h3 class="fn" id="QOpenGLFramebufferObject"><a name="QOpenGLFramebufferObject"></a>QOpenGLFramebufferObject::<span class="name">QOpenGLFramebufferObject</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>size</i>, <span class="type">GLenum</span> <i>target</i> = GL_TEXTURE_2D)</h3>
+<p>Constructs an OpenGL framebuffer object and binds a 2D OpenGL texture to the buffer of the size <i>size</i>. The texture is bound to the <code>GL_COLOR_ATTACHMENT0</code> target in the framebuffer object.</p>
+<p>The <i>target</i> parameter is used to specify the OpenGL texture target. The default target is <code>GL_TEXTURE_2D</code>. Keep in mind that <code>GL_TEXTURE_2D</code> textures must have a power of 2 width and height (e.g&#x2e; 256x512), unless you are using OpenGL 2.0 or higher.</p>
+<p>By default, no depth and stencil buffers are attached. This behavior can be toggled using one of the overloaded constructors.</p>
+<p>The default internal texture format is <code>GL_RGBA8</code> for desktop OpenGL, and <code>GL_RGBA</code> for OpenGL/ES.</p>
+<p>It is important that you have a current OpenGL context set when creating the <a href="qopenglframebufferobject.html">QOpenGLFramebufferObject</a>, otherwise the initialization will fail.</p>
+<p><b>See also </b><a href="qopenglframebufferobject.html#size">size</a>(), <a href="qopenglframebufferobject.html#texture">texture</a>(), and <a href="qopenglframebufferobject.html#attachment">attachment</a>().</p>
+<!-- @@@QOpenGLFramebufferObject -->
+<!-- $$$~QOpenGLFramebufferObject[overload1]$$$~QOpenGLFramebufferObject -->
+<h3 class="fn" id="dtor.QOpenGLFramebufferObject"><a name="dtor.QOpenGLFramebufferObject"></a><code>[virtual] </code>QOpenGLFramebufferObject::<span class="name">~QOpenGLFramebufferObject</span>()</h3>
+<p>Destroys the framebuffer object and frees any allocated resources.</p>
+<!-- @@@~QOpenGLFramebufferObject -->
+<!-- $$$addColorAttachment[overload1]$$$addColorAttachmentconstQSize&GLenum -->
+<h3 class="fn" id="addColorAttachment"><a name="addColorAttachment"></a><span class="type">void</span> QOpenGLFramebufferObject::<span class="name">addColorAttachment</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>size</i>, <span class="type">GLenum</span> <i>internalFormat</i> = 0)</h3>
+<p>Creates and attaches an additional texture or renderbuffer of <i>size</i> width and height.</p>
+<p>There is always an attachment at GL_COLOR_ATTACHMENT0. Call this function to set up additional attachments at GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, ..&#x2e;</p>
+<p>When <i>internalFormat</i> is not <code>0</code>, it specifies the internal format of the texture or renderbuffer. Otherwise a default of GL_RGBA or GL_RGBA8 is used.</p>
+<p><b>Note: </b>This is only functional when multiple render targets are supported by the OpenGL implementation. When that is not the case, the function will not add any additional color attachments. Call <a href="qopenglfunctions.html#hasOpenGLFeature">QOpenGLFunctions::hasOpenGLFeature</a>() with <a href="qopenglfunctions.html#OpenGLFeature-enum">QOpenGLFunctions::MultipleRenderTargets</a> at runtime to check if MRT is supported.</p><p><b>Note: </b>The internal format of the color attachments may differ but there may be limitations on the supported combinations, depending on the drivers.</p><p><b>Note: </b>The size of the color attachments may differ but rendering is limited to the area that fits all the attachments, according to the OpenGL specification. Some drivers may not be fully conformant in this respect, however.</p><p>This function was introduced in  Qt 5.6.</p>
+<!-- @@@addColorAttachment -->
+<!-- $$$addColorAttachment$$$addColorAttachmentintintGLenum -->
+<h3 class="fn" id="addColorAttachment-1"><a name="addColorAttachment-1"></a><span class="type">void</span> QOpenGLFramebufferObject::<span class="name">addColorAttachment</span>(<span class="type">int</span> <i>width</i>, <span class="type">int</span> <i>height</i>, <span class="type">GLenum</span> <i>internalFormat</i> = 0)</h3>
+<p>This is an overloaded function.</p>
+<p>Creates and attaches an additional texture or renderbuffer of size <i>width</i> and <i>height</i>.</p>
+<p>When <i>internalFormat</i> is not <code>0</code>, it specifies the internal format of the texture or renderbuffer. Otherwise a default of GL_RGBA or GL_RGBA8 is used.</p>
+<p>This function was introduced in  Qt 5.6.</p>
+<!-- @@@addColorAttachment -->
+<!-- $$$attachment[overload1]$$$attachment -->
+<h3 class="fn" id="attachment"><a name="attachment"></a><span class="type"><a href="qopenglframebufferobject.html#Attachment-enum">QOpenGLFramebufferObject::Attachment</a></span> QOpenGLFramebufferObject::<span class="name">attachment</span>() const</h3>
+<p>Returns the status of the depth and stencil buffers attached to this framebuffer object.</p>
+<p><b>See also </b><a href="qopenglframebufferobject.html#setAttachment">setAttachment</a>().</p>
+<!-- @@@attachment -->
+<!-- $$$bind[overload1]$$$bind -->
+<h3 class="fn" id="bind"><a name="bind"></a><span class="type">bool</span> QOpenGLFramebufferObject::<span class="name">bind</span>()</h3>
+<p>Switches rendering from the default, windowing system provided framebuffer to this framebuffer object. Returns <code>true</code> upon success, false otherwise.</p>
+<p><b>Note: </b>If <a href="qopenglframebufferobject.html#takeTexture">takeTexture</a>() was called, a new texture is created and associated with the framebuffer object. This is potentially expensive and changes the context state (the currently bound texture).</p><p><b>See also </b><a href="qopenglframebufferobject.html#release">release</a>().</p>
+<!-- @@@bind -->
+<!-- $$$bindDefault[overload1]$$$bindDefault -->
+<h3 class="fn" id="bindDefault"><a name="bindDefault"></a><code>[static] </code><span class="type">bool</span> QOpenGLFramebufferObject::<span class="name">bindDefault</span>()</h3>
+<p>Switches rendering back to the default, windowing system provided framebuffer. Returns <code>true</code> upon success, false otherwise.</p>
+<p><b>See also </b><a href="qopenglframebufferobject.html#bind">bind</a>() and <a href="qopenglframebufferobject.html#release">release</a>().</p>
+<!-- @@@bindDefault -->
+<!-- $$$blitFramebuffer[overload1]$$$blitFramebufferQOpenGLFramebufferObject*constQRect&QOpenGLFramebufferObject*constQRect&GLbitfieldGLenumintintQOpenGLFramebufferObject::FramebufferRestorePolicy -->
+<h3 class="fn" id="blitFramebuffer"><a name="blitFramebuffer"></a><code>[static] </code><span class="type">void</span> QOpenGLFramebufferObject::<span class="name">blitFramebuffer</span>(<span class="type"><a href="qopenglframebufferobject.html#QOpenGLFramebufferObject">QOpenGLFramebufferObject</a></span> *<i>target</i>, const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> &amp;<i>targetRect</i>, <span class="type"><a href="qopenglframebufferobject.html#QOpenGLFramebufferObject">QOpenGLFramebufferObject</a></span> *<i>source</i>, const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> &amp;<i>sourceRect</i>, <span class="type">GLbitfield</span> <i>buffers</i>, <span class="type">GLenum</span> <i>filter</i>, <span class="type">int</span> <i>readColorAttachmentIndex</i>, <span class="type">int</span> <i>drawColorAttachmentIndex</i>, <span class="type"><a href="qopenglframebufferobject.html#FramebufferRestorePolicy-enum">QOpenGLFramebufferObject::FramebufferRestorePolicy</a></span> <i>restorePolicy</i>)</h3>
+<p>Blits from the <i>sourceRect</i> rectangle in the <i>source</i> framebuffer object to the <i>targetRect</i> rectangle in the <i>target</i> framebuffer object.</p>
+<p>If <i>source</i> or <i>target</i> is 0, the default framebuffer will be used instead of a framebuffer object as source or target respectively.</p>
+<p>This function will have no effect unless <a href="qopenglframebufferobject.html#hasOpenGLFramebufferBlit">hasOpenGLFramebufferBlit</a>() returns true.</p>
+<p>The <i>buffers</i> parameter should be a mask consisting of any combination of <code>GL_COLOR_BUFFER_BIT</code>, <code>GL_DEPTH_BUFFER_BIT</code>, and <code>GL_STENCIL_BUFFER_BIT</code>. Any buffer type that is not present both in the source and target buffers is ignored.</p>
+<p>The <i>sourceRect</i> and <i>targetRect</i> rectangles may have different sizes; in this case <i>buffers</i> should not contain <code>GL_DEPTH_BUFFER_BIT</code> or <code>GL_STENCIL_BUFFER_BIT</code>. The <i>filter</i> parameter should be set to <code>GL_LINEAR</code> or <code>GL_NEAREST</code>, and specifies whether linear or nearest interpolation should be used when scaling is performed.</p>
+<p>If <i>source</i> equals <i>target</i> a copy is performed within the same buffer. Results are undefined if the source and target rectangles overlap and have different sizes. The sizes must also be the same if any of the framebuffer objects are multisample framebuffers.</p>
+<p><b>Note: </b>The scissor test will restrict the blit area if enabled.</p><p>When multiple render targets are in use, <i>readColorAttachmentIndex</i> and <i>drawColorAttachmentIndex</i> specify the index of the color attachments in the source and destination framebuffers.</p>
+<p>The <i>restorePolicy</i> determines if the framebuffer that was bound prior to calling this function should be restored, or if the default framebuffer should be bound before returning, of if the caller is responsible for tracking and setting the bound framebuffer. Restoring the previous framebuffer can be relatively expensive due to the call to <code>glGetIntegerv</code> which on some OpenGL drivers may imply a pipeline stall.</p>
+<p>This function was introduced in  Qt 5.7.</p>
+<p><b>See also </b><a href="qopenglframebufferobject.html#hasOpenGLFramebufferBlit">hasOpenGLFramebufferBlit</a>().</p>
+<!-- @@@blitFramebuffer -->
+<!-- $$$blitFramebuffer$$$blitFramebufferQOpenGLFramebufferObject*constQRect&QOpenGLFramebufferObject*constQRect&GLbitfieldGLenumintint -->
+<h3 class="fn" id="blitFramebuffer-1"><a name="blitFramebuffer-1"></a><code>[static] </code><span class="type">void</span> QOpenGLFramebufferObject::<span class="name">blitFramebuffer</span>(<span class="type"><a href="qopenglframebufferobject.html#QOpenGLFramebufferObject">QOpenGLFramebufferObject</a></span> *<i>target</i>, const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> &amp;<i>targetRect</i>, <span class="type"><a href="qopenglframebufferobject.html#QOpenGLFramebufferObject">QOpenGLFramebufferObject</a></span> *<i>source</i>, const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> &amp;<i>sourceRect</i>, <span class="type">GLbitfield</span> <i>buffers</i>, <span class="type">GLenum</span> <i>filter</i>, <span class="type">int</span> <i>readColorAttachmentIndex</i>, <span class="type">int</span> <i>drawColorAttachmentIndex</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Convenience overload to blit between two framebuffer objects and to restore the previous framebuffer binding. Equivalent to calling <a href="qopenglframebufferobject.html#blitFramebuffer">blitFramebuffer</a>(target, targetRect, source, sourceRect, buffers, filter, readColorAttachmentIndex, drawColorAttachmentIndex, <a href="qopenglframebufferobject.html#FramebufferRestorePolicy-enum">RestoreFrameBufferBinding</a>).</p>
+<!-- @@@blitFramebuffer -->
+<!-- $$$blitFramebuffer$$$blitFramebufferQOpenGLFramebufferObject*constQRect&QOpenGLFramebufferObject*constQRect&GLbitfieldGLenum -->
+<h3 class="fn" id="blitFramebuffer-2"><a name="blitFramebuffer-2"></a><code>[static] </code><span class="type">void</span> QOpenGLFramebufferObject::<span class="name">blitFramebuffer</span>(<span class="type"><a href="qopenglframebufferobject.html#QOpenGLFramebufferObject">QOpenGLFramebufferObject</a></span> *<i>target</i>, const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> &amp;<i>targetRect</i>, <span class="type"><a href="qopenglframebufferobject.html#QOpenGLFramebufferObject">QOpenGLFramebufferObject</a></span> *<i>source</i>, const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> &amp;<i>sourceRect</i>, <span class="type">GLbitfield</span> <i>buffers</i> = GL_COLOR_BUFFER_BIT, <span class="type">GLenum</span> <i>filter</i> = GL_NEAREST)</h3>
+<p>This is an overloaded function.</p>
+<p>* Convenience overload to blit between two framebuffer objects.</p>
+<!-- @@@blitFramebuffer -->
+<!-- $$$blitFramebuffer$$$blitFramebufferQOpenGLFramebufferObject*QOpenGLFramebufferObject*GLbitfieldGLenum -->
+<h3 class="fn" id="blitFramebuffer-3"><a name="blitFramebuffer-3"></a><code>[static] </code><span class="type">void</span> QOpenGLFramebufferObject::<span class="name">blitFramebuffer</span>(<span class="type"><a href="qopenglframebufferobject.html#QOpenGLFramebufferObject">QOpenGLFramebufferObject</a></span> *<i>target</i>, <span class="type"><a href="qopenglframebufferobject.html#QOpenGLFramebufferObject">QOpenGLFramebufferObject</a></span> *<i>source</i>, <span class="type">GLbitfield</span> <i>buffers</i> = GL_COLOR_BUFFER_BIT, <span class="type">GLenum</span> <i>filter</i> = GL_NEAREST)</h3>
+<p>This is an overloaded function.</p>
+<p>Convenience overload to blit between two framebuffer objects.</p>
+<!-- @@@blitFramebuffer -->
+<!-- $$$format[overload1]$$$format -->
+<h3 class="fn" id="format"><a name="format"></a><span class="type"><a href="qopenglframebufferobjectformat.html">QOpenGLFramebufferObjectFormat</a></span> QOpenGLFramebufferObject::<span class="name">format</span>() const</h3>
+<p>Returns the format of this framebuffer object.</p>
+<!-- @@@format -->
+<!-- $$$handle[overload1]$$$handle -->
+<h3 class="fn" id="handle"><a name="handle"></a><span class="type">GLuint</span> QOpenGLFramebufferObject::<span class="name">handle</span>() const</h3>
+<p>Returns the OpenGL framebuffer object handle for this framebuffer object (returned by the <code>glGenFrameBuffersEXT()</code> function). This handle can be used to attach new images or buffers to the framebuffer. The user is responsible for cleaning up and destroying these objects.</p>
+<!-- @@@handle -->
+<!-- $$$hasOpenGLFramebufferBlit[overload1]$$$hasOpenGLFramebufferBlit -->
+<h3 class="fn" id="hasOpenGLFramebufferBlit"><a name="hasOpenGLFramebufferBlit"></a><code>[static] </code><span class="type">bool</span> QOpenGLFramebufferObject::<span class="name">hasOpenGLFramebufferBlit</span>()</h3>
+<p>Returns <code>true</code> if the OpenGL <code>GL_EXT_framebuffer_blit</code> extension is present on this system; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qopenglframebufferobject.html#blitFramebuffer">blitFramebuffer</a>().</p>
+<!-- @@@hasOpenGLFramebufferBlit -->
+<!-- $$$hasOpenGLFramebufferObjects[overload1]$$$hasOpenGLFramebufferObjects -->
+<h3 class="fn" id="hasOpenGLFramebufferObjects"><a name="hasOpenGLFramebufferObjects"></a><code>[static] </code><span class="type">bool</span> QOpenGLFramebufferObject::<span class="name">hasOpenGLFramebufferObjects</span>()</h3>
+<p>Returns <code>true</code> if the OpenGL <code>GL_EXT_framebuffer_object</code> extension is present on this system; otherwise returns <code>false</code>.</p>
+<!-- @@@hasOpenGLFramebufferObjects -->
+<!-- $$$height[overload1]$$$height -->
+<h3 class="fn" id="height"><a name="height"></a><span class="type">int</span> QOpenGLFramebufferObject::<span class="name">height</span>() const</h3>
+<p>Returns the height of the framebuffer object attachments.</p>
+<!-- @@@height -->
+<!-- $$$isBound[overload1]$$$isBound -->
+<h3 class="fn" id="isBound"><a name="isBound"></a><span class="type">bool</span> QOpenGLFramebufferObject::<span class="name">isBound</span>() const</h3>
+<p>Returns <code>true</code> if the framebuffer object is currently bound to the current context, otherwise false is returned.</p>
+<!-- @@@isBound -->
+<!-- $$$isValid[overload1]$$$isValid -->
+<h3 class="fn" id="isValid"><a name="isValid"></a><span class="type">bool</span> QOpenGLFramebufferObject::<span class="name">isValid</span>() const</h3>
+<p>Returns <code>true</code> if the framebuffer object is valid.</p>
+<p>The framebuffer can become invalid if the initialization process fails, the user attaches an invalid buffer to the framebuffer object, or a non-power of two width/height is specified as the texture size if the texture target is <code>GL_TEXTURE_2D</code>. The non-power of two limitation does not apply if the OpenGL version is 2.0 or higher, or if the GL_ARB_texture_non_power_of_two extension is present.</p>
+<p>The framebuffer can also become invalid if the <a href="qopenglcontext.html">QOpenGLContext</a> that the framebuffer was created within is destroyed and there are no other shared contexts that can take over ownership of the framebuffer.</p>
+<!-- @@@isValid -->
+<!-- $$$release[overload1]$$$release -->
+<h3 class="fn" id="release"><a name="release"></a><span class="type">bool</span> QOpenGLFramebufferObject::<span class="name">release</span>()</h3>
+<p>Switches rendering back to the default, windowing system provided framebuffer. Returns <code>true</code> upon success, false otherwise.</p>
+<p><b>See also </b><a href="qopenglframebufferobject.html#bind">bind</a>().</p>
+<!-- @@@release -->
+<!-- $$$setAttachment[overload1]$$$setAttachmentQOpenGLFramebufferObject::Attachment -->
+<h3 class="fn" id="setAttachment"><a name="setAttachment"></a><span class="type">void</span> QOpenGLFramebufferObject::<span class="name">setAttachment</span>(<span class="type"><a href="qopenglframebufferobject.html#Attachment-enum">QOpenGLFramebufferObject::Attachment</a></span> <i>attachment</i>)</h3>
+<p>Sets the attachments of the framebuffer object to <i>attachment</i>.</p>
+<p>This can be used to free or reattach the depth and stencil buffer attachments as needed.</p>
+<p><b>Note: </b>This function alters the current framebuffer binding.</p><p><b>See also </b><a href="qopenglframebufferobject.html#attachment">attachment</a>().</p>
+<!-- @@@setAttachment -->
+<!-- $$$size[overload1]$$$size -->
+<h3 class="fn" id="size"><a name="size"></a><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QOpenGLFramebufferObject::<span class="name">size</span>() const</h3>
+<p>Returns the size of the color and depth/stencil attachments attached to this framebuffer object.</p>
+<!-- @@@size -->
+<!-- $$$sizes[overload1]$$$sizes -->
+<h3 class="fn" id="sizes"><a name="sizes"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="../qtcore/qsize.html">QSize</a></span>&gt; QOpenGLFramebufferObject::<span class="name">sizes</span>() const</h3>
+<p>Returns the sizes of all color attachments attached to this framebuffer object.</p>
+<p>This function was introduced in  Qt 5.6.</p>
+<!-- @@@sizes -->
+<!-- $$$takeTexture[overload1]$$$takeTexture -->
+<h3 class="fn" id="takeTexture"><a name="takeTexture"></a><span class="type">GLuint</span> QOpenGLFramebufferObject::<span class="name">takeTexture</span>()</h3>
+<p>Returns the texture id for the texture attached to this framebuffer object. The ownership of the texture is transferred to the caller.</p>
+<p>If the framebuffer object is currently bound, an implicit <a href="qopenglframebufferobject.html#release">release</a>() will be done. During the next call to <a href="qopenglframebufferobject.html#bind">bind</a>() a new texture will be created.</p>
+<p>If a multisample framebuffer object is used, then there is no texture and the return value from this function will be invalid. Similarly, incomplete framebuffer objects will also return 0.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<p><b>See also </b><a href="qopenglframebufferobject.html#texture">texture</a>(), <a href="qopenglframebufferobject.html#bind">bind</a>(), and <a href="qopenglframebufferobject.html#release">release</a>().</p>
+<!-- @@@takeTexture -->
+<!-- $$$takeTexture$$$takeTextureint -->
+<h3 class="fn" id="takeTexture-1"><a name="takeTexture-1"></a><span class="type">GLuint</span> QOpenGLFramebufferObject::<span class="name">takeTexture</span>(<span class="type">int</span> <i>colorAttachmentIndex</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns the texture id for the texture attached to the color attachment of index <i>colorAttachmentIndex</i> of this framebuffer object. The ownership of the texture is transferred to the caller.</p>
+<p>When <i>colorAttachmentIndex</i> is <code>0</code>, the behavior is identical to the parameter-less variant of this function.</p>
+<p>If the framebuffer object is currently bound, an implicit <a href="qopenglframebufferobject.html#release">release</a>() will be done. During the next call to <a href="qopenglframebufferobject.html#bind">bind</a>() a new texture will be created.</p>
+<p>If a multisample framebuffer object is used, then there is no texture and the return value from this function will be invalid. Similarly, incomplete framebuffer objects will also return 0.</p>
+<p>This function was introduced in  Qt 5.6.</p>
+<!-- @@@takeTexture -->
+<!-- $$$texture[overload1]$$$texture -->
+<h3 class="fn" id="texture"><a name="texture"></a><span class="type">GLuint</span> QOpenGLFramebufferObject::<span class="name">texture</span>() const</h3>
+<p>Returns the texture id for the texture attached as the default rendering target in this framebuffer object. This texture id can be bound as a normal texture in your own OpenGL code.</p>
+<p>If a multisample framebuffer object is used then the value returned from this function will be invalid.</p>
+<p>When multiple textures are attached, the return value is the ID of the first one.</p>
+<p><b>See also </b><a href="qopenglframebufferobject.html#takeTexture">takeTexture</a>() and <a href="qopenglframebufferobject.html#textures">textures</a>().</p>
+<!-- @@@texture -->
+<!-- $$$textures[overload1]$$$textures -->
+<h3 class="fn" id="textures"><a name="textures"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type">GLuint</span>&gt; QOpenGLFramebufferObject::<span class="name">textures</span>() const</h3>
+<p>Returns the texture id for all attached textures.</p>
+<p>If a multisample framebuffer object is used, then an empty vector is returned.</p>
+<p>This function was introduced in  Qt 5.6.</p>
+<p><b>See also </b><a href="qopenglframebufferobject.html#takeTexture">takeTexture</a>() and <a href="qopenglframebufferobject.html#texture">texture</a>().</p>
+<!-- @@@textures -->
+<!-- $$$toImage[overload1]$$$toImagebool -->
+<h3 class="fn" id="toImage"><a name="toImage"></a><span class="type"><a href="qimage.html">QImage</a></span> QOpenGLFramebufferObject::<span class="name">toImage</span>(<span class="type">bool</span> <i>flipped</i>) const</h3>
+<p>Returns the contents of this framebuffer object as a <a href="qimage.html">QImage</a>.</p>
+<p>If <i>flipped</i> is true the image is flipped from OpenGL coordinates to raster coordinates. If used together with <a href="qopenglpaintdevice.html">QOpenGLPaintDevice</a>, <i>flipped</i> should be the opposite of the value of <a href="qopenglpaintdevice.html#paintFlipped">QOpenGLPaintDevice::paintFlipped</a>().</p>
+<p>The returned image has a format of premultiplied ARGB32 or RGB32. The latter is used only when internalTextureFormat() is set to <code>GL_RGB</code>. Since Qt 5.2 the function will fall back to premultiplied RGBA8888 or RGBx8888 when reading to (A)RGB32 is not supported, and this includes OpenGL ES. Since Qt 5.4 an A2BGR30 image is returned if the internal format is RGB10_A2, and since Qt 5.12 a RGBA64 image is return if the internal format is RGBA16.</p>
+<p>If the rendering in the framebuffer was not done with premultiplied alpha in mind, create a wrapper <a href="qimage.html">QImage</a> with a non-premultiplied format. This is necessary before performing operations like <a href="qimage.html#save">QImage::save</a>() because otherwise the image data would get unpremultiplied, even though it was not premultiplied in the first place. To create such a wrapper without performing a copy of the pixel data, do the following:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qimage.html">QImage</a></span> fboImage(fbo<span class="operator">.</span>toImage());
+  <span class="type"><a href="qimage.html">QImage</a></span> image(fboImage<span class="operator">.</span>constBits()<span class="operator">,</span> fboImage<span class="operator">.</span>width()<span class="operator">,</span> fboImage<span class="operator">.</span>height()<span class="operator">,</span> <span class="type"><a href="qimage.html">QImage</a></span><span class="operator">::</span>Format_ARGB32);
+
+</pre>
+<p>For multisampled framebuffer objects the samples are resolved using the <code>GL_EXT_framebuffer_blit</code> extension. If the extension is not available, the contents of the returned image is undefined.</p>
+<p>For singlesampled framebuffers the contents is retrieved via <code>glReadPixels</code>. This is a potentially expensive and inefficient operation. Therefore it is recommended that this function is used as seldom as possible.</p>
+<p><b>See also </b><a href="qopenglpaintdevice.html#paintFlipped">QOpenGLPaintDevice::paintFlipped</a>().</p>
+<!-- @@@toImage -->
+<!-- $$$toImage$$$toImage -->
+<h3 class="fn" id="toImage-1"><a name="toImage-1"></a><span class="type"><a href="qimage.html">QImage</a></span> QOpenGLFramebufferObject::<span class="name">toImage</span>() const</h3>
+<p>This is an overloaded function.</p>
+<p>Returns the contents of this framebuffer object as a <a href="qimage.html">QImage</a>. This method flips the image from OpenGL coordinates to raster coordinates.</p>
+<!-- @@@toImage -->
+<!-- $$$toImage$$$toImageboolint -->
+<h3 class="fn" id="toImage-2"><a name="toImage-2"></a><span class="type"><a href="qimage.html">QImage</a></span> QOpenGLFramebufferObject::<span class="name">toImage</span>(<span class="type">bool</span> <i>flipped</i>, <span class="type">int</span> <i>colorAttachmentIndex</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>Returns the contents of the color attachment of index <i>colorAttachmentIndex</i> of this framebuffer object as a <a href="qimage.html">QImage</a>. This method flips the image from OpenGL coordinates to raster coordinates when <i>flipped</i> is set to <code>true</code>.</p>
+<p><b>Note: </b>This overload is only fully functional when multiple render targets are supported by the OpenGL implementation. When that is not the case, only one color attachment will be set up.</p><p>This function was introduced in  Qt 5.6.</p>
+<!-- @@@toImage -->
+<!-- $$$width[overload1]$$$width -->
+<h3 class="fn" id="width"><a name="width"></a><span class="type">int</span> QOpenGLFramebufferObject::<span class="name">width</span>() const</h3>
+<p>Returns the width of the framebuffer object attachments.</p>
+<!-- @@@width -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

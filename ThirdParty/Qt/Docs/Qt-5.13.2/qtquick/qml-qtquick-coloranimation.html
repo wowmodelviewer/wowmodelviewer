@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickanimation.cpp -->
+  <title>ColorAnimation QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >ColorAnimation QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">ColorAnimation QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$ColorAnimation-brief -->
+<p>Animates changes in color values. <a href="#details">More...</a></p>
+<!-- @@@ColorAnimation -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-propertyanimation.html">PropertyAnimation</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-coloranimation-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-coloranimation.html#from-prop">from</a></b></b> : color</li>
+<li class="fn"><b><b><a href="qml-qtquick-coloranimation.html#to-prop">to</a></b></b> : color</li>
+</ul>
+<!-- $$$ColorAnimation-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><a href="qtquick-animation-example.html#coloranimation">ColorAnimation</a> is a specialized <a href="qtquick-animation-example.html#propertyanimation">PropertyAnimation</a> that defines an animation to be applied when a color value changes.</p>
+<p>Here is a <a href="qtquick-animation-example.html#coloranimation">ColorAnimation</a> applied to the <code>color</code> property of a <a href="qml-qtquick-rectangle.html">Rectangle</a> as a property value source. It animates the <code>color</code> property's value from its current value to a value of &quot;red&quot;, over 1000 milliseconds:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span>
+      <span class="name">color</span>: <span class="string">&quot;red&quot;</span>
+
+      ColorAnimation on <span class="name">color</span> { <span class="name">to</span>: <span class="string">&quot;yellow&quot;</span>; <span class="name">duration</span>: <span class="number">1000</span> }
+  }
+
+</pre>
+<p>Like any other animation type, a <a href="qtquick-animation-example.html#coloranimation">ColorAnimation</a> can be applied in a number of ways, including transitions, behaviors and property value sources. The <a href="qtquick-statesanimations-animations.html">Animation and Transitions in Qt Quick</a> documentation shows a variety of methods for creating animations.</p>
+<p>For convenience, when a <a href="qtquick-animation-example.html#coloranimation">ColorAnimation</a> is used in a <a href="qmlexampletoggleswitch.html#transition">Transition</a>, it will animate any <code>color</code> properties that have been modified during the state change. If a <a href="qml-qtquick-propertyanimation.html#property-prop">property</a> or <a href="qml-qtquick-propertyanimation.html#properties-prop">properties</a> are explicitly set for the animation, then those are used instead.</p>
+<p><b>See also </b><a href="qtquick-statesanimations-animations.html">Animation and Transitions in Qt Quick</a> and <a href="qtquick-animation-example.html">Qt Quick Examples - Animation</a>.</p>
+<!-- @@@ColorAnimation -->
+<h2>Property Documentation</h2>
+<!-- $$$from -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="from-prop"></a><span class="name">from</span> : <span class="type"><a href="qml-color.html">color</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the color value at which the animation should begin.</p>
+<p>For example, the following animation is not applied until a color value has reached &quot;#c0c0c0&quot;:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-item.html">Item</a></span> {
+      <span class="name">states</span>: [
+          <span class="comment">// States are defined here...</span>
+      ]
+
+      <span class="name">transitions</span>: <span class="name">Transition</span> {
+          <span class="type"><a href="qml-qtquick-coloranimation.html">ColorAnimation</a></span> { <span class="name">from</span>: <span class="string">&quot;#c0c0c0&quot;</span>; <span class="name">duration</span>: <span class="number">2000</span> }
+      }
+  }
+
+</pre>
+<p>If the <a href="qtquick-animation-example.html#coloranimation">ColorAnimation</a> is defined within a <a href="qmlexampletoggleswitch.html#transition">Transition</a> or <a href="qml-qtquick-behavior.html">Behavior</a>, this value defaults to the value defined in the starting state of the <a href="qmlexampletoggleswitch.html#transition">Transition</a>, or the current value of the property at the moment the <a href="qml-qtquick-behavior.html">Behavior</a> is triggered.</p>
+<p><b>See also </b><a href="qtquick-statesanimations-animations.html">Animation and Transitions in Qt Quick</a>.</p>
+</div></div><!-- @@@from -->
+<br/>
+<!-- $$$to -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="to-prop"></a><span class="name">to</span> : <span class="type"><a href="qml-color.html">color</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the color value at which the animation should end.</p>
+<p>If the <a href="qtquick-animation-example.html#coloranimation">ColorAnimation</a> is defined within a <a href="qmlexampletoggleswitch.html#transition">Transition</a> or <a href="qml-qtquick-behavior.html">Behavior</a>, this value defaults to the value defined in the end state of the <a href="qmlexampletoggleswitch.html#transition">Transition</a>, or the value of the property change that triggered the <a href="qml-qtquick-behavior.html">Behavior</a>.</p>
+<p><b>See also </b><a href="qtquick-statesanimations-animations.html">Animation and Transitions in Qt Quick</a>.</p>
+</div></div><!-- @@@to -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdeadlinetimer.cpp -->
+  <title>QDeadlineTimer Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QDeadlineTimer</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#reference-clocks">Reference Clocks</a></li>
+<li class="level2"><a href="#timer-types">Timer types</a></li>
+<li class="level2"><a href="#std-op-op-chrono-compatibility"><code>std::chrono</code> Compatibility</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QDeadlineTimer Class</h1>
+<!-- $$$QDeadlineTimer-brief -->
+<p>The <a href="qdeadlinetimer.html">QDeadlineTimer</a> class marks a deadline in the future. <a href="#details">More...</a></p>
+<!-- @@@QDeadlineTimer -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QDeadlineTimer&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr></table></div><p>This class was introduced in  Qt 5.8.</p>
+<ul>
+<li><a href="qdeadlinetimer-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#ForeverConstant-enum">ForeverConstant</a></b> { Forever }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#QDeadlineTimer-4">QDeadlineTimer</a></b>(std::chrono::duration&lt;Rep, Period&gt; <i>remaining</i>, Qt::TimerType <i>type</i> = Qt::CoarseTimer)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#QDeadlineTimer-3">QDeadlineTimer</a></b>(std::chrono::time_point&lt;Clock, Duration&gt; <i>deadline</i>, Qt::TimerType <i>type</i> = Qt::CoarseTimer)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#QDeadlineTimer-2">QDeadlineTimer</a></b>(qint64 <i>msecs</i>, Qt::TimerType <i>type</i> = Qt::CoarseTimer)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#QDeadlineTimer-1">QDeadlineTimer</a></b>(<i>QDeadlineTimer::ForeverConstant</i>, Qt::TimerType <i>timerType</i> = Qt::CoarseTimer)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></b>(Qt::TimerType <i>timerType</i> = Qt::CoarseTimer)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint64 </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#deadline">deadline</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint64 </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#deadlineNSecs">deadlineNSecs</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#hasExpired">hasExpired</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#isForever">isForever</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint64 </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#remainingTime">remainingTime</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> std::chrono::nanoseconds </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#remainingTimeAsDuration">remainingTimeAsDuration</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint64 </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#remainingTimeNSecs">remainingTimeNSecs</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#setDeadline">setDeadline</a></b>(qint64 <i>msecs</i>, Qt::TimerType <i>timerType</i> = Qt::CoarseTimer)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#setDeadline-1">setDeadline</a></b>(std::chrono::time_point&lt;Clock, Duration&gt; <i>deadline</i>, Qt::TimerType <i>type</i> = Qt::CoarseTimer)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#setPreciseDeadline">setPreciseDeadline</a></b>(qint64 <i>secs</i>, qint64 <i>nsecs</i> = 0, Qt::TimerType <i>timerType</i> = Qt::CoarseTimer)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#setPreciseRemainingTime">setPreciseRemainingTime</a></b>(qint64 <i>secs</i>, qint64 <i>nsecs</i> = 0, Qt::TimerType <i>timerType</i> = Qt::CoarseTimer)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#setRemainingTime">setRemainingTime</a></b>(qint64 <i>msecs</i>, Qt::TimerType <i>timerType</i> = Qt::CoarseTimer)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#setRemainingTime-1">setRemainingTime</a></b>(std::chrono::duration&lt;Rep, Period&gt; <i>remaining</i>, Qt::TimerType <i>type</i> = Qt::CoarseTimer)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#setTimerType">setTimerType</a></b>(Qt::TimerType <i>timerType</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#swap">swap</a></b>(QDeadlineTimer &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::TimerType </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#timerType">timerType</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDeadlineTimer &amp;</td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#operator-2b-eq">operator+=</a></b>(qint64 <i>msecs</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDeadlineTimer &amp;</td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#operator--eq">operator-=</a></b>(qint64 <i>msecs</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDeadlineTimer &amp;</td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#operator-eq">operator=</a></b>(std::chrono::time_point&lt;Clock, Duration&gt; <i>deadline_</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDeadlineTimer &amp;</td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#operator-eq-1">operator=</a></b>(std::chrono::duration&lt;Rep, Period&gt; <i>remaining</i>)</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QDeadlineTimer </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#addNSecs">addNSecs</a></b>(QDeadlineTimer <i>dt</i>, qint64 <i>nsecs</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDeadlineTimer </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#current">current</a></b>(Qt::TimerType <i>timerType</i> = Qt::CoarseTimer)</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#operator-not-eq">operator!=</a></b>(QDeadlineTimer <i>d1</i>, QDeadlineTimer <i>d2</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDeadlineTimer </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#operator-2b">operator+</a></b>(QDeadlineTimer <i>dt</i>, qint64 <i>msecs</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDeadlineTimer </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#operator-2b-1">operator+</a></b>(qint64 <i>msecs</i>, QDeadlineTimer <i>dt</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDeadlineTimer </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#operator-">operator-</a></b>(QDeadlineTimer <i>dt</i>, qint64 <i>msecs</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#operator-lt">operator&lt;</a></b>(QDeadlineTimer <i>d1</i>, QDeadlineTimer <i>d2</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#operator-lt-eq">operator&lt;=</a></b>(QDeadlineTimer <i>d1</i>, QDeadlineTimer <i>d2</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#operator-eq-eq">operator==</a></b>(QDeadlineTimer <i>d1</i>, QDeadlineTimer <i>d2</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#operator-gt">operator&gt;</a></b>(QDeadlineTimer <i>d1</i>, QDeadlineTimer <i>d2</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qdeadlinetimer.html#operator-gt-eq">operator&gt;=</a></b>(QDeadlineTimer <i>d1</i>, QDeadlineTimer <i>d2</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QDeadlineTimer-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qdeadlinetimer.html">QDeadlineTimer</a> class is usually used to calculate future deadlines and verify whether the deadline has expired. <a href="qdeadlinetimer.html">QDeadlineTimer</a> can also be used for deadlines without expiration (&quot;forever&quot;). It forms a counterpart to <a href="qelapsedtimer.html">QElapsedTimer</a>, which calculates how much time has elapsed since <a href="qelapsedtimer.html#start">QElapsedTimer::start</a>() was called.</p>
+<p><a href="qdeadlinetimer.html">QDeadlineTimer</a> provides a more convenient API compared to <a href="qelapsedtimer.html#hasExpired">QElapsedTimer::hasExpired</a>().</p>
+<p>The typical use-case for the class is to create a <a href="qdeadlinetimer.html">QDeadlineTimer</a> before the operation in question is started, and then use <a href="qdeadlinetimer.html#remainingTime">remainingTime</a>() or <a href="qdeadlinetimer.html#hasExpired">hasExpired</a>() to determine whether to continue trying the operation. <a href="qdeadlinetimer.html">QDeadlineTimer</a> objects can be passed to functions being called to execute this operation so they know how long to still operate.</p>
+<pre class="cpp">
+
+      <span class="type">void</span> executeOperation(<span class="type">int</span> msecs)
+      {
+          <span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> deadline(msecs);
+          <span class="keyword">do</span> {
+              <span class="keyword">if</span> (readFromDevice(deadline<span class="operator">.</span>remainingTime())
+                  <span class="keyword">break</span>;
+              waitForReadyRead(deadline);
+          } <span class="keyword">while</span> (<span class="operator">!</span>deadline<span class="operator">.</span>hasExpired());
+      }
+
+</pre>
+<p>Many <a href="qdeadlinetimer.html">QDeadlineTimer</a> functions deal with time out values, which all are measured in milliseconds. There are two special values, the same as many other Qt functions named <code>waitFor</code> or similar:</p>
+<ul>
+<li>0: no time left, expired</li>
+<li>-1: infinite time left, timer never expires</li>
+</ul>
+<a name="reference-clocks"></a>
+<h3 id="reference-clocks">Reference Clocks</h3>
+<p><a href="qdeadlinetimer.html">QDeadlineTimer</a> will use the same clock as <a href="qelapsedtimer.html">QElapsedTimer</a> (see <a href="qelapsedtimer.html#clockType">QElapsedTimer::clockType</a>() and <a href="qelapsedtimer.html#isMonotonic">QElapsedTimer::isMonotonic</a>()).</p>
+<a name="timer-types"></a>
+<h3 id="timer-types">Timer types</h3>
+<p>Like <a href="qtimer.html">QTimer</a>, <a href="qdeadlinetimer.html">QDeadlineTimer</a> can select among different levels of coarseness on the timers. You can select precise timing by passing <a href="qt.html#TimerType-enum">Qt::PreciseTimer</a> to the functions that set of change the timer, or you can select coarse timing by passing <a href="qt.html#TimerType-enum">Qt::CoarseTimer</a>. <a href="qt.html#TimerType-enum">Qt::VeryCoarseTimer</a> is currently interpreted the same way as <a href="qt.html#TimerType-enum">Qt::CoarseTimer</a>.</p>
+<p>This feature is dependent on support from the operating system: if the OS does not support a coarse timer functionality, then <a href="qdeadlinetimer.html">QDeadlineTimer</a> will behave like <a href="qt.html#TimerType-enum">Qt::PreciseTimer</a> was passed.</p>
+<p><a href="qdeadlinetimer.html">QDeadlineTimer</a> defaults to <a href="qt.html#TimerType-enum">Qt::CoarseTimer</a> because on operating systems that do support coarse timing, making timing calls to that clock source is often much more efficient. The level of coarseness depends on the operating system, but should be in the order of a couple of milliseconds.</p>
+<a name="std-op-op-chrono-compatibility"></a>
+<h3 id="std-op-op-chrono-compatibility"><code>std::chrono</code> Compatibility</h3>
+<p><a href="qdeadlinetimer.html">QDeadlineTimer</a> is compatible with the <code>std::chrono</code> API from C++11 and can be constructed from or compared to both <code>std::chrono::duration</code> and <code>std::chrono::time_point</code> objects. In addition, it is fully compatible with the time literals from C++14, which allow one to write code as:</p>
+<pre class="cpp">
+
+      <span class="keyword">using</span> <span class="keyword">namespace</span> std<span class="operator">::</span>chrono;
+      <span class="keyword">using</span> <span class="keyword">namespace</span> std<span class="operator">::</span>chrono_literals;
+
+      <span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> deadline(<span class="number">30s</span>);
+      device<span class="operator">-</span><span class="operator">&gt;</span>waitForReadyRead(deadline);
+      <span class="keyword">if</span> (deadline<span class="operator">.</span>remainingTime<span class="operator">&lt;</span>nanoseconds<span class="operator">&gt;</span>() <span class="operator">&gt;</span> <span class="number">300ms</span>)
+          cleanup();
+
+</pre>
+<p>As can be seen in the example above, <a href="qdeadlinetimer.html">QDeadlineTimer</a> offers a templated version of <a href="qdeadlinetimer.html#remainingTime">remainingTime</a>() and <a href="qdeadlinetimer.html#deadline">deadline</a>() that can be used to return <code>std::chrono</code> objects.</p>
+<p>Note that comparing to <code>time_point</code> is not as efficient as comparing to <code>duration</code>, since <a href="qdeadlinetimer.html">QDeadlineTimer</a> may need to convert from its own internal clock source to the clock source used by the <code>time_point</code> object. Also note that, due to this conversion, the deadlines will not be precise, so the following code is not expected to compare equally:</p>
+<pre class="cpp">
+
+      <span class="keyword">using</span> <span class="keyword">namespace</span> std<span class="operator">::</span>chrono;
+      <span class="keyword">using</span> <span class="keyword">namespace</span> std<span class="operator">::</span>chrono_literals;
+      <span class="keyword">auto</span> now <span class="operator">=</span> steady_clock<span class="operator">::</span>now();
+      <span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> deadline(now <span class="operator">+</span> <span class="number">1s</span>);
+      Q_ASSERT(deadline <span class="operator">=</span><span class="operator">=</span> now <span class="operator">+</span> <span class="number">1s</span>);
+
+</pre>
+</div>
+<p><b>See also </b><a href="qtime.html">QTime</a>, <a href="qtimer.html">QTimer</a>, <a href="qdeadlinetimer.html">QDeadlineTimer</a>, and <a href="qt.html#TimerType-enum">Qt::TimerType</a>.</p>
+<!-- @@@QDeadlineTimer -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$ForeverConstant$$$Forever -->
+<h3 class="fn" id="ForeverConstant-enum"><a name="ForeverConstant-enum"></a>enum QDeadlineTimer::<span class="name">ForeverConstant</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QDeadlineTimer::Forever</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Used when creating a <a href="qdeadlinetimer.html">QDeadlineTimer</a> to indicate the deadline should not expire</td></tr>
+</table></div>
+<!-- @@@ForeverConstant -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QDeadlineTimer$$$QDeadlineTimerstd::chrono::duration<Rep,Period>Qt::TimerType -->
+<h3 class="fn" id="QDeadlineTimer-4"><a name="QDeadlineTimer-4"></a>QDeadlineTimer::<span class="name">QDeadlineTimer</span>(<span class="type">std::chrono::duration</span>&lt;<span class="type">Rep</span>, <span class="type">Period</span>&gt; <i>remaining</i>, <span class="type"><a href="qt.html#TimerType-enum">Qt::TimerType</a></span> <i>type</i> = Qt::CoarseTimer)</h3>
+<p>Constructs a <a href="qdeadlinetimer.html">QDeadlineTimer</a> object with a remaining time of <i>remaining</i>. If <i>remaining</i> is zero or negative, this <a href="qdeadlinetimer.html">QDeadlineTimer</a> object will be mark as expired, whereas if <i>remaining</i> is equal to <code>duration::max()</code>, the object will be set to never expire.</p>
+<p>The <a href="qdeadlinetimer.html">QDeadlineTimer</a> object will be constructed with the specified timer <i>type</i>.</p>
+<p>This constructor can be used with C++14's user-defined literals for time, such as in:</p>
+<pre class="cpp">
+
+      <span class="keyword">using</span> <span class="keyword">namespace</span> std<span class="operator">::</span>chrono_literals;
+      <span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> deadline(<span class="number">250ms</span>);
+
+</pre>
+<p>For optimization purposes, if <i>remaining</i> is zero or negative, this function may skip obtaining the current time and may instead use a value known to be in the past. If that happens, <a href="qdeadlinetimer.html#deadline">deadline</a>() may return an unexpected value and this object cannot be used in calculation of how long it is overdue. If that functionality is required, use <a href="qdeadlinetimer.html#current">QDeadlineTimer::current</a>() and add time to it.</p>
+<p><b>See also </b><a href="qdeadlinetimer.html#hasExpired">hasExpired</a>(), <a href="qdeadlinetimer.html#isForever">isForever</a>(), <a href="qdeadlinetimer.html#remainingTime">remainingTime</a>(), and <a href="qdeadlinetimer.html#setRemainingTime">setRemainingTime</a>().</p>
+<!-- @@@QDeadlineTimer -->
+<!-- $$$QDeadlineTimer$$$QDeadlineTimerstd::chrono::time_point<Clock,Duration>Qt::TimerType -->
+<h3 class="fn" id="QDeadlineTimer-3"><a name="QDeadlineTimer-3"></a>QDeadlineTimer::<span class="name">QDeadlineTimer</span>(<span class="type">std::chrono::time_point</span>&lt;<span class="type">Clock</span>, <span class="type">Duration</span>&gt; <i>deadline</i>, <span class="type"><a href="qt.html#TimerType-enum">Qt::TimerType</a></span> <i>type</i> = Qt::CoarseTimer)</h3>
+<p>Constructs a <a href="qdeadlinetimer.html">QDeadlineTimer</a> object with a deadline at <i>deadline</i> time point, converting from the clock source <code>Clock</code> to Qt's internal clock source (see <a href="qelapsedtimer.html#clockType">QElapsedTimer::clockType</a>()).</p>
+<p>If <i>deadline</i> is in the past, this <a href="qdeadlinetimer.html">QDeadlineTimer</a> object is set to expired, whereas if <i>deadline</i> is equal to <code>Duration::max()</code>, then this object is set to never expire.</p>
+<p>The <a href="qdeadlinetimer.html">QDeadlineTimer</a> object will be constructed with the specified timer <i>type</i>.</p>
+<p><b>See also </b><a href="qdeadlinetimer.html#hasExpired">hasExpired</a>(), <a href="qdeadlinetimer.html#isForever">isForever</a>(), <a href="qdeadlinetimer.html#remainingTime">remainingTime</a>(), and <a href="qdeadlinetimer.html#setDeadline">setDeadline</a>().</p>
+<!-- @@@QDeadlineTimer -->
+<!-- $$$QDeadlineTimer$$$QDeadlineTimerqint64Qt::TimerType -->
+<h3 class="fn" id="QDeadlineTimer-2"><a name="QDeadlineTimer-2"></a>QDeadlineTimer::<span class="name">QDeadlineTimer</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>msecs</i>, <span class="type"><a href="qt.html#TimerType-enum">Qt::TimerType</a></span> <i>type</i> = Qt::CoarseTimer)</h3>
+<p>Constructs a <a href="qdeadlinetimer.html">QDeadlineTimer</a> object with an expiry time of <i>msecs</i> msecs from the moment of the creation of this object, if msecs is positive. If <i>msecs</i> is zero, this <a href="qdeadlinetimer.html">QDeadlineTimer</a> will be marked as expired, causing <a href="qdeadlinetimer.html#remainingTime">remainingTime</a>() to return zero and <a href="qdeadlinetimer.html#deadline">deadline</a>() to return an indeterminate time point in the past. If <i>msecs</i> is -1, the timer will be set it to never expire, causing <a href="qdeadlinetimer.html#remainingTime">remainingTime</a>() to return -1 and <a href="qdeadlinetimer.html#deadline">deadline</a>() to return the maximum value.</p>
+<p>The <a href="qdeadlinetimer.html">QDeadlineTimer</a> object will be constructed with the specified timer <i>type</i>.</p>
+<p>For optimization purposes, if <i>msecs</i> is zero, this function may skip obtaining the current time and may instead use a value known to be in the past. If that happens, <a href="qdeadlinetimer.html#deadline">deadline</a>() may return an unexpected value and this object cannot be used in calculation of how long it is overdue. If that functionality is required, use <a href="qdeadlinetimer.html#current">QDeadlineTimer::current</a>() and add time to it.</p>
+<p><b>See also </b><a href="qdeadlinetimer.html#hasExpired">hasExpired</a>(), <a href="qdeadlinetimer.html#isForever">isForever</a>(), <a href="qdeadlinetimer.html#remainingTime">remainingTime</a>(), and <a href="qdeadlinetimer.html#setRemainingTime">setRemainingTime</a>().</p>
+<!-- @@@QDeadlineTimer -->
+<!-- $$$QDeadlineTimer$$$QDeadlineTimerQDeadlineTimer::ForeverConstantQt::TimerType -->
+<h3 class="fn" id="QDeadlineTimer-1"><a name="QDeadlineTimer-1"></a>QDeadlineTimer::<span class="name">QDeadlineTimer</span>(<i>QDeadlineTimer::ForeverConstant</i>, <span class="type"><a href="qt.html#TimerType-enum">Qt::TimerType</a></span> <i>timerType</i> = Qt::CoarseTimer)</h3>
+<p><a href="qdeadlinetimer.html">QDeadlineTimer</a> objects created with <a href="qdeadlinetimer.html#ForeverConstant-enum">ForeverConstant</a> never expire. For such objects, <a href="qdeadlinetimer.html#remainingTime">remainingTime</a>() will return -1, <a href="qdeadlinetimer.html#deadline">deadline</a>() will return the maximum value, and <a href="qdeadlinetimer.html#isForever">isForever</a>() will return true.</p>
+<p>The timer type <i>timerType</i> may be ignored, since the timer is already expired.</p>
+<p><b>See also </b><a href="qdeadlinetimer.html#ForeverConstant-enum">ForeverConstant</a>, <a href="qdeadlinetimer.html#hasExpired">hasExpired</a>(), <a href="qdeadlinetimer.html#isForever">isForever</a>(), <a href="qdeadlinetimer.html#remainingTime">remainingTime</a>(), and <a href="qdeadlinetimer.html#timerType">timerType</a>().</p>
+<!-- @@@QDeadlineTimer -->
+<!-- $$$QDeadlineTimer[overload1]$$$QDeadlineTimerQt::TimerType -->
+<h3 class="fn" id="QDeadlineTimer"><a name="QDeadlineTimer"></a>QDeadlineTimer::<span class="name">QDeadlineTimer</span>(<span class="type"><a href="qt.html#TimerType-enum">Qt::TimerType</a></span> <i>timerType</i> = Qt::CoarseTimer)</h3>
+<p>Constructs an expired <a href="qdeadlinetimer.html">QDeadlineTimer</a> object. For this object, <a href="qdeadlinetimer.html#remainingTime">remainingTime</a>() will return 0.</p>
+<p>The timer type <i>timerType</i> may be ignored, since the timer is already expired. Similarly, for optimization purposes, this function will not attempt to obtain the current time and will use a value known to be in the past. Therefore, <a href="qdeadlinetimer.html#deadline">deadline</a>() may return an unexpected value and this object cannot be used in calculation of how long it is overdue. If that functionality is required, use <a href="qdeadlinetimer.html#current">QDeadlineTimer::current</a>().</p>
+<p><b>See also </b><a href="qdeadlinetimer.html#hasExpired">hasExpired</a>(), <a href="qdeadlinetimer.html#remainingTime">remainingTime</a>(), <a href="qt.html#TimerType-enum">Qt::TimerType</a>, and <a href="qdeadlinetimer.html#current">current</a>().</p>
+<!-- @@@QDeadlineTimer -->
+<!-- $$$addNSecs[overload1]$$$addNSecsQDeadlineTimerqint64 -->
+<h3 class="fn" id="addNSecs"><a name="addNSecs"></a><code>[static] </code><span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> QDeadlineTimer::<span class="name">addNSecs</span>(<span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> <i>dt</i>, <span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>nsecs</i>)</h3>
+<p>Returns a <a href="qdeadlinetimer.html">QDeadlineTimer</a> object whose deadline is extended from <i>dt</i>'s deadline by <i>nsecs</i> nanoseconds. If <i>dt</i> was set to never expire, this function returns a <a href="qdeadlinetimer.html">QDeadlineTimer</a> that will not expire either.</p>
+<p><b>Note: </b>if <i>dt</i> was created as expired, its deadline is indeterminate and adding an amount of time may or may not cause it to become unexpired.</p><!-- @@@addNSecs -->
+<!-- $$$current[overload1]$$$currentQt::TimerType -->
+<h3 class="fn" id="current"><a name="current"></a><code>[static] </code><span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> QDeadlineTimer::<span class="name">current</span>(<span class="type"><a href="qt.html#TimerType-enum">Qt::TimerType</a></span> <i>timerType</i> = Qt::CoarseTimer)</h3>
+<p>Returns a <a href="qdeadlinetimer.html">QDeadlineTimer</a> that is expired but is guaranteed to contain the current time. Objects created by this function can participate in the calculation of how long a timer is overdue, using the <a href="qdeadlinetimer.html#deadline">deadline</a>() function.</p>
+<p>The <a href="qdeadlinetimer.html">QDeadlineTimer</a> object will be constructed with the specified <i>timerType</i>.</p>
+<!-- @@@current -->
+<!-- $$$deadline[overload1]$$$deadline -->
+<h3 class="fn" id="deadline"><a name="deadline"></a><span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> QDeadlineTimer::<span class="name">deadline</span>() const</h3>
+<p>Returns the absolute time point for the deadline stored in <a href="qdeadlinetimer.html">QDeadlineTimer</a> object, calculated in milliseconds relative to the reference clock, the same as <a href="qelapsedtimer.html#msecsSinceReference">QElapsedTimer::msecsSinceReference</a>(). The value will be in the past if this <a href="qdeadlinetimer.html">QDeadlineTimer</a> has expired.</p>
+<p>If this <a href="qdeadlinetimer.html">QDeadlineTimer</a> never expires, this function returns <code>std::numeric_limits&lt;qint64&gt;::max()</code>.</p>
+<p>This function can be used to calculate the amount of time a timer is overdue, by subtracting <a href="qdeadlinetimer.html#current">QDeadlineTimer::current</a>() or <a href="qelapsedtimer.html#msecsSinceReference">QElapsedTimer::msecsSinceReference</a>(), as in the following example:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> realTimeLeft <span class="operator">=</span> deadline<span class="operator">.</span>deadline();
+      <span class="keyword">if</span> (realTimeLeft <span class="operator">!</span><span class="operator">=</span> (std<span class="operator">::</span>numeric_limits<span class="operator">&lt;</span><span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span><span class="operator">&gt;</span><span class="operator">::</span>max)()) {
+          realTimeLeft <span class="operator">-</span><span class="operator">=</span> <span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span><span class="operator">::</span>current()<span class="operator">.</span>deadline();
+          <span class="comment">// or:</span>
+          <span class="comment">//QElapsedTimer timer;</span>
+          <span class="comment">//timer.start();</span>
+          <span class="comment">//realTimeLeft -= timer.msecsSinceReference();</span>
+      }
+
+</pre>
+<p><b>Note: </b>Timers that were created as expired have an indetermine time point in the past as their deadline, so the above calculation may not work.</p><p><b>See also </b><a href="qdeadlinetimer.html#remainingTime">remainingTime</a>(), <a href="qdeadlinetimer.html#deadlineNSecs">deadlineNSecs</a>(), and <a href="qdeadlinetimer.html#setDeadline">setDeadline</a>().</p>
+<!-- @@@deadline -->
+<!-- $$$deadlineNSecs[overload1]$$$deadlineNSecs -->
+<h3 class="fn" id="deadlineNSecs"><a name="deadlineNSecs"></a><span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> QDeadlineTimer::<span class="name">deadlineNSecs</span>() const</h3>
+<p>Returns the absolute time point for the deadline stored in <a href="qdeadlinetimer.html">QDeadlineTimer</a> object, calculated in nanoseconds relative to the reference clock, the same as <a href="qelapsedtimer.html#msecsSinceReference">QElapsedTimer::msecsSinceReference</a>(). The value will be in the past if this <a href="qdeadlinetimer.html">QDeadlineTimer</a> has expired.</p>
+<p>If this <a href="qdeadlinetimer.html">QDeadlineTimer</a> never expires or the number of nanoseconds until the deadline can't be accommodated in the return type, this function returns <code>std::numeric_limits&lt;qint64&gt;::max()</code>.</p>
+<p>This function can be used to calculate the amount of time a timer is overdue, by subtracting <a href="qdeadlinetimer.html#current">QDeadlineTimer::current</a>(), as in the following example:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> realTimeLeft <span class="operator">=</span> deadline<span class="operator">.</span>deadlineNSecs();
+      <span class="keyword">if</span> (realTimeLeft <span class="operator">!</span><span class="operator">=</span> std<span class="operator">::</span>numeric_limits<span class="operator">&lt;</span><span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span><span class="operator">&gt;</span><span class="operator">::</span>max())
+          realTimeLeft <span class="operator">-</span><span class="operator">=</span> <span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span><span class="operator">::</span>current()<span class="operator">.</span>deadlineNSecs();
+
+</pre>
+<p><b>Note: </b>Timers that were created as expired have an indetermine time point in the past as their deadline, so the above calculation may not work.</p><p><b>See also </b><a href="qdeadlinetimer.html#remainingTime">remainingTime</a>() and deadlineNSecs().</p>
+<!-- @@@deadlineNSecs -->
+<!-- $$$hasExpired[overload1]$$$hasExpired -->
+<h3 class="fn" id="hasExpired"><a name="hasExpired"></a><span class="type">bool</span> QDeadlineTimer::<span class="name">hasExpired</span>() const</h3>
+<p>Returns true if this <a href="qdeadlinetimer.html">QDeadlineTimer</a> object has expired, false if there remains time left. For objects that have expired, <a href="qdeadlinetimer.html#remainingTime">remainingTime</a>() will return zero and <a href="qdeadlinetimer.html#deadline">deadline</a>() will return a time point in the past.</p>
+<p><a href="qdeadlinetimer.html">QDeadlineTimer</a> objects created with the <a href="qdeadlinetimer.html#ForeverConstant-enum">ForeverConstant</a> never expire and this function always returns false for them.</p>
+<p><b>See also </b><a href="qdeadlinetimer.html#isForever">isForever</a>() and <a href="qdeadlinetimer.html#remainingTime">remainingTime</a>().</p>
+<!-- @@@hasExpired -->
+<!-- $$$isForever[overload1]$$$isForever -->
+<h3 class="fn" id="isForever"><a name="isForever"></a><span class="type">bool</span> QDeadlineTimer::<span class="name">isForever</span>() const</h3>
+<p>Returns true if this <a href="qdeadlinetimer.html">QDeadlineTimer</a> object never expires, false otherwise. For timers that never expire, <a href="qdeadlinetimer.html#remainingTime">remainingTime</a>() always returns -1 and <a href="qdeadlinetimer.html#deadline">deadline</a>() returns the maximum value.</p>
+<p><b>See also </b><a href="qdeadlinetimer.html#ForeverConstant-enum">ForeverConstant</a>, <a href="qdeadlinetimer.html#hasExpired">hasExpired</a>(), and <a href="qdeadlinetimer.html#remainingTime">remainingTime</a>().</p>
+<!-- @@@isForever -->
+<!-- $$$remainingTime[overload1]$$$remainingTime -->
+<h3 class="fn" id="remainingTime"><a name="remainingTime"></a><span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> QDeadlineTimer::<span class="name">remainingTime</span>() const</h3>
+<p>Returns the remaining time in this <a href="qdeadlinetimer.html">QDeadlineTimer</a> object in milliseconds. If the timer has already expired, this function will return zero and it is not possible to obtain the amount of time overdue with this function (to do that, see <a href="qdeadlinetimer.html#deadline">deadline</a>()). If the timer was set to never expire, this function returns -1.</p>
+<p>This function is suitable for use in Qt APIs that take a millisecond timeout, such as the many <a href="qiodevice.html">QIODevice</a> <code>waitFor</code> functions or the timed lock functions in <a href="qmutex.html">QMutex</a>, <a href="qwaitcondition.html">QWaitCondition</a>, <a href="qsemaphore.html">QSemaphore</a>, or <a href="qreadwritelock.html">QReadWriteLock</a>. For example:</p>
+<pre class="cpp">
+
+      mutex<span class="operator">.</span>tryLock(deadline<span class="operator">.</span>remainingTime());
+
+</pre>
+<p><b>See also </b><a href="qdeadlinetimer.html#setRemainingTime">setRemainingTime</a>(), <a href="qdeadlinetimer.html#remainingTimeNSecs">remainingTimeNSecs</a>(), <a href="qdeadlinetimer.html#isForever">isForever</a>(), and <a href="qdeadlinetimer.html#hasExpired">hasExpired</a>().</p>
+<!-- @@@remainingTime -->
+<!-- $$$remainingTimeAsDuration[overload1]$$$remainingTimeAsDuration -->
+<h3 class="fn" id="remainingTimeAsDuration"><a name="remainingTimeAsDuration"></a><span class="type">std::chrono::nanoseconds</span> QDeadlineTimer::<span class="name">remainingTimeAsDuration</span>() const</h3>
+<p>Returns the time remaining before the deadline.</p>
+<!-- @@@remainingTimeAsDuration -->
+<!-- $$$remainingTimeNSecs[overload1]$$$remainingTimeNSecs -->
+<h3 class="fn" id="remainingTimeNSecs"><a name="remainingTimeNSecs"></a><span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> QDeadlineTimer::<span class="name">remainingTimeNSecs</span>() const</h3>
+<p>Returns the remaining time in this <a href="qdeadlinetimer.html">QDeadlineTimer</a> object in nanoseconds. If the timer has already expired, this function will return zero and it is not possible to obtain the amount of time overdue with this function. If the timer was set to never expire, this function returns -1.</p>
+<p><b>See also </b><a href="qdeadlinetimer.html#remainingTime">remainingTime</a>(), <a href="qdeadlinetimer.html#isForever">isForever</a>(), and <a href="qdeadlinetimer.html#hasExpired">hasExpired</a>().</p>
+<!-- @@@remainingTimeNSecs -->
+<!-- $$$setDeadline[overload1]$$$setDeadlineqint64Qt::TimerType -->
+<h3 class="fn" id="setDeadline"><a name="setDeadline"></a><span class="type">void</span> QDeadlineTimer::<span class="name">setDeadline</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>msecs</i>, <span class="type"><a href="qt.html#TimerType-enum">Qt::TimerType</a></span> <i>timerType</i> = Qt::CoarseTimer)</h3>
+<p>Sets the deadline for this <a href="qdeadlinetimer.html">QDeadlineTimer</a> object to be the <i>msecs</i> absolute time point, counted in milliseconds since the reference clock (the same as <a href="qelapsedtimer.html#msecsSinceReference">QElapsedTimer::msecsSinceReference</a>()), and the timer type to <i>timerType</i>. If the value is in the past, this <a href="qdeadlinetimer.html">QDeadlineTimer</a> will be marked as expired.</p>
+<p>If <i>msecs</i> is <code>std::numeric_limits&lt;qint64&gt;::max()</code> or the deadline is beyond a representable point in the future, this <a href="qdeadlinetimer.html">QDeadlineTimer</a> will be set to never expire.</p>
+<p><b>See also </b><a href="qdeadlinetimer.html#setPreciseDeadline">setPreciseDeadline</a>(), <a href="qdeadlinetimer.html#deadline">deadline</a>(), <a href="qdeadlinetimer.html#deadlineNSecs">deadlineNSecs</a>(), and <a href="qdeadlinetimer.html#setRemainingTime">setRemainingTime</a>().</p>
+<!-- @@@setDeadline -->
+<!-- $$$setDeadline$$$setDeadlinestd::chrono::time_point<Clock,Duration>Qt::TimerType -->
+<h3 class="fn" id="setDeadline-1"><a name="setDeadline-1"></a><span class="type">void</span> QDeadlineTimer::<span class="name">setDeadline</span>(<span class="type">std::chrono::time_point</span>&lt;<span class="type">Clock</span>, <span class="type">Duration</span>&gt; <i>deadline</i>, <span class="type"><a href="qt.html#TimerType-enum">Qt::TimerType</a></span> <i>type</i> = Qt::CoarseTimer)</h3>
+<p>Sets this <a href="qdeadlinetimer.html">QDeadlineTimer</a> to the deadline marked by <i>deadline</i> time point, converting from the clock source <code>Clock</code> to Qt's internal clock source (see <a href="qelapsedtimer.html#clockType">QElapsedTimer::clockType</a>()).</p>
+<p>If <i>deadline</i> is in the past, this <a href="qdeadlinetimer.html">QDeadlineTimer</a> object is set to expired, whereas if <i>deadline</i> is equal to <code>Duration::max()</code>, then this object is set to never expire.</p>
+<p>The timer type for this <a href="qdeadlinetimer.html">QDeadlineTimer</a> object will be set to the specified <i>type</i>.</p>
+<p><b>See also </b><a href="qdeadlinetimer.html#hasExpired">hasExpired</a>(), <a href="qdeadlinetimer.html#isForever">isForever</a>(), and <a href="qdeadlinetimer.html#remainingTime">remainingTime</a>().</p>
+<!-- @@@setDeadline -->
+<!-- $$$setPreciseDeadline[overload1]$$$setPreciseDeadlineqint64qint64Qt::TimerType -->
+<h3 class="fn" id="setPreciseDeadline"><a name="setPreciseDeadline"></a><span class="type">void</span> QDeadlineTimer::<span class="name">setPreciseDeadline</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>secs</i>, <span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>nsecs</i> = 0, <span class="type"><a href="qt.html#TimerType-enum">Qt::TimerType</a></span> <i>timerType</i> = Qt::CoarseTimer)</h3>
+<p>Sets the deadline for this <a href="qdeadlinetimer.html">QDeadlineTimer</a> object to be <i>secs</i> seconds and <i>nsecs</i> nanoseconds since the reference clock epoch (the same as <a href="qelapsedtimer.html#msecsSinceReference">QElapsedTimer::msecsSinceReference</a>()), and the timer type to <i>timerType</i>. If the value is in the past, this <a href="qdeadlinetimer.html">QDeadlineTimer</a> will be marked as expired.</p>
+<p>If <i>secs</i> or <i>nsecs</i> is <code>std::numeric_limits&lt;qint64&gt;::max()</code>, this <a href="qdeadlinetimer.html">QDeadlineTimer</a> will be set to never expire. If <i>nsecs</i> is more than 1 billion nanoseconds (1 second), then <i>secs</i> will be adjusted accordingly.</p>
+<p><b>See also </b><a href="qdeadlinetimer.html#setDeadline">setDeadline</a>(), <a href="qdeadlinetimer.html#deadline">deadline</a>(), <a href="qdeadlinetimer.html#deadlineNSecs">deadlineNSecs</a>(), and <a href="qdeadlinetimer.html#setRemainingTime">setRemainingTime</a>().</p>
+<!-- @@@setPreciseDeadline -->
+<!-- $$$setPreciseRemainingTime[overload1]$$$setPreciseRemainingTimeqint64qint64Qt::TimerType -->
+<h3 class="fn" id="setPreciseRemainingTime"><a name="setPreciseRemainingTime"></a><span class="type">void</span> QDeadlineTimer::<span class="name">setPreciseRemainingTime</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>secs</i>, <span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>nsecs</i> = 0, <span class="type"><a href="qt.html#TimerType-enum">Qt::TimerType</a></span> <i>timerType</i> = Qt::CoarseTimer)</h3>
+<p>Sets the remaining time for this <a href="qdeadlinetimer.html">QDeadlineTimer</a> object to <i>secs</i> seconds plus <i>nsecs</i> nanoseconds from now, if <i>secs</i> has a positive value. If <i>secs</i> is -1, this <a href="qdeadlinetimer.html">QDeadlineTimer</a> will be set it to never expire. If both parameters are zero, this <a href="qdeadlinetimer.html">QDeadlineTimer</a> will be marked as expired.</p>
+<p>The timer type for this <a href="qdeadlinetimer.html">QDeadlineTimer</a> object will be set to the specified <i>timerType</i>.</p>
+<p><b>See also </b><a href="qdeadlinetimer.html#setRemainingTime">setRemainingTime</a>(), <a href="qdeadlinetimer.html#hasExpired">hasExpired</a>(), <a href="qdeadlinetimer.html#isForever">isForever</a>(), and <a href="qdeadlinetimer.html#remainingTime">remainingTime</a>().</p>
+<!-- @@@setPreciseRemainingTime -->
+<!-- $$$setRemainingTime[overload1]$$$setRemainingTimeqint64Qt::TimerType -->
+<h3 class="fn" id="setRemainingTime"><a name="setRemainingTime"></a><span class="type">void</span> QDeadlineTimer::<span class="name">setRemainingTime</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>msecs</i>, <span class="type"><a href="qt.html#TimerType-enum">Qt::TimerType</a></span> <i>timerType</i> = Qt::CoarseTimer)</h3>
+<p>Sets the remaining time for this <a href="qdeadlinetimer.html">QDeadlineTimer</a> object to <i>msecs</i> milliseconds from now, if <i>msecs</i> has a positive value. If <i>msecs</i> is zero, this <a href="qdeadlinetimer.html">QDeadlineTimer</a> object will be marked as expired, whereas a value of -1 will set it to never expire.</p>
+<p>The timer type for this <a href="qdeadlinetimer.html">QDeadlineTimer</a> object will be set to the specified <i>timerType</i>.</p>
+<p><b>See also </b><a href="qdeadlinetimer.html#setPreciseRemainingTime">setPreciseRemainingTime</a>(), <a href="qdeadlinetimer.html#hasExpired">hasExpired</a>(), <a href="qdeadlinetimer.html#isForever">isForever</a>(), and <a href="qdeadlinetimer.html#remainingTime">remainingTime</a>().</p>
+<!-- @@@setRemainingTime -->
+<!-- $$$setRemainingTime$$$setRemainingTimestd::chrono::duration<Rep,Period>Qt::TimerType -->
+<h3 class="fn" id="setRemainingTime-1"><a name="setRemainingTime-1"></a><span class="type">void</span> QDeadlineTimer::<span class="name">setRemainingTime</span>(<span class="type">std::chrono::duration</span>&lt;<span class="type">Rep</span>, <span class="type">Period</span>&gt; <i>remaining</i>, <span class="type"><a href="qt.html#TimerType-enum">Qt::TimerType</a></span> <i>type</i> = Qt::CoarseTimer)</h3>
+<p>This is an overloaded function.</p>
+<p>Sets the remaining time for this <a href="qdeadlinetimer.html">QDeadlineTimer</a> object to <i>remaining</i>. If <i>remaining</i> is zero or negative, this <a href="qdeadlinetimer.html">QDeadlineTimer</a> object will be mark as expired, whereas if <i>remaining</i> is equal to <code>duration::max()</code>, the object will be set to never expire.</p>
+<p>The timer type for this <a href="qdeadlinetimer.html">QDeadlineTimer</a> object will be set to the specified <i>type</i>.</p>
+<p>This function can be used with C++14's user-defined literals for time, such as in:</p>
+<pre class="cpp">
+
+      <span class="keyword">using</span> <span class="keyword">namespace</span> std<span class="operator">::</span>chrono_literals;
+      deadline<span class="operator">.</span>setRemainingTime(<span class="number">250ms</span>);
+
+</pre>
+<p><b>Note: </b>Qt detects the necessary C++14 compiler support by way of the feature test recommendations from <a href="https://isocpp.org/std/standing-documents/sd-6-sg10-feature-test-recommendations">C++ Committee's Standing Document 6</a>.</p><p><b>See also </b><a href="qdeadlinetimer.html#setDeadline">setDeadline</a>(), <a href="qdeadlinetimer.html#remainingTime">remainingTime</a>(), <a href="qdeadlinetimer.html#hasExpired">hasExpired</a>(), and <a href="qdeadlinetimer.html#isForever">isForever</a>().</p>
+<!-- @@@setRemainingTime -->
+<!-- $$$setTimerType[overload1]$$$setTimerTypeQt::TimerType -->
+<h3 class="fn" id="setTimerType"><a name="setTimerType"></a><span class="type">void</span> QDeadlineTimer::<span class="name">setTimerType</span>(<span class="type"><a href="qt.html#TimerType-enum">Qt::TimerType</a></span> <i>timerType</i>)</h3>
+<p>Changes the timer type for this object to <i>timerType</i>.</p>
+<p>The behavior for each possible value of <i>timerType</i> is operating-system dependent. <a href="qt.html#TimerType-enum">Qt::PreciseTimer</a> will use the most precise timer that Qt can find, with resolution of 1 millisecond or better, whereas <a href="qdeadlinetimer.html">QDeadlineTimer</a> will try to use a more coarse timer for <a href="qt.html#TimerType-enum">Qt::CoarseTimer</a> and <a href="qt.html#TimerType-enum">Qt::VeryCoarseTimer</a>.</p>
+<p><b>See also </b><a href="qdeadlinetimer.html#timerType">timerType</a>() and <a href="qt.html#TimerType-enum">Qt::TimerType</a>.</p>
+<!-- @@@setTimerType -->
+<!-- $$$swap[overload1]$$$swapQDeadlineTimer& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QDeadlineTimer::<span class="name">swap</span>(<span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps this deadline timer with the <i>other</i> deadline timer.</p>
+<!-- @@@swap -->
+<!-- $$$timerType[overload1]$$$timerType -->
+<h3 class="fn" id="timerType"><a name="timerType"></a><span class="type"><a href="qt.html#TimerType-enum">Qt::TimerType</a></span> QDeadlineTimer::<span class="name">timerType</span>() const</h3>
+<p>Returns the timer type is active for this object.</p>
+<p><b>See also </b><a href="qdeadlinetimer.html#setTimerType">setTimerType</a>().</p>
+<!-- @@@timerType -->
+<!-- $$$operator+=[overload1]$$$operator+=qint64 -->
+<h3 class="fn" id="operator-2b-eq"><a name="operator-2b-eq"></a><span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> &amp;QDeadlineTimer::<span class="name">operator+=</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>msecs</i>)</h3>
+<p>Extends this <a href="qdeadlinetimer.html">QDeadlineTimer</a> object by <i>msecs</i> milliseconds and returns itself. If this object is set to never expire, this function does nothing.</p>
+<p>To add times of precision greater than 1 millisecond, use <a href="qdeadlinetimer.html#addNSecs">addNSecs</a>().</p>
+<!-- @@@operator+= -->
+<!-- $$$operator-=[overload1]$$$operator-=qint64 -->
+<h3 class="fn" id="operator--eq"><a name="operator--eq"></a><span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> &amp;QDeadlineTimer::<span class="name">operator-=</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>msecs</i>)</h3>
+<p>Shortens this <a href="qdeadlinetimer.html">QDeadlineTimer</a> object by <i>msecs</i> milliseconds and returns itself. If this object is set to never expire, this function does nothing.</p>
+<p>To subtract times of precision greater than 1 millisecond, use <a href="qdeadlinetimer.html#addNSecs">addNSecs</a>().</p>
+<!-- @@@operator-= -->
+<!-- $$$operator=[overload1]$$$operator=std::chrono::time_point<Clock,Duration> -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> &amp;QDeadlineTimer::<span class="name">operator=</span>(<span class="type">std::chrono::time_point</span>&lt;<span class="type">Clock</span>, <span class="type">Duration</span>&gt; <i>deadline_</i>)</h3>
+<p>Assigns <i>deadline_</i> to this deadline timer.</p>
+<!-- @@@operator= -->
+<!-- $$$operator=$$$operator=std::chrono::duration<Rep,Period> -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> &amp;QDeadlineTimer::<span class="name">operator=</span>(<span class="type">std::chrono::duration</span>&lt;<span class="type">Rep</span>, <span class="type">Period</span>&gt; <i>remaining</i>)</h3>
+<p>Sets this deadline timer to the <i>remaining</i> time.</p>
+<!-- @@@operator= -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$operator!=[overload1]$$$operator!=QDeadlineTimerQDeadlineTimer -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> <span class="name">operator!=</span>(<span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> <i>d1</i>, <span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> <i>d2</i>)</h3>
+<p>Returns true if the deadline on <i>d1</i> and the deadline in <i>d2</i> are diferent, false otherwise. The timer type used to create the two deadlines is ignored. This function is equivalent to:</p>
+<pre class="cpp">
+
+      <span class="keyword">return</span> d1<span class="operator">.</span>deadlineNSecs() <span class="operator">!</span><span class="operator">=</span> d2<span class="operator">.</span>deadlineNSecs();
+
+</pre>
+<p><b>Note: </b>comparing <a href="qdeadlinetimer.html">QDeadlineTimer</a> objects with different timer types is not supported and may result in unpredictable behavior.</p><!-- @@@operator!= -->
+<!-- $$$operator+[overload1]$$$operator+QDeadlineTimerqint64 -->
+<h3 class="fn" id="operator-2b"><a name="operator-2b"></a><span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> <span class="name">operator+</span>(<span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> <i>dt</i>, <span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>msecs</i>)</h3>
+<p>Returns a <a href="qdeadlinetimer.html">QDeadlineTimer</a> object whose deadline is <i>msecs</i> later than the deadline stored in <i>dt</i>. If <i>dt</i> is set to never expire, this function returns a <a href="qdeadlinetimer.html">QDeadlineTimer</a> that does not expire either.</p>
+<p>To add times of precision greater than 1 millisecond, use <a href="qdeadlinetimer.html#addNSecs">addNSecs</a>().</p>
+<!-- @@@operator+ -->
+<!-- $$$operator+$$$operator+qint64QDeadlineTimer -->
+<h3 class="fn" id="operator-2b-1"><a name="operator-2b-1"></a><span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> <span class="name">operator+</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>msecs</i>, <span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> <i>dt</i>)</h3>
+<p>Returns a <a href="qdeadlinetimer.html">QDeadlineTimer</a> object whose deadline is <i>msecs</i> later than the deadline stored in <i>dt</i>. If <i>dt</i> is set to never expire, this function returns a <a href="qdeadlinetimer.html">QDeadlineTimer</a> that does not expire either.</p>
+<p>To add times of precision greater than 1 millisecond, use <a href="qdeadlinetimer.html#addNSecs">addNSecs</a>().</p>
+<!-- @@@operator+ -->
+<!-- $$$operator-[overload1]$$$operator-QDeadlineTimerqint64 -->
+<h3 class="fn" id="operator-"><a name="operator-"></a><span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> <span class="name">operator-</span>(<span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> <i>dt</i>, <span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>msecs</i>)</h3>
+<p>Returns a <a href="qdeadlinetimer.html">QDeadlineTimer</a> object whose deadline is <i>msecs</i> before the deadline stored in <i>dt</i>. If <i>dt</i> is set to never expire, this function returns a <a href="qdeadlinetimer.html">QDeadlineTimer</a> that does not expire either.</p>
+<p>To subtract times of precision greater than 1 millisecond, use <a href="qdeadlinetimer.html#addNSecs">addNSecs</a>().</p>
+<!-- @@@operator- -->
+<!-- $$$operator<[overload1]$$$operator<QDeadlineTimerQDeadlineTimer -->
+<h3 class="fn" id="operator-lt"><a name="operator-lt"></a><span class="type">bool</span> <span class="name">operator&lt;</span>(<span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> <i>d1</i>, <span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> <i>d2</i>)</h3>
+<p>Returns true if the deadline on <i>d1</i> is earlier than the deadline in <i>d2</i>, false otherwise. The timer type used to create the two deadlines is ignored. This function is equivalent to:</p>
+<pre class="cpp">
+
+      <span class="keyword">return</span> d1<span class="operator">.</span>deadlineNSecs() <span class="operator">&lt;</span> d2<span class="operator">.</span>deadlineNSecs();
+
+</pre>
+<p><b>Note: </b>comparing <a href="qdeadlinetimer.html">QDeadlineTimer</a> objects with different timer types is not supported and may result in unpredictable behavior.</p><!-- @@@operator< -->
+<!-- $$$operator<=[overload1]$$$operator<=QDeadlineTimerQDeadlineTimer -->
+<h3 class="fn" id="operator-lt-eq"><a name="operator-lt-eq"></a><span class="type">bool</span> <span class="name">operator&lt;=</span>(<span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> <i>d1</i>, <span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> <i>d2</i>)</h3>
+<p>Returns true if the deadline on <i>d1</i> is earlier than or the same as the deadline in <i>d2</i>, false otherwise. The timer type used to create the two deadlines is ignored. This function is equivalent to:</p>
+<pre class="cpp">
+
+      <span class="keyword">return</span> d1<span class="operator">.</span>deadlineNSecs() <span class="operator">&lt;</span><span class="operator">=</span> d2<span class="operator">.</span>deadlineNSecs();
+
+</pre>
+<p><b>Note: </b>comparing <a href="qdeadlinetimer.html">QDeadlineTimer</a> objects with different timer types is not supported and may result in unpredictable behavior.</p><!-- @@@operator<= -->
+<!-- $$$operator==[overload1]$$$operator==QDeadlineTimerQDeadlineTimer -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> <span class="name">operator==</span>(<span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> <i>d1</i>, <span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> <i>d2</i>)</h3>
+<p>Returns true if the deadline on <i>d1</i> and the deadline in <i>d2</i> are the same, false otherwise. The timer type used to create the two deadlines is ignored. This function is equivalent to:</p>
+<pre class="cpp">
+
+      <span class="keyword">return</span> d1<span class="operator">.</span>deadlineNSecs() <span class="operator">=</span><span class="operator">=</span> d2<span class="operator">.</span>deadlineNSecs();
+
+</pre>
+<p><b>Note: </b>comparing <a href="qdeadlinetimer.html">QDeadlineTimer</a> objects with different timer types is not supported and may result in unpredictable behavior.</p><!-- @@@operator== -->
+<!-- $$$operator>[overload1]$$$operator>QDeadlineTimerQDeadlineTimer -->
+<h3 class="fn" id="operator-gt"><a name="operator-gt"></a><span class="type">bool</span> <span class="name">operator&gt;</span>(<span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> <i>d1</i>, <span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> <i>d2</i>)</h3>
+<p>Returns true if the deadline on <i>d1</i> is later than the deadline in <i>d2</i>, false otherwise. The timer type used to create the two deadlines is ignored. This function is equivalent to:</p>
+<pre class="cpp">
+
+      <span class="keyword">return</span> d1<span class="operator">.</span>deadlineNSecs() <span class="operator">&gt;</span> d2<span class="operator">.</span>deadlineNSecs();
+
+</pre>
+<p><b>Note: </b>comparing <a href="qdeadlinetimer.html">QDeadlineTimer</a> objects with different timer types is not supported and may result in unpredictable behavior.</p><!-- @@@operator> -->
+<!-- $$$operator>=[overload1]$$$operator>=QDeadlineTimerQDeadlineTimer -->
+<h3 class="fn" id="operator-gt-eq"><a name="operator-gt-eq"></a><span class="type">bool</span> <span class="name">operator&gt;=</span>(<span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> <i>d1</i>, <span class="type"><a href="qdeadlinetimer.html#QDeadlineTimer">QDeadlineTimer</a></span> <i>d2</i>)</h3>
+<p>Returns true if the deadline on <i>d1</i> is later than or the same as the deadline in <i>d2</i>, false otherwise. The timer type used to create the two deadlines is ignored. This function is equivalent to:</p>
+<pre class="cpp">
+
+      <span class="keyword">return</span> d1<span class="operator">.</span>deadlineNSecs() <span class="operator">&gt;</span><span class="operator">=</span> d2<span class="operator">.</span>deadlineNSecs();
+
+</pre>
+<p><b>Note: </b>comparing <a href="qdeadlinetimer.html">QDeadlineTimer</a> objects with different timer types is not supported and may result in unpredictable behavior.</p><!-- @@@operator>= -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

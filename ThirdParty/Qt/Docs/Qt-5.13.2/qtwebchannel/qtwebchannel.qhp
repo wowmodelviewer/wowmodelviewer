@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+    <namespace>org.qt-project.qtwebchannel.5132</namespace>
+    <virtualFolder>qtwebchannel</virtualFolder>
+    <metaData name="version" value="5.13.2"/>
+    <customFilter name="QtWebChannel 5.13.2">
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtwebchannel</filterAttribute>
+    </customFilter>
+    <filterSection>
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtrefdoc</filterAttribute>
+        <filterAttribute>qtwebchannel</filterAttribute>
+        <toc>
+            <section ref="qtwebchannel-index.html" title="Qt WebChannel">
+                <section ref="qtwebchannel-module.html" title="C++ Classes">
+                    <section ref="qwebchannel.html" title="QWebChannel Class Reference">
+                        <section ref="qwebchannel-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qwebchannelabstracttransport.html" title="QWebChannelAbstractTransport Class Reference">
+                        <section ref="qwebchannelabstracttransport-members.html" title="List of all members"/>
+                    </section>
+                </section>
+                <section ref="qtwebchannel-qmlmodule.html" title="QML Types">
+                    <section ref="qml-qtwebchannel-webchannel.html" title="WebChannel Type Reference">
+                        <section ref="qml-qtwebchannel-webchannel-members.html" title="List of all members"/>
+                    </section>
+                </section>
+                <section ref="qtwebchannel-examples.html" title="Examples"/>
+                <section ref="qtwebchannel-javascript.html" title="JavaScript API">
+                    <section ref="qtwebchannel-qmlmodule.html" title="Qt WebChannel QML Types"/>
+                    <section ref="qwebchannel.html" title="QWebChannel Class Reference">
+                        <section ref="qwebchannel-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qwebchannelabstracttransport.html" title="QWebChannelAbstractTransport Class Reference">
+                        <section ref="qwebchannelabstracttransport-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qtwebchannel-index.html" title="Qt WebChannel"/>
+                    <section ref="qtwebchannel-module.html" title="Qt WebChannel C++ Classes"/>
+                    <section ref="qtwebchannel-examples.html" title="Qt WebChannel Examples"/>
+                    <section ref="qtwebchannel-javascript.html" title="Qt WebChannel JavaScript API"/>
+                    <section ref="qml-qtwebchannel-webchannel.html" title="WebChannel Type Reference">
+                        <section ref="qml-qtwebchannel-webchannel-members.html" title="List of all members"/>
+                    </section>
+                </section>
+            </section>
+        </toc>
+        <keywords>
+            <keyword name="QWebChannel" id="QWebChannel" ref="qwebchannel.html"/>
+            <keyword name="QWebChannelAbstractTransport" id="QWebChannelAbstractTransport" ref="qwebchannelabstracttransport.html"/>
+            <keyword name="Qt WebChannel" id="Qt WebChannel" ref="qtwebchannel-index.html"/>
+            <keyword name="Qt WebChannel C++ Classes" id="Qt WebChannel C++ Classes" ref="qtwebchannel-module.html"/>
+            <keyword name="Qt WebChannel Examples" id="Qt WebChannel Examples" ref="qtwebchannel-examples.html"/>
+            <keyword name="Qt WebChannel JavaScript API" id="Qt WebChannel JavaScript API" ref="qtwebchannel-javascript.html"/>
+            <keyword name="Qt WebChannel QML Types" id="Qt WebChannel QML Types" ref="qtwebchannel-qmlmodule.html"/>
+            <keyword name="WebChannel" id="QML.WebChannel" ref="qml-qtwebchannel-webchannel.html"/>
+            <keyword name="blockUpdates" id="QWebChannel::blockUpdates" ref="qwebchannel.html#blockUpdates-prop"/>
+            <keyword name="blockUpdates" id="QWebChannel::blockUpdates" ref="qwebchannel.html#blockUpdates-prop"/>
+            <keyword name="blockUpdatesChanged" id="QWebChannel::blockUpdatesChanged" ref="qwebchannel.html#blockUpdates-prop"/>
+            <keyword name="connectTo" id="QWebChannel::connectTo" ref="qwebchannel.html#connectTo"/>
+            <keyword name="connectTo" id="WebChannel::connectTo" ref="qml-qtwebchannel-webchannel.html#connectTo-method"/>
+            <keyword name="deregisterObject" id="QWebChannel::deregisterObject" ref="qwebchannel.html#deregisterObject"/>
+            <keyword name="disconnectFrom" id="QWebChannel::disconnectFrom" ref="qwebchannel.html#disconnectFrom"/>
+            <keyword name="disconnectFrom" id="WebChannel::disconnectFrom" ref="qml-qtwebchannel-webchannel.html#disconnectFrom-method"/>
+            <keyword name="id" id="WebChannel::id" ref="qml-qtwebchannel-webchannel.html#id-attached-prop"/>
+            <keyword name="messageReceived" id="QWebChannelAbstractTransport::messageReceived" ref="qwebchannelabstracttransport.html#messageReceived"/>
+            <keyword name="registerObject" id="QWebChannel::registerObject" ref="qwebchannel.html#registerObject"/>
+            <keyword name="registerObjects" id="QWebChannel::registerObjects" ref="qwebchannel.html#registerObjects"/>
+            <keyword name="registerObjects" id="WebChannel::registerObjects" ref="qml-qtwebchannel-webchannel.html#registerObjects-method"/>
+            <keyword name="registeredObjects" id="QWebChannel::registeredObjects" ref="qwebchannel.html#registeredObjects"/>
+            <keyword name="registeredObjects" id="WebChannel::registeredObjects" ref="qml-qtwebchannel-webchannel.html#registeredObjects-prop"/>
+            <keyword name="sendMessage" id="QWebChannelAbstractTransport::sendMessage" ref="qwebchannelabstracttransport.html#sendMessage"/>
+            <keyword name="setBlockUpdates" id="QWebChannel::setBlockUpdates" ref="qwebchannel.html#blockUpdates-prop"/>
+            <keyword name="transports" id="WebChannel::transports" ref="qml-qtwebchannel-webchannel.html#transports-prop"/>
+            <keyword name="~QWebChannel" id="QWebChannel::~QWebChannel" ref="qwebchannel.html#dtor.QWebChannel"/>
+            <keyword name="~QWebChannelAbstractTransport" id="QWebChannelAbstractTransport::~QWebChannelAbstractTransport" ref="qwebchannelabstracttransport.html#dtor.QWebChannelAbstractTransport"/>
+        </keywords>
+        <files>
+            <file>images/arrow_bc.png</file>
+            <file>images/bgrContent.png</file>
+            <file>images/btn_next.png</file>
+            <file>images/btn_prev.png</file>
+            <file>images/bullet_dn.png</file>
+            <file>images/bullet_sq.png</file>
+            <file>images/chatclient-html.png</file>
+            <file>images/chatclient-qml.png</file>
+            <file>images/chatserver-cpp.png</file>
+            <file>images/home.png</file>
+            <file>images/ico_note.png</file>
+            <file>images/ico_note_attention.png</file>
+            <file>images/ico_out.png</file>
+            <file>images/logo.png</file>
+            <file>images/standalone-screenshot.png</file>
+            <file>qml-qtwebchannel-webchannel-members.html</file>
+            <file>qml-qtwebchannel-webchannel.html</file>
+            <file>qtwebchannel-chatclient-html-example.html</file>
+            <file>qtwebchannel-chatclient-qml-example.html</file>
+            <file>qtwebchannel-chatserver-cpp-example.html</file>
+            <file>qtwebchannel-examples.html</file>
+            <file>qtwebchannel-index.html</file>
+            <file>qtwebchannel-javascript.html</file>
+            <file>qtwebchannel-module.html</file>
+            <file>qtwebchannel-qmlmodule.html</file>
+            <file>qtwebchannel-standalone-example.html</file>
+            <file>qwebchannel-members.html</file>
+            <file>qwebchannel.html</file>
+            <file>qwebchannelabstracttransport-members.html</file>
+            <file>qwebchannelabstracttransport.html</file>
+            <file>style/offline-simple.css</file>
+            <file>style/offline.css</file>
+        </files>
+    </filterSection>
+</QtHelpProject>

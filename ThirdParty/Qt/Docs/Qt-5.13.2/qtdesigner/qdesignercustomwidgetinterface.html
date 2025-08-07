@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- customwidget.qdoc -->
+  <title>QDesignerCustomWidgetInterface Class | Qt Designer Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtdesigner-manual.html">Qt Designer Manual</a></td><td ><a href="qtdesigner-module.html">C++ Classes</a></td><td >QDesignerCustomWidgetInterface</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtdesigner-manual.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#macros">Macros</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QDesignerCustomWidgetInterface Class</h1>
+<!-- $$$QDesignerCustomWidgetInterface-brief -->
+<p>The <a href="qdesignercustomwidgetinterface.html">QDesignerCustomWidgetInterface</a> class enables Qt Designer to access and construct custom widgets. <a href="#details">More...</a></p>
+<!-- @@@QDesignerCustomWidgetInterface -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QDesignerCustomWidgetInterface&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += designer</td></tr></table></div><ul>
+<li><a href="qdesignercustomwidgetinterface-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qdesignercustomwidgetinterface.html#dtor.QDesignerCustomWidgetInterface">~QDesignerCustomWidgetInterface</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QString </td><td class="memItemRight bottomAlign"><b><a href="qdesignercustomwidgetinterface.html#codeTemplate">codeTemplate</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QWidget *</td><td class="memItemRight bottomAlign"><b><a href="qdesignercustomwidgetinterface.html#createWidget">createWidget</a></b>(QWidget *<i>parent</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QString </td><td class="memItemRight bottomAlign"><b><a href="qdesignercustomwidgetinterface.html#domXml">domXml</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QString </td><td class="memItemRight bottomAlign"><b><a href="qdesignercustomwidgetinterface.html#group">group</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QIcon </td><td class="memItemRight bottomAlign"><b><a href="qdesignercustomwidgetinterface.html#icon">icon</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QString </td><td class="memItemRight bottomAlign"><b><a href="qdesignercustomwidgetinterface.html#includeFile">includeFile</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qdesignercustomwidgetinterface.html#initialize">initialize</a></b>(QDesignerFormEditorInterface *<i>formEditor</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qdesignercustomwidgetinterface.html#isContainer">isContainer</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qdesignercustomwidgetinterface.html#isInitialized">isInitialized</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QString </td><td class="memItemRight bottomAlign"><b><a href="qdesignercustomwidgetinterface.html#name">name</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QString </td><td class="memItemRight bottomAlign"><b><a href="qdesignercustomwidgetinterface.html#toolTip">toolTip</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QString </td><td class="memItemRight bottomAlign"><b><a href="qdesignercustomwidgetinterface.html#whatsThis">whatsThis</a></b>() const = 0</td></tr>
+</table></div>
+<a name="macros"></a>
+<h2 id="macros">Macros</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdesignercustomwidgetinterface.html#QDESIGNER_WIDGET_EXPORT">QDESIGNER_WIDGET_EXPORT</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QDesignerCustomWidgetInterface-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qdesignercustomwidgetinterface.html">QDesignerCustomWidgetInterface</a> provides a custom widget with an interface. The class contains a set of functions that must be subclassed to return basic information about the widget, such as its class name and the name of its header file. Other functions must be implemented to initialize the plugin when it is loaded, and to construct instances of the custom widget for <i>Qt Designer</i> to use.</p>
+<p>When implementing a custom widget you must subclass <a href="qdesignercustomwidgetinterface.html">QDesignerCustomWidgetInterface</a> to expose your widget to <i>Qt Designer</i>. For example, this is the declaration for the plugin used in the <a href="qtdesigner-customwidgetplugin-example.html">Custom Widget Plugin example</a> that enables an analog clock custom widget to be used by <i>Qt Designer</i>:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> AnalogClockPlugin : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">,</span> <span class="keyword">public</span> <span class="type"><a href="qdesignercustomwidgetinterface.html">QDesignerCustomWidgetInterface</a></span>
+  {
+      Q_OBJECT
+      Q_PLUGIN_METADATA(IID <span class="string">&quot;org.qt-project.Qt.QDesignerCustomWidgetInterface&quot;</span>)
+      Q_INTERFACES(<span class="type"><a href="qdesignercustomwidgetinterface.html">QDesignerCustomWidgetInterface</a></span>)
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> AnalogClockPlugin(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+
+      bool isContainer() <span class="keyword">const</span> override;
+      bool isInitialized() <span class="keyword">const</span> override;
+      <span class="type">QIcon</span> icon() <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> domXml() <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> group() <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> includeFile() <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> name() <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> toolTip() <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> whatsThis() <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>createWidget(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent) override;
+      <span class="type">void</span> initialize(<span class="type"><a href="qdesignerformeditorinterface.html">QDesignerFormEditorInterface</a></span> <span class="operator">*</span>core) override;
+
+  <span class="keyword">private</span>:
+      bool initialized <span class="operator">=</span> <span class="keyword">false</span>;
+  };
+
+</pre>
+<p>Note that the only part of the class definition that is specific to this particular custom widget is the class name. In addition, since we are implementing an interface, we must ensure that it's made known to the meta object system using the <a href="../qtcore/qobject.html#Q_INTERFACES">Q_INTERFACES</a>() macro. This enables <i>Qt Designer</i> to use the <a href="../qtcore/qobject.html#qobject_cast">qobject_cast</a>() function to query for supported interfaces using nothing but a <a href="../qtcore/qobject.html">QObject</a> pointer.</p>
+<p>After <i>Qt Designer</i> loads a custom widget plugin, it calls the interface's <a href="qdesignercustomwidgetinterface.html#initialize">initialize</a>() function to enable it to set up any resources that it may need. This function is called with a <a href="qdesignerformeditorinterface.html">QDesignerFormEditorInterface</a> parameter that provides the plugin with a gateway to all of <i>Qt Designer</i>'s API.</p>
+<p><i>Qt Designer</i> constructs instances of the custom widget by calling the plugin's <a href="qdesignercustomwidgetinterface.html#createWidget">createWidget</a>() function with a suitable parent widget. Plugins must construct and return an instance of a custom widget with the specified parent widget.</p>
+<p>Exporting your custom widget plugin to <i>Qt Designer</i> using the <a href="../qtcore/qtplugin.html#Q_PLUGIN_METADATA">Q_PLUGIN_METADATA</a>() macro. For example, if a library called <code>libcustomwidgetplugin.so</code> (on Unix) or <code>libcustomwidget.dll</code> (on Windows) contains a widget class called <code>MyCustomWidget</code>, we can export it by adding the following line to the file containing the plugin header:</p>
+<pre class="cpp">
+
+  Q_PLUGIN_METADATA(IID <span class="string">&quot;org.qt-project.Qt.QDesignerCustomWidgetInterface&quot;</span>)
+
+</pre>
+<p>This macro ensures that <i>Qt Designer</i> can access and construct the custom widget. Without this macro, there is no way for <i>Qt Designer</i> to use it.</p>
+<p>When implementing a custom widget plugin, you build it as a separate library. If you want to include several custom widget plugins in the same library, you must in addition subclass <a href="qdesignercustomwidgetcollectioninterface.html">QDesignerCustomWidgetCollectionInterface</a>.</p>
+<p><b>Warning:</b> If your custom widget plugin contains <a href="../qtcore/qvariant.html">QVariant</a> properties, be aware that only the following <a href="../qtcore/qvariant-obsolete.html#Type-enum">types</a> are supported:</p>
+<ul>
+<li>QVariant::ByteArray</li>
+<li>QVariant::Bool</li>
+<li>QVariant::Color</li>
+<li>QVariant::Cursor</li>
+<li>QVariant::Date</li>
+<li>QVariant::DateTime</li>
+<li>QVariant::Double</li>
+<li>QVariant::Int</li>
+<li>QVariant::Point</li>
+<li>QVariant::Rect</li>
+<li>QVariant::Size</li>
+<li>QVariant::SizePolicy</li>
+<li>QVariant::String</li>
+<li>QVariant::Time</li>
+<li>QVariant::UInt</li>
+</ul>
+<p>For a complete example using the <a href="qdesignercustomwidgetinterface.html">QDesignerCustomWidgetInterface</a> class, see the <a href="qtdesigner-customwidgetplugin-example.html">Custom Widget Example</a>. The example shows how to create a custom widget plugin for <i>Qt Designer</i>.</p>
+</div>
+<p><b>See also </b><a href="qdesignercustomwidgetcollectioninterface.html">QDesignerCustomWidgetCollectionInterface</a> and <a href="designer-creating-custom-widgets.html">Creating Custom Widgets for Qt Designer</a>.</p>
+<!-- @@@QDesignerCustomWidgetInterface -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$~QDesignerCustomWidgetInterface[overload1]$$$~QDesignerCustomWidgetInterface -->
+<h3 class="fn" id="dtor.QDesignerCustomWidgetInterface"><a name="dtor.QDesignerCustomWidgetInterface"></a><code>[virtual] </code>QDesignerCustomWidgetInterface::<span class="name">~QDesignerCustomWidgetInterface</span>()</h3>
+<p>Destroys the custom widget interface.</p>
+<!-- @@@~QDesignerCustomWidgetInterface -->
+<!-- $$$codeTemplate[overload1]$$$codeTemplate -->
+<h3 class="fn" id="codeTemplate"><a name="codeTemplate"></a><code>[virtual] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QDesignerCustomWidgetInterface::<span class="name">codeTemplate</span>() const</h3>
+<p>This function is reserved for future use by <i>Qt Designer</i>.</p>
+<!-- @@@codeTemplate -->
+<!-- $$$createWidget[overload1]$$$createWidgetQWidget* -->
+<h3 class="fn" id="createWidget"><a name="createWidget"></a><code>[pure virtual] </code><span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> *QDesignerCustomWidgetInterface::<span class="name">createWidget</span>(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> *<i>parent</i>)</h3>
+<p>Returns a new instance of the custom widget, with the given <i>parent</i>.</p>
+<!-- @@@createWidget -->
+<!-- $$$domXml[overload1]$$$domXml -->
+<h3 class="fn" id="domXml"><a name="domXml"></a><code>[virtual] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QDesignerCustomWidgetInterface::<span class="name">domXml</span>() const</h3>
+<p>Returns the XML that is used to describe the custom widget's properties to <i>Qt Designer</i>.</p>
+<!-- @@@domXml -->
+<!-- $$$group[overload1]$$$group -->
+<h3 class="fn" id="group"><a name="group"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QDesignerCustomWidgetInterface::<span class="name">group</span>() const</h3>
+<p>Returns the name of the group to which the custom widget belongs.</p>
+<!-- @@@group -->
+<!-- $$$icon[overload1]$$$icon -->
+<h3 class="fn" id="icon"><a name="icon"></a><code>[pure virtual] </code><span class="type">QIcon</span> QDesignerCustomWidgetInterface::<span class="name">icon</span>() const</h3>
+<p>Returns the icon used to represent the custom widget in <i>Qt Designer</i>'s widget box.</p>
+<!-- @@@icon -->
+<!-- $$$includeFile[overload1]$$$includeFile -->
+<h3 class="fn" id="includeFile"><a name="includeFile"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QDesignerCustomWidgetInterface::<span class="name">includeFile</span>() const</h3>
+<p>Returns the path to the include file that <a href="../qtdoc/uic.html">uic</a> uses when creating code for the custom widget.</p>
+<!-- @@@includeFile -->
+<!-- $$$initialize[overload1]$$$initializeQDesignerFormEditorInterface* -->
+<h3 class="fn" id="initialize"><a name="initialize"></a><code>[virtual] </code><span class="type">void</span> QDesignerCustomWidgetInterface::<span class="name">initialize</span>(<span class="type"><a href="qdesignerformeditorinterface.html">QDesignerFormEditorInterface</a></span> *<i>formEditor</i>)</h3>
+<p>Initializes the widget for use with the specified <i>formEditor</i> interface.</p>
+<p><b>See also </b><a href="qdesignercustomwidgetinterface.html#isInitialized">isInitialized</a>().</p>
+<!-- @@@initialize -->
+<!-- $$$isContainer[overload1]$$$isContainer -->
+<h3 class="fn" id="isContainer"><a name="isContainer"></a><code>[pure virtual] </code><span class="type">bool</span> QDesignerCustomWidgetInterface::<span class="name">isContainer</span>() const</h3>
+<p>Returns true if the custom widget is intended to be used as a container; otherwise returns false.</p>
+<p>Most custom widgets are not used to hold other widgets, so their implementations of this function will return false, but custom containers will return true to ensure that they behave correctly in <i>Qt Designer</i>.</p>
+<!-- @@@isContainer -->
+<!-- $$$isInitialized[overload1]$$$isInitialized -->
+<h3 class="fn" id="isInitialized"><a name="isInitialized"></a><code>[virtual] </code><span class="type">bool</span> QDesignerCustomWidgetInterface::<span class="name">isInitialized</span>() const</h3>
+<p>Returns true if the widget has been initialized; otherwise returns false.</p>
+<p><b>See also </b><a href="qdesignercustomwidgetinterface.html#initialize">initialize</a>().</p>
+<!-- @@@isInitialized -->
+<!-- $$$name[overload1]$$$name -->
+<h3 class="fn" id="name"><a name="name"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QDesignerCustomWidgetInterface::<span class="name">name</span>() const</h3>
+<p>Returns the class name of the custom widget supplied by the interface.</p>
+<p>The name returned <i>must</i> be identical to the class name used for the custom widget.</p>
+<!-- @@@name -->
+<!-- $$$toolTip[overload1]$$$toolTip -->
+<h3 class="fn" id="toolTip"><a name="toolTip"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QDesignerCustomWidgetInterface::<span class="name">toolTip</span>() const</h3>
+<p>Returns a short description of the widget that can be used by <i>Qt Designer</i> in a tool tip.</p>
+<!-- @@@toolTip -->
+<!-- $$$whatsThis[overload1]$$$whatsThis -->
+<h3 class="fn" id="whatsThis"><a name="whatsThis"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QDesignerCustomWidgetInterface::<span class="name">whatsThis</span>() const</h3>
+<p>Returns a description of the widget that can be used by <i>Qt Designer</i> in &quot;What's This?&quot; help for the widget.</p>
+<!-- @@@whatsThis -->
+</div>
+<div class="macros">
+<h2>Macro Documentation</h2>
+<!-- $$$QDESIGNER_WIDGET_EXPORT[overload1]$$$QDESIGNER_WIDGET_EXPORT -->
+<h3 class="fn" id="QDESIGNER_WIDGET_EXPORT"><a name="QDESIGNER_WIDGET_EXPORT"></a><span class="name">QDESIGNER_WIDGET_EXPORT</span></h3>
+<p>This macro is used when defining custom widgets to ensure that they are correctly exported from plugins for use with <i>Qt Designer</i>.</p>
+<p>On some platforms, the symbols required by <i>Qt Designer</i> to create new widgets are removed from plugins by the build system, making them unusable. Using this macro ensures that the symbols are retained on those platforms, and has no side effects on other platforms.</p>
+<p>For example, the <a href="qtdesigner-worldtimeclockplugin-example.html">World Time Clock Plugin</a> example exports a custom widget class with the following declaration:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> QDESIGNER_WIDGET_EXPORT WorldTimeClock : <span class="keyword">public</span> <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>
+  {
+      Q_OBJECT
+      ...
+  };
+
+</pre>
+<p>This function was introduced in  Qt 4.1.</p>
+<p><b>See also </b><a href="designer-creating-custom-widgets.html">Creating Custom Widgets for Qt Designer</a>.</p>
+<!-- @@@QDESIGNER_WIDGET_EXPORT -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

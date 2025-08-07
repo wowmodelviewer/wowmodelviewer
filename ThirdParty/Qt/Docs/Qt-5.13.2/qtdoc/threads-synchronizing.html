@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- threads.qdoc -->
+  <title>Synchronizing Threads | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Synchronizing Threads</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="threads-technologies.html" />
+  <link rel="next" href="threads-reentrancy.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="threads-technologies.html">Multithreading Technologies in Qt</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="threads-reentrancy.html">Reentrancy and Thread-Safety</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#low-level-synchronization-primitives">Low-Level Synchronization Primitives</a></li>
+<li class="level2"><a href="#risks">Risks</a></li>
+<li class="level2"><a href="#convenience-classes">Convenience classes</a></li>
+<li class="level1"><a href="#high-level-event-queues">High-Level Event Queues</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Synchronizing Threads</h1>
+<span class="subtitle"></span>
+<!-- $$$threads-synchronizing.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>While the purpose of threads is to allow code to run in parallel, there are times where threads must stop and wait for other threads. For example, if two threads try to write to the same variable simultaneously, the result is undefined. The principle of forcing threads to wait for one another is called <i>mutual exclusion</i>. It is a common technique for protecting shared resources such as data.</p>
+<p>Qt provides low-level primitives as well as high-level mechanisms for synchronizing threads.</p>
+<a name="low-level-synchronization-primitives"></a>
+<h2 id="low-level-synchronization-primitives">Low-Level Synchronization Primitives</h2>
+<p><a href="../qtcore/qmutex.html">QMutex</a> is the basic class for enforcing mutual exclusion. A thread locks a mutex in order to gain access to a shared resource. If a second thread tries to lock the mutex while it is already locked, the second thread will be put to sleep until the first thread completes its task and unlocks the mutex.</p>
+<p><a href="../qtcore/qreadwritelock.html">QReadWriteLock</a> is similar to <a href="../qtcore/qmutex.html">QMutex</a>, except that it distinguishes between &quot;read&quot; and &quot;write&quot; access. When a piece of data is not being written to, it is safe for multiple threads to read from it simultaneously. A <a href="../qtcore/qmutex.html">QMutex</a> forces multiple readers to take turns to read shared data, but a <a href="../qtcore/qreadwritelock.html">QReadWriteLock</a> allows simultaneous reading, thus improving parallelism.</p>
+<p><a href="../qtcore/qsemaphore.html">QSemaphore</a> is a generalization of <a href="../qtcore/qmutex.html">QMutex</a> that protects a certain number of identical resources. In contrast, a <a href="../qtcore/qmutex.html">QMutex</a> protects exactly one resource. The <a href="../qtcore/qtcore-threads-semaphores-example.html">Semaphores Example</a> shows a typical application of semaphores: synchronizing access to a circular buffer between a producer and a consumer.</p>
+<p><a href="../qtcore/qwaitcondition.html">QWaitCondition</a> synchronizes threads not by enforcing mutual exclusion but by providing a <i>condition variable</i>. While the other primitives make threads wait until a resource is unlocked, <a href="../qtcore/qwaitcondition.html">QWaitCondition</a> makes threads wait until a particular condition has been met. To allow the waiting threads to proceed, call <a href="../qtcore/qwaitcondition.html#wakeOne">wakeOne()</a> to wake one randomly selected thread or <a href="../qtcore/qwaitcondition.html#wakeAll">wakeAll()</a> to wake them all simultaneously. The <a href="../qtcore/qtcore-threads-waitconditions-example.html">Wait Conditions Example</a> shows how to solve the producer-consumer problem using <a href="../qtcore/qwaitcondition.html">QWaitCondition</a> instead of <a href="../qtcore/qsemaphore.html">QSemaphore</a>.</p>
+<p><b>Note: </b>Qt's synchronization classes rely on the use of properly aligned pointers. For instance, you cannot use packed classes with MSVC.</p><p>These synchronization classes can be used to make a method thread safe. However, doing so incurs a performance penalty, which is why most Qt methods are not made thread safe.</p>
+<a name="risks"></a>
+<h3 id="risks">Risks</h3>
+<p>If a thread locks a resource but does not unlock it, the application may freeze because the resource will become permanently unavailable to other threads. This can happen, for example, if an exception is thrown and forces the current function to return without releasing its lock.</p>
+<p>Another similar scenario is a <i>deadlock</i>. For example, suppose that thread A is waiting for thread B to unlock a resource. If thread B is also waiting for thread A to unlock a different resource, then both threads will end up waiting forever, so the application will freeze.</p>
+<a name="convenience-classes"></a>
+<h3 id="convenience-classes">Convenience classes</h3>
+<p><a href="../qtcore/qmutexlocker.html">QMutexLocker</a>, <a href="../qtcore/qreadlocker.html">QReadLocker</a> and <a href="../qtcore/qwritelocker.html">QWriteLocker</a> are convenience classes that make it easier to use <a href="../qtcore/qmutex.html">QMutex</a> and <a href="../qtcore/qreadwritelock.html">QReadWriteLock</a>. They lock a resource when they are constructed, and automatically unlock it when they are destroyed. They are designed to simplify code that use <a href="../qtcore/qmutex.html">QMutex</a> and <a href="../qtcore/qreadwritelock.html">QReadWriteLock</a>, thus reducing the chances that a resource becomes permanently locked by accident.</p>
+<a name="high-level-event-queues"></a>
+<h2 id="high-level-event-queues">High-Level Event Queues</h2>
+<p>Qt's <a href="../qtcore/eventsandfilters.html">event system</a> is very useful for inter-thread communication. Every thread may have its own event loop. To call a slot (or any <a href="../qtcore/qobject.html#Q_INVOKABLE">invokable</a> method) in another thread, place that call in the target thread's event loop. This lets the target thread finish its current task before the slot starts running, while the original thread continues running in parallel.</p>
+<p>To place an invocation in an event loop, make a queued <a href="../qtcore/signalsandslots.html">signal-slot</a> connection. Whenever the signal is emitted, its arguments will be recorded by the event system. The thread that the signal receiver <a href="../qtcore/qobject.html#thread-affinity">lives in</a> will then run the slot. Alternatively, call <a href="../qtcore/qmetaobject.html#invokeMethod">QMetaObject::invokeMethod</a>() to achieve the same effect without signals. In both cases, a <a href="../qtcore/qt.html#ConnectionType-enum">queued connection</a> must be used because a <a href="../qtcore/qt.html#ConnectionType-enum">direct connection</a> bypasses the event system and runs the method immediately in the current thread.</p>
+<p>There is no risk of deadlocks when using the event system for thread synchronization, unlike using low-level primitives. However, the event system does not enforce mutual exclusion. If invokable methods access shared data, they must still be protected with low-level primitives.</p>
+<p>Having said that, Qt's event system, along with <a href="../qtcore/implicit-sharing.html">implicitly shared</a> data structures, offers an alternative to traditional thread locking. If signals and slots are used exclusively and no variables are shared between threads, a multithreaded program can do without low-level primitives altogether.</p>
+</div>
+<p><b>See also </b><a href="../qtcore/qthread.html#exec">QThread::exec</a>() and <a href="threads-qobject.html">Threads and QObjects</a>.</p>
+<!-- @@@threads-synchronizing.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="threads-technologies.html">Multithreading Technologies in Qt</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="threads-reentrancy.html">Reentrancy and Thread-Safety</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

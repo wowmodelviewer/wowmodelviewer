@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmetadatawritercontrol.cpp -->
+  <title>QMetaDataWriterControl Class | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-modules.html">C++ Classes</a></td><td >QMetaDataWriterControl</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#macros">Macros</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QMetaDataWriterControl Class</h1>
+<!-- $$$QMetaDataWriterControl-brief -->
+<p>The <a href="qmetadatawritercontrol.html">QMetaDataWriterControl</a> class provides write access to the meta-data of a <a href="qmediaservice.html">QMediaService</a>'s media. <a href="#details">More...</a></p>
+<!-- @@@QMetaDataWriterControl -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QMetaDataWriterControl&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += multimedia</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qmediacontrol.html">QMediaControl</a></td></tr></table></div><ul>
+<li><a href="qmetadatawritercontrol-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qmetadatawritercontrol.html#dtor.QMetaDataWriterControl">~QMetaDataWriterControl</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QStringList </td><td class="memItemRight bottomAlign"><b><a href="qmetadatawritercontrol.html#availableMetaData">availableMetaData</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qmetadatawritercontrol.html#isMetaDataAvailable">isMetaDataAvailable</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qmetadatawritercontrol.html#isWritable">isWritable</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QVariant </td><td class="memItemRight bottomAlign"><b><a href="qmetadatawritercontrol.html#metaData">metaData</a></b>(const QString &amp;<i>key</i>) const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qmetadatawritercontrol.html#setMetaData">setMetaData</a></b>(const QString &amp;<i>key</i>, const QVariant &amp;<i>value</i>) = 0</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmetadatawritercontrol.html#metaDataAvailableChanged">metaDataAvailableChanged</a></b>(bool <i>available</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmetadatawritercontrol.html#metaDataChanged-1">metaDataChanged</a></b>(const QString &amp;<i>key</i>, const QVariant &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmetadatawritercontrol.html#metaDataChanged">metaDataChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmetadatawritercontrol.html#writableChanged">writableChanged</a></b>(bool <i>writable</i>)</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmetadatawritercontrol.html#QMetaDataWriterControl">QMetaDataWriterControl</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+</table></div>
+<a name="macros"></a>
+<h2 id="macros">Macros</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmetadatawritercontrol.html#QMetaDataWriterControl_iid">QMetaDataWriterControl_iid</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QMetaDataWriterControl-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>If a <a href="qmediaservice.html">QMediaService</a> can provide write access to the meta-data of its current media it will implement <a href="qmetadatawritercontrol.html">QMetaDataWriterControl</a>. This control provides functions for both retrieving and setting meta-data values. Meta-data may be addressed by the keys defined in the <a href="qmediametadata.html">QMediaMetaData</a> namespace.</p>
+<p>The functionality provided by this control is exposed to application code by the meta-data members of <a href="qmediaobject.html">QMediaObject</a>, and so meta-data access is potentially available in any of the media object classes. Any media service may implement QMetaDataControl.</p>
+<p>The interface name of <a href="qmetadatawritercontrol.html">QMetaDataWriterControl</a> is <code>org.qt-project.qt.metadatawritercontrol/5.0</code> as defined in <a href="qmetadatawritercontrol.html#QMetaDataWriterControl_iid">QMetaDataWriterControl_iid</a>.</p>
+</div>
+<p><b>See also </b><a href="qmediaservice.html#requestControl-1">QMediaService::requestControl</a>() and <a href="qmediaobject.html">QMediaObject</a>.</p>
+<!-- @@@QMetaDataWriterControl -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QMetaDataWriterControl[overload1]$$$QMetaDataWriterControlQObject* -->
+<h3 class="fn" id="QMetaDataWriterControl"><a name="QMetaDataWriterControl"></a><code>[protected] </code>QMetaDataWriterControl::<span class="name">QMetaDataWriterControl</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Construct a <a href="qmetadatawritercontrol.html">QMetaDataWriterControl</a> with <i>parent</i>. This class is meant as a base class for service specific meta data providers so this constructor is protected.</p>
+<!-- @@@QMetaDataWriterControl -->
+<!-- $$$metaDataAvailableChanged[overload1]$$$metaDataAvailableChangedbool -->
+<h3 class="fn" id="metaDataAvailableChanged"><a name="metaDataAvailableChanged"></a><code>[signal] </code><span class="type">void</span> QMetaDataWriterControl::<span class="name">metaDataAvailableChanged</span>(<span class="type">bool</span> <i>available</i>)</h3>
+<p>Signal the availability of meta-data has changed, <i>available</i> will be true if the multimedia object has meta-data.</p>
+<!-- @@@metaDataAvailableChanged -->
+<!-- $$$metaDataChanged$$$metaDataChangedconstQString&constQVariant& -->
+<h3 class="fn" id="metaDataChanged-1"><a name="metaDataChanged-1"></a><code>[signal] </code><span class="type">void</span> QMetaDataWriterControl::<span class="name">metaDataChanged</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>key</i>, const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>value</i>)</h3>
+<p>Signal the changes of one meta-data element <i>value</i> with the given <i>key</i>.</p>
+<p><b>Note:</b> Signal <i>metaDataChanged</i> is overloaded in this class. To connect to this signal by using the function pointer syntax, Qt provides a convenient helper for obtaining the function pointer as shown in this example:<pre class="cpp">
+
+  connect(metaDataWriterControl<span class="operator">,</span> <span class="type">QOverload</span><span class="operator">&lt;</span><span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span><span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> <span class="operator">&amp;</span><span class="operator">&gt;</span><span class="operator">::</span>of(<span class="operator">&amp;</span><span class="type"><a href="qmetadatawritercontrol.html#QMetaDataWriterControl">QMetaDataWriterControl</a></span><span class="operator">::</span>metaDataChanged)<span class="operator">,</span>
+      <span class="operator">[</span><span class="operator">=</span><span class="operator">]</span>(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>key<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> <span class="operator">&amp;</span>value){ <span class="comment">/* ... */</span> });
+
+</pre>
+<!-- @@@metaDataChanged -->
+<!-- $$$metaDataChanged[overload1]$$$metaDataChanged -->
+<h3 class="fn" id="metaDataChanged"><a name="metaDataChanged"></a><code>[signal] </code><span class="type">void</span> QMetaDataWriterControl::<span class="name">metaDataChanged</span>()</h3>
+<p>Signal the changes of meta-data.</p>
+<p>If multiple meta-data elements are changed, metaDataChanged(const <a href="../qtcore/qstring.html">QString</a> &amp;key, const <a href="../qtcore/qvariant.html">QVariant</a> &amp;value) signal is emitted for each of them with metaDataChanged() changed emitted once.</p>
+<p><b>Note:</b> Signal <i>metaDataChanged</i> is overloaded in this class. To connect to this signal by using the function pointer syntax, Qt provides a convenient helper for obtaining the function pointer as shown in this example:<pre class="cpp">
+
+  connect(metaDataWriterControl<span class="operator">,</span> <span class="type">QOverload</span><span class="operator">&lt;</span><span class="operator">&gt;</span><span class="operator">::</span>of(<span class="operator">&amp;</span><span class="type"><a href="qmetadatawritercontrol.html#QMetaDataWriterControl">QMetaDataWriterControl</a></span><span class="operator">::</span>metaDataChanged)<span class="operator">,</span>
+      <span class="operator">[</span><span class="operator">=</span><span class="operator">]</span>(){ <span class="comment">/* ... */</span> });
+
+</pre>
+<!-- @@@metaDataChanged -->
+<!-- $$$writableChanged[overload1]$$$writableChangedbool -->
+<h3 class="fn" id="writableChanged"><a name="writableChanged"></a><code>[signal] </code><span class="type">void</span> QMetaDataWriterControl::<span class="name">writableChanged</span>(<span class="type">bool</span> <i>writable</i>)</h3>
+<p>Signal a change in the writable status of meta-data, <i>writable</i> will be true if meta-data elements can be added or adjusted.</p>
+<!-- @@@writableChanged -->
+<!-- $$$~QMetaDataWriterControl[overload1]$$$~QMetaDataWriterControl -->
+<h3 class="fn" id="dtor.QMetaDataWriterControl"><a name="dtor.QMetaDataWriterControl"></a><code>[virtual] </code>QMetaDataWriterControl::<span class="name">~QMetaDataWriterControl</span>()</h3>
+<p>Destroy the meta-data writer control.</p>
+<!-- @@@~QMetaDataWriterControl -->
+<!-- $$$availableMetaData[overload1]$$$availableMetaData -->
+<h3 class="fn" id="availableMetaData"><a name="availableMetaData"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> QMetaDataWriterControl::<span class="name">availableMetaData</span>() const</h3>
+<p>Returns a list of keys there is meta-data available for.</p>
+<!-- @@@availableMetaData -->
+<!-- $$$isMetaDataAvailable[overload1]$$$isMetaDataAvailable -->
+<h3 class="fn" id="isMetaDataAvailable"><a name="isMetaDataAvailable"></a><code>[pure virtual] </code><span class="type">bool</span> QMetaDataWriterControl::<span class="name">isMetaDataAvailable</span>() const</h3>
+<p>Identifies if meta-data is available from a media service.</p>
+<p>Returns true if the meta-data is available and false otherwise.</p>
+<!-- @@@isMetaDataAvailable -->
+<!-- $$$isWritable[overload1]$$$isWritable -->
+<h3 class="fn" id="isWritable"><a name="isWritable"></a><code>[pure virtual] </code><span class="type">bool</span> QMetaDataWriterControl::<span class="name">isWritable</span>() const</h3>
+<p>Identifies if a media service's meta-data can be edited.</p>
+<p>Returns true if the meta-data is writable and false otherwise.</p>
+<!-- @@@isWritable -->
+<!-- $$$metaData[overload1]$$$metaDataconstQString& -->
+<h3 class="fn" id="metaData"><a name="metaData"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QMetaDataWriterControl::<span class="name">metaData</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>key</i>) const</h3>
+<p>Returns the meta-data for the given <i>key</i>.</p>
+<p><b>See also </b><a href="qmetadatawritercontrol.html#setMetaData">setMetaData</a>().</p>
+<!-- @@@metaData -->
+<!-- $$$setMetaData[overload1]$$$setMetaDataconstQString&constQVariant& -->
+<h3 class="fn" id="setMetaData"><a name="setMetaData"></a><code>[pure virtual] </code><span class="type">void</span> QMetaDataWriterControl::<span class="name">setMetaData</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>key</i>, const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>value</i>)</h3>
+<p>Sets the <i>value</i> of the meta-data element with the given <i>key</i>.</p>
+<p><b>See also </b><a href="qmetadatawritercontrol.html#metaData">metaData</a>().</p>
+<!-- @@@setMetaData -->
+</div>
+<div class="macros">
+<h2>Macro Documentation</h2>
+<!-- $$$QMetaDataWriterControl_iid[overload1]$$$QMetaDataWriterControl_iid -->
+<h3 class="fn" id="QMetaDataWriterControl_iid"><a name="QMetaDataWriterControl_iid"></a><span class="name">QMetaDataWriterControl_iid</span></h3>
+<p><code>org.qt-project.qt.metadatawritercontrol/5.0</code></p>
+<p>Defines the interface name of the <a href="qmetadatawritercontrol.html">QMetaDataWriterControl</a> class.</p>
+<!-- @@@QMetaDataWriterControl_iid -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

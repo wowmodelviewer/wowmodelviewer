@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qlibraryinfo.cpp -->
+  <title>QLibraryInfo Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QLibraryInfo</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QLibraryInfo Class</h1>
+<!-- $$$QLibraryInfo-brief -->
+<p>The <a href="qlibraryinfo.html">QLibraryInfo</a> class provides information about the Qt library. <a href="#details">More...</a></p>
+<!-- @@@QLibraryInfo -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QLibraryInfo&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr></table></div><ul>
+<li><a href="qlibraryinfo-members.html">List of all members, including inherited members</a></li>
+<li><a href="qlibraryinfo-obsolete.html">Obsolete members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qlibraryinfo.html#LibraryLocation-enum">LibraryLocation</a></b> { PrefixPath, DocumentationPath, HeadersPath, LibrariesPath, ..., SettingsPath }</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qlibraryinfo.html#isDebugBuild">isDebugBuild</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qlibraryinfo.html#location">location</a></b>(QLibraryInfo::LibraryLocation <i>loc</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVersionNumber </td><td class="memItemRight bottomAlign"><b><a href="qlibraryinfo.html#version">version</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QLibraryInfo-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Many pieces of information are established when Qt is configured and built. This class provides an abstraction for accessing that information. By using the static functions of this class, an application can obtain information about the instance of the Qt library which the application is using at run-time.</p>
+<p>You can also use a <code>qt.conf</code> file to override the hard-coded paths that are compiled into the Qt library. For more information, see the <a href="../qtdoc/qt-conf.html">Using qt.conf</a> documentation.</p>
+</div>
+<p><b>See also </b><a href="qsysinfo.html">QSysInfo</a> and <a href="../qtdoc/qt-conf.html">Using qt.conf</a>.</p>
+<!-- @@@QLibraryInfo -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$LibraryLocation$$$PrefixPath$$$DocumentationPath$$$HeadersPath$$$LibrariesPath$$$LibraryExecutablesPath$$$BinariesPath$$$PluginsPath$$$ImportsPath$$$Qml2ImportsPath$$$ArchDataPath$$$DataPath$$$TranslationsPath$$$ExamplesPath$$$TestsPath$$$SettingsPath -->
+<h3 class="fn" id="LibraryLocation-enum"><a name="LibraryLocation-enum"></a>enum QLibraryInfo::<span class="name">LibraryLocation</span></h3>
+<p>This enum type is used to specify a specific location specifier:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QLibraryInfo::PrefixPath</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The default prefix for all paths.</td></tr>
+<tr><td class="topAlign"><code>QLibraryInfo::DocumentationPath</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The location for documentation upon install.</td></tr>
+<tr><td class="topAlign"><code>QLibraryInfo::HeadersPath</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The location for all headers.</td></tr>
+<tr><td class="topAlign"><code>QLibraryInfo::LibrariesPath</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">The location of installed libraries.</td></tr>
+<tr><td class="topAlign"><code>QLibraryInfo::LibraryExecutablesPath</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">The location of installed executables required by libraries at runtime.</td></tr>
+<tr><td class="topAlign"><code>QLibraryInfo::BinariesPath</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">The location of installed Qt binaries (tools and applications).</td></tr>
+<tr><td class="topAlign"><code>QLibraryInfo::PluginsPath</code></td><td class="topAlign tblval"><code>6</code></td><td class="topAlign">The location of installed Qt plugins.</td></tr>
+<tr><td class="topAlign"><code>QLibraryInfo::ImportsPath</code></td><td class="topAlign tblval"><code>7</code></td><td class="topAlign">The location of installed QML extensions to import (QML 1.x).</td></tr>
+<tr><td class="topAlign"><code>QLibraryInfo::Qml2ImportsPath</code></td><td class="topAlign tblval"><code>8</code></td><td class="topAlign">The location of installed QML extensions to import (QML 2.x).</td></tr>
+<tr><td class="topAlign"><code>QLibraryInfo::ArchDataPath</code></td><td class="topAlign tblval"><code>9</code></td><td class="topAlign">The location of general architecture-dependent Qt data.</td></tr>
+<tr><td class="topAlign"><code>QLibraryInfo::DataPath</code></td><td class="topAlign tblval"><code>10</code></td><td class="topAlign">The location of general architecture-independent Qt data.</td></tr>
+<tr><td class="topAlign"><code>QLibraryInfo::TranslationsPath</code></td><td class="topAlign tblval"><code>11</code></td><td class="topAlign">The location of translation information for Qt strings.</td></tr>
+<tr><td class="topAlign"><code>QLibraryInfo::ExamplesPath</code></td><td class="topAlign tblval"><code>12</code></td><td class="topAlign">The location for examples upon install.</td></tr>
+<tr><td class="topAlign"><code>QLibraryInfo::TestsPath</code></td><td class="topAlign tblval"><code>13</code></td><td class="topAlign">The location of installed Qt testcases.</td></tr>
+<tr><td class="topAlign"><code>QLibraryInfo::SettingsPath</code></td><td class="topAlign tblval"><code>100</code></td><td class="topAlign">The location for Qt settings. Not applicable on Windows.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qlibraryinfo.html#location">location</a>().</p>
+<!-- @@@LibraryLocation -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$isDebugBuild[overload1]$$$isDebugBuild -->
+<h3 class="fn" id="isDebugBuild"><a name="isDebugBuild"></a><code>[static] </code><span class="type">bool</span> QLibraryInfo::<span class="name">isDebugBuild</span>()</h3>
+<p>Returns <code>true</code> if this build of Qt was built with debugging enabled, or false if it was built in release mode.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@isDebugBuild -->
+<!-- $$$location[overload1]$$$locationQLibraryInfo::LibraryLocation -->
+<h3 class="fn" id="location"><a name="location"></a><code>[static] </code><span class="type"><a href="qstring.html">QString</a></span> QLibraryInfo::<span class="name">location</span>(<span class="type"><a href="qlibraryinfo.html#LibraryLocation-enum">QLibraryInfo::LibraryLocation</a></span> <i>loc</i>)</h3>
+<p>Returns the location specified by <i>loc</i>.</p>
+<!-- @@@location -->
+<!-- $$$version[overload1]$$$version -->
+<h3 class="fn" id="version"><a name="version"></a><code>[static] </code><span class="type"><a href="qversionnumber.html">QVersionNumber</a></span> QLibraryInfo::<span class="name">version</span>()</h3>
+<p>Returns the version of the Qt library.</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<p><b>See also </b><a href="qtglobal.html#qVersion">qVersion</a>().</p>
+<!-- @@@version -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

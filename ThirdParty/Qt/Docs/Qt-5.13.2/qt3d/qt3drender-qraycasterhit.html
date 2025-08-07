@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qraycasterhit.cpp -->
+  <title>QRayCasterHit Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QRayCasterHit</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QRayCasterHit Class</h1>
+<span class="small-subtitle">(<a href="qt3drender-qraycasterhit.html">Qt3DRender::QRayCasterHit</a>)<br/></span>
+<!-- $$$QRayCasterHit-brief -->
+<p>Details of a hit when casting a ray through a model. <a href="#details">More...</a></p>
+<!-- @@@QRayCasterHit -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QRayCasterHit&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3drender</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.11</td></tr></table></div><p>This class was introduced in  Qt 5.11.</p>
+<ul>
+<li><a href="qt3drender-qraycasterhit-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qraycasterhit.html#HitType-enum">HitType</a></b> { TriangleHit, LineHit, PointHit, EntityHit }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> float </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qraycasterhit.html#distance">distance</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DCore::QEntity *</td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qraycasterhit.html#entity">entity</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DCore::QNodeId </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qraycasterhit.html#entityId">entityId</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector3D </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qraycasterhit.html#localIntersection">localIntersection</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qraycasterhit.html#primitiveIndex">primitiveIndex</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QRayCasterHit::HitType </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qraycasterhit.html#type">type</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qraycasterhit.html#vertex1Index">vertex1Index</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qraycasterhit.html#vertex2Index">vertex2Index</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qraycasterhit.html#vertex3Index">vertex3Index</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector3D </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qraycasterhit.html#worldIntersection">worldIntersection</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QRayCasterHit-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qt3drender-qraycasterhit.html">Qt3DRender::QRayCasterHit</a> contains the details of a successful hit when casting a ray through a model using a <a href="qt3drender-qraycaster.html">Qt3DRender::QRayCaster</a> or <a href="qt3drender-qscreenraycaster.html">Qt3DRender::QScreenRayCaster</a> component.</p>
+</div>
+<p><b>See also </b><a href="qt3drender-qraycaster.html">Qt3DRender::QRayCaster</a>, <a href="qt3drender-qscreenraycaster.html">Qt3DRender::QScreenRayCaster</a>, and <a href="qt3drender-qpickingsettings.html">Qt3DRender::QPickingSettings</a>.</p>
+<!-- @@@QRayCasterHit -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$HitType$$$TriangleHit$$$LineHit$$$PointHit$$$EntityHit -->
+<h3 class="fn" id="HitType-enum"><a name="HitType-enum"></a>enum QRayCasterHit::<span class="name">HitType</span></h3>
+<p>Specifies type of hit that was returned. This is controlled using <a href="qt3drender-qpickingsettings.html">QPickingSettings</a>.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QRayCasterHit::TriangleHit</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The picked primitive was a triangle and the vertex indices refer to the three points making up the triangle</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QRayCasterHit::LineHit</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The picked primitive was a line segment, and the first two vertices refer to the two points making up the line</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QRayCasterHit::PointHit</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The picked primitive was a single point; all 3 vertex indices will be undefined</td></tr>
+<tr><td class="topAlign"><code>Qt3DRender::QRayCasterHit::EntityHit</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">Only the bounding volume was considered; the primitive and vertex indices will be undefined</td></tr>
+</table></div>
+<!-- @@@HitType -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$distance[overload1]$$$distance -->
+<h3 class="fn" id="distance"><a name="distance"></a><span class="type">float</span> QRayCasterHit::<span class="name">distance</span>() const</h3>
+<p>Returns the distance between the origin of the ray and the intersection point</p>
+<!-- @@@distance -->
+<!-- $$$entity[overload1]$$$entity -->
+<h3 class="fn" id="entity"><a name="entity"></a><span class="type"><a href="qt3dcore-qentity.html">Qt3DCore::QEntity</a></span> *QRayCasterHit::<span class="name">entity</span>() const</h3>
+<p>Returns a pointer to the entity that was hit</p>
+<!-- @@@entity -->
+<!-- $$$entityId[overload1]$$$entityId -->
+<h3 class="fn" id="entityId"><a name="entityId"></a><span class="type"><a href="qt3dcore-qnodeid.html">Qt3DCore::QNodeId</a></span> QRayCasterHit::<span class="name">entityId</span>() const</h3>
+<p>Returns the id of the entity that was hit</p>
+<!-- @@@entityId -->
+<!-- $$$localIntersection[overload1]$$$localIntersection -->
+<h3 class="fn" id="localIntersection"><a name="localIntersection"></a><span class="type"><a href="../qtgui/qvector3d.html">QVector3D</a></span> QRayCasterHit::<span class="name">localIntersection</span>() const</h3>
+<p>Returns the coordinates of the intersection point in the entity's coordinate system</p>
+<!-- @@@localIntersection -->
+<!-- $$$primitiveIndex[overload1]$$$primitiveIndex -->
+<h3 class="fn" id="primitiveIndex"><a name="primitiveIndex"></a><span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> QRayCasterHit::<span class="name">primitiveIndex</span>() const</h3>
+<p>Returns the index of the picked primitive</p>
+<!-- @@@primitiveIndex -->
+<!-- $$$type[overload1]$$$type -->
+<h3 class="fn" id="type"><a name="type"></a><span class="type"><a href="qt3drender-qraycasterhit.html#HitType-enum">Qt3DRender::QRayCasterHit::HitType</a></span> QRayCasterHit::<span class="name">type</span>() const</h3>
+<p>Returns the type of the hit</p>
+<!-- @@@type -->
+<!-- $$$vertex1Index[overload1]$$$vertex1Index -->
+<h3 class="fn" id="vertex1Index"><a name="vertex1Index"></a><span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> QRayCasterHit::<span class="name">vertex1Index</span>() const</h3>
+<p>Returns the index of the first vertex of the picked primitive</p>
+<!-- @@@vertex1Index -->
+<!-- $$$vertex2Index[overload1]$$$vertex2Index -->
+<h3 class="fn" id="vertex2Index"><a name="vertex2Index"></a><span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> QRayCasterHit::<span class="name">vertex2Index</span>() const</h3>
+<p>Returns the index of the second vertex of the picked primitive</p>
+<!-- @@@vertex2Index -->
+<!-- $$$vertex3Index[overload1]$$$vertex3Index -->
+<h3 class="fn" id="vertex3Index"><a name="vertex3Index"></a><span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> QRayCasterHit::<span class="name">vertex3Index</span>() const</h3>
+<p>Returns the index of the third vertex of the picked primitive</p>
+<!-- @@@vertex3Index -->
+<!-- $$$worldIntersection[overload1]$$$worldIntersection -->
+<h3 class="fn" id="worldIntersection"><a name="worldIntersection"></a><span class="type"><a href="../qtgui/qvector3d.html">QVector3D</a></span> QRayCasterHit::<span class="name">worldIntersection</span>() const</h3>
+<p>Returns the coordinates of the intersection point in the model's coordinate system</p>
+<!-- @@@worldIntersection -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

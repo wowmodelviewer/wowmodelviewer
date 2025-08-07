@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qttestlib-manual.qdoc -->
+  <title>Chapter 6: Skipping Tests with QSKIP | Qt Test 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qttest-index.html">Qt Test</a></td><td >Chapter 6: Skipping Tests with QSKIP</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qttest-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="qttestlib-tutorial5-example.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="qttestlib-tutorial5-example.html">Chapter 5</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level2"><a href="#using-qskip-description-in-a-test-function">Using QSKIP(<i>description</i>) in a test function</a></li>
+<li class="level2"><a href="#using-qskip-in-a-data-function">Using QSKIP in a _data function</a></li>
+<li class="level2"><a href="#using-qskip-from-inittestcase-or-inittestcase-data">Using QSKIP from initTestCase() or initTestCase_data()</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Chapter 6: Skipping Tests with QSKIP</h1>
+<span class="subtitle"></span>
+<!-- $$$qttestlib-tutorial6.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="using-qskip-description-in-a-test-function"></a>
+<h3 id="using-qskip-description-in-a-test-function">Using QSKIP(<i>description</i>) in a test function</h3>
+<p>If the <a href="qtest.html#QSKIP">QSKIP</a>() macro is called from a test function, it stops the execution of the test without adding a failure to the test log. It can be used to skip tests that are certain to fail. The text in the QSKIP <i>description</i> parameter is appended to the test log, and explains why the test was not carried out.</p>
+<p>QSKIP can be used to skip testing when the implementation is not yet complete or not supported on a certain platform. When there are known failures, it is recommended to use <a href="qtest.html#QEXPECT_FAIL">QEXPECT_FAIL</a>, so that the test is always completely executed.</p>
+<p>Example of QSKIP in a test function:</p>
+<pre class="cpp">
+
+  <span class="keyword">if</span> ( tst_Databases<span class="operator">::</span>getMySqlVersion( db )<span class="operator">.</span>section( <span class="type"><a href="../qtcore/qchar.html">QChar</a></span>(<span class="char">'.'</span>)<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span> )<span class="operator">.</span>toInt()<span class="operator">&lt;</span><span class="number">5</span> )
+      QSKIP( <span class="string">&quot;Test requires MySQL &gt;= 5.0&quot;</span>);
+
+</pre>
+<p>In a data-driven test, each call to <a href="qtest.html#QSKIP">QSKIP</a>() skips only the current row of test data. If the data-driven test contains an unconditional call to QSKIP, it produces a skip message for each row of test data.</p>
+<a name="using-qskip-in-a-data-function"></a>
+<h3 id="using-qskip-in-a-data-function">Using QSKIP in a _data function</h3>
+<p>If called from a _data function, the <a href="qtest.html#QSKIP">QSKIP</a>() macro stops execution of the _data function. This prevents execution of the associated test function.</p>
+<p>See below for an example:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> tst_Skip<span class="operator">::</span>test_data()
+  {
+      <span class="type"><a href="qtest.html">QTest</a></span><span class="operator">::</span>addColumn<span class="operator">&lt;</span>bool<span class="operator">&gt;</span>(<span class="string">&quot;bool&quot;</span>);
+      <span class="type"><a href="qtest.html">QTest</a></span><span class="operator">::</span>newRow(<span class="string">&quot;local 1&quot;</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="keyword">false</span>;
+      <span class="type"><a href="qtest.html">QTest</a></span><span class="operator">::</span>newRow(<span class="string">&quot;local 2&quot;</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="keyword">true</span>;
+
+      QSKIP(<span class="string">&quot;skipping all&quot;</span>);
+  }
+
+</pre>
+<a name="using-qskip-from-inittestcase-or-inittestcase-data"></a>
+<h3 id="using-qskip-from-inittestcase-or-inittestcase-data">Using QSKIP from initTestCase() or initTestCase_data()</h3>
+<p>If called from <code>initTestCase()</code> or <code>initTestCase_data()</code>, the <a href="qtest.html#QSKIP">QSKIP</a>() macro will skip all test and _data functions.</p>
+</div>
+<!-- @@@qttestlib-tutorial6.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="qttestlib-tutorial5-example.html">Chapter 5</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

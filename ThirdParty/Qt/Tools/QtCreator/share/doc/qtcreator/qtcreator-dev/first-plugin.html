@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- first-plugin.qdoc -->
+  <title>Creating Your First Plugin | Extending Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="extending-index.html#">Extending Qt Creator Manual</a></td><td >Creating Your First Plugin</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="extending-index.html#">Extending Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#creating-a-plugin-project">Creating a Plugin Project</a></li>
+<li class="level1"><a href="#building-and-running-the-plugin">Building and Running the Plugin</a></li>
+<li class="level1"><a href="#file-structure">File Structure</a></li>
+<li class="level1"><a href="#qmake-project">qmake Project</a></li>
+<li class="level1"><a href="#plugin-meta-data-template">Plugin Meta Data Template</a></li>
+<li class="level1"><a href="#plugin-class">Plugin Class</a></li>
+<li class="level2"><a href="#header-file">Header File</a></li>
+<li class="level2"><a href="#source-file">Source File</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Creating Your First Plugin</h1>
+<span class="subtitle"></span>
+<!-- $$$first-plugin.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>This section describes how to create a Qt Creator plugin by using the plugin template provided by Qt Creator, and get the first impression of what a plugin consists of and what its general structure is.</p>
+<a name="creating-a-plugin-project"></a>
+<h2 id="creating-a-plugin-project">Creating a Plugin Project</h2>
+<p>Qt Creator comes with a wizard for Qt Creator plugins, that creates a runable, <i>minimal</i> plugin for you. We strongly suggest that you use two different Qt Creator instances for developing and testing your plugin with. Otherwise your plugin will also be loaded in your development environment, which can make that unstable while your plugin is still unstable. You can just create a copy of your Qt Creator build and use one for actually developing, and the other for testing your plugin with.</p>
+<p>You need to make sure that you use the same Qt Creator version that you want to develop for to create the plugin. Because of the <a href="coding-style.html#binary-and-source-compatibility">Binary and Source Compatibility</a> rules of Qt Creator, the Qt Creator plugin wizard creates a plugin that might only compile and run with the same Qt Creator version that it was created with.</p>
+<ol class="1" type="1"><li>Select <b>File</b> &gt; <b>New File or Project</b> &gt; <b>Library</b> &gt; <b>Qt Creator Plugin</b> &gt; <b>Choose</b>.<p class="centerAlign"><img src="images/firstplugin-wizard.png" alt="&quot;Choose the \QC Plugin Wizard&quot;" /></p><p>The <b>Introduction and Project Location</b> dialog opens.</p>
+<p class="centerAlign"><img src="images/firstplugin-nameandpath.png" alt="&quot;Choose Name and Place of the Project&quot;" /></p></li>
+<li>Give your project a name and specify in which path this project will be created. The actual plugin's name can be different from the project name. You will choose that name later in the wizard. Continue to the next page.<p>The <b>Kit Selection</b> dialog opens.</p>
+<p class="centerAlign"><img src="images/firstplugin-kitselection.png" alt="&quot;Choose the kit to build and run your project with&quot;" /></p></li>
+<li>Select the kit to build and run your project with. For a Qt Creator plugin this needs to be a kit with <b>Desktop</b> device type, and a Qt version that is compatible with the Qt version that your Qt Creator was built with (in the best case the exact same build). If you use an incompatible Qt version to build your plugin, you will get errors while Qt Creator tries to load your plugin. Continue to the next page.<p>The <b>Plugin Information</b> dialog opens.</p>
+<p class="centerAlign"><img src="images/firstplugin-pluginsetup.png" alt="&quot;Specify Your Plugin Details&quot;" /></p></li>
+<li>In the <b>Plugin name</b> field, type <b>Example</b>. The name of the plugin is used as its identifier, and also is the base for the file names and classes in the code.</li>
+<li>The values of the following fields are mainly informational, and are shown in the detailed view in Qt Creator's plugin overview (<b>Help</b> &gt; <b>About Plugins</b>, or <b>Qt Creator</b> &gt; <b>About Plugins</b> on Mac).<ul>
+<li><b>Vendor name</b> is a short one-word name of the company or organization that created the plugin. This is also used for the path name where the plugin will be deployed to.</li>
+<li><b>Copyright</b> is a one-line, short copyright string.</li>
+<li><b>License</b> is a license text.</li>
+<li><b>Description</b> is a short description of what the plugin does.</li>
+<li><b>URL</b> is a website where the user can find more information about the plugin and/or organization providing it.</li>
+</ul>
+</li>
+<li>Set the <b>Qt Creator sources</b> and <b>Qt Creator build</b> fields to the source and build directory of the Qt Creator instance you want to use to test your plugin with, respectively. If you don't do that correctly you will get compile errors for your plugin, and your plugin might not show up in Qt Creator at all.</li>
+<li>In the <b>Deploy into</b> list, select <b>Qt Creator build</b>. This sets your <code>.pro</code> file up to deploy your plugin directly into your Qt Creator build's plugin directory (requires you to have write permissions there). The other option, <b>Local user settings</b>, sets your <code>.pro</code> file up to deploy your plugin into Qt Creator's user plugin path (for example <code>~/.config/QtProject/qtcreator/plugins</code> on Unix systems). We choose <b>Qt Creator build</b> because we use a self-compiled Qt Creator, and want the plugin to be only loaded by that Qt Creator instance. Continue to the next page.<p>The <b>Project Management</b> dialog opens.</p>
+<p class="centerAlign"><img src="images/firstplugin-summary.png" alt="&quot;Summary of Created Files&quot;" /></p></li>
+<li>Review the files that will be created, choose a version control system that Qt Creator should use for your project (always a good idea!), and finish the wizard.</li>
+</ol>
+<a name="building-and-running-the-plugin"></a>
+<h2 id="building-and-running-the-plugin">Building and Running the Plugin</h2>
+<p>If you passed the correct Qt Creator source and build paths in the project wizard, your plugin should just build fine when pressing the build button. When you try to run your project, Qt Creator will ask you for the executable to run and you are presented the following dialog:</p>
+<p class="centerAlign"><img src="images/firstplugin-runsettings.png" alt="&quot;Specify the Executable to Run&quot;" /></p><p>Select the path to the Qt Creator executable from the build that you specified in the <b>Qt Creator build</b> setting in the project wizard and click <b>OK</b>. Qt Creator starts up, and you can verify that your plugin successfully loaded by looking for a menu entry <b>Tools</b> &gt; <b>Example</b> and by looking for the plugin in the <b>About Plugins</b> dialog.</p>
+<p class="centerAlign"><img src="images/firstplugin-menuitem.png" alt="&quot;Menu Registered by the Plugin&quot;" /></p><a name="file-structure"></a>
+<h2 id="file-structure">File Structure</h2>
+<p>The plugin wizard creates a set of basic files that a plugin needs or should have. We will have a look at some of them in detail in the following sections, here is a short overview:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >File</th><th >Role</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>Example.json.in</code></td><td >Plugin meta data template. <a href="http://doc.qt.io/qt-5/qmake-manual.html">QMake</a> creates an <code>Example.json</code> from this file, which is compiled into the plugin as meta data. The meta data is read by Qt Creator to find out about the plugin.</td></tr>
+<tr valign="top" class="even"><td ><code>example.pro</code></td><td >Project file, used by <a href="http://doc.qt.io/qt-5/qmake-manual.html">QMake</a> to generate a Makefile that then is used to build the plugin.</td></tr>
+<tr valign="top" class="odd"><td ><code>example_global.h</code></td><td >Contains macro definitions that are useful when this plugin should export symbols to other plugins.</td></tr>
+<tr valign="top" class="even"><td ><code>exampleconstants.h</code></td><td >Header defining constants used by the plugin code.</td></tr>
+<tr valign="top" class="odd"><td ><code>exampleplugin.h/.cpp</code></td><td >C++ header and source files that define the plugin class that will be instanciated and run by Qt Creator's plugin manager.</td></tr>
+</table></div>
+<a name="qmake-project"></a>
+<h2 id="qmake-project">qmake Project</h2>
+<p>The qmake project file <code>example.pro</code> defines how your plugin should be compiled. Qt Creator plugins need to have a specific setup there, in addition to telling qmake which files need to be compiled (or handled by <code>moc</code> or <code>uic</code>). Let us have a look at what the project wizard generated for you in detail.</p>
+<pre class="cpp">
+
+  DEFINES += EXAMPLE_LIBRARY
+
+</pre>
+<p>The first section of the .pro file lets the compiler pass an <code>EXAMPLE_LIBRARY</code> define to the compiled code, which is used in the <code>example_global.h</code> header, but is not really of interest for now. You should not need to change that section of the <code>.pro</code> file.</p>
+<pre class="cpp">
+
+  SOURCES += exampleplugin.cpp
+
+  HEADERS += exampleplugin.h \
+          example_global.h \
+          exampleconstants.h
+
+</pre>
+<p>This section tells qmake about the files of your project that it should let compile or otherwise handle. You need to expand that section with any files you add to the project.</p>
+<pre class="cpp">
+
+  ## set the QTC_SOURCE environment variable to override the setting here
+  QTCREATOR_SOURCES = $$(QTC_SOURCE)
+  isEmpty(QTCREATOR_SOURCES):QTCREATOR_SOURCES=/Users/example/qtcreator-src
+
+  ## set the QTC_BUILD environment variable to override the setting here
+  IDE_BUILD_TREE = $$(QTC_BUILD)
+  isEmpty(IDE_BUILD_TREE):IDE_BUILD_TREE=/Users/example/qtcreator-build
+
+</pre>
+<p>To compile and deploy your plugin, the project needs access to the Qt Creator sources and build. This section contains the logic that looks for the information about the location of the sources and build in the <code>QTC_SOURCE</code> and <code>QTC_BUILD</code> environment variables. If these are not defined, it uses the defaults you set in the project wizard.</p>
+<p>So, if someone else opens your plugin project on their machine, they do not need to edit the .pro file, but instead they should set the <code>QTC_SOURCE</code> and <code>QTC_BUILD</code> environment variables correctly for the plugin's build environment.</p>
+<p>You should not need to change this section, except perhaps to adapt the defaults.</p>
+<pre class="cpp">
+
+  ## uncomment to build plugin into user config directory
+  ## &lt;localappdata&gt;/plugins/&lt;ideversion&gt;
+  ##    where &lt;localappdata&gt; is e.g.
+  ##    &quot;%LOCALAPPDATA%\QtProject\qtcreator&quot; on Windows Vista and later
+  ##    &quot;$XDG_DATA_HOME/data/QtProject/qtcreator&quot; or &quot;~/.local/share/data/QtProject/qtcreator&quot; on Linux
+  ##    &quot;~/Library/Application Support/QtProject/Qt Creator&quot; on Mac
+  # USE_USER_DESTDIR = yes
+
+</pre>
+<p>Qt Creator plugins can either be installed into the Qt Creator installation's plugin directory (requires write access there), or to a user specific plugin directory. The <code>USE_USER_DESTDIR</code> switch in the .pro file defines which method is used for building the plugin (which is independent from what you can later use for distributing your plugin to other users).</p>
+<pre class="cpp">
+
+  ###### If the plugin can be depended upon by other plugins, this code needs to be outsourced to
+  ###### &lt;dirname&gt;_dependencies.pri, where &lt;dirname&gt; is the name of the directory containing the
+  ###### plugin's sources.
+
+  QTC_PLUGIN_NAME = Example
+  QTC_LIB_DEPENDS += \
+      # nothing here at this time
+
+  QTC_PLUGIN_DEPENDS += \
+      coreplugin
+
+  QTC_PLUGIN_RECOMMENDS += \
+      # optional plugin dependencies. nothing here at this time
+
+  ###### End _dependencies.pri contents ######
+
+</pre>
+<p>This section defines the name and dependencies of your plugin. The <code>QTC_PLUGIN_NAME</code> variable defines the name of your plugin, and the name of the dynamic library that is created for it. The <code>QTC_LIB_DEPENDS</code> variable is a list of library names of the Qt Creator utility libraries that your plugin depends on. Typical values would be <code>aggregation</code>, <code>extensionsystem</code> and <code>utils</code>. The <code>QTC_PLUGIN_DEPENDS</code> variable defines the Qt Creator plugins that your plugin depends on. Almost all Qt Creator plugins will depend on the <code>coreplugin</code>. The <code>QTC_PLUGIN_RECOMMENDS</code> variable defines the Qt Creator plugins that your plugin optionally depends on. For more information, see <a href="plugin-meta-data.html#optional-dependencies">Optional Dependencies</a>.</p>
+<pre class="cpp">
+
+  include($$QTCREATOR_SOURCES/src/qtcreatorplugin.pri)
+
+</pre>
+<p>The included file <code>qtcreatorplugin.pri</code> makes sure that you build a plugin that is suitable for use in Qt Creator, by using the information you gave above.</p>
+<p>For more information about qmake, and writing <code>.pro</code> files in general, see the <a href="http://doc.qt.io/qt-5/qmake-manual.html">qmake Manual</a>.</p>
+<a name="plugin-meta-data-template"></a>
+<h2 id="plugin-meta-data-template">Plugin Meta Data Template</h2>
+<p>The <code>.json</code> file is a JSON file that contains information that is needed by the plugin manager to find your plugin and resolve its dependencies before actually loading your plugin's library file. We will only have a short look at it here. For more information, see <a href="plugin-meta-data.html#">Plugin Meta Data</a>.</p>
+<p>The wizard doesn't actually create a .json file directly, but instead a <code>.json.in</code> file. qmake uses this to generate the actual plugin .json meta data file, replacing variables like <code>QTCREATOR_VERSION</code> with their actual values. Therefore you need to escape all backslashes and quotes in the <code>.json.in</code> file (i.e&#x2e; you need to write <code>\</code> to get a backslash and <code>\&quot;</code> to get a quote in the generated plugin JSON meta data).</p>
+<pre class="cpp">
+
+      \&quot;Name\&quot; : \&quot;Example\&quot;,
+      \&quot;Version\&quot; : \&quot;0.0.1\&quot;,
+      \&quot;CompatVersion\&quot; : \&quot;0.0.1\&quot;,
+
+</pre>
+<p>The first items in the meta data that is created by the wizard define the name of your plugin, its version, and with what version of this plugin the current version is binary compatible with.</p>
+<pre class="cpp">
+
+      \&quot;Vendor\&quot; : \&quot;My Company\&quot;,
+      \&quot;Copyright\&quot; : \&quot;(C) My Company\&quot;,
+      \&quot;License\&quot; : \&quot;BSD\&quot;,
+      \&quot;Category\&quot; : \&quot;Examples\&quot;,
+      \&quot;Description\&quot; : \&quot;Minimal plugin example.\&quot;,
+      \&quot;Url\&quot; : \&quot;http://www.mycompany.com\&quot;,
+
+</pre>
+<p>After that you'll find the information about the plugin that you gave in the project wizard.</p>
+<pre class="cpp">
+
+      $$dependencyList
+
+</pre>
+<p>The <code>$$dependencyList</code> variable is automatically replaced by the dependency information in <code>QTC_PLUGIN_DEPENDS</code> and <code>QTC_PLUGIN_RECOMMENDS</code> from your plugin's <code>.pro</code> file.</p>
+<a name="plugin-class"></a>
+<h2 id="plugin-class">Plugin Class</h2>
+<p>The files <code>exampleplugin.h</code> and <code>exampleplugin.cpp</code> define the plugin implementation of your little plugin. We'll concentrate on some highlights here, and give pointers to more detailed information for the various parts.</p>
+<a name="header-file"></a>
+<h3 id="header-file">Header File</h3>
+<p>The header file <code>exampleplugin.h</code> defines the interface of the plugin class.</p>
+<pre class="cpp">
+
+  <span class="keyword">namespace</span> Example {
+  <span class="keyword">namespace</span> Internal {
+
+</pre>
+<p>The plugin is defined in a <code>Example::Internal</code> namespace, which conforms to the coding rules for <a href="coding-style.html#coding-rules-namespacing">namespacing</a> in Qt Creator sources.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> ExamplePlugin : <span class="keyword">public</span> ExtensionSystem<span class="operator">::</span>IPlugin
+  {
+      Q_OBJECT
+      Q_PLUGIN_METADATA(IID <span class="string">&quot;org.qt-project.Qt.QtCreatorPlugin&quot;</span> FILE <span class="string">&quot;Example.json&quot;</span>)
+
+</pre>
+<p>All Qt Creator plugins must be derived from ExtensionSystem::IPlugin and are QObjects. The <code>Q_PLUGIN_METADATA</code> macro is necessary to create a valid Qt plugin. The <code>IID</code> given in the macro must be <code>org.qt-project.Qt.QtCreatorPlugin</code>, to identify it as a Qt Creator plugin, and <code>FILE</code> must point to the plugin's meta data file as described in <a href="plugin-meta-data.html#">Plugin Meta Data</a>.</p>
+<pre class="cpp">
+
+      bool initialize(<span class="keyword">const</span> <span class="type">QStringList</span> <span class="operator">&amp;</span>arguments<span class="operator">,</span> <span class="type">QString</span> <span class="operator">*</span>errorString);
+      <span class="type">void</span> extensionsInitialized();
+      ShutdownFlag aboutToShutdown();
+
+</pre>
+<p>The base class defines basic functions that are called during the life cycle of a plugin, which are here implemented for your new plugin. These functions and their roles are described in detail in The Plugin Life Cycle.</p>
+<pre class="cpp">
+
+  <span class="keyword">private</span>:
+      <span class="type">void</span> triggerAction();
+
+</pre>
+<p>The plugin has an additional custom slot, that is used to pop up a dialog when the user chooses the menu item that this plugin adds.</p>
+<a name="source-file"></a>
+<h3 id="source-file">Source File</h3>
+<p>The source file contains the actual implementation of the plugin, which registers a new menu and menu item, and opens a message box when that item is triggered.</p>
+<p>All the necessary header files from the plugin code itself, from the <code>Core</code> plugin, and from Qt are included in the beginning of the file. The setup of the menu and menu item is done in the plugin's <code>initialize</code> function, which is the first thing called after the plugin constructor. In that function, the plugin can be sure that the basic setup of plugin's that it depends on has been done, for example the Core plugin's <code>ActionManager</code> instance has been created.</p>
+<p>For more information about implementing the plugin interface, see the ExtensionSystem::IPlugin API documentation and <a href="plugin-lifecycle.html#">Plugin Life Cycle</a>.</p>
+<pre class="cpp">
+
+      <span class="type">QAction</span> <span class="operator">*</span>action <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QAction</span>(tr(<span class="string">&quot;Example Action&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      Core<span class="operator">::</span>Command <span class="operator">*</span>cmd <span class="operator">=</span> Core<span class="operator">::</span>ActionManager<span class="operator">::</span>registerAction(action<span class="operator">,</span> Constants<span class="operator">::</span>ACTION_ID<span class="operator">,</span>
+                                              Core<span class="operator">::</span>Context(Core<span class="operator">::</span>Constants<span class="operator">::</span>C_GLOBAL));
+      cmd<span class="operator">-</span><span class="operator">&gt;</span>setDefaultKeySequence(<span class="type">QKeySequence</span>(tr(<span class="string">&quot;Ctrl+Alt+Meta+A&quot;</span>)));
+      connect(action<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QAction</span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ExamplePlugin<span class="operator">::</span>triggerAction);
+
+</pre>
+<p>This part of the code creates a new <code>QAction</code>, registers it as a new <code>Command</code> in the action manager, and connects it to the plugin's slot. The action manager provides a central place where the user can assign and change keyboard shortcuts, and manages cases where for example a menu item should be directed to different plugins under different circumstances, as well as a few other things. This is described in more detail in Menus and Menu Items.</p>
+<pre class="cpp">
+
+      Core<span class="operator">::</span>ActionContainer <span class="operator">*</span>menu <span class="operator">=</span> Core<span class="operator">::</span>ActionManager<span class="operator">::</span>createMenu(Constants<span class="operator">::</span>MENU_ID);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>menu()<span class="operator">-</span><span class="operator">&gt;</span>setTitle(tr(<span class="string">&quot;Example&quot;</span>));
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(cmd);
+      Core<span class="operator">::</span>ActionManager<span class="operator">::</span>actionContainer(Core<span class="operator">::</span>Constants<span class="operator">::</span>M_TOOLS)<span class="operator">-</span><span class="operator">&gt;</span>addMenu(menu);
+
+</pre>
+<p>Here a new menu item is created, the created command added to it, and the menu added to the <b>Tools</b> menu in the menu bar. Again, this is covered in more detail in Menus and Menu Items.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> ExamplePlugin<span class="operator">::</span>triggerAction()
+  {
+      <span class="type"><a href="http://doc.qt.io/qt-5/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>information(Core<span class="operator">::</span>ICore<span class="operator">::</span>mainWindow()<span class="operator">,</span>
+                               tr(<span class="string">&quot;Action Triggered&quot;</span>)<span class="operator">,</span>
+                               tr(<span class="string">&quot;This is an action from Example.&quot;</span>));
+  }
+
+</pre>
+<p>This part defines the code that is called when the menu item is triggered. It uses the Qt API to open a message box that displays informative text and an <b>OK</b> button.</p>
+</div>
+<!-- @@@first-plugin.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

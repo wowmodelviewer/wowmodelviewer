@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qaxscript.cpp -->
+  <title>QAxScriptManager Class | Active Qt 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="activeqt-index.html">Active Qt</a></td><td >QAxScriptManager</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="activeqt-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAxScriptManager Class</h1>
+<!-- $$$QAxScriptManager-brief -->
+<p>The <a href="qaxscriptmanager.html">QAxScriptManager</a> class provides a bridge between application objects and script code. <a href="#details">More...</a></p>
+<!-- @@@QAxScriptManager -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAxScriptManager&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += axcontainer</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><ul>
+<li><a href="qaxscriptmanager-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qaxscriptmanager.html#QAxScriptManager">QAxScriptManager</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qaxscriptmanager.html#dtor.QAxScriptManager">~QAxScriptManager</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaxscriptmanager.html#addObject">addObject</a></b>(QAxBase *<i>object</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaxscriptmanager.html#addObject-1">addObject</a></b>(QObject *<i>object</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariant </td><td class="memItemRight bottomAlign"><b><a href="qaxscriptmanager.html#call">call</a></b>(const QString &amp;<i>function</i>, const QVariant &amp;<i>var1</i> = QVariant(), const QVariant &amp;<i>var2</i> = QVariant(), const QVariant &amp;<i>var3</i> = QVariant(), const QVariant &amp;<i>var4</i> = QVariant(), const QVariant &amp;<i>var5</i> = QVariant(), const QVariant &amp;<i>var6</i> = QVariant(), const QVariant &amp;<i>var7</i> = QVariant(), const QVariant &amp;<i>var8</i> = QVariant())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariant </td><td class="memItemRight bottomAlign"><b><a href="qaxscriptmanager.html#call-1">call</a></b>(const QString &amp;<i>function</i>, QList&lt;QVariant&gt; &amp;<i>arguments</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qaxscriptmanager.html#functions">functions</a></b>(QAxScript::FunctionFlags <i>flags</i> = QAxScript::FunctionNames) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QAxScript *</td><td class="memItemRight bottomAlign"><b><a href="qaxscriptmanager.html#load">load</a></b>(const QString &amp;<i>code</i>, const QString &amp;<i>name</i>, const QString &amp;<i>language</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QAxScript *</td><td class="memItemRight bottomAlign"><b><a href="qaxscriptmanager.html#load-1">load</a></b>(const QString &amp;<i>file</i>, const QString &amp;<i>name</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QAxScript *</td><td class="memItemRight bottomAlign"><b><a href="qaxscriptmanager.html#script">script</a></b>(const QString &amp;<i>name</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qaxscriptmanager.html#scriptNames">scriptNames</a></b>() const</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaxscriptmanager.html#error">error</a></b>(QAxScript *<i>script</i>, int <i>code</i>, const QString &amp;<i>description</i>, int <i>sourcePosition</i>, const QString &amp;<i>sourceText</i>)</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qaxscriptmanager.html#registerEngine">registerEngine</a></b>(const QString &amp;<i>name</i>, const QString &amp;<i>extension</i>, const QString &amp;<i>code</i> = QString())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qaxscriptmanager.html#scriptFileFilter">scriptFileFilter</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAxScriptManager-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qaxscriptmanager.html">QAxScriptManager</a> acts as a bridge between the COM objects embedded in the Qt application through <a href="qaxobject.html">QAxObject</a> or <a href="qaxwidget.html">QAxWidget</a>, and the scripting languages available through the Windows Script technologies, usually JScript and VBScript.</p>
+<p>Create one <a href="qaxscriptmanager.html">QAxScriptManager</a> for each separate document in your application, and add the COM objects the scripts need to access using <a href="qaxscriptmanager.html#addObject">addObject</a>(). Then <a href="qaxscriptmanager.html#load">load</a>() the script sources and invoke the functions using <a href="qaxscriptmanager.html#call">call</a>().</p>
+<p><b>Warning:</b> This class is not available with the bcc5.5 compiler.</p>
+</div>
+<p><b>See also </b><a href="qaxscript.html">QAxScript</a>, <a href="qaxscriptengine.html">QAxScriptEngine</a>, <a href="qaxbase.html">QAxBase</a>, and <a href="activeqt-index.html">ActiveQt Framework</a>.</p>
+<!-- @@@QAxScriptManager -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QAxScriptManager[overload1]$$$QAxScriptManagerQObject* -->
+<h3 class="fn" id="QAxScriptManager"><a name="QAxScriptManager"></a>QAxScriptManager::<span class="name">QAxScriptManager</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Creates a <a href="qaxscriptmanager.html">QAxScriptManager</a> object. <i>parent</i> is passed on to the <a href="../qtcore/qobject.html">QObject</a> constructor.</p>
+<p>It is usual to create one <a href="qaxscriptmanager.html">QAxScriptManager</a> for each document in an application.</p>
+<!-- @@@QAxScriptManager -->
+<!-- $$$error[overload1]$$$errorQAxScript*intconstQString&intconstQString& -->
+<h3 class="fn" id="error"><a name="error"></a><code>[signal] </code><span class="type">void</span> QAxScriptManager::<span class="name">error</span>(<span class="type"><a href="qaxscript.html">QAxScript</a></span> *<i>script</i>, <span class="type">int</span> <i>code</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>description</i>, <span class="type">int</span> <i>sourcePosition</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>sourceText</i>)</h3>
+<p>This signal is emitted when an execution error occurred while running <i>script</i>.</p>
+<p><i>code</i>, <i>description</i>, <i>sourcePosition</i> and <i>sourceText</i> contain information about the execution error.</p>
+<p><b>Warning:</b> Do not delete <i>script</i> in a slot connected to this signal. Use <a href="../qtcore/qobject.html#deleteLater">deleteLater</a>() instead.</p>
+<!-- @@@error -->
+<!-- $$$~QAxScriptManager[overload1]$$$~QAxScriptManager -->
+<h3 class="fn" id="dtor.QAxScriptManager"><a name="dtor.QAxScriptManager"></a><code>[override virtual] </code>QAxScriptManager::<span class="name">~QAxScriptManager</span>()</h3>
+<p>Destroys the objects, releasing all allocated resources.</p>
+<!-- @@@~QAxScriptManager -->
+<!-- $$$addObject[overload1]$$$addObjectQAxBase* -->
+<h3 class="fn" id="addObject"><a name="addObject"></a><span class="type">void</span> QAxScriptManager::<span class="name">addObject</span>(<span class="type"><a href="qaxbase.html">QAxBase</a></span> *<i>object</i>)</h3>
+<p>Adds <i>object</i> to the manager. Scripts handled by this manager can access the object in the code using the object's <a href="../qtcore/qobject.html#objectName-prop">objectName</a> property.</p>
+<p>You must add all the necessary objects before loading any scripts.</p>
+<!-- @@@addObject -->
+<!-- $$$addObject$$$addObjectQObject* -->
+<h3 class="fn" id="addObject-1"><a name="addObject-1"></a><span class="type">void</span> QAxScriptManager::<span class="name">addObject</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>object</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Adds a generic COM wrapper for <i>object</i> to the manager. <i>object</i> must be exposed as a COM object using the functionality provided by the <a href="qaxserver-module.html">QAxServer</a> module. Applications using this function you must link against the qaxserver library.</p>
+<!-- @@@addObject -->
+<!-- $$$call[overload1]$$$callconstQString&constQVariant&constQVariant&constQVariant&constQVariant&constQVariant&constQVariant&constQVariant&constQVariant& -->
+<h3 class="fn" id="call"><a name="call"></a><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QAxScriptManager::<span class="name">call</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>function</i>, const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>var1</i> = QVariant(), const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>var2</i> = QVariant(), const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>var3</i> = QVariant(), const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>var4</i> = QVariant(), const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>var5</i> = QVariant(), const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>var6</i> = QVariant(), const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>var7</i> = QVariant(), const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>var8</i> = QVariant())</h3>
+<p>Calls <i>function</i>, passing the parameters <i>var1</i>, <i>var1</i>, <i>var2</i>, <i>var3</i>, <i>var4</i>, <i>var5</i>, <i>var6</i>, <i>var7</i> and <i>var8</i> as arguments and returns the value returned by the function, or an invalid <a href="../qtcore/qvariant.html">QVariant</a> if the function does not return a value or when the function call failed. The call returns when the script's execution has finished.</p>
+<p>In most script engines the only supported parameter type is &quot;const <a href="../qtcore/qvariant.html">QVariant</a>&amp;&quot;, for example, to call a JavaScript function</p>
+<pre class="cpp">
+
+  function setNumber(number)
+  {
+      n <span class="operator">=</span> number;
+  }
+
+</pre>
+<p>use</p>
+<pre class="cpp">
+
+  <span class="type">QValueList</span> args;
+  args <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">5</span>;
+  script<span class="operator">-</span><span class="operator">&gt;</span>call(<span class="string">&quot;setNumber(const QVariant&amp;)&quot;</span><span class="operator">,</span> args);
+
+</pre>
+<p>As with <a href="qaxbase.html#dynamicCall">dynamicCall</a> the parameters can directly be embedded in the function string.</p>
+<pre class="cpp">
+
+  script<span class="operator">-</span><span class="operator">&gt;</span>call(<span class="string">&quot;setNumber(5)&quot;</span>);
+
+</pre>
+<p>However, this is slower.</p>
+<p>Functions provided by script engines that don't support introspection are not available and must be called directly using <a href="qaxscript.html#call">QAxScript::call</a>() on the respective <a href="qaxscriptmanager.html#script">script</a> object.</p>
+<p>Note that calling this function can be significantely slower than using call() on the respective <a href="qaxscript.html">QAxScript</a> directly.</p>
+<!-- @@@call -->
+<!-- $$$call$$$callconstQString&QList<QVariant>& -->
+<h3 class="fn" id="call-1"><a name="call-1"></a><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QAxScriptManager::<span class="name">call</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>function</i>, <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>&gt; &amp;<i>arguments</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Calls <i>function</i> passing <i>arguments</i> as parameters, and returns the result. Returns when the script's execution has finished.</p>
+<!-- @@@call -->
+<!-- $$$functions[overload1]$$$functionsQAxScript::FunctionFlags -->
+<h3 class="fn" id="functions"><a name="functions"></a><span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> QAxScriptManager::<span class="name">functions</span>(<span class="type"><a href="qaxscript.html#FunctionFlags-enum">QAxScript::FunctionFlags</a></span> <i>flags</i> = QAxScript::FunctionNames) const</h3>
+<p>Returns a list with all the functions that are available. Functions provided by script engines that don't support introspection are not included in the list. The functions are either provided with full prototypes or only as names, depending on the value of <i>flags</i>.</p>
+<!-- @@@functions -->
+<!-- $$$load[overload1]$$$loadconstQString&constQString&constQString& -->
+<h3 class="fn" id="load"><a name="load"></a><span class="type"><a href="qaxscript.html">QAxScript</a></span> *QAxScriptManager::<span class="name">load</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>code</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>language</i>)</h3>
+<p>Loads the script source <i>code</i> using the script engine for <i>language</i>. The script can later be referred to using its <i>name</i> which should not be empty.</p>
+<p>The function returns a pointer to the script for the given <i>code</i> if the <i>code</i> was loaded successfully; otherwise it returns 0.</p>
+<p>If <i>language</i> is empty it will be determined heuristically. If <i>code</i> contains the string &quot;End Sub&quot; it will be interpreted as VBScript, otherwise as JScript. Additional script engines can be registered using <a href="qaxscriptmanager.html#registerEngine">registerEngine</a>().</p>
+<p>You must add all the objects necessary (using <a href="qaxscriptmanager.html#addObject">addObject</a>()) <i>before</i> loading any scripts. If <i>code</i> declares a function that is already available (no matter in which language) the first function is overloaded and can no longer be called via <a href="qaxscriptmanager.html#call">call</a>(); but it will still be available by calling its <a href="qaxscriptmanager.html#script">script</a> directly.</p>
+<p><b>See also </b><a href="qaxscriptmanager.html#addObject">addObject</a>(), <a href="qaxscriptmanager.html#scriptNames">scriptNames</a>(), and <a href="qaxscriptmanager.html#functions">functions</a>().</p>
+<!-- @@@load -->
+<!-- $$$load$$$loadconstQString&constQString& -->
+<h3 class="fn" id="load-1"><a name="load-1"></a><span class="type"><a href="qaxscript.html">QAxScript</a></span> *QAxScriptManager::<span class="name">load</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>file</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Loads the source code from the <i>file</i>. The script can later be referred to using its <i>name</i> which should not be empty.</p>
+<p>The function returns a pointer to the script engine for the code in <i>file</i> if <i>file</i> was loaded successfully; otherwise it returns 0.</p>
+<p>The script engine used is determined from the file's extension. By default &quot;.js&quot; files are interpreted as JScript files, and &quot;.vbs&quot; and &quot;.dsm&quot; files are interpreted as VBScript. Additional script engines can be registered using <a href="qaxscriptmanager.html#registerEngine">registerEngine</a>().</p>
+<!-- @@@load -->
+<!-- $$$registerEngine[overload1]$$$registerEngineconstQString&constQString&constQString& -->
+<h3 class="fn" id="registerEngine"><a name="registerEngine"></a><code>[static] </code><span class="type">bool</span> QAxScriptManager::<span class="name">registerEngine</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>extension</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>code</i> = QString())</h3>
+<p>Registers the script engine called <i>name</i> and returns true if the engine was found; otherwise does nothing and returns false.</p>
+<p>The script engine will be used when loading files with the given <i>extension</i>, or when loading source code that contains the string <i>code</i>.</p>
+<!-- @@@registerEngine -->
+<!-- $$$script[overload1]$$$scriptconstQString& -->
+<h3 class="fn" id="script"><a name="script"></a><span class="type"><a href="qaxscript.html">QAxScript</a></span> *QAxScriptManager::<span class="name">script</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>) const</h3>
+<p>Returns the script called <i>name</i>.</p>
+<p>You can use the returned pointer to call functions directly through <a href="qaxscript.html#call">QAxScript::call</a>(), to access the script engine directly, or to delete and thus unload the script.</p>
+<!-- @@@script -->
+<!-- $$$scriptFileFilter[overload1]$$$scriptFileFilter -->
+<h3 class="fn" id="scriptFileFilter"><a name="scriptFileFilter"></a><code>[static] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QAxScriptManager::<span class="name">scriptFileFilter</span>()</h3>
+<p>Returns a file filter listing all the supported script languages. This filter string is convenient for use with <a href="../qtwidgets/qfiledialog.html">QFileDialog</a>.</p>
+<!-- @@@scriptFileFilter -->
+<!-- $$$scriptNames[overload1]$$$scriptNames -->
+<h3 class="fn" id="scriptNames"><a name="scriptNames"></a><span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> QAxScriptManager::<span class="name">scriptNames</span>() const</h3>
+<p>Returns a list with the names of all the scripts.</p>
+<!-- @@@scriptNames -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

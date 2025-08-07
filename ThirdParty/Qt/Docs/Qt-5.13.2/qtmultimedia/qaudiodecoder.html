@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qaudiodecoder.cpp -->
+  <title>QAudioDecoder Class | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-modules.html">C++ Classes</a></td><td >QAudioDecoder</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAudioDecoder Class</h1>
+<!-- $$$QAudioDecoder-brief -->
+<p>The <a href="qaudiodecoder.html">QAudioDecoder</a> class allows decoding audio. <a href="#details">More...</a></p>
+<!-- @@@QAudioDecoder -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAudioDecoder&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += multimedia</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qmediaobject.html">QMediaObject</a></td></tr></table></div><p><b>This class is under development and is subject to change.</b></p>
+<ul>
+<li><a href="qaudiodecoder-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#Error-enum">Error</a></b> { NoError, ResourceError, FormatError, AccessDeniedError, ServiceMissingError }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#State-enum">State</a></b> { StoppedState, DecodingState }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qaudiodecoder.html#bufferAvailable-prop">bufferAvailable</a></b> : const bool</li>
+<li class="fn"><b><a href="qaudiodecoder.html#error-prop">error</a></b> : const QString</li>
+<li class="fn"><b><a href="qaudiodecoder.html#sourceFilename-prop">sourceFilename</a></b> : QString</li>
+<li class="fn"><b><a href="qaudiodecoder.html#state-prop">state</a></b> : const State</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#QAudioDecoder">QAudioDecoder</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#dtor.QAudioDecoder">~QAudioDecoder</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QAudioFormat </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#audioFormat">audioFormat</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#bufferAvailable">bufferAvailable</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint64 </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#duration">duration</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QAudioDecoder::Error </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#error">error</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#error-prop">errorString</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint64 </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#position">position</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QAudioBuffer </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#read">read</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#setAudioFormat">setAudioFormat</a></b>(const QAudioFormat &amp;<i>format</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#setSourceDevice">setSourceDevice</a></b>(QIODevice *<i>device</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#setSourceFilename">setSourceFilename</a></b>(const QString &amp;<i>fileName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QIODevice *</td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#sourceDevice">sourceDevice</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#sourceFilename">sourceFilename</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QAudioDecoder::State </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#state-prop">state</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#start">start</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#stop">stop</a></b>()</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#bufferAvailableChanged">bufferAvailableChanged</a></b>(bool <i>available</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#bufferReady">bufferReady</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#durationChanged">durationChanged</a></b>(qint64 <i>duration</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#error-1">error</a></b>(QAudioDecoder::Error <i>error</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#finished">finished</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#formatChanged">formatChanged</a></b>(const QAudioFormat &amp;<i>format</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#positionChanged">positionChanged</a></b>(qint64 <i>position</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#sourceChanged">sourceChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#stateChanged">stateChanged</a></b>(QAudioDecoder::State <i>state</i>)</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QMultimedia::SupportEstimate </td><td class="memItemRight bottomAlign"><b><a href="qaudiodecoder.html#hasSupport">hasSupport</a></b>(const QString &amp;<i>mimeType</i>, const QStringList &amp;<i>codecs</i> = QStringList())</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAudioDecoder-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qaudiodecoder.html">QAudioDecoder</a> class is a high level class for decoding local audio media files. It is similar to the <a href="qmediaplayer.html">QMediaPlayer</a> class except that audio is provided back through this API rather than routed directly to audio hardware, and playlists and network and streaming based media is not supported.</p>
+</div>
+<p><b>See also </b><a href="qaudiobuffer.html">QAudioBuffer</a>.</p>
+<!-- @@@QAudioDecoder -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Error$$$NoError$$$ResourceError$$$FormatError$$$AccessDeniedError$$$ServiceMissingError -->
+<h3 class="fn" id="Error-enum"><a name="Error-enum"></a>enum QAudioDecoder::<span class="name">Error</span></h3>
+<p>Defines a media player error condition.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QAudioDecoder::NoError</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">No error has occurred.</td></tr>
+<tr><td class="topAlign"><code>QAudioDecoder::ResourceError</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">A media resource couldn't be resolved.</td></tr>
+<tr><td class="topAlign"><code>QAudioDecoder::FormatError</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The format of a media resource isn't supported.</td></tr>
+<tr><td class="topAlign"><code>QAudioDecoder::AccessDeniedError</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">There are not the appropriate permissions to play a media resource.</td></tr>
+<tr><td class="topAlign"><code>QAudioDecoder::ServiceMissingError</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">A valid playback service was not found, playback cannot proceed.</td></tr>
+</table></div>
+<!-- @@@Error -->
+<!-- $$$State$$$StoppedState$$$DecodingState -->
+<h3 class="fn" id="State-enum"><a name="State-enum"></a>enum QAudioDecoder::<span class="name">State</span></h3>
+<p>Defines the current state of a media player.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QAudioDecoder::StoppedState</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The decoder is not decoding. Decoding will start at the start of the media.</td></tr>
+<tr><td class="topAlign"><code>QAudioDecoder::DecodingState</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The audio player is currently decoding media.</td></tr>
+</table></div>
+<!-- @@@State -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$bufferAvailable-prop$$$bufferAvailable$$$bufferAvailableChangedbool -->
+<h3 class="fn" id="bufferAvailable-prop"><a name="bufferAvailable-prop"></a><span class="name">bufferAvailable</span> : const <span class="type">bool</span></h3>
+<p>This property holds whether there is a decoded audio buffer available</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qaudiodecoder.html#bufferAvailable">bufferAvailable</a></b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qaudiodecoder.html#bufferAvailableChanged">bufferAvailableChanged</a></b></span>(bool <i>available</i>)</td></tr>
+</table></div>
+<!-- @@@bufferAvailable -->
+<!-- $$$error-prop$$$errorString -->
+<h3 class="fn" id="error-prop"><a name="error-prop"></a><span class="name">error</span> : const <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>This property holds a string describing the last error condition.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>errorString</b></span>() const</td></tr>
+</table></div>
+<p><b>See also </b><a href="qaudiodecoder.html#error">error</a>().</p>
+<!-- @@@error -->
+<!-- $$$sourceFilename-prop$$$sourceFilename$$$setSourceFilenameconstQString&$$$sourceChanged -->
+<h3 class="fn" id="sourceFilename-prop"><a name="sourceFilename-prop"></a><span class="name">sourceFilename</span> : <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>This property holds the active filename being decoded by the decoder object.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qaudiodecoder.html#sourceFilename">sourceFilename</a></b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qaudiodecoder.html#setSourceFilename">setSourceFilename</a></b></span>(const QString &amp;<i>fileName</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qaudiodecoder.html#sourceChanged">sourceChanged</a></b></span>()</td></tr>
+</table></div>
+<!-- @@@sourceFilename -->
+<!-- $$$state-prop$$$state$$$stateChangedQAudioDecoder::State -->
+<h3 class="fn" id="state-prop"><a name="state-prop"></a><span class="name">state</span> : const <span class="type"><a href="qaudiodecoder.html#State-enum">State</a></span></h3>
+<p>This property holds the audio decoder's playback state.</p>
+<p>By default this property is QAudioDecoder::Stopped</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QAudioDecoder::State </td><td class="memItemRight bottomAlign"><span class="name"><b>state</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qaudiodecoder.html#stateChanged">stateChanged</a></b></span>(QAudioDecoder::State <i>state</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qaudiodecoder.html#start">start</a>() and <a href="qaudiodecoder.html#stop">stop</a>().</p>
+<!-- @@@state -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QAudioDecoder[overload1]$$$QAudioDecoderQObject* -->
+<h3 class="fn" id="QAudioDecoder"><a name="QAudioDecoder"></a>QAudioDecoder::<span class="name">QAudioDecoder</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Construct an <a href="qaudiodecoder.html">QAudioDecoder</a> instance parented to <i>parent</i>.</p>
+<!-- @@@QAudioDecoder -->
+<!-- $$$bufferAvailableChanged -->
+<h3 class="fn" id="bufferAvailableChanged"><a name="bufferAvailableChanged"></a><code>[signal] </code><span class="type">void</span> QAudioDecoder::<span class="name">bufferAvailableChanged</span>(<span class="type">bool</span> <i>available</i>)</h3>
+<p>Signals the availability (if <i>available</i> is true) of a new buffer.</p>
+<p>If <i>available</i> is false, there are no buffers available.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qaudiodecoder.html#bufferAvailable-prop">bufferAvailable</a>. </p><p><b>See also </b><a href="qaudiodecoder.html#bufferAvailable">bufferAvailable</a>() and <a href="qaudiodecoder.html#bufferReady">bufferReady</a>().</p>
+<!-- @@@bufferAvailableChanged -->
+<!-- $$$bufferReady[overload1]$$$bufferReady -->
+<h3 class="fn" id="bufferReady"><a name="bufferReady"></a><code>[signal] </code><span class="type">void</span> QAudioDecoder::<span class="name">bufferReady</span>()</h3>
+<p>Signals that a new decoded audio buffer is available to be read.</p>
+<p><b>See also </b><a href="qaudiodecoder.html#read">read</a>() and <a href="qaudiodecoder.html#bufferAvailable">bufferAvailable</a>().</p>
+<!-- @@@bufferReady -->
+<!-- $$$durationChanged[overload1]$$$durationChangedqint64 -->
+<h3 class="fn" id="durationChanged"><a name="durationChanged"></a><code>[signal] </code><span class="type">void</span> QAudioDecoder::<span class="name">durationChanged</span>(<span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> <i>duration</i>)</h3>
+<p>Signals that the estimated <i>duration</i> of the decoded data has changed.</p>
+<p><b>See also </b><a href="qaudiodecoder.html#positionChanged">positionChanged</a>().</p>
+<!-- @@@durationChanged -->
+<!-- $$$error$$$errorQAudioDecoder::Error -->
+<h3 class="fn" id="error-1"><a name="error-1"></a><code>[signal] </code><span class="type">void</span> QAudioDecoder::<span class="name">error</span>(<span class="type"><a href="qaudiodecoder.html#Error-enum">QAudioDecoder::Error</a></span> <i>error</i>)</h3>
+<p>Signals that an <i>error</i> condition has occurred.</p>
+<p><b>Note:</b> Signal <i>error</i> is overloaded in this class. To connect to this signal by using the function pointer syntax, Qt provides a convenient helper for obtaining the function pointer as shown in this example:<pre class="cpp">
+
+  connect(audioDecoder<span class="operator">,</span> <span class="type">QOverload</span><span class="operator">&lt;</span><span class="type"><a href="qaudiodecoder.html#QAudioDecoder">QAudioDecoder</a></span><span class="operator">::</span>Error<span class="operator">&gt;</span><span class="operator">::</span>of(<span class="operator">&amp;</span><span class="type"><a href="qaudiodecoder.html#QAudioDecoder">QAudioDecoder</a></span><span class="operator">::</span>error)<span class="operator">,</span>
+      <span class="operator">[</span><span class="operator">=</span><span class="operator">]</span>(<span class="type"><a href="qaudiodecoder.html#QAudioDecoder">QAudioDecoder</a></span><span class="operator">::</span>Error error){ <span class="comment">/* ... */</span> });
+
+</pre>
+<p><b>See also </b><a href="qaudiodecoder.html#error-prop">errorString</a>().</p>
+<!-- @@@error -->
+<!-- $$$finished[overload1]$$$finished -->
+<h3 class="fn" id="finished"><a name="finished"></a><code>[signal] </code><span class="type">void</span> QAudioDecoder::<span class="name">finished</span>()</h3>
+<p>Signals that the decoding has finished successfully. If decoding fails, error signal is emitted instead.</p>
+<p><b>See also </b><a href="qaudiodecoder.html#start">start</a>(), <a href="qaudiodecoder.html#stop">stop</a>(), and <a href="qaudiodecoder.html#error">error</a>().</p>
+<!-- @@@finished -->
+<!-- $$$formatChanged[overload1]$$$formatChangedconstQAudioFormat& -->
+<h3 class="fn" id="formatChanged"><a name="formatChanged"></a><code>[signal] </code><span class="type">void</span> QAudioDecoder::<span class="name">formatChanged</span>(const <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span> &amp;<i>format</i>)</h3>
+<p>Signals that the current audio format of the decoder has changed to <i>format</i>.</p>
+<p><b>See also </b><a href="qaudiodecoder.html#audioFormat">audioFormat</a>() and <a href="qaudiodecoder.html#setAudioFormat">setAudioFormat</a>().</p>
+<!-- @@@formatChanged -->
+<!-- $$$positionChanged[overload1]$$$positionChangedqint64 -->
+<h3 class="fn" id="positionChanged"><a name="positionChanged"></a><code>[signal] </code><span class="type">void</span> QAudioDecoder::<span class="name">positionChanged</span>(<span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> <i>position</i>)</h3>
+<p>Signals that the current <i>position</i> of the decoder has changed.</p>
+<p><b>See also </b><a href="qaudiodecoder.html#durationChanged">durationChanged</a>().</p>
+<!-- @@@positionChanged -->
+<!-- $$$sourceChanged -->
+<h3 class="fn" id="sourceChanged"><a name="sourceChanged"></a><code>[signal] </code><span class="type">void</span> QAudioDecoder::<span class="name">sourceChanged</span>()</h3>
+<p>Signals that the current source of the decoder has changed.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qaudiodecoder.html#sourceFilename-prop">sourceFilename</a>. </p><p><b>See also </b><a href="qaudiodecoder.html#sourceFilename">sourceFilename</a>() and <a href="qaudiodecoder.html#sourceDevice">sourceDevice</a>().</p>
+<!-- @@@sourceChanged -->
+<!-- $$$start[overload1]$$$start -->
+<h3 class="fn" id="start"><a name="start"></a><code>[slot] </code><span class="type">void</span> QAudioDecoder::<span class="name">start</span>()</h3>
+<p>Starts decoding the audio resource.</p>
+<p>As data gets decoded, the <a href="qaudiodecoder.html#bufferReady">bufferReady</a>() signal will be emitted when enough data has been decoded. Calling <a href="qaudiodecoder.html#read">read</a>() will then return an audio buffer without blocking.</p>
+<p>If you call <a href="qaudiodecoder.html#read">read</a>() before a buffer is ready, an invalid buffer will be returned, again without blocking.</p>
+<p><b>See also </b><a href="qaudiodecoder.html#read">read</a>().</p>
+<!-- @@@start -->
+<!-- $$$stateChanged -->
+<h3 class="fn" id="stateChanged"><a name="stateChanged"></a><code>[signal] </code><span class="type">void</span> QAudioDecoder::<span class="name">stateChanged</span>(<span class="type"><a href="qaudiodecoder.html#State-enum">QAudioDecoder::State</a></span> <i>state</i>)</h3>
+<p>Signal the <i>state</i> of the decoder object has changed.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qaudiodecoder.html#state-prop">state</a>. </p><!-- @@@stateChanged -->
+<!-- $$$stop[overload1]$$$stop -->
+<h3 class="fn" id="stop"><a name="stop"></a><code>[slot] </code><span class="type">void</span> QAudioDecoder::<span class="name">stop</span>()</h3>
+<p>Stop decoding audio. Calling <a href="qaudiodecoder.html#start">start</a>() again will resume decoding from the beginning.</p>
+<!-- @@@stop -->
+<!-- $$$~QAudioDecoder[overload1]$$$~QAudioDecoder -->
+<h3 class="fn" id="dtor.QAudioDecoder"><a name="dtor.QAudioDecoder"></a><code>[virtual] </code>QAudioDecoder::<span class="name">~QAudioDecoder</span>()</h3>
+<p>Destroys the audio decoder object.</p>
+<!-- @@@~QAudioDecoder -->
+<!-- $$$audioFormat[overload1]$$$audioFormat -->
+<h3 class="fn" id="audioFormat"><a name="audioFormat"></a><span class="type"><a href="qaudioformat.html">QAudioFormat</a></span> QAudioDecoder::<span class="name">audioFormat</span>() const</h3>
+<p>Returns the current audio format of the decoded stream.</p>
+<p>Any buffers returned should have this format.</p>
+<p><b>See also </b><a href="qaudiodecoder.html#setAudioFormat">setAudioFormat</a>() and <a href="qaudiodecoder.html#formatChanged">formatChanged</a>().</p>
+<!-- @@@audioFormat -->
+<!-- $$$bufferAvailable -->
+<h3 class="fn" id="bufferAvailable"><a name="bufferAvailable"></a><span class="type">bool</span> QAudioDecoder::<span class="name">bufferAvailable</span>() const</h3>
+<p>Returns true if a buffer is available to be read, and false otherwise. If there is no buffer available, calling the <a href="qaudiodecoder.html#read">read</a>() function will return an invalid buffer.</p>
+<p><b>Note:</b> Getter function for property <a href="qaudiodecoder.html#bufferAvailable-prop">bufferAvailable</a>. </p><!-- @@@bufferAvailable -->
+<!-- $$$duration[overload1]$$$duration -->
+<h3 class="fn" id="duration"><a name="duration"></a><span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> QAudioDecoder::<span class="name">duration</span>() const</h3>
+<p>Returns total duration (in milliseconds) of the audio stream or -1 if not available.</p>
+<!-- @@@duration -->
+<!-- $$$error[overload1]$$$error -->
+<h3 class="fn" id="error"><a name="error"></a><span class="type"><a href="qaudiodecoder.html#Error-enum">QAudioDecoder::Error</a></span> QAudioDecoder::<span class="name">error</span>() const</h3>
+<p>Returns the current error state.</p>
+<!-- @@@error -->
+<!-- $$$hasSupport[overload1]$$$hasSupportconstQString&constQStringList& -->
+<h3 class="fn" id="hasSupport"><a name="hasSupport"></a><code>[static] </code><span class="type"><a href="qmultimedia.html#SupportEstimate-enum">QMultimedia::SupportEstimate</a></span> QAudioDecoder::<span class="name">hasSupport</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>mimeType</i>, const <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> &amp;<i>codecs</i> = QStringList())</h3>
+<p>Returns the level of support an audio decoder has for a <i>mimeType</i> and a set of <i>codecs</i>.</p>
+<!-- @@@hasSupport -->
+<!-- $$$position[overload1]$$$position -->
+<h3 class="fn" id="position"><a name="position"></a><span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> QAudioDecoder::<span class="name">position</span>() const</h3>
+<p>Returns position (in milliseconds) of the last buffer read from the decoder or -1 if no buffers have been read.</p>
+<!-- @@@position -->
+<!-- $$$read[overload1]$$$read -->
+<h3 class="fn" id="read"><a name="read"></a><span class="type"><a href="qaudiobuffer.html">QAudioBuffer</a></span> QAudioDecoder::<span class="name">read</span>() const</h3>
+<p>Read a buffer from the decoder, if one is available. Returns an invalid buffer if there are no decoded buffers currently available, or on failure. In both cases this function will not block.</p>
+<p>You should either respond to the <a href="qaudiodecoder.html#bufferReady">bufferReady</a>() signal or check the <a href="qaudiodecoder.html#bufferAvailable">bufferAvailable</a>() function before calling read() to make sure you get useful data.</p>
+<!-- @@@read -->
+<!-- $$$setAudioFormat[overload1]$$$setAudioFormatconstQAudioFormat& -->
+<h3 class="fn" id="setAudioFormat"><a name="setAudioFormat"></a><span class="type">void</span> QAudioDecoder::<span class="name">setAudioFormat</span>(const <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span> &amp;<i>format</i>)</h3>
+<p>Set the desired audio format for decoded samples to <i>format</i>.</p>
+<p>This property can only be set while the decoder is stopped. Setting this property at other times will be ignored.</p>
+<p>If the decoder does not support this format, <a href="qaudiodecoder.html#error">error</a>() will be set to <code>FormatError</code>.</p>
+<p>If you do not specify a format, the format of the decoded audio itself will be used. Otherwise, some format conversion will be applied.</p>
+<p>If you wish to reset the decoded format to that of the original audio file, you can specify an invalid <i>format</i>.</p>
+<p><b>See also </b><a href="qaudiodecoder.html#audioFormat">audioFormat</a>().</p>
+<!-- @@@setAudioFormat -->
+<!-- $$$setSourceDevice[overload1]$$$setSourceDeviceQIODevice* -->
+<h3 class="fn" id="setSourceDevice"><a name="setSourceDevice"></a><span class="type">void</span> QAudioDecoder::<span class="name">setSourceDevice</span>(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span> *<i>device</i>)</h3>
+<p>Sets the current audio <a href="../qtcore/qiodevice.html">QIODevice</a> to <i>device</i>.</p>
+<p>When this property is set any current decoding is stopped, and any audio buffers are discarded.</p>
+<p>You can only specify either a source filename or a source <a href="../qtcore/qiodevice.html">QIODevice</a>. Setting one will unset the other.</p>
+<p><b>See also </b><a href="qaudiodecoder.html#sourceDevice">sourceDevice</a>().</p>
+<!-- @@@setSourceDevice -->
+<!-- $$$setSourceFilename -->
+<h3 class="fn" id="setSourceFilename"><a name="setSourceFilename"></a><span class="type">void</span> QAudioDecoder::<span class="name">setSourceFilename</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>fileName</i>)</h3>
+<p>Sets the current audio file name to <i>fileName</i>.</p>
+<p>When this property is set any current decoding is stopped, and any audio buffers are discarded.</p>
+<p>You can only specify either a source filename or a source <a href="../qtcore/qiodevice.html">QIODevice</a>. Setting one will unset the other.</p>
+<p><b>Note:</b> Setter function for property <a href="qaudiodecoder.html#sourceFilename-prop">sourceFilename</a>. </p><p><b>See also </b><a href="qaudiodecoder.html#sourceFilename">sourceFilename</a>().</p>
+<!-- @@@setSourceFilename -->
+<!-- $$$sourceDevice[overload1]$$$sourceDevice -->
+<h3 class="fn" id="sourceDevice"><a name="sourceDevice"></a><span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span> *QAudioDecoder::<span class="name">sourceDevice</span>() const</h3>
+<p>Returns the current source <a href="../qtcore/qiodevice.html">QIODevice</a>, if one was set. If <a href="qaudiodecoder.html#setSourceFilename">setSourceFilename</a>() was called, this will be 0.</p>
+<p><b>See also </b><a href="qaudiodecoder.html#setSourceDevice">setSourceDevice</a>().</p>
+<!-- @@@sourceDevice -->
+<!-- $$$sourceFilename -->
+<h3 class="fn" id="sourceFilename"><a name="sourceFilename"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QAudioDecoder::<span class="name">sourceFilename</span>() const</h3>
+<p>Returns the current file name to decode. If <a href="qaudiodecoder.html#setSourceDevice">setSourceDevice</a> was called, this will be empty.</p>
+<p><b>Note:</b> Getter function for property <a href="qaudiodecoder.html#sourceFilename-prop">sourceFilename</a>. </p><p><b>See also </b><a href="qaudiodecoder.html#setSourceFilename">setSourceFilename</a>().</p>
+<!-- @@@sourceFilename -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

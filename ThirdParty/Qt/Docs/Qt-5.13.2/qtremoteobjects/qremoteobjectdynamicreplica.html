@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qremoteobjectdynamicreplica.cpp -->
+  <title>QRemoteObjectDynamicReplica Class | Qt Remote Objects 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtremoteobjects-index.html">Qt Remote Objects</a></td><td ><a href="qtremoteobjects-module.html">C++ Classes</a></td><td >QRemoteObjectDynamicReplica</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtremoteobjects-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QRemoteObjectDynamicReplica Class</h1>
+<!-- $$$QRemoteObjectDynamicReplica-brief -->
+<p>A dynamically instantiated <a href="qtremoteobjects-replica.html#replica">Replica</a>. <a href="#details">More...</a></p>
+<!-- @@@QRemoteObjectDynamicReplica -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QRemoteObjectDynamicReplica&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += remoteobjects</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qremoteobjectreplica.html">QRemoteObjectReplica</a></td></tr></table></div><ul>
+<li><a href="qremoteobjectdynamicreplica-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qremoteobjectdynamicreplica.html#dtor.QRemoteObjectDynamicReplica">~QRemoteObjectDynamicReplica</a></b>() override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QRemoteObjectDynamicReplica-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>There are generated replicas (replicas having the header files produced by the <a href="qtremoteobjects-repc.html">Replica Compiler</a>), and dynamic replicas, which are generated on-the-fly. This is the class for the dynamic type of replica.</p>
+<p>When the connection to the <a href="qtremoteobjects-source.html#source">Source</a> object is made, the initialization step passes the current property values (see <a href="qtremoteobjects-replica.html#replica-initialization">Replica Initialization</a>). In a DynamicReplica, the property/signal/slot details are also sent, allowing the replica object to be created on-the-fly. This can be conventient in QML or scripting, but has two primary disadvantages. First, the object is in effect &quot;empty&quot; until it is successfully initialized by the <a href="qtremoteobjects-source.html#source">Source</a>. Second, in C++, calls must be made using <a href="../qtcore/qmetaobject.html#invokeMethod">QMetaObject::invokeMethod</a>(), as the moc generated lookup will not be available.</p>
+<p>This class does not have a public constructor. It can only be instantiated by using the dynamic <a href="qremoteobjectnode.html#acquire">QRemoteObjectNode::acquire</a> method.</p>
+</div>
+<!-- @@@QRemoteObjectDynamicReplica -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$~QRemoteObjectDynamicReplica[overload1]$$$~QRemoteObjectDynamicReplica -->
+<h3 class="fn" id="dtor.QRemoteObjectDynamicReplica"><a name="dtor.QRemoteObjectDynamicReplica"></a><code>[override virtual] </code>QRemoteObjectDynamicReplica::<span class="name">~QRemoteObjectDynamicReplica</span>()</h3>
+<p>Destroys the dynamic replica.</p>
+<p><b>See also </b><a href="qtremoteobjects-replica.html#replica-ownership">Replica Ownership</a>.</p>
+<!-- @@@~QRemoteObjectDynamicReplica -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

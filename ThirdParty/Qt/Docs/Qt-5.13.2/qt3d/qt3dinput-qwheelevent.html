@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmouseevent.cpp -->
+  <title>QWheelEvent Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QWheelEvent</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QWheelEvent Class</h1>
+<span class="small-subtitle">(<a href="qt3dinput-qwheelevent.html">Qt3DInput::QWheelEvent</a>)<br/></span>
+<!-- $$$QWheelEvent-brief -->
+<p>The <a href="qt3dinput-qwheelevent.html">QWheelEvent</a> class contains parameters that describe a mouse wheel event. <a href="#details">More...</a></p>
+<!-- @@@QWheelEvent -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;Qt3DInput/QWheelEvent&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3dinput</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-input-wheelevent.html">WheelEvent</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.5.</p>
+<ul>
+<li><a href="qt3dinput-qwheelevent-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qwheelevent.html#Buttons-enum">Buttons</a></b> { LeftButton, RightButton, MiddleButton, BackButton, NoButton }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qwheelevent.html#Modifiers-enum">Modifiers</a></b> { NoModifier, ShiftModifier, ControlModifier, AltModifier, MetaModifier, KeypadModifier }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qt3dinput-qwheelevent.html#accepted-prop">accepted</a></b> : bool</li>
+<li class="fn"><b><a href="qt3dinput-qwheelevent.html#angleDelta-prop">angleDelta</a></b> : const QPoint</li>
+<li class="fn"><b><a href="qt3dinput-qwheelevent.html#buttons-prop">buttons</a></b> : const int</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qt3dinput-qwheelevent.html#modifiers-prop">modifiers</a></b> : const Qt3DInput::QWheelEvent::Modifiers</li>
+<li class="fn"><b><a href="qt3dinput-qwheelevent.html#x-prop">x</a></b> : const int</li>
+<li class="fn"><b><a href="qt3dinput-qwheelevent.html#y-prop">y</a></b> : const int</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qwheelevent.html#QWheelEvent">QWheelEvent</a></b>(const ::QWheelEvent &amp;<i>e</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPoint </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qwheelevent.html#angleDelta">angleDelta</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qwheelevent.html#buttons">buttons</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qwheelevent.html#isAccepted">isAccepted</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DInput::QWheelEvent::Modifiers </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qwheelevent.html#modifiers">modifiers</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qwheelevent.html#setAccepted">setAccepted</a></b>(bool <i>accepted</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QEvent::Type </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qwheelevent.html#type">type</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qwheelevent.html#x">x</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qwheelevent.html#y">y</a></b>() const</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qwheelevent.html#QWheelEventPtr-typedef">QWheelEventPtr</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QWheelEvent-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Mouse wheel events occur when the mouse is rotated.</p>
+</div>
+<p><b>See also </b><a href="qt3dinput-qkeyevent.html">QKeyEvent</a>, <a href="qt3dinput-qmouseevent.html">QMouseEvent</a>, and <a href="qt3dinput-qmousehandler.html">QMouseHandler</a>.</p>
+<!-- @@@QWheelEvent -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Buttons$$$LeftButton$$$RightButton$$$MiddleButton$$$BackButton$$$NoButton -->
+<h3 class="fn" id="Buttons-enum"><a name="Buttons-enum"></a>enum QWheelEvent::<span class="name">Buttons</span></h3>
+<div class="table"><table class="valuelist"><tr><th class="tblConst">Constant</th><th class="tblVal">Value</th></tr>
+<tr><td class="topAlign"><code>Qt3DInput::QWheelEvent::LeftButton</code></td><td class="topAlign tblval"><code>Qt::LeftButton</code></td></tr>
+<tr><td class="topAlign"><code>Qt3DInput::QWheelEvent::RightButton</code></td><td class="topAlign tblval"><code>Qt::RightButton</code></td></tr>
+<tr><td class="topAlign"><code>Qt3DInput::QWheelEvent::MiddleButton</code></td><td class="topAlign tblval"><code>Qt::MiddleButton</code></td></tr>
+<tr><td class="topAlign"><code>Qt3DInput::QWheelEvent::BackButton</code></td><td class="topAlign tblval"><code>Qt::BackButton</code></td></tr>
+<tr><td class="topAlign"><code>Qt3DInput::QWheelEvent::NoButton</code></td><td class="topAlign tblval"><code>Qt::NoButton</code></td></tr>
+</table></div>
+<!-- @@@Buttons -->
+<!-- $$$Modifiers$$$NoModifier$$$ShiftModifier$$$ControlModifier$$$AltModifier$$$MetaModifier$$$KeypadModifier -->
+<h3 class="fn" id="Modifiers-enum"><a name="Modifiers-enum"></a>enum QWheelEvent::<span class="name">Modifiers</span></h3>
+<div class="table"><table class="valuelist"><tr><th class="tblConst">Constant</th><th class="tblVal">Value</th></tr>
+<tr><td class="topAlign"><code>Qt3DInput::QWheelEvent::NoModifier</code></td><td class="topAlign tblval"><code>Qt::NoModifier</code></td></tr>
+<tr><td class="topAlign"><code>Qt3DInput::QWheelEvent::ShiftModifier</code></td><td class="topAlign tblval"><code>Qt::ShiftModifier</code></td></tr>
+<tr><td class="topAlign"><code>Qt3DInput::QWheelEvent::ControlModifier</code></td><td class="topAlign tblval"><code>Qt::ControlModifier</code></td></tr>
+<tr><td class="topAlign"><code>Qt3DInput::QWheelEvent::AltModifier</code></td><td class="topAlign tblval"><code>Qt::AltModifier</code></td></tr>
+<tr><td class="topAlign"><code>Qt3DInput::QWheelEvent::MetaModifier</code></td><td class="topAlign tblval"><code>Qt::MetaModifier</code></td></tr>
+<tr><td class="topAlign"><code>Qt3DInput::QWheelEvent::KeypadModifier</code></td><td class="topAlign tblval"><code>Qt::KeypadModifier</code></td></tr>
+</table></div>
+<!-- @@@Modifiers -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$accepted-prop$$$isAccepted$$$setAcceptedbool -->
+<h3 class="fn" id="accepted-prop"><a name="accepted-prop"></a><span class="name">accepted</span> : <span class="type">bool</span></h3>
+<p>Specifies if the mouse wheel event has been accepted</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3dinput-qwheelevent.html#isAccepted">isAccepted</a></b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3dinput-qwheelevent.html#setAccepted">setAccepted</a></b></span>(bool <i>accepted</i>)</td></tr>
+</table></div>
+<!-- @@@accepted -->
+<!-- $$$angleDelta-prop$$$angleDelta -->
+<h3 class="fn" id="angleDelta-prop"><a name="angleDelta-prop"></a><span class="name">angleDelta</span> : const <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span></h3>
+<p>Specifies The change wheel angle of the mouse wheel event</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QPoint </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3dinput-qwheelevent.html#angleDelta">angleDelta</a></b></span>() const</td></tr>
+</table></div>
+<!-- @@@angleDelta -->
+<!-- $$$buttons-prop$$$buttons -->
+<h3 class="fn" id="buttons-prop"><a name="buttons-prop"></a><span class="name">buttons</span> : const <span class="type">int</span></h3>
+<p>Specifies the button if present in the mouse wheel event</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3dinput-qwheelevent.html#buttons">buttons</a></b></span>() const</td></tr>
+</table></div>
+<!-- @@@buttons -->
+<!-- $$$modifiers-prop$$$modifiers -->
+<h3 class="fn" id="modifiers-prop"><a name="modifiers-prop"></a><span class="name">modifiers</span> : const <span class="type"><a href="qt3dinput-qwheelevent.html#Modifiers-enum">Qt3DInput::QWheelEvent::Modifiers</a></span></h3>
+<p>Specifies if any modifiers were applied to the mouse wheel event</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DInput::QWheelEvent::Modifiers </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3dinput-qwheelevent.html#modifiers">modifiers</a></b></span>() const</td></tr>
+</table></div>
+<!-- @@@modifiers -->
+<!-- $$$x-prop$$$x -->
+<h3 class="fn" id="x-prop"><a name="x-prop"></a><span class="name">x</span> : const <span class="type">int</span></h3>
+<p>Specifies The X coordinate of the mouse wheel event</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3dinput-qwheelevent.html#x">x</a></b></span>() const</td></tr>
+</table></div>
+<!-- @@@x -->
+<!-- $$$y-prop$$$y -->
+<h3 class="fn" id="y-prop"><a name="y-prop"></a><span class="name">y</span> : const <span class="type">int</span></h3>
+<p>Specifies The Y coordinate of the mouse wheel event</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3dinput-qwheelevent.html#y">y</a></b></span>() const</td></tr>
+</table></div>
+<!-- @@@y -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QWheelEvent[overload1]$$$QWheelEventconst::QWheelEvent& -->
+<h3 class="fn" id="QWheelEvent"><a name="QWheelEvent"></a>QWheelEvent::<span class="name">QWheelEvent</span>(const <span class="type">::QWheelEvent</span> &amp;<i>e</i>)</h3>
+<p>Constructs a new <a href="qt3dinput-qwheelevent.html">QWheelEvent</a> instance from the <a href="qt3dinput-qwheelevent.html">QWheelEvent</a> <i>e</i>.</p>
+<!-- @@@QWheelEvent -->
+<!-- $$$angleDelta -->
+<h3 class="fn" id="angleDelta"><a name="angleDelta"></a><span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> QWheelEvent::<span class="name">angleDelta</span>() const</h3>
+<p>Returns the distance that the wheel is rotated, in eighths of a degree. A positive value indicates that the wheel was rotated forward (away from the user), a negative value indicates the wheel was rotated backward (toward the user).</p>
+<p><b>Note:</b> Getter function for property <a href="qt3dinput-qwheelevent.html#angleDelta-prop">angleDelta</a>. </p><!-- @@@angleDelta -->
+<!-- $$$buttons -->
+<h3 class="fn" id="buttons"><a name="buttons"></a><span class="type">int</span> QWheelEvent::<span class="name">buttons</span>() const</h3>
+<p>Returns a bitfield to be used to check for mouse buttons that may be accompanying the wheel event.</p>
+<p><b>Note:</b> Getter function for property <a href="qt3dinput-qwheelevent.html#buttons-prop">buttons</a>. </p><!-- @@@buttons -->
+<!-- $$$isAccepted -->
+<h3 class="fn" id="isAccepted"><a name="isAccepted"></a><span class="type">bool</span> QWheelEvent::<span class="name">isAccepted</span>() const</h3>
+<p>Returns whether the event was accepted.</p>
+<p><b>Note:</b> Getter function for property <a href="qt3dinput-qwheelevent.html#accepted-prop">accepted</a>. </p><!-- @@@isAccepted -->
+<!-- $$$modifiers -->
+<h3 class="fn" id="modifiers"><a name="modifiers"></a><span class="type"><a href="qt3dinput-qwheelevent.html#Modifiers-enum">Qt3DInput::QWheelEvent::Modifiers</a></span> QWheelEvent::<span class="name">modifiers</span>() const</h3>
+<p>Returns the keyboard modifiers that may be accompanying the wheel event.</p>
+<p><b>Note:</b> Getter function for property <a href="qt3dinput-qwheelevent.html#modifiers-prop">modifiers</a>. </p><!-- @@@modifiers -->
+<!-- $$$setAccepted -->
+<h3 class="fn" id="setAccepted"><a name="setAccepted"></a><span class="type">void</span> QWheelEvent::<span class="name">setAccepted</span>(<span class="type">bool</span> <i>accepted</i>)</h3>
+<p>Sets the event as accepted if <i>accepted</i> is true.</p>
+<p><b>Note: </b>When an event is accepted, it will prevent further propagation to other listeners.</p><p><b>Note:</b> Setter function for property <a href="qt3dinput-qwheelevent.html#accepted-prop">accepted</a>. </p><p><b>See also </b><a href="qt3dinput-qwheelevent.html#isAccepted">isAccepted</a>().</p>
+<!-- @@@setAccepted -->
+<!-- $$$type[overload1]$$$type -->
+<h3 class="fn" id="type"><a name="type"></a><span class="type"><a href="../qtcore/qevent.html#Type-enum">QEvent::Type</a></span> QWheelEvent::<span class="name">type</span>() const</h3>
+<p>Returns the <a href="../qtcore/qevent.html#Type-enum">QEvent::Type</a> of the event.</p>
+<!-- @@@type -->
+<!-- $$$x -->
+<h3 class="fn" id="x"><a name="x"></a><span class="type">int</span> QWheelEvent::<span class="name">x</span>() const</h3>
+<p>Returns the x position of the mouse event.</p>
+<p><b>Note:</b> Getter function for property <a href="qt3dinput-qwheelevent.html#x-prop">x</a>. </p><!-- @@@x -->
+<!-- $$$y -->
+<h3 class="fn" id="y"><a name="y"></a><span class="type">int</span> QWheelEvent::<span class="name">y</span>() const</h3>
+<p>Returns the x position of the mouse event.</p>
+<p><b>Note:</b> Getter function for property <a href="qt3dinput-qwheelevent.html#y-prop">y</a>. </p><!-- @@@y -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$QWheelEventPtr -->
+<h3 class="fn" id="QWheelEventPtr-typedef"><a name="QWheelEventPtr-typedef"></a>typedef <span class="name">QWheelEventPtr</span></h3>
+<p>A shared pointer for <a href="qt3dinput-qwheelevent.html">QWheelEvent</a>.</p>
+<!-- @@@QWheelEventPtr -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

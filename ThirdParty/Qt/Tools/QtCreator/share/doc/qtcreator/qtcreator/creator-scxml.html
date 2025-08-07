@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-scxml.qdoc -->
+  <title>Editing State Charts | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Editing State Charts</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-modeling.html" />
+  <link rel="next" href="creator-building-running.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-modeling.html">Modeling</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-building-running.html">Building and Running</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#creating-state-charts">Creating State Charts</a></li>
+<li class="level1"><a href="#managing-states">Managing States</a></li>
+<li class="level1"><a href="#managing-transitions">Managing Transitions</a></li>
+<li class="level1"><a href="#adding-executable-content">Adding Executable Content</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Editing State Charts</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-scxml.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>State charts provide a graphical way of modeling how a system reacts to stimuli. This is done by defining the possible <i>states</i> that the system can be in, and how the system can move from one state to another (<i>transitions</i> between states). A key characteristic of event-driven systems (such as Qt applications) is that behavior often depends not only on the last or current <i>event</i>, but also the events that preceded it. With state charts, this information is easy to express.</p>
+<p>Qt Creator provides a project wizard for adding <a href="https://www.w3.org/TR/scxml/">State Chart XML (SCXML)</a> files with boilerplate code to projects and an experimental SCXML editor for editing the state charts. You can use the SCXML editor to add <i>states</i> and <i>transitions</i> to the files. You can then use the classes in the Qt SCXML module to embed the state machines created from the files in Qt applications.</p>
+<p class="centerAlign"><img src="images/qtcreator-scxml-editor.png" alt="SXCML Editor" /></p><p>You can drag and drop states from the <b>Common States</b> view (1) to the state editor (2). Select a state in the state editor and use the tool buttons (3) to create a transition (4) and its <i>target state</i>.</p>
+<p>You can view the state chart structure in the <b>Structure</b> view (5) and specify attributes for the selected state or transition in the <b>Attributes</b> view (6).</p>
+<p>You can use the toolbar buttons (7) to execute functions such as editing, zooming, magnifying, navigating, and panning state charts, as well as taking screenshots and viewing statistics.</p>
+<p>To zoom into and out of the whole state chart in the state editor, select <b>Zoom In</b> or <b>Zoom Out</b> or press <b>Ctrl</b> and use the mouse wheel. To make the whole state chart visible in the state editor at a time, select <img src="images/fittoview.png" alt="" /> (<b>Fit to View</b>).</p>
+<p>To view a particular part of a large state chart in the state editor, select <img src="images/navigator.png" alt="" /> (<b>Navigator</b>) and move the navigator frame on the part you want to view.</p>
+<p>To use the magnifier to zoom into a part of the state chart, select <img src="images/zoom.png" alt="" /> (<b>Magnifier Tool</b>). To move the magnifier tool faster, press down the <b>Alt</b> key.</p>
+<p>To pan the state chart, select <img src="images/pan.png" alt="" /> (<b>Panning</b>). To increase the pace of panning, press down the <b>Shift</b> key.</p>
+<p>To view statistics about the numbers of states and transitions in the state chart, select <img src="images/statistics.png" alt="" /> (<b>View Statistics</b>).</p>
+<p>To search from the state chart, use the <b>Search</b> pane. The search checks the whole SCXML tree for attributes that match the search criteria.</p>
+<p>To save the currently visible part of the state chart as an image, select <img src="images/snapshot.png" alt="" /> (<b>Save Screenshot</b>). To save the whole state chart as an image, select <img src="images/icon-export-canvas.png" alt="" /> (<b>Export Canvas to Image</b>).</p>
+<a name="creating-state-charts"></a>
+<h2 id="creating-state-charts">Creating State Charts</h2>
+<p>To create a state chart:</p>
+<ol class="1" type="1"><li>Select <b>Help</b> &gt; <b>About Plugins</b> &gt; <b>Modeling</b> &gt; <b>ScxmlEditor</b> and restart Qt Creator to enable the plugin.</li>
+<li>Select <b>File</b> &gt; <b>New File or Project</b> &gt; <b>Files and Classes</b> &gt; <b>Modeling</b> &gt; <b>State Chart</b> &gt; <b>Choose</b> to create an empty state chart and to open it in the SCXML editor.</li>
+<li>Drag and drop a state from the <b>Common States</b> view to the state editor.</li>
+<li>Drag and drop child states to the initial state to create a <i>compound state</i> or use the tool buttons to create a transition from the selected state and its target state.</li>
+<li>Select a state to edit its attributes in the <b>Attributes</b> view.</li>
+<li>Select the transition line to add edge points to it.</li>
+<li>To raise or send events, for example, use the context menu commands to add executable content to the <code>&lt;onentry&gt;</code> and <code>&lt;onexit&gt;</code> elements of states or to transitions.</li>
+</ol>
+<p>The following sections describe how to manage states, transitions, and executable content.</p>
+<a name="managing-states"></a>
+<h2 id="managing-states">Managing States</h2>
+<p>When the state machine enters a state in response to an event, the state that it entered becomes the <i>active state</i>.</p>
+<p>State charts are hierarchical, and therefore states can be nested inside other states, to create compound states.</p>
+<p>In addition to basic states, you can create the following types of states:</p>
+<ul>
+<li><i>Initial</i> state is the state the state machine enters when it starts.</li>
+<li><i>Parallel state</i> contains child states that execute in parallel and are all active simultaneously. Events are processed independently by each child state and may trigger different transitions for each child.</li>
+<li><i>Final state</i> enables a state machine to finish. When the state machine enters a top-level final state, it emits the finished signal and halts. You can create final states in compound states to hide the internal details of a compound state. The outside world can only enter the state and get a notification when the state has finished. A parallel state finishes when all its child states reach final states.</li>
+<li><i>History state</i> is a pseudo-state that represents the child state the parent state was in the last time the parent state was exited.<p>Create a history state as a child of the state for which you want to record the current child state. When the state machine detects the presence of such a state at runtime, it automatically records the current (real) child state when the parent state is exited. A transition to the history state is in fact a transition to the child state that the state machine previously saved. The state machine automatically forwards the transition to the real child state.</p>
+</li>
+</ul>
+<p>You can add new states to the state chart in the following ways:</p>
+<ul>
+<li>Drag and drop states from the <b>Common States</b> view to the state editor.</li>
+<li>Select a state in the state editor, and then select the <b>State</b> tool button to create a transition and its target state.</li>
+<li>Copy and paste states within the SCXML editor or between the SCXML editor and the <b>Edit</b> mode.</li>
+</ul>
+<p>You can drag states on top of other states to create compound states, or you can drag child states out of their parent state. To move child states within their parent, press down the <b>Ctrl</b> key while moving them.</p>
+<p>You can use toolbar buttons to align states in the state editor, to adjust their size, and to change the default color scheme. Overlapping states are marked in red color.</p>
+<p>To expand or collapse the state tree structure in the <b>Structure</b> view, double-click a state.</p>
+<p>To view a child state of a nested state in more detail in the state editor, select <b>Zoom to State</b>.</p>
+<p>To ensure that the state ids are unique within a compound state machine, select <img src="images/namespace.png" alt="" /> (<b>Toggle Full Namespace</b>). The name of the parent state is added to the names of the child states, separated by two colons (::). For example:</p>
+<pre class="cpp plain">
+
+  &lt;state id=&quot;broken&quot;&gt;
+  ..&#x2e;
+      &lt;state id=&quot;broken::blinking&quot;&gt;
+      ..&#x2e;
+      &lt;/state&gt;
+      &lt;state id=&quot;broken::unblinking&quot;&gt;
+      ..&#x2e;
+      &lt;/state&gt;
+  &lt;/state&gt;
+
+</pre>
+<a name="managing-transitions"></a>
+<h2 id="managing-transitions">Managing Transitions</h2>
+<p>Transitions define how a state reacts to <i>events</i> that are generated either by the state machine or external entities. When events occur, the state machine checks for a matching transition defined in the active state and moves to its target state.</p>
+<p>To create a transition from the selected state to a new state, drag and release the mouse at the location where you want to add the target state. When you draw a transition to the center of another state, it points to the center of the state, but you can also draw a transition to the edge of the state.</p>
+<p>To add edge points to transitions, select a transition line. Only two edge points are permitted for each line, and unnecessary edge points are removed automatically. To remove the selected edge point, select <b>Remove Point</b> in the context menu.</p>
+<p>To add new edge points with a mouse click, select the <b>Transition</b> tool button.</p>
+<p>A transition label is automatically center-aligned, but you can drag it to another position.</p>
+<p>To remove the selected transition, select <b>Remove</b> in the context menu.</p>
+<a name="adding-executable-content"></a>
+<h2 id="adding-executable-content">Adding Executable Content</h2>
+<p>You can add <i>executable content</i> to a state chart to enable the state machine to modify its data model and to interact with external entities.</p>
+<p>Use the context menu commands to add executable content to the <code>&lt;onentry&gt;</code> and <code>&lt;onexit&gt;</code> elements or to transitions:</p>
+<ul>
+<li><code>&lt;raise&gt;</code> to raise events</li>
+<li><code>&lt;send&gt;</code> to communicate with external entities</li>
+<li><code>&lt;script&gt;</code> to run scripts</li>
+<li><code>&lt;assign&gt;</code> to modify the data model</li>
+<li><code>&lt;cancel&gt;</code> to cancel action execution</li>
+<li><code>&lt;log&gt;</code> to record information in a log</li>
+<li><code>&lt;if&gt;</code> to execute actions conditionally</li>
+<li><code>&lt;foreach&gt;</code> to iterate over the items in a collection and execute an action for each of them</li>
+</ul>
+<p>During a transition, the state machine executes the content that you specify for the <code>&lt;onexit&gt;</code> element in the state it is leaving, then the content in the transition, and then the content for the <code>&lt;onentry&gt;</code> element in the state it is entering.</p>
+<p>You can add attributes for the selected executable content in the <b>Attributes</b> view.</p>
+</div>
+<!-- @@@creator-scxml.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-modeling.html">Modeling</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-building-running.html">Building and Running</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qgeocircle.cpp -->
+  <title>QGeoCircle Class | Qt Positioning 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtpositioning-index.html">Qt Positioning</a></td><td ><a href="qtpositioning-module.html">C++ Classes</a></td><td >QGeoCircle</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtpositioning-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QGeoCircle Class</h1>
+<!-- $$$QGeoCircle-brief -->
+<p>The <a href="qgeocircle.html">QGeoCircle</a> class defines a circular geographic area. <a href="#details">More...</a></p>
+<!-- @@@QGeoCircle -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QGeoCircle&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += positioning</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.2</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qgeoshape.html">QGeoShape</a></td></tr></table></div><p>This class was introduced in  Qt 5.2.</p>
+<ul>
+<li><a href="qgeocircle-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qgeocircle.html#center-prop">center</a></b> : QGeoCoordinate</li>
+<li class="fn"><b><a href="qgeocircle.html#radius-prop">radius</a></b> : qreal</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeocircle.html#QGeoCircle-3">QGeoCircle</a></b>(const QGeoShape &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeocircle.html#QGeoCircle-2">QGeoCircle</a></b>(const QGeoCircle &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeocircle.html#QGeoCircle-1">QGeoCircle</a></b>(const QGeoCoordinate &amp;<i>center</i>, qreal <i>radius</i> = -1.0)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeocircle.html#QGeoCircle">QGeoCircle</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoCircle &amp;</td><td class="memItemRight bottomAlign"><b><a href="qgeocircle.html#operator-eq">operator=</a></b>(const QGeoCircle &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeocircle.html#dtor.QGeoCircle">~QGeoCircle</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoCoordinate </td><td class="memItemRight bottomAlign"><b><a href="qgeocircle.html#center">center</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeocircle.html#extendCircle">extendCircle</a></b>(const QGeoCoordinate &amp;<i>coordinate</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qgeocircle.html#radius">radius</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeocircle.html#setCenter">setCenter</a></b>(const QGeoCoordinate &amp;<i>center</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeocircle.html#setRadius">setRadius</a></b>(qreal <i>radius</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qgeocircle.html#toString">toString</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeocircle.html#translate">translate</a></b>(double <i>degreesLatitude</i>, double <i>degreesLongitude</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoCircle </td><td class="memItemRight bottomAlign"><b><a href="qgeocircle.html#translated">translated</a></b>(double <i>degreesLatitude</i>, double <i>degreesLongitude</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgeocircle.html#operator-not-eq">operator!=</a></b>(const QGeoCircle &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgeocircle.html#operator-eq-eq">operator==</a></b>(const QGeoCircle &amp;<i>other</i>) const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QGeoCircle-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The circle is defined in terms of a <a href="qgeocoordinate.html">QGeoCoordinate</a> which specifies the center of the circle and a qreal which specifies the radius of the circle in meters.</p>
+<p>The circle is considered invalid if the center coordinate is invalid or if the radius is less than zero.</p>
+<p>This class is a <a href="../qtcore/qobject.html#Q_GADGET">Q_GADGET</a> since Qt 5.5&#x2e; It can be <a href="positioning-cpp-qml.html#cpp-value-integration-positioning">directly used from C++ and QML</a>.</p>
+</div>
+<!-- @@@QGeoCircle -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$center-prop$$$center$$$setCenterconstQGeoCoordinate& -->
+<h3 class="fn" id="center-prop"><a name="center-prop"></a><span class="name">center</span> : <span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span></h3>
+<p>This property holds the center coordinate for the geo circle.</p>
+<p>The circle is considered invalid if this property contains an invalid coordinate.</p>
+<p>A default constructed <a href="qgeocircle.html">QGeoCircle</a> uses an invalid <a href="qgeocoordinate.html">QGeoCoordinate</a> as center.</p>
+<p>While this property is introduced in Qt 5.5, the related accessor functions exist since the first version of this class.</p>
+<p>This property was introduced in  Qt 5.5.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QGeoCoordinate </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qgeocircle.html#center">center</a></b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qgeocircle.html#setCenter">setCenter</a></b></span>(const QGeoCoordinate &amp;<i>center</i>)</td></tr>
+</table></div>
+<!-- @@@center -->
+<!-- $$$radius-prop$$$radius$$$setRadiusqreal -->
+<h3 class="fn" id="radius-prop"><a name="radius-prop"></a><span class="name">radius</span> : <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span></h3>
+<p>This property holds the circle radius in meters.</p>
+<p>The circle is considered invalid if this property is negative.</p>
+<p>By default, the radius is initialized with <code>-1</code>.</p>
+<p>While this property is introduced in Qt 5.5, the related accessor functions exist since the first version of this class.</p>
+<p>This property was introduced in  Qt 5.5.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qreal </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qgeocircle.html#radius">radius</a></b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qgeocircle.html#setRadius">setRadius</a></b></span>(qreal <i>radius</i>)</td></tr>
+</table></div>
+<!-- @@@radius -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QGeoCircle$$$QGeoCircleconstQGeoShape& -->
+<h3 class="fn" id="QGeoCircle-3"><a name="QGeoCircle-3"></a>QGeoCircle::<span class="name">QGeoCircle</span>(const <span class="type"><a href="qgeoshape.html#QGeoShape">QGeoShape</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a new geo circle from the contents of <i>other</i>.</p>
+<!-- @@@QGeoCircle -->
+<!-- $$$QGeoCircle$$$QGeoCircleconstQGeoCircle& -->
+<h3 class="fn" id="QGeoCircle-2"><a name="QGeoCircle-2"></a>QGeoCircle::<span class="name">QGeoCircle</span>(const <span class="type"><a href="qgeocircle.html#QGeoCircle">QGeoCircle</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a new geo circle from the contents of <i>other</i>.</p>
+<!-- @@@QGeoCircle -->
+<!-- $$$QGeoCircle$$$QGeoCircleconstQGeoCoordinate&qreal -->
+<h3 class="fn" id="QGeoCircle-1"><a name="QGeoCircle-1"></a>QGeoCircle::<span class="name">QGeoCircle</span>(const <span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span> &amp;<i>center</i>, <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>radius</i> = -1.0)</h3>
+<p>Constructs a new geo circle centered at <i>center</i> and with a radius of <i>radius</i> meters.</p>
+<!-- @@@QGeoCircle -->
+<!-- $$$QGeoCircle[overload1]$$$QGeoCircle -->
+<h3 class="fn" id="QGeoCircle"><a name="QGeoCircle"></a>QGeoCircle::<span class="name">QGeoCircle</span>()</h3>
+<p>Constructs a new, invalid geo circle.</p>
+<!-- @@@QGeoCircle -->
+<!-- $$$operator=[overload1]$$$operator=constQGeoCircle& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qgeocircle.html#QGeoCircle">QGeoCircle</a></span> &amp;QGeoCircle::<span class="name">operator=</span>(const <span class="type"><a href="qgeocircle.html#QGeoCircle">QGeoCircle</a></span> &amp;<i>other</i>)</h3>
+<p>Assigns <i>other</i> to this geo circle and returns a reference to this geo circle.</p>
+<!-- @@@operator= -->
+<!-- $$$~QGeoCircle[overload1]$$$~QGeoCircle -->
+<h3 class="fn" id="dtor.QGeoCircle"><a name="dtor.QGeoCircle"></a>QGeoCircle::<span class="name">~QGeoCircle</span>()</h3>
+<p>Destroys this geo circle.</p>
+<!-- @@@~QGeoCircle -->
+<!-- $$$center -->
+<h3 class="fn" id="center"><a name="center"></a><span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span> QGeoCircle::<span class="name">center</span>() const</h3>
+<p>Returns the center coordinate of this geo circle. Equivalent to <a href="qgeoshape.html#center">QGeoShape::center</a>().</p>
+<p><b>Note:</b> Getter function for property <a href="qgeocircle.html#center-prop">center</a>. </p><p><b>See also </b><a href="qgeocircle.html#setCenter">setCenter</a>().</p>
+<!-- @@@center -->
+<!-- $$$extendCircle[overload1]$$$extendCircleconstQGeoCoordinate& -->
+<h3 class="fn" id="extendCircle"><a name="extendCircle"></a><span class="type">void</span> QGeoCircle::<span class="name">extendCircle</span>(const <span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span> &amp;<i>coordinate</i>)</h3>
+<p>Extends the geo circle to also cover the coordinate <i>coordinate</i></p>
+<p>This function was introduced in  Qt 5.9.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@extendCircle -->
+<!-- $$$radius -->
+<h3 class="fn" id="radius"><a name="radius"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QGeoCircle::<span class="name">radius</span>() const</h3>
+<p>Returns the radius in meters of this geo circle.</p>
+<p><b>Note:</b> Getter function for property <a href="qgeocircle.html#radius-prop">radius</a>. </p><p><b>See also </b><a href="qgeocircle.html#setRadius">setRadius</a>().</p>
+<!-- @@@radius -->
+<!-- $$$setCenter -->
+<h3 class="fn" id="setCenter"><a name="setCenter"></a><span class="type">void</span> QGeoCircle::<span class="name">setCenter</span>(const <span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span> &amp;<i>center</i>)</h3>
+<p>Sets the center coordinate of this geo circle to <i>center</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="qgeocircle.html#center-prop">center</a>. </p><p><b>See also </b><a href="qgeocircle.html#center">center</a>().</p>
+<!-- @@@setCenter -->
+<!-- $$$setRadius -->
+<h3 class="fn" id="setRadius"><a name="setRadius"></a><span class="type">void</span> QGeoCircle::<span class="name">setRadius</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>radius</i>)</h3>
+<p>Sets the radius in meters of this geo circle to <i>radius</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="qgeocircle.html#radius-prop">radius</a>. </p><p><b>See also </b><a href="qgeocircle.html#radius">radius</a>().</p>
+<!-- @@@setRadius -->
+<!-- $$$toString[overload1]$$$toString -->
+<h3 class="fn" id="toString"><a name="toString"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QGeoCircle::<span class="name">toString</span>() const</h3>
+<p>Returns the geo circle properties as a string.</p>
+<p>This function was introduced in  Qt 5.5.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@toString -->
+<!-- $$$translate[overload1]$$$translatedoubledouble -->
+<h3 class="fn" id="translate"><a name="translate"></a><span class="type">void</span> QGeoCircle::<span class="name">translate</span>(<span class="type">double</span> <i>degreesLatitude</i>, <span class="type">double</span> <i>degreesLongitude</i>)</h3>
+<p>Translates this geo circle by <i>degreesLatitude</i> northwards and <i>degreesLongitude</i> eastwards.</p>
+<p>Negative values of <i>degreesLatitude</i> and <i>degreesLongitude</i> correspond to southward and westward translation respectively.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@translate -->
+<!-- $$$translated[overload1]$$$translateddoubledouble -->
+<h3 class="fn" id="translated"><a name="translated"></a><span class="type"><a href="qgeocircle.html#QGeoCircle">QGeoCircle</a></span> QGeoCircle::<span class="name">translated</span>(<span class="type">double</span> <i>degreesLatitude</i>, <span class="type">double</span> <i>degreesLongitude</i>) const</h3>
+<p>Returns a copy of this geo circle translated by <i>degreesLatitude</i> northwards and <i>degreesLongitude</i> eastwards.</p>
+<p>Negative values of <i>degreesLatitude</i> and <i>degreesLongitude</i> correspond to southward and westward translation respectively.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<p><b>See also </b><a href="qgeocircle.html#translate">translate</a>().</p>
+<!-- @@@translated -->
+<!-- $$$operator!=[overload1]$$$operator!=constQGeoCircle& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> QGeoCircle::<span class="name">operator!=</span>(const <span class="type"><a href="qgeocircle.html#QGeoCircle">QGeoCircle</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns whether this geo circle is not equal to <i>other</i>.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQGeoCircle& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> QGeoCircle::<span class="name">operator==</span>(const <span class="type"><a href="qgeocircle.html#QGeoCircle">QGeoCircle</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns whether this geo circle is equal to <i>other</i>.</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

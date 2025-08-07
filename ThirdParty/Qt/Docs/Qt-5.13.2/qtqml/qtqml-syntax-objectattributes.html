@@ -1,0 +1,826 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- objectattributes.qdoc -->
+  <title>QML Object Attributes | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td >QML Object Attributes</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#attributes-in-object-declarations">Attributes in Object Declarations</a></li>
+<li class="level2"><a href="#the-id-attribute">The <i>id</i> Attribute</a></li>
+<li class="level2"><a href="#property-attributes">Property Attributes</a></li>
+<li class="level2"><a href="#signal-attributes">Signal Attributes</a></li>
+<li class="level2"><a href="#signal-handler-attributes">Signal Handler Attributes</a></li>
+<li class="level2"><a href="#method-attributes">Method Attributes</a></li>
+<li class="level2"><a href="#attached-properties-and-attached-signal-handlers">Attached Properties and Attached Signal Handlers</a></li>
+<li class="level2"><a href="#enumeration-attributes">Enumeration Attributes</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QML Object Attributes</h1>
+<span class="subtitle"></span>
+<!-- $$$qtqml-syntax-objectattributes.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Every QML object type has a defined set of attributes. Each instance of an object type is created with the set of attributes that have been defined for that object type. There are several different kinds of attributes which can be specified, which are described below.</p>
+<a name="attributes-in-object-declarations"></a>
+<h2 id="attributes-in-object-declarations">Attributes in Object Declarations</h2>
+<p>An <a href="qtqml-syntax-basics.html#object-declarations">object declaration</a> in a QML document defines a new type. It also declares an object hierarchy that will be instantiated should an instance of that newly defined type be created.</p>
+<p>The set of QML object-type attribute types is as follows:</p>
+<ul>
+<li>the <i>id</i> attribute</li>
+<li>property attributes</li>
+<li>signal attributes</li>
+<li>signal handler attributes</li>
+<li>method attributes</li>
+<li>attached properties and attached signal handler attributes</li>
+<li>enumeration attributes</li>
+</ul>
+<p>These attributes are discussed in detail below.</p>
+<a name="the-id-attribute"></a>
+<h3 id="the-id-attribute">The <i>id</i> Attribute</h3>
+<p>Every QML object type has exactly one <i>id</i> attribute. This attribute is provided by the language itself, and cannot be redefined or overridden by any QML object type.</p>
+<p>A value may be assigned to the <i>id</i> attribute of an object instance to allow that object to be identified and referred to by other objects. This <code>id</code> must begin with a lower-case letter or an underscore, and cannot contain characters other than letters, numbers and underscores.</p>
+<p>Below is a <a href="../qtquick/qml-qtquick-textinput.html">TextInput</a> object and a <a href="../qtquick/qml-qtquick-text.html">Text</a> object. The <a href="../qtquick/qml-qtquick-textinput.html">TextInput</a> object's <code>id</code> value is set to &quot;myTextInput&quot;. The <a href="../qtquick/qml-qtquick-text.html">Text</a> object sets its <code>text</code> property to have the same value as the <code>text</code> property of the <a href="../qtquick/qml-qtquick-textinput.html">TextInput</a>, by referring to <code>myTextInput.text</code>. Now, both items will display the same text:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-column.html">Column</a></span> {
+      <span class="name">width</span>: <span class="number">200</span>; <span class="name">height</span>: <span class="number">200</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-textinput.html">TextInput</a></span> { <span class="name">id</span>: <span class="name">myTextInput</span>; <span class="name">text</span>: <span class="string">&quot;Hello World&quot;</span> }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="name">myTextInput</span>.<span class="name">text</span> }
+  }
+
+</pre>
+<p>An object can be referred to by its <code>id</code> from anywhere within the <i>component scope</i> in which it is declared. Therefore, an <code>id</code> value must always be unique within its component scope. See <a href="qtqml-documents-scope.html">Scope and Naming Resolution</a> for more information.</p>
+<p>Once an object instance is created, the value of its <i>id</i> attribute cannot be changed. While it may look like an ordinary property, the <code>id</code> attribute is <b>not</b> an ordinary <code>property</code> attribute, and special semantics apply to it; for example, it is not possible to access <code>myTextInput.id</code> in the above example.</p>
+<a name="property-attributes"></a>
+<h3 id="property-attributes">Property Attributes</h3>
+<p>A property is an attribute of an object that can be assigned a static value or bound to a dynamic expression. A property's value can be read by other objects. Generally it can also be modified by another object, unless a particular QML type has explicitly disallowed this for a specific property.</p>
+<a name="defining-property-attributes"></a>
+<h4 id="defining-property-attributes">Defining Property Attributes</h4>
+<p>A property may be defined for a type in C++ by registering a <a href="../qtcore/qobject.html#Q_PROPERTY">Q_PROPERTY</a> of a class which is then registered with the QML type system. Alternatively, a custom property of an object type may be defined in an object declaration in a QML document with the following syntax:</p>
+<pre class="cpp">
+
+  <span class="operator">[</span><span class="keyword">default</span><span class="operator">]</span> property <span class="operator">&lt;</span>propertyType<span class="operator">&gt;</span> <span class="operator">&lt;</span>propertyName<span class="operator">&gt;</span>
+
+</pre>
+<p>In this way an object declaration may <a href="qtqml-typesystem-objecttypes.html#defining-object-types-from-qml">expose a particular value</a> to outside objects or maintain some internal state more easily.</p>
+<p>Property names must begin with a lower case letter and can only contain letters, numbers and underscores. <a href="https://developer.mozilla.org/en/JavaScript/Reference/Reserved_Words">JavaScript reserved words</a> are not valid property names. The <code>default</code> keyword is optional, and modifies the semantics of the property being declared. See the upcoming section on <a href="qtqml-syntax-objectattributes.html#default-properties">default properties</a> for more information about the <code>default</code> property modifier.</p>
+<p>Declaring a custom property implicitly creates a value-change <a href="qtqml-syntax-objectattributes.html#signal-attributes">signal</a> for that property, as well as an associated <a href="qtqml-syntax-objectattributes.html#signal-handler-attributes">signal handler</a> called <i>on&lt;PropertyName&gt;Changed</i>, where <i>&lt;PropertyName&gt;</i> is the name of the property, with the first letter capitalized.</p>
+<p>For example, the following object declaration defines a new type which derives from the Rectangle base type. It has two new properties, with a <a href="qtqml-syntax-objectattributes.html#signal-handler-attributes">signal handler</a> implemented for one of those new properties:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      property <span class="type"><a href="../qtquick/qml-color.html">color</a></span> <span class="name">previousColor</span>
+      property <span class="type"><a href="../qtquick/qml-color.html">color</a></span> <span class="name">nextColor</span>
+      <span class="name">onNextColorChanged</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;The next color will be: &quot;</span> <span class="operator">+</span> <span class="name">nextColor</span>.<span class="name">toString</span>())
+  }
+
+</pre>
+<a name="valid-types-in-custom-property-definitions"></a>
+<h5 id="valid-types-in-custom-property-definitions">Valid Types in Custom Property Definitions</h5>
+<p>Any of the <a href="qtqml-typesystem-basictypes.html">QML Basic Types</a> aside from the <a href="qml-enumeration.html">enumeration</a> type can be used as custom property types. For example, these are all valid property declarations:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      property <span class="type"><a href="qml-int.html">int</a></span> <span class="name">someNumber</span>
+      property <span class="type"><a href="qml-string.html">string</a></span> <span class="name">someString</span>
+      property <span class="type"><a href="qml-url.html">url</a></span> <span class="name">someUrl</span>
+  }
+
+</pre>
+<p>(Enumeration values are simply whole number values and can be referred to with the <a href="qml-int.html">int</a> type instead.)</p>
+<p>Some basic types are provided by the <code>QtQuick</code> module and thus cannot be used as property types unless the module is imported. See the <a href="qtqml-typesystem-basictypes.html">QML Basic Types</a> documentation for more details.</p>
+<p>Note the <a href="qml-var.html">var</a> basic type is a generic placeholder type that can hold any type of value, including lists and objects:</p>
+<pre class="cpp">
+
+  property var someNumber: <span class="number">1.5</span>
+  property var someString: <span class="string">&quot;abc&quot;</span>
+  property var someBool: <span class="keyword">true</span>
+  property var someList: <span class="operator">[</span><span class="number">1</span><span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="string">&quot;three&quot;</span><span class="operator">,</span> <span class="string">&quot;four&quot;</span><span class="operator">]</span>
+  property var someObject: Rectangle { width: <span class="number">100</span>; height: <span class="number">100</span>; color: <span class="string">&quot;red&quot;</span> }
+
+</pre>
+<p>Additionally, any <a href="qtqml-typesystem-objecttypes.html">QML object type</a> can be used as a property type. For example:</p>
+<pre class="cpp">
+
+  property Item someItem
+  property Rectangle someRectangle
+
+</pre>
+<p>This applies to <a href="qtqml-typesystem-objecttypes.html#defining-object-types-from-qml">custom QML types</a> as well. If a QML type was defined in a file named <code>ColorfulButton.qml</code> (in a directory which was then imported by the client), then a property of type <code>ColorfulButton</code> would also be valid.</p>
+<a name="assigning-values-to-property-attributes"></a>
+<h4 id="assigning-values-to-property-attributes">Assigning Values to Property Attributes</h4>
+<p>The value of a property of an object instance may be specified in two separate ways:</p>
+<ul>
+<li>a value assignment on initialization</li>
+<li>an imperative value assignment</li>
+</ul>
+<p>In either case, the value may be either a <i>static</i> value or a <i>binding expression</i> value.</p>
+<a name="value-assignment-on-initialization"></a>
+<h5 id="value-assignment-on-initialization">Value Assignment on Initialization</h5>
+<p>The syntax for assigning a value to a property on initialization is:</p>
+<pre class="cpp">
+
+  <span class="operator">&lt;</span>propertyName<span class="operator">&gt;</span> : <span class="operator">&lt;</span>value<span class="operator">&gt;</span>
+
+</pre>
+<p>An initialization value assignment may be combined with a property definition in an object declaration, if desired. In that case, the syntax of the property definition becomes:</p>
+<pre class="cpp">
+
+  <span class="operator">[</span><span class="keyword">default</span><span class="operator">]</span> property <span class="operator">&lt;</span>propertyType<span class="operator">&gt;</span> <span class="operator">&lt;</span>propertyName<span class="operator">&gt;</span> : <span class="operator">&lt;</span>value<span class="operator">&gt;</span>
+
+</pre>
+<p>An example of property value initialization follows:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">color</span>: <span class="string">&quot;red&quot;</span>
+      property <span class="type"><a href="../qtquick/qml-color.html">color</a></span> <span class="name">nextColor</span>: <span class="string">&quot;blue&quot;</span> <span class="comment">// combined property declaration and initialization</span>
+  }
+
+</pre>
+<a name="imperative-value-assignment"></a>
+<h5 id="imperative-value-assignment">Imperative Value Assignment</h5>
+<p>An imperative value assignment is where a property value (either static value or binding expression) is assigned to a property from imperative JavaScript code. The syntax of an imperative value assignment is just the JavaScript assignment operator, as shown below:</p>
+<pre class="cpp">
+
+  <span class="operator">[</span><span class="operator">&lt;</span>objectId<span class="operator">&gt;</span><span class="operator">.</span><span class="operator">]</span><span class="operator">&lt;</span>propertyName<span class="operator">&gt;</span> <span class="operator">=</span> value
+
+</pre>
+<p>An example of imperative value assignment follows:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">rect</span>
+      <span class="name">Component</span>.onCompleted: {
+          <span class="name">rect</span>.<span class="name">color</span> <span class="operator">=</span> <span class="string">&quot;red&quot;</span>
+      }
+  }
+
+</pre>
+<a name="static-values-and-binding-expression-values"></a>
+<h4 id="static-values-and-binding-expression-values">Static Values and Binding Expression Values</h4>
+<p>As previously noted, there are two kinds of values which may be assigned to a property: <i>static</i> values, and <i>binding expression</i> values. The latter are also known as <a href="qtqml-syntax-propertybinding.html">property bindings</a>.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Kind</th><th >Semantics</th></tr></thead>
+<tr valign="top" class="odd"><td >Static Value</td><td >A constant value which does not depend on other properties.</td></tr>
+<tr valign="top" class="even"><td >Binding Expression</td><td >A JavaScript expression which describes a property's relationship with other properties. The variables in this expression are called the property's <i>dependencies</i>.<p>The QML engine enforces the relationship between a property and its dependencies. When any of the dependencies change in value, the QML engine automatically re-evaluates the binding expression and assigns the new result to the property.</p>
+</td></tr>
+</table></div>
+<p>Here is an example that shows both kinds of values being assigned to properties:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="comment">// both of these are static value assignments on initialization</span>
+      <span class="name">width</span>: <span class="number">400</span>
+      <span class="name">height</span>: <span class="number">200</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="comment">// both of these are binding expression value assignments on initialization</span>
+          <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">2</span>
+          <span class="name">height</span>: <span class="name">parent</span>.<span class="name">height</span>
+      }
+  }
+
+</pre>
+<p><b>Note: </b>To assign a binding expression imperatively, the binding expression must be contained in a function that is passed into <a href="qml-qtqml-qt.html#binding-method">Qt.binding()</a>, and then the value returned by Qt.binding() must be assigned to the property. In contrast, Qt.binding() must not be used when assigning a binding expression upon initialization. See <a href="qtqml-syntax-propertybinding.html">Property Binding</a> for more information.</p><a name="type-safety"></a>
+<h4 id="type-safety">Type Safety</h4>
+<p>Properties are type safe. A property can only be assigned a value that matches the property type.</p>
+<p>For example, if a property is a real, and if you try to assign a string to it, you will get an error:</p>
+<pre class="cpp">
+
+  property <span class="type">int</span> volume: <span class="string">&quot;four&quot;</span>  <span class="comment">// generates an error; the property's object will not be loaded</span>
+
+</pre>
+<p>Likewise if a property is assigned a value of the wrong type during run time, the new value will not be assigned, and an error will be generated.</p>
+<p>Some property types do not have a natural value representation, and for those property types the QML engine automatically performs string-to-typed-value conversion. So, for example, even though properties of the <code>color</code> type store colors and not strings, you are able to assign the string <code>&quot;red&quot;</code> to a color property, without an error being reported.</p>
+<p>See <a href="qtqml-typesystem-basictypes.html">QML Basic Types</a> for a list of the types of properties that are supported by default. Additionally, any available <a href="qtqml-typesystem-objecttypes.html">QML object type</a> may also be used as a property type.</p>
+<a name="special-property-types"></a>
+<h4 id="special-property-types">Special Property Types</h4>
+<a name="object-list-property-attributes"></a>
+<h5 id="object-list-property-attributes">Object List Property Attributes</h5>
+<p>A <a href="qml-list.html">list</a> type property can be assigned a list of QML object-type values. The syntax for defining an object list value is a comma-separated list surrounded by square brackets:</p>
+<pre class="cpp">
+
+  <span class="operator">[</span> <span class="operator">&lt;</span>item <span class="number">1</span><span class="operator">&gt;</span><span class="operator">,</span> <span class="operator">&lt;</span>item <span class="number">2</span><span class="operator">&gt;</span><span class="operator">,</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> <span class="operator">]</span>
+
+</pre>
+<p>For example, the <a href="../qtquick/qml-qtquick-item.html">Item</a> type has a <a href="../qtquick/qml-qtquick-item.html#states-prop">states</a> property that is used to hold a list of <a href="qml-qtqml-statemachine-state.html">State</a> type objects. The code below initializes the value of this property to a list of three <a href="qml-qtqml-statemachine-state.html">State</a> objects:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">states</span>: [
+          <span class="type"><a href="qml-qtqml-statemachine-state.html">State</a></span> { <span class="name">name</span>: <span class="string">&quot;loading&quot;</span> },
+          <span class="type"><a href="qml-qtqml-statemachine-state.html">State</a></span> { <span class="name">name</span>: <span class="string">&quot;running&quot;</span> },
+          <span class="type"><a href="qml-qtqml-statemachine-state.html">State</a></span> { <span class="name">name</span>: <span class="string">&quot;stopped&quot;</span> }
+      ]
+  }
+
+</pre>
+<p>If the list contains a single item, the square brackets may be omitted:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">states</span>: <span class="name">State</span> { <span class="name">name</span>: <span class="string">&quot;running&quot;</span> }
+  }
+
+</pre>
+<p>A <a href="qml-list.html">list</a> type property may be specified in an object declaration with the following syntax:</p>
+<pre class="cpp">
+
+  <span class="operator">[</span><span class="keyword">default</span><span class="operator">]</span> property list<span class="operator">&lt;</span><span class="operator">&lt;</span>objectType<span class="operator">&gt;</span><span class="operator">&gt;</span> propertyName
+
+</pre>
+<p>and, like other property declarations, a property initialization may be combined with the property declaration with the following syntax:</p>
+<pre class="cpp">
+
+  <span class="operator">[</span><span class="keyword">default</span><span class="operator">]</span> property list<span class="operator">&lt;</span><span class="operator">&lt;</span>objectType<span class="operator">&gt;</span><span class="operator">&gt;</span> propertyName: <span class="operator">&lt;</span>value<span class="operator">&gt;</span>
+
+</pre>
+<p>An example of list property declaration follows:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="comment">// declaration without initialization</span>
+      property list&lt;<span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span>&gt; <span class="name">siblingRects</span>
+
+      <span class="comment">// declaration with initialization</span>
+      property list&lt;<span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span>&gt; <span class="name">childRects</span>: [
+          <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> { <span class="name">color</span>: <span class="string">&quot;red&quot;</span> },
+          <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> { <span class="name">color</span>: <span class="string">&quot;blue&quot;</span>}
+      ]
+  }
+
+</pre>
+<p>If you wish to declare a property to store a list of values which are not necessarily QML object-type values, you should declare a <a href="qml-var.html">var</a> property instead.</p>
+<a name="grouped-properties"></a>
+<h5 id="grouped-properties">Grouped Properties</h5>
+<p>In some cases properties contain a logical group of sub-property attributes. These sub-property attributes can be assigned to using either the dot notation or group notation.</p>
+<p>For example, the <a href="../qtquick/qml-qtquick-text.html">Text</a> type has a <a href="../qtquick/qml-qtquick-text.html#font.family-prop">font</a> group property. Below, the first <a href="../qtquick/qml-qtquick-text.html">Text</a> object initializes its <code>font</code> values using dot notation, while the second uses group notation:</p>
+<pre class="cpp">
+
+  Text {
+      <span class="comment">//dot notation</span>
+      font<span class="operator">.</span>pixelSize: <span class="number">12</span>
+      font<span class="operator">.</span>b: <span class="keyword">true</span>
+  }
+
+  Text {
+      <span class="comment">//group notation</span>
+      font { pixelSize: <span class="number">12</span>; b: <span class="keyword">true</span> }
+  }
+
+</pre>
+<p>Grouped property types are basic types which have subproperties. Some of these basic types are provided by the QML language, while others may only be used if the Qt Quick module is imported. See the documentation about <a href="qtqml-typesystem-basictypes.html">QML Basic Types</a> for more information.</p>
+<a name="property-aliases"></a>
+<h4 id="property-aliases">Property Aliases</h4>
+<p>Property aliases are properties which hold a reference to another property. Unlike an ordinary property definition, which allocates a new, unique storage space for the property, a property alias connects the newly declared property (called the aliasing property) as a direct reference to an existing property (the aliased property).</p>
+<p>A property alias declaration looks like an ordinary property definition, except that it requires the <code>alias</code> keyword instead of a property type, and the right-hand-side of the property declaration must be a valid alias reference:</p>
+<pre class="cpp">
+
+  <span class="operator">[</span><span class="keyword">default</span><span class="operator">]</span> property alias <span class="operator">&lt;</span>name<span class="operator">&gt;</span>: <span class="operator">&lt;</span>alias reference<span class="operator">&gt;</span>
+
+</pre>
+<p>Unlike an ordinary property, an alias has the following restrictions:</p>
+<ul>
+<li>It can only refer to an object, or the property of an object, that is within the scope of the <a href="qtqml-typesystem-objecttypes.html">type</a> within which the alias is declared.</li>
+<li>It cannot contain arbitrary JavaScript expressions</li>
+<li>It cannot refer to objects declared outside of the scope of its type.</li>
+<li>The <i>alias reference</i> is not optional, unlike the optional default value for an ordinary property; the alias reference must be provided when the alias is first declared.</li>
+<li>It cannot refer to <a href="qtqml-syntax-objectattributes.html#attached-properties-and-attached-signal-handlers">attached properties</a>.</li>
+<li>It cannot refer to grouped properties; the following code will not work:<pre class="cpp">
+
+  property alias color: rectangle<span class="operator">.</span>border<span class="operator">.</span>color
+
+  Rectangle {
+      id: rectangle
+  }
+
+</pre>
+<p>However, aliases to <a href="qtqml-typesystem-basictypes.html">value type</a> properties do work:</p>
+<pre class="cpp">
+
+  property alias rectX: object<span class="operator">.</span>rectProperty<span class="operator">.</span>x
+
+  Item {
+      id: object
+      property rect rectProperty
+  }
+
+</pre>
+</li>
+</ul>
+<p>For example, below is a <code>Button</code> type with a <code>buttonText</code> aliased property which is connected to the <code>text</code> object of the <a href="../qtquick/qml-qtquick-text.html">Text</a> child:</p>
+<pre class="qml">
+
+  <span class="comment">// Button.qml</span>
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      property <span class="type">alias</span> <span class="name">buttonText</span>: <span class="name">textItem</span>.<span class="name">text</span>
+
+      <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">30</span>; <span class="name">color</span>: <span class="string">&quot;yellow&quot;</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> { <span class="name">id</span>: <span class="name">textItem</span> }
+  }
+
+</pre>
+<p>The following code would create a <code>Button</code> with a defined text string for the child <a href="../qtquick/qml-qtquick-text.html">Text</a> object:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-button.html">Button</a></span> { <span class="name">buttonText</span>: <span class="string">&quot;Click Me&quot;</span> }
+
+</pre>
+<p>Here, modifying <code>buttonText</code> directly modifies the textItem.text value; it does not change some other value that then updates textItem.text. If <code>buttonText</code> was not an alias, changing its value would not actually change the displayed text at all, as property bindings are not bi-directional: the <code>buttonText</code> value would have changed if textItem.text was changed, but not the other way around.</p>
+<a name="considerations-for-property-aliases"></a>
+<h5 id="considerations-for-property-aliases">Considerations for Property Aliases</h5>
+<p>Aliases are only activated once a component has been fully initialized. An error is generated when an uninitialized alias is referenced. Likewise, aliasing an aliasing property will also result in an error.</p>
+<pre class="qml">
+
+  property <span class="type">alias</span> <span class="name">widgetLabel</span>: <span class="name">label</span>
+
+  <span class="comment">//will generate an error</span>
+  <span class="comment">//widgetLabel.text: &quot;Initial text&quot;</span>
+
+  <span class="comment">//will generate an error</span>
+  <span class="comment">//property alias widgetLabelText: widgetLabel.text</span>
+
+  <span class="name">Component</span>.onCompleted: <span class="name">widgetLabel</span>.<span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Alias completed Initialization&quot;</span>
+
+</pre>
+<p>When importing a <a href="qtqml-typesystem-objecttypes.html">QML object type</a> with a property alias in the root object, however, the property appear as a regular Qt property and consequently can be used in alias references.</p>
+<p>It is possible for an aliasing property to have the same name as an existing property, effectively overwriting the existing property. For example, the following QML type has a <code>color</code> alias property, named the same as the built-in <a href="../qtquick/qml-qtquick-rectangle.html#color-prop">Rectangle::color</a> property:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">coloredrectangle</span>
+      property <span class="type">alias</span> <span class="name">color</span>: <span class="name">bluerectangle</span>.<span class="name">color</span>
+      <span class="name">color</span>: <span class="string">&quot;red&quot;</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">bluerectangle</span>
+          <span class="name">color</span>: <span class="string">&quot;#1234ff&quot;</span>
+      }
+
+      <span class="name">Component</span>.onCompleted: {
+          <span class="name">console</span>.<span class="name">log</span> (<span class="name">coloredrectangle</span>.<span class="name">color</span>)    <span class="comment">//prints &quot;#1234ff&quot;</span>
+          <span class="name">setInternalColor</span>()
+          <span class="name">console</span>.<span class="name">log</span> (<span class="name">coloredrectangle</span>.<span class="name">color</span>)    <span class="comment">//prints &quot;#111111&quot;</span>
+          <span class="name">coloredrectangle</span>.<span class="name">color</span> <span class="operator">=</span> <span class="string">&quot;#884646&quot;</span>
+          <span class="name">console</span>.<span class="name">log</span> (<span class="name">coloredrectangle</span>.<span class="name">color</span>)    <span class="comment">//prints #884646</span>
+      }
+
+      <span class="comment">//internal function that has access to internal properties</span>
+      <span class="keyword">function</span> <span class="name">setInternalColor</span>() {
+          <span class="name">color</span> <span class="operator">=</span> <span class="string">&quot;#111111&quot;</span>
+      }
+  }
+
+</pre>
+<p>Any object that use this type and refer to its <code>color</code> property will be referring to the alias rather than the ordinary <a href="../qtquick/qml-qtquick-rectangle.html#color-prop">Rectangle::color</a> property. Internally, however, the rectangle can correctly set its <code>color</code> property and refer to the actual defined property rather than the alias.</p>
+<a name="property-aliases-and-types"></a>
+<h5 id="property-aliases-and-types">Property Aliases and Types</h5>
+<p>Property aliases cannot have explicit type specifications. The type of a property alias is the <i>declared</i> type of the property or object it refers to. Therefore, if you create an alias to an object referenced via id with extra properties declared inline, the extra properties won't be accessible through the alias:</p>
+<pre class="qml">
+
+  <span class="comment">// MyItem.qml</span>
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      property <span class="type">alias</span> <span class="name">inner</span>: <span class="name">innerItem</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+          <span class="name">id</span>: <span class="name">innerItem</span>
+          property <span class="type"><a href="qml-int.html">int</a></span> <span class="name">extraProperty</span>
+      }
+  }
+
+</pre>
+<p>You cannot initialize <i>inner.extraProperty</i> from outside of this component, as inner is only an <i>Item</i>:</p>
+<pre class="qml">
+
+  <span class="comment">// main.qml</span>
+  <span class="type">MyItem</span> {
+      <span class="name">inner</span>.extraProperty: <span class="number">5</span> <span class="comment">// fails</span>
+  }
+
+</pre>
+<p>However, if you extract the inner object into a separate component with a dedicated .qml file, you can instantiate that component instead and have all its properties available through the alias:</p>
+<pre class="qml">
+
+  // MainItem.qml
+  Item {
+      // Now you can access inner.extraProperty, as inner is now an ExtraItem
+      property alias inner: innerItem
+
+      ExtraItem {
+          id: innerItem
+      }
+  }
+
+  // ExtraItem.qml
+  Item {
+      property int extraProperty
+  }
+
+</pre>
+<a name="default-properties"></a>
+<h4 id="default-properties">Default Properties</h4>
+<p>An object definition can have a single <i>default</i> property. A default property is the property to which a value is assigned if an object is declared within another object's definition without declaring it as a value for a particular property.</p>
+<p>Declaring a property with the optional <code>default</code> keyword marks it as the default property. For example, say there is a file MyLabel.qml with a default property <code>someText</code>:</p>
+<pre class="qml">
+
+  <span class="comment">// MyLabel.qml</span>
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+      default property <span class="type"><a href="qml-var.html">var</a></span> <span class="name">someText</span>
+
+      <span class="name">text</span>: <span class="string">&quot;Hello, &quot;</span> <span class="operator">+</span> <span class="name">someText</span>.<span class="name">text</span>
+  }
+
+</pre>
+<p>The <code>someText</code> value could be assigned to in a <code>MyLabel</code> object definition, like this:</p>
+<pre class="qml">
+
+  <span class="type">MyLabel</span> {
+      <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="string">&quot;world!&quot;</span> }
+  }
+
+</pre>
+<p>This has exactly the same effect as the following:</p>
+<pre class="qml">
+
+  <span class="type">MyLabel</span> {
+      <span class="name">someText</span>: <span class="name">Text</span> { <span class="name">text</span>: <span class="string">&quot;world!&quot;</span> }
+  }
+
+</pre>
+<p>However, since the <code>someText</code> property has been marked as the default property, it is not necessary to explicitly assign the <a href="../qtquick/qml-qtquick-text.html">Text</a> object to this property.</p>
+<p>You will notice that child objects can be added to any <a href="../qtquick/qml-qtquick-item.html">Item</a>-based type without explicitly adding them to the <a href="../qtquick/qml-qtquick-item.html#children-prop">children</a> property. This is because the default property of <a href="../qtquick/qml-qtquick-item.html">Item</a> is its <code>data</code> property, and any items added to this list for an <a href="../qtquick/qml-qtquick-item.html">Item</a> are automatically added to its list of <a href="../qtquick/qml-qtquick-item.html#children-prop">children</a>.</p>
+<p>Default properties can be useful for reassigning the children of an item. See the <a href="../qtquick/qtquick-customitems-tabwidget-example.html">TabWidget Example</a>, which uses a default property to automatically reassign children of the TabWidget as children of an inner <a href="../qtquick/qml-qtquick-listview.html">ListView</a>. See also <a href="../qtquick/qtquick-codesamples.html#extending-qml">Extending QML</a>.</p>
+<a name="read-only-properties"></a>
+<h4 id="read-only-properties">Read-Only Properties</h4>
+<p>An object declaration may define a read-only property using the <code>readonly</code> keyword, with the following syntax:</p>
+<pre class="cpp">
+
+  readonly property <span class="operator">&lt;</span>propertyType<span class="operator">&gt;</span> <span class="operator">&lt;</span>propertyName<span class="operator">&gt;</span> : <span class="operator">&lt;</span>initialValue<span class="operator">&gt;</span>
+
+</pre>
+<p>Read-only properties must be assigned a value on initialization. After a read-only property is initialized, it no longer possible to give it a value, whether from imperative code or otherwise.</p>
+<p>For example, the code in the <code>Component.onCompleted</code> block below is invalid:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      readonly property <span class="type"><a href="qml-int.html">int</a></span> <span class="name">someNumber</span>: <span class="number">10</span>
+
+      <span class="name">Component</span>.onCompleted: <span class="name">someNumber</span> <span class="operator">=</span> <span class="number">20</span>  <span class="comment">// doesn't work, causes an error</span>
+  }
+
+</pre>
+<p><b>Note: </b>A read-only property cannot also be a <a href="qtqml-syntax-objectattributes.html#default-properties">default</a> property.</p><a name="property-modifier-objects"></a>
+<h4 id="property-modifier-objects">Property Modifier Objects</h4>
+<p>Properties can have <a href="qtqml-cppintegration-definetypes.html#property-modifier-types">property value modifier objects</a> associated with them. The syntax for declaring an instance of a property modifier type associated with a particular property is as follows:</p>
+<pre class="cpp">
+
+  <span class="operator">&lt;</span>PropertyModifierTypeName<span class="operator">&gt;</span> on <span class="operator">&lt;</span>propertyName<span class="operator">&gt;</span> {
+      <span class="comment">// attributes of the object instance</span>
+  }
+
+</pre>
+<p>It is important to note that the above syntax is in fact an <a href="qtqml-syntax-basics.html#object-declarations">object declaration</a> which will instantiate an object which acts on a pre-existing property.</p>
+<p>Certain property modifier types may only be applicable to specific property types, however this is not enforced by the language. For example, the <code>NumberAnimation</code> type provided by <code>QtQuick</code> will only animate numeric-type (such as <code>int</code> or <code>real</code>) properties. Attempting to use a <code>NumberAnimation</code> with non-numeric property will not result in an error, however the non-numeric property will not be animated. The behavior of a property modifier type when associated with a particular property type is defined by its implementation.</p>
+<a name="signal-attributes"></a>
+<h3 id="signal-attributes">Signal Attributes</h3>
+<p>A signal is a notification from an object that some event has occurred: for example, a property has changed, an animation has started or stopped, or when an image has been downloaded. The <a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a> type, for example, has a <a href="../qtquick/qml-qtquick-mousearea.html#clicked-signal">clicked</a> signal that is emitted when the user clicks within the mouse area.</p>
+<p>An object can be notified through a <a href="qtqml-syntax-objectattributes.html#signal-handler-attributes">signal handler</a> whenever a particular signal is emitted. A signal handler is declared with the syntax <i>on&lt;Signal&gt;</i> where <i>&lt;Signal&gt;</i> is the name of the signal, with the first letter capitalized. The signal handler must be declared within the definition of the object that emits the signal, and the handler should contain the block of JavaScript code to be executed when the signal handler is invoked.</p>
+<p>For example, the <i>onClicked</i> signal handler below is declared within the <a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a> object definition, and is invoked when the <a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a> is clicked, causing a console message to be printed:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">onClicked</span>: {
+              <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Click!&quot;</span>)
+          }
+      }
+  }
+
+</pre>
+<a name="defining-signal-attributes"></a>
+<h4 id="defining-signal-attributes">Defining Signal Attributes</h4>
+<p>A signal may be defined for a type in C++ by registering a <a href="../qtcore/qobject.html#Q_SIGNAL">Q_SIGNAL</a> of a class which is then registered with the QML type system. Alternatively, a custom signal for an object type may be defined in an object declaration in a QML document with the following syntax:</p>
+<pre class="cpp">
+
+  signal <span class="operator">&lt;</span>signalName<span class="operator">&gt;</span><span class="operator">[</span>(<span class="operator">[</span><span class="operator">&lt;</span>type<span class="operator">&gt;</span> <span class="operator">&lt;</span>parameter name<span class="operator">&gt;</span><span class="operator">[</span><span class="operator">,</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span><span class="operator">]</span><span class="operator">]</span>)<span class="operator">]</span>
+
+</pre>
+<p>Attempting to declare two signals or methods with the same name in the same type block is an error. However, a new signal may reuse the name of an existing signal on the type. (This should be done with caution, as the existing signal may be hidden and become inaccessible.)</p>
+<p>Here are three examples of signal declarations:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      signal <span class="type">clicked</span>
+      signal <span class="type">hovered</span>()
+      signal <span class="type">actionPerformed</span>(string action, var actionResult)
+  }
+
+</pre>
+<p>If the signal has no parameters, the &quot;()&quot; brackets are optional. If parameters are used, the parameter types must be declared, as for the <code>string</code> and <code>var</code> arguments for the <code>actionPerformed</code> signal above. The allowed parameter types are the same as those listed under <a href="qtqml-syntax-objectattributes.html#defining-property-attributes">Defining Property Attributes</a> on this page.</p>
+<p>To emit a signal, invoke it as a method. Any relevant <a href="qtqml-syntax-objectattributes.html#signal-handler-attributes">signal handlers</a> will be invoked when the signal is emitted, and handlers can use the defined signal argument names to access the respective arguments.</p>
+<a name="property-change-signals"></a>
+<h4 id="property-change-signals">Property Change Signals</h4>
+<p>QML types also provide built-in <i>property change signals</i> that are emitted whenever a property value changes, as previously described in the section on <a href="qtqml-syntax-objectattributes.html#property-attributes">property attributes</a>. See the upcoming section on <a href="qtqml-syntax-signals.html#property-change-signal-handlers">property change signal handlers</a> for more information about why these signals are useful, and how to use them.</p>
+<a name="signal-handler-attributes"></a>
+<h3 id="signal-handler-attributes">Signal Handler Attributes</h3>
+<p>Signal handlers are a special sort of <a href="qtqml-syntax-objectattributes.html#method-attributes">method attribute</a>, where the method implementation is invoked by the QML engine whenever the associated signal is emitted. Adding a signal to an object definition in QML will automatically add an associated signal handler to the object definition, which has, by default, an empty implementation. Clients can provide an implementation, to implement program logic.</p>
+<p>Consider the following <code>SquareButton</code> type, whose definition is provided in the <code>SquareButton.qml</code> file as shown below, with signals <code>activated</code> and <code>deactivated</code>:</p>
+<pre class="qml">
+
+  <span class="comment">// SquareButton.qml</span>
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">root</span>
+
+      signal <span class="type">activated</span>(real xPosition, real yPosition)
+      signal <span class="type">deactivated</span>
+
+      property <span class="type"><a href="qml-int.html">int</a></span> <span class="name">side</span>: <span class="number">100</span>
+      <span class="name">width</span>: <span class="name">side</span>; <span class="name">height</span>: <span class="name">side</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">onPressed</span>: <span class="name">root</span>.<span class="name">activated</span>(<span class="name">mouse</span>.<span class="name">x</span>, <span class="name">mouse</span>.<span class="name">y</span>)
+          <span class="name">onReleased</span>: <span class="name">root</span>.<span class="name">deactivated</span>()
+      }
+  }
+
+</pre>
+<p>These signals could be received by any <code>SquareButton</code> objects in another QML file in the same directory, where implementations for the signal handlers are provided by the client:</p>
+<pre class="qml">
+
+  <span class="comment">// myapplication.qml</span>
+  <span class="type">SquareButton</span> {
+      <span class="name">onActivated</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Activated at &quot;</span> <span class="operator">+</span> <span class="name">xPosition</span> <span class="operator">+</span> <span class="string">&quot;,&quot;</span> <span class="operator">+</span> <span class="name">yPosition</span>)
+      <span class="name">onDeactivated</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Deactivated!&quot;</span>)
+  }
+
+</pre>
+<p>See the <a href="qtqml-syntax-signals.html">Signal and Handler Event System</a> for more details on use of signals.</p>
+<a name="property-change-signal-handlers"></a>
+<h4 id="property-change-signal-handlers">Property Change Signal Handlers</h4>
+<p>Signal handlers for property change signal take the syntax form <i>on&lt;Property&gt;Changed</i> where <i>&lt;Property&gt;</i> is the name of the property, with the first letter capitalized. For example, although the <a href="../qtquick/qml-qtquick-textinput.html">TextInput</a> type documentation does not document a <code>textChanged</code> signal, this signal is implicitly available through the fact that <a href="../qtquick/qml-qtquick-textinput.html">TextInput</a> has a <a href="../qtquick/qml-qtquick-textinput.html#text-prop">text</a> property and so it is possible to write an <code>onTextChanged</code> signal handler to be called whenever this property changes:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-textinput.html">TextInput</a></span> {
+      <span class="name">text</span>: <span class="string">&quot;Change this!&quot;</span>
+
+      <span class="name">onTextChanged</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Text has changed to:&quot;</span>, <span class="name">text</span>)
+  }
+
+</pre>
+<a name="method-attributes"></a>
+<h3 id="method-attributes">Method Attributes</h3>
+<p>A method of an object type is a function which may be called to perform some processing or trigger further events. A method can be connected to a signal so that it is automatically invoked whenever the signal is emitted. See <a href="qtqml-syntax-signals.html">Signal and Handler Event System</a> for more details.</p>
+<a name="defining-method-attributes"></a>
+<h4 id="defining-method-attributes">Defining Method Attributes</h4>
+<p>A method may be defined for a type in C++ by tagging a function of a class which is then registered with the QML type system with <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a> or by registering it as a <a href="../qtcore/qobject.html#Q_SLOT">Q_SLOT</a> of the class. Alternatively, a custom method can be added to an object declaration in a QML document with the following syntax:</p>
+<pre class="cpp">
+
+  function <span class="operator">&lt;</span>functionName<span class="operator">&gt;</span>(<span class="operator">[</span><span class="operator">&lt;</span>parameterName<span class="operator">&gt;</span><span class="operator">[</span><span class="operator">,</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span><span class="operator">]</span><span class="operator">]</span>) { <span class="operator">&lt;</span>body<span class="operator">&gt;</span> }
+
+</pre>
+<p>Methods can be added to a QML type in order to define standalone, reusable blocks of JavaScript code. These methods can be invoked either internally or by external objects.</p>
+<p>Unlike signals, method parameter types do not have to be declared as they default to the <code>var</code> type.</p>
+<p>Attempting to declare two methods or signals with the same name in the same type block is an error. However, a new method may reuse the name of an existing method on the type. (This should be done with caution, as the existing method may be hidden and become inaccessible.)</p>
+<p>Below is a <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> with a <code>calculateHeight()</code> method that is called when assigning the <code>height</code> value:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">rect</span>
+
+      <span class="keyword">function</span> <span class="name">calculateHeight</span>() {
+          <span class="keyword">return</span> <span class="name">rect</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">2</span>;
+      }
+
+      <span class="name">width</span>: <span class="number">100</span>
+      <span class="name">height</span>: <span class="name">calculateHeight</span>()
+  }
+
+</pre>
+<p>If the method has parameters, they are accessible by name within the method. Below, when the <a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a> is clicked it invokes the <code>moveTo()</code> method which can then refer to the received <code>newX</code> and <code>newY</code> parameters to reposition the text:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">width</span>: <span class="number">200</span>; <span class="name">height</span>: <span class="number">200</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">onClicked</span>: <span class="name">label</span>.<span class="name">moveTo</span>(<span class="name">mouse</span>.<span class="name">x</span>, <span class="name">mouse</span>.<span class="name">y</span>)
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+          <span class="name">id</span>: <span class="name">label</span>
+
+          <span class="keyword">function</span> <span class="name">moveTo</span>(newX, newY) {
+              <span class="name">label</span>.<span class="name">x</span> <span class="operator">=</span> <span class="name">newX</span>;
+              <span class="name">label</span>.<span class="name">y</span> <span class="operator">=</span> <span class="name">newY</span>;
+          }
+
+          <span class="name">text</span>: <span class="string">&quot;Move me!&quot;</span>
+      }
+  }
+
+</pre>
+<a name="attached-properties-and-attached-signal-handlers"></a>
+<h3 id="attached-properties-and-attached-signal-handlers">Attached Properties and Attached Signal Handlers</h3>
+<p><i>Attached properties</i> and <i>attached signal handlers</i> are mechanisms that enable objects to be annotated with extra properties or signal handlers that are otherwise unavailable to the object. In particular, they allow objects to access properties or signals that are specifically relevant to the individual object.</p>
+<p>A QML type implementation may choose to <a href="qtqml-cppintegration-definetypes.html#providing-attached-properties">create an <i>attaching type</i> in C++</a> with particular properties and signals. Instances of this type can then be created and <i>attached</i> to specific objects at run time, allowing those objects to access the properties and signals of the attaching type. These are accessed by prefixing the properties and respective signal handlers with the name of the attaching type.</p>
+<p>References to attached properties and handlers take the following syntax form:</p>
+<pre class="cpp">
+
+  <span class="operator">&lt;</span>AttachingType<span class="operator">&gt;</span><span class="operator">.</span><span class="operator">&lt;</span>propertyName<span class="operator">&gt;</span>
+  <span class="operator">&lt;</span>AttachingType<span class="operator">&gt;</span><span class="operator">.</span>on<span class="operator">&lt;</span>SignalName<span class="operator">&gt;</span>
+
+</pre>
+<p>For example, the <a href="../qtquick/qml-qtquick-listview.html">ListView</a> type has an attached property <a href="../qtquick/qml-qtquick-listview.html#isCurrentItem-attached-prop">ListView.isCurrentItem</a> that is available to each delegate object in a <a href="../qtquick/qml-qtquick-listview.html">ListView</a>. This can be used by each individual delegate object to determine whether it is the currently selected item in the view:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+      <span class="name">width</span>: <span class="number">240</span>; <span class="name">height</span>: <span class="number">320</span>
+      <span class="name">model</span>: <span class="number">3</span>
+      <span class="name">delegate</span>: <span class="name">Rectangle</span> {
+          <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">30</span>
+          <span class="name">color</span>: <span class="name">ListView</span>.<span class="name">isCurrentItem</span> ? <span class="string">&quot;red&quot;</span> : <span class="string">&quot;yellow&quot;</span>
+      }
+  }
+
+</pre>
+<p>In this case, the name of the <i>attaching type</i> is <code>ListView</code> and the property in question is <code>isCurrentItem</code>, hence the attached property is referred to as <code>ListView.isCurrentItem</code>.</p>
+<p>An attached signal handler is referred to in the same way. For example, the <a href="qml-qtqml-component.html#completed-signal">Component.onCompleted</a> attached signal handler is commonly used to execute some JavaScript code when a component's creation process has been completed. In the example below, once the <a href="qml-qtqml-models-listmodel.html">ListModel</a> has been fully created, its <code>Component.onCompleted</code> signal handler will automatically be invoked to populate the model:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+      <span class="name">width</span>: <span class="number">240</span>; <span class="name">height</span>: <span class="number">320</span>
+      <span class="name">model</span>: <span class="name">ListModel</span> {
+          <span class="name">id</span>: <span class="name">listModel</span>
+          <span class="name">Component</span>.onCompleted: {
+              <span class="keyword">for</span> (var i = 0; <span class="name">i</span> <span class="operator">&lt;</span> <span class="number">10</span>; i++)
+                  <span class="name">listModel</span>.<span class="name">append</span>({&quot;Name&quot;: <span class="string">&quot;Item &quot;</span> <span class="operator">+</span> <span class="name">i</span>})
+          }
+      }
+      <span class="name">delegate</span>: <span class="name">Text</span> { <span class="name">text</span>: <span class="name">index</span> }
+  }
+
+</pre>
+<p>Since the name of the <i>attaching type</i> is <code>Component</code> and that type has a <a href="qml-qtqml-component.html#completed-signal">completed</a> signal, the attached signal handler is referred to as <code>Component.onCompleted</code>.</p>
+<a name="a-note-about-accessing-attached-properties-and-signal-handlers"></a>
+<h4 id="a-note-about-accessing-attached-properties-and-signal-handlers">A Note About Accessing Attached Properties and Signal Handlers</h4>
+<p>A common error is to assume that attached properties and signal handlers are directly accessible from the children of the object to which these attributes have been attached. This is not the case. The instance of the <i>attaching type</i> is only attached to specific objects, not to the object and all of its children.</p>
+<p>For example, below is a modified version of the earlier example involving attached properties. This time, the delegate is an <a href="../qtquick/qml-qtquick-item.html">Item</a> and the colored <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> is a child of that item:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+      <span class="name">width</span>: <span class="number">240</span>; <span class="name">height</span>: <span class="number">320</span>
+      <span class="name">model</span>: <span class="number">3</span>
+      <span class="name">delegate</span>: <span class="name">Item</span> {
+          <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">30</span>
+
+          <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+              <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">30</span>
+              <span class="name">color</span>: <span class="name">ListView</span>.<span class="name">isCurrentItem</span> ? <span class="string">&quot;red&quot;</span> : <span class="string">&quot;yellow&quot;</span>    <span class="comment">// WRONG! This won't work.</span>
+          }
+      }
+  }
+
+</pre>
+<p>This does not work as expected because <code>ListView.isCurrentItem</code> is attached <i>only</i> to the root delegate object, and not its children. Since the <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> is a child of the delegate, rather than being the delegate itself, it cannot access the <code>isCurrentItem</code> attached property as <code>ListView.isCurrentItem</code>. So instead, the rectangle should access <code>isCurrentItem</code> through the root delegate:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+      <span class="comment">//....</span>
+      <span class="name">delegate</span>: <span class="name">Item</span> {
+          <span class="name">id</span>: <span class="name">delegateItem</span>
+          <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">30</span>
+
+          <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+              <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">30</span>
+              <span class="name">color</span>: <span class="name">delegateItem</span>.<span class="name">ListView</span>.<span class="name">isCurrentItem</span> ? <span class="string">&quot;red&quot;</span> : <span class="string">&quot;yellow&quot;</span>   <span class="comment">// correct</span>
+          }
+      }
+  }
+
+</pre>
+<p>Now <code>delegateItem.ListView.isCurrentItem</code> correctly refers to the <code>isCurrentItem</code> attached property of the delegate.</p>
+<a name="enumeration-attributes"></a>
+<h3 id="enumeration-attributes">Enumeration Attributes</h3>
+<p>Enumerations provide a fixed set of named choices. They can be declared in QML using the <code>enum</code> keyword:</p>
+<pre class="qml">
+
+  <span class="comment">// MyText.qml</span>
+  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+      enum TextType {
+          Normal,
+          Heading
+      }
+  }
+
+</pre>
+<p>As shown above, enumeration types (e.g&#x2e; <code>TextType</code>) and values (e.g&#x2e; <code>Normal</code>) must begin with an uppercase letter.</p>
+<p>Values are referred to via <code>&lt;Type&gt;.&lt;EnumerationType&gt;.&lt;Value&gt;</code> or <code>&lt;Type&gt;.&lt;Value&gt;</code>.</p>
+<pre class="qml">
+
+  <span class="comment">// MyText.qml</span>
+  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+      enum TextType {
+          Normal,
+          Heading
+      }
+
+      property <span class="type"><a href="qml-int.html">int</a></span> <span class="name">textType</span>: <span class="name">MyText</span>.<span class="name">TextType</span>.<span class="name">Normal</span>
+
+      <span class="name">font</span>.bold: <span class="name">textType</span> <span class="operator">==</span> <span class="name">MyText</span>.<span class="name">TextType</span>.<span class="name">Heading</span>
+      <span class="name">font</span>.pixelSize: <span class="name">textType</span> <span class="operator">==</span> <span class="name">MyText</span>.<span class="name">TextType</span>.<span class="name">Heading</span> ? <span class="number">24</span> : <span class="number">12</span>
+  }
+
+</pre>
+<p>More information on enumeration usage in QML can be found in the <a href="qtqml-typesystem-basictypes.html">QML Basic Types</a> <a href="qml-enumeration.html">enumeration</a> documentation.</p>
+<p>The ability to declare enumerations in QML was introduced in Qt 5.10.</p>
+</div>
+<!-- @@@qtqml-syntax-objectattributes.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

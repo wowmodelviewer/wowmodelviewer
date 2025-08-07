@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qpropertynoderemovedchange.cpp -->
+  <title>QPropertyNodeRemovedChange Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QPropertyNodeRemovedChange</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPropertyNodeRemovedChange Class</h1>
+<span class="small-subtitle">(<a href="qt3dcore-qpropertynoderemovedchange.html">Qt3DCore::QPropertyNodeRemovedChange</a>)<br/></span>
+<!-- $$$QPropertyNodeRemovedChange-brief -->
+<p>The <a href="qt3dcore-qpropertynoderemovedchange.html">QPropertyNodeRemovedChange</a> class is used to notify when a node is removed from a property. <a href="#details">More...</a></p>
+<!-- @@@QPropertyNodeRemovedChange -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;Qt3DCore/QPropertyNodeRemovedChange&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3dcore</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3dcore-qstaticpropertyvalueremovedchangebase.html">Qt3DCore::QStaticPropertyValueRemovedChangeBase</a></td></tr></table></div><ul>
+<li><a href="qt3dcore-qpropertynoderemovedchange-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qpropertynoderemovedchange.html#QPropertyNodeRemovedChange">QPropertyNodeRemovedChange</a></b>(Qt3DCore::QNodeId <i>subjectId</i>, Qt3DCore::QNode *<i>node</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QMetaObject *</td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qpropertynoderemovedchange.html#metaObject">metaObject</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DCore::QNodeId </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qpropertynoderemovedchange.html#removedNodeId">removedNodeId</a></b>() const</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qpropertynoderemovedchange.html#QPropertyNodeRemovedChangePtr-typedef">QPropertyNodeRemovedChangePtr</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPropertyNodeRemovedChange-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QPropertyNodeRemovedChange -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QPropertyNodeRemovedChange[overload1]$$$QPropertyNodeRemovedChangeQt3DCore::QNodeIdQt3DCore::QNode* -->
+<h3 class="fn" id="QPropertyNodeRemovedChange"><a name="QPropertyNodeRemovedChange"></a>QPropertyNodeRemovedChange::<span class="name">QPropertyNodeRemovedChange</span>(<span class="type"><a href="qt3dcore-qnodeid.html">Qt3DCore::QNodeId</a></span> <i>subjectId</i>, <span class="type"><a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></span> *<i>node</i>)</h3>
+<p>Constructs a new <a href="qt3dcore-qpropertynoderemovedchange.html">QPropertyNodeRemovedChange</a> with <i>subjectId</i>, <i>node</i>.</p>
+<!-- @@@QPropertyNodeRemovedChange -->
+<!-- $$$metaObject[overload1]$$$metaObject -->
+<h3 class="fn" id="metaObject"><a name="metaObject"></a>const <span class="type"><a href="../qtcore/qmetaobject.html">QMetaObject</a></span> *QPropertyNodeRemovedChange::<span class="name">metaObject</span>() const</h3>
+<p>Returns the metaObject of the node removed to the property.</p>
+<!-- @@@metaObject -->
+<!-- $$$removedNodeId[overload1]$$$removedNodeId -->
+<h3 class="fn" id="removedNodeId"><a name="removedNodeId"></a><span class="type"><a href="qt3dcore-qnodeid.html">Qt3DCore::QNodeId</a></span> QPropertyNodeRemovedChange::<span class="name">removedNodeId</span>() const</h3>
+<p>Returns the id of the node removed to the property.</p>
+<!-- @@@removedNodeId -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$QPropertyNodeRemovedChangePtr -->
+<h3 class="fn" id="QPropertyNodeRemovedChangePtr-typedef"><a name="QPropertyNodeRemovedChangePtr-typedef"></a>typedef <span class="name">QPropertyNodeRemovedChangePtr</span></h3>
+<p>A shared pointer for <a href="qt3dcore-qpropertynoderemovedchange.html">QPropertyNodeRemovedChange</a>.</p>
+<!-- @@@QPropertyNodeRemovedChangePtr -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

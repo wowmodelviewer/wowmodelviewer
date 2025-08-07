@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qandroidintent.cpp -->
+  <title>QAndroidIntent Class | Qt Android Extras 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtandroidextras-index.html">Qt Android Extras</a></td><td ><a href="qtandroidextras-module.html">C++ Classes</a></td><td >QAndroidIntent</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtandroidextras-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAndroidIntent Class</h1>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAndroidIntent&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += androidextras</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.10</td></tr></table></div><p>This class was introduced in  Qt 5.10.</p>
+<ul>
+<li><a href="qandroidintent-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qandroidintent.html#QAndroidIntent-3">QAndroidIntent</a></b>(const QAndroidJniObject &amp;<i>packageContext</i>, const char *<i>className</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qandroidintent.html#QAndroidIntent-2">QAndroidIntent</a></b>(const QString &amp;<i>action</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qandroidintent.html#QAndroidIntent-1">QAndroidIntent</a></b>(const QAndroidJniObject &amp;<i>intent</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qandroidintent.html#QAndroidIntent">QAndroidIntent</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qandroidintent.html#extraBytes">extraBytes</a></b>(const QString &amp;<i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariant </td><td class="memItemRight bottomAlign"><b><a href="qandroidintent.html#extraVariant">extraVariant</a></b>(const QString &amp;<i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QAndroidJniObject </td><td class="memItemRight bottomAlign"><b><a href="qandroidintent.html#handle">handle</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qandroidintent.html#putExtra">putExtra</a></b>(const QString &amp;<i>key</i>, const QByteArray &amp;<i>data</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qandroidintent.html#putExtra-1">putExtra</a></b>(const QString &amp;<i>key</i>, const QVariant &amp;<i>value</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAndroidIntent-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qandroidintent.html">QAndroidIntent</a> is a convenience class that wraps the most important <a href="https://developer.android.com/reference/android/content/Intent.html">Android Intent</a> methods.</p>
+</div>
+<!-- @@@QAndroidIntent -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QAndroidIntent$$$QAndroidIntentconstQAndroidJniObject&constchar* -->
+<h3 class="fn" id="QAndroidIntent-3"><a name="QAndroidIntent-3"></a>QAndroidIntent::<span class="name">QAndroidIntent</span>(const <span class="type"><a href="qandroidjniobject.html">QAndroidJniObject</a></span> &amp;<i>packageContext</i>, const <span class="type">char</span> *<i>className</i>)</h3>
+<p>Creates a new intent and sets the provided <i>packageContext</i> and the service <i>className</i>. Example:</p>
+<pre class="cpp">
+
+  <span class="keyword">auto</span> serviceIntent <span class="operator">=</span> <span class="type"><a href="qandroidintent.html#QAndroidIntent">QAndroidIntent</a></span>(<span class="type">QtAndroid</span><span class="operator">::</span>androidActivity()<span class="operator">.</span>object()<span class="operator">,</span> <span class="string">&quot;com.example.MyService&quot;</span>);
+
+</pre>
+<p><b>See also </b><a href="qtandroid.html#androidActivity">QtAndroid::androidActivity</a> and <a href="qtandroid.html#bindService">QtAndroid::bindService</a>.</p>
+<!-- @@@QAndroidIntent -->
+<!-- $$$QAndroidIntent$$$QAndroidIntentconstQString& -->
+<h3 class="fn" id="QAndroidIntent-2"><a name="QAndroidIntent-2"></a>QAndroidIntent::<span class="name">QAndroidIntent</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>action</i>)</h3>
+<p>Creates a new intent and sets the provided <i>action</i>.</p>
+<!-- @@@QAndroidIntent -->
+<!-- $$$QAndroidIntent$$$QAndroidIntentconstQAndroidJniObject& -->
+<h3 class="fn" id="QAndroidIntent-1"><a name="QAndroidIntent-1"></a>QAndroidIntent::<span class="name">QAndroidIntent</span>(const <span class="type"><a href="qandroidjniobject.html">QAndroidJniObject</a></span> &amp;<i>intent</i>)</h3>
+<p>Wraps the provided <i>intent</i> java object.</p>
+<!-- @@@QAndroidIntent -->
+<!-- $$$QAndroidIntent[overload1]$$$QAndroidIntent -->
+<h3 class="fn" id="QAndroidIntent"><a name="QAndroidIntent"></a>QAndroidIntent::<span class="name">QAndroidIntent</span>()</h3>
+<p>Create a new intent</p>
+<!-- @@@QAndroidIntent -->
+<!-- $$$extraBytes[overload1]$$$extraBytesconstQString& -->
+<h3 class="fn" id="extraBytes"><a name="extraBytes"></a><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> QAndroidIntent::<span class="name">extraBytes</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>key</i>)</h3>
+<p>Returns the extra <i>key</i> data from the Intent extras</p>
+<!-- @@@extraBytes -->
+<!-- $$$extraVariant[overload1]$$$extraVariantconstQString& -->
+<h3 class="fn" id="extraVariant"><a name="extraVariant"></a><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QAndroidIntent::<span class="name">extraVariant</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>key</i>)</h3>
+<p>Returns the extra <i>key</i> data from the Intent extras as a <a href="../qtcore/qvariant.html">QVariant</a></p>
+<!-- @@@extraVariant -->
+<!-- $$$handle[overload1]$$$handle -->
+<h3 class="fn" id="handle"><a name="handle"></a><span class="type"><a href="qandroidjniobject.html">QAndroidJniObject</a></span> QAndroidIntent::<span class="name">handle</span>() const</h3>
+<p>The return value is useful to call other Java API which are not covered by this wrapper</p>
+<!-- @@@handle -->
+<!-- $$$putExtra[overload1]$$$putExtraconstQString&constQByteArray& -->
+<h3 class="fn" id="putExtra"><a name="putExtra"></a><span class="type">void</span> QAndroidIntent::<span class="name">putExtra</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>key</i>, const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>data</i>)</h3>
+<p>Sets the <i>key</i> with the <i>data</i> in the Intent extras</p>
+<!-- @@@putExtra -->
+<!-- $$$putExtra$$$putExtraconstQString&constQVariant& -->
+<h3 class="fn" id="putExtra-1"><a name="putExtra-1"></a><span class="type">void</span> QAndroidIntent::<span class="name">putExtra</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>key</i>, const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>value</i>)</h3>
+<p>Sets the <i>key</i> with the <i>value</i> in the Intent extras.</p>
+<!-- @@@putExtra -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

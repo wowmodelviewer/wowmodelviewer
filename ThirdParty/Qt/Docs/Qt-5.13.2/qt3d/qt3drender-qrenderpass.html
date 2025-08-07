@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qrenderpass.cpp -->
+  <title>QRenderPass Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QRenderPass</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QRenderPass Class</h1>
+<span class="small-subtitle">(<a href="qt3drender-qrenderpass.html">Qt3DRender::QRenderPass</a>)<br/></span>
+<!-- $$$QRenderPass-brief -->
+<p>Encapsulates a Render Pass. <a href="#details">More...</a></p>
+<!-- @@@QRenderPass -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QRenderPass&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3drender</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-renderpass.html">RenderPass</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></td></tr></table></div><p>This class was introduced in  Qt 5.7.</p>
+<ul>
+<li><a href="qt3drender-qrenderpass-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qt3drender-qrenderpass.html#shaderProgram-prop">shaderProgram</a></b> : Qt3DRender::QShaderProgram*</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrenderpass.html#QRenderPass">QRenderPass</a></b>(Qt3DCore::QNode *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrenderpass.html#addFilterKey">addFilterKey</a></b>(Qt3DRender::QFilterKey *<i>filterKey</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrenderpass.html#addParameter">addParameter</a></b>(Qt3DRender::QParameter *<i>parameter</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrenderpass.html#addRenderState">addRenderState</a></b>(Qt3DRender::QRenderState *<i>state</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;Qt3DRender::QFilterKey *&gt; </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrenderpass.html#filterKeys">filterKeys</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;Qt3DRender::QParameter *&gt; </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrenderpass.html#parameters">parameters</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrenderpass.html#removeFilterKey">removeFilterKey</a></b>(Qt3DRender::QFilterKey *<i>filterKey</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrenderpass.html#removeParameter">removeParameter</a></b>(Qt3DRender::QParameter *<i>parameter</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrenderpass.html#removeRenderState">removeRenderState</a></b>(Qt3DRender::QRenderState *<i>state</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;Qt3DRender::QRenderState *&gt; </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrenderpass.html#renderStates">renderStates</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QShaderProgram *</td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrenderpass.html#shaderProgram-prop">shaderProgram</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrenderpass.html#shaderProgram-prop">setShaderProgram</a></b>(Qt3DRender::QShaderProgram *<i>shaderProgram</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrenderpass.html#shaderProgram-prop">shaderProgramChanged</a></b>(Qt3DRender::QShaderProgram *<i>shaderProgram</i>)</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrenderpass.html#ParameterList-typedef">ParameterList</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QRenderPass-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A <a href="qt3drender-qrenderpass.html">Qt3DRender::QRenderPass</a> specifies a single rendering pass - an instance of shader program execution - used by <a href="qt3drender-qtechnique.html">Qt3DRender::QTechnique</a>. Render pass consists of a <a href="qt3drender-qshaderprogram.html">Qt3DRender::QShaderProgram</a> and a list of <a href="qt3drender-qfilterkey.html">Qt3DRender::QFilterKey</a> objects, a list of <a href="qt3drender-qrenderstate.html">Qt3DRender::QRenderState</a> objects and a list of <a href="qt3drender-qparameter.html">Qt3DRender::QParameter</a> objects.</p>
+<p><a href="qt3drender-qrenderpass.html">QRenderPass</a> executes the <a href="qt3drender-qshaderprogram.html">QShaderProgram</a> using the given <a href="qt3drender-qrenderstate.html">QRenderState</a> and <a href="qt3drender-qparameter.html">QParameter</a> nodes when at least one of <a href="qt3drender-qfilterkey.html">QFilterKey</a> nodes being referenced matches any of the <a href="qt3drender-qfilterkey.html">QFilterKey</a> nodes in <a href="qt3drender-qrenderpassfilter.html">QRenderPassFilter</a> or when no <a href="qt3drender-qfilterkey.html">QFilterKey</a> nodes are specified and no <a href="qt3drender-qrenderpassfilter.html">QRenderPassFilter</a> is present in the FrameGraph.</p>
+<p>If the <a href="qt3drender-qrenderpass.html">QRenderPass</a> defines a <a href="qt3drender-qparameter.html">QParameter</a>, it will be overridden by a <a href="qt3drender-qparameter.html">QParameter</a> with the same name if it exists in any of the <a href="qt3drender-qtechnique.html">QTechnique</a>, <a href="qt3drender-qeffect.html">QEffect</a>, <a href="qt3drender-qmaterial.html">QMaterial</a>, <a href="qt3drender-qtechniquefilter.html">QTechniqueFilter</a>, <a href="qt3drender-qrenderpassfilter.html">QRenderPassFilter</a> associated with the pass at runtime. This still can be useful to define sane default values.</p>
+<p>At render time, for each leaf node of the FrameGraph a base render state is recorded by accumulating states defined by all <a href="qt3drender-qrenderstateset.html">QRenderStateSet</a> nodes in the FrameGraph branch. Each <a href="qt3drender-qrenderpass.html">QRenderPass</a> can overload this base render state by specifying its own <a href="qt3drender-qrenderstate.html">QRenderState</a> nodes.</p>
+<pre class="cpp">
+
+  <span class="comment">// Create the render passes</span>
+  <span class="type"><a href="qt3drender-qrenderpass.html#QRenderPass">QRenderPass</a></span> <span class="operator">*</span>pass <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3drender-qrenderpass.html#QRenderPass">QRenderPass</a></span>();
+
+  <span class="comment">// Create shader program</span>
+  <span class="type"><a href="qt3drender-qshaderprogram.html">QShaderProgram</a></span> <span class="operator">*</span>glShader <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3drender-qshaderprogram.html">QShaderProgram</a></span>();
+
+  <span class="comment">// Set the shader on the render pass</span>
+  pass<span class="operator">-</span><span class="operator">&gt;</span>setShaderProgram(glShader);
+
+  <span class="comment">// Create a FilterKey</span>
+  <span class="type"><a href="qt3drender-qfilterkey.html">QFilterKey</a></span> <span class="operator">*</span>filterKey <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3drender-qfilterkey.html">QFilterKey</a></span>();
+  filterKey<span class="operator">-</span><span class="operator">&gt;</span>setName(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;name&quot;</span>));
+  fitlerKey<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;zFillPass&quot;</span>));
+
+  <span class="comment">// Add the FilterKey to the pass</span>
+  pass<span class="operator">-</span><span class="operator">&gt;</span>addFilterKey(filterKey);
+
+  <span class="comment">// Create a QParameter</span>
+  <span class="type"><a href="qt3drender-qparameter.html">QParameter</a></span> <span class="operator">*</span>colorParameter <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3drender-qparameter.html">QParameter</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;color&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span><span class="operator">::</span>fromRgbF(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">1.0f</span>));
+
+  <span class="comment">// Add parameter to pass</span>
+  pass<span class="operator">-</span><span class="operator">&gt;</span>addParameter(colorParameter);
+
+  <span class="comment">// Create a QRenderState</span>
+  <span class="type"><a href="qt3drender-qdepthtest.html">QDepthTest</a></span> <span class="operator">*</span>depthTest <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3drender-qdepthtest.html">QDepthTest</a></span>();
+
+  <span class="comment">// Add the render state to the pass</span>
+  pass<span class="operator">-</span><span class="operator">&gt;</span>addRenderState(depthTest);
+
+</pre>
+</div>
+<p><b>See also </b><a href="qt3drender-qrenderpassfilter.html">QRenderPassFilter</a>, <a href="qt3drender-qfilterkey.html">QFilterKey</a>, <a href="qt3drender-qparameter.html">QParameter</a>, <a href="qt3drender-qrenderstate.html">QRenderState</a>, <a href="qt3drender-qeffect.html">QEffect</a>, and <a href="qt3drender-qtechnique.html">QTechnique</a>.</p>
+<!-- @@@QRenderPass -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$shaderProgram-prop$$$shaderProgram$$$setShaderProgramQt3DRender::QShaderProgram*$$$shaderProgramChangedQt3DRender::QShaderProgram* -->
+<h3 class="fn" id="shaderProgram-prop"><a name="shaderProgram-prop"></a><span class="name">shaderProgram</span> : <span class="type"><a href="qt3drender-qshaderprogram.html">Qt3DRender::QShaderProgram</a></span>*</h3>
+<p>Specifies the shader program to be used for this render pass.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QShaderProgram *</td><td class="memItemRight bottomAlign"><span class="name"><b>shaderProgram</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setShaderProgram</b></span>(Qt3DRender::QShaderProgram *<i>shaderProgram</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>shaderProgramChanged</b></span>(Qt3DRender::QShaderProgram *<i>shaderProgram</i>)</td></tr>
+</table></div>
+<!-- @@@shaderProgram -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QRenderPass[overload1]$$$QRenderPassQt3DCore::QNode* -->
+<h3 class="fn" id="QRenderPass"><a name="QRenderPass"></a>QRenderPass::<span class="name">QRenderPass</span>(<span class="type"><a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new <a href="qt3drender-qrenderpass.html">QRenderPass</a> with the specified <i>parent</i>.</p>
+<!-- @@@QRenderPass -->
+<!-- $$$addFilterKey[overload1]$$$addFilterKeyQt3DRender::QFilterKey* -->
+<h3 class="fn" id="addFilterKey"><a name="addFilterKey"></a><span class="type">void</span> QRenderPass::<span class="name">addFilterKey</span>(<span class="type"><a href="qt3drender-qfilterkey.html">Qt3DRender::QFilterKey</a></span> *<i>filterKey</i>)</h3>
+<p>Adds <i>filterKey</i> to the <a href="qt3drender-qrenderpass.html">Qt3DRender::QRenderPass</a> local filter keys.</p>
+<!-- @@@addFilterKey -->
+<!-- $$$addParameter[overload1]$$$addParameterQt3DRender::QParameter* -->
+<h3 class="fn" id="addParameter"><a name="addParameter"></a><span class="type">void</span> QRenderPass::<span class="name">addParameter</span>(<span class="type"><a href="qt3drender-qparameter.html">Qt3DRender::QParameter</a></span> *<i>parameter</i>)</h3>
+<p>Add <i>parameter</i> to the render pass' parameters.</p>
+<!-- @@@addParameter -->
+<!-- $$$addRenderState[overload1]$$$addRenderStateQt3DRender::QRenderState* -->
+<h3 class="fn" id="addRenderState"><a name="addRenderState"></a><span class="type">void</span> QRenderPass::<span class="name">addRenderState</span>(<span class="type"><a href="qt3drender-qrenderstate.html">Qt3DRender::QRenderState</a></span> *<i>state</i>)</h3>
+<p>Adds a render <i>state</i> to the rendering pass. That implies that when the pass is executed at render time, the globally set render state will be modified by the states defined locally by the <a href="qt3drender-qrenderpass.html">Qt3DRender::QRenderPass</a>.</p>
+<p><b>Note: </b>not defining any <a href="qt3drender-qrenderstate.html">Qt3DRender::QRenderState</a> in a pass will result in the pass using the globally set render state for a given FrameGraph branch execution path.</p><!-- @@@addRenderState -->
+<!-- $$$filterKeys[overload1]$$$filterKeys -->
+<h3 class="fn" id="filterKeys"><a name="filterKeys"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="qt3drender-qfilterkey.html">Qt3DRender::QFilterKey</a></span> *&gt; QRenderPass::<span class="name">filterKeys</span>() const</h3>
+<p>Returns the list of <a href="qt3drender-qfilterkey.html">Qt3DRender::QFilterKey</a> key objects making up the filter keys of the <a href="qt3drender-qrenderpass.html">Qt3DRender::QRenderPass</a>.</p>
+<!-- @@@filterKeys -->
+<!-- $$$parameters[overload1]$$$parameters -->
+<h3 class="fn" id="parameters"><a name="parameters"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="qt3drender-qparameter.html">Qt3DRender::QParameter</a></span> *&gt; QRenderPass::<span class="name">parameters</span>() const</h3>
+<p>Returns a vector of the render pass' current parameters</p>
+<!-- @@@parameters -->
+<!-- $$$removeFilterKey[overload1]$$$removeFilterKeyQt3DRender::QFilterKey* -->
+<h3 class="fn" id="removeFilterKey"><a name="removeFilterKey"></a><span class="type">void</span> QRenderPass::<span class="name">removeFilterKey</span>(<span class="type"><a href="qt3drender-qfilterkey.html">Qt3DRender::QFilterKey</a></span> *<i>filterKey</i>)</h3>
+<p>Removes <i>filterKey</i> from the <a href="qt3drender-qrenderpass.html">Qt3DRender::QRenderPass</a> local filter keys.</p>
+<!-- @@@removeFilterKey -->
+<!-- $$$removeParameter[overload1]$$$removeParameterQt3DRender::QParameter* -->
+<h3 class="fn" id="removeParameter"><a name="removeParameter"></a><span class="type">void</span> QRenderPass::<span class="name">removeParameter</span>(<span class="type"><a href="qt3drender-qparameter.html">Qt3DRender::QParameter</a></span> *<i>parameter</i>)</h3>
+<p>Remove <i>parameter</i> from the render pass' parameters.</p>
+<!-- @@@removeParameter -->
+<!-- $$$removeRenderState[overload1]$$$removeRenderStateQt3DRender::QRenderState* -->
+<h3 class="fn" id="removeRenderState"><a name="removeRenderState"></a><span class="type">void</span> QRenderPass::<span class="name">removeRenderState</span>(<span class="type"><a href="qt3drender-qrenderstate.html">Qt3DRender::QRenderState</a></span> *<i>state</i>)</h3>
+<p>Removes <i>state</i> from the <a href="qt3drender-qrenderpass.html">Qt3DRender::QRenderPass</a> local render state.</p>
+<!-- @@@removeRenderState -->
+<!-- $$$renderStates[overload1]$$$renderStates -->
+<h3 class="fn" id="renderStates"><a name="renderStates"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="qt3drender-qrenderstate.html">Qt3DRender::QRenderState</a></span> *&gt; QRenderPass::<span class="name">renderStates</span>() const</h3>
+<p>Returns the list of <a href="qt3drender-qrenderstate.html">Qt3DRender::QRenderState</a> state objects making up the render state of the <a href="qt3drender-qrenderpass.html">Qt3DRender::QRenderPass</a>.</p>
+<!-- @@@renderStates -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$ParameterList -->
+<h3 class="fn" id="ParameterList-typedef"><a name="ParameterList-typedef"></a>typedef <span class="name">ParameterList</span></h3>
+<p>A list of <a href="qt3drender-qparameter.html">Qt3DRender::QParameter</a> parameters.</p>
+<!-- @@@ParameterList -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

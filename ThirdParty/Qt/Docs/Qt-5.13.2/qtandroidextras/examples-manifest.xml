@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<instructionals module="QtAndroidExtras">
+    <examples>
+        <example name="Qt Notifier" docUrl="qthelp://org.qt-project.qtandroidextras.5132/qtandroidextras/qtandroidextras-notification-example.html" projectPath="androidextras/notification/notification.pro" imageUrl="qthelp://org.qt-project.qtandroidextras.5132/qtandroidextras/images/notification.png">
+            <description><![CDATA[Demonstrates calling Java code from an Android application.]]></description>
+            <tags>android,extras,notifier</tags>
+            <fileToOpen>androidextras/notification/main.cpp</fileToOpen>
+            <fileToOpen mainFile="true">androidextras/notification/qml/main.qml</fileToOpen>
+        </example>
+    </examples>
+</instructionals>

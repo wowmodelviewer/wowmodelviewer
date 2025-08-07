@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- cli-run.qdoc -->
+  <title>run | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td><td >run</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<p class="naviNextPrevious headerNavi">
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#synopsis">Synopsis</a></li>
+<li class="level1"><a href="#description">Description</a></li>
+<li class="level1"><a href="#options">Options</a></li>
+<li class="level2"><a href="#op-op-op-op-all-op-op-products"><code>--all-products</code></a></li>
+<li class="level2"><a href="#op-op-op-op-build-op-op-directory-op-op-op-op-d-op-lt-op-directory-op-gt-op"><code>--build-directory|-d &lt;directory&gt;</code></a></li>
+<li class="level2"><a href="#op-op-op-op-changed-op-op-files-op-lt-op-file-op-gt-op-op-op-op-op-op-lt-op-file-op-gt-op-op-op-op-op-op-op-op-op"><code>--changed-files &lt;file&gt;[,&lt;file&gt;..&#x2e;]</code></a></li>
+<li class="level2"><a href="#op-op-op-op-check-op-op-outputs"><code>--check-outputs</code></a></li>
+<li class="level2"><a href="#op-op-op-op-check-op-op-timestamps"><code>--check-timestamps</code></a></li>
+<li class="level2"><a href="#op-op-op-op-clean-op-op-install-op-op-root"><code>--clean-install-root</code></a></li>
+<li class="level2"><a href="#op-op-op-op-command-op-op-echo-op-op-mode-op-lt-op-mode-op-gt-op"><code>--command-echo-mode &lt;mode&gt;</code></a></li>
+<li class="level2"><a href="#op-op-op-op-dry-op-op-run-op-op-op-op-n"><code>--dry-run|-n</code></a></li>
+<li class="level2"><a href="#op-op-op-op-op-op-file-op-op-op-op-f-op-lt-op-file-op-gt-op-op-op"><code>[--file|-f &lt;file&gt;]</code></a></li>
+<li class="level2"><a href="#op-op-op-op-force-op-op-probe-op-op-execution"><code>--force-probe-execution</code></a></li>
+<li class="level2"><a href="#op-op-op-op-install-op-op-root-op-lt-op-directory-op-gt-op"><code>--install-root &lt;directory&gt;</code></a></li>
+<li class="level2"><a href="#op-op-op-op-jobs-op-op-op-op-j-op-lt-op-n-op-gt-op"><code>--jobs|-j &lt;n&gt;</code></a></li>
+<li class="level2"><a href="#op-op-op-op-keep-op-op-going-op-op-op-op-k"><code>--keep-going|-k</code></a></li>
+<li class="level2"><a href="#op-op-op-op-less-op-op-verbose-op-op-op-op-q"><code>--less-verbose|-q</code></a></li>
+<li class="level2"><a href="#op-op-op-op-log-op-op-level-op-lt-op-level-op-gt-op"><code>--log-level &lt;level&gt;</code></a></li>
+<li class="level2"><a href="#op-op-op-op-log-op-op-time"><code>--log-time</code></a></li>
+<li class="level2"><a href="#op-op-op-op-more-op-op-verbose-op-op-op-op-v"><code>--more-verbose|-v</code></a></li>
+<li class="level2"><a href="#op-op-op-op-no-op-op-build"><code>--no-build</code></a></li>
+<li class="level2"><a href="#op-op-op-op-products-op-op-op-op-p-op-lt-op-name-op-gt-op-op-op-op-op-op-lt-op-name-op-gt-op-op-op-op-op-op-op-op-op"><code>--products|-p &lt;name&gt;[,&lt;name&gt;..&#x2e;]</code></a></li>
+<li class="level2"><a href="#op-op-op-op-settings-op-op-dir-op-lt-op-directory-op-gt-op"><code>--settings-dir &lt;directory&gt;</code></a></li>
+<li class="level2"><a href="#op-op-op-op-setup-op-op-run-op-op-env-op-op-config"><code>--setup-run-env-config</code></a></li>
+<li class="level2"><a href="#op-op-op-op-wait-op-op-lock"><code>--wait-lock</code></a></li>
+<li class="level1"><a href="#parameters">Parameters</a></li>
+<li class="level2"><a href="#config-configuration-op-op-name"><code>config:configuration-name</code></a></li>
+<li class="level2"><a href="#property-value"><code>property:value</code></a></li>
+<li class="level1"><a href="#arguments">Arguments</a></li>
+<li class="level2"><a href="#op-op-op-op-arguments"><code>--</code> &lt;arguments&gt;</a></li>
+<li class="level1"><a href="#examples">Examples</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">run</h1>
+<span class="subtitle"></span>
+<!-- $$$cli-run.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="synopsis"></a>
+<h2 id="synopsis">Synopsis</h2>
+<pre class="cpp">
+
+  qbs run <span class="operator">[</span>options<span class="operator">]</span> <span class="operator">[</span>config:configuration<span class="operator">-</span>name<span class="operator">]</span> <span class="operator">[</span>property:value<span class="operator">]</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> <span class="operator">[</span> <span class="operator">-</span><span class="operator">-</span> <span class="operator">&lt;</span>arguments<span class="operator">&gt;</span><span class="operator">]</span>
+
+</pre>
+<a name="description"></a>
+<h2 id="description">Description</h2>
+<p>Runs the specified product's executable with the specified <code>&lt;arguments&gt;</code>. If the project has only one product, the <code>--products</code> option may be omitted.</p>
+<p>The product will be built if it is not up to date, unless the <code>--no-build</code> option is specified. For more information, see <a href="cli-build.html#">build</a>.</p>
+<p>For more information about running applications, see <a href="running-applications.html#">Running Applications</a>.</p>
+<a name="options"></a>
+<h2 id="options">Options</h2>
+<a name="op-op-op-op-all-op-op-products"></a>
+<h3 id="op-op-op-op-all-op-op-products"><code>--all-products</code></h3>
+<p>Processes all <a href="qml-qbslanguageitems-product.html">products</a>, even if their <code>builtByDefault</code> property is <code>false</code>.</p>
+<a name="op-op-op-op-build-op-op-directory-op-op-op-op-d-op-lt-op-directory-op-gt-op"></a>
+<h3 id="op-op-op-op-build-op-op-directory-op-op-op-op-d-op-lt-op-directory-op-gt-op"><code>--build-directory|-d &lt;directory&gt;</code></h3>
+<p>Specifies a <code>&lt;directory&gt;</code> where build artifacts are stored.</p>
+<p>The default value is the current directory unless <code>preferences.defaultBuildDirectory</code> is set.</p>
+<p>Relative paths will be interpreted relative to the current directory.</p>
+<p>You can use the following special values as placeholders:</p>
+<ul>
+<li><code>@project</code> is expanded to the name of the project file excluding the extension <code>.qbs</code>.</li>
+<li><code>@path</code> is expanded to the name of the directory containing the project file.</li>
+</ul>
+<a name="op-op-op-op-changed-op-op-files-op-lt-op-file-op-gt-op-op-op-op-op-op-lt-op-file-op-gt-op-op-op-op-op-op-op-op-op"></a>
+<h3 id="op-op-op-op-changed-op-op-files-op-lt-op-file-op-gt-op-op-op-op-op-op-lt-op-file-op-gt-op-op-op-op-op-op-op-op-op"><code>--changed-files &lt;file&gt;[,&lt;file&gt;..&#x2e;]</code></h3>
+<p>Assumes that the files specified by <code>&lt;file&gt;</code>, and only those files, have changed.</p>
+<a name="op-op-op-op-check-op-op-outputs"></a>
+<h3 id="op-op-op-op-check-op-op-outputs"><code>--check-outputs</code></h3>
+<p>Forces transformer output <a href="qml-qbslanguageitems-artifact.html">artifact</a> checks.</p>
+<p>Verifies that the output artifacts declared by <a href="qml-qbslanguageitems-rule.html">rules</a> in the <a href="qml-qbslanguageitems-project.html">project</a> are actually created.</p>
+<a name="op-op-op-op-check-op-op-timestamps"></a>
+<h3 id="op-op-op-op-check-op-op-timestamps"><code>--check-timestamps</code></h3>
+<p>Forces timestamp checks.</p>
+<p>Retrieves the timestamps from the file system, instead of using the file timestamps that are stored in the build graph.</p>
+<a name="op-op-op-op-clean-op-op-install-op-op-root"></a>
+<h3 id="op-op-op-op-clean-op-op-install-op-op-root"><code>--clean-install-root</code></h3>
+<p>Removes the installation base directory before installing.</p>
+<a name="op-op-op-op-command-op-op-echo-op-op-mode-op-lt-op-mode-op-gt-op"></a>
+<h3 id="op-op-op-op-command-op-op-echo-op-op-mode-op-lt-op-mode-op-gt-op"><code>--command-echo-mode &lt;mode&gt;</code></h3>
+<p>Determines what kind of output to show when executing commands.</p>
+<p>Possible values of <code>&lt;mode&gt;</code> are:</p>
+<ul>
+<li><code>silent</code></li>
+<li><code>summary</code> (default value)</li>
+<li><code>command-line</code></li>
+<li><code>command-line-with-environment</code></li>
+</ul>
+<a name="op-op-op-op-dry-op-op-run-op-op-op-op-n"></a>
+<h3 id="op-op-op-op-dry-op-op-run-op-op-op-op-n"><code>--dry-run|-n</code></h3>
+<p>Performs a dry run. No commands will be executed and no permanent changes to the build graph will be done.</p>
+<a name="op-op-op-op-op-op-file-op-op-op-op-f-op-lt-op-file-op-gt-op-op-op"></a>
+<h3 id="op-op-op-op-op-op-file-op-op-op-op-f-op-lt-op-file-op-gt-op-op-op"><code>[--file|-f &lt;file&gt;]</code></h3>
+<p>Uses <code>&lt;file&gt;</code> as the project file. If <code>&lt;file&gt;</code> is a directory and it contains a single file with the extension <code>.qbs</code>, that file will be used.</p>
+<p>If this option is not given at all, the behavior is the same as for <code>-f &lt;working-dir&gt;</code>.</p>
+<a name="op-op-op-op-force-op-op-probe-op-op-execution"></a>
+<h3 id="op-op-op-op-force-op-op-probe-op-op-execution"><code>--force-probe-execution</code></h3>
+<p>Forces re-execution of all <a href="qml-qbslanguageitems-probe.html">Probe</a> items' configure scripts, rather than using the cached data.</p>
+<a name="op-op-op-op-install-op-op-root-op-lt-op-directory-op-gt-op"></a>
+<h3 id="op-op-op-op-install-op-op-root-op-lt-op-directory-op-gt-op"><code>--install-root &lt;directory&gt;</code></h3>
+<p>Installs into the specified <code>&lt;directory&gt;</code>. If the directory does not exist, it will be created.</p>
+<p>The default value is <code>&lt;build</code> dir&gt;/install-root.</p>
+<p>Use the special value <code>@sysroot</code> to install into the <code>sysroot</code>. That is, the value of the <a href="qml-qbsmodules-qbs.html#sysroot-prop">qbs.sysroot</a> property.</p>
+<a name="op-op-op-op-jobs-op-op-op-op-j-op-lt-op-n-op-gt-op"></a>
+<h3 id="op-op-op-op-jobs-op-op-op-op-j-op-lt-op-n-op-gt-op"><code>--jobs|-j &lt;n&gt;</code></h3>
+<p>Uses <code>&lt;n&gt;</code> concurrent build jobs, where <code>&lt;n&gt;</code> must be an integer greater than zero.</p>
+<p>The default is the number of logical cores.</p>
+<a name="op-op-op-op-keep-op-op-going-op-op-op-op-k"></a>
+<h3 id="op-op-op-op-keep-op-op-going-op-op-op-op-k"><code>--keep-going|-k</code></h3>
+<p>Keeps going when errors occur, if at all possible.</p>
+<a name="op-op-op-op-less-op-op-verbose-op-op-op-op-q"></a>
+<h3 id="op-op-op-op-less-op-op-verbose-op-op-op-op-q"><code>--less-verbose|-q</code></h3>
+<p>Becomes more quiet by decreasing the log level by one. This option can be given more than once. Excessive occurrences have no effect.</p>
+<p>If the option <code>--log-level</code> appears anywhere on the command line in addition to this option, its value is taken as the base for the decrease.</p>
+<a name="op-op-op-op-log-op-op-level-op-lt-op-level-op-gt-op"></a>
+<h3 id="op-op-op-op-log-op-op-level-op-lt-op-level-op-gt-op"><code>--log-level &lt;level&gt;</code></h3>
+<p>Uses the specified log level.</p>
+<p>Possible values of <code>&lt;level&gt;</code> are:</p>
+<ul>
+<li><code>error</code></li>
+<li><code>warning</code></li>
+<li><code>info</code> (default value)</li>
+<li><code>debug</code></li>
+<li><code>trace</code></li>
+</ul>
+<a name="op-op-op-op-log-op-op-time"></a>
+<h3 id="op-op-op-op-log-op-op-time"><code>--log-time</code></h3>
+<p>Logs the time that the operations involved in this command take.</p>
+<p>This option is implied in log levels <code>debug</code> and higher.</p>
+<p>This option is mutually exclusive with <code>--show-progress</code>.</p>
+<a name="op-op-op-op-more-op-op-verbose-op-op-op-op-v"></a>
+<h3 id="op-op-op-op-more-op-op-verbose-op-op-op-op-v"><code>--more-verbose|-v</code></h3>
+<p>Becomes more verbose by increasing the log level by one. This option can be given more than once. Excessive occurrences have no effect.</p>
+<p>If the option <code>--log-level</code> appears anywhere on the command line in addition to this option, its value is taken as the base for the increase.</p>
+<a name="op-op-op-op-no-op-op-build"></a>
+<h3 id="op-op-op-op-no-op-op-build"><code>--no-build</code></h3>
+<p>Does not re-build the project before installing or running it.</p>
+<a name="op-op-op-op-products-op-op-op-op-p-op-lt-op-name-op-gt-op-op-op-op-op-op-lt-op-name-op-gt-op-op-op-op-op-op-op-op-op"></a>
+<h3 id="op-op-op-op-products-op-op-op-op-p-op-lt-op-name-op-gt-op-op-op-op-op-op-lt-op-name-op-gt-op-op-op-op-op-op-op-op-op"><code>--products|-p &lt;name&gt;[,&lt;name&gt;..&#x2e;]</code></h3>
+<p>Takes only the <a href="qml-qbslanguageitems-product.html">products</a> specified by <code>&lt;name&gt;</code> and their dependencies into account.</p>
+<a name="op-op-op-op-settings-op-op-dir-op-lt-op-directory-op-gt-op"></a>
+<h3 id="op-op-op-op-settings-op-op-dir-op-lt-op-directory-op-gt-op"><code>--settings-dir &lt;directory&gt;</code></h3>
+<p>Reads all settings (such as <a href="qml-qbslanguageitems-profile.html">profile</a> information) from the specified <code>&lt;directory&gt;</code>. If the directory does not exist, it will be created.</p>
+<p>The default value is system-specific. For example:</p>
+<ul>
+<li>Linux: <code>$HOME/.config/QtProject/qbs</code></li>
+<li>Windows: <code>%APPDATA%\QtProject\qbs</code></li>
+<li>macOS: <code>$HOME/Library/Preferences/qbs</code></li>
+</ul>
+<a name="op-op-op-op-setup-op-op-run-op-op-env-op-op-config"></a>
+<h3 id="op-op-op-op-setup-op-op-run-op-op-env-op-op-config"><code>--setup-run-env-config</code></h3>
+<p>A comma-separated list of strings. They will show up in the <code>config</code> parameter of all <a href="qml-qbslanguageitems-module.html#setupRunEnvironment-prop">setupRunEnvironment</a> scripts.</p>
+<a name="op-op-op-op-wait-op-op-lock"></a>
+<h3 id="op-op-op-op-wait-op-op-lock"><code>--wait-lock</code></h3>
+<p>Waits indefinitely for other processes to release the build graph lock.</p>
+<p>This option is typically used by <a href="generators.html#">generators</a>, which may re-invoke multiple Qbs processes on the same project simultaneously.</p>
+<a name="parameters"></a>
+<h2 id="parameters">Parameters</h2>
+<a name="config-configuration-op-op-name"></a>
+<h3 id="config-configuration-op-op-name"><code>config:configuration-name</code></h3>
+<p>Specifies the build configuration to use.</p>
+<p>Qbs can build a project for one or multiple configurations at once, each having a different set of parameters. The <code>config</code> parameter has a special function: with each occurrence a new configuration instance begins and all subsequent parameters until the next <code>config</code> are assigned to this instance. Parameter assignments before the first occurrence of <code>config</code> are applied to all build configurations. Inside products and modules, the current active build configuration can be retrieved via <a href="qml-qbsmodules-qbs.html#configurationName-prop">qbs.configurationName</a>.</p>
+<p>In the following snippet, a profile <code>clang</code> is applied to all configurations while <code>cpp.optimization</code> is different for <code>debug</code> and <code>release</code>:</p>
+<pre class="cpp">
+
+  profile:clang config:debug cpp<span class="operator">.</span>optimization:none config:release cpp<span class="operator">.</span>optimization:small
+
+</pre>
+<p>The value of <code>config</code> determines the name of the build folder and affects the default value of the <a href="qml-qbsmodules-qbs.html#buildVariant-prop">qbs.buildVariant</a> property. Qbs knows the <code>config</code> values <code>&quot;debug&quot;</code> and <code>&quot;release&quot;</code>, but in general any name can be chosen. When naming configurations created for special purposes, follow the rules for legal names generally used in programming languages:</p>
+<ul>
+<li>The first character must be a letter (a-z), an underscore (_), or a dollar sign ($).</li>
+<li>Subsequent characters may be letters, digits, underscores, or dollar signs.</li>
+</ul>
+<a name="property-value"></a>
+<h3 id="property-value"><code>property:value</code></h3>
+<p>Property values set in project files or profiles can be overridden on the command line. The syntax is:</p>
+<pre class="cpp">
+
+  <span class="operator">&lt;</span>prefix<span class="operator">&gt;</span><span class="operator">.</span><span class="operator">&lt;</span>property<span class="operator">-</span>name<span class="operator">&gt;</span>:<span class="operator">&lt;</span>property<span class="operator">-</span>value<span class="operator">&gt;</span>
+
+</pre>
+<p>For more information, see <a href="language-introduction.html#overriding-property-values-from-the-command-line">Overriding Property Values from the Command Line</a>.</p>
+<a name="arguments"></a>
+<h2 id="arguments">Arguments</h2>
+<a name="op-op-op-op-arguments"></a>
+<h3 id="op-op-op-op-arguments"><code>--</code> &lt;arguments&gt;</h3>
+<p>Command-line arguments to be passed to the program to be run.</p>
+<a name="examples"></a>
+<h2 id="examples">Examples</h2>
+<p>Runs the Qt Creator application:</p>
+<pre class="cpp">
+
+  qbs run <span class="operator">-</span><span class="operator">-</span>products qtcreator
+
+</pre>
+</div>
+<!-- @@@cli-run.html -->
+<p class="naviNextPrevious footerNavi">
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

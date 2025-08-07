@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- state.cpp -->
+  <title>HistoryState QML Type | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td ><a href="qtqml-qmlmodule.html">QML Types</a></td><td >HistoryState QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#example-usage">Example Usage</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">HistoryState QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$HistoryState-brief -->
+<p>The <a href="qml-qtqml-statemachine-historystate.html">HistoryState</a> type provides a means of returning to a previously active substate. <a href="#details">More...</a></p>
+<!-- @@@HistoryState -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQml.StateMachine 1.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.4</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtqml-statemachine-qabstractstate.html">QAbstractState</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtqml-statemachine-historystate-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtqml-statemachine-historystate.html#defaultState-prop">defaultState</a></b></b> : QAbstractState</li>
+<li class="fn"><b><b><a href="qml-qtqml-statemachine-historystate.html#historyType-prop">historyType</a></b></b> : enumeration</li>
+</ul>
+<!-- $$$HistoryState-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>A history state is a pseudo-state that represents the child state that the parent state was in the last time the parent state was exited. A transition with a history state as its target is in fact a transition to one of the other child states of the parent state. <a href="qml-qtqml-statemachine-historystate.html">HistoryState</a> is part of <a href="qmlstatemachine.html">The Declarative State Machine Framework</a>.</p>
+<p>Use the <a href="qml-qtqml-statemachine-historystate.html#defaultState-prop">defaultState</a> property to set the state that should be entered if the parent state has never been entered.</p>
+<a name="example-usage"></a>
+<h2 id="example-usage">Example Usage</h2>
+<pre class="qml">
+
+  import QtQuick 2.0
+  import QtQml.StateMachine 1.0 as DSM
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-button.html">Button</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">id</span>: <span class="name">button</span>
+          <span class="name">text</span>: <span class="string">&quot;Press me&quot;</span>
+          <span class="type">DSM</span>.StateMachine {
+              <span class="name">id</span>: <span class="name">stateMachine</span>
+              <span class="name">initialState</span>: <span class="name">parentState</span>
+              <span class="name">running</span>: <span class="number">true</span>
+              <span class="type">DSM</span>.State {
+                  <span class="name">id</span>: <span class="name">parentState</span>
+                  <span class="name">initialState</span>: <span class="name">child2</span>
+                  <span class="name">onEntered</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;parentState entered&quot;</span>)
+                  <span class="name">onExited</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;parentState exited&quot;</span>)
+                  <span class="type">DSM</span>.State {
+                      <span class="name">id</span>: <span class="name">child1</span>
+                      <span class="name">onEntered</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;child1 entered&quot;</span>)
+                      <span class="name">onExited</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;child1 exited&quot;</span>)
+                  }
+                  <span class="type">DSM</span>.State {
+                      <span class="name">id</span>: <span class="name">child2</span>
+                      <span class="name">onEntered</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;child2 entered&quot;</span>)
+                      <span class="name">onExited</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;child2 exited&quot;</span>)
+                  }
+                  <span class="type">DSM</span>.HistoryState {
+                      <span class="name">id</span>: <span class="name">historyState</span>
+                      <span class="name">defaultState</span>: <span class="name">child1</span>
+                  }
+                  <span class="type">DSM</span>.SignalTransition {
+                      <span class="name">targetState</span>: <span class="name">historyState</span>
+
+                      <span class="comment">// Clicking the button will cause the state machine to enter the child state</span>
+                      <span class="comment">// that parentState was in the last time parentState was exited, or the history state's default</span>
+                      <span class="comment">// state if parentState has never been entered.</span>
+                      <span class="name">signal</span>: <span class="name">button</span>.<span class="name">clicked</span>
+                  }
+              }
+          }
+      }
+  }
+
+</pre>
+<br style="clear: both" /><p>By default, a history state is shallow, meaning that it will not remember nested states. This can be configured through the <a href="qml-qtqml-statemachine-historystate.html#historyType-prop">historyType</a> property.</p>
+<p><b>See also </b><a href="qml-qtqml-statemachine-statemachine.html">StateMachine</a> and <a href="qml-qtqml-statemachine-state.html">State</a>.</p>
+<!-- @@@HistoryState -->
+<h2>Property Documentation</h2>
+<!-- $$$defaultState -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="defaultState-prop"></a><span class="name">defaultState</span> : <span class="type"><a href="qml-qtqml-statemachine-qabstractstate.html">QAbstractState</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The default state of this history state.</p>
+<p>The default state indicates the state to transition to if the parent state has never been entered before.</p>
+</div></div><!-- @@@defaultState -->
+<br/>
+<!-- $$$historyType -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="historyType-prop"></a><span class="name">historyType</span> : <span class="type"><a href="qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The type of history that this history state records.</p>
+<p>The default value of this property is <a href="qml-qtqml-statemachine-historystate.html">HistoryState</a>.ShallowHistory.</p>
+<p>This enum specifies the type of history that a <a href="qml-qtqml-statemachine-historystate.html">HistoryState</a> records.</p>
+<ul>
+<li><a href="qml-qtqml-statemachine-historystate.html">HistoryState</a>.ShallowHistory Only the immediate child states of the parent state are recorded. In this case, a transition with the history state as its target will end up in the immediate child state that the parent was in the last time it was exited. This is the default.</li>
+<li><a href="qml-qtqml-statemachine-historystate.html">HistoryState</a>.DeepHistory Nested states are recorded. In this case a transition with the history state as its target will end up in the most deeply nested descendant state the parent was in the last time it was exited.</li>
+</ul>
+</div></div><!-- @@@historyType -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

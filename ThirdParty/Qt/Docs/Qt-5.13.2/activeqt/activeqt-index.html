@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- activeqt-index.qdoc -->
+  <title>Active Qt 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td >Active Qt</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#articles-and-guides">Articles and Guides</a></li>
+<li class="level1"><a href="#licenses-and-attributions">Licenses and Attributions</a></li>
+<li class="level1"><a href="#reference">Reference</a></li>
+<li class="level1"><a href="#examples">Examples</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Active Qt</h1>
+<span class="subtitle"></span>
+<!-- $$$activeqt-index.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Qt's ActiveX and COM support allows Qt for Windows developers to:</p>
+<ul>
+<li>Access and use ActiveX controls and COM objects provided by any ActiveX server in their Qt applications.</li>
+<li>Make their Qt applications available as COM servers, with any number of Qt objects and widgets as COM objects and ActiveX controls.</li>
+</ul>
+<p>For more information about using ActiveX with Qt, see <a href="activeqt-server.html">Building ActiveX servers in Qt</a>.</p>
+<p>The <a href="activeqt-index.html">ActiveQt</a> framework consists of two modules:</p>
+<ul>
+<li>The <a href="activeqt-container.html">QAxContainer</a> module is a static library implementing <a href="../qtcore/qobject.html">QObject</a> and <a href="../qtwidgets/qwidget.html">QWidget</a> subclasses, <a href="qaxobject.html">QAxObject</a> and <a href="qaxwidget.html">QAxWidget</a>, that act as containers for COM objects and ActiveX controls.</li>
+<li>The <a href="activeqt-server.html">QAxServer</a> module is a static library that implements functionality for in-process and executable COM servers. This module provides the <a href="qaxaggregated.html">QAxAggregated</a>, <a href="qaxbindable.html">QAxBindable</a> and <a href="qaxfactory.html">QAxFactory</a> classes.</li>
+</ul>
+<p>A set of <a href="activeqt-tools.html">tools</a> is provided to simplify the developing and building of Qt projects that use ActiveX.</p>
+<p>To build the static libraries, change into the <code>activeqt</code> directory (usually <code>QTDIR/src/activeqt</code>), and run <code>qmake</code> and your make tool in both the <code>container</code> and the <code>control</code> subdirectory. The <code>qaxcontainer</code> and <code>qaxserver</code> libraries will be linked into <code>QTDIR/lib</code>.</p>
+<p>If you are using a shared configuration of Qt enter the <code>plugin</code> subdirectory and run <code>qmake</code> and your make tool to build a plugin that integrates the <a href="qaxcontainer-module.html">QAxContainer</a> module into <a href="../qtdesigner/qtdesigner-manual.html">Qt Designer</a>.</p>
+<a name="articles-and-guides"></a>
+<h2 id="articles-and-guides">Articles and Guides</h2>
+<ul>
+<li><a href="activeqt-tools.html">Tools for ActiveQt</a></li>
+<li><a href="activeqt-container.html">Using ActiveX controls and COM in Qt</a></li>
+<li><a href="activeqt-server.html">Building ActiveX servers in Qt</a></li>
+</ul>
+<a name="licenses-and-attributions"></a>
+<h2 id="licenses-and-attributions">Licenses and Attributions</h2>
+<p>The <a href="qaxcontainer-module.html">QAxContainer</a> and <a href="qaxserver-module.html">QAxServer</a> modules are available under commercial licenses from <a href="http://www.qt.io/about-us/">The Qt Company</a>. In addition, they are available under the <a href="https://spdx.org/licenses/BSD-3-Clause.html">BSD 3-clause &quot;New&quot; or &quot;Revised&quot; License</a>:</p>
+<pre class="cpp plain">
+
+  Copyright (C) 2017 The Qt Company Ltd.
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are
+  met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in
+      the documentation and/or other materials provided with the
+      distribution.
+    * Neither the name of The Qt Company Ltd nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+</pre>
+<p>See <a href="../qtdoc/licensing.html">Qt Licensing</a> for further details.</p>
+<a name="reference"></a>
+<h2 id="reference">Reference</h2>
+<ul>
+<li><a href="qaxcontainer-module.html">QAxContainer C++ Classes</a></li>
+<li><a href="qaxserver-module.html">QAxServer C++ Classes</a></li>
+</ul>
+<a name="examples"></a>
+<h2 id="examples">Examples</h2>
+<ul>
+<li><a href="activeqt-activeqt-multiple-example.html">Multiple Example (ActiveQt)</a></li>
+<li><a href="activeqt-activeqt-qutlook-example.html">Qutlook Example (ActiveQt)</a></li>
+<li><a href="activeqt-activeqt-comapp-example.html">COM App Example (ActiveQt)</a></li>
+<li><a href="activeqt-dotnet.html">Dot Net Example (ActiveQt)</a></li>
+<li><a href="activeqt-activeqt-opengl-example.html">OpenGL Example (ActiveQt)</a></li>
+<li><a href="activeqt-activeqt-hierarchy-example.html">Hierarchy Example (ActiveQt)</a></li>
+<li><a href="activeqt-activeqt-mediaplayer-example.html">Media Player Example (ActiveQt)</a></li>
+<li><a href="activeqt-activeqt-menus-example.html">Menus Example (ActiveQt)</a></li>
+<li><a href="activeqt-activeqt-wrapper-example.html">Wrapper Example (ActiveQt)</a></li>
+<li><a href="activeqt-activeqt-simple-example.html">Simple Example (ActiveQt)</a></li>
+</ul>
+</div>
+<!-- @@@activeqt-index.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

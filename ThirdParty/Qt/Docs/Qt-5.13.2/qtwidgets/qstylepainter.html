@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qstylepainter.cpp -->
+  <title>QStylePainter Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QStylePainter</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QStylePainter Class</h1>
+<!-- $$$QStylePainter-brief -->
+<p>The <a href="qstylepainter.html">QStylePainter</a> class is a convenience class for drawing <a href="qstyle.html">QStyle</a> elements inside a widget. <a href="#details">More...</a></p>
+<!-- @@@QStylePainter -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QStylePainter&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtgui/qpainter.html">QPainter</a></td></tr></table></div><ul>
+<li><a href="qstylepainter-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstylepainter.html#QStylePainter-2">QStylePainter</a></b>(QPaintDevice *<i>pd</i>, QWidget *<i>widget</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstylepainter.html#QStylePainter-1">QStylePainter</a></b>(QWidget *<i>widget</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstylepainter.html#QStylePainter">QStylePainter</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstylepainter.html#begin">begin</a></b>(QWidget *<i>widget</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstylepainter.html#begin-1">begin</a></b>(QPaintDevice *<i>pd</i>, QWidget *<i>widget</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qstylepainter.html#drawComplexControl">drawComplexControl</a></b>(QStyle::ComplexControl <i>cc</i>, const QStyleOptionComplex &amp;<i>option</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qstylepainter.html#drawControl">drawControl</a></b>(QStyle::ControlElement <i>ce</i>, const QStyleOption &amp;<i>option</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qstylepainter.html#drawItemPixmap">drawItemPixmap</a></b>(const QRect &amp;<i>rect</i>, int <i>flags</i>, const QPixmap &amp;<i>pixmap</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qstylepainter.html#drawItemText">drawItemText</a></b>(const QRect &amp;<i>rect</i>, int <i>flags</i>, const QPalette &amp;<i>pal</i>, bool <i>enabled</i>, const QString &amp;<i>text</i>, QPalette::ColorRole <i>textRole</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qstylepainter.html#drawPrimitive">drawPrimitive</a></b>(QStyle::PrimitiveElement <i>pe</i>, const QStyleOption &amp;<i>option</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStyle *</td><td class="memItemRight bottomAlign"><b><a href="qstylepainter.html#style">style</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QStylePainter-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qstylepainter.html">QStylePainter</a> extends <a href="../qtgui/qpainter.html">QPainter</a> with a set of high-level <code>draw..&#x2e;()</code> functions implemented on top of <a href="qstyle.html">QStyle</a>'s API. The advantage of using <a href="qstylepainter.html">QStylePainter</a> is that the parameter lists get considerably shorter. Whereas a <a href="qstyle.html">QStyle</a> object must be able to draw on any widget using any painter (because the application normally has one <a href="qstyle.html">QStyle</a> object shared by all widget), a <a href="qstylepainter.html">QStylePainter</a> is initialized with a widget, eliminating the need to specify the <a href="qwidget.html">QWidget</a>, the <a href="../qtgui/qpainter.html">QPainter</a>, and the <a href="qstyle.html">QStyle</a> for every function call.</p>
+<p>Example using <a href="qstyle.html">QStyle</a> directly:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MyWidget<span class="operator">::</span>paintEvent(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span> <span class="operator">*</span> <span class="comment">/* event */</span>)
+  {
+      <span class="type"><a href="../qtgui/qpainter.html#QPainter">QPainter</a></span> painter(<span class="keyword">this</span>);
+
+      <span class="type"><a href="qstyleoptionfocusrect.html">QStyleOptionFocusRect</a></span> option;
+      option<span class="operator">.</span>initFrom(<span class="keyword">this</span>);
+      option<span class="operator">.</span>backgroundColor <span class="operator">=</span> palette()<span class="operator">.</span>color(<span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>Background);
+
+      style()<span class="operator">-</span><span class="operator">&gt;</span>drawPrimitive(<span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PE_FrameFocusRect<span class="operator">,</span> <span class="operator">&amp;</span>option<span class="operator">,</span> <span class="operator">&amp;</span>painter<span class="operator">,</span> <span class="keyword">this</span>);
+  }
+
+</pre>
+<p>Example using <a href="qstylepainter.html">QStylePainter</a>:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> MyWidget<span class="operator">::</span>paintEvent(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span> <span class="operator">*</span> <span class="comment">/* event */</span>)
+  {
+      <span class="type"><a href="qstylepainter.html#QStylePainter">QStylePainter</a></span> painter(<span class="keyword">this</span>);
+
+      <span class="type"><a href="qstyleoptionfocusrect.html">QStyleOptionFocusRect</a></span> option;
+      option<span class="operator">.</span>initFrom(<span class="keyword">this</span>);
+      option<span class="operator">.</span>backgroundColor <span class="operator">=</span> palette()<span class="operator">.</span>color(<span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>Background);
+
+      painter<span class="operator">.</span>drawPrimitive(<span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>PE_FrameFocusRect<span class="operator">,</span> option);
+  }
+
+</pre>
+</div>
+<p><b>See also </b><a href="qstyle.html">QStyle</a> and <a href="qstyleoption.html">QStyleOption</a>.</p>
+<!-- @@@QStylePainter -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QStylePainter$$$QStylePainterQPaintDevice*QWidget* -->
+<h3 class="fn" id="QStylePainter-2"><a name="QStylePainter-2"></a>QStylePainter::<span class="name">QStylePainter</span>(<span class="type"><a href="../qtgui/qpaintdevice.html">QPaintDevice</a></span> *<i>pd</i>, <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i>)</h3>
+<p>Construct a <a href="qstylepainter.html">QStylePainter</a> using <i>pd</i> for its paint device, and attributes from <i>widget</i>.</p>
+<!-- @@@QStylePainter -->
+<!-- $$$QStylePainter$$$QStylePainterQWidget* -->
+<h3 class="fn" id="QStylePainter-1"><a name="QStylePainter-1"></a>QStylePainter::<span class="name">QStylePainter</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i>)</h3>
+<p>Construct a <a href="qstylepainter.html">QStylePainter</a> using widget <i>widget</i> for its paint device.</p>
+<!-- @@@QStylePainter -->
+<!-- $$$QStylePainter[overload1]$$$QStylePainter -->
+<h3 class="fn" id="QStylePainter"><a name="QStylePainter"></a>QStylePainter::<span class="name">QStylePainter</span>()</h3>
+<p>Constructs a <a href="qstylepainter.html">QStylePainter</a>.</p>
+<!-- @@@QStylePainter -->
+<!-- $$$begin[overload1]$$$beginQWidget* -->
+<h3 class="fn" id="begin"><a name="begin"></a><span class="type">bool</span> QStylePainter::<span class="name">begin</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i>)</h3>
+<p>Begin painting operations on the specified <i>widget</i>. Returns <code>true</code> if the painter is ready to use; otherwise returns <code>false</code>.</p>
+<p>This is automatically called by the constructor that takes a <a href="qwidget.html">QWidget</a>.</p>
+<!-- @@@begin -->
+<!-- $$$begin$$$beginQPaintDevice*QWidget* -->
+<h3 class="fn" id="begin-1"><a name="begin-1"></a><span class="type">bool</span> QStylePainter::<span class="name">begin</span>(<span class="type"><a href="../qtgui/qpaintdevice.html">QPaintDevice</a></span> *<i>pd</i>, <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Begin painting operations on paint device <i>pd</i> as if it was <i>widget</i>.</p>
+<p>This is automatically called by the constructor that takes a <a href="../qtgui/qpaintdevice.html">QPaintDevice</a> and a <a href="qwidget.html">QWidget</a>.</p>
+<!-- @@@begin -->
+<!-- $$$drawComplexControl[overload1]$$$drawComplexControlQStyle::ComplexControlconstQStyleOptionComplex& -->
+<h3 class="fn" id="drawComplexControl"><a name="drawComplexControl"></a><span class="type">void</span> QStylePainter::<span class="name">drawComplexControl</span>(<span class="type"><a href="qstyle.html#ComplexControl-enum">QStyle::ComplexControl</a></span> <i>cc</i>, const <span class="type"><a href="qstyleoptioncomplex.html">QStyleOptionComplex</a></span> &amp;<i>option</i>)</h3>
+<p>Use the widget's style to draw a complex control <i>cc</i> specified by the <a href="qstyleoptioncomplex.html">QStyleOptionComplex</a> <i>option</i>.</p>
+<p><b>See also </b><a href="qstyle.html#drawComplexControl">QStyle::drawComplexControl</a>().</p>
+<!-- @@@drawComplexControl -->
+<!-- $$$drawControl[overload1]$$$drawControlQStyle::ControlElementconstQStyleOption& -->
+<h3 class="fn" id="drawControl"><a name="drawControl"></a><span class="type">void</span> QStylePainter::<span class="name">drawControl</span>(<span class="type"><a href="qstyle.html#ControlElement-enum">QStyle::ControlElement</a></span> <i>ce</i>, const <span class="type"><a href="qstyleoption.html">QStyleOption</a></span> &amp;<i>option</i>)</h3>
+<p>Use the widget's style to draw a control element <i>ce</i> specified by <a href="qstyleoption.html">QStyleOption</a> <i>option</i>.</p>
+<p><b>See also </b><a href="qstyle.html#drawControl">QStyle::drawControl</a>().</p>
+<!-- @@@drawControl -->
+<!-- $$$drawItemPixmap[overload1]$$$drawItemPixmapconstQRect&intconstQPixmap& -->
+<h3 class="fn" id="drawItemPixmap"><a name="drawItemPixmap"></a><span class="type">void</span> QStylePainter::<span class="name">drawItemPixmap</span>(const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> &amp;<i>rect</i>, <span class="type">int</span> <i>flags</i>, const <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> &amp;<i>pixmap</i>)</h3>
+<p>Draws the <i>pixmap</i> in rectangle <i>rect</i>. The pixmap is aligned according to <i>flags</i>.</p>
+<p><b>See also </b><a href="qstyle.html#drawItemPixmap">QStyle::drawItemPixmap</a>() and <a href="../qtcore/qt.html#AlignmentFlag-enum">Qt::Alignment</a>.</p>
+<!-- @@@drawItemPixmap -->
+<!-- $$$drawItemText[overload1]$$$drawItemTextconstQRect&intconstQPalette&boolconstQString&QPalette::ColorRole -->
+<h3 class="fn" id="drawItemText"><a name="drawItemText"></a><span class="type">void</span> QStylePainter::<span class="name">drawItemText</span>(const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> &amp;<i>rect</i>, <span class="type">int</span> <i>flags</i>, const <span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span> &amp;<i>pal</i>, <span class="type">bool</span> <i>enabled</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>text</i>, <span class="type"><a href="../qtgui/qpalette.html#ColorRole-enum">QPalette::ColorRole</a></span> <i>textRole</i> = ...)</h3>
+<p>Draws the <i>text</i> in rectangle <i>rect</i> and palette <i>pal</i>. The text is aligned and wrapped according to <i>flags</i>.</p>
+<p>The pen color is specified with <i>textRole</i>. The <i>enabled</i> bool indicates whether or not the item is enabled; when reimplementing this bool should influence how the item is drawn.</p>
+<p><b>See also </b><a href="qstyle.html#drawItemText">QStyle::drawItemText</a>() and <a href="../qtcore/qt.html#AlignmentFlag-enum">Qt::Alignment</a>.</p>
+<!-- @@@drawItemText -->
+<!-- $$$drawPrimitive[overload1]$$$drawPrimitiveQStyle::PrimitiveElementconstQStyleOption& -->
+<h3 class="fn" id="drawPrimitive"><a name="drawPrimitive"></a><span class="type">void</span> QStylePainter::<span class="name">drawPrimitive</span>(<span class="type"><a href="qstyle.html#PrimitiveElement-enum">QStyle::PrimitiveElement</a></span> <i>pe</i>, const <span class="type"><a href="qstyleoption.html">QStyleOption</a></span> &amp;<i>option</i>)</h3>
+<p>Use the widget's style to draw a primitive element <i>pe</i> specified by <a href="qstyleoption.html">QStyleOption</a> <i>option</i>.</p>
+<p><b>See also </b><a href="qstyle.html#drawPrimitive">QStyle::drawPrimitive</a>().</p>
+<!-- @@@drawPrimitive -->
+<!-- $$$style[overload1]$$$style -->
+<h3 class="fn" id="style"><a name="style"></a><span class="type"><a href="qstyle.html">QStyle</a></span> *QStylePainter::<span class="name">style</span>() const</h3>
+<p>Return the current style used by the <a href="qstylepainter.html">QStylePainter</a>.</p>
+<!-- @@@style -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

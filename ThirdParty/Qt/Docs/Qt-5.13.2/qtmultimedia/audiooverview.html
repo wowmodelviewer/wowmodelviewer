@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- audiooverview.qdoc -->
+  <title>Audio Overview | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td >Audio Overview</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#audio-features">Audio Features</a></li>
+<li class="level1"><a href="#audio-implementation-details">Audio Implementation Details</a></li>
+<li class="level2"><a href="#playing-compressed-audio">Playing Compressed Audio</a></li>
+<li class="level2"><a href="#recording-audio-to-a-file">Recording Audio to a File</a></li>
+<li class="level2"><a href="#low-latency-sound-effects">Low Latency Sound Effects</a></li>
+<li class="level2"><a href="#monitoring-audio-data-during-playback-or-recording">Monitoring Audio Data During Playback or Recording</a></li>
+<li class="level2"><a href="#low-level-audio-playback-and-recording">Low Level Audio Playback and Recording</a></li>
+<li class="level2"><a href="#decoding-compressed-audio-to-memory">Decoding Compressed Audio to Memory</a></li>
+<li class="level1"><a href="#examples">Examples</a></li>
+<li class="level2"><a href="#c-examples">C++ Examples</a></li>
+<li class="level1"><a href="#reference-documentation">Reference Documentation</a></li>
+<li class="level2"><a href="#c-classes">C++ Classes</a></li>
+<li class="level2"><a href="#qml-types">QML Types</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Audio Overview</h1>
+<span class="subtitle"></span>
+<!-- $$$audiooverview.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="audio-features"></a>
+<h2 id="audio-features">Audio Features</h2>
+<p>Qt Multimedia offers a range of audio classes, covering both low and high level approaches to audio input, output and processing. In addition to traditional audio usage, the <a href="qtaudioengine-qmlmodule.html">Qt Audio Engine</a> QML types offer high level 3D positional audio for QML applications. See that documentation for more information.</p>
+<a name="audio-implementation-details"></a>
+<h2 id="audio-implementation-details">Audio Implementation Details</h2>
+<a name="playing-compressed-audio"></a>
+<h3 id="playing-compressed-audio">Playing Compressed Audio</h3>
+<p>For playing media or audio files that are not simple, uncompressed audio, you can use the <a href="qmediaplayer.html">QMediaPlayer</a> C++ class, or the <a href="qml-multimedia.html#audio">Audio</a> and <a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a> QML types. The <a href="qmediaplayer.html">QMediaPlayer</a> class and associated QML types are also capable of playing <a href="videooverview.html#multimedia-playing-video">video</a>, if required. The compressed audio formats supported does depend on the operating system environment, and also what media plugins the user may have installed.</p>
+<p>Here is how you play a local file using C++:</p>
+<pre class="cpp">
+
+  player <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span>;
+  <span class="comment">// ...</span>
+  player<span class="operator">-</span><span class="operator">&gt;</span>setMedia(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>fromLocalFile(<span class="string">&quot;/Users/me/Music/coolsong.mp3&quot;</span>));
+  player<span class="operator">-</span><span class="operator">&gt;</span>setVolume(<span class="number">50</span>);
+  player<span class="operator">-</span><span class="operator">&gt;</span>play();
+
+</pre>
+<p>You can also put files (even remote URLs) into a playlist:</p>
+<pre class="cpp">
+
+  player <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span>;
+
+  playlist <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmediaplaylist.html">QMediaPlaylist</a></span>(player);
+  playlist<span class="operator">-</span><span class="operator">&gt;</span>addMedia(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="string">&quot;http://example.com/myfile1.mp3&quot;</span>));
+  playlist<span class="operator">-</span><span class="operator">&gt;</span>addMedia(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="string">&quot;http://example.com/myfile2.mp3&quot;</span>));
+  <span class="comment">// ...</span>
+  playlist<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(<span class="number">1</span>);
+  player<span class="operator">-</span><span class="operator">&gt;</span>play();
+
+</pre>
+<a name="recording-audio-to-a-file"></a>
+<h3 id="recording-audio-to-a-file">Recording Audio to a File</h3>
+<p>For recording audio to a file, the <a href="qaudiorecorder.html">QAudioRecorder</a> class allows you to compress audio data from an input device and record it.</p>
+<pre class="cpp">
+
+  audioRecorder <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaudiorecorder.html">QAudioRecorder</a></span>;
+
+  <span class="type"><a href="qaudioencodersettings.html">QAudioEncoderSettings</a></span> audioSettings;
+  audioSettings<span class="operator">.</span>setCodec(<span class="string">&quot;audio/amr&quot;</span>);
+  audioSettings<span class="operator">.</span>setQuality(<span class="type"><a href="qmultimedia.html">QMultimedia</a></span><span class="operator">::</span>HighQuality);
+
+  audioRecorder<span class="operator">-</span><span class="operator">&gt;</span>setEncodingSettings(audioSettings);
+
+  audioRecorder<span class="operator">-</span><span class="operator">&gt;</span>setOutputLocation(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>fromLocalFile(<span class="string">&quot;test.amr&quot;</span>));
+  audioRecorder<span class="operator">-</span><span class="operator">&gt;</span>record();
+
+</pre>
+<a name="low-latency-sound-effects"></a>
+<h3 id="low-latency-sound-effects">Low Latency Sound Effects</h3>
+<p>In addition to the raw access to sound devices described above, the <a href="qsoundeffect.html">QSoundEffect</a> class (and <a href="qml-multimedia.html#soundeffect">SoundEffect</a> QML type) offers a slightly higher level way to play sounds. These classes allow you to specify a WAV format file which can then be played with low latency when necessary. Both <a href="qsoundeffect.html">QSoundEffect</a> and <a href="qml-multimedia.html#soundeffect">SoundEffect</a> have essentially the same API.</p>
+<p>You can adjust the number of <a href="qsoundeffect.html#loopCount">loops</a> a sound effect is played, as well as the <a href="qsoundeffect.html#setVolume">volume</a> (or <a href="qsoundeffect.html#setMuted">muting</a>) of the effect.</p>
+<p>For older, Qt 4.x based applications <a href="qsound.html">QSound</a> is also available. Applications are recommended to use <a href="qsoundeffect.html">QSoundEffect</a> where possible.</p>
+<a name="monitoring-audio-data-during-playback-or-recording"></a>
+<h3 id="monitoring-audio-data-during-playback-or-recording">Monitoring Audio Data During Playback or Recording</h3>
+<p>The <a href="qaudioprobe.html">QAudioProbe</a> class allows you to monitor audio data being played or recorded in the higher level classes like <a href="qmediaplayer.html">QMediaPlayer</a>, <a href="qcamera.html">QCamera</a> and <a href="qaudiorecorder.html">QAudioRecorder</a>. After creating your high level class, you can simply set the source of the probe to your class, and receive audio buffers as they are processed. This is useful for several audio processing tasks, particularly for visualization or adjusting gain. You cannot modify the buffers, and they may arrive at a slightly different time than the media pipeline processes them.</p>
+<p>Here's an example of installing a probe during recording:</p>
+<pre class="cpp">
+
+  audioRecorder <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaudiorecorder.html">QAudioRecorder</a></span>;
+
+  <span class="type"><a href="qaudioencodersettings.html">QAudioEncoderSettings</a></span> audioSettings;
+  audioSettings<span class="operator">.</span>setCodec(<span class="string">&quot;audio/amr&quot;</span>);
+  audioSettings<span class="operator">.</span>setQuality(<span class="type"><a href="qmultimedia.html">QMultimedia</a></span><span class="operator">::</span>HighQuality);
+
+  audioRecorder<span class="operator">-</span><span class="operator">&gt;</span>setEncodingSettings(audioSettings);
+
+  audioRecorder<span class="operator">-</span><span class="operator">&gt;</span>setOutputLocation(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>fromLocalFile(<span class="string">&quot;test.amr&quot;</span>));
+
+  audioProbe <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaudioprobe.html">QAudioProbe</a></span>(<span class="keyword">this</span>);
+  <span class="keyword">if</span> (audioProbe<span class="operator">-</span><span class="operator">&gt;</span>setSource(audioRecorder)) {
+      <span class="comment">// Probing succeeded, audioProbe-&gt;isValid() should be true.</span>
+      connect(audioProbe<span class="operator">,</span> SIGNAL(audioBufferProbed(<span class="type"><a href="qaudiobuffer.html">QAudioBuffer</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(calculateLevel(<span class="type"><a href="qaudiobuffer.html">QAudioBuffer</a></span>)));
+  }
+
+  audioRecorder<span class="operator">-</span><span class="operator">&gt;</span>record();
+  <span class="comment">// Now audio buffers being recorded should be signaled</span>
+  <span class="comment">// by the probe, so we can do things like calculating the</span>
+  <span class="comment">// audio power level, or performing a frequency transform</span>
+
+</pre>
+<a name="low-level-audio-playback-and-recording"></a>
+<h3 id="low-level-audio-playback-and-recording">Low Level Audio Playback and Recording</h3>
+<p>Qt Multimedia offers classes for raw access to audio input and output facilities, allowing applications to receive raw data from devices like microphones, and to write raw data to speakers or other devices. Generally these classes do not do any audio decoding, or other processing, but they can support different types of raw audio data.</p>
+<p>The <a href="qaudiooutput.html">QAudioOutput</a> class offers raw audio data output, while <a href="qaudioinput.html">QAudioInput</a> offers raw audio data input. Both classes have adjustable buffers and latency, so they are suitable for both low latency use cases (like games or VOIP) and high latency (like music playback). The available hardware determines what audio outputs and inputs are available.</p>
+<a name="push-and-pull"></a>
+<h4 id="push-and-pull">Push and Pull</h4>
+<p>The low level audio classes can operate in two modes - <code>push</code> and <code>pull</code>. In <code>pull</code> mode, the audio device is started by giving it a <a href="../qtcore/qiodevice.html">QIODevice</a>. For an output device, the <a href="qaudiooutput.html">QAudioOutput</a> class will pull data from the <a href="../qtcore/qiodevice.html">QIODevice</a> (using <a href="../qtcore/qiodevice.html#read">QIODevice::read</a>()) when more audio data is required. Conversely, for <code>pull</code> mode with <a href="qaudioinput.html">QAudioInput</a>, when audio data is available then the data will be written directly to the <a href="../qtcore/qiodevice.html">QIODevice</a>.</p>
+<p>In <code>push</code> mode, the audio device provides a <a href="../qtcore/qiodevice.html">QIODevice</a> instance that can be written or read to as needed. Typically this results in simpler code but more buffering, which may affect latency.</p>
+<a name="decoding-compressed-audio-to-memory"></a>
+<h3 id="decoding-compressed-audio-to-memory">Decoding Compressed Audio to Memory</h3>
+<p>In some cases you may want to decode a compressed audio file and do further processing yourself (for example, mixing multiple samples or using custom digital signal processing algorithms). <a href="qaudiodecoder.html">QAudioDecoder</a> supports decoding local files or data streams from <a href="../qtcore/qiodevice.html">QIODevice</a> instances.</p>
+<p>Here's an example of decoding a local file:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span> desiredFormat;
+  desiredFormat<span class="operator">.</span>setChannelCount(<span class="number">2</span>);
+  desiredFormat<span class="operator">.</span>setCodec(<span class="string">&quot;audio/x-raw&quot;</span>);
+  desiredFormat<span class="operator">.</span>setSampleType(<span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>UnSignedInt);
+  desiredFormat<span class="operator">.</span>setSampleRate(<span class="number">48000</span>);
+  desiredFormat<span class="operator">.</span>setSampleSize(<span class="number">16</span>);
+
+  <span class="type"><a href="qaudiodecoder.html">QAudioDecoder</a></span> <span class="operator">*</span>decoder <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaudiodecoder.html">QAudioDecoder</a></span>(<span class="keyword">this</span>);
+  decoder<span class="operator">-</span><span class="operator">&gt;</span>setAudioFormat(desiredFormat);
+  decoder<span class="operator">-</span><span class="operator">&gt;</span>setSourceFilename(<span class="string">&quot;level1.mp3&quot;</span>);
+
+  connect(decoder<span class="operator">,</span> SIGNAL(bufferReady())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(readBuffer()));
+  decoder<span class="operator">-</span><span class="operator">&gt;</span>start();
+
+  <span class="comment">// Now wait for bufferReady() signal and call decoder-&gt;read()</span>
+
+</pre>
+<a name="examples"></a>
+<h2 id="examples">Examples</h2>
+<p>There are both C++ and QML examples available.</p>
+<a name="c-examples"></a>
+<h3 id="c-examples">C++ Examples</h3>
+<a name="reference-documentation"></a>
+<h2 id="reference-documentation">Reference Documentation</h2>
+<a name="c-classes"></a>
+<h3 id="c-classes">C++ Classes</h3>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qaudio.html">QAudio</a></p></td><td class="tblDescr"><p>Contains enums used by the audio classes</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qaudiobuffer.html">QAudioBuffer</a></p></td><td class="tblDescr"><p>Represents a collection of audio samples with a specific format and sample rate</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qaudiobuffer-stereoframe.html">QAudioBuffer::StereoFrame</a></p></td><td class="tblDescr"><p>Simple wrapper for a stereo audio frame</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qaudiodecoder.html">QAudioDecoder</a></p></td><td class="tblDescr"><p>Allows decoding audio</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qaudiodeviceinfo.html">QAudioDeviceInfo</a></p></td><td class="tblDescr"><p>Interface to query audio devices and their functionality</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qaudioformat.html">QAudioFormat</a></p></td><td class="tblDescr"><p>Stores audio stream parameter information</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qaudioinput.html">QAudioInput</a></p></td><td class="tblDescr"><p>Interface for receiving audio data from an audio input device</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qaudiooutput.html">QAudioOutput</a></p></td><td class="tblDescr"><p>Interface for sending audio data to an audio output device</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qaudioprobe.html">QAudioProbe</a></p></td><td class="tblDescr"><p>Allows you to monitor audio being played or recorded</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qabstractaudiodeviceinfo.html">QAbstractAudioDeviceInfo</a></p></td><td class="tblDescr"><p>Base class for audio backends</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qaudiosystemplugin.html">QAudioSystemPlugin</a></p></td><td class="tblDescr"><p>Abstract base for audio plugins</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qsound.html">QSound</a></p></td><td class="tblDescr"><p>Method to play .wav sound files</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qsoundeffect.html">QSoundEffect</a></p></td><td class="tblDescr"><p>Way to play low latency sound effects</p></td></tr>
+</table></div>
+<a name="qml-types"></a>
+<h3 id="qml-types">QML Types</h3>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-audio.html">Audio</a></p></td><td class="tblDescr"><p>Add audio playback to a scene</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a></p></td><td class="tblDescr"><p>Add media playback to a scene</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-playlist.html">Playlist</a></p></td><td class="tblDescr"><p>For specifying a list of media to be played</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-playlistitem.html">PlaylistItem</a></p></td><td class="tblDescr"><p>Defines an item in a Playlist</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-qtmultimedia-soundeffect.html">SoundEffect</a></p></td><td class="tblDescr"><p>Type provides a way to play sound effects in QML</p></td></tr>
+</table></div>
+</div>
+<!-- @@@audiooverview.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

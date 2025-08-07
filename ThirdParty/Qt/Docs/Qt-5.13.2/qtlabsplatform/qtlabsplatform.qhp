@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+    <namespace>org.qt-project.qtlabsplatform.5132</namespace>
+    <virtualFolder>qtlabsplatform</virtualFolder>
+    <metaData name="version" value="5.13.2"/>
+    <customFilter name="QtLabsPlatform 5.13.2">
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtlabsplatform</filterAttribute>
+    </customFilter>
+    <filterSection>
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtlabsplatform</filterAttribute>
+        <filterAttribute>qtrefdoc</filterAttribute>
+        <toc>
+            <section ref="qtlabsplatform-index.html" title="Qt Labs Platform">
+                <section ref="qt-labs-platform-qmlmodule.html" title="QML Types">
+                    <section ref="qml-qt-labs-platform-colordialog.html" title="ColorDialog Type Reference">
+                        <section ref="qml-qt-labs-platform-colordialog-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qt-labs-platform-dialog.html" title="Dialog Type Reference">
+                        <section ref="qml-qt-labs-platform-dialog-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qt-labs-platform-filedialog.html" title="FileDialog Type Reference">
+                        <section ref="qml-qt-labs-platform-filedialog-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qt-labs-platform-folderdialog.html" title="FolderDialog Type Reference">
+                        <section ref="qml-qt-labs-platform-folderdialog-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qt-labs-platform-fontdialog.html" title="FontDialog Type Reference">
+                        <section ref="qml-qt-labs-platform-fontdialog-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qt-labs-platform-menu.html" title="Menu Type Reference">
+                        <section ref="qml-qt-labs-platform-menu-members.html" title="List of all members"/>
+                        <section ref="qml-qt-labs-platform-menu-obsolete.html" title="Obsolete members"/>
+                    </section>
+                    <section ref="qml-qt-labs-platform-menubar.html" title="MenuBar Type Reference">
+                        <section ref="qml-qt-labs-platform-menubar-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qt-labs-platform-menuitem.html" title="MenuItem Type Reference">
+                        <section ref="qml-qt-labs-platform-menuitem-members.html" title="List of all members"/>
+                        <section ref="qml-qt-labs-platform-menuitem-obsolete.html" title="Obsolete members"/>
+                    </section>
+                    <section ref="qml-qt-labs-platform-menuitemgroup.html" title="MenuItemGroup Type Reference">
+                        <section ref="qml-qt-labs-platform-menuitemgroup-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qt-labs-platform-menuseparator.html" title="MenuSeparator Type Reference">
+                        <section ref="qml-qt-labs-platform-menuseparator-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qt-labs-platform-messagedialog.html" title="MessageDialog Type Reference">
+                        <section ref="qml-qt-labs-platform-messagedialog-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qt-labs-platform-standardpaths.html" title="StandardPaths Type Reference">
+                        <section ref="qml-qt-labs-platform-standardpaths-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qt-labs-platform-systemtrayicon.html" title="SystemTrayIcon Type Reference">
+                        <section ref="qml-qt-labs-platform-systemtrayicon-members.html" title="List of all members"/>
+                        <section ref="qml-qt-labs-platform-systemtrayicon-obsolete.html" title="Obsolete members"/>
+                    </section>
+                </section>
+            </section>
+        </toc>
+        <keywords>
+            <keyword name="ColorDialog" id="QML.ColorDialog" ref="qml-qt-labs-platform-colordialog.html"/>
+            <keyword name="Dialog" id="QML.Dialog" ref="qml-qt-labs-platform-dialog.html"/>
+            <keyword name="FileDialog" id="QML.FileDialog" ref="qml-qt-labs-platform-filedialog.html"/>
+            <keyword name="FolderDialog" id="QML.FolderDialog" ref="qml-qt-labs-platform-folderdialog.html"/>
+            <keyword name="FontDialog" id="QML.FontDialog" ref="qml-qt-labs-platform-fontdialog.html"/>
+            <keyword name="Menu" id="QML.Menu" ref="qml-qt-labs-platform-menu.html"/>
+            <keyword name="MenuBar" id="QML.MenuBar" ref="qml-qt-labs-platform-menubar.html"/>
+            <keyword name="MenuItem" id="QML.MenuItem" ref="qml-qt-labs-platform-menuitem.html"/>
+            <keyword name="MenuItemGroup" id="QML.MenuItemGroup" ref="qml-qt-labs-platform-menuitemgroup.html"/>
+            <keyword name="MenuSeparator" id="QML.MenuSeparator" ref="qml-qt-labs-platform-menuseparator.html"/>
+            <keyword name="MessageDialog" id="QML.MessageDialog" ref="qml-qt-labs-platform-messagedialog.html"/>
+            <keyword name="Qt Labs Platform" id="Qt Labs Platform" ref="qtlabsplatform-index.html"/>
+            <keyword name="Qt Labs Platform QML Types" id="Qt Labs Platform QML Types" ref="qt-labs-platform-qmlmodule.html"/>
+            <keyword name="StandardPaths" id="QML.StandardPaths" ref="qml-qt-labs-platform-standardpaths.html"/>
+            <keyword name="SystemTrayIcon" id="QML.SystemTrayIcon" ref="qml-qt-labs-platform-systemtrayicon.html"/>
+            <keyword name="abortClicked" id="MessageDialog::abortClicked" ref="qml-qt-labs-platform-messagedialog.html#abortClicked-signal"/>
+            <keyword name="aboutToHide" id="Menu::aboutToHide" ref="qml-qt-labs-platform-menu.html#aboutToHide-signal"/>
+            <keyword name="aboutToShow" id="Menu::aboutToShow" ref="qml-qt-labs-platform-menu.html#aboutToShow-signal"/>
+            <keyword name="accept" id="Dialog::accept" ref="qml-qt-labs-platform-dialog.html#accept-method"/>
+            <keyword name="acceptLabel" id="FileDialog::acceptLabel" ref="qml-qt-labs-platform-filedialog.html#acceptLabel-prop"/>
+            <keyword name="acceptLabel" id="FolderDialog::acceptLabel" ref="qml-qt-labs-platform-folderdialog.html#acceptLabel-prop"/>
+            <keyword name="accepted" id="Dialog::accepted" ref="qml-qt-labs-platform-dialog.html#accepted-signal"/>
+            <keyword name="activated" id="SystemTrayIcon::activated" ref="qml-qt-labs-platform-systemtrayicon.html#activated-signal"/>
+            <keyword name="addItem" id="Menu::addItem" ref="qml-qt-labs-platform-menu.html#addItem-method"/>
+            <keyword name="addItem" id="MenuItemGroup::addItem" ref="qml-qt-labs-platform-menuitemgroup.html#addItem-method"/>
+            <keyword name="addMenu" id="Menu::addMenu" ref="qml-qt-labs-platform-menu.html#addMenu-method"/>
+            <keyword name="addMenu" id="MenuBar::addMenu" ref="qml-qt-labs-platform-menubar.html#addMenu-method"/>
+            <keyword name="applyClicked" id="MessageDialog::applyClicked" ref="qml-qt-labs-platform-messagedialog.html#applyClicked-signal"/>
+            <keyword name="available" id="SystemTrayIcon::available" ref="qml-qt-labs-platform-systemtrayicon.html#available-prop"/>
+            <keyword name="buttons" id="MessageDialog::buttons" ref="qml-qt-labs-platform-messagedialog.html#buttons-prop"/>
+            <keyword name="cancelClicked" id="MessageDialog::cancelClicked" ref="qml-qt-labs-platform-messagedialog.html#cancelClicked-signal"/>
+            <keyword name="checkable" id="MenuItem::checkable" ref="qml-qt-labs-platform-menuitem.html#checkable-prop"/>
+            <keyword name="checked" id="MenuItem::checked" ref="qml-qt-labs-platform-menuitem.html#checked-prop"/>
+            <keyword name="checkedItem" id="MenuItemGroup::checkedItem" ref="qml-qt-labs-platform-menuitemgroup.html#checkedItem-prop"/>
+            <keyword name="clear" id="Menu::clear" ref="qml-qt-labs-platform-menu.html#clear-method"/>
+            <keyword name="clear" id="MenuBar::clear" ref="qml-qt-labs-platform-menubar.html#clear-method"/>
+            <keyword name="clear" id="MenuItemGroup::clear" ref="qml-qt-labs-platform-menuitemgroup.html#clear-method"/>
+            <keyword name="clicked" id="MessageDialog::clicked" ref="qml-qt-labs-platform-messagedialog.html#clicked-signal"/>
+            <keyword name="close" id="Dialog::close" ref="qml-qt-labs-platform-dialog.html#close-method"/>
+            <keyword name="close" id="Menu::close" ref="qml-qt-labs-platform-menu.html#close-method"/>
+            <keyword name="closeClicked" id="MessageDialog::closeClicked" ref="qml-qt-labs-platform-messagedialog.html#closeClicked-signal"/>
+            <keyword name="color" id="ColorDialog::color" ref="qml-qt-labs-platform-colordialog.html#color-prop"/>
+            <keyword name="currentColor" id="ColorDialog::currentColor" ref="qml-qt-labs-platform-colordialog.html#currentColor-prop"/>
+            <keyword name="currentFile" id="FileDialog::currentFile" ref="qml-qt-labs-platform-filedialog.html#currentFile-prop"/>
+            <keyword name="currentFiles" id="FileDialog::currentFiles" ref="qml-qt-labs-platform-filedialog.html#currentFiles-prop"/>
+            <keyword name="currentFolder" id="FolderDialog::currentFolder" ref="qml-qt-labs-platform-folderdialog.html#currentFolder-prop"/>
+            <keyword name="currentFont" id="FontDialog::currentFont" ref="qml-qt-labs-platform-fontdialog.html#currentFont-prop"/>
+            <keyword name="data" id="Dialog::data" ref="qml-qt-labs-platform-dialog.html#data-prop"/>
+            <keyword name="data" id="Menu::data" ref="qml-qt-labs-platform-menu.html#data-prop"/>
+            <keyword name="data" id="MenuBar::data" ref="qml-qt-labs-platform-menubar.html#data-prop"/>
+            <keyword name="defaultSuffix" id="FileDialog::defaultSuffix" ref="qml-qt-labs-platform-filedialog.html#defaultSuffix-prop"/>
+            <keyword name="detailedText" id="MessageDialog::detailedText" ref="qml-qt-labs-platform-messagedialog.html#detailedText-prop"/>
+            <keyword name="discardClicked" id="MessageDialog::discardClicked" ref="qml-qt-labs-platform-messagedialog.html#discardClicked-signal"/>
+            <keyword name="displayName" id="StandardPaths::displayName" ref="qml-qt-labs-platform-standardpaths.html#displayName-method"/>
+            <keyword name="done" id="Dialog::done" ref="qml-qt-labs-platform-dialog.html#done-method"/>
+            <keyword name="enabled" id="Menu::enabled" ref="qml-qt-labs-platform-menu.html#enabled-prop"/>
+            <keyword name="enabled" id="MenuItem::enabled" ref="qml-qt-labs-platform-menuitem.html#enabled-prop"/>
+            <keyword name="enabled" id="MenuItemGroup::enabled" ref="qml-qt-labs-platform-menuitemgroup.html#enabled-prop"/>
+            <keyword name="exclusive" id="MenuItemGroup::exclusive" ref="qml-qt-labs-platform-menuitemgroup.html#exclusive-prop"/>
+            <keyword name="file" id="FileDialog::file" ref="qml-qt-labs-platform-filedialog.html#file-prop"/>
+            <keyword name="fileMode" id="FileDialog::fileMode" ref="qml-qt-labs-platform-filedialog.html#fileMode-prop"/>
+            <keyword name="files" id="FileDialog::files" ref="qml-qt-labs-platform-filedialog.html#files-prop"/>
+            <keyword name="findExecutable" id="StandardPaths::findExecutable" ref="qml-qt-labs-platform-standardpaths.html#findExecutable-method"/>
+            <keyword name="flags" id="Dialog::flags" ref="qml-qt-labs-platform-dialog.html#flags-prop"/>
+            <keyword name="folder" id="FileDialog::folder" ref="qml-qt-labs-platform-filedialog.html#folder-prop"/>
+            <keyword name="folder" id="FolderDialog::folder" ref="qml-qt-labs-platform-folderdialog.html#folder-prop"/>
+            <keyword name="font" id="FontDialog::font" ref="qml-qt-labs-platform-fontdialog.html#font-prop"/>
+            <keyword name="font" id="Menu::font" ref="qml-qt-labs-platform-menu.html#font-prop"/>
+            <keyword name="font" id="MenuItem::font" ref="qml-qt-labs-platform-menuitem.html#font-prop"/>
+            <keyword name="geometry" id="SystemTrayIcon::geometry" ref="qml-qt-labs-platform-systemtrayicon.html#geometry-prop"/>
+            <keyword name="group" id="MenuItem::group" ref="qml-qt-labs-platform-menuitem.html#group-prop"/>
+            <keyword name="helpClicked" id="MessageDialog::helpClicked" ref="qml-qt-labs-platform-messagedialog.html#helpClicked-signal"/>
+            <keyword name="hide" id="SystemTrayIcon::hide" ref="qml-qt-labs-platform-systemtrayicon.html#hide-method"/>
+            <keyword name="hovered" id="MenuItem::hovered" ref="qml-qt-labs-platform-menuitem.html#hovered-signal"/>
+            <keyword name="hovered" id="MenuItemGroup::hovered" ref="qml-qt-labs-platform-menuitemgroup.html#hovered-signal"/>
+            <keyword name="icon.mask" id="MenuItem::icon.mask" ref="qml-qt-labs-platform-menuitem.html#icon.mask-prop"/>
+            <keyword name="icon.mask" id="SystemTrayIcon::icon.mask" ref="qml-qt-labs-platform-systemtrayicon.html#icon.mask-prop"/>
+            <keyword name="icon.name" id="MenuItem::icon.name" ref="qml-qt-labs-platform-menuitem.html#icon.name-prop"/>
+            <keyword name="icon.name" id="SystemTrayIcon::icon.name" ref="qml-qt-labs-platform-systemtrayicon.html#icon.name-prop"/>
+            <keyword name="icon.source" id="MenuItem::icon.source" ref="qml-qt-labs-platform-menuitem.html#icon.source-prop"/>
+            <keyword name="icon.source" id="SystemTrayIcon::icon.source" ref="qml-qt-labs-platform-systemtrayicon.html#icon.source-prop"/>
+            <keyword name="iconName" id="Menu::iconName" ref="qml-qt-labs-platform-menu-obsolete.html#iconName-prop"/>
+            <keyword name="iconName" id="MenuItem::iconName" ref="qml-qt-labs-platform-menuitem-obsolete.html#iconName-prop"/>
+            <keyword name="iconName" id="SystemTrayIcon::iconName" ref="qml-qt-labs-platform-systemtrayicon-obsolete.html#iconName-prop"/>
+            <keyword name="iconSource" id="Menu::iconSource" ref="qml-qt-labs-platform-menu-obsolete.html#iconSource-prop"/>
+            <keyword name="iconSource" id="MenuItem::iconSource" ref="qml-qt-labs-platform-menuitem-obsolete.html#iconSource-prop"/>
+            <keyword name="iconSource" id="SystemTrayIcon::iconSource" ref="qml-qt-labs-platform-systemtrayicon-obsolete.html#iconSource-prop"/>
+            <keyword name="ignoreClicked" id="MessageDialog::ignoreClicked" ref="qml-qt-labs-platform-messagedialog.html#ignoreClicked-signal"/>
+            <keyword name="informativeText" id="MessageDialog::informativeText" ref="qml-qt-labs-platform-messagedialog.html#informativeText-prop"/>
+            <keyword name="insertItem" id="Menu::insertItem" ref="qml-qt-labs-platform-menu.html#insertItem-method"/>
+            <keyword name="insertMenu" id="Menu::insertMenu" ref="qml-qt-labs-platform-menu.html#insertMenu-method"/>
+            <keyword name="insertMenu" id="MenuBar::insertMenu" ref="qml-qt-labs-platform-menubar.html#insertMenu-method"/>
+            <keyword name="items" id="Menu::items" ref="qml-qt-labs-platform-menu.html#items-prop"/>
+            <keyword name="items" id="MenuItemGroup::items" ref="qml-qt-labs-platform-menuitemgroup.html#items-prop"/>
+            <keyword name="locate" id="StandardPaths::locate" ref="qml-qt-labs-platform-standardpaths.html#locate-method"/>
+            <keyword name="locateAll" id="StandardPaths::locateAll" ref="qml-qt-labs-platform-standardpaths.html#locateAll-method"/>
+            <keyword name="menu" id="MenuItem::menu" ref="qml-qt-labs-platform-menuitem.html#menu-prop"/>
+            <keyword name="menu" id="SystemTrayIcon::menu" ref="qml-qt-labs-platform-systemtrayicon.html#menu-prop"/>
+            <keyword name="menuBar" id="Menu::menuBar" ref="qml-qt-labs-platform-menu.html#menuBar-prop"/>
+            <keyword name="menuItem" id="Menu::menuItem" ref="qml-qt-labs-platform-menu.html#menuItem-prop"/>
+            <keyword name="menus" id="MenuBar::menus" ref="qml-qt-labs-platform-menubar.html#menus-prop"/>
+            <keyword name="messageClicked" id="SystemTrayIcon::messageClicked" ref="qml-qt-labs-platform-systemtrayicon.html#messageClicked-signal"/>
+            <keyword name="minimumWidth" id="Menu::minimumWidth" ref="qml-qt-labs-platform-menu.html#minimumWidth-prop"/>
+            <keyword name="modality" id="Dialog::modality" ref="qml-qt-labs-platform-dialog.html#modality-prop"/>
+            <keyword name="nameFilters" id="FileDialog::nameFilters" ref="qml-qt-labs-platform-filedialog.html#nameFilters-prop"/>
+            <keyword name="noClicked" id="MessageDialog::noClicked" ref="qml-qt-labs-platform-messagedialog.html#noClicked-signal"/>
+            <keyword name="noToAllClicked" id="MessageDialog::noToAllClicked" ref="qml-qt-labs-platform-messagedialog.html#noToAllClicked-signal"/>
+            <keyword name="okClicked" id="MessageDialog::okClicked" ref="qml-qt-labs-platform-messagedialog.html#okClicked-signal"/>
+            <keyword name="open" id="Dialog::open" ref="qml-qt-labs-platform-dialog.html#open-method"/>
+            <keyword name="open" id="Menu::open" ref="qml-qt-labs-platform-menu.html#open-method"/>
+            <keyword name="openClicked" id="MessageDialog::openClicked" ref="qml-qt-labs-platform-messagedialog.html#openClicked-signal"/>
+            <keyword name="options" id="ColorDialog::options" ref="qml-qt-labs-platform-colordialog.html#options-prop"/>
+            <keyword name="options" id="FileDialog::options" ref="qml-qt-labs-platform-filedialog.html#options-prop"/>
+            <keyword name="options" id="FolderDialog::options" ref="qml-qt-labs-platform-folderdialog.html#options-prop"/>
+            <keyword name="options" id="FontDialog::options" ref="qml-qt-labs-platform-fontdialog.html#options-prop"/>
+            <keyword name="parentMenu" id="Menu::parentMenu" ref="qml-qt-labs-platform-menu.html#parentMenu-prop"/>
+            <keyword name="parentWindow" id="Dialog::parentWindow" ref="qml-qt-labs-platform-dialog.html#parentWindow-prop"/>
+            <keyword name="reject" id="Dialog::reject" ref="qml-qt-labs-platform-dialog.html#reject-method"/>
+            <keyword name="rejectLabel" id="FileDialog::rejectLabel" ref="qml-qt-labs-platform-filedialog.html#rejectLabel-prop"/>
+            <keyword name="rejectLabel" id="FolderDialog::rejectLabel" ref="qml-qt-labs-platform-folderdialog.html#rejectLabel-prop"/>
+            <keyword name="rejected" id="Dialog::rejected" ref="qml-qt-labs-platform-dialog.html#rejected-signal"/>
+            <keyword name="removeItem" id="Menu::removeItem" ref="qml-qt-labs-platform-menu.html#removeItem-method"/>
+            <keyword name="removeItem" id="MenuItemGroup::removeItem" ref="qml-qt-labs-platform-menuitemgroup.html#removeItem-method"/>
+            <keyword name="removeMenu" id="Menu::removeMenu" ref="qml-qt-labs-platform-menu.html#removeMenu-method"/>
+            <keyword name="removeMenu" id="MenuBar::removeMenu" ref="qml-qt-labs-platform-menubar.html#removeMenu-method"/>
+            <keyword name="resetClicked" id="MessageDialog::resetClicked" ref="qml-qt-labs-platform-messagedialog.html#resetClicked-signal"/>
+            <keyword name="restoreDefaultsClicked" id="MessageDialog::restoreDefaultsClicked" ref="qml-qt-labs-platform-messagedialog.html#restoreDefaultsClicked-signal"/>
+            <keyword name="result" id="Dialog::result" ref="qml-qt-labs-platform-dialog.html#result-prop"/>
+            <keyword name="retryClicked" id="MessageDialog::retryClicked" ref="qml-qt-labs-platform-messagedialog.html#retryClicked-signal"/>
+            <keyword name="role" id="MenuItem::role" ref="qml-qt-labs-platform-menuitem.html#role-prop"/>
+            <keyword name="saveAllClicked" id="MessageDialog::saveAllClicked" ref="qml-qt-labs-platform-messagedialog.html#saveAllClicked-signal"/>
+            <keyword name="saveClicked" id="MessageDialog::saveClicked" ref="qml-qt-labs-platform-messagedialog.html#saveClicked-signal"/>
+            <keyword name="selectedNameFilter.extensions" id="FileDialog::selectedNameFilter.extensions" ref="qml-qt-labs-platform-filedialog.html#selectedNameFilter.extensions-prop"/>
+            <keyword name="selectedNameFilter.index" id="FileDialog::selectedNameFilter.index" ref="qml-qt-labs-platform-filedialog.html#selectedNameFilter.index-prop"/>
+            <keyword name="selectedNameFilter.name" id="FileDialog::selectedNameFilter.name" ref="qml-qt-labs-platform-filedialog.html#selectedNameFilter.name-prop"/>
+            <keyword name="separator" id="MenuItem::separator" ref="qml-qt-labs-platform-menuitem.html#separator-prop"/>
+            <keyword name="setTestModeEnabled" id="StandardPaths::setTestModeEnabled" ref="qml-qt-labs-platform-standardpaths.html#setTestModeEnabled-method"/>
+            <keyword name="shortcut" id="MenuItem::shortcut" ref="qml-qt-labs-platform-menuitem.html#shortcut-prop"/>
+            <keyword name="show" id="SystemTrayIcon::show" ref="qml-qt-labs-platform-systemtrayicon.html#show-method"/>
+            <keyword name="showMessage" id="SystemTrayIcon::showMessage" ref="qml-qt-labs-platform-systemtrayicon.html#showMessage-method"/>
+            <keyword name="standardLocations" id="StandardPaths::standardLocations" ref="qml-qt-labs-platform-standardpaths.html#standardLocations-method"/>
+            <keyword name="subMenu" id="MenuItem::subMenu" ref="qml-qt-labs-platform-menuitem.html#subMenu-prop"/>
+            <keyword name="supportsMessages" id="SystemTrayIcon::supportsMessages" ref="qml-qt-labs-platform-systemtrayicon.html#supportsMessages-prop"/>
+            <keyword name="systemTrayIcon" id="Menu::systemTrayIcon" ref="qml-qt-labs-platform-menu.html#systemTrayIcon-prop"/>
+            <keyword name="text" id="MenuItem::text" ref="qml-qt-labs-platform-menuitem.html#text-prop"/>
+            <keyword name="text" id="MessageDialog::text" ref="qml-qt-labs-platform-messagedialog.html#text-prop"/>
+            <keyword name="title" id="Dialog::title" ref="qml-qt-labs-platform-dialog.html#title-prop"/>
+            <keyword name="title" id="Menu::title" ref="qml-qt-labs-platform-menu.html#title-prop"/>
+            <keyword name="toggle" id="MenuItem::toggle" ref="qml-qt-labs-platform-menuitem.html#toggle-method"/>
+            <keyword name="tooltip" id="SystemTrayIcon::tooltip" ref="qml-qt-labs-platform-systemtrayicon.html#tooltip-prop"/>
+            <keyword name="triggered" id="MenuItem::triggered" ref="qml-qt-labs-platform-menuitem.html#triggered-signal"/>
+            <keyword name="triggered" id="MenuItemGroup::triggered" ref="qml-qt-labs-platform-menuitemgroup.html#triggered-signal"/>
+            <keyword name="type" id="Menu::type" ref="qml-qt-labs-platform-menu.html#type-prop"/>
+            <keyword name="visible" id="Dialog::visible" ref="qml-qt-labs-platform-dialog.html#visible-prop"/>
+            <keyword name="visible" id="Menu::visible" ref="qml-qt-labs-platform-menu.html#visible-prop"/>
+            <keyword name="visible" id="MenuItem::visible" ref="qml-qt-labs-platform-menuitem.html#visible-prop"/>
+            <keyword name="visible" id="MenuItemGroup::visible" ref="qml-qt-labs-platform-menuitemgroup.html#visible-prop"/>
+            <keyword name="visible" id="SystemTrayIcon::visible" ref="qml-qt-labs-platform-systemtrayicon.html#visible-prop"/>
+            <keyword name="window" id="MenuBar::window" ref="qml-qt-labs-platform-menubar.html#window-prop"/>
+            <keyword name="writableLocation" id="StandardPaths::writableLocation" ref="qml-qt-labs-platform-standardpaths.html#writableLocation-method"/>
+            <keyword name="yesClicked" id="MessageDialog::yesClicked" ref="qml-qt-labs-platform-messagedialog.html#yesClicked-signal"/>
+            <keyword name="yesToAllClicked" id="MessageDialog::yesToAllClicked" ref="qml-qt-labs-platform-messagedialog.html#yesToAllClicked-signal"/>
+        </keywords>
+        <files>
+            <file>images/arrow_bc.png</file>
+            <file>images/bgrContent.png</file>
+            <file>images/btn_next.png</file>
+            <file>images/btn_prev.png</file>
+            <file>images/bullet_dn.png</file>
+            <file>images/bullet_sq.png</file>
+            <file>images/home.png</file>
+            <file>images/ico_note.png</file>
+            <file>images/ico_note_attention.png</file>
+            <file>images/ico_out.png</file>
+            <file>images/logo.png</file>
+            <file>images/qtlabsplatform-colordialog-gtk.png</file>
+            <file>images/qtlabsplatform-filedialog-gtk.png</file>
+            <file>images/qtlabsplatform-folderdialog-gtk.png</file>
+            <file>images/qtlabsplatform-fontdialog-gtk.png</file>
+            <file>images/qtlabsplatform-menu.png</file>
+            <file>images/qtlabsplatform-menubar.png</file>
+            <file>images/qtlabsplatform-messagedialog-android.png</file>
+            <file>images/qtlabsplatform-messagedialog-informative-android.png</file>
+            <file>images/qtlabsplatform-systemtrayicon-menu.png</file>
+            <file>images/qtlabsplatform-systemtrayicon-message.png</file>
+            <file>images/qtlabsplatform-systemtrayicon.png</file>
+            <file>qml-qt-labs-platform-colordialog-members.html</file>
+            <file>qml-qt-labs-platform-colordialog.html</file>
+            <file>qml-qt-labs-platform-dialog-members.html</file>
+            <file>qml-qt-labs-platform-dialog.html</file>
+            <file>qml-qt-labs-platform-filedialog-members.html</file>
+            <file>qml-qt-labs-platform-filedialog.html</file>
+            <file>qml-qt-labs-platform-folderdialog-members.html</file>
+            <file>qml-qt-labs-platform-folderdialog.html</file>
+            <file>qml-qt-labs-platform-fontdialog-members.html</file>
+            <file>qml-qt-labs-platform-fontdialog.html</file>
+            <file>qml-qt-labs-platform-menu-members.html</file>
+            <file>qml-qt-labs-platform-menu-obsolete.html</file>
+            <file>qml-qt-labs-platform-menu.html</file>
+            <file>qml-qt-labs-platform-menubar-members.html</file>
+            <file>qml-qt-labs-platform-menubar.html</file>
+            <file>qml-qt-labs-platform-menuitem-members.html</file>
+            <file>qml-qt-labs-platform-menuitem-obsolete.html</file>
+            <file>qml-qt-labs-platform-menuitem.html</file>
+            <file>qml-qt-labs-platform-menuitemgroup-members.html</file>
+            <file>qml-qt-labs-platform-menuitemgroup.html</file>
+            <file>qml-qt-labs-platform-menuseparator-members.html</file>
+            <file>qml-qt-labs-platform-menuseparator.html</file>
+            <file>qml-qt-labs-platform-messagedialog-members.html</file>
+            <file>qml-qt-labs-platform-messagedialog.html</file>
+            <file>qml-qt-labs-platform-standardpaths-members.html</file>
+            <file>qml-qt-labs-platform-standardpaths.html</file>
+            <file>qml-qt-labs-platform-systemtrayicon-members.html</file>
+            <file>qml-qt-labs-platform-systemtrayicon-obsolete.html</file>
+            <file>qml-qt-labs-platform-systemtrayicon.html</file>
+            <file>qt-labs-platform-qmlmodule.html</file>
+            <file>qtlabsplatform-index.html</file>
+            <file>style/offline-simple.css</file>
+            <file>style/offline.css</file>
+        </files>
+    </filterSection>
+</QtHelpProject>

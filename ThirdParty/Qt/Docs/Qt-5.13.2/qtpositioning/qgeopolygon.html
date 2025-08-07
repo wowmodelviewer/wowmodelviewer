@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qgeopolygon.cpp -->
+  <title>QGeoPolygon Class | Qt Positioning 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtpositioning-index.html">Qt Positioning</a></td><td ><a href="qtpositioning-module.html">C++ Classes</a></td><td >QGeoPolygon</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtpositioning-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QGeoPolygon Class</h1>
+<!-- $$$QGeoPolygon-brief -->
+<p>The <a href="qgeopolygon.html">QGeoPolygon</a> class defines a geographic polygon. <a href="#details">More...</a></p>
+<!-- @@@QGeoPolygon -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QGeoPolygon&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += positioning</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.10</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qgeoshape.html">QGeoShape</a></td></tr></table></div><p>This class was introduced in  Qt 5.10.</p>
+<ul>
+<li><a href="qgeopolygon-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#QGeoPolygon-3">QGeoPolygon</a></b>(const QGeoShape &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#QGeoPolygon-2">QGeoPolygon</a></b>(const QGeoPolygon &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#QGeoPolygon-1">QGeoPolygon</a></b>(const QList&lt;QGeoCoordinate&gt; &amp;<i>path</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#QGeoPolygon">QGeoPolygon</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoPolygon &amp;</td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#operator-eq">operator=</a></b>(const QGeoPolygon &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#dtor.QGeoPolygon">~QGeoPolygon</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#addCoordinate">addCoordinate</a></b>(const QGeoCoordinate &amp;<i>coordinate</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#addHole">addHole</a></b>(const QVariant &amp;<i>holePath</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#addHole-1">addHole</a></b>(const QList&lt;QGeoCoordinate&gt; &amp;<i>holePath</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#containsCoordinate">containsCoordinate</a></b>(const QGeoCoordinate &amp;<i>coordinate</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoCoordinate </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#coordinateAt">coordinateAt</a></b>(int <i>index</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QVariantList </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#hole">hole</a></b>(int <i>index</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QList&lt;QGeoCoordinate&gt; </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#holePath">holePath</a></b>(int <i>index</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#holesCount">holesCount</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#insertCoordinate">insertCoordinate</a></b>(int <i>index</i>, const QGeoCoordinate &amp;<i>coordinate</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#length">length</a></b>(int <i>indexFrom</i> = 0, int <i>indexTo</i> = -1) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QList&lt;QGeoCoordinate&gt; &amp;</td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#path">path</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#removeCoordinate">removeCoordinate</a></b>(const QGeoCoordinate &amp;<i>coordinate</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#removeCoordinate-1">removeCoordinate</a></b>(int <i>index</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#removeHole">removeHole</a></b>(int <i>index</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#replaceCoordinate">replaceCoordinate</a></b>(int <i>index</i>, const QGeoCoordinate &amp;<i>coordinate</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#setPath">setPath</a></b>(const QList&lt;QGeoCoordinate&gt; &amp;<i>path</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#size">size</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#toString">toString</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#translate">translate</a></b>(double <i>degreesLatitude</i>, double <i>degreesLongitude</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoPolygon </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#translated">translated</a></b>(double <i>degreesLatitude</i>, double <i>degreesLongitude</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#operator-not-eq">operator!=</a></b>(const QGeoPolygon &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#operator-eq-eq">operator==</a></b>(const QGeoPolygon &amp;<i>other</i>) const</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QVariantList </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#perimeter">perimeter</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeopolygon.html#setPerimeter">setPerimeter</a></b>(const QVariantList &amp;<i>path</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QGeoPolygon-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The polygon is defined by an ordered list of QGeoCoordinates representing its perimeter.</p>
+<p>Each two adjacent elements in this list are intended to be connected together by the shortest line segment of constant bearing passing through both elements. This type of connection can cross the date line in the longitudinal direction, but never crosses the poles.</p>
+<p>This is relevant for the calculation of the bounding box returned by <a href="qgeoshape.html#boundingGeoRectangle">QGeoShape::boundingGeoRectangle</a>() for this shape, which will have the latitude of the top left corner set to the maximum latitude in the path point set. Similarly, the latitude of the bottom right corner will be the minimum latitude in the path point set.</p>
+<p>This class is a <a href="../qtcore/qobject.html#Q_GADGET">Q_GADGET</a>. It can be <a href="positioning-cpp-qml.html#cpp-value-integration-positioning">directly used from C++ and QML</a>.</p>
+</div>
+<!-- @@@QGeoPolygon -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QGeoPolygon$$$QGeoPolygonconstQGeoShape& -->
+<h3 class="fn" id="QGeoPolygon-3"><a name="QGeoPolygon-3"></a>QGeoPolygon::<span class="name">QGeoPolygon</span>(const <span class="type"><a href="qgeoshape.html#QGeoShape">QGeoShape</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a new geo polygon from the contents of <i>other</i>.</p>
+<!-- @@@QGeoPolygon -->
+<!-- $$$QGeoPolygon$$$QGeoPolygonconstQGeoPolygon& -->
+<h3 class="fn" id="QGeoPolygon-2"><a name="QGeoPolygon-2"></a>QGeoPolygon::<span class="name">QGeoPolygon</span>(const <span class="type"><a href="qgeopolygon.html#QGeoPolygon">QGeoPolygon</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a new geo polygon from the contents of <i>other</i>.</p>
+<!-- @@@QGeoPolygon -->
+<!-- $$$QGeoPolygon$$$QGeoPolygonconstQList<QGeoCoordinate>& -->
+<h3 class="fn" id="QGeoPolygon-1"><a name="QGeoPolygon-1"></a>QGeoPolygon::<span class="name">QGeoPolygon</span>(const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span>&gt; &amp;<i>path</i>)</h3>
+<p>Constructs a new geo <i>polygon</i> from the coordinates specified in <i>path</i>.</p>
+<!-- @@@QGeoPolygon -->
+<!-- $$$QGeoPolygon[overload1]$$$QGeoPolygon -->
+<h3 class="fn" id="QGeoPolygon"><a name="QGeoPolygon"></a>QGeoPolygon::<span class="name">QGeoPolygon</span>()</h3>
+<p>Constructs a new, empty geo polygon.</p>
+<!-- @@@QGeoPolygon -->
+<!-- $$$operator=[overload1]$$$operator=constQGeoPolygon& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qgeopolygon.html#QGeoPolygon">QGeoPolygon</a></span> &amp;QGeoPolygon::<span class="name">operator=</span>(const <span class="type"><a href="qgeopolygon.html#QGeoPolygon">QGeoPolygon</a></span> &amp;<i>other</i>)</h3>
+<p>Assigns <i>other</i> to this geo polygon and returns a reference to this geo polygon.</p>
+<!-- @@@operator= -->
+<!-- $$$~QGeoPolygon[overload1]$$$~QGeoPolygon -->
+<h3 class="fn" id="dtor.QGeoPolygon"><a name="dtor.QGeoPolygon"></a>QGeoPolygon::<span class="name">~QGeoPolygon</span>()</h3>
+<p>Destroys this polygon.</p>
+<!-- @@@~QGeoPolygon -->
+<!-- $$$addCoordinate[overload1]$$$addCoordinateconstQGeoCoordinate& -->
+<h3 class="fn" id="addCoordinate"><a name="addCoordinate"></a><span class="type">void</span> QGeoPolygon::<span class="name">addCoordinate</span>(const <span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span> &amp;<i>coordinate</i>)</h3>
+<p>Appends <i>coordinate</i> to the polygon.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@addCoordinate -->
+<!-- $$$addHole[overload1]$$$addHoleconstQVariant& -->
+<h3 class="fn" id="addHole"><a name="addHole"></a><span class="type">void</span> QGeoPolygon::<span class="name">addHole</span>(const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>holePath</i>)</h3>
+<p>Sets the <i>holePath</i> for a hole inside the polygon. The hole is a <a href="../qtcore/qvariant.html">QVariant</a> containing a <a href="../qtcore/qlist.html">QList</a>&lt;<a href="qgeocoordinate.html">QGeoCoordinate</a>&gt;.</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@addHole -->
+<!-- $$$addHole$$$addHoleconstQList<QGeoCoordinate>& -->
+<h3 class="fn" id="addHole-1"><a name="addHole-1"></a><span class="type">void</span> QGeoPolygon::<span class="name">addHole</span>(const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span>&gt; &amp;<i>holePath</i>)</h3>
+<p>Overloaded method. Sets the <i>holePath</i> for a hole inside the polygon. The hole is a <a href="../qtcore/qlist.html">QList</a>&lt;<a href="qgeocoordinate.html">QGeoCoordinate</a>&gt;.</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<!-- @@@addHole -->
+<!-- $$$containsCoordinate[overload1]$$$containsCoordinateconstQGeoCoordinate& -->
+<h3 class="fn" id="containsCoordinate"><a name="containsCoordinate"></a><span class="type">bool</span> QGeoPolygon::<span class="name">containsCoordinate</span>(const <span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span> &amp;<i>coordinate</i>) const</h3>
+<p>Returns true if the polygon's perimeter contains <i>coordinate</i> as one of the elements.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@containsCoordinate -->
+<!-- $$$coordinateAt[overload1]$$$coordinateAtint -->
+<h3 class="fn" id="coordinateAt"><a name="coordinateAt"></a><span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span> QGeoPolygon::<span class="name">coordinateAt</span>(<span class="type">int</span> <i>index</i>) const</h3>
+<p>Returns the coordinate at <i>index</i> .</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@coordinateAt -->
+<!-- $$$hole[overload1]$$$holeint -->
+<h3 class="fn" id="hole"><a name="hole"></a>const <span class="type"><a href="../qtcore/qvariant.html#QVariantList-typedef">QVariantList</a></span> QGeoPolygon::<span class="name">hole</span>(<span class="type">int</span> <i>index</i>) const</h3>
+<p>Returns a <a href="../qtcore/qvariant.html">QVariant</a> containing a <a href="../qtcore/qvariant.html">QVariant</a> containing a <a href="../qtcore/qlist.html">QList</a>&lt;<a href="qgeocoordinate.html">QGeoCoordinate</a>&gt; which represents the hole at <i>index</i>.</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@hole -->
+<!-- $$$holePath[overload1]$$$holePathint -->
+<h3 class="fn" id="holePath"><a name="holePath"></a>const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span>&gt; QGeoPolygon::<span class="name">holePath</span>(<span class="type">int</span> <i>index</i>) const</h3>
+<p>Returns a <a href="../qtcore/qlist.html">QList</a>&lt;<a href="qgeocoordinate.html">QGeoCoordinate</a>&gt; which represents the hole at <i>index</i>.</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<!-- @@@holePath -->
+<!-- $$$holesCount[overload1]$$$holesCount -->
+<h3 class="fn" id="holesCount"><a name="holesCount"></a><span class="type">int</span> QGeoPolygon::<span class="name">holesCount</span>() const</h3>
+<p>Returns the number of holes.</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@holesCount -->
+<!-- $$$insertCoordinate[overload1]$$$insertCoordinateintconstQGeoCoordinate& -->
+<h3 class="fn" id="insertCoordinate"><a name="insertCoordinate"></a><span class="type">void</span> QGeoPolygon::<span class="name">insertCoordinate</span>(<span class="type">int</span> <i>index</i>, const <span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span> &amp;<i>coordinate</i>)</h3>
+<p>Inserts <i>coordinate</i> at the specified <i>index</i>.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@insertCoordinate -->
+<!-- $$$length[overload1]$$$lengthintint -->
+<h3 class="fn" id="length"><a name="length"></a><span class="type">double</span> QGeoPolygon::<span class="name">length</span>(<span class="type">int</span> <i>indexFrom</i> = 0, <span class="type">int</span> <i>indexTo</i> = -1) const</h3>
+<p>Returns the length of the polygon's perimeter, in meters, from the element <i>indexFrom</i> to the element <i>indexTo</i>. The length is intended to be the sum of the shortest distances for each pair of adjacent points.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@length -->
+<!-- $$$path[overload1]$$$path -->
+<h3 class="fn" id="path"><a name="path"></a>const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span>&gt; &amp;QGeoPolygon::<span class="name">path</span>() const</h3>
+<p>Returns all the elements of the polygon's boundary.</p>
+<p><b>See also </b><a href="qgeopolygon.html#setPath">setPath</a>().</p>
+<!-- @@@path -->
+<!-- $$$perimeter[overload1]$$$perimeter -->
+<h3 class="fn" id="perimeter"><a name="perimeter"></a><code>[protected] </code><span class="type"><a href="../qtcore/qvariant.html#QVariantList-typedef">QVariantList</a></span> QGeoPolygon::<span class="name">perimeter</span>() const</h3>
+<p>Returns all the elements of the polygon's perimeter.</p>
+<p>This function was introduced in  QtPositioning 5.12.</p>
+<p><b>See also </b><a href="qgeopolygon.html#setPerimeter">setPerimeter</a>().</p>
+<!-- @@@perimeter -->
+<!-- $$$removeCoordinate[overload1]$$$removeCoordinateconstQGeoCoordinate& -->
+<h3 class="fn" id="removeCoordinate"><a name="removeCoordinate"></a><span class="type">void</span> QGeoPolygon::<span class="name">removeCoordinate</span>(const <span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span> &amp;<i>coordinate</i>)</h3>
+<p>Removes the last occurrence of <i>coordinate</i> from the polygon.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@removeCoordinate -->
+<!-- $$$removeCoordinate$$$removeCoordinateint -->
+<h3 class="fn" id="removeCoordinate-1"><a name="removeCoordinate-1"></a><span class="type">void</span> QGeoPolygon::<span class="name">removeCoordinate</span>(<span class="type">int</span> <i>index</i>)</h3>
+<p>Removes element at position <i>index</i> from the polygon.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@removeCoordinate -->
+<!-- $$$removeHole[overload1]$$$removeHoleint -->
+<h3 class="fn" id="removeHole"><a name="removeHole"></a><span class="type">void</span> QGeoPolygon::<span class="name">removeHole</span>(<span class="type">int</span> <i>index</i>)</h3>
+<p>Removes element at position <i>index</i> from the holes <a href="../qtcore/qlist.html">QList</a>.</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@removeHole -->
+<!-- $$$replaceCoordinate[overload1]$$$replaceCoordinateintconstQGeoCoordinate& -->
+<h3 class="fn" id="replaceCoordinate"><a name="replaceCoordinate"></a><span class="type">void</span> QGeoPolygon::<span class="name">replaceCoordinate</span>(<span class="type">int</span> <i>index</i>, const <span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span> &amp;<i>coordinate</i>)</h3>
+<p>Replaces the path element at the specified <i>index</i> with <i>coordinate</i>.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@replaceCoordinate -->
+<!-- $$$setPath[overload1]$$$setPathconstQList<QGeoCoordinate>& -->
+<h3 class="fn" id="setPath"><a name="setPath"></a><span class="type">void</span> QGeoPolygon::<span class="name">setPath</span>(const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span>&gt; &amp;<i>path</i>)</h3>
+<p>Sets the <i>path</i> for the polygon.</p>
+<p><b>See also </b><a href="qgeopolygon.html#path">path</a>().</p>
+<!-- @@@setPath -->
+<!-- $$$setPerimeter[overload1]$$$setPerimeterconstQVariantList& -->
+<h3 class="fn" id="setPerimeter"><a name="setPerimeter"></a><code>[protected] </code><span class="type">void</span> QGeoPolygon::<span class="name">setPerimeter</span>(const <span class="type"><a href="../qtcore/qvariant.html#QVariantList-typedef">QVariantList</a></span> &amp;<i>path</i>)</h3>
+<p>Sets all the elements of the polygon's perimeter based on a list of coordinates (<i>path</i>). &#x2e;</p>
+<p>This function was introduced in  QtPositioning 5.12.</p>
+<p><b>See also </b><a href="qgeopolygon.html#perimeter">perimeter</a>().</p>
+<!-- @@@setPerimeter -->
+<!-- $$$size[overload1]$$$size -->
+<h3 class="fn" id="size"><a name="size"></a><span class="type">int</span> QGeoPolygon::<span class="name">size</span>() const</h3>
+<p>Returns the number of elements in the polygon.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@size -->
+<!-- $$$toString[overload1]$$$toString -->
+<h3 class="fn" id="toString"><a name="toString"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QGeoPolygon::<span class="name">toString</span>() const</h3>
+<p>Returns the geo polygon properties as a string.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@toString -->
+<!-- $$$translate[overload1]$$$translatedoubledouble -->
+<h3 class="fn" id="translate"><a name="translate"></a><span class="type">void</span> QGeoPolygon::<span class="name">translate</span>(<span class="type">double</span> <i>degreesLatitude</i>, <span class="type">double</span> <i>degreesLongitude</i>)</h3>
+<p>Translates this geo polygon by <i>degreesLatitude</i> northwards and <i>degreesLongitude</i> eastwards.</p>
+<p>Negative values of <i>degreesLatitude</i> and <i>degreesLongitude</i> correspond to southward and westward translation respectively.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@translate -->
+<!-- $$$translated[overload1]$$$translateddoubledouble -->
+<h3 class="fn" id="translated"><a name="translated"></a><span class="type"><a href="qgeopolygon.html#QGeoPolygon">QGeoPolygon</a></span> QGeoPolygon::<span class="name">translated</span>(<span class="type">double</span> <i>degreesLatitude</i>, <span class="type">double</span> <i>degreesLongitude</i>) const</h3>
+<p>Returns a copy of this geo polygon translated by <i>degreesLatitude</i> northwards and <i>degreesLongitude</i> eastwards.</p>
+<p>Negative values of <i>degreesLatitude</i> and <i>degreesLongitude</i> correspond to southward and westward translation respectively.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<p><b>See also </b><a href="qgeopolygon.html#translate">translate</a>().</p>
+<!-- @@@translated -->
+<!-- $$$operator!=[overload1]$$$operator!=constQGeoPolygon& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> QGeoPolygon::<span class="name">operator!=</span>(const <span class="type"><a href="qgeopolygon.html#QGeoPolygon">QGeoPolygon</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns whether this geo polygon is not equal to <i>other</i>.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQGeoPolygon& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> QGeoPolygon::<span class="name">operator==</span>(const <span class="type"><a href="qgeopolygon.html#QGeoPolygon">QGeoPolygon</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns whether this geo polygon is equal to <i>other</i>.</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

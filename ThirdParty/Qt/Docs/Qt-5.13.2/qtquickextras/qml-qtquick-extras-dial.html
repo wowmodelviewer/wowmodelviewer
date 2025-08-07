@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- Dial.qml -->
+  <title>Dial QML Type | Qt Quick Extras 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickextras-index.html">Qt Quick Extras</a></td><td ><a href="qtquick-extras-qmlmodule.html">QML Types</a></td><td >Dial QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickextras-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Dial QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Dial-brief -->
+<p>A circular dial that is rotated to set a value. <a href="#details">More...</a></p>
+<!-- @@@Dial -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Extras 1.4</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.5</td></tr></table></div><ul>
+<li><a href="qml-qtquick-extras-dial-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-extras-dial.html#activeFocusOnPress-prop">activeFocusOnPress</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-extras-dial.html#hovered-prop">hovered</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-extras-dial.html#maximumValue-prop">maximumValue</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-extras-dial.html#minimumValue-prop">minimumValue</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-extras-dial.html#pressed-prop">pressed</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-extras-dial.html#stepSize-prop">stepSize</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-extras-dial.html#tickmarksVisible-prop">tickmarksVisible</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-extras-dial.html#value-prop">value</a></b></b> : real</li>
+</ul>
+<!-- $$$Dial-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p class="centerAlign"><img src="images/dial.png" alt="A Dial" /></p><p>The Dial is similar to a traditional dial knob that is found on devices such as stereos or industrial equipment. It allows the user to specify a value within a range.</p>
+<p>Like <a href="qml-qtquick-extras-circulargauge.html">CircularGauge</a>, Dial can display tickmarks to give an indication of the current value. When a suitable <a href="qml-qtquick-extras-dial.html#stepSize-prop">stepSize</a> is combined with <a href="../qtquickcontrols1/qml-qtquick-controls-styles-dialstyle.html#tickmarkStepSize-prop">tickmarkStepSize</a>, the dial &quot;snaps&quot; to each tickmark.</p>
+<p>You can create a custom appearance for a Dial by assigning a <a href="../qtquickcontrols1/qml-qtquick-controls-styles-dialstyle.html">DialStyle</a>.</p>
+<!-- @@@Dial -->
+<h2>Property Documentation</h2>
+<!-- $$$activeFocusOnPress -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="activeFocusOnPress-prop"></a><span class="name">activeFocusOnPress</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property specifies whether the dial should gain active focus when pressed.</p>
+<p>The default value is <code>false</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-extras-dial.html#pressed-prop">pressed</a>.</p>
+</div></div><!-- @@@activeFocusOnPress -->
+<br/>
+<!-- $$$hovered -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="hovered-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">hovered</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the button is being hovered.</p>
+</div></div><!-- @@@hovered -->
+<br/>
+<!-- $$$maximumValue -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="maximumValue-prop"></a><span class="name">maximumValue</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The largest value allowed by the dial.</p>
+<p>The default value is <code>1.0</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-extras-dial.html#value-prop">value</a> and <a href="qml-qtquick-extras-dial.html#minimumValue-prop">minimumValue</a>.</p>
+</div></div><!-- @@@maximumValue -->
+<br/>
+<!-- $$$minimumValue -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="minimumValue-prop"></a><span class="name">minimumValue</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The smallest value allowed by the dial.</p>
+<p>The default value is <code>0.0</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-extras-dial.html#value-prop">value</a> and <a href="qml-qtquick-extras-dial.html#maximumValue-prop">maximumValue</a>.</p>
+</div></div><!-- @@@minimumValue -->
+<br/>
+<!-- $$$pressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="pressed-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">pressed</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns <code>true</code> if the dial is pressed.</p>
+<p><b>See also </b><a href="qml-qtquick-extras-dial.html#activeFocusOnPress-prop">activeFocusOnPress</a>.</p>
+</div></div><!-- @@@pressed -->
+<br/>
+<!-- $$$stepSize -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="stepSize-prop"></a><span class="name">stepSize</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The default value is <code>0.0</code>.</p>
+</div></div><!-- @@@stepSize -->
+<br/>
+<!-- $$$tickmarksVisible -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="tickmarksVisible-prop"></a><span class="name">tickmarksVisible</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property determines whether or not the dial displays tickmarks, minor tickmarks, and labels.</p>
+<p>For more fine-grained control over what is displayed, the following style components of <a href="../qtquickcontrols1/qml-qtquick-controls-styles-dialstyle.html">DialStyle</a> can be used:</p>
+<ul>
+<li><a href="../qtquickcontrols1/qml-qtquick-controls-styles-dialstyle.html#tickmark-prop">tickmark</a></li>
+<li><a href="../qtquickcontrols1/qml-qtquick-controls-styles-dialstyle.html#minorTickmark-prop">minorTickmark</a></li>
+<li><a href="../qtquickcontrols1/qml-qtquick-controls-styles-dialstyle.html#tickmarkLabel-prop">tickmarkLabel</a></li>
+</ul>
+<p>The default value is <code>true</code>.</p>
+</div></div><!-- @@@tickmarksVisible -->
+<br/>
+<!-- $$$value -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="value-prop"></a><span class="name">value</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The angle of the handle along the dial, in the range of <code>0.0</code> to <code>1.0</code>.</p>
+<p>The default value is <code>0.0</code>.</p>
+</div></div><!-- @@@value -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

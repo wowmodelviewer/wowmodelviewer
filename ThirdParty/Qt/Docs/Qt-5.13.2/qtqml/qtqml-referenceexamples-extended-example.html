@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qml-extending.qdoc -->
+  <title>Extending QML - Extension Objects Example | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td >Extending QML - Extension Objects Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Extending QML - Extension Objects Example</h1>
+<span class="subtitle"></span>
+<!-- $$$referenceexamples/extended-brief -->
+<p>Extension Objects.</p>
+<!-- @@@referenceexamples/extended -->
+<!-- $$$referenceexamples/extended-description -->
+<div class="descr"> <a name="details"></a>
+<p>This example builds on:</p>
+<ul>
+<li><a href="qtqml-referenceexamples-adding-example.html">Extending QML - Adding Types Example</a></li>
+</ul>
+<p>Shows how to use <a href="qqmlengine.html#qmlRegisterExtendedType">qmlRegisterExtendedType()</a> to provide an <a href="qtqml-cppintegration-definetypes.html#registering-extension-objects">extension object</a> to a <a href="../qtwidgets/qlineedit.html">QLineEdit</a> without modifying or subclassing it.</p>
+<p>Firstly, the LineEditExtension class is registered with the QML system as an extension of <a href="../qtwidgets/qlineedit.html">QLineEdit</a>:</p>
+<pre class="cpp">
+
+      qmlRegisterExtendedType<span class="operator">&lt;</span><span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span><span class="operator">,</span> LineEditExtension<span class="operator">&gt;</span>(<span class="string">&quot;People&quot;</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span> <span class="string">&quot;QLineEdit&quot;</span>);
+
+</pre>
+<p>The QML engine then instantiates a <a href="../qtwidgets/qlineedit.html">QLineEdit</a>:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qqmlengine.html">QQmlEngine</a></span> engine;
+      <span class="type"><a href="qqmlcomponent.html">QQmlComponent</a></span> component(<span class="operator">&amp;</span>engine<span class="operator">,</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="string">&quot;qrc:example.qml&quot;</span>));
+      <span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span> <span class="operator">*</span>edit <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(component<span class="operator">.</span>create());
+
+</pre>
+<p>In QML, a property is set on the line edit that only exists in the LineEditExtension class:</p>
+<pre class="qml">
+
+  <span class="type">QLineEdit</span> {
+      <span class="name">leftMargin</span>: <span class="number">20</span>
+  }
+
+</pre>
+<p>The extension type performs calls on the <a href="../qtwidgets/qlineedit.html">QLineEdit</a> that otherwise will not be accessible to the QML engine.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtdeclarative.git/tree/examples/qml/referenceexamples/extended?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@referenceexamples/extended -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

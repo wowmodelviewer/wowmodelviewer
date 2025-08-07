@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qkeyframeanimation.cpp -->
+  <title>QKeyframeAnimation Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QKeyframeAnimation</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QKeyframeAnimation Class</h1>
+<span class="small-subtitle">(<a href="qt3danimation-qkeyframeanimation.html">Qt3DAnimation::QKeyframeAnimation</a>)<br/></span>
+<!-- $$$QKeyframeAnimation-brief -->
+<p>A class implementing simple keyframe animation to a <a href="../qtgui/qtransform.html">QTransform</a>. <a href="#details">More...</a></p>
+<!-- @@@QKeyframeAnimation -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QKeyframeAnimation&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3danimation</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.9</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-animation-keyframeanimation.html">KeyframeAnimation</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3danimation-qabstractanimation.html">Qt3DAnimation::QAbstractAnimation</a></td></tr></table></div><p>This class was introduced in  Qt 5.9.</p>
+<ul>
+<li><a href="qt3danimation-qkeyframeanimation-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#RepeatMode-enum">RepeatMode</a></b> { None, Constant, Repeat }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qt3danimation-qkeyframeanimation.html#easing-prop">easing</a></b> : QEasingCurve</li>
+<li class="fn"><b><a href="qt3danimation-qkeyframeanimation.html#endMode-prop">endMode</a></b> : RepeatMode</li>
+<li class="fn"><b><a href="qt3danimation-qkeyframeanimation.html#framePositions-prop">framePositions</a></b> : QVector&lt;float&gt;</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qt3danimation-qkeyframeanimation.html#startMode-prop">startMode</a></b> : RepeatMode</li>
+<li class="fn"><b><a href="qt3danimation-qkeyframeanimation.html#target-prop">target</a></b> : Qt3DCore::QTransform*</li>
+<li class="fn"><b><a href="qt3danimation-qkeyframeanimation.html#targetName-prop">targetName</a></b> : QString</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#QKeyframeAnimation">QKeyframeAnimation</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#addKeyframe">addKeyframe</a></b>(Qt3DCore::QTransform *<i>keyframe</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QEasingCurve </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#easing-prop">easing</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DAnimation::QKeyframeAnimation::RepeatMode </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#endMode-prop">endMode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;float&gt; </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#framePositions-prop">framePositions</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;Qt3DCore::QTransform *&gt; </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#keyframeList">keyframeList</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#removeKeyframe">removeKeyframe</a></b>(Qt3DCore::QTransform *<i>keyframe</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#setKeyframes">setKeyframes</a></b>(const QVector&lt;Qt3DCore::QTransform *&gt; &amp;<i>keyframes</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DAnimation::QKeyframeAnimation::RepeatMode </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#startMode-prop">startMode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DCore::QTransform *</td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#target-prop">target</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#targetName-prop">targetName</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#easing-prop">setEasing</a></b>(const QEasingCurve &amp;<i>easing</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#endMode-prop">setEndMode</a></b>(Qt3DAnimation::QKeyframeAnimation::RepeatMode <i>mode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#framePositions-prop">setFramePositions</a></b>(const QVector&lt;float&gt; &amp;<i>positions</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#startMode-prop">setStartMode</a></b>(Qt3DAnimation::QKeyframeAnimation::RepeatMode <i>mode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#target-prop">setTarget</a></b>(Qt3DCore::QTransform *<i>target</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#targetName-prop">setTargetName</a></b>(const QString &amp;<i>name</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#easing-prop">easingChanged</a></b>(const QEasingCurve &amp;<i>easing</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#endMode-prop">endModeChanged</a></b>(QKeyframeAnimation::RepeatMode <i>endMode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#framePositions-prop">framePositionsChanged</a></b>(const QVector&lt;float&gt; &amp;<i>positions</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#startMode-prop">startModeChanged</a></b>(QKeyframeAnimation::RepeatMode <i>startMode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#target-prop">targetChanged</a></b>(Qt3DCore::QTransform *<i>target</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qkeyframeanimation.html#targetName-prop">targetNameChanged</a></b>(const QString &amp;<i>name</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QKeyframeAnimation-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A <a href="qt3danimation-qkeyframeanimation.html">Qt3DAnimation::QKeyframeAnimation</a> class implements simple keyframe animation that can be used to animate <a href="../qtgui/qtransform.html">QTransform</a>. The keyframes consists of multiple timed QTransforms, which are interpolated and applied to the target <a href="../qtgui/qtransform.html">QTransform</a>. <a href="../qtcore/qeasingcurve.html">QEasingCurve</a> is used between keyframes to control the interpolator. <a href="qt3danimation-qkeyframeanimation.html#RepeatMode-enum">RepeatMode</a> can be set for when the position set to the <a href="qt3danimation-qkeyframeanimation.html">QKeyframeAnimation</a> is below or above the values defined in the keyframe positions.</p>
+</div>
+<!-- @@@QKeyframeAnimation -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$RepeatMode$$$None$$$Constant$$$Repeat -->
+<h3 class="fn" id="RepeatMode-enum"><a name="RepeatMode-enum"></a>enum QKeyframeAnimation::<span class="name">RepeatMode</span></h3>
+<p>This enumeration specifies how position values outside keyframe values are handled.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Qt3DAnimation::QKeyframeAnimation::None</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The animation is not applied to the target transform.</td></tr>
+<tr><td class="topAlign"><code>Qt3DAnimation::QKeyframeAnimation::Constant</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The edge keyframe value is used.</td></tr>
+<tr><td class="topAlign"><code>Qt3DAnimation::QKeyframeAnimation::Repeat</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The animation is repeated.</td></tr>
+</table></div>
+<!-- @@@RepeatMode -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$easing-prop$$$easing$$$setEasingconstQEasingCurve&$$$easingChangedconstQEasingCurve& -->
+<h3 class="fn" id="easing-prop"><a name="easing-prop"></a><span class="name">easing</span> : <span class="type"><a href="../qtcore/qeasingcurve.html">QEasingCurve</a></span></h3>
+<p>Holds the easing curve of the interpolator between keyframes.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QEasingCurve </td><td class="memItemRight bottomAlign"><span class="name"><b>easing</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setEasing</b></span>(const QEasingCurve &amp;<i>easing</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>easingChanged</b></span>(const QEasingCurve &amp;<i>easing</i>)</td></tr>
+</table></div>
+<!-- @@@easing -->
+<!-- $$$endMode-prop$$$endMode$$$setEndModeQt3DAnimation::QKeyframeAnimation::RepeatMode$$$endModeChangedQKeyframeAnimation::RepeatMode -->
+<h3 class="fn" id="endMode-prop"><a name="endMode-prop"></a><span class="name">endMode</span> : <span class="type"><a href="qt3danimation-qkeyframeanimation.html#RepeatMode-enum">RepeatMode</a></span></h3>
+<p>Holds the repeat mode for the position values greater than the last frame position.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DAnimation::QKeyframeAnimation::RepeatMode </td><td class="memItemRight bottomAlign"><span class="name"><b>endMode</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setEndMode</b></span>(Qt3DAnimation::QKeyframeAnimation::RepeatMode <i>mode</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>endModeChanged</b></span>(QKeyframeAnimation::RepeatMode <i>endMode</i>)</td></tr>
+</table></div>
+<!-- @@@endMode -->
+<!-- $$$framePositions-prop$$$framePositions$$$setFramePositionsconstQVector<float>&$$$framePositionsChangedconstQVector<float>& -->
+<h3 class="fn" id="framePositions-prop"><a name="framePositions-prop"></a><span class="name">framePositions</span> : <span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type">float</span>&gt;</h3>
+<p>Holds the positions of the keyframes. Each position in the list specifies the position of the corresponding keyframe with the same index. The values must be in an ascending order. Values can be positive or negative and do not have any predefined unit.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QVector&lt;float&gt; </td><td class="memItemRight bottomAlign"><span class="name"><b>framePositions</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setFramePositions</b></span>(const QVector&lt;float&gt; &amp;<i>positions</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>framePositionsChanged</b></span>(const QVector&lt;float&gt; &amp;<i>positions</i>)</td></tr>
+</table></div>
+<!-- @@@framePositions -->
+<!-- $$$startMode-prop$$$startMode$$$setStartModeQt3DAnimation::QKeyframeAnimation::RepeatMode$$$startModeChangedQKeyframeAnimation::RepeatMode -->
+<h3 class="fn" id="startMode-prop"><a name="startMode-prop"></a><span class="name">startMode</span> : <span class="type"><a href="qt3danimation-qkeyframeanimation.html#RepeatMode-enum">RepeatMode</a></span></h3>
+<p>Holds the repeat mode for the position values less than the first frame position.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DAnimation::QKeyframeAnimation::RepeatMode </td><td class="memItemRight bottomAlign"><span class="name"><b>startMode</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setStartMode</b></span>(Qt3DAnimation::QKeyframeAnimation::RepeatMode <i>mode</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>startModeChanged</b></span>(QKeyframeAnimation::RepeatMode <i>startMode</i>)</td></tr>
+</table></div>
+<!-- @@@startMode -->
+<!-- $$$target-prop$$$target$$$setTargetQt3DCore::QTransform*$$$targetChangedQt3DCore::QTransform* -->
+<h3 class="fn" id="target-prop"><a name="target-prop"></a><span class="name">target</span> : <span class="type"><a href="qt3dcore-qtransform.html">Qt3DCore::QTransform</a></span>*</h3>
+<p>Holds the target <a href="../qtgui/qtransform.html">QTransform</a> the animation is applied to.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DCore::QTransform *</td><td class="memItemRight bottomAlign"><span class="name"><b>target</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setTarget</b></span>(Qt3DCore::QTransform *<i>target</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>targetChanged</b></span>(Qt3DCore::QTransform *<i>target</i>)</td></tr>
+</table></div>
+<!-- @@@target -->
+<!-- $$$targetName-prop$$$targetName$$$setTargetNameconstQString&$$$targetNameChangedconstQString& -->
+<h3 class="fn" id="targetName-prop"><a name="targetName-prop"></a><span class="name">targetName</span> : <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>Holds the name of the target transform. This is a convenience property making it easier to match the target transform to the keyframe animation. The name is usually same as the name of the parent entity of the target transform, but does not have to be.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>targetName</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setTargetName</b></span>(const QString &amp;<i>name</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>targetNameChanged</b></span>(const QString &amp;<i>name</i>)</td></tr>
+</table></div>
+<!-- @@@targetName -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QKeyframeAnimation[overload1]$$$QKeyframeAnimationQObject* -->
+<h3 class="fn" id="QKeyframeAnimation"><a name="QKeyframeAnimation"></a>QKeyframeAnimation::<span class="name">QKeyframeAnimation</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs an <a href="qt3danimation-qkeyframeanimation.html">QKeyframeAnimation</a> with <i>parent</i>.</p>
+<!-- @@@QKeyframeAnimation -->
+<!-- $$$addKeyframe[overload1]$$$addKeyframeQt3DCore::QTransform* -->
+<h3 class="fn" id="addKeyframe"><a name="addKeyframe"></a><span class="type">void</span> QKeyframeAnimation::<span class="name">addKeyframe</span>(<span class="type"><a href="qt3dcore-qtransform.html">Qt3DCore::QTransform</a></span> *<i>keyframe</i>)</h3>
+<p>Adds new <i>keyframe</i> at the end of the animation. The <a href="../qtgui/qtransform.html">QTransform</a> can be added to the animation multiple times.</p>
+<!-- @@@addKeyframe -->
+<!-- $$$keyframeList[overload1]$$$keyframeList -->
+<h3 class="fn" id="keyframeList"><a name="keyframeList"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="qt3dcore-qtransform.html">Qt3DCore::QTransform</a></span> *&gt; QKeyframeAnimation::<span class="name">keyframeList</span>() const</h3>
+<p>Returns the list of keyframes.</p>
+<!-- @@@keyframeList -->
+<!-- $$$removeKeyframe[overload1]$$$removeKeyframeQt3DCore::QTransform* -->
+<h3 class="fn" id="removeKeyframe"><a name="removeKeyframe"></a><span class="type">void</span> QKeyframeAnimation::<span class="name">removeKeyframe</span>(<span class="type"><a href="qt3dcore-qtransform.html">Qt3DCore::QTransform</a></span> *<i>keyframe</i>)</h3>
+<p>Removes a <i>keyframe</i> from the animation. If the same <a href="../qtgui/qtransform.html">QTransform</a> is set as keyframe multiple times, all occurrences are removed.</p>
+<!-- @@@removeKeyframe -->
+<!-- $$$setKeyframes[overload1]$$$setKeyframesconstQVector<Qt3DCore::QTransform*>& -->
+<h3 class="fn" id="setKeyframes"><a name="setKeyframes"></a><span class="type">void</span> QKeyframeAnimation::<span class="name">setKeyframes</span>(const <span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="qt3dcore-qtransform.html">Qt3DCore::QTransform</a></span> *&gt; &amp;<i>keyframes</i>)</h3>
+<p>Sets the <i>keyframes</i> of the animation. Old keyframes are cleared.</p>
+<!-- @@@setKeyframes -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qrendercapture.cpp -->
+  <title>QRenderCapture Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QRenderCapture</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QRenderCapture Class</h1>
+<span class="small-subtitle">(<a href="qt3drender-qrendercapture.html">Qt3DRender::QRenderCapture</a>)<br/></span>
+<!-- $$$QRenderCapture-brief -->
+<p>Frame graph node for render capture. <a href="#details">More...</a></p>
+<!-- @@@QRenderCapture -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;Qt3DRender/QRenderCapture&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3drender</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-rendercapture.html">RenderCapture</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3drender-qframegraphnode.html">Qt3DRender::QFrameGraphNode</a></td></tr></table></div><p>This class was introduced in  Qt 5.8.</p>
+<ul>
+<li><a href="qt3drender-qrendercapture-members.html">List of all members, including inherited members</a></li>
+<li><a href="qt3drender-qrendercapture-obsolete.html">Obsolete members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrendercapture.html#QRenderCapture">QRenderCapture</a></b>(Qt3DCore::QNode *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QRenderCaptureReply *</td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrendercapture.html#requestCapture-1">requestCapture</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QRenderCaptureReply *</td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrendercapture.html#requestCapture-2">requestCapture</a></b>(const QRect &amp;<i>rect</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QRenderCapture-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qt3drender-qrendercapture.html">QRenderCapture</a> is used to capture rendering into an image at any render stage. Capturing must be initiated by the user and one image is returned per capture request. User can issue multiple render capture requests simultaniously, but only one request is served per <a href="qt3drender-qrendercapture.html">QRenderCapture</a> instance per frame.</p>
+</div>
+<!-- @@@QRenderCapture -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QRenderCapture[overload1]$$$QRenderCaptureQt3DCore::QNode* -->
+<h3 class="fn" id="QRenderCapture"><a name="QRenderCapture"></a>QRenderCapture::<span class="name">QRenderCapture</span>(<span class="type"><a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></span> *<i>parent</i> = nullptr)</h3>
+<p>The constructor creates an instance with the specified <i>parent</i>.</p>
+<!-- @@@QRenderCapture -->
+<!-- $$$requestCapture$$$requestCapture -->
+<h3 class="fn" id="requestCapture-1"><a name="requestCapture-1"></a><span class="type"><a href="qt3drender-qrendercapturereply.html">Qt3DRender::QRenderCaptureReply</a></span> *QRenderCapture::<span class="name">requestCapture</span>()</h3>
+<p>Used to request render capture. Only one render capture result is produced per requestCapture call even if the frame graph has multiple leaf nodes. The function returns a <a href="qt3drender-qrendercapturereply.html">QRenderCaptureReply</a> object, which receives the captured image when it is done. The user is responsible for deallocating the returned object.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@requestCapture -->
+<!-- $$$requestCapture$$$requestCaptureconstQRect& -->
+<h3 class="fn" id="requestCapture-2"><a name="requestCapture-2"></a><span class="type"><a href="qt3drender-qrendercapturereply.html">Qt3DRender::QRenderCaptureReply</a></span> *QRenderCapture::<span class="name">requestCapture</span>(const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> &amp;<i>rect</i>)</h3>
+<p>Used to request render capture from a specified <i>rect</i>. Only one render capture result is produced per requestCapture call even if the frame graph has multiple leaf nodes. The function returns a <a href="qt3drender-qrendercapturereply.html">QRenderCaptureReply</a> object, which receives the captured image when it is done. The user is responsible for deallocating the returned object.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@requestCapture -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

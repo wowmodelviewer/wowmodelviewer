@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qserialportinfo.cpp -->
+  <title>QSerialPortInfo Class | Qt Serial Port 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtserialport-index.html">Qt Serial Port</a></td><td ><a href="qtserialport-module.html">C++ Classes</a></td><td >QSerialPortInfo</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtserialport-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSerialPortInfo Class</h1>
+<!-- $$$QSerialPortInfo-brief -->
+<p>Provides information about existing serial ports. <a href="#details">More...</a></p>
+<!-- @@@QSerialPortInfo -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QSerialPortInfo&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += serialport</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.1</td></tr></table></div><p>This class was introduced in  Qt 5.1.</p>
+<ul>
+<li><a href="qserialportinfo-members.html">List of all members, including inherited members</a></li>
+<li><a href="qserialportinfo-obsolete.html">Obsolete members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qserialportinfo.html#QSerialPortInfo-3">QSerialPortInfo</a></b>(const QSerialPortInfo &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qserialportinfo.html#QSerialPortInfo-2">QSerialPortInfo</a></b>(const QString &amp;<i>name</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qserialportinfo.html#QSerialPortInfo-1">QSerialPortInfo</a></b>(const QSerialPort &amp;<i>port</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qserialportinfo.html#QSerialPortInfo">QSerialPortInfo</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSerialPortInfo &amp;</td><td class="memItemRight bottomAlign"><b><a href="qserialportinfo.html#operator-eq">operator=</a></b>(const QSerialPortInfo &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qserialportinfo.html#dtor.QSerialPortInfo">~QSerialPortInfo</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qserialportinfo.html#description">description</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qserialportinfo.html#hasProductIdentifier">hasProductIdentifier</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qserialportinfo.html#hasVendorIdentifier">hasVendorIdentifier</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qserialportinfo.html#isBusy">isBusy</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qserialportinfo.html#isNull">isNull</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qserialportinfo.html#manufacturer">manufacturer</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qserialportinfo.html#portName">portName</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> quint16 </td><td class="memItemRight bottomAlign"><b><a href="qserialportinfo.html#productIdentifier">productIdentifier</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qserialportinfo.html#serialNumber">serialNumber</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qserialportinfo.html#swap">swap</a></b>(QSerialPortInfo &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qserialportinfo.html#systemLocation">systemLocation</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> quint16 </td><td class="memItemRight bottomAlign"><b><a href="qserialportinfo.html#vendorIdentifier">vendorIdentifier</a></b>() const</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QSerialPortInfo&gt; </td><td class="memItemRight bottomAlign"><b><a href="qserialportinfo.html#availablePorts">availablePorts</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;qint32&gt; </td><td class="memItemRight bottomAlign"><b><a href="qserialportinfo.html#standardBaudRates">standardBaudRates</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSerialPortInfo-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Use the static functions to generate a list of <a href="qserialportinfo.html">QSerialPortInfo</a> objects. Each <a href="qserialportinfo.html">QSerialPortInfo</a> object in the list represents a single serial port and can be queried for the port name, system location, description, and manufacturer. The <a href="qserialportinfo.html">QSerialPortInfo</a> class can also be used as an input parameter for the setPort() method of the <a href="qserialport.html">QSerialPort</a> class.</p>
+</div>
+<p><b>See also </b><a href="qserialport.html">QSerialPort</a>.</p>
+<!-- @@@QSerialPortInfo -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QSerialPortInfo$$$QSerialPortInfoconstQSerialPortInfo& -->
+<h3 class="fn" id="QSerialPortInfo-3"><a name="QSerialPortInfo-3"></a>QSerialPortInfo::<span class="name">QSerialPortInfo</span>(const <span class="type"><a href="qserialportinfo.html#QSerialPortInfo">QSerialPortInfo</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a copy of <i>other</i>.</p>
+<!-- @@@QSerialPortInfo -->
+<!-- $$$QSerialPortInfo$$$QSerialPortInfoconstQString& -->
+<h3 class="fn" id="QSerialPortInfo-2"><a name="QSerialPortInfo-2"></a>QSerialPortInfo::<span class="name">QSerialPortInfo</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>)</h3>
+<p>Constructs a <a href="qserialportinfo.html">QSerialPortInfo</a> object from serial port <i>name</i>.</p>
+<p>This constructor finds the relevant serial port among the available ones according to the port name <i>name</i>, and constructs the serial port info instance for that port.</p>
+<!-- @@@QSerialPortInfo -->
+<!-- $$$QSerialPortInfo$$$QSerialPortInfoconstQSerialPort& -->
+<h3 class="fn" id="QSerialPortInfo-1"><a name="QSerialPortInfo-1"></a>QSerialPortInfo::<span class="name">QSerialPortInfo</span>(const <span class="type"><a href="qserialport.html">QSerialPort</a></span> &amp;<i>port</i>)</h3>
+<p>Constructs a <a href="qserialportinfo.html">QSerialPortInfo</a> object from serial <i>port</i>.</p>
+<!-- @@@QSerialPortInfo -->
+<!-- $$$QSerialPortInfo[overload1]$$$QSerialPortInfo -->
+<h3 class="fn" id="QSerialPortInfo"><a name="QSerialPortInfo"></a>QSerialPortInfo::<span class="name">QSerialPortInfo</span>()</h3>
+<p>Constructs an empty <a href="qserialportinfo.html">QSerialPortInfo</a> object.</p>
+<p><b>See also </b><a href="qserialportinfo.html#isNull">isNull</a>().</p>
+<!-- @@@QSerialPortInfo -->
+<!-- $$$operator=[overload1]$$$operator=constQSerialPortInfo& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qserialportinfo.html#QSerialPortInfo">QSerialPortInfo</a></span> &amp;QSerialPortInfo::<span class="name">operator=</span>(const <span class="type"><a href="qserialportinfo.html#QSerialPortInfo">QSerialPortInfo</a></span> &amp;<i>other</i>)</h3>
+<p>Sets the <a href="qserialportinfo.html">QSerialPortInfo</a> object to be equal to <i>other</i>.</p>
+<!-- @@@operator= -->
+<!-- $$$~QSerialPortInfo[overload1]$$$~QSerialPortInfo -->
+<h3 class="fn" id="dtor.QSerialPortInfo"><a name="dtor.QSerialPortInfo"></a>QSerialPortInfo::<span class="name">~QSerialPortInfo</span>()</h3>
+<p>Destroys the <a href="qserialportinfo.html">QSerialPortInfo</a> object. References to the values in the object become invalid.</p>
+<!-- @@@~QSerialPortInfo -->
+<!-- $$$availablePorts[overload1]$$$availablePorts -->
+<h3 class="fn" id="availablePorts"><a name="availablePorts"></a><code>[static] </code><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qserialportinfo.html#QSerialPortInfo">QSerialPortInfo</a></span>&gt; QSerialPortInfo::<span class="name">availablePorts</span>()</h3>
+<p>Returns a list of available serial ports on the system.</p>
+<!-- @@@availablePorts -->
+<!-- $$$description[overload1]$$$description -->
+<h3 class="fn" id="description"><a name="description"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QSerialPortInfo::<span class="name">description</span>() const</h3>
+<p>Returns the description string of the serial port, if available; otherwise returns an empty string.</p>
+<p><b>See also </b><a href="qserialportinfo.html#manufacturer">manufacturer</a>() and <a href="qserialportinfo.html#serialNumber">serialNumber</a>().</p>
+<!-- @@@description -->
+<!-- $$$hasProductIdentifier[overload1]$$$hasProductIdentifier -->
+<h3 class="fn" id="hasProductIdentifier"><a name="hasProductIdentifier"></a><span class="type">bool</span> QSerialPortInfo::<span class="name">hasProductIdentifier</span>() const</h3>
+<p>Returns <code>true</code> if there is a valid <code>16-bit</code> product number present; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qserialportinfo.html#productIdentifier">productIdentifier</a>(), <a href="qserialportinfo.html#vendorIdentifier">vendorIdentifier</a>(), and <a href="qserialportinfo.html#hasVendorIdentifier">hasVendorIdentifier</a>().</p>
+<!-- @@@hasProductIdentifier -->
+<!-- $$$hasVendorIdentifier[overload1]$$$hasVendorIdentifier -->
+<h3 class="fn" id="hasVendorIdentifier"><a name="hasVendorIdentifier"></a><span class="type">bool</span> QSerialPortInfo::<span class="name">hasVendorIdentifier</span>() const</h3>
+<p>Returns <code>true</code> if there is a valid <code>16-bit</code> vendor number present; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qserialportinfo.html#vendorIdentifier">vendorIdentifier</a>(), <a href="qserialportinfo.html#productIdentifier">productIdentifier</a>(), and <a href="qserialportinfo.html#hasProductIdentifier">hasProductIdentifier</a>().</p>
+<!-- @@@hasVendorIdentifier -->
+<!-- $$$isBusy[overload1]$$$isBusy -->
+<h3 class="fn" id="isBusy"><a name="isBusy"></a><span class="type">bool</span> QSerialPortInfo::<span class="name">isBusy</span>() const</h3>
+<p>Returns <code>true</code> if serial port is busy; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qserialportinfo.html#isNull">isNull</a>().</p>
+<!-- @@@isBusy -->
+<!-- $$$isNull[overload1]$$$isNull -->
+<h3 class="fn" id="isNull"><a name="isNull"></a><span class="type">bool</span> QSerialPortInfo::<span class="name">isNull</span>() const</h3>
+<p>Returns whether this <a href="qserialportinfo.html">QSerialPortInfo</a> object holds a serial port definition.</p>
+<p><b>See also </b><a href="qserialportinfo.html#isBusy">isBusy</a>().</p>
+<!-- @@@isNull -->
+<!-- $$$manufacturer[overload1]$$$manufacturer -->
+<h3 class="fn" id="manufacturer"><a name="manufacturer"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QSerialPortInfo::<span class="name">manufacturer</span>() const</h3>
+<p>Returns the manufacturer string of the serial port, if available; otherwise returns an empty string.</p>
+<p><b>See also </b><a href="qserialportinfo.html#description">description</a>() and <a href="qserialportinfo.html#serialNumber">serialNumber</a>().</p>
+<!-- @@@manufacturer -->
+<!-- $$$portName[overload1]$$$portName -->
+<h3 class="fn" id="portName"><a name="portName"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QSerialPortInfo::<span class="name">portName</span>() const</h3>
+<p>Returns the name of the serial port.</p>
+<p><b>See also </b><a href="qserialportinfo.html#systemLocation">systemLocation</a>().</p>
+<!-- @@@portName -->
+<!-- $$$productIdentifier[overload1]$$$productIdentifier -->
+<h3 class="fn" id="productIdentifier"><a name="productIdentifier"></a><span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> QSerialPortInfo::<span class="name">productIdentifier</span>() const</h3>
+<p>Returns the 16-bit product number for the serial port, if available; otherwise returns zero.</p>
+<p><b>See also </b><a href="qserialportinfo.html#hasProductIdentifier">hasProductIdentifier</a>(), <a href="qserialportinfo.html#vendorIdentifier">vendorIdentifier</a>(), and <a href="qserialportinfo.html#hasVendorIdentifier">hasVendorIdentifier</a>().</p>
+<!-- @@@productIdentifier -->
+<!-- $$$serialNumber[overload1]$$$serialNumber -->
+<h3 class="fn" id="serialNumber"><a name="serialNumber"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QSerialPortInfo::<span class="name">serialNumber</span>() const</h3>
+<p>Returns the serial number string of the serial port, if available; otherwise returns an empty string.</p>
+<p><b>Note: </b>The serial number may include letters.</p><p>This function was introduced in  Qt 5.3.</p>
+<p><b>See also </b><a href="qserialportinfo.html#description">description</a>() and <a href="qserialportinfo.html#manufacturer">manufacturer</a>().</p>
+<!-- @@@serialNumber -->
+<!-- $$$standardBaudRates[overload1]$$$standardBaudRates -->
+<h3 class="fn" id="standardBaudRates"><a name="standardBaudRates"></a><code>[static] </code><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="../qtcore/qtglobal.html#qint32-typedef">qint32</a></span>&gt; QSerialPortInfo::<span class="name">standardBaudRates</span>()</h3>
+<p>Returns a list of available standard baud rates supported by the target platform.</p>
+<!-- @@@standardBaudRates -->
+<!-- $$$swap[overload1]$$$swapQSerialPortInfo& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QSerialPortInfo::<span class="name">swap</span>(<span class="type"><a href="qserialportinfo.html#QSerialPortInfo">QSerialPortInfo</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps <a href="qserialportinfo.html">QSerialPortInfo</a> <i>other</i> with this <a href="qserialportinfo.html">QSerialPortInfo</a>. This operation is very fast and never fails.</p>
+<!-- @@@swap -->
+<!-- $$$systemLocation[overload1]$$$systemLocation -->
+<h3 class="fn" id="systemLocation"><a name="systemLocation"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QSerialPortInfo::<span class="name">systemLocation</span>() const</h3>
+<p>Returns the system location of the serial port.</p>
+<p><b>See also </b><a href="qserialportinfo.html#portName">portName</a>().</p>
+<!-- @@@systemLocation -->
+<!-- $$$vendorIdentifier[overload1]$$$vendorIdentifier -->
+<h3 class="fn" id="vendorIdentifier"><a name="vendorIdentifier"></a><span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> QSerialPortInfo::<span class="name">vendorIdentifier</span>() const</h3>
+<p>Returns the 16-bit vendor number for the serial port, if available; otherwise returns zero.</p>
+<p><b>See also </b><a href="qserialportinfo.html#hasVendorIdentifier">hasVendorIdentifier</a>(), <a href="qserialportinfo.html#productIdentifier">productIdentifier</a>(), and <a href="qserialportinfo.html#hasProductIdentifier">hasProductIdentifier</a>().</p>
+<!-- @@@vendorIdentifier -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

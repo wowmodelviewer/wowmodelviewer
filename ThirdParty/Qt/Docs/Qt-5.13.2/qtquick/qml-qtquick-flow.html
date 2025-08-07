@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickpositioners.cpp -->
+  <title>Flow QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >Flow QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Flow QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Flow-brief -->
+<p>Positions its children side by side, wrapping as necessary. <a href="#details">More...</a></p>
+<!-- @@@Flow -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-item.html">Item</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-flow-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-flow.html#add-prop">add</a></b></b> : Transition</li>
+<li class="fn"><b><b><a href="qml-qtquick-flow.html#bottomPadding-prop">bottomPadding</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-flow.html#effectiveLayoutDirection-prop">effectiveLayoutDirection</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-flow.html#flow-prop">flow</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-flow.html#layoutDirection-prop">layoutDirection</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-flow.html#leftPadding-prop">leftPadding</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-flow.html#move-prop">move</a></b></b> : Transition</li>
+<li class="fn"><b><b><a href="qml-qtquick-flow.html#padding-prop">padding</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-flow.html#populate-prop">populate</a></b></b> : Transition</li>
+<li class="fn"><b><b><a href="qml-qtquick-flow.html#rightPadding-prop">rightPadding</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-flow.html#spacing-prop">spacing</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-flow.html#topPadding-prop">topPadding</a></b></b> : real</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-flow.html#positioningComplete-signal">positioningComplete</a></b></b>()</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-flow.html#forceLayout-method">forceLayout</a></b></b>()</li>
+</ul>
+<!-- $$$Flow-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The Flow item positions its child items like words on a page, wrapping them to create rows or columns of items.</p>
+<p>Below is a Flow that contains various <a href="qml-qtquick-text.html">Text</a> items:</p>
+<pre class="qml">
+
+      <span class="type"><a href="qml-qtquick-flow.html">Flow</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">anchors</span>.margins: <span class="number">4</span>
+          <span class="name">spacing</span>: <span class="number">10</span>
+
+          <span class="type"><a href="qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="string">&quot;Text&quot;</span>; <span class="name">font</span>.pixelSize: <span class="number">40</span> }
+          <span class="type"><a href="qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="string">&quot;items&quot;</span>; <span class="name">font</span>.pixelSize: <span class="number">40</span> }
+          <span class="type"><a href="qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="string">&quot;flowing&quot;</span>; <span class="name">font</span>.pixelSize: <span class="number">40</span> }
+          <span class="type"><a href="qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="string">&quot;inside&quot;</span>; <span class="name">font</span>.pixelSize: <span class="number">40</span> }
+          <span class="type"><a href="qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="string">&quot;a&quot;</span>; <span class="name">font</span>.pixelSize: <span class="number">40</span> }
+          <span class="type"><a href="qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="string">&quot;Flow&quot;</span>; <span class="name">font</span>.pixelSize: <span class="number">40</span> }
+          <span class="type"><a href="qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="string">&quot;item&quot;</span>; <span class="name">font</span>.pixelSize: <span class="number">40</span> }
+      }
+
+</pre>
+<p>The Flow item automatically positions the child <a href="qml-qtquick-text.html">Text</a> items side by side, wrapping as necessary:</p>
+<p class="centerAlign"><img src="images/qml-flow-snippet.png" alt="" /></p><p>If an item within a Flow is not <a href="qml-qtquick-item.html#visible-prop">visible</a>, or if it has a width or height of 0, the item will not be laid out and it will not be visible within the Flow. Also, since a Flow automatically positions its children, a child item within a Flow should not set its <a href="qml-qtquick-item.html#x-prop">x</a> or <a href="qml-qtquick-item.html#y-prop">y</a> positions or anchor itself with any of the <a href="qml-qtquick-item.html#anchors-prop">anchor</a> properties.</p>
+<p>For more information on using Flow and other related positioner-types, see <a href="qtquick-positioning-layouts.html">Item Positioners</a>.</p>
+<p><b>See also </b><a href="qml-qtquick-column.html">Column</a>, <a href="qml-qtquick-row.html">Row</a>, <a href="qml-qtquick-grid.html">Grid</a>, <a href="qml-qtquick-positioner.html">Positioner</a>, and <a href="qtquick-positioners-example.html">Qt Quick Examples - Positioners</a>.</p>
+<!-- @@@Flow -->
+<h2>Property Documentation</h2>
+<!-- $$$ -->
+<div class="qmlitem"><div class="qmlproto"><div class="table"><table class="qmlname"><tr valign="top" class="odd" id="padding-prop"><td class="tblQmlPropNode"><p><a name="padding-prop"></a><span class="name">padding</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr><tr valign="top" class="odd" id="topPadding-prop"><td class="tblQmlPropNode"><p><a name="topPadding-prop"></a><span class="name">topPadding</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr><tr valign="top" class="odd" id="leftPadding-prop"><td class="tblQmlPropNode"><p><a name="leftPadding-prop"></a><span class="name">leftPadding</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr><tr valign="top" class="odd" id="bottomPadding-prop"><td class="tblQmlPropNode"><p><a name="bottomPadding-prop"></a><span class="name">bottomPadding</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr><tr valign="top" class="odd" id="rightPadding-prop"><td class="tblQmlPropNode"><p><a name="rightPadding-prop"></a><span class="name">rightPadding</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr></table></div></div><div class="qmldoc"><p>These properties hold the padding around the content.</p>
+<p>This documentation was introduced in  Qt 5.6.</p>
+</div></div><!-- @@@ -->
+<br/>
+<!-- $$$add -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="add-prop"></a><span class="name">add</span> : <span class="type"><a href="qml-qtquick-transition.html">Transition</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the transition to be run for items that are added to this positioner. For a positioner, this applies to:</p>
+<ul>
+<li>Items that are created or reparented as a child of the positioner after the positioner has been created</li>
+<li>Child items that change their <a href="qml-qtquick-item.html#visible-prop">Item::visible</a> property from false to true, and thus are now visible</li>
+</ul>
+<p>The transition can use the <a href="qml-qtquick-viewtransition.html">ViewTransition</a> property to access more details about the item that is being added. See the <a href="qml-qtquick-viewtransition.html">ViewTransition</a> documentation for more details and examples on using these transitions.</p>
+<p><b>Note: </b>This transition is not applied to the items that are already part of the positioner at the time of its creation. In this case, the <a href="qml-qtquick-flow.html#populate-prop">populate</a> transition is applied instead.</p><p><b>See also </b><a href="qml-qtquick-flow.html#populate-prop">populate</a>, <a href="qml-qtquick-viewtransition.html">ViewTransition</a>, and <a href="qtquick-positioners-example.html">Qt Quick Examples - Positioners</a>.</p>
+</div></div><!-- @@@add -->
+<br/>
+<!-- $$$effectiveLayoutDirection -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="effectiveLayoutDirection-prop"></a><span class="name">effectiveLayoutDirection</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the effective layout direction of the flow.</p>
+<p>When using the attached property <a href="qml-qtquick-layoutmirroring.html#enabled-prop">LayoutMirroring::enabled</a> for locale layouts, the visual layout direction of the grid positioner will be mirrored. However, the property <a href="qml-qtquick-flow.html#layoutDirection-prop">layoutDirection</a> will remain unchanged.</p>
+<p><b>See also </b><a href="qml-qtquick-flow.html#layoutDirection-prop">Flow::layoutDirection</a> and <a href="qml-qtquick-layoutmirroring.html">LayoutMirroring</a>.</p>
+</div></div><!-- @@@effectiveLayoutDirection -->
+<br/>
+<!-- $$$flow -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="flow-prop"></a><span class="name">flow</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the flow of the layout.</p>
+<p>Possible values are:</p>
+<ul>
+<li>Flow.LeftToRight (default) - Items are positioned next to to each other according to the <a href="qml-qtquick-flow.html#layoutDirection-prop">layoutDirection</a> until the width of the Flow is exceeded, then wrapped to the next line.</li>
+<li>Flow.TopToBottom - Items are positioned next to each other from top to bottom until the height of the Flow is exceeded, then wrapped to the next column.</li>
+</ul>
+</div></div><!-- @@@flow -->
+<br/>
+<!-- $$$layoutDirection -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="layoutDirection-prop"></a><span class="name">layoutDirection</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the layout direction of the layout.</p>
+<p>Possible values are:</p>
+<ul>
+<li>Qt.LeftToRight (default) - Items are positioned from the top to bottom, and left to right. The flow direction is dependent on the <a href="qml-qtquick-flow.html#flow-prop">Flow::flow</a> property.</li>
+<li>Qt.RightToLeft - Items are positioned from the top to bottom, and right to left. The flow direction is dependent on the <a href="qml-qtquick-flow.html#flow-prop">Flow::flow</a> property.</li>
+</ul>
+<p><b>See also </b><a href="qml-qtquick-grid.html#layoutDirection-prop">Grid::layoutDirection</a>, <a href="qml-qtquick-row.html#layoutDirection-prop">Row::layoutDirection</a>, and <a href="qtquick-righttoleft-example.html">Qt Quick Examples - Right to Left</a>.</p>
+</div></div><!-- @@@layoutDirection -->
+<br/>
+<!-- $$$move -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="move-prop"></a><span class="name">move</span> : <span class="type"><a href="qml-qtquick-transition.html">Transition</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the transition to run for items that have moved within the positioner. For a positioner, this applies to:</p>
+<ul>
+<li>Child items that move when they are displaced due to the addition, removal or rearrangement of other items in the positioner</li>
+<li>Child items that are repositioned due to the resizing of other items in the positioner</li>
+</ul>
+<p>The transition can use the <a href="qml-qtquick-viewtransition.html">ViewTransition</a> property to access more details about the item that is being moved. Note, however, that for this move transition, the <a href="qml-qtquick-viewtransition.html">ViewTransition</a>.targetIndexes and <a href="qml-qtquick-viewtransition.html">ViewTransition</a>.targetItems lists are only set when this transition is triggered by the addition of other items in the positioner; in other cases, these lists will be empty. See the <a href="qml-qtquick-viewtransition.html">ViewTransition</a> documentation for more details and examples on using these transitions.</p>
+<p><b>See also </b><a href="qml-qtquick-flow.html#add-prop">add</a>, <a href="qml-qtquick-flow.html#populate-prop">populate</a>, <a href="qml-qtquick-viewtransition.html">ViewTransition</a>, and <a href="qtquick-positioners-example.html">Qt Quick Examples - Positioners</a>.</p>
+</div></div><!-- @@@move -->
+<br/>
+<!-- $$$populate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="populate-prop"></a><span class="name">populate</span> : <span class="type"><a href="qml-qtquick-transition.html">Transition</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the transition to be run for items that are part of this positioner at the time of its creation. The transition is run when the positioner is first created.</p>
+<p>The transition can use the <a href="qml-qtquick-viewtransition.html">ViewTransition</a> property to access more details about the item that is being added. See the <a href="qml-qtquick-viewtransition.html">ViewTransition</a> documentation for more details and examples on using these transitions.</p>
+<p><b>See also </b><a href="qml-qtquick-flow.html#add-prop">add</a>, <a href="qml-qtquick-viewtransition.html">ViewTransition</a>, and <a href="qtquick-positioners-example.html">Qt Quick Examples - Positioners</a>.</p>
+</div></div><!-- @@@populate -->
+<br/>
+<!-- $$$spacing -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="spacing-prop"></a><span class="name">spacing</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>spacing is the amount in pixels left empty between each adjacent item, and defaults to 0.</p>
+<p><b>See also </b><a href="qml-qtquick-grid.html#spacing-prop">Grid::spacing</a>.</p>
+</div></div><!-- @@@spacing -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$positioningComplete[overload1]$$$positioningComplete -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="positioningComplete-signal"></a><span class="name">positioningComplete</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when positioning has been completed.</p>
+<p>The corresponding handler is <code>onPositioningComplete</code>.</p>
+<p>This signal was introduced in  Qt 5.9.</p>
+</div></div><!-- @@@positioningComplete -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$forceLayout[overload1]$$$forceLayout -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="forceLayout-method"></a><span class="name">forceLayout</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Flow typically positions its children once per frame. This means that inside script blocks it is possible for the underlying children to have changed, but the Flow to have not yet been updated accordingly.</p>
+<p>This method forces the Flow to immediately respond to any outstanding changes in its children.</p>
+<p><b>Note</b>: methods in general should only be called after the Component has completed.</p>
+<p>This method was introduced in  Qt 5.9.</p>
+</div></div><!-- @@@forceLayout -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

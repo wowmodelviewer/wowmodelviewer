@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- photoviewer.qdoc -->
+  <title>Qt Quick Demo - Photo Viewer | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Qt Quick Demo - Photo Viewer</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<h1 class="title">Qt Quick Demo - Photo Viewer</h1>
+<span class="subtitle"></span>
+<pre class="cpp">
+
+  TEMPLATE = app
+
+  QT += qml quick xmlpatterns
+  CONFIG += lrelease embed_translations
+
+  SOURCES += main.cpp
+
+  lupdate_only {
+  SOURCES = *.qml \
+            PhotoViewerCore/*.qml \
+            PhotoViewerCore/script/*.js
+  }
+
+  TRANSLATIONS += i18n/qml_fr.ts \
+                  i18n/qml_de.ts
+
+  EXTRA_TRANSLATIONS += i18n/qml_en.ts
+
+  RESOURCES += main.qml \
+               PhotoViewerCore/AlbumDelegate.qml \
+               PhotoViewerCore/BusyIndicator.qml \
+               PhotoViewerCore/Button.qml \
+               PhotoViewerCore/EditableButton.qml \
+               PhotoViewerCore/PhotoDelegate.qml \
+               PhotoViewerCore/ProgressBar.qml \
+               PhotoViewerCore/RssModel.qml \
+               PhotoViewerCore/Tag.qml \
+               PhotoViewerCore/images/box-shadow.png \
+               PhotoViewerCore/images/busy.png \
+               PhotoViewerCore/images/cardboard.png \
+               PhotoViewerCore/script/script.mjs \
+
+  target.path = $$[QT_INSTALL_EXAMPLES]/demos/photoviewer
+  INSTALLS += target
+
+</pre>

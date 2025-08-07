@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qplatformfontdatabase.cpp -->
+  <title>QSupportedWritingSystems Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QSupportedWritingSystems</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSupportedWritingSystems Class</h1>
+<!-- $$$QSupportedWritingSystems-brief -->
+<p>The <a href="qsupportedwritingsystems.html">QSupportedWritingSystems</a> class is used when registering fonts with the internal Qt fontdatabase. <a href="#details">More...</a></p>
+<!-- @@@QSupportedWritingSystems -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QSupportedWritingSystems&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr></table></div><ul>
+<li><a href="qsupportedwritingsystems-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsupportedwritingsystems.html#QSupportedWritingSystems-1">QSupportedWritingSystems</a></b>(const QSupportedWritingSystems &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsupportedwritingsystems.html#QSupportedWritingSystems">QSupportedWritingSystems</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSupportedWritingSystems &amp;</td><td class="memItemRight bottomAlign"><b><a href="qsupportedwritingsystems.html#operator-eq">operator=</a></b>(const QSupportedWritingSystems &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsupportedwritingsystems.html#dtor.QSupportedWritingSystems">~QSupportedWritingSystems</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsupportedwritingsystems.html#setSupported">setSupported</a></b>(QFontDatabase::WritingSystem <i>writingSystem</i>, bool <i>support</i> = true)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qsupportedwritingsystems.html#supported">supported</a></b>(QFontDatabase::WritingSystem <i>writingSystem</i>) const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSupportedWritingSystems-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Its to provide an easy to use interface for indicating what writing systems a specific font supports.</p>
+</div>
+<!-- @@@QSupportedWritingSystems -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QSupportedWritingSystems$$$QSupportedWritingSystemsconstQSupportedWritingSystems& -->
+<h3 class="fn" id="QSupportedWritingSystems-1"><a name="QSupportedWritingSystems-1"></a>QSupportedWritingSystems::<span class="name">QSupportedWritingSystems</span>(const <span class="type"><a href="qsupportedwritingsystems.html#QSupportedWritingSystems">QSupportedWritingSystems</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a copy of the <i>other</i> writing systems object.</p>
+<!-- @@@QSupportedWritingSystems -->
+<!-- $$$QSupportedWritingSystems[overload1]$$$QSupportedWritingSystems -->
+<h3 class="fn" id="QSupportedWritingSystems"><a name="QSupportedWritingSystems"></a>QSupportedWritingSystems::<span class="name">QSupportedWritingSystems</span>()</h3>
+<p>Constructs a new object to handle supported writing systems.</p>
+<!-- @@@QSupportedWritingSystems -->
+<!-- $$$operator=[overload1]$$$operator=constQSupportedWritingSystems& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qsupportedwritingsystems.html#QSupportedWritingSystems">QSupportedWritingSystems</a></span> &amp;QSupportedWritingSystems::<span class="name">operator=</span>(const <span class="type"><a href="qsupportedwritingsystems.html#QSupportedWritingSystems">QSupportedWritingSystems</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a copy of the <i>other</i> writing systems object.</p>
+<!-- @@@operator= -->
+<!-- $$$~QSupportedWritingSystems[overload1]$$$~QSupportedWritingSystems -->
+<h3 class="fn" id="dtor.QSupportedWritingSystems"><a name="dtor.QSupportedWritingSystems"></a>QSupportedWritingSystems::<span class="name">~QSupportedWritingSystems</span>()</h3>
+<p>Destroys the supported writing systems object.</p>
+<!-- @@@~QSupportedWritingSystems -->
+<!-- $$$setSupported[overload1]$$$setSupportedQFontDatabase::WritingSystembool -->
+<h3 class="fn" id="setSupported"><a name="setSupported"></a><span class="type">void</span> QSupportedWritingSystems::<span class="name">setSupported</span>(<span class="type"><a href="qfontdatabase.html#WritingSystem-enum">QFontDatabase::WritingSystem</a></span> <i>writingSystem</i>, <span class="type">bool</span> <i>support</i> = true)</h3>
+<p>Sets or clears support for the specified <i>writingSystem</i> based on the value given by <i>support</i>.</p>
+<p><b>See also </b><a href="qsupportedwritingsystems.html#supported">supported</a>().</p>
+<!-- @@@setSupported -->
+<!-- $$$supported[overload1]$$$supportedQFontDatabase::WritingSystem -->
+<h3 class="fn" id="supported"><a name="supported"></a><span class="type">bool</span> QSupportedWritingSystems::<span class="name">supported</span>(<span class="type"><a href="qfontdatabase.html#WritingSystem-enum">QFontDatabase::WritingSystem</a></span> <i>writingSystem</i>) const</h3>
+<p>Returns <code>true</code> if the writing system specified by <i>writingSystem</i> is supported; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qsupportedwritingsystems.html#setSupported">setSupported</a>().</p>
+<!-- @@@supported -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- deployment.qdoc -->
+  <title>Deploying Qt Applications | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Deploying Qt Applications</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#static-vs-shared-libraries">Static vs. Shared Libraries</a></li>
+<li class="level1"><a href="#deploying-qt-s-libraries">Deploying Qt's Libraries</a></li>
+<li class="level1"><a href="#licensing">Licensing</a></li>
+<li class="level1"><a href="#platform-specific-notes">Platform-Specific Notes</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Deploying Qt Applications</h1>
+<span class="subtitle"></span>
+<!-- $$$deployment.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Deploying an Qt application does not require any C++ programming. All you need to do is to build Qt and your application in release mode, following the procedures described in this documentation.</p>
+<a name="static-vs-shared-libraries"></a>
+<h2 id="static-vs-shared-libraries">Static vs. Shared Libraries</h2>
+<p>There are two ways of deploying an application:</p>
+<ul>
+<li>Static Linking</li>
+<li>Shared Libraries (Frameworks on Mac)</li>
+</ul>
+<p>Static linking results in a stand-alone executable. The advantage is that you will only have a few files to deploy. The disadvantages are that the executables are large and with no flexibility (i.e a new version of the application, or of Qt, will require that the deployment process is repeated), and that you cannot deploy plugins.</p>
+<p>To deploy plugin-based applications, you can use the shared library approach. Shared libraries also provide smaller, more flexible executables. For example, using the shared library approach, the user is able to independently upgrade the Qt library used by the application.</p>
+<p>Another reason why you might want to use the shared library approach, is if you want to use the same Qt libraries for a family of applications. In fact, if you download the binary installation of Qt, you get Qt as a shared library.</p>
+<p>The disadvantage with the shared library approach is that you will get more files to deploy. For more information, see <a href="sharedlibrary.html">Creating Shared Libraries</a>.</p>
+<a name="deploying-qt-s-libraries"></a>
+<h2 id="deploying-qt-s-libraries">Deploying Qt's Libraries</h2>
+<p>Unless Qt is part of the system libraries it must be redistributed with your application. The minimum is to redistribute the run-time of the libraries used by the application. However, with static linking, the Qt run-times can be compiled into the executable.</p>
+<p>In general, you should deploy all plugins that your Qt build uses, excluding those that you have identified as unnecessary for your application and its users.</p>
+<p>For instance, you may need to deploy plugins for JPEG support and SQL drivers, but you should also deploy plugins that your users may require, including those for accessibility. For more information about plugins, see <a href="plugins-howto.html">How to Create Qt Plugins</a>.</p>
+<p>Applications using <a href="../qtqml/qtqml-index.html">Qt QML</a> also need to ship the <a href="modules-qml.html">QML modules</a> they use.</p>
+<p>While deploying an application using the shared library approach, you must ensure that the Qt libraries use the correct path to find the Qt plugins, documentation, translation, and so on. To do this, you can use a <code>qt.conf</code> file. For more information, see <a href="qt-conf.html">Using qt.conf</a>.</p>
+<p>Depending on configuration, compiler-specific libraries must be redistributed as well. For more information, see the platform-specific application dependencies for <a href="linux-deployment.html#application-dependencies">X11</a>, <a href="windows-deployment.html#application-dependencies">Windows</a>, and <a href="macos.html">macOS</a>.</p>
+<a name="licensing"></a>
+<h2 id="licensing">Licensing</h2>
+<p>Some of Qt's libraries are based on third party libraries that are not licensed using the same dual-license model as Qt. As a result, care must be taken when deploying applications that use these libraries, particularly when the application is statically linked to them. For more information, see <a href="licenses-used-in-qt.html">Third-Party Licenses Used in Qt</a>.</p>
+<p>Some configurations of <a href="../qtnetwork/qtnetwork-module.html">QtNetwork</a> use OpenSSL at run-time. Deployment of OpenSSL libraries is subject to both licensing and export restrictions. For more information, see <a href="../qtnetwork/ssl.html">Secure Sockets Layer (SSL) Classes</a>.</p>
+<a name="platform-specific-notes"></a>
+<h2 id="platform-specific-notes">Platform-Specific Notes</h2>
+<p>The procedure of deploying Qt applications is different for the various platforms:</p>
+<ul>
+<li><a href="linux-deployment.html">Qt for X11 Platforms</a></li>
+<li><a href="windows-deployment.html">Qt for Windows</a></li>
+<li><a href="macos.html#deploying-applications-on-macos">Qt for macOS</a></li>
+<li><a href="deployment-android.html">Qt for Android</a></li>
+</ul>
+</div>
+<p><b>See also </b><a href="../qtlinguist/linguist-programmers.html#deploying-translations">Deploying Translations</a>.</p>
+<!-- @@@deployment.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

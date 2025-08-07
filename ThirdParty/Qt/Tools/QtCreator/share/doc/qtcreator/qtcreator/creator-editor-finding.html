@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-search.qdoc -->
+  <title>Finding and Replacing | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Finding and Replacing</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-finding-overview.html" />
+  <link rel="next" href="creator-editor-locator.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-finding-overview.html">Finding</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-editor-locator.html">Searching with the Locator</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#advanced-search">Advanced Search</a></li>
+<li class="level1"><a href="#enabling-silver-searcher">Enabling Silver Searcher</a></li>
+<li class="level1"><a href="#exploring-clang-ast">Exploring Clang AST</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Finding and Replacing</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-editor-finding.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>To search through the currently open file:</p>
+<ol class="1" type="1"><li>Press <b>Ctrl+F</b> or select <b>Edit</b> &gt; <b>Find/Replace</b> &gt; <b>Find/Replace</b>.</li>
+<li>Enter the text you are looking for.<p>If the text is found, all occurrences are highlighted as you type.</p>
+</li>
+<li>To go to the next occurrence, click <img src="images/next.png" alt="" /> (<b>Find Next</b>), or press <b>F3</b>. To go to the previous occurrence click <img src="images/prev.png" alt="" /> (<b>Find Previous</b>), or press <b>Shift+F3</b>.</li>
+</ol>
+<p>You can restrict the search in the <b>Find</b> field by selecting one or several search criteria:</p>
+<ul>
+<li>To make your search case sensitive, select <b>Case Sensitive</b>.</li>
+<li>To search only whole words, select <b>Whole Words Only</b>.</li>
+<li>To search using regular expressions, select <b>Use Regular Expressions</b>. Regular expressions used in Qt Creator are modeled on Perl regular expressions. For more information on using regular expressions, see the documentation for the <a href="http://doc.qt.io/qt-5/qregularexpression.html">QRegularExpression</a> Class.</li>
+</ul>
+<p><b>Note: </b>If you have selected text before selecting <b>Find/Replace</b>, the search is conducted within the selection.</p><p>To replace occurrences of the existing text, enter the new text in the <b>Replace with</b> field.</p>
+<ul>
+<li>To replace the selected occurrence and move to the next one, click <b>Find Next</b> or press <b>Ctrl+=</b>.</li>
+<li>To replace the selected occurrence and move to the previous one, click <b>Find Previous</b>.</li>
+<li>To replace all occurrences in the file, click <b>Replace All</b>.</li>
+</ul>
+<p>The <b>Preserve Case when Replacing</b> option can be selected to preserve the case of the original text when replacing. This option is not compatible with the <b>Use Regular Expressions</b> search option, and will thus be disabled when regular expressions are used. When the option is used, the case of the occurrence will be conserved, according to the following rules:</p>
+<ul>
+<li>All upper-case occurrences are replaced with the upper-case new text.</li>
+<li>All lower-case occurrences are replaced with the lower-case new text.</li>
+<li>Capitalized occurrences are replaced with the capitalized new text.</li>
+<li>Other occurrences are replaced with the new text as entered.</li>
+<li>If an occurrence and the new text have the same prefix or suffix, then the case of the prefix and/or suffix are preserved, and the other rules are applied on the rest of the occurrence only.</li>
+</ul>
+<p>The locations of search hits, breakpoints, and bookmarks in your document are highlighted on the editor scroll bar. To turn highlighting off, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Text Editor</b> &gt; <b>Display</b> &gt; <b>Highlight search results on the scrollbar</b>.</p>
+<a name="advanced-search"></a>
+<h2 id="advanced-search">Advanced Search</h2>
+<p>To search through projects, files on a file system or currently open files:</p>
+<ol class="1" type="1"><li>Press <b>Ctrl+Shift+F</b> or select <b>Edit</b> &gt; <b>Find/Replace</b> &gt; <b>Advanced Find</b> &gt; <b>Open Advanced Find</b>.</li>
+<li>Select the scope of your search:<ul>
+<li><b>All Projects</b> searches from all currently open projects.<p class="centerAlign"><img src="images/qtcreator-search-allprojects.png" alt="" /></p></li>
+<li><b>Current Project</b> searches from the project you are currently editing.</li>
+<li><b>Files in File System</b> recursively searches from the selected directory.<p class="centerAlign"><img src="images/qtcreator-search-filesystem.png" alt="" /></p><p>In the <b>Search engine</b> field, select the search engine to use:</p>
+<ul>
+<li>Select <b>Internal</b> to use the Qt Creator search engine.</li>
+<li>Select <b>Git Grep</b> to use Git to only search tracked files in the Git work tree. To restrict the search to the HEAD, a tag, a local or remote branch, or a commit hash, enter a reference. Leave the field empty to search through the file system.</li>
+<li>Select <b>Silver Searcher</b> to use the experimental Silver Searcher plugin. For more information, see <a href="#enabling-silver-searcher">Enabling Silver Searcher</a>.</li>
+</ul>
+</li>
+<li><b>Current File</b> searches only from the current file.</li>
+<li><b>Open Documents</b> searches from all open files.</li>
+<li><b>Clang Query Project</b> explores the Clang abstract syntax tree (AST) using AST matcher expressions. For more information, see <a href="#exploring-clang-ast">Exploring Clang AST</a>.</li>
+</ul>
+</li>
+<li>In the <b>File pattern</b> field, specify file patterns to restrict the search to files that match the pattern. For example, to search for a string only in <code>.cpp</code> and <code>.h</code> files, enter <code>*.cpp,*.h</code>.</li>
+<li>In the <b>Exclusion pattern</b> field, specify file patterns to omit files from the search.</li>
+<li>Enter the text you are looking for and click <b>Search</b>.<p class="centerAlign"><img src="images/qtcreator-searchresults.png" alt="" /></p><p>A list of files containing the searched text is displayed in the <b>Search Results</b> pane.</p>
+<ul>
+<li>To see all occurrences in a file, double-click the file name in the list.</li>
+<li>To go to an occurrence, double-click it.</li>
+<li>To repeat the search after you have made changes to the listed files, for example, select <b>Search Again</b>.</li>
+</ul>
+</li>
+</ol>
+<p>The search results are stored in the search history from which you can select earlier searches.</p>
+<p>To clear the search results, select the <img src="images/clean_pane_small.png" alt="" /> (<b>Clear</b>) button.</p>
+<p>To start a new search, select the <img src="images/qtcreator-new-search-icon.png" alt="" /> (<b>New Search</b>) button.</p>
+<p><b>Note: </b>You can use <b>Advanced Find</b> also to search for symbols. For more information, see <a href="creator-editor-refactoring.html#finding-symbols">Finding Symbols</a>.</p><a name="enabling-silver-searcher"></a>
+<h2 id="enabling-silver-searcher">Enabling Silver Searcher</h2>
+<p>You can use Silver Searcher as a search engine in Qt Creator if you install Silver Searcher on the development PC and enable the experimental plugin.</p>
+<p>To use Silver Searcher:</p>
+<ol class="1" type="1"><li>Download and install Silver Searcher from <a href="https://geoff.greer.fm/ag/">The Silver Searcher</a> or <a href="https://github.com/ggreer/the_silver_searcher">GitHub</a>.<p>You might have to build Silver Searcher from sources for some platforms.</p>
+</li>
+<li>Select <b>Help</b> &gt; <b>About Plugins</b> &gt; <b>Utilities</b> &gt; <b>SilverSearcher</b> to enable the plugin.</li>
+<li>Restart Qt Creator to be able to use the plugin.</li>
+<li>When searching, select <b>Silver Searcher</b> in the <b>Search engine</b> field.</li>
+</ol>
+<a name="exploring-clang-ast"></a>
+<h2 id="exploring-clang-ast">Exploring Clang AST</h2>
+<p>You can use the experimental Clang Refactoring plugin to explore the Clang AST using AST matcher expressions. For more information about constructing matcher expressions, see <a href="http://clang.llvm.org/docs/LibASTMatchersReference.html">AST Matcher Reference</a>.</p>
+<p>To explore the AST:</p>
+<ol class="1" type="1"><li>Select <b>Help</b> &gt; <b>About Plugins</b> &gt; <b>C++</b> &gt; <b>ClangRefactoring</b> to enable the plugin.</li>
+<li>Restart Qt Creator to be able to use the plugin.</li>
+<li>When searching, select <b>Clang Query Project</b> in the <b>Scope</b> field.</li>
+<li>Enter an AST matcher expression in the <b>Search for</b> field.</li>
+</ol>
+<p>You can view the results of the query as links to code positions in the <b>Search Results</b> output pane.</p>
+</div>
+<!-- @@@creator-editor-finding.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-finding-overview.html">Finding</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-editor-locator.html">Searching with the Locator</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

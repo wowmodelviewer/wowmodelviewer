@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtextobject.cpp -->
+  <title>QTextBlockGroup Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QTextBlockGroup</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QTextBlockGroup Class</h1>
+<!-- $$$QTextBlockGroup-brief -->
+<p>The <a href="qtextblockgroup.html">QTextBlockGroup</a> class provides a container for text blocks within a <a href="qtextdocument.html">QTextDocument</a>. <a href="#details">More...</a></p>
+<!-- @@@QTextBlockGroup -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QTextBlockGroup&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qtextobject.html">QTextObject</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qtextlist.html">QTextList</a></p>
+</td></tr></table></div><ul>
+<li><a href="qtextblockgroup-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtextblockgroup.html#QTextBlockGroup">QTextBlockGroup</a></b>(QTextDocument *<i>document</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qtextblockgroup.html#dtor.QTextBlockGroup">~QTextBlockGroup</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qtextblockgroup.html#blockFormatChanged">blockFormatChanged</a></b>(const QTextBlock &amp;<i>block</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qtextblockgroup.html#blockInserted">blockInserted</a></b>(const QTextBlock &amp;<i>block</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QTextBlock&gt; </td><td class="memItemRight bottomAlign"><b><a href="qtextblockgroup.html#blockList">blockList</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qtextblockgroup.html#blockRemoved">blockRemoved</a></b>(const QTextBlock &amp;<i>block</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QTextBlockGroup-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Block groups can be used to organize blocks of text within a document. They maintain an up-to-date list of the text blocks that belong to them, even when text blocks are being edited.</p>
+<p>Each group has a parent document which is specified when the group is constructed.</p>
+<p>Text blocks can be inserted into a group with <a href="qtextblockgroup.html#blockInserted">blockInserted</a>(), and removed with <a href="qtextblockgroup.html#blockRemoved">blockRemoved</a>(). If a block's format is changed, <a href="qtextblockgroup.html#blockFormatChanged">blockFormatChanged</a>() is called.</p>
+<p>The list of blocks in the group is returned by <a href="qtextblockgroup.html#blockList">blockList</a>(). Note that the blocks in the list are not necessarily adjacent elements in the document; for example, the top-level items in a multi-level list will be separated by the items in lower levels of the list.</p>
+</div>
+<p><b>See also </b><a href="qtextblock.html">QTextBlock</a> and <a href="qtextdocument.html">QTextDocument</a>.</p>
+<!-- @@@QTextBlockGroup -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QTextBlockGroup[overload1]$$$QTextBlockGroupQTextDocument* -->
+<h3 class="fn" id="QTextBlockGroup"><a name="QTextBlockGroup"></a><code>[protected] </code>QTextBlockGroup::<span class="name">QTextBlockGroup</span>(<span class="type"><a href="qtextdocument.html">QTextDocument</a></span> *<i>document</i>)</h3>
+<p>Creates a new new block group for the given <i>document</i>.</p>
+<p><b>Warning:</b> This function should only be called from <a href="qtextdocument.html#createObject">QTextDocument::createObject</a>().</p>
+<!-- @@@QTextBlockGroup -->
+<!-- $$$~QTextBlockGroup[overload1]$$$~QTextBlockGroup -->
+<h3 class="fn" id="dtor.QTextBlockGroup"><a name="dtor.QTextBlockGroup"></a><code>[virtual protected] </code>QTextBlockGroup::<span class="name">~QTextBlockGroup</span>()</h3>
+<p>Destroys this block group; the blocks are not deleted, they simply don't belong to this block anymore.</p>
+<!-- @@@~QTextBlockGroup -->
+<!-- $$$blockFormatChanged[overload1]$$$blockFormatChangedconstQTextBlock& -->
+<h3 class="fn" id="blockFormatChanged"><a name="blockFormatChanged"></a><code>[virtual protected] </code><span class="type">void</span> QTextBlockGroup::<span class="name">blockFormatChanged</span>(const <span class="type"><a href="qtextblock.html">QTextBlock</a></span> &amp;<i>block</i>)</h3>
+<p>This function is called whenever the specified <i>block</i> of text is changed. The text block is a member of this group.</p>
+<p>The base class implementation does nothing.</p>
+<!-- @@@blockFormatChanged -->
+<!-- $$$blockInserted[overload1]$$$blockInsertedconstQTextBlock& -->
+<h3 class="fn" id="blockInserted"><a name="blockInserted"></a><code>[virtual protected] </code><span class="type">void</span> QTextBlockGroup::<span class="name">blockInserted</span>(const <span class="type"><a href="qtextblock.html">QTextBlock</a></span> &amp;<i>block</i>)</h3>
+<p>Appends the given <i>block</i> to the end of the group.</p>
+<p><b>Warning:</b> If you reimplement this function you must call the base class implementation.</p>
+<!-- @@@blockInserted -->
+<!-- $$$blockList[overload1]$$$blockList -->
+<h3 class="fn" id="blockList"><a name="blockList"></a><code>[protected] </code><span class="type">QList</span>&lt;<span class="type"><a href="qtextblock.html">QTextBlock</a></span>&gt; QTextBlockGroup::<span class="name">blockList</span>() const</h3>
+<p>Returns a (possibly empty) list of all the blocks that are part of the block group.</p>
+<!-- @@@blockList -->
+<!-- $$$blockRemoved[overload1]$$$blockRemovedconstQTextBlock& -->
+<h3 class="fn" id="blockRemoved"><a name="blockRemoved"></a><code>[virtual protected] </code><span class="type">void</span> QTextBlockGroup::<span class="name">blockRemoved</span>(const <span class="type"><a href="qtextblock.html">QTextBlock</a></span> &amp;<i>block</i>)</h3>
+<p>Removes the given <i>block</i> from the group; the block itself is not deleted, it simply isn't a member of this group anymore.</p>
+<!-- @@@blockRemoved -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

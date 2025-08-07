@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtgui.qdoc -->
+  <title>Qt GUI C++ Classes | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td >Qt GUI C++ Classes</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#namespaces">Namespaces</a></li>
+<li class="level1"><a href="#classes">Classes</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt GUI C++ Classes</h1>
+<span class="subtitle"></span>
+<!-- $$$QtGui-brief -->
+<p>The Qt GUI module provides the basic enablers for graphical applications written with Qt. <a href="#details">More...</a></p>
+<!-- @@@QtGui -->
+<a name="namespaces"></a>
+<h2 id="namespaces">Namespaces</h2>
+<a name="classes"></a>
+<h2 id="classes">Classes</h2>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qaccessible.html">QAccessible</a></p></td><td class="tblDescr"><p>Enums and static functions related to accessibility</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qaccessibleeditabletextinterface.html">QAccessibleEditableTextInterface</a></p></td><td class="tblDescr"><p>Implements support for objects with editable text</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qaccessibleevent.html">QAccessibleEvent</a></p></td><td class="tblDescr"><p>The base class for accessibility notifications</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qaccessibleinterface.html">QAccessibleInterface</a></p></td><td class="tblDescr"><p>Defines an interface that exposes information about accessible objects</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qaccessiblestatechangeevent.html">QAccessibleStateChangeEvent</a></p></td><td class="tblDescr"><p>Notfies the accessibility framework that the state of an object has changed</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qaccessibletablecellinterface.html">QAccessibleTableCellInterface</a></p></td><td class="tblDescr"><p>Implements support for the IAccessibleTable2 Cell interface</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qaccessibletablemodelchangeevent.html">QAccessibleTableModelChangeEvent</a></p></td><td class="tblDescr"><p>Signifies a change in a table, list, or tree where cells are added or removed. If the change affected a number of rows, firstColumn and lastColumn will return -1. Likewise for columns, the row functions may return -1</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qaccessibletextcursorevent.html">QAccessibleTextCursorEvent</a></p></td><td class="tblDescr"><p>Notifies of cursor movements</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qaccessibletextinsertevent.html">QAccessibleTextInsertEvent</a></p></td><td class="tblDescr"><p>Notifies of text being inserted</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qaccessibletextinterface.html">QAccessibleTextInterface</a></p></td><td class="tblDescr"><p>Implements support for text handling</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qaccessibletextremoveevent.html">QAccessibleTextRemoveEvent</a></p></td><td class="tblDescr"><p>Notifies of text being deleted</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qaccessibletextselectionevent.html">QAccessibleTextSelectionEvent</a></p></td><td class="tblDescr"><p>Signals a change in the text selection of an object</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qaccessibletextupdateevent.html">QAccessibleTextUpdateEvent</a></p></td><td class="tblDescr"><p>Notifies about text changes. This is for accessibles that support editable text such as line edits. This event occurs for example when a portion of selected text gets replaced by pasting a new text or in override mode of editors</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qaccessiblevaluechangeevent.html">QAccessibleValueChangeEvent</a></p></td><td class="tblDescr"><p>Describes a change in value for an accessible object</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qaccessiblevalueinterface.html">QAccessibleValueInterface</a></p></td><td class="tblDescr"><p>Implements support for objects that manipulate a value</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qaccessible-state.html">QAccessible::State</a></p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qaccessibleobject.html">QAccessibleObject</a></p></td><td class="tblDescr"><p>Implements parts of the QAccessibleInterface for QObjects</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qbitmap.html">QBitmap</a></p></td><td class="tblDescr"><p>Monochrome (1-bit depth) pixmaps</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qicon.html">QIcon</a></p></td><td class="tblDescr"><p>Scalable icons in different modes and states</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qiconengine.html">QIconEngine</a></p></td><td class="tblDescr"><p>Abstract base class for QIcon renderers</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qiconengine-availablesizesargument.html">QIconEngine::AvailableSizesArgument</a></p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qiconengine-scaledpixmapargument.html">QIconEngine::ScaledPixmapArgument</a></p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qiconengineplugin.html">QIconEnginePlugin</a></p></td><td class="tblDescr"><p>Abstract base for custom QIconEngine plugins</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qimage.html">QImage</a></p></td><td class="tblDescr"><p>Hardware-independent image representation that allows direct access to the pixel data, and can be used as a paint device</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qimageiohandler.html">QImageIOHandler</a></p></td><td class="tblDescr"><p>Defines the common image I/O interface for all image formats in Qt</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qimageioplugin.html">QImageIOPlugin</a></p></td><td class="tblDescr"><p>Defines an interface for writing an image format plugin</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qimagereader.html">QImageReader</a></p></td><td class="tblDescr"><p>Format independent interface for reading images from files or other devices</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qimagewriter.html">QImageWriter</a></p></td><td class="tblDescr"><p>Format independent interface for writing images to files or other devices</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qmovie.html">QMovie</a></p></td><td class="tblDescr"><p>Convenience class for playing movies with QImageReader</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qpicture.html">QPicture</a></p></td><td class="tblDescr"><p>Paint device that records and replays QPainter commands</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qpixmap.html">QPixmap</a></p></td><td class="tblDescr"><p>Off-screen image representation that can be used as a paint device</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qpixmapcache-key.html">QPixmapCache::Key</a></p></td><td class="tblDescr"><p>QPixmapCache::Key class can be used for efficient access to the QPixmapCache</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qpixmapcache.html">QPixmapCache</a></p></td><td class="tblDescr"><p>Application-wide cache for pixmaps</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qstandarditem.html">QStandardItem</a></p></td><td class="tblDescr"><p>Item for use with the QStandardItemModel class</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qstandarditemmodel.html">QStandardItemModel</a></p></td><td class="tblDescr"><p>Generic model for storing custom data</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qclipboard.html">QClipboard</a></p></td><td class="tblDescr"><p>Access to the window system clipboard</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qcursor.html">QCursor</a></p></td><td class="tblDescr"><p>Mouse cursor with an arbitrary shape</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qdrag.html">QDrag</a></p></td><td class="tblDescr"><p>Support for MIME-based drag and drop data transfer</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qinputmethodevent-attribute.html">QInputMethodEvent::Attribute</a></p></td><td class="tblDescr"><p>QInputMethodEvent::Attribute class stores an input method attribute</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qactionevent.html">QActionEvent</a></p></td><td class="tblDescr"><p>Event that is generated when a QAction is added, removed, or changed</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qcloseevent.html">QCloseEvent</a></p></td><td class="tblDescr"><p>Contains parameters that describe a close event</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qcontextmenuevent.html">QContextMenuEvent</a></p></td><td class="tblDescr"><p>Contains parameters that describe a context menu event</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qdragenterevent.html">QDragEnterEvent</a></p></td><td class="tblDescr"><p>Event which is sent to a widget when a drag and drop action enters it</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qdragleaveevent.html">QDragLeaveEvent</a></p></td><td class="tblDescr"><p>Event that is sent to a widget when a drag and drop action leaves it</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qdragmoveevent.html">QDragMoveEvent</a></p></td><td class="tblDescr"><p>Event which is sent while a drag and drop action is in progress</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qdropevent.html">QDropEvent</a></p></td><td class="tblDescr"><p>Event which is sent when a drag and drop action is completed</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qenterevent.html">QEnterEvent</a></p></td><td class="tblDescr"><p>Contains parameters that describe an enter event</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qexposeevent.html">QExposeEvent</a></p></td><td class="tblDescr"><p>Contains event parameters for expose events</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qfileopenevent.html">QFileOpenEvent</a></p></td><td class="tblDescr"><p>Event that will be sent when there is a request to open a file or a URL</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qfocusevent.html">QFocusEvent</a></p></td><td class="tblDescr"><p>Contains event parameters for widget focus events</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qhelpevent.html">QHelpEvent</a></p></td><td class="tblDescr"><p>Event that is used to request helpful information about a particular point in a widget</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qhideevent.html">QHideEvent</a></p></td><td class="tblDescr"><p>Event which is sent after a widget is hidden</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qhoverevent.html">QHoverEvent</a></p></td><td class="tblDescr"><p>Contains parameters that describe a mouse event</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qicondragevent.html">QIconDragEvent</a></p></td><td class="tblDescr"><p>Indicates that a main icon drag has begun</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qinputevent.html">QInputEvent</a></p></td><td class="tblDescr"><p>The base class for events that describe user input</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qinputmethodevent.html">QInputMethodEvent</a></p></td><td class="tblDescr"><p>Parameters for input method events</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qinputmethodqueryevent.html">QInputMethodQueryEvent</a></p></td><td class="tblDescr"><p>Event sent by the input context to input objects</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qkeyevent.html">QKeyEvent</a></p></td><td class="tblDescr"><p>Describes a key event</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qmouseevent.html">QMouseEvent</a></p></td><td class="tblDescr"><p>Contains parameters that describe a mouse event</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qmoveevent.html">QMoveEvent</a></p></td><td class="tblDescr"><p>Contains event parameters for move events</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qnativegestureevent.html">QNativeGestureEvent</a></p></td><td class="tblDescr"><p>Contains parameters that describe a gesture event</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qpaintevent.html">QPaintEvent</a></p></td><td class="tblDescr"><p>Contains event parameters for paint events</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplatformsurfaceevent.html">QPlatformSurfaceEvent</a></p></td><td class="tblDescr"><p>Used to notify about native platform surface events</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qpointingdeviceuniqueid.html">QPointingDeviceUniqueId</a></p></td><td class="tblDescr"><p>Identifies a unique object, such as a tagged token or stylus, which is used with a pointing device</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qresizeevent.html">QResizeEvent</a></p></td><td class="tblDescr"><p>Contains event parameters for resize events</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qscrollevent.html">QScrollEvent</a></p></td><td class="tblDescr"><p>Sent when scrolling</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qscrollprepareevent.html">QScrollPrepareEvent</a></p></td><td class="tblDescr"><p>Sent in preparation of scrolling</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qshortcutevent.html">QShortcutEvent</a></p></td><td class="tblDescr"><p>Event which is generated when the user presses a key combination</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qshowevent.html">QShowEvent</a></p></td><td class="tblDescr"><p>Event that is sent when a widget is shown</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qstatustipevent.html">QStatusTipEvent</a></p></td><td class="tblDescr"><p>Event that is used to show messages in a status bar</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtabletevent.html">QTabletEvent</a></p></td><td class="tblDescr"><p>Contains parameters that describe a Tablet event</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtouchevent.html">QTouchEvent</a></p></td><td class="tblDescr"><p>Contains parameters that describe a touch event</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qwhatsthisclickedevent.html">QWhatsThisClickedEvent</a></p></td><td class="tblDescr"><p>Event that can be used to handle hyperlinks in a &quot;What's This?&quot; text</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qwheelevent.html">QWheelEvent</a></p></td><td class="tblDescr"><p>Contains parameters that describe a wheel event</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qwindowstatechangeevent.html">QWindowStateChangeEvent</a></p></td><td class="tblDescr"><p>The window state before a window state change</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtouchevent-touchpoint.html">QTouchEvent::TouchPoint</a></p></td><td class="tblDescr"><p>Information about a touch point in a QTouchEvent</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qgenericplugin.html">QGenericPlugin</a></p></td><td class="tblDescr"><p>Abstract base class for plugins</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qgenericpluginfactory.html">QGenericPluginFactory</a></p></td><td class="tblDescr"><p>Creates plugin drivers</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qguiapplication.html">QGuiApplication</a></p></td><td class="tblDescr"><p>Manages the GUI application's control flow and main settings</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qinputmethod.html">QInputMethod</a></p></td><td class="tblDescr"><p>Access to the active text input method</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qkeysequence.html">QKeySequence</a></p></td><td class="tblDescr"><p>Encapsulates a key sequence as used by shortcuts</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qoffscreensurface.html">QOffscreenSurface</a></p></td><td class="tblDescr"><p>Represents an offscreen surface in the underlying platform</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopenglcontext.html">QOpenGLContext</a></p></td><td class="tblDescr"><p>Represents a native OpenGL context, enabling OpenGL rendering on a QSurface</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopenglcontextgroup.html">QOpenGLContextGroup</a></p></td><td class="tblDescr"><p>Represents a group of contexts sharing OpenGL resources</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopenglversionprofile.html">QOpenGLVersionProfile</a></p></td><td class="tblDescr"><p>Represents the version and if applicable the profile of an OpenGL context</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopenglwindow.html">QOpenGLWindow</a></p></td><td class="tblDescr"><p>Convenience subclass of QWindow to perform OpenGL painting</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qpaintdevicewindow.html">QPaintDeviceWindow</a></p></td><td class="tblDescr"><p>Convenience subclass of QWindow that is also a QPaintDevice</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qpalette.html">QPalette</a></p></td><td class="tblDescr"><p>Contains color groups for each widget state</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qpixelformat.html">QPixelFormat</a></p></td><td class="tblDescr"><p>Class for describing different pixel layouts in graphics buffers</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qrasterwindow.html">QRasterWindow</a></p></td><td class="tblDescr"><p>Convenience class for using QPainter on a QWindow</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qscreen.html">QScreen</a></p></td><td class="tblDescr"><p>Used to query screen properties</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qsessionmanager.html">QSessionManager</a></p></td><td class="tblDescr"><p>Access to the session manager</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qstylehints.html">QStyleHints</a></p></td><td class="tblDescr"><p>Contains platform specific hints and settings</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qsurface.html">QSurface</a></p></td><td class="tblDescr"><p>Abstraction of renderable surfaces in Qt</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qsurfaceformat.html">QSurfaceFormat</a></p></td><td class="tblDescr"><p>Represents the format of a QSurface</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtouchdevice.html">QTouchDevice</a></p></td><td class="tblDescr"><p>Describes the device from which touch events originate</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qwindow.html">QWindow</a></p></td><td class="tblDescr"><p>Represents a window in the underlying windowing system</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qgenericmatrix.html">QGenericMatrix</a></p></td><td class="tblDescr"><p>Template class that represents a NxM transformation matrix with N columns and M rows</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qmatrix4x4.html">QMatrix4x4</a></p></td><td class="tblDescr"><p>Represents a 4x4 transformation matrix in 3D space</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qquaternion.html">QQuaternion</a></p></td><td class="tblDescr"><p>Represents a quaternion consisting of a vector and scalar</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qvector2d.html">QVector2D</a></p></td><td class="tblDescr"><p>Represents a vector or vertex in 2D space</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qvector3d.html">QVector3D</a></p></td><td class="tblDescr"><p>Represents a vector or vertex in 3D space</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qvector4d.html">QVector4D</a></p></td><td class="tblDescr"><p>Represents a vector or vertex in 4D space</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopenglbuffer.html">QOpenGLBuffer</a></p></td><td class="tblDescr"><p>Functions for creating and managing OpenGL buffer objects</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopengldebuglogger.html">QOpenGLDebugLogger</a></p></td><td class="tblDescr"><p>Enables logging of OpenGL debugging messages</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopengldebugmessage.html">QOpenGLDebugMessage</a></p></td><td class="tblDescr"><p>Wraps an OpenGL debug message</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopenglextrafunctions.html">QOpenGLExtraFunctions</a></p></td><td class="tblDescr"><p>Cross-platform access to the OpenGL ES 3.0, 3.1 and 3.2 API</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopenglframebufferobject.html">QOpenGLFramebufferObject</a></p></td><td class="tblDescr"><p>Encapsulates an OpenGL framebuffer object</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopenglframebufferobjectformat.html">QOpenGLFramebufferObjectFormat</a></p></td><td class="tblDescr"><p>Specifies the format of an OpenGL framebuffer object</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopenglfunctions.html">QOpenGLFunctions</a></p></td><td class="tblDescr"><p>Cross-platform access to the OpenGL ES 2.0 API</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopenglfunctions-1-0.html">QOpenGLFunctions_1_0</a></p></td><td class="tblDescr"><p>All functions for OpenGL 1.0 specification</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopenglfunctions-3-2-core.html">QOpenGLFunctions_3_2_Core</a></p></td><td class="tblDescr"><p>All functions for OpenGL 3.2 core profile</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopenglpaintdevice.html">QOpenGLPaintDevice</a></p></td><td class="tblDescr"><p>Enables painting to an OpenGL context using QPainter</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopenglshader.html">QOpenGLShader</a></p></td><td class="tblDescr"><p>Allows OpenGL shaders to be compiled</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopenglshaderprogram.html">QOpenGLShaderProgram</a></p></td><td class="tblDescr"><p>Allows OpenGL shader programs to be linked and used</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopengltexture.html">QOpenGLTexture</a></p></td><td class="tblDescr"><p>Encapsulates an OpenGL texture object</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopengltextureblitter.html">QOpenGLTextureBlitter</a></p></td><td class="tblDescr"><p>Convenient way to draw textured quads via OpenGL</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopengltimemonitor.html">QOpenGLTimeMonitor</a></p></td><td class="tblDescr"><p>Wraps a sequence of OpenGL timer query objects</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopengltimerquery.html">QOpenGLTimerQuery</a></p></td><td class="tblDescr"><p>Wraps an OpenGL timer query object</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qabstractopenglfunctions.html">QAbstractOpenGLFunctions</a></p></td><td class="tblDescr"><p>The base class of a family of classes that expose all functions for each OpenGL version and profile</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopenglvertexarrayobject-binder.html">QOpenGLVertexArrayObject::Binder</a></p></td><td class="tblDescr"><p>QOpenGLVertexArrayObject::Binder class is a convenience class to help with the binding and releasing of OpenGL Vertex Array Objects</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopenglvertexarrayobject.html">QOpenGLVertexArrayObject</a></p></td><td class="tblDescr"><p>Wraps an OpenGL Vertex Array Object</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qbackingstore.html">QBackingStore</a></p></td><td class="tblDescr"><p>Drawing area for QWindow</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qbrush.html">QBrush</a></p></td><td class="tblDescr"><p>Defines the fill pattern of shapes drawn by QPainter</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qconicalgradient.html">QConicalGradient</a></p></td><td class="tblDescr"><p>Used in combination with QBrush to specify a conical gradient brush</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qgradient.html">QGradient</a></p></td><td class="tblDescr"><p>Used in combination with QBrush to specify gradient fills</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qlineargradient.html">QLinearGradient</a></p></td><td class="tblDescr"><p>Used in combination with QBrush to specify a linear gradient brush</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qradialgradient.html">QRadialGradient</a></p></td><td class="tblDescr"><p>Used in combination with QBrush to specify a radial gradient brush</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qcolor.html">QColor</a></p></td><td class="tblDescr"><p>Colors based on RGB, HSV or CMYK values</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qpagedpaintdevice.html">QPagedPaintDevice</a></p></td><td class="tblDescr"><p>Represents a paint device that supports multiple pages</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qpagelayout.html">QPageLayout</a></p></td><td class="tblDescr"><p>Describes the size, orientation and margins of a page</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qpagesize.html">QPageSize</a></p></td><td class="tblDescr"><p>Describes the size and name of a defined page size</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qpaintdevice.html">QPaintDevice</a></p></td><td class="tblDescr"><p>The base class of objects that can be painted on with QPainter</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qpaintengine.html">QPaintEngine</a></p></td><td class="tblDescr"><p>Abstract definition of how QPainter draws to a given device on a given platform</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qpaintenginestate.html">QPaintEngineState</a></p></td><td class="tblDescr"><p>Information about the active paint engine's current state</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtextitem.html">QTextItem</a></p></td><td class="tblDescr"><p>All the information required to draw text in a custom paint engine</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qpainter-pixmapfragment.html">QPainter::PixmapFragment</a></p></td><td class="tblDescr"><p>This class is used in conjunction with the QPainter::drawPixmapFragments() function to specify how a pixmap, or sub-rect of a pixmap, is drawn</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qpainter.html">QPainter</a></p></td><td class="tblDescr"><p>Performs low-level painting on widgets and other paint devices</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qpainterpath-element.html">QPainterPath::Element</a></p></td><td class="tblDescr"><p>QPainterPath::Element class specifies the position and type of a subpath</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qpainterpath.html">QPainterPath</a></p></td><td class="tblDescr"><p>Container for painting operations, enabling graphical shapes to be constructed and reused</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qpainterpathstroker.html">QPainterPathStroker</a></p></td><td class="tblDescr"><p>Used to generate fillable outlines for a given painter path</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qpdfwriter.html">QPdfWriter</a></p></td><td class="tblDescr"><p>Class to generate PDFs that can be used as a paint device</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qpen.html">QPen</a></p></td><td class="tblDescr"><p>Defines how a QPainter should draw lines and outlines of shapes</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qpolygon.html">QPolygon</a></p></td><td class="tblDescr"><p>Vector of points using integer precision</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qpolygonf.html">QPolygonF</a></p></td><td class="tblDescr"><p>Vector of points using floating point precision</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qregion.html">QRegion</a></p></td><td class="tblDescr"><p>Specifies a clip region for a painter</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qrgba64.html">QRgba64</a></p></td><td class="tblDescr"><p>Struct contains a 64-bit RGB color</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtransform.html">QTransform</a></p></td><td class="tblDescr"><p>Specifies 2D transformations of a coordinate system</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qabstracttextdocumentlayout.html">QAbstractTextDocumentLayout</a></p></td><td class="tblDescr"><p>Abstract base class used to implement custom layouts for QTextDocuments</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtextobjectinterface.html">QTextObjectInterface</a></p></td><td class="tblDescr"><p>Allows drawing of custom text objects in QTextDocuments</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qabstracttextdocumentlayout-paintcontext.html">QAbstractTextDocumentLayout::PaintContext</a></p></td><td class="tblDescr"><p>QAbstractTextDocumentLayout::PaintContext class is a convenience class defining the parameters used when painting a document's layout</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qabstracttextdocumentlayout-selection.html">QAbstractTextDocumentLayout::Selection</a></p></td><td class="tblDescr"><p>QAbstractTextDocumentLayout::Selection class is a convenience class defining the parameters of a selection</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qfont.html">QFont</a></p></td><td class="tblDescr"><p>Specifies a query for a font used for drawing text</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qfontdatabase.html">QFontDatabase</a></p></td><td class="tblDescr"><p>Information about the fonts available in the underlying window system</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qfontinfo.html">QFontInfo</a></p></td><td class="tblDescr"><p>General information about fonts</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qfontmetrics.html">QFontMetrics</a></p></td><td class="tblDescr"><p>Font metrics information</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qfontmetricsf.html">QFontMetricsF</a></p></td><td class="tblDescr"><p>Font metrics information</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qglyphrun.html">QGlyphRun</a></p></td><td class="tblDescr"><p>Direct access to the internal glyphs in a font</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qrawfont.html">QRawFont</a></p></td><td class="tblDescr"><p>Access to a single physical instance of a font</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qstatictext.html">QStaticText</a></p></td><td class="tblDescr"><p>Enables optimized drawing of text when the text and its layout is updated rarely</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qsyntaxhighlighter.html">QSyntaxHighlighter</a></p></td><td class="tblDescr"><p>Allows you to define syntax highlighting rules, and in addition you can use the class to query a document's current formatting or user data</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtextcursor.html">QTextCursor</a></p></td><td class="tblDescr"><p>Offers an API to access and modify QTextDocuments</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtextdocument.html">QTextDocument</a></p></td><td class="tblDescr"><p>Holds formatted text</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtextdocumentfragment.html">QTextDocumentFragment</a></p></td><td class="tblDescr"><p>Represents a piece of formatted text from a QTextDocument</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtextdocumentwriter.html">QTextDocumentWriter</a></p></td><td class="tblDescr"><p>Format-independent interface for writing a QTextDocument to files or other devices</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtextblockformat.html">QTextBlockFormat</a></p></td><td class="tblDescr"><p>Formatting information for blocks of text in a QTextDocument</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtextcharformat.html">QTextCharFormat</a></p></td><td class="tblDescr"><p>Formatting information for characters in a QTextDocument</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtextformat.html">QTextFormat</a></p></td><td class="tblDescr"><p>Formatting information for a QTextDocument</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtextframeformat.html">QTextFrameFormat</a></p></td><td class="tblDescr"><p>Formatting information for frames in a QTextDocument</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtextimageformat.html">QTextImageFormat</a></p></td><td class="tblDescr"><p>Formatting information for images in a QTextDocument</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtextlength.html">QTextLength</a></p></td><td class="tblDescr"><p>Encapsulates the different types of length used in a QTextDocument</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtextlistformat.html">QTextListFormat</a></p></td><td class="tblDescr"><p>Formatting information for lists in a QTextDocument</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtexttablecellformat.html">QTextTableCellFormat</a></p></td><td class="tblDescr"><p>Formatting information for table cells in a QTextDocument</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtexttableformat.html">QTextTableFormat</a></p></td><td class="tblDescr"><p>Formatting information for tables in a QTextDocument</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtextinlineobject.html">QTextInlineObject</a></p></td><td class="tblDescr"><p>Represents an inline object in a QAbstractTextDocumentLayout and its implementations</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtextlayout.html">QTextLayout</a></p></td><td class="tblDescr"><p>Used to lay out and render text</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtextline.html">QTextLine</a></p></td><td class="tblDescr"><p>Represents a line of text inside a QTextLayout</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtextlayout-formatrange.html">QTextLayout::FormatRange</a></p></td><td class="tblDescr"><p>QTextLayout::FormatRange structure is used to apply extra formatting information for a specified area in the text layout's content</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtextlist.html">QTextList</a></p></td><td class="tblDescr"><p>Decorated list of items in a QTextDocument</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtextblock.html">QTextBlock</a></p></td><td class="tblDescr"><p>Container for text fragments in a QTextDocument</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtextblockgroup.html">QTextBlockGroup</a></p></td><td class="tblDescr"><p>Container for text blocks within a QTextDocument</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtextblockuserdata.html">QTextBlockUserData</a></p></td><td class="tblDescr"><p>Used to associate custom data with blocks of text</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtextfragment.html">QTextFragment</a></p></td><td class="tblDescr"><p>Holds a piece of text in a QTextDocument with a single QTextCharFormat</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtextframe.html">QTextFrame</a></p></td><td class="tblDescr"><p>Represents a frame in a QTextDocument</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtextobject.html">QTextObject</a></p></td><td class="tblDescr"><p>Base class for different kinds of objects that can group parts of a QTextDocument together</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtextblock-iterator.html">QTextBlock::iterator</a></p></td><td class="tblDescr"><p>QTextBlock::iterator class provides an iterator for reading the contents of a QTextBlock</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtextoption.html">QTextOption</a></p></td><td class="tblDescr"><p>Description of general rich text properties</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtextoption-tab.html">QTextOption::Tab</a></p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtexttable.html">QTextTable</a></p></td><td class="tblDescr"><p>Represents a table in a QTextDocument</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtexttablecell.html">QTextTableCell</a></p></td><td class="tblDescr"><p>Represents the properties of a cell in a QTextTable</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qdesktopservices.html">QDesktopServices</a></p></td><td class="tblDescr"><p>Methods for accessing common desktop services</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qdoublevalidator.html">QDoubleValidator</a></p></td><td class="tblDescr"><p>Range checking of floating-point numbers</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qintvalidator.html">QIntValidator</a></p></td><td class="tblDescr"><p>Validator that ensures a string contains a valid integer within a specified range</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qregexpvalidator.html">QRegExpValidator</a></p></td><td class="tblDescr"><p>Used to check a string against a regular expression</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qvalidator.html">QValidator</a></p></td><td class="tblDescr"><p>Validation of input text</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qvulkaninstance.html">QVulkanInstance</a></p></td><td class="tblDescr"><p>Represents a native Vulkan instance, enabling Vulkan rendering onto a QSurface</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qrasterpaintengine.html">QRasterPaintEngine</a></p></td><td class="tblDescr"><p>Enables hardware acceleration of painting operations in Qt for Embedded Linux</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qsupportedwritingsystems.html">QSupportedWritingSystems</a></p></td><td class="tblDescr"><p>Used when registering fonts with the internal Qt fontdatabase</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopenglfunctions-1-1.html">QOpenGLFunctions_1_1</a></p></td><td class="tblDescr"><p>All functions for OpenGL 1.1 specification</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopenglfunctions-1-2.html">QOpenGLFunctions_1_2</a></p></td><td class="tblDescr"><p>All functions for OpenGL 1.2 specification</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopenglfunctions-1-3.html">QOpenGLFunctions_1_3</a></p></td><td class="tblDescr"><p>All functions for OpenGL 1.3 specification</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopenglfunctions-1-4.html">QOpenGLFunctions_1_4</a></p></td><td class="tblDescr"><p>All functions for OpenGL 1.4 specification</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopenglfunctions-1-5.html">QOpenGLFunctions_1_5</a></p></td><td class="tblDescr"><p>All functions for OpenGL 1.5 specification</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopenglfunctions-2-0.html">QOpenGLFunctions_2_0</a></p></td><td class="tblDescr"><p>All functions for OpenGL 2.0 specification</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopenglfunctions-2-1.html">QOpenGLFunctions_2_1</a></p></td><td class="tblDescr"><p>All functions for OpenGL 2.1 specification</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopenglfunctions-3-0.html">QOpenGLFunctions_3_0</a></p></td><td class="tblDescr"><p>All functions for OpenGL 3.0 specification</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopenglfunctions-3-1.html">QOpenGLFunctions_3_1</a></p></td><td class="tblDescr"><p>All functions for OpenGL 3.1 specification</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopenglfunctions-3-2-compatibility.html">QOpenGLFunctions_3_2_Compatibility</a></p></td><td class="tblDescr"><p>All functions for OpenGL 3.2 compatibility profile</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopenglfunctions-3-3-compatibility.html">QOpenGLFunctions_3_3_Compatibility</a></p></td><td class="tblDescr"><p>All functions for OpenGL 3.3 compatibility profile</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopenglfunctions-3-3-core.html">QOpenGLFunctions_3_3_Core</a></p></td><td class="tblDescr"><p>All functions for OpenGL 3.3 core profile</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopenglfunctions-4-0-compatibility.html">QOpenGLFunctions_4_0_Compatibility</a></p></td><td class="tblDescr"><p>All functions for OpenGL 4.0 compatibility profile</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopenglfunctions-4-0-core.html">QOpenGLFunctions_4_0_Core</a></p></td><td class="tblDescr"><p>All functions for OpenGL 4.0 core profile</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopenglfunctions-4-1-compatibility.html">QOpenGLFunctions_4_1_Compatibility</a></p></td><td class="tblDescr"><p>All functions for OpenGL 4.1 compatibility profile</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopenglfunctions-4-1-core.html">QOpenGLFunctions_4_1_Core</a></p></td><td class="tblDescr"><p>All functions for OpenGL 4.1 core profile</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopenglfunctions-4-2-compatibility.html">QOpenGLFunctions_4_2_Compatibility</a></p></td><td class="tblDescr"><p>All functions for OpenGL 4.2 compatibility profile</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopenglfunctions-4-2-core.html">QOpenGLFunctions_4_2_Core</a></p></td><td class="tblDescr"><p>All functions for OpenGL 4.2 core profile</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopenglfunctions-4-3-compatibility.html">QOpenGLFunctions_4_3_Compatibility</a></p></td><td class="tblDescr"><p>All functions for OpenGL 4.3 compatibility profile</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopenglfunctions-4-3-core.html">QOpenGLFunctions_4_3_Core</a></p></td><td class="tblDescr"><p>All functions for OpenGL 4.3 core profile</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopenglfunctions-4-4-compatibility.html">QOpenGLFunctions_4_4_Compatibility</a></p></td><td class="tblDescr"><p>All functions for OpenGL 4.4 compatibility profile</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopenglfunctions-4-4-core.html">QOpenGLFunctions_4_4_Core</a></p></td><td class="tblDescr"><p>All functions for OpenGL 4.4 core profile</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopenglfunctions-4-5-compatibility.html">QOpenGLFunctions_4_5_Compatibility</a></p></td><td class="tblDescr"><p>All functions for OpenGL 4.5 compatibility profile</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qopenglfunctions-4-5-core.html">QOpenGLFunctions_4_5_Core</a></p></td><td class="tblDescr"><p>All functions for OpenGL 4.5 core profile</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qopenglfunctions-es2.html">QOpenGLFunctions_ES2</a></p></td><td class="tblDescr"><p>All functions for OpenGL ES 2</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qvulkandevicefunctions.html">QVulkanDeviceFunctions</a></p></td><td class="tblDescr"><p>Cross-platform access to the device level core Vulkan 1.0 API</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qvulkanfunctions.html">QVulkanFunctions</a></p></td><td class="tblDescr"><p>Cross-platform access to the instance level core Vulkan 1.0 API</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qvulkanwindow.html">QVulkanWindow</a></p></td><td class="tblDescr"><p>Convenience subclass of QWindow to perform Vulkan rendering</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qvulkanwindowrenderer.html">QVulkanWindowRenderer</a></p></td><td class="tblDescr"><p>Used to implement the application-specific rendering logic for a QVulkanWindow</p></td></tr>
+</table></div>
+<!-- $$$QtGui-description -->
+<a name="details"></a>
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The Qt GUI module provides classes for windowing system integration, event handling, OpenGL and OpenGL ES integration, Vulkan integration, 2D graphics, imaging, fonts and typography. These classes are used internally by Qt's user interface technologies and can also be used directly, for instance to write applications using low-level OpenGL ES graphics APIs.</p>
+</div>
+<!-- @@@QtGui -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

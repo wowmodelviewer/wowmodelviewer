@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- multiple.qdoc -->
+  <title>Two Simple Qt Widgets | Active Qt 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="activeqt-index.html">Active Qt</a></td><td >Two Simple Qt Widgets</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="activeqt-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Two Simple Qt Widgets</h1>
+<span class="subtitle"></span>
+<!-- $$$qaxserver-demo-multiple.html-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="operator">&lt;</span>script language<span class="operator">=</span><span class="string">&quot;javascript&quot;</span><span class="operator">&gt;</span>
+  function setColor( form )
+  {
+      Ax1<span class="operator">.</span>fillColor <span class="operator">=</span> form<span class="operator">.</span>colorEdit<span class="operator">.</span>value;
+  }
+
+  function setWidth( form )
+  {
+      Ax2<span class="operator">.</span>lineWidth <span class="operator">=</span> form<span class="operator">.</span>widthEdit<span class="operator">.</span>value;
+  }
+  <span class="operator">&lt;</span><span class="operator">/</span>script<span class="operator">&gt;</span>
+
+  <span class="operator">&lt;</span>p <span class="operator">/</span><span class="operator">&gt;</span>
+  This is one <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> subclass:<span class="operator">&lt;</span>br <span class="operator">/</span><span class="operator">&gt;</span>
+  <span class="operator">&lt;</span>object ID<span class="operator">=</span><span class="string">&quot;Ax1&quot;</span> CLASSID<span class="operator">=</span><span class="string">&quot;CLSID:1D9928BD-4453-4bdd-903D-E525ED17FDE5&quot;</span>
+  CODEBASE<span class="operator">=</span><span class="string">&quot;http://qt.nokia.com/demos/multipleax.cab&quot;</span><span class="operator">&gt;</span>
+  <span class="operator">[</span>Object <span class="keyword">not</span> available<span class="operator">!</span> Did you forget to build and <span class="keyword">register</span> the server<span class="operator">?</span><span class="operator">]</span>
+  <span class="operator">&lt;</span><span class="operator">/</span>object<span class="operator">&gt;</span><span class="operator">&lt;</span>br <span class="operator">/</span><span class="operator">&gt;</span>
+  <span class="operator">&lt;</span>form<span class="operator">&gt;</span>
+  Fill Color: <span class="operator">&lt;</span>input type<span class="operator">=</span><span class="string">&quot;edit&quot;</span> ID<span class="operator">=</span><span class="string">&quot;colorEdit&quot;</span> value <span class="operator">=</span> <span class="string">&quot;red&quot;</span> <span class="operator">/</span><span class="operator">&gt;</span>
+  <span class="operator">&lt;</span>input type<span class="operator">=</span><span class="string">&quot;button&quot;</span> value <span class="operator">=</span> <span class="string">&quot;Set&quot;</span> onClick<span class="operator">=</span><span class="string">&quot;setColor(this.form)&quot;</span> <span class="operator">/</span><span class="operator">&gt;</span>
+  <span class="operator">&lt;</span>input type<span class="operator">=</span><span class="string">&quot;button&quot;</span> value <span class="operator">=</span> <span class="string">&quot;Hide&quot;</span> onClick<span class="operator">=</span><span class="string">&quot;Ax1.hide()&quot;</span> <span class="operator">/</span><span class="operator">&gt;</span>
+  <span class="operator">&lt;</span>input type<span class="operator">=</span><span class="string">&quot;button&quot;</span> value <span class="operator">=</span> <span class="string">&quot;Show&quot;</span> onClick<span class="operator">=</span><span class="string">&quot;Ax1.show()&quot;</span> <span class="operator">/</span><span class="operator">&gt;</span>
+  <span class="operator">&lt;</span><span class="operator">/</span>form<span class="operator">&gt;</span>
+
+  <span class="operator">&lt;</span>p <span class="operator">/</span><span class="operator">&gt;</span>
+  This is another <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> subclass:<span class="operator">&lt;</span>br <span class="operator">/</span><span class="operator">&gt;</span>
+  <span class="operator">&lt;</span>object ID<span class="operator">=</span><span class="string">&quot;Ax2&quot;</span> CLASSID<span class="operator">=</span><span class="string">&quot;CLSID:58139D56-6BE9-4b17-937D-1B1EDEDD5B71&quot;</span>
+  CODEBASE<span class="operator">=</span><span class="string">&quot;http://qt.nokia.com/demos/multipleax.cab&quot;</span><span class="operator">&gt;</span>
+  <span class="operator">[</span>Object <span class="keyword">not</span> available<span class="operator">!</span> Did you forget to build and <span class="keyword">register</span> the server<span class="operator">?</span><span class="operator">]</span>
+  <span class="operator">&lt;</span><span class="operator">/</span>object<span class="operator">&gt;</span><span class="operator">&lt;</span>br <span class="operator">/</span><span class="operator">&gt;</span>
+  <span class="operator">&lt;</span>form<span class="operator">&gt;</span>
+  Line width: <span class="operator">&lt;</span>input type<span class="operator">=</span><span class="string">&quot;edit&quot;</span> ID<span class="operator">=</span><span class="string">&quot;widthEdit&quot;</span> value <span class="operator">=</span> <span class="string">&quot;1&quot;</span> <span class="operator">/</span><span class="operator">&gt;</span>
+  <span class="operator">&lt;</span>input type<span class="operator">=</span><span class="string">&quot;button&quot;</span> value <span class="operator">=</span> <span class="string">&quot;Set&quot;</span> onClick<span class="operator">=</span><span class="string">&quot;setWidth(this.form)&quot;</span> <span class="operator">/</span><span class="operator">&gt;</span>
+  <span class="operator">&lt;</span><span class="operator">/</span>form<span class="operator">&gt;</span>
+
+</pre>
+</div>
+<!-- @@@qaxserver-demo-multiple.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickstyle.cpp -->
+  <title>QQuickStyle Class | Qt Quick Controls 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td ><a href="qtquickcontrols2-module.html">C++ Classes</a></td><td >QQuickStyle</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QQuickStyle Class</h1>
+<!-- $$$QQuickStyle-brief -->
+<p>The <a href="qquickstyle.html">QQuickStyle</a> class allows configuring the application style. <a href="#details">More...</a></p>
+<!-- @@@QQuickStyle -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QQuickStyle&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += quickcontrols2</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr></table></div><p>This class was introduced in  Qt 5.7.</p>
+<ul>
+<li><a href="qquickstyle-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickstyle.html#addStylePath">addStylePath</a></b>(const QString &amp;<i>path</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qquickstyle.html#availableStyles">availableStyles</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qquickstyle.html#name">name</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qquickstyle.html#path">path</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickstyle.html#setFallbackStyle">setFallbackStyle</a></b>(const QString &amp;<i>style</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickstyle.html#setStyle">setStyle</a></b>(const QString &amp;<i>style</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qquickstyle.html#stylePathList">stylePathList</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QQuickStyle-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qquickstyle.html">QQuickStyle</a> provides API for querying and configuring the application <a href="qtquickcontrols2-styles.html">styles</a> of Qt Quick Controls.</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QGuiApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QQmlApplicationEngine&gt;</span>
+  <span class="preprocessor">#include &lt;QQuickStyle&gt;</span>
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span><span class="operator">::</span>setAttribute(<span class="type">Qt</span><span class="operator">::</span>AA_EnableHighDpiScaling);
+      <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      <span class="type"><a href="qquickstyle.html">QQuickStyle</a></span><span class="operator">::</span>setStyle(<span class="string">&quot;Material&quot;</span>);
+
+      <span class="type"><a href="../qtqml/qqmlapplicationengine.html">QQmlApplicationEngine</a></span> engine;
+      engine<span class="operator">.</span>load(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="string">&quot;qrc:/main.qml&quot;</span>));
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p><b>Note: </b>The style must be configured <b>before</b> loading QML that imports Qt Quick Controls. It is not possible to change the style after the QML types have been registered.</p><p>The style can also be specified as a path to a custom style, such as <code>&quot;:/mystyle&quot;</code>. See <a href="qtquickcontrols2-customize.html#creating-a-custom-style">Creating a Custom Style</a> for more details about building custom styles. Custom styles do not need to implement all controls. By default, the styling system uses the <a href="qtquickcontrols2-default.html">Default style</a> as a fallback for controls that a custom style does not provide. It is possible to specify a different fallback style to customize or extend one of the built-in styles.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qquickstyle.html">QQuickStyle</a></span><span class="operator">::</span>setStyle(<span class="string">&quot;:/mystyle&quot;</span>);
+  <span class="type"><a href="qquickstyle.html">QQuickStyle</a></span><span class="operator">::</span>setFallbackStyle(<span class="string">&quot;Material&quot;</span>);
+
+</pre>
+</div>
+<p><b>See also </b><a href="qtquickcontrols2-styles.html">Styling Qt Quick Controls</a>.</p>
+<!-- @@@QQuickStyle -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$addStylePath[overload1]$$$addStylePathconstQString& -->
+<h3 class="fn" id="addStylePath"><a name="addStylePath"></a><code>[static] </code><span class="type">void</span> QQuickStyle::<span class="name">addStylePath</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>path</i>)</h3>
+<p>Adds <i>path</i> as a directory where Qt Quick Controls 2 searches for available styles.</p>
+<p>The <i>path</i> may be any local filesystem directory or <a href="../qtcore/resources.html">Qt Resource</a> directory. For example, the following paths are all valid:</p>
+<ul>
+<li><code>/path/to/styles/</code></li>
+<li><code>file:///path/to/styles/</code></li>
+<li><code>:/path/to/styles/</code></li>
+<li><code>qrc:/path/to/styles/</code>)</li>
+</ul>
+<p>The <i>path</i> will be converted into <a href="../qtcore/qdir.html#canonicalPath">canonical form</a> before it is added to the style path list.</p>
+<p>The newly added <i>path</i> will be first in the <a href="qquickstyle.html#stylePathList">stylePathList</a>().</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<p><b>See also </b><a href="qquickstyle.html#stylePathList">stylePathList</a>() and <a href="qquickstyle.html#availableStyles">availableStyles</a>().</p>
+<!-- @@@addStylePath -->
+<!-- $$$availableStyles[overload1]$$$availableStyles -->
+<h3 class="fn" id="availableStyles"><a name="availableStyles"></a><code>[static] </code><span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> QQuickStyle::<span class="name">availableStyles</span>()</h3>
+<p>Returns the names of the available styles.</p>
+<p><b>Note: </b>The method must be called <b>after</b> creating an instance of <a href="../qtgui/qguiapplication.html">QGuiApplication</a>.</p><p>This function was introduced in  Qt 5.9.</p>
+<p><b>See also </b><a href="qquickstyle.html#stylePathList">stylePathList</a>() and <a href="qquickstyle.html#addStylePath">addStylePath</a>().</p>
+<!-- @@@availableStyles -->
+<!-- $$$name[overload1]$$$name -->
+<h3 class="fn" id="name"><a name="name"></a><code>[static] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QQuickStyle::<span class="name">name</span>()</h3>
+<p>Returns the name of the application style.</p>
+<p><b>Note: </b>The application style can be specified by passing a <code>-style</code> command line argument. Therefore <code>name()</code> may not return a fully resolved value if called before constructing a <a href="../qtgui/qguiapplication.html">QGuiApplication</a>.</p><!-- @@@name -->
+<!-- $$$path[overload1]$$$path -->
+<h3 class="fn" id="path"><a name="path"></a><code>[static] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QQuickStyle::<span class="name">path</span>()</h3>
+<p>Returns the path of an overridden application style, or an empty string if the style is one of the built-in Qt Quick Controls 2 styles.</p>
+<p><b>Note: </b>The application style can be specified by passing a <code>-style</code> command line argument. Therefore <code>path()</code> may not return a fully resolved value if called before constructing a <a href="../qtgui/qguiapplication.html">QGuiApplication</a>.</p><!-- @@@path -->
+<!-- $$$setFallbackStyle[overload1]$$$setFallbackStyleconstQString& -->
+<h3 class="fn" id="setFallbackStyle"><a name="setFallbackStyle"></a><code>[static] </code><span class="type">void</span> QQuickStyle::<span class="name">setFallbackStyle</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>style</i>)</h3>
+<p>Sets the application fallback style to <i>style</i>.</p>
+<p><b>Note: </b>The fallback style must be the name of one of the built-in Qt Quick Controls styles, e.g&#x2e; &quot;Material&quot;.</p><p><b>Note: </b>The style must be configured <b>before</b> loading QML that imports Qt Quick Controls. It is not possible to change the style after the QML types have been registered.</p><p>The fallback style can be also specified by setting the <code>QT_QUICK_CONTROLS_FALLBACK_STYLE</code> <a href="qtquickcontrols2-environment.html">environment variable</a>.</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<p><b>See also </b><a href="qquickstyle.html#setStyle">setStyle</a>() and <a href="qtquickcontrols2-styles.html#using-styles-in-qt-quick-controls">Using Styles in Qt Quick Controls</a>.</p>
+<!-- @@@setFallbackStyle -->
+<!-- $$$setStyle[overload1]$$$setStyleconstQString& -->
+<h3 class="fn" id="setStyle"><a name="setStyle"></a><code>[static] </code><span class="type">void</span> QQuickStyle::<span class="name">setStyle</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>style</i>)</h3>
+<p>Sets the application style to <i>style</i>.</p>
+<p><b>Note: </b>The style must be configured <b>before</b> loading QML that imports Qt Quick Controls. It is not possible to change the style after the QML types have been registered.</p><p><b>See also </b><a href="qquickstyle.html#setFallbackStyle">setFallbackStyle</a>() and <a href="qtquickcontrols2-styles.html#using-styles-in-qt-quick-controls">Using Styles in Qt Quick Controls</a>.</p>
+<!-- @@@setStyle -->
+<!-- $$$stylePathList[overload1]$$$stylePathList -->
+<h3 class="fn" id="stylePathList"><a name="stylePathList"></a><code>[static] </code><span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> QQuickStyle::<span class="name">stylePathList</span>()</h3>
+<p>Returns the list of directories where Qt Quick Controls 2 searches for available styles.</p>
+<p>By default, the list contains paths specified in the <code>QT_QUICK_CONTROLS_STYLE_PATH</code> environment variable, and any existing <code>QtQuick/Controls.2</code> sub-directories in <a href="../qtqml/qqmlengine.html#importPathList">QQmlEngine::importPathList</a>().</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<p><b>See also </b><a href="qquickstyle.html#addStylePath">addStylePath</a>() and <a href="qquickstyle.html#availableStyles">availableStyles</a>().</p>
+<!-- @@@stylePathList -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

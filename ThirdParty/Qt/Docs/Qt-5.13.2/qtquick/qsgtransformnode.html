@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qsgnode.cpp -->
+  <title>QSGTransformNode Class | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-module.html">C++ Classes</a></td><td >QSGTransformNode</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSGTransformNode Class</h1>
+<!-- $$$QSGTransformNode-brief -->
+<p>The <a href="qsgtransformnode.html">QSGTransformNode</a> class implements transformations in the scene graph. <a href="#details">More...</a></p>
+<!-- @@@QSGTransformNode -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QSGTransformNode&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += quick</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qsgnode.html">QSGNode</a></td></tr></table></div><ul>
+<li><a href="qsgtransformnode-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsgtransformnode.html#QSGTransformNode">QSGTransformNode</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qsgtransformnode.html#dtor.QSGTransformNode">~QSGTransformNode</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QMatrix4x4 &amp;</td><td class="memItemRight bottomAlign"><b><a href="qsgtransformnode.html#matrix">matrix</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsgtransformnode.html#setMatrix">setMatrix</a></b>(const QMatrix4x4 &amp;<i>matrix</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSGTransformNode-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Transformations apply the node's subtree and can be nested. Multiple transform nodes will be accumulated by intersecting all their matrices. The accumulation happens as part of the rendering.</p>
+<p>The transform nodes implement a 4x4 matrix which in theory supports full 3D transformations. However, because the renderer optimizes for 2D use-cases rather than 3D use-cases, rendering a scene with full 3D transformations needs to be done with some care.</p>
+<p><b>Note: </b>All classes with QSG prefix should be used solely on the scene graph's rendering thread. See <a href="qtquick-visualcanvas-scenegraph.html#scene-graph-and-rendering">Scene Graph and Rendering</a> for more information.</p></div>
+<!-- @@@QSGTransformNode -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QSGTransformNode[overload1]$$$QSGTransformNode -->
+<h3 class="fn" id="QSGTransformNode"><a name="QSGTransformNode"></a>QSGTransformNode::<span class="name">QSGTransformNode</span>()</h3>
+<p>Create a new <a href="qsgtransformnode.html">QSGTransformNode</a> with its matrix set to the identity matrix.</p>
+<!-- @@@QSGTransformNode -->
+<!-- $$$~QSGTransformNode[overload1]$$$~QSGTransformNode -->
+<h3 class="fn" id="dtor.QSGTransformNode"><a name="dtor.QSGTransformNode"></a><code>[override virtual] </code>QSGTransformNode::<span class="name">~QSGTransformNode</span>()</h3>
+<p>Deletes this transform node.</p>
+<!-- @@@~QSGTransformNode -->
+<!-- $$$matrix[overload1]$$$matrix -->
+<h3 class="fn" id="matrix"><a name="matrix"></a>const <span class="type"><a href="../qtgui/qmatrix4x4.html">QMatrix4x4</a></span> &amp;QSGTransformNode::<span class="name">matrix</span>() const</h3>
+<p>Returns this transform node's matrix.</p>
+<p><b>See also </b><a href="qsgtransformnode.html#setMatrix">setMatrix</a>().</p>
+<!-- @@@matrix -->
+<!-- $$$setMatrix[overload1]$$$setMatrixconstQMatrix4x4& -->
+<h3 class="fn" id="setMatrix"><a name="setMatrix"></a><span class="type">void</span> QSGTransformNode::<span class="name">setMatrix</span>(const <span class="type"><a href="../qtgui/qmatrix4x4.html">QMatrix4x4</a></span> &amp;<i>matrix</i>)</h3>
+<p>Sets this transform node's matrix to <i>matrix</i>.</p>
+<p><b>See also </b><a href="qsgtransformnode.html#matrix">matrix</a>().</p>
+<!-- @@@setMatrix -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

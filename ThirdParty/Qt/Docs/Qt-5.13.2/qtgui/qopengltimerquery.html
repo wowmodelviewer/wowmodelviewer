@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qopengltimerquery.cpp -->
+  <title>QOpenGLTimerQuery Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QOpenGLTimerQuery</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QOpenGLTimerQuery Class</h1>
+<!-- $$$QOpenGLTimerQuery-brief -->
+<p>The <a href="qopengltimerquery.html">QOpenGLTimerQuery</a> class wraps an OpenGL timer query object. <a href="#details">More...</a></p>
+<!-- @@@QOpenGLTimerQuery -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QOpenGLTimerQuery&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.1</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.1.</p>
+<ul>
+<li><a href="qopengltimerquery-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qopengltimerquery.html#QOpenGLTimerQuery">QOpenGLTimerQuery</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qopengltimerquery.html#dtor.QOpenGLTimerQuery">~QOpenGLTimerQuery</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopengltimerquery.html#begin">begin</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qopengltimerquery.html#create">create</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopengltimerquery.html#destroy">destroy</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopengltimerquery.html#end">end</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qopengltimerquery.html#isCreated">isCreated</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qopengltimerquery.html#isResultAvailable">isResultAvailable</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> GLuint </td><td class="memItemRight bottomAlign"><b><a href="qopengltimerquery.html#objectId">objectId</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qopengltimerquery.html#recordTimestamp">recordTimestamp</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> GLuint64 </td><td class="memItemRight bottomAlign"><b><a href="qopengltimerquery.html#waitForResult">waitForResult</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> GLuint64 </td><td class="memItemRight bottomAlign"><b><a href="qopengltimerquery.html#waitForTimestamp">waitForTimestamp</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QOpenGLTimerQuery-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>OpenGL timer query objects are OpenGL managed resources to measure the execution times of sequences of OpenGL commands on the GPU.</p>
+<p>OpenGL offers various levels of support for timer queries, depending on the version of OpenGL you have and the presence of the ARB_timer_query or EXT_timer_query extensions. The support can be summarized as:</p>
+<ul>
+<li>OpenGL &gt;=3.3 offers full support for all timer query functionality.</li>
+<li>OpenGL 3.2 with the ARB_timer_query extension offers full support for all timer query functionality.</li>
+<li>OpenGL &lt;=3.2 with the EXT_timer_query extension offers limited support in that the timestamp of the GPU cannot be queried. Places where this impacts functions provided by Qt classes will be highlighted in the function documentation.</li>
+<li>OpenGL ES 2 (and OpenGL ES 3) do not provide any support for OpenGL timer queries.</li>
+</ul>
+<p>OpenGL represents time with a granularity of 1 nanosecond (1e-9 seconds). As a consequence of this, 32-bit integers would only give a total possible duration of approximately 4 seconds, which would not be difficult to exceed in poorly performing or lengthy operations. OpenGL therefore uses 64 bit integer types to represent times. A GLuint64 variable has enough width to contain a duration of hundreds of years, which is plenty for real-time rendering needs.</p>
+<p>As with the other Qt OpenGL classes, <a href="qopengltimerquery.html">QOpenGLTimerQuery</a> has a <a href="qopengltimerquery.html#create">create</a>() function to create the underlying OpenGL object. This is to allow the developer to ensure that there is a valid current OpenGL context at the time.</p>
+<p>Once created, timer queries can be issued in one of several ways. The simplest method is to delimit a block of commands with calls to <a href="qopengltimerquery.html#begin">begin</a>() and <a href="qopengltimerquery.html#end">end</a>(). This instructs OpenGL to measure the time taken from completing all commands issued prior to <a href="qopengltimerquery.html#begin">begin</a>() until the completion of all commands issued prior to <a href="qopengltimerquery.html#end">end</a>().</p>
+<p>At the end of a frame we can retrieve the results by calling <a href="qopengltimerquery.html#waitForResult">waitForResult</a>(). As this function's name implies, it blocks CPU execution until OpenGL notifies that the timer query result is available. To avoid blocking, you can check if the query result is available by calling <a href="qopengltimerquery.html#isResultAvailable">isResultAvailable</a>(). Note that modern GPUs are deeply pipelined and query results may not become available for between 1-5 frames after they were issued.</p>
+<p>Note that OpenGL does not permit nesting or interleaving of multiple timer queries using <a href="qopengltimerquery.html#begin">begin</a>() and <a href="qopengltimerquery.html#end">end</a>(). Using multiple timer queries and <a href="qopengltimerquery.html#recordTimestamp">recordTimestamp</a>() avoids this limitation. When using <a href="qopengltimerquery.html#recordTimestamp">recordTimestamp</a>() the result can be obtained at some later time using <a href="qopengltimerquery.html#isResultAvailable">isResultAvailable</a>() and <a href="qopengltimerquery.html#waitForResult">waitForResult</a>(). Qt provides the convenience class <a href="qopengltimemonitor.html">QOpenGLTimeMonitor</a> that helps with using multiple query objects.</p>
+</div>
+<p><b>See also </b><a href="qopengltimemonitor.html">QOpenGLTimeMonitor</a>.</p>
+<!-- @@@QOpenGLTimerQuery -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QOpenGLTimerQuery[overload1]$$$QOpenGLTimerQueryQObject* -->
+<h3 class="fn" id="QOpenGLTimerQuery"><a name="QOpenGLTimerQuery"></a>QOpenGLTimerQuery::<span class="name">QOpenGLTimerQuery</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Creates a <a href="qopengltimerquery.html">QOpenGLTimerQuery</a> instance with the given <i>parent</i>. You must call <a href="qopengltimerquery.html#create">create</a>() with a valid OpenGL context before using.</p>
+<!-- @@@QOpenGLTimerQuery -->
+<!-- $$$~QOpenGLTimerQuery[overload1]$$$~QOpenGLTimerQuery -->
+<h3 class="fn" id="dtor.QOpenGLTimerQuery"><a name="dtor.QOpenGLTimerQuery"></a><code>[virtual] </code>QOpenGLTimerQuery::<span class="name">~QOpenGLTimerQuery</span>()</h3>
+<p>Destroys the <a href="qopengltimerquery.html">QOpenGLTimerQuery</a> and the underlying OpenGL resource.</p>
+<!-- @@@~QOpenGLTimerQuery -->
+<!-- $$$begin[overload1]$$$begin -->
+<h3 class="fn" id="begin"><a name="begin"></a><span class="type">void</span> QOpenGLTimerQuery::<span class="name">begin</span>()</h3>
+<p>Marks the start point in the OpenGL command queue for a sequence of commands to be timed by this query object.</p>
+<p>This is useful for simple use-cases. Usually it is better to use <a href="qopengltimerquery.html#recordTimestamp">recordTimestamp</a>().</p>
+<p><b>See also </b><a href="qopengltimerquery.html#end">end</a>(), <a href="qopengltimerquery.html#isResultAvailable">isResultAvailable</a>(), <a href="qopengltimerquery.html#waitForResult">waitForResult</a>(), and <a href="qopengltimerquery.html#recordTimestamp">recordTimestamp</a>().</p>
+<!-- @@@begin -->
+<!-- $$$create[overload1]$$$create -->
+<h3 class="fn" id="create"><a name="create"></a><span class="type">bool</span> QOpenGLTimerQuery::<span class="name">create</span>()</h3>
+<p>Creates the underlying OpenGL timer query object. There must be a valid OpenGL context that supports query objects current for this function to succeed.</p>
+<p>Returns <code>true</code> if the OpenGL timer query object was successfully created.</p>
+<!-- @@@create -->
+<!-- $$$destroy[overload1]$$$destroy -->
+<h3 class="fn" id="destroy"><a name="destroy"></a><span class="type">void</span> QOpenGLTimerQuery::<span class="name">destroy</span>()</h3>
+<p>Destroys the underlying OpenGL timer query object. The context that was current when <a href="qopengltimerquery.html#create">create</a>() was called must be current when calling this function.</p>
+<!-- @@@destroy -->
+<!-- $$$end[overload1]$$$end -->
+<h3 class="fn" id="end"><a name="end"></a><span class="type">void</span> QOpenGLTimerQuery::<span class="name">end</span>()</h3>
+<p>Marks the end point in the OpenGL command queue for a sequence of commands to be timed by this query object.</p>
+<p>This is useful for simple use-cases. Usually it is better to use <a href="qopengltimerquery.html#recordTimestamp">recordTimestamp</a>().</p>
+<p><b>See also </b><a href="qopengltimerquery.html#begin">begin</a>(), <a href="qopengltimerquery.html#isResultAvailable">isResultAvailable</a>(), <a href="qopengltimerquery.html#waitForResult">waitForResult</a>(), and <a href="qopengltimerquery.html#recordTimestamp">recordTimestamp</a>().</p>
+<!-- @@@end -->
+<!-- $$$isCreated[overload1]$$$isCreated -->
+<h3 class="fn" id="isCreated"><a name="isCreated"></a><span class="type">bool</span> QOpenGLTimerQuery::<span class="name">isCreated</span>() const</h3>
+<p>Returns <code>true</code> if the underlying OpenGL query object has been created. If this returns <code>true</code> and the associated OpenGL context is current, then you are able to issue queries with this object.</p>
+<!-- @@@isCreated -->
+<!-- $$$isResultAvailable[overload1]$$$isResultAvailable -->
+<h3 class="fn" id="isResultAvailable"><a name="isResultAvailable"></a><span class="type">bool</span> QOpenGLTimerQuery::<span class="name">isResultAvailable</span>() const</h3>
+<p>Returns <code>true</code> if the OpenGL timer query result is available.</p>
+<p>This function is non-blocking and ideally should be used to check for the availability of the query result before calling <a href="qopengltimerquery.html#waitForResult">waitForResult</a>().</p>
+<p><b>See also </b><a href="qopengltimerquery.html#waitForResult">waitForResult</a>().</p>
+<!-- @@@isResultAvailable -->
+<!-- $$$objectId[overload1]$$$objectId -->
+<h3 class="fn" id="objectId"><a name="objectId"></a><span class="type">GLuint</span> QOpenGLTimerQuery::<span class="name">objectId</span>() const</h3>
+<p>Returns the id of the underlying OpenGL query object.</p>
+<!-- @@@objectId -->
+<!-- $$$recordTimestamp[overload1]$$$recordTimestamp -->
+<h3 class="fn" id="recordTimestamp"><a name="recordTimestamp"></a><span class="type">void</span> QOpenGLTimerQuery::<span class="name">recordTimestamp</span>()</h3>
+<p>Places a marker in the OpenGL command queue for the GPU to record the timestamp when this marker is reached by the GPU. This function is non-blocking and the result will become available at some later time.</p>
+<p>The availability of the result can be checked with <a href="qopengltimerquery.html#isResultAvailable">isResultAvailable</a>(). The result can be fetched with <a href="qopengltimerquery.html#waitForResult">waitForResult</a>() which will block if the result is not yet available.</p>
+<p><b>See also </b><a href="qopengltimerquery.html#waitForResult">waitForResult</a>(), <a href="qopengltimerquery.html#isResultAvailable">isResultAvailable</a>(), <a href="qopengltimerquery.html#begin">begin</a>(), and <a href="qopengltimerquery.html#end">end</a>().</p>
+<!-- @@@recordTimestamp -->
+<!-- $$$waitForResult[overload1]$$$waitForResult -->
+<h3 class="fn" id="waitForResult"><a name="waitForResult"></a><span class="type">GLuint64</span> QOpenGLTimerQuery::<span class="name">waitForResult</span>() const</h3>
+<p>Returns the result of the OpenGL timer query.</p>
+<p>This function will block until the result is made available by OpenGL. It is recommended to call <a href="qopengltimerquery.html#isResultAvailable">isResultAvailable</a>() to ensure that the result is available to avoid unnecessary blocking and stalling.</p>
+<p><b>See also </b><a href="qopengltimerquery.html#isResultAvailable">isResultAvailable</a>().</p>
+<!-- @@@waitForResult -->
+<!-- $$$waitForTimestamp[overload1]$$$waitForTimestamp -->
+<h3 class="fn" id="waitForTimestamp"><a name="waitForTimestamp"></a><span class="type">GLuint64</span> QOpenGLTimerQuery::<span class="name">waitForTimestamp</span>() const</h3>
+<p>Returns the current timestamp of the GPU when all previously issued OpenGL commands have been received but not necessarily executed by the GPU.</p>
+<p>This function blocks until the result is returned.</p>
+<p><b>See also </b><a href="qopengltimerquery.html#recordTimestamp">recordTimestamp</a>().</p>
+<!-- @@@waitForTimestamp -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

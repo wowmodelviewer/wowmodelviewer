@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-debugger.qdoc -->
+  <title>Launching the Debugger | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Launching the Debugger</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-debugger-engines.html" />
+  <link rel="next" href="creator-debug-mode.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-debugger-engines.html">Setting Up Debugger</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-debug-mode.html">Interacting with the Debugger</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#launching-the-debugger-in-different-modes">Launching the Debugger in Different Modes</a></li>
+<li class="level2"><a href="#launching-in-start-internal-mode">Launching in Start Internal Mode</a></li>
+<li class="level2"><a href="#launching-in-start-external-mode">Launching in Start External Mode</a></li>
+<li class="level2"><a href="#launching-in-attach-mode">Launching in Attach Mode</a></li>
+<li class="level2"><a href="#launching-in-core-mode">Launching in Core Mode</a></li>
+<li class="level2"><a href="#launching-in-post-mortem-mode">Launching in Post-Mortem Mode</a></li>
+<li class="level1"><a href="#remote-debugging">Remote Debugging</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Launching the Debugger</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-debugger-operating-modes.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>To start an application from an open project under the control of a debugger, select the <img src="images/qtcreator-debug-button.png" alt="" /> (<b>Start Debugging of Startup Project</b>) button or press <b>F5</b>.</p>
+<p>Qt Creator checks whether the compiled program is up-to-date, and rebuilds and deploys it if the <b>Always build project before deploying it</b> and <b>Always deploy before running</b> options are selected in the <b>Build and Run</b> options. To debug the program without deploying it, select <b>Debug</b> &gt; <b>Start Debugging</b> &gt; <b>Start Debugging Without Deployment</b>.</p>
+<p>The debugger then takes over and starts the program with suitable parameters.</p>
+<p><b>Note: </b>Starting a C++ program in the debugger can take a long time, typically in the range of several seconds to minutes if complex features are used.</p><a name="launching-the-debugger-in-different-modes"></a>
+<h2 id="launching-the-debugger-in-different-modes">Launching the Debugger in Different Modes</h2>
+<p>The debugger plugin can run the native debuggers in various operating modes depending on where and how the debugged process is started and run. Some of the modes are only available for a particular operating system or platform.</p>
+<p>In general, <b>F5</b> and the <b>Start Debugging of Startup Project</b> button are set up in a way to start the operating mode that is commonly used in a given context. So if the current project is set up as a C++ application using the <a href="https://mingw-w64.org/">MinGW</a> toolchain targeting desktop Windows, the GDB engine will be started in Start Internal mode. If the current project is a QML application using C++ plugins, a &quot;mixed&quot; QML/C++ engine will be started, with the C++ parts being handled by GDB and GDB server remote debugging.</p>
+<p>Change the run configuration parameters (such as <b>Run in Terminal</b>) in the run settings of the project, or select options from the <b>Debug</b> &gt; <b>Start Debugging</b> menu to select other modes of operation.</p>
+<p>The debugger can run in the following modes:</p>
+<ul>
+<li><b>Start Internal</b> to debug applications developed inside Qt Creator such as a Qt based GUI application.</li>
+<li><b>Start External</b> to start and debug processes without a proper Qt Creator project setup, either locally or on a remote machine.</li>
+<li><b>Attach</b> to debug processes already started and running outside Qt Creator, either locally or on a remote machine.</li>
+<li><b>Core</b> to debug crashed processes on Unix.</li>
+<li><b>Post-mortem</b> to debug crashed processes on Windows.</li>
+</ul>
+<a name="launching-in-start-internal-mode"></a>
+<h3 id="launching-in-start-internal-mode">Launching in Start Internal Mode</h3>
+<p>Start Internal mode is the default start mode for most projects, including all projects using a desktop Qt version and plain C++ projects.</p>
+<p>If you need a console window to operate your application, for example because it accepts console input from the user, go to <b>Projects</b> &gt; <b>Run Settings</b> and select the <b>Run in terminal</b> check box.</p>
+<p>To launch the debugger in Start Internal mode, click the <b>Start Debugging</b> button for the active project.</p>
+<p>You can specify breakpoints before or after launching the debugger. For more information, see <a href="creator-debug-mode.html#setting-breakpoints">Setting Breakpoints</a>.</p>
+<a name="launching-in-start-external-mode"></a>
+<h3 id="launching-in-start-external-mode">Launching in Start External Mode</h3>
+<p>You can debug any executable already present on your local or on a remote machine without using a project. You specify a build and run kit that identifies the device to debug the application on.</p>
+<p>While this mode does not strictly require a project to be opened in Qt Creator, opening it makes setting breakpoints and stepping through the code easier.</p>
+<p>To start and debug an external application:</p>
+<ol class="1" type="1"><li>Select <b>Debug</b> &gt; <b>Start Debugging</b> &gt; <b>Start and Debug External Application</b>.<p class="centerAlign"><img src="images/qtcreator-debugger-start-external.png" alt="" /></p></li>
+<li>In the <b>Kit</b> field, select the build and run kit to use for building the project.</li>
+<li>In the <b>Local executable</b> field, specify the path to the application executable on the local machine.</li>
+<li>In the <b>Command line arguments</b> field, specify command line arguments to be passed to the executable.</li>
+<li>In the <b>Working directory</b> field, specify the working directory. It defaults to the directory of the build result.</li>
+<li>Select the <b>Run in terminal</b> check box for console applications.</li>
+<li>Select the <b>Break at &quot;main&quot;</b> check box to stop the debugger at the main function.</li>
+<li>In the <b>Debug information</b> field, specify the location for storing debug information. You cannot use an empty path.</li>
+<li>In the <b>Recent</b> field, you can select a recent configuration to use.</li>
+</ol>
+<a name="launching-in-attach-mode"></a>
+<h3 id="launching-in-attach-mode">Launching in Attach Mode</h3>
+<p>You can attach the debugger to applications that are already running or instruct the debugger to attach to an application when it starts.</p>
+<a name="attaching-to-running-applications"></a>
+<h4 id="attaching-to-running-applications">Attaching to Running Applications</h4>
+<p>To attach the debugger to an application already running on your local or on a remote machine:</p>
+<ol class="1" type="1"><li>Select <b>Debug</b> &gt; <b>Start Debugging</b> &gt; <b>Attach to Running Application</b>.<p class="centerAlign"><img src="images/qtcreator-debugger-attach-to-running.png" alt="" /></p></li>
+<li>In the <b>Filter</b> field, enter a string to filter processes by their process ID or name.</li>
+<li>Select a process in the list, and then select <b>Attach to Process</b> to start debugging.</li>
+</ol>
+<p>To refresh the list of running processes, select <b>Update List</b>.</p>
+<p>To terminate the selected process, select <b>Kill Process</b>.</p>
+<p>While this mode does not strictly require a project to be opened in Qt Creator, opening it makes setting breakpoints and stepping through the code easier.</p>
+<p>You can specify breakpoints before or after attaching the debugger to the application. For more information, see <a href="creator-debug-mode.html#setting-breakpoints">Setting Breakpoints</a>.</p>
+<a name="attaching-to-processes-when-they-start"></a>
+<h4 id="attaching-to-processes-when-they-start">Attaching to Processes when They Start</h4>
+<p>To instruct the debugger to watch an application process and to attach to it when it starts:</p>
+<ol class="1" type="1"><li>Select <b>Debug</b> &gt; <b>Start Debugging</b> &gt; <b>Attach to Unstarted Application</b>.<p class="centerAlign"><img src="images/qtcreator-debugger-attach-to-process-not-yet-started.png" alt="" /></p></li>
+<li>In the <b>Kit</b> field, select the build and run kit to use for building the project.</li>
+<li>In the <b>Executable</b> field, specify the path to the application executable.</li>
+<li>Select the <b>Reopen dialog when application finishes</b> check box to return to this dialog when the application is closed.</li>
+<li>Select the <b>Continue on attach</b> check box to instruct the debugger to keep the application running after attaching to it.</li>
+<li>Select <b>Start Watching</b> to wait for the application process to start.</li>
+</ol>
+<a name="launching-in-core-mode"></a>
+<h3 id="launching-in-core-mode">Launching in Core Mode</h3>
+<p>The Core mode is used to inspect <i>core</i> files (crash dumps) that are generated from crashed processes on Linux and Unix systems if the system is set up to allow this.</p>
+<p>To enable the dumping of core files on a Unix system, enter the following command in the shell from which the application will be launched:</p>
+<pre class="cpp">
+
+  ulimit <span class="operator">-</span>c unlimited
+
+</pre>
+<p>To launch the debugger in the core mode:</p>
+<ol class="1" type="1"><li>Select <b>Debug</b> &gt; <b>Start Debugging</b> &gt; <b>Load Core File</b>.<p class="centerAlign"><img src="images/qtcreator-debugger-load-core-file.png" alt="" /></p></li>
+<li>In the <b>Kit</b> field, select a build and run kit that was used for building the binary for which the core file was created. If the core file stems from a binary not built by Qt Creator or a process not initiated by Qt Creator, select a kit that matches the setup used as closely as possible, in respect to the specified device, tool chain, debugger, and sysroot.</li>
+<li>In the <b>Core file</b> field, specify the core file to inspect.</li>
+<li>In the <b>Executable of symbol file</b> field, specify a file that contains debug information corresponding to the core file. Typically, this is the executable file or a <code>.debug</code> file if the debug information is stored separately from the executable.</li>
+<li>In the <b>Override start script</b> field, specify a script file to run instead of the default start script.</li>
+</ol>
+<p>Also in this mode, using a properly configured project containing the sources of the crashed program is not strictly necessary, but helpful.</p>
+<a name="launching-in-post-mortem-mode"></a>
+<h3 id="launching-in-post-mortem-mode">Launching in Post-Mortem Mode</h3>
+<p>The post-mortem mode is available only on Windows, if you have installed the debugging tools for Windows.</p>
+<p>The Qt Creator installation program asks you whether you want to register Qt Creator as a post-mortem debugger. To change the setting, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Debugger</b> &gt; <b>General</b> &gt; <b>Use Qt Creator for post-mortem debugging</b>.</p>
+<p>You can launch the debugger in the post-mortem mode if an application crashes on Windows. Click the <b>Debug in Qt Creator</b> button in the error message that is displayed by the Windows operating system.</p>
+<a name="remote-debugging"></a>
+<h2 id="remote-debugging">Remote Debugging</h2>
+<p>Qt Creator provides very easy access to remote debugging.</p>
+<p>In general, the remote debugging setup consist of a probe running on the remote machine and a counterpart running on the host side. The probe is either integrated into the running process (e.g&#x2e; for QML debugging) or runs a separate process (e.g&#x2e; when using GDB server on embedded Linux). The host side typically consists of Qt Creator itself, often with the help of an external process, such as GDB or CDB.</p>
+<p>While this setup might look daunting, it is mostly invisible to the user of Qt Creator. To start debugging on a remote target with the necessary helper processes running, select the corresponding <a href="creator-glossary.html#glossary-buildandrun-kit">kit</a> in <b>Projects</b> &gt; <b>Build &amp; Run</b>, and then select a function to start remote debugging in the <b>Debug</b> &gt; <b>Start Debugging</b> menu.</p>
+<p>Special use cases, such as attaching to a running process on the target, might still require manual setup.</p>
+<a name="using-gdb"></a>
+<h4 id="using-gdb">Using GDB</h4>
+<p>When debugging on a target supported by GDB server, a local GDB process talks to a GDB server running on the remote machine that controls the process to be debugged.</p>
+<p>The GDB server process is started on the remote machines by passing a port number and the executable:</p>
+<pre class="cpp">
+
+  gdbserver :<span class="number">1234</span> <span class="operator">&lt;</span>executable<span class="operator">&gt;</span>
+
+</pre>
+<p>It then typically responds:</p>
+<pre class="cpp">
+
+  Process bin<span class="operator">/</span>qtcreator created; pid <span class="operator">=</span> <span class="number">5159</span>
+  Listening on port <span class="number">1234</span>
+
+</pre>
+<p>On the local machine that runs Qt Creator:</p>
+<ol class="1" type="1"><li>Select <b>Debug</b> &gt; <b>Start Debugging</b> &gt; <b>Attach to Running Debug Server</b>.<p class="centerAlign"><img src="images/qtcreator-debugger-attach-to-running-debug-server.png" alt="" /></p></li>
+<li>In the <b>Kit</b> field, select the build and run kit to use for building the project.</li>
+<li>In the <b>Server port</b> field, enter the name of the remote machine and the port number to use.</li>
+<li>In the <b>Local executable</b> field, specify the path to the application executable on the local machine.</li>
+<li>In the <b>Command line arguments</b> field, specify command line arguments to be passed to the executable.</li>
+<li>In the <b>Working directory</b> field, specify the working directory. It defaults to the directory of the build result.</li>
+<li>Select the <b>Run in terminal</b> check box for console applications.</li>
+<li>Select the <b>Break at &quot;main&quot;</b> check box to stop the debugger at the main function.</li>
+<li>In the <b>Server start script</b> field, specify a script file to run when the server starts.</li>
+<li>In the <b>Debug information</b> field, specify the location for storing debug information. You cannot use an empty path.</li>
+<li>In the <b>Override server channel</b> field, specify a communication channel to use, such as a serial line or custom port.</li>
+<li>In the <b>Recent</b> field, you can select a recent configuration to use.</li>
+<li>Select <b>OK</b> to start debugging.</li>
+</ol>
+<a name="using-cdb"></a>
+<h4 id="using-cdb">Using CDB</h4>
+<p>In remote mode, the local CDB process talks to a CDB process that runs on the remote machine. The process is started with special command line options that switch it into server mode. The remote CDB process must load the Qt Creator CDB extension library that is shipped with Qt Creator:</p>
+<ol class="1" type="1"><li>Install the <i>Debugging Tools for Windows</i> on the remote machine. The installation folder contains the CDB command line executable (<code>cdb.exe</code>).</li>
+<li>Copy the Qt Creator CDB extension library from the Qt installation directory to the a new folder on the remote machine (32 or 64 bit version depending on the version of the Debugging Tools for Windows used):<ul>
+<li><code>\lib\qtcreatorcdbext32\qtcreatorcdbext.dll</code> (32 bit)</li>
+<li><code>\lib\qtcreatorcdbext64\qtcreatorcdbext.dll</code> (64 bit)</li>
+</ul>
+</li>
+<li>Set the _NT_DEBUGGER_EXTENSION_PATH environment variable to point to that folder.</li>
+<li>To use TCP/IP as communication protocol, launch remote CDB as follows:<pre class="cpp">
+
+  cdb<span class="operator">.</span>exe <span class="operator">-</span>server tcp:port<span class="operator">=</span><span class="number">1234</span> <span class="operator">&lt;</span>executable<span class="operator">&gt;</span>
+
+</pre>
+</li>
+<li>On the local machine running Qt Creator, select <b>Debug</b> &gt; <b>Start Debugging</b> &gt; <b>Attach to Remote CDB Session</b>.</li>
+<li>In the <b>Connection</b> field enter the connection parameters. For example, for TCP/IP:<pre class="cpp">
+
+  Server:Port
+
+</pre>
+<p>If you chose some other protocol, specify one of the alternative formats:</p>
+<pre class="cpp">
+
+  tcp:server<span class="operator">=</span>Server<span class="operator">,</span>port<span class="operator">=</span>Port<span class="operator">[</span><span class="operator">,</span>password<span class="operator">=</span>Password<span class="operator">]</span><span class="operator">[</span><span class="operator">,</span>ipversion<span class="operator">=</span><span class="number">6</span><span class="operator">]</span>
+  tcp:clicon<span class="operator">=</span>Server<span class="operator">,</span>port<span class="operator">=</span>Port<span class="operator">[</span><span class="operator">,</span>password<span class="operator">=</span>Password<span class="operator">]</span><span class="operator">[</span><span class="operator">,</span>ipversion<span class="operator">=</span><span class="number">6</span><span class="operator">]</span>
+  npipe:server<span class="operator">=</span>Server<span class="operator">,</span>pipe<span class="operator">=</span>PipeName<span class="operator">[</span><span class="operator">,</span>password<span class="operator">=</span>Password<span class="operator">]</span>
+  com:port<span class="operator">=</span>COMPort<span class="operator">,</span>baud<span class="operator">=</span>BaudRate<span class="operator">,</span>channel<span class="operator">=</span>COMChannel<span class="operator">[</span><span class="operator">,</span>password<span class="operator">=</span>Password<span class="operator">]</span>
+  spipe:proto<span class="operator">=</span>Protocol<span class="operator">,</span>{certuser<span class="operator">=</span>Cert<span class="operator">|</span>machuser<span class="operator">=</span>Cert}<span class="operator">,</span>server<span class="operator">=</span>Server<span class="operator">,</span>pipe<span class="operator">=</span>PipeName<span class="operator">[</span><span class="operator">,</span>password<span class="operator">=</span>Password<span class="operator">]</span>
+  ssl:proto<span class="operator">=</span>Protocol<span class="operator">,</span>{certuser<span class="operator">=</span>Cert<span class="operator">|</span>machuser<span class="operator">=</span>Cert}<span class="operator">,</span>server<span class="operator">=</span>Server<span class="operator">,</span>port<span class="operator">=</span>Socket<span class="operator">[</span><span class="operator">,</span>password<span class="operator">=</span>Password<span class="operator">]</span>
+  ssl:proto<span class="operator">=</span>Protocol<span class="operator">,</span>{certuser<span class="operator">=</span>Cert<span class="operator">|</span>machuser<span class="operator">=</span>Cert}<span class="operator">,</span>clicon<span class="operator">=</span>Server<span class="operator">,</span>port<span class="operator">=</span>Socket<span class="operator">[</span><span class="operator">,</span>password<span class="operator">=</span>Password<span class="operator">]</span>
+
+</pre>
+</li>
+<li>Click <b>OK</b> to start debugging.</li>
+</ol>
+</div>
+<!-- @@@creator-debugger-operating-modes.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-debugger-engines.html">Setting Up Debugger</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-debug-mode.html">Interacting with the Debugger</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

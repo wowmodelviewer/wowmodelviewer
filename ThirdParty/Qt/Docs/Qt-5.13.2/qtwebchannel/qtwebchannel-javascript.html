@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- javascript.qdoc -->
+  <title>Qt WebChannel JavaScript API | Qt WebChannel 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwebchannel-index.html">Qt WebChannel</a></td><td >Qt WebChannel JavaScript API</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwebchannel-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#setting-up-the-javascript-api">Setting up the JavaScript API</a></li>
+<li class="level1"><a href="#interacting-with-qobjects">Interacting with QObjects</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt WebChannel JavaScript API</h1>
+<span class="subtitle"></span>
+<!-- $$$qtwebchannel-javascript.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="setting-up-the-javascript-api"></a>
+<h2 id="setting-up-the-javascript-api">Setting up the JavaScript API</h2>
+<p>To communicate with a <a href="qwebchannel.html">QWebChannel</a> or <a href="qml-qtwebchannel-webchannel.html">WebChannel</a>, a client must use and set up the JavaScript API provided by <code>qwebchannel.js</code>. For clients run inside <a href="../qtwebengine/qtwebengine-index.html">Qt WebEngine</a>, you can load the file via <code>qrc:///qtwebchannel/qwebchannel.js</code>. For external clients, you need to copy the file to your web server. Then instantiate a <a href="qwebchannel.html">QWebChannel</a> object and pass it a transport object and a callback function, which will be invoked once the initialization of the channel finishes and the published objects become available.</p>
+<p>The transport object implements a minimal message passing interface. It should be an object with a <code>send()</code> function, which takes a stringified JSON message and transmits it to the server-side <a href="qwebchannelabstracttransport.html">QWebChannelAbstractTransport</a> object. Furthermore, its <code>onmessage</code> property should be called when a message from the server was received. Alternatively, you can use a <a href="../qtwebsockets/qtwebsockets-index.html">WebSocket</a> to implement the interface.</p>
+<p>Note that the JavaScript <a href="qwebchannel.html">QWebChannel</a> object should be constructed once the transport object is fully operational. In case of a WebSocket, that means you should create the <a href="qwebchannel.html">QWebChannel</a> in the socket's <code>onopen</code> handler. Take a look at the <a href="qtwebchannel-standalone-example.html">Qt WebChannel Standalone Example</a> to see how this is done.</p>
+<a name="interacting-with-qobjects"></a>
+<h2 id="interacting-with-qobjects">Interacting with QObjects</h2>
+<p>Once the callback passed to the <a href="qwebchannel.html">QWebChannel</a> object is invoked, the channel has finished initialization and all published objects are accessible to the HTML client via the <code>channel.objects</code> property. Thus, assuming an object was published with the identifier &quot;foo&quot;, then we can interact with it as shown in the example below. Note that all communication between the HTML client and the QML/C++ server is asynchronous. Properties are cached on the HTML side. Furthermore keep in mind that only QML/C++ data types which can be converted to JSON will be (de-)serialized properly and thus accessible to HTML clients.</p>
+<pre class="cpp">
+
+  <span class="keyword">new</span> <span class="type"><a href="qwebchannel.html">QWebChannel</a></span>(yourTransport<span class="operator">,</span> function(channel) {
+
+      <span class="comment">// Connect to a signal:</span>
+      channel<span class="operator">.</span>objects<span class="operator">.</span>foo<span class="operator">.</span>mySignal<span class="operator">.</span>connect(function() {
+          <span class="comment">// This callback will be invoked whenever the signal is emitted on the C++/QML side.</span>
+          console<span class="operator">.</span>log(arguments);
+      });
+
+      <span class="comment">// To make the object known globally, assign it to the window object, i.e.:</span>
+      window<span class="operator">.</span>foo <span class="operator">=</span> channel<span class="operator">.</span>objects<span class="operator">.</span>foo;
+
+      <span class="comment">// Invoke a method:</span>
+      foo<span class="operator">.</span>myMethod(arg1<span class="operator">,</span> arg2<span class="operator">,</span> function(returnValue) {
+          <span class="comment">// This callback will be invoked when myMethod has a return value. Keep in mind that</span>
+          <span class="comment">// the communication is asynchronous, hence the need for this callback.</span>
+          console<span class="operator">.</span>log(returnValue);
+      });
+
+      <span class="comment">// Read a property value, which is cached on the client side:</span>
+      console<span class="operator">.</span>log(foo<span class="operator">.</span>myProperty);
+
+      <span class="comment">// Writing a property will instantly update the client side cache.</span>
+      <span class="comment">// The remote end will be notified about the change asynchronously</span>
+      foo<span class="operator">.</span>myProperty <span class="operator">=</span> <span class="string">&quot;Hello World!&quot;</span>;
+
+      <span class="comment">// To get notified about remote property changes,</span>
+      <span class="comment">// simply connect to the corresponding notify signal:</span>
+      foo<span class="operator">.</span>onMyPropertyChanged<span class="operator">.</span>connect(function(newValue) {
+          console<span class="operator">.</span>log(newValue);
+      });
+
+      <span class="comment">// One can also access enums that are marked with Q_ENUM:</span>
+      console<span class="operator">.</span>log(foo<span class="operator">.</span>MyEnum<span class="operator">.</span>MyEnumerator);
+  });
+
+</pre>
+</div>
+<!-- @@@qtwebchannel-javascript.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

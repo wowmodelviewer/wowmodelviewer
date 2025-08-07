@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtaxcontainer.qdoc -->
+  <title>Using ActiveX controls and COM in Qt | Active Qt 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="activeqt-index.html">Active Qt</a></td><td >Using ActiveX controls and COM in Qt</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="activeqt-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#using-the-library">Using the Library</a></li>
+<li class="level2"><a href="#distributing-qaxcontainer-applications">Distributing QAxContainer Applications</a></li>
+<li class="level1"><a href="#instantiating-com-objects">Instantiating COM Objects</a></li>
+<li class="level2"><a href="#typical-error-messages">Typical Error Messages</a></li>
+<li class="level1"><a href="#accessing-the-object-api">Accessing the Object API</a></li>
+<li class="level2"><a href="#generating-a-c-namespace">Generating a C++ Namespace</a></li>
+<li class="level2"><a href="#call-by-name">Call-by-Name</a></li>
+<li class="level2"><a href="#calling-function-through-a-script-engine">Calling Function Through a Script Engine</a></li>
+<li class="level2"><a href="#calling-a-function-using-the-native-com-interfaces">Calling a Function Using the Native COM Interfaces</a></li>
+<li class="level2"><a href="#typical-error-messages">Typical Error Messages</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Using ActiveX controls and COM in Qt</h1>
+<span class="subtitle"></span>
+<!-- $$$activeqt-container.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The <a href="qaxcontainer-module.html">QAxContainer</a> module is part of the <a href="activeqt-index.html">ActiveQt</a> framework. It provides a library implementing a <a href="../qtwidgets/qwidget.html">QWidget</a> subclass, <a href="qaxwidget.html">QAxWidget</a>, that acts as a container for ActiveX controls, and a <a href="../qtcore/qobject.html">QObject</a> subclass, <a href="qaxobject.html">QAxObject</a>, that can be used to easily access non-visual COM objects. Scripting COM objects embedded using these classes is possible through the <a href="qaxscript.html">QAxScript</a>, <a href="qaxscriptmanager.html">QAxScriptManager</a> and <a href="qaxscriptengine.html">QAxScriptEngine</a> classes, and a set of <a href="activeqt-tools.html">tools</a> makes it easy to access COM objects programmatically.</p>
+<p>The module consists of six classes</p>
+<ol class="1" type="1"><li><a href="qaxbase.html">QAxBase</a> is an abstract class that provides an API to initialize and access a COM object or ActiveX control.</li>
+<li><a href="qaxobject.html">QAxObject</a> provides a <a href="../qtcore/qobject.html">QObject</a> that wraps a COM object.</li>
+<li><a href="qaxwidget.html">QAxWidget</a> is a <a href="../qtwidgets/qwidget.html">QWidget</a> that wraps an ActiveX control.</li>
+<li><a href="qaxscriptmanager.html">QAxScriptManager</a>, <a href="qaxscript.html">QAxScript</a> and <a href="qaxscriptengine.html">QAxScriptEngine</a> provide an interface to the Windows Script Host.</li>
+</ol>
+<p>Some <a href="../qtdoc/examples-activeqt.html">example applications</a> that use standard ActiveX controls to provide high-level user interface functionality are provided.</p>
+<p>Topics:</p>
+<a name="using-the-library"></a>
+<h2 id="using-the-library">Using the Library</h2>
+<p>To build Qt applications that can host COM objects and ActiveX controls link the application against the <a href="qaxcontainer-module.html">QAxContainer</a> module by adding</p>
+<pre class="cpp">
+
+  QT += axcontainer
+
+</pre>
+<p>to your application's <code>.pro</code> file.</p>
+<a name="distributing-qaxcontainer-applications"></a>
+<h3 id="distributing-qaxcontainer-applications">Distributing QAxContainer Applications</h3>
+<p>The <a href="qaxcontainer-module.html">QAxContainer</a> library is static, so there is no need to redistribute any additional files when using this module. Note however that the ActiveX server binaries you are using might not be installed on the target system, so you have to ship them with your package and register them during the installation process of your application.</p>
+<a name="instantiating-com-objects"></a>
+<h2 id="instantiating-com-objects">Instantiating COM Objects</h2>
+<p>To instantiate a COM object use the <a href="qaxbase.html#control-prop">QAxBase::setControl</a>() API, or pass the name of the object directly into the constructor of the <a href="qaxbase.html">QAxBase</a> subclass you are using.</p>
+<p>The control can be specified in a variety of formats, but the fastest and most powerful format is to use the class ID (CLSID) of the object directly. The class ID can be prepended with information about a remote machine that the object should run on, and can include a license key for licensed controls.</p>
+<a name="typical-error-messages"></a>
+<h3 id="typical-error-messages">Typical Error Messages</h3>
+<p><a href="activeqt-index.html">ActiveQt</a> prints error messages to the debug output when it encounters error situations at runtime. Usually you must run your program in the debugger to see these messages (e.g&#x2e; in Visual Studio's Debug output).</p>
+<a name="requested-control-could-not-be-instantiated"></a>
+<h4 id="requested-control-could-not-be-instantiated">Requested control could not be instantiated</h4>
+<p>The control requested in <a href="qaxbase.html#control-prop">QAxBase::setControl</a>() is not installed on this system, or is not accessible for the current user.</p>
+<p>The control might require administrator rights, or a license key. If the control is licensed, pass the license key to <a href="qaxbase.html#control-prop">QAxBase::setControl</a> as documented.</p>
+<a name="accessing-the-object-api"></a>
+<h2 id="accessing-the-object-api">Accessing the Object API</h2>
+<p><a href="activeqt-index.html">ActiveQt</a> provides a Qt API to the COM object, and replaces COM datatypes with Qt equivalents.</p>
+<p>There are four ways to call APIs on the COM object:</p>
+<ul>
+<li>Generating a C++ namespace</li>
+<li>Call-by-name</li>
+<li>Through a script engine</li>
+<li>Using the native COM interfaces</li>
+</ul>
+<a name="generating-a-c-namespace"></a>
+<h3 id="generating-a-c-namespace">Generating a C++ Namespace</h3>
+<p>To generate a C++ namespace for the type library you want to access, use the <a href="activeqt-dumpcpp.html">dumpcpp</a> tool. Run this tool manually on the type library you want to use, or integrate it into the build system by adding the type libraries to the <code>TYPELIBS</code> variable in your application's <code>.pro</code> file:</p>
+<pre class="cpp">
+
+  TYPELIBS = file.tlb
+
+</pre>
+<p>Note that <a href="activeqt-dumpcpp.html">dumpcpp</a> might not be able to expose all APIs in the type library.</p>
+<p>Include the resulting header file in your code to access the object APIs through the generated C++ classes. See the <a href="activeqt-activeqt-qutlook-example.html">Qutlook</a> example for more information.</p>
+<a name="call-by-name"></a>
+<h3 id="call-by-name">Call-by-Name</h3>
+<p>Use <a href="qaxbase.html#dynamicCall">QAxBase::dynamicCall</a>() and <a href="qaxbase.html#querySubObject">QAxBase::querySubObject</a>() as well as the <a href="../qtcore/qobject.html#setProperty">QObject::setProperty</a>() and <a href="../qtcore/qobject.html#property">QObject::property</a>() APIs to call the methods and properties of the COM object through their name. Use the <a href="activeqt-dumpdoc.html">dumpdoc</a> tool to get the documentation of the Qt API for any COM object and its subobjects; note that not all of the COM object's APIs might be available.</p>
+<p>See the <a href="activeqt-activeqt-mediaplayer-example.html">Media Player</a> example for more information.</p>
+<a name="calling-function-through-a-script-engine"></a>
+<h3 id="calling-function-through-a-script-engine">Calling Function Through a Script Engine</h3>
+<p>A Qt application can host any ActiveScript engine installed on the system. The script engine can then run script code that accesses the COM objects.</p>
+<p>To instantiate a script engine, use <a href="qaxscriptmanager.html#addObject">QAxScriptManager::addObject</a>() to register the COM objects you want to access from script, and <a href="qaxscriptmanager.html#load">QAxScriptManager::load</a>() to load the script code into the engine. Then call the script functions using <a href="qaxscriptmanager.html#call">QAxScriptManager::call</a>() or <a href="qaxscript.html#call">QAxScript::call</a>().</p>
+<p>Which APIs of the COM object are available through scripting depends on the script language used.</p>
+<p>The <a href="../qtdoc/activeqt-testcon.html">ActiveX Test Container</a> demonstrates loading of script files.</p>
+<a name="calling-a-function-using-the-native-com-interfaces"></a>
+<h3 id="calling-a-function-using-the-native-com-interfaces">Calling a Function Using the Native COM Interfaces</h3>
+<p>To call functions of the COM object that can not be accessed via any of the above methods it is possible to request the COM interface directly using <a href="qaxbase.html#queryInterface">QAxBase::queryInterface</a>(). To get a C++ definition of the respective interface classes use the <code>#import</code> directive with the type library provided with the control; see your compiler manual for details.</p>
+<a name="typical-error-messages"></a>
+<h3 id="typical-error-messages">Typical Error Messages</h3>
+<p><a href="activeqt-index.html">ActiveQt</a> prints error messages to the debug output when it encounters error situations at runtime. Usually you must run your program in the debugger to see these messages (e.g&#x2e; in Visual Studio's Debug output).</p>
+<a name="qaxbase-internalinvoke-no-such-method"></a>
+<h4 id="qaxbase-internalinvoke-no-such-method">QAxBase::internalInvoke: No such method</h4>
+<p>A <a href="qaxbase.html#dynamicCall">QAxBase::dynamicCall</a>() failed - the function prototype did not match any function available in the object's API.</p>
+<a name="error-calling-idispatch-member-non-optional-parameter-missing"></a>
+<h4 id="error-calling-idispatch-member-non-optional-parameter-missing">Error calling IDispatch member: Non-optional parameter missing</h4>
+<p>A <a href="qaxbase.html#dynamicCall">QAxBase::dynamicCall</a>() failed - the function prototype was correct, but too few parameters were provided.</p>
+<a name="error-calling-idispatch-member-type-mismatch-in-parameter-n"></a>
+<h4 id="error-calling-idispatch-member-type-mismatch-in-parameter-n">Error calling IDispatch member: Type mismatch in parameter n</h4>
+<p>A <a href="qaxbase.html#dynamicCall">QAxBase::dynamicCall</a>() failed - the function prototype was correct, but the parameter at index <code>n</code> was of the wrong type and could not be coerced to the correct type.</p>
+<a name="qaxscriptmanager-call-no-script-provides-this-function"></a>
+<h4 id="qaxscriptmanager-call-no-script-provides-this-function">QAxScriptManager::call(): No script provides this function</h4>
+<p>You try to call a function that is provided through an engine that doesn't provide introspection (ie. ActivePython or <a href="http://www.activestate.com/Products/activeperl/index.mhtml">ActivePerl</a>). You need to call the function directly on the respective <a href="qaxscript.html">QAxScript</a> object.</p>
+</div>
+<p><b>See also </b><a href="activeqt-index.html">ActiveQt Framework</a>.</p>
+<!-- @@@activeqt-container.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

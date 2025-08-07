@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+    <namespace>org.qt-project.qtx11extras.5132</namespace>
+    <virtualFolder>qtx11extras</virtualFolder>
+    <metaData name="version" value="5.13.2"/>
+    <customFilter name="QtX11Extras 5.13.2">
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtx11extras</filterAttribute>
+    </customFilter>
+    <filterSection>
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtrefdoc</filterAttribute>
+        <filterAttribute>qtx11extras</filterAttribute>
+        <toc>
+            <section ref="qtx11extras-index.html" title="Qt X11 Extras">
+                <section ref="qtx11extras-module.html" title="C++ Classes">
+                    <section ref="qx11info.html" title="QX11Info Class Reference">
+                        <section ref="qx11info-members.html" title="List of all members"/>
+                    </section>
+                </section>
+            </section>
+        </toc>
+        <keywords>
+            <keyword name="QX11Info" id="QX11Info" ref="qx11info.html"/>
+            <keyword name="QX11Info::PeekDefault" id="QX11Info::PeekDefault" ref="qx11info.html#PeekOption-enum"/>
+            <keyword name="QX11Info::PeekFromCachedIndex" id="QX11Info::PeekFromCachedIndex" ref="qx11info.html#PeekOption-enum"/>
+            <keyword name="QX11Info::PeekOption" id="QX11Info::PeekOption" ref="qx11info.html#PeekOption-enum"/>
+            <keyword name="QX11Info::PeekOptions" id="QX11Info::PeekOptions" ref="qx11info.html#PeekOption-enum"/>
+            <keyword name="QX11Info::PeekerCallback" id="QX11Info::PeekerCallback" ref="qx11info.html#PeekerCallback-typedef"/>
+            <keyword name="Qt X11 Extras" id="Qt X11 Extras" ref="qtx11extras-index.html"/>
+            <keyword name="Qt X11 Extras C++ Classes" id="Qt X11 Extras C++ Classes" ref="qtx11extras-module.html"/>
+            <keyword name="appDpiX" id="QX11Info::appDpiX" ref="qx11info.html#appDpiX"/>
+            <keyword name="appDpiY" id="QX11Info::appDpiY" ref="qx11info.html#appDpiY"/>
+            <keyword name="appScreen" id="QX11Info::appScreen" ref="qx11info.html#appScreen"/>
+            <keyword name="appTime" id="QX11Info::appTime" ref="qx11info.html#appTime"/>
+            <keyword name="appUserTime" id="QX11Info::appUserTime" ref="qx11info.html#appUserTime"/>
+            <keyword name="connection" id="QX11Info::connection" ref="qx11info.html#connection"/>
+            <keyword name="display" id="QX11Info::display" ref="qx11info.html#display"/>
+            <keyword name="generatePeekerId" id="QX11Info::generatePeekerId" ref="qx11info.html#generatePeekerId"/>
+            <keyword name="getTimestamp" id="QX11Info::getTimestamp" ref="qx11info.html#getTimestamp"/>
+            <keyword name="isCompositingManagerRunning" id="QX11Info::isCompositingManagerRunning" ref="qx11info.html#isCompositingManagerRunning"/>
+            <keyword name="isPlatformX11" id="QX11Info::isPlatformX11" ref="qx11info.html#isPlatformX11"/>
+            <keyword name="nextStartupId" id="QX11Info::nextStartupId" ref="qx11info.html#nextStartupId"/>
+            <keyword name="peekEventQueue" id="QX11Info::peekEventQueue" ref="qx11info.html#peekEventQueue"/>
+            <keyword name="removePeekerId" id="QX11Info::removePeekerId" ref="qx11info.html#removePeekerId"/>
+            <keyword name="setAppTime" id="QX11Info::setAppTime" ref="qx11info.html#setAppTime"/>
+            <keyword name="setAppUserTime" id="QX11Info::setAppUserTime" ref="qx11info.html#setAppUserTime"/>
+            <keyword name="setNextStartupId" id="QX11Info::setNextStartupId" ref="qx11info.html#setNextStartupId"/>
+        </keywords>
+        <files>
+            <file>images/arrow_bc.png</file>
+            <file>images/bgrContent.png</file>
+            <file>images/btn_next.png</file>
+            <file>images/btn_prev.png</file>
+            <file>images/bullet_dn.png</file>
+            <file>images/bullet_sq.png</file>
+            <file>images/home.png</file>
+            <file>images/ico_note.png</file>
+            <file>images/ico_note_attention.png</file>
+            <file>images/ico_out.png</file>
+            <file>images/logo.png</file>
+            <file>qtx11extras-index.html</file>
+            <file>qtx11extras-module.html</file>
+            <file>qx11info-members.html</file>
+            <file>qx11info.html</file>
+            <file>style/offline-simple.css</file>
+            <file>style/offline.css</file>
+        </files>
+    </filterSection>
+</QtHelpProject>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- examples.qdoc -->
+  <title>Threading and Concurrent Programming Examples | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Threading and Concurrent Programming Examples</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Threading and Concurrent Programming Examples</h1>
+<span class="subtitle"></span>
+<!-- $$$examples-threadandconcurrent.html-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/thread-examples.png" alt="" /></p><p>Qt makes it easy to write multithreaded applications. Signals and slots can be used to safely communicate between threads in your application.</p>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtcore/qtcore-threads-mandelbrot-example.html">Mandelbrot Example</a></p></td><td class="tblDescr"><p>Mandelbrot example demonstrates multi-thread programming using Qt. It shows how to use a worker thread to perform heavy computations without blocking the main thread's event loop</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtcore/qtcore-threads-queuedcustomtype-example.html">Queued Custom Type Example</a></p></td><td class="tblDescr"><p>Demonstrates multi-thread programming using Qt</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtcore/qtcore-threads-semaphores-example.html">Semaphores Example</a></p></td><td class="tblDescr"><p>Demonstrates multi-thread programming using Qt</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtcore/qtcore-threads-waitconditions-example.html">Wait Conditions Example</a></p></td><td class="tblDescr"><p>Demonstrates multi-thread programming using Qt</p></td></tr>
+</table></div>
+<p>The <a href="../qtconcurrent/qtconcurrent.html">QtConcurrent</a> namespace includes a collection of classes and functions for straightforward concurrent programming.</p>
+<p>These examples show how to apply the basic techniques of concurrent programming to simple problems.</p>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtconcurrent/qtconcurrent-imagescaling-example.html">Image Scaling Example</a></p></td><td class="tblDescr"><p>Demonstrates how to asynchronously scale images</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtconcurrent/qtconcurrent-map-example.html">Map Example</a></p></td><td class="tblDescr"><p>Demonstrates how to scale images synchronously</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtconcurrent/qtconcurrent-progressdialog-example.html">QtConcurrent Progress Dialog Example</a></p></td><td class="tblDescr"><p>Demonstrates how to monitor the progress of the active processes</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtconcurrent/qtconcurrent-wordcount-example.html">QtConcurrent Word Count Example</a></p></td><td class="tblDescr"><p>Demonstrates how to use the map-reduce algorithm</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtconcurrent/qtconcurrent-runfunction-example.html">Run Function Example</a></p></td><td class="tblDescr"><p>Demonstrates how to run standard functions concurrently</p></td></tr>
+</table></div>
+<p>Examples marked with an asterisk (*) are fully documented.</p>
+</div>
+<!-- @@@examples-threadandconcurrent.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

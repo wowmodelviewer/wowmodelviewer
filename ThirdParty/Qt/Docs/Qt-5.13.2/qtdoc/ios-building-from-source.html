@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- ios.qdoc -->
+  <title>Qt for iOS - Building from Source | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Qt for iOS - Building from Source</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt for iOS - Building from Source</h1>
+<span class="subtitle"></span>
+<!-- $$$ios-building-from-source.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Building <a href="ios.html">Qt for iOS</a> from sources requires <a href="http://itunes.apple.com/us/app/xcode/id497799835?ls=1&mt=12">Xcode</a> with command-line tools installed. This can be done within Xcode from <b>Preferences</b> &gt; <b>Downloads</b> &gt; <b>Components</b> &gt; <b>Command Line Tools</b>.</p>
+<p>Qt 5 sources can be obtained either by cloning the repositories or downloading the source package(s).</p>
+<p>We can then configure and build Qt. This is done from the Qt 5 top directory:</p>
+<pre class="cpp plain">
+
+  &gt; ./configure -xplatform macx-ios-clang -release
+
+</pre>
+<p>For other configure options, see <a href="configure-options.html">Qt Configure Options</a>.</p>
+<p>Then, simply run <code>make</code>.</p>
+<p><b>Note: </b>A default build will include both simulator and device libraries. If you want to build for a single target, use the <code>-sdk</code> argument with either <code>iphoneos</code> or <code>iphonesimulator</code>.</p></div>
+<!-- @@@ios-building-from-source.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

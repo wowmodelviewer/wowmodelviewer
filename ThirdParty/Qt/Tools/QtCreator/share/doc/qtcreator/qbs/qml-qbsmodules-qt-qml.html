@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qt-qml-module.qdoc -->
+  <title>Qt.qml QML Type | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<p class="naviNextPrevious headerNavi">
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#relevant-file-tags">Relevant File Tags</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt.qml QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Qt.qml-brief -->
+<p>Provides Qt QML support. <a href="#details">More...</a></p>
+<!-- @@@Qt.qml -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QbsModules .</td></tr></table></div><ul>
+<li><a href="qml-qbsmodules-qt-qml-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qbsmodules-qt-qml.html#cacheFilesInstallDir-prop">cacheFilesInstallDir</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-qt-qml.html#cachingEnabled-prop">cachingEnabled</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-qt-qml.html#generateCacheFiles-prop">generateCacheFiles</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-qt-qml.html#qmlCacheGenPath-prop">qmlCacheGenPath</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-qt-qml.html#qmlImportScannerName-prop">qmlImportScannerName</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-qt-qml.html#qmlPath-prop">qmlPath</a></b></b> : string</li>
+</ul>
+<!-- $$$Qt.qml-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The Qt.qml module provides support for the Qt QML module, which contains classes for QML and JavaScript languages.</p>
+<p><b>Note: </b>If the current value of <a href="qml-qbsmodules-qbs.html#architecture-prop">qbs.architecture</a> is not supported by <code>qmlcachegen</code>, the QML cache file generator rule is disabled.</p><a name="relevant-file-tags"></a>
+<h3 id="relevant-file-tags">Relevant File Tags</h3>
+<a name="filetags-qml"></a><div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Tag</th><th >Auto-tagged File Names</th><th >Since</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>&quot;qt.qml.js&quot;</code></td><td ><code>*.js</code></td><td >1.10</td><td >QML companion JavaScript files. Source files with this tag serve as input for the QML cache file generator.</td></tr>
+<tr valign="top" class="even"><td ><code>&quot;qt.qml.qml&quot;</code></td><td ><code>*.qml</code></td><td >1.8</td><td >Source files with this tag serve as inputs to the QML plugin scanner.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qml-qbsmodules-qt-quick.html">Qt.quick</a> and <a href="qml-qbsmodules-qt-declarative.html">Qt.declarative</a>.</p>
+<!-- @@@Qt.qml -->
+<h2>Property Documentation</h2>
+<!-- $$$cacheFilesInstallDir -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="cacheFilesInstallDir-prop"></a><span class="name">cacheFilesInstallDir</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The path to the directory where the cache files are installed.</p>
+<p>If this property is set, QML cache files are automatically installed.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@cacheFilesInstallDir -->
+<br/>
+<!-- $$$cachingEnabled -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="cachingEnabled-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">cachingEnabled</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property is <code>true</code> if <a href="qml-qbsmodules-qt-qml.html#generateCacheFiles-prop">generateCacheFiles</a> is <code>true</code> and the platform supports QML cache generation.</p>
+<p>Default: <code>false</code></p>
+</div></div><!-- @@@cachingEnabled -->
+<br/>
+<!-- $$$generateCacheFiles -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="generateCacheFiles-prop"></a><span class="name">generateCacheFiles</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether QML cache files are generated.</p>
+<p>Default: <code>false</code></p>
+</div></div><!-- @@@generateCacheFiles -->
+<br/>
+<!-- $$$qmlCacheGenPath -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="qmlCacheGenPath-prop"></a><span class="name">qmlCacheGenPath</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The absolute path to the <code>qmlcachegen</code> executable.</p>
+<p>Default: Determined by <a href="cli-setup-qt.html#">setup-qt</a>.</p>
+</div></div><!-- @@@qmlCacheGenPath -->
+<br/>
+<!-- $$$qmlImportScannerName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="qmlImportScannerName-prop"></a><span class="name">qmlImportScannerName</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The base name of the QML import scanner.</p>
+<p>Set this value if your system uses a name different from the default value.</p>
+<p>Default: <code>&quot;qmlimportscanner&quot;</code></p>
+</div></div><!-- @@@qmlImportScannerName -->
+<br/>
+<!-- $$$qmlPath -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="qmlPath-prop"></a><span class="name">qmlPath</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The absolute path to the directory where Qt's QML files are installed.</p>
+<p>Default: Determined by <a href="cli-setup-qt.html#">setup-qt</a>.</p>
+</div></div><!-- @@@qmlPath -->
+<br/>
+<p class="naviNextPrevious footerNavi">
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

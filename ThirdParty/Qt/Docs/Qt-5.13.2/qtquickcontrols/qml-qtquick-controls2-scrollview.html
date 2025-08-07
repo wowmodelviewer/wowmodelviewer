@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickscrollview.cpp -->
+  <title>ScrollView QML Type | Qt Quick Controls 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td ><a href="qtquick-controls2-qmlmodule.html">QML Types</a></td><td >ScrollView QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#sizing">Sizing</a></li>
+<li class="level2"><a href="#scroll-bars">Scroll Bars</a></li>
+<li class="level2"><a href="#touch-vs-mouse-interaction">Touch vs. Mouse Interaction</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">ScrollView QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$ScrollView-brief -->
+<p>Scrollable view. <a href="#details">More...</a></p>
+<!-- @@@ScrollView -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Controls 2.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.9</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-controls2-pane.html">Pane</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-controls2-scrollview-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-scrollview.html#contentChildren-prop">contentChildren</a></b></b> : list&lt;Item&gt;</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-scrollview.html#contentData-prop">contentData</a></b></b> : list&lt;Object&gt;</li>
+</ul>
+<!-- $$$ScrollView-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><a href="qml-qtquick-controls2-scrollview.html">ScrollView</a> provides scrolling for user-defined content. It can be used to either replace a <a href="../qtquick/qml-qtquick-flickable.html">Flickable</a>, or to decorate an existing one.</p>
+<p class="centerAlign"><img src="images/qtquickcontrols2-scrollview.png" alt="" /></p><p>The first example demonstrates the simplest usage of <a href="qml-qtquick-controls2-scrollview.html">ScrollView</a>.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls2-scrollview.html">ScrollView</a></span> {
+      <span class="name">width</span>: <span class="number">200</span>
+      <span class="name">height</span>: <span class="number">200</span>
+      <span class="name">clip</span>: <span class="number">true</span>
+
+      <span class="type"><a href="qml-qtquick-controls2-label.html">Label</a></span> {
+          <span class="name">text</span>: <span class="string">&quot;ABC&quot;</span>
+          <span class="name">font</span>.pixelSize: <span class="number">224</span>
+      }
+  }
+
+</pre>
+<p><b>Note: </b><a href="qml-qtquick-controls2-scrollview.html">ScrollView</a> does not automatically clip its contents. If it is not used as a full-screen item, you should consider setting the <a href="../qtquick/qml-qtquick-item.html#clip-prop">clip</a> property to <code>true</code>, as shown above.</p><p>The second example illustrates using an existing <a href="../qtquick/qml-qtquick-flickable.html">Flickable</a>, that is, a <a href="../qtquick/qml-qtquick-listview.html">ListView</a>.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls2-scrollview.html">ScrollView</a></span> {
+      <span class="name">width</span>: <span class="number">200</span>
+      <span class="name">height</span>: <span class="number">200</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+          <span class="name">model</span>: <span class="number">20</span>
+          <span class="name">delegate</span>: <span class="name">ItemDelegate</span> {
+              <span class="name">text</span>: <span class="string">&quot;Item &quot;</span> <span class="operator">+</span> <span class="name">index</span>
+          }
+      }
+  }
+
+</pre>
+<a name="sizing"></a>
+<h3 id="sizing">Sizing</h3>
+<p>As with Flickable, there are several things to keep in mind when using <a href="qml-qtquick-controls2-scrollview.html">ScrollView</a>:</p>
+<ul>
+<li>If only a single item is used within a <a href="qml-qtquick-controls2-scrollview.html">ScrollView</a>, the content size is automatically calculated based on the implicit size of its contained item. However, if more than one item is used (or an implicit size is not provided), the <a href="qml-qtquick-controls2-pane.html#contentWidth-prop">contentWidth</a> and <a href="qml-qtquick-controls2-pane.html#contentHeight-prop">contentHeight</a> properties must be set to the combined size of its contained items.</li>
+<li>If the content size is less than or equal to the size of the <a href="qml-qtquick-controls2-scrollview.html">ScrollView</a>, it will not be flickable.</li>
+</ul>
+<a name="scroll-bars"></a>
+<h3 id="scroll-bars">Scroll Bars</h3>
+<p>The horizontal and vertical scroll bars can be accessed and customized using the <a href="qml-qtquick-controls2-scrollbar.html#horizontal-attached-prop">ScrollBar.horizontal</a> and <a href="qml-qtquick-controls2-scrollbar.html#vertical-attached-prop">ScrollBar.vertical</a> attached properties. The following example adjusts the scroll bar policies so that the horizontal scroll bar is always off, and the vertical scroll bar is always on.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls2-scrollview.html">ScrollView</a></span> {
+      <span class="comment">// ...</span>
+      <span class="name">ScrollBar</span>.horizontal.policy: <span class="name">ScrollBar</span>.<span class="name">AlwaysOff</span>
+      <span class="name">ScrollBar</span>.vertical.policy: <span class="name">ScrollBar</span>.<span class="name">AlwaysOn</span>
+  }
+
+</pre>
+<a name="touch-vs-mouse-interaction"></a>
+<h3 id="touch-vs-mouse-interaction">Touch vs. Mouse Interaction</h3>
+<p>On touch, <a href="qml-qtquick-controls2-scrollview.html">ScrollView</a> enables flicking and makes the scroll bars non-interactive.</p>
+<p class="centerAlign"><img src="images/qtquickcontrols2-scrollindicator.gif" alt="" /></p><p>When interacted with a mouse device, flicking is disabled and the scroll bars are interactive.</p>
+<p class="centerAlign"><img src="images/qtquickcontrols2-scrollbar.gif" alt="" /></p><p>Scroll bars can be made interactive on touch, or non-interactive when interacted with a mouse device, by setting the <a href="qml-qtquick-controls2-scrollbar.html#interactive-prop">interactive</a> property explicitly to <code>true</code> or <code>false</code>, respectively.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls2-scrollview.html">ScrollView</a></span> {
+      <span class="comment">// ...</span>
+      <span class="name">ScrollBar</span>.horizontal.interactive: <span class="number">true</span>
+      <span class="name">ScrollBar</span>.vertical.interactive: <span class="number">true</span>
+  }
+
+</pre>
+<p><b>See also </b><a href="qml-qtquick-controls2-scrollbar.html">ScrollBar</a>, <a href="qml-qtquick-controls2-scrollindicator.html">ScrollIndicator</a>, <a href="qtquickcontrols2-customize.html#customizing-scrollview">Customizing ScrollView</a>, <a href="qtquickcontrols2-containers.html">Container Controls</a>, and <a href="qtquickcontrols2-focus.html">Focus Management in Qt Quick Controls</a>.</p>
+<!-- @@@ScrollView -->
+<h2>Property Documentation</h2>
+<!-- $$$contentChildren -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="contentChildren-prop"></a><span class="name">contentChildren</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the list of content children.</p>
+<p>The list contains all items that have been declared in QML as children of the view.</p>
+<p><b>Note: </b>Unlike <code>contentData</code>, <code>contentChildren</code> does not include non-visual QML objects.</p><p><b>See also </b><a href="../qtquick/qml-qtquick-item.html#children-prop">Item::children</a> and <a href="qml-qtquick-controls2-scrollview.html#contentData-prop">contentData</a>.</p>
+</div></div><!-- @@@contentChildren -->
+<br/>
+<!-- $$$contentData -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="contentData-prop"></a><span class="qmldefault">[default] </span><span class="name">contentData</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type">Object</span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the list of content data.</p>
+<p>The list contains all objects that have been declared in QML as children of the view.</p>
+<p><b>Note: </b>Unlike <code>contentChildren</code>, <code>contentData</code> does include non-visual QML objects.</p><p><b>See also </b><a href="../qtquick/qml-qtquick-item.html#data-prop">Item::data</a> and <a href="qml-qtquick-controls2-scrollview.html#contentChildren-prop">contentChildren</a>.</p>
+</div></div><!-- @@@contentData -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtserialbus-module-cpp.qdoc -->
+  <title>Qt Serial Bus C++ Classes | Qt Serial Bus 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtserialbus-index.html">Qt Serial Bus</a></td><td >Qt Serial Bus C++ Classes</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtserialbus-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#classes">Classes</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Serial Bus C++ Classes</h1>
+<span class="subtitle"></span>
+<!-- $$$QtSerialBus-brief -->
+<p>Provides classes to read and write serial bus data. <a href="#details">More...</a></p>
+<!-- @@@QtSerialBus -->
+<p>This module was introduced in  Qt 5.8.</p>
+<a name="classes"></a>
+<h2 id="classes">Classes</h2>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qmodbusclient.html">QModbusClient</a></p></td><td class="tblDescr"><p>The interface to send Modbus requests</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qcanbus.html">QCanBus</a></p></td><td class="tblDescr"><p>Handles registration and creation of bus plugins</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qcanbusdevice.html">QCanBusDevice</a></p></td><td class="tblDescr"><p>The interface class for CAN bus</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qcanbusdevice-filter.html">QCanBusDevice::Filter</a></p></td><td class="tblDescr"><p>QCanBusDevice::Filter struct defines a filter for CAN bus frames</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qcanbusdeviceinfo.html">QCanBusDeviceInfo</a></p></td><td class="tblDescr"><p>Information about CAN bus interfaces</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qcanbusfactoryv2.html">QCanBusFactoryV2</a></p></td><td class="tblDescr"><p>Factory class used as the plugin interface for CAN bus plugins</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qcanbusframe.html">QCanBusFrame</a></p></td><td class="tblDescr"><p>Container class representing a single CAN frame</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qcanbusframe-timestamp.html">QCanBusFrame::TimeStamp</a></p></td><td class="tblDescr"><p>Timestamp information with microsecond precision</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qmodbusdataunit.html">QModbusDataUnit</a></p></td><td class="tblDescr"><p>Container class representing single bit and 16 bit word entries in the Modbus register</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qmodbusdevice.html">QModbusDevice</a></p></td><td class="tblDescr"><p>The base class for Modbus classes, QModbusServer and QModbusClient</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qmodbusdeviceidentification.html">QModbusDeviceIdentification</a></p></td><td class="tblDescr"><p>Container class representing the physical and functional description of a Modbus server</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qmodbusexceptionresponse.html">QModbusExceptionResponse</a></p></td><td class="tblDescr"><p>Container class containing the function and error code inside a Modbus ADU</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qmodbuspdu.html">QModbusPdu</a></p></td><td class="tblDescr"><p>Abstract container class containing the function code and payload that is stored inside a Modbus ADU</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qmodbusrequest.html">QModbusRequest</a></p></td><td class="tblDescr"><p>Container class containing the function code and payload that is stored inside a Modbus ADU</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qmodbusresponse.html">QModbusResponse</a></p></td><td class="tblDescr"><p>Container class containing the function code and payload that is stored inside a Modbus ADU</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qmodbusreply.html">QModbusReply</a></p></td><td class="tblDescr"><p>Contains the data for a request sent with a QModbusClient derived class</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qmodbusrtuserialmaster.html">QModbusRtuSerialMaster</a></p></td><td class="tblDescr"><p>Represents a Modbus client that uses a serial bus for its communication with the Modbus server</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qmodbusrtuserialslave.html">QModbusRtuSerialSlave</a></p></td><td class="tblDescr"><p>Represents a Modbus server that uses a serial port for its communication with the Modbus client</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qmodbusserver.html">QModbusServer</a></p></td><td class="tblDescr"><p>The interface to receive and process Modbus requests</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qmodbustcpclient.html">QModbusTcpClient</a></p></td><td class="tblDescr"><p>The interface class for Modbus TCP client device</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qmodbustcpconnectionobserver.html">QModbusTcpConnectionObserver</a></p></td><td class="tblDescr"><p>Represents the interface for objects that can be passed to QModbusTcpServer::installConnectionObserver</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qmodbustcpserver.html">QModbusTcpServer</a></p></td><td class="tblDescr"><p>Represents a Modbus server that uses a TCP server for its communication with the Modbus client</p></td></tr>
+</table></div>
+<!-- $$$QtSerialBus-description -->
+<a name="details"></a>
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Provides classes to access various serial buses.</p>
+<p>For C++ projects include the header appropriate for the current use case, for example applications using the CAN bus device may use</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QCanBusDevice&gt;</span>
+
+</pre>
+<p>The .pro file should have the <i>serialbus</i> keyword added</p>
+<pre class="cpp">
+
+  QT <span class="operator">+</span><span class="operator">=</span> serialbus
+
+</pre>
+<p>See more in the <a href="qtserialbus-index.html">Qt Serial Bus Overview</a>.</p>
+</div>
+<!-- @@@QtSerialBus -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

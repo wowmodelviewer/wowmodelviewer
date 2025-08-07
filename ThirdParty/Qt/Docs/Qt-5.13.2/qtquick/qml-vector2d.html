@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmltypereference.qdoc -->
+  <title>vector2d QML Basic Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >vector2d QML Basic Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">vector2d QML Basic Type</h1>
+<span class="subtitle"></span>
+<!-- $$$vector2d-description -->
+<div class="descr"> <a name="details"></a>
+<p>A <code>vector2d</code> type has <code>x</code> and <code>y</code> attributes, otherwise it is similar to the <code>vector3d</code> type. Please see the documentation about the <code>vector3d</code> type for more information.</p>
+<p>To create a <code>vector2d</code> value, specify it as a &quot;x,y&quot; string, or define the components individually, or compose it with the Qt.vector2d() function.</p>
+<p>The vector2d type has the following idempotent functions which can be invoked in QML:</p>
+<div class="table"><table class="generic" width="60%">
+ <thead><tr class="qt-style"><th >Function Signature</th><th >Description</th><th >Example</th></tr></thead>
+<tr valign="top" class="odd"><td >real dotProduct(vector2d other)</td><td >Returns the scalar real result of the dot product of <code>this</code> vector2d with the <code>other</code> vector2d</td><td ><pre class="cpp">
+
+  var a <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>vector2d(<span class="number">1</span><span class="operator">,</span><span class="number">2</span>);
+  var b <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>vector2d(<span class="number">3</span><span class="operator">,</span><span class="number">4</span>);
+  var c <span class="operator">=</span> a<span class="operator">.</span>dotProduct(b);
+  console<span class="operator">.</span>log(c); <span class="comment">// 11</span>
+
+</pre>
+</td></tr>
+<tr valign="top" class="even"><td >vector2d times(vector2d other)</td><td >Returns the vector2d result of multiplying <code>this</code> vector2d with the <code>other</code> vector2d</td><td ><pre class="cpp">
+
+  var a <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>vector2d(<span class="number">1</span><span class="operator">,</span><span class="number">2</span>);
+  var b <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>vector2d(<span class="number">3</span><span class="operator">,</span><span class="number">4</span>);
+  var c <span class="operator">=</span> a<span class="operator">.</span>times(b);
+  console<span class="operator">.</span>log(c<span class="operator">.</span>toString()); <span class="comment">// QVector2D(3, 8)</span>
+
+</pre>
+</td></tr>
+<tr valign="top" class="odd"><td >vector2d times(real factor)</td><td >Returns the vector2d result of multiplying <code>this</code> vector2d with the scalar <code>factor</code></td><td ><pre class="cpp">
+
+  var a <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>vector2d(<span class="number">1</span><span class="operator">,</span><span class="number">2</span>);
+  var b <span class="operator">=</span> <span class="number">4.48</span>;
+  var c <span class="operator">=</span> a<span class="operator">.</span>times(b);
+  console<span class="operator">.</span>log(c<span class="operator">.</span>toString()); <span class="comment">// QVector2D(4.48, 8.96)</span>
+
+</pre>
+</td></tr>
+<tr valign="top" class="even"><td >vector2d plus(vector2d other)</td><td >Returns the vector2d result of the addition of <code>this</code> vector2d with the <code>other</code> vector2d</td><td ><pre class="cpp">
+
+  var a <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>vector2d(<span class="number">1</span><span class="operator">,</span><span class="number">2</span>);
+  var b <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>vector2d(<span class="number">3</span><span class="operator">,</span><span class="number">4</span>);
+  var c <span class="operator">=</span> a<span class="operator">.</span>plus(b);
+  console<span class="operator">.</span>log(c<span class="operator">.</span>toString()); <span class="comment">// QVector2D(4, 6)</span>
+
+</pre>
+</td></tr>
+<tr valign="top" class="odd"><td >vector2d minus(vector2d other)</td><td >Returns the vector2d result of the subtraction of <code>other</code> vector2d from <code>this</code> vector2d</td><td ><pre class="cpp">
+
+  var a <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>vector2d(<span class="number">1</span><span class="operator">,</span><span class="number">2</span>);
+  var b <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>vector2d(<span class="number">3</span><span class="operator">,</span><span class="number">4</span>);
+  var c <span class="operator">=</span> a<span class="operator">.</span>minus(b);
+  console<span class="operator">.</span>log(c<span class="operator">.</span>toString()); <span class="comment">// QVector2D(-2, -2)</span>
+
+</pre>
+</td></tr>
+<tr valign="top" class="even"><td >vector2d normalized()</td><td >Returns the normalized form of <code>this</code> vector</td><td ><pre class="cpp">
+
+  var a <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>vector2d(<span class="number">1</span><span class="operator">,</span><span class="number">2</span>);
+  var b <span class="operator">=</span> a<span class="operator">.</span>normalized();
+  console<span class="operator">.</span>log(b<span class="operator">.</span>toString()); <span class="comment">// QVector2D(0.447214, 0.894427)</span>
+
+</pre>
+</td></tr>
+<tr valign="top" class="odd"><td >real <a href="../qtwidgets/stylesheet-reference.html#length">length()</a></td><td >Returns the scalar real value of the length of <code>this</code> vector2d</td><td ><pre class="cpp">
+
+  var a <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>vector2d(<span class="number">1</span><span class="operator">,</span><span class="number">2</span>);
+  var b <span class="operator">=</span> a<span class="operator">.</span>length();
+  console<span class="operator">.</span>log(b<span class="operator">.</span>toString()); <span class="comment">// 2.23606797749979</span>
+
+</pre>
+</td></tr>
+<tr valign="top" class="even"><td >vector3d toVector3d()</td><td >Returns the vector3d result of converting <code>this</code> vector2d to a vector3d</td><td ><pre class="cpp">
+
+  var a <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>vector2d(<span class="number">1</span><span class="operator">,</span><span class="number">2</span>);
+  var b <span class="operator">=</span> a<span class="operator">.</span>toVector3d();
+  console<span class="operator">.</span>log(b<span class="operator">.</span>toString()); <span class="comment">// QVector3D(1, 2, 0)</span>
+
+</pre>
+</td></tr>
+<tr valign="top" class="odd"><td >vector4d toVector4d()</td><td >Returns the vector4d result of converting <code>this</code> vector2d to a vector4d</td><td ><pre class="cpp">
+
+  var a <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>vector2d(<span class="number">1</span><span class="operator">,</span><span class="number">2</span>);
+  var b <span class="operator">=</span> a<span class="operator">.</span>toVector4d();
+  console<span class="operator">.</span>log(b<span class="operator">.</span>toString()); <span class="comment">// QVector4D(1, 2, 0, 0)</span>
+
+</pre>
+</td></tr>
+<tr valign="top" class="even"><td >bool fuzzyEquals(vector2d other, real epsilon)</td><td >Returns true if <code>this</code> vector2d is approximately equal to the <code>other</code> vector2d. The approximation will be true if each attribute of <code>this</code> is within <code>epsilon</code> of <code>other</code>. Note that <code>epsilon</code> is an optional argument, the default <code>epsilon</code> is 0.00001.</td><td ><pre class="cpp">
+
+  var a <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>vector2d(<span class="number">1</span><span class="operator">,</span><span class="number">2</span>);
+  var b <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>vector2d(<span class="number">1.0001</span><span class="operator">,</span> <span class="number">1.9998</span>);
+  var c <span class="operator">=</span> a<span class="operator">.</span>fuzzyEquals(b);        <span class="comment">// default epsilon</span>
+  var d <span class="operator">=</span> a<span class="operator">.</span>fuzzyEquals(b<span class="operator">,</span> <span class="number">0.005</span>); <span class="comment">// supplied epsilon</span>
+  console<span class="operator">.</span>log(c <span class="operator">+</span> <span class="string">&quot; &quot;</span> <span class="operator">+</span> d); <span class="comment">// false true</span>
+
+</pre>
+</td></tr>
+</table></div>
+<p>This basic type is provided by the <a href="qtquick-module.html">QtQuick</a> import.</p>
+</div>
+<p><b>See also </b><a href="../qtqml/qtqml-typesystem-basictypes.html">QML Basic Types</a>.</p>
+<!-- @@@vector2d -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

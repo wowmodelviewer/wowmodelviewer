@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmlsensorgesture.cpp -->
+  <title>SensorGesture QML Type | Qt Sensors 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtsensors-index.html">Qt Sensors</a></td><td ><a href="qtsensors-qmlmodule.html">QML Types</a></td><td >SensorGesture QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtsensors-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">SensorGesture QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$SensorGesture-brief -->
+<p>Provides notifications when sensor-based gestures are detected. <a href="#details">More...</a></p>
+<!-- @@@SensorGesture -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtSensors 5.11</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  QtSensors 5.0</td></tr></table></div><ul>
+<li><a href="qml-qtsensors-sensorgesture-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtsensors-sensorgesture.html#availableGestures-prop">availableGestures</a></b></b> : stringlist</li>
+<li class="fn"><b><b><a href="qml-qtsensors-sensorgesture.html#enabled-prop">enabled</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtsensors-sensorgesture.html#gestures-prop">gestures</a></b></b> : stringlist</li>
+<li class="fn"><b><b><a href="qml-qtsensors-sensorgesture.html#invalidGestures-prop">invalidGestures</a></b></b> : stringlist</li>
+<li class="fn"><b><b><a href="qml-qtsensors-sensorgesture.html#validGestures-prop">validGestures</a></b></b> : stringlist</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtsensors-sensorgesture.html#detected-signal">detected</a></b></b>(<i>gesture</i>)</li>
+</ul>
+<!-- $$$SensorGesture-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>This type provides notification when sensor gestures are triggered.</p>
+<p>The following QML code creates a &quot;shake&quot; and &quot;SecondCounter&quot; <a href="qml-qtsensors-sensorgesture.html">SensorGesture</a> QML type, and displays the detected gesture in a text type.</p>
+<p><a href="qtsensors-module.html">QtSensors</a>.shake gesture is available with the Qt Sensors API, but the <a href="qtsensors-module.html">QtSensors</a>.SecondCounter sensor gesture is provided as example code for the <a href="qtsensors-qmlsensorgestures-example.html">Qt Sensors - SensorGesture QML Type example</a></p>
+<pre class="qml">
+
+  <span class="type">Item</span> {
+     <span class="type"><a href="qml-qtsensors-sensorgesture.html">SensorGesture</a></span> {
+         <span class="name">id</span>: <span class="name">sensorGesture</span>
+         <span class="name">enabled</span>: <span class="number">false</span>
+         <span class="name">gestures</span> : [<span class="string">&quot;QtSensors.shake&quot;</span>, <span class="string">&quot;QtSensors.SecondCounter&quot;</span>]
+         <span class="name">onDetected</span>:{
+             <span class="name">detectedText</span>.<span class="name">text</span> <span class="operator">=</span> <span class="name">gesture</span>
+         }
+     }
+     <span class="type">Text</span> {
+         <span class="name">id</span>: <span class="name">detectedText</span>
+         <span class="name">x</span>:<span class="number">5</span>
+         <span class="name">y</span>:<span class="number">160</span>
+     }
+  }
+
+</pre>
+<p><a href="sensorgesture-plugins-topics.html#qt-sensor-gestures">Qt Sensor Gestures</a> contains a list of currently supported sensor gestures and their descriptions.</p>
+<!-- @@@SensorGesture -->
+<h2>Property Documentation</h2>
+<!-- $$$availableGestures -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="availableGestures-prop"></a><span class="name">availableGestures</span> : <span class="type">stringlist</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property can be used to determine all available gestures on the system.</p>
+</div></div><!-- @@@availableGestures -->
+<br/>
+<!-- $$$enabled -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="enabled-prop"></a><span class="name">enabled</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property can be used to activate or deactivate the sensor gesture. Default value is false;</p>
+<p><b>See also </b><a href="qml-qtsensors-sensorgesture.html#detected-signal">SensorGesture::detected</a> and <a href="qml-qtsensors-sensorgesture.html#detected-signal">detected</a>.</p>
+</div></div><!-- @@@enabled -->
+<br/>
+<!-- $$$gestures -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="gestures-prop"></a><span class="name">gestures</span> : <span class="type">stringlist</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Set this property to a list of the gestures that the application is interested in detecting. This property cannot be changed while the type is enabled.</p>
+<p>The properties <a href="qml-qtsensors-sensorgesture.html#validGestures-prop">validGestures</a> and <a href="qml-qtsensors-sensorgesture.html#invalidGestures-prop">invalidGestures</a> will be set as appropriate immediately. To determine all available getures on the system please use the <a href="qml-qtsensors-sensorgesture.html#availableGestures-prop">availableGestures</a> property.</p>
+<p><b>See also </b><a href="sensorgesture-plugins-topics.html">QtSensorGestures Plugins</a>.</p>
+</div></div><!-- @@@gestures -->
+<br/>
+<!-- $$$invalidGestures -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="invalidGestures-prop"></a><span class="name">invalidGestures</span> : <span class="type">stringlist</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the requested gestures that were not found on the system.</p>
+</div></div><!-- @@@invalidGestures -->
+<br/>
+<!-- $$$validGestures -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="validGestures-prop"></a><span class="name">validGestures</span> : <span class="type">stringlist</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the requested gestures that were found on the system.</p>
+</div></div><!-- @@@validGestures -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$detected[overload1]$$$detected -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="detected-signal"></a><span class="name">detected</span>(<i>gesture</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted whenever a gesture is detected. The <i>gesture</i> parameter contains the gesture that was detected.</p>
+<p>The corresponding handler is <code>onDetected</code>.</p>
+</div></div><!-- @@@detected -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

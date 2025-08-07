@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- remoteobjects-registry.qdoc -->
+  <title>Qt Remote Objects Registry | Qt Remote Objects 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtremoteobjects-index.html">Qt Remote Objects</a></td><td >Qt Remote Objects Registry</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtremoteobjects-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Remote Objects Registry</h1>
+<span class="subtitle"></span>
+<!-- $$$qtremoteobjects-registry.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The registry provides a simpler way to establish these connections. Every node that wants to be part of the registry's network connects to the registry. The registry is itself a specialized source object, and thus is hosted by a node. Connecting to the registry is simply a matter of passing the registry's URL to the <a href="qremoteobjectnode.html">QRemoteObjectNode</a> or <a href="qremoteobjecthost.html">QRemoteObjectHost</a> constructor, or passing the URL to the setRegistryUrl method.</p>
+<p>The registry is tightly integrated with QtRO. Whenever a <a href="qtremoteobjects-source.html#source">Source</a> is added or removed, the name/URL is updated in the registry automatically. So once your node is connected to the registry, it is not necessary to connect to any other nodes manually. If you request an object on the network and you aren't connected to the hosting node, the registry will know what URL to connect to and will initiate the connection. Once connected (and the list of available objects is passed along, including the desired <a href="qtremoteobjects-source.html#source">Source</a>), the initialization process for the requested <a href="qtremoteobjects-replica.html#replica">Replica</a> will start automatically.</p>
+</div>
+<!-- @@@qtremoteobjects-registry.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

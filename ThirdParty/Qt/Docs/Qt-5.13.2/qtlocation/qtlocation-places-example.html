@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- places.qdoc -->
+  <title>Places (QML) | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td >Places (QML)</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+<li class="level1"><a href="#overview">Overview</a></li>
+<li class="level1"><a href="#displaying-categories">Displaying Categories</a></li>
+<li class="level1"><a href="#presenting-search-suggestions">Presenting Search Suggestions</a></li>
+<li class="level1"><a href="#searching-for-places">Searching for Places</a></li>
+<li class="level1"><a href="#displaying-place-content">Displaying Place Content</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Places (QML)</h1>
+<span class="subtitle"></span>
+<!-- $$$places-brief -->
+<p>The Places example demonstrates how to search for Places and access related content.</p>
+<!-- @@@places -->
+<!-- $$$places-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/places.png" alt="" /></p><p>The Places example demonstrates how to search for Places. In particular it shows how further information such as reviews, images and related content can be retrieved.</p>
+<a name="running-the-example"></a>
+<h4 id="running-the-example">Running the Example</h4>
+<p>To run the example from <a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a>, open the <b>Welcome</b> mode and select the example from <b>Examples</b>. For more information, visit <a href="http://doc.qt.io/qtcreator/creator-build-example-application.html">Building and Running an Example</a>.</p>
+<p>The example can work with any of the available geo services plugins. However, some plugins may require additional <a href="qml-qtlocation-pluginparameter.html">plugin parameters</a> in order to function correctly. <a href="qml-qtlocation-pluginparameter.html">Plugin parameters</a> can be passed on the command line using the <code>--plugin</code> argument, which takes the form:</p>
+<pre class="cpp plain">
+
+  --plugin.&lt;parameter name&gt; &lt;parameter value&gt;
+
+</pre>
+<p>Refer to the documentation for each of the geo services plugins for details on what plugin parameters they support. The default plugin used by this example is <a href="location-plugin-osm.html">Qt Location Open Street Map Plugin</a>, which does not require any parameters.</p>
+<a name="overview"></a>
+<h4 id="overview">Overview</h4>
+<p>The Places example presents an application window displaying a map. At the top of the window is a search box, which is used to enter a place search query. To search for a place enter a search term into the text box and click the magnifying glass icon. To search for a place by category, click the category icon to display the list of available categories and select the desired category. The place search query will be for places that are near the current location shown on the map.</p>
+<p>For some plugins like <a href="location-plugin-here.html">Qt Location HERE Plugin</a> the search box provides search term suggestions when three or more characters are entered. Selecting one of the suggestions will cause a place search to be performed with the selected search text.</p>
+<p>Clicking on a search result will display details about the place. If a places has rich content (editorials, reviews and images), these can be accessed by the buttons on the details page. To find similar places click the &quot;Find similar&quot; button.</p>
+<p>The geo service provider can be changed by accessing the &quot;Provider&quot; menu.</p>
+<a name="displaying-categories"></a>
+<h4 id="displaying-categories">Displaying Categories</h4>
+<p>Before search by category can be performed, the list of available categories needs to be retrieved. This is achieved by creating a <a href="qml-qtlocation-categorymodel.html">CategoryModel</a>.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtlocation-categorymodel.html">CategoryModel</a></span> {
+      <span class="name">id</span>: <span class="name">categoryModel</span>
+      <span class="name">hierarchical</span>: <span class="number">true</span>
+  }
+
+</pre>
+<p>The <a href="qml-qtlocation-categorymodel.html">CategoryModel</a> type provides a model of the available categories. It can provide either a flat list or a hierarchical tree model. In this example, we use a hierarchical tree model, by setting the <a href="qml-qtlocation-categorymodel.html#hierarchical-prop">hierarchical</a> property to <i>true</i>. The <a href="qml-qtlocation-categorymodel.html#plugin-prop">plugin</a> property is set during example intalization.</p>
+<p>Next we create a <a href="../qtquick/qml-qtquick-listview.html">ListView</a> to display the category model.</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+      <span class="name">id</span>: <span class="name">root</span>
+      property <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span> <span class="name">categoryModel</span>
+      property <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span> <span class="name">rootIndex</span>
+
+      signal <span class="type">searchCategory</span>(variant category)
+      signal <span class="type">showSubcategories</span>(variant index)
+
+      <span class="name">snapMode</span>: <span class="name">ListView</span>.<span class="name">SnapToItem</span>
+
+      <span class="name">model</span>: <span class="name">DelegateModel</span> {
+          <span class="name">id</span>: <span class="name">delegeteDataModel</span>
+          <span class="name">model</span>: <span class="name">root</span>.<span class="name">categoryModel</span>
+          <span class="name">rootIndex</span>: <span class="name">root</span>.<span class="name">rootIndex</span>
+          <span class="name">delegate</span>: <span class="name">CategoryDelegate</span> {
+              <span class="name">onSearchCategory</span>: <span class="name">root</span>.<span class="name">searchCategory</span>(<span class="name">category</span>);
+              <span class="name">onShowSubcategories</span>: <span class="name">root</span>.<span class="name">showSubcategories</span>(<span class="name">delegeteDataModel</span>.<span class="name">modelIndex</span>(<span class="name">index</span>))
+          }
+      }
+  }
+
+</pre>
+<p>Because a hierarchical model is being used, a <a href="../qtqml/qml-qtqml-models-delegatemodel.html">DelegateModel</a> is needed to provide navigation functionality. If flat list model was being used the view could use the <a href="qml-qtlocation-categorymodel.html">CategoryModel</a> directly.</p>
+<p>The <i>rootIndex</i> property sets the root index of the <a href="../qtqml/qml-qtqml-models-delegatemodel.html">DelegateModel</a>. Categories are displayed by the <i>CategoryDelegate</i>, which provides two signals. The <i>onShowSubcategories</i> emits the <b>showSubcategories()</b> signal with root index to the current index causing the sub categories of the selected category to be displayed. The <i>onSearchCategory</i> handler emits the <b>searchCategory()</b> signal with a category parameter indicating which specific category has been chosen.</p>
+<p>The <i>CategoryDelegate</i> displays the category name and emits the <b>searchCategory()</b> signal when the <a href="../qtquickcontrols/qml-qtquick-controls2-label.html">Label</a> is clicked:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-label.html">Label</a></span> {
+      <span class="name">id</span>: <span class="name">labelItem</span>
+      <span class="name">text</span>: <span class="name">category</span>.<span class="name">name</span>
+      <span class="name">anchors</span>.left: <span class="name">icon</span>.<span class="name">right</span>
+      <span class="name">anchors</span>.verticalCenter: <span class="name">parent</span>.<span class="name">verticalCenter</span>
+      <span class="name">anchors</span>.right: <span class="name">arrow</span>.<span class="name">left</span>
+  }
+
+  <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+      <span class="name">id</span>: <span class="name">mouse</span>
+      <span class="name">anchors</span>.fill: <span class="name">parent</span>
+      <span class="name">onClicked</span>: <span class="name">root</span>.<span class="name">searchCategory</span>()
+  }
+
+</pre>
+<p>The <i>CategoryDelegate</i> also displays <i>arrow</i> <a href="../qtquickcontrols/qml-qtquick-controls2-toolbutton.html">ToolButton</a> when <i>hasModelChildren</i> property is set.</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-toolbutton.html">ToolButton</a></span> {
+      <span class="name">id</span>: <span class="name">arrow</span>
+      <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+      <span class="name">anchors</span>.verticalCenter: <span class="name">parent</span>.<span class="name">verticalCenter</span>
+      <span class="name">anchors</span>.rightMargin: <span class="number">15</span>
+      <span class="name">visible</span>: <span class="name">model</span>.<span class="name">hasModelChildren</span>
+      <span class="name">iconSource</span>: <span class="string">&quot;../../resources/right.png&quot;</span>
+      <span class="name">onClicked</span>: <span class="name">root</span>.<span class="name">showSubcategories</span>()
+  }
+
+</pre>
+<a name="presenting-search-suggestions"></a><a name="presenting-search-suggestions"></a>
+<h4 id="presenting-search-suggestions">Presenting Search Suggestions</h4>
+<p>The <a href="qml-qtlocation-placesearchsuggestionmodel.html">PlaceSearchSuggestionModel</a> type is used to fetch suggested search terms based on a partially entered search term.</p>
+<p>A new suggestion search is triggered whenever the entered search term is changed.</p>
+<pre class="qml">
+
+  <span class="type">SearchBar</span> {
+      <span class="name">id</span>: <span class="name">searchBar</span>
+      <span class="name">onSearchTextChanged</span>: {
+          <span class="keyword">if</span> (<span class="name">searchText</span>.<span class="name">length</span> <span class="operator">&gt;=</span> <span class="number">3</span> <span class="operator">&amp;&amp;</span> <span class="name">suggestionModel</span> <span class="operator">!=</span> <span class="number">null</span>) {
+              <span class="name">suggestionModel</span>.<span class="name">searchTerm</span> <span class="operator">=</span> <span class="name">searchText</span>;
+              <span class="name">suggestionModel</span>.<span class="name">update</span>();
+          }
+      }
+  }
+
+</pre>
+<p>Suggestions are only queried if the length of the search term is three or more characters.</p>
+<p>When the status of the <a href="qml-qtlocation-placesearchsuggestionmodel.html">PlaceSearchSuggestionModel</a> changes, search suggestions are displayed.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtlocation-placesearchsuggestionmodel.html">PlaceSearchSuggestionModel</a></span> {
+      <span class="name">id</span>: <span class="name">suggestionModel</span>
+      <span class="name">searchArea</span>: <span class="name">searchRegion</span>
+
+      <span class="name">onStatusChanged</span>: {
+          <span class="keyword">if</span> (<span class="name">status</span> <span class="operator">==</span> <span class="name">PlaceSearchSuggestionModel</span>.<span class="name">Ready</span>)
+              <span class="name">stackView</span>.<span class="name">showSuggestions</span>()
+      }
+  }
+
+</pre>
+<p>The main object in the &quot;SuggestionsShown&quot; state is the <a href="../qtquick/qml-qtquick-listview.html">ListView</a> showing the search suggestions.</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+      <span class="name">id</span>: <span class="name">suggestionView</span>
+      property <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span> <span class="name">suggestionModel</span>
+      signal <span class="type">suggestionSelected</span>(string text)
+
+      <span class="name">model</span>: <span class="name">suggestionModel</span>
+      <span class="name">delegate</span>: <span class="name">Item</span> {
+          <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+          <span class="name">height</span>: <span class="name">label</span>.<span class="name">height</span> <span class="operator">*</span> <span class="number">1.5</span>
+          <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-label.html">Label</a></span> {
+              <span class="name">id</span>: <span class="name">label</span>
+              <span class="name">text</span>: <span class="name">suggestion</span>
+          }
+          <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+              <span class="name">anchors</span>.fill: <span class="name">parent</span>
+              <span class="name">onClicked</span>: <span class="name">suggestionSelected</span>(<span class="name">suggestion</span>)
+          }
+      }
+  }
+
+</pre>
+<p>A <a href="../qtquickcontrols/qml-qtquick-controls2-label.html">Label</a> object is used as the delegate to display the suggestion text. Clicking on the suggested search term updates the search term and triggers a place search using the search suggestion.</p>
+<a name="searching-for-places"></a>
+<h4 id="searching-for-places">Searching for Places</h4>
+<p>The <a href="qml-qtlocation-placesearchmodel.html">PlaceSearchModel</a> type is used to search for places.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtlocation-placesearchmodel.html">PlaceSearchModel</a></span> {
+      <span class="name">id</span>: <span class="name">placeSearchModel</span>
+      <span class="name">searchArea</span>: <span class="name">searchRegion</span>
+
+      <span class="keyword">function</span> <span class="name">searchForCategory</span>(category) {
+          <span class="name">searchTerm</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+          <span class="name">categories</span> <span class="operator">=</span> <span class="name">category</span>;
+          <span class="name">recommendationId</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+          <span class="name">searchArea</span> <span class="operator">=</span> <span class="name">searchRegion</span>
+          <span class="name">limit</span> <span class="operator">=</span> -<span class="number">1</span>;
+          <span class="name">update</span>();
+      }
+
+      <span class="keyword">function</span> <span class="name">searchForText</span>(text) {
+          <span class="name">searchTerm</span> <span class="operator">=</span> <span class="name">text</span>;
+          <span class="name">categories</span> <span class="operator">=</span> <span class="number">null</span>;
+          <span class="name">recommendationId</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+          <span class="name">searchArea</span> <span class="operator">=</span> <span class="name">searchRegion</span>
+          <span class="name">limit</span> <span class="operator">=</span> -<span class="number">1</span>;
+          <span class="name">update</span>();
+      }
+
+      <span class="keyword">function</span> <span class="name">searchForRecommendations</span>(placeId) {
+          <span class="name">searchTerm</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+          <span class="name">categories</span> <span class="operator">=</span> <span class="number">null</span>;
+          <span class="name">recommendationId</span> <span class="operator">=</span> <span class="name">placeId</span>;
+          <span class="name">searchArea</span> <span class="operator">=</span> <span class="number">null</span>;
+          <span class="name">limit</span> <span class="operator">=</span> -<span class="number">1</span>;
+          <span class="name">update</span>();
+      }
+
+      <span class="name">onStatusChanged</span>: {
+          <span class="keyword">switch</span> (<span class="name">status</span>) {
+          <span class="keyword">case</span> <span class="name">PlaceSearchModel</span>.<span class="name">Ready</span>:
+              <span class="keyword">if</span> (<span class="name">count</span> <span class="operator">&gt;</span> <span class="number">0</span>)
+                  <span class="name">stackView</span>.<span class="name">showPlaces</span>()
+              <span class="keyword">else</span>
+                  <span class="name">stackView</span>.<span class="name">showMessage</span>(<span class="name">qsTr</span>(<span class="string">&quot;Search Place Error&quot;</span>),<span class="name">qsTr</span>(<span class="string">&quot;Place not found !&quot;</span>))
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="name">PlaceSearchModel</span>.<span class="name">Error</span>:
+              <span class="name">stackView</span>.<span class="name">showMessage</span>(<span class="name">qsTr</span>(<span class="string">&quot;Search Place Error&quot;</span>),<span class="name">errorString</span>())
+              <span class="keyword">break</span>;
+          }
+      }
+  }
+
+</pre>
+<p>First some of the model's properties are set, which will be used to form the search request. The <a href="qml-qtlocation-placesearchmodel.html#searchArea-prop">searchArea</a> property is set to the <i>searchRegion</i> object which is a <a href="../qtpositioning/qml-geocircle.html">geocircle</a> with a center that is linked to the current location displayed on the <a href="qml-qtlocation-map.html">Map</a>.</p>
+<p>Finally, we define three helper functions <b>searchForCategory()</b>, <b>searchForText()</b> and <b>searchForRecommendations()</b> which set either the <a href="qml-qtlocation-placesearchmodel.html#categories-prop">categories</a> or <a href="qml-qtlocation-placesearchmodel.html#searchTerm-prop">searchTerm</a> or <a href="qml-qtlocation-placesearchmodel.html#recommendationId-prop">recommendationId</a> properties and invokes the <a href="qml-qtlocation-placesearchmodel.html#update-method">update()</a> method to start the place search. The search results are displayed in a <a href="../qtquick/qml-qtquick-listview.html">ListView</a>.</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+      <span class="name">id</span>: <span class="name">searchView</span>
+      <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+      <span class="name">height</span>: <span class="name">parent</span>.<span class="name">height</span>
+
+      property <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span> <span class="name">placeSearchModel</span>
+      signal <span class="type">showPlaceDetails</span>(variant place, variant distance)
+      signal <span class="type">showMap</span>()
+
+      <span class="name">model</span>: <span class="name">placeSearchModel</span>
+      <span class="name">delegate</span>: <span class="name">SearchResultDelegate</span> {
+          <span class="name">onShowPlaceDetails</span>: <span class="name">searchView</span>.<span class="name">showPlaceDetails</span>(<span class="name">place</span>, <span class="name">distance</span>)
+          <span class="name">onSearchFor</span>: <span class="name">placeSearchModel</span>.<span class="name">searchForText</span>(<span class="name">query</span>);
+      }
+
+      <span class="name">footer</span>:
+
+          <span class="name">RowLayout</span> {
+          <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+
+          <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-button.html">Button</a></span> {
+              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Previous&quot;</span>)
+              <span class="name">enabled</span>: <span class="name">placeSearchModel</span>.<span class="name">previousPagesAvailable</span>
+              <span class="name">onClicked</span>: <span class="name">placeSearchModel</span>.<span class="name">previousPage</span>()
+              <span class="name">Layout</span>.alignment: <span class="name">Qt</span>.<span class="name">AlignHCenter</span>
+          }
+
+          <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-button.html">Button</a></span> {
+              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Clear&quot;</span>)
+              <span class="name">onClicked</span>: {
+                  <span class="name">placeSearchModel</span>.<span class="name">reset</span>()
+                  <span class="name">showMap</span>()
+              }
+              <span class="name">Layout</span>.alignment: <span class="name">Qt</span>.<span class="name">AlignHCenter</span>
+          }
+
+          <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-button.html">Button</a></span> {
+              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Next&quot;</span>)
+              <span class="name">enabled</span>: <span class="name">placeSearchModel</span>.<span class="name">nextPagesAvailable</span>
+              <span class="name">onClicked</span>: <span class="name">placeSearchModel</span>.<span class="name">nextPage</span>()
+              <span class="name">Layout</span>.alignment: <span class="name">Qt</span>.<span class="name">AlignHCenter</span>
+          }
+      }
+  }
+
+</pre>
+<p>The delegate used in the <a href="../qtquick/qml-qtquick-listview.html">ListView</a>, <i>SearchResultDelegate</i>, is designed to handle multiple search result types via a <a href="../qtquick/qml-qtquick-loader.html">Loader</a> object. For results of type <i>PlaceResult</i> the delegate is:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtqml/qml-qtqml-component.html">Component</a></span> {
+      <span class="name">id</span>: <span class="name">placeComponent</span>
+      <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+          <span class="name">id</span>: <span class="name">placeRoot</span>
+          <span class="name">width</span>: <span class="name">root</span>.<span class="name">width</span>
+          <span class="name">height</span>: <span class="name">Math</span>.<span class="name">max</span>(<span class="name">icon</span>.<span class="name">height</span>, <span class="number">3</span> <span class="operator">*</span> <span class="name">placeName</span>.<span class="name">height</span>)
+
+          <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+              <span class="name">anchors</span>.fill: <span class="name">parent</span>
+              <span class="name">color</span>: <span class="string">&quot;#44ffffff&quot;</span>
+              <span class="name">visible</span>: <span class="name">mouse</span>.<span class="name">pressed</span>
+          }
+
+          <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+              <span class="name">anchors</span>.fill: <span class="name">parent</span>
+              <span class="name">color</span>: <span class="string">&quot;#dbffde&quot;</span>
+              <span class="name">visible</span>: <span class="name">model</span>.<span class="name">sponsored</span> <span class="operator">!==</span> <span class="name">undefined</span> ? <span class="name">model</span>.<span class="name">sponsored</span> : <span class="number">false</span>
+
+              <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-label.html">Label</a></span> {
+                  <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Sponsored result&quot;</span>)
+                  <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                  <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+                  <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+                  <span class="name">font</span>.pixelSize: <span class="number">8</span>
+                  <span class="name">visible</span>: <span class="name">model</span>.<span class="name">sponsored</span> <span class="operator">!==</span> <span class="name">undefined</span> ? <span class="name">model</span>.<span class="name">sponsored</span> : <span class="number">false</span>
+              }
+          }
+
+          <span class="type"><a href="../qtquick/qml-qtquick-layouts-gridlayout.html">GridLayout</a></span> {
+              <span class="name">rows</span>: <span class="number">2</span>
+              <span class="name">columns</span>: <span class="number">2</span>
+              <span class="name">anchors</span>.fill: <span class="name">parent</span>
+              <span class="name">anchors</span>.leftMargin: <span class="number">30</span>
+              <span class="name">flow</span>: <span class="name">GridLayout</span>.<span class="name">TopToBottom</span>
+
+              <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+                  <span class="comment">// anchors.verticalCenter: parent.verticalCenter</span>
+                  <span class="name">id</span>:<span class="name">icon</span>
+                  <span class="name">source</span>: <span class="name">place</span>.<span class="name">favorite</span> ? <span class="string">&quot;../../resources/star.png&quot;</span> : <span class="name">place</span>.<span class="name">icon</span>.<span class="name">url</span>()
+                  <span class="name">Layout</span>.rowSpan: <span class="number">2</span>
+              }
+
+              <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-label.html">Label</a></span> {
+                  <span class="name">id</span>: <span class="name">placeName</span>
+                  <span class="name">text</span>: <span class="name">place</span>.<span class="name">favorite</span> ? <span class="name">place</span>.<span class="name">favorite</span>.<span class="name">name</span> : <span class="name">place</span>.<span class="name">name</span>
+                  <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+              }
+
+              <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-label.html">Label</a></span> {
+                  <span class="name">id</span>: <span class="name">distanceText</span>
+                  <span class="name">font</span>.italic: <span class="number">true</span>
+                  <span class="name">text</span>: <span class="name">Helper</span>.<span class="name">formatDistance</span>(<span class="name">distance</span>)
+                  <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+              }
+          }
+
+          <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+              <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+              <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+              <span class="name">anchors</span>.margins: <span class="number">15</span>
+              <span class="name">height</span>: <span class="number">1</span>
+              <span class="name">color</span>: <span class="string">&quot;#46a2da&quot;</span>
+          }
+
+          <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+              <span class="name">id</span>: <span class="name">mouse</span>
+              <span class="name">anchors</span>.fill: <span class="name">parent</span>
+              <span class="name">onClicked</span>: {
+                  <span class="keyword">if</span> (<span class="name">model</span>.<span class="name">type</span> <span class="operator">===</span> <span class="name">undefined</span> <span class="operator">||</span> <span class="name">type</span> <span class="operator">===</span> <span class="name">PlaceSearchModel</span>.<span class="name">PlaceResult</span>) {
+                      <span class="keyword">if</span> (!<span class="name">place</span>.<span class="name">detailsFetched</span>)
+                          <span class="name">place</span>.<span class="name">getDetails</span>();
+                      <span class="name">root</span>.<span class="name">showPlaceDetails</span>(<span class="name">model</span>.<span class="name">place</span>, <span class="name">model</span>.<span class="name">distance</span>);
+                  }
+              }
+          }
+      }
+  }
+
+</pre>
+<a name="displaying-place-content"></a>
+<h4 id="displaying-place-content">Displaying Place Content</h4>
+<p>Places can have additional rich content, including editorials, reviews and images. Rich content is accessed via a set of models. Content models are generally not created directly by the application developer, instead models are obtained from the <a href="qml-qtlocation-place.html#editorialModel-prop">editorialModel</a>, <a href="qml-qtlocation-place.html#reviewModel-prop">reviewModel</a> and <a href="qml-qtlocation-place.html#imageModel-prop">imageModel</a> properties of the <a href="qml-qtlocation-place.html">Place</a> type.</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+      <span class="name">id</span>:<span class="name">view</span>
+      property <span class="type"><a href="qml-qtlocation-place.html">Place</a></span> <span class="name">place</span>
+      signal <span class="type">showEditorial</span>(variant editorial)
+      <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+      <span class="name">height</span>: <span class="name">parent</span>.<span class="name">height</span>
+      <span class="name">model</span>: <span class="name">place</span>.<span class="name">editorialModel</span>
+      <span class="name">delegate</span>: <span class="name">EditorialDelegate</span> {
+          <span class="name">onShowEditorial</span>: <span class="name">view</span>.<span class="name">showEditorial</span>(<span class="name">model</span>)
+      }
+  }
+
+</pre>
+<p><a href="https://code.qt.io/cgit/qt/qtlocation.git/tree/examples/location/places?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@places -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

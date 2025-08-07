@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwaylandxdgshellv5.cpp -->
+  <title>XdgPopupV5 QML Type | Qt Wayland Compositor 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwaylandcompositor-index.html">Qt Wayland Compositor</a></td><td ><a href="qtwayland-compositor-qmlmodule.html">QML Types</a></td><td >XdgPopupV5 QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwaylandcompositor-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">XdgPopupV5 QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$XdgPopupV5-brief -->
+<p>Provides a <code>xdg_popup</code> interface that implements popup features for the xdg-shell protocol. <a href="#details">More...</a></p>
+<!-- @@@XdgPopupV5 -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtWayland.Compositor 1.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr></table></div><ul>
+<li><a href="qml-qtwayland-compositor-xdgpopupv5-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-xdgpopupv5.html#parentSurface-prop">parentSurface</a></b></b> : WaylandSurface</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-xdgpopupv5.html#position-prop">position</a></b></b> : point</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-xdgpopupv5.html#shell-prop">shell</a></b></b> : XdgShellV5</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-xdgpopupv5.html#surface-prop">surface</a></b></b> : WaylandSurface</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtwayland-compositor-xdgpopupv5.html#initialize-method">initialize</a></b></b>(<i>shell</i>,  WaylandSurface <i>surface</i>,  WaylandSurface <i>parentSurface</i>,  point <i>position</i>,  WaylandResource <i>resource</i>)</li>
+</ul>
+<!-- $$$XdgPopupV5-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>This type is part of the <a href="qml-qtwayland-compositor-xdgshellv5.html">XdgShellV5</a> extension and provides a way to extend the functionality of an existing <a href="qml-qtwayland-compositor-waylandsurface.html">WaylandSurface</a> for handling popup surfaces created by clients using xdg-shell.</p>
+<p>It corresponds to the Wayland interface <code>xdg_popup</code> for the unstable xdg-shell protocol v5.</p>
+<!-- @@@XdgPopupV5 -->
+<h2>Property Documentation</h2>
+<!-- $$$parentSurface -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="parentSurface-prop"></a><span class="name">parentSurface</span> : <span class="type"><a href="qml-qtwayland-compositor-waylandsurface.html">WaylandSurface</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the surface associated with the parent of this <a href="qml-qtwayland-compositor-xdgpopupv5.html" class="obsolete">XdgPopupV5</a>.</p>
+</div></div><!-- @@@parentSurface -->
+<br/>
+<!-- $$$position -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="position-prop"></a><span class="name">position</span> : <span class="type"><a href="../qtqml/qml-point.html">point</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the location of the upper left corner of the surface relative to the upper left corner of the parent surface, in surface local coordinates.</p>
+</div></div><!-- @@@position -->
+<br/>
+<!-- $$$shell -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="shell-prop"></a><span class="name">shell</span> : <span class="type"><a href="qml-qtwayland-compositor-xdgshellv5.html">XdgShellV5</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the shell associated with this <a href="qml-qtwayland-compositor-xdgpopupv5.html" class="obsolete">XdgPopupV5</a>.</p>
+</div></div><!-- @@@shell -->
+<br/>
+<!-- $$$surface -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="surface-prop"></a><span class="name">surface</span> : <span class="type"><a href="qml-qtwayland-compositor-waylandsurface.html">WaylandSurface</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the surface associated with this <a href="qml-qtwayland-compositor-xdgpopupv5.html" class="obsolete">XdgPopupV5</a>.</p>
+</div></div><!-- @@@surface -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$initialize[overload1]$$$initializeWaylandSurfaceWaylandSurfacepointWaylandResource -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="initialize-method"></a><span class="type">void</span> <span class="name">initialize</span>(<i>shell</i>,  <span class="type"><a href="qml-qtwayland-compositor-waylandsurface.html">WaylandSurface</a></span> <i>surface</i>,  <span class="type"><a href="qml-qtwayland-compositor-waylandsurface.html">WaylandSurface</a></span> <i>parentSurface</i>,  <span class="type"><a href="../qtqml/qml-point.html">point</a></span> <i>position</i>,  <span class="type">WaylandResource</span> <i>resource</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Initializes the xdg popup, associating it with the given <i>shell</i>, <i>surface</i>, <i>parentSurface</i>, <i>position</i> and <i>resource</i>.</p>
+</div></div><!-- @@@initialize -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

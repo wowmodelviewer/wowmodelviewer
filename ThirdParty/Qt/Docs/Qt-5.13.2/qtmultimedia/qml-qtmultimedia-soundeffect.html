@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qsoundeffect.cpp -->
+  <title>SoundEffect QML Type | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-qmlmodule.html">QML Types</a></td><td >SoundEffect QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">SoundEffect QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$SoundEffect-brief -->
+<p>The <a href="qml-multimedia.html#soundeffect">SoundEffect</a> type provides a way to play sound effects in QML. <a href="#details">More...</a></p>
+<!-- @@@SoundEffect -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtMultimedia 5.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiates:</td><td class="memItemRight bottomAlign"> <a href="qml-qtmultimedia-soundeffect.html"><a href="qsoundeffect.html">QSoundEffect</a></td></tr></table></div><ul>
+<li><a href="qml-qtmultimedia-soundeffect-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmultimedia-soundeffect.html#category-prop">category</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-soundeffect.html#loops-prop">loops</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-soundeffect.html#loopsRemaining-prop">loopsRemaining</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-soundeffect.html#muted-prop">muted</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-soundeffect.html#playing-prop">playing</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-soundeffect.html#source-prop">source</a></b></b> : url</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-soundeffect.html#status-prop">status</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-soundeffect.html#volume-prop">volume</a></b></b> : qreal</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmultimedia-soundeffect.html#categoryChanged-signal">categoryChanged</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-soundeffect.html#loadedChanged-signal">loadedChanged</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-soundeffect.html#loopCountChanged-signal">loopCountChanged</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-soundeffect.html#loopsRemainingChanged-signal">loopsRemainingChanged</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-soundeffect.html#mutedChanged-signal">mutedChanged</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-soundeffect.html#playingChanged-signal">playingChanged</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-soundeffect.html#sourceChanged-signal">sourceChanged</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-soundeffect.html#statusChanged-signal">statusChanged</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-soundeffect.html#volumeChanged-signal">volumeChanged</a></b></b>()</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">bool <b><b><a href="qml-qtmultimedia-soundeffect.html#isLoaded-method">isLoaded</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-soundeffect.html#play-method">play</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-soundeffect.html#stop-method">stop</a></b></b>()</li>
+</ul>
+<!-- $$$SoundEffect-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>This type allows you to play uncompressed audio files (typically WAV files) in a generally lower latency way, and is suitable for &quot;feedback&quot; type sounds in response to user actions (e.g&#x2e; virtual keyboard sounds, positive or negative feedback for popup dialogs, or game sounds). If low latency is not important, consider using the <a href="qml-qtmultimedia-mediaplayer.html">MediaPlayer</a> or Audio types instead, since they support a wider variety of media formats and are less resource intensive.</p>
+<p>Typically the sound effect should be reused, which allows all the parsing and preparation to be done ahead of time, and only triggered when necessary. This is easy to achieve with QML, since you can declare your <a href="qml-multimedia.html#soundeffect">SoundEffect</a> instance and refer to it elsewhere.</p>
+<p>The following example plays a WAV file on mouse click.</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+      <span class="name">text</span>: <span class="string">&quot;Click Me!&quot;</span>;
+      <span class="name">font</span>.pointSize: <span class="number">24</span>;
+      <span class="name">width</span>: <span class="number">150</span>; <span class="name">height</span>: <span class="number">50</span>;
+
+      <span class="type"><a href="qml-qtmultimedia-soundeffect.html">SoundEffect</a></span> {
+          <span class="name">id</span>: <span class="name">playSound</span>
+          <span class="name">source</span>: <span class="string">&quot;soundeffect.wav&quot;</span>
+      }
+      <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+          <span class="name">id</span>: <span class="name">playArea</span>
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">onPressed</span>: { <span class="name">playSound</span>.<span class="name">play</span>() }
+      }
+  }
+
+</pre>
+<p>Since <a href="qml-multimedia.html#soundeffect">SoundEffect</a> requires slightly more resources to achieve lower latency playback, the platform may limit the number of simultaneously playing sound effects.</p>
+<!-- @@@SoundEffect -->
+<h2>Property Documentation</h2>
+<!-- $$$category -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="category-prop"></a><span class="name">category</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property contains the <i>category</i> of this sound effect.</p>
+<p>Some platforms can perform different audio routing for different categories, or may allow the user to set different volume levels for different categories.</p>
+<p>This setting will be ignored on platforms that do not support audio categories.</p>
+</div></div><!-- @@@category -->
+<br/>
+<!-- $$$loops -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="loops-prop"></a><span class="name">loops</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the number of times the sound is played. A value of 0 or 1 means the sound will be played only once; set to <a href="qml-multimedia.html#soundeffect">SoundEffect</a>.Infinite to enable infinite looping.</p>
+<p>The value can be changed while the sound effect is playing, in which case it will update the remaining loops to the new value.</p>
+</div></div><!-- @@@loops -->
+<br/>
+<!-- $$$loopsRemaining -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="loopsRemaining-prop"></a><span class="name">loopsRemaining</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property contains the number of loops remaining before the sound effect stops by itself, or <a href="qml-multimedia.html#soundeffect">SoundEffect</a>.Infinite if that's what has been set in <a href="qml-qtmultimedia-soundeffect.html#loops-prop">loops</a>.</p>
+</div></div><!-- @@@loopsRemaining -->
+<br/>
+<!-- $$$muted -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="muted-prop"></a><span class="name">muted</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property provides a way to control muting. A value of <code>true</code> will mute this effect. Otherwise, playback will occur with the currently specified <a href="qml-qtmultimedia-soundeffect.html#volume-prop">volume</a>.</p>
+</div></div><!-- @@@muted -->
+<br/>
+<!-- $$$playing -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="playing-prop"></a><span class="name">playing</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property indicates whether the sound effect is playing or not.</p>
+</div></div><!-- @@@playing -->
+<br/>
+<!-- $$$source -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="source-prop"></a><span class="name">source</span> : <span class="type"><a href="../qtqml/qml-url.html">url</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the url for the sound to play. For the <a href="qml-multimedia.html#soundeffect">SoundEffect</a> to attempt to load the source, the URL must exist and the application must have read permission in the specified directory. If the desired source is a local file the URL may be specified using either absolute or relative (to the file that declared the <a href="qml-multimedia.html#soundeffect">SoundEffect</a>) pathing.</p>
+</div></div><!-- @@@source -->
+<br/>
+<!-- $$$status -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="status-prop"></a><span class="name">status</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property indicates the current status of the <a href="qml-multimedia.html#soundeffect">SoundEffect</a> as enumerated within <a href="qml-multimedia.html#soundeffect">SoundEffect</a>. Possible statuses are listed below.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Value</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><a href="qml-multimedia.html#soundeffect">SoundEffect</a>.Null</td><td >No source has been set or the source is null.</td></tr>
+<tr valign="top" class="even"><td ><a href="qml-multimedia.html#soundeffect">SoundEffect</a>.Loading</td><td >The <a href="qml-multimedia.html#soundeffect">SoundEffect</a> is trying to load the source.</td></tr>
+<tr valign="top" class="odd"><td ><a href="qml-multimedia.html#soundeffect">SoundEffect</a>.Ready</td><td >The source is loaded and ready for play.</td></tr>
+<tr valign="top" class="even"><td ><a href="qml-multimedia.html#soundeffect">SoundEffect</a>.Error</td><td >An error occurred during operation, such as failure of loading the source.</td></tr>
+</table></div>
+</div></div><!-- @@@status -->
+<br/>
+<!-- $$$volume -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="volume-prop"></a><span class="name">volume</span> : <span class="type">qreal</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the volume of the sound effect playback.</p>
+<p>The volume is scaled linearly from <code>0.0</code> (silence) to <code>1.0</code> (full volume). Values outside this range will be clamped.</p>
+<p>The default volume is <code>1.0</code>.</p>
+<p>UI volume controls should usually be scaled nonlinearly. For example, using a logarithmic scale will produce linear changes in perceived loudness, which is what a user would normally expect from a volume control. See <a href="qml-qtmultimedia-qtmultimedia.html#convertVolume-method">QtMultimedia.convertVolume()</a> for more details.</p>
+</div></div><!-- @@@volume -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$categoryChanged[overload1]$$$categoryChanged -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="categoryChanged-signal"></a><span class="name">categoryChanged</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The <code>categoryChanged</code> signal is emitted when the category property has changed.</p>
+<p>The corresponding handler is <code>onCategoryChanged</code>.</p>
+</div></div><!-- @@@categoryChanged -->
+<br/>
+<!-- $$$loadedChanged[overload1]$$$loadedChanged -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="loadedChanged-signal"></a><span class="name">loadedChanged</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The <code>loadedChanged</code> signal is emitted when the loading state has changed.</p>
+<p>The corresponding handler is <code>onLoadedChanged</code>.</p>
+</div></div><!-- @@@loadedChanged -->
+<br/>
+<!-- $$$loopCountChanged[overload1]$$$loopCountChanged -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="loopCountChanged-signal"></a><span class="name">loopCountChanged</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The <code>loopCountChanged</code> signal is emitted when the initial number of loops has changed.</p>
+<p>The corresponding handler is <code>onLoopCountChanged</code>.</p>
+</div></div><!-- @@@loopCountChanged -->
+<br/>
+<!-- $$$loopsRemainingChanged[overload1]$$$loopsRemainingChanged -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="loopsRemainingChanged-signal"></a><span class="name">loopsRemainingChanged</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The <code>loopsRemainingChanged</code> signal is emitted when the remaining number of loops has changed.</p>
+<p>The corresponding handler is <code>onLoopsRemainingChanged</code>.</p>
+</div></div><!-- @@@loopsRemainingChanged -->
+<br/>
+<!-- $$$mutedChanged[overload1]$$$mutedChanged -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="mutedChanged-signal"></a><span class="name">mutedChanged</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The <code>mutedChanged</code> signal is emitted when the mute state has changed.</p>
+<p>The corresponding handler is <code>onMutedChanged</code>.</p>
+</div></div><!-- @@@mutedChanged -->
+<br/>
+<!-- $$$playingChanged[overload1]$$$playingChanged -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="playingChanged-signal"></a><span class="name">playingChanged</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The <code>playingChanged</code> signal is emitted when the playing property has changed.</p>
+<p>The corresponding handler is <code>onPlayingChanged</code>.</p>
+</div></div><!-- @@@playingChanged -->
+<br/>
+<!-- $$$sourceChanged[overload1]$$$sourceChanged -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="sourceChanged-signal"></a><span class="name">sourceChanged</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The <code>sourceChanged</code> signal is emitted when the source has been changed.</p>
+<p>The corresponding handler is <code>onSourceChanged</code>.</p>
+</div></div><!-- @@@sourceChanged -->
+<br/>
+<!-- $$$statusChanged[overload1]$$$statusChanged -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="statusChanged-signal"></a><span class="name">statusChanged</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The <code>statusChanged</code> signal is emitted when the status property has changed.</p>
+<p>The corresponding handler is <code>onStatusChanged</code>.</p>
+</div></div><!-- @@@statusChanged -->
+<br/>
+<!-- $$$volumeChanged[overload1]$$$volumeChanged -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="volumeChanged-signal"></a><span class="name">volumeChanged</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The <code>volumeChanged</code> signal is emitted when the volume has changed.</p>
+<p>The corresponding handler is <code>onVolumeChanged</code>.</p>
+</div></div><!-- @@@volumeChanged -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$isLoaded[overload1]$$$isLoaded -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="isLoaded-method"></a><span class="type"><a href="../qtqml/qml-bool.html">bool</a></span> <span class="name">isLoaded</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns whether the sound effect has finished loading the <a href="qml-qtmultimedia-soundeffect.html#source-prop">source</a>.</p>
+</div></div><!-- @@@isLoaded -->
+<br/>
+<!-- $$$play[overload1]$$$play -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="play-method"></a><span class="name">play</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Start playback of the sound effect, looping the effect for the number of times as specified in the loops property.</p>
+<p>This is the default method for <a href="qml-multimedia.html#soundeffect">SoundEffect</a>.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtmultimedia-soundeffect.html">SoundEffect</a></span> {
+      <span class="name">id</span>: <span class="name">playSound</span>
+      <span class="name">source</span>: <span class="string">&quot;soundeffect.wav&quot;</span>
+  }
+  <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+      <span class="name">id</span>: <span class="name">playArea</span>
+      <span class="name">anchors</span>.fill: <span class="name">parent</span>
+      <span class="name">onPressed</span>: { <span class="name">playSound</span>.<span class="name">play</span>() }
+  }
+
+</pre>
+</div></div><!-- @@@play -->
+<br/>
+<!-- $$$stop[overload1]$$$stop -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="stop-method"></a><span class="name">stop</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Stop current playback.</p>
+</div></div><!-- @@@stop -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

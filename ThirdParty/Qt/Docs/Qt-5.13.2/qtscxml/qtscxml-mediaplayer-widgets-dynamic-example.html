@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- mediaplayer-widgets-dynamic.qdoc -->
+  <title>Qt SCXML Media Player Example (Dynamic) | Qt SCXML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtscxml-index.html">Qt SCXML</a></td><td >Qt SCXML Media Player Example (Dynamic)</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtscxml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+<li class="level1"><a href="#using-the-ecmascript-data-model">Using the ECMAScript Data Model</a></li>
+<li class="level1"><a href="#dynamically-loading-the-state-machine">Dynamically Loading the State Machine</a></li>
+<li class="level1"><a href="#connecting-to-states">Connecting to States</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt SCXML Media Player Example (Dynamic)</h1>
+<span class="subtitle"></span>
+<!-- $$$mediaplayer-widgets-dynamic-brief -->
+<p>A widget-based application that sends data to and receives it from a dynamically loaded ECMAScript data model.</p>
+<!-- @@@mediaplayer-widgets-dynamic -->
+<!-- $$$mediaplayer-widgets-dynamic-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/mediaplayer.png" alt="" /></p><p><i>Media Player Example (Dynamic)</i> demonstrates how to access data from a dynamically loaded ECMAScript data model.</p>
+<p>The UI is created using Qt Widgets.</p>
+<a name="running-the-example"></a>
+<h4 id="running-the-example">Running the Example</h4>
+<p>To run the example from <a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a>, open the <b>Welcome</b> mode and select the example from <b>Examples</b>. For more information, visit <a href="http://doc.qt.io/qtcreator/creator-build-example-application.html">Building and Running an Example</a>.</p>
+<a name="using-the-ecmascript-data-model"></a>
+<h4 id="using-the-ecmascript-data-model">Using the ECMAScript Data Model</h4>
+<p>We specify the data model as a value of the <i>datamodel</i> attribute of the <code>&lt;scxml&gt;</code> element in <i>mediaplayer-common/mediaplayer.scxml</i>:</p>
+<pre class="cpp">
+
+  &lt;scxml
+      xmlns=&quot;http://www.w3.org/2005/07/scxml&quot;
+      version=&quot;1.0&quot;
+      name=&quot;MediaPlayerStateMachine&quot;
+      initial=&quot;stopped&quot;
+      datamodel=&quot;ecmascript&quot;
+  &gt;
+      &lt;datamodel&gt;
+          &lt;data id=&quot;media&quot;/&gt;
+      &lt;/datamodel&gt;
+
+</pre>
+<a name="dynamically-loading-the-state-machine"></a>
+<h4 id="dynamically-loading-the-state-machine">Dynamically Loading the State Machine</h4>
+<p>We link against the Qt SCXML module by adding the following line to the example <i>.pro</i> file:</p>
+<pre class="cpp">
+
+  QT += widgets scxml
+
+</pre>
+<p>We dynamically create and instantiate the state machine in <i>mediaplayer-wigdets-dynamic/mediaplayer-widgets-dynamic.cpp</i>:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &quot;../mediaplayer-common/mainwindow.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QScxmlStateMachine&gt;</span>
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span><span class="operator">*</span>argv)
+  {
+      <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      <span class="keyword">auto</span> machine <span class="operator">=</span> <span class="type"><a href="qscxmlstatemachine.html">QScxmlStateMachine</a></span><span class="operator">::</span>fromFile(
+                  <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;:mediaplayer.scxml&quot;</span>));
+      MainWindow mainWindow(machine);
+      machine<span class="operator">-</span><span class="operator">&gt;</span>setParent(<span class="operator">&amp;</span>mainWindow);
+
+      machine<span class="operator">-</span><span class="operator">&gt;</span>start();
+      mainWindow<span class="operator">.</span>show();
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<a name="connecting-to-states"></a>
+<h4 id="connecting-to-states">Connecting to States</h4>
+<p>The media player state machine will send out events when users tap a control and when playback starts or stops, as specified in the SCXML file:</p>
+<pre class="cpp">
+
+      &lt;state id=&quot;stopped&quot;&gt;
+          &lt;transition event=&quot;tap&quot; cond=&quot;isValidMedia()&quot; target=&quot;playing&quot;/&gt;
+      &lt;/state&gt;
+
+      &lt;state id=&quot;playing&quot;&gt;
+          &lt;onentry&gt;
+              &lt;assign location=&quot;media&quot; expr=&quot;_event.data.media&quot;/&gt;
+              &lt;send event=&quot;playbackStarted&quot;&gt;
+                  &lt;param name=&quot;media&quot; expr=&quot;media&quot;/&gt;
+              &lt;/send&gt;
+          &lt;/onentry&gt;
+
+          &lt;onexit&gt;
+              &lt;send event=&quot;playbackStopped&quot;&gt;
+                  &lt;param name=&quot;media&quot; expr=&quot;media&quot;/&gt;
+              &lt;/send&gt;
+          &lt;/onexit&gt;
+
+          &lt;transition event=&quot;tap&quot; cond=&quot;!isValidMedia() || media === _event.data.media&quot; target=&quot;stopped&quot;/&gt;
+          &lt;transition event=&quot;tap&quot; cond=&quot;isValidMedia() &amp;amp;&amp;amp; media !== _event.data.media&quot; target=&quot;playing&quot;/&gt;
+      &lt;/state&gt;
+
+</pre>
+<p>To be notified when a state machine sends out an event, we connect to the corresponding signals:</p>
+<pre class="cpp">
+
+      stateMachine<span class="operator">-</span><span class="operator">&gt;</span>connectToEvent(<span class="string">&quot;playbackStarted&quot;</span><span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>started);
+      stateMachine<span class="operator">-</span><span class="operator">&gt;</span>connectToEvent(<span class="string">&quot;playbackStopped&quot;</span><span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>stopped);
+
+</pre>
+<p><a href="https://code.qt.io/cgit/qt/qtscxml.git/tree/examples/scxml/mediaplayer-widgets-dynamic?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@mediaplayer-widgets-dynamic -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

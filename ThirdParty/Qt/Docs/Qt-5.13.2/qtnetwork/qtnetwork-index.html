@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtnetwork.qdoc -->
+  <title>Qt Network 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td >Qt Network</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#getting-started">Getting Started</a></li>
+<li class="level1"><a href="#articles-and-guides">Articles and Guides</a></li>
+<li class="level1"><a href="#api-reference">API Reference</a></li>
+<li class="level1"><a href="#licenses-and-attributions">Licenses and Attributions</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Network</h1>
+<span class="subtitle"></span>
+<!-- $$$qtnetwork-index.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Qt Network provides a set of APIs for programming applications that use TCP/IP. Operations such as requests, cookies, and sending data over HTTP are handled by various C++ classes.</p>
+<a name="getting-started"></a>
+<h2 id="getting-started">Getting Started</h2>
+<p>To use Qt Network classes,add this directive into the C++ files:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QtNetwork&gt;</span>
+
+</pre>
+<p>To link against the Qt Network module, add this line to the project file:</p>
+<pre class="cpp">
+
+  QT <span class="operator">+</span><span class="operator">=</span> network
+
+</pre>
+<a name="articles-and-guides"></a>
+<h2 id="articles-and-guides">Articles and Guides</h2>
+<p>These articles contain information about Qt Network setup and about applications with networking capabilities.</p>
+<ul>
+<li><a href="qtnetwork-programming.html">Network Programming with Qt</a> - Programming applications with networking capabilities</li>
+<li><a href="bearer-management.html">Bearer Management</a> - An API to control the system's connectivity state</li>
+<li><a href="ssl.html">Secure Sockets Layer (SSL) Classes</a> - Classes for secure communication over network sockets</li>
+</ul>
+<a name="api-reference"></a>
+<h2 id="api-reference">API Reference</h2>
+<p>These are links to the API reference materials.</p>
+<ul>
+<li><a href="qtnetwork-module.html">C++ Classes</a></li>
+</ul>
+<a name="licenses-and-attributions"></a>
+<h2 id="licenses-and-attributions">Licenses and Attributions</h2>
+<p>Qt Network is available under commercial licenses from <a href="http://www.qt.io/about-us/">The Qt Company</a>. In addition, it is available under the <a href="http://www.gnu.org/licenses/lgpl-3.0.html">GNU Lesser General Public License, version 3</a>, or the <a href="http://www.gnu.org/licenses/gpl-2.0.html">GNU General Public License, version 2</a>. See <a href="../qtdoc/licensing.html">Qt Licensing</a> for further details.</p>
+<p>Qt Network can use the <a href="https://www.openssl.org/">OpenSSL Toolkit</a> as a backend. The library is then linked against OpenSSL in a way that requires compliance with the <a href="https://www.openssl.org/source/license.html">OpenSSL License</a>. To allow linking OpenSSL with Qt Network under the GPL, following exceptions to the GPL do apply:</p>
+<pre class="cpp plain">
+
+  In addition, as a special exception, the copyright holders listed above give
+  permission to link the code of its release of Qt with the OpenSSL project's
+  &quot;OpenSSL&quot; library (or modified versions of the &quot;OpenSSL&quot; library that use the
+  same license as the original version), and distribute the linked executables.
+
+  You must comply with the GNU General Public License version 2 in all
+  respects for all of the code used other than the &quot;OpenSSL&quot; code.  If you
+  modify this file, you may extend this exception to your version of the file,
+  but you are not obligated to do so.  If you do not wish to do so, delete
+  this exception statement from your version of this file.
+
+</pre>
+<p>Also note shipping OpenSSL might cause <a href="ssl.html#import-and-export-restrictions">Import and Export Restrictions</a> to apply.</p>
+</div>
+<!-- @@@qtnetwork-index.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

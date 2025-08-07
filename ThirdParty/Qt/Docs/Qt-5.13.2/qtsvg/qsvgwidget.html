@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qsvgwidget.cpp -->
+  <title>QSvgWidget Class | Qt SVG 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtsvg-index.html">Qt SVG</a></td><td ><a href="qtsvg-module.html">C++ Classes</a></td><td >QSvgWidget</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtsvg-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSvgWidget Class</h1>
+<!-- $$$QSvgWidget-brief -->
+<p>The <a href="qsvgwidget.html">QSvgWidget</a> class provides a widget that is used to display the contents of Scalable Vector Graphics (SVG) files. <a href="#details">More...</a></p>
+<!-- @@@QSvgWidget -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QSvgWidget&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += svg</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.1</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtwidgets/qwidget.html">QWidget</a></td></tr></table></div><p>This class was introduced in  Qt 4.1.</p>
+<ul>
+<li><a href="qsvgwidget-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsvgwidget.html#QSvgWidget-1">QSvgWidget</a></b>(const QString &amp;<i>file</i>, QWidget *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsvgwidget.html#QSvgWidget">QSvgWidget</a></b>(QWidget *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qsvgwidget.html#dtor.QSvgWidget">~QSvgWidget</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSvgRenderer *</td><td class="memItemRight bottomAlign"><b><a href="qsvgwidget.html#renderer">renderer</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSize </td><td class="memItemRight bottomAlign"><b><a href="qsvgwidget.html#sizeHint">sizeHint</a></b>() const override</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsvgwidget.html#load-1">load</a></b>(const QByteArray &amp;<i>contents</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsvgwidget.html#load">load</a></b>(const QString &amp;<i>file</i>)</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qsvgwidget.html#paintEvent">paintEvent</a></b>(QPaintEvent *<i>event</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSvgWidget-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This class enables developers to display SVG drawings alongside standard widgets, and is used in much the same way as <a href="../qtwidgets/qlabel.html">QLabel</a> is used for displaying text and bitmap images.</p>
+<p>Since <a href="qsvgwidget.html">QSvgWidget</a> is a subclass of <a href="../qtwidgets/qwidget.html">QWidget</a>, SVG drawings are rendered using the properties of the display. More control can be exercised over the rendering process with the <a href="qsvgrenderer.html">QSvgRenderer</a> class, as this can be used to paint onto other paint devices, such as <a href="../qtgui/qimage.html">QImage</a> and QGLWidget. The renderer used by the widget can be obtained with the <a href="qsvgwidget.html#renderer">renderer</a>() function.</p>
+<p>Each <a href="qsvgwidget.html">QSvgWidget</a> can be constructed with the file name of a SVG file, or they can be constructed without a specific file to render and one can be supplied later. The <a href="qsvgwidget.html#load">load</a>() functions provide two different ways to load an SVG file: they accept either the file name of an SVG file or a <a href="../qtcore/qbytearray.html">QByteArray</a> containing the serialized XML representation of an SVG file.</p>
+<p>By default, the widget provides a size hint to reflect the size of the drawing that it displays. If no data has been loaded, the widget provides the default <a href="../qtwidgets/qwidget.html">QWidget</a> size hint. Subclass this class and reimplement <a href="qsvgwidget.html#sizeHint">sizeHint</a>() if you need to customize this behavior.</p>
+</div>
+<p><b>See also </b><a href="qsvgrenderer.html">QSvgRenderer</a>, <a href="qtsvg-module.html">Qt SVG C++ Classes</a>, and <a href="../qtgui/qpicture.html">QPicture</a>.</p>
+<!-- @@@QSvgWidget -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QSvgWidget$$$QSvgWidgetconstQString&QWidget* -->
+<h3 class="fn" id="QSvgWidget-1"><a name="QSvgWidget-1"></a>QSvgWidget::<span class="name">QSvgWidget</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>file</i>, <span class="type"><a href="../qtwidgets/qwidget.html#QWidget">QWidget</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new SVG display widget with the given <i>parent</i> and loads the contents of the specified <i>file</i>.</p>
+<!-- @@@QSvgWidget -->
+<!-- $$$QSvgWidget[overload1]$$$QSvgWidgetQWidget* -->
+<h3 class="fn" id="QSvgWidget"><a name="QSvgWidget"></a>QSvgWidget::<span class="name">QSvgWidget</span>(<span class="type"><a href="../qtwidgets/qwidget.html#QWidget">QWidget</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new SVG display widget with the given <i>parent</i>.</p>
+<!-- @@@QSvgWidget -->
+<!-- $$$load$$$loadconstQByteArray& -->
+<h3 class="fn" id="load-1"><a name="load-1"></a><code>[slot] </code><span class="type">void</span> QSvgWidget::<span class="name">load</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>contents</i>)</h3>
+<p>Loads the specified SVG format <i>contents</i> and updates the widget.</p>
+<!-- @@@load -->
+<!-- $$$load[overload1]$$$loadconstQString& -->
+<h3 class="fn" id="load"><a name="load"></a><code>[slot] </code><span class="type">void</span> QSvgWidget::<span class="name">load</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>file</i>)</h3>
+<p>Loads the contents of the specified SVG <i>file</i> and updates the widget.</p>
+<!-- @@@load -->
+<!-- $$$~QSvgWidget[overload1]$$$~QSvgWidget -->
+<h3 class="fn" id="dtor.QSvgWidget"><a name="dtor.QSvgWidget"></a><code>[virtual] </code>QSvgWidget::<span class="name">~QSvgWidget</span>()</h3>
+<p>Destroys the widget.</p>
+<!-- @@@~QSvgWidget -->
+<!-- $$$paintEvent[overload1]$$$paintEventQPaintEvent* -->
+<h3 class="fn" id="paintEvent"><a name="paintEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QSvgWidget::<span class="name">paintEvent</span>(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="../qtwidgets/qwidget.html#paintEvent">QWidget::paintEvent</a>(QPaintEvent *event).</p>
+<!-- @@@paintEvent -->
+<!-- $$$renderer[overload1]$$$renderer -->
+<h3 class="fn" id="renderer"><a name="renderer"></a><span class="type"><a href="qsvgrenderer.html">QSvgRenderer</a></span> *QSvgWidget::<span class="name">renderer</span>() const</h3>
+<p>Returns the renderer used to display the contents of the widget.</p>
+<!-- @@@renderer -->
+<!-- $$$sizeHint[overload1]$$$sizeHint -->
+<h3 class="fn" id="sizeHint"><a name="sizeHint"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QSvgWidget::<span class="name">sizeHint</span>() const</h3>
+<p>Reimplements an access function for property: <a href="../qtwidgets/qwidget.html#sizeHint-prop">QWidget::sizeHint</a>.</p>
+<!-- @@@sizeHint -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- globalVariables.qdoc -->
+  <title>C++ Source Code Analyzer Example | Qt XML Patterns 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtxmlpatterns-index.html">Qt XML Patterns</a></td><td >C++ Source Code Analyzer Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtxmlpatterns-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#introduction">Introduction</a></li>
+<li class="level2"><a href="#reporting-uses-of-mutable-global-variables">Reporting Uses of Mutable Global Variables</a></li>
+<li class="level1"><a href="#xquery-code-walk-through">XQuery Code Walk-Through</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">C++ Source Code Analyzer Example</h1>
+<span class="subtitle"></span>
+<!-- $$$xquery-brief -->
+<p>Using <a href="xmlprocessing.html">XQuery</a> and the <code>xmlpatterns</code> command line utility to query C++ source code.</p>
+<!-- @@@xquery -->
+<!-- $$$xquery-description -->
+<div class="descr"> <a name="details"></a>
+<p>This example uses <a href="xmlprocessing.html">XQuery</a> and the <code>xmlpatterns</code> command line utility to query C++ source code.</p>
+<a name="introduction"></a>
+<h4 id="introduction">Introduction</h4>
+<p>Suppose we want to analyze C++ source code to find coding standard violations and instances of bad or inefficient patterns. We can do it using the common searching and pattern matching utilities to process the C++ files (e.g&#x2e;, <code>grep</code>, <code>sed</code>, and <code>awk</code>). Now we can also use <a href="xmlprocessing.html">XQuery</a> with the Qt XML Patterns module.</p>
+<p>An extension to the <code>g++</code> open source C++ compiler (<a href="http://public.kitware.com/GCC_XML/HTML/Index.html">GCC-XML</a>) generates an XML description of C++ source code declarations. This XML description can then be processed by Qt XML Patterns using XQueries to navigate the XML description of the C++ source and produce a report. Consider the problem of finding mutable global variables:</p>
+<a name="reporting-uses-of-mutable-global-variables"></a>
+<h5 id="reporting-uses-of-mutable-global-variables">Reporting Uses of Mutable Global Variables</h5>
+<p>Suppose we want to introduce threading to a C++ application that was originally written without threading. In a threaded program, mutable global variables can cause bugs, because one thread might change a global variable that other threads are reading, or two threads might try to set the same global variable. So when converting our program to use threading, one of the things we must do is protect the global variables to prevent the bugs described above. How can we use <a href="xmlprocessing.html">XQuery</a> and <a href="http://public.kitware.com/GCC_XML/HTML/Index.html">GCC-XML</a> to find the variables that need protecting?</p>
+<a name="a-c-application"></a>
+<h6 id="a-c-application">A C++ application</h6>
+<p>Consider the declarations in this hypothetical C++ application:</p>
+<pre class="cpp">
+
+   <span class="number">1.</span> <span class="type">int</span> mutablePrimitive1;
+   <span class="number">2.</span> <span class="type">int</span> mutablePrimitive2;
+   <span class="number">3.</span> <span class="keyword">const</span> <span class="type">int</span> constPrimitive1 <span class="operator">=</span> <span class="number">4</span>;
+   <span class="number">4.</span> <span class="keyword">const</span> <span class="type">int</span> constPrimitive2 <span class="operator">=</span> <span class="number">3</span>;
+   <span class="number">5.</span>
+   <span class="number">6.</span> <span class="keyword">class</span> ComplexClass
+   <span class="number">7.</span> {
+   <span class="number">8.</span>  <span class="keyword">public</span>:
+   <span class="number">9.</span>    ComplexClass();
+  <span class="number">10.</span>    ComplexClass(<span class="keyword">const</span> ComplexClass <span class="operator">&amp;</span>);
+  <span class="number">11.</span>    <span class="operator">~</span>ComplexClass();
+  <span class="number">12.</span> };
+  <span class="number">13.</span>
+  <span class="number">14.</span> ComplexClass mutableComplex1;
+  <span class="number">15.</span> ComplexClass mutableComplex2;
+  <span class="number">16.</span> <span class="keyword">const</span> ComplexClass constComplex1;
+  <span class="number">17.</span> <span class="keyword">const</span> ComplexClass constComplex2;
+  <span class="number">18.</span>
+  <span class="number">19.</span> <span class="type">int</span> main()
+  <span class="number">20.</span> {
+  <span class="number">22.</span>     <span class="type">int</span> localVariable;
+  <span class="number">23.</span>     localVariable <span class="operator">=</span> <span class="number">0</span>;
+  <span class="number">24.</span>     <span class="keyword">return</span> localVariable;
+  <span class="number">25.</span> }
+
+</pre>
+<a name="the-xml-description-of-the-c-application"></a>
+<h6 id="the-xml-description-of-the-c-application">The XML description of the C++ application</h6>
+<p>Submitting this C++ source to <a href="http://public.kitware.com/GCC_XML/HTML/Index.html">GCC-XML</a> produces this XML description:</p>
+<pre class="cpp">
+
+  &lt;?xml version=&quot;1.0&quot;?&gt;
+  &lt;GCC_XML&gt;
+    &lt;Namespace id=&quot;_1&quot; name=&quot;::&quot; members=&quot;_3 _4 _5 _6 _7 _8 _9 _10 _11 _12 _13 _14 _15 &quot; mangled=&quot;_Z2::&quot;/&gt;
+    &lt;Namespace id=&quot;_2&quot; name=&quot;std&quot; context=&quot;_1&quot; members=&quot;&quot; mangled=&quot;_Z3std&quot;/&gt;
+    &lt;Function id=&quot;_3&quot; name=&quot;_GLOBAL__D_globals.cppwVRo3a&quot; returns=&quot;_16&quot; context=&quot;_1&quot; location=&quot;f0:14&quot; file=&quot;f0&quot; line=&quot;14&quot; endline=&quot;14&quot;/&gt;
+    &lt;Function id=&quot;_4&quot; name=&quot;_GLOBAL__I_globals.cppwVRo3a&quot; returns=&quot;_16&quot; context=&quot;_1&quot; location=&quot;f0:14&quot; file=&quot;f0&quot; line=&quot;14&quot; endline=&quot;14&quot;/&gt;
+    &lt;Function id=&quot;_5&quot; name=&quot;__static_initialization_and_destruction_0&quot; returns=&quot;_16&quot; context=&quot;_1&quot; mangled=&quot;_Z41__static_initialization_and_destruction_0ii&quot; location=&quot;f0:23&quot; file=&quot;f0&quot; line=&quot;23&quot; endline=&quot;14&quot;&gt;
+      &lt;Argument name=&quot;__initialize_p&quot; type=&quot;_17&quot;/&gt;
+      &lt;Argument name=&quot;__priority&quot; type=&quot;_17&quot;/&gt;
+    &lt;/Function&gt;
+    &lt;Function id=&quot;_6&quot; name=&quot;main&quot; returns=&quot;_17&quot; context=&quot;_1&quot; location=&quot;f0:20&quot; file=&quot;f0&quot; line=&quot;20&quot; endline=&quot;24&quot;/&gt;
+    &lt;Variable id=&quot;_7&quot; name=&quot;constComplex2&quot; type=&quot;_11c&quot; context=&quot;_1&quot; location=&quot;f0:17&quot; file=&quot;f0&quot; line=&quot;17&quot;/&gt;
+    &lt;Variable id=&quot;_8&quot; name=&quot;constComplex1&quot; type=&quot;_11c&quot; context=&quot;_1&quot; location=&quot;f0:16&quot; file=&quot;f0&quot; line=&quot;16&quot;/&gt;
+    &lt;Variable id=&quot;_9&quot; name=&quot;mutableComplex2&quot; type=&quot;_11&quot; context=&quot;_1&quot; location=&quot;f0:15&quot; file=&quot;f0&quot; line=&quot;15&quot;/&gt;
+    &lt;Variable id=&quot;_10&quot; name=&quot;mutableComplex1&quot; type=&quot;_11&quot; context=&quot;_1&quot; location=&quot;f0:14&quot; file=&quot;f0&quot; line=&quot;14&quot;/&gt;
+    &lt;Class id=&quot;_11&quot; name=&quot;ComplexClass&quot; context=&quot;_1&quot; mangled=&quot;12ComplexClass&quot; location=&quot;f0:7&quot; file=&quot;f0&quot; line=&quot;7&quot; members=&quot;_19 _20 _21 &quot; bases=&quot;&quot;/&gt;
+    &lt;Variable id=&quot;_12&quot; name=&quot;constPrimitive2&quot; type=&quot;_17c&quot; init=&quot;3&quot; context=&quot;_1&quot; location=&quot;f0:4&quot; file=&quot;f0&quot; line=&quot;4&quot;/&gt;
+    &lt;Variable id=&quot;_13&quot; name=&quot;constPrimitive1&quot; type=&quot;_17c&quot; init=&quot;4&quot; context=&quot;_1&quot; location=&quot;f0:3&quot; file=&quot;f0&quot; line=&quot;3&quot;/&gt;
+    &lt;Variable id=&quot;_14&quot; name=&quot;mutablePrimitive2&quot; type=&quot;_17&quot; context=&quot;_1&quot; location=&quot;f0:2&quot; file=&quot;f0&quot; line=&quot;2&quot;/&gt;
+    &lt;Variable id=&quot;_15&quot; name=&quot;mutablePrimitive1&quot; type=&quot;_17&quot; context=&quot;_1&quot; location=&quot;f0:1&quot; file=&quot;f0&quot; line=&quot;1&quot;/&gt;
+    &lt;FundamentalType id=&quot;_16&quot; name=&quot;void&quot;/&gt;
+    &lt;FundamentalType id=&quot;_17&quot; name=&quot;int&quot;/&gt;
+    &lt;CvQualifiedType id=&quot;_11c&quot; type=&quot;_11&quot; const=&quot;1&quot;/&gt;
+    &lt;Constructor id=&quot;_19&quot; name=&quot;ComplexClass&quot; context=&quot;_11&quot; mangled=&quot;_ZN12ComplexClassC1Ev *INTERNAL* &quot; location=&quot;f0:9&quot; file=&quot;f0&quot; line=&quot;9&quot; extern=&quot;1&quot;/&gt;
+    &lt;Constructor id=&quot;_20&quot; name=&quot;ComplexClass&quot; context=&quot;_11&quot; mangled=&quot;_ZN12ComplexClassC1ERKS_ *INTERNAL* &quot; location=&quot;f0:10&quot; file=&quot;f0&quot; line=&quot;10&quot; extern=&quot;1&quot;&gt;
+      &lt;Argument type=&quot;_23&quot;/&gt;
+    &lt;/Constructor&gt;
+    &lt;Destructor id=&quot;_21&quot; name=&quot;ComplexClass&quot; context=&quot;_11&quot; mangled=&quot;_ZN12ComplexClassD1Ev *INTERNAL* &quot; location=&quot;f0:11&quot; file=&quot;f0&quot; line=&quot;11&quot; extern=&quot;1&quot;&gt;
+    &lt;/Destructor&gt;
+    &lt;CvQualifiedType id=&quot;_17c&quot; type=&quot;_17&quot; const=&quot;1&quot;/&gt;
+    &lt;ReferenceType id=&quot;_23&quot; type=&quot;_11c&quot;/&gt;
+    &lt;File id=&quot;f0&quot; name=&quot;globals.cpp&quot;/&gt;
+  &lt;/GCC_XML&gt;
+
+</pre>
+<a name="the-xquery-for-finding-global-variables"></a>
+<h6 id="the-xquery-for-finding-global-variables">The XQuery for finding global variables</h6>
+<p>We need an <a href="xmlprocessing.html">XQuery</a> to find the global variables in the XML description. Here is our <a href="xmlprocessing.html">XQuery</a> source. We walk through it in <a href="qtxmlpatterns-xquery-example.html#xquery-code-walk-through">XQuery Code Walk-Through</a>.</p>
+<pre class="cpp">
+
+  (:
+      This XQuery loads a GCC-XML file and reports the locations of all
+      global variables in the original C++ source. To run the query,
+      use the command line:
+
+      xmlpatterns reportGlobals.xq -param fileToOpen=globals.gccxml -output globals.html
+
+      &quot;fileToOpen=globals.gccxml&quot; binds the file name &quot;globals.gccxml&quot;
+      to the variable &quot;fileToOpen&quot; declared and used below.
+  :)
+
+  declare variable $fileToOpen as xs:anyURI external;
+  declare variable $inDoc as document-node() := doc($fileToOpen);
+
+  (:
+     This function determines whether the typeId is a complex type,
+     e.g. QString. We only check whether it's a class. To be strictly
+     correct, we should check whether the class has a non-synthesized
+     constructor. We accept both mutable and const types.
+  :)
+  declare function local:isComplexType($typeID as xs:string) as xs:boolean
+  {
+      exists($inDoc/GCC_XML/Class[@id = $typeID])
+      or
+      exists($inDoc/GCC_XML/Class[@id = $inDoc/GCC_XML/CvQualifiedType[@id = $typeID]/@type])
+  };
+
+  (:
+     This function determines whether the typeId is a primitive type.
+  :)
+  declare function local:isPrimitive($typeId as xs:string) as xs:boolean
+  {
+      exists($inDoc/GCC_XML/FundamentalType[@id = $typeId])
+  };
+
+  (:
+     This function constructs a line for the report. The line contains
+     a variable name, the source file, and the line number.
+  :)
+  declare function local:location($block as element()) as xs:string
+  {
+      concat($inDoc/GCC_XML/File[@id = $block/@file]/@name, &quot; at line &quot;, $block/@line)
+  };
+
+  (:
+     This function generates the report. Note that it is called once
+     in the &lt;body&gt; element of the &lt;html&gt; output.
+
+     It ignores const variables of simple types but reports all others.
+  :)
+  declare function local:report() as element()+
+  {
+      let $complexVariables as element(Variable)* := $inDoc/GCC_XML/Variable[local:isComplexType(@type)]
+      return if (exists($complexVariables))
+             then (&lt;p xmlns=&quot;http://www.w3.org/1999/xhtml/&quot;&gt;Global variables with complex types:&lt;/p&gt;,
+                   &lt;ol xmlns=&quot;http://www.w3.org/1999/xhtml/&quot;&gt;
+                      {
+                          (: For each Variable in $complexVariables... :)
+                          $complexVariables/&lt;li&gt;&lt;span class=&quot;variableName&quot;&gt;{string(@name)}&lt;/span&gt; in {local:location(.)}&lt;/li&gt;
+                      }
+                   &lt;/ol&gt;)
+             else &lt;p xmlns=&quot;http://www.w3.org/1999/xhtml/&quot;&gt;No complex global variables found.&lt;/p&gt;
+
+      ,
+
+      let $primitiveVariables as element(Variable)+ := $inDoc/GCC_XML/Variable[local:isPrimitive(@type)]
+      return if (exists($primitiveVariables))
+             then (&lt;p xmlns=&quot;http://www.w3.org/1999/xhtml/&quot;&gt;Mutable global variables with primitives types:&lt;/p&gt;,
+                   &lt;ol xmlns=&quot;http://www.w3.org/1999/xhtml/&quot;&gt;
+                      {
+                          (: For each Variable in $complexVariables... :)
+                          $primitiveVariables/&lt;li&gt;&lt;span class=&quot;variableName&quot;&gt;{string(@name)}&lt;/span&gt; in {local:location(.)}&lt;/li&gt;
+                      }
+                   &lt;/ol&gt;)
+             else &lt;p xmlns=&quot;http://www.w3.org/1999/xhtml/&quot;&gt;No mutable primitive global variables found.&lt;/p&gt;
+  };
+
+  (:
+      This is where the &lt;html&gt; report is output. First
+      there is some style stuff, then the &lt;body&gt; element,
+      which contains the call to the \c{local:report()}
+      declared above.
+  :)
+  &lt;html xmlns=&quot;http://www.w3.org/1999/xhtml/&quot; xml:lang=&quot;en&quot; lang=&quot;en&quot;&gt;
+      &lt;head&gt;
+          &lt;title&gt;Global variables report for {$fileToOpen}&lt;/title&gt;
+      &lt;/head&gt;
+      &lt;style type=&quot;text/css&quot;&gt;
+          .details
+          {{
+              text-align: left;
+              font-size: 80%;
+              color: blue
+          }}
+          .variableName
+          {{
+              font-family: courier;
+              color: blue
+          }}
+      &lt;/style&gt;
+
+      &lt;body&gt;
+          &lt;p class=&quot;details&quot;&gt;Start report: {current-dateTime()}&lt;/p&gt;
+          {
+              local:report()
+          }
+          &lt;p class=&quot;details&quot;&gt;End report: {current-dateTime()}&lt;/p&gt;
+      &lt;/body&gt;
+
+  &lt;/html&gt;
+
+</pre>
+<a name="running-the-xquery"></a>
+<h6 id="running-the-xquery">Running the XQuery</h6>
+<p>To run the <a href="xmlprocessing.html">XQuery</a> using the <code>xmlpatterns</code> command line utility, enter the following command:</p>
+<pre class="cpp plain">
+
+  xmlpatterns reportGlobals.xq -param fileToOpen=globals.gccxml -output globals.html
+
+</pre>
+<a name="the-xquery-output"></a>
+<h6 id="the-xquery-output">The XQuery output</h6>
+<p>The <code>xmlpatterns</code> command loads and parses <code>globals.gccxml</code>, runs the <a href="xmlprocessing.html">XQuery</a> <code>reportGlobals.xq</code>, and generates this report:</p>
+<div class="details"><p>Start report: 2008-12-16T13:43:49.65Z</p>
+</div><p>Global variables with complex types:</p>
+<ol class="1" type="1"><li><span class="variableName">mutableComplex1</span> in globals.cpp at line 14</li>
+<li><span class="variableName">mutableComplex2</span> in globals.cpp at line 15</li>
+<li><span class="variableName">constComplex1</span> in globals.cpp at line 16</li>
+<li><span class="variableName">constComplex2</span> in globals.cpp at line 17</li>
+</ol>
+<p>Mutable global variables with primitives types:</p>
+<ol class="1" type="1"><li><span class="variableName">mutablePrimitive1</span> in globals.cpp at line 1</li>
+<li><span class="variableName">mutablePrimitive2</span> in globals.cpp at line 2</li>
+</ol>
+<div class="details"><p>End report: 2008-12-16T13:43:49.65Z</p>
+</div><a name="xquery-code-walk-through"></a>
+<h4 id="xquery-code-walk-through">XQuery Code Walk-Through</h4>
+<p>The <a href="xmlprocessing.html">XQuery</a> source is in <code>examples/xmlpatterns/xquery/globalVariables/reportGlobals.xq</code> It begins with two variable declarations that begin the <a href="xmlprocessing.html">XQuery</a>:</p>
+<pre class="cpp">
+
+  declare variable $fileToOpen as xs:anyURI external;
+  declare variable $inDoc as document-node() := doc($fileToOpen);
+
+</pre>
+<p>The first variable, <code>$fileToOpen</code>, appears in the <code>xmlpatterns</code> command shown earlier, as <code>-param fileToOpen=globals.gccxml</code>. This binds the variable name to the file name. This variable is then used in the declaration of the second variable, <code>$inDoc</code>, as the parameter to the <a href="http://www.w3.org/TR/xpath-functions/#func-doc">doc()</a> function. The <code>doc()</code> function returns the document node of <code>globals.gccxml</code>, which is assigned to <code>$inDoc</code> to be used later in the <a href="xmlprocessing.html">XQuery</a> as the root node of our searches for global variables.</p>
+<p>Next skip to the end of the <a href="xmlprocessing.html">XQuery</a>, where the <code>&lt;html&gt;</code> element is constructed. The <code>&lt;html&gt;</code> will contain a <code>&lt;head&gt;</code> element to specify a heading for the html page, followed by some style instructions for displaying the text, and then the <code>&lt;body&gt;</code> element.</p>
+<pre class="cpp">
+
+  &lt;html xmlns=&quot;http://www.w3.org/1999/xhtml/&quot; xml:lang=&quot;en&quot; lang=&quot;en&quot;&gt;
+      &lt;head&gt;
+          &lt;title&gt;Global variables report for {$fileToOpen}&lt;/title&gt;
+      &lt;/head&gt;
+      &lt;style type=&quot;text/css&quot;&gt;
+          .details
+          {{
+              text-align: left;
+              font-size: 80%;
+              color: blue
+          }}
+          .variableName
+          {{
+              font-family: courier;
+              color: blue
+          }}
+      &lt;/style&gt;
+
+      &lt;body&gt;
+          &lt;p class=&quot;details&quot;&gt;Start report: {current-dateTime()}&lt;/p&gt;
+          {
+              local:report()
+          }
+          &lt;p class=&quot;details&quot;&gt;End report: {current-dateTime()}&lt;/p&gt;
+      &lt;/body&gt;
+
+  &lt;/html&gt;
+
+</pre>
+<p>The <code>&lt;body&gt;</code> element contains a call to the <code>local:report()</code> function, which is where the query does the &quot;heavy lifting.&quot; Note the two <code>return</code> clauses separated by the <i>comma operator</i> about halfway down:</p>
+<pre class="cpp">
+
+  declare function local:report() as element()+
+  {
+      let $complexVariables as element(Variable)* := $inDoc/GCC_XML/Variable[local:isComplexType(@type)]
+      return if (exists($complexVariables))
+             then (&lt;p xmlns=&quot;http://www.w3.org/1999/xhtml/&quot;&gt;Global variables with complex types:&lt;/p&gt;,
+                   &lt;ol xmlns=&quot;http://www.w3.org/1999/xhtml/&quot;&gt;
+                      {
+                          (: For each Variable in $complexVariables... :)
+                          $complexVariables/&lt;li&gt;&lt;span class=&quot;variableName&quot;&gt;{string(@name)}&lt;/span&gt; in {local:location(.)}&lt;/li&gt;
+                      }
+                   &lt;/ol&gt;)
+             else &lt;p xmlns=&quot;http://www.w3.org/1999/xhtml/&quot;&gt;No complex global variables found.&lt;/p&gt;
+
+      ,
+
+      let $primitiveVariables as element(Variable)+ := $inDoc/GCC_XML/Variable[local:isPrimitive(@type)]
+      return if (exists($primitiveVariables))
+             then (&lt;p xmlns=&quot;http://www.w3.org/1999/xhtml/&quot;&gt;Mutable global variables with primitives types:&lt;/p&gt;,
+                   &lt;ol xmlns=&quot;http://www.w3.org/1999/xhtml/&quot;&gt;
+                      {
+                          (: For each Variable in $complexVariables... :)
+                          $primitiveVariables/&lt;li&gt;&lt;span class=&quot;variableName&quot;&gt;{string(@name)}&lt;/span&gt; in {local:location(.)}&lt;/li&gt;
+                      }
+                   &lt;/ol&gt;)
+             else &lt;p xmlns=&quot;http://www.w3.org/1999/xhtml/&quot;&gt;No mutable primitive global variables found.&lt;/p&gt;
+  };
+
+</pre>
+<p>The <code>return</code> clauses are like two separate queries. The comma operator separating them means that both <code>return</code> clauses are executed and both return their results, or, rather, both output their results. The first <code>return</code> clause searches for global variables with complex types, and the second searches for mutable global variables with primitive types.</p>
+<p>Here is the html generated for the <code>&lt;body&gt;</code> element. Compare it with the <a href="xmlprocessing.html">XQuery</a> code above:</p>
+<pre class="cpp">
+
+      &lt;body&gt;
+          &lt;p class=&quot;details&quot;&gt;Start report: 2008-12-16T13:43:49.65Z&lt;/p&gt;
+          &lt;p&gt;Global variables with complex types:&lt;/p&gt;
+          &lt;ol&gt;
+              &lt;li&gt;
+                  &lt;span class=&quot;variableName&quot;&gt;mutableComplex1&lt;/span&gt; in globals.cpp at line 14&lt;/li&gt;
+              &lt;li&gt;
+                  &lt;span class=&quot;variableName&quot;&gt;mutableComplex2&lt;/span&gt; in globals.cpp at line 15&lt;/li&gt;
+              &lt;li&gt;
+                  &lt;span class=&quot;variableName&quot;&gt;constComplex1&lt;/span&gt; in globals.cpp at line 16&lt;/li&gt;
+              &lt;li&gt;
+                  &lt;span class=&quot;variableName&quot;&gt;constComplex2&lt;/span&gt; in globals.cpp at line 17&lt;/li&gt;
+          &lt;/ol&gt;
+          &lt;p&gt;Mutable global variables with primitives types:&lt;/p&gt;
+          &lt;ol&gt;
+              &lt;li&gt;
+                  &lt;span class=&quot;variableName&quot;&gt;mutablePrimitive1&lt;/span&gt; in globals.cpp at line 1&lt;/li&gt;
+              &lt;li&gt;
+                  &lt;span class=&quot;variableName&quot;&gt;mutablePrimitive2&lt;/span&gt; in globals.cpp at line 2&lt;/li&gt;
+          &lt;/ol&gt;
+          &lt;p class=&quot;details&quot;&gt;End report: 2008-12-16T13:43:49.65Z&lt;/p&gt;
+      &lt;/body&gt;
+
+</pre>
+<p>The <a href="xmlprocessing.html">XQuery</a> declares three more local functions that are called in turn by the <code>local:report()</code> function. <code>isComplexType()</code> returns true if the variable has a complex type. The variable can be mutable or const.</p>
+<pre class="cpp">
+
+  declare function local:isComplexType($typeID as xs:string) as xs:boolean
+  {
+      exists($inDoc/GCC_XML/Class[@id = $typeID])
+      or
+      exists($inDoc/GCC_XML/Class[@id = $inDoc/GCC_XML/CvQualifiedType[@id = $typeID]/@type])
+  };
+
+</pre>
+<p><code>isPrimitive()</code> returns true if the variable has a primitive type. The variable must be mutable.</p>
+<pre class="cpp">
+
+  declare function local:isPrimitive($typeId as xs:string) as xs:boolean
+  {
+      exists($inDoc/GCC_XML/FundamentalType[@id = $typeId])
+  };
+
+</pre>
+<p><code>location()</code> returns a text constructed from the variable's file and line number attributes.</p>
+<pre class="cpp">
+
+  declare function local:location($block as element()) as xs:string
+  {
+      concat($inDoc/GCC_XML/File[@id = $block/@file]/@name, &quot; at line &quot;, $block/@line)
+  };
+
+</pre>
+<p><a href="https://code.qt.io/cgit/qt/qtxmlpatterns.git/tree/examples/xmlpatterns/xquery?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@xquery -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,7 @@
+QMAKE_PRL_BUILD_DIR = /home/qt/work/build/qtbase/doc
+QMAKE_PRO_INPUT = doc.pro
+QMAKE_PRL_TARGET = doc
+QMAKE_PRL_CONFIG = lex yacc depend_includepath testcase_targets import_plugins import_qpa_plugin qt_build_extra file_copies qmake_use warn_on release link_prl incremental shared release linux unix posix gcc sse2 aesni sse3 ssse3 sse4_1 sse4_2 avx avx2 avx512f avx512bw avx512cd avx512dq avx512er avx512ifma avx512pf avx512vbmi avx512vl compile_examples enable_new_dtags f16c headersclean largefile precompile_header rdrnd shani warnings_are_errors x86SimdAlways qt_clear_installs utf8_source create_prl link_prl prepare_docs qt_docs_targets no_private_qt_headers_warning QTDIR_build qt_example_installs exceptions_off testcase_exceptions explicitlib warning_clean
+QMAKE_PRL_VERSION = 1.0.0
+QMAKE_PRL_LIBS =
+QMAKE_PRL_LIBS_FOR_CMAKE = ;

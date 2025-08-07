@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- topic.qdoc -->
+  <title>QML Documents | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td >QML Documents</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#structure-of-a-qml-document">Structure of a QML Document</a></li>
+<li class="level2"><a href="#syntax-of-the-qml-language">Syntax of the QML Language</a></li>
+<li class="level1"><a href="#defining-object-types-through-qml-documents">Defining Object Types Through QML Documents</a></li>
+<li class="level1"><a href="#resource-loading-and-network-transparency">Resource Loading and Network Transparency</a></li>
+<li class="level1"><a href="#scope-and-naming-resolution">Scope and Naming Resolution</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QML Documents</h1>
+<span class="subtitle"></span>
+<!-- $$$qtqml-documents-topic.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>A QML document is a string which conforms to QML document syntax. A document defines a QML object type. A document is generally loaded from a <code>&quot;.qml&quot;</code> file stored either locally or remotely, but can be constructed manually in code. An instance of the object type defined by a document may be created using a <a href="qml-qtqml-component.html">Component</a> in QML code, or a <a href="qqmlcomponent.html">QQmlComponent</a> in C++. Alternatively, if the object type is explicitly exposed to the QML type system with a particular type name, the type may be used directly in object declarations in other documents.</p>
+<p>The ability to define re-usable QML object types in documents is an important enabler to allow clients to write modular, highly readable and maintainable code.</p>
+<p>Since Qt 5.4, a document can also have the file extension <code>&quot;.ui.qml&quot;</code>. The QML engine handles these files like standard .qml files and ignores the <code>.ui</code> part of the extension. Qt Creator handles those files as <a href="http://doc.qt.io/qtcreator/creator-quick-ui-forms.html">UI forms</a> for the Qt Quick Designer. The files can contain only a subset of the QML language that is defined by Qt Creator.</p>
+<a name="structure-of-a-qml-document"></a>
+<h2 id="structure-of-a-qml-document">Structure of a QML Document</h2>
+<p>A QML document consists of two sections: the imports section, and the object declaration section. The imports section in a document contains import statements that define which QML object types and JavaScript resources the document is able to use. The object declaration section defines the object tree to be created when instantiating the object type defined by the document.</p>
+<p>An example of a simple document is as follows:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">width</span>: <span class="number">300</span>
+      <span class="name">height</span>: <span class="number">200</span>
+      <span class="name">color</span>: <span class="string">&quot;blue&quot;</span>
+  }
+
+</pre>
+<p>See the <a href="qtqml-documents-structure.html">Structure of a QML Document</a> for more information on the topic.</p>
+<a name="syntax-of-the-qml-language"></a>
+<h3 id="syntax-of-the-qml-language">Syntax of the QML Language</h3>
+<p>The object declaration section of the document must specify a valid object hierarchy with appropriate <a href="qtqml-syntax-basics.html">QML syntax</a>. An object declaration may include the specification of custom <a href="qtqml-syntax-objectattributes.html">object attributes</a>. Object method attributes may be specified as JavaScript functions, and object property attributes may be assigned <a href="qtqml-syntax-propertybinding.html">property binding expressions</a>.</p>
+<p>Please see the documentation about the <a href="qtqml-syntax-basics.html">syntax of QML</a> for more information about valid syntax, and see the documentation about <a href="qtqml-javascript-topic.html">integrating QML and JavaScript</a> for in-depth information on that topic.</p>
+<a name="defining-object-types-through-qml-documents"></a>
+<h2 id="defining-object-types-through-qml-documents">Defining Object Types Through QML Documents</h2>
+<p>As described briefly in the previous section, a document implicitly defines a QML object type. One of the core principles of QML is the ability to define and then re-use object types. This improves the maintainability of QML code, increases the readability of object hierarchy declarations, and promotes separation between UI definition and logic implementation.</p>
+<p>In the following example, the client developer defines a <code>Button</code> type with a document in a file:</p>
+<pre class="qml">
+
+  <span class="comment">// Button.qml</span>
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span>
+      <span class="name">color</span>: <span class="string">&quot;red&quot;</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">onClicked</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Button clicked!&quot;</span>)
+      }
+  }
+
+</pre>
+<p>The <code>Button</code> type can then be used in an application:</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><pre class="qml">
+
+  <span class="comment">// application.qml</span>
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-column.html">Column</a></span> {
+      <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-button.html">Button</a></span> { <span class="name">width</span>: <span class="number">50</span>; <span class="name">height</span>: <span class="number">50</span> }
+      <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-button.html">Button</a></span> { <span class="name">x</span>: <span class="number">50</span>; <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">50</span>; <span class="name">color</span>: <span class="string">&quot;blue&quot;</span> }
+      <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-button.html">Button</a></span> { <span class="name">width</span>: <span class="number">50</span>; <span class="name">height</span>: <span class="number">50</span>; <span class="name">radius</span>: <span class="number">8</span> }
+  }
+
+</pre>
+</td><td ><p class="centerAlign"><img src="images/button-types.png" alt="" /></p></td></tr>
+</table></div>
+<p>Please see the documentation about <a href="qtqml-documents-definetypes.html">defining object types in documents</a> for in-depth information on the topic.</p>
+<a name="resource-loading-and-network-transparency"></a>
+<h2 id="resource-loading-and-network-transparency">Resource Loading and Network Transparency</h2>
+<p>It is important to note that QML is network-transparent. Applications can import documents from remote paths just as simply as documents from local paths. In fact, any <code>url</code> property may be assigned a remote or local URL, and the QML engine will handle any network communication involved.</p>
+<p>Please see the <a href="qtqml-documents-networktransparency.html">Network Transparency</a> documentation for more information about network transparency in imports.</p>
+<a name="scope-and-naming-resolution"></a>
+<h2 id="scope-and-naming-resolution">Scope and Naming Resolution</h2>
+<p>Expressions in documents usually involve objects or properties of objects, and since multiple objects may be defined and since different objects may have properties with the same name, some predefined symbol resolution semantics must be defined by QML. Please see the page on <a href="qtqml-documents-scope.html">scope and symbol resolution</a> for in-depth information about the topic.</p>
+</div>
+<!-- @@@qtqml-documents-topic.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

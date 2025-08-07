@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qxmlstream.cpp -->
+  <title>QXmlStreamAttributes Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QXmlStreamAttributes</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QXmlStreamAttributes Class</h1>
+<!-- $$$QXmlStreamAttributes-brief -->
+<p>The <a href="qxmlstreamattributes.html">QXmlStreamAttributes</a> class represents a vector of <a href="qxmlstreamattribute.html">QXmlStreamAttribute</a>. <a href="#details">More...</a></p>
+<!-- @@@QXmlStreamAttributes -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QXmlStreamAttributes&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.3</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qvector.html">QVector</a></td></tr></table></div><p>This class was introduced in  Qt 4.3.</p>
+<ul>
+<li><a href="qxmlstreamattributes-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qxmlstreamattributes.html#QXmlStreamAttributes">QXmlStreamAttributes</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qxmlstreamattributes.html#append">append</a></b>(const QString &amp;<i>namespaceUri</i>, const QString &amp;<i>name</i>, const QString &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qxmlstreamattributes.html#append-1">append</a></b>(const QString &amp;<i>qualifiedName</i>, const QString &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qxmlstreamattributes.html#hasAttribute">hasAttribute</a></b>(const QString &amp;<i>qualifiedName</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qxmlstreamattributes.html#hasAttribute-1">hasAttribute</a></b>(QLatin1String <i>qualifiedName</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qxmlstreamattributes.html#hasAttribute-2">hasAttribute</a></b>(const QString &amp;<i>namespaceUri</i>, const QString &amp;<i>name</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringRef </td><td class="memItemRight bottomAlign"><b><a href="qxmlstreamattributes.html#value">value</a></b>(const QString &amp;<i>namespaceUri</i>, const QString &amp;<i>name</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringRef </td><td class="memItemRight bottomAlign"><b><a href="qxmlstreamattributes.html#value-1">value</a></b>(const QString &amp;<i>namespaceUri</i>, QLatin1String <i>name</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringRef </td><td class="memItemRight bottomAlign"><b><a href="qxmlstreamattributes.html#value-2">value</a></b>(QLatin1String <i>namespaceUri</i>, QLatin1String <i>name</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringRef </td><td class="memItemRight bottomAlign"><b><a href="qxmlstreamattributes.html#value-3">value</a></b>(const QString &amp;<i>qualifiedName</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringRef </td><td class="memItemRight bottomAlign"><b><a href="qxmlstreamattributes.html#value-4">value</a></b>(QLatin1String <i>qualifiedName</i>) const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QXmlStreamAttributes-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Attributes are returned by a <a href="qxmlstreamreader.html">QXmlStreamReader</a> in <a href="qxmlstreamreader.html#attributes">attributes()</a> when the reader reports a <a href="qxmlstreamreader.html#TokenType-enum">start element</a>. The class can also be used with a <a href="qxmlstreamwriter.html">QXmlStreamWriter</a> as an argument to <a href="qxmlstreamwriter.html#writeAttributes">writeAttributes()</a>.</p>
+<p>The convenience function <a href="qxmlstreamattributes.html#value">value</a>() loops over the vector and returns an attribute value for a given namespaceUri and an attribute's name.</p>
+<p>New attributes can be added with <a href="qxmlstreamattributes.html#append">append</a>().</p>
+</div>
+<!-- @@@QXmlStreamAttributes -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QXmlStreamAttributes[overload1]$$$QXmlStreamAttributes -->
+<h3 class="fn" id="QXmlStreamAttributes"><a name="QXmlStreamAttributes"></a>QXmlStreamAttributes::<span class="name">QXmlStreamAttributes</span>()</h3>
+<p>A constructor for <a href="qxmlstreamattributes.html">QXmlStreamAttributes</a>.</p>
+<!-- @@@QXmlStreamAttributes -->
+<!-- $$$append[overload1]$$$appendconstQString&constQString&constQString& -->
+<h3 class="fn" id="append"><a name="append"></a><span class="type">void</span> QXmlStreamAttributes::<span class="name">append</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>namespaceUri</i>, const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>name</i>, const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>value</i>)</h3>
+<p>Appends a new attribute with <i>name</i> in the namespace described with <i>namespaceUri</i>, and value <i>value</i>. The <i>namespaceUri</i> can be empty.</p>
+<!-- @@@append -->
+<!-- $$$append$$$appendconstQString&constQString& -->
+<h3 class="fn" id="append-1"><a name="append-1"></a><span class="type">void</span> QXmlStreamAttributes::<span class="name">append</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>qualifiedName</i>, const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>value</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Appends a new attribute with qualified name <i>qualifiedName</i> and value <i>value</i>.</p>
+<!-- @@@append -->
+<!-- $$$hasAttribute[overload1]$$$hasAttributeconstQString& -->
+<h3 class="fn" id="hasAttribute"><a name="hasAttribute"></a><span class="type">bool</span> QXmlStreamAttributes::<span class="name">hasAttribute</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>qualifiedName</i>) const</h3>
+<p>Returns <code>true</code> if this <a href="qxmlstreamattributes.html">QXmlStreamAttributes</a> has an attribute whose qualified name is <i>qualifiedName</i>; otherwise returns <code>false</code>.</p>
+<p>Note that this is not namespace aware. For instance, if this <a href="qxmlstreamattributes.html">QXmlStreamAttributes</a> contains an attribute whose lexical name is &quot;xlink:href&quot; this doesn't tell that an attribute named <code>href</code> in the XLink namespace is present, since the <code>xlink</code> prefix can be bound to any namespace. Use the overload that takes a namespace URI and a local name as parameter, for namespace aware code.</p>
+<p>This function was introduced in  Qt 4.5.</p>
+<!-- @@@hasAttribute -->
+<!-- $$$hasAttribute$$$hasAttributeQLatin1String -->
+<h3 class="fn" id="hasAttribute-1"><a name="hasAttribute-1"></a><span class="type">bool</span> QXmlStreamAttributes::<span class="name">hasAttribute</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>qualifiedName</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>This function was introduced in  Qt 4.5.</p>
+<!-- @@@hasAttribute -->
+<!-- $$$hasAttribute$$$hasAttributeconstQString&constQString& -->
+<h3 class="fn" id="hasAttribute-2"><a name="hasAttribute-2"></a><span class="type">bool</span> QXmlStreamAttributes::<span class="name">hasAttribute</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>namespaceUri</i>, const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>name</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>Returns <code>true</code> if this <a href="qxmlstreamattributes.html">QXmlStreamAttributes</a> has an attribute whose namespace URI and name correspond to <i>namespaceUri</i> and <i>name</i>; otherwise returns <code>false</code>.</p>
+<p>This function was introduced in  Qt 4.5.</p>
+<!-- @@@hasAttribute -->
+<!-- $$$value[overload1]$$$valueconstQString&constQString& -->
+<h3 class="fn" id="value"><a name="value"></a><span class="type"><a href="qstringref.html">QStringRef</a></span> QXmlStreamAttributes::<span class="name">value</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>namespaceUri</i>, const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>name</i>) const</h3>
+<p>Returns the value of the attribute <i>name</i> in the namespace described with <i>namespaceUri</i>, or an empty string reference if the attribute is not defined. The <i>namespaceUri</i> can be empty.</p>
+<!-- @@@value -->
+<!-- $$$value$$$valueconstQString&QLatin1String -->
+<h3 class="fn" id="value-1"><a name="value-1"></a><span class="type"><a href="qstringref.html">QStringRef</a></span> QXmlStreamAttributes::<span class="name">value</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>namespaceUri</i>, <span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>name</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>Returns the value of the attribute <i>name</i> in the namespace described with <i>namespaceUri</i>, or an empty string reference if the attribute is not defined. The <i>namespaceUri</i> can be empty.</p>
+<!-- @@@value -->
+<!-- $$$value$$$valueQLatin1StringQLatin1String -->
+<h3 class="fn" id="value-2"><a name="value-2"></a><span class="type"><a href="qstringref.html">QStringRef</a></span> QXmlStreamAttributes::<span class="name">value</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>namespaceUri</i>, <span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>name</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>Returns the value of the attribute <i>name</i> in the namespace described with <i>namespaceUri</i>, or an empty string reference if the attribute is not defined. The <i>namespaceUri</i> can be empty.</p>
+<!-- @@@value -->
+<!-- $$$value$$$valueconstQString& -->
+<h3 class="fn" id="value-3"><a name="value-3"></a><span class="type"><a href="qstringref.html">QStringRef</a></span> QXmlStreamAttributes::<span class="name">value</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>qualifiedName</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>Returns the value of the attribute with qualified name <i>qualifiedName</i> , or an empty string reference if the attribute is not defined. A qualified name is the raw name of an attribute in the XML data. It consists of the namespace prefix, followed by colon, followed by the attribute's local name. Since the namespace prefix is not unique (the same prefix can point to different namespaces and different prefixes can point to the same namespace), you shouldn't use qualified names, but a resolved namespaceUri and the attribute's local name.</p>
+<!-- @@@value -->
+<!-- $$$value$$$valueQLatin1String -->
+<h3 class="fn" id="value-4"><a name="value-4"></a><span class="type"><a href="qstringref.html">QStringRef</a></span> QXmlStreamAttributes::<span class="name">value</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>qualifiedName</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>Returns the value of the attribute with qualified name <i>qualifiedName</i> , or an empty string reference if the attribute is not defined. A qualified name is the raw name of an attribute in the XML data. It consists of the namespace prefix, followed by colon, followed by the attribute's local name. Since the namespace prefix is not unique (the same prefix can point to different namespaces and different prefixes can point to the same namespace), you shouldn't use qualified names, but a resolved namespaceUri and the attribute's local name.</p>
+<!-- @@@value -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

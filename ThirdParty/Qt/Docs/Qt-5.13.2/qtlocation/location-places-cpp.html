@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- places.qdoc -->
+  <title>Places (C++) | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td >Places (C++)</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#overview">Overview</a></li>
+<li class="level1"><a href="#place-definition">Place Definition</a></li>
+<li class="level1"><a href="#common-operations">Common Operations</a></li>
+<li class="level2"><a href="#initializing-a-manager">Initializing a Manager</a></li>
+<li class="level2"><a href="#discovery-search">Discovery/Search</a></li>
+<li class="level2"><a href="#fetching-place-details">Fetching Place Details</a></li>
+<li class="level2"><a href="#fetching-rich-content">Fetching Rich Content</a></li>
+<li class="level2"><a href="#search-suggestions">Search Suggestions</a></li>
+<li class="level2"><a href="#saving-a-place">Saving a Place</a></li>
+<li class="level2"><a href="#removing-a-place">Removing a Place</a></li>
+<li class="level2"><a href="#using-categories">Using Categories</a></li>
+<li class="level2"><a href="#saving-a-category">Saving a Category</a></li>
+<li class="level2"><a href="#removing-a-category">Removing a Category</a></li>
+<li class="level2"><a href="#matching-places-between-managers">Matching Places Between Managers</a></li>
+<li class="level1"><a href="#classes-in-places">Classes in Places</a></li>
+<li class="level2"><a href="#data-classes">Data Classes</a></li>
+<li class="level2"><a href="#request-classes">Request Classes</a></li>
+<li class="level2"><a href="#reply-classes">Reply classes</a></li>
+<li class="level2"><a href="#manager-classes">Manager Classes</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Places (C++)</h1>
+<span class="subtitle"></span>
+<!-- $$$location-places-cpp.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="overview"></a>
+<h2 id="overview">Overview</h2>
+<p>The Places API allows users to discover places/points of interest and view details about them such as address and contact information; some places may even have rich content such as images and reviews. The Places API also facilitates management of places and categories, allowing users to save and remove them.</p>
+<a name="place-definition"></a>
+<h2 id="place-definition">Place Definition</h2>
+<p>A place is a point of interest, it could be a favorite restaurant, a park or someone's home. A <a href="qplace.html">QPlace</a> object represents a place by acting as a container for various information about that place.</p>
+<p>This information can be divided into 2 broad classifications</p>
+<ul>
+<li>Details</li>
+<li>Rich content</li>
+</ul>
+<p>The place details consist of properties of the place, such as the name, location, contact information and so on. When a place is returned during a search, these details are filled in. Sometimes in order to save bandwidth, there are further details about the place that can be retrieved on an individual place by place basis, if the user is interested. The <a href="qplace.html#detailsFetched">QPlace::detailsFetched</a>() function can be queried to see if all available details have been fetched, and if not, <a href="qplacemanager.html#getPlaceDetails">QPlaceManager::getPlaceDetails</a>() can be used to retrieve them. Precisely which details are populated during a search and which need to be fetched individually may vary from provider to provider. See <a href="qtlocation-index.html#plugin-references-and-parameters">plugin documentation</a> for more details.</p>
+<p>The rich content of a place consists of items such as images, reviews and editorials. Potentially there may be many rich content items, so they are treated separately from the place details. They can be retrieved in a paged fashion via <a href="qplacemanager.html#getPlaceContent">QPlaceManager::getPlaceContent</a>(). If necessary, the content may be assigned to a place so it can act as a convenient container.</p>
+<a name="common-operations"></a>
+<h2 id="common-operations">Common Operations</h2>
+<a name="initializing-a-manager"></a>
+<h3 id="initializing-a-manager">Initializing a Manager</h3>
+<p>All places functionality is facilitated by a <a href="qplacemanager.html">QPlaceManager</a> instance. One must specify a <a href="qgeoserviceprovider.html">QGeoServiceProvider</a> in order to create the <a href="qplacemanager.html">QPlaceManager</a></p>
+<pre class="cpp">
+
+  <span class="comment">//The &quot;provider name&quot; is used to select a particular provider</span>
+  <span class="type"><a href="qgeoserviceprovider.html">QGeoServiceProvider</a></span> <span class="operator">*</span>provider <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgeoserviceprovider.html">QGeoServiceProvider</a></span>(<span class="string">&quot;provider name&quot;</span>);
+  <span class="type"><a href="qplacemanager.html">QPlaceManager</a></span> <span class="operator">*</span>manager <span class="operator">=</span> provider<span class="operator">-</span><span class="operator">&gt;</span>placeManager();
+
+</pre>
+<a name="discovery-search"></a>
+<h3 id="discovery-search">Discovery/Search</h3>
+<p>In order to perform a search operation we simply create a <a href="qplacesearchrequest.html">QPlaceSearchRequest</a> and set the desired search parameters, such as a search term and search center.</p>
+<pre class="cpp">
+
+  <span class="comment">//instantiate request and set parameters</span>
+  <span class="type"><a href="qplacesearchrequest.html">QPlaceSearchRequest</a></span> searchRequest;
+  searchRequest<span class="operator">.</span>setSearchTerm(<span class="string">&quot;ice cream&quot;</span>);
+  searchRequest<span class="operator">.</span>setSearchArea(<span class="type"><a href="../qtpositioning/qgeocircle.html">QGeoCircle</a></span>(<span class="type"><a href="../qtpositioning/qgeocoordinate.html">QGeoCoordinate</a></span>(<span class="number">12.34</span><span class="operator">,</span> <span class="number">56.78</span>)));
+
+  <span class="comment">//send off a search request</span>
+  <span class="comment">/*QPlaceSearchReply * */</span> searchReply <span class="operator">=</span> manager<span class="operator">-</span><span class="operator">&gt;</span>search(searchRequest);
+
+  <span class="comment">//connect a slot to handle the reply</span>
+  connect(searchReply<span class="operator">,</span> SIGNAL(finished())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(handleSearchReply()));
+
+</pre>
+<p>The request is an asynchronous operation so we need a slot to handle the completion of the request. In the handler we check that there are no errors and that our search result type is a place. If so we can then retrieve some of the core details of the place. At the end of the slot, we delete the reply since they are for single use only.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> handleSearchReply() {
+      <span class="keyword">if</span> (searchReply<span class="operator">-</span><span class="operator">&gt;</span>error() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qplacereply.html">QPlaceReply</a></span><span class="operator">::</span>NoError) {
+          foreach (<span class="keyword">const</span> <span class="type"><a href="qplacesearchresult.html">QPlaceSearchResult</a></span> <span class="operator">&amp;</span>result<span class="operator">,</span> searchReply<span class="operator">-</span><span class="operator">&gt;</span>results()) {
+              <span class="keyword">if</span> (result<span class="operator">.</span>type() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qplacesearchresult.html">QPlaceSearchResult</a></span><span class="operator">::</span>PlaceResult) {
+                  <span class="type"><a href="qplaceresult.html">QPlaceResult</a></span> placeResult <span class="operator">=</span> result;
+                  <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Name: &quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> placeResult<span class="operator">.</span>place()<span class="operator">.</span>name();
+                  <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Coordinate &quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> placeResult<span class="operator">.</span>place()<span class="operator">.</span>location()<span class="operator">.</span>coordinate()<span class="operator">.</span>toString();
+                  <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Street: &quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> placeResult<span class="operator">.</span>place()<span class="operator">.</span>location()<span class="operator">.</span>address()<span class="operator">.</span>street();
+                  <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Distance: &quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> placeResult<span class="operator">.</span>distance();
+              }
+          }
+      }
+      searchReply<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();  <span class="comment">//discard reply</span>
+      searchReply <span class="operator">=</span> <span class="number">0</span>;
+  }
+
+</pre>
+<p><b>Note:</b> Depending upon the plugin backend that was chosen, the search results may contain places which have further details that can be fetched on a place by place basis. To fetch these other details see <a href="location-places-cpp.html#fetching-place-details">Fetching Place Details</a>.</p>
+<a name="recommendations"></a>
+<h4 id="recommendations">Recommendations</h4>
+<p>Recommendations can be retrieved by supplying a place id via <a href="qplacesearchrequest.html#setRecommendationId">QPlaceSearchRequest::setRecommendationId</a>(). Any places similar to the given place are retrieved.</p>
+<a name="paging"></a>
+<h4 id="paging">Paging</h4>
+<p>If the plugin supports paging, the limit parameter may be provided to the search request.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qplacesearchrequest.html">QPlaceSearchRequest</a></span> searchRequest;
+  searchRequest<span class="operator">.</span>setLimit(<span class="number">15</span>); <span class="comment">//specify how many results are to be retrieved.</span>
+
+</pre>
+<a name="fetching-place-details"></a>
+<h3 id="fetching-place-details">Fetching Place Details</h3>
+<p>A place that has been returned from a search request may have more details that can be fetched. The following demonstrates how to check if there are further details and if so how to request them.</p>
+<pre class="cpp">
+
+  <span class="keyword">if</span> (<span class="operator">!</span>place<span class="operator">.</span>detailsFetched()) {
+      <span class="comment">/*QPlaceDetailsReply * */</span> detailsReply <span class="operator">=</span> manager<span class="operator">-</span><span class="operator">&gt;</span>getPlaceDetails(place<span class="operator">.</span>placeId());
+      connect(detailsReply<span class="operator">,</span> SIGNAL(finished())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(handleDetailsReply()));
+  }
+      ...
+      ...
+  <span class="type">void</span> handleDetailsReply() {
+      <span class="type"><a href="qplace.html">QPlace</a></span> place;
+      <span class="keyword">if</span> (detailsReply<span class="operator">-</span><span class="operator">&gt;</span>error() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qplacereply.html">QPlaceReply</a></span><span class="operator">::</span>NoError)
+          place <span class="operator">=</span> detailsReply<span class="operator">-</span><span class="operator">&gt;</span>place();
+
+      detailsReply<span class="operator">-</span><span class="operator">&gt;</span>deleteLater(); <span class="comment">//discard reply</span>
+      detailsReply <span class="operator">=</span> <span class="number">0</span>;
+  }
+
+</pre>
+<a name="fetching-rich-content"></a>
+<h3 id="fetching-rich-content">Fetching Rich Content</h3>
+<p>Rich content such as images and reviews is retrieved through the manager and then if required assigned to a place.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qplacecontentrequest.html">QPlaceContentRequest</a></span> request;
+  request<span class="operator">.</span>setContentType(<span class="type"><a href="qplacecontent.html">QPlaceContent</a></span><span class="operator">::</span>ImageType);
+  request<span class="operator">.</span>setPlaceId(place<span class="operator">.</span>placeId());
+  request<span class="operator">.</span>setLimit(<span class="number">5</span>);
+  <span class="comment">/*QPlaceContentReply * */</span> contentReply <span class="operator">=</span> manager<span class="operator">-</span><span class="operator">&gt;</span>getPlaceContent(request);
+  connect(contentReply<span class="operator">,</span> SIGNAL(finished())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(handleImagesReply()));
+
+</pre>
+<p>We can handle the content request as shown below.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> handleImagesReply() {
+      <span class="keyword">if</span> (contentReply<span class="operator">-</span><span class="operator">&gt;</span>error() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qplacereply.html">QPlaceReply</a></span><span class="operator">::</span>NoError) {
+          <span class="type"><a href="../qtcore/qmapiterator.html">QMapIterator</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="qplacecontent.html">QPlaceContent</a></span><span class="operator">&gt;</span> iter(contentReply<span class="operator">-</span><span class="operator">&gt;</span>content());
+          <span class="keyword">while</span> (iter<span class="operator">.</span>hasNext()) {
+              <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Index: &quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> iter<span class="operator">.</span>key();
+              <span class="type"><a href="qplaceimage.html">QPlaceImage</a></span> image <span class="operator">=</span> iter<span class="operator">.</span>value();
+              <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> image<span class="operator">.</span>url();
+              <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> image<span class="operator">.</span>mimeType();
+          }
+
+          <span class="comment">//alternatively if indexes are irrelevant</span>
+          foreach (<span class="keyword">const</span> <span class="type"><a href="qplaceimage.html">QPlaceImage</a></span> <span class="operator">&amp;</span>image<span class="operator">,</span> contentReply<span class="operator">-</span><span class="operator">&gt;</span>content()) {
+              <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> image<span class="operator">.</span>url();
+              <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> image<span class="operator">.</span>mimeType();
+          }
+
+          <span class="comment">//we can assign content to the place that it belongs to.</span>
+          <span class="comment">//the place object serves as a container where we can retrieve</span>
+          <span class="comment">//content that has already been fetched</span>
+          place<span class="operator">.</span>insertContent(contentReply<span class="operator">-</span><span class="operator">&gt;</span>request()<span class="operator">.</span>contentType()<span class="operator">,</span> contentReply<span class="operator">-</span><span class="operator">&gt;</span>content());
+          place<span class="operator">.</span>setTotalContentCount(contentReply<span class="operator">-</span><span class="operator">&gt;</span>request()<span class="operator">.</span>contentType()<span class="operator">,</span> contentReply<span class="operator">-</span><span class="operator">&gt;</span>totalCount());
+      }
+
+      contentReply<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+      contentReply <span class="operator">=</span> <span class="number">0</span>;
+  }
+
+</pre>
+<p>It is important to note that the results in the <a href="qplacecontentreply.html">QPlaceContentReply</a>, is a <a href="qplacecontent.html#Collection-typedef">QPlaceContent::Collection</a> which is essentially a <a href="../qtcore/qmap.html">QMap</a>&lt;int, <a href="qplacecontent.html">QPlaceContent</a>&gt;. The key <code>int</code> in this case is the index of the content, and the value is the content itself. Due to the way Content is implemented it is possible to convert a content type as follows</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qplaceimage.html">QPlaceImage</a></span> image <span class="operator">=</span> content; <span class="comment">//provided that 'content' has a type QPlace::ImageType</span>
+
+</pre>
+<p>The usage of the <a href="qplacecontent.html#Collection-typedef">QPlaceContent::Collection</a> and the conversion between content and its subtypes means that code for handling the mechanics of paging reviews, images and editorials can be easily shared.</p>
+<a name="search-suggestions"></a>
+<h3 id="search-suggestions">Search Suggestions</h3>
+<p>The retrieval of search term suggestions is very similar to performing a place search. A <a href="qplacesearchrequest.html">QPlaceSearchRequest</a> is used just like a place search, the only difference being that the search term is set to a partially completed string.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qplacesearchrequest.html">QPlaceSearchRequest</a></span> request;
+  request<span class="operator">.</span>setSearchTerm(<span class="string">&quot;piz&quot;</span>);
+  request<span class="operator">.</span>setSearchArea(<span class="type"><a href="../qtpositioning/qgeocircle.html">QGeoCircle</a></span>(<span class="type"><a href="../qtpositioning/qgeocoordinate.html">QGeoCoordinate</a></span>(<span class="number">12.34</span><span class="operator">,</span> <span class="number">56.78</span>)));
+  <span class="comment">/* QPlaceSearchSuggestion * */</span>suggestionReply <span class="operator">=</span> manager<span class="operator">-</span><span class="operator">&gt;</span>searchSuggestions(request);
+  connect(suggestionReply<span class="operator">,</span> SIGNAL(finished())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(handleSuggestionReply()));
+
+</pre>
+<p>And when the request is done, we can use the reply to show the suggestions.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> handleSuggestionReply() {
+      <span class="keyword">if</span> (suggestionReply<span class="operator">-</span><span class="operator">&gt;</span>error() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qplacereply.html">QPlaceReply</a></span><span class="operator">::</span>NoError) {
+          foreach (<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>suggestion<span class="operator">,</span> suggestionReply<span class="operator">-</span><span class="operator">&gt;</span>suggestions())
+              <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> suggestion;
+      }
+
+      suggestionReply<span class="operator">-</span><span class="operator">&gt;</span>deleteLater(); <span class="comment">//discard reply</span>
+      suggestionReply <span class="operator">=</span> <span class="number">0</span>;
+  }
+
+</pre>
+<a name="saving-a-place-cpp"></a><a name="saving-a-place"></a>
+<h3 id="saving-a-place">Saving a Place</h3>
+<p>The saving of a new place is performed as follows, we create a <a href="qplace.html">QPlace</a> instance and populate it with information such as a name, address and coordinate. Once done we can invoke <a href="qplacemanager.html#savePlace">QPlaceManager::savePlace</a>() to begin a save operation.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qplace.html">QPlace</a></span>  place;
+  place<span class="operator">.</span>setName( <span class="string">&quot;Fred's Ice Cream Parlor&quot;</span> );
+
+  <span class="type"><a href="../qtpositioning/qgeolocation.html">QGeoLocation</a></span> location;
+  location<span class="operator">.</span>setCoordinate(<span class="type"><a href="../qtpositioning/qgeocoordinate.html">QGeoCoordinate</a></span>(<span class="number">12.34</span><span class="operator">,</span> <span class="number">56.78</span>));
+
+  <span class="type"><a href="../qtpositioning/qgeoaddress.html">QGeoAddress</a></span> address;
+  address<span class="operator">.</span>setStreet(<span class="string">&quot;111 Nother Street&quot;</span>);
+      ...
+  location<span class="operator">.</span>setAddress(address);
+  place<span class="operator">.</span>setLocation(location);
+
+  <span class="comment">/* QPlaceIdReply * */</span>savePlaceReply <span class="operator">=</span> manager<span class="operator">-</span><span class="operator">&gt;</span>savePlace(place);
+  connect(savePlaceReply<span class="operator">,</span> SIGNAL(finished())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(handleSavePlaceReply()));
+
+</pre>
+<p>Once a place is saved the reply contains the new identifier for that place.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> handleSavePlaceReply() {
+      <span class="keyword">if</span> (savePlaceReply<span class="operator">-</span><span class="operator">&gt;</span>error() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qplacereply.html">QPlaceReply</a></span><span class="operator">::</span>NoError)
+          <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> savePlaceReply<span class="operator">-</span><span class="operator">&gt;</span>id();
+
+      savePlaceReply<span class="operator">-</span><span class="operator">&gt;</span>deleteLater(); <span class="comment">//discard reply</span>
+      savePlaceReply <span class="operator">=</span> <span class="number">0</span>;
+  }
+
+</pre>
+<p>Note that to save an already <i>existing</i> place, the <a href="qplace.html#placeId">QPlace::placeId</a>() must be filled in with the correct identifier. Otherwise a new place will be created if empty or the wrong place overwritten if the identifier is incorrect.</p>
+<p>When a place is saved, the <a href="qplacemanager.html">QPlaceManager</a> may emit QPlaceManager::placedAdded() or <a href="qplacemanager.html#placeUpdated">QPlaceManager::placeUpdated</a>() signals. However whether a manager does so or not is provider specific, managers accessing places from a web service will typically not emit these signals while managers accessing places locally stored generally will.</p>
+<a name="caveats"></a>
+<h4 id="caveats">Caveats</h4>
+<p>The Places API is currently designed for only saving <i>core</i> details. Saving rich content like images and reviews or details like supplier and rating is not a supported use case. Typically a manager will generally ignore these fields upon save and may produce a warning message if they are populated.</p>
+<p>The Places API only supports saving of the following <i>core details</i>:</p>
+<ul>
+<li>name</li>
+<li>place id</li>
+<li>location</li>
+<li>contact details</li>
+<li>icon</li>
+<li>categories (tag-like names to describe a place)</li>
+<li>visibility scope</li>
+</ul>
+<p>It is possible that providers may only support a subset of these. See the <a href="qtlocation-index.html#plugin-references-and-parameters">plugin documentation</a> for more details.</p>
+<p>Saving of properties such as the rating, extended attributes, images, reviews, editorials and supplier is explicitly not supported by the Places API.</p>
+<a name="saving-between-managers"></a>
+<h4 id="saving-between-managers">Saving Between Managers</h4>
+<p>When saving places between managers, there are a few things to be aware of. Some fields of a place such as the id, categories and icons are manager specific entities for example the categories in one manager may not be recognized in another. Therefore trying to save a place directly from one manager to another is not possible.</p>
+<p>The typical approach is to use the <a href="qplacemanager.html#compatiblePlace">QPlaceManager::compatiblePlace</a>() function, it creates a copy of a place, but only copies data that the manager supports. Manager specific data such as the place identifier is not copied over. The new copy is now suitable for saving into the manager. If the manager supports matching by alternative identifiers, an alternative identifier attribute is assigned to the copy (see <a href="location-places-cpp.html#matching-places-between-managers">Matching places between managers</a>)</p>
+<pre class="cpp">
+
+  <span class="comment">//result retrieved from a different manager)</span>
+  <span class="type"><a href="qplace.html">QPlace</a></span> place <span class="operator">=</span> manager<span class="operator">-</span><span class="operator">&gt;</span>compatiblePlace(result<span class="operator">.</span>place());
+  saveReply <span class="operator">=</span> manager<span class="operator">-</span><span class="operator">&gt;</span>savePlace(place);
+
+</pre>
+<a name="removing-a-place-cpp"></a><a name="removing-a-place"></a>
+<h3 id="removing-a-place">Removing a Place</h3>
+<p>The removal of a place is performed as follows:</p>
+<pre class="cpp">
+
+  <span class="comment">/* QPlaceIdReply * */</span>removePlaceReply <span class="operator">=</span> manager<span class="operator">-</span><span class="operator">&gt;</span>removePlace(place<span class="operator">.</span>placeId());
+  connect(removePlaceReply<span class="operator">,</span> SIGNAL(finished())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(handleRemovePlaceReply()));
+      ...
+      ...
+  <span class="type">void</span> handleRemovePlaceReply() {
+      <span class="keyword">if</span> (removePlaceReply<span class="operator">-</span><span class="operator">&gt;</span>error() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qplacereply.html">QPlaceReply</a></span><span class="operator">::</span>NoError)
+          <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Removal of place identified by&quot;</span>
+                   <span class="operator">&lt;</span><span class="operator">&lt;</span> removePlaceReply<span class="operator">-</span><span class="operator">&gt;</span>id() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;was successful&quot;</span>;
+
+      removePlaceReply<span class="operator">-</span><span class="operator">&gt;</span>deleteLater(); <span class="comment">//discard reply</span>
+      removePlaceReply <span class="operator">=</span> <span class="number">0</span>;
+  }
+
+</pre>
+<p>When a place is removed, the <a href="qplacemanager.html">QPlaceManager</a> may emit the <a href="qplacemanager.html#placeRemoved">QPlaceManager::placeRemoved</a>() signal. Whether a manager does so is provider specific. Managers accessing places from a web service will typically not emit these signals, while managers accessing places stored locally generally will.</p>
+<a name="using-categories"></a>
+<h3 id="using-categories">Using Categories</h3>
+<p>Categories are keywords that can describe a place. For example, 'park', 'theater', 'restaurant'. A place could be described by many categories, it could be a park and a music venue and a ferry or bus stop.</p>
+<p>To use categories they must first be initialized.</p>
+<pre class="cpp">
+
+  <span class="comment">/* QPlaceReply * */</span>initCatReply <span class="operator">=</span> manager<span class="operator">-</span><span class="operator">&gt;</span>initializeCategories();
+  connect(initCatReply<span class="operator">,</span> SIGNAL(finished())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(handleInitCatReply()));
+      ...
+      ...
+  <span class="type">void</span> handleInitCatReply() {
+      <span class="keyword">if</span> (initCatReply<span class="operator">-</span><span class="operator">&gt;</span>error() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qplacereply.html">QPlaceReply</a></span><span class="operator">::</span>NoError)
+          <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Categories initialized&quot;</span>;
+      <span class="keyword">else</span>
+          <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Failed to initialize categories&quot;</span>;
+
+      initCatReply<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+      initCatReply <span class="operator">=</span> <span class="number">0</span>;
+  }
+
+</pre>
+<p>After the categories have been initialized we can then use these category functions.</p>
+<ul>
+<li><a href="qplacemanager.html#childCategories">QPlaceManager::childCategories</a>()</li>
+<li><a href="qplacemanager.html#category">QPlaceManager::category</a>()</li>
+<li><a href="qplacemanager.html#parentCategoryId">QPlaceManager::parentCategoryId</a>()</li>
+<li><a href="qplacemanager.html#childCategoryIds">QPlaceManager::childCategoryIds</a>();</li>
+</ul>
+<p>To retrieve the top level categories we use the <a href="qplacemanager.html#childCategories">QPlaceManager::childCategories</a>() function but do not provide a category identifier.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qplacecategory.html">QPlaceCategory</a></span><span class="operator">&gt;</span> topLevelCategories <span class="operator">=</span> manager<span class="operator">-</span><span class="operator">&gt;</span>childCategories();
+  foreach (<span class="keyword">const</span> <span class="type"><a href="qplacecategory.html">QPlaceCategory</a></span> <span class="operator">&amp;</span>category<span class="operator">,</span> topLevelCategories)
+      <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> category<span class="operator">.</span>name();
+
+</pre>
+<p>If we did provide an identifier then we could retrieve a category's children.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qplacecategory.html">QPlaceCategory</a></span><span class="operator">&gt;</span> childCategories <span class="operator">=</span> manager<span class="operator">-</span><span class="operator">&gt;</span>childCategories(pizza<span class="operator">.</span>categoryId());
+
+</pre>
+<a name="saving-a-category"></a>
+<h3 id="saving-a-category">Saving a Category</h3>
+<p>The following shows how to save a category</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qplacecategory.html">QPlaceCategory</a></span> fastFood;
+
+  <span class="type"><a href="qplacecategory.html">QPlaceCategory</a></span> category;
+  category<span class="operator">.</span>setName(<span class="string">&quot;pizza&quot;</span>);
+  <span class="comment">/*QPlaceIdReply */</span> saveCategoryReply <span class="operator">=</span> manager<span class="operator">-</span><span class="operator">&gt;</span>saveCategory(category);
+  connect(saveCategoryReply<span class="operator">,</span> SIGNAL(finished())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(handleSaveCategoryReply()));
+
+  <span class="comment">//we could have saved a category as a child by supplying a parent identifier.</span>
+  saveCategoryReply <span class="operator">=</span> manager<span class="operator">-</span><span class="operator">&gt;</span>saveCategory(category<span class="operator">,</span> fastFood<span class="operator">.</span>categoryId());
+      ...
+      ...
+  <span class="type">void</span> handleSaveCategoryReply() {
+      <span class="keyword">if</span> (saveCategoryReply<span class="operator">-</span><span class="operator">&gt;</span>error() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qplacereply.html">QPlaceReply</a></span><span class="operator">::</span>NoError) {
+          <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Saved category id =&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> saveCategoryReply<span class="operator">-</span><span class="operator">&gt;</span>id();
+      }
+
+      saveCategoryReply<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+      saveCategoryReply <span class="operator">=</span> <span class="number">0</span>;
+  }
+
+</pre>
+<p>When a category is saved, the <a href="qplacemanager.html">QPlaceManager</a> may emit <a href="qplacemanager.html#categoryAdded">QPlaceManager::categoryAdded</a>() or <a href="qplacemanager.html#categoryUpdated">QPlaceManager::categoryUpdated</a>() signals. However whether a manager does so or not is provider specific, managers accessing places from a web service will typically not emit these signals while managers accessing places locally stored generally will.</p>
+<a name="removing-a-category"></a>
+<h3 id="removing-a-category">Removing a Category</h3>
+<p>Category removal is very similar to removing a place</p>
+<pre class="cpp">
+
+  <span class="comment">/* QPlaceIdReply * */</span>removeCategoryReply <span class="operator">=</span> manager<span class="operator">-</span><span class="operator">&gt;</span>removeCategory(place<span class="operator">.</span>placeId());
+  connect(removeCategoryReply<span class="operator">,</span> SIGNAL(finished())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(handleRemoveCategoryReply()));
+      ...
+      ...
+  <span class="type">void</span> handleRemoveCategoryReply() {
+      <span class="keyword">if</span> (removeCategoryReply<span class="operator">-</span><span class="operator">&gt;</span>error() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qplacereply.html">QPlaceReply</a></span><span class="operator">::</span>NoError)
+          <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Removal of category identified by&quot;</span>
+                   <span class="operator">&lt;</span><span class="operator">&lt;</span> removeCategoryReply<span class="operator">-</span><span class="operator">&gt;</span>id() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;was successful&quot;</span>;
+
+      removeCategoryReply<span class="operator">-</span><span class="operator">&gt;</span>deleteLater(); <span class="comment">//discard reply</span>
+      removeCategoryReply <span class="operator">=</span> <span class="number">0</span>;
+  }
+
+</pre>
+<p>When a category is removed, the <a href="qplacemanager.html">QPlaceManager</a> may emit the <a href="qplacemanager.html#categoryRemoved">QPlaceManager::categoryRemoved</a>() signal. Whether a manager does so is provider specific. Managers accessing places from a web service will typically not emit these signals, while managers accessing places stored locally generally will.</p>
+<a name="matching-places-between-managers"></a>
+<h3 id="matching-places-between-managers">Matching Places Between Managers</h3>
+<p>Sometimes you may want to cross reference whether places from one manager match those from another manager. Such a situation may arise where one manager provides read-only access to places (origin manager) while another second r/w manager (destination manager) is used to save selected favorites from the first. During a search of the origin manager we may want to know which ones have been 'favorited' into the destination manager and perhaps display a customized favorite name rather than the original name.</p>
+<p>The matching mechanism can vary between managers, but is typically accomplished through an alternative identifier. As part of the save process, the place identifier from the origin manager is saved as an alternative identifier attribute in the destination manager (which can have its own place identifier scheme). In the following example, the origin manager is from the 'here' QGeoServiceProider, therefore as part of the saving process an alternative identifier attribute, x_id_here, is set for the place saved into the destination manager (when <a href="qplacemanager.html#compatiblePlace">QPlaceManager::compatiblePlace</a>() is called)</p>
+<pre class="cpp">
+
+  origin R<span class="operator">/</span>O manager(here)       destination R<span class="operator">/</span>W manager (places_jsondb)
+                          Save
+  Place id: ae246         <span class="operator">-</span><span class="operator">-</span><span class="operator">-</span><span class="operator">&gt;</span>    Place id: <span class="number">0001</span>
+  Attribute type: x_provider      Attribute type: x_id_here
+  Attribute value: here           Attribute text value: ae246
+
+</pre>
+<p>In order to perform the matching, we create a <a href="qplacematchrequest.html">QPlaceMatchRequest</a> and assign it the search results from the origin manager. The <a href="qplacematchrequest.html">QPlaceMatchRequest</a> will be used on the destination manager to return corresponding places. We also specify matching parameters which are key value pairs. As mentioned previously, this can vary depending on the manager but typically the key is <a href="qplacematchrequest.html#AlternativeId-var">QPlaceMatchRequest::AlternativeId</a> to indicate we are matching by alternative id, the value in this case would be x_id_here which specifies which alternative identifier attribute we are using to do the matching.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qplacematchrequest.html">QPlaceMatchRequest</a></span> request;
+  request<span class="operator">.</span>setResults(results);
+  <span class="type"><a href="../qtcore/qvariant.html#QVariantMap-typedef">QVariantMap</a></span> parameters;
+  parameters<span class="operator">.</span>insert(<span class="type"><a href="qplacematchrequest.html">QPlaceMatchRequest</a></span><span class="operator">::</span>AlternativeId<span class="operator">,</span> <span class="string">&quot;x_id_here&quot;</span>);
+  request<span class="operator">.</span>setParameters(parameters);
+  matchReply <span class="operator">=</span> manager<span class="operator">-</span><span class="operator">&gt;</span>matchingPlaces(request);
+      ...
+      ...
+  <span class="type">void</span> matchHandler() {
+      <span class="keyword">if</span> (matchReply<span class="operator">-</span><span class="operator">&gt;</span>error() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qplacereply.html">QPlaceReply</a></span><span class="operator">::</span>NoError) {
+          foreach (<span class="keyword">const</span> <span class="type"><a href="qplace.html">QPlace</a></span> place<span class="operator">,</span> matchReply<span class="operator">-</span><span class="operator">&gt;</span>places()) {
+              <span class="keyword">if</span> (place <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="qplace.html">QPlace</a></span>())
+                  <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Place is a favorite with name&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> place<span class="operator">.</span>name();
+              <span class="keyword">else</span>
+                  <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Place is not a favorite&quot;</span>;
+          }
+      }
+
+      matchReply<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+      matchReply <span class="operator">=</span> <span class="number">0</span>;
+  }
+
+</pre>
+<a name="classes-in-places"></a>
+<h2 id="classes-in-places">Classes in Places</h2>
+<a name="data-classes"></a>
+<h3 id="data-classes">Data Classes</h3>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplace.html">QPlace</a></p></td><td class="tblDescr"><p>Represents a set of data about a place</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplaceicon.html">QPlaceIcon</a></p></td><td class="tblDescr"><p>Represents an icon</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplaceattribute.html">QPlaceAttribute</a></p></td><td class="tblDescr"><p>Represents generic attribute information about a place</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplacecategory.html">QPlaceCategory</a></p></td><td class="tblDescr"><p>Represents a category that a QPlace can be associated with</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplacecontactdetail.html">QPlaceContactDetail</a></p></td><td class="tblDescr"><p>Represents a contact detail such as a phone number or website url</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplacecontent.html">QPlaceContent</a></p></td><td class="tblDescr"><p>Serves as the base class for rich content types</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplaceeditorial.html">QPlaceEditorial</a></p></td><td class="tblDescr"><p>Represents a publisher's article describing a place</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplaceimage.html">QPlaceImage</a></p></td><td class="tblDescr"><p>Represents a reference to an image</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplaceproposedsearchresult.html">QPlaceProposedSearchResult</a></p></td><td class="tblDescr"><p>Represents a search result containing a proposed search</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplaceratings.html">QPlaceRatings</a></p></td><td class="tblDescr"><p>Holds rating information about a place</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplaceresult.html">QPlaceResult</a></p></td><td class="tblDescr"><p>Represents a search result containing a place</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplacereview.html">QPlaceReview</a></p></td><td class="tblDescr"><p>Represents a review of a place</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplacesearchresult.html">QPlaceSearchResult</a></p></td><td class="tblDescr"><p>The base class for search results</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplacesupplier.html">QPlaceSupplier</a></p></td><td class="tblDescr"><p>Represents a supplier of a place or content associated with a place</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplaceuser.html">QPlaceUser</a></p></td><td class="tblDescr"><p>Represents an individual user</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtpositioning/qgeoaddress.html">QGeoAddress</a></p></td><td class="tblDescr"><p>Represents an address of a QGeoLocation</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtpositioning/qgeolocation.html">QGeoLocation</a></p></td><td class="tblDescr"><p>Represents basic information about a location</p></td></tr>
+</table></div>
+<a name="request-classes"></a>
+<h3 id="request-classes">Request Classes</h3>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplacecontentrequest.html">QPlaceContentRequest</a></p></td><td class="tblDescr"><p>Represents the parameters of a content request</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplacematchrequest.html">QPlaceMatchRequest</a></p></td><td class="tblDescr"><p>Used to find places from one manager that match those from another. It represents a set of request parameters</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplacesearchrequest.html">QPlaceSearchRequest</a></p></td><td class="tblDescr"><p>Represents the set of parameters for a search request</p></td></tr>
+</table></div>
+<a name="places-reply-classes"></a><a name="reply-classes"></a>
+<h3 id="reply-classes">Reply classes</h3>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplacecontentreply.html">QPlaceContentReply</a></p></td><td class="tblDescr"><p>Manages a content retrieval operation started by an instance of QPlaceManager</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplacedetailsreply.html">QPlaceDetailsReply</a></p></td><td class="tblDescr"><p>Manages a place details fetch operation started by an instance of QPlaceManager</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplaceidreply.html">QPlaceIdReply</a></p></td><td class="tblDescr"><p>Manages operations which return an identifier such as saving and removal operations of places and categories</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplacematchreply.html">QPlaceMatchReply</a></p></td><td class="tblDescr"><p>Manages a place matching operation started by an instance of QPlaceManager</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplacereply.html">QPlaceReply</a></p></td><td class="tblDescr"><p>Manages an operation started by an instance of QPlaceManager and serves as a base class for more specialized replies</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplacesearchreply.html">QPlaceSearchReply</a></p></td><td class="tblDescr"><p>Manages a place search operation started by an instance of QPlaceManager</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplacesearchsuggestionreply.html">QPlaceSearchSuggestionReply</a></p></td><td class="tblDescr"><p>Manages a search suggestion operation started by an instance of QPlaceManager</p></td></tr>
+</table></div>
+<a name="manager-classes"></a>
+<h3 id="manager-classes">Manager Classes</h3>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplacemanager.html">QPlaceManager</a></p></td><td class="tblDescr"><p>The interface which allows clients to access places stored in a particular backend</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplacemanagerengine.html">QPlaceManagerEngine</a></p></td><td class="tblDescr"><p>Interface for implementers of QGeoServiceProvider plugins who want to provide access to place functionality</p></td></tr>
+</table></div>
+</div>
+<!-- @@@location-places-cpp.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

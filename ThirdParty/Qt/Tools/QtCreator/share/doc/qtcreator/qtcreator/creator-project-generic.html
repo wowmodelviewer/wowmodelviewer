@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-projects-generic.qdoc -->
+  <title>Setting Up a Generic Project | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Setting Up a Generic Project</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-projects-autotools.html" />
+  <link rel="next" href="creator-cli.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-projects-autotools.html">Setting Up an Autotools Project</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-cli.html">Using Command Line Options</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#importing-a-generic-project">Importing a Generic Project</a></li>
+<li class="level1"><a href="#working-with-generic-project-files">Working with Generic Project Files</a></li>
+<li class="level1"><a href="#specifying-files">Specifying Files</a></li>
+<li class="level1"><a href="#specifying-include-paths">Specifying Include Paths</a></li>
+<li class="level1"><a href="#specifying-defines">Specifying Defines</a></li>
+<li class="level1"><a href="#forwarding-flags-to-clang-code-model">Forwarding Flags to Clang Code Model</a></li>
+<li class="level1"><a href="#providing-deployment-information">Providing Deployment Information</a></li>
+<li class="level1"><a href="#creating-a-run-configuration">Creating a Run Configuration</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Setting Up a Generic Project</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-project-generic.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Generic project support allows you to use Qt Creator as a code editor. You can change the way your project is built by modifying the <code>make</code> command in the <b>Projects</b> mode under <b>Build Settings</b>.</p>
+<p>When you import a project, Qt Creator creates the following files that allow you to specify which files belong to your project and which include directories or defines you want to pass to your compiler: <code>.files</code>, <code>.includes</code>, and <code>.config</code>.</p>
+<a name="importing-a-generic-project"></a>
+<h2 id="importing-a-generic-project">Importing a Generic Project</h2>
+<p>To import an existing generic project:</p>
+<ol class="1" type="1"><li>Select <b>File</b> &gt; <b>New File or Project</b> &gt; <b>Import Project</b> &gt; <b>Import Existing Project</b>.</li>
+<li>In <b>Import Existing Project</b>, enter the project name and select the location of the project file you want to import.<p>Qt Creator automatically generates the following files in the project directory:</p>
+<ul>
+<li><a href="#specifying-files">.files</a></li>
+<li><a href="#specifying-include-paths">.includes</a></li>
+<li><a href="#specifying-defines">.config</a></li>
+<li>.creator</li>
+<li><a href="#forwarding-flags-to-clang-code-model">.cflags</a></li>
+<li><a href="#forwarding-flags-to-clang-code-model">.cxxflags</a></li>
+</ul>
+</li>
+</ol>
+<p>When the project is successfully imported, Qt Creator creates the project tree in the sidebar.</p>
+<p>After importing a generic project into Qt Creator, open it by selecting the <code>.creator</code> file.</p>
+<a name="working-with-generic-project-files"></a>
+<h2 id="working-with-generic-project-files">Working with Generic Project Files</h2>
+<p>For a generic project, you have to manually specify which files belong to your project and which include directories or defines you want to pass to your compiler.</p>
+<a name="specifying-files"></a>
+<h2 id="specifying-files">Specifying Files</h2>
+<p>The list of files for a generic project is specified in the <code>.files</code> file. When you first create a generic project, Qt Creator adds any files it recognizes to your project.</p>
+<p>To add or remove files, edit the <code>.files</code> file in Qt Creator. Qt Creator recreates your project tree when you save the <code>.files</code> file. Alternatively, you can add and remove files using the context menu in the project tree.</p>
+<p>If you frequently need to update the <code>.files</code> file, you can do so efficiently by using a script that updates the file for you. If the file is modified externally, you have to restart Qt Creator for the changes to take effect.</p>
+<p>To update the <code>.files</code> on the <b>Git</b> repository use the following script:</p>
+<pre class="cpp">
+
+  git ls<span class="operator">-</span>files <span class="string">&quot;*.cpp&quot;</span> <span class="string">&quot;*.h&quot;</span> <span class="operator">&gt;</span> MyProject<span class="operator">.</span>files
+
+</pre>
+<a name="specifying-include-paths"></a>
+<h2 id="specifying-include-paths">Specifying Include Paths</h2>
+<p>The include paths are specified in the <code>.includes</code> file, one include path per line. The paths can be either absolute or relative to the <code>.includes</code> file.</p>
+<a name="specifying-defines"></a>
+<h2 id="specifying-defines">Specifying Defines</h2>
+<p>The defines are specified in the <code>.config</code> file. The <code>.config</code> file is a regular C++ file, prepended to all your source files when they are parsed. Only use the <code>.config</code> file to add lines as in the example below:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#define NAME value</span>
+
+</pre>
+<a name="forwarding-flags-to-clang-code-model"></a>
+<h2 id="forwarding-flags-to-clang-code-model">Forwarding Flags to Clang Code Model</h2>
+<p>The <code>.cxxflags</code> and <code>.cflags</code> files contain command line flags for the Clang code model on a single line.</p>
+<p>For example, specify the <code>-std=c++11</code> to set the language version for parsing as C++11.</p>
+<a name="providing-deployment-information"></a>
+<h2 id="providing-deployment-information">Providing Deployment Information</h2>
+<p>If you want to run your application on an embedded Linux device, you first need to deploy your executable and possibly other files. Qt Creator does that for you automatically if you provide the necessary information. This works the same way as explained for CMake <a href="creator-deployment-embedded-linux.html#deploying-cmake-projects-to-embedded-linux-devices">here</a>, except that you also need to include your application binary in the list.</p>
+<a name="creating-a-run-configuration"></a>
+<h2 id="creating-a-run-configuration">Creating a Run Configuration</h2>
+<p>Qt Creator cannot automatically determine which executable to run.</p>
+<p>In the <b>Projects</b> mode under <b>Run Settings</b>, define the executable file to run:</p>
+<ol class="1" type="1"><li>Click <b>Add</b> and select <b>Custom Executable</b>.</li>
+<li>Define the configuration name, the location of the executable, any additional arguments and the working directory.</li>
+</ol>
+</div>
+<!-- @@@creator-project-generic.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-projects-autotools.html">Setting Up an Autotools Project</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-cli.html">Using Command Line Options</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

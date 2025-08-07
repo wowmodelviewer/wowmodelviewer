@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- visual.qdoc -->
+  <title>Use Case - Visual Elements In QML | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Use Case - Visual Elements In QML</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#the-rectangle-type">The Rectangle Type</a></li>
+<li class="level1"><a href="#the-image-type">The Image Type</a></li>
+<li class="level1"><a href="#shared-visual-properties">Shared Visual Properties</a></li>
+<li class="level2"><a href="#opacity-and-visibility">Opacity and Visibility</a></li>
+<li class="level2"><a href="#transforms">Transforms</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Use Case - Visual Elements In QML</h1>
+<span class="subtitle"></span>
+<!-- $$$qtquick-usecase-visual.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="the-rectangle-type"></a>
+<h2 id="the-rectangle-type">The Rectangle Type</h2>
+<p>For the most basic of visuals, <a href="../qtquick/qtquick-index.html">Qt Quick</a> provides a <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> type to draw rectangles. These rectangles can be colored with a color or a vertical gradient. The <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> type can also draw borders on the rectangle.</p>
+<p>For drawing custom shapes beyond rectangles, see the <a href="../qtquick/qml-qtquick-canvas.html">Canvas</a> type or display a pre-rendered image using the <a href="../qdoc/09-qdoc-commands-includingimages.html#image">Image</a> type.</p>
+<pre class="qml">
+
+  import QtQuick 2.3
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+
+      <span class="name">width</span>: <span class="number">320</span>
+      <span class="name">height</span>: <span class="number">480</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">color</span>: <span class="string">&quot;#272822&quot;</span>
+          <span class="name">width</span>: <span class="number">320</span>
+          <span class="name">height</span>: <span class="number">480</span>
+      }
+
+      <span class="comment">// This element displays a rectangle with a gradient and a border</span>
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">x</span>: <span class="number">160</span>
+          <span class="name">y</span>: <span class="number">20</span>
+          <span class="name">width</span>: <span class="number">100</span>
+          <span class="name">height</span>: <span class="number">100</span>
+          <span class="name">radius</span>: <span class="number">8</span> <span class="comment">// This gives rounded corners to the Rectangle</span>
+          <span class="name">gradient</span>: <span class="name">Gradient</span> { <span class="comment">// This sets a vertical gradient fill</span>
+              <span class="type"><a href="../qtquick/qml-qtquick-gradientstop.html">GradientStop</a></span> { <span class="name">position</span>: <span class="number">0.0</span>; <span class="name">color</span>: <span class="string">&quot;aqua&quot;</span> }
+              <span class="type"><a href="../qtquick/qml-qtquick-gradientstop.html">GradientStop</a></span> { <span class="name">position</span>: <span class="number">1.0</span>; <span class="name">color</span>: <span class="string">&quot;teal&quot;</span> }
+          }
+          <span class="type">border</span> { <span class="name">width</span>: <span class="number">3</span>; <span class="name">color</span>: <span class="string">&quot;white&quot;</span> } <span class="comment">// This sets a 3px wide black border to be drawn</span>
+      }
+
+      <span class="comment">// This rectangle is a plain color with no border</span>
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">x</span>: <span class="number">40</span>
+          <span class="name">y</span>: <span class="number">20</span>
+          <span class="name">width</span>: <span class="number">100</span>
+          <span class="name">height</span>: <span class="number">100</span>
+          <span class="name">color</span>: <span class="string">&quot;red&quot;</span>
+      }
+  }
+
+</pre>
+<p class="centerAlign"><img src="images/qml-uses-visual-rectangles.png" alt="" /></p><a name="the-image-type"></a>
+<h2 id="the-image-type">The Image Type</h2>
+<p><a href="../qtquick/qtquick-index.html">Qt Quick</a> provides an <a href="../qdoc/09-qdoc-commands-includingimages.html#image">Image</a> type which may be used to display images. The <a href="../qdoc/09-qdoc-commands-includingimages.html#image">Image</a> type has a <a href="../qtquick/qml-qtquick-image.html#source-prop">source</a> property whose value can be a remote or local URL, or the URL of an image file embedded in a compiled resource file.</p>
+<pre class="qml">
+
+  <span class="comment">// This element displays an image. Because the source is online, it may take some time to fetch</span>
+  <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+      <span class="name">x</span>: <span class="number">40</span>
+      <span class="name">y</span>: <span class="number">20</span>
+      <span class="name">width</span>: <span class="number">61</span>
+      <span class="name">height</span>: <span class="number">73</span>
+      <span class="name">source</span>: <span class="string">&quot;http://codereview.qt-project.org/static/logo_qt.png&quot;</span>
+  }
+
+</pre>
+<p>For more complex images there are other types similar to <a href="../qdoc/09-qdoc-commands-includingimages.html#image">Image</a>. <a href="../qtquick/qml-qtquick-borderimage.html">BorderImage</a> draws an image with grid scaling, suitable for images used as borders. <a href="../qtquick/qml-qtquick-animatedimage.html">AnimatedImage</a> plays animated .gif and .mng images. <a href="../qtquick/qml-qtquick-animatedsprite.html">AnimatedSprite</a> and <a href="../qtquick/qml-qtquick-spritesequence.html">SpriteSequence</a> play animations comprised of multiple frames stored adjacently in a non animated image format.</p>
+<p>For displaying video files and camera data, see the <a href="../qtmultimedia/qtmultimedia-index.html">Qt Multimedia</a> module.</p>
+<a name="shared-visual-properties"></a>
+<h2 id="shared-visual-properties">Shared Visual Properties</h2>
+<p>All visual items provided by <a href="../qtquick/qtquick-index.html">Qt Quick</a> are based on the Item type, which provides a common set of attributes for visual items, including opacity and transform attributes.</p>
+<a name="opacity-and-visibility"></a>
+<h3 id="opacity-and-visibility">Opacity and Visibility</h3>
+<p>The QML object types provided by Qt Quick have built-in support for <a href="../qtquick/qml-qtquick-item.html#opacity-prop">opacity</a>. Opacity can be animated to allow smooth transitions to or from a transparent state. Visibility can also be managed with the <a href="../qtquick/qml-qtquick-item.html#visible-prop">visible</a> property more efficiently, but at the cost of not being able to animate it.</p>
+<pre class="qml">
+
+  import QtQuick 2.3
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+
+      <span class="name">width</span>: <span class="number">320</span>
+      <span class="name">height</span>: <span class="number">480</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">color</span>: <span class="string">&quot;#272822&quot;</span>
+          <span class="name">width</span>: <span class="number">320</span>
+          <span class="name">height</span>: <span class="number">480</span>
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+          <span class="name">x</span>: <span class="number">20</span>
+          <span class="name">y</span>: <span class="number">270</span>
+          <span class="name">width</span>: <span class="number">200</span>
+          <span class="name">height</span>: <span class="number">200</span>
+          <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+              <span class="name">anchors</span>.fill: <span class="name">parent</span>
+              <span class="name">onClicked</span>: <span class="name">topRect</span>.<span class="name">visible</span> <span class="operator">=</span> !<span class="name">topRect</span>.<span class="name">visible</span>
+          }
+          <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+              <span class="name">x</span>: <span class="number">20</span>
+              <span class="name">y</span>: <span class="number">20</span>
+              <span class="name">width</span>: <span class="number">100</span>
+              <span class="name">height</span>: <span class="number">100</span>
+              <span class="name">color</span>: <span class="string">&quot;red&quot;</span>
+          }
+          <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+              <span class="name">id</span>: <span class="name">topRect</span>
+              <span class="name">opacity</span>: <span class="number">0.5</span>
+
+              <span class="name">x</span>: <span class="number">100</span>
+              <span class="name">y</span>: <span class="number">100</span>
+              <span class="name">width</span>: <span class="number">100</span>
+              <span class="name">height</span>: <span class="number">100</span>
+              <span class="name">color</span>: <span class="string">&quot;blue&quot;</span>
+          }
+      }
+  }
+
+</pre>
+<p class="centerAlign"><img src="images/qml-uses-visual-opacity.png" alt="" /></p><a name="transforms"></a>
+<h3 id="transforms">Transforms</h3>
+<p>Qt Quick types have built-in support for transformations. If you wish to have your visual content rotated or scaled, you can set the <a href="../qtquick/qml-qtquick-item.html#rotation-prop">Item::rotation</a> or <a href="../qtquick/qml-qtquick-item.html#scale-prop">Item::scale</a> property. These can also be animated.</p>
+<pre class="qml">
+
+  import QtQuick 2.3
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+
+      <span class="name">width</span>: <span class="number">320</span>
+      <span class="name">height</span>: <span class="number">480</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">color</span>: <span class="string">&quot;#272822&quot;</span>
+          <span class="name">width</span>: <span class="number">320</span>
+          <span class="name">height</span>: <span class="number">480</span>
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">rotation</span>: <span class="number">45</span> <span class="comment">// This rotates the Rectangle by 45 degrees</span>
+          <span class="name">x</span>: <span class="number">20</span>
+          <span class="name">y</span>: <span class="number">160</span>
+          <span class="name">width</span>: <span class="number">100</span>
+          <span class="name">height</span>: <span class="number">100</span>
+          <span class="name">color</span>: <span class="string">&quot;blue&quot;</span>
+      }
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">scale</span>: <span class="number">0.8</span> <span class="comment">// This scales the Rectangle down to 80% size</span>
+          <span class="name">x</span>: <span class="number">160</span>
+          <span class="name">y</span>: <span class="number">160</span>
+          <span class="name">width</span>: <span class="number">100</span>
+          <span class="name">height</span>: <span class="number">100</span>
+          <span class="name">color</span>: <span class="string">&quot;green&quot;</span>
+      }
+  }
+
+</pre>
+<p class="centerAlign"><img src="images/qml-uses-visual-transforms.png" alt="" /></p><p>For more complex transformations, see the <a href="../qtquick/qml-qtquick-item.html#transform-prop">Item::transform</a> property.</p>
+</div>
+<!-- @@@qtquick-usecase-visual.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

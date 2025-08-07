@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwineventnotifier.cpp -->
+  <title>QWinEventNotifier Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QWinEventNotifier</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QWinEventNotifier Class</h1>
+<!-- $$$QWinEventNotifier-brief -->
+<p>The <a href="qwineventnotifier.html">QWinEventNotifier</a> class provides support for the Windows Wait functions. <a href="#details">More...</a></p>
+<!-- @@@QWinEventNotifier -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QWinEventNotifier&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.0</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.0.</p>
+<ul>
+<li><a href="qwineventnotifier-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwineventnotifier.html#QWinEventNotifier-1">QWinEventNotifier</a></b>(QWinEventNotifier::HANDLE <i>hEvent</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwineventnotifier.html#QWinEventNotifier">QWinEventNotifier</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qwineventnotifier.html#dtor.QWinEventNotifier">~QWinEventNotifier</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWinEventNotifier::HANDLE </td><td class="memItemRight bottomAlign"><b><a href="qwineventnotifier.html#handle">handle</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwineventnotifier.html#isEnabled">isEnabled</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwineventnotifier.html#setHandle">setHandle</a></b>(QWinEventNotifier::HANDLE <i>hEvent</i>)</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwineventnotifier.html#setEnabled">setEnabled</a></b>(bool <i>enable</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwineventnotifier.html#activated">activated</a></b>(QWinEventNotifier::HANDLE <i>hEvent</i>)</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qwineventnotifier.html#event">event</a></b>(QEvent *<i>e</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QWinEventNotifier-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qwineventnotifier.html">QWinEventNotifier</a> class makes it possible to use the wait functions on windows in a asynchronous manner. With this class, you can register a HANDLE to an event and get notification when that event becomes signalled. The state of the event is not modified in the process so if it is a manual reset event you will need to reset it after the notification.</p>
+<p>Once you have created a event object using Windows API such as CreateEvent() or OpenEvent(), you can create an event notifier to monitor the event handle. If the event notifier is enabled, it will emit the <a href="qwineventnotifier.html#activated">activated</a>() signal whenever the corresponding event object is signalled.</p>
+<p>The <a href="qwineventnotifier.html#setEnabled">setEnabled</a>() function allows you to disable as well as enable the event notifier. It is generally advisable to explicitly enable or disable the event notifier. A disabled notifier does nothing when the event object is signalled (the same effect as not creating the event notifier). Use the <a href="qwineventnotifier.html#isEnabled">isEnabled</a>() function to determine the notifier's current status.</p>
+<p>Finally, you can use the <a href="qwineventnotifier.html#setHandle">setHandle</a>() function to register a new event object, and the <a href="qwineventnotifier.html#handle">handle</a>() function to retrieve the event handle.</p>
+<p><b>Further information:</b> Although the class is called <a href="qwineventnotifier.html">QWinEventNotifier</a>, it can be used for certain other objects which are so-called synchronization objects, such as Processes, Threads, Waitable timers.</p>
+<p><b>Warning:</b> This class is only available on Windows.</p>
+</div>
+<!-- @@@QWinEventNotifier -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QWinEventNotifier$$$QWinEventNotifierQWinEventNotifier::HANDLEQObject* -->
+<h3 class="fn" id="QWinEventNotifier-1"><a name="QWinEventNotifier-1"></a>QWinEventNotifier::<span class="name">QWinEventNotifier</span>(<span class="type">QWinEventNotifier::HANDLE</span> <i>hEvent</i>, <span class="type"><a href="qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs an event notifier with the given <i>parent</i>. It enables the notifier, and watches for the event <i>hEvent</i>.</p>
+<p>The notifier is enabled by default, i.e&#x2e; it emits the <a href="qwineventnotifier.html#activated">activated</a>() signal whenever the corresponding event is signalled. However, it is generally advisable to explicitly enable or disable the event notifier.</p>
+<p><b>See also </b><a href="qwineventnotifier.html#setEnabled">setEnabled</a>() and <a href="qwineventnotifier.html#isEnabled">isEnabled</a>().</p>
+<!-- @@@QWinEventNotifier -->
+<!-- $$$QWinEventNotifier[overload1]$$$QWinEventNotifierQObject* -->
+<h3 class="fn" id="QWinEventNotifier"><a name="QWinEventNotifier"></a>QWinEventNotifier::<span class="name">QWinEventNotifier</span>(<span class="type"><a href="qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs an event notifier with the given <i>parent</i>.</p>
+<!-- @@@QWinEventNotifier -->
+<!-- $$$activated[overload1]$$$activatedQWinEventNotifier::HANDLE -->
+<h3 class="fn" id="activated"><a name="activated"></a><code>[signal] </code><span class="type">void</span> QWinEventNotifier::<span class="name">activated</span>(<span class="type">QWinEventNotifier::HANDLE</span> <i>hEvent</i>)</h3>
+<p>This signal is emitted whenever the event notifier is enabled and the corresponding HANDLE is signalled.</p>
+<p>The state of the event is not modified in the process, so if it is a manual reset event, you will need to reset it after the notification.</p>
+<p>The object is passed in the <i>hEvent</i> parameter.</p>
+<p><b>Note: </b>This is a private signal. It can be used in signal connections but cannot be emitted by the user.</p>
+<p><b>See also </b><a href="qwineventnotifier.html#handle">handle</a>().</p>
+<!-- @@@activated -->
+<!-- $$$setEnabled[overload1]$$$setEnabledbool -->
+<h3 class="fn" id="setEnabled"><a name="setEnabled"></a><code>[slot] </code><span class="type">void</span> QWinEventNotifier::<span class="name">setEnabled</span>(<span class="type">bool</span> <i>enable</i>)</h3>
+<p>If <i>enable</i> is true, the notifier is enabled; otherwise the notifier is disabled.</p>
+<p><b>See also </b><a href="qwineventnotifier.html#isEnabled">isEnabled</a>() and <a href="qwineventnotifier.html#activated">activated</a>().</p>
+<!-- @@@setEnabled -->
+<!-- $$$~QWinEventNotifier[overload1]$$$~QWinEventNotifier -->
+<h3 class="fn" id="dtor.QWinEventNotifier"><a name="dtor.QWinEventNotifier"></a><code>[virtual] </code>QWinEventNotifier::<span class="name">~QWinEventNotifier</span>()</h3>
+<p>Destroys this notifier.</p>
+<!-- @@@~QWinEventNotifier -->
+<!-- $$$event[overload1]$$$eventQEvent* -->
+<h3 class="fn" id="event"><a name="event"></a><code>[override virtual protected] </code><span class="type">bool</span> QWinEventNotifier::<span class="name">event</span>(<span class="type"><a href="qevent.html">QEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="qobject.html#event">QObject::event</a>(QEvent *e).</p>
+<!-- @@@event -->
+<!-- $$$handle[overload1]$$$handle -->
+<h3 class="fn" id="handle"><a name="handle"></a><span class="type">QWinEventNotifier::HANDLE</span> QWinEventNotifier::<span class="name">handle</span>() const</h3>
+<p>Returns the HANDLE that has been registered in the notifier.</p>
+<p><b>See also </b><a href="qwineventnotifier.html#setHandle">setHandle</a>().</p>
+<!-- @@@handle -->
+<!-- $$$isEnabled[overload1]$$$isEnabled -->
+<h3 class="fn" id="isEnabled"><a name="isEnabled"></a><span class="type">bool</span> QWinEventNotifier::<span class="name">isEnabled</span>() const</h3>
+<p>Returns <code>true</code> if the notifier is enabled; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qwineventnotifier.html#setEnabled">setEnabled</a>().</p>
+<!-- @@@isEnabled -->
+<!-- $$$setHandle[overload1]$$$setHandleQWinEventNotifier::HANDLE -->
+<h3 class="fn" id="setHandle"><a name="setHandle"></a><span class="type">void</span> QWinEventNotifier::<span class="name">setHandle</span>(<span class="type">QWinEventNotifier::HANDLE</span> <i>hEvent</i>)</h3>
+<p>Register the HANDLE <i>hEvent</i>. The old HANDLE will be automatically unregistered.</p>
+<p><b>Note</b>: The notifier will be disabled as a side effect and needs to be re-enabled.</p>
+<p><b>See also </b><a href="qwineventnotifier.html#handle">handle</a>() and <a href="qwineventnotifier.html#setEnabled">setEnabled</a>().</p>
+<!-- @@@setHandle -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qhelpengine.cpp -->
+  <title>QHelpEngine Class | Qt Help 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qthelp-index.html">Qt Help</a></td><td ><a href="qthelp-module.html">C++ Classes</a></td><td >QHelpEngine</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qthelp-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QHelpEngine Class</h1>
+<!-- $$$QHelpEngine-brief -->
+<p>The <a href="qhelpengine.html">QHelpEngine</a> class provides access to contents and indices of the help engine. <a href="#details">More...</a></p>
+<!-- @@@QHelpEngine -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QHelpEngine&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += help</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.4</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qhelpenginecore.html">QHelpEngineCore</a></td></tr></table></div><p>This class was introduced in  Qt 4.4.</p>
+<ul>
+<li><a href="qhelpengine-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qhelpengine.html#QHelpEngine">QHelpEngine</a></b>(const QString &amp;<i>collectionFile</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qhelpengine.html#dtor.QHelpEngine">~QHelpEngine</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QHelpContentModel *</td><td class="memItemRight bottomAlign"><b><a href="qhelpengine.html#contentModel">contentModel</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QHelpContentWidget *</td><td class="memItemRight bottomAlign"><b><a href="qhelpengine.html#contentWidget">contentWidget</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QHelpIndexModel *</td><td class="memItemRight bottomAlign"><b><a href="qhelpengine.html#indexModel">indexModel</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QHelpIndexWidget *</td><td class="memItemRight bottomAlign"><b><a href="qhelpengine.html#indexWidget">indexWidget</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QHelpSearchEngine *</td><td class="memItemRight bottomAlign"><b><a href="qhelpengine.html#searchEngine">searchEngine</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QHelpEngine-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QHelpEngine -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QHelpEngine[overload1]$$$QHelpEngineconstQString&QObject* -->
+<h3 class="fn" id="QHelpEngine"><a name="QHelpEngine"></a>QHelpEngine::<span class="name">QHelpEngine</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>collectionFile</i>, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new help engine with the given <i>parent</i>. The help engine uses the information stored in the <i>collectionFile</i> for providing help. If the collection file does not already exist, it will be created.</p>
+<!-- @@@QHelpEngine -->
+<!-- $$$~QHelpEngine[overload1]$$$~QHelpEngine -->
+<h3 class="fn" id="dtor.QHelpEngine"><a name="dtor.QHelpEngine"></a><code>[virtual] </code>QHelpEngine::<span class="name">~QHelpEngine</span>()</h3>
+<p>Destroys the help engine object.</p>
+<!-- @@@~QHelpEngine -->
+<!-- $$$contentModel[overload1]$$$contentModel -->
+<h3 class="fn" id="contentModel"><a name="contentModel"></a><span class="type"><a href="qhelpcontentmodel.html">QHelpContentModel</a></span> *QHelpEngine::<span class="name">contentModel</span>() const</h3>
+<p>Returns the content model.</p>
+<!-- @@@contentModel -->
+<!-- $$$contentWidget[overload1]$$$contentWidget -->
+<h3 class="fn" id="contentWidget"><a name="contentWidget"></a><span class="type"><a href="qhelpcontentwidget.html">QHelpContentWidget</a></span> *QHelpEngine::<span class="name">contentWidget</span>()</h3>
+<p>Returns the content widget.</p>
+<!-- @@@contentWidget -->
+<!-- $$$indexModel[overload1]$$$indexModel -->
+<h3 class="fn" id="indexModel"><a name="indexModel"></a><span class="type"><a href="qhelpindexmodel.html">QHelpIndexModel</a></span> *QHelpEngine::<span class="name">indexModel</span>() const</h3>
+<p>Returns the index model.</p>
+<!-- @@@indexModel -->
+<!-- $$$indexWidget[overload1]$$$indexWidget -->
+<h3 class="fn" id="indexWidget"><a name="indexWidget"></a><span class="type"><a href="qhelpindexwidget.html">QHelpIndexWidget</a></span> *QHelpEngine::<span class="name">indexWidget</span>()</h3>
+<p>Returns the index widget.</p>
+<!-- @@@indexWidget -->
+<!-- $$$searchEngine[overload1]$$$searchEngine -->
+<h3 class="fn" id="searchEngine"><a name="searchEngine"></a><span class="type"><a href="qhelpsearchengine.html">QHelpSearchEngine</a></span> *QHelpEngine::<span class="name">searchEngine</span>()</h3>
+<p>Returns the default search engine.</p>
+<!-- @@@searchEngine -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickv4particledata.cpp -->
+  <title>Particle QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >Particle QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Particle QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Particle-brief -->
+<p>Represents particles manipulated by emitters and affectors. <a href="#details">More...</a></p>
+<!-- @@@Particle -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Particles 2.13</td></tr></table></div><ul>
+<li><a href="qml-qtquick-particles-particle-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#alpha-prop">alpha</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#autoRotate-prop">autoRotate</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#ax-prop">ax</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#ay-prop">ay</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#blue-prop">blue</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#currentSize-prop">currentSize</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#endSize-prop">endSize</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#green-prop">green</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#initialAX-prop">initialAX</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#initialAY-prop">initialAY</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#initialVX-prop">initialVX</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#initialVY-prop">initialVY</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#initialX-prop">initialX</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#initialY-prop">initialY</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#lifeLeft-prop">lifeLeft</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#lifeSpan-prop">lifeSpan</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#red-prop">red</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#rotation-prop">rotation</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#rotationVelocity-prop">rotationVelocity</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#startSize-prop">startSize</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#t-prop">t</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#update-prop">update</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#vx-prop">vx</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#vy-prop">vy</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#x-prop">x</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#xDeformationVectorX-prop">xDeformationVectorX</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#xDeformationVectorY-prop">xDeformationVectorY</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#y-prop">y</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#yDeformationVectorX-prop">yDeformationVectorX</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-particle.html#yDeformationVectorY-prop">yDeformationVectorY</a></b></b> : real</li>
+</ul>
+<!-- $$$Particle-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>Particle elements are always managed internally by the <a href="qml-qtquick-particles-particlesystem.html">ParticleSystem</a> and cannot be created in QML. However, sometimes they are exposed via signals so as to allow arbitrary changes to the particle state</p>
+<!-- @@@Particle -->
+<h2>Property Documentation</h2>
+<!-- $$$alpha -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="alpha-prop"></a><span class="name">alpha</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p><a href="qml-qtquick-particles-imageparticle.html">ImageParticle</a> can draw colorized particles. When it does so, alpha is used as the alpha channel of the color applied to the source image.</p>
+<p>Values are from 0.0 to 1.0&#x2e;</p>
+</div></div><!-- @@@alpha -->
+<br/>
+<!-- $$$autoRotate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="autoRotate-prop"></a><span class="name">autoRotate</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If autoRotate is true, then the particle's rotation will be set so that it faces the direction of travel, plus any rotation from the rotation or <a href="qml-qtquick-particles-particle.html#rotationVelocity-prop">rotationVelocity</a> properties.</p>
+</div></div><!-- @@@autoRotate -->
+<br/>
+<!-- $$$ax -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="ax-prop"></a><span class="name">ax</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The current x acceleration of the particle.</p>
+</div></div><!-- @@@ax -->
+<br/>
+<!-- $$$ay -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="ay-prop"></a><span class="name">ay</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The current y acceleration of the particle.</p>
+</div></div><!-- @@@ay -->
+<br/>
+<!-- $$$blue -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="blue-prop"></a><span class="name">blue</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p><a href="qml-qtquick-particles-imageparticle.html">ImageParticle</a> can draw colorized particles. When it does so, blue is used as the blue channel of the color applied to the source image.</p>
+<p>Values are from 0.0 to 1.0&#x2e;</p>
+</div></div><!-- @@@blue -->
+<br/>
+<!-- $$$currentSize -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="currentSize-prop"></a><span class="name">currentSize</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The currentSize of the particle, interpolating between <a href="qml-qtquick-particles-particle.html#startSize-prop">startSize</a> and <a href="qml-qtquick-particles-particle.html#endSize-prop">endSize</a> based on the currentTime.</p>
+</div></div><!-- @@@currentSize -->
+<br/>
+<!-- $$$endSize -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="endSize-prop"></a><span class="name">endSize</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The size in pixels that the particle image is at the end of its life. If this value is less than 0, then it is disregarded and the particle will have its <a href="qml-qtquick-particles-particle.html#startSize-prop">startSize</a> for the entire lifetime.</p>
+</div></div><!-- @@@endSize -->
+<br/>
+<!-- $$$green -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="green-prop"></a><span class="name">green</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p><a href="qml-qtquick-particles-imageparticle.html">ImageParticle</a> can draw colorized particles. When it does so, green is used as the green channel of the color applied to the source image.</p>
+<p>Values are from 0.0 to 1.0&#x2e;</p>
+</div></div><!-- @@@green -->
+<br/>
+<!-- $$$initialAX -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="initialAX-prop"></a><span class="name">initialAX</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The x acceleration of the particle at the beginning of its lifetime.</p>
+<p>The method of simulation prefers to have the initial values changed, rather than determining and changing the value at a given time. Change initial values in CustomEmitters instead of the current values.</p>
+</div></div><!-- @@@initialAX -->
+<br/>
+<!-- $$$initialAY -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="initialAY-prop"></a><span class="name">initialAY</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The y acceleration of the particle at the beginning of its lifetime.</p>
+<p>The method of simulation prefers to have the initial values changed, rather than determining and changing the value at a given time. Change initial values in CustomEmitters instead of the current values.</p>
+</div></div><!-- @@@initialAY -->
+<br/>
+<!-- $$$initialVX -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="initialVX-prop"></a><span class="name">initialVX</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The x velocity of the particle at the beginning of its lifetime.</p>
+<p>The method of simulation prefers to have the initial values changed, rather than determining and changing the value at a given time. Change initial values in CustomEmitters instead of the current values.</p>
+</div></div><!-- @@@initialVX -->
+<br/>
+<!-- $$$initialVY -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="initialVY-prop"></a><span class="name">initialVY</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The y velocity of the particle at the beginning of its lifetime.</p>
+<p>The method of simulation prefers to have the initial values changed, rather than determining and changing the value at a given time. Change initial values in CustomEmitters instead of the current values.</p>
+</div></div><!-- @@@initialVY -->
+<br/>
+<!-- $$$initialX -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="initialX-prop"></a><span class="name">initialX</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The x coordinate of the particle at the beginning of its lifetime.</p>
+<p>The method of simulation prefers to have the initial values changed, rather than determining and changing the value at a given time. Change initial values in CustomEmitters instead of the current values.</p>
+</div></div><!-- @@@initialX -->
+<br/>
+<!-- $$$initialY -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="initialY-prop"></a><span class="name">initialY</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The y coordinate of the particle at the beginning of its lifetime.</p>
+<p>The method of simulation prefers to have the initial values changed, rather than determining and changing the value at a given time. Change initial values in CustomEmitters instead of the current values.</p>
+</div></div><!-- @@@initialY -->
+<br/>
+<!-- $$$lifeLeft -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="lifeLeft-prop"></a><span class="name">lifeLeft</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The time in seconds that the particle has left to live at the current point in time.</p>
+</div></div><!-- @@@lifeLeft -->
+<br/>
+<!-- $$$lifeSpan -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="lifeSpan-prop"></a><span class="name">lifeSpan</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The time in seconds that the particle will live for.</p>
+</div></div><!-- @@@lifeSpan -->
+<br/>
+<!-- $$$red -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="red-prop"></a><span class="name">red</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p><a href="qml-qtquick-particles-imageparticle.html">ImageParticle</a> can draw colorized particles. When it does so, red is used as the red channel of the color applied to the source image.</p>
+<p>Values are from 0.0 to 1.0&#x2e;</p>
+</div></div><!-- @@@red -->
+<br/>
+<!-- $$$rotation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="rotation-prop"></a><span class="name">rotation</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Degrees clockwise that the particle image is rotated at the beginning of its life.</p>
+</div></div><!-- @@@rotation -->
+<br/>
+<!-- $$$rotationVelocity -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="rotationVelocity-prop"></a><span class="name">rotationVelocity</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Degrees clockwise per second that the particle image is rotated at while alive.</p>
+</div></div><!-- @@@rotationVelocity -->
+<br/>
+<!-- $$$startSize -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="startSize-prop"></a><span class="name">startSize</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The size in pixels that the particle image is at the start of its life.</p>
+</div></div><!-- @@@startSize -->
+<br/>
+<!-- $$$t -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="t-prop"></a><span class="name">t</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The time, in seconds since the beginning of the simulation, that the particle was born.</p>
+</div></div><!-- @@@t -->
+<br/>
+<!-- $$$update -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="update-prop"></a><span class="name">update</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Inside an Affector, the changes made to the particle will only be applied if update is set to true.</p>
+</div></div><!-- @@@update -->
+<br/>
+<!-- $$$vx -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="vx-prop"></a><span class="name">vx</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The current x velocity of the particle.</p>
+</div></div><!-- @@@vx -->
+<br/>
+<!-- $$$vy -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="vy-prop"></a><span class="name">vy</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The current y velocity of the particle.</p>
+</div></div><!-- @@@vy -->
+<br/>
+<!-- $$$x -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="x-prop"></a><span class="name">x</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The current x coordinate of the particle.</p>
+</div></div><!-- @@@x -->
+<br/>
+<!-- $$$xDeformationVectorX -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="xDeformationVectorX-prop"></a><span class="name">xDeformationVectorX</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The x component of the deformation vector along the X axis. <a href="qml-qtquick-particles-imageparticle.html">ImageParticle</a> can draw particles across non-square shapes. It will draw the texture rectangle across the parallelogram drawn with the x and y deformation vectors.</p>
+</div></div><!-- @@@xDeformationVectorX -->
+<br/>
+<!-- $$$xDeformationVectorY -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="xDeformationVectorY-prop"></a><span class="name">xDeformationVectorY</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The x component of the deformation vector along the X axis. <a href="qml-qtquick-particles-imageparticle.html">ImageParticle</a> can draw particles across non-square shapes. It will draw the texture rectangle across the parallelogram drawn with the x and y deformation vectors.</p>
+</div></div><!-- @@@xDeformationVectorY -->
+<br/>
+<!-- $$$y -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="y-prop"></a><span class="name">y</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The current y coordinate of the particle.</p>
+</div></div><!-- @@@y -->
+<br/>
+<!-- $$$yDeformationVectorX -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="yDeformationVectorX-prop"></a><span class="name">yDeformationVectorX</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The y component of the deformation vector along the X axis. <a href="qml-qtquick-particles-imageparticle.html">ImageParticle</a> can draw particles across non-square shapes. It will draw the texture rectangle across the parallelogram drawn with the x and y deformation vectors.</p>
+</div></div><!-- @@@yDeformationVectorX -->
+<br/>
+<!-- $$$yDeformationVectorY -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="yDeformationVectorY-prop"></a><span class="name">yDeformationVectorY</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The y component of the deformation vector along the Y axis. <a href="qml-qtquick-particles-imageparticle.html">ImageParticle</a> can draw particles across non-square shapes. It will draw the texture rectangle across the parallelogram drawn with the x and y deformation vectors.</p>
+</div></div><!-- @@@yDeformationVectorY -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

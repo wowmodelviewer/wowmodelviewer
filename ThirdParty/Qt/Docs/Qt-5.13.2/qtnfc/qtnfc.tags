@@ -1,0 +1,1537 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tagfile>
+    <compound kind="class">
+        <name>QNearFieldTarget</name>
+        <filename>qnearfieldtarget.html</filename>
+        <base>QObject</base>
+        <member kind="enum">
+            <name>Type</name>
+            <anchor>Type-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="ProprietaryTag">
+            <anchor>Type-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="NfcTagType1">
+            <anchor>Type-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="NfcTagType2">
+            <anchor>Type-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="NfcTagType3">
+            <anchor>Type-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="NfcTagType4">
+            <anchor>Type-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="MifareTag">
+            <anchor>Type-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="enum">
+            <name>AccessMethod</name>
+            <anchor>AccessMethod-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="UnknownAccess">
+            <anchor>AccessMethod-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="NdefAccess">
+            <anchor>AccessMethod-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="TagTypeSpecificAccess">
+            <anchor>AccessMethod-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="LlcpAccess">
+            <anchor>AccessMethod-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="typedef" type="QNearFieldTarget::AccessMethod">
+            <name>AccessMethods</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>AccessMethod-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="enum">
+            <name>Error</name>
+            <anchor>Error-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="NoError">
+            <anchor>Error-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="UnknownError">
+            <anchor>Error-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="UnsupportedError">
+            <anchor>Error-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="TargetOutOfRangeError">
+            <anchor>Error-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="NoResponseError">
+            <anchor>Error-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="ChecksumMismatchError">
+            <anchor>Error-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="InvalidParametersError">
+            <anchor>Error-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="NdefReadError">
+            <anchor>Error-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="NdefWriteError">
+            <anchor>Error-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="CommandError">
+            <anchor>Error-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QNearFieldTarget</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>QNearFieldTarget</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QNearFieldTarget</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>dtor.QNearFieldTarget</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual QByteArray</type>
+            <name>uid</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>uid</anchor>
+            <arglist>() const const = 0</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual QUrl</type>
+            <name>url</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>url</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual QNearFieldTarget::Type</type>
+            <name>type</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>type</anchor>
+            <arglist>() const const = 0</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual QNearFieldTarget::AccessMethods</type>
+            <name>accessMethods</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>accessMethods</anchor>
+            <arglist>() const const = 0</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>keepConnection</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>keepConnection</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>setKeepConnection</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>setKeepConnection</anchor>
+            <arglist>(bool isPersistent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>disconnect</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>disconnect</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>isProcessingCommand</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>isProcessingCommand</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual bool</type>
+            <name>hasNdefMessage</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>hasNdefMessage</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual QNearFieldTarget::RequestId</type>
+            <name>readNdefMessages</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>readNdefMessages</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual QNearFieldTarget::RequestId</type>
+            <name>writeNdefMessages</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>writeNdefMessages</anchor>
+            <arglist>(const QList&lt;QNdefMessage&gt; &amp;messages)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>maxCommandLength</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>maxCommandLength</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual QNearFieldTarget::RequestId</type>
+            <name>sendCommand</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>sendCommand</anchor>
+            <arglist>(const QByteArray &amp;command)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual QNearFieldTarget::RequestId</type>
+            <name>sendCommands</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>sendCommands</anchor>
+            <arglist>(const QList&lt;QByteArray&gt; &amp;commands)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual bool</type>
+            <name>waitForRequestCompleted</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>waitForRequestCompleted</anchor>
+            <arglist>(const QNearFieldTarget::RequestId &amp;id, int msecs)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QVariant</type>
+            <name>requestResponse</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>requestResponse</anchor>
+            <arglist>(const QNearFieldTarget::RequestId &amp;id)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setResponseForRequest</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>setResponseForRequest</anchor>
+            <arglist>(const QNearFieldTarget::RequestId &amp;id, const QVariant &amp;response, bool emitRequestCompleted)</arglist>
+        </member>
+        <member kind="function" protection="protected" virtualness="virtual" static="no">
+            <type>virtual bool</type>
+            <name>handleResponse</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>handleResponse</anchor>
+            <arglist>(const QNearFieldTarget::RequestId &amp;id, const QByteArray &amp;response)</arglist>
+        </member>
+        <member kind="function" protection="protected" virtualness="non" static="no">
+            <type>void</type>
+            <name>reportError</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>reportError</anchor>
+            <arglist>(QNearFieldTarget::Error error, const QNearFieldTarget::RequestId &amp;id)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>disconnected</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>disconnected</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>ndefMessageRead</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>ndefMessageRead</anchor>
+            <arglist>(const QNdefMessage &amp;message)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>ndefMessagesWritten</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>ndefMessagesWritten</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>requestCompleted</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>requestCompleted</anchor>
+            <arglist>(const QNearFieldTarget::RequestId &amp;id)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>error</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>error</anchor>
+            <arglist>(QNearFieldTarget::Error error, const QNearFieldTarget::RequestId &amp;id)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>quint16</type>
+            <name>qNfcChecksum</name>
+            <anchorfile>qnearfieldtarget.html</anchorfile>
+            <anchor>qNfcChecksum</anchor>
+            <arglist>(const char *data, uint len)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QQmlNdefRecord</name>
+        <filename>qqmlndefrecord.html</filename>
+        <base>QObject</base>
+        <member kind="property" type="QString">
+            <name>type</name>
+            <anchorfile>qqmlndefrecord.html</anchorfile>
+            <anchor>type-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="TypeNameFormat">
+            <name>typeNameFormat</name>
+            <anchorfile>qqmlndefrecord.html</anchorfile>
+            <anchor>typeNameFormat-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="QNdefRecord">
+            <name>record</name>
+            <anchorfile>qqmlndefrecord.html</anchorfile>
+            <anchor>record-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="enum">
+            <name>TypeNameFormat</name>
+            <anchor>TypeNameFormat-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Empty">
+            <anchor>TypeNameFormat-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="NfcRtd">
+            <anchor>TypeNameFormat-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Mime">
+            <anchor>TypeNameFormat-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Uri">
+            <anchor>TypeNameFormat-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="ExternalRtd">
+            <anchor>TypeNameFormat-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Unknown">
+            <anchor>TypeNameFormat-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QQmlNdefRecord</name>
+            <anchorfile>qqmlndefrecord.html</anchorfile>
+            <anchor>QQmlNdefRecord</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QQmlNdefRecord</name>
+            <anchorfile>qqmlndefrecord.html</anchorfile>
+            <anchor>QQmlNdefRecord-1</anchor>
+            <arglist>(const QNdefRecord &amp;record, QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QQmlNdefRecord</name>
+            <anchorfile>qqmlndefrecord.html</anchorfile>
+            <anchor>dtor.QQmlNdefRecord</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QString</type>
+            <name>type</name>
+            <anchorfile>qqmlndefrecord.html</anchorfile>
+            <anchor>type</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setType</name>
+            <anchorfile>qqmlndefrecord.html</anchorfile>
+            <anchor>setType</anchor>
+            <arglist>(const QString &amp;newtype)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setTypeNameFormat</name>
+            <anchorfile>qqmlndefrecord.html</anchorfile>
+            <anchor>setTypeNameFormat</anchor>
+            <arglist>(QQmlNdefRecord::TypeNameFormat newTypeNameFormat)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QQmlNdefRecord::TypeNameFormat</type>
+            <name>typeNameFormat</name>
+            <anchorfile>qqmlndefrecord.html</anchorfile>
+            <anchor>typeNameFormat</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QNdefRecord</type>
+            <name>record</name>
+            <anchorfile>qqmlndefrecord.html</anchorfile>
+            <anchor>record</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setRecord</name>
+            <anchorfile>qqmlndefrecord.html</anchorfile>
+            <anchor>setRecord</anchor>
+            <arglist>(const QNdefRecord &amp;record)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>typeChanged</name>
+            <anchorfile>qqmlndefrecord.html</anchorfile>
+            <anchor>typeChanged</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>typeNameFormatChanged</name>
+            <anchorfile>qqmlndefrecord.html</anchorfile>
+            <anchor>typeNameFormat-prop</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>recordChanged</name>
+            <anchorfile>qqmlndefrecord.html</anchorfile>
+            <anchor>record-prop</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>Q_DECLARE_NDEFRECORD</name>
+            <anchorfile>qqmlndefrecord.html</anchorfile>
+            <anchor>Q_DECLARE_NDEFRECORD</anchor>
+            <arglist>( className,  typeNameFormat,  type)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QNearFieldManager</name>
+        <filename>qnearfieldmanager.html</filename>
+        <base>QObject</base>
+        <member kind="enum">
+            <name>AdapterState</name>
+            <anchor>AdapterState-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Offline">
+            <anchor>AdapterState-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="TurningOn">
+            <anchor>AdapterState-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Online">
+            <anchor>AdapterState-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="TurningOff">
+            <anchor>AdapterState-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="enum">
+            <name>TargetAccessMode</name>
+            <anchor>TargetAccessMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="NoTargetAccess">
+            <anchor>TargetAccessMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="NdefReadTargetAccess">
+            <anchor>TargetAccessMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="NdefWriteTargetAccess">
+            <anchor>TargetAccessMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="TagTypeSpecificTargetAccess">
+            <anchor>TargetAccessMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="typedef" type="QNearFieldManager::TargetAccessMode">
+            <name>TargetAccessModes</name>
+            <anchorfile>qnearfieldmanager.html</anchorfile>
+            <anchor>TargetAccessMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QNearFieldManager</name>
+            <anchorfile>qnearfieldmanager.html</anchorfile>
+            <anchor>QNearFieldManager</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QNearFieldManager</name>
+            <anchorfile>qnearfieldmanager.html</anchorfile>
+            <anchor>dtor.QNearFieldManager</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>isAvailable</name>
+            <anchorfile>qnearfieldmanager.html</anchorfile>
+            <anchor>isAvailable</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>isSupported</name>
+            <anchorfile>qnearfieldmanager.html</anchorfile>
+            <anchor>isSupported</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setTargetAccessModes</name>
+            <anchorfile>qnearfieldmanager.html</anchorfile>
+            <anchor>setTargetAccessModes</anchor>
+            <arglist>(QNearFieldManager::TargetAccessModes accessModes)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QNearFieldManager::TargetAccessModes</type>
+            <name>targetAccessModes</name>
+            <anchorfile>qnearfieldmanager.html</anchorfile>
+            <anchor>targetAccessModes</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>startTargetDetection</name>
+            <anchorfile>qnearfieldmanager.html</anchorfile>
+            <anchor>startTargetDetection</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>stopTargetDetection</name>
+            <anchorfile>qnearfieldmanager.html</anchorfile>
+            <anchor>stopTargetDetection</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>registerNdefMessageHandler</name>
+            <anchorfile>qnearfieldmanager.html</anchorfile>
+            <anchor>registerNdefMessageHandler</anchor>
+            <arglist>(QObject *object, const char *method)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>registerNdefMessageHandler</name>
+            <anchorfile>qnearfieldmanager.html</anchorfile>
+            <anchor>registerNdefMessageHandler-1</anchor>
+            <arglist>(QNdefRecord::TypeNameFormat typeNameFormat, const QByteArray &amp;type, QObject *object, const char *method)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>registerNdefMessageHandler</name>
+            <anchorfile>qnearfieldmanager.html</anchorfile>
+            <anchor>registerNdefMessageHandler-2</anchor>
+            <arglist>(const QNdefFilter &amp;filter, QObject *object, const char *method)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>unregisterNdefMessageHandler</name>
+            <anchorfile>qnearfieldmanager.html</anchorfile>
+            <anchor>unregisterNdefMessageHandler</anchor>
+            <arglist>(int handlerId)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>adapterStateChanged</name>
+            <anchorfile>qnearfieldmanager.html</anchorfile>
+            <anchor>adapterStateChanged</anchor>
+            <arglist>(QNearFieldManager::AdapterState state)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>targetDetected</name>
+            <anchorfile>qnearfieldmanager.html</anchorfile>
+            <anchor>targetDetected</anchor>
+            <arglist>(QNearFieldTarget *target)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>targetLost</name>
+            <anchorfile>qnearfieldmanager.html</anchorfile>
+            <anchor>targetLost</anchor>
+            <arglist>(QNearFieldTarget *target)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QNdefMessage</name>
+        <filename>qndefmessage.html</filename>
+        <base>QList</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QNdefMessage</name>
+            <anchorfile>qndefmessage.html</anchorfile>
+            <anchor>QNdefMessage</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QNdefMessage</name>
+            <anchorfile>qndefmessage.html</anchorfile>
+            <anchor>QNdefMessage-1</anchor>
+            <arglist>(const QNdefRecord &amp;record)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QNdefMessage</name>
+            <anchorfile>qndefmessage.html</anchorfile>
+            <anchor>QNdefMessage-2</anchor>
+            <arglist>(const QNdefMessage &amp;message)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QNdefMessage</name>
+            <anchorfile>qndefmessage.html</anchorfile>
+            <anchor>QNdefMessage-3</anchor>
+            <arglist>(const QList&lt;QNdefRecord&gt; &amp;records)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>operator==</name>
+            <anchorfile>qndefmessage.html</anchorfile>
+            <anchor>operator-eq-eq</anchor>
+            <arglist>(const QNdefMessage &amp;other) const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QByteArray</type>
+            <name>toByteArray</name>
+            <anchorfile>qndefmessage.html</anchorfile>
+            <anchor>toByteArray</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>QNdefMessage</type>
+            <name>fromByteArray</name>
+            <anchorfile>qndefmessage.html</anchorfile>
+            <anchor>fromByteArray</anchor>
+            <arglist>(const QByteArray &amp;message)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtNfc.NdefTextRecord</name>
+        <filename>qml-qtnfc-ndeftextrecord.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QNdefNfcTextRecord</name>
+        <filename>qndefnfctextrecord.html</filename>
+        <base>QNdefRecord</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QNdefNfcTextRecord</name>
+            <anchorfile>qndefnfctextrecord.html</anchorfile>
+            <anchor>QNdefNfcTextRecord</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QNdefNfcTextRecord</name>
+            <anchorfile>qndefnfctextrecord.html</anchorfile>
+            <anchor>QNdefNfcTextRecord-1</anchor>
+            <arglist>(const QNdefRecord &amp;other)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QString</type>
+            <name>locale</name>
+            <anchorfile>qndefnfctextrecord.html</anchorfile>
+            <anchor>locale</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setLocale</name>
+            <anchorfile>qndefnfctextrecord.html</anchorfile>
+            <anchor>setLocale</anchor>
+            <arglist>(const QString &amp;locale)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QString</type>
+            <name>text</name>
+            <anchorfile>qndefnfctextrecord.html</anchorfile>
+            <anchor>text</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setText</name>
+            <anchorfile>qndefnfctextrecord.html</anchorfile>
+            <anchor>setText</anchor>
+            <arglist>(const QString text)</arglist>
+        </member>
+        <member kind="enum">
+            <name>Encoding</name>
+            <anchor>Encoding-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Utf8">
+            <anchor>Encoding-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Utf16">
+            <anchor>Encoding-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QNdefNfcTextRecord::Encoding</type>
+            <name>encoding</name>
+            <anchorfile>qndefnfctextrecord.html</anchorfile>
+            <anchor>encoding</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setEncoding</name>
+            <anchorfile>qndefnfctextrecord.html</anchorfile>
+            <anchor>setEncoding</anchor>
+            <arglist>(QNdefNfcTextRecord::Encoding encoding)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QNearFieldShareTarget</name>
+        <filename>qnearfieldsharetarget.html</filename>
+        <base>QObject</base>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QNearFieldShareTarget</name>
+            <anchorfile>qnearfieldsharetarget.html</anchorfile>
+            <anchor>dtor.QNearFieldShareTarget</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QNearFieldShareManager::ShareModes</type>
+            <name>shareModes</name>
+            <anchorfile>qnearfieldsharetarget.html</anchorfile>
+            <anchor>shareModes</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>share</name>
+            <anchorfile>qnearfieldsharetarget.html</anchorfile>
+            <anchor>share</anchor>
+            <arglist>(const QNdefMessage &amp;message)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>share</name>
+            <anchorfile>qnearfieldsharetarget.html</anchorfile>
+            <anchor>share-1</anchor>
+            <arglist>(const QList&lt;QFileInfo&gt; &amp;files)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>cancel</name>
+            <anchorfile>qnearfieldsharetarget.html</anchorfile>
+            <anchor>cancel</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>isShareInProgress</name>
+            <anchorfile>qnearfieldsharetarget.html</anchorfile>
+            <anchor>isShareInProgress</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QNearFieldShareManager::ShareError</type>
+            <name>shareError</name>
+            <anchorfile>qnearfieldsharetarget.html</anchorfile>
+            <anchor>shareError</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>error</name>
+            <anchorfile>qnearfieldsharetarget.html</anchorfile>
+            <anchor>error</anchor>
+            <arglist>(QNearFieldShareManager::ShareError error)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>shareFinished</name>
+            <anchorfile>qnearfieldsharetarget.html</anchorfile>
+            <anchor>shareFinished</anchor>
+            <arglist>()</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QNdefNfcSmartPosterRecord</name>
+        <filename>qndefnfcsmartposterrecord.html</filename>
+        <base>QNdefRecord</base>
+        <member kind="enum">
+            <name>Action</name>
+            <anchor>Action-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="UnspecifiedAction">
+            <anchor>Action-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="DoAction">
+            <anchor>Action-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="SaveAction">
+            <anchor>Action-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="EditAction">
+            <anchor>Action-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QNdefNfcSmartPosterRecord</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>QNdefNfcSmartPosterRecord</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QNdefNfcSmartPosterRecord</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>QNdefNfcSmartPosterRecord-1</anchor>
+            <arglist>(const QNdefRecord &amp;other)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QNdefNfcSmartPosterRecord</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>QNdefNfcSmartPosterRecord-2</anchor>
+            <arglist>(const QNdefNfcSmartPosterRecord &amp;other)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QNdefNfcSmartPosterRecord &amp;</type>
+            <name>operator=</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>operator-eq</anchor>
+            <arglist>(const QNdefNfcSmartPosterRecord &amp;other)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>~QNdefNfcSmartPosterRecord</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>dtor.QNdefNfcSmartPosterRecord</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>hasTitle</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>hasTitle</anchor>
+            <arglist>(const QString &amp;locale) const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>hasAction</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>hasAction</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>hasIcon</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>hasIcon</anchor>
+            <arglist>(const QByteArray &amp;mimetype) const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>hasSize</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>hasSize</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>hasTypeInfo</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>hasTypeInfo</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>titleCount</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>titleCount</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QNdefNfcTextRecord</type>
+            <name>titleRecord</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>titleRecord</anchor>
+            <arglist>(const int index) const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QString</type>
+            <name>title</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>title</anchor>
+            <arglist>(const QString &amp;locale) const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QList&lt;QNdefNfcTextRecord&gt;</type>
+            <name>titleRecords</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>titleRecords</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>addTitle</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>addTitle</anchor>
+            <arglist>(const QNdefNfcTextRecord &amp;text)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>addTitle</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>addTitle-1</anchor>
+            <arglist>(const QString &amp;text, const QString &amp;locale, QNdefNfcTextRecord::Encoding encoding)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>removeTitle</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>removeTitle</anchor>
+            <arglist>(const QNdefNfcTextRecord &amp;text)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>removeTitle</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>removeTitle-1</anchor>
+            <arglist>(const QString &amp;locale)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setTitles</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>setTitles</anchor>
+            <arglist>(const QList&lt;QNdefNfcTextRecord&gt; &amp;titles)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QUrl</type>
+            <name>uri</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>uri</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QNdefNfcUriRecord</type>
+            <name>uriRecord</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>uriRecord</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setUri</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>setUri</anchor>
+            <arglist>(const QNdefNfcUriRecord &amp;url)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setUri</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>setUri-1</anchor>
+            <arglist>(const QUrl &amp;url)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QNdefNfcSmartPosterRecord::Action</type>
+            <name>action</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>action</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setAction</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>setAction</anchor>
+            <arglist>(QNdefNfcSmartPosterRecord::Action act)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>iconCount</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>iconCount</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QNdefNfcIconRecord</type>
+            <name>iconRecord</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>iconRecord</anchor>
+            <arglist>(const int index) const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QByteArray</type>
+            <name>icon</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>icon</anchor>
+            <arglist>(const QByteArray &amp;mimetype) const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QList&lt;QNdefNfcIconRecord&gt;</type>
+            <name>iconRecords</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>iconRecords</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>addIcon</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>addIcon</anchor>
+            <arglist>(const QNdefNfcIconRecord &amp;icon)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>addIcon</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>addIcon-1</anchor>
+            <arglist>(const QByteArray &amp;type, const QByteArray &amp;data)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>removeIcon</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>removeIcon</anchor>
+            <arglist>(const QNdefNfcIconRecord &amp;icon)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>removeIcon</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>removeIcon-1</anchor>
+            <arglist>(const QByteArray &amp;type)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setIcons</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>setIcons</anchor>
+            <arglist>(const QList&lt;QNdefNfcIconRecord&gt; &amp;icons)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>quint32</type>
+            <name>size</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>size</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setSize</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>setSize</anchor>
+            <arglist>(quint32 size)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QByteArray</type>
+            <name>typeInfo</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>typeInfo</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setTypeInfo</name>
+            <anchorfile>qndefnfcsmartposterrecord.html</anchorfile>
+            <anchor>setTypeInfo</anchor>
+            <arglist>(const QByteArray &amp;type)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtNfc.NdefRecord</name>
+        <filename>qml-qtnfc-ndefrecord.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QNdefNfcUriRecord</name>
+        <filename>qndefnfcurirecord.html</filename>
+        <base>QNdefRecord</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QNdefNfcUriRecord</name>
+            <anchorfile>qndefnfcurirecord.html</anchorfile>
+            <anchor>QNdefNfcUriRecord</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QNdefNfcUriRecord</name>
+            <anchorfile>qndefnfcurirecord.html</anchorfile>
+            <anchor>QNdefNfcUriRecord-1</anchor>
+            <arglist>(const QNdefRecord &amp;other)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QUrl</type>
+            <name>uri</name>
+            <anchorfile>qndefnfcurirecord.html</anchorfile>
+            <anchor>uri</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setUri</name>
+            <anchorfile>qndefnfcurirecord.html</anchorfile>
+            <anchor>setUri</anchor>
+            <arglist>(const QUrl &amp;uri)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtNfc.NearField</name>
+        <filename>qml-qtnfc-nearfield.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>tagFound</name>
+            <anchorfile>qml-qtnfc-nearfield.html</anchorfile>
+            <anchor>tagFound-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>tagRemoved</name>
+            <anchorfile>qml-qtnfc-nearfield.html</anchorfile>
+            <anchor>tagRemoved-signal</anchor>
+            <arglist>()</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QNdefFilter</name>
+        <filename>qndeffilter.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QNdefFilter</name>
+            <anchorfile>qndeffilter.html</anchorfile>
+            <anchor>QNdefFilter</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QNdefFilter</name>
+            <anchorfile>qndeffilter.html</anchorfile>
+            <anchor>QNdefFilter-1</anchor>
+            <arglist>(const QNdefFilter &amp;other)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>~QNdefFilter</name>
+            <anchorfile>qndeffilter.html</anchorfile>
+            <anchor>dtor.QNdefFilter</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>clear</name>
+            <anchorfile>qndeffilter.html</anchorfile>
+            <anchor>clear</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setOrderMatch</name>
+            <anchorfile>qndeffilter.html</anchorfile>
+            <anchor>setOrderMatch</anchor>
+            <arglist>(bool on)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>orderMatch</name>
+            <anchorfile>qndeffilter.html</anchorfile>
+            <anchor>orderMatch</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>appendRecord</name>
+            <anchorfile>qndeffilter.html</anchorfile>
+            <anchor>appendRecord</anchor>
+            <arglist>(unsigned int min, unsigned int max)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>appendRecord</name>
+            <anchorfile>qndeffilter.html</anchorfile>
+            <anchor>appendRecord-1</anchor>
+            <arglist>(QNdefRecord::TypeNameFormat typeNameFormat, const QByteArray &amp;type, unsigned int min, unsigned int max)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>appendRecord</name>
+            <anchorfile>qndeffilter.html</anchorfile>
+            <anchor>appendRecord-2</anchor>
+            <arglist>(const QNdefFilter::Record &amp;record)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>recordCount</name>
+            <anchorfile>qndeffilter.html</anchorfile>
+            <anchor>recordCount</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QNdefFilter::Record</type>
+            <name>recordAt</name>
+            <anchorfile>qndeffilter.html</anchorfile>
+            <anchor>recordAt</anchor>
+            <arglist>(int i) const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QNdefFilter &amp;</type>
+            <name>operator=</name>
+            <anchorfile>qndeffilter.html</anchorfile>
+            <anchor>operator-eq</anchor>
+            <arglist>(const QNdefFilter &amp;other)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QNdefRecord</name>
+        <filename>qndefrecord.html</filename>
+        <member kind="enum">
+            <name>TypeNameFormat</name>
+            <anchor>TypeNameFormat-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Empty">
+            <anchor>TypeNameFormat-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="NfcRtd">
+            <anchor>TypeNameFormat-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Mime">
+            <anchor>TypeNameFormat-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Uri">
+            <anchor>TypeNameFormat-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="ExternalRtd">
+            <anchor>TypeNameFormat-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Unknown">
+            <anchor>TypeNameFormat-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QNdefRecord</name>
+            <anchorfile>qndefrecord.html</anchorfile>
+            <anchor>QNdefRecord</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>~QNdefRecord</name>
+            <anchorfile>qndefrecord.html</anchorfile>
+            <anchor>dtor.QNdefRecord</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QNdefRecord</name>
+            <anchorfile>qndefrecord.html</anchorfile>
+            <anchor>QNdefRecord-1</anchor>
+            <arglist>(const QNdefRecord &amp;other)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QNdefRecord &amp;</type>
+            <name>operator=</name>
+            <anchorfile>qndefrecord.html</anchorfile>
+            <anchor>operator-eq</anchor>
+            <arglist>(const QNdefRecord &amp;other)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setTypeNameFormat</name>
+            <anchorfile>qndefrecord.html</anchorfile>
+            <anchor>setTypeNameFormat</anchor>
+            <arglist>(QNdefRecord::TypeNameFormat typeNameFormat)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QNdefRecord::TypeNameFormat</type>
+            <name>typeNameFormat</name>
+            <anchorfile>qndefrecord.html</anchorfile>
+            <anchor>typeNameFormat</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setType</name>
+            <anchorfile>qndefrecord.html</anchorfile>
+            <anchor>setType</anchor>
+            <arglist>(const QByteArray &amp;type)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QByteArray</type>
+            <name>type</name>
+            <anchorfile>qndefrecord.html</anchorfile>
+            <anchor>type</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setId</name>
+            <anchorfile>qndefrecord.html</anchorfile>
+            <anchor>setId</anchor>
+            <arglist>(const QByteArray &amp;id)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QByteArray</type>
+            <name>id</name>
+            <anchorfile>qndefrecord.html</anchorfile>
+            <anchor>id</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setPayload</name>
+            <anchorfile>qndefrecord.html</anchorfile>
+            <anchor>setPayload</anchor>
+            <arglist>(const QByteArray &amp;payload)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QByteArray</type>
+            <name>payload</name>
+            <anchorfile>qndefrecord.html</anchorfile>
+            <anchor>payload</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>isEmpty</name>
+            <anchorfile>qndefrecord.html</anchorfile>
+            <anchor>isEmpty</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>isRecordType</name>
+            <anchorfile>qndefrecord.html</anchorfile>
+            <anchor>isRecordType</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>operator==</name>
+            <anchorfile>qndefrecord.html</anchorfile>
+            <anchor>operator-eq-eq</anchor>
+            <arglist>(const QNdefRecord &amp;other) const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>operator!=</name>
+            <anchorfile>qndefrecord.html</anchorfile>
+            <anchor>operator-not-eq</anchor>
+            <arglist>(const QNdefRecord &amp;other) const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>Q_DECLARE_NDEF_RECORD</name>
+            <anchorfile>qndefrecord.html</anchorfile>
+            <anchor>Q_DECLARE_NDEF_RECORD</anchor>
+            <arglist>( className,  typeNameFormat,  type,  initialPayload)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>Q_DECLARE_ISRECORDTYPE_FOR_NDEF_RECORD</name>
+            <anchorfile>qndefrecord.html</anchorfile>
+            <anchor>Q_DECLARE_ISRECORDTYPE_FOR_NDEF_RECORD</anchor>
+            <arglist>( className,  typeNameFormat,  type)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QNearFieldShareManager</name>
+        <filename>qnearfieldsharemanager.html</filename>
+        <base>QObject</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QNearFieldShareManager</name>
+            <anchorfile>qnearfieldsharemanager.html</anchorfile>
+            <anchor>QNearFieldShareManager</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QNearFieldShareManager</name>
+            <anchorfile>qnearfieldsharemanager.html</anchorfile>
+            <anchor>dtor.QNearFieldShareManager</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="enum">
+            <name>ShareError</name>
+            <anchor>ShareError-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="NoError">
+            <anchor>ShareError-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="UnknownError">
+            <anchor>ShareError-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="InvalidShareContentError">
+            <anchor>ShareError-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="ShareCanceledError">
+            <anchor>ShareError-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="ShareInterruptedError">
+            <anchor>ShareError-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="ShareRejectedError">
+            <anchor>ShareError-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="UnsupportedShareModeError">
+            <anchor>ShareError-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="ShareAlreadyInProgressError">
+            <anchor>ShareError-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="SharePermissionDeniedError">
+            <anchor>ShareError-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="enum">
+            <name>ShareMode</name>
+            <anchor>ShareMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="NoShare">
+            <anchor>ShareMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="NdefShare">
+            <anchor>ShareMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="FileShare">
+            <anchor>ShareMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="typedef" type="QNearFieldShareManager::ShareMode">
+            <name>ShareModes</name>
+            <anchorfile>qnearfieldsharemanager.html</anchorfile>
+            <anchor>ShareMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>QNearFieldShareManager::ShareModes</type>
+            <name>supportedShareModes</name>
+            <anchorfile>qnearfieldsharemanager.html</anchorfile>
+            <anchor>supportedShareModes</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setShareModes</name>
+            <anchorfile>qnearfieldsharemanager.html</anchorfile>
+            <anchor>setShareModes</anchor>
+            <arglist>(QNearFieldShareManager::ShareModes mode)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QNearFieldShareManager::ShareModes</type>
+            <name>shareModes</name>
+            <anchorfile>qnearfieldsharemanager.html</anchorfile>
+            <anchor>shareModes</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QNearFieldShareManager::ShareError</type>
+            <name>shareError</name>
+            <anchorfile>qnearfieldsharemanager.html</anchorfile>
+            <anchor>shareError</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>targetDetected</name>
+            <anchorfile>qnearfieldsharemanager.html</anchorfile>
+            <anchor>targetDetected</anchor>
+            <arglist>(QNearFieldShareTarget *shareTarget)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>shareModesChanged</name>
+            <anchorfile>qnearfieldsharemanager.html</anchorfile>
+            <anchor>shareModesChanged</anchor>
+            <arglist>(QNearFieldShareManager::ShareModes modes)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>error</name>
+            <anchorfile>qnearfieldsharemanager.html</anchorfile>
+            <anchor>error</anchor>
+            <arglist>(QNearFieldShareManager::ShareError error)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QtNfc.NdefFilter</name>
+        <filename>qml-qtnfc-ndeffilter.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtNfc.NdefUriRecord</name>
+        <filename>qml-qtnfc-ndefurirecord.html</filename>
+    </compound>
+    <compound kind="class">
+        <name>QtNfc.NdefMimeRecord</name>
+        <filename>qml-qtnfc-ndefmimerecord.html</filename>
+    </compound>
+</tagfile>

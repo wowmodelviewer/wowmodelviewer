@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qplaceeditorial.cpp -->
+  <title>QPlaceEditorial Class | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-module.html">C++ Classes</a></td><td >QPlaceEditorial</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPlaceEditorial Class</h1>
+<!-- $$$QPlaceEditorial-brief -->
+<p>The <a href="qplaceeditorial.html">QPlaceEditorial</a> class represents a publisher's article describing a place. <a href="#details">More...</a></p>
+<!-- @@@QPlaceEditorial -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QPlaceEditorial&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += location</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.6</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qplacecontent.html">QPlaceContent</a></td></tr></table></div><p>This class was introduced in  Qt 5.6.</p>
+<ul>
+<li><a href="qplaceeditorial-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qplaceeditorial.html#QPlaceEditorial-1">QPlaceEditorial</a></b>(const QPlaceContent &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qplaceeditorial.html#QPlaceEditorial">QPlaceEditorial</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qplaceeditorial.html#dtor.QPlaceEditorial">~QPlaceEditorial</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qplaceeditorial.html#language">language</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplaceeditorial.html#setLanguage">setLanguage</a></b>(const QString &amp;<i>language</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplaceeditorial.html#setText">setText</a></b>(const QString &amp;<i>text</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplaceeditorial.html#setTitle">setTitle</a></b>(const QString &amp;<i>title</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qplaceeditorial.html#text">text</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qplaceeditorial.html#title">title</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPlaceEditorial-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Each <a href="qplaceeditorial.html">QPlaceEditorial</a> has a title, text and language; in addition to those properties inherited from <a href="qplacecontent.html">QPlaceContent</a>.</p>
+<p>Note: The Places API only supports editorials as 'retrieve-only' objects. Submitting editorials to a provider is not a supported use case.</p>
+</div>
+<p><b>See also </b><a href="qplacecontent.html">QPlaceContent</a>.</p>
+<!-- @@@QPlaceEditorial -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QPlaceEditorial$$$QPlaceEditorialconstQPlaceContent& -->
+<h3 class="fn" id="QPlaceEditorial-1"><a name="QPlaceEditorial-1"></a>QPlaceEditorial::<span class="name">QPlaceEditorial</span>(const <span class="type"><a href="qplacecontent.html#QPlaceContent">QPlaceContent</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a copy of <i>other</i> if possible, otherwise constructs a default editorial object.</p>
+<!-- @@@QPlaceEditorial -->
+<!-- $$$QPlaceEditorial[overload1]$$$QPlaceEditorial -->
+<h3 class="fn" id="QPlaceEditorial"><a name="QPlaceEditorial"></a>QPlaceEditorial::<span class="name">QPlaceEditorial</span>()</h3>
+<p>Constructs a new editorial object.</p>
+<!-- @@@QPlaceEditorial -->
+<!-- $$$~QPlaceEditorial[overload1]$$$~QPlaceEditorial -->
+<h3 class="fn" id="dtor.QPlaceEditorial"><a name="dtor.QPlaceEditorial"></a><code>[virtual] </code>QPlaceEditorial::<span class="name">~QPlaceEditorial</span>()</h3>
+<p>Destructor.</p>
+<!-- @@@~QPlaceEditorial -->
+<!-- $$$language[overload1]$$$language -->
+<h3 class="fn" id="language"><a name="language"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPlaceEditorial::<span class="name">language</span>() const</h3>
+<p>Returns the language of the editorial. Typically this would be a language code in the 2 letter ISO 639-1 format.</p>
+<p><b>See also </b><a href="qplaceeditorial.html#setLanguage">setLanguage</a>().</p>
+<!-- @@@language -->
+<!-- $$$setLanguage[overload1]$$$setLanguageconstQString& -->
+<h3 class="fn" id="setLanguage"><a name="setLanguage"></a><span class="type">void</span> QPlaceEditorial::<span class="name">setLanguage</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>language</i>)</h3>
+<p>Sets the <i>language</i> of the editorial. Typically this would be a language code in the 2 letter ISO 639-1 format.</p>
+<p><b>See also </b><a href="qplaceeditorial.html#language">language</a>().</p>
+<!-- @@@setLanguage -->
+<!-- $$$setText[overload1]$$$setTextconstQString& -->
+<h3 class="fn" id="setText"><a name="setText"></a><span class="type">void</span> QPlaceEditorial::<span class="name">setText</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>text</i>)</h3>
+<p>Sets the <i>text</i> of the editorial.</p>
+<p><b>See also </b><a href="qplaceeditorial.html#text">text</a>().</p>
+<!-- @@@setText -->
+<!-- $$$setTitle[overload1]$$$setTitleconstQString& -->
+<h3 class="fn" id="setTitle"><a name="setTitle"></a><span class="type">void</span> QPlaceEditorial::<span class="name">setTitle</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>title</i>)</h3>
+<p>Sets the <i>title</i> of the editorial.</p>
+<p><b>See also </b><a href="qplaceeditorial.html#title">title</a>().</p>
+<!-- @@@setTitle -->
+<!-- $$$text[overload1]$$$text -->
+<h3 class="fn" id="text"><a name="text"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPlaceEditorial::<span class="name">text</span>() const</h3>
+<p>Returns a textual description of the place.</p>
+<p>Depending upon the provider, the editorial text could be either rich(HTML based) text or plain text.</p>
+<p><b>See also </b><a href="qplaceeditorial.html#setText">setText</a>().</p>
+<!-- @@@text -->
+<!-- $$$title[overload1]$$$title -->
+<h3 class="fn" id="title"><a name="title"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPlaceEditorial::<span class="name">title</span>() const</h3>
+<p>Returns the title of the editorial.</p>
+<p><b>See also </b><a href="qplaceeditorial.html#setTitle">setTitle</a>().</p>
+<!-- @@@title -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

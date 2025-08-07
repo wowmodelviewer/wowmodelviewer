@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<instructionals module="QtGamepad">
+    <examples>
+        <example name="Qt Gamepad Configure Buttons Example" docUrl="qthelp://org.qt-project.qtgamepad.5132/qtgamepad/qtgamepad-configurebuttons-example.html" projectPath="gamepad/configureButtons/configureButtons.pro" imageUrl="qthelp://org.qt-project.qtgamepad.5132/qtgamepad/images/configuregamepadbuttons-example.png">
+            <description><![CDATA[Enables configuring the gamepad buttons.]]></description>
+            <tags>buttons,configure,gamepad</tags>
+            <fileToOpen>gamepad/configureButtons/main.cpp</fileToOpen>
+            <fileToOpen mainFile="true">gamepad/configureButtons/main.qml</fileToOpen>
+        </example>
+        <example name="Qt Gamepad Key Navigation Example" docUrl="qthelp://org.qt-project.qtgamepad.5132/qtgamepad/qtgamepad-keynavigation-example.html" projectPath="gamepad/keyNavigation/keyNavigation.pro" imageUrl="qthelp://org.qt-project.qtgamepad.5132/qtgamepad/images/keynavigationgamepad-example.png">
+            <description><![CDATA[Demonstrates how to use navigation keys on the gamepad.]]></description>
+            <tags>gamepad,key,navigation</tags>
+            <fileToOpen>gamepad/keyNavigation/main.cpp</fileToOpen>
+            <fileToOpen mainFile="true">gamepad/keyNavigation/qml/main.qml</fileToOpen>
+        </example>
+        <example name="Qt Gamepad Mouse Item Example" docUrl="qthelp://org.qt-project.qtgamepad.5132/qtgamepad/qtgamepad-mouseitem-example.html" projectPath="gamepad/mouseItem/mouseItem.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[Depicts joystick movement using a pointer.]]></description>
+            <tags>gamepad,item,mouse</tags>
+            <fileToOpen>gamepad/mouseItem/main.cpp</fileToOpen>
+            <fileToOpen mainFile="true">gamepad/mouseItem/qml/main.qml</fileToOpen>
+        </example>
+        <example name="Qt Gamepad Qt Quick Example" docUrl="qthelp://org.qt-project.qtgamepad.5132/qtgamepad/qtgamepad-quickgamepad-example.html" projectPath="gamepad/quickGamepad/quickGamepad.pro" imageUrl="qthelp://org.qt-project.qtgamepad.5132/qtgamepad/images/qtquickgamepad-example.png">
+            <description><![CDATA[Demonstrates how to interact with the gamepad using QML.]]></description>
+            <tags>gamepad,quick</tags>
+            <fileToOpen>gamepad/quickGamepad/main.cpp</fileToOpen>
+            <fileToOpen mainFile="true">gamepad/quickGamepad/qml/main.qml</fileToOpen>
+        </example>
+        <example name="Qt Gamepad Simple Example" docUrl="qthelp://org.qt-project.qtgamepad.5132/qtgamepad/qtgamepad-simple-example.html" projectPath="gamepad/simple/simple.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[A simple example demonstrating the APIs in use.]]></description>
+            <tags>gamepad,simple</tags>
+            <fileToOpen mainFile="true">gamepad/simple/main.cpp</fileToOpen>
+        </example>
+    </examples>
+</instructionals>

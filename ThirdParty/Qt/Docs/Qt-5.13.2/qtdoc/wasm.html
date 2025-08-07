@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- webasm.qdoc -->
+  <title>Qt for WebAssembly | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Qt for WebAssembly</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#getting-started-with-qt-for-webassembly">Getting Started with Qt for WebAssembly</a></li>
+<li class="level2"><a href="#install-emscripten">Install Emscripten</a></li>
+<li class="level1"><a href="#test-run-your-application">Test-run your application</a></li>
+<li class="level1"><a href="#some-examples">Some examples</a></li>
+<li class="level1"><a href="#limitations">Limitations</a></li>
+<li class="level1"><a href="#external-resources">External resources</a></li>
+<li class="level1"><a href="#licenses">Licenses</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt for WebAssembly</h1>
+<span class="subtitle"></span>
+<!-- $$$wasm.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>WebAssembly is a binary format that allows sand-boxed executable code in web pages. This format is nearly as fast as native machine code, and is now supported by all major web browsers.</p>
+<p>Qt for WebAssembly is a <a href="qpa.html">platform plugin</a> that lets you build Qt applications, which can be integrated into your web pages. It doesn't require any client-side installations and reduces the server-side resource usage.</p>
+<a name="getting-started-with-qt-for-webassembly"></a>
+<h2 id="getting-started-with-qt-for-webassembly">Getting Started with Qt for WebAssembly</h2>
+<a name="install-emscripten"></a>
+<h3 id="install-emscripten">Install Emscripten</h3>
+<p><a href="https://emscripten.org/docs/introducing_emscripten/index.html">emscripten</a> is a toolchain for compiling to asm.js and WebAssembly. It lets you run Qt on the web at near-native speed without plugins.</p>
+<p>Refer to the <a href="http://kripken.github.io/emscripten-site/docs/getting_started/index.html">emscripten documentation</a> for more information about checking out the Emscripten SDK and installing and activating Emscripten for your Qt version.</p>
+<p>After installation, you should have emscripten in your path. Check this with the following command:</p>
+<pre class="cpp plain">
+
+  em++ --version
+
+</pre>
+<p>Each minor release of Qt supports a known-good Emscripten version. That Emscripten version will be supported for the lifetime of that Qt version.</p>
+<p>The known-good versions are:</p>
+<ul>
+<li>Qt 5.12: 1.38.16</li>
+<li>Qt 5.13: 1.38.27 (multithreading: 1.38.30)</li>
+</ul>
+<p>Use <code>emsdk</code> to install specific <code>emscripten</code> versions. For example, to install it for Qt 5.13, enter:</p>
+<ul>
+<li>./emsdk install sdk-1.38.27-64bit</li>
+<li>./emsdk activate --embedded sdk-1.38.27-64bit</li>
+</ul>
+<p>The <code>--embedded</code> option is useful if you want to install multiple versions of the SDK. It locates all configuration and cache files inside the SDK so that multiple versions do not conflict.</p>
+<p>After installation, you should have emscripten in your path. Check this with the following command:</p>
+<pre class="cpp plain">
+
+  em++ --version
+
+</pre>
+<a name="download-the-binaries"></a>
+<h4 id="download-the-binaries">Download the binaries</h4>
+<p>The binary builds can be downloaded in the Downloads section using your Qt account.</p>
+<a name="build-qt-from-the-sources"></a>
+<h4 id="build-qt-from-the-sources">Build Qt from the sources</h4>
+<p>Alternatively, you could download the Qt sources in the Downloads section, and build Qt from it.</p>
+<p>Configure Qt as a cross-compile build for the <code>wasm-emscripten</code> platform. This will implicitly set the &quot;-static&quot; and &quot;-no-feature-thread&quot; options. Pass the <code>-compile-examples</code> option to enable examples.</p>
+<pre class="cpp plain">
+
+  ./configure -xplatform wasm-emscripten -nomake examples -prefix $PWD/qtbase
+
+</pre>
+<p>On Windows, make sure you have <code>MinGW</code> as well as <code>sed</code> in your <code>PATH</code> and configure with the following:</p>
+<pre class="cpp plain">
+
+  configure -no-warnings-are-errors -xplatform wasm-emscripten -platform win32-g++ -nomake examples -prefix %CD%\qtbase
+
+</pre>
+<p>Build required modules:</p>
+<pre class="cpp plain">
+
+  make module-qtbase module-qtdeclarative [other modules]
+
+</pre>
+<p>The Qt build is a static build, and does not support threads.</p>
+<a name="build-and-run-your-application"></a>
+<h4 id="build-and-run-your-application">Build and run your application</h4>
+<pre class="cpp plain">
+
+  $ /path/to/qt-wasm/qtbase/bin/qmake
+  $ make
+
+</pre>
+<p>This generates the following files:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Generated file</th><th >Brief Description</th></tr></thead>
+<tr valign="top" class="odd"><td >app.html</td><td >HTML container</td></tr>
+<tr valign="top" class="even"><td >qtloader.js</td><td >JS API for loading Qt apps</td></tr>
+<tr valign="top" class="odd"><td >app.js</td><td >JS API for loading Qt apps</td></tr>
+<tr valign="top" class="even"><td >app.wasm</td><td >emscripten app binary</td></tr>
+</table></div>
+<p>When deploying the app, the compression is typically handled on the server side. We recommend to compress the wasm binaries because this typically reduces the size of the binary by 50 %.</p>
+<a name="test-run-your-application"></a>
+<h2 id="test-run-your-application">Test-run your application</h2>
+<p>You can test-run your application in the following way:</p>
+<pre class="cpp plain">
+
+  /path/to/emscripten/emrun --browser=firefox appname.html
+
+</pre>
+<a name="some-examples"></a>
+<h2 id="some-examples">Some examples</h2>
+<ul>
+<li><a href="http://example.qt.io/qt-webassembly/opengl/hellowindow/hellowindow.html">An example displaying a Qt logo using OpenGL calls</a></li>
+<li><a href="http://example.qt.io/qt-webassembly/SensorTagDemo/SensorTagDemo.html">An industry automation use case</a></li>
+<li><a href="http://example.qt.io/qt-webassembly/quickcontrols2/gallery/gallery.html">A gallery of available controls in Qt Quick Controls</a></li>
+<li><a href="http://example.qt.io/qt-webassembly/widgets/richtext/textedit/textedit.html">A simple text editor, written with Qt Widgets</a></li>
+</ul>
+<a name="limitations"></a>
+<h2 id="limitations">Limitations</h2>
+<p>The most important limitation is that the Qt build is static, and does not support threads.</p>
+<p>For further info, refer to <a href="https://wiki.qt.io/Qt_for_WebAssembly#Known_issues_and_platform_notes">Known_issues_and_platform_notes</a>.</p>
+<a name="external-resources"></a>
+<h2 id="external-resources">External resources</h2>
+<ul>
+<li><a href="http://blog.qt.io/blog/2018/04/23/beta-qt-webassembly-technology-preview/">Qt for WebAssembly Technology Preview</a></li>
+<li><a href="http://blog.qt.io/blog/2018/05/22/qt-for-webassembly/">Qt and WebAssembly</a></li>
+<li><a href="https://wiki.qt.io/Qt_for_WebAssembly">Qt for WebAssembly wiki</a></li>
+<li><a href="http://blog.qt.io/blog/2018/11/19/getting-started-qt-webassembly/">Getting Started with Qt for WebAssembly</a></li>
+<li><a href="http://blog.qt.io/blog/2018/06/12/remote-uis-webgl-webassembly/">Remote UIs with WebGL and WebAssembly</a></li>
+<li><a href="https://webassembly.org">WebAssembly Resource site</a></li>
+</ul>
+<a name="licenses"></a>
+<h2 id="licenses">Licenses</h2>
+<p>Qt for WebAssembly is available under commercial licenses from <a href="http://www.qt.io/about-us/">The Qt Company</a>. In addition, it is available under the <a href="http://www.gnu.org/licenses/gpl-3.0.html">GNU General Public License, version 3</a>. See <a href="licensing.html">Qt Licensing</a> for further details.</p>
+</div>
+<p><b>See also </b><a href="https://webassembly.org">WebAssembly Resource site</a>, <a href="http://blog.qt.io/blog/2018/11/19/getting-started-qt-webassembly/">Getting Started with Qt for WebAssembly</a>, and <a href="http://blog.qt.io/blog/2018/06/12/remote-uis-webgl-webassembly/">Remote UIs with WebGL and WebAssembly</a>.</p>
+<!-- @@@wasm.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

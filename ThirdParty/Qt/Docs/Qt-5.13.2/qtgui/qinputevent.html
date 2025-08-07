@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qevent.cpp -->
+  <title>QInputEvent Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QInputEvent</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QInputEvent Class</h1>
+<!-- $$$QInputEvent-brief -->
+<p>The <a href="qinputevent.html">QInputEvent</a> class is the base class for events that describe user input. <a href="#details">More...</a></p>
+<!-- @@@QInputEvent -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QInputEvent&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qevent.html">QEvent</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qcontextmenuevent.html">QContextMenuEvent</a>, <a href="qhoverevent.html">QHoverEvent</a>, <a href="qkeyevent.html">QKeyEvent</a>, <a href="qmouseevent.html">QMouseEvent</a>, <a href="qnativegestureevent.html">QNativeGestureEvent</a>, <a href="qtabletevent.html">QTabletEvent</a>, <a href="qtouchevent.html">QTouchEvent</a>, and <a href="qwheelevent.html">QWheelEvent</a></p>
+</td></tr></table></div><ul>
+<li><a href="qinputevent-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::KeyboardModifiers </td><td class="memItemRight bottomAlign"><b><a href="qinputevent.html#modifiers">modifiers</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> ulong </td><td class="memItemRight bottomAlign"><b><a href="qinputevent.html#timestamp">timestamp</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QInputEvent-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QInputEvent -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$modifiers[overload1]$$$modifiers -->
+<h3 class="fn" id="modifiers"><a name="modifiers"></a><span class="type"><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a></span> QInputEvent::<span class="name">modifiers</span>() const</h3>
+<p>Returns the keyboard modifier flags that existed immediately before the event occurred.</p>
+<p><b>See also </b><a href="qguiapplication.html#keyboardModifiers">QGuiApplication::keyboardModifiers</a>().</p>
+<!-- @@@modifiers -->
+<!-- $$$timestamp[overload1]$$$timestamp -->
+<h3 class="fn" id="timestamp"><a name="timestamp"></a><span class="type"><a href="../qtcore/qtglobal.html#ulong-typedef">ulong</a></span> QInputEvent::<span class="name">timestamp</span>() const</h3>
+<p>Returns the window system's timestamp for this event. It will normally be in milliseconds since some arbitrary point in time, such as the time when the system was started.</p>
+<!-- @@@timestamp -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

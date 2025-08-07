@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-task-lists.qdoc -->
+  <title>Showing Task List Files in Issues Pane | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Showing Task List Files in Issues Pane</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-editor-external.html" />
+  <link rel="next" href="creator-help-overview.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-editor-external.html">Using External Tools</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-help-overview.html">Getting Help</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#managing-task-list-entries">Managing Task List Entries</a></li>
+<li class="level1"><a href="#task-list-file-format">Task List File Format</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Showing Task List Files in Issues Pane</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-task-lists.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>You can use code scanning and analysis tools to examine source code. These tools report issues for you to fix. Qt Creator enables you to load lists of issues into the <b>Issues</b> pane for easier navigation.</p>
+<p>Qt Creator expects tasks to be defined in a simple line-based file format that is easy to generate using scripts. The scripts can either convert reports from other tools or create lists of issues in the <a href="#task-list-file-format">task list format</a> from code. For an example of a script that checks new lines of code and matches them against regular expressions to generate a task list, see <code>scripts\mytasks.pl</code> in the Qt Creator repository.</p>
+<a name="managing-task-list-entries"></a>
+<h2 id="managing-task-list-entries">Managing Task List Entries</h2>
+<p>To open task list files in the <b>Issues</b> pane, choose <b>File</b> &gt; <b>Open</b>. Right-click a task list entry to open a context menu that contains commands for managing the entry. You can copy or remove task list entries or navigate to the corresponding source code.</p>
+<p>Qt Creator monitors the loaded files and displays the changes in the <b>Issues</b> pane. To keep the current entries in a task list, but stop checking for changes, select <b>Stop Monitoring</b>.</p>
+<a name="task-list-file-format"></a>
+<h2 id="task-list-file-format">Task List File Format</h2>
+<p>The filename extension must be .tasks for Qt Creator to recognize a file as a task list file.</p>
+<p>Each line in a task list file is treated as a tab-separated list of strings with <code>\t</code>, <code>\n</code>, and <code>\\</code> used as escape characters. The strings are used to create one task per line. The lines can have one of the following formats:</p>
+<ul>
+<li><code>description</code></li>
+<li><code>type\tdescription</code></li>
+<li><code>file\ttype\tdescription</code></li>
+<li><code>file\tline\ttype\tdescription</code></li>
+</ul>
+<p>The task type can have one of the following values:</p>
+<ul>
+<li>A string starting with <code>err</code>, which displays the error icon in the beginning of the line</li>
+<li>A string starting with <code>warn</code>, which displays the warning icon</li>
+<li>Any other value, which sets the task type to Unknown and does not display an icon</li>
+</ul>
+<p>The values are not case sensitive.</p>
+<p>Lines starting with the hash mark character (#) in the first column are ignored.</p>
+<p>If the file path is given as a relative path, it is based on the parent directory of the task list file.</p>
+</div>
+<!-- @@@creator-task-lists.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-editor-external.html">Using External Tools</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-help-overview.html">Getting Help</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

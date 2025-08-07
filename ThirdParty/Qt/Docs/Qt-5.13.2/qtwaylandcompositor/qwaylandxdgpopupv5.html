@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwaylandxdgshellv5.cpp -->
+  <title>QWaylandXdgPopupV5 Class | Qt Wayland Compositor 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwaylandcompositor-index.html">Qt Wayland Compositor</a></td><td ><a href="qtwaylandcompositor-module.html">C++ Classes</a></td><td >QWaylandXdgPopupV5</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwaylandcompositor-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QWaylandXdgPopupV5 Class</h1>
+<!-- $$$QWaylandXdgPopupV5-brief -->
+<p>The <a href="qwaylandxdgpopupv5.html">QWaylandXdgPopupV5</a> class provides menus for an xdg surface. <a href="#details">More...</a></p>
+<!-- @@@QWaylandXdgPopupV5 -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QWaylandXdgPopupV5&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += waylandcompositor</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> QWaylandShellSurfaceTemplate</td></tr></table></div><p><b>This class is obsolete.</b> It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>This class was introduced in  Qt 5.8.</p>
+<ul>
+<li><a href="qwaylandxdgpopupv5-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qwaylandxdgpopupv5.html#parentSurface-prop">parentSurface</a></b> : QWaylandSurface* const</li>
+<li class="fn"><b><a href="qwaylandxdgpopupv5.html#position-prop">position</a></b> : const QPoint</li>
+<li class="fn"><b><a href="qwaylandxdgpopupv5.html#shell-prop">shell</a></b> : QWaylandXdgShellV5* const</li>
+<li class="fn"><b><a href="qwaylandxdgpopupv5.html#surface-prop">surface</a></b> : QWaylandSurface* const</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgpopupv5.html#QWaylandXdgPopupV5-1">QWaylandXdgPopupV5</a></b>(QWaylandXdgShellV5 *<i>xdgShell</i>, QWaylandSurface *<i>surface</i>, QWaylandSurface *<i>parentSurface</i>, const QPoint &amp;<i>position</i>, const QWaylandResource &amp;<i>resource</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgpopupv5.html#QWaylandXdgPopupV5">QWaylandXdgPopupV5</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgpopupv5.html#initialize">initialize</a></b>(QWaylandXdgShellV5 *<i>shell</i>, QWaylandSurface *<i>surface</i>, QWaylandSurface *<i>parentSurface</i>, const QPoint &amp;<i>position</i>, const QWaylandResource &amp;<i>resource</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandSurface *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgpopupv5.html#parentSurface-prop">parentSurface</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPoint </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgpopupv5.html#position-prop">position</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandXdgShellV5 *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgpopupv5.html#shell-prop">shell</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandSurface *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgpopupv5.html#surface-prop">surface</a></b>() const</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgpopupv5.html#parentSurface-prop">parentSurfaceChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgpopupv5.html#position-prop">positionChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgpopupv5.html#shell-prop">shellChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgpopupv5.html#surface-prop">surfaceChanged</a></b>()</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> const struct wl_interface *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgpopupv5.html#interface">interface</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandSurfaceRole *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgpopupv5.html#role">role</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QWaylandXdgPopupV5-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This class is part of the <a href="qwaylandxdgshellv5.html">QWaylandXdgShellV5</a> extension and provides a way to extend the functionality of an existing <a href="qwaylandsurface.html">QWaylandSurface</a> with features specific to desktop-style menus for an xdg surface.</p>
+<p>It corresponds to the Wayland interface xdg_popup.</p>
+</div>
+<!-- @@@QWaylandXdgPopupV5 -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$parentSurface-prop$$$parentSurface$$$parentSurfaceChanged -->
+<h3 class="fn" id="parentSurface-prop"><a name="parentSurface-prop"></a><span class="name">parentSurface</span> : <span class="type"><a href="qwaylandsurface.html">QWaylandSurface</a></span>* const</h3>
+<p>This property holds the surface associated with the parent of this <a href="qwaylandxdgpopupv5.html" class="obsolete">QWaylandXdgPopupV5</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QWaylandSurface *</td><td class="memItemRight bottomAlign"><span class="name"><b>parentSurface</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>parentSurfaceChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@parentSurface -->
+<!-- $$$position-prop$$$position$$$positionChanged -->
+<h3 class="fn" id="position-prop"><a name="position-prop"></a><span class="name">position</span> : const <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span></h3>
+<p>This property holds the location of the upper left corner of the surface relative to the upper left corner of the parent surface, in surface local coordinates.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QPoint </td><td class="memItemRight bottomAlign"><span class="name"><b>position</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>positionChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@position -->
+<!-- $$$shell-prop$$$shell$$$shellChanged -->
+<h3 class="fn" id="shell-prop"><a name="shell-prop"></a><span class="name">shell</span> : <span class="type"><a href="qwaylandxdgshellv5.html">QWaylandXdgShellV5</a></span>* const</h3>
+<p>This property holds the shell associated with this <a href="qwaylandxdgpopupv5.html" class="obsolete">QWaylandXdgPopupV5</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QWaylandXdgShellV5 *</td><td class="memItemRight bottomAlign"><span class="name"><b>shell</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>shellChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@shell -->
+<!-- $$$surface-prop$$$surface$$$surfaceChanged -->
+<h3 class="fn" id="surface-prop"><a name="surface-prop"></a><span class="name">surface</span> : <span class="type"><a href="qwaylandsurface.html">QWaylandSurface</a></span>* const</h3>
+<p>This property holds the surface associated with this <a href="qwaylandxdgpopupv5.html" class="obsolete">QWaylandXdgPopupV5</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QWaylandSurface *</td><td class="memItemRight bottomAlign"><span class="name"><b>surface</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>surfaceChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@surface -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QWaylandXdgPopupV5$$$QWaylandXdgPopupV5QWaylandXdgShellV5*QWaylandSurface*QWaylandSurface*constQPoint&constQWaylandResource& -->
+<h3 class="fn" id="QWaylandXdgPopupV5-1"><a name="QWaylandXdgPopupV5-1"></a>QWaylandXdgPopupV5::<span class="name">QWaylandXdgPopupV5</span>(<span class="type"><a href="qwaylandxdgshellv5.html">QWaylandXdgShellV5</a></span> *<i>xdgShell</i>, <span class="type"><a href="qwaylandsurface.html">QWaylandSurface</a></span> *<i>surface</i>, <span class="type"><a href="qwaylandsurface.html">QWaylandSurface</a></span> *<i>parentSurface</i>, const <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> &amp;<i>position</i>, const <span class="type">QWaylandResource</span> &amp;<i>resource</i>)</h3>
+<p>Constructs a <a href="qwaylandxdgpopupv5.html" class="obsolete">QWaylandXdgPopupV5</a>, associating it with <i>xdgShell</i> at the specified <i>position</i> for <i>surface</i>, and initializes it with the given <i>parentSurface</i> and <i>resource</i>.</p>
+<!-- @@@QWaylandXdgPopupV5 -->
+<!-- $$$QWaylandXdgPopupV5[overload1]$$$QWaylandXdgPopupV5 -->
+<h3 class="fn" id="QWaylandXdgPopupV5"><a name="QWaylandXdgPopupV5"></a>QWaylandXdgPopupV5::<span class="name">QWaylandXdgPopupV5</span>()</h3>
+<p>Constructs a <a href="qwaylandxdgpopupv5.html" class="obsolete">QWaylandXdgPopupV5</a>.</p>
+<!-- @@@QWaylandXdgPopupV5 -->
+<!-- $$$initialize[overload1]$$$initializeQWaylandXdgShellV5*QWaylandSurface*QWaylandSurface*constQPoint&constQWaylandResource& -->
+<h3 class="fn" id="initialize"><a name="initialize"></a><span class="type">void</span> QWaylandXdgPopupV5::<span class="name">initialize</span>(<span class="type"><a href="qwaylandxdgshellv5.html">QWaylandXdgShellV5</a></span> *<i>shell</i>, <span class="type"><a href="qwaylandsurface.html">QWaylandSurface</a></span> *<i>surface</i>, <span class="type"><a href="qwaylandsurface.html">QWaylandSurface</a></span> *<i>parentSurface</i>, const <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> &amp;<i>position</i>, const <span class="type">QWaylandResource</span> &amp;<i>resource</i>)</h3>
+<p>Initializes the <a href="qwaylandxdgpopupv5.html" class="obsolete">QWaylandXdgPopupV5</a>, associating it with the given <i>shell</i>, <i>surface</i>, <i>parentSurface</i>, <i>position</i>, and <i>resource</i>.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@initialize -->
+<!-- $$$interface[overload1]$$$interface -->
+<h3 class="fn" id="interface"><a name="interface"></a><code>[static] </code>const <span class="type">struct</span> <span class="type">wl_interface</span> *QWaylandXdgPopupV5::<span class="name">interface</span>()</h3>
+<p>Returns the Wayland interface for the <a href="qwaylandxdgpopupv5.html" class="obsolete">QWaylandXdgPopupV5</a>.</p>
+<!-- @@@interface -->
+<!-- $$$role[overload1]$$$role -->
+<h3 class="fn" id="role"><a name="role"></a><code>[static] </code><span class="type">QWaylandSurfaceRole</span> *QWaylandXdgPopupV5::<span class="name">role</span>()</h3>
+<p>Returns the surface role for the <a href="qwaylandxdgpopupv5.html" class="obsolete">QWaylandXdgPopupV5</a>.</p>
+<!-- @@@role -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

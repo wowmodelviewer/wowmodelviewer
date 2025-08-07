@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdoc-manual-markupcmds.qdoc -->
+  <title>Text Markup | QDoc Manual 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qdoc-index.html">QDoc Manual</a></td><td >Text Markup</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qdoc-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="03-qdoc-commands-markup.html" />
+  <link rel="next" href="05-qdoc-commands-documentstructure.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="03-qdoc-commands-markup.html">Markup Commands</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="05-qdoc-commands-documentstructure.html">Document Structure</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#a-parameter-marker">\a (parameter marker)</a></li>
+<li class="level1"><a href="#c-code-font">\c (code font)</a></li>
+<li class="level1"><a href="#div">\div</a></li>
+<li class="level1"><a href="#span">\span</a></li>
+<li class="level1"><a href="#tt-teletype-font">\tt (teletype font)</a></li>
+<li class="level1"><a href="#b">\b</a></li>
+<li class="level1"><a href="#e-emphasis-italics">\e (emphasis, italics)</a></li>
+<li class="level1"><a href="#sub">\sub</a></li>
+<li class="level1"><a href="#sup">\sup</a></li>
+<li class="level1"><a href="#uicontrol">\uicontrol</a></li>
+<li class="level1"><a href="#underline">\underline</a></li>
+<li class="level1"><a href="#double-backslash">\\ (double backslash)</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Text Markup</h1>
+<span class="subtitle"></span>
+<!-- $$$04-qdoc-commands-textmarkup.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The text formatting commands indicate how text is to be rendered.</p>
+<a name="a-command"></a><a name="a-parameter-marker"></a>
+<h2 id="a-parameter-marker">\a (parameter marker)</h2>
+<p>The \a command tells QDoc the next word is a formal parameter name.</p>
+<p>A warning is emitted when a formal parameter is not documented or is misspelled, so when you document a function you should mention each formal parameter by name in the function description, preceded by the \a command. The parameter name is then rendered in italics.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+     Constructs a line edit containing the text
+     \a contents<span class="operator">.</span> The \a parent parameter is sent
+     to the <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> constructor<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+  <span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span><span class="operator">::</span><span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span>(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>contents<span class="operator">,</span> <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent) :<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>(parent)
+  {
+     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  }
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p><b><a href="../qtwidgets/qlineedit.html">QLineEdit::QLineEdit</a> ( const <a href="../qtcore/qstring.html">QString</a> &amp; contents, <a href="../qtwidgets/qwidget.html">QWidget</a> *parent )</b></p>
+<p>Constructs a line edit containing the text <i>contents</i>. The <i>parent</i> parameter is sent to the <a href="../qtwidgets/qwidget.html">QWidget</a> constructor.</p>
+</blockquote>
+<p>The formal parameter name may be enclosed between curly brackets, but that isn't required.</p>
+<a name="c-command"></a><a name="c-code-font"></a>
+<h2 id="c-code-font">\c (code font)</h2>
+<p>The \c command is used for rendering variable names, user-defined class names, and C++ keywords (for example, <code>int</code> and <code>for</code>) in the code font.</p>
+<p>The command renders its argument using a monospace font. For example:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+    The \c AnalogClock <span class="keyword">class</span> provides a clock widget with hour
+    and minute hands that is automatically updated every
+    few seconds<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p>The <code>AnalogClock</code> class provides a clock widget with hour and minute hands, which are automatically updated every few seconds.</p>
+</blockquote>
+<p>If the text to be rendered in the code font contains spaces, enclose the entire text in curly brackets.</p>
+<pre class="cpp">
+
+  \c {<span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span><span class="operator">::</span><span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span>(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>contents<span class="operator">,</span> <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent) :<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>(parent)}
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p><code>QLineEdit::QLineEdit(const QString &amp;contents, QWidget *parent) :QWidget(parent)</code></p>
+</blockquote>
+<p>The \c command accepts the special character <code>\</code> within its argument, which renders it as a normal character. So if you want to use nested commands, you must use the <a href="04-qdoc-commands-textmarkup.html#tt-command">teletype (\tt)</a> command instead.</p>
+<p>See also <a href="04-qdoc-commands-textmarkup.html#tt-command">\tt</a> and <a href="06-qdoc-commands-includecodeinline.html#code-command">\code</a>.</p>
+<a name="div-command"></a><a name="div"></a>
+<h2 id="div">\div</h2>
+<p>The \div and \enddiv commands delimit a large or small block of text (which may include other QDoc commands) to which special formatting attributes should be applied.</p>
+<p>An argument must be provided in curly braces, as in the qdoc comment shown below. The argument is not interpreted but is used as attribute(s) of the tag that is output by qdoc.</p>
+<p>For example, we might want to render an inline image so that it floats to the right of the current block of text:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+     \div {<span class="keyword">class</span><span class="operator">=</span><span class="string">&quot;float-right&quot;</span>}
+       \inlineimage qml<span class="operator">-</span>column<span class="operator">.</span>png
+     \enddiv
+
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>If qdoc is generating HTML, it will translate these commands to:</p>
+<pre class="cpp">
+
+  <span class="operator">&lt;</span>div <span class="keyword">class</span><span class="operator">=</span><span class="string">&quot;float-right&quot;</span><span class="operator">&gt;</span><span class="operator">&lt;</span>p<span class="operator">&gt;</span><span class="operator">&lt;</span>img src<span class="operator">=</span><span class="string">&quot;images/qml-column.png&quot;</span> <span class="operator">/</span><span class="operator">&gt;</span><span class="operator">&lt;</span><span class="operator">/</span>p<span class="operator">&gt;</span><span class="operator">&lt;</span><span class="operator">/</span>div<span class="operator">&gt;</span>
+
+</pre>
+<p>For HTML, the attribute value <i>float-right</i> then will refer to a clause in the style.css file, which in this case could be:</p>
+<pre class="cpp">
+
+  div<span class="operator">.</span><span class="type">float</span><span class="operator">-</span>right
+  {
+     <span class="type">float</span>: right; margin<span class="operator">-</span>left: <span class="number">2em</span>
+  }
+
+</pre>
+<p>If qdoc is generating DITA XML, it will translate the commands to:</p>
+<pre class="cpp">
+
+  <span class="operator">&lt;</span>sectiondiv outputclass<span class="operator">=</span><span class="string">&quot;float-right&quot;</span><span class="operator">&gt;</span>
+      <span class="operator">&lt;</span>p<span class="operator">&gt;</span>
+          <span class="operator">&lt;</span>fig<span class="operator">&gt;</span>
+              <span class="operator">&lt;</span>image href<span class="operator">=</span><span class="string">&quot;images/qml-column.png&quot;</span> placement<span class="operator">=</span><span class="string">&quot;inline&quot;</span><span class="operator">/</span><span class="operator">&gt;</span>
+          <span class="operator">&lt;</span><span class="operator">/</span>fig<span class="operator">&gt;</span>
+      <span class="operator">&lt;</span><span class="operator">/</span>p<span class="operator">&gt;</span>
+  <span class="operator">&lt;</span><span class="operator">/</span>sectiondiv<span class="operator">&gt;</span>
+
+</pre>
+<p>Your DITA XML publishing program must then recognize the <i>outputclass</i> attribute value.</p>
+<p><b>Note: </b>Note that the <b>\div</b> command can be nested.</p><p>Below you can find an example taken from the index.qdoc file used to generate index.html for Qt 4.7:</p>
+<pre class="cpp">
+
+  \div {<span class="keyword">class</span><span class="operator">=</span><span class="string">&quot;indexbox guide&quot;</span>}
+      \div {<span class="keyword">class</span><span class="operator">=</span><span class="string">&quot;heading&quot;</span>}
+          <span class="type"><a href="../qtcore/qt.html">Qt</a></span> Developer Guide
+  \enddiv
+      \div {<span class="keyword">class</span><span class="operator">=</span><span class="string">&quot;indexboxcont indexboxbar&quot;</span>}
+          \div {<span class="keyword">class</span><span class="operator">=</span><span class="string">&quot;section indexIcon&quot;</span>} \emptyspan
+          \enddiv
+          \div {<span class="keyword">class</span><span class="operator">=</span><span class="string">&quot;section&quot;</span>}
+              <span class="type"><a href="../qtcore/qt.html">Qt</a></span> is a cross<span class="operator">-</span>platform application and UI
+              framework<span class="operator">.</span> Using <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">,</span> you can write web<span class="operator">-</span>enabled
+              applications once and deploy them across desktop<span class="operator">,</span>
+              mobile and embedded operating systems without
+              rewriting the source code<span class="operator">.</span>
+          \enddiv
+          \div {<span class="keyword">class</span><span class="operator">=</span><span class="string">&quot;section sectionlist&quot;</span>}
+              \list
+                 \li \l{Getting Started}
+                 \li \l{Installation} {Installation}
+                 \li \l{how<span class="operator">-</span>to<span class="operator">-</span>learn<span class="operator">-</span>qt<span class="operator">.</span>html} {How to learn <span class="type"><a href="../qtcore/qt.html">Qt</a></span>}
+                 \li \l{tutorials<span class="operator">.</span>html} {Tutorials}
+                 \li \l{<span class="type"><a href="../qtcore/qt.html">Qt</a></span> Examples} {Examples}
+                 \li \l{qt4<span class="operator">-</span><span class="number">7</span><span class="operator">-</span>intro<span class="operator">.</span>html} {What<span class="char">'s new in Qt 4.7}
+              \endlist
+          \enddiv
+      \enddiv
+  \enddiv
+  </span>
+
+</pre>
+<p>When all the class attribute values are defined as they are in the style.css file that is used for rendering the Qt documentation, the above example is rendered as:</p>
+<div class="indexbox guide"><div class="heading"><p>Qt Developer Guide</p>
+</div><div class="indexboxcont indexboxbar"><div class="section indexIcon"><span></span></div><div class="section"><p>Qt is a cross-platform application and UI framework. Using Qt, you can write web-enabled applications once and deploy them across desktop, mobile and embedded operating systems without rewriting the source code.</p>
+</div><div class="section sectionlist"><ul>
+<li>Getting Started</li>
+<li>Installation</li>
+<li>How to learn Qt</li>
+<li>Tutorials</li>
+<li>Examples</li>
+<li>What's new in Qt 4.7</li>
+</ul>
+</div></div></div><p>When generating DITA XML, qdoc outputs the nested <i>div</i> commands as:</p>
+<pre class="cpp">
+
+  <span class="operator">&lt;</span>sectiondiv outputclass<span class="operator">=</span><span class="string">&quot;indexbox guide&quot;</span><span class="operator">&gt;</span>
+      <span class="operator">&lt;</span>sectiondiv outputclass<span class="operator">=</span><span class="string">&quot;heading&quot;</span><span class="operator">&gt;</span>
+          <span class="operator">&lt;</span>p<span class="operator">&gt;</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span> Developer Guide<span class="operator">&lt;</span><span class="operator">/</span>p<span class="operator">&gt;</span>
+      <span class="operator">&lt;</span><span class="operator">/</span>sectiondiv<span class="operator">&gt;</span>
+      <span class="operator">&lt;</span>sectiondiv outputclass<span class="operator">=</span><span class="string">&quot;indexboxcont indexboxbar&quot;</span><span class="operator">&gt;</span>
+          <span class="operator">&lt;</span>sectiondiv outputclass<span class="operator">=</span><span class="string">&quot;section indexIcon&quot;</span><span class="operator">/</span><span class="operator">&gt;</span>
+          <span class="operator">&lt;</span>sectiondiv outputclass<span class="operator">=</span><span class="string">&quot;section&quot;</span><span class="operator">&gt;</span>
+              <span class="operator">&lt;</span>p<span class="operator">&gt;</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span> is a cross<span class="operator">-</span>platform application and UI
+                 framework<span class="operator">.</span> Using <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">,</span> you can write
+                 web<span class="operator">-</span>enabled applications once and deploy
+                 them across desktop<span class="operator">,</span> mobile and embedded
+                 operating systems without rewriting the
+                 source code<span class="operator">.</span>
+              <span class="operator">&lt;</span><span class="operator">/</span>p<span class="operator">&gt;</span>
+          <span class="operator">&lt;</span><span class="operator">/</span>sectiondiv<span class="operator">&gt;</span>
+          <span class="operator">&lt;</span>sectiondiv outputclass<span class="operator">=</span><span class="string">&quot;section sectionlist&quot;</span><span class="operator">&gt;</span>
+              <span class="operator">&lt;</span>ul<span class="operator">&gt;</span>
+                  <span class="operator">&lt;</span>li<span class="operator">&gt;</span>
+                      <span class="operator">&lt;</span>xref href<span class="operator">=</span><span class="string">&quot;gettingstarted.xml#id-606ee7a8-219b-47b7-8f94-91bc8c76e54c&quot;</span><span class="operator">&gt;</span>Getting started<span class="operator">&lt;</span><span class="operator">/</span>xref<span class="operator">&gt;</span>
+                  <span class="operator">&lt;</span><span class="operator">/</span>li<span class="operator">&gt;</span>
+                  <span class="operator">&lt;</span>li<span class="operator">&gt;</span>
+                      <span class="operator">&lt;</span>xref href<span class="operator">=</span><span class="string">&quot;installation.xml#id-075c20e2-aa1e-4f88-a316-a46517e50443&quot;</span><span class="operator">&gt;</span>Installation<span class="operator">&lt;</span><span class="operator">/</span>xref<span class="operator">&gt;</span>
+                  <span class="operator">&lt;</span><span class="operator">/</span>li<span class="operator">&gt;</span>
+                  <span class="operator">&lt;</span>li<span class="operator">&gt;</span>
+                      <span class="operator">&lt;</span>xref href<span class="operator">=</span><span class="string">&quot;how-to-learn-qt.xml#id-49f509b5-52f9-4cd9-9921-74217b9a5182&quot;</span><span class="operator">&gt;</span>How to learn <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">&lt;</span><span class="operator">/</span>xref<span class="operator">&gt;</span>
+                  <span class="operator">&lt;</span><span class="operator">/</span>li<span class="operator">&gt;</span>
+                  <span class="operator">&lt;</span>li<span class="operator">&gt;</span>
+                      <span class="operator">&lt;</span>xref href<span class="operator">=</span><span class="string">&quot;tutorials.xml#id-a737f955-a904-455f-b4aa-0dc69ed5a64f&quot;</span><span class="operator">&gt;</span>Tutorials<span class="operator">&lt;</span><span class="operator">/</span>xref<span class="operator">&gt;</span>
+                  <span class="operator">&lt;</span><span class="operator">/</span>li<span class="operator">&gt;</span>
+                  <span class="operator">&lt;</span>li<span class="operator">&gt;</span>
+                      <span class="operator">&lt;</span>xref href<span class="operator">=</span><span class="string">&quot;all-examples.xml#id-98d95159-d65b-4706-b08f-13d80080448d&quot;</span><span class="operator">&gt;</span>Examples<span class="operator">&lt;</span><span class="operator">/</span>xref<span class="operator">&gt;</span>
+                  <span class="operator">&lt;</span><span class="operator">/</span>li<span class="operator">&gt;</span>
+                  <span class="operator">&lt;</span>li<span class="operator">&gt;</span>
+                      <span class="operator">&lt;</span>xref href<span class="operator">=</span><span class="string">&quot;qt4-7-intro.xml#id-519ae0e3-4242-4c2a-b2be-e05d1e95f177&quot;</span><span class="operator">&gt;</span>What<span class="char">'s new in Qt 4.7&lt;/xref&gt;
+                  &lt;/li&gt;
+              &lt;/ul&gt;
+          &lt;/sectiondiv&gt;
+      &lt;/sectiondiv&gt;
+  &lt;/sectiondiv&gt;
+  </span>
+
+</pre>
+<p>Your DITA XML publishing program must recognize the values of the <i>outputclass</i> attribute.</p>
+<p>See also <a href="04-qdoc-commands-textmarkup.html#span-command">\span</a>.</p>
+<a name="span-command"></a><a name="span"></a>
+<h2 id="span">\span</h2>
+<p>The \span command applies special formatting to a small block of text.</p>
+<p>Two arguments must be provided, each argument in curly braces, as shown in the QDoc comment below. The first argument is not interpreted, but specifies the formatting attribute(s) of the tag output by QDoc. The second argument is the text to be rendered with the special formatting attributes.</p>
+<p>For example, we might want to render the first word of each element in a numeric list in blue.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      Global variables with complex types:
+  \list <span class="number">1</span>
+          \li \span {<span class="keyword">class</span><span class="operator">=</span><span class="string">&quot;variableName&quot;</span>} {mutableComplex1} in globals<span class="operator">.</span>cpp at line <span class="number">14</span>
+          \li \span {<span class="keyword">class</span><span class="operator">=</span><span class="string">&quot;variableName&quot;</span>} {mutableComplex2} in globals<span class="operator">.</span>cpp at line <span class="number">15</span>
+          \li \span {<span class="keyword">class</span><span class="operator">=</span><span class="string">&quot;variableName&quot;</span>} {constComplex1} in globals<span class="operator">.</span>cpp at line <span class="number">16</span>
+          \li \span {<span class="keyword">class</span><span class="operator">=</span><span class="string">&quot;variableName&quot;</span>} {constComplex2} in globals<span class="operator">.</span>cpp at line <span class="number">17</span>
+      \endlist
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>Class <i>variableName</i> refers to a clause in your style.css.</p>
+<pre class="cpp">
+
+  <span class="operator">.</span>variableName
+  {
+      font<span class="operator">-</span>family: courier;
+  color: blue
+  }
+
+</pre>
+<p>Using the <i>variableName</i> clause shown above, the example is rendered as:</p>
+<p>Global variables with complex types:</p>
+<ol class="1" type="1"><li><span class="variableName">mutableComplex1</span> in globals.cpp at line 14</li>
+<li><span class="variableName">mutableComplex2</span> in globals.cpp at line 15</li>
+<li><span class="variableName">constComplex1</span> in globals.cpp at line 16</li>
+<li><span class="variableName">constComplex2</span> in globals.cpp at line 17</li>
+</ol>
+<p><b>Note: </b>The <b>span</b> command does not cause a new paragraph to be started.</p><p>See also <a href="04-qdoc-commands-textmarkup.html#div-command">\div</a>.</p>
+<a name="tt-command"></a><a name="tt-teletype-font"></a>
+<h2 id="tt-teletype-font">\tt (teletype font)</h2>
+<p>The \tt command renders its argument in a monospace font. This command behaves just like the <a href="04-qdoc-commands-textmarkup.html#c-command">\c</a> command, except that \tt allows you to nest QDoc commands within the argument (e.g&#x2e; <a href="04-qdoc-commands-textmarkup.html#e-command">\e</a>, <a href="04-qdoc-commands-textmarkup.html#b-command">\b</a> and <a href="04-qdoc-commands-textmarkup.html#underline-command">\underline</a>).</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      After having populated the main container with
+      child widgets<span class="operator">,</span> \c setupUi() scans the main container<span class="char">'s list of
+      slots for names with the form
+      \tt{on_\e{objectName}_\e{signalName}().}
+  * /
+  </span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p>After having populated the main container with child widgets, <code>setupUi()</code> scans the main container's list of slots for names with the form <code>on_<i>objectName</i>_<i>signalName</i>().</code></p>
+</blockquote>
+<p>If the text to be rendered in the code font contains spaces, enclose the entire text in curly brackets.</p>
+<pre class="cpp">
+
+  \tt {<span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span><span class="operator">::</span><span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span>(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>contents<span class="operator">,</span> <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent) :<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>(parent)}
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p><code><a href="../qtwidgets/qlineedit.html">QLineEdit::QLineEdit</a>(const <a href="../qtcore/qstring.html">QString</a> &amp;contents, <a href="../qtwidgets/qwidget.html">QWidget</a> *parent) :<a href="../qtwidgets/qwidget.html">QWidget</a>(parent)</code></p>
+</blockquote>
+<p>See also <a href="04-qdoc-commands-textmarkup.html#c-command">\c</a>.</p>
+<a name="b-command"></a><a name="b"></a>
+<h2 id="b">\b</h2>
+<p>The \b command renders its argument in bold font. This command used to be called \bold.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      This is regular text; \b {<span class="keyword">this</span> text is
+      rendered <span class="keyword">using</span> the \\b command}<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p>This is regular text; <b>this text is rendered using the \b command</b>.</p>
+</blockquote>
+<a name="e-command"></a><a name="e-emphasis-italics"></a>
+<h2 id="e-emphasis-italics">\e (emphasis, italics)</h2>
+<p>The \e command renders its argument in a special font, normally italics. This command used to be called \i, which is now deprecated.</p>
+<p>If the argument contains spaces or other punctuation, enclose the argument in curly brackets.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      Here<span class="operator">,</span> we render \e {a few words} in italics<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p>Here, we render <i>a few words</i> in italics.</p>
+</blockquote>
+<p>If you want to use other QDoc commands within an argument that contains spaces, you always need to enclose the argument in braces. But QDoc is smart enough to count parentheses [3], so you don't need braces in cases like this:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      An argument can sometimes contain whitespaces<span class="operator">,</span>
+      <span class="keyword">for</span> example: \e <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;A Brand New Button&quot;</span>))
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p>An argument can sometimes contain whitespaces, for example: <i>QPushButton(tr(&quot;A Brand New Button&quot;))</i></p>
+</blockquote>
+<p>Finally, trailing punctuation is not included in an argument [4], nor is &quot;'s&quot; [5]</p>
+        <table align="center" cellpadding="2"
+           cellspacing="1" border="0">
+        <tr valign="top" bgcolor="#a2c511">
+            <th></th>
+            <th>QDoc Syntax</th>
+            <th>Generated Documentation</th>
+        </tr>
+
+        <tr valign="top" bgcolor="#d0d0d0">
+           <td>1</td>
+            <td>A variation of a command button is a \e menu
+                button.</td>
+            <td>A variation of a command button is a <i>menu</i>
+                button.</td>
+        </tr>
+
+        <tr valign="top" bgcolor="#c0c0c0">
+            <td>2</td>
+            <td>The QPushButton widget provides a
+                \e {command button}.</td>
+            <td>The QPushButton widget provides a
+                <i>command button</i>.</td>
+        </tr>
+
+        <tr valign="top" bgcolor="#d0d0d0">
+            <td>3</td>
+            <td>Another class of buttons are option buttons
+                \e (see QRadioButton).</td>
+            <td>Another class of buttons are option buttons
+                <i> (see QRadioButton)</i>.</td>
+        </tr>
+
+        <tr valign="top" bgcolor="#c0c0c0">
+            <td>4</td>
+            <td>A push button emits the signal \e clicked().</td>
+            <td>A push button emits the signal <i>clicked</i>().</td>
+        </tr>
+
+        <tr valign="top" bgcolor="#d0d0d0">
+            <td>5</td>
+            <td>The \e QPushButton's checked property is
+                false by default.</td>
+            <td>The <i>QPushButton</i>'s checked property is
+                false by default.</td>
+        </tr>
+
+        </table>
+    <a name="sub-command"></a><a name="sub"></a>
+<h2 id="sub">\sub</h2>
+<p>The \sub command renders its argument lower than the baseline of the regular text, using a smaller font.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      Definition (Range): Consider the sequence
+      {x\sub n}\sub {n <span class="operator">&gt;</span> <span class="number">1</span>} <span class="operator">.</span> The set
+
+      {x\sub <span class="number">2</span><span class="operator">,</span> x\sub <span class="number">3</span><span class="operator">,</span> x\sub <span class="number">4</span><span class="operator">,</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>} <span class="operator">=</span> {x\sub n ; n <span class="operator">=</span> <span class="number">2</span><span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>}
+
+      is called the range of the sequence<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p>Definition (Range): Consider the sequence {x<sub>n</sub>}<sub>n &gt; 1</sub> . The set</p>
+<p>{x<sub>2</sub>, x<sub>3</sub>, x<sub>4</sub>, ..&#x2e;} = {x<sub>n</sub> ; n = 2, 3, 4, ..&#x2e;}</p>
+<p>is called the range of the sequence.</p>
+</blockquote>
+<p>If the argument contains spaces or other punctuation, enclose the argument in curly brackets.</p>
+<a name="sup-command"></a><a name="sup"></a>
+<h2 id="sup">\sup</h2>
+<p>The \sup command renders its argument higher than the baseline of the regular text, using a smaller font.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      The series
+
+      <span class="number">1</span> <span class="operator">+</span> a <span class="operator">+</span> a\sup <span class="number">2</span> <span class="operator">+</span> a\sup <span class="number">3</span> <span class="operator">+</span> a\sup <span class="number">4</span> <span class="operator">+</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+      is called the \i {geometric series}<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p>The series</p>
+<p>1 + a + a<sup>2</sup> + a<sup>3</sup> + a<sup>4</sup> + ..&#x2e;</p>
+<p>is called the <i>geometric series</i>.</p>
+</blockquote>
+<p>If the argument contains spaces or other punctuation, enclose the argument in curly brackets.</p>
+<a name="uicontrol-command"></a><a name="uicontrol"></a>
+<h2 id="uicontrol">\uicontrol</h2>
+<p>The \uicontrol command is used to mark content as being used for UI control elements. When using HTML, the output is rendered in bold. When using DITA XML the content is enclosed in a <code>uicontrol</code> tag.</p>
+<a name="underline-command"></a><a name="underline"></a>
+<h2 id="underline">\underline</h2>
+<p>The \underline command renders its argument underlined.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      The \underline {F}ile menu gives the users the possibility
+      to edit an existing file<span class="operator">,</span> <span class="keyword">or</span> save a <span class="keyword">new</span> <span class="keyword">or</span> modified
+      file<span class="operator">,</span> and exit the application<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p>The <u>F</u>ile menu gives the users the possibility to edit an existing file, or save a new or modified file, and exit the application.</p>
+</blockquote>
+<p>If the argument contains spaces or other punctuation, enclose the argument in curly brackets.</p>
+<a name="backslash-command"></a><a name="double-backslash"></a>
+<h2 id="double-backslash">\\ (double backslash)</h2>
+<p>The \\ command expands to a double backslash.</p>
+<p>QDoc commands always start with a single backslash. To display a single backslash in the text you need to type two backslashes. If you want to display two backslashes, you need to type four.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      The \\\\ command is useful <span class="keyword">if</span> you want a
+      backslash to appear verbatim<span class="operator">,</span> <span class="keyword">for</span> example<span class="operator">,</span>
+      writing C:\\windows\\home\\<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p>The \\ command is useful if you want a backslash to appear verbatim, for example, writing C:\windows\home\.</p>
+</blockquote>
+<p>However, if you want your text to appear in a monospace font as well, you can use the <a href="04-qdoc-commands-textmarkup.html#c-command">\c</a> command instead, which accepts and renders the backslash as any other character. For example:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      The \\c command is useful <span class="keyword">if</span> you want a
+      backslash to appear verbatim<span class="operator">,</span> and the word
+      that contains it written in a monospace font<span class="operator">,</span>
+      like <span class="keyword">this</span>: \c {C:\windows\home\}<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p>The \c command is useful if you want a backslash to appear verbatim, and the word that contains it written in a monospace font, like this: <code>C:\windows\home\</code>.</p>
+</blockquote>
+</div>
+<p><b>See also </b><a href="04-qdoc-commands-textmarkup.html#b">\b</a>.</p>
+<!-- @@@04-qdoc-commands-textmarkup.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="03-qdoc-commands-markup.html">Markup Commands</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="05-qdoc-commands-documentstructure.html">Document Structure</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

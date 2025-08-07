@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- advtutorial.qdoc -->
+  <title>QML Advanced Tutorial 1 - Creating the Game Canvas and Blocks | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td >QML Advanced Tutorial 1 - Creating the Game Canvas and Blocks</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="qml-advtutorial.html" />
+  <link rel="next" href="qtquick-tutorials-samegame-samegame2-example.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="qml-advtutorial.html">QML Advanced Tutorial</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qtquick-tutorials-samegame-samegame2-example.html">QML Advanced Tutorial 2 - Populating the Game Canvas</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level2"><a href="#creating-the-application-screen">Creating the Application Screen</a></li>
+<li class="level2"><a href="#adding-button-and-block-components">Adding <code>Button</code> and <code>Block</code> Components</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QML Advanced Tutorial 1 - Creating the Game Canvas and Blocks</h1>
+<span class="subtitle"></span>
+<!-- $$$tutorials/samegame/samegame1-description -->
+<div class="descr"> <a name="details"></a>
+<a name="creating-the-application-screen"></a>
+<h5 id="creating-the-application-screen">Creating the Application Screen</h5>
+<p>The first step is to create the basic QML items in your application.</p>
+<p>To begin with, we create our Same Game application with a main screen like this:</p>
+<p class="centerAlign"><img src="images/declarative-adv-tutorial1.png" alt="" /></p><p>This is defined by the main application file, <code>samegame.qml</code>, which looks like this:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">screen</span>
+
+      <span class="name">width</span>: <span class="number">490</span>; <span class="name">height</span>: <span class="number">720</span>
+
+      <span class="type"><a href="qml-qtquick-systempalette.html">SystemPalette</a></span> { <span class="name">id</span>: <span class="name">activePalette</span> }
+
+      <span class="type"><a href="qml-qtquick-item.html">Item</a></span> {
+          <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+          <span class="type">anchors</span> { <span class="name">top</span>: <span class="name">parent</span>.<span class="name">top</span>; <span class="name">bottom</span>: <span class="name">toolBar</span>.<span class="name">top</span> }
+
+          <span class="type"><a href="qml-qtquick-image.html">Image</a></span> {
+              <span class="name">id</span>: <span class="name">background</span>
+              <span class="name">anchors</span>.fill: <span class="name">parent</span>
+              <span class="name">source</span>: <span class="string">&quot;../shared/pics/background.jpg&quot;</span>
+              <span class="name">fillMode</span>: <span class="name">Image</span>.<span class="name">PreserveAspectCrop</span>
+          }
+      }
+
+      <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">toolBar</span>
+          <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>; <span class="name">height</span>: <span class="number">30</span>
+          <span class="name">color</span>: <span class="name">activePalette</span>.<span class="name">window</span>
+          <span class="name">anchors</span>.bottom: <span class="name">screen</span>.<span class="name">bottom</span>
+
+          <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-button.html">Button</a></span> {
+              <span class="type">anchors</span> { <span class="name">left</span>: <span class="name">parent</span>.<span class="name">left</span>; <span class="name">verticalCenter</span>: <span class="name">parent</span>.<span class="name">verticalCenter</span> }
+              <span class="name">text</span>: <span class="string">&quot;New Game&quot;</span>
+              <span class="name">onClicked</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;This doesn't do anything yet...&quot;</span>)
+          }
+
+          <span class="type"><a href="qml-qtquick-text.html">Text</a></span> {
+              <span class="name">id</span>: <span class="name">score</span>
+              <span class="type">anchors</span> { <span class="name">right</span>: <span class="name">parent</span>.<span class="name">right</span>; <span class="name">verticalCenter</span>: <span class="name">parent</span>.<span class="name">verticalCenter</span> }
+              <span class="name">text</span>: <span class="string">&quot;Score: Who knows?&quot;</span>
+          }
+      }
+  }
+
+</pre>
+<p>This gives you a basic game window that includes the main canvas for the blocks, a &quot;New Game&quot; button and a score display.</p>
+<p>One item you may not recognize here is the <a href="qml-qtquick-systempalette.html">SystemPalette</a> item. This provides access to the Qt system palette and is used to give the button a more native look-and-feel.</p>
+<p>Notice the anchors for the <code>Item</code>, <code>Button</code> and <code>Text</code> types are set using group (dot) notation for readability.</p>
+<a name="adding-button-and-block-components"></a>
+<h5 id="adding-button-and-block-components">Adding <code>Button</code> and <code>Block</code> Components</h5>
+<p>The <code>Button</code> item in the code above is defined in a separate component file named <code>Button.qml</code>. To create a functional button, we use the QML types <a href="qml-qtquick-text.html">Text</a> and <a href="qml-qtquick-mousearea.html">MouseArea</a> inside a <a href="qml-qtquick-rectangle.html">Rectangle</a>. Here is the <code>Button.qml</code> code:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">container</span>
+
+      property <span class="type"><a href="../qtqml/qml-string.html">string</a></span> <span class="name">text</span>: <span class="string">&quot;Button&quot;</span>
+
+      signal <span class="type">clicked</span>
+
+      <span class="name">width</span>: <span class="name">buttonLabel</span>.<span class="name">width</span> <span class="operator">+</span> <span class="number">20</span>; <span class="name">height</span>: <span class="name">buttonLabel</span>.<span class="name">height</span> <span class="operator">+</span> <span class="number">5</span>
+      <span class="type">border</span> { <span class="name">width</span>: <span class="number">1</span>; <span class="name">color</span>: <span class="name">Qt</span>.<span class="name">darker</span>(<span class="name">activePalette</span>.<span class="name">button</span>) }
+      <span class="name">antialiasing</span>: <span class="number">true</span>
+      <span class="name">radius</span>: <span class="number">8</span>
+
+      <span class="comment">// color the button with a gradient</span>
+      <span class="name">gradient</span>: <span class="name">Gradient</span> {
+          <span class="type"><a href="qml-qtquick-gradientstop.html">GradientStop</a></span> {
+              <span class="name">position</span>: <span class="number">0.0</span>
+              <span class="name">color</span>: {
+                  <span class="keyword">if</span> (<span class="name">mouseArea</span>.<span class="name">pressed</span>)
+                      <span class="keyword">return</span> <span class="name">activePalette</span>.<span class="name">dark</span>
+                  <span class="keyword">else</span>
+                      <span class="keyword">return</span> <span class="name">activePalette</span>.<span class="name">light</span>
+              }
+          }
+          <span class="type"><a href="qml-qtquick-gradientstop.html">GradientStop</a></span> { <span class="name">position</span>: <span class="number">1.0</span>; <span class="name">color</span>: <span class="name">activePalette</span>.<span class="name">button</span> }
+      }
+
+      <span class="type"><a href="qml-qtquick-mousearea.html">MouseArea</a></span> {
+          <span class="name">id</span>: <span class="name">mouseArea</span>
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">onClicked</span>: <span class="name">container</span>.<span class="name">clicked</span>();
+      }
+
+      <span class="type"><a href="qml-qtquick-text.html">Text</a></span> {
+          <span class="name">id</span>: <span class="name">buttonLabel</span>
+          <span class="name">anchors</span>.centerIn: <span class="name">container</span>
+          <span class="name">color</span>: <span class="name">activePalette</span>.<span class="name">buttonText</span>
+          <span class="name">text</span>: <span class="name">container</span>.<span class="name">text</span>
+      }
+  }
+
+</pre>
+<p>This essentially defines a rectangle that contains text and can be clicked. The <a href="qml-qtquick-mousearea.html">MouseArea</a> has an <code>onClicked()</code> handler that is implemented to emit the <code>clicked()</code> signal of the <code>container</code> when the area is clicked.</p>
+<p>In Same Game, the screen is filled with small blocks when the game begins. Each block is just an item that contains an image. The block code is defined in a separate <code>Block.qml</code> file:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">block</span>
+
+      <span class="type"><a href="qml-qtquick-image.html">Image</a></span> {
+          <span class="name">id</span>: <span class="name">img</span>
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">source</span>: <span class="string">&quot;../shared/pics/redStone.png&quot;</span>
+      }
+  }
+
+</pre>
+<p>At the moment, the block doesn't do anything; it is just an image. As the tutorial progresses we will animate and give behaviors to the blocks. We have not added any code yet to create the blocks; we will do this in the next chapter.</p>
+<p>We have set the image to be the size of its parent Item using <code>anchors.fill: parent</code>. This means that when we dynamically create and resize the block items later on in the tutorial, the image will be scaled automatically to the correct size.</p>
+<p>Notice the relative path for the Image type's <code>source</code> property. This path is relative to the location of the file that contains the <a href="qml-qtquick-image.html">Image</a> type. Alternatively, you could set the Image source to an absolute file path or a URL that contains an image.</p>
+<p>You should be familiar with the code so far. We have just created some basic types to get started. Next, we will populate the game canvas with some blocks.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtdeclarative.git/tree/examples/quick/tutorials/samegame/samegame1?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@tutorials/samegame/samegame1 -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="qml-advtutorial.html">QML Advanced Tutorial</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qtquick-tutorials-samegame-samegame2-example.html">QML Advanced Tutorial 2 - Populating the Game Canvas</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

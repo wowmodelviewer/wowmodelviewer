@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- integrity-build-monolith-app-tutorial.qdoc -->
+  <title>Preparing U-Boot | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Preparing U-Boot</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="integrity-creating-bootable-sd-card.html" />
+  <link rel="next" href="integrity-monolith-project-tutorial.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="integrity-creating-bootable-sd-card.html">Creating Bootable SD Card</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="integrity-monolith-project-tutorial.html">Qt for INTEGRITY: Monolith Project Tutorial</a>
+</p><p/>
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Preparing U-Boot</h1>
+<span class="subtitle"></span>
+<!-- $$$integrity-preparing-u-boot.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Finally, prepare the i.MX6 Quad board for U-Boot:</p>
+<ol class="1" type="1"><li>Connect to your i.MX6 Quad board with a serial connection at a baud rate of 115200.</li>
+<li>Set the following environment variables in the U-Boot terminal:<pre class="cpp plain">
+
+  setenv bootcmd_demo_dt 'mmc dev 1;
+  fatload mmc 1:1 20000000 demo.image;
+  fatload mmc 1:1 4FFE0000 imx6q-sabrelite.dtb;
+  bootm 20000000 - 4FFE0000'
+
+  setenv bootcmd 'run bootcmd_demo_dt'
+  saveenv
+
+</pre>
+<p><b>Note: </b>The file <i>demo.image</i> was built with the mkimage tool in <a href="integrity-building-u-boot-image.html">Building U-Boot Image</a>.</p></li>
+<li>Reset the i.MX6 Quad board.</li>
+</ol>
+<p>Now your i.MX6 Quad board is ready to run your application.</p>
+</div>
+<!-- @@@integrity-preparing-u-boot.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="integrity-creating-bootable-sd-card.html">Creating Bootable SD Card</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="integrity-monolith-project-tutorial.html">Qt for INTEGRITY: Monolith Project Tutorial</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

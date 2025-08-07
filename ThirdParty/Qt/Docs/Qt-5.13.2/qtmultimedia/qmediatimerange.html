@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmediatimerange.cpp -->
+  <title>QMediaTimeRange Class | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-modules.html">C++ Classes</a></td><td >QMediaTimeRange</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QMediaTimeRange Class</h1>
+<!-- $$$QMediaTimeRange-brief -->
+<p>The <a href="qmediatimerange.html">QMediaTimeRange</a> class represents a set of zero or more disjoint time intervals. <a href="#details">More...</a></p>
+<!-- @@@QMediaTimeRange -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QMediaTimeRange&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += multimedia</td></tr></table></div><ul>
+<li><a href="qmediatimerange-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#QMediaTimeRange-3">QMediaTimeRange</a></b>(const QMediaTimeRange &amp;<i>range</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#QMediaTimeRange-2">QMediaTimeRange</a></b>(const QMediaTimeInterval &amp;<i>interval</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#QMediaTimeRange-1">QMediaTimeRange</a></b>(qint64 <i>start</i>, qint64 <i>end</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMediaTimeRange &amp;</td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#operator-eq-1">operator=</a></b>(const QMediaTimeInterval &amp;<i>interval</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMediaTimeRange &amp;</td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#operator-eq">operator=</a></b>(const QMediaTimeRange &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#dtor.QMediaTimeRange">~QMediaTimeRange</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#addInterval">addInterval</a></b>(const QMediaTimeInterval &amp;<i>interval</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#addInterval-1">addInterval</a></b>(qint64 <i>start</i>, qint64 <i>end</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#addTimeRange">addTimeRange</a></b>(const QMediaTimeRange &amp;<i>range</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#clear">clear</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#contains">contains</a></b>(qint64 <i>time</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint64 </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#earliestTime">earliestTime</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QMediaTimeInterval&gt; </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#intervals">intervals</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#isContinuous">isContinuous</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#isEmpty">isEmpty</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint64 </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#latestTime">latestTime</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#removeInterval">removeInterval</a></b>(const QMediaTimeInterval &amp;<i>interval</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#removeInterval-1">removeInterval</a></b>(qint64 <i>start</i>, qint64 <i>end</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#removeTimeRange">removeTimeRange</a></b>(const QMediaTimeRange &amp;<i>range</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMediaTimeRange &amp;</td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#operator-2b-eq">operator+=</a></b>(const QMediaTimeRange &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMediaTimeRange &amp;</td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#operator-2b-eq-1">operator+=</a></b>(const QMediaTimeInterval &amp;<i>interval</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMediaTimeRange &amp;</td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#operator--eq">operator-=</a></b>(const QMediaTimeRange &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMediaTimeRange &amp;</td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#operator--eq-1">operator-=</a></b>(const QMediaTimeInterval &amp;<i>interval</i>)</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#operator-not-eq">operator!=</a></b>(const QMediaTimeInterval &amp;<i>a</i>, const QMediaTimeInterval &amp;<i>b</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#operator-not-eq-1">operator!=</a></b>(const QMediaTimeRange &amp;<i>a</i>, const QMediaTimeRange &amp;<i>b</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMediaTimeRange </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#operator-2b">operator+</a></b>(const QMediaTimeRange &amp;<i>r1</i>, const QMediaTimeRange &amp;<i>r2</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMediaTimeRange </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#operator-">operator-</a></b>(const QMediaTimeRange &amp;<i>r1</i>, const QMediaTimeRange &amp;<i>r2</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#operator-eq-eq">operator==</a></b>(const QMediaTimeInterval &amp;<i>a</i>, const QMediaTimeInterval &amp;<i>b</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmediatimerange.html#operator-eq-eq-1">operator==</a></b>(const QMediaTimeRange &amp;<i>a</i>, const QMediaTimeRange &amp;<i>b</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QMediaTimeRange-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qmediatimerange.html#earliestTime">earliestTime</a>(), <a href="qmediatimerange.html#latestTime">latestTime</a>(), <a href="qmediatimerange.html#intervals">intervals</a>() and <a href="qmediatimerange.html#isEmpty">isEmpty</a>() methods are used to get information about the current time range.</p>
+<p>The <a href="qmediatimerange.html#addInterval">addInterval</a>(), <a href="qmediatimerange.html#removeInterval">removeInterval</a>() and <a href="qmediatimerange.html#clear">clear</a>() methods are used to modify the current time range.</p>
+<p>When adding or removing intervals from the time range, existing intervals within the range may be expanded, trimmed, deleted, merged or split to ensure that all intervals within the time range remain distinct and disjoint. As a consequence, all intervals added or removed from a time range must be <a href="qmediatimeinterval.html#isNormal">normal</a>.</p>
+</div>
+<p><b>See also </b><a href="qmediatimeinterval.html">QMediaTimeInterval</a>.</p>
+<!-- @@@QMediaTimeRange -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QMediaTimeRange$$$QMediaTimeRangeconstQMediaTimeRange& -->
+<h3 class="fn" id="QMediaTimeRange-3"><a name="QMediaTimeRange-3"></a>QMediaTimeRange::<span class="name">QMediaTimeRange</span>(const <span class="type"><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></span> &amp;<i>range</i>)</h3>
+<p>Constructs a time range by copying another time <i>range</i>.</p>
+<!-- @@@QMediaTimeRange -->
+<!-- $$$QMediaTimeRange$$$QMediaTimeRangeconstQMediaTimeInterval& -->
+<h3 class="fn" id="QMediaTimeRange-2"><a name="QMediaTimeRange-2"></a>QMediaTimeRange::<span class="name">QMediaTimeRange</span>(const <span class="type"><a href="qmediatimeinterval.html">QMediaTimeInterval</a></span> &amp;<i>interval</i>)</h3>
+<p>Constructs a time range that contains an initial interval, <i>interval</i>.</p>
+<p>If <i>interval</i> is not <a href="qmediatimeinterval.html#isNormal">normal</a>, the resulting time range will be empty.</p>
+<p><b>See also </b><a href="qmediatimerange.html#addInterval">addInterval</a>().</p>
+<!-- @@@QMediaTimeRange -->
+<!-- $$$QMediaTimeRange$$$QMediaTimeRangeqint64qint64 -->
+<h3 class="fn" id="QMediaTimeRange-1"><a name="QMediaTimeRange-1"></a>QMediaTimeRange::<span class="name">QMediaTimeRange</span>(<span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> <i>start</i>, <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> <i>end</i>)</h3>
+<p>Constructs a time range that contains an initial interval from <i>start</i> to <i>end</i> inclusive.</p>
+<p>If the interval is not <a href="qmediatimeinterval.html#isNormal">normal</a>, the resulting time range will be empty.</p>
+<p><b>See also </b><a href="qmediatimerange.html#addInterval">addInterval</a>().</p>
+<!-- @@@QMediaTimeRange -->
+<!-- $$$QMediaTimeRange[overload1]$$$QMediaTimeRange -->
+<h3 class="fn" id="QMediaTimeRange"><a name="QMediaTimeRange"></a>QMediaTimeRange::<span class="name">QMediaTimeRange</span>()</h3>
+<p>Constructs an empty time range.</p>
+<!-- @@@QMediaTimeRange -->
+<!-- $$$operator=$$$operator=constQMediaTimeInterval& -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type"><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></span> &amp;QMediaTimeRange::<span class="name">operator=</span>(const <span class="type"><a href="qmediatimeinterval.html">QMediaTimeInterval</a></span> &amp;<i>interval</i>)</h3>
+<p>Sets the time range to a single continuous interval, <i>interval</i>.</p>
+<!-- @@@operator= -->
+<!-- $$$operator=[overload1]$$$operator=constQMediaTimeRange& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></span> &amp;QMediaTimeRange::<span class="name">operator=</span>(const <span class="type"><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></span> &amp;<i>other</i>)</h3>
+<p>Takes a copy of the <i>other</i> time range and returns itself.</p>
+<!-- @@@operator= -->
+<!-- $$$~QMediaTimeRange[overload1]$$$~QMediaTimeRange -->
+<h3 class="fn" id="dtor.QMediaTimeRange"><a name="dtor.QMediaTimeRange"></a>QMediaTimeRange::<span class="name">~QMediaTimeRange</span>()</h3>
+<p>Destructor.</p>
+<!-- @@@~QMediaTimeRange -->
+<!-- $$$addInterval[overload1]$$$addIntervalconstQMediaTimeInterval& -->
+<h3 class="fn" id="addInterval"><a name="addInterval"></a><span class="type">void</span> QMediaTimeRange::<span class="name">addInterval</span>(const <span class="type"><a href="qmediatimeinterval.html">QMediaTimeInterval</a></span> &amp;<i>interval</i>)</h3>
+<p>Adds the specified <i>interval</i> to the time range.</p>
+<p>Adding intervals which are not <a href="qmediatimeinterval.html#isNormal">normal</a> is invalid, and will be ignored.</p>
+<p>If the specified interval is adjacent to, or overlaps existing intervals within the time range, these intervals will be merged.</p>
+<p>This operation takes linear time.</p>
+<p><b>See also </b><a href="qmediatimerange.html#removeInterval">removeInterval</a>().</p>
+<!-- @@@addInterval -->
+<!-- $$$addInterval$$$addIntervalqint64qint64 -->
+<h3 class="fn" id="addInterval-1"><a name="addInterval-1"></a><span class="type">void</span> QMediaTimeRange::<span class="name">addInterval</span>(<span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> <i>start</i>, <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> <i>end</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Adds the interval specified by <i>start</i> and <i>end</i> to the time range.</p>
+<p><b>See also </b><a href="qmediatimerange.html#addInterval">addInterval</a>().</p>
+<!-- @@@addInterval -->
+<!-- $$$addTimeRange[overload1]$$$addTimeRangeconstQMediaTimeRange& -->
+<h3 class="fn" id="addTimeRange"><a name="addTimeRange"></a><span class="type">void</span> QMediaTimeRange::<span class="name">addTimeRange</span>(const <span class="type"><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></span> &amp;<i>range</i>)</h3>
+<p>Adds each of the intervals in <i>range</i> to this time range.</p>
+<p>Equivalent to calling <a href="qmediatimerange.html#addInterval">addInterval</a>() for each interval in <i>range</i>.</p>
+<!-- @@@addTimeRange -->
+<!-- $$$clear[overload1]$$$clear -->
+<h3 class="fn" id="clear"><a name="clear"></a><span class="type">void</span> QMediaTimeRange::<span class="name">clear</span>()</h3>
+<p>Removes all intervals from the time range.</p>
+<p><b>See also </b><a href="qmediatimerange.html#removeInterval">removeInterval</a>().</p>
+<!-- @@@clear -->
+<!-- $$$contains[overload1]$$$containsqint64 -->
+<h3 class="fn" id="contains"><a name="contains"></a><span class="type">bool</span> QMediaTimeRange::<span class="name">contains</span>(<span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> <i>time</i>) const</h3>
+<p>Returns true if the specified <i>time</i> lies within the time range.</p>
+<!-- @@@contains -->
+<!-- $$$earliestTime[overload1]$$$earliestTime -->
+<h3 class="fn" id="earliestTime"><a name="earliestTime"></a><span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> QMediaTimeRange::<span class="name">earliestTime</span>() const</h3>
+<p>Returns the earliest time within the time range.</p>
+<p>For empty time ranges, this value is equal to zero.</p>
+<p><b>See also </b><a href="qmediatimerange.html#latestTime">latestTime</a>().</p>
+<!-- @@@earliestTime -->
+<!-- $$$intervals[overload1]$$$intervals -->
+<h3 class="fn" id="intervals"><a name="intervals"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qmediatimeinterval.html">QMediaTimeInterval</a></span>&gt; QMediaTimeRange::<span class="name">intervals</span>() const</h3>
+<p>Returns the list of intervals covered by this time range.</p>
+<!-- @@@intervals -->
+<!-- $$$isContinuous[overload1]$$$isContinuous -->
+<h3 class="fn" id="isContinuous"><a name="isContinuous"></a><span class="type">bool</span> QMediaTimeRange::<span class="name">isContinuous</span>() const</h3>
+<p>Returns true if the time range consists of a continuous interval. That is, there is one or fewer disjoint intervals within the time range.</p>
+<!-- @@@isContinuous -->
+<!-- $$$isEmpty[overload1]$$$isEmpty -->
+<h3 class="fn" id="isEmpty"><a name="isEmpty"></a><span class="type">bool</span> QMediaTimeRange::<span class="name">isEmpty</span>() const</h3>
+<p>Returns true if there are no intervals within the time range.</p>
+<p><b>See also </b><a href="qmediatimerange.html#intervals">intervals</a>().</p>
+<!-- @@@isEmpty -->
+<!-- $$$latestTime[overload1]$$$latestTime -->
+<h3 class="fn" id="latestTime"><a name="latestTime"></a><span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> QMediaTimeRange::<span class="name">latestTime</span>() const</h3>
+<p>Returns the latest time within the time range.</p>
+<p>For empty time ranges, this value is equal to zero.</p>
+<p><b>See also </b><a href="qmediatimerange.html#earliestTime">earliestTime</a>().</p>
+<!-- @@@latestTime -->
+<!-- $$$removeInterval[overload1]$$$removeIntervalconstQMediaTimeInterval& -->
+<h3 class="fn" id="removeInterval"><a name="removeInterval"></a><span class="type">void</span> QMediaTimeRange::<span class="name">removeInterval</span>(const <span class="type"><a href="qmediatimeinterval.html">QMediaTimeInterval</a></span> &amp;<i>interval</i>)</h3>
+<p>Removes the specified <i>interval</i> from the time range.</p>
+<p>Removing intervals which are not <a href="qmediatimeinterval.html#isNormal">normal</a> is invalid, and will be ignored.</p>
+<p>Intervals within the time range will be trimmed, split or deleted such that no intervals within the time range include any part of the target interval.</p>
+<p>This operation takes linear time.</p>
+<p><b>See also </b><a href="qmediatimerange.html#addInterval">addInterval</a>().</p>
+<!-- @@@removeInterval -->
+<!-- $$$removeInterval$$$removeIntervalqint64qint64 -->
+<h3 class="fn" id="removeInterval-1"><a name="removeInterval-1"></a><span class="type">void</span> QMediaTimeRange::<span class="name">removeInterval</span>(<span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> <i>start</i>, <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> <i>end</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Removes the interval specified by <i>start</i> and <i>end</i> from the time range.</p>
+<p><b>See also </b><a href="qmediatimerange.html#removeInterval">removeInterval</a>().</p>
+<!-- @@@removeInterval -->
+<!-- $$$removeTimeRange[overload1]$$$removeTimeRangeconstQMediaTimeRange& -->
+<h3 class="fn" id="removeTimeRange"><a name="removeTimeRange"></a><span class="type">void</span> QMediaTimeRange::<span class="name">removeTimeRange</span>(const <span class="type"><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></span> &amp;<i>range</i>)</h3>
+<p>Removes each of the intervals in <i>range</i> from this time range.</p>
+<p>Equivalent to calling <a href="qmediatimerange.html#removeInterval">removeInterval</a>() for each interval in <i>range</i>.</p>
+<!-- @@@removeTimeRange -->
+<!-- $$$operator+=[overload1]$$$operator+=constQMediaTimeRange& -->
+<h3 class="fn" id="operator-2b-eq"><a name="operator-2b-eq"></a><span class="type"><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></span> &amp;QMediaTimeRange::<span class="name">operator+=</span>(const <span class="type"><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></span> &amp;<i>other</i>)</h3>
+<p>Adds each interval in <i>other</i> to the time range and returns the result.</p>
+<!-- @@@operator+= -->
+<!-- $$$operator+=$$$operator+=constQMediaTimeInterval& -->
+<h3 class="fn" id="operator-2b-eq-1"><a name="operator-2b-eq-1"></a><span class="type"><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></span> &amp;QMediaTimeRange::<span class="name">operator+=</span>(const <span class="type"><a href="qmediatimeinterval.html">QMediaTimeInterval</a></span> &amp;<i>interval</i>)</h3>
+<p>Adds the specified <i>interval</i> to the time range and returns the result.</p>
+<!-- @@@operator+= -->
+<!-- $$$operator-=[overload1]$$$operator-=constQMediaTimeRange& -->
+<h3 class="fn" id="operator--eq"><a name="operator--eq"></a><span class="type"><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></span> &amp;QMediaTimeRange::<span class="name">operator-=</span>(const <span class="type"><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></span> &amp;<i>other</i>)</h3>
+<p>Removes each interval in <i>other</i> from the time range and returns the result.</p>
+<!-- @@@operator-= -->
+<!-- $$$operator-=$$$operator-=constQMediaTimeInterval& -->
+<h3 class="fn" id="operator--eq-1"><a name="operator--eq-1"></a><span class="type"><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></span> &amp;QMediaTimeRange::<span class="name">operator-=</span>(const <span class="type"><a href="qmediatimeinterval.html">QMediaTimeInterval</a></span> &amp;<i>interval</i>)</h3>
+<p>Removes the specified <i>interval</i> from the time range and returns the result.</p>
+<!-- @@@operator-= -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$operator!=[overload1]$$$operator!=constQMediaTimeInterval&constQMediaTimeInterval& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> <span class="name">operator!=</span>(const <span class="type"><a href="qmediatimeinterval.html">QMediaTimeInterval</a></span> &amp;<i>a</i>, const <span class="type"><a href="qmediatimeinterval.html">QMediaTimeInterval</a></span> &amp;<i>b</i>)</h3>
+<p>Returns true if <i>a</i> is not exactly equal to <i>b</i>.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator!=$$$operator!=constQMediaTimeRange&constQMediaTimeRange& -->
+<h3 class="fn" id="operator-not-eq-1"><a name="operator-not-eq-1"></a><span class="type">bool</span> <span class="name">operator!=</span>(const <span class="type"><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></span> &amp;<i>a</i>, const <span class="type"><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></span> &amp;<i>b</i>)</h3>
+<p>Returns true if one or more intervals in <i>a</i> are not present in <i>b</i>.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator+[overload1]$$$operator+constQMediaTimeRange&constQMediaTimeRange& -->
+<h3 class="fn" id="operator-2b"><a name="operator-2b"></a><span class="type"><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></span> <span class="name">operator+</span>(const <span class="type"><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></span> &amp;<i>r1</i>, const <span class="type"><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></span> &amp;<i>r2</i>)</h3>
+<p>Returns a time range containing the union between <i>r1</i> and <i>r2</i>.</p>
+<!-- @@@operator+ -->
+<!-- $$$operator-[overload1]$$$operator-constQMediaTimeRange&constQMediaTimeRange& -->
+<h3 class="fn" id="operator-"><a name="operator-"></a><span class="type"><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></span> <span class="name">operator-</span>(const <span class="type"><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></span> &amp;<i>r1</i>, const <span class="type"><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></span> &amp;<i>r2</i>)</h3>
+<p>Returns a time range containing <i>r2</i> subtracted from <i>r1</i>.</p>
+<!-- @@@operator- -->
+<!-- $$$operator==[overload1]$$$operator==constQMediaTimeInterval&constQMediaTimeInterval& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> <span class="name">operator==</span>(const <span class="type"><a href="qmediatimeinterval.html">QMediaTimeInterval</a></span> &amp;<i>a</i>, const <span class="type"><a href="qmediatimeinterval.html">QMediaTimeInterval</a></span> &amp;<i>b</i>)</h3>
+<p>Returns true if <i>a</i> is exactly equal to <i>b</i>.</p>
+<!-- @@@operator== -->
+<!-- $$$operator==$$$operator==constQMediaTimeRange&constQMediaTimeRange& -->
+<h3 class="fn" id="operator-eq-eq-1"><a name="operator-eq-eq-1"></a><span class="type">bool</span> <span class="name">operator==</span>(const <span class="type"><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></span> &amp;<i>a</i>, const <span class="type"><a href="qmediatimerange.html#QMediaTimeRange">QMediaTimeRange</a></span> &amp;<i>b</i>)</h3>
+<p>Returns true if all intervals in <i>a</i> are present in <i>b</i>.</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

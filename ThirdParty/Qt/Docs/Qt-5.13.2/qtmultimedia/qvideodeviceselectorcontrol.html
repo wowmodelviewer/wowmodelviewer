@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qvideodeviceselectorcontrol.cpp -->
+  <title>QVideoDeviceSelectorControl Class | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-modules.html">C++ Classes</a></td><td >QVideoDeviceSelectorControl</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#macros">Macros</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QVideoDeviceSelectorControl Class</h1>
+<!-- $$$QVideoDeviceSelectorControl-brief -->
+<p>The <a href="qvideodeviceselectorcontrol.html">QVideoDeviceSelectorControl</a> class provides an video device selector media control. <a href="#details">More...</a></p>
+<!-- @@@QVideoDeviceSelectorControl -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QVideoDeviceSelectorControl&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += multimedia</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qmediacontrol.html">QMediaControl</a></td></tr></table></div><ul>
+<li><a href="qvideodeviceselectorcontrol-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qvideodeviceselectorcontrol.html#dtor.QVideoDeviceSelectorControl">~QVideoDeviceSelectorControl</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qvideodeviceselectorcontrol.html#defaultDevice">defaultDevice</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qvideodeviceselectorcontrol.html#deviceCount">deviceCount</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QString </td><td class="memItemRight bottomAlign"><b><a href="qvideodeviceselectorcontrol.html#deviceDescription">deviceDescription</a></b>(int <i>index</i>) const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QString </td><td class="memItemRight bottomAlign"><b><a href="qvideodeviceselectorcontrol.html#deviceName">deviceName</a></b>(int <i>index</i>) const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qvideodeviceselectorcontrol.html#selectedDevice">selectedDevice</a></b>() const = 0</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qvideodeviceselectorcontrol.html#setSelectedDevice">setSelectedDevice</a></b>(int <i>index</i>) = 0</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvideodeviceselectorcontrol.html#devicesChanged">devicesChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvideodeviceselectorcontrol.html#selectedDeviceChanged-1">selectedDeviceChanged</a></b>(const QString &amp;<i>name</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvideodeviceselectorcontrol.html#selectedDeviceChanged">selectedDeviceChanged</a></b>(int <i>index</i>)</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qvideodeviceselectorcontrol.html#QVideoDeviceSelectorControl">QVideoDeviceSelectorControl</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+</table></div>
+<a name="macros"></a>
+<h2 id="macros">Macros</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qvideodeviceselectorcontrol.html#QCameraInfoControl_iid">QCameraInfoControl_iid</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qvideodeviceselectorcontrol.html#QVideoDeviceSelectorControl_iid">QVideoDeviceSelectorControl_iid</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QVideoDeviceSelectorControl-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qvideodeviceselectorcontrol.html">QVideoDeviceSelectorControl</a> class provides descriptions of the video devices available on a system and allows one to be selected as the endpoint of a media service.</p>
+<p>The interface name of <a href="qvideodeviceselectorcontrol.html">QVideoDeviceSelectorControl</a> is <code>org.qt-project.qt.videodeviceselectorcontrol/5.0</code> as defined in <a href="qvideodeviceselectorcontrol.html#QVideoDeviceSelectorControl_iid">QVideoDeviceSelectorControl_iid</a>.</p>
+</div>
+<!-- @@@QVideoDeviceSelectorControl -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QVideoDeviceSelectorControl[overload1]$$$QVideoDeviceSelectorControlQObject* -->
+<h3 class="fn" id="QVideoDeviceSelectorControl"><a name="QVideoDeviceSelectorControl"></a><code>[protected] </code>QVideoDeviceSelectorControl::<span class="name">QVideoDeviceSelectorControl</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a video device selector control with the given <i>parent</i>.</p>
+<!-- @@@QVideoDeviceSelectorControl -->
+<!-- $$$devicesChanged[overload1]$$$devicesChanged -->
+<h3 class="fn" id="devicesChanged"><a name="devicesChanged"></a><code>[signal] </code><span class="type">void</span> QVideoDeviceSelectorControl::<span class="name">devicesChanged</span>()</h3>
+<p>Signals that the list of available video devices has changed.</p>
+<!-- @@@devicesChanged -->
+<!-- $$$selectedDeviceChanged$$$selectedDeviceChangedconstQString& -->
+<h3 class="fn" id="selectedDeviceChanged-1"><a name="selectedDeviceChanged-1"></a><code>[signal] </code><span class="type">void</span> QVideoDeviceSelectorControl::<span class="name">selectedDeviceChanged</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>)</h3>
+<p>Signals that the selected video device <i>name</i> has changed.</p>
+<p><b>Note:</b> Signal <i>selectedDeviceChanged</i> is overloaded in this class. To connect to this signal by using the function pointer syntax, Qt provides a convenient helper for obtaining the function pointer as shown in this example:<pre class="cpp">
+
+  connect(videoDeviceSelectorControl<span class="operator">,</span> <span class="type">QOverload</span><span class="operator">&lt;</span><span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span><span class="operator">&gt;</span><span class="operator">::</span>of(<span class="operator">&amp;</span><span class="type"><a href="qvideodeviceselectorcontrol.html#QVideoDeviceSelectorControl">QVideoDeviceSelectorControl</a></span><span class="operator">::</span>selectedDeviceChanged)<span class="operator">,</span>
+      <span class="operator">[</span><span class="operator">=</span><span class="operator">]</span>(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>name){ <span class="comment">/* ... */</span> });
+
+</pre>
+<!-- @@@selectedDeviceChanged -->
+<!-- $$$selectedDeviceChanged[overload1]$$$selectedDeviceChangedint -->
+<h3 class="fn" id="selectedDeviceChanged"><a name="selectedDeviceChanged"></a><code>[signal] </code><span class="type">void</span> QVideoDeviceSelectorControl::<span class="name">selectedDeviceChanged</span>(<span class="type">int</span> <i>index</i>)</h3>
+<p>Signals that the selected video device <i>index</i> has changed.</p>
+<p><b>Note:</b> Signal <i>selectedDeviceChanged</i> is overloaded in this class. To connect to this signal by using the function pointer syntax, Qt provides a convenient helper for obtaining the function pointer as shown in this example:<pre class="cpp">
+
+  connect(videoDeviceSelectorControl<span class="operator">,</span> <span class="type">QOverload</span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span><span class="operator">::</span>of(<span class="operator">&amp;</span><span class="type"><a href="qvideodeviceselectorcontrol.html#QVideoDeviceSelectorControl">QVideoDeviceSelectorControl</a></span><span class="operator">::</span>selectedDeviceChanged)<span class="operator">,</span>
+      <span class="operator">[</span><span class="operator">=</span><span class="operator">]</span>(<span class="type">int</span> index){ <span class="comment">/* ... */</span> });
+
+</pre>
+<!-- @@@selectedDeviceChanged -->
+<!-- $$$setSelectedDevice[overload1]$$$setSelectedDeviceint -->
+<h3 class="fn" id="setSelectedDevice"><a name="setSelectedDevice"></a><code>[pure virtual slot] </code><span class="type">void</span> QVideoDeviceSelectorControl::<span class="name">setSelectedDevice</span>(<span class="type">int</span> <i>index</i>)</h3>
+<p>Sets the selected video device <i>index</i>.</p>
+<p><b>See also </b><a href="qvideodeviceselectorcontrol.html#selectedDevice">selectedDevice</a>().</p>
+<!-- @@@setSelectedDevice -->
+<!-- $$$~QVideoDeviceSelectorControl[overload1]$$$~QVideoDeviceSelectorControl -->
+<h3 class="fn" id="dtor.QVideoDeviceSelectorControl"><a name="dtor.QVideoDeviceSelectorControl"></a><code>[virtual] </code>QVideoDeviceSelectorControl::<span class="name">~QVideoDeviceSelectorControl</span>()</h3>
+<p>Destroys a video device selector control.</p>
+<!-- @@@~QVideoDeviceSelectorControl -->
+<!-- $$$defaultDevice[overload1]$$$defaultDevice -->
+<h3 class="fn" id="defaultDevice"><a name="defaultDevice"></a><code>[pure virtual] </code><span class="type">int</span> QVideoDeviceSelectorControl::<span class="name">defaultDevice</span>() const</h3>
+<p>Returns the index of the default video device.</p>
+<!-- @@@defaultDevice -->
+<!-- $$$deviceCount[overload1]$$$deviceCount -->
+<h3 class="fn" id="deviceCount"><a name="deviceCount"></a><code>[pure virtual] </code><span class="type">int</span> QVideoDeviceSelectorControl::<span class="name">deviceCount</span>() const</h3>
+<p>Returns the number of available video devices;</p>
+<!-- @@@deviceCount -->
+<!-- $$$deviceDescription[overload1]$$$deviceDescriptionint -->
+<h3 class="fn" id="deviceDescription"><a name="deviceDescription"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QVideoDeviceSelectorControl::<span class="name">deviceDescription</span>(<span class="type">int</span> <i>index</i>) const</h3>
+<p>Returns a description of the video device at <i>index</i>.</p>
+<!-- @@@deviceDescription -->
+<!-- $$$deviceName[overload1]$$$deviceNameint -->
+<h3 class="fn" id="deviceName"><a name="deviceName"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QVideoDeviceSelectorControl::<span class="name">deviceName</span>(<span class="type">int</span> <i>index</i>) const</h3>
+<p>Returns the name of the video device at <i>index</i>.</p>
+<!-- @@@deviceName -->
+<!-- $$$selectedDevice[overload1]$$$selectedDevice -->
+<h3 class="fn" id="selectedDevice"><a name="selectedDevice"></a><code>[pure virtual] </code><span class="type">int</span> QVideoDeviceSelectorControl::<span class="name">selectedDevice</span>() const</h3>
+<p>Returns the index of the selected video device.</p>
+<p><b>See also </b><a href="qvideodeviceselectorcontrol.html#setSelectedDevice">setSelectedDevice</a>().</p>
+<!-- @@@selectedDevice -->
+</div>
+<div class="macros">
+<h2>Macro Documentation</h2>
+<!-- $$$QCameraInfoControl_iid[overload1]$$$QCameraInfoControl_iid -->
+<h3 class="fn" id="QCameraInfoControl_iid"><a name="QCameraInfoControl_iid"></a><span class="name">QCameraInfoControl_iid</span></h3>
+<p><code>org.qt-project.qt.camerainfocontrol/5.3</code></p>
+<p>Defines the interface name of the <a href="qcamerainfocontrol.html">QCameraInfoControl</a> class.</p>
+<!-- @@@QCameraInfoControl_iid -->
+<!-- $$$QVideoDeviceSelectorControl_iid[overload1]$$$QVideoDeviceSelectorControl_iid -->
+<h3 class="fn" id="QVideoDeviceSelectorControl_iid"><a name="QVideoDeviceSelectorControl_iid"></a><span class="name">QVideoDeviceSelectorControl_iid</span></h3>
+<p><code>org.qt-project.qt.videodeviceselectorcontrol/5.0</code></p>
+<p>Defines the interface name of the <a href="qvideodeviceselectorcontrol.html">QVideoDeviceSelectorControl</a> class.</p>
+<!-- @@@QVideoDeviceSelectorControl_iid -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

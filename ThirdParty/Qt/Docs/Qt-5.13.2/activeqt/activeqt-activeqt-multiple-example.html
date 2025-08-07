@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- multiple.qdoc -->
+  <title>Multiple Example (ActiveQt) | Active Qt 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="activeqt-index.html">Active Qt</a></td><td >Multiple Example (ActiveQt)</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="activeqt-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Multiple Example (ActiveQt)</h1>
+<span class="subtitle"></span>
+<!-- $$$activeqt/multiple-brief -->
+<p>The Multiple example demonstrates the implementation of a <a href="qaxfactory.html">QAxFactory</a> to provide multiple ActiveX controls in a single in process ActiveX server using the <code>QAXFACTORY_EXPORT()</code> macro. The ActiveX controls in this example are simple <a href="../qtwidgets/qwidget.html">QWidget</a> subclasses that reimplement <a href="../qtwidgets/qwidget.html#paintEvent">QWidget::paintEvent</a>().</p>
+<!-- @@@activeqt/multiple -->
+<!-- $$$activeqt/multiple-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="keyword">class</span> QAxWidget1 : <span class="keyword">public</span> <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>
+  {
+      Q_OBJECT
+      Q_CLASSINFO(<span class="string">&quot;ClassID&quot;</span><span class="operator">,</span> <span class="string">&quot;{1D9928BD-4453-4bdd-903D-E525ED17FDE5}&quot;</span>)
+      Q_CLASSINFO(<span class="string">&quot;InterfaceID&quot;</span><span class="operator">,</span> <span class="string">&quot;{99F6860E-2C5A-42ec-87F2-43396F4BE389}&quot;</span>)
+      Q_CLASSINFO(<span class="string">&quot;EventsID&quot;</span><span class="operator">,</span> <span class="string">&quot;{0A3E9F27-E4F1-45bb-9E47-63099BCCD0E3}&quot;</span>)
+
+      Q_PROPERTY(<span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> fillColor READ fillColor WRITE setFillColor)
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> QAxWidget1(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr)
+          : <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>(parent)<span class="operator">,</span> m_fillColor(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>red)
+      {
+      }
+
+      <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> fillColor() <span class="keyword">const</span>
+      {
+          <span class="keyword">return</span> m_fillColor;
+      }
+
+      <span class="type">void</span> setFillColor(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> <span class="operator">&amp;</span>fc)
+      {
+          m_fillColor <span class="operator">=</span> fc;
+          repaint();
+      }
+
+  <span class="keyword">protected</span>:
+      <span class="type">void</span> paintEvent(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span> <span class="operator">*</span>e)
+      {
+          <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> paint(<span class="keyword">this</span>);
+          <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> r <span class="operator">=</span> rect();
+          r<span class="operator">.</span>adjust(<span class="number">10</span><span class="operator">,</span> <span class="number">10</span><span class="operator">,</span> <span class="operator">-</span><span class="number">10</span><span class="operator">,</span> <span class="operator">-</span><span class="number">10</span>);
+          paint<span class="operator">.</span>fillRect(r<span class="operator">,</span> m_fillColor);
+      }
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> m_fillColor;
+  };
+
+</pre>
+<p>The first control draws a filled rectangle. The fill color is exposed as a property. <code>Q_CLASSINFO()</code> is used to specify the COM identifiers.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> QAxWidget2 : <span class="keyword">public</span> <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>
+  {
+      Q_OBJECT
+      Q_CLASSINFO(<span class="string">&quot;ClassID&quot;</span><span class="operator">,</span> <span class="string">&quot;{58139D56-6BE9-4b17-937D-1B1EDEDD5B71}&quot;</span>)
+      Q_CLASSINFO(<span class="string">&quot;InterfaceID&quot;</span><span class="operator">,</span> <span class="string">&quot;{B66280AB-08CC-4dcc-924F-58E6D7975B7D}&quot;</span>)
+      Q_CLASSINFO(<span class="string">&quot;EventsID&quot;</span><span class="operator">,</span> <span class="string">&quot;{D72BACBA-03C4-4480-B4BB-DE4FE3AA14A0}&quot;</span>)
+      Q_CLASSINFO(<span class="string">&quot;ToSuperClass&quot;</span><span class="operator">,</span> <span class="string">&quot;QAxWidget2&quot;</span>)
+      Q_CLASSINFO(<span class="string">&quot;StockEvents&quot;</span><span class="operator">,</span> <span class="string">&quot;yes&quot;</span>)
+      Q_CLASSINFO(<span class="string">&quot;Insertable&quot;</span><span class="operator">,</span> <span class="string">&quot;yes&quot;</span>)
+
+      Q_PROPERTY(<span class="type">int</span> lineWidth READ lineWidth WRITE setLineWidth)
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> QAxWidget2(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr)
+          : <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>(parent)<span class="operator">,</span> m_lineWidth(<span class="number">1</span>)
+      {
+      }
+
+      <span class="type">int</span> lineWidth() <span class="keyword">const</span>
+      {
+          <span class="keyword">return</span> m_lineWidth;
+      }
+
+      <span class="type">void</span> setLineWidth(<span class="type">int</span> lw)
+      {
+          m_lineWidth <span class="operator">=</span> lw;
+          repaint();
+      }
+
+  <span class="keyword">protected</span>:
+      <span class="type">void</span> paintEvent(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span> <span class="operator">*</span>e)
+      {
+          <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> paint(<span class="keyword">this</span>);
+          <span class="type"><a href="../qtgui/qpen.html">QPen</a></span> pen <span class="operator">=</span> paint<span class="operator">.</span>pen();
+          pen<span class="operator">.</span>setWidth(m_lineWidth);
+          paint<span class="operator">.</span>setPen(pen);
+
+          <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> r <span class="operator">=</span> rect();
+          r<span class="operator">.</span>adjust(<span class="number">10</span><span class="operator">,</span> <span class="number">10</span><span class="operator">,</span> <span class="operator">-</span><span class="number">10</span><span class="operator">,</span> <span class="operator">-</span><span class="number">10</span>);
+          paint<span class="operator">.</span>drawEllipse(r);
+      }
+
+  <span class="keyword">private</span>:
+      <span class="type">int</span> m_lineWidth;
+  };
+
+</pre>
+<p>The second control draws a circle. The linewith is exposed as a property. <code>Q_CLASSINFO()</code> is used to specify the COM identifiers, and to set the attributes <i>ToSuperClass</i> and <i>StockEvents</i> to expose only the API of the class itself, and to add COM stock events to the ActiveX control.</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &quot;ax1.h&quot;</span>
+  <span class="preprocessor">#include &quot;ax2.h&quot;</span>
+  <span class="preprocessor">#include &lt;QAxFactory&gt;</span>
+
+  QT_USE_NAMESPACE
+
+  QAXFACTORY_BEGIN(<span class="string">&quot;{98DE28B6-6CD3-4e08-B9FA-3D1DB43F1D2F}&quot;</span><span class="operator">,</span> <span class="string">&quot;{05828915-AD1C-47ab-AB96-D6AD1E25F0E2}&quot;</span>)
+      QAXCLASS(QAxWidget1)
+      QAXCLASS(QAxWidget2)
+  QAXFACTORY_END()
+
+</pre>
+<p>The classes are exported from the server using the <a href="qaxfactory.html">QAxFactory</a> macros.</p>
+<p>To build the example you must first build the <a href="qaxserver-module.html">QAxServer</a> library. Then run <code>qmake</code> and your make tool in <code>examples/activeqt/multiple</code>.</p>
+<p>The <a href="qaxserver-demo-multiple.html">Two Simple Qt Widgets</a> demonstration requires your WebBrowser to support ActiveX controls, and scripting to be enabled.</p>
+<pre class="cpp">
+
+  <span class="operator">&lt;</span>script language<span class="operator">=</span><span class="string">&quot;javascript&quot;</span><span class="operator">&gt;</span>
+  function setColor( form )
+  {
+      Ax1<span class="operator">.</span>fillColor <span class="operator">=</span> form<span class="operator">.</span>colorEdit<span class="operator">.</span>value;
+  }
+
+  function setWidth( form )
+  {
+      Ax2<span class="operator">.</span>lineWidth <span class="operator">=</span> form<span class="operator">.</span>widthEdit<span class="operator">.</span>value;
+  }
+  <span class="operator">&lt;</span><span class="operator">/</span>script<span class="operator">&gt;</span>
+
+  <span class="operator">&lt;</span>p <span class="operator">/</span><span class="operator">&gt;</span>
+  This is one <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> subclass:<span class="operator">&lt;</span>br <span class="operator">/</span><span class="operator">&gt;</span>
+  <span class="operator">&lt;</span>object ID<span class="operator">=</span><span class="string">&quot;Ax1&quot;</span> CLASSID<span class="operator">=</span><span class="string">&quot;CLSID:1D9928BD-4453-4bdd-903D-E525ED17FDE5&quot;</span>
+  CODEBASE<span class="operator">=</span><span class="string">&quot;http://qt.nokia.com/demos/multipleax.cab&quot;</span><span class="operator">&gt;</span>
+  <span class="operator">[</span>Object <span class="keyword">not</span> available<span class="operator">!</span> Did you forget to build and <span class="keyword">register</span> the server<span class="operator">?</span><span class="operator">]</span>
+  <span class="operator">&lt;</span><span class="operator">/</span>object<span class="operator">&gt;</span><span class="operator">&lt;</span>br <span class="operator">/</span><span class="operator">&gt;</span>
+  <span class="operator">&lt;</span>form<span class="operator">&gt;</span>
+  Fill Color: <span class="operator">&lt;</span>input type<span class="operator">=</span><span class="string">&quot;edit&quot;</span> ID<span class="operator">=</span><span class="string">&quot;colorEdit&quot;</span> value <span class="operator">=</span> <span class="string">&quot;red&quot;</span> <span class="operator">/</span><span class="operator">&gt;</span>
+  <span class="operator">&lt;</span>input type<span class="operator">=</span><span class="string">&quot;button&quot;</span> value <span class="operator">=</span> <span class="string">&quot;Set&quot;</span> onClick<span class="operator">=</span><span class="string">&quot;setColor(this.form)&quot;</span> <span class="operator">/</span><span class="operator">&gt;</span>
+  <span class="operator">&lt;</span>input type<span class="operator">=</span><span class="string">&quot;button&quot;</span> value <span class="operator">=</span> <span class="string">&quot;Hide&quot;</span> onClick<span class="operator">=</span><span class="string">&quot;Ax1.hide()&quot;</span> <span class="operator">/</span><span class="operator">&gt;</span>
+  <span class="operator">&lt;</span>input type<span class="operator">=</span><span class="string">&quot;button&quot;</span> value <span class="operator">=</span> <span class="string">&quot;Show&quot;</span> onClick<span class="operator">=</span><span class="string">&quot;Ax1.show()&quot;</span> <span class="operator">/</span><span class="operator">&gt;</span>
+  <span class="operator">&lt;</span><span class="operator">/</span>form<span class="operator">&gt;</span>
+
+  <span class="operator">&lt;</span>p <span class="operator">/</span><span class="operator">&gt;</span>
+  This is another <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> subclass:<span class="operator">&lt;</span>br <span class="operator">/</span><span class="operator">&gt;</span>
+  <span class="operator">&lt;</span>object ID<span class="operator">=</span><span class="string">&quot;Ax2&quot;</span> CLASSID<span class="operator">=</span><span class="string">&quot;CLSID:58139D56-6BE9-4b17-937D-1B1EDEDD5B71&quot;</span>
+  CODEBASE<span class="operator">=</span><span class="string">&quot;http://qt.nokia.com/demos/multipleax.cab&quot;</span><span class="operator">&gt;</span>
+  <span class="operator">[</span>Object <span class="keyword">not</span> available<span class="operator">!</span> Did you forget to build and <span class="keyword">register</span> the server<span class="operator">?</span><span class="operator">]</span>
+  <span class="operator">&lt;</span><span class="operator">/</span>object<span class="operator">&gt;</span><span class="operator">&lt;</span>br <span class="operator">/</span><span class="operator">&gt;</span>
+  <span class="operator">&lt;</span>form<span class="operator">&gt;</span>
+  Line width: <span class="operator">&lt;</span>input type<span class="operator">=</span><span class="string">&quot;edit&quot;</span> ID<span class="operator">=</span><span class="string">&quot;widthEdit&quot;</span> value <span class="operator">=</span> <span class="string">&quot;1&quot;</span> <span class="operator">/</span><span class="operator">&gt;</span>
+  <span class="operator">&lt;</span>input type<span class="operator">=</span><span class="string">&quot;button&quot;</span> value <span class="operator">=</span> <span class="string">&quot;Set&quot;</span> onClick<span class="operator">=</span><span class="string">&quot;setWidth(this.form)&quot;</span> <span class="operator">/</span><span class="operator">&gt;</span>
+  <span class="operator">&lt;</span><span class="operator">/</span>form<span class="operator">&gt;</span>
+
+</pre>
+<p><a href="https://code.qt.io/cgit/qt/qtactiveqt.git/tree/examples/activeqt/multiple?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@activeqt/multiple -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

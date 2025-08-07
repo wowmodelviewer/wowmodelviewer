@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- basictypes.qdoc -->
+  <title>variant QML Basic Type | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td ><a href="qtqml-qmlmodule.html">QML Types</a></td><td >variant QML Basic Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#using-scarce-resources-with-the-variant-type">Using Scarce Resources with the variant Type</a></li>
+<li class="level1"><a href="#storing-arrays-and-objects">Storing Arrays and Objects</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">variant QML Basic Type</h1>
+<span class="subtitle"></span>
+<!-- $$$variant-description -->
+<div class="descr"> <a name="details"></a>
+<p>The <code>variant</code> type is a generic property type. It is obsolete and exists only to support old applications; new applications should use <a href="qml-var.html">var</a> type properties instead.</p>
+<p>A variant type property can hold any of the <a href="qtqml-typesystem-basictypes.html">basic type</a> values:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      property <span class="type"><a href="qml-variant.html">variant</a></span> <span class="name">aNumber</span>: <span class="number">100</span>
+      property <span class="type"><a href="qml-variant.html">variant</a></span> <span class="name">aString</span>: <span class="string">&quot;Hello world!&quot;</span>
+      property <span class="type"><a href="qml-variant.html">variant</a></span> <span class="name">aBool</span>: <span class="number">false</span>
+  }
+
+</pre>
+<p>When integrating with C++, note that any <a href="../qtcore/qvariant.html">QVariant</a> value <a href="qtqml-cppintegration-data.html">passed into QML from C++</a> is automatically converted into a <code>variant</code> value, and vice-versa.</p>
+<a name="using-scarce-resources-with-the-variant-type"></a>
+<h2 id="using-scarce-resources-with-the-variant-type">Using Scarce Resources with the variant Type</h2>
+<p>A <code>variant</code> type property can also hold an image or pixmap. A <code>variant</code> which contains a <a href="../qtgui/qpixmap.html">QPixmap</a> or <a href="../qtgui/qimage.html">QImage</a> is known as a &quot;scarce resource&quot; and the declarative engine will attempt to automatically release such resources after evaluation of any JavaScript expression which requires one to be copied has completed.</p>
+<p>Clients may explicitly release such a scarce resource by calling the &quot;destroy&quot; method on the <code>variant</code> property from within JavaScript. They may also explicitly preserve the scarce resource by calling the &quot;preserve&quot; method on the <code>variant</code> property from within JavaScript.</p>
+<a name="storing-arrays-and-objects"></a>
+<h2 id="storing-arrays-and-objects">Storing Arrays and Objects</h2>
+<p>The <code>variant</code> type can also hold:</p>
+<ul>
+<li>An array of <a href="qtqml-typesystem-basictypes.html">basic type</a> values</li>
+<li>A map of key-value pairs with <a href="qtqml-typesystem-basictypes.html">basic-type</a> values</li>
+</ul>
+<p>For example, below is an <code>items</code> array and an <code>attributes</code> map. Their contents can be examined using JavaScript <code>for</code> loops. Individual array values are accessible by index, and individual map values are accessible by key:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      property <span class="type"><a href="qml-variant.html">variant</a></span> <span class="name">items</span>: [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="string">&quot;four&quot;</span>, <span class="string">&quot;five&quot;</span>]
+      property <span class="type"><a href="qml-variant.html">variant</a></span> <span class="name">attributes</span>: { 'color': <span class="string">'red'</span>, 'width': <span class="number">100</span> }
+
+      <span class="name">Component</span>.onCompleted: {
+          <span class="keyword">for</span> (var i = 0; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">items</span>.<span class="name">length</span>; i++)
+              <span class="name">console</span>.<span class="name">log</span>(<span class="name">items</span>[<span class="name">i</span>])
+
+          <span class="keyword">for</span> (var prop in <span class="name">attributes</span>)
+              <span class="name">console</span>.<span class="name">log</span>(<span class="name">prop</span>, <span class="string">&quot;=&quot;</span>, <span class="name">attributes</span>[<span class="name">prop</span>])
+      }
+  }
+
+</pre>
+<p>While this is a convenient way to store array and map-type values, you must be aware that the <code>items</code> and <code>attributes</code> properties above are <i>not</i> QML objects (and certainly not JavaScript object either) and the key-value pairs in <code>attributes</code> are <i>not</i> QML properties. Rather, the <code>items</code> property holds an array of values, and <code>attributes</code> holds a set of key-value pairs. Since they are stored as a set of values, instead of as an object, their contents <i>cannot</i> be modified individually:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      property <span class="type"><a href="qml-variant.html">variant</a></span> <span class="name">items</span>: [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="string">&quot;four&quot;</span>, <span class="string">&quot;five&quot;</span>]
+      property <span class="type"><a href="qml-variant.html">variant</a></span> <span class="name">attributes</span>: { 'color': <span class="string">'red'</span>, 'width': <span class="number">100</span> }
+
+      <span class="name">Component</span>.onCompleted: {
+          <span class="name">items</span>[<span class="number">0</span>] <span class="operator">=</span> <span class="number">10</span>
+          <span class="name">console</span>.<span class="name">log</span>(<span class="name">items</span>[<span class="number">0</span>])     <span class="comment">// This will still be '1'!</span>
+          <span class="name">attributes</span>.<span class="name">color</span> <span class="operator">=</span> <span class="string">'blue'</span>
+          <span class="name">console</span>.<span class="name">log</span>(<span class="name">attributes</span>.<span class="name">color</span>)     <span class="comment">// This will still be 'red'!</span>
+      }
+  }
+
+</pre>
+<p>Since it is not possible to individually add or remove items from a list or object stored in a <code>variant</code>, the only way to modify its contents is to reassign a new value. However, this is not efficient, as it causes the value to be serialized and deserialized.</p>
+<p>Additionally, since <code>items</code> and <code>attributes</code> are not QML objects, changing their individual values do not trigger property change notifications. If the above example had <code>onNumberChanged</code> or <code>onAnimalChanged</code> signal handlers, they would not have been called. If, however, the <code>items</code> or <code>attributes</code> properties themselves were reassigned to different values, then such handlers would be called.</p>
+<p>JavaScript programmers should also note that when a JavaScript object is copied to an array or map property, the <i>contents</i> of the object (that is, its key-value properties) are copied, rather than the object itself. The property does not hold a reference to the original JavaScript object, and extra data such as the object's JavaScript prototype chain is also lost in the process.</p>
+<p>This basic type is provided by the QML language.</p>
+</div>
+<p><b>See also </b><a href="qtqml-typesystem-basictypes.html">QML Basic Types</a>.</p>
+<!-- @@@variant -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

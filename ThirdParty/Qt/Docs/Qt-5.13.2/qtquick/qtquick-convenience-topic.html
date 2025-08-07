@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- topic.qdoc -->
+  <title>Important Concepts In Qt Quick - Convenience Types | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td >Important Concepts In Qt Quick - Convenience Types</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#dynamic-object-instantiation">Dynamic Object Instantiation</a></li>
+<li class="level1"><a href="#dynamic-bindings">Dynamic Bindings</a></li>
+<li class="level1"><a href="#dynamic-signal-connections">Dynamic Signal Connections</a></li>
+<li class="level1"><a href="#timer-based-events">Timer-Based Events</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Important Concepts In Qt Quick - Convenience Types</h1>
+<span class="subtitle"></span>
+<!-- $$$qtquick-convenience-topic.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>In a highly dynamic user interface, the application developer will often wish to react to events and trigger various response logic. QML has built-in support for these concepts through bindings, signals and signal handlers, and dynamic object instantiation, but Qt Quick expands upon the support provided by the language with various convenience types.</p>
+<a name="dynamic-object-instantiation"></a>
+<h2 id="dynamic-object-instantiation">Dynamic Object Instantiation</h2>
+<p>QML provides a number of ways to dynamically create and manage QML objects.</p>
+<p>Objects can be created dynamically from within imperative JavaScript code in various ways. See <a href="../qtqml/qtqml-javascript-dynamicobjectcreation.html">Dynamic QML object creation from JavaScript</a> for more details.</p>
+<p>Qt Quick provides the <a href="qml-qtquick-loader.html">Loader</a>, <a href="qml-qtquick-repeater.html">Repeater</a>, <a href="qml-qtquick-listview.html">ListView</a>, <a href="qml-qtquick-gridview.html">GridView</a> and <a href="qml-qtquick-pathview.html">PathView</a> types which also support dynamic object management, and provide a declarative API.</p>
+<p>Please see the <a href="../qtdoc/qtquick-performance.html">performance guide</a> for more information on using dynamic instantiation and lazy initialization to improve application performance.</p>
+<a name="dynamic-bindings"></a>
+<h2 id="dynamic-bindings">Dynamic Bindings</h2>
+<p><a href="../qtqml/qtqml-syntax-propertybinding.html">Property bindings</a> are a fundamental feature of QML. Typically, a property is initialized with its binding. However, the <a href="../qtqml/qml-qtqml-binding.html">Binding</a> type and <a href="../qtqml/qml-qtqml-qt.html#binding-method">Qt.binding()</a> function allows the client to dynamically bind properties from any object at run-time, and modify the binding target when required (or when it becomes available).</p>
+<a name="dynamic-signal-connections"></a>
+<h2 id="dynamic-signal-connections">Dynamic Signal Connections</h2>
+<p>QML supports dynamic signal connections through a signal's <code>connect()</code> method. The <a href="qtquick-index.html">Qt Quick</a> module provides the convenience <a href="../qtqml/qml-qtqml-connections.html">Connections</a> type which allows setting up a signal connection involving an object which isn't part of the static object hierarchy. It also allows the connection to be dynamically retargeted at runtime, which allows an application to process different signal notifications with different functions depending on the program state.</p>
+<p>By declaring a <a href="../qtqml/qml-qtqml-connections.html">Connections</a> instance, the client can dynamically cause signals emitted by one object to trigger methods of another object, and can modify the connection target when required (or when it becomes available).</p>
+<a name="timer-based-events"></a>
+<h2 id="timer-based-events">Timer-Based Events</h2>
+<p>Another common use-case is to trigger functionality some specified period of time after a particular event occurs. These sort of timer-based triggers are supported in Qt Quick through the <a href="../qtqml/qml-qtqml-timer.html">Timer</a> type. Both single-shot and recurring timers are supported.</p>
+</div>
+<!-- @@@qtquick-convenience-topic.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

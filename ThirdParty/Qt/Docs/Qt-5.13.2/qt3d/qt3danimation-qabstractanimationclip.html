@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qabstractanimationclip.cpp -->
+  <title>QAbstractAnimationClip Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QAbstractAnimationClip</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAbstractAnimationClip Class</h1>
+<span class="small-subtitle">(<a href="qt3danimation-qabstractanimationclip.html">Qt3DAnimation::QAbstractAnimationClip</a>)<br/></span>
+<!-- $$$QAbstractAnimationClip-brief -->
+<p><a href="qt3danimation-qabstractanimationclip.html">QAbstractAnimationClip</a> is the base class for types providing key frame animation data. <a href="#details">More...</a></p>
+<!-- @@@QAbstractAnimationClip -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAbstractAnimationClip&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3danimation</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.9</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qt3danimation-qanimationcliploader.html">Qt3DAnimation::QAnimationClipLoader</a></p>
+</td></tr></table></div><p>This class was introduced in  Qt 5.9.</p>
+<ul>
+<li><a href="qt3danimation-qabstractanimationclip-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qt3danimation-qabstractanimationclip.html#duration-prop">duration</a></b> : const float</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qabstractanimationclip.html#dtor.QAbstractAnimationClip">~QAbstractAnimationClip</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> float </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qabstractanimationclip.html#duration-prop">duration</a></b>() const</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3danimation-qabstractanimationclip.html#duration-prop">durationChanged</a></b>(float <i>duration</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAbstractAnimationClip-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>To utilise the key frame animation framework in the Qt 3D Animation module the animator component in use needs to be provided with the key frame animation data. The animation data is provided by one of the concrete subclasses of <a href="qt3danimation-qabstractanimationclip.html">QAbstractAnimationClip</a>:</p>
+<ul>
+<li>Qt3DAnimation::QAnimationClip</li>
+<li><a href="qt3danimation-qanimationcliploader.html">Qt3DAnimation::QAnimationClipLoader</a></li>
+</ul>
+<p>QAnimationClip should be used when you want to create the animation data programmatically within your application. The actual data is set with a QAnimationClipData value type.</p>
+<p>If you are loading baked animation data from a file, e.g&#x2e; as created by an artist, then use the <a href="qt3danimation-qanimationcliploader.html">QAnimationClipLoader</a> class and set its <code>source</code> property.</p>
+<p>Once the animation clip has been populated with data using the above methods, the read-only duration property will be updated by the Qt 3D Animation backend.</p>
+<p>The typical usage of animation clips is:</p>
+<pre class="cpp">
+
+  <span class="keyword">auto</span> animator <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3danimation-qclipanimator.html">QClipAnimator</a></span>();
+  <span class="keyword">auto</span> clip <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3danimation-qanimationcliploader.html">QAnimationClipLoader</a></span>();
+  clip<span class="operator">-</span><span class="operator">&gt;</span>setSource(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>fromLocalFile(<span class="string">&quot;bounce.json&quot;</span>));
+  animator<span class="operator">-</span><span class="operator">&gt;</span>setClip(clip);
+  animator<span class="operator">-</span><span class="operator">&gt;</span>setChannelMapper(<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>);
+  animator<span class="operator">-</span><span class="operator">&gt;</span>setRunning(<span class="keyword">true</span>);
+
+</pre>
+<p>Animation clips are also used as the leaf node values in animation blend trees:</p>
+<pre class="cpp">
+
+  <span class="comment">// Create leaf nodes of blend tree</span>
+  <span class="keyword">auto</span> slideClipValue <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QClipBlendValue</span>(
+      <span class="keyword">new</span> <span class="type"><a href="qt3danimation-qanimationcliploader.html">QAnimationClipLoader</a></span>(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>fromLocalFile(<span class="string">&quot;slide.json&quot;</span>)));
+  <span class="keyword">auto</span> bounceClipValue <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QClipBlendValue</span>(
+      <span class="keyword">new</span> <span class="type"><a href="qt3danimation-qanimationcliploader.html">QAnimationClipLoader</a></span>(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>fromLocalFile(<span class="string">&quot;bounce.json&quot;</span>)));
+
+  <span class="comment">// Create blend tree inner node</span>
+  <span class="keyword">auto</span> additiveNode <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3danimation-qadditiveclipblend.html">QAdditiveClipBlend</a></span>();
+  additiveNode<span class="operator">-</span><span class="operator">&gt;</span>setBaseClip(slideClipValue);
+  additiveNode<span class="operator">-</span><span class="operator">&gt;</span>setAdditiveClip(bounceClipValue);
+  additiveNode<span class="operator">-</span><span class="operator">&gt;</span>setAdditiveFactor(<span class="number">0.5f</span>);
+
+  <span class="comment">// Run the animator</span>
+  <span class="keyword">auto</span> animator <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3danimation-qblendedclipanimator.html">QBlendedClipAnimator</a></span>();
+  animator<span class="operator">-</span><span class="operator">&gt;</span>setBlendTree(additiveNode);
+  animator<span class="operator">-</span><span class="operator">&gt;</span>setChannelMapper(<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>);
+  animator<span class="operator">-</span><span class="operator">&gt;</span>setRunning(<span class="keyword">true</span>);
+
+</pre>
+</div>
+<p><b>See also </b>QAnimationClip and <a href="qt3danimation-qanimationcliploader.html">QAnimationClipLoader</a>.</p>
+<!-- @@@QAbstractAnimationClip -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$duration-prop$$$duration$$$durationChangedfloat -->
+<h3 class="fn" id="duration-prop"><a name="duration-prop"></a><span class="name">duration</span> : const <span class="type">float</span></h3>
+<p>Holds the duration of the animation clip in seconds. Gets updated once the animation data is provided to Qt 3D using one of the concrete subclasses.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> float </td><td class="memItemRight bottomAlign"><span class="name"><b>duration</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>durationChanged</b></span>(float <i>duration</i>)</td></tr>
+</table></div>
+<!-- @@@duration -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$~QAbstractAnimationClip[overload1]$$$~QAbstractAnimationClip -->
+<h3 class="fn" id="dtor.QAbstractAnimationClip"><a name="dtor.QAbstractAnimationClip"></a><code>[virtual] </code>QAbstractAnimationClip::<span class="name">~QAbstractAnimationClip</span>()</h3>
+<p>Destroys this animation clip.</p>
+<!-- @@@~QAbstractAnimationClip -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

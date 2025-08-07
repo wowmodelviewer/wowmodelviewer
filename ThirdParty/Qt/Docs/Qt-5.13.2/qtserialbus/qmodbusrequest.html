@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmodbuspdu.cpp -->
+  <title>QModbusRequest Class | Qt Serial Bus 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtserialbus-index.html">Qt Serial Bus</a></td><td ><a href="qtserialbus-module.html">C++ Classes</a></td><td >QModbusRequest</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtserialbus-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QModbusRequest Class</h1>
+<!-- $$$QModbusRequest-brief -->
+<p><a href="qmodbusrequest.html">QModbusRequest</a> is a container class containing the function code and payload that is stored inside a Modbus ADU. <a href="#details">More...</a></p>
+<!-- @@@QModbusRequest -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QModbusRequest&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += serialbus</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qmodbuspdu.html">QModbusPdu</a></td></tr></table></div><p>This class was introduced in  Qt 5.8.</p>
+<ul>
+<li><a href="qmodbusrequest-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qmodbusrequest.html#CalcFuncPtr-typedef">CalcFuncPtr</a></b></td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmodbusrequest.html#QModbusRequest-3">QModbusRequest</a></b>(QModbusPdu::FunctionCode <i>code</i>, Args... <i>data</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmodbusrequest.html#QModbusRequest-2">QModbusRequest</a></b>(QModbusPdu::FunctionCode <i>code</i>, const QByteArray &amp;<i>data</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmodbusrequest.html#QModbusRequest-1">QModbusRequest</a></b>(const QModbusPdu &amp;<i>pdu</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmodbusrequest.html#QModbusRequest">QModbusRequest</a></b>()</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmodbusrequest.html#calculateDataSize">calculateDataSize</a></b>(const QModbusRequest &amp;<i>request</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmodbusrequest.html#minimumDataSize">minimumDataSize</a></b>(const QModbusRequest &amp;<i>request</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmodbusrequest.html#registerDataSizeCalculator">registerDataSizeCalculator</a></b>(QModbusPdu::FunctionCode <i>fc</i>, QModbusRequest::CalcFuncPtr <i>calculator</i>)</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QDataStream &amp;</td><td class="memItemRight bottomAlign"><b><a href="qmodbusrequest.html#operator-gt-gt">operator&gt;&gt;</a></b>(QDataStream &amp;<i>stream</i>, QModbusRequest &amp;<i>pdu</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QModbusRequest-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A Modbus request usually consists of a single byte describing the <code>FunctionCode</code> and N bytes of payload</p>
+<p>A typical Modbus request can looks like this:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qmodbusrequest.html#QModbusRequest">QModbusRequest</a></span> request(<span class="type"><a href="qmodbusrequest.html#QModbusRequest">QModbusRequest</a></span><span class="operator">::</span>WriteMultipleCoils<span class="operator">,</span>
+      <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">::</span>fromHex(<span class="string">&quot;0013000a02cd01&quot;</span>));
+
+</pre>
+<p><b>Note: </b>When using the constructor taking the <code>QByteArray</code>, please make sure to convert the containing data to big-endian byte order before creating the request.</p><p>The same request can be created like this, if the values are known at compile time:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> startAddress <span class="operator">=</span> <span class="number">19</span><span class="operator">,</span> numberOfCoils <span class="operator">=</span> <span class="number">10</span>;
+  <span class="type"><a href="../qtcore/qtglobal.html#quint8-typedef">quint8</a></span> payloadInBytes <span class="operator">=</span> <span class="number">2</span><span class="operator">,</span> outputHigh <span class="operator">=</span> <span class="number">0xcd</span><span class="operator">,</span> outputLow <span class="operator">=</span> <span class="number">0x01</span>;
+  <span class="type"><a href="qmodbusrequest.html#QModbusRequest">QModbusRequest</a></span> request(<span class="type"><a href="qmodbusrequest.html#QModbusRequest">QModbusRequest</a></span><span class="operator">::</span>WriteMultipleCoils<span class="operator">,</span> startAddress<span class="operator">,</span> numberOfCoils<span class="operator">,</span>
+      payloadInBytes<span class="operator">,</span> outputHigh<span class="operator">,</span> outputLow);
+
+</pre>
+</div>
+<!-- @@@QModbusRequest -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$CalcFuncPtr -->
+<h3 class="fn" id="CalcFuncPtr-typedef"><a name="CalcFuncPtr-typedef"></a>typedef QModbusRequest::<span class="name">CalcFuncPtr</span></h3>
+<p>Typedef for a pointer to a custom calculator function with the same signature as <a href="qmodbusrequest.html#calculateDataSize">QModbusRequest::calculateDataSize</a>.</p>
+<!-- @@@CalcFuncPtr -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QModbusRequest$$$QModbusRequestQModbusPdu::FunctionCodeArgs... -->
+<h3 class="fn" id="QModbusRequest-3"><a name="QModbusRequest-3"></a>QModbusRequest::<span class="name">QModbusRequest</span>(<span class="type"><a href="qmodbuspdu.html#FunctionCode-enum">QModbusPdu::FunctionCode</a></span> <i>code</i>, <span class="type">Args</span>... <i>data</i>)</h3>
+<p>Constructs a <a href="qmodbusrequest.html">QModbusRequest</a> with function code set to <i>code</i> and payload set to <i>data</i>. The data is converted and stored in big-endian byte order.</p>
+<p><b>Note: </b>Usage is limited <code>quint8</code> and <code>quint16</code> only. This is because <code>QDataStream</code> stream operators will not only append raw data, but also e.g&#x2e; size, count, etc. for complex types.</p><!-- @@@QModbusRequest -->
+<!-- $$$QModbusRequest$$$QModbusRequestQModbusPdu::FunctionCodeconstQByteArray& -->
+<h3 class="fn" id="QModbusRequest-2"><a name="QModbusRequest-2"></a>QModbusRequest::<span class="name">QModbusRequest</span>(<span class="type"><a href="qmodbuspdu.html#FunctionCode-enum">QModbusPdu::FunctionCode</a></span> <i>code</i>, const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>data</i> = ...)</h3>
+<p>Constructs a <a href="qmodbusresponse.html">QModbusResponse</a> with function code set to <i>code</i> and payload set to <i>data</i>. The data is expected to be stored in big-endian byte order already.</p>
+<!-- @@@QModbusRequest -->
+<!-- $$$QModbusRequest$$$QModbusRequestconstQModbusPdu& -->
+<h3 class="fn" id="QModbusRequest-1"><a name="QModbusRequest-1"></a>QModbusRequest::<span class="name">QModbusRequest</span>(const <span class="type"><a href="qmodbuspdu.html#QModbusPdu">QModbusPdu</a></span> &amp;<i>pdu</i>)</h3>
+<p>Constructs a copy of <i>pdu</i>.</p>
+<!-- @@@QModbusRequest -->
+<!-- $$$QModbusRequest[overload1]$$$QModbusRequest -->
+<h3 class="fn" id="QModbusRequest"><a name="QModbusRequest"></a>QModbusRequest::<span class="name">QModbusRequest</span>()</h3>
+<p>Constructs an invalid <a href="qmodbusrequest.html">QModbusRequest</a>.</p>
+<!-- @@@QModbusRequest -->
+<!-- $$$calculateDataSize[overload1]$$$calculateDataSizeconstQModbusRequest& -->
+<h3 class="fn" id="calculateDataSize"><a name="calculateDataSize"></a><code>[static] </code><span class="type">int</span> QModbusRequest::<span class="name">calculateDataSize</span>(const <span class="type"><a href="qmodbusrequest.html#QModbusRequest">QModbusRequest</a></span> &amp;<i>request</i>)</h3>
+<p>Calculates the expected data size for <i>request</i> based on the request's function code and data. Returns the full size of the request's data part; <code>-1</code> if the size could not be properly calculated.</p>
+<p><b>See also </b><a href="qmodbusrequest.html#minimumDataSize">minimumDataSize</a> and <a href="qmodbusrequest.html#registerDataSizeCalculator">registerDataSizeCalculator</a>.</p>
+<!-- @@@calculateDataSize -->
+<!-- $$$minimumDataSize[overload1]$$$minimumDataSizeconstQModbusRequest& -->
+<h3 class="fn" id="minimumDataSize"><a name="minimumDataSize"></a><code>[static] </code><span class="type">int</span> QModbusRequest::<span class="name">minimumDataSize</span>(const <span class="type"><a href="qmodbusrequest.html#QModbusRequest">QModbusRequest</a></span> &amp;<i>request</i>)</h3>
+<p>Returns the expected minimum data size for <i>request</i> based on the request's function code; <code>-1</code> if the function code is not known.</p>
+<!-- @@@minimumDataSize -->
+<!-- $$$registerDataSizeCalculator[overload1]$$$registerDataSizeCalculatorQModbusPdu::FunctionCodeQModbusRequest::CalcFuncPtr -->
+<h3 class="fn" id="registerDataSizeCalculator"><a name="registerDataSizeCalculator"></a><code>[static] </code><span class="type">void</span> QModbusRequest::<span class="name">registerDataSizeCalculator</span>(<span class="type"><a href="qmodbuspdu.html#FunctionCode-enum">QModbusPdu::FunctionCode</a></span> <i>fc</i>, <span class="type"><a href="qmodbusrequest.html#CalcFuncPtr-typedef">QModbusRequest::CalcFuncPtr</a></span> <i>calculator</i>)</h3>
+<p>This function registers a user-defined implementation to calculate the request data size for function code <i>fc</i>. It can be used to extend or override the implementation inside <a href="qmodbusrequest.html#calculateDataSize">QModbusRequest::calculateDataSize</a>().</p>
+<p>The <code>CalcFuncPtr</code> is a typedef for a pointer to a custom <i>calculator</i> function with the following signature:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> myCalculateDataSize(<span class="keyword">const</span> <span class="type"><a href="qmodbusrequest.html#QModbusRequest">QModbusRequest</a></span> <span class="operator">&amp;</span>pdu);
+
+</pre>
+<!-- @@@registerDataSizeCalculator -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$operator>>[overload1]$$$operator>>QDataStream&QModbusRequest& -->
+<h3 class="fn" id="operator-gt-gt"><a name="operator-gt-gt"></a><span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> &amp;<span class="name">operator&gt;&gt;</span>(<span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> &amp;<i>stream</i>, <span class="type"><a href="qmodbusrequest.html#QModbusRequest">QModbusRequest</a></span> &amp;<i>pdu</i>)</h3>
+<p>Reads a <i>pdu</i> from the <i>stream</i> and returns a reference to the stream.</p>
+<p><b>Note: </b>The function might fail to properly stream PDU's with function code <a href="qmodbuspdu.html#FunctionCode-enum">QModbusPdu::Diagnostics</a> or <a href="qmodbuspdu.html#FunctionCode-enum">QModbusPdu::EncapsulatedInterfaceTransport</a> because of the missing size indicator inside the PDU. In particular this may happen when the PDU is embedded into a stream that doesn't end with the diagnostic/encapsulated request itself.</p><!-- @@@operator>> -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

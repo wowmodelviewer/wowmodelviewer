@@ -1,0 +1,38 @@
+{
+    "version": 1,
+    "supportedProjectTypes": [ ],
+    "id": "F.EmptyText",
+    "category": "U.General",
+    "trDescription": "Creates an empty file.",
+    "trDisplayName": "Empty File",
+    "trDisplayCategory": "General",
+    "iconText": "txt",
+    "platformIndependent": true,
+    "enabled": "%{JS: value('Plugins').indexOf('TextEditor') >= 0}",
+
+    "pages" :
+    [
+        {
+            "trDisplayName": "Location",
+            "trShortTitle": "Location",
+            "typeId": "File"
+        },
+        {
+            "trDisplayName": "Project Management",
+            "trShortTitle": "Summary",
+            "typeId": "Summary"
+        }
+    ],
+    "generators" :
+    [
+        {
+            "typeId": "File",
+            "data":
+            {
+                "source": "file.txt",
+                "target": "%{TargetPath}",
+                "openInEditor": true
+            }
+        }
+    ]
+}

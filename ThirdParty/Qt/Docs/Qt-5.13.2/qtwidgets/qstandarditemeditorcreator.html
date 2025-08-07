@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qitemeditorfactory.cpp -->
+  <title>QStandardItemEditorCreator Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QStandardItemEditorCreator</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QStandardItemEditorCreator Class</h1>
+<!-- $$$QStandardItemEditorCreator-brief -->
+<p>The <a href="qstandarditemeditorcreator.html">QStandardItemEditorCreator</a> class provides the possibility to register widgets without having to subclass <a href="qitemeditorcreatorbase.html">QItemEditorCreatorBase</a>. <a href="#details">More...</a></p>
+<!-- @@@QStandardItemEditorCreator -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QStandardItemEditorCreator&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.2</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qitemeditorcreatorbase.html">QItemEditorCreatorBase</a></td></tr></table></div><p>This class was introduced in  Qt 4.2.</p>
+<ul>
+<li><a href="qstandarditemeditorcreator-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstandarditemeditorcreator.html#QStandardItemEditorCreator">QStandardItemEditorCreator</a></b>()</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QWidget *</td><td class="memItemRight bottomAlign"><b><a href="qstandarditemeditorcreator.html#createWidget">createWidget</a></b>(QWidget *<i>parent</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qstandarditemeditorcreator.html#valuePropertyName">valuePropertyName</a></b>() const override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QStandardItemEditorCreator-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This convenience template class makes it possible to register widgets without having to subclass <a href="qitemeditorcreatorbase.html">QItemEditorCreatorBase</a>.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qitemeditorfactory.html">QItemEditorFactory</a></span> <span class="operator">*</span>editorFactory <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qitemeditorfactory.html">QItemEditorFactory</a></span>;
+  <span class="type"><a href="qitemeditorcreatorbase.html">QItemEditorCreatorBase</a></span> <span class="operator">*</span>creator <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qstandarditemeditorcreator.html#QStandardItemEditorCreator">QStandardItemEditorCreator</a></span><span class="operator">&lt;</span>MyFancyDateTimeEdit<span class="operator">&gt;</span>();
+  editorFactory<span class="operator">-</span><span class="operator">&gt;</span>registerEditor(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>DateType<span class="operator">,</span> creator);
+
+</pre>
+<p>Setting the <code>editorFactory</code> created above in an item delegate via <a href="qstyleditemdelegate.html#setItemEditorFactory">QStyledItemDelegate::setItemEditorFactory</a>() makes sure that all values of type QVariant::DateTime will be edited in <code>MyFancyDateTimeEdit</code>.</p>
+<p>The editor must provide a user property that will contain the editing data. The property is used by <a href="qstyleditemdelegate.html">QStyledItemDelegate</a>s to set and retrieve the data (using Qt's <a href="../qtcore/metaobjects.html">meta-object system</a>). You set the user property with the USER keyword:</p>
+<pre class="cpp">
+
+  Q_PROPERTY(<span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> color READ color WRITE setColor USER <span class="keyword">true</span>)
+
+</pre>
+</div>
+<p><b>See also </b><a href="qitemeditorcreatorbase.html">QItemEditorCreatorBase</a>, <a href="qitemeditorcreator.html">QItemEditorCreator</a>, <a href="qitemeditorfactory.html">QItemEditorFactory</a>, <a href="qstyleditemdelegate.html">QStyledItemDelegate</a>, and <a href="qtwidgets-itemviews-coloreditorfactory-example.html">Color Editor Factory Example</a>.</p>
+<!-- @@@QStandardItemEditorCreator -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QStandardItemEditorCreator[overload1]$$$QStandardItemEditorCreator -->
+<h3 class="fn" id="QStandardItemEditorCreator"><a name="QStandardItemEditorCreator"></a>QStandardItemEditorCreator::<span class="name">QStandardItemEditorCreator</span>()</h3>
+<p>Constructs an editor creator object.</p>
+<!-- @@@QStandardItemEditorCreator -->
+<!-- $$$createWidget[overload1]$$$createWidgetQWidget* -->
+<h3 class="fn" id="createWidget"><a name="createWidget"></a><code>[override virtual] </code><span class="type"><a href="qwidget.html">QWidget</a></span> *QStandardItemEditorCreator::<span class="name">createWidget</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>parent</i>) const</h3>
+<p>Reimplements: <a href="qitemeditorcreatorbase.html#createWidget">QItemEditorCreatorBase::createWidget</a>(QWidget *parent) const.</p>
+<!-- @@@createWidget -->
+<!-- $$$valuePropertyName[overload1]$$$valuePropertyName -->
+<h3 class="fn" id="valuePropertyName"><a name="valuePropertyName"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> QStandardItemEditorCreator::<span class="name">valuePropertyName</span>() const</h3>
+<p>Reimplements: <a href="qitemeditorcreatorbase.html#valuePropertyName">QItemEditorCreatorBase::valuePropertyName</a>() const.</p>
+<!-- @@@valuePropertyName -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

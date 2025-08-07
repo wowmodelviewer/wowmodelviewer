@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- customwidgetplugin.qdoc -->
+  <title>Custom Widget Plugin Example | Qt Designer Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtdesigner-manual.html">Qt Designer Manual</a></td><td >Custom Widget Plugin Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtdesigner-manual.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#preparation">Preparation</a></li>
+<li class="level1"><a href="#analogclock-class-definition-and-implementation">AnalogClock Class Definition and Implementation</a></li>
+<li class="level1"><a href="#analogclockplugin-class-definition">AnalogClockPlugin Class Definition</a></li>
+<li class="level1"><a href="#analogclockplugin-implementation">AnalogClockPlugin Implementation</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Custom Widget Plugin Example</h1>
+<span class="subtitle"></span>
+<!-- $$$customwidgetplugin-brief -->
+<p>Creating a custom widget plugin for Qt Designer.</p>
+<!-- @@@customwidgetplugin -->
+<!-- $$$customwidgetplugin-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/customwidgetplugin-example.png" alt="" /></p><p>In this example, the custom widget used is based on the <a href="../qtwidgets/qtwidgets-widgets-analogclock-example.html">Analog Clock example</a>, and does not provide any custom signals or slots.</p>
+<a name="preparation"></a>
+<h4 id="preparation">Preparation</h4>
+<p>To provide a custom widget that can be used with <i>Qt Designer</i>, we need to supply a self-contained implementation and provide a plugin interface. In this example, we reuse the <a href="../qtwidgets/qtwidgets-widgets-analogclock-example.html">Analog Clock example</a> for convenience.</p>
+<p>Since custom widgets plugins rely on components supplied with <i>Qt Designer</i>, the project file that we use needs to contain information about <i>Qt Designer</i>'s library components:</p>
+<pre class="cpp">
+
+  CONFIG      += plugin
+  TEMPLATE    = lib
+  QT          += widgets uiplugin
+
+</pre>
+<p>The <code>TEMPLATE</code> variable's value makes <code>qmake</code> create the custom widget as a library. Later, we will ensure that the widget will be recognized as a plugin by Qt by using the <a href="../qtcore/qtplugin.html#Q_PLUGIN_METADATA">Q_PLUGIN_METADATA</a>() macro to export the relevant widget information.</p>
+<p>The <code>CONFIG</code> variable is set to <code>plugin</code>, which ensures that <code>qmake</code> considers the custom widget a plugin library.</p>
+<p>The <code>QT</code> variable contains the keyword <code>uiplugin</code>. This plugin type provides a factory function for custom widget creation by implementing the abstract interfaces <a href="qdesignercustomwidgetinterface.html">QDesignerCustomWidgetInterface</a> or <a href="qdesignercustomwidgetcollectioninterface.html">QDesignerCustomWidgetCollectionInterface</a>, suitable for use with <a href="../qtuitools/quiloader.html">QUiLoader</a>. It does not have a dependency on the <i>Qt Designer</i> libraries. Plugins accessing other interfaces of <i>Qt Designer</i> to implement container extensions or other <i>Qt Designer</i> specific functionality follow different rules and are covered by other examples.</p>
+<p>The header and source files for the widget are declared in the usual way, and we provide an implementation of the plugin interface so that <i>Qt Designer</i> can use the custom widget:</p>
+<pre class="cpp">
+
+  HEADERS     = analogclock.h \
+                customwidgetplugin.h
+  SOURCES     = analogclock.cpp \
+                customwidgetplugin.cpp
+  OTHER_FILES += analogclock.json
+
+</pre>
+<p>It is also important to ensure that the plugin is installed in a location that is searched by <i>Qt Designer</i>. We do this by specifying a target path for the project and adding it to the list of items to install:</p>
+<pre class="cpp">
+
+  target.path = $$[QT_INSTALL_PLUGINS]/designer
+  INSTALLS += target
+
+</pre>
+<p>The custom widget is created as a library, and will be installed alongside the other <i>Qt Designer</i> plugins when the project is installed (using <code>make install</code> or an equivalent installation procedure). Later, we will ensure that it is recognized as a plugin by <i>Qt Designer</i> by using the <a href="../qtcore/qtplugin.html#Q_PLUGIN_METADATA">Q_PLUGIN_METADATA</a>() macro to export the relevant widget information.</p>
+<p>Note that if you want the plugins to appear in a Visual Studio integration, the plugins must be built in release mode and their libraries must be copied into the plugin directory in the install path of the integration (for an example, see <code>C:/program files/trolltech as/visual studio integration/plugins</code>).</p>
+<p>For more information about plugins, see the <a href="../qtdoc/plugins-howto.html">How to Create Qt Plugins</a> documentation.</p>
+<a name="analogclock-class-definition-and-implementation"></a>
+<h4 id="analogclock-class-definition-and-implementation">AnalogClock Class Definition and Implementation</h4>
+<p>The <code>AnalogClock</code> class is defined and implemented in exactly the same way as described in the <a href="../qtwidgets/qtwidgets-widgets-analogclock-example.html">Analog Clock example</a>. Since the class is self-contained, and does not require any external configuration, it can be used without modification as a custom widget in <i>Qt Designer</i>.</p>
+<a name="analogclockplugin-class-definition"></a>
+<h4 id="analogclockplugin-class-definition">AnalogClockPlugin Class Definition</h4>
+<p>The <code>AnalogClock</code> class is exposed to <i>Qt Designer</i> through the <code>AnalogClockPlugin</code> class. This class inherits from both <a href="../qtcore/qobject.html">QObject</a> and the <a href="qdesignercustomwidgetinterface.html">QDesignerCustomWidgetInterface</a> class, and implements an interface defined by <a href="qdesignercustomwidgetinterface.html">QDesignerCustomWidgetInterface</a>:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> AnalogClockPlugin : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">,</span> <span class="keyword">public</span> <span class="type"><a href="qdesignercustomwidgetinterface.html">QDesignerCustomWidgetInterface</a></span>
+  {
+      Q_OBJECT
+      Q_PLUGIN_METADATA(IID <span class="string">&quot;org.qt-project.Qt.QDesignerCustomWidgetInterface&quot;</span>)
+      Q_INTERFACES(<span class="type"><a href="qdesignercustomwidgetinterface.html">QDesignerCustomWidgetInterface</a></span>)
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> AnalogClockPlugin(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+
+      bool isContainer() <span class="keyword">const</span> override;
+      bool isInitialized() <span class="keyword">const</span> override;
+      <span class="type">QIcon</span> icon() <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> domXml() <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> group() <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> includeFile() <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> name() <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> toolTip() <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> whatsThis() <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>createWidget(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent) override;
+      <span class="type">void</span> initialize(<span class="type"><a href="qdesignerformeditorinterface.html">QDesignerFormEditorInterface</a></span> <span class="operator">*</span>core) override;
+
+  <span class="keyword">private</span>:
+      bool initialized <span class="operator">=</span> <span class="keyword">false</span>;
+  };
+
+</pre>
+<p>The functions provide information about the widget that <i>Qt Designer</i> can use in the <a href="designer-to-know.html#widgetbox">widget box</a>. The <code>initialized</code> private member variable is used to record whether the plugin has been initialized by <i>Qt Designer</i>.</p>
+<p>Note that the only part of the class definition that is specific to this particular custom widget is the class name.</p>
+<a name="analogclockplugin-implementation"></a>
+<h4 id="analogclockplugin-implementation">AnalogClockPlugin Implementation</h4>
+<p>The class constructor simply calls the <a href="../qtcore/qobject.html">QObject</a> base class constructor and sets the <code>initialized</code> variable to <code>false</code>.</p>
+<pre class="cpp">
+
+  AnalogClockPlugin<span class="operator">::</span>AnalogClockPlugin(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>(parent)
+  {
+  }
+
+</pre>
+<p><i>Qt Designer</i> will initialize the plugin when it is required by calling the <code>initialize()</code> function:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> AnalogClockPlugin<span class="operator">::</span>initialize(<span class="type"><a href="qdesignerformeditorinterface.html">QDesignerFormEditorInterface</a></span> <span class="operator">*</span> <span class="comment">/* core */</span>)
+  {
+      <span class="keyword">if</span> (initialized)
+          <span class="keyword">return</span>;
+
+      initialized <span class="operator">=</span> <span class="keyword">true</span>;
+  }
+
+</pre>
+<p>In this example, the <code>initialized</code> private variable is tested, and only set to <code>true</code> if the plugin is not already initialized. Although, this plugin does not require any special code to be executed when it is initialized, we could include such code after the test for initialization.</p>
+<p>The <code>isInitialized()</code> function lets <i>Qt Designer</i> know whether the plugin is ready for use:</p>
+<pre class="cpp">
+
+  bool AnalogClockPlugin<span class="operator">::</span>isInitialized() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> initialized;
+  }
+
+</pre>
+<p>Instances of the custom widget are supplied by the <code>createWidget()</code> function. The implementation for the analog clock is straightforward:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>AnalogClockPlugin<span class="operator">::</span>createWidget(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+  {
+      <span class="keyword">return</span> <span class="keyword">new</span> AnalogClock(parent);
+  }
+
+</pre>
+<p>In this case, the custom widget only requires a <code>parent</code> to be specified. If other arguments need to be supplied to the widget, they can be introduced here.</p>
+<p>The following functions provide information for <i>Qt Designer</i> to use to represent the widget in the widget box. The <code>name()</code> function returns the name of class that provides the custom widget:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> AnalogClockPlugin<span class="operator">::</span>name() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;AnalogClock&quot;</span>);
+  }
+
+</pre>
+<p>The <code>group()</code> function is used to describe the type of widget that the custom widget belongs to:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> AnalogClockPlugin<span class="operator">::</span>group() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Display Widgets [Examples]&quot;</span>);
+  }
+
+</pre>
+<p>The widget plugin will be placed in a section identified by its group name in <i>Qt Designer</i>'s widget box. The icon used to represent the widget in the widget box is returned by the <code>icon()</code> function:</p>
+<pre class="cpp">
+
+  <span class="type">QIcon</span> AnalogClockPlugin<span class="operator">::</span>icon() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type">QIcon</span>();
+  }
+
+</pre>
+<p>In this case, we return a null icon to indicate that we have no icon that can be used to represent the widget.</p>
+<p>A tool tip and &quot;What's This?&quot; help can be supplied for the custom widget's entry in the widget box. The <code>toolTip()</code> function should return a short message describing the widget:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> AnalogClockPlugin<span class="operator">::</span>toolTip() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>();
+  }
+
+</pre>
+<p>The <code>whatsThis()</code> function can return a longer description:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> AnalogClockPlugin<span class="operator">::</span>whatsThis() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>();
+  }
+
+</pre>
+<p>The <code>isContainer()</code> function tells <i>Qt Designer</i> whether the widget is supposed to be used as a container for other widgets. If not, <i>Qt Designer</i> will not allow the user to place widgets inside it.</p>
+<pre class="cpp">
+
+  bool AnalogClockPlugin<span class="operator">::</span>isContainer() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="keyword">false</span>;
+  }
+
+</pre>
+<p>Most widgets in Qt can contain child widgets, but it only makes sense to use dedicated container widgets for this purpose in <i>Qt Designer</i>. By returning <code>false</code>, we indicate that the custom widget cannot hold other widgets; if we returned true, <i>Qt Designer</i> would allow other widgets to be placed inside the analog clock and a layout to be defined.</p>
+<p>The <code>domXml()</code> function provides a way to include default settings for the widget in the standard XML format used by <i>Qt Designer</i>. In this case, we only specify the widget's geometry:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> AnalogClockPlugin<span class="operator">::</span>domXml() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="string">&quot;&lt;ui language=\&quot;c++\&quot;&gt;\n&quot;</span>
+             <span class="string">&quot; &lt;widget class=\&quot;AnalogClock\&quot; name=\&quot;analogClock\&quot;&gt;\n&quot;</span>
+             <span class="string">&quot;  &lt;property name=\&quot;geometry\&quot;&gt;\n&quot;</span>
+             <span class="string">&quot;   &lt;rect&gt;\n&quot;</span>
+             <span class="string">&quot;    &lt;x&gt;0&lt;/x&gt;\n&quot;</span>
+             <span class="string">&quot;    &lt;y&gt;0&lt;/y&gt;\n&quot;</span>
+             <span class="string">&quot;    &lt;width&gt;100&lt;/width&gt;\n&quot;</span>
+             <span class="string">&quot;    &lt;height&gt;100&lt;/height&gt;\n&quot;</span>
+             <span class="string">&quot;   &lt;/rect&gt;\n&quot;</span>
+             <span class="string">&quot;  &lt;/property&gt;\n&quot;</span>
+             <span class="string">&quot;  &lt;property name=\&quot;toolTip\&quot; &gt;\n&quot;</span>
+             <span class="string">&quot;   &lt;string&gt;The current time&lt;/string&gt;\n&quot;</span>
+             <span class="string">&quot;  &lt;/property&gt;\n&quot;</span>
+             <span class="string">&quot;  &lt;property name=\&quot;whatsThis\&quot; &gt;\n&quot;</span>
+             <span class="string">&quot;   &lt;string&gt;The analog clock widget displays the current time.&lt;/string&gt;\n&quot;</span>
+             <span class="string">&quot;  &lt;/property&gt;\n&quot;</span>
+             <span class="string">&quot; &lt;/widget&gt;\n&quot;</span>
+             <span class="string">&quot;&lt;/ui&gt;\n&quot;</span>;
+  }
+
+</pre>
+<p>If the widget provides a reasonable size hint, it is not necessary to define it here. In addition, returning an empty string instead of a <code>&lt;widget&gt;</code> element will tell <i>Qt Designer</i> not to install the widget in the widget box.</p>
+<p>To make the analog clock widget usable by applications, we implement the <code>includeFile()</code> function to return the name of the header file containing the custom widget class definition:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> AnalogClockPlugin<span class="operator">::</span>includeFile() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;analogclock.h&quot;</span>);
+  }
+
+</pre>
+<p><a href="https://code.qt.io/cgit/qt/qttools.git/tree/examples/designer/customwidgetplugin?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@customwidgetplugin -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

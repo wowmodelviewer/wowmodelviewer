@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- objecttrees.qdoc -->
+  <title>Object Trees &amp; Ownership | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td >Object Trees &amp; Ownership</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#overview">Overview</a></li>
+<li class="level1"><a href="#construction-destruction-order-of-qobjects">Construction/Destruction Order of QObjects</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Object Trees &amp; Ownership</h1>
+<span class="subtitle"></span>
+<!-- $$$objecttrees.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="overview"></a>
+<h2 id="overview">Overview</h2>
+<p><a href="qobject.html">QObjects</a> organize themselves in object trees. When you create a <a href="qobject.html">QObject</a> with another object as parent, it's added to the parent's <a href="qobject.html#children">children()</a> list, and is deleted when the parent is. It turns out that this approach fits the needs of GUI objects very well. For example, a <a href="../qtwidgets/qshortcut.html">QShortcut</a> (keyboard shortcut) is a child of the relevant window, so when the user closes that window, the shortcut is deleted too.</p>
+<p><a href="../qtquick/qquickitem.html">QQuickItem</a>, the basic visual element of the Qt Quick module, inherits from <a href="qobject.html">QObject</a>, but has a concept of the <i>visual parent</i> which differs from that of the <i><a href="qobject.html">QObject</a> parent</i>. An item's visual parent may not necessarily be the same as its object parent. See <a href="../qtquick/qtquick-visualcanvas-visualparent.html">Concepts - Visual Parent in Qt Quick</a> for more details.</p>
+<p><a href="../qtwidgets/qwidget.html">QWidget</a>, the fundamental class of the Qt Widgets module, extends the parent-child relationship. A child normally also becomes a child widget, i.e&#x2e; it is displayed in its parent's coordinate system and is graphically clipped by its parent's boundaries. For example, when the application deletes a message box after it has been closed, the message box's buttons and label are also deleted, just as we'd want, because the buttons and label are children of the message box.</p>
+<p>You can also delete child objects yourself, and they will remove themselves from their parents. For example, when the user removes a toolbar it may lead to the application deleting one of its <a href="../qtwidgets/qtoolbar.html">QToolBar</a> objects, in which case the tool bar's <a href="../qtwidgets/qmainwindow.html">QMainWindow</a> parent would detect the change and reconfigure its screen space accordingly.</p>
+<p>The debugging functions <a href="qobject.html#dumpObjectTree">QObject::dumpObjectTree</a>() and <a href="qobject.html#dumpObjectInfo">QObject::dumpObjectInfo</a>() are often useful when an application looks or acts strangely.</p>
+<a name="note-on-the-order-of-construction-destruction-of-qobjects"></a><a name="construction-destruction-order-of-qobjects"></a>
+<h2 id="construction-destruction-order-of-qobjects">Construction/Destruction Order of QObjects</h2>
+<p>When <a href="qobject.html">QObjects</a> are created on the heap (i.e&#x2e;, created with <i>new</i>), a tree can be constructed from them in any order, and later, the objects in the tree can be destroyed in any order. When any <a href="qobject.html">QObject</a> in the tree is deleted, if the object has a parent, the destructor automatically removes the object from its parent. If the object has children, the destructor automatically deletes each child. No <a href="qobject.html">QObject</a> is deleted twice, regardless of the order of destruction.</p>
+<p>When <a href="qobject.html">QObjects</a> are created on the stack, the same behavior applies. Normally, the order of destruction still doesn't present a problem. Consider the following snippet:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main()
+  {
+      <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> window;
+      <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> quit(<span class="string">&quot;Quit&quot;</span><span class="operator">,</span> <span class="operator">&amp;</span>window);
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  }
+
+</pre>
+<p>The parent, <code>window</code>, and the child, <code>quit</code>, are both <a href="qobject.html">QObjects</a> because <a href="../qtwidgets/qpushbutton.html">QPushButton</a> inherits <a href="../qtwidgets/qwidget.html">QWidget</a>, and <a href="../qtwidgets/qwidget.html">QWidget</a> inherits <a href="qobject.html">QObject</a>. This code is correct: the destructor of <code>quit</code> is <i>not</i> called twice because the C++ language standard <i>(ISO/IEC 14882:2003)</i> specifies that destructors of local objects are called in the reverse order of their constructors. Therefore, the destructor of the child, <code>quit</code>, is called first, and it removes itself from its parent, <code>window</code>, before the destructor of <code>window</code> is called.</p>
+<p>But now consider what happens if we swap the order of construction, as shown in this second snippet:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main()
+  {
+      <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> quit(<span class="string">&quot;Quit&quot;</span>);
+      <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> window;
+
+      quit<span class="operator">.</span>setParent(<span class="operator">&amp;</span>window);
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  }
+
+</pre>
+<p>In this case, the order of destruction causes a problem. The parent's destructor is called first because it was created last. It then calls the destructor of its child, <code>quit</code>, which is incorrect because <code>quit</code> is a local variable. When <code>quit</code> subsequently goes out of scope, its destructor is called again, this time correctly, but the damage has already been done.</p>
+</div>
+<!-- @@@objecttrees.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

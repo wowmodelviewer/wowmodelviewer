@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmake-manual.qdoc -->
+  <title>Configuring qmake | qmake Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qmake-manual.html">qmake Manual</a></td><td >Configuring qmake</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qmake-manual.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="qmake-precompiledheaders.html" />
+  <link rel="next" href="qmake-reference.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="qmake-precompiledheaders.html">Using Precompiled Headers</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qmake-reference.html">Reference</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#qmakespec">QMAKESPEC</a></li>
+<li class="level1"><a href="#cache-file">Cache File</a></li>
+<li class="level1"><a href="#file-extensions">File Extensions</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Configuring qmake</h1>
+<span class="subtitle"></span>
+<!-- $$$qmake-environment-reference.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<p>qmake has a system for persistent configuration, which allows you to set a property in qmake once, and query it each time qmake is invoked. You can set a property in qmake as follows:</p>
+<pre class="cpp">
+
+  qmake -set PROPERTY VALUE
+
+</pre>
+<p>The appropriate property and value should be substituted for <code>PROPERTY</code> and <code>VALUE</code>.</p>
+<p>You can retrieve this information back from qmake as follows:</p>
+<pre class="cpp">
+
+  qmake -query PROPERTY
+  qmake -query #queries all current PROPERTY/VALUE pairs
+
+</pre>
+<p><b>Note: </b><code>qmake -query</code> lists built-in properties in addition to the properties that you set with <code>qmake -set PROPERTY VALUE</code>.</p><p>This information will be saved into a <a href="../qtcore/qsettings.html">QSettings</a> object (meaning it will be stored in different places for different platforms).</p>
+<p>The following list summarizes the <code>built-in</code> properties:</p>
+<ul>
+<li>QMAKE_SPEC - the shortname of the host <code>mkspec</code> that is resolved and stored in the <a href="qmake-environment-reference.html#qmakespec">QMAKESPEC</a> variable during a host build</li>
+<li>QMAKE_VERSION - the current version of qmake</li>
+<li>QMAKE_XSPEC - the shortname of the target <code>mkspec</code> that is resolved and stored in the <a href="qmake-environment-reference.html#qmakespec">QMAKESPEC</a> variable during a target build</li>
+<li>QT_HOST_BINS - location of host executables</li>
+<li>QT_HOST_DATA - location of data for host executables used by qmake</li>
+<li>QT_HOST_PREFIX - default prefix for all host paths</li>
+<li>QT_INSTALL_ARCHDATA - location of general architecture-dependent Qt data</li>
+<li>QT_INSTALL_BINS - location of Qt binaries (tools and applications)</li>
+<li>QT_INSTALL_CONFIGURATION - location for Qt settings. Not applicable on Windows</li>
+<li>QT_INSTALL_DATA - location of general architecture-independent Qt data</li>
+<li>QT_INSTALL_DOCS - location of documentation</li>
+<li>QT_INSTALL_EXAMPLES - location of examples</li>
+<li>QT_INSTALL_HEADERS - location for all header files</li>
+<li>QT_INSTALL_IMPORTS - location of QML 1.x extensions</li>
+<li>QT_INSTALL_LIBEXECS - location of executables required by libraries at runtime</li>
+<li>QT_INSTALL_LIBS - location of libraries</li>
+<li>QT_INSTALL_PLUGINS - location of Qt plugins</li>
+<li>QT_INSTALL_PREFIX - default prefix for all paths</li>
+<li>QT_INSTALL_QML - location of QML 2.x extensions</li>
+<li>QT_INSTALL_TESTS - location of Qt test cases</li>
+<li>QT_INSTALL_TRANSLATIONS - location of translation information for Qt strings</li>
+<li>QT_SYSROOT - the sysroot used by the target build environment</li>
+<li><a href="qmake-variable-reference.html#qt-version">QT_VERSION</a> - the Qt version. We recommend that you query Qt module specific version numbers by using $$QT.&lt;module&gt;.version variables instead.</li>
+</ul>
+<p>For example, you can query the installation of Qt for this version of qmake with the <code>QT_INSTALL_PREFIX</code> property:</p>
+<pre class="cpp">
+
+  qmake -query &quot;QT_INSTALL_PREFIX&quot;
+
+</pre>
+<p>You can query the values of properties in a project file as follows:</p>
+<pre class="cpp">
+
+  QMAKE_VERS = $$[QMAKE_VERSION]
+
+</pre>
+<a name="qmakespec"></a><a name="qmakespec"></a>
+<h2 id="qmakespec">QMAKESPEC</h2>
+<p>qmake requires a platform and compiler description file which contains many default values used to generate appropriate Makefiles. The standard Qt distribution comes with many of these files, located in the <code>mkspecs</code> subdirectory of the Qt installation.</p>
+<p>The <code>QMAKESPEC</code> environment variable can contain any of the following:</p>
+<ul>
+<li>A complete path to a directory containing a <code>qmake.conf</code> file. In this case qmake will open the <code>qmake.conf</code> file from within that directory. If the file does not exist, qmake will exit with an error.</li>
+<li>The name of a platform-compiler combination. In this case, qmake will search in the directory specified by the <code>mkspecs</code> subdirectory of the data path specified when Qt was compiled (see <a href="../qtcore/qlibraryinfo.html#LibraryLocation-enum">QLibraryInfo::DataPath</a>).</li>
+</ul>
+<p><b>Note: </b>The <code>QMAKESPEC</code> path will be automatically added to the generated Makefile after the contents of the <a href="qmake-variable-reference.html#includepath">INCLUDEPATH</a> system variable.</p><a name="cache"></a><a name="cache-file"></a>
+<h2 id="cache-file">Cache File</h2>
+<p>The cache file is a special file qmake reads to find settings not specified in the <code>qmake.conf</code> file, project files, or at the command line. When qmake is run, it looks for a file called <code>.qmake.cache</code> in parent directories of the current directory, unless you specify <code>-nocache</code>. If qmake fails to find this file, it will silently ignore this step of processing.</p>
+<p>If qmake finds a <code>.qmake.cache</code> file then it will process this file first before it processes the project file.</p>
+<a name="extensions"></a><a name="file-extensions"></a>
+<h2 id="file-extensions">File Extensions</h2>
+<p>Under normal circumstances qmake will try to use appropriate file extensions for your platform. However, it is sometimes necessary to override the default choices for each platform and explicitly define file extensions for qmake to use. This is achieved by redefining certain built-in variables. For example, the extension used for <a href="../qtdoc/moc.html">moc</a> files can be redefined with the following assignment in a project file:</p>
+<pre class="cpp">
+
+  QMAKE_EXT_MOC = .mymoc
+
+</pre>
+<p>The following variables can be used to redefine common file extensions recognized by qmake:</p>
+<ul>
+<li><a href="qmake-variable-reference.html#qmake-ext-moc">QMAKE_EXT_MOC</a> modifies the extension placed on included moc files.</li>
+<li><a href="qmake-variable-reference.html#qmake-ext-ui">QMAKE_EXT_UI</a> modifies the extension used for <i>Qt Designer</i> UI files (usually in <a href="qmake-variable-reference.html#forms">FORMS</a>).</li>
+<li><a href="qmake-variable-reference.html#qmake-ext-prl">QMAKE_EXT_PRL</a> modifies the extension placed on <a href="qmake-advanced-usage.html#libdepend">library dependency files</a>.</li>
+<li><a href="qmake-variable-reference.html#qmake-ext-lex">QMAKE_EXT_LEX</a> changes the suffix used in Lex files (usually in <a href="qmake-variable-reference.html#lexsources">LEXSOURCES</a>).</li>
+<li><a href="qmake-variable-reference.html#qmake-ext-yacc">QMAKE_EXT_YACC</a> changes the suffix used in Yacc files (usually in <a href="qmake-variable-reference.html#yaccsources">YACCSOURCES</a>).</li>
+<li><a href="qmake-variable-reference.html#qmake-ext-obj">QMAKE_EXT_OBJ</a> changes the suffix used on generated object files.</li>
+</ul>
+<p>All of the above accept just the first value, so you must assign to it just one value that will be used throughout your project file. There are two variables that accept a list of values:</p>
+<ul>
+<li><a href="qmake-variable-reference.html#qmake-ext-cpp">QMAKE_EXT_CPP</a> causes qmake to interpret all files with these suffixes as C++ source files.</li>
+<li><a href="qmake-variable-reference.html#qmake-ext-h">QMAKE_EXT_H</a> causes qmake to interpret all files with these suffixes as C and C++ header files.</li>
+</ul>
+</div>
+<!-- @@@qmake-environment-reference.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="qmake-precompiledheaders.html">Using Precompiled Headers</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qmake-reference.html">Reference</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qqueue.cpp -->
+  <title>QQueue Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QQueue</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QQueue Class</h1>
+<!-- $$$QQueue-brief -->
+<p>The <a href="qqueue.html">QQueue</a> class is a generic container that provides a queue. <a href="#details">More...</a></p>
+<!-- @@@QQueue -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QQueue&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qlist.html">QList</a></td></tr></table></div><ul>
+<li><a href="qqueue-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> T </td><td class="memItemRight bottomAlign"><b><a href="qqueue.html#dequeue">dequeue</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqueue.html#enqueue">enqueue</a></b>(const T &amp;<i>t</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> T &amp;</td><td class="memItemRight bottomAlign"><b><a href="qqueue.html#head">head</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const T &amp;</td><td class="memItemRight bottomAlign"><b><a href="qqueue.html#head-1">head</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqueue.html#swap">swap</a></b>(QQueue&lt;T&gt; &amp;<i>other</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QQueue-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qqueue.html">QQueue</a>&lt;T&gt; is one of Qt's generic <a href="containers.html">container classes</a>. It implements a queue data structure for items of a same type.</p>
+<p>A queue is a first in, first out (FIFO) structure. Items are added to the tail of the queue using <a href="qqueue.html#enqueue">enqueue</a>() and retrieved from the head using <a href="qqueue.html#dequeue">dequeue</a>(). The <a href="qqueue.html#head">head</a>() function provides access to the head item without removing it.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qqueue.html">QQueue</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span> queue;
+  queue<span class="operator">.</span>enqueue(<span class="number">1</span>);
+  queue<span class="operator">.</span>enqueue(<span class="number">2</span>);
+  queue<span class="operator">.</span>enqueue(<span class="number">3</span>);
+  <span class="keyword">while</span> (<span class="operator">!</span>queue<span class="operator">.</span>isEmpty())
+      cout <span class="operator">&lt;</span><span class="operator">&lt;</span> queue<span class="operator">.</span>dequeue() <span class="operator">&lt;</span><span class="operator">&lt;</span> endl;
+
+</pre>
+<p>The example will output 1, 2, 3 in that order.</p>
+<p><a href="qqueue.html">QQueue</a> inherits from <a href="qlist.html">QList</a>. All of <a href="qlist.html">QList</a>'s functionality also applies to <a href="qqueue.html">QQueue</a>. For example, you can use <a href="qlist.html#isEmpty">isEmpty</a>() to test whether the queue is empty, and you can traverse a <a href="qqueue.html">QQueue</a> using <a href="qlist.html">QList</a>'s iterator classes (for example, <a href="qlistiterator.html">QListIterator</a>). But in addition, <a href="qqueue.html">QQueue</a> provides three convenience functions that make it easy to implement FIFO semantics: <a href="qqueue.html#enqueue">enqueue</a>(), <a href="qqueue.html#dequeue">dequeue</a>(), and <a href="qqueue.html#head">head</a>().</p>
+<p><a href="qqueue.html">QQueue</a>'s value type must be an <a href="containers.html#assignable-data-type">assignable data type</a>. This covers most data types that are commonly used, but the compiler won't let you, for example, store a <a href="../qtwidgets/qwidget.html">QWidget</a> as a value. Use <a href="../qtwidgets/qwidget.html">QWidget</a>* instead.</p>
+</div>
+<p><b>See also </b><a href="qlist.html">QList</a> and <a href="qstack.html">QStack</a>.</p>
+<!-- @@@QQueue -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$dequeue[overload1]$$$dequeue -->
+<h3 class="fn" id="dequeue"><a name="dequeue"></a><span class="type">T</span> QQueue::<span class="name">dequeue</span>()</h3>
+<p>Removes the head item in the queue and returns it. This function assumes that the queue isn't empty.</p>
+<p>This is the same as <a href="qlist.html#takeFirst">QList::takeFirst</a>().</p>
+<p><b>See also </b><a href="qqueue.html#head">head</a>(), <a href="qqueue.html#enqueue">enqueue</a>(), and <a href="qlist.html#isEmpty">isEmpty</a>().</p>
+<!-- @@@dequeue -->
+<!-- $$$enqueue[overload1]$$$enqueueconstT& -->
+<h3 class="fn" id="enqueue"><a name="enqueue"></a><span class="type">void</span> QQueue::<span class="name">enqueue</span>(const <span class="type">T</span> &amp;<i>t</i>)</h3>
+<p>Adds value <i>t</i> to the tail of the queue.</p>
+<p>This is the same as <a href="qlist.html#append">QList::append</a>().</p>
+<p><b>See also </b><a href="qqueue.html#dequeue">dequeue</a>() and <a href="qqueue.html#head">head</a>().</p>
+<!-- @@@enqueue -->
+<!-- $$$head[overload1]$$$head -->
+<h3 class="fn" id="head"><a name="head"></a><span class="type">T</span> &amp;QQueue::<span class="name">head</span>()</h3>
+<p>Returns a reference to the queue's head item. This function assumes that the queue isn't empty.</p>
+<p>This is the same as <a href="qlist.html#first">QList::first</a>().</p>
+<p><b>See also </b><a href="qqueue.html#dequeue">dequeue</a>(), <a href="qqueue.html#enqueue">enqueue</a>(), and <a href="qlist.html#isEmpty">isEmpty</a>().</p>
+<!-- @@@head -->
+<!-- $$$head$$$head -->
+<h3 class="fn" id="head-1"><a name="head-1"></a>const <span class="type">T</span> &amp;QQueue::<span class="name">head</span>() const</h3>
+<p>This is an overloaded function.</p>
+<!-- @@@head -->
+<!-- $$$swap[overload1]$$$swapQQueue<T>& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QQueue::<span class="name">swap</span>(<span class="type"><a href="qqueue.html">QQueue</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>other</i>)</h3>
+<p>Swaps queue <i>other</i> with this queue. This operation is very fast and never fails.</p>
+<p>This function was introduced in  Qt 4.8.</p>
+<!-- @@@swap -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

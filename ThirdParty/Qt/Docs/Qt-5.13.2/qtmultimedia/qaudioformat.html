@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qaudioformat.cpp -->
+  <title>QAudioFormat Class | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-modules.html">C++ Classes</a></td><td >QAudioFormat</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAudioFormat Class</h1>
+<!-- $$$QAudioFormat-brief -->
+<p>The <a href="qaudioformat.html">QAudioFormat</a> class stores audio stream parameter information. <a href="#details">More...</a></p>
+<!-- @@@QAudioFormat -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAudioFormat&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += multimedia</td></tr></table></div><ul>
+<li><a href="qaudioformat-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#Endian-enum">Endian</a></b> { BigEndian, LittleEndian }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#SampleType-enum">SampleType</a></b> { Unknown, SignedInt, UnSignedInt, Float }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#QAudioFormat-1">QAudioFormat</a></b>(const QAudioFormat &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#QAudioFormat">QAudioFormat</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QAudioFormat &amp;</td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#operator-eq">operator=</a></b>(const QAudioFormat &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#dtor.QAudioFormat">~QAudioFormat</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QAudioFormat::Endian </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#byteOrder">byteOrder</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint32 </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#bytesForDuration">bytesForDuration</a></b>(qint64 <i>duration</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint32 </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#bytesForFrames">bytesForFrames</a></b>(qint32 <i>frameCount</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#bytesPerFrame">bytesPerFrame</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#channelCount">channelCount</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#codec">codec</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint64 </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#durationForBytes">durationForBytes</a></b>(qint32 <i>bytes</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint64 </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#durationForFrames">durationForFrames</a></b>(qint32 <i>frameCount</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint32 </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#framesForBytes">framesForBytes</a></b>(qint32 <i>byteCount</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint32 </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#framesForDuration">framesForDuration</a></b>(qint64 <i>duration</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#isValid">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#sampleRate">sampleRate</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#sampleSize">sampleSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QAudioFormat::SampleType </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#sampleType">sampleType</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#setByteOrder">setByteOrder</a></b>(QAudioFormat::Endian <i>byteOrder</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#setChannelCount">setChannelCount</a></b>(int <i>channels</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#setCodec">setCodec</a></b>(const QString &amp;<i>codec</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#setSampleRate">setSampleRate</a></b>(int <i>samplerate</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#setSampleSize">setSampleSize</a></b>(int <i>sampleSize</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#setSampleType">setSampleType</a></b>(QAudioFormat::SampleType <i>sampleType</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#operator-not-eq">operator!=</a></b>(const QAudioFormat &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qaudioformat.html#operator-eq-eq">operator==</a></b>(const QAudioFormat &amp;<i>other</i>) const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAudioFormat-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>An audio format specifies how data in an audio stream is arranged, i.e, how the stream is to be interpreted. The encoding itself is specified by the <a href="qaudioformat.html#codec">codec</a>() used for the stream.</p>
+<p>In addition to the encoding, <a href="qaudioformat.html">QAudioFormat</a> contains other parameters that further specify how the audio sample data is arranged. These are the frequency, the number of channels, the sample size, the sample type, and the byte order. The following table describes these in more detail.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Parameter</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >Sample Rate</td><td >Samples per second of audio data in Hertz.</td></tr>
+<tr valign="top" class="even"><td >Number of channels</td><td >The number of audio channels (typically one for mono or two for stereo)</td></tr>
+<tr valign="top" class="odd"><td >Sample size</td><td >How much data is stored in each sample (typically 8 or 16 bits)</td></tr>
+<tr valign="top" class="even"><td >Sample type</td><td >Numerical representation of sample (typically signed integer, unsigned integer or float)</td></tr>
+<tr valign="top" class="odd"><td >Byte order</td><td >Byte ordering of sample (typically little endian, big endian)</td></tr>
+</table></div>
+<p>This class is typically used in conjunction with <a href="qaudioinput.html">QAudioInput</a> or <a href="qaudiooutput.html">QAudioOutput</a> to allow you to specify the parameters of the audio stream being read or written, or with <a href="qaudiobuffer.html">QAudioBuffer</a> when dealing with samples in memory.</p>
+<p>You can obtain audio formats compatible with the audio device used through functions in <a href="qaudiodeviceinfo.html">QAudioDeviceInfo</a>. This class also lets you query available parameter values for a device, so that you can set the parameters yourself. See the <a href="qaudiodeviceinfo.html">QAudioDeviceInfo</a> class description for details. You need to know the format of the audio streams you wish to play or record.</p>
+<p>In the common case of interleaved linear PCM data, the codec will be &quot;audio/pcm&quot;, and the samples for all channels will be interleaved. One sample for each channel for the same instant in time is referred to as a frame in Qt Multimedia (and other places).</p>
+</div>
+<!-- @@@QAudioFormat -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Endian$$$BigEndian$$$LittleEndian -->
+<h3 class="fn" id="Endian-enum"><a name="Endian-enum"></a>enum QAudioFormat::<span class="name">Endian</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QAudioFormat::BigEndian</code></td><td class="topAlign tblval"><code>QSysInfo::BigEndian</code></td><td class="topAlign">Samples are big endian byte order</td></tr>
+<tr><td class="topAlign"><code>QAudioFormat::LittleEndian</code></td><td class="topAlign tblval"><code>QSysInfo::LittleEndian</code></td><td class="topAlign">Samples are little endian byte order</td></tr>
+</table></div>
+<!-- @@@Endian -->
+<!-- $$$SampleType$$$Unknown$$$SignedInt$$$UnSignedInt$$$Float -->
+<h3 class="fn" id="SampleType-enum"><a name="SampleType-enum"></a>enum QAudioFormat::<span class="name">SampleType</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QAudioFormat::Unknown</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Not Set</td></tr>
+<tr><td class="topAlign"><code>QAudioFormat::SignedInt</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Samples are signed integers</td></tr>
+<tr><td class="topAlign"><code>QAudioFormat::UnSignedInt</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Samples are unsigned intergers</td></tr>
+<tr><td class="topAlign"><code>QAudioFormat::Float</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">Samples are floats</td></tr>
+</table></div>
+<!-- @@@SampleType -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QAudioFormat$$$QAudioFormatconstQAudioFormat& -->
+<h3 class="fn" id="QAudioFormat-1"><a name="QAudioFormat-1"></a>QAudioFormat::<span class="name">QAudioFormat</span>(const <span class="type"><a href="qaudioformat.html#QAudioFormat">QAudioFormat</a></span> &amp;<i>other</i>)</h3>
+<p>Construct a new audio format using <i>other</i>.</p>
+<!-- @@@QAudioFormat -->
+<!-- $$$QAudioFormat[overload1]$$$QAudioFormat -->
+<h3 class="fn" id="QAudioFormat"><a name="QAudioFormat"></a>QAudioFormat::<span class="name">QAudioFormat</span>()</h3>
+<p>Construct a new audio format.</p>
+<p>Values are initialized as follows:</p>
+<ul>
+<li><a href="qaudioformat.html#sampleRate">sampleRate</a>() = -1</li>
+<li><a href="qaudioformat.html#channelCount">channelCount</a>() = -1</li>
+<li><a href="qaudioformat.html#sampleSize">sampleSize</a>() = -1</li>
+<li><a href="qaudioformat.html#byteOrder">byteOrder</a>() = <a href="qaudioformat.html#Endian-enum">QAudioFormat::Endian</a>(<a href="../qtcore/qsysinfo.html#Endian-enum">QSysInfo::ByteOrder</a>)</li>
+<li><a href="qaudioformat.html#sampleType">sampleType</a>() = <a href="qaudioformat.html#SampleType-enum">QAudioFormat::Unknown</a> <code>codec()</code> = &quot;&quot;</li>
+</ul>
+<!-- @@@QAudioFormat -->
+<!-- $$$operator=[overload1]$$$operator=constQAudioFormat& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qaudioformat.html#QAudioFormat">QAudioFormat</a></span> &amp;QAudioFormat::<span class="name">operator=</span>(const <span class="type"><a href="qaudioformat.html#QAudioFormat">QAudioFormat</a></span> &amp;<i>other</i>)</h3>
+<p>Assigns <i>other</i> to this <a href="qaudioformat.html">QAudioFormat</a> implementation.</p>
+<!-- @@@operator= -->
+<!-- $$$~QAudioFormat[overload1]$$$~QAudioFormat -->
+<h3 class="fn" id="dtor.QAudioFormat"><a name="dtor.QAudioFormat"></a>QAudioFormat::<span class="name">~QAudioFormat</span>()</h3>
+<p>Destroy this audio format.</p>
+<!-- @@@~QAudioFormat -->
+<!-- $$$byteOrder[overload1]$$$byteOrder -->
+<h3 class="fn" id="byteOrder"><a name="byteOrder"></a><span class="type"><a href="qaudioformat.html#Endian-enum">QAudioFormat::Endian</a></span> QAudioFormat::<span class="name">byteOrder</span>() const</h3>
+<p>Returns the current byteOrder value.</p>
+<p><b>See also </b><a href="qaudioformat.html#setByteOrder">setByteOrder</a>().</p>
+<!-- @@@byteOrder -->
+<!-- $$$bytesForDuration[overload1]$$$bytesForDurationqint64 -->
+<h3 class="fn" id="bytesForDuration"><a name="bytesForDuration"></a><span class="type"><a href="../qtcore/qtglobal.html#qint32-typedef">qint32</a></span> QAudioFormat::<span class="name">bytesForDuration</span>(<span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> <i>duration</i>) const</h3>
+<p>Returns the number of bytes required for this audio format for <i>duration</i> microseconds.</p>
+<p>Returns 0 if this format is not valid.</p>
+<p>Note that some rounding may occur if <i>duration</i> is not an exact fraction of the <a href="qaudioformat.html#sampleRate">sampleRate</a>().</p>
+<p><b>See also </b><a href="qaudioformat.html#durationForBytes">durationForBytes</a>().</p>
+<!-- @@@bytesForDuration -->
+<!-- $$$bytesForFrames[overload1]$$$bytesForFramesqint32 -->
+<h3 class="fn" id="bytesForFrames"><a name="bytesForFrames"></a><span class="type"><a href="../qtcore/qtglobal.html#qint32-typedef">qint32</a></span> QAudioFormat::<span class="name">bytesForFrames</span>(<span class="type"><a href="../qtcore/qtglobal.html#qint32-typedef">qint32</a></span> <i>frameCount</i>) const</h3>
+<p>Returns the number of bytes required for <i>frameCount</i> frames of this format.</p>
+<p>Returns 0 if this format is not valid.</p>
+<p><b>See also </b><a href="qaudioformat.html#bytesForDuration">bytesForDuration</a>().</p>
+<!-- @@@bytesForFrames -->
+<!-- $$$bytesPerFrame[overload1]$$$bytesPerFrame -->
+<h3 class="fn" id="bytesPerFrame"><a name="bytesPerFrame"></a><span class="type">int</span> QAudioFormat::<span class="name">bytesPerFrame</span>() const</h3>
+<p>Returns the number of bytes required to represent one frame (a sample in each channel) in this format.</p>
+<p>Returns 0 if this format is invalid.</p>
+<!-- @@@bytesPerFrame -->
+<!-- $$$channelCount[overload1]$$$channelCount -->
+<h3 class="fn" id="channelCount"><a name="channelCount"></a><span class="type">int</span> QAudioFormat::<span class="name">channelCount</span>() const</h3>
+<p>Returns the current channel count value.</p>
+<p><b>See also </b><a href="qaudioformat.html#setChannelCount">setChannelCount</a>().</p>
+<!-- @@@channelCount -->
+<!-- $$$codec[overload1]$$$codec -->
+<h3 class="fn" id="codec"><a name="codec"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QAudioFormat::<span class="name">codec</span>() const</h3>
+<p>Returns the current codec identifier.</p>
+<p><b>See also </b><a href="qaudioformat.html#setCodec">setCodec</a>() and <a href="qaudiodeviceinfo.html#supportedCodecs">QAudioDeviceInfo::supportedCodecs</a>().</p>
+<!-- @@@codec -->
+<!-- $$$durationForBytes[overload1]$$$durationForBytesqint32 -->
+<h3 class="fn" id="durationForBytes"><a name="durationForBytes"></a><span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> QAudioFormat::<span class="name">durationForBytes</span>(<span class="type"><a href="../qtcore/qtglobal.html#qint32-typedef">qint32</a></span> <i>bytes</i>) const</h3>
+<p>Returns the number of microseconds represented by <i>bytes</i> in this format.</p>
+<p>Returns 0 if this format is not valid.</p>
+<p>Note that some rounding may occur if <i>bytes</i> is not an exact multiple of the number of bytes per frame.</p>
+<p><b>See also </b><a href="qaudioformat.html#bytesForDuration">bytesForDuration</a>().</p>
+<!-- @@@durationForBytes -->
+<!-- $$$durationForFrames[overload1]$$$durationForFramesqint32 -->
+<h3 class="fn" id="durationForFrames"><a name="durationForFrames"></a><span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> QAudioFormat::<span class="name">durationForFrames</span>(<span class="type"><a href="../qtcore/qtglobal.html#qint32-typedef">qint32</a></span> <i>frameCount</i>) const</h3>
+<p>Return the number of microseconds represented by <i>frameCount</i> frames in this format.</p>
+<!-- @@@durationForFrames -->
+<!-- $$$framesForBytes[overload1]$$$framesForBytesqint32 -->
+<h3 class="fn" id="framesForBytes"><a name="framesForBytes"></a><span class="type"><a href="../qtcore/qtglobal.html#qint32-typedef">qint32</a></span> QAudioFormat::<span class="name">framesForBytes</span>(<span class="type"><a href="../qtcore/qtglobal.html#qint32-typedef">qint32</a></span> <i>byteCount</i>) const</h3>
+<p>Returns the number of frames represented by <i>byteCount</i> in this format.</p>
+<p>Note that some rounding may occur if <i>byteCount</i> is not an exact multiple of the number of bytes per frame.</p>
+<p>Each frame has one sample per channel.</p>
+<p><b>See also </b><a href="qaudioformat.html#framesForDuration">framesForDuration</a>().</p>
+<!-- @@@framesForBytes -->
+<!-- $$$framesForDuration[overload1]$$$framesForDurationqint64 -->
+<h3 class="fn" id="framesForDuration"><a name="framesForDuration"></a><span class="type"><a href="../qtcore/qtglobal.html#qint32-typedef">qint32</a></span> QAudioFormat::<span class="name">framesForDuration</span>(<span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> <i>duration</i>) const</h3>
+<p>Returns the number of frames required to represent <i>duration</i> microseconds in this format.</p>
+<p>Note that some rounding may occur if <i>duration</i> is not an exact fraction of the <a href="qaudioformat.html#sampleRate">sampleRate</a>().</p>
+<!-- @@@framesForDuration -->
+<!-- $$$isValid[overload1]$$$isValid -->
+<h3 class="fn" id="isValid"><a name="isValid"></a><span class="type">bool</span> QAudioFormat::<span class="name">isValid</span>() const</h3>
+<p>Returns true if all of the parameters are valid.</p>
+<!-- @@@isValid -->
+<!-- $$$sampleRate[overload1]$$$sampleRate -->
+<h3 class="fn" id="sampleRate"><a name="sampleRate"></a><span class="type">int</span> QAudioFormat::<span class="name">sampleRate</span>() const</h3>
+<p>Returns the current sample rate in Hertz.</p>
+<p><b>See also </b><a href="qaudioformat.html#setSampleRate">setSampleRate</a>().</p>
+<!-- @@@sampleRate -->
+<!-- $$$sampleSize[overload1]$$$sampleSize -->
+<h3 class="fn" id="sampleSize"><a name="sampleSize"></a><span class="type">int</span> QAudioFormat::<span class="name">sampleSize</span>() const</h3>
+<p>Returns the current sample size value, in bits.</p>
+<p><b>See also </b><a href="qaudioformat.html#setSampleSize">setSampleSize</a>() and <a href="qaudioformat.html#bytesPerFrame">bytesPerFrame</a>().</p>
+<!-- @@@sampleSize -->
+<!-- $$$sampleType[overload1]$$$sampleType -->
+<h3 class="fn" id="sampleType"><a name="sampleType"></a><span class="type"><a href="qaudioformat.html#SampleType-enum">QAudioFormat::SampleType</a></span> QAudioFormat::<span class="name">sampleType</span>() const</h3>
+<p>Returns the current <a href="qaudioformat.html#SampleType-enum">SampleType</a> value.</p>
+<p><b>See also </b><a href="qaudioformat.html#setSampleType">setSampleType</a>().</p>
+<!-- @@@sampleType -->
+<!-- $$$setByteOrder[overload1]$$$setByteOrderQAudioFormat::Endian -->
+<h3 class="fn" id="setByteOrder"><a name="setByteOrder"></a><span class="type">void</span> QAudioFormat::<span class="name">setByteOrder</span>(<span class="type"><a href="qaudioformat.html#Endian-enum">QAudioFormat::Endian</a></span> <i>byteOrder</i>)</h3>
+<p>Sets the <a href="qaudioformat.html#byteOrder">byteOrder</a> to <i>byteOrder</i>.</p>
+<p><b>See also </b><a href="qaudioformat.html#byteOrder">byteOrder</a>().</p>
+<!-- @@@setByteOrder -->
+<!-- $$$setChannelCount[overload1]$$$setChannelCountint -->
+<h3 class="fn" id="setChannelCount"><a name="setChannelCount"></a><span class="type">void</span> QAudioFormat::<span class="name">setChannelCount</span>(<span class="type">int</span> <i>channels</i>)</h3>
+<p>Sets the channel count to <i>channels</i>.</p>
+<p><b>See also </b><a href="qaudioformat.html#channelCount">channelCount</a>().</p>
+<!-- @@@setChannelCount -->
+<!-- $$$setCodec[overload1]$$$setCodecconstQString& -->
+<h3 class="fn" id="setCodec"><a name="setCodec"></a><span class="type">void</span> QAudioFormat::<span class="name">setCodec</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>codec</i>)</h3>
+<p>Sets the codec to <i>codec</i>.</p>
+<p>The parameter to this function should be one of the types reported by the <a href="qaudiodeviceinfo.html#supportedCodecs">QAudioDeviceInfo::supportedCodecs</a>() function for the audio device you are working with.</p>
+<p><b>See also </b><a href="qaudioformat.html#codec">codec</a>() and <a href="qaudiodeviceinfo.html#supportedCodecs">QAudioDeviceInfo::supportedCodecs</a>().</p>
+<!-- @@@setCodec -->
+<!-- $$$setSampleRate[overload1]$$$setSampleRateint -->
+<h3 class="fn" id="setSampleRate"><a name="setSampleRate"></a><span class="type">void</span> QAudioFormat::<span class="name">setSampleRate</span>(<span class="type">int</span> <i>samplerate</i>)</h3>
+<p>Sets the sample rate to <i>samplerate</i> Hertz.</p>
+<p><b>See also </b><a href="qaudioformat.html#sampleRate">sampleRate</a>().</p>
+<!-- @@@setSampleRate -->
+<!-- $$$setSampleSize[overload1]$$$setSampleSizeint -->
+<h3 class="fn" id="setSampleSize"><a name="setSampleSize"></a><span class="type">void</span> QAudioFormat::<span class="name">setSampleSize</span>(<span class="type">int</span> <i>sampleSize</i>)</h3>
+<p>Sets the sample size to the <i>sampleSize</i> specified, in bits.</p>
+<p>This is typically 8 or 16, but some systems may support higher sample sizes.</p>
+<p><b>See also </b><a href="qaudioformat.html#sampleSize">sampleSize</a>().</p>
+<!-- @@@setSampleSize -->
+<!-- $$$setSampleType[overload1]$$$setSampleTypeQAudioFormat::SampleType -->
+<h3 class="fn" id="setSampleType"><a name="setSampleType"></a><span class="type">void</span> QAudioFormat::<span class="name">setSampleType</span>(<span class="type"><a href="qaudioformat.html#SampleType-enum">QAudioFormat::SampleType</a></span> <i>sampleType</i>)</h3>
+<p>Sets the <a href="qaudioformat.html#sampleType">sampleType</a> to <i>sampleType</i>.</p>
+<p><b>See also </b><a href="qaudioformat.html#sampleType">sampleType</a>().</p>
+<!-- @@@setSampleType -->
+<!-- $$$operator!=[overload1]$$$operator!=constQAudioFormat& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> QAudioFormat::<span class="name">operator!=</span>(const <span class="type"><a href="qaudioformat.html#QAudioFormat">QAudioFormat</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns true if this <a href="qaudioformat.html">QAudioFormat</a> is not equal to the <i>other</i> <a href="qaudioformat.html">QAudioFormat</a>; otherwise returns false.</p>
+<p>All elements of <a href="qaudioformat.html">QAudioFormat</a> are used for the comparison.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQAudioFormat& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> QAudioFormat::<span class="name">operator==</span>(const <span class="type"><a href="qaudioformat.html#QAudioFormat">QAudioFormat</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns true if this <a href="qaudioformat.html">QAudioFormat</a> is equal to the <i>other</i> <a href="qaudioformat.html">QAudioFormat</a>; otherwise returns false.</p>
+<p>All elements of <a href="qaudioformat.html">QAudioFormat</a> are used for the comparison.</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

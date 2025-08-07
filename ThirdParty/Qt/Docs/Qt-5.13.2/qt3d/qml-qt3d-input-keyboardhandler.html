@@ -1,0 +1,544 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qkeyboardhandler.cpp -->
+  <title>KeyboardHandler QML Type | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-qml.html">QML Types</a></td><td >KeyboardHandler QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">KeyboardHandler QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$KeyboardHandler-brief -->
+<p>QML frontend for QKeyboardHandler C++ class. <a href="#details">More...</a></p>
+<!-- @@@KeyboardHandler -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import Qt3D.Input 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiates:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-input-keyboardhandler.html"><a href="qt3dinput-qkeyboardhandler.html">QKeyboardHandler</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qt3d-core-component3d.html">Component3D</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qt3d-input-keyboardhandler-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#focus-prop">focus</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#sourceDevice-prop">sourceDevice</a></b></b> : KeyboardDevice</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#asteriskPressed-signal">asteriskPressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#backPressed-signal">backPressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#backtabPressed-signal">backtabPressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#callPressed-signal">callPressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#cancelPressed-signal">cancelPressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#context1Pressed-signal">context1Pressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#context2Pressed-signal">context2Pressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#context3Pressed-signal">context3Pressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#context4Pressed-signal">context4Pressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#deletePressed-signal">deletePressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#digit0Pressed-signal">digit0Pressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#digit1Pressed-signal">digit1Pressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#digit2Pressed-signal">digit2Pressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#digit3Pressed-signal">digit3Pressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#digit4Pressed-signal">digit4Pressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#digit5Pressed-signal">digit5Pressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#digit6Pressed-signal">digit6Pressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#digit7Pressed-signal">digit7Pressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#digit8Pressed-signal">digit8Pressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#digit9Pressed-signal">digit9Pressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#downPressed-signal">downPressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#enterPressed-signal">enterPressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#escapePressed-signal">escapePressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#flipPressed-signal">flipPressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#hangupPressed-signal">hangupPressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#leftPressed-signal">leftPressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#menuPressed-signal">menuPressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#noPressed-signal">noPressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#numberSignPressed-signal">numberSignPressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#pressed-signal">pressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#released-signal">released</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#returnPressed-signal">returnPressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#rightPressed-signal">rightPressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#selectPressed-signal">selectPressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#spacePressed-signal">spacePressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#tabPressed-signal">tabPressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#upPressed-signal">upPressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#volumeDownPressed-signal">volumeDownPressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#volumeUpPressed-signal">volumeUpPressed</a></b></b>(<i>event</i>)</li>
+<li class="fn"><b><b><a href="qml-qt3d-input-keyboardhandler.html#yesPressed-signal">yesPressed</a></b></b>(<i>event</i>)</li>
+</ul>
+<!-- $$$KeyboardHandler-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<!-- @@@KeyboardHandler -->
+<h2>Property Documentation</h2>
+<!-- $$$focus -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="focus-prop"></a><span class="name">focus</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"></div></div><!-- @@@focus -->
+<br/>
+<!-- $$$sourceDevice -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="sourceDevice-prop"></a><span class="name">sourceDevice</span> : <span class="type"><a href="qml-qt3d-input-keyboarddevice.html">KeyboardDevice</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"></div></div><!-- @@@sourceDevice -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$asteriskPressed[overload1]$$$asteriskPressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="asteriskPressed-signal"></a><span class="name">asteriskPressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the * key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@asteriskPressed -->
+<br/>
+<!-- $$$backPressed[overload1]$$$backPressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="backPressed-signal"></a><span class="name">backPressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the back key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@backPressed -->
+<br/>
+<!-- $$$backtabPressed[overload1]$$$backtabPressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="backtabPressed-signal"></a><span class="name">backtabPressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the backtab key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@backtabPressed -->
+<br/>
+<!-- $$$callPressed[overload1]$$$callPressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="callPressed-signal"></a><span class="name">callPressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the call key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@callPressed -->
+<br/>
+<!-- $$$cancelPressed[overload1]$$$cancelPressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="cancelPressed-signal"></a><span class="name">cancelPressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the cancel key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@cancelPressed -->
+<br/>
+<!-- $$$context1Pressed[overload1]$$$context1Pressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="context1Pressed-signal"></a><span class="name">context1Pressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the context 1 key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@context1Pressed -->
+<br/>
+<!-- $$$context2Pressed[overload1]$$$context2Pressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="context2Pressed-signal"></a><span class="name">context2Pressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the context 2 key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@context2Pressed -->
+<br/>
+<!-- $$$context3Pressed[overload1]$$$context3Pressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="context3Pressed-signal"></a><span class="name">context3Pressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the context 2 key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@context3Pressed -->
+<br/>
+<!-- $$$context4Pressed[overload1]$$$context4Pressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="context4Pressed-signal"></a><span class="name">context4Pressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the context 4 key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@context4Pressed -->
+<br/>
+<!-- $$$deletePressed[overload1]$$$deletePressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="deletePressed-signal"></a><span class="name">deletePressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the delete key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@deletePressed -->
+<br/>
+<!-- $$$digit0Pressed[overload1]$$$digit0Pressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="digit0Pressed-signal"></a><span class="name">digit0Pressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the 0 key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@digit0Pressed -->
+<br/>
+<!-- $$$digit1Pressed[overload1]$$$digit1Pressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="digit1Pressed-signal"></a><span class="name">digit1Pressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the 1 key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@digit1Pressed -->
+<br/>
+<!-- $$$digit2Pressed[overload1]$$$digit2Pressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="digit2Pressed-signal"></a><span class="name">digit2Pressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the 2 key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@digit2Pressed -->
+<br/>
+<!-- $$$digit3Pressed[overload1]$$$digit3Pressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="digit3Pressed-signal"></a><span class="name">digit3Pressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the 3 key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@digit3Pressed -->
+<br/>
+<!-- $$$digit4Pressed[overload1]$$$digit4Pressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="digit4Pressed-signal"></a><span class="name">digit4Pressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the 4 key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@digit4Pressed -->
+<br/>
+<!-- $$$digit5Pressed[overload1]$$$digit5Pressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="digit5Pressed-signal"></a><span class="name">digit5Pressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the 5 key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@digit5Pressed -->
+<br/>
+<!-- $$$digit6Pressed[overload1]$$$digit6Pressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="digit6Pressed-signal"></a><span class="name">digit6Pressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the 6 key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@digit6Pressed -->
+<br/>
+<!-- $$$digit7Pressed[overload1]$$$digit7Pressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="digit7Pressed-signal"></a><span class="name">digit7Pressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the 7 key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@digit7Pressed -->
+<br/>
+<!-- $$$digit8Pressed[overload1]$$$digit8Pressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="digit8Pressed-signal"></a><span class="name">digit8Pressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the 8 key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@digit8Pressed -->
+<br/>
+<!-- $$$digit9Pressed[overload1]$$$digit9Pressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="digit9Pressed-signal"></a><span class="name">digit9Pressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the 9 key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@digit9Pressed -->
+<br/>
+<!-- $$$downPressed[overload1]$$$downPressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="downPressed-signal"></a><span class="name">downPressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the down key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@downPressed -->
+<br/>
+<!-- $$$enterPressed[overload1]$$$enterPressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="enterPressed-signal"></a><span class="name">enterPressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the enter key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@enterPressed -->
+<br/>
+<!-- $$$escapePressed[overload1]$$$escapePressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="escapePressed-signal"></a><span class="name">escapePressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the escape key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@escapePressed -->
+<br/>
+<!-- $$$flipPressed[overload1]$$$flipPressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="flipPressed-signal"></a><span class="name">flipPressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the flip key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@flipPressed -->
+<br/>
+<!-- $$$hangupPressed[overload1]$$$hangupPressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="hangupPressed-signal"></a><span class="name">hangupPressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the hangup key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@hangupPressed -->
+<br/>
+<!-- $$$leftPressed[overload1]$$$leftPressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="leftPressed-signal"></a><span class="name">leftPressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the left key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@leftPressed -->
+<br/>
+<!-- $$$menuPressed[overload1]$$$menuPressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="menuPressed-signal"></a><span class="name">menuPressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the menu key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@menuPressed -->
+<br/>
+<!-- $$$noPressed[overload1]$$$noPressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="noPressed-signal"></a><span class="name">noPressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the yes key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@noPressed -->
+<br/>
+<!-- $$$numberSignPressed[overload1]$$$numberSignPressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="numberSignPressed-signal"></a><span class="name">numberSignPressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the number sign key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@numberSignPressed -->
+<br/>
+<!-- $$$pressed[overload1]$$$pressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="pressed-signal"></a><span class="name">pressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when a key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@pressed -->
+<br/>
+<!-- $$$released[overload1]$$$released -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="released-signal"></a><span class="name">released</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when a key is released with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@released -->
+<br/>
+<!-- $$$returnPressed[overload1]$$$returnPressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="returnPressed-signal"></a><span class="name">returnPressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the return key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@returnPressed -->
+<br/>
+<!-- $$$rightPressed[overload1]$$$rightPressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="rightPressed-signal"></a><span class="name">rightPressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the right key is pressed with the event details being contained within <i>event</i></p>
+</div></div><!-- @@@rightPressed -->
+<br/>
+<!-- $$$selectPressed[overload1]$$$selectPressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="selectPressed-signal"></a><span class="name">selectPressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the select key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@selectPressed -->
+<br/>
+<!-- $$$spacePressed[overload1]$$$spacePressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="spacePressed-signal"></a><span class="name">spacePressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the space key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@spacePressed -->
+<br/>
+<!-- $$$tabPressed[overload1]$$$tabPressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="tabPressed-signal"></a><span class="name">tabPressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the tab key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@tabPressed -->
+<br/>
+<!-- $$$upPressed[overload1]$$$upPressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="upPressed-signal"></a><span class="name">upPressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the up key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@upPressed -->
+<br/>
+<!-- $$$volumeDownPressed[overload1]$$$volumeDownPressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="volumeDownPressed-signal"></a><span class="name">volumeDownPressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the volume down key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@volumeDownPressed -->
+<br/>
+<!-- $$$volumeUpPressed[overload1]$$$volumeUpPressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="volumeUpPressed-signal"></a><span class="name">volumeUpPressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the volume up key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@volumeUpPressed -->
+<br/>
+<!-- $$$yesPressed[overload1]$$$yesPressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="yesPressed-signal"></a><span class="name">yesPressed</span>(<i>event</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the yes key is pressed with the event details being contained within <i>event</i>.</p>
+</div></div><!-- @@@yesPressed -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

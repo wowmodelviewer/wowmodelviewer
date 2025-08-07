@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- shakeit.qdoc -->
+  <title>Qt Sensors - ShakeIt QML Example | Qt Sensors 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtsensors-index.html">Qt Sensors</a></td><td >Qt Sensors - ShakeIt QML Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtsensors-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level2"><a href="#shakeit-in-qml">ShakeIt in QML</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Sensors - ShakeIt QML Example</h1>
+<span class="subtitle"></span>
+<!-- $$$shakeit-brief -->
+<p>The sensor gesture example demonstrates the steps for creating a QML application that uses sensor gestures and the included shake sensor.</p>
+<!-- @@@shakeit -->
+<!-- $$$shakeit-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/shakeit.png" alt="" /></p><a name="shakeit-in-qml"></a>
+<h5 id="shakeit-in-qml">ShakeIt in QML</h5>
+<p>Writing a QML application that uses the Shake QML sensorgestures type requires the following steps:</p>
+<p>Import the Sensors Declarative module.</p>
+<pre class="qml">
+
+  import QtSensors 5.0
+
+</pre>
+<p>Add a <a href="qml-qtsensors-sensorgesture.html">SensorGesture</a> QML type.</p>
+<pre class="qml">
+
+      <span class="type"><a href="qml-qtsensors-sensorgesture.html">SensorGesture</a></span> {
+
+</pre>
+<p>In the <a href="qml-qtsensors-sensorgesture.html">SensorGesture</a> type, specify which gesture to be used. Note that this can be a comma separated list. Here we are only interested in one gesture recognizer.</p>
+<pre class="qml">
+
+          <span class="name">gestures</span> : [<span class="string">&quot;QtSensors.shake&quot;</span>, <span class="string">&quot;QtSensors.whip&quot;</span>, <span class="string">&quot;QtSensors.twist&quot;</span>, <span class="string">&quot;QtSensors.cover&quot;</span>,
+              <span class="string">&quot;QtSensors.hover&quot;</span>, <span class="string">&quot;QtSensors.turnover&quot;</span>, <span class="string">&quot;QtSensors.pickup&quot;</span>, <span class="string">&quot;QtSensors.slam&quot;</span> , <span class="string">&quot;QtSensors.doubletap&quot;</span>]
+
+</pre>
+<p>Use the 'enabled' property to start the sensor gesture.</p>
+<pre class="qml">
+
+          <span class="name">enabled</span>: <span class="number">true</span>
+
+</pre>
+<p>Use the onDetected signal to do stuff.</p>
+<pre class="qml">
+
+          <span class="name">onDetected</span>:{
+              <span class="name">console</span>.<span class="name">debug</span>(<span class="name">gesture</span>)
+              <span class="name">label</span>.<span class="name">text</span> <span class="operator">=</span> <span class="name">gesture</span>
+
+              <span class="keyword">if</span> (<span class="name">gesture</span> <span class="operator">==</span> <span class="string">&quot;shake&quot;</span>) {
+                  <span class="name">window</span>.<span class="name">state</span> <span class="operator">==</span> <span class="string">&quot;rotated&quot;</span> ? <span class="name">window</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;default&quot;</span> : <span class="name">window</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;rotated&quot;</span>
+                  <span class="name">timer</span>.<span class="name">start</span>()
+              }
+              <span class="keyword">if</span> (<span class="name">gesture</span> <span class="operator">==</span> <span class="string">&quot;whip&quot;</span>) {
+                  <span class="name">window</span>.<span class="name">state</span> <span class="operator">==</span> <span class="string">&quot;whipped&quot;</span> ? <span class="name">window</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;default&quot;</span> : <span class="name">window</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;whipped&quot;</span>
+                  <span class="name">timer</span>.<span class="name">start</span>()
+              }
+              <span class="keyword">if</span> (<span class="name">gesture</span> <span class="operator">==</span> <span class="string">&quot;twistRight&quot;</span>) {
+                  <span class="name">window</span>.<span class="name">state</span> <span class="operator">==</span> <span class="string">&quot;twistedR&quot;</span> ? <span class="name">window</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;default&quot;</span> : <span class="name">window</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;twistedR&quot;</span>
+                  <span class="name">timer</span>.<span class="name">start</span>()
+              }
+              <span class="keyword">if</span> (<span class="name">gesture</span> <span class="operator">==</span> <span class="string">&quot;twistLeft&quot;</span>) {
+                  <span class="name">window</span>.<span class="name">state</span> <span class="operator">==</span> <span class="string">&quot;twistedL&quot;</span> ? <span class="name">window</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;default&quot;</span> : <span class="name">window</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;twistedL&quot;</span>
+                  <span class="name">timer</span>.<span class="name">start</span>()
+              }
+              <span class="keyword">if</span> (<span class="name">gesture</span> <span class="operator">==</span> <span class="string">&quot;cover&quot;</span>) {
+                  <span class="name">window</span>.<span class="name">state</span> <span class="operator">==</span> <span class="string">&quot;covered&quot;</span> ? <span class="name">window</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;default&quot;</span> : <span class="name">window</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;covered&quot;</span>
+                  <span class="name">timer</span>.<span class="name">start</span>()
+              }
+              <span class="keyword">if</span> (<span class="name">gesture</span> <span class="operator">==</span> <span class="string">&quot;hover&quot;</span>) {
+                  <span class="name">window</span>.<span class="name">state</span> <span class="operator">==</span> <span class="string">&quot;hovered&quot;</span> ? <span class="name">window</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;default&quot;</span> : <span class="name">window</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;hovered&quot;</span>
+                  <span class="name">timer</span>.<span class="name">start</span>()
+              }
+              <span class="keyword">if</span> (<span class="name">gesture</span> <span class="operator">==</span> <span class="string">&quot;turnover&quot;</span>) {
+                  <span class="name">window</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;default&quot;</span>
+                  <span class="name">loopy2a_mono</span>.<span class="name">play</span>();
+                  <span class="name">timer</span>.<span class="name">start</span>()
+              }
+              <span class="keyword">if</span> (<span class="name">gesture</span> <span class="operator">==</span> <span class="string">&quot;pickup&quot;</span>) {
+                  <span class="name">window</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;default&quot;</span>
+                  <span class="name">phone</span>.<span class="name">play</span>()
+                  <span class="name">timer</span>.<span class="name">start</span>()
+              }
+              <span class="keyword">if</span> (<span class="name">gesture</span> <span class="operator">==</span> <span class="string">&quot;slam&quot;</span>) {
+                  <span class="name">window</span>.<span class="name">state</span> <span class="operator">==</span> <span class="string">&quot;slammed&quot;</span> ? <span class="name">window</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;default&quot;</span> : <span class="name">window</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;slammed&quot;</span>
+                  <span class="name">timer</span>.<span class="name">start</span>()
+              }
+              <span class="keyword">if</span> (<span class="name">gesture</span> <span class="operator">==</span> <span class="string">&quot;doubletap&quot;</span>) {
+                  <span class="name">window</span>.<span class="name">state</span> <span class="operator">==</span> <span class="string">&quot;doubletapped&quot;</span> ? <span class="name">window</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;default&quot;</span> : <span class="name">window</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;doubletapped&quot;</span>
+                  <span class="name">timer</span>.<span class="name">start</span>()
+              }
+          }
+
+</pre>
+<p>There are additional gestures to shake which are supported: whip, twistRight, hover, cover, turnover and pickup.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtsensors.git/tree/examples/sensors/shakeit?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@shakeit -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

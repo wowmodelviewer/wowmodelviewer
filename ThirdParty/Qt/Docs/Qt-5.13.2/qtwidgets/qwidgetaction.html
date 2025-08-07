@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwidgetaction.cpp -->
+  <title>QWidgetAction Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QWidgetAction</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QWidgetAction Class</h1>
+<!-- $$$QWidgetAction-brief -->
+<p>The <a href="qwidgetaction.html">QWidgetAction</a> class extends <a href="qaction.html">QAction</a> by an interface for inserting custom widgets into action based containers, such as toolbars. <a href="#details">More...</a></p>
+<!-- @@@QWidgetAction -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QWidgetAction&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.2</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qaction.html">QAction</a></td></tr></table></div><p>This class was introduced in  Qt 4.2.</p>
+<ul>
+<li><a href="qwidgetaction-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwidgetaction.html#QWidgetAction">QWidgetAction</a></b>(QObject *<i>parent</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qwidgetaction.html#dtor.QWidgetAction">~QWidgetAction</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWidget *</td><td class="memItemRight bottomAlign"><b><a href="qwidgetaction.html#defaultWidget">defaultWidget</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwidgetaction.html#releaseWidget">releaseWidget</a></b>(QWidget *<i>widget</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWidget *</td><td class="memItemRight bottomAlign"><b><a href="qwidgetaction.html#requestWidget">requestWidget</a></b>(QWidget *<i>parent</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwidgetaction.html#setDefaultWidget">setDefaultWidget</a></b>(QWidget *<i>widget</i>)</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QWidget *</td><td class="memItemRight bottomAlign"><b><a href="qwidgetaction.html#createWidget">createWidget</a></b>(QWidget *<i>parent</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QWidget *&gt; </td><td class="memItemRight bottomAlign"><b><a href="qwidgetaction.html#createdWidgets">createdWidgets</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwidgetaction.html#deleteWidget">deleteWidget</a></b>(QWidget *<i>widget</i>)</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qwidgetaction.html#event">event</a></b>(QEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qwidgetaction.html#eventFilter">eventFilter</a></b>(QObject *<i>obj</i>, QEvent *<i>event</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QWidgetAction-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Most actions in an application are represented as items in menus or buttons in toolbars. However sometimes more complex widgets are necessary. For example a zoom action in a word processor may be realized using a <a href="qcombobox.html">QComboBox</a> in a <a href="qtoolbar.html">QToolBar</a>, presenting a range of different zoom levels. <a href="qtoolbar.html">QToolBar</a> provides <a href="qtoolbar.html#insertWidget">QToolBar::insertWidget</a>() as convenience function for inserting a single widget. However if you want to implement an action that uses custom widgets for visualization in multiple containers then you have to subclass <a href="qwidgetaction.html">QWidgetAction</a>.</p>
+<p>If a <a href="qwidgetaction.html">QWidgetAction</a> is added for example to a <a href="qtoolbar.html">QToolBar</a> then <a href="qwidgetaction.html#createWidget">QWidgetAction::createWidget</a>() is called. Reimplementations of that function should create a new custom widget with the specified parent.</p>
+<p>If the action is removed from a container widget then <a href="qwidgetaction.html#deleteWidget">QWidgetAction::deleteWidget</a>() is called with the previously created custom widget as argument. The default implementation hides the widget and deletes it using <a href="../qtcore/qobject.html#deleteLater">QObject::deleteLater</a>().</p>
+<p>If you have only one single custom widget then you can set it as default widget using <a href="qwidgetaction.html#setDefaultWidget">setDefaultWidget</a>(). That widget will then be used if the action is added to a <a href="qtoolbar.html">QToolBar</a>, or in general to an action container that supports <a href="qwidgetaction.html">QWidgetAction</a>. If a <a href="qwidgetaction.html">QWidgetAction</a> with only a default widget is added to two toolbars at the same time then the default widget is shown only in the first toolbar the action was added to. <a href="qwidgetaction.html">QWidgetAction</a> takes over ownership of the default widget.</p>
+<p>Note that it is up to the widget to activate the action, for example by reimplementing mouse event handlers and calling <a href="qaction.html#trigger">QAction::trigger</a>().</p>
+<p><b><a href="../qtdoc/internationalization.html#macos">macOS</a></b>: If you add a widget to a menu in the application's menu bar on <a href="../qtdoc/internationalization.html#macos">macOS</a>, the widget will be added and it will function but with some limitations:</p>
+<ol class="1" type="1"><li>The widget is reparented away from the <a href="qmenu.html">QMenu</a> to the native menu view. If you show the menu in some other place (e.g&#x2e; as a popup menu), the widget will not be there.</li>
+<li>Focus/Keyboard handling of the widget is not possible.</li>
+<li>Due to Apple's design, mouse tracking on the widget currently does not work.</li>
+<li>Connecting the <a href="qaction.html#triggered">triggered</a>() signal to a slot that opens a modal dialog will cause a crash in <a href="../qtdoc/internationalization.html#macos">macOS</a> 10.4 (known bug acknowledged by Apple), a workaround is to use a QueuedConnection instead of a DirectConnection.</li>
+</ol>
+</div>
+<p><b>See also </b><a href="qaction.html">QAction</a>, <a href="qactiongroup.html">QActionGroup</a>, and <a href="qwidget.html">QWidget</a>.</p>
+<!-- @@@QWidgetAction -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QWidgetAction[overload1]$$$QWidgetActionQObject* -->
+<h3 class="fn" id="QWidgetAction"><a name="QWidgetAction"></a>QWidgetAction::<span class="name">QWidgetAction</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i>)</h3>
+<p>Constructs an action with <i>parent</i>.</p>
+<!-- @@@QWidgetAction -->
+<!-- $$$~QWidgetAction[overload1]$$$~QWidgetAction -->
+<h3 class="fn" id="dtor.QWidgetAction"><a name="dtor.QWidgetAction"></a><code>[virtual] </code>QWidgetAction::<span class="name">~QWidgetAction</span>()</h3>
+<p>Destroys the object and frees allocated resources.</p>
+<!-- @@@~QWidgetAction -->
+<!-- $$$createWidget[overload1]$$$createWidgetQWidget* -->
+<h3 class="fn" id="createWidget"><a name="createWidget"></a><code>[virtual protected] </code><span class="type"><a href="qwidget.html">QWidget</a></span> *QWidgetAction::<span class="name">createWidget</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>parent</i>)</h3>
+<p>This function is called whenever the action is added to a container widget that supports custom widgets. If you don't want a custom widget to be used as representation of the action in the specified <i>parent</i> widget then 0 should be returned.</p>
+<p><b>See also </b><a href="qwidgetaction.html#deleteWidget">deleteWidget</a>().</p>
+<!-- @@@createWidget -->
+<!-- $$$createdWidgets[overload1]$$$createdWidgets -->
+<h3 class="fn" id="createdWidgets"><a name="createdWidgets"></a><code>[protected] </code><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qwidget.html">QWidget</a></span> *&gt; QWidgetAction::<span class="name">createdWidgets</span>() const</h3>
+<p>Returns the list of widgets that have been using <a href="qwidgetaction.html#createWidget">createWidget</a>() and are currently in use by widgets the action has been added to.</p>
+<!-- @@@createdWidgets -->
+<!-- $$$defaultWidget[overload1]$$$defaultWidget -->
+<h3 class="fn" id="defaultWidget"><a name="defaultWidget"></a><span class="type"><a href="qwidget.html">QWidget</a></span> *QWidgetAction::<span class="name">defaultWidget</span>() const</h3>
+<p>Returns the default widget.</p>
+<p><b>See also </b><a href="qwidgetaction.html#setDefaultWidget">setDefaultWidget</a>().</p>
+<!-- @@@defaultWidget -->
+<!-- $$$deleteWidget[overload1]$$$deleteWidgetQWidget* -->
+<h3 class="fn" id="deleteWidget"><a name="deleteWidget"></a><code>[virtual protected] </code><span class="type">void</span> QWidgetAction::<span class="name">deleteWidget</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i>)</h3>
+<p>This function is called whenever the action is removed from a container widget that displays the action using a custom <i>widget</i> previously created using <a href="qwidgetaction.html#createWidget">createWidget</a>(). The default implementation hides the <i>widget</i> and schedules it for deletion using <a href="../qtcore/qobject.html#deleteLater">QObject::deleteLater</a>().</p>
+<p><b>See also </b><a href="qwidgetaction.html#createWidget">createWidget</a>().</p>
+<!-- @@@deleteWidget -->
+<!-- $$$event[overload1]$$$eventQEvent* -->
+<h3 class="fn" id="event"><a name="event"></a><code>[override virtual protected] </code><span class="type">bool</span> QWidgetAction::<span class="name">event</span>(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qaction.html#event">QAction::event</a>(QEvent *e).</p>
+<!-- @@@event -->
+<!-- $$$eventFilter[overload1]$$$eventFilterQObject*QEvent* -->
+<h3 class="fn" id="eventFilter"><a name="eventFilter"></a><code>[override virtual protected] </code><span class="type">bool</span> QWidgetAction::<span class="name">eventFilter</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>obj</i>, <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="../qtcore/qobject.html#eventFilter">QObject::eventFilter</a>(QObject *watched, QEvent *event).</p>
+<!-- @@@eventFilter -->
+<!-- $$$releaseWidget[overload1]$$$releaseWidgetQWidget* -->
+<h3 class="fn" id="releaseWidget"><a name="releaseWidget"></a><span class="type">void</span> QWidgetAction::<span class="name">releaseWidget</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i>)</h3>
+<p>Releases the specified <i>widget</i>.</p>
+<p>Container widgets that support actions call this function when a widget action is removed.</p>
+<p><b>See also </b><a href="qwidgetaction.html#requestWidget">requestWidget</a>(), <a href="qwidgetaction.html#deleteWidget">deleteWidget</a>(), and <a href="qwidgetaction.html#defaultWidget">defaultWidget</a>().</p>
+<!-- @@@releaseWidget -->
+<!-- $$$requestWidget[overload1]$$$requestWidgetQWidget* -->
+<h3 class="fn" id="requestWidget"><a name="requestWidget"></a><span class="type"><a href="qwidget.html">QWidget</a></span> *QWidgetAction::<span class="name">requestWidget</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>parent</i>)</h3>
+<p>Returns a widget that represents the action, with the given <i>parent</i>.</p>
+<p>Container widgets that support actions can call this function to request a widget as visual representation of the action.</p>
+<p><b>See also </b><a href="qwidgetaction.html#releaseWidget">releaseWidget</a>(), <a href="qwidgetaction.html#createWidget">createWidget</a>(), and <a href="qwidgetaction.html#defaultWidget">defaultWidget</a>().</p>
+<!-- @@@requestWidget -->
+<!-- $$$setDefaultWidget[overload1]$$$setDefaultWidgetQWidget* -->
+<h3 class="fn" id="setDefaultWidget"><a name="setDefaultWidget"></a><span class="type">void</span> QWidgetAction::<span class="name">setDefaultWidget</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i>)</h3>
+<p>Sets <i>widget</i> to be the default widget. The ownership is transferred to <a href="qwidgetaction.html">QWidgetAction</a>. Unless <a href="qwidgetaction.html#createWidget">createWidget</a>() is reimplemented by a subclass to return a new widget the default widget is used when a container widget requests a widget through <a href="qwidgetaction.html#requestWidget">requestWidget</a>().</p>
+<p><b>See also </b><a href="qwidgetaction.html#defaultWidget">defaultWidget</a>().</p>
+<!-- @@@setDefaultWidget -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

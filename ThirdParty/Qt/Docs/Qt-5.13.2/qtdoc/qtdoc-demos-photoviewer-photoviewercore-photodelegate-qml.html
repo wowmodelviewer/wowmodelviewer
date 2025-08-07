@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- photoviewer.qdoc -->
+  <title>Qt Quick Demo - Photo Viewer | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Qt Quick Demo - Photo Viewer</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<h1 class="title">Qt Quick Demo - Photo Viewer</h1>
+<span class="subtitle"></span>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.0
+  import &quot;script/script.mjs&quot; as Script
+
+  <span class="type"><a href="../qtqml/qml-package.html">Package</a></span> {
+      <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> { <span class="name">id</span>: <span class="name">stackItem</span>; <span class="name">Package</span>.name: <span class="string">'stack'</span>; <span class="name">width</span>: <span class="number">160</span>; <span class="name">height</span>: <span class="number">153</span>; <span class="name">z</span>: <span class="name">stackItem</span>.<span class="name">PathView</span>.<span class="name">z</span> }
+      <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> { <span class="name">id</span>: <span class="name">listItem</span>; <span class="name">Package</span>.name: <span class="string">'list'</span>; <span class="name">width</span>: <span class="name">mainWindow</span>.<span class="name">width</span> <span class="operator">+</span> <span class="number">40</span>; <span class="name">height</span>: <span class="number">153</span> }
+      <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> { <span class="name">id</span>: <span class="name">gridItem</span>; <span class="name">Package</span>.name: <span class="string">'grid'</span>; <span class="name">width</span>: <span class="number">160</span>; <span class="name">height</span>: <span class="number">153</span> }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+          <span class="name">width</span>: <span class="number">160</span>; <span class="name">height</span>: <span class="number">153</span>
+
+          <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+              <span class="name">id</span>: <span class="name">photoWrapper</span>
+
+              property <span class="type"><a href="../qtqml/qml-double.html">double</a></span> <span class="name">randomAngle</span>: <span class="name">Math</span>.<span class="name">random</span>() <span class="operator">*</span> (<span class="number">2</span> <span class="operator">*</span> <span class="number">6</span> <span class="operator">+</span> <span class="number">1</span>) <span class="operator">-</span> <span class="number">6</span>
+              property <span class="type"><a href="../qtqml/qml-double.html">double</a></span> <span class="name">randomAngle2</span>: <span class="name">Math</span>.<span class="name">random</span>() <span class="operator">*</span> (<span class="number">2</span> <span class="operator">*</span> <span class="number">6</span> <span class="operator">+</span> <span class="number">1</span>) <span class="operator">-</span> <span class="number">6</span>
+
+              <span class="name">x</span>: <span class="number">0</span>; <span class="name">y</span>: <span class="number">0</span>; <span class="name">width</span>: <span class="number">140</span>; <span class="name">height</span>: <span class="number">133</span>
+              <span class="name">z</span>: <span class="name">stackItem</span>.<span class="name">PathView</span>.<span class="name">z</span>; <span class="name">rotation</span>: <span class="name">photoWrapper</span>.<span class="name">randomAngle</span>
+
+              <span class="type"><a href="../qtquick/qml-qtquick-borderimage.html">BorderImage</a></span> {
+                  <span class="type">anchors</span> {
+                      <span class="name">fill</span>: <span class="name">originalImage</span>.<span class="name">status</span> <span class="operator">==</span> <span class="name">Image</span>.<span class="name">Ready</span> ? <span class="name">border</span> : <span class="name">placeHolder</span>
+                      <span class="name">leftMargin</span>: -<span class="number">6</span>; <span class="name">topMargin</span>: -<span class="number">6</span>; <span class="name">rightMargin</span>: -<span class="number">8</span>; <span class="name">bottomMargin</span>: -<span class="number">8</span>
+                  }
+                  <span class="name">source</span>: <span class="string">'images/box-shadow.png'</span>
+                  <span class="name">border</span>.left: <span class="number">10</span>; <span class="name">border</span>.top: <span class="number">10</span>; <span class="name">border</span>.right: <span class="number">10</span>; <span class="name">border</span>.bottom: <span class="number">10</span>
+              }
+              <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+                  <span class="name">id</span>: <span class="name">placeHolder</span>
+
+                  property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">w</span>: <span class="name">Script</span>.<span class="name">getWidth</span>(<span class="name">content</span>)
+                  property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">h</span>: <span class="name">Script</span>.<span class="name">getHeight</span>(<span class="name">content</span>)
+                  property <span class="type"><a href="../qtqml/qml-double.html">double</a></span> <span class="name">s</span>: <span class="name">Script</span>.<span class="name">calculateScale</span>(<span class="name">w</span>, <span class="name">h</span>, <span class="name">photoWrapper</span>.<span class="name">width</span>)
+
+                  <span class="name">color</span>: <span class="string">'white'</span>; <span class="name">anchors</span>.centerIn: <span class="name">parent</span>; <span class="name">antialiasing</span>: <span class="number">true</span>
+                  <span class="name">width</span>:  <span class="name">w</span> <span class="operator">*</span> <span class="name">s</span>; <span class="name">height</span>: <span class="name">h</span> <span class="operator">*</span> <span class="name">s</span>; <span class="name">visible</span>: <span class="name">originalImage</span>.<span class="name">status</span> <span class="operator">!=</span> <span class="name">Image</span>.<span class="name">Ready</span>
+                  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+                      <span class="name">color</span>: <span class="string">&quot;#878787&quot;</span>; <span class="name">antialiasing</span>: <span class="number">true</span>
+                      <span class="type">anchors</span> { <span class="name">fill</span>: <span class="name">parent</span>; <span class="name">topMargin</span>: <span class="number">3</span>; <span class="name">bottomMargin</span>: <span class="number">3</span>; <span class="name">leftMargin</span>: <span class="number">3</span>; <span class="name">rightMargin</span>: <span class="number">3</span> }
+                  }
+              }
+              <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+                  <span class="name">id</span>: <span class="name">border</span>; <span class="name">color</span>: <span class="string">'white'</span>; <span class="name">anchors</span>.centerIn: <span class="name">parent</span>; <span class="name">antialiasing</span>: <span class="number">true</span>
+                  <span class="name">width</span>: <span class="name">originalImage</span>.<span class="name">paintedWidth</span> <span class="operator">+</span> <span class="number">6</span>; <span class="name">height</span>: <span class="name">originalImage</span>.<span class="name">paintedHeight</span> <span class="operator">+</span> <span class="number">6</span>
+                  <span class="name">visible</span>: !<span class="name">placeHolder</span>.<span class="name">visible</span>
+              }
+              <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-busyindicator.html">BusyIndicator</a></span> { <span class="name">anchors</span>.centerIn: <span class="name">parent</span>; <span class="name">on</span>: <span class="name">originalImage</span>.<span class="name">status</span> <span class="operator">!=</span> <span class="name">Image</span>.<span class="name">Ready</span> }
+              <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+                  <span class="name">id</span>: <span class="name">originalImage</span>; <span class="name">antialiasing</span>: <span class="number">true</span>;
+                  <span class="name">source</span>: <span class="string">&quot;http://&quot;</span> <span class="operator">+</span> <span class="name">Script</span>.<span class="name">getImagePath</span>(<span class="name">content</span>); <span class="name">cache</span>: <span class="number">false</span>
+                  <span class="name">fillMode</span>: <span class="name">Image</span>.<span class="name">PreserveAspectFit</span>; <span class="name">width</span>: <span class="name">photoWrapper</span>.<span class="name">width</span>; <span class="name">height</span>: <span class="name">photoWrapper</span>.<span class="name">height</span>
+              }
+              <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+                  <span class="name">id</span>: <span class="name">hqImage</span>; <span class="name">antialiasing</span>: <span class="number">true</span>; <span class="name">source</span>: <span class="string">&quot;&quot;</span>; <span class="name">visible</span>: <span class="number">false</span>; <span class="name">cache</span>: <span class="number">false</span>
+                  <span class="name">fillMode</span>: <span class="name">Image</span>.<span class="name">PreserveAspectFit</span>; <span class="name">width</span>: <span class="name">photoWrapper</span>.<span class="name">width</span>; <span class="name">height</span>: <span class="name">photoWrapper</span>.<span class="name">height</span>
+              }
+              <span class="type"><a href="../qtqml/qml-qtqml-binding.html">Binding</a></span> {
+                  <span class="name">target</span>: <span class="name">mainWindow</span>; <span class="name">property</span>: <span class="string">&quot;downloadProgress&quot;</span>; <span class="name">value</span>: <span class="name">hqImage</span>.<span class="name">progress</span>
+                  <span class="name">when</span>: <span class="name">listItem</span>.<span class="name">ListView</span>.<span class="name">isCurrentItem</span>
+              }
+              <span class="type"><a href="../qtqml/qml-qtqml-binding.html">Binding</a></span> {
+                  <span class="name">target</span>: <span class="name">mainWindow</span>; <span class="name">property</span>: <span class="string">&quot;imageLoading&quot;</span>
+                  <span class="name">value</span>: (<span class="name">hqImage</span>.<span class="name">status</span> <span class="operator">==</span> <span class="name">Image</span>.<span class="name">Loading</span>) ? <span class="number">1</span> : <span class="number">0</span>; <span class="name">when</span>: <span class="name">listItem</span>.<span class="name">ListView</span>.<span class="name">isCurrentItem</span>
+              }
+              <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+                  <span class="name">width</span>: <span class="name">originalImage</span>.<span class="name">paintedWidth</span>; <span class="name">height</span>: <span class="name">originalImage</span>.<span class="name">paintedHeight</span>; <span class="name">anchors</span>.centerIn: <span class="name">originalImage</span>
+                  <span class="name">onClicked</span>: {
+                      <span class="keyword">if</span> (<span class="name">albumWrapper</span>.<span class="name">state</span> <span class="operator">==</span> <span class="string">'inGrid'</span>) {
+                          <span class="name">gridItem</span>.<span class="name">GridView</span>.<span class="name">view</span>.<span class="name">currentIndex</span> <span class="operator">=</span> <span class="name">index</span>;
+                          <span class="name">albumWrapper</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">'fullscreen'</span>
+                      } <span class="keyword">else</span> {
+                          <span class="name">gridItem</span>.<span class="name">GridView</span>.<span class="name">view</span>.<span class="name">currentIndex</span> <span class="operator">=</span> <span class="name">index</span>;
+                          <span class="name">albumWrapper</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">'inGrid'</span>
+                      }
+                  }
+              }
+
+              <span class="name">states</span>: [
+              <span class="type"><a href="../qtqml/qml-qtqml-statemachine-state.html">State</a></span> {
+                  <span class="name">name</span>: <span class="string">'stacked'</span>; <span class="name">when</span>: <span class="name">albumWrapper</span>.<span class="name">state</span> <span class="operator">==</span> <span class="string">''</span>
+                  <span class="type"><a href="../qtquick/qml-qtquick-parentchange.html">ParentChange</a></span> { <span class="name">target</span>: <span class="name">photoWrapper</span>; <span class="name">parent</span>: <span class="name">stackItem</span>; <span class="name">x</span>: <span class="number">10</span>; <span class="name">y</span>: <span class="number">10</span> }
+                  <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> { <span class="name">target</span>: <span class="name">photoWrapper</span>; <span class="name">opacity</span>: <span class="name">stackItem</span>.<span class="name">PathView</span>.<span class="name">onPath</span> ? <span class="number">1.0</span> : <span class="number">0.0</span> }
+              },
+              <span class="type"><a href="../qtqml/qml-qtqml-statemachine-state.html">State</a></span> {
+                  <span class="name">name</span>: <span class="string">'inGrid'</span>; <span class="name">when</span>: <span class="name">albumWrapper</span>.<span class="name">state</span> <span class="operator">==</span> <span class="string">'inGrid'</span>
+                  <span class="type"><a href="../qtquick/qml-qtquick-parentchange.html">ParentChange</a></span> { <span class="name">target</span>: <span class="name">photoWrapper</span>; <span class="name">parent</span>: <span class="name">gridItem</span>; <span class="name">x</span>: <span class="number">10</span>; <span class="name">y</span>: <span class="number">10</span>; <span class="name">rotation</span>: <span class="name">photoWrapper</span>.<span class="name">randomAngle2</span> }
+              },
+              <span class="type"><a href="../qtqml/qml-qtqml-statemachine-state.html">State</a></span> {
+                  <span class="name">name</span>: <span class="string">'fullscreen'</span>; <span class="name">when</span>: <span class="name">albumWrapper</span>.<span class="name">state</span> <span class="operator">==</span> <span class="string">'fullscreen'</span>
+                  <span class="type"><a href="../qtquick/qml-qtquick-parentchange.html">ParentChange</a></span> {
+                      <span class="name">target</span>: <span class="name">photoWrapper</span>; <span class="name">parent</span>: <span class="name">listItem</span>; <span class="name">x</span>: <span class="number">0</span>; <span class="name">y</span>: <span class="number">0</span>; <span class="name">rotation</span>: <span class="number">0</span>
+                      <span class="name">width</span>: <span class="name">mainWindow</span>.<span class="name">width</span>; <span class="name">height</span>: <span class="name">mainWindow</span>.<span class="name">height</span>
+                  }
+                  <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> { <span class="name">target</span>: <span class="name">border</span>; <span class="name">opacity</span>: <span class="number">0</span> }
+                  <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> { <span class="name">target</span>: <span class="name">hqImage</span>; <span class="name">source</span>: <span class="name">listItem</span>.<span class="name">ListView</span>.<span class="name">isCurrentItem</span> ? <span class="name">hq</span> : <span class="string">&quot;&quot;</span>; <span class="name">visible</span>: <span class="number">true</span> }
+              }
+              ]
+
+              <span class="name">transitions</span>: [
+              <span class="type"><a href="../qtquick/qml-qtquick-transition.html">Transition</a></span> {
+                  <span class="name">from</span>: <span class="string">'stacked'</span>; <span class="name">to</span>: <span class="string">'inGrid'</span>
+                  <span class="type"><a href="../qtquick/qml-qtquick-sequentialanimation.html">SequentialAnimation</a></span> {
+                      <span class="type"><a href="../qtquick/qml-qtquick-pauseanimation.html">PauseAnimation</a></span> { <span class="name">duration</span>: <span class="number">10</span> <span class="operator">*</span> <span class="name">index</span> }
+                      <span class="type"><a href="../qtquick/qml-qtquick-parentanimation.html">ParentAnimation</a></span> {
+                          <span class="name">target</span>: <span class="name">photoWrapper</span>; <span class="name">via</span>: <span class="name">foreground</span>
+                          <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> {
+                              <span class="name">target</span>: <span class="name">photoWrapper</span>; <span class="name">properties</span>: <span class="string">'x,y,rotation,opacity'</span>; <span class="name">duration</span>: <span class="number">600</span>; <span class="name">easing</span>.type: <span class="string">'OutQuart'</span>
+                          }
+                      }
+                  }
+              },
+              <span class="type"><a href="../qtquick/qml-qtquick-transition.html">Transition</a></span> {
+                  <span class="name">from</span>: <span class="string">'inGrid'</span>; <span class="name">to</span>: <span class="string">'stacked'</span>
+                  <span class="type"><a href="../qtquick/qml-qtquick-parentanimation.html">ParentAnimation</a></span> {
+                      <span class="name">target</span>: <span class="name">photoWrapper</span>; <span class="name">via</span>: <span class="name">foreground</span>
+                      <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">properties</span>: <span class="string">'x,y,rotation,opacity'</span>; <span class="name">duration</span>: <span class="number">600</span>; <span class="name">easing</span>.type: <span class="string">'OutQuart'</span> }
+                  }
+              },
+              <span class="type"><a href="../qtquick/qml-qtquick-transition.html">Transition</a></span> {
+                  <span class="name">from</span>: <span class="string">'inGrid'</span>; <span class="name">to</span>: <span class="string">'fullscreen'</span>
+                  <span class="type"><a href="../qtquick/qml-qtquick-sequentialanimation.html">SequentialAnimation</a></span> {
+                      <span class="type"><a href="../qtquick/qml-qtquick-pauseanimation.html">PauseAnimation</a></span> { <span class="name">duration</span>: <span class="name">gridItem</span>.<span class="name">GridView</span>.<span class="name">isCurrentItem</span> ? <span class="number">0</span> : <span class="number">600</span> }
+                      <span class="type"><a href="../qtquick/qml-qtquick-parentanimation.html">ParentAnimation</a></span> {
+                          <span class="name">target</span>: <span class="name">photoWrapper</span>; <span class="name">via</span>: <span class="name">foreground</span>
+                          <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> {
+                              <span class="name">targets</span>: [ <span class="name">photoWrapper</span>, <span class="name">border</span> ]
+                              <span class="name">properties</span>: <span class="string">'x,y,width,height,opacity,rotation'</span>
+                              <span class="name">duration</span>: <span class="name">gridItem</span>.<span class="name">GridView</span>.<span class="name">isCurrentItem</span> ? <span class="number">600</span> : <span class="number">1</span>; <span class="name">easing</span>.type: <span class="string">'OutQuart'</span>
+                          }
+                      }
+                  }
+              },
+              <span class="type"><a href="../qtquick/qml-qtquick-transition.html">Transition</a></span> {
+                  <span class="name">from</span>: <span class="string">'fullscreen'</span>; <span class="name">to</span>: <span class="string">'inGrid'</span>
+                  <span class="type"><a href="../qtquick/qml-qtquick-parentanimation.html">ParentAnimation</a></span> {
+                      <span class="name">target</span>: <span class="name">photoWrapper</span>; <span class="name">via</span>: <span class="name">foreground</span>
+                      <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> {
+                          <span class="name">targets</span>: [ <span class="name">photoWrapper</span>, <span class="name">border</span> ]
+                          <span class="name">properties</span>: <span class="string">'x,y,width,height,rotation,opacity'</span>
+                          <span class="name">duration</span>: <span class="name">gridItem</span>.<span class="name">GridView</span>.<span class="name">isCurrentItem</span> ? <span class="number">600</span> : <span class="number">1</span>; <span class="name">easing</span>.type: <span class="string">'OutQuart'</span>
+                      }
+                  }
+              }
+              ]
+          }
+      }
+  }
+
+</pre>

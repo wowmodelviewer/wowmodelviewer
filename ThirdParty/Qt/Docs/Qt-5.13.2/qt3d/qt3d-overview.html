@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qt3d-overview.qdoc -->
+  <title>Qt 3D Overview | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td >Qt 3D Overview</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#basic-3d-features">Basic 3D Features</a></li>
+<li class="level2"><a href="#materials">Materials</a></li>
+<li class="level2"><a href="#shaders">Shaders</a></li>
+<li class="level2"><a href="#shadow-mapping">Shadow Mapping</a></li>
+<li class="level2"><a href="#instanced-rendering">Instanced Rendering</a></li>
+<li class="level2"><a href="#uniform-buffer-objects">Uniform Buffer Objects</a></li>
+<li class="level2"><a href="#useful-tips">Useful Tips</a></li>
+<li class="level1"><a href="#configurable-renderer">Configurable Renderer</a></li>
+<li class="level1"><a href="#3d-extensions">3D Extensions</a></li>
+<li class="level1"><a href="#performance">Performance</a></li>
+<li class="level1"><a href="#qt-3d-architecture">Qt 3D Architecture</a></li>
+<li class="level2"><a href="#using-an-ecs">Using an ECS</a></li>
+<li class="level2"><a href="#ecs-backend">ECS Backend</a></li>
+<li class="level2"><a href="#qt-3d-ecs-implementation">Qt 3D ECS Implementation</a></li>
+<li class="level1"><a href="#extending-qt-3d">Extending Qt 3D</a></li>
+<li class="level1"><a href="#qt-3d-task-based-engine">Qt 3D Task-Based Engine</a></li>
+<li class="level1"><a href="#qt-3d-s-aspects">Qt 3D's Aspects</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt 3D Overview</h1>
+<span class="subtitle"></span>
+<!-- $$$qt3d-overview.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Qt 3D provides a fully configurable renderer that enables developers to quickly implement any rendering pipeline that they need. Further, Qt 3D provides a generic framework for near-realtime simulations beyond rendering.</p>
+<p>Qt 3D is cleanly separated into a core and any number of <i>aspects</i> that can implement any functionality they wish. The aspects interact with <i>components</i> and <i>entities</i> to provide some slice of functionality. Examples of aspects include physics, audio, collision, artificial intelligence (AI), and path finding.</p>
+<a name="basic-3d-features"></a>
+<h2 id="basic-3d-features">Basic 3D Features</h2>
+<p>Qt 3D is a 3D framework that enables the drawing of 3D shapes and moving them around, as well as moving the camera. It supports the following basic features:</p>
+<ul>
+<li>2D and 3D <a href="qt3drender-module.html">rendering</a> for C++ and Qt Quick applications</li>
+<li><a href="qt3drender-qmesh.html">Meshes</a> and <a href="qt3drender-geometry.html">Geometry</a></li>
+<li><a href="qt3dextras-module.html#materials">Materials</a></li>
+<li><a href="qt3d-overview.html#shaders">Shaders</a></li>
+<li><a href="qt3d-overview.html#shadow-mapping">Shadow mapping</a></li>
+<li><a href="qt3dextras-qmetalroughmaterial.html#ambientOcclusion-prop">Ambient occlusion</a></li>
+<li>High dynamic range</li>
+<li><a href="qt3drender-framegraph.html#deferred-renderer">Deferred rendering</a></li>
+<li>Multitexturing</li>
+<li><a href="qt3d-overview.html#instanced-rendering">Instanced rendering</a></li>
+<li><a href="qt3d-overview.html#uniform-buffer-objects">Uniform Buffer Objects</a></li>
+<li><a href="qt3drender-protips.html">Pro Tips</a></li>
+</ul>
+<a name="materials"></a>
+<h3 id="materials">Materials</h3>
+<p>Qt 3D has a robust and very flexible material system that allows multiple levels of customization. It caters for different rendering approaches on different platforms or OpenGL versions, enables multiple rendering passes with different state sets, provides mechanisms for overriding of parameters at different levels, and allows easy switching of shaders. All this from C++ or using QML property bindings.</p>
+<p>The properties of a <a href="qml-qt3d-render-material.html">Material</a> type can easily be mapped through to uniform variables in a GLSL shader program that is itself specified in the referenced effect property.</p>
+<p>For examples of using materials, see the following examples:</p>
+<ul>
+<li><a href="qt3d-simplecustommaterial-example.html">Qt 3D: Simple Custom Material QML Example</a></li>
+<li><a href="qt3d-advancedcustommaterial-example.html">Qt 3D: Advanced Custom Material QML Example</a></li>
+<li><a href="qt3d-pbr-materials-example.html">Qt 3D: PBR Materials QML Example</a></li>
+</ul>
+<a name="shaders"></a>
+<h3 id="shaders">Shaders</h3>
+<p>Qt 3D supports all of the OpenGL programmable rendering pipeline stages: vertex, tessellation control, tessellation evaluation, geometry, and fragment shaders. Compute shaders are planned for a future release.</p>
+<p>For examples of using shaders, see the <a href="../qtgui/qopenglshaderprogram.html#simple-shader-example">Simple Shader Example</a>, <a href="qt3d-shadow-map-qml-example.html">Qt 3D: Shadow Map QML Example</a>, <a href="qt3d-wireframe-example.html">Qt 3D: Wireframe QML Example</a>, and <a href="qt3d-wave-example.html">Qt 3D: Wave QML Example</a>.</p>
+<a name="shadow-mapping"></a>
+<h3 id="shadow-mapping">Shadow Mapping</h3>
+<p>Shadows are not directly supported by OpenGL, but there are countless techniques that can be employed to generate them. Shadow mapping is simple to use for generating good-looking shadows, while having a very small performance cost.</p>
+<p>Shadow mapping is typically implemented using a two pass rendering. In the first pass, the shadow information is generated. In the second pass, the scene is generated using a particular rendering technique, while at the same time using the information gathered in the first pass to draw the shadows.</p>
+<p>The idea behind shadow mapping is that only the closest fragments to the light are lit. Fragments <i>behind</i> other fragments are occluded, and therefore in shadow.</p>
+<p>Therefore, in the first pass, the scene is drawn from the point of view of the light. The information that is stored is simply the distance of the closest fragment in this <i>light space</i>. In OpenGL terms, this corresponds to having a Framebuffer Object, or FBO, with a depth texture attached to it. In fact, the <i>distance from the eye</i> is the definition of the depth, and the default depth testing done by OpenGL will actually store only the depth for the closest fragment.</p>
+<p>A color texture attachment is not even needed, because there is no need to shade fragments, only to calculate their depth.</p>
+<p>The following image displays a scene with a self-shadowed plane and trefoil knot:</p>
+<p class="centerAlign"><img src="images/shadowmapping-qt3d.png" alt="" /></p><p>The following image shows an exaggerated shadow map texture of the scene:</p>
+<p class="centerAlign"><img src="images/shadowmapping-depth.png" alt="" /></p><p>The image indicates the depth stored when rendering the scene from the light point of view. Darker colors represent a shallow depth (that is, closer to the camera). In this scene, the light is placed somewhere above the objects in the scene, on the right side with respect to the main camera (compare this with the first screenshot). This matches with the fact that the toy plane is closer to the camera than the other objects.</p>
+<p>Once the shadow map has been generated, the second rendering pass is done. In this second pass, rendering is done using the normal scene's camera. Any effect can be used here, such as Phong shading. It is important that the shadow map algorithm is applied in the fragment shader. That is, the fragment that is closest to the light is drawn lit, whereas the other fragments are drawn in shadow.</p>
+<p>The shadow map generated in the first pass provides the necessary information about the distance of fragments to light. It then suffices to remap the fragment in light space, thereby calculating its depth from the light point of view, as well as where its coordinates are on the shadow map texture. The shadow map texture can then be sampled at the given coordinates and the fragment's depth can be compared with the result of the sampling. If the fragment is further away, then it is in shadow; otherwise it is lit.</p>
+<p>For example code, see the <a href="qt3d-shadow-map-qml-example.html">Qt 3D: Shadow Map QML Example</a>.</p>
+<a name="instanced-rendering"></a>
+<h3 id="instanced-rendering">Instanced Rendering</h3>
+<p><i>Instancing</i> is a way of getting the GPU to draw many copies (instances) of a base object that varies in some way for each copy. Often, in position, orientation, color, material properties, scale, and so on. Qt 3D provides an API similar to the Qt Quick <a href="../qtquick/qml-qtquick-repeater.html">Repeater</a> element. In this case, the delegate is the base object and the model provides the per-instance data. So whereas an entity with a <a href="qml-qt3d-render-mesh.html">Mesh</a> component attached eventually gets transformed into a call to glDrawElements, an entity with a instanced component will be translated into a call to glDrawElementsInstanced.</p>
+<p>Instanced rendering is planned for a future release.</p>
+<a name="uniform-buffer-objects"></a>
+<h3 id="uniform-buffer-objects">Uniform Buffer Objects</h3>
+<p>A Uniform Buffer Object (UBO) can be bound to OpenGL shader programs to make large amounts of data readily available. Typical use cases for UBOs are for sets of material or lighting parameters.</p>
+<a name="useful-tips"></a>
+<h3 id="useful-tips">Useful Tips</h3>
+<p>Some very useful programming tips for 3D rendering can be found on this page: <a href="qt3drender-protips.html">Qt 3D Render Pro Tips</a>.</p>
+<a name="configurable-renderer"></a>
+<h2 id="configurable-renderer">Configurable Renderer</h2>
+<p>To combine support for both C++ and QML APIs with having a fully configurable renderer, the concept of a <i>framegraph</i> was introduced. While a <i>scenegraph</i> is a data-driven description of <i>what</i> to render, a <a href="qt3drender-framegraph.html">framegraph</a> is a data-driven description of <i>how</i> to render it.</p>
+<p>A framegraph enables developers to choose between a simple forward renderer, including a z-fill pass, or using a deferred renderer for example. It also gives them control over when to render any transparent objects, and so on. Since this is all configured purely from data, it is very easy to modify even dynamically at runtime without touching any C++ code. It is possible to extend Qt 3D by creating your own framegraphs that implement custom rendering algorithms.</p>
+<a name="3d-extensions"></a>
+<h2 id="3d-extensions">3D Extensions</h2>
+<p>Beyond the essentials of displaying 3D content on the screen, Qt 3D is extensible and flexible enough to act as a host for the following types of extensions related to the 3D objects:</p>
+<ul>
+<li>Physics simulation</li>
+<li>Collision detection</li>
+<li>3D positional audio</li>
+<li>Rigid body, skeletal, and morph target animation</li>
+<li>Path finding and other AI</li>
+<li>Picking</li>
+<li>Particles</li>
+<li>Object spawning</li>
+</ul>
+<a name="performance"></a>
+<h2 id="performance">Performance</h2>
+<p>Qt 3D is designed to perform well and scale up with the number of available CPU cores, because modern hardware improves performance by increasing the numbers of cores rather than base clock speed. Using multiple cores works well, because many tasks are independent of each other. For example, the operations performed by a path finding module do not overlap strongly with the tasks performed by a renderer, except maybe when rendering debug information or statistics.</p>
+<a name="qt-3d-architecture"></a>
+<h2 id="qt-3d-architecture">Qt 3D Architecture</h2>
+<p>The main use cases of Qt 3D are simulating objects in near-realtime and rendering the state of those objects onto the screen. The Space Invaders example contains the following objects:</p>
+<p class="centerAlign"><img src="images/Space-invaders.jpg" alt="" /></p><ul>
+<li>The player's ground cannon</li>
+<li>The ground</li>
+<li>The defensive blocks</li>
+<li>The enemy space invader ships</li>
+<li>The enemy boss flying saucer</li>
+<li>The bullets shot by the enemies and the player</li>
+</ul>
+<p>In a traditional C++ design, these types of object would typically be implemented as classes arranged in some kind of inheritance tree. Various branches in the inheritance tree might add additional functionality to the root class for features such as:</p>
+<ul>
+<li>Accepts user input</li>
+<li>Plays a sound</li>
+<li>Is animated</li>
+<li>Collides with other objects</li>
+<li>Is drawn on screen</li>
+</ul>
+<p>The types in the Space Invaders example can be classified against these features. However, designing an elegant inheritance tree for even such a simple example is not easy.</p>
+<p>This approach and other variations on inheritance present a number of problems:</p>
+<ul>
+<li>Deep and wide inheritance hierarchies are difficult to understand, maintain and extend.</li>
+<li>The inheritance taxonomy is set in stone at compile time.</li>
+<li>Each level in the class inheritance tree can only classify upon a single criteria or axis.</li>
+<li>Shared functionality tends to <i>bubble up</i> the class hierarchy over time.</li>
+<li>It is impossible to predict what the developers will want to do.</li>
+</ul>
+<p>Extending deep and wide inheritance trees usually requires understanding, and agreeing with, the taxonomy used by the original author. Therefore, Qt 3D places focus on aggregation instead of inheritance as the means of imparting functionality onto an instance of an object. Specifically, Qt 3D implements an Entity Component System (ECS).</p>
+<a name="using-an-ecs"></a>
+<h3 id="using-an-ecs">Using an ECS</h3>
+<p>In an ECS, an entity represents a simulated object, but by itself it is devoid of any specific behavior or characteristics. Additional behavior can be grafted onto an entity by having the entity aggregate one or more components. Each component is a vertical slice of behavior of an object type.</p>
+<p>In the Space Invaders example, the ground is an entity with an attached component that tells the system that the entity needs rendering and what kind of rendering it needs. An enemy space invader ship is another entity with attached components that cause the ship to be rendered, but also enable it to emit sounds, be collided with, be animated, and be controlled by a simple AI.</p>
+<p>The player's ground cannon entity has mostly similar components to the enemy space invader ship, except that it does not have the AI component. In its place, the cannon has an input component to enable the player to move it around and to fire bullets.</p>
+<a name="ecs-backend"></a>
+<h3 id="ecs-backend">ECS Backend</h3>
+<p class="centerAlign"><img src="images/ecs-2.png" alt="" /></p><p>The backend of Qt 3D implements the <i>system</i> part of the ECS paradigm in the form of <i>aspects</i>. An aspect implements the particular vertical slice of the functionality provided to entities by a combination of one or more of their aggregated components.</p>
+<p>For example, the renderer aspect looks for entities that have mesh, material, and optionally transformation components. If the renderer aspect finds such an entity, it knows how to take that data and draw something nice from it. If an entity does not have those components, the renderer aspect ignores it.</p>
+<p>Qt 3D builds custom entities by aggregating components that provide additional capabilities. The Qt 3D engine uses aspects to process and update entities with specific components.</p>
+<p>For example, a physics aspect looks for entities that have some kind of collision volume component and another component that specifies other properties needed by such simulations like mass, coefficient of friction, and so on. An entity that emits sound has a component that specifies it is a sound emitter, as well as specifying when and which sounds to play.</p>
+<p>Because ECS uses aggregation rather than inheritance, it is possible to dynamically change how an object behaves at runtime simply by adding or removing components.</p>
+<p>For example, to enable a player to suddenly run through walls after a power-up, that entity's collision volume component can be removed temporarily, until the power-up times out. There is no need to create a special one-off subclass for <code>PlayerWhoRunsThroughWalls</code>.</p>
+<a name="qt-3d-ecs-implementation"></a>
+<h3 id="qt-3d-ecs-implementation">Qt 3D ECS Implementation</h3>
+<p>Qt 3D implements ECS as a simple class hierarchy. The Qt 3D base class is <a href="qt3dcore-qnode.html">Qt3DCore::QNode</a>, which is a subclass of <a href="../qtcore/qobject.html">QObject</a>. <a href="qt3dcore-qnode.html">Qt3DCore::QNode</a> adds to <a href="../qtcore/qobject.html">QObject</a> the ability to automatically communicate property changes to aspects and an ID that is unique throughout an application. The aspects exist in additional threads and <a href="qt3dcore-qnode.html">Qt3DCore::QNode</a> simplifies the data transfer between the user-facing objects and the aspects.</p>
+<p>Typically, subclasses of <a href="qt3dcore-qnode.html">Qt3DCore::QNode</a> provide additional supporting data that is referenced by components. For example, the QShaderProgram class specifies the GLSL code to be used when rendering a set of entities.</p>
+<p class="centerAlign"><img src="images/ecs-1.png" alt="" /></p><p>Components in Qt 3D are implemented by subclassing <a href="qt3dcore-qcomponent.html">Qt3DCore::QComponent</a> and adding the data necessary for the corresponding aspect to do its work. For example, the mesh component is used by the renderer aspect to retrieve the per-vertex data that should be sent down the OpenGL pipeline.</p>
+<p>Finally, <a href="qt3dcore-qentity.html">Qt3DCore::QEntity</a> is simply an object that can aggregate zero or more <a href="qt3dcore-qcomponent.html">Qt3DCore::QComponent</a> instances.</p>
+<a name="extending-qt-3d"></a>
+<h2 id="extending-qt-3d">Extending Qt 3D</h2>
+<p>Adding functionality to Qt 3D, either as part of Qt or specific to your own applications to benefit from the multi-threaded back-end consists of the following tasks:</p>
+<ul>
+<li>Identify and implement any necessary components and supporting data.</li>
+<li>Register the components with the QML engine (only if you use the QML API).</li>
+<li>Subclass QAbstractAspect and implement the subsystem functionality.</li>
+</ul>
+<a name="qt-3d-task-based-engine"></a>
+<h2 id="qt-3d-task-based-engine">Qt 3D Task-Based Engine</h2>
+<p>In Qt 3D, aspects are asked in each frame for a set of <i>tasks</i> to execute along with the <i>dependencies</i> between them. The tasks are distributed across all the configured cores by a scheduler to improve performance.</p>
+<a name="qt-3d-s-aspects"></a>
+<h2 id="qt-3d-s-aspects">Qt 3D's Aspects</h2>
+<p>By default, Qt 3D provides the <a href="qt3drender-module.html">Qt3DRender</a> and <a href="qt3dinput-module.html">Qt3DInput</a> aspects. The components and other supporting classes provided by these aspects are discussed in the documentation for those modules.</p>
+<p>Additional aspects providing more capabilities will be added in future versions of Qt 3D.</p>
+</div>
+<!-- @@@qt3d-overview.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- licensewizard.qdoc -->
+  <title>License Wizard Example | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >License Wizard Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#the-licensewizard-class">The LicenseWizard Class</a></li>
+<li class="level1"><a href="#the-intropage-class">The IntroPage Class</a></li>
+<li class="level1"><a href="#the-evaluatepage-class">The EvaluatePage Class</a></li>
+<li class="level1"><a href="#the-conclusionpage-class">The ConclusionPage Class</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">License Wizard Example</h1>
+<span class="subtitle"></span>
+<!-- $$$dialogs/licensewizard-brief -->
+<p>The License Wizard example shows how to implement complex wizards in Qt.</p>
+<!-- @@@dialogs/licensewizard -->
+<!-- $$$dialogs/licensewizard-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/licensewizard-example.png" alt="Screenshot of the License Wizard example" /></p><p>Most wizards have a linear structure, with page 1 followed by page 2 and so on until the last page. The <a href="qtwidgets-dialogs-classwizard-example.html">Class Wizard</a> example shows how to create such wizards.</p>
+<p>Some wizards are more complex in that they allow different traversal paths based on the information provided by the user. The License Wizard example illustrates this. It provides five wizard pages; depending on which options are selected, the user can reach different pages.</p>
+<p class="centerAlign"><img src="images/licensewizard-flow.png" alt="The License Wizard pages" /></p><p>The example consists of the following classes:</p>
+<ul>
+<li><code>LicenseWizard</code> inherits <a href="qwizard.html">QWizard</a> and implements a non-linear five-page wizard that leads the user through the process of choosing a license agreement.</li>
+<li><code>IntroPage</code>, <code>EvaluatePage</code>, <code>RegisterPage</code>, <code>DetailsPage</code>, and <code>ConclusionPage</code> are <a href="qwizardpage.html">QWizardPage</a> subclasses that implement the wizard pages.</li>
+</ul>
+<a name="the-licensewizard-class"></a>
+<h4 id="the-licensewizard-class">The LicenseWizard Class</h4>
+<p>The <code>LicenseWizard</code> class derives from <a href="qwizard.html">QWizard</a> and provides a five-page wizard that guides the user through the process of registering their copy of a fictitious software product. Here's the class definition:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> LicenseWizard : <span class="keyword">public</span> <span class="type"><a href="qwizard.html">QWizard</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      <span class="keyword">enum</span> { Page_Intro<span class="operator">,</span> Page_Evaluate<span class="operator">,</span> Page_Register<span class="operator">,</span> Page_Details<span class="operator">,</span>
+             Page_Conclusion };
+
+      LicenseWizard(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+
+  <span class="keyword">private</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> showHelp();
+  };
+
+</pre>
+<p>The class's public API is limited to a constructor and an enum. The enum defines the IDs associated with the various pages:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Class name</th><th >Enum value</th><th >Page ID</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>IntroPage</code></td><td ><code>Page_Intro</code></td><td >0</td></tr>
+<tr valign="top" class="even"><td ><code>EvaluatePage</code></td><td ><code>Page_Evaluate</code></td><td >1</td></tr>
+<tr valign="top" class="odd"><td ><code>RegisterPage</code></td><td ><code>Page_Register</code></td><td >2</td></tr>
+<tr valign="top" class="even"><td ><code>DetailsPage</code></td><td ><code>Page_Details</code></td><td >3</td></tr>
+<tr valign="top" class="odd"><td ><code>ConclusionPage</code></td><td ><code>Page_Conclusion</code></td><td >4</td></tr>
+</table></div>
+<p>For this example, the IDs are arbitrary. The only constraints are that they must be unique and different from -1. IDs allow us to refer to pages.</p>
+<pre class="cpp">
+
+  LicenseWizard<span class="operator">::</span>LicenseWizard(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qwizard.html">QWizard</a></span>(parent)
+  {
+      setPage(Page_Intro<span class="operator">,</span> <span class="keyword">new</span> IntroPage);
+      setPage(Page_Evaluate<span class="operator">,</span> <span class="keyword">new</span> EvaluatePage);
+      setPage(Page_Register<span class="operator">,</span> <span class="keyword">new</span> RegisterPage);
+      setPage(Page_Details<span class="operator">,</span> <span class="keyword">new</span> DetailsPage);
+      setPage(Page_Conclusion<span class="operator">,</span> <span class="keyword">new</span> ConclusionPage);
+
+      setStartId(Page_Intro);
+
+</pre>
+<p>In the constructor, we create the five pages, insert them into the wizard using <a href="qwizard.html#setPage">QWizard::setPage</a>(), and set <code>Page_Intro</code> to be the first page.</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#ifndef Q_OS_MAC</span>
+      setWizardStyle(ModernStyle);
+  <span class="preprocessor">#endif</span>
+
+</pre>
+<p>We set the style to <a href="qwizard.html#WizardStyle-enum">ModernStyle</a> on all platforms except <a href="../qtdoc/internationalization.html#macos">macOS</a>,</p>
+<pre class="cpp">
+
+      setOption(HaveHelpButton<span class="operator">,</span> <span class="keyword">true</span>);
+      setPixmap(<span class="type"><a href="qwizard.html">QWizard</a></span><span class="operator">::</span>LogoPixmap<span class="operator">,</span> <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span>(<span class="string">&quot;:/images/logo.png&quot;</span>));
+
+      connect(<span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qwizard.html">QWizard</a></span><span class="operator">::</span>helpRequested<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>LicenseWizard<span class="operator">::</span>showHelp);
+
+      setWindowTitle(tr(<span class="string">&quot;License Wizard&quot;</span>));
+  }
+
+</pre>
+<p>We configure the <a href="qwizard.html">QWizard</a> to show a <b>Help</b> button, which is connected to our <code>showHelp()</code> slot. We also set the <a href="qwizard.html#WizardPixmap-enum">LogoPixmap</a> for all pages that have a header (i.e&#x2e;, <code>EvaluatePage</code>, <code>RegisterPage</code>, and <code>DetailsPage</code>).</p>
+<pre class="cpp">
+
+  <span class="type">void</span> LicenseWizard<span class="operator">::</span>showHelp()
+  {
+      <span class="keyword">static</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> lastHelpMessage;
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> message;
+
+      <span class="keyword">switch</span> (currentId()) {
+      <span class="keyword">case</span> Page_Intro:
+          message <span class="operator">=</span> tr(<span class="string">&quot;The decision you make here will affect which page you &quot;</span>
+                       <span class="string">&quot;get to see next.&quot;</span>);
+          <span class="keyword">break</span>;
+      ...
+      <span class="keyword">default</span>:
+          message <span class="operator">=</span> tr(<span class="string">&quot;This help is likely not to be of any help.&quot;</span>);
+      }
+
+      <span class="keyword">if</span> (lastHelpMessage <span class="operator">=</span><span class="operator">=</span> message)
+          message <span class="operator">=</span> tr(<span class="string">&quot;Sorry, I already gave what help I could. &quot;</span>
+                       <span class="string">&quot;Maybe you should try asking a human?&quot;</span>);
+
+      <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>information(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;License Wizard Help&quot;</span>)<span class="operator">,</span> message);
+
+      lastHelpMessage <span class="operator">=</span> message;
+  }
+
+</pre>
+<p>In <code>showHelp()</code>, we display help texts that are appropriate for the current page. If the user clicks <b>Help</b> twice for the same page, we say, &quot;Sorry, I already gave what help I could. Maybe you should try asking a human?&quot;</p>
+<a name="the-intropage-class"></a>
+<h4 id="the-intropage-class">The IntroPage Class</h4>
+<p>The pages are defined in <code>licensewizard.h</code> and implemented in <code>licensewizard.cpp</code>, together with <code>LicenseWizard</code>.</p>
+<p>Here's the definition and implementation of <code>IntroPage</code>:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> IntroPage : <span class="keyword">public</span> <span class="type"><a href="qwizardpage.html">QWizardPage</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      IntroPage(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+
+      <span class="type">int</span> nextId() <span class="keyword">const</span> override;
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>topLabel;
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>registerRadioButton;
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>evaluateRadioButton;
+  };
+
+  IntroPage<span class="operator">::</span>IntroPage(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qwizardpage.html">QWizardPage</a></span>(parent)
+  {
+      setTitle(tr(<span class="string">&quot;Introduction&quot;</span>));
+      setPixmap(<span class="type"><a href="qwizard.html">QWizard</a></span><span class="operator">::</span>WatermarkPixmap<span class="operator">,</span> <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span>(<span class="string">&quot;:/images/watermark.png&quot;</span>));
+
+      topLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;This wizard will help you register your copy of &quot;</span>
+                               <span class="string">&quot;&lt;i&gt;Super Product One&lt;/i&gt;&amp;trade; or start &quot;</span>
+                               <span class="string">&quot;evaluating the product.&quot;</span>));
+      topLabel<span class="operator">-</span><span class="operator">&gt;</span>setWordWrap(<span class="keyword">true</span>);
+
+      registerRadioButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qradiobutton.html">QRadioButton</a></span>(tr(<span class="string">&quot;&amp;Register your copy&quot;</span>));
+      evaluateRadioButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qradiobutton.html">QRadioButton</a></span>(tr(<span class="string">&quot;&amp;Evaluate the product for 30 &quot;</span>
+                                                <span class="string">&quot;days&quot;</span>));
+      registerRadioButton<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+
+      <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(topLabel);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(registerRadioButton);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(evaluateRadioButton);
+      setLayout(layout);
+  }
+
+</pre>
+<p>A page inherits from <a href="qwizardpage.html">QWizardPage</a>. We set a <a href="qwizardpage.html#title-prop">title</a> and a <a href="qwizard.html#WizardPixmap-enum">watermark pixmap</a>. By not setting any <a href="qwizardpage.html#subTitle-prop">subTitle</a>, we ensure that no header is displayed for this page. (On Windows, it is customary for wizards to display a watermark pixmap on the first and last pages, and to have a header on the other pages.)</p>
+<pre class="cpp">
+
+  <span class="type">int</span> IntroPage<span class="operator">::</span>nextId() <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (evaluateRadioButton<span class="operator">-</span><span class="operator">&gt;</span>isChecked()) {
+          <span class="keyword">return</span> LicenseWizard<span class="operator">::</span>Page_Evaluate;
+      } <span class="keyword">else</span> {
+          <span class="keyword">return</span> LicenseWizard<span class="operator">::</span>Page_Register;
+      }
+  }
+
+</pre>
+<p>The <code>nextId()</code> function returns the ID for <code>EvaluatePage</code> if the <b>Evaluate the product for 30 days</b> option is checked; otherwise it returns the ID for <code>RegisterPage</code>.</p>
+<a name="the-evaluatepage-class"></a>
+<h4 id="the-evaluatepage-class">The EvaluatePage Class</h4>
+<p>The <code>EvaluatePage</code> is slightly more involved:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> EvaluatePage : <span class="keyword">public</span> <span class="type"><a href="qwizardpage.html">QWizardPage</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      EvaluatePage(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+
+      <span class="type">int</span> nextId() <span class="keyword">const</span> override;
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>nameLabel;
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>emailLabel;
+      <span class="type"><a href="qlineedit.html">QLineEdit</a></span> <span class="operator">*</span>nameLineEdit;
+      <span class="type"><a href="qlineedit.html">QLineEdit</a></span> <span class="operator">*</span>emailLineEdit;
+  };
+
+  EvaluatePage<span class="operator">::</span>EvaluatePage(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qwizardpage.html">QWizardPage</a></span>(parent)
+  {
+      setTitle(tr(<span class="string">&quot;Evaluate &lt;i&gt;Super Product One&lt;/i&gt;&amp;trade;&quot;</span>));
+      setSubTitle(tr(<span class="string">&quot;Please fill both fields. Make sure to provide a valid &quot;</span>
+                     <span class="string">&quot;email address (e.g., john.smith@example.com).&quot;</span>));
+
+      nameLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;N&amp;ame:&quot;</span>));
+      nameLineEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlineedit.html">QLineEdit</a></span>;
+      ...
+      registerField(<span class="string">&quot;evaluate.name*&quot;</span><span class="operator">,</span> nameLineEdit);
+      registerField(<span class="string">&quot;evaluate.email*&quot;</span><span class="operator">,</span> emailLineEdit);
+      ...
+  }
+
+</pre>
+<p>First, we set the page's <a href="qwizardpage.html#title-prop">title</a> and <a href="qwizardpage.html#subTitle-prop">subTitle</a>.</p>
+<p>Then we create the child widgets, create <a href="qwizard.html#registering-and-using-fields">wizard fields</a> associated with them, and put them into layouts. The fields are created with an asterisk (<code>*</code>) next to their name. This makes them <a href="qwizard.html#mandatory-fields">mandatory fields</a>, that is, fields that must be filled before the user can press the <b>Next</b> button (<b>Continue</b> on <a href="../qtdoc/internationalization.html#macos">macOS</a>). The fields' values can be accessed from any other page using <a href="qwizardpage.html#field">QWizardPage::field</a>().</p>
+<p>Resetting the page amounts to clearing the two text fields.</p>
+<pre class="cpp">
+
+  <span class="type">int</span> EvaluatePage<span class="operator">::</span>nextId() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> LicenseWizard<span class="operator">::</span>Page_Conclusion;
+  }
+
+</pre>
+<p>The next page is always the <code>ConclusionPage</code>.</p>
+<a name="the-conclusionpage-class"></a>
+<h4 id="the-conclusionpage-class">The ConclusionPage Class</h4>
+<p>The <code>RegisterPage</code> and <code>DetailsPage</code> are very similar to <code>EvaluatePage</code>. Let's go directly to the <code>ConclusionPage</code>:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> ConclusionPage : <span class="keyword">public</span> <span class="type"><a href="qwizardpage.html">QWizardPage</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      ConclusionPage(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+
+      <span class="type">void</span> initializePage() override;
+      <span class="type">int</span> nextId() <span class="keyword">const</span> override;
+      <span class="type">void</span> setVisible(bool visible) override;
+
+  <span class="keyword">private</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> printButtonClicked();
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>bottomLabel;
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>agreeCheckBox;
+  };
+
+</pre>
+<p>This time, we reimplement <a href="qwizardpage.html#initializePage">QWizardPage::initializePage</a>() and <a href="qwidget.html#visible-prop">QWidget::setVisible</a>(), in addition to <a href="qwizardpage.html#nextId">nextId()</a>. We also declare a private slot: <code>printButtonClicked()</code>.</p>
+<pre class="cpp">
+
+  <span class="type">int</span> IntroPage<span class="operator">::</span>nextId() <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (evaluateRadioButton<span class="operator">-</span><span class="operator">&gt;</span>isChecked()) {
+          <span class="keyword">return</span> LicenseWizard<span class="operator">::</span>Page_Evaluate;
+      } <span class="keyword">else</span> {
+          <span class="keyword">return</span> LicenseWizard<span class="operator">::</span>Page_Register;
+      }
+  }
+
+</pre>
+<p>The default implementation of <a href="qwizardpage.html#nextId">QWizardPage::nextId</a>() returns the page with the next ID, or -1 if the current page has the highest ID. This behavior would work here, because <code>Page_Conclusion</code> equals 5 and there is no page with a higher ID, but to avoid relying on such subtle behavior, we reimplement <a href="qwizardpage.html#nextId">nextId()</a> to return -1.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> ConclusionPage<span class="operator">::</span>initializePage()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> licenseText;
+
+      <span class="keyword">if</span> (wizard()<span class="operator">-</span><span class="operator">&gt;</span>hasVisitedPage(LicenseWizard<span class="operator">::</span>Page_Evaluate)) {
+          licenseText <span class="operator">=</span> tr(<span class="string">&quot;&lt;u&gt;Evaluation License Agreement:&lt;/u&gt; &quot;</span>
+                           <span class="string">&quot;You can use this software for 30 days and make one &quot;</span>
+                           <span class="string">&quot;backup, but you are not allowed to distribute it.&quot;</span>);
+      } <span class="keyword">else</span> <span class="keyword">if</span> (wizard()<span class="operator">-</span><span class="operator">&gt;</span>hasVisitedPage(LicenseWizard<span class="operator">::</span>Page_Details)) {
+          licenseText <span class="operator">=</span> tr(<span class="string">&quot;&lt;u&gt;First-Time License Agreement:&lt;/u&gt; &quot;</span>
+                           <span class="string">&quot;You can use this software subject to the license &quot;</span>
+                           <span class="string">&quot;you will receive by email.&quot;</span>);
+      } <span class="keyword">else</span> {
+          licenseText <span class="operator">=</span> tr(<span class="string">&quot;&lt;u&gt;Upgrade License Agreement:&lt;/u&gt; &quot;</span>
+                           <span class="string">&quot;This software is licensed under the terms of your &quot;</span>
+                           <span class="string">&quot;current license.&quot;</span>);
+      }
+      bottomLabel<span class="operator">-</span><span class="operator">&gt;</span>setText(licenseText);
+  }
+
+</pre>
+<p>We use <a href="qwizard.html#hasVisitedPage">QWizard::hasVisitedPage</a>() to determine the type of license agreement the user has chosen. If the user filled the <code>EvaluatePage</code>, the license text refers to an Evaluation License Agreement. If the user filled the <code>DetailsPage</code>, the license text is a First-Time License Agreement. If the user provided an upgrade key and skipped the <code>DetailsPage</code>, the license text is an Update License Agreement.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> ConclusionPage<span class="operator">::</span>setVisible(bool visible)
+  {
+      <span class="type"><a href="qwizardpage.html">QWizardPage</a></span><span class="operator">::</span>setVisible(visible);
+
+      <span class="keyword">if</span> (visible) {
+          wizard()<span class="operator">-</span><span class="operator">&gt;</span>setButtonText(<span class="type"><a href="qwizard.html">QWizard</a></span><span class="operator">::</span>CustomButton1<span class="operator">,</span> tr(<span class="string">&quot;&amp;Print&quot;</span>));
+          wizard()<span class="operator">-</span><span class="operator">&gt;</span>setOption(<span class="type"><a href="qwizard.html">QWizard</a></span><span class="operator">::</span>HaveCustomButton1<span class="operator">,</span> <span class="keyword">true</span>);
+          connect(wizard()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qwizard.html">QWizard</a></span><span class="operator">::</span>customButtonClicked<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ConclusionPage<span class="operator">::</span>printButtonClicked);
+      } <span class="keyword">else</span> {
+          wizard()<span class="operator">-</span><span class="operator">&gt;</span>setOption(<span class="type"><a href="qwizard.html">QWizard</a></span><span class="operator">::</span>HaveCustomButton1<span class="operator">,</span> <span class="keyword">false</span>);
+          disconnect(wizard()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qwizard.html">QWizard</a></span><span class="operator">::</span>customButtonClicked<span class="operator">,</span>
+                     <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ConclusionPage<span class="operator">::</span>printButtonClicked);
+      }
+  }
+
+</pre>
+<p>We want to display a <b>Print</b> button in the wizard when the <code>ConclusionPage</code> is up. One way to accomplish this is to reimplement <a href="qwidget.html#visible-prop">QWidget::setVisible</a>():</p>
+<ul>
+<li>If the page is shown, we set the <a href="qwizard.html#WizardButton-enum">CustomButton1</a> button's text to <b><u>P</u>rint</b>, we enable the <a href="qwizard.html#WizardOption-enum">HaveCustomButton1</a> option, and we connect the <a href="qwizard.html">QWizard</a>'s <a href="qwizard.html#customButtonClicked">customButtonClicked()</a> signal to our <code>printButtonClicked()</code> slot.</li>
+<li>If the page is hidden, we disable the <a href="qwizard.html#WizardOption-enum">HaveCustomButton1</a> option and disconnect the <code>printButtonClicked()</code> slot.</li>
+</ul>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/dialogs/licensewizard?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<p><b>See also </b><a href="qwizard.html">QWizard</a>, <a href="qtwidgets-dialogs-classwizard-example.html">Class Wizard Example</a>, and <a href="qtwidgets-dialogs-trivialwizard-example.html">Trivial Wizard Example</a>.</p>
+<!-- @@@dialogs/licensewizard -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

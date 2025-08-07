@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qpa.qdoc -->
+  <title>Qt Platform Abstraction | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Qt Platform Abstraction</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#qpa-minimal-plugins">QPA Minimal Plugins</a></li>
+<li class="level1"><a href="#class-overview">Class Overview</a></li>
+<li class="level1"><a href="#qpa-plugins">QPA Plugins</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Platform Abstraction</h1>
+<span class="subtitle"></span>
+<!-- $$$qpa.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The Qt Platform Abstraction (QPA) is the platform abstraction layer for Qt 5 and replaces Qt for Embedded Linux and the platform ports from Qt 4.</p>
+<p>QPA plugins are implemented by subclassing various <code>QPlatform*</code> classes. There are several <i>root</i> classes, such as <code>QPlatformIntegration</code> and <code>QPlatformWindow</code> for window system integration and <code>QPlatformTheme</code> for deeper platform theming and integration. <a href="../qtwidgets/qstyle.html">QStyle</a> is not a part of QPA.</p>
+<p>There are no source or binary compatibility guarantees for the QPA classes, meaning that a platform plugin is only guaranteed to work with the Qt version it was developed against. API changes will however only be made in minor releases. (5.1, 5.2, and so on.)</p>
+<a name="qpa-minimal-plugins"></a>
+<h2 id="qpa-minimal-plugins">QPA Minimal Plugins</h2>
+<p>There is no detailed tutorial documentation for writing QPA plugins at this time. However, there are two minimal plugins shipped with Qt 5 for testing and other special purposes that you can use as examples:</p>
+<ul>
+<li><code>qtbase/src/plugins/platforms/minimal/</code></li>
+<li><code>qtbase/src/plugins/platforms/minimalegl/</code></li>
+</ul>
+<p>The <code>qminimal</code> plugin is used for tools that link against <a href="../qtgui/qtgui-index.html">Qt GUI</a>, but do not require window system integration (for example, <code>qmlplugindump</code>). It also has diagnostic support for dumping window contents to image files as determined by environment variables.</p>
+<a name="class-overview"></a>
+<h2 id="class-overview">Class Overview</h2>
+<ul>
+<li>QPlatformIntegration<ul>
+<li><a href="../qtcore/qabstracteventdispatcher.html">QAbstractEventDispatcher</a></li>
+<li>QPlatformAccessibility</li>
+<li>QPlatformBackingStore</li>
+<li>QPlatformClipboard</li>
+<li>QPlatformCursor</li>
+<li>QPlatformDrag</li>
+<li>QPlatformFontDatabase</li>
+<li>QPlatformGraphicsBuffer</li>
+<li>QPlatformInputContext</li>
+<li>QPlatformNativeInterface</li>
+<li>QPlatformOffscreenSurface</li>
+<li>QPlatformOpenGLContext</li>
+<li>QPlatformScreen</li>
+<li>QPlatformServices</li>
+<li>QPlatformSharedGraphicsCache</li>
+<li>QPlatformSurface</li>
+<li>QPlatformWindow</li>
+</ul>
+</li>
+<li>QPlatformTheme<ul>
+<li>QPlatformDialogHelper</li>
+<li>QPlatformMenu</li>
+<li>QPlatformMenuBar</li>
+<li>QPlatformMenuItem</li>
+<li>QPlatformSystemTrayIcon</li>
+<li>platform palettes</li>
+<li>platform fonts</li>
+<li>theme hints</li>
+</ul>
+</li>
+</ul>
+<p><code>qtbase/src/platformsupport</code> contains several helper classes for implementing platform plugins on Unix-like systems.</p>
+<a name="qpa-plugins"></a>
+<h2 id="qpa-plugins">QPA Plugins</h2>
+<p>The following table summarizes the platform plugins available for QPA:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Plugin Name</th><th >Plugin Class Name</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>qandroid</code></td><td >QAndroidPlatformIntegration</td><td ><a href="android.html">Android support</a></td></tr>
+<tr valign="top" class="even"><td ><code>qbsdfb</code></td><td >QBsdFbIntegration</td><td >BsdFb support</td></tr>
+<tr valign="top" class="odd"><td ><code>qcocoa</code></td><td >QCocoaIntegrationPlugin</td><td ><a href="macos.html">Cocoa support</a></td></tr>
+<tr valign="top" class="even"><td ><code>qdirect2d</code></td><td >QWindowsDirect2DIntegrationPlugin</td><td >Similar to the <code>qwindows</code> plugin, but replaces the raster paint engine with a Direct2D-based paint engine for <a href="../qtgui/qpixmap.html">QPixmap</a> and <a href="../qtgui/qbackingstore.html">QBackingStore</a>.</td></tr>
+<tr valign="top" class="odd"><td ><code>qdirectfb</code></td><td >QDirectFbIntegrationPlugin</td><td >DirectFB is centered around <i>surfaces</i>, which are the equivalent of a <a href="../qtgui/qpaintdevice.html">QPaintDevice</a>.</td></tr>
+<tr valign="top" class="even"><td ><code>qeglfs</code></td><td >QEglFSIntegrationPlugin</td><td ><a href="embedded-linux.html#embedded-eglfs">EGLFS</a> support for embedded Linux devices.</td></tr>
+<tr valign="top" class="odd"><td ><code>qhaiku</code></td><td >QHaikuIntegration</td><td >Haiku support</td></tr>
+<tr valign="top" class="even"><td ><code>qios</code></td><td >QIOSIntegrationPlugin</td><td ><a href="ios.html">iOS support</a></td></tr>
+<tr valign="top" class="odd"><td ><code>qlinuxfb</code></td><td >QLinuxFbIntegrationPlugin</td><td ><a href="embedded-linux.html#linuxfb">LinuxFB</a> support for embedded Linux devices.</td></tr>
+<tr valign="top" class="even"><td ><code>qmirclient</code></td><td >QMirClientIntegration</td><td >Mir client support</td></tr>
+<tr valign="top" class="odd"><td ><code>qopenwf</code></td><td >QOpenWFDIntegrationPlugin</td><td >OpenWF Display support for managing display control hardware.</td></tr>
+<tr valign="top" class="even"><td ><code>qqnx</code></td><td >QQnxIntegrationPlugin</td><td ><a href="qnx.html">QNX support</a></td></tr>
+<tr valign="top" class="odd"><td ><code>qvnc</code></td><td >QVncIntegration</td><td >VNC support</td></tr>
+<tr valign="top" class="even"><td ><code>qwasm</code></td><td >QWasmIntegration</td><td ><a href="wasm.html">WebAssembly support</a></td></tr>
+<tr valign="top" class="odd"><td ><code>qwayland</code></td><td ><ul>
+<li>QWaylandIntegrationPlugin</li>
+<li>QWaylandBrcmEglPlatformIntegrationPlugin</li>
+<li>QWaylandEglPlatformIntegrationPlugin</li>
+<li>QWaylandXCompositeEglPlatformIntegrationPlugin</li>
+<li>QWaylandXCompositeGlxPlatformIntegrationPlugin</li>
+</ul>
+</td><td ><a href="../qtwaylandcompositor/qtwaylandcompositor-index.html">Wayland support</a></td></tr>
+<tr valign="top" class="even"><td ><code>qwindows</code></td><td >QWindowsIntegrationPlugin</td><td ><a href="windows.html">Windows support</a></td></tr>
+<tr valign="top" class="odd"><td ><code>qwinrt</code></td><td >QWinRTIntegrationPlugin</td><td ><a href="winrt-support.html">Universal Windows Platform (UWP) support</a><p><b>Note: </b>This plugin was originally written for WinRT (Windows Runtime), and is therefore called <code>qwinrt</code>.</p></td></tr>
+<tr valign="top" class="even"><td ><code>qxcb</code></td><td >QXcbIntegrationPlugin</td><td ><a href="linux.html">X Window System (X11) support</a></td></tr>
+<tr valign="top" class="odd"><td ><code>webgl</code></td><td >QWebGLIntegrationPlugin</td><td ><a href="webgl.html">WebGL</a> support for Qt Quick applications</td></tr>
+</table></div>
+</div>
+<!-- @@@qpa.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

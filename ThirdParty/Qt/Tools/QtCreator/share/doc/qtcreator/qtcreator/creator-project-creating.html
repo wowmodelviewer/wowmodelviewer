@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-projects-creating.qdoc -->
+  <title>Creating Projects | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Creating Projects</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-project-managing.html" />
+  <link rel="next" href="creator-project-opening.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-project-managing.html">Managing Projects</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-project-opening.html">Opening Projects</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#selecting-the-build-system">Selecting the Build System</a></li>
+<li class="level1"><a href="#using-project-wizards">Using Project Wizards</a></li>
+<li class="level1"><a href="#selecting-project-type">Selecting Project Type</a></li>
+<li class="level2"><a href="#creating-qt-for-python-applications">Creating Qt for Python Applications</a></li>
+<li class="level1"><a href="#adding-files-to-projects">Adding Files to Projects</a></li>
+<li class="level2"><a href="#creating-c-classes">Creating C++ Classes</a></li>
+<li class="level2"><a href="#creating-resource-files">Creating Resource Files</a></li>
+<li class="level2"><a href="#creating-opengl-fragment-and-vertex-shaders">Creating OpenGL Fragment and Vertex Shaders</a></li>
+<li class="level2"><a href="#displaying-additional-file-types-in-projects-pane">Displaying Additional File Types in Projects Pane</a></li>
+<li class="level1"><a href="#adding-subprojects-to-projects">Adding Subprojects to Projects</a></li>
+<li class="level1"><a href="#binding-keyboard-shortcuts-to-wizards">Binding Keyboard Shortcuts to Wizards</a></li>
+<li class="level1"><a href="#related-topics">Related Topics</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Creating Projects</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-project-creating.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Creating a project enables you to:</p>
+<ul>
+<li>Group files together</li>
+<li>Add custom build steps</li>
+<li>Include forms and resource files</li>
+<li>Specify settings for running applications</li>
+</ul>
+<p>Setting up a new project in Qt Creator is aided by a wizard that guides you step-by-step through the project creation process. The wizards prompt you to enter the settings needed for that particular type of project and create the necessary files for you. You can add your own custom wizards to standardize the way subprojects and classes are added to a project.</p>
+<p>Most Qt Creator project wizards enable you to choose the build system to use for building the project: qmake, CMake, or Qbs. If you are not presented with a choice, the project is set up to use qmake.</p>
+<p>You can use wizards also to create plain C or C++ projects that use qmake, Qbs, or CMake, but do not use the Qt library.</p>
+<p>In addition, you can import projects as <i>generic projects</i> that do not use qmake, Qbs, or CMake. This enables you to use Qt Creator as a code editor and to fully control the steps and commands used to build the project.</p>
+<p>You can install tools for <a href="creator-glossary.html#glossary-device">devices</a> as part of Qt distributions. The <a href="creator-glossary.html#glossary-buildandrun-kit">kits</a> and build and run settings for the installed device types are set up automatically. However, you might need to install and configure some additional software on the devices to be able to connect to them from the development PC.</p>
+<a name="selecting-the-build-system"></a>
+<h2 id="selecting-the-build-system">Selecting the Build System</h2>
+<p>Most Qt Creator project wizards enable you to choose the build system to use for building the project: qmake, CMake, or Qbs. If you are not presented with a choice, the project is set up to use qmake.</p>
+<p><a href="http://doc.qt.io/qt-5/qmake-manual.html">qmake</a> is a cross-platform system for build automation that helps simplify the build process for development projects across different platforms. qmake automates the generation of build configurations so that only a few lines of information are needed to create each configuration. qmake is installed and configured when you install Qt. To use one of the other supported build systems, you need to set it up.</p>
+<p><a href="http://doc.qt.io/qt-5/cmake-manual.html#cmake-manual">CMake</a> is an alternative to qmake for automating the generation of build configurations. For more information, see <a href="creator-project-cmake.html#">Setting Up CMake</a>.</p>
+<p><a href="http://doc.qt.io/qbs/index.html">Qbs</a> is an all-in-one build tool that generates a build graph from a high-level project description (like qmake or CMake do) and executes the commands in the low-level build graph (like make does). For more information, see <a href="creator-project-qbs.html#">Setting Up Qbs</a>.</p>
+<p>To change the location of the project directory, and to specify settings for building and running projects, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Build &amp; Run</b> &gt; <b>General</b>. The <b>CMake</b> tab contains additional settings for CMake. You can find more settings for CMake and Qbs in <b>Tools</b> &gt; <b>Options</b> &gt; <b>Kits</b> &gt; <b>CMake</b> and <b>Qbs</b>.</p>
+<p>To specify build and run settings for different target platforms, select <b>Projects</b>. For more information on the options you have, see <a href="creator-build-settings.html#">Specifying Build Settings</a>.</p>
+<a name="using-project-wizards"></a>
+<h2 id="using-project-wizards">Using Project Wizards</h2>
+<p>In the first step, you select a template for the project. You can filter templates (1) to view only those that apply to a particular target platform.</p>
+<p class="centerAlign"><img src="images/qtcreator-new-qt-quick-project-wizard.png" alt="" /></p><p>Next, you select a location for the project and specify settings for it.</p>
+<p>When you have completed the steps, Qt Creator automatically generates the project with required headers, source files, user interface descriptions and project files, as defined by the wizard.</p>
+<p>For example, if you choose to create a Qt Quick application, Qt Creator generates a QML file that you can modify in the Design mode.</p>
+<a name="selecting-project-type"></a>
+<h2 id="selecting-project-type">Selecting Project Type</h2>
+<p>You can use wizards to create following types of projects:</p>
+<ul>
+<li>Applications<ul>
+<li>Qt Widgets Application<p>Use Qt Designer forms to design a Qt widget based user interface for the desktop and C++ to implement the application logic</p>
+</li>
+<li>Qt Quick Application - Empty<p>Create an empty Qt Quick application that uses Qt Quick 2 types.</p>
+<p>You can build the application and deploy it to desktop, embedded, and mobile target platforms.</p>
+</li>
+<li>Qt Quick Application - Scroll, Stack, or Swipe<p>Create a Qt Quick application that uses <a href="http://doc.qt.io/qt-5/qtquickcontrols2-index.html">Qt Quick Controls</a> to implement a scrollable list (requires Qt 5.9 or later) or a set of pages with a stack-based or swipe-based navigation model (requires Qt 5.7 or later).</p>
+</li>
+<li>Qt Console Application<p>Use a single main.cpp file</p>
+</li>
+<li>Qt for Python Application - Empty or Window<p>Create a <a href="https://doc.qt.io/qtforpython/index.html">Qt for Python</a> application that contains only the main code for a <a href="http://doc.qt.io/qt-5/qapplication.html">QApplication</a> or create one that contains an empty window.</p>
+</li>
+</ul>
+</li>
+<li>Libraries<ul>
+<li>C++ Library<p>Shared or static C++ library based on qmake</p>
+</li>
+<li>Qt Quick 2 Extension Plugin<p>C++ plugin that makes it possible to offer extensions that can be loaded dynamically into Qt Quick 2 applications by using the <a href="http://doc.qt.io/qt-5/qqmlengine.html">QQmlEngine</a> class</p>
+</li>
+<li>Qt Creator Plugin</li>
+</ul>
+</li>
+<li>Other Projects<ul>
+<li>Auto Test Project<p>Projects with boilerplate code for a Qt or Google test. For more information, see <a href="creator-autotest.html#creating-tests">Creating Tests</a>.</p>
+</li>
+<li>Qt Quick UI Prototype<p>Use a single QML file that contains the main view. You can review <a href="quick-projects.html#creating-qt-quick-ui-projects">Qt Quick UI prototypes</a> in a <a href="creator-editor-external.html#previewing-qml-files">preview tool</a> and you need not build them. Qt Quick UI prototypes cannot be deployed to embedded or mobile target platforms. For those platforms, create a Qt Quick application instead.</p>
+</li>
+<li>Qt Custom Designer Widgets<p>Custom Qt Designer widget or widget collection</p>
+</li>
+<li>Empty qmake Project<p>Empty qmake project that is based on qmake but does not use any default classes</p>
+</li>
+<li>Subdirs Project<p>Subprojects that enable you to structure your qmake projects as a tree hierarchy</p>
+</li>
+<li>Code Snippet<p>Creates a qmake project from a code snippet. When fixing bug reports that contain a code snippet, you can place the code snippet into a project to compile and check it.</p>
+</li>
+</ul>
+</li>
+<li>Non-Qt Projects<ul>
+<li>Plain C or C++ Application<p>Plain C or C++ application that uses qmake, Qbs, or CMake but does not use the Qt library</p>
+</li>
+<li>Nim Application (experimental)<p><a href="http://nim-lang.org/">Nim</a> application that uses qmake or CMake but does not use the Qt library</p>
+<p><b>Note: </b>The <b>Nim Application</b> option becomes visible after you enable the experimental Nim plugin. Select <b>Help</b> &gt; <b>About Plugins</b> &gt; <b>Other Languages</b> &gt; <b>Nim</b>, and then restart Qt Creator.</p></li>
+</ul>
+</li>
+<li>Import Project<ul>
+<li>Project from version control<p>Import a project from a supported version control system. For more information on how version control systems are integrated in Qt Creator, see <a href="creator-version-control.html#">Using Version Control Systems</a></p>
+</li>
+<li>Import as qmake Project<p>Import an existing project that does not use any of the supported build systems: qmake, Qbs, CMake, or Autotools. The wizard creates a qmake .pro file, which enables you to use Qt Creator as a code editor and as a launcher for debugging and analysis tools. However, if you want to build the project, you might need to edit the generated .pro file.</p>
+</li>
+<li>Import Existing Project<p>Import an existing project that does not use any of the supported build systems: qmake, Qbs, CMake, or Autotools. This enables you to use Qt Creator as a code editor</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>To create a new project, select <b>File</b> &gt; <b>New File or Project</b> and select the type of your project. The contents of the wizard dialogs depend on the project type and the <a href="creator-glossary.html#glossary-buildandrun-kit">kits</a> that you select in the <b>Kit Selection</b> dialog. Follow the instructions of the wizard.</p>
+<p>For examples of creating different types of projects, see <a href="creator-tutorials.html#">Tutorials</a>.</p>
+<p>For more information about creating Qt Quick projects, see <a href="quick-projects.html#">Creating Qt Quick Projects</a>.</p>
+<a name="creating-qt-for-python-applications"></a>
+<h3 id="creating-qt-for-python-applications">Creating Qt for Python Applications</h3>
+<p><a href="https://doc.qt.io/qtforpython/index.html">Qt for Python</a> enables you to use Qt 5 API in Python applications. You can use the PySide2 module to gain access to individual Qt modules, such as <a href="http://doc.qt.io/qt-5/qtcore-index.html">Qt Core</a>, <a href="http://doc.qt.io/qt-5/qtgui-index.html">Qt GUI</a>, and <a href="http://doc.qt.io/qt-5/qtwidgets-index.html">Qt Widgets</a>.</p>
+<p>The Qt for Python Application wizards generate a <code>.pyproject</code> file that lists the files in the Python project and a <code>.py</code> file that contains some boilerplate code.</p>
+<p>The <code>.pyproject</code> files are JSON-based configuration files that replace the previously used <code>.pyqtc</code> configuration files. You can still open and use <code>.pyqtc</code> files, but we recommend that you choose <code>.pyproject</code> files for new projects.</p>
+<p>The <b>Qt for Python - Window</b> wizard enables you to create a Python source file for a new class that you can add to a Python project. Specify the class name, base class, and and source file for the class.</p>
+<p class="centerAlign"><img src="images/qtcreator-python-wizard-app-window.png" alt="" /></p><p>The Window wizard adds the imports to the source file to provide access to the <a href="http://doc.qt.io/qt-5/qapplication.html">QApplication</a> and the base class you selected in the Qt Widgets module:</p>
+<pre class="cpp plain">
+
+  import sys
+  from PySide2.QtWidgets import QApplication, QWidget
+
+</pre>
+<p>The Window wizard also adds a main class with the specified name that inherits from the specified base class:</p>
+<pre class="cpp plain">
+
+  class MyWidget(QWidget):
+      def __init__(self):
+          QWidget.__init__(self)
+
+</pre>
+<p>Next, the Window wizard adds a main function, where it creates a <a href="http://doc.qt.io/qt-5/qapplication.html">QApplication</a> instance. As Qt can receive arguments from the command line, you can pass any arguments to the <a href="http://doc.qt.io/qt-5/qapplication.html">QApplication</a> object. Usually, you do not need to pass any arguments, and you can use the following approach:</p>
+<pre class="cpp plain">
+
+  if __name__ == &quot;__main__&quot;:
+      app = QApplication([])
+
+</pre>
+<p>Next, the Window wizard instantiates the <code>MainWindow</code> class and shows it:</p>
+<pre class="cpp plain">
+
+  window = MyWidget()
+  window.show()
+  ..&#x2e;
+
+</pre>
+<p>Finally, the Window wizard calls the <code>app.exec_()</code> method to enter the Qt main loop and start executing the Qt code:</p>
+<pre class="cpp plain">
+
+  sys.exit(app.exec_())
+
+</pre>
+<p>The Empty wizard adds similar code to the source file, but it does not add any classes, so you need to add and instantiate them yourself.</p>
+<p>For examples of creating Qt for Python applications, see <a href="https://doc.qt.io/qtforpython/tutorials/index.html">Qt for Python Examples and Tutorials</a>.</p>
+<a name="adding-files-to-projects"></a>
+<h2 id="adding-files-to-projects">Adding Files to Projects</h2>
+<p>You can use wizards also to add individual files to your projects. You can create the following types of files:</p>
+<ul>
+<li>C++<p>C++ class, source, or header files that you can use to write the application logic in both Qt Quick projects and Qt widget based projects</p>
+</li>
+<li>Qt<ul>
+<li>Qt item model source and header files that you can use to create classes derived from <a href="http://doc.qt.io/qt-5/qabstractitemmodel.html">QAbstractItemModel</a>, <a href="http://doc.qt.io/qt-5/qabstracttablemodel.html">QAbstractTableModel</a>, or <a href="http://doc.qt.io/qt-5/qabstractlistmodel.html">QAbstractListModel</a>.</li>
+<li>Qt Designer forms and Qt Designer form classes, which specify parts of user interfaces in Qt widget based projects</li>
+<li>Qt resource files, which allow you to store binary files in the application executable</li>
+<li>QML files, which specify items in Qt Quick projects. <b>QML File (Qt Quick 2)</b> creates a QML file that imports Qt Quick 2.0 and <b>Qt Quick UI File</b> creates an UI form (<i>.ui.qml</i>) and the corresponding QML file.</li>
+<li>JavaScript files that you can use to write the application logic in Qt Quick projects</li>
+</ul>
+</li>
+<li>Models and state charts<ul>
+<li>Universal Modeling Language (UML) style models with structured diagrams. However, the model editor uses a variant of UML and provides only a subset of properties for specifying the appearance of model elements. For more information, see <a href="creator-modeling.html#">Modeling</a>.</li>
+<li>State Chart XML (SCXML) files that contain boilerplate code for state machines. You can use the classes in the <a href="http://doc.qt.io/qt-5/qtscxml-index.html">Qt SCXML</a> module to embed state machines created from the files in Qt applications.</li>
+</ul>
+</li>
+<li>GLSL<p>GLSL files that define fragment and vertex shaders in both Qt Quick projects and Qt widget based projects</p>
+</li>
+<li>General<ul>
+<li>Empty files</li>
+<li>Scratch buffers that use temporary files. You can create this type of files for temporarily storing information that you do not intend to save</li>
+</ul>
+</li>
+<li>Java<p>Java class files that you can use to create Java classes.</p>
+</li>
+<li>Python<p>Python class and source files that you can use to create Python classes and scripts with UTF-8 encoding.</p>
+</li>
+<li>Nim (experimental)<ul>
+<li>Nim script files.</li>
+<li>Nim source files with UTF-8 encoding.</li>
+</ul>
+</li>
+</ul>
+<a name="creating-c-classes"></a>
+<h3 id="creating-c-classes">Creating C++ Classes</h3>
+<p>The <b>C++ Class Wizard</b> allows you to create a C++ header and source file for a new class that you can add to a C++ project. Specify the class name, base class, and header and source files for the class.</p>
+<p>The wizard supports namespaces. To use a namespace, enter a qualified class name in the <b>Class name</b> field. For example: MyNamespace::MySubNamespace::MyClass.</p>
+<p class="centerAlign"><img src="images/qtcreator-cpp-class-wizard.png" alt="&quot;Enter Class Name dialog&quot;" /></p><p>The names of the header and source file are based on the class name. To change the default suffix of a file, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>C++</b> &gt; <b>File Naming</b>.</p>
+<p class="centerAlign"><img src="images/qtcreator-options-cpp-files.png" alt="&quot;File Naming tab in Options&quot;" /></p><p>In the <b>License template</b> field, you can use <a href="creator-project-wizards-json.html#using-variables-in-wizards">predefined wizard variables</a> to specify the path and filename of the license to use in the source and header files.</p>
+<p>You can create your own project and class wizards. For more information, see <a href="creator-project-wizards.html#">Adding New Custom Wizards</a>.</p>
+<a name="creating-resource-files"></a>
+<h3 id="creating-resource-files">Creating Resource Files</h3>
+<p>Qt Creator supports the <a href="http://doc.qt.io/qt-5/resources.html">Qt Resource System</a>, which is a platform-independent mechanism for storing files in the application's executable.</p>
+<p class="centerAlign"><img src="images/qtcreator-add-resource-wizard.png" alt="&quot;New File or Project dialog&quot;" /></p><p>The wizard creates a resource collection file (.qrc) that you can manage in the resource editor.</p>
+<p class="centerAlign"><img src="images/qtcreator-add-resource.png" alt="&quot;Editing resource files&quot;" /></p><p>Select <b>Add</b> &gt; <b>Add Files</b> to locate and add individual files.</p>
+<p>By default, resources are accessible in the application under the same file name as they have in the source tree, with a <code>:/</code> prefix, or by a URL with a <code>qrc</code> scheme. To specify a path prefix for all files in the <code>.qrc</code> file, select <b>Add</b> &gt; <b>Add Prefix</b> or enter the prefix in the <b>Prefix</b> field.</p>
+<p>Some resources need to change based on the user's locale, such as translation files or icons. You can specify a locale in the <b>Language</b> field.</p>
+<p>Select <b>Remove</b> to remove the selected file from the resource collection. In the <b>Remove File</b> dialog, select the <b>Delete file permanently</b> check box to remove the file from the file system. To remove files that cannot be found in the file system, select <b>Remove Missing Files</b>.</p>
+<p>The above functions are also available in the context menu in the <b>Projects</b> view.</p>
+<a name="creating-opengl-fragment-and-vertex-shaders"></a>
+<h3 id="creating-opengl-fragment-and-vertex-shaders">Creating OpenGL Fragment and Vertex Shaders</h3>
+<p>Qt provides support for integration with OpenGL implementations on all platforms, which allows you to display hardware accelerated 3D graphics alongside a more conventional user interface. For more information, see <a href="http://doc.qt.io/qt-5/qtgui-index.html">Qt GUI</a>.</p>
+<p>You can use the <a href="http://doc.qt.io/qt-5/qopenglshader.html">QOpenGLShader</a> class to compile OpenGL shaders written in the OpenGL Shading Language (GLSL) and in the OpenGL/ES Shading Language (GLSL/ES). <a href="http://doc.qt.io/qt-5/qopenglshader.html">QOpenGLShader</a> and <a href="http://doc.qt.io/qt-5/qopenglshaderprogram.html">QOpenGLShaderProgram</a> shelter you from the details of compiling and linking vertex and fragment shaders.</p>
+<p>You can use Qt Creator code editor to write fragment and vertex shaders in GLSL or GLSL/ES. The code editor provides syntax highlighting and code completion for the files.</p>
+<p class="centerAlign"><img src="images/qtcreator-new-opengl-file.png" alt="&quot;New OpenGL file wizard&quot;" /></p><a name="displaying-additional-file-types-in-projects-pane"></a>
+<h3 id="displaying-additional-file-types-in-projects-pane">Displaying Additional File Types in Projects Pane</h3>
+<p>Qt Creator determines whether to display files from the project folder in the <b>Projects</b> pane depending on the file type (.pro, .pri, .cpp, .h, .qrc, and so on). To display other types of files, edit the project file. Add filenames as values of the <code>DISTFILES</code> variable. You can also use wildcards.</p>
+<p>For example, the following code specifies that text files are displayed in the <b>Projects</b> pane:</p>
+<pre class="cpp">
+
+  DISTFILES <span class="operator">+</span><span class="operator">=</span> <span class="operator">*</span><span class="operator">.</span>txt
+
+</pre>
+<p>This also makes the files available in the <b>Locator</b>.</p>
+<a name="adding-subprojects-to-projects"></a>
+<h2 id="adding-subprojects-to-projects">Adding Subprojects to Projects</h2>
+<p>In addition to Qt libraries, you can link your application to other libraries, such as system libraries or your own libraries. Further, your own libraries might link to other libraries. To be able to compile your project, you must add the libraries to your project. This also enables code completion and syntax highlighting for the libraries. The procedure of adding a library to a project depends on the build system that you use.</p>
+<p>When you create a new project, you can add it to another project as a subproject in the <b>Project Management</b> dialog. However, the root project must specify that qmake uses the <code>subdirs</code> template to build the project.</p>
+<p>To create a root project, select <b>File &gt; New File or Project &gt; Other Project &gt; Subdirs Project &gt; Choose</b>.</p>
+<p>On the <b>Summary</b> page, select <b>Finish &amp; Add Subproject</b> to create the root project and to add another project, such as a C++ library.</p>
+<p>The wizard creates a project file (.pro) that defines a <code>subdirs</code> template and the subproject that you add as a value of the <a href="http://doc.qt.io/qt-5/qmake-variable-reference.html#subdirs">SUBDIRS variable</a>. It also adds all the necessary files for the subproject.</p>
+<p>To create more subprojects, right-click the project name in the <b>Projects</b> pane, and select <b>New Subproject</b> in the context menu. To add an existing project as a subproject, select <b>Add Existing Projects</b>.</p>
+<p>To remove subprojects, right-click the project name in the <b>Projects</b> pane, and select <b>Remove Subproject</b> in the context menu.</p>
+<p>To specify dependencies, use the <b>Add Library</b> wizard. For more information, see <a href="creator-project-qmake-libraries.html#">Adding Libraries to Projects</a>.</p>
+<a name="binding-keyboard-shortcuts-to-wizards"></a>
+<h2 id="binding-keyboard-shortcuts-to-wizards">Binding Keyboard Shortcuts to Wizards</h2>
+<p>If you use a wizard regularly, you can bind a custom keyboard shortcut to it. Triggering this keyboard shortcut will directly open the wizard without the need to navigate to <b>File</b> &gt; <b>New File or Project</b>.</p>
+<p>Keyboard shortcuts for wizards can be set in <b>Tools</b> &gt; <b>Options</b> &gt; <b>Environment</b> &gt; <b>Keyboard</b> &gt; <b>Wizard</b>. All wizard actions start with <b>Impl</b> there.</p>
+<a name="related-topics"></a>
+<h2 id="related-topics">Related Topics</h2>
+<ul>
+<li><a href="creator-project-opening.html#">Opening Projects</a></li>
+<li><a href="creator-project-qmake-libraries.html#">Adding Libraries to Projects</a></li>
+<li><a href="creator-project-wizards.html#">Adding New Custom Wizards</a></li>
+<li><a href="creator-project-other.html#">Using Other Build Systems</a></li>
+</ul>
+</div>
+<!-- @@@creator-project-creating.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-project-managing.html">Managing Projects</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-project-opening.html">Opening Projects</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

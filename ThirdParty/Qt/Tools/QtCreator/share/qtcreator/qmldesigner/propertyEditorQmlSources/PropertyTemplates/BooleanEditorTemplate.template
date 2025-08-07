@@ -1,0 +1,9 @@
+Label {
+    text: "%1"
+    tooltip: "%1"
+}
+
+CheckBox {
+    text: backendValues.%2.valueToString
+    backendValue: backendValues.%2
+}

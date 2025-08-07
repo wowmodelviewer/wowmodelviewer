@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdatetime.cpp -->
+  <title>Obsolete Members for QDateTime | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QDateTime</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Obsolete Members for QDateTime</h1>
+<p><b>The following members of class <a href="qdatetime.html">QDateTime</a> are obsolete.</b> They are provided to keep old source code working. We strongly advise against using them in new code.</p>
+<h2>Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>void </td><td class="memItemRight bottomAlign"><b><a href="qdatetime-obsolete.html#setTime_t">setTime_t</a></b>(uint <i>seconds</i>)</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>uint </td><td class="memItemRight bottomAlign"><b><a href="qdatetime-obsolete.html#toTime_t">toTime_t</a></b>() const</td></tr>
+</table></div>
+<h2>Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>QDateTime </td><td class="memItemRight bottomAlign"><b><a href="qdatetime-obsolete.html#fromTime_t">fromTime_t</a></b>(uint <i>seconds</i>)</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>QDateTime </td><td class="memItemRight bottomAlign"><b><a href="qdatetime-obsolete.html#fromTime_t-1">fromTime_t</a></b>(uint <i>seconds</i>, Qt::TimeSpec <i>spec</i>, int <i>offsetSeconds</i> = 0)</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>QDateTime </td><td class="memItemRight bottomAlign"><b><a href="qdatetime-obsolete.html#fromTime_t-2">fromTime_t</a></b>(uint <i>seconds</i>, const QTimeZone &amp;<i>timeZone</i>)</td></tr>
+</table></div>
+<h2>Member Function Documentation</h2>
+<!-- $$$fromTime_t[overload1]$$$fromTime_tuint -->
+<h3 class="fn" id="fromTime_t"><a name="fromTime_t"></a><code>[static] </code><span class="type"><a href="qdatetime.html#QDateTime">QDateTime</a></span> QDateTime::<span class="name">fromTime_t</span>(<span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <i>seconds</i>)</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Returns a datetime whose date and time are the number of <i>seconds</i> that have passed since 1970-01-01T00:00:00, Coordinated Universal Time (<a href="qt.html#TimeSpec-enum">Qt::UTC</a>) and converted to <a href="qt.html#TimeSpec-enum">Qt::LocalTime</a>. On systems that do not support time zones, the time will be set as if local time were <a href="qt.html#TimeSpec-enum">Qt::UTC</a>.</p>
+<p><b>Note: </b>This function is deprecated. Please use <a href="qdatetime.html#fromSecsSinceEpoch">fromSecsSinceEpoch</a>() in new code.</p><p>This function was introduced in  Qt 4.2.</p>
+<p><b>See also </b><a href="qdatetime-obsolete.html#toTime_t">toTime_t</a>() and <a href="qdatetime-obsolete.html#setTime_t">setTime_t</a>().</p>
+<!-- @@@fromTime_t -->
+<!-- $$$fromTime_t$$$fromTime_tuintQt::TimeSpecint -->
+<h3 class="fn" id="fromTime_t-1"><a name="fromTime_t-1"></a><code>[static] </code><span class="type"><a href="qdatetime.html#QDateTime">QDateTime</a></span> QDateTime::<span class="name">fromTime_t</span>(<span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <i>seconds</i>, <span class="type"><a href="qt.html#TimeSpec-enum">Qt::TimeSpec</a></span> <i>spec</i>, <span class="type">int</span> <i>offsetSeconds</i> = 0)</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Returns a datetime whose date and time are the number of <i>seconds</i> that have passed since 1970-01-01T00:00:00, Coordinated Universal Time (<a href="qt.html#TimeSpec-enum">Qt::UTC</a>) and converted to the given <i>spec</i>.</p>
+<p>If the <i>spec</i> is not <a href="qt.html#TimeSpec-enum">Qt::OffsetFromUTC</a> then the <i>offsetSeconds</i> will be ignored. If the <i>spec</i> is <a href="qt.html#TimeSpec-enum">Qt::OffsetFromUTC</a> and the <i>offsetSeconds</i> is 0 then the spec will be set to <a href="qt.html#TimeSpec-enum">Qt::UTC</a>, i.e&#x2e; an offset of 0 seconds.</p>
+<p><b>Note: </b>This function is deprecated. Please use <a href="qdatetime.html#fromSecsSinceEpoch">fromSecsSinceEpoch</a>() in new code.</p><p>This function was introduced in  Qt 5.2.</p>
+<p><b>See also </b><a href="qdatetime-obsolete.html#toTime_t">toTime_t</a>() and <a href="qdatetime-obsolete.html#setTime_t">setTime_t</a>().</p>
+<!-- @@@fromTime_t -->
+<!-- $$$fromTime_t$$$fromTime_tuintconstQTimeZone& -->
+<h3 class="fn" id="fromTime_t-2"><a name="fromTime_t-2"></a><code>[static] </code><span class="type"><a href="qdatetime.html#QDateTime">QDateTime</a></span> QDateTime::<span class="name">fromTime_t</span>(<span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <i>seconds</i>, const <span class="type"><a href="qtimezone.html">QTimeZone</a></span> &amp;<i>timeZone</i>)</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Returns a datetime whose date and time are the number of <i>seconds</i> that have passed since 1970-01-01T00:00:00, Coordinated Universal Time (<a href="qt.html#TimeSpec-enum">Qt::UTC</a>) and with the given <i>timeZone</i>.</p>
+<p><b>Note: </b>This function is deprecated. Please use <a href="qdatetime.html#fromSecsSinceEpoch">fromSecsSinceEpoch</a>() in new code.</p><p>This function was introduced in  Qt 5.2.</p>
+<p><b>See also </b><a href="qdatetime-obsolete.html#toTime_t">toTime_t</a>() and <a href="qdatetime-obsolete.html#setTime_t">setTime_t</a>().</p>
+<!-- @@@fromTime_t -->
+<!-- $$$setTime_t[overload1]$$$setTime_tuint -->
+<h3 class="fn" id="setTime_t"><a name="setTime_t"></a><span class="type">void</span> QDateTime::<span class="name">setTime_t</span>(<span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <i>seconds</i>)</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Sets the date and time given the number of <i>seconds</i> that have passed since 1970-01-01T00:00:00, Coordinated Universal Time (<a href="qt.html#TimeSpec-enum">Qt::UTC</a>). On systems that do not support time zones this function will behave as if local time were <a href="qt.html#TimeSpec-enum">Qt::UTC</a>.</p>
+<p><b>Note: </b>This function is deprecated. For new code, use <a href="qdatetime.html#setSecsSinceEpoch">setSecsSinceEpoch</a>().</p><p><b>See also </b><a href="qdatetime-obsolete.html#toTime_t">toTime_t</a>().</p>
+<!-- @@@setTime_t -->
+<!-- $$$toTime_t[overload1]$$$toTime_t -->
+<h3 class="fn" id="toTime_t"><a name="toTime_t"></a><span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> QDateTime::<span class="name">toTime_t</span>() const</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Returns the datetime as the number of seconds that have passed since 1970-01-01T00:00:00, Coordinated Universal Time (<a href="qt.html#TimeSpec-enum">Qt::UTC</a>).</p>
+<p>On systems that do not support time zones, this function will behave as if local time were <a href="qt.html#TimeSpec-enum">Qt::UTC</a>.</p>
+<p><b>Note: </b>This function returns a 32-bit unsigned integer and is deprecated.</p><p>If the date is outside the range 1970-01-01T00:00:00 to 2106-02-07T06:28:14, this function returns -1 cast to an unsigned integer (i.e&#x2e;, 0xFFFFFFFF).</p>
+<p>To get an extended range, use <a href="qdatetime.html#toMSecsSinceEpoch">toMSecsSinceEpoch</a>() or <a href="qdatetime.html#toSecsSinceEpoch">toSecsSinceEpoch</a>().</p>
+<p><b>See also </b><a href="qdatetime.html#toSecsSinceEpoch">toSecsSinceEpoch</a>(), <a href="qdatetime.html#toMSecsSinceEpoch">toMSecsSinceEpoch</a>(), and <a href="qdatetime-obsolete.html#setTime_t">setTime_t</a>().</p>
+<!-- @@@toTime_t -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

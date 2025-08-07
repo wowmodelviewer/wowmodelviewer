@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwaylandxdgshell.cpp -->
+  <title>QWaylandXdgToplevel Class | Qt Wayland Compositor 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwaylandcompositor-index.html">Qt Wayland Compositor</a></td><td ><a href="qtwaylandcompositor-module.html">C++ Classes</a></td><td >QWaylandXdgToplevel</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwaylandcompositor-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QWaylandXdgToplevel Class</h1>
+<!-- $$$QWaylandXdgToplevel-brief -->
+<p>The <a href="qwaylandxdgtoplevel.html">QWaylandXdgToplevel</a> class represents the toplevel window specific parts of an xdg surface. <a href="#details">More...</a></p>
+<!-- @@@QWaylandXdgToplevel -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QWaylandXdgToplevel&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += waylandcompositor</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.12</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.12.</p>
+<ul>
+<li><a href="qwaylandxdgtoplevel-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#DecorationMode-enum">DecorationMode</a></b> { ServerSideDecoration, ClientSideDecoration }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qwaylandxdgtoplevel.html#activated-prop">activated</a></b> : const bool</li>
+<li class="fn"><b><a href="qwaylandxdgtoplevel.html#appId-prop">appId</a></b> : const QString</li>
+<li class="fn"><b><a href="qwaylandxdgtoplevel.html#fullscreen-prop">fullscreen</a></b> : const bool</li>
+<li class="fn"><b><a href="qwaylandxdgtoplevel.html#maxSize-prop">maxSize</a></b> : const QSize</li>
+<li class="fn"><b><a href="qwaylandxdgtoplevel.html#maximized-prop">maximized</a></b> : const bool</li>
+<li class="fn"><b><a href="qwaylandxdgtoplevel.html#minSize-prop">minSize</a></b> : const QSize</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qwaylandxdgtoplevel.html#parentToplevel-prop">parentToplevel</a></b> : QWaylandXdgToplevel* const</li>
+<li class="fn"><b><a href="qwaylandxdgtoplevel.html#resizing-prop">resizing</a></b> : const bool</li>
+<li class="fn"><b><a href="qwaylandxdgtoplevel.html#states-prop">states</a></b> : const QList&lt;int&gt;</li>
+<li class="fn"><b><a href="qwaylandxdgtoplevel.html#title-prop">title</a></b> : const QString</li>
+<li class="fn"><b><a href="qwaylandxdgtoplevel.html#xdgSurface-prop">xdgSurface</a></b> : QWaylandXdgSurface* const</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#QWaylandXdgToplevel">QWaylandXdgToplevel</a></b>(QWaylandXdgSurface *<i>xdgSurface</i>, QWaylandResource &amp;<i>resource</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#activated-prop">activated</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#appId-prop">appId</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#fullscreen-prop">fullscreen</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#maxSize-prop">maxSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#maximized-prop">maximized</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#minSize-prop">minSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandXdgToplevel *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#parentToplevel-prop">parentToplevel</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#resizing-prop">resizing</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#sendClose">sendClose</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#sendConfigure">sendConfigure</a></b>(const QSize &amp;<i>size</i>, const QVector&lt;QWaylandXdgToplevel::State&gt; &amp;<i>states</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#sendFullscreen">sendFullscreen</a></b>(const QSize &amp;<i>size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#sendMaximized">sendMaximized</a></b>(const QSize &amp;<i>size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#sendResizing">sendResizing</a></b>(const QSize &amp;<i>maxSize</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#sendUnmaximized">sendUnmaximized</a></b>(const QSize &amp;<i>size</i> = QSize(0, 0))</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#sizeForResize">sizeForResize</a></b>(const QSizeF &amp;<i>size</i>, const QPointF &amp;<i>delta</i>, Qt::Edges <i>edges</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#title-prop">title</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandXdgSurface *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#xdgSurface-prop">xdgSurface</a></b>() const</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#activated-prop">activatedChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#appId-prop">appIdChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#fullscreen-prop">fullscreenChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#maxSize-prop">maxSizeChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#maximized-prop">maximizedChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#minSize-prop">minSizeChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#parentToplevel-prop">parentToplevelChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#resizing-prop">resizingChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#states-prop">statesChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#title-prop">titleChanged</a></b>()</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandXdgToplevel *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#fromResource">fromResource</a></b>(::wl_resource *<i>resource</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandSurfaceRole *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgtoplevel.html#role">role</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QWaylandXdgToplevel-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This class is part of the <a href="qwaylandxdgshell.html">QWaylandXdgShell</a> extension and provides a way to extend the functionality of an <a href="qwaylandxdgsurface.html">QWaylandXdgSurface</a> with features specific to desktop-style windows.</p>
+<p>It corresponds to the Wayland interface <code>xdg_toplevel</code>.</p>
+</div>
+<!-- @@@QWaylandXdgToplevel -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$DecorationMode$$$ClientSideDecoration$$$ServerSideDecoration -->
+<h3 class="fn" id="DecorationMode-enum"><a name="DecorationMode-enum"></a>enum QWaylandXdgToplevel::<span class="name">DecorationMode</span></h3>
+<p>This enum type is used to specify the window decoration mode for toplevel windows.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QWaylandXdgToplevel::ServerSideDecoration</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The compositor should draw window decorations.</td></tr>
+<tr><td class="topAlign"><code>QWaylandXdgToplevel::ClientSideDecoration</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The client should draw window decorations.</td></tr>
+</table></div>
+<!-- @@@DecorationMode -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$activated-prop$$$activated$$$activatedChanged -->
+<h3 class="fn" id="activated-prop"><a name="activated-prop"></a><span class="name">activated</span> : const <span class="type">bool</span></h3>
+<p>This property holds whether toplevel is drawing itself as having input focus.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>activated</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>activatedChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@activated -->
+<!-- $$$appId-prop$$$appId$$$appIdChanged -->
+<h3 class="fn" id="appId-prop"><a name="appId-prop"></a><span class="name">appId</span> : const <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>This property holds the app id of the <a href="qwaylandxdgtoplevel.html">QWaylandXdgToplevel</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>appId</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>appIdChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@appId -->
+<!-- $$$fullscreen-prop$$$fullscreen$$$fullscreenChanged -->
+<h3 class="fn" id="fullscreen-prop"><a name="fullscreen-prop"></a><span class="name">fullscreen</span> : const <span class="type">bool</span></h3>
+<p>This property holds whether the client has acknowledged that it should be fullscreen.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>fullscreen</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>fullscreenChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@fullscreen -->
+<!-- $$$maxSize-prop$$$maxSize$$$maxSizeChanged -->
+<h3 class="fn" id="maxSize-prop"><a name="maxSize-prop"></a><span class="name">maxSize</span> : const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span></h3>
+<p>This property holds the maximum size of the <a href="qwaylandxdgtoplevel.html">QWaylandXdgToplevel</a>.</p>
+<p>The compositor is free to ignore this value and request a larger size.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QSize </td><td class="memItemRight bottomAlign"><span class="name"><b>maxSize</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>maxSizeChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@maxSize -->
+<!-- $$$maximized-prop$$$maximized$$$maximizedChanged -->
+<h3 class="fn" id="maximized-prop"><a name="maximized-prop"></a><span class="name">maximized</span> : const <span class="type">bool</span></h3>
+<p>This property holds whether the client has acknowledged that it should be maximized.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>maximized</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>maximizedChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@maximized -->
+<!-- $$$minSize-prop$$$minSize$$$minSizeChanged -->
+<h3 class="fn" id="minSize-prop"><a name="minSize-prop"></a><span class="name">minSize</span> : const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span></h3>
+<p>This property holds the minimum size of the <a href="qwaylandxdgtoplevel.html">QWaylandXdgToplevel</a>.</p>
+<p>The compositor is free to ignore this value and request a smaller size.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QSize </td><td class="memItemRight bottomAlign"><span class="name"><b>minSize</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>minSizeChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@minSize -->
+<!-- $$$parentToplevel-prop$$$parentToplevel$$$parentToplevelChanged -->
+<h3 class="fn" id="parentToplevel-prop"><a name="parentToplevel-prop"></a><span class="name">parentToplevel</span> : <span class="type"><a href="qwaylandxdgtoplevel.html#QWaylandXdgToplevel">QWaylandXdgToplevel</a></span>* const</h3>
+<p>This property holds the <a href="qml-qtwayland-compositor-xdgtoplevel.html">XdgToplevel</a> parent of this <a href="qml-qtwayland-compositor-xdgtoplevel.html">XdgToplevel</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QWaylandXdgToplevel *</td><td class="memItemRight bottomAlign"><span class="name"><b>parentToplevel</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>parentToplevelChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@parentToplevel -->
+<!-- $$$resizing-prop$$$resizing$$$resizingChanged -->
+<h3 class="fn" id="resizing-prop"><a name="resizing-prop"></a><span class="name">resizing</span> : const <span class="type">bool</span></h3>
+<p>This property holds whether the client has acknowledged that it is being resized.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>resizing</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>resizingChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@resizing -->
+<!-- $$$states-prop$$$statesChanged -->
+<h3 class="fn" id="states-prop"><a name="states-prop"></a><span class="name">states</span> : const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type">int</span>&gt;</h3>
+<p>This property holds the last states the client acknowledged for this QWaylandToplevel.</p>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>statesChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@states -->
+<!-- $$$title-prop$$$title$$$titleChanged -->
+<h3 class="fn" id="title-prop"><a name="title-prop"></a><span class="name">title</span> : const <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>This property holds the title of the <a href="qwaylandxdgtoplevel.html">QWaylandXdgToplevel</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>title</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>titleChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@title -->
+<!-- $$$xdgSurface-prop$$$xdgSurface -->
+<h3 class="fn" id="xdgSurface-prop"><a name="xdgSurface-prop"></a><span class="name">xdgSurface</span> : <span class="type"><a href="qwaylandxdgsurface.html">QWaylandXdgSurface</a></span>* const</h3>
+<p>This property holds the <a href="qwaylandxdgsurface.html">QWaylandXdgSurface</a> for this <a href="qwaylandxdgtoplevel.html">QWaylandXdgToplevel</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QWaylandXdgSurface *</td><td class="memItemRight bottomAlign"><span class="name"><b>xdgSurface</b></span>() const</td></tr>
+</table></div>
+<!-- @@@xdgSurface -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QWaylandXdgToplevel[overload1]$$$QWaylandXdgToplevelQWaylandXdgSurface*QWaylandResource& -->
+<h3 class="fn" id="QWaylandXdgToplevel"><a name="QWaylandXdgToplevel"></a>QWaylandXdgToplevel::<span class="name">QWaylandXdgToplevel</span>(<span class="type"><a href="qwaylandxdgsurface.html">QWaylandXdgSurface</a></span> *<i>xdgSurface</i>, <span class="type">QWaylandResource</span> &amp;<i>resource</i>)</h3>
+<p>Constructs a <a href="qwaylandxdgtoplevel.html">QWaylandXdgToplevel</a> for the given <i>xdgSurface</i> and <i>resource</i>.</p>
+<!-- @@@QWaylandXdgToplevel -->
+<!-- $$$fromResource[overload1]$$$fromResource::wl_resource* -->
+<h3 class="fn" id="fromResource"><a name="fromResource"></a><code>[static] </code><span class="type"><a href="qwaylandxdgtoplevel.html#QWaylandXdgToplevel">QWaylandXdgToplevel</a></span> *QWaylandXdgToplevel::<span class="name">fromResource</span>(<span class="type">::wl_resource</span> *<i>resource</i>)</h3>
+<p>Returns the <a href="qwaylandxdgtoplevel.html">QWaylandXdgToplevel</a> corresponding to the <i>resource</i>.</p>
+<!-- @@@fromResource -->
+<!-- $$$role[overload1]$$$role -->
+<h3 class="fn" id="role"><a name="role"></a><code>[static] </code><span class="type">QWaylandSurfaceRole</span> *QWaylandXdgToplevel::<span class="name">role</span>()</h3>
+<p>Returns the surface role for the QWaylandToplevel.</p>
+<!-- @@@role -->
+<!-- $$$sendClose[overload1]$$$sendClose -->
+<h3 class="fn" id="sendClose"><a name="sendClose"></a><span class="type">void</span> QWaylandXdgToplevel::<span class="name">sendClose</span>()</h3>
+<p>Sends a close event to the client. The client may choose to ignore the event.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@sendClose -->
+<!-- $$$sendConfigure[overload1]$$$sendConfigureconstQSize&constQVector<QWaylandXdgToplevel::State>& -->
+<h3 class="fn" id="sendConfigure"><a name="sendConfigure"></a><span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> QWaylandXdgToplevel::<span class="name">sendConfigure</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>size</i>, const <span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type">QWaylandXdgToplevel::State</span>&gt; &amp;<i>states</i>)</h3>
+<p>Sends a configure event to the client. Parameter <i>size</i> contains the pixel size of the surface. A size of zero means the client is free to decide the size. Known <i>states</i> are enumerated in QWaylandXdgToplevel::State.</p>
+<!-- @@@sendConfigure -->
+<!-- $$$sendFullscreen[overload1]$$$sendFullscreenconstQSize& -->
+<h3 class="fn" id="sendFullscreen"><a name="sendFullscreen"></a><span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> QWaylandXdgToplevel::<span class="name">sendFullscreen</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>size</i>)</h3>
+<p>Convenience for sending a configure event with the fullscreen state set, and maximized and resizing removed. The activated state is left in its current state.</p>
+<p><i>size</i> is the new size of the window.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<p><b>See also </b><a href="qwaylandxdgtoplevel.html#sendUnmaximized">sendUnmaximized</a>.</p>
+<!-- @@@sendFullscreen -->
+<!-- $$$sendMaximized[overload1]$$$sendMaximizedconstQSize& -->
+<h3 class="fn" id="sendMaximized"><a name="sendMaximized"></a><span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> QWaylandXdgToplevel::<span class="name">sendMaximized</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>size</i>)</h3>
+<p>Convenience for sending a configure event with the maximized state set, and fullscreen and resizing removed. The activated state is left in its current state.</p>
+<p><i>size</i> is the new size of the window.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@sendMaximized -->
+<!-- $$$sendResizing[overload1]$$$sendResizingconstQSize& -->
+<h3 class="fn" id="sendResizing"><a name="sendResizing"></a><span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> QWaylandXdgToplevel::<span class="name">sendResizing</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>maxSize</i>)</h3>
+<p>Convenience for sending a configure event with the resizing state set, and maximized and fullscreen removed. The activated state is left in its current state.</p>
+<p><i>maxSize</i> is the new size of the window.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@sendResizing -->
+<!-- $$$sendUnmaximized[overload1]$$$sendUnmaximizedconstQSize& -->
+<h3 class="fn" id="sendUnmaximized"><a name="sendUnmaximized"></a><span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> QWaylandXdgToplevel::<span class="name">sendUnmaximized</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>size</i> = QSize(0, 0))</h3>
+<p>Convenience for sending a configure event with the maximized, fullscreen and resizing states removed, and fullscreen and resizing removed. The activated state is left in its current state.</p>
+<p><i>size</i> is the new size of the window. If <i>size</i> is zero, the client decides the size.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@sendUnmaximized -->
+<!-- $$$sizeForResize[overload1]$$$sizeForResizeconstQSizeF&constQPointF&Qt::Edges -->
+<h3 class="fn" id="sizeForResize"><a name="sizeForResize"></a><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QWaylandXdgToplevel::<span class="name">sizeForResize</span>(const <span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span> &amp;<i>size</i>, const <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> &amp;<i>delta</i>, <span class="type"><a href="../qtcore/qt.html#Edge-enum">Qt::Edges</a></span> <i>edges</i>) const</h3>
+<p>Convenience for computing the new size given the current <i>size</i>, a <i>delta</i>, and the <i>edges</i> active in the drag.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@sizeForResize -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmediaserviceprovider.cpp -->
+  <title>QMediaServiceSupportedDevicesInterface Struct | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-modules.html">C++ Classes</a></td><td >QMediaServiceSupportedDevicesInterface</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QMediaServiceSupportedDevicesInterface Struct</h1>
+<!-- $$$QMediaServiceSupportedDevicesInterface-brief -->
+<p>The <a href="qmediaservicesupporteddevicesinterface.html">QMediaServiceSupportedDevicesInterface</a> class interface identifies the devices supported by a media service plug-in. <a href="#details">More...</a></p>
+<!-- @@@QMediaServiceSupportedDevicesInterface -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QMediaServiceSupportedDevicesInterface&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += multimedia</td></tr></table></div><ul>
+<li><a href="qmediaservicesupporteddevicesinterface-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qmediaservicesupporteddevicesinterface.html#dtor.QMediaServiceSupportedDevicesInterface">~QMediaServiceSupportedDevicesInterface</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QString </td><td class="memItemRight bottomAlign"><b><a href="qmediaservicesupporteddevicesinterface.html#deviceDescription">deviceDescription</a></b>(const QByteArray &amp;<i>service</i>, const QByteArray &amp;<i>device</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QList&lt;QByteArray&gt; </td><td class="memItemRight bottomAlign"><b><a href="qmediaservicesupporteddevicesinterface.html#devices">devices</a></b>(const QByteArray &amp;<i>service</i>) const = 0</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QMediaServiceSupportedDevicesInterface-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A <a href="qmediaserviceproviderplugin.html">QMediaServiceProviderPlugin</a> may implement this interface.</p>
+</div>
+<!-- @@@QMediaServiceSupportedDevicesInterface -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$~QMediaServiceSupportedDevicesInterface[overload1]$$$~QMediaServiceSupportedDevicesInterface -->
+<h3 class="fn" id="dtor.QMediaServiceSupportedDevicesInterface"><a name="dtor.QMediaServiceSupportedDevicesInterface"></a><code>[virtual] </code>QMediaServiceSupportedDevicesInterface::<span class="name">~QMediaServiceSupportedDevicesInterface</span>()</h3>
+<p>Destroys a media service supported devices interface.</p>
+<!-- @@@~QMediaServiceSupportedDevicesInterface -->
+<!-- $$$deviceDescription[overload1]$$$deviceDescriptionconstQByteArray&constQByteArray& -->
+<h3 class="fn" id="deviceDescription"><a name="deviceDescription"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QMediaServiceSupportedDevicesInterface::<span class="name">deviceDescription</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>service</i>, const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>device</i>)</h3>
+<p>Returns the description of a <i>device</i> available for a <i>service</i> type.</p>
+<!-- @@@deviceDescription -->
+<!-- $$$devices[overload1]$$$devicesconstQByteArray& -->
+<h3 class="fn" id="devices"><a name="devices"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span>&gt; QMediaServiceSupportedDevicesInterface::<span class="name">devices</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>service</i>) const</h3>
+<p>Returns a list of devices available for a <i>service</i> type.</p>
+<!-- @@@devices -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

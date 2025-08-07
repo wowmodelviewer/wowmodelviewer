@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmediarecordercontrol.cpp -->
+  <title>QMediaRecorderControl Class | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-modules.html">C++ Classes</a></td><td >QMediaRecorderControl</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#macros">Macros</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QMediaRecorderControl Class</h1>
+<!-- $$$QMediaRecorderControl-brief -->
+<p>The <a href="qmediarecordercontrol.html">QMediaRecorderControl</a> class provides access to the recording functionality of a <a href="qmediaservice.html">QMediaService</a>. <a href="#details">More...</a></p>
+<!-- @@@QMediaRecorderControl -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QMediaRecorderControl&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += multimedia</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qmediacontrol.html">QMediaControl</a></td></tr></table></div><ul>
+<li><a href="qmediarecordercontrol-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qmediarecordercontrol.html#dtor.QMediaRecorderControl">~QMediaRecorderControl</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qmediarecordercontrol.html#applySettings">applySettings</a></b>() = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual qint64 </td><td class="memItemRight bottomAlign"><b><a href="qmediarecordercontrol.html#duration">duration</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qmediarecordercontrol.html#isMuted">isMuted</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QUrl </td><td class="memItemRight bottomAlign"><b><a href="qmediarecordercontrol.html#outputLocation">outputLocation</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qmediarecordercontrol.html#setOutputLocation">setOutputLocation</a></b>(const QUrl &amp;<i>location</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QMediaRecorder::State </td><td class="memItemRight bottomAlign"><b><a href="qmediarecordercontrol.html#state">state</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QMediaRecorder::Status </td><td class="memItemRight bottomAlign"><b><a href="qmediarecordercontrol.html#status">status</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual qreal </td><td class="memItemRight bottomAlign"><b><a href="qmediarecordercontrol.html#volume">volume</a></b>() const = 0</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qmediarecordercontrol.html#setMuted">setMuted</a></b>(bool <i>muted</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qmediarecordercontrol.html#setState">setState</a></b>(QMediaRecorder::State <i>state</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qmediarecordercontrol.html#setVolume">setVolume</a></b>(qreal <i>volume</i>) = 0</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediarecordercontrol.html#actualLocationChanged">actualLocationChanged</a></b>(const QUrl &amp;<i>location</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediarecordercontrol.html#durationChanged">durationChanged</a></b>(qint64 <i>duration</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediarecordercontrol.html#error">error</a></b>(int <i>error</i>, const QString &amp;<i>errorString</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediarecordercontrol.html#mutedChanged">mutedChanged</a></b>(bool <i>muted</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediarecordercontrol.html#stateChanged">stateChanged</a></b>(QMediaRecorder::State <i>state</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediarecordercontrol.html#statusChanged">statusChanged</a></b>(QMediaRecorder::Status <i>status</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediarecordercontrol.html#volumeChanged">volumeChanged</a></b>(qreal <i>gain</i>)</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmediarecordercontrol.html#QMediaRecorderControl">QMediaRecorderControl</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+</table></div>
+<a name="macros"></a>
+<h2 id="macros">Macros</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmediarecordercontrol.html#QMediaRecorderControl_iid">QMediaRecorderControl_iid</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QMediaRecorderControl-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Generally you will use the <a href="qmediarecorder.html">QMediaRecorder</a> class in application code - this class is mostly used when implementing a new <a href="qmediaservice.html">QMediaService</a> or if there is access to specific low level functionality not otherwise present in <a href="qmediarecorder.html">QMediaRecorder</a>.</p>
+<p>If a <a href="qmediaservice.html">QMediaService</a> can record media it will implement <a href="qmediarecordercontrol.html">QMediaRecorderControl</a>. This control provides a means to set the <a href="qmediarecordercontrol.html#outputLocation">output location</a>, and record, pause and stop recording via the <a href="qmediarecordercontrol.html#setState">setState</a>() method. It also provides feedback on the <a href="qmediarecordercontrol.html#duration">duration</a> of the recording.</p>
+<p>The interface name of <a href="qmediarecordercontrol.html">QMediaRecorderControl</a> is <code>org.qt-project.qt.mediarecordercontrol/5.0</code> as defined in <a href="qmediarecordercontrol.html#QMediaRecorderControl_iid">QMediaRecorderControl_iid</a>.</p>
+</div>
+<p><b>See also </b><a href="qmediaservice.html#requestControl-1">QMediaService::requestControl</a>() and <a href="qmediarecorder.html">QMediaRecorder</a>.</p>
+<!-- @@@QMediaRecorderControl -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QMediaRecorderControl[overload1]$$$QMediaRecorderControlQObject* -->
+<h3 class="fn" id="QMediaRecorderControl"><a name="QMediaRecorderControl"></a><code>[protected] </code>QMediaRecorderControl::<span class="name">QMediaRecorderControl</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a media recorder control with the given <i>parent</i>.</p>
+<!-- @@@QMediaRecorderControl -->
+<!-- $$$actualLocationChanged[overload1]$$$actualLocationChangedconstQUrl& -->
+<h3 class="fn" id="actualLocationChanged"><a name="actualLocationChanged"></a><code>[signal] </code><span class="type">void</span> QMediaRecorderControl::<span class="name">actualLocationChanged</span>(const <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> &amp;<i>location</i>)</h3>
+<p>Signals that the actual media <i>location</i> has changed. This signal should be emitted at start of recording.</p>
+<!-- @@@actualLocationChanged -->
+<!-- $$$durationChanged[overload1]$$$durationChangedqint64 -->
+<h3 class="fn" id="durationChanged"><a name="durationChanged"></a><code>[signal] </code><span class="type">void</span> QMediaRecorderControl::<span class="name">durationChanged</span>(<span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> <i>duration</i>)</h3>
+<p>Signals that the <i>duration</i> of the recorded media has changed.</p>
+<p>This only emitted when there is a discontinuous change in the duration such as being reset to 0.</p>
+<!-- @@@durationChanged -->
+<!-- $$$error[overload1]$$$errorintconstQString& -->
+<h3 class="fn" id="error"><a name="error"></a><code>[signal] </code><span class="type">void</span> QMediaRecorderControl::<span class="name">error</span>(<span class="type">int</span> <i>error</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>errorString</i>)</h3>
+<p>Signals that an <i>error</i> has occurred. The <i>errorString</i> describes the error.</p>
+<!-- @@@error -->
+<!-- $$$mutedChanged[overload1]$$$mutedChangedbool -->
+<h3 class="fn" id="mutedChanged"><a name="mutedChanged"></a><code>[signal] </code><span class="type">void</span> QMediaRecorderControl::<span class="name">mutedChanged</span>(<span class="type">bool</span> <i>muted</i>)</h3>
+<p>Signals that the <i>muted</i> state of a media recorder has changed.</p>
+<!-- @@@mutedChanged -->
+<!-- $$$setMuted[overload1]$$$setMutedbool -->
+<h3 class="fn" id="setMuted"><a name="setMuted"></a><code>[pure virtual slot] </code><span class="type">void</span> QMediaRecorderControl::<span class="name">setMuted</span>(<span class="type">bool</span> <i>muted</i>)</h3>
+<p>Sets the <i>muted</i> state of a media recorder.</p>
+<p><b>See also </b><a href="qmediarecordercontrol.html#isMuted">isMuted</a>().</p>
+<!-- @@@setMuted -->
+<!-- $$$setState[overload1]$$$setStateQMediaRecorder::State -->
+<h3 class="fn" id="setState"><a name="setState"></a><code>[pure virtual slot] </code><span class="type">void</span> QMediaRecorderControl::<span class="name">setState</span>(<span class="type"><a href="qmediarecorder.html#State-enum">QMediaRecorder::State</a></span> <i>state</i>)</h3>
+<p>Set the media recorder <i>state</i>.</p>
+<p><b>See also </b><a href="qmediarecordercontrol.html#state">state</a>().</p>
+<!-- @@@setState -->
+<!-- $$$setVolume[overload1]$$$setVolumeqreal -->
+<h3 class="fn" id="setVolume"><a name="setVolume"></a><code>[pure virtual slot] </code><span class="type">void</span> QMediaRecorderControl::<span class="name">setVolume</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>volume</i>)</h3>
+<p>Sets the audio <i>volume</i> of a media recorder control.</p>
+<p>The volume is scaled linearly, ranging from <code>0</code> (silence) to <code>100</code> (full volume).</p>
+<p><b>See also </b><a href="qmediarecordercontrol.html#volume">volume</a>().</p>
+<!-- @@@setVolume -->
+<!-- $$$stateChanged[overload1]$$$stateChangedQMediaRecorder::State -->
+<h3 class="fn" id="stateChanged"><a name="stateChanged"></a><code>[signal] </code><span class="type">void</span> QMediaRecorderControl::<span class="name">stateChanged</span>(<span class="type"><a href="qmediarecorder.html#State-enum">QMediaRecorder::State</a></span> <i>state</i>)</h3>
+<p>Signals that the <i>state</i> of a media recorder has changed.</p>
+<!-- @@@stateChanged -->
+<!-- $$$statusChanged[overload1]$$$statusChangedQMediaRecorder::Status -->
+<h3 class="fn" id="statusChanged"><a name="statusChanged"></a><code>[signal] </code><span class="type">void</span> QMediaRecorderControl::<span class="name">statusChanged</span>(<span class="type"><a href="qmediarecorder.html#Status-enum">QMediaRecorder::Status</a></span> <i>status</i>)</h3>
+<p>Signals that the <i>status</i> of a media recorder has changed.</p>
+<!-- @@@statusChanged -->
+<!-- $$$volumeChanged[overload1]$$$volumeChangedqreal -->
+<h3 class="fn" id="volumeChanged"><a name="volumeChanged"></a><code>[signal] </code><span class="type">void</span> QMediaRecorderControl::<span class="name">volumeChanged</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>gain</i>)</h3>
+<p>Signals that the audio <i>gain</i> value has changed.</p>
+<!-- @@@volumeChanged -->
+<!-- $$$~QMediaRecorderControl[overload1]$$$~QMediaRecorderControl -->
+<h3 class="fn" id="dtor.QMediaRecorderControl"><a name="dtor.QMediaRecorderControl"></a><code>[virtual] </code>QMediaRecorderControl::<span class="name">~QMediaRecorderControl</span>()</h3>
+<p>Destroys a media recorder control.</p>
+<!-- @@@~QMediaRecorderControl -->
+<!-- $$$applySettings[overload1]$$$applySettings -->
+<h3 class="fn" id="applySettings"><a name="applySettings"></a><code>[pure virtual] </code><span class="type">void</span> QMediaRecorderControl::<span class="name">applySettings</span>()</h3>
+<p>Commits the encoder settings and performs pre-initialization to reduce delays when recording is started.</p>
+<!-- @@@applySettings -->
+<!-- $$$duration[overload1]$$$duration -->
+<h3 class="fn" id="duration"><a name="duration"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> QMediaRecorderControl::<span class="name">duration</span>() const</h3>
+<p>Return the current duration in milliseconds.</p>
+<!-- @@@duration -->
+<!-- $$$isMuted[overload1]$$$isMuted -->
+<h3 class="fn" id="isMuted"><a name="isMuted"></a><code>[pure virtual] </code><span class="type">bool</span> QMediaRecorderControl::<span class="name">isMuted</span>() const</h3>
+<p>Returns true if the recorder is muted, and false if it is not.</p>
+<!-- @@@isMuted -->
+<!-- $$$outputLocation[overload1]$$$outputLocation -->
+<h3 class="fn" id="outputLocation"><a name="outputLocation"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> QMediaRecorderControl::<span class="name">outputLocation</span>() const</h3>
+<p>Returns the current output location being used.</p>
+<p><b>See also </b><a href="qmediarecordercontrol.html#setOutputLocation">setOutputLocation</a>().</p>
+<!-- @@@outputLocation -->
+<!-- $$$setOutputLocation[overload1]$$$setOutputLocationconstQUrl& -->
+<h3 class="fn" id="setOutputLocation"><a name="setOutputLocation"></a><code>[pure virtual] </code><span class="type">bool</span> QMediaRecorderControl::<span class="name">setOutputLocation</span>(const <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> &amp;<i>location</i>)</h3>
+<p>Sets the output <i>location</i> and returns if this operation is successful. If file at the output location already exists, it should be overwritten.</p>
+<p>The <i>location</i> can be relative or empty; in this case the service should use the system specific place and file naming scheme.</p>
+<p>After recording has started, the backend should report the actual file location with <a href="qmediarecordercontrol.html#actualLocationChanged">actualLocationChanged</a>() signal.</p>
+<p><b>See also </b><a href="qmediarecordercontrol.html#outputLocation">outputLocation</a>().</p>
+<!-- @@@setOutputLocation -->
+<!-- $$$state[overload1]$$$state -->
+<h3 class="fn" id="state"><a name="state"></a><code>[pure virtual] </code><span class="type"><a href="qmediarecorder.html#State-enum">QMediaRecorder::State</a></span> QMediaRecorderControl::<span class="name">state</span>() const</h3>
+<p>Return the current recording state.</p>
+<p><b>See also </b><a href="qmediarecordercontrol.html#setState">setState</a>().</p>
+<!-- @@@state -->
+<!-- $$$status[overload1]$$$status -->
+<h3 class="fn" id="status"><a name="status"></a><code>[pure virtual] </code><span class="type"><a href="qmediarecorder.html#Status-enum">QMediaRecorder::Status</a></span> QMediaRecorderControl::<span class="name">status</span>() const</h3>
+<p>Return the current recording status.</p>
+<!-- @@@status -->
+<!-- $$$volume[overload1]$$$volume -->
+<h3 class="fn" id="volume"><a name="volume"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QMediaRecorderControl::<span class="name">volume</span>() const</h3>
+<p>Returns the audio volume of a media recorder control.</p>
+<p><b>See also </b><a href="qmediarecordercontrol.html#setVolume">setVolume</a>().</p>
+<!-- @@@volume -->
+</div>
+<div class="macros">
+<h2>Macro Documentation</h2>
+<!-- $$$QMediaRecorderControl_iid[overload1]$$$QMediaRecorderControl_iid -->
+<h3 class="fn" id="QMediaRecorderControl_iid"><a name="QMediaRecorderControl_iid"></a><span class="name">QMediaRecorderControl_iid</span></h3>
+<p><code>org.qt-project.qt.mediarecordercontrol/5.0</code></p>
+<p>Defines the interface name of the <a href="qmediarecordercontrol.html">QMediaRecorderControl</a> class.</p>
+<!-- @@@QMediaRecorderControl_iid -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

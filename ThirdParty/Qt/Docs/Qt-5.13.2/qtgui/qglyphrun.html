@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qglyphrun.cpp -->
+  <title>QGlyphRun Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QGlyphRun</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QGlyphRun Class</h1>
+<!-- $$$QGlyphRun-brief -->
+<p>The <a href="qglyphrun.html">QGlyphRun</a> class provides direct access to the internal glyphs in a font. <a href="#details">More...</a></p>
+<!-- @@@QGlyphRun -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QGlyphRun&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.8</td></tr></table></div><p>This class was introduced in  Qt 4.8.</p>
+<ul>
+<li><a href="qglyphrun-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#GlyphRunFlag-enum">GlyphRunFlag</a></b> { Overline, Underline, StrikeOut, RightToLeft, SplitLigature }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#GlyphRunFlag-enum">GlyphRunFlags</a></b></td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#QGlyphRun-1">QGlyphRun</a></b>(const QGlyphRun &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#QGlyphRun">QGlyphRun</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGlyphRun &amp;</td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#operator-eq-1">operator=</a></b>(const QGlyphRun &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#dtor.QGlyphRun">~QGlyphRun</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRectF </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#boundingRect">boundingRect</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#clear">clear</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGlyphRun::GlyphRunFlags </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#flags">flags</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;quint32&gt; </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#glyphIndexes">glyphIndexes</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#isEmpty">isEmpty</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#isRightToLeft">isRightToLeft</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#overline">overline</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;QPointF&gt; </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#positions">positions</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRawFont </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#rawFont">rawFont</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#setBoundingRect">setBoundingRect</a></b>(const QRectF &amp;<i>boundingRect</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#setFlag">setFlag</a></b>(QGlyphRun::GlyphRunFlag <i>flag</i>, bool <i>enabled</i> = true)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#setFlags">setFlags</a></b>(QGlyphRun::GlyphRunFlags <i>flags</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#setGlyphIndexes">setGlyphIndexes</a></b>(const QVector&lt;quint32&gt; &amp;<i>glyphIndexes</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#setOverline">setOverline</a></b>(bool <i>overline</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#setPositions">setPositions</a></b>(const QVector&lt;QPointF&gt; &amp;<i>positions</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#setRawData">setRawData</a></b>(const quint32 *<i>glyphIndexArray</i>, const QPointF *<i>glyphPositionArray</i>, int <i>size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#setRawFont">setRawFont</a></b>(const QRawFont &amp;<i>rawFont</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#setRightToLeft">setRightToLeft</a></b>(bool <i>rightToLeft</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#setStrikeOut">setStrikeOut</a></b>(bool <i>strikeOut</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#setUnderline">setUnderline</a></b>(bool <i>underline</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#strikeOut">strikeOut</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#swap">swap</a></b>(QGlyphRun &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#underline">underline</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#operator-not-eq">operator!=</a></b>(const QGlyphRun &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qglyphrun.html#operator-eq-eq">operator==</a></b>(const QGlyphRun &amp;<i>other</i>) const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QGlyphRun-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>When Qt displays a string of text encoded in Unicode, it will first convert the Unicode points into a list of glyph indexes and a list of positions based on one or more fonts. The Unicode representation of the text and the <a href="qfont.html">QFont</a> object will in this case serve as a convenient abstraction that hides the details of what actually takes place when displaying the text on-screen. For instance, by the time the text actually reaches the screen, it may be represented by a set of fonts in addition to the one specified by the user, e.g&#x2e; in case the originally selected font did not support all the writing systems contained in the text.</p>
+<p>Under certain circumstances, it can be useful as an application developer to have more low-level control over which glyphs in a specific font are drawn to the screen. This could for instance be the case in applications that use an external font engine and text shaper together with Qt. <a href="qglyphrun.html">QGlyphRun</a> provides an interface to the raw data needed to get text on the screen. It contains a list of glyph indexes, a position for each glyph and a font.</p>
+<p>It is the user's responsibility to ensure that the selected font actually contains the provided glyph indexes.</p>
+<p><a href="qtextlayout.html#glyphRuns">QTextLayout::glyphRuns</a>() or <a href="qtextfragment.html#glyphRuns">QTextFragment::glyphRuns</a>() can be used to convert unicode encoded text into a list of <a href="qglyphrun.html">QGlyphRun</a> objects, and <a href="qpainter.html#drawGlyphRun">QPainter::drawGlyphRun</a>() can be used to draw the glyphs.</p>
+<p><b>Note: </b>Please note that <a href="qrawfont.html">QRawFont</a> is considered local to the thread in which it is constructed. This in turn means that a new <a href="qrawfont.html">QRawFont</a> will have to be created and set on the <a href="qglyphrun.html">QGlyphRun</a> if it is moved to a different thread. If the <a href="qglyphrun.html">QGlyphRun</a> contains a reference to a <a href="qrawfont.html">QRawFont</a> from a different thread than the current, it will not be possible to draw the glyphs using a <a href="qpainter.html">QPainter</a>, as the <a href="qrawfont.html">QRawFont</a> is considered invalid and inaccessible in this case.</p></div>
+<!-- @@@QGlyphRun -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$GlyphRunFlag$$$Overline$$$Underline$$$StrikeOut$$$RightToLeft$$$SplitLigature -->
+<h3 class="flags" id="GlyphRunFlag-enum"><a name="GlyphRunFlag-enum"></a>enum QGlyphRun::<span class="name">GlyphRunFlag</span><br/>flags QGlyphRun::<span class="name">GlyphRunFlags</span></h3>
+<p>This enum describes flags that alter the way the run of glyphs might be presented or behave in a visual layout. The layout which generates the glyph runs can set these flags based on relevant internal data, to retain information needed to present the text as intended by the user of the layout.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QGlyphRun::Overline</code></td><td class="topAlign tblval"><code>0x01</code></td><td class="topAlign">Indicates that the glyphs should be visualized together with an overline.</td></tr>
+<tr><td class="topAlign"><code>QGlyphRun::Underline</code></td><td class="topAlign tblval"><code>0x02</code></td><td class="topAlign">Indicates that the glyphs should be visualized together with an underline.</td></tr>
+<tr><td class="topAlign"><code>QGlyphRun::StrikeOut</code></td><td class="topAlign tblval"><code>0x04</code></td><td class="topAlign">Indicates that the glyphs should be struck out visually.</td></tr>
+<tr><td class="topAlign"><code>QGlyphRun::RightToLeft</code></td><td class="topAlign tblval"><code>0x08</code></td><td class="topAlign">Indicates that the glyphs are ordered right to left. This can affect the positioning of other screen elements that are relative to the glyph run, such as an inline text object.</td></tr>
+<tr><td class="topAlign"><code>QGlyphRun::SplitLigature</code></td><td class="topAlign tblval"><code>0x10</code></td><td class="topAlign">Indicates that the glyph run splits a ligature glyph. This means that a ligature glyph is included in the run, but the characters represented by it corresponds only to part of that ligature. The glyph run's <a href="qglyphrun.html#boundingRect">boundingRect</a>() function can in this case be used to retrieve the area covered by glyphs that correspond to the characters represented by the glyph run. When visualizing the glyphs, care needs to be taken to clip to this bounding rect to ensure that only the corresponding part of the ligature is painted. In particular, this can be the case when retrieving a glyph run from a <a href="qtextlayout.html">QTextLayout</a> for a specific character range, e.g&#x2e; when retrieving the selected area of a <a href="qtextlayout.html">QTextLayout</a>.</td></tr>
+</table></div>
+<p>This enum was introduced or modified in  Qt 5.0.</p>
+<p>The GlyphRunFlags type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;GlyphRunFlag&gt;. It stores an OR combination of GlyphRunFlag values.</p>
+<!-- @@@GlyphRunFlag -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QGlyphRun$$$QGlyphRunconstQGlyphRun& -->
+<h3 class="fn" id="QGlyphRun-1"><a name="QGlyphRun-1"></a>QGlyphRun::<span class="name">QGlyphRun</span>(const <span class="type"><a href="qglyphrun.html#QGlyphRun">QGlyphRun</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a <a href="qglyphrun.html">QGlyphRun</a> object which is a copy of <i>other</i>.</p>
+<!-- @@@QGlyphRun -->
+<!-- $$$QGlyphRun[overload1]$$$QGlyphRun -->
+<h3 class="fn" id="QGlyphRun"><a name="QGlyphRun"></a>QGlyphRun::<span class="name">QGlyphRun</span>()</h3>
+<p>Constructs an empty <a href="qglyphrun.html">QGlyphRun</a> object.</p>
+<!-- @@@QGlyphRun -->
+<!-- $$$operator=$$$operator=constQGlyphRun& -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type"><a href="qglyphrun.html#QGlyphRun">QGlyphRun</a></span> &amp;QGlyphRun::<span class="name">operator=</span>(const <span class="type"><a href="qglyphrun.html#QGlyphRun">QGlyphRun</a></span> &amp;<i>other</i>)</h3>
+<p>Assigns <i>other</i> to this <a href="qglyphrun.html">QGlyphRun</a> object.</p>
+<!-- @@@operator= -->
+<!-- $$$~QGlyphRun[overload1]$$$~QGlyphRun -->
+<h3 class="fn" id="dtor.QGlyphRun"><a name="dtor.QGlyphRun"></a>QGlyphRun::<span class="name">~QGlyphRun</span>()</h3>
+<p>Destroys the <a href="qglyphrun.html">QGlyphRun</a>.</p>
+<!-- @@@~QGlyphRun -->
+<!-- $$$boundingRect[overload1]$$$boundingRect -->
+<h3 class="fn" id="boundingRect"><a name="boundingRect"></a><span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> QGlyphRun::<span class="name">boundingRect</span>() const</h3>
+<p>Returns the smallest rectangle that contains all glyphs in this <a href="qglyphrun.html">QGlyphRun</a>. If a bounding rect has been set using <a href="qglyphrun.html#setBoundingRect">setBoundingRect</a>(), then this will be returned. Otherwise the bounding rect will be calculated based on the font metrics of the glyphs in the glyph run.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qglyphrun.html#setBoundingRect">setBoundingRect</a>().</p>
+<!-- @@@boundingRect -->
+<!-- $$$clear[overload1]$$$clear -->
+<h3 class="fn" id="clear"><a name="clear"></a><span class="type">void</span> QGlyphRun::<span class="name">clear</span>()</h3>
+<p>Clears all data in the <a href="qglyphrun.html">QGlyphRun</a> object.</p>
+<!-- @@@clear -->
+<!-- $$$flags[overload1]$$$flags -->
+<h3 class="fn" id="flags"><a name="flags"></a><span class="type"><a href="qglyphrun.html#GlyphRunFlag-enum">QGlyphRun::GlyphRunFlags</a></span> QGlyphRun::<span class="name">flags</span>() const</h3>
+<p>Returns the flags set for this <a href="qglyphrun.html">QGlyphRun</a>.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qglyphrun.html#setFlags">setFlags</a>(), <a href="qglyphrun.html#setFlag">setFlag</a>(), and <a href="qglyphrun.html#setFlag">setFlag</a>().</p>
+<!-- @@@flags -->
+<!-- $$$glyphIndexes[overload1]$$$glyphIndexes -->
+<h3 class="fn" id="glyphIndexes"><a name="glyphIndexes"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="../qtcore/qtglobal.html#quint32-typedef">quint32</a></span>&gt; QGlyphRun::<span class="name">glyphIndexes</span>() const</h3>
+<p>Returns the glyph indexes for this <a href="qglyphrun.html">QGlyphRun</a> object.</p>
+<p><b>See also </b><a href="qglyphrun.html#setGlyphIndexes">setGlyphIndexes</a>() and <a href="qglyphrun.html#setPositions">setPositions</a>().</p>
+<!-- @@@glyphIndexes -->
+<!-- $$$isEmpty[overload1]$$$isEmpty -->
+<h3 class="fn" id="isEmpty"><a name="isEmpty"></a><span class="type">bool</span> QGlyphRun::<span class="name">isEmpty</span>() const</h3>
+<p>Returns <code>true</code> if the <a href="qglyphrun.html">QGlyphRun</a> does not contain any glyphs.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@isEmpty -->
+<!-- $$$isRightToLeft[overload1]$$$isRightToLeft -->
+<h3 class="fn" id="isRightToLeft"><a name="isRightToLeft"></a><span class="type">bool</span> QGlyphRun::<span class="name">isRightToLeft</span>() const</h3>
+<p>Returns <code>true</code> if this <a href="qglyphrun.html">QGlyphRun</a> contains glyphs that are painted from the right to the left.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qglyphrun.html#setRightToLeft">setRightToLeft</a>() and <a href="qglyphrun.html#flags">flags</a>().</p>
+<!-- @@@isRightToLeft -->
+<!-- $$$overline[overload1]$$$overline -->
+<h3 class="fn" id="overline"><a name="overline"></a><span class="type">bool</span> QGlyphRun::<span class="name">overline</span>() const</h3>
+<p>Returns <code>true</code> if this <a href="qglyphrun.html">QGlyphRun</a> should be painted with an overline decoration.</p>
+<p><b>See also </b><a href="qglyphrun.html#setOverline">setOverline</a>() and <a href="qglyphrun.html#flags">flags</a>().</p>
+<!-- @@@overline -->
+<!-- $$$positions[overload1]$$$positions -->
+<h3 class="fn" id="positions"><a name="positions"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>&gt; QGlyphRun::<span class="name">positions</span>() const</h3>
+<p>Returns the position of the edge of the baseline for each glyph in this set of glyph indexes.</p>
+<p><b>See also </b><a href="qglyphrun.html#setPositions">setPositions</a>().</p>
+<!-- @@@positions -->
+<!-- $$$rawFont[overload1]$$$rawFont -->
+<h3 class="fn" id="rawFont"><a name="rawFont"></a><span class="type"><a href="qrawfont.html">QRawFont</a></span> QGlyphRun::<span class="name">rawFont</span>() const</h3>
+<p>Returns the font selected for this <a href="qglyphrun.html">QGlyphRun</a> object.</p>
+<p><b>See also </b><a href="qglyphrun.html#setRawFont">setRawFont</a>().</p>
+<!-- @@@rawFont -->
+<!-- $$$setBoundingRect[overload1]$$$setBoundingRectconstQRectF& -->
+<h3 class="fn" id="setBoundingRect"><a name="setBoundingRect"></a><span class="type">void</span> QGlyphRun::<span class="name">setBoundingRect</span>(const <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> &amp;<i>boundingRect</i>)</h3>
+<p>Sets the bounding rect of the glyphs in this <a href="qglyphrun.html">QGlyphRun</a> to be <i>boundingRect</i>. This rectangle will be returned by <a href="qglyphrun.html#boundingRect">boundingRect</a>() unless it is empty, in which case the bounding rectangle of the glyphs in the glyph run will be returned instead.</p>
+<p><b>Note: </b>Unless you are implementing text shaping, you should not have to use this function. It is used specifically when the <a href="qglyphrun.html">QGlyphRun</a> should represent an area which is smaller than the area of the glyphs it contains. This could happen e.g&#x2e; if the glyph run is retrieved by calling <a href="qtextlayout.html#glyphRuns">QTextLayout::glyphRuns</a>() and the specified range only includes part of a ligature (where two or more characters are combined to a single glyph.) When this is the case, the bounding rect should only include the appropriate part of the ligature glyph, based on a calculation of the average width of the characters in the ligature.</p><p>In order to support such a case (an example is selections which should be drawn with a different color than the main text color), it is necessary to clip the painting mechanism to the rectangle returned from <a href="qglyphrun.html#boundingRect">boundingRect</a>() to avoid drawing the entire ligature glyph.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qglyphrun.html#boundingRect">boundingRect</a>().</p>
+<!-- @@@setBoundingRect -->
+<!-- $$$setFlag[overload1]$$$setFlagQGlyphRun::GlyphRunFlagbool -->
+<h3 class="fn" id="setFlag"><a name="setFlag"></a><span class="type">void</span> QGlyphRun::<span class="name">setFlag</span>(<span class="type"><a href="qglyphrun.html#GlyphRunFlag-enum">QGlyphRun::GlyphRunFlag</a></span> <i>flag</i>, <span class="type">bool</span> <i>enabled</i> = true)</h3>
+<p>If <i>enabled</i> is true, then <i>flag</i> is enabled; otherwise, it is disabled.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qglyphrun.html#flags">flags</a>() and <a href="qglyphrun.html#setFlags">setFlags</a>().</p>
+<!-- @@@setFlag -->
+<!-- $$$setFlags[overload1]$$$setFlagsQGlyphRun::GlyphRunFlags -->
+<h3 class="fn" id="setFlags"><a name="setFlags"></a><span class="type">void</span> QGlyphRun::<span class="name">setFlags</span>(<span class="type"><a href="qglyphrun.html#GlyphRunFlag-enum">QGlyphRun::GlyphRunFlags</a></span> <i>flags</i>)</h3>
+<p>Sets the flags of this <a href="qglyphrun.html">QGlyphRun</a> to <i>flags</i>.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qglyphrun.html#setFlag">setFlag</a>() and <a href="qglyphrun.html#flags">flags</a>().</p>
+<!-- @@@setFlags -->
+<!-- $$$setGlyphIndexes[overload1]$$$setGlyphIndexesconstQVector<quint32>& -->
+<h3 class="fn" id="setGlyphIndexes"><a name="setGlyphIndexes"></a><span class="type">void</span> QGlyphRun::<span class="name">setGlyphIndexes</span>(const <span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="../qtcore/qtglobal.html#quint32-typedef">quint32</a></span>&gt; &amp;<i>glyphIndexes</i>)</h3>
+<p>Set the glyph indexes for this <a href="qglyphrun.html">QGlyphRun</a> object to <i>glyphIndexes</i>. The glyph indexes must be valid for the selected font.</p>
+<p><b>See also </b><a href="qglyphrun.html#glyphIndexes">glyphIndexes</a>().</p>
+<!-- @@@setGlyphIndexes -->
+<!-- $$$setOverline[overload1]$$$setOverlinebool -->
+<h3 class="fn" id="setOverline"><a name="setOverline"></a><span class="type">void</span> QGlyphRun::<span class="name">setOverline</span>(<span class="type">bool</span> <i>overline</i>)</h3>
+<p>Indicates that this <a href="qglyphrun.html">QGlyphRun</a> should be painted with an overline decoration if <i>overline</i> is true. Otherwise the <a href="qglyphrun.html">QGlyphRun</a> should be painted with no overline decoration.</p>
+<p><b>See also </b><a href="qglyphrun.html#overline">overline</a>(), <a href="qglyphrun.html#setFlag">setFlag</a>(), and <a href="qglyphrun.html#setFlags">setFlags</a>().</p>
+<!-- @@@setOverline -->
+<!-- $$$setPositions[overload1]$$$setPositionsconstQVector<QPointF>& -->
+<h3 class="fn" id="setPositions"><a name="setPositions"></a><span class="type">void</span> QGlyphRun::<span class="name">setPositions</span>(const <span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>&gt; &amp;<i>positions</i>)</h3>
+<p>Sets the positions of the edge of the baseline for each glyph in this set of glyph indexes to <i>positions</i>.</p>
+<p><b>See also </b><a href="qglyphrun.html#positions">positions</a>().</p>
+<!-- @@@setPositions -->
+<!-- $$$setRawData[overload1]$$$setRawDataconstquint32*constQPointF*int -->
+<h3 class="fn" id="setRawData"><a name="setRawData"></a><span class="type">void</span> QGlyphRun::<span class="name">setRawData</span>(const <span class="type"><a href="../qtcore/qtglobal.html#quint32-typedef">quint32</a></span> *<i>glyphIndexArray</i>, const <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> *<i>glyphPositionArray</i>, <span class="type">int</span> <i>size</i>)</h3>
+<p>Sets the glyph indexes and positions of this <a href="qglyphrun.html">QGlyphRun</a> to use the first <i>size</i> elements in the arrays <i>glyphIndexArray</i> and <i>glyphPositionArray</i>. The data is <i>not</i> copied. The caller must guarantee that the arrays are not deleted as long as this <a href="qglyphrun.html">QGlyphRun</a> and any copies of it exists.</p>
+<p><b>See also </b><a href="qglyphrun.html#setGlyphIndexes">setGlyphIndexes</a>() and <a href="qglyphrun.html#setPositions">setPositions</a>().</p>
+<!-- @@@setRawData -->
+<!-- $$$setRawFont[overload1]$$$setRawFontconstQRawFont& -->
+<h3 class="fn" id="setRawFont"><a name="setRawFont"></a><span class="type">void</span> QGlyphRun::<span class="name">setRawFont</span>(const <span class="type"><a href="qrawfont.html">QRawFont</a></span> &amp;<i>rawFont</i>)</h3>
+<p>Sets the font in which to look up the glyph indexes to the <i>rawFont</i> specified.</p>
+<p><b>See also </b><a href="qglyphrun.html#rawFont">rawFont</a>() and <a href="qglyphrun.html#setGlyphIndexes">setGlyphIndexes</a>().</p>
+<!-- @@@setRawFont -->
+<!-- $$$setRightToLeft[overload1]$$$setRightToLeftbool -->
+<h3 class="fn" id="setRightToLeft"><a name="setRightToLeft"></a><span class="type">void</span> QGlyphRun::<span class="name">setRightToLeft</span>(<span class="type">bool</span> <i>rightToLeft</i>)</h3>
+<p>Indicates that this <a href="qglyphrun.html">QGlyphRun</a> contains glyphs that should be ordered from the right to left if <i>rightToLeft</i> is true. Otherwise the order of the glyphs is assumed to be left to right.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qglyphrun.html#isRightToLeft">isRightToLeft</a>(), <a href="qglyphrun.html#setFlag">setFlag</a>(), and <a href="qglyphrun.html#setFlags">setFlags</a>().</p>
+<!-- @@@setRightToLeft -->
+<!-- $$$setStrikeOut[overload1]$$$setStrikeOutbool -->
+<h3 class="fn" id="setStrikeOut"><a name="setStrikeOut"></a><span class="type">void</span> QGlyphRun::<span class="name">setStrikeOut</span>(<span class="type">bool</span> <i>strikeOut</i>)</h3>
+<p>Indicates that this <a href="qglyphrun.html">QGlyphRun</a> should be painted with an strike out decoration if <i>strikeOut</i> is true. Otherwise the <a href="qglyphrun.html">QGlyphRun</a> should be painted with no strike out decoration.</p>
+<p><b>See also </b><a href="qglyphrun.html#strikeOut">strikeOut</a>(), <a href="qglyphrun.html#setFlag">setFlag</a>(), and <a href="qglyphrun.html#setFlags">setFlags</a>().</p>
+<!-- @@@setStrikeOut -->
+<!-- $$$setUnderline[overload1]$$$setUnderlinebool -->
+<h3 class="fn" id="setUnderline"><a name="setUnderline"></a><span class="type">void</span> QGlyphRun::<span class="name">setUnderline</span>(<span class="type">bool</span> <i>underline</i>)</h3>
+<p>Indicates that this <a href="qglyphrun.html">QGlyphRun</a> should be painted with an underline decoration if <i>underline</i> is true. Otherwise the <a href="qglyphrun.html">QGlyphRun</a> should be painted with no underline decoration.</p>
+<p><b>See also </b><a href="qglyphrun.html#underline">underline</a>(), <a href="qglyphrun.html#setFlag">setFlag</a>(), and <a href="qglyphrun.html#setFlags">setFlags</a>().</p>
+<!-- @@@setUnderline -->
+<!-- $$$strikeOut[overload1]$$$strikeOut -->
+<h3 class="fn" id="strikeOut"><a name="strikeOut"></a><span class="type">bool</span> QGlyphRun::<span class="name">strikeOut</span>() const</h3>
+<p>Returns <code>true</code> if this <a href="qglyphrun.html">QGlyphRun</a> should be painted with a strike out decoration.</p>
+<p><b>See also </b><a href="qglyphrun.html#setStrikeOut">setStrikeOut</a>() and <a href="qglyphrun.html#flags">flags</a>().</p>
+<!-- @@@strikeOut -->
+<!-- $$$swap[overload1]$$$swapQGlyphRun& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QGlyphRun::<span class="name">swap</span>(<span class="type"><a href="qglyphrun.html#QGlyphRun">QGlyphRun</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps this glyph run instance with <i>other</i>. This function is very fast and never fails.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@swap -->
+<!-- $$$underline[overload1]$$$underline -->
+<h3 class="fn" id="underline"><a name="underline"></a><span class="type">bool</span> QGlyphRun::<span class="name">underline</span>() const</h3>
+<p>Returns <code>true</code> if this <a href="qglyphrun.html">QGlyphRun</a> should be painted with an underline decoration.</p>
+<p><b>See also </b><a href="qglyphrun.html#setUnderline">setUnderline</a>() and <a href="qglyphrun.html#flags">flags</a>().</p>
+<!-- @@@underline -->
+<!-- $$$operator!=[overload1]$$$operator!=constQGlyphRun& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> QGlyphRun::<span class="name">operator!=</span>(const <span class="type"><a href="qglyphrun.html#QGlyphRun">QGlyphRun</a></span> &amp;<i>other</i>) const</h3>
+<p>Compares <i>other</i> to this <a href="qglyphrun.html">QGlyphRun</a> object. Returns <code>true</code> if any of the list of glyph indexes, the list of positions or the font are different, otherwise returns <code>false</code>.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQGlyphRun& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> QGlyphRun::<span class="name">operator==</span>(const <span class="type"><a href="qglyphrun.html#QGlyphRun">QGlyphRun</a></span> &amp;<i>other</i>) const</h3>
+<p>Compares <i>other</i> to this <a href="qglyphrun.html">QGlyphRun</a> object. Returns <code>true</code> if the list of glyph indexes, the list of positions and the font are all equal, otherwise returns <code>false</code>.</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

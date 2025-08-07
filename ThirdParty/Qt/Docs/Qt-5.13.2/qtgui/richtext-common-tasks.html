@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- richtext.qdoc -->
+  <title>Common Rich Text Editing Tasks | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td >Common Rich Text Editing Tasks</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="richtext-layouts.html" />
+  <link rel="next" href="richtext-advanced-processing.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="richtext-layouts.html">Document Layouts</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="richtext-advanced-processing.html">Advanced Rich Text Processing</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#using-qtextedit">Using QTextEdit</a></li>
+<li class="level1"><a href="#selecting-text">Selecting Text</a></li>
+<li class="level1"><a href="#finding-text">Finding Text</a></li>
+<li class="level1"><a href="#printing-documents">Printing Documents</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Common Rich Text Editing Tasks</h1>
+<span class="subtitle"></span>
+<!-- $$$richtext-common-tasks.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>There are a number of tasks that are often performed by developers when editing and processing text documents using Qt. These include the use of display widgets such as <a href="../qtwidgets/qtextbrowser.html">QTextBrowser</a> and <a href="../qtwidgets/qtextedit.html">QTextEdit</a>, creation of documents with <a href="qtextdocument.html">QTextDocument</a>, editing using a <a href="qtextcursor.html">QTextCursor</a>, and exporting the document structure. This document outlines some of the more common ways of using the rich text classes to perform these tasks, showing convenient patterns that can be reused in your own applications.</p>
+<a name="using-qtextedit"></a>
+<h2 id="using-qtextedit">Using QTextEdit</h2>
+<p>A text editor widget can be constructed and used to display HTML in the following way:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtwidgets/qtextedit.html">QTextEdit</a></span> <span class="operator">*</span>editor <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qtextedit.html">QTextEdit</a></span>(parent);
+  editor<span class="operator">-</span><span class="operator">&gt;</span>setHtml(aStringContainingHTMLtext);
+  editor<span class="operator">-</span><span class="operator">&gt;</span>show();
+
+</pre>
+<p>By default, the text editor contains a document with a root frame, inside which is an empty text block. This document can be obtained so that it can be modified directly by the application:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qtextdocument.html">QTextDocument</a></span> <span class="operator">*</span>document <span class="operator">=</span> editor<span class="operator">-</span><span class="operator">&gt;</span>document();
+
+</pre>
+<p>The text editor's cursor may also be used to edit a document:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qtextcursor.html">QTextCursor</a></span> cursor <span class="operator">=</span> editor<span class="operator">-</span><span class="operator">&gt;</span>textCursor();
+
+</pre>
+<p>Although a document can be edited using many cursors at once, a <a href="../qtwidgets/qtextedit.html">QTextEdit</a> only displays a single cursor at a time. Therefore, if we want to update the editor to display a particular cursor or its selection, we need to set the editor's cursor after we have modified the document:</p>
+<pre class="cpp">
+
+  editor<span class="operator">-</span><span class="operator">&gt;</span>setTextCursor(cursor);
+
+</pre>
+<a name="selecting-text"></a>
+<h2 id="selecting-text">Selecting Text</h2>
+<p>Text is selected by moving the cursor using operations that are similar to those performed by a user in a text editor. To select text between two points in the document, we need to position the cursor at the first point then move it using a special mode (<a href="qtextcursor.html#MoveMode-enum">QTextCursor::MoveMode</a>) with a move operation (<a href="qtextcursor.html#MoveOperation-enum">QTextCursor::MoveOperation</a>). When we select the text, we leave the selection anchor at the old cursor position just as the user might do by holding down the Shift key when selecting text:</p>
+<pre class="cpp">
+
+      cursor<span class="operator">.</span>movePosition(<span class="type"><a href="qtextcursor.html">QTextCursor</a></span><span class="operator">::</span>StartOfWord);
+      cursor<span class="operator">.</span>movePosition(<span class="type"><a href="qtextcursor.html">QTextCursor</a></span><span class="operator">::</span>EndOfWord<span class="operator">,</span> <span class="type"><a href="qtextcursor.html">QTextCursor</a></span><span class="operator">::</span>KeepAnchor);
+
+</pre>
+<p>In the above code, a whole word is selected using this method. <a href="qtextcursor.html">QTextCursor</a> provides a number of common move operations for selecting individual characters, words, lines, and whole blocks.</p>
+<a name="finding-text"></a>
+<h2 id="finding-text">Finding Text</h2>
+<p><a href="qtextdocument.html">QTextDocument</a> provides a cursor-based interface for searching, making it easy to find and modify text in the style of a text editor. The following code finds all the instances of a particular word in a document, and changes the color of each:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qtextcursor.html">QTextCursor</a></span> newCursor(document);
+
+      <span class="keyword">while</span> (<span class="operator">!</span>newCursor<span class="operator">.</span>isNull() <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>newCursor<span class="operator">.</span>atEnd()) {
+          newCursor <span class="operator">=</span> document<span class="operator">-</span><span class="operator">&gt;</span>find(searchString<span class="operator">,</span> newCursor);
+
+          <span class="keyword">if</span> (<span class="operator">!</span>newCursor<span class="operator">.</span>isNull()) {
+              newCursor<span class="operator">.</span>movePosition(<span class="type"><a href="qtextcursor.html">QTextCursor</a></span><span class="operator">::</span>WordRight<span class="operator">,</span>
+                                     <span class="type"><a href="qtextcursor.html">QTextCursor</a></span><span class="operator">::</span>KeepAnchor);
+
+              newCursor<span class="operator">.</span>mergeCharFormat(colorFormat);
+          }
+      }
+
+</pre>
+<p>Note that the cursor does not have to be moved after each search and replace operation; it is always positioned at the end of the word that was just replaced.</p>
+<a name="printing-documents"></a>
+<h2 id="printing-documents">Printing Documents</h2>
+<p><a href="../qtwidgets/qtextedit.html">QTextEdit</a> is designed for the display of large rich text documents that are read on screen, rendering them in the same way as a web browser. As a result, it does not automatically break the contents of the document into page-sized pieces that are suitable for printing.</p>
+<p><a href="qtextdocument.html">QTextDocument</a> provides a <a href="qtextdocument.html#print">print()</a> function to allow documents to be printed using the QPrinter class. The following code shows how to prepare a document in a <a href="../qtwidgets/qtextedit.html">QTextEdit</a> for printing with a QPrinter:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qtextdocument.html">QTextDocument</a></span> <span class="operator">*</span>document <span class="operator">=</span> editor<span class="operator">-</span><span class="operator">&gt;</span>document();
+      <span class="type">QPrinter</span> printer;
+
+      <span class="type">QPrintDialog</span> <span class="operator">*</span>dlg <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QPrintDialog</span>(<span class="operator">&amp;</span>printer<span class="operator">,</span> <span class="keyword">this</span>);
+      <span class="keyword">if</span> (dlg<span class="operator">-</span><span class="operator">&gt;</span>exec() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span><span class="operator">::</span>Accepted)
+          <span class="keyword">return</span>;
+
+      document<span class="operator">-</span><span class="operator">&gt;</span>print(<span class="operator">&amp;</span>printer);
+
+</pre>
+<p>The document is obtained from the text editor, and a QPrinter is constructed then configured using a QPrintDialog. If the user accepts the printer's configuration then the document is formatted and printed using the <a href="qtextdocument.html#print">print()</a> function.</p>
+</div>
+<!-- @@@richtext-common-tasks.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="richtext-layouts.html">Document Layouts</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="richtext-advanced-processing.html">Advanced Rich Text Processing</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

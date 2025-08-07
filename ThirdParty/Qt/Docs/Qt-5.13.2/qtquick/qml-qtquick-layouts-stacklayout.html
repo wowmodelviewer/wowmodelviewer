@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickstacklayout.cpp -->
+  <title>StackLayout QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >StackLayout QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">StackLayout QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$StackLayout-brief -->
+<p>The <a href="qml-qtquick-layouts-stacklayout.html">StackLayout</a> class provides a stack of items where only one item is visible at a time. <a href="#details">More...</a></p>
+<!-- @@@StackLayout -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Layouts 1.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-item.html">Item</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-layouts-stacklayout-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-layouts-stacklayout.html#count-prop">count</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-layouts-stacklayout.html#currentIndex-prop">currentIndex</a></b></b> : int</li>
+</ul>
+<!-- $$$StackLayout-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The current visible item can be modified by setting the <a href="qml-qtquick-layouts-stacklayout.html#currentIndex-prop">currentIndex</a> property. The index corresponds to the order of the <a href="qml-qtquick-layouts-stacklayout.html">StackLayout</a>'s children.</p>
+<p>In contrast to most other layouts, child Items' <a href="qml-qtquick-layouts-layout.html#fillWidth-attached-prop">Layout.fillWidth</a> and <a href="qml-qtquick-layouts-layout.html#fillHeight-attached-prop">Layout.fillHeight</a> properties default to <code>true</code>. As a consequence, child items are by default filled to match the size of the <a href="qml-qtquick-layouts-stacklayout.html">StackLayout</a> as long as their <a href="qml-qtquick-layouts-layout.html#maximumWidth-attached-prop">Layout.maximumWidth</a> or <a href="qml-qtquick-layouts-layout.html#maximumHeight-attached-prop">Layout.maximumHeight</a> does not prevent it.</p>
+<p>Items are added to the layout by reparenting the item to the layout. Similarly, removal is done by reparenting the item from the layout. Both of these operations will affect the layout's <a href="qml-qtquick-layouts-stacklayout.html#count-prop">count</a> property.</p>
+<p>The following code will create a <a href="qml-qtquick-layouts-stacklayout.html">StackLayout</a> where only the 'plum' rectangle is visible.</p>
+<pre class="cpp">
+
+  StackLayout {
+      id: layout
+      anchors<span class="operator">.</span>fill: parent
+      currentIndex: <span class="number">1</span>
+      Rectangle {
+          color: <span class="char">'teal'</span>
+          implicitWidth: <span class="number">200</span>
+          implicitHeight: <span class="number">200</span>
+      }
+      Rectangle {
+          color: <span class="char">'plum'</span>
+          implicitWidth: <span class="number">300</span>
+          implicitHeight: <span class="number">200</span>
+      }
+  }
+
+</pre>
+<p>Items in a <a href="qml-qtquick-layouts-stacklayout.html">StackLayout</a> support these attached properties:</p>
+<ul>
+<li><a href="qml-qtquick-layouts-layout.html#minimumWidth-attached-prop">Layout.minimumWidth</a></li>
+<li><a href="qml-qtquick-layouts-layout.html#minimumHeight-attached-prop">Layout.minimumHeight</a></li>
+<li><a href="qml-qtquick-layouts-layout.html#preferredWidth-attached-prop">Layout.preferredWidth</a></li>
+<li><a href="qml-qtquick-layouts-layout.html#preferredHeight-attached-prop">Layout.preferredHeight</a></li>
+<li><a href="qml-qtquick-layouts-layout.html#maximumWidth-attached-prop">Layout.maximumWidth</a></li>
+<li><a href="qml-qtquick-layouts-layout.html#maximumHeight-attached-prop">Layout.maximumHeight</a></li>
+<li><a href="qml-qtquick-layouts-layout.html#fillWidth-attached-prop">Layout.fillWidth</a></li>
+<li><a href="qml-qtquick-layouts-layout.html#fillHeight-attached-prop">Layout.fillHeight</a></li>
+</ul>
+<p>Read more about attached properties <a href="../qtqml/qtqml-syntax-objectattributes.html">here</a>.</p>
+<p><b>See also </b><a href="qml-qtquick-layouts-columnlayout.html">ColumnLayout</a>, <a href="qml-qtquick-layouts-gridlayout.html">GridLayout</a>, <a href="qml-qtquick-layouts-rowlayout.html">RowLayout</a>, and <a href="../qtquickcontrols/qml-qtquick-controls2-stackview.html">StackView</a>.</p>
+<!-- @@@StackLayout -->
+<h2>Property Documentation</h2>
+<!-- $$$count -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="count-prop"></a><span class="name">count</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the number of items that belong to the layout.</p>
+<p>Only items that are children of the <a href="qml-qtquick-layouts-stacklayout.html">StackLayout</a> will be candidates for layouting.</p>
+</div></div><!-- @@@count -->
+<br/>
+<!-- $$$currentIndex -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="currentIndex-prop"></a><span class="name">currentIndex</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the index of the child item that is currently visible in the <a href="qml-qtquick-layouts-stacklayout.html">StackLayout</a>. By default it will be <code>-1</code> for an empty layout, otherwise the default is <code>0</code> (referring to the first item).</p>
+</div></div><!-- @@@currentIndex -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,952 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtquickcontrols2-chattutorial.qdoc -->
+  <title>Qt Quick Controls - Chat Tutorial | Qt Quick Controls 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td >Qt Quick Controls - Chat Tutorial</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#chapter-1-setting-up">Chapter 1: Setting Up</a></li>
+<li class="level2"><a href="#main-cpp">main.cpp</a></li>
+<li class="level2"><a href="#main-qml">main.qml</a></li>
+<li class="level2"><a href="#the-project-file">The Project File</a></li>
+<li class="level1"><a href="#chapter-2-lists">Chapter 2: Lists</a></li>
+<li class="level2"><a href="#sizing-and-positioning">Sizing and Positioning</a></li>
+<li class="level2"><a href="#model">Model</a></li>
+<li class="level2"><a href="#delegate">Delegate</a></li>
+<li class="level1"><a href="#chapter-3-navigation">Chapter 3: Navigation</a></li>
+<li class="level2"><a href="#navigating-with-stackview">Navigating with StackView</a></li>
+<li class="level1"><a href="#chapter-4-models">Chapter 4: Models</a></li>
+<li class="level2"><a href="#qsqlquerymodel">QSqlQueryModel</a></li>
+<li class="level2"><a href="#qsqltablemodel">QSqlTableModel</a></li>
+<li class="level2"><a href="#connecting-to-the-database-and-registering-types-with-qml">Connecting to the Database and Registering Types With QML</a></li>
+<li class="level2"><a href="#using-the-models-in-qml">Using the Models in QML</a></li>
+<li class="level1"><a href="#chapter-5-styling">Chapter 5: Styling</a></li>
+<li class="level1"><a href="#summary">Summary</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Quick Controls - Chat Tutorial</h1>
+<span class="subtitle"></span>
+<!-- $$$chattutorial-brief -->
+<p>Tutorial about writing a basic chat client using Qt Quick Controls.</p>
+<!-- @@@chattutorial -->
+<!-- $$$chattutorial-description -->
+<div class="descr"> <a name="details"></a>
+<p>This tutorial shows how to write a basic chat application using Qt Quick Controls. It will also explain how to integrate an SQL database into a Qt application.</p>
+<a name="chapter-1-setting-up"></a>
+<h4 id="chapter-1-setting-up">Chapter 1: Setting Up</h4>
+<p>When setting up a new project, it's easiest to use <a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a>. For this project, we chose the <a href="http://doc.qt.io/qtcreator/quick-projects.html">Qt Quick application</a> template, which creates a basic &quot;Hello World&quot; application with the following files:</p>
+<ul>
+<li><code>MainForm.ui.qml</code> - Defines the default UI</li>
+<li><code>main.qml</code> - Embeds the default UI in a Window</li>
+<li><code>qml.qrc</code> - Lists the <code>.qml</code> files that are built into the binary</li>
+<li><code>main.cpp</code> - Loads <code>main.qml</code></li>
+<li><code>chattutorial.pro</code> - Provides the qmake configuration</li>
+</ul>
+<p><b>Note: </b>Delete the <code>MainForm.ui.qml</code> from the project as we will not use it in this tutorial.</p><a name="main-cpp"></a>
+<h5 id="main-cpp">main.cpp</h5>
+<p>The default code in <code>main.cpp</code> has two includes:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QGuiApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QQmlApplicationEngine&gt;</span>
+
+</pre>
+<p>The first gives us access to <a href="../qtgui/qguiapplication.html">QGuiApplication</a>. All Qt applications require an application object, but the precise type depends on what the application does. <a href="../qtcore/qcoreapplication.html">QCoreApplication</a> is sufficient for non-graphical applications. <a href="../qtgui/qguiapplication.html">QGuiApplication</a> is sufficient for graphical applications that do not use <a href="../qtwidgets/qtwidgets-index.html">Qt Widgets</a>, while <a href="../qtwidgets/qapplication.html">QApplication</a> is required for those that do.</p>
+<p>The second include makes <a href="../qtqml/qqmlapplicationengine.html">QQmlApplicationEngine</a> available, along with some useful functions required for making C++ types accessible from QML.</p>
+<p>Within <code>main()</code>, we set up the application object and QML engine:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span><span class="operator">::</span>setAttribute(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AA_EnableHighDpiScaling);
+
+      <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      <span class="type"><a href="../qtqml/qqmlapplicationengine.html">QQmlApplicationEngine</a></span> engine;
+      engine<span class="operator">.</span>load(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;qrc:/main.qml&quot;</span>)));
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p>It begins with enabling <a href="../qtdoc/highdpi.html">high DPI scaling</a>, which is not part of the default code. It is necessary to do so before the application object is constructed.</p>
+<p>After that's done, we construct the application object, passing any application arguments provided by the user.</p>
+<p>Next, the QML engine is created. <a href="../qtqml/qqmlapplicationengine.html">QQmlApplicationEngine</a> is a convenient wrapper over <a href="../qtqml/qqmlengine.html">QQmlEngine</a>, providing the <a href="../qtqml/qqmlapplicationengine.html#load">load()</a> function to easily load QML for an application. It also adds some convenience for using <a href="qtquickcontrols2-fileselectors.html">file selectors</a>.</p>
+<p>Once we've set up things in C++, we can move on to the user interface in QML.</p>
+<a name="main-qml"></a>
+<h5 id="main-qml">main.qml</h5>
+<p>Let's modify the default QML code to suit our needs.</p>
+<pre class="cpp">
+
+  import QtQuick 2.12
+  import QtQuick.Controls 2.12
+
+</pre>
+<p>First, import the <a href="../qtquick/qtquick-index.html">Qt Quick</a> module. This gives us access to graphical primitives such as <a href="../qtquick/qml-qtquick-item.html">Item</a>, <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a>, <a href="../qtquick/qml-qtquick-text.html">Text</a>, and so on. For the full list of types, see the <a href="../qtquick/qtquick-qmlmodule.html">Qt Quick QML Types</a> documentation.</p>
+<p>Next, import the Qt Quick Controls module. Amongst other things, this provides access to <a href="qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a>, which will replace the existing root type, <code>Window</code>:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a></span> {
+      <span class="name">width</span>: <span class="number">540</span>
+      <span class="name">height</span>: <span class="number">960</span>
+      <span class="name">visible</span>: <span class="number">true</span>
+      ...
+      }
+
+</pre>
+<p><a href="qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a> is a <a href="../qtquick/qml-qtquick-window-window.html">Window</a> with some added convenience for creating a <a href="qml-qtquick-controls2-applicationwindow.html#header-attached-prop">header</a> and a <a href="qml-qtquick-controls2-applicationwindow.html#footer-attached-prop">footer</a>. It also provides the foundation for <a href="qml-qtquick-controls2-popup.html">popups</a> and supports some basic styling, such as the background <a href="../qtquick/qml-qtquick-window-window.html#color-prop">color</a>.</p>
+<p>There are three properties that are almost always set when using <a href="qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a>: <a href="../qtquick/qml-qtquick-window-window.html#width-attached-prop">width</a>, <a href="../qtquick/qml-qtquick-window-window.html#height-attached-prop">height</a>, and <a href="../qtquick/qml-qtquick-window-window.html#visible-prop">visible</a>. Once we've set these, we have a properly sized, empty window ready to be filled with content.</p>
+<p><b>Note: </b>The <code>title</code> property from the default code is removed.</p><p>The first <i>&quot;screen&quot;</i> in our application will be a list of contacts. It would be nice to have some text at the top of each screen that describes its purpose. The header and footer properties of <a href="qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a> could work in this situation. They have some characteristics that make them ideal for items that should be displayed on every screen of an application:</p>
+<ul>
+<li>They are anchored to the top and bottom of the window, respectively.</li>
+<li>They fill the width of the window.</li>
+</ul>
+<p>However, when the contents of the header and footer varies depending on which screen the user is viewing, it is much easier to use <a href="qml-qtquick-controls2-page.html">Page</a>. For now, we'll just add one page, but in the next chapter, we'll demonstrate how to navigate between several pages.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qml-qtquick-controls2-page.html">Page</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">header</span>: <span class="name">Label</span> {
+              <span class="name">padding</span>: <span class="number">10</span>
+              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Contacts&quot;</span>)
+              <span class="name">font</span>.pixelSize: <span class="number">20</span>
+              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+              <span class="name">verticalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignVCenter</span>
+          }
+      }
+
+</pre>
+<p>We replace the default <code>MainForm {..&#x2e;}</code> code block with a Page, which is sized to occupy all the space on the window using the <a href="../qtquick/qml-qtquick-item.html#anchors.fill-prop">anchors.fill</a> property.</p>
+<p>Then, we assign a <a href="qml-qtquick-controls2-label.html">Label</a> to its <a href="qml-qtquick-controls2-page.html#header-prop">header</a> property. Label extends the primitive <a href="../qtquick/qml-qtquick-text.html">Text</a> item from the Qt Quick module by adding <a href="qtquickcontrols2-styles.html">styling</a> and <a href="qml-qtquick-controls2-control.html#font-prop">font</a> inheritance. This means that a Label can look different depending on which style is in use, and can also propagate its pixel size to its children.</p>
+<p>We want some distance between the top of the application window and the text, so we set the <a href="../qtquick/qml-qtquick-text.html#padding-prop">padding</a> property. This allocates extra space on each side of the label (within its bounds). We can also explicitly set the <a href="../qtquick/qml-qtquick-text.html#topPadding-prop">topPadding</a> and <a href="../qtquick/qml-qtquick-text.html#bottomPadding-prop">bottomPadding</a> properties instead.</p>
+<p>We set the text of the label using the <code>qsTr()</code> function, which ensures that the text can be translated by <a href="../qtdoc/i18n-source-translation.html">Qt's translation system</a>. It's a good practice to follow for text that is visible to the end users of your application.</p>
+<p>By default, text is vertically aligned to the top of its bounds, while the horizontal alignment depends on the natural direction of the text; for example, text that is read from left to right will be aligned to the left. If we used these defaults, our text would be at the top-left corner of the window. This is not desirable for a header, so we align the text to the center of its bounds, both horizontally and vertically.</p>
+<a name="the-project-file"></a>
+<h5 id="the-project-file">The Project File</h5>
+<p>The <code>.pro</code> or <a href="../qmake/qmake-project-files.html">project</a> file contains all of the information needed by <a href="../qmake/qmake-manual.html">qmake</a> to generate a Makefile, which is then used to compile and link the application.</p>
+<pre class="cpp">
+
+  TEMPLATE = app
+
+</pre>
+<p>The first line tells <code>qmake</code> which kind of project this is. We're building an application, so we use the <code>app</code> template.</p>
+<pre class="cpp">
+
+  QT += qml quick
+
+</pre>
+<p>The next line declares the Qt libraries that we want to use from C++.</p>
+<pre class="cpp">
+
+  CONFIG += c++11
+
+</pre>
+<p>This line states that a C++11 compatible compiler is required to build the project.</p>
+<pre class="cpp">
+
+  SOURCES += main.cpp
+
+</pre>
+<p>The <code>SOURCES</code> variable lists all of the source files that should be compiled. A similar variable, <code>HEADERS</code>, is available for header files.</p>
+<pre class="cpp">
+
+  RESOURCES += qml.qrc
+
+</pre>
+<p>The next line tells <code>qmake</code> that we have a collection of <a href="../qtcore/resources.html">resources</a> that should be built into the executable.</p>
+<pre class="cpp">
+
+  target.path = $$[QT_INSTALL_EXAMPLES]/quickcontrols2/chattutorial/chapter1-settingup
+
+</pre>
+<p>This line replaces deployment settings that come with the default project file. It determines where the example is copied, on running &quot;<code>make install</code>&quot;.</p>
+<p>Now we can build and run the application:</p>
+<div class="border"><p class="centerAlign"><img src="images/qtquickcontrols2-chattutorial-chapter1.png" alt="" /></p></div><a name="chapter-2-lists"></a>
+<h4 id="chapter-2-lists">Chapter 2: Lists</h4>
+<p>In this chapter, we'll explain how to create a list of interactive items using <a href="../qtquick/qml-qtquick-listview.html">ListView</a> and <a href="qml-qtquick-controls2-itemdelegate.html">ItemDelegate</a>.</p>
+<p><a href="../qtquick/qml-qtquick-listview.html">ListView</a> comes from the Qt Quick module, and displays a list of items populated from a <a href="../qtquick/qtquick-modelviewsdata-modelview.html">model</a>. <a href="qml-qtquick-controls2-itemdelegate.html">ItemDelegate</a> comes from the Qt Quick Controls module, and provides a standard view item for use in views and controls such as <a href="../qtquick/qml-qtquick-listview.html">ListView</a> and <a href="qml-qtquick-controls2-combobox.html">ComboBox</a>. For example, each <a href="qml-qtquick-controls2-itemdelegate.html">ItemDelegate</a> can display text, be checked on and off, and react to mouse clicks.</p>
+<p>Here is our <a href="../qtquick/qml-qtquick-listview.html">ListView</a>:</p>
+<pre class="cpp">
+
+          ...
+
+          <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+              <span class="name">id</span>: <span class="name">listView</span>
+              <span class="name">anchors</span>.fill: <span class="name">parent</span>
+              <span class="name">topMargin</span>: <span class="number">48</span>
+              <span class="name">leftMargin</span>: <span class="number">48</span>
+              <span class="name">bottomMargin</span>: <span class="number">48</span>
+              <span class="name">rightMargin</span>: <span class="number">48</span>
+              <span class="name">spacing</span>: <span class="number">20</span>
+              <span class="name">model</span>: [<span class="string">&quot;Albert Einstein&quot;</span>, <span class="string">&quot;Ernest Hemingway&quot;</span>, <span class="string">&quot;Hans Gude&quot;</span>]
+              <span class="name">delegate</span>: <span class="name">ItemDelegate</span> {
+                  <span class="name">text</span>: <span class="name">modelData</span>
+                  <span class="name">width</span>: <span class="name">listView</span>.<span class="name">width</span> <span class="operator">-</span> <span class="name">listView</span>.<span class="name">leftMargin</span> <span class="operator">-</span> <span class="name">listView</span>.<span class="name">rightMargin</span>
+                  <span class="name">height</span>: <span class="name">avatar</span>.<span class="name">implicitHeight</span>
+                  <span class="name">leftPadding</span>: <span class="name">avatar</span>.<span class="name">implicitWidth</span> <span class="operator">+</span> <span class="number">32</span>
+
+                  <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+                      <span class="name">id</span>: <span class="name">avatar</span>
+                      <span class="name">source</span>: <span class="string">&quot;qrc:/&quot;</span> <span class="operator">+</span> <span class="name">modelData</span>.<span class="name">replace</span>(<span class="string">&quot; &quot;</span>, <span class="string">&quot;_&quot;</span>) <span class="operator">+</span> <span class="string">&quot;.png&quot;</span>
+                  }
+              }
+          }
+          ...
+
+</pre>
+<a name="sizing-and-positioning"></a>
+<h5 id="sizing-and-positioning">Sizing and Positioning</h5>
+<p>The first thing we do is set a size for the view. It should fill the available space on the page, so we use <a href="../qtquick/qml-qtquick-item.html#anchors.fill-prop">anchors.fill</a>. Note that Page ensures that its header and footer have enough of their own space reserved, so the view in this case will sit below the header, for example.</p>
+<p>Next, we set <a href="../qtquick/qml-qtquick-flickable.html#leftMargin-prop">margins</a> around the <a href="../qtquick/qml-qtquick-listview.html">ListView</a> to put some distance between it and the edges of the window. The margin properties reserve space within the bounds of the view, which means that the empty areas can still be <i>&quot;flicked&quot;</i> by the user.</p>
+<p>The items should be nicely spaced out within the view, so the <a href="../qtquick/qml-qtquick-listview.html#spacing-prop">spacing</a> property is set to <code>20</code>.</p>
+<a name="model"></a>
+<h5 id="model">Model</h5>
+<p>In order to quickly populate the view with some items, we've used a JavaScript array as the model. One of the greatest strengths of QML is its ability to make prototyping an application extremely quick, and this is an example of that. It's also possible to simply assign a <a href="../qtquick/qtquick-modelviewsdata-modelview.html#integers-as-models">number</a> to the model property to indicate how many items you need. For example, if you assign <code>10</code> to the <code>model</code> property, each item's display text will be a number from <code>0</code> to <code>9</code>.</p>
+<p>However, once the application gets past the prototype stage, it quickly becomes necessary to use some real data. For this, it's best to use a proper C++ model by <a href="../qtcore/qabstractitemmodel.html">subclassing QAbstractItemModel</a>.</p>
+<a name="delegate"></a>
+<h5 id="delegate">Delegate</h5>
+<p>On to the <a href="../qtquick/qml-qtquick-listview.html#delegate-prop">delegate</a>. We assign the corresponding text from the model to the <a href="qml-qtquick-controls2-abstractbutton.html#text-prop">text</a> property of <a href="qml-qtquick-controls2-itemdelegate.html">ItemDelegate</a>. The exact manner in which the data from the model is made available to each delegate depends on the type of model used. See <a href="../qtquick/qtquick-modelviewsdata-modelview.html">Models and Views in Qt Quick</a> for more information.</p>
+<p>In our application, the width of each item in the view should be the same as the width of the view. This ensures that the user has a lot of room with which to select a contact from the list, which is an important factor on devices with small touch screens, like mobile phones. However, the width of the view includes our <code>48</code> pixel margins, so we must account for that in our assignment to the width property.</p>
+<p>Next, we define an <a href="../qtquick/qml-qtquick-image.html">Image</a>. This will display a picture of the user's contact. The image will be <code>40</code> pixels wide and <code>40</code> pixels high. We'll base the height of the delegate on the image's height, so that we don't have any empty vertical space.</p>
+<div class="border"><p class="centerAlign"><img src="images/qtquickcontrols2-chattutorial-chapter2.png" alt="" /></p></div><a name="chapter-3-navigation"></a>
+<h4 id="chapter-3-navigation">Chapter 3: Navigation</h4>
+<p>In this chapter, you'll learn how to use <a href="qml-qtquick-controls2-stackview.html">StackView</a> to navigate between pages in an application. Here's the revised <code>main.qml</code>:</p>
+<pre class="cpp">
+
+  import QtQuick 2.12
+  import QtQuick.Controls 2.12
+
+  <span class="type"><a href="qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a></span> {
+      <span class="name">id</span>: <span class="name">window</span>
+      <span class="name">width</span>: <span class="number">540</span>
+      <span class="name">height</span>: <span class="number">960</span>
+      <span class="name">visible</span>: <span class="number">true</span>
+
+      <span class="type"><a href="qml-qtquick-controls2-stackview.html">StackView</a></span> {
+          <span class="name">id</span>: <span class="name">stackView</span>
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">initialItem</span>: <span class="name">ContactPage</span> {}
+      }
+  }
+
+</pre>
+<a name="navigating-with-stackview"></a>
+<h5 id="navigating-with-stackview">Navigating with StackView</h5>
+<p>As its name suggests, <a href="qml-qtquick-controls2-stackview.html">StackView</a> provides stack-based navigation. The last item to be <i>&quot;pushed&quot;</i> onto the stack is the first one to be removed, and the top-most item is always the one that is visible.</p>
+<p>In the same manner as we did with Page, we tell the <a href="qml-qtquick-controls2-stackview.html">StackView</a> to fill the application window. The only thing left to do after that is to give it an item to display, via <a href="qml-qtquick-controls2-stackview.html#initialItem-prop">initialItem</a>. <a href="qml-qtquick-controls2-stackview.html">StackView</a> accepts <a href="../qtquick/qml-qtquick-item.html">items</a>, <a href="../qtqml/qml-qtqml-component.html">components</a> and <a href="../qtqml/qml-url.html">URLs</a>.</p>
+<p>You'll notice that we moved the code for the contact list into <code>ContactPage.qml</code>. It's a good idea to do this as soon as you have a general idea of which screens your application will contain. Doing so not only makes your code easier to read, but ensures that items are only instantiated from a given component when completely necessary, reducing memory usage.</p>
+<p><b>Note: </b>Qt Creator provides several convenient <a href="http://doc.qt.io/qtcreator/creator-editor-refactoring.html#refactoring-qml-code">refactoring options for QML</a>, one of which allows you to move a block of code into a separate file (<code>Alt + Enter &gt; Move Component into Separate File</code>).</p><p>Another thing to consider when using <a href="../qtquick/qml-qtquick-listview.html">ListView</a> is whether to refer to it by <code>id</code>, or use the attached <a href="../qtquick/qml-qtquick-listview.html#view-attached-prop">ListView.view</a> property. The best approach depends on a few different factors. Giving the view an id will result in shorter and more efficient binding expressions, as the attached property has a very small amount of overhead. However, if you plan on reusing the delegate in other views, it is better to use the attached properties to avoid tying the delegate to a particular view. For example, using the attached properties, the <code>width</code> assignment in our delegate becomes:</p>
+<pre class="cpp">
+
+  width: ListView<span class="operator">.</span>view<span class="operator">.</span>width <span class="operator">-</span> ListView<span class="operator">.</span>view<span class="operator">.</span>leftMargin <span class="operator">-</span> ListView<span class="operator">.</span>view<span class="operator">.</span>rightMargin
+
+</pre>
+<p>In chapter 2, we added a <a href="../qtquick/qml-qtquick-listview.html">ListView</a> below the header. If you run the application for that chapter, you'll see that the contents of the view can be scrolled over the top of the header:</p>
+<div class="border"><p class="centerAlign"><img src="images/qtquickcontrols2-chattutorial-chapter2-listview-header.gif" alt="" /></p></div><p>This is not that nice, especially if the text in the delegates is long enough that it reaches the text in the header. What we ideally want to do is to have a solid block of color under the header text, but <i>above</i> the view. This ensures that the listview contents can't visually interfere with the header contents. Note that it's also possible to achieve this by setting the <a href="../qtquick/qml-qtquick-item.html#clip-prop">clip</a> property of the view to <code>true</code>, but doing so <a href="../qtgui/qpainter.html#clipping">can affect performance</a>.</p>
+<p><a href="qml-qtquick-controls2-toolbar.html">ToolBar</a> is the right tool for this job. It is a container of both application-wide and context-sensitive actions and controls, such as navigation buttons and search fields. Best of all, it has a background color that, as usual, comes from the application style. Here it is in action:</p>
+<pre class="cpp">
+
+      <span class="name">header</span>: <span class="name">ToolBar</span> {
+          <span class="type"><a href="qml-qtquick-controls2-label.html">Label</a></span> {
+              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Contacts&quot;</span>)
+              <span class="name">font</span>.pixelSize: <span class="number">20</span>
+              <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+          }
+      }
+
+</pre>
+<div class="border"><p class="centerAlign"><img src="images/qtquickcontrols2-chattutorial-chapter3-listview-header.gif" alt="" /></p></div><p>It has no layout of its own, so we center the label within it ourselves.</p>
+<p>The rest of the code is the same as it was in chapter 2, except that we've taken advantage of the <a href="qml-qtquick-controls2-abstractbutton.html#clicked-signal">clicked</a> signal to push the next page onto the stackview:</p>
+<pre class="cpp">
+
+              <span class="name">onClicked</span>: <span class="name">root</span>.<span class="name">StackView</span>.<span class="name">view</span>.<span class="name">push</span>(<span class="string">&quot;qrc:/ConversationPage.qml&quot;</span>, { inConversationWith: <span class="name">modelData</span> })
+
+</pre>
+<p>When pushing a <a href="../qtqml/qml-qtqml-component.html">Component</a> or <a href="../qtqml/qml-url.html">url</a> onto <a href="qml-qtquick-controls2-stackview.html">StackView</a>, it's often necessary to initialize the (eventually) instantiated item with some variables. <a href="qml-qtquick-controls2-stackview.html">StackView</a>'s <a href="qml-qtquick-controls2-stackview.html#push-method">push()</a> function accounts for this, by taking a JavaScript object as the second argument. We use this to provide the next page with a contact's name, which it then uses to display the relevant conversation. Note the <code>root.StackView.view.push</code> syntax; this is necessary because of how <a href="../qtqml/qtqml-syntax-objectattributes.html#a-note-about-accessing-attached-properties-and-signal-handlers">attached properties</a> work.</p>
+<p>Let's step through <code>ConversationPage.qml</code>, beginning with the imports:</p>
+<pre class="cpp">
+
+  import QtQuick 2.12
+  import QtQuick.Layouts 1.12
+  import QtQuick.Controls 2.12
+
+</pre>
+<p>These are the same as before, except for the addition of the <code>QtQuick.Layouts</code> import, which we'll cover shortly.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qml-qtquick-controls2-page.html">Page</a></span> {
+      <span class="name">id</span>: <span class="name">root</span>
+
+      property <span class="type">string</span> <span class="name">inConversationWith</span>
+
+      <span class="name">header</span>: <span class="name">ToolBar</span> {
+          <span class="type"><a href="qml-qtquick-controls2-toolbutton.html">ToolButton</a></span> {
+              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Back&quot;</span>)
+              <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+              <span class="name">anchors</span>.leftMargin: <span class="number">10</span>
+              <span class="name">anchors</span>.verticalCenter: <span class="name">parent</span>.<span class="name">verticalCenter</span>
+              <span class="name">onClicked</span>: <span class="name">root</span>.<span class="name">StackView</span>.<span class="name">view</span>.<span class="name">pop</span>()
+          }
+
+          <span class="type"><a href="qml-qtquick-controls2-label.html">Label</a></span> {
+              <span class="name">id</span>: <span class="name">pageTitle</span>
+              <span class="name">text</span>: <span class="name">inConversationWith</span>
+              <span class="name">font</span>.pixelSize: <span class="number">20</span>
+              <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+          }
+      }
+      ...
+
+</pre>
+<p>The root item of this component is another Page, which has a custom property called <code>inConversationWith</code>. For now, this property will simply determine what the label in the header displays. Later on, we'll use it in the SQL query that populates the list of messages in the conversation.</p>
+<p>To allow the user to go back to the Contact page, we add a <a href="qml-qtquick-controls2-toolbutton.html">ToolButton</a> that calls <a href="qml-qtquick-controls2-stackview.html#pop-method">pop()</a> when clicked. A <a href="qml-qtquick-controls2-toolbutton.html">ToolButton</a> is functionally similar to <a href="qml-qtquick-controls2-button.html">Button</a>, but provides a look that is more suitable within a <a href="qml-qtquick-controls2-toolbar.html">ToolBar</a>.</p>
+<p>There are two ways of laying out items in QML: <a href="../qtquick/qtquick-positioning-layouts.html">Item Positioners</a> and <a href="../qtquick/qtquicklayouts-index.html">Qt Quick Layouts</a>. Item positioners (<a href="../qtquick/qml-qtquick-row.html">Row</a>, <a href="../qtquick/qml-qtquick-column.html">Column</a>, and so on) are useful for situations where the size of items is known or fixed, and all that is required is to neatly position them in a certain formation. The layouts in Qt Quick Layouts can both position and resize items, making them well suited for resizable user interfaces. Below, we use <a href="../qtquick/qml-qtquick-layouts-columnlayout.html">ColumnLayout</a> to vertically lay out a <a href="../qtquick/qml-qtquick-listview.html">ListView</a> and a <a href="qml-qtquick-controls2-pane.html">Pane</a>:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="../qtquick/qml-qtquick-layouts-columnlayout.html">ColumnLayout</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+
+          <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+              <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+              ...
+
+          }
+          ...
+
+          <span class="type"><a href="qml-qtquick-controls2-pane.html">Pane</a></span> {
+              <span class="name">id</span>: <span class="name">pane</span>
+              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+              ...
+      }
+
+</pre>
+<p>Pane is basically a rectangle whose color comes from the application's style. It is similar to <a href="qml-qtquick-controls2-frame.html">Frame</a>, with the only difference being that it has no stroke around its border.</p>
+<p>Items that are direct children of a layout have various <a href="../qtquick/qml-qtquick-layouts-layout.html">attached properties</a> available to them. We use <a href="../qtquick/qml-qtquick-layouts-layout.html#fillWidth-attached-prop">Layout.fillWidth</a> and <a href="../qtquick/qml-qtquick-layouts-layout.html#fillHeight-attached-prop">Layout.fillHeight</a> on the <a href="../qtquick/qml-qtquick-listview.html">ListView</a> to ensure that it takes as much space within the <a href="../qtquick/qml-qtquick-layouts-columnlayout.html">ColumnLayout</a> as it can. The same is done for the Pane. As <a href="../qtquick/qml-qtquick-layouts-columnlayout.html">ColumnLayout</a> is a vertical layout, there aren't any items to the left or right of each child, so this will result in each item consuming the entire width of the layout.</p>
+<p>On the other hand, the <a href="../qtquick/qml-qtquick-layouts-layout.html#fillHeight-attached-prop">Layout.fillHeight</a> statement in the <a href="../qtquick/qml-qtquick-listview.html">ListView</a> will enable it to occupy the remaining space that is left after accommodating the Pane.</p>
+<p>Let's look at the listview in detail:</p>
+<pre class="cpp">
+
+          <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+              <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+              <span class="name">Layout</span>.margins: <span class="name">pane</span>.<span class="name">leftPadding</span> <span class="operator">+</span> <span class="name">messageField</span>.<span class="name">leftPadding</span>
+              <span class="name">displayMarginBeginning</span>: <span class="number">40</span>
+              <span class="name">displayMarginEnd</span>: <span class="number">40</span>
+              <span class="name">verticalLayoutDirection</span>: <span class="name">ListView</span>.<span class="name">BottomToTop</span>
+              <span class="name">spacing</span>: <span class="number">12</span>
+              <span class="name">model</span>: <span class="number">10</span>
+              <span class="name">delegate</span>: <span class="name">Row</span> {
+                  readonly property <span class="type">bool</span> <span class="name">sentByMe</span>: <span class="name">index</span> <span class="operator">%</span> <span class="number">2</span> <span class="operator">==</span> <span class="number">0</span>
+
+                  <span class="name">anchors</span>.right: <span class="name">sentByMe</span> ? <span class="name">parent</span>.<span class="name">right</span> : <span class="name">undefined</span>
+                  <span class="name">spacing</span>: <span class="number">6</span>
+
+                  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+                      <span class="name">id</span>: <span class="name">avatar</span>
+                      <span class="name">width</span>: <span class="name">height</span>
+                      <span class="name">height</span>: <span class="name">parent</span>.<span class="name">height</span>
+                      <span class="name">color</span>: <span class="string">&quot;grey&quot;</span>
+                      <span class="name">visible</span>: !<span class="name">sentByMe</span>
+                  }
+
+                  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+                      <span class="name">width</span>: <span class="number">80</span>
+                      <span class="name">height</span>: <span class="number">40</span>
+                      <span class="name">color</span>: <span class="name">sentByMe</span> ? <span class="string">&quot;lightgrey&quot;</span> : <span class="string">&quot;steelblue&quot;</span>
+
+                      <span class="type"><a href="qml-qtquick-controls2-label.html">Label</a></span> {
+                          <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+                          <span class="name">text</span>: <span class="name">index</span>
+                          <span class="name">color</span>: <span class="name">sentByMe</span> ? <span class="string">&quot;black&quot;</span> : <span class="string">&quot;white&quot;</span>
+                      }
+                  }
+              }
+
+              <span class="name">ScrollBar</span>.vertical: <span class="name">ScrollBar</span> {}
+          }
+
+</pre>
+<p>After filling the width and height of its parent, we also set some margins on the view. This gives us a nice alignment with the placeholder text in the &quot;compose message&quot; field:</p>
+<div class="border"><p class="centerAlign"><img src="images/qtquickcontrols2-chattutorial-chapter3-view-margins.png" alt="" /></p></div><p>Next, we set <a href="../qtquick/qml-qtquick-listview.html#displayMarginBeginning-prop">displayMarginBeginning</a> and <a href="../qtquick/qml-qtquick-listview.html#displayMarginEnd-prop">displayMarginEnd</a>. These properties ensure that the delegates outside the bounds of the view do not disappear while scrolling at the edges of the view. It's easiest to understand this by commenting out the properties and seeing what happens when scrolling the view.</p>
+<p>We then flip the vertical direction of the view, so that first items are at the bottom. The delegates are spaced out by 12 pixels, and a <i>&quot;dummy&quot;</i> model is assigned for testing purposes, until we implement the real model in chapter 4.</p>
+<p>Within the delegate, we declare a <a href="../qtquick/qml-qtquick-row.html">Row</a> as the root item, as we want the avatar to be followed by the message contents, as shown in the image above.</p>
+<p>Messages sent by the user should be distinguished from those sent by a contact. For now, we set a dummy property <code>sentByMe</code>, which simply uses the index of the delegate to alternate between different authors. Using this property, we distinguish between different authors in three ways:</p>
+<ul>
+<li>Messages sent by the user are aligned to the right side of the screen by setting <code>anchors.right</code> to <code>parent.right</code>.</li>
+<li>By setting the <code>visible</code> property of the avatar (which is simply a Rectangle for now) based on <code>sentByMe</code>, we only show it if the message was sent by a contact.</li>
+<li>We change the color of the rectangle depending on the author. Since we do not want to display dark text on a dark background, and vice versa, we also set the text color depending on who the author is. In chapter 5, we'll see how styling takes care of matters like this for us.</li>
+</ul>
+<p>At the bottom of the screen, we place a <a href="qml-qtquick-controls2-textarea.html">TextArea</a> item to allow multi-line text input, and a button to send the message. We use Pane to cover the area under these two items, in the same way that we use <a href="qml-qtquick-controls2-toolbar.html">ToolBar</a> to prevent the contents of the listview from interfering with the page header:</p>
+<pre class="cpp">
+
+          <span class="type"><a href="qml-qtquick-controls2-pane.html">Pane</a></span> {
+              <span class="name">id</span>: <span class="name">pane</span>
+              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+
+              <span class="type"><a href="../qtquick/qml-qtquick-layouts-rowlayout.html">RowLayout</a></span> {
+                  <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+
+                  <span class="type"><a href="qml-qtquick-controls2-textarea.html">TextArea</a></span> {
+                      <span class="name">id</span>: <span class="name">messageField</span>
+                      <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                      <span class="name">placeholderText</span>: <span class="name">qsTr</span>(<span class="string">&quot;Compose message&quot;</span>)
+                      <span class="name">wrapMode</span>: <span class="name">TextArea</span>.<span class="name">Wrap</span>
+                  }
+
+                  <span class="type"><a href="qml-qtquick-controls2-button.html">Button</a></span> {
+                      <span class="name">id</span>: <span class="name">sendButton</span>
+                      <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Send&quot;</span>)
+                      <span class="name">enabled</span>: <span class="name">messageField</span>.<span class="name">length</span> <span class="operator">&gt;</span> <span class="number">0</span>
+                  }
+              }
+          }
+
+</pre>
+<p>The <a href="qml-qtquick-controls2-textarea.html">TextArea</a> should fill the available width of the screen. We assign some placeholder text to provide a visual cue to the user as to where they should begin typing. The text within the input area is wrapped to ensure that it does not go outside of the screen.</p>
+<p>Finally, the button is only enabled when there is actually a message to send.</p>
+<div class="border"><p class="centerAlign"><img src="images/qtquickcontrols2-chattutorial-chapter3.gif" alt="" /></p></div><a name="chapter-4-models"></a>
+<h4 id="chapter-4-models">Chapter 4: Models</h4>
+<p>In chapter 4, we'll take you through the process of creating both read-only and read-write SQL models in C++ and exposing them to QML to populate views.</p>
+<a name="qsqlquerymodel"></a>
+<h5 id="qsqlquerymodel">QSqlQueryModel</h5>
+<p>In order to keep the tutorial simple, we've chosen to make the list of user contacts non-editable. <a href="qtquickcontrols-chattutorial-example.html#qsqlquerymodel">QSqlQueryModel</a> is the logical choice for this purpose, as it provides a read-only data model for SQL result sets.</p>
+<p>Let's take a look at our <code>SqlContactModel</code> class that derives from <a href="qtquickcontrols-chattutorial-example.html#qsqlquerymodel">QSqlQueryModel</a>:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QSqlQueryModel&gt;</span>
+
+  <span class="keyword">class</span> SqlContactModel : <span class="keyword">public</span> <span class="type"><a href="../qtsql/qsqlquerymodel.html">QSqlQueryModel</a></span>
+  {
+  <span class="keyword">public</span>:
+      SqlContactModel(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+  };
+
+</pre>
+<p>There's not much going on here, so let's move on to the <code>.cpp</code> file:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &quot;sqlcontactmodel.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QDebug&gt;</span>
+  <span class="preprocessor">#include &lt;QSqlError&gt;</span>
+  <span class="preprocessor">#include &lt;QSqlQuery&gt;</span>
+
+  <span class="keyword">static</span> <span class="type">void</span> createTable()
+  {
+      <span class="keyword">if</span> (<span class="type"><a href="../qtsql/qsqldatabase.html">QSqlDatabase</a></span><span class="operator">::</span>database()<span class="operator">.</span>tables()<span class="operator">.</span>contains(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Contacts&quot;</span>))) {
+          <span class="comment">// The table already exists; we don't need to do anything.</span>
+          <span class="keyword">return</span>;
+      }
+
+      <span class="type"><a href="../qtsql/qsqlquery.html">QSqlQuery</a></span> query;
+      <span class="keyword">if</span> (<span class="operator">!</span>query<span class="operator">.</span>exec(
+          <span class="string">&quot;CREATE TABLE IF NOT EXISTS 'Contacts' (&quot;</span>
+          <span class="string">&quot;   'name' TEXT NOT NULL,&quot;</span>
+          <span class="string">&quot;   PRIMARY KEY(name)&quot;</span>
+          <span class="string">&quot;)&quot;</span>)) {
+          <a href="../qtcore/qtglobal.html#qFatal">qFatal</a>(<span class="string">&quot;Failed to query database: %s&quot;</span><span class="operator">,</span> <a href="../qtcore/qtglobal.html#qPrintable">qPrintable</a>(query<span class="operator">.</span>lastError()<span class="operator">.</span>text()));
+      }
+
+      query<span class="operator">.</span>exec(<span class="string">&quot;INSERT INTO Contacts VALUES('Albert Einstein')&quot;</span>);
+      query<span class="operator">.</span>exec(<span class="string">&quot;INSERT INTO Contacts VALUES('Ernest Hemingway')&quot;</span>);
+      query<span class="operator">.</span>exec(<span class="string">&quot;INSERT INTO Contacts VALUES('Hans Gude')&quot;</span>);
+  }
+
+</pre>
+<p>We include the header file of our class and those that we require from Qt. We then define a static function named <code>createTable()</code> that we'll use to create the SQL table (if it doesn't already exist), and then populate it with some dummy contacts.</p>
+<p>The call to <a href="../qtsql/qsqldatabase.html#database">database()</a> might look a little bit confusing because we have not set up a specific database yet. If no connection name is passed to this function, it will return a <i>&quot;default connection&quot;</i>, whose creation we will cover soon.</p>
+<pre class="cpp">
+
+  SqlContactModel<span class="operator">::</span>SqlContactModel(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent) :
+      <span class="type"><a href="../qtsql/qsqlquerymodel.html">QSqlQueryModel</a></span>(parent)
+  {
+      createTable();
+
+      <span class="type"><a href="../qtsql/qsqlquery.html">QSqlQuery</a></span> query;
+      <span class="keyword">if</span> (<span class="operator">!</span>query<span class="operator">.</span>exec(<span class="string">&quot;SELECT * FROM Contacts&quot;</span>))
+          <a href="../qtcore/qtglobal.html#qFatal">qFatal</a>(<span class="string">&quot;Contacts SELECT query failed: %s&quot;</span><span class="operator">,</span> <a href="../qtcore/qtglobal.html#qPrintable">qPrintable</a>(query<span class="operator">.</span>lastError()<span class="operator">.</span>text()));
+
+      setQuery(query);
+      <span class="keyword">if</span> (lastError()<span class="operator">.</span>isValid())
+          <a href="../qtcore/qtglobal.html#qFatal">qFatal</a>(<span class="string">&quot;Cannot set query on SqlContactModel: %s&quot;</span><span class="operator">,</span> <a href="../qtcore/qtglobal.html#qPrintable">qPrintable</a>(lastError()<span class="operator">.</span>text()));
+  }
+
+</pre>
+<p>In the constructor, we call <code>createTable()</code>. We then construct a query that will be used to populate the model. In this case, we are simply interested in all rows of the <code>Contacts</code> table.</p>
+<a name="qsqltablemodel"></a>
+<h5 id="qsqltablemodel">QSqlTableModel</h5>
+<p><code>SqlConversationModel</code> is more complex:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QSqlTableModel&gt;</span>
+
+  <span class="keyword">class</span> SqlConversationModel : <span class="keyword">public</span> <span class="type"><a href="../qtsql/qsqltablemodel.html">QSqlTableModel</a></span>
+  {
+      Q_OBJECT
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> recipient READ recipient WRITE setRecipient NOTIFY recipientChanged)
+
+  <span class="keyword">public</span>:
+      SqlConversationModel(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> recipient() <span class="keyword">const</span>;
+      <span class="type">void</span> setRecipient(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>recipient);
+
+      <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> data(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qhash.html">QHash</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> roleNames() <span class="keyword">const</span> override;
+
+      Q_INVOKABLE <span class="type">void</span> sendMessage(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>recipient<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>message);
+
+  <span class="keyword">signals</span>:
+      <span class="type">void</span> recipientChanged();
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> m_recipient;
+  };
+
+</pre>
+<p>We use both the <code>Q_PROPERTY</code> and <code>Q_INVOKABLE</code> macros, and therefore we must let <a href="../qtdoc/moc.html">moc</a> know by using the <code>Q_OBJECT</code> macro.</p>
+<p>The <code>recipient</code> property will be set from QML to let the model know which conversation it should retrieve messages for.</p>
+<p>We override the <a href="../qtsql/qsqltablemodel.html#data">data()</a> and <a href="../qtcore/qabstractitemmodel.html#roleNames">roleNames()</a> functions so that we can use our custom roles in QML.</p>
+<p>We also define the <code>sendMessage()</code> function that we want to call from QML, hence the <code>Q_INVOKABLE</code> macro.</p>
+<p>Let's take a look at the <code>.cpp</code> file:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &quot;sqlconversationmodel.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QDateTime&gt;</span>
+  <span class="preprocessor">#include &lt;QDebug&gt;</span>
+  <span class="preprocessor">#include &lt;QSqlError&gt;</span>
+  <span class="preprocessor">#include &lt;QSqlRecord&gt;</span>
+  <span class="preprocessor">#include &lt;QSqlQuery&gt;</span>
+
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>conversationsTableName <span class="operator">=</span> <span class="string">&quot;Conversations&quot;</span>;
+
+  <span class="keyword">static</span> <span class="type">void</span> createTable()
+  {
+      <span class="keyword">if</span> (<span class="type"><a href="../qtsql/qsqldatabase.html">QSqlDatabase</a></span><span class="operator">::</span>database()<span class="operator">.</span>tables()<span class="operator">.</span>contains(conversationsTableName)) {
+          <span class="comment">// The table already exists; we don't need to do anything.</span>
+          <span class="keyword">return</span>;
+      }
+
+      <span class="type"><a href="../qtsql/qsqlquery.html">QSqlQuery</a></span> query;
+      <span class="keyword">if</span> (<span class="operator">!</span>query<span class="operator">.</span>exec(
+          <span class="string">&quot;CREATE TABLE IF NOT EXISTS 'Conversations' (&quot;</span>
+          <span class="string">&quot;'author' TEXT NOT NULL,&quot;</span>
+          <span class="string">&quot;'recipient' TEXT NOT NULL,&quot;</span>
+          <span class="string">&quot;'timestamp' TEXT NOT NULL,&quot;</span>
+          <span class="string">&quot;'message' TEXT NOT NULL,&quot;</span>
+          <span class="string">&quot;FOREIGN KEY('author') REFERENCES Contacts ( name ),&quot;</span>
+          <span class="string">&quot;FOREIGN KEY('recipient') REFERENCES Contacts ( name )&quot;</span>
+          <span class="string">&quot;)&quot;</span>)) {
+          <a href="../qtcore/qtglobal.html#qFatal">qFatal</a>(<span class="string">&quot;Failed to query database: %s&quot;</span><span class="operator">,</span> <a href="../qtcore/qtglobal.html#qPrintable">qPrintable</a>(query<span class="operator">.</span>lastError()<span class="operator">.</span>text()));
+      }
+
+      query<span class="operator">.</span>exec(<span class="string">&quot;INSERT INTO Conversations VALUES('Me', 'Ernest Hemingway', '2016-01-07T14:36:06', 'Hello!')&quot;</span>);
+      query<span class="operator">.</span>exec(<span class="string">&quot;INSERT INTO Conversations VALUES('Ernest Hemingway', 'Me', '2016-01-07T14:36:16', 'Good afternoon.')&quot;</span>);
+      query<span class="operator">.</span>exec(<span class="string">&quot;INSERT INTO Conversations VALUES('Me', 'Albert Einstein', '2016-01-01T11:24:53', 'Hi!')&quot;</span>);
+      query<span class="operator">.</span>exec(<span class="string">&quot;INSERT INTO Conversations VALUES('Albert Einstein', 'Me', '2016-01-07T14:36:16', 'Good morning.')&quot;</span>);
+      query<span class="operator">.</span>exec(<span class="string">&quot;INSERT INTO Conversations VALUES('Hans Gude', 'Me', '2015-11-20T06:30:02', 'God morgen. Har du fått mitt maleri?')&quot;</span>);
+      query<span class="operator">.</span>exec(<span class="string">&quot;INSERT INTO Conversations VALUES('Me', 'Hans Gude', '2015-11-20T08:21:03', 'God morgen, Hans. Ja, det er veldig fint. Tusen takk! &quot;</span>
+                 <span class="string">&quot;Hvor mange timer har du brukt på den?')&quot;</span>);
+  }
+
+</pre>
+<p>This is very similar to <code>sqlcontactmodel.cpp</code>, with the exception that we are now operating on the <code>Conversations</code> table. We also define <code>conversationsTableName</code> as a static const variable, as we use it in a couple of places throughout the file.</p>
+<pre class="cpp">
+
+  SqlConversationModel<span class="operator">::</span>SqlConversationModel(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent) :
+      <span class="type"><a href="../qtsql/qsqltablemodel.html">QSqlTableModel</a></span>(parent)
+  {
+      createTable();
+      setTable(conversationsTableName);
+      setSort(<span class="number">2</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DescendingOrder);
+      <span class="comment">// Ensures that the model is sorted correctly after submitting a new row.</span>
+      setEditStrategy(<span class="type"><a href="../qtsql/qsqltablemodel.html">QSqlTableModel</a></span><span class="operator">::</span>OnManualSubmit);
+  }
+
+</pre>
+<p>As with <code>SqlContactModel</code>, the first thing that we do in the constructor is create the table. We tell <a href="qtquickcontrols-chattutorial-example.html#qsqltablemodel">QSqlTableModel</a> the name of the table we'll be using via the <a href="../qtsql/qsqltablemodel.html#setTable">setTable()</a> function. To ensure that the latest messages in the conversation are shown first, we sort the query results by the <code>timestamp</code> field in descending order. This goes hand in hand with setting <a href="../qtquick/qml-qtquick-listview.html">ListView</a>'s <a href="../qtquick/qml-qtquick-listview.html#verticalLayoutDirection-prop">verticalLayoutDirection</a> property to <code>ListView.BottomToTop</code> (which we covered in chapter 3).</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> SqlConversationModel<span class="operator">::</span>recipient() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_recipient;
+  }
+
+  <span class="type">void</span> SqlConversationModel<span class="operator">::</span>setRecipient(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>recipient)
+  {
+      <span class="keyword">if</span> (recipient <span class="operator">=</span><span class="operator">=</span> m_recipient)
+          <span class="keyword">return</span>;
+
+      m_recipient <span class="operator">=</span> recipient;
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> filterString <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>fromLatin1(
+          <span class="string">&quot;(recipient = '%1' AND author = 'Me') OR (recipient = 'Me' AND author='%1')&quot;</span>)<span class="operator">.</span>arg(m_recipient);
+      setFilter(filterString);
+      select();
+
+      <span class="keyword">emit</span> recipientChanged();
+  }
+
+</pre>
+<p>In <code>setRecipient()</code>, we set a filter over the results returned from the database.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> SqlConversationModel<span class="operator">::</span>data(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (role <span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole)
+          <span class="keyword">return</span> <span class="type"><a href="../qtsql/qsqltablemodel.html">QSqlTableModel</a></span><span class="operator">::</span>data(index<span class="operator">,</span> role);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtsql/qsqlrecord.html">QSqlRecord</a></span> sqlRecord <span class="operator">=</span> record(index<span class="operator">.</span>row());
+      <span class="keyword">return</span> sqlRecord<span class="operator">.</span>value(role <span class="operator">-</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole);
+  }
+
+</pre>
+<p>The <code>data()</code> function falls back to <a href="qtquickcontrols-chattutorial-example.html#qsqltablemodel">QSqlTableModel</a>'s implementation if the role is not a custom user role. If the role is a user role, we can subtract <a href="../qtcore/qt.html#ItemDataRole-enum">Qt::UserRole</a> from it to get the index of that field and then use that to find the value that we need to return.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qhash.html">QHash</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> SqlConversationModel<span class="operator">::</span>roleNames() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qhash.html">QHash</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> names;
+      names<span class="operator">[</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole<span class="operator">]</span> <span class="operator">=</span> <span class="string">&quot;author&quot;</span>;
+      names<span class="operator">[</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole <span class="operator">+</span> <span class="number">1</span><span class="operator">]</span> <span class="operator">=</span> <span class="string">&quot;recipient&quot;</span>;
+      names<span class="operator">[</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole <span class="operator">+</span> <span class="number">2</span><span class="operator">]</span> <span class="operator">=</span> <span class="string">&quot;timestamp&quot;</span>;
+      names<span class="operator">[</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole <span class="operator">+</span> <span class="number">3</span><span class="operator">]</span> <span class="operator">=</span> <span class="string">&quot;message&quot;</span>;
+      <span class="keyword">return</span> names;
+  }
+
+</pre>
+<p>In <code>roleNames()</code>, we return a mapping of our custom role values to role names. This enables us to use these roles in QML. It can be useful to declare an enum to hold all of the role values, but since we don't refer to any specific value in code outside of this function, we don't bother.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> SqlConversationModel<span class="operator">::</span>sendMessage(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>recipient<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>message)
+  {
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> timestamp <span class="operator">=</span> <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span><span class="operator">::</span>currentDateTime()<span class="operator">.</span>toString(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ISODate);
+
+      <span class="type"><a href="../qtsql/qsqlrecord.html">QSqlRecord</a></span> newRecord <span class="operator">=</span> record();
+      newRecord<span class="operator">.</span>setValue(<span class="string">&quot;author&quot;</span><span class="operator">,</span> <span class="string">&quot;Me&quot;</span>);
+      newRecord<span class="operator">.</span>setValue(<span class="string">&quot;recipient&quot;</span><span class="operator">,</span> recipient);
+      newRecord<span class="operator">.</span>setValue(<span class="string">&quot;timestamp&quot;</span><span class="operator">,</span> timestamp);
+      newRecord<span class="operator">.</span>setValue(<span class="string">&quot;message&quot;</span><span class="operator">,</span> message);
+      <span class="keyword">if</span> (<span class="operator">!</span>insertRecord(rowCount()<span class="operator">,</span> newRecord)) {
+          <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Failed to send message:&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> lastError()<span class="operator">.</span>text();
+          <span class="keyword">return</span>;
+      }
+
+</pre>
+<p>The <code>sendMessage()</code> function uses the given <code>recipient</code> and a <code>message</code> to insert a new record into the database. Due to our usage of <a href="../qtsql/qsqltablemodel.html#EditStrategy-enum">QSqlTableModel::OnManualSubmit</a>, we must manually call <a href="../qtsql/qsqltablemodel.html#submitAll">submitAll()</a>.</p>
+<a name="connecting-to-the-database-and-registering-types-with-qml"></a>
+<h5 id="connecting-to-the-database-and-registering-types-with-qml">Connecting to the Database and Registering Types With QML</h5>
+<p>Now that we've established the model classes, let's take a look at <code>main.cpp</code>:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QGuiApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QStandardPaths&gt;</span>
+  <span class="preprocessor">#include &lt;QSqlDatabase&gt;</span>
+  <span class="preprocessor">#include &lt;QSqlError&gt;</span>
+  <span class="preprocessor">#include &lt;QtQml&gt;</span>
+
+  <span class="preprocessor">#include &quot;sqlcontactmodel.h&quot;</span>
+  <span class="preprocessor">#include &quot;sqlconversationmodel.h&quot;</span>
+
+  <span class="keyword">static</span> <span class="type">void</span> connectToDatabase()
+  {
+      <span class="type"><a href="../qtsql/qsqldatabase.html">QSqlDatabase</a></span> database <span class="operator">=</span> <span class="type"><a href="../qtsql/qsqldatabase.html">QSqlDatabase</a></span><span class="operator">::</span>database();
+      <span class="keyword">if</span> (<span class="operator">!</span>database<span class="operator">.</span>isValid()) {
+          database <span class="operator">=</span> <span class="type"><a href="../qtsql/qsqldatabase.html">QSqlDatabase</a></span><span class="operator">::</span>addDatabase(<span class="string">&quot;QSQLITE&quot;</span>);
+          <span class="keyword">if</span> (<span class="operator">!</span>database<span class="operator">.</span>isValid())
+              <a href="../qtcore/qtglobal.html#qFatal">qFatal</a>(<span class="string">&quot;Cannot add database: %s&quot;</span><span class="operator">,</span> <a href="../qtcore/qtglobal.html#qPrintable">qPrintable</a>(database<span class="operator">.</span>lastError()<span class="operator">.</span>text()));
+      }
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qdir.html">QDir</a></span> writeDir <span class="operator">=</span> <span class="type"><a href="../qtcore/qstandardpaths.html">QStandardPaths</a></span><span class="operator">::</span>writableLocation(<span class="type"><a href="../qtcore/qstandardpaths.html">QStandardPaths</a></span><span class="operator">::</span>AppDataLocation);
+      <span class="keyword">if</span> (<span class="operator">!</span>writeDir<span class="operator">.</span>mkpath(<span class="string">&quot;.&quot;</span>))
+          <a href="../qtcore/qtglobal.html#qFatal">qFatal</a>(<span class="string">&quot;Failed to create writable directory at %s&quot;</span><span class="operator">,</span> <a href="../qtcore/qtglobal.html#qPrintable">qPrintable</a>(writeDir<span class="operator">.</span>absolutePath()));
+
+      <span class="comment">// Ensure that we have a writable location on all devices.</span>
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> writeDir<span class="operator">.</span>absolutePath() <span class="operator">+</span> <span class="string">&quot;/chat-database.sqlite3&quot;</span>;
+      <span class="comment">// When using the SQLite driver, open() will create the SQLite database if it doesn't exist.</span>
+      database<span class="operator">.</span>setDatabaseName(fileName);
+      <span class="keyword">if</span> (<span class="operator">!</span>database<span class="operator">.</span>open()) {
+          <a href="../qtcore/qtglobal.html#qFatal">qFatal</a>(<span class="string">&quot;Cannot open database: %s&quot;</span><span class="operator">,</span> <a href="../qtcore/qtglobal.html#qPrintable">qPrintable</a>(database<span class="operator">.</span>lastError()<span class="operator">.</span>text()));
+          <span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>remove(fileName);
+      }
+  }
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span><span class="operator">::</span>setAttribute(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AA_EnableHighDpiScaling);
+      <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      qmlRegisterType<span class="operator">&lt;</span>SqlContactModel<span class="operator">&gt;</span>(<span class="string">&quot;io.qt.examples.chattutorial&quot;</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;SqlContactModel&quot;</span>);
+      qmlRegisterType<span class="operator">&lt;</span>SqlConversationModel<span class="operator">&gt;</span>(<span class="string">&quot;io.qt.examples.chattutorial&quot;</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;SqlConversationModel&quot;</span>);
+
+      connectToDatabase();
+
+      <span class="type"><a href="../qtqml/qqmlapplicationengine.html">QQmlApplicationEngine</a></span> engine;
+      engine<span class="operator">.</span>load(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;qrc:/main.qml&quot;</span>)));
+      <span class="keyword">if</span> (engine<span class="operator">.</span>rootObjects()<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span> <span class="operator">-</span><span class="number">1</span>;
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p><code>connectToDatabase()</code> creates the connection to the <a href="../qtsql/qtsql-attribution-sqlite.html#sqlite">SQLite</a> database, creating the actual file if it doesn't already exist.</p>
+<p>Within <code>main()</code>, we call <a href="../qtqml/qqmlengine.html#qmlRegisterType">qmlRegisterType()</a> to register our models as types within QML.</p>
+<a name="using-the-models-in-qml"></a>
+<h5 id="using-the-models-in-qml">Using the Models in QML</h5>
+<p>Now that we have the models available as QML types, there are some minor changes to be done to <code>ContactPage.qml</code>. To be able to use the types, we must first import them using the URI we set in <code>main.cpp</code>:</p>
+<pre class="cpp">
+
+  import io.qt.examples.chattutorial 1.0
+
+</pre>
+<p>We then replace the dummy model with the proper one:</p>
+<pre class="cpp">
+
+          <span class="name">model</span>: <span class="name">SqlContactModel</span> {}
+
+</pre>
+<p>Within the delegate, we use a different syntax for accessing the model data:</p>
+<pre class="cpp">
+
+              <span class="name">text</span>: <span class="name">model</span>.<span class="name">display</span>
+
+</pre>
+<p>In <code>ConversationPage.qml</code>, we add the same <code>chattutorial</code> import, and replace the dummy model:</p>
+<pre class="cpp">
+
+              <span class="name">model</span>: <span class="name">SqlConversationModel</span> {
+                  <span class="name">recipient</span>: <span class="name">inConversationWith</span>
+              }
+
+</pre>
+<p>Within the model, we set the <code>recipient</code> property to the name of the contact for which the page is being displayed.</p>
+<p>The root delegate item changes from a Row to a Column, to accommodate the timestamp that we want to display below every message:</p>
+<pre class="cpp">
+
+              <span class="name">delegate</span>: <span class="name">Column</span> {
+                  <span class="name">anchors</span>.right: <span class="name">sentByMe</span> ? <span class="name">parent</span>.<span class="name">right</span> : <span class="name">undefined</span>
+                  <span class="name">spacing</span>: <span class="number">6</span>
+
+                  readonly property <span class="type">bool</span> <span class="name">sentByMe</span>: <span class="name">model</span>.<span class="name">recipient</span> <span class="operator">!==</span> <span class="string">&quot;Me&quot;</span>
+
+                  <span class="type"><a href="../qtquick/qml-qtquick-row.html">Row</a></span> {
+                      <span class="name">id</span>: <span class="name">messageRow</span>
+                      <span class="name">spacing</span>: <span class="number">6</span>
+                      <span class="name">anchors</span>.right: <span class="name">sentByMe</span> ? <span class="name">parent</span>.<span class="name">right</span> : <span class="name">undefined</span>
+
+                      <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+                          <span class="name">id</span>: <span class="name">avatar</span>
+                          <span class="name">source</span>: !<span class="name">sentByMe</span> ? <span class="string">&quot;qrc:/&quot;</span> <span class="operator">+</span> <span class="name">model</span>.<span class="name">author</span>.<span class="name">replace</span>(<span class="string">&quot; &quot;</span>, <span class="string">&quot;_&quot;</span>) <span class="operator">+</span> <span class="string">&quot;.png&quot;</span> : <span class="string">&quot;&quot;</span>
+                      }
+
+                      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+                          <span class="name">width</span>: <span class="name">Math</span>.<span class="name">min</span>(<span class="name">messageText</span>.<span class="name">implicitWidth</span> <span class="operator">+</span> <span class="number">24</span>,
+                              <span class="name">listView</span>.<span class="name">width</span> <span class="operator">-</span> (!<span class="name">sentByMe</span> ? <span class="name">avatar</span>.<span class="name">width</span> <span class="operator">+</span> <span class="name">messageRow</span>.<span class="name">spacing</span> : <span class="number">0</span>))
+                          <span class="name">height</span>: <span class="name">messageText</span>.<span class="name">implicitHeight</span> <span class="operator">+</span> <span class="number">24</span>
+                          <span class="name">color</span>: <span class="name">sentByMe</span> ? <span class="string">&quot;lightgrey&quot;</span> : <span class="string">&quot;steelblue&quot;</span>
+
+                          <span class="type"><a href="qml-qtquick-controls2-label.html">Label</a></span> {
+                              <span class="name">id</span>: <span class="name">messageText</span>
+                              <span class="name">text</span>: <span class="name">model</span>.<span class="name">message</span>
+                              <span class="name">color</span>: <span class="name">sentByMe</span> ? <span class="string">&quot;black&quot;</span> : <span class="string">&quot;white&quot;</span>
+                              <span class="name">anchors</span>.fill: <span class="name">parent</span>
+                              <span class="name">anchors</span>.margins: <span class="number">12</span>
+                              <span class="name">wrapMode</span>: <span class="name">Label</span>.<span class="name">Wrap</span>
+                          }
+                      }
+                  }
+
+                  <span class="type"><a href="qml-qtquick-controls2-label.html">Label</a></span> {
+                      <span class="name">id</span>: <span class="name">timestampText</span>
+                      <span class="name">text</span>: <span class="name">Qt</span>.<span class="name">formatDateTime</span>(<span class="name">model</span>.<span class="name">timestamp</span>, <span class="string">&quot;d MMM hh:mm&quot;</span>)
+                      <span class="name">color</span>: <span class="string">&quot;lightgrey&quot;</span>
+                      <span class="name">anchors</span>.right: <span class="name">sentByMe</span> ? <span class="name">parent</span>.<span class="name">right</span> : <span class="name">undefined</span>
+                  }
+              }
+
+</pre>
+<div class="border"><p class="centerAlign"><img src="images/qtquickcontrols2-chattutorial-chapter4-message-timestamp.png" alt="" /></p></div><p>Now that we have a proper model, we can use its <code>recipient</code> role in the expression for the <code>sentByMe</code> property.</p>
+<p>The Rectangle that was used for the avatar has been converted into an Image. The image has its own implicit size, so we don't need to specify it explicitly. As before, we only show the avatar when the author isn't the user, except this time we set the <code>source</code> of the image to an empty URL instead of using the <code>visible</code> property.</p>
+<p>We want each message background to be slightly wider (12 pixels each side) than its text. However, if it's too long, we want to limit its width to the edge of the listview, hence the usage of <code>Math.min()</code>. When the message wasn't sent by us, an avatar will always come before it, so we account for that by subtracting the width of the avatar and the row spacing.</p>
+<p>For example, in the image above, the implicit width of the message text is the smaller value. However, in the image below, the message text is quite long, so the smaller value (the width of the view) is chosen, ensuring that the text stops at the opposite edge of the screen:</p>
+<div class="border"><p class="centerAlign"><img src="images/qtquickcontrols2-chattutorial-chapter4-long-message.png" alt="" /></p></div><p>In order to display the timestamp for each message that we discussed earlier, we use a Label. The date and time are formatted with <a href="../qtqml/qml-qtqml-qt.html#formatDateTime-method">Qt.formatDateTime()</a>, using a custom format.</p>
+<p>The <i>&quot;send&quot;</i> button must now react to being clicked:</p>
+<pre class="cpp">
+
+                  <span class="type"><a href="qml-qtquick-controls2-button.html">Button</a></span> {
+                      <span class="name">id</span>: <span class="name">sendButton</span>
+                      <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Send&quot;</span>)
+                      <span class="name">enabled</span>: <span class="name">messageField</span>.<span class="name">length</span> <span class="operator">&gt;</span> <span class="number">0</span>
+                      <span class="name">onClicked</span>: {
+                          <span class="name">listView</span>.<span class="name">model</span>.<span class="name">sendMessage</span>(<span class="name">inConversationWith</span>, <span class="name">messageField</span>.<span class="name">text</span>);
+                          <span class="name">messageField</span>.<span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+                      }
+                  }
+
+</pre>
+<p>First, we call the invokable <code>sendMessage()</code> function of the model, which inserts a new row into the Conversations database table. Then, we clear the text field to make way for future input.</p>
+<div class="border"><p class="centerAlign"><img src="images/qtquickcontrols2-chattutorial-chapter4.gif" alt="" /></p></div><a name="chapter-5-styling"></a>
+<h4 id="chapter-5-styling">Chapter 5: Styling</h4>
+<p>Styles in Qt Quick Controls are designed to work on any platform. In this chapter, we'll do some minor visual tweaks to make sure our application looks good when run with the <a href="qtquickcontrols2-default.html">Default</a>, <a href="qtquickcontrols2-material.html">Material</a>, and <a href="qtquickcontrols2-universal.html">Universal</a> styles.</p>
+<p>So far, we've just been testing the application with the Default style. If we run it with the <a href="qtquickcontrols2-material.html">Material Style</a>, for example, we'll immediately see some issues. Here is the Contacts page:</p>
+<div class="border"><p class="centerAlign"><img src="images/qtquickcontrols2-chattutorial-chapter5-contacts-material-test.png" alt="" /></p></div><p>The header text is black on a dark blue background, which is very difficult to read. The same thing occurs with the Conversations page:</p>
+<div class="border"><p class="centerAlign"><img src="images/qtquickcontrols2-chattutorial-chapter5-conversations-material-test.png" alt="" /></p></div><p>The solution is to tell the toolbar that it should use the <i>&quot;Dark&quot;</i> theme, so that this information is propagated to its children, allowing them to switch their text color to something lighter. The simplest way of doing so is to import the Material style directly and use the Material attached property:</p>
+<pre class="cpp">
+
+  import <span class="type"><a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a></span><span class="operator">.</span>Controls<span class="operator">.</span>Material <span class="number">2.12</span>
+
+  <span class="comment">// ...</span>
+
+  header: ToolBar {
+      Material<span class="operator">.</span>theme: Material<span class="operator">.</span>Dark
+
+      <span class="comment">// ...</span>
+  }
+
+</pre>
+<p>However, this brings with it a hard dependency to the Material style; the Material style plugin <i>must</i> be deployed with the application, even if the target device doesn't use it, otherwise the QML engine will fail to find the import.</p>
+<p>Instead, it is better to rely on Qt Quick Controls's built-in support for <a href="qtquickcontrols2-fileselectors.html">style-based file selectors</a>. To do this, we must move the <a href="qml-qtquick-controls2-toolbar.html">ToolBar</a> out into its own file. We'll call it <code>ChatToolBar.qml</code>. This will be the <i>&quot;default&quot;</i> version of the file, which means that it will be used when the <a href="qtquickcontrols2-default.html">Default style</a> is in use. Here's the new file:</p>
+<pre class="cpp">
+
+  import QtQuick.Controls 2.12
+
+  <span class="type"><a href="qml-qtquick-controls2-toolbar.html">ToolBar</a></span> {
+  }
+
+</pre>
+<p>As we only use the <a href="qml-qtquick-controls2-toolbar.html">ToolBar</a> type within this file, we only need the Qt Quick Controls import. The code itself has not changed from how it was in <code>ContactPage.qml</code>, which is how it should be; for the default version of the file, nothing needs to be different.</p>
+<p>Back in <code>ContactPage.qml</code>, we update the code to use the new type:</p>
+<pre class="cpp">
+
+      <span class="name">header</span>: <span class="name">ChatToolBar</span> {
+          <span class="type"><a href="qml-qtquick-controls2-label.html">Label</a></span> {
+              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Contacts&quot;</span>)
+              <span class="name">font</span>.pixelSize: <span class="number">20</span>
+              <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+          }
+      }
+
+</pre>
+<p>Now we need to add the Material version of the toolbar. File selectors expect variants of a file to be in appropriately named directories that exist alongside the default version of the file. This means that we need to add a folder named &quot;+material&quot; in the same directory that ChatToolBar.qml is in: the root folder. The &quot;+&quot; is required by <a href="../qtcore/qfileselector.html">QFileSelector</a> as a way of ensuring that the selection feature is not accidentally triggered.</p>
+<p>Here's <code>+material/ChatToolBar.qml</code>:</p>
+<pre class="cpp">
+
+  import QtQuick.Controls 2.12
+  import QtQuick.Controls.Material 2.12
+
+  <span class="type"><a href="qml-qtquick-controls2-toolbar.html">ToolBar</a></span> {
+      <span class="name">Material</span>.theme: <span class="name">Material</span>.<span class="name">Dark</span>
+  }
+
+</pre>
+<p>We'll make the same changes to <code>ConversationPage.qml</code>:</p>
+<pre class="cpp">
+
+      <span class="name">header</span>: <span class="name">ChatToolBar</span> {
+          <span class="type"><a href="qml-qtquick-controls2-toolbutton.html">ToolButton</a></span> {
+              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Back&quot;</span>)
+              <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+              <span class="name">anchors</span>.leftMargin: <span class="number">10</span>
+              <span class="name">anchors</span>.verticalCenter: <span class="name">parent</span>.<span class="name">verticalCenter</span>
+              <span class="name">onClicked</span>: <span class="name">root</span>.<span class="name">StackView</span>.<span class="name">view</span>.<span class="name">pop</span>()
+          }
+
+          <span class="type"><a href="qml-qtquick-controls2-label.html">Label</a></span> {
+              <span class="name">id</span>: <span class="name">pageTitle</span>
+              <span class="name">text</span>: <span class="name">inConversationWith</span>
+              <span class="name">font</span>.pixelSize: <span class="number">20</span>
+              <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+          }
+      }
+
+</pre>
+<p>Now both pages look correct:</p>
+<div class="border"><p class="centerAlign"><img src="images/qtquickcontrols2-chattutorial-chapter5-contacts-material.png" alt="" /></p></div><div class="border"><p class="centerAlign"><img src="images/qtquickcontrols2-chattutorial-chapter5-conversations-material.png" alt="" /></p></div><p>Let's try out the Universal style:</p>
+<div class="border"><p class="centerAlign"><img src="images/qtquickcontrols2-chattutorial-chapter5-contacts-universal.png" alt="" /></p></div><div class="border"><p class="centerAlign"><img src="images/qtquickcontrols2-chattutorial-chapter5-conversations-universal.png" alt="" /></p></div><p>No issues there. For a relatively simple application such as this one, there should be very few adjustments necessary when switching styles.</p>
+<p>Now let's try each style's dark theme. The Default style has no dark theme, as it would add a slight overhead to a style that is designed to be as performant as possible. We'll test out the Material style first, so add an entry to <code>qtquickcontrols2.conf</code> that tells it to use its dark theme:</p>
+<pre class="cpp">
+
+  <span class="operator">[</span>material<span class="operator">]</span>
+  Primary<span class="operator">=</span>Indigo
+  Accent<span class="operator">=</span>Indigo
+  Theme<span class="operator">=</span>Dark
+
+</pre>
+<p>Once this is done, build and run the application. This is what you should see:</p>
+<div class="border"><p class="centerAlign"><img src="images/qtquickcontrols2-chattutorial-chapter5-contacts-material-dark.png" alt="" /></p></div><div class="border"><p class="centerAlign"><img src="images/qtquickcontrols2-chattutorial-chapter5-conversations-material-dark.png" alt="" /></p></div><p>Both pages look fine. Now add an entry for the Universal style:</p>
+<pre class="cpp">
+
+  <span class="operator">[</span>universal<span class="operator">]</span>
+  Theme<span class="operator">=</span>Dark
+
+</pre>
+<p>After building and running the application, you should see these results:</p>
+<div class="border"><p class="centerAlign"><img src="images/qtquickcontrols2-chattutorial-chapter5-contacts-universal-dark.png" alt="" /></p></div><div class="border"><p class="centerAlign"><img src="images/qtquickcontrols2-chattutorial-chapter5-conversations-universal-dark.png" alt="" /></p></div><a name="summary"></a>
+<h4 id="summary">Summary</h4>
+<p>In this tutorial, we've taken you through the following steps of writing a basic application using Qt Quick Controls:</p>
+<ul>
+<li>Creating a new project using Qt Creator.</li>
+<li>Setting up a basic <a href="qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a>.</li>
+<li>Defining headers and footers with Page.</li>
+<li>Displaying content in a <a href="../qtquick/qml-qtquick-listview.html">ListView</a>.</li>
+<li>Refactoring components into their own files.</li>
+<li>Navigating between screens with <a href="qml-qtquick-controls2-stackview.html">StackView</a>.</li>
+<li>Using layouts to allow an application to resize gracefully.</li>
+<li>Implementing both custom read-only and writable models that integrate an SQL database into the application.</li>
+<li>Integrating C++ with QML via <a href="../qtcore/qobject.html#Q_PROPERTY">Q_PROPERTY</a>, <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>, and <a href="../qtqml/qqmlengine.html#qmlRegisterType-1">qmlRegisterType</a>().</li>
+<li>Testing and configuring multiple styles.</li>
+</ul>
+<p><a href="https://code.qt.io/cgit/qt/qtquickcontrols2.git/tree/examples/quickcontrols2/chattutorial?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@chattutorial -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

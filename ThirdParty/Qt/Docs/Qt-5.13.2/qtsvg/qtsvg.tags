@@ -1,0 +1,544 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tagfile>
+    <compound kind="class">
+        <name>QSvgWidget</name>
+        <filename>qsvgwidget.html</filename>
+        <base>QWidget</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QSvgWidget</name>
+            <anchorfile>qsvgwidget.html</anchorfile>
+            <anchor>QSvgWidget</anchor>
+            <arglist>(QWidget *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QSvgWidget</name>
+            <anchorfile>qsvgwidget.html</anchorfile>
+            <anchor>QSvgWidget-1</anchor>
+            <arglist>(const QString &amp;file, QWidget *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QSvgWidget</name>
+            <anchorfile>qsvgwidget.html</anchorfile>
+            <anchor>dtor.QSvgWidget</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QSvgRenderer *</type>
+            <name>renderer</name>
+            <anchorfile>qsvgwidget.html</anchorfile>
+            <anchor>renderer</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual QSize</type>
+            <name>sizeHint</name>
+            <anchorfile>qsvgwidget.html</anchorfile>
+            <anchor>sizeHint</anchor>
+            <arglist>() const const override</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>load</name>
+            <anchorfile>qsvgwidget.html</anchorfile>
+            <anchor>load</anchor>
+            <arglist>(const QString &amp;file)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>load</name>
+            <anchorfile>qsvgwidget.html</anchorfile>
+            <anchor>load-1</anchor>
+            <arglist>(const QByteArray &amp;contents)</arglist>
+        </member>
+        <member kind="function" protection="protected" virtualness="virtual" static="no">
+            <type>virtual void</type>
+            <name>paintEvent</name>
+            <anchorfile>qsvgwidget.html</anchorfile>
+            <anchor>paintEvent</anchor>
+            <arglist>(QPaintEvent *event) override</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QSvgRenderer</name>
+        <filename>qsvgrenderer.html</filename>
+        <base>QObject</base>
+        <member kind="property" type="QRectF">
+            <name>viewBox</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>viewBox-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="int">
+            <name>framesPerSecond</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>framesPerSecond-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QSvgRenderer</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>QSvgRenderer</anchor>
+            <arglist>(QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QSvgRenderer</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>QSvgRenderer-1</anchor>
+            <arglist>(const QString &amp;filename, QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QSvgRenderer</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>QSvgRenderer-2</anchor>
+            <arglist>(const QByteArray &amp;contents, QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QSvgRenderer</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>QSvgRenderer-3</anchor>
+            <arglist>(QXmlStreamReader *contents, QObject *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QSvgRenderer</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>dtor.QSvgRenderer</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>isValid</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>isValid</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QSize</type>
+            <name>defaultSize</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>defaultSize</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QRect</type>
+            <name>viewBox</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>viewBox</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QRectF</type>
+            <name>viewBoxF</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>viewBox-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setViewBox</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>viewBox-prop</anchor>
+            <arglist>(const QRect &amp;viewbox)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setViewBox</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>viewBox-prop</anchor>
+            <arglist>(const QRectF &amp;viewbox)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>animated</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>animated</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>framesPerSecond</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>framesPerSecond-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setFramesPerSecond</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>framesPerSecond-prop</anchor>
+            <arglist>(int num)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QRectF</type>
+            <name>boundsOnElement</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>boundsOnElement</anchor>
+            <arglist>(const QString &amp;id) const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>elementExists</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>elementExists</anchor>
+            <arglist>(const QString &amp;id) const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QMatrix</type>
+            <name>matrixForElement</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>matrixForElement</anchor>
+            <arglist>(const QString &amp;id) const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>load</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>load</anchor>
+            <arglist>(const QString &amp;filename)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>load</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>load-1</anchor>
+            <arglist>(const QByteArray &amp;contents)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>load</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>load-2</anchor>
+            <arglist>(QXmlStreamReader *contents)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>render</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>render</anchor>
+            <arglist>(QPainter *painter)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>render</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>render-1</anchor>
+            <arglist>(QPainter *painter, const QRectF &amp;bounds)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>render</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>render-2</anchor>
+            <arglist>(QPainter *painter, const QString &amp;elementId, const QRectF &amp;bounds)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>repaintNeeded</name>
+            <anchorfile>qsvgrenderer.html</anchorfile>
+            <anchor>repaintNeeded</anchor>
+            <arglist>()</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QSvgGenerator</name>
+        <filename>qsvggenerator.html</filename>
+        <base>QPaintDevice</base>
+        <member kind="property" type="QSize">
+            <name>size</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>size-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="QRectF">
+            <name>viewBox</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>viewBox-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="QString">
+            <name>title</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>title-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="QString">
+            <name>description</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>description-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="QString">
+            <name>fileName</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>fileName-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="QIODevice*">
+            <name>outputDevice</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>outputDevice-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="int">
+            <name>resolution</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>resolution-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QSvgGenerator</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>QSvgGenerator</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QSvgGenerator</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>dtor.QSvgGenerator</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QString</type>
+            <name>title</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>title-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setTitle</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>title-prop</anchor>
+            <arglist>(const QString &amp;title)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QString</type>
+            <name>description</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>description-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setDescription</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>description-prop</anchor>
+            <arglist>(const QString &amp;description)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QSize</type>
+            <name>size</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>size-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setSize</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>size-prop</anchor>
+            <arglist>(const QSize &amp;size)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QRect</type>
+            <name>viewBox</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>viewBox</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QRectF</type>
+            <name>viewBoxF</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>viewBox-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setViewBox</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>viewBox-prop</anchor>
+            <arglist>(const QRect &amp;viewBox)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setViewBox</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>viewBox-prop</anchor>
+            <arglist>(const QRectF &amp;viewBox)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QString</type>
+            <name>fileName</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>fileName-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setFileName</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>fileName-prop</anchor>
+            <arglist>(const QString &amp;fileName)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QIODevice *</type>
+            <name>outputDevice</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>outputDevice-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setOutputDevice</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>outputDevice-prop</anchor>
+            <arglist>(QIODevice *outputDevice)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setResolution</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>resolution-prop</anchor>
+            <arglist>(int dpi)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>resolution</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>resolution-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="protected" virtualness="virtual" static="no">
+            <type>virtual QPaintEngine *</type>
+            <name>paintEngine</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>paintEngine</anchor>
+            <arglist>() const const override</arglist>
+        </member>
+        <member kind="function" protection="protected" virtualness="virtual" static="no">
+            <type>virtual int</type>
+            <name>metric</name>
+            <anchorfile>qsvggenerator.html</anchorfile>
+            <anchor>metric</anchor>
+            <arglist>(QPaintDevice::PaintDeviceMetric metric) const const override</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QGraphicsSvgItem</name>
+        <filename>qgraphicssvgitem.html</filename>
+        <base>QGraphicsObject</base>
+        <member kind="property" type="QString">
+            <name>elementId</name>
+            <anchorfile>qgraphicssvgitem.html</anchorfile>
+            <anchor>elementId-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="property" type="QSize">
+            <name>maximumCacheSize</name>
+            <anchorfile>qgraphicssvgitem.html</anchorfile>
+            <anchor>maximumCacheSize-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QGraphicsSvgItem</name>
+            <anchorfile>qgraphicssvgitem.html</anchorfile>
+            <anchor>QGraphicsSvgItem</anchor>
+            <arglist>(QGraphicsItem *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QGraphicsSvgItem</name>
+            <anchorfile>qgraphicssvgitem.html</anchorfile>
+            <anchor>QGraphicsSvgItem-1</anchor>
+            <arglist>(const QString &amp;fileName, QGraphicsItem *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setSharedRenderer</name>
+            <anchorfile>qgraphicssvgitem.html</anchorfile>
+            <anchor>setSharedRenderer</anchor>
+            <arglist>(QSvgRenderer *renderer)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QSvgRenderer *</type>
+            <name>renderer</name>
+            <anchorfile>qgraphicssvgitem.html</anchorfile>
+            <anchor>renderer</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setElementId</name>
+            <anchorfile>qgraphicssvgitem.html</anchorfile>
+            <anchor>setElementId</anchor>
+            <arglist>(const QString &amp;id)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QString</type>
+            <name>elementId</name>
+            <anchorfile>qgraphicssvgitem.html</anchorfile>
+            <anchor>elementId</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setCachingEnabled</name>
+            <anchorfile>qgraphicssvgitem-obsolete.html</anchorfile>
+            <anchor>setCachingEnabled</anchor>
+            <arglist>(bool caching)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>isCachingEnabled</name>
+            <anchorfile>qgraphicssvgitem-obsolete.html</anchorfile>
+            <anchor>isCachingEnabled</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setMaximumCacheSize</name>
+            <anchorfile>qgraphicssvgitem.html</anchorfile>
+            <anchor>setMaximumCacheSize</anchor>
+            <arglist>(const QSize &amp;size)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QSize</type>
+            <name>maximumCacheSize</name>
+            <anchorfile>qgraphicssvgitem.html</anchorfile>
+            <anchor>maximumCacheSize</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual QRectF</type>
+            <name>boundingRect</name>
+            <anchorfile>qgraphicssvgitem.html</anchorfile>
+            <anchor>boundingRect</anchor>
+            <arglist>() const const override</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual void</type>
+            <name>paint</name>
+            <anchorfile>qgraphicssvgitem.html</anchorfile>
+            <anchor>paint</anchor>
+            <arglist>(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual int</type>
+            <name>type</name>
+            <anchorfile>qgraphicssvgitem.html</anchorfile>
+            <anchor>type</anchor>
+            <arglist>() const const override</arglist>
+        </member>
+    </compound>
+</tagfile>

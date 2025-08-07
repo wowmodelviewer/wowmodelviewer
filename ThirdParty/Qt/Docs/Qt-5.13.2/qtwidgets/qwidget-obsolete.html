@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwidget.cpp -->
+  <title>Obsolete Members for QWidget | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QWidget</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Obsolete Members for QWidget</h1>
+<p><b>The following members of class <a href="qwidget.html">QWidget</a> are obsolete.</b> They are provided to keep old source code working. We strongly advise against using them in new code.</p>
+<h2>Properties</h2>
+<ul>
+<li class="fn"><code>(obsolete) </code><b><a href="qwidget-obsolete.html#windowIconText-prop">windowIconText</a></b> : QString</li>
+</ul>
+<h2>Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>bool </td><td class="memItemRight bottomAlign"><b><a href="qwidget-obsolete.html#isEnabledToTLW">isEnabledToTLW</a></b>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>bool </td><td class="memItemRight bottomAlign"><b><a href="qwidget-obsolete.html#isTopLevel">isTopLevel</a></b>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>QWidget *</td><td class="memItemRight bottomAlign"><b><a href="qwidget-obsolete.html#topLevelWidget">topLevelWidget</a></b>() const</td></tr>
+</table></div>
+<h2>Property Documentation</h2>
+<!-- $$$windowIconText-prop$$$windowIconText$$$setWindowIconTextconstQString&$$$windowIconTextChangedconstQString& -->
+<h3 class="fn" id="windowIconText-prop"><a name="windowIconText-prop"></a><span class="name">windowIconText</span> : <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>This property is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>This property holds the text to be displayed on the icon of a minimized window</p>
+<p>This property only makes sense for windows. If no icon text has been set, this accessor returns an empty string. It is only implemented on the X11 platform, and only certain window managers use this window property.</p>
+<p>This property is deprecated.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qwidget.html#windowIconText-prop">windowIconText</a></b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qwidget.html#windowIconText-prop">setWindowIconText</a></b></span>(<i>const QString &amp;</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qwidget-obsolete.html#windowIconTextChanged">windowIconTextChanged</a></b></span>(const QString &amp;<i>iconText</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qwidget.html#windowIcon-prop">windowIcon</a> and <a href="qwidget.html#windowTitle-prop">windowTitle</a>.</p>
+<!-- @@@windowIconText -->
+<h2>Member Function Documentation</h2>
+<!-- $$$windowIconTextChanged -->
+<h3 class="fn" id="windowIconTextChanged"><a name="windowIconTextChanged"></a><code>[signal] </code><span class="type">void</span> QWidget::<span class="name">windowIconTextChanged</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>iconText</i>)</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>This signal is emitted when the window's icon text has changed, with the new <i>iconText</i> as an argument.</p>
+<p>This signal is deprecated.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qwidget-obsolete.html#windowIconText-prop">windowIconText</a>. </p><!-- @@@windowIconTextChanged -->
+<!-- $$$isEnabledToTLW[overload1]$$$isEnabledToTLW -->
+<h3 class="fn" id="isEnabledToTLW"><a name="isEnabledToTLW"></a><span class="type">bool</span> QWidget::<span class="name">isEnabledToTLW</span>() const</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>This function is deprecated. It is equivalent to <a href="qwidget.html#enabled-prop">isEnabled</a>()</p>
+<!-- @@@isEnabledToTLW -->
+<!-- $$$isTopLevel[overload1]$$$isTopLevel -->
+<h3 class="fn" id="isTopLevel"><a name="isTopLevel"></a><span class="type">bool</span> QWidget::<span class="name">isTopLevel</span>() const</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Use <a href="qwidget.html#isWindow">isWindow</a>() instead.</p>
+<!-- @@@isTopLevel -->
+<!-- $$$topLevelWidget[overload1]$$$topLevelWidget -->
+<h3 class="fn" id="topLevelWidget"><a name="topLevelWidget"></a><span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *QWidget::<span class="name">topLevelWidget</span>() const</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Use <a href="qwidget.html#window">window</a>() instead.</p>
+<!-- @@@topLevelWidget -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

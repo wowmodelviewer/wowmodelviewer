@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquicktrailemitter.cpp -->
+  <title>TrailEmitter QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >TrailEmitter QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">TrailEmitter QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$TrailEmitter-brief -->
+<p>Emits logical particles from other logical particles. <a href="#details">More...</a></p>
+<!-- @@@TrailEmitter -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Particles 2.13</td></tr></table></div><ul>
+<li><a href="qml-qtquick-particles-trailemitter-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-particles-trailemitter.html#emitHeight-prop">emitHeight</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-trailemitter.html#emitRatePerParticle-prop">emitRatePerParticle</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-trailemitter.html#emitShape-prop">emitShape</a></b></b> : Shape</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-trailemitter.html#emitWidth-prop">emitWidth</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-trailemitter.html#follow-prop">follow</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-trailemitter.html#velocityFromMovement-prop">velocityFromMovement</a></b></b> : qreal</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-particles-trailemitter.html#emitFollowParticles-signal">emitFollowParticles</a></b></b>(<i>particles</i>,  Particle <i>followed</i>)</li>
+</ul>
+<!-- $$$TrailEmitter-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>This element emits logical particles into the <a href="qml-qtquick-particles-particlesystem.html">ParticleSystem</a>, with the starting positions based on those of other logical particles.</p>
+<!-- @@@TrailEmitter -->
+<h2>Property Documentation</h2>
+<!-- $$$emitHeight -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="emitHeight-prop"></a><span class="name">emitHeight</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The height in pixels the <a href="qml-qtquick-particles-trailemitter.html#emitShape-prop">emitShape</a> is scaled to. If set to <a href="qml-qtquick-particles-trailemitter.html">TrailEmitter</a>.ParticleSize, the height will be the current size of the particle being followed.</p>
+<p>Default is 0.</p>
+</div></div><!-- @@@emitHeight -->
+<br/>
+<!-- $$$emitRatePerParticle -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="emitRatePerParticle-prop"></a><span class="name">emitRatePerParticle</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"></div></div><!-- @@@emitRatePerParticle -->
+<br/>
+<!-- $$$emitShape -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="emitShape-prop"></a><span class="name">emitShape</span> : <span class="type"><a href="qml-qtquick-shapes-shape.html">Shape</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>As the area of a <a href="qml-qtquick-particles-trailemitter.html">TrailEmitter</a> is the area it follows, a separate shape can be provided to be the shape it emits out of. This shape has width and height specified by <a href="qml-qtquick-particles-trailemitter.html#emitWidth-prop">emitWidth</a> and <a href="qml-qtquick-particles-trailemitter.html#emitHeight-prop">emitHeight</a>, and is centered on the followed particle's position.</p>
+<p>The default shape is a filled Rectangle.</p>
+</div></div><!-- @@@emitShape -->
+<br/>
+<!-- $$$emitWidth -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="emitWidth-prop"></a><span class="name">emitWidth</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The width in pixels the <a href="qml-qtquick-particles-trailemitter.html#emitShape-prop">emitShape</a> is scaled to. If set to <a href="qml-qtquick-particles-trailemitter.html">TrailEmitter</a>.ParticleSize, the width will be the current size of the particle being followed.</p>
+<p>Default is 0.</p>
+</div></div><!-- @@@emitWidth -->
+<br/>
+<!-- $$$follow -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="follow-prop"></a><span class="name">follow</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The type of logical particle which this is emitting from.</p>
+</div></div><!-- @@@follow -->
+<br/>
+<!-- $$$velocityFromMovement -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="velocityFromMovement-prop"></a><span class="name">velocityFromMovement</span> : <span class="type">qreal</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If this value is non-zero, then any movement of the emitter will provide additional starting velocity to the particles based on the movement. The additional vector will be the same angle as the emitter's movement, with a magnitude that is the magnitude of the emitters movement multiplied by velocityFromMovement.</p>
+<p>Default value is 0.</p>
+</div></div><!-- @@@velocityFromMovement -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$emitFollowParticles[overload1]$$$emitFollowParticlesParticle -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="emitFollowParticles-signal"></a><span class="name">emitFollowParticles</span>(<i>particles</i>,  <span class="type"><a href="qml-qtquick-particles-particle.html">Particle</a></span> <i>followed</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when particles are emitted from the <i>followed</i> particle. <i>particles</i> contains an array of particle objects which can be directly manipulated.</p>
+<p>The corresponding handler is <code>onEmitFollowParticles</code>. If you use this signal handler, emitParticles will not be emitted.</p>
+</div></div><!-- @@@emitFollowParticles -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

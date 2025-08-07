@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- timers.qdoc -->
+  <title>Timers | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td >Timers</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Timers</h1>
+<span class="subtitle"></span>
+<!-- $$$timers.html-description -->
+<div class="descr"> <a name="details"></a>
+<p><a href="qobject.html">QObject</a>, the base class of all Qt objects, provides the basic timer support in Qt. With <a href="qobject.html#startTimer">QObject::startTimer</a>(), you start a timer with an interval in milliseconds as argument. The function returns a unique integer timer ID. The timer will now fire at regular intervals until you explicitly call <a href="qobject.html#killTimer">QObject::killTimer</a>() with the timer ID.</p>
+<p>For this mechanism to work, the application must run in an event loop. You start an event loop with <a href="../qtwidgets/qapplication.html#exec">QApplication::exec</a>(). When a timer fires, the application sends a <a href="qtimerevent.html">QTimerEvent</a>, and the flow of control leaves the event loop until the timer event is processed. This implies that a timer cannot fire while your application is busy doing something else. In other words: the accuracy of timers depends on the granularity of your application.</p>
+<p>In multithreaded applications, you can use the timer mechanism in any thread that has an event loop. To start an event loop from a non-GUI thread, use <a href="qthread.html#exec">QThread::exec</a>(). Qt uses the object's <a href="qobject.html#thread">thread affinity</a> to determine which thread will deliver the <a href="qtimerevent.html">QTimerEvent</a>. Because of this, you must start and stop all timers in the object's thread; it is not possible to start timers for objects in another thread.</p>
+<p>The upper limit for the interval value is determined by the number of milliseconds that can be specified in a signed integer (in practice, this is a period of just over 24 days). The accuracy depends on the underlying operating system. Windows 2000 has 15 millisecond accuracy; other systems that we have tested can handle 1 millisecond intervals.</p>
+<p>The main API for the timer functionality is <a href="qtimer.html">QTimer</a>. That class provides regular timers that emit a signal when the timer fires, and inherits <a href="qobject.html">QObject</a> so that it fits well into the ownership structure of most GUI programs. The normal way of using it is like this:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qtimer.html">QTimer</a></span> <span class="operator">*</span>timer <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtimer.html">QTimer</a></span>(<span class="keyword">this</span>);
+      connect(timer<span class="operator">,</span> SIGNAL(timeout())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateCaption()));
+      timer<span class="operator">-</span><span class="operator">&gt;</span>start(<span class="number">1000</span>);
+
+</pre>
+<p>The <a href="qtimer.html">QTimer</a> object is made into a child of this widget so that, when this widget is deleted, the timer is deleted too. Next, its <a href="qtimer.html#timeout">timeout()</a> signal is connected to the slot that will do the work, it is started with a value of 1000 milliseconds, indicating that it will time out every second.</p>
+<p><a href="qtimer.html">QTimer</a> also provides a static function for single-shot timers. For example:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qtimer.html">QTimer</a></span><span class="operator">::</span>singleShot(<span class="number">200</span><span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateCaption()));
+
+</pre>
+<p>200 milliseconds (0.2 seconds) after this line of code is executed, the <code>updateCaption()</code> slot will be called.</p>
+<p>For <a href="qtimer.html">QTimer</a> to work, you must have an event loop in your application; that is, you must call <a href="qcoreapplication.html#exec">QCoreApplication::exec</a>() somewhere. Timer events will be delivered only while the event loop is running.</p>
+<p>In multithreaded applications, you can use <a href="qtimer.html">QTimer</a> in any thread that has an event loop. To start an event loop from a non-GUI thread, use <a href="qthread.html#exec">QThread::exec</a>(). Qt uses the timer's <a href="qobject.html#thread">thread affinity</a> to determine which thread will emit the <a href="qtimer.html#timeout">timeout()</a> signal. Because of this, you must start and stop the timer in its thread; it is not possible to start a timer from another thread.</p>
+<p>The <a href="../qtwidgets/qtwidgets-widgets-analogclock-example.html">Analog Clock</a> example shows how to use <a href="qtimer.html">QTimer</a> to redraw a widget at regular intervals. From <code>AnalogClock</code>'s implementation:</p>
+<pre class="cpp">
+
+  AnalogClock<span class="operator">::</span>AnalogClock(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>(parent)
+  {
+      <span class="type"><a href="qtimer.html">QTimer</a></span> <span class="operator">*</span>timer <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtimer.html">QTimer</a></span>(<span class="keyword">this</span>);
+      connect(timer<span class="operator">,</span> SIGNAL(timeout())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(update()));
+      timer<span class="operator">-</span><span class="operator">&gt;</span>start(<span class="number">1000</span>);
+      ...
+  }
+
+</pre>
+<p>Every second, <a href="qtimer.html">QTimer</a> will call the <a href="../qtwidgets/qwidget.html#update">QWidget::update</a>() slot to refresh the clock's display.</p>
+<p>If you already have a <a href="qobject.html">QObject</a> subclass and want an easy optimization, you can use <a href="qbasictimer.html">QBasicTimer</a> instead of <a href="qtimer.html">QTimer</a>. With <a href="qbasictimer.html">QBasicTimer</a>, you must reimplement <a href="qobject.html#timerEvent">timerEvent()</a> in your <a href="qobject.html">QObject</a> subclass and handle the timeout there. The <a href="../qtwidgets/qtwidgets-widgets-wiggly-example.html">Wiggly</a> example shows how to use <a href="qbasictimer.html">QBasicTimer</a>.</p>
+</div>
+<!-- @@@timers.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

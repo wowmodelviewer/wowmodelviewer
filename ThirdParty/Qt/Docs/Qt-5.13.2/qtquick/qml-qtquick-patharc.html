@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickpath.cpp -->
+  <title>PathArc QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >PathArc QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">PathArc QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$PathArc-brief -->
+<p>Defines an arc with the given radius. <a href="#details">More...</a></p>
+<!-- @@@PathArc -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick 2.13</td></tr></table></div><ul>
+<li><a href="qml-qtquick-patharc-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-patharc.html#direction-prop">direction</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-patharc.html#radiusX-prop">radiusX</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-patharc.html#radiusY-prop">radiusY</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-patharc.html#relativeX-prop">relativeX</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-patharc.html#relativeY-prop">relativeY</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-patharc.html#useLargeArc-prop">useLargeArc</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-patharc.html#x-prop">x</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-patharc.html#xAxisRotation-prop">xAxisRotation</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-patharc.html#y-prop">y</a></b></b> : real</li>
+</ul>
+<!-- $$$PathArc-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><a href="qml-qtquick-patharc.html">PathArc</a> provides a simple way of specifying an arc that ends at a given position and uses the specified radius. It is modeled after the SVG elliptical arc command.</p>
+<p>The following QML produces the path shown below:</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><p class="centerAlign"><img src="images/declarative-patharc.png" alt="" /></p></td><td ><pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-path.html">Path</a></span> {
+      <span class="name">startX</span>: <span class="number">100</span>; <span class="name">startY</span>: <span class="number">0</span>
+
+      <span class="type"><a href="qml-qtquick-patharc.html">PathArc</a></span> {
+          <span class="name">x</span>: <span class="number">0</span>; <span class="name">y</span>: <span class="number">100</span>
+          <span class="name">radiusX</span>: <span class="number">100</span>; <span class="name">radiusY</span>: <span class="number">100</span>
+          <span class="name">useLargeArc</span>: <span class="number">true</span>
+      }
+  }
+
+</pre>
+</td></tr>
+</table></div>
+<p>Note that a single <a href="qml-qtquick-patharc.html">PathArc</a> cannot be used to specify a circle. Instead, you can use two <a href="qml-qtquick-patharc.html">PathArc</a> elements, each specifying half of the circle.</p>
+<p><b>See also </b><a href="qml-qtquick-path.html">Path</a>, <a href="qml-qtquick-pathline.html">PathLine</a>, <a href="qml-qtquick-pathquad.html">PathQuad</a>, <a href="qml-qtquick-pathcubic.html">PathCubic</a>, <a href="qml-qtquick-pathanglearc.html">PathAngleArc</a>, <a href="qml-qtquick-pathcurve.html">PathCurve</a>, and <a href="qml-qtquick-pathsvg.html">PathSvg</a>.</p>
+<!-- @@@PathArc -->
+<h2>Property Documentation</h2>
+<!-- $$$ -->
+<div class="qmlitem"><div class="qmlproto"><div class="table"><table class="qmlname"><tr valign="top" class="odd" id="radiusX-prop"><td class="tblQmlPropNode"><p><a name="radiusX-prop"></a><span class="name">radiusX</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr><tr valign="top" class="odd" id="radiusY-prop"><td class="tblQmlPropNode"><p><a name="radiusY-prop"></a><span class="name">radiusY</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr></table></div></div><div class="qmldoc"><p>Defines the radius of the arc.</p>
+<p>The following QML demonstrates how different radius values can be used to change the shape of the arc:</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><p class="centerAlign"><img src="images/declarative-arcradius.png" alt="" /></p></td><td ><pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-path.html">Path</a></span> {
+      <span class="name">startX</span>: <span class="number">0</span>; <span class="name">startY</span>: <span class="number">100</span>
+
+      <span class="type"><a href="qml-qtquick-patharc.html">PathArc</a></span> {
+          <span class="name">relativeX</span>: <span class="number">50</span>; <span class="name">y</span>: <span class="number">100</span>
+          <span class="name">radiusX</span>: <span class="number">25</span>; <span class="name">radiusY</span>: <span class="number">15</span>
+      }
+      <span class="type"><a href="qml-qtquick-patharc.html">PathArc</a></span> {
+          <span class="name">relativeX</span>: <span class="number">50</span>; <span class="name">y</span>: <span class="number">100</span>
+          <span class="name">radiusX</span>: <span class="number">25</span>; <span class="name">radiusY</span>: <span class="number">25</span>
+      }
+      <span class="type"><a href="qml-qtquick-patharc.html">PathArc</a></span> {
+          <span class="name">relativeX</span>: <span class="number">50</span>; <span class="name">y</span>: <span class="number">100</span>
+          <span class="name">radiusX</span>: <span class="number">25</span>; <span class="name">radiusY</span>: <span class="number">50</span>
+      }
+      <span class="type"><a href="qml-qtquick-patharc.html">PathArc</a></span> {
+          <span class="name">relativeX</span>: <span class="number">50</span>; <span class="name">y</span>: <span class="number">100</span>
+          <span class="name">radiusX</span>: <span class="number">50</span>; <span class="name">radiusY</span>: <span class="number">100</span>
+      }
+  }
+
+</pre>
+</td></tr>
+</table></div>
+</div></div><!-- @@@ -->
+<br/>
+<!-- $$$ -->
+<div class="qmlitem"><div class="qmlproto"><div class="table"><table class="qmlname"><tr valign="top" class="odd" id="relativeX-prop"><td class="tblQmlPropNode"><p><a name="relativeX-prop"></a><span class="name">relativeX</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr><tr valign="top" class="odd" id="relativeY-prop"><td class="tblQmlPropNode"><p><a name="relativeY-prop"></a><span class="name">relativeY</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr></table></div></div><div class="qmldoc"><p>Defines the end point of the arc relative to its start.</p>
+<p>If both a relative and absolute end position are specified for a single axis, the relative position will be used.</p>
+<p>Relative and absolute positions can be mixed, for example it is valid to set a relative x and an absolute y.</p>
+<p><b>See also </b><a href="qml-qtquick-patharc.html#x-prop">x</a> and <a href="qml-qtquick-patharc.html#y-prop">y</a>.</p>
+</div></div><!-- @@@ -->
+<br/>
+<!-- $$$ -->
+<div class="qmlitem"><div class="qmlproto"><div class="table"><table class="qmlname"><tr valign="top" class="odd" id="x-prop"><td class="tblQmlPropNode"><p><a name="x-prop"></a><span class="name">x</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr><tr valign="top" class="odd" id="y-prop"><td class="tblQmlPropNode"><p><a name="y-prop"></a><span class="name">y</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr></table></div></div><div class="qmldoc"><p>Defines the end point of the arc.</p>
+<p><b>See also </b><a href="qml-qtquick-patharc.html#relativeX-prop">relativeX</a> and <a href="qml-qtquick-patharc.html#relativeY-prop">relativeY</a>.</p>
+</div></div><!-- @@@ -->
+<br/>
+<!-- $$$direction -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="direction-prop"></a><span class="name">direction</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Defines the direction of the arc. Possible values are <a href="qml-qtquick-patharc.html">PathArc</a>.Clockwise (default) and <a href="qml-qtquick-patharc.html">PathArc</a>.Counterclockwise.</p>
+<p>The following QML can produce either of the two illustrated arcs below by changing the value of direction.</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><p class="centerAlign"><img src="images/declarative-arcdirection.png" alt="" /></p></td><td ><pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-path.html">Path</a></span> {
+      <span class="name">startX</span>: <span class="number">50</span>; <span class="name">startY</span>: <span class="number">50</span>
+
+      <span class="type"><a href="qml-qtquick-patharc.html">PathArc</a></span> {
+          <span class="name">x</span>: <span class="number">150</span>; <span class="name">y</span>: <span class="number">50</span>
+          <span class="name">radiusX</span>: <span class="number">75</span>; <span class="name">radiusY</span>: <span class="number">50</span>
+      }
+  }
+
+</pre>
+</td></tr>
+</table></div>
+<p><b>See also </b><a href="qml-qtquick-patharc.html#useLargeArc-prop">useLargeArc</a>.</p>
+</div></div><!-- @@@direction -->
+<br/>
+<!-- $$$useLargeArc -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="useLargeArc-prop"></a><span class="name">useLargeArc</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use a large arc as defined by the arc points.</p>
+<p>Given fixed start and end positions, radius, and direction, there are two possible arcs that can fit the data. useLargeArc is used to distinguish between these. For example, the following QML can produce either of the two illustrated arcs below by changing the value of useLargeArc.</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><p class="centerAlign"><img src="images/declarative-largearc.png" alt="" /></p></td><td ><pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-path.html">Path</a></span> {
+      <span class="name">startX</span>: <span class="number">0</span>; <span class="name">startY</span>: <span class="number">100</span>
+      <span class="type"><a href="qml-qtquick-patharc.html">PathArc</a></span> {
+          <span class="name">x</span>: <span class="number">100</span>; <span class="name">y</span>: <span class="number">200</span>
+          <span class="name">radiusX</span>: <span class="number">100</span>; <span class="name">radiusY</span>: <span class="number">100</span>
+          <span class="name">direction</span>: <span class="name">PathArc</span>.<span class="name">Clockwise</span>
+      }
+  }
+
+</pre>
+</td></tr>
+</table></div>
+<p>The default value is false.</p>
+</div></div><!-- @@@useLargeArc -->
+<br/>
+<!-- $$$xAxisRotation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="xAxisRotation-prop"></a><span class="name">xAxisRotation</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Defines the rotation of the arc, in degrees. The default value is 0.</p>
+<p>An arc is a section of circles or ellipses. Given the radius and the start and end points, there are two ellipses that connect the points. This property defines the rotation of the X axis of these ellipses.</p>
+<p><b>Note: </b>The value is only useful when the x and y radius differ, meaning the arc is a section of ellipses.</p><p>The following QML demonstrates how different radius values can be used to change the shape of the arc:</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><p class="centerAlign"><img src="images/declarative-arcrotation.png" alt="" /></p></td><td ><pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-path.html">Path</a></span> {
+      <span class="name">startX</span>: <span class="number">50</span>; <span class="name">startY</span>: <span class="number">100</span>
+
+      <span class="type"><a href="qml-qtquick-patharc.html">PathArc</a></span> {
+          <span class="name">x</span>: <span class="number">150</span>; <span class="name">y</span>: <span class="number">100</span>
+          <span class="name">radiusX</span>: <span class="number">50</span>; <span class="name">radiusY</span>: <span class="number">20</span>
+          <span class="name">xAxisRotation</span>: <span class="number">45</span>
+      }
+  }
+
+</pre>
+</td></tr>
+</table></div>
+</div></div><!-- @@@xAxisRotation -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

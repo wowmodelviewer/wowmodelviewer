@@ -1,0 +1,559 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickmenu.cpp -->
+  <title>Menu QML Type | Qt Quick Controls 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td ><a href="qtquick-controls2-qmlmodule.html">QML Types</a></td><td >Menu QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Menu QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Menu-brief -->
+<p>Menu popup that can be used as a context menu or popup menu. <a href="#details">More...</a></p>
+<!-- @@@Menu -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Controls 2.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-controls2-popup.html">Popup</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-controls2-menu-members.html">List of all members, including inherited members</a></li>
+<li><a href="qml-qtquick-controls2-menu-obsolete.html">Obsolete members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-menu.html#cascade-prop">cascade</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-menu.html#contentData-prop">contentData</a></b></b> : list&lt;Object&gt;</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-menu.html#contentModel-prop">contentModel</a></b></b> : model</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-menu.html#count-prop">count</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-menu.html#currentIndex-prop">currentIndex</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-menu.html#delegate-prop">delegate</a></b></b> : Component</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-menu.html#focus-prop">focus</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-menu.html#overlap-prop">overlap</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-menu.html#title-prop">title</a></b></b> : string</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">Action <b><b><a href="qml-qtquick-controls2-menu.html#actionAt-method">actionAt</a></b></b>(<i>index</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-menu.html#addAction-method">addAction</a></b></b>(<i>action</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-menu.html#addItem-method">addItem</a></b></b>(<i>item</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-menu.html#addMenu-method">addMenu</a></b></b>(<i>menu</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-menu.html#dismiss-method">dismiss</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-menu.html#insertAction-method">insertAction</a></b></b>(<i>index</i>,  Action <i>action</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-menu.html#insertItem-method">insertItem</a></b></b>(<i>index</i>,  Item <i>item</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-menu.html#insertMenu-method">insertMenu</a></b></b>(<i>index</i>,  Menu <i>menu</i>)</li>
+<li class="fn">Item <b><b><a href="qml-qtquick-controls2-menu.html#itemAt-method">itemAt</a></b></b>(<i>index</i>)</li>
+<li class="fn">Menu <b><b><a href="qml-qtquick-controls2-menu.html#menuAt-method">menuAt</a></b></b>(<i>index</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-menu.html#moveItem-method">moveItem</a></b></b>(<i>from</i>,  int <i>to</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-menu.html#popup-method-5">popup</a></b></b>(<i>parent</i>,  real <i>x</i>,  real <i>y</i>,  MenuItem item = <i>null</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-menu.html#popup-method-4">popup</a></b></b>(<i>x</i>,  real <i>y</i>,  MenuItem item = <i>null</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-menu.html#popup-method-3">popup</a></b></b>(<i>parent</i>,  point <i>pos</i>,  MenuItem item = <i>null</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-menu.html#popup-method-2">popup</a></b></b>(<i>pos</i>,  MenuItem item = <i>null</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-menu.html#popup-method-1">popup</a></b></b>(<i>parent</i>,  MenuItem item = <i>null</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-menu.html#popup-method">popup</a></b></b>(MenuItem item = <i>null</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-menu.html#removeAction-method">removeAction</a></b></b>(<i>action</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-menu.html#removeItem-method-1">removeItem</a></b></b>(<i>item</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-menu.html#removeMenu-method">removeMenu</a></b></b>(<i>menu</i>)</li>
+<li class="fn">Action <b><b><a href="qml-qtquick-controls2-menu.html#takeAction-method">takeAction</a></b></b>(<i>index</i>)</li>
+<li class="fn">MenuItem <b><b><a href="qml-qtquick-controls2-menu.html#takeItem-method">takeItem</a></b></b>(<i>index</i>)</li>
+<li class="fn">Menu <b><b><a href="qml-qtquick-controls2-menu.html#takeMenu-method">takeMenu</a></b></b>(<i>index</i>)</li>
+</ul>
+<!-- $$$Menu-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p class="centerAlign"><img src="images/qtquickcontrols2-menu.png" alt="" /></p><p>Menu has two main use cases:</p>
+<ul>
+<li>Context menus; for example, a menu that is shown after right clicking</li>
+<li>Popup menus; for example, a menu that is shown after clicking a button</li>
+</ul>
+<p>When used as a context menu, the recommended way of opening the menu is to call <a href="qml-qtquick-controls2-menu.html#popup-method">popup()</a>. Unless a position is explicitly specified, the menu is positioned at the mouse cursor on desktop platforms that have a mouse cursor available, and otherwise centered over its parent item.</p>
+<pre class="cpp">
+
+  MouseArea {
+      anchors<span class="operator">.</span>fill: parent
+      acceptedButtons: <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>LeftButton <span class="operator">|</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>RightButton
+      onClicked: {
+          <span class="keyword">if</span> (mouse<span class="operator">.</span>button <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>RightButton)
+              contextMenu<span class="operator">.</span>popup()
+      }
+      onPressAndHold: {
+          <span class="keyword">if</span> (mouse<span class="operator">.</span>source <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>MouseEventNotSynthesized)
+              contextMenu<span class="operator">.</span>popup()
+      }
+
+      Menu {
+          id: contextMenu
+          MenuItem { text: <span class="string">&quot;Cut&quot;</span> }
+          MenuItem { text: <span class="string">&quot;Copy&quot;</span> }
+          MenuItem { text: <span class="string">&quot;Paste&quot;</span> }
+      }
+  }
+
+</pre>
+<p>When used as a popup menu, it is easiest to specify the position by specifying the desired <a href="qml-qtquick-controls2-popup.html#x-prop">x</a> and <a href="qml-qtquick-controls2-popup.html#y-prop">y</a> coordinates using the respective properties, and call <a href="qml-qtquick-controls2-popup.html#open-method">open()</a> to open the menu.</p>
+<pre class="cpp">
+
+  Button {
+      id: fileButton
+      text: <span class="string">&quot;File&quot;</span>
+      onClicked: menu<span class="operator">.</span>open()
+
+      Menu {
+          id: menu
+          y: fileButton<span class="operator">.</span>height
+
+          MenuItem {
+              text: <span class="string">&quot;New...&quot;</span>
+          }
+          MenuItem {
+              text: <span class="string">&quot;Open...&quot;</span>
+          }
+          MenuItem {
+              text: <span class="string">&quot;Save&quot;</span>
+          }
+      }
+  }
+
+</pre>
+<p>Since <a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a>.Controls 2.3 (Qt 5.10), it is also possible to create sub-menus and declare Action objects inside Menu:</p>
+<pre class="cpp">
+
+  Menu {
+      Action { text: <span class="string">&quot;Cut&quot;</span> }
+      Action { text: <span class="string">&quot;Copy&quot;</span> }
+      Action { text: <span class="string">&quot;Paste&quot;</span> }
+
+      MenuSeparator { }
+
+      Menu {
+          title: <span class="string">&quot;Find/Replace&quot;</span>
+          Action { text: <span class="string">&quot;Find Next&quot;</span> }
+          Action { text: <span class="string">&quot;Find Previous&quot;</span> }
+          Action { text: <span class="string">&quot;Replace&quot;</span> }
+      }
+  }
+
+</pre>
+<p>Sub-menus are <a href="qml-qtquick-controls2-menu.html#cascade-prop">cascading</a> by default on desktop platforms that have a mouse cursor available. Non-cascading menus are shown one menu at a time, and centered over the parent menu.</p>
+<p>Typically, menu items are statically declared as children of the menu, but Menu also provides API to <a href="qml-qtquick-controls2-menu.html#addItem-method">add</a>, <a href="qml-qtquick-controls2-menu.html#insertItem-method">insert</a>, <a href="qml-qtquick-controls2-menu.html#moveItem-method">move</a> and <a href="qml-qtquick-controls2-menu-obsolete.html#removeItem-method">remove</a> items dynamically. The items in a menu can be accessed using <a href="qml-qtquick-controls2-menu.html#itemAt-method">itemAt()</a> or <a href="qml-qtquick-controls2-popup.html#contentChildren-prop">contentChildren</a>.</p>
+<p>Although <a href="qml-qtquick-controls2-menuitem.html">MenuItems</a> are most commonly used with Menu, it can contain any type of item.</p>
+<p><b>See also </b><a href="qtquickcontrols2-customize.html#customizing-menu">Customizing Menu</a>, <a href="qml-qtquick-controls2-menuitem.html">MenuItem</a>, <a href="qtquickcontrols2-menus.html">Menu Controls</a>, and <a href="qtquickcontrols2-popups.html">Popup Controls</a>.</p>
+<!-- @@@Menu -->
+<h2>Property Documentation</h2>
+<!-- $$$cascade -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="cascade-prop"></a><span class="name">cascade</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the menu cascades its sub-menus.</p>
+<p>The default value is platform-specific. Menus are cascading by default on desktop platforms that have a mouse cursor available. Non-cascading menus are shown one menu at a time, and centered over the parent menu.</p>
+<p><b>Note: </b>Changing the value of the property has no effect while the menu is open.</p><p>This property was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-menu.html#overlap-prop">overlap</a>.</p>
+</div></div><!-- @@@cascade -->
+<br/>
+<!-- $$$contentData -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="contentData-prop"></a><span class="qmldefault">[default] </span><span class="name">contentData</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type">Object</span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the list of content data.</p>
+<p>The list contains all objects that have been declared in QML as children of the menu, and also items that have been dynamically added or inserted using the <a href="qml-qtquick-controls2-menu.html#addItem-method">addItem()</a> and <a href="qml-qtquick-controls2-menu.html#insertItem-method">insertItem()</a> methods, respectively.</p>
+<p><b>Note: </b>Unlike <code>contentChildren</code>, <code>contentData</code> does include non-visual QML objects. It is not re-ordered when items are inserted or moved.</p><p><b>See also </b><a href="../qtquick/qml-qtquick-item.html#data-prop">Item::data</a> and <a href="qml-qtquick-controls2-popup.html#contentChildren-prop">contentChildren</a>.</p>
+</div></div><!-- @@@contentData -->
+<br/>
+<!-- $$$contentModel -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="contentModel-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">contentModel</span> : <span class="type">model</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the model used to display menu items.</p>
+<p>The content model is provided for visualization purposes. It can be assigned as a model to a content item that presents the contents of the menu.</p>
+<pre class="cpp">
+
+  Menu {
+      id: menu
+      contentItem: ListView {
+          model: menu<span class="operator">.</span>contentModel
+      }
+  }
+
+</pre>
+<p>The model allows menu items to be statically declared as children of the menu.</p>
+</div></div><!-- @@@contentModel -->
+<br/>
+<!-- $$$count -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="count-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">count</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the number of items.</p>
+<p>This property was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+</div></div><!-- @@@count -->
+<br/>
+<!-- $$$currentIndex -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="currentIndex-prop"></a><span class="name">currentIndex</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the index of the currently highlighted item.</p>
+<p>Menu items can be highlighted by mouse hover or keyboard navigation.</p>
+<p>This property was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-menuitem.html#highlighted-prop">MenuItem::highlighted</a>.</p>
+</div></div><!-- @@@currentIndex -->
+<br/>
+<!-- $$$delegate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="delegate-prop"></a><span class="name">delegate</span> : <span class="type"><a href="../qtqml/qml-qtqml-component.html">Component</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the component that is used to create items to present actions.</p>
+<pre class="cpp">
+
+  Menu {
+      Action { text: <span class="string">&quot;Cut&quot;</span> }
+      Action { text: <span class="string">&quot;Copy&quot;</span> }
+      Action { text: <span class="string">&quot;Paste&quot;</span> }
+  }
+
+</pre>
+<p>This property was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-action.html">Action</a>.</p>
+</div></div><!-- @@@delegate -->
+<br/>
+<!-- $$$focus -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="focus-prop"></a><span class="name">focus</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the popup wants focus.</p>
+<p>When the popup actually receives focus, activeFocus will be <code>true</code>. For more information, see <a href="../qtquick/qtquick-input-focus.html">Keyboard Focus in Qt Quick</a>.</p>
+<p>The default value is <code>false</code>.</p>
+<p><b>See also </b>activeFocus.</p>
+</div></div><!-- @@@focus -->
+<br/>
+<!-- $$$overlap -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="overlap-prop"></a><span class="name">overlap</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the amount of pixels by which the menu horizontally overlaps its parent menu.</p>
+<p>The property only has effect when the menu is used as a cascading sub-menu.</p>
+<p>The default value is style-specific.</p>
+<p><b>Note: </b>Changing the value of the property has no effect while the menu is open.</p><p>This property was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-menu.html#cascade-prop">cascade</a>.</p>
+</div></div><!-- @@@overlap -->
+<br/>
+<!-- $$$title -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="title-prop"></a><span class="name">title</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the title for the menu.</p>
+<p>The title of a menu is often displayed in the text of a menu item when the menu is a submenu, and in the text of a tool button when it is in a menubar.</p>
+</div></div><!-- @@@title -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$ -->
+<div class="qmlitem"><div class="fngroup">
+<div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="popup-method-4"></a><span class="type">void</span> <span class="name">popup</span>(<i>x</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y</i>,  <span class="type"><a href="qml-qtquick-controls2-menuitem.html">MenuItem</a></span> <span class="type">item</span> = <i>null</i>)</p></td></tr>
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="popup-method-5"></a><span class="type">void</span> <span class="name">popup</span>(<i>parent</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>x</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y</i>,  <span class="type"><a href="qml-qtquick-controls2-menuitem.html">MenuItem</a></span> <span class="type">item</span> = <i>null</i>)</p></td></tr>
+</table></div>
+</div></div><div class="qmldoc"><p>Opens the menu at the specified position <i>x</i>, <i>y</i> in the popups coordinate system, that is, a coordinate relative to its <i>parent</i> item.</p>
+<p>The menu can be optionally aligned to a specific menu <i>item</i>.</p>
+<p>This documentation was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-menu.html#dismiss-method">dismiss()</a> and <a href="qml-qtquick-controls2-popup.html#open-method">Popup::open()</a>.</p>
+</div></div><!-- @@@ -->
+<br/>
+<!-- $$$ -->
+<div class="qmlitem"><div class="fngroup">
+<div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="popup-method-2"></a><span class="type">void</span> <span class="name">popup</span>(<i>pos</i>,  <span class="type"><a href="qml-qtquick-controls2-menuitem.html">MenuItem</a></span> <span class="type">item</span> = <i>null</i>)</p></td></tr>
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="popup-method-3"></a><span class="type">void</span> <span class="name">popup</span>(<i>parent</i>,  <span class="type"><a href="../qtqml/qml-point.html">point</a></span> <i>pos</i>,  <span class="type"><a href="qml-qtquick-controls2-menuitem.html">MenuItem</a></span> <span class="type">item</span> = <i>null</i>)</p></td></tr>
+</table></div>
+</div></div><div class="qmldoc"><p>Opens the menu at the specified position <i>pos</i> in the popups coordinate system, that is, a coordinate relative to its <i>parent</i> item.</p>
+<p>The menu can be optionally aligned to a specific menu <i>item</i>.</p>
+<p>This documentation was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#open-method">Popup::open()</a>.</p>
+</div></div><!-- @@@ -->
+<br/>
+<!-- $$$ -->
+<div class="qmlitem"><div class="fngroup">
+<div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="popup-method"></a><span class="type">void</span> <span class="name">popup</span>(<span class="type"><a href="qml-qtquick-controls2-menuitem.html">MenuItem</a></span> <span class="type">item</span> = <i>null</i>)</p></td></tr>
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="popup-method-1"></a><span class="type">void</span> <span class="name">popup</span>(<i>parent</i>,  <span class="type"><a href="qml-qtquick-controls2-menuitem.html">MenuItem</a></span> <span class="type">item</span> = <i>null</i>)</p></td></tr>
+</table></div>
+</div></div><div class="qmldoc"><p>Opens the menu at the mouse cursor on desktop platforms that have a mouse cursor available, and otherwise centers the menu over its <i>parent</i> item.</p>
+<p>The menu can be optionally aligned to a specific menu <i>item</i>.</p>
+<p>This documentation was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#open-method">Popup::open()</a>.</p>
+</div></div><!-- @@@ -->
+<br/>
+<!-- $$$actionAt[overload1]$$$actionAt -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="actionAt-method"></a><span class="type"><a href="qml-qtquick-controls2-action.html">Action</a></span> <span class="name">actionAt</span>(<i>index</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the action at <i>index</i>, or <code>null</code> if the index is not valid or there is no action at the specified index.</p>
+<p>This method was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+</div></div><!-- @@@actionAt -->
+<br/>
+<!-- $$$addAction[overload1]$$$addAction -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="addAction-method"></a><span class="type">void</span> <span class="name">addAction</span>(<i>action</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Adds <i>action</i> to the end of this menu.</p>
+<p>This method was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+</div></div><!-- @@@addAction -->
+<br/>
+<!-- $$$addItem[overload1]$$$addItem -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="addItem-method"></a><span class="type">void</span> <span class="name">addItem</span>(<i>item</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Adds <i>item</i> to the end of the list of items.</p>
+</div></div><!-- @@@addItem -->
+<br/>
+<!-- $$$addMenu[overload1]$$$addMenu -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="addMenu-method"></a><span class="type">void</span> <span class="name">addMenu</span>(<i>menu</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Adds <i>menu</i> as a sub-menu to the end of this menu.</p>
+<p>This method was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+</div></div><!-- @@@addMenu -->
+<br/>
+<!-- $$$dismiss[overload1]$$$dismiss -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="dismiss-method"></a><span class="type">void</span> <span class="name">dismiss</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Closes all menus in the hierarchy that this menu belongs to.</p>
+<p><b>Note: </b>Unlike <a href="qml-qtquick-controls2-popup.html#close-method">close()</a> that only closes a menu and its sub-menus, <code>dismiss()</code> closes the whole hierarchy of menus, including the parent menus. In practice, <code>close()</code> is suitable e.g&#x2e; for implementing navigation in a hierarchy of menus, and <code>dismiss()</code> is the appropriate method for closing the whole hierarchy of menus.</p><p>This method was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-menu.html#popup-method">popup()</a> and <a href="qml-qtquick-controls2-popup.html#close-method">Popup::close()</a>.</p>
+</div></div><!-- @@@dismiss -->
+<br/>
+<!-- $$$insertAction[overload1]$$$insertActionAction -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="insertAction-method"></a><span class="type">void</span> <span class="name">insertAction</span>(<i>index</i>,  <span class="type"><a href="qml-qtquick-controls2-action.html">Action</a></span> <i>action</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Inserts <i>action</i> at <i>index</i>. The index is within all items in the menu.</p>
+<p>This method was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+</div></div><!-- @@@insertAction -->
+<br/>
+<!-- $$$insertItem[overload1]$$$insertItemItem -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="insertItem-method"></a><span class="type">void</span> <span class="name">insertItem</span>(<i>index</i>,  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> <i>item</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Inserts <i>item</i> at <i>index</i>.</p>
+</div></div><!-- @@@insertItem -->
+<br/>
+<!-- $$$insertMenu[overload1]$$$insertMenuMenu -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="insertMenu-method"></a><span class="type">void</span> <span class="name">insertMenu</span>(<i>index</i>,  <span class="type"><a href="qml-qtquick-controls2-menu.html">Menu</a></span> <i>menu</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Inserts <i>menu</i> as a sub-menu at <i>index</i>. The index is within all items in the menu.</p>
+<p>This method was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+</div></div><!-- @@@insertMenu -->
+<br/>
+<!-- $$$itemAt[overload1]$$$itemAt -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="itemAt-method"></a><span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> <span class="name">itemAt</span>(<i>index</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the item at <i>index</i>, or <code>null</code> if it does not exist.</p>
+</div></div><!-- @@@itemAt -->
+<br/>
+<!-- $$$menuAt[overload1]$$$menuAt -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="menuAt-method"></a><span class="type"><a href="qml-qtquick-controls2-menu.html">Menu</a></span> <span class="name">menuAt</span>(<i>index</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the sub-menu at <i>index</i>, or <code>null</code> if the index is not valid or there is no sub-menu at the specified index.</p>
+<p>This method was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+</div></div><!-- @@@menuAt -->
+<br/>
+<!-- $$$moveItem[overload1]$$$moveItemint -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="moveItem-method"></a><span class="type">void</span> <span class="name">moveItem</span>(<i>from</i>,  <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <i>to</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Moves an item <i>from</i> one index <i>to</i> another.</p>
+</div></div><!-- @@@moveItem -->
+<br/>
+<!-- $$$removeAction[overload1]$$$removeAction -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="removeAction-method"></a><span class="type">void</span> <span class="name">removeAction</span>(<i>action</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Removes and destroys the specified <i>action</i>.</p>
+<p>This method was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+</div></div><!-- @@@removeAction -->
+<br/>
+<!-- $$$removeItem$$$removeItem -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="removeItem-method-1"></a><span class="type">void</span> <span class="name">removeItem</span>(<i>item</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Removes and destroys the specified <i>item</i>.</p>
+<p>This method was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+</div></div><!-- @@@removeItem -->
+<br/>
+<!-- $$$removeMenu[overload1]$$$removeMenu -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="removeMenu-method"></a><span class="type">void</span> <span class="name">removeMenu</span>(<i>menu</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Removes and destroys the specified <i>menu</i>.</p>
+<p>This method was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+</div></div><!-- @@@removeMenu -->
+<br/>
+<!-- $$$takeAction[overload1]$$$takeAction -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="takeAction-method"></a><span class="type"><a href="qml-qtquick-controls2-action.html">Action</a></span> <span class="name">takeAction</span>(<i>index</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Removes and returns the action at <i>index</i>. The index is within all items in the menu.</p>
+<p><b>Note: </b>The ownership of the action is transferred to the caller.</p><p>This method was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+</div></div><!-- @@@takeAction -->
+<br/>
+<!-- $$$takeItem[overload1]$$$takeItem -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="takeItem-method"></a><span class="type"><a href="qml-qtquick-controls2-menuitem.html">MenuItem</a></span> <span class="name">takeItem</span>(<i>index</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Removes and returns the item at <i>index</i>.</p>
+<p><b>Note: </b>The ownership of the item is transferred to the caller.</p><p>This method was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+</div></div><!-- @@@takeItem -->
+<br/>
+<!-- $$$takeMenu[overload1]$$$takeMenu -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="takeMenu-method"></a><span class="type"><a href="qml-qtquick-controls2-menu.html">Menu</a></span> <span class="name">takeMenu</span>(<i>index</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Removes and returns the menu at <i>index</i>. The index is within all items in the menu.</p>
+<p><b>Note: </b>The ownership of the menu is transferred to the caller.</p><p>This method was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+</div></div><!-- @@@takeMenu -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

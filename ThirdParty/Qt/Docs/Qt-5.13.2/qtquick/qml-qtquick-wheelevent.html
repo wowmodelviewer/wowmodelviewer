@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickevents.cpp -->
+  <title>WheelEvent QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >WheelEvent QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">WheelEvent QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$WheelEvent-brief -->
+<p>Provides information about a mouse wheel event. <a href="#details">More...</a></p>
+<!-- @@@WheelEvent -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick 2.13</td></tr></table></div><ul>
+<li><a href="qml-qtquick-wheelevent-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-wheelevent.html#accepted-prop">accepted</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-wheelevent.html#angleDelta-prop">angleDelta</a></b></b> : point</li>
+<li class="fn"><b><b><a href="qml-qtquick-wheelevent.html#buttons-prop">buttons</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-wheelevent.html#inverted-prop">inverted</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-wheelevent.html#modifiers-prop">modifiers</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-wheelevent.html#pixelDelta-prop">pixelDelta</a></b></b> : point</li>
+<li class="fn"><b><b><a href="qml-qtquick-wheelevent.html#x-prop">x</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-wheelevent.html#y-prop">y</a></b></b> : real</li>
+</ul>
+<!-- $$$WheelEvent-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The position of the mouse can be found via the <a href="qml-qtquick-item.html#x-prop">x</a> and <a href="qml-qtquick-item.html#y-prop">y</a> properties.</p>
+<p><b>See also </b><a href="qml-qtquick-mousearea.html">MouseArea</a>.</p>
+<!-- @@@WheelEvent -->
+<h2>Property Documentation</h2>
+<!-- $$$ -->
+<div class="qmlitem"><div class="qmlproto"><div class="table"><table class="qmlname"><tr valign="top" class="odd" id="x-prop"><td class="tblQmlPropNode"><p><a name="x-prop"></a><span class="name">x</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr><tr valign="top" class="odd" id="y-prop"><td class="tblQmlPropNode"><p><a name="y-prop"></a><span class="name">y</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr></table></div></div><div class="qmldoc"><p>These properties hold the coordinates of the position supplied by the wheel event.</p>
+</div></div><!-- @@@ -->
+<br/>
+<!-- $$$accepted -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="accepted-prop"></a><span class="name">accepted</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Setting <i>accepted</i> to true prevents the wheel event from being propagated to items below this item.</p>
+<p>Generally, if the item acts on the wheel event then it should be accepted so that items lower in the stacking order do not also respond to the same event.</p>
+</div></div><!-- @@@accepted -->
+<br/>
+<!-- $$$angleDelta -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="angleDelta-prop"></a><span class="name">angleDelta</span> : <span class="type"><a href="../qtqml/qml-point.html">point</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the distance that the wheel is rotated in wheel degrees. The x and y cordinate of this property holds the delta in horizontal and vertical orientation.</p>
+<p>A positive value indicates that the wheel was rotated up/right; a negative value indicates that the wheel was rotated down/left.</p>
+<p>Most mouse types work in steps of 15 degrees, in which case the delta value is a multiple of 120; i.e&#x2e;, 120 units * 1/8 = 15 degrees.</p>
+</div></div><!-- @@@angleDelta -->
+<br/>
+<!-- $$$buttons -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="buttons-prop"></a><span class="name">buttons</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the mouse buttons pressed when the wheel event was generated.</p>
+<p>It contains a bitwise combination of:</p>
+<ul>
+<li><a href="../qtcore/qt.html#MouseButton-enum">Qt.LeftButton</a></li>
+<li><a href="../qtcore/qt.html#MouseButton-enum">Qt.RightButton</a></li>
+<li><a href="../qtcore/qt.html#MouseButton-enum">Qt.MiddleButton</a></li>
+</ul>
+</div></div><!-- @@@buttons -->
+<br/>
+<!-- $$$inverted -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="inverted-prop"></a><span class="name">inverted</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns whether the delta values delivered with the event are inverted.</p>
+<p>Normally, a vertical wheel will produce a <a href="qml-qtquick-wheelevent.html">WheelEvent</a> with positive delta values if the top of the wheel is rotating away from the hand operating it. Similarly, a horizontal wheel movement will produce a <a href="../qtgui/qwheelevent.html">QWheelEvent</a> with positive delta values if the top of the wheel is moved to the left.</p>
+<p>However, on some platforms this is configurable, so that the same operations described above will produce negative delta values (but with the same magnitude). For instance, in a QML component (such as a tumbler or a slider) where it is appropriate to synchronize the movement or rotation of an item with the direction of the wheel, regardless of the system settings, the wheel event handler can use the inverted property to decide whether to negate the <a href="qml-qtquick-wheelevent.html#angleDelta-prop">angleDelta</a> or <a href="qml-qtquick-wheelevent.html#pixelDelta-prop">pixelDelta</a> values.</p>
+<p><b>Note: </b>Many platforms provide no such information. On such platforms inverted always returns false.</p></div></div><!-- @@@inverted -->
+<br/>
+<!-- $$$modifiers -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="modifiers-prop"></a><span class="name">modifiers</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the keyboard modifier flags that existed immediately before the event occurred.</p>
+<p>It contains a bitwise combination of:</p>
+<ul>
+<li><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt.NoModifier</a> - No modifier key is pressed.</li>
+<li><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt.ShiftModifier</a> - A Shift key on the keyboard is pressed.</li>
+<li><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt.ControlModifier</a> - A Ctrl key on the keyboard is pressed.</li>
+<li><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt.AltModifier</a> - An Alt key on the keyboard is pressed.</li>
+<li><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt.MetaModifier</a> - A Meta key on the keyboard is pressed.</li>
+<li><a href="../qtcore/qt.html#KeyboardModifier-enum">Qt.KeypadModifier</a> - A keypad button is pressed.</li>
+</ul>
+<p>For example, to react to a Control key pressed during the wheel event:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-mousearea.html">MouseArea</a></span> {
+      <span class="name">onWheel</span>: {
+          <span class="keyword">if</span> (<span class="name">wheel</span>.<span class="name">modifiers</span> <span class="operator">&amp;</span> <span class="name">Qt</span>.<span class="name">ControlModifier</span>) {
+              <span class="name">adjustZoom</span>(<span class="name">wheel</span>.<span class="name">angleDelta</span>.<span class="name">y</span> <span class="operator">/</span> <span class="number">120</span>);
+          }
+      }
+  }
+
+</pre>
+</div></div><!-- @@@modifiers -->
+<br/>
+<!-- $$$pixelDelta -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="pixelDelta-prop"></a><span class="name">pixelDelta</span> : <span class="type"><a href="../qtqml/qml-point.html">point</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the delta in screen pixels and is available in platforms that have high-resolution trackpads, such as <a href="../qtdoc/internationalization.html#macos">macOS</a>. The x and y cordinate of this property holds the delta in horizontal and vertical orientation. The value should be used directly to scroll content on screen.</p>
+<p>For platforms without high-resolution trackpad support, pixelDelta will always be (0,0), and <a href="qml-qtquick-wheelevent.html#angleDelta-prop">angleDelta</a> should be used instead.</p>
+</div></div><!-- @@@pixelDelta -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

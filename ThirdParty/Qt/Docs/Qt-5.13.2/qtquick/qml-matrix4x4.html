@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmltypereference.qdoc -->
+  <title>matrix4x4 QML Basic Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >matrix4x4 QML Basic Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">matrix4x4 QML Basic Type</h1>
+<span class="subtitle"></span>
+<!-- $$$matrix4x4-description -->
+<div class="descr"> <a name="details"></a>
+<p>A <code>matrix4x4</code> type has sixteen values, each accessible via the properties <code>m11</code> through <code>m44</code> in QML (in row/column order). Values of this type can be composed with the Qt.matrix4x4() function. Each attribute in a matrix4x4 is stored as a real (single-precision on ARM, double-precision on x86).</p>
+<p>The matrix4x4 type has the following idempotent functions which can be invoked in QML:</p>
+<div class="table"><table class="generic" width="%">
+ <thead><tr class="qt-style"><th >Function Signature</th><th >Description</th><th >Example</th></tr></thead>
+<tr valign="top" class="odd"><td >matrix4x4 times(matrix4x4 other)</td><td >Returns the matrix4x4 result of multiplying <code>this</code> matrix4x4 with the <code>other</code> matrix4x4</td><td ><pre class="cpp">
+
+  var a <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>matrix4x4(<span class="number">1</span><span class="operator">,</span><span class="number">2</span><span class="operator">,</span><span class="number">3</span><span class="operator">,</span><span class="number">4</span><span class="operator">,</span><span class="number">5</span><span class="operator">,</span><span class="number">6</span><span class="operator">,</span><span class="number">7</span><span class="operator">,</span><span class="number">8</span><span class="operator">,</span><span class="number">9</span><span class="operator">,</span><span class="number">10</span><span class="operator">,</span><span class="number">11</span><span class="operator">,</span><span class="number">12</span><span class="operator">,</span><span class="number">13</span><span class="operator">,</span><span class="number">14</span><span class="operator">,</span><span class="number">15</span><span class="operator">,</span><span class="number">16</span>);
+  var b <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>matrix4x4(<span class="number">4</span><span class="operator">,</span><span class="number">5</span><span class="operator">,</span><span class="number">6</span><span class="operator">,</span><span class="number">7</span><span class="operator">,</span><span class="number">8</span><span class="operator">,</span><span class="number">9</span><span class="operator">,</span><span class="number">10</span><span class="operator">,</span><span class="number">11</span><span class="operator">,</span><span class="number">12</span><span class="operator">,</span><span class="number">13</span><span class="operator">,</span><span class="number">14</span><span class="operator">,</span><span class="number">15</span><span class="operator">,</span><span class="number">16</span><span class="operator">,</span><span class="number">17</span><span class="operator">,</span><span class="number">18</span><span class="operator">,</span><span class="number">19</span>);
+  var c <span class="operator">=</span> a<span class="operator">.</span>times(b);
+  console<span class="operator">.</span>log(c<span class="operator">.</span>toString());
+  <span class="comment">// QMatrix4x4(120, 130, 140, 150, 280, 306, 332, 358, 440, 482,</span>
+  <span class="comment">//524, 566, 600, 658, 716, 774)</span>
+
+</pre>
+</td></tr>
+<tr valign="top" class="even"><td >vector4d times(vector4d vector)</td><td >Returns the vector4d result of transforming the <code>vector</code> according to <code>this</code> matrix4x4 with the matrix applied pre-vector</td><td ><pre class="cpp">
+
+  var a <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>matrix4x4(<span class="number">1</span><span class="operator">,</span><span class="number">2</span><span class="operator">,</span><span class="number">3</span><span class="operator">,</span><span class="number">4</span><span class="operator">,</span><span class="number">5</span><span class="operator">,</span><span class="number">6</span><span class="operator">,</span><span class="number">7</span><span class="operator">,</span><span class="number">8</span><span class="operator">,</span><span class="number">9</span><span class="operator">,</span><span class="number">10</span><span class="operator">,</span><span class="number">11</span><span class="operator">,</span><span class="number">12</span><span class="operator">,</span><span class="number">13</span><span class="operator">,</span><span class="number">14</span><span class="operator">,</span><span class="number">15</span><span class="operator">,</span><span class="number">16</span>);
+  var b <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>vector4d(<span class="number">5</span><span class="operator">,</span><span class="number">6</span><span class="operator">,</span><span class="number">7</span><span class="operator">,</span><span class="number">8</span>);
+  var c <span class="operator">=</span> a<span class="operator">.</span>times(b);
+  console<span class="operator">.</span>log(c<span class="operator">.</span>toString()); <span class="comment">// QVector4D(70, 174, 278, 382)</span>
+
+</pre>
+</td></tr>
+<tr valign="top" class="odd"><td >vector3d times(vector3d vector)</td><td >Returns the vector3d result of transforming the <code>vector</code> according to <code>this</code> matrix4x4 with the matrix applied pre-vector</td><td ><pre class="cpp">
+
+  var a <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>matrix4x4(<span class="number">1</span><span class="operator">,</span><span class="number">2</span><span class="operator">,</span><span class="number">3</span><span class="operator">,</span><span class="number">4</span><span class="operator">,</span><span class="number">5</span><span class="operator">,</span><span class="number">6</span><span class="operator">,</span><span class="number">7</span><span class="operator">,</span><span class="number">8</span><span class="operator">,</span><span class="number">9</span><span class="operator">,</span><span class="number">10</span><span class="operator">,</span><span class="number">11</span><span class="operator">,</span><span class="number">12</span><span class="operator">,</span><span class="number">13</span><span class="operator">,</span><span class="number">14</span><span class="operator">,</span><span class="number">15</span><span class="operator">,</span><span class="number">16</span>);
+  var b <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>vector3d(<span class="number">5</span><span class="operator">,</span><span class="number">6</span><span class="operator">,</span><span class="number">7</span>);
+  var c <span class="operator">=</span> a<span class="operator">.</span>times(b);
+  console<span class="operator">.</span>log(c<span class="operator">.</span>toString()); <span class="comment">// QVector3D(0.155556, 0.437037, 0.718518)</span>
+
+</pre>
+</td></tr>
+<tr valign="top" class="even"><td >matrix4x4 times(real factor)</td><td >Returns the matrix4x4 result of multiplying <code>this</code> matrix4x4 with the scalar <code>factor</code></td><td ><pre class="cpp">
+
+  var a <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>matrix4x4(<span class="number">1</span><span class="operator">,</span><span class="number">2</span><span class="operator">,</span><span class="number">3</span><span class="operator">,</span><span class="number">4</span><span class="operator">,</span><span class="number">5</span><span class="operator">,</span><span class="number">6</span><span class="operator">,</span><span class="number">7</span><span class="operator">,</span><span class="number">8</span><span class="operator">,</span><span class="number">9</span><span class="operator">,</span><span class="number">10</span><span class="operator">,</span><span class="number">11</span><span class="operator">,</span><span class="number">12</span><span class="operator">,</span><span class="number">13</span><span class="operator">,</span><span class="number">14</span><span class="operator">,</span><span class="number">15</span><span class="operator">,</span><span class="number">16</span>);
+  var b <span class="operator">=</span> <span class="number">4.48</span>;
+  var c <span class="operator">=</span> a<span class="operator">.</span>times(b);
+  console<span class="operator">.</span>log(c<span class="operator">.</span>toString());
+  <span class="comment">// QMatrix4x4(4.48, 8.96, 13.44, 17.92, 22.4, 26.88, 31.36, 35.84,</span>
+  <span class="comment">// 40.32, 44.8, 49.28, 53.76, 58.24, 62.72, 67.2, 71.68)</span>
+
+</pre>
+</td></tr>
+<tr valign="top" class="odd"><td >matrix4x4 plus(matrix4x4 other)</td><td >Returns the matrix4x4 result of the addition of <code>this</code> matrix4x4 with the <code>other</code> matrix4x4</td><td ><pre class="cpp">
+
+  var a <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>matrix4x4(<span class="number">1</span><span class="operator">,</span><span class="number">2</span><span class="operator">,</span><span class="number">3</span><span class="operator">,</span><span class="number">4</span><span class="operator">,</span><span class="number">5</span><span class="operator">,</span><span class="number">6</span><span class="operator">,</span><span class="number">7</span><span class="operator">,</span><span class="number">8</span><span class="operator">,</span><span class="number">9</span><span class="operator">,</span><span class="number">10</span><span class="operator">,</span><span class="number">11</span><span class="operator">,</span><span class="number">12</span><span class="operator">,</span><span class="number">13</span><span class="operator">,</span><span class="number">14</span><span class="operator">,</span><span class="number">15</span><span class="operator">,</span><span class="number">16</span>);
+  var b <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>matrix4x4(<span class="number">5</span><span class="operator">,</span><span class="number">6</span><span class="operator">,</span><span class="number">7</span><span class="operator">,</span><span class="number">8</span><span class="operator">,</span><span class="number">9</span><span class="operator">,</span><span class="number">10</span><span class="operator">,</span><span class="number">11</span><span class="operator">,</span><span class="number">12</span><span class="operator">,</span><span class="number">13</span><span class="operator">,</span><span class="number">14</span><span class="operator">,</span><span class="number">15</span><span class="operator">,</span><span class="number">16</span><span class="operator">,</span><span class="number">17</span><span class="operator">,</span><span class="number">18</span><span class="operator">,</span><span class="number">19</span><span class="operator">,</span><span class="number">20</span>);
+  var c <span class="operator">=</span> a<span class="operator">.</span>plus(b);
+  console<span class="operator">.</span>log(c<span class="operator">.</span>toString());
+  <span class="comment">// QMatrix4x4(6, 8, 10, 12, 14, 16, 18, 20, 22,</span>
+  <span class="comment">// 24, 26, 28, 30, 32, 34, 36)</span>
+
+</pre>
+</td></tr>
+<tr valign="top" class="even"><td >matrix4x4 minus(matrix4x4 other)</td><td >Returns the matrix4x4 result of the subtraction of <code>other</code> matrix4x4 from <code>this</code> matrix4x4</td><td ><pre class="cpp">
+
+  var a <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>matrix4x4(<span class="number">1</span><span class="operator">,</span><span class="number">2</span><span class="operator">,</span><span class="number">3</span><span class="operator">,</span><span class="number">4</span><span class="operator">,</span><span class="number">5</span><span class="operator">,</span><span class="number">6</span><span class="operator">,</span><span class="number">7</span><span class="operator">,</span><span class="number">8</span><span class="operator">,</span><span class="number">9</span><span class="operator">,</span><span class="number">10</span><span class="operator">,</span><span class="number">11</span><span class="operator">,</span><span class="number">12</span><span class="operator">,</span><span class="number">13</span><span class="operator">,</span><span class="number">14</span><span class="operator">,</span><span class="number">15</span><span class="operator">,</span><span class="number">16</span>);
+  var b <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>matrix4x4(<span class="number">5</span><span class="operator">,</span><span class="number">6</span><span class="operator">,</span><span class="number">7</span><span class="operator">,</span><span class="number">8</span><span class="operator">,</span><span class="number">9</span><span class="operator">,</span><span class="number">10</span><span class="operator">,</span><span class="number">11</span><span class="operator">,</span><span class="number">12</span><span class="operator">,</span><span class="number">13</span><span class="operator">,</span><span class="number">14</span><span class="operator">,</span><span class="number">15</span><span class="operator">,</span><span class="number">16</span><span class="operator">,</span><span class="number">17</span><span class="operator">,</span><span class="number">18</span><span class="operator">,</span><span class="number">19</span><span class="operator">,</span><span class="number">20</span>);
+  var c <span class="operator">=</span> a<span class="operator">.</span>minus(b);
+  console<span class="operator">.</span>log(c<span class="operator">.</span>toString());
+  <span class="comment">// QMatrix4x4(-4, -4, -4, -4, -4, -4, -4, -4, -4,</span>
+  <span class="comment">// -4, -4, -4, -4, -4, -4, -4)</span>
+
+</pre>
+</td></tr>
+<tr valign="top" class="odd"><td >vector4d row(int which)</td><td >Returns the vector4d row of <code>this</code> specified by <code>which</code>. Note: the <code>which</code> is 0-based access into the matrix.</td><td ><pre class="cpp">
+
+  var a <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>matrix4x4(<span class="number">1</span><span class="operator">,</span><span class="number">2</span><span class="operator">,</span><span class="number">3</span><span class="operator">,</span><span class="number">4</span><span class="operator">,</span><span class="number">5</span><span class="operator">,</span><span class="number">6</span><span class="operator">,</span><span class="number">7</span><span class="operator">,</span><span class="number">8</span><span class="operator">,</span><span class="number">9</span><span class="operator">,</span><span class="number">10</span><span class="operator">,</span><span class="number">11</span><span class="operator">,</span><span class="number">12</span><span class="operator">,</span><span class="number">13</span><span class="operator">,</span><span class="number">14</span><span class="operator">,</span><span class="number">15</span><span class="operator">,</span><span class="number">16</span>);
+  var b <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>vector4d(a<span class="operator">.</span>m21<span class="operator">,</span> a<span class="operator">.</span>m22<span class="operator">,</span> a<span class="operator">.</span>m23<span class="operator">,</span> a<span class="operator">.</span>m24);
+  var c <span class="operator">=</span> a<span class="operator">.</span>row(<span class="number">2</span>); <span class="comment">// zero based access!  so not equal to b</span>
+  console<span class="operator">.</span>log(b<span class="operator">.</span>toString() <span class="operator">+</span> <span class="string">&quot; &quot;</span> <span class="operator">+</span> c<span class="operator">.</span>toString());
+  <span class="comment">// QVector4D(5, 6, 7, 8) QVector4D(9, 10, 11, 12)</span>
+
+</pre>
+</td></tr>
+<tr valign="top" class="even"><td >vector4d column(int which)</td><td >Returns the vector4d column of <code>this</code> specified by <code>which</code>. Note: the <code>which</code> is 0-based access into the matrix.</td><td ><pre class="cpp">
+
+  var a <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>matrix4x4(<span class="number">1</span><span class="operator">,</span><span class="number">2</span><span class="operator">,</span><span class="number">3</span><span class="operator">,</span><span class="number">4</span><span class="operator">,</span><span class="number">5</span><span class="operator">,</span><span class="number">6</span><span class="operator">,</span><span class="number">7</span><span class="operator">,</span><span class="number">8</span><span class="operator">,</span><span class="number">9</span><span class="operator">,</span><span class="number">10</span><span class="operator">,</span><span class="number">11</span><span class="operator">,</span><span class="number">12</span><span class="operator">,</span><span class="number">13</span><span class="operator">,</span><span class="number">14</span><span class="operator">,</span><span class="number">15</span><span class="operator">,</span><span class="number">16</span>);
+  var b <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>vector4d(a<span class="operator">.</span>m12<span class="operator">,</span> a<span class="operator">.</span>m22<span class="operator">,</span> a<span class="operator">.</span>m32<span class="operator">,</span> a<span class="operator">.</span>m42);
+  var c <span class="operator">=</span> a<span class="operator">.</span>column(<span class="number">2</span>); <span class="comment">// zero based access!  so not equal to b</span>
+  console<span class="operator">.</span>log(b<span class="operator">.</span>toString() <span class="operator">+</span> <span class="string">&quot; &quot;</span> <span class="operator">+</span> c<span class="operator">.</span>toString());
+  <span class="comment">// QVector4D(2, 6, 10, 14) QVector4D(3, 7, 11, 15)</span>
+
+</pre>
+</td></tr>
+<tr valign="top" class="odd"><td >real determinant()</td><td >Returns the determinant of <code>this</code> matrix4x4</td><td ><pre class="cpp">
+
+  var a <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>matrix4x4(<span class="number">1</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">2</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">3</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">100</span><span class="operator">,</span><span class="number">200</span><span class="operator">,</span><span class="number">300</span><span class="operator">,</span><span class="number">1</span>);
+  var b <span class="operator">=</span> a<span class="operator">.</span>determinant();
+  console<span class="operator">.</span>log(b); <span class="comment">// 6</span>
+
+</pre>
+</td></tr>
+<tr valign="top" class="even"><td >matrix4x4 inverted()</td><td >Returns the inverse of <code>this</code> matrix4x4 if it exists, else the identity matrix.</td><td ><pre class="cpp">
+
+  var a <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>matrix4x4(<span class="number">1</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">2</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">3</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">100</span><span class="operator">,</span><span class="number">200</span><span class="operator">,</span><span class="number">300</span><span class="operator">,</span><span class="number">1</span>);
+  var b <span class="operator">=</span> a<span class="operator">.</span>inverted();
+  console<span class="operator">.</span>log(b<span class="operator">.</span>toString());
+  <span class="comment">// QMatrix4x4(1, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0.333333, 0, -100,</span>
+  <span class="comment">// -100, -100, 1)</span>
+
+</pre>
+</td></tr>
+<tr valign="top" class="odd"><td >matrix4x4 transposed()</td><td >Returns the transpose of <code>this</code> matrix4x4</td><td ><pre class="cpp">
+
+  var a <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>matrix4x4(<span class="number">1</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">2</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">3</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">100</span><span class="operator">,</span><span class="number">200</span><span class="operator">,</span><span class="number">300</span><span class="operator">,</span><span class="number">1</span>);
+  var b <span class="operator">=</span> a<span class="operator">.</span>transposed();
+  console<span class="operator">.</span>log(b<span class="operator">.</span>toString());
+  <span class="comment">// QMatrix4x4(1, 0, 0, 100, 0, 2, 0, 200, 0, 0, 3, 300, 0, 0, 0, 1)</span>
+
+</pre>
+</td></tr>
+<tr valign="top" class="even"><td >bool fuzzyEquals(matrix4x4 other, real epsilon)</td><td >Returns true if <code>this</code> matrix4x4 is approximately equal to the <code>other</code> matrix4x4. The approximation will be true if each attribute of <code>this</code> is within <code>epsilon</code> of the respective attribute of <code>other</code>. Note that <code>epsilon</code> is an optional argument, the default <code>epsilon</code> is 0.00001.</td><td ><pre class="cpp">
+
+  var a <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>matrix4x4(<span class="number">1</span><span class="operator">,</span><span class="number">2</span><span class="operator">,</span><span class="number">3</span><span class="operator">,</span><span class="number">4</span><span class="operator">,</span><span class="number">5</span><span class="operator">,</span><span class="number">6</span><span class="operator">,</span><span class="number">7</span><span class="operator">,</span><span class="number">8</span><span class="operator">,</span><span class="number">9</span><span class="operator">,</span><span class="number">10</span><span class="operator">,</span><span class="number">11</span><span class="operator">,</span><span class="number">12</span><span class="operator">,</span><span class="number">13</span><span class="operator">,</span><span class="number">14</span><span class="operator">,</span><span class="number">15</span><span class="operator">,</span><span class="number">16</span>);
+  var b <span class="operator">=</span> <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>matrix4x4(<span class="number">1.0001</span><span class="operator">,</span><span class="number">2.0001</span><span class="operator">,</span><span class="number">3.0002</span><span class="operator">,</span><span class="number">4.0003</span><span class="operator">,</span><span class="number">5.0001</span><span class="operator">,</span><span class="number">6.0002</span><span class="operator">,</span>
+                       <span class="number">7.0002</span><span class="operator">,</span><span class="number">8.0004</span><span class="operator">,</span> <span class="number">9.0001</span><span class="operator">,</span><span class="number">10.0003</span><span class="operator">,</span>
+                       <span class="number">11.0003</span><span class="operator">,</span><span class="number">12.0004</span><span class="operator">,</span><span class="number">13.0001</span><span class="operator">,</span>
+                       <span class="number">14.0002</span><span class="operator">,</span><span class="number">15.0003</span><span class="operator">,</span><span class="number">16.0004</span>);
+  var c <span class="operator">=</span> a<span class="operator">.</span>fuzzyEquals(b);        <span class="comment">// default epsilon</span>
+  var d <span class="operator">=</span> a<span class="operator">.</span>fuzzyEquals(b<span class="operator">,</span> <span class="number">0.005</span>); <span class="comment">// supplied epsilon</span>
+  console<span class="operator">.</span>log(c <span class="operator">+</span> <span class="string">&quot; &quot;</span> <span class="operator">+</span> d); <span class="comment">// false true</span>
+
+</pre>
+</td></tr>
+</table></div>
+<p>This basic type is provided by the <a href="qtquick-module.html">QtQuick</a> import.</p>
+</div>
+<p><b>See also </b><a href="../qtqml/qtqml-typesystem-basictypes.html">QML Basic Types</a>.</p>
+<!-- @@@matrix4x4 -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

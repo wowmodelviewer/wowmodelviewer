@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-code-syntax.qdoc -->
+  <title>Checking Code Syntax | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Checking Code Syntax</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-highlighting.html" />
+  <link rel="next" href="creator-completing-code.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-highlighting.html">Semantic Highlighting</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-completing-code.html">Completing Code</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#viewing-annotations">Viewing Annotations</a></li>
+<li class="level2"><a href="#specifying-line-annotation-positions">Specifying Line Annotation Positions</a></li>
+<li class="level1"><a href="#javascript-and-qml-error-codes">JavaScript and QML Error Codes</a></li>
+<li class="level1"><a href="#resetting-the-code-model">Resetting the Code Model</a></li>
+<li class="level1"><a href="#inspecting-qml-and-javascript">Inspecting QML and JavaScript</a></li>
+<li class="level1"><a href="#automatically-formatting-qml-js-files">Automatically Formatting QML/JS Files</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Checking Code Syntax</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-checking-code-syntax.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>As you write code, Qt Creator checks code syntax. When Qt Creator spots a syntax error in your code it underlines it and shows error details when you move the mouse pointer over the error. Similarly, when you are working on an instance of a JavaScript object notation (JSON) entity, Qt Creator underlines errors in JSON data structure.</p>
+<p>In the following screenshot, Qt Creator points out an error, because a semicolon is missing at the end of the line:</p>
+<p class="centerAlign"><img src="images/qtcreator-syntaxerror.png" alt="" /></p><p>In the following screenshot, Qt Creator issues a warning, because the variable is not used:</p>
+<p class="centerAlign"><img src="images/qtcreator-semanticerror.png" alt="" /></p><p>To modify the colors used for underlining errors and warnings, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Text Editor</b> &gt; <b>Fonts &amp; Colors</b> &gt; <b>Copy</b>, and select new colors for <b>Error</b> and <b>Warning</b>.</p>
+<a name="viewing-annotations"></a>
+<h2 id="viewing-annotations">Viewing Annotations</h2>
+<p>When using the Clang code model, errors and warnings are additionally marked with icons and annotated. If a <a href="http://clang.llvm.org/diagnostics.html">Clang fix-it</a> is available, you can execute it by clicking the <img src="images/refactormarker.png" alt="" /> icon and pressing <b>Enter</b>.</p>
+<p>In the following screenshot, a Qt class name contains a typo:</p>
+<p class="centerAlign"><img src="images/qtcreator-typo-clang.png" alt="" /></p><p>You can use the icons in the tooltip popup to copy the error or warning message to the clipboard or to ignore and hide it. Select the <b>Annotation Settings</b> link to specify the position of the line annotations.</p>
+<p>In the following screenshot, a semicolon is missing at the end of the line.</p>
+<p class="centerAlign"><img src="images/qtcreator-syntaxerror-clang.png" alt="" /></p><p>In the following screenshot, the variable is not used.</p>
+<p class="centerAlign"><img src="images/qtcreator-semanticerror-clang.png" alt="" /></p><p>When writing QML or JavaScript code, the annotations may contain error codes listed in <a href="#javascript-and-qml-error-codes">JavaScript and QML Error Codes</a>.</p>
+<p class="centerAlign"><img src="images/qml-syntax-check.png" alt="" /></p><a name="specifying-line-annotation-positions"></a>
+<h3 id="specifying-line-annotation-positions">Specifying Line Annotation Positions</h3>
+<p>To specify the position where the annotations are displayed, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Text Editor</b> &gt; <b>Display</b> &gt; <b>Line annotations</b>, and then select whether to display the annotations directly next to the code, aligned to the right of the code, or in the right margin. Showing annotations between lines can be useful if there is usually not enough space to display annotations next to the text.</p>
+<p>If you hide the annotations by deselecting the check box, you can move the mouse pointer over an icon to view them.</p>
+<a name="javascript-and-qml-error-codes"></a>
+<h2 id="javascript-and-qml-error-codes">JavaScript and QML Error Codes</h2>
+<p>You can run static checks on the QML and JavaScript code in your project to find common problems. To run the checks, select <b>Tools</b> &gt; <b>QML/JS</b> &gt; <b>Run Checks</b> or press <b>Ctrl+Shift+C</b>. The results are shown in the <b>QML</b> and <b>QML Analysis</b> filters of the <b>Issues</b> output pane.</p>
+<p>Many of the error messages are similar to the ones in Douglas Crockford's <a href="http://www.jslint.com">JSLint</a> tool. For more information about JSLint errors, see <a href="http://linterrors.com/js">JSLint Error Explanations</a>.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Id</th><th >Severity</th><th >Message</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >M1</td><td >Error</td><td >Invalid value for enum</td><td ></td></tr>
+<tr valign="top" class="even"><td >M2</td><td >Error</td><td >Enum value must be a string or a number</td><td ></td></tr>
+<tr valign="top" class="odd"><td >M3</td><td >Error</td><td >Number value expected</td><td ></td></tr>
+<tr valign="top" class="even"><td >M4</td><td >Error</td><td >Boolean value expected</td><td ></td></tr>
+<tr valign="top" class="odd"><td >M5</td><td >Error</td><td >String value expected</td><td ></td></tr>
+<tr valign="top" class="even"><td >M6</td><td >Error</td><td >Invalid URL</td><td ></td></tr>
+<tr valign="top" class="odd"><td >M7</td><td >Warning</td><td >File or directory does not exist</td><td ></td></tr>
+<tr valign="top" class="even"><td >M8</td><td >Error</td><td >Invalid color</td><td ></td></tr>
+<tr valign="top" class="odd"><td >M9</td><td >Error</td><td >Anchor line expected</td><td ></td></tr>
+<tr valign="top" class="even"><td >M10</td><td >Error</td><td >Duplicate property binding</td><td >See also: <a href="http://linterrors.com/js/duplicate-key-a">Duplicate key '{a}'</a>.</td></tr>
+<tr valign="top" class="odd"><td >M11</td><td >Error</td><td >Id expected</td><td >See also: <a href="http://linterrors.com/js/expected-an-identifier-and-instead-saw-a-a-reserved-word">Expected an identifier and instead saw '{a}' (a reserved word)</a>.</td></tr>
+<tr valign="top" class="even"><td >M14</td><td >Error</td><td >Invalid id</td><td >See also: <a href="http://linterrors.com/js/expected-an-identifier-and-instead-saw-a-a-reserved-word">Expected an identifier and instead saw '{a}' (a reserved word)</a>.</td></tr>
+<tr valign="top" class="odd"><td >M15</td><td >Error</td><td >Duplicate id</td><td >Ids in a file must be unique. See also: <a href="http://linterrors.com/js/duplicate-key-a">Duplicate key '{a}'</a>.</td></tr>
+<tr valign="top" class="even"><td >M16</td><td >Error</td><td >Invalid property name <code>name</code></td><td ></td></tr>
+<tr valign="top" class="odd"><td >M17</td><td >Error</td><td ><code>Name</code> does not have members</td><td ></td></tr>
+<tr valign="top" class="even"><td >M18</td><td >Error</td><td ><code>Field</code> is not a member of <code>object</code></td><td ></td></tr>
+<tr valign="top" class="odd"><td >M19</td><td >Warning</td><td >Assignment in condition</td><td >It could be a typing error. If it is intentional, wrap the assignment in parentheses.</td></tr>
+<tr valign="top" class="even"><td >M20</td><td >Warning</td><td >Unterminated non-empty case block</td><td >Case blocks should either be empty or end in a flow control statement such as <code>break</code>, <code>return</code> or <code>continue</code>. Alternatively you can indicate intentional fall through by ending with a <code>// fall through</code> comment.</td></tr>
+<tr valign="top" class="odd"><td >M23</td><td >Warning</td><td >Do not use <code>eval</code></td><td >See also: <a href="http://linterrors.com/js/eval-is-evil">eval is evil</a>.</td></tr>
+<tr valign="top" class="even"><td >M28</td><td >Warning</td><td >Unreachable</td><td >Indicates that the underlined statement will never be executed.</td></tr>
+<tr valign="top" class="odd"><td >M29</td><td >Warning</td><td >Do not use <code>with</code></td><td >See also: <a href="http://linterrors.com/js/unexpected-with">Unexpected 'with'</a>.</td></tr>
+<tr valign="top" class="even"><td >M30</td><td >Warning</td><td >Do not use comma expressions</td><td ></td></tr>
+<tr valign="top" class="odd"><td >M31</td><td >Warning</td><td >Unnecessary message suppression</td><td ></td></tr>
+<tr valign="top" class="even"><td >M103</td><td >Warning</td><td ><code>Name</code> is already a formal parameter</td><td ></td></tr>
+<tr valign="top" class="odd"><td >M104</td><td >Warning</td><td ><code>Name</code> is already a function</td><td ></td></tr>
+<tr valign="top" class="even"><td >M105</td><td >Warning</td><td >Var <code>name</code> is used before its declaration</td><td ></td></tr>
+<tr valign="top" class="odd"><td >M106</td><td >Warning</td><td ><code>Name</code> is already a var</td><td ></td></tr>
+<tr valign="top" class="even"><td >M107</td><td >Warning</td><td ><code>Name</code> is declared more than once</td><td >Variables declared in a function are always visible everywhere in the function, even when declared in nested blocks or <code>for</code> statement conditions. Redeclaring a variable has no effect.</td></tr>
+<tr valign="top" class="odd"><td >M108</td><td >Warning</td><td >Function <code>name</code> is used before its declaration</td><td >See also: <a href="http://linterrors.com/js/a-was-used-before-it-was-defined">{a} was used before it was defined</a>.</td></tr>
+<tr valign="top" class="even"><td >M109</td><td >Warning</td><td >Do not use <code>Boolean</code> as a constructor</td><td >See also: <a href="http://linterrors.com/js/do-not-use-a-as-a-constructor">Do not use {a} as a constructor</a>.</td></tr>
+<tr valign="top" class="odd"><td >M110</td><td >Warning</td><td >Do not use <code>String</code> as a constructor</td><td >See also: <a href="http://linterrors.com/js/do-not-use-a-as-a-constructor">Do not use {a} as a constructor</a>.</td></tr>
+<tr valign="top" class="even"><td >M111</td><td >Warning</td><td >Do not use <code>Object</code> as a constructor</td><td >See also: <a href="http://linterrors.com/js/do-not-use-a-as-a-constructor">Do not use {a} as a constructor</a>.</td></tr>
+<tr valign="top" class="odd"><td >M112</td><td >Warning</td><td >Do not use <code>Array</code> as a constructor</td><td >See also: <a href="http://linterrors.com/js/do-not-use-a-as-a-constructor">Do not use {a} as a constructor</a>.</td></tr>
+<tr valign="top" class="even"><td >M113</td><td >Warning</td><td >Do not use <code>Function</code> as a constructor</td><td >See also: <a href="http://linterrors.com/js/do-not-use-a-as-a-constructor">Do not use {a} as a constructor</a>.</td></tr>
+<tr valign="top" class="odd"><td >M114</td><td >Hint</td><td >The <code>function</code> keyword and the opening parenthesis should be separated by a single space</td><td >See also: <a href="http://linterrors.com/js/expected-exactly-one-space-between-a-and-b">Expected exactly one space between {a} and {b}</a>.</td></tr>
+<tr valign="top" class="even"><td >M115</td><td >Warning</td><td >Do not use stand-alone blocks</td><td >Blocks do not affect variable scoping. Thus blocks that are not associated to <code>if</code>, <code>while</code>, etc. have no effect and should be avoided.</td></tr>
+<tr valign="top" class="odd"><td >M116</td><td >Warning</td><td >Do not use void expressions</td><td ></td></tr>
+<tr valign="top" class="even"><td >M117</td><td >Warning</td><td >Confusing pluses</td><td >See also: <a href="http://linterrors.com/js/confusing-pluses">Confusing pluses</a>.</td></tr>
+<tr valign="top" class="odd"><td >M119</td><td >Warning</td><td >Confusing minuses</td><td >See also: <a href="http://linterrors.com/js/confusing-minuses">Confusing minuses</a>.</td></tr>
+<tr valign="top" class="even"><td >M121</td><td >Hint</td><td >Declare all function vars on a single line</td><td ></td></tr>
+<tr valign="top" class="odd"><td >M123</td><td >Hint</td><td >Unnecessary parentheses</td><td ><a name="m126"></a></td></tr>
+<tr valign="top" class="even"><td >M126</td><td >Warning</td><td ><code>==</code> and <code>!=</code> may perform type coercion, use <code>===</code> or <code>!==</code> to avoid it</td><td >The non-strict equality comparison is allowed to convert its arguments to a common type. That can lead to unexpected results such as <code>' \t\r\n' == 0</code> being true. Use the strict equality operators <code>===</code> and <code>!==</code> and be explicit about conversions you require.</td></tr>
+<tr valign="top" class="odd"><td >M127</td><td >Warning</td><td >Expression statements should be assignments, calls or delete expressions only</td><td ></td></tr>
+<tr valign="top" class="even"><td >M128</td><td >Error</td><td >A state cannot have the specified child item</td><td ></td></tr>
+<tr valign="top" class="odd"><td >M201</td><td >Hint</td><td >Place var declarations at the start of a function</td><td >See also: <a href="http://linterrors.com/js/move-var-declarations-to-the-top-of-the-function">Move 'var' declarations to the top of the function</a>.</td></tr>
+<tr valign="top" class="even"><td >M202</td><td >Hint</td><td >Use only one statement per line</td><td ></td></tr>
+<tr valign="top" class="odd"><td >M203</td><td >Warning</td><td >Imperative code is not supported in the Design mode</td><td ></td></tr>
+<tr valign="top" class="even"><td >M204</td><td >Warning</td><td >This QML type is not supported in the Design mode</td><td ></td></tr>
+<tr valign="top" class="odd"><td >M205</td><td >Warning</td><td >Reference to parent QML type cannot be resolved correctly by the Design mode</td><td ></td></tr>
+<tr valign="top" class="even"><td >M206</td><td >Warning</td><td >This visual property binding cannot be evaluated in the local context and might not show up in Design mode as expected</td><td ></td></tr>
+<tr valign="top" class="odd"><td >M207</td><td >Warning</td><td >Design mode only supports states in the root QML type</td><td ></td></tr>
+<tr valign="top" class="even"><td >M208</td><td >Error</td><td >This id might be ambiguous and is not supported in the Design mode.</td><td ></td></tr>
+<tr valign="top" class="odd"><td >M209</td><td >Error</td><td >This type (type name) is not supported as a root element in the Design mode.</td><td ></td></tr>
+<tr valign="top" class="even"><td >M220</td><td >Error</td><td >This type (type name) is not supported as a root element of a Qt Quick UI form.</td><td ></td></tr>
+<tr valign="top" class="odd"><td >M221</td><td >Error</td><td >This type (type name) is not supported in a Qt Quick UI form.</td><td ></td></tr>
+<tr valign="top" class="even"><td >M222</td><td >Error</td><td >Functions are not supported in a Qt Quick UI form.</td><td >For a list of supported JavaScript functions, see <a href="creator-quick-ui-forms.html#supported-methods">Supported Methods</a>.</td></tr>
+<tr valign="top" class="odd"><td >M223</td><td >Error</td><td >Java Script blocks are not supported in a Qt Quick UI form.</td><td ></td></tr>
+<tr valign="top" class="even"><td >M224</td><td >Error</td><td >Behavior type is not supported in a Qt Quick UI form.</td><td ></td></tr>
+<tr valign="top" class="odd"><td >M225</td><td >Error</td><td >States are only supported in the root item in a Qt Quick UI form.</td><td ></td></tr>
+<tr valign="top" class="even"><td >M226</td><td >Error</td><td >Referencing the parent of the root item is not supported in a Qt Quick UI form.</td><td ></td></tr>
+<tr valign="top" class="odd"><td >M300</td><td >Error</td><td >Unknown component</td><td ></td></tr>
+<tr valign="top" class="even"><td >M301</td><td >Error</td><td >Could not resolve the prototype <code>name</code> of <code>object</code></td><td ></td></tr>
+<tr valign="top" class="odd"><td >M302</td><td >Error</td><td >Could not resolve the prototype <code>name</code></td><td ></td></tr>
+<tr valign="top" class="even"><td >M303</td><td >Error</td><td >Prototype cycle, the last non-repeated component is <code>name</code></td><td ></td></tr>
+<tr valign="top" class="odd"><td >M304</td><td >Error</td><td >Invalid property type <code>name</code></td><td ></td></tr>
+<tr valign="top" class="even"><td >M305</td><td >Warning</td><td ><code>==</code> and <code>!=</code> perform type coercion, use <code>===</code> or <code>!==</code> to avoid it</td><td >See <a href="#m126">M126</a>.</td></tr>
+<tr valign="top" class="odd"><td >M306</td><td >Warning</td><td >Calls of functions that start with an uppercase letter should use <code>new</code></td><td >By convention, functions that start with an uppercase letter are constructor functions that should only be used with <code>new</code>.</td></tr>
+<tr valign="top" class="even"><td >M307</td><td >Warning</td><td >Use <code>new</code> only with functions that start with an uppercase letter</td><td >See also: <a href="http://linterrors.com/js/do-not-use-a-as-a-constructor">Do not use {a} as a constructor</a>.</td></tr>
+<tr valign="top" class="odd"><td >M308</td><td >Warning</td><td >Do not use <code>Number</code> as a constructor</td><td >See also: <a href="http://linterrors.com/js/do-not-use-a-as-a-constructor">Do not use {a} as a constructor</a>.</td></tr>
+<tr valign="top" class="even"><td >M309</td><td >Hint</td><td >Use spaces around binary operators</td><td ></td></tr>
+<tr valign="top" class="odd"><td >M310</td><td >Warning</td><td >Unintentional empty block, use ({}) for empty object literal</td><td ></td></tr>
+<tr valign="top" class="even"><td >M311</td><td >Hint</td><td >Use <code>type</code> instead of <code>var</code> or <code>variant</code> to improve performance</td><td ></td></tr>
+<tr valign="top" class="odd"><td >M312</td><td >Error</td><td >Missing property <code>number</code></td><td ></td></tr>
+<tr valign="top" class="even"><td >M313</td><td >Error</td><td >Object value expected</td><td ></td></tr>
+<tr valign="top" class="odd"><td >M314</td><td >Error</td><td >Array value expected</td><td ></td></tr>
+<tr valign="top" class="even"><td >M315</td><td >Error</td><td ><code>Value</code> value expected</td><td ></td></tr>
+<tr valign="top" class="odd"><td >M316</td><td >Error</td><td >Maximum number value is <code>number</code></td><td ></td></tr>
+<tr valign="top" class="even"><td >M317</td><td >Error</td><td >Minimum number value is <code>number</code></td><td ></td></tr>
+<tr valign="top" class="odd"><td >M318</td><td >Error</td><td >Maximum number value is exclusive</td><td ></td></tr>
+<tr valign="top" class="even"><td >M319</td><td >Error</td><td >Minimum number value is exclusive</td><td ></td></tr>
+<tr valign="top" class="odd"><td >M320</td><td >Error</td><td >String value does not match required pattern</td><td ></td></tr>
+<tr valign="top" class="even"><td >M321</td><td >Error</td><td >Minimum string value length is <code>number</code></td><td ></td></tr>
+<tr valign="top" class="odd"><td >M322</td><td >Error</td><td >Maximum string value length is <code>number</code></td><td ></td></tr>
+<tr valign="top" class="even"><td >M323</td><td >Error</td><td ><code>Number</code> elements expected in array value</td><td >See also: <a href="http://linterrors.com/js/the-array-literal-notation-is-preferrable">The array literal notation [] is preferable</a>.</td></tr>
+</table></div>
+<a name="resetting-the-code-model"></a>
+<h2 id="resetting-the-code-model">Resetting the Code Model</h2>
+<p>If you change the build and run kit when you have QML files open in the code editor, the code model might become corrupt. The following error message indicates that this might have happened: <i>Using Qt Quick 1 code model instead of Qt Quick 2</i>.</p>
+<p>You can see the error message when you move the mouse pointer over code that Qt Creator underlines in the code editor or when you open a QML file in the Design mode.</p>
+<p>To reset the code model, select <b>Tools</b> &gt; <b>QML/JS</b> &gt; <b>Reset Code Model</b>.</p>
+<p>If this does not help, try changing the QML emulation layer to the one that was built with the same Qt version as the one selected in the build and run kit. For more information, see <a href="creator-qml-modules-with-plugins.html#running-qml-modules-in-design-mode">Running QML Modules in Design Mode</a>.</p>
+<a name="inspecting-qml-and-javascript"></a>
+<h2 id="inspecting-qml-and-javascript">Inspecting QML and JavaScript</h2>
+<p>To inspect QML and JavaScript properties, methods, and enums, move the cursor over them and select <b>Tools</b> &gt; <b>QML/JS</b> &gt; <b>Inspect API for Element Under Cursor</b>.</p>
+<a name="automatically-formatting-qml-js-files"></a>
+<h2 id="automatically-formatting-qml-js-files">Automatically Formatting QML/JS Files</h2>
+<p>To automatically format QML/JS files upon saving, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Qt Quick</b> &gt; <b>QML/JS Editing</b> &gt; <b>Enable auto format on file save</b>.</p>
+</div>
+<!-- @@@creator-checking-code-syntax.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-highlighting.html">Semantic Highlighting</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-completing-code.html">Completing Code</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

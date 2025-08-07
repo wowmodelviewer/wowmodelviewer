@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- configure.qdoc -->
+  <title>Qt Configure Options | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Qt Configure Options</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#source-build-and-install-directories">Source, Build, and Install Directories</a></li>
+<li class="level1"><a href="#modules-and-features">Modules and Features</a></li>
+<li class="level2"><a href="#excluding-qt-modules">Excluding Qt Modules</a></li>
+<li class="level2"><a href="#including-or-excluding-features">Including or Excluding Features</a></li>
+<li class="level1"><a href="#third-party-libraries">Third-Party Libraries</a></li>
+<li class="level1"><a href="#compiler-options">Compiler Options</a></li>
+<li class="level1"><a href="#cross-compilation-options">Cross-Compilation Options</a></li>
+<li class="level2"><a href="#specific-options-for-platforms">Specific Options for Platforms</a></li>
+<li class="level1"><a href="#opengl-options-for-windows">OpenGL Options for Windows</a></li>
+<li class="level1"><a href="#developer-builds">Developer Builds</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Configure Options</h1>
+<span class="subtitle"></span>
+<!-- $$$configure-options.html-description -->
+<div class="descr"> <a name="details"></a>
+<p><code>configure</code> is a command-line tool which determines how to build Qt for a particular platform. Configure can exclude a feature in Qt as well as determine how Qt builds and deploys applications onto host platforms. This page discusses some of the configure options, but for the full list of options, enter the command <code>configure -h</code>. Configure should be run from the main Qt source directory.</p>
+<p>Unless stated otherwise, the commands in this page are for the Linux platforms. On macOS and on Windows, the <code>PATH</code> and directory structure are different, therefore the commands will vary. Also, on Windows systems, the configure script is called <i>configure.bat</i>.</p>
+<p>After running <code>configure</code>, build the sources with the <code>make</code> tool belonging to the chosen toolchain.</p>
+<a name="source-build-and-install-directories"></a>
+<h2 id="source-build-and-install-directories">Source, Build, and Install Directories</h2>
+<p>The <i>source</i> directory contains the source code that is obtained from the source package or git repository. The <i>build</i> directory is where the build-related files such as Makefiles, object files, and other intermediate files are stored. The <i>install</i> directory is where the binaries and libraries are installed, for use either by the system or by the application.</p>
+<p>It is recommended to keep these directories separate by shadow-building and using the <code>-prefix</code> option. This enables you to keep the Qt <i>source</i> tree clean from the build artifacts and binaries, which are stored in a separate directory. This method is very convenient if you want to have multiple builds from the same source tree, but for different configurations. To shadow-build, run <code>configure</code> from a separate directory:</p>
+<pre class="cpp plain">
+
+  mkdir ~/qt-build
+  cd ~/qt-build
+  ~/qt-source/configure -prefix /opt/Qt5.9
+  qmake
+
+</pre>
+<p>Configuring with the <code>-prefix</code> option means that the Qt binaries and libraries are installed into another directory, which is <code>/opt/Qt5.9</code> in this case. Running <code>qmake</code> generates the Makefiles in the <i>~/qt-build</i> directory and not in the <i>source</i> directory. After the Makefiles are in place, run the following commands to build the Qt binaries and libraries, and install them:</p>
+<pre class="cpp plain">
+
+  make
+  make install
+
+</pre>
+<a name="modules-and-features"></a>
+<h2 id="modules-and-features">Modules and Features</h2>
+<p>Qt consists of different <a href="qtmodules.html">modules</a> whose sources can be found in different directories inside the top-level source directory. Users can explicitly exclude specific top-level directories to limit build times. Furthermore, each Qt module might have features that can also be explicitly enabled or disabled.</p>
+<a name="excluding-qt-modules"></a>
+<h3 id="excluding-qt-modules">Excluding Qt Modules</h3>
+<p>Configure's <code>-skip</code> option allows top-level source directories to be excluded from the Qt build. Note that many directories contain multiple Qt modules. For example, to exclude Qt NFC and Qt Bluetooth from the Qt build, provide <code>-skip qtconnectivity</code> as the argument to configure.</p>
+<pre class="cpp">
+
+  <span class="operator">.</span><span class="operator">/</span>configure <span class="operator">-</span>skip qtconnectivity
+
+</pre>
+<a name="including-or-excluding-features"></a>
+<h3 id="including-or-excluding-features">Including or Excluding Features</h3>
+<p>The <code>-feature-</code><i>&lt;feature&gt;</i> and <code>-no-feature-</code><i>&lt;feature&gt;</i> options include and exclude specific features, respectively.</p>
+<p>For example, to disable <a href="accessible.html">Accessibility</a>, provide <code>-no-feature-accessibility</code> as the argument:</p>
+<pre class="cpp">
+
+  <span class="operator">.</span><span class="operator">/</span>configure <span class="operator">-</span>no<span class="operator">-</span>feature<span class="operator">-</span>accessibility
+
+</pre>
+<p>Use <code>configure -list-features</code> to show a list of all available features on the command line. Note that features can depend on other features, so disabling a feature might have side-effects on other features.</p>
+<p>The <a href="https://doc.qt.io/QtForDeviceCreation/qt-configuration-tool.html">Qt Configuration Tool</a> that is part of <a href="http://doc.qt.io/QtForDeviceCreation">Qt for Device Creation</a> allows the tweaking of features and dependencies through a convenient user interface.</p>
+<a name="third-party-libraries"></a>
+<h2 id="third-party-libraries">Third-Party Libraries</h2>
+<p>The Qt source packages include third-party libraries. To set whether Qt should use the system's versions of the libraries or to use the bundled version, pass either <code>-system</code> or <code>-qt</code> before the name of the library to configure.</p>
+<p>The table below summarizes the third-party options:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Library Name</th><th >Bundled in Qt</th><th >Installed in System</th></tr></thead>
+<tr valign="top" class="odd"><td >zlib</td><td ><code>-qt-zlib</code></td><td ><code>-system-zlib</code></td></tr>
+<tr valign="top" class="even"><td >libjpeg</td><td ><code>-qt-libjpeg</code></td><td ><code>-system-libjpeg</code></td></tr>
+<tr valign="top" class="odd"><td >libpng</td><td ><code>-qt-libpng</code></td><td ><code>-system-libpng</code></td></tr>
+<tr valign="top" class="even"><td >xcb</td><td ><code>-qt-xcb</code></td><td ><code>-system-xcb</code></td></tr>
+<tr valign="top" class="odd"><td >freetype</td><td ><code>-qt-freetype</code></td><td ><code>-system-freetype</code></td></tr>
+<tr valign="top" class="even"><td >PCRE</td><td ><code>-qt-pcre</code></td><td ><code>-system-pcre</code></td></tr>
+<tr valign="top" class="odd"><td ><a href="../qtgui/qtgui-attribution-harfbuzz.html#harfbuzz">HarfBuzz</a>-NG</td><td ><code>-qt-harfbuzz</code></td><td ><code>-system-harfbuzz</code></td></tr>
+</table></div>
+<p>It is also possible to disable support for these libraries by using <code>-no</code> instead of <code>-qt</code>. For example, to use the system's xcb library and disable zlib support, enter the following:</p>
+<pre class="cpp">
+
+  <span class="operator">.</span><span class="operator">/</span>configure <span class="operator">-</span>no<span class="operator">-</span>zlib <span class="operator">-</span>qt<span class="operator">-</span>libjpeg <span class="operator">-</span>qt<span class="operator">-</span>libpng <span class="operator">-</span>system<span class="operator">-</span>xcb
+
+</pre>
+<p>For a full list of options, consult the help with <code>configure -help</code>.</p>
+<a name="compiler-options"></a>
+<h2 id="compiler-options">Compiler Options</h2>
+<p>The <code>-platform</code> option sets the host platform and the compiler for building the Qt sources. The list of supported platforms and compilers is found in the <a href="supported-platforms.html">supported platforms</a> page while the full list is available in <i>qtbase/mkspecs</i> directory.</p>
+<p>For example, on Ubuntu Linux systems, Qt can be compiled by several compilers such as clang or g++:</p>
+<pre class="cpp">
+
+  <span class="operator">.</span><span class="operator">/</span>configure <span class="operator">-</span>platform linux<span class="operator">-</span>clang
+  <span class="operator">.</span><span class="operator">/</span>configure <span class="operator">-</span>platform linux<span class="operator">-</span>g<span class="operator">+</span><span class="operator">+</span>
+  <span class="operator">.</span><span class="operator">/</span>configure <span class="operator">-</span>platform linux<span class="operator">-</span>g<span class="operator">+</span><span class="operator">+</span><span class="operator">-</span><span class="number">32</span>
+
+</pre>
+<p>For <a href="windows.html">Windows</a> machines, either <a href="https://mingw-w64.org/">MinGW</a> or Visual Studio toolchains can be used to compile Qt.</p>
+<pre class="cpp">
+
+  configure<span class="operator">.</span>bat <span class="operator">-</span>platform win32<span class="operator">-</span>g<span class="operator">+</span><span class="operator">+</span>
+  configure<span class="operator">.</span>bat <span class="operator">-</span>platform win32<span class="operator">-</span>msvc
+
+</pre>
+<p>Afterwards, the generated Makefiles will use the appropriate compiler commands.</p>
+<a name="cross-compilation-options"></a>
+<h2 id="cross-compilation-options">Cross-Compilation Options</h2>
+<p>To configure Qt for cross-platform development and deployment, the development toolchain for the target platform needs to be set up. This set up varies among the <a href="supported-platforms.html">Supported Platforms</a>.</p>
+<p>Common options are:</p>
+<ul>
+<li><code>-xplatform</code> - the target platform. Valid xplatform options are the same as the <code>-platform</code> options which are found in <i>qtbase/mkspecs</i>.</li>
+<li><code>-device</code> - a specific device or chipsets. The list of devices that configure is compatible with are found in <i>qtbase/mkspecs/devices</i>. For more information, visit the <a href="http://wiki.qt.io/Category:Devices">Devices</a> Wiki page.</li>
+<li><code>-device-option</code> - sets additional qmake variables. For example, <code>-device-option CROSS_COMPILE=</code><i>&lt;path-to-toolchain&gt;</i> provides the environment variable, <code>CROSS_COMPILE</code>, as needed by certain devices.</li>
+</ul>
+<p><b>Note: </b>Toolchains for non-desktop targets often come with a so-called <i>sysroot</i> which Qt needs to be configured against.</p><a name="specific-options-for-platforms"></a>
+<h3 id="specific-options-for-platforms">Specific Options for Platforms</h3>
+<p>The following pages provide guidelines on how to configure Qt for specific platform development:</p>
+<ul>
+<li><a href="http://wiki.qt.io/Qt5ForAndroidBuilding">Building Qt 5 for Android</a> Wiki page</li>
+<li><a href="ios-building-from-source.html">Qt for iOS - Building from Source</a></li>
+<li><a href="winrt-support.html#building-from-source">Qt for UWP - Building from Source</a></li>
+<li><a href="configure-linux-device.html">Configure an Embedded Linux Device</a></li>
+<li><a href="http://wiki.qt.io/Qt_RaspberryPi">Qt for Raspberry Pi</a> - a community-driven site for Raspberry devices</li>
+<li><a href="http://wiki.qt.io/Category:Devices">Devices</a> - a list of other devices and chipsets</li>
+</ul>
+<a name="opengl-options-for-windows"></a>
+<h2 id="opengl-options-for-windows">OpenGL Options for Windows</h2>
+<p>On Windows, Qt can be configured with the system OpenGL or with <a href="https://chromium.googlesource.com/angle/angle/+/master/README.md">ANGLE</a>. By default, Qt is configured to use dynamic OpenGL. This means that it tries to use system OpenGL and falls back to ANGLE, which is bundled with Qt and depends on the DirectX SDK, if native OpenGL does not work. ANGLE enables running Qt applications that depend on OpenGL, without installing the latest OpenGL drivers. If ANGLE also fails, Qt will fall back to software rendering, which is the slowest but most safe of the rendering methods.</p>
+<p>The <code>-opengl</code> option can be used to configure Qt to use the OpenGL in the target system, a different version of OpenGL ES (with or without ANGLE), or dynamically switch between the available OpenGL implementations.</p>
+<pre class="cpp">
+
+  configure<span class="operator">.</span>bat <span class="operator">-</span>opengl dynamic
+
+</pre>
+<p>With the <code>dynamic</code> option, Qt will try to use native OpenGL first. If that fails, it will fall back to ANGLE and finally to software rendering in case of ANGLE failing as well.</p>
+<pre class="cpp">
+
+  configure<span class="operator">.</span>bat <span class="operator">-</span>opengl desktop
+
+</pre>
+<p>With the <code>desktop</code> option, Qt uses the OpenGL installed on Windows, requiring that the OpenGL in the target Windows machine is compatible with the application. The <code>-opengl</code> option accepts two versions of OpenGL ES, <code>es2</code> for OpenGL ES 2.0 or <code>es1</code> for OpenGL ES Common Profile.</p>
+<pre class="cpp">
+
+  configure<span class="operator">.</span>bat <span class="operator">-</span>opengl es2
+
+</pre>
+<p>You can also use <code>-opengl dynamic</code>, which enable applications to dynamically switch between the available options at runtime. For more details about the benefits of using dynamic GL-switching, see <a href="windows-requirements.html#graphics-drivers">Graphics Drivers</a>.</p>
+<a name="developer-builds"></a>
+<h2 id="developer-builds">Developer Builds</h2>
+<p>The <code>-developer-build</code> option is not meant for shipping applications, but can be used for developing Qt. Such a build contains more exported symbols than a standard build and compiles with a higher warning level.</p>
+</div>
+<!-- @@@configure-options.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwinjumplistcategory.cpp -->
+  <title>QWinJumpListCategory Class | Qt Windows Extras 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwinextras-index.html">Qt Windows Extras</a></td><td ><a href="qtwinextras-module.html">C++ Classes</a></td><td >QWinJumpListCategory</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwinextras-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QWinJumpListCategory Class</h1>
+<!-- $$$QWinJumpListCategory-brief -->
+<p>The <a href="qwinjumplistcategory.html">QWinJumpListCategory</a> class represents a jump list category. <a href="#details">More...</a></p>
+<!-- @@@QWinJumpListCategory -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QWinJumpListCategory&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += winextras</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.2</td></tr></table></div><p>This class was introduced in  Qt 5.2.</p>
+<ul>
+<li><a href="qwinjumplistcategory-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistcategory.html#Type-enum">Type</a></b> { Custom, Recent, Frequent, Tasks }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistcategory.html#QWinJumpListCategory">QWinJumpListCategory</a></b>(const QString &amp;<i>title</i> = QString())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistcategory.html#dtor.QWinJumpListCategory">~QWinJumpListCategory</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWinJumpListItem *</td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistcategory.html#addDestination">addDestination</a></b>(const QString &amp;<i>filePath</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistcategory.html#addItem">addItem</a></b>(QWinJumpListItem *<i>item</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWinJumpListItem *</td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistcategory.html#addLink">addLink</a></b>(const QString &amp;<i>title</i>, const QString &amp;<i>executablePath</i>, const QStringList &amp;<i>arguments</i> = QStringList())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWinJumpListItem *</td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistcategory.html#addLink-1">addLink</a></b>(const QIcon &amp;<i>icon</i>, const QString &amp;<i>title</i>, const QString &amp;<i>executablePath</i>, const QStringList &amp;<i>arguments</i> = QStringList())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWinJumpListItem *</td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistcategory.html#addSeparator">addSeparator</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistcategory.html#clear">clear</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistcategory.html#count">count</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistcategory.html#isEmpty">isEmpty</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistcategory.html#isVisible">isVisible</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QWinJumpListItem *&gt; </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistcategory.html#items">items</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistcategory.html#setTitle">setTitle</a></b>(const QString &amp;<i>title</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistcategory.html#setVisible">setVisible</a></b>(bool <i>visible</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistcategory.html#title">title</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWinJumpListCategory::Type </td><td class="memItemRight bottomAlign"><b><a href="qwinjumplistcategory.html#type">type</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QWinJumpListCategory-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QWinJumpListCategory -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Type$$$Custom$$$Recent$$$Frequent$$$Tasks -->
+<h3 class="fn" id="Type-enum"><a name="Type-enum"></a>enum QWinJumpListCategory::<span class="name">Type</span></h3>
+<p>This enum describes the available <a href="qwinjumplistcategory.html">QWinJumpListCategory</a> types.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QWinJumpListCategory::Custom</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">A custom jump list category.</td></tr>
+<tr><td class="topAlign"><code>QWinJumpListCategory::Recent</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">A jump list category of &quot;recent&quot; items.</td></tr>
+<tr><td class="topAlign"><code>QWinJumpListCategory::Frequent</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">A jump list category of &quot;frequent&quot; items.</td></tr>
+<tr><td class="topAlign"><code>QWinJumpListCategory::Tasks</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">A jump list category of tasks.</td></tr>
+</table></div>
+<!-- @@@Type -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QWinJumpListCategory[overload1]$$$QWinJumpListCategoryconstQString& -->
+<h3 class="fn" id="QWinJumpListCategory"><a name="QWinJumpListCategory"></a>QWinJumpListCategory::<span class="name">QWinJumpListCategory</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>title</i> = QString())</h3>
+<p>Constructs a custom <a href="qwinjumplistcategory.html">QWinJumpListCategory</a> with the specified <i>title</i>.</p>
+<!-- @@@QWinJumpListCategory -->
+<!-- $$$~QWinJumpListCategory[overload1]$$$~QWinJumpListCategory -->
+<h3 class="fn" id="dtor.QWinJumpListCategory"><a name="dtor.QWinJumpListCategory"></a>QWinJumpListCategory::<span class="name">~QWinJumpListCategory</span>()</h3>
+<p>Destroys the <a href="qwinjumplistcategory.html">QWinJumpListCategory</a>.</p>
+<!-- @@@~QWinJumpListCategory -->
+<!-- $$$addDestination[overload1]$$$addDestinationconstQString& -->
+<h3 class="fn" id="addDestination"><a name="addDestination"></a><span class="type"><a href="qwinjumplistitem.html">QWinJumpListItem</a></span> *QWinJumpListCategory::<span class="name">addDestination</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>filePath</i>)</h3>
+<p>Adds a destination to the category pointing to <i>filePath</i>.</p>
+<!-- @@@addDestination -->
+<!-- $$$addItem[overload1]$$$addItemQWinJumpListItem* -->
+<h3 class="fn" id="addItem"><a name="addItem"></a><span class="type">void</span> QWinJumpListCategory::<span class="name">addItem</span>(<span class="type"><a href="qwinjumplistitem.html">QWinJumpListItem</a></span> *<i>item</i>)</h3>
+<p>Adds an <i>item</i> to the category.</p>
+<!-- @@@addItem -->
+<!-- $$$addLink[overload1]$$$addLinkconstQString&constQString&constQStringList& -->
+<h3 class="fn" id="addLink"><a name="addLink"></a><span class="type"><a href="qwinjumplistitem.html">QWinJumpListItem</a></span> *QWinJumpListCategory::<span class="name">addLink</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>title</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>executablePath</i>, const <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> &amp;<i>arguments</i> = QStringList())</h3>
+<p>Adds a link to the category using <i>title</i>, <i>executablePath</i>, and optionally <i>arguments</i>.</p>
+<!-- @@@addLink -->
+<!-- $$$addLink$$$addLinkconstQIcon&constQString&constQString&constQStringList& -->
+<h3 class="fn" id="addLink-1"><a name="addLink-1"></a><span class="type"><a href="qwinjumplistitem.html">QWinJumpListItem</a></span> *QWinJumpListCategory::<span class="name">addLink</span>(const <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> &amp;<i>icon</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>title</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>executablePath</i>, const <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> &amp;<i>arguments</i> = QStringList())</h3>
+<p>This function overloads <a href="qwinjumplistcategory.html#addLink">addLink</a>().</p>
+<p>Adds a link to the category using <i>icon</i>, <i>title</i>, <i>executablePath</i>, and optionally <i>arguments</i>.</p>
+<!-- @@@addLink -->
+<!-- $$$addSeparator[overload1]$$$addSeparator -->
+<h3 class="fn" id="addSeparator"><a name="addSeparator"></a><span class="type"><a href="qwinjumplistitem.html">QWinJumpListItem</a></span> *QWinJumpListCategory::<span class="name">addSeparator</span>()</h3>
+<p>Adds a separator to the category.</p>
+<p><b>Note: </b>Only tasks category supports separators.</p><!-- @@@addSeparator -->
+<!-- $$$clear[overload1]$$$clear -->
+<h3 class="fn" id="clear"><a name="clear"></a><span class="type">void</span> QWinJumpListCategory::<span class="name">clear</span>()</h3>
+<p>Clears the category.</p>
+<!-- @@@clear -->
+<!-- $$$count[overload1]$$$count -->
+<h3 class="fn" id="count"><a name="count"></a><span class="type">int</span> QWinJumpListCategory::<span class="name">count</span>() const</h3>
+<p>Returns the amount of items in the category.</p>
+<!-- @@@count -->
+<!-- $$$isEmpty[overload1]$$$isEmpty -->
+<h3 class="fn" id="isEmpty"><a name="isEmpty"></a><span class="type">bool</span> QWinJumpListCategory::<span class="name">isEmpty</span>() const</h3>
+<p>Returns whether the category is empty.</p>
+<!-- @@@isEmpty -->
+<!-- $$$isVisible[overload1]$$$isVisible -->
+<h3 class="fn" id="isVisible"><a name="isVisible"></a><span class="type">bool</span> QWinJumpListCategory::<span class="name">isVisible</span>() const</h3>
+<p>Returns whether the category is visible.</p>
+<!-- @@@isVisible -->
+<!-- $$$items[overload1]$$$items -->
+<h3 class="fn" id="items"><a name="items"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qwinjumplistitem.html">QWinJumpListItem</a></span> *&gt; QWinJumpListCategory::<span class="name">items</span>() const</h3>
+<p>Returns the list of items in the category.</p>
+<!-- @@@items -->
+<!-- $$$setTitle[overload1]$$$setTitleconstQString& -->
+<h3 class="fn" id="setTitle"><a name="setTitle"></a><span class="type">void</span> QWinJumpListCategory::<span class="name">setTitle</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>title</i>)</h3>
+<p>Sets the category <i>title</i>.</p>
+<p><b>See also </b><a href="qwinjumplistcategory.html#title">title</a>().</p>
+<!-- @@@setTitle -->
+<!-- $$$setVisible[overload1]$$$setVisiblebool -->
+<h3 class="fn" id="setVisible"><a name="setVisible"></a><span class="type">void</span> QWinJumpListCategory::<span class="name">setVisible</span>(<span class="type">bool</span> <i>visible</i>)</h3>
+<p>Sets the category <i>visible</i>.</p>
+<p><b>See also </b><a href="qwinjumplistcategory.html#isVisible">isVisible</a>().</p>
+<!-- @@@setVisible -->
+<!-- $$$title[overload1]$$$title -->
+<h3 class="fn" id="title"><a name="title"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QWinJumpListCategory::<span class="name">title</span>() const</h3>
+<p>Returns the category title.</p>
+<p><b>See also </b><a href="qwinjumplistcategory.html#setTitle">setTitle</a>().</p>
+<!-- @@@title -->
+<!-- $$$type[overload1]$$$type -->
+<h3 class="fn" id="type"><a name="type"></a><span class="type"><a href="qwinjumplistcategory.html#Type-enum">QWinJumpListCategory::Type</a></span> QWinJumpListCategory::<span class="name">type</span>() const</h3>
+<p>Returns the category type.</p>
+<!-- @@@type -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

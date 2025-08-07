@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qbitmap.cpp -->
+  <title>QBitmap Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QBitmap</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QBitmap Class</h1>
+<!-- $$$QBitmap-brief -->
+<p>The <a href="qbitmap.html">QBitmap</a> class provides monochrome (1-bit depth) pixmaps. <a href="#details">More...</a></p>
+<!-- @@@QBitmap -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QBitmap&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qpixmap.html">QPixmap</a></td></tr></table></div><ul>
+<li><a href="qbitmap-members.html">List of all members, including inherited members</a></li>
+<li><a href="qbitmap-obsolete.html">Obsolete members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qbitmap.html#QBitmap-4">QBitmap</a></b>(const QString &amp;<i>fileName</i>, const char *<i>format</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qbitmap.html#QBitmap-3">QBitmap</a></b>(const QSize &amp;<i>size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qbitmap.html#QBitmap-2">QBitmap</a></b>(int <i>width</i>, int <i>height</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qbitmap.html#QBitmap-1">QBitmap</a></b>(const QPixmap &amp;<i>pixmap</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qbitmap.html#QBitmap">QBitmap</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QBitmap &amp;</td><td class="memItemRight bottomAlign"><b><a href="qbitmap.html#operator-eq-2">operator=</a></b>(const QPixmap &amp;<i>pixmap</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qbitmap.html#dtor.QBitmap">~QBitmap</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbitmap.html#clear">clear</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbitmap.html#swap">swap</a></b>(QBitmap &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QBitmap </td><td class="memItemRight bottomAlign"><b><a href="qbitmap.html#transformed">transformed</a></b>(const QTransform &amp;<i>matrix</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariant </td><td class="memItemRight bottomAlign"><b><a href="qbitmap.html#operator-QVariant">operator QVariant</a></b>() const</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QBitmap </td><td class="memItemRight bottomAlign"><b><a href="qbitmap.html#fromData">fromData</a></b>(const QSize &amp;<i>size</i>, const uchar *<i>bits</i>, QImage::Format <i>monoFormat</i> = QImage::Format_MonoLSB)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QBitmap </td><td class="memItemRight bottomAlign"><b><a href="qbitmap.html#fromImage">fromImage</a></b>(const QImage &amp;<i>image</i>, Qt::ImageConversionFlags <i>flags</i> = Qt::AutoColor)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QBitmap </td><td class="memItemRight bottomAlign"><b><a href="qbitmap.html#fromImage-1">fromImage</a></b>(QImage &amp;&amp;<i>image</i>, Qt::ImageConversionFlags <i>flags</i> = Qt::AutoColor)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QBitmap-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qbitmap.html">QBitmap</a> class is a monochrome off-screen paint device used mainly for creating custom <a href="qcursor.html">QCursor</a> and <a href="qbrush.html">QBrush</a> objects, constructing <a href="qregion.html">QRegion</a> objects, and for setting masks for pixmaps and widgets.</p>
+<p><a href="qbitmap.html">QBitmap</a> is a <a href="qpixmap.html">QPixmap</a> subclass ensuring a depth of 1, except for null objects which have a depth of 0. If a pixmap with a depth greater than 1 is assigned to a bitmap, the bitmap will be dithered automatically.</p>
+<p>Use the <a href="qcolor.html">QColor</a> objects <a href="../qtcore/qt.html#GlobalColor-enum">Qt::color0</a> and <a href="../qtcore/qt.html#GlobalColor-enum">Qt::color1</a> when drawing on a <a href="qbitmap.html">QBitmap</a> object (or a <a href="qpixmap.html">QPixmap</a> object with depth 1).</p>
+<p>Painting with <a href="../qtcore/qt.html#GlobalColor-enum">Qt::color0</a> sets the bitmap bits to 0, and painting with <a href="../qtcore/qt.html#GlobalColor-enum">Qt::color1</a> sets the bits to 1. For a bitmap, 0-bits indicate background (or transparent pixels) and 1-bits indicate foreground (or opaque pixels). Use the <a href="qbitmap.html#clear">clear</a>() function to set all the bits to <a href="../qtcore/qt.html#GlobalColor-enum">Qt::color0</a>. Note that using the <a href="../qtcore/qt.html#GlobalColor-enum">Qt::black</a> and <a href="../qtcore/qt.html#GlobalColor-enum">Qt::white</a> colors make no sense because the QColor::pixel() value is not necessarily 0 for black and 1 for white.</p>
+<p>The <a href="qbitmap.html">QBitmap</a> class provides the <a href="qbitmap.html#transformed">transformed</a>() function returning a transformed copy of the bitmap; use the <a href="qtransform.html">QTransform</a> argument to translate, scale, shear, and rotate the bitmap. In addition, <a href="qbitmap.html">QBitmap</a> provides the static <a href="qbitmap.html#fromData">fromData</a>() function which returns a bitmap constructed from the given <code>uchar</code> data, and the static <a href="qbitmap.html#fromImage">fromImage</a>() function returning a converted copy of a <a href="qimage.html">QImage</a> object.</p>
+<p>Just like the <a href="qpixmap.html">QPixmap</a> class, <a href="qbitmap.html">QBitmap</a> is optimized by the use of implicit data sharing. For more information, see the <a href="../qtcore/implicit-sharing.html">Implicit Data Sharing</a> documentation.</p>
+</div>
+<p><b>See also </b><a href="qpixmap.html">QPixmap</a>, <a href="qimage.html">QImage</a>, <a href="qimagereader.html">QImageReader</a>, and <a href="qimagewriter.html">QImageWriter</a>.</p>
+<!-- @@@QBitmap -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QBitmap$$$QBitmapconstQString&constchar* -->
+<h3 class="fn" id="QBitmap-4"><a name="QBitmap-4"></a>QBitmap::<span class="name">QBitmap</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>fileName</i>, const <span class="type">char</span> *<i>format</i> = nullptr)</h3>
+<p>Constructs a bitmap from the file specified by the given <i>fileName</i>. If the file does not exist, or has an unknown format, the bitmap becomes a null bitmap.</p>
+<p>The <i>fileName</i> and <i>format</i> parameters are passed on to the <a href="qpixmap.html#load">QPixmap::load</a>() function. If the file format uses more than 1 bit per pixel, the resulting bitmap will be dithered automatically.</p>
+<p><b>See also </b><a href="qpixmap.html#isNull">QPixmap::isNull</a>() and <a href="qimagereader.html#imageFormat">QImageReader::imageFormat</a>().</p>
+<!-- @@@QBitmap -->
+<!-- $$$QBitmap$$$QBitmapconstQSize& -->
+<h3 class="fn" id="QBitmap-3"><a name="QBitmap-3"></a>QBitmap::<span class="name">QBitmap</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>size</i>)</h3>
+<p>Constructs a bitmap with the given <i>size</i>. The pixels in the bitmap are uninitialized.</p>
+<p><b>See also </b><a href="qbitmap.html#clear">clear</a>().</p>
+<!-- @@@QBitmap -->
+<!-- $$$QBitmap$$$QBitmapintint -->
+<h3 class="fn" id="QBitmap-2"><a name="QBitmap-2"></a>QBitmap::<span class="name">QBitmap</span>(<span class="type">int</span> <i>width</i>, <span class="type">int</span> <i>height</i>)</h3>
+<p>Constructs a bitmap with the given <i>width</i> and <i>height</i>. The pixels inside are uninitialized.</p>
+<p><b>See also </b><a href="qbitmap.html#clear">clear</a>().</p>
+<!-- @@@QBitmap -->
+<!-- $$$QBitmap$$$QBitmapconstQPixmap& -->
+<h3 class="fn" id="QBitmap-1"><a name="QBitmap-1"></a>QBitmap::<span class="name">QBitmap</span>(const <span class="type"><a href="qpixmap.html#QPixmap">QPixmap</a></span> &amp;<i>pixmap</i>)</h3>
+<p>Constructs a bitmap that is a copy of the given <i>pixmap</i>.</p>
+<p>If the pixmap has a depth greater than 1, the resulting bitmap will be dithered automatically.</p>
+<p><b>See also </b><a href="qpixmap.html#depth">QPixmap::depth</a>(), <a href="qbitmap.html#fromImage">fromImage</a>(), and <a href="qbitmap.html#fromData">fromData</a>().</p>
+<!-- @@@QBitmap -->
+<!-- $$$QBitmap[overload1]$$$QBitmap -->
+<h3 class="fn" id="QBitmap"><a name="QBitmap"></a>QBitmap::<span class="name">QBitmap</span>()</h3>
+<p>Constructs a null bitmap.</p>
+<p><b>See also </b><a href="qpixmap.html#isNull">QPixmap::isNull</a>().</p>
+<!-- @@@QBitmap -->
+<!-- $$$operator=$$$operator=constQPixmap& -->
+<h3 class="fn" id="operator-eq-2"><a name="operator-eq-2"></a><span class="type"><a href="qbitmap.html#QBitmap">QBitmap</a></span> &amp;QBitmap::<span class="name">operator=</span>(const <span class="type"><a href="qpixmap.html#QPixmap">QPixmap</a></span> &amp;<i>pixmap</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Assigns the given <i>pixmap</i> to this bitmap and returns a reference to this bitmap.</p>
+<p>If the pixmap has a depth greater than 1, the resulting bitmap will be dithered automatically.</p>
+<p><b>See also </b><a href="qpixmap.html#depth">QPixmap::depth</a>().</p>
+<!-- @@@operator= -->
+<!-- $$$~QBitmap[overload1]$$$~QBitmap -->
+<h3 class="fn" id="dtor.QBitmap"><a name="dtor.QBitmap"></a><code>[virtual] </code>QBitmap::<span class="name">~QBitmap</span>()</h3>
+<p>Destroys the bitmap.</p>
+<!-- @@@~QBitmap -->
+<!-- $$$clear[overload1]$$$clear -->
+<h3 class="fn" id="clear"><a name="clear"></a><span class="type">void</span> QBitmap::<span class="name">clear</span>()</h3>
+<p>Clears the bitmap, setting all its bits to <a href="../qtcore/qt.html#GlobalColor-enum">Qt::color0</a>.</p>
+<!-- @@@clear -->
+<!-- $$$fromData[overload1]$$$fromDataconstQSize&constuchar*QImage::Format -->
+<h3 class="fn" id="fromData"><a name="fromData"></a><code>[static] </code><span class="type"><a href="qbitmap.html#QBitmap">QBitmap</a></span> QBitmap::<span class="name">fromData</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>size</i>, const <span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span> *<i>bits</i>, <span class="type"><a href="qimage.html#Format-enum">QImage::Format</a></span> <i>monoFormat</i> = QImage::Format_MonoLSB)</h3>
+<p>Constructs a bitmap with the given <i>size</i>, and sets the contents to the <i>bits</i> supplied.</p>
+<p>The bitmap data has to be byte aligned and provided in in the bit order specified by <i>monoFormat</i>. The mono format must be either <a href="qimage.html#Format-enum">QImage::Format_Mono</a> or <a href="qimage.html#Format-enum">QImage::Format_MonoLSB</a>. Use <a href="qimage.html#Format-enum">QImage::Format_Mono</a> to specify data on the XBM format.</p>
+<p><b>See also </b><a href="qbitmap.html#fromImage">fromImage</a>().</p>
+<!-- @@@fromData -->
+<!-- $$$fromImage[overload1]$$$fromImageconstQImage&Qt::ImageConversionFlags -->
+<h3 class="fn" id="fromImage"><a name="fromImage"></a><code>[static] </code><span class="type"><a href="qbitmap.html#QBitmap">QBitmap</a></span> QBitmap::<span class="name">fromImage</span>(const <span class="type"><a href="qimage.html">QImage</a></span> &amp;<i>image</i>, <span class="type"><a href="../qtcore/qt.html#ImageConversionFlag-enum">Qt::ImageConversionFlags</a></span> <i>flags</i> = Qt::AutoColor)</h3>
+<p>Returns a copy of the given <i>image</i> converted to a bitmap using the specified image conversion <i>flags</i>.</p>
+<p><b>See also </b><a href="qbitmap.html#fromData">fromData</a>().</p>
+<!-- @@@fromImage -->
+<!-- $$$fromImage$$$fromImageQImage&&Qt::ImageConversionFlags -->
+<h3 class="fn" id="fromImage-1"><a name="fromImage-1"></a><code>[static] </code><span class="type"><a href="qbitmap.html#QBitmap">QBitmap</a></span> QBitmap::<span class="name">fromImage</span>(<span class="type"><a href="qimage.html">QImage</a></span> &amp;&amp;<i>image</i>, <span class="type"><a href="../qtcore/qt.html#ImageConversionFlag-enum">Qt::ImageConversionFlags</a></span> <i>flags</i> = Qt::AutoColor)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a copy of the given <i>image</i> converted to a bitmap using the specified image conversion <i>flags</i>.</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<p><b>See also </b><a href="qbitmap.html#fromData">fromData</a>().</p>
+<!-- @@@fromImage -->
+<!-- $$$swap[overload1]$$$swapQBitmap& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QBitmap::<span class="name">swap</span>(<span class="type"><a href="qbitmap.html#QBitmap">QBitmap</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps bitmap <i>other</i> with this bitmap. This operation is very fast and never fails.</p>
+<p>This function was introduced in  Qt 4.8.</p>
+<!-- @@@swap -->
+<!-- $$$transformed[overload1]$$$transformedconstQTransform& -->
+<h3 class="fn" id="transformed"><a name="transformed"></a><span class="type"><a href="qbitmap.html#QBitmap">QBitmap</a></span> QBitmap::<span class="name">transformed</span>(const <span class="type"><a href="qtransform.html">QTransform</a></span> &amp;<i>matrix</i>) const</h3>
+<p>Returns a copy of this bitmap, transformed according to the given <i>matrix</i>.</p>
+<p><b>See also </b><a href="qpixmap.html#transformed">QPixmap::transformed</a>().</p>
+<!-- @@@transformed -->
+<!-- $$$operator QVariant[overload1]$$$operator QVariant -->
+<h3 class="fn" id="operator-QVariant"><a name="operator-QVariant"></a><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QBitmap::<span class="name">operator QVariant</span>() const</h3>
+<p>Returns the bitmap as a <a href="../qtcore/qvariant.html">QVariant</a>.</p>
+<!-- @@@operator QVariant -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

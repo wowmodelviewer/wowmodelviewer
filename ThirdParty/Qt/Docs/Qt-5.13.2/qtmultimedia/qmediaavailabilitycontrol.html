@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmediaavailabilitycontrol.cpp -->
+  <title>QMediaAvailabilityControl Class | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-modules.html">C++ Classes</a></td><td >QMediaAvailabilityControl</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#macros">Macros</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QMediaAvailabilityControl Class</h1>
+<!-- $$$QMediaAvailabilityControl-brief -->
+<p>The <a href="qmediaavailabilitycontrol.html">QMediaAvailabilityControl</a> class supplies a control for reporting availability of a service. <a href="#details">More...</a></p>
+<!-- @@@QMediaAvailabilityControl -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QMediaAvailabilityControl&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += multimedia</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qmediacontrol.html">QMediaControl</a></td></tr></table></div><ul>
+<li><a href="qmediaavailabilitycontrol-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qmediaavailabilitycontrol.html#dtor.QMediaAvailabilityControl">~QMediaAvailabilityControl</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QMultimedia::AvailabilityStatus </td><td class="memItemRight bottomAlign"><b><a href="qmediaavailabilitycontrol.html#availability">availability</a></b>() const = 0</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmediaavailabilitycontrol.html#availabilityChanged">availabilityChanged</a></b>(QMultimedia::AvailabilityStatus <i>availability</i>)</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmediaavailabilitycontrol.html#QMediaAvailabilityControl">QMediaAvailabilityControl</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+</table></div>
+<a name="macros"></a>
+<h2 id="macros">Macros</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmediaavailabilitycontrol.html#QMediaAvailabilityControl_iid">QMediaAvailabilityControl_iid</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QMediaAvailabilityControl-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>An instance of <a href="qmediaobject.html">QMediaObject</a> (or its derived classes) can report any changes in availability via this control.</p>
+<p>The interface name of <a href="qmediaavailabilitycontrol.html">QMediaAvailabilityControl</a> is <code>org.qt-project.qt.mediaavailabilitycontrol/5.0</code> as defined in <a href="qmediaavailabilitycontrol.html#QMediaAvailabilityControl_iid">QMediaAvailabilityControl_iid</a>.</p>
+</div>
+<p><b>See also </b><a href="qmediaservice.html#requestControl-1">QMediaService::requestControl</a>() and <a href="qmediaobject.html">QMediaObject</a>.</p>
+<!-- @@@QMediaAvailabilityControl -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QMediaAvailabilityControl[overload1]$$$QMediaAvailabilityControlQObject* -->
+<h3 class="fn" id="QMediaAvailabilityControl"><a name="QMediaAvailabilityControl"></a><code>[protected] </code>QMediaAvailabilityControl::<span class="name">QMediaAvailabilityControl</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs an availability control object with <i>parent</i>.</p>
+<!-- @@@QMediaAvailabilityControl -->
+<!-- $$$availabilityChanged[overload1]$$$availabilityChangedQMultimedia::AvailabilityStatus -->
+<h3 class="fn" id="availabilityChanged"><a name="availabilityChanged"></a><code>[signal] </code><span class="type">void</span> QMediaAvailabilityControl::<span class="name">availabilityChanged</span>(<span class="type"><a href="qmultimedia.html#AvailabilityStatus-enum">QMultimedia::AvailabilityStatus</a></span> <i>availability</i>)</h3>
+<p>Signal emitted when the current <i>availability</i> value changed.</p>
+<!-- @@@availabilityChanged -->
+<!-- $$$~QMediaAvailabilityControl[overload1]$$$~QMediaAvailabilityControl -->
+<h3 class="fn" id="dtor.QMediaAvailabilityControl"><a name="dtor.QMediaAvailabilityControl"></a><code>[virtual] </code>QMediaAvailabilityControl::<span class="name">~QMediaAvailabilityControl</span>()</h3>
+<p>Destruct the availability control object.</p>
+<!-- @@@~QMediaAvailabilityControl -->
+<!-- $$$availability[overload1]$$$availability -->
+<h3 class="fn" id="availability"><a name="availability"></a><code>[pure virtual] </code><span class="type"><a href="qmultimedia.html#AvailabilityStatus-enum">QMultimedia::AvailabilityStatus</a></span> QMediaAvailabilityControl::<span class="name">availability</span>() const</h3>
+<p>Returns the current availability of this instance of the media service. If the availability changes at run time (for example, some other media client takes all media resources) the availabilityChanges() signal should be emitted.</p>
+<!-- @@@availability -->
+</div>
+<div class="macros">
+<h2>Macro Documentation</h2>
+<!-- $$$QMediaAvailabilityControl_iid[overload1]$$$QMediaAvailabilityControl_iid -->
+<h3 class="fn" id="QMediaAvailabilityControl_iid"><a name="QMediaAvailabilityControl_iid"></a><span class="name">QMediaAvailabilityControl_iid</span></h3>
+<p><code>org.qt-project.qt.mediaavailabilitycontrol/5.0</code></p>
+<p>Defines the interface name of the <a href="qmediaavailabilitycontrol.html">QMediaAvailabilityControl</a> class.</p>
+<!-- @@@QMediaAvailabilityControl_iid -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

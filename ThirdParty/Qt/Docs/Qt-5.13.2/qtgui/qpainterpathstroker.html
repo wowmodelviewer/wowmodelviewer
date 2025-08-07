@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qpainterpath.cpp -->
+  <title>QPainterPathStroker Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QPainterPathStroker</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPainterPathStroker Class</h1>
+<!-- $$$QPainterPathStroker-brief -->
+<p>The <a href="qpainterpathstroker.html">QPainterPathStroker</a> class is used to generate fillable outlines for a given painter path. <a href="#details">More...</a></p>
+<!-- @@@QPainterPathStroker -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QPainterPathStroker&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.1</td></tr></table></div><p>This class was introduced in  Qt 4.1.</p>
+<ul>
+<li><a href="qpainterpathstroker-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpainterpathstroker.html#QPainterPathStroker-1">QPainterPathStroker</a></b>(const QPen &amp;<i>pen</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpainterpathstroker.html#QPainterPathStroker">QPainterPathStroker</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpainterpathstroker.html#dtor.QPainterPathStroker">~QPainterPathStroker</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::PenCapStyle </td><td class="memItemRight bottomAlign"><b><a href="qpainterpathstroker.html#capStyle">capStyle</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPainterPath </td><td class="memItemRight bottomAlign"><b><a href="qpainterpathstroker.html#createStroke">createStroke</a></b>(const QPainterPath &amp;<i>path</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qpainterpathstroker.html#curveThreshold">curveThreshold</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qpainterpathstroker.html#dashOffset">dashOffset</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;qreal&gt; </td><td class="memItemRight bottomAlign"><b><a href="qpainterpathstroker.html#dashPattern">dashPattern</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::PenJoinStyle </td><td class="memItemRight bottomAlign"><b><a href="qpainterpathstroker.html#joinStyle">joinStyle</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qpainterpathstroker.html#miterLimit">miterLimit</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpainterpathstroker.html#setCapStyle">setCapStyle</a></b>(Qt::PenCapStyle <i>style</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpainterpathstroker.html#setCurveThreshold">setCurveThreshold</a></b>(qreal <i>threshold</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpainterpathstroker.html#setDashOffset">setDashOffset</a></b>(qreal <i>offset</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpainterpathstroker.html#setDashPattern">setDashPattern</a></b>(Qt::PenStyle <i>style</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpainterpathstroker.html#setDashPattern-1">setDashPattern</a></b>(const QVector&lt;qreal&gt; &amp;<i>dashPattern</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpainterpathstroker.html#setJoinStyle">setJoinStyle</a></b>(Qt::PenJoinStyle <i>style</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpainterpathstroker.html#setMiterLimit">setMiterLimit</a></b>(qreal <i>limit</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpainterpathstroker.html#setWidth">setWidth</a></b>(qreal <i>width</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qpainterpathstroker.html#width">width</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPainterPathStroker-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>By calling the <a href="qpainterpathstroker.html#createStroke">createStroke</a>() function, passing a given <a href="qpainterpath.html">QPainterPath</a> as argument, a new painter path representing the outline of the given path is created. The newly created painter path can then be filled to draw the original painter path's outline.</p>
+<p>You can control the various design aspects (width, cap styles, join styles and dash pattern) of the outlining using the following functions:</p>
+<ul>
+<li><a href="qpainterpathstroker.html#setWidth">setWidth</a>()</li>
+<li><a href="qpainterpathstroker.html#setCapStyle">setCapStyle</a>()</li>
+<li><a href="qpainterpathstroker.html#setJoinStyle">setJoinStyle</a>()</li>
+<li><a href="qpainterpathstroker.html#setDashPattern">setDashPattern</a>()</li>
+</ul>
+<p>The <a href="qpainterpathstroker.html#setDashPattern">setDashPattern</a>() function accepts both a <a href="../qtcore/qt.html#PenStyle-enum">Qt::PenStyle</a> object and a vector representation of the pattern as argument.</p>
+<p>In addition you can specify a curve's threshold, controlling the granularity with which a curve is drawn, using the <a href="qpainterpathstroker.html#setCurveThreshold">setCurveThreshold</a>() function. The default threshold is a well adjusted value (0.25), and normally you should not need to modify it. However, you can make the curve's appearance smoother by decreasing its value.</p>
+<p>You can also control the miter limit for the generated outline using the <a href="qpainterpathstroker.html#setMiterLimit">setMiterLimit</a>() function. The miter limit describes how far from each join the miter join can extend. The limit is specified in the units of width so the pixelwise miter limit will be <code>miterlimit * width</code>. This value is only used if the join style is <a href="../qtcore/qt.html#PenJoinStyle-enum">Qt::MiterJoin</a>.</p>
+<p>The painter path generated by the <a href="qpainterpathstroker.html#createStroke">createStroke</a>() function should only be used for outlining the given painter path. Otherwise it may cause unexpected behavior. Generated outlines also require the <a href="../qtcore/qt.html#FillRule-enum">Qt::WindingFill</a> rule which is set by default.</p>
+</div>
+<p><b>See also </b><a href="qpen.html">QPen</a> and <a href="qbrush.html">QBrush</a>.</p>
+<!-- @@@QPainterPathStroker -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QPainterPathStroker$$$QPainterPathStrokerconstQPen& -->
+<h3 class="fn" id="QPainterPathStroker-1"><a name="QPainterPathStroker-1"></a>QPainterPathStroker::<span class="name">QPainterPathStroker</span>(const <span class="type"><a href="qpen.html">QPen</a></span> &amp;<i>pen</i>)</h3>
+<p>Creates a new stroker based on <i>pen</i>.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<!-- @@@QPainterPathStroker -->
+<!-- $$$QPainterPathStroker[overload1]$$$QPainterPathStroker -->
+<h3 class="fn" id="QPainterPathStroker"><a name="QPainterPathStroker"></a>QPainterPathStroker::<span class="name">QPainterPathStroker</span>()</h3>
+<p>Creates a new stroker.</p>
+<!-- @@@QPainterPathStroker -->
+<!-- $$$~QPainterPathStroker[overload1]$$$~QPainterPathStroker -->
+<h3 class="fn" id="dtor.QPainterPathStroker"><a name="dtor.QPainterPathStroker"></a>QPainterPathStroker::<span class="name">~QPainterPathStroker</span>()</h3>
+<p>Destroys the stroker.</p>
+<!-- @@@~QPainterPathStroker -->
+<!-- $$$capStyle[overload1]$$$capStyle -->
+<h3 class="fn" id="capStyle"><a name="capStyle"></a><span class="type"><a href="../qtcore/qt.html#PenCapStyle-enum">Qt::PenCapStyle</a></span> QPainterPathStroker::<span class="name">capStyle</span>() const</h3>
+<p>Returns the cap style of the generated outlines.</p>
+<p><b>See also </b><a href="qpainterpathstroker.html#setCapStyle">setCapStyle</a>().</p>
+<!-- @@@capStyle -->
+<!-- $$$createStroke[overload1]$$$createStrokeconstQPainterPath& -->
+<h3 class="fn" id="createStroke"><a name="createStroke"></a><span class="type"><a href="qpainterpath.html">QPainterPath</a></span> QPainterPathStroker::<span class="name">createStroke</span>(const <span class="type"><a href="qpainterpath.html">QPainterPath</a></span> &amp;<i>path</i>) const</h3>
+<p>Generates a new path that is a fillable area representing the outline of the given <i>path</i>.</p>
+<p>The various design aspects of the outline are based on the stroker's properties: <a href="qpainterpathstroker.html#width">width</a>(), <a href="qpainterpathstroker.html#capStyle">capStyle</a>(), <a href="qpainterpathstroker.html#joinStyle">joinStyle</a>(), <a href="qpainterpathstroker.html#dashPattern">dashPattern</a>(), <a href="qpainterpathstroker.html#curveThreshold">curveThreshold</a>() and <a href="qpainterpathstroker.html#miterLimit">miterLimit</a>().</p>
+<p>The generated path should only be used for outlining the given painter path. Otherwise it may cause unexpected behavior. Generated outlines also require the <a href="../qtcore/qt.html#FillRule-enum">Qt::WindingFill</a> rule which is set by default.</p>
+<!-- @@@createStroke -->
+<!-- $$$curveThreshold[overload1]$$$curveThreshold -->
+<h3 class="fn" id="curveThreshold"><a name="curveThreshold"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QPainterPathStroker::<span class="name">curveThreshold</span>() const</h3>
+<p>Returns the curve flattening threshold for the generated outlines.</p>
+<p><b>See also </b><a href="qpainterpathstroker.html#setCurveThreshold">setCurveThreshold</a>().</p>
+<!-- @@@curveThreshold -->
+<!-- $$$dashOffset[overload1]$$$dashOffset -->
+<h3 class="fn" id="dashOffset"><a name="dashOffset"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QPainterPathStroker::<span class="name">dashOffset</span>() const</h3>
+<p>Returns the dash offset for the generated outlines.</p>
+<p><b>See also </b><a href="qpainterpathstroker.html#setDashOffset">setDashOffset</a>().</p>
+<!-- @@@dashOffset -->
+<!-- $$$dashPattern[overload1]$$$dashPattern -->
+<h3 class="fn" id="dashPattern"><a name="dashPattern"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span>&gt; QPainterPathStroker::<span class="name">dashPattern</span>() const</h3>
+<p>Returns the dash pattern for the generated outlines.</p>
+<p><b>See also </b><a href="qpainterpathstroker.html#setDashPattern">setDashPattern</a>().</p>
+<!-- @@@dashPattern -->
+<!-- $$$joinStyle[overload1]$$$joinStyle -->
+<h3 class="fn" id="joinStyle"><a name="joinStyle"></a><span class="type"><a href="../qtcore/qt.html#PenJoinStyle-enum">Qt::PenJoinStyle</a></span> QPainterPathStroker::<span class="name">joinStyle</span>() const</h3>
+<p>Returns the join style of the generated outlines.</p>
+<p><b>See also </b><a href="qpainterpathstroker.html#setJoinStyle">setJoinStyle</a>().</p>
+<!-- @@@joinStyle -->
+<!-- $$$miterLimit[overload1]$$$miterLimit -->
+<h3 class="fn" id="miterLimit"><a name="miterLimit"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QPainterPathStroker::<span class="name">miterLimit</span>() const</h3>
+<p>Returns the miter limit for the generated outlines.</p>
+<p><b>See also </b><a href="qpainterpathstroker.html#setMiterLimit">setMiterLimit</a>().</p>
+<!-- @@@miterLimit -->
+<!-- $$$setCapStyle[overload1]$$$setCapStyleQt::PenCapStyle -->
+<h3 class="fn" id="setCapStyle"><a name="setCapStyle"></a><span class="type">void</span> QPainterPathStroker::<span class="name">setCapStyle</span>(<span class="type"><a href="../qtcore/qt.html#PenCapStyle-enum">Qt::PenCapStyle</a></span> <i>style</i>)</h3>
+<p>Sets the cap style of the generated outlines to <i>style</i>. If a dash pattern is set, each segment of the pattern is subject to the cap <i>style</i>.</p>
+<p><b>See also </b><a href="qpainterpathstroker.html#capStyle">capStyle</a>().</p>
+<!-- @@@setCapStyle -->
+<!-- $$$setCurveThreshold[overload1]$$$setCurveThresholdqreal -->
+<h3 class="fn" id="setCurveThreshold"><a name="setCurveThreshold"></a><span class="type">void</span> QPainterPathStroker::<span class="name">setCurveThreshold</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>threshold</i>)</h3>
+<p>Specifies the curve flattening <i>threshold</i>, controlling the granularity with which the generated outlines' curve is drawn.</p>
+<p>The default threshold is a well adjusted value (0.25), and normally you should not need to modify it. However, you can make the curve's appearance smoother by decreasing its value.</p>
+<p><b>See also </b><a href="qpainterpathstroker.html#curveThreshold">curveThreshold</a>().</p>
+<!-- @@@setCurveThreshold -->
+<!-- $$$setDashOffset[overload1]$$$setDashOffsetqreal -->
+<h3 class="fn" id="setDashOffset"><a name="setDashOffset"></a><span class="type">void</span> QPainterPathStroker::<span class="name">setDashOffset</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>offset</i>)</h3>
+<p>Sets the dash offset for the generated outlines to <i>offset</i>.</p>
+<p>See the documentation for <a href="qpen.html#setDashOffset">QPen::setDashOffset</a>() for a description of the dash offset.</p>
+<p><b>See also </b><a href="qpainterpathstroker.html#dashOffset">dashOffset</a>().</p>
+<!-- @@@setDashOffset -->
+<!-- $$$setDashPattern[overload1]$$$setDashPatternQt::PenStyle -->
+<h3 class="fn" id="setDashPattern"><a name="setDashPattern"></a><span class="type">void</span> QPainterPathStroker::<span class="name">setDashPattern</span>(<span class="type"><a href="../qtcore/qt.html#PenStyle-enum">Qt::PenStyle</a></span> <i>style</i>)</h3>
+<p>Sets the dash pattern for the generated outlines to <i>style</i>.</p>
+<p><b>See also </b><a href="qpainterpathstroker.html#dashPattern">dashPattern</a>().</p>
+<!-- @@@setDashPattern -->
+<!-- $$$setDashPattern$$$setDashPatternconstQVector<qreal>& -->
+<h3 class="fn" id="setDashPattern-1"><a name="setDashPattern-1"></a><span class="type">void</span> QPainterPathStroker::<span class="name">setDashPattern</span>(const <span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span>&gt; &amp;<i>dashPattern</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Sets the dash pattern for the generated outlines to <i>dashPattern</i>. This function makes it possible to specify custom dash patterns.</p>
+<p>Each element in the vector contains the lengths of the dashes and spaces in the stroke, beginning with the first dash in the first element, the first space in the second element, and alternating between dashes and spaces for each following pair of elements.</p>
+<p>The vector can contain an odd number of elements, in which case the last element will be extended by the length of the first element when the pattern repeats.</p>
+<!-- @@@setDashPattern -->
+<!-- $$$setJoinStyle[overload1]$$$setJoinStyleQt::PenJoinStyle -->
+<h3 class="fn" id="setJoinStyle"><a name="setJoinStyle"></a><span class="type">void</span> QPainterPathStroker::<span class="name">setJoinStyle</span>(<span class="type"><a href="../qtcore/qt.html#PenJoinStyle-enum">Qt::PenJoinStyle</a></span> <i>style</i>)</h3>
+<p>Sets the join style of the generated outlines to <i>style</i>.</p>
+<p><b>See also </b><a href="qpainterpathstroker.html#joinStyle">joinStyle</a>().</p>
+<!-- @@@setJoinStyle -->
+<!-- $$$setMiterLimit[overload1]$$$setMiterLimitqreal -->
+<h3 class="fn" id="setMiterLimit"><a name="setMiterLimit"></a><span class="type">void</span> QPainterPathStroker::<span class="name">setMiterLimit</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>limit</i>)</h3>
+<p>Sets the miter limit of the generated outlines to <i>limit</i>.</p>
+<p>The miter limit describes how far from each join the miter join can extend. The limit is specified in units of the currently set width. So the pixelwise miter limit will be <code>miterlimit * width</code>.</p>
+<p>This value is only used if the join style is <a href="../qtcore/qt.html#PenJoinStyle-enum">Qt::MiterJoin</a>.</p>
+<p><b>See also </b><a href="qpainterpathstroker.html#miterLimit">miterLimit</a>().</p>
+<!-- @@@setMiterLimit -->
+<!-- $$$setWidth[overload1]$$$setWidthqreal -->
+<h3 class="fn" id="setWidth"><a name="setWidth"></a><span class="type">void</span> QPainterPathStroker::<span class="name">setWidth</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>width</i>)</h3>
+<p>Sets the width of the generated outline painter path to <i>width</i>.</p>
+<p>The generated outlines will extend approximately 50% of <i>width</i> to each side of the given input path's original outline.</p>
+<p><b>See also </b><a href="qpainterpathstroker.html#width">width</a>().</p>
+<!-- @@@setWidth -->
+<!-- $$$width[overload1]$$$width -->
+<h3 class="fn" id="width"><a name="width"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QPainterPathStroker::<span class="name">width</span>() const</h3>
+<p>Returns the width of the generated outlines.</p>
+<p><b>See also </b><a href="qpainterpathstroker.html#setWidth">setWidth</a>().</p>
+<!-- @@@width -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

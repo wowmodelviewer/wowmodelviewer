@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdbusmessage.cpp -->
+  <title>QDBusMessage Class | Qt D-Bus</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtdbus-index.html">Qt D-Bus</a></td><td ><a href="qtdbus-module.html">C++ Classes</a></td><td >QDBusMessage</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtdbus-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QDBusMessage Class</h1>
+<!-- $$$QDBusMessage-brief -->
+<p>The <a href="qdbusmessage.html">QDBusMessage</a> class represents one message sent or received over the D-Bus bus. <a href="#details">More...</a></p>
+<!-- @@@QDBusMessage -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QDBusMessage&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += dbus</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.2</td></tr></table></div><p>This class was introduced in  Qt 4.2.</p>
+<ul>
+<li><a href="qdbusmessage-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#MessageType-enum">MessageType</a></b> { MethodCallMessage, SignalMessage, ReplyMessage, ErrorMessage, InvalidMessage }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#QDBusMessage-1">QDBusMessage</a></b>(const QDBusMessage &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#QDBusMessage">QDBusMessage</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDBusMessage &amp;</td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#operator-eq-1">operator=</a></b>(const QDBusMessage &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#dtor.QDBusMessage">~QDBusMessage</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QVariant&gt; </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#arguments">arguments</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#autoStartService">autoStartService</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDBusMessage </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#createErrorReply">createErrorReply</a></b>(const QString <i>name</i>, const QString &amp;<i>msg</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDBusMessage </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#createErrorReply-1">createErrorReply</a></b>(const QDBusError &amp;<i>error</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDBusMessage </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#createErrorReply-2">createErrorReply</a></b>(QDBusError::ErrorType <i>type</i>, const QString &amp;<i>msg</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDBusMessage </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#createReply">createReply</a></b>(const QList&lt;QVariant&gt; &amp;<i>arguments</i> = QList&lt;QVariant&gt;()) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDBusMessage </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#createReply-1">createReply</a></b>(const QVariant &amp;<i>argument</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#errorMessage">errorMessage</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#errorName">errorName</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#interface">interface</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#isDelayedReply">isDelayedReply</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#isInteractiveAuthorizationAllowed">isInteractiveAuthorizationAllowed</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#isReplyRequired">isReplyRequired</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#member">member</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#path">path</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#service">service</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#setArguments">setArguments</a></b>(const QList&lt;QVariant&gt; &amp;<i>arguments</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#setAutoStartService">setAutoStartService</a></b>(bool <i>enable</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#setDelayedReply">setDelayedReply</a></b>(bool <i>enable</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#setInteractiveAuthorizationAllowed">setInteractiveAuthorizationAllowed</a></b>(bool <i>enable</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#signature">signature</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#swap">swap</a></b>(QDBusMessage &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDBusMessage::MessageType </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#type">type</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDBusMessage &amp;</td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#operator-lt-lt">operator&lt;&lt;</a></b>(const QVariant &amp;<i>arg</i>)</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QDBusMessage </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#createError">createError</a></b>(const QString &amp;<i>name</i>, const QString &amp;<i>msg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDBusMessage </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#createError-1">createError</a></b>(const QDBusError &amp;<i>error</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDBusMessage </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#createError-2">createError</a></b>(QDBusError::ErrorType <i>type</i>, const QString &amp;<i>msg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDBusMessage </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#createMethodCall">createMethodCall</a></b>(const QString &amp;<i>service</i>, const QString &amp;<i>path</i>, const QString &amp;<i>interface</i>, const QString &amp;<i>method</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDBusMessage </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#createSignal">createSignal</a></b>(const QString &amp;<i>path</i>, const QString &amp;<i>interface</i>, const QString &amp;<i>name</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDBusMessage </td><td class="memItemRight bottomAlign"><b><a href="qdbusmessage.html#createTargetedSignal">createTargetedSignal</a></b>(const QString &amp;<i>service</i>, const QString &amp;<i>path</i>, const QString &amp;<i>interface</i>, const QString &amp;<i>name</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QDBusMessage-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This object can represent any of the four different types of messages (<a href="qdbusmessage.html#MessageType-enum">MessageType</a>) that can occur on the bus:</p>
+<ul>
+<li>Method calls</li>
+<li>Method return values</li>
+<li>Signal emissions</li>
+<li>Error codes</li>
+</ul>
+<p>Objects of this type are created with the static <a href="qdbusmessage.html#createError">createError</a>(), <a href="qdbusmessage.html#createMethodCall">createMethodCall</a>() and <a href="qdbusmessage.html#createSignal">createSignal</a>() functions. Use the <a href="qdbusconnection.html#send">QDBusConnection::send</a>() function to send the messages.</p>
+</div>
+<!-- @@@QDBusMessage -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$MessageType$$$InvalidMessage$$$MethodCallMessage$$$ReplyMessage$$$ErrorMessage$$$SignalMessage -->
+<h3 class="fn" id="MessageType-enum"><a name="MessageType-enum"></a>enum QDBusMessage::<span class="name">MessageType</span></h3>
+<p>The possible message types:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QDBusMessage::MethodCallMessage</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">a message representing an outgoing or incoming method call</td></tr>
+<tr><td class="topAlign"><code>QDBusMessage::SignalMessage</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">a message representing an outgoing or incoming signal emission</td></tr>
+<tr><td class="topAlign"><code>QDBusMessage::ReplyMessage</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">a message representing the return values of a method call</td></tr>
+<tr><td class="topAlign"><code>QDBusMessage::ErrorMessage</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">a message representing an error condition in response to a method call</td></tr>
+<tr><td class="topAlign"><code>QDBusMessage::InvalidMessage</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">an invalid message: this is never set on messages received from D-Bus</td></tr>
+</table></div>
+<!-- @@@MessageType -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QDBusMessage$$$QDBusMessageconstQDBusMessage& -->
+<h3 class="fn" id="QDBusMessage-1"><a name="QDBusMessage-1"></a>QDBusMessage::<span class="name">QDBusMessage</span>(const <span class="type"><a href="qdbusmessage.html#QDBusMessage">QDBusMessage</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a copy of the object given by <i>other</i>.</p>
+<p>Note: <a href="qdbusmessage.html">QDBusMessage</a> objects are shared. Modifications made to the copy will affect the original one as well. See <a href="qdbusmessage.html#setDelayedReply">setDelayedReply</a>() for more information.</p>
+<!-- @@@QDBusMessage -->
+<!-- $$$QDBusMessage[overload1]$$$QDBusMessage -->
+<h3 class="fn" id="QDBusMessage"><a name="QDBusMessage"></a>QDBusMessage::<span class="name">QDBusMessage</span>()</h3>
+<p>Constructs an empty, invalid <a href="qdbusmessage.html">QDBusMessage</a> object.</p>
+<p><b>See also </b><a href="qdbusmessage.html#createError">createError</a>(), <a href="qdbusmessage.html#createMethodCall">createMethodCall</a>(), and <a href="qdbusmessage.html#createSignal">createSignal</a>().</p>
+<!-- @@@QDBusMessage -->
+<!-- $$$operator=$$$operator=constQDBusMessage& -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type"><a href="qdbusmessage.html#QDBusMessage">QDBusMessage</a></span> &amp;QDBusMessage::<span class="name">operator=</span>(const <span class="type"><a href="qdbusmessage.html#QDBusMessage">QDBusMessage</a></span> &amp;<i>other</i>)</h3>
+<p>Copies the contents of the object given by <i>other</i>.</p>
+<p>Note: <a href="qdbusmessage.html">QDBusMessage</a> objects are shared. Modifications made to the copy will affect the original one as well. See <a href="qdbusmessage.html#setDelayedReply">setDelayedReply</a>() for more information.</p>
+<!-- @@@operator= -->
+<!-- $$$~QDBusMessage[overload1]$$$~QDBusMessage -->
+<h3 class="fn" id="dtor.QDBusMessage"><a name="dtor.QDBusMessage"></a>QDBusMessage::<span class="name">~QDBusMessage</span>()</h3>
+<p>Disposes of the object and frees any resources that were being held.</p>
+<!-- @@@~QDBusMessage -->
+<!-- $$$arguments[overload1]$$$arguments -->
+<h3 class="fn" id="arguments"><a name="arguments"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>&gt; QDBusMessage::<span class="name">arguments</span>() const</h3>
+<p>Returns the list of arguments that are going to be sent or were received from D-Bus.</p>
+<p><b>See also </b><a href="qdbusmessage.html#setArguments">setArguments</a>().</p>
+<!-- @@@arguments -->
+<!-- $$$autoStartService[overload1]$$$autoStartService -->
+<h3 class="fn" id="autoStartService"><a name="autoStartService"></a><span class="type">bool</span> QDBusMessage::<span class="name">autoStartService</span>() const</h3>
+<p>Returns the auto start flag, as set by <a href="qdbusmessage.html#setAutoStartService">setAutoStartService</a>(). By default, this flag is true, which means Qt D-Bus will auto start a service, if it is not running already.</p>
+<p>This function was introduced in  Qt 4.7.</p>
+<p><b>See also </b><a href="qdbusmessage.html#setAutoStartService">setAutoStartService</a>().</p>
+<!-- @@@autoStartService -->
+<!-- $$$createError[overload1]$$$createErrorconstQString&constQString& -->
+<h3 class="fn" id="createError"><a name="createError"></a><code>[static] </code><span class="type"><a href="qdbusmessage.html#QDBusMessage">QDBusMessage</a></span> QDBusMessage::<span class="name">createError</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>msg</i>)</h3>
+<p>Constructs a new DBus message representing an error, with the given <i>name</i> and <i>msg</i>.</p>
+<!-- @@@createError -->
+<!-- $$$createError$$$createErrorconstQDBusError& -->
+<h3 class="fn" id="createError-1"><a name="createError-1"></a><code>[static] </code><span class="type"><a href="qdbusmessage.html#QDBusMessage">QDBusMessage</a></span> QDBusMessage::<span class="name">createError</span>(const <span class="type"><a href="qdbuserror.html">QDBusError</a></span> &amp;<i>error</i>)</h3>
+<p>Constructs a new DBus message representing the given <i>error</i>.</p>
+<!-- @@@createError -->
+<!-- $$$createError$$$createErrorQDBusError::ErrorTypeconstQString& -->
+<h3 class="fn" id="createError-2"><a name="createError-2"></a><code>[static] </code><span class="type"><a href="qdbusmessage.html#QDBusMessage">QDBusMessage</a></span> QDBusMessage::<span class="name">createError</span>(<span class="type"><a href="qdbuserror.html#ErrorType-enum">QDBusError::ErrorType</a></span> <i>type</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>msg</i>)</h3>
+<p>Constructs a new DBus message for the error type <i>type</i> using the message <i>msg</i>. Returns the DBus message.</p>
+<!-- @@@createError -->
+<!-- $$$createErrorReply[overload1]$$$createErrorReplyconstQStringconstQString& -->
+<h3 class="fn" id="createErrorReply"><a name="createErrorReply"></a><span class="type"><a href="qdbusmessage.html#QDBusMessage">QDBusMessage</a></span> QDBusMessage::<span class="name">createErrorReply</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <i>name</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>msg</i>) const</h3>
+<p>Constructs a new DBus message representing an error reply message, with the given <i>name</i> and <i>msg</i>.</p>
+<!-- @@@createErrorReply -->
+<!-- $$$createErrorReply$$$createErrorReplyconstQDBusError& -->
+<h3 class="fn" id="createErrorReply-1"><a name="createErrorReply-1"></a><span class="type"><a href="qdbusmessage.html#QDBusMessage">QDBusMessage</a></span> QDBusMessage::<span class="name">createErrorReply</span>(const <span class="type"><a href="qdbuserror.html">QDBusError</a></span> &amp;<i>error</i>) const</h3>
+<p>Constructs a new DBus message representing an error reply message, from the given <i>error</i> object.</p>
+<!-- @@@createErrorReply -->
+<!-- $$$createErrorReply$$$createErrorReplyQDBusError::ErrorTypeconstQString& -->
+<h3 class="fn" id="createErrorReply-2"><a name="createErrorReply-2"></a><span class="type"><a href="qdbusmessage.html#QDBusMessage">QDBusMessage</a></span> QDBusMessage::<span class="name">createErrorReply</span>(<span class="type"><a href="qdbuserror.html#ErrorType-enum">QDBusError::ErrorType</a></span> <i>type</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>msg</i>) const</h3>
+<p>Constructs a new DBus reply message for the error type <i>type</i> using the message <i>msg</i>. Returns the DBus message.</p>
+<!-- @@@createErrorReply -->
+<!-- $$$createMethodCall[overload1]$$$createMethodCallconstQString&constQString&constQString&constQString& -->
+<h3 class="fn" id="createMethodCall"><a name="createMethodCall"></a><code>[static] </code><span class="type"><a href="qdbusmessage.html#QDBusMessage">QDBusMessage</a></span> QDBusMessage::<span class="name">createMethodCall</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>service</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>path</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>interface</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>method</i>)</h3>
+<p>Constructs a new DBus message representing a method call. A method call always informs its destination address (<i>service</i>, <i>path</i>, <i>interface</i> and <i>method</i>).</p>
+<p>The DBus bus allows calling a method on a given remote object without specifying the destination interface, if the method name is unique. However, if two interfaces on the remote object export the same method name, the result is undefined (one of the two may be called or an error may be returned).</p>
+<p>When using DBus in a peer-to-peer context (i.e&#x2e;, not on a bus), the <i>service</i> parameter is optional.</p>
+<p>The <a href="qdbusinterface.html">QDBusInterface</a> class provides a simpler abstraction to synchronous method calling.</p>
+<p>This function returns a <a href="qdbusmessage.html">QDBusMessage</a> object that can be sent with <a href="qdbusconnection.html#call">QDBusConnection::call</a>().</p>
+<!-- @@@createMethodCall -->
+<!-- $$$createReply[overload1]$$$createReplyconstQList<QVariant>& -->
+<h3 class="fn" id="createReply"><a name="createReply"></a><span class="type"><a href="qdbusmessage.html#QDBusMessage">QDBusMessage</a></span> QDBusMessage::<span class="name">createReply</span>(const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>&gt; &amp;<i>arguments</i> = QList&lt;QVariant&gt;()) const</h3>
+<p>Constructs a new DBus message representing a reply, with the given <i>arguments</i>.</p>
+<!-- @@@createReply -->
+<!-- $$$createReply$$$createReplyconstQVariant& -->
+<h3 class="fn" id="createReply-1"><a name="createReply-1"></a><span class="type"><a href="qdbusmessage.html#QDBusMessage">QDBusMessage</a></span> QDBusMessage::<span class="name">createReply</span>(const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>argument</i>) const</h3>
+<p>Constructs a new DBus message representing a reply, with the given <i>argument</i>.</p>
+<!-- @@@createReply -->
+<!-- $$$createSignal[overload1]$$$createSignalconstQString&constQString&constQString& -->
+<h3 class="fn" id="createSignal"><a name="createSignal"></a><code>[static] </code><span class="type"><a href="qdbusmessage.html#QDBusMessage">QDBusMessage</a></span> QDBusMessage::<span class="name">createSignal</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>path</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>interface</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>)</h3>
+<p>Constructs a new DBus message with the given <i>path</i>, <i>interface</i> and <i>name</i>, representing a signal emission.</p>
+<p>A DBus signal is emitted from one application and is received by all applications that are listening for that signal from that interface.</p>
+<p>The <a href="qdbusmessage.html">QDBusMessage</a> object that is returned can be sent using the <a href="qdbusconnection.html#send">QDBusConnection::send</a>() function.</p>
+<!-- @@@createSignal -->
+<!-- $$$createTargetedSignal[overload1]$$$createTargetedSignalconstQString&constQString&constQString&constQString& -->
+<h3 class="fn" id="createTargetedSignal"><a name="createTargetedSignal"></a><code>[static] </code><span class="type"><a href="qdbusmessage.html#QDBusMessage">QDBusMessage</a></span> QDBusMessage::<span class="name">createTargetedSignal</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>service</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>path</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>interface</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>)</h3>
+<p>Constructs a new DBus message with the given <i>path</i>, <i>interface</i> and <i>name</i>, representing a signal emission to a specific destination.</p>
+<p>A DBus signal is emitted from one application and is received only by the application owning the destination <i>service</i> name.</p>
+<p>The <a href="qdbusmessage.html">QDBusMessage</a> object that is returned can be sent using the <a href="qdbusconnection.html#send">QDBusConnection::send</a>() function.</p>
+<p>This function was introduced in  Qt 5.6.</p>
+<!-- @@@createTargetedSignal -->
+<!-- $$$errorMessage[overload1]$$$errorMessage -->
+<h3 class="fn" id="errorMessage"><a name="errorMessage"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QDBusMessage::<span class="name">errorMessage</span>() const</h3>
+<p>Returns the human-readable message associated with the error that was received.</p>
+<p>This function was introduced in  Qt 4.3.</p>
+<!-- @@@errorMessage -->
+<!-- $$$errorName[overload1]$$$errorName -->
+<h3 class="fn" id="errorName"><a name="errorName"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QDBusMessage::<span class="name">errorName</span>() const</h3>
+<p>Returns the name of the error that was received.</p>
+<!-- @@@errorName -->
+<!-- $$$interface[overload1]$$$interface -->
+<h3 class="fn" id="interface"><a name="interface"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QDBusMessage::<span class="name">interface</span>() const</h3>
+<p>Returns the interface of the method being called (in the case of a method call) or of the signal being received from.</p>
+<!-- @@@interface -->
+<!-- $$$isDelayedReply[overload1]$$$isDelayedReply -->
+<h3 class="fn" id="isDelayedReply"><a name="isDelayedReply"></a><span class="type">bool</span> QDBusMessage::<span class="name">isDelayedReply</span>() const</h3>
+<p>Returns the delayed reply flag, as set by <a href="qdbusmessage.html#setDelayedReply">setDelayedReply</a>(). By default, this flag is false, which means Qt D-Bus will generate automatic replies when necessary.</p>
+<!-- @@@isDelayedReply -->
+<!-- $$$isInteractiveAuthorizationAllowed[overload1]$$$isInteractiveAuthorizationAllowed -->
+<h3 class="fn" id="isInteractiveAuthorizationAllowed"><a name="isInteractiveAuthorizationAllowed"></a><span class="type">bool</span> QDBusMessage::<span class="name">isInteractiveAuthorizationAllowed</span>() const</h3>
+<p>Returns the interactive authorization allowed flag, as set by <a href="qdbusmessage.html#setInteractiveAuthorizationAllowed">setInteractiveAuthorizationAllowed</a>(). By default this flag is false and the other end is expected to make any authorization decisions non-interactively and promptly.</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<p><b>See also </b><a href="qdbusmessage.html#setInteractiveAuthorizationAllowed">setInteractiveAuthorizationAllowed</a>().</p>
+<!-- @@@isInteractiveAuthorizationAllowed -->
+<!-- $$$isReplyRequired[overload1]$$$isReplyRequired -->
+<h3 class="fn" id="isReplyRequired"><a name="isReplyRequired"></a><span class="type">bool</span> QDBusMessage::<span class="name">isReplyRequired</span>() const</h3>
+<p>Returns the flag that indicates if this message should see a reply or not. This is only meaningful for <a href="qdbusmessage.html#MessageType-enum">method call messages</a>: any other kind of message cannot have replies and this function will always return false for them.</p>
+<!-- @@@isReplyRequired -->
+<!-- $$$member[overload1]$$$member -->
+<h3 class="fn" id="member"><a name="member"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QDBusMessage::<span class="name">member</span>() const</h3>
+<p>Returns the name of the signal that was emitted or the name of the method that was called.</p>
+<!-- @@@member -->
+<!-- $$$path[overload1]$$$path -->
+<h3 class="fn" id="path"><a name="path"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QDBusMessage::<span class="name">path</span>() const</h3>
+<p>Returns the path of the object that this message is being sent to (in the case of a method call) or being received from (for a signal).</p>
+<!-- @@@path -->
+<!-- $$$service[overload1]$$$service -->
+<h3 class="fn" id="service"><a name="service"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QDBusMessage::<span class="name">service</span>() const</h3>
+<p>Returns the name of the service or the bus address of the remote method call.</p>
+<!-- @@@service -->
+<!-- $$$setArguments[overload1]$$$setArgumentsconstQList<QVariant>& -->
+<h3 class="fn" id="setArguments"><a name="setArguments"></a><span class="type">void</span> QDBusMessage::<span class="name">setArguments</span>(const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>&gt; &amp;<i>arguments</i>)</h3>
+<p>Sets the arguments that are going to be sent over D-Bus to <i>arguments</i>. Those will be the arguments to a method call or the parameters in the signal.</p>
+<p><b>See also </b><a href="qdbusmessage.html#arguments">arguments</a>().</p>
+<!-- @@@setArguments -->
+<!-- $$$setAutoStartService[overload1]$$$setAutoStartServicebool -->
+<h3 class="fn" id="setAutoStartService"><a name="setAutoStartService"></a><span class="type">void</span> QDBusMessage::<span class="name">setAutoStartService</span>(<span class="type">bool</span> <i>enable</i>)</h3>
+<p>Sets the auto start flag to <i>enable</i>. This flag only makes sense for method call messages, where it tells the D-Bus server to either auto start the service responsible for the service name, or not to auto start it.</p>
+<p>By default this flag is true, i.e&#x2e; a service is autostarted. This means:</p>
+<p>When the service that this method call is sent to is already running, the method call is sent to it. If the service is not running yet, the D-Bus daemon is requested to autostart the service that is assigned to this service name. This is handled by .service files that are placed in a directory known to the D-Bus server. These files then each contain a service name and the path to a program that should be executed when this service name is requested.</p>
+<p>This function was introduced in  Qt 4.7.</p>
+<p><b>See also </b><a href="qdbusmessage.html#autoStartService">autoStartService</a>().</p>
+<!-- @@@setAutoStartService -->
+<!-- $$$setDelayedReply[overload1]$$$setDelayedReplybool -->
+<h3 class="fn" id="setDelayedReply"><a name="setDelayedReply"></a><span class="type">void</span> QDBusMessage::<span class="name">setDelayedReply</span>(<span class="type">bool</span> <i>enable</i>) const</h3>
+<p>Sets whether the message will be replied later (if <i>enable</i> is true) or if an automatic reply should be generated by Qt D-Bus (if <i>enable</i> is false).</p>
+<p>In D-Bus, all method calls must generate a reply to the caller, unless the caller explicitly indicates otherwise (see <a href="qdbusmessage.html#isReplyRequired">isReplyRequired</a>()). <a href="qtdbus-index.html">QtDBus</a> automatically generates such replies for any slots being called, but it also allows slots to indicate whether they will take responsibility of sending the reply at a later time, after the function has finished processing.</p>
+<p><b>See also </b><a href="qdbusmessage.html#isDelayedReply">isDelayedReply</a>() and <a href="qdbusdeclaringslots.html#delayed-replies">Delayed Replies</a>.</p>
+<!-- @@@setDelayedReply -->
+<!-- $$$setInteractiveAuthorizationAllowed[overload1]$$$setInteractiveAuthorizationAllowedbool -->
+<h3 class="fn" id="setInteractiveAuthorizationAllowed"><a name="setInteractiveAuthorizationAllowed"></a><span class="type">void</span> QDBusMessage::<span class="name">setInteractiveAuthorizationAllowed</span>(<span class="type">bool</span> <i>enable</i>)</h3>
+<p>Sets the interactive authorization flag to <i>enable</i>. This flag only makes sense for method call messages, where it tells the D-Bus server that the caller of the method is prepared to wait for interactive authorization to take place (for instance via Polkit) before the actual method is processed.</p>
+<p>By default this flag is false and the other end is expected to make any authorization decisions non-interactively and promptly.</p>
+<p>The <code>org.freedesktop.DBus.Error.InteractiveAuthorizationRequired</code> error indicates that authorization failed, but could have succeeded if this flag had been set.</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<p><b>See also </b><a href="qdbusmessage.html#isInteractiveAuthorizationAllowed">isInteractiveAuthorizationAllowed</a>().</p>
+<!-- @@@setInteractiveAuthorizationAllowed -->
+<!-- $$$signature[overload1]$$$signature -->
+<h3 class="fn" id="signature"><a name="signature"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QDBusMessage::<span class="name">signature</span>() const</h3>
+<p>Returns the signature of the signal that was received or for the output arguments of a method call.</p>
+<!-- @@@signature -->
+<!-- $$$swap[overload1]$$$swapQDBusMessage& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QDBusMessage::<span class="name">swap</span>(<span class="type"><a href="qdbusmessage.html#QDBusMessage">QDBusMessage</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps this <a href="qdbusmessage.html">QDBusMessage</a> instance with <i>other</i>.</p>
+<!-- @@@swap -->
+<!-- $$$type[overload1]$$$type -->
+<h3 class="fn" id="type"><a name="type"></a><span class="type"><a href="qdbusmessage.html#MessageType-enum">QDBusMessage::MessageType</a></span> QDBusMessage::<span class="name">type</span>() const</h3>
+<p>Returns the message type.</p>
+<!-- @@@type -->
+<!-- $$$operator<<[overload1]$$$operator<<constQVariant& -->
+<h3 class="fn" id="operator-lt-lt"><a name="operator-lt-lt"></a><span class="type"><a href="qdbusmessage.html#QDBusMessage">QDBusMessage</a></span> &amp;QDBusMessage::<span class="name">operator&lt;&lt;</span>(const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>arg</i>)</h3>
+<p>Appends the argument <i>arg</i> to the list of arguments to be sent over D-Bus in a method call or signal emission.</p>
+<!-- @@@operator<< -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

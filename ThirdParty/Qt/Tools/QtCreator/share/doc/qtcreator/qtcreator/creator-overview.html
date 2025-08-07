@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-overview.qdoc -->
+  <title>IDE Overview | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >IDE Overview</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-getting-started.html" />
+  <link rel="next" href="creator-quick-tour.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-getting-started.html">Getting Started</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-quick-tour.html">User Interface</a>
+</p><p/>
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">IDE Overview</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-overview.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Qt Creator is an integrated development environment (IDE) that provides you with tools to design and develop applications with the Qt application framework. Qt is designed for developing applications and user interfaces once and deploying them to several desktop, embedded, and mobile operating systems. Qt Creator provides you with tools for accomplishing your tasks throughout the whole application development life-cycle, from creating a project to deploying the application to the target platforms.</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><img src="images/creator_managingprojects.png" alt="" /></td><td ><img src="images/creator_designinguserinterface.png" alt="" /></td><td ><img src="images/creator_coding.png" alt="" /></td></tr>
+<tr valign="top" class="even"><td ><b><a href="creator-project-managing.html#">Managing Projects</a></b><p>To be able to build and run applications, Qt Creator needs the same information as a compiler would need. This information is specified in the project settings.</p>
+<p>Setting up a new project in Qt Creator is aided by a wizard that guides you step-by-step through the project creation process, creates the necessary files, and specifies settings depending on the choices you make. For more information, see <a href="creator-project-managing.html#">Managing Projects</a>.</p>
+</td><td ><b><a href="creator-design-mode.html#">Designing User Interfaces</a></b><p>Qt Creator provides integrated visual editors for creating Qt Quick and widget-based applications in the Design mode. To create intuitive, modern-looking, fluid user interfaces, you can use <a href="http://doc.qt.io/qt-5/qtquick-index.html">Qt Quick</a>. If you need a traditional user interface that is clearly structured and enforces a platform look and feel, you can use the integrated Qt Designer. For more information, see <a href="creator-design-mode.html#">Designing User Interfaces</a>.</p>
+</td><td ><b><a href="creator-coding.html#">Coding</a></b><p>As an IDE, Qt Creator differs from a text editor in that it knows how to build and run applications. It understands the C++ and QML languages as code, not just as plain text. This enables it to provide you with useful features, such as semantic highlighting, checking code syntax, code completion, and refactoring actions. Qt Creator supports some of these services also for other programming languages, such as Python, for which a <i>language server</i> is available that provides information about the code to IDEs. For more information, see <a href="creator-coding.html#">Coding</a>.</p>
+</td></tr>
+<tr valign="top" class="odd"><td ><img src="images/creator_buildingrunning.png" alt="" /></td><td ><img src="images/creator_testing.png" alt="" /></td><td ><img src="images/creator_publishing.png" alt="" /></td></tr>
+<tr valign="top" class="even"><td ><b><a href="creator-building-running.html#">Building and Running</a></b><p>Qt Creator is integrated with cross-platform systems for build automation: qmake, Qbs, CMake, and Autotools. In addition, you can import projects as <i>generic projects</i> and fully control the steps and commands used to build the project.</p>
+<p>Qt Creator provides support for running and deploying Qt applications built for the desktop environment or a <a href="creator-glossary.html#glossary-device">device</a>. <a href="creator-glossary.html#glossary-buildandrun-kit">Kits</a>, build, run, and deployment settings allow you to quickly switch between different setups and target platforms.</p>
+<p>For more information, see <a href="creator-building-running.html#">Building and Running</a>.</p>
+</td><td ><b><a href="creator-testing.html#">Testing</a></b><p>Qt Creator is integrated to several external native debuggers: GNU Symbolic Debugger (GDB), Microsoft Console Debugger (CDB), and internal JavaScript debugger. In the <b>Debug</b> mode, you can inspect the state of your application while debugging.</p>
+<p>The memory and CPU power available on devices are limited and you should use them carefully. Qt Creator integrates Valgrind code analysis tools for detecting memory leaks and profiling function execution. In addition, the QML Profiler enables you to profile Qt Quick applications.</p>
+<p>Qt Creator is integrated to the <a href="http://doc.qt.io/qt-5/qttest-index.html">Qt Test</a>, Google C++ Testing, and Boost.Test frameworks for unit testing applications and libraries. You can use Qt Creator to create, build, and run autotests.</p>
+<p>For more information, see <a href="creator-testing.html#">Testing</a>.</p>
+</td><td ><b>Publishing</b><p>Qt Creator allows you to create installation packages for mobile devices that are suitable for publishing to application stores and other channels. You must make sure that the package contents meet the requirements for publishing on the channel.</p>
+<p>For more information, see <a href="http://doc.qt.io/qt-5/android-publishing-to-googleplay.html">Publishing to Google Play</a>.</p>
+</td></tr>
+</table></div>
+</div>
+<!-- @@@creator-overview.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-getting-started.html">Getting Started</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-quick-tour.html">User Interface</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

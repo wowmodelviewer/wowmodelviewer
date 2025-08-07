@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcameraexposurecontrol.cpp -->
+  <title>QCameraExposureControl Class | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-modules.html">C++ Classes</a></td><td >QCameraExposureControl</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#macros">Macros</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCameraExposureControl Class</h1>
+<!-- $$$QCameraExposureControl-brief -->
+<p>The <a href="qcameraexposurecontrol.html">QCameraExposureControl</a> class allows controlling camera exposure parameters. <a href="#details">More...</a></p>
+<!-- @@@QCameraExposureControl -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QCameraExposureControl&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += multimedia</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qmediacontrol.html">QMediaControl</a></td></tr></table></div><ul>
+<li><a href="qcameraexposurecontrol-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qcameraexposurecontrol.html#ExposureParameter-enum">ExposureParameter</a></b> { ISO, Aperture, ShutterSpeed, ExposureCompensation, ..., ExtendedExposureParameter }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qcameraexposurecontrol.html#dtor.QCameraExposureControl">~QCameraExposureControl</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QVariant </td><td class="memItemRight bottomAlign"><b><a href="qcameraexposurecontrol.html#actualValue">actualValue</a></b>(QCameraExposureControl::ExposureParameter <i>parameter</i>) const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qcameraexposurecontrol.html#isParameterSupported">isParameterSupported</a></b>(QCameraExposureControl::ExposureParameter <i>parameter</i>) const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QVariant </td><td class="memItemRight bottomAlign"><b><a href="qcameraexposurecontrol.html#requestedValue">requestedValue</a></b>(QCameraExposureControl::ExposureParameter <i>parameter</i>) const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qcameraexposurecontrol.html#setValue">setValue</a></b>(QCameraExposureControl::ExposureParameter <i>parameter</i>, const QVariant &amp;<i>value</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QVariantList </td><td class="memItemRight bottomAlign"><b><a href="qcameraexposurecontrol.html#supportedParameterRange">supportedParameterRange</a></b>(QCameraExposureControl::ExposureParameter <i>parameter</i>, bool *<i>continuous</i>) const = 0</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcameraexposurecontrol.html#actualValueChanged">actualValueChanged</a></b>(int <i>parameter</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcameraexposurecontrol.html#parameterRangeChanged">parameterRangeChanged</a></b>(int <i>parameter</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcameraexposurecontrol.html#requestedValueChanged">requestedValueChanged</a></b>(int <i>parameter</i>)</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcameraexposurecontrol.html#QCameraExposureControl">QCameraExposureControl</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+</table></div>
+<a name="macros"></a>
+<h2 id="macros">Macros</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcameraexposurecontrol.html#QCameraExposureControl_iid">QCameraExposureControl_iid</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCameraExposureControl-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qcameraexposure.html">QCameraExposure</a> class is the usual method of adjusting exposure related parameters when using camera functionality. This class provides a more complete but less easy to use interface, and also forms the interface to implement when writing a new implementation of <a href="qcamera.html">QCamera</a> functionality.</p>
+<p>You can adjust a number of parameters that will affect images and video taken with the corresponding <a href="qcamera.html">QCamera</a> object - see the <a href="qcameraexposurecontrol.html#ExposureParameter-enum">ExposureParameter</a> enumeration.</p>
+<p>The interface name of <a href="qcameraexposurecontrol.html">QCameraExposureControl</a> is <code>org.qt-project.qt.cameraexposurecontrol/5.0</code> as defined in <a href="qcameraexposurecontrol.html#QCameraExposureControl_iid">QCameraExposureControl_iid</a>.</p>
+</div>
+<p><b>See also </b><a href="qcameraexposure.html">QCameraExposure</a> and <a href="qcamera.html">QCamera</a>.</p>
+<!-- @@@QCameraExposureControl -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$ExposureParameter$$$ISO$$$Aperture$$$ShutterSpeed$$$ExposureCompensation$$$FlashPower$$$FlashCompensation$$$TorchPower$$$SpotMeteringPoint$$$ExposureMode$$$MeteringMode$$$ExtendedExposureParameter -->
+<h3 class="fn" id="ExposureParameter-enum"><a name="ExposureParameter-enum"></a>enum QCameraExposureControl::<span class="name">ExposureParameter</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QCameraExposureControl::ISO</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Camera ISO sensitivity, specified as integer value.</td></tr>
+<tr><td class="topAlign"><code>QCameraExposureControl::Aperture</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Lens aperture is specified as an qreal F number. The supported apertures list can change depending on the focal length, in such a case the exposureParameterRangeChanged() signal is emitted.</td></tr>
+<tr><td class="topAlign"><code>QCameraExposureControl::ShutterSpeed</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Shutter speed in seconds, specified as qreal.</td></tr>
+<tr><td class="topAlign"><code>QCameraExposureControl::ExposureCompensation</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">Exposure compensation, specified as qreal EV value.</td></tr>
+<tr><td class="topAlign"><code>QCameraExposureControl::FlashPower</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">Manual flash power, specified as qreal value. Accepted power range is [0..1&#x2e;0], with 0 value means no flash and 1.0 corresponds to full flash power.</td></tr>
+</table></div>
+<p>This value is only used in the <a href="qcameraexposure.html#FlashMode-enum">manual flash mode</a>.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="even"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QCameraExposureControl::TorchPower</code></td><td class="topAlign tblval"><code>6</code></td><td class="topAlign">Manual torch power, specified as qreal value. Accepted power range is [0..1&#x2e;0], with 0 value means no light and 1.0 corresponds to full torch power.</td></tr>
+</table></div>
+<p>This value is only used in the <a href="qcameraexposure.html#FlashMode-enum">torch flash mode</a>.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QCameraExposureControl::FlashCompensation</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">Flash compensation, specified as qreal EV value.</td></tr>
+<tr><td class="topAlign"><code>QCameraExposureControl::SpotMeteringPoint</code></td><td class="topAlign tblval"><code>7</code></td><td class="topAlign">The relative frame coordinate of the point to use for exposure metering in spot metering mode, specified as a <a href="../qtcore/qpointf.html">QPointF</a>.</td></tr>
+<tr><td class="topAlign"><code>QCameraExposureControl::ExposureMode</code></td><td class="topAlign tblval"><code>8</code></td><td class="topAlign">Camera exposure mode.</td></tr>
+<tr><td class="topAlign"><code>QCameraExposureControl::MeteringMode</code></td><td class="topAlign tblval"><code>9</code></td><td class="topAlign">Camera metering mode.</td></tr>
+<tr><td class="topAlign"><code>QCameraExposureControl::ExtendedExposureParameter</code></td><td class="topAlign tblval"><code>1000</code></td><td class="topAlign">The base value for platform specific extended parameters. For such parameters the sequential values starting from ExtendedExposureParameter should be used.</td></tr>
+</table></div>
+<!-- @@@ExposureParameter -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QCameraExposureControl[overload1]$$$QCameraExposureControlQObject* -->
+<h3 class="fn" id="QCameraExposureControl"><a name="QCameraExposureControl"></a><code>[protected] </code>QCameraExposureControl::<span class="name">QCameraExposureControl</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a camera exposure control object with <i>parent</i>.</p>
+<!-- @@@QCameraExposureControl -->
+<!-- $$$actualValueChanged[overload1]$$$actualValueChangedint -->
+<h3 class="fn" id="actualValueChanged"><a name="actualValueChanged"></a><code>[signal] </code><span class="type">void</span> QCameraExposureControl::<span class="name">actualValueChanged</span>(<span class="type">int</span> <i>parameter</i>)</h3>
+<p>Signal emitted when the actual exposure <i>parameter</i> value has changed, usually in result of auto exposure algorithms or manual exposure parameter applied.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@actualValueChanged -->
+<!-- $$$parameterRangeChanged[overload1]$$$parameterRangeChangedint -->
+<h3 class="fn" id="parameterRangeChanged"><a name="parameterRangeChanged"></a><code>[signal] </code><span class="type">void</span> QCameraExposureControl::<span class="name">parameterRangeChanged</span>(<span class="type">int</span> <i>parameter</i>)</h3>
+<p>Signal emitted when the supported range of exposure <i>parameter</i> values has changed.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@parameterRangeChanged -->
+<!-- $$$requestedValueChanged[overload1]$$$requestedValueChangedint -->
+<h3 class="fn" id="requestedValueChanged"><a name="requestedValueChanged"></a><code>[signal] </code><span class="type">void</span> QCameraExposureControl::<span class="name">requestedValueChanged</span>(<span class="type">int</span> <i>parameter</i>)</h3>
+<p>Signal emitted when the requested exposure <i>parameter</i> value has changed, usually in result of <a href="qcameraexposurecontrol.html#setValue">setValue</a>() call.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@requestedValueChanged -->
+<!-- $$$~QCameraExposureControl[overload1]$$$~QCameraExposureControl -->
+<h3 class="fn" id="dtor.QCameraExposureControl"><a name="dtor.QCameraExposureControl"></a><code>[virtual] </code>QCameraExposureControl::<span class="name">~QCameraExposureControl</span>()</h3>
+<p>Destroys the camera exposure control object.</p>
+<!-- @@@~QCameraExposureControl -->
+<!-- $$$actualValue[overload1]$$$actualValueQCameraExposureControl::ExposureParameter -->
+<h3 class="fn" id="actualValue"><a name="actualValue"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QCameraExposureControl::<span class="name">actualValue</span>(<span class="type"><a href="qcameraexposurecontrol.html#ExposureParameter-enum">QCameraExposureControl::ExposureParameter</a></span> <i>parameter</i>) const</h3>
+<p>Returns the actual exposure <i>parameter</i> value, or invalid QVariant() if the value is unknown or not supported.</p>
+<p>The actual parameter value may differ for the requested one if automatic mode is selected or camera supports only limited set of values within the supported range.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@actualValue -->
+<!-- $$$isParameterSupported[overload1]$$$isParameterSupportedQCameraExposureControl::ExposureParameter -->
+<h3 class="fn" id="isParameterSupported"><a name="isParameterSupported"></a><code>[pure virtual] </code><span class="type">bool</span> QCameraExposureControl::<span class="name">isParameterSupported</span>(<span class="type"><a href="qcameraexposurecontrol.html#ExposureParameter-enum">QCameraExposureControl::ExposureParameter</a></span> <i>parameter</i>) const</h3>
+<p>Returns true is exposure <i>parameter</i> is supported by backend.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@isParameterSupported -->
+<!-- $$$requestedValue[overload1]$$$requestedValueQCameraExposureControl::ExposureParameter -->
+<h3 class="fn" id="requestedValue"><a name="requestedValue"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QCameraExposureControl::<span class="name">requestedValue</span>(<span class="type"><a href="qcameraexposurecontrol.html#ExposureParameter-enum">QCameraExposureControl::ExposureParameter</a></span> <i>parameter</i>) const</h3>
+<p>Returns the requested exposure <i>parameter</i> value.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@requestedValue -->
+<!-- $$$setValue[overload1]$$$setValueQCameraExposureControl::ExposureParameterconstQVariant& -->
+<h3 class="fn" id="setValue"><a name="setValue"></a><code>[pure virtual] </code><span class="type">bool</span> QCameraExposureControl::<span class="name">setValue</span>(<span class="type"><a href="qcameraexposurecontrol.html#ExposureParameter-enum">QCameraExposureControl::ExposureParameter</a></span> <i>parameter</i>, const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>value</i>)</h3>
+<p>Set the exposure <i>parameter</i> to <i>value</i>. If a null or invalid <a href="../qtcore/qvariant.html">QVariant</a> is passed, backend should choose the value automatically, and if possible report the actual value to user with <a href="qcameraexposurecontrol.html#actualValue">QCameraExposureControl::actualValue</a>().</p>
+<p>Returns true if parameter is supported and value is correct.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@setValue -->
+<!-- $$$supportedParameterRange[overload1]$$$supportedParameterRangeQCameraExposureControl::ExposureParameterbool* -->
+<h3 class="fn" id="supportedParameterRange"><a name="supportedParameterRange"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qvariant.html#QVariantList-typedef">QVariantList</a></span> QCameraExposureControl::<span class="name">supportedParameterRange</span>(<span class="type"><a href="qcameraexposurecontrol.html#ExposureParameter-enum">QCameraExposureControl::ExposureParameter</a></span> <i>parameter</i>, <span class="type">bool</span> *<i>continuous</i>) const</h3>
+<p>Returns the list of supported <i>parameter</i> values;</p>
+<p>If the camera supports arbitrary exposure parameter value within the supported range, *<i>continuous</i> is set to true, otherwise *<i>continuous</i> is set to false.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@supportedParameterRange -->
+</div>
+<div class="macros">
+<h2>Macro Documentation</h2>
+<!-- $$$QCameraExposureControl_iid[overload1]$$$QCameraExposureControl_iid -->
+<h3 class="fn" id="QCameraExposureControl_iid"><a name="QCameraExposureControl_iid"></a><span class="name">QCameraExposureControl_iid</span></h3>
+<p><code>org.qt-project.qt.cameraexposurecontrol/5.0</code></p>
+<p>Defines the interface name of the <a href="qcameraexposurecontrol.html">QCameraExposureControl</a> class.</p>
+<!-- @@@QCameraExposureControl_iid -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

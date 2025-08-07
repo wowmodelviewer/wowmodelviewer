@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickshadereffectmesh.cpp -->
+  <title>BorderImageMesh QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >BorderImageMesh QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">BorderImageMesh QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$BorderImageMesh-brief -->
+<p>Defines a mesh with vertices arranged like those of a <a href="qml-qtquick-borderimage.html">BorderImage</a>. <a href="#details">More...</a></p>
+<!-- @@@BorderImageMesh -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr></table></div><ul>
+<li><a href="qml-qtquick-borderimagemesh-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-borderimagemesh.html#border-prop">border</a></b></b><ul>
+<li class="fn"><b><b><a href="qml-qtquick-borderimagemesh.html#border.left-prop">border.left</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-borderimagemesh.html#border.right-prop">border.right</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-borderimagemesh.html#border.top-prop">border.top</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-borderimagemesh.html#border.bottom-prop">border.bottom</a></b></b> : int</li>
+</ul>
+</li>
+<li class="fn"><b><b><a href="qml-qtquick-borderimagemesh.html#horizontalTileMode-prop">horizontalTileMode</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-borderimagemesh.html#size-prop">size</a></b></b> : size</li>
+<li class="fn"><b><b><a href="qml-qtquick-borderimagemesh.html#verticalTileMode-prop">verticalTileMode</a></b></b> : enumeration</li>
+</ul>
+<!-- $$$BorderImageMesh-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><a href="qml-qtquick-borderimagemesh.html">BorderImageMesh</a> provides <a href="qml-qtquick-borderimage.html">BorderImage</a>-like capabilities to a <a href="qml-qtquick-shadereffect.html">ShaderEffect</a> without the need for a potentially costly <a href="qml-qtquick-shadereffectsource.html">ShaderEffectSource</a>.</p>
+<p>The following are functionally equivalent:</p>
+<pre class="qml">
+
+  BorderImage {
+      id: borderImage
+      border {
+          left: 10
+          right: 10
+          top: 10
+          bottom: 10
+      }
+      source: &quot;myImage.png&quot;
+      visible: false
+  }
+  ShaderEffectSource {
+      id: effectSource
+      sourceItem: borderImage
+      visible: false
+  }
+  ShaderEffect {
+      property var source: effectSource
+      ...
+  }
+
+</pre>
+<pre class="qml">
+
+  Image {
+      id: image
+      source: &quot;myImage.png&quot;
+      visible: false
+  }
+  ShaderEffect {
+      property var source: image
+      mesh: BorderImageMesh {
+          border {
+              left: 10
+              right: 10
+              top: 10
+              bottom: 10
+          }
+          size: image.sourceSize
+      }
+      ...
+  }
+
+</pre>
+<p>But the <a href="qml-qtquick-borderimagemesh.html">BorderImageMesh</a> version can typically be better optimized.</p>
+<!-- @@@BorderImageMesh -->
+<h2>Property Documentation</h2>
+<!-- $$$ -->
+<div class="qmlitem"><div class="qmlproto"><div class="table"><table class="qmlname"><tr valign="top" class="odd" id="horizontalTileMode-prop"><td class="tblQmlPropNode"><p><a name="horizontalTileMode-prop"></a><span class="name">horizontalTileMode</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr><tr valign="top" class="odd" id="verticalTileMode-prop"><td class="tblQmlPropNode"><p><a name="verticalTileMode-prop"></a><span class="name">verticalTileMode</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr></table></div></div><div class="qmldoc"><p>This property describes how to repeat or stretch the middle parts of an image.</p>
+<ul>
+<li><a href="qml-qtquick-borderimage.html">BorderImage</a>.Stretch - Scales the image to fit to the available area.</li>
+<li><a href="qml-qtquick-borderimage.html">BorderImage</a>.Repeat - Tile the image until there is no more space. May crop the last image.</li>
+<li><a href="qml-qtquick-borderimage.html">BorderImage</a>.Round - Like Repeat, but scales the images down to ensure that the last image is not cropped.</li>
+</ul>
+<p>The default tile mode for each property is <a href="qml-qtquick-borderimage.html">BorderImage</a>.Stretch.</p>
+</div></div><!-- @@@ -->
+<br/>
+<!-- $$$border -->
+<div class="qmlitem"><div class="qmlproto"><div class="table"><table class="qmlname"><tr valign="top" class="even" id="border-prop"><th class="centerAlign"><p><a name="border-prop"></a><b>border group</b></p></th></tr><tr valign="top" class="odd" id="border.left-prop"><td class="tblQmlPropNode"><p><a name="border.left-prop"></a><span class="name">border.left</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr><tr valign="top" class="odd" id="border.right-prop"><td class="tblQmlPropNode"><p><a name="border.right-prop"></a><span class="name">border.right</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr><tr valign="top" class="odd" id="border.top-prop"><td class="tblQmlPropNode"><p><a name="border.top-prop"></a><span class="name">border.top</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr><tr valign="top" class="odd" id="border.bottom-prop"><td class="tblQmlPropNode"><p><a name="border.bottom-prop"></a><span class="name">border.bottom</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr></table></div></div><div class="qmldoc"><p>The 4 border lines (2 horizontal and 2 vertical) break the image into 9 sections, as shown below:</p>
+<p class="centerAlign"><img src="images/declarative-scalegrid.png" alt="" /></p><p>Each border line (left, right, top, and bottom) specifies an offset in pixels from the respective edge of the mesh. By default, each border line has a value of 0.</p>
+<p>For example, the following definition sets the bottom line 10 pixels up from the bottom of the mesh:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-borderimagemesh.html">BorderImageMesh</a></span> {
+      <span class="name">border</span>.bottom: <span class="number">10</span>
+      <span class="comment">// ...</span>
+  }
+
+</pre>
+</div></div><!-- @@@border -->
+<br/>
+<!-- $$$size -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="size-prop"></a><span class="name">size</span> : <span class="type"><a href="../qtqml/qml-size.html">size</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The base size of the mesh. This generally corresponds to the <a href="qml-qtquick-image.html#sourceSize-prop">sourceSize</a> of the image being used by the <a href="qml-qtquick-shadereffect.html">ShaderEffect</a>.</p>
+</div></div><!-- @@@size -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

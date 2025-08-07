@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- plugandpaint.qdoc -->
+  <title>Plug &amp; Paint Extra Filters Example | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Plug &amp; Paint Extra Filters Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Plug &amp; Paint Extra Filters Example</h1>
+<span class="subtitle"></span>
+<!-- $$$tools/plugandpaint/plugins/extrafilters-brief -->
+<p>A plugin providing the extra filters.</p>
+<!-- @@@tools/plugandpaint/plugins/extrafilters -->
+<!-- $$$tools/plugandpaint/plugins/extrafilters-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/plugandpaint.png" alt="Screenshot of the Plug &amp; Paint example" /></p><p>The Extra Filters example is a plugin for the <a href="qtwidgets-tools-plugandpaint-app-example.html">Plug &amp; Paint</a> example. It provides a set of filters in addition to those provided by the <a href="qtwidgets-tools-plugandpaint-plugins-basictools-example.html">Basic Tools</a> plugin.</p>
+<p>Since the approach is identical to <a href="qtwidgets-tools-plugandpaint-plugins-basictools-example.html">Basic Tools</a>, we won't review the code here. The only part of interest is the <code>.pro</code> file, since Extra Filters is a dynamic plugin (<a href="qtwidgets-tools-plugandpaint-plugins-basictools-example.html">Basic Tools</a> is linked statically into the Plug &amp; Paint executable).</p>
+<p>Here's the project file for building the Extra Filters plugin:</p>
+<pre class="cpp">
+
+  TEMPLATE      = lib
+  CONFIG       += plugin
+  QT           += widgets
+  INCLUDEPATH  += ../../app
+  HEADERS       = extrafiltersplugin.h
+  SOURCES       = extrafiltersplugin.cpp
+  TARGET        = $$qtLibraryTarget(pnp_extrafilters)
+  DESTDIR       = ../../plugins
+
+</pre>
+<p>The <code>.pro</code> file differs from typical <code>.pro</code> files in many respects. First, it starts with a <code>TEMPLATE</code> entry specifying <code>lib</code>. (The default template is <code>app</code>.) It also adds <code>plugin</code> to the <code>CONFIG</code> variable. This is necessary on some platforms to avoid generating symbolic links with version numbers in the file name, which is appropriate for most dynamic libraries but not for plugins.</p>
+<p>The <code>INCLUDEPATH</code> variable sets the search paths for global headers (i.e&#x2e;, header files included using <code>#include &lt;..&#x2e;&gt;</code>). We add <code>../&#x2e;./app</code> to the list, so that we can include <code>&lt;interfaces.h&gt;</code>.</p>
+<p>The <code>TARGET</code> variable specifies which name we want to give the target library. We use <code>pnp_</code> as the prefix to show that the plugin is designed to work with Plug &amp; Paint. On Unix, <code>lib</code> is also prepended to that name. On all platforms, a platform-specific suffix is appended (e.g&#x2e;, <code>.dll</code> on Windows, <code>.so</code> on Linux).</p>
+<p>The <code>DESTDIR</code> variable specifies where we want to install the plugin. We put it in Plug &amp; Paint's <code>plugins</code> subdirectory, since that's where the application looks for dynamic plugins.</p>
+<p>The <code>CONFIG()</code> code at the end is necessary for this example because the example is part of the Qt distribution and Qt can be configured to be built simultaneously in debug and in release modes. You don't need to for your own plugins.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/tools/plugandpaint/plugins/extrafilters?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@tools/plugandpaint/plugins/extrafilters -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

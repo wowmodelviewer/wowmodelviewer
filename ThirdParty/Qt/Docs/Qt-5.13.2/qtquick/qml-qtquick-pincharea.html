@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickpincharea.cpp -->
+  <title>PinchArea QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >PinchArea QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">PinchArea QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$PinchArea-brief -->
+<p>Enables simple pinch gesture handling. <a href="#details">More...</a></p>
+<!-- @@@PinchArea -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-item.html">Item</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-pincharea-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-pincharea.html#enabled-prop">enabled</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-pincharea.html#pinch-prop">pinch</a></b></b><ul>
+<li class="fn"><b><b><a href="qml-qtquick-pincharea.html#pinch.target-prop">pinch.target</a></b></b> : Item</li>
+<li class="fn"><b><b><a href="qml-qtquick-pincharea.html#pinch.active-prop">pinch.active</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-pincharea.html#pinch.minimumScale-prop">pinch.minimumScale</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-pincharea.html#pinch.maximumScale-prop">pinch.maximumScale</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-pincharea.html#pinch.minimumRotation-prop">pinch.minimumRotation</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-pincharea.html#pinch.maximumRotation-prop">pinch.maximumRotation</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-pincharea.html#pinch.dragAxis-prop">pinch.dragAxis</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-pincharea.html#pinch.minimumX-prop">pinch.minimumX</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-pincharea.html#pinch.maximumX-prop">pinch.maximumX</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-pincharea.html#pinch.minimumY-prop">pinch.minimumY</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-pincharea.html#pinch.maximumY-prop">pinch.maximumY</a></b></b> : real</li>
+</ul>
+</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-pincharea.html#pinchFinished-signal">pinchFinished</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-pincharea.html#pinchStarted-signal">pinchStarted</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-pincharea.html#pinchUpdated-signal">pinchUpdated</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-pincharea.html#smartZoom-signal">smartZoom</a></b></b>()</li>
+</ul>
+<!-- $$$PinchArea-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><b>The <a href="qml-qtquick-pincharea.html">PinchArea</a> type was added in <a href="qtquick-module.html">QtQuick</a> 1.1</b></p>
+<p>A <a href="qml-qtquick-pincharea.html">PinchArea</a> is an invisible item that is typically used in conjunction with a visible item in order to provide pinch gesture handling for that item.</p>
+<p>The <a href="qml-qtquick-pincharea.html#enabled-prop">enabled</a> property is used to enable and disable pinch handling for the proxied item. When disabled, the pinch area becomes transparent to mouse/touch events.</p>
+<p><a href="qml-qtquick-pincharea.html">PinchArea</a> can be used in two ways:</p>
+<ul>
+<li>setting a <code>pinch.target</code> to provide automatic interaction with an item</li>
+<li>using the onPinchStarted, onPinchUpdated and onPinchFinished handlers</li>
+</ul>
+<p>Since Qt 5.5, <a href="qml-qtquick-pincharea.html">PinchArea</a> can react to native pinch gesture events from the operating system if available; otherwise it reacts only to touch events.</p>
+<p><b>See also </b><a href="qml-qtquick-pinchevent.html">PinchEvent</a>, <a href="../qtgui/qnativegestureevent.html">QNativeGestureEvent</a>, and <a href="../qtgui/qtouchevent.html">QTouchEvent</a>.</p>
+<!-- @@@PinchArea -->
+<h2>Property Documentation</h2>
+<!-- $$$enabled -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="enabled-prop"></a><span class="name">enabled</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the item accepts pinch gestures.</p>
+<p>This property defaults to true.</p>
+</div></div><!-- @@@enabled -->
+<br/>
+<!-- $$$pinch -->
+<div class="qmlitem"><div class="qmlproto"><div class="table"><table class="qmlname"><tr valign="top" class="even" id="pinch-prop"><th class="centerAlign"><p><a name="pinch-prop"></a><b>pinch group</b></p></th></tr><tr valign="top" class="odd" id="pinch.target-prop"><td class="tblQmlPropNode"><p><a name="pinch.target-prop"></a><span class="name">pinch.target</span> : <span class="type"><a href="qml-qtquick-item.html">Item</a></span></p></td></tr><tr valign="top" class="odd" id="pinch.active-prop"><td class="tblQmlPropNode"><p><a name="pinch.active-prop"></a><span class="name">pinch.active</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr><tr valign="top" class="odd" id="pinch.minimumScale-prop"><td class="tblQmlPropNode"><p><a name="pinch.minimumScale-prop"></a><span class="name">pinch.minimumScale</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr><tr valign="top" class="odd" id="pinch.maximumScale-prop"><td class="tblQmlPropNode"><p><a name="pinch.maximumScale-prop"></a><span class="name">pinch.maximumScale</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr><tr valign="top" class="odd" id="pinch.minimumRotation-prop"><td class="tblQmlPropNode"><p><a name="pinch.minimumRotation-prop"></a><span class="name">pinch.minimumRotation</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr><tr valign="top" class="odd" id="pinch.maximumRotation-prop"><td class="tblQmlPropNode"><p><a name="pinch.maximumRotation-prop"></a><span class="name">pinch.maximumRotation</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr><tr valign="top" class="odd" id="pinch.dragAxis-prop"><td class="tblQmlPropNode"><p><a name="pinch.dragAxis-prop"></a><span class="name">pinch.dragAxis</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr><tr valign="top" class="odd" id="pinch.minimumX-prop"><td class="tblQmlPropNode"><p><a name="pinch.minimumX-prop"></a><span class="name">pinch.minimumX</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr><tr valign="top" class="odd" id="pinch.maximumX-prop"><td class="tblQmlPropNode"><p><a name="pinch.maximumX-prop"></a><span class="name">pinch.maximumX</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr><tr valign="top" class="odd" id="pinch.minimumY-prop"><td class="tblQmlPropNode"><p><a name="pinch.minimumY-prop"></a><span class="name">pinch.minimumY</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr><tr valign="top" class="odd" id="pinch.maximumY-prop"><td class="tblQmlPropNode"><p><a name="pinch.maximumY-prop"></a><span class="name">pinch.maximumY</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr></table></div></div><div class="qmldoc"><p><code>pinch</code> provides a convenient way to make an item react to pinch gestures.</p>
+<ul>
+<li><code>pinch.target</code> specifies the id of the item to drag.</li>
+<li><code>pinch.active</code> specifies if the target item is currently being dragged.</li>
+<li><code>pinch.minimumScale</code> and <code>pinch.maximumScale</code> limit the range of the Item.scale property, but not the <code>PinchEvent</code> <a href="qml-qtquick-pinchevent.html">scale</a> property.</li>
+<li><code>pinch.minimumRotation</code> and <code>pinch.maximumRotation</code> limit the range of the Item.rotation property, but not the <code>PinchEvent</code> <a href="qml-qtquick-pinchevent.html">rotation</a> property.</li>
+<li><code>pinch.dragAxis</code> specifies whether dragging in not allowed (<code>Pinch.NoDrag</code>), can be done horizontally (<code>Pinch.XAxis</code>), vertically (<code>Pinch.YAxis</code>), or both (<code>Pinch.XAndYAxis</code>)</li>
+<li><code>pinch.minimum</code> and <code>pinch.maximum</code> limit how far the target can be dragged along the corresponding axes.</li>
+</ul>
+</div></div><!-- @@@pinch -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$pinchFinished[overload1]$$$pinchFinished -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="pinchFinished-signal"></a><span class="name">pinchFinished</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the pinch area detects that a pinch gesture has finished.</p>
+<p>The <a href="qml-qtquick-pinchevent.html">pinch</a> parameter (not the same as the <a href="qml-qtquick-pincharea.html">pinch</a> property) provides information about the pinch gesture, including the scale, center and angle of the pinch.</p>
+<p>The corresponding handler is <code>onPinchFinished</code>.</p>
+</div></div><!-- @@@pinchFinished -->
+<br/>
+<!-- $$$pinchStarted[overload1]$$$pinchStarted -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="pinchStarted-signal"></a><span class="name">pinchStarted</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the pinch area detects that a pinch gesture has started: two touch points (fingers) have been detected, and they have moved beyond the <a href="../qtgui/qstylehints.html">startDragDistance</a> threshold for the gesture to begin.</p>
+<p>The <a href="qml-qtquick-pinchevent.html">pinch</a> parameter (not the same as the <a href="qml-qtquick-pincharea.html">pinch</a> property) provides information about the pinch gesture, including the scale, center and angle of the pinch. At the time of the <code>pinchStarted</code> signal, these values are reset to the default values, regardless of the results from previous gestures: pinch.scale will be <code>1.0</code> and pinch.rotation will be <code>0.0</code>. As the gesture progresses, <a href="qml-qtquick-pincharea.html#pinchUpdated-signal">pinchUpdated</a> will report the deviation from those defaults.</p>
+<p>To ignore this gesture set the <code>pinch.accepted</code> property to false. The gesture will be canceled and no further events will be sent.</p>
+<p>The corresponding handler is <code>onPinchStarted</code>.</p>
+</div></div><!-- @@@pinchStarted -->
+<br/>
+<!-- $$$pinchUpdated[overload1]$$$pinchUpdated -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="pinchUpdated-signal"></a><span class="name">pinchUpdated</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the pinch area detects that a pinch gesture has changed.</p>
+<p>The <a href="qml-qtquick-pinchevent.html">pinch</a> parameter provides information about the pinch gesture, including the scale, center and angle of the pinch. These values reflect changes only since the beginning of the current gesture, and therefore are not limited by the minimum and maximum limits in the <a href="qml-qtquick-pincharea.html">pinch</a> property.</p>
+<p>The corresponding handler is <code>onPinchUpdated</code>.</p>
+</div></div><!-- @@@pinchUpdated -->
+<br/>
+<!-- $$$smartZoom[overload1]$$$smartZoom -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="smartZoom-signal"></a><span class="name">smartZoom</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the pinch area detects the smart zoom gesture. This gesture occurs only on certain operating systems such as <a href="../qtdoc/internationalization.html#macos">macOS</a>.</p>
+<p>The <a href="qml-qtquick-pinchevent.html">pinch</a> parameter provides information about the pinch gesture, including the location where the gesture occurred. <code>pinch.scale</code> will be greater than zero when the gesture indicates that the user wishes to enter smart zoom, and zero when exiting (even though typically the same gesture is used to toggle between the two states).</p>
+<p>The corresponding handler is <code>onSmartZoom</code>.</p>
+<p>This signal was introduced in  Qt 5.5.</p>
+</div></div><!-- @@@smartZoom -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

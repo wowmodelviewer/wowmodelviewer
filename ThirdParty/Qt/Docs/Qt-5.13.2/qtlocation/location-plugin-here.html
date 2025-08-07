@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- nokia.qdoc -->
+  <title>Qt Location HERE Plugin | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td >Qt Location HERE Plugin</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#overview">Overview</a></li>
+<li class="level1"><a href="#parameters">Parameters</a></li>
+<li class="level2"><a href="#mandatory-parameters">Mandatory parameters</a></li>
+<li class="level2"><a href="#optional-parameters">Optional parameters</a></li>
+<li class="level1"><a href="#parameter-usage-example">Parameter Usage Example</a></li>
+<li class="level2"><a href="#qml">QML</a></li>
+<li class="level2"><a href="#c">C++</a></li>
+<li class="level1"><a href="#places">Places</a></li>
+<li class="level2"><a href="#capabilities">Capabilities</a></li>
+<li class="level2"><a href="#plugin-specific-behaviors-and-limitations">Plugin Specific Behaviors and Limitations.</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Location HERE Plugin</h1>
+<span class="subtitle"></span>
+<!-- $$$location-plugin-here.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="overview"></a>
+<h2 id="overview">Overview</h2>
+<p>Included with Qt Location is a geo services plugin which accesses the relevant HERE services provided by HERE/Nokia. The use of these services is governed by the terms and conditions available at <a href="https://developer.here.com/terms-conditions">https://developer.here.com/terms-conditions</a>.</p>
+<p>Note that accepting the terms and conditions only applies those terms and conditions to the use of the HERE geo services plugin and does not limit the use of the other geo services plugins that may be included with Qt.</p>
+<p>The HERE geo services plugin can be loaded by using the plugin key &quot;here&quot;.</p>
+<p>The online plugin uses the tiled map classes, which caches tile data in heap memory and texture memory.</p>
+<a name="parameters"></a>
+<h2 id="parameters">Parameters</h2>
+<a name="mandatory-parameters"></a>
+<h3 id="mandatory-parameters">Mandatory parameters</h3>
+<p>The following table lists mandatory parameters that <i>must</i> be passed to the HERE plugin.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Parameter</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >here.app_id</td><td >Client <i>app_id</i> part of the app_id/token pair used for authentication by all managers.</td></tr>
+<tr valign="top" class="even"><td >here.token</td><td >Client <i>token</i> part of the app_id/token pair for the service used for authentication by all managers.</td></tr>
+</table></div>
+<p>The HERE geo services plugin requires an application id and token pair to authenticate the application with the HERE services. To obtain an application id and token pair visit <a href="https://developer.here.com/">https://developer.here.com/</a></p>
+<a name="optional-parameters"></a>
+<h3 id="optional-parameters">Optional parameters</h3>
+<p>The following table lists optional parameters that can be passed to the HERE plugin.</p>
+<p><b>Note: </b>Since Qt 5.5 all parameters below must be prefixed with <code>here</code>. Previous versions did not require a prefix.</p><div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Parameter</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >here.proxy</td><td >Proxy server URL used by all managers. For usage of the system proxy just pass &quot;system&quot; as value.<p><b>Note: </b>See the notes in <a href="../qtnetwork/qnetworkproxyfactory.html#systemProxyForQuery">QNetworkProxyFactory::systemProxyForQuery</a>() for further information.</p></td></tr>
+<tr valign="top" class="even"><td >here.mapping.host</td><td >Base map tile service URL used by mapping manager.</td></tr>
+<tr valign="top" class="odd"><td >here.mapping.host.aerial</td><td >Aerial map tile service URL used by mapping manager. For all satellite, hybrid and terrain schemes.</td></tr>
+<tr valign="top" class="even"><td >here.mapping.cache.directory</td><td >Absolute path to map tile cache directory used as network disk cache.<p>The default place for the cache is the <code>QtLocation/here</code> subdirectory in the location returned by <a href="../qtcore/qstandardpaths.html#writableLocation">QStandardPaths::writableLocation</a>(), called with <a href="../qtcore/qstandardpaths.html#StandardLocation-enum">QStandardPaths::GenericCacheLocation</a> as a parameter. On systems that have no concept of a shared cache, the application-specific <a href="../qtcore/qstandardpaths.html#StandardLocation-enum">QStandardPaths::CacheLocation</a> is used instead.</p>
+</td></tr>
+<tr valign="top" class="odd"><td >here.mapping.cache.disk.cost_strategy</td><td >The cost strategy to use to cache map tiles on disk. Valid values are <b>bytesize</b> and <b>unitary</b>. Using <b>bytesize</b>, the related size parameter (<b>here.mapping.cache.disk.size</b>) will be interpreted as bytes. Using <b>unitary</b>, they will be interpreted as number of tiles. The default value for this parameter is <b>bytesize</b>.</td></tr>
+<tr valign="top" class="even"><td >here.mapping.cache.disk.size</td><td >Disk cache size for map tiles. The default size of the cache is 50 MiB when <b>bytesize</b> is the cost strategy for this cache, or 1000 tiles, when <b>unitary</b> is the cost strategy.</td></tr>
+<tr valign="top" class="odd"><td >here.mapping.cache.memory.cost_strategy</td><td >The cost strategy to use to cache map tiles in memory. Valid values are <b>bytesize</b> and <b>unitary</b>. Using <b>bytesize</b>, the related size parameter (<b>here.mapping.cache.memory.size</b>) will be interpreted as bytes. Using <b>unitary</b>, they will be interpreted as number of tiles. The default value for this parameter is <b>bytesize</b>.</td></tr>
+<tr valign="top" class="even"><td >here.mapping.cache.memory.size</td><td >Memory cache size for map tiles. The default size of the cache is 3 MiB when <b>bytesize</b> is the cost strategy for this cache, or 100 tiles, when <b>unitary</b> is the cost strategy.</td></tr>
+<tr valign="top" class="odd"><td >here.mapping.cache.texture.cost_strategy</td><td >The cost strategy to use to cache decompressed map tiles in memory. Valid values are <b>bytesize</b> and <b>unitary</b>. Using <b>bytesize</b>, the related size parameter (<b>here.mapping.cache.texture.size</b>) will be interpreted as bytes. Using <b>unitary</b>, they will be interpreted as number of tiles. The default value for this parameter is <b>bytesize</b>.</td></tr>
+<tr valign="top" class="even"><td >here.mapping.cache.texture.size</td><td >Texture cache size for map tiles. The default size of the cache is 6 MiB when <b>bytesize</b> is the cost strategy for this cache, or 30 tiles, when <b>unitary</b> is the cost strategy. Note that the texture cache has a hard minimum size which depends on the size of the map viewport (it must contain enough data to display the tiles currently visible on the display). This value is the amount of cache to be used in addition to the bare minimum.</td></tr>
+<tr valign="top" class="odd"><td >here.mapping.prefetching_style</td><td >This parameter allows to provide a hint how tile prefetching is to be performed by the engine. The default value, <code>TwoNeighbourLayers</code>, makes the engine prefetch tiles for the layer above and the one below the current tile layer, providing ready tiles when zooming in or out from the current zoom level. <code>OneNeighbourLayer</code> only prefetches the one layer closest to the current zoom level. Finally, <code>NoPrefetching</code> allows to disable the prefetching, so only tiles that are visible will be fetched. Note that, depending on the active map type, this hint might be ignored.</td></tr>
+<tr valign="top" class="even"><td >here.mapping.highdpi_tiles</td><td >Whether or not to request high dpi tiles. Valid values are <b>true</b> and <b>false</b>. The default value is <b>false</b>.</td></tr>
+<tr valign="top" class="odd"><td >here.geocoding.host</td><td >Geocoding service URL used by geocoding manager.</td></tr>
+<tr valign="top" class="even"><td >here.routing.host</td><td >Routing service URL used by routing manager.</td></tr>
+<tr valign="top" class="odd"><td >here.places.host</td><td >Search service URL used by search manager.</td></tr>
+<tr valign="top" class="even"><td >here.places.api_version</td><td >Version of the REST API used by the places manager. Currently versions 1 and 2 are supported. The version 1 is deprecated and will not be part of the final Qt release. The default is version 2.</td></tr>
+</table></div>
+<a name="parameter-usage-example"></a>
+<h2 id="parameter-usage-example">Parameter Usage Example</h2>
+<p>The following two examples show how to create a HERE plugin instance with parameters supplied for an application id and token, which is required for authentication.</p>
+<a name="qml"></a>
+<h3 id="qml">QML</h3>
+<pre class="cpp">
+
+  Plugin {
+      name: <span class="string">&quot;here&quot;</span>
+      PluginParameter { name: <span class="string">&quot;here.app_id&quot;</span>; value: <span class="string">&quot;myapp&quot;</span> }
+      PluginParameter { name: <span class="string">&quot;here.token&quot;</span>; value: <span class="string">&quot;abcdefg12345&quot;</span> }
+  }
+
+</pre>
+<a name="c"></a>
+<h3 id="c">C++</h3>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qmap.html">QMap</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">,</span><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">&gt;</span> params;
+  params<span class="operator">[</span><span class="string">&quot;here.app_id&quot;</span><span class="operator">]</span> <span class="operator">=</span> <span class="string">&quot;myapp&quot;</span>;
+  params<span class="operator">[</span><span class="string">&quot;here.token&quot;</span><span class="operator">]</span> <span class="operator">=</span> <span class="string">&quot;abcdefg12345&quot;</span>;
+
+  <span class="type"><a href="qgeoserviceprovider.html">QGeoServiceProvider</a></span> <span class="operator">*</span>gsp <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgeoserviceprovider.html">QGeoServiceProvider</a></span>(<span class="string">&quot;here&quot;</span><span class="operator">,</span> params);
+
+</pre>
+<a name="places"></a>
+<h2 id="places">Places</h2>
+<p>The HERE provider remotely accesses places (read-only) from a REST based server. The specific capabilities and behaviours are outlined below:</p>
+<a name="capabilities"></a>
+<h3 id="capabilities">Capabilities</h3>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td >Storage</td><td >remote</td></tr>
+<tr valign="top" class="even"><td >Read/Write</td><td >read-only</td></tr>
+<tr valign="top" class="odd"><td >Icons</td><td >yes</td></tr>
+<tr valign="top" class="even"><td >Search term suggestions</td><td >yes</td></tr>
+<tr valign="top" class="odd"><td >Recommendations</td><td >yes</td></tr>
+<tr valign="top" class="even"><td >Category structure</td><td >Hierarchical</td></tr>
+<tr valign="top" class="odd"><td >(Rich) Content images</td><td >yes</td></tr>
+<tr valign="top" class="even"><td >(Rich) Content reviews</td><td >yes</td></tr>
+<tr valign="top" class="odd"><td >(Rich) Content editorials</td><td >yes</td></tr>
+<tr valign="top" class="even"><td >All details fetched during search</td><td >no</td></tr>
+<tr valign="top" class="odd"><td >Paging offset index</td><td >no</td></tr>
+<tr valign="top" class="even"><td >Paging limit</td><td >yes</td></tr>
+<tr valign="top" class="odd"><td >Distance relevance hint</td><td >no</td></tr>
+<tr valign="top" class="even"><td >Lexical name relevance hint</td><td >no</td></tr>
+<tr valign="top" class="odd"><td >Extended Attributes</td><td >yes</td></tr>
+<tr valign="top" class="even"><td >Notifications for added/removed places/categories</td><td >no</td></tr>
+<tr valign="top" class="odd"><td >visibility scopes</td><td >public</td></tr>
+<tr valign="top" class="even"><td >favorites matching/(usable as favoritesPlugin)</td><td >no</td></tr>
+</table></div>
+<a name="plugin-specific-behaviors-and-limitations"></a>
+<h3 id="plugin-specific-behaviors-and-limitations">Plugin Specific Behaviors and Limitations.</h3>
+<a name="search"></a>
+<h4 id="search">Search</h4>
+<p>The following list shows what core place data is returned during a place search:</p>
+<ul>
+<li>name</li>
+<li>location</li>
+<li>contact information</li>
+<li>attribution</li>
+<li>categories</li>
+<li>rating</li>
+<li>visibility</li>
+</ul>
+<p>The following list shows further details that may be retrieved via QPlaceManager::getDetails()</p>
+<ul>
+<li>supplier</li>
+<li>extended attributes</li>
+</ul>
+<a name="searching-for-places"></a>
+<h4 id="searching-for-places">Searching for Places</h4>
+<a name="search-term-and-categories"></a>
+<h5 id="search-term-and-categories">Search Term and Categories</h5>
+<p>The HERE plugin supports searching with a <i>search term</i> and <i>category or categories</i>, however both are not supported simultaneously.</p>
+<ul>
+<li>Valid usage: <i>search term</i> + <i>search center</i></li>
+<li>Valid usage: <i>category</i> + <i>search center</i></li>
+<li>Invalid usage: <i>search term</i> + <i>category</i> + <i>search center</i></li>
+</ul>
+<p>This limitation applies when using the HERE plugin with <a href="qml-qtlocation-placesearchmodel.html">PlaceSearchModel</a> and <a href="qplacemanager.html#search">QPlaceManager::search</a>().</p>
+<a name="search-area"></a>
+<h5 id="search-area">Search Area</h5>
+<p>The HERE plugin only supports provision of a <i>search center</i> when searching for places via <a href="qml-qtlocation-placesearchmodel.html">PlaceSearchModel</a> and <a href="qplacemanager.html#search">QPlaceManager::search</a>(). A search center can be provided via a bounding circle, however the radius should be kept at the default value of -1. Typically a developer should not have to set the radius at all. If a developer sets a radius, it is ignored by the plugin and the boundaries are not honored.</p>
+<p>In a similar manner only the center of a bounding box is taken into consideration when searching. The boundaries of the box are not honored.</p>
+<p>A search center <i>must</i> be provided for all searches.</p>
+<a name="relevancy-hints"></a>
+<h5 id="relevancy-hints">Relevancy Hints</h5>
+<p>The HERE plugin does not support relevancy hints. Any relevancy hints supplied to a search request are consequently ignored.</p>
+<a name="search-term-suggestions"></a>
+<h4 id="search-term-suggestions">Search Term suggestions</h4>
+<p>Only a partial <i>search term</i> and <i>search center</i> is supported when retrieving suggestions. This limitation applies when using the HERE plugin with the <a href="qml-qtlocation-placesearchsuggestionmodel.html">PlaceSearchSuggestionModel</a> and <a href="qplacemanager.html#searchSuggestions">QPlaceManager::searchSuggestions</a>().</p>
+<p>Both search term and search center <i>must</i> be provided when retrieving search term suggestions.</p>
+<a name="recommendations"></a>
+<h4 id="recommendations">Recommendations</h4>
+<p>Only a given <i>place identifier</i> is supported as a parameter for a recommendations. No other parameters such as limit, offset, and search area are supported. This limitation applies when using the HERE plugin with <a href="qml-qtlocation-placesearchmodel.html">PlaceSearchModel</a> and <a href="qplacemanager.html#search">QPlaceManager::search</a>().</p>
+<a name="extended-attributes"></a>
+<h4 id="extended-attributes">Extended Attributes</h4>
+<p>The supported set of attributes provided by the HERE plugin are not fixed and may grow over time. Also the attributes provided may vary according to a place by place basis, e.g one place may provide opening hours while another does not. At the time of writing, it is known that some places provide <code>openingHours</code> (<a href="qplaceattribute.html#OpeningHours-var">QPlaceAttribute::OpeningHours</a>) and <code>payment</code> (<a href="qplaceattribute.html#Payment-var">QPlaceAttribute::Payment</a>) methods but other attributes may be made available by the backend server. All places provided by the plugin will have the <code>x_provider</code> (<a href="qplaceattribute.html#Provider-var">QPlaceAttribute::Provider</a>) attribute set to <code>here</code>.</p>
+<a name="restrictions-of-usage-extendedattributes-and-content"></a>
+<h4 id="restrictions-of-usage-extendedattributes-and-content">Restrictions of Usage - ExtendedAttributes and Content</h4>
+<p>The extended attributes and rich content of places are not permitted to be saved. For QML this is related to <a href="qml-qtlocation-place.html#extendedAttributes-prop">Place::extendedAttributes</a>, <a href="qml-qtlocation-imagemodel.html">ImageModel</a>, <a href="qml-qtlocation-reviewmodel.html">ReviewModel</a>, and <a href="qml-qtlocation-editorialmodel.html">EditorialModel</a>. For C++ this relates to <a href="qplace.html#extendedAttribute">QPlace::extendedAttribute</a>(), <a href="qplace.html#content">QPlace::content</a>() and <a href="qplacemanager.html#getPlaceContent">QPlaceManager::getPlaceContent</a>().</p>
+<p>(Note that the HERE plugin is a read-only source of places and does not support saving functionality at all.)</p>
+</div>
+<!-- @@@location-plugin-here.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

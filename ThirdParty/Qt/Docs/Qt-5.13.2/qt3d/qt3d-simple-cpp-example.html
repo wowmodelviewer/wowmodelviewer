@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- simple-cpp.qdoc -->
+  <title>Qt 3D: Simple C++ Example | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td >Qt 3D: Simple C++ Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+<li class="level1"><a href="#setting-up-the-scene">Setting Up the Scene</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt 3D: Simple C++ Example</h1>
+<span class="subtitle"></span>
+<!-- $$$simple-cpp-brief -->
+<p>A C++ application that demonstrates how to render a scene in Qt 3D.</p>
+<!-- @@@simple-cpp -->
+<!-- $$$simple-cpp-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/simple-cpp.png" alt="" /></p><p><i>Simple</i> demonstrates how to render a scene in Qt 3D.</p>
+<a name="running-the-example"></a>
+<h4 id="running-the-example">Running the Example</h4>
+<p>To run the example from <a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a>, open the <b>Welcome</b> mode and select the example from <b>Examples</b>. For more information, visit <a href="http://doc.qt.io/qtcreator/creator-build-example-application.html">Building and Running an Example</a>.</p>
+<a name="setting-up-the-scene"></a>
+<h4 id="setting-up-the-scene">Setting Up the Scene</h4>
+<p>We set up the scene in the <i>main.cpp</i> file.</p>
+<p>To be able to use the classes and functions in the Q3D Core, Q3D Render, Qt 3D Input, and Qt 3D Extras modules, we must include the classes:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;Qt3DCore/QEntity&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DRender/QCamera&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DRender/QCameraLens&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DCore/QTransform&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DCore/QAspectEngine&gt;</span>
+
+  <span class="preprocessor">#include &lt;Qt3DInput/QInputAspect&gt;</span>
+
+  <span class="preprocessor">#include &lt;Qt3DRender/QRenderAspect&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DExtras/QForwardRenderer&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DExtras/QPhongMaterial&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DExtras/QCylinderMesh&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DExtras/QSphereMesh&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DExtras/QTorusMesh&gt;</span>
+
+</pre>
+<p>First, we set up the scene and specify its root entity:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QEntity</span> <span class="operator">*</span>createScene()
+  {
+      <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QEntity</span> <span class="operator">*</span>rootEntity <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QEntity</span>;
+
+</pre>
+<p>We specify the material to use for Phong rendering:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qt3drender-module.html">Qt3DRender</a></span><span class="operator">::</span><span class="type">QMaterial</span> <span class="operator">*</span>material <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dextras-module.html">Qt3DExtras</a></span><span class="operator">::</span><span class="type">QPhongMaterial</span>(rootEntity);
+
+</pre>
+<p>The root entity is just an empty shell and its behavior is defined by the components that it references. We specify the torus entity and its mesh, transform, and material components:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QEntity</span> <span class="operator">*</span>torusEntity <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QEntity</span>(rootEntity);
+      <span class="type"><a href="qt3dextras-module.html">Qt3DExtras</a></span><span class="operator">::</span><span class="type">QTorusMesh</span> <span class="operator">*</span>torusMesh <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dextras-module.html">Qt3DExtras</a></span><span class="operator">::</span><span class="type">QTorusMesh</span>;
+      torusMesh<span class="operator">-</span><span class="operator">&gt;</span>setRadius(<span class="number">5</span>);
+      torusMesh<span class="operator">-</span><span class="operator">&gt;</span>setMinorRadius(<span class="number">1</span>);
+      torusMesh<span class="operator">-</span><span class="operator">&gt;</span>setRings(<span class="number">100</span>);
+      torusMesh<span class="operator">-</span><span class="operator">&gt;</span>setSlices(<span class="number">20</span>);
+
+      <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QTransform</span> <span class="operator">*</span>torusTransform <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QTransform</span>;
+      torusTransform<span class="operator">-</span><span class="operator">&gt;</span>setScale3D(QVector3D(<span class="number">1.5</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0.5</span>));
+      torusTransform<span class="operator">-</span><span class="operator">&gt;</span>setRotation(<span class="type"><a href="../qtgui/qquaternion.html">QQuaternion</a></span><span class="operator">::</span>fromAxisAndAngle(QVector3D(<span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>)<span class="operator">,</span> <span class="number">45.0f</span>));
+
+      torusEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(torusMesh);
+      torusEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(torusTransform);
+      torusEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(material);
+
+</pre>
+<p>We also specify a sphere entity and its components:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QEntity</span> <span class="operator">*</span>sphereEntity <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QEntity</span>(rootEntity);
+      <span class="type"><a href="qt3dextras-module.html">Qt3DExtras</a></span><span class="operator">::</span><span class="type">QSphereMesh</span> <span class="operator">*</span>sphereMesh <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dextras-module.html">Qt3DExtras</a></span><span class="operator">::</span><span class="type">QSphereMesh</span>;
+      sphereMesh<span class="operator">-</span><span class="operator">&gt;</span>setRadius(<span class="number">3</span>);
+
+      <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QTransform</span> <span class="operator">*</span>sphereTransform <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QTransform</span>;
+      OrbitTransformController <span class="operator">*</span>controller <span class="operator">=</span> <span class="keyword">new</span> OrbitTransformController(sphereTransform);
+      controller<span class="operator">-</span><span class="operator">&gt;</span>setTarget(sphereTransform);
+      controller<span class="operator">-</span><span class="operator">&gt;</span>setRadius(<span class="number">20.0f</span>);
+
+      <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span> <span class="operator">*</span>sphereRotateTransformAnimation <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span>(sphereTransform);
+      sphereRotateTransformAnimation<span class="operator">-</span><span class="operator">&gt;</span>setTargetObject(controller);
+      sphereRotateTransformAnimation<span class="operator">-</span><span class="operator">&gt;</span>setPropertyName(<span class="string">&quot;angle&quot;</span>);
+      sphereRotateTransformAnimation<span class="operator">-</span><span class="operator">&gt;</span>setStartValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="number">0</span>));
+      sphereRotateTransformAnimation<span class="operator">-</span><span class="operator">&gt;</span>setEndValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="number">360</span>));
+      sphereRotateTransformAnimation<span class="operator">-</span><span class="operator">&gt;</span>setDuration(<span class="number">10000</span>);
+      sphereRotateTransformAnimation<span class="operator">-</span><span class="operator">&gt;</span>setLoopCount(<span class="operator">-</span><span class="number">1</span>);
+      sphereRotateTransformAnimation<span class="operator">-</span><span class="operator">&gt;</span>start();
+
+      sphereEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(sphereMesh);
+      sphereEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(sphereTransform);
+      sphereEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(material);
+
+</pre>
+<p>We use a property animation to animate the sphere transform.</p>
+<p>Finally, we initialize a Qt GUI application that uses a Qt 3D window:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span><span class="operator">*</span> argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span> app(argc<span class="operator">,</span> argv);
+      <span class="type"><a href="qt3dextras-module.html">Qt3DExtras</a></span><span class="operator">::</span><span class="type">Qt3DWindow</span> view;
+
+      <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QEntity</span> <span class="operator">*</span>scene <span class="operator">=</span> createScene();
+
+      <span class="comment">// Camera</span>
+      <span class="type"><a href="qt3drender-module.html">Qt3DRender</a></span><span class="operator">::</span><span class="type">QCamera</span> <span class="operator">*</span>camera <span class="operator">=</span> view<span class="operator">.</span>camera();
+      camera<span class="operator">-</span><span class="operator">&gt;</span>lens()<span class="operator">-</span><span class="operator">&gt;</span>setPerspectiveProjection(<span class="number">45.0f</span><span class="operator">,</span> <span class="number">16.0f</span><span class="operator">/</span><span class="number">9.0f</span><span class="operator">,</span> <span class="number">0.1f</span><span class="operator">,</span> <span class="number">1000.0f</span>);
+      camera<span class="operator">-</span><span class="operator">&gt;</span>setPosition(QVector3D(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">40.0f</span>));
+      camera<span class="operator">-</span><span class="operator">&gt;</span>setViewCenter(QVector3D(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>));
+
+      <span class="comment">// For camera controls</span>
+      <span class="type"><a href="qt3dextras-module.html">Qt3DExtras</a></span><span class="operator">::</span><span class="type">QOrbitCameraController</span> <span class="operator">*</span>camController <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dextras-module.html">Qt3DExtras</a></span><span class="operator">::</span><span class="type">QOrbitCameraController</span>(scene);
+      camController<span class="operator">-</span><span class="operator">&gt;</span>setLinearSpeed( <span class="number">50.0f</span> );
+      camController<span class="operator">-</span><span class="operator">&gt;</span>setLookSpeed( <span class="number">180.0f</span> );
+      camController<span class="operator">-</span><span class="operator">&gt;</span>setCamera(camera);
+
+      view<span class="operator">.</span>setRootEntity(scene);
+      view<span class="operator">.</span>show();
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p><a href="https://code.qt.io/cgit/qt/qt3d.git/tree/examples/qt3d/simple-cpp?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@simple-cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

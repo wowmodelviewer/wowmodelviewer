@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- openglunderqml.qdoc -->
+  <title>Scene Graph - OpenGL Under QML | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td >Scene Graph - OpenGL Under QML</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Scene Graph - OpenGL Under QML</h1>
+<span class="subtitle"></span>
+<!-- $$$scenegraph/openglunderqml-brief -->
+<p>Shows how to render OpenGL under a Qt Quick scene.</p>
+<!-- @@@scenegraph/openglunderqml -->
+<!-- $$$scenegraph/openglunderqml-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/openglunderqml-example.jpg" alt="" /></p><p>The OpenGL under QML example shows how an application can make use of the <a href="qquickwindow.html#beforeRendering">QQuickWindow::beforeRendering</a>() signal to draw custom OpenGL content under a Qt Quick scene. This signal is emitted at the start of every frame, before the scene graph starts its rendering, thus any OpenGL draw calls that are made as a response to this signal, will stack under the Qt Quick items.</p>
+<p>As an alternative, applications that wish to render OpenGL content on top of the Qt Quick scene, can do so by connecting to the <a href="qquickwindow.html#afterRendering">QQuickWindow::afterRendering</a>() signal.</p>
+<p>In this example, we will also see how it is possible to have values that are exposed to QML which affect the OpenGL rendering. We animate the threshold value using a <a href="qml-qtquick-numberanimation.html">NumberAnimation</a> in the QML file and this value is used by the OpenGL shader program that draws the squircles.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> Squircle : <span class="keyword">public</span> <span class="type"><a href="qquickitem.html">QQuickItem</a></span>
+  {
+      Q_OBJECT
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> t READ t WRITE setT NOTIFY tChanged)
+
+  <span class="keyword">public</span>:
+      Squircle();
+
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> t() <span class="keyword">const</span> { <span class="keyword">return</span> m_t; }
+      <span class="type">void</span> setT(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> t);
+
+  <span class="keyword">signals</span>:
+      <span class="type">void</span> tChanged();
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> sync();
+      <span class="type">void</span> cleanup();
+
+  <span class="keyword">private</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> handleWindowChanged(<span class="type"><a href="qquickwindow.html">QQuickWindow</a></span> <span class="operator">*</span>win);
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> m_t;
+      SquircleRenderer <span class="operator">*</span>m_renderer;
+  };
+
+</pre>
+<p>First of all, we need an object we can expose to QML. This is a subclass of <a href="qquickitem.html">QQuickItem</a> so we can easily access <a href="qquickitem.html#window">QQuickItem::window</a>().</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> SquircleRenderer : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">,</span> <span class="keyword">protected</span> <span class="type"><a href="../qtgui/qopenglfunctions.html">QOpenGLFunctions</a></span>
+  {
+      Q_OBJECT
+  <span class="keyword">public</span>:
+      SquircleRenderer() : m_t(<span class="number">0</span>)<span class="operator">,</span> m_program(<span class="number">0</span>) { }
+      <span class="operator">~</span>SquircleRenderer();
+
+      <span class="type">void</span> setT(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> t) { m_t <span class="operator">=</span> t; }
+      <span class="type">void</span> setViewportSize(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> <span class="operator">&amp;</span>size) { m_viewportSize <span class="operator">=</span> size; }
+      <span class="type">void</span> setWindow(<span class="type"><a href="qquickwindow.html">QQuickWindow</a></span> <span class="operator">*</span>window) { m_window <span class="operator">=</span> window; }
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> paint();
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> m_viewportSize;
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> m_t;
+      <span class="type"><a href="../qtgui/qopenglshaderprogram.html">QOpenGLShaderProgram</a></span> <span class="operator">*</span>m_program;
+      <span class="type"><a href="qquickwindow.html">QQuickWindow</a></span> <span class="operator">*</span>m_window;
+  };
+
+</pre>
+<p>Then we need an object to take care of the rendering. This instance needs to be separated from the <a href="qquickitem.html">QQuickItem</a> because the item lives in the GUI thread and the rendering potentially happens on the render thread. Since we want to connect to <a href="qquickwindow.html#beforeRendering">QQuickWindow::beforeRendering</a>(), we make the renderer a <a href="../qtcore/qobject.html">QObject</a>. The renderer contains a copy of all the state it needs, independent of the GUI thread.</p>
+<p><b>Note: </b>Don't be tempted to merge the two objects into one. QQuickItems may be deleted on the GUI thread while the render thread is rendering.</p><p>Lets move on to the implementation.</p>
+<pre class="cpp">
+
+  Squircle<span class="operator">::</span>Squircle()
+      : m_t(<span class="number">0</span>)
+      <span class="operator">,</span> m_renderer(nullptr)
+  {
+      connect(<span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qquickitem.html">QQuickItem</a></span><span class="operator">::</span>windowChanged<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>Squircle<span class="operator">::</span>handleWindowChanged);
+  }
+
+</pre>
+<p>The constructor of the <code>Squircle</code> class simply initializes the values and connects to the window changed signal which we will use to prepare our renderer.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> Squircle<span class="operator">::</span>handleWindowChanged(<span class="type"><a href="qquickwindow.html">QQuickWindow</a></span> <span class="operator">*</span>win)
+  {
+      <span class="keyword">if</span> (win) {
+          connect(win<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qquickwindow.html">QQuickWindow</a></span><span class="operator">::</span>beforeSynchronizing<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>Squircle<span class="operator">::</span>sync<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DirectConnection);
+          connect(win<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qquickwindow.html">QQuickWindow</a></span><span class="operator">::</span>sceneGraphInvalidated<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>Squircle<span class="operator">::</span>cleanup<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DirectConnection);
+
+</pre>
+<p>Once we have a window, we attach to the <a href="qquickwindow.html#beforeSynchronizing">QQuickWindow::beforeSynchronizing</a>() signal which we will use to create the renderer and to copy state into it safely. We also connect to the <a href="qquickwindow.html#sceneGraphInvalidated">QQuickWindow::sceneGraphInvalidated</a>() signal to handle the cleanup of the renderer.</p>
+<p><b>Note: </b>Since the Squircle object has affinity to the GUI thread and the signals are emitted from the rendering thread, it is crucial that the connections are made with <a href="../qtcore/qt.html#ConnectionType-enum">Qt::DirectConnection</a>. Failing to do so, will result in that the slots are invoked on the wrong thread with no OpenGL context present.</p><pre class="cpp">
+
+          win<span class="operator">-</span><span class="operator">&gt;</span>setClearBeforeRendering(<span class="keyword">false</span>);
+      }
+  }
+
+</pre>
+<p>The default behavior of the scene graph is to clear the framebuffer before rendering. Since we render before the scene graph, we need to turn this clearing off. This means that we need to clear ourselves in the <code>paint()</code> function.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> Squircle<span class="operator">::</span>sync()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_renderer) {
+          m_renderer <span class="operator">=</span> <span class="keyword">new</span> SquircleRenderer();
+          connect(window()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qquickwindow.html">QQuickWindow</a></span><span class="operator">::</span>beforeRendering<span class="operator">,</span> m_renderer<span class="operator">,</span> <span class="operator">&amp;</span>SquircleRenderer<span class="operator">::</span>paint<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DirectConnection);
+      }
+      m_renderer<span class="operator">-</span><span class="operator">&gt;</span>setViewportSize(window()<span class="operator">-</span><span class="operator">&gt;</span>size() <span class="operator">*</span> window()<span class="operator">-</span><span class="operator">&gt;</span>devicePixelRatio());
+      m_renderer<span class="operator">-</span><span class="operator">&gt;</span>setT(m_t);
+      m_renderer<span class="operator">-</span><span class="operator">&gt;</span>setWindow(window());
+  }
+
+</pre>
+<p>We use the <code>sync()</code> function to initialize the renderer and to copy the state in our item into the renderer. When the renderer is created, we also connect the <a href="qquickwindow.html#beforeRendering">QQuickWindow::beforeRendering</a>() to the renderer's <code>paint()</code> slot.</p>
+<p><b>Note: </b>The <a href="qquickwindow.html#beforeSynchronizing">QQuickWindow::beforeSynchronizing</a>() signal is emitted on the rendering thread while the GUI thread is blocked, so it is safe to simply copy the value without any additional protection.</p><pre class="cpp">
+
+  <span class="type">void</span> Squircle<span class="operator">::</span>cleanup()
+  {
+      <span class="keyword">if</span> (m_renderer) {
+          <span class="keyword">delete</span> m_renderer;
+          m_renderer <span class="operator">=</span> nullptr;
+      }
+  }
+
+  SquircleRenderer<span class="operator">::</span><span class="operator">~</span>SquircleRenderer()
+  {
+      <span class="keyword">delete</span> m_program;
+  }
+
+</pre>
+<p>In the <code>cleanup()</code> function we delete the renderer which in turn cleans up its own resources.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> Squircle<span class="operator">::</span>setT(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> t)
+  {
+      <span class="keyword">if</span> (t <span class="operator">=</span><span class="operator">=</span> m_t)
+          <span class="keyword">return</span>;
+      m_t <span class="operator">=</span> t;
+      <span class="keyword">emit</span> tChanged();
+      <span class="keyword">if</span> (window())
+          window()<span class="operator">-</span><span class="operator">&gt;</span>update();
+  }
+
+</pre>
+<p>When the value of <code>t</code> changes, we call <a href="qquickwindow.html#update">QQuickWindow::update</a>() rather than <a href="qquickitem.html#update">QQuickItem::update</a>() because the former will force the entire window to be redrawn, even when the scene graph has not changed since the last frame.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> SquircleRenderer<span class="operator">::</span>paint()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_program) {
+          initializeOpenGLFunctions();
+
+          m_program <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtgui/qopenglshaderprogram.html">QOpenGLShaderProgram</a></span>();
+          m_program<span class="operator">-</span><span class="operator">&gt;</span>addCacheableShaderFromSourceCode(<span class="type"><a href="../qtgui/qopenglshader.html">QOpenGLShader</a></span><span class="operator">::</span>Vertex<span class="operator">,</span>
+                                                      <span class="string">&quot;attribute highp vec4 vertices;&quot;</span>
+                                                      <span class="string">&quot;varying highp vec2 coords;&quot;</span>
+                                                      <span class="string">&quot;void main() {&quot;</span>
+                                                      <span class="string">&quot;    gl_Position = vertices;&quot;</span>
+                                                      <span class="string">&quot;    coords = vertices.xy;&quot;</span>
+                                                      <span class="string">&quot;}&quot;</span>);
+          m_program<span class="operator">-</span><span class="operator">&gt;</span>addCacheableShaderFromSourceCode(<span class="type"><a href="../qtgui/qopenglshader.html">QOpenGLShader</a></span><span class="operator">::</span>Fragment<span class="operator">,</span>
+                                                      <span class="string">&quot;uniform lowp float t;&quot;</span>
+                                                      <span class="string">&quot;varying highp vec2 coords;&quot;</span>
+                                                      <span class="string">&quot;void main() {&quot;</span>
+                                                      <span class="string">&quot;    lowp float i = 1. - (pow(abs(coords.x), 4.) + pow(abs(coords.y), 4.));&quot;</span>
+                                                      <span class="string">&quot;    i = smoothstep(t - 0.8, t + 0.8, i);&quot;</span>
+                                                      <span class="string">&quot;    i = floor(i * 20.) / 20.;&quot;</span>
+                                                      <span class="string">&quot;    gl_FragColor = vec4(coords * .5 + .5, i, i);&quot;</span>
+                                                      <span class="string">&quot;}&quot;</span>);
+
+          m_program<span class="operator">-</span><span class="operator">&gt;</span>bindAttributeLocation(<span class="string">&quot;vertices&quot;</span><span class="operator">,</span> <span class="number">0</span>);
+          m_program<span class="operator">-</span><span class="operator">&gt;</span>link();
+
+      }
+
+</pre>
+<p>In the SquircleRenderer's <code>paint()</code> function we start by initializing the shader program. By initializing the shader program here, we make sure that the OpenGL context is bound and that we are on the correct thread.</p>
+<pre class="cpp">
+
+      m_program<span class="operator">-</span><span class="operator">&gt;</span>bind();
+
+      m_program<span class="operator">-</span><span class="operator">&gt;</span>enableAttributeArray(<span class="number">0</span>);
+
+      <span class="type">float</span> values<span class="operator">[</span><span class="operator">]</span> <span class="operator">=</span> {
+          <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span>
+          <span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span>
+          <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span>
+          <span class="number">1</span><span class="operator">,</span> <span class="number">1</span>
+      };
+      m_program<span class="operator">-</span><span class="operator">&gt;</span>setAttributeArray(<span class="number">0</span><span class="operator">,</span> GL_FLOAT<span class="operator">,</span> values<span class="operator">,</span> <span class="number">2</span>);
+      m_program<span class="operator">-</span><span class="operator">&gt;</span>setUniformValue(<span class="string">&quot;t&quot;</span><span class="operator">,</span> (<span class="type">float</span>) m_t);
+
+      glViewport(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> m_viewportSize<span class="operator">.</span>width()<span class="operator">,</span> m_viewportSize<span class="operator">.</span>height());
+
+      glDisable(GL_DEPTH_TEST);
+
+      glClearColor(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span>);
+      glClear(GL_COLOR_BUFFER_BIT);
+
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA<span class="operator">,</span> GL_ONE);
+
+      glDrawArrays(GL_TRIANGLE_STRIP<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">4</span>);
+
+      m_program<span class="operator">-</span><span class="operator">&gt;</span>disableAttributeArray(<span class="number">0</span>);
+      m_program<span class="operator">-</span><span class="operator">&gt;</span>release();
+
+      <span class="comment">// Not strictly needed for this example, but generally useful for when</span>
+      <span class="comment">// mixing with raw OpenGL.</span>
+      m_window<span class="operator">-</span><span class="operator">&gt;</span>resetOpenGLState();
+  }
+
+</pre>
+<p>We use the shader program to draw the squircle. At the end of the <code>paint</code> function we release the program and disable the attributes we used so that the OpenGL context is in a &quot;clean&quot; state for the scene graph to pick it up.</p>
+<p><b>Note: </b>If tracking the changes in the OpenGL context's state is not feasible, one can use the function <a href="qquickwindow.html#resetOpenGLState">QQuickWindow::resetOpenGLState</a>() which will reset all state that the scene graph relies on.</p><pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span><span class="operator">*</span>argv)
+  {
+      <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      qmlRegisterType<span class="operator">&lt;</span>Squircle<span class="operator">&gt;</span>(<span class="string">&quot;OpenGLUnderQML&quot;</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;Squircle&quot;</span>);
+
+      <span class="type"><a href="qquickview.html">QQuickView</a></span> view;
+      view<span class="operator">.</span>setResizeMode(<span class="type"><a href="qquickview.html">QQuickView</a></span><span class="operator">::</span>SizeRootObjectToView);
+      view<span class="operator">.</span>setSource(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="string">&quot;qrc:///scenegraph/openglunderqml/main.qml&quot;</span>));
+      view<span class="operator">.</span>show();
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p>The application's <code>main()</code> function instantiates a <a href="qquickview.html">QQuickView</a> and launches the <code>main.qml</code> file. The only thing worth noting is that we export the <code>Squircle</code> class to QML using the <a href="../qtqml/qqmlengine.html#qmlRegisterType-1">qmlRegisterType</a>() macro.</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+  import OpenGLUnderQML 1.0
+
+  <span class="type"><a href="qml-qtquick-item.html">Item</a></span> {
+
+      <span class="name">width</span>: <span class="number">320</span>
+      <span class="name">height</span>: <span class="number">480</span>
+
+      <span class="type">Squircle</span> {
+          SequentialAnimation on <span class="name">t</span> {
+              <span class="type"><a href="qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">to</span>: <span class="number">1</span>; <span class="name">duration</span>: <span class="number">2500</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InQuad</span> }
+              <span class="type"><a href="qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">to</span>: <span class="number">0</span>; <span class="name">duration</span>: <span class="number">2500</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">OutQuad</span> }
+              <span class="name">loops</span>: <span class="name">Animation</span>.<span class="name">Infinite</span>
+              <span class="name">running</span>: <span class="number">true</span>
+          }
+      }
+
+</pre>
+<p>We import the Squircle QML type with the name we registered in the <code>main()</code> function. We then instantiate it and create a running <a href="qml-qtquick-numberanimation.html">NumberAnimation</a> on its <code>t</code> property.</p>
+<pre class="qml">
+
+      <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">color</span>: <span class="name">Qt</span>.<span class="name">rgba</span>(<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0.7</span>)
+          <span class="name">radius</span>: <span class="number">10</span>
+          <span class="name">border</span>.width: <span class="number">1</span>
+          <span class="name">border</span>.color: <span class="string">&quot;white&quot;</span>
+          <span class="name">anchors</span>.fill: <span class="name">label</span>
+          <span class="name">anchors</span>.margins: -<span class="number">10</span>
+      }
+
+      <span class="type"><a href="qml-qtquick-text.html">Text</a></span> {
+          <span class="name">id</span>: <span class="name">label</span>
+          <span class="name">color</span>: <span class="string">&quot;black&quot;</span>
+          <span class="name">wrapMode</span>: <span class="name">Text</span>.<span class="name">WordWrap</span>
+          <span class="name">text</span>: <span class="string">&quot;The background here is a squircle rendered with raw OpenGL using the 'beforeRender()' signal in QQuickWindow. This text label and its border is rendered using QML&quot;</span>
+          <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+          <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+          <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+          <span class="name">anchors</span>.margins: <span class="number">20</span>
+      }
+  }
+
+</pre>
+<p>Then we overlay a short descriptive text, so that it is clearly visible that we are in fact rendering OpenGL under our Qt Quick scene.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtdeclarative.git/tree/examples/quick/scenegraph/openglunderqml?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@scenegraph/openglunderqml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

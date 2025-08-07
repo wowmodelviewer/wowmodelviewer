@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qaxobject.cpp -->
+  <title>QAxObject Class | Active Qt 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="activeqt-index.html">Active Qt</a></td><td >QAxObject</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="activeqt-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAxObject Class</h1>
+<!-- $$$QAxObject-brief -->
+<p>The <a href="qaxobject.html">QAxObject</a> class provides a <a href="../qtcore/qobject.html">QObject</a> that wraps a COM object. <a href="#details">More...</a></p>
+<!-- @@@QAxObject -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAxObject&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += axcontainer</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a> and <a href="qaxbase.html">QAxBase</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qaxscriptengine.html">QAxScriptEngine</a></p>
+</td></tr></table></div><ul>
+<li><a href="qaxobject-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qaxobject.html#QAxObject-2">QAxObject</a></b>(IUnknown *<i>iface</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qaxobject.html#QAxObject-1">QAxObject</a></b>(const QString &amp;<i>c</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qaxobject.html#QAxObject">QAxObject</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qaxobject.html#dtor.QAxObject">~QAxObject</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qaxobject.html#doVerb">doVerb</a></b>(const QString &amp;<i>verb</i>)</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qaxobject.html#connectNotify">connectNotify</a></b>(const QMetaMethod &amp;<i>signal</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAxObject-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A <a href="qaxobject.html">QAxObject</a> can be instantiated as an empty object, with the name of the COM object it should wrap, or with a pointer to the IUnknown that represents an existing COM object. If the COM object implements the <code>IDispatch</code> interface, the properties, methods and events of that object become available as Qt properties, slots and signals. The base class, <a href="qaxbase.html">QAxBase</a>, provides an API to access the COM object directly through the IUnknown pointer.</p>
+<p><a href="qaxobject.html">QAxObject</a> is a <a href="../qtcore/qobject.html">QObject</a> and can be used as such, e.g&#x2e; it can be organized in an object hierarchy, receive events and connect to signals and slots.</p>
+<p><a href="qaxobject.html">QAxObject</a> also inherits most of its ActiveX-related functionality from <a href="qaxbase.html">QAxBase</a>, notably <a href="qaxbase.html#dynamicCall">dynamicCall</a>() and <a href="qaxbase.html#querySubObject">querySubObject</a>().</p>
+<p><b>Warning:</b> You can subclass <a href="qaxobject.html">QAxObject</a>, but you cannot use the <a href="../qtcore/qobject.html#Q_OBJECT">Q_OBJECT</a> macro in the subclass (the generated moc-file will not compile), so you cannot add further signals, slots or properties. This limitation is due to the metaobject information generated in runtime. To work around this problem, aggregate the <a href="qaxobject.html">QAxObject</a> as a member of the <a href="../qtcore/qobject.html">QObject</a> subclass.</p>
+</div>
+<p><b>See also </b><a href="qaxbase.html">QAxBase</a>, <a href="qaxwidget.html">QAxWidget</a>, <a href="qaxscript.html">QAxScript</a>, and <a href="activeqt-index.html">ActiveQt Framework</a>.</p>
+<!-- @@@QAxObject -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QAxObject$$$QAxObjectIUnknown*QObject* -->
+<h3 class="fn" id="QAxObject-2"><a name="QAxObject-2"></a>QAxObject::<span class="name">QAxObject</span>(<span class="type">IUnknown</span> *<i>iface</i>, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Creates a <a href="qaxobject.html">QAxObject</a> that wraps the COM object referenced by <i>iface</i>. <i>parent</i> is propagated to the <a href="../qtcore/qobject.html">QObject</a> constructor.</p>
+<!-- @@@QAxObject -->
+<!-- $$$QAxObject$$$QAxObjectconstQString&QObject* -->
+<h3 class="fn" id="QAxObject-1"><a name="QAxObject-1"></a>QAxObject::<span class="name">QAxObject</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>c</i>, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Creates a <a href="qaxobject.html">QAxObject</a> that wraps the COM object <i>c</i>. <i>parent</i> is propagated to the <a href="../qtcore/qobject.html">QObject</a> constructor.</p>
+<p><b>See also </b><a href="qaxbase.html#control-prop">setControl</a>().</p>
+<!-- @@@QAxObject -->
+<!-- $$$QAxObject[overload1]$$$QAxObjectQObject* -->
+<h3 class="fn" id="QAxObject"><a name="QAxObject"></a>QAxObject::<span class="name">QAxObject</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Creates an empty COM object and propagates <i>parent</i> to the <a href="../qtcore/qobject.html">QObject</a> constructor. To initialize the object, call <a href="qaxbase.html#control-prop">setControl</a>.</p>
+<!-- @@@QAxObject -->
+<!-- $$$~QAxObject[overload1]$$$~QAxObject -->
+<h3 class="fn" id="dtor.QAxObject"><a name="dtor.QAxObject"></a><code>[override virtual] </code>QAxObject::<span class="name">~QAxObject</span>()</h3>
+<p>Releases the COM object and destroys the <a href="qaxobject.html">QAxObject</a>, cleaning up all allocated resources.</p>
+<!-- @@@~QAxObject -->
+<!-- $$$connectNotify[overload1]$$$connectNotifyconstQMetaMethod& -->
+<h3 class="fn" id="connectNotify"><a name="connectNotify"></a><code>[override virtual protected] </code><span class="type">void</span> QAxObject::<span class="name">connectNotify</span>(const <span class="type"><a href="../qtcore/qmetamethod.html">QMetaMethod</a></span> &amp;<i>signal</i>)</h3>
+<p>Reimplements: <a href="../qtcore/qobject.html#connectNotify">QObject::connectNotify</a>(const QMetaMethod &amp;signal).</p>
+<!-- @@@connectNotify -->
+<!-- $$$doVerb[overload1]$$$doVerbconstQString& -->
+<h3 class="fn" id="doVerb"><a name="doVerb"></a><span class="type">bool</span> QAxObject::<span class="name">doVerb</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>verb</i>)</h3>
+<p>Requests the COM object to perform the action <i>verb</i>. The possible verbs are returned by <a href="qaxbase.html#verbs">verbs</a>().</p>
+<p>The function returns true if the object could perform the action, otherwise returns false.</p>
+<p>This function was introduced in  Qt 4.1.</p>
+<!-- @@@doVerb -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

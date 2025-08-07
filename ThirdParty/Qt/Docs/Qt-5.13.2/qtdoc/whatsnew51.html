@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- whatsnew51.qdoc -->
+  <title>What's New in Qt 5.1 | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >What's New in Qt 5.1</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#new-modules">New Modules</a></li>
+<li class="level1"><a href="#new-supported-platforms">New Supported Platforms</a></li>
+<li class="level1"><a href="#summary-of-changes">Summary of Changes</a></li>
+<li class="level2"><a href="#moc-changes">moc Changes</a></li>
+<li class="level2"><a href="#qmake-changes">qmake Changes</a></li>
+<li class="level2"><a href="#qt-core-changes">Qt Core Changes</a></li>
+<li class="level2"><a href="#qt-gui-changes">Qt GUI Changes</a></li>
+<li class="level2"><a href="#qt-network-changes">Qt Network Changes</a></li>
+<li class="level2"><a href="#qt-qml-changes">Qt QML Changes</a></li>
+<li class="level2"><a href="#qt-quick-changes">Qt Quick Changes</a></li>
+<li class="level2"><a href="#qt-webkit-changes">Qt WebKit Changes</a></li>
+<li class="level2"><a href="#qt-widgets-changes">Qt Widgets Changes</a></li>
+<li class="level2"><a href="#qt-creator-compatibility">Qt Creator Compatibility</a></li>
+<li class="level2"><a href="#other-new-features">Other New Features</a></li>
+<li class="level1"><a href="#list-of-api-changes">List of API Changes</a></li>
+<li class="level1"><a href="#additions-to-other-qt-5-releases">Additions to Other Qt 5 Releases</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">What's New in Qt 5.1</h1>
+<span class="subtitle"></span>
+<!-- $$$whatsnew51.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Qt 5.1 introduces many changes for helping developers continue creating wonderful applications, easily and with less code. As well in this release, focus is placed on bug fixing and new features, while maintaining compatibility with Qt 5.0&#x2e;</p>
+<p>This page is a summary of new features. For specific API changes, the <a href="whatsnew59.html#list-of-api-changes">List of API Changes</a> section contains links to new and obsolete classes.</p>
+<a name="new-modules"></a>
+<h2 id="new-modules">New Modules</h2>
+<p>New modules add more functionality for developers to use on various platforms.</p>
+<ul>
+<li><a href="../qtquickcontrols1/qtquickcontrols1-index.html">Qt Quick Controls</a> - a set of reusable UI controls. Qt 5.1 targets desktop platforms, while future releases will include more features useful on touch devices.</li>
+<li><a href="../qtquick/qtquicklayouts-index.html">Qt Quick Layouts</a> - provides layouts for <a href="../qtquick/qtquick-index.html">Qt Quick</a></li>
+<li><a href="../qtquickdialogs/qtquickdialogs-index.html">Qt Quick Dialogs</a> - contains types for creating and interacting with system dialogs</li>
+<li><a href="../qtx11extras/qtx11extras-index.html">Qt X11 Extras</a> - adds platform specific APIs for X11</li>
+<li><a href="../qtsensors/qtsensors-index.html">Qt Sensors</a> - provides access to sensor hardware and motion gesture recognition both via QML and C++ interfaces. Supports <a href="android.html">Android</a>, BlackBerry, <a href="ios.html">iOS</a>, and Mer platforms.</li>
+<li><a href="../qtserialport/qtserialport-index.html">Qt Serial Port</a> - provides an interface for hardware and virtual serial ports</li>
+</ul>
+<p>The <a href="qtmodules.html">All Modules</a> page contains a list of all modules in Qt 5.1&#x2e;</p>
+<a name="new-supported-platforms"></a>
+<h2 id="new-supported-platforms">New Supported Platforms</h2>
+<p>Qt 5.1 introduces support for following new platforms with technology preview status:</p>
+<ul>
+<li><a href="android.html">Qt for Android</a> (Technology Preview)</li>
+<li><a href="ios.html">Qt for iOS</a> (Technology Preview)</li>
+</ul>
+<a name="summary-of-changes"></a>
+<h2 id="summary-of-changes">Summary of Changes</h2>
+<a name="moc-changes"></a>
+<h3 id="moc-changes">moc Changes</h3>
+<ul>
+<li>New keyword in <a href="../qtcore/qobject.html#Q_PROPERTY">Q_PROPERTY</a>(), <code>MEMBER</code>, lets you bind a property to a class member without requiring to have a getter or a setter.</li>
+</ul>
+<a name="qmake-changes"></a>
+<h3 id="qmake-changes">qmake Changes</h3>
+<ul>
+<li>On Windows: Added support for specifying application icon (via <code>RC_ICONS</code>).</li>
+</ul>
+<a name="qt-core-changes"></a>
+<h3 id="qt-core-changes">Qt Core Changes</h3>
+<ul>
+<li>Added support for SHA3 to <a href="../qtcore/qcryptographichash.html">QCryptographicHash</a></li>
+<li>Added toInt(), toUInt(), and similar functions to <a href="../qtcore/qstringref.html">QStringRef</a></li>
+<li>A new threadsafe initialization of global statics through refactored <a href="../qtcore/qglobalstatic.html#Q_GLOBAL_STATIC">Q_GLOBAL_STATIC</a>.</li>
+<li>A new class, <a href="../qtcore/qlockfile.html">QLockFile</a>, provides locking between processes using a file. This lock enables applications to check that there is only one instance of it running.</li>
+<li>A new class, <a href="../qtcore/qsavefile.html">QSaveFile</a>, provides transaction such as file writing.</li>
+</ul>
+<a name="qt-gui-changes"></a>
+<h3 id="qt-gui-changes">Qt GUI Changes</h3>
+<ul>
+<li>Support for embedding and reparenting of windows created from other processes, via <a href="../qtgui/qwindow.html#fromWinId">QWindow::fromWinId</a>().</li>
+<li><a href="../qtwidgets/qwidget.html#createWindowContainer">QWidget::createWindowContainer</a>() adds the capability to embed <a href="../qtgui/qwindow.html">QWindow</a> instances, such as <a href="../qtquick/qquickview.html">QQuickView</a> or a <a href="../qtgui/qwindow.html">QWindow</a> using <a href="../qtgui/qopenglcontext.html">QOpenGLContext</a>, into a <a href="../qtwidgets/qwidget.html">QWidget</a> hierarchy.</li>
+<li>Support for kerning advances in <a href="../qtgui/qrawfont.html#advancesForGlyphIndexes">QRawFont::advancesForGlyphIndexes</a>.</li>
+<li><a href="../qtgui/qimagereader.html">QImageReader</a> and <a href="../qtgui/qimagewriter.html">QImageWriter</a> adds the ability to report supported MimeTypes.</li>
+<li>New input method plugin, QComposeInputContext.</li>
+<li>New GTK+ 2.x platformtheme plugin that provides native file, font, and color dialogs.</li>
+<li>New class, <a href="../qtgui/qopenglcontext.html#versionFunctions-1">QOpenGLContext::versionFunctions</a>(), provides access to all OpenGL functions.</li>
+<li>New <a href="../qtgui/qopengltimerquery.html">QOpenGLTimerQuery</a> and <a href="../qtgui/qopengltimemonitor.html">QOpenGLTimeMonitor</a> classes.</li>
+<li>New <a href="../qtgui/qopengldebuglogger.html">QOpenGLDebugLogger</a> class expose KHR_debug extension for easy debugging.</li>
+<li>Added support for Geometry, Tessellation Control, Tessellation Evaluation, and Compute shaders to <a href="../qtgui/qopenglshader.html">QOpenGLShader</a> and <a href="../qtgui/qopenglshaderprogram.html">QOpenGLShaderProgram</a>.</li>
+<li>New <a href="../qtgui/qopenglvertexarrayobject.html">QOpenGLVertexArrayObject</a> class.</li>
+</ul>
+<a name="qt-network-changes"></a>
+<h3 id="qt-network-changes">Qt Network Changes</h3>
+<ul>
+<li>New encrypted() signal to <a href="../qtnetwork/qnetworkaccessmanager.html">QNetworkAccessManager</a> and <a href="../qtnetwork/qnetworkreply.html">QNetworkReply</a> so that applications can perform additional checks on the certificate chain.</li>
+<li>Support for sending intermediate certificates when <a href="../qtnetwork/qsslsocket.html">QSslSocket</a> is used as a server and when using client certificates.</li>
+<li>Support for SSL session reuse allowing much faster connections to servers.</li>
+</ul>
+<a name="qt-qml-changes"></a>
+<h3 id="qt-qml-changes">Qt QML Changes</h3>
+<ul>
+<li>New <a href="../qtqml/qqmlapplicationengine.html">QQmlApplicationEngine</a> convenience class for QML applications.</li>
+<li>New Instantiatior type for generic, dynamic object creation.</li>
+<li>New <a href="../qtqml/qtqml-models-qmlmodule.html">QtQml.Models</a> module containing <a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a>, <a href="../qtqml/qml-qtqml-models-listmodel.html">ListModel</a>, <a href="../qtqml/qml-qtqml-models-delegatemodel.html">DelegateModel</a>, <a href="../qtqml/qml-qtqml-models-delegatemodelgroup.html">DelegateModelGroup</a>, and <a href="../qtqml/qml-qtqml-models-objectmodel.html">ObjectModel</a>.</li>
+<li>New properties for <a href="../qtqml/qml-qtqml-qt.html#application-prop">Qt::application</a>: arguments, name, and version.</li>
+</ul>
+<a name="qt-quick-changes"></a>
+<h3 id="qt-quick-changes">Qt Quick Changes</h3>
+<ul>
+<li>New threaded render loop for Mac, Linux, and Embedded.</li>
+<li>New render loop for windows for smoother animations.</li>
+<li>New <a href="../qtquickdialogs/qtquickdialogs-index.html">Qt Quick Dialogs</a> submodule with <a href="../qtquickdialogs/qml-qtquick-dialogs-filedialog.html">FileDialog</a> and <a href="../qtquickdialogs/qml-qtquick-dialogs-colordialog.html">ColorDialog</a> types.</li>
+<li>New <a href="../qtquick/qml-qtquick-window-window.html">Window</a> properties: activeFocusItem, minimumWidth, minimumHeight, maximumWidth, maximumHeight, visibility, contentOrientation, and opacity.</li>
+<li>New <a href="../qtquick/qml-qtquick-item.html">Item</a> property: activeFocusOnTab.</li>
+<li>New <a href="../qtquick/qml-qtquick-grid.html">Grid</a> properties: horizontalAlignment, verticalAlignment, and effectiveHorizontalAlignment.</li>
+<li>New <a href="../qtquick/qml-qtquick-textedit.html">TextEdit</a> properties: selectByKeyboard and textDocument</li>
+<li>A <a href="../qtquick/qml-qtquick-window-window.html">Window</a> declared inside another Window or <a href="../qtquick/qml-qtquick-item.html">Item</a> will automatically be transient for (centered upon) the outer window.</li>
+</ul>
+<a name="qt-webkit-changes"></a>
+<h3 id="qt-webkit-changes">Qt WebKit Changes</h3>
+<ul>
+<li>JavaScript JIT on Windows 64 bit.</li>
+<li>Improved font rendering, kerning enabled by default.</li>
+<li>Improved garbage collection.</li>
+<li>Support for WOFF fonts.</li>
+<li>Support for WebGL without accelerated compositing.</li>
+<li>Support for GStreamer 1.0&#x2e;</li>
+<li>Improved perceived page load performance and support for Link prefetch.</li>
+</ul>
+<a name="qt-widgets-changes"></a>
+<h3 id="qt-widgets-changes">Qt Widgets Changes</h3>
+<ul>
+<li>Added property toolTipsVisible in <a href="../qtwidgets/qmenu.html">QMenu</a>.</li>
+</ul>
+<a name="qt-creator-compatibility"></a>
+<h3 id="qt-creator-compatibility">Qt Creator Compatibility</h3>
+<p><a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a> 2.7 complements this Qt release with the most prominent new features:</p>
+<ul>
+<li>Improved C++11 code editing support</li>
+<li><a href="http://doc.qt.io/qtcreator/creator-using-qt-quick-designer.html">Qt Quick Designer</a> with full support for Qt Quick</li>
+<li>Android <a href="http://doc.qt.io/qtcreator/creator-deploying-android.html">development target</a></li>
+<li>Experimental QBS and diff integration</li>
+</ul>
+<a name="other-new-features"></a>
+<h3 id="other-new-features">Other New Features</h3>
+<ul>
+<li>Restored support for static Qt builds</li>
+</ul>
+<a name="list-of-api-changes"></a>
+<h2 id="list-of-api-changes">List of API Changes</h2>
+<p>The pages below contain a list of API changes in Qt 5.1</p>
+<ul>
+<li><a href="newclasses51.html">New Classes and Functions in Qt 5.1</a></li>
+<li><a href="obsoleteclasses.html">Obsolete Classes</a></li>
+</ul>
+<a name="additions-to-other-qt-5-releases"></a>
+<h2 id="additions-to-other-qt-5-releases">Additions to Other Qt 5 Releases</h2>
+<ul>
+<li><a href="whatsnew54.html">What's New in Qt 5.4</a></li>
+<li><a href="whatsnew53.html">What's New in Qt 5.3</a></li>
+<li><a href="whatsnew52.html">What's New in Qt 5.2</a></li>
+<li><a href="whatsnew50.html">What's New in Qt 5.0</a></li>
+</ul>
+</div>
+<!-- @@@whatsnew51.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

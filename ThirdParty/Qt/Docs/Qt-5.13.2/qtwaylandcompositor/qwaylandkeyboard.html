@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwaylandkeyboard.cpp -->
+  <title>QWaylandKeyboard Class | Qt Wayland Compositor 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwaylandcompositor-index.html">Qt Wayland Compositor</a></td><td ><a href="qtwaylandcompositor-module.html">C++ Classes</a></td><td >QWaylandKeyboard</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwaylandcompositor-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QWaylandKeyboard Class</h1>
+<!-- $$$QWaylandKeyboard-brief -->
+<p>The <a href="qwaylandkeyboard.html">QWaylandKeyboard</a> class represents a keyboard device. <a href="#details">More...</a></p>
+<!-- @@@QWaylandKeyboard -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QWaylandKeyboard&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += waylandcompositor</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> QWaylandObject</td></tr></table></div><p>This class was introduced in  Qt 5.8.</p>
+<ul>
+<li><a href="qwaylandkeyboard-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwaylandkeyboard.html#QWaylandKeyboard">QWaylandKeyboard</a></b>(QWaylandSeat *<i>seat</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandCompositor *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandkeyboard.html#compositor">compositor</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandSurface *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandkeyboard.html#focus">focus</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandClient *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandkeyboard.html#focusClient">focusClient</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> quint32 </td><td class="memItemRight bottomAlign"><b><a href="qwaylandkeyboard.html#repeatDelay">repeatDelay</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> quint32 </td><td class="memItemRight bottomAlign"><b><a href="qwaylandkeyboard.html#repeatRate">repeatRate</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandSeat *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandkeyboard.html#seat">seat</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandkeyboard.html#sendKeyModifiers">sendKeyModifiers</a></b>(QWaylandClient *<i>client</i>, uint32_t <i>serial</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandkeyboard.html#sendKeyPressEvent">sendKeyPressEvent</a></b>(uint <i>code</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandkeyboard.html#sendKeyReleaseEvent">sendKeyReleaseEvent</a></b>(uint <i>code</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandkeyboard.html#setFocus">setFocus</a></b>(QWaylandSurface *<i>surface</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandkeyboard.html#setRepeatDelay">setRepeatDelay</a></b>(quint32 <i>delay</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandkeyboard.html#setRepeatRate">setRepeatRate</a></b>(quint32 <i>rate</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandkeyboard.html#repeatDelay-prop">repeatDelayChanged</a></b>(quint32 <i>repeatDelay</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandkeyboard.html#repeatRate-prop">repeatRateChanged</a></b>(quint32 <i>repeatRate</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QWaylandKeyboard-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This class provides access to the keyboard device in a <a href="qwaylandseat.html">QWaylandSeat</a>. It corresponds to the Wayland interface wl_keyboard.</p>
+</div>
+<!-- @@@QWaylandKeyboard -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QWaylandKeyboard[overload1]$$$QWaylandKeyboardQWaylandSeat*QObject* -->
+<h3 class="fn" id="QWaylandKeyboard"><a name="QWaylandKeyboard"></a>QWaylandKeyboard::<span class="name">QWaylandKeyboard</span>(<span class="type"><a href="qwaylandseat.html">QWaylandSeat</a></span> *<i>seat</i>, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a <a href="qwaylandkeyboard.html">QWaylandKeyboard</a> for the given <i>seat</i> and with the given <i>parent</i>.</p>
+<!-- @@@QWaylandKeyboard -->
+<!-- $$$compositor[overload1]$$$compositor -->
+<h3 class="fn" id="compositor"><a name="compositor"></a><span class="type"><a href="qwaylandcompositor.html">QWaylandCompositor</a></span> *QWaylandKeyboard::<span class="name">compositor</span>() const</h3>
+<p>Returns the compositor for this <a href="qwaylandkeyboard.html">QWaylandKeyboard</a>.</p>
+<!-- @@@compositor -->
+<!-- $$$focus[overload1]$$$focus -->
+<h3 class="fn" id="focus"><a name="focus"></a><span class="type"><a href="qwaylandsurface.html">QWaylandSurface</a></span> *QWaylandKeyboard::<span class="name">focus</span>() const</h3>
+<p>Returns the currently focused surface.</p>
+<p><b>See also </b><a href="qwaylandkeyboard.html#setFocus">setFocus</a>().</p>
+<!-- @@@focus -->
+<!-- $$$focusClient[overload1]$$$focusClient -->
+<h3 class="fn" id="focusClient"><a name="focusClient"></a><span class="type"><a href="qwaylandclient.html">QWaylandClient</a></span> *QWaylandKeyboard::<span class="name">focusClient</span>() const</h3>
+<p>Returns the client that currently has keyboard focus.</p>
+<!-- @@@focusClient -->
+<!-- $$$repeatDelay -->
+<h3 class="fn" id="repeatDelay"><a name="repeatDelay"></a><span class="type"><a href="../qtcore/qtglobal.html#quint32-typedef">quint32</a></span> QWaylandKeyboard::<span class="name">repeatDelay</span>() const</h3>
+<p>Returns the current repeat delay.</p>
+<p><b>Note:</b> Getter function for property <a href="">repeatDelay</a>. </p><p><b>See also </b><a href="qwaylandkeyboard.html#setRepeatDelay">setRepeatDelay</a>().</p>
+<!-- @@@repeatDelay -->
+<!-- $$$repeatRate -->
+<h3 class="fn" id="repeatRate"><a name="repeatRate"></a><span class="type"><a href="../qtcore/qtglobal.html#quint32-typedef">quint32</a></span> QWaylandKeyboard::<span class="name">repeatRate</span>() const</h3>
+<p>Returns the current repeat rate.</p>
+<p><b>Note:</b> Getter function for property <a href="">repeatRate</a>. </p><p><b>See also </b><a href="qwaylandkeyboard.html#setRepeatRate">setRepeatRate</a>().</p>
+<!-- @@@repeatRate -->
+<!-- $$$seat[overload1]$$$seat -->
+<h3 class="fn" id="seat"><a name="seat"></a><span class="type"><a href="qwaylandseat.html">QWaylandSeat</a></span> *QWaylandKeyboard::<span class="name">seat</span>() const</h3>
+<p>Returns the seat for this <a href="qwaylandkeyboard.html">QWaylandKeyboard</a>.</p>
+<!-- @@@seat -->
+<!-- $$$sendKeyModifiers[overload1]$$$sendKeyModifiersQWaylandClient*uint32_t -->
+<h3 class="fn" id="sendKeyModifiers"><a name="sendKeyModifiers"></a><code>[virtual] </code><span class="type">void</span> QWaylandKeyboard::<span class="name">sendKeyModifiers</span>(<span class="type"><a href="qwaylandclient.html">QWaylandClient</a></span> *<i>client</i>, <span class="type">uint32_t</span> <i>serial</i>)</h3>
+<p>Sends the current key modifiers to <i>client</i> with the given <i>serial</i>.</p>
+<!-- @@@sendKeyModifiers -->
+<!-- $$$sendKeyPressEvent[overload1]$$$sendKeyPressEventuint -->
+<h3 class="fn" id="sendKeyPressEvent"><a name="sendKeyPressEvent"></a><code>[virtual] </code><span class="type">void</span> QWaylandKeyboard::<span class="name">sendKeyPressEvent</span>(<span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> <i>code</i>)</h3>
+<p>Sends a key press event with the key <i>code</i> to the current keyboard focus.</p>
+<!-- @@@sendKeyPressEvent -->
+<!-- $$$sendKeyReleaseEvent[overload1]$$$sendKeyReleaseEventuint -->
+<h3 class="fn" id="sendKeyReleaseEvent"><a name="sendKeyReleaseEvent"></a><code>[virtual] </code><span class="type">void</span> QWaylandKeyboard::<span class="name">sendKeyReleaseEvent</span>(<span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> <i>code</i>)</h3>
+<p>Sends a key release event with the key <i>code</i> to the current keyboard focus.</p>
+<!-- @@@sendKeyReleaseEvent -->
+<!-- $$$setFocus[overload1]$$$setFocusQWaylandSurface* -->
+<h3 class="fn" id="setFocus"><a name="setFocus"></a><code>[virtual] </code><span class="type">void</span> QWaylandKeyboard::<span class="name">setFocus</span>(<span class="type"><a href="qwaylandsurface.html">QWaylandSurface</a></span> *<i>surface</i>)</h3>
+<p>Sets the current focus to <i>surface</i>.</p>
+<p><b>See also </b><a href="qwaylandkeyboard.html#focus">focus</a>().</p>
+<!-- @@@setFocus -->
+<!-- $$$setRepeatDelay -->
+<h3 class="fn" id="setRepeatDelay"><a name="setRepeatDelay"></a><span class="type">void</span> QWaylandKeyboard::<span class="name">setRepeatDelay</span>(<span class="type"><a href="../qtcore/qtglobal.html#quint32-typedef">quint32</a></span> <i>delay</i>)</h3>
+<p>Sets the repeat delay to <i>delay</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">repeatDelay</a>. </p><p><b>See also </b><a href="qwaylandkeyboard.html#repeatDelay">repeatDelay</a>().</p>
+<!-- @@@setRepeatDelay -->
+<!-- $$$setRepeatRate -->
+<h3 class="fn" id="setRepeatRate"><a name="setRepeatRate"></a><span class="type">void</span> QWaylandKeyboard::<span class="name">setRepeatRate</span>(<span class="type"><a href="../qtcore/qtglobal.html#quint32-typedef">quint32</a></span> <i>rate</i>)</h3>
+<p>Sets the repeat rate to <i>rate</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">repeatRate</a>. </p><p><b>See also </b><a href="qwaylandkeyboard.html#repeatRate">repeatRate</a>().</p>
+<!-- @@@setRepeatRate -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

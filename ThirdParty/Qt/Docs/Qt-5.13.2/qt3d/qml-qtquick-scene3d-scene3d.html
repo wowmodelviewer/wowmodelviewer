@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- scene3ditem.cpp -->
+  <title>Scene3D QML Type | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-qml.html">QML Types</a></td><td >Scene3D QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Scene3D QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Scene3D-brief -->
+<p>The <a href="qml-qtquick-scene3d-scene3d.html">Scene3D</a> type is used to integrate a Qt3D scene into a <a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a> 2 scene. <a href="#details">More...</a></p>
+<!-- @@@Scene3D -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Scene3D 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="../qtquick/qml-qtquick-item.html">Item</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-scene3d-scene3d-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-scene3d-scene3d.html#aspects-prop">aspects</a></b></b> : list&lt;string&gt;</li>
+<li class="fn"><b><b><a href="qml-qtquick-scene3d-scene3d.html#cameraAspectRatioMode-prop">cameraAspectRatioMode</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-scene3d-scene3d.html#entity-prop">entity</a></b></b> : Entity</li>
+<li class="fn"><b><b><a href="qml-qtquick-scene3d-scene3d.html#hoverEnabled-prop">hoverEnabled</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-scene3d-scene3d.html#multisample-prop">multisample</a></b></b> : bool</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtquick-scene3d-scene3d.html#setItemAreaAndDevicePixelRatio-method">setItemAreaAndDevicePixelRatio</a></b></b>(<i>area</i>,  real <i>devicePixelRatio</i>)</li>
+</ul>
+<!-- $$$Scene3D-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qml-qtquick-scene3d-scene3d.html">Scene3D</a> type renders a Qt3D scene, provided by an <a href="qml-qt3d-core-entity.html">Entity</a>, into a multisampled Framebuffer object. This object is later blitted into a non-multisampled Framebuffer object, which is then rendered with premultiplied alpha. If multisampling is not required, it can be avoided by setting the <a href="qml-qtquick-scene3d-scene3d.html#multisample-prop">multisample</a> property to <code>false</code>. In this case <a href="qml-qtquick-scene3d-scene3d.html">Scene3D</a> will render directly into the non-multisampled Framebuffer object.</p>
+<p>If the scene to be rendered includes non-opaque materials, you may need to modify those materials with custom blend arguments in order for them to be rendered correctly. For example, if working with a <a href="qml-qt3d-extras-phongalphamaterial.html">PhongAlphaMaterial</a> and a scene with an opaque clear color, you will likely want to add:</p>
+<pre class="qml">
+
+  sourceAlphaArg: BlendEquationArguments.Zero
+  destinationAlphaArg: BlendEquationArguments.One
+
+</pre>
+<p>to that material.</p>
+<!-- @@@Scene3D -->
+<h2>Property Documentation</h2>
+<!-- $$$aspects -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="aspects-prop"></a><span class="name">aspects</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="../qtqml/qml-string.html">string</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The list of aspects that should be registered for the 3D scene.</p>
+<p>For example, if the scene makes use of <a href="qml-qt3d-logic-frameaction.html">FrameAction</a>, the <code>&quot;logic&quot;</code> aspect should be included in the list.</p>
+<p>The <code>&quot;render&quot;</code> aspect is hardwired and does not need to be explicitly listed.</p>
+</div></div><!-- @@@aspects -->
+<br/>
+<!-- $$$cameraAspectRatioMode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="cameraAspectRatioMode-prop"></a><span class="name">cameraAspectRatioMode</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Scene3D.AutomaticAspectRatio</code></td><td class="topAlign">Automatic aspect ratio.</td></tr>
+<tr><td class="topAlign"><code>Scene3D.UserAspectRatio</code></td><td class="topAlign">User defined aspect ratio.</td></tr>
+</table></div>
+<p></p>
+</div></div><!-- @@@cameraAspectRatioMode -->
+<br/>
+<!-- $$$entity -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="entity-prop"></a><span class="qmldefault">[default] </span><span class="name">entity</span> : <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The root entity of the 3D scene to be displayed.</p>
+</div></div><!-- @@@entity -->
+<br/>
+<!-- $$$hoverEnabled -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="hoverEnabled-prop"></a><span class="name">hoverEnabled</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p><code>true</code> if hover events are accepted.</p>
+</div></div><!-- @@@hoverEnabled -->
+<br/>
+<!-- $$$multisample -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="multisample-prop"></a><span class="name">multisample</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p><code>true</code> if a multisample render buffer is requested.</p>
+<p>By default multisampling is enabled. If the OpenGL implementation has no support for multisample renderbuffers or framebuffer blits, the request to use multisampling is ignored.</p>
+<p><b>Note: </b>Refrain from changing the value frequently as it involves expensive and potentially slow initialization of framebuffers and other OpenGL resources.</p></div></div><!-- @@@multisample -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$setItemAreaAndDevicePixelRatio[overload1]$$$setItemAreaAndDevicePixelRatioreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="setItemAreaAndDevicePixelRatio-method"></a><span class="type">void</span> <span class="name">setItemAreaAndDevicePixelRatio</span>(<i>area</i>,  <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>devicePixelRatio</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p></p>
+</div></div><!-- @@@setItemAreaAndDevicePixelRatio -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

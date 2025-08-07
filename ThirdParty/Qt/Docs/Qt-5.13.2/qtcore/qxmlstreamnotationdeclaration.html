@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qxmlstream.cpp -->
+  <title>QXmlStreamNotationDeclaration Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QXmlStreamNotationDeclaration</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QXmlStreamNotationDeclaration Class</h1>
+<!-- $$$QXmlStreamNotationDeclaration-brief -->
+<p>The <a href="qxmlstreamnotationdeclaration.html">QXmlStreamNotationDeclaration</a> class represents a DTD notation declaration. <a href="#details">More...</a></p>
+<!-- @@@QXmlStreamNotationDeclaration -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QXmlStreamNotationDeclaration&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.3</td></tr></table></div><p>This class was introduced in  Qt 4.3.</p>
+<ul>
+<li><a href="qxmlstreamnotationdeclaration-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qxmlstreamnotationdeclaration.html#QXmlStreamNotationDeclaration-1">QXmlStreamNotationDeclaration</a></b>(const QXmlStreamNotationDeclaration &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qxmlstreamnotationdeclaration.html#QXmlStreamNotationDeclaration">QXmlStreamNotationDeclaration</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QXmlStreamNotationDeclaration &amp;</td><td class="memItemRight bottomAlign"><b><a href="qxmlstreamnotationdeclaration.html#operator-eq">operator=</a></b>(const QXmlStreamNotationDeclaration &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qxmlstreamnotationdeclaration.html#dtor.QXmlStreamNotationDeclaration">~QXmlStreamNotationDeclaration</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringRef </td><td class="memItemRight bottomAlign"><b><a href="qxmlstreamnotationdeclaration.html#name">name</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringRef </td><td class="memItemRight bottomAlign"><b><a href="qxmlstreamnotationdeclaration.html#publicId">publicId</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringRef </td><td class="memItemRight bottomAlign"><b><a href="qxmlstreamnotationdeclaration.html#systemId">systemId</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qxmlstreamnotationdeclaration.html#operator-not-eq">operator!=</a></b>(const QXmlStreamNotationDeclaration &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qxmlstreamnotationdeclaration.html#operator-eq-eq">operator==</a></b>(const QXmlStreamNotationDeclaration &amp;<i>other</i>) const</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qxmlstreamnotationdeclaration.html#QXmlStreamNotationDeclarations-typedef">QXmlStreamNotationDeclarations</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QXmlStreamNotationDeclaration-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>An notation declaration consists of a <a href="qxmlstreamnotationdeclaration.html#name">name</a>(), a <a href="qxmlstreamnotationdeclaration.html#systemId">systemId</a>(), and a <a href="qxmlstreamnotationdeclaration.html#publicId">publicId</a>().</p>
+</div>
+<!-- @@@QXmlStreamNotationDeclaration -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QXmlStreamNotationDeclaration$$$QXmlStreamNotationDeclarationconstQXmlStreamNotationDeclaration& -->
+<h3 class="fn" id="QXmlStreamNotationDeclaration-1"><a name="QXmlStreamNotationDeclaration-1"></a>QXmlStreamNotationDeclaration::<span class="name">QXmlStreamNotationDeclaration</span>(const <span class="type"><a href="qxmlstreamnotationdeclaration.html#QXmlStreamNotationDeclaration">QXmlStreamNotationDeclaration</a></span> &amp;<i>other</i>)</h3>
+<p>Creates a copy of <i>other</i>.</p>
+<!-- @@@QXmlStreamNotationDeclaration -->
+<!-- $$$QXmlStreamNotationDeclaration[overload1]$$$QXmlStreamNotationDeclaration -->
+<h3 class="fn" id="QXmlStreamNotationDeclaration"><a name="QXmlStreamNotationDeclaration"></a>QXmlStreamNotationDeclaration::<span class="name">QXmlStreamNotationDeclaration</span>()</h3>
+<p>Creates an empty notation declaration.</p>
+<!-- @@@QXmlStreamNotationDeclaration -->
+<!-- $$$operator=[overload1]$$$operator=constQXmlStreamNotationDeclaration& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qxmlstreamnotationdeclaration.html#QXmlStreamNotationDeclaration">QXmlStreamNotationDeclaration</a></span> &amp;QXmlStreamNotationDeclaration::<span class="name">operator=</span>(const <span class="type"><a href="qxmlstreamnotationdeclaration.html#QXmlStreamNotationDeclaration">QXmlStreamNotationDeclaration</a></span> &amp;<i>other</i>)</h3>
+<p>Assigns <i>other</i> to this notation declaration.</p>
+<!-- @@@operator= -->
+<!-- $$$~QXmlStreamNotationDeclaration[overload1]$$$~QXmlStreamNotationDeclaration -->
+<h3 class="fn" id="dtor.QXmlStreamNotationDeclaration"><a name="dtor.QXmlStreamNotationDeclaration"></a>QXmlStreamNotationDeclaration::<span class="name">~QXmlStreamNotationDeclaration</span>()</h3>
+<p>Destructs this notation declaration.</p>
+<!-- @@@~QXmlStreamNotationDeclaration -->
+<!-- $$$name[overload1]$$$name -->
+<h3 class="fn" id="name"><a name="name"></a><span class="type"><a href="qstringref.html">QStringRef</a></span> QXmlStreamNotationDeclaration::<span class="name">name</span>() const</h3>
+<p>Returns the notation name.</p>
+<!-- @@@name -->
+<!-- $$$publicId[overload1]$$$publicId -->
+<h3 class="fn" id="publicId"><a name="publicId"></a><span class="type"><a href="qstringref.html">QStringRef</a></span> QXmlStreamNotationDeclaration::<span class="name">publicId</span>() const</h3>
+<p>Returns the public identifier.</p>
+<!-- @@@publicId -->
+<!-- $$$systemId[overload1]$$$systemId -->
+<h3 class="fn" id="systemId"><a name="systemId"></a><span class="type"><a href="qstringref.html">QStringRef</a></span> QXmlStreamNotationDeclaration::<span class="name">systemId</span>() const</h3>
+<p>Returns the system identifier.</p>
+<!-- @@@systemId -->
+<!-- $$$operator!=[overload1]$$$operator!=constQXmlStreamNotationDeclaration& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> QXmlStreamNotationDeclaration::<span class="name">operator!=</span>(const <span class="type"><a href="qxmlstreamnotationdeclaration.html#QXmlStreamNotationDeclaration">QXmlStreamNotationDeclaration</a></span> &amp;<i>other</i>) const</h3>
+<p>Compares this notation declaration with <i>other</i> and returns <code>true</code> if they are not equal; otherwise returns <code>false</code>.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQXmlStreamNotationDeclaration& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> QXmlStreamNotationDeclaration::<span class="name">operator==</span>(const <span class="type"><a href="qxmlstreamnotationdeclaration.html#QXmlStreamNotationDeclaration">QXmlStreamNotationDeclaration</a></span> &amp;<i>other</i>) const</h3>
+<p>Compares this notation declaration with <i>other</i> and returns <code>true</code> if they are equal; otherwise returns <code>false</code>.</p>
+<!-- @@@operator== -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$QXmlStreamNotationDeclarations -->
+<h3 class="fn" id="QXmlStreamNotationDeclarations-typedef"><a name="QXmlStreamNotationDeclarations-typedef"></a>typedef <span class="name">QXmlStreamNotationDeclarations</span></h3>
+<p>Synonym for <a href="qvector.html">QVector</a>&lt;<a href="qxmlstreamnotationdeclaration.html">QXmlStreamNotationDeclaration</a>&gt;.</p>
+<!-- @@@QXmlStreamNotationDeclarations -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

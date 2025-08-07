@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qvideowidget.cpp -->
+  <title>QVideoWidget Class | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-modules.html">C++ Classes</a></td><td >QVideoWidget</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QVideoWidget Class</h1>
+<!-- $$$QVideoWidget-brief -->
+<p>The <a href="qvideowidget.html">QVideoWidget</a> class provides a widget which presents video produced by a media object. <a href="#details">More...</a></p>
+<!-- @@@QVideoWidget -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QVideoWidget&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += multimediawidgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtwidgets/qwidget.html">QWidget</a> and <a href="qmediabindableinterface.html">QMediaBindableInterface</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qcameraviewfinder.html">QCameraViewfinder</a></p>
+</td></tr></table></div><ul>
+<li><a href="qvideowidget-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qvideowidget.html#aspectRatioMode-prop">aspectRatioMode</a></b> : Qt::AspectRatioMode</li>
+<li class="fn"><b><a href="qvideowidget.html#brightness-prop">brightness</a></b> : int</li>
+<li class="fn"><b><a href="qvideowidget.html#contrast-prop">contrast</a></b> : int</li>
+<li class="fn"><b><a href="qvideowidget.html#fullScreen-prop">fullScreen</a></b> : bool</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qvideowidget.html#hue-prop">hue</a></b> : int</li>
+<li class="fn"><b><a href="qvideowidget.html#mediaObject-prop">mediaObject</a></b> : QMediaObject* const</li>
+<li class="fn"><b><a href="qvideowidget.html#saturation-prop">saturation</a></b> : int</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#QVideoWidget">QVideoWidget</a></b>(QWidget *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#dtor.QVideoWidget">~QVideoWidget</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::AspectRatioMode </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#aspectRatioMode-prop">aspectRatioMode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#brightness-prop">brightness</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#contrast-prop">contrast</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#hue-prop">hue</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#fullScreen-prop">isFullScreen</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#saturation-prop">saturation</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QMediaObject *</td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#mediaObject-prop">mediaObject</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSize </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#sizeHint">sizeHint</a></b>() const override</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#aspectRatioMode-prop">setAspectRatioMode</a></b>(Qt::AspectRatioMode <i>mode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#brightness-prop">setBrightness</a></b>(int <i>brightness</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#contrast-prop">setContrast</a></b>(int <i>contrast</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#fullScreen-prop">setFullScreen</a></b>(bool <i>fullScreen</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#hue-prop">setHue</a></b>(int <i>hue</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#saturation-prop">setSaturation</a></b>(int <i>saturation</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#brightnessChanged">brightnessChanged</a></b>(int <i>brightness</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#contrastChanged">contrastChanged</a></b>(int <i>contrast</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#fullScreenChanged">fullScreenChanged</a></b>(bool <i>fullScreen</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#hueChanged">hueChanged</a></b>(int <i>hue</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#saturationChanged">saturationChanged</a></b>(int <i>saturation</i>)</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#event">event</a></b>(QEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#hideEvent">hideEvent</a></b>(QHideEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#moveEvent">moveEvent</a></b>(QMoveEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#paintEvent">paintEvent</a></b>(QPaintEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#resizeEvent">resizeEvent</a></b>(QResizeEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qvideowidget.html#showEvent">showEvent</a></b>(QShowEvent *<i>event</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QVideoWidget-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Attaching a <a href="qvideowidget.html">QVideoWidget</a> to a <a href="qmediaobject.html">QMediaObject</a> allows it to display the video or image output of that media object. A <a href="qvideowidget.html">QVideoWidget</a> is attached to media object by passing a pointer to the <a href="qmediaobject.html">QMediaObject</a> in its constructor, and detached by destroying the <a href="qvideowidget.html">QVideoWidget</a>.</p>
+<pre class="cpp">
+
+  player <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span>;
+
+  playlist <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmediaplaylist.html">QMediaPlaylist</a></span>(player);
+  playlist<span class="operator">-</span><span class="operator">&gt;</span>addMedia(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="string">&quot;http://example.com/myclip1.mp4&quot;</span>));
+  playlist<span class="operator">-</span><span class="operator">&gt;</span>addMedia(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="string">&quot;http://example.com/myclip2.mp4&quot;</span>));
+
+  videoWidget <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvideowidget.html#QVideoWidget">QVideoWidget</a></span>;
+  player<span class="operator">-</span><span class="operator">&gt;</span>setVideoOutput(videoWidget);
+
+  videoWidget<span class="operator">-</span><span class="operator">&gt;</span>show();
+  playlist<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(<span class="number">1</span>);
+  player<span class="operator">-</span><span class="operator">&gt;</span>play();
+
+</pre>
+<p><b>Note</b>: Only a single display output can be attached to a media object at one time.</p>
+</div>
+<p><b>See also </b><a href="qmediaobject.html">QMediaObject</a>, <a href="qmediaplayer.html">QMediaPlayer</a>, and <a href="qgraphicsvideoitem.html">QGraphicsVideoItem</a>.</p>
+<!-- @@@QVideoWidget -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$aspectRatioMode-prop$$$aspectRatioMode$$$setAspectRatioModeQt::AspectRatioMode -->
+<h3 class="fn" id="aspectRatioMode-prop"><a name="aspectRatioMode-prop"></a><span class="name">aspectRatioMode</span> : <span class="type"><a href="../qtcore/qt.html#AspectRatioMode-enum">Qt::AspectRatioMode</a></span></h3>
+<p>how video is scaled with respect to its aspect ratio.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt::AspectRatioMode </td><td class="memItemRight bottomAlign"><span class="name"><b>aspectRatioMode</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setAspectRatioMode</b></span>(Qt::AspectRatioMode <i>mode</i>)</td></tr>
+</table></div>
+<!-- @@@aspectRatioMode -->
+<!-- $$$brightness-prop$$$brightness$$$setBrightnessint$$$brightnessChangedint -->
+<h3 class="fn" id="brightness-prop"><a name="brightness-prop"></a><span class="name">brightness</span> : <span class="type">int</span></h3>
+<p>This property holds an adjustment to the brightness of displayed video.</p>
+<p>Valid brightness values range between -100 and 100, the default is 0.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>brightness</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setBrightness</b></span>(int <i>brightness</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qvideowidget.html#brightnessChanged">brightnessChanged</a></b></span>(int <i>brightness</i>)</td></tr>
+</table></div>
+<!-- @@@brightness -->
+<!-- $$$contrast-prop$$$contrast$$$setContrastint$$$contrastChangedint -->
+<h3 class="fn" id="contrast-prop"><a name="contrast-prop"></a><span class="name">contrast</span> : <span class="type">int</span></h3>
+<p>This property holds an adjustment to the contrast of displayed video.</p>
+<p>Valid contrast values range between -100 and 100, the default is 0.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>contrast</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setContrast</b></span>(int <i>contrast</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qvideowidget.html#contrastChanged">contrastChanged</a></b></span>(int <i>contrast</i>)</td></tr>
+</table></div>
+<!-- @@@contrast -->
+<!-- $$$fullScreen-prop$$$isFullScreen$$$setFullScreenbool$$$fullScreenChangedbool -->
+<h3 class="fn" id="fullScreen-prop"><a name="fullScreen-prop"></a><span class="name">fullScreen</span> : <span class="type">bool</span></h3>
+<p>This property holds whether video display is confined to a window or is fullScreen.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>isFullScreen</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setFullScreen</b></span>(bool <i>fullScreen</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qvideowidget.html#fullScreenChanged">fullScreenChanged</a></b></span>(bool <i>fullScreen</i>)</td></tr>
+</table></div>
+<!-- @@@fullScreen -->
+<!-- $$$hue-prop$$$hue$$$setHueint$$$hueChangedint -->
+<h3 class="fn" id="hue-prop"><a name="hue-prop"></a><span class="name">hue</span> : <span class="type">int</span></h3>
+<p>This property holds an adjustment to the hue of displayed video.</p>
+<p>Valid hue values range between -100 and 100, the default is 0.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>hue</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setHue</b></span>(int <i>hue</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qvideowidget.html#hueChanged">hueChanged</a></b></span>(int <i>hue</i>)</td></tr>
+</table></div>
+<!-- @@@hue -->
+<!-- $$$mediaObject-prop$$$mediaObject -->
+<h3 class="fn" id="mediaObject-prop"><a name="mediaObject-prop"></a><span class="name">mediaObject</span> : <span class="type"><a href="qmediaobject.html">QMediaObject</a></span>* const</h3>
+<p>This property holds the media object which provides the video displayed by a widget.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> virtual QMediaObject *</td><td class="memItemRight bottomAlign"><span class="name"><b>mediaObject</b></span>() const override</td></tr>
+</table></div>
+<!-- @@@mediaObject -->
+<!-- $$$saturation-prop$$$saturation$$$setSaturationint$$$saturationChangedint -->
+<h3 class="fn" id="saturation-prop"><a name="saturation-prop"></a><span class="name">saturation</span> : <span class="type">int</span></h3>
+<p>This property holds an adjustment to the saturation of displayed video.</p>
+<p>Valid saturation values range between -100 and 100, the default is 0.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>saturation</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setSaturation</b></span>(int <i>saturation</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qvideowidget.html#saturationChanged">saturationChanged</a></b></span>(int <i>saturation</i>)</td></tr>
+</table></div>
+<!-- @@@saturation -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QVideoWidget[overload1]$$$QVideoWidgetQWidget* -->
+<h3 class="fn" id="QVideoWidget"><a name="QVideoWidget"></a>QVideoWidget::<span class="name">QVideoWidget</span>(<span class="type"><a href="../qtwidgets/qwidget.html#QWidget">QWidget</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new video widget.</p>
+<p>The <i>parent</i> is passed to <a href="../qtwidgets/qwidget.html">QWidget</a>.</p>
+<!-- @@@QVideoWidget -->
+<!-- $$$brightnessChanged -->
+<h3 class="fn" id="brightnessChanged"><a name="brightnessChanged"></a><code>[signal] </code><span class="type">void</span> QVideoWidget::<span class="name">brightnessChanged</span>(<span class="type">int</span> <i>brightness</i>)</h3>
+<p>Signals that a video widgets's <i>brightness</i> adjustment has changed.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qvideowidget.html#brightness-prop">brightness</a>. </p><p><b>See also </b><a href="qvideowidget.html#brightness-prop">brightness</a>().</p>
+<!-- @@@brightnessChanged -->
+<!-- $$$contrastChanged -->
+<h3 class="fn" id="contrastChanged"><a name="contrastChanged"></a><code>[signal] </code><span class="type">void</span> QVideoWidget::<span class="name">contrastChanged</span>(<span class="type">int</span> <i>contrast</i>)</h3>
+<p>Signals that a video widgets's <i>contrast</i> adjustment has changed.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qvideowidget.html#contrast-prop">contrast</a>. </p><p><b>See also </b><a href="qvideowidget.html#contrast-prop">contrast</a>().</p>
+<!-- @@@contrastChanged -->
+<!-- $$$fullScreenChanged -->
+<h3 class="fn" id="fullScreenChanged"><a name="fullScreenChanged"></a><code>[signal] </code><span class="type">void</span> QVideoWidget::<span class="name">fullScreenChanged</span>(<span class="type">bool</span> <i>fullScreen</i>)</h3>
+<p>Signals that the <i>fullScreen</i> mode of a video widget has changed.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qvideowidget.html#fullScreen-prop">fullScreen</a>. </p><p><b>See also </b><a href="qvideowidget.html#fullScreen-prop">isFullScreen</a>().</p>
+<!-- @@@fullScreenChanged -->
+<!-- $$$hueChanged -->
+<h3 class="fn" id="hueChanged"><a name="hueChanged"></a><code>[signal] </code><span class="type">void</span> QVideoWidget::<span class="name">hueChanged</span>(<span class="type">int</span> <i>hue</i>)</h3>
+<p>Signals that a video widgets's <i>hue</i> has changed.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qvideowidget.html#hue-prop">hue</a>. </p><p><b>See also </b><a href="qvideowidget.html#hue-prop">hue</a>().</p>
+<!-- @@@hueChanged -->
+<!-- $$$saturationChanged -->
+<h3 class="fn" id="saturationChanged"><a name="saturationChanged"></a><code>[signal] </code><span class="type">void</span> QVideoWidget::<span class="name">saturationChanged</span>(<span class="type">int</span> <i>saturation</i>)</h3>
+<p>Signals that a video widgets's <i>saturation</i> has changed.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qvideowidget.html#saturation-prop">saturation</a>. </p><p><b>See also </b><a href="qvideowidget.html#saturation-prop">saturation</a>().</p>
+<!-- @@@saturationChanged -->
+<!-- $$$~QVideoWidget[overload1]$$$~QVideoWidget -->
+<h3 class="fn" id="dtor.QVideoWidget"><a name="dtor.QVideoWidget"></a><code>[virtual] </code>QVideoWidget::<span class="name">~QVideoWidget</span>()</h3>
+<p>Destroys a video widget.</p>
+<!-- @@@~QVideoWidget -->
+<!-- $$$event[overload1]$$$eventQEvent* -->
+<h3 class="fn" id="event"><a name="event"></a><code>[override virtual protected] </code><span class="type">bool</span> QVideoWidget::<span class="name">event</span>(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="../qtwidgets/qwidget.html#event">QWidget::event</a>(QEvent *event).</p>
+<p>Current event <i>event</i>. Returns the value of the baseclass <a href="../qtwidgets/qwidget.html#event">QWidget::event</a>(<a href="../qtcore/qevent.html">QEvent</a> *event) function.</p>
+<!-- @@@event -->
+<!-- $$$hideEvent[overload1]$$$hideEventQHideEvent* -->
+<h3 class="fn" id="hideEvent"><a name="hideEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QVideoWidget::<span class="name">hideEvent</span>(<span class="type"><a href="../qtgui/qhideevent.html">QHideEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="../qtwidgets/qwidget.html#hideEvent">QWidget::hideEvent</a>(QHideEvent *event).</p>
+<p>Handles the hide <i>event</i>.</p>
+<!-- @@@hideEvent -->
+<!-- $$$moveEvent[overload1]$$$moveEventQMoveEvent* -->
+<h3 class="fn" id="moveEvent"><a name="moveEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QVideoWidget::<span class="name">moveEvent</span>(<span class="type"><a href="../qtgui/qmoveevent.html">QMoveEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="../qtwidgets/qwidget.html#moveEvent">QWidget::moveEvent</a>(QMoveEvent *event).</p>
+<p>Handles the move <i>event</i>.</p>
+<!-- @@@moveEvent -->
+<!-- $$$paintEvent[overload1]$$$paintEventQPaintEvent* -->
+<h3 class="fn" id="paintEvent"><a name="paintEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QVideoWidget::<span class="name">paintEvent</span>(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="../qtwidgets/qwidget.html#paintEvent">QWidget::paintEvent</a>(QPaintEvent *event).</p>
+<p>Handles the paint <i>event</i>.</p>
+<!-- @@@paintEvent -->
+<!-- $$$resizeEvent[overload1]$$$resizeEventQResizeEvent* -->
+<h3 class="fn" id="resizeEvent"><a name="resizeEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QVideoWidget::<span class="name">resizeEvent</span>(<span class="type"><a href="../qtgui/qresizeevent.html">QResizeEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="../qtwidgets/qwidget.html#resizeEvent">QWidget::resizeEvent</a>(QResizeEvent *event).</p>
+<p>Handles the resize <i>event</i>.</p>
+<!-- @@@resizeEvent -->
+<!-- $$$showEvent[overload1]$$$showEventQShowEvent* -->
+<h3 class="fn" id="showEvent"><a name="showEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QVideoWidget::<span class="name">showEvent</span>(<span class="type"><a href="../qtgui/qshowevent.html">QShowEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="../qtwidgets/qwidget.html#showEvent">QWidget::showEvent</a>(QShowEvent *event).</p>
+<p>Handles the show <i>event</i>.</p>
+<!-- @@@showEvent -->
+<!-- $$$sizeHint[overload1]$$$sizeHint -->
+<h3 class="fn" id="sizeHint"><a name="sizeHint"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QVideoWidget::<span class="name">sizeHint</span>() const</h3>
+<p>Reimplements an access function for property: <a href="../qtwidgets/qwidget.html#sizeHint-prop">QWidget::sizeHint</a>.</p>
+<p>Returns the size hint for the current back end, if there is one, or else the size hint from <a href="../qtwidgets/qwidget.html">QWidget</a>.</p>
+<!-- @@@sizeHint -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

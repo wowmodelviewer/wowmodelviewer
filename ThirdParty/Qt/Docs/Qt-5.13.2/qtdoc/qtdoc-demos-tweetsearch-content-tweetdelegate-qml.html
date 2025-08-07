@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- tweetsearch.qdoc -->
+  <title>Qt Quick Demo - Tweet Search | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Qt Quick Demo - Tweet Search</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<h1 class="title">Qt Quick Demo - Tweet Search</h1>
+<span class="subtitle"></span>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2017 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.0
+  import &quot;tweetsearch.mjs&quot; as Helper
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">container</span>
+      property <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <span class="name">hm</span>: <span class="number">1.0</span>
+      property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">appear</span>: -<span class="number">1</span>
+      property <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <span class="name">startRotation</span>: <span class="number">1</span>
+
+      <span class="name">onAppearChanged</span>: {
+          <span class="name">container</span>.<span class="name">startRotation</span> <span class="operator">=</span> <span class="number">0.5</span>
+          <span class="name">flipBar</span>.<span class="name">animDuration</span> <span class="operator">=</span> <span class="name">appear</span>;
+          <span class="name">delayedAnim</span>.<span class="name">start</span>();
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-sequentialanimation.html">SequentialAnimation</a></span> {
+          <span class="name">id</span>: <span class="name">delayedAnim</span>
+          <span class="type"><a href="../qtquick/qml-qtquick-pauseanimation.html">PauseAnimation</a></span> { <span class="name">duration</span>: <span class="number">50</span> }
+          <span class="type"><a href="../qtquick/qml-qtquick-scriptaction.html">ScriptAction</a></span> { <span class="name">script</span>: <span class="name">flipBar</span>.<span class="name">flipDown</span>(<span class="name">startRotation</span>); }
+      }
+
+      <span class="name">width</span>: <span class="number">320</span>
+      <span class="name">height</span>: <span class="name">flipBar</span>.<span class="name">height</span> <span class="operator">*</span> <span class="name">hm</span>
+
+      <span class="type">FlipBar</span> {
+          <span class="name">id</span>: <span class="name">flipBar</span>
+
+          property <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span> <span class="name">flipped</span>: <span class="number">false</span>
+          <span class="name">delta</span>: <span class="name">startRotation</span>
+
+          <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+          <span class="name">width</span>: <span class="name">container</span>.<span class="name">ListView</span>.<span class="name">view</span> ? <span class="name">container</span>.<span class="name">ListView</span>.<span class="name">view</span>.<span class="name">width</span> : <span class="number">0</span>
+          <span class="name">height</span>: <span class="name">Math</span>.<span class="name">max</span>(<span class="number">72</span>, <span class="name">tweet</span>.<span class="name">y</span> <span class="operator">+</span> <span class="name">tweet</span>.<span class="name">height</span> <span class="operator">+</span> <span class="number">10</span>)
+
+          <span class="name">front</span>: <span class="name">Rectangle</span> {
+              <span class="name">width</span>: <span class="name">container</span>.<span class="name">ListView</span>.<span class="name">view</span> ? <span class="name">container</span>.<span class="name">ListView</span>.<span class="name">view</span>.<span class="name">width</span> : <span class="number">0</span>
+              <span class="name">height</span>: <span class="name">Math</span>.<span class="name">max</span>(<span class="number">72</span>, <span class="name">tweet</span>.<span class="name">y</span> <span class="operator">+</span> <span class="name">tweet</span>.<span class="name">height</span> <span class="operator">+</span> <span class="number">10</span>)
+              <span class="name">color</span>: <span class="string">&quot;#2699bf&quot;</span>
+
+              <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> { <span class="name">color</span>: <span class="string">&quot;#33ccff&quot;</span>; <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>; <span class="name">height</span>: <span class="number">1</span> }
+              <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> { <span class="name">color</span>: <span class="string">&quot;#1a6680&quot;</span>; <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>; <span class="name">height</span>: <span class="number">1</span>; <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span> }
+
+              <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+                  <span class="name">id</span>: <span class="name">placeHolder</span>
+                  <span class="name">source</span>: <span class="string">&quot;resources/anonymous.png&quot;</span>
+                  <span class="name">x</span>: <span class="number">10</span>; <span class="name">y</span>: <span class="number">9</span>
+                  <span class="name">visible</span>: <span class="name">avatar</span>.<span class="name">status</span> <span class="operator">!=</span> <span class="name">Image</span>.<span class="name">Ready</span>
+              }
+
+              <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+                  <span class="name">id</span>: <span class="name">avatar</span>
+                  <span class="name">source</span>: <span class="name">model</span>.<span class="name">userImage</span>
+                  <span class="name">anchors</span>.fill: <span class="name">placeHolder</span>
+                  <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+                      <span class="name">id</span>: <span class="name">mouseArea</span>
+                      <span class="name">anchors</span>.fill: <span class="name">parent</span>
+                      <span class="name">onClicked</span>: {
+                          <span class="name">flipBar</span>.<span class="name">flipUp</span>()
+                          <span class="name">flipBar</span>.<span class="name">flipped</span> <span class="operator">=</span> <span class="number">true</span>
+                      }
+                  }
+              }
+
+              <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                  <span class="name">id</span>: <span class="name">name</span>
+                  <span class="name">text</span>: <span class="name">model</span>.<span class="name">name</span>
+                  <span class="type">anchors</span> { <span class="name">left</span>: <span class="name">avatar</span>.<span class="name">right</span>; <span class="name">leftMargin</span>: <span class="number">10</span>; <span class="name">top</span>: <span class="name">avatar</span>.<span class="name">top</span>; <span class="name">topMargin</span>: -<span class="number">3</span> }
+                  <span class="name">font</span>.pixelSize: <span class="number">12</span>
+                  <span class="name">font</span>.bold: <span class="number">true</span>
+                  <span class="name">color</span>: <span class="string">&quot;white&quot;</span>
+                  <span class="name">linkColor</span>: <span class="string">&quot;white&quot;</span>
+              }
+
+              <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                  <span class="name">id</span>: <span class="name">tweet</span>
+                  <span class="name">text</span>: <span class="name">model</span>.<span class="name">statusText</span>
+                  <span class="type">anchors</span> { <span class="name">left</span>: <span class="name">avatar</span>.<span class="name">right</span>; <span class="name">leftMargin</span>: <span class="number">10</span>; <span class="name">top</span>: <span class="name">name</span>.<span class="name">bottom</span>; <span class="name">topMargin</span>: <span class="number">0</span>; <span class="name">right</span>: <span class="name">parent</span>.<span class="name">right</span>; <span class="name">rightMargin</span>: <span class="number">10</span> }
+                  <span class="name">wrapMode</span>: <span class="name">Text</span>.<span class="name">WordWrap</span>
+                  <span class="name">font</span>.pixelSize: <span class="number">12</span>
+                  <span class="name">font</span>.bold: <span class="number">false</span>
+                  <span class="name">color</span>: <span class="string">&quot;#adebff&quot;</span>
+                  <span class="name">linkColor</span>: <span class="string">&quot;white&quot;</span>
+                  <span class="name">onLinkActivated</span>: {
+                      var tag = <span class="name">link</span>.<span class="name">split</span>(<span class="string">&quot;https://twitter.com/search?q=%23&quot;</span>)
+                      var user = <span class="name">link</span>.<span class="name">split</span>(<span class="string">&quot;https://twitter.com/&quot;</span>)
+                      <span class="keyword">if</span> (<span class="name">tag</span>[<span class="number">1</span>] <span class="operator">!=</span> <span class="name">undefined</span>) {
+                          <span class="name">mainListView</span>.<span class="name">positionViewAtBeginning</span>()
+                          <span class="name">mainListView</span>.<span class="name">clear</span>()
+                          <span class="name">mainListView</span>.<span class="name">autoSearch</span>(<span class="string">'tag'</span>, <span class="name">tag</span>[<span class="number">1</span>])
+                          <span class="name">tweetsModel</span>.<span class="name">from</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span>
+                          <span class="name">tweetsModel</span>.<span class="name">phrase</span> <span class="operator">=</span> <span class="string">&quot;#&quot;</span> <span class="operator">+</span> <span class="name">tag</span>[<span class="number">1</span>]
+                      } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">user</span>[<span class="number">1</span>] <span class="operator">!=</span> <span class="name">undefined</span>) {
+                          <span class="name">mainListView</span>.<span class="name">positionViewAtBeginning</span>()
+                          <span class="name">mainListView</span>.<span class="name">clear</span>()
+                          <span class="name">mainListView</span>.<span class="name">autoSearch</span>(<span class="string">'user'</span>, <span class="name">user</span>[<span class="number">1</span>])
+                          <span class="name">tweetsModel</span>.<span class="name">phrase</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span>
+                          <span class="name">tweetsModel</span>.<span class="name">from</span> <span class="operator">=</span> <span class="name">user</span>[<span class="number">1</span>]
+                      } <span class="keyword">else</span>
+                          <span class="name">Qt</span>.<span class="name">openUrlExternally</span>(<span class="name">link</span>)
+                  }
+              }
+          }
+
+          <span class="name">back</span>: <span class="name">Rectangle</span> {
+              <span class="name">width</span>: <span class="name">container</span>.<span class="name">ListView</span>.<span class="name">view</span> ? <span class="name">container</span>.<span class="name">ListView</span>.<span class="name">view</span>.<span class="name">width</span> : <span class="number">0</span>
+              <span class="name">height</span>: <span class="name">Math</span>.<span class="name">max</span>(<span class="number">72</span>, <span class="name">tweet</span>.<span class="name">y</span> <span class="operator">+</span> <span class="name">tweet</span>.<span class="name">height</span> <span class="operator">+</span> <span class="number">10</span>)
+              <span class="name">color</span>: <span class="string">&quot;#be4a25&quot;</span>
+
+              <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> { <span class="name">color</span>: <span class="string">&quot;#ff6633&quot;</span>; <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>; <span class="name">height</span>: <span class="number">1</span> }
+              <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> { <span class="name">color</span>: <span class="string">&quot;#80341a&quot;</span>; <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>; <span class="name">height</span>: <span class="number">1</span>; <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span> }
+
+              <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+                  <span class="name">id</span>: <span class="name">avatar2</span>
+                  <span class="name">source</span>: <span class="name">model</span>.<span class="name">userImage</span>
+                  <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+                  <span class="name">anchors</span>.rightMargin: <span class="number">10</span>
+                  <span class="name">y</span>: <span class="number">9</span>
+                  <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+                      <span class="name">anchors</span>.fill: <span class="name">parent</span>
+                      <span class="name">onClicked</span>: {
+                          <span class="name">flipBar</span>.<span class="name">flipDown</span>()
+                          <span class="name">flipBar</span>.<span class="name">flipped</span> <span class="operator">=</span> <span class="number">false</span>
+                      }
+                  }
+              }
+
+              <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                  <span class="name">id</span>: <span class="name">username</span>
+                  <span class="name">text</span>: <span class="name">model</span>.<span class="name">twitterName</span>
+                  <span class="name">x</span>: <span class="number">10</span>; <span class="type">anchors</span> { <span class="name">top</span>: <span class="name">avatar2</span>.<span class="name">top</span>; <span class="name">topMargin</span>: -<span class="number">3</span> }
+                  <span class="name">font</span>.pixelSize: <span class="number">12</span>
+                  <span class="name">font</span>.bold: <span class="number">true</span>
+                  <span class="name">color</span>: <span class="string">&quot;white&quot;</span>
+                  <span class="name">linkColor</span>: <span class="string">&quot;white&quot;</span>
+              }
+
+              <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                  <span class="name">text</span>: <span class="name">model</span>.<span class="name">source</span> <span class="operator">+</span> <span class="string">&quot;&lt;br&gt;&quot;</span> <span class="operator">+</span> <span class="name">Helper</span>.<span class="name">formatDate</span>(<span class="name">model</span>.<span class="name">published</span>) <span class="operator">+</span> <span class="string">&quot;&lt;br&gt;&quot;</span> <span class="operator">+</span> <span class="name">model</span>.<span class="name">uri</span>
+                  <span class="name">x</span>: <span class="number">10</span>; <span class="type">anchors</span> { <span class="name">top</span>: <span class="name">username</span>.<span class="name">bottom</span>; <span class="name">topMargin</span>: <span class="number">0</span> }
+                  <span class="name">wrapMode</span>: <span class="name">Text</span>.<span class="name">WordWrap</span>
+                  <span class="name">font</span>.pixelSize: <span class="number">12</span>
+                  <span class="name">font</span>.bold: <span class="number">false</span>
+                  <span class="name">color</span>: <span class="string">&quot;#ffc2ad&quot;</span>
+                  <span class="name">linkColor</span>: <span class="string">&quot;white&quot;</span>
+                  <span class="name">onLinkActivated</span>: <span class="name">Qt</span>.<span class="name">openUrlExternally</span>(<span class="name">link</span>);
+              }
+          }
+      }
+  }
+
+</pre>

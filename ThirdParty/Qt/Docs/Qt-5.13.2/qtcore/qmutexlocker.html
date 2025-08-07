@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmutex.cpp -->
+  <title>QMutexLocker Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QMutexLocker</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QMutexLocker Class</h1>
+<!-- $$$QMutexLocker-brief -->
+<p>The <a href="qmutexlocker.html">QMutexLocker</a> class is a convenience class that simplifies locking and unlocking mutexes. <a href="#details">More...</a></p>
+<!-- @@@QMutexLocker -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QMutexLocker&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr></table></div><ul>
+<li><a href="qmutexlocker-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">thread-safe</a>.</p>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmutexlocker.html#QMutexLocker">QMutexLocker</a></b>(QMutex *<i>mutex</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmutexlocker.html#dtor.QMutexLocker">~QMutexLocker</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMutex *</td><td class="memItemRight bottomAlign"><b><a href="qmutexlocker.html#mutex">mutex</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmutexlocker.html#relock">relock</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmutexlocker.html#unlock">unlock</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QMutexLocker-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Locking and unlocking a <a href="qmutex.html">QMutex</a> in complex functions and statements or in exception handling code is error-prone and difficult to debug. <a href="qmutexlocker.html">QMutexLocker</a> can be used in such situations to ensure that the state of the mutex is always well-defined.</p>
+<p><a href="qmutexlocker.html">QMutexLocker</a> should be created within a function where a <a href="qmutex.html">QMutex</a> needs to be locked. The mutex is locked when <a href="qmutexlocker.html">QMutexLocker</a> is created. You can unlock and relock the mutex with <code>unlock()</code> and <code>relock()</code>. If locked, the mutex will be unlocked when the <a href="qmutexlocker.html">QMutexLocker</a> is destroyed.</p>
+<p>For example, this complex function locks a <a href="qmutex.html">QMutex</a> upon entering the function and unlocks the mutex at all the exit points:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> complexFunction(<span class="type">int</span> flag)
+  {
+      mutex<span class="operator">.</span>lock();
+
+      <span class="type">int</span> retVal <span class="operator">=</span> <span class="number">0</span>;
+
+      <span class="keyword">switch</span> (flag) {
+      <span class="keyword">case</span> <span class="number">0</span>:
+      <span class="keyword">case</span> <span class="number">1</span>:
+          retVal <span class="operator">=</span> moreComplexFunction(flag);
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> <span class="number">2</span>:
+          {
+              <span class="type">int</span> status <span class="operator">=</span> anotherFunction();
+              <span class="keyword">if</span> (status <span class="operator">&lt;</span> <span class="number">0</span>) {
+                  mutex<span class="operator">.</span>unlock();
+                  <span class="keyword">return</span> <span class="operator">-</span><span class="number">2</span>;
+              }
+              retVal <span class="operator">=</span> status <span class="operator">+</span> flag;
+          }
+          <span class="keyword">break</span>;
+      <span class="keyword">default</span>:
+          <span class="keyword">if</span> (flag <span class="operator">&gt;</span> <span class="number">10</span>) {
+              mutex<span class="operator">.</span>unlock();
+              <span class="keyword">return</span> <span class="operator">-</span><span class="number">1</span>;
+          }
+          <span class="keyword">break</span>;
+      }
+
+      mutex<span class="operator">.</span>unlock();
+      <span class="keyword">return</span> retVal;
+  }
+
+</pre>
+<p>This example function will get more complicated as it is developed, which increases the likelihood that errors will occur.</p>
+<p>Using <a href="qmutexlocker.html">QMutexLocker</a> greatly simplifies the code, and makes it more readable:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> complexFunction(<span class="type">int</span> flag)
+  {
+      <span class="type"><a href="qmutexlocker.html#QMutexLocker">QMutexLocker</a></span> locker(<span class="operator">&amp;</span>mutex);
+
+      <span class="type">int</span> retVal <span class="operator">=</span> <span class="number">0</span>;
+
+      <span class="keyword">switch</span> (flag) {
+      <span class="keyword">case</span> <span class="number">0</span>:
+      <span class="keyword">case</span> <span class="number">1</span>:
+          <span class="keyword">return</span> moreComplexFunction(flag);
+      <span class="keyword">case</span> <span class="number">2</span>:
+          {
+              <span class="type">int</span> status <span class="operator">=</span> anotherFunction();
+              <span class="keyword">if</span> (status <span class="operator">&lt;</span> <span class="number">0</span>)
+                  <span class="keyword">return</span> <span class="operator">-</span><span class="number">2</span>;
+              retVal <span class="operator">=</span> status <span class="operator">+</span> flag;
+          }
+          <span class="keyword">break</span>;
+      <span class="keyword">default</span>:
+          <span class="keyword">if</span> (flag <span class="operator">&gt;</span> <span class="number">10</span>)
+              <span class="keyword">return</span> <span class="operator">-</span><span class="number">1</span>;
+          <span class="keyword">break</span>;
+      }
+
+      <span class="keyword">return</span> retVal;
+  }
+
+</pre>
+<p>Now, the mutex will always be unlocked when the <a href="qmutexlocker.html">QMutexLocker</a> object is destroyed (when the function returns since <code>locker</code> is an auto variable).</p>
+<p>The same principle applies to code that throws and catches exceptions. An exception that is not caught in the function that has locked the mutex has no way of unlocking the mutex before the exception is passed up the stack to the calling function.</p>
+<p><a href="qmutexlocker.html">QMutexLocker</a> also provides a <code>mutex()</code> member function that returns the mutex on which the <a href="qmutexlocker.html">QMutexLocker</a> is operating. This is useful for code that needs access to the mutex, such as <a href="qwaitcondition.html#wait">QWaitCondition::wait</a>(). For example:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> SignalWaiter
+  {
+  <span class="keyword">private</span>:
+      <span class="type"><a href="qmutexlocker.html#QMutexLocker">QMutexLocker</a></span> locker;
+
+  <span class="keyword">public</span>:
+      SignalWaiter(<span class="type"><a href="qmutex.html">QMutex</a></span> <span class="operator">*</span>mutex)
+          : locker(mutex)
+      {
+      }
+
+      <span class="type">void</span> waitForSignal()
+      {
+          <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+          <span class="keyword">while</span> (<span class="operator">!</span>signalled)
+              waitCondition<span class="operator">.</span>wait(locker<span class="operator">.</span>mutex());
+          <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+      }
+  };
+
+</pre>
+</div>
+<p><b>See also </b><a href="qreadlocker.html">QReadLocker</a>, <a href="qwritelocker.html">QWriteLocker</a>, and <a href="qmutex.html">QMutex</a>.</p>
+<!-- @@@QMutexLocker -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QMutexLocker[overload1]$$$QMutexLockerQMutex* -->
+<h3 class="fn" id="QMutexLocker"><a name="QMutexLocker"></a>QMutexLocker::<span class="name">QMutexLocker</span>(<span class="type"><a href="qmutex.html">QMutex</a></span> *<i>mutex</i>)</h3>
+<p>Constructs a <a href="qmutexlocker.html">QMutexLocker</a> and locks <i>mutex</i>. The mutex will be unlocked when the <a href="qmutexlocker.html">QMutexLocker</a> is destroyed. If <i>mutex</i> is zero, <a href="qmutexlocker.html">QMutexLocker</a> does nothing.</p>
+<p><b>See also </b><a href="qmutex.html#lock">QMutex::lock</a>().</p>
+<!-- @@@QMutexLocker -->
+<!-- $$$~QMutexLocker[overload1]$$$~QMutexLocker -->
+<h3 class="fn" id="dtor.QMutexLocker"><a name="dtor.QMutexLocker"></a>QMutexLocker::<span class="name">~QMutexLocker</span>()</h3>
+<p>Destroys the <a href="qmutexlocker.html">QMutexLocker</a> and unlocks the mutex that was locked in the constructor.</p>
+<p><b>See also </b><a href="qmutex.html#unlock">QMutex::unlock</a>().</p>
+<!-- @@@~QMutexLocker -->
+<!-- $$$mutex[overload1]$$$mutex -->
+<h3 class="fn" id="mutex"><a name="mutex"></a><span class="type"><a href="qmutex.html">QMutex</a></span> *QMutexLocker::<span class="name">mutex</span>() const</h3>
+<p>Returns the mutex on which the <a href="qmutexlocker.html">QMutexLocker</a> is operating.</p>
+<!-- @@@mutex -->
+<!-- $$$relock[overload1]$$$relock -->
+<h3 class="fn" id="relock"><a name="relock"></a><span class="type">void</span> QMutexLocker::<span class="name">relock</span>()</h3>
+<p>Relocks an unlocked mutex locker.</p>
+<p><b>See also </b><a href="qmutexlocker.html#unlock">unlock</a>().</p>
+<!-- @@@relock -->
+<!-- $$$unlock[overload1]$$$unlock -->
+<h3 class="fn" id="unlock"><a name="unlock"></a><span class="type">void</span> QMutexLocker::<span class="name">unlock</span>()</h3>
+<p>Unlocks this mutex locker. You can use <code>relock()</code> to lock it again. It does not need to be locked when destroyed.</p>
+<p><b>See also </b><a href="qmutexlocker.html#relock">relock</a>().</p>
+<!-- @@@unlock -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qnearfieldsharemanager.cpp -->
+  <title>QNearFieldShareManager Class | Qt NFC 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtnfc-index.html">Qt NFC</a></td><td ><a href="qtnfc-module.html">C++ Classes</a></td><td >QNearFieldShareManager</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtnfc-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QNearFieldShareManager Class</h1>
+<!-- $$$QNearFieldShareManager-brief -->
+<p>The <a href="qnearfieldsharemanager.html">QNearFieldShareManager</a> class manages all interactions related to sharing files and data over NFC. <a href="#details">More...</a></p>
+<!-- @@@QNearFieldShareManager -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QNearFieldShareManager&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += nfc</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.3</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.3.</p>
+<ul>
+<li><a href="qnearfieldsharemanager-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qnearfieldsharemanager.html#ShareError-enum">ShareError</a></b> { NoError, UnknownError, InvalidShareContentError, ShareCanceledError, ..., SharePermissionDeniedError }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qnearfieldsharemanager.html#ShareMode-enum">ShareMode</a></b> { NoShare, NdefShare, FileShare }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qnearfieldsharemanager.html#ShareMode-enum">ShareModes</a></b></td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qnearfieldsharemanager.html#QNearFieldShareManager">QNearFieldShareManager</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qnearfieldsharemanager.html#dtor.QNearFieldShareManager">~QNearFieldShareManager</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qnearfieldsharemanager.html#setShareModes">setShareModes</a></b>(QNearFieldShareManager::ShareModes <i>mode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QNearFieldShareManager::ShareError </td><td class="memItemRight bottomAlign"><b><a href="qnearfieldsharemanager.html#shareError">shareError</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QNearFieldShareManager::ShareModes </td><td class="memItemRight bottomAlign"><b><a href="qnearfieldsharemanager.html#shareModes">shareModes</a></b>() const</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qnearfieldsharemanager.html#error">error</a></b>(QNearFieldShareManager::ShareError <i>error</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qnearfieldsharemanager.html#shareModesChanged">shareModesChanged</a></b>(QNearFieldShareManager::ShareModes <i>modes</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qnearfieldsharemanager.html#targetDetected">targetDetected</a></b>(QNearFieldShareTarget *<i>shareTarget</i>)</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QNearFieldShareManager::ShareModes </td><td class="memItemRight bottomAlign"><b><a href="qnearfieldsharemanager.html#supportedShareModes">supportedShareModes</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QNearFieldShareManager-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Applications can share NDEF data or file content using NFC technology by tapping two NFC-enabled devices together. The <a href="qnearfieldsharemanager.html">QNearFieldShareManager</a> provides a high level entry point to access this functionality.</p>
+<p>The class allows both NDEF data and/or files to be shared between two devices by calling the <a href="qnearfieldsharemanager.html#setShareModes">setShareModes</a>() method. This method specifies either an NDEF Data and/or a File transfer. The <a href="qnearfieldsharemanager.html#targetDetected">targetDetected</a>() signal is emitted each time a share target is detected. A <a href="qnearfieldsharetarget.html">QNearFieldShareTarget</a> pointer is passed with the signal, which can be used to share either an NDEF message or one or more files.</p>
+<p>The process of sharing files via NFC involves other underlying communication transports such as Bluetooth or Wi-Fi Direct. It is implementation specific how and what type of transports are used to perform file transfer. The overall time taken to transfer content depends on the maximum speed of the transport used. Note that the process of sharing NDEF message/data does not require the use of other transports outside NFC.</p>
+<p>If an error occurs, <a href="qnearfieldsharemanager.html#shareError">shareError</a>() returns the error type.</p>
+<p>Platforms that do not support both NDEF data and file content sharing modes can return the supported subset in the <a href="qnearfieldsharemanager.html#supportedShareModes">supportedShareModes</a>() method. Applications that call <a href="qnearfieldsharemanager.html#setShareModes">setShareModes</a>() with an unsupported mode will receive an error signal with a <a href="qnearfieldsharemanager.html#ShareError-enum">UnsupportedShareModeError</a>.</p>
+<p>Since sharing data over NFC is effectively a data pipe between two processes (one on the sender and one of the receiver), the application developer should only create a single instance of <a href="qnearfieldsharemanager.html">QNearFieldShareManager</a> per application. This avoids the possibility that different parts of the same application attempt to all consume data transferred over NFC.</p>
+</div>
+<!-- @@@QNearFieldShareManager -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$ShareError$$$NoError$$$UnknownError$$$InvalidShareContentError$$$ShareCanceledError$$$ShareInterruptedError$$$ShareRejectedError$$$UnsupportedShareModeError$$$ShareAlreadyInProgressError$$$SharePermissionDeniedError -->
+<h3 class="fn" id="ShareError-enum"><a name="ShareError-enum"></a>enum QNearFieldShareManager::<span class="name">ShareError</span></h3>
+<p>This enum specifies the share error type.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QNearFieldShareManager::NoError</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">No error.</td></tr>
+<tr><td class="topAlign"><code>QNearFieldShareManager::UnknownError</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Unknown or internal error occurred.</td></tr>
+<tr><td class="topAlign"><code>QNearFieldShareManager::InvalidShareContentError</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Invalid content was provided for sharing.</td></tr>
+<tr><td class="topAlign"><code>QNearFieldShareManager::ShareCanceledError</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">Data or file sharing is canceled on the local or remote device.</td></tr>
+<tr><td class="topAlign"><code>QNearFieldShareManager::ShareInterruptedError</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">Data or file sharing is interrupted due to an I/O error.</td></tr>
+<tr><td class="topAlign"><code>QNearFieldShareManager::ShareRejectedError</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">Data or file sharing is rejected by the remote device.</td></tr>
+<tr><td class="topAlign"><code>QNearFieldShareManager::UnsupportedShareModeError</code></td><td class="topAlign tblval"><code>6</code></td><td class="topAlign">Data or file sharing is not supported by the share target.</td></tr>
+<tr><td class="topAlign"><code>QNearFieldShareManager::ShareAlreadyInProgressError</code></td><td class="topAlign tblval"><code>7</code></td><td class="topAlign">Data or file sharing is already in progress.</td></tr>
+<tr><td class="topAlign"><code>QNearFieldShareManager::SharePermissionDeniedError</code></td><td class="topAlign tblval"><code>8</code></td><td class="topAlign">File sharing is denied due to insufficient permission.</td></tr>
+</table></div>
+<!-- @@@ShareError -->
+<!-- $$$ShareMode$$$NoShare$$$NdefShare$$$FileShare -->
+<h3 class="flags" id="ShareMode-enum"><a name="ShareMode-enum"></a>enum QNearFieldShareManager::<span class="name">ShareMode</span><br/>flags QNearFieldShareManager::<span class="name">ShareModes</span></h3>
+<p>This enum specifies the content type to be shared.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QNearFieldShareManager::NoShare</code></td><td class="topAlign tblval"><code>0x00</code></td><td class="topAlign">No content is currently set to be shared.</td></tr>
+<tr><td class="topAlign"><code>QNearFieldShareManager::NdefShare</code></td><td class="topAlign tblval"><code>0x01</code></td><td class="topAlign">Share NDEF message with target.</td></tr>
+<tr><td class="topAlign"><code>QNearFieldShareManager::FileShare</code></td><td class="topAlign tblval"><code>0x02</code></td><td class="topAlign">Share file with target.</td></tr>
+</table></div>
+<p>The ShareModes type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;ShareMode&gt;. It stores an OR combination of ShareMode values.</p>
+<!-- @@@ShareMode -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QNearFieldShareManager[overload1]$$$QNearFieldShareManagerQObject* -->
+<h3 class="fn" id="QNearFieldShareManager"><a name="QNearFieldShareManager"></a>QNearFieldShareManager::<span class="name">QNearFieldShareManager</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new near field share manager with <i>parent</i>.</p>
+<!-- @@@QNearFieldShareManager -->
+<!-- $$$error[overload1]$$$errorQNearFieldShareManager::ShareError -->
+<h3 class="fn" id="error"><a name="error"></a><code>[signal] </code><span class="type">void</span> QNearFieldShareManager::<span class="name">error</span>(<span class="type"><a href="qnearfieldsharemanager.html#ShareError-enum">QNearFieldShareManager::ShareError</a></span> <i>error</i>)</h3>
+<p>This signal is emitted whenever an <i>error</i> occurs related to a share request.</p>
+<!-- @@@error -->
+<!-- $$$shareModesChanged[overload1]$$$shareModesChangedQNearFieldShareManager::ShareModes -->
+<h3 class="fn" id="shareModesChanged"><a name="shareModesChanged"></a><code>[signal] </code><span class="type">void</span> QNearFieldShareManager::<span class="name">shareModesChanged</span>(<span class="type"><a href="qnearfieldsharemanager.html#ShareMode-enum">QNearFieldShareManager::ShareModes</a></span> <i>modes</i>)</h3>
+<p>This signal is emitted whenever the share <i>modes</i> are changed.</p>
+<!-- @@@shareModesChanged -->
+<!-- $$$targetDetected[overload1]$$$targetDetectedQNearFieldShareTarget* -->
+<h3 class="fn" id="targetDetected"><a name="targetDetected"></a><code>[signal] </code><span class="type">void</span> QNearFieldShareManager::<span class="name">targetDetected</span>(<span class="type"><a href="qnearfieldsharetarget.html">QNearFieldShareTarget</a></span> *<i>shareTarget</i>)</h3>
+<p>This signal is emitted whenever a <i>shareTarget</i> is detected. The <i>shareTarget</i> instance is owned by <a href="qnearfieldsharemanager.html">QNearFieldShareManager</a> and must not be deleted by the application.</p>
+<!-- @@@targetDetected -->
+<!-- $$$~QNearFieldShareManager[overload1]$$$~QNearFieldShareManager -->
+<h3 class="fn" id="dtor.QNearFieldShareManager"><a name="dtor.QNearFieldShareManager"></a><code>[virtual] </code>QNearFieldShareManager::<span class="name">~QNearFieldShareManager</span>()</h3>
+<p>Destroys the near field share manager.</p>
+<!-- @@@~QNearFieldShareManager -->
+<!-- $$$setShareModes[overload1]$$$setShareModesQNearFieldShareManager::ShareModes -->
+<h3 class="fn" id="setShareModes"><a name="setShareModes"></a><span class="type">void</span> QNearFieldShareManager::<span class="name">setShareModes</span>(<span class="type"><a href="qnearfieldsharemanager.html#ShareMode-enum">QNearFieldShareManager::ShareModes</a></span> <i>mode</i>)</h3>
+<p>Initializes the NFC share <i>mode</i> to detect a <a href="qnearfieldsharetarget.html">QNearFieldShareTarget</a> for data and/or file sharing. Calls to this method will overwrite previous share modes.</p>
+<p>A <a href="qnearfieldsharemanager.html#shareModesChanged">shareModesChanged</a>() signal will be emitted when share modes are different from previous modes. A <a href="qnearfieldsharemanager.html#targetDetected">targetDetected</a>() signal will be emitted if a share target is detected.</p>
+<p><b>See also </b><a href="qnearfieldsharemanager.html#shareModes">shareModes</a>().</p>
+<!-- @@@setShareModes -->
+<!-- $$$shareError[overload1]$$$shareError -->
+<h3 class="fn" id="shareError"><a name="shareError"></a><span class="type"><a href="qnearfieldsharemanager.html#ShareError-enum">QNearFieldShareManager::ShareError</a></span> QNearFieldShareManager::<span class="name">shareError</span>() const</h3>
+<p>Returns the error code of the error that occurred.</p>
+<!-- @@@shareError -->
+<!-- $$$shareModes[overload1]$$$shareModes -->
+<h3 class="fn" id="shareModes"><a name="shareModes"></a><span class="type"><a href="qnearfieldsharemanager.html#ShareMode-enum">QNearFieldShareManager::ShareModes</a></span> QNearFieldShareManager::<span class="name">shareModes</span>() const</h3>
+<p>Returns which shared modes are set.</p>
+<p><b>See also </b><a href="qnearfieldsharemanager.html#setShareModes">setShareModes</a>().</p>
+<!-- @@@shareModes -->
+<!-- $$$supportedShareModes[overload1]$$$supportedShareModes -->
+<h3 class="fn" id="supportedShareModes"><a name="supportedShareModes"></a><code>[static] </code><span class="type"><a href="qnearfieldsharemanager.html#ShareMode-enum">QNearFieldShareManager::ShareModes</a></span> QNearFieldShareManager::<span class="name">supportedShareModes</span>()</h3>
+<p>Returns the shared modes supported by NFC.</p>
+<!-- @@@supportedShareModes -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

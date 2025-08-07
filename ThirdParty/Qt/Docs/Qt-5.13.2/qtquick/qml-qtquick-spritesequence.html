@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickspritesequence.cpp -->
+  <title>SpriteSequence QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >SpriteSequence QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">SpriteSequence QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$SpriteSequence-brief -->
+<p>Draws a sprite animation. <a href="#details">More...</a></p>
+<!-- @@@SpriteSequence -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-item.html">Item</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-spritesequence-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-spritesequence.html#currentSprite-prop">currentSprite</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-spritesequence.html#goalSprite-prop">goalSprite</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-spritesequence.html#interpolate-prop">interpolate</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-spritesequence.html#running-prop">running</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-spritesequence.html#sprites-prop">sprites</a></b></b> : list&lt;Sprite&gt;</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-spritesequence.html#jumpTo-method">jumpTo</a></b></b>(<i>sprite</i>)</li>
+</ul>
+<!-- $$$SpriteSequence-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><a href="qml-qtquick-spritesequence.html">SpriteSequence</a> renders and controls a list of animations defined by <a href="qml-qtquick-sprite.html">Sprite</a> types.</p>
+<p>For full details, see the <a href="qtquick-effects-sprites.html">Sprite Animations</a> overview.</p>
+<p><b>See also </b><a href="qtquick-imageelements-example.html#sprite-animations-with-spritesequence">Sprite animations with SpriteSequence</a>.</p>
+<!-- @@@SpriteSequence -->
+<h2>Property Documentation</h2>
+<!-- $$$currentSprite -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="currentSprite-prop"></a><span class="name">currentSprite</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The name of the <a href="qml-qtquick-sprite.html">Sprite</a> that is currently animating.</p>
+</div></div><!-- @@@currentSprite -->
+<br/>
+<!-- $$$goalSprite -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="goalSprite-prop"></a><span class="name">goalSprite</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The name of the <a href="qml-qtquick-sprite.html">Sprite</a> that the animation should move to.</p>
+<p>Sprite states have defined durations and transitions between them; setting <code>goalSprite</code> will cause it to disregard any path weightings (including <code>0</code>) and head down the path that will reach the <code>goalSprite</code> quickest (fewest animations). It will pass through intermediate states on that path, and animate them for their duration.</p>
+<p>If it is possible to return to the <code>goalSprite</code> from the starting point of the <code>goalSprite</code>, it will continue to do so until <code>goalSprite</code> is set to <code>&quot;&quot;</code> or an unreachable state.</p>
+</div></div><!-- @@@goalSprite -->
+<br/>
+<!-- $$$interpolate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="interpolate-prop"></a><span class="name">interpolate</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If <code>true</code>, interpolation will occur between sprite frames to make the animation appear smoother.</p>
+<p>Default is <code>true</code>.</p>
+</div></div><!-- @@@interpolate -->
+<br/>
+<!-- $$$running -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="running-prop"></a><span class="name">running</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether the sprite is animating or not.</p>
+<p>Default is <code>true</code>.</p>
+</div></div><!-- @@@running -->
+<br/>
+<!-- $$$sprites -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="sprites-prop"></a><span class="name">sprites</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="qml-qtquick-sprite.html">Sprite</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The sprite or sprites to draw. Sprites will be scaled to the size of this item.</p>
+</div></div><!-- @@@sprites -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$jumpTo[overload1]$$$jumpTo -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="jumpTo-method"></a><span class="name">jumpTo</span>(<i>sprite</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This function causes the <a href="qml-qtquick-spritesequence.html">SpriteSequence</a> to jump to the specified <i>sprite</i> immediately; intermediate sprites are not played.</p>
+</div></div><!-- @@@jumpTo -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

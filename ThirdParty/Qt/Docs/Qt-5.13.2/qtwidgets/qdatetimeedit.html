@@ -1,0 +1,651 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdatetimeedit.cpp -->
+  <title>QDateTimeEdit Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QDateTimeEdit</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#using-a-pop-up-calendar-widget">Using a Pop-up Calendar Widget</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QDateTimeEdit Class</h1>
+<!-- $$$QDateTimeEdit-brief -->
+<p>The <a href="qdatetimeedit.html">QDateTimeEdit</a> class provides a widget for editing dates and times. <a href="#details">More...</a></p>
+<!-- @@@QDateTimeEdit -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QDateTimeEdit&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qabstractspinbox.html">QAbstractSpinBox</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qdateedit.html">QDateEdit</a> and <a href="qtimeedit.html">QTimeEdit</a></p>
+</td></tr></table></div><ul>
+<li><a href="qdatetimeedit-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#Section-enum">Section</a></b> { NoSection, AmPmSection, MSecSection, SecondSection, ..., YearSection }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#Section-enum">Sections</a></b></td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qdatetimeedit.html#calendarPopup-prop">calendarPopup</a></b> : bool</li>
+<li class="fn"><b><a href="qdatetimeedit.html#currentSection-prop">currentSection</a></b> : Section</li>
+<li class="fn"><b><a href="qdatetimeedit.html#currentSectionIndex-prop">currentSectionIndex</a></b> : int</li>
+<li class="fn"><b><a href="qdatetimeedit.html#date-prop">date</a></b> : QDate</li>
+<li class="fn"><b><a href="qdatetimeedit.html#dateTime-prop">dateTime</a></b> : QDateTime</li>
+<li class="fn"><b><a href="qdatetimeedit.html#displayFormat-prop">displayFormat</a></b> : QString</li>
+<li class="fn"><b><a href="qdatetimeedit.html#displayedSections-prop">displayedSections</a></b> : const Sections</li>
+<li class="fn"><b><a href="qdatetimeedit.html#maximumDate-prop">maximumDate</a></b> : QDate</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qdatetimeedit.html#maximumDateTime-prop">maximumDateTime</a></b> : QDateTime</li>
+<li class="fn"><b><a href="qdatetimeedit.html#maximumTime-prop">maximumTime</a></b> : QTime</li>
+<li class="fn"><b><a href="qdatetimeedit.html#minimumDate-prop">minimumDate</a></b> : QDate</li>
+<li class="fn"><b><a href="qdatetimeedit.html#minimumDateTime-prop">minimumDateTime</a></b> : QDateTime</li>
+<li class="fn"><b><a href="qdatetimeedit.html#minimumTime-prop">minimumTime</a></b> : QTime</li>
+<li class="fn"><b><a href="qdatetimeedit.html#sectionCount-prop">sectionCount</a></b> : const int</li>
+<li class="fn"><b><a href="qdatetimeedit.html#time-prop">time</a></b> : QTime</li>
+<li class="fn"><b><a href="qdatetimeedit.html#timeSpec-prop">timeSpec</a></b> : Qt::TimeSpec</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#QDateTimeEdit-3">QDateTimeEdit</a></b>(const QTime &amp;<i>time</i>, QWidget *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#QDateTimeEdit-2">QDateTimeEdit</a></b>(const QDate &amp;<i>date</i>, QWidget *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#QDateTimeEdit-1">QDateTimeEdit</a></b>(const QDateTime &amp;<i>datetime</i>, QWidget *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#QDateTimeEdit">QDateTimeEdit</a></b>(QWidget *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#dtor.QDateTimeEdit">~QDateTimeEdit</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#calendarPopup-prop">calendarPopup</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCalendarWidget *</td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#calendarWidget">calendarWidget</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#maximumDate-prop">clearMaximumDate</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#maximumDateTime-prop">clearMaximumDateTime</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#maximumTime-prop">clearMaximumTime</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#minimumDate-prop">clearMinimumDate</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#minimumDateTime-prop">clearMinimumDateTime</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#minimumTime-prop">clearMinimumTime</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDateTimeEdit::Section </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#currentSection-prop">currentSection</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#currentSectionIndex-prop">currentSectionIndex</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDate </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#date">date</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDateTime </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#dateTime-prop">dateTime</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#displayFormat-prop">displayFormat</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDateTimeEdit::Sections </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#displayedSections-prop">displayedSections</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDate </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#maximumDate-prop">maximumDate</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDateTime </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#maximumDateTime-prop">maximumDateTime</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QTime </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#maximumTime-prop">maximumTime</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDate </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#minimumDate-prop">minimumDate</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDateTime </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#minimumDateTime-prop">minimumDateTime</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QTime </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#minimumTime-prop">minimumTime</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDateTimeEdit::Section </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#sectionAt">sectionAt</a></b>(int <i>index</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#sectionCount-prop">sectionCount</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#sectionText">sectionText</a></b>(QDateTimeEdit::Section <i>section</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#calendarPopup-prop">setCalendarPopup</a></b>(bool <i>enable</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#setCalendarWidget">setCalendarWidget</a></b>(QCalendarWidget *<i>calendarWidget</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#currentSection-prop">setCurrentSection</a></b>(QDateTimeEdit::Section <i>section</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#currentSectionIndex-prop">setCurrentSectionIndex</a></b>(int <i>index</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#setDateRange">setDateRange</a></b>(const QDate &amp;<i>min</i>, const QDate &amp;<i>max</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#setDateTimeRange">setDateTimeRange</a></b>(const QDateTime &amp;<i>min</i>, const QDateTime &amp;<i>max</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#displayFormat-prop">setDisplayFormat</a></b>(const QString &amp;<i>format</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#maximumDate-prop">setMaximumDate</a></b>(const QDate &amp;<i>max</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#maximumDateTime-prop">setMaximumDateTime</a></b>(const QDateTime &amp;<i>dt</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#maximumTime-prop">setMaximumTime</a></b>(const QTime &amp;<i>max</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#minimumDate-prop">setMinimumDate</a></b>(const QDate &amp;<i>min</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#minimumDateTime-prop">setMinimumDateTime</a></b>(const QDateTime &amp;<i>dt</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#minimumTime-prop">setMinimumTime</a></b>(const QTime &amp;<i>min</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#setSelectedSection">setSelectedSection</a></b>(QDateTimeEdit::Section <i>section</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#setTimeRange">setTimeRange</a></b>(const QTime &amp;<i>min</i>, const QTime &amp;<i>max</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#timeSpec-prop">setTimeSpec</a></b>(Qt::TimeSpec <i>spec</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QTime </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#time">time</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::TimeSpec </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#timeSpec-prop">timeSpec</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#clear">clear</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#event">event</a></b>(QEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSize </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#sizeHint">sizeHint</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#stepBy">stepBy</a></b>(int <i>steps</i>) override</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#date-prop">setDate</a></b>(const QDate &amp;<i>date</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#dateTime-prop">setDateTime</a></b>(const QDateTime &amp;<i>dateTime</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#time-prop">setTime</a></b>(const QTime &amp;<i>time</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#dateChanged">dateChanged</a></b>(const QDate &amp;<i>date</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#dateTimeChanged">dateTimeChanged</a></b>(const QDateTime &amp;<i>datetime</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#timeChanged">timeChanged</a></b>(const QTime &amp;<i>time</i>)</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QDateTime </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#dateTimeFromText">dateTimeFromText</a></b>(const QString &amp;<i>text</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#initStyleOption">initStyleOption</a></b>(QStyleOptionSpinBox *<i>option</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QString </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#textFromDateTime">textFromDateTime</a></b>(const QDateTime &amp;<i>dateTime</i>) const</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#fixup">fixup</a></b>(QString &amp;<i>input</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#focusInEvent">focusInEvent</a></b>(QFocusEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#focusNextPrevChild">focusNextPrevChild</a></b>(bool <i>next</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#keyPressEvent">keyPressEvent</a></b>(QKeyEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#mousePressEvent">mousePressEvent</a></b>(QMouseEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#paintEvent">paintEvent</a></b>(QPaintEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QAbstractSpinBox::StepEnabled </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#stepEnabled">stepEnabled</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QValidator::State </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#validate">validate</a></b>(QString &amp;<i>text</i>, int &amp;<i>pos</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qdatetimeedit.html#wheelEvent">wheelEvent</a></b>(QWheelEvent *<i>event</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QDateTimeEdit-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p class="centerAlign"><img src="images/windows-datetimeedit.png" alt="" /></p><p><a href="qdatetimeedit.html">QDateTimeEdit</a> allows the user to edit dates by using the keyboard or the arrow keys to increase and decrease date and time values. The arrow keys can be used to move from section to section within the <a href="qdatetimeedit.html">QDateTimeEdit</a> box. Dates and times appear in accordance with the format set; see <a href="qdatetimeedit.html#displayFormat-prop">setDisplayFormat</a>().</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qdatetimeedit.html#QDateTimeEdit">QDateTimeEdit</a></span> <span class="operator">*</span>dateEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qdatetimeedit.html#QDateTimeEdit">QDateTimeEdit</a></span>(<span class="type"><a href="../qtcore/qdate.html">QDate</a></span><span class="operator">::</span>currentDate());
+  dateEdit<span class="operator">-</span><span class="operator">&gt;</span>setMinimumDate(<span class="type"><a href="../qtcore/qdate.html">QDate</a></span><span class="operator">::</span>currentDate()<span class="operator">.</span>addDays(<span class="operator">-</span><span class="number">365</span>));
+  dateEdit<span class="operator">-</span><span class="operator">&gt;</span>setMaximumDate(<span class="type"><a href="../qtcore/qdate.html">QDate</a></span><span class="operator">::</span>currentDate()<span class="operator">.</span>addDays(<span class="number">365</span>));
+  dateEdit<span class="operator">-</span><span class="operator">&gt;</span>setDisplayFormat(<span class="string">&quot;yyyy.MM.dd&quot;</span>);
+
+</pre>
+<p>Here we've created a new <a href="qdatetimeedit.html">QDateTimeEdit</a> object initialized with today's date, and restricted the valid date range to today plus or minus 365 days. We've set the order to month, day, year.</p>
+<p>The minimum value for <a href="qdatetimeedit.html">QDateTimeEdit</a> is 14 September 1752. You can change this by calling <a href="qdatetimeedit.html#minimumDate-prop">setMinimumDate</a>(), taking into account that the minimum value for <a href="../qtcore/qdate.html">QDate</a> is 2 January 4713BC.</p>
+<p>Other useful functions are <a href="qdatetimeedit.html#maximumDate-prop">setMaximumDate</a>(), <a href="qdatetimeedit.html#minimumTime-prop">setMinimumTime</a>() and <a href="qdatetimeedit.html#maximumTime-prop">setMaximumTime</a>().</p>
+<a name="using-a-pop-up-calendar-widget"></a>
+<h3 id="using-a-pop-up-calendar-widget">Using a Pop-up Calendar Widget</h3>
+<p><a href="qdatetimeedit.html">QDateTimeEdit</a> can be configured to allow a <a href="qcalendarwidget.html">QCalendarWidget</a> to be used to select dates. This is enabled by setting the <a href="qdatetimeedit.html#calendarPopup-prop">calendarPopup</a> property. Additionally, you can supply a custom calendar widget for use as the calendar pop-up by calling the <a href="qdatetimeedit.html#setCalendarWidget">setCalendarWidget</a>() function. The existing calendar widget can be retrieved with <a href="qdatetimeedit.html#calendarWidget">calendarWidget</a>().</p>
+</div>
+<p><b>See also </b><a href="qdateedit.html">QDateEdit</a>, <a href="qtimeedit.html">QTimeEdit</a>, <a href="../qtcore/qdate.html">QDate</a>, and <a href="../qtcore/qtime.html">QTime</a>.</p>
+<!-- @@@QDateTimeEdit -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Section$$$NoSection$$$AmPmSection$$$MSecSection$$$SecondSection$$$MinuteSection$$$HourSection$$$DaySection$$$MonthSection$$$YearSection$$$TimeSections_Mask$$$DateSections_Mask -->
+<h3 class="flags" id="Section-enum"><a name="Section-enum"></a>enum QDateTimeEdit::<span class="name">Section</span><br/>flags QDateTimeEdit::<span class="name">Sections</span></h3>
+<div class="table"><table class="valuelist"><tr><th class="tblConst">Constant</th><th class="tblVal">Value</th></tr>
+<tr><td class="topAlign"><code>QDateTimeEdit::NoSection</code></td><td class="topAlign tblval"><code>0x0000</code></td></tr>
+<tr><td class="topAlign"><code>QDateTimeEdit::AmPmSection</code></td><td class="topAlign tblval"><code>0x0001</code></td></tr>
+<tr><td class="topAlign"><code>QDateTimeEdit::MSecSection</code></td><td class="topAlign tblval"><code>0x0002</code></td></tr>
+<tr><td class="topAlign"><code>QDateTimeEdit::SecondSection</code></td><td class="topAlign tblval"><code>0x0004</code></td></tr>
+<tr><td class="topAlign"><code>QDateTimeEdit::MinuteSection</code></td><td class="topAlign tblval"><code>0x0008</code></td></tr>
+<tr><td class="topAlign"><code>QDateTimeEdit::HourSection</code></td><td class="topAlign tblval"><code>0x0010</code></td></tr>
+<tr><td class="topAlign"><code>QDateTimeEdit::DaySection</code></td><td class="topAlign tblval"><code>0x0100</code></td></tr>
+<tr><td class="topAlign"><code>QDateTimeEdit::MonthSection</code></td><td class="topAlign tblval"><code>0x0200</code></td></tr>
+<tr><td class="topAlign"><code>QDateTimeEdit::YearSection</code></td><td class="topAlign tblval"><code>0x0400</code></td></tr>
+</table></div>
+<p>The Sections type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;Section&gt;. It stores an OR combination of Section values.</p>
+<!-- @@@Section -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$calendarPopup-prop$$$calendarPopup$$$setCalendarPopupbool -->
+<h3 class="fn" id="calendarPopup-prop"><a name="calendarPopup-prop"></a><span class="name">calendarPopup</span> : <span class="type">bool</span></h3>
+<p>This property holds the current calendar pop-up show mode.</p>
+<p>The calendar pop-up will be shown upon clicking the arrow button. This property is valid only if there is a valid date display format.</p>
+<p>This property was introduced in  Qt 4.2.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>calendarPopup</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setCalendarPopup</b></span>(bool <i>enable</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qdatetimeedit.html#displayFormat-prop">setDisplayFormat</a>().</p>
+<!-- @@@calendarPopup -->
+<!-- $$$currentSection-prop$$$currentSection$$$setCurrentSectionQDateTimeEdit::Section -->
+<h3 class="fn" id="currentSection-prop"><a name="currentSection-prop"></a><span class="name">currentSection</span> : <span class="type"><a href="qdatetimeedit.html#Section-enum">Section</a></span></h3>
+<p>This property holds the current section of the spinbox <i>setCurrentSection()</i></p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QDateTimeEdit::Section </td><td class="memItemRight bottomAlign"><span class="name"><b>currentSection</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setCurrentSection</b></span>(QDateTimeEdit::Section <i>section</i>)</td></tr>
+</table></div>
+<!-- @@@currentSection -->
+<!-- $$$currentSectionIndex-prop$$$currentSectionIndex$$$setCurrentSectionIndexint -->
+<h3 class="fn" id="currentSectionIndex-prop"><a name="currentSectionIndex-prop"></a><span class="name">currentSectionIndex</span> : <span class="type">int</span></h3>
+<p>This property holds the current section index of the spinbox</p>
+<p>If the format is 'yyyy/MM/dd', the displayText is '2001/05/21', and the cursorPosition is 5, currentSectionIndex returns 1. If the cursorPosition is 3, currentSectionIndex is 0, and so on.</p>
+<p><i>setCurrentSection()</i></p>
+<p>This property was introduced in  Qt 4.3.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>currentSectionIndex</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setCurrentSectionIndex</b></span>(int <i>index</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qdatetimeedit.html#currentSection-prop">currentSection</a>().</p>
+<!-- @@@currentSectionIndex -->
+<!-- $$$date-prop$$$date$$$setDateconstQDate&$$$dateChangedconstQDate& -->
+<h3 class="fn" id="date-prop"><a name="date-prop"></a><span class="name">date</span> : <span class="type"><a href="../qtcore/qdate.html">QDate</a></span></h3>
+<p>This property holds the <a href="../qtcore/qdate.html">QDate</a> that is set in the widget</p>
+<p>By default, this property contains a date that refers to January 1, 2000.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QDate </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qdatetimeedit.html#date">date</a></b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setDate</b></span>(const QDate &amp;<i>date</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qdatetimeedit.html#dateChanged">dateChanged</a></b></span>(const QDate &amp;<i>date</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qdatetimeedit.html#time">time</a> and <a href="qdatetimeedit.html#dateTime-prop">dateTime</a>.</p>
+<!-- @@@date -->
+<!-- $$$dateTime-prop$$$dateTime$$$setDateTimeconstQDateTime&$$$dateTimeChangedconstQDateTime& -->
+<h3 class="fn" id="dateTime-prop"><a name="dateTime-prop"></a><span class="name">dateTime</span> : <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span></h3>
+<p>This property holds the <a href="../qtcore/qdatetime.html">QDateTime</a> that is set in the <a href="qdatetimeedit.html">QDateTimeEdit</a></p>
+<p>When setting this property the timespec of the <a href="qdatetimeedit.html">QDateTimeEdit</a> remains the same and the timespec of the new <a href="../qtcore/qdatetime.html">QDateTime</a> is ignored.</p>
+<p>By default, this property contains a date that refers to January 1, 2000 and a time of 00:00:00 and 0 milliseconds.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QDateTime </td><td class="memItemRight bottomAlign"><span class="name"><b>dateTime</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setDateTime</b></span>(const QDateTime &amp;<i>dateTime</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qdatetimeedit.html#dateTimeChanged">dateTimeChanged</a></b></span>(const QDateTime &amp;<i>datetime</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qdatetimeedit.html#date">date</a> and <a href="qdatetimeedit.html#time">time</a>.</p>
+<!-- @@@dateTime -->
+<!-- $$$displayFormat-prop$$$displayFormat$$$setDisplayFormatconstQString& -->
+<h3 class="fn" id="displayFormat-prop"><a name="displayFormat-prop"></a><span class="name">displayFormat</span> : <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>This property holds the format used to display the time/date of the date time edit</p>
+<p>This format is described in <a href="../qtcore/qdatetime.html#toString">QDateTime::toString</a>() and <a href="../qtcore/qdatetime.html#fromString">QDateTime::fromString</a>()</p>
+<p>Example format strings (assuming that the date is 2nd of July 1969):</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Format</th><th >Result</th></tr></thead>
+<tr valign="top" class="odd"><td >dd.MM.yyyy</td><td >02.07.1969</td></tr>
+<tr valign="top" class="even"><td >MMM d yy</td><td >Jul 2 69</td></tr>
+<tr valign="top" class="odd"><td >MMMM d yy</td><td >July 2 69</td></tr>
+</table></div>
+<p>Note that if you specify a two digit year, it will be interpreted to be in the century in which the date time edit was initialized. The default century is the 21 (2000-2099).</p>
+<p>If you specify an invalid format the format will not be set.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>displayFormat</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setDisplayFormat</b></span>(const QString &amp;<i>format</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="../qtcore/qdatetime.html#toString">QDateTime::toString</a>() and <a href="qdatetimeedit.html#displayedSections-prop">displayedSections</a>().</p>
+<!-- @@@displayFormat -->
+<!-- $$$displayedSections-prop$$$displayedSections -->
+<h3 class="fn" id="displayedSections-prop"><a name="displayedSections-prop"></a><span class="name">displayedSections</span> : const <span class="type"><a href="qdatetimeedit.html#Section-enum">Sections</a></span></h3>
+<p>This property holds the currently displayed fields of the date time edit</p>
+<p>Returns a bit set of the displayed sections for this format. <i>setDisplayFormat()</i>, <a href="qdatetimeedit.html#displayFormat-prop">displayFormat</a>()</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QDateTimeEdit::Sections </td><td class="memItemRight bottomAlign"><span class="name"><b>displayedSections</b></span>() const</td></tr>
+</table></div>
+<!-- @@@displayedSections -->
+<!-- $$$maximumDate-prop$$$maximumDate$$$setMaximumDateconstQDate&$$$clearMaximumDate -->
+<h3 class="fn" id="maximumDate-prop"><a name="maximumDate-prop"></a><span class="name">maximumDate</span> : <span class="type"><a href="../qtcore/qdate.html">QDate</a></span></h3>
+<p>This property holds the maximum date of the date time edit</p>
+<p>When setting this property the <a href="qdatetimeedit.html#minimumDate-prop">minimumDate</a> is adjusted if necessary to ensure that the range remains valid. If the date is not a valid <a href="../qtcore/qdate.html">QDate</a> object, this function does nothing.</p>
+<p>By default, this property contains a date that refers to December 31, 9999.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QDate </td><td class="memItemRight bottomAlign"><span class="name"><b>maximumDate</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setMaximumDate</b></span>(const QDate &amp;<i>max</i>)</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>clearMaximumDate</b></span>()</td></tr>
+</table></div>
+<p><b>See also </b><a href="qdatetimeedit.html#minimumDate-prop">minimumDate</a>, <a href="qdatetimeedit.html#minimumTime-prop">minimumTime</a>, <a href="qdatetimeedit.html#maximumTime-prop">maximumTime</a>, and <a href="qdatetimeedit.html#setDateRange">setDateRange</a>().</p>
+<!-- @@@maximumDate -->
+<!-- $$$maximumDateTime-prop$$$maximumDateTime$$$setMaximumDateTimeconstQDateTime&$$$clearMaximumDateTime -->
+<h3 class="fn" id="maximumDateTime-prop"><a name="maximumDateTime-prop"></a><span class="name">maximumDateTime</span> : <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span></h3>
+<p>This property holds the maximum datetime of the date time edit</p>
+<p>When setting this property the <a href="qdatetimeedit.html#minimumDateTime-prop">minimumDateTime</a>() is adjusted if necessary to ensure that the range remains valid. If the datetime is not a valid <a href="../qtcore/qdatetime.html">QDateTime</a> object, this function does nothing.</p>
+<p>The default maximumDateTime can be restored with clearMaximumDateTime().</p>
+<p>By default, this property contains a date that refers to 31 December, 9999 and a time of 23:59:59 and 999 milliseconds.</p>
+<p>This property was introduced in  Qt 4.4.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QDateTime </td><td class="memItemRight bottomAlign"><span class="name"><b>maximumDateTime</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setMaximumDateTime</b></span>(const QDateTime &amp;<i>dt</i>)</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>clearMaximumDateTime</b></span>()</td></tr>
+</table></div>
+<p><b>See also </b><a href="qdatetimeedit.html#minimumDateTime-prop">minimumDateTime</a>(), <a href="qdatetimeedit.html#minimumTime-prop">minimumTime</a>(), <a href="qdatetimeedit.html#maximumTime-prop">maximumTime</a>(), <a href="qdatetimeedit.html#minimumDate-prop">minimumDate</a>(), <a href="qdatetimeedit.html#maximumDate-prop">maximumDate</a>(), <a href="qdatetimeedit.html#setDateTimeRange">setDateTimeRange</a>(), <a href="qdatetimeedit.html#setDateRange">setDateRange</a>(), <a href="qdatetimeedit.html#setTimeRange">setTimeRange</a>(), <a href="qdatetimeedit.html#minimumDateTime-prop">clearMinimumDateTime</a>(), <a href="qdatetimeedit.html#minimumDate-prop">clearMinimumDate</a>(), <a href="qdatetimeedit.html#maximumDate-prop">clearMaximumDate</a>(), <a href="qdatetimeedit.html#minimumTime-prop">clearMinimumTime</a>(), and <a href="qdatetimeedit.html#maximumTime-prop">clearMaximumTime</a>().</p>
+<!-- @@@maximumDateTime -->
+<!-- $$$maximumTime-prop$$$maximumTime$$$setMaximumTimeconstQTime&$$$clearMaximumTime -->
+<h3 class="fn" id="maximumTime-prop"><a name="maximumTime-prop"></a><span class="name">maximumTime</span> : <span class="type"><a href="../qtcore/qtime.html">QTime</a></span></h3>
+<p>This property holds the maximum time of the date time edit</p>
+<p>When setting this property, the <a href="qdatetimeedit.html#minimumTime-prop">minimumTime</a> is adjusted if necessary to ensure that the range remains valid. If the time is not a valid <a href="../qtcore/qtime.html">QTime</a> object, this function does nothing.</p>
+<p>By default, this property contains a time of 23:59:59 and 999 milliseconds.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QTime </td><td class="memItemRight bottomAlign"><span class="name"><b>maximumTime</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setMaximumTime</b></span>(const QTime &amp;<i>max</i>)</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>clearMaximumTime</b></span>()</td></tr>
+</table></div>
+<p><b>See also </b><a href="qdatetimeedit.html#minimumTime-prop">minimumTime</a>, <a href="qdatetimeedit.html#minimumDate-prop">minimumDate</a>, <a href="qdatetimeedit.html#maximumDate-prop">maximumDate</a>, and <a href="qdatetimeedit.html#setTimeRange">setTimeRange</a>().</p>
+<!-- @@@maximumTime -->
+<!-- $$$minimumDate-prop$$$minimumDate$$$setMinimumDateconstQDate&$$$clearMinimumDate -->
+<h3 class="fn" id="minimumDate-prop"><a name="minimumDate-prop"></a><span class="name">minimumDate</span> : <span class="type"><a href="../qtcore/qdate.html">QDate</a></span></h3>
+<p>This property holds the minimum date of the date time edit</p>
+<p>When setting this property the <a href="qdatetimeedit.html#maximumDate-prop">maximumDate</a> is adjusted if necessary, to ensure that the range remains valid. If the date is not a valid <a href="../qtcore/qdate.html">QDate</a> object, this function does nothing.</p>
+<p>By default, this property contains a date that refers to September 14, 1752. The minimum date must be at least the first day in year 100, otherwise setMinimumDate() has no effect.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QDate </td><td class="memItemRight bottomAlign"><span class="name"><b>minimumDate</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setMinimumDate</b></span>(const QDate &amp;<i>min</i>)</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>clearMinimumDate</b></span>()</td></tr>
+</table></div>
+<p><b>See also </b><a href="qdatetimeedit.html#minimumTime-prop">minimumTime</a>(), <a href="qdatetimeedit.html#maximumTime-prop">maximumTime</a>(), and <a href="qdatetimeedit.html#setDateRange">setDateRange</a>().</p>
+<!-- @@@minimumDate -->
+<!-- $$$minimumDateTime-prop$$$minimumDateTime$$$setMinimumDateTimeconstQDateTime&$$$clearMinimumDateTime -->
+<h3 class="fn" id="minimumDateTime-prop"><a name="minimumDateTime-prop"></a><span class="name">minimumDateTime</span> : <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span></h3>
+<p>This property holds the minimum datetime of the date time edit</p>
+<p>When setting this property the <a href="qdatetimeedit.html#maximumDateTime-prop">maximumDateTime</a>() is adjusted if necessary to ensure that the range remains valid. If the datetime is not a valid <a href="../qtcore/qdatetime.html">QDateTime</a> object, this function does nothing.</p>
+<p>The default minimumDateTime can be restored with clearMinimumDateTime()</p>
+<p>By default, this property contains a date that refers to September 14, 1752 and a time of 00:00:00 and 0 milliseconds.</p>
+<p>This property was introduced in  Qt 4.4.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QDateTime </td><td class="memItemRight bottomAlign"><span class="name"><b>minimumDateTime</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setMinimumDateTime</b></span>(const QDateTime &amp;<i>dt</i>)</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>clearMinimumDateTime</b></span>()</td></tr>
+</table></div>
+<p><b>See also </b><a href="qdatetimeedit.html#maximumDateTime-prop">maximumDateTime</a>(), <a href="qdatetimeedit.html#minimumTime-prop">minimumTime</a>(), <a href="qdatetimeedit.html#maximumTime-prop">maximumTime</a>(), <a href="qdatetimeedit.html#minimumDate-prop">minimumDate</a>(), <a href="qdatetimeedit.html#maximumDate-prop">maximumDate</a>(), <a href="qdatetimeedit.html#setDateTimeRange">setDateTimeRange</a>(), <a href="qdatetimeedit.html#setDateRange">setDateRange</a>(), <a href="qdatetimeedit.html#setTimeRange">setTimeRange</a>(), <a href="qdatetimeedit.html#maximumDateTime-prop">clearMaximumDateTime</a>(), <a href="qdatetimeedit.html#minimumDate-prop">clearMinimumDate</a>(), <a href="qdatetimeedit.html#maximumDate-prop">clearMaximumDate</a>(), <a href="qdatetimeedit.html#minimumTime-prop">clearMinimumTime</a>(), and <a href="qdatetimeedit.html#maximumTime-prop">clearMaximumTime</a>().</p>
+<!-- @@@minimumDateTime -->
+<!-- $$$minimumTime-prop$$$minimumTime$$$setMinimumTimeconstQTime&$$$clearMinimumTime -->
+<h3 class="fn" id="minimumTime-prop"><a name="minimumTime-prop"></a><span class="name">minimumTime</span> : <span class="type"><a href="../qtcore/qtime.html">QTime</a></span></h3>
+<p>This property holds the minimum time of the date time edit</p>
+<p>When setting this property the <a href="qdatetimeedit.html#maximumTime-prop">maximumTime</a> is adjusted if necessary, to ensure that the range remains valid. If the time is not a valid <a href="../qtcore/qtime.html">QTime</a> object, this function does nothing.</p>
+<p>By default, this property contains a time of 00:00:00 and 0 milliseconds.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QTime </td><td class="memItemRight bottomAlign"><span class="name"><b>minimumTime</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setMinimumTime</b></span>(const QTime &amp;<i>min</i>)</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>clearMinimumTime</b></span>()</td></tr>
+</table></div>
+<p><b>See also </b><a href="qdatetimeedit.html#maximumTime-prop">maximumTime</a>, <a href="qdatetimeedit.html#minimumDate-prop">minimumDate</a>, <a href="qdatetimeedit.html#maximumDate-prop">maximumDate</a>, and <a href="qdatetimeedit.html#setTimeRange">setTimeRange</a>().</p>
+<!-- @@@minimumTime -->
+<!-- $$$sectionCount-prop$$$sectionCount -->
+<h3 class="fn" id="sectionCount-prop"><a name="sectionCount-prop"></a><span class="name">sectionCount</span> : const <span class="type">int</span></h3>
+<p>This property holds the number of sections displayed. If the format is 'yyyy/yy/yyyy', sectionCount returns 3</p>
+<p>This property was introduced in  Qt 4.3.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>sectionCount</b></span>() const</td></tr>
+</table></div>
+<!-- @@@sectionCount -->
+<!-- $$$time-prop$$$time$$$setTimeconstQTime&$$$timeChangedconstQTime& -->
+<h3 class="fn" id="time-prop"><a name="time-prop"></a><span class="name">time</span> : <span class="type"><a href="../qtcore/qtime.html">QTime</a></span></h3>
+<p>This property holds the <a href="../qtcore/qtime.html">QTime</a> that is set in the widget</p>
+<p>By default, this property contains a time of 00:00:00 and 0 milliseconds.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QTime </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qdatetimeedit.html#time">time</a></b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setTime</b></span>(const QTime &amp;<i>time</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qdatetimeedit.html#timeChanged">timeChanged</a></b></span>(const QTime &amp;<i>time</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qdatetimeedit.html#date">date</a> and <a href="qdatetimeedit.html#dateTime-prop">dateTime</a>.</p>
+<!-- @@@time -->
+<!-- $$$timeSpec-prop$$$timeSpec$$$setTimeSpecQt::TimeSpec -->
+<h3 class="fn" id="timeSpec-prop"><a name="timeSpec-prop"></a><span class="name">timeSpec</span> : <span class="type"><a href="../qtcore/qt.html#TimeSpec-enum">Qt::TimeSpec</a></span></h3>
+<p>This property holds the current timespec used by the date time edit.</p>
+<p>This property was introduced in  Qt 4.4.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt::TimeSpec </td><td class="memItemRight bottomAlign"><span class="name"><b>timeSpec</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setTimeSpec</b></span>(Qt::TimeSpec <i>spec</i>)</td></tr>
+</table></div>
+<!-- @@@timeSpec -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QDateTimeEdit$$$QDateTimeEditconstQTime&QWidget* -->
+<h3 class="fn" id="QDateTimeEdit-3"><a name="QDateTimeEdit-3"></a>QDateTimeEdit::<span class="name">QDateTimeEdit</span>(const <span class="type"><a href="../qtcore/qtime.html">QTime</a></span> &amp;<i>time</i>, <span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs an empty date time editor with a <i>parent</i>. The value is set to <i>time</i>.</p>
+<!-- @@@QDateTimeEdit -->
+<!-- $$$QDateTimeEdit$$$QDateTimeEditconstQDate&QWidget* -->
+<h3 class="fn" id="QDateTimeEdit-2"><a name="QDateTimeEdit-2"></a>QDateTimeEdit::<span class="name">QDateTimeEdit</span>(const <span class="type"><a href="../qtcore/qdate.html">QDate</a></span> &amp;<i>date</i>, <span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs an empty date time editor with a <i>parent</i>. The value is set to <i>date</i>.</p>
+<!-- @@@QDateTimeEdit -->
+<!-- $$$QDateTimeEdit$$$QDateTimeEditconstQDateTime&QWidget* -->
+<h3 class="fn" id="QDateTimeEdit-1"><a name="QDateTimeEdit-1"></a>QDateTimeEdit::<span class="name">QDateTimeEdit</span>(const <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> &amp;<i>datetime</i>, <span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs an empty date time editor with a <i>parent</i>. The value is set to <i>datetime</i>.</p>
+<!-- @@@QDateTimeEdit -->
+<!-- $$$QDateTimeEdit[overload1]$$$QDateTimeEditQWidget* -->
+<h3 class="fn" id="QDateTimeEdit"><a name="QDateTimeEdit"></a>QDateTimeEdit::<span class="name">QDateTimeEdit</span>(<span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs an empty date time editor with a <i>parent</i>.</p>
+<!-- @@@QDateTimeEdit -->
+<!-- $$$dateChanged -->
+<h3 class="fn" id="dateChanged"><a name="dateChanged"></a><code>[signal] </code><span class="type">void</span> QDateTimeEdit::<span class="name">dateChanged</span>(const <span class="type"><a href="../qtcore/qdate.html">QDate</a></span> &amp;<i>date</i>)</h3>
+<p>This signal is emitted whenever the date is changed. The new date is passed in <i>date</i>.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qdatetimeedit.html#date-prop">date</a>. </p><!-- @@@dateChanged -->
+<!-- $$$dateTimeChanged -->
+<h3 class="fn" id="dateTimeChanged"><a name="dateTimeChanged"></a><code>[signal] </code><span class="type">void</span> QDateTimeEdit::<span class="name">dateTimeChanged</span>(const <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> &amp;<i>datetime</i>)</h3>
+<p>This signal is emitted whenever the date or time is changed. The new date and time is passed in <i>datetime</i>.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qdatetimeedit.html#dateTime-prop">dateTime</a>. </p><!-- @@@dateTimeChanged -->
+<!-- $$$timeChanged -->
+<h3 class="fn" id="timeChanged"><a name="timeChanged"></a><code>[signal] </code><span class="type">void</span> QDateTimeEdit::<span class="name">timeChanged</span>(const <span class="type"><a href="../qtcore/qtime.html">QTime</a></span> &amp;<i>time</i>)</h3>
+<p>This signal is emitted whenever the time is changed. The new time is passed in <i>time</i>.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qdatetimeedit.html#time-prop">time</a>. </p><!-- @@@timeChanged -->
+<!-- $$$~QDateTimeEdit[overload1]$$$~QDateTimeEdit -->
+<h3 class="fn" id="dtor.QDateTimeEdit"><a name="dtor.QDateTimeEdit"></a><code>[virtual] </code>QDateTimeEdit::<span class="name">~QDateTimeEdit</span>()</h3>
+<p>Destructor.</p>
+<!-- @@@~QDateTimeEdit -->
+<!-- $$$calendarWidget[overload1]$$$calendarWidget -->
+<h3 class="fn" id="calendarWidget"><a name="calendarWidget"></a><span class="type"><a href="qcalendarwidget.html">QCalendarWidget</a></span> *QDateTimeEdit::<span class="name">calendarWidget</span>() const</h3>
+<p>Returns the calendar widget for the editor if <a href="qdatetimeedit.html#calendarPopup-prop">calendarPopup</a> is set to true and (<a href="../qtquick/qtquick-views-example.html#sections">sections</a>() &amp; <a href="qdatetimeedit.html#Section-enum">DateSections_Mask</a>) != 0.</p>
+<p>This function creates and returns a calendar widget if none has been set.</p>
+<p>This function was introduced in  Qt 4.4.</p>
+<p><b>See also </b><a href="qdatetimeedit.html#setCalendarWidget">setCalendarWidget</a>().</p>
+<!-- @@@calendarWidget -->
+<!-- $$$clear[overload1]$$$clear -->
+<h3 class="fn" id="clear"><a name="clear"></a><code>[override virtual] </code><span class="type">void</span> QDateTimeEdit::<span class="name">clear</span>()</h3>
+<p>Reimplements: <a href="qabstractspinbox.html#clear">QAbstractSpinBox::clear</a>().</p>
+<!-- @@@clear -->
+<!-- $$$date -->
+<h3 class="fn" id="date"><a name="date"></a><span class="type"><a href="../qtcore/qdate.html">QDate</a></span> QDateTimeEdit::<span class="name">date</span>() const</h3>
+<p>Returns the date of the date time edit.</p>
+<p><b>Note:</b> Getter function for property <a href="qdatetimeedit.html#date-prop">date</a>. </p><p><b>See also </b><a href="qdatetimeedit.html#date-prop">setDate</a>().</p>
+<!-- @@@date -->
+<!-- $$$dateTimeFromText[overload1]$$$dateTimeFromTextconstQString& -->
+<h3 class="fn" id="dateTimeFromText"><a name="dateTimeFromText"></a><code>[virtual protected] </code><span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> QDateTimeEdit::<span class="name">dateTimeFromText</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>text</i>) const</h3>
+<p>Returns an appropriate datetime for the given <i>text</i>.</p>
+<p>This virtual function is used by the datetime edit whenever it needs to interpret text entered by the user as a value.</p>
+<p><b>See also </b><a href="qdatetimeedit.html#textFromDateTime">textFromDateTime</a>() and <a href="qdatetimeedit.html#validate">validate</a>().</p>
+<!-- @@@dateTimeFromText -->
+<!-- $$$event[overload1]$$$eventQEvent* -->
+<h3 class="fn" id="event"><a name="event"></a><code>[override virtual] </code><span class="type">bool</span> QDateTimeEdit::<span class="name">event</span>(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qabstractspinbox.html#event">QAbstractSpinBox::event</a>(QEvent *event).</p>
+<!-- @@@event -->
+<!-- $$$fixup[overload1]$$$fixupQString& -->
+<h3 class="fn" id="fixup"><a name="fixup"></a><code>[override virtual protected] </code><span class="type">void</span> QDateTimeEdit::<span class="name">fixup</span>(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>input</i>) const</h3>
+<p>Reimplements: <a href="qabstractspinbox.html#fixup">QAbstractSpinBox::fixup</a>(QString &amp;input) const.</p>
+<!-- @@@fixup -->
+<!-- $$$focusInEvent[overload1]$$$focusInEventQFocusEvent* -->
+<h3 class="fn" id="focusInEvent"><a name="focusInEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QDateTimeEdit::<span class="name">focusInEvent</span>(<span class="type"><a href="../qtgui/qfocusevent.html">QFocusEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qabstractspinbox.html#focusInEvent">QAbstractSpinBox::focusInEvent</a>(QFocusEvent *event).</p>
+<!-- @@@focusInEvent -->
+<!-- $$$focusNextPrevChild[overload1]$$$focusNextPrevChildbool -->
+<h3 class="fn" id="focusNextPrevChild"><a name="focusNextPrevChild"></a><code>[override virtual protected] </code><span class="type">bool</span> QDateTimeEdit::<span class="name">focusNextPrevChild</span>(<span class="type">bool</span> <i>next</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#focusNextPrevChild">QWidget::focusNextPrevChild</a>(bool next).</p>
+<!-- @@@focusNextPrevChild -->
+<!-- $$$initStyleOption[overload1]$$$initStyleOptionQStyleOptionSpinBox* -->
+<h3 class="fn" id="initStyleOption"><a name="initStyleOption"></a><code>[protected] </code><span class="type">void</span> QDateTimeEdit::<span class="name">initStyleOption</span>(<span class="type"><a href="qstyleoptionspinbox.html">QStyleOptionSpinBox</a></span> *<i>option</i>) const</h3>
+<p>Initialize <i>option</i> with the values from this QDataTimeEdit. This method is useful for subclasses when they need a <a href="qstyleoptionspinbox.html">QStyleOptionSpinBox</a>, but don't want to fill in all the information themselves.</p>
+<p><b>See also </b><a href="qstyleoption.html#initFrom">QStyleOption::initFrom</a>().</p>
+<!-- @@@initStyleOption -->
+<!-- $$$keyPressEvent[overload1]$$$keyPressEventQKeyEvent* -->
+<h3 class="fn" id="keyPressEvent"><a name="keyPressEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QDateTimeEdit::<span class="name">keyPressEvent</span>(<span class="type"><a href="../qtgui/qkeyevent.html">QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qabstractspinbox.html#keyPressEvent">QAbstractSpinBox::keyPressEvent</a>(QKeyEvent *event).</p>
+<!-- @@@keyPressEvent -->
+<!-- $$$mousePressEvent[overload1]$$$mousePressEventQMouseEvent* -->
+<h3 class="fn" id="mousePressEvent"><a name="mousePressEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QDateTimeEdit::<span class="name">mousePressEvent</span>(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qabstractspinbox.html#mousePressEvent">QAbstractSpinBox::mousePressEvent</a>(QMouseEvent *event).</p>
+<!-- @@@mousePressEvent -->
+<!-- $$$paintEvent[overload1]$$$paintEventQPaintEvent* -->
+<h3 class="fn" id="paintEvent"><a name="paintEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QDateTimeEdit::<span class="name">paintEvent</span>(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qabstractspinbox.html#paintEvent">QAbstractSpinBox::paintEvent</a>(QPaintEvent *event).</p>
+<!-- @@@paintEvent -->
+<!-- $$$sectionAt[overload1]$$$sectionAtint -->
+<h3 class="fn" id="sectionAt"><a name="sectionAt"></a><span class="type"><a href="qdatetimeedit.html#Section-enum">QDateTimeEdit::Section</a></span> QDateTimeEdit::<span class="name">sectionAt</span>(<span class="type">int</span> <i>index</i>) const</h3>
+<p>Returns the Section at <i>index</i>.</p>
+<p>If the format is 'yyyy/MM/dd', sectionAt(0) returns <a href="qdatetimeedit.html#Section-enum">YearSection</a>, sectionAt(1) returns <a href="qdatetimeedit.html#Section-enum">MonthSection</a>, and sectionAt(2) returns <a href="qdatetimeedit.html#Section-enum">YearSection</a>,</p>
+<p>This function was introduced in  Qt 4.3.</p>
+<!-- @@@sectionAt -->
+<!-- $$$sectionText[overload1]$$$sectionTextQDateTimeEdit::Section -->
+<h3 class="fn" id="sectionText"><a name="sectionText"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QDateTimeEdit::<span class="name">sectionText</span>(<span class="type"><a href="qdatetimeedit.html#Section-enum">QDateTimeEdit::Section</a></span> <i>section</i>) const</h3>
+<p>Returns the text from the given <i>section</i>.</p>
+<p><b>See also </b><a href="qdatetimeedit.html#currentSection-prop">currentSection</a>().</p>
+<!-- @@@sectionText -->
+<!-- $$$setCalendarWidget[overload1]$$$setCalendarWidgetQCalendarWidget* -->
+<h3 class="fn" id="setCalendarWidget"><a name="setCalendarWidget"></a><span class="type">void</span> QDateTimeEdit::<span class="name">setCalendarWidget</span>(<span class="type"><a href="qcalendarwidget.html">QCalendarWidget</a></span> *<i>calendarWidget</i>)</h3>
+<p>Sets the given <i>calendarWidget</i> as the widget to be used for the calendar pop-up. The editor does not automatically take ownership of the calendar widget.</p>
+<p><b>Note: </b><a href="qdatetimeedit.html#calendarPopup-prop">calendarPopup</a> must be set to true before setting the calendar widget.</p><p>This function was introduced in  Qt 4.4.</p>
+<p><b>See also </b><a href="qdatetimeedit.html#calendarWidget">calendarWidget</a>() and <a href="qdatetimeedit.html#calendarPopup-prop">calendarPopup</a>.</p>
+<!-- @@@setCalendarWidget -->
+<!-- $$$setDateRange[overload1]$$$setDateRangeconstQDate&constQDate& -->
+<h3 class="fn" id="setDateRange"><a name="setDateRange"></a><span class="type">void</span> QDateTimeEdit::<span class="name">setDateRange</span>(const <span class="type"><a href="../qtcore/qdate.html">QDate</a></span> &amp;<i>min</i>, const <span class="type"><a href="../qtcore/qdate.html">QDate</a></span> &amp;<i>max</i>)</h3>
+<p>Convenience function to set minimum and maximum date with one function call.</p>
+<pre class="cpp">
+
+  setDateRange(min<span class="operator">,</span> max);
+
+</pre>
+<p>is analogous to:</p>
+<pre class="cpp">
+
+  setMinimumDate(min);
+  setMaximumDate(max);
+
+</pre>
+<p>If either <i>min</i> or <i>max</i> are not valid, this function does nothing.</p>
+<p><b>See also </b><a href="qdatetimeedit.html#minimumDate-prop">setMinimumDate</a>(), <a href="qdatetimeedit.html#maximumDate-prop">maximumDate</a>(), <a href="qdatetimeedit.html#maximumDate-prop">setMaximumDate</a>(), <a href="qdatetimeedit.html#minimumDate-prop">clearMinimumDate</a>(), <a href="qdatetimeedit.html#minimumTime-prop">setMinimumTime</a>(), <a href="qdatetimeedit.html#maximumTime-prop">maximumTime</a>(), <a href="qdatetimeedit.html#maximumTime-prop">setMaximumTime</a>(), <a href="qdatetimeedit.html#minimumTime-prop">clearMinimumTime</a>(), and <a href="../qtcore/qdate.html#isValid">QDate::isValid</a>().</p>
+<!-- @@@setDateRange -->
+<!-- $$$setDateTimeRange[overload1]$$$setDateTimeRangeconstQDateTime&constQDateTime& -->
+<h3 class="fn" id="setDateTimeRange"><a name="setDateTimeRange"></a><span class="type">void</span> QDateTimeEdit::<span class="name">setDateTimeRange</span>(const <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> &amp;<i>min</i>, const <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> &amp;<i>max</i>)</h3>
+<p>Convenience function to set minimum and maximum date time with one function call.</p>
+<pre class="cpp">
+
+  setDateTimeRange(min<span class="operator">,</span> max);
+
+</pre>
+<p>is analogous to:</p>
+<pre class="cpp">
+
+  setMinimumDateTime(min);
+  setMaximumDateTime(max);
+
+</pre>
+<p>If either <i>min</i> or <i>max</i> are not valid, this function does nothing.</p>
+<p>This function was introduced in  Qt 4.4.</p>
+<p><b>See also </b><a href="qdatetimeedit.html#minimumDate-prop">setMinimumDate</a>(), <a href="qdatetimeedit.html#maximumDate-prop">maximumDate</a>(), <a href="qdatetimeedit.html#maximumDate-prop">setMaximumDate</a>(), <a href="qdatetimeedit.html#minimumDate-prop">clearMinimumDate</a>(), <a href="qdatetimeedit.html#minimumTime-prop">setMinimumTime</a>(), <a href="qdatetimeedit.html#maximumTime-prop">maximumTime</a>(), <a href="qdatetimeedit.html#maximumTime-prop">setMaximumTime</a>(), <a href="qdatetimeedit.html#minimumTime-prop">clearMinimumTime</a>(), and <a href="../qtcore/qdatetime.html#isValid">QDateTime::isValid</a>().</p>
+<!-- @@@setDateTimeRange -->
+<!-- $$$setSelectedSection[overload1]$$$setSelectedSectionQDateTimeEdit::Section -->
+<h3 class="fn" id="setSelectedSection"><a name="setSelectedSection"></a><span class="type">void</span> QDateTimeEdit::<span class="name">setSelectedSection</span>(<span class="type"><a href="qdatetimeedit.html#Section-enum">QDateTimeEdit::Section</a></span> <i>section</i>)</h3>
+<p>Selects <i>section</i>. If <i>section</i> doesn't exist in the currently displayed sections, this function does nothing. If <i>section</i> is <a href="qdatetimeedit.html#Section-enum">NoSection</a>, this function will unselect all text in the editor. Otherwise, this function will move the cursor and the current section to the selected section.</p>
+<p>This function was introduced in  Qt 4.2.</p>
+<p><b>See also </b><a href="qdatetimeedit.html#currentSection-prop">currentSection</a>().</p>
+<!-- @@@setSelectedSection -->
+<!-- $$$setTimeRange[overload1]$$$setTimeRangeconstQTime&constQTime& -->
+<h3 class="fn" id="setTimeRange"><a name="setTimeRange"></a><span class="type">void</span> QDateTimeEdit::<span class="name">setTimeRange</span>(const <span class="type"><a href="../qtcore/qtime.html">QTime</a></span> &amp;<i>min</i>, const <span class="type"><a href="../qtcore/qtime.html">QTime</a></span> &amp;<i>max</i>)</h3>
+<p>Convenience function to set minimum and maximum time with one function call.</p>
+<pre class="cpp">
+
+  setTimeRange(min<span class="operator">,</span> max);
+
+</pre>
+<p>is analogous to:</p>
+<pre class="cpp">
+
+  setMinimumTime(min);
+  setMaximumTime(max);
+
+</pre>
+<p>If either <i>min</i> or <i>max</i> are not valid, this function does nothing.</p>
+<p><b>See also </b><a href="qdatetimeedit.html#minimumDate-prop">setMinimumDate</a>(), <a href="qdatetimeedit.html#maximumDate-prop">maximumDate</a>(), <a href="qdatetimeedit.html#maximumDate-prop">setMaximumDate</a>(), <a href="qdatetimeedit.html#minimumDate-prop">clearMinimumDate</a>(), <a href="qdatetimeedit.html#minimumTime-prop">setMinimumTime</a>(), <a href="qdatetimeedit.html#maximumTime-prop">maximumTime</a>(), <a href="qdatetimeedit.html#maximumTime-prop">setMaximumTime</a>(), <a href="qdatetimeedit.html#minimumTime-prop">clearMinimumTime</a>(), and <a href="../qtcore/qtime.html#isValid">QTime::isValid</a>().</p>
+<!-- @@@setTimeRange -->
+<!-- $$$sizeHint[overload1]$$$sizeHint -->
+<h3 class="fn" id="sizeHint"><a name="sizeHint"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QDateTimeEdit::<span class="name">sizeHint</span>() const</h3>
+<p>Reimplements: <a href="qabstractspinbox.html#sizeHint">QAbstractSpinBox::sizeHint</a>() const.</p>
+<!-- @@@sizeHint -->
+<!-- $$$stepBy[overload1]$$$stepByint -->
+<h3 class="fn" id="stepBy"><a name="stepBy"></a><code>[override virtual] </code><span class="type">void</span> QDateTimeEdit::<span class="name">stepBy</span>(<span class="type">int</span> <i>steps</i>)</h3>
+<p>Reimplements: <a href="qabstractspinbox.html#stepBy">QAbstractSpinBox::stepBy</a>(int steps).</p>
+<!-- @@@stepBy -->
+<!-- $$$stepEnabled[overload1]$$$stepEnabled -->
+<h3 class="fn" id="stepEnabled"><a name="stepEnabled"></a><code>[override virtual protected] </code><span class="type"><a href="qabstractspinbox.html#StepEnabledFlag-enum">QAbstractSpinBox::StepEnabled</a></span> QDateTimeEdit::<span class="name">stepEnabled</span>() const</h3>
+<p>Reimplements: <a href="qabstractspinbox.html#stepEnabled">QAbstractSpinBox::stepEnabled</a>() const.</p>
+<!-- @@@stepEnabled -->
+<!-- $$$textFromDateTime[overload1]$$$textFromDateTimeconstQDateTime& -->
+<h3 class="fn" id="textFromDateTime"><a name="textFromDateTime"></a><code>[virtual protected] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QDateTimeEdit::<span class="name">textFromDateTime</span>(const <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> &amp;<i>dateTime</i>) const</h3>
+<p>This virtual function is used by the date time edit whenever it needs to display <i>dateTime</i>.</p>
+<p>If you reimplement this, you may also need to reimplement <a href="qdatetimeedit.html#validate">validate</a>().</p>
+<p><b>See also </b><a href="qdatetimeedit.html#dateTimeFromText">dateTimeFromText</a>() and <a href="qdatetimeedit.html#validate">validate</a>().</p>
+<!-- @@@textFromDateTime -->
+<!-- $$$time -->
+<h3 class="fn" id="time"><a name="time"></a><span class="type"><a href="../qtcore/qtime.html">QTime</a></span> QDateTimeEdit::<span class="name">time</span>() const</h3>
+<p>Returns the time of the date time edit.</p>
+<p><b>Note:</b> Getter function for property <a href="qdatetimeedit.html#time-prop">time</a>. </p><p><b>See also </b><a href="qdatetimeedit.html#time-prop">setTime</a>().</p>
+<!-- @@@time -->
+<!-- $$$validate[overload1]$$$validateQString&int& -->
+<h3 class="fn" id="validate"><a name="validate"></a><code>[override virtual protected] </code><span class="type"><a href="../qtgui/qvalidator.html#State-enum">QValidator::State</a></span> QDateTimeEdit::<span class="name">validate</span>(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>text</i>, <span class="type">int</span> &amp;<i>pos</i>) const</h3>
+<p>Reimplements: <a href="qabstractspinbox.html#validate">QAbstractSpinBox::validate</a>(QString &amp;input, int &amp;pos) const.</p>
+<!-- @@@validate -->
+<!-- $$$wheelEvent[overload1]$$$wheelEventQWheelEvent* -->
+<h3 class="fn" id="wheelEvent"><a name="wheelEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QDateTimeEdit::<span class="name">wheelEvent</span>(<span class="type"><a href="../qtgui/qwheelevent.html">QWheelEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qabstractspinbox.html#wheelEvent">QAbstractSpinBox::wheelEvent</a>(QWheelEvent *event).</p>
+<!-- @@@wheelEvent -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

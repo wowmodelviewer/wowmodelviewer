@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- distancefieldgenerator-manual.qdoc -->
+  <title>Qt Distance Field Generator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td >Qt Distance Field Generator Manual</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#general-usage">General Usage</a></li>
+<li class="level1"><a href="#selecting-glyphs">Selecting Glyphs</a></li>
+<li class="level1"><a href="#using-the-file">Using the File</a></li>
+<li class="level1"><a href="#measuring-performance">Measuring performance</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Distance Field Generator Manual</h1>
+<span class="subtitle"></span>
+<!-- $$$qtdistancefieldgenerator-index.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>If the user interface of an application has a lot of text, it may cause a small, but noticeable, performance impact the first time it is displayed to the user. This is especially true if the text is rendered in multiple different fonts or use a large amount of distinct characters (common for instance in writing systems such as Hanzi, written Chinese).</p>
+<p>The reason is that in order to render the text efficiently later, Qt will spend some time creating graphical assets for each of the glyphs that will later be reused. This happens the first time a glyph is displayed in the scene.</p>
+<p>For advanced users who want to optimize startup performance, it is possible to pregenerate this font cache, as long as Text.QtRendering is the rendering type in use. The Qt Distance Field Generator tool can be used to pregenerate the cache, either for all glyphs in the fonts, or just a selection that are known to be displayed during a critical phase.</p>
+<p><b>Note: </b>This is a tool that may be used by advanced users to streamline their application in ways that cannot be done automatically by Qt. For most common use cases, the default behavior in Qt will be sufficient.</p><p class="centerAlign"><img src="images/distancefieldgenerator.png" alt="&quot;Qt Distance Field Generator UI&quot;" /></p><a name="general-usage"></a>
+<h2 id="general-usage">General Usage</h2>
+<p>Use the Qt Distance Field Generator in the following way:</p>
+<ul>
+<li>Load a font file with <b>File</b> &gt; <b>Open</b> font. If the font file is large, there will be some waiting as it reads the fonts and generates the distance fields.</li>
+<li>Once this is done, select the glyphs that you want to save in the pregenerated cache. This should ideally be the glyphs that are used by your application during a performance-critical phase, so that doing the generation ahead of time will give a visible impact on performance.</li>
+<li>Finally, click <b>Save</b> to save the new font file.</li>
+</ul>
+<p><b>Note: </b>In order to modify a font in this way, you will need to make sure its license does not prohibit it.</p><a name="selecting-glyphs"></a>
+<h2 id="selecting-glyphs">Selecting Glyphs</h2>
+<p>Glyphs can be selected in multiple ways. The simplest way is to click the grid of glyphs to select a particular glyph. You can cancel the selection by clicking on the glyph again.</p>
+<p>In addition, you can use the list of Unicode ranges to select all glyphs matching the characters in a certain range.</p>
+<p>If you want to make sure you pregenerate the glyphs for a specific string from your user interface, you can use the <b>Select</b> &gt; <b>Select</b> string function.</p>
+<p><b>Note: </b>Both of the two latter selection methods base the results on the CMAP table in the font and will not do any shaping.</p><a name="using-the-file"></a>
+<h2 id="using-the-file">Using the File</h2>
+<p>Once you have prepared a file, the next step is to load it in your application. The saved file is a copy of the original font file, and can thus be used in the same ways as any other font file. In addition, it has a special font table which is recognized by Qt and used to prepopulate the glyph cache when the font is used in Qt Quick.</p>
+<p>You can, for instance, load the font using a <code>FontLoader</code> in your application code. When it is used to display text in a <code>Text</code> element with <code>renderType</code> set to <code>Text.QtRendering</code> (the default), then the pregenerated cache will be loaded and used.</p>
+<a name="measuring-performance"></a>
+<h2 id="measuring-performance">Measuring performance</h2>
+<p>For analyzing the impact of distance field generation on your application, you can set the <code>QT_LOGGING_RULES</code> environment variable to <code>&quot;qt.scenegraph.time.glyph=true&quot;</code>.</p>
+<p>When using normal fonts with no built-in cache, you will give output similar to this:</p>
+<pre class="cpp">
+
+  qt<span class="operator">.</span>scenegraph<span class="operator">.</span>time<span class="operator">.</span>glyph: distancefield: <span class="number">50</span> glyphs prepared in <span class="number">16ms</span><span class="operator">,</span> rendering<span class="operator">=</span><span class="number">15</span><span class="operator">,</span> upload<span class="operator">=</span><span class="number">1</span>
+
+</pre>
+<p>If you have pregenerated all the glyphs in use, the output will instead read something like this:</p>
+<pre class="cpp">
+
+  qt<span class="operator">.</span>scenegraph<span class="operator">.</span>time<span class="operator">.</span>glyph: distancefield: <span class="number">50</span> pre<span class="operator">-</span>generated glyphs loaded in <span class="number">2ms</span>
+
+</pre>
+<p>In this case, the time used to prepare the distance fields used to render in the application has been reduced from one full frame (16 ms) to 2 ms. You can also use the output to verify that all the glyphs in use are being loaded from the cache and to identify problematic phases in your application's life cycle, performance-wise.</p>
+</div>
+<!-- @@@qtdistancefieldgenerator-index.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickdial.cpp -->
+  <title>Dial QML Type | Qt Quick Controls 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td ><a href="qtquick-controls2-qmlmodule.html">QML Types</a></td><td >Dial QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Dial QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Dial-brief -->
+<p>Circular dial that is rotated to set a value. <a href="#details">More...</a></p>
+<!-- @@@Dial -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Controls 2.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-controls2-control.html">Control</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-controls2-dial-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dial.html#angle-prop">angle</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dial.html#from-prop">from</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dial.html#handle-prop">handle</a></b></b> : Item</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dial.html#inputMode-prop">inputMode</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dial.html#live-prop">live</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dial.html#position-prop">position</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dial.html#pressed-prop">pressed</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dial.html#snapMode-prop">snapMode</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dial.html#stepSize-prop">stepSize</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dial.html#to-prop">to</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dial.html#value-prop">value</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dial.html#wrap-prop">wrap</a></b></b> : bool</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-dial.html#moved-signal">moved</a></b></b>()</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-dial.html#decrease-method">decrease</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-dial.html#increase-method">increase</a></b></b>()</li>
+</ul>
+<!-- $$$Dial-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The Dial is similar to a traditional dial knob that is found on devices such as stereos or industrial equipment. It allows the user to specify a value within a range.</p>
+<p class="centerAlign"><img src="images/qtquickcontrols2-dial-no-wrap.gif" alt="" /></p><p>The value of the dial is set with the <a href="qml-qtquick-controls2-dial.html#value-prop">value</a> property. The range is set with the <a href="qml-qtquick-controls2-dial.html#from-prop">from</a> and <a href="qml-qtquick-controls2-dial.html#to-prop">to</a> properties. To enable or disable wrapping, use the <a href="qml-qtquick-controls2-dial.html#wrap-prop">wrap</a> property.</p>
+<p>The dial can be manipulated with a keyboard. It supports the following actions:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th ><b>Action</b></th><th ><b>Key</b></th></tr></thead>
+<tr valign="top" class="odd"><td >Decrease <a href="qml-qtquick-controls2-dial.html#value-prop">value</a> by <a href="qml-qtquick-controls2-dial.html#stepSize-prop">stepSize</a></td><td ><code>Qt.Key_Left</code></td></tr>
+<tr valign="top" class="even"><td >Decrease <a href="qml-qtquick-controls2-dial.html#value-prop">value</a> by <a href="qml-qtquick-controls2-dial.html#stepSize-prop">stepSize</a></td><td ><code>Qt.Key_Down</code></td></tr>
+<tr valign="top" class="odd"><td >Set <a href="qml-qtquick-controls2-dial.html#value-prop">value</a> to <a href="qml-qtquick-controls2-dial.html#from-prop">from</a></td><td ><code>Qt.Key_Home</code></td></tr>
+<tr valign="top" class="even"><td >Increase <a href="qml-qtquick-controls2-dial.html#value-prop">value</a> by <a href="qml-qtquick-controls2-dial.html#stepSize-prop">stepSize</a></td><td ><code>Qt.Key_Right</code></td></tr>
+<tr valign="top" class="odd"><td >Increase <a href="qml-qtquick-controls2-dial.html#value-prop">value</a> by <a href="qml-qtquick-controls2-dial.html#stepSize-prop">stepSize</a></td><td ><code>Qt.Key_Up</code></td></tr>
+<tr valign="top" class="even"><td >Set <a href="qml-qtquick-controls2-dial.html#value-prop">value</a> to <a href="qml-qtquick-controls2-dial.html#to-prop">to</a></td><td ><code>Qt.Key_End</code></td></tr>
+</table></div>
+<p>Dial supports three <a href="qml-qtquick-controls2-dial.html#inputMode-prop">input modes</a>: <code>Dial.Circular</code>, <code>Dial.Horizontal</code> and <code>Dial.Vertical</code>. The circular input mode operates on an absolute input system, where the position of the cursor within the dial directly reflects its value. The horizontal and vertical input modes use a relative input system, where changes in the cursor's position are &quot;added&quot; to the value of the dial.</p>
+<p>The following image illustrates the directions in which the various input modes track movement:</p>
+<p class="centerAlign"><img src="images/qtquickcontrols2-dial-inputmode.png" alt="" /></p><p><b>See also </b><a href="qtquickcontrols2-customize.html#customizing-dial">Customizing Dial</a> and <a href="qtquickcontrols2-input.html">Input Controls</a>.</p>
+<!-- @@@Dial -->
+<h2>Property Documentation</h2>
+<!-- $$$angle -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="angle-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">angle</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the angle of the handle.</p>
+<p>The range is from <code>-140</code> degrees to <code>140</code> degrees.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-dial.html#position-prop">position</a>.</p>
+</div></div><!-- @@@angle -->
+<br/>
+<!-- $$$from -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="from-prop"></a><span class="name">from</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the starting value for the range. The default value is <code>0.0</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-dial.html#to-prop">to</a> and <a href="qml-qtquick-controls2-dial.html#value-prop">value</a>.</p>
+</div></div><!-- @@@from -->
+<br/>
+<!-- $$$handle -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="handle-prop"></a><span class="name">handle</span> : <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the handle of the dial.</p>
+<p>The handle acts as a visual indicator of the position of the dial.</p>
+<p><b>See also </b><a href="qtquickcontrols2-customize.html#customizing-dial">Customizing Dial</a>.</p>
+</div></div><!-- @@@handle -->
+<br/>
+<!-- $$$inputMode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="inputMode-prop"></a><span class="name">inputMode</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the input mode.</p>
+<p>Dial supports three input modes: <code>Dial.Circular</code>, <code>Dial.Horizontal</code> and <code>Dial.Vertical</code>. The circular input mode operates on an absolute input system, where the position of the cursor within the dial directly reflects its value. The horizontal and vertical input modes use a relative input system, where changes in the cursor's position are &quot;added&quot; to the value of the dial.</p>
+<p>The following image illustrates the directions in which the various input modes track movement:</p>
+<p class="centerAlign"><img src="images/qtquickcontrols2-dial-inputmode.png" alt="" /></p><p>The default value is <code>Dial.Circular</code>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+</div></div><!-- @@@inputMode -->
+<br/>
+<!-- $$$live -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="live-prop"></a><span class="name">live</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the dial provides live updates for the <a href="qml-qtquick-controls2-dial.html#value-prop">value</a> property while the handle is dragged.</p>
+<p>The default value is <code>true</code>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.2 (Qt 5.9).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-dial.html#value-prop">value</a>.</p>
+</div></div><!-- @@@live -->
+<br/>
+<!-- $$$position -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="position-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">position</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the logical position of the handle.</p>
+<p>The position is expressed as a fraction of the control's angle range (the range within which the handle can be moved) in the range <code>0.0 - 1.0</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-dial.html#value-prop">value</a> and <a href="qml-qtquick-controls2-dial.html#angle-prop">angle</a>.</p>
+</div></div><!-- @@@position -->
+<br/>
+<!-- $$$pressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="pressed-prop"></a><span class="name">pressed</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the dial is pressed.</p>
+<p>The dial will be pressed when either the mouse is pressed over it, or a key such as <code>Qt.Key_Left</code> is held down. If you'd prefer not to have the dial be pressed upon key presses (due to styling reasons, for example), you can use the <a href="../qtquick/qml-qtquick-keys.html">Keys attached property</a>:</p>
+<pre class="cpp">
+
+  Dial {
+      Keys<span class="operator">.</span>onLeftPressed: {}
+  }
+
+</pre>
+<p>This will result in pressed only being <code>true</code> upon mouse presses.</p>
+</div></div><!-- @@@pressed -->
+<br/>
+<!-- $$$snapMode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="snapMode-prop"></a><span class="name">snapMode</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the snap mode.</p>
+<p>The snap mode works with the <a href="qml-qtquick-controls2-dial.html#stepSize-prop">stepSize</a> to allow the handle to snap to certain points along the dial.</p>
+<p>Possible values:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Dial.NoSnap</code></td><td class="topAlign">The dial does not snap (default).</td></tr>
+<tr><td class="topAlign"><code>Dial.SnapAlways</code></td><td class="topAlign">The dial snaps while the handle is dragged.</td></tr>
+<tr><td class="topAlign"><code>Dial.SnapOnRelease</code></td><td class="topAlign">The dial does not snap while being dragged, but only after the handle is released.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qml-qtquick-controls2-dial.html#stepSize-prop">stepSize</a>.</p>
+</div></div><!-- @@@snapMode -->
+<br/>
+<!-- $$$stepSize -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="stepSize-prop"></a><span class="name">stepSize</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the step size.</p>
+<p>The step size determines the amount by which the dial's value is increased and decreased when interacted with via the keyboard. For example, a step size of <code>0.2</code>, will result in the dial's value increasing and decreasing in increments of <code>0.2</code>.</p>
+<p>The step size is only respected for touch and mouse interaction when <a href="qml-qtquick-controls2-dial.html#snapMode-prop">snapMode</a> is set to a value other than <code>Dial.NoSnap</code>.</p>
+<p>The default value is <code>0.0</code>, which results in an effective step size of <code>0.1</code> for keyboard interaction.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-dial.html#snapMode-prop">snapMode</a>, <a href="qml-qtquick-controls2-dial.html#increase-method">increase()</a>, and <a href="qml-qtquick-controls2-dial.html#decrease-method">decrease()</a>.</p>
+</div></div><!-- @@@stepSize -->
+<br/>
+<!-- $$$to -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="to-prop"></a><span class="name">to</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the end value for the range. The default value is <code>1.0</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-dial.html#from-prop">from</a> and <a href="qml-qtquick-controls2-dial.html#value-prop">value</a>.</p>
+</div></div><!-- @@@to -->
+<br/>
+<!-- $$$value -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="value-prop"></a><span class="name">value</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the value in the range <code>from</code> - <code>to</code>. The default value is <code>0.0</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-dial.html#position-prop">position</a> and <a href="qml-qtquick-controls2-dial.html#live-prop">live</a>.</p>
+</div></div><!-- @@@value -->
+<br/>
+<!-- $$$wrap -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="wrap-prop"></a><span class="name">wrap</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the dial wraps when dragged.</p>
+<p>For example, when this property is set to <code>true</code>, dragging the dial past the <a href="qml-qtquick-controls2-dial.html#to-prop">to</a> position will result in the handle being positioned at the <a href="qml-qtquick-controls2-dial.html#from-prop">from</a> position, and vice versa:</p>
+<p class="centerAlign"><img src="images/qtquickcontrols2-dial-wrap.gif" alt="" /></p><p>When this property is <code>false</code>, it's not possible to drag the dial across the from and to values.</p>
+<p class="centerAlign"><img src="images/qtquickcontrols2-dial-no-wrap.gif" alt="" /></p><p>The default value is <code>false</code>.</p>
+</div></div><!-- @@@wrap -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$moved[overload1]$$$moved -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="moved-signal"></a><span class="name">moved</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the dial has been interactively moved by the user by either touch, mouse, or keys.</p>
+<p>This signal was introduced in  QtQuick.Controls 2.2 (Qt 5.9).</p>
+</div></div><!-- @@@moved -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$decrease[overload1]$$$decrease -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="decrease-method"></a><span class="type">void</span> <span class="name">decrease</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Decreases the value by <a href="qml-qtquick-controls2-dial.html#stepSize-prop">stepSize</a>, or <code>0.1</code> if <a href="qml-qtquick-controls2-dial.html#stepSize-prop">stepSize</a> is not defined.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-dial.html#stepSize-prop">stepSize</a>.</p>
+</div></div><!-- @@@decrease -->
+<br/>
+<!-- $$$increase[overload1]$$$increase -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="increase-method"></a><span class="type">void</span> <span class="name">increase</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Increases the value by <a href="qml-qtquick-controls2-dial.html#stepSize-prop">stepSize</a>, or <code>0.1</code> if <a href="qml-qtquick-controls2-dial.html#stepSize-prop">stepSize</a> is not defined.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-dial.html#stepSize-prop">stepSize</a>.</p>
+</div></div><!-- @@@increase -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

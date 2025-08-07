@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdeclarativegeoroute.cpp -->
+  <title>Route QML Type | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-qmlmodule.html">QML Types</a></td><td >Route QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#example">Example</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Route QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Route-brief -->
+<p>The Route type represents one geographical route. <a href="#details">More...</a></p>
+<!-- @@@Route -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtLocation 5.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  QtLocation 5.5</td></tr></table></div><ul>
+<li><a href="qml-qtlocation-route-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtlocation-route.html#bounds-prop">bounds</a></b></b> : georectangle</li>
+<li class="fn"><b><b><a href="qml-qtlocation-route.html#distance-prop">distance</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtlocation-route.html#extendedAttributes-prop">extendedAttributes</a></b></b> : Object</li>
+<li class="fn"><b><b><a href="qml-qtlocation-route.html#legs-prop">legs</a></b></b> : list&lt;Route&gt;</li>
+<li class="fn"><b><b><a href="qml-qtlocation-route.html#path-prop">path</a></b></b> : list&lt;coordinate&gt;</li>
+<li class="fn"><b><b><a href="qml-qtlocation-route.html#routeQuery-prop">routeQuery</a></b></b> : RouteQuery</li>
+<li class="fn"><b><b><a href="qml-qtlocation-route.html#segments-prop">segments</a></b></b> : list&lt;RouteSegment&gt;</li>
+<li class="fn"><b><b><a href="qml-qtlocation-route.html#travelTime-prop">travelTime</a></b></b> : int</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">bool <b><b><a href="qml-qtlocation-route.html#equals-method">equals</a></b></b>(<i>other</i>)</li>
+<li class="fn">int <b><b><a href="qml-qtlocation-route.html#segmentsCount-method">segmentsCount</a></b></b>()</li>
+</ul>
+<!-- $$$Route-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>A Route type contains high level information about a route, such as the length the route, the estimated travel time for the route, and enough information to render a basic image of the route on a map.</p>
+<p>The <a href="qgeoroute.html">QGeoRoute</a> object also contains a list of <a href="qml-qtlocation-routesegment.html">RouteSegment</a> objects which describe subsections of the route in greater detail.</p>
+<p>The primary means of acquiring Route objects is <a href="qml-qtlocation-routemodel.html">RouteModel</a>.</p>
+<a name="example"></a>
+<h2 id="example">Example</h2>
+<p>This example shows how to display a route's maneuvers in a <a href="../qtquick/qml-qtquick-listview.html">ListView</a>:</p>
+<pre class="qml">
+
+  import QtQuick 2.3
+  import QtPositioning 5.5
+  import QtLocation 5.6
+
+  <span class="type"><a href="qml-qtlocation-routemodel.html">RouteModel</a></span> {
+      <span class="name">id</span>: <span class="name">routeModel</span>
+      <span class="comment">// model initialization</span>
+  }
+
+  <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+      <span class="name">id</span>: <span class="name">listview</span>
+      <span class="name">anchors</span>.fill: <span class="name">parent</span>
+      <span class="name">spacing</span>: <span class="number">10</span>
+      <span class="name">model</span>: <span class="name">routeModel</span>.<span class="name">status</span> <span class="operator">==</span> <span class="name">RouteModel</span>.<span class="name">Ready</span> ? <span class="name">routeModel</span>.<span class="name">get</span>(<span class="number">0</span>).<span class="name">segments</span> : <span class="number">null</span>
+      <span class="name">visible</span>: <span class="name">model</span> ? <span class="number">true</span> : <span class="number">false</span>
+      <span class="name">delegate</span>: <span class="name">Row</span> {
+          <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+          <span class="name">spacing</span>: <span class="number">10</span>
+          property <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span> <span class="name">hasManeuver</span> : <span class="name">modelData</span>.<span class="name">maneuver</span> <span class="operator">&amp;&amp;</span> <span class="name">modelData</span>.<span class="name">maneuver</span>.<span class="name">valid</span>
+          <span class="name">visible</span>: <span class="name">hasManeuver</span>
+          <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: (<span class="number">1</span> <span class="operator">+</span> <span class="name">index</span>) <span class="operator">+</span> <span class="string">&quot;.&quot;</span> }
+          <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="name">hasManeuver</span> ? <span class="name">modelData</span>.<span class="name">maneuver</span>.<span class="name">instructionText</span> : <span class="string">&quot;&quot;</span> }
+      }
+  }
+
+</pre>
+<!-- @@@Route -->
+<h2>Property Documentation</h2>
+<!-- $$$bounds -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="bounds-prop"></a><span class="name">bounds</span> : <span class="type"><a href="../qtpositioning/qml-georectangle.html">georectangle</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Read-only property which holds a bounding box which encompasses the entire route.</p>
+</div></div><!-- @@@bounds -->
+<br/>
+<!-- $$$distance -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="distance-prop"></a><span class="name">distance</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Read-only property which holds distance covered by this route, in meters.</p>
+</div></div><!-- @@@distance -->
+<br/>
+<!-- $$$extendedAttributes -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="extendedAttributes-prop"></a><span class="name">extendedAttributes</span> : <span class="type">Object</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the extended attributes of the route and is a map. These attributes are plugin specific, and can be empty.</p>
+<p>Consult the <a href="qtlocation-index.html#plugin-references-and-parameters">plugin documentation</a> for what attributes are supported and how they should be used.</p>
+<p>Note, due to limitations of the <a href="../qtqml/qqmlpropertymap.html">QQmlPropertyMap</a>, it is not possible to declaratively specify the attributes in QML, assignment of attributes keys and values can only be accomplished by JavaScript.</p>
+<p>This property was introduced in  QtLocation 5.13.</p>
+</div></div><!-- @@@extendedAttributes -->
+<br/>
+<!-- $$$legs -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="legs-prop"></a><span class="name">legs</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="qml-qtlocation-route.html">Route</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the route legs associated with this route. Route legs are the sub-routes between each two adjacent waypoints. The result may be empty, if this level of detail is not supported by the backend.</p>
+<p>This property was introduced in  QtLocation 5.12.</p>
+</div></div><!-- @@@legs -->
+<br/>
+<!-- $$$path -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="path-prop"></a><span class="name">path</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="../qtpositioning/qml-coordinate.html">coordinate</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Read-only property which holds the geographical coordinates of this route. Coordinates are listed in the order in which they would be traversed by someone traveling along this segment of the route.</p>
+<p>To access individual segments you can use standard list accessors: 'path.length' indicates the number of objects and 'path[index starting from zero]' gives the actual object.</p>
+<p><b>See also </b><a href="../qtpositioning/qml-qtpositioning-qtpositioning.html#coordinate-method">QtPositioning::coordinate</a>.</p>
+</div></div><!-- @@@path -->
+<br/>
+<!-- $$$routeQuery -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="routeQuery-prop"></a><span class="name">routeQuery</span> : <span class="type"><a href="qml-qtlocation-routequery.html">RouteQuery</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the route query associated with this route.</p>
+<p>This property was introduced in  Qt 5.11.</p>
+</div></div><!-- @@@routeQuery -->
+<br/>
+<!-- $$$segments -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="segments-prop"></a><span class="name">segments</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="qml-qtlocation-routesegment.html">RouteSegment</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Read-only property which holds the list of <a href="qml-qtlocation-routesegment.html">RouteSegment</a> objects of this route.</p>
+<p>To access individual segments you can use standard list accessors: 'segments.length' indicates the number of objects and 'segments[index starting from zero]' gives the actual objects.</p>
+<p><b>See also </b><a href="qml-qtlocation-routesegment.html">RouteSegment</a>.</p>
+</div></div><!-- @@@segments -->
+<br/>
+<!-- $$$travelTime -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="travelTime-prop"></a><span class="name">travelTime</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Read-only property which holds the estimated amount of time it will take to traverse this route, in seconds.</p>
+</div></div><!-- @@@travelTime -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$equals[overload1]$$$equals -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="equals-method"></a><span class="type"><a href="../qtqml/qml-bool.html">bool</a></span> <span class="name">equals</span>(<i>other</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This method performs deep comparison if the present route is identical to the <i>other</i> route. Returns <code>true</code> if the routes are equal.</p>
+<p>This method was introduced in  Qt 5.12.</p>
+</div></div><!-- @@@equals -->
+<br/>
+<!-- $$$segmentsCount[overload1]$$$segmentsCount -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="segmentsCount-method"></a><span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">segmentsCount</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the number of segments in the route</p>
+<p>This method was introduced in  Qt 5.11.</p>
+<p><b>See also </b><a href="qml-qtlocation-routesegment.html">RouteSegment</a>.</p>
+</div></div><!-- @@@segmentsCount -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

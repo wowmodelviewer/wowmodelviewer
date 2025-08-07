@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- secureudpclient.qdoc -->
+  <title>DTLS client | Qt Network 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtnetwork-index.html">Qt Network</a></td><td >DTLS client</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtnetwork-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">DTLS client</h1>
+<span class="subtitle"></span>
+<!-- $$$secureudpclient-brief -->
+<p>This example demonstrates how to implement client-side DTLS connections.</p>
+<!-- @@@secureudpclient -->
+<!-- $$$secureudpclient-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/secureudpclient-example.png" alt="Screenshot of the DTLS client example." /></p><p><b>Note: </b>The DTLS client example is intended to be run alongside the <a href="qtnetwork-secureudpserver-example.html">DTLS server</a> example.</p><p>The example DTLS client can establish several DTLS connections to one or many DTLS servers. A client-side DTLS connection is implemented by the DtlsAssociation class. This class uses <a href="qudpsocket.html">QUdpSocket</a> to read and write datagrams and <a href="qdtls.html">QDtls</a> for encryption:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> DtlsAssociation : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      DtlsAssociation(<span class="keyword">const</span> <span class="type"><a href="qhostaddress.html">QHostAddress</a></span> <span class="operator">&amp;</span>address<span class="operator">,</span> <span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> port<span class="operator">,</span>
+                      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>connectionName);
+      <span class="operator">~</span>DtlsAssociation();
+      <span class="type">void</span> startHandshake();
+
+  <span class="keyword">signals</span>:
+      <span class="type">void</span> errorMessage(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>message);
+      <span class="type">void</span> warningMessage(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>message);
+      <span class="type">void</span> infoMessage(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>message);
+      <span class="type">void</span> serverResponse(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>clientInfo<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>datagraam<span class="operator">,</span>
+                          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>plainText);
+
+  <span class="keyword">private</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> udpSocketConnected();
+      <span class="type">void</span> readyRead();
+      <span class="type">void</span> handshakeTimeout();
+      <span class="type">void</span> pskRequired(<span class="type"><a href="qsslpresharedkeyauthenticator.html">QSslPreSharedKeyAuthenticator</a></span> <span class="operator">*</span>auth);
+      <span class="type">void</span> pingTimeout();
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> name;
+      <span class="type"><a href="qudpsocket.html">QUdpSocket</a></span> socket;
+      <span class="type"><a href="qdtls.html">QDtls</a></span> crypto;
+
+      <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span> pingTimer;
+      <span class="type">unsigned</span> ping <span class="operator">=</span> <span class="number">0</span>;
+
+      Q_DISABLE_COPY(DtlsAssociation)
+  };
+
+</pre>
+<p>The constructor sets the minimal TLS configuration for the new DTLS connection, and sets the address and the port of the server:</p>
+<pre class="cpp">
+
+      ...
+  <span class="keyword">auto</span> configuration <span class="operator">=</span> <span class="type"><a href="qsslconfiguration.html">QSslConfiguration</a></span><span class="operator">::</span>defaultDtlsConfiguration();
+  configuration<span class="operator">.</span>setPeerVerifyMode(<span class="type"><a href="qsslsocket.html">QSslSocket</a></span><span class="operator">::</span>VerifyNone);
+  crypto<span class="operator">.</span>setPeer(address<span class="operator">,</span> port);
+  crypto<span class="operator">.</span>setDtlsConfiguration(configuration);
+      ...
+
+</pre>
+<p>The <a href="qdtls.html#handshakeTimeout">QDtls::handshakeTimeout</a>() signal is connected to the handleTimeout() slot to deal with packet loss and retransmission during the handshake phase:</p>
+<pre class="cpp">
+
+      ...
+  connect(<span class="operator">&amp;</span>crypto<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qdtls.html">QDtls</a></span><span class="operator">::</span>handshakeTimeout<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>DtlsAssociation<span class="operator">::</span>handshakeTimeout);
+      ...
+
+</pre>
+<p>To ensure we receive only the datagrams from the server, we connect our UDP socket to the server:</p>
+<pre class="cpp">
+
+      ...
+  socket<span class="operator">.</span>connectToHost(address<span class="operator">.</span>toString()<span class="operator">,</span> port);
+      ...
+
+</pre>
+<p>The <a href="../qtcore/qiodevice.html#readyRead">QUdpSocket::readyRead</a>() signal is connected to the readyRead() slot:</p>
+<pre class="cpp">
+
+      ...
+  connect(<span class="operator">&amp;</span>socket<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qudpsocket.html">QUdpSocket</a></span><span class="operator">::</span>readyRead<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>DtlsAssociation<span class="operator">::</span>readyRead);
+      ...
+
+</pre>
+<p>When a secure connection to a server is established, a DtlsAssociation object will be sending short ping messages to the server, using a timer:</p>
+<pre class="cpp">
+
+  pingTimer<span class="operator">.</span>setInterval(<span class="number">5000</span>);
+  connect(<span class="operator">&amp;</span>pingTimer<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span><span class="operator">::</span>timeout<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>DtlsAssociation<span class="operator">::</span>pingTimeout);
+
+</pre>
+<p>startHandshake() starts a handshake with the server:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> DtlsAssociation<span class="operator">::</span>startHandshake()
+  {
+      <span class="keyword">if</span> (socket<span class="operator">.</span>state() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="qabstractsocket.html">QAbstractSocket</a></span><span class="operator">::</span>ConnectedState) {
+          <span class="keyword">emit</span> infoMessage(tr(<span class="string">&quot;%1: connecting UDP socket first ...&quot;</span>)<span class="operator">.</span>arg(name));
+          connect(<span class="operator">&amp;</span>socket<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qabstractsocket.html">QAbstractSocket</a></span><span class="operator">::</span>connected<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>DtlsAssociation<span class="operator">::</span>udpSocketConnected);
+          <span class="keyword">return</span>;
+      }
+
+      <span class="keyword">if</span> (<span class="operator">!</span>crypto<span class="operator">.</span>doHandshake(<span class="operator">&amp;</span>socket))
+          <span class="keyword">emit</span> errorMessage(tr(<span class="string">&quot;%1: failed to start a handshake - %2&quot;</span>)<span class="operator">.</span>arg(name<span class="operator">,</span> crypto<span class="operator">.</span>dtlsErrorString()));
+      <span class="keyword">else</span>
+          <span class="keyword">emit</span> infoMessage(tr(<span class="string">&quot;%1: starting a handshake&quot;</span>)<span class="operator">.</span>arg(name));
+  }
+
+</pre>
+<p>The readyRead() slot reads a datagram sent by the server:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> dgram(socket<span class="operator">.</span>pendingDatagramSize()<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Uninitialized);
+  <span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> bytesRead <span class="operator">=</span> socket<span class="operator">.</span>readDatagram(dgram<span class="operator">.</span>data()<span class="operator">,</span> dgram<span class="operator">.</span>size());
+  <span class="keyword">if</span> (bytesRead <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">0</span>) {
+      <span class="keyword">emit</span> warningMessage(tr(<span class="string">&quot;%1: spurious read notification?&quot;</span>)<span class="operator">.</span>arg(name));
+      <span class="keyword">return</span>;
+  }
+
+  dgram<span class="operator">.</span>resize(bytesRead);
+
+</pre>
+<p>If the handshake was already completed, this datagram is decrypted:</p>
+<pre class="cpp">
+
+  <span class="keyword">if</span> (crypto<span class="operator">.</span>isConnectionEncrypted()) {
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> plainText <span class="operator">=</span> crypto<span class="operator">.</span>decryptDatagram(<span class="operator">&amp;</span>socket<span class="operator">,</span> dgram);
+      <span class="keyword">if</span> (plainText<span class="operator">.</span>size()) {
+          <span class="keyword">emit</span> serverResponse(name<span class="operator">,</span> dgram<span class="operator">,</span> plainText);
+          <span class="keyword">return</span>;
+      }
+
+      <span class="keyword">if</span> (crypto<span class="operator">.</span>dtlsError() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qdtls.html#QDtlsError-enum">QDtlsError</a></span><span class="operator">::</span>RemoteClosedConnectionError) {
+          <span class="keyword">emit</span> errorMessage(tr(<span class="string">&quot;%1: shutdown alert received&quot;</span>)<span class="operator">.</span>arg(name));
+          socket<span class="operator">.</span>close();
+          pingTimer<span class="operator">.</span>stop();
+          <span class="keyword">return</span>;
+      }
+
+      <span class="keyword">emit</span> warningMessage(tr(<span class="string">&quot;%1: zero-length datagram received?&quot;</span>)<span class="operator">.</span>arg(name));
+  } <span class="keyword">else</span> {
+
+</pre>
+<p>otherwise, we try to continue the handshake:</p>
+<pre class="cpp">
+
+      <span class="keyword">if</span> (<span class="operator">!</span>crypto<span class="operator">.</span>doHandshake(<span class="operator">&amp;</span>socket<span class="operator">,</span> dgram)) {
+          <span class="keyword">emit</span> errorMessage(tr(<span class="string">&quot;%1: handshake error - %2&quot;</span>)<span class="operator">.</span>arg(name<span class="operator">,</span> crypto<span class="operator">.</span>dtlsErrorString()));
+          <span class="keyword">return</span>;
+      }
+
+</pre>
+<p>When the handshake has completed, we send our first ping message:</p>
+<pre class="cpp">
+
+      <span class="keyword">if</span> (crypto<span class="operator">.</span>isConnectionEncrypted()) {
+          <span class="keyword">emit</span> infoMessage(tr(<span class="string">&quot;%1: encrypted connection established!&quot;</span>)<span class="operator">.</span>arg(name));
+          pingTimer<span class="operator">.</span>start();
+          pingTimeout();
+      } <span class="keyword">else</span> {
+
+</pre>
+<p>The pskRequired() slot provides the Pre-Shared Key (PSK) needed during the handshake phase:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> DtlsAssociation<span class="operator">::</span>pskRequired(<span class="type"><a href="qsslpresharedkeyauthenticator.html">QSslPreSharedKeyAuthenticator</a></span> <span class="operator">*</span>auth)
+  {
+      Q_ASSERT(auth);
+
+      <span class="keyword">emit</span> infoMessage(tr(<span class="string">&quot;%1: providing pre-shared key ...&quot;</span>)<span class="operator">.</span>arg(name));
+      auth<span class="operator">-</span><span class="operator">&gt;</span>setIdentity(name<span class="operator">.</span>toLatin1());
+      auth<span class="operator">-</span><span class="operator">&gt;</span>setPreSharedKey(<span class="type"><a href="../qtcore/qbytearray.html#QByteArrayLiteral">QByteArrayLiteral</a></span>(<span class="string">&quot;\x1a\x2b\x3c\x4d\x5e\x6f&quot;</span>));
+  }
+
+</pre>
+<p><b>Note: </b>For the sake of brevity, the definition of pskRequired() is oversimplified. The documentation for the <a href="qsslpresharedkeyauthenticator.html">QSslPreSharedKeyAuthenticator</a> class explains in detail how this slot can be properly implemented.</p><p>pingTimeout() sends an encrypted message to the server:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> DtlsAssociation<span class="operator">::</span>pingTimeout()
+  {
+      <span class="keyword">static</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> message <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;I am %1, please, accept our ping %2&quot;</span>);
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> written <span class="operator">=</span> crypto<span class="operator">.</span>writeDatagramEncrypted(<span class="operator">&amp;</span>socket<span class="operator">,</span> message<span class="operator">.</span>arg(name)<span class="operator">.</span>arg(ping)<span class="operator">.</span>toLatin1());
+      <span class="keyword">if</span> (written <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">0</span>) {
+          <span class="keyword">emit</span> errorMessage(tr(<span class="string">&quot;%1: failed to send a ping - %2&quot;</span>)<span class="operator">.</span>arg(name<span class="operator">,</span> crypto<span class="operator">.</span>dtlsErrorString()));
+          pingTimer<span class="operator">.</span>stop();
+          <span class="keyword">return</span>;
+      }
+
+      <span class="operator">+</span><span class="operator">+</span>ping;
+  }
+
+</pre>
+<p>During the handshake phase the client must handle possible timeouts, which can happen due to packet loss. The handshakeTimeout() slot retransmits the handshake messages:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> DtlsAssociation<span class="operator">::</span>handshakeTimeout()
+  {
+      <span class="keyword">emit</span> warningMessage(tr(<span class="string">&quot;%1: handshake timeout, trying to re-transmit&quot;</span>)<span class="operator">.</span>arg(name));
+      <span class="keyword">if</span> (<span class="operator">!</span>crypto<span class="operator">.</span>handleTimeout(<span class="operator">&amp;</span>socket))
+          <span class="keyword">emit</span> errorMessage(tr(<span class="string">&quot;%1: failed to re-transmit - %2&quot;</span>)<span class="operator">.</span>arg(name<span class="operator">,</span> crypto<span class="operator">.</span>dtlsErrorString()));
+  }
+
+</pre>
+<p>Before a client connection is destroyed, its DTLS connection must be shut down:</p>
+<pre class="cpp">
+
+  DtlsAssociation<span class="operator">::</span><span class="operator">~</span>DtlsAssociation()
+  {
+      <span class="keyword">if</span> (crypto<span class="operator">.</span>isConnectionEncrypted())
+          crypto<span class="operator">.</span>shutdown(<span class="operator">&amp;</span>socket);
+  }
+
+</pre>
+<p>Error messages, informational messages, and decrypted responses from servers are displayed by the UI:</p>
+<pre class="cpp">
+
+  <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> colorizer(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;&lt;font color=\&quot;%1\&quot;&gt;%2&lt;/font&gt;&lt;br&gt;&quot;</span>));
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>addErrorMessage(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>message)
+  {
+      ui<span class="operator">-</span><span class="operator">&gt;</span>clientMessages<span class="operator">-</span><span class="operator">&gt;</span>insertHtml(colorizer<span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Crimson&quot;</span>)<span class="operator">,</span> message));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>addWarningMessage(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>message)
+  {
+      ui<span class="operator">-</span><span class="operator">&gt;</span>clientMessages<span class="operator">-</span><span class="operator">&gt;</span>insertHtml(colorizer<span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;DarkOrange&quot;</span>)<span class="operator">,</span> message));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>addInfoMessage(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>message)
+  {
+      ui<span class="operator">-</span><span class="operator">&gt;</span>clientMessages<span class="operator">-</span><span class="operator">&gt;</span>insertHtml(colorizer<span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;DarkBlue&quot;</span>)<span class="operator">,</span> message));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>addServerResponse(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>clientInfo<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>datagram<span class="operator">,</span>
+                                     <span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>plainText)
+  {
+      <span class="keyword">static</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> messageColor <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;DarkMagenta&quot;</span>);
+      <span class="keyword">static</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> formatter <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;&lt;br&gt;---------------&quot;</span>
+                                                      <span class="string">&quot;&lt;br&gt;%1 received a DTLS datagram:&lt;br&gt; %2&quot;</span>
+                                                      <span class="string">&quot;&lt;br&gt;As plain text:&lt;br&gt; %3&quot;</span>);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> html <span class="operator">=</span> formatter<span class="operator">.</span>arg(clientInfo<span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>fromUtf8(datagram<span class="operator">.</span>toHex(<span class="char">' '</span>))<span class="operator">,</span>
+                                         <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>fromUtf8(plainText));
+      ui<span class="operator">-</span><span class="operator">&gt;</span>serverMessages<span class="operator">-</span><span class="operator">&gt;</span>insertHtml(colorizer<span class="operator">.</span>arg(messageColor<span class="operator">,</span> html));
+  }
+
+</pre>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/network/secureudpclient?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@secureudpclient -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

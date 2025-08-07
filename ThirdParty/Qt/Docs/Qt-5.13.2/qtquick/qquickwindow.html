@@ -1,0 +1,686 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickwindow.cpp -->
+  <title>QQuickWindow Class | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-module.html">C++ Classes</a></td><td >QQuickWindow</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#rendering">Rendering</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QQuickWindow Class</h1>
+<!-- $$$QQuickWindow-brief -->
+<p>The <a href="qquickwindow.html">QQuickWindow</a> class provides the window for displaying a graphical QML scene. <a href="#details">More...</a></p>
+<!-- @@@QQuickWindow -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QQuickWindow&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += quick</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.0</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qtquick-window-window.html">Window</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtgui/qwindow.html">QWindow</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qquickview.html">QQuickView</a></p>
+</td></tr></table></div><p>This class was introduced in  Qt 5.0.</p>
+<ul>
+<li><a href="qquickwindow-members.html">List of all members, including inherited members</a></li>
+<li><a href="qquickwindow-obsolete.html">Obsolete members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#CreateTextureOption-enum">CreateTextureOption</a></b> { TextureHasAlphaChannel, TextureHasMipmaps, TextureOwnsGLTexture, TextureCanUseAtlas, TextureIsOpaque }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#CreateTextureOption-enum">CreateTextureOptions</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#RenderStage-enum">RenderStage</a></b> { BeforeSynchronizingStage, AfterSynchronizingStage, BeforeRenderingStage, AfterRenderingStage, AfterSwapStage, NoStage }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#SceneGraphError-enum">SceneGraphError</a></b> { ContextNotAvailable }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#TextRenderType-enum">TextRenderType</a></b> { QtTextRendering, NativeTextRendering }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qquickwindow.html#activeFocusItem-prop">activeFocusItem</a></b> : QQuickItem* const</li>
+<li class="fn"><b><a href="qquickwindow.html#color-prop">color</a></b> : QColor</li>
+<li class="fn"><b><a href="qquickwindow.html#contentItem-prop">contentItem</a></b> : QQuickItem* const</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#QQuickWindow">QQuickWindow</a></b>(QWindow *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#dtor.QQuickWindow">~QQuickWindow</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQuickItem *</td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#activeFocusItem-prop">activeFocusItem</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#clearBeforeRendering">clearBeforeRendering</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QColor </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#color-prop">color</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQuickItem *</td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#contentItem-prop">contentItem</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSGImageNode *</td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#createImageNode">createImageNode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSGNinePatchNode *</td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#createNinePatchNode">createNinePatchNode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSGRectangleNode *</td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#createRectangleNode">createRectangleNode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSGTexture *</td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#createTextureFromId">createTextureFromId</a></b>(uint <i>id</i>, const QSize &amp;<i>size</i>, QQuickWindow::CreateTextureOptions <i>options</i> = CreateTextureOption()) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSGTexture *</td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#createTextureFromImage">createTextureFromImage</a></b>(const QImage &amp;<i>image</i>, QQuickWindow::CreateTextureOptions <i>options</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSGTexture *</td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#createTextureFromImage-1">createTextureFromImage</a></b>(const QImage &amp;<i>image</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#effectiveDevicePixelRatio">effectiveDevicePixelRatio</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QImage </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#grabWindow">grabWindow</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQmlIncubationController *</td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#incubationController">incubationController</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#isPersistentOpenGLContext">isPersistentOpenGLContext</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#isPersistentSceneGraph">isPersistentSceneGraph</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#isSceneGraphInitialized">isSceneGraphInitialized</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQuickItem *</td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#mouseGrabberItem">mouseGrabberItem</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QOpenGLContext *</td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#openglContext">openglContext</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QOpenGLFramebufferObject *</td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#renderTarget">renderTarget</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#renderTargetId">renderTargetId</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#renderTargetSize">renderTargetSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSGRendererInterface *</td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#rendererInterface">rendererInterface</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#resetOpenGLState">resetOpenGLState</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#scheduleRenderJob">scheduleRenderJob</a></b>(QRunnable *<i>job</i>, QQuickWindow::RenderStage <i>stage</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#setClearBeforeRendering">setClearBeforeRendering</a></b>(bool <i>enabled</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#color-prop">setColor</a></b>(const QColor &amp;<i>color</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#setPersistentOpenGLContext">setPersistentOpenGLContext</a></b>(bool <i>persistent</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#setPersistentSceneGraph">setPersistentSceneGraph</a></b>(bool <i>persistent</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#setRenderTarget">setRenderTarget</a></b>(QOpenGLFramebufferObject *<i>fbo</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#setRenderTarget-1">setRenderTarget</a></b>(uint <i>fboId</i>, const QSize &amp;<i>size</i>)</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QAccessibleInterface *</td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#accessibleRoot">accessibleRoot</a></b>() const override</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#releaseResources">releaseResources</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#update">update</a></b>()</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#activeFocusItem-prop">activeFocusItemChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#afterAnimating">afterAnimating</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#afterRendering">afterRendering</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#afterSynchronizing">afterSynchronizing</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#beforeRendering">beforeRendering</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#beforeSynchronizing">beforeSynchronizing</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#closing">closing</a></b>(QQuickCloseEvent *<i>close</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#color-prop">colorChanged</a></b>(<i>const QColor &amp;</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#frameSwapped">frameSwapped</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#openglContextCreated">openglContextCreated</a></b>(QOpenGLContext *<i>context</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#sceneGraphAboutToStop">sceneGraphAboutToStop</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#sceneGraphError">sceneGraphError</a></b>(QQuickWindow::SceneGraphError <i>error</i>, const QString &amp;<i>message</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#sceneGraphInitialized">sceneGraphInitialized</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#sceneGraphInvalidated">sceneGraphInvalidated</a></b>()</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#hasDefaultAlphaBuffer">hasDefaultAlphaBuffer</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#sceneGraphBackend">sceneGraphBackend</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#setDefaultAlphaBuffer">setDefaultAlphaBuffer</a></b>(bool <i>useAlpha</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#setSceneGraphBackend">setSceneGraphBackend</a></b>(QSGRendererInterface::GraphicsApi <i>api</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#setSceneGraphBackend-1">setSceneGraphBackend</a></b>(const QString &amp;<i>backend</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#setTextRenderType">setTextRenderType</a></b>(QQuickWindow::TextRenderType <i>renderType</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQuickWindow::TextRenderType </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#textRenderType">textRenderType</a></b>()</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#event">event</a></b>(QEvent *<i>e</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#exposeEvent">exposeEvent</a></b>(<i>QExposeEvent *</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#focusInEvent">focusInEvent</a></b>(QFocusEvent *<i>ev</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#focusOutEvent">focusOutEvent</a></b>(QFocusEvent *<i>ev</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#hideEvent">hideEvent</a></b>(<i>QHideEvent *</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#keyPressEvent">keyPressEvent</a></b>(QKeyEvent *<i>e</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#keyReleaseEvent">keyReleaseEvent</a></b>(QKeyEvent *<i>e</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#mouseDoubleClickEvent">mouseDoubleClickEvent</a></b>(QMouseEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#mouseMoveEvent">mouseMoveEvent</a></b>(QMouseEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#mousePressEvent">mousePressEvent</a></b>(QMouseEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#mouseReleaseEvent">mouseReleaseEvent</a></b>(QMouseEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#resizeEvent">resizeEvent</a></b>(QResizeEvent *<i>ev</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#showEvent">showEvent</a></b>(<i>QShowEvent *</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qquickwindow.html#wheelEvent">wheelEvent</a></b>(QWheelEvent *<i>event</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QQuickWindow-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qquickwindow.html">QQuickWindow</a> provides the graphical scene management needed to interact with and display a scene of QQuickItems.</p>
+<p>A <a href="qquickwindow.html">QQuickWindow</a> always has a single invisible root item. To add items to this window, reparent the items to the root item or to an existing item in the scene.</p>
+<p>For easily displaying a scene from a QML file, see <a href="qquickview.html">QQuickView</a>.</p>
+<a name="rendering"></a>
+<h3 id="rendering">Rendering</h3>
+<p><a href="qquickwindow.html">QQuickWindow</a> uses a scene graph to represent what needs to be rendered. This scene graph is disconnected from the QML scene and potentially lives in another thread, depending on the platform implementation. Since the rendering scene graph lives independently from the QML scene, it can also be completely released without affecting the state of the QML scene.</p>
+<p>The <a href="qquickwindow.html#sceneGraphInitialized">sceneGraphInitialized</a>() signal is emitted on the rendering thread before the QML scene is rendered to the screen for the first time. If the rendering scene graph has been released, the signal will be emitted again before the next frame is rendered.</p>
+<a name="integration-with-opengl"></a>
+<h4 id="integration-with-opengl">Integration with OpenGL</h4>
+<p>When using the default OpenGL adaptation, it is possible to integrate OpenGL calls directly into the <a href="qquickwindow.html">QQuickWindow</a> using the same OpenGL context as the Qt Quick Scene Graph. This is done by connecting to the <a href="qquickwindow.html#beforeRendering">QQuickWindow::beforeRendering</a>() or <a href="qquickwindow.html#afterRendering">QQuickWindow::afterRendering</a>() signal.</p>
+<p><b>Note: </b>When using <a href="qquickwindow.html#beforeRendering">QQuickWindow::beforeRendering</a>(), make sure to disable clearing before rendering with <a href="qquickwindow.html#setClearBeforeRendering">QQuickWindow::setClearBeforeRendering</a>().</p><a name="exposure-and-visibility"></a>
+<h4 id="exposure-and-visibility">Exposure and Visibility</h4>
+<p>When a <a href="qquickwindow.html">QQuickWindow</a> instance is deliberately hidden with <a href="../qtgui/qwindow.html#hide">hide</a>() or <a href="../qtgui/qwindow.html#visible-prop">setVisible</a>(false), it will stop rendering and its scene graph and graphics context might be released. The <a href="qquickwindow.html#sceneGraphInvalidated">sceneGraphInvalidated</a>() signal will be emitted when this happens.</p>
+<p><b>Warning:</b> It is crucial that graphics operations and interaction with the scene graph happens exclusively on the rendering thread, primarily during the updatePaintNode() phase.</p>
+<p><b>Warning:</b> As signals related to rendering might be emitted from the rendering thread, connections should be made using <a href="../qtcore/qt.html#ConnectionType-enum">Qt::DirectConnection</a>.</p>
+<a name="resource-management"></a>
+<h4 id="resource-management">Resource Management</h4>
+<p>QML will try to cache images and scene graph nodes to improve performance, but in some low-memory scenarios it might be required to aggressively release these resources. The <a href="qquickwindow.html#releaseResources">releaseResources</a>() can be used to force the clean up of certain resources. Calling <a href="qquickwindow.html#releaseResources">releaseResources</a>() may result in the entire scene graph and in the case of the OpenGL adaptation the associated context will be deleted. The <a href="qquickwindow.html#sceneGraphInvalidated">sceneGraphInvalidated</a>() signal will be emitted when this happens.</p>
+<p><b>Note: </b>All classes with QSG prefix should be used solely on the scene graph's rendering thread. See <a href="qtquick-visualcanvas-scenegraph.html#scene-graph-and-rendering">Scene Graph and Rendering</a> for more information.</p><a name="context-and-surface-formats"></a>
+<h4 id="context-and-surface-formats">Context and Surface Formats</h4>
+<p>While it is possible to specify a <a href="../qtgui/qsurfaceformat.html">QSurfaceFormat</a> for every <a href="qquickwindow.html">QQuickWindow</a> by calling the member function <a href="../qtgui/qwindow.html#setFormat">setFormat</a>(), windows may also be created from QML by using the Window and <a href="../qtquickcontrols/qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a> elements. In this case there is no C++ code involved in the creation of the window instance, yet applications may still wish to set certain surface format values, for example to request a given OpenGL version or profile. Such applications can call the static function <a href="../qtgui/qsurfaceformat.html#setDefaultFormat">QSurfaceFormat::setDefaultFormat</a>() at startup. The specified format will be used for all Quick windows created afterwards.</p>
+</div>
+<p><b>See also </b><a href="qtquick-scenegraph-openglunderqml-example.html">Scene Graph - OpenGL Under QML</a>.</p>
+<!-- @@@QQuickWindow -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$CreateTextureOption$$$TextureHasAlphaChannel$$$TextureHasMipmaps$$$TextureOwnsGLTexture$$$TextureCanUseAtlas$$$TextureIsOpaque -->
+<h3 class="flags" id="CreateTextureOption-enum"><a name="CreateTextureOption-enum"></a>enum QQuickWindow::<span class="name">CreateTextureOption</span><br/>flags QQuickWindow::<span class="name">CreateTextureOptions</span></h3>
+<p>The CreateTextureOption enums are used to customize a texture is wrapped.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QQuickWindow::TextureHasAlphaChannel</code></td><td class="topAlign tblval"><code>0x0001</code></td><td class="topAlign">The texture has an alpha channel and should be drawn using blending.</td></tr>
+<tr><td class="topAlign"><code>QQuickWindow::TextureHasMipmaps</code></td><td class="topAlign tblval"><code>0x0002</code></td><td class="topAlign">The texture has mipmaps and can be drawn with mipmapping enabled.</td></tr>
+<tr><td class="topAlign"><code>QQuickWindow::TextureOwnsGLTexture</code></td><td class="topAlign tblval"><code>0x0004</code></td><td class="topAlign">The texture object owns the texture id and will delete the OpenGL texture when the texture object is deleted.</td></tr>
+<tr><td class="topAlign"><code>QQuickWindow::TextureCanUseAtlas</code></td><td class="topAlign tblval"><code>0x0008</code></td><td class="topAlign">The image can be uploaded into a texture atlas.</td></tr>
+<tr><td class="topAlign"><code>QQuickWindow::TextureIsOpaque</code></td><td class="topAlign tblval"><code>0x0010</code></td><td class="topAlign">The texture will return false for <a href="qsgtexture.html#hasAlphaChannel">QSGTexture::hasAlphaChannel</a>() and will not be blended. This flag was added in Qt 5.6&#x2e;</td></tr>
+</table></div>
+<p>The CreateTextureOptions type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;CreateTextureOption&gt;. It stores an OR combination of CreateTextureOption values.</p>
+<!-- @@@CreateTextureOption -->
+<!-- $$$RenderStage$$$BeforeSynchronizingStage$$$AfterSynchronizingStage$$$BeforeRenderingStage$$$AfterRenderingStage$$$AfterSwapStage$$$NoStage -->
+<h3 class="fn" id="RenderStage-enum"><a name="RenderStage-enum"></a>enum QQuickWindow::<span class="name">RenderStage</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QQuickWindow::BeforeSynchronizingStage</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Before synchronization.</td></tr>
+<tr><td class="topAlign"><code>QQuickWindow::AfterSynchronizingStage</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">After synchronization.</td></tr>
+<tr><td class="topAlign"><code>QQuickWindow::BeforeRenderingStage</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Before rendering.</td></tr>
+<tr><td class="topAlign"><code>QQuickWindow::AfterRenderingStage</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">After rendering.</td></tr>
+<tr><td class="topAlign"><code>QQuickWindow::AfterSwapStage</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">After the frame is swapped.</td></tr>
+<tr><td class="topAlign"><code>QQuickWindow::NoStage</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">As soon as possible. This value was added in Qt 5.6&#x2e;</td></tr>
+</table></div>
+<p>This enum was introduced or modified in  Qt 5.4.</p>
+<p><b>See also </b><a href="qtquick-visualcanvas-scenegraph.html#scene-graph-and-rendering">Scene Graph and Rendering</a>.</p>
+<!-- @@@RenderStage -->
+<!-- $$$SceneGraphError$$$ContextNotAvailable -->
+<h3 class="fn" id="SceneGraphError-enum"><a name="SceneGraphError-enum"></a>enum QQuickWindow::<span class="name">SceneGraphError</span></h3>
+<p>This enum describes the error in a <a href="qquickwindow.html#sceneGraphError">sceneGraphError</a>() signal.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QQuickWindow::ContextNotAvailable</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">graphics context creation failed. This typically means that no suitable OpenGL implementation was found, for example because no graphics drivers are installed and so no OpenGL 2 support is present. On mobile and embedded boards that use OpenGL ES such an error is likely to indicate issues in the windowing system integration and possibly an incorrect configuration of Qt.</td></tr>
+</table></div>
+<p>This enum was introduced or modified in  Qt 5.3.</p>
+<!-- @@@SceneGraphError -->
+<!-- $$$TextRenderType$$$QtTextRendering$$$NativeTextRendering -->
+<h3 class="fn" id="TextRenderType-enum"><a name="TextRenderType-enum"></a>enum QQuickWindow::<span class="name">TextRenderType</span></h3>
+<p>This enum describes the default render type of text-like elements in Qt Quick (<a href="qml-qtquick-text.html">Text</a>, <a href="qml-qtquick-textinput.html">TextInput</a>, etc.)&#x2e;</p>
+<p>Select NativeTextRendering if you prefer text to look native on the target platform and do not require advanced features such as transformation of the text. Using such features in combination with the NativeTextRendering render type will lend poor and sometimes pixelated results.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QQuickWindow::QtTextRendering</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Use Qt's own rasterization algorithm.</td></tr>
+<tr><td class="topAlign"><code>QQuickWindow::NativeTextRendering</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Use the operating system's native rasterizer for text.</td></tr>
+</table></div>
+<p>This enum was introduced or modified in  Qt 5.10.</p>
+<!-- @@@TextRenderType -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$activeFocusItem-prop$$$activeFocusItem$$$activeFocusItemChanged -->
+<h3 class="fn" id="activeFocusItem-prop"><a name="activeFocusItem-prop"></a><span class="name">activeFocusItem</span> : <span class="type"><a href="qquickitem.html">QQuickItem</a></span>* const</h3>
+<p>This property holds the item which currently has active focus or <code>null</code> if there is no item with active focus.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QQuickItem *</td><td class="memItemRight bottomAlign"><span class="name"><b>activeFocusItem</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>activeFocusItemChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@activeFocusItem -->
+<!-- $$$color-prop$$$color$$$setColorconstQColor&$$$colorChangedconstQColor& -->
+<h3 class="fn" id="color-prop"><a name="color-prop"></a><span class="name">color</span> : <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span></h3>
+<p>This property holds the color used to clear the OpenGL context.</p>
+<p>Setting the clear color has no effect when clearing is disabled. By default, the clear color is white.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QColor </td><td class="memItemRight bottomAlign"><span class="name"><b>color</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setColor</b></span>(const QColor &amp;<i>color</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>colorChanged</b></span>(<i>const QColor &amp;</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qquickwindow.html#setClearBeforeRendering">setClearBeforeRendering</a>() and <a href="qquickwindow.html#setDefaultAlphaBuffer">setDefaultAlphaBuffer</a>().</p>
+<!-- @@@color -->
+<!-- $$$contentItem-prop$$$contentItem -->
+<h3 class="fn" id="contentItem-prop"><a name="contentItem-prop"></a><span class="name">contentItem</span> : <span class="type"><a href="qquickitem.html">QQuickItem</a></span>* const</h3>
+<p>This property holds the invisible root item of the scene.</p>
+<p>A <a href="qquickwindow.html">QQuickWindow</a> always has a single invisible root item containing all of its content. To add items to this window, reparent the items to the contentItem or to an existing item in the scene.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QQuickItem *</td><td class="memItemRight bottomAlign"><span class="name"><b>contentItem</b></span>() const</td></tr>
+</table></div>
+<!-- @@@contentItem -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QQuickWindow[overload1]$$$QQuickWindowQWindow* -->
+<h3 class="fn" id="QQuickWindow"><a name="QQuickWindow"></a>QQuickWindow::<span class="name">QQuickWindow</span>(<span class="type"><a href="../qtgui/qwindow.html#QWindow">QWindow</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a window for displaying a QML scene with parent window <i>parent</i>.</p>
+<!-- @@@QQuickWindow -->
+<!-- $$$afterAnimating[overload1]$$$afterAnimating -->
+<h3 class="fn" id="afterAnimating"><a name="afterAnimating"></a><code>[signal] </code><span class="type">void</span> QQuickWindow::<span class="name">afterAnimating</span>()</h3>
+<p>This signal is emitted on the gui thread before requesting the render thread to perform the synchronization of the scene graph.</p>
+<p>Unlike the other similar signals, this one is emitted on the gui thread instead of the render thread. It can be used to synchronize external animation systems with the QML content.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<!-- @@@afterAnimating -->
+<!-- $$$afterRendering[overload1]$$$afterRendering -->
+<h3 class="fn" id="afterRendering"><a name="afterRendering"></a><code>[signal] </code><span class="type">void</span> QQuickWindow::<span class="name">afterRendering</span>()</h3>
+<p>This signal is emitted after the scene has completed rendering, before swapbuffers is called.</p>
+<p>This signal can be used to paint using raw OpenGL on top of QML content, or to do screen scraping of the current frame buffer.</p>
+<p>The OpenGL context used for rendering the scene graph will be bound at this point.</p>
+<p><b>Warning:</b> This signal is emitted from the scene graph rendering thread. If your slot function needs to finish before execution continues, you must make sure that the connection is direct (see <a href="../qtcore/qt.html#ConnectionType-enum">Qt::ConnectionType</a>).</p>
+<p><b>Warning:</b> Make very sure that a signal handler for afterRendering() leaves the OpenGL context in the same state as it was when the signal handler was entered. Failing to do so can result in the scene not rendering properly.</p>
+<p><b>See also </b><a href="qquickwindow.html#resetOpenGLState">resetOpenGLState</a>().</p>
+<!-- @@@afterRendering -->
+<!-- $$$afterSynchronizing[overload1]$$$afterSynchronizing -->
+<h3 class="fn" id="afterSynchronizing"><a name="afterSynchronizing"></a><code>[signal] </code><span class="type">void</span> QQuickWindow::<span class="name">afterSynchronizing</span>()</h3>
+<p>This signal is emitted after the scene graph is synchronized with the QML state.</p>
+<p>This signal can be used to do preparation required after calls to <a href="qquickitem.html#updatePaintNode">QQuickItem::updatePaintNode</a>(), while the GUI thread is still locked.</p>
+<p>The graphics context used for rendering the scene graph will be bound at this point.</p>
+<p><b>Warning:</b> This signal is emitted from the scene graph rendering thread. If your slot function needs to finish before execution continues, you must make sure that the connection is direct (see <a href="../qtcore/qt.html#ConnectionType-enum">Qt::ConnectionType</a>).</p>
+<p><b>Warning:</b> When using the OpenGL adaptation, make sure that a signal handler for afterSynchronizing leaves the OpenGL context in the same state as it was when the signal handler was entered. Failing to do so can result in the scene not rendering properly.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<p><b>See also </b><a href="qquickwindow.html#resetOpenGLState">resetOpenGLState</a>().</p>
+<!-- @@@afterSynchronizing -->
+<!-- $$$beforeRendering[overload1]$$$beforeRendering -->
+<h3 class="fn" id="beforeRendering"><a name="beforeRendering"></a><code>[signal] </code><span class="type">void</span> QQuickWindow::<span class="name">beforeRendering</span>()</h3>
+<p>This signal is emitted before the scene starts rendering.</p>
+<p>Combined with the modes for clearing the background, this option can be used to paint using raw OpenGL under QML content.</p>
+<p>The OpenGL context used for rendering the scene graph will be bound at this point.</p>
+<p><b>Warning:</b> This signal is emitted from the scene graph rendering thread. If your slot function needs to finish before execution continues, you must make sure that the connection is direct (see <a href="../qtcore/qt.html#ConnectionType-enum">Qt::ConnectionType</a>).</p>
+<p><b>Warning:</b> Make very sure that a signal handler for beforeRendering leaves the OpenGL context in the same state as it was when the signal handler was entered. Failing to do so can result in the scene not rendering properly.</p>
+<p><b>See also </b><a href="qquickwindow.html#resetOpenGLState">resetOpenGLState</a>().</p>
+<!-- @@@beforeRendering -->
+<!-- $$$beforeSynchronizing[overload1]$$$beforeSynchronizing -->
+<h3 class="fn" id="beforeSynchronizing"><a name="beforeSynchronizing"></a><code>[signal] </code><span class="type">void</span> QQuickWindow::<span class="name">beforeSynchronizing</span>()</h3>
+<p>This signal is emitted before the scene graph is synchronized with the QML state.</p>
+<p>This signal can be used to do any preparation required before calls to <a href="qquickitem.html#updatePaintNode">QQuickItem::updatePaintNode</a>().</p>
+<p>The OpenGL context used for rendering the scene graph will be bound at this point.</p>
+<p><b>Warning:</b> This signal is emitted from the scene graph rendering thread. If your slot function needs to finish before execution continues, you must make sure that the connection is direct (see <a href="../qtcore/qt.html#ConnectionType-enum">Qt::ConnectionType</a>).</p>
+<p><b>Warning:</b> Make very sure that a signal handler for beforeSynchronizing leaves the GL context in the same state as it was when the signal handler was entered. Failing to do so can result in the scene not rendering properly.</p>
+<p><b>See also </b><a href="qquickwindow.html#resetOpenGLState">resetOpenGLState</a>().</p>
+<!-- @@@beforeSynchronizing -->
+<!-- $$$closing[overload1]$$$closingQQuickCloseEvent* -->
+<h3 class="fn" id="closing"><a name="closing"></a><code>[signal] </code><span class="type">void</span> QQuickWindow::<span class="name">closing</span>(<span class="type">QQuickCloseEvent</span> *<i>close</i>)</h3>
+<p>This signal is emitted when the window receives the event <i>close</i> from the windowing system.</p>
+<p>On macOs, Qt will create a menu item <code>Quit</code> if there is no menu item whose text is &quot;quit&quot; or &quot;exit&quot;. This menu item calls the <code>QCoreApplication::quit</code> signal, not the <code>QQuickWindow::closing()</code> signal.</p>
+<p>This function was introduced in  Qt 5.1.</p>
+<p><b>See also </b><a href="../qtwidgets/qmenubar.html#qmenubar-as-a-global-menu-bar">QMenuBar as a Global Menu Bar</a>.</p>
+<!-- @@@closing -->
+<!-- $$$frameSwapped[overload1]$$$frameSwapped -->
+<h3 class="fn" id="frameSwapped"><a name="frameSwapped"></a><code>[signal] </code><span class="type">void</span> QQuickWindow::<span class="name">frameSwapped</span>()</h3>
+<p>This signal is emitted when a frame has been queued for presenting. With vertical synchronization enabled the signal is emitted at most once per vsync interval in a continuously animating scene.</p>
+<p>This signal will be emitted from the scene graph rendering thread.</p>
+<!-- @@@frameSwapped -->
+<!-- $$$openglContextCreated[overload1]$$$openglContextCreatedQOpenGLContext* -->
+<h3 class="fn" id="openglContextCreated"><a name="openglContextCreated"></a><code>[signal] </code><span class="type">void</span> QQuickWindow::<span class="name">openglContextCreated</span>(<span class="type"><a href="../qtgui/qopenglcontext.html">QOpenGLContext</a></span> *<i>context</i>)</h3>
+<p>This signal is emitted on the gui thread when the OpenGL <i>context</i> for this window is created, before it is made current.</p>
+<p>Some implementations will share the same OpenGL context between multiple <a href="qquickwindow.html">QQuickWindow</a> instances. The openglContextCreated() signal will in this case only be emitted for the first window, when the OpenGL context is actually created.</p>
+<p><a href="qquickwindow.html#openglContext">QQuickWindow::openglContext</a>() will still return 0 for this window until after the QQuickWindow::sceneGraphInitialize() has been emitted.</p>
+<p><b>Note: </b>This signal will only be emmited when using the default OpenGL scene graph adaptation.</p><p>This function was introduced in  Qt 5.3.</p>
+<!-- @@@openglContextCreated -->
+<!-- $$$releaseResources[overload1]$$$releaseResources -->
+<h3 class="fn" id="releaseResources"><a name="releaseResources"></a><code>[slot] </code><span class="type">void</span> QQuickWindow::<span class="name">releaseResources</span>()</h3>
+<p>This function tries to release redundant resources currently held by the QML scene.</p>
+<p>Calling this function might result in the scene graph and the OpenGL context used for rendering being released to release graphics memory. If this happens, the <a href="qquickwindow.html#sceneGraphInvalidated">sceneGraphInvalidated</a>() signal will be called, allowing users to clean up their own graphics resources. The <a href="qquickwindow.html#setPersistentOpenGLContext">setPersistentOpenGLContext</a>() and <a href="qquickwindow.html#setPersistentSceneGraph">setPersistentSceneGraph</a>() functions can be used to prevent this from happening, if handling the cleanup is not feasible in the application, at the cost of higher memory usage.</p>
+<p><b>See also </b><a href="qquickwindow.html#sceneGraphInvalidated">sceneGraphInvalidated</a>(), <a href="qquickwindow.html#setPersistentOpenGLContext">setPersistentOpenGLContext</a>(), and <a href="qquickwindow.html#setPersistentSceneGraph">setPersistentSceneGraph</a>().</p>
+<!-- @@@releaseResources -->
+<!-- $$$sceneGraphAboutToStop[overload1]$$$sceneGraphAboutToStop -->
+<h3 class="fn" id="sceneGraphAboutToStop"><a name="sceneGraphAboutToStop"></a><code>[signal] </code><span class="type">void</span> QQuickWindow::<span class="name">sceneGraphAboutToStop</span>()</h3>
+<p>This signal is emitted on the render thread when the scene graph is about to stop rendering. This happens usually because the window has been hidden.</p>
+<p>Applications may use this signal to release resources, but should be prepared to reinstantiated them again fast. The scene graph and the graphics context are not released at this time.</p>
+<p><b>Warning:</b> This signal is emitted from the scene graph rendering thread. If your slot function needs to finish before execution continues, you must make sure that the connection is direct (see <a href="../qtcore/qt.html#ConnectionType-enum">Qt::ConnectionType</a>).</p>
+<p><b>Warning:</b> Make very sure that a signal handler for sceneGraphAboutToStop() leaves the graphics context in the same state as it was when the signal handler was entered. Failing to do so can result in the scene not rendering properly.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<p><b>See also </b><a href="qquickwindow.html#sceneGraphInvalidated">sceneGraphInvalidated</a>() and <a href="qquickwindow.html#resetOpenGLState">resetOpenGLState</a>().</p>
+<!-- @@@sceneGraphAboutToStop -->
+<!-- $$$sceneGraphError[overload1]$$$sceneGraphErrorQQuickWindow::SceneGraphErrorconstQString& -->
+<h3 class="fn" id="sceneGraphError"><a name="sceneGraphError"></a><code>[signal] </code><span class="type">void</span> QQuickWindow::<span class="name">sceneGraphError</span>(<span class="type"><a href="qquickwindow.html#SceneGraphError-enum">QQuickWindow::SceneGraphError</a></span> <i>error</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>message</i>)</h3>
+<p>This signal is emitted when an <i>error</i> occurred during scene graph initialization.</p>
+<p>Applications should connect to this signal if they wish to handle errors, like graphics context creation failures, in a custom way. When no slot is connected to the signal, the behavior will be different: Quick will print the <i>message</i>, or show a message box, and terminate the application.</p>
+<p>This signal will be emitted from the gui thread.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<!-- @@@sceneGraphError -->
+<!-- $$$sceneGraphInitialized[overload1]$$$sceneGraphInitialized -->
+<h3 class="fn" id="sceneGraphInitialized"><a name="sceneGraphInitialized"></a><code>[signal] </code><span class="type">void</span> QQuickWindow::<span class="name">sceneGraphInitialized</span>()</h3>
+<p>This signal is emitted when the scene graph has been initialized.</p>
+<p>This signal will be emitted from the scene graph rendering thread.</p>
+<!-- @@@sceneGraphInitialized -->
+<!-- $$$sceneGraphInvalidated[overload1]$$$sceneGraphInvalidated -->
+<h3 class="fn" id="sceneGraphInvalidated"><a name="sceneGraphInvalidated"></a><code>[signal] </code><span class="type">void</span> QQuickWindow::<span class="name">sceneGraphInvalidated</span>()</h3>
+<p>This signal is emitted when the scene graph has been invalidated.</p>
+<p>This signal implies that the graphics rendering context used has been invalidated and all user resources tied to that context should be released.</p>
+<p>In the case of the default OpenGL adaptation the context of this window will be bound when this function is called. The only exception is if the native OpenGL has been destroyed outside Qt's control, for instance through EGL_CONTEXT_LOST.</p>
+<p>This signal will be emitted from the scene graph rendering thread.</p>
+<!-- @@@sceneGraphInvalidated -->
+<!-- $$$update[overload1]$$$update -->
+<h3 class="fn" id="update"><a name="update"></a><code>[slot] </code><span class="type">void</span> QQuickWindow::<span class="name">update</span>()</h3>
+<p>Schedules the window to render another frame.</p>
+<p>Calling QQuickWindow::update() differs from <a href="qquickitem.html#update">QQuickItem::update</a>() in that it always triggers a repaint, regardless of changes in the underlying scene graph or not.</p>
+<!-- @@@update -->
+<!-- $$$~QQuickWindow[overload1]$$$~QQuickWindow -->
+<h3 class="fn" id="dtor.QQuickWindow"><a name="dtor.QQuickWindow"></a><code>[override virtual] </code>QQuickWindow::<span class="name">~QQuickWindow</span>()</h3>
+<p>Destroys the window.</p>
+<!-- @@@~QQuickWindow -->
+<!-- $$$accessibleRoot[overload1]$$$accessibleRoot -->
+<h3 class="fn" id="accessibleRoot"><a name="accessibleRoot"></a><code>[override virtual] </code><span class="type"><a href="../qtgui/qaccessibleinterface.html">QAccessibleInterface</a></span> *QQuickWindow::<span class="name">accessibleRoot</span>() const</h3>
+<p>Returns an accessibility interface for this window, or 0 if such an interface cannot be created.</p>
+<!-- @@@accessibleRoot -->
+<!-- $$$clearBeforeRendering[overload1]$$$clearBeforeRendering -->
+<h3 class="fn" id="clearBeforeRendering"><a name="clearBeforeRendering"></a><span class="type">bool</span> QQuickWindow::<span class="name">clearBeforeRendering</span>() const</h3>
+<p>Returns whether clearing of the color buffer is done before rendering or not.</p>
+<p><b>See also </b><a href="qquickwindow.html#setClearBeforeRendering">setClearBeforeRendering</a>().</p>
+<!-- @@@clearBeforeRendering -->
+<!-- $$$createImageNode[overload1]$$$createImageNode -->
+<h3 class="fn" id="createImageNode"><a name="createImageNode"></a><span class="type"><a href="qsgimagenode.html">QSGImageNode</a></span> *QQuickWindow::<span class="name">createImageNode</span>() const</h3>
+<p>Creates a simple image node. When the scenegraph is not initialized, the return value is null.</p>
+<p>This is cross-backend alternative to constructing a QSGSimpleTextureNode directly.</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<p><b>See also </b><a href="qsgimagenode.html">QSGImageNode</a>.</p>
+<!-- @@@createImageNode -->
+<!-- $$$createNinePatchNode[overload1]$$$createNinePatchNode -->
+<h3 class="fn" id="createNinePatchNode"><a name="createNinePatchNode"></a><span class="type">QSGNinePatchNode</span> *QQuickWindow::<span class="name">createNinePatchNode</span>() const</h3>
+<p>Creates a nine patch node. When the scenegraph is not initialized, the return value is null.</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<!-- @@@createNinePatchNode -->
+<!-- $$$createRectangleNode[overload1]$$$createRectangleNode -->
+<h3 class="fn" id="createRectangleNode"><a name="createRectangleNode"></a><span class="type"><a href="qsgrectanglenode.html">QSGRectangleNode</a></span> *QQuickWindow::<span class="name">createRectangleNode</span>() const</h3>
+<p>Creates a simple rectangle node. When the scenegraph is not initialized, the return value is null.</p>
+<p>This is cross-backend alternative to constructing a QSGSimpleRectNode directly.</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<p><b>See also </b><a href="qsgrectanglenode.html">QSGRectangleNode</a>.</p>
+<!-- @@@createRectangleNode -->
+<!-- $$$createTextureFromId[overload1]$$$createTextureFromIduintconstQSize&QQuickWindow::CreateTextureOptions -->
+<h3 class="fn" id="createTextureFromId"><a name="createTextureFromId"></a><span class="type"><a href="qsgtexture.html">QSGTexture</a></span> *QQuickWindow::<span class="name">createTextureFromId</span>(<span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> <i>id</i>, const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>size</i>, <span class="type"><a href="qquickwindow.html#CreateTextureOption-enum">QQuickWindow::CreateTextureOptions</a></span> <i>options</i> = CreateTextureOption()) const</h3>
+<p>Creates a new <a href="qsgtexture.html">QSGTexture</a> object from an existing OpenGL texture <i>id</i> and <i>size</i>.</p>
+<p>The caller of the function is responsible for deleting the returned texture.</p>
+<p>The returned texture will be using <code>GL_TEXTURE_2D</code> as texture target and assumes that internal format is <code>GL_RGBA</code>. Reimplement <a href="qsgtexture.html">QSGTexture</a> to create textures with different parameters.</p>
+<p>Use <i>options</i> to customize the texture attributes. The TextureUsesAtlas option is ignored.</p>
+<p><b>Warning:</b> This function will return null if the scenegraph has not yet been initialized or OpenGL is not in use.</p>
+<p><b>Note: </b>This function only has an effect when using the default OpenGL scene graph adaptation.</p><p><b>See also </b><a href="qquickwindow.html#sceneGraphInitialized">sceneGraphInitialized</a>() and <a href="qsgtexture.html">QSGTexture</a>.</p>
+<!-- @@@createTextureFromId -->
+<!-- $$$createTextureFromImage[overload1]$$$createTextureFromImageconstQImage&QQuickWindow::CreateTextureOptions -->
+<h3 class="fn" id="createTextureFromImage"><a name="createTextureFromImage"></a><span class="type"><a href="qsgtexture.html">QSGTexture</a></span> *QQuickWindow::<span class="name">createTextureFromImage</span>(const <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> &amp;<i>image</i>, <span class="type"><a href="qquickwindow.html#CreateTextureOption-enum">QQuickWindow::CreateTextureOptions</a></span> <i>options</i>) const</h3>
+<p>Creates a new <a href="qsgtexture.html">QSGTexture</a> from the supplied <i>image</i>. If the image has an alpha channel, the corresponding texture will have an alpha channel.</p>
+<p>The caller of the function is responsible for deleting the returned texture. For example whe using the OpenGL adaptation the actual OpenGL texture will be deleted when the texture object is deleted.</p>
+<p>When <i>options</i> contains <a href="qquickwindow.html#CreateTextureOption-enum">TextureCanUseAtlas</a>, the engine may put the image into a texture atlas. Textures in an atlas need to rely on <a href="qsgtexture.html#normalizedTextureSubRect">QSGTexture::normalizedTextureSubRect</a>() for their geometry and will not support <a href="qsgtexture.html#WrapMode-enum">QSGTexture::Repeat</a>. Other values from <a href="qquickwindow.html#CreateTextureOption-enum">CreateTextureOption</a> are ignored.</p>
+<p>When <i>options</i> contains <a href="qquickwindow.html#CreateTextureOption-enum">TextureIsOpaque</a>, the engine will create an RGB texture which returns false for <a href="qsgtexture.html#hasAlphaChannel">QSGTexture::hasAlphaChannel</a>(). Opaque textures will in most cases be faster to render. When this flag is not set, the texture will have an alpha channel based on the image's format.</p>
+<p>When <i>options</i> contains <a href="qquickwindow.html#CreateTextureOption-enum">TextureHasMipmaps</a>, the engine will create a texture which can use mipmap filtering. Mipmapped textures can not be in an atlas.</p>
+<p>When using the OpenGL adaptation, the returned texture will be using <code>GL_TEXTURE_2D</code> as texture target and <code>GL_RGBA</code> as internal format. Reimplement <a href="qsgtexture.html">QSGTexture</a> to create textures with different parameters.</p>
+<p><b>Warning:</b> This function will return 0 if the scene graph has not yet been initialized.</p>
+<p><b>Warning:</b> The returned texture is not memory managed by the scene graph and must be explicitly deleted by the caller on the rendering thread. This is achieved by deleting the texture from a <a href="qsgnode.html">QSGNode</a> destructor or by using <a href="../qtcore/qobject.html#deleteLater">deleteLater</a>() in the case where the texture already has affinity to the rendering thread.</p>
+<p>This function can be called from any thread.</p>
+<p><b>See also </b><a href="qquickwindow.html#sceneGraphInitialized">sceneGraphInitialized</a>() and <a href="qsgtexture.html">QSGTexture</a>.</p>
+<!-- @@@createTextureFromImage -->
+<!-- $$$createTextureFromImage$$$createTextureFromImageconstQImage& -->
+<h3 class="fn" id="createTextureFromImage-1"><a name="createTextureFromImage-1"></a><span class="type"><a href="qsgtexture.html">QSGTexture</a></span> *QQuickWindow::<span class="name">createTextureFromImage</span>(const <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> &amp;<i>image</i>) const</h3>
+<p>This is an overloaded function.</p>
+<!-- @@@createTextureFromImage -->
+<!-- $$$effectiveDevicePixelRatio[overload1]$$$effectiveDevicePixelRatio -->
+<h3 class="fn" id="effectiveDevicePixelRatio"><a name="effectiveDevicePixelRatio"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QQuickWindow::<span class="name">effectiveDevicePixelRatio</span>() const</h3>
+<p>Returns the device pixel ratio for this window.</p>
+<p>This is different from <a href="../qtgui/qwindow.html#devicePixelRatio">QWindow::devicePixelRatio</a>() in that it supports redirected rendering via <a href="qquickrendercontrol.html">QQuickRenderControl</a>. When using a <a href="qquickrendercontrol.html">QQuickRenderControl</a>, the <a href="qquickwindow.html">QQuickWindow</a> is often not created, meaning it is never shown and there is no underlying native window created in the windowing system. As a result, querying properties like the device pixel ratio cannot give correct results. Use this function instead.</p>
+<p><b>See also </b><a href="../qtgui/qwindow.html#devicePixelRatio">QWindow::devicePixelRatio</a>().</p>
+<!-- @@@effectiveDevicePixelRatio -->
+<!-- $$$event[overload1]$$$eventQEvent* -->
+<h3 class="fn" id="event"><a name="event"></a><code>[override virtual protected] </code><span class="type">bool</span> QQuickWindow::<span class="name">event</span>(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="../qtgui/qwindow.html#event">QWindow::event</a>(QEvent *ev).</p>
+<!-- @@@event -->
+<!-- $$$exposeEvent[overload1]$$$exposeEventQExposeEvent* -->
+<h3 class="fn" id="exposeEvent"><a name="exposeEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QQuickWindow::<span class="name">exposeEvent</span>(<i>QExposeEvent *</i>)</h3>
+<p>Reimplements: <a href="../qtgui/qwindow.html#exposeEvent">QWindow::exposeEvent</a>(QExposeEvent *ev).</p>
+<!-- @@@exposeEvent -->
+<!-- $$$focusInEvent[overload1]$$$focusInEventQFocusEvent* -->
+<h3 class="fn" id="focusInEvent"><a name="focusInEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QQuickWindow::<span class="name">focusInEvent</span>(<span class="type"><a href="../qtgui/qfocusevent.html">QFocusEvent</a></span> *<i>ev</i>)</h3>
+<p>Reimplements: <a href="../qtgui/qwindow.html#focusInEvent">QWindow::focusInEvent</a>(QFocusEvent *ev).</p>
+<!-- @@@focusInEvent -->
+<!-- $$$focusOutEvent[overload1]$$$focusOutEventQFocusEvent* -->
+<h3 class="fn" id="focusOutEvent"><a name="focusOutEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QQuickWindow::<span class="name">focusOutEvent</span>(<span class="type"><a href="../qtgui/qfocusevent.html">QFocusEvent</a></span> *<i>ev</i>)</h3>
+<p>Reimplements: <a href="../qtgui/qwindow.html#focusOutEvent">QWindow::focusOutEvent</a>(QFocusEvent *ev).</p>
+<!-- @@@focusOutEvent -->
+<!-- $$$grabWindow[overload1]$$$grabWindow -->
+<h3 class="fn" id="grabWindow"><a name="grabWindow"></a><span class="type"><a href="../qtgui/qimage.html">QImage</a></span> QQuickWindow::<span class="name">grabWindow</span>()</h3>
+<p>Grabs the contents of the window and returns it as an image.</p>
+<p>It is possible to call the grabWindow() function when the window is not visible. This requires that the window is <a href="../qtgui/qwindow.html#create">created</a> and has a valid size and that no other <a href="qquickwindow.html">QQuickWindow</a> instances are rendering in the same process.</p>
+<p><b>Warning:</b> Calling this function will cause performance problems.</p>
+<p><b>Warning:</b> This function can only be called from the GUI thread.</p>
+<!-- @@@grabWindow -->
+<!-- $$$hasDefaultAlphaBuffer[overload1]$$$hasDefaultAlphaBuffer -->
+<h3 class="fn" id="hasDefaultAlphaBuffer"><a name="hasDefaultAlphaBuffer"></a><code>[static] </code><span class="type">bool</span> QQuickWindow::<span class="name">hasDefaultAlphaBuffer</span>()</h3>
+<p>Returns whether to use alpha transparency on newly created windows.</p>
+<p>This function was introduced in  Qt 5.1.</p>
+<p><b>See also </b><a href="qquickwindow.html#setDefaultAlphaBuffer">setDefaultAlphaBuffer</a>().</p>
+<!-- @@@hasDefaultAlphaBuffer -->
+<!-- $$$hideEvent[overload1]$$$hideEventQHideEvent* -->
+<h3 class="fn" id="hideEvent"><a name="hideEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QQuickWindow::<span class="name">hideEvent</span>(<i>QHideEvent *</i>)</h3>
+<p>Reimplements: <a href="../qtgui/qwindow.html#hideEvent">QWindow::hideEvent</a>(QHideEvent *ev).</p>
+<!-- @@@hideEvent -->
+<!-- $$$incubationController[overload1]$$$incubationController -->
+<h3 class="fn" id="incubationController"><a name="incubationController"></a><span class="type"><a href="../qtqml/qqmlincubationcontroller.html">QQmlIncubationController</a></span> *QQuickWindow::<span class="name">incubationController</span>() const</h3>
+<p>Returns an incubation controller that splices incubation between frames for this window. <a href="qquickview.html">QQuickView</a> automatically installs this controller for you, otherwise you will need to install it yourself using <a href="../qtqml/qqmlengine.html#setIncubationController">QQmlEngine::setIncubationController</a>().</p>
+<p>The controller is owned by the window and will be destroyed when the window is deleted.</p>
+<!-- @@@incubationController -->
+<!-- $$$isPersistentOpenGLContext[overload1]$$$isPersistentOpenGLContext -->
+<h3 class="fn" id="isPersistentOpenGLContext"><a name="isPersistentOpenGLContext"></a><span class="type">bool</span> QQuickWindow::<span class="name">isPersistentOpenGLContext</span>() const</h3>
+<p>Returns whether the OpenGL context can be released during the lifetime of the <a href="qquickwindow.html">QQuickWindow</a>.</p>
+<p><b>Note: </b>This is a hint. When and how this happens is implementation specific. It also only has an effect when using the default OpenGL scene graph adaptation</p><!-- @@@isPersistentOpenGLContext -->
+<!-- $$$isPersistentSceneGraph[overload1]$$$isPersistentSceneGraph -->
+<h3 class="fn" id="isPersistentSceneGraph"><a name="isPersistentSceneGraph"></a><span class="type">bool</span> QQuickWindow::<span class="name">isPersistentSceneGraph</span>() const</h3>
+<p>Returns whether the scene graph nodes and resources can be released during the lifetime of this <a href="qquickwindow.html">QQuickWindow</a>.</p>
+<p><b>Note: </b>This is a hint. When and how this happens is implementation specific.</p><!-- @@@isPersistentSceneGraph -->
+<!-- $$$isSceneGraphInitialized[overload1]$$$isSceneGraphInitialized -->
+<h3 class="fn" id="isSceneGraphInitialized"><a name="isSceneGraphInitialized"></a><span class="type">bool</span> QQuickWindow::<span class="name">isSceneGraphInitialized</span>() const</h3>
+<p>Returns true if the scene graph has been initialized; otherwise returns false.</p>
+<!-- @@@isSceneGraphInitialized -->
+<!-- $$$keyPressEvent[overload1]$$$keyPressEventQKeyEvent* -->
+<h3 class="fn" id="keyPressEvent"><a name="keyPressEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QQuickWindow::<span class="name">keyPressEvent</span>(<span class="type"><a href="../qtgui/qkeyevent.html">QKeyEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="../qtgui/qwindow.html#keyPressEvent">QWindow::keyPressEvent</a>(QKeyEvent *ev).</p>
+<!-- @@@keyPressEvent -->
+<!-- $$$keyReleaseEvent[overload1]$$$keyReleaseEventQKeyEvent* -->
+<h3 class="fn" id="keyReleaseEvent"><a name="keyReleaseEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QQuickWindow::<span class="name">keyReleaseEvent</span>(<span class="type"><a href="../qtgui/qkeyevent.html">QKeyEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="../qtgui/qwindow.html#keyReleaseEvent">QWindow::keyReleaseEvent</a>(QKeyEvent *ev).</p>
+<!-- @@@keyReleaseEvent -->
+<!-- $$$mouseDoubleClickEvent[overload1]$$$mouseDoubleClickEventQMouseEvent* -->
+<h3 class="fn" id="mouseDoubleClickEvent"><a name="mouseDoubleClickEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QQuickWindow::<span class="name">mouseDoubleClickEvent</span>(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="../qtgui/qwindow.html#mouseDoubleClickEvent">QWindow::mouseDoubleClickEvent</a>(QMouseEvent *ev).</p>
+<!-- @@@mouseDoubleClickEvent -->
+<!-- $$$mouseGrabberItem[overload1]$$$mouseGrabberItem -->
+<h3 class="fn" id="mouseGrabberItem"><a name="mouseGrabberItem"></a><span class="type"><a href="qquickitem.html">QQuickItem</a></span> *QQuickWindow::<span class="name">mouseGrabberItem</span>() const</h3>
+<p>Returns the item which currently has the mouse grab.</p>
+<!-- @@@mouseGrabberItem -->
+<!-- $$$mouseMoveEvent[overload1]$$$mouseMoveEventQMouseEvent* -->
+<h3 class="fn" id="mouseMoveEvent"><a name="mouseMoveEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QQuickWindow::<span class="name">mouseMoveEvent</span>(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="../qtgui/qwindow.html#mouseMoveEvent">QWindow::mouseMoveEvent</a>(QMouseEvent *ev).</p>
+<!-- @@@mouseMoveEvent -->
+<!-- $$$mousePressEvent[overload1]$$$mousePressEventQMouseEvent* -->
+<h3 class="fn" id="mousePressEvent"><a name="mousePressEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QQuickWindow::<span class="name">mousePressEvent</span>(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="../qtgui/qwindow.html#mousePressEvent">QWindow::mousePressEvent</a>(QMouseEvent *ev).</p>
+<!-- @@@mousePressEvent -->
+<!-- $$$mouseReleaseEvent[overload1]$$$mouseReleaseEventQMouseEvent* -->
+<h3 class="fn" id="mouseReleaseEvent"><a name="mouseReleaseEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QQuickWindow::<span class="name">mouseReleaseEvent</span>(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="../qtgui/qwindow.html#mouseReleaseEvent">QWindow::mouseReleaseEvent</a>(QMouseEvent *ev).</p>
+<!-- @@@mouseReleaseEvent -->
+<!-- $$$openglContext[overload1]$$$openglContext -->
+<h3 class="fn" id="openglContext"><a name="openglContext"></a><span class="type"><a href="../qtgui/qopenglcontext.html">QOpenGLContext</a></span> *QQuickWindow::<span class="name">openglContext</span>() const</h3>
+<p>Returns the OpenGL context used for rendering.</p>
+<p>If the scene graph is not ready, or the scene graph is not using OpenGL, this function will return null.</p>
+<p><b>Note: </b>If using a scene graph adaptation other than OpenGL this function will return nullptr.</p><p><b>See also </b><a href="qquickwindow.html#sceneGraphInitialized">sceneGraphInitialized</a>() and <a href="qquickwindow.html#sceneGraphInvalidated">sceneGraphInvalidated</a>().</p>
+<!-- @@@openglContext -->
+<!-- $$$renderTarget[overload1]$$$renderTarget -->
+<h3 class="fn" id="renderTarget"><a name="renderTarget"></a><span class="type"><a href="../qtgui/qopenglframebufferobject.html">QOpenGLFramebufferObject</a></span> *QQuickWindow::<span class="name">renderTarget</span>() const</h3>
+<p>Returns the render target for this window.</p>
+<p>The default is to render to the surface of the window, in which case the render target is 0.</p>
+<p><b>Note: </b>This function will return nullptr when not using the OpenGL scene graph adaptation.</p><p><b>See also </b><a href="qquickwindow.html#setRenderTarget">setRenderTarget</a>().</p>
+<!-- @@@renderTarget -->
+<!-- $$$renderTargetId[overload1]$$$renderTargetId -->
+<h3 class="fn" id="renderTargetId"><a name="renderTargetId"></a><span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> QQuickWindow::<span class="name">renderTargetId</span>() const</h3>
+<p>Returns the FBO id of the render target when set; otherwise returns 0.</p>
+<!-- @@@renderTargetId -->
+<!-- $$$renderTargetSize[overload1]$$$renderTargetSize -->
+<h3 class="fn" id="renderTargetSize"><a name="renderTargetSize"></a><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QQuickWindow::<span class="name">renderTargetSize</span>() const</h3>
+<p>Returns the size of the currently set render target; otherwise returns an empty size.</p>
+<!-- @@@renderTargetSize -->
+<!-- $$$rendererInterface[overload1]$$$rendererInterface -->
+<h3 class="fn" id="rendererInterface"><a name="rendererInterface"></a><span class="type"><a href="qsgrendererinterface.html">QSGRendererInterface</a></span> *QQuickWindow::<span class="name">rendererInterface</span>() const</h3>
+<p>Returns the current renderer interface. The value is always valid and is never null.</p>
+<p><b>Note: </b>This function can be called at any time after constructing the <a href="qquickwindow.html">QQuickWindow</a>, even while <a href="qquickwindow.html#isSceneGraphInitialized">isSceneGraphInitialized</a>() is still false. However, some renderer interface functions, in particular <a href="qsgrendererinterface.html#getResource">QSGRendererInterface::getResource</a>() will not be functional until the scenegraph is up and running. Backend queries, like <a href="qsgrendererinterface.html#graphicsApi">QSGRendererInterface::graphicsApi</a>() or <a href="qsgrendererinterface.html#shaderType">QSGRendererInterface::shaderType</a>(), will always be functional on the other hand.</p><p><b>Note: </b>The ownership of the returned pointer stays with Qt. The returned instance may or may not be shared between different <a href="qquickwindow.html">QQuickWindow</a> instances, depending on the scenegraph backend in use. Therefore applications are expected to query the interface object for each <a href="qquickwindow.html">QQuickWindow</a> instead of reusing the already queried pointer.</p><p>This function was introduced in  Qt 5.8.</p>
+<p><b>See also </b><a href="qsgrendernode.html">QSGRenderNode</a> and <a href="qsgrendererinterface.html">QSGRendererInterface</a>.</p>
+<!-- @@@rendererInterface -->
+<!-- $$$resetOpenGLState[overload1]$$$resetOpenGLState -->
+<h3 class="fn" id="resetOpenGLState"><a name="resetOpenGLState"></a><span class="type">void</span> QQuickWindow::<span class="name">resetOpenGLState</span>()</h3>
+<p>Call this function to reset the OpenGL context its default state.</p>
+<p>The scene graph uses the OpenGL context and will both rely on and clobber its state. When mixing raw OpenGL commands with scene graph rendering, this function provides a convenient way of resetting the OpenGL context state back to its default values.</p>
+<p>This function does not touch state in the fixed-function pipeline.</p>
+<p>This function does not clear the color, depth and stencil buffers. Use <a href="qquickwindow.html#setClearBeforeRendering">QQuickWindow::setClearBeforeRendering</a> to control clearing of the color buffer. The depth and stencil buffer might be clobbered by the scene graph renderer. Clear these manually on demand.</p>
+<p><b>Note: </b>This function only has an effect when using the default OpenGL scene graph adaptation.</p><p>This function was introduced in  Qt 5.2.</p>
+<p><b>See also </b><a href="qquickwindow.html#beforeRendering">QQuickWindow::beforeRendering</a>().</p>
+<!-- @@@resetOpenGLState -->
+<!-- $$$resizeEvent[overload1]$$$resizeEventQResizeEvent* -->
+<h3 class="fn" id="resizeEvent"><a name="resizeEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QQuickWindow::<span class="name">resizeEvent</span>(<span class="type"><a href="../qtgui/qresizeevent.html">QResizeEvent</a></span> *<i>ev</i>)</h3>
+<p>Reimplements: <a href="../qtgui/qwindow.html#resizeEvent">QWindow::resizeEvent</a>(QResizeEvent *ev).</p>
+<!-- @@@resizeEvent -->
+<!-- $$$sceneGraphBackend[overload1]$$$sceneGraphBackend -->
+<h3 class="fn" id="sceneGraphBackend"><a name="sceneGraphBackend"></a><code>[static] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QQuickWindow::<span class="name">sceneGraphBackend</span>()</h3>
+<p>Returns the requested Qt Quick scenegraph backend.</p>
+<p><b>Note: </b>The return value of this function may still be outdated by subsequent calls to <a href="qquickwindow.html#setSceneGraphBackend">setSceneGraphBackend</a>() until the first <a href="qquickwindow.html">QQuickWindow</a> in the application has been constructed.</p><p>This function was introduced in  Qt 5.9.</p>
+<p><b>See also </b><a href="qquickwindow.html#setSceneGraphBackend">setSceneGraphBackend</a>().</p>
+<!-- @@@sceneGraphBackend -->
+<!-- $$$scheduleRenderJob[overload1]$$$scheduleRenderJobQRunnable*QQuickWindow::RenderStage -->
+<h3 class="fn" id="scheduleRenderJob"><a name="scheduleRenderJob"></a><span class="type">void</span> QQuickWindow::<span class="name">scheduleRenderJob</span>(<span class="type"><a href="../qtcore/qrunnable.html">QRunnable</a></span> *<i>job</i>, <span class="type"><a href="qquickwindow.html#RenderStage-enum">QQuickWindow::RenderStage</a></span> <i>stage</i>)</h3>
+<p>Schedules <i>job</i> to run when the rendering of this window reaches the given <i>stage</i>.</p>
+<p>This is a convenience to the equivalent signals in <a href="qquickwindow.html">QQuickWindow</a> for &quot;one shot&quot; tasks.</p>
+<p>The window takes ownership over <i>job</i> and will delete it when the job is completed.</p>
+<p>If rendering is shut down before <i>job</i> has a chance to run, the job will be run and then deleted as part of the scene graph cleanup. If the window is never shown and no rendering happens before the <a href="qquickwindow.html">QQuickWindow</a> is destroyed, all pending jobs will be destroyed without their run() method being called.</p>
+<p>If the rendering is happening on a different thread, then the job will happen on the rendering thread.</p>
+<p>If <i>stage</i> is <a href="qquickwindow.html#RenderStage-enum">NoStage</a>, <i>job</i> will be run at the earliest opportunity whenever the render thread is not busy rendering a frame. If there is no OpenGL context available or the window is not exposed at the time the job is either posted or handled, it is deleted without executing the run() method. If a non-threaded renderer is in use, the run() method of the job is executed synchronously. The OpenGL context is changed to the renderer context before executing a <a href="qquickwindow.html#RenderStage-enum">NoStage</a> job.</p>
+<p><b>Note: </b>This function does not trigger rendering; the jobs targeting any other stage than <a href="qquickwindow.html#RenderStage-enum">NoStage</a> will be stored run until rendering is triggered elsewhere. To force the job to run earlier, call <a href="qquickwindow.html#update">QQuickWindow::update</a>();</p><p>This function was introduced in  Qt 5.4.</p>
+<p><b>See also </b><a href="qquickwindow.html#beforeRendering">beforeRendering</a>(), <a href="qquickwindow.html#afterRendering">afterRendering</a>(), <a href="qquickwindow.html#beforeSynchronizing">beforeSynchronizing</a>(), <a href="qquickwindow.html#afterSynchronizing">afterSynchronizing</a>(), <a href="qquickwindow.html#frameSwapped">frameSwapped</a>(), and <a href="qquickwindow.html#sceneGraphInvalidated">sceneGraphInvalidated</a>().</p>
+<!-- @@@scheduleRenderJob -->
+<!-- $$$setClearBeforeRendering[overload1]$$$setClearBeforeRenderingbool -->
+<h3 class="fn" id="setClearBeforeRendering"><a name="setClearBeforeRendering"></a><span class="type">void</span> QQuickWindow::<span class="name">setClearBeforeRendering</span>(<span class="type">bool</span> <i>enabled</i>)</h3>
+<p>Sets whether the scene graph rendering of QML should clear the color buffer before it starts rendering to <i>enabled</i>.</p>
+<p>By disabling clearing of the color buffer, it is possible to render OpengGL content under the scene graph.</p>
+<p>The color buffer is cleared by default.</p>
+<p><b>See also </b><a href="qquickwindow.html#clearBeforeRendering">clearBeforeRendering</a>() and <a href="qquickwindow.html#beforeRendering">beforeRendering</a>().</p>
+<!-- @@@setClearBeforeRendering -->
+<!-- $$$setDefaultAlphaBuffer[overload1]$$$setDefaultAlphaBufferbool -->
+<h3 class="fn" id="setDefaultAlphaBuffer"><a name="setDefaultAlphaBuffer"></a><code>[static] </code><span class="type">void</span> QQuickWindow::<span class="name">setDefaultAlphaBuffer</span>(<span class="type">bool</span> <i>useAlpha</i>)</h3>
+<p><i>useAlpha</i> specifies whether to use alpha transparency on newly created windows.</p>
+<p>In any application which expects to create translucent windows, it's necessary to set this to true before creating the first <a href="qquickwindow.html">QQuickWindow</a>. The default value is false.</p>
+<p>This function was introduced in  Qt 5.1.</p>
+<p><b>See also </b><a href="qquickwindow.html#hasDefaultAlphaBuffer">hasDefaultAlphaBuffer</a>().</p>
+<!-- @@@setDefaultAlphaBuffer -->
+<!-- $$$setPersistentOpenGLContext[overload1]$$$setPersistentOpenGLContextbool -->
+<h3 class="fn" id="setPersistentOpenGLContext"><a name="setPersistentOpenGLContext"></a><span class="type">void</span> QQuickWindow::<span class="name">setPersistentOpenGLContext</span>(<span class="type">bool</span> <i>persistent</i>)</h3>
+<p>Sets whether the OpenGL context should be preserved, and cannot be released until the last window is deleted, to <i>persistent</i>. The default value is true.</p>
+<p>The OpenGL context can be released to free up graphics resources when the window is obscured, hidden or not rendering. When this happens is implementation specific.</p>
+<p>The <a href="../qtgui/qopenglcontext.html#aboutToBeDestroyed">QOpenGLContext::aboutToBeDestroyed</a>() signal is emitted from the <a href="qquickwindow.html#openglContext">QQuickWindow::openglContext</a>() when the OpenGL context is about to be released. The <a href="qquickwindow.html#sceneGraphInitialized">QQuickWindow::sceneGraphInitialized</a>() signal is emitted when a new OpenGL context is created for this window. Make a <a href="../qtcore/qt.html#ConnectionType-enum">Qt::DirectConnection</a> to these signals to be notified.</p>
+<p>The OpenGL context is still released when the last <a href="qquickwindow.html">QQuickWindow</a> is deleted.</p>
+<p><b>Note: </b>This only has an effect when using the default OpenGL scene graph adaptation.</p><p><b>See also </b><a href="qquickwindow.html#isPersistentOpenGLContext">isPersistentOpenGLContext</a>(), <a href="qquickwindow.html#setPersistentSceneGraph">setPersistentSceneGraph</a>(), <a href="../qtgui/qopenglcontext.html#aboutToBeDestroyed">QOpenGLContext::aboutToBeDestroyed</a>(), and <a href="qquickwindow.html#sceneGraphInitialized">sceneGraphInitialized</a>().</p>
+<!-- @@@setPersistentOpenGLContext -->
+<!-- $$$setPersistentSceneGraph[overload1]$$$setPersistentSceneGraphbool -->
+<h3 class="fn" id="setPersistentSceneGraph"><a name="setPersistentSceneGraph"></a><span class="type">void</span> QQuickWindow::<span class="name">setPersistentSceneGraph</span>(<span class="type">bool</span> <i>persistent</i>)</h3>
+<p>Sets whether the scene graph nodes and resources can be released to <i>persistent</i>. The default value is true.</p>
+<p>The scene graph nodes and resources can be released to free up graphics resources when the window is obscured, hidden or not rendering. When this happens is implementation specific.</p>
+<p>The <a href="qquickwindow.html#sceneGraphInvalidated">QQuickWindow::sceneGraphInvalidated</a>() signal is emitted when cleanup occurs. The <a href="qquickwindow.html#sceneGraphInitialized">QQuickWindow::sceneGraphInitialized</a>() signal is emitted when a new scene graph is recreated for this window. Make a <a href="../qtcore/qt.html#ConnectionType-enum">Qt::DirectConnection</a> to these signals to be notified.</p>
+<p>The scene graph nodes and resources are still released when the last <a href="qquickwindow.html">QQuickWindow</a> is deleted.</p>
+<p><b>See also </b><a href="qquickwindow.html#isPersistentSceneGraph">isPersistentSceneGraph</a>(), <a href="qquickwindow.html#setPersistentOpenGLContext">setPersistentOpenGLContext</a>(), <a href="qquickwindow.html#sceneGraphInvalidated">sceneGraphInvalidated</a>(), and <a href="qquickwindow.html#sceneGraphInitialized">sceneGraphInitialized</a>().</p>
+<!-- @@@setPersistentSceneGraph -->
+<!-- $$$setRenderTarget[overload1]$$$setRenderTargetQOpenGLFramebufferObject* -->
+<h3 class="fn" id="setRenderTarget"><a name="setRenderTarget"></a><span class="type">void</span> QQuickWindow::<span class="name">setRenderTarget</span>(<span class="type"><a href="../qtgui/qopenglframebufferobject.html">QOpenGLFramebufferObject</a></span> *<i>fbo</i>)</h3>
+<p>Sets the render target for this window to be <i>fbo</i>.</p>
+<p>The specified fbo must be created in the context of the window or one that shares with it.</p>
+<p><b>Note: </b>This function only has an effect when using the default OpenGL scene graph adaptation.</p><p><b>Warning:</b> This function can only be called from the thread doing the rendering.</p>
+<p><b>See also </b><a href="qquickwindow.html#renderTarget">renderTarget</a>().</p>
+<!-- @@@setRenderTarget -->
+<!-- $$$setRenderTarget$$$setRenderTargetuintconstQSize& -->
+<h3 class="fn" id="setRenderTarget-1"><a name="setRenderTarget-1"></a><span class="type">void</span> QQuickWindow::<span class="name">setRenderTarget</span>(<span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> <i>fboId</i>, const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>size</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Sets the render target for this window to be an FBO with <i>fboId</i> and <i>size</i>.</p>
+<p>The specified FBO must be created in the context of the window or one that shares with it.</p>
+<p><b>Note: </b><i>fboId</i> can also be set to 0. In this case rendering will target the default framebuffer of whichever surface is current when the scenegraph renders. <i>size</i> must still be valid, specifying the dimensions of the surface.</p><p><b>Note: </b>This function only has an effect when using the default OpenGL scene graph adaptation.</p><p><b>Warning:</b> This function can only be called from the thread doing the rendering.</p>
+<!-- @@@setRenderTarget -->
+<!-- $$$setSceneGraphBackend[overload1]$$$setSceneGraphBackendQSGRendererInterface::GraphicsApi -->
+<h3 class="fn" id="setSceneGraphBackend"><a name="setSceneGraphBackend"></a><code>[static] </code><span class="type">void</span> QQuickWindow::<span class="name">setSceneGraphBackend</span>(<span class="type"><a href="qsgrendererinterface.html#GraphicsApi-enum">QSGRendererInterface::GraphicsApi</a></span> <i>api</i>)</h3>
+<p>Requests a Qt Quick scenegraph backend for the specified graphics <i>api</i>. Backends can either be built-in or be installed in form of dynamically loaded plugins.</p>
+<p><b>Note: </b>The call to the function must happen before constructing the first <a href="qquickwindow.html">QQuickWindow</a> in the application. It cannot be changed afterwards.</p><p>If the selected backend is invalid or an error occurs, the default backend (OpenGL or software, depending on the Qt configuration) is used.</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<p><b>See also </b><a href="qquickwindow.html#sceneGraphBackend">sceneGraphBackend</a>().</p>
+<!-- @@@setSceneGraphBackend -->
+<!-- $$$setSceneGraphBackend$$$setSceneGraphBackendconstQString& -->
+<h3 class="fn" id="setSceneGraphBackend-1"><a name="setSceneGraphBackend-1"></a><code>[static] </code><span class="type">void</span> QQuickWindow::<span class="name">setSceneGraphBackend</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>backend</i>)</h3>
+<p>Requests the specified Qt Quick scenegraph <i>backend</i>. Backends can either be built-in or be installed in form of dynamically loaded plugins.</p>
+<p>This is an overloaded function.</p>
+<p><b>Note: </b>The call to the function must happen before constructing the first <a href="qquickwindow.html">QQuickWindow</a> in the application. It cannot be changed afterwards.</p><p>If <i>backend</i> is invalid or an error occurs, the default backend (OpenGL or software, depending on the Qt configuration) is used.</p>
+<p><b>Note: </b>Calling this function is equivalent to setting the <code>QT_QUICK_BACKEND</code> or <code>QMLSCENE_DEVICE</code> environment variables. However, this API is safer to use in applications that spawn other processes as there is no need to worry about environment inheritance.</p><p>This function was introduced in  Qt 5.8.</p>
+<!-- @@@setSceneGraphBackend -->
+<!-- $$$setTextRenderType[overload1]$$$setTextRenderTypeQQuickWindow::TextRenderType -->
+<h3 class="fn" id="setTextRenderType"><a name="setTextRenderType"></a><code>[static] </code><span class="type">void</span> QQuickWindow::<span class="name">setTextRenderType</span>(<span class="type"><a href="qquickwindow.html#TextRenderType-enum">QQuickWindow::TextRenderType</a></span> <i>renderType</i>)</h3>
+<p>Sets the default render type of text-like elements in Qt Quick to <i>renderType</i>.</p>
+<p><b>Note: </b>setting the render type will only affect elements created afterwards; the render type of existing elements will not be modified.</p><p>This function was introduced in  Qt 5.10.</p>
+<p><b>See also </b><a href="qquickwindow.html#textRenderType">textRenderType</a>().</p>
+<!-- @@@setTextRenderType -->
+<!-- $$$showEvent[overload1]$$$showEventQShowEvent* -->
+<h3 class="fn" id="showEvent"><a name="showEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QQuickWindow::<span class="name">showEvent</span>(<i>QShowEvent *</i>)</h3>
+<p>Reimplements: <a href="../qtgui/qwindow.html#showEvent">QWindow::showEvent</a>(QShowEvent *ev).</p>
+<!-- @@@showEvent -->
+<!-- $$$textRenderType[overload1]$$$textRenderType -->
+<h3 class="fn" id="textRenderType"><a name="textRenderType"></a><code>[static] </code><span class="type"><a href="qquickwindow.html#TextRenderType-enum">QQuickWindow::TextRenderType</a></span> QQuickWindow::<span class="name">textRenderType</span>()</h3>
+<p>Returns the render type of text-like elements in Qt Quick. The default is <a href="qquickwindow.html#TextRenderType-enum">QQuickWindow::QtTextRendering</a>.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<p><b>See also </b><a href="qquickwindow.html#setTextRenderType">setTextRenderType</a>().</p>
+<!-- @@@textRenderType -->
+<!-- $$$wheelEvent[overload1]$$$wheelEventQWheelEvent* -->
+<h3 class="fn" id="wheelEvent"><a name="wheelEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QQuickWindow::<span class="name">wheelEvent</span>(<span class="type"><a href="../qtgui/qwheelevent.html">QWheelEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="../qtgui/qwindow.html#wheelEvent">QWindow::wheelEvent</a>(QWheelEvent *ev).</p>
+<!-- @@@wheelEvent -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

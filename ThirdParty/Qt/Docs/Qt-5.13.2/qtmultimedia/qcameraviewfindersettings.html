@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcameraviewfindersettings.cpp -->
+  <title>QCameraViewfinderSettings Class | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-modules.html">C++ Classes</a></td><td >QCameraViewfinderSettings</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCameraViewfinderSettings Class</h1>
+<!-- $$$QCameraViewfinderSettings-brief -->
+<p>The <a href="qcameraviewfindersettings.html">QCameraViewfinderSettings</a> class provides a set of viewfinder settings. <a href="#details">More...</a></p>
+<!-- @@@QCameraViewfinderSettings -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QCameraViewfinderSettings&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += multimedia</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.5</td></tr></table></div><p>This class was introduced in  Qt 5.5.</p>
+<ul>
+<li><a href="qcameraviewfindersettings-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcameraviewfindersettings.html#QCameraViewfinderSettings-1">QCameraViewfinderSettings</a></b>(const QCameraViewfinderSettings &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcameraviewfindersettings.html#QCameraViewfinderSettings">QCameraViewfinderSettings</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCameraViewfinderSettings &amp;</td><td class="memItemRight bottomAlign"><b><a href="qcameraviewfindersettings.html#operator-eq-1">operator=</a></b>(QCameraViewfinderSettings &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCameraViewfinderSettings &amp;</td><td class="memItemRight bottomAlign"><b><a href="qcameraviewfindersettings.html#operator-eq">operator=</a></b>(const QCameraViewfinderSettings &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcameraviewfindersettings.html#dtor.QCameraViewfinderSettings">~QCameraViewfinderSettings</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcameraviewfindersettings.html#isNull">isNull</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qcameraviewfindersettings.html#maximumFrameRate">maximumFrameRate</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qcameraviewfindersettings.html#minimumFrameRate">minimumFrameRate</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qcameraviewfindersettings.html#pixelAspectRatio">pixelAspectRatio</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVideoFrame::PixelFormat </td><td class="memItemRight bottomAlign"><b><a href="qcameraviewfindersettings.html#pixelFormat">pixelFormat</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qcameraviewfindersettings.html#resolution">resolution</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcameraviewfindersettings.html#setMaximumFrameRate">setMaximumFrameRate</a></b>(qreal <i>rate</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcameraviewfindersettings.html#setMinimumFrameRate">setMinimumFrameRate</a></b>(qreal <i>rate</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcameraviewfindersettings.html#setPixelAspectRatio">setPixelAspectRatio</a></b>(const QSize &amp;<i>ratio</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcameraviewfindersettings.html#setPixelAspectRatio-1">setPixelAspectRatio</a></b>(int <i>horizontal</i>, int <i>vertical</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcameraviewfindersettings.html#setPixelFormat">setPixelFormat</a></b>(QVideoFrame::PixelFormat <i>format</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcameraviewfindersettings.html#setResolution">setResolution</a></b>(const QSize &amp;<i>resolution</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcameraviewfindersettings.html#setResolution-1">setResolution</a></b>(int <i>width</i>, int <i>height</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcameraviewfindersettings.html#swap">swap</a></b>(QCameraViewfinderSettings &amp;<i>other</i>)</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcameraviewfindersettings.html#operator-not-eq">operator!=</a></b>(const QCameraViewfinderSettings &amp;<i>lhs</i>, const QCameraViewfinderSettings &amp;<i>rhs</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcameraviewfindersettings.html#operator-eq-eq">operator==</a></b>(const QCameraViewfinderSettings &amp;<i>lhs</i>, const QCameraViewfinderSettings &amp;<i>rhs</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCameraViewfinderSettings-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A viewfinder settings object is used to specify the viewfinder settings used by <a href="qcamera.html">QCamera</a>. Viewfinder settings are selected by constructing a <a href="qcameraviewfindersettings.html">QCameraViewfinderSettings</a> object, setting the desired properties and then passing it to a <a href="qcamera.html">QCamera</a> instance using the <a href="qcamera.html#setViewfinderSettings">QCamera::setViewfinderSettings</a>() function.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qcameraviewfindersettings.html#QCameraViewfinderSettings">QCameraViewfinderSettings</a></span> viewfinderSettings;
+  viewfinderSettings<span class="operator">.</span>setResolution(<span class="number">640</span><span class="operator">,</span> <span class="number">480</span>);
+  viewfinderSettings<span class="operator">.</span>setMinimumFrameRate(<span class="number">15.0</span>);
+  viewfinderSettings<span class="operator">.</span>setMaximumFrameRate(<span class="number">30.0</span>);
+
+  camera<span class="operator">-</span><span class="operator">&gt;</span>setViewfinderSettings(viewfinderSettings);
+
+</pre>
+<p>Different cameras may have different capabilities. The application should query the camera capabilities before setting parameters. For example, the application should call <a href="qcamera.html#supportedViewfinderResolutions">QCamera::supportedViewfinderResolutions</a>() before calling <a href="qcameraviewfindersettings.html#setResolution">setResolution</a>().</p>
+</div>
+<p><b>See also </b><a href="qcamera.html">QCamera</a>.</p>
+<!-- @@@QCameraViewfinderSettings -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QCameraViewfinderSettings$$$QCameraViewfinderSettingsconstQCameraViewfinderSettings& -->
+<h3 class="fn" id="QCameraViewfinderSettings-1"><a name="QCameraViewfinderSettings-1"></a>QCameraViewfinderSettings::<span class="name">QCameraViewfinderSettings</span>(const <span class="type"><a href="qcameraviewfindersettings.html#QCameraViewfinderSettings">QCameraViewfinderSettings</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a copy of the viewfinder settings object <i>other</i>.</p>
+<!-- @@@QCameraViewfinderSettings -->
+<!-- $$$QCameraViewfinderSettings[overload1]$$$QCameraViewfinderSettings -->
+<h3 class="fn" id="QCameraViewfinderSettings"><a name="QCameraViewfinderSettings"></a>QCameraViewfinderSettings::<span class="name">QCameraViewfinderSettings</span>()</h3>
+<p>Constructs a null viewfinder settings object.</p>
+<!-- @@@QCameraViewfinderSettings -->
+<!-- $$$operator=$$$operator=QCameraViewfinderSettings&& -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type"><a href="qcameraviewfindersettings.html#QCameraViewfinderSettings">QCameraViewfinderSettings</a></span> &amp;QCameraViewfinderSettings::<span class="name">operator=</span>(<span class="type"><a href="qcameraviewfindersettings.html#QCameraViewfinderSettings">QCameraViewfinderSettings</a></span> &amp;&amp;<i>other</i>)</h3>
+<p>Moves <i>other</i> to this viewfinder settings object and returns a reference to this object.</p>
+<!-- @@@operator= -->
+<!-- $$$operator=[overload1]$$$operator=constQCameraViewfinderSettings& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qcameraviewfindersettings.html#QCameraViewfinderSettings">QCameraViewfinderSettings</a></span> &amp;QCameraViewfinderSettings::<span class="name">operator=</span>(const <span class="type"><a href="qcameraviewfindersettings.html#QCameraViewfinderSettings">QCameraViewfinderSettings</a></span> &amp;<i>other</i>)</h3>
+<p>Assigns the value of <i>other</i> to a viewfinder settings object.</p>
+<!-- @@@operator= -->
+<!-- $$$~QCameraViewfinderSettings[overload1]$$$~QCameraViewfinderSettings -->
+<h3 class="fn" id="dtor.QCameraViewfinderSettings"><a name="dtor.QCameraViewfinderSettings"></a>QCameraViewfinderSettings::<span class="name">~QCameraViewfinderSettings</span>()</h3>
+<p>Destroys a viewfinder settings object.</p>
+<!-- @@@~QCameraViewfinderSettings -->
+<!-- $$$isNull[overload1]$$$isNull -->
+<h3 class="fn" id="isNull"><a name="isNull"></a><span class="type">bool</span> QCameraViewfinderSettings::<span class="name">isNull</span>() const</h3>
+<p>Identifies if a viewfinder settings object is uninitalized.</p>
+<p>Returns true if the settings are null, and false if they are not.</p>
+<!-- @@@isNull -->
+<!-- $$$maximumFrameRate[overload1]$$$maximumFrameRate -->
+<h3 class="fn" id="maximumFrameRate"><a name="maximumFrameRate"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QCameraViewfinderSettings::<span class="name">maximumFrameRate</span>() const</h3>
+<p>Returns the viewfinder maximum frame rate in frames per second.</p>
+<p><b>See also </b><a href="qcameraviewfindersettings.html#setMaximumFrameRate">setMaximumFrameRate</a>() and <a href="qcameraviewfindersettings.html#minimumFrameRate">minimumFrameRate</a>().</p>
+<!-- @@@maximumFrameRate -->
+<!-- $$$minimumFrameRate[overload1]$$$minimumFrameRate -->
+<h3 class="fn" id="minimumFrameRate"><a name="minimumFrameRate"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QCameraViewfinderSettings::<span class="name">minimumFrameRate</span>() const</h3>
+<p>Returns the viewfinder minimum frame rate in frames per second.</p>
+<p><b>See also </b><a href="qcameraviewfindersettings.html#setMinimumFrameRate">setMinimumFrameRate</a>() and <a href="qcameraviewfindersettings.html#maximumFrameRate">maximumFrameRate</a>().</p>
+<!-- @@@minimumFrameRate -->
+<!-- $$$pixelAspectRatio[overload1]$$$pixelAspectRatio -->
+<h3 class="fn" id="pixelAspectRatio"><a name="pixelAspectRatio"></a><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QCameraViewfinderSettings::<span class="name">pixelAspectRatio</span>() const</h3>
+<p>Returns the viewfinder pixel aspect ratio.</p>
+<p><b>See also </b><a href="qcameraviewfindersettings.html#setPixelAspectRatio">setPixelAspectRatio</a>().</p>
+<!-- @@@pixelAspectRatio -->
+<!-- $$$pixelFormat[overload1]$$$pixelFormat -->
+<h3 class="fn" id="pixelFormat"><a name="pixelFormat"></a><span class="type"><a href="qvideoframe.html#PixelFormat-enum">QVideoFrame::PixelFormat</a></span> QCameraViewfinderSettings::<span class="name">pixelFormat</span>() const</h3>
+<p>Returns the viewfinder pixel format.</p>
+<p><b>See also </b><a href="qcameraviewfindersettings.html#setPixelFormat">setPixelFormat</a>().</p>
+<!-- @@@pixelFormat -->
+<!-- $$$resolution[overload1]$$$resolution -->
+<h3 class="fn" id="resolution"><a name="resolution"></a><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QCameraViewfinderSettings::<span class="name">resolution</span>() const</h3>
+<p>Returns the viewfinder resolution.</p>
+<p><b>See also </b><a href="qcameraviewfindersettings.html#setResolution">setResolution</a>().</p>
+<!-- @@@resolution -->
+<!-- $$$setMaximumFrameRate[overload1]$$$setMaximumFrameRateqreal -->
+<h3 class="fn" id="setMaximumFrameRate"><a name="setMaximumFrameRate"></a><span class="type">void</span> QCameraViewfinderSettings::<span class="name">setMaximumFrameRate</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>rate</i>)</h3>
+<p>Sets the viewfinder maximum frame <i>rate</i> in frames per second.</p>
+<p>If the maximum frame <i>rate</i> is equal to the minimum frame rate, the frame rate is fixed. If not, the actual frame rate fluctuates between the minimum and the maximum.</p>
+<p>If the given <i>rate</i> equals to <code>0</code>, the backend makes an optimal choice based on the supported frame rates and the other viewfinder settings.</p>
+<p><b>See also </b><a href="qcameraviewfindersettings.html#maximumFrameRate">maximumFrameRate</a>(), <a href="qcameraviewfindersettings.html#setMinimumFrameRate">setMinimumFrameRate</a>(), and <a href="qcamera.html#supportedViewfinderFrameRateRanges">QCamera::supportedViewfinderFrameRateRanges</a>().</p>
+<!-- @@@setMaximumFrameRate -->
+<!-- $$$setMinimumFrameRate[overload1]$$$setMinimumFrameRateqreal -->
+<h3 class="fn" id="setMinimumFrameRate"><a name="setMinimumFrameRate"></a><span class="type">void</span> QCameraViewfinderSettings::<span class="name">setMinimumFrameRate</span>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> <i>rate</i>)</h3>
+<p>Sets the viewfinder minimum frame <i>rate</i> in frames per second.</p>
+<p>If the minimum frame <i>rate</i> is equal to the maximum frame rate, the frame rate is fixed. If not, the actual frame rate fluctuates between the minimum and the maximum.</p>
+<p>If the given <i>rate</i> equals to <code>0</code>, the backend makes an optimal choice based on the supported frame rates and the other viewfinder settings.</p>
+<p><b>See also </b><a href="qcameraviewfindersettings.html#minimumFrameRate">minimumFrameRate</a>(), <a href="qcameraviewfindersettings.html#setMaximumFrameRate">setMaximumFrameRate</a>(), and <a href="qcamera.html#supportedViewfinderFrameRateRanges">QCamera::supportedViewfinderFrameRateRanges</a>().</p>
+<!-- @@@setMinimumFrameRate -->
+<!-- $$$setPixelAspectRatio[overload1]$$$setPixelAspectRatioconstQSize& -->
+<h3 class="fn" id="setPixelAspectRatio"><a name="setPixelAspectRatio"></a><span class="type">void</span> QCameraViewfinderSettings::<span class="name">setPixelAspectRatio</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>ratio</i>)</h3>
+<p>Sets the viewfinder pixel aspect <i>ratio</i>.</p>
+<p><b>See also </b><a href="qcameraviewfindersettings.html#pixelAspectRatio">pixelAspectRatio</a>().</p>
+<!-- @@@setPixelAspectRatio -->
+<!-- $$$setPixelAspectRatio$$$setPixelAspectRatiointint -->
+<h3 class="fn" id="setPixelAspectRatio-1"><a name="setPixelAspectRatio-1"></a><span class="type">void</span> QCameraViewfinderSettings::<span class="name">setPixelAspectRatio</span>(<span class="type">int</span> <i>horizontal</i>, <span class="type">int</span> <i>vertical</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Sets the <i>horizontal</i> and <i>vertical</i> elements of the viewfinder's pixel aspect ratio.</p>
+<!-- @@@setPixelAspectRatio -->
+<!-- $$$setPixelFormat[overload1]$$$setPixelFormatQVideoFrame::PixelFormat -->
+<h3 class="fn" id="setPixelFormat"><a name="setPixelFormat"></a><span class="type">void</span> QCameraViewfinderSettings::<span class="name">setPixelFormat</span>(<span class="type"><a href="qvideoframe.html#PixelFormat-enum">QVideoFrame::PixelFormat</a></span> <i>format</i>)</h3>
+<p>Sets the viewfinder pixel <i>format</i>.</p>
+<p>If the given <i>format</i> is equal to <a href="qvideoframe.html#PixelFormat-enum">QVideoFrame::Format_Invalid</a>, the backend uses the default format.</p>
+<p><b>See also </b><a href="qcameraviewfindersettings.html#pixelFormat">pixelFormat</a>() and <a href="qcamera.html#supportedViewfinderPixelFormats">QCamera::supportedViewfinderPixelFormats</a>().</p>
+<!-- @@@setPixelFormat -->
+<!-- $$$setResolution[overload1]$$$setResolutionconstQSize& -->
+<h3 class="fn" id="setResolution"><a name="setResolution"></a><span class="type">void</span> QCameraViewfinderSettings::<span class="name">setResolution</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>resolution</i>)</h3>
+<p>Sets the viewfinder <i>resolution</i>.</p>
+<p>If the given <i>resolution</i> is empty, the backend makes an optimal choice based on the supported resolutions and the other viewfinder settings.</p>
+<p>If the camera is used to capture videos or images, the viewfinder resolution might be ignored if it conflicts with the capture resolution.</p>
+<p><b>See also </b><a href="qcameraviewfindersettings.html#resolution">resolution</a>(), <a href="qvideoencodersettings.html#setResolution">QVideoEncoderSettings::setResolution</a>(), <a href="qimageencodersettings.html#setResolution">QImageEncoderSettings::setResolution</a>(), and <a href="qcamera.html#supportedViewfinderResolutions">QCamera::supportedViewfinderResolutions</a>().</p>
+<!-- @@@setResolution -->
+<!-- $$$setResolution$$$setResolutionintint -->
+<h3 class="fn" id="setResolution-1"><a name="setResolution-1"></a><span class="type">void</span> QCameraViewfinderSettings::<span class="name">setResolution</span>(<span class="type">int</span> <i>width</i>, <span class="type">int</span> <i>height</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Sets the <i>width</i> and <i>height</i> of the viewfinder resolution.</p>
+<!-- @@@setResolution -->
+<!-- $$$swap[overload1]$$$swapQCameraViewfinderSettings& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QCameraViewfinderSettings::<span class="name">swap</span>(<span class="type"><a href="qcameraviewfindersettings.html#QCameraViewfinderSettings">QCameraViewfinderSettings</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps this viewfinder settings object with <i>other</i>. This function is very fast and never fails.</p>
+<!-- @@@swap -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$operator!=[overload1]$$$operator!=constQCameraViewfinderSettings&constQCameraViewfinderSettings& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> <span class="name">operator!=</span>(const <span class="type"><a href="qcameraviewfindersettings.html#QCameraViewfinderSettings">QCameraViewfinderSettings</a></span> &amp;<i>lhs</i>, const <span class="type"><a href="qcameraviewfindersettings.html#QCameraViewfinderSettings">QCameraViewfinderSettings</a></span> &amp;<i>rhs</i>)</h3>
+<p>Determines if <i>lhs</i> is of equal value to <i>rhs</i>.</p>
+<p>Returns true if the settings objects are not of equal value, and false if they are of equal value.</p>
+<p>This function was introduced in  Qt 5.5.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQCameraViewfinderSettings&constQCameraViewfinderSettings& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> <span class="name">operator==</span>(const <span class="type"><a href="qcameraviewfindersettings.html#QCameraViewfinderSettings">QCameraViewfinderSettings</a></span> &amp;<i>lhs</i>, const <span class="type"><a href="qcameraviewfindersettings.html#QCameraViewfinderSettings">QCameraViewfinderSettings</a></span> &amp;<i>rhs</i>)</h3>
+<p>Determines if <i>lhs</i> is of equal value to <i>rhs</i>.</p>
+<p>Returns true if the settings objects are of equal value, and false if they are not of equal value.</p>
+<p>This function was introduced in  Qt 5.5.</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

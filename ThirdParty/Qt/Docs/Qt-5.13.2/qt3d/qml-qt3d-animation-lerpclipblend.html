@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qlerpclipblend.cpp -->
+  <title>LerpClipBlend QML Type | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-qml.html">QML Types</a></td><td >LerpClipBlend QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">LerpClipBlend QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$LerpClipBlend-brief -->
+<p>Performs a linear interpolation of two animation clips based on a normalized factor. <a href="#details">More...</a></p>
+<!-- @@@LerpClipBlend -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import Qt3D.Animation 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.9</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiates:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-animation-lerpclipblend.html"><a href="qt3danimation-qlerpclipblend.html">QLerpClipBlend</a></td></tr></table></div><ul>
+<li><a href="qml-qt3d-animation-lerpclipblend-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qt3d-animation-lerpclipblend.html#blendFactor-prop">blendFactor</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qt3d-animation-lerpclipblend.html#endClip-prop">endClip</a></b></b> : AbstractClipBlendNode</li>
+<li class="fn"><b><b><a href="qml-qt3d-animation-lerpclipblend.html#startClip-prop">startClip</a></b></b> : AbstractClipBlendNode</li>
+</ul>
+<!-- $$$LerpClipBlend-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><a href="qml-qt3d-animation-lerpclipblend.html">LerpClipBlend</a> can be useful to create advanced animation effects based on individual animation clips. For instance, given a player character,, lerp blending could be used to combine a walking animation clip with an injured animation clip based on a blend factor that increases the more the player gets injured. This would then allow with blend factor == 0 to have a non injured walking player, with blend factor == 1 a fully injured player, with blend factor == 0.5 a partially walking and injured player.</p>
+<p><b>See also </b><a href="qml-qt3d-animation-blendedclipanimator.html">BlendedClipAnimator</a>.</p>
+<!-- @@@LerpClipBlend -->
+<h2>Property Documentation</h2>
+<!-- $$$blendFactor -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="blendFactor-prop"></a><span class="name">blendFactor</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Specifies the blending factor between 0 and 1 to control the blending of two animation clips.</p>
+</div></div><!-- @@@blendFactor -->
+<br/>
+<!-- $$$endClip -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="endClip-prop"></a><span class="name">endClip</span> : <span class="type"><a href="qml-qt3d-animation-abstractclipblendnode.html">AbstractClipBlendNode</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the sub-tree that should be used as the end clip for this lerp blend node. That is, the clip returned by this blend node when the <a href="qml-qt3d-animation-lerpclipblend.html#blendFactor-prop">blendFactor</a> is set to a value of 1.</p>
+</div></div><!-- @@@endClip -->
+<br/>
+<!-- $$$startClip -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="startClip-prop"></a><span class="name">startClip</span> : <span class="type"><a href="qml-qt3d-animation-abstractclipblendnode.html">AbstractClipBlendNode</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the sub-tree that should be used as the start clip for this lerp blend node. That is, the clip returned by this blend node when the <a href="qml-qt3d-animation-lerpclipblend.html#blendFactor-prop">blendFactor</a> is set to a value of 0.</p>
+</div></div><!-- @@@startClip -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,671 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qserialport.cpp -->
+  <title>QSerialPort Class | Qt Serial Port 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtserialport-index.html">Qt Serial Port</a></td><td ><a href="qtserialport-module.html">C++ Classes</a></td><td >QSerialPort</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtserialport-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSerialPort Class</h1>
+<!-- $$$QSerialPort-brief -->
+<p>Provides functions to access serial ports. <a href="#details">More...</a></p>
+<!-- @@@QSerialPort -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QSerialPort&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += serialport</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.1</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qiodevice.html">QIODevice</a></td></tr></table></div><p>This class was introduced in  Qt 5.1.</p>
+<ul>
+<li><a href="qserialport-members.html">List of all members, including inherited members</a></li>
+<li><a href="qserialport-obsolete.html">Obsolete members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#BaudRate-enum">BaudRate</a></b> { Baud1200, Baud2400, Baud4800, Baud9600, ..., UnknownBaud }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#DataBits-enum">DataBits</a></b> { Data5, Data6, Data7, Data8, UnknownDataBits }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#Direction-enum">Direction</a></b> { Input, Output, AllDirections }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#Direction-enum">Directions</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#FlowControl-enum">FlowControl</a></b> { NoFlowControl, HardwareControl, SoftwareControl, UnknownFlowControl }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#Parity-enum">Parity</a></b> { NoParity, EvenParity, OddParity, SpaceParity, MarkParity, UnknownParity }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#PinoutSignal-enum">PinoutSignal</a></b> { NoSignal, TransmittedDataSignal, ReceivedDataSignal, DataTerminalReadySignal, ..., SecondaryReceivedDataSignal }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#PinoutSignal-enum">PinoutSignals</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#SerialPortError-enum">SerialPortError</a></b> { NoError, DeviceNotFoundError, PermissionError, OpenError, ..., UnknownError }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#StopBits-enum">StopBits</a></b> { OneStop, OneAndHalfStop, TwoStop, UnknownStopBits }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qserialport.html#baudRate-prop">baudRate</a></b> : qint32</li>
+<li class="fn"><b><a href="qserialport.html#breakEnabled-prop">breakEnabled</a></b> : bool</li>
+<li class="fn"><b><a href="qserialport.html#dataBits-prop">dataBits</a></b> : DataBits</li>
+<li class="fn"><b><a href="qserialport.html#dataTerminalReady-prop">dataTerminalReady</a></b> : bool</li>
+<li class="fn"><b><a href="qserialport.html#error-prop">error</a></b> : SerialPortError</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qserialport.html#flowControl-prop">flowControl</a></b> : FlowControl</li>
+<li class="fn"><b><a href="qserialport.html#parity-prop">parity</a></b> : Parity</li>
+<li class="fn"><b><a href="qserialport.html#requestToSend-prop">requestToSend</a></b> : bool</li>
+<li class="fn"><b><a href="qserialport.html#stopBits-prop">stopBits</a></b> : StopBits</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#QSerialPort-2">QSerialPort</a></b>(const QSerialPortInfo &amp;<i>serialPortInfo</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#QSerialPort-1">QSerialPort</a></b>(const QString &amp;<i>name</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#QSerialPort">QSerialPort</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#dtor.QSerialPort">~QSerialPort</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint32 </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#baudRate-prop">baudRate</a></b>(QSerialPort::Directions <i>directions</i> = AllDirections) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#clear">clear</a></b>(QSerialPort::Directions <i>directions</i> = AllDirections)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#error-prop">clearError</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSerialPort::DataBits </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#dataBits-prop">dataBits</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSerialPort::SerialPortError </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#error-prop">error</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSerialPort::FlowControl </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#flowControl-prop">flowControl</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#flush">flush</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSerialPort::Handle </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#handle">handle</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#breakEnabled-prop">isBreakEnabled</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#dataTerminalReady-prop">isDataTerminalReady</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#requestToSend-prop">isRequestToSend</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSerialPort::Parity </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#parity-prop">parity</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSerialPort::PinoutSignals </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#pinoutSignals">pinoutSignals</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#portName">portName</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint64 </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#readBufferSize">readBufferSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#sendBreak">sendBreak</a></b>(int <i>duration</i> = 0)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#baudRate-prop">setBaudRate</a></b>(qint32 <i>baudRate</i>, QSerialPort::Directions <i>directions</i> = AllDirections)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#breakEnabled-prop">setBreakEnabled</a></b>(bool <i>set</i> = true)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#dataBits-prop">setDataBits</a></b>(QSerialPort::DataBits <i>dataBits</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#dataTerminalReady-prop">setDataTerminalReady</a></b>(bool <i>set</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#flowControl-prop">setFlowControl</a></b>(QSerialPort::FlowControl <i>flowControl</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#parity-prop">setParity</a></b>(QSerialPort::Parity <i>parity</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#setPort">setPort</a></b>(const QSerialPortInfo &amp;<i>serialPortInfo</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#setPortName">setPortName</a></b>(const QString &amp;<i>name</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#setReadBufferSize">setReadBufferSize</a></b>(qint64 <i>size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#requestToSend-prop">setRequestToSend</a></b>(bool <i>set</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#stopBits-prop">setStopBits</a></b>(QSerialPort::StopBits <i>stopBits</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSerialPort::StopBits </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#stopBits-prop">stopBits</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#atEnd">atEnd</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual qint64 </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#bytesAvailable">bytesAvailable</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual qint64 </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#bytesToWrite">bytesToWrite</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#canReadLine">canReadLine</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#close">close</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#isSequential">isSequential</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#open">open</a></b>(QIODevice::OpenMode <i>mode</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#waitForBytesWritten">waitForBytesWritten</a></b>(int <i>msecs</i> = 30000) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#waitForReadyRead">waitForReadyRead</a></b>(int <i>msecs</i> = 30000) override</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#baudRateChanged">baudRateChanged</a></b>(qint32 <i>baudRate</i>, QSerialPort::Directions <i>directions</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#breakEnabled-prop">breakEnabledChanged</a></b>(bool <i>set</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#dataBitsChanged">dataBitsChanged</a></b>(QSerialPort::DataBits <i>dataBits</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#dataTerminalReadyChanged">dataTerminalReadyChanged</a></b>(bool <i>set</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#errorOccurred">errorOccurred</a></b>(QSerialPort::SerialPortError <i>error</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#flowControlChanged">flowControlChanged</a></b>(QSerialPort::FlowControl <i>flow</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#parityChanged">parityChanged</a></b>(QSerialPort::Parity <i>parity</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#requestToSendChanged">requestToSendChanged</a></b>(bool <i>set</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#stopBitsChanged">stopBitsChanged</a></b>(QSerialPort::StopBits <i>stopBits</i>)</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual qint64 </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#readData">readData</a></b>(char *<i>data</i>, qint64 <i>maxSize</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual qint64 </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#readLineData">readLineData</a></b>(char *<i>data</i>, qint64 <i>maxSize</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual qint64 </td><td class="memItemRight bottomAlign"><b><a href="qserialport.html#writeData">writeData</a></b>(const char *<i>data</i>, qint64 <i>maxSize</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSerialPort-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>You can get information about the available serial ports using the <a href="qserialportinfo.html">QSerialPortInfo</a> helper class, which allows an enumeration of all the serial ports in the system. This is useful to obtain the correct name of the serial port you want to use. You can pass an object of the helper class as an argument to the <a href="qserialport.html#setPort">setPort</a>() or <a href="qserialport.html#setPortName">setPortName</a>() methods to assign the desired serial device.</p>
+<p>After setting the port, you can open it in read-only (r/o), write-only (w/o), or read-write (r/w) mode using the <a href="qserialport.html#open">open</a>() method.</p>
+<p><b>Note: </b>The serial port is always opened with exclusive access (that is, no other process or thread can access an already opened serial port).</p><p>Use the <a href="qserialport.html#close">close</a>() method to close the port and cancel the I/O operations.</p>
+<p>Having successfully opened, <a href="qserialport.html">QSerialPort</a> tries to determine the current configuration of the port and initializes itself. You can reconfigure the port to the desired setting using the <a href="qserialport.html#baudRate-prop">setBaudRate</a>(), <a href="qserialport.html#dataBits-prop">setDataBits</a>(), <a href="qserialport.html#parity-prop">setParity</a>(), <a href="qserialport.html#stopBits-prop">setStopBits</a>(), and <a href="qserialport.html#flowControl-prop">setFlowControl</a>() methods.</p>
+<p>There are a couple of properties to work with the pinout signals namely: <a href="qserialport.html#dataTerminalReady-prop">QSerialPort::dataTerminalReady</a>, <a href="qserialport.html#requestToSend-prop">QSerialPort::requestToSend</a>. It is also possible to use the <a href="qserialport.html#pinoutSignals">pinoutSignals</a>() method to query the current pinout signals set.</p>
+<p>Once you know that the ports are ready to read or write, you can use the <a href="../qtcore/qiodevice.html#read">read</a>() or <a href="../qtcore/qiodevice.html#write">write</a>() methods. Alternatively the <a href="../qtcore/qiodevice.html#readLine">readLine</a>() and <a href="../qtcore/qiodevice.html#readAll">readAll</a>() convenience methods can also be invoked. If not all the data is read at once, the remaining data will be available for later as new incoming data is appended to the <a href="qserialport.html">QSerialPort</a>'s internal read buffer. You can limit the size of the read buffer using <a href="qserialport.html#setReadBufferSize">setReadBufferSize</a>().</p>
+<p><a href="qserialport.html">QSerialPort</a> provides a set of functions that suspend the calling thread until certain signals are emitted. These functions can be used to implement blocking serial ports:</p>
+<ul>
+<li><a href="qserialport.html#waitForReadyRead">waitForReadyRead</a>() blocks calls until new data is available for reading.</li>
+<li><a href="qserialport.html#waitForBytesWritten">waitForBytesWritten</a>() blocks calls until one payload of data has been written to the serial port.</li>
+</ul>
+<p>See the following example:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> numRead <span class="operator">=</span> <span class="number">0</span><span class="operator">,</span> numReadTotal <span class="operator">=</span> <span class="number">0</span>;
+  <span class="type">char</span> buffer<span class="operator">[</span><span class="number">50</span><span class="operator">]</span>;
+
+  <span class="keyword">for</span> (;;) {
+      numRead  <span class="operator">=</span> serial<span class="operator">.</span>read(buffer<span class="operator">,</span> <span class="number">50</span>);
+
+      <span class="comment">// Do whatever with the array</span>
+
+      numReadTotal <span class="operator">+</span><span class="operator">=</span> numRead;
+      <span class="keyword">if</span> (numRead <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>serial<span class="operator">.</span>waitForReadyRead())
+          <span class="keyword">break</span>;
+  }
+
+</pre>
+<p>If <a href="../qtcore/qiodevice.html#waitForReadyRead">waitForReadyRead()</a> returns <code>false</code>, the connection has been closed or an error has occurred.</p>
+<p>If an error occurs at any point in time, <a href="qserialport.html">QSerialPort</a> will emit the <a href="qserialport.html#errorOccurred">errorOccurred</a>() signal. You can also call <a href="qserialport.html#error-prop">error</a>() to find the type of error that occurred last.</p>
+<p>Programming with a blocking serial port is radically different from programming with a non-blocking serial port. A blocking serial port does not require an event loop and typically leads to simpler code. However, in a GUI application, blocking serial port should only be used in non-GUI threads, to avoid freezing the user interface.</p>
+<p>For more details about these approaches, refer to the <a href="qtserialport-examples.html">example</a> applications.</p>
+<p>The <a href="qserialport.html">QSerialPort</a> class can also be used with <a href="../qtcore/qtextstream.html">QTextStream</a> and <a href="../qtcore/qdatastream.html">QDataStream</a>'s stream operators (operator&lt;&lt;() and operator&gt;&gt;()). There is one issue to be aware of, though: make sure that enough data is available before attempting to read by using the operator&gt;&gt;() overloaded operator.</p>
+</div>
+<p><b>See also </b><a href="qserialportinfo.html">QSerialPortInfo</a>.</p>
+<!-- @@@QSerialPort -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$BaudRate$$$Baud1200$$$Baud2400$$$Baud4800$$$Baud9600$$$Baud19200$$$Baud38400$$$Baud57600$$$Baud115200$$$UnknownBaud -->
+<h3 class="fn" id="BaudRate-enum"><a name="BaudRate-enum"></a>enum QSerialPort::<span class="name">BaudRate</span></h3>
+<p>This enum describes the baud rate which the communication device operates with.</p>
+<p><b>Note: </b>Only the most common standard baud rates are listed in this enum.</p><div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QSerialPort::Baud1200</code></td><td class="topAlign tblval"><code>1200</code></td><td class="topAlign">1200 baud.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::Baud2400</code></td><td class="topAlign tblval"><code>2400</code></td><td class="topAlign">2400 baud.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::Baud4800</code></td><td class="topAlign tblval"><code>4800</code></td><td class="topAlign">4800 baud.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::Baud9600</code></td><td class="topAlign tblval"><code>9600</code></td><td class="topAlign">9600 baud.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::Baud19200</code></td><td class="topAlign tblval"><code>19200</code></td><td class="topAlign">19200 baud.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::Baud38400</code></td><td class="topAlign tblval"><code>38400</code></td><td class="topAlign">38400 baud.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::Baud57600</code></td><td class="topAlign tblval"><code>57600</code></td><td class="topAlign">57600 baud.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::Baud115200</code></td><td class="topAlign tblval"><code>115200</code></td><td class="topAlign">115200 baud.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::UnknownBaud</code></td><td class="topAlign tblval"><code>-1</code></td><td class="topAlign">Unknown baud. This value is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qserialport.html#baudRate-prop">QSerialPort::baudRate</a>.</p>
+<!-- @@@BaudRate -->
+<!-- $$$DataBits$$$Data5$$$Data6$$$Data7$$$Data8$$$UnknownDataBits -->
+<h3 class="fn" id="DataBits-enum"><a name="DataBits-enum"></a>enum QSerialPort::<span class="name">DataBits</span></h3>
+<p>This enum describes the number of data bits used.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QSerialPort::Data5</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">The number of data bits in each character is 5. It is used for Baudot code. It generally only makes sense with older equipment such as teleprinters.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::Data6</code></td><td class="topAlign tblval"><code>6</code></td><td class="topAlign">The number of data bits in each character is 6. It is rarely used.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::Data7</code></td><td class="topAlign tblval"><code>7</code></td><td class="topAlign">The number of data bits in each character is 7. It is used for true ASCII. It generally only makes sense with older equipment such as teleprinters.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::Data8</code></td><td class="topAlign tblval"><code>8</code></td><td class="topAlign">The number of data bits in each character is 8. It is used for most kinds of data, as this size matches the size of a byte. It is almost universally used in newer applications.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::UnknownDataBits</code></td><td class="topAlign tblval"><code>-1</code></td><td class="topAlign">Unknown number of bits. This value is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qserialport.html#dataBits-prop">QSerialPort::dataBits</a>.</p>
+<!-- @@@DataBits -->
+<!-- $$$Direction$$$Input$$$Output$$$AllDirections -->
+<h3 class="flags" id="Direction-enum"><a name="Direction-enum"></a>enum QSerialPort::<span class="name">Direction</span><br/>flags QSerialPort::<span class="name">Directions</span></h3>
+<p>This enum describes the possible directions of the data transmission.</p>
+<p><b>Note: </b>This enumeration is used for setting the baud rate of the device separately for each direction on some operating systems (for example, POSIX-like).</p><div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QSerialPort::Input</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Input direction.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::Output</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Output direction.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::AllDirections</code></td><td class="topAlign tblval"><code>Input | Output</code></td><td class="topAlign">Simultaneously in two directions.</td></tr>
+</table></div>
+<p>The Directions type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;Direction&gt;. It stores an OR combination of Direction values.</p>
+<!-- @@@Direction -->
+<!-- $$$FlowControl$$$NoFlowControl$$$HardwareControl$$$SoftwareControl$$$UnknownFlowControl -->
+<h3 class="fn" id="FlowControl-enum"><a name="FlowControl-enum"></a>enum QSerialPort::<span class="name">FlowControl</span></h3>
+<p>This enum describes the flow control used.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QSerialPort::NoFlowControl</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">No flow control.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::HardwareControl</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Hardware flow control (RTS/CTS).</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::SoftwareControl</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Software flow control (XON/XOFF).</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::UnknownFlowControl</code></td><td class="topAlign tblval"><code>-1</code></td><td class="topAlign">Unknown flow control. This value is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qserialport.html#flowControl-prop">QSerialPort::flowControl</a>.</p>
+<!-- @@@FlowControl -->
+<!-- $$$Parity$$$NoParity$$$EvenParity$$$OddParity$$$SpaceParity$$$MarkParity$$$UnknownParity -->
+<h3 class="fn" id="Parity-enum"><a name="Parity-enum"></a>enum QSerialPort::<span class="name">Parity</span></h3>
+<p>This enum describes the parity scheme used.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QSerialPort::NoParity</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">No parity bit it sent. This is the most common parity setting. Error detection is handled by the communication protocol.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::EvenParity</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The number of 1 bits in each character, including the parity bit, is always even.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::OddParity</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">The number of 1 bits in each character, including the parity bit, is always odd. It ensures that at least one state transition occurs in each character.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::SpaceParity</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">Space parity. The parity bit is sent in the space signal condition. It does not provide error detection information.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::MarkParity</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">Mark parity. The parity bit is always set to the mark signal condition (logical 1). It does not provide error detection information.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::UnknownParity</code></td><td class="topAlign tblval"><code>-1</code></td><td class="topAlign">Unknown parity. This value is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qserialport.html#parity-prop">QSerialPort::parity</a>.</p>
+<!-- @@@Parity -->
+<!-- $$$PinoutSignal$$$NoSignal$$$TransmittedDataSignal$$$ReceivedDataSignal$$$DataTerminalReadySignal$$$DataCarrierDetectSignal$$$DataSetReadySignal$$$RingIndicatorSignal$$$RequestToSendSignal$$$ClearToSendSignal$$$SecondaryTransmittedDataSignal$$$SecondaryReceivedDataSignal -->
+<h3 class="flags" id="PinoutSignal-enum"><a name="PinoutSignal-enum"></a>enum QSerialPort::<span class="name">PinoutSignal</span><br/>flags QSerialPort::<span class="name">PinoutSignals</span></h3>
+<p>This enum describes the possible RS-232 pinout signals.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QSerialPort::NoSignal</code></td><td class="topAlign tblval"><code>0x00</code></td><td class="topAlign">No line active</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::TransmittedDataSignal</code></td><td class="topAlign tblval"><code>0x01</code></td><td class="topAlign">TxD (Transmitted Data). This value is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::ReceivedDataSignal</code></td><td class="topAlign tblval"><code>0x02</code></td><td class="topAlign">RxD (Received Data). This value is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::DataTerminalReadySignal</code></td><td class="topAlign tblval"><code>0x04</code></td><td class="topAlign">DTR (Data Terminal Ready).</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::DataCarrierDetectSignal</code></td><td class="topAlign tblval"><code>0x08</code></td><td class="topAlign">DCD (Data Carrier Detect).</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::DataSetReadySignal</code></td><td class="topAlign tblval"><code>0x10</code></td><td class="topAlign">DSR (Data Set Ready).</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::RingIndicatorSignal</code></td><td class="topAlign tblval"><code>0x20</code></td><td class="topAlign">RNG (Ring Indicator).</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::RequestToSendSignal</code></td><td class="topAlign tblval"><code>0x40</code></td><td class="topAlign">RTS (Request To Send).</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::ClearToSendSignal</code></td><td class="topAlign tblval"><code>0x80</code></td><td class="topAlign">CTS (Clear To Send).</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::SecondaryTransmittedDataSignal</code></td><td class="topAlign tblval"><code>0x100</code></td><td class="topAlign">STD (Secondary Transmitted Data).</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::SecondaryReceivedDataSignal</code></td><td class="topAlign tblval"><code>0x200</code></td><td class="topAlign">SRD (Secondary Received Data).</td></tr>
+</table></div>
+<p>The PinoutSignals type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;PinoutSignal&gt;. It stores an OR combination of PinoutSignal values.</p>
+<p><b>See also </b><a href="qserialport.html#pinoutSignals">pinoutSignals</a>(), <a href="qserialport.html#dataTerminalReady-prop">QSerialPort::dataTerminalReady</a>, and <a href="qserialport.html#requestToSend-prop">QSerialPort::requestToSend</a>.</p>
+<!-- @@@PinoutSignal -->
+<!-- $$$SerialPortError$$$NoError$$$DeviceNotFoundError$$$PermissionError$$$OpenError$$$ParityError$$$FramingError$$$BreakConditionError$$$WriteError$$$ReadError$$$ResourceError$$$UnsupportedOperationError$$$UnknownError$$$TimeoutError$$$NotOpenError -->
+<h3 class="fn" id="SerialPortError-enum"><a name="SerialPortError-enum"></a>enum QSerialPort::<span class="name">SerialPortError</span></h3>
+<p>This enum describes the errors that may be contained by the <a href="qserialport.html#error-prop">QSerialPort::error</a> property.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QSerialPort::NoError</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">No error occurred.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::DeviceNotFoundError</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">An error occurred while attempting to open an non-existing device.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::PermissionError</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">An error occurred while attempting to open an already opened device by another process or a user not having enough permission and credentials to open.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::OpenError</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">An error occurred while attempting to open an already opened device in this object.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::NotOpenError</code></td><td class="topAlign tblval"><code>13</code></td><td class="topAlign">This error occurs when an operation is executed that can only be successfully performed if the device is open. This value was introduced in <a href="qtserialport-module.html">QtSerialPort</a> 5.2&#x2e;</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::ParityError</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">Parity error detected by the hardware while reading data. This value is obsolete. We strongly advise against using it in new code.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::FramingError</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">Framing error detected by the hardware while reading data. This value is obsolete. We strongly advise against using it in new code.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::BreakConditionError</code></td><td class="topAlign tblval"><code>6</code></td><td class="topAlign">Break condition detected by the hardware on the input line. This value is obsolete. We strongly advise against using it in new code.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::WriteError</code></td><td class="topAlign tblval"><code>7</code></td><td class="topAlign">An I/O error occurred while writing the data.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::ReadError</code></td><td class="topAlign tblval"><code>8</code></td><td class="topAlign">An I/O error occurred while reading the data.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::ResourceError</code></td><td class="topAlign tblval"><code>9</code></td><td class="topAlign">An I/O error occurred when a resource becomes unavailable, e.g&#x2e; when the device is unexpectedly removed from the system.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::UnsupportedOperationError</code></td><td class="topAlign tblval"><code>10</code></td><td class="topAlign">The requested device operation is not supported or prohibited by the running operating system.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::TimeoutError</code></td><td class="topAlign tblval"><code>12</code></td><td class="topAlign">A timeout error occurred. This value was introduced in <a href="qtserialport-module.html">QtSerialPort</a> 5.2&#x2e;</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::UnknownError</code></td><td class="topAlign tblval"><code>11</code></td><td class="topAlign">An unidentified error occurred.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qserialport.html#error-prop">QSerialPort::error</a>.</p>
+<!-- @@@SerialPortError -->
+<!-- $$$StopBits$$$OneStop$$$OneAndHalfStop$$$TwoStop$$$UnknownStopBits -->
+<h3 class="fn" id="StopBits-enum"><a name="StopBits-enum"></a>enum QSerialPort::<span class="name">StopBits</span></h3>
+<p>This enum describes the number of stop bits used.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QSerialPort::OneStop</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">1 stop bit.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::OneAndHalfStop</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">1.5 stop bits. This is only for the Windows platform.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::TwoStop</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">2 stop bits.</td></tr>
+<tr><td class="topAlign"><code>QSerialPort::UnknownStopBits</code></td><td class="topAlign tblval"><code>-1</code></td><td class="topAlign">Unknown number of stop bits. This value is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qserialport.html#stopBits-prop">QSerialPort::stopBits</a>.</p>
+<!-- @@@StopBits -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$baudRate-prop$$$baudRateQSerialPort::Directions$$$setBaudRateqint32QSerialPort::Directions$$$baudRateChangedqint32QSerialPort::Directions -->
+<h3 class="fn" id="baudRate-prop"><a name="baudRate-prop"></a><span class="name">baudRate</span> : <span class="type"><a href="../qtcore/qtglobal.html#qint32-typedef">qint32</a></span></h3>
+<p>This property holds the data baud rate for the desired direction</p>
+<p>If the setting is successful or set before opening the port, returns <code>true</code>; otherwise returns <code>false</code> and sets an error code which can be obtained by accessing the value of the <a href="qserialport.html#error-prop">QSerialPort::error</a> property. To set the baud rate, use the enumeration <a href="qserialport.html#BaudRate-enum">QSerialPort::BaudRate</a> or any positive qint32 value.</p>
+<p><b>Note: </b>If the setting is set before opening the port, the actual serial port setting is done automatically in the <a href="qserialport.html#open">QSerialPort::open</a>() method right after that the opening of the port succeeds.</p><p><b>Warning:</b> Setting the <a href="qserialport.html#Direction-enum">AllDirections</a> flag is supported on all platforms. Windows supports only this mode.</p>
+<p><b>Warning:</b> Returns equal baud rate in any direction on Windows.</p>
+<p>The default value is Baud9600, i.e&#x2e; 9600 bits per second.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qint32 </td><td class="memItemRight bottomAlign"><span class="name"><b>baudRate</b></span>(QSerialPort::Directions <i>directions</i> = AllDirections) const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>setBaudRate</b></span>(qint32 <i>baudRate</i>, QSerialPort::Directions <i>directions</i> = AllDirections)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qserialport.html#baudRateChanged">baudRateChanged</a></b></span>(qint32 <i>baudRate</i>, QSerialPort::Directions <i>directions</i>)</td></tr>
+</table></div>
+<!-- @@@baudRate -->
+<!-- $$$breakEnabled-prop$$$isBreakEnabled$$$setBreakEnabledbool$$$breakEnabledChangedbool -->
+<h3 class="fn" id="breakEnabled-prop"><a name="breakEnabled-prop"></a><span class="name">breakEnabled</span> : <span class="type">bool</span></h3>
+<p>This property holds the state of the transmission line in break</p>
+<p>Returns <code>true</code> on success, <code>false</code> otherwise. If the flag is <code>true</code> then the transmission line is in break state; otherwise is in non-break state.</p>
+<p><b>Note: </b>The serial port has to be open before trying to set or get this property; otherwise returns <code>false</code> and sets the <a href="qserialport.html#SerialPortError-enum">NotOpenError</a> error code. This is a bit unusual as opposed to the regular Qt property settings of a class. However, this is a special use case since the property is set through the interaction with the kernel and hardware. Hence, the two scenarios cannot be completely compared to each other.</p><p>This property was introduced in  Qt 5.5.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>isBreakEnabled</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>setBreakEnabled</b></span>(bool <i>set</i> = true)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>breakEnabledChanged</b></span>(bool <i>set</i>)</td></tr>
+</table></div>
+<!-- @@@breakEnabled -->
+<!-- $$$dataBits-prop$$$dataBits$$$setDataBitsQSerialPort::DataBits$$$dataBitsChangedQSerialPort::DataBits -->
+<h3 class="fn" id="dataBits-prop"><a name="dataBits-prop"></a><span class="name">dataBits</span> : <span class="type"><a href="qserialport.html#DataBits-enum">DataBits</a></span></h3>
+<p>This property holds the data bits in a frame</p>
+<p>If the setting is successful or set before opening the port, returns <code>true</code>; otherwise returns <code>false</code> and sets an error code which can be obtained by accessing the value of the <a href="qserialport.html#error-prop">QSerialPort::error</a> property.</p>
+<p><b>Note: </b>If the setting is set before opening the port, the actual serial port setting is done automatically in the <a href="qserialport.html#open">QSerialPort::open</a>() method right after that the opening of the port succeeds.</p><p>The default value is Data8, i.e&#x2e; 8 data bits.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QSerialPort::DataBits </td><td class="memItemRight bottomAlign"><span class="name"><b>dataBits</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>setDataBits</b></span>(QSerialPort::DataBits <i>dataBits</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qserialport.html#dataBitsChanged">dataBitsChanged</a></b></span>(QSerialPort::DataBits <i>dataBits</i>)</td></tr>
+</table></div>
+<!-- @@@dataBits -->
+<!-- $$$dataTerminalReady-prop$$$isDataTerminalReady$$$setDataTerminalReadybool$$$dataTerminalReadyChangedbool -->
+<h3 class="fn" id="dataTerminalReady-prop"><a name="dataTerminalReady-prop"></a><span class="name">dataTerminalReady</span> : <span class="type">bool</span></h3>
+<p>This property holds the state (high or low) of the line signal DTR</p>
+<p>Returns <code>true</code> on success, <code>false</code> otherwise. If the flag is <code>true</code> then the DTR signal is set to high; otherwise low.</p>
+<p><b>Note: </b>The serial port has to be open before trying to set or get this property; otherwise <code>false</code> is returned and the error code is set to <a href="qserialport.html#SerialPortError-enum">NotOpenError</a>.</p><p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>isDataTerminalReady</b></span>()</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>setDataTerminalReady</b></span>(bool <i>set</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qserialport.html#dataTerminalReadyChanged">dataTerminalReadyChanged</a></b></span>(bool <i>set</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qserialport.html#pinoutSignals">pinoutSignals</a>().</p>
+<!-- @@@dataTerminalReady -->
+<!-- $$$error-prop$$$error$$$clearError -->
+<h3 class="fn" id="error-prop"><a name="error-prop"></a><span class="name">error</span> : <span class="type"><a href="qserialport.html#SerialPortError-enum">SerialPortError</a></span></h3>
+<p>This property holds the error status of the serial port</p>
+<p>The I/O device status returns an error code. For example, if <a href="qserialport.html#open">open</a>() returns <code>false</code>, or a read/write operation returns <code>-1</code>, this property can be used to figure out the reason why the operation failed.</p>
+<p>The error code is set to the default <a href="qserialport.html#SerialPortError-enum">QSerialPort::NoError</a> after a call to clearError()</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QSerialPort::SerialPortError </td><td class="memItemRight bottomAlign"><span class="name"><b>error</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>clearError</b></span>()</td></tr>
+</table></div>
+<!-- @@@error -->
+<!-- $$$flowControl-prop$$$flowControl$$$setFlowControlQSerialPort::FlowControl$$$flowControlChangedQSerialPort::FlowControl -->
+<h3 class="fn" id="flowControl-prop"><a name="flowControl-prop"></a><span class="name">flowControl</span> : <span class="type"><a href="qserialport.html#FlowControl-enum">FlowControl</a></span></h3>
+<p>This property holds the desired flow control mode</p>
+<p>If the setting is successful or set before opening the port, returns <code>true</code>; otherwise returns <code>false</code> and sets an error code which can be obtained by accessing the value of the <a href="qserialport.html#error-prop">QSerialPort::error</a> property.</p>
+<p><b>Note: </b>If the setting is set before opening the port, the actual serial port setting is done automatically in the <a href="qserialport.html#open">QSerialPort::open</a>() method right after that the opening of the port succeeds.</p><p>The default value is <a href="qserialport.html#FlowControl-enum">NoFlowControl</a>, i.e&#x2e; no flow control.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QSerialPort::FlowControl </td><td class="memItemRight bottomAlign"><span class="name"><b>flowControl</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>setFlowControl</b></span>(QSerialPort::FlowControl <i>flowControl</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qserialport.html#flowControlChanged">flowControlChanged</a></b></span>(QSerialPort::FlowControl <i>flow</i>)</td></tr>
+</table></div>
+<!-- @@@flowControl -->
+<!-- $$$parity-prop$$$parity$$$setParityQSerialPort::Parity$$$parityChangedQSerialPort::Parity -->
+<h3 class="fn" id="parity-prop"><a name="parity-prop"></a><span class="name">parity</span> : <span class="type"><a href="qserialport.html#Parity-enum">Parity</a></span></h3>
+<p>This property holds the parity checking mode</p>
+<p>If the setting is successful or set before opening the port, returns <code>true</code>; otherwise returns <code>false</code> and sets an error code which can be obtained by accessing the value of the <a href="qserialport.html#error-prop">QSerialPort::error</a> property.</p>
+<p><b>Note: </b>If the setting is set before opening the port, the actual serial port setting is done automatically in the <a href="qserialport.html#open">QSerialPort::open</a>() method right after that the opening of the port succeeds.</p><p>The default value is <a href="qserialport.html#Parity-enum">NoParity</a>, i.e&#x2e; no parity.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QSerialPort::Parity </td><td class="memItemRight bottomAlign"><span class="name"><b>parity</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>setParity</b></span>(QSerialPort::Parity <i>parity</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qserialport.html#parityChanged">parityChanged</a></b></span>(QSerialPort::Parity <i>parity</i>)</td></tr>
+</table></div>
+<!-- @@@parity -->
+<!-- $$$requestToSend-prop$$$isRequestToSend$$$setRequestToSendbool$$$requestToSendChangedbool -->
+<h3 class="fn" id="requestToSend-prop"><a name="requestToSend-prop"></a><span class="name">requestToSend</span> : <span class="type">bool</span></h3>
+<p>This property holds the state (high or low) of the line signal RTS</p>
+<p>Returns <code>true</code> on success, <code>false</code> otherwise. If the flag is <code>true</code> then the RTS signal is set to high; otherwise low.</p>
+<p><b>Note: </b>The serial port has to be open before trying to set or get this property; otherwise <code>false</code> is returned and the error code is set to <a href="qserialport.html#SerialPortError-enum">NotOpenError</a>.</p><p><b>Note: </b>An attempt to control the RTS signal in the <a href="qserialport.html#FlowControl-enum">HardwareControl</a> mode will fail with error code set to <a href="qserialport.html#SerialPortError-enum">UnsupportedOperationError</a>, because the signal is automatically controlled by the driver.</p><p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>isRequestToSend</b></span>()</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>setRequestToSend</b></span>(bool <i>set</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qserialport.html#requestToSendChanged">requestToSendChanged</a></b></span>(bool <i>set</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qserialport.html#pinoutSignals">pinoutSignals</a>().</p>
+<!-- @@@requestToSend -->
+<!-- $$$stopBits-prop$$$stopBits$$$setStopBitsQSerialPort::StopBits$$$stopBitsChangedQSerialPort::StopBits -->
+<h3 class="fn" id="stopBits-prop"><a name="stopBits-prop"></a><span class="name">stopBits</span> : <span class="type"><a href="qserialport.html#StopBits-enum">StopBits</a></span></h3>
+<p>This property holds the number of stop bits in a frame</p>
+<p>If the setting is successful or set before opening the port, returns <code>true</code>; otherwise returns <code>false</code> and sets an error code which can be obtained by accessing the value of the <a href="qserialport.html#error-prop">QSerialPort::error</a> property.</p>
+<p><b>Note: </b>If the setting is set before opening the port, the actual serial port setting is done automatically in the <a href="qserialport.html#open">QSerialPort::open</a>() method right after that the opening of the port succeeds.</p><p>The default value is <a href="qserialport.html#StopBits-enum">OneStop</a>, i.e&#x2e; 1 stop bit.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QSerialPort::StopBits </td><td class="memItemRight bottomAlign"><span class="name"><b>stopBits</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>setStopBits</b></span>(QSerialPort::StopBits <i>stopBits</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qserialport.html#stopBitsChanged">stopBitsChanged</a></b></span>(QSerialPort::StopBits <i>stopBits</i>)</td></tr>
+</table></div>
+<!-- @@@stopBits -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QSerialPort$$$QSerialPortconstQSerialPortInfo&QObject* -->
+<h3 class="fn" id="QSerialPort-2"><a name="QSerialPort-2"></a>QSerialPort::<span class="name">QSerialPort</span>(const <span class="type"><a href="qserialportinfo.html">QSerialPortInfo</a></span> &amp;<i>serialPortInfo</i>, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new serial port object with the given <i>parent</i> to represent the serial port with the specified helper class <i>serialPortInfo</i>.</p>
+<!-- @@@QSerialPort -->
+<!-- $$$QSerialPort$$$QSerialPortconstQString&QObject* -->
+<h3 class="fn" id="QSerialPort-1"><a name="QSerialPort-1"></a>QSerialPort::<span class="name">QSerialPort</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new serial port object with the given <i>parent</i> to represent the serial port with the specified <i>name</i>.</p>
+<p>The name should have a specific format; see the <a href="qserialport.html#setPort">setPort</a>() method.</p>
+<!-- @@@QSerialPort -->
+<!-- $$$QSerialPort[overload1]$$$QSerialPortQObject* -->
+<h3 class="fn" id="QSerialPort"><a name="QSerialPort"></a>QSerialPort::<span class="name">QSerialPort</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new serial port object with the given <i>parent</i>.</p>
+<!-- @@@QSerialPort -->
+<!-- $$$baudRateChanged -->
+<h3 class="fn" id="baudRateChanged"><a name="baudRateChanged"></a><code>[signal] </code><span class="type">void</span> QSerialPort::<span class="name">baudRateChanged</span>(<span class="type"><a href="../qtcore/qtglobal.html#qint32-typedef">qint32</a></span> <i>baudRate</i>, <span class="type"><a href="qserialport.html#Direction-enum">QSerialPort::Directions</a></span> <i>directions</i>)</h3>
+<p>This signal is emitted after the baud rate has been changed. The new baud rate is passed as <i>baudRate</i> and directions as <i>directions</i>.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qserialport.html#baudRate-prop">baudRate</a>. </p><p><b>See also </b><a href="qserialport.html#baudRate-prop">QSerialPort::baudRate</a>.</p>
+<!-- @@@baudRateChanged -->
+<!-- $$$dataBitsChanged -->
+<h3 class="fn" id="dataBitsChanged"><a name="dataBitsChanged"></a><code>[signal] </code><span class="type">void</span> QSerialPort::<span class="name">dataBitsChanged</span>(<span class="type"><a href="qserialport.html#DataBits-enum">QSerialPort::DataBits</a></span> <i>dataBits</i>)</h3>
+<p>This signal is emitted after the data bits in a frame has been changed. The new data bits in a frame is passed as <i>dataBits</i>.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qserialport.html#dataBits-prop">dataBits</a>. </p><p><b>See also </b><a href="qserialport.html#dataBits-prop">QSerialPort::dataBits</a>.</p>
+<!-- @@@dataBitsChanged -->
+<!-- $$$dataTerminalReadyChanged -->
+<h3 class="fn" id="dataTerminalReadyChanged"><a name="dataTerminalReadyChanged"></a><code>[signal] </code><span class="type">void</span> QSerialPort::<span class="name">dataTerminalReadyChanged</span>(<span class="type">bool</span> <i>set</i>)</h3>
+<p>This signal is emitted after the state (high or low) of the line signal DTR has been changed. The new the state (high or low) of the line signal DTR is passed as <i>set</i>.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qserialport.html#dataTerminalReady-prop">dataTerminalReady</a>. </p><p><b>See also </b><a href="qserialport.html#dataTerminalReady-prop">QSerialPort::dataTerminalReady</a>.</p>
+<!-- @@@dataTerminalReadyChanged -->
+<!-- $$$errorOccurred[overload1]$$$errorOccurredQSerialPort::SerialPortError -->
+<h3 class="fn" id="errorOccurred"><a name="errorOccurred"></a><code>[signal] </code><span class="type">void</span> QSerialPort::<span class="name">errorOccurred</span>(<span class="type"><a href="qserialport.html#SerialPortError-enum">QSerialPort::SerialPortError</a></span> <i>error</i>)</h3>
+<p>This signal is emitted when an error occurs in the serial port. The specified <i>error</i> describes the type of error that occurred.</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<p><b>See also </b><a href="qserialport.html#error-prop">QSerialPort::error</a>.</p>
+<!-- @@@errorOccurred -->
+<!-- $$$flowControlChanged -->
+<h3 class="fn" id="flowControlChanged"><a name="flowControlChanged"></a><code>[signal] </code><span class="type">void</span> QSerialPort::<span class="name">flowControlChanged</span>(<span class="type"><a href="qserialport.html#FlowControl-enum">QSerialPort::FlowControl</a></span> <i>flow</i>)</h3>
+<p>This signal is emitted after the flow control mode has been changed. The new flow control mode is passed as <i>flow</i>.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qserialport.html#flowControl-prop">flowControl</a>. </p><p><b>See also </b><a href="qserialport.html#flowControl-prop">QSerialPort::flowControl</a>.</p>
+<!-- @@@flowControlChanged -->
+<!-- $$$parityChanged -->
+<h3 class="fn" id="parityChanged"><a name="parityChanged"></a><code>[signal] </code><span class="type">void</span> QSerialPort::<span class="name">parityChanged</span>(<span class="type"><a href="qserialport.html#Parity-enum">QSerialPort::Parity</a></span> <i>parity</i>)</h3>
+<p>This signal is emitted after the parity checking mode has been changed. The new parity checking mode is passed as <i>parity</i>.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qserialport.html#parity-prop">parity</a>. </p><p><b>See also </b><a href="qserialport.html#parity-prop">QSerialPort::parity</a>.</p>
+<!-- @@@parityChanged -->
+<!-- $$$requestToSendChanged -->
+<h3 class="fn" id="requestToSendChanged"><a name="requestToSendChanged"></a><code>[signal] </code><span class="type">void</span> QSerialPort::<span class="name">requestToSendChanged</span>(<span class="type">bool</span> <i>set</i>)</h3>
+<p>This signal is emitted after the state (high or low) of the line signal RTS has been changed. The new the state (high or low) of the line signal RTS is passed as <i>set</i>.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qserialport.html#requestToSend-prop">requestToSend</a>. </p><p><b>See also </b><a href="qserialport.html#requestToSend-prop">QSerialPort::requestToSend</a>.</p>
+<!-- @@@requestToSendChanged -->
+<!-- $$$stopBitsChanged -->
+<h3 class="fn" id="stopBitsChanged"><a name="stopBitsChanged"></a><code>[signal] </code><span class="type">void</span> QSerialPort::<span class="name">stopBitsChanged</span>(<span class="type"><a href="qserialport.html#StopBits-enum">QSerialPort::StopBits</a></span> <i>stopBits</i>)</h3>
+<p>This signal is emitted after the number of stop bits in a frame has been changed. The new number of stop bits in a frame is passed as <i>stopBits</i>.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qserialport.html#stopBits-prop">stopBits</a>. </p><p><b>See also </b><a href="qserialport.html#stopBits-prop">QSerialPort::stopBits</a>.</p>
+<!-- @@@stopBitsChanged -->
+<!-- $$$~QSerialPort[overload1]$$$~QSerialPort -->
+<h3 class="fn" id="dtor.QSerialPort"><a name="dtor.QSerialPort"></a><code>[virtual] </code>QSerialPort::<span class="name">~QSerialPort</span>()</h3>
+<p>Closes the serial port, if necessary, and then destroys object.</p>
+<!-- @@@~QSerialPort -->
+<!-- $$$atEnd[overload1]$$$atEnd -->
+<h3 class="fn" id="atEnd"><a name="atEnd"></a><code>[override virtual] </code><span class="type">bool</span> QSerialPort::<span class="name">atEnd</span>() const</h3>
+<p>Reimplements: <a href="../qtcore/qiodevice.html#atEnd">QIODevice::atEnd</a>() const.</p>
+<p>Returns <code>true</code> if no more data is currently available for reading; otherwise returns <code>false</code>.</p>
+<p>This function is most commonly used when reading data from the serial port in a loop. For example:</p>
+<pre class="cpp">
+
+  <span class="comment">// This slot is connected to QSerialPort::readyRead()</span>
+  <span class="type">void</span> <span class="type">QSerialPortClass</span><span class="operator">::</span>readyReadSlot()
+  {
+      <span class="keyword">while</span> (<span class="operator">!</span>port<span class="operator">.</span>atEnd()) {
+          <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> data <span class="operator">=</span> port<span class="operator">.</span>read(<span class="number">100</span>);
+          <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+      }
+  }
+
+</pre>
+<p><b>See also </b><a href="qserialport.html#bytesAvailable">bytesAvailable</a>() and <a href="../qtcore/qiodevice.html#readyRead">readyRead</a>().</p>
+<!-- @@@atEnd -->
+<!-- $$$bytesAvailable[overload1]$$$bytesAvailable -->
+<h3 class="fn" id="bytesAvailable"><a name="bytesAvailable"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> QSerialPort::<span class="name">bytesAvailable</span>() const</h3>
+<p>Reimplements: <a href="../qtcore/qiodevice.html#bytesAvailable">QIODevice::bytesAvailable</a>() const.</p>
+<p>Returns the number of incoming bytes that are waiting to be read.</p>
+<p><b>See also </b><a href="qserialport.html#bytesToWrite">bytesToWrite</a>() and <a href="../qtcore/qiodevice.html#read">read</a>().</p>
+<!-- @@@bytesAvailable -->
+<!-- $$$bytesToWrite[overload1]$$$bytesToWrite -->
+<h3 class="fn" id="bytesToWrite"><a name="bytesToWrite"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> QSerialPort::<span class="name">bytesToWrite</span>() const</h3>
+<p>Reimplements: <a href="../qtcore/qiodevice.html#bytesToWrite">QIODevice::bytesToWrite</a>() const.</p>
+<p>Returns the number of bytes that are waiting to be written. The bytes are written when control goes back to the event loop or when <a href="qserialport.html#flush">flush</a>() is called.</p>
+<p><b>See also </b><a href="qserialport.html#bytesAvailable">bytesAvailable</a>() and <a href="qserialport.html#flush">flush</a>().</p>
+<!-- @@@bytesToWrite -->
+<!-- $$$canReadLine[overload1]$$$canReadLine -->
+<h3 class="fn" id="canReadLine"><a name="canReadLine"></a><code>[override virtual] </code><span class="type">bool</span> QSerialPort::<span class="name">canReadLine</span>() const</h3>
+<p>Reimplements: <a href="../qtcore/qiodevice.html#canReadLine">QIODevice::canReadLine</a>() const.</p>
+<p>Returns <code>true</code> if a line of data can be read from the serial port; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="../qtcore/qiodevice.html#readLine">readLine</a>().</p>
+<!-- @@@canReadLine -->
+<!-- $$$clear[overload1]$$$clearQSerialPort::Directions -->
+<h3 class="fn" id="clear"><a name="clear"></a><span class="type">bool</span> QSerialPort::<span class="name">clear</span>(<span class="type"><a href="qserialport.html#Direction-enum">QSerialPort::Directions</a></span> <i>directions</i> = AllDirections)</h3>
+<p>Discards all characters from the output or input buffer, depending on given directions <i>directions</i>. This includes clearing the internal class buffers and the UART (driver) buffers. Also terminate pending read or write operations. If successful, returns <code>true</code>; otherwise returns <code>false</code>.</p>
+<p><b>Note: </b>The serial port has to be open before trying to clear any buffered data; otherwise returns <code>false</code> and sets the <a href="qserialport.html#SerialPortError-enum">NotOpenError</a> error code.</p><!-- @@@clear -->
+<!-- $$$close[overload1]$$$close -->
+<h3 class="fn" id="close"><a name="close"></a><code>[override virtual] </code><span class="type">void</span> QSerialPort::<span class="name">close</span>()</h3>
+<p>Reimplements: <a href="../qtcore/qiodevice.html#close">QIODevice::close</a>().</p>
+<p><b>Note: </b>The serial port has to be open before trying to close it; otherwise sets the <a href="qserialport.html#SerialPortError-enum">NotOpenError</a> error code.</p><p><b>See also </b><a href="../qtcore/qiodevice.html#close">QIODevice::close</a>().</p>
+<!-- @@@close -->
+<!-- $$$flush[overload1]$$$flush -->
+<h3 class="fn" id="flush"><a name="flush"></a><span class="type">bool</span> QSerialPort::<span class="name">flush</span>()</h3>
+<p>This function writes as much as possible from the internal write buffer to the underlying serial port without blocking. If any data was written, this function returns <code>true</code>; otherwise returns <code>false</code>.</p>
+<p>Call this function for sending the buffered data immediately to the serial port. The number of bytes successfully written depends on the operating system. In most cases, this function does not need to be called, because the <a href="qserialport.html">QSerialPort</a> class will start sending data automatically once control is returned to the event loop. In the absence of an event loop, call <a href="qserialport.html#waitForBytesWritten">waitForBytesWritten</a>() instead.</p>
+<p><b>Note: </b>The serial port has to be open before trying to flush any buffered data; otherwise returns <code>false</code> and sets the <a href="qserialport.html#SerialPortError-enum">NotOpenError</a> error code.</p><p><b>See also </b><a href="../qtcore/qiodevice.html#write">write</a>() and <a href="qserialport.html#waitForBytesWritten">waitForBytesWritten</a>().</p>
+<!-- @@@flush -->
+<!-- $$$handle[overload1]$$$handle -->
+<h3 class="fn" id="handle"><a name="handle"></a><span class="type">QSerialPort::Handle</span> QSerialPort::<span class="name">handle</span>() const</h3>
+<p>If the platform is supported and the serial port is open, returns the native serial port handle; otherwise returns <code>-1</code>.</p>
+<p><b>Warning:</b> This function is for expert use only; use it at your own risk. Furthermore, this function carries no compatibility promise between minor Qt releases.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@handle -->
+<!-- $$$isSequential[overload1]$$$isSequential -->
+<h3 class="fn" id="isSequential"><a name="isSequential"></a><code>[override virtual] </code><span class="type">bool</span> QSerialPort::<span class="name">isSequential</span>() const</h3>
+<p>Reimplements: <a href="../qtcore/qiodevice.html#isSequential">QIODevice::isSequential</a>() const.</p>
+<p>Always returns <code>true</code>. The serial port is a sequential device.</p>
+<!-- @@@isSequential -->
+<!-- $$$open[overload1]$$$openQIODevice::OpenMode -->
+<h3 class="fn" id="open"><a name="open"></a><code>[override virtual] </code><span class="type">bool</span> QSerialPort::<span class="name">open</span>(<span class="type"><a href="../qtcore/qiodevice.html#OpenModeFlag-enum">QIODevice::OpenMode</a></span> <i>mode</i>)</h3>
+<p>Reimplements: <a href="../qtcore/qiodevice.html#open">QIODevice::open</a>(QIODevice::OpenMode mode).</p>
+<p>Opens the serial port using <a href="../qtcore/qiodevice.html#OpenModeFlag-enum">OpenMode</a> <i>mode</i>, and then returns <code>true</code> if successful; otherwise returns <code>false</code> and sets an error code which can be obtained by calling the <a href="qserialport.html#error-prop">error</a>() method.</p>
+<p><b>Note: </b>The method returns <code>false</code> if opening the port is successful, but could not set any of the port settings successfully. In that case, the port is closed automatically not to leave the port around with incorrect settings.</p><p><b>Warning:</b> The <i>mode</i> has to be <a href="../qtcore/qiodevice.html#OpenModeFlag-enum">QIODevice::ReadOnly</a>, <a href="../qtcore/qiodevice.html#OpenModeFlag-enum">QIODevice::WriteOnly</a>, or <a href="../qtcore/qiodevice.html#OpenModeFlag-enum">QIODevice::ReadWrite</a>. Other modes are unsupported.</p>
+<p><b>See also </b><a href="../qtcore/qiodevice.html#OpenModeFlag-enum">QIODevice::OpenMode</a> and <a href="qserialport.html#setPort">setPort</a>().</p>
+<!-- @@@open -->
+<!-- $$$pinoutSignals[overload1]$$$pinoutSignals -->
+<h3 class="fn" id="pinoutSignals"><a name="pinoutSignals"></a><span class="type"><a href="qserialport.html#PinoutSignal-enum">QSerialPort::PinoutSignals</a></span> QSerialPort::<span class="name">pinoutSignals</span>()</h3>
+<p>Returns the state of the line signals in a bitmap format.</p>
+<p>From this result, it is possible to allocate the state of the desired signal by applying a mask &quot;AND&quot;, where the mask is the desired enumeration value from <a href="qserialport.html#PinoutSignal-enum">QSerialPort::PinoutSignals</a>.</p>
+<p><b>Note: </b>This method performs a system call, thus ensuring that the line signal states are returned properly. This is necessary when the underlying operating systems cannot provide proper notifications about the changes.</p><p><b>Note: </b>The serial port has to be open before trying to get the pinout signals; otherwise returns <a href="qserialport.html#PinoutSignal-enum">NoSignal</a> and sets the <a href="qserialport.html#SerialPortError-enum">NotOpenError</a> error code.</p><p><b>See also </b><a href="qserialport.html#dataTerminalReady-prop">QSerialPort::dataTerminalReady</a> and <a href="qserialport.html#requestToSend-prop">QSerialPort::requestToSend</a>.</p>
+<!-- @@@pinoutSignals -->
+<!-- $$$portName[overload1]$$$portName -->
+<h3 class="fn" id="portName"><a name="portName"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QSerialPort::<span class="name">portName</span>() const</h3>
+<p>Returns the name set by <a href="qserialport.html#setPort">setPort</a>() or passed to the <a href="qserialport.html">QSerialPort</a> constructor. This name is short, i.e&#x2e; it is extracted and converted from the internal variable system location of the device. The conversion algorithm is platform specific:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Platform</th><th >Brief Description</th></tr></thead>
+<tr valign="top" class="odd"><td >Windows</td><td >Removes the prefix &quot;\\.\&quot; or &quot;//./&quot; from the system location and returns the remainder of the string.</td></tr>
+<tr valign="top" class="even"><td >Unix, BSD</td><td >Removes the prefix &quot;/dev/&quot; from the system location and returns the remainder of the string.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qserialport.html#setPortName">setPortName</a>(), <a href="qserialport.html#setPort">setPort</a>(), and <a href="qserialportinfo.html#portName">QSerialPortInfo::portName</a>().</p>
+<!-- @@@portName -->
+<!-- $$$readBufferSize[overload1]$$$readBufferSize -->
+<h3 class="fn" id="readBufferSize"><a name="readBufferSize"></a><span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> QSerialPort::<span class="name">readBufferSize</span>() const</h3>
+<p>Returns the size of the internal read buffer. This limits the amount of data that the client can receive before calling the <a href="../qtcore/qiodevice.html#read">read</a>() or <a href="../qtcore/qiodevice.html#readAll">readAll</a>() methods.</p>
+<p>A read buffer size of <code>0</code> (the default) means that the buffer has no size limit, ensuring that no data is lost.</p>
+<p><b>See also </b><a href="qserialport.html#setReadBufferSize">setReadBufferSize</a>() and <a href="../qtcore/qiodevice.html#read">read</a>().</p>
+<!-- @@@readBufferSize -->
+<!-- $$$readData[overload1]$$$readDatachar*qint64 -->
+<h3 class="fn" id="readData"><a name="readData"></a><code>[override virtual protected] </code><span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> QSerialPort::<span class="name">readData</span>(<span class="type">char</span> *<i>data</i>, <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> <i>maxSize</i>)</h3>
+<p>Reimplements: <a href="../qtcore/qiodevice.html#readData">QIODevice::readData</a>(char *data, qint64 maxSize).</p>
+<!-- @@@readData -->
+<!-- $$$readLineData[overload1]$$$readLineDatachar*qint64 -->
+<h3 class="fn" id="readLineData"><a name="readLineData"></a><code>[override virtual protected] </code><span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> QSerialPort::<span class="name">readLineData</span>(<span class="type">char</span> *<i>data</i>, <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> <i>maxSize</i>)</h3>
+<p>Reimplements: <a href="../qtcore/qiodevice.html#readLineData">QIODevice::readLineData</a>(char *data, qint64 maxSize).</p>
+<!-- @@@readLineData -->
+<!-- $$$sendBreak[overload1]$$$sendBreakint -->
+<h3 class="fn" id="sendBreak"><a name="sendBreak"></a><span class="type">bool</span> QSerialPort::<span class="name">sendBreak</span>(<span class="type">int</span> <i>duration</i> = 0)</h3>
+<p>Sends a continuous stream of zero bits during a specified period of time <i>duration</i> in msec if the terminal is using asynchronous serial data. If successful, returns <code>true</code>; otherwise returns <code>false</code>.</p>
+<p>If the duration is zero then zero bits are transmitted by at least <code>0.25</code> seconds, but no more than <code>0.5</code> seconds.</p>
+<p>If the duration is non zero then zero bits are transmitted within a certain period of time depending on the implementation.</p>
+<p><b>Note: </b>The serial port has to be open before trying to send a break duration; otherwise returns <code>false</code> and sets the <a href="qserialport.html#SerialPortError-enum">NotOpenError</a> error code.</p><p><b>See also </b><a href="qserialport.html#breakEnabled-prop">setBreakEnabled</a>().</p>
+<!-- @@@sendBreak -->
+<!-- $$$setPort[overload1]$$$setPortconstQSerialPortInfo& -->
+<h3 class="fn" id="setPort"><a name="setPort"></a><span class="type">void</span> QSerialPort::<span class="name">setPort</span>(const <span class="type"><a href="qserialportinfo.html">QSerialPortInfo</a></span> &amp;<i>serialPortInfo</i>)</h3>
+<p>Sets the port stored in the serial port info instance <i>serialPortInfo</i>.</p>
+<p><b>See also </b><a href="qserialport.html#portName">portName</a>() and <a href="qserialportinfo.html">QSerialPortInfo</a>.</p>
+<!-- @@@setPort -->
+<!-- $$$setPortName[overload1]$$$setPortNameconstQString& -->
+<h3 class="fn" id="setPortName"><a name="setPortName"></a><span class="type">void</span> QSerialPort::<span class="name">setPortName</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>)</h3>
+<p>Sets the <i>name</i> of the serial port.</p>
+<p>The name of the serial port can be passed as either a short name or the long system location if necessary.</p>
+<p><b>See also </b><a href="qserialport.html#portName">portName</a>() and <a href="qserialportinfo.html">QSerialPortInfo</a>.</p>
+<!-- @@@setPortName -->
+<!-- $$$setReadBufferSize[overload1]$$$setReadBufferSizeqint64 -->
+<h3 class="fn" id="setReadBufferSize"><a name="setReadBufferSize"></a><span class="type">void</span> QSerialPort::<span class="name">setReadBufferSize</span>(<span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> <i>size</i>)</h3>
+<p>Sets the size of <a href="qserialport.html">QSerialPort</a>'s internal read buffer to be <i>size</i> bytes.</p>
+<p>If the buffer size is limited to a certain size, <a href="qserialport.html">QSerialPort</a> will not buffer more than this size of data. The special case of a buffer size of <code>0</code> means that the read buffer is unlimited and all incoming data is buffered. This is the default.</p>
+<p>This option is useful if the data is only read at certain points in time (for instance in a real-time streaming application) or if the serial port should be protected against receiving too much data, which may eventually cause the application to run out of memory.</p>
+<p><b>See also </b><a href="qserialport.html#readBufferSize">readBufferSize</a>() and <a href="../qtcore/qiodevice.html#read">read</a>().</p>
+<!-- @@@setReadBufferSize -->
+<!-- $$$waitForBytesWritten[overload1]$$$waitForBytesWrittenint -->
+<h3 class="fn" id="waitForBytesWritten"><a name="waitForBytesWritten"></a><code>[override virtual] </code><span class="type">bool</span> QSerialPort::<span class="name">waitForBytesWritten</span>(<span class="type">int</span> <i>msecs</i> = 30000)</h3>
+<p>Reimplements: <a href="../qtcore/qiodevice.html#waitForBytesWritten">QIODevice::waitForBytesWritten</a>(int msecs).</p>
+<p>This function blocks until at least one byte has been written to the serial port and the <a href="../qtcore/qiodevice.html#bytesWritten">bytesWritten()</a> signal has been emitted. The function will timeout after <i>msecs</i> milliseconds; the default timeout is 30000 milliseconds. If <i>msecs</i> is -1, this function will not time out.</p>
+<p>The function returns <code>true</code> if the <a href="../qtcore/qiodevice.html#bytesWritten">bytesWritten</a>() signal is emitted; otherwise it returns <code>false</code> (if an error occurred or the operation timed out).</p>
+<!-- @@@waitForBytesWritten -->
+<!-- $$$waitForReadyRead[overload1]$$$waitForReadyReadint -->
+<h3 class="fn" id="waitForReadyRead"><a name="waitForReadyRead"></a><code>[override virtual] </code><span class="type">bool</span> QSerialPort::<span class="name">waitForReadyRead</span>(<span class="type">int</span> <i>msecs</i> = 30000)</h3>
+<p>Reimplements: <a href="../qtcore/qiodevice.html#waitForReadyRead">QIODevice::waitForReadyRead</a>(int msecs).</p>
+<p>This function blocks until new data is available for reading and the <a href="../qtcore/qiodevice.html#readyRead">readyRead()</a> signal has been emitted. The function will timeout after <i>msecs</i> milliseconds; the default timeout is 30000 milliseconds. If <i>msecs</i> is -1, this function will not time out.</p>
+<p>The function returns <code>true</code> if the <a href="../qtcore/qiodevice.html#readyRead">readyRead</a>() signal is emitted and there is new data available for reading; otherwise it returns <code>false</code> (if an error occurred or the operation timed out).</p>
+<p><b>See also </b><a href="qserialport.html#waitForBytesWritten">waitForBytesWritten</a>().</p>
+<!-- @@@waitForReadyRead -->
+<!-- $$$writeData[overload1]$$$writeDataconstchar*qint64 -->
+<h3 class="fn" id="writeData"><a name="writeData"></a><code>[override virtual protected] </code><span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> QSerialPort::<span class="name">writeData</span>(const <span class="type">char</span> *<i>data</i>, <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> <i>maxSize</i>)</h3>
+<p>Reimplements: <a href="../qtcore/qiodevice.html#writeData">QIODevice::writeData</a>(const char *data, qint64 maxSize).</p>
+<!-- @@@writeData -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

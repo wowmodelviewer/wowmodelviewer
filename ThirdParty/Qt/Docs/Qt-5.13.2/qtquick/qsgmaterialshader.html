@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qsgmaterial.cpp -->
+  <title>QSGMaterialShader Class | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-module.html">C++ Classes</a></td><td >QSGMaterialShader</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSGMaterialShader Class</h1>
+<!-- $$$QSGMaterialShader-brief -->
+<p>The <a href="qsgmaterialshader.html">QSGMaterialShader</a> class represents an OpenGL shader program in the renderer. <a href="#details">More...</a></p>
+<!-- @@@QSGMaterialShader -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QSGMaterialShader&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += quick</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qsgsimplematerialshader.html">QSGSimpleMaterialShader</a></p>
+</td></tr></table></div><ul>
+<li><a href="qsgmaterialshader-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> class </td><td class="memItemRight bottomAlign"><b><a href="qsgmaterialshader-renderstate.html">RenderState</a></b></td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsgmaterialshader.html#QSGMaterialShader">QSGMaterialShader</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qsgmaterialshader.html#activate">activate</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual const char *const *</td><td class="memItemRight bottomAlign"><b><a href="qsgmaterialshader.html#attributeNames">attributeNames</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qsgmaterialshader.html#deactivate">deactivate</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QOpenGLShaderProgram *</td><td class="memItemRight bottomAlign"><b><a href="qsgmaterialshader.html#program">program</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qsgmaterialshader.html#updateState">updateState</a></b>(const QSGMaterialShader::RenderState &amp;<i>state</i>, QSGMaterial *<i>newMaterial</i>, QSGMaterial *<i>oldMaterial</i>)</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qsgmaterialshader.html#compile">compile</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual const char *</td><td class="memItemRight bottomAlign"><b><a href="qsgmaterialshader.html#fragmentShader">fragmentShader</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qsgmaterialshader.html#initialize">initialize</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsgmaterialshader.html#setShaderSourceFile">setShaderSourceFile</a></b>(QOpenGLShader::ShaderType <i>type</i>, const QString &amp;<i>sourceFile</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsgmaterialshader.html#setShaderSourceFiles">setShaderSourceFiles</a></b>(QOpenGLShader::ShaderType <i>type</i>, const QStringList &amp;<i>sourceFiles</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual const char *</td><td class="memItemRight bottomAlign"><b><a href="qsgmaterialshader.html#vertexShader">vertexShader</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSGMaterialShader-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qsgmaterialshader.html">QSGMaterialShader</a> API is very low-level. A more convenient API, which provides almost all the same features, is available through <a href="qsgsimplematerialshader.html">QSGSimpleMaterialShader</a>.</p>
+<p>The <a href="qsgmaterial.html">QSGMaterial</a> and <a href="qsgmaterialshader.html">QSGMaterialShader</a> form a tight relationship. For one scene graph (including nested graphs), there is one unique <a href="qsgmaterialshader.html">QSGMaterialShader</a> instance which encapsulates the <a href="../qtgui/qopenglshaderprogram.html">QOpenGLShaderProgram</a> the scene graph uses to render that material, such as a shader to flat coloring of geometry. Each <a href="qsggeometrynode.html">QSGGeometryNode</a> can have a unique <a href="qsgmaterial.html">QSGMaterial</a> containing the how the shader should be configured when drawing that node, such as the actual color used to render the geometry.</p>
+<p>An instance of <a href="qsgmaterialshader.html">QSGMaterialShader</a> is never created explicitly by the user, it will be created on demand by the scene graph through <a href="qsgmaterial.html#createShader">QSGMaterial::createShader</a>(). The scene graph will make sure that there is only one instance of each shader implementation through a scene graph.</p>
+<p>The source code returned from <a href="qsgmaterialshader.html#vertexShader">vertexShader</a>() is used to control what the material does with the vertiex data that comes in from the geometry. The source code returned from the <a href="qsgmaterialshader.html#fragmentShader">fragmentShader</a>() is used to control what how the material should fill each individual pixel in the geometry. The vertex and fragment source code is queried once during initialization, changing what is returned from these functions later will not have any effect.</p>
+<p>The <a href="qsgmaterialshader.html#activate">activate</a>() function is called by the scene graph when a shader is is starting to be used. The deactivate function is called by the scene graph when the shader is no longer going to be used. While active, the scene graph may make one or more calls to <a href="qsgmaterialshader.html#updateState">updateState</a>() which will update the state of the shader for each individual geometry to render.</p>
+<p>The <a href="qsgmaterialshader.html#attributeNames">attributeNames</a>() returns the name of the attributes used in the <a href="qsgmaterialshader.html#vertexShader">vertexShader</a>(). These are used in the default implementation of <a href="qsgmaterialshader.html#activate">activate</a>() and <a href="qsgmaterialshader.html#deactivate">deactivate</a>() to decide whice vertex registers are enabled.</p>
+<p>The <a href="qsgmaterialshader.html#initialize">initialize</a>() function is called during program creation to allow subclasses to prepare for use, such as resolve uniform names in the <a href="qsgmaterialshader.html#vertexShader">vertexShader</a>() and <a href="qsgmaterialshader.html#fragmentShader">fragmentShader</a>().</p>
+<p>A minimal example:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> Shader : <span class="keyword">public</span> <span class="type"><a href="qsgmaterialshader.html#QSGMaterialShader">QSGMaterialShader</a></span>
+  {
+  <span class="keyword">public</span>:
+      <span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>vertexShader() <span class="keyword">const</span> {
+          <span class="keyword">return</span>
+          <span class="string">&quot;attribute highp vec4 vertex;          \n&quot;</span>
+          <span class="string">&quot;uniform highp mat4 matrix;            \n&quot;</span>
+          <span class="string">&quot;void main() {                         \n&quot;</span>
+          <span class="string">&quot;    gl_Position = matrix * vertex;    \n&quot;</span>
+          <span class="string">&quot;}&quot;</span>;
+      }
+
+      <span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>fragmentShader() <span class="keyword">const</span> {
+          <span class="keyword">return</span>
+          <span class="string">&quot;uniform lowp float opacity;                            \n&quot;</span>
+          <span class="string">&quot;void main() {                                          \n&quot;</span>
+                  <span class="string">&quot;    gl_FragColor = vec4(1, 0, 0, 1) * opacity; \n&quot;</span>
+          <span class="string">&quot;}&quot;</span>;
+      }
+
+      <span class="type">char</span> <span class="keyword">const</span> <span class="operator">*</span><span class="keyword">const</span> <span class="operator">*</span>attributeNames() <span class="keyword">const</span>
+      {
+          <span class="keyword">static</span> <span class="type">char</span> <span class="keyword">const</span> <span class="operator">*</span><span class="keyword">const</span> names<span class="operator">[</span><span class="operator">]</span> <span class="operator">=</span> { <span class="string">&quot;vertex&quot;</span><span class="operator">,</span> <span class="number">0</span> };
+          <span class="keyword">return</span> names;
+      }
+
+      <span class="type">void</span> initialize()
+      {
+          <span class="type"><a href="qsgmaterialshader.html#QSGMaterialShader">QSGMaterialShader</a></span><span class="operator">::</span>initialize();
+          m_id_matrix <span class="operator">=</span> program()<span class="operator">-</span><span class="operator">&gt;</span>uniformLocation(<span class="string">&quot;matrix&quot;</span>);
+          m_id_opacity <span class="operator">=</span> program()<span class="operator">-</span><span class="operator">&gt;</span>uniformLocation(<span class="string">&quot;opacity&quot;</span>);
+      }
+
+      <span class="type">void</span> updateState(<span class="keyword">const</span> RenderState <span class="operator">&amp;</span>state<span class="operator">,</span> <span class="type"><a href="qsgmaterial.html">QSGMaterial</a></span> <span class="operator">*</span>newMaterial<span class="operator">,</span> <span class="type"><a href="qsgmaterial.html">QSGMaterial</a></span> <span class="operator">*</span>oldMaterial)
+      {
+          Q_ASSERT(program()<span class="operator">-</span><span class="operator">&gt;</span>isLinked());
+          <span class="keyword">if</span> (state<span class="operator">.</span>isMatrixDirty())
+              program()<span class="operator">-</span><span class="operator">&gt;</span>setUniformValue(m_id_matrix<span class="operator">,</span> state<span class="operator">.</span>combinedMatrix());
+          <span class="keyword">if</span> (state<span class="operator">.</span>isOpacityDirty())
+              program()<span class="operator">-</span><span class="operator">&gt;</span>setUniformValue(m_id_opacity<span class="operator">,</span> state<span class="operator">.</span>opacity());
+      }
+
+  <span class="keyword">private</span>:
+      <span class="type">int</span> m_id_matrix;
+      <span class="type">int</span> m_id_opacity;
+  };
+
+</pre>
+<p><b>Note: </b>All classes with QSG prefix should be used solely on the scene graph's rendering thread. See <a href="qtquick-visualcanvas-scenegraph.html#scene-graph-and-rendering">Scene Graph and Rendering</a> for more information.</p></div>
+<!-- @@@QSGMaterialShader -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QSGMaterialShader[overload1]$$$QSGMaterialShader -->
+<h3 class="fn" id="QSGMaterialShader"><a name="QSGMaterialShader"></a>QSGMaterialShader::<span class="name">QSGMaterialShader</span>()</h3>
+<p>Creates a new <a href="qsgmaterialshader.html">QSGMaterialShader</a>.</p>
+<!-- @@@QSGMaterialShader -->
+<!-- $$$activate[overload1]$$$activate -->
+<h3 class="fn" id="activate"><a name="activate"></a><code>[virtual] </code><span class="type">void</span> QSGMaterialShader::<span class="name">activate</span>()</h3>
+<p>This function is called by the scene graph to indicate that geometry is about to be rendered using this shader.</p>
+<p>State that is global for all uses of the shader, independent of the geometry that is being drawn, can be setup in this function.</p>
+<!-- @@@activate -->
+<!-- $$$attributeNames[overload1]$$$attributeNames -->
+<h3 class="fn" id="attributeNames"><a name="attributeNames"></a><code>[pure virtual] </code>const <span class="type">char</span> *const *QSGMaterialShader::<span class="name">attributeNames</span>() const</h3>
+<p>Returns a zero-terminated array describing the names of the attributes used in the vertex shader.</p>
+<p>This function is called when the shader is compiled to specify which attributes exist. The order of the attribute names defines the attribute register position in the vertex shader.</p>
+<!-- @@@attributeNames -->
+<!-- $$$compile[overload1]$$$compile -->
+<h3 class="fn" id="compile"><a name="compile"></a><code>[virtual protected] </code><span class="type">void</span> QSGMaterialShader::<span class="name">compile</span>()</h3>
+<p>This function is called when the shader is initialized to compile the actual <a href="../qtgui/qopenglshaderprogram.html">QOpenGLShaderProgram</a>. Do not call it explicitly.</p>
+<p>The default implementation will extract the <a href="qsgmaterialshader.html#vertexShader">vertexShader</a>() and <a href="qsgmaterialshader.html#fragmentShader">fragmentShader</a>() and bind the names returned from <a href="qsgmaterialshader.html#attributeNames">attributeNames</a>() to consecutive vertex attribute registers starting at 0.</p>
+<!-- @@@compile -->
+<!-- $$$deactivate[overload1]$$$deactivate -->
+<h3 class="fn" id="deactivate"><a name="deactivate"></a><code>[virtual] </code><span class="type">void</span> QSGMaterialShader::<span class="name">deactivate</span>()</h3>
+<p>This function is called by the scene graph to indicate that geometry will no longer to be rendered using this shader.</p>
+<!-- @@@deactivate -->
+<!-- $$$fragmentShader[overload1]$$$fragmentShader -->
+<h3 class="fn" id="fragmentShader"><a name="fragmentShader"></a><code>[virtual protected] </code>const <span class="type">char</span> *QSGMaterialShader::<span class="name">fragmentShader</span>() const</h3>
+<p>Called when the shader is being initialized to get the fragment shader source code.</p>
+<p>The contents returned from this function should never change.</p>
+<!-- @@@fragmentShader -->
+<!-- $$$initialize[overload1]$$$initialize -->
+<h3 class="fn" id="initialize"><a name="initialize"></a><code>[virtual protected] </code><span class="type">void</span> QSGMaterialShader::<span class="name">initialize</span>()</h3>
+<p>Reimplement this function to do one-time initialization when the shader program is compiled. The OpenGL shader program is compiled and linked, but not bound, when this function is called.</p>
+<!-- @@@initialize -->
+<!-- $$$program[overload1]$$$program -->
+<h3 class="fn" id="program"><a name="program"></a><span class="type"><a href="../qtgui/qopenglshaderprogram.html">QOpenGLShaderProgram</a></span> *QSGMaterialShader::<span class="name">program</span>()</h3>
+<p>Returns the shader program used by this <a href="qsgmaterialshader.html">QSGMaterialShader</a>.</p>
+<!-- @@@program -->
+<!-- $$$setShaderSourceFile[overload1]$$$setShaderSourceFileQOpenGLShader::ShaderTypeconstQString& -->
+<h3 class="fn" id="setShaderSourceFile"><a name="setShaderSourceFile"></a><code>[protected] </code><span class="type">void</span> QSGMaterialShader::<span class="name">setShaderSourceFile</span>(<span class="type"><a href="../qtgui/qopenglshader.html#ShaderTypeBit-enum">QOpenGLShader::ShaderType</a></span> <i>type</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>sourceFile</i>)</h3>
+<p>Sets the GLSL source file for the shader stage <i>type</i> to <i>sourceFile</i>. The default implementation of the <a href="qsgmaterialshader.html#vertexShader">vertexShader</a>() and <a href="qsgmaterialshader.html#fragmentShader">fragmentShader</a>() functions will load the source files set by this function.</p>
+<p>This function is useful when you have a single source file for a given shader stage. If your shader consists of multiple source files then use <a href="qsgmaterialshader.html#setShaderSourceFiles">setShaderSourceFiles</a>()</p>
+<p><b>See also </b><a href="qsgmaterialshader.html#setShaderSourceFiles">setShaderSourceFiles</a>(), <a href="qsgmaterialshader.html#vertexShader">vertexShader</a>(), and <a href="qsgmaterialshader.html#fragmentShader">fragmentShader</a>().</p>
+<!-- @@@setShaderSourceFile -->
+<!-- $$$setShaderSourceFiles[overload1]$$$setShaderSourceFilesQOpenGLShader::ShaderTypeconstQStringList& -->
+<h3 class="fn" id="setShaderSourceFiles"><a name="setShaderSourceFiles"></a><code>[protected] </code><span class="type">void</span> QSGMaterialShader::<span class="name">setShaderSourceFiles</span>(<span class="type"><a href="../qtgui/qopenglshader.html#ShaderTypeBit-enum">QOpenGLShader::ShaderType</a></span> <i>type</i>, const <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> &amp;<i>sourceFiles</i>)</h3>
+<p>Sets the GLSL source files for the shader stage <i>type</i> to <i>sourceFiles</i>. The default implementation of the <a href="qsgmaterialshader.html#vertexShader">vertexShader</a>() and <a href="qsgmaterialshader.html#fragmentShader">fragmentShader</a>() functions will load the source files set by this function in the order given.</p>
+<p><b>See also </b><a href="qsgmaterialshader.html#setShaderSourceFile">setShaderSourceFile</a>(), <a href="qsgmaterialshader.html#vertexShader">vertexShader</a>(), and <a href="qsgmaterialshader.html#fragmentShader">fragmentShader</a>().</p>
+<!-- @@@setShaderSourceFiles -->
+<!-- $$$updateState[overload1]$$$updateStateconstQSGMaterialShader::RenderState&QSGMaterial*QSGMaterial* -->
+<h3 class="fn" id="updateState"><a name="updateState"></a><code>[virtual] </code><span class="type">void</span> QSGMaterialShader::<span class="name">updateState</span>(const <span class="type"><a href="qsgmaterialshader-renderstate.html">QSGMaterialShader::RenderState</a></span> &amp;<i>state</i>, <span class="type"><a href="qsgmaterial.html">QSGMaterial</a></span> *<i>newMaterial</i>, <span class="type"><a href="qsgmaterial.html">QSGMaterial</a></span> *<i>oldMaterial</i>)</h3>
+<p>This function is called by the scene graph before geometry is rendered to make sure the shader is in the right state.</p>
+<p>The current rendering <i>state</i> is passed from the scene graph. If the state indicates that any state is dirty, the updateState implementation must update accordingly for the geometry to render correctly.</p>
+<p>The subclass specific state, such as the color of a flat color material, should be extracted from <i>newMaterial</i> to update the color uniforms accordingly.</p>
+<p>The <i>oldMaterial</i> can be used to minimze state changes when updating material states. The <i>oldMaterial</i> is 0 if this shader was just activated.</p>
+<p><b>See also </b><a href="qsgmaterialshader.html#activate">activate</a>() and <a href="qsgmaterialshader.html#deactivate">deactivate</a>().</p>
+<!-- @@@updateState -->
+<!-- $$$vertexShader[overload1]$$$vertexShader -->
+<h3 class="fn" id="vertexShader"><a name="vertexShader"></a><code>[virtual protected] </code>const <span class="type">char</span> *QSGMaterialShader::<span class="name">vertexShader</span>() const</h3>
+<p>Called when the shader is being initialized to get the vertex shader source code.</p>
+<p>The contents returned from this function should never change.</p>
+<!-- @@@vertexShader -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

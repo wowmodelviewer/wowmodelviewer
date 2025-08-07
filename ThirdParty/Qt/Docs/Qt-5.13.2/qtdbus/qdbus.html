@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdbusconnection.cpp -->
+  <title>QDBus Namespace | Qt D-Bus</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtdbus-index.html">Qt D-Bus</a></td><td >QDBus Namespace</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtdbus-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#types">Types</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QDBus Namespace</h1>
+<!-- $$$QDBus-brief -->
+<p>The <a href="qdbus.html">QDBus</a> namespace contains miscellaneous identifiers used throughout the Qt D-Bus module. <a href="#details">More...</a></p>
+<!-- @@@QDBus -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QDBus&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += dbus</td></tr></table></div><ul>
+</ul>
+<a name="types"></a>
+<h2 id="types">Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qdbus.html#CallMode-enum">CallMode</a></b> { NoBlock, Block, BlockWithGui, AutoDetect }</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QDBus-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QDBus -->
+<div class="types">
+<h2>Type Documentation</h2>
+<!-- $$$CallMode$$$NoBlock$$$Block$$$BlockWithGui$$$AutoDetect -->
+<h3 class="fn" id="CallMode-enum"><a name="CallMode-enum"></a>enum QDBus::<span class="name">CallMode</span></h3>
+<p>This enum describes the various ways of placing a function call. The valid modes are:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QDBus::NoBlock</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Place the call but don't wait for the reply (the reply's contents will be discarded).</td></tr>
+<tr><td class="topAlign"><code>QDBus::Block</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Don't use an event loop to wait for a reply, but instead block on network operations while waiting. This means the user-interface may not be updated until the function returns.</td></tr>
+<tr><td class="topAlign"><code>QDBus::BlockWithGui</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Use the Qt event loop to wait for a reply. This means that the user-interface will stay responsive (processing input events), but it also means other events may happen, like signal delivery and other D-Bus method calls.</td></tr>
+<tr><td class="topAlign"><code>QDBus::AutoDetect</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">Automatically detect if the called function has a reply.</td></tr>
+</table></div>
+<p>When using BlockWithGui, applications must be prepared for reentrancy in any function.</p>
+<!-- @@@CallMode -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

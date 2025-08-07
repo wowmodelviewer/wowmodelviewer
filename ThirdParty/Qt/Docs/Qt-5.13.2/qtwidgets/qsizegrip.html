@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qsizegrip.cpp -->
+  <title>QSizeGrip Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QSizeGrip</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSizeGrip Class</h1>
+<!-- $$$QSizeGrip-brief -->
+<p>The <a href="qsizegrip.html">QSizeGrip</a> class provides a resize handle for resizing top-level windows. <a href="#details">More...</a></p>
+<!-- @@@QSizeGrip -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QSizeGrip&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qwidget.html">QWidget</a></td></tr></table></div><ul>
+<li><a href="qsizegrip-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsizegrip.html#QSizeGrip">QSizeGrip</a></b>(QWidget *<i>parent</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qsizegrip.html#dtor.QSizeGrip">~QSizeGrip</a></b>()</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qsizegrip.html#setVisible">setVisible</a></b>(bool <i>visible</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSize </td><td class="memItemRight bottomAlign"><b><a href="qsizegrip.html#sizeHint">sizeHint</a></b>() const override</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qsizegrip.html#event">event</a></b>(QEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qsizegrip.html#eventFilter">eventFilter</a></b>(QObject *<i>o</i>, QEvent *<i>e</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qsizegrip.html#hideEvent">hideEvent</a></b>(QHideEvent *<i>hideEvent</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qsizegrip.html#mouseMoveEvent">mouseMoveEvent</a></b>(QMouseEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qsizegrip.html#mousePressEvent">mousePressEvent</a></b>(QMouseEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qsizegrip.html#mouseReleaseEvent">mouseReleaseEvent</a></b>(QMouseEvent *<i>mouseEvent</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qsizegrip.html#moveEvent">moveEvent</a></b>(QMoveEvent *<i>moveEvent</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qsizegrip.html#paintEvent">paintEvent</a></b>(QPaintEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qsizegrip.html#showEvent">showEvent</a></b>(QShowEvent *<i>showEvent</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSizeGrip-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This widget works like the standard Windows resize handle. In the X11 version this resize handle generally works differently from the one provided by the system if the X11 window manager does not support necessary modern post-ICCCM specifications.</p>
+<p>Put this widget anywhere in a widget tree and the user can use it to resize the top-level window or any widget with the <a href="../qtcore/qt.html#WindowType-enum">Qt::SubWindow</a> flag set. Generally, this should be in the lower right-hand corner.</p>
+<p>Note that <a href="qstatusbar.html">QStatusBar</a> already uses this widget, so if you have a status bar (e.g&#x2e;, you are using <a href="qmainwindow.html">QMainWindow</a>), then you don't need to use this widget explicitly. The same goes for <a href="qdialog.html">QDialog</a>, for which you can just call <a href="qdialog.html#sizeGripEnabled-prop">QDialog::setSizeGripEnabled()</a>.</p>
+<p>On some platforms the size grip automatically hides itself when the window is shown full screen or maximised.</p>
+<div class="table"><table class="generic" width="50%">
+ <tr valign="top" class="odd"><td ><img src="images/fusion-statusbar-sizegrip.png" alt="Screenshot of a Fusion style size grip" /></td><td >A size grip widget at the bottom-right corner of a main window, shown in the <a href="gallery.html">Fusion widget style</a>.</td></tr>
+</table></div>
+<p>The <a href="qsizegrip.html">QSizeGrip</a> class inherits <a href="qwidget.html">QWidget</a> and reimplements the <a href="qwidget.html#mousePressEvent">mousePressEvent()</a> and <a href="qwidget.html#mouseMoveEvent">mouseMoveEvent()</a> functions to feature the resize functionality, and the <a href="qwidget.html#paintEvent">paintEvent()</a> function to render the size grip widget.</p>
+</div>
+<p><b>See also </b><a href="qstatusbar.html">QStatusBar</a> and <a href="qwidget.html#windowState">QWidget::windowState</a>().</p>
+<!-- @@@QSizeGrip -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QSizeGrip[overload1]$$$QSizeGripQWidget* -->
+<h3 class="fn" id="QSizeGrip"><a name="QSizeGrip"></a>QSizeGrip::<span class="name">QSizeGrip</span>(<span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i>)</h3>
+<p>Constructs a resize corner as a child widget of the given <i>parent</i>.</p>
+<!-- @@@QSizeGrip -->
+<!-- $$$~QSizeGrip[overload1]$$$~QSizeGrip -->
+<h3 class="fn" id="dtor.QSizeGrip"><a name="dtor.QSizeGrip"></a><code>[virtual] </code>QSizeGrip::<span class="name">~QSizeGrip</span>()</h3>
+<p>Destroys this size grip.</p>
+<!-- @@@~QSizeGrip -->
+<!-- $$$event[overload1]$$$eventQEvent* -->
+<h3 class="fn" id="event"><a name="event"></a><code>[override virtual protected] </code><span class="type">bool</span> QSizeGrip::<span class="name">event</span>(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#event">QWidget::event</a>(QEvent *event).</p>
+<!-- @@@event -->
+<!-- $$$eventFilter[overload1]$$$eventFilterQObject*QEvent* -->
+<h3 class="fn" id="eventFilter"><a name="eventFilter"></a><code>[override virtual protected] </code><span class="type">bool</span> QSizeGrip::<span class="name">eventFilter</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>o</i>, <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="../qtcore/qobject.html#eventFilter">QObject::eventFilter</a>(QObject *watched, QEvent *event).</p>
+<!-- @@@eventFilter -->
+<!-- $$$hideEvent[overload1]$$$hideEventQHideEvent* -->
+<h3 class="fn" id="hideEvent"><a name="hideEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QSizeGrip::<span class="name">hideEvent</span>(<span class="type"><a href="../qtgui/qhideevent.html">QHideEvent</a></span> *<i>hideEvent</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#hideEvent">QWidget::hideEvent</a>(QHideEvent *event).</p>
+<!-- @@@hideEvent -->
+<!-- $$$mouseMoveEvent[overload1]$$$mouseMoveEventQMouseEvent* -->
+<h3 class="fn" id="mouseMoveEvent"><a name="mouseMoveEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QSizeGrip::<span class="name">mouseMoveEvent</span>(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#mouseMoveEvent">QWidget::mouseMoveEvent</a>(QMouseEvent *event).</p>
+<p>Resizes the top-level widget containing this widget. The mouse move event is passed in the <i>event</i> parameter.</p>
+<!-- @@@mouseMoveEvent -->
+<!-- $$$mousePressEvent[overload1]$$$mousePressEventQMouseEvent* -->
+<h3 class="fn" id="mousePressEvent"><a name="mousePressEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QSizeGrip::<span class="name">mousePressEvent</span>(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#mousePressEvent">QWidget::mousePressEvent</a>(QMouseEvent *event).</p>
+<p>Receives the mouse press events for the widget, and primes the resize operation. The mouse press event is passed in the <i>event</i> parameter.</p>
+<!-- @@@mousePressEvent -->
+<!-- $$$mouseReleaseEvent[overload1]$$$mouseReleaseEventQMouseEvent* -->
+<h3 class="fn" id="mouseReleaseEvent"><a name="mouseReleaseEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QSizeGrip::<span class="name">mouseReleaseEvent</span>(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> *<i>mouseEvent</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#mouseReleaseEvent">QWidget::mouseReleaseEvent</a>(QMouseEvent *event).</p>
+<!-- @@@mouseReleaseEvent -->
+<!-- $$$moveEvent[overload1]$$$moveEventQMoveEvent* -->
+<h3 class="fn" id="moveEvent"><a name="moveEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QSizeGrip::<span class="name">moveEvent</span>(<span class="type"><a href="../qtgui/qmoveevent.html">QMoveEvent</a></span> *<i>moveEvent</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#moveEvent">QWidget::moveEvent</a>(QMoveEvent *event).</p>
+<!-- @@@moveEvent -->
+<!-- $$$paintEvent[overload1]$$$paintEventQPaintEvent* -->
+<h3 class="fn" id="paintEvent"><a name="paintEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QSizeGrip::<span class="name">paintEvent</span>(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#paintEvent">QWidget::paintEvent</a>(QPaintEvent *event).</p>
+<p>Paints the resize grip.</p>
+<p>Resize grips are usually rendered as small diagonal textured lines in the lower-right corner. The paint event is passed in the <i>event</i> parameter.</p>
+<!-- @@@paintEvent -->
+<!-- $$$setVisible[overload1]$$$setVisiblebool -->
+<h3 class="fn" id="setVisible"><a name="setVisible"></a><code>[override virtual] </code><span class="type">void</span> QSizeGrip::<span class="name">setVisible</span>(<span class="type">bool</span> <i>visible</i>)</h3>
+<p>Reimplements an access function for property: <a href="qwidget.html#visible-prop">QWidget::visible</a>.</p>
+<!-- @@@setVisible -->
+<!-- $$$showEvent[overload1]$$$showEventQShowEvent* -->
+<h3 class="fn" id="showEvent"><a name="showEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QSizeGrip::<span class="name">showEvent</span>(<span class="type"><a href="../qtgui/qshowevent.html">QShowEvent</a></span> *<i>showEvent</i>)</h3>
+<p>Reimplements: <a href="qwidget.html#showEvent">QWidget::showEvent</a>(QShowEvent *event).</p>
+<!-- @@@showEvent -->
+<!-- $$$sizeHint[overload1]$$$sizeHint -->
+<h3 class="fn" id="sizeHint"><a name="sizeHint"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QSizeGrip::<span class="name">sizeHint</span>() const</h3>
+<p>Reimplements an access function for property: <a href="qwidget.html#sizeHint-prop">QWidget::sizeHint</a>.</p>
+<!-- @@@sizeHint -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

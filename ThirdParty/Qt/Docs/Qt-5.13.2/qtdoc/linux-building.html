@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- linux.qdoc -->
+  <title>Qt for Linux/X11 - Building from Source | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Qt for Linux/X11 - Building from Source</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#step-1-installing-the-license-file-commercially-licensed-qt-only">Step 1: Installing the License File (Commercially Licensed Qt Only)</a></li>
+<li class="level1"><a href="#step-2-unpacking-the-archive">Step 2: Unpacking the Archive</a></li>
+<li class="level1"><a href="#step-3-building-the-library">Step 3: Building the Library</a></li>
+<li class="level1"><a href="#step-4-set-the-environment-variables">Step 4: Set the Environment Variables</a></li>
+<li class="level1"><a href="#step-5-build-the-qt-documentation">Step 5: Build the Qt Documentation</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt for Linux/X11 - Building from Source</h1>
+<span class="subtitle"></span>
+<!-- $$$linux-building.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>You can download the Qt 5 sources from the <a href="http://qt.io/download">Downloads</a> page. For more information, visit the <a href="gettingstarted.html">Getting Started with Qt</a> page.</p>
+<p>Qt for X11 has some requirements that are given in more detail in the <a href="linux-requirements.html">Qt for X11 Requirements</a> document.</p>
+<a name="step-1-installing-the-license-file-commercially-licensed-qt-only"></a>
+<h2 id="step-1-installing-the-license-file-commercially-licensed-qt-only">Step 1: Installing the License File (Commercially Licensed Qt Only)</h2>
+<p>If you use Qt with a commercial license, the Qt tools look for a local license file. If you are using a binary installer or the commercial Qt Creator, your licenses are automatically fetched and stored in your local user profile (<code>$XDG_DATA_HOME/Qt/qtlicenses.ini</code> file).</p>
+<p>If you do not use any binary installer or Qt Creator, you can download the respective license file from your <a href="https://account.qt.io/">Qt Account</a> Web portal and save it to your user profile as <code>$HOME/.qt-license</code>. If you prefer a different location or file name, you need to set the <code>QT_LICENSE_FILE</code> environment variable to the respective file path.</p>
+<a name="step-2-unpacking-the-archive"></a>
+<h2 id="step-2-unpacking-the-archive">Step 2: Unpacking the Archive</h2>
+<p>Unpack the archive if you have not done so already. For example, if you have the <code>qt-everywhere-opensource-src-%VERSION%.tar.gz</code> package, type the following commands at a command line prompt:</p>
+<pre class="cpp">
+
+  cd <span class="operator">/</span>tmp
+  gunzip qt<span class="operator">-</span>everywhere<span class="operator">-</span>opensource<span class="operator">-</span>src<span class="operator">-</span><span class="operator">%</span>VERSION<span class="operator">%</span><span class="operator">.</span>tar<span class="operator">.</span>gz        <span class="preprocessor"># uncompress the archive</span>
+  tar xvf qt<span class="operator">-</span>everywhere<span class="operator">-</span>opensource<span class="operator">-</span>src<span class="operator">-</span><span class="operator">%</span>VERSION<span class="operator">%</span><span class="operator">.</span>tar          <span class="preprocessor"># unpack it</span>
+
+</pre>
+<p>This creates the directory <code>/tmp/qt-everywhere-opensource-src-%VERSION%</code> containing the files from the archive. We only support the GNU version of the tar archiving utility. Note that on some systems it is called gtar.</p>
+<a name="step-3-building-the-library"></a>
+<h2 id="step-3-building-the-library">Step 3: Building the Library</h2>
+<p>To configure the Qt library for your machine type, run the <code>./configure</code> script in the package directory.</p>
+<p>By default, Qt is configured for installation in the <code>/usr/local/Qt-%VERSION%</code> directory, but this can be changed by using the <code>-prefix</code> option.</p>
+<pre class="cpp">
+
+  cd <span class="operator">/</span>tmp<span class="operator">/</span>qt<span class="operator">-</span>everywhere<span class="operator">-</span>opensource<span class="operator">-</span>src<span class="operator">-</span><span class="operator">%</span>VERSION<span class="operator">%</span>
+  <span class="operator">.</span><span class="operator">/</span>configure
+
+</pre>
+<p>The <a href="configure-options.html">Configure Options</a> page contains more information about the configure options.</p>
+<p>To create the library and compile all the examples, tools, and tutorials, type:</p>
+<pre class="cpp">
+
+  make
+
+</pre>
+<p>If <code>-prefix</code> is outside the build directory, you need to install the library, examples, tools, and tutorials in the appropriate place. To do this (as root if necessary), type:</p>
+<pre class="cpp">
+
+  make install
+
+</pre>
+<p>Note that on some systems the make utility is named differently, like gmake. The configure script tells you which make utility to use.</p>
+<p><b>Note: </b>Later, if you need to reconfigure and rebuild Qt from the same location, ensure that all traces of the previous configuration are removed. To do so, from the build directory, type <code>make confclean</code> before running <code>configure</code> again.</p><a name="step-4-set-the-environment-variables"></a>
+<h2 id="step-4-set-the-environment-variables">Step 4: Set the Environment Variables</h2>
+<p>To use Qt, some environment variables need to be extended.</p>
+<pre class="cpp">
+
+  PATH               <span class="operator">-</span> to locate qmake<span class="operator">,</span> moc and other <span class="type"><a href="../qtcore/qt.html">Qt</a></span> tools
+
+</pre>
+<p>This is done as follows:</p>
+<p>In <code>.profile</code> (if your shell is bash, ksh, zsh or sh), add the following lines:</p>
+<pre class="cpp">
+
+  PATH<span class="operator">=</span><span class="operator">/</span>usr<span class="operator">/</span>local<span class="operator">/</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">-</span><span class="operator">%</span>VERSION<span class="operator">%</span><span class="operator">/</span>bin:$PATH
+  <span class="keyword">export</span> PATH
+
+</pre>
+<p>In <code>.login</code> (if your shell is csh or tcsh), add the following line:</p>
+<pre class="cpp">
+
+  setenv PATH <span class="operator">/</span>usr<span class="operator">/</span>local<span class="operator">/</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">-</span><span class="operator">%</span>VERSION<span class="operator">%</span><span class="operator">/</span>bin:$PATH
+
+</pre>
+<p>If you use a different shell, modify your environment variables accordingly.</p>
+<p>For compilers that do not support rpath you must also extend the <code>LD_LIBRARY_PATH</code> environment variable to include <code>/usr/local/Qt-%VERSION%/lib</code>. On Linux with GCC this step is not needed.</p>
+<a name="step-5-build-the-qt-documentation"></a>
+<h2 id="step-5-build-the-qt-documentation">Step 5: Build the Qt Documentation</h2>
+<p>For the Qt reference documentation to be available in <a href="../qtassistant/qtassistant-index.html">Qt Assistant</a>, you must build it separately:</p>
+<pre class="cpp">
+
+  make docs
+
+</pre>
+</div>
+<!-- @@@linux-building.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

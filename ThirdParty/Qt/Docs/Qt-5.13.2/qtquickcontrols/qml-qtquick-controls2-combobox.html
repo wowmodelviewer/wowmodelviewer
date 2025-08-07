@@ -1,0 +1,626 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickcombobox.cpp -->
+  <title>ComboBox QML Type | Qt Quick Controls 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td ><a href="qtquick-controls2-qmlmodule.html">QML Types</a></td><td >ComboBox QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#editable-combobox">Editable ComboBox</a></li>
+<li class="level2"><a href="#combobox-model-roles">ComboBox Model Roles</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">ComboBox QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$ComboBox-brief -->
+<p>Combined button and popup list for selecting options. <a href="#details">More...</a></p>
+<!-- @@@ComboBox -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Controls 2.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-controls2-control.html">Control</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-controls2-combobox-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-combobox.html#acceptableInput-prop">acceptableInput</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-combobox.html#count-prop">count</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-combobox.html#currentIndex-prop">currentIndex</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-combobox.html#currentText-prop">currentText</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-combobox.html#delegate-prop">delegate</a></b></b> : Component</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-combobox.html#displayText-prop">displayText</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-combobox.html#down-prop">down</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-combobox.html#editText-prop">editText</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-combobox.html#editable-prop">editable</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-combobox.html#flat-prop">flat</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-combobox.html#highlightedIndex-prop">highlightedIndex</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-combobox.html#implicitIndicatorHeight-prop">implicitIndicatorHeight</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-combobox.html#implicitIndicatorWidth-prop">implicitIndicatorWidth</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-combobox.html#indicator-prop">indicator</a></b></b> : Item</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-combobox.html#inputMethodComposing-prop">inputMethodComposing</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-combobox.html#inputMethodHints-prop">inputMethodHints</a></b></b> : flags</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-combobox.html#model-prop">model</a></b></b> : model</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-combobox.html#popup-prop">popup</a></b></b> : Popup</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-combobox.html#pressed-prop">pressed</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-combobox.html#textRole-prop">textRole</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-combobox.html#validator-prop">validator</a></b></b> : Validator</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-combobox.html#accepted-signal">accepted</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-combobox.html#activated-signal">activated</a></b></b>(<i>index</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-combobox.html#highlighted-signal">highlighted</a></b></b>(<i>index</i>)</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-combobox.html#decrementCurrentIndex-method">decrementCurrentIndex</a></b></b>()</li>
+<li class="fn">int <b><b><a href="qml-qtquick-controls2-combobox.html#find-method">find</a></b></b>(<i>text</i>,  flags = <i>Qt.MatchExactly</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-combobox.html#incrementCurrentIndex-method">incrementCurrentIndex</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-combobox.html#selectAll-method">selectAll</a></b></b>()</li>
+<li class="fn">string <b><b><a href="qml-qtquick-controls2-combobox.html#textAt-method">textAt</a></b></b>(<i>index</i>)</li>
+</ul>
+<!-- $$$ComboBox-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p class="centerAlign"><img src="images/qtquickcontrols2-combobox.gif" alt="" /></p><p><a href="qml-qtquick-controls2-combobox.html">ComboBox</a> is a combined button and popup list. It provides a means of presenting a list of options to the user in a way that takes up the minimum amount of screen space.</p>
+<p><a href="qml-qtquick-controls2-combobox.html">ComboBox</a> is populated with a data model. The data model is commonly a JavaScript array, a <a href="../qtqml/qml-qtqml-models-listmodel.html">ListModel</a> or an integer, but other types of <a href="../qtquick/qtquick-modelviewsdata-modelview.html#qml-data-models">data models</a> are also supported.</p>
+<pre class="cpp">
+
+  ComboBox {
+      model: <span class="operator">[</span><span class="string">&quot;First&quot;</span><span class="operator">,</span> <span class="string">&quot;Second&quot;</span><span class="operator">,</span> <span class="string">&quot;Third&quot;</span><span class="operator">]</span>
+  }
+
+</pre>
+<a name="editable-combobox"></a>
+<h2 id="editable-combobox">Editable ComboBox</h2>
+<p><a href="qml-qtquick-controls2-combobox.html">ComboBox</a> can be made <a href="qml-qtquick-controls2-combobox.html#editable-prop">editable</a>. An editable combo box auto-completes its text based on what is available in the model.</p>
+<p>The following example demonstrates appending content to an editable combo box by reacting to the <a href="qml-qtquick-controls2-combobox.html#accepted-signal">accepted</a> signal.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls2-combobox.html">ComboBox</a></span> {
+      <span class="name">editable</span>: <span class="number">true</span>
+      <span class="name">model</span>: <span class="name">ListModel</span> {
+          <span class="name">id</span>: <span class="name">model</span>
+          <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">text</span>: <span class="string">&quot;Banana&quot;</span> }
+          <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">text</span>: <span class="string">&quot;Apple&quot;</span> }
+          <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">text</span>: <span class="string">&quot;Coconut&quot;</span> }
+      }
+      <span class="name">onAccepted</span>: {
+          <span class="keyword">if</span> (<span class="name">find</span>(<span class="name">editText</span>) <span class="operator">===</span> -<span class="number">1</span>)
+              <span class="name">model</span>.<span class="name">append</span>({text: <span class="name">editText</span>})
+      }
+  }
+
+</pre>
+<a name="combobox-model-roles"></a>
+<h2 id="combobox-model-roles">ComboBox Model Roles</h2>
+<p><a href="qml-qtquick-controls2-combobox.html">ComboBox</a> is able to visualize standard <a href="../qtquick/qtquick-modelviewsdata-modelview.html#qml-data-models">data models</a> that provide the <code>modelData</code> role:</p>
+<ul>
+<li>models that have only one role</li>
+<li>models that do not have named roles (JavaScript array, integer)</li>
+</ul>
+<p>When using models that have multiple named roles, <a href="qml-qtquick-controls2-combobox.html">ComboBox</a> must be configured to use a specific <a href="qml-qtquick-controls2-combobox.html#textRole-prop">text role</a> for its <a href="qml-qtquick-controls2-combobox.html#displayText-prop">display text</a> and <a href="qtquickcontrols-chattutorial-example.html#delegate">delegate</a> instances.</p>
+<pre class="cpp">
+
+  ComboBox {
+      textRole: <span class="string">&quot;key&quot;</span>
+      model: ListModel {
+          ListElement { key: <span class="string">&quot;First&quot;</span>; value: <span class="number">123</span> }
+          ListElement { key: <span class="string">&quot;Second&quot;</span>; value: <span class="number">456</span> }
+          ListElement { key: <span class="string">&quot;Third&quot;</span>; value: <span class="number">789</span> }
+      }
+  }
+
+</pre>
+<p><b>Note: </b>If <a href="qml-qtquick-controls2-combobox.html">ComboBox</a> is assigned a data model that has multiple named roles, but <a href="qml-qtquick-controls2-combobox.html#textRole-prop">textRole</a> is not defined, <a href="qml-qtquick-controls2-combobox.html">ComboBox</a> is unable to visualize it and throws a <code>ReferenceError: modelData is not defined</code>.</p><p><b>See also </b><a href="qtquickcontrols2-customize.html#customizing-combobox">Customizing ComboBox</a>, <a href="qtquickcontrols2-input.html">Input Controls</a>, and <a href="qtquickcontrols2-focus.html">Focus Management in Qt Quick Controls</a>.</p>
+<!-- @@@ComboBox -->
+<h2>Property Documentation</h2>
+<!-- $$$acceptableInput -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="acceptableInput-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">acceptableInput</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the combo box contains acceptable text in the editable text field.</p>
+<p>If a validator has been set, the value is <code>true</code> only if the current text is acceptable to the validator as a final string (not as an intermediate string).</p>
+<p>This property was introduced in  QtQuick.Controls 2.2 (Qt 5.9).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-combobox.html#validator-prop">validator</a> and <a href="qml-qtquick-controls2-combobox.html#accepted-signal">accepted</a>.</p>
+</div></div><!-- @@@acceptableInput -->
+<br/>
+<!-- $$$count -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="count-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">count</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the number of items in the combo box.</p>
+</div></div><!-- @@@count -->
+<br/>
+<!-- $$$currentIndex -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="currentIndex-prop"></a><span class="name">currentIndex</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the index of the current item in the combo box.</p>
+<p>The default value is <code>-1</code> when <a href="qml-qtquick-controls2-combobox.html#count-prop">count</a> is <code>0</code>, and <code>0</code> otherwise.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-combobox.html#activated-signal">activated()</a>, <a href="qml-qtquick-controls2-combobox.html#currentText-prop">currentText</a>, and <a href="qml-qtquick-controls2-combobox.html#highlightedIndex-prop">highlightedIndex</a>.</p>
+</div></div><!-- @@@currentIndex -->
+<br/>
+<!-- $$$currentText -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="currentText-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">currentText</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the text of the current item in the combo box.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-combobox.html#currentIndex-prop">currentIndex</a>, <a href="qml-qtquick-controls2-combobox.html#displayText-prop">displayText</a>, <a href="qml-qtquick-controls2-combobox.html#textRole-prop">textRole</a>, and <a href="qml-qtquick-controls2-combobox.html#editText-prop">editText</a>.</p>
+</div></div><!-- @@@currentText -->
+<br/>
+<!-- $$$delegate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="delegate-prop"></a><span class="name">delegate</span> : <span class="type"><a href="../qtqml/qml-qtqml-component.html">Component</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds a delegate that presents an item in the combo box popup.</p>
+<p>It is recommended to use <a href="qml-qtquick-controls2-itemdelegate.html">ItemDelegate</a> (or any other <a href="qml-qtquick-controls2-abstractbutton.html">AbstractButton</a> derivatives) as the delegate. This ensures that the interaction works as expected, and the popup will automatically close when appropriate. When other types are used as the delegate, the popup must be closed manually. For example, if <a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a> is used:</p>
+<pre class="cpp">
+
+  delegate: Rectangle {
+      <span class="comment">// ...</span>
+      MouseArea {
+          <span class="comment">// ...</span>
+          onClicked: comboBox<span class="operator">.</span>popup<span class="operator">.</span>close()
+      }
+  }
+
+</pre>
+<p><b>See also </b><a href="qml-qtquick-controls2-itemdelegate.html">ItemDelegate</a> and <a href="qtquickcontrols2-customize.html#customizing-combobox">Customizing ComboBox</a>.</p>
+</div></div><!-- @@@delegate -->
+<br/>
+<!-- $$$displayText -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="displayText-prop"></a><span class="name">displayText</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the text that is displayed on the combo box button.</p>
+<p>By default, the display text presents the current selection. That is, it follows the text of the current item. However, the default display text can be overridden with a custom value.</p>
+<pre class="cpp">
+
+  ComboBox {
+      currentIndex: <span class="number">1</span>
+      displayText: <span class="string">&quot;Size: &quot;</span> <span class="operator">+</span> currentText
+      model: <span class="operator">[</span><span class="string">&quot;S&quot;</span><span class="operator">,</span> <span class="string">&quot;M&quot;</span><span class="operator">,</span> <span class="string">&quot;L&quot;</span><span class="operator">]</span>
+  }
+
+</pre>
+<p><b>See also </b><a href="qml-qtquick-controls2-combobox.html#currentText-prop">currentText</a> and <a href="qml-qtquick-controls2-combobox.html#textRole-prop">textRole</a>.</p>
+</div></div><!-- @@@displayText -->
+<br/>
+<!-- $$$down -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="down-prop"></a><span class="name">down</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the combo box button is visually down.</p>
+<p>Unless explicitly set, this property is <code>true</code> when either <code>pressed</code> or <code>popup.visible</code> is <code>true</code>. To return to the default value, set this property to <code>undefined</code>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.2 (Qt 5.9).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-combobox.html#pressed-prop">pressed</a> and <a href="qml-qtquick-controls2-combobox.html#popup-prop">popup</a>.</p>
+</div></div><!-- @@@down -->
+<br/>
+<!-- $$$editText -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="editText-prop"></a><span class="name">editText</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the text in the text field of an editable combo box.</p>
+<p>This property was introduced in  QtQuick.Controls 2.2 (Qt 5.9).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-combobox.html#editable-prop">editable</a>, <a href="qml-qtquick-controls2-combobox.html#currentText-prop">currentText</a>, and <a href="qml-qtquick-controls2-combobox.html#displayText-prop">displayText</a>.</p>
+</div></div><!-- @@@editText -->
+<br/>
+<!-- $$$editable -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="editable-prop"></a><span class="name">editable</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the combo box is editable.</p>
+<p>The default value is <code>false</code>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.2 (Qt 5.9).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-combobox.html#validator-prop">validator</a>.</p>
+</div></div><!-- @@@editable -->
+<br/>
+<!-- $$$flat -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="flat-prop"></a><span class="name">flat</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the combo box button is flat.</p>
+<p>A flat combo box button does not draw a background unless it is interacted with. In comparison to normal combo boxes, flat combo boxes provide looks that make them stand out less from the rest of the UI. For instance, when placing a combo box into a tool bar, it may be desirable to make the combo box flat so it matches better with the flat looks of tool buttons.</p>
+<p>The default value is <code>false</code>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.1 (Qt 5.8).</p>
+</div></div><!-- @@@flat -->
+<br/>
+<!-- $$$highlightedIndex -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="highlightedIndex-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">highlightedIndex</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the index of the highlighted item in the combo box popup list.</p>
+<p>When a highlighted item is activated, the popup is closed, <a href="qml-qtquick-controls2-combobox.html#currentIndex-prop">currentIndex</a> is set to <code>highlightedIndex</code>, and the value of this property is reset to <code>-1</code>, as there is no longer a highlighted item.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-combobox.html#highlighted-signal">highlighted()</a> and <a href="qml-qtquick-controls2-combobox.html#currentIndex-prop">currentIndex</a>.</p>
+</div></div><!-- @@@highlightedIndex -->
+<br/>
+<!-- $$$implicitIndicatorHeight -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="implicitIndicatorHeight-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">implicitIndicatorHeight</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the implicit indicator height.</p>
+<p>The value is equal to <code>indicator ? indicator.implicitHeight : 0</code>.</p>
+<p>This is typically used, together with <a href="qml-qtquick-controls2-control.html#implicitContentHeight-prop">implicitContentHeight</a> and <a href="qml-qtquick-controls2-control.html#implicitBackgroundHeight-prop">implicitBackgroundHeight</a>, to calculate the <a href="../qtquick/qml-qtquick-item.html#implicitHeight-prop">implicitHeight</a>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-combobox.html#implicitIndicatorWidth-prop">implicitIndicatorWidth</a>.</p>
+</div></div><!-- @@@implicitIndicatorHeight -->
+<br/>
+<!-- $$$implicitIndicatorWidth -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="implicitIndicatorWidth-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">implicitIndicatorWidth</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the implicit indicator width.</p>
+<p>The value is equal to <code>indicator ? indicator.implicitWidth : 0</code>.</p>
+<p>This is typically used, together with <a href="qml-qtquick-controls2-control.html#implicitContentWidth-prop">implicitContentWidth</a> and <a href="qml-qtquick-controls2-control.html#implicitBackgroundWidth-prop">implicitBackgroundWidth</a>, to calculate the <a href="../qtquick/qml-qtquick-item.html#implicitWidth-prop">implicitWidth</a>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-combobox.html#implicitIndicatorHeight-prop">implicitIndicatorHeight</a>.</p>
+</div></div><!-- @@@implicitIndicatorWidth -->
+<br/>
+<!-- $$$indicator -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="indicator-prop"></a><span class="name">indicator</span> : <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the drop indicator item.</p>
+<p><b>See also </b><a href="qtquickcontrols2-customize.html#customizing-combobox">Customizing ComboBox</a>.</p>
+</div></div><!-- @@@indicator -->
+<br/>
+<!-- $$$inputMethodComposing -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="inputMethodComposing-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">inputMethodComposing</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether an editable combo box has partial text input from an input method.</p>
+<p>While it is composing, an input method may rely on mouse or key events from the combo box to edit or commit the partial text. This property can be used to determine when to disable event handlers that may interfere with the correct operation of an input method.</p>
+<p>This property was introduced in  QtQuick.Controls 2.2 (Qt 5.9).</p>
+</div></div><!-- @@@inputMethodComposing -->
+<br/>
+<!-- $$$inputMethodHints -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="inputMethodHints-prop"></a><span class="name">inputMethodHints</span> : <span class="type">flags</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Provides hints to the input method about the expected content of the combo box and how it should operate.</p>
+<p>The default value is <code>Qt.ImhNoPredictiveText</code>.</p>
+<p>The value is a bit-wise combination of flags or <code>Qt.ImhNone</code> if no hints are set.</p>
+<p>Flags that alter behavior are:</p>
+<ul>
+<li>Qt.ImhHiddenText - Characters should be hidden, as is typically used when entering passwords.</li>
+<li>Qt.ImhSensitiveData - Typed text should not be stored by the active input method in any persistent storage like predictive user dictionary.</li>
+<li>Qt.ImhNoAutoUppercase - The input method should not try to automatically switch to upper case when a sentence ends.</li>
+<li>Qt.ImhPreferNumbers - Numbers are preferred (but not required).</li>
+<li>Qt.ImhPreferUppercase - Upper case letters are preferred (but not required).</li>
+<li>Qt.ImhPreferLowercase - Lower case letters are preferred (but not required).</li>
+<li>Qt.ImhNoPredictiveText - Do not use predictive text (i.e&#x2e; dictionary lookup) while typing.</li>
+<li>Qt.ImhDate - The text editor functions as a date field.</li>
+<li>Qt.ImhTime - The text editor functions as a time field.</li>
+</ul>
+<p>Flags that restrict input (exclusive flags) are:</p>
+<ul>
+<li>Qt.ImhDigitsOnly - Only digits are allowed.</li>
+<li>Qt.ImhFormattedNumbersOnly - Only number input is allowed. This includes decimal point and minus sign.</li>
+<li>Qt.ImhUppercaseOnly - Only upper case letter input is allowed.</li>
+<li>Qt.ImhLowercaseOnly - Only lower case letter input is allowed.</li>
+<li>Qt.ImhDialableCharactersOnly - Only characters suitable for phone dialing are allowed.</li>
+<li>Qt.ImhEmailCharactersOnly - Only characters suitable for email addresses are allowed.</li>
+<li>Qt.ImhUrlCharactersOnly - Only characters suitable for URLs are allowed.</li>
+</ul>
+<p>Masks:</p>
+<ul>
+<li>Qt.ImhExclusiveInputMask - This mask yields nonzero if any of the exclusive flags are used.</li>
+</ul>
+<p>This property was introduced in  QtQuick.Controls 2.2 (Qt 5.9).</p>
+</div></div><!-- @@@inputMethodHints -->
+<br/>
+<!-- $$$model -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="model-prop"></a><span class="name">model</span> : <span class="type">model</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the model providing data for the combo box.</p>
+<pre class="cpp">
+
+  ComboBox {
+      textRole: <span class="string">&quot;key&quot;</span>
+      model: ListModel {
+          ListElement { key: <span class="string">&quot;First&quot;</span>; value: <span class="number">123</span> }
+          ListElement { key: <span class="string">&quot;Second&quot;</span>; value: <span class="number">456</span> }
+          ListElement { key: <span class="string">&quot;Third&quot;</span>; value: <span class="number">789</span> }
+      }
+  }
+
+</pre>
+<p><b>See also </b><a href="qml-qtquick-controls2-combobox.html#textRole-prop">textRole</a> and <a href="../qtquick/qtquick-modelviewsdata-modelview.html#qml-data-models">Data Models</a>.</p>
+</div></div><!-- @@@model -->
+<br/>
+<!-- $$$popup -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="popup-prop"></a><span class="name">popup</span> : <span class="type"><a href="qml-qtquick-controls2-popup.html">Popup</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the popup.</p>
+<p>The popup can be opened or closed manually, if necessary:</p>
+<pre class="cpp">
+
+  onSpecialEvent: comboBox<span class="operator">.</span>popup<span class="operator">.</span>close()
+
+</pre>
+<p><b>See also </b><a href="qtquickcontrols2-customize.html#customizing-combobox">Customizing ComboBox</a>.</p>
+</div></div><!-- @@@popup -->
+<br/>
+<!-- $$$pressed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="pressed-prop"></a><span class="name">pressed</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the combo box button is physically pressed. A button can be pressed by either touch or key events.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-combobox.html#down-prop">down</a>.</p>
+</div></div><!-- @@@pressed -->
+<br/>
+<!-- $$$textRole -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="textRole-prop"></a><span class="name">textRole</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the model role used for populating the combo box.</p>
+<p>When the model has multiple roles, <code>textRole</code> can be set to determine which role should be displayed.</p>
+<p><b>See also </b><a href="qtquickcontrols-chattutorial-example.html#model">model</a>, <a href="qml-qtquick-controls2-combobox.html#currentText-prop">currentText</a>, <a href="qml-qtquick-controls2-combobox.html#displayText-prop">displayText</a>, and <a href="qml-qtquick-controls2-combobox.html#combobox-model-roles">ComboBox Model Roles</a>.</p>
+</div></div><!-- @@@textRole -->
+<br/>
+<!-- $$$validator -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="validator-prop"></a><span class="name">validator</span> : <span class="type">Validator</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds an input text validator for an editable combo box.</p>
+<p>When a validator is set, the text field will only accept input which leaves the text property in an intermediate state. The <a href="qml-qtquick-controls2-combobox.html#accepted-signal">accepted</a> signal will only be emitted if the text is in an acceptable state when the <b>Return</b> or <b>Enter</b> key is pressed.</p>
+<p>The currently supported validators are <a href="../qtquick/qml-qtquick-intvalidator.html">IntValidator</a>, <a href="../qtquick/qml-qtquick-doublevalidator.html">DoubleValidator</a>, and <a href="../qtquick/qml-qtquick-regexpvalidator.html">RegExpValidator</a>. An example of using validators is shown below, which allows input of integers between <code>0</code> and <code>10</code> into the text field:</p>
+<pre class="cpp">
+
+  ComboBox {
+      model: <span class="number">10</span>
+      editable: <span class="keyword">true</span>
+      validator: IntValidator {
+          top: <span class="number">9</span>
+          bottom: <span class="number">0</span>
+      }
+  }
+
+</pre>
+<p>This property was introduced in  QtQuick.Controls 2.2 (Qt 5.9).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-combobox.html#acceptableInput-prop">acceptableInput</a>, <a href="qml-qtquick-controls2-combobox.html#accepted-signal">accepted</a>, and <a href="qml-qtquick-controls2-combobox.html#editable-prop">editable</a>.</p>
+</div></div><!-- @@@validator -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$accepted[overload1]$$$accepted -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="accepted-signal"></a><span class="type">void</span> <span class="name">accepted</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the <b>Return</b> or <b>Enter</b> key is pressed on an <a href="qml-qtquick-controls2-combobox.html#editable-prop">editable</a> combo box.</p>
+<p>You can handle this signal in order to add the newly entered item to the model, for example:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls2-combobox.html">ComboBox</a></span> {
+      <span class="name">editable</span>: <span class="number">true</span>
+      <span class="name">model</span>: <span class="name">ListModel</span> {
+          <span class="name">id</span>: <span class="name">model</span>
+          <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">text</span>: <span class="string">&quot;Banana&quot;</span> }
+          <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">text</span>: <span class="string">&quot;Apple&quot;</span> }
+          <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">text</span>: <span class="string">&quot;Coconut&quot;</span> }
+      }
+      <span class="name">onAccepted</span>: {
+          <span class="keyword">if</span> (<span class="name">find</span>(<span class="name">editText</span>) <span class="operator">===</span> -<span class="number">1</span>)
+              <span class="name">model</span>.<span class="name">append</span>({text: <span class="name">editText</span>})
+      }
+  }
+
+</pre>
+<p>Before the signal is emitted, a check is done to see if the string exists in the model. If it does, <a href="qml-qtquick-controls2-combobox.html#currentIndex-prop">currentIndex</a> will be set to its index, and <a href="qml-qtquick-controls2-combobox.html#currentText-prop">currentText</a> to the string itself.</p>
+<p>After the signal has been emitted, and if the first check failed (that is, the item did not exist), another check will be done to see if the item was added by the signal handler. If it was, the <a href="qml-qtquick-controls2-combobox.html#currentIndex-prop">currentIndex</a> and <a href="qml-qtquick-controls2-combobox.html#currentText-prop">currentText</a> are updated accordingly. Otherwise, they will be set to <code>-1</code> and <code>&quot;&quot;</code>, respectively.</p>
+<p><b>Note: </b>If there is a <a href="qml-qtquick-controls2-combobox.html#validator-prop">validator</a> set on the combo box, the signal will only be emitted if the input is in an acceptable state.</p><p>This signal was introduced in  QtQuick.Controls 2.2 (Qt 5.9).</p>
+</div></div><!-- @@@accepted -->
+<br/>
+<!-- $$$activated[overload1]$$$activated -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="activated-signal"></a><span class="type">void</span> <span class="name">activated</span>(<i>index</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the item at <i>index</i> is activated by the user.</p>
+<p>An item is activated when it is selected while the popup is open, causing the popup to close (and <a href="qml-qtquick-controls2-combobox.html#currentIndex-prop">currentIndex</a> to change), or while the popup is closed and the combo box is navigated via keyboard, causing the <a href="qml-qtquick-controls2-combobox.html#currentIndex-prop">currentIndex</a> to change. The <a href="qml-qtquick-controls2-combobox.html#currentIndex-prop">currentIndex</a> property is set to <i>index</i>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-combobox.html#currentIndex-prop">currentIndex</a>.</p>
+</div></div><!-- @@@activated -->
+<br/>
+<!-- $$$highlighted[overload1]$$$highlighted -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="highlighted-signal"></a><span class="type">void</span> <span class="name">highlighted</span>(<i>index</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the item at <i>index</i> in the popup list is highlighted by the user.</p>
+<p>The highlighted signal is only emitted when the popup is open and an item is highlighted, but not necessarily <a href="qml-qtquick-controls2-combobox.html#activated-signal">activated</a>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-combobox.html#highlightedIndex-prop">highlightedIndex</a>.</p>
+</div></div><!-- @@@highlighted -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$decrementCurrentIndex[overload1]$$$decrementCurrentIndex -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="decrementCurrentIndex-method"></a><span class="type">void</span> <span class="name">decrementCurrentIndex</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Decrements the current index of the combo box, or the highlighted index if the popup list is visible.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-combobox.html#currentIndex-prop">currentIndex</a> and <a href="qml-qtquick-controls2-combobox.html#highlightedIndex-prop">highlightedIndex</a>.</p>
+</div></div><!-- @@@decrementCurrentIndex -->
+<br/>
+<!-- $$$find[overload1]$$$findflags= -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="find-method"></a><span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">find</span>(<i>text</i>,  <span class="type">flags</span> = <i>Qt.MatchExactly</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the index of the specified <i>text</i>, or <code>-1</code> if no match is found.</p>
+<p>The way the search is performed is defined by the specified match <i>flags</i>. By default, combo box performs case sensitive exact matching (<code>Qt.MatchExactly</code>). All other match types are case-insensitive unless the <code>Qt.MatchCaseSensitive</code> flag is also specified.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Qt.MatchExactly</code></td><td class="topAlign">The search term matches exactly (default).</td></tr>
+<tr><td class="topAlign"><code>Qt.MatchRegExp</code></td><td class="topAlign">The search term matches as a regular expression.</td></tr>
+<tr><td class="topAlign"><code>Qt.MatchWildcard</code></td><td class="topAlign">The search term matches using wildcards.</td></tr>
+<tr><td class="topAlign"><code>Qt.MatchFixedString</code></td><td class="topAlign">The search term matches as a fixed string.</td></tr>
+<tr><td class="topAlign"><code>Qt.MatchStartsWith</code></td><td class="topAlign">The search term matches the start of the item.</td></tr>
+<tr><td class="topAlign"><code>Qt.MatchEndsWidth</code></td><td class="topAlign">The search term matches the end of the item.</td></tr>
+<tr><td class="topAlign"><code>Qt.MatchContains</code></td><td class="topAlign">The search term is contained in the item.</td></tr>
+<tr><td class="topAlign"><code>Qt.MatchCaseSensitive</code></td><td class="topAlign">The search is case sensitive.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qml-qtquick-controls2-combobox.html#textRole-prop">textRole</a>.</p>
+</div></div><!-- @@@find -->
+<br/>
+<!-- $$$incrementCurrentIndex[overload1]$$$incrementCurrentIndex -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="incrementCurrentIndex-method"></a><span class="type">void</span> <span class="name">incrementCurrentIndex</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Increments the current index of the combo box, or the highlighted index if the popup list is visible.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-combobox.html#currentIndex-prop">currentIndex</a> and <a href="qml-qtquick-controls2-combobox.html#highlightedIndex-prop">highlightedIndex</a>.</p>
+</div></div><!-- @@@incrementCurrentIndex -->
+<br/>
+<!-- $$$selectAll[overload1]$$$selectAll -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="selectAll-method"></a><span class="type">void</span> <span class="name">selectAll</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Selects all the text in the editable text field of the combo box.</p>
+<p>This method was introduced in  QtQuick.Controls 2.2 (Qt 5.9).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-combobox.html#editText-prop">editText</a>.</p>
+</div></div><!-- @@@selectAll -->
+<br/>
+<!-- $$$textAt[overload1]$$$textAt -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="textAt-method"></a><span class="type"><a href="../qtqml/qml-string.html">string</a></span> <span class="name">textAt</span>(<i>index</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns the text for the specified <i>index</i>, or an empty string if the index is out of bounds.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-combobox.html#textRole-prop">textRole</a>.</p>
+</div></div><!-- @@@textAt -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

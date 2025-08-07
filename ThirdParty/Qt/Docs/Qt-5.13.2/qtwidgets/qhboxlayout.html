@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qboxlayout.cpp -->
+  <title>QHBoxLayout Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QHBoxLayout</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QHBoxLayout Class</h1>
+<!-- $$$QHBoxLayout-brief -->
+<p>The <a href="qhboxlayout.html">QHBoxLayout</a> class lines up widgets horizontally. <a href="#details">More...</a></p>
+<!-- @@@QHBoxLayout -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QHBoxLayout&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qboxlayout.html">QBoxLayout</a></td></tr></table></div><ul>
+<li><a href="qhboxlayout-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qhboxlayout.html#QHBoxLayout-1">QHBoxLayout</a></b>(QWidget *<i>parent</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qhboxlayout.html#QHBoxLayout">QHBoxLayout</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qhboxlayout.html#dtor.QHBoxLayout">~QHBoxLayout</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QHBoxLayout-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This class is used to construct horizontal box layout objects. See <a href="qboxlayout.html">QBoxLayout</a> for details.</p>
+<p>The simplest use of the class is like this:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>window <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qwidget.html">QWidget</a></span>;
+      <span class="type"><a href="qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>button1 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpushbutton.html">QPushButton</a></span>(<span class="string">&quot;One&quot;</span>);
+      <span class="type"><a href="qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>button2 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpushbutton.html">QPushButton</a></span>(<span class="string">&quot;Two&quot;</span>);
+      <span class="type"><a href="qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>button3 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpushbutton.html">QPushButton</a></span>(<span class="string">&quot;Three&quot;</span>);
+      <span class="type"><a href="qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>button4 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpushbutton.html">QPushButton</a></span>(<span class="string">&quot;Four&quot;</span>);
+      <span class="type"><a href="qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>button5 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpushbutton.html">QPushButton</a></span>(<span class="string">&quot;Five&quot;</span>);
+
+      <span class="type"><a href="qhboxlayout.html#QHBoxLayout">QHBoxLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qhboxlayout.html#QHBoxLayout">QHBoxLayout</a></span>;
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(button1);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(button2);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(button3);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(button4);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(button5);
+
+      window<span class="operator">-</span><span class="operator">&gt;</span>setLayout(layout);
+      window<span class="operator">-</span><span class="operator">&gt;</span>show();
+
+</pre>
+<p>First, we create the widgets we want in the layout. Then, we create the <a href="qhboxlayout.html">QHBoxLayout</a> object and add the widgets into the layout. Finally, we call <a href="qwidget.html#setLayout">QWidget::setLayout</a>() to install the <a href="qhboxlayout.html">QHBoxLayout</a> object onto the widget. At that point, the widgets in the layout are reparented to have <code>window</code> as their parent.</p>
+<p class="centerAlign"><img src="images/qhboxlayout-with-5-children.png" alt="Horizontal box layout with five child widgets" /></p></div>
+<p><b>See also </b><a href="qvboxlayout.html">QVBoxLayout</a>, <a href="qgridlayout.html">QGridLayout</a>, <a href="qstackedlayout.html">QStackedLayout</a>, <a href="layout.html">Layout Management</a>, and <a href="qtwidgets-layouts-basiclayouts-example.html">Basic Layouts Example</a>.</p>
+<!-- @@@QHBoxLayout -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QHBoxLayout$$$QHBoxLayoutQWidget* -->
+<h3 class="fn" id="QHBoxLayout-1"><a name="QHBoxLayout-1"></a>QHBoxLayout::<span class="name">QHBoxLayout</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>parent</i>)</h3>
+<p>Constructs a new top-level horizontal box with parent <i>parent</i>.</p>
+<!-- @@@QHBoxLayout -->
+<!-- $$$QHBoxLayout[overload1]$$$QHBoxLayout -->
+<h3 class="fn" id="QHBoxLayout"><a name="QHBoxLayout"></a>QHBoxLayout::<span class="name">QHBoxLayout</span>()</h3>
+<p>Constructs a new horizontal box. You must add it to another layout.</p>
+<!-- @@@QHBoxLayout -->
+<!-- $$$~QHBoxLayout[overload1]$$$~QHBoxLayout -->
+<h3 class="fn" id="dtor.QHBoxLayout"><a name="dtor.QHBoxLayout"></a><code>[virtual] </code>QHBoxLayout::<span class="name">~QHBoxLayout</span>()</h3>
+<p>Destroys this box layout.</p>
+<p>The layout's widgets aren't destroyed.</p>
+<!-- @@@~QHBoxLayout -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

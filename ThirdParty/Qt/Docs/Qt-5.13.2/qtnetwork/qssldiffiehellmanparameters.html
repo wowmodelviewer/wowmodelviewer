@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qssldiffiehellmanparameters.cpp -->
+  <title>QSslDiffieHellmanParameters Class | Qt Network 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtnetwork-index.html">Qt Network</a></td><td ><a href="qtnetwork-module.html">C++ Classes</a></td><td >QSslDiffieHellmanParameters</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtnetwork-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSslDiffieHellmanParameters Class</h1>
+<!-- $$$QSslDiffieHellmanParameters-brief -->
+<p>The <a href="qssldiffiehellmanparameters.html">QSslDiffieHellmanParameters</a> class provides an interface for Diffie-Hellman parameters for servers. <a href="#details">More...</a></p>
+<!-- @@@QSslDiffieHellmanParameters -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QSslDiffieHellmanParameters&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += network</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr></table></div><p>This class was introduced in  Qt 5.8.</p>
+<ul>
+<li><a href="qssldiffiehellmanparameters-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qssldiffiehellmanparameters.html#Error-enum">Error</a></b> { NoError, InvalidInputDataError, UnsafeParametersError }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qssldiffiehellmanparameters.html#QSslDiffieHellmanParameters-2">QSslDiffieHellmanParameters</a></b>(QSslDiffieHellmanParameters &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qssldiffiehellmanparameters.html#QSslDiffieHellmanParameters-1">QSslDiffieHellmanParameters</a></b>(const QSslDiffieHellmanParameters &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qssldiffiehellmanparameters.html#QSslDiffieHellmanParameters">QSslDiffieHellmanParameters</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSslDiffieHellmanParameters &amp;</td><td class="memItemRight bottomAlign"><b><a href="qssldiffiehellmanparameters.html#operator-eq-1">operator=</a></b>(QSslDiffieHellmanParameters &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSslDiffieHellmanParameters &amp;</td><td class="memItemRight bottomAlign"><b><a href="qssldiffiehellmanparameters.html#operator-eq">operator=</a></b>(const QSslDiffieHellmanParameters &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qssldiffiehellmanparameters.html#dtor.QSslDiffieHellmanParameters">~QSslDiffieHellmanParameters</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSslDiffieHellmanParameters::Error </td><td class="memItemRight bottomAlign"><b><a href="qssldiffiehellmanparameters.html#error">error</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qssldiffiehellmanparameters.html#errorString">errorString</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qssldiffiehellmanparameters.html#isEmpty">isEmpty</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qssldiffiehellmanparameters.html#isValid">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qssldiffiehellmanparameters.html#swap">swap</a></b>(QSslDiffieHellmanParameters &amp;<i>other</i>)</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QSslDiffieHellmanParameters </td><td class="memItemRight bottomAlign"><b><a href="qssldiffiehellmanparameters.html#defaultParameters">defaultParameters</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSslDiffieHellmanParameters </td><td class="memItemRight bottomAlign"><b><a href="qssldiffiehellmanparameters.html#fromEncoded">fromEncoded</a></b>(const QByteArray &amp;<i>encoded</i>, QSsl::EncodingFormat <i>encoding</i> = QSsl::Pem)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSslDiffieHellmanParameters </td><td class="memItemRight bottomAlign"><b><a href="qssldiffiehellmanparameters.html#fromEncoded-1">fromEncoded</a></b>(QIODevice *<i>device</i>, QSsl::EncodingFormat <i>encoding</i> = QSsl::Pem)</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qssldiffiehellmanparameters.html#qHash">qHash</a></b>(const QSslDiffieHellmanParameters &amp;<i>dhparam</i>, uint <i>seed</i> = 0)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDebug </td><td class="memItemRight bottomAlign"><b><a href="qssldiffiehellmanparameters.html#operator-lt-lt">operator&lt;&lt;</a></b>(QDebug <i>debug</i>, const QSslDiffieHellmanParameters &amp;<i>dhparam</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qssldiffiehellmanparameters.html#operator-eq-eq">operator==</a></b>(const QSslDiffieHellmanParameters &amp;<i>lhs</i>, const QSslDiffieHellmanParameters &amp;<i>rhs</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSslDiffieHellmanParameters-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qssldiffiehellmanparameters.html">QSslDiffieHellmanParameters</a> provides an interface for setting Diffie-Hellman parameters to servers based on <a href="qsslsocket.html">QSslSocket</a>.</p>
+</div>
+<p><b>See also </b><a href="qsslsocket.html">QSslSocket</a>, <a href="qsslcipher.html">QSslCipher</a>, and <a href="qsslconfiguration.html">QSslConfiguration</a>.</p>
+<!-- @@@QSslDiffieHellmanParameters -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Error$$$NoError$$$InvalidInputDataError$$$UnsafeParametersError -->
+<h3 class="fn" id="Error-enum"><a name="Error-enum"></a>enum QSslDiffieHellmanParameters::<span class="name">Error</span></h3>
+<p>Describes a <a href="qssldiffiehellmanparameters.html">QSslDiffieHellmanParameters</a> error.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QSslDiffieHellmanParameters::NoError</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">No error occurred.</td></tr>
+<tr><td class="topAlign"><code>QSslDiffieHellmanParameters::InvalidInputDataError</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The given input data could not be used to construct a <a href="qssldiffiehellmanparameters.html">QSslDiffieHellmanParameters</a> object.</td></tr>
+<tr><td class="topAlign"><code>QSslDiffieHellmanParameters::UnsafeParametersError</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The Diffie-Hellman parameters are unsafe and should not be used.</td></tr>
+</table></div>
+<!-- @@@Error -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QSslDiffieHellmanParameters$$$QSslDiffieHellmanParametersQSslDiffieHellmanParameters&& -->
+<h3 class="fn" id="QSslDiffieHellmanParameters-2"><a name="QSslDiffieHellmanParameters-2"></a>QSslDiffieHellmanParameters::<span class="name">QSslDiffieHellmanParameters</span>(<span class="type"><a href="qssldiffiehellmanparameters.html#QSslDiffieHellmanParameters">QSslDiffieHellmanParameters</a></span> &amp;&amp;<i>other</i>)</h3>
+<p>Move-constructs from <i>other</i>.</p>
+<p><b>Note: </b>The moved-from object <i>other</i> is placed in a partially-formed state, in which the only valid operations are destruction and assignment of a new value.</p><!-- @@@QSslDiffieHellmanParameters -->
+<!-- $$$QSslDiffieHellmanParameters$$$QSslDiffieHellmanParametersconstQSslDiffieHellmanParameters& -->
+<h3 class="fn" id="QSslDiffieHellmanParameters-1"><a name="QSslDiffieHellmanParameters-1"></a>QSslDiffieHellmanParameters::<span class="name">QSslDiffieHellmanParameters</span>(const <span class="type"><a href="qssldiffiehellmanparameters.html#QSslDiffieHellmanParameters">QSslDiffieHellmanParameters</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs an identical copy of <i>other</i>.</p>
+<!-- @@@QSslDiffieHellmanParameters -->
+<!-- $$$QSslDiffieHellmanParameters[overload1]$$$QSslDiffieHellmanParameters -->
+<h3 class="fn" id="QSslDiffieHellmanParameters"><a name="QSslDiffieHellmanParameters"></a>QSslDiffieHellmanParameters::<span class="name">QSslDiffieHellmanParameters</span>()</h3>
+<p>Constructs an empty <a href="qssldiffiehellmanparameters.html">QSslDiffieHellmanParameters</a> instance.</p>
+<p>If an empty <a href="qssldiffiehellmanparameters.html">QSslDiffieHellmanParameters</a> instance is set on a <a href="qsslconfiguration.html">QSslConfiguration</a> object, Diffie-Hellman negotiation will be disabled.</p>
+<p><b>See also </b><a href="qssldiffiehellmanparameters.html#isValid">isValid</a>() and <a href="qsslconfiguration.html">QSslConfiguration</a>.</p>
+<!-- @@@QSslDiffieHellmanParameters -->
+<!-- $$$operator=$$$operator=QSslDiffieHellmanParameters&& -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type"><a href="qssldiffiehellmanparameters.html#QSslDiffieHellmanParameters">QSslDiffieHellmanParameters</a></span> &amp;QSslDiffieHellmanParameters::<span class="name">operator=</span>(<span class="type"><a href="qssldiffiehellmanparameters.html#QSslDiffieHellmanParameters">QSslDiffieHellmanParameters</a></span> &amp;&amp;<i>other</i>)</h3>
+<p>Move-assigns <i>other</i> to this <a href="qssldiffiehellmanparameters.html">QSslDiffieHellmanParameters</a> instance.</p>
+<p><b>Note: </b>The moved-from object <i>other</i> is placed in a partially-formed state, in which the only valid operations are destruction and assignment of a new value.</p><!-- @@@operator= -->
+<!-- $$$operator=[overload1]$$$operator=constQSslDiffieHellmanParameters& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qssldiffiehellmanparameters.html#QSslDiffieHellmanParameters">QSslDiffieHellmanParameters</a></span> &amp;QSslDiffieHellmanParameters::<span class="name">operator=</span>(const <span class="type"><a href="qssldiffiehellmanparameters.html#QSslDiffieHellmanParameters">QSslDiffieHellmanParameters</a></span> &amp;<i>other</i>)</h3>
+<p>Copies the contents of <i>other</i> into this <a href="qssldiffiehellmanparameters.html">QSslDiffieHellmanParameters</a>, making the two <a href="qssldiffiehellmanparameters.html">QSslDiffieHellmanParameters</a> identical.</p>
+<p>Returns a reference to this <a href="qssldiffiehellmanparameters.html">QSslDiffieHellmanParameters</a>.</p>
+<!-- @@@operator= -->
+<!-- $$$~QSslDiffieHellmanParameters[overload1]$$$~QSslDiffieHellmanParameters -->
+<h3 class="fn" id="dtor.QSslDiffieHellmanParameters"><a name="dtor.QSslDiffieHellmanParameters"></a>QSslDiffieHellmanParameters::<span class="name">~QSslDiffieHellmanParameters</span>()</h3>
+<p>Destroys the <a href="qssldiffiehellmanparameters.html">QSslDiffieHellmanParameters</a> object.</p>
+<!-- @@@~QSslDiffieHellmanParameters -->
+<!-- $$$defaultParameters[overload1]$$$defaultParameters -->
+<h3 class="fn" id="defaultParameters"><a name="defaultParameters"></a><code>[static] </code><span class="type"><a href="qssldiffiehellmanparameters.html#QSslDiffieHellmanParameters">QSslDiffieHellmanParameters</a></span> QSslDiffieHellmanParameters::<span class="name">defaultParameters</span>()</h3>
+<p>Returns the default <a href="qssldiffiehellmanparameters.html">QSslDiffieHellmanParameters</a> used by <a href="qsslsocket.html">QSslSocket</a>.</p>
+<p>This is currently the 1024-bit MODP group from RFC 2459, also known as the Second Oakley Group.</p>
+<!-- @@@defaultParameters -->
+<!-- $$$error[overload1]$$$error -->
+<h3 class="fn" id="error"><a name="error"></a><span class="type"><a href="qssldiffiehellmanparameters.html#Error-enum">QSslDiffieHellmanParameters::Error</a></span> QSslDiffieHellmanParameters::<span class="name">error</span>() const</h3>
+<p>Returns the error that caused the <a href="qssldiffiehellmanparameters.html">QSslDiffieHellmanParameters</a> object to be invalid.</p>
+<!-- @@@error -->
+<!-- $$$errorString[overload1]$$$errorString -->
+<h3 class="fn" id="errorString"><a name="errorString"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QSslDiffieHellmanParameters::<span class="name">errorString</span>() const</h3>
+<p>Returns a human-readable description of the error that caused the <a href="qssldiffiehellmanparameters.html">QSslDiffieHellmanParameters</a> object to be invalid.</p>
+<!-- @@@errorString -->
+<!-- $$$fromEncoded[overload1]$$$fromEncodedconstQByteArray&QSsl::EncodingFormat -->
+<h3 class="fn" id="fromEncoded"><a name="fromEncoded"></a><code>[static] </code><span class="type"><a href="qssldiffiehellmanparameters.html#QSslDiffieHellmanParameters">QSslDiffieHellmanParameters</a></span> QSslDiffieHellmanParameters::<span class="name">fromEncoded</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>encoded</i>, <span class="type"><a href="qssl.html#EncodingFormat-enum">QSsl::EncodingFormat</a></span> <i>encoding</i> = QSsl::Pem)</h3>
+<p>Constructs a <a href="qssldiffiehellmanparameters.html">QSslDiffieHellmanParameters</a> object using the byte array <i>encoded</i> in either PEM or DER form as specified by <i>encoding</i>.</p>
+<p>Use the <a href="qssldiffiehellmanparameters.html#isValid">isValid</a>() method on the returned object to check whether the Diffie-Hellman parameters were valid and loaded correctly.</p>
+<p><b>See also </b><a href="qssldiffiehellmanparameters.html#isValid">isValid</a>() and <a href="qsslconfiguration.html">QSslConfiguration</a>.</p>
+<!-- @@@fromEncoded -->
+<!-- $$$fromEncoded$$$fromEncodedQIODevice*QSsl::EncodingFormat -->
+<h3 class="fn" id="fromEncoded-1"><a name="fromEncoded-1"></a><code>[static] </code><span class="type"><a href="qssldiffiehellmanparameters.html#QSslDiffieHellmanParameters">QSslDiffieHellmanParameters</a></span> QSslDiffieHellmanParameters::<span class="name">fromEncoded</span>(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span> *<i>device</i>, <span class="type"><a href="qssl.html#EncodingFormat-enum">QSsl::EncodingFormat</a></span> <i>encoding</i> = QSsl::Pem)</h3>
+<p>Constructs a <a href="qssldiffiehellmanparameters.html">QSslDiffieHellmanParameters</a> object by reading from <i>device</i> in either PEM or DER form as specified by <i>encoding</i>.</p>
+<p>Use the <a href="qssldiffiehellmanparameters.html#isValid">isValid</a>() method on the returned object to check whether the Diffie-Hellman parameters were valid and loaded correctly.</p>
+<p>In particular, if <i>device</i> is <code>nullptr</code> or not open for reading, an invalid object will be returned.</p>
+<p><b>See also </b><a href="qssldiffiehellmanparameters.html#isValid">isValid</a>() and <a href="qsslconfiguration.html">QSslConfiguration</a>.</p>
+<!-- @@@fromEncoded -->
+<!-- $$$isEmpty[overload1]$$$isEmpty -->
+<h3 class="fn" id="isEmpty"><a name="isEmpty"></a><span class="type">bool</span> QSslDiffieHellmanParameters::<span class="name">isEmpty</span>() const</h3>
+<p>Returns <code>true</code> if this is a an empty <a href="qssldiffiehellmanparameters.html">QSslDiffieHellmanParameters</a> instance.</p>
+<p>Setting an empty <a href="qssldiffiehellmanparameters.html">QSslDiffieHellmanParameters</a> instance on a <a href="qsslsocket.html">QSslSocket</a>-based server will disable Diffie-Hellman key exchange.</p>
+<!-- @@@isEmpty -->
+<!-- $$$isValid[overload1]$$$isValid -->
+<h3 class="fn" id="isValid"><a name="isValid"></a><span class="type">bool</span> QSslDiffieHellmanParameters::<span class="name">isValid</span>() const</h3>
+<p>Returns <code>true</code> if this is a valid <a href="qssldiffiehellmanparameters.html">QSslDiffieHellmanParameters</a>; otherwise false.</p>
+<p>This method should be used after constructing a <a href="qssldiffiehellmanparameters.html">QSslDiffieHellmanParameters</a> object to determine its validity.</p>
+<p>If a <a href="qssldiffiehellmanparameters.html">QSslDiffieHellmanParameters</a> object is not valid, you can use the <a href="qssldiffiehellmanparameters.html#error">error</a>() method to determine what error prevented the object from being constructed.</p>
+<p><b>See also </b><a href="qssldiffiehellmanparameters.html#error">error</a>().</p>
+<!-- @@@isValid -->
+<!-- $$$swap[overload1]$$$swapQSslDiffieHellmanParameters& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QSslDiffieHellmanParameters::<span class="name">swap</span>(<span class="type"><a href="qssldiffiehellmanparameters.html#QSslDiffieHellmanParameters">QSslDiffieHellmanParameters</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps this <a href="qssldiffiehellmanparameters.html">QSslDiffieHellmanParameters</a> with <i>other</i>. This function is very fast and never fails.</p>
+<!-- @@@swap -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$qHash[overload1]$$$qHashconstQSslDiffieHellmanParameters&uint -->
+<h3 class="fn" id="qHash"><a name="qHash"></a><span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> <span class="name">qHash</span>(const <span class="type"><a href="qssldiffiehellmanparameters.html#QSslDiffieHellmanParameters">QSslDiffieHellmanParameters</a></span> &amp;<i>dhparam</i>, <span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> <i>seed</i> = 0)</h3>
+<p>Returns an hash value for <i>dhparam</i>, using <i>seed</i> to seed the calculation.</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<!-- @@@qHash -->
+<!-- $$$operator<<[overload1]$$$operator<<QDebugconstQSslDiffieHellmanParameters& -->
+<h3 class="fn" id="operator-lt-lt"><a name="operator-lt-lt"></a><span class="type"><a href="../qtcore/qdebug.html">QDebug</a></span> <span class="name">operator&lt;&lt;</span>(<span class="type"><a href="../qtcore/qdebug.html">QDebug</a></span> <i>debug</i>, const <span class="type"><a href="qssldiffiehellmanparameters.html#QSslDiffieHellmanParameters">QSslDiffieHellmanParameters</a></span> &amp;<i>dhparam</i>)</h3>
+<p>Writes the set of Diffie-Hellman parameters in <i>dhparam</i> into the debug object <i>debug</i> for debugging purposes.</p>
+<p>The Diffie-Hellman parameters will be represented in Base64-encoded DER form.</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<p><b>See also </b><a href="../qtdoc/testing-and-debugging.html#debugging-techniques">Debugging Techniques</a>.</p>
+<!-- @@@operator<< -->
+<!-- $$$operator==[overload1]$$$operator==constQSslDiffieHellmanParameters&constQSslDiffieHellmanParameters& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> <span class="name">operator==</span>(const <span class="type"><a href="qssldiffiehellmanparameters.html#QSslDiffieHellmanParameters">QSslDiffieHellmanParameters</a></span> &amp;<i>lhs</i>, const <span class="type"><a href="qssldiffiehellmanparameters.html#QSslDiffieHellmanParameters">QSslDiffieHellmanParameters</a></span> &amp;<i>rhs</i>)</h3>
+<p>Returns <code>true</code> if <i>lhs</i> is equal to <i>rhs</i>; otherwise returns <code>false</code>.</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

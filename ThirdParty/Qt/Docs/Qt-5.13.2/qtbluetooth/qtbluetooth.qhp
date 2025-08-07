@@ -1,0 +1,1221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+    <namespace>org.qt-project.qtbluetooth.5132</namespace>
+    <virtualFolder>qtbluetooth</virtualFolder>
+    <metaData name="version" value="5.13.2"/>
+    <customFilter name="QtBluetooth 5.13.2">
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtbluetooth</filterAttribute>
+    </customFilter>
+    <filterSection>
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtbluetooth</filterAttribute>
+        <filterAttribute>qtrefdoc</filterAttribute>
+        <toc>
+            <section ref="qtbluetooth-index.html" title="Qt Bluetooth">
+                <section ref="qtbluetooth-overview.html" title="Overviews">
+                    <section ref="qtbluetooth-attribution-bluez.html" title="BlueZ"/>
+                    <section ref="qtbluetooth-le-overview.html" title="Bluetooth Low Energy Overview"/>
+                    <section ref="qtbluetooth-index.html" title="Qt Bluetooth"/>
+                    <section ref="bluetooth-examples.html" title="Qt Bluetooth Examples"/>
+                    <section ref="qtbluetooth-overview.html" title="Qt Bluetooth Overview"/>
+                </section>
+                <section ref="qtbluetooth-module.html" title="C++ Classes">
+                    <section ref="qbluetoothaddress.html" title="QBluetoothAddress Class Reference">
+                        <section ref="qbluetoothaddress-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qbluetoothdevicediscoveryagent.html" title="QBluetoothDeviceDiscoveryAgent Class Reference">
+                        <section ref="qbluetoothdevicediscoveryagent-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qbluetoothdeviceinfo.html" title="QBluetoothDeviceInfo Class Reference">
+                        <section ref="qbluetoothdeviceinfo-members.html" title="List of all members"/>
+                        <section ref="qbluetoothdeviceinfo-obsolete.html" title="Obsolete members"/>
+                    </section>
+                    <section ref="qbluetoothhostinfo.html" title="QBluetoothHostInfo Class Reference">
+                        <section ref="qbluetoothhostinfo-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qbluetoothlocaldevice.html" title="QBluetoothLocalDevice Class Reference">
+                        <section ref="qbluetoothlocaldevice-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qbluetoothserver.html" title="QBluetoothServer Class Reference">
+                        <section ref="qbluetoothserver-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qbluetoothservicediscoveryagent.html" title="QBluetoothServiceDiscoveryAgent Class Reference">
+                        <section ref="qbluetoothservicediscoveryagent-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qbluetoothserviceinfo.html" title="QBluetoothServiceInfo Class Reference">
+                        <section ref="qbluetoothserviceinfo-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qbluetoothserviceinfo-alternative.html" title="QBluetoothServiceInfo::Alternative Class Reference">
+                        <section ref="qbluetoothserviceinfo-alternative-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qbluetoothserviceinfo-sequence.html" title="QBluetoothServiceInfo::Sequence Class Reference">
+                        <section ref="qbluetoothserviceinfo-sequence-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qbluetoothsocket.html" title="QBluetoothSocket Class Reference">
+                        <section ref="qbluetoothsocket-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qbluetoothtransfermanager.html" title="QBluetoothTransferManager Class Reference">
+                        <section ref="qbluetoothtransfermanager-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qbluetoothtransferreply.html" title="QBluetoothTransferReply Class Reference">
+                        <section ref="qbluetoothtransferreply-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qbluetoothtransferrequest.html" title="QBluetoothTransferRequest Class Reference">
+                        <section ref="qbluetoothtransferrequest-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qbluetoothuuid.html" title="QBluetoothUuid Class Reference">
+                        <section ref="qbluetoothuuid-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qlowenergyadvertisingdata.html" title="QLowEnergyAdvertisingData Class Reference">
+                        <section ref="qlowenergyadvertisingdata-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qlowenergyadvertisingparameters.html" title="QLowEnergyAdvertisingParameters Class Reference">
+                        <section ref="qlowenergyadvertisingparameters-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qlowenergycharacteristic.html" title="QLowEnergyCharacteristic Class Reference">
+                        <section ref="qlowenergycharacteristic-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qlowenergycharacteristicdata.html" title="QLowEnergyCharacteristicData Class Reference">
+                        <section ref="qlowenergycharacteristicdata-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qlowenergyconnectionparameters.html" title="QLowEnergyConnectionParameters Class Reference">
+                        <section ref="qlowenergyconnectionparameters-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qlowenergycontroller.html" title="QLowEnergyController Class Reference">
+                        <section ref="qlowenergycontroller-members.html" title="List of all members"/>
+                        <section ref="qlowenergycontroller-obsolete.html" title="Obsolete members"/>
+                    </section>
+                    <section ref="qlowenergydescriptor.html" title="QLowEnergyDescriptor Class Reference">
+                        <section ref="qlowenergydescriptor-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qlowenergydescriptordata.html" title="QLowEnergyDescriptorData Class Reference">
+                        <section ref="qlowenergydescriptordata-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qlowenergyservice.html" title="QLowEnergyService Class Reference">
+                        <section ref="qlowenergyservice-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qlowenergyservicedata.html" title="QLowEnergyServiceData Class Reference">
+                        <section ref="qlowenergyservicedata-members.html" title="List of all members"/>
+                    </section>
+                </section>
+                <section ref="qtbluetooth-qmlmodule.html" title="QML Types"/>
+                <section ref="bluetooth-examples.html" title="Qt Bluetooth Examples"/>
+            </section>
+        </toc>
+        <keywords>
+            <keyword name="AddressInfo" id="QLowEnergyAdvertisingParameters::AddressInfo" ref="qlowenergyadvertisingparameters-addressinfo.html"/>
+            <keyword name="Alternative" id="QBluetoothServiceInfo::Alternative" ref="qbluetoothserviceinfo-alternative.html"/>
+            <keyword name="BlueZ" id="BlueZ" ref="qtbluetooth-attribution-bluez.html"/>
+            <keyword name="Bluetooth Low Energy Overview" id="Bluetooth Low Energy Overview" ref="qtbluetooth-le-overview.html"/>
+            <keyword name="BluetoothDiscoveryModel" id="QML.BluetoothDiscoveryModel" ref="qml-qtbluetooth-bluetoothdiscoverymodel.html"/>
+            <keyword name="BluetoothService" id="QML.BluetoothService" ref="qml-qtbluetooth-bluetoothservice.html"/>
+            <keyword name="BluetoothSocket" id="QML.BluetoothSocket" ref="qml-qtbluetooth-bluetoothsocket.html"/>
+            <keyword name="QBluetooth" id="QBluetooth" ref="qbluetooth.html"/>
+            <keyword name="QBluetooth::AttAccessConstraint" id="QBluetooth::AttAccessConstraint" ref="qbluetooth.html#AttAccessConstraint-enum"/>
+            <keyword name="QBluetooth::AttAccessConstraints" id="QBluetooth::AttAccessConstraints" ref="qbluetooth.html#AttAccessConstraint-enum"/>
+            <keyword name="QBluetooth::AttAuthenticationRequired" id="QBluetooth::AttAuthenticationRequired" ref="qbluetooth.html#AttAccessConstraint-enum"/>
+            <keyword name="QBluetooth::AttAuthorizationRequired" id="QBluetooth::AttAuthorizationRequired" ref="qbluetooth.html#AttAccessConstraint-enum"/>
+            <keyword name="QBluetooth::AttEncryptionRequired" id="QBluetooth::AttEncryptionRequired" ref="qbluetooth.html#AttAccessConstraint-enum"/>
+            <keyword name="QBluetooth::Authentication" id="QBluetooth::Authentication" ref="qbluetooth.html#Security-enum"/>
+            <keyword name="QBluetooth::Authorization" id="QBluetooth::Authorization" ref="qbluetooth.html#Security-enum"/>
+            <keyword name="QBluetooth::Encryption" id="QBluetooth::Encryption" ref="qbluetooth.html#Security-enum"/>
+            <keyword name="QBluetooth::NoSecurity" id="QBluetooth::NoSecurity" ref="qbluetooth.html#Security-enum"/>
+            <keyword name="QBluetooth::QLowEnergyHandle" id="QLowEnergyHandle" ref="qbluetooth.html#QLowEnergyHandle-typedef"/>
+            <keyword name="QBluetooth::Secure" id="QBluetooth::Secure" ref="qbluetooth.html#Security-enum"/>
+            <keyword name="QBluetooth::Security" id="QBluetooth::Security" ref="qbluetooth.html#Security-enum"/>
+            <keyword name="QBluetooth::SecurityFlags" id="QBluetooth::SecurityFlags" ref="qbluetooth.html#Security-enum"/>
+            <keyword name="QBluetoothAddress" id="QBluetoothAddress" ref="qbluetoothaddress.html"/>
+            <keyword name="QBluetoothDeviceDiscoveryAgent" id="QBluetoothDeviceDiscoveryAgent" ref="qbluetoothdevicediscoveryagent.html"/>
+            <keyword name="QBluetoothDeviceDiscoveryAgent::ClassicMethod" id="QBluetoothDeviceDiscoveryAgent::ClassicMethod" ref="qbluetoothdevicediscoveryagent.html#DiscoveryMethod-enum"/>
+            <keyword name="QBluetoothDeviceDiscoveryAgent::DiscoveryMethod" id="QBluetoothDeviceDiscoveryAgent::DiscoveryMethod" ref="qbluetoothdevicediscoveryagent.html#DiscoveryMethod-enum"/>
+            <keyword name="QBluetoothDeviceDiscoveryAgent::DiscoveryMethods" id="QBluetoothDeviceDiscoveryAgent::DiscoveryMethods" ref="qbluetoothdevicediscoveryagent.html#DiscoveryMethod-enum"/>
+            <keyword name="QBluetoothDeviceDiscoveryAgent::Error" id="QBluetoothDeviceDiscoveryAgent::Error" ref="qbluetoothdevicediscoveryagent.html#Error-enum"/>
+            <keyword name="QBluetoothDeviceDiscoveryAgent::GeneralUnlimitedInquiry" id="QBluetoothDeviceDiscoveryAgent::GeneralUnlimitedInquiry" ref="qbluetoothdevicediscoveryagent.html#InquiryType-enum"/>
+            <keyword name="QBluetoothDeviceDiscoveryAgent::InputOutputError" id="QBluetoothDeviceDiscoveryAgent::InputOutputError" ref="qbluetoothdevicediscoveryagent.html#Error-enum"/>
+            <keyword name="QBluetoothDeviceDiscoveryAgent::InquiryType" id="QBluetoothDeviceDiscoveryAgent::InquiryType" ref="qbluetoothdevicediscoveryagent.html#InquiryType-enum"/>
+            <keyword name="QBluetoothDeviceDiscoveryAgent::InvalidBluetoothAdapterError" id="QBluetoothDeviceDiscoveryAgent::InvalidBluetoothAdapterError" ref="qbluetoothdevicediscoveryagent.html#Error-enum"/>
+            <keyword name="QBluetoothDeviceDiscoveryAgent::LimitedInquiry" id="QBluetoothDeviceDiscoveryAgent::LimitedInquiry" ref="qbluetoothdevicediscoveryagent.html#InquiryType-enum"/>
+            <keyword name="QBluetoothDeviceDiscoveryAgent::LowEnergyMethod" id="QBluetoothDeviceDiscoveryAgent::LowEnergyMethod" ref="qbluetoothdevicediscoveryagent.html#DiscoveryMethod-enum"/>
+            <keyword name="QBluetoothDeviceDiscoveryAgent::NoError" id="QBluetoothDeviceDiscoveryAgent::NoError" ref="qbluetoothdevicediscoveryagent.html#Error-enum"/>
+            <keyword name="QBluetoothDeviceDiscoveryAgent::NoMethod" id="QBluetoothDeviceDiscoveryAgent::NoMethod" ref="qbluetoothdevicediscoveryagent.html#DiscoveryMethod-enum"/>
+            <keyword name="QBluetoothDeviceDiscoveryAgent::PoweredOffError" id="QBluetoothDeviceDiscoveryAgent::PoweredOffError" ref="qbluetoothdevicediscoveryagent.html#Error-enum"/>
+            <keyword name="QBluetoothDeviceDiscoveryAgent::UnknownError" id="QBluetoothDeviceDiscoveryAgent::UnknownError" ref="qbluetoothdevicediscoveryagent.html#Error-enum"/>
+            <keyword name="QBluetoothDeviceDiscoveryAgent::UnsupportedDiscoveryMethod" id="QBluetoothDeviceDiscoveryAgent::UnsupportedDiscoveryMethod" ref="qbluetoothdevicediscoveryagent.html#Error-enum"/>
+            <keyword name="QBluetoothDeviceDiscoveryAgent::UnsupportedPlatformError" id="QBluetoothDeviceDiscoveryAgent::UnsupportedPlatformError" ref="qbluetoothdevicediscoveryagent.html#Error-enum"/>
+            <keyword name="QBluetoothDeviceInfo" id="QBluetoothDeviceInfo" ref="qbluetoothdeviceinfo.html"/>
+            <keyword name="QBluetoothDeviceInfo::All" id="QBluetoothDeviceInfo::All" ref="qbluetoothdeviceinfo.html#Field-enum"/>
+            <keyword name="QBluetoothDeviceInfo::AllServices" id="QBluetoothDeviceInfo::AllServices" ref="qbluetoothdeviceinfo.html#ServiceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::AudioService" id="QBluetoothDeviceInfo::AudioService" ref="qbluetoothdeviceinfo.html#ServiceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::AudioVideoDevice" id="QBluetoothDeviceInfo::AudioVideoDevice" ref="qbluetoothdeviceinfo.html#MajorDeviceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::BaseRateAndLowEnergyCoreConfiguration" id="QBluetoothDeviceInfo::BaseRateAndLowEnergyCoreConfiguration" ref="qbluetoothdeviceinfo.html#CoreConfiguration-enum"/>
+            <keyword name="QBluetoothDeviceInfo::BaseRateCoreConfiguration" id="QBluetoothDeviceInfo::BaseRateCoreConfiguration" ref="qbluetoothdeviceinfo.html#CoreConfiguration-enum"/>
+            <keyword name="QBluetoothDeviceInfo::Camcorder" id="QBluetoothDeviceInfo::Camcorder" ref="qbluetoothdeviceinfo.html#MinorAudioVideoClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::CapturingService" id="QBluetoothDeviceInfo::CapturingService" ref="qbluetoothdeviceinfo.html#ServiceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::CarAudio" id="QBluetoothDeviceInfo::CarAudio" ref="qbluetoothdeviceinfo.html#MinorAudioVideoClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::CardReaderPeripheral" id="QBluetoothDeviceInfo::CardReaderPeripheral" ref="qbluetoothdeviceinfo.html#MinorPeripheralClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::CellularPhone" id="QBluetoothDeviceInfo::CellularPhone" ref="qbluetoothdeviceinfo.html#MinorPhoneClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::CommonIsdnAccessPhone" id="QBluetoothDeviceInfo::CommonIsdnAccessPhone" ref="qbluetoothdeviceinfo.html#MinorPhoneClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::ComputerDevice" id="QBluetoothDeviceInfo::ComputerDevice" ref="qbluetoothdeviceinfo.html#MajorDeviceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::CordlessPhone" id="QBluetoothDeviceInfo::CordlessPhone" ref="qbluetoothdeviceinfo.html#MinorPhoneClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::CoreConfiguration" id="QBluetoothDeviceInfo::CoreConfiguration" ref="qbluetoothdeviceinfo.html#CoreConfiguration-enum"/>
+            <keyword name="QBluetoothDeviceInfo::CoreConfigurations" id="QBluetoothDeviceInfo::CoreConfigurations" ref="qbluetoothdeviceinfo.html#CoreConfiguration-enum"/>
+            <keyword name="QBluetoothDeviceInfo::DataComplete" id="QBluetoothDeviceInfo::DataComplete" ref="qbluetoothdeviceinfo.html#DataCompleteness-enum"/>
+            <keyword name="QBluetoothDeviceInfo::DataCompleteness" id="QBluetoothDeviceInfo::DataCompleteness" ref="qbluetoothdeviceinfo.html#DataCompleteness-enum"/>
+            <keyword name="QBluetoothDeviceInfo::DataIncomplete" id="QBluetoothDeviceInfo::DataIncomplete" ref="qbluetoothdeviceinfo.html#DataCompleteness-enum"/>
+            <keyword name="QBluetoothDeviceInfo::DataUnavailable" id="QBluetoothDeviceInfo::DataUnavailable" ref="qbluetoothdeviceinfo.html#DataCompleteness-enum"/>
+            <keyword name="QBluetoothDeviceInfo::DesktopComputer" id="QBluetoothDeviceInfo::DesktopComputer" ref="qbluetoothdeviceinfo.html#MinorComputerClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::DigitizerTabletPeripheral" id="QBluetoothDeviceInfo::DigitizerTabletPeripheral" ref="qbluetoothdeviceinfo.html#MinorPeripheralClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::Field" id="QBluetoothDeviceInfo::Field" ref="qbluetoothdeviceinfo.html#Field-enum"/>
+            <keyword name="QBluetoothDeviceInfo::Fields" id="QBluetoothDeviceInfo::Fields" ref="qbluetoothdeviceinfo.html#Field-enum"/>
+            <keyword name="QBluetoothDeviceInfo::GamepadPeripheral" id="QBluetoothDeviceInfo::GamepadPeripheral" ref="qbluetoothdeviceinfo.html#MinorPeripheralClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::GamingDevice" id="QBluetoothDeviceInfo::GamingDevice" ref="qbluetoothdeviceinfo.html#MinorAudioVideoClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::HandheldClamShellComputer" id="QBluetoothDeviceInfo::HandheldClamShellComputer" ref="qbluetoothdeviceinfo.html#MinorComputerClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::HandheldComputer" id="QBluetoothDeviceInfo::HandheldComputer" ref="qbluetoothdeviceinfo.html#MinorComputerClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::HandsFreeDevice" id="QBluetoothDeviceInfo::HandsFreeDevice" ref="qbluetoothdeviceinfo.html#MinorAudioVideoClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::Headphones" id="QBluetoothDeviceInfo::Headphones" ref="qbluetoothdeviceinfo.html#MinorAudioVideoClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::HealthBloodPressureMonitor" id="QBluetoothDeviceInfo::HealthBloodPressureMonitor" ref="qbluetoothdeviceinfo.html#MinorHealthClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::HealthDataDisplay" id="QBluetoothDeviceInfo::HealthDataDisplay" ref="qbluetoothdeviceinfo.html#MinorHealthClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::HealthDevice" id="QBluetoothDeviceInfo::HealthDevice" ref="qbluetoothdeviceinfo.html#MajorDeviceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::HealthGlucoseMeter" id="QBluetoothDeviceInfo::HealthGlucoseMeter" ref="qbluetoothdeviceinfo.html#MinorHealthClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::HealthPulseOximeter" id="QBluetoothDeviceInfo::HealthPulseOximeter" ref="qbluetoothdeviceinfo.html#MinorHealthClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::HealthStepCounter" id="QBluetoothDeviceInfo::HealthStepCounter" ref="qbluetoothdeviceinfo.html#MinorHealthClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::HealthThermometer" id="QBluetoothDeviceInfo::HealthThermometer" ref="qbluetoothdeviceinfo.html#MinorHealthClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::HealthWeightScale" id="QBluetoothDeviceInfo::HealthWeightScale" ref="qbluetoothdeviceinfo.html#MinorHealthClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::HiFiAudioDevice" id="QBluetoothDeviceInfo::HiFiAudioDevice" ref="qbluetoothdeviceinfo.html#MinorAudioVideoClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::ImageCamera" id="QBluetoothDeviceInfo::ImageCamera" ref="qbluetoothdeviceinfo.html#MinorImagingClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::ImageDisplay" id="QBluetoothDeviceInfo::ImageDisplay" ref="qbluetoothdeviceinfo.html#MinorImagingClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::ImagePrinter" id="QBluetoothDeviceInfo::ImagePrinter" ref="qbluetoothdeviceinfo.html#MinorImagingClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::ImageScanner" id="QBluetoothDeviceInfo::ImageScanner" ref="qbluetoothdeviceinfo.html#MinorImagingClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::ImagingDevice" id="QBluetoothDeviceInfo::ImagingDevice" ref="qbluetoothdeviceinfo.html#MajorDeviceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::InformationService" id="QBluetoothDeviceInfo::InformationService" ref="qbluetoothdeviceinfo.html#ServiceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::JoystickPeripheral" id="QBluetoothDeviceInfo::JoystickPeripheral" ref="qbluetoothdeviceinfo.html#MinorPeripheralClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::KeyboardPeripheral" id="QBluetoothDeviceInfo::KeyboardPeripheral" ref="qbluetoothdeviceinfo.html#MinorPeripheralClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::KeyboardWithPointingDevicePeripheral" id="QBluetoothDeviceInfo::KeyboardWithPointingDevicePeripheral" ref="qbluetoothdeviceinfo.html#MinorPeripheralClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::LANAccessDevice" id="QBluetoothDeviceInfo::LANAccessDevice" ref="qbluetoothdeviceinfo.html#MajorDeviceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::LaptopComputer" id="QBluetoothDeviceInfo::LaptopComputer" ref="qbluetoothdeviceinfo.html#MinorComputerClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::Loudspeaker" id="QBluetoothDeviceInfo::Loudspeaker" ref="qbluetoothdeviceinfo.html#MinorAudioVideoClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::LowEnergyCoreConfiguration" id="QBluetoothDeviceInfo::LowEnergyCoreConfiguration" ref="qbluetoothdeviceinfo.html#CoreConfiguration-enum"/>
+            <keyword name="QBluetoothDeviceInfo::MajorDeviceClass" id="QBluetoothDeviceInfo::MajorDeviceClass" ref="qbluetoothdeviceinfo.html#MajorDeviceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::ManufacturerData" id="QBluetoothDeviceInfo::ManufacturerData" ref="qbluetoothdeviceinfo.html#Field-enum"/>
+            <keyword name="QBluetoothDeviceInfo::Microphone" id="QBluetoothDeviceInfo::Microphone" ref="qbluetoothdeviceinfo.html#MinorAudioVideoClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::MinorAudioVideoClass" id="QBluetoothDeviceInfo::MinorAudioVideoClass" ref="qbluetoothdeviceinfo.html#MinorAudioVideoClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::MinorComputerClass" id="QBluetoothDeviceInfo::MinorComputerClass" ref="qbluetoothdeviceinfo.html#MinorComputerClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::MinorHealthClass" id="QBluetoothDeviceInfo::MinorHealthClass" ref="qbluetoothdeviceinfo.html#MinorHealthClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::MinorImagingClass" id="QBluetoothDeviceInfo::MinorImagingClass" ref="qbluetoothdeviceinfo.html#MinorImagingClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::MinorMiscellaneousClass" id="QBluetoothDeviceInfo::MinorMiscellaneousClass" ref="qbluetoothdeviceinfo.html#MinorMiscellaneousClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::MinorNetworkClass" id="QBluetoothDeviceInfo::MinorNetworkClass" ref="qbluetoothdeviceinfo.html#MinorNetworkClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::MinorPeripheralClass" id="QBluetoothDeviceInfo::MinorPeripheralClass" ref="qbluetoothdeviceinfo.html#MinorPeripheralClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::MinorPhoneClass" id="QBluetoothDeviceInfo::MinorPhoneClass" ref="qbluetoothdeviceinfo.html#MinorPhoneClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::MinorToyClass" id="QBluetoothDeviceInfo::MinorToyClass" ref="qbluetoothdeviceinfo.html#MinorToyClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::MinorWearableClass" id="QBluetoothDeviceInfo::MinorWearableClass" ref="qbluetoothdeviceinfo.html#MinorWearableClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::MiscellaneousDevice" id="QBluetoothDeviceInfo::MiscellaneousDevice" ref="qbluetoothdeviceinfo.html#MajorDeviceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::NetworkDevice" id="QBluetoothDeviceInfo::NetworkDevice" ref="qbluetoothdeviceinfo.html#MajorDeviceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::NetworkFullService" id="QBluetoothDeviceInfo::NetworkFullService" ref="qbluetoothdeviceinfo.html#MinorNetworkClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::NetworkLoadFactorFive" id="QBluetoothDeviceInfo::NetworkLoadFactorFive" ref="qbluetoothdeviceinfo.html#MinorNetworkClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::NetworkLoadFactorFour" id="QBluetoothDeviceInfo::NetworkLoadFactorFour" ref="qbluetoothdeviceinfo.html#MinorNetworkClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::NetworkLoadFactorOne" id="QBluetoothDeviceInfo::NetworkLoadFactorOne" ref="qbluetoothdeviceinfo.html#MinorNetworkClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::NetworkLoadFactorSix" id="QBluetoothDeviceInfo::NetworkLoadFactorSix" ref="qbluetoothdeviceinfo.html#MinorNetworkClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::NetworkLoadFactorThree" id="QBluetoothDeviceInfo::NetworkLoadFactorThree" ref="qbluetoothdeviceinfo.html#MinorNetworkClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::NetworkLoadFactorTwo" id="QBluetoothDeviceInfo::NetworkLoadFactorTwo" ref="qbluetoothdeviceinfo.html#MinorNetworkClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::NetworkNoService" id="QBluetoothDeviceInfo::NetworkNoService" ref="qbluetoothdeviceinfo.html#MinorNetworkClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::NetworkingService" id="QBluetoothDeviceInfo::NetworkingService" ref="qbluetoothdeviceinfo.html#ServiceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::NoService" id="QBluetoothDeviceInfo::NoService" ref="qbluetoothdeviceinfo.html#ServiceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::None" id="QBluetoothDeviceInfo::None" ref="qbluetoothdeviceinfo.html#Field-enum"/>
+            <keyword name="QBluetoothDeviceInfo::ObjectTransferService" id="QBluetoothDeviceInfo::ObjectTransferService" ref="qbluetoothdeviceinfo.html#ServiceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::PeripheralDevice" id="QBluetoothDeviceInfo::PeripheralDevice" ref="qbluetoothdeviceinfo.html#MajorDeviceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::PhoneDevice" id="QBluetoothDeviceInfo::PhoneDevice" ref="qbluetoothdeviceinfo.html#MajorDeviceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::PointingDevicePeripheral" id="QBluetoothDeviceInfo::PointingDevicePeripheral" ref="qbluetoothdeviceinfo.html#MinorPeripheralClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::PortableAudioDevice" id="QBluetoothDeviceInfo::PortableAudioDevice" ref="qbluetoothdeviceinfo.html#MinorAudioVideoClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::PositioningService" id="QBluetoothDeviceInfo::PositioningService" ref="qbluetoothdeviceinfo.html#ServiceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::RSSI" id="QBluetoothDeviceInfo::RSSI" ref="qbluetoothdeviceinfo.html#Field-enum"/>
+            <keyword name="QBluetoothDeviceInfo::RemoteControlPeripheral" id="QBluetoothDeviceInfo::RemoteControlPeripheral" ref="qbluetoothdeviceinfo.html#MinorPeripheralClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::RenderingService" id="QBluetoothDeviceInfo::RenderingService" ref="qbluetoothdeviceinfo.html#ServiceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::SensingDevicePeripheral" id="QBluetoothDeviceInfo::SensingDevicePeripheral" ref="qbluetoothdeviceinfo.html#MinorPeripheralClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::ServerComputer" id="QBluetoothDeviceInfo::ServerComputer" ref="qbluetoothdeviceinfo.html#MinorComputerClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::ServiceClass" id="QBluetoothDeviceInfo::ServiceClass" ref="qbluetoothdeviceinfo.html#ServiceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::ServiceClasses" id="QBluetoothDeviceInfo::ServiceClasses" ref="qbluetoothdeviceinfo.html#ServiceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::SetTopBox" id="QBluetoothDeviceInfo::SetTopBox" ref="qbluetoothdeviceinfo.html#MinorAudioVideoClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::SmartPhone" id="QBluetoothDeviceInfo::SmartPhone" ref="qbluetoothdeviceinfo.html#MinorPhoneClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::TelephonyService" id="QBluetoothDeviceInfo::TelephonyService" ref="qbluetoothdeviceinfo.html#ServiceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::ToyController" id="QBluetoothDeviceInfo::ToyController" ref="qbluetoothdeviceinfo.html#MinorToyClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::ToyDevice" id="QBluetoothDeviceInfo::ToyDevice" ref="qbluetoothdeviceinfo.html#MajorDeviceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::ToyDoll" id="QBluetoothDeviceInfo::ToyDoll" ref="qbluetoothdeviceinfo.html#MinorToyClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::ToyGame" id="QBluetoothDeviceInfo::ToyGame" ref="qbluetoothdeviceinfo.html#MinorToyClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::ToyRobot" id="QBluetoothDeviceInfo::ToyRobot" ref="qbluetoothdeviceinfo.html#MinorToyClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::ToyVehicle" id="QBluetoothDeviceInfo::ToyVehicle" ref="qbluetoothdeviceinfo.html#MinorToyClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::UncategorizedAudioVideoDevice" id="QBluetoothDeviceInfo::UncategorizedAudioVideoDevice" ref="qbluetoothdeviceinfo.html#MinorAudioVideoClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::UncategorizedComputer" id="QBluetoothDeviceInfo::UncategorizedComputer" ref="qbluetoothdeviceinfo.html#MinorComputerClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::UncategorizedDevice" id="QBluetoothDeviceInfo::UncategorizedDevice" ref="qbluetoothdeviceinfo.html#MajorDeviceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::UncategorizedHealthDevice" id="QBluetoothDeviceInfo::UncategorizedHealthDevice" ref="qbluetoothdeviceinfo.html#MinorHealthClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::UncategorizedImagingDevice" id="QBluetoothDeviceInfo::UncategorizedImagingDevice" ref="qbluetoothdeviceinfo.html#MinorImagingClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::UncategorizedMiscellaneous" id="QBluetoothDeviceInfo::UncategorizedMiscellaneous" ref="qbluetoothdeviceinfo.html#MinorMiscellaneousClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::UncategorizedPeripheral" id="QBluetoothDeviceInfo::UncategorizedPeripheral" ref="qbluetoothdeviceinfo.html#MinorPeripheralClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::UncategorizedPhone" id="QBluetoothDeviceInfo::UncategorizedPhone" ref="qbluetoothdeviceinfo.html#MinorPhoneClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::UncategorizedToy" id="QBluetoothDeviceInfo::UncategorizedToy" ref="qbluetoothdeviceinfo.html#MinorToyClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::UncategorizedWearableDevice" id="QBluetoothDeviceInfo::UncategorizedWearableDevice" ref="qbluetoothdeviceinfo.html#MinorWearableClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::UnknownCoreConfiguration" id="QBluetoothDeviceInfo::UnknownCoreConfiguration" ref="qbluetoothdeviceinfo.html#CoreConfiguration-enum"/>
+            <keyword name="QBluetoothDeviceInfo::Vcr" id="QBluetoothDeviceInfo::Vcr" ref="qbluetoothdeviceinfo.html#MinorAudioVideoClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::VideoCamera" id="QBluetoothDeviceInfo::VideoCamera" ref="qbluetoothdeviceinfo.html#MinorAudioVideoClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::VideoConferencing" id="QBluetoothDeviceInfo::VideoConferencing" ref="qbluetoothdeviceinfo.html#MinorAudioVideoClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::VideoDisplayAndLoudspeaker" id="QBluetoothDeviceInfo::VideoDisplayAndLoudspeaker" ref="qbluetoothdeviceinfo.html#MinorAudioVideoClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::VideoMonitor" id="QBluetoothDeviceInfo::VideoMonitor" ref="qbluetoothdeviceinfo.html#MinorAudioVideoClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::WearableComputer" id="QBluetoothDeviceInfo::WearableComputer" ref="qbluetoothdeviceinfo.html#MinorComputerClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::WearableDevice" id="QBluetoothDeviceInfo::WearableDevice" ref="qbluetoothdeviceinfo.html#MajorDeviceClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::WearableGlasses" id="QBluetoothDeviceInfo::WearableGlasses" ref="qbluetoothdeviceinfo.html#MinorWearableClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::WearableHeadsetDevice" id="QBluetoothDeviceInfo::WearableHeadsetDevice" ref="qbluetoothdeviceinfo.html#MinorAudioVideoClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::WearableHelmet" id="QBluetoothDeviceInfo::WearableHelmet" ref="qbluetoothdeviceinfo.html#MinorWearableClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::WearableJacket" id="QBluetoothDeviceInfo::WearableJacket" ref="qbluetoothdeviceinfo.html#MinorWearableClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::WearablePager" id="QBluetoothDeviceInfo::WearablePager" ref="qbluetoothdeviceinfo.html#MinorWearableClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::WearableWristWatch" id="QBluetoothDeviceInfo::WearableWristWatch" ref="qbluetoothdeviceinfo.html#MinorWearableClass-enum"/>
+            <keyword name="QBluetoothDeviceInfo::WiredModemOrVoiceGatewayPhone" id="QBluetoothDeviceInfo::WiredModemOrVoiceGatewayPhone" ref="qbluetoothdeviceinfo.html#MinorPhoneClass-enum"/>
+            <keyword name="QBluetoothHostInfo" id="QBluetoothHostInfo" ref="qbluetoothhostinfo.html"/>
+            <keyword name="QBluetoothLocalDevice" id="QBluetoothLocalDevice" ref="qbluetoothlocaldevice.html"/>
+            <keyword name="QBluetoothLocalDevice::AuthorizedPaired" id="QBluetoothLocalDevice::AuthorizedPaired" ref="qbluetoothlocaldevice.html#Pairing-enum"/>
+            <keyword name="QBluetoothLocalDevice::Error" id="QBluetoothLocalDevice::Error" ref="qbluetoothlocaldevice.html#Error-enum"/>
+            <keyword name="QBluetoothLocalDevice::HostConnectable" id="QBluetoothLocalDevice::HostConnectable" ref="qbluetoothlocaldevice.html#HostMode-enum"/>
+            <keyword name="QBluetoothLocalDevice::HostDiscoverable" id="QBluetoothLocalDevice::HostDiscoverable" ref="qbluetoothlocaldevice.html#HostMode-enum"/>
+            <keyword name="QBluetoothLocalDevice::HostDiscoverableLimitedInquiry" id="QBluetoothLocalDevice::HostDiscoverableLimitedInquiry" ref="qbluetoothlocaldevice.html#HostMode-enum"/>
+            <keyword name="QBluetoothLocalDevice::HostMode" id="QBluetoothLocalDevice::HostMode" ref="qbluetoothlocaldevice.html#HostMode-enum"/>
+            <keyword name="QBluetoothLocalDevice::HostPoweredOff" id="QBluetoothLocalDevice::HostPoweredOff" ref="qbluetoothlocaldevice.html#HostMode-enum"/>
+            <keyword name="QBluetoothLocalDevice::NoError" id="QBluetoothLocalDevice::NoError" ref="qbluetoothlocaldevice.html#Error-enum"/>
+            <keyword name="QBluetoothLocalDevice::Paired" id="QBluetoothLocalDevice::Paired" ref="qbluetoothlocaldevice.html#Pairing-enum"/>
+            <keyword name="QBluetoothLocalDevice::Pairing" id="QBluetoothLocalDevice::Pairing" ref="qbluetoothlocaldevice.html#Pairing-enum"/>
+            <keyword name="QBluetoothLocalDevice::PairingError" id="QBluetoothLocalDevice::PairingError" ref="qbluetoothlocaldevice.html#Error-enum"/>
+            <keyword name="QBluetoothLocalDevice::UnknownError" id="QBluetoothLocalDevice::UnknownError" ref="qbluetoothlocaldevice.html#Error-enum"/>
+            <keyword name="QBluetoothLocalDevice::Unpaired" id="QBluetoothLocalDevice::Unpaired" ref="qbluetoothlocaldevice.html#Pairing-enum"/>
+            <keyword name="QBluetoothServer" id="QBluetoothServer" ref="qbluetoothserver.html"/>
+            <keyword name="QBluetoothServer::Error" id="QBluetoothServer::Error" ref="qbluetoothserver.html#Error-enum"/>
+            <keyword name="QBluetoothServer::InputOutputError" id="QBluetoothServer::InputOutputError" ref="qbluetoothserver.html#Error-enum"/>
+            <keyword name="QBluetoothServer::NoError" id="QBluetoothServer::NoError" ref="qbluetoothserver.html#Error-enum"/>
+            <keyword name="QBluetoothServer::PoweredOffError" id="QBluetoothServer::PoweredOffError" ref="qbluetoothserver.html#Error-enum"/>
+            <keyword name="QBluetoothServer::ServiceAlreadyRegisteredError" id="QBluetoothServer::ServiceAlreadyRegisteredError" ref="qbluetoothserver.html#Error-enum"/>
+            <keyword name="QBluetoothServer::UnknownError" id="QBluetoothServer::UnknownError" ref="qbluetoothserver.html#Error-enum"/>
+            <keyword name="QBluetoothServer::UnsupportedProtocolError" id="QBluetoothServer::UnsupportedProtocolError" ref="qbluetoothserver.html#Error-enum"/>
+            <keyword name="QBluetoothServiceDiscoveryAgent" id="QBluetoothServiceDiscoveryAgent" ref="qbluetoothservicediscoveryagent.html"/>
+            <keyword name="QBluetoothServiceDiscoveryAgent::DiscoveryMode" id="QBluetoothServiceDiscoveryAgent::DiscoveryMode" ref="qbluetoothservicediscoveryagent.html#DiscoveryMode-enum"/>
+            <keyword name="QBluetoothServiceDiscoveryAgent::Error" id="QBluetoothServiceDiscoveryAgent::Error" ref="qbluetoothservicediscoveryagent.html#Error-enum"/>
+            <keyword name="QBluetoothServiceDiscoveryAgent::FullDiscovery" id="QBluetoothServiceDiscoveryAgent::FullDiscovery" ref="qbluetoothservicediscoveryagent.html#DiscoveryMode-enum"/>
+            <keyword name="QBluetoothServiceDiscoveryAgent::InputOutputError" id="QBluetoothServiceDiscoveryAgent::InputOutputError" ref="qbluetoothservicediscoveryagent.html#Error-enum"/>
+            <keyword name="QBluetoothServiceDiscoveryAgent::InvalidBluetoothAdapterError" id="QBluetoothServiceDiscoveryAgent::InvalidBluetoothAdapterError" ref="qbluetoothservicediscoveryagent.html#Error-enum"/>
+            <keyword name="QBluetoothServiceDiscoveryAgent::MinimalDiscovery" id="QBluetoothServiceDiscoveryAgent::MinimalDiscovery" ref="qbluetoothservicediscoveryagent.html#DiscoveryMode-enum"/>
+            <keyword name="QBluetoothServiceDiscoveryAgent::NoError" id="QBluetoothServiceDiscoveryAgent::NoError" ref="qbluetoothservicediscoveryagent.html#Error-enum"/>
+            <keyword name="QBluetoothServiceDiscoveryAgent::PoweredOffError" id="QBluetoothServiceDiscoveryAgent::PoweredOffError" ref="qbluetoothservicediscoveryagent.html#Error-enum"/>
+            <keyword name="QBluetoothServiceDiscoveryAgent::UnknownError" id="QBluetoothServiceDiscoveryAgent::UnknownError" ref="qbluetoothservicediscoveryagent.html#Error-enum"/>
+            <keyword name="QBluetoothServiceInfo" id="QBluetoothServiceInfo" ref="qbluetoothserviceinfo.html"/>
+            <keyword name="QBluetoothServiceInfo::AdditionalProtocolDescriptorList" id="QBluetoothServiceInfo::AdditionalProtocolDescriptorList" ref="qbluetoothserviceinfo.html#AttributeId-enum"/>
+            <keyword name="QBluetoothServiceInfo::AttributeId" id="QBluetoothServiceInfo::AttributeId" ref="qbluetoothserviceinfo.html#AttributeId-enum"/>
+            <keyword name="QBluetoothServiceInfo::BluetoothProfileDescriptorList" id="QBluetoothServiceInfo::BluetoothProfileDescriptorList" ref="qbluetoothserviceinfo.html#AttributeId-enum"/>
+            <keyword name="QBluetoothServiceInfo::BrowseGroupList" id="QBluetoothServiceInfo::BrowseGroupList" ref="qbluetoothserviceinfo.html#AttributeId-enum"/>
+            <keyword name="QBluetoothServiceInfo::ClientExecutableUrl" id="QBluetoothServiceInfo::ClientExecutableUrl" ref="qbluetoothserviceinfo.html#AttributeId-enum"/>
+            <keyword name="QBluetoothServiceInfo::DocumentationUrl" id="QBluetoothServiceInfo::DocumentationUrl" ref="qbluetoothserviceinfo.html#AttributeId-enum"/>
+            <keyword name="QBluetoothServiceInfo::IconUrl" id="QBluetoothServiceInfo::IconUrl" ref="qbluetoothserviceinfo.html#AttributeId-enum"/>
+            <keyword name="QBluetoothServiceInfo::L2capProtocol" id="QBluetoothServiceInfo::L2capProtocol" ref="qbluetoothserviceinfo.html#Protocol-enum"/>
+            <keyword name="QBluetoothServiceInfo::LanguageBaseAttributeIdList" id="QBluetoothServiceInfo::LanguageBaseAttributeIdList" ref="qbluetoothserviceinfo.html#AttributeId-enum"/>
+            <keyword name="QBluetoothServiceInfo::PrimaryLanguageBase" id="QBluetoothServiceInfo::PrimaryLanguageBase" ref="qbluetoothserviceinfo.html#AttributeId-enum"/>
+            <keyword name="QBluetoothServiceInfo::Protocol" id="QBluetoothServiceInfo::Protocol" ref="qbluetoothserviceinfo.html#Protocol-enum"/>
+            <keyword name="QBluetoothServiceInfo::ProtocolDescriptorList" id="QBluetoothServiceInfo::ProtocolDescriptorList" ref="qbluetoothserviceinfo.html#AttributeId-enum"/>
+            <keyword name="QBluetoothServiceInfo::RfcommProtocol" id="QBluetoothServiceInfo::RfcommProtocol" ref="qbluetoothserviceinfo.html#Protocol-enum"/>
+            <keyword name="QBluetoothServiceInfo::ServiceAvailability" id="QBluetoothServiceInfo::ServiceAvailability" ref="qbluetoothserviceinfo.html#AttributeId-enum"/>
+            <keyword name="QBluetoothServiceInfo::ServiceClassIds" id="QBluetoothServiceInfo::ServiceClassIds" ref="qbluetoothserviceinfo.html#AttributeId-enum"/>
+            <keyword name="QBluetoothServiceInfo::ServiceDescription" id="QBluetoothServiceInfo::ServiceDescription" ref="qbluetoothserviceinfo.html#AttributeId-enum"/>
+            <keyword name="QBluetoothServiceInfo::ServiceId" id="QBluetoothServiceInfo::ServiceId" ref="qbluetoothserviceinfo.html#AttributeId-enum"/>
+            <keyword name="QBluetoothServiceInfo::ServiceInfoTimeToLive" id="QBluetoothServiceInfo::ServiceInfoTimeToLive" ref="qbluetoothserviceinfo.html#AttributeId-enum"/>
+            <keyword name="QBluetoothServiceInfo::ServiceName" id="QBluetoothServiceInfo::ServiceName" ref="qbluetoothserviceinfo.html#AttributeId-enum"/>
+            <keyword name="QBluetoothServiceInfo::ServiceProvider" id="QBluetoothServiceInfo::ServiceProvider" ref="qbluetoothserviceinfo.html#AttributeId-enum"/>
+            <keyword name="QBluetoothServiceInfo::ServiceRecordHandle" id="QBluetoothServiceInfo::ServiceRecordHandle" ref="qbluetoothserviceinfo.html#AttributeId-enum"/>
+            <keyword name="QBluetoothServiceInfo::ServiceRecordState" id="QBluetoothServiceInfo::ServiceRecordState" ref="qbluetoothserviceinfo.html#AttributeId-enum"/>
+            <keyword name="QBluetoothServiceInfo::UnknownProtocol" id="QBluetoothServiceInfo::UnknownProtocol" ref="qbluetoothserviceinfo.html#Protocol-enum"/>
+            <keyword name="QBluetoothSocket" id="QBluetoothSocket" ref="qbluetoothsocket.html"/>
+            <keyword name="QBluetoothSocket::BoundState" id="QBluetoothSocket::BoundState" ref="qbluetoothsocket.html#SocketState-enum"/>
+            <keyword name="QBluetoothSocket::ClosingState" id="QBluetoothSocket::ClosingState" ref="qbluetoothsocket.html#SocketState-enum"/>
+            <keyword name="QBluetoothSocket::ConnectedState" id="QBluetoothSocket::ConnectedState" ref="qbluetoothsocket.html#SocketState-enum"/>
+            <keyword name="QBluetoothSocket::ConnectingState" id="QBluetoothSocket::ConnectingState" ref="qbluetoothsocket.html#SocketState-enum"/>
+            <keyword name="QBluetoothSocket::HostNotFoundError" id="QBluetoothSocket::HostNotFoundError" ref="qbluetoothsocket.html#SocketError-enum"/>
+            <keyword name="QBluetoothSocket::ListeningState" id="QBluetoothSocket::ListeningState" ref="qbluetoothsocket.html#SocketState-enum"/>
+            <keyword name="QBluetoothSocket::NetworkError" id="QBluetoothSocket::NetworkError" ref="qbluetoothsocket.html#SocketError-enum"/>
+            <keyword name="QBluetoothSocket::NoSocketError" id="QBluetoothSocket::NoSocketError" ref="qbluetoothsocket.html#SocketError-enum"/>
+            <keyword name="QBluetoothSocket::OperationError" id="QBluetoothSocket::OperationError" ref="qbluetoothsocket.html#SocketError-enum"/>
+            <keyword name="QBluetoothSocket::RemoteHostClosedError" id="QBluetoothSocket::RemoteHostClosedError" ref="qbluetoothsocket.html#SocketError-enum"/>
+            <keyword name="QBluetoothSocket::ServiceLookupState" id="QBluetoothSocket::ServiceLookupState" ref="qbluetoothsocket.html#SocketState-enum"/>
+            <keyword name="QBluetoothSocket::ServiceNotFoundError" id="QBluetoothSocket::ServiceNotFoundError" ref="qbluetoothsocket.html#SocketError-enum"/>
+            <keyword name="QBluetoothSocket::SocketError" id="QBluetoothSocket::SocketError" ref="qbluetoothsocket.html#SocketError-enum"/>
+            <keyword name="QBluetoothSocket::SocketState" id="QBluetoothSocket::SocketState" ref="qbluetoothsocket.html#SocketState-enum"/>
+            <keyword name="QBluetoothSocket::UnconnectedState" id="QBluetoothSocket::UnconnectedState" ref="qbluetoothsocket.html#SocketState-enum"/>
+            <keyword name="QBluetoothSocket::UnknownSocketError" id="QBluetoothSocket::UnknownSocketError" ref="qbluetoothsocket.html#SocketError-enum"/>
+            <keyword name="QBluetoothSocket::UnsupportedProtocolError" id="QBluetoothSocket::UnsupportedProtocolError" ref="qbluetoothsocket.html#SocketError-enum"/>
+            <keyword name="QBluetoothTransferManager" id="QBluetoothTransferManager" ref="qbluetoothtransfermanager.html"/>
+            <keyword name="QBluetoothTransferReply" id="QBluetoothTransferReply" ref="qbluetoothtransferreply.html"/>
+            <keyword name="QBluetoothTransferReply::FileNotFoundError" id="QBluetoothTransferReply::FileNotFoundError" ref="qbluetoothtransferreply.html#TransferError-enum"/>
+            <keyword name="QBluetoothTransferReply::HostNotFoundError" id="QBluetoothTransferReply::HostNotFoundError" ref="qbluetoothtransferreply.html#TransferError-enum"/>
+            <keyword name="QBluetoothTransferReply::IODeviceNotReadableError" id="QBluetoothTransferReply::IODeviceNotReadableError" ref="qbluetoothtransferreply.html#TransferError-enum"/>
+            <keyword name="QBluetoothTransferReply::NoError" id="QBluetoothTransferReply::NoError" ref="qbluetoothtransferreply.html#TransferError-enum"/>
+            <keyword name="QBluetoothTransferReply::ResourceBusyError" id="QBluetoothTransferReply::ResourceBusyError" ref="qbluetoothtransferreply.html#TransferError-enum"/>
+            <keyword name="QBluetoothTransferReply::SessionError" id="QBluetoothTransferReply::SessionError" ref="qbluetoothtransferreply.html#TransferError-enum"/>
+            <keyword name="QBluetoothTransferReply::TransferError" id="QBluetoothTransferReply::TransferError" ref="qbluetoothtransferreply.html#TransferError-enum"/>
+            <keyword name="QBluetoothTransferReply::UnknownError" id="QBluetoothTransferReply::UnknownError" ref="qbluetoothtransferreply.html#TransferError-enum"/>
+            <keyword name="QBluetoothTransferReply::UserCanceledTransferError" id="QBluetoothTransferReply::UserCanceledTransferError" ref="qbluetoothtransferreply.html#TransferError-enum"/>
+            <keyword name="QBluetoothTransferRequest" id="QBluetoothTransferRequest" ref="qbluetoothtransferrequest.html"/>
+            <keyword name="QBluetoothTransferRequest::Attribute" id="QBluetoothTransferRequest::Attribute" ref="qbluetoothtransferrequest.html#Attribute-enum"/>
+            <keyword name="QBluetoothTransferRequest::DescriptionAttribute" id="QBluetoothTransferRequest::DescriptionAttribute" ref="qbluetoothtransferrequest.html#Attribute-enum"/>
+            <keyword name="QBluetoothTransferRequest::LengthAttribute" id="QBluetoothTransferRequest::LengthAttribute" ref="qbluetoothtransferrequest.html#Attribute-enum"/>
+            <keyword name="QBluetoothTransferRequest::NameAttribute" id="QBluetoothTransferRequest::NameAttribute" ref="qbluetoothtransferrequest.html#Attribute-enum"/>
+            <keyword name="QBluetoothTransferRequest::TimeAttribute" id="QBluetoothTransferRequest::TimeAttribute" ref="qbluetoothtransferrequest.html#Attribute-enum"/>
+            <keyword name="QBluetoothTransferRequest::TypeAttribute" id="QBluetoothTransferRequest::TypeAttribute" ref="qbluetoothtransferrequest.html#Attribute-enum"/>
+            <keyword name="QBluetoothUuid" id="QBluetoothUuid" ref="qbluetoothuuid.html"/>
+            <keyword name="QBluetoothUuid::AV_RemoteControl" id="QBluetoothUuid::AV_RemoteControl" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::AV_RemoteControlController" id="QBluetoothUuid::AV_RemoteControlController" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::AV_RemoteControlTarget" id="QBluetoothUuid::AV_RemoteControlTarget" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::AdvancedAudioDistribution" id="QBluetoothUuid::AdvancedAudioDistribution" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::AerobicHeartRateLowerLimit" id="QBluetoothUuid::AerobicHeartRateLowerLimit" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::AerobicHeartRateUpperLimit" id="QBluetoothUuid::AerobicHeartRateUpperLimit" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::AerobicThreshold" id="QBluetoothUuid::AerobicThreshold" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::Age" id="QBluetoothUuid::Age" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::AlertCategoryID" id="QBluetoothUuid::AlertCategoryID" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::AlertCategoryIDBitMask" id="QBluetoothUuid::AlertCategoryIDBitMask" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::AlertLevel" id="QBluetoothUuid::AlertLevel" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::AlertNotificationControlPoint" id="QBluetoothUuid::AlertNotificationControlPoint" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::AlertNotificationService" id="QBluetoothUuid::AlertNotificationService" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::AlertStatus" id="QBluetoothUuid::AlertStatus" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::AnaerobicHeartRateLowerLimit" id="QBluetoothUuid::AnaerobicHeartRateLowerLimit" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::AnaerobicHeartRateUpperLimit" id="QBluetoothUuid::AnaerobicHeartRateUpperLimit" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::AnaerobicThreshold" id="QBluetoothUuid::AnaerobicThreshold" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::ApparentWindDirection" id="QBluetoothUuid::ApparentWindDirection" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::ApparentWindSpeed" id="QBluetoothUuid::ApparentWindSpeed" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::Appearance" id="QBluetoothUuid::Appearance" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::Att" id="QBluetoothUuid::Att" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::AudioSink" id="QBluetoothUuid::AudioSink" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::AudioSource" id="QBluetoothUuid::AudioSource" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::Avctp" id="QBluetoothUuid::Avctp" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::Avdtp" id="QBluetoothUuid::Avdtp" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::BarometricPressureTrend" id="QBluetoothUuid::BarometricPressureTrend" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::BasicImage" id="QBluetoothUuid::BasicImage" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::BasicPrinting" id="QBluetoothUuid::BasicPrinting" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::BatteryLevel" id="QBluetoothUuid::BatteryLevel" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::BatteryService" id="QBluetoothUuid::BatteryService" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::BloodPressure" id="QBluetoothUuid::BloodPressure" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::BloodPressureFeature" id="QBluetoothUuid::BloodPressureFeature" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::BloodPressureMeasurement" id="QBluetoothUuid::BloodPressureMeasurement" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::Bnep" id="QBluetoothUuid::Bnep" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::BodyComposition" id="QBluetoothUuid::BodyComposition" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::BodyCompositionFeature" id="QBluetoothUuid::BodyCompositionFeature" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::BodyCompositionMeasurement" id="QBluetoothUuid::BodyCompositionMeasurement" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::BodySensorLocation" id="QBluetoothUuid::BodySensorLocation" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::BondManagement" id="QBluetoothUuid::BondManagement" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::BootKeyboardInputReport" id="QBluetoothUuid::BootKeyboardInputReport" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::BootKeyboardOutputReport" id="QBluetoothUuid::BootKeyboardOutputReport" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::BootMouseInputReport" id="QBluetoothUuid::BootMouseInputReport" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::BrowseGroupDescriptor" id="QBluetoothUuid::BrowseGroupDescriptor" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::CSCFeature" id="QBluetoothUuid::CSCFeature" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::CSCMeasurement" id="QBluetoothUuid::CSCMeasurement" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::CharacteristicAggregateFormat" id="QBluetoothUuid::CharacteristicAggregateFormat" ref="qbluetoothuuid.html#DescriptorType-enum"/>
+            <keyword name="QBluetoothUuid::CharacteristicExtendedProperties" id="QBluetoothUuid::CharacteristicExtendedProperties" ref="qbluetoothuuid.html#DescriptorType-enum"/>
+            <keyword name="QBluetoothUuid::CharacteristicPresentationFormat" id="QBluetoothUuid::CharacteristicPresentationFormat" ref="qbluetoothuuid.html#DescriptorType-enum"/>
+            <keyword name="QBluetoothUuid::CharacteristicType" id="QBluetoothUuid::CharacteristicType" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::CharacteristicUserDescription" id="QBluetoothUuid::CharacteristicUserDescription" ref="qbluetoothuuid.html#DescriptorType-enum"/>
+            <keyword name="QBluetoothUuid::ClientCharacteristicConfiguration" id="QBluetoothUuid::ClientCharacteristicConfiguration" ref="qbluetoothuuid.html#DescriptorType-enum"/>
+            <keyword name="QBluetoothUuid::Cmtp" id="QBluetoothUuid::Cmtp" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::ContinuousGlucoseMonitoring" id="QBluetoothUuid::ContinuousGlucoseMonitoring" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::CurrentTime" id="QBluetoothUuid::CurrentTime" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::CurrentTimeService" id="QBluetoothUuid::CurrentTimeService" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::CyclingPower" id="QBluetoothUuid::CyclingPower" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::CyclingPowerControlPoint" id="QBluetoothUuid::CyclingPowerControlPoint" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::CyclingPowerFeature" id="QBluetoothUuid::CyclingPowerFeature" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::CyclingPowerMeasurement" id="QBluetoothUuid::CyclingPowerMeasurement" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::CyclingPowerVector" id="QBluetoothUuid::CyclingPowerVector" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::CyclingSpeedAndCadence" id="QBluetoothUuid::CyclingSpeedAndCadence" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::DSTOffset" id="QBluetoothUuid::DSTOffset" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::DatabaseChangeIncrement" id="QBluetoothUuid::DatabaseChangeIncrement" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::DateOfBirth" id="QBluetoothUuid::DateOfBirth" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::DateOfThresholdAssessment" id="QBluetoothUuid::DateOfThresholdAssessment" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::DateTime" id="QBluetoothUuid::DateTime" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::DayDateTime" id="QBluetoothUuid::DayDateTime" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::DayOfWeek" id="QBluetoothUuid::DayOfWeek" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::DescriptorType" id="QBluetoothUuid::DescriptorType" ref="qbluetoothuuid.html#DescriptorType-enum"/>
+            <keyword name="QBluetoothUuid::DescriptorValueChanged" id="QBluetoothUuid::DescriptorValueChanged" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::DeviceInformation" id="QBluetoothUuid::DeviceInformation" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::DeviceName" id="QBluetoothUuid::DeviceName" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::DewPoint" id="QBluetoothUuid::DewPoint" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::DialupNetworking" id="QBluetoothUuid::DialupNetworking" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::DirectPrinting" id="QBluetoothUuid::DirectPrinting" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::DirectPrintingReferenceObjectsService" id="QBluetoothUuid::DirectPrintingReferenceObjectsService" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::Display3D" id="QBluetoothUuid::Display3D" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::Elevation" id="QBluetoothUuid::Elevation" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::EmailAddress" id="QBluetoothUuid::EmailAddress" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::EnvironmentalSensing" id="QBluetoothUuid::EnvironmentalSensing" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::EnvironmentalSensingConfiguration" id="QBluetoothUuid::EnvironmentalSensingConfiguration" ref="qbluetoothuuid.html#DescriptorType-enum"/>
+            <keyword name="QBluetoothUuid::EnvironmentalSensingMeasurement" id="QBluetoothUuid::EnvironmentalSensingMeasurement" ref="qbluetoothuuid.html#DescriptorType-enum"/>
+            <keyword name="QBluetoothUuid::EnvironmentalSensingTriggerSetting" id="QBluetoothUuid::EnvironmentalSensingTriggerSetting" ref="qbluetoothuuid.html#DescriptorType-enum"/>
+            <keyword name="QBluetoothUuid::ExactTime256" id="QBluetoothUuid::ExactTime256" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::ExternalReportReference" id="QBluetoothUuid::ExternalReportReference" ref="qbluetoothuuid.html#DescriptorType-enum"/>
+            <keyword name="QBluetoothUuid::FatBurnHeartRateLowerLimit" id="QBluetoothUuid::FatBurnHeartRateLowerLimit" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::FatBurnHeartRateUpperLimit" id="QBluetoothUuid::FatBurnHeartRateUpperLimit" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::FirmwareRevisionString" id="QBluetoothUuid::FirmwareRevisionString" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::FirstName" id="QBluetoothUuid::FirstName" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::FiveZoneHeartRateLimits" id="QBluetoothUuid::FiveZoneHeartRateLimits" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::Ftp" id="QBluetoothUuid::Ftp" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::GN" id="QBluetoothUuid::GN" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::GNSS" id="QBluetoothUuid::GNSS" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::GNSSServer" id="QBluetoothUuid::GNSSServer" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::Gender" id="QBluetoothUuid::Gender" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::GenericAccess" id="QBluetoothUuid::GenericAccess" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::GenericAttribute" id="QBluetoothUuid::GenericAttribute" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::GenericAudio" id="QBluetoothUuid::GenericAudio" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::GenericFileTransfer" id="QBluetoothUuid::GenericFileTransfer" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::GenericNetworking" id="QBluetoothUuid::GenericNetworking" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::GenericTelephony" id="QBluetoothUuid::GenericTelephony" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::Glasses3D" id="QBluetoothUuid::Glasses3D" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::Glucose" id="QBluetoothUuid::Glucose" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::GlucoseFeature" id="QBluetoothUuid::GlucoseFeature" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::GlucoseMeasurement" id="QBluetoothUuid::GlucoseMeasurement" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::GlucoseMeasurementContext" id="QBluetoothUuid::GlucoseMeasurementContext" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::GustFactor" id="QBluetoothUuid::GustFactor" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::HCRPrint" id="QBluetoothUuid::HCRPrint" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::HCRScan" id="QBluetoothUuid::HCRScan" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::HDP" id="QBluetoothUuid::HDP" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::HDPSink" id="QBluetoothUuid::HDPSink" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::HDPSource" id="QBluetoothUuid::HDPSource" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::HIDControlPoint" id="QBluetoothUuid::HIDControlPoint" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::HIDInformation" id="QBluetoothUuid::HIDInformation" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::Handsfree" id="QBluetoothUuid::Handsfree" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::HandsfreeAudioGateway" id="QBluetoothUuid::HandsfreeAudioGateway" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::HardcopyCableReplacement" id="QBluetoothUuid::HardcopyCableReplacement" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::HardcopyControlChannel" id="QBluetoothUuid::HardcopyControlChannel" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::HardcopyDataChannel" id="QBluetoothUuid::HardcopyDataChannel" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::HardcopyNotification" id="QBluetoothUuid::HardcopyNotification" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::HardwareRevisionString" id="QBluetoothUuid::HardwareRevisionString" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::Headset" id="QBluetoothUuid::Headset" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::HeadsetAG" id="QBluetoothUuid::HeadsetAG" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::HeadsetHS" id="QBluetoothUuid::HeadsetHS" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::HealthThermometer" id="QBluetoothUuid::HealthThermometer" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::HeartRate" id="QBluetoothUuid::HeartRate" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::HeartRateControlPoint" id="QBluetoothUuid::HeartRateControlPoint" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::HeartRateMax" id="QBluetoothUuid::HeartRateMax" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::HeartRateMeasurement" id="QBluetoothUuid::HeartRateMeasurement" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::HeatIndex" id="QBluetoothUuid::HeatIndex" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::Height" id="QBluetoothUuid::Height" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::Hidp" id="QBluetoothUuid::Hidp" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::HipCircumference" id="QBluetoothUuid::HipCircumference" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::Http" id="QBluetoothUuid::Http" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::HumanInterfaceDevice" id="QBluetoothUuid::HumanInterfaceDevice" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::HumanInterfaceDeviceService" id="QBluetoothUuid::HumanInterfaceDeviceService" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::Humidity" id="QBluetoothUuid::Humidity" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::IEEE1107320601RegulatoryCertificationDataList" id="QBluetoothUuid::IEEE1107320601RegulatoryCertificationDataList" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::ImagingAutomaticArchive" id="QBluetoothUuid::ImagingAutomaticArchive" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::ImagingReferenceObjects" id="QBluetoothUuid::ImagingReferenceObjects" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::ImagingResponder" id="QBluetoothUuid::ImagingResponder" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::ImmediateAlert" id="QBluetoothUuid::ImmediateAlert" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::IntermediateCuffPressure" id="QBluetoothUuid::IntermediateCuffPressure" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::IntermediateTemperature" id="QBluetoothUuid::IntermediateTemperature" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::Ip" id="QBluetoothUuid::Ip" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::IrMCSync" id="QBluetoothUuid::IrMCSync" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::IrMCSyncCommand" id="QBluetoothUuid::IrMCSyncCommand" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::Irradiance" id="QBluetoothUuid::Irradiance" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::L2cap" id="QBluetoothUuid::L2cap" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::LANAccessUsingPPP" id="QBluetoothUuid::LANAccessUsingPPP" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::LNControlPoint" id="QBluetoothUuid::LNControlPoint" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::LNFeature" id="QBluetoothUuid::LNFeature" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::Language" id="QBluetoothUuid::Language" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::LastName" id="QBluetoothUuid::LastName" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::LinkLoss" id="QBluetoothUuid::LinkLoss" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::LocalTimeInformation" id="QBluetoothUuid::LocalTimeInformation" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::LocationAndNavigation" id="QBluetoothUuid::LocationAndNavigation" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::LocationAndSpeed" id="QBluetoothUuid::LocationAndSpeed" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::MPSProfile" id="QBluetoothUuid::MPSProfile" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::MPSService" id="QBluetoothUuid::MPSService" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::MagneticDeclination" id="QBluetoothUuid::MagneticDeclination" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::MagneticFluxDensity2D" id="QBluetoothUuid::MagneticFluxDensity2D" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::MagneticFluxDensity3D" id="QBluetoothUuid::MagneticFluxDensity3D" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::ManufacturerNameString" id="QBluetoothUuid::ManufacturerNameString" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::MaximumRecommendedHeartRate" id="QBluetoothUuid::MaximumRecommendedHeartRate" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::McapControlChannel" id="QBluetoothUuid::McapControlChannel" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::McapDataChannel" id="QBluetoothUuid::McapDataChannel" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::MeasurementInterval" id="QBluetoothUuid::MeasurementInterval" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::MessageAccessProfile" id="QBluetoothUuid::MessageAccessProfile" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::MessageAccessServer" id="QBluetoothUuid::MessageAccessServer" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::MessageNotificationServer" id="QBluetoothUuid::MessageNotificationServer" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::ModelNumberString" id="QBluetoothUuid::ModelNumberString" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::NAP" id="QBluetoothUuid::NAP" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::Navigation" id="QBluetoothUuid::Navigation" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::NewAlert" id="QBluetoothUuid::NewAlert" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::NextDSTChangeService" id="QBluetoothUuid::NextDSTChangeService" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::OBEXFileTransfer" id="QBluetoothUuid::OBEXFileTransfer" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::Obex" id="QBluetoothUuid::Obex" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::ObexObjectPush" id="QBluetoothUuid::ObexObjectPush" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::PANU" id="QBluetoothUuid::PANU" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::PeripheralPreferredConnectionParameters" id="QBluetoothUuid::PeripheralPreferredConnectionParameters" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::PeripheralPrivacyFlag" id="QBluetoothUuid::PeripheralPrivacyFlag" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::PhoneAlertStatusService" id="QBluetoothUuid::PhoneAlertStatusService" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::PhonebookAccess" id="QBluetoothUuid::PhonebookAccess" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::PhonebookAccessPCE" id="QBluetoothUuid::PhonebookAccessPCE" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::PhonebookAccessPSE" id="QBluetoothUuid::PhonebookAccessPSE" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::PnPID" id="QBluetoothUuid::PnPID" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::PnPInformation" id="QBluetoothUuid::PnPInformation" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::PollenConcentration" id="QBluetoothUuid::PollenConcentration" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::PositionQuality" id="QBluetoothUuid::PositionQuality" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::Pressure" id="QBluetoothUuid::Pressure" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::PrintingStatus" id="QBluetoothUuid::PrintingStatus" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::ProtocolMode" id="QBluetoothUuid::ProtocolMode" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::ProtocolUuid" id="QBluetoothUuid::ProtocolUuid" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::PublicBrowseGroup" id="QBluetoothUuid::PublicBrowseGroup" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::RSCFeature" id="QBluetoothUuid::RSCFeature" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::RSCMeasurement" id="QBluetoothUuid::RSCMeasurement" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::Rainfall" id="QBluetoothUuid::Rainfall" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::ReconnectionAddress" id="QBluetoothUuid::ReconnectionAddress" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::RecordAccessControlPoint" id="QBluetoothUuid::RecordAccessControlPoint" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::ReferencePrinting" id="QBluetoothUuid::ReferencePrinting" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::ReferenceTimeInformation" id="QBluetoothUuid::ReferenceTimeInformation" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::ReferenceTimeUpdateService" id="QBluetoothUuid::ReferenceTimeUpdateService" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::ReflectedUI" id="QBluetoothUuid::ReflectedUI" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::Report" id="QBluetoothUuid::Report" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::ReportMap" id="QBluetoothUuid::ReportMap" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::ReportReference" id="QBluetoothUuid::ReportReference" ref="qbluetoothuuid.html#DescriptorType-enum"/>
+            <keyword name="QBluetoothUuid::RestingHeartRate" id="QBluetoothUuid::RestingHeartRate" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::Rfcomm" id="QBluetoothUuid::Rfcomm" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::RingerControlPoint" id="QBluetoothUuid::RingerControlPoint" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::RingerSetting" id="QBluetoothUuid::RingerSetting" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::RunningSpeedAndCadence" id="QBluetoothUuid::RunningSpeedAndCadence" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::SCControlPoint" id="QBluetoothUuid::SCControlPoint" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::SIMAccess" id="QBluetoothUuid::SIMAccess" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::ScanIntervalWindow" id="QBluetoothUuid::ScanIntervalWindow" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::ScanParameters" id="QBluetoothUuid::ScanParameters" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::ScanRefresh" id="QBluetoothUuid::ScanRefresh" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::Sdp" id="QBluetoothUuid::Sdp" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::SensorLocation" id="QBluetoothUuid::SensorLocation" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::SerialNumberString" id="QBluetoothUuid::SerialNumberString" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::SerialPort" id="QBluetoothUuid::SerialPort" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::ServerCharacteristicConfiguration" id="QBluetoothUuid::ServerCharacteristicConfiguration" ref="qbluetoothuuid.html#DescriptorType-enum"/>
+            <keyword name="QBluetoothUuid::ServiceChanged" id="QBluetoothUuid::ServiceChanged" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::ServiceClassUuid" id="QBluetoothUuid::ServiceClassUuid" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::ServiceDiscoveryServer" id="QBluetoothUuid::ServiceDiscoveryServer" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::SoftwareRevisionString" id="QBluetoothUuid::SoftwareRevisionString" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::SportTypeForAerobicAnaerobicThresholds" id="QBluetoothUuid::SportTypeForAerobicAnaerobicThresholds" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::SupportedNewAlertCategory" id="QBluetoothUuid::SupportedNewAlertCategory" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::SupportedUnreadAlertCategory" id="QBluetoothUuid::SupportedUnreadAlertCategory" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::Synchronization3D" id="QBluetoothUuid::Synchronization3D" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::SystemID" id="QBluetoothUuid::SystemID" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::Tcp" id="QBluetoothUuid::Tcp" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::TcsAt" id="QBluetoothUuid::TcsAt" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::TcsBin" id="QBluetoothUuid::TcsBin" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::Temperature" id="QBluetoothUuid::Temperature" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::TemperatureMeasurement" id="QBluetoothUuid::TemperatureMeasurement" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::TemperatureType" id="QBluetoothUuid::TemperatureType" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::ThreeZoneHeartRateLimits" id="QBluetoothUuid::ThreeZoneHeartRateLimits" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::TimeAccuracy" id="QBluetoothUuid::TimeAccuracy" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::TimeSource" id="QBluetoothUuid::TimeSource" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::TimeUpdateControlPoint" id="QBluetoothUuid::TimeUpdateControlPoint" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::TimeUpdateState" id="QBluetoothUuid::TimeUpdateState" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::TimeWithDST" id="QBluetoothUuid::TimeWithDST" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::TimeZone" id="QBluetoothUuid::TimeZone" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::TrueWindDirection" id="QBluetoothUuid::TrueWindDirection" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::TrueWindSpeed" id="QBluetoothUuid::TrueWindSpeed" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::TwoZoneHeartRateLimits" id="QBluetoothUuid::TwoZoneHeartRateLimits" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::TxPower" id="QBluetoothUuid::TxPower" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::TxPowerLevel" id="QBluetoothUuid::TxPowerLevel" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::UVIndex" id="QBluetoothUuid::UVIndex" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::UdiCPlain" id="QBluetoothUuid::UdiCPlain" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::Udp" id="QBluetoothUuid::Udp" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::UnknownDescriptorType" id="QBluetoothUuid::UnknownDescriptorType" ref="qbluetoothuuid.html#DescriptorType-enum"/>
+            <keyword name="QBluetoothUuid::UnreadAlertStatus" id="QBluetoothUuid::UnreadAlertStatus" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::Upnp" id="QBluetoothUuid::Upnp" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QBluetoothUuid::UserControlPoint" id="QBluetoothUuid::UserControlPoint" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::UserData" id="QBluetoothUuid::UserData" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::UserIndex" id="QBluetoothUuid::UserIndex" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::VO2Max" id="QBluetoothUuid::VO2Max" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::ValidRange" id="QBluetoothUuid::ValidRange" ref="qbluetoothuuid.html#DescriptorType-enum"/>
+            <keyword name="QBluetoothUuid::VideoDistribution" id="QBluetoothUuid::VideoDistribution" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::VideoSink" id="QBluetoothUuid::VideoSink" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::VideoSource" id="QBluetoothUuid::VideoSource" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::WaistCircumference" id="QBluetoothUuid::WaistCircumference" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::Weight" id="QBluetoothUuid::Weight" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::WeightMeasurement" id="QBluetoothUuid::WeightMeasurement" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::WeightScale" id="QBluetoothUuid::WeightScale" ref="qbluetoothuuid.html#ServiceClassUuid-enum"/>
+            <keyword name="QBluetoothUuid::WeightScaleFeature" id="QBluetoothUuid::WeightScaleFeature" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::WindChill" id="QBluetoothUuid::WindChill" ref="qbluetoothuuid.html#CharacteristicType-enum"/>
+            <keyword name="QBluetoothUuid::Wsp" id="QBluetoothUuid::Wsp" ref="qbluetoothuuid.html#ProtocolUuid-enum"/>
+            <keyword name="QLowEnergyAdvertisingData" id="QLowEnergyAdvertisingData" ref="qlowenergyadvertisingdata.html"/>
+            <keyword name="QLowEnergyAdvertisingData::Discoverability" id="QLowEnergyAdvertisingData::Discoverability" ref="qlowenergyadvertisingdata.html#Discoverability-enum"/>
+            <keyword name="QLowEnergyAdvertisingData::DiscoverabilityGeneral" id="QLowEnergyAdvertisingData::DiscoverabilityGeneral" ref="qlowenergyadvertisingdata.html#Discoverability-enum"/>
+            <keyword name="QLowEnergyAdvertisingData::DiscoverabilityLimited" id="QLowEnergyAdvertisingData::DiscoverabilityLimited" ref="qlowenergyadvertisingdata.html#Discoverability-enum"/>
+            <keyword name="QLowEnergyAdvertisingData::DiscoverabilityNone" id="QLowEnergyAdvertisingData::DiscoverabilityNone" ref="qlowenergyadvertisingdata.html#Discoverability-enum"/>
+            <keyword name="QLowEnergyAdvertisingParameters" id="QLowEnergyAdvertisingParameters" ref="qlowenergyadvertisingparameters.html"/>
+            <keyword name="QLowEnergyAdvertisingParameters::AdvInd" id="QLowEnergyAdvertisingParameters::AdvInd" ref="qlowenergyadvertisingparameters.html#Mode-enum"/>
+            <keyword name="QLowEnergyAdvertisingParameters::AdvNonConnInd" id="QLowEnergyAdvertisingParameters::AdvNonConnInd" ref="qlowenergyadvertisingparameters.html#Mode-enum"/>
+            <keyword name="QLowEnergyAdvertisingParameters::AdvScanInd" id="QLowEnergyAdvertisingParameters::AdvScanInd" ref="qlowenergyadvertisingparameters.html#Mode-enum"/>
+            <keyword name="QLowEnergyAdvertisingParameters::FilterPolicy" id="QLowEnergyAdvertisingParameters::FilterPolicy" ref="qlowenergyadvertisingparameters.html#FilterPolicy-enum"/>
+            <keyword name="QLowEnergyAdvertisingParameters::IgnoreWhiteList" id="QLowEnergyAdvertisingParameters::IgnoreWhiteList" ref="qlowenergyadvertisingparameters.html#FilterPolicy-enum"/>
+            <keyword name="QLowEnergyAdvertisingParameters::Mode" id="QLowEnergyAdvertisingParameters::Mode" ref="qlowenergyadvertisingparameters.html#Mode-enum"/>
+            <keyword name="QLowEnergyAdvertisingParameters::UseWhiteListForConnecting" id="QLowEnergyAdvertisingParameters::UseWhiteListForConnecting" ref="qlowenergyadvertisingparameters.html#FilterPolicy-enum"/>
+            <keyword name="QLowEnergyAdvertisingParameters::UseWhiteListForScanning" id="QLowEnergyAdvertisingParameters::UseWhiteListForScanning" ref="qlowenergyadvertisingparameters.html#FilterPolicy-enum"/>
+            <keyword name="QLowEnergyAdvertisingParameters::UseWhiteListForScanningAndConnecting" id="QLowEnergyAdvertisingParameters::UseWhiteListForScanningAndConnecting" ref="qlowenergyadvertisingparameters.html#FilterPolicy-enum"/>
+            <keyword name="QLowEnergyCharacteristic" id="QLowEnergyCharacteristic" ref="qlowenergycharacteristic.html"/>
+            <keyword name="QLowEnergyCharacteristic::Broadcasting" id="QLowEnergyCharacteristic::Broadcasting" ref="qlowenergycharacteristic.html#PropertyType-enum"/>
+            <keyword name="QLowEnergyCharacteristic::ExtendedProperty" id="QLowEnergyCharacteristic::ExtendedProperty" ref="qlowenergycharacteristic.html#PropertyType-enum"/>
+            <keyword name="QLowEnergyCharacteristic::Indicate" id="QLowEnergyCharacteristic::Indicate" ref="qlowenergycharacteristic.html#PropertyType-enum"/>
+            <keyword name="QLowEnergyCharacteristic::Notify" id="QLowEnergyCharacteristic::Notify" ref="qlowenergycharacteristic.html#PropertyType-enum"/>
+            <keyword name="QLowEnergyCharacteristic::PropertyType" id="QLowEnergyCharacteristic::PropertyType" ref="qlowenergycharacteristic.html#PropertyType-enum"/>
+            <keyword name="QLowEnergyCharacteristic::PropertyTypes" id="QLowEnergyCharacteristic::PropertyTypes" ref="qlowenergycharacteristic.html#PropertyType-enum"/>
+            <keyword name="QLowEnergyCharacteristic::Read" id="QLowEnergyCharacteristic::Read" ref="qlowenergycharacteristic.html#PropertyType-enum"/>
+            <keyword name="QLowEnergyCharacteristic::Unknown" id="QLowEnergyCharacteristic::Unknown" ref="qlowenergycharacteristic.html#PropertyType-enum"/>
+            <keyword name="QLowEnergyCharacteristic::Write" id="QLowEnergyCharacteristic::Write" ref="qlowenergycharacteristic.html#PropertyType-enum"/>
+            <keyword name="QLowEnergyCharacteristic::WriteNoResponse" id="QLowEnergyCharacteristic::WriteNoResponse" ref="qlowenergycharacteristic.html#PropertyType-enum"/>
+            <keyword name="QLowEnergyCharacteristic::WriteSigned" id="QLowEnergyCharacteristic::WriteSigned" ref="qlowenergycharacteristic.html#PropertyType-enum"/>
+            <keyword name="QLowEnergyCharacteristicData" id="QLowEnergyCharacteristicData" ref="qlowenergycharacteristicdata.html"/>
+            <keyword name="QLowEnergyConnectionParameters" id="QLowEnergyConnectionParameters" ref="qlowenergyconnectionparameters.html"/>
+            <keyword name="QLowEnergyController" id="QLowEnergyController" ref="qlowenergycontroller.html"/>
+            <keyword name="QLowEnergyController::AdvertisingError" id="QLowEnergyController::AdvertisingError" ref="qlowenergycontroller.html#Error-enum"/>
+            <keyword name="QLowEnergyController::AdvertisingState" id="QLowEnergyController::AdvertisingState" ref="qlowenergycontroller.html#ControllerState-enum"/>
+            <keyword name="QLowEnergyController::CentralRole" id="QLowEnergyController::CentralRole" ref="qlowenergycontroller.html#Role-enum"/>
+            <keyword name="QLowEnergyController::ClosingState" id="QLowEnergyController::ClosingState" ref="qlowenergycontroller.html#ControllerState-enum"/>
+            <keyword name="QLowEnergyController::ConnectedState" id="QLowEnergyController::ConnectedState" ref="qlowenergycontroller.html#ControllerState-enum"/>
+            <keyword name="QLowEnergyController::ConnectingState" id="QLowEnergyController::ConnectingState" ref="qlowenergycontroller.html#ControllerState-enum"/>
+            <keyword name="QLowEnergyController::ConnectionError" id="QLowEnergyController::ConnectionError" ref="qlowenergycontroller.html#Error-enum"/>
+            <keyword name="QLowEnergyController::ControllerState" id="QLowEnergyController::ControllerState" ref="qlowenergycontroller.html#ControllerState-enum"/>
+            <keyword name="QLowEnergyController::DiscoveredState" id="QLowEnergyController::DiscoveredState" ref="qlowenergycontroller.html#ControllerState-enum"/>
+            <keyword name="QLowEnergyController::DiscoveringState" id="QLowEnergyController::DiscoveringState" ref="qlowenergycontroller.html#ControllerState-enum"/>
+            <keyword name="QLowEnergyController::Error" id="QLowEnergyController::Error" ref="qlowenergycontroller.html#Error-enum"/>
+            <keyword name="QLowEnergyController::InvalidBluetoothAdapterError" id="QLowEnergyController::InvalidBluetoothAdapterError" ref="qlowenergycontroller.html#Error-enum"/>
+            <keyword name="QLowEnergyController::NetworkError" id="QLowEnergyController::NetworkError" ref="qlowenergycontroller.html#Error-enum"/>
+            <keyword name="QLowEnergyController::NoError" id="QLowEnergyController::NoError" ref="qlowenergycontroller.html#Error-enum"/>
+            <keyword name="QLowEnergyController::PeripheralRole" id="QLowEnergyController::PeripheralRole" ref="qlowenergycontroller.html#Role-enum"/>
+            <keyword name="QLowEnergyController::PublicAddress" id="QLowEnergyController::PublicAddress" ref="qlowenergycontroller.html#RemoteAddressType-enum"/>
+            <keyword name="QLowEnergyController::RandomAddress" id="QLowEnergyController::RandomAddress" ref="qlowenergycontroller.html#RemoteAddressType-enum"/>
+            <keyword name="QLowEnergyController::RemoteAddressType" id="QLowEnergyController::RemoteAddressType" ref="qlowenergycontroller.html#RemoteAddressType-enum"/>
+            <keyword name="QLowEnergyController::RemoteHostClosedError" id="QLowEnergyController::RemoteHostClosedError" ref="qlowenergycontroller.html#Error-enum"/>
+            <keyword name="QLowEnergyController::Role" id="QLowEnergyController::Role" ref="qlowenergycontroller.html#Role-enum"/>
+            <keyword name="QLowEnergyController::UnconnectedState" id="QLowEnergyController::UnconnectedState" ref="qlowenergycontroller.html#ControllerState-enum"/>
+            <keyword name="QLowEnergyController::UnknownError" id="QLowEnergyController::UnknownError" ref="qlowenergycontroller.html#Error-enum"/>
+            <keyword name="QLowEnergyController::UnknownRemoteDeviceError" id="QLowEnergyController::UnknownRemoteDeviceError" ref="qlowenergycontroller.html#Error-enum"/>
+            <keyword name="QLowEnergyDescriptor" id="QLowEnergyDescriptor" ref="qlowenergydescriptor.html"/>
+            <keyword name="QLowEnergyDescriptorData" id="QLowEnergyDescriptorData" ref="qlowenergydescriptordata.html"/>
+            <keyword name="QLowEnergyService" id="QLowEnergyService" ref="qlowenergyservice.html"/>
+            <keyword name="QLowEnergyService::CharacteristicReadError" id="QLowEnergyService::CharacteristicReadError" ref="qlowenergyservice.html#ServiceError-enum"/>
+            <keyword name="QLowEnergyService::CharacteristicWriteError" id="QLowEnergyService::CharacteristicWriteError" ref="qlowenergyservice.html#ServiceError-enum"/>
+            <keyword name="QLowEnergyService::DescriptorReadError" id="QLowEnergyService::DescriptorReadError" ref="qlowenergyservice.html#ServiceError-enum"/>
+            <keyword name="QLowEnergyService::DescriptorWriteError" id="QLowEnergyService::DescriptorWriteError" ref="qlowenergyservice.html#ServiceError-enum"/>
+            <keyword name="QLowEnergyService::DiscoveringServices" id="QLowEnergyService::DiscoveringServices" ref="qlowenergyservice.html#ServiceState-enum"/>
+            <keyword name="QLowEnergyService::DiscoveryRequired" id="QLowEnergyService::DiscoveryRequired" ref="qlowenergyservice.html#ServiceState-enum"/>
+            <keyword name="QLowEnergyService::IncludedService" id="QLowEnergyService::IncludedService" ref="qlowenergyservice.html#ServiceType-enum"/>
+            <keyword name="QLowEnergyService::InvalidService" id="QLowEnergyService::InvalidService" ref="qlowenergyservice.html#ServiceState-enum"/>
+            <keyword name="QLowEnergyService::LocalService" id="QLowEnergyService::LocalService" ref="qlowenergyservice.html#ServiceState-enum"/>
+            <keyword name="QLowEnergyService::NoError" id="QLowEnergyService::NoError" ref="qlowenergyservice.html#ServiceError-enum"/>
+            <keyword name="QLowEnergyService::OperationError" id="QLowEnergyService::OperationError" ref="qlowenergyservice.html#ServiceError-enum"/>
+            <keyword name="QLowEnergyService::PrimaryService" id="QLowEnergyService::PrimaryService" ref="qlowenergyservice.html#ServiceType-enum"/>
+            <keyword name="QLowEnergyService::ServiceDiscovered" id="QLowEnergyService::ServiceDiscovered" ref="qlowenergyservice.html#ServiceState-enum"/>
+            <keyword name="QLowEnergyService::ServiceError" id="QLowEnergyService::ServiceError" ref="qlowenergyservice.html#ServiceError-enum"/>
+            <keyword name="QLowEnergyService::ServiceState" id="QLowEnergyService::ServiceState" ref="qlowenergyservice.html#ServiceState-enum"/>
+            <keyword name="QLowEnergyService::ServiceType" id="QLowEnergyService::ServiceType" ref="qlowenergyservice.html#ServiceType-enum"/>
+            <keyword name="QLowEnergyService::ServiceTypes" id="QLowEnergyService::ServiceTypes" ref="qlowenergyservice.html#ServiceType-enum"/>
+            <keyword name="QLowEnergyService::UnknownError" id="QLowEnergyService::UnknownError" ref="qlowenergyservice.html#ServiceError-enum"/>
+            <keyword name="QLowEnergyService::WriteMode" id="QLowEnergyService::WriteMode" ref="qlowenergyservice.html#WriteMode-enum"/>
+            <keyword name="QLowEnergyService::WriteSigned" id="QLowEnergyService::WriteSigned" ref="qlowenergyservice.html#WriteMode-enum"/>
+            <keyword name="QLowEnergyService::WriteWithResponse" id="QLowEnergyService::WriteWithResponse" ref="qlowenergyservice.html#WriteMode-enum"/>
+            <keyword name="QLowEnergyService::WriteWithoutResponse" id="QLowEnergyService::WriteWithoutResponse" ref="qlowenergyservice.html#WriteMode-enum"/>
+            <keyword name="QLowEnergyServiceData" id="QLowEnergyServiceData" ref="qlowenergyservicedata.html"/>
+            <keyword name="QLowEnergyServiceData::ServiceType" id="QLowEnergyServiceData::ServiceType" ref="qlowenergyservicedata.html#ServiceType-enum"/>
+            <keyword name="QLowEnergyServiceData::ServiceTypePrimary" id="QLowEnergyServiceData::ServiceTypePrimary" ref="qlowenergyservicedata.html#ServiceType-enum"/>
+            <keyword name="QLowEnergyServiceData::ServiceTypeSecondary" id="QLowEnergyServiceData::ServiceTypeSecondary" ref="qlowenergyservicedata.html#ServiceType-enum"/>
+            <keyword name="Qt Bluetooth" id="Qt Bluetooth" ref="qtbluetooth-index.html"/>
+            <keyword name="Qt Bluetooth C++ Classes" id="Qt Bluetooth C++ Classes" ref="qtbluetooth-module.html"/>
+            <keyword name="Qt Bluetooth Examples" id="Qt Bluetooth Examples" ref="bluetooth-examples.html"/>
+            <keyword name="Qt Bluetooth Overview" id="Qt Bluetooth Overview" ref="qtbluetooth-overview.html"/>
+            <keyword name="Qt Bluetooth QML Types" id="Qt Bluetooth QML Types" ref="qtbluetooth-qmlmodule.html"/>
+            <keyword name="Sequence" id="QBluetoothServiceInfo::Sequence" ref="qbluetoothserviceinfo-sequence.html"/>
+            <keyword name="abort" id="QBluetoothSocket::abort" ref="qbluetoothsocket.html#abort"/>
+            <keyword name="abort" id="QBluetoothTransferReply::abort" ref="qbluetoothtransferreply.html#abort"/>
+            <keyword name="addCharacteristic" id="QLowEnergyServiceData::addCharacteristic" ref="qlowenergyservicedata.html#addCharacteristic"/>
+            <keyword name="addDescriptor" id="QLowEnergyCharacteristicData::addDescriptor" ref="qlowenergycharacteristicdata.html#addDescriptor"/>
+            <keyword name="addIncludedService" id="QLowEnergyServiceData::addIncludedService" ref="qlowenergyservicedata.html#addIncludedService"/>
+            <keyword name="addService" id="QLowEnergyController::addService" ref="qlowenergycontroller.html#addService"/>
+            <keyword name="address" id="AddressInfo::address" ref="qlowenergyadvertisingparameters-addressinfo.html#address-var"/>
+            <keyword name="address" id="QBluetoothDeviceInfo::address" ref="qbluetoothdeviceinfo.html#address"/>
+            <keyword name="address" id="QBluetoothHostInfo::address" ref="qbluetoothhostinfo.html#address"/>
+            <keyword name="address" id="QBluetoothLocalDevice::address" ref="qbluetoothlocaldevice.html#address"/>
+            <keyword name="address" id="QBluetoothTransferRequest::address" ref="qbluetoothtransferrequest.html#address"/>
+            <keyword name="allDevices" id="QBluetoothLocalDevice::allDevices" ref="qbluetoothlocaldevice.html#allDevices"/>
+            <keyword name="attribute" id="QBluetoothServiceInfo::attribute" ref="qbluetoothserviceinfo.html#attribute"/>
+            <keyword name="attribute" id="QBluetoothTransferRequest::attribute" ref="qbluetoothtransferrequest.html#attribute"/>
+            <keyword name="attributes" id="QBluetoothServiceInfo::attributes" ref="qbluetoothserviceinfo.html#attributes"/>
+            <keyword name="bluetoothdVersion" id="bluetoothdVersion" ref=""/>
+            <keyword name="bytesAvailable" id="QBluetoothSocket::bytesAvailable" ref="qbluetoothsocket.html#bytesAvailable"/>
+            <keyword name="bytesToWrite" id="QBluetoothSocket::bytesToWrite" ref="qbluetoothsocket.html#bytesToWrite"/>
+            <keyword name="canReadLine" id="QBluetoothSocket::canReadLine" ref="qbluetoothsocket.html#canReadLine"/>
+            <keyword name="canceled" id="QBluetoothDeviceDiscoveryAgent::canceled" ref="qbluetoothdevicediscoveryagent.html#canceled"/>
+            <keyword name="canceled" id="QBluetoothServiceDiscoveryAgent::canceled" ref="qbluetoothservicediscoveryagent.html#canceled"/>
+            <keyword name="characteristic" id="QLowEnergyService::characteristic" ref="qlowenergyservice.html#characteristic"/>
+            <keyword name="characteristicChanged" id="QLowEnergyService::characteristicChanged" ref="qlowenergyservice.html#characteristicChanged"/>
+            <keyword name="characteristicRead" id="QLowEnergyService::characteristicRead" ref="qlowenergyservice.html#characteristicRead"/>
+            <keyword name="characteristicToString" id="QBluetoothUuid::characteristicToString" ref="qbluetoothuuid.html#characteristicToString"/>
+            <keyword name="characteristicWritten" id="QLowEnergyService::characteristicWritten" ref="qlowenergyservice.html#characteristicWritten"/>
+            <keyword name="characteristics" id="QLowEnergyService::characteristics" ref="qlowenergyservice.html#characteristics"/>
+            <keyword name="characteristics" id="QLowEnergyServiceData::characteristics" ref="qlowenergyservicedata.html#characteristics"/>
+            <keyword name="clear" id="QBluetoothAddress::clear" ref="qbluetoothaddress.html#clear"/>
+            <keyword name="clear" id="QBluetoothServiceDiscoveryAgent::clear" ref="qbluetoothservicediscoveryagent.html#clear"/>
+            <keyword name="close" id="QBluetoothServer::close" ref="qbluetoothserver.html#close"/>
+            <keyword name="close" id="QBluetoothSocket::close" ref="qbluetoothsocket.html#close"/>
+            <keyword name="connectToDevice" id="QLowEnergyController::connectToDevice" ref="qlowenergycontroller.html#connectToDevice"/>
+            <keyword name="connectToService" id="QBluetoothSocket::connectToService" ref="qbluetoothsocket.html#connectToService"/>
+            <keyword name="connected" id="BluetoothSocket::connected" ref="qml-qtbluetooth-bluetoothsocket.html#connected-prop"/>
+            <keyword name="connected" id="QBluetoothSocket::connected" ref="qbluetoothsocket.html#connected"/>
+            <keyword name="connected" id="QLowEnergyController::connected" ref="qlowenergycontroller.html#connected"/>
+            <keyword name="connectedDevices" id="QBluetoothLocalDevice::connectedDevices" ref="qbluetoothlocaldevice.html#connectedDevices"/>
+            <keyword name="connectionUpdated" id="QLowEnergyController::connectionUpdated" ref="qlowenergycontroller.html#connectionUpdated"/>
+            <keyword name="contains" id="QBluetoothServiceInfo::contains" ref="qbluetoothserviceinfo.html#contains"/>
+            <keyword name="contains" id="QLowEnergyService::contains" ref="qlowenergyservice.html#contains"/>
+            <keyword name="coreConfigurations" id="QBluetoothDeviceInfo::coreConfigurations" ref="qbluetoothdeviceinfo.html#coreConfigurations"/>
+            <keyword name="createCentral" id="QLowEnergyController::createCentral" ref="qlowenergycontroller.html#createCentral"/>
+            <keyword name="createPeripheral" id="QLowEnergyController::createPeripheral" ref="qlowenergycontroller.html#createPeripheral"/>
+            <keyword name="createServiceObject" id="QLowEnergyController::createServiceObject" ref="qlowenergycontroller.html#createServiceObject"/>
+            <keyword name="descriptor" id="QLowEnergyCharacteristic::descriptor" ref="qlowenergycharacteristic.html#descriptor"/>
+            <keyword name="descriptorRead" id="QLowEnergyService::descriptorRead" ref="qlowenergyservice.html#descriptorRead"/>
+            <keyword name="descriptorToString" id="QBluetoothUuid::descriptorToString" ref="qbluetoothuuid.html#descriptorToString"/>
+            <keyword name="descriptorWritten" id="QLowEnergyService::descriptorWritten" ref="qlowenergyservice.html#descriptorWritten"/>
+            <keyword name="descriptors" id="QLowEnergyCharacteristic::descriptors" ref="qlowenergycharacteristic.html#descriptors"/>
+            <keyword name="descriptors" id="QLowEnergyCharacteristicData::descriptors" ref="qlowenergycharacteristicdata.html#descriptors"/>
+            <keyword name="detailsChanged" id="BluetoothService::detailsChanged" ref="qml-qtbluetooth-bluetoothservice.html#detailsChanged-signal"/>
+            <keyword name="device" id="QBluetoothServiceInfo::device" ref="qbluetoothserviceinfo.html#device"/>
+            <keyword name="deviceAddress" id="BluetoothService::deviceAddress" ref="qml-qtbluetooth-bluetoothservice.html#deviceAddress-prop"/>
+            <keyword name="deviceConnected" id="QBluetoothLocalDevice::deviceConnected" ref="qbluetoothlocaldevice.html#deviceConnected"/>
+            <keyword name="deviceDisconnected" id="QBluetoothLocalDevice::deviceDisconnected" ref="qbluetoothlocaldevice.html#deviceDisconnected"/>
+            <keyword name="deviceDiscovered" id="BluetoothDiscoveryModel::deviceDiscovered" ref="qml-qtbluetooth-bluetoothdiscoverymodel.html#deviceDiscovered-signal"/>
+            <keyword name="deviceDiscovered" id="QBluetoothDeviceDiscoveryAgent::deviceDiscovered" ref="qbluetoothdevicediscoveryagent.html#deviceDiscovered"/>
+            <keyword name="deviceName" id="BluetoothService::deviceName" ref="qml-qtbluetooth-bluetoothservice.html#deviceName-prop"/>
+            <keyword name="deviceUpdated" id="QBluetoothDeviceDiscoveryAgent::deviceUpdated" ref="qbluetoothdevicediscoveryagent.html#deviceUpdated"/>
+            <keyword name="deviceUuid" id="QBluetoothDeviceInfo::deviceUuid" ref="qbluetoothdeviceinfo.html#deviceUuid"/>
+            <keyword name="disconnectFromDevice" id="QLowEnergyController::disconnectFromDevice" ref="qlowenergycontroller.html#disconnectFromDevice"/>
+            <keyword name="disconnectFromService" id="QBluetoothSocket::disconnectFromService" ref="qbluetoothsocket.html#disconnectFromService"/>
+            <keyword name="disconnected" id="QBluetoothSocket::disconnected" ref="qbluetoothsocket.html#disconnected"/>
+            <keyword name="disconnected" id="QLowEnergyController::disconnected" ref="qlowenergycontroller.html#disconnected"/>
+            <keyword name="discoverDetails" id="QLowEnergyService::discoverDetails" ref="qlowenergyservice.html#discoverDetails"/>
+            <keyword name="discoverServices" id="QLowEnergyController::discoverServices" ref="qlowenergycontroller.html#discoverServices"/>
+            <keyword name="discoverability" id="QLowEnergyAdvertisingData::discoverability" ref="qlowenergyadvertisingdata.html#discoverability"/>
+            <keyword name="discoveredDevices" id="QBluetoothDeviceDiscoveryAgent::discoveredDevices" ref="qbluetoothdevicediscoveryagent.html#discoveredDevices"/>
+            <keyword name="discoveredServices" id="QBluetoothServiceDiscoveryAgent::discoveredServices" ref="qbluetoothservicediscoveryagent.html#discoveredServices"/>
+            <keyword name="discoveryFinished" id="QLowEnergyController::discoveryFinished" ref="qlowenergycontroller.html#discoveryFinished"/>
+            <keyword name="discoveryMode" id="BluetoothDiscoveryModel::discoveryMode" ref="qml-qtbluetooth-bluetoothdiscoverymodel.html#discoveryMode-prop"/>
+            <keyword name="doDeviceDiscovery" id="QBluetoothSocket::doDeviceDiscovery" ref="qbluetoothsocket.html#doDeviceDiscovery"/>
+            <keyword name="error" id="BluetoothDiscoveryModel::error" ref="qml-qtbluetooth-bluetoothdiscoverymodel.html#error-prop"/>
+            <keyword name="error" id="BluetoothSocket::error" ref="qml-qtbluetooth-bluetoothsocket.html#error-prop"/>
+            <keyword name="error" id="QBluetoothDeviceDiscoveryAgent::error" ref="qbluetoothdevicediscoveryagent.html#error"/>
+            <keyword name="error" id="QBluetoothLocalDevice::error" ref="qbluetoothlocaldevice.html#error"/>
+            <keyword name="error" id="QBluetoothServer::error" ref="qbluetoothserver.html#error"/>
+            <keyword name="error" id="QBluetoothServiceDiscoveryAgent::error" ref="qbluetoothservicediscoveryagent.html#error"/>
+            <keyword name="error" id="QBluetoothSocket::error" ref="qbluetoothsocket.html#error"/>
+            <keyword name="error" id="QBluetoothTransferReply::error" ref="qbluetoothtransferreply.html#error"/>
+            <keyword name="error" id="QLowEnergyController::error" ref="qlowenergycontroller.html#error"/>
+            <keyword name="error" id="QLowEnergyService::error" ref="qlowenergyservice.html#error"/>
+            <keyword name="errorString" id="QBluetoothDeviceDiscoveryAgent::errorString" ref="qbluetoothdevicediscoveryagent.html#errorString"/>
+            <keyword name="errorString" id="QBluetoothServiceDiscoveryAgent::errorString" ref="qbluetoothservicediscoveryagent.html#errorString"/>
+            <keyword name="errorString" id="QBluetoothSocket::errorString" ref="qbluetoothsocket.html#errorString"/>
+            <keyword name="errorString" id="QBluetoothTransferReply::errorString" ref="qbluetoothtransferreply.html#errorString"/>
+            <keyword name="errorString" id="QLowEnergyController::errorString" ref="qlowenergycontroller.html#errorString"/>
+            <keyword name="filterPolicy" id="QLowEnergyAdvertisingParameters::filterPolicy" ref="qlowenergyadvertisingparameters.html#filterPolicy"/>
+            <keyword name="findAdapterForAddress" id="findAdapterForAddress" ref=""/>
+            <keyword name="finished" id="QBluetoothDeviceDiscoveryAgent::finished" ref="qbluetoothdevicediscoveryagent.html#finished"/>
+            <keyword name="finished" id="QBluetoothServiceDiscoveryAgent::finished" ref="qbluetoothservicediscoveryagent.html#finished"/>
+            <keyword name="finished" id="QBluetoothTransferManager::finished" ref="qbluetoothtransfermanager.html#finished"/>
+            <keyword name="finished" id="QBluetoothTransferReply::finished" ref="qbluetoothtransferreply.html#finished"/>
+            <keyword name="handle" id="QLowEnergyCharacteristic::handle" ref="qlowenergycharacteristic.html#handle"/>
+            <keyword name="handle" id="QLowEnergyDescriptor::handle" ref="qlowenergydescriptor.html#handle"/>
+            <keyword name="hasPendingConnections" id="QBluetoothServer::hasPendingConnections" ref="qbluetoothserver.html#hasPendingConnections"/>
+            <keyword name="hostMode" id="QBluetoothLocalDevice::hostMode" ref="qbluetoothlocaldevice.html#hostMode"/>
+            <keyword name="hostModeStateChanged" id="QBluetoothLocalDevice::hostModeStateChanged" ref="qbluetoothlocaldevice.html#hostModeStateChanged"/>
+            <keyword name="includePowerLevel" id="QLowEnergyAdvertisingData::includePowerLevel" ref="qlowenergyadvertisingdata.html#includePowerLevel"/>
+            <keyword name="includedServices" id="QLowEnergyService::includedServices" ref="qlowenergyservice.html#includedServices"/>
+            <keyword name="includedServices" id="QLowEnergyServiceData::includedServices" ref="qlowenergyservicedata.html#includedServices"/>
+            <keyword name="inquiryType" id="QBluetoothDeviceDiscoveryAgent::inquiryType" ref="qbluetoothdevicediscoveryagent.html#inquiryType-prop"/>
+            <keyword name="inquiryType" id="QBluetoothDeviceDiscoveryAgent::inquiryType" ref="qbluetoothdevicediscoveryagent.html#inquiryType-prop"/>
+            <keyword name="invalidManufacturerId" id="QLowEnergyAdvertisingData::invalidManufacturerId" ref="qlowenergyadvertisingdata.html#invalidManufacturerId"/>
+            <keyword name="isActive" id="QBluetoothDeviceDiscoveryAgent::isActive" ref="qbluetoothdevicediscoveryagent.html#isActive"/>
+            <keyword name="isActive" id="QBluetoothServiceDiscoveryAgent::isActive" ref="qbluetoothservicediscoveryagent.html#isActive"/>
+            <keyword name="isCached" id="QBluetoothDeviceInfo::isCached" ref="qbluetoothdeviceinfo.html#isCached"/>
+            <keyword name="isComplete" id="QBluetoothServiceInfo::isComplete" ref="qbluetoothserviceinfo.html#isComplete"/>
+            <keyword name="isFinished" id="QBluetoothTransferReply::isFinished" ref="qbluetoothtransferreply.html#isFinished"/>
+            <keyword name="isListening" id="QBluetoothServer::isListening" ref="qbluetoothserver.html#isListening"/>
+            <keyword name="isNull" id="QBluetoothAddress::isNull" ref="qbluetoothaddress.html#isNull"/>
+            <keyword name="isReadable" id="QLowEnergyDescriptorData::isReadable" ref="qlowenergydescriptordata.html#isReadable"/>
+            <keyword name="isRegistered" id="QBluetoothServiceInfo::isRegistered" ref="qbluetoothserviceinfo.html#isRegistered"/>
+            <keyword name="isRunning" id="QBluetoothTransferReply::isRunning" ref="qbluetoothtransferreply.html#isRunning"/>
+            <keyword name="isSequential" id="QBluetoothSocket::isSequential" ref="qbluetoothsocket.html#isSequential"/>
+            <keyword name="isValid" id="QBluetoothDeviceInfo::isValid" ref="qbluetoothdeviceinfo.html#isValid"/>
+            <keyword name="isValid" id="QBluetoothLocalDevice::isValid" ref="qbluetoothlocaldevice.html#isValid"/>
+            <keyword name="isValid" id="QBluetoothServiceInfo::isValid" ref="qbluetoothserviceinfo.html#isValid"/>
+            <keyword name="isValid" id="QLowEnergyCharacteristic::isValid" ref="qlowenergycharacteristic.html#isValid"/>
+            <keyword name="isValid" id="QLowEnergyCharacteristicData::isValid" ref="qlowenergycharacteristicdata.html#isValid"/>
+            <keyword name="isValid" id="QLowEnergyDescriptor::isValid" ref="qlowenergydescriptor.html#isValid"/>
+            <keyword name="isValid" id="QLowEnergyDescriptorData::isValid" ref="qlowenergydescriptordata.html#isValid"/>
+            <keyword name="isValid" id="QLowEnergyServiceData::isValid" ref="qlowenergyservicedata.html#isValid"/>
+            <keyword name="isWritable" id="QLowEnergyDescriptorData::isWritable" ref="qlowenergydescriptordata.html#isWritable"/>
+            <keyword name="latency" id="QLowEnergyConnectionParameters::latency" ref="qlowenergyconnectionparameters.html#latency"/>
+            <keyword name="listen" id="QBluetoothServer::listen" ref="qbluetoothserver.html#listen"/>
+            <keyword name="localAddress" id="QBluetoothSocket::localAddress" ref="qbluetoothsocket.html#localAddress"/>
+            <keyword name="localAddress" id="QLowEnergyController::localAddress" ref="qlowenergycontroller.html#localAddress"/>
+            <keyword name="localName" id="QBluetoothSocket::localName" ref="qbluetoothsocket.html#localName"/>
+            <keyword name="localName" id="QLowEnergyAdvertisingData::localName" ref="qlowenergyadvertisingdata.html#localName"/>
+            <keyword name="localPort" id="QBluetoothSocket::localPort" ref="qbluetoothsocket.html#localPort"/>
+            <keyword name="lowEnergyDiscoveryTimeout" id="QBluetoothDeviceDiscoveryAgent::lowEnergyDiscoveryTimeout" ref="qbluetoothdevicediscoveryagent.html#lowEnergyDiscoveryTimeout"/>
+            <keyword name="majorDeviceClass" id="QBluetoothDeviceInfo::majorDeviceClass" ref="qbluetoothdeviceinfo.html#majorDeviceClass"/>
+            <keyword name="manager" id="QBluetoothTransferReply::manager" ref="qbluetoothtransferreply.html#manager"/>
+            <keyword name="manufacturerData" id="QBluetoothDeviceInfo::manufacturerData" ref="qbluetoothdeviceinfo.html#manufacturerData"/>
+            <keyword name="manufacturerData" id="QLowEnergyAdvertisingData::manufacturerData" ref="qlowenergyadvertisingdata.html#manufacturerData"/>
+            <keyword name="manufacturerId" id="QLowEnergyAdvertisingData::manufacturerId" ref="qlowenergyadvertisingdata.html#manufacturerId"/>
+            <keyword name="manufacturerIds" id="QBluetoothDeviceInfo::manufacturerIds" ref="qbluetoothdeviceinfo.html#manufacturerIds"/>
+            <keyword name="maxPendingConnections" id="QBluetoothServer::maxPendingConnections" ref="qbluetoothserver.html#maxPendingConnections"/>
+            <keyword name="maximumInterval" id="QLowEnergyAdvertisingParameters::maximumInterval" ref="qlowenergyadvertisingparameters.html#maximumInterval"/>
+            <keyword name="maximumInterval" id="QLowEnergyConnectionParameters::maximumInterval" ref="qlowenergyconnectionparameters.html#maximumInterval"/>
+            <keyword name="maximumValueLength" id="QLowEnergyCharacteristicData::maximumValueLength" ref="qlowenergycharacteristicdata.html#maximumValueLength"/>
+            <keyword name="minimumInterval" id="QLowEnergyAdvertisingParameters::minimumInterval" ref="qlowenergyadvertisingparameters.html#minimumInterval"/>
+            <keyword name="minimumInterval" id="QLowEnergyConnectionParameters::minimumInterval" ref="qlowenergyconnectionparameters.html#minimumInterval"/>
+            <keyword name="minimumSize" id="QBluetoothUuid::minimumSize" ref="qbluetoothuuid.html#minimumSize"/>
+            <keyword name="minimumValueLength" id="QLowEnergyCharacteristicData::minimumValueLength" ref="qlowenergycharacteristicdata.html#minimumValueLength"/>
+            <keyword name="minorDeviceClass" id="QBluetoothDeviceInfo::minorDeviceClass" ref="qbluetoothdeviceinfo.html#minorDeviceClass"/>
+            <keyword name="mode" id="QLowEnergyAdvertisingParameters::mode" ref="qlowenergyadvertisingparameters.html#mode"/>
+            <keyword name="name" id="QBluetoothDeviceInfo::name" ref="qbluetoothdeviceinfo.html#name"/>
+            <keyword name="name" id="QBluetoothHostInfo::name" ref="qbluetoothhostinfo.html#name"/>
+            <keyword name="name" id="QBluetoothLocalDevice::name" ref="qbluetoothlocaldevice.html#name"/>
+            <keyword name="name" id="QLowEnergyCharacteristic::name" ref="qlowenergycharacteristic.html#name"/>
+            <keyword name="name" id="QLowEnergyDescriptor::name" ref="qlowenergydescriptor.html#name"/>
+            <keyword name="newConnection" id="QBluetoothServer::newConnection" ref="qbluetoothserver.html#newConnection"/>
+            <keyword name="nextPendingConnection" id="QBluetoothServer::nextPendingConnection" ref="qbluetoothserver.html#nextPendingConnection"/>
+            <keyword name="operator!=" id="QBluetoothAddress::operator!=" ref="qbluetoothaddress.html#operator-not-eq"/>
+            <keyword name="operator!=" id="QBluetoothDeviceInfo::operator!=" ref="qbluetoothdeviceinfo.html#operator-not-eq"/>
+            <keyword name="operator!=" id="QBluetoothHostInfo::operator!=" ref="qbluetoothhostinfo.html#operator-not-eq"/>
+            <keyword name="operator!=" id="QBluetoothTransferRequest::operator!=" ref="qbluetoothtransferrequest.html#operator-not-eq"/>
+            <keyword name="operator!=" id="QBluetoothUuid::operator!=" ref="qbluetoothuuid.html#operator-not-eq"/>
+            <keyword name="operator!=" id="QLowEnergyCharacteristic::operator!=" ref="qlowenergycharacteristic.html#operator-not-eq"/>
+            <keyword name="operator!=" id="QLowEnergyDescriptor::operator!=" ref="qlowenergydescriptor.html#operator-not-eq"/>
+            <keyword name="operator!=" id="operator!=" ref=""/>
+            <keyword name="operator&lt;" id="QBluetoothAddress::operator&lt;" ref="qbluetoothaddress.html#operator-lt"/>
+            <keyword name="operator=" id="QBluetoothAddress::operator=" ref="qbluetoothaddress.html#operator-eq"/>
+            <keyword name="operator=" id="QBluetoothDeviceInfo::operator=" ref="qbluetoothdeviceinfo.html#operator-eq"/>
+            <keyword name="operator=" id="QBluetoothHostInfo::operator=" ref="qbluetoothhostinfo.html#operator-eq"/>
+            <keyword name="operator=" id="QBluetoothServiceInfo::operator=" ref="qbluetoothserviceinfo.html#operator-eq"/>
+            <keyword name="operator=" id="QBluetoothTransferRequest::operator=" ref="qbluetoothtransferrequest.html#operator-eq"/>
+            <keyword name="operator=" id="QLowEnergyAdvertisingData::operator=" ref="qlowenergyadvertisingdata.html#operator-eq"/>
+            <keyword name="operator=" id="QLowEnergyAdvertisingParameters::operator=" ref="qlowenergyadvertisingparameters.html#operator-eq"/>
+            <keyword name="operator=" id="QLowEnergyCharacteristic::operator=" ref="qlowenergycharacteristic.html#operator-eq"/>
+            <keyword name="operator=" id="QLowEnergyCharacteristicData::operator=" ref="qlowenergycharacteristicdata.html#operator-eq"/>
+            <keyword name="operator=" id="QLowEnergyConnectionParameters::operator=" ref="qlowenergyconnectionparameters.html#operator-eq"/>
+            <keyword name="operator=" id="QLowEnergyDescriptor::operator=" ref="qlowenergydescriptor.html#operator-eq"/>
+            <keyword name="operator=" id="QLowEnergyDescriptorData::operator=" ref="qlowenergydescriptordata.html#operator-eq"/>
+            <keyword name="operator=" id="QLowEnergyServiceData::operator=" ref="qlowenergyservicedata.html#operator-eq"/>
+            <keyword name="operator==" id="QBluetoothAddress::operator==" ref="qbluetoothaddress.html#operator-eq-eq"/>
+            <keyword name="operator==" id="QBluetoothDeviceInfo::operator==" ref="qbluetoothdeviceinfo.html#operator-eq-eq"/>
+            <keyword name="operator==" id="QBluetoothHostInfo::operator==" ref="qbluetoothhostinfo.html#operator-eq-eq"/>
+            <keyword name="operator==" id="QBluetoothTransferRequest::operator==" ref="qbluetoothtransferrequest.html#operator-eq-eq"/>
+            <keyword name="operator==" id="QBluetoothUuid::operator==" ref="qbluetoothuuid.html#operator-eq-eq"/>
+            <keyword name="operator==" id="QLowEnergyCharacteristic::operator==" ref="qlowenergycharacteristic.html#operator-eq-eq"/>
+            <keyword name="operator==" id="QLowEnergyDescriptor::operator==" ref="qlowenergydescriptor.html#operator-eq-eq"/>
+            <keyword name="operator==" id="operator==" ref=""/>
+            <keyword name="pairingConfirmation" id="QBluetoothLocalDevice::pairingConfirmation" ref="qbluetoothlocaldevice.html#pairingConfirmation"/>
+            <keyword name="pairingDisplayConfirmation" id="QBluetoothLocalDevice::pairingDisplayConfirmation" ref="qbluetoothlocaldevice.html#pairingDisplayConfirmation"/>
+            <keyword name="pairingDisplayPinCode" id="QBluetoothLocalDevice::pairingDisplayPinCode" ref="qbluetoothlocaldevice.html#pairingDisplayPinCode"/>
+            <keyword name="pairingFinished" id="QBluetoothLocalDevice::pairingFinished" ref="qbluetoothlocaldevice.html#pairingFinished"/>
+            <keyword name="pairingStatus" id="QBluetoothLocalDevice::pairingStatus" ref="qbluetoothlocaldevice.html#pairingStatus"/>
+            <keyword name="peerAddress" id="QBluetoothSocket::peerAddress" ref="qbluetoothsocket.html#peerAddress"/>
+            <keyword name="peerName" id="QBluetoothSocket::peerName" ref="qbluetoothsocket.html#peerName"/>
+            <keyword name="peerPort" id="QBluetoothSocket::peerPort" ref="qbluetoothsocket.html#peerPort"/>
+            <keyword name="powerOn" id="QBluetoothLocalDevice::powerOn" ref="qbluetoothlocaldevice.html#powerOn"/>
+            <keyword name="preferredSecurityFlags" id="QBluetoothSocket::preferredSecurityFlags" ref="qbluetoothsocket.html#preferredSecurityFlags"/>
+            <keyword name="properties" id="QLowEnergyCharacteristic::properties" ref="qlowenergycharacteristic.html#properties"/>
+            <keyword name="properties" id="QLowEnergyCharacteristicData::properties" ref="qlowenergycharacteristicdata.html#properties"/>
+            <keyword name="protocolDescriptor" id="QBluetoothServiceInfo::protocolDescriptor" ref="qbluetoothserviceinfo.html#protocolDescriptor"/>
+            <keyword name="protocolServiceMultiplexer" id="QBluetoothServiceInfo::protocolServiceMultiplexer" ref="qbluetoothserviceinfo.html#protocolServiceMultiplexer"/>
+            <keyword name="protocolToString" id="QBluetoothUuid::protocolToString" ref="qbluetoothuuid.html#protocolToString"/>
+            <keyword name="put" id="QBluetoothTransferManager::put" ref="qbluetoothtransfermanager.html#put"/>
+            <keyword name="rawData" id="QLowEnergyAdvertisingData::rawData" ref="qlowenergyadvertisingdata.html#rawData"/>
+            <keyword name="readCharacteristic" id="QLowEnergyService::readCharacteristic" ref="qlowenergyservice.html#readCharacteristic"/>
+            <keyword name="readConstraints" id="QLowEnergyCharacteristicData::readConstraints" ref="qlowenergycharacteristicdata.html#readConstraints"/>
+            <keyword name="readConstraints" id="QLowEnergyDescriptorData::readConstraints" ref="qlowenergydescriptordata.html#readConstraints"/>
+            <keyword name="readData" id="QBluetoothSocket::readData" ref="qbluetoothsocket.html#readData"/>
+            <keyword name="readDescriptor" id="QLowEnergyService::readDescriptor" ref="qlowenergyservice.html#readDescriptor"/>
+            <keyword name="registerService" id="QBluetoothServiceInfo::registerService" ref="qbluetoothserviceinfo.html#registerService"/>
+            <keyword name="registered" id="BluetoothService::registered" ref="qml-qtbluetooth-bluetoothservice.html#registered-prop"/>
+            <keyword name="remoteAddress" id="BluetoothDiscoveryModel::remoteAddress" ref="qml-qtbluetooth-bluetoothdiscoverymodel.html#remoteAddress-prop"/>
+            <keyword name="remoteAddress" id="QBluetoothServiceDiscoveryAgent::remoteAddress" ref="qbluetoothservicediscoveryagent.html#remoteAddress"/>
+            <keyword name="remoteAddress" id="QLowEnergyController::remoteAddress" ref="qlowenergycontroller.html#remoteAddress"/>
+            <keyword name="remoteAddressType" id="QLowEnergyController::remoteAddressType" ref="qlowenergycontroller.html#remoteAddressType"/>
+            <keyword name="remoteDeviceUuid" id="QLowEnergyController::remoteDeviceUuid" ref="qlowenergycontroller.html#remoteDeviceUuid"/>
+            <keyword name="remoteName" id="QLowEnergyController::remoteName" ref="qlowenergycontroller.html#remoteName"/>
+            <keyword name="removeAttribute" id="QBluetoothServiceInfo::removeAttribute" ref="qbluetoothserviceinfo.html#removeAttribute"/>
+            <keyword name="request" id="QBluetoothTransferReply::request" ref="qbluetoothtransferreply.html#request"/>
+            <keyword name="requestConnectionUpdate" id="QLowEnergyController::requestConnectionUpdate" ref="qlowenergycontroller.html#requestConnectionUpdate"/>
+            <keyword name="requestPairing" id="QBluetoothLocalDevice::requestPairing" ref="qbluetoothlocaldevice.html#requestPairing"/>
+            <keyword name="role" id="QLowEnergyController::role" ref="qlowenergycontroller.html#role"/>
+            <keyword name="rssi" id="QBluetoothDeviceInfo::rssi" ref="qbluetoothdeviceinfo.html#rssi"/>
+            <keyword name="running" id="BluetoothDiscoveryModel::running" ref="qml-qtbluetooth-bluetoothdiscoverymodel.html#running-prop"/>
+            <keyword name="securityFlags" id="QBluetoothServer::securityFlags" ref="qbluetoothserver.html#securityFlags"/>
+            <keyword name="serverAddress" id="QBluetoothServer::serverAddress" ref="qbluetoothserver.html#serverAddress"/>
+            <keyword name="serverChannel" id="QBluetoothServiceInfo::serverChannel" ref="qbluetoothserviceinfo.html#serverChannel"/>
+            <keyword name="serverPort" id="QBluetoothServer::serverPort" ref="qbluetoothserver.html#serverPort"/>
+            <keyword name="serverType" id="QBluetoothServer::serverType" ref="qbluetoothserver.html#serverType"/>
+            <keyword name="service" id="BluetoothSocket::service" ref="qml-qtbluetooth-bluetoothsocket.html#service-prop"/>
+            <keyword name="serviceAvailability" id="QBluetoothServiceInfo::serviceAvailability" ref="qbluetoothserviceinfo.html#serviceAvailability"/>
+            <keyword name="serviceClassToString" id="QBluetoothUuid::serviceClassToString" ref="qbluetoothuuid.html#serviceClassToString"/>
+            <keyword name="serviceClassUuids" id="QBluetoothServiceInfo::serviceClassUuids" ref="qbluetoothserviceinfo.html#serviceClassUuids"/>
+            <keyword name="serviceClasses" id="QBluetoothDeviceInfo::serviceClasses" ref="qbluetoothdeviceinfo.html#serviceClasses"/>
+            <keyword name="serviceDescription" id="BluetoothService::serviceDescription" ref="qml-qtbluetooth-bluetoothservice.html#serviceDescription-prop"/>
+            <keyword name="serviceDescription" id="QBluetoothServiceInfo::serviceDescription" ref="qbluetoothserviceinfo.html#serviceDescription"/>
+            <keyword name="serviceDiscovered" id="BluetoothDiscoveryModel::serviceDiscovered" ref="qml-qtbluetooth-bluetoothdiscoverymodel.html#serviceDiscovered-signal"/>
+            <keyword name="serviceDiscovered" id="QBluetoothServiceDiscoveryAgent::serviceDiscovered" ref="qbluetoothservicediscoveryagent.html#serviceDiscovered"/>
+            <keyword name="serviceDiscovered" id="QLowEnergyController::serviceDiscovered" ref="qlowenergycontroller.html#serviceDiscovered"/>
+            <keyword name="serviceName" id="BluetoothService::serviceName" ref="qml-qtbluetooth-bluetoothservice.html#serviceName-prop"/>
+            <keyword name="serviceName" id="QBluetoothServiceInfo::serviceName" ref="qbluetoothserviceinfo.html#serviceName"/>
+            <keyword name="serviceName" id="QLowEnergyService::serviceName" ref="qlowenergyservice.html#serviceName"/>
+            <keyword name="serviceProtocol" id="BluetoothService::serviceProtocol" ref="qml-qtbluetooth-bluetoothservice.html#serviceProtocol-prop"/>
+            <keyword name="serviceProvider" id="QBluetoothServiceInfo::serviceProvider" ref="qbluetoothserviceinfo.html#serviceProvider"/>
+            <keyword name="serviceUuid" id="BluetoothService::serviceUuid" ref="qml-qtbluetooth-bluetoothservice.html#serviceUuid-prop"/>
+            <keyword name="serviceUuid" id="QBluetoothServiceInfo::serviceUuid" ref="qbluetoothserviceinfo.html#serviceUuid"/>
+            <keyword name="serviceUuid" id="QLowEnergyService::serviceUuid" ref="qlowenergyservice.html#serviceUuid"/>
+            <keyword name="serviceUuids" id="QBluetoothDeviceInfo::serviceUuids" ref="qbluetoothdeviceinfo.html#serviceUuids"/>
+            <keyword name="serviceUuidsCompleteness" id="QBluetoothDeviceInfo::serviceUuidsCompleteness" ref="qbluetoothdeviceinfo-obsolete.html#serviceUuidsCompleteness"/>
+            <keyword name="services" id="QLowEnergyAdvertisingData::services" ref="qlowenergyadvertisingdata.html#services"/>
+            <keyword name="services" id="QLowEnergyController::services" ref="qlowenergycontroller.html#services"/>
+            <keyword name="setAddress" id="QBluetoothHostInfo::setAddress" ref="qbluetoothhostinfo.html#setAddress"/>
+            <keyword name="setAttribute" id="QBluetoothServiceInfo::setAttribute" ref="qbluetoothserviceinfo.html#setAttribute"/>
+            <keyword name="setAttribute" id="QBluetoothTransferRequest::setAttribute" ref="qbluetoothtransferrequest.html#setAttribute"/>
+            <keyword name="setCached" id="QBluetoothDeviceInfo::setCached" ref="qbluetoothdeviceinfo.html#setCached"/>
+            <keyword name="setCharacteristics" id="QLowEnergyServiceData::setCharacteristics" ref="qlowenergyservicedata.html#setCharacteristics"/>
+            <keyword name="setCoreConfigurations" id="QBluetoothDeviceInfo::setCoreConfigurations" ref="qbluetoothdeviceinfo.html#setCoreConfigurations"/>
+            <keyword name="setDescriptors" id="QLowEnergyCharacteristicData::setDescriptors" ref="qlowenergycharacteristicdata.html#setDescriptors"/>
+            <keyword name="setDevice" id="QBluetoothServiceInfo::setDevice" ref="qbluetoothserviceinfo.html#setDevice"/>
+            <keyword name="setDeviceUuid" id="QBluetoothDeviceInfo::setDeviceUuid" ref="qbluetoothdeviceinfo.html#setDeviceUuid"/>
+            <keyword name="setDiscoverability" id="QLowEnergyAdvertisingData::setDiscoverability" ref="qlowenergyadvertisingdata.html#setDiscoverability"/>
+            <keyword name="setHostMode" id="QBluetoothLocalDevice::setHostMode" ref="qbluetoothlocaldevice.html#setHostMode"/>
+            <keyword name="setIncludePowerLevel" id="QLowEnergyAdvertisingData::setIncludePowerLevel" ref="qlowenergyadvertisingdata.html#setIncludePowerLevel"/>
+            <keyword name="setIncludedServices" id="QLowEnergyServiceData::setIncludedServices" ref="qlowenergyservicedata.html#setIncludedServices"/>
+            <keyword name="setInquiryType" id="QBluetoothDeviceDiscoveryAgent::setInquiryType" ref="qbluetoothdevicediscoveryagent.html#inquiryType-prop"/>
+            <keyword name="setInterval" id="QLowEnergyAdvertisingParameters::setInterval" ref="qlowenergyadvertisingparameters.html#setInterval"/>
+            <keyword name="setIntervalRange" id="QLowEnergyConnectionParameters::setIntervalRange" ref="qlowenergyconnectionparameters.html#setIntervalRange"/>
+            <keyword name="setLatency" id="QLowEnergyConnectionParameters::setLatency" ref="qlowenergyconnectionparameters.html#setLatency"/>
+            <keyword name="setLocalName" id="QLowEnergyAdvertisingData::setLocalName" ref="qlowenergyadvertisingdata.html#setLocalName"/>
+            <keyword name="setLowEnergyDiscoveryTimeout" id="QBluetoothDeviceDiscoveryAgent::setLowEnergyDiscoveryTimeout" ref="qbluetoothdevicediscoveryagent.html#setLowEnergyDiscoveryTimeout"/>
+            <keyword name="setManager" id="QBluetoothTransferReply::setManager" ref="qbluetoothtransferreply.html#setManager"/>
+            <keyword name="setManufacturerData" id="QBluetoothDeviceInfo::setManufacturerData" ref="qbluetoothdeviceinfo.html#setManufacturerData"/>
+            <keyword name="setManufacturerData" id="QLowEnergyAdvertisingData::setManufacturerData" ref="qlowenergyadvertisingdata.html#setManufacturerData"/>
+            <keyword name="setMaxPendingConnections" id="QBluetoothServer::setMaxPendingConnections" ref="qbluetoothserver.html#setMaxPendingConnections"/>
+            <keyword name="setMode" id="QLowEnergyAdvertisingParameters::setMode" ref="qlowenergyadvertisingparameters.html#setMode"/>
+            <keyword name="setName" id="QBluetoothHostInfo::setName" ref="qbluetoothhostinfo.html#setName"/>
+            <keyword name="setPreferredSecurityFlags" id="QBluetoothSocket::setPreferredSecurityFlags" ref="qbluetoothsocket.html#setPreferredSecurityFlags"/>
+            <keyword name="setProperties" id="QLowEnergyCharacteristicData::setProperties" ref="qlowenergycharacteristicdata.html#setProperties"/>
+            <keyword name="setRawData" id="QLowEnergyAdvertisingData::setRawData" ref="qlowenergyadvertisingdata.html#setRawData"/>
+            <keyword name="setReadConstraints" id="QLowEnergyCharacteristicData::setReadConstraints" ref="qlowenergycharacteristicdata.html#setReadConstraints"/>
+            <keyword name="setReadPermissions" id="QLowEnergyDescriptorData::setReadPermissions" ref="qlowenergydescriptordata.html#setReadPermissions"/>
+            <keyword name="setRemoteAddress" id="QBluetoothServiceDiscoveryAgent::setRemoteAddress" ref="qbluetoothservicediscoveryagent.html#setRemoteAddress"/>
+            <keyword name="setRemoteAddressType" id="QLowEnergyController::setRemoteAddressType" ref="qlowenergycontroller.html#setRemoteAddressType"/>
+            <keyword name="setRequest" id="QBluetoothTransferReply::setRequest" ref="qbluetoothtransferreply.html#setRequest"/>
+            <keyword name="setRssi" id="QBluetoothDeviceInfo::setRssi" ref="qbluetoothdeviceinfo.html#setRssi"/>
+            <keyword name="setSecurityFlags" id="QBluetoothServer::setSecurityFlags" ref="qbluetoothserver.html#setSecurityFlags"/>
+            <keyword name="setServiceAvailability" id="QBluetoothServiceInfo::setServiceAvailability" ref="qbluetoothserviceinfo.html#setServiceAvailability"/>
+            <keyword name="setServiceDescription" id="QBluetoothServiceInfo::setServiceDescription" ref="qbluetoothserviceinfo.html#setServiceDescription"/>
+            <keyword name="setServiceName" id="QBluetoothServiceInfo::setServiceName" ref="qbluetoothserviceinfo.html#setServiceName"/>
+            <keyword name="setServiceProvider" id="QBluetoothServiceInfo::setServiceProvider" ref="qbluetoothserviceinfo.html#setServiceProvider"/>
+            <keyword name="setServiceUuid" id="QBluetoothServiceInfo::setServiceUuid" ref="qbluetoothserviceinfo.html#setServiceUuid"/>
+            <keyword name="setServiceUuids" id="QBluetoothDeviceInfo::setServiceUuids" ref="qbluetoothdeviceinfo-obsolete.html#setServiceUuids"/>
+            <keyword name="setServices" id="QLowEnergyAdvertisingData::setServices" ref="qlowenergyadvertisingdata.html#setServices"/>
+            <keyword name="setSocketDescriptor" id="QBluetoothSocket::setSocketDescriptor" ref="qbluetoothsocket.html#setSocketDescriptor"/>
+            <keyword name="setSocketError" id="QBluetoothSocket::setSocketError" ref="qbluetoothsocket.html#setSocketError"/>
+            <keyword name="setSocketState" id="QBluetoothSocket::setSocketState" ref="qbluetoothsocket.html#setSocketState"/>
+            <keyword name="setSupervisionTimeout" id="QLowEnergyConnectionParameters::setSupervisionTimeout" ref="qlowenergyconnectionparameters.html#setSupervisionTimeout"/>
+            <keyword name="setType" id="QLowEnergyServiceData::setType" ref="qlowenergyservicedata.html#setType"/>
+            <keyword name="setUuid" id="QLowEnergyCharacteristicData::setUuid" ref="qlowenergycharacteristicdata.html#setUuid"/>
+            <keyword name="setUuid" id="QLowEnergyDescriptorData::setUuid" ref="qlowenergydescriptordata.html#setUuid"/>
+            <keyword name="setUuid" id="QLowEnergyServiceData::setUuid" ref="qlowenergyservicedata.html#setUuid"/>
+            <keyword name="setUuidFilter" id="QBluetoothServiceDiscoveryAgent::setUuidFilter" ref="qbluetoothservicediscoveryagent.html#setUuidFilter"/>
+            <keyword name="setValue" id="QLowEnergyCharacteristicData::setValue" ref="qlowenergycharacteristicdata.html#setValue"/>
+            <keyword name="setValue" id="QLowEnergyDescriptorData::setValue" ref="qlowenergydescriptordata.html#setValue"/>
+            <keyword name="setValueLength" id="QLowEnergyCharacteristicData::setValueLength" ref="qlowenergycharacteristicdata.html#setValueLength"/>
+            <keyword name="setWhiteList" id="QLowEnergyAdvertisingParameters::setWhiteList" ref="qlowenergyadvertisingparameters.html#setWhiteList"/>
+            <keyword name="setWriteConstraints" id="QLowEnergyCharacteristicData::setWriteConstraints" ref="qlowenergycharacteristicdata.html#setWriteConstraints"/>
+            <keyword name="setWritePermissions" id="QLowEnergyDescriptorData::setWritePermissions" ref="qlowenergydescriptordata.html#setWritePermissions"/>
+            <keyword name="socketDescriptor" id="QBluetoothSocket::socketDescriptor" ref="qbluetoothsocket.html#socketDescriptor"/>
+            <keyword name="socketProtocol" id="QBluetoothServiceInfo::socketProtocol" ref="qbluetoothserviceinfo.html#socketProtocol"/>
+            <keyword name="socketType" id="QBluetoothSocket::socketType" ref="qbluetoothsocket.html#socketType"/>
+            <keyword name="start" id="QBluetoothDeviceDiscoveryAgent::start" ref="qbluetoothdevicediscoveryagent.html#start"/>
+            <keyword name="start" id="QBluetoothServiceDiscoveryAgent::start" ref="qbluetoothservicediscoveryagent.html#start"/>
+            <keyword name="startAdvertising" id="QLowEnergyController::startAdvertising" ref="qlowenergycontroller.html#startAdvertising"/>
+            <keyword name="state" id="BluetoothSocket::state" ref="qml-qtbluetooth-bluetoothsocket.html#state-prop"/>
+            <keyword name="state" id="QBluetoothSocket::state" ref="qbluetoothsocket.html#state"/>
+            <keyword name="state" id="QLowEnergyController::state" ref="qlowenergycontroller.html#state"/>
+            <keyword name="state" id="QLowEnergyService::state" ref="qlowenergyservice.html#state"/>
+            <keyword name="stateChanged" id="QBluetoothSocket::stateChanged" ref="qbluetoothsocket.html#stateChanged"/>
+            <keyword name="stateChanged" id="QLowEnergyController::stateChanged" ref="qlowenergycontroller.html#stateChanged"/>
+            <keyword name="stateChanged" id="QLowEnergyService::stateChanged" ref="qlowenergyservice.html#stateChanged"/>
+            <keyword name="stop" id="QBluetoothDeviceDiscoveryAgent::stop" ref="qbluetoothdevicediscoveryagent.html#stop"/>
+            <keyword name="stop" id="QBluetoothServiceDiscoveryAgent::stop" ref="qbluetoothservicediscoveryagent.html#stop"/>
+            <keyword name="stopAdvertising" id="QLowEnergyController::stopAdvertising" ref="qlowenergycontroller.html#stopAdvertising"/>
+            <keyword name="stringData" id="BluetoothSocket::stringData" ref="qml-qtbluetooth-bluetoothsocket.html#stringData-prop"/>
+            <keyword name="supervisionTimeout" id="QLowEnergyConnectionParameters::supervisionTimeout" ref="qlowenergyconnectionparameters.html#supervisionTimeout"/>
+            <keyword name="supportedDiscoveryMethods" id="QBluetoothDeviceDiscoveryAgent::supportedDiscoveryMethods" ref="qbluetoothdevicediscoveryagent.html#supportedDiscoveryMethods"/>
+            <keyword name="swap" id="QLowEnergyAdvertisingData::swap" ref="qlowenergyadvertisingdata.html#swap"/>
+            <keyword name="swap" id="QLowEnergyAdvertisingParameters::swap" ref="qlowenergyadvertisingparameters.html#swap"/>
+            <keyword name="swap" id="QLowEnergyCharacteristicData::swap" ref="qlowenergycharacteristicdata.html#swap"/>
+            <keyword name="swap" id="QLowEnergyConnectionParameters::swap" ref="qlowenergyconnectionparameters.html#swap"/>
+            <keyword name="swap" id="QLowEnergyDescriptorData::swap" ref="qlowenergydescriptordata.html#swap"/>
+            <keyword name="swap" id="QLowEnergyServiceData::swap" ref="qlowenergyservicedata.html#swap"/>
+            <keyword name="toString" id="QBluetoothAddress::toString" ref="qbluetoothaddress.html#toString"/>
+            <keyword name="toUInt128" id="QBluetoothUuid::toUInt128" ref="qbluetoothuuid.html#toUInt128"/>
+            <keyword name="toUInt16" id="QBluetoothUuid::toUInt16" ref="qbluetoothuuid.html#toUInt16"/>
+            <keyword name="toUInt32" id="QBluetoothUuid::toUInt32" ref="qbluetoothuuid.html#toUInt32"/>
+            <keyword name="toUInt64" id="QBluetoothAddress::toUInt64" ref="qbluetoothaddress.html#toUInt64"/>
+            <keyword name="transferProgress" id="QBluetoothTransferReply::transferProgress" ref="qbluetoothtransferreply.html#transferProgress"/>
+            <keyword name="type" id="AddressInfo::type" ref="qlowenergyadvertisingparameters-addressinfo.html#type-var"/>
+            <keyword name="type" id="QLowEnergyDescriptor::type" ref="qlowenergydescriptor.html#type"/>
+            <keyword name="type" id="QLowEnergyService::type" ref="qlowenergyservice.html#type"/>
+            <keyword name="type" id="QLowEnergyServiceData::type" ref="qlowenergyservicedata.html#type"/>
+            <keyword name="unregisterService" id="QBluetoothServiceInfo::unregisterService" ref="qbluetoothserviceinfo.html#unregisterService"/>
+            <keyword name="uuid" id="QLowEnergyCharacteristic::uuid" ref="qlowenergycharacteristic.html#uuid"/>
+            <keyword name="uuid" id="QLowEnergyCharacteristicData::uuid" ref="qlowenergycharacteristicdata.html#uuid"/>
+            <keyword name="uuid" id="QLowEnergyDescriptor::uuid" ref="qlowenergydescriptor.html#uuid"/>
+            <keyword name="uuid" id="QLowEnergyDescriptorData::uuid" ref="qlowenergydescriptordata.html#uuid"/>
+            <keyword name="uuid" id="QLowEnergyServiceData::uuid" ref="qlowenergyservicedata.html#uuid"/>
+            <keyword name="uuidFilter" id="BluetoothDiscoveryModel::uuidFilter" ref="qml-qtbluetooth-bluetoothdiscoverymodel.html#uuidFilter-prop"/>
+            <keyword name="uuidFilter" id="QBluetoothServiceDiscoveryAgent::uuidFilter" ref="qbluetoothservicediscoveryagent.html#uuidFilter"/>
+            <keyword name="value" id="QLowEnergyCharacteristic::value" ref="qlowenergycharacteristic.html#value"/>
+            <keyword name="value" id="QLowEnergyCharacteristicData::value" ref="qlowenergycharacteristicdata.html#value"/>
+            <keyword name="value" id="QLowEnergyDescriptor::value" ref="qlowenergydescriptor.html#value"/>
+            <keyword name="value" id="QLowEnergyDescriptorData::value" ref="qlowenergydescriptordata.html#value"/>
+            <keyword name="whiteList" id="QLowEnergyAdvertisingParameters::whiteList" ref="qlowenergyadvertisingparameters.html#whiteList"/>
+            <keyword name="writeCharacteristic" id="QLowEnergyService::writeCharacteristic" ref="qlowenergyservice.html#writeCharacteristic"/>
+            <keyword name="writeConstraints" id="QLowEnergyCharacteristicData::writeConstraints" ref="qlowenergycharacteristicdata.html#writeConstraints"/>
+            <keyword name="writeConstraints" id="QLowEnergyDescriptorData::writeConstraints" ref="qlowenergydescriptordata.html#writeConstraints"/>
+            <keyword name="writeData" id="QBluetoothSocket::writeData" ref="qbluetoothsocket.html#writeData"/>
+            <keyword name="writeDescriptor" id="QLowEnergyService::writeDescriptor" ref="qlowenergyservice.html#writeDescriptor"/>
+            <keyword name="~QBluetoothAddress" id="QBluetoothAddress::~QBluetoothAddress" ref="qbluetoothaddress.html#dtor.QBluetoothAddress"/>
+            <keyword name="~QBluetoothDeviceDiscoveryAgent" id="QBluetoothDeviceDiscoveryAgent::~QBluetoothDeviceDiscoveryAgent" ref="qbluetoothdevicediscoveryagent.html#dtor.QBluetoothDeviceDiscoveryAgent"/>
+            <keyword name="~QBluetoothDeviceInfo" id="QBluetoothDeviceInfo::~QBluetoothDeviceInfo" ref="qbluetoothdeviceinfo.html#dtor.QBluetoothDeviceInfo"/>
+            <keyword name="~QBluetoothHostInfo" id="QBluetoothHostInfo::~QBluetoothHostInfo" ref="qbluetoothhostinfo.html#dtor.QBluetoothHostInfo"/>
+            <keyword name="~QBluetoothLocalDevice" id="QBluetoothLocalDevice::~QBluetoothLocalDevice" ref="qbluetoothlocaldevice.html#dtor.QBluetoothLocalDevice"/>
+            <keyword name="~QBluetoothServer" id="QBluetoothServer::~QBluetoothServer" ref="qbluetoothserver.html#dtor.QBluetoothServer"/>
+            <keyword name="~QBluetoothServiceDiscoveryAgent" id="QBluetoothServiceDiscoveryAgent::~QBluetoothServiceDiscoveryAgent" ref="qbluetoothservicediscoveryagent.html#dtor.QBluetoothServiceDiscoveryAgent"/>
+            <keyword name="~QBluetoothServiceInfo" id="QBluetoothServiceInfo::~QBluetoothServiceInfo" ref="qbluetoothserviceinfo.html#dtor.QBluetoothServiceInfo"/>
+            <keyword name="~QBluetoothSocket" id="QBluetoothSocket::~QBluetoothSocket" ref="qbluetoothsocket.html#dtor.QBluetoothSocket"/>
+            <keyword name="~QBluetoothTransferManager" id="QBluetoothTransferManager::~QBluetoothTransferManager" ref="qbluetoothtransfermanager.html#dtor.QBluetoothTransferManager"/>
+            <keyword name="~QBluetoothTransferReply" id="QBluetoothTransferReply::~QBluetoothTransferReply" ref="qbluetoothtransferreply.html#dtor.QBluetoothTransferReply"/>
+            <keyword name="~QBluetoothTransferRequest" id="QBluetoothTransferRequest::~QBluetoothTransferRequest" ref="qbluetoothtransferrequest.html#dtor.QBluetoothTransferRequest"/>
+            <keyword name="~QBluetoothUuid" id="QBluetoothUuid::~QBluetoothUuid" ref="qbluetoothuuid.html#dtor.QBluetoothUuid"/>
+            <keyword name="~QLowEnergyAdvertisingData" id="QLowEnergyAdvertisingData::~QLowEnergyAdvertisingData" ref="qlowenergyadvertisingdata.html#dtor.QLowEnergyAdvertisingData"/>
+            <keyword name="~QLowEnergyAdvertisingParameters" id="QLowEnergyAdvertisingParameters::~QLowEnergyAdvertisingParameters" ref="qlowenergyadvertisingparameters.html#dtor.QLowEnergyAdvertisingParameters"/>
+            <keyword name="~QLowEnergyCharacteristic" id="QLowEnergyCharacteristic::~QLowEnergyCharacteristic" ref="qlowenergycharacteristic.html#dtor.QLowEnergyCharacteristic"/>
+            <keyword name="~QLowEnergyCharacteristicData" id="QLowEnergyCharacteristicData::~QLowEnergyCharacteristicData" ref="qlowenergycharacteristicdata.html#dtor.QLowEnergyCharacteristicData"/>
+            <keyword name="~QLowEnergyConnectionParameters" id="QLowEnergyConnectionParameters::~QLowEnergyConnectionParameters" ref="qlowenergyconnectionparameters.html#dtor.QLowEnergyConnectionParameters"/>
+            <keyword name="~QLowEnergyController" id="QLowEnergyController::~QLowEnergyController" ref="qlowenergycontroller.html#dtor.QLowEnergyController"/>
+            <keyword name="~QLowEnergyDescriptor" id="QLowEnergyDescriptor::~QLowEnergyDescriptor" ref="qlowenergydescriptor.html#dtor.QLowEnergyDescriptor"/>
+            <keyword name="~QLowEnergyDescriptorData" id="QLowEnergyDescriptorData::~QLowEnergyDescriptorData" ref="qlowenergydescriptordata.html#dtor.QLowEnergyDescriptorData"/>
+            <keyword name="~QLowEnergyService" id="QLowEnergyService::~QLowEnergyService" ref="qlowenergyservice.html#dtor.QLowEnergyService"/>
+            <keyword name="~QLowEnergyServiceData" id="QLowEnergyServiceData::~QLowEnergyServiceData" ref="qlowenergyservicedata.html#dtor.QLowEnergyServiceData"/>
+        </keywords>
+        <files>
+            <file>bluetooth-examples.html</file>
+            <file>images/arrow_bc.png</file>
+            <file>images/bgrContent.png</file>
+            <file>images/btchat-example.png</file>
+            <file>images/btfiletransfer-example.png</file>
+            <file>images/btn_next.png</file>
+            <file>images/btn_prev.png</file>
+            <file>images/btscanner-example.png</file>
+            <file>images/bullet_dn.png</file>
+            <file>images/bullet_sq.png</file>
+            <file>images/chat-view.png</file>
+            <file>images/devicescan.png</file>
+            <file>images/heartgame-result.png</file>
+            <file>images/heartgame-running.png</file>
+            <file>images/heartgame-search.png</file>
+            <file>images/heartgame-start.png</file>
+            <file>images/home.png</file>
+            <file>images/ico_note.png</file>
+            <file>images/ico_note_attention.png</file>
+            <file>images/ico_out.png</file>
+            <file>images/intro.png</file>
+            <file>images/intro1.png</file>
+            <file>images/logo.png</file>
+            <file>images/lowenergyscanner-chars.png</file>
+            <file>images/lowenergyscanner-devices.png</file>
+            <file>images/lowenergyscanner-services.png</file>
+            <file>images/opp-example-1.png</file>
+            <file>images/opp-example-2.png</file>
+            <file>images/opp-example-3.png</file>
+            <file>images/peripheral-structure.png</file>
+            <file>images/servicescan.png</file>
+            <file>qbluetooth.html</file>
+            <file>qbluetoothaddress-members.html</file>
+            <file>qbluetoothaddress.html</file>
+            <file>qbluetoothdevicediscoveryagent-members.html</file>
+            <file>qbluetoothdevicediscoveryagent.html</file>
+            <file>qbluetoothdeviceinfo-members.html</file>
+            <file>qbluetoothdeviceinfo-obsolete.html</file>
+            <file>qbluetoothdeviceinfo.html</file>
+            <file>qbluetoothhostinfo-members.html</file>
+            <file>qbluetoothhostinfo.html</file>
+            <file>qbluetoothlocaldevice-members.html</file>
+            <file>qbluetoothlocaldevice.html</file>
+            <file>qbluetoothserver-members.html</file>
+            <file>qbluetoothserver.html</file>
+            <file>qbluetoothservicediscoveryagent-members.html</file>
+            <file>qbluetoothservicediscoveryagent.html</file>
+            <file>qbluetoothserviceinfo-alternative-members.html</file>
+            <file>qbluetoothserviceinfo-alternative.html</file>
+            <file>qbluetoothserviceinfo-members.html</file>
+            <file>qbluetoothserviceinfo-sequence-members.html</file>
+            <file>qbluetoothserviceinfo-sequence.html</file>
+            <file>qbluetoothserviceinfo.html</file>
+            <file>qbluetoothsocket-members.html</file>
+            <file>qbluetoothsocket.html</file>
+            <file>qbluetoothtransfermanager-members.html</file>
+            <file>qbluetoothtransfermanager.html</file>
+            <file>qbluetoothtransferreply-members.html</file>
+            <file>qbluetoothtransferreply.html</file>
+            <file>qbluetoothtransferrequest-members.html</file>
+            <file>qbluetoothtransferrequest.html</file>
+            <file>qbluetoothuuid-members.html</file>
+            <file>qbluetoothuuid.html</file>
+            <file>qlowenergyadvertisingdata-members.html</file>
+            <file>qlowenergyadvertisingdata.html</file>
+            <file>qlowenergyadvertisingparameters-addressinfo-members.html</file>
+            <file>qlowenergyadvertisingparameters-addressinfo.html</file>
+            <file>qlowenergyadvertisingparameters-members.html</file>
+            <file>qlowenergyadvertisingparameters.html</file>
+            <file>qlowenergycharacteristic-members.html</file>
+            <file>qlowenergycharacteristic.html</file>
+            <file>qlowenergycharacteristicdata-members.html</file>
+            <file>qlowenergycharacteristicdata.html</file>
+            <file>qlowenergyconnectionparameters-members.html</file>
+            <file>qlowenergyconnectionparameters.html</file>
+            <file>qlowenergycontroller-members.html</file>
+            <file>qlowenergycontroller-obsolete.html</file>
+            <file>qlowenergycontroller.html</file>
+            <file>qlowenergydescriptor-members.html</file>
+            <file>qlowenergydescriptor.html</file>
+            <file>qlowenergydescriptordata-members.html</file>
+            <file>qlowenergydescriptordata.html</file>
+            <file>qlowenergyservice-members.html</file>
+            <file>qlowenergyservice.html</file>
+            <file>qlowenergyservicedata-members.html</file>
+            <file>qlowenergyservicedata.html</file>
+            <file>qml-qtbluetooth-bluetoothdiscoverymodel-members.html</file>
+            <file>qml-qtbluetooth-bluetoothdiscoverymodel.html</file>
+            <file>qml-qtbluetooth-bluetoothservice-members.html</file>
+            <file>qml-qtbluetooth-bluetoothservice.html</file>
+            <file>qml-qtbluetooth-bluetoothsocket-members.html</file>
+            <file>qml-qtbluetooth-bluetoothsocket.html</file>
+            <file>qtbluetooth-attribution-bluez.html</file>
+            <file>qtbluetooth-btchat-example.html</file>
+            <file>qtbluetooth-btfiletransfer-example.html</file>
+            <file>qtbluetooth-btscanner-example.html</file>
+            <file>qtbluetooth-chat-example.html</file>
+            <file>qtbluetooth-heartrate-game-example.html</file>
+            <file>qtbluetooth-heartrate-server-example.html</file>
+            <file>qtbluetooth-index.html</file>
+            <file>qtbluetooth-le-overview.html</file>
+            <file>qtbluetooth-lowenergyscanner-example.html</file>
+            <file>qtbluetooth-module.html</file>
+            <file>qtbluetooth-overview.html</file>
+            <file>qtbluetooth-picturetransfer-example.html</file>
+            <file>qtbluetooth-pingpong-example.html</file>
+            <file>qtbluetooth-qmlmodule.html</file>
+            <file>qtbluetooth-scanner-example.html</file>
+            <file>style/offline-simple.css</file>
+            <file>style/offline.css</file>
+        </files>
+    </filterSection>
+</QtHelpProject>

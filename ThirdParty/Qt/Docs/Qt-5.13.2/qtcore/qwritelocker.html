@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qreadwritelock.cpp -->
+  <title>QWriteLocker Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QWriteLocker</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QWriteLocker Class</h1>
+<!-- $$$QWriteLocker-brief -->
+<p>The <a href="qwritelocker.html">QWriteLocker</a> class is a convenience class that simplifies locking and unlocking read-write locks for write access. <a href="#details">More...</a></p>
+<!-- @@@QWriteLocker -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QWriteLocker&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr></table></div><ul>
+<li><a href="qwritelocker-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">thread-safe</a>.</p>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwritelocker.html#QWriteLocker">QWriteLocker</a></b>(QReadWriteLock *<i>lock</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwritelocker.html#dtor.QWriteLocker">~QWriteLocker</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QReadWriteLock *</td><td class="memItemRight bottomAlign"><b><a href="qwritelocker.html#readWriteLock">readWriteLock</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwritelocker.html#relock">relock</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwritelocker.html#unlock">unlock</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QWriteLocker-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The purpose of <a href="qwritelocker.html">QWriteLocker</a> (and <a href="qreadlocker.html">QReadLocker</a>) is to simplify <a href="qreadwritelock.html">QReadWriteLock</a> locking and unlocking. Locking and unlocking statements or in exception handling code is error-prone and difficult to debug. <a href="qwritelocker.html">QWriteLocker</a> can be used in such situations to ensure that the state of the lock is always well-defined.</p>
+<p>Here's an example that uses <a href="qwritelocker.html">QWriteLocker</a> to lock and unlock a read-write lock for writing:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qreadwritelock.html">QReadWriteLock</a></span> lock;
+
+  <span class="type">void</span> writeData(<span class="keyword">const</span> <span class="type"><a href="qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>data)
+  {
+      <span class="type"><a href="qwritelocker.html#QWriteLocker">QWriteLocker</a></span> locker(<span class="operator">&amp;</span>lock);
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  }
+
+</pre>
+<p>It is equivalent to the following code:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qreadwritelock.html">QReadWriteLock</a></span> lock;
+
+  <span class="type">void</span> writeData(<span class="keyword">const</span> <span class="type"><a href="qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>data)
+  {
+      lock<span class="operator">.</span>lockForWrite();
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+      lock<span class="operator">.</span>unlock();
+  }
+
+</pre>
+<p>The <a href="qmutexlocker.html">QMutexLocker</a> documentation shows examples where the use of a locker object greatly simplifies programming.</p>
+</div>
+<p><b>See also </b><a href="qreadlocker.html">QReadLocker</a> and <a href="qreadwritelock.html">QReadWriteLock</a>.</p>
+<!-- @@@QWriteLocker -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QWriteLocker[overload1]$$$QWriteLockerQReadWriteLock* -->
+<h3 class="fn" id="QWriteLocker"><a name="QWriteLocker"></a>QWriteLocker::<span class="name">QWriteLocker</span>(<span class="type"><a href="qreadwritelock.html">QReadWriteLock</a></span> *<i>lock</i>)</h3>
+<p>Constructs a <a href="qwritelocker.html">QWriteLocker</a> and locks <i>lock</i> for writing. The lock will be unlocked when the <a href="qwritelocker.html">QWriteLocker</a> is destroyed. If <code>lock</code> is zero, <a href="qwritelocker.html">QWriteLocker</a> does nothing.</p>
+<p><b>See also </b><a href="qreadwritelock.html#lockForWrite">QReadWriteLock::lockForWrite</a>().</p>
+<!-- @@@QWriteLocker -->
+<!-- $$$~QWriteLocker[overload1]$$$~QWriteLocker -->
+<h3 class="fn" id="dtor.QWriteLocker"><a name="dtor.QWriteLocker"></a>QWriteLocker::<span class="name">~QWriteLocker</span>()</h3>
+<p>Destroys the <a href="qwritelocker.html">QWriteLocker</a> and unlocks the lock that was passed to the constructor.</p>
+<p><b>See also </b><a href="qreadwritelock.html#unlock">QReadWriteLock::unlock</a>().</p>
+<!-- @@@~QWriteLocker -->
+<!-- $$$readWriteLock[overload1]$$$readWriteLock -->
+<h3 class="fn" id="readWriteLock"><a name="readWriteLock"></a><span class="type"><a href="qreadwritelock.html">QReadWriteLock</a></span> *QWriteLocker::<span class="name">readWriteLock</span>() const</h3>
+<p>Returns a pointer to the read-write lock that was passed to the constructor.</p>
+<!-- @@@readWriteLock -->
+<!-- $$$relock[overload1]$$$relock -->
+<h3 class="fn" id="relock"><a name="relock"></a><span class="type">void</span> QWriteLocker::<span class="name">relock</span>()</h3>
+<p>Relocks an unlocked lock.</p>
+<p><b>See also </b><a href="qwritelocker.html#unlock">unlock</a>().</p>
+<!-- @@@relock -->
+<!-- $$$unlock[overload1]$$$unlock -->
+<h3 class="fn" id="unlock"><a name="unlock"></a><span class="type">void</span> QWriteLocker::<span class="name">unlock</span>()</h3>
+<p>Unlocks the lock associated with this locker.</p>
+<p><b>See also </b><a href="qreadwritelock.html#unlock">QReadWriteLock::unlock</a>().</p>
+<!-- @@@unlock -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

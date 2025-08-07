@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtquick-properties.qdoc -->
+  <title>Specifying Item Properties | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Specifying Item Properties</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="qtquick-navigator.html" />
+  <link rel="next" href="studio-timeline.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="qtquick-navigator.html">Managing Item Hierarchy</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="studio-timeline.html">Creating Animations</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#viewing-changes-in-properties">Viewing Changes in Properties</a></li>
+<li class="level1"><a href="#picking-colors">Picking Colors</a></li>
+<li class="level1"><a href="#picking-gradients">Picking Gradients</a></li>
+<li class="level1"><a href="#marking-text-items-for-translation">Marking Text Items for Translation</a></li>
+<li class="level1"><a href="#loading-placeholder-data">Loading Placeholder Data</a></li>
+<li class="level2"><a href="#using-dummy-models">Using Dummy Models</a></li>
+<li class="level2"><a href="#creating-dummy-context">Creating Dummy Context</a></li>
+<li class="level1"><a href="#building-transformations-on-items">Building Transformations on Items</a></li>
+<li class="level1"><a href="#editing-properties-inline">Editing Properties Inline</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Specifying Item Properties</h1>
+<span class="subtitle"></span>
+<!-- $$$qtquick-properties.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The <b>Properties</b> pane displays all the properties of the selected item. The properties are grouped by type. The top part of the pane displays properties that are common to all QML types, such as position, size, and visibility.</p>
+<p>The bottom part of the pane displays properties that are specific to each QML type. For example, the following image displays the properties you can set for <b>Rectangle</b> (1) and <b>Text</b> (2) items.</p>
+<p class="centerAlign"><img src="images/qmldesigner-element-properties.png" alt="" /></p><p>To change the item type, double-click the <b>Type</b> field in the <b>Properties</b> pane, and enter the name of another QML type in the field. If you have specified properties for the item that are not supported for the new type, the type cannot be changed and an error message is displayed. Select the <b>Settings</b> menu next to the property name, and then select <b>Reset</b> to remove the property values before trying again.</p>
+<p>To modify the common properties of multiple items simultaneously, select them in the <b>Navigator</b> or on the canvas:</p>
+<ul>
+<li>On Windows, press and hold <b>Ctrl</b> and <b>Shift</b>, and then click the items to select them.</li>
+<li>On macOS, press <b>Shift</b> to select a range of items or <b>Cmd</b> to select multiple single items.</li>
+</ul>
+<p>To return an item to its implicit position after moving it, select the <img src="images/qtcreator-reset-position-icon.png" alt="" /> (<b>Reset Position</b>) button on the toolbar. To return it to its implicit size, select <img src="images/qtcreator-reset-size-icon.png" alt="" /> (<b>Reset Size</b>) button.</p>
+<p>To set the visibility of the item, select <b>Edit</b> &gt; <b>Visibility</b> in the context menu.</p>
+<p>For more information on the properties available for an item, press <b>F1</b>.</p>
+<a name="viewing-changes-in-properties"></a>
+<h2 id="viewing-changes-in-properties">Viewing Changes in Properties</h2>
+<p>The default values of properties are displayed in white color, while the values that you specify explicitly are highlighted with blue color. In addition, property changes in states are highlighted with blue.</p>
+<p>This allows you to easily see which values are set in the UI form or QML file and which values are default characteristics of a QML type or a component.</p>
+<p>When editing states, you can easily see which values are explicitly set in the current state and which values are derived from the base state.</p>
+<p>The following images illustrate this. In the base state, the <b>Size</b> (1) and <b>Colors</b> (2) values are explicitly set and highlighted.</p>
+<p class="centerAlign"><img src="images/qmldesigner-properties-explicit-base.png" alt="&quot;Explicitly set properties&quot;" /></p><p>In <b>State1</b>, only the color (1) is explicitly set and highlighted.</p>
+<p class="centerAlign"><img src="images/qmldesigner-properties-explicit-state1.png" alt="&quot;Explicitly set properties&quot;" /></p><p>Resetting a property sets it back to the default value and removes the value from the UI form or QML file.</p>
+<p><b>Note: </b>As a result, all boolean values can be visualized in four different ways.</p><p>For example, visibility can be visualized as follows:</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><p class="centerAlign"><img src="images/qmldesigner-boolean-true.png" alt="" /></p></td><td >TRUE</td><td >The QML type is visible by default. The visibility might be overridden by the visibility set in the base state.</td></tr>
+<tr valign="top" class="even"><td ><p class="centerAlign"><img src="images/qmldesigner-boolean-true-blue.png" alt="" /></p></td><td >TRUE (highlighted)</td><td >The QML type is explicitly set to visible.</td></tr>
+<tr valign="top" class="odd"><td ><p class="centerAlign"><img src="images/qmldesigner-boolean-false.png" alt="" /></p></td><td >FALSE</td><td >The QML type is hidden by default. The visibility might be overridden by the visibility set in the base state.</td></tr>
+<tr valign="top" class="even"><td ><p class="centerAlign"><img src="images/qmldesigner-boolean-false-blue.png" alt="" /></p></td><td >FALSE (hightlighted)</td><td >The type is explicitly set to hidden.</td></tr>
+</table></div>
+<a name="picking-colors"></a>
+<h2 id="picking-colors">Picking Colors</h2>
+<p>To specify the color of the selected item in the color picker view (1), select the color picker icon (2) in the <b>Properties</b> pane.</p>
+<p class="centerAlign"><img src="images/qtquick-designer-color-picker.png" alt="&quot;Color Picker view&quot;" /></p><p>You can use either a solid color (3) or a gradient (4). You can select the gradient in the <b>Gradient Picker</b> (5).</p>
+<p>The <b>Original</b> field displays the original color of the item, whereas the <b>New</b> field displays the current color. The <b>Recent</b> field displays the colors that you have last selected.</p>
+<a name="picking-gradients"></a>
+<h2 id="picking-gradients">Picking Gradients</h2>
+<p>The <b>Gradient Picker</b> enables you to specify <a href="https://webgradients.com/">WebGradients</a> for QML types that support <a href="http://doc.qt.io/qt-5/qgradient.html">QGradient</a>.</p>
+<p>To open the <b>Gradient Picker</b>, select the <b>Gradient Picker Dialog</b> icon in the <b>Properties</b> view.</p>
+<p class="centerAlign"><img src="images/qtquick-designer-gradient-picker.png" alt="&quot;Gradient Picker dialog&quot;" /></p><p>To apply a gradient on the selected item, select <b>Apply</b>.</p>
+<p>To save a gradient in the <b>User Presets</b> tab, select <b>Save</b>.</p>
+<p>By default, a linear gradient (4) is used, but you can select another supported gradient type in the <b>Properties</b> view.</p>
+<a name="marking-text-items-for-translation"></a>
+<h2 id="marking-text-items-for-translation">Marking Text Items for Translation</h2>
+<p>To support translators, mark each text item that should be translated. In the <b>Properties</b> pane, <b>Text</b> field, select <b>tr</b> (1).</p>
+<p class="centerAlign"><img src="images/qmldesigner-text-property-tr.png" alt="&quot;Text properties&quot;" /></p><p>By default, the text string is enclosed in a <code>qsTr()</code> call.</p>
+<p class="centerAlign"><img src="images/qml-translate.png" alt="&quot;Text marked for translation&quot;" /></p><p>If you use text IDs instead of plain text, change the default call to <code>qsTrId()</code>. Select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Qt Quick</b> &gt; <b>Qt Quick Designer</b>, and then select the <b>qsTrId()</b> radio button in the <b>Internationalization</b> group. For more information about text ID based translations, see <a href="http://doc.qt.io/qt-5/linguist-id-based-i18n.html">Qt Linguist Manual: Text ID Based Translations</a>.</p>
+<p>To preserve the context when editing the text or to change the context by setting a binding on the text property, change the default call to <code>qsTranslate()</code> by selecting the <b>qsTranslate()</b> radio button.</p>
+<p>For more information, see <a href="http://doc.qt.io/qt-5/qtquick-internationalization.html">Internationalization and Localization with Qt Quick</a>.</p>
+<a name="loading-placeholder-data"></a>
+<h2 id="loading-placeholder-data">Loading Placeholder Data</h2>
+<p>The Design mode supports views, models, and delegates, so that when you add a Grid View, List View, or Path View item, the <a href="http://doc.qt.io/qt-5/qml-qtqml-models-listmodel.html">ListModel</a> and the delegate item are added automatically.</p>
+<p>However, the missing context of the application presents a challenge. Specific models defined in C++ are the most obvious case. Often, the context is missing simple properties, which are either defined in C++, or in other QML files. A typical example is an item that uses the properties of its parent, such as <code>parent.width</code>.</p>
+<a name="using-dummy-models"></a>
+<h3 id="using-dummy-models">Using Dummy Models</h3>
+<p>If you open a file in the Design mode that references a C++ model, you see nothing on the canvas. If the data in the model is fetched from the internet, you have no control over it. To get reliable data, <i>dummy data</i> was introduced.</p>
+<p>For example, the following code snippet describes the file example.qml that contains a <a href="http://doc.qt.io/qt-5/qml-qtquick-listview.html">ListView</a> that in turn specifies a C++ model:</p>
+<pre class="qml">
+
+  <span class="type"><a href="http://doc.qt.io/qt-5/qml-qtquick-listview.html">ListView</a></span> {
+      <span class="name">model</span>: <span class="name">dataModel</span>
+      <span class="name">delegate</span>: <span class="name">ContactDelegate</span> {
+          <span class="name">name</span>: <span class="name">name</span>
+      }
+  }
+
+</pre>
+<p>Create a directory named <i>dummydata</i> in the root directory of the project, so that it is not deployed to the device. In the <code>dummydata</code> directory, create a QML file that has the same name as the value of <code>model</code>:</p>
+<pre class="cpp">
+
+  qml<span class="operator">/</span>exampleapp<span class="operator">/</span>example<span class="operator">.</span>qml
+  dummydata<span class="operator">/</span>dataModel<span class="operator">.</span>qml
+
+</pre>
+<p>Then create the dataModel.qml file that contains the dummy data:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="http://doc.qt.io/qt-5/qml-qtqml-models-listmodel.html">ListModel</a></span> {
+       <span class="type"><a href="http://doc.qt.io/qt-5/qml-qtqml-models-listelement.html">ListElement</a></span> {
+           <span class="name">name</span>: <span class="string">&quot;Ariane&quot;</span>
+       }
+       <span class="type"><a href="http://doc.qt.io/qt-5/qml-qtqml-models-listelement.html">ListElement</a></span> {
+           <span class="name">name</span>: <span class="string">&quot;Bella&quot;</span>
+       }
+       <span class="type"><a href="http://doc.qt.io/qt-5/qml-qtqml-models-listelement.html">ListElement</a></span> {
+           <span class="name">name</span>: <span class="string">&quot;Corinna&quot;</span>
+       }
+  }
+
+</pre>
+<a name="creating-dummy-context"></a>
+<h3 id="creating-dummy-context">Creating Dummy Context</h3>
+<p>The following example presents a common pattern in QML:</p>
+<pre class="qml">
+
+  <span class="type"><a href="http://doc.qt.io/qt-5/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+      <span class="name">height</span>: <span class="name">parent</span>.<span class="name">height</span>
+  }
+
+</pre>
+<p>This works nicely for applications but the Design mode displays a zero-sized item. A parent for the opened file does not exist, because the context is missing. To get around the missing context, the idea of a <i>dummy context</i> is introduced. If you place a file with the same name as the application (here, example.qml) in the <code>dummydata/context</code> directory, you can fake a parent context:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+  import QmlDesigner 1.0
+
+  <span class="type">DummyContextObject</span> {
+      <span class="name">parent</span>: <span class="name">Item</span> {
+          <span class="name">width</span>: <span class="number">640</span>
+          <span class="name">height</span>: <span class="number">300</span>
+      }
+  }
+
+</pre>
+<a name="building-transformations-on-items"></a>
+<h2 id="building-transformations-on-items">Building Transformations on Items</h2>
+<p>The <b>Advanced</b> pane allows you to configure advanced transformations, such as rotation, scale, and translation. You can assign any number of transformations to an item. Each transformation is applied in order, one at a time.</p>
+<p>For more information on Transform types, see <a href="http://doc.qt.io/qt-5/qml-qtquick-transform.html">Transform</a>.</p>
+<a name="editing-properties-inline"></a>
+<h2 id="editing-properties-inline">Editing Properties Inline</h2>
+<p>You can double-click objects on the canvas to edit their text, color, or source properties inline. Because you can specify several of these properties for some QML types, such as <a href="http://doc.qt.io/qt-5/qml-qtquick-textedit.html">Text Edit</a>, you can also right-click objects to open the inline editors from a context-menu.</p>
+<p class="centerAlign"><img src="images/qmldesigner-inline-editing.png" alt="" /></p></div>
+<!-- @@@qtquick-properties.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="qtquick-navigator.html">Managing Item Hierarchy</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="studio-timeline.html">Creating Animations</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

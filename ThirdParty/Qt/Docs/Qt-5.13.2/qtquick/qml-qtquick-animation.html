@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickanimation.cpp -->
+  <title>Animation QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >Animation QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Animation QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Animation-brief -->
+<p>Is the base of all QML animations. <a href="#details">More...</a></p>
+<!-- @@@Animation -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-anchoranimation.html">AnchorAnimation</a>, <a href="qml-qtquick-animator.html">Animator</a>, <a href="qml-qtquick-parallelanimation.html">ParallelAnimation</a>, <a href="qml-qtquick-parentanimation.html">ParentAnimation</a>, <a href="qml-qtquick-pathanimation.html">PathAnimation</a>, <a href="qml-qtquick-pauseanimation.html">PauseAnimation</a>, <a href="qml-qtquick-propertyaction.html">PropertyAction</a>, <a href="qml-qtquick-propertyanimation.html">PropertyAnimation</a>, <a href="qml-qtquick-scriptaction.html">ScriptAction</a>, and <a href="qml-qtquick-sequentialanimation.html">SequentialAnimation</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-animation-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-animation.html#alwaysRunToEnd-prop">alwaysRunToEnd</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-animation.html#loops-prop">loops</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-animation.html#paused-prop">paused</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-animation.html#running-prop">running</a></b></b> : bool</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-animation.html#finished-signal">finished</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-animation.html#started-signal">started</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-animation.html#stopped-signal">stopped</a></b></b>()</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-animation.html#complete-method">complete</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-animation.html#pause-method">pause</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-animation.html#restart-method">restart</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-animation.html#resume-method">resume</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-animation.html#start-method">start</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-animation.html#stop-method">stop</a></b></b>()</li>
+</ul>
+<!-- $$$Animation-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The Animation type cannot be used directly in a QML file. It exists to provide a set of common properties and methods, available across all the other animation types that inherit from it. Attempting to use the Animation type directly will result in an error.</p>
+<!-- @@@Animation -->
+<h2>Property Documentation</h2>
+<!-- $$$alwaysRunToEnd -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="alwaysRunToEnd-prop"></a><span class="name">alwaysRunToEnd</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the animation should run to completion when it is stopped.</p>
+<p>If this true the animation will complete its current iteration when it is stopped - either by setting the <code>running</code> property to false, or by calling the <code>stop()</code> method. The <code>complete()</code> method is not effected by this value.</p>
+<p>This behavior is most useful when the <code>loops</code> property is set, as the animation will finish playing normally but not restart.</p>
+<p>By default, the alwaysRunToEnd property is not set.</p>
+<p><b>Note: </b>alwaysRunToEnd has no effect on animations in a Transition.</p></div></div><!-- @@@alwaysRunToEnd -->
+<br/>
+<!-- $$$loops -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="loops-prop"></a><span class="name">loops</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the number of times the animation should play.</p>
+<p>By default, <code>loops</code> is 1: the animation will play through once and then stop.</p>
+<p>If set to Animation.Infinite, the animation will continuously repeat until it is explicitly stopped - either by setting the <code>running</code> property to false, or by calling the <code>stop()</code> method.</p>
+<p>In the following example, the rectangle will spin indefinitely.</p>
+<pre class="cpp">
+
+  Rectangle {
+      width: <span class="number">100</span>; height: <span class="number">100</span>; color: <span class="string">&quot;green&quot;</span>
+      RotationAnimation on rotation {
+          loops: Animation<span class="operator">.</span>Infinite
+          from: <span class="number">0</span>
+          to: <span class="number">360</span>
+      }
+  }
+
+</pre>
+</div></div><!-- @@@loops -->
+<br/>
+<!-- $$$paused -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="paused-prop"></a><span class="name">paused</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the animation is currently paused.</p>
+<p>The <code>paused</code> property can be set to declaratively control whether or not an animation is paused.</p>
+<p>Animations can also be paused and resumed imperatively from JavaScript using the <code>pause()</code> and <code>resume()</code> methods.</p>
+<p>By default, animations are not paused.</p>
+</div></div><!-- @@@paused -->
+<br/>
+<!-- $$$running -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="running-prop"></a><span class="name">running</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the animation is currently running.</p>
+<p>The <code>running</code> property can be set to declaratively control whether or not an animation is running. The following example will animate a rectangle whenever the <a href="qml-qtquick-mousearea.html">MouseArea</a> is pressed.</p>
+<pre class="cpp">
+
+  Rectangle {
+      width: <span class="number">100</span>; height: <span class="number">100</span>
+      NumberAnimation on x {
+          running: myMouse<span class="operator">.</span>pressed
+          from: <span class="number">0</span>; to: <span class="number">100</span>
+      }
+      MouseArea { id: myMouse }
+  }
+
+</pre>
+<p>Likewise, the <code>running</code> property can be read to determine if the animation is running. In the following example the Text item will indicate whether or not the animation is running.</p>
+<pre class="cpp">
+
+  NumberAnimation { id: myAnimation }
+  Text { text: myAnimation<span class="operator">.</span>running <span class="operator">?</span> <span class="string">&quot;Animation is running&quot;</span> : <span class="string">&quot;Animation is not running&quot;</span> }
+
+</pre>
+<p>Animations can also be started and stopped imperatively from JavaScript using the <code>start()</code> and <code>stop()</code> methods.</p>
+<p>By default, animations are not running. Though, when the animations are assigned to properties, as property value sources using the <i>on</i> syntax, they are set to running by default.</p>
+</div></div><!-- @@@running -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$finished[overload1]$$$finished -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="finished-signal"></a><span class="name">finished</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the animation has finished naturally.</p>
+<p>It is not emitted when <a href="qml-qtquick-animation.html#running-prop">running</a> is set to <code>false</code>, nor for animations whose <a href="qml-qtquick-animation.html#loops-prop">loops</a> property is set to <code>Animation.Infinite</code>.</p>
+<p>In addition, it is only emitted for top-level, standalone animations. It will not be emitted for animations in a Behavior or Transition, or animations that are part of an animation group.</p>
+<p>If <a href="qml-qtquick-animation.html#alwaysRunToEnd-prop">alwaysRunToEnd</a> is true, this signal will not be emitted until the animation has completed its current iteration.</p>
+<p>The corresponding handler is <code>onFinished</code>.</p>
+<p>This signal was introduced in  Qt 5.12.</p>
+<p><b>See also </b><a href="qml-qtquick-animation.html#stopped-signal">stopped()</a>, <a href="qml-qtquick-animation.html#started-signal">started()</a>, and <a href="qml-qtquick-animation.html#running-prop">running</a>.</p>
+</div></div><!-- @@@finished -->
+<br/>
+<!-- $$$started[overload1]$$$started -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="started-signal"></a><span class="name">started</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the animation begins.</p>
+<p>It is only triggered for top-level, standalone animations. It will not be triggered for animations in a Behavior or Transition, or animations that are part of an animation group.</p>
+<p>The corresponding handler is <code>onStarted</code>.</p>
+</div></div><!-- @@@started -->
+<br/>
+<!-- $$$stopped[overload1]$$$stopped -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="stopped-signal"></a><span class="name">stopped</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the animation ends.</p>
+<p>The animation may have been stopped manually, or may have run to completion.</p>
+<p>It is only triggered for top-level, standalone animations. It will not be triggered for animations in a Behavior or Transition, or animations that are part of an animation group.</p>
+<p>If <a href="qml-qtquick-animation.html#alwaysRunToEnd-prop">alwaysRunToEnd</a> is true, this signal will not be emitted until the animation has completed its current iteration.</p>
+<p>The corresponding handler is <code>onStopped</code>.</p>
+</div></div><!-- @@@stopped -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$complete[overload1]$$$complete -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="complete-method"></a><span class="name">complete</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Stops the animation, jumping to the final property values</p>
+<p>If the animation is not running, calling this method has no effect. The <code>running</code> property will be false following a call to <code>complete()</code>.</p>
+<p>Unlike <code>stop()</code>, <code>complete()</code> immediately fast-forwards the animation to its end. In the following example,</p>
+<pre class="cpp">
+
+  Rectangle {
+      NumberAnimation on x { from: <span class="number">0</span>; to: <span class="number">100</span>; duration: <span class="number">500</span> }
+  }
+
+</pre>
+<p>calling <code>stop()</code> at time 250ms will result in the <code>x</code> property having a value of 50, while calling <code>complete()</code> will set the <code>x</code> property to 100, exactly as though the animation had played the whole way through.</p>
+</div></div><!-- @@@complete -->
+<br/>
+<!-- $$$pause[overload1]$$$pause -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="pause-method"></a><span class="name">pause</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Pauses the animation</p>
+<p>If the animation is already paused or not <code>running</code>, calling this method has no effect. The <code>paused</code> property will be true following a call to <code>pause()</code>.</p>
+</div></div><!-- @@@pause -->
+<br/>
+<!-- $$$restart[overload1]$$$restart -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="restart-method"></a><span class="name">restart</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Restarts the animation</p>
+<p>This is a convenience method, and is equivalent to calling <code>stop()</code> and then <code>start()</code>.</p>
+</div></div><!-- @@@restart -->
+<br/>
+<!-- $$$resume[overload1]$$$resume -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="resume-method"></a><span class="name">resume</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Resumes a paused animation</p>
+<p>If the animation is not paused or not <code>running</code>, calling this method has no effect. The <code>paused</code> property will be false following a call to <code>resume()</code>.</p>
+</div></div><!-- @@@resume -->
+<br/>
+<!-- $$$start[overload1]$$$start -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="start-method"></a><span class="name">start</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Starts the animation</p>
+<p>If the animation is already running, calling this method has no effect. The <code>running</code> property will be true following a call to <code>start()</code>.</p>
+</div></div><!-- @@@start -->
+<br/>
+<!-- $$$stop[overload1]$$$stop -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="stop-method"></a><span class="name">stop</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Stops the animation</p>
+<p>If the animation is not running, calling this method has no effect. Both the <code>running</code> and <code>paused</code> properties will be false following a call to <code>stop()</code>.</p>
+<p>Normally <code>stop()</code> stops the animation immediately, and the animation has no further influence on property values. In this example animation</p>
+<pre class="cpp">
+
+  Rectangle {
+      NumberAnimation on x { from: <span class="number">0</span>; to: <span class="number">100</span>; duration: <span class="number">500</span> }
+  }
+
+</pre>
+<p>was stopped at time 250ms, the <code>x</code> property will have a value of 50.</p>
+<p>However, if the <code>alwaysRunToEnd</code> property is set, the animation will continue running until it completes and then stop. The <code>running</code> property will still become false immediately.</p>
+</div></div><!-- @@@stop -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

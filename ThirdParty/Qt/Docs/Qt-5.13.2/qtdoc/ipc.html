@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- ipc.qdoc -->
+  <title>Inter-Process Communication in Qt | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Inter-Process Communication in Qt</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#tcp-ip">TCP/IP</a></li>
+<li class="level1"><a href="#shared-memory">Shared Memory</a></li>
+<li class="level1"><a href="#d-bus-protocol">D-Bus protocol</a></li>
+<li class="level1"><a href="#qprocess-class">QProcess Class</a></li>
+<li class="level1"><a href="#session-management">Session Management</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Inter-Process Communication in Qt</h1>
+<span class="subtitle"></span>
+<!-- $$$ipc.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Qt provides several ways to implement Inter-Process Communication (IPC) in Qt applications.</p>
+<a name="tcp-ip"></a>
+<h2 id="tcp-ip">TCP/IP</h2>
+<p>The cross-platform <a href="../qtnetwork/qtnetwork-index.html">Qt Network</a> module provides classes that make network programming portable and easy. It offers high-level classes (e.g&#x2e;, <a href="../qtnetwork/qnetworkaccessmanager.html">QNetworkAccessManager</a>, QFtp) that communicate using specific application-level protocols, and lower-level classes (e.g&#x2e;, <a href="../qtnetwork/qtcpsocket.html">QTcpSocket</a>, <a href="../qtnetwork/qtcpserver.html">QTcpServer</a>, <a href="../qtnetwork/qsslsocket.html">QSslSocket</a>) for implementing protocols.</p>
+<a name="shared-memory"></a>
+<h2 id="shared-memory">Shared Memory</h2>
+<p>The cross-platform shared memory class, <a href="../qtcore/qsharedmemory.html">QSharedMemory</a>, provides access to the operating system's shared memory implementation. It allows safe access to shared memory segments by multiple threads and processes. Additionally, <a href="../qtcore/qsystemsemaphore.html">QSystemSemaphore</a> can be used to control access to resources shared by the system, as well as to communicate between processes.</p>
+<a name="d-bus-protocol"></a>
+<h2 id="d-bus-protocol">D-Bus protocol</h2>
+<p>The <a href="../qtdbus/qtdbus-index.html">Qt D-Bus</a> module is a Unix-only library you can use to implement IPC using the D-Bus protocol. It extends Qt's <a href="../qtcore/signalsandslots.html">Signals and Slots</a> mechanism to the IPC level, allowing a signal emitted by one process to be connected to a slot in another process. The <a href="../qtdbus/qtdbus-index.html">Qt D-Bus</a> documentation has detailed information on how to use the <a href="../qtdbus/qtdbus-index.html">Qt D-Bus</a> module.</p>
+<a name="qprocess-class"></a>
+<h2 id="qprocess-class">QProcess Class</h2>
+<p>The cross-platform class <a href="../qtcore/qprocess.html">QProcess</a> can be used to start external programs as child processes, and to communicate with them. It provides an API for monitoring and controlling the state of the child process. <a href="../qtcore/qprocess.html">QProcess</a> gives access to the input/output channels of child process by inheriting from <a href="../qtcore/qiodevice.html">QIODevice</a>.</p>
+<a name="session-management"></a>
+<h2 id="session-management">Session Management</h2>
+<p>In Linux/X11 platforms, Qt provides support for session management. Sessions allow events to be propagated to processes, for example, to notify when a shutdown occurs. The process and applications can then perform any necessary operations such as save open documents.</p>
+<ul>
+<li><a href="session.html">Session Management</a></li>
+</ul>
+</div>
+<!-- @@@ipc.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

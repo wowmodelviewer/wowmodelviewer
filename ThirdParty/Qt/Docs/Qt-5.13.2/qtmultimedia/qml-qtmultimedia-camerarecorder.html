@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdeclarativecamerarecorder.cpp -->
+  <title>CameraRecorder QML Type | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-qmlmodule.html">QML Types</a></td><td >CameraRecorder QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">CameraRecorder QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$CameraRecorder-brief -->
+<p>Controls video recording with the Camera. <a href="#details">More...</a></p>
+<!-- @@@CameraRecorder -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtMultimedia 5.13</td></tr></table></div><ul>
+<li><a href="qml-qtmultimedia-camerarecorder-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerarecorder.html#actualLocation-prop">actualLocation</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerarecorder.html#audioBitRate-prop">audioBitRate</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerarecorder.html#audioChannels-prop">audioChannels</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerarecorder.html#audioCodec-prop">audioCodec</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerarecorder.html#audioEncodingMode-prop">audioEncodingMode</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerarecorder.html#audioSampleRate-prop">audioSampleRate</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerarecorder.html#duration-prop">duration</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerarecorder.html#errorCode-prop">errorCode</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerarecorder.html#errorString-prop">errorString</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerarecorder.html#frameRate-prop">frameRate</a></b></b> : qreal</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerarecorder.html#mediaContainer-prop">mediaContainer</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerarecorder.html#muted-prop">muted</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerarecorder.html#outputLocation-prop">outputLocation</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerarecorder.html#recorderState-prop">recorderState</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerarecorder.html#recorderStatus-prop">recorderStatus</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerarecorder.html#resolution-prop">resolution</a></b></b> : size</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerarecorder.html#videoBitRate-prop">videoBitRate</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerarecorder.html#videoCodec-prop">videoCodec</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerarecorder.html#videoEncodingMode-prop">videoEncodingMode</a></b></b> : enumeration</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerarecorder.html#record-method">record</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerarecorder.html#setMetadata-method">setMetadata</a></b></b>(<i>key</i>, <i>value</i>)</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerarecorder.html#stop-method">stop</a></b></b>()</li>
+</ul>
+<!-- $$$CameraRecorder-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><a href="qml-qtmultimedia-camerarecorder.html">CameraRecorder</a> allows recording camera streams to files, and adjusting recording settings and metadata for videos.</p>
+<p>It should not be constructed separately, instead the <code>videoRecorder</code> property of a <a href="qml-multimedia.html#camera">Camera</a> should be used.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtmultimedia-camera.html">Camera</a></span> {
+      <span class="name">videoRecorder</span>.audioEncodingMode: <span class="name">CameraRecorder</span>.<span class="name">ConstantBitrateEncoding</span>;
+      <span class="name">videoRecorder</span>.audioBitRate: <span class="number">128000</span>
+      <span class="name">videoRecorder</span>.mediaContainer: <span class="string">&quot;mp4&quot;</span>
+      <span class="comment">// ...</span>
+  }
+
+</pre>
+<p>There are many different settings for each part of the recording process (audio, video, and output formats), as well as control over muting and where to store the output file.</p>
+<p><b>See also </b><a href="qaudioencodersettings.html">QAudioEncoderSettings</a> and <a href="qvideoencodersettings.html">QVideoEncoderSettings</a>.</p>
+<!-- @@@CameraRecorder -->
+<h2>Property Documentation</h2>
+<!-- $$$actualLocation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="actualLocation-prop"></a><span class="name">actualLocation</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the actual location of the last saved media content. The actual location is usually available after the recording starts, and reset when new location is set or the new recording starts.</p>
+</div></div><!-- @@@actualLocation -->
+<br/>
+<!-- $$$audioBitRate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="audioBitRate-prop"></a><span class="name">audioBitRate</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the audio bit rate (in bits per second) to be used for recording video.</p>
+</div></div><!-- @@@audioBitRate -->
+<br/>
+<!-- $$$audioChannels -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="audioChannels-prop"></a><span class="name">audioChannels</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property indicates the number of audio channels to be encoded while recording video (1 is mono, 2 is stereo).</p>
+</div></div><!-- @@@audioChannels -->
+<br/>
+<!-- $$$audioCodec -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="audioCodec-prop"></a><span class="name">audioCodec</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the audio codec to be used for recording video. Typically this is <code>aac</code> or <code>amr-wb</code>.</p>
+<p><b>See also </b><a href="qml-qtmultimedia-cameraimageprocessing.html#whiteBalanceMode-prop">whileBalanceMode</a>.</p>
+</div></div><!-- @@@audioCodec -->
+<br/>
+<!-- $$$audioEncodingMode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="audioEncodingMode-prop"></a><span class="name">audioEncodingMode</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The type of encoding method to use when recording audio.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Value</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >ConstantQualityEncoding</td><td >Encoding will aim to have a constant quality, adjusting bitrate to fit. This is the default. The bitrate setting will be ignored.</td></tr>
+<tr valign="top" class="even"><td >ConstantBitRateEncoding</td><td >Encoding will use a constant bit rate, adjust quality to fit. This is appropriate if you are trying to optimize for space.</td></tr>
+<tr valign="top" class="odd"><td >AverageBitRateEncoding</td><td >Encoding will try to keep an average bitrate setting, but will use more or less as needed.</td></tr>
+</table></div>
+</div></div><!-- @@@audioEncodingMode -->
+<br/>
+<!-- $$$audioSampleRate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="audioSampleRate-prop"></a><span class="name">audioSampleRate</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the sample rate to be used to encode audio while recording video.</p>
+</div></div><!-- @@@audioSampleRate -->
+<br/>
+<!-- $$$duration -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="duration-prop"></a><span class="name">duration</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the duration (in miliseconds) of the last recording.</p>
+</div></div><!-- @@@duration -->
+<br/>
+<!-- $$$errorCode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="errorCode-prop"></a><span class="name">errorCode</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the last error code.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Value</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><a href="../qtnetwork/qdtls.html#QDtlsError-enum">NoError</a></td><td >No Errors</td></tr>
+<tr valign="top" class="even"><td >ResourceError</td><td >Device is not ready or not available.</td></tr>
+<tr valign="top" class="odd"><td >FormatError</td><td >Current format is not supported.</td></tr>
+<tr valign="top" class="even"><td >OutOfSpaceError</td><td >No space left on device.</td></tr>
+</table></div>
+</div></div><!-- @@@errorCode -->
+<br/>
+<!-- $$$errorString -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="errorString-prop"></a><span class="name">errorString</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the description of the last error.</p>
+</div></div><!-- @@@errorString -->
+<br/>
+<!-- $$$frameRate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="frameRate-prop"></a><span class="name">frameRate</span> : <span class="type">qreal</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the framerate (in frames per second) to be used for recording video.</p>
+</div></div><!-- @@@frameRate -->
+<br/>
+<!-- $$$mediaContainer -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="mediaContainer-prop"></a><span class="name">mediaContainer</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the media container to be used for recording video. Typically this is <code>mp4</code>.</p>
+</div></div><!-- @@@mediaContainer -->
+<br/>
+<!-- $$$muted -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="muted-prop"></a><span class="name">muted</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property indicates whether the audio input is muted during recording.</p>
+</div></div><!-- @@@muted -->
+<br/>
+<!-- $$$outputLocation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="outputLocation-prop"></a><span class="name">outputLocation</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the destination location of the media content. If the location is empty, the recorder uses the system-specific place and file naming scheme.</p>
+</div></div><!-- @@@outputLocation -->
+<br/>
+<!-- $$$recorderState -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="recorderState-prop"></a><span class="name">recorderState</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the current state of the camera recorder object.</p>
+<p>The state can be one of these two:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Value</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >StoppedState</td><td >The camera is not recording video.</td></tr>
+<tr valign="top" class="even"><td >RecordingState</td><td >The camera is recording video.</td></tr>
+</table></div>
+</div></div><!-- @@@recorderState -->
+<br/>
+<!-- $$$recorderStatus -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="recorderStatus-prop"></a><span class="name">recorderStatus</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the current status of media recording.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Value</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >UnavailableStatus</td><td >Recording is not supported by the camera.</td></tr>
+<tr valign="top" class="even"><td >UnloadedStatus</td><td >The recorder is available but not loaded.</td></tr>
+<tr valign="top" class="odd"><td >LoadingStatus</td><td >The recorder is initializing.</td></tr>
+<tr valign="top" class="even"><td >LoadedStatus</td><td >The recorder is initialized and ready to record media.</td></tr>
+<tr valign="top" class="odd"><td >StartingStatus</td><td >Recording is requested but not active yet.</td></tr>
+<tr valign="top" class="even"><td >RecordingStatus</td><td >Recording is active.</td></tr>
+<tr valign="top" class="odd"><td >PausedStatus</td><td >Recording is paused.</td></tr>
+<tr valign="top" class="even"><td >FinalizingStatus</td><td >Recording is stopped with media being finalized.</td></tr>
+</table></div>
+</div></div><!-- @@@recorderStatus -->
+<br/>
+<!-- $$$resolution -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="resolution-prop"></a><span class="name">resolution</span> : <span class="type"><a href="../qtqml/qml-size.html">size</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the video frame dimensions to be used for video capture.</p>
+</div></div><!-- @@@resolution -->
+<br/>
+<!-- $$$videoBitRate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="videoBitRate-prop"></a><span class="name">videoBitRate</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the bit rate (in bits per second) to be used for recording video.</p>
+</div></div><!-- @@@videoBitRate -->
+<br/>
+<!-- $$$videoCodec -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="videoCodec-prop"></a><span class="name">videoCodec</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the video codec to be used for recording video. Typically this is <code>h264</code>.</p>
+</div></div><!-- @@@videoCodec -->
+<br/>
+<!-- $$$videoEncodingMode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="videoEncodingMode-prop"></a><span class="name">videoEncodingMode</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the type of encoding method to be used for recording video.</p>
+<p>The following are the different encoding methods used:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Value</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >ConstantQualityEncoding</td><td >Encoding will aim to have a constant quality, adjusting bitrate to fit. This is the default. The bitrate setting will be ignored.</td></tr>
+<tr valign="top" class="even"><td >ConstantBitRateEncoding</td><td >Encoding will use a constant bit rate, adjust quality to fit. This is appropriate if you are trying to optimize for space.</td></tr>
+<tr valign="top" class="odd"><td >AverageBitRateEncoding</td><td >Encoding will try to keep an average bitrate setting, but will use more or less as needed.</td></tr>
+</table></div>
+</div></div><!-- @@@videoEncodingMode -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$record[overload1]$$$record -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="record-method"></a><span class="name">record</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Starts recording.</p>
+</div></div><!-- @@@record -->
+<br/>
+<!-- $$$setMetadata[overload1]$$$setMetadata -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="setMetadata-method"></a><span class="name">setMetadata</span>(<i>key</i>, <i>value</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Sets metadata for the next video to be recorder, with the given <i>key</i> being associated with <i>value</i>.</p>
+</div></div><!-- @@@setMetadata -->
+<br/>
+<!-- $$$stop[overload1]$$$stop -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="stop-method"></a><span class="name">stop</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Stops recording.</p>
+</div></div><!-- @@@stop -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

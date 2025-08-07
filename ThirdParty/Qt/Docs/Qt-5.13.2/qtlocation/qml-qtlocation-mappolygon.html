@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdeclarativepolygonmapitem.cpp -->
+  <title>MapPolygon QML Type | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-qmlmodule.html">QML Types</a></td><td >MapPolygon QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#performance">Performance</a></li>
+<li class="level2"><a href="#example-usage">Example Usage</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">MapPolygon QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$MapPolygon-brief -->
+<p>The <a href="qml-qtlocation-mappolygon.html">MapPolygon</a> type displays a polygon on a Map. <a href="#details">More...</a></p>
+<!-- @@@MapPolygon -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtLocation 5.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  QtLocation 5.5</td></tr></table></div><ul>
+<li><a href="qml-qtlocation-mappolygon-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtlocation-mappolygon.html#border-prop">border</a></b></b><ul>
+<li class="fn"><b><b><a href="qml-qtlocation-mappolygon.html#border.width-prop">border.width</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtlocation-mappolygon.html#border.color-prop">border.color</a></b></b> : color</li>
+</ul>
+</li>
+<li class="fn"><b><b><a href="qml-qtlocation-mappolygon.html#color-prop">color</a></b></b> : color</li>
+<li class="fn"><b><b><a href="qml-qtlocation-mappolygon.html#path-prop">path</a></b></b> : list&lt;coordinate&gt;</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtlocation-mappolygon.html#addCoordinate-method">addCoordinate</a></b></b>(<i>coordinate</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtlocation-mappolygon.html#removeCoordinate-method">removeCoordinate</a></b></b>(<i>coordinate</i>)</li>
+</ul>
+<!-- $$$MapPolygon-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qml-qtlocation-mappolygon.html">MapPolygon</a> type displays a polygon on a Map, specified in terms of an ordered list of <a href="../qtpositioning/qml-qtpositioning-qtpositioning.html#coordinate-method">coordinates</a>. For best appearance and results, polygons should be simple (not self-intersecting).</p>
+<p>The <a href="../qtpositioning/qml-qtpositioning-qtpositioning.html#coordinate-method">coordinates</a> on the path cannot be directly changed after being added to the Polygon. Instead, copy the <a href="qml-qtlocation-mappolygon.html#path-prop">path</a> into a var, modify the copy and reassign the copy back to the <a href="qml-qtlocation-mappolygon.html#path-prop">path</a>.</p>
+<pre class="cpp">
+
+  var path <span class="operator">=</span> mapPolygon<span class="operator">.</span>path;
+  path<span class="operator">[</span><span class="number">0</span><span class="operator">]</span><span class="operator">.</span>latitude <span class="operator">=</span> <span class="number">5</span>;
+  mapPolygon<span class="operator">.</span>path <span class="operator">=</span> path;
+
+</pre>
+<p>Coordinates can also be added and removed at any time using the <a href="qml-qtlocation-mappolygon.html#addCoordinate-method">addCoordinate</a> and <a href="qml-qtlocation-mappolygon.html#removeCoordinate-method">removeCoordinate</a> methods.</p>
+<p>For drawing rectangles with &quot;straight&quot; edges (same latitude across one edge, same latitude across the other), the <a href="qml-qtlocation-maprectangle.html">MapRectangle</a> type provides a simpler, two-point API.</p>
+<p>By default, the polygon is displayed as a 1 pixel black border with no fill. To change its appearance, use the <a href="qml-qtlocation-mappolygon.html#color-prop">color</a>, <a href="qml-qtlocation-mappolygon.html#border.color-prop">border.color</a> and <a href="qml-qtlocation-mappolygon.html#border.width-prop">border.width</a> properties.</p>
+<p><b>Note: </b>Since MapPolygons are geographic items, dragging a <a href="qml-qtlocation-mappolygon.html">MapPolygon</a> (through the use of <a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a>) causes its vertices to be recalculated in the geographic coordinate space. The edges retain the same geographic lengths (latitude and longitude differences between the vertices), but they remain straight. Apparent stretching of the item occurs when dragged to a different latitude.</p><a name="performance"></a>
+<h3 id="performance">Performance</h3>
+<p>MapPolygons have a rendering cost that is O(n) with respect to the number of vertices. This means that the per frame cost of having a Polygon on the Map grows in direct proportion to the number of points on the Polygon. There is an additional triangulation cost (approximately O(n log n)) which is currently paid with each frame, but in future may be paid only upon adding or removing points.</p>
+<p>Like the other map objects, <a href="qml-qtlocation-mappolygon.html">MapPolygon</a> is normally drawn without a smooth appearance. Setting the <a href="../qtquick/qml-qtquick-item.html#opacity-prop">opacity</a> property will force the object to be blended, which decreases performance considerably depending on the hardware in use.</p>
+<a name="example-usage"></a>
+<h3 id="example-usage">Example Usage</h3>
+<p>The following snippet shows a <a href="qml-qtlocation-mappolygon.html">MapPolygon</a> being used to display a triangle, with three vertices near Brisbane, Australia. The triangle is filled in green, with a 1 pixel black border.</p>
+<pre class="cpp">
+
+  Map {
+      MapPolygon {
+          color: <span class="char">'green'</span>
+          path: <span class="operator">[</span>
+              { latitude: <span class="operator">-</span><span class="number">27</span><span class="operator">,</span> longitude: <span class="number">153.0</span> }<span class="operator">,</span>
+              { latitude: <span class="operator">-</span><span class="number">27</span><span class="operator">,</span> longitude: <span class="number">154.1</span> }<span class="operator">,</span>
+              { latitude: <span class="operator">-</span><span class="number">28</span><span class="operator">,</span> longitude: <span class="number">153.5</span> }
+          <span class="operator">]</span>
+      }
+  }
+
+</pre>
+<p class="centerAlign"><img src="images/api-mappolygon.png" alt="" /></p><!-- @@@MapPolygon -->
+<h2>Property Documentation</h2>
+<!-- $$$border -->
+<div class="qmlitem"><div class="qmlproto"><div class="table"><table class="qmlname"><tr valign="top" class="even" id="border-prop"><th class="centerAlign"><p><a name="border-prop"></a><b>border group</b></p></th></tr><tr valign="top" class="odd" id="border.width-prop"><td class="tblQmlPropNode"><p><a name="border.width-prop"></a><span class="name">border.width</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr><tr valign="top" class="odd" id="border.color-prop"><td class="tblQmlPropNode"><p><a name="border.color-prop"></a><span class="name">border.color</span> : <span class="type"><a href="../qtquick/qml-color.html">color</a></span></p></td></tr></table></div></div><div class="qmldoc"><p>This property is part of the border property group. The border property group holds the width and color used to draw the border of the polygon.</p>
+<p>The width is in pixels and is independent of the zoom level of the map.</p>
+<p>The default values correspond to a black border with a width of 1 pixel. For no line, use a width of 0 or a transparent color.</p>
+</div></div><!-- @@@border -->
+<br/>
+<!-- $$$color -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="color-prop"></a><span class="name">color</span> : <span class="type"><a href="../qtquick/qml-color.html">color</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the color used to fill the polygon.</p>
+<p>The default value is transparent.</p>
+</div></div><!-- @@@color -->
+<br/>
+<!-- $$$path -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="path-prop"></a><span class="name">path</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="../qtpositioning/qml-coordinate.html">coordinate</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the ordered list of coordinates which define the polygon. Having less than 3 different coordinates in the path results in undefined behavior.</p>
+<p><b>See also </b><a href="qml-qtlocation-mappolygon.html#addCoordinate-method">addCoordinate</a> and <a href="qml-qtlocation-mappolygon.html#removeCoordinate-method">removeCoordinate</a>.</p>
+</div></div><!-- @@@path -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$addCoordinate[overload1]$$$addCoordinate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="addCoordinate-method"></a><span class="type">void</span> <span class="name">addCoordinate</span>(<i>coordinate</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Adds the specified <i>coordinate</i> to the path.</p>
+<p><b>See also </b><a href="qml-qtlocation-mappolygon.html#removeCoordinate-method">removeCoordinate</a> and <a href="qml-qtlocation-mappolygon.html#path-prop">path</a>.</p>
+</div></div><!-- @@@addCoordinate -->
+<br/>
+<!-- $$$removeCoordinate[overload1]$$$removeCoordinate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="removeCoordinate-method"></a><span class="type">void</span> <span class="name">removeCoordinate</span>(<i>coordinate</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Removes <i>coordinate</i> from the path. If there are multiple instances of the same coordinate, the one added last is removed.</p>
+<p>If <i>coordinate</i> is not in the path this method does nothing.</p>
+<p><b>See also </b><a href="qml-qtlocation-mappolygon.html#addCoordinate-method">addCoordinate</a> and <a href="qml-qtlocation-mappolygon.html#path-prop">path</a>.</p>
+</div></div><!-- @@@removeCoordinate -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

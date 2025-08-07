@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- binary-probe.qdoc -->
+  <title>BinaryProbe QML Type | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<p class="naviNextPrevious headerNavi">
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">BinaryProbe QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$BinaryProbe-brief -->
+<p>Locates executable files outside the project. <a href="#details">More...</a></p>
+<!-- @@@BinaryProbe -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import  </td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-pathprobe.html">PathProbe</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-binaryprobe-members.html">List of all members, including inherited members</a></li>
+</ul>
+<!-- $$$BinaryProbe-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>Finds executable files that have the specified file names.</p>
+<p><a href="qml-binaryprobe.html">BinaryProbe</a> searches for executable files within directories specified by the PATH environment variable.</p>
+<p><b>Note: </b>On Unix, also searches in the <code>/usr/bin</code> and <code>/usr/local/bin</code> directories by default. Override <a href="qml-pathprobe.html#platformSearchPaths-prop">PathProbe.platformSearchPaths</a> to change this behavior.</p><p><b>Note: </b>On Windows, only files that have <i>.com</i>, <i>.exe</i>, <i>.bat</i>, <i>.cmd</i> extensions are considered <i>executables</i>. Override <a href="qml-pathprobe.html#nameSuffixes-prop">PathProbe.nameSuffixes</a> to change this behavior.</p><p>For example, <a href="qml-binaryprobe.html">BinaryProbe</a> can be used to search for a protobuf compiler executable as follows:</p>
+<pre class="cpp">
+
+  import qbs<span class="operator">.</span>File
+  import qbs<span class="operator">.</span>Probes
+
+  Module {
+      <span class="comment">// search for a protoc executable</span>
+      Probes<span class="operator">.</span>BinaryProbe {
+          id: protocProbe
+          names: <span class="string">&quot;protoc&quot;</span>
+      }
+      property string executableFilePath: protocProbe<span class="operator">.</span>filePath
+
+      validate: {
+          <span class="keyword">if</span> (<span class="operator">!</span>File<span class="operator">.</span>exists(executableFilePath))
+              <span class="keyword">throw</span> <span class="string">&quot;The executable '&quot;</span> <span class="operator">+</span> executableFilePath <span class="operator">+</span> <span class="string">&quot;' does not exist.&quot;</span>;
+      }
+
+      <span class="comment">// use the found executable</span>
+      Rule {
+          <span class="comment">// rule input/outputs here...</span>
+
+          <span class="comment">// run executable</span>
+          prepare: {
+              var args <span class="operator">=</span> <span class="comment">// initialize arguments...</span>
+              var cmd <span class="operator">=</span> <span class="keyword">new</span> Command(executableFilePath<span class="operator">,</span> args);
+              cmd<span class="operator">.</span>highlight <span class="operator">=</span> <span class="string">&quot;codegen&quot;</span>;
+              cmd<span class="operator">.</span>description <span class="operator">=</span> <span class="string">&quot;generating protobuf files for &quot;</span> <span class="operator">+</span> input<span class="operator">.</span>fileName;
+              <span class="keyword">return</span> <span class="operator">[</span>cmd<span class="operator">]</span>;
+          }
+      }
+  }
+
+</pre>
+<!-- @@@BinaryProbe -->
+<p class="naviNextPrevious footerNavi">
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

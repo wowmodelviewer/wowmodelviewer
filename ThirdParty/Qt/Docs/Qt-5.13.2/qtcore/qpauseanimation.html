@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qpauseanimation.cpp -->
+  <title>QPauseAnimation Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QPauseAnimation</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPauseAnimation Class</h1>
+<!-- $$$QPauseAnimation-brief -->
+<p>The <a href="qpauseanimation.html">QPauseAnimation</a> class provides a pause for <a href="qsequentialanimationgroup.html">QSequentialAnimationGroup</a>. <a href="#details">More...</a></p>
+<!-- @@@QPauseAnimation -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QPauseAnimation&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.6</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qabstractanimation.html">QAbstractAnimation</a></td></tr></table></div><p>This class was introduced in  Qt 4.6.</p>
+<ul>
+<li><a href="qpauseanimation-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qpauseanimation.html#duration-prop">duration</a></b> : int</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpauseanimation.html#QPauseAnimation-1">QPauseAnimation</a></b>(int <i>msecs</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpauseanimation.html#QPauseAnimation">QPauseAnimation</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qpauseanimation.html#dtor.QPauseAnimation">~QPauseAnimation</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpauseanimation.html#duration-prop">setDuration</a></b>(int <i>msecs</i>)</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qpauseanimation.html#duration-prop">duration</a></b>() const override</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qpauseanimation.html#event">event</a></b>(QEvent *<i>e</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qpauseanimation.html#updateCurrentTime">updateCurrentTime</a></b>(<i>int</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPauseAnimation-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>If you wish to introduce a delay between animations in a <a href="qsequentialanimationgroup.html">QSequentialAnimationGroup</a>, you can insert a <a href="qpauseanimation.html">QPauseAnimation</a>. This class does not animate anything, but does not <a href="qabstractanimation.html#finished">finish</a> before a specified number of milliseconds have elapsed from when it was started. You specify the duration of the pause in the constructor. It can also be set directly with <a href="qpauseanimation.html#duration-prop">setDuration</a>().</p>
+<p>It is not necessary to construct a <a href="qpauseanimation.html">QPauseAnimation</a> yourself. <a href="qsequentialanimationgroup.html">QSequentialAnimationGroup</a> provides the convenience functions <a href="qsequentialanimationgroup.html#addPause">addPause()</a> and <a href="qsequentialanimationgroup.html#insertPause">insertPause()</a>. These functions simply take the number of milliseconds the pause should last.</p>
+</div>
+<p><b>See also </b><a href="qsequentialanimationgroup.html">QSequentialAnimationGroup</a>.</p>
+<!-- @@@QPauseAnimation -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$duration-prop$$$duration$$$setDurationint -->
+<h3 class="fn" id="duration-prop"><a name="duration-prop"></a><span class="name">duration</span> : <span class="type">int</span></h3>
+<p>This property holds the duration of the pause.</p>
+<p>The duration of the pause. The duration should not be negative. The default duration is 250 milliseconds.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> virtual int </td><td class="memItemRight bottomAlign"><span class="name"><b>duration</b></span>() const override</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setDuration</b></span>(int <i>msecs</i>)</td></tr>
+</table></div>
+<!-- @@@duration -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QPauseAnimation$$$QPauseAnimationintQObject* -->
+<h3 class="fn" id="QPauseAnimation-1"><a name="QPauseAnimation-1"></a>QPauseAnimation::<span class="name">QPauseAnimation</span>(<span class="type">int</span> <i>msecs</i>, <span class="type"><a href="qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a <a href="qpauseanimation.html">QPauseAnimation</a>. <i>msecs</i> is the duration of the pause. <i>parent</i> is passed to <a href="qobject.html">QObject</a>'s constructor.</p>
+<!-- @@@QPauseAnimation -->
+<!-- $$$QPauseAnimation[overload1]$$$QPauseAnimationQObject* -->
+<h3 class="fn" id="QPauseAnimation"><a name="QPauseAnimation"></a>QPauseAnimation::<span class="name">QPauseAnimation</span>(<span class="type"><a href="qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a <a href="qpauseanimation.html">QPauseAnimation</a>. <i>parent</i> is passed to <a href="qobject.html">QObject</a>'s constructor. The default duration is 0.</p>
+<!-- @@@QPauseAnimation -->
+<!-- $$$~QPauseAnimation[overload1]$$$~QPauseAnimation -->
+<h3 class="fn" id="dtor.QPauseAnimation"><a name="dtor.QPauseAnimation"></a><code>[virtual] </code>QPauseAnimation::<span class="name">~QPauseAnimation</span>()</h3>
+<p>Destroys the pause animation.</p>
+<!-- @@@~QPauseAnimation -->
+<!-- $$$event[overload1]$$$eventQEvent* -->
+<h3 class="fn" id="event"><a name="event"></a><code>[override virtual protected] </code><span class="type">bool</span> QPauseAnimation::<span class="name">event</span>(<span class="type"><a href="qevent.html">QEvent</a></span> *<i>e</i>)</h3>
+<p>Reimplements: <a href="qabstractanimation.html#event">QAbstractAnimation::event</a>(QEvent *event).</p>
+<!-- @@@event -->
+<!-- $$$updateCurrentTime[overload1]$$$updateCurrentTimeint -->
+<h3 class="fn" id="updateCurrentTime"><a name="updateCurrentTime"></a><code>[override virtual protected] </code><span class="type">void</span> QPauseAnimation::<span class="name">updateCurrentTime</span>(<i>int</i>)</h3>
+<p>Reimplements: <a href="qabstractanimation.html#updateCurrentTime">QAbstractAnimation::updateCurrentTime</a>(int currentTime).</p>
+<!-- @@@updateCurrentTime -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcomputecommand.cpp -->
+  <title>QComputeCommand Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QComputeCommand</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QComputeCommand Class</h1>
+<span class="small-subtitle">(<a href="qt3drender-qcomputecommand.html">Qt3DRender::QComputeCommand</a>)<br/></span>
+<!-- $$$QComputeCommand-brief -->
+<p><a href="qt3dcore-qcomponent.html">QComponent</a> to issue work for the compute shader on GPU. <a href="#details">More...</a></p>
+<!-- @@@QComputeCommand -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QComputeCommand&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3drender</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-computecommand.html">ComputeCommand</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3dcore-qcomponent.html">Qt3DCore::QComponent</a></td></tr></table></div><p>This class was introduced in  Qt 5.7.</p>
+<ul>
+<li><a href="qt3drender-qcomputecommand-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qt3drender-qcomputecommand.html#runType-prop">runType</a></b> : RunType</li>
+<li class="fn"><b><a href="qt3drender-qcomputecommand.html#workGroupX-prop">workGroupX</a></b> : int</li>
+<li class="fn"><b><a href="qt3drender-qcomputecommand.html#workGroupY-prop">workGroupY</a></b> : int</li>
+<li class="fn"><b><a href="qt3drender-qcomputecommand.html#workGroupZ-prop">workGroupZ</a></b> : int</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qcomputecommand.html#QComputeCommand">QComputeCommand</a></b>(Qt3DCore::QNode *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QComputeCommand::RunType </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qcomputecommand.html#runType-prop">runType</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qcomputecommand.html#workGroupX-prop">workGroupX</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qcomputecommand.html#workGroupY-prop">workGroupY</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qcomputecommand.html#workGroupZ-prop">workGroupZ</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qcomputecommand.html#runType-prop">setRunType</a></b>(Qt3DRender::QComputeCommand::RunType <i>runType</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qcomputecommand.html#setWorkGroupX">setWorkGroupX</a></b>(int <i>workGroupX</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qcomputecommand.html#setWorkGroupY">setWorkGroupY</a></b>(int <i>workGroupY</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qcomputecommand.html#setWorkGroupZ">setWorkGroupZ</a></b>(int <i>workGroupZ</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qcomputecommand.html#trigger-1">trigger</a></b>(int <i>workGroupX</i>, int <i>workGroupY</i>, int <i>workGroupZ</i>, int <i>frameCount</i> = 1)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qcomputecommand.html#trigger">trigger</a></b>(int <i>frameCount</i> = 1)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qcomputecommand.html#runType-prop">runTypeChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qcomputecommand.html#workGroupX-prop">workGroupXChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qcomputecommand.html#workGroupY-prop">workGroupYChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qcomputecommand.html#workGroupZ-prop">workGroupZChanged</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QComputeCommand-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A <a href="qt3drender-qcomputecommand.html">Qt3DRender::QComputeCommand</a> is used to issue work for the compute shader. The compute shader is specified in the <a href="qt3drender-qmaterial.html">QMaterial</a> component of the same entity the <a href="qt3drender-qcomputecommand.html">QComputeCommand</a> is added to. The <a href="qt3drender-qcomputecommand.html#workGroupX-prop">workGroupX</a>, <a href="qt3drender-qcomputecommand.html#workGroupY-prop">workGroupY</a> and <a href="qt3drender-qcomputecommand.html#workGroupZ-prop">workGroupZ</a> properties specify the work group sizes for the compute shader invocation. <a href="qt3drender-qdispatchcompute.html">Qt3DRender::QDispatchCompute</a> node needs to be present in the FrameGraph to actually issue the commands.</p>
+<p><b>Note: </b>If the rendering policy is set to <a href="qt3drender-qrendersettings.html#RenderPolicy-enum">Qt3DRender::QRenderSettings::OnDemand</a> and there are no changes to the scene, the <a href="qml-computecommand.html">ComputeCommand</a> will not be invoked repeatedly. The <a href="qt3drender-qrendersettings.html#RenderPolicy-enum">Qt3DRender::QRenderSettings::Always</a> render policy must be set for the <a href="qml-computecommand.html">ComputeCommand</a> to be repeatedly invoked if there are no other changes to the scene that triggers rendering a new frame.</p></div>
+<!-- @@@QComputeCommand -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$runType-prop$$$runType$$$setRunTypeQt3DRender::QComputeCommand::RunType$$$runTypeChanged -->
+<h3 class="fn" id="runType-prop"><a name="runType-prop"></a><span class="name">runType</span> : <span class="type">RunType</span></h3>
+<p>Specifies whether the compute command should be performed every frame or manually triggered.</p>
+<p>If set to Continuous, Compute command is executed everyframe. This is the default.</p>
+<p>If set to Manual CompouteCommand is executed for a given number of frames and then the component disables itself.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QComputeCommand::RunType </td><td class="memItemRight bottomAlign"><span class="name"><b>runType</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setRunType</b></span>(Qt3DRender::QComputeCommand::RunType <i>runType</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>runTypeChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@runType -->
+<!-- $$$workGroupX-prop$$$workGroupX$$$setWorkGroupXint$$$workGroupXChanged -->
+<h3 class="fn" id="workGroupX-prop"><a name="workGroupX-prop"></a><span class="name">workGroupX</span> : <span class="type">int</span></h3>
+<p>Specifies X workgroup size.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>workGroupX</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qcomputecommand.html#setWorkGroupX">setWorkGroupX</a></b></span>(int <i>workGroupX</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>workGroupXChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@workGroupX -->
+<!-- $$$workGroupY-prop$$$workGroupY$$$setWorkGroupYint$$$workGroupYChanged -->
+<h3 class="fn" id="workGroupY-prop"><a name="workGroupY-prop"></a><span class="name">workGroupY</span> : <span class="type">int</span></h3>
+<p>Specifies Y workgroup size.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>workGroupY</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qcomputecommand.html#setWorkGroupY">setWorkGroupY</a></b></span>(int <i>workGroupY</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>workGroupYChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@workGroupY -->
+<!-- $$$workGroupZ-prop$$$workGroupZ$$$setWorkGroupZint$$$workGroupZChanged -->
+<h3 class="fn" id="workGroupZ-prop"><a name="workGroupZ-prop"></a><span class="name">workGroupZ</span> : <span class="type">int</span></h3>
+<p>Specifies Z workgroup size.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>workGroupZ</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3drender-qcomputecommand.html#setWorkGroupZ">setWorkGroupZ</a></b></span>(int <i>workGroupZ</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>workGroupZChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@workGroupZ -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QComputeCommand[overload1]$$$QComputeCommandQt3DCore::QNode* -->
+<h3 class="fn" id="QComputeCommand"><a name="QComputeCommand"></a>QComputeCommand::<span class="name">QComputeCommand</span>(<span class="type"><a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></span> *<i>parent</i> = nullptr)</h3>
+<p>The constructor creates a new <a href="qt3drender-qcomputecommand.html">Qt3DRender::QComputeCommand</a> instance with the specified <i>parent</i>.</p>
+<!-- @@@QComputeCommand -->
+<!-- $$$setWorkGroupX -->
+<h3 class="fn" id="setWorkGroupX"><a name="setWorkGroupX"></a><code>[slot] </code><span class="type">void</span> QComputeCommand::<span class="name">setWorkGroupX</span>(<span class="type">int</span> <i>workGroupX</i>)</h3>
+<p>Sets the workgroup for the first dimension to <i>workGroupX</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="qt3drender-qcomputecommand.html#workGroupX-prop">workGroupX</a>. </p><p><b>See also </b><a href="qt3drender-qcomputecommand.html#workGroupX-prop">workGroupX</a>().</p>
+<!-- @@@setWorkGroupX -->
+<!-- $$$setWorkGroupY -->
+<h3 class="fn" id="setWorkGroupY"><a name="setWorkGroupY"></a><code>[slot] </code><span class="type">void</span> QComputeCommand::<span class="name">setWorkGroupY</span>(<span class="type">int</span> <i>workGroupY</i>)</h3>
+<p>Sets the workgroup for the second dimension to <i>workGroupY</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="qt3drender-qcomputecommand.html#workGroupY-prop">workGroupY</a>. </p><p><b>See also </b><a href="qt3drender-qcomputecommand.html#workGroupY-prop">workGroupY</a>().</p>
+<!-- @@@setWorkGroupY -->
+<!-- $$$setWorkGroupZ -->
+<h3 class="fn" id="setWorkGroupZ"><a name="setWorkGroupZ"></a><code>[slot] </code><span class="type">void</span> QComputeCommand::<span class="name">setWorkGroupZ</span>(<span class="type">int</span> <i>workGroupZ</i>)</h3>
+<p>Sets the workgroup for the third dimension to <i>workGroupZ</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="qt3drender-qcomputecommand.html#workGroupZ-prop">workGroupZ</a>. </p><p><b>See also </b><a href="qt3drender-qcomputecommand.html#workGroupZ-prop">workGroupZ</a>().</p>
+<!-- @@@setWorkGroupZ -->
+<!-- $$$trigger$$$triggerintintintint -->
+<h3 class="fn" id="trigger-1"><a name="trigger-1"></a><code>[slot] </code><span class="type">void</span> QComputeCommand::<span class="name">trigger</span>(<span class="type">int</span> <i>workGroupX</i>, <span class="type">int</span> <i>workGroupY</i>, <span class="type">int</span> <i>workGroupZ</i>, <span class="type">int</span> <i>frameCount</i> = 1)</h3>
+<p>When the run type is set to Manual, calling trigger will make the compute command be executed for the next <i>frameCount</i> frames. Upon completion of the execution, the enabled property will be set to false. The size of the workgroup previously set will be overridden with <i>workGroupX</i>, <i>workGroupY</i>, <i>workGroupZ</i>.</p>
+<!-- @@@trigger -->
+<!-- $$$trigger[overload1]$$$triggerint -->
+<h3 class="fn" id="trigger"><a name="trigger"></a><code>[slot] </code><span class="type">void</span> QComputeCommand::<span class="name">trigger</span>(<span class="type">int</span> <i>frameCount</i> = 1)</h3>
+<p>When the run type is set to Manual, calling trigger will make the compute command be executed for the next <i>frameCount</i> frames. Upon completion of the execution, the enabled property will be set to false.</p>
+<!-- @@@trigger -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

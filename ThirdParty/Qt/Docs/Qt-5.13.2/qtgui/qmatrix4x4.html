@@ -1,0 +1,572 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmatrix4x4.cpp -->
+  <title>QMatrix4x4 Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QMatrix4x4</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QMatrix4x4 Class</h1>
+<!-- $$$QMatrix4x4-brief -->
+<p>The <a href="qmatrix4x4.html">QMatrix4x4</a> class represents a 4x4 transformation matrix in 3D space. <a href="#details">More...</a></p>
+<!-- @@@QMatrix4x4 -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QMatrix4x4&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.6</td></tr></table></div><p>This class was introduced in  Qt 4.6.</p>
+<ul>
+<li><a href="qmatrix4x4-members.html">List of all members, including inherited members</a></li>
+<li><a href="qmatrix4x4-obsolete.html">Obsolete members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#QMatrix4x4-5">QMatrix4x4</a></b>(const QMatrix &amp;<i>matrix</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></b>(const QTransform &amp;<i>transform</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#QMatrix4x4-4">QMatrix4x4</a></b>(const QGenericMatrix&lt;N, M, float&gt; &amp;<i>matrix</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#QMatrix4x4-3">QMatrix4x4</a></b>(float <i>m11</i>, float <i>m12</i>, float <i>m13</i>, float <i>m14</i>, float <i>m21</i>, float <i>m22</i>, float <i>m23</i>, float <i>m24</i>, float <i>m31</i>, float <i>m32</i>, float <i>m33</i>, float <i>m34</i>, float <i>m41</i>, float <i>m42</i>, float <i>m43</i>, float <i>m44</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#QMatrix4x4-2">QMatrix4x4</a></b>(const float *<i>values</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector4D </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#column">column</a></b>(int <i>index</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const float *</td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#constData">constData</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#copyDataTo">copyDataTo</a></b>(float *<i>values</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> float *</td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#data">data</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const float *</td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#data-1">data</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#determinant">determinant</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#fill">fill</a></b>(float <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#frustum">frustum</a></b>(float <i>left</i>, float <i>right</i>, float <i>bottom</i>, float <i>top</i>, float <i>nearPlane</i>, float <i>farPlane</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMatrix4x4 </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#inverted">inverted</a></b>(bool *<i>invertible</i> = nullptr) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#isAffine">isAffine</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#isIdentity">isIdentity</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#lookAt">lookAt</a></b>(const QVector3D &amp;<i>eye</i>, const QVector3D &amp;<i>center</i>, const QVector3D &amp;<i>up</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPoint </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#map">map</a></b>(const QPoint &amp;<i>point</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPointF </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#map-1">map</a></b>(const QPointF &amp;<i>point</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector3D </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#map-2">map</a></b>(const QVector3D &amp;<i>point</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector4D </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#map-3">map</a></b>(const QVector4D &amp;<i>point</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRect </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#mapRect">mapRect</a></b>(const QRect &amp;<i>rect</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRectF </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#mapRect-1">mapRect</a></b>(const QRectF &amp;<i>rect</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector3D </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#mapVector">mapVector</a></b>(const QVector3D &amp;<i>vector</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMatrix3x3 </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#normalMatrix">normalMatrix</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#optimize">optimize</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#ortho">ortho</a></b>(float <i>left</i>, float <i>right</i>, float <i>bottom</i>, float <i>top</i>, float <i>nearPlane</i>, float <i>farPlane</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#ortho-1">ortho</a></b>(const QRect &amp;<i>rect</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#ortho-2">ortho</a></b>(const QRectF &amp;<i>rect</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#perspective">perspective</a></b>(float <i>verticalAngle</i>, float <i>aspectRatio</i>, float <i>nearPlane</i>, float <i>farPlane</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#rotate">rotate</a></b>(float <i>angle</i>, const QVector3D &amp;<i>vector</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#rotate-1">rotate</a></b>(float <i>angle</i>, float <i>x</i>, float <i>y</i>, float <i>z</i> = 0.0f)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#rotate-2">rotate</a></b>(const QQuaternion &amp;<i>quaternion</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector4D </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#row">row</a></b>(int <i>index</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#scale">scale</a></b>(const QVector3D &amp;<i>vector</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#scale-1">scale</a></b>(float <i>x</i>, float <i>y</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#scale-2">scale</a></b>(float <i>x</i>, float <i>y</i>, float <i>z</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#scale-3">scale</a></b>(float <i>factor</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#setColumn">setColumn</a></b>(int <i>index</i>, const QVector4D &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#setRow">setRow</a></b>(int <i>index</i>, const QVector4D &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#setToIdentity">setToIdentity</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMatrix </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#toAffine">toAffine</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGenericMatrix&lt;N, M, float&gt; </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#toGenericMatrix">toGenericMatrix</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QTransform </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#toTransform">toTransform</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QTransform </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#toTransform-1">toTransform</a></b>(float <i>distanceToPlane</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#translate">translate</a></b>(const QVector3D &amp;<i>vector</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#translate-1">translate</a></b>(float <i>x</i>, float <i>y</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#translate-2">translate</a></b>(float <i>x</i>, float <i>y</i>, float <i>z</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMatrix4x4 </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#transposed">transposed</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#viewport">viewport</a></b>(float <i>left</i>, float <i>bottom</i>, float <i>width</i>, float <i>height</i>, float <i>nearPlane</i> = 0.0f, float <i>farPlane</i> = 1.0f)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#viewport-1">viewport</a></b>(const QRectF &amp;<i>rect</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariant </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-QVariant">operator QVariant</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-not-eq">operator!=</a></b>(const QMatrix4x4 &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const float &amp;</td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-28-29">operator()</a></b>(int <i>row</i>, int <i>column</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> float &amp;</td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-28-29-1">operator()</a></b>(int <i>row</i>, int <i>column</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMatrix4x4 &amp;</td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-2a-eq">operator*=</a></b>(const QMatrix4x4 &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMatrix4x4 &amp;</td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-2a-eq-1">operator*=</a></b>(float <i>factor</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMatrix4x4 &amp;</td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-2b-eq">operator+=</a></b>(const QMatrix4x4 &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMatrix4x4 &amp;</td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator--eq">operator-=</a></b>(const QMatrix4x4 &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMatrix4x4 &amp;</td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-2f-eq">operator/=</a></b>(float <i>divisor</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-eq-eq">operator==</a></b>(const QMatrix4x4 &amp;<i>other</i>) const</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#qFuzzyCompare">qFuzzyCompare</a></b>(const QMatrix4x4 &amp;<i>m1</i>, const QMatrix4x4 &amp;<i>m2</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMatrix4x4 </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-2a">operator*</a></b>(const QMatrix4x4 &amp;<i>m1</i>, const QMatrix4x4 &amp;<i>m2</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPoint </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-2a-1">operator*</a></b>(const QPoint &amp;<i>point</i>, const QMatrix4x4 &amp;<i>matrix</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPointF </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-2a-2">operator*</a></b>(const QPointF &amp;<i>point</i>, const QMatrix4x4 &amp;<i>matrix</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPoint </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-2a-3">operator*</a></b>(const QMatrix4x4 &amp;<i>matrix</i>, const QPoint &amp;<i>point</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector4D </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-2a-3">operator*</a></b>(const QVector4D &amp;<i>vector</i>, const QMatrix4x4 &amp;<i>matrix</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector3D </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-2a-3">operator*</a></b>(const QVector3D &amp;<i>vector</i>, const QMatrix4x4 &amp;<i>matrix</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPointF </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-2a-4">operator*</a></b>(const QMatrix4x4 &amp;<i>matrix</i>, const QPointF &amp;<i>point</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector4D </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-2a-4">operator*</a></b>(const QMatrix4x4 &amp;<i>matrix</i>, const QVector4D &amp;<i>vector</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector3D </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-2a-4">operator*</a></b>(const QMatrix4x4 &amp;<i>matrix</i>, const QVector3D &amp;<i>vector</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMatrix4x4 </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-2a-5">operator*</a></b>(float <i>factor</i>, const QMatrix4x4 &amp;<i>matrix</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMatrix4x4 </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-2a-6">operator*</a></b>(const QMatrix4x4 &amp;<i>matrix</i>, float <i>factor</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMatrix4x4 </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-2b">operator+</a></b>(const QMatrix4x4 &amp;<i>m1</i>, const QMatrix4x4 &amp;<i>m2</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMatrix4x4 </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-">operator-</a></b>(const QMatrix4x4 &amp;<i>m1</i>, const QMatrix4x4 &amp;<i>m2</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMatrix4x4 </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator--1">operator-</a></b>(const QMatrix4x4 &amp;<i>matrix</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMatrix4x4 </td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-2f">operator/</a></b>(const QMatrix4x4 &amp;<i>matrix</i>, float <i>divisor</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDataStream &amp;</td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-lt-lt">operator&lt;&lt;</a></b>(QDataStream &amp;<i>stream</i>, const QMatrix4x4 &amp;<i>matrix</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QDataStream &amp;</td><td class="memItemRight bottomAlign"><b><a href="qmatrix4x4.html#operator-gt-gt">operator&gt;&gt;</a></b>(QDataStream &amp;<i>stream</i>, QMatrix4x4 &amp;<i>matrix</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QMatrix4x4-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qmatrix4x4.html">QMatrix4x4</a> class in general is treated as a row-major matrix, in that the constructors and <a href="qmatrix4x4.html#operator-28-29">operator</a>() functions take data in row-major format, as is familiar in C-style usage.</p>
+<p>Internally the data is stored as column-major format, so as to be optimal for passing to OpenGL functions, which expect column-major data.</p>
+<p>When using these functions be aware that they return data in <b>column-major</b> format:</p>
+<ul>
+<li><a href="qmatrix4x4.html#data">data</a>()</li>
+<li><a href="qmatrix4x4.html#constData">constData</a>()</li>
+</ul>
+</div>
+<p><b>See also </b><a href="qvector3d.html">QVector3D</a> and <a href="qgenericmatrix.html">QGenericMatrix</a>.</p>
+<!-- @@@QMatrix4x4 -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QMatrix4x4$$$QMatrix4x4constQMatrix& -->
+<h3 class="fn" id="QMatrix4x4-5"><a name="QMatrix4x4-5"></a>QMatrix4x4::<span class="name">QMatrix4x4</span>(const <span class="type"><a href="qmatrix.html">QMatrix</a></span> &amp;<i>matrix</i>)</h3>
+<p>Constructs a 4x4 matrix from a conventional Qt 2D affine transformation <i>matrix</i>.</p>
+<p>If <i>matrix</i> has a special type (identity, translate, scale, etc), the programmer should follow this constructor with a call to <a href="qmatrix4x4.html#optimize">optimize</a>() if they wish <a href="qmatrix4x4.html">QMatrix4x4</a> to optimize further calls to <a href="qmatrix4x4.html#translate">translate</a>(), <a href="qmatrix4x4.html#scale">scale</a>(), etc.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#toAffine">toAffine</a>() and <a href="qmatrix4x4.html#optimize">optimize</a>().</p>
+<!-- @@@QMatrix4x4 -->
+<!-- $$$QMatrix4x4[overload1]$$$QMatrix4x4constQTransform& -->
+<h3 class="fn" id="QMatrix4x4"><a name="QMatrix4x4"></a>QMatrix4x4::<span class="name">QMatrix4x4</span>(const <span class="type"><a href="qtransform.html">QTransform</a></span> &amp;<i>transform</i>)</h3>
+<p>Constructs a 4x4 matrix from the conventional Qt 2D transformation matrix <i>transform</i>.</p>
+<p>If <i>transform</i> has a special type (identity, translate, scale, etc), the programmer should follow this constructor with a call to <a href="qmatrix4x4.html#optimize">optimize</a>() if they wish <a href="qmatrix4x4.html">QMatrix4x4</a> to optimize further calls to <a href="qmatrix4x4.html#translate">translate</a>(), <a href="qmatrix4x4.html#scale">scale</a>(), etc.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#toTransform">toTransform</a>() and <a href="qmatrix4x4.html#optimize">optimize</a>().</p>
+<!-- @@@QMatrix4x4 -->
+<!-- $$$QMatrix4x4$$$QMatrix4x4constQGenericMatrix<N,M,float>& -->
+<h3 class="fn" id="QMatrix4x4-4"><a name="QMatrix4x4-4"></a>QMatrix4x4::<span class="name">QMatrix4x4</span>(const <span class="type"><a href="qgenericmatrix.html">QGenericMatrix</a></span>&lt;<span class="type">N</span>, <span class="type">M</span>, <span class="type">float</span>&gt; &amp;<i>matrix</i> = ...)</h3>
+<p>Constructs a 4x4 matrix from the left-most 4 columns and top-most 4 rows of <i>matrix</i>. If <i>matrix</i> has less than 4 columns or rows, the remaining elements are filled with elements from the identity matrix.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#toGenericMatrix">toGenericMatrix</a>().</p>
+<!-- @@@QMatrix4x4 -->
+<!-- $$$QMatrix4x4$$$QMatrix4x4floatfloatfloatfloatfloatfloatfloatfloatfloatfloatfloatfloatfloatfloatfloatfloat -->
+<h3 class="fn" id="QMatrix4x4-3"><a name="QMatrix4x4-3"></a>QMatrix4x4::<span class="name">QMatrix4x4</span>(<span class="type">float</span> <i>m11</i>, <span class="type">float</span> <i>m12</i>, <span class="type">float</span> <i>m13</i>, <span class="type">float</span> <i>m14</i>, <span class="type">float</span> <i>m21</i>, <span class="type">float</span> <i>m22</i>, <span class="type">float</span> <i>m23</i>, <span class="type">float</span> <i>m24</i>, <span class="type">float</span> <i>m31</i>, <span class="type">float</span> <i>m32</i>, <span class="type">float</span> <i>m33</i>, <span class="type">float</span> <i>m34</i>, <span class="type">float</span> <i>m41</i>, <span class="type">float</span> <i>m42</i>, <span class="type">float</span> <i>m43</i>, <span class="type">float</span> <i>m44</i>)</h3>
+<p>Constructs a matrix from the 16 elements <i>m11</i>, <i>m12</i>, <i>m13</i>, <i>m14</i>, <i>m21</i>, <i>m22</i>, <i>m23</i>, <i>m24</i>, <i>m31</i>, <i>m32</i>, <i>m33</i>, <i>m34</i>, <i>m41</i>, <i>m42</i>, <i>m43</i>, and <i>m44</i>. The elements are specified in row-major order.</p>
+<p>If the matrix has a special type (identity, translate, scale, etc), the programmer should follow this constructor with a call to <a href="qmatrix4x4.html#optimize">optimize</a>() if they wish <a href="qmatrix4x4.html">QMatrix4x4</a> to optimize further calls to <a href="qmatrix4x4.html#translate">translate</a>(), <a href="qmatrix4x4.html#scale">scale</a>(), etc.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#optimize">optimize</a>().</p>
+<!-- @@@QMatrix4x4 -->
+<!-- $$$QMatrix4x4$$$QMatrix4x4constfloat* -->
+<h3 class="fn" id="QMatrix4x4-2"><a name="QMatrix4x4-2"></a>QMatrix4x4::<span class="name">QMatrix4x4</span>(const <span class="type">float</span> *<i>values</i>)</h3>
+<p>Constructs a matrix from the given 16 floating-point <i>values</i>. The contents of the array <i>values</i> is assumed to be in row-major order.</p>
+<p>If the matrix has a special type (identity, translate, scale, etc), the programmer should follow this constructor with a call to <a href="qmatrix4x4.html#optimize">optimize</a>() if they wish <a href="qmatrix4x4.html">QMatrix4x4</a> to optimize further calls to <a href="qmatrix4x4.html#translate">translate</a>(), <a href="qmatrix4x4.html#scale">scale</a>(), etc.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#copyDataTo">copyDataTo</a>() and <a href="qmatrix4x4.html#optimize">optimize</a>().</p>
+<!-- @@@QMatrix4x4 -->
+<!-- $$$QMatrix4x4[overload1]$$$QMatrix4x4 -->
+<h3 class="fn" id="QMatrix4x4"><a name="QMatrix4x4"></a>QMatrix4x4::<span class="name">QMatrix4x4</span>()</h3>
+<p>Constructs an identity matrix.</p>
+<!-- @@@QMatrix4x4 -->
+<!-- $$$column[overload1]$$$columnint -->
+<h3 class="fn" id="column"><a name="column"></a><span class="type"><a href="qvector4d.html">QVector4D</a></span> QMatrix4x4::<span class="name">column</span>(<span class="type">int</span> <i>index</i>) const</h3>
+<p>Returns the elements of column <i>index</i> as a 4D vector.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#setColumn">setColumn</a>() and <a href="qmatrix4x4.html#row">row</a>().</p>
+<!-- @@@column -->
+<!-- $$$constData[overload1]$$$constData -->
+<h3 class="fn" id="constData"><a name="constData"></a>const <span class="type">float</span> *QMatrix4x4::<span class="name">constData</span>() const</h3>
+<p>Returns a constant pointer to the raw data of this matrix. This raw data is stored in column-major format.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#data">data</a>().</p>
+<!-- @@@constData -->
+<!-- $$$copyDataTo[overload1]$$$copyDataTofloat* -->
+<h3 class="fn" id="copyDataTo"><a name="copyDataTo"></a><span class="type">void</span> QMatrix4x4::<span class="name">copyDataTo</span>(<span class="type">float</span> *<i>values</i>) const</h3>
+<p>Retrieves the 16 items in this matrix and copies them to <i>values</i> in row-major order.</p>
+<!-- @@@copyDataTo -->
+<!-- $$$data[overload1]$$$data -->
+<h3 class="fn" id="data"><a name="data"></a><span class="type">float</span> *QMatrix4x4::<span class="name">data</span>()</h3>
+<p>Returns a pointer to the raw data of this matrix.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#constData">constData</a>() and <a href="qmatrix4x4.html#optimize">optimize</a>().</p>
+<!-- @@@data -->
+<!-- $$$data$$$data -->
+<h3 class="fn" id="data-1"><a name="data-1"></a>const <span class="type">float</span> *QMatrix4x4::<span class="name">data</span>() const</h3>
+<p>Returns a constant pointer to the raw data of this matrix. This raw data is stored in column-major format.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#constData">constData</a>().</p>
+<!-- @@@data -->
+<!-- $$$determinant[overload1]$$$determinant -->
+<h3 class="fn" id="determinant"><a name="determinant"></a><span class="type">double</span> QMatrix4x4::<span class="name">determinant</span>() const</h3>
+<p>Returns the determinant of this matrix.</p>
+<!-- @@@determinant -->
+<!-- $$$fill[overload1]$$$fillfloat -->
+<h3 class="fn" id="fill"><a name="fill"></a><span class="type">void</span> QMatrix4x4::<span class="name">fill</span>(<span class="type">float</span> <i>value</i>)</h3>
+<p>Fills all elements of this matrx with <i>value</i>.</p>
+<!-- @@@fill -->
+<!-- $$$frustum[overload1]$$$frustumfloatfloatfloatfloatfloatfloat -->
+<h3 class="fn" id="frustum"><a name="frustum"></a><span class="type">void</span> QMatrix4x4::<span class="name">frustum</span>(<span class="type">float</span> <i>left</i>, <span class="type">float</span> <i>right</i>, <span class="type">float</span> <i>bottom</i>, <span class="type">float</span> <i>top</i>, <span class="type">float</span> <i>nearPlane</i>, <span class="type">float</span> <i>farPlane</i>)</h3>
+<p>Multiplies this matrix by another that applies a perspective frustum projection for a window with lower-left corner (<i>left</i>, <i>bottom</i>), upper-right corner (<i>right</i>, <i>top</i>), and the specified <i>nearPlane</i> and <i>farPlane</i> clipping planes.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#ortho">ortho</a>() and <a href="qmatrix4x4.html#perspective">perspective</a>().</p>
+<!-- @@@frustum -->
+<!-- $$$inverted[overload1]$$$invertedbool* -->
+<h3 class="fn" id="inverted"><a name="inverted"></a><span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> QMatrix4x4::<span class="name">inverted</span>(<span class="type">bool</span> *<i>invertible</i> = nullptr) const</h3>
+<p>Returns the inverse of this matrix. Returns the identity if this matrix cannot be inverted; i.e&#x2e; <a href="qmatrix4x4.html#determinant">determinant</a>() is zero. If <i>invertible</i> is not null, then true will be written to that location if the matrix can be inverted; false otherwise.</p>
+<p>If the matrix is recognized as the identity or an orthonormal matrix, then this function will quickly invert the matrix using optimized routines.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#determinant">determinant</a>() and <a href="qmatrix4x4.html#normalMatrix">normalMatrix</a>().</p>
+<!-- @@@inverted -->
+<!-- $$$isAffine[overload1]$$$isAffine -->
+<h3 class="fn" id="isAffine"><a name="isAffine"></a><span class="type">bool</span> QMatrix4x4::<span class="name">isAffine</span>() const</h3>
+<p>Returns <code>true</code> if this matrix is affine matrix; false otherwise.</p>
+<p>An affine matrix is a 4x4 matrix with row 3 equal to (0, 0, 0, 1), e.g&#x2e; no projective coefficients.</p>
+<p>This function was introduced in  Qt 5.5.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#isIdentity">isIdentity</a>().</p>
+<!-- @@@isAffine -->
+<!-- $$$isIdentity[overload1]$$$isIdentity -->
+<h3 class="fn" id="isIdentity"><a name="isIdentity"></a><span class="type">bool</span> QMatrix4x4::<span class="name">isIdentity</span>() const</h3>
+<p>Returns <code>true</code> if this matrix is the identity; false otherwise.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#setToIdentity">setToIdentity</a>().</p>
+<!-- @@@isIdentity -->
+<!-- $$$lookAt[overload1]$$$lookAtconstQVector3D&constQVector3D&constQVector3D& -->
+<h3 class="fn" id="lookAt"><a name="lookAt"></a><span class="type">void</span> QMatrix4x4::<span class="name">lookAt</span>(const <span class="type"><a href="qvector3d.html">QVector3D</a></span> &amp;<i>eye</i>, const <span class="type"><a href="qvector3d.html">QVector3D</a></span> &amp;<i>center</i>, const <span class="type"><a href="qvector3d.html">QVector3D</a></span> &amp;<i>up</i>)</h3>
+<p>Multiplies this matrix by a viewing matrix derived from an eye point. The <i>center</i> value indicates the center of the view that the <i>eye</i> is looking at. The <i>up</i> value indicates which direction should be considered up with respect to the <i>eye</i>.</p>
+<p><b>Note: </b>The <i>up</i> vector must not be parallel to the line of sight from <i>eye</i> to <i>center</i>.</p><!-- @@@lookAt -->
+<!-- $$$map[overload1]$$$mapconstQPoint& -->
+<h3 class="fn" id="map"><a name="map"></a><span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> QMatrix4x4::<span class="name">map</span>(const <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> &amp;<i>point</i>) const</h3>
+<p>Maps <i>point</i> by multiplying this matrix by <i>point</i>.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#mapRect">mapRect</a>().</p>
+<!-- @@@map -->
+<!-- $$$map$$$mapconstQPointF& -->
+<h3 class="fn" id="map-1"><a name="map-1"></a><span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> QMatrix4x4::<span class="name">map</span>(const <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> &amp;<i>point</i>) const</h3>
+<p>Maps <i>point</i> by multiplying this matrix by <i>point</i>.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#mapRect">mapRect</a>().</p>
+<!-- @@@map -->
+<!-- $$$map$$$mapconstQVector3D& -->
+<h3 class="fn" id="map-2"><a name="map-2"></a><span class="type"><a href="qvector3d.html">QVector3D</a></span> QMatrix4x4::<span class="name">map</span>(const <span class="type"><a href="qvector3d.html">QVector3D</a></span> &amp;<i>point</i>) const</h3>
+<p>Maps <i>point</i> by multiplying this matrix by <i>point</i>.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#mapRect">mapRect</a>() and <a href="qmatrix4x4.html#mapVector">mapVector</a>().</p>
+<!-- @@@map -->
+<!-- $$$map$$$mapconstQVector4D& -->
+<h3 class="fn" id="map-3"><a name="map-3"></a><span class="type"><a href="qvector4d.html">QVector4D</a></span> QMatrix4x4::<span class="name">map</span>(const <span class="type"><a href="qvector4d.html">QVector4D</a></span> &amp;<i>point</i>) const</h3>
+<p>Maps <i>point</i> by multiplying this matrix by <i>point</i>.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#mapRect">mapRect</a>().</p>
+<!-- @@@map -->
+<!-- $$$mapRect[overload1]$$$mapRectconstQRect& -->
+<h3 class="fn" id="mapRect"><a name="mapRect"></a><span class="type"><a href="../qtcore/qrect.html">QRect</a></span> QMatrix4x4::<span class="name">mapRect</span>(const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> &amp;<i>rect</i>) const</h3>
+<p>Maps <i>rect</i> by multiplying this matrix by the corners of <i>rect</i> and then forming a new rectangle from the results. The returned rectangle will be an ordinary 2D rectangle with sides parallel to the horizontal and vertical axes.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#map">map</a>().</p>
+<!-- @@@mapRect -->
+<!-- $$$mapRect$$$mapRectconstQRectF& -->
+<h3 class="fn" id="mapRect-1"><a name="mapRect-1"></a><span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> QMatrix4x4::<span class="name">mapRect</span>(const <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> &amp;<i>rect</i>) const</h3>
+<p>Maps <i>rect</i> by multiplying this matrix by the corners of <i>rect</i> and then forming a new rectangle from the results. The returned rectangle will be an ordinary 2D rectangle with sides parallel to the horizontal and vertical axes.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#map">map</a>().</p>
+<!-- @@@mapRect -->
+<!-- $$$mapVector[overload1]$$$mapVectorconstQVector3D& -->
+<h3 class="fn" id="mapVector"><a name="mapVector"></a><span class="type"><a href="qvector3d.html">QVector3D</a></span> QMatrix4x4::<span class="name">mapVector</span>(const <span class="type"><a href="qvector3d.html">QVector3D</a></span> &amp;<i>vector</i>) const</h3>
+<p>Maps <i>vector</i> by multiplying the top 3x3 portion of this matrix by <i>vector</i>. The translation and projection components of this matrix are ignored.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#map">map</a>().</p>
+<!-- @@@mapVector -->
+<!-- $$$normalMatrix[overload1]$$$normalMatrix -->
+<h3 class="fn" id="normalMatrix"><a name="normalMatrix"></a><span class="type"><a href="qgenericmatrix.html#QMatrix3x3-typedef">QMatrix3x3</a></span> QMatrix4x4::<span class="name">normalMatrix</span>() const</h3>
+<p>Returns the normal matrix corresponding to this 4x4 transformation. The normal matrix is the transpose of the inverse of the top-left 3x3 part of this 4x4 matrix. If the 3x3 sub-matrix is not invertible, this function returns the identity.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#inverted">inverted</a>().</p>
+<!-- @@@normalMatrix -->
+<!-- $$$optimize[overload1]$$$optimize -->
+<h3 class="fn" id="optimize"><a name="optimize"></a><span class="type">void</span> QMatrix4x4::<span class="name">optimize</span>()</h3>
+<p>Optimize the usage of this matrix from its current elements.</p>
+<p>Some operations such as <a href="qmatrix4x4.html#translate">translate</a>(), <a href="qmatrix4x4.html#scale">scale</a>(), and <a href="qmatrix4x4.html#rotate">rotate</a>() can be performed more efficiently if the matrix being modified is already known to be the identity, a previous <a href="qmatrix4x4.html#translate">translate</a>(), a previous <a href="qmatrix4x4.html#scale">scale</a>(), etc.</p>
+<p>Normally the <a href="qmatrix4x4.html">QMatrix4x4</a> class keeps track of this special type internally as operations are performed. However, if the matrix is modified directly with {<a href="../qtcore/qloggingcategory.html#operator-28-29">QLoggingCategory::operator</a>()}{<a href="qmatrix4x4.html#operator-28-29">operator</a>()()} or <a href="qmatrix4x4.html#data">data</a>(), then <a href="qmatrix4x4.html">QMatrix4x4</a> will lose track of the special type and will revert to the safest but least efficient operations thereafter.</p>
+<p>By calling optimize() after directly modifying the matrix, the programmer can force <a href="qmatrix4x4.html">QMatrix4x4</a> to recover the special type if the elements appear to conform to one of the known optimized types.</p>
+<p><b>See also </b><a href="../qtcore/qloggingcategory.html#operator-28-29">operator</a>()(), <a href="qmatrix4x4.html#data">data</a>(), and <a href="qmatrix4x4.html#translate">translate</a>().</p>
+<!-- @@@optimize -->
+<!-- $$$ortho[overload1]$$$orthofloatfloatfloatfloatfloatfloat -->
+<h3 class="fn" id="ortho"><a name="ortho"></a><span class="type">void</span> QMatrix4x4::<span class="name">ortho</span>(<span class="type">float</span> <i>left</i>, <span class="type">float</span> <i>right</i>, <span class="type">float</span> <i>bottom</i>, <span class="type">float</span> <i>top</i>, <span class="type">float</span> <i>nearPlane</i>, <span class="type">float</span> <i>farPlane</i>)</h3>
+<p>Multiplies this matrix by another that applies an orthographic projection for a window with lower-left corner (<i>left</i>, <i>bottom</i>), upper-right corner (<i>right</i>, <i>top</i>), and the specified <i>nearPlane</i> and <i>farPlane</i> clipping planes.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#frustum">frustum</a>() and <a href="qmatrix4x4.html#perspective">perspective</a>().</p>
+<!-- @@@ortho -->
+<!-- $$$ortho$$$orthoconstQRect& -->
+<h3 class="fn" id="ortho-1"><a name="ortho-1"></a><span class="type">void</span> QMatrix4x4::<span class="name">ortho</span>(const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> &amp;<i>rect</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Multiplies this matrix by another that applies an orthographic projection for a window with boundaries specified by <i>rect</i>. The near and far clipping planes will be -1 and 1 respectively.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#frustum">frustum</a>() and <a href="qmatrix4x4.html#perspective">perspective</a>().</p>
+<!-- @@@ortho -->
+<!-- $$$ortho$$$orthoconstQRectF& -->
+<h3 class="fn" id="ortho-2"><a name="ortho-2"></a><span class="type">void</span> QMatrix4x4::<span class="name">ortho</span>(const <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> &amp;<i>rect</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Multiplies this matrix by another that applies an orthographic projection for a window with boundaries specified by <i>rect</i>. The near and far clipping planes will be -1 and 1 respectively.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#frustum">frustum</a>() and <a href="qmatrix4x4.html#perspective">perspective</a>().</p>
+<!-- @@@ortho -->
+<!-- $$$perspective[overload1]$$$perspectivefloatfloatfloatfloat -->
+<h3 class="fn" id="perspective"><a name="perspective"></a><span class="type">void</span> QMatrix4x4::<span class="name">perspective</span>(<span class="type">float</span> <i>verticalAngle</i>, <span class="type">float</span> <i>aspectRatio</i>, <span class="type">float</span> <i>nearPlane</i>, <span class="type">float</span> <i>farPlane</i>)</h3>
+<p>Multiplies this matrix by another that applies a perspective projection. The vertical field of view will be <i>verticalAngle</i> degrees within a window with a given <i>aspectRatio</i> that determines the horizontal field of view. The projection will have the specified <i>nearPlane</i> and <i>farPlane</i> clipping planes which are the distances from the viewer to the corresponding planes.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#ortho">ortho</a>() and <a href="qmatrix4x4.html#frustum">frustum</a>().</p>
+<!-- @@@perspective -->
+<!-- $$$rotate[overload1]$$$rotatefloatconstQVector3D& -->
+<h3 class="fn" id="rotate"><a name="rotate"></a><span class="type">void</span> QMatrix4x4::<span class="name">rotate</span>(<span class="type">float</span> <i>angle</i>, const <span class="type"><a href="qvector3d.html">QVector3D</a></span> &amp;<i>vector</i>)</h3>
+<p>Multiples this matrix by another that rotates coordinates through <i>angle</i> degrees about <i>vector</i>.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#scale">scale</a>() and <a href="qmatrix4x4.html#translate">translate</a>().</p>
+<!-- @@@rotate -->
+<!-- $$$rotate$$$rotatefloatfloatfloatfloat -->
+<h3 class="fn" id="rotate-1"><a name="rotate-1"></a><span class="type">void</span> QMatrix4x4::<span class="name">rotate</span>(<span class="type">float</span> <i>angle</i>, <span class="type">float</span> <i>x</i>, <span class="type">float</span> <i>y</i>, <span class="type">float</span> <i>z</i> = 0.0f)</h3>
+<p>This is an overloaded function.</p>
+<p>Multiplies this matrix by another that rotates coordinates through <i>angle</i> degrees about the vector (<i>x</i>, <i>y</i>, <i>z</i>).</p>
+<p><b>See also </b><a href="qmatrix4x4.html#scale">scale</a>() and <a href="qmatrix4x4.html#translate">translate</a>().</p>
+<!-- @@@rotate -->
+<!-- $$$rotate$$$rotateconstQQuaternion& -->
+<h3 class="fn" id="rotate-2"><a name="rotate-2"></a><span class="type">void</span> QMatrix4x4::<span class="name">rotate</span>(const <span class="type"><a href="qquaternion.html">QQuaternion</a></span> &amp;<i>quaternion</i>)</h3>
+<p>Multiples this matrix by another that rotates coordinates according to a specified <i>quaternion</i>. The <i>quaternion</i> is assumed to have been normalized.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#scale">scale</a>(), <a href="qmatrix4x4.html#translate">translate</a>(), and <a href="qquaternion.html">QQuaternion</a>.</p>
+<!-- @@@rotate -->
+<!-- $$$row[overload1]$$$rowint -->
+<h3 class="fn" id="row"><a name="row"></a><span class="type"><a href="qvector4d.html">QVector4D</a></span> QMatrix4x4::<span class="name">row</span>(<span class="type">int</span> <i>index</i>) const</h3>
+<p>Returns the elements of row <i>index</i> as a 4D vector.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#setRow">setRow</a>() and <a href="qmatrix4x4.html#column">column</a>().</p>
+<!-- @@@row -->
+<!-- $$$scale[overload1]$$$scaleconstQVector3D& -->
+<h3 class="fn" id="scale"><a name="scale"></a><span class="type">void</span> QMatrix4x4::<span class="name">scale</span>(const <span class="type"><a href="qvector3d.html">QVector3D</a></span> &amp;<i>vector</i>)</h3>
+<p>Multiplies this matrix by another that scales coordinates by the components of <i>vector</i>.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#translate">translate</a>() and <a href="qmatrix4x4.html#rotate">rotate</a>().</p>
+<!-- @@@scale -->
+<!-- $$$scale$$$scalefloatfloat -->
+<h3 class="fn" id="scale-1"><a name="scale-1"></a><span class="type">void</span> QMatrix4x4::<span class="name">scale</span>(<span class="type">float</span> <i>x</i>, <span class="type">float</span> <i>y</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Multiplies this matrix by another that scales coordinates by the components <i>x</i>, and <i>y</i>.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#translate">translate</a>() and <a href="qmatrix4x4.html#rotate">rotate</a>().</p>
+<!-- @@@scale -->
+<!-- $$$scale$$$scalefloatfloatfloat -->
+<h3 class="fn" id="scale-2"><a name="scale-2"></a><span class="type">void</span> QMatrix4x4::<span class="name">scale</span>(<span class="type">float</span> <i>x</i>, <span class="type">float</span> <i>y</i>, <span class="type">float</span> <i>z</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Multiplies this matrix by another that scales coordinates by the components <i>x</i>, <i>y</i>, and <i>z</i>.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#translate">translate</a>() and <a href="qmatrix4x4.html#rotate">rotate</a>().</p>
+<!-- @@@scale -->
+<!-- $$$scale$$$scalefloat -->
+<h3 class="fn" id="scale-3"><a name="scale-3"></a><span class="type">void</span> QMatrix4x4::<span class="name">scale</span>(<span class="type">float</span> <i>factor</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Multiplies this matrix by another that scales coordinates by the given <i>factor</i>.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#translate">translate</a>() and <a href="qmatrix4x4.html#rotate">rotate</a>().</p>
+<!-- @@@scale -->
+<!-- $$$setColumn[overload1]$$$setColumnintconstQVector4D& -->
+<h3 class="fn" id="setColumn"><a name="setColumn"></a><span class="type">void</span> QMatrix4x4::<span class="name">setColumn</span>(<span class="type">int</span> <i>index</i>, const <span class="type"><a href="qvector4d.html">QVector4D</a></span> &amp;<i>value</i>)</h3>
+<p>Sets the elements of column <i>index</i> to the components of <i>value</i>.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#column">column</a>() and <a href="qmatrix4x4.html#setRow">setRow</a>().</p>
+<!-- @@@setColumn -->
+<!-- $$$setRow[overload1]$$$setRowintconstQVector4D& -->
+<h3 class="fn" id="setRow"><a name="setRow"></a><span class="type">void</span> QMatrix4x4::<span class="name">setRow</span>(<span class="type">int</span> <i>index</i>, const <span class="type"><a href="qvector4d.html">QVector4D</a></span> &amp;<i>value</i>)</h3>
+<p>Sets the elements of row <i>index</i> to the components of <i>value</i>.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#row">row</a>() and <a href="qmatrix4x4.html#setColumn">setColumn</a>().</p>
+<!-- @@@setRow -->
+<!-- $$$setToIdentity[overload1]$$$setToIdentity -->
+<h3 class="fn" id="setToIdentity"><a name="setToIdentity"></a><span class="type">void</span> QMatrix4x4::<span class="name">setToIdentity</span>()</h3>
+<p>Sets this matrix to the identity.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#isIdentity">isIdentity</a>().</p>
+<!-- @@@setToIdentity -->
+<!-- $$$toAffine[overload1]$$$toAffine -->
+<h3 class="fn" id="toAffine"><a name="toAffine"></a><span class="type"><a href="qmatrix.html">QMatrix</a></span> QMatrix4x4::<span class="name">toAffine</span>() const</h3>
+<p>Returns the conventional Qt 2D affine transformation matrix that corresponds to this matrix. It is assumed that this matrix only contains 2D affine transformation elements.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#toTransform">toTransform</a>().</p>
+<!-- @@@toAffine -->
+<!-- $$$toGenericMatrix[overload1]$$$toGenericMatrix -->
+<h3 class="fn" id="toGenericMatrix"><a name="toGenericMatrix"></a><span class="type"><a href="qgenericmatrix.html">QGenericMatrix</a></span>&lt;<span class="type">N</span>, <span class="type">M</span>, <span class="type">float</span>&gt; QMatrix4x4::<span class="name">toGenericMatrix</span>() const</h3>
+<p>Constructs a NxM generic matrix from the left-most N columns and top-most M rows of this 4x4 matrix. If N or M is greater than 4, then the remaining elements are filled with elements from the identity matrix.</p>
+<!-- @@@toGenericMatrix -->
+<!-- $$$toTransform[overload1]$$$toTransform -->
+<h3 class="fn" id="toTransform"><a name="toTransform"></a><span class="type"><a href="qtransform.html">QTransform</a></span> QMatrix4x4::<span class="name">toTransform</span>() const</h3>
+<p>Returns the conventional Qt 2D transformation matrix that corresponds to this matrix.</p>
+<p>The returned <a href="qtransform.html">QTransform</a> is formed by simply dropping the third row and third column of the <a href="qmatrix4x4.html">QMatrix4x4</a>. This is suitable for implementing orthographic projections where the z co-ordinate should be dropped rather than projected.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#toAffine">toAffine</a>().</p>
+<!-- @@@toTransform -->
+<!-- $$$toTransform$$$toTransformfloat -->
+<h3 class="fn" id="toTransform-1"><a name="toTransform-1"></a><span class="type"><a href="qtransform.html">QTransform</a></span> QMatrix4x4::<span class="name">toTransform</span>(<span class="type">float</span> <i>distanceToPlane</i>) const</h3>
+<p>Returns the conventional Qt 2D transformation matrix that corresponds to this matrix.</p>
+<p>If <i>distanceToPlane</i> is non-zero, it indicates a projection factor to use to adjust for the z co-ordinate. The value of 1024 corresponds to the projection factor used by <a href="qtransform.html#rotate">QTransform::rotate</a>() for the x and y axes.</p>
+<p>If <i>distanceToPlane</i> is zero, then the returned <a href="qtransform.html">QTransform</a> is formed by simply dropping the third row and third column of the <a href="qmatrix4x4.html">QMatrix4x4</a>. This is suitable for implementing orthographic projections where the z co-ordinate should be dropped rather than projected.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#toAffine">toAffine</a>().</p>
+<!-- @@@toTransform -->
+<!-- $$$translate[overload1]$$$translateconstQVector3D& -->
+<h3 class="fn" id="translate"><a name="translate"></a><span class="type">void</span> QMatrix4x4::<span class="name">translate</span>(const <span class="type"><a href="qvector3d.html">QVector3D</a></span> &amp;<i>vector</i>)</h3>
+<p>Multiplies this matrix by another that translates coordinates by the components of <i>vector</i>.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#scale">scale</a>() and <a href="qmatrix4x4.html#rotate">rotate</a>().</p>
+<!-- @@@translate -->
+<!-- $$$translate$$$translatefloatfloat -->
+<h3 class="fn" id="translate-1"><a name="translate-1"></a><span class="type">void</span> QMatrix4x4::<span class="name">translate</span>(<span class="type">float</span> <i>x</i>, <span class="type">float</span> <i>y</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Multiplies this matrix by another that translates coordinates by the components <i>x</i>, and <i>y</i>.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#scale">scale</a>() and <a href="qmatrix4x4.html#rotate">rotate</a>().</p>
+<!-- @@@translate -->
+<!-- $$$translate$$$translatefloatfloatfloat -->
+<h3 class="fn" id="translate-2"><a name="translate-2"></a><span class="type">void</span> QMatrix4x4::<span class="name">translate</span>(<span class="type">float</span> <i>x</i>, <span class="type">float</span> <i>y</i>, <span class="type">float</span> <i>z</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Multiplies this matrix by another that translates coordinates by the components <i>x</i>, <i>y</i>, and <i>z</i>.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#scale">scale</a>() and <a href="qmatrix4x4.html#rotate">rotate</a>().</p>
+<!-- @@@translate -->
+<!-- $$$transposed[overload1]$$$transposed -->
+<h3 class="fn" id="transposed"><a name="transposed"></a><span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> QMatrix4x4::<span class="name">transposed</span>() const</h3>
+<p>Returns this matrix, transposed about its diagonal.</p>
+<!-- @@@transposed -->
+<!-- $$$viewport[overload1]$$$viewportfloatfloatfloatfloatfloatfloat -->
+<h3 class="fn" id="viewport"><a name="viewport"></a><span class="type">void</span> QMatrix4x4::<span class="name">viewport</span>(<span class="type">float</span> <i>left</i>, <span class="type">float</span> <i>bottom</i>, <span class="type">float</span> <i>width</i>, <span class="type">float</span> <i>height</i>, <span class="type">float</span> <i>nearPlane</i> = 0.0f, <span class="type">float</span> <i>farPlane</i> = 1.0f)</h3>
+<p>Multiplies this matrix by another that performs the scale and bias transformation used by OpenGL to transform from normalized device coordinates (NDC) to viewport (window) coordinates. That is it maps points from the cube ranging over [-1, 1] in each dimension to the viewport with it's near-lower-left corner at (<i>left</i>, <i>bottom</i>, <i>nearPlane</i>) and with size (<i>width</i>, <i>height</i>, <i>farPlane</i> - <i>nearPlane</i>).</p>
+<p>This matches the transform used by the fixed function OpenGL viewport transform controlled by the functions glViewport() and glDepthRange().</p>
+<!-- @@@viewport -->
+<!-- $$$viewport$$$viewportconstQRectF& -->
+<h3 class="fn" id="viewport-1"><a name="viewport-1"></a><span class="type">void</span> QMatrix4x4::<span class="name">viewport</span>(const <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> &amp;<i>rect</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Sets up viewport transform for viewport bounded by <i>rect</i> and with near and far set to 0 and 1 respectively.</p>
+<!-- @@@viewport -->
+<!-- $$$operator QVariant[overload1]$$$operator QVariant -->
+<h3 class="fn" id="operator-QVariant"><a name="operator-QVariant"></a><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QMatrix4x4::<span class="name">operator QVariant</span>() const</h3>
+<p>Returns the matrix as a <a href="../qtcore/qvariant.html">QVariant</a>.</p>
+<!-- @@@operator QVariant -->
+<!-- $$$operator!=[overload1]$$$operator!=constQMatrix4x4& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> QMatrix4x4::<span class="name">operator!=</span>(const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns <code>true</code> if this matrix is not identical to <i>other</i>; false otherwise. This operator uses an exact floating-point comparison.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator()[overload1]$$$operator()intint -->
+<h3 class="fn" id="operator-28-29"><a name="operator-28-29"></a>const <span class="type">float</span> &amp;QMatrix4x4::<span class="name">operator()</span>(<span class="type">int</span> <i>row</i>, <span class="type">int</span> <i>column</i>) const</h3>
+<p>Returns a constant reference to the element at position (<i>row</i>, <i>column</i>) in this matrix.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#column">column</a>() and <a href="qmatrix4x4.html#row">row</a>().</p>
+<!-- @@@operator() -->
+<!-- $$$operator()$$$operator()intint -->
+<h3 class="fn" id="operator-28-29-1"><a name="operator-28-29-1"></a><span class="type">float</span> &amp;QMatrix4x4::<span class="name">operator()</span>(<span class="type">int</span> <i>row</i>, <span class="type">int</span> <i>column</i>)</h3>
+<p>Returns a reference to the element at position (<i>row</i>, <i>column</i>) in this matrix so that the element can be assigned to.</p>
+<p><b>See also </b><a href="qmatrix4x4.html#optimize">optimize</a>(), <a href="qmatrix4x4.html#setColumn">setColumn</a>(), and <a href="qmatrix4x4.html#setRow">setRow</a>().</p>
+<!-- @@@operator() -->
+<!-- $$$operator*=[overload1]$$$operator*=constQMatrix4x4& -->
+<h3 class="fn" id="operator-2a-eq"><a name="operator-2a-eq"></a><span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;QMatrix4x4::<span class="name">operator*=</span>(const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>other</i>)</h3>
+<p>Multiplies the contents of <i>other</i> by this matrix.</p>
+<!-- @@@operator*= -->
+<!-- $$$operator*=$$$operator*=float -->
+<h3 class="fn" id="operator-2a-eq-1"><a name="operator-2a-eq-1"></a><span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;QMatrix4x4::<span class="name">operator*=</span>(<span class="type">float</span> <i>factor</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Multiplies all elements of this matrix by <i>factor</i>.</p>
+<!-- @@@operator*= -->
+<!-- $$$operator+=[overload1]$$$operator+=constQMatrix4x4& -->
+<h3 class="fn" id="operator-2b-eq"><a name="operator-2b-eq"></a><span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;QMatrix4x4::<span class="name">operator+=</span>(const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>other</i>)</h3>
+<p>Adds the contents of <i>other</i> to this matrix.</p>
+<!-- @@@operator+= -->
+<!-- $$$operator-=[overload1]$$$operator-=constQMatrix4x4& -->
+<h3 class="fn" id="operator--eq"><a name="operator--eq"></a><span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;QMatrix4x4::<span class="name">operator-=</span>(const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>other</i>)</h3>
+<p>Subtracts the contents of <i>other</i> from this matrix.</p>
+<!-- @@@operator-= -->
+<!-- $$$operator/=[overload1]$$$operator/=float -->
+<h3 class="fn" id="operator-2f-eq"><a name="operator-2f-eq"></a><span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;QMatrix4x4::<span class="name">operator/=</span>(<span class="type">float</span> <i>divisor</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Divides all elements of this matrix by <i>divisor</i>.</p>
+<!-- @@@operator/= -->
+<!-- $$$operator==[overload1]$$$operator==constQMatrix4x4& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> QMatrix4x4::<span class="name">operator==</span>(const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns <code>true</code> if this matrix is identical to <i>other</i>; false otherwise. This operator uses an exact floating-point comparison.</p>
+<!-- @@@operator== -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$qFuzzyCompare[overload1]$$$qFuzzyCompareconstQMatrix4x4&constQMatrix4x4& -->
+<h3 class="fn" id="qFuzzyCompare"><a name="qFuzzyCompare"></a><span class="type">bool</span> <span class="name">qFuzzyCompare</span>(const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>m1</i>, const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>m2</i>)</h3>
+<p>Returns <code>true</code> if <i>m1</i> and <i>m2</i> are equal, allowing for a small fuzziness factor for floating-point comparisons; false otherwise.</p>
+<!-- @@@qFuzzyCompare -->
+<!-- $$$operator*[overload1]$$$operator*constQMatrix4x4&constQMatrix4x4& -->
+<h3 class="fn" id="operator-2a"><a name="operator-2a"></a><span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> <span class="name">operator*</span>(const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>m1</i>, const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>m2</i>)</h3>
+<p>Returns the product of <i>m1</i> and <i>m2</i>.</p>
+<!-- @@@operator* -->
+<!-- $$$operator*$$$operator*constQPoint&constQMatrix4x4& -->
+<h3 class="fn" id="operator-2a-1"><a name="operator-2a-1"></a><span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <span class="name">operator*</span>(const <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> &amp;<i>point</i>, const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>matrix</i>)</h3>
+<p>Returns the result of transforming <i>point</i> according to <i>matrix</i>, with the matrix applied post-point.</p>
+<!-- @@@operator* -->
+<!-- $$$operator*$$$operator*constQPointF&constQMatrix4x4& -->
+<h3 class="fn" id="operator-2a-2"><a name="operator-2a-2"></a><span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> <span class="name">operator*</span>(const <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> &amp;<i>point</i>, const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>matrix</i>)</h3>
+<p>Returns the result of transforming <i>point</i> according to <i>matrix</i>, with the matrix applied post-point.</p>
+<!-- @@@operator* -->
+<!-- $$$operator*$$$operator*constQMatrix4x4&constQPoint& -->
+<h3 class="fn" id="operator-2a-3"><a name="operator-2a-3"></a><span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <span class="name">operator*</span>(const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>matrix</i>, const <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> &amp;<i>point</i>)</h3>
+<p>Returns the result of transforming <i>point</i> according to <i>matrix</i>, with the matrix applied pre-point.</p>
+<!-- @@@operator* -->
+<!-- $$$operator*$$$operator*constQVector4D&constQMatrix4x4& -->
+<h3 class="fn" id="operator-2a-3"><a name="operator-2a-3"></a><span class="type"><a href="qvector4d.html">QVector4D</a></span> <span class="name">operator*</span>(const <span class="type"><a href="qvector4d.html">QVector4D</a></span> &amp;<i>vector</i>, const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>matrix</i>)</h3>
+<p>Returns the result of transforming <i>vector</i> according to <i>matrix</i>, with the matrix applied post-vector.</p>
+<!-- @@@operator* -->
+<!-- $$$operator*$$$operator*constQVector3D&constQMatrix4x4& -->
+<h3 class="fn" id="operator-2a-3"><a name="operator-2a-3"></a><span class="type"><a href="qvector3d.html">QVector3D</a></span> <span class="name">operator*</span>(const <span class="type"><a href="qvector3d.html">QVector3D</a></span> &amp;<i>vector</i>, const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>matrix</i>)</h3>
+<p>Returns the result of transforming <i>vector</i> according to <i>matrix</i>, with the matrix applied post-vector.</p>
+<!-- @@@operator* -->
+<!-- $$$operator*$$$operator*constQMatrix4x4&constQPointF& -->
+<h3 class="fn" id="operator-2a-4"><a name="operator-2a-4"></a><span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> <span class="name">operator*</span>(const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>matrix</i>, const <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> &amp;<i>point</i>)</h3>
+<p>Returns the result of transforming <i>point</i> according to <i>matrix</i>, with the matrix applied pre-point.</p>
+<!-- @@@operator* -->
+<!-- $$$operator*$$$operator*constQMatrix4x4&constQVector4D& -->
+<h3 class="fn" id="operator-2a-4"><a name="operator-2a-4"></a><span class="type"><a href="qvector4d.html">QVector4D</a></span> <span class="name">operator*</span>(const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>matrix</i>, const <span class="type"><a href="qvector4d.html">QVector4D</a></span> &amp;<i>vector</i>)</h3>
+<p>Returns the result of transforming <i>vector</i> according to <i>matrix</i>, with the matrix applied pre-vector.</p>
+<!-- @@@operator* -->
+<!-- $$$operator*$$$operator*constQMatrix4x4&constQVector3D& -->
+<h3 class="fn" id="operator-2a-4"><a name="operator-2a-4"></a><span class="type"><a href="qvector3d.html">QVector3D</a></span> <span class="name">operator*</span>(const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>matrix</i>, const <span class="type"><a href="qvector3d.html">QVector3D</a></span> &amp;<i>vector</i>)</h3>
+<p>Returns the result of transforming <i>vector</i> according to <i>matrix</i>, with the matrix applied pre-vector.</p>
+<!-- @@@operator* -->
+<!-- $$$operator*$$$operator*floatconstQMatrix4x4& -->
+<h3 class="fn" id="operator-2a-5"><a name="operator-2a-5"></a><span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> <span class="name">operator*</span>(<span class="type">float</span> <i>factor</i>, const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>matrix</i>)</h3>
+<p>Returns the result of multiplying all elements of <i>matrix</i> by <i>factor</i>.</p>
+<!-- @@@operator* -->
+<!-- $$$operator*$$$operator*constQMatrix4x4&float -->
+<h3 class="fn" id="operator-2a-6"><a name="operator-2a-6"></a><span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> <span class="name">operator*</span>(const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>matrix</i>, <span class="type">float</span> <i>factor</i>)</h3>
+<p>Returns the result of multiplying all elements of <i>matrix</i> by <i>factor</i>.</p>
+<!-- @@@operator* -->
+<!-- $$$operator+[overload1]$$$operator+constQMatrix4x4&constQMatrix4x4& -->
+<h3 class="fn" id="operator-2b"><a name="operator-2b"></a><span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> <span class="name">operator+</span>(const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>m1</i>, const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>m2</i>)</h3>
+<p>Returns the sum of <i>m1</i> and <i>m2</i>.</p>
+<!-- @@@operator+ -->
+<!-- $$$operator-[overload1]$$$operator-constQMatrix4x4&constQMatrix4x4& -->
+<h3 class="fn" id="operator-"><a name="operator-"></a><span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> <span class="name">operator-</span>(const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>m1</i>, const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>m2</i>)</h3>
+<p>Returns the difference of <i>m1</i> and <i>m2</i>.</p>
+<!-- @@@operator- -->
+<!-- $$$operator-$$$operator-constQMatrix4x4& -->
+<h3 class="fn" id="operator--1"><a name="operator--1"></a><span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> <span class="name">operator-</span>(const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>matrix</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns the negation of <i>matrix</i>.</p>
+<!-- @@@operator- -->
+<!-- $$$operator/[overload1]$$$operator/constQMatrix4x4&float -->
+<h3 class="fn" id="operator-2f"><a name="operator-2f"></a><span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> <span class="name">operator/</span>(const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>matrix</i>, <span class="type">float</span> <i>divisor</i>)</h3>
+<p>Returns the result of dividing all elements of <i>matrix</i> by <i>divisor</i>.</p>
+<!-- @@@operator/ -->
+<!-- $$$operator<<[overload1]$$$operator<<QDataStream&constQMatrix4x4& -->
+<h3 class="fn" id="operator-lt-lt"><a name="operator-lt-lt"></a><span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> &amp;<span class="name">operator&lt;&lt;</span>(<span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> &amp;<i>stream</i>, const <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>matrix</i>)</h3>
+<p>Writes the given <i>matrix</i> to the given <i>stream</i> and returns a reference to the stream.</p>
+<p><b>See also </b><a href="../qtcore/datastreamformat.html">Serializing Qt Data Types</a>.</p>
+<!-- @@@operator<< -->
+<!-- $$$operator>>[overload1]$$$operator>>QDataStream&QMatrix4x4& -->
+<h3 class="fn" id="operator-gt-gt"><a name="operator-gt-gt"></a><span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> &amp;<span class="name">operator&gt;&gt;</span>(<span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> &amp;<i>stream</i>, <span class="type"><a href="qmatrix4x4.html#QMatrix4x4">QMatrix4x4</a></span> &amp;<i>matrix</i>)</h3>
+<p>Reads a 4x4 matrix from the given <i>stream</i> into the given <i>matrix</i> and returns a reference to the stream.</p>
+<p><b>See also </b><a href="../qtcore/datastreamformat.html">Serializing Qt Data Types</a>.</p>
+<!-- @@@operator>> -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

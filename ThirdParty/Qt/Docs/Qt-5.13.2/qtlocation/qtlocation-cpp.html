@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtlocation-cpp.qdoc -->
+  <title>Qt Location C++ API | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td >Qt Location C++ API</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#geoservice-provider-classes">Geoservice Provider Classes</a></li>
+<li class="level1"><a href="#maps-and-navigation-classes">Maps and Navigation Classes</a></li>
+<li class="level1"><a href="#places-classes">Places Classes</a></li>
+<li class="level1"><a href="#geoservices-and-positioning-plugin-classes">Geoservices and Positioning Plugin Classes</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Location C++ API</h1>
+<span class="subtitle"></span>
+<!-- $$$qtlocation-cpp.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The Location API provides a library for mapping, navigation and place information.</p>
+<p>The Qt Location API provides the developer with a set of functions to interact with maps, navigational data and places of interest. This is particularly useful when associated with current position information which can be retrieved via the <a href="../qtpositioning/qtpositioning-qmlmodule.html">QtPositioning</a> module.</p>
+<p>With the Maps API we can associate a position with a map in various formats supplied by a backend. Then the Places API could be used to populate places on the Map or even specify the current position as a place of interest and associate it with an icon, contact details and other information.</p>
+<p>The following table provides links to more detailed information on sections of the Qt Location C++ API.</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><a href="location-maps-cpp.html">Maps and Navigation</a></td><td >Displaying maps and finding routes.</td></tr>
+<tr valign="top" class="even"><td ><a href="location-places-cpp.html">Places</a></td><td >Searching for and managing points of interest.</td></tr>
+<tr valign="top" class="odd"><td ><a href="qtlocation-geoservices.html">Geoservices Plugin Implementation</a></td><td >Implement new geoservices and positioning plugins.</td></tr>
+</table></div>
+<a name="geoservice-provider-classes"></a>
+<h2 id="geoservice-provider-classes">Geoservice Provider Classes</h2>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qgeoserviceprovider.html">QGeoServiceProvider</a></p></td><td class="tblDescr"><p>Aggregates access to services which provide geographical information</p></td></tr>
+</table></div>
+<a name="maps-and-navigation-classes"></a>
+<h2 id="maps-and-navigation-classes">Maps and Navigation Classes</h2>
+<p>Currently it is not possible to interact with maps data via C++. The only available interface is the <a href="location-maps-qml.html">Maps and Navigation (QML)</a> API.</p>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qgeoroute.html">QGeoRoute</a></p></td><td class="tblDescr"><p>Represents a route between two points</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qgeorouteleg.html">QGeoRouteLeg</a></p></td><td class="tblDescr"><p>Represents a leg of a route, that is the portion of a route between one waypoint and the next. This is a subclass of QGeoRoute, exposing route leg specific API</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qgeoroutereply.html">QGeoRouteReply</a></p></td><td class="tblDescr"><p>Manages an operation started by an instance of QGeoRoutingManager</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qgeomaneuver.html">QGeoManeuver</a></p></td><td class="tblDescr"><p>Represents the information relevant to the point at which two QGeoRouteSegments meet</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qgeorouterequest.html">QGeoRouteRequest</a></p></td><td class="tblDescr"><p>Represents the parameters and restrictions which define a request for routing information</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qgeoroutesegment.html">QGeoRouteSegment</a></p></td><td class="tblDescr"><p>Represents a segment of a route</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qgeoroutingmanager.html">QGeoRoutingManager</a></p></td><td class="tblDescr"><p>Support for geographic routing operations</p></td></tr>
+</table></div>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qgeocodereply.html">QGeoCodeReply</a></p></td><td class="tblDescr"><p>Manages an operation started by an instance of QGeoCodingManager</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qgeocodingmanager.html">QGeoCodingManager</a></p></td><td class="tblDescr"><p>Support for geocoding operations</p></td></tr>
+</table></div>
+<a name="places-classes"></a>
+<h2 id="places-classes">Places Classes</h2>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplace.html">QPlace</a></p></td><td class="tblDescr"><p>Represents a set of data about a place</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplacecontentreply.html">QPlaceContentReply</a></p></td><td class="tblDescr"><p>Manages a content retrieval operation started by an instance of QPlaceManager</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplacedetailsreply.html">QPlaceDetailsReply</a></p></td><td class="tblDescr"><p>Manages a place details fetch operation started by an instance of QPlaceManager</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplaceicon.html">QPlaceIcon</a></p></td><td class="tblDescr"><p>Represents an icon</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplaceidreply.html">QPlaceIdReply</a></p></td><td class="tblDescr"><p>Manages operations which return an identifier such as saving and removal operations of places and categories</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplacemanager.html">QPlaceManager</a></p></td><td class="tblDescr"><p>The interface which allows clients to access places stored in a particular backend</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplaceattribute.html">QPlaceAttribute</a></p></td><td class="tblDescr"><p>Represents generic attribute information about a place</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplacecategory.html">QPlaceCategory</a></p></td><td class="tblDescr"><p>Represents a category that a QPlace can be associated with</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplacecontactdetail.html">QPlaceContactDetail</a></p></td><td class="tblDescr"><p>Represents a contact detail such as a phone number or website url</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplacecontent.html">QPlaceContent</a></p></td><td class="tblDescr"><p>Serves as the base class for rich content types</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplacecontentrequest.html">QPlaceContentRequest</a></p></td><td class="tblDescr"><p>Represents the parameters of a content request</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplaceeditorial.html">QPlaceEditorial</a></p></td><td class="tblDescr"><p>Represents a publisher's article describing a place</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplaceimage.html">QPlaceImage</a></p></td><td class="tblDescr"><p>Represents a reference to an image</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplacemanagerengine.html">QPlaceManagerEngine</a></p></td><td class="tblDescr"><p>Interface for implementers of QGeoServiceProvider plugins who want to provide access to place functionality</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplacematchreply.html">QPlaceMatchReply</a></p></td><td class="tblDescr"><p>Manages a place matching operation started by an instance of QPlaceManager</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplacematchrequest.html">QPlaceMatchRequest</a></p></td><td class="tblDescr"><p>Used to find places from one manager that match those from another. It represents a set of request parameters</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplaceproposedsearchresult.html">QPlaceProposedSearchResult</a></p></td><td class="tblDescr"><p>Represents a search result containing a proposed search</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplaceratings.html">QPlaceRatings</a></p></td><td class="tblDescr"><p>Holds rating information about a place</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplacereply.html">QPlaceReply</a></p></td><td class="tblDescr"><p>Manages an operation started by an instance of QPlaceManager and serves as a base class for more specialized replies</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplaceresult.html">QPlaceResult</a></p></td><td class="tblDescr"><p>Represents a search result containing a place</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplacereview.html">QPlaceReview</a></p></td><td class="tblDescr"><p>Represents a review of a place</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplacesearchreply.html">QPlaceSearchReply</a></p></td><td class="tblDescr"><p>Manages a place search operation started by an instance of QPlaceManager</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplacesearchrequest.html">QPlaceSearchRequest</a></p></td><td class="tblDescr"><p>Represents the set of parameters for a search request</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplacesearchresult.html">QPlaceSearchResult</a></p></td><td class="tblDescr"><p>The base class for search results</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplacesearchsuggestionreply.html">QPlaceSearchSuggestionReply</a></p></td><td class="tblDescr"><p>Manages a search suggestion operation started by an instance of QPlaceManager</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplacesupplier.html">QPlaceSupplier</a></p></td><td class="tblDescr"><p>Represents a supplier of a place or content associated with a place</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qplaceuser.html">QPlaceUser</a></p></td><td class="tblDescr"><p>Represents an individual user</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtpositioning/qgeoaddress.html">QGeoAddress</a></p></td><td class="tblDescr"><p>Represents an address of a QGeoLocation</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtpositioning/qgeolocation.html">QGeoLocation</a></p></td><td class="tblDescr"><p>Represents basic information about a location</p></td></tr>
+</table></div>
+<a name="geoservices-and-positioning-plugin-classes"></a>
+<h2 id="geoservices-and-positioning-plugin-classes">Geoservices and Positioning Plugin Classes</h2>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qgeocodingmanagerengine.html">QGeoCodingManagerEngine</a></p></td><td class="tblDescr"><p>Interface and convenience methods to implementers of QGeoServiceProvider plugins who want to provide support for geocoding operations</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qgeoroutingmanagerengine.html">QGeoRoutingManagerEngine</a></p></td><td class="tblDescr"><p>Interface and convenience methods to implementers of QGeoServiceProvider plugins who want to provide access to geographic routing information</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qgeoserviceproviderfactoryv2.html">QGeoServiceProviderFactoryV2</a></p></td><td class="tblDescr"><p>Factory class used as the plugin interface for services related to geographical information</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qplacemanagerengine.html">QPlaceManagerEngine</a></p></td><td class="tblDescr"><p>Interface for implementers of QGeoServiceProvider plugins who want to provide access to place functionality</p></td></tr>
+</table></div>
+</div>
+<!-- @@@qtlocation-cpp.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

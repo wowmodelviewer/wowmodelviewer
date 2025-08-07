@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qgamepadkeynavigation.cpp -->
+  <title>QGamepadKeyNavigation Class | Qt Gamepad 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgamepad-index.html">Qt Gamepad</a></td><td ><a href="qtgamepad-module.html">C++ Classes</a></td><td >QGamepadKeyNavigation</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgamepad-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QGamepadKeyNavigation Class</h1>
+<!-- $$$QGamepadKeyNavigation-brief -->
+<p>Provides support for keyboard events triggered by gamepads. <a href="#details">More...</a></p>
+<!-- @@@QGamepadKeyNavigation -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QGamepadKeyNavigation&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gamepad</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><ul>
+<li><a href="qgamepadkeynavigation-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#QGamepadKeyNavigation">QGamepadKeyNavigation</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#active">active</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::Key </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonAKey">buttonAKey</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::Key </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonBKey">buttonBKey</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::Key </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonGuideKey">buttonGuideKey</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::Key </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonL1Key">buttonL1Key</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::Key </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonL2Key">buttonL2Key</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::Key </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonL3Key">buttonL3Key</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::Key </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonR1Key">buttonR1Key</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::Key </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonR2Key">buttonR2Key</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::Key </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonR3Key">buttonR3Key</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::Key </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonSelectKey">buttonSelectKey</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::Key </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonStartKey">buttonStartKey</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::Key </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonXKey">buttonXKey</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::Key </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonYKey">buttonYKey</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::Key </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#downKey">downKey</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGamepad *</td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#gamepad">gamepad</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::Key </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#leftKey">leftKey</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::Key </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#rightKey">rightKey</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt::Key </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#upKey">upKey</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#setActive">setActive</a></b>(bool <i>isActive</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#setButtonAKey">setButtonAKey</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#setButtonBKey">setButtonBKey</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#setButtonGuideKey">setButtonGuideKey</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#setButtonL1Key">setButtonL1Key</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#setButtonL2Key">setButtonL2Key</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#setButtonL3Key">setButtonL3Key</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#setButtonR1Key">setButtonR1Key</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#setButtonR2Key">setButtonR2Key</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#setButtonR3Key">setButtonR3Key</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#setButtonSelectKey">setButtonSelectKey</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#setButtonStartKey">setButtonStartKey</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#setButtonXKey">setButtonXKey</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#setButtonYKey">setButtonYKey</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#setDownKey">setDownKey</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#setGamepad">setGamepad</a></b>(QGamepad *<i>gamepad</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#setLeftKey">setLeftKey</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#setRightKey">setRightKey</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#setUpKey">setUpKey</a></b>(Qt::Key <i>key</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#active-prop">activeChanged</a></b>(bool <i>isActive</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonAKey-prop">buttonAKeyChanged</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonBKey-prop">buttonBKeyChanged</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonGuideKey-prop">buttonGuideKeyChanged</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonL1Key-prop">buttonL1KeyChanged</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonL2Key-prop">buttonL2KeyChanged</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonL3Key-prop">buttonL3KeyChanged</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonR1Key-prop">buttonR1KeyChanged</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonR2Key-prop">buttonR2KeyChanged</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonR3Key-prop">buttonR3KeyChanged</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonSelectKey-prop">buttonSelectKeyChanged</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonStartKey-prop">buttonStartKeyChanged</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonXKey-prop">buttonXKeyChanged</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#buttonYKey-prop">buttonYKeyChanged</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#downKey-prop">downKeyChanged</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#gamepad-prop">gamepadChanged</a></b>(QGamepad *<i>gamepad</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#leftKey-prop">leftKeyChanged</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#rightKey-prop">rightKeyChanged</a></b>(Qt::Key <i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgamepadkeynavigation.html#upKey-prop">upKeyChanged</a></b>(Qt::Key <i>key</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QGamepadKeyNavigation-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qgamepadkeynavigation.html">QGamepadKeyNavigation</a> provides support for keyboard events triggered by gamepads.</p>
+</div>
+<!-- @@@QGamepadKeyNavigation -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QGamepadKeyNavigation[overload1]$$$QGamepadKeyNavigationQObject* -->
+<h3 class="fn" id="QGamepadKeyNavigation"><a name="QGamepadKeyNavigation"></a>QGamepadKeyNavigation::<span class="name">QGamepadKeyNavigation</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a QGamepadNavigation object with the given <i>parent</i>.</p>
+<!-- @@@QGamepadKeyNavigation -->
+<!-- $$$setActive -->
+<h3 class="fn" id="setActive"><a name="setActive"></a><code>[slot] </code><span class="type">void</span> QGamepadKeyNavigation::<span class="name">setActive</span>(<span class="type">bool</span> <i>isActive</i>)</h3>
+<p>Activates key navigation if <i>isActive</i> is true, disables it otherwise.</p>
+<p><b>Note:</b> Setter function for property <a href="">active</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#active">active</a>().</p>
+<!-- @@@setActive -->
+<!-- $$$setButtonAKey -->
+<h3 class="fn" id="setButtonAKey"><a name="setButtonAKey"></a><code>[slot] </code><span class="type">void</span> QGamepadKeyNavigation::<span class="name">setButtonAKey</span>(<span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>)</h3>
+<p>* Sets the mapping of the A button with the keycode * specified in <i>key</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">buttonAKey</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#buttonAKey">buttonAKey</a>().</p>
+<!-- @@@setButtonAKey -->
+<!-- $$$setButtonBKey -->
+<h3 class="fn" id="setButtonBKey"><a name="setButtonBKey"></a><code>[slot] </code><span class="type">void</span> QGamepadKeyNavigation::<span class="name">setButtonBKey</span>(<span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>)</h3>
+<p>* Sets the mapping of the B button with the keycode * specified in <i>key</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">buttonBKey</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#buttonBKey">buttonBKey</a>().</p>
+<!-- @@@setButtonBKey -->
+<!-- $$$setButtonGuideKey -->
+<h3 class="fn" id="setButtonGuideKey"><a name="setButtonGuideKey"></a><code>[slot] </code><span class="type">void</span> QGamepadKeyNavigation::<span class="name">setButtonGuideKey</span>(<span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>)</h3>
+<p>* Sets the mapping of the Guide button with the keycode * specified in <i>key</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">buttonGuideKey</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#buttonGuideKey">buttonGuideKey</a>().</p>
+<!-- @@@setButtonGuideKey -->
+<!-- $$$setButtonL1Key -->
+<h3 class="fn" id="setButtonL1Key"><a name="setButtonL1Key"></a><code>[slot] </code><span class="type">void</span> QGamepadKeyNavigation::<span class="name">setButtonL1Key</span>(<span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>)</h3>
+<p>* Sets the mapping of the left shoulder button with the * keycode specified in <i>key</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">buttonL1Key</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#buttonL1Key">buttonL1Key</a>().</p>
+<!-- @@@setButtonL1Key -->
+<!-- $$$setButtonL2Key -->
+<h3 class="fn" id="setButtonL2Key"><a name="setButtonL2Key"></a><code>[slot] </code><span class="type">void</span> QGamepadKeyNavigation::<span class="name">setButtonL2Key</span>(<span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>)</h3>
+<p>* Sets the mapping of the left trigger button with the * keycode specified in <i>key</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">buttonL2Key</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#buttonL2Key">buttonL2Key</a>().</p>
+<!-- @@@setButtonL2Key -->
+<!-- $$$setButtonL3Key -->
+<h3 class="fn" id="setButtonL3Key"><a name="setButtonL3Key"></a><code>[slot] </code><span class="type">void</span> QGamepadKeyNavigation::<span class="name">setButtonL3Key</span>(<span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>)</h3>
+<p>* Sets the mapping of the left stick button with the * keycode specified in <i>key</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">buttonL3Key</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#buttonL3Key">buttonL3Key</a>().</p>
+<!-- @@@setButtonL3Key -->
+<!-- $$$setButtonR1Key -->
+<h3 class="fn" id="setButtonR1Key"><a name="setButtonR1Key"></a><code>[slot] </code><span class="type">void</span> QGamepadKeyNavigation::<span class="name">setButtonR1Key</span>(<span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>)</h3>
+<p>* Sets the mapping of the right shoulder button with the * keycode specified in <i>key</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">buttonR1Key</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#buttonR1Key">buttonR1Key</a>().</p>
+<!-- @@@setButtonR1Key -->
+<!-- $$$setButtonR2Key -->
+<h3 class="fn" id="setButtonR2Key"><a name="setButtonR2Key"></a><code>[slot] </code><span class="type">void</span> QGamepadKeyNavigation::<span class="name">setButtonR2Key</span>(<span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>)</h3>
+<p>* Sets the mapping of the right trigger button with the * keycode specified in <i>key</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">buttonR2Key</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#buttonR2Key">buttonR2Key</a>().</p>
+<!-- @@@setButtonR2Key -->
+<!-- $$$setButtonR3Key -->
+<h3 class="fn" id="setButtonR3Key"><a name="setButtonR3Key"></a><code>[slot] </code><span class="type">void</span> QGamepadKeyNavigation::<span class="name">setButtonR3Key</span>(<span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>)</h3>
+<p>* Sets the mapping of the right stick button with the * keycode specified in <i>key</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">buttonR3Key</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#buttonR3Key">buttonR3Key</a>().</p>
+<!-- @@@setButtonR3Key -->
+<!-- $$$setButtonSelectKey -->
+<h3 class="fn" id="setButtonSelectKey"><a name="setButtonSelectKey"></a><code>[slot] </code><span class="type">void</span> QGamepadKeyNavigation::<span class="name">setButtonSelectKey</span>(<span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>)</h3>
+<p>* Sets the mapping of the Select button with the * keycode specified in <i>key</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">buttonSelectKey</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#buttonSelectKey">buttonSelectKey</a>().</p>
+<!-- @@@setButtonSelectKey -->
+<!-- $$$setButtonStartKey -->
+<h3 class="fn" id="setButtonStartKey"><a name="setButtonStartKey"></a><code>[slot] </code><span class="type">void</span> QGamepadKeyNavigation::<span class="name">setButtonStartKey</span>(<span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>)</h3>
+<p>* Sets the mapping of the Start button with the * keycode specified in <i>key</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">buttonStartKey</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#buttonStartKey">buttonStartKey</a>().</p>
+<!-- @@@setButtonStartKey -->
+<!-- $$$setButtonXKey -->
+<h3 class="fn" id="setButtonXKey"><a name="setButtonXKey"></a><code>[slot] </code><span class="type">void</span> QGamepadKeyNavigation::<span class="name">setButtonXKey</span>(<span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>)</h3>
+<p>* Sets the mapping of the X button with the * keycode specified in <i>key</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">buttonXKey</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#buttonXKey">buttonXKey</a>().</p>
+<!-- @@@setButtonXKey -->
+<!-- $$$setButtonYKey -->
+<h3 class="fn" id="setButtonYKey"><a name="setButtonYKey"></a><code>[slot] </code><span class="type">void</span> QGamepadKeyNavigation::<span class="name">setButtonYKey</span>(<span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>)</h3>
+<p>* Sets the mapping of the Y button with the * keycode specified in <i>key</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">buttonYKey</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#buttonYKey">buttonYKey</a>().</p>
+<!-- @@@setButtonYKey -->
+<!-- $$$setDownKey -->
+<h3 class="fn" id="setDownKey"><a name="setDownKey"></a><code>[slot] </code><span class="type">void</span> QGamepadKeyNavigation::<span class="name">setDownKey</span>(<span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>)</h3>
+<p>* Sets the mapping of the Down button with the * keycode specified in <i>key</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">downKey</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#downKey">downKey</a>().</p>
+<!-- @@@setDownKey -->
+<!-- $$$setGamepad -->
+<h3 class="fn" id="setGamepad"><a name="setGamepad"></a><code>[slot] </code><span class="type">void</span> QGamepadKeyNavigation::<span class="name">setGamepad</span>(<span class="type"><a href="qgamepad.html">QGamepad</a></span> *<i>gamepad</i>)</h3>
+<p>* Selects the specified <i>gamepad</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">gamepad</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#gamepad">gamepad</a>().</p>
+<!-- @@@setGamepad -->
+<!-- $$$setLeftKey -->
+<h3 class="fn" id="setLeftKey"><a name="setLeftKey"></a><code>[slot] </code><span class="type">void</span> QGamepadKeyNavigation::<span class="name">setLeftKey</span>(<span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>)</h3>
+<p>* Sets the mapping of the Left button with the * keycode specified in <i>key</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">leftKey</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#leftKey">leftKey</a>().</p>
+<!-- @@@setLeftKey -->
+<!-- $$$setRightKey -->
+<h3 class="fn" id="setRightKey"><a name="setRightKey"></a><code>[slot] </code><span class="type">void</span> QGamepadKeyNavigation::<span class="name">setRightKey</span>(<span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>)</h3>
+<p>* Sets the mapping of the Right button with the * keycode specified in <i>key</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">rightKey</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#rightKey">rightKey</a>().</p>
+<!-- @@@setRightKey -->
+<!-- $$$setUpKey -->
+<h3 class="fn" id="setUpKey"><a name="setUpKey"></a><code>[slot] </code><span class="type">void</span> QGamepadKeyNavigation::<span class="name">setUpKey</span>(<span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> <i>key</i>)</h3>
+<p>* Sets the mapping of the Up button with the * keycode specified in <i>key</i>.</p>
+<p><b>Note:</b> Setter function for property <a href="">upKey</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#upKey">upKey</a>().</p>
+<!-- @@@setUpKey -->
+<!-- $$$active -->
+<h3 class="fn" id="active"><a name="active"></a><span class="type">bool</span> QGamepadKeyNavigation::<span class="name">active</span>() const</h3>
+<p>* Returns whether key navigation on the gamepad is active or not.</p>
+<p><b>Note:</b> Getter function for property <a href="">active</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#setActive">setActive</a>().</p>
+<!-- @@@active -->
+<!-- $$$buttonAKey -->
+<h3 class="fn" id="buttonAKey"><a name="buttonAKey"></a><span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> QGamepadKeyNavigation::<span class="name">buttonAKey</span>() const</h3>
+<p>Returns the key mapping of A button.</p>
+<p><b>Note:</b> Getter function for property <a href="">buttonAKey</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#setButtonAKey">setButtonAKey</a>().</p>
+<!-- @@@buttonAKey -->
+<!-- $$$buttonBKey -->
+<h3 class="fn" id="buttonBKey"><a name="buttonBKey"></a><span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> QGamepadKeyNavigation::<span class="name">buttonBKey</span>() const</h3>
+<p>Returns the key mapping of the B button.</p>
+<p><b>Note:</b> Getter function for property <a href="">buttonBKey</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#setButtonBKey">setButtonBKey</a>().</p>
+<!-- @@@buttonBKey -->
+<!-- $$$buttonGuideKey -->
+<h3 class="fn" id="buttonGuideKey"><a name="buttonGuideKey"></a><span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> QGamepadKeyNavigation::<span class="name">buttonGuideKey</span>() const</h3>
+<p>Returns the key mapping of the Guide button.</p>
+<p><b>Note:</b> Getter function for property <a href="">buttonGuideKey</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#setButtonGuideKey">setButtonGuideKey</a>().</p>
+<!-- @@@buttonGuideKey -->
+<!-- $$$buttonL1Key -->
+<h3 class="fn" id="buttonL1Key"><a name="buttonL1Key"></a><span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> QGamepadKeyNavigation::<span class="name">buttonL1Key</span>() const</h3>
+<p>Returns the key mapping of the left shoulder button.</p>
+<p><b>Note:</b> Getter function for property <a href="">buttonL1Key</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#setButtonL1Key">setButtonL1Key</a>().</p>
+<!-- @@@buttonL1Key -->
+<!-- $$$buttonL2Key -->
+<h3 class="fn" id="buttonL2Key"><a name="buttonL2Key"></a><span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> QGamepadKeyNavigation::<span class="name">buttonL2Key</span>() const</h3>
+<p>Returns the key mapping of the left trigger button.</p>
+<p><b>Note:</b> Getter function for property <a href="">buttonL2Key</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#setButtonL2Key">setButtonL2Key</a>().</p>
+<!-- @@@buttonL2Key -->
+<!-- $$$buttonL3Key -->
+<h3 class="fn" id="buttonL3Key"><a name="buttonL3Key"></a><span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> QGamepadKeyNavigation::<span class="name">buttonL3Key</span>() const</h3>
+<p>Returns the key mapping of the left stick button.</p>
+<p><b>Note:</b> Getter function for property <a href="">buttonL3Key</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#setButtonL3Key">setButtonL3Key</a>().</p>
+<!-- @@@buttonL3Key -->
+<!-- $$$buttonR1Key -->
+<h3 class="fn" id="buttonR1Key"><a name="buttonR1Key"></a><span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> QGamepadKeyNavigation::<span class="name">buttonR1Key</span>() const</h3>
+<p>Returns the key mapping of the Right shoulder button.</p>
+<p><b>Note:</b> Getter function for property <a href="">buttonR1Key</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#setButtonR1Key">setButtonR1Key</a>().</p>
+<!-- @@@buttonR1Key -->
+<!-- $$$buttonR2Key -->
+<h3 class="fn" id="buttonR2Key"><a name="buttonR2Key"></a><span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> QGamepadKeyNavigation::<span class="name">buttonR2Key</span>() const</h3>
+<p>Returns the key mapping of the Right trigger button.</p>
+<p><b>Note:</b> Getter function for property <a href="">buttonR2Key</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#setButtonR2Key">setButtonR2Key</a>().</p>
+<!-- @@@buttonR2Key -->
+<!-- $$$buttonR3Key -->
+<h3 class="fn" id="buttonR3Key"><a name="buttonR3Key"></a><span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> QGamepadKeyNavigation::<span class="name">buttonR3Key</span>() const</h3>
+<p>Returns the key mapping of the right stick button.</p>
+<p><b>Note:</b> Getter function for property <a href="">buttonR3Key</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#setButtonR3Key">setButtonR3Key</a>().</p>
+<!-- @@@buttonR3Key -->
+<!-- $$$buttonSelectKey -->
+<h3 class="fn" id="buttonSelectKey"><a name="buttonSelectKey"></a><span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> QGamepadKeyNavigation::<span class="name">buttonSelectKey</span>() const</h3>
+<p>Returns the key mapping of the Select button.</p>
+<p><b>Note:</b> Getter function for property <a href="">buttonSelectKey</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#setButtonSelectKey">setButtonSelectKey</a>().</p>
+<!-- @@@buttonSelectKey -->
+<!-- $$$buttonStartKey -->
+<h3 class="fn" id="buttonStartKey"><a name="buttonStartKey"></a><span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> QGamepadKeyNavigation::<span class="name">buttonStartKey</span>() const</h3>
+<p>Returns the key mapping of the Start button.</p>
+<p><b>Note:</b> Getter function for property <a href="">buttonStartKey</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#setButtonStartKey">setButtonStartKey</a>().</p>
+<!-- @@@buttonStartKey -->
+<!-- $$$buttonXKey -->
+<h3 class="fn" id="buttonXKey"><a name="buttonXKey"></a><span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> QGamepadKeyNavigation::<span class="name">buttonXKey</span>() const</h3>
+<p>Returns the key mapping of the X button.</p>
+<p><b>Note:</b> Getter function for property <a href="">buttonXKey</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#setButtonXKey">setButtonXKey</a>().</p>
+<!-- @@@buttonXKey -->
+<!-- $$$buttonYKey -->
+<h3 class="fn" id="buttonYKey"><a name="buttonYKey"></a><span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> QGamepadKeyNavigation::<span class="name">buttonYKey</span>() const</h3>
+<p>Returns the key mapping of the Y button.</p>
+<p><b>Note:</b> Getter function for property <a href="">buttonYKey</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#setButtonYKey">setButtonYKey</a>().</p>
+<!-- @@@buttonYKey -->
+<!-- $$$downKey -->
+<h3 class="fn" id="downKey"><a name="downKey"></a><span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> QGamepadKeyNavigation::<span class="name">downKey</span>() const</h3>
+<p>Returns the key mapping of the Down button.</p>
+<p><b>Note:</b> Getter function for property <a href="">downKey</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#setDownKey">setDownKey</a>().</p>
+<!-- @@@downKey -->
+<!-- $$$gamepad -->
+<h3 class="fn" id="gamepad"><a name="gamepad"></a><span class="type"><a href="qgamepad.html">QGamepad</a></span> *QGamepadKeyNavigation::<span class="name">gamepad</span>() const</h3>
+<p>Returns a pointer the current <a href="qgamepad.html">QGamepad</a></p>
+<p><b>Note:</b> Getter function for property <a href="">gamepad</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#setGamepad">setGamepad</a>().</p>
+<!-- @@@gamepad -->
+<!-- $$$leftKey -->
+<h3 class="fn" id="leftKey"><a name="leftKey"></a><span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> QGamepadKeyNavigation::<span class="name">leftKey</span>() const</h3>
+<p>Returns the key mapping of the Left button.</p>
+<p><b>Note:</b> Getter function for property <a href="">leftKey</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#setLeftKey">setLeftKey</a>().</p>
+<!-- @@@leftKey -->
+<!-- $$$rightKey -->
+<h3 class="fn" id="rightKey"><a name="rightKey"></a><span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> QGamepadKeyNavigation::<span class="name">rightKey</span>() const</h3>
+<p>Returns the key mapping of the Right button.</p>
+<p><b>Note:</b> Getter function for property <a href="">rightKey</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#setRightKey">setRightKey</a>().</p>
+<!-- @@@rightKey -->
+<!-- $$$upKey -->
+<h3 class="fn" id="upKey"><a name="upKey"></a><span class="type"><a href="../qtcore/qt.html#Key-enum">Qt::Key</a></span> QGamepadKeyNavigation::<span class="name">upKey</span>() const</h3>
+<p>Returns the key mapping of the Up button.</p>
+<p><b>Note:</b> Getter function for property <a href="">upKey</a>. </p><p><b>See also </b><a href="qgamepadkeynavigation.html#setUpKey">setUpKey</a>().</p>
+<!-- @@@upKey -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

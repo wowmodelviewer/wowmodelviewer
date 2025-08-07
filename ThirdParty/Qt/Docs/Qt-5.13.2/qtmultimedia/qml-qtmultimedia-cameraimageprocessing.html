@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdeclarativecameraimageprocessing.cpp -->
+  <title>CameraImageProcessing QML Type | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-qmlmodule.html">QML Types</a></td><td >CameraImageProcessing QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">CameraImageProcessing QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$CameraImageProcessing-brief -->
+<p>An interface for camera capture related settings. <a href="#details">More...</a></p>
+<!-- @@@CameraImageProcessing -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtMultimedia 5.13</td></tr></table></div><ul>
+<li><a href="qml-qtmultimedia-cameraimageprocessing-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraimageprocessing.html#brightness-prop">brightness</a></b></b> : qreal</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraimageprocessing.html#colorFilter-prop">colorFilter</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraimageprocessing.html#contrast-prop">contrast</a></b></b> : qreal</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraimageprocessing.html#denoisingLevel-prop">denoisingLevel</a></b></b> : qreal</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraimageprocessing.html#isAvailable-prop">isAvailable</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraimageprocessing.html#manualWhiteBalance-prop">manualWhiteBalance</a></b></b> : qreal</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraimageprocessing.html#saturation-prop">saturation</a></b></b> : qreal</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraimageprocessing.html#sharpeningLevel-prop">sharpeningLevel</a></b></b> : qreal</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraimageprocessing.html#supportedColorFilters-prop">supportedColorFilters</a></b></b> : list&lt;ColorFilter&gt;</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraimageprocessing.html#supportedWhiteBalanceModes-prop">supportedWhiteBalanceModes</a></b></b> : list&lt;WhiteBalanceMode&gt;</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-cameraimageprocessing.html#whiteBalanceMode-prop">whiteBalanceMode</a></b></b> : enumeration</li>
+</ul>
+<!-- $$$CameraImageProcessing-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><a href="qml-qtmultimedia-cameraimageprocessing.html">CameraImageProcessing</a> provides control over post-processing done by the camera middleware, including white balance adjustments, contrast, saturation, sharpening, and denoising</p>
+<p>It should not be constructed separately, instead the <code>imageProcessing</code> property of a <a href="qml-multimedia.html#camera">Camera</a> should be used.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtmultimedia-camera.html">Camera</a></span> {
+      <span class="name">id</span>: <span class="name">camera</span>
+
+      <span class="type">imageProcessing</span> {
+          <span class="name">whiteBalanceMode</span>: <span class="name">Camera</span>.<span class="name">WhiteBalanceTungsten</span>
+          <span class="name">contrast</span>: <span class="number">0.66</span>
+          <span class="name">saturation</span>: -<span class="number">0.5</span>
+      }
+  }
+
+</pre>
+<!-- @@@CameraImageProcessing -->
+<h2>Property Documentation</h2>
+<!-- $$$brightness -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="brightness-prop"></a><span class="name">brightness</span> : <span class="type">qreal</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Image brightness adjustment. Valid brightness adjustment values range between -1.0 and 1.0, with a default of 0.</p>
+<p>This property was introduced in  Qt 5.7.</p>
+</div></div><!-- @@@brightness -->
+<br/>
+<!-- $$$colorFilter -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="colorFilter-prop"></a><span class="name">colorFilter</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds which color filter if any will be applied to image data captured by the camera.</p>
+<p>It can be one of:</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><a href="qml-qtmultimedia-cameraimageprocessing.html">CameraImageProcessing</a>.ColorFilterNone</td><td >No filter is applied to images.</td></tr>
+<tr valign="top" class="even"><td ><a href="qml-qtmultimedia-cameraimageprocessing.html">CameraImageProcessing</a>.ColorFilterGrayscale</td><td >A grayscale filter.</td></tr>
+<tr valign="top" class="odd"><td ><a href="qml-qtmultimedia-cameraimageprocessing.html">CameraImageProcessing</a>.ColorFilterNegative</td><td >A negative filter.</td></tr>
+<tr valign="top" class="even"><td ><a href="qml-qtmultimedia-cameraimageprocessing.html">CameraImageProcessing</a>.ColorFilterSolarize</td><td >A solarize filter.</td></tr>
+<tr valign="top" class="odd"><td ><a href="qml-qtmultimedia-cameraimageprocessing.html">CameraImageProcessing</a>.ColorFilterSepia</td><td >A sepia filter.</td></tr>
+<tr valign="top" class="even"><td ><a href="qml-qtmultimedia-cameraimageprocessing.html">CameraImageProcessing</a>.ColorFilterPosterize</td><td >A posterize filter.</td></tr>
+<tr valign="top" class="odd"><td ><a href="qml-qtmultimedia-cameraimageprocessing.html">CameraImageProcessing</a>.ColorFilterWhiteboard</td><td >A whiteboard filter.</td></tr>
+<tr valign="top" class="even"><td ><a href="qml-qtmultimedia-cameraimageprocessing.html">CameraImageProcessing</a>.ColorFilterBlackboard</td><td >A blackboard filter.</td></tr>
+<tr valign="top" class="odd"><td ><a href="qml-qtmultimedia-cameraimageprocessing.html">CameraImageProcessing</a>.ColorFilterAqua</td><td >An aqua filter.</td></tr>
+<tr valign="top" class="even"><td ><a href="qml-qtmultimedia-cameraimageprocessing.html">CameraImageProcessing</a>.ColorFilterVendor</td><td >The base value for vendor defined filters.</td></tr>
+</table></div>
+<p>This property was introduced in  Qt 5.5.</p>
+</div></div><!-- @@@colorFilter -->
+<br/>
+<!-- $$$contrast -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="contrast-prop"></a><span class="name">contrast</span> : <span class="type">qreal</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Image contrast adjustment. Valid contrast adjustment values range between -1.0 and 1.0, with a default of 0.</p>
+</div></div><!-- @@@contrast -->
+<br/>
+<!-- $$$denoisingLevel -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="denoisingLevel-prop"></a><span class="name">denoisingLevel</span> : <span class="type">qreal</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Adjustment of denoising applied to image.</p>
+<p>Valid denoising level values range between -1.0 for for denoising disabled, 0 for default denoising level and 1.0 for maximum denoising applied.</p>
+</div></div><!-- @@@denoisingLevel -->
+<br/>
+<!-- $$$isAvailable -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="isAvailable-prop"></a><span class="name">isAvailable</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds if image processing related settings are supported by this camera.</p>
+<p>This property was introduced in  Qt 5.11.</p>
+</div></div><!-- @@@isAvailable -->
+<br/>
+<!-- $$$manualWhiteBalance -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="manualWhiteBalance-prop"></a><span class="name">manualWhiteBalance</span> : <span class="type">qreal</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The color temperature used when in manual white balance mode (WhiteBalanceManual). The units are Kelvin.</p>
+<p><b>See also </b><a href="qml-qtmultimedia-cameraimageprocessing.html#whiteBalanceMode-prop">whiteBalanceMode</a>.</p>
+</div></div><!-- @@@manualWhiteBalance -->
+<br/>
+<!-- $$$saturation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="saturation-prop"></a><span class="name">saturation</span> : <span class="type">qreal</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Image saturation adjustment. Valid saturation adjustment values range between -1.0 and 1.0, the default is 0.</p>
+</div></div><!-- @@@saturation -->
+<br/>
+<!-- $$$sharpeningLevel -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="sharpeningLevel-prop"></a><span class="name">sharpeningLevel</span> : <span class="type">qreal</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Adjustment of sharpening level applied to image.</p>
+<p>Valid sharpening level values range between -1.0 for for sharpening disabled, 0 for default sharpening level and 1.0 for maximum sharpening applied.</p>
+</div></div><!-- @@@sharpeningLevel -->
+<br/>
+<!-- $$$supportedColorFilters -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="supportedColorFilters-prop"></a><span class="name">supportedColorFilters</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type">ColorFilter</span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the supported color filters by this camera.</p>
+<p>This property was introduced in  Qt 5.11.</p>
+</div></div><!-- @@@supportedColorFilters -->
+<br/>
+<!-- $$$supportedWhiteBalanceModes -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="supportedWhiteBalanceModes-prop"></a><span class="name">supportedWhiteBalanceModes</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type">WhiteBalanceMode</span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the supported white balance modes by this camera.</p>
+<p>This property was introduced in  Qt 5.11.</p>
+</div></div><!-- @@@supportedWhiteBalanceModes -->
+<br/>
+<!-- $$$whiteBalanceMode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="whiteBalanceMode-prop"></a><span class="name">whiteBalanceMode</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Value</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >WhiteBalanceManual</td><td >Manual white balance. In this mode the manual white balance property value is used.</td></tr>
+<tr valign="top" class="even"><td >WhiteBalanceAuto</td><td >Auto white balance mode.</td></tr>
+<tr valign="top" class="odd"><td >WhiteBalanceSunlight</td><td >Sunlight white balance mode.</td></tr>
+<tr valign="top" class="even"><td >WhiteBalanceCloudy</td><td >Cloudy white balance mode.</td></tr>
+<tr valign="top" class="odd"><td >WhiteBalanceShade</td><td >Shade white balance mode.</td></tr>
+<tr valign="top" class="even"><td >WhiteBalanceTungsten</td><td >Tungsten white balance mode.</td></tr>
+<tr valign="top" class="odd"><td >WhiteBalanceFluorescent</td><td >Fluorescent white balance mode.</td></tr>
+<tr valign="top" class="even"><td >WhiteBalanceFlash</td><td >Flash white balance mode.</td></tr>
+<tr valign="top" class="odd"><td >WhiteBalanceSunset</td><td >Sunset white balance mode.</td></tr>
+<tr valign="top" class="even"><td >WhiteBalanceVendor</td><td >Vendor defined white balance mode.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qml-qtmultimedia-cameraimageprocessing.html#manualWhiteBalance-prop">manualWhiteBalance</a>.</p>
+</div></div><!-- @@@whiteBalanceMode -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

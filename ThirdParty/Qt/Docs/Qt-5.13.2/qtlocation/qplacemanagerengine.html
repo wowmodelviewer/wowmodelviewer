@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qplacemanagerengine.cpp -->
+  <title>QPlaceManagerEngine Class | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-module.html">C++ Classes</a></td><td >QPlaceManagerEngine</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPlaceManagerEngine Class</h1>
+<!-- $$$QPlaceManagerEngine-brief -->
+<p>The <a href="qplacemanagerengine.html">QPlaceManagerEngine</a> class provides an interface for implementers of <a href="qgeoserviceprovider.html">QGeoServiceProvider</a> plugins who want to provide access to place functionality. <a href="#details">More...</a></p>
+<!-- @@@QPlaceManagerEngine -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QPlaceManagerEngine&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += location</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.6</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.6.</p>
+<ul>
+<li><a href="qplacemanagerengine-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#QPlaceManagerEngine">QPlaceManagerEngine</a></b>(const QVariantMap &amp;<i>parameters</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#dtor.QPlaceManagerEngine">~QPlaceManagerEngine</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QPlaceCategory </td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#category">category</a></b>(const QString &amp;<i>categoryId</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QList&lt;QPlaceCategory&gt; </td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#childCategories">childCategories</a></b>(const QString &amp;<i>parentId</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QStringList </td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#childCategoryIds">childCategoryIds</a></b>(const QString &amp;<i>categoryId</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QPlace </td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#compatiblePlace">compatiblePlace</a></b>(const QPlace &amp;<i>original</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QUrl </td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#constructIconUrl">constructIconUrl</a></b>(const QPlaceIcon &amp;<i>icon</i>, const QSize &amp;<i>size</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QPlaceContentReply *</td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#getPlaceContent">getPlaceContent</a></b>(const QPlaceContentRequest &amp;<i>request</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QPlaceDetailsReply *</td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#getPlaceDetails">getPlaceDetails</a></b>(const QString &amp;<i>placeId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QPlaceReply *</td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#initializeCategories">initializeCategories</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QList&lt;QLocale&gt; </td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#locales">locales</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#managerName">managerName</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#managerVersion">managerVersion</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QPlaceMatchReply *</td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#matchingPlaces">matchingPlaces</a></b>(const QPlaceMatchRequest &amp;<i>request</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QString </td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#parentCategoryId">parentCategoryId</a></b>(const QString &amp;<i>categoryId</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QPlaceIdReply *</td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#removeCategory">removeCategory</a></b>(const QString &amp;<i>categoryId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QPlaceIdReply *</td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#removePlace">removePlace</a></b>(const QString &amp;<i>placeId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QPlaceIdReply *</td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#saveCategory">saveCategory</a></b>(const QPlaceCategory &amp;<i>category</i>, const QString &amp;<i>parentId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QPlaceIdReply *</td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#savePlace">savePlace</a></b>(const QPlace &amp;<i>place</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QPlaceSearchReply *</td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#search">search</a></b>(const QPlaceSearchRequest &amp;<i>request</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QPlaceSearchSuggestionReply *</td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#searchSuggestions">searchSuggestions</a></b>(const QPlaceSearchRequest &amp;<i>request</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#setLocales">setLocales</a></b>(const QList&lt;QLocale&gt; &amp;<i>locales</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#categoryAdded">categoryAdded</a></b>(const QPlaceCategory &amp;<i>category</i>, const QString &amp;<i>parentId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#categoryRemoved">categoryRemoved</a></b>(const QString &amp;<i>categoryId</i>, const QString &amp;<i>parentId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#categoryUpdated">categoryUpdated</a></b>(const QPlaceCategory &amp;<i>category</i>, const QString &amp;<i>parentId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#dataChanged">dataChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#error">error</a></b>(QPlaceReply *<i>reply</i>, QPlaceReply::Error <i>error</i>, const QString &amp;<i>errorString</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#finished">finished</a></b>(QPlaceReply *<i>reply</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#placeAdded">placeAdded</a></b>(const QString &amp;<i>placeId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#placeRemoved">placeRemoved</a></b>(const QString &amp;<i>placeId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#placeUpdated">placeUpdated</a></b>(const QString &amp;<i>placeId</i>)</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QPlaceManager *</td><td class="memItemRight bottomAlign"><b><a href="qplacemanagerengine.html#manager">manager</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPlaceManagerEngine-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Application developers need not concern themselves with the <a href="qplacemanagerengine.html">QPlaceManagerEngine</a>. Backend implementers however will need to derive from <a href="qplacemanagerengine.html">QPlaceManagerEngine</a> and provide implementations for the abstract virtual functions.</p>
+<p>For more information on writing a backend see the <a href="location-places-backend.html">Places Backend</a> documentation.</p>
+</div>
+<p><b>See also </b><a href="qplacemanager.html">QPlaceManager</a>.</p>
+<!-- @@@QPlaceManagerEngine -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QPlaceManagerEngine[overload1]$$$QPlaceManagerEngineconstQVariantMap&QObject* -->
+<h3 class="fn" id="QPlaceManagerEngine"><a name="QPlaceManagerEngine"></a>QPlaceManagerEngine::<span class="name">QPlaceManagerEngine</span>(const <span class="type"><a href="../qtcore/qvariant.html#QVariantMap-typedef">QVariantMap</a></span> &amp;<i>parameters</i>, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new engine with the specified <i>parent</i>, using <i>parameters</i> to pass any implementation specific data to the engine.</p>
+<!-- @@@QPlaceManagerEngine -->
+<!-- $$$categoryAdded[overload1]$$$categoryAddedconstQPlaceCategory&constQString& -->
+<h3 class="fn" id="categoryAdded"><a name="categoryAdded"></a><code>[signal] </code><span class="type">void</span> QPlaceManagerEngine::<span class="name">categoryAdded</span>(const <span class="type"><a href="qplacecategory.html">QPlaceCategory</a></span> &amp;<i>category</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>parentId</i>)</h3>
+<p>This signal is emitted if a <i>category</i> has been added to the manager engine's datastore. The parent of the <i>category</i> is specified by <i>parentId</i>.</p>
+<p>This signal is only emitted by manager engines that support the QPlaceManager::NotificationsFeature.</p>
+<p><b>See also </b><a href="qplacemanagerengine.html#dataChanged">dataChanged</a>().</p>
+<!-- @@@categoryAdded -->
+<!-- $$$categoryRemoved[overload1]$$$categoryRemovedconstQString&constQString& -->
+<h3 class="fn" id="categoryRemoved"><a name="categoryRemoved"></a><code>[signal] </code><span class="type">void</span> QPlaceManagerEngine::<span class="name">categoryRemoved</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>categoryId</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>parentId</i>)</h3>
+<p>This signal is emitted when the category corresponding to <i>categoryId</i> has been removed from the manager engine's datastore. The parent of the removed category is specified by <i>parentId</i>.</p>
+<p>This signal is only emitted by manager engines that support the QPlaceManager::NotificationsFeature.</p>
+<p><b>See also </b><a href="qplacemanagerengine.html#dataChanged">dataChanged</a>().</p>
+<!-- @@@categoryRemoved -->
+<!-- $$$categoryUpdated[overload1]$$$categoryUpdatedconstQPlaceCategory&constQString& -->
+<h3 class="fn" id="categoryUpdated"><a name="categoryUpdated"></a><code>[signal] </code><span class="type">void</span> QPlaceManagerEngine::<span class="name">categoryUpdated</span>(const <span class="type"><a href="qplacecategory.html">QPlaceCategory</a></span> &amp;<i>category</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>parentId</i>)</h3>
+<p>This signal is emitted if a <i>category</i> has been modified in the manager engine's datastore. The parent of the modified category is specified by <i>parentId</i>.</p>
+<p>This signal is only emitted by manager engines that support the QPlaceManager::NotificationsFeature.</p>
+<p><b>See also </b><a href="qplacemanagerengine.html#dataChanged">dataChanged</a>().</p>
+<!-- @@@categoryUpdated -->
+<!-- $$$dataChanged[overload1]$$$dataChanged -->
+<h3 class="fn" id="dataChanged"><a name="dataChanged"></a><code>[signal] </code><span class="type">void</span> QPlaceManagerEngine::<span class="name">dataChanged</span>()</h3>
+<p>*</p>
+<p>This signal is emitted by the engine if there are large scale changes to its underlying datastore and the engine considers these changes radical enough to require clients to reload all data.</p>
+<p>If the signal is emitted, no other signals will be emitted for the associated changes.</p>
+<!-- @@@dataChanged -->
+<!-- $$$error[overload1]$$$errorQPlaceReply*QPlaceReply::ErrorconstQString& -->
+<h3 class="fn" id="error"><a name="error"></a><code>[signal] </code><span class="type">void</span> QPlaceManagerEngine::<span class="name">error</span>(<span class="type"><a href="qplacereply.html">QPlaceReply</a></span> *<i>reply</i>, <span class="type"><a href="qplacereply.html#Error-enum">QPlaceReply::Error</a></span> <i>error</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>errorString</i> = ...)</h3>
+<p>This signal is emitted when an error has been detected in the processing of <i>reply</i>. The <a href="qplacemanager.html#finished">QPlaceManager::finished</a>() signal will probably follow.</p>
+<p>The error will be described by the error code <i>error</i>. If <i>errorString</i> is not empty it will contain a textual description of the error meant for developers and not end users.</p>
+<p>This signal and <a href="qplacereply.html#error">QPlaceReply::error</a>() will be emitted at the same time.</p>
+<p><b>Note: </b>Do not delete the <i>reply</i> object in the slot connected to this signal. Use <a href="../qtcore/qobject.html#deleteLater">deleteLater</a>() instead.</p><!-- @@@error -->
+<!-- $$$finished[overload1]$$$finishedQPlaceReply* -->
+<h3 class="fn" id="finished"><a name="finished"></a><code>[signal] </code><span class="type">void</span> QPlaceManagerEngine::<span class="name">finished</span>(<span class="type"><a href="qplacereply.html">QPlaceReply</a></span> *<i>reply</i>)</h3>
+<p>This signal is emitted when <i>reply</i> has finished processing.</p>
+<p>If reply-&gt;<a href="qplacemanagerengine.html#error">error</a>() equals <a href="qplacereply.html#Error-enum">QPlaceReply::NoError</a> then the processing finished successfully.</p>
+<p>This signal and <a href="qplacereply.html#finished">QPlaceReply::finished</a>() will be emitted at the same time.</p>
+<p><b>Note: </b>Do not delete the <i>reply</i> object in the slot connected to this signal. Use <a href="../qtcore/qobject.html#deleteLater">deleteLater</a>() instead.</p><!-- @@@finished -->
+<!-- $$$placeAdded[overload1]$$$placeAddedconstQString& -->
+<h3 class="fn" id="placeAdded"><a name="placeAdded"></a><code>[signal] </code><span class="type">void</span> QPlaceManagerEngine::<span class="name">placeAdded</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>placeId</i>)</h3>
+<p>This signal is emitted if a place has been added to the manager engine's datastore. The particular added place is specified by <i>placeId</i>.</p>
+<p>This signal is only emitted by manager engines that support the QPlaceManager::NotificationsFeature.</p>
+<p><b>See also </b><a href="qplacemanagerengine.html#dataChanged">dataChanged</a>().</p>
+<!-- @@@placeAdded -->
+<!-- $$$placeRemoved[overload1]$$$placeRemovedconstQString& -->
+<h3 class="fn" id="placeRemoved"><a name="placeRemoved"></a><code>[signal] </code><span class="type">void</span> QPlaceManagerEngine::<span class="name">placeRemoved</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>placeId</i>)</h3>
+<p>This signal is emitted if a place has been removed from the manager engine's datastore. The particular place that has been removed is specified by <i>placeId</i>.</p>
+<p>This signal is only emitted by manager engines that support the QPlaceManager::NotificationsFeature.</p>
+<p><b>See also </b><a href="qplacemanagerengine.html#dataChanged">dataChanged</a>().</p>
+<!-- @@@placeRemoved -->
+<!-- $$$placeUpdated[overload1]$$$placeUpdatedconstQString& -->
+<h3 class="fn" id="placeUpdated"><a name="placeUpdated"></a><code>[signal] </code><span class="type">void</span> QPlaceManagerEngine::<span class="name">placeUpdated</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>placeId</i>)</h3>
+<p>This signal is emitted if a place has been modified in the manager engine's datastore. The particular modified place is specified by <i>placeId</i>.</p>
+<p>This signal is only emitted by manager engines that support the QPlaceManager::NotificationsFeature.</p>
+<p><b>See also </b><a href="qplacemanagerengine.html#dataChanged">dataChanged</a>().</p>
+<!-- @@@placeUpdated -->
+<!-- $$$~QPlaceManagerEngine[overload1]$$$~QPlaceManagerEngine -->
+<h3 class="fn" id="dtor.QPlaceManagerEngine"><a name="dtor.QPlaceManagerEngine"></a><code>[virtual] </code>QPlaceManagerEngine::<span class="name">~QPlaceManagerEngine</span>()</h3>
+<p>Destroys this engine.</p>
+<!-- @@@~QPlaceManagerEngine -->
+<!-- $$$category[overload1]$$$categoryconstQString& -->
+<h3 class="fn" id="category"><a name="category"></a><code>[virtual] </code><span class="type"><a href="qplacecategory.html">QPlaceCategory</a></span> QPlaceManagerEngine::<span class="name">category</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>categoryId</i>) const</h3>
+<p>Returns the category corresponding to the given <i>categoryId</i>.</p>
+<!-- @@@category -->
+<!-- $$$childCategories[overload1]$$$childCategoriesconstQString& -->
+<h3 class="fn" id="childCategories"><a name="childCategories"></a><code>[virtual] </code><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qplacecategory.html">QPlaceCategory</a></span>&gt; QPlaceManagerEngine::<span class="name">childCategories</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>parentId</i>) const</h3>
+<p>Returns a list of categories that are children of the category corresponding to <i>parentId</i>. If <i>parentId</i> is empty, all the top level categories are returned.</p>
+<!-- @@@childCategories -->
+<!-- $$$childCategoryIds[overload1]$$$childCategoryIdsconstQString& -->
+<h3 class="fn" id="childCategoryIds"><a name="childCategoryIds"></a><code>[virtual] </code><span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> QPlaceManagerEngine::<span class="name">childCategoryIds</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>categoryId</i>) const</h3>
+<p>Returns the child category identifiers of the category corresponding to <i>categoryId</i>. If <i>categoryId</i> is empty then all top level category identifiers are returned.</p>
+<!-- @@@childCategoryIds -->
+<!-- $$$compatiblePlace[overload1]$$$compatiblePlaceconstQPlace& -->
+<h3 class="fn" id="compatiblePlace"><a name="compatiblePlace"></a><code>[virtual] </code><span class="type"><a href="qplace.html">QPlace</a></span> QPlaceManagerEngine::<span class="name">compatiblePlace</span>(const <span class="type"><a href="qplace.html">QPlace</a></span> &amp;<i>original</i>) const</h3>
+<p>Returns a pruned or modified version of the <i>original</i> place which is suitable to be saved by the manager engine.</p>
+<p>Only place details that are supported by this manager is present in the modified version. Manager specific data such as the place id, is not copied over from the <i>original</i>.</p>
+<!-- @@@compatiblePlace -->
+<!-- $$$constructIconUrl[overload1]$$$constructIconUrlconstQPlaceIcon&constQSize& -->
+<h3 class="fn" id="constructIconUrl"><a name="constructIconUrl"></a><code>[virtual] </code><span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> QPlaceManagerEngine::<span class="name">constructIconUrl</span>(const <span class="type"><a href="qplaceicon.html">QPlaceIcon</a></span> &amp;<i>icon</i>, const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>size</i>) const</h3>
+<p><a href="../qtcore/qurl.html">QUrl</a> QPlaceManagerEngine::constructIconUrl(const <a href="qplaceicon.html">QPlaceIcon</a> &amp;icon, const <a href="../qtcore/qsize.html">QSize</a> &amp;size)</p>
+<p>Constructs an icon url from a given <i>icon</i>, <i>size</i>. The URL of the icon image that most closely matches the given parameters is returned.</p>
+<!-- @@@constructIconUrl -->
+<!-- $$$getPlaceContent[overload1]$$$getPlaceContentconstQPlaceContentRequest& -->
+<h3 class="fn" id="getPlaceContent"><a name="getPlaceContent"></a><code>[virtual] </code><span class="type"><a href="qplacecontentreply.html">QPlaceContentReply</a></span> *QPlaceManagerEngine::<span class="name">getPlaceContent</span>(const <span class="type"><a href="qplacecontentrequest.html">QPlaceContentRequest</a></span> &amp;<i>request</i>)</h3>
+<p>Retrieves content for a place according to the parameters specified in <i>request</i>.</p>
+<!-- @@@getPlaceContent -->
+<!-- $$$getPlaceDetails[overload1]$$$getPlaceDetailsconstQString& -->
+<h3 class="fn" id="getPlaceDetails"><a name="getPlaceDetails"></a><code>[virtual] </code><span class="type"><a href="qplacedetailsreply.html">QPlaceDetailsReply</a></span> *QPlaceManagerEngine::<span class="name">getPlaceDetails</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>placeId</i>)</h3>
+<p>Retrieves details of place corresponding to the given <i>placeId</i>.</p>
+<!-- @@@getPlaceDetails -->
+<!-- $$$initializeCategories[overload1]$$$initializeCategories -->
+<h3 class="fn" id="initializeCategories"><a name="initializeCategories"></a><code>[virtual] </code><span class="type"><a href="qplacereply.html">QPlaceReply</a></span> *QPlaceManagerEngine::<span class="name">initializeCategories</span>()</h3>
+<p>Initializes the categories of the manager engine.</p>
+<!-- @@@initializeCategories -->
+<!-- $$$locales[overload1]$$$locales -->
+<h3 class="fn" id="locales"><a name="locales"></a><code>[virtual] </code><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="../qtcore/qlocale.html">QLocale</a></span>&gt; QPlaceManagerEngine::<span class="name">locales</span>() const</h3>
+<p>Returns a list of preferred locales. The locales are used as a hint to the manager engine for what language place and category details should be returned in.</p>
+<p>If the first specified locale cannot be accommodated, the manager engine falls back to the next and so forth.</p>
+<p>Support for locales may vary from provider to provider. For those that do support it, by default, the <a href="../qtcore/qlocale.html#setDefault">global default locale</a> will be used. If the manager engine has no locales assigned to it, it implicitly uses the global default locale. For engines that do not support locales, the locale list is always empty.</p>
+<p><b>See also </b><a href="qplacemanagerengine.html#setLocales">setLocales</a>().</p>
+<!-- @@@locales -->
+<!-- $$$manager[overload1]$$$manager -->
+<h3 class="fn" id="manager"><a name="manager"></a><code>[protected] </code><span class="type"><a href="qplacemanager.html">QPlaceManager</a></span> *QPlaceManagerEngine::<span class="name">manager</span>() const</h3>
+<p>Returns the manager instance used to create this engine.</p>
+<!-- @@@manager -->
+<!-- $$$managerName[overload1]$$$managerName -->
+<h3 class="fn" id="managerName"><a name="managerName"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPlaceManagerEngine::<span class="name">managerName</span>() const</h3>
+<p>Returns the name which this engine implementation uses to distinguish itself from the implementations provided by other plugins.</p>
+<p>The manager name is automatically set to be the same as the QGeoServiceProviderFactory::providerName().</p>
+<!-- @@@managerName -->
+<!-- $$$managerVersion[overload1]$$$managerVersion -->
+<h3 class="fn" id="managerVersion"><a name="managerVersion"></a><span class="type">int</span> QPlaceManagerEngine::<span class="name">managerVersion</span>() const</h3>
+<p>Returns the version of this engine implementation.</p>
+<p>The manager version is automatically set to be the same as the QGeoServiceProviderFactory::providerVersion().</p>
+<!-- @@@managerVersion -->
+<!-- $$$matchingPlaces[overload1]$$$matchingPlacesconstQPlaceMatchRequest& -->
+<h3 class="fn" id="matchingPlaces"><a name="matchingPlaces"></a><code>[virtual] </code><span class="type"><a href="qplacematchreply.html">QPlaceMatchReply</a></span> *QPlaceManagerEngine::<span class="name">matchingPlaces</span>(const <span class="type"><a href="qplacematchrequest.html">QPlaceMatchRequest</a></span> &amp;<i>request</i>)</h3>
+<p>Returns a reply which contains a list of places which correspond/match those specified in <i>request</i>.</p>
+<!-- @@@matchingPlaces -->
+<!-- $$$parentCategoryId[overload1]$$$parentCategoryIdconstQString& -->
+<h3 class="fn" id="parentCategoryId"><a name="parentCategoryId"></a><code>[virtual] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPlaceManagerEngine::<span class="name">parentCategoryId</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>categoryId</i>) const</h3>
+<p>Returns the parent category identifier of the category corresponding to <i>categoryId</i>.</p>
+<!-- @@@parentCategoryId -->
+<!-- $$$removeCategory[overload1]$$$removeCategoryconstQString& -->
+<h3 class="fn" id="removeCategory"><a name="removeCategory"></a><code>[virtual] </code><span class="type"><a href="qplaceidreply.html">QPlaceIdReply</a></span> *QPlaceManagerEngine::<span class="name">removeCategory</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>categoryId</i>)</h3>
+<p>Removes the category corresponding to <i>categoryId</i> from the manager engine's datastore.</p>
+<!-- @@@removeCategory -->
+<!-- $$$removePlace[overload1]$$$removePlaceconstQString& -->
+<h3 class="fn" id="removePlace"><a name="removePlace"></a><code>[virtual] </code><span class="type"><a href="qplaceidreply.html">QPlaceIdReply</a></span> *QPlaceManagerEngine::<span class="name">removePlace</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>placeId</i>)</h3>
+<p>Removes the place corresponding to <i>placeId</i> from the manager engine's datastore.</p>
+<!-- @@@removePlace -->
+<!-- $$$saveCategory[overload1]$$$saveCategoryconstQPlaceCategory&constQString& -->
+<h3 class="fn" id="saveCategory"><a name="saveCategory"></a><code>[virtual] </code><span class="type"><a href="qplaceidreply.html">QPlaceIdReply</a></span> *QPlaceManagerEngine::<span class="name">saveCategory</span>(const <span class="type"><a href="qplacecategory.html">QPlaceCategory</a></span> &amp;<i>category</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>parentId</i>)</h3>
+<p>Saves a <i>category</i> that is a child of the category specified by <i>parentId</i>. An empty <i>parentId</i> means <i>category</i> is saved as a top level category.</p>
+<!-- @@@saveCategory -->
+<!-- $$$savePlace[overload1]$$$savePlaceconstQPlace& -->
+<h3 class="fn" id="savePlace"><a name="savePlace"></a><code>[virtual] </code><span class="type"><a href="qplaceidreply.html">QPlaceIdReply</a></span> *QPlaceManagerEngine::<span class="name">savePlace</span>(const <span class="type"><a href="qplace.html">QPlace</a></span> &amp;<i>place</i>)</h3>
+<p>Saves a specified <i>place</i> to the manager engine's datastore.</p>
+<!-- @@@savePlace -->
+<!-- $$$search[overload1]$$$searchconstQPlaceSearchRequest& -->
+<h3 class="fn" id="search"><a name="search"></a><code>[virtual] </code><span class="type"><a href="qplacesearchreply.html">QPlaceSearchReply</a></span> *QPlaceManagerEngine::<span class="name">search</span>(const <span class="type"><a href="qplacesearchrequest.html">QPlaceSearchRequest</a></span> &amp;<i>request</i>)</h3>
+<p>Searches for places according to the parameters specified in <i>request</i>.</p>
+<!-- @@@search -->
+<!-- $$$searchSuggestions[overload1]$$$searchSuggestionsconstQPlaceSearchRequest& -->
+<h3 class="fn" id="searchSuggestions"><a name="searchSuggestions"></a><code>[virtual] </code><span class="type"><a href="qplacesearchsuggestionreply.html">QPlaceSearchSuggestionReply</a></span> *QPlaceManagerEngine::<span class="name">searchSuggestions</span>(const <span class="type"><a href="qplacesearchrequest.html">QPlaceSearchRequest</a></span> &amp;<i>request</i>)</h3>
+<p>Requests a set of search term suggestions according to the parameters specified in <i>request</i>.</p>
+<!-- @@@searchSuggestions -->
+<!-- $$$setLocales[overload1]$$$setLocalesconstQList<QLocale>& -->
+<h3 class="fn" id="setLocales"><a name="setLocales"></a><code>[virtual] </code><span class="type">void</span> QPlaceManagerEngine::<span class="name">setLocales</span>(const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="../qtcore/qlocale.html">QLocale</a></span>&gt; &amp;<i>locales</i>)</h3>
+<p>Set the list of preferred <i>locales</i>.</p>
+<p><b>See also </b><a href="qplacemanagerengine.html#locales">locales</a>().</p>
+<!-- @@@setLocales -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

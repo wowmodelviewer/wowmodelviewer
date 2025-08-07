@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+    <namespace>org.qt-project.qtquickextras.5132</namespace>
+    <virtualFolder>qtquickextras</virtualFolder>
+    <metaData name="version" value="5.13.2"/>
+    <customFilter name="QtQuickExtras 5.13.2">
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtquickextras</filterAttribute>
+    </customFilter>
+    <filterSection>
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtquickextras</filterAttribute>
+        <filterAttribute>qtrefdoc</filterAttribute>
+        <toc>
+            <section ref="qtquickextras-index.html" title="Qt Quick Extras">
+                <section ref="qtquick-extras-qmlmodule.html" title="Extras QML Types">
+                    <section ref="qml-qtquick-extras-circulargauge.html" title="CircularGauge Type Reference">
+                        <section ref="qml-qtquick-extras-circulargauge-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-extras-delaybutton.html" title="DelayButton Type Reference">
+                        <section ref="qml-qtquick-extras-delaybutton-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-extras-dial.html" title="Dial Type Reference">
+                        <section ref="qml-qtquick-extras-dial-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-extras-gauge.html" title="Gauge Type Reference">
+                        <section ref="qml-qtquick-extras-gauge-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-extras-picture.html" title="Picture Type Reference">
+                        <section ref="qml-qtquick-extras-picture-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-extras-piemenu.html" title="PieMenu Type Reference">
+                        <section ref="qml-qtquick-extras-piemenu-members.html" title="List of all members"/>
+                        <section ref="qml-qtquick-extras-piemenu-obsolete.html" title="Obsolete members"/>
+                    </section>
+                    <section ref="qml-qtquick-extras-statusindicator.html" title="StatusIndicator Type Reference">
+                        <section ref="qml-qtquick-extras-statusindicator-members.html" title="List of all members"/>
+                        <section ref="qml-qtquick-extras-statusindicator-obsolete.html" title="Obsolete members"/>
+                    </section>
+                    <section ref="qml-qtquick-extras-togglebutton.html" title="ToggleButton Type Reference">
+                        <section ref="qml-qtquick-extras-togglebutton-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-extras-tumbler.html" title="Tumbler Type Reference">
+                        <section ref="qml-qtquick-extras-tumbler-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qtquick-extras-tumblercolumn.html" title="TumblerColumn Type Reference">
+                        <section ref="qml-qtquick-extras-tumblercolumn-members.html" title="List of all members"/>
+                    </section>
+                </section>
+                <section ref="qtquickextras-examples.html" title="Extras Examples"/>
+            </section>
+        </toc>
+        <keywords>
+            <keyword name="CircularGauge" id="QML.CircularGauge" ref="qml-qtquick-extras-circulargauge.html"/>
+            <keyword name="DelayButton" id="QML.DelayButton" ref="qml-qtquick-extras-delaybutton.html"/>
+            <keyword name="Dial" id="QML.Dial" ref="qml-qtquick-extras-dial.html"/>
+            <keyword name="Gauge" id="QML.Gauge" ref="qml-qtquick-extras-gauge.html"/>
+            <keyword name="Picture" id="QML.Picture" ref="qml-qtquick-extras-picture.html"/>
+            <keyword name="PieMenu" id="QML.PieMenu" ref="qml-qtquick-extras-piemenu.html"/>
+            <keyword name="Qt Quick Extras" id="Qt Quick Extras" ref="qtquickextras-index.html"/>
+            <keyword name="Qt Quick Extras Examples" id="Qt Quick Extras Examples" ref="qtquickextras-examples.html"/>
+            <keyword name="Qt Quick Extras Overview" id="Qt Quick Extras Overview" ref="qtquickextras-overview.html"/>
+            <keyword name="Qt Quick Extras QML Types" id="Qt Quick Extras QML Types" ref="qtquick-extras-qmlmodule.html"/>
+            <keyword name="StatusIndicator" id="QML.StatusIndicator" ref="qml-qtquick-extras-statusindicator.html"/>
+            <keyword name="ToggleButton" id="QML.ToggleButton" ref="qml-qtquick-extras-togglebutton.html"/>
+            <keyword name="Tumbler" id="QML.Tumbler" ref="qml-qtquick-extras-tumbler.html"/>
+            <keyword name="TumblerColumn" id="QML.TumblerColumn" ref="qml-qtquick-extras-tumblercolumn.html"/>
+            <keyword name="activated" id="DelayButton::activated" ref="qml-qtquick-extras-delaybutton.html#activated-signal"/>
+            <keyword name="activationMode" id="PieMenu::activationMode" ref="qml-qtquick-extras-piemenu-obsolete.html#activationMode-prop"/>
+            <keyword name="active" id="StatusIndicator::active" ref="qml-qtquick-extras-statusindicator.html#active-prop"/>
+            <keyword name="activeFocus" id="TumblerColumn::activeFocus" ref="qml-qtquick-extras-tumblercolumn.html#activeFocus-prop"/>
+            <keyword name="activeFocusOnPress" id="Dial::activeFocusOnPress" ref="qml-qtquick-extras-dial.html#activeFocusOnPress-prop"/>
+            <keyword name="addColumn" id="Tumbler::addColumn" ref="qml-qtquick-extras-tumbler.html#addColumn-method"/>
+            <keyword name="addItem" id="PieMenu::addItem" ref="qml-qtquick-extras-piemenu.html#addItem-method"/>
+            <keyword name="boundingItem" id="PieMenu::boundingItem" ref="qml-qtquick-extras-piemenu.html#boundingItem-prop"/>
+            <keyword name="color" id="Picture::color" ref="qml-qtquick-extras-picture.html#color-prop"/>
+            <keyword name="color" id="StatusIndicator::color" ref="qml-qtquick-extras-statusindicator.html#color-prop"/>
+            <keyword name="columnCount" id="Tumbler::columnCount" ref="qml-qtquick-extras-tumbler.html#columnCount-prop"/>
+            <keyword name="columnForeground" id="TumblerColumn::columnForeground" ref="qml-qtquick-extras-tumblercolumn.html#columnForeground-prop"/>
+            <keyword name="currentIndex" id="PieMenu::currentIndex" ref="qml-qtquick-extras-piemenu.html#currentIndex-prop"/>
+            <keyword name="currentIndex" id="TumblerColumn::currentIndex" ref="qml-qtquick-extras-tumblercolumn.html#currentIndex-prop"/>
+            <keyword name="currentIndexAt" id="Tumbler::currentIndexAt" ref="qml-qtquick-extras-tumbler.html#currentIndexAt-method"/>
+            <keyword name="currentItem" id="PieMenu::currentItem" ref="qml-qtquick-extras-piemenu.html#currentItem-prop"/>
+            <keyword name="delay" id="DelayButton::delay" ref="qml-qtquick-extras-delaybutton.html#delay-prop"/>
+            <keyword name="delegate" id="TumblerColumn::delegate" ref="qml-qtquick-extras-tumblercolumn.html#delegate-prop"/>
+            <keyword name="font" id="Gauge::font" ref="qml-qtquick-extras-gauge.html#font-prop"/>
+            <keyword name="formatValue" id="Gauge::formatValue" ref="qml-qtquick-extras-gauge.html#formatValue-prop"/>
+            <keyword name="getColumn" id="Tumbler::getColumn" ref="qml-qtquick-extras-tumbler.html#getColumn-method"/>
+            <keyword name="highlight" id="TumblerColumn::highlight" ref="qml-qtquick-extras-tumblercolumn.html#highlight-prop"/>
+            <keyword name="hovered" id="Dial::hovered" ref="qml-qtquick-extras-dial.html#hovered-prop"/>
+            <keyword name="insertColumn" id="Tumbler::insertColumn" ref="qml-qtquick-extras-tumbler.html#insertColumn-method"/>
+            <keyword name="insertItem" id="PieMenu::insertItem" ref="qml-qtquick-extras-piemenu.html#insertItem-method"/>
+            <keyword name="maximumValue" id="CircularGauge::maximumValue" ref="qml-qtquick-extras-circulargauge.html#maximumValue-prop"/>
+            <keyword name="maximumValue" id="Dial::maximumValue" ref="qml-qtquick-extras-dial.html#maximumValue-prop"/>
+            <keyword name="maximumValue" id="Gauge::maximumValue" ref="qml-qtquick-extras-gauge.html#maximumValue-prop"/>
+            <keyword name="menuItems" id="PieMenu::menuItems" ref="qml-qtquick-extras-piemenu.html#menuItems-prop"/>
+            <keyword name="minimumValue" id="CircularGauge::minimumValue" ref="qml-qtquick-extras-circulargauge.html#minimumValue-prop"/>
+            <keyword name="minimumValue" id="Dial::minimumValue" ref="qml-qtquick-extras-dial.html#minimumValue-prop"/>
+            <keyword name="minimumValue" id="Gauge::minimumValue" ref="qml-qtquick-extras-gauge.html#minimumValue-prop"/>
+            <keyword name="minorTickmarkCount" id="Gauge::minorTickmarkCount" ref="qml-qtquick-extras-gauge.html#minorTickmarkCount-prop"/>
+            <keyword name="model" id="TumblerColumn::model" ref="qml-qtquick-extras-tumblercolumn.html#model-prop"/>
+            <keyword name="on" id="StatusIndicator::on" ref="qml-qtquick-extras-statusindicator-obsolete.html#on-prop"/>
+            <keyword name="orientation" id="Gauge::orientation" ref="qml-qtquick-extras-gauge.html#orientation-prop"/>
+            <keyword name="popup" id="PieMenu::popup" ref="qml-qtquick-extras-piemenu.html#popup-method"/>
+            <keyword name="pressed" id="Dial::pressed" ref="qml-qtquick-extras-dial.html#pressed-prop"/>
+            <keyword name="progress" id="DelayButton::progress" ref="qml-qtquick-extras-delaybutton.html#progress-prop"/>
+            <keyword name="removeItem" id="PieMenu::removeItem" ref="qml-qtquick-extras-piemenu.html#removeItem-method"/>
+            <keyword name="role" id="TumblerColumn::role" ref="qml-qtquick-extras-tumblercolumn.html#role-prop"/>
+            <keyword name="selectionAngle" id="PieMenu::selectionAngle" ref="qml-qtquick-extras-piemenu.html#selectionAngle-prop"/>
+            <keyword name="setCurrentIndexAt" id="Tumbler::setCurrentIndexAt" ref="qml-qtquick-extras-tumbler.html#setCurrentIndexAt-method"/>
+            <keyword name="source" id="Picture::source" ref="qml-qtquick-extras-picture.html#source-prop"/>
+            <keyword name="stepSize" id="CircularGauge::stepSize" ref="qml-qtquick-extras-circulargauge.html#stepSize-prop"/>
+            <keyword name="stepSize" id="Dial::stepSize" ref="qml-qtquick-extras-dial.html#stepSize-prop"/>
+            <keyword name="tickmarkAlignment" id="Gauge::tickmarkAlignment" ref="qml-qtquick-extras-gauge.html#tickmarkAlignment-prop"/>
+            <keyword name="tickmarkStepSize" id="Gauge::tickmarkStepSize" ref="qml-qtquick-extras-gauge.html#tickmarkStepSize-prop"/>
+            <keyword name="tickmarksVisible" id="CircularGauge::tickmarksVisible" ref="qml-qtquick-extras-circulargauge.html#tickmarksVisible-prop"/>
+            <keyword name="tickmarksVisible" id="Dial::tickmarksVisible" ref="qml-qtquick-extras-dial.html#tickmarksVisible-prop"/>
+            <keyword name="title" id="PieMenu::title" ref="qml-qtquick-extras-piemenu.html#title-prop"/>
+            <keyword name="triggerMode" id="PieMenu::triggerMode" ref="qml-qtquick-extras-piemenu.html#triggerMode-prop"/>
+            <keyword name="value" id="CircularGauge::value" ref="qml-qtquick-extras-circulargauge.html#value-prop"/>
+            <keyword name="value" id="Dial::value" ref="qml-qtquick-extras-dial.html#value-prop"/>
+            <keyword name="value" id="Gauge::value" ref="qml-qtquick-extras-gauge.html#value-prop"/>
+            <keyword name="visible" id="TumblerColumn::visible" ref="qml-qtquick-extras-tumblercolumn.html#visible-prop"/>
+            <keyword name="width" id="TumblerColumn::width" ref="qml-qtquick-extras-tumblercolumn.html#width-prop"/>
+        </keywords>
+        <files>
+            <file>images/arrow_bc.png</file>
+            <file>images/bgrContent.png</file>
+            <file>images/btn_next.png</file>
+            <file>images/btn_prev.png</file>
+            <file>images/bullet_dn.png</file>
+            <file>images/bullet_sq.png</file>
+            <file>images/circulargauge.png</file>
+            <file>images/delaybutton-activated.png</file>
+            <file>images/delaybutton-progress.png</file>
+            <file>images/delaybutton.png</file>
+            <file>images/dial.png</file>
+            <file>images/gauge.png</file>
+            <file>images/home.png</file>
+            <file>images/ico_note.png</file>
+            <file>images/ico_note_attention.png</file>
+            <file>images/ico_out.png</file>
+            <file>images/logo.png</file>
+            <file>images/piemenu-boundingItem-example.png</file>
+            <file>images/piemenu-boundingItem-null-example.png</file>
+            <file>images/piemenu.png</file>
+            <file>images/qtquickextras-example-dashboard.png</file>
+            <file>images/qtquickextras-example-flat.png</file>
+            <file>images/qtquickextras-example-gallery.png</file>
+            <file>images/statusindicator-active.png</file>
+            <file>images/statusindicator-green.png</file>
+            <file>images/statusindicator-inactive.png</file>
+            <file>images/togglebutton-checked.png</file>
+            <file>images/togglebutton-unchecked.png</file>
+            <file>images/tumbler.png</file>
+            <file>qml-qtquick-extras-circulargauge-members.html</file>
+            <file>qml-qtquick-extras-circulargauge.html</file>
+            <file>qml-qtquick-extras-delaybutton-members.html</file>
+            <file>qml-qtquick-extras-delaybutton.html</file>
+            <file>qml-qtquick-extras-dial-members.html</file>
+            <file>qml-qtquick-extras-dial.html</file>
+            <file>qml-qtquick-extras-gauge-members.html</file>
+            <file>qml-qtquick-extras-gauge.html</file>
+            <file>qml-qtquick-extras-picture-members.html</file>
+            <file>qml-qtquick-extras-picture.html</file>
+            <file>qml-qtquick-extras-piemenu-members.html</file>
+            <file>qml-qtquick-extras-piemenu-obsolete.html</file>
+            <file>qml-qtquick-extras-piemenu.html</file>
+            <file>qml-qtquick-extras-statusindicator-members.html</file>
+            <file>qml-qtquick-extras-statusindicator-obsolete.html</file>
+            <file>qml-qtquick-extras-statusindicator.html</file>
+            <file>qml-qtquick-extras-togglebutton-members.html</file>
+            <file>qml-qtquick-extras-togglebutton.html</file>
+            <file>qml-qtquick-extras-tumbler-members.html</file>
+            <file>qml-qtquick-extras-tumbler.html</file>
+            <file>qml-qtquick-extras-tumblercolumn-members.html</file>
+            <file>qml-qtquick-extras-tumblercolumn.html</file>
+            <file>qtquick-extras-qmlmodule.html</file>
+            <file>qtquickextras-dashboard-example.html</file>
+            <file>qtquickextras-examples.html</file>
+            <file>qtquickextras-flat-example.html</file>
+            <file>qtquickextras-gallery-example.html</file>
+            <file>qtquickextras-index.html</file>
+            <file>qtquickextras-overview.html</file>
+            <file>style/offline-simple.css</file>
+            <file>style/offline.css</file>
+        </files>
+    </filterSection>
+</QtHelpProject>

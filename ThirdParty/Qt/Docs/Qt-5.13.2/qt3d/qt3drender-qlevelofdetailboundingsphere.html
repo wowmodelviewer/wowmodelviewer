@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qlevelofdetailboundingsphere.cpp -->
+  <title>QLevelOfDetailBoundingSphere Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QLevelOfDetailBoundingSphere</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QLevelOfDetailBoundingSphere Class</h1>
+<span class="small-subtitle">(<a href="qt3drender-qlevelofdetailboundingsphere.html">Qt3DRender::QLevelOfDetailBoundingSphere</a>)<br/></span>
+<!-- $$$QLevelOfDetailBoundingSphere-brief -->
+<p>The <a href="qt3drender-qlevelofdetailboundingsphere.html">QLevelOfDetailBoundingSphere</a> class provides a simple spherical volume, defined by its center and radius. <a href="#details">More...</a></p>
+<!-- @@@QLevelOfDetailBoundingSphere -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QLevelOfDetailBoundingSphere&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3drender</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.9</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-levelofdetailboundingsphere.html">LevelOfDetailBoundingSphere</a></td></tr></table></div><p>This class was introduced in  Qt 5.9.</p>
+<ul>
+<li><a href="qt3drender-qlevelofdetailboundingsphere-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qt3drender-qlevelofdetailboundingsphere.html#center-prop">center</a></b> : const QVector3D</li>
+<li class="fn"><b><a href="qt3drender-qlevelofdetailboundingsphere.html#radius-prop">radius</a></b> : const float</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qlevelofdetailboundingsphere.html#QLevelOfDetailBoundingSphere">QLevelOfDetailBoundingSphere</a></b>(QVector3D <i>center</i> = QVector3D(), float <i>radius</i> = 1.0f)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector3D </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qlevelofdetailboundingsphere.html#center-prop">center</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> float </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qlevelofdetailboundingsphere.html#radius-prop">radius</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QLevelOfDetailBoundingSphere-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QLevelOfDetailBoundingSphere -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$center-prop$$$center -->
+<h3 class="fn" id="center-prop"><a name="center-prop"></a><span class="name">center</span> : const <span class="type"><a href="../qtgui/qvector3d.html">QVector3D</a></span></h3>
+<p>Specifies the center of the bounding sphere</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QVector3D </td><td class="memItemRight bottomAlign"><span class="name"><b>center</b></span>() const</td></tr>
+</table></div>
+<!-- @@@center -->
+<!-- $$$radius-prop$$$radius -->
+<h3 class="fn" id="radius-prop"><a name="radius-prop"></a><span class="name">radius</span> : const <span class="type">float</span></h3>
+<p>Specifies the radius of the bounding sphere</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> float </td><td class="memItemRight bottomAlign"><span class="name"><b>radius</b></span>() const</td></tr>
+</table></div>
+<!-- @@@radius -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QLevelOfDetailBoundingSphere[overload1]$$$QLevelOfDetailBoundingSphereQVector3Dfloat -->
+<h3 class="fn" id="QLevelOfDetailBoundingSphere"><a name="QLevelOfDetailBoundingSphere"></a>QLevelOfDetailBoundingSphere::<span class="name">QLevelOfDetailBoundingSphere</span>(<span class="type"><a href="../qtgui/qvector3d.html">QVector3D</a></span> <i>center</i> = QVector3D(), <span class="type">float</span> <i>radius</i> = 1.0f)</h3>
+<p>Constructs a new <a href="qt3drender-qlevelofdetailboundingsphere.html">QLevelOfDetailBoundingSphere</a> with the specified <i>center</i> and <i>radius</i>.</p>
+<!-- @@@QLevelOfDetailBoundingSphere -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

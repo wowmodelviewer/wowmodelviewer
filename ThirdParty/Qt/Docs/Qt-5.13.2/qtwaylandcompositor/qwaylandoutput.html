@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwaylandoutput.cpp -->
+  <title>QWaylandOutput Class | Qt Wayland Compositor 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwaylandcompositor-index.html">Qt Wayland Compositor</a></td><td ><a href="qtwaylandcompositor-module.html">C++ Classes</a></td><td >QWaylandOutput</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwaylandcompositor-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QWaylandOutput Class</h1>
+<!-- $$$QWaylandOutput-brief -->
+<p>The <a href="qwaylandoutput.html">QWaylandOutput</a> class represents a displayable area managed by the compositor. <a href="#details">More...</a></p>
+<!-- @@@QWaylandOutput -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QWaylandOutput&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += waylandcompositor</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> QWaylandObject</td></tr></table></div><p>This class was introduced in  Qt 5.8.</p>
+<ul>
+<li><a href="qwaylandoutput-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#Subpixel-enum">Subpixel</a></b> { SubpixelUnknown, SubpixelNone, SubpixelHorizontalRgb, SubpixelHorizontalBgr, SubpixelVerticalRgb, SubpixelVerticalBgr }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#Transform-enum">Transform</a></b> { TransformNormal, Transform90, Transform180, Transform270, ..., TransformFlipped270 }</td></tr>
+</table></div>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qwaylandoutput.html#availableGeometry-prop">availableGeometry</a></b> : QRect</li>
+<li class="fn"><b><a href="qwaylandoutput.html#geometry-prop">geometry</a></b> : const QRect</li>
+<li class="fn"><b><a href="qwaylandoutput.html#manufacturer-prop">manufacturer</a></b> : QString</li>
+<li class="fn"><b><a href="qwaylandoutput.html#model-prop">model</a></b> : QString</li>
+<li class="fn"><b><a href="qwaylandoutput.html#physicalSize-prop">physicalSize</a></b> : QSize</li>
+<li class="fn"><b><a href="qwaylandoutput.html#position-prop">position</a></b> : QPoint</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qwaylandoutput.html#scaleFactor-prop">scaleFactor</a></b> : int</li>
+<li class="fn"><b><a href="qwaylandoutput.html#sizeFollowsWindow-prop">sizeFollowsWindow</a></b> : bool</li>
+<li class="fn"><b><a href="qwaylandoutput.html#subpixel-prop">subpixel</a></b> : QWaylandOutput::Subpixel</li>
+<li class="fn"><b><a href="qwaylandoutput.html#transform-prop">transform</a></b> : QWaylandOutput::Transform</li>
+<li class="fn"><b><a href="qwaylandoutput.html#window-prop">window</a></b> : QWindow*</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#QWaylandOutput-1">QWaylandOutput</a></b>(QWaylandCompositor *<i>compositor</i>, QWindow *<i>window</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#dtor.QWaylandOutput">~QWaylandOutput</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#addMode">addMode</a></b>(const QWaylandOutputMode &amp;<i>mode</i>, bool <i>preferred</i> = false)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRect </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#availableGeometry-prop">availableGeometry</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandCompositor *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#compositor">compositor</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandOutputMode </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#currentMode">currentMode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#frameStarted">frameStarted</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRect </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#geometry-prop">geometry</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#manufacturer-prop">manufacturer</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#model-prop">model</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QWaylandOutputMode&gt; </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#modes">modes</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#physicalSize-prop">physicalSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPoint </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#position-prop">position</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#scaleFactor-prop">scaleFactor</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#sendFrameCallbacks">sendFrameCallbacks</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#availableGeometry-prop">setAvailableGeometry</a></b>(const QRect &amp;<i>availableGeometry</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#setCurrentMode">setCurrentMode</a></b>(const QWaylandOutputMode &amp;<i>mode</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#manufacturer-prop">setManufacturer</a></b>(const QString &amp;<i>manufacturer</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#model-prop">setModel</a></b>(const QString &amp;<i>model</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#physicalSize-prop">setPhysicalSize</a></b>(const QSize &amp;<i>size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#position-prop">setPosition</a></b>(const QPoint &amp;<i>pt</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#scaleFactor-prop">setScaleFactor</a></b>(int <i>scale</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#sizeFollowsWindow-prop">setSizeFollowsWindow</a></b>(bool <i>follow</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#subpixel-prop">setSubpixel</a></b>(const QWaylandOutput::Subpixel &amp;<i>subpixel</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#transform-prop">setTransform</a></b>(const QWaylandOutput::Transform &amp;<i>transform</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#window-prop">setWindow</a></b>(QWindow *<i>window</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#sizeFollowsWindow-prop">sizeFollowsWindow</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandOutput::Subpixel </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#subpixel-prop">subpixel</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandOutput::Transform </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#transform-prop">transform</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#update">update</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWindow *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#window-prop">window</a></b>() const</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#availableGeometry-prop">availableGeometryChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#compositor-prop">compositorChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#geometry-prop">geometryChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#manufacturer-prop">manufacturerChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#model-prop">modelChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#physicalSize-prop">physicalSizeChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#position-prop">positionChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#scaleFactor-prop">scaleFactorChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#sizeFollowsWindow-prop">sizeFollowsWindowChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#subpixel-prop">subpixelChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#transform-prop">transformChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#window-prop">windowChanged</a></b>()</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandOutput *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandoutput.html#fromResource">fromResource</a></b>(wl_resource *<i>resource</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QWaylandOutput-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qwaylandoutput.html">QWaylandOutput</a> manages a rectangular area within bounds of the compositor's geometry, to use it for displaying client content. This could, for instance, be a screen managed by the <a href="qml-qtwayland-compositor-waylandcompositor.html">WaylandCompositor</a>.</p>
+<p>The class corresponds to the <code>wl_output</code> interface in the Wayland protocol.</p>
+</div>
+<!-- @@@QWaylandOutput -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Subpixel$$$SubpixelUnknown$$$SubpixelNone$$$SubpixelHorizontalRgb$$$SubpixelHorizontalBgr$$$SubpixelVerticalRgb$$$SubpixelVerticalBgr -->
+<h3 class="fn" id="Subpixel-enum"><a name="Subpixel-enum"></a>enum QWaylandOutput::<span class="name">Subpixel</span></h3>
+<p>This enum type is used to specify the subpixel arrangement of a <a href="qwaylandoutput.html">QWaylandOutput</a>.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QWaylandOutput::SubpixelUnknown</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The subpixel arrangement is not set.</td></tr>
+<tr><td class="topAlign"><code>QWaylandOutput::SubpixelNone</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">There are no subpixels.</td></tr>
+<tr><td class="topAlign"><code>QWaylandOutput::SubpixelHorizontalRgb</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The subpixels are arranged horizontally in red, green, blue order.</td></tr>
+<tr><td class="topAlign"><code>QWaylandOutput::SubpixelHorizontalBgr</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">The subpixels are arranged horizontally in blue, green, red order.</td></tr>
+<tr><td class="topAlign"><code>QWaylandOutput::SubpixelVerticalRgb</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">The subpixels are arranged vertically in red, green, blue order.</td></tr>
+<tr><td class="topAlign"><code>QWaylandOutput::SubpixelVerticalBgr</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">The subpixels are arranged vertically in blue, green, red order.</td></tr>
+</table></div>
+<p><b>See also </b><a href="qwaylandoutput.html#subpixel-prop">QWaylandOutput::subpixel</a>.</p>
+<!-- @@@Subpixel -->
+<!-- $$$Transform$$$TransformNormal$$$Transform90$$$Transform180$$$Transform270$$$TransformFlipped$$$TransformFlipped90$$$TransformFlipped180$$$TransformFlipped270 -->
+<h3 class="fn" id="Transform-enum"><a name="Transform-enum"></a>enum QWaylandOutput::<span class="name">Transform</span></h3>
+<p>* * This enum type is used to specify the orientation of a <a href="qwaylandoutput.html">QWaylandOutput</a>. * *</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QWaylandOutput::TransformNormal</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The orientation is normal. *</td></tr>
+<tr><td class="topAlign"><code>QWaylandOutput::Transform90</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The orientation is rotated 90 degrees. *</td></tr>
+<tr><td class="topAlign"><code>QWaylandOutput::Transform180</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The orientation is rotated 180 degrees. *</td></tr>
+<tr><td class="topAlign"><code>QWaylandOutput::Transform270</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">The orientation is rotated 270 degrees. *</td></tr>
+<tr><td class="topAlign"><code>QWaylandOutput::TransformFlipped</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">The orientation is mirrored. *</td></tr>
+<tr><td class="topAlign"><code>QWaylandOutput::TransformFlipped90</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">The orientation is mirrored, and rotated 90 degrees. *</td></tr>
+<tr><td class="topAlign"><code>QWaylandOutput::TransformFlipped180</code></td><td class="topAlign tblval"><code>6</code></td><td class="topAlign">The orientation is mirrored, and rotated 180 degrees. *</td></tr>
+<tr><td class="topAlign"><code>QWaylandOutput::TransformFlipped270</code></td><td class="topAlign tblval"><code>7</code></td><td class="topAlign">The orientation is mirrored, and rotated 270 degrees. * *</td></tr>
+</table></div>
+<p><b>See also </b><a href="qwaylandoutput.html#transform-prop">QWaylandOutput::transform</a>.</p>
+<!-- @@@Transform -->
+</div>
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$availableGeometry-prop$$$availableGeometry$$$setAvailableGeometryconstQRect&$$$availableGeometryChanged -->
+<h3 class="fn" id="availableGeometry-prop"><a name="availableGeometry-prop"></a><span class="name">availableGeometry</span> : <span class="type"><a href="../qtcore/qrect.html">QRect</a></span></h3>
+<p>This property holds the geometry of the <a href="qwaylandoutput.html">QWaylandOutput</a> available for displaying content. The available geometry is in output coordinates space, starts from 0,0 and it's as big as the output by default.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QRect </td><td class="memItemRight bottomAlign"><span class="name"><b>availableGeometry</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setAvailableGeometry</b></span>(const QRect &amp;<i>availableGeometry</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>availableGeometryChanged</b></span>()</td></tr>
+</table></div>
+<p><b>See also </b><a href="qwaylandoutput.html#currentMode">QWaylandOutput::currentMode</a> and <a href="qwaylandoutput.html#geometry-prop">QWaylandOutput::geometry</a>.</p>
+<!-- @@@availableGeometry -->
+<!-- $$$geometry-prop$$$geometry$$$geometryChanged -->
+<h3 class="fn" id="geometry-prop"><a name="geometry-prop"></a><span class="name">geometry</span> : const <span class="type"><a href="../qtcore/qrect.html">QRect</a></span></h3>
+<p>This property holds the geometry of the <a href="qwaylandoutput.html">QWaylandOutput</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QRect </td><td class="memItemRight bottomAlign"><span class="name"><b>geometry</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>geometryChanged</b></span>()</td></tr>
+</table></div>
+<p><b>See also </b><a href="qwaylandoutput.html#currentMode">QWaylandOutput::currentMode</a>.</p>
+<!-- @@@geometry -->
+<!-- $$$manufacturer-prop$$$manufacturer$$$setManufacturerconstQString&$$$manufacturerChanged -->
+<h3 class="fn" id="manufacturer-prop"><a name="manufacturer-prop"></a><span class="name">manufacturer</span> : <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>This property holds a textual description of the manufacturer of this <a href="qwaylandoutput.html">QWaylandOutput</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>manufacturer</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setManufacturer</b></span>(const QString &amp;<i>manufacturer</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>manufacturerChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@manufacturer -->
+<!-- $$$model-prop$$$model$$$setModelconstQString&$$$modelChanged -->
+<h3 class="fn" id="model-prop"><a name="model-prop"></a><span class="name">model</span> : <span class="type"><a href="../qtcore/qstring.html">QString</a></span></h3>
+<p>This property holds a textual description of the model of this <a href="qwaylandoutput.html">QWaylandOutput</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>model</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setModel</b></span>(const QString &amp;<i>model</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>modelChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@model -->
+<!-- $$$physicalSize-prop$$$physicalSize$$$setPhysicalSizeconstQSize&$$$physicalSizeChanged -->
+<h3 class="fn" id="physicalSize-prop"><a name="physicalSize-prop"></a><span class="name">physicalSize</span> : <span class="type"><a href="../qtcore/qsize.html">QSize</a></span></h3>
+<p>This property holds the physical size of the <a href="qwaylandoutput.html">QWaylandOutput</a> in millimeters.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QSize </td><td class="memItemRight bottomAlign"><span class="name"><b>physicalSize</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setPhysicalSize</b></span>(const QSize &amp;<i>size</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>physicalSizeChanged</b></span>()</td></tr>
+</table></div>
+<p><b>See also </b><a href="qwaylandoutput.html#geometry-prop">QWaylandOutput::geometry</a> and <a href="qwaylandoutput.html#currentMode">QWaylandOutput::currentMode</a>.</p>
+<!-- @@@physicalSize -->
+<!-- $$$position-prop$$$position$$$setPositionconstQPoint&$$$positionChanged -->
+<h3 class="fn" id="position-prop"><a name="position-prop"></a><span class="name">position</span> : <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span></h3>
+<p>This property holds the position of this <a href="qwaylandoutput.html">QWaylandOutput</a> in the compositor's coordinate system.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QPoint </td><td class="memItemRight bottomAlign"><span class="name"><b>position</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setPosition</b></span>(const QPoint &amp;<i>pt</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>positionChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@position -->
+<!-- $$$scaleFactor-prop$$$scaleFactor$$$setScaleFactorint$$$scaleFactorChanged -->
+<h3 class="fn" id="scaleFactor-prop"><a name="scaleFactor-prop"></a><span class="name">scaleFactor</span> : <span class="type">int</span></h3>
+<p>This property holds the factor by which the <a href="qwaylandcompositor.html">QWaylandCompositor</a> scales surface buffers before they are displayed. This is used on high density output devices where unscaled content would be too small to be practical. The client can in turn set the scale factor of its buffer to match the output if it prefers to provide high resolution content that is suitable for the output device.</p>
+<p>The default is 1 (no scaling).</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>scaleFactor</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setScaleFactor</b></span>(int <i>scale</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>scaleFactorChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@scaleFactor -->
+<!-- $$$sizeFollowsWindow-prop$$$sizeFollowsWindow$$$setSizeFollowsWindowbool$$$sizeFollowsWindowChanged -->
+<h3 class="fn" id="sizeFollowsWindow-prop"><a name="sizeFollowsWindow-prop"></a><span class="name">sizeFollowsWindow</span> : <span class="type">bool</span></h3>
+<p>This property controls whether the size of the <a href="qwaylandoutput.html">QWaylandOutput</a> matches the size of its window.</p>
+<p>If this property is true, all modes previously added are replaced by a mode that matches window size and screen refresh rate.</p>
+<p>The default is false.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>sizeFollowsWindow</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setSizeFollowsWindow</b></span>(bool <i>follow</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>sizeFollowsWindowChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@sizeFollowsWindow -->
+<!-- $$$subpixel-prop$$$subpixel$$$setSubpixelconstQWaylandOutput::Subpixel&$$$subpixelChanged -->
+<h3 class="fn" id="subpixel-prop"><a name="subpixel-prop"></a><span class="name">subpixel</span> : <span class="type"><a href="qwaylandoutput.html#Subpixel-enum">QWaylandOutput::Subpixel</a></span></h3>
+<p>This property holds the subpixel arrangement of this <a href="qwaylandoutput.html">QWaylandOutput</a>. The default is <a href="qwaylandoutput.html#Subpixel-enum">QWaylandOutput::SubpixelUnknown</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QWaylandOutput::Subpixel </td><td class="memItemRight bottomAlign"><span class="name"><b>subpixel</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setSubpixel</b></span>(const QWaylandOutput::Subpixel &amp;<i>subpixel</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>subpixelChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@subpixel -->
+<!-- $$$transform-prop$$$transform$$$setTransformconstQWaylandOutput::Transform&$$$transformChanged -->
+<h3 class="fn" id="transform-prop"><a name="transform-prop"></a><span class="name">transform</span> : <span class="type"><a href="qwaylandoutput.html#Transform-enum">QWaylandOutput::Transform</a></span></h3>
+<p>This property holds the transformation that the <a href="qwaylandcompositor.html">QWaylandCompositor</a> applies to a surface to compensate for the orientation of the <a href="qwaylandoutput.html">QWaylandOutput</a>.</p>
+<p>The default is <a href="qwaylandoutput.html#Transform-enum">QWaylandOutput::TransformNormal</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QWaylandOutput::Transform </td><td class="memItemRight bottomAlign"><span class="name"><b>transform</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setTransform</b></span>(const QWaylandOutput::Transform &amp;<i>transform</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>transformChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@transform -->
+<!-- $$$window-prop$$$window$$$setWindowQWindow*$$$windowChanged -->
+<h3 class="fn" id="window-prop"><a name="window-prop"></a><span class="name">window</span> : <span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span>*</h3>
+<p>This property holds the <a href="../qtgui/qwindow.html">QWindow</a> for this <a href="qwaylandoutput.html">QWaylandOutput</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QWindow *</td><td class="memItemRight bottomAlign"><span class="name"><b>window</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setWindow</b></span>(QWindow *<i>window</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>windowChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@window -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QWaylandOutput$$$QWaylandOutputQWaylandCompositor*QWindow* -->
+<h3 class="fn" id="QWaylandOutput-1"><a name="QWaylandOutput-1"></a>QWaylandOutput::<span class="name">QWaylandOutput</span>(<span class="type"><a href="qwaylandcompositor.html">QWaylandCompositor</a></span> *<i>compositor</i>, <span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> *<i>window</i>)</h3>
+<p>Constructs a <a href="qwaylandoutput.html">QWaylandOutput</a> in <i>compositor</i> and with the specified <i>window</i>. The <a href="qwaylandcompositor.html#create">create()</a> function must be called on the <i>compositor</i> before constructing a <a href="qwaylandoutput.html">QWaylandOutput</a> for it.</p>
+<p>The <a href="qwaylandoutput.html">QWaylandOutput</a> object is initialized later, in reaction to an event. At this point it is added as an output for the <i>compositor</i>. If it is the first <a href="qwaylandoutput.html">QWaylandOutput</a> object created for this <i>compositor</i>, it becomes the <a href="qwaylandcompositor.html#defaultOutput-prop">default output</a>.</p>
+<!-- @@@QWaylandOutput -->
+<!-- $$$~QWaylandOutput[overload1]$$$~QWaylandOutput -->
+<h3 class="fn" id="dtor.QWaylandOutput"><a name="dtor.QWaylandOutput"></a><code>[override virtual] </code>QWaylandOutput::<span class="name">~QWaylandOutput</span>()</h3>
+<p>Destroys the <a href="qwaylandoutput.html">QWaylandOutput</a>.</p>
+<!-- @@@~QWaylandOutput -->
+<!-- $$$addMode[overload1]$$$addModeconstQWaylandOutputMode&bool -->
+<h3 class="fn" id="addMode"><a name="addMode"></a><span class="type">void</span> QWaylandOutput::<span class="name">addMode</span>(const <span class="type"><a href="qwaylandoutputmode.html">QWaylandOutputMode</a></span> &amp;<i>mode</i>, <span class="type">bool</span> <i>preferred</i> = false)</h3>
+<p>Adds the mode <i>mode</i> to the output and mark it as preferred if <i>preferred</i> is <code>true</code>. Please note there can only be one preferred mode.</p>
+<!-- @@@addMode -->
+<!-- $$$compositor -->
+<h3 class="fn" id="compositor"><a name="compositor"></a><span class="type"><a href="qwaylandcompositor.html">QWaylandCompositor</a></span> *QWaylandOutput::<span class="name">compositor</span>() const</h3>
+<p>Returns the compositor for this <a href="qwaylandoutput.html">QWaylandOutput</a>.</p>
+<p><b>Note:</b> Getter function for property <a href="">compositor</a>. </p><!-- @@@compositor -->
+<!-- $$$currentMode[overload1]$$$currentMode -->
+<h3 class="fn" id="currentMode"><a name="currentMode"></a><span class="type"><a href="qwaylandoutputmode.html">QWaylandOutputMode</a></span> QWaylandOutput::<span class="name">currentMode</span>() const</h3>
+<p>Returns the output's size in pixels and refresh rate in mHz. If the current mode is not set it will return an invalid mode.</p>
+<p><b>See also </b><a href="qwaylandoutput.html#setCurrentMode">setCurrentMode</a>(), <a href="qwaylandoutput.html#modes">QWaylandOutput::modes</a>, and <a href="qwaylandoutputmode.html">QWaylandOutputMode</a>.</p>
+<!-- @@@currentMode -->
+<!-- $$$frameStarted[overload1]$$$frameStarted -->
+<h3 class="fn" id="frameStarted"><a name="frameStarted"></a><span class="type">void</span> QWaylandOutput::<span class="name">frameStarted</span>()</h3>
+<p>Informs <a href="qwaylandoutput.html">QWaylandOutput</a> that a frame has started.</p>
+<!-- @@@frameStarted -->
+<!-- $$$fromResource[overload1]$$$fromResourcewl_resource* -->
+<h3 class="fn" id="fromResource"><a name="fromResource"></a><code>[static] </code><span class="type">QWaylandOutput</span> *QWaylandOutput::<span class="name">fromResource</span>(<span class="type">wl_resource</span> *<i>resource</i>)</h3>
+<p>Returns the <a href="qwaylandoutput.html">QWaylandOutput</a> corresponding to <i>resource</i>.</p>
+<!-- @@@fromResource -->
+<!-- $$$modes[overload1]$$$modes -->
+<h3 class="fn" id="modes"><a name="modes"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qwaylandoutputmode.html">QWaylandOutputMode</a></span>&gt; QWaylandOutput::<span class="name">modes</span>() const</h3>
+<p>Returns the list of modes.</p>
+<!-- @@@modes -->
+<!-- $$$sendFrameCallbacks[overload1]$$$sendFrameCallbacks -->
+<h3 class="fn" id="sendFrameCallbacks"><a name="sendFrameCallbacks"></a><span class="type">void</span> QWaylandOutput::<span class="name">sendFrameCallbacks</span>()</h3>
+<p>Sends pending frame callbacks.</p>
+<!-- @@@sendFrameCallbacks -->
+<!-- $$$setCurrentMode[overload1]$$$setCurrentModeconstQWaylandOutputMode& -->
+<h3 class="fn" id="setCurrentMode"><a name="setCurrentMode"></a><span class="type">void</span> QWaylandOutput::<span class="name">setCurrentMode</span>(const <span class="type"><a href="qwaylandoutputmode.html">QWaylandOutputMode</a></span> &amp;<i>mode</i>)</h3>
+<p>Sets the current mode. The mode <i>mode</i> must have been previously added.</p>
+<p><b>See also </b><a href="qwaylandoutput.html#currentMode">currentMode</a>(), <a href="qwaylandoutput.html#modes">QWaylandOutput::modes</a>, and <a href="qwaylandoutputmode.html">QWaylandOutputMode</a>.</p>
+<!-- @@@setCurrentMode -->
+<!-- $$$update[overload1]$$$update -->
+<h3 class="fn" id="update"><a name="update"></a><code>[virtual] </code><span class="type">void</span> QWaylandOutput::<span class="name">update</span>()</h3>
+<p>Schedules a <a href="../qtcore/qevent.html#Type-enum">QEvent::UpdateRequest</a> to be delivered to the <a href="qwaylandoutput.html">QWaylandOutput</a>'s <a href="qwaylandoutput.html#window-prop">window</a>.</p>
+<p><b>See also </b><a href="../qtgui/qwindow.html#requestUpdate">QWindow::requestUpdate</a>().</p>
+<!-- @@@update -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

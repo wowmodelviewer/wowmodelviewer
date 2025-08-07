@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtqml.qdoc -->
+  <title>Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td >Qt QML</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#getting-started">Getting Started</a></li>
+<li class="level1"><a href="#qml-and-qml-types">QML and QML Types</a></li>
+<li class="level2"><a href="#lists-and-models">Lists and Models</a></li>
+<li class="level1"><a href="#javascript-environment-for-qml-applications">JavaScript Environment for QML Applications</a></li>
+<li class="level1"><a href="#integrating-qml-with-c-applications">Integrating QML with C++ Applications</a></li>
+<li class="level1"><a href="#additional-frameworks">Additional Frameworks</a></li>
+<li class="level1"><a href="#licenses-and-attributions">Licenses and Attributions</a></li>
+<li class="level1"><a href="#guides-and-other-information">Guides and Other Information</a></li>
+<li class="level2"><a href="#reference">Reference</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt QML</h1>
+<span class="subtitle"></span>
+<!-- $$$qtqml-index.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The Qt QML module provides a framework for developing applications and libraries with the <a href="../qtdoc/qmlapplications.html">QML language</a>. It defines and implements the language and engine infrastructure, and provides an API to enable application developers to extend the QML language with custom types and integrate QML code with JavaScript and C++. The Qt QML module provides both a <a href="qtqml-qmlmodule.html">QML API</a> and a <a href="qtqml-module.html">C++ API</a>.</p>
+<p>Note that while the Qt QML module provides the language and infrastructure for QML applications, the <a href="../qtquick/qtquick-index.html">Qt Quick</a> module provides many visual components, model-view support, an animation framework, and much more for building user interfaces.</p>
+<p>For those new to QML and Qt Quick, please see <a href="../qtdoc/qmlapplications.html">QML Applications</a> for an introduction to writing QML applications.</p>
+<a name="getting-started"></a>
+<h2 id="getting-started">Getting Started</h2>
+<p>To include the definitions of the module's classes, use the following directive:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QtQml&gt;</span>
+
+</pre>
+<p>The QML types in Qt QML are available through the <code>QtQml</code> import. To use the types, add the following import statement to your .qml file:</p>
+<pre class="qml">
+
+  import QtQml 2.13
+
+</pre>
+<p>To link against the module, add this line to your <a href="../qmake/qmake-manual.html">qmake</a> <code>.pro</code> file:</p>
+<pre class="cpp">
+
+  QT <span class="operator">+</span><span class="operator">=</span> qml
+
+</pre>
+<a name="qml-and-qml-types"></a>
+<h2 id="qml-and-qml-types">QML and QML Types</h2>
+<p>The Qt QML module contains the QML framework and important QML types used in applications. The constructs of QML are described in the <a href="qmlreference.html">The QML Reference</a>.</p>
+<p>In addition to the <a href="qtqml-typesystem-basictypes.html">QML Basic Types</a>, the module comes with the following QML object types:</p>
+<ul>
+<li><a href="qml-qtqml-component.html">Component</a></li>
+<li><a href="qml-qtqml-qtobject.html">QtObject</a></li>
+<li><a href="qml-qtqml-binding.html">Binding</a></li>
+<li><a href="qml-qtqml-connections.html">Connections</a></li>
+<li><a href="qml-qtqml-timer.html">Timer</a></li>
+</ul>
+<p>The <a href="qml-qtqml-qt.html">Qt</a> global object provides useful enums and functions for various QML types.</p>
+<a name="lists-and-models"></a>
+<h3 id="lists-and-models">Lists and Models</h3>
+<p>New in Qt 5.1, the model types are moved to a submodule, <code>QtQml.Models</code>. The <a href="qtqml-models-qmlmodule.html">Qt QML Models</a> page has more information.</p>
+<ul>
+<li><a href="qml-qtqml-models-delegatemodel.html">DelegateModel</a></li>
+<li><a href="qml-qtqml-models-delegatemodelgroup.html">DelegateModelGroup</a></li>
+<li><a href="qml-qtqml-models-listelement.html">ListElement</a></li>
+<li><a href="qml-qtqml-models-listmodel.html">ListModel</a></li>
+<li><a href="qml-qtqml-models-objectmodel.html">ObjectModel</a></li>
+</ul>
+<a name="javascript-environment-for-qml-applications"></a>
+<h2 id="javascript-environment-for-qml-applications">JavaScript Environment for QML Applications</h2>
+<p>JavaScript expressions allow QML code to contain application logic. Qt QML provides the framework for running JavaScript expressions in QML and from C++.</p>
+<p>These sections are from <a href="qmlreference.html">The QML Reference</a>.</p>
+<ul>
+<li><a href="qtqml-javascript-topic.html">Integrating QML and JavaScript</a></li>
+<li><a href="qtqml-javascript-expressions.html">Using JavaScript Expressions with QML</a></li>
+<li><a href="qtqml-javascript-dynamicobjectcreation.html">Dynamic QML Object Creation from JavaScript</a></li>
+<li><a href="qtqml-javascript-resources.html">Defining JavaScript Resources In QML</a></li>
+<li><a href="qtqml-javascript-imports.html">Importing JavaScript Resources In QML</a></li>
+<li><a href="qtqml-javascript-hostenvironment.html">JavaScript Host Environment</a></li>
+</ul>
+<a name="integrating-qml-with-c-applications"></a>
+<h2 id="integrating-qml-with-c-applications">Integrating QML with C++ Applications</h2>
+<p>The module also provides the framework for running QML applications. The QML framework allows QML code to contain JavaScript expressions and for the QML code to interact with C++ code.</p>
+<ul>
+<li><a href="qtqml-cppclasses-topic.html">Important C++ Classes Provided By The Qt QML Module</a></li>
+<li><a href="qtqml-cppintegration-topic.html">Integrating QML and C++</a></li>
+</ul>
+<a name="additional-frameworks"></a>
+<h2 id="additional-frameworks">Additional Frameworks</h2>
+<ul>
+<li><a href="qmlstatemachine.html">The Declarative State Machine Framework</a></li>
+</ul>
+<a name="licenses-and-attributions"></a>
+<h2 id="licenses-and-attributions">Licenses and Attributions</h2>
+<p>Qt QML is available under commercial licenses from <a href="http://www.qt.io/about-us/">The Qt Company</a>. In addition, it is available under free software licenses. Since Qt 5.4, these free software licenses are <a href="http://www.gnu.org/licenses/lgpl-3.0.html">GNU Lesser General Public License, version 3</a>, or the <a href="http://www.gnu.org/licenses/gpl-2.0.html">GNU General Public License, version 2</a>. See <a href="../qtdoc/licensing.html">Qt Licensing</a> for further details.</p>
+<p>Furthermore Qt QML in Qt 5.13.2 may contain third party modules under following permissive licenses:</p>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtqml-attribution-masm.html">JavaScriptCore Macro Assembler</a></p></td><td class="tblDescr"><p>BSD 2-clause &quot;Simplified&quot; License</p></td></tr>
+</table></div>
+<a name="guides-and-other-information"></a>
+<h2 id="guides-and-other-information">Guides and Other Information</h2>
+<p>Further information for writing QML applications:</p>
+<ul>
+<li><a href="qmlreference.html">The QML Reference</a></li>
+<li><a href="../qtdoc/qmlapplications.html">QML Applications</a> - essential information for application development with QML and Qt Quick</li>
+<li><a href="../qtquick/qtquick-index.html">Qt Quick</a> - a module which provides a set of QML types and C++ classes for building user interfaces and applications with QML</li>
+</ul>
+<a name="reference"></a>
+<h3 id="reference">Reference</h3>
+<ul>
+<li><a href="qtqml-module.html">C++ Classes</a></li>
+<li><a href="qtqml-qmlmodule.html">QML Types</a></li>
+<li><a href="qmlextendingexamples.html">Examples</a></li>
+</ul>
+</div>
+<!-- @@@qtqml-index.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

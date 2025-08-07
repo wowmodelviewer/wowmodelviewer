@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- TableViewColumn.qml -->
+  <title>TableViewColumn QML Type | Qt Quick Controls 1 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols1-index.html">Qt Quick Controls 1</a></td><td ><a href="qtquick-controls-qmlmodule.html">QML Types</a></td><td >TableViewColumn QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols1-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">TableViewColumn QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$TableViewColumn-brief -->
+<p>Used to define columns in a <a href="qml-qtquick-controls-tableview.html">TableView</a> or in a <a href="qml-qtquick-controls-treeview.html">TreeView</a>. <a href="#details">More...</a></p>
+<!-- @@@TableViewColumn -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Controls 1.4</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.1</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="../qtqml/qml-qtqml-qtobject.html">QtObject</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-controls-tableviewcolumn-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls-tableviewcolumn.html#delegate-prop">delegate</a></b></b> : Component</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls-tableviewcolumn.html#elideMode-prop">elideMode</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls-tableviewcolumn.html#horizontalAlignment-prop">horizontalAlignment</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls-tableviewcolumn.html#movable-prop">movable</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls-tableviewcolumn.html#resizable-prop">resizable</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls-tableviewcolumn.html#role-prop">role</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls-tableviewcolumn.html#title-prop">title</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls-tableviewcolumn.html#visible-prop">visible</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls-tableviewcolumn.html#width-prop">width</a></b></b> : int</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtquick-controls-tableviewcolumn.html#resizeToContents-method">resizeToContents</a></b></b>()</li>
+</ul>
+<!-- $$$TableViewColumn-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p class="centerAlign"><img src="images/tableview.png" alt="" /></p><p><a href="qml-qtquick-controls-tableviewcolumn.html">TableViewColumn</a> represents a column within a <a href="qml-qtquick-controls-tableview.html">TableView</a> or a <a href="qml-qtquick-controls-treeview.html">TreeView</a>. It provides properties to decide how the data in that column is presented.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls-tableview.html">TableView</a></span> {
+      <span class="type"><a href="qml-qtquick-controls-tableviewcolumn.html">TableViewColumn</a></span> { <span class="name">role</span>: <span class="string">&quot;title&quot;</span>; <span class="name">title</span>: <span class="string">&quot;Title&quot;</span>; <span class="name">width</span>: <span class="number">100</span> }
+      <span class="type"><a href="qml-qtquick-controls-tableviewcolumn.html">TableViewColumn</a></span> { <span class="name">role</span>: <span class="string">&quot;author&quot;</span>; <span class="name">title</span>: <span class="string">&quot;Author&quot;</span>; <span class="name">width</span>: <span class="number">200</span> }
+      <span class="name">model</span>: <span class="name">libraryModel</span>
+  }
+
+</pre>
+<p><b>See also </b><a href="qml-qtquick-controls-tableview.html">TableView</a> and <a href="qml-qtquick-controls-treeview.html">TreeView</a>.</p>
+<!-- @@@TableViewColumn -->
+<h2>Property Documentation</h2>
+<!-- $$$delegate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="delegate-prop"></a><span class="name">delegate</span> : <span class="type"><a href="../qtqml/qml-qtqml-component.html">Component</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The delegate of the column. This can be used to set the itemDelagate of a <a href="qml-qtquick-controls-tableview.html">TableView</a> or <a href="qml-qtquick-controls-treeview.html">TreeView</a> for a specific column.</p>
+<p>In the delegate you have access to the following special properties:</p>
+<ul>
+<li>styleData.selected - if the item is currently selected</li>
+<li>styleData.value - the value or text for this item</li>
+<li>styleData.textColor - the default text color for an item</li>
+<li>styleData.row - the index of the row</li>
+<li>styleData.column - the index of the column</li>
+<li>styleData.<a href="qml-qtquick-controls-tableviewcolumn.html#elideMode-prop">elideMode</a> - the elide mode of the column</li>
+<li>styleData.textAlignment - the horizontal text alignment of the column</li>
+</ul>
+</div></div><!-- @@@delegate -->
+<br/>
+<!-- $$$elideMode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="elideMode-prop"></a><span class="name">elideMode</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The text elide mode of the column. Allowed values are:</p>
+<ul>
+<li>Text.ElideNone</li>
+<li>Text.ElideLeft</li>
+<li>Text.ElideMiddle</li>
+<li>Text.ElideRight - the default</li>
+</ul>
+<p><b>See also </b><a href="../qtquick/qml-qtquick-text.html#elide-prop">elide</a>.</p>
+</div></div><!-- @@@elideMode -->
+<br/>
+<!-- $$$horizontalAlignment -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="horizontalAlignment-prop"></a><span class="name">horizontalAlignment</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The horizontal text alignment of the column. Allowed values are:</p>
+<ul>
+<li>Text.AlignLeft - the default</li>
+<li>Text.AlignRight</li>
+<li>Text.AlignHCenter</li>
+<li>Text.AlignJustify</li>
+</ul>
+<p><b>See also </b><a href="../qtquick/qml-qtquick-text.html#horizontalAlignment-prop">horizontalAlignment</a>.</p>
+</div></div><!-- @@@horizontalAlignment -->
+<br/>
+<!-- $$$movable -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="movable-prop"></a><span class="name">movable</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Determines if the column should be movable. The default value is <code>true</code>.</p>
+<p><b>Note: </b>A non-movable column may get indirectly moved if adjacent columns are movable.</p><p>This property was introduced in  QtQuick.Controls 1.1.</p>
+</div></div><!-- @@@movable -->
+<br/>
+<!-- $$$resizable -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="resizable-prop"></a><span class="name">resizable</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Determines if the column should be resizable.</p>
+<p>This property was introduced in  QtQuick.Controls 1.1.</p>
+</div></div><!-- @@@resizable -->
+<br/>
+<!-- $$$role -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="role-prop"></a><span class="name">role</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The model <code>role</code> of the column.</p>
+</div></div><!-- @@@role -->
+<br/>
+<!-- $$$title -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="title-prop"></a><span class="name">title</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The title text of the column.</p>
+</div></div><!-- @@@title -->
+<br/>
+<!-- $$$visible -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="visible-prop"></a><span class="name">visible</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The visible status of the column.</p>
+</div></div><!-- @@@visible -->
+<br/>
+<!-- $$$width -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="width-prop"></a><span class="name">width</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The current width of the column. The default value depends on platform. If only one column is defined, the width expands to the viewport.</p>
+</div></div><!-- @@@width -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$resizeToContents[overload1]$$$resizeToContents -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="resizeToContents-method"></a><span class="type">void</span> <span class="name">resizeToContents</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Resizes the column so that the implicitWidth of the contents on every row will fit.</p>
+<p>This method was introduced in  QtQuick.Controls 1.2.</p>
+</div></div><!-- @@@resizeToContents -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

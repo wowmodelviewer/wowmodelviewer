@@ -1,0 +1,745 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- performance.qdoc -->
+  <title>Performance Considerations And Suggestions | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Performance Considerations And Suggestions</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#timing-considerations">Timing Considerations</a></li>
+<li class="level1"><a href="#profiling">Profiling</a></li>
+<li class="level1"><a href="#javascript-code">JavaScript Code</a></li>
+<li class="level2"><a href="#bindings">Bindings</a></li>
+<li class="level2"><a href="#type-conversion">Type-Conversion</a></li>
+<li class="level2"><a href="#resolving-properties">Resolving Properties</a></li>
+<li class="level2"><a href="#property-bindings">Property Bindings</a></li>
+<li class="level2"><a href="#sequence-tips">Sequence tips</a></li>
+<li class="level2"><a href="#value-type-tips">Value-Type tips</a></li>
+<li class="level2"><a href="#other-javascript-objects">Other JavaScript Objects</a></li>
+<li class="level1"><a href="#common-interface-elements">Common Interface Elements</a></li>
+<li class="level2"><a href="#text-elements">Text Elements</a></li>
+<li class="level2"><a href="#images">Images</a></li>
+<li class="level2"><a href="#position-elements-with-anchors">Position Elements With Anchors</a></li>
+<li class="level1"><a href="#models-and-views">Models and Views</a></li>
+<li class="level2"><a href="#custom-c-models">Custom C++ Models</a></li>
+<li class="level2"><a href="#listmodel-qml-type">ListModel QML Type</a></li>
+<li class="level2"><a href="#views">Views</a></li>
+<li class="level1"><a href="#visual-effects">Visual Effects</a></li>
+<li class="level2"><a href="#animations">Animations</a></li>
+<li class="level2"><a href="#particles">Particles</a></li>
+<li class="level1"><a href="#controlling-element-lifetime">Controlling Element Lifetime</a></li>
+<li class="level2"><a href="#lazy-initialization">Lazy Initialization</a></li>
+<li class="level2"><a href="#destroy-unused-elements">Destroy Unused Elements</a></li>
+<li class="level1"><a href="#rendering">Rendering</a></li>
+<li class="level2"><a href="#clipping">Clipping</a></li>
+<li class="level2"><a href="#over-drawing-and-invisible-elements">Over-drawing and Invisible Elements</a></li>
+<li class="level2"><a href="#translucent-vs-opaque">Translucent vs Opaque</a></li>
+<li class="level2"><a href="#shaders">Shaders</a></li>
+<li class="level1"><a href="#memory-allocation-and-collection">Memory Allocation And Collection</a></li>
+<li class="level2"><a href="#tips-for-qml-application-developers">Tips For QML Application Developers</a></li>
+<li class="level2"><a href="#memory-allocation-in-a-qml-application">Memory Allocation in a QML Application</a></li>
+<li class="level2"><a href="#in-depth-memory-allocation-considerations">In-Depth Memory Allocation Considerations</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Performance Considerations And Suggestions</h1>
+<span class="subtitle"></span>
+<!-- $$$qtquick-performance.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="timing-considerations"></a>
+<h2 id="timing-considerations">Timing Considerations</h2>
+<p>As an application developer, you must strive to allow the rendering engine to achieve a consistent 60 frames-per-second refresh rate. 60 FPS means that there is approximately 16 milliseconds between each frame in which processing can be done, which includes the processing required to upload the draw primitives to the graphics hardware.</p>
+<p>In practice, this means that the application developer should:</p>
+<ul>
+<li>use asynchronous, event-driven programming wherever possible</li>
+<li>use worker threads to do significant processing</li>
+<li>never manually spin the event loop</li>
+<li>never spend more than a couple of milliseconds per frame within blocking functions</li>
+</ul>
+<p>Failure to do so will result in skipped frames, which has a drastic effect on the user experience.</p>
+<p><b>Note: </b>A pattern which is tempting, but should <i>never</i> be used, is creating your own <a href="../qtcore/qeventloop.html">QEventLoop</a> or calling <a href="../qtcore/qcoreapplication.html#processEvents">QCoreApplication::processEvents</a>() in order to avoid blocking within a C++ code block invoked from QML. This is dangerous, because when an event loop is entered in a signal handler or binding, the QML engine continues to run other bindings, animations, transitions, etc. Those bindings can then cause side effects which, for example, destroy the hierarchy containing your event loop.</p><a name="profiling"></a>
+<h2 id="profiling">Profiling</h2>
+<p>The most important tip is: use the QML profiler included with Qt Creator. Knowing where time is spent in an application will allow you to focus on problem areas which actually exist, rather than problem areas which potentially exist. See the Qt Creator manual for more information on how to use the QML profiling tool.</p>
+<p>Determining which bindings are being run the most often, or which functions your application is spending the most time in, will allow you to decide whether you need to optimize the problem areas, or redesign some implementation details of your application so that the performance is improved. Attempting to optimize code without profiling is likely to result in very minor rather than significant performance improvements.</p>
+<a name="javascript-code"></a>
+<h2 id="javascript-code">JavaScript Code</h2>
+<p>Most QML applications will have a large amount of JavaScript code in them, in the form of dynamic functions, signal handlers, and property binding expressions. This is generally not a problem. Thanks to some optimizations in the QML engine, such as those done to the bindings compiler, it can (in some use-cases) be faster than calling a C++ function. However, care must be taken to ensure that unnecessary processing isn't triggered accidentally.</p>
+<a name="bindings"></a>
+<h3 id="bindings">Bindings</h3>
+<p>There are two types of bindings in QML: optimized and non-optimized bindings. It is a good idea to keep binding expressions as simple as possible, since the QML engine makes use of an optimized binding expression evaluator which can evaluate simple binding expressions without needing to switch into a full JavaScript execution environment. These optimized bindings are evaluated far more efficiently than more complex (non-optimized) bindings. The basic requirement for optimization of bindings is that the type information of every symbol accessed must be known at compile time.</p>
+<p>Things to avoid in binding expressions to maximize optimizability:</p>
+<ul>
+<li>declaring intermediate JavaScript variables</li>
+<li>accessing &quot;var&quot; properties</li>
+<li>calling JavaScript functions</li>
+<li>constructing closures or defining functions within the binding expression</li>
+<li>accessing properties outside of the immediate evaluation scope</li>
+<li>writing to other properties as side effects</li>
+</ul>
+<p>Bindings are quickest when they know the type of objects and properties they are working with. This means that non-final property lookup in a binding expression can be slower in some cases, where it is possible that the type of the property being looked up has been changed (for example, by a derived type).</p>
+<p>The immediate evaluation scope can be summarized by saying that it contains:</p>
+<ul>
+<li>the properties of the expression scope object (for binding expressions, this is the object to which the property binding belongs)</li>
+<li>ids of any objects in the component</li>
+<li>the properties of the root item in the component</li>
+</ul>
+<p>Ids of objects from other components and properties of any such objects, as well as symbols defined in or included from a JavaScript import, are not in the immediate evaluation scope, and thus bindings which access any of those things will not be optimized.</p>
+<p>Note that if a binding cannot be optimized by the QML engine's optimized binding expression evaluator, and thus must be evaluated by the full JavaScript environment, some of the tips listed above will no longer apply. For example, it can sometimes be beneficial to cache the result of property resolution in an intermediate JavaScript variable in a very complex binding. Upcoming sections have more information on these sorts of optimizations.</p>
+<a name="type-conversion"></a>
+<h3 id="type-conversion">Type-Conversion</h3>
+<p>One major cost of using JavaScript is that in most cases when a property from a QML type is accessed, a JavaScript object with an external resource containing the underlying C++ data (or a reference to it) is created. In most cases, this is fairly inexpensive, but in others it can be quite expensive. One example of where it is expensive is assigning a C++ <a href="../qtcore/qvariant.html#QVariantMap-typedef">QVariantMap</a> <a href="../qtcore/qobject.html#Q_PROPERTY">Q_PROPERTY</a> to a QML &quot;variant&quot; property. Lists can also be expensive, although sequences of specific types (<a href="../qtcore/qlist.html">QList</a> of int, qreal, bool, <a href="../qtcore/qstring.html">QString</a>, and <a href="../qtcore/qurl.html">QUrl</a>) should be inexpensive; other list types involve an expensive conversion cost (creating a new JavaScript Array, and adding new types one by one, with per-type conversion from C++ type instance to JavaScript value).</p>
+<p>Converting between some basic property types (such as &quot;string&quot; and &quot;url&quot; properties) can also be expensive. Using the closest matching property type will avoid unnecessary conversion.</p>
+<p>If you must expose a <a href="../qtcore/qvariant.html#QVariantMap-typedef">QVariantMap</a> to QML, use a &quot;var&quot; property rather than a &quot;variant&quot; property. In general, &quot;property var&quot; should be considered to be superior to &quot;property variant&quot; for every use-case from <a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a> 2.0 and newer (note that &quot;property variant&quot; is marked as obsolete), as it allows a true JavaScript reference to be stored (which can reduce the number of conversions required in certain expressions).</p>
+<a name="resolving-properties"></a>
+<h3 id="resolving-properties">Resolving Properties</h3>
+<p>Property resolution takes time. While in some cases the result of a lookup can be cached and reused, it is always best to avoid doing unnecessary work altogether, if possible.</p>
+<p>In the following example, we have a block of code which is run often (in this case, it is the contents of an explicit loop; but it could be a commonly-evaluated binding expression, for example) and in it, we resolve the object with the &quot;rect&quot; id and its &quot;color&quot; property multiple times:</p>
+<pre class="qml">
+
+  <span class="comment">// bad.qml</span>
+  import QtQuick 2.3
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">width</span>: <span class="number">400</span>
+      <span class="name">height</span>: <span class="number">200</span>
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">rect</span>
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">color</span>: <span class="string">&quot;blue&quot;</span>
+      }
+
+      <span class="keyword">function</span> <span class="name">printValue</span>(which, value) {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="name">which</span> <span class="operator">+</span> <span class="string">&quot; = &quot;</span> <span class="operator">+</span> <span class="name">value</span>);
+      }
+
+      <span class="name">Component</span>.onCompleted: {
+          var t0 = new <span class="name">Date</span>();
+          <span class="keyword">for</span> (var i = 0; <span class="name">i</span> <span class="operator">&lt;</span> <span class="number">1000</span>; ++<span class="name">i</span>) {
+              <span class="name">printValue</span>(<span class="string">&quot;red&quot;</span>, <span class="name">rect</span>.<span class="name">color</span>.<span class="name">r</span>);
+              <span class="name">printValue</span>(<span class="string">&quot;green&quot;</span>, <span class="name">rect</span>.<span class="name">color</span>.<span class="name">g</span>);
+              <span class="name">printValue</span>(<span class="string">&quot;blue&quot;</span>, <span class="name">rect</span>.<span class="name">color</span>.<span class="name">b</span>);
+              <span class="name">printValue</span>(<span class="string">&quot;alpha&quot;</span>, <span class="name">rect</span>.<span class="name">color</span>.<span class="name">a</span>);
+          }
+          var t1 = new <span class="name">Date</span>();
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Took: &quot;</span> <span class="operator">+</span> (<span class="name">t1</span>.<span class="name">valueOf</span>() <span class="operator">-</span> <span class="name">t0</span>.<span class="name">valueOf</span>()) <span class="operator">+</span> <span class="string">&quot; milliseconds for 1000 iterations&quot;</span>);
+      }
+  }
+
+</pre>
+<p>We could instead resolve the common base just once in the block:</p>
+<pre class="qml">
+
+  <span class="comment">// good.qml</span>
+  import QtQuick 2.3
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">width</span>: <span class="number">400</span>
+      <span class="name">height</span>: <span class="number">200</span>
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">rect</span>
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">color</span>: <span class="string">&quot;blue&quot;</span>
+      }
+
+      <span class="keyword">function</span> <span class="name">printValue</span>(which, value) {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="name">which</span> <span class="operator">+</span> <span class="string">&quot; = &quot;</span> <span class="operator">+</span> <span class="name">value</span>);
+      }
+
+      <span class="name">Component</span>.onCompleted: {
+          var t0 = new <span class="name">Date</span>();
+          <span class="keyword">for</span> (var i = 0; <span class="name">i</span> <span class="operator">&lt;</span> <span class="number">1000</span>; ++<span class="name">i</span>) {
+              var rectColor = <span class="name">rect</span>.<span class="name">color</span>; <span class="comment">// resolve the common base.</span>
+              <span class="name">printValue</span>(<span class="string">&quot;red&quot;</span>, <span class="name">rectColor</span>.<span class="name">r</span>);
+              <span class="name">printValue</span>(<span class="string">&quot;green&quot;</span>, <span class="name">rectColor</span>.<span class="name">g</span>);
+              <span class="name">printValue</span>(<span class="string">&quot;blue&quot;</span>, <span class="name">rectColor</span>.<span class="name">b</span>);
+              <span class="name">printValue</span>(<span class="string">&quot;alpha&quot;</span>, <span class="name">rectColor</span>.<span class="name">a</span>);
+          }
+          var t1 = new <span class="name">Date</span>();
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Took: &quot;</span> <span class="operator">+</span> (<span class="name">t1</span>.<span class="name">valueOf</span>() <span class="operator">-</span> <span class="name">t0</span>.<span class="name">valueOf</span>()) <span class="operator">+</span> <span class="string">&quot; milliseconds for 1000 iterations&quot;</span>);
+      }
+  }
+
+</pre>
+<p>Just this simple change results in a significant performance improvement. Note that the code above can be improved even further (since the property being looked up never changes during the loop processing), by hoisting the property resolution out of the loop, as follows:</p>
+<pre class="qml">
+
+  <span class="comment">// better.qml</span>
+  import QtQuick 2.3
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">width</span>: <span class="number">400</span>
+      <span class="name">height</span>: <span class="number">200</span>
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">rect</span>
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">color</span>: <span class="string">&quot;blue&quot;</span>
+      }
+
+      <span class="keyword">function</span> <span class="name">printValue</span>(which, value) {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="name">which</span> <span class="operator">+</span> <span class="string">&quot; = &quot;</span> <span class="operator">+</span> <span class="name">value</span>);
+      }
+
+      <span class="name">Component</span>.onCompleted: {
+          var t0 = new <span class="name">Date</span>();
+          var rectColor = <span class="name">rect</span>.<span class="name">color</span>; <span class="comment">// resolve the common base outside the tight loop.</span>
+          <span class="keyword">for</span> (var i = 0; <span class="name">i</span> <span class="operator">&lt;</span> <span class="number">1000</span>; ++<span class="name">i</span>) {
+              <span class="name">printValue</span>(<span class="string">&quot;red&quot;</span>, <span class="name">rectColor</span>.<span class="name">r</span>);
+              <span class="name">printValue</span>(<span class="string">&quot;green&quot;</span>, <span class="name">rectColor</span>.<span class="name">g</span>);
+              <span class="name">printValue</span>(<span class="string">&quot;blue&quot;</span>, <span class="name">rectColor</span>.<span class="name">b</span>);
+              <span class="name">printValue</span>(<span class="string">&quot;alpha&quot;</span>, <span class="name">rectColor</span>.<span class="name">a</span>);
+          }
+          var t1 = new <span class="name">Date</span>();
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Took: &quot;</span> <span class="operator">+</span> (<span class="name">t1</span>.<span class="name">valueOf</span>() <span class="operator">-</span> <span class="name">t0</span>.<span class="name">valueOf</span>()) <span class="operator">+</span> <span class="string">&quot; milliseconds for 1000 iterations&quot;</span>);
+      }
+  }
+
+</pre>
+<a name="property-bindings"></a>
+<h3 id="property-bindings">Property Bindings</h3>
+<p>A property binding expression will be re-evaluated if any of the properties it references are changed. As such, binding expressions should be kept as simple as possible.</p>
+<p>If you have a loop where you do some processing, but only the final result of the processing is important, it is often better to update a temporary accumulator which you afterwards assign to the property you need to update, rather than incrementally updating the property itself, in order to avoid triggering re-evaluation of binding expressions during the intermediate stages of accumulation.</p>
+<p>The following contrived example illustrates this point:</p>
+<pre class="qml">
+
+  <span class="comment">// bad.qml</span>
+  import QtQuick 2.3
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">root</span>
+      <span class="name">width</span>: <span class="number">200</span>
+      <span class="name">height</span>: <span class="number">200</span>
+      property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">accumulatedValue</span>: <span class="number">0</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">text</span>: <span class="name">root</span>.<span class="name">accumulatedValue</span>.<span class="name">toString</span>()
+          <span class="name">onTextChanged</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;text binding re-evaluated&quot;</span>)
+      }
+
+      <span class="name">Component</span>.onCompleted: {
+          var someData = [ <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">20</span> ];
+          <span class="keyword">for</span> (var i = 0; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">someData</span>.<span class="name">length</span>; ++<span class="name">i</span>) {
+              <span class="name">accumulatedValue</span> <span class="operator">=</span> <span class="name">accumulatedValue</span> <span class="operator">+</span> <span class="name">someData</span>[<span class="name">i</span>];
+          }
+      }
+  }
+
+</pre>
+<p>The loop in the onCompleted handler causes the &quot;text&quot; property binding to be re-evaluated six times (which then results in any other property bindings which rely on the text value, as well as the onTextChanged signal handler, to be re-evaluated each time, and lays out the text for display each time). This is clearly unnecessary in this case, since we really only care about the final value of the accumulation.</p>
+<p>It could be rewritten as follows:</p>
+<pre class="qml">
+
+  <span class="comment">// good.qml</span>
+  import QtQuick 2.3
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">root</span>
+      <span class="name">width</span>: <span class="number">200</span>
+      <span class="name">height</span>: <span class="number">200</span>
+      property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">accumulatedValue</span>: <span class="number">0</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">text</span>: <span class="name">root</span>.<span class="name">accumulatedValue</span>.<span class="name">toString</span>()
+          <span class="name">onTextChanged</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;text binding re-evaluated&quot;</span>)
+      }
+
+      <span class="name">Component</span>.onCompleted: {
+          var someData = [ <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">20</span> ];
+          var temp = <span class="name">accumulatedValue</span>;
+          <span class="keyword">for</span> (var i = 0; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">someData</span>.<span class="name">length</span>; ++<span class="name">i</span>) {
+              <span class="name">temp</span> <span class="operator">=</span> <span class="name">temp</span> <span class="operator">+</span> <span class="name">someData</span>[<span class="name">i</span>];
+          }
+          <span class="name">accumulatedValue</span> <span class="operator">=</span> <span class="name">temp</span>;
+      }
+  }
+
+</pre>
+<a name="sequence-tips"></a>
+<h3 id="sequence-tips">Sequence tips</h3>
+<p>As mentioned earlier, some sequence types are fast (for example, <a href="../qtcore/qlist.html">QList</a>&lt;int&gt;, <a href="../qtcore/qlist.html">QList</a>&lt;qreal&gt;, <a href="../qtcore/qlist.html">QList</a>&lt;bool&gt;, <a href="../qtcore/qlist.html">QList</a>&lt;<a href="../qtcore/qstring.html">QString</a>&gt;, <a href="../qtcore/qstringlist.html">QStringList</a> and <a href="../qtcore/qlist.html">QList</a>&lt;<a href="../qtcore/qurl.html">QUrl</a>&gt;) while others will be much slower. Aside from using these types wherever possible instead of slower types, there are some other performance-related semantics you need to be aware of to achieve the best performance.</p>
+<p>Firstly, there are two different implementations for sequence types: one for where the sequence is a <a href="../qtcore/qobject.html#Q_PROPERTY">Q_PROPERTY</a> of a <a href="../qtcore/qobject.html">QObject</a> (we'll call this a reference sequence), and another for where the sequence is returned from a <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a> function of a <a href="../qtcore/qobject.html">QObject</a> (we'll call this a copy sequence).</p>
+<p>A reference sequence is read and written via <a href="../qtcore/qmetaobject.html#property">QMetaObject::property</a>() and thus is read and written as a <a href="../qtcore/qvariant.html">QVariant</a>. This means that changing the value of any element in the sequence from JavaScript will result in three steps occurring: the complete sequence will be read from the <a href="../qtcore/qobject.html">QObject</a> (as a <a href="../qtcore/qvariant.html">QVariant</a>, but then cast to a sequence of the correct type); the element at the specified index will be changed in that sequence; and the complete sequence will be written back to the <a href="../qtcore/qobject.html">QObject</a> (as a <a href="../qtcore/qvariant.html">QVariant</a>).</p>
+<p>A copy sequence is far simpler as the actual sequence is stored in the JavaScript object's resource data, so no read/modify/write cycle occurs (instead, the resource data is modified directly).</p>
+<p>Therefore, writes to elements of a reference sequence will be much slower than writes to elements of a copy sequence. In fact, writing to a single element of an N-element reference sequence is equivalent in cost to assigning a N-element copy sequence to that reference sequence, so you're usually better off modifying a temporary copy sequence and then assigning the result to a reference sequence, during computation.</p>
+<p>Assume the existence (and prior registration into the &quot;Qt.example 1.0&quot; namespace) of the following C++ type:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> SequenceTypeExample : <span class="keyword">public</span> <span class="type"><a href="../qtquick/qquickitem.html">QQuickItem</a></span>
+  {
+      Q_OBJECT
+      Q_PROPERTY (<span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span><span class="operator">&gt;</span> qrealListProperty READ qrealListProperty WRITE setQrealListProperty NOTIFY qrealListPropertyChanged)
+
+  <span class="keyword">public</span>:
+      SequenceTypeExample() : <span class="type"><a href="../qtquick/qquickitem.html">QQuickItem</a></span>() { m_list <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">1.1</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">2.2</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">3.3</span>; }
+      <span class="operator">~</span>SequenceTypeExample() {}
+
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span><span class="operator">&gt;</span> qrealListProperty() <span class="keyword">const</span> { <span class="keyword">return</span> m_list; }
+      <span class="type">void</span> setQrealListProperty(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span><span class="operator">&gt;</span> <span class="operator">&amp;</span>list) { m_list <span class="operator">=</span> list; <span class="keyword">emit</span> qrealListPropertyChanged(); }
+
+  <span class="keyword">signals</span>:
+      <span class="type">void</span> qrealListPropertyChanged();
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span><span class="operator">&gt;</span> m_list;
+  };
+
+</pre>
+<p>The following example writes to elements of a reference sequence in a tight loop, resulting in bad performance:</p>
+<pre class="qml">
+
+  <span class="comment">// bad.qml</span>
+  import QtQuick 2.3
+  import Qt.example 1.0
+
+  <span class="type">SequenceTypeExample</span> {
+      <span class="name">id</span>: <span class="name">root</span>
+      <span class="name">width</span>: <span class="number">200</span>
+      <span class="name">height</span>: <span class="number">200</span>
+
+      <span class="name">Component</span>.onCompleted: {
+          var t0 = new <span class="name">Date</span>();
+          <span class="name">qrealListProperty</span>.<span class="name">length</span> <span class="operator">=</span> <span class="number">100</span>;
+          <span class="keyword">for</span> (var i = 0; <span class="name">i</span> <span class="operator">&lt;</span> <span class="number">500</span>; ++<span class="name">i</span>) {
+              <span class="keyword">for</span> (var j = 0; <span class="name">j</span> <span class="operator">&lt;</span> <span class="number">100</span>; ++<span class="name">j</span>) {
+                  <span class="name">qrealListProperty</span>[<span class="name">j</span>] <span class="operator">=</span> <span class="name">j</span>;
+              }
+          }
+          var t1 = new <span class="name">Date</span>();
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;elapsed: &quot;</span> <span class="operator">+</span> (<span class="name">t1</span>.<span class="name">valueOf</span>() <span class="operator">-</span> <span class="name">t0</span>.<span class="name">valueOf</span>()) <span class="operator">+</span> <span class="string">&quot; milliseconds&quot;</span>);
+      }
+  }
+
+</pre>
+<p>The <a href="../qtcore/qobject.html">QObject</a> property read and write in the inner loop caused by the <code>&quot;qrealListProperty[j] = j&quot;</code> expression makes this code very suboptimal. Instead, something functionally equivalent but much faster would be:</p>
+<pre class="qml">
+
+  <span class="comment">// good.qml</span>
+  import QtQuick 2.3
+  import Qt.example 1.0
+
+  <span class="type">SequenceTypeExample</span> {
+      <span class="name">id</span>: <span class="name">root</span>
+      <span class="name">width</span>: <span class="number">200</span>
+      <span class="name">height</span>: <span class="number">200</span>
+
+      <span class="name">Component</span>.onCompleted: {
+          var t0 = new <span class="name">Date</span>();
+          var someData = [<span class="number">1.1</span>, <span class="number">2.2</span>, <span class="number">3.3</span>]
+          <span class="name">someData</span>.<span class="name">length</span> <span class="operator">=</span> <span class="number">100</span>;
+          <span class="keyword">for</span> (var i = 0; <span class="name">i</span> <span class="operator">&lt;</span> <span class="number">500</span>; ++<span class="name">i</span>) {
+              <span class="keyword">for</span> (var j = 0; <span class="name">j</span> <span class="operator">&lt;</span> <span class="number">100</span>; ++<span class="name">j</span>) {
+                  <span class="name">someData</span>[<span class="name">j</span>] <span class="operator">=</span> <span class="name">j</span>;
+              }
+              <span class="name">qrealListProperty</span> <span class="operator">=</span> <span class="name">someData</span>;
+          }
+          var t1 = new <span class="name">Date</span>();
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;elapsed: &quot;</span> <span class="operator">+</span> (<span class="name">t1</span>.<span class="name">valueOf</span>() <span class="operator">-</span> <span class="name">t0</span>.<span class="name">valueOf</span>()) <span class="operator">+</span> <span class="string">&quot; milliseconds&quot;</span>);
+      }
+  }
+
+</pre>
+<p>Secondly, a change signal for the property is emitted if any element in it changes. If you have many bindings to a particular element in a sequence property, it is better to create a dynamic property which is bound to that element, and use that dynamic property as the symbol in the binding expressions instead of the sequence element, as it will only cause re-evaluation of bindings if its value changes.</p>
+<p>This is an unusual use-case which most clients should never hit, but is worth being aware of, in case you find yourself doing something like this:</p>
+<pre class="qml">
+
+  <span class="comment">// bad.qml</span>
+  import QtQuick 2.3
+  import Qt.example 1.0
+
+  <span class="type">SequenceTypeExample</span> {
+      <span class="name">id</span>: <span class="name">root</span>
+
+      property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">firstBinding</span>: <span class="name">qrealListProperty</span>[<span class="number">1</span>] <span class="operator">+</span> <span class="number">10</span>;
+      property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">secondBinding</span>: <span class="name">qrealListProperty</span>[<span class="number">1</span>] <span class="operator">+</span> <span class="number">20</span>;
+      property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">thirdBinding</span>: <span class="name">qrealListProperty</span>[<span class="number">1</span>] <span class="operator">+</span> <span class="number">30</span>;
+
+      <span class="name">Component</span>.onCompleted: {
+          var t0 = new <span class="name">Date</span>();
+          <span class="keyword">for</span> (var i = 0; <span class="name">i</span> <span class="operator">&lt;</span> <span class="number">1000</span>; ++<span class="name">i</span>) {
+              <span class="name">qrealListProperty</span>[<span class="number">2</span>] <span class="operator">=</span> <span class="name">i</span>;
+          }
+          var t1 = new <span class="name">Date</span>();
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;elapsed: &quot;</span> <span class="operator">+</span> (<span class="name">t1</span>.<span class="name">valueOf</span>() <span class="operator">-</span> <span class="name">t0</span>.<span class="name">valueOf</span>()) <span class="operator">+</span> <span class="string">&quot; milliseconds&quot;</span>);
+      }
+  }
+
+</pre>
+<p>Note that even though only the element at index 2 is modified in the loop, the three bindings will all be re-evaluated since the granularity of the change signal is that the entire property has changed. As such, adding an intermediate binding can sometimes be beneficial:</p>
+<pre class="qml">
+
+  <span class="comment">// good.qml</span>
+  import QtQuick 2.3
+  import Qt.example 1.0
+
+  <span class="type">SequenceTypeExample</span> {
+      <span class="name">id</span>: <span class="name">root</span>
+
+      property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">intermediateBinding</span>: <span class="name">qrealListProperty</span>[<span class="number">1</span>]
+      property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">firstBinding</span>: <span class="name">intermediateBinding</span> <span class="operator">+</span> <span class="number">10</span>;
+      property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">secondBinding</span>: <span class="name">intermediateBinding</span> <span class="operator">+</span> <span class="number">20</span>;
+      property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">thirdBinding</span>: <span class="name">intermediateBinding</span> <span class="operator">+</span> <span class="number">30</span>;
+
+      <span class="name">Component</span>.onCompleted: {
+          var t0 = new <span class="name">Date</span>();
+          <span class="keyword">for</span> (var i = 0; <span class="name">i</span> <span class="operator">&lt;</span> <span class="number">1000</span>; ++<span class="name">i</span>) {
+              <span class="name">qrealListProperty</span>[<span class="number">2</span>] <span class="operator">=</span> <span class="name">i</span>;
+          }
+          var t1 = new <span class="name">Date</span>();
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;elapsed: &quot;</span> <span class="operator">+</span> (<span class="name">t1</span>.<span class="name">valueOf</span>() <span class="operator">-</span> <span class="name">t0</span>.<span class="name">valueOf</span>()) <span class="operator">+</span> <span class="string">&quot; milliseconds&quot;</span>);
+      }
+  }
+
+</pre>
+<p>In the above example, only the intermediate binding will be re-evaluated each time, resulting in a significant performance increase.</p>
+<a name="value-type-tips"></a>
+<h3 id="value-type-tips">Value-Type tips</h3>
+<p>Value-type properties (font, color, vector3d, etc) have similar <a href="../qtcore/qobject.html">QObject</a> property and change notification semantics to sequence type properties. As such, the tips given above for sequences are also applicable for value-type properties. While they are usually less of a problem with value-types (since the number of sub-properties of a value-type is usually far less than the number of elements in a sequence), any increase in the number of bindings being re-evaluated needlessly will have a negative impact on performance.</p>
+<a name="other-javascript-objects"></a>
+<h3 id="other-javascript-objects">Other JavaScript Objects</h3>
+<p>Different JavaScript engines provide different optimizations. The JavaScript engine which <a href="../qtquick/qtquick-index.html">Qt Quick 2</a> uses is optimized for object instantiation and property lookup, but the optimizations which it provides relies on certain criteria. If your application does not meet the criteria, the JavaScript engine falls back to a &quot;slow-path&quot; mode with much worse performance. As such, always try to ensure you meet the following criteria:</p>
+<ul>
+<li>Avoid using eval() if at all possible</li>
+<li>Do not delete properties of objects</li>
+</ul>
+<a name="common-interface-elements"></a>
+<h2 id="common-interface-elements">Common Interface Elements</h2>
+<a name="text-elements"></a>
+<h3 id="text-elements">Text Elements</h3>
+<p>Calculating text layouts can be a slow operation. Consider using the <code>PlainText</code> format instead of <code>StyledText</code> wherever possible, as this reduces the amount of work required of the layout engine. If you cannot use <code>PlainText</code> (as you need to embed images, or use tags to specify ranges of characters to have certain formatting (bold, italic, etc) as opposed to the entire text) then you should use <code>StyledText</code>.</p>
+<p>You should only use <code>AutoText</code> if the text might be (but probably isn't) <code>StyledText</code> as this mode will incur a parsing cost. The <code>RichText</code> mode should not be used, as <code>StyledText</code> provides almost all of its features at a fraction of its cost.</p>
+<a name="images"></a>
+<h3 id="images">Images</h3>
+<p>Images are a vital part of any user interface. Unfortunately, they are also a big source of problems due to the time it takes to load them, the amount of memory they consume, and the way in which they are used.</p>
+<a name="asynchronous-loading"></a>
+<h4 id="asynchronous-loading">Asynchronous Loading</h4>
+<p>Images are often quite large, and so it is wise to ensure that loading an image doesn't block the UI thread. Set the &quot;asynchronous&quot; property of the QML Image element to <code>true</code> to enable asynchronous loading of images from the local file system (remote images are always loaded asynchronously) where this would not result in a negative impact upon the aesthetics of the user interface.</p>
+<p>Image elements with the &quot;asynchronous&quot; property set to <code>true</code> will load images in a low-priority worker thread.</p>
+<a name="explicit-source-size"></a>
+<h4 id="explicit-source-size">Explicit Source Size</h4>
+<p>If your application loads a large image but displays it in a small-sized element, set the &quot;sourceSize&quot; property to the size of the element being rendered to ensure that the smaller-scaled version of the image is kept in memory, rather than the large one.</p>
+<p>Beware that changing the sourceSize will cause the image to be reloaded.</p>
+<a name="avoid-run-time-composition"></a>
+<h4 id="avoid-run-time-composition">Avoid Run-time Composition</h4>
+<p>Also remember that you can avoid doing composition work at run-time by providing the pre-composed image resource with your application (for example, providing elements with shadow effects).</p>
+<a name="avoid-smoothing-images"></a>
+<h4 id="avoid-smoothing-images">Avoid Smoothing Images</h4>
+<p>Enable <code>image.smooth</code> only if required. It is slower on some hardware, and it has no visual effect if the image is displayed in its natural size.</p>
+<a name="painting"></a>
+<h4 id="painting">Painting</h4>
+<p>Avoid painting the same area several times. Use Item as root element rather than Rectangle to avoid painting the background several times.</p>
+<a name="position-elements-with-anchors"></a>
+<h3 id="position-elements-with-anchors">Position Elements With Anchors</h3>
+<p>It is more efficient to use anchors rather than bindings to position items relative to each other. Consider this use of bindings to position rect2 relative to rect1:</p>
+<pre class="cpp">
+
+  Rectangle {
+      id: rect1
+      x: <span class="number">20</span>
+      width: <span class="number">200</span>; height: <span class="number">200</span>
+  }
+  Rectangle {
+      id: rect2
+      x: rect1<span class="operator">.</span>x
+      y: rect1<span class="operator">.</span>y <span class="operator">+</span> rect1<span class="operator">.</span>height
+      width: rect1<span class="operator">.</span>width <span class="operator">-</span> <span class="number">20</span>
+      height: <span class="number">200</span>
+  }
+
+</pre>
+<p>This is achieved more efficiently using anchors:</p>
+<pre class="cpp">
+
+  Rectangle {
+      id: rect1
+      x: <span class="number">20</span>
+      width: <span class="number">200</span>; height: <span class="number">200</span>
+  }
+  Rectangle {
+      id: rect2
+      height: <span class="number">200</span>
+      anchors<span class="operator">.</span>left: rect1<span class="operator">.</span>left
+      anchors<span class="operator">.</span>top: rect1<span class="operator">.</span>bottom
+      anchors<span class="operator">.</span>right: rect1<span class="operator">.</span>right
+      anchors<span class="operator">.</span>rightMargin: <span class="number">20</span>
+  }
+
+</pre>
+<p>Positioning with bindings (by assigning binding expressions to the x, y, width and height properties of visual objects, rather than using anchors) is relatively slow, although it allows maximum flexibility.</p>
+<p>If the layout is not dynamic, the most performant way to specify the layout is via static initialization of the x, y, width and height properties. Item coordinates are always relative to their parent, so if you wanted to be a fixed offset from your parent's 0,0 coordinate you should not use anchors. In the following example the child Rectangle objects are in the same place, but the anchors code shown is not as resource efficient as the code which uses fixed positioning via static initialization:</p>
+<pre class="cpp">
+
+  Rectangle {
+      width: <span class="number">60</span>
+      height: <span class="number">60</span>
+      Rectangle {
+          id: fixedPositioning
+          x: <span class="number">20</span>
+          y: <span class="number">20</span>
+          width: <span class="number">20</span>
+          height: <span class="number">20</span>
+      }
+      Rectangle {
+          id: anchorPositioning
+          anchors<span class="operator">.</span>fill: parent
+          anchors<span class="operator">.</span>margins: <span class="number">20</span>
+      }
+  }
+
+</pre>
+<a name="models-and-views"></a>
+<h2 id="models-and-views">Models and Views</h2>
+<p>Most applications will have at least one model feeding data to a view. There are some semantics which application developers need to be aware of, in order to achieve maximal performance.</p>
+<a name="custom-c-models"></a>
+<h3 id="custom-c-models">Custom C++ Models</h3>
+<p>It is often desirable to write your own custom model in C++ for use with a view in QML. While the optimal implementation of any such model will depend heavily on the use-case it must fulfil, some general guidelines are as follows:</p>
+<ul>
+<li>Be as asynchronous as possible</li>
+<li>Do all processing in a (low priority) worker thread</li>
+<li>Batch up backend operations so that (potentially slow) I/O and IPC is minimized</li>
+<li>Use a sliding slice window to cache results, whose parameters are determined with the help of profiling</li>
+</ul>
+<p>It is important to note that using a low-priority worker thread is recommended to minimize the risk of starving the GUI thread (which could result in worse perceived performance). Also, remember that synchronization and locking mechanisms can be a significant cause of slow performance, and so care should be taken to avoid unnecessary locking.</p>
+<a name="listmodel-qml-type"></a>
+<h3 id="listmodel-qml-type">ListModel QML Type</h3>
+<p>QML provides a <a href="../qtqml/qml-qtqml-models-listmodel.html">ListModel</a> type which can be used to feed data to a <a href="../qtquick/qml-qtquick-listview.html">ListView</a>. It should suffice for most use-cases and be relatively performant so long as it is used correctly.</p>
+<a name="populate-within-a-worker-thread"></a>
+<h4 id="populate-within-a-worker-thread">Populate Within A Worker Thread</h4>
+<p><a href="../qtqml/qml-qtqml-models-listmodel.html">ListModel</a> elements can be populated in a (low priority) worker thread in JavaScript. The developer must explicitly call &quot;sync()&quot; on the <a href="../qtqml/qml-qtqml-models-listmodel.html">ListModel</a> from within the <a href="../qtqml/qml-qtqml-workerscript.html">WorkerScript</a> to have the changes synchronized to the main thread. See the <a href="../qtqml/qml-qtqml-workerscript.html">WorkerScript</a> documentation for more information.</p>
+<p>Please note that using a <a href="../qtqml/qml-qtqml-workerscript.html">WorkerScript</a> element will result in a separate JavaScript engine being created (as the JavaScript engine is per-thread). This will result in increased memory usage. Multiple <a href="../qtqml/qml-qtqml-workerscript.html">WorkerScript</a> elements will all use the same worker thread, however, so the memory impact of using a second or third <a href="../qtqml/qml-qtqml-workerscript.html">WorkerScript</a> element is negligible once an application already uses one.</p>
+<a name="don-t-use-dynamic-roles"></a>
+<h4 id="don-t-use-dynamic-roles">Don't Use Dynamic Roles</h4>
+<p>The <a href="../qtqml/qml-qtqml-models-listmodel.html">ListModel</a> element in <a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a> 2 is much more performant than in <a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a> 1. The performance improvements mainly come from assumptions about the type of roles within each element in a given model - if the type doesn't change, the caching performance improves dramatically. If the type can change dynamically from element to element, this optimization becomes impossible, and the performance of the model will be an order of magnitude worse.</p>
+<p>Therefore, dynamic typing is disabled by default; the developer must specifically set the boolean &quot;dynamicRoles&quot; property of the model to enable dynamic typing (and suffer the attendant performance degradation). We recommend that you do not use dynamic typing if it is possible to redesign your application to avoid it.</p>
+<a name="views"></a>
+<h3 id="views">Views</h3>
+<p>View delegates should be kept as simple as possible. Have just enough QML in the delegate to display the necessary information. Any additional functionality which is not immediately required (for example, if it displays more information when clicked) should not be created until needed (see the upcoming section on lazy initialization).</p>
+<p>The following list is a good summary of things to keep in mind when designing a delegate:</p>
+<ul>
+<li>The fewer elements that are in a delegate, the faster they can be created, and thus the faster the view can be scrolled.</li>
+<li>Keep the number of bindings in a delegate to a minimum; in particular, use anchors rather than bindings for relative positioning within a delegate.</li>
+<li>Avoid using <a href="../qtquick/qml-qtquick-shadereffect.html">ShaderEffect</a> elements within delegates.</li>
+<li>Never enable clipping on a delegate.</li>
+</ul>
+<p>You may set the <code>cacheBuffer</code> property of a view to allow asynchronous creation and buffering of delegates outside of the visible area. Utilizing a <code>cacheBuffer</code> is recommended for view delegates that are non-trivial and unlikely to be created within a single frame.</p>
+<p>Bear in mind that a <code>cacheBuffer</code> keeps additional delegates in-memory. Therefore, the value derived from utilizing the <code>cacheBuffer</code> must be balanced against additional memory usage. Developers should use benchmarking to find the best value for their use-case, since the increased memory pressure caused by utilizing a <code>cacheBuffer</code> can, in some rare cases, cause reduced frame rate when scrolling.</p>
+<a name="visual-effects"></a>
+<h2 id="visual-effects">Visual Effects</h2>
+<p><a href="../qtquick/qtquick-index.html">Qt Quick 2</a> includes several features which allow developers and designers to create exceptionally appealing user interfaces. Fluidity and dynamic transitions as well as visual effects can be used to great effect in an application, but some care must be taken when using some of the features in QML as they can have performance implications.</p>
+<a name="animations"></a>
+<h3 id="animations">Animations</h3>
+<p>In general, animating a property will cause any bindings which reference that property to be re-evaluated. Usually, this is what is desired but in other cases it may be better to disable the binding prior to performing the animation, and then reassign the binding once the animation has completed.</p>
+<p>Avoid running JavaScript during animation. For example, running a complex JavaScript expression for each frame of an x property animation should be avoided.</p>
+<p>Developers should be especially careful using script animations, as these are run in the main thread (and therefore can cause frames to be skipped if they take too long to complete).</p>
+<a name="particles"></a>
+<h3 id="particles">Particles</h3>
+<p>The <a href="../qtquick/qtquick-particles-qmlmodule.html">Qt Quick Particles</a> module allows beautiful particle effects to be integrated seamlessly into user interfaces. However, every platform has different graphics hardware capabilities, and the Particles module is unable to limit parameters to what your hardware can gracefully support. The more particles you attempt to render (and the larger they are), the faster your graphics hardware will need to be in order to render at 60 FPS. Affecting more particles requires a faster CPU. It is therefore important to test all particle effects on your target platform carefully, to calibrate the number and size of particles you can render at 60 FPS.</p>
+<p>It should be noted that a particle system can be disabled when not in use (for example, on a non-visible element) to avoid doing unnecessary simulation.</p>
+<p>See the <a href="../qtquick/qtquick-particles-performance.html">Particle System Performance Guide</a> for more in-depth information.</p>
+<a name="controlling-element-lifetime"></a>
+<h2 id="controlling-element-lifetime">Controlling Element Lifetime</h2>
+<p>By partitioning an application into simple, modular components, each contained in a single QML file, you can achieve faster application startup time and better control over memory usage, and reduce the number of active-but-invisible elements in your application.</p>
+<a name="lazy-initialization"></a>
+<h3 id="lazy-initialization">Lazy Initialization</h3>
+<p>The QML engine does some tricky things to try to ensure that loading and initialization of components doesn't cause frames to be skipped. However, there is no better way to reduce startup time than to avoid doing work you don't need to do, and delaying the work until it is necessary. This may be achieved by using either <a href="../qtquick/qml-qtquick-loader.html">Loader</a> or creating components <a href="../qtqml/qtqml-javascript-dynamicobjectcreation.html">dynamically</a>.</p>
+<a name="using-loader"></a>
+<h4 id="using-loader">Using Loader</h4>
+<p>The Loader is an element which allows dynamic loading and unloading of components.</p>
+<ul>
+<li>Using the &quot;active&quot; property of a Loader, initialization can be delayed until required.</li>
+<li>Using the overloaded version of the &quot;setSource()&quot; function, initial property values can be supplied.</li>
+<li>Setting the Loader <a href="../qtquick/qml-qtquick-loader.html#asynchronous-prop">asynchronous</a> property to true may also improve fluidity while a component is instantiated.</li>
+</ul>
+<a name="using-dynamic-creation"></a>
+<h4 id="using-dynamic-creation">Using Dynamic Creation</h4>
+<p>Developers can use the Qt.createComponent() function to create a component dynamically at runtime from within JavaScript, and then call createObject() to instantiate it. Depending on the ownership semantics specified in the call, the developer may have to delete the created object manually. See <a href="../qtqml/qtqml-javascript-dynamicobjectcreation.html">Dynamic QML Object Creation from JavaScript</a> for more information.</p>
+<a name="destroy-unused-elements"></a>
+<h3 id="destroy-unused-elements">Destroy Unused Elements</h3>
+<p>Elements which are invisible because they are a child of a non-visible element (for example, the second tab in a tab-widget, while the first tab is shown) should be initialized lazily in most cases, and deleted when no longer in use, to avoid the ongoing cost of leaving them active (for example, rendering, animations, property binding evaluation, etc).</p>
+<p>An item loaded with a Loader element may be released by resetting the &quot;source&quot; or &quot;sourceComponent&quot; property of the Loader, while other items may be explicitly released by calling destroy() on them. In some cases, it may be necessary to leave the item active, in which case it should be made invisible at the very least.</p>
+<p>See the upcoming section on Rendering for more information on active but invisible elements.</p>
+<a name="rendering"></a>
+<h2 id="rendering">Rendering</h2>
+<p>The scene graph used for rendering in <a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a> 2 allows highly dynamic, animated user interfaces to be rendered fluidly at 60 FPS. There are some things which can dramatically decrease rendering performance, however, and developers should be careful to avoid these pitfalls wherever possible.</p>
+<a name="clipping-performance"></a><a name="clipping"></a>
+<h3 id="clipping">Clipping</h3>
+<p>Clipping is disabled by default, and should only be enabled when required.</p>
+<p>Clipping is a visual effect, NOT an optimization. It increases (rather than reduces) complexity for the renderer. If clipping is enabled, an item will clip its own painting, as well as the painting of its children, to its bounding rectangle. This stops the renderer from being able to reorder the drawing order of elements freely, resulting in a sub-optimal best-case scene graph traversal.</p>
+<p>Clipping inside a delegate is especially bad and should be avoided at all costs.</p>
+<a name="over-drawing-and-invisible-elements"></a>
+<h3 id="over-drawing-and-invisible-elements">Over-drawing and Invisible Elements</h3>
+<p>If you have elements which are totally covered by other (opaque) elements, it is best to set their &quot;visible&quot; property to <code>false</code> or they will be drawn needlessly.</p>
+<p>Similarly, elements which are invisible (for example, the second tab in a tab widget, while the first tab is shown) but need to be initialized at startup time (for example, if the cost of instantiating the second tab takes too long to be able to do it only when the tab is activated), should have their &quot;visible&quot; property set to <code>false</code>, in order to avoid the cost of drawing them (although as previously explained, they will still incur the cost of any animations or bindings evaluation since they are still active).</p>
+<a name="translucent-vs-opaque"></a>
+<h3 id="translucent-vs-opaque">Translucent vs Opaque</h3>
+<p>Opaque content is generally a lot faster to draw than translucent. The reason being that translucent content needs blending and that the renderer can potentially optimize opaque content better.</p>
+<p>An image with one translucent pixel is treated as fully translucent, even though it is mostly opaque. The same is true for an <a href="../qtquick/qml-qtquick-borderimage.html">BorderImage</a> with transparent edges.</p>
+<a name="shaders"></a>
+<h3 id="shaders">Shaders</h3>
+<p>The <a href="../qtquick/qml-qtquick-shadereffect.html">ShaderEffect</a> type makes it possible to place GLSL code inline in a Qt Quick application with very little overhead. However, it is important to realize that the fragment program needs to run for every pixel in the rendered shape. When deploying to low-end hardware and the shader is covering a large amount of pixels, one should keep the fragment shader to a few instructions to avoid poor performance.</p>
+<p>Shaders written in GLSL allow for complex transformations and visual effects to be written, however they should be used with care. Using a <a href="../qtquick/qml-qtquick-shadereffectsource.html">ShaderEffectSource</a> causes a scene to be prerendered into an FBO before it can be drawn. This extra overhead can be quite expensive.</p>
+<a name="memory-allocation-and-collection"></a>
+<h2 id="memory-allocation-and-collection">Memory Allocation And Collection</h2>
+<p>The amount of memory which will be allocated by an application and the way in which that memory will be allocated are very important considerations. Aside from the obvious concerns about out-of-memory conditions on memory-constrained devices, allocating memory on the heap is a fairly computationally expensive operation, and certain allocation strategies can result in increased fragmentation of data across pages. JavaScript uses a managed memory heap which is automatically garbage collected, and this has some advantages, but also some important implications.</p>
+<p>An application written in QML uses memory from both the C++ heap and an automatically managed JavaScript heap. The application developer needs to be aware of the subtleties of each in order to maximise performance.</p>
+<a name="tips-for-qml-application-developers"></a>
+<h3 id="tips-for-qml-application-developers">Tips For QML Application Developers</h3>
+<p>The tips and suggestions contained in this section are guidelines only, and may not be applicable in all circumstances. Be sure to benchmark and analyze your application carefully using empirical metrics, in order to make the best decisions possible.</p>
+<a name="instantiate-and-initialize-components-lazily"></a>
+<h4 id="instantiate-and-initialize-components-lazily">Instantiate and initialize components lazily</h4>
+<p>If your application consists of multiple views (for example, multiple tabs) but only one is required at any one time, you can use lazy instantiation to minimize the amount of memory you need to have allocated at any given time. See the prior section on <a href="qtquick-performance.html#lazy-initialization">Lazy Initialization</a> for more information.</p>
+<a name="destroy-unused-objects"></a>
+<h4 id="destroy-unused-objects">Destroy unused objects</h4>
+<p>If you lazy load components, or create objects dynamically during a JavaScript expression, it is often better to <code>destroy()</code> them manually rather than wait for automatic garbage collection to do so. See the prior section on <a href="qtquick-performance.html#controlling-element-lifetime">Controlling Element Lifetime</a> for more information.</p>
+<a name="don-t-manually-invoke-the-garbage-collector"></a>
+<h4 id="don-t-manually-invoke-the-garbage-collector">Don't manually invoke the garbage collector</h4>
+<p>In most cases, it is not wise to manually invoke the garbage collector, as it will block the GUI thread for a substantial period of time. This can result in skipped frames and jerky animations, which should be avoided at all costs.</p>
+<p>There are some cases where manually invoking the garbage collector is acceptable (and this is explained in greater detail in an upcoming section), but in most cases, invoking the garbage collector is unnecessary and counter-productive.</p>
+<a name="avoid-complex-bindings"></a>
+<h4 id="avoid-complex-bindings">Avoid complex bindings</h4>
+<p>Aside from the reduced performance of complex bindings (for example, due to having to enter the JavaScript execution context to perform evaluation), they also take up more memory both on the C++ heap and the JavaScript heap than bindings which can be evaluated by QML's optimized binding expression evaluator.</p>
+<a name="avoid-defining-multiple-identical-implicit-types"></a>
+<h4 id="avoid-defining-multiple-identical-implicit-types">Avoid defining multiple identical implicit types</h4>
+<p>If a QML element has a custom property defined in QML, it becomes its own implicit type. This is explained in greater detail in an upcoming section. If multiple identical implicit types are defined inline in a component, some memory will be wasted. In that situation it is usually better to explicitly define a new component which can then be reused.</p>
+<p>Defining a custom property can often be a beneficial performance optimization (for example, to reduce the number of bindings which are required or re-evaluated), or it can improve the modularity and maintainability of a component. In those cases, using custom properties is encouraged. However, the new type should, if it is used more than once, be split into its own component (.qml file) in order to conserve memory.</p>
+<a name="reuse-existing-components"></a>
+<h4 id="reuse-existing-components">Reuse existing components</h4>
+<p>If you are considering defining a new component, it's worth double checking that such a component doesn't already exist in the component set for your platform. Otherwise, you will be forcing the QML engine to generate and store type-data for a type which is essentially a duplicate of another pre-existing and potentially already loaded component.</p>
+<a name="use-singleton-types-instead-of-pragma-library-scripts"></a>
+<h4 id="use-singleton-types-instead-of-pragma-library-scripts">Use singleton types instead of pragma library scripts</h4>
+<p>If you are using a pragma library script to store application-wide instance data, consider using a <a href="../qtcore/qobject.html">QObject</a> singleton type instead. This should result in better performance, and will result in less JavaScript heap memory being used.</p>
+<a name="memory-allocation-in-a-qml-application"></a>
+<h3 id="memory-allocation-in-a-qml-application">Memory Allocation in a QML Application</h3>
+<p>The memory usage of a QML application may be split into two parts: its C++ heap usage and its JavaScript heap usage. Some of the memory allocated in each will be unavoidable, as it is allocated by the QML engine or the JavaScript engine, while the rest is dependent upon decisions made by the application developer.</p>
+<p>The C++ heap will contain:</p>
+<ul>
+<li>the fixed and unavoidable overhead of the QML engine (implementation data structures, context information, and so on);</li>
+<li>per-component compiled data and type information, including per-type property metadata, which is generated by the QML engine depending on which modules and which components are loaded by the application;</li>
+<li>per-object C++ data (including property values) plus a per-element metaobject hierarchy, depending on which components the application instantiates;</li>
+<li>any data which is allocated specifically by QML imports (libraries).</li>
+</ul>
+<p>The JavaScript heap will contain:</p>
+<ul>
+<li>the fixed and unavoidable overhead of the JavaScript engine itself (including built-in JavaScript types);</li>
+<li>the fixed and unavoidable overhead of our JavaScript integration (constructor functions for loaded types, function templates, and so on);</li>
+<li>per-type layout information and other internal type-data generated by the JavaScript engine at runtime, for each type (see note below, regarding types);</li>
+<li>per-object JavaScript data (&quot;var&quot; properties, JavaScript functions and signal handlers, and non-optimized binding expressions);</li>
+<li>variables allocated during expression evaluation.</li>
+</ul>
+<p>Furthermore, there will be one JavaScript heap allocated for use in the main thread, and optionally one other JavaScript heap allocated for use in the <a href="../qtqml/qml-qtqml-workerscript.html">WorkerScript</a> thread. If an application does not use a <a href="../qtqml/qml-qtqml-workerscript.html">WorkerScript</a> element, that overhead will not be incurred. The JavaScript heap can be several megabytes in size, and so applications written for memory-constrained devices may be best served by avoiding the <a href="../qtqml/qml-qtqml-workerscript.html">WorkerScript</a> element despite its usefulness in populating list models asynchronously.</p>
+<p>Note that both the QML engine and the JavaScript engine will automatically generate their own caches of type-data about observed types. Every component loaded by an application is a distinct (explicit) type, and every element (component instance) that defines its own custom properties in QML is an implicit type. Any element (instance of a component) that does not define any custom property is considered by the JavaScript and QML engines to be of the type explicitly defined by the component, rather than its own implicit type.</p>
+<p>Consider the following example:</p>
+<pre class="qml">
+
+  import QtQuick 2.3
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">root</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">r0</span>
+          <span class="name">color</span>: <span class="string">&quot;red&quot;</span>
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">r1</span>
+          <span class="name">color</span>: <span class="string">&quot;blue&quot;</span>
+          <span class="name">width</span>: <span class="number">50</span>
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">r2</span>
+          property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">customProperty</span>: <span class="number">5</span>
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">r3</span>
+          property <span class="type"><a href="../qtqml/qml-string.html">string</a></span> <span class="name">customProperty</span>: <span class="string">&quot;hello&quot;</span>
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">r4</span>
+          property <span class="type"><a href="../qtqml/qml-string.html">string</a></span> <span class="name">customProperty</span>: <span class="string">&quot;hello&quot;</span>
+      }
+  }
+
+</pre>
+<p>In the previous example, the rectangles <code>r0</code> and <code>r1</code> do not have any custom properties, and thus the JavaScript and QML engines consider them both to be of the same type. That is, <code>r0</code> and <code>r1</code> are both considered to be of the explicitly defined <code>Rectangle</code> type. The rectangles <code>r2</code>, <code>r3</code> and <code>r4</code> each have custom properties and are each considered to be of different (implicit) types. Note that <code>r3</code> and <code>r4</code> are each considered to be of different types, even though they have identical property information, simply because the custom property was not declared in the component which they are instances of.</p>
+<p>If <code>r3</code> and <code>r4</code> were both instances of a <code>RectangleWithString</code> component, and that component definition included the declaration of a string property named <code>customProperty</code>, then <code>r3</code> and <code>r4</code> would be considered to be of the same type (that is, they would be instances of the <code>RectangleWithString</code> type, rather than defining their own implicit type).</p>
+<a name="in-depth-memory-allocation-considerations"></a>
+<h3 id="in-depth-memory-allocation-considerations">In-Depth Memory Allocation Considerations</h3>
+<p>Whenever making decisions regarding memory allocation or performance trade-offs, it is important to keep in mind the impact of CPU-cache performance, operating system paging, and JavaScript engine garbage collection. Potential solutions should be benchmarked carefully in order to ensure that the best one is selected.</p>
+<p>No set of general guidelines can replace a solid understanding of the underlying principles of computer science combined with a practical knowledge of the implementation details of the platform for which the application developer is developing. Furthermore, no amount of theoretical calculation can replace a good set of benchmarks and analysis tools when making trade-off decisions.</p>
+<a name="fragmentation"></a>
+<h4 id="fragmentation">Fragmentation</h4>
+<p>Fragmentation is a C++ development issue. If the application developer is not defining any C++ types or plugins, they may safely ignore this section.</p>
+<p>Over time, an application will allocate large portions of memory, write data to that memory, and subsequently free some portions of it once it has finished using some of the data. This can result in &quot;free&quot; memory being located in non-contiguous chunks, which cannot be returned to the operating system for other applications to use. It also has an impact on the caching and access characteristics of the application, as the &quot;living&quot; data may be spread across many different pages of physical memory. This in turn could force the operating system to swap, which can cause filesystem I/O - which is, comparatively speaking, an extremely slow operation.</p>
+<p>Fragmentation can be avoided by utilizing pool allocators (and other contiguous memory allocators), by reducing the amount of memory which is allocated at any one time by carefully managing object lifetimes, by periodically cleansing and rebuilding caches, or by utilizing a memory-managed runtime with garbage collection (such as JavaScript).</p>
+<a name="garbage-collection"></a>
+<h4 id="garbage-collection">Garbage Collection</h4>
+<p>JavaScript provides garbage collection. Memory which is allocated on the JavaScript heap (as opposed to the C++ heap) is owned by the JavaScript engine. The engine will periodically collect all unreferenced data on the JavaScript heap.</p>
+<a name="implications-of-garbage-collection"></a>
+<h5 id="implications-of-garbage-collection">Implications of Garbage Collection</h5>
+<p>Garbage collection has advantages and disadvantages. It means that manually managing object lifetime is less important. However, it also means that a potentially long-lasting operation may be initiated by the JavaScript engine at a time which is out of the application developer's control. Unless JavaScript heap usage is considered carefully by the application developer, the frequency and duration of garbage collection may have a negative impact upon the application experience.</p>
+<a name="manually-invoking-the-garbage-collector"></a>
+<h5 id="manually-invoking-the-garbage-collector">Manually Invoking the Garbage Collector</h5>
+<p>An application written in QML will (most likely) require garbage collection to be performed at some stage. While garbage collection will be automatically triggered by the JavaScript engine when the amount of available free memory is low, it is occasionally better if the application developer makes decisions about when to invoke the garbage collector manually (although usually this is not the case).</p>
+<p>The application developer is likely to have the best understanding of when an application is going to be idle for substantial periods of time. If a QML application uses a lot of JavaScript heap memory, causing regular and disruptive garbage collection cycles during particularly performance-sensitive tasks (for example, list scrolling, animations, and so forth), the application developer may be well served to manually invoke the garbage collector during periods of zero activity. Idle periods are ideal for performing garbage collection since the user will not notice any degradation of user experience (skipped frames, jerky animations, and so on) which would result from invoking the garbage collector while activity is occurring.</p>
+<p>The garbage collector may be invoked manually by calling <code>gc()</code> within JavaScript. This will cause a comprehensive collection cycle to be performed, which may take from between a few hundred to more than a thousand milliseconds to complete, and so should be avoided if at all possible.</p>
+<a name="memory-vs-performance-trade-offs"></a>
+<h4 id="memory-vs-performance-trade-offs">Memory vs Performance Trade-offs</h4>
+<p>In some situations, it is possible to trade-off increased memory usage for decreased processing time. For example, caching the result of a symbol lookup used in a tight loop to a temporary variable in a JavaScript expression will result in a significant performance improvement when evaluating that expression, but it involves allocating a temporary variable. In some cases, these trade-offs are sensible (such as the case above, which is almost always sensible), but in other cases it may be better to allow processing to take slightly longer in order to avoid increasing the memory pressure on the system.</p>
+<p>In some cases, the impact of increased memory pressure can be extreme. In some situations, trading off memory usage for an assumed performance gain can result in increased page-thrash or cache-thrash, causing a huge reduction in performance. It is always necessary to benchmark the impact of trade-offs carefully in order to determine which solution is best in a given situation.</p>
+<p>For in-depth information on cache performance and memory-time trade-offs, refer to the following articles:</p>
+<ul>
+<li>Ulrich Drepper's excellent article: &quot;What Every Programmer Should Know About Memory&quot;, at: <a href="https://people.freebsd.org/~lstewart/articles/cpumemory.pdf">https://people.freebsd.org/~lstewart/articles/cpumemory.pdf</a>.</li>
+<li>Agner Fog's excellent manuals on optimizing C++ applications at: <a href="http://www.agner.org/optimize/">http://www.agner.org/optimize/</a>.</li>
+</ul>
+</div>
+<!-- @@@qtquick-performance.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwaylandquickshellsurfaceitem.cpp -->
+  <title>QWaylandQuickShellSurfaceItem Class | Qt Wayland Compositor 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwaylandcompositor-index.html">Qt Wayland Compositor</a></td><td ><a href="qtwaylandcompositor-module.html">C++ Classes</a></td><td >QWaylandQuickShellSurfaceItem</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwaylandcompositor-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QWaylandQuickShellSurfaceItem Class</h1>
+<!-- $$$QWaylandQuickShellSurfaceItem-brief -->
+<p>The <a href="qwaylandquickshellsurfaceitem.html">QWaylandQuickShellSurfaceItem</a> class provides a Qt Quick item that represents a <a href="qwaylandshellsurface.html">QWaylandShellSurface</a>. <a href="#details">More...</a></p>
+<!-- @@@QWaylandQuickShellSurfaceItem -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QWaylandQuickShellSurfaceItem&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += waylandcompositor</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qwaylandquickitem.html">QWaylandQuickItem</a></td></tr></table></div><p>This class was introduced in  Qt 5.8.</p>
+<ul>
+<li><a href="qwaylandquickshellsurfaceitem-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qwaylandquickshellsurfaceitem.html#autoCreatePopupItems-prop">autoCreatePopupItems</a></b> : bool</li>
+<li class="fn"><b><a href="qwaylandquickshellsurfaceitem.html#moveItem-prop">moveItem</a></b> : QQuickItem*</li>
+<li class="fn"><b><a href="qwaylandquickshellsurfaceitem.html#shellSurface-prop">shellSurface</a></b> : QWaylandShellSurface*</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwaylandquickshellsurfaceitem.html#QWaylandQuickShellSurfaceItem">QWaylandQuickShellSurfaceItem</a></b>(QQuickItem *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwaylandquickshellsurfaceitem.html#autoCreatePopupItems-prop">autoCreatePopupItems</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QQuickItem *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandquickshellsurfaceitem.html#moveItem-prop">moveItem</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandquickshellsurfaceitem.html#autoCreatePopupItems-prop">setAutoCreatePopupItems</a></b>(bool <i>enabled</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandquickshellsurfaceitem.html#moveItem-prop">setMoveItem</a></b>(QQuickItem *<i>moveItem</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandquickshellsurfaceitem.html#shellSurface-prop">setShellSurface</a></b>(QWaylandShellSurface *<i>shellSurface</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandShellSurface *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandquickshellsurfaceitem.html#shellSurface-prop">shellSurface</a></b>() const</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandquickshellsurfaceitem.html#autoCreatePopupItems-prop">autoCreatePopupItemsChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandquickshellsurfaceitem.html#moveItem-prop">moveItemChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandquickshellsurfaceitem.html#shellSurface-prop">shellSurfaceChanged</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QWaylandQuickShellSurfaceItem-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This class is used to render <code>wl_shell</code>, <code>xdg_shell</code> or <code>ivi_application</code> surfaces as part of a Qt Quick scene. It handles moving and resizing triggered by clicking on the window decorations.</p>
+</div>
+<p><b>See also </b><a href="qwaylandquickitem.html">QWaylandQuickItem</a>, <a href="qwaylandwlshellsurface.html">QWaylandWlShellSurface</a>, <a href="qwaylandxdgsurfacev5.html">QWaylandXdgSurfaceV5</a>, and <a href="qwaylandivisurface.html">QWaylandIviSurface</a>.</p>
+<!-- @@@QWaylandQuickShellSurfaceItem -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$autoCreatePopupItems-prop$$$autoCreatePopupItems$$$setAutoCreatePopupItemsbool$$$autoCreatePopupItemsChanged -->
+<h3 class="fn" id="autoCreatePopupItems-prop"><a name="autoCreatePopupItems-prop"></a><span class="name">autoCreatePopupItems</span> : <span class="type">bool</span></h3>
+<p>This property holds whether QWaylandQuickShellSurfaceItems for popups parented to the shell surface managed by this item should automatically be created.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>autoCreatePopupItems</b></span>()</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setAutoCreatePopupItems</b></span>(bool <i>enabled</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>autoCreatePopupItemsChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@autoCreatePopupItems -->
+<!-- $$$moveItem-prop$$$moveItem$$$setMoveItemQQuickItem*$$$moveItemChanged -->
+<h3 class="fn" id="moveItem-prop"><a name="moveItem-prop"></a><span class="name">moveItem</span> : <span class="type"><a href="../qtquick/qquickitem.html#QQuickItem">QQuickItem</a></span>*</h3>
+<p>This property holds the move item for this <a href="qwaylandquickshellsurfaceitem.html">QWaylandQuickShellSurfaceItem</a>. This is the item that will be moved when the clients request the <a href="qwaylandshellsurface.html">QWaylandShellSurface</a> to be moved, maximized, resized etc. This property is useful when implementing server-side decorations.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QQuickItem *</td><td class="memItemRight bottomAlign"><span class="name"><b>moveItem</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setMoveItem</b></span>(QQuickItem *<i>moveItem</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>moveItemChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@moveItem -->
+<!-- $$$shellSurface-prop$$$shellSurface$$$setShellSurfaceQWaylandShellSurface*$$$shellSurfaceChanged -->
+<h3 class="fn" id="shellSurface-prop"><a name="shellSurface-prop"></a><span class="name">shellSurface</span> : <span class="type"><a href="qwaylandshellsurface.html">QWaylandShellSurface</a></span>*</h3>
+<p>This property holds the <a href="qwaylandshellsurface.html">QWaylandShellSurface</a> rendered by this <a href="qwaylandquickshellsurfaceitem.html">QWaylandQuickShellSurfaceItem</a>. It may either be a QWaylandXdgSurfaceV5, <a href="qwaylandwlshellsurface.html">QWaylandWlShellSurface</a> or <a href="qwaylandivisurface.html">QWaylandIviSurface</a> depending on which shell protocol is in use.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QWaylandShellSurface *</td><td class="memItemRight bottomAlign"><span class="name"><b>shellSurface</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setShellSurface</b></span>(QWaylandShellSurface *<i>shellSurface</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>shellSurfaceChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@shellSurface -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QWaylandQuickShellSurfaceItem[overload1]$$$QWaylandQuickShellSurfaceItemQQuickItem* -->
+<h3 class="fn" id="QWaylandQuickShellSurfaceItem"><a name="QWaylandQuickShellSurfaceItem"></a>QWaylandQuickShellSurfaceItem::<span class="name">QWaylandQuickShellSurfaceItem</span>(<span class="type"><a href="../qtquick/qquickitem.html#QQuickItem">QQuickItem</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a QWaylandQuickWlShellSurfaceItem with the given <i>parent</i>.</p>
+<!-- @@@QWaylandQuickShellSurfaceItem -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-projects-custom-wizards.qdoc -->
+  <title>Adding New Custom Wizards | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Adding New Custom Wizards</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-project-qmake-libraries.html" />
+  <link rel="next" href="creator-project-wizards-json.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-project-qmake-libraries.html">Adding Libraries to Projects</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-project-wizards-json.html">Adding JSON-Based Wizards</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#wizard-types">Wizard Types</a></li>
+<li class="level1"><a href="#locating-wizards">Locating Wizards</a></li>
+<li class="level1"><a href="#tips-for-wizard-development">Tips for Wizard Development</a></li>
+<li class="level2"><a href="#verbose-output">Verbose Output</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Adding New Custom Wizards</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-project-wizards.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>If you have a team working on a large application or several applications, you might want to standardize the way the team members create projects and files.</p>
+<p>You can copy the wizard templates in the template folders to create your own project and file wizards. They are displayed in the <b>New</b> dialog that opens when you choose <b>File</b> &gt; <b>New File or Project</b>.</p>
+<p>A custom wizard defines the user interface of a set of wizard pages. The values the user enters in the wizard are assigned field names. Field name and value pairs are then passed to the file creation process.</p>
+<a name="wizard-types"></a>
+<h2 id="wizard-types">Wizard Types</h2>
+<p>In a project wizard, you can specify the files needed in a project. You can add wizard pages to allow developers to specify settings for the project.</p>
+<p>A file wizard is similar, but does not contain any project file.</p>
+<p>You are encouraged to create JSON-based wizards. They provide a super-set of the functionality available in the XML based wizards used before. For more information, see:</p>
+<ul>
+<li><a href="creator-project-wizards-json.html#">Adding JSON-Based Wizards</a></li>
+<li><a href="creator-project-wizards-xml.html#">Adding XML-Based Wizards</a> (deprecated)</li>
+</ul>
+<a name="locating-wizards"></a>
+<h2 id="locating-wizards">Locating Wizards</h2>
+<p>Wizards are located in subdirectories of the following directories:</p>
+<ul>
+<li><code>share/qtcreator/templates/wizards</code></li>
+<li>the local user's configuration folder, <code>$HOME/.config/QtProject/qtcreator/templates/wizards</code> on Linux and macOS or <code>%APPDATA%\QtProject\qtcreator\templates\wizards</code> on Windows</li>
+</ul>
+<p><b>Note: </b>If you installed Qt Creator on macOS, you can find the wizards in <code>Qt Creator.app/Contents/Resources/templates/wizards</code>.</p><a name="tips-for-wizard-development"></a>
+<h2 id="tips-for-wizard-development">Tips for Wizard Development</h2>
+<p>Qt Creator has some actions that can improve the wizard development process. These are by default not bound to any keyboard shortcuts and can thus not be triggered. To enable them, assign keyboard shortcuts in <b>Tools</b> &gt; <b>Options</b> &gt; <b>Environment</b> &gt; <b>Keyboard</b> &gt; <b>Wizard</b>.</p>
+<p>The following actions can help with wizard development:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Action Id</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td ><b>Inspect</b></td><td >Triggering this action opens a window that lists all the defined fields and variables in the wizard at the time the action was triggered. Each activation of this action opens a new non-modal window, so you can compare state at different pages of the wizard for example.</td></tr>
+<tr valign="top" class="even"><td ><b>Factory.Reset</b></td><td >Triggering this action makes Qt Creator forget all wizard factories, causing it to reload all wizard definitions when for example opening <b>File</b> &gt; <b>New File or Project</b>. This way you can avoid having to restart Qt Creator for your changes to a wizard definition to become visible.</td></tr>
+</table></div>
+<a name="verbose-output"></a>
+<h3 id="verbose-output">Verbose Output</h3>
+<p>When developing custom wizards (both JSON as well as XML based), it is recommended to start Qt Creator with the <code>-customwizard-verbose</code> argument. It causes each correctly set up wizard to produce output along the following lines:</p>
+<pre class="cpp">
+
+  Checking <span class="string">&quot;/home/jsmith/.config/QtProject/qtcreator/templates/wizards/mywizard&quot;</span>
+  <span class="keyword">for</span> wizard<span class="operator">.</span>json<span class="operator">.</span>
+  <span class="operator">*</span> Configuration found and parsed<span class="operator">.</span>
+
+</pre>
+<p>The output includes the name of the directory that was checked for a <code>wizard.json</code> file. If the file is not found, the message is not displayed.</p>
+<p>If the file contains errors, such as an invalid icon path, the following types of messages are displayed:</p>
+<pre class="cpp">
+
+  Checking <span class="string">&quot;/home/jsmith/.config/QtProject/qtcreator/templates/wizards/mywizard&quot;</span>
+  <span class="keyword">for</span> wizard<span class="operator">.</span>json<span class="operator">.</span>
+  <span class="operator">*</span> Configuration found and parsed<span class="operator">.</span>
+  <span class="operator">*</span> Failed to create: Icon file
+  <span class="string">&quot;/home/jsmith/.config/QtProject/qtcreator/templates/wizards/mywizard/../..
+  /global/genericfilewizard.png&quot;</span> <span class="keyword">not</span> found<span class="operator">.</span>
+
+</pre>
+<p>See <a href="creator-cli.html#">Using Command Line Options</a> for more information about command line arguments.</p>
+</div>
+<!-- @@@creator-project-wizards.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-project-qmake-libraries.html">Adding Libraries to Projects</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-project-wizards-json.html">Adding JSON-Based Wizards</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

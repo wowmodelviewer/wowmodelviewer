@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtpositioning.qdoc -->
+  <title>Qt Positioning C++ Classes | Qt Positioning 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtpositioning-index.html">Qt Positioning</a></td><td >Qt Positioning C++ Classes</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtpositioning-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#classes">Classes</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Positioning C++ Classes</h1>
+<span class="subtitle"></span>
+<!-- $$$QtPositioning-brief -->
+<p>The Positioning module provides positioning information via QML and C++ interfaces. <a href="#details">More...</a></p>
+<!-- @@@QtPositioning -->
+<a name="classes"></a>
+<h2 id="classes">Classes</h2>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qgeoareamonitorinfo.html">QGeoAreaMonitorInfo</a></p></td><td class="tblDescr"><p>Describes the parameters of an area or region to be monitored for proximity</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qgeoareamonitorsource.html">QGeoAreaMonitorSource</a></p></td><td class="tblDescr"><p>Enables the detection of proximity changes for a specified set of coordinates</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qgeoaddress.html">QGeoAddress</a></p></td><td class="tblDescr"><p>Represents an address of a QGeoLocation</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qgeocircle.html">QGeoCircle</a></p></td><td class="tblDescr"><p>Defines a circular geographic area</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qgeocoordinate.html">QGeoCoordinate</a></p></td><td class="tblDescr"><p>Defines a geographical position on the surface of the Earth</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qgeolocation.html">QGeoLocation</a></p></td><td class="tblDescr"><p>Represents basic information about a location</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qgeopath.html">QGeoPath</a></p></td><td class="tblDescr"><p>Defines a geographic path</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qgeopolygon.html">QGeoPolygon</a></p></td><td class="tblDescr"><p>Defines a geographic polygon</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qgeopositioninfo.html">QGeoPositionInfo</a></p></td><td class="tblDescr"><p>Contains information gathered on a global position, direction and velocity at a particular point in time</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qgeopositioninfosource.html">QGeoPositionInfoSource</a></p></td><td class="tblDescr"><p>Abstract base class for the distribution of positional updates</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qgeopositioninfosourcefactory.html">QGeoPositionInfoSourceFactory</a></p></td><td class="tblDescr"><p>Factory class used as the plugin interface for external providers of positioning data</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qgeorectangle.html">QGeoRectangle</a></p></td><td class="tblDescr"><p>Defines a rectangular geographic area</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qgeosatelliteinfo.html">QGeoSatelliteInfo</a></p></td><td class="tblDescr"><p>Contains basic information about a satellite</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qgeosatelliteinfosource.html">QGeoSatelliteInfoSource</a></p></td><td class="tblDescr"><p>Abstract base class for the distribution of satellite information updates</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qgeoshape.html">QGeoShape</a></p></td><td class="tblDescr"><p>Defines a geographic area</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qnmeapositioninfosource.html">QNmeaPositionInfoSource</a></p></td><td class="tblDescr"><p>Positional information using a NMEA data source</p></td></tr>
+</table></div>
+<!-- $$$QtPositioning-description -->
+<a name="details"></a>
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>To load the Qt Positioning module, add the following statement to your .qml files</p>
+<pre class="qml">
+
+  import QtPositioning 5.11
+
+</pre>
+<p>For C++ projects include the header appropriate for the current use case, for example applications using routes may use</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QGeoCoordinate&gt;</span>
+
+</pre>
+<p>The .pro file should have the <i>positioning</i> keyword added</p>
+<pre class="cpp plain">
+
+  QT += positioning
+
+</pre>
+<p>See more in the <a href="qtpositioning-index.html">Qt Positioning Overview</a>.</p>
+</div>
+<!-- @@@QtPositioning -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

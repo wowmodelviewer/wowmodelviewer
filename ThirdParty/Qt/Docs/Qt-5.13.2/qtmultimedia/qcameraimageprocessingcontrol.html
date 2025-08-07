@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcameraimageprocessingcontrol.cpp -->
+  <title>QCameraImageProcessingControl Class | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-modules.html">C++ Classes</a></td><td >QCameraImageProcessingControl</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#macros">Macros</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCameraImageProcessingControl Class</h1>
+<!-- $$$QCameraImageProcessingControl-brief -->
+<p>The <a href="qcameraimageprocessingcontrol.html">QCameraImageProcessingControl</a> class provides an abstract class for controlling image processing parameters, like white balance, contrast, saturation, sharpening and denoising. <a href="#details">More...</a></p>
+<!-- @@@QCameraImageProcessingControl -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QCameraImageProcessingControl&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += multimedia</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qmediacontrol.html">QMediaControl</a></td></tr></table></div><ul>
+<li><a href="qcameraimageprocessingcontrol-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qcameraimageprocessingcontrol.html#ProcessingParameter-enum">ProcessingParameter</a></b> { WhiteBalancePreset, ColorTemperature, Contrast, Saturation, ..., ExtendedParameter }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qcameraimageprocessingcontrol.html#dtor.QCameraImageProcessingControl">~QCameraImageProcessingControl</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qcameraimageprocessingcontrol.html#isParameterSupported">isParameterSupported</a></b>(QCameraImageProcessingControl::ProcessingParameter <i>parameter</i>) const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qcameraimageprocessingcontrol.html#isParameterValueSupported">isParameterValueSupported</a></b>(QCameraImageProcessingControl::ProcessingParameter <i>parameter</i>, const QVariant &amp;<i>value</i>) const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QVariant </td><td class="memItemRight bottomAlign"><b><a href="qcameraimageprocessingcontrol.html#parameter">parameter</a></b>(QCameraImageProcessingControl::ProcessingParameter <i>parameter</i>) const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcameraimageprocessingcontrol.html#setParameter">setParameter</a></b>(QCameraImageProcessingControl::ProcessingParameter <i>parameter</i>, const QVariant &amp;<i>value</i>) = 0</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcameraimageprocessingcontrol.html#QCameraImageProcessingControl">QCameraImageProcessingControl</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+</table></div>
+<a name="macros"></a>
+<h2 id="macros">Macros</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcameraimageprocessingcontrol.html#QCameraImageProcessingControl_iid">QCameraImageProcessingControl_iid</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCameraImageProcessingControl-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The interface name of <a href="qcameraimageprocessingcontrol.html">QCameraImageProcessingControl</a> is <code>org.qt-project.qt.cameraimageprocessingcontrol/5.0</code> as defined in <a href="qcameraimageprocessingcontrol.html#QCameraImageProcessingControl_iid">QCameraImageProcessingControl_iid</a>.</p>
+<p>Camera service may choose the parameters of image processing pipeline depending on sensor properties camera settings and capture parameters.</p>
+<p>This control allows to modify some parameters of image processing pipeline to achieve desired results.</p>
+<p>Parameters with the &quot;Adjustment&quot; suffix, like <a href="qcameraimageprocessingcontrol.html#ProcessingParameter-enum">ContrastAdjustment</a>, <a href="qcameraimageprocessingcontrol.html#ProcessingParameter-enum">SaturationAdjustment</a> etc allows to adjust the parameter values, selected by camera engine, while parameters like Contrast and Saturation overwrites them.</p>
+<p>For example setting the <a href="qcameraimageprocessingcontrol.html#ProcessingParameter-enum">SharpeningAdjustment</a> parameter to -0.1 slightly reduces the amount of sharpening applied, while settings the Sharpening parameter to 0 disables sharpening at all.</p>
+</div>
+<p><b>See also </b><a href="qmediaservice.html#requestControl-1">QMediaService::requestControl</a>() and <a href="qcamera.html">QCamera</a>.</p>
+<!-- @@@QCameraImageProcessingControl -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$ProcessingParameter$$$WhiteBalancePreset$$$ColorTemperature$$$Contrast$$$Saturation$$$Brightness$$$Sharpening$$$Denoising$$$ContrastAdjustment$$$SaturationAdjustment$$$BrightnessAdjustment$$$SharpeningAdjustment$$$DenoisingAdjustment$$$ColorFilter$$$ExtendedParameter -->
+<h3 class="fn" id="ProcessingParameter-enum"><a name="ProcessingParameter-enum"></a>enum QCameraImageProcessingControl::<span class="name">ProcessingParameter</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QCameraImageProcessingControl::WhiteBalancePreset</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The white balance preset.</td></tr>
+<tr><td class="topAlign"><code>QCameraImageProcessingControl::ColorTemperature</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Color temperature in K. This value is used when the manual white balance mode is selected.</td></tr>
+<tr><td class="topAlign"><code>QCameraImageProcessingControl::Contrast</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Image contrast.</td></tr>
+<tr><td class="topAlign"><code>QCameraImageProcessingControl::Saturation</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">Image saturation.</td></tr>
+<tr><td class="topAlign"><code>QCameraImageProcessingControl::Brightness</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">Image brightness.</td></tr>
+<tr><td class="topAlign"><code>QCameraImageProcessingControl::Sharpening</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">Amount of sharpening applied.</td></tr>
+<tr><td class="topAlign"><code>QCameraImageProcessingControl::Denoising</code></td><td class="topAlign tblval"><code>6</code></td><td class="topAlign">Amount of denoising applied.</td></tr>
+<tr><td class="topAlign"><code>QCameraImageProcessingControl::ContrastAdjustment</code></td><td class="topAlign tblval"><code>7</code></td><td class="topAlign">Image contrast adjustment.</td></tr>
+<tr><td class="topAlign"><code>QCameraImageProcessingControl::SaturationAdjustment</code></td><td class="topAlign tblval"><code>8</code></td><td class="topAlign">Image saturation adjustment.</td></tr>
+<tr><td class="topAlign"><code>QCameraImageProcessingControl::BrightnessAdjustment</code></td><td class="topAlign tblval"><code>9</code></td><td class="topAlign">Image brightness adjustment.</td></tr>
+<tr><td class="topAlign"><code>QCameraImageProcessingControl::SharpeningAdjustment</code></td><td class="topAlign tblval"><code>10</code></td><td class="topAlign">Adjustment of sharpening applied.</td></tr>
+<tr><td class="topAlign"><code>QCameraImageProcessingControl::DenoisingAdjustment</code></td><td class="topAlign tblval"><code>11</code></td><td class="topAlign">Adjustment of denoising applied.</td></tr>
+<tr><td class="topAlign"><code>QCameraImageProcessingControl::ColorFilter</code></td><td class="topAlign tblval"><code>12</code></td><td class="topAlign">Image filter applied. Since 5.5</td></tr>
+<tr><td class="topAlign"><code>QCameraImageProcessingControl::ExtendedParameter</code></td><td class="topAlign tblval"><code>1000</code></td><td class="topAlign">The base value for platform specific extended parameters.</td></tr>
+</table></div>
+<!-- @@@ProcessingParameter -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QCameraImageProcessingControl[overload1]$$$QCameraImageProcessingControlQObject* -->
+<h3 class="fn" id="QCameraImageProcessingControl"><a name="QCameraImageProcessingControl"></a><code>[protected] </code>QCameraImageProcessingControl::<span class="name">QCameraImageProcessingControl</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs an image processing control object with <i>parent</i>.</p>
+<!-- @@@QCameraImageProcessingControl -->
+<!-- $$$~QCameraImageProcessingControl[overload1]$$$~QCameraImageProcessingControl -->
+<h3 class="fn" id="dtor.QCameraImageProcessingControl"><a name="dtor.QCameraImageProcessingControl"></a><code>[virtual] </code>QCameraImageProcessingControl::<span class="name">~QCameraImageProcessingControl</span>()</h3>
+<p>Destruct the image processing control object.</p>
+<!-- @@@~QCameraImageProcessingControl -->
+<!-- $$$isParameterSupported[overload1]$$$isParameterSupportedQCameraImageProcessingControl::ProcessingParameter -->
+<h3 class="fn" id="isParameterSupported"><a name="isParameterSupported"></a><code>[pure virtual] </code><span class="type">bool</span> QCameraImageProcessingControl::<span class="name">isParameterSupported</span>(<span class="type"><a href="qcameraimageprocessingcontrol.html#ProcessingParameter-enum">QCameraImageProcessingControl::ProcessingParameter</a></span> <i>parameter</i>) const</h3>
+<p>Returns true if the camera supports adjusting image processing <i>parameter</i>.</p>
+<p>Usually the supported setting is static, but some parameters may not be available depending on other camera settings, like presets. In such case the currently supported parameters should be returned.</p>
+<!-- @@@isParameterSupported -->
+<!-- $$$isParameterValueSupported[overload1]$$$isParameterValueSupportedQCameraImageProcessingControl::ProcessingParameterconstQVariant& -->
+<h3 class="fn" id="isParameterValueSupported"><a name="isParameterValueSupported"></a><code>[pure virtual] </code><span class="type">bool</span> QCameraImageProcessingControl::<span class="name">isParameterValueSupported</span>(<span class="type"><a href="qcameraimageprocessingcontrol.html#ProcessingParameter-enum">QCameraImageProcessingControl::ProcessingParameter</a></span> <i>parameter</i>, const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>value</i>) const</h3>
+<p>Returns true if the camera supports setting the image processing <i>parameter</i> <i>value</i>.</p>
+<p>It's used only for parameters with a limited set of values, like <a href="qcameraimageprocessingcontrol.html#ProcessingParameter-enum">WhiteBalancePreset</a>.</p>
+<!-- @@@isParameterValueSupported -->
+<!-- $$$parameter[overload1]$$$parameterQCameraImageProcessingControl::ProcessingParameter -->
+<h3 class="fn" id="parameter"><a name="parameter"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QCameraImageProcessingControl::<span class="name">parameter</span>(<span class="type"><a href="qcameraimageprocessingcontrol.html#ProcessingParameter-enum">QCameraImageProcessingControl::ProcessingParameter</a></span> <i>parameter</i>) const</h3>
+<p>Returns the image processing <i>parameter</i> value.</p>
+<p><b>See also </b><a href="qcameraimageprocessingcontrol.html#setParameter">setParameter</a>().</p>
+<!-- @@@parameter -->
+<!-- $$$setParameter[overload1]$$$setParameterQCameraImageProcessingControl::ProcessingParameterconstQVariant& -->
+<h3 class="fn" id="setParameter"><a name="setParameter"></a><code>[pure virtual] </code><span class="type">void</span> QCameraImageProcessingControl::<span class="name">setParameter</span>(<span class="type"><a href="qcameraimageprocessingcontrol.html#ProcessingParameter-enum">QCameraImageProcessingControl::ProcessingParameter</a></span> <i>parameter</i>, const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>value</i>)</h3>
+<p>Sets the image processing <i>parameter</i> <i>value</i>. Passing the null or invalid <a href="../qtcore/qvariant.html">QVariant</a> value allows backend to choose the suitable parameter value.</p>
+<p>The valid values range depends on the parameter type. For <a href="qcameraimageprocessingcontrol.html#ProcessingParameter-enum">WhiteBalancePreset</a> the value should be one of <a href="qcameraimageprocessing.html#WhiteBalanceMode-enum">QCameraImageProcessing::WhiteBalanceMode</a> values; for Contrast, Saturation, Brightness, Sharpening and Denoising the value should be in [0..1&#x2e;0] range with invalid <a href="../qtcore/qvariant.html">QVariant</a> value indicating the default parameter value; for <a href="qcameraimageprocessingcontrol.html#ProcessingParameter-enum">ContrastAdjustment</a>, <a href="qcameraimageprocessingcontrol.html#ProcessingParameter-enum">SaturationAdjustment</a>, <a href="qcameraimageprocessingcontrol.html#ProcessingParameter-enum">BrightnessAdjustment</a>, <a href="qcameraimageprocessingcontrol.html#ProcessingParameter-enum">SharpeningAdjustment</a> and <a href="qcameraimageprocessingcontrol.html#ProcessingParameter-enum">DenoisingAdjustment</a> the value should be in [-1.0&#x2e;.1&#x2e;0] range with default 0.</p>
+<p><b>See also </b><a href="qcameraimageprocessingcontrol.html#parameter">parameter</a>().</p>
+<!-- @@@setParameter -->
+</div>
+<div class="macros">
+<h2>Macro Documentation</h2>
+<!-- $$$QCameraImageProcessingControl_iid[overload1]$$$QCameraImageProcessingControl_iid -->
+<h3 class="fn" id="QCameraImageProcessingControl_iid"><a name="QCameraImageProcessingControl_iid"></a><span class="name">QCameraImageProcessingControl_iid</span></h3>
+<p><code>org.qt-project.qt.cameraimageprocessingcontrol/5.0</code></p>
+<p>Defines the interface name of the <a href="qcameraimageprocessingcontrol.html">QCameraImageProcessingControl</a> class.</p>
+<!-- @@@QCameraImageProcessingControl_iid -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

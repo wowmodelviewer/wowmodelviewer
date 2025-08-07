@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qgraphicstransform.cpp -->
+  <title>QGraphicsRotation Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QGraphicsRotation</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QGraphicsRotation Class</h1>
+<!-- $$$QGraphicsRotation-brief -->
+<p>The <a href="qgraphicsrotation.html">QGraphicsRotation</a> class provides a rotation transformation around a given axis. <a href="#details">More...</a></p>
+<!-- @@@QGraphicsRotation -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QGraphicsRotation&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.6</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qgraphicstransform.html">QGraphicsTransform</a></td></tr></table></div><p>This class was introduced in  Qt 4.6.</p>
+<ul>
+<li><a href="qgraphicsrotation-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qgraphicsrotation.html#angle-prop">angle</a></b> : qreal</li>
+<li class="fn"><b><a href="qgraphicsrotation.html#axis-prop">axis</a></b> : QVector3D</li>
+<li class="fn"><b><a href="qgraphicsrotation.html#origin-prop">origin</a></b> : QVector3D</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsrotation.html#QGraphicsRotation">QGraphicsRotation</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsrotation.html#dtor.QGraphicsRotation">~QGraphicsRotation</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsrotation.html#angle-prop">angle</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector3D </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsrotation.html#axis-prop">axis</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector3D </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsrotation.html#origin-prop">origin</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsrotation.html#angle-prop">setAngle</a></b>(<i>qreal</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsrotation.html#axis-prop">setAxis</a></b>(const QVector3D &amp;<i>axis</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsrotation.html#setAxis-1">setAxis</a></b>(Qt::Axis <i>axis</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsrotation.html#origin-prop">setOrigin</a></b>(const QVector3D &amp;<i>point</i>)</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsrotation.html#applyTo">applyTo</a></b>(QMatrix4x4 *<i>matrix</i>) const override</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsrotation.html#angleChanged">angleChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsrotation.html#axisChanged">axisChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsrotation.html#originChanged">originChanged</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QGraphicsRotation-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>You can provide the desired axis by assigning a <a href="../qtgui/qvector3d.html">QVector3D</a> to the axis property or by passing a member if <a href="../qtcore/qt.html#Axis-enum">Qt::Axis</a> to the <a href="qgraphicsrotation.html#axis-prop">setAxis</a> convenience function. By default the axis is (0, 0, 1) i.e&#x2e;, rotation around the Z axis.</p>
+<p>The angle property, which is provided by <a href="qgraphicsrotation.html">QGraphicsRotation</a>, now describes the number of degrees to rotate around this axis.</p>
+<p><a href="qgraphicsrotation.html">QGraphicsRotation</a> provides certain parameters to help control how the rotation should be applied.</p>
+<p>The origin is the point that the item is rotated around (i.e&#x2e;, it stays fixed relative to the parent as the rest of the item is rotated). By default the origin is <a href="../qtcore/qpointf.html">QPointF</a>(0, 0).</p>
+<p>The angle property provides the number of degrees to rotate the item clockwise around the origin. This value also be negative, indicating a counter-clockwise rotation. For animation purposes it may also be useful to provide rotation angles exceeding (-360, 360) degrees, for instance to animate how an item rotates several times.</p>
+<p>Note: the final rotation is the combined effect of a rotation in 3D space followed by a projection back to 2D. If several rotations are performed in succession, they will not behave as expected unless they were all around the Z axis.</p>
+</div>
+<p><b>See also </b><a href="qgraphicstransform.html">QGraphicsTransform</a>, <a href="qgraphicsitem.html#setRotation">QGraphicsItem::setRotation</a>(), and <a href="../qtgui/qtransform.html#rotate">QTransform::rotate</a>().</p>
+<!-- @@@QGraphicsRotation -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$angle-prop$$$angle$$$setAngleqreal$$$angleChanged -->
+<h3 class="fn" id="angle-prop"><a name="angle-prop"></a><span class="name">angle</span> : <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span></h3>
+<p>This property holds the angle for clockwise rotation, in degrees.</p>
+<p>The angle can be any real number; the default value is 0.0&#x2e; A value of 180 will rotate 180 degrees, clockwise. If you provide a negative number, the item will be rotated counter-clockwise. Normally the rotation angle will be in the range (-360, 360), but you can also provide numbers outside of this range (e.g&#x2e;, a angle of 370 degrees gives the same result as 10 degrees). Setting the angle to NaN results in no rotation.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qreal </td><td class="memItemRight bottomAlign"><span class="name"><b>angle</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setAngle</b></span>(<i>qreal</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qgraphicsrotation.html#angleChanged">angleChanged</a></b></span>()</td></tr>
+</table></div>
+<p><b>See also </b><a href="stylesheet-reference.html#origin">origin</a>.</p>
+<!-- @@@angle -->
+<!-- $$$axis-prop$$$axis$$$setAxisconstQVector3D&$$$setAxisQt::Axis$$$axisChanged -->
+<h3 class="fn" id="axis-prop"><a name="axis-prop"></a><span class="name">axis</span> : <span class="type"><a href="../qtgui/qvector3d.html">QVector3D</a></span></h3>
+<p>This property holds a rotation axis, specified by a vector in 3D space.</p>
+<p>This can be any axis in 3D space. By default the axis is (0, 0, 1), which is aligned with the Z axis. If you provide another axis, <a href="qgraphicsrotation.html">QGraphicsRotation</a> will provide a transformation that rotates around this axis. For example, if you would like to rotate an item around its X axis, you could pass (1, 0, 0) as the axis.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QVector3D </td><td class="memItemRight bottomAlign"><span class="name"><b>axis</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setAxis</b></span>(const QVector3D &amp;<i>axis</i>)</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qgraphicsrotation.html#setAxis-1">setAxis</a></b></span>(Qt::Axis <i>axis</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qgraphicsrotation.html#axisChanged">axisChanged</a></b></span>()</td></tr>
+</table></div>
+<p><b>See also </b><a href="../qtgui/qtransform.html">QTransform</a> and <a href="qgraphicsrotation.html#angle-prop">QGraphicsRotation::angle</a>.</p>
+<!-- @@@axis -->
+<!-- $$$origin-prop$$$origin$$$setOriginconstQVector3D&$$$originChanged -->
+<h3 class="fn" id="origin-prop"><a name="origin-prop"></a><span class="name">origin</span> : <span class="type"><a href="../qtgui/qvector3d.html">QVector3D</a></span></h3>
+<p>This property holds the origin of the rotation in 3D space.</p>
+<p>All rotations will be done relative to this point (i.e&#x2e;, this point will stay fixed, relative to the parent, when the item is rotated).</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QVector3D </td><td class="memItemRight bottomAlign"><span class="name"><b>origin</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setOrigin</b></span>(const QVector3D &amp;<i>point</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qgraphicsrotation.html#originChanged">originChanged</a></b></span>()</td></tr>
+</table></div>
+<p><b>See also </b><a href="qgraphicsrotation.html#angle-prop">angle</a>.</p>
+<!-- @@@origin -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QGraphicsRotation[overload1]$$$QGraphicsRotationQObject* -->
+<h3 class="fn" id="QGraphicsRotation"><a name="QGraphicsRotation"></a>QGraphicsRotation::<span class="name">QGraphicsRotation</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new <a href="qgraphicsrotation.html">QGraphicsRotation</a> with the given <i>parent</i>.</p>
+<!-- @@@QGraphicsRotation -->
+<!-- $$$angleChanged -->
+<h3 class="fn" id="angleChanged"><a name="angleChanged"></a><code>[signal] </code><span class="type">void</span> QGraphicsRotation::<span class="name">angleChanged</span>()</h3>
+<p>This signal is emitted whenever the angle has changed.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qgraphicsrotation.html#angle-prop">angle</a>. </p><p><b>See also </b><a href="qgraphicsrotation.html#angle-prop">QGraphicsRotation::angle</a>.</p>
+<!-- @@@angleChanged -->
+<!-- $$$axisChanged -->
+<h3 class="fn" id="axisChanged"><a name="axisChanged"></a><code>[signal] </code><span class="type">void</span> QGraphicsRotation::<span class="name">axisChanged</span>()</h3>
+<p>This signal is emitted whenever the axis of the object changes.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qgraphicsrotation.html#axis-prop">axis</a>. </p><p><b>See also </b><a href="qgraphicsrotation.html#axis-prop">QGraphicsRotation::axis</a>.</p>
+<!-- @@@axisChanged -->
+<!-- $$$originChanged -->
+<h3 class="fn" id="originChanged"><a name="originChanged"></a><code>[signal] </code><span class="type">void</span> QGraphicsRotation::<span class="name">originChanged</span>()</h3>
+<p>This signal is emitted whenever the origin has changed.</p>
+<p><b>Note:</b> Notifier signal for property <a href="qgraphicsrotation.html#origin-prop">origin</a>. </p><p><b>See also </b><a href="qgraphicsrotation.html#origin-prop">QGraphicsRotation::origin</a>.</p>
+<!-- @@@originChanged -->
+<!-- $$$~QGraphicsRotation[overload1]$$$~QGraphicsRotation -->
+<h3 class="fn" id="dtor.QGraphicsRotation"><a name="dtor.QGraphicsRotation"></a><code>[virtual] </code>QGraphicsRotation::<span class="name">~QGraphicsRotation</span>()</h3>
+<p>Destroys the graphics rotation.</p>
+<!-- @@@~QGraphicsRotation -->
+<!-- $$$applyTo[overload1]$$$applyToQMatrix4x4* -->
+<h3 class="fn" id="applyTo"><a name="applyTo"></a><code>[override virtual] </code><span class="type">void</span> QGraphicsRotation::<span class="name">applyTo</span>(<span class="type"><a href="../qtgui/qmatrix4x4.html">QMatrix4x4</a></span> *<i>matrix</i>) const</h3>
+<p>Reimplements: <a href="qgraphicstransform.html#applyTo">QGraphicsTransform::applyTo</a>(QMatrix4x4 *matrix) const.</p>
+<!-- @@@applyTo -->
+<!-- $$$setAxis -->
+<h3 class="fn" id="setAxis-1"><a name="setAxis-1"></a><span class="type">void</span> QGraphicsRotation::<span class="name">setAxis</span>(<span class="type"><a href="../qtcore/qt.html#Axis-enum">Qt::Axis</a></span> <i>axis</i>)</h3>
+<p>Convenience function to set the axis to <i>axis</i>.</p>
+<p>Note: the <a href="../qtcore/qt.html#Axis-enum">Qt::YAxis</a> rotation for <a href="../qtgui/qtransform.html">QTransform</a> is inverted from the correct mathematical rotation in 3D space. The <a href="qgraphicsrotation.html">QGraphicsRotation</a> class implements a correct mathematical rotation. The following two sequences of code will perform the same transformation:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtgui/qtransform.html">QTransform</a></span> t;
+  t<span class="operator">.</span>rotate(<span class="number">45</span><span class="operator">,</span> <span class="type">Qt</span><span class="operator">::</span>YAxis);
+
+  <span class="type"><a href="qgraphicsrotation.html#QGraphicsRotation">QGraphicsRotation</a></span> r;
+  r<span class="operator">.</span>setAxis(<span class="type">Qt</span><span class="operator">::</span>YAxis);
+  r<span class="operator">.</span>setAngle(<span class="operator">-</span><span class="number">45</span>);
+
+</pre>
+<p><b>Note:</b> Setter function for property <a href="qgraphicsrotation.html#axis-prop">axis</a>. </p><!-- @@@setAxis -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

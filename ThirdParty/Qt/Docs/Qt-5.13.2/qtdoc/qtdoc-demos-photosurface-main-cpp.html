@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- photosurface.qdoc -->
+  <title>Qt Quick Demo - Photo Surface | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Qt Quick Demo - Photo Surface</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<h1 class="title">Qt Quick Demo - Photo Surface</h1>
+<span class="subtitle"></span>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2017 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#ifdef QT_WIDGETS_LIB</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QApplication&gt;</span>
+  <span class="preprocessor">#else</span>
+  <span class="preprocessor">#include &lt;QtGui/QGuiApplication&gt;</span>
+  <span class="preprocessor">#endif</span>
+  <span class="preprocessor">#include &lt;QtQml/QQmlApplicationEngine&gt;</span>
+  <span class="preprocessor">#include &lt;QtQml/QQmlContext&gt;</span>
+  <span class="preprocessor">#include &lt;QtQuick/QQuickWindow&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QImageReader&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QCommandLineParser&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QCommandLineOption&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QDebug&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QDir&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QMimeDatabase&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QStandardPaths&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QUrl&gt;</span>
+
+  <span class="keyword">static</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> imageNameFilters()
+  {
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> result;
+      <span class="type"><a href="../qtcore/qmimedatabase.html">QMimeDatabase</a></span> mimeDatabase;
+      <span class="keyword">const</span> <span class="keyword">auto</span> supportedMimeTypes <span class="operator">=</span> <span class="type"><a href="../qtgui/qimagereader.html">QImageReader</a></span><span class="operator">::</span>supportedMimeTypes();
+      <span class="keyword">for</span> (<span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>m : supportedMimeTypes) {
+          <span class="keyword">const</span> <span class="keyword">auto</span> suffixes <span class="operator">=</span> mimeDatabase<span class="operator">.</span>mimeTypeForName(m)<span class="operator">.</span>suffixes();
+          <span class="keyword">for</span> (<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>suffix : suffixes)
+              result<span class="operator">.</span>append(QLatin1String(<span class="string">&quot;*.&quot;</span>) <span class="operator">+</span> suffix);
+      }
+      <span class="keyword">return</span> result;
+  }
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span><span class="operator">*</span> argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="comment">// The reason to use QApplication is that QWidget-based dialogs</span>
+      <span class="comment">// are the native dialogs on Qt-based platforms like KDE,</span>
+      <span class="comment">// but they cannot be instantiated if this is a QGuiApplication.</span>
+  <span class="preprocessor">#ifdef QT_WIDGETS_LIB</span>
+      <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> app(argc<span class="operator">,</span> argv);
+  <span class="preprocessor">#else</span>
+      <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span> app(argc<span class="operator">,</span> argv);
+  <span class="preprocessor">#endif</span>
+      <span class="type"><a href="../qtquick/qquickwindow.html">QQuickWindow</a></span><span class="operator">::</span>setDefaultAlphaBuffer(<span class="keyword">true</span>);
+
+      <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>setApplicationName(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Photosurface&quot;</span>));
+      <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>setOrganizationName(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;QtProject&quot;</span>));
+      <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>setApplicationVersion(QLatin1String(QT_VERSION_STR));
+      <span class="type"><a href="../qtcore/qcommandlineparser.html">QCommandLineParser</a></span> parser;
+      parser<span class="operator">.</span>setApplicationDescription(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Qt Quick Demo - Photo Surface&quot;</span>));
+      parser<span class="operator">.</span>addHelpOption();
+      parser<span class="operator">.</span>addVersionOption();
+      parser<span class="operator">.</span>addPositionalArgument(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;directory&quot;</span>)<span class="operator">,</span>
+                                   <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;The image directory or URL to show.&quot;</span>));
+      parser<span class="operator">.</span>process(app);
+
+      <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> initialUrl;
+      <span class="keyword">if</span> (<span class="operator">!</span>parser<span class="operator">.</span>positionalArguments()<span class="operator">.</span>isEmpty()) {
+          initialUrl <span class="operator">=</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>fromUserInput(parser<span class="operator">.</span>positionalArguments()<span class="operator">.</span>first()<span class="operator">,</span>
+                                           <span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>currentPath()<span class="operator">,</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>AssumeLocalFile);
+          <span class="keyword">if</span> (<span class="operator">!</span>initialUrl<span class="operator">.</span>isValid()) {
+              <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>()<span class="operator">.</span>nospace() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Invalid argument: \&quot;&quot;</span>
+                  <span class="operator">&lt;</span><span class="operator">&lt;</span> parser<span class="operator">.</span>positionalArguments()<span class="operator">.</span>first() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;\&quot;: &quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> initialUrl<span class="operator">.</span>errorString();
+              <span class="keyword">return</span> <span class="number">1</span>;
+          }
+      }
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> nameFilters <span class="operator">=</span> imageNameFilters();
+
+      <span class="type"><a href="../qtqml/qqmlapplicationengine.html">QQmlApplicationEngine</a></span> engine;
+      <span class="type"><a href="../qtqml/qqmlcontext.html">QQmlContext</a></span> <span class="operator">*</span>context <span class="operator">=</span> engine<span class="operator">.</span>rootContext();
+
+      <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> picturesLocationUrl <span class="operator">=</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>fromLocalFile(<span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>homePath());
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> picturesLocations <span class="operator">=</span> <span class="type"><a href="../qtcore/qstandardpaths.html">QStandardPaths</a></span><span class="operator">::</span>standardLocations(<span class="type"><a href="../qtcore/qstandardpaths.html">QStandardPaths</a></span><span class="operator">::</span>PicturesLocation);
+      <span class="keyword">if</span> (<span class="operator">!</span>picturesLocations<span class="operator">.</span>isEmpty()) {
+          picturesLocationUrl <span class="operator">=</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>fromLocalFile(picturesLocations<span class="operator">.</span>first());
+          <span class="keyword">if</span> (initialUrl<span class="operator">.</span>isEmpty()
+              <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span><span class="type"><a href="../qtcore/qdir.html">QDir</a></span>(picturesLocations<span class="operator">.</span>first())<span class="operator">.</span>entryInfoList(nameFilters<span class="operator">,</span> <span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>Files)<span class="operator">.</span>isEmpty()) {
+              initialUrl <span class="operator">=</span> picturesLocationUrl;
+          }
+      }
+
+      context<span class="operator">-</span><span class="operator">&gt;</span>setContextProperty(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;contextPicturesLocation&quot;</span>)<span class="operator">,</span> picturesLocationUrl);
+      context<span class="operator">-</span><span class="operator">&gt;</span>setContextProperty(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;contextInitialUrl&quot;</span>)<span class="operator">,</span> initialUrl);
+      context<span class="operator">-</span><span class="operator">&gt;</span>setContextProperty(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;contextImageNameFilters&quot;</span>)<span class="operator">,</span> nameFilters);
+
+      engine<span class="operator">.</span>load(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="string">&quot;qrc:///photosurface.qml&quot;</span>));
+      <span class="keyword">if</span> (engine<span class="operator">.</span>rootObjects()<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span> <span class="operator">-</span><span class="number">1</span>;
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>

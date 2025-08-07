@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-projects-settings-build.qdoc -->
+  <title>Specifying Build Settings | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Specifying Build Settings</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-debuggers.html" />
+  <link rel="next" href="creator-run-settings.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-debuggers.html">Adding Debuggers</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-run-settings.html">Specifying Run Settings</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#editing-build-configurations">Editing Build Configurations</a></li>
+<li class="level2"><a href="#qmake-build-configuration">qmake Build Configuration</a></li>
+<li class="level2"><a href="#cmake-build-configuration">CMake Build Configuration</a></li>
+<li class="level1"><a href="#starting-external-processes">Starting External Processes</a></li>
+<li class="level2"><a href="#using-environment-variables">Using Environment Variables</a></li>
+<li class="level2"><a href="#using-qt-creator-variables">Using Qt Creator Variables</a></li>
+<li class="level1"><a href="#build-steps">Build Steps</a></li>
+<li class="level2"><a href="#qmake-build-steps">qmake Build Steps</a></li>
+<li class="level2"><a href="#cmake-build-steps">CMake Build Steps</a></li>
+<li class="level2"><a href="#qbs-build-steps">Qbs Build Steps</a></li>
+<li class="level2"><a href="#adding-custom-build-steps">Adding Custom Build Steps</a></li>
+<li class="level2"><a href="#executing-custom-commands">Executing Custom Commands</a></li>
+<li class="level1"><a href="#clean-steps">Clean Steps</a></li>
+<li class="level2"><a href="#cmake-clean-steps">CMake Clean Steps</a></li>
+<li class="level2"><a href="#qbs-clean-steps">Qbs Clean Steps</a></li>
+<li class="level1"><a href="#build-environment">Build Environment</a></li>
+<li class="level2"><a href="#batch-editing">Batch Editing</a></li>
+<li class="level2"><a href="#clearing-the-system-environment">Clearing the System Environment</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Specifying Build Settings</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-build-settings.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Different build configurations allow you to quickly switch between different build settings. By default, Qt Creator creates <i>debug</i>, <i>release</i>, and <i>profile</i> build configurations. A debug build contains additional debug symbols that you need for debugging the application but that you can leave out from the release version. Generally, you use the debug configuration for testing and the release configuration for creating the final installation file. A profile configuration is an optimized release build that is delivered with separate debug information. It is best suited for analyzing applications.</p>
+<p>You specify build settings in the <b>Projects</b> mode. To add a new build configuration, click <b>Add</b> and select the type of configuration you would like to add. You can add as many build configurations as you need.</p>
+<p>To delete the build configuration currently selected, click <b>Remove</b>.</p>
+<a name="editing-build-configurations"></a>
+<h2 id="editing-build-configurations">Editing Build Configurations</h2>
+<p>Select the build configuration to edit in the <b>Edit build configuration</b> field.</p>
+<a name="qmake-build-configuration"></a>
+<h3 id="qmake-build-configuration">qmake Build Configuration</h3>
+<p class="centerAlign"><img src="images/qtcreator-projectpane.png" alt="" /></p><p>By default, Qt Creator builds projects in a separate directory from the source directory, as <a href="creator-glossary.html#glossary-shadow-build">shadow builds</a>. This keeps the files generated for each <a href="creator-glossary.html#glossary-buildandrun-kit">build and run kit</a> separate. If you only build and run with a single <a href="creator-glossary.html#glossary-buildandrun-kit">kit</a>, you can deselect the <b>Shadow build</b> checkbox.</p>
+<p>To make in-source builds the default option for all projects, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Build &amp; Run</b> &gt; <b>General</b>, and enter a period (.) in the <b>Default build directory</b> field.</p>
+<p>You can create separate versions of project files to keep platform-dependent code separate. You can use qmake <a href="http://doc.qt.io/qt-5/qmake-tutorial.html#adding-platform-specific-source-files">scopes</a> to select the file to process depending on which platform qmake is run on.</p>
+<a name="cmake-build-configuration"></a>
+<h3 id="cmake-build-configuration">CMake Build Configuration</h3>
+<p class="centerAlign"><img src="images/qtcreator-cmake-build-settings.png" alt="" /></p><p>Setting names with a common prefix (up to the first underscore character) are grouped under the prefix. To view all settings, select the <b>Advanced</b> check box.</p>
+<p>To add build settings, select <b>Add</b>, and then select the type of the setting that you are adding: <b>Boolean</b>, <b>String</b>, <b>Directory</b>, or <b>File</b>.</p>
+<p>To change the type of the selected setting, select <b>Force to bool</b>, <b>Force to file</b>, <b>Force to directory</b>, or <b>Force to string</b>.</p>
+<p>To modify the value of a build setting, double-click it, or select it, and then select <b>Edit</b>. To save the changes, select <b>Apply Configuration Changes</b>. Keep in mind that a configuration change might trigger a follow-up configuration change.</p>
+<p>To remove a setting, select <b>Unset</b>.</p>
+<p>To reset the changes that you made, select <b>Reset</b>.</p>
+<a name="starting-external-processes"></a>
+<h2 id="starting-external-processes">Starting External Processes</h2>
+<p>Qt Creator executes external processes to accomplish tasks such as building and running applications. To execute the processes, Qt Creator uses shell commands that are native to the system. It constructs the commands from an executable name and optional command line arguments.</p>
+<p>The executable name is specified in the executable fields: <b>qmake</b>, <b>Make</b>, <b>Command</b>, or <b>Executable</b>. It is either derived from the project or specified manually. When you specify executables manually, you can reference environment variables and Qt Creator variables. However, no quoting rules apply.</p>
+<p>You can specify command-line arguments in the arguments fields: <b>Additional arguments</b>, <b>Command arguments</b>, <b>Make arguments</b>, <b>Arguments</b>, <b>Default Arguments</b>, or <b>Extra arguments</b>. You can create shell command lines that can contain redirection and other advanced constructs. However, some more complex use cases, such as piping test data into the application being tested or grouping commands, are not supported because the value of the <b>Executable</b> field is always placed first when constructing the command.</p>
+<a name="using-environment-variables"></a>
+<h3 id="using-environment-variables">Using Environment Variables</h3>
+<p>You can use any environment variables as values in the fields. For a list of variable names, click <b>Build Environment &gt; Details</b> in the <b>Build Settings</b>. Environment variables are referenced using the native syntax: $VARNAME or ${VARNAME} on Unix and %VARNAME% on Windows.</p>
+<a name="using-qt-creator-variables"></a>
+<h3 id="using-qt-creator-variables">Using Qt Creator Variables</h3>
+<p>You can use Qt Creator variables in arguments, executable paths, and working directories. The variables take care of quoting their expansions, so you do not need to put them in quotes. Select the <img src="images/replace.png" alt="" /> (<b>Variables</b>) button in a field to select from a list of variables that are available in a particular context.</p>
+<p>The following syntax enables you to use environment variables as Qt Creator variables: %{Env:VARNAME}.</p>
+<p>Qt Creator uses pattern substitution when expanding variable names. To replace the first match of <i>pattern</i> within <i>variable</i> with <i>replacement</i>, use:</p>
+<pre class="cpp plain">
+
+  %{variable/pattern/replacement}
+
+</pre>
+<p>To replace all matches of <i>pattern</i> within <i>variable</i> with <i>replacement</i>, use:</p>
+<pre class="cpp plain">
+
+  %{variable//pattern/replacement}
+
+</pre>
+<p>The pattern can be a regular expression and the replacement can contain backreferences. For example, if <code>%{variable}</code> is <code>my123var</code>, then <code>%{variable/(..)(\d+)/\2\1}</code> is expanded to <code>123myvar</code>.</p>
+<p>To use the default value if the variable is not set, use:</p>
+<pre class="cpp plain">
+
+  %{variable:-default}
+
+</pre>
+<a name="build-steps"></a>
+<h2 id="build-steps">Build Steps</h2>
+<p>In <b>Build Steps</b> you can change the settings for the build system selected for building the project: qmake, CMake, or Qbs.</p>
+<a name="qmake-build-steps"></a>
+<h3 id="qmake-build-steps">qmake Build Steps</h3>
+<p>Qt Creator builds qmake projects by running the <code>make</code> or <code>nmake</code> command from the Qt version defined for the current build configuration.</p>
+<p class="centerAlign"><img src="images/qtcreator-build-steps.png" alt="&quot;Build steps&quot;" /></p><p>To override the shell command that Qt Creator constructs by default, disable or remove the build step and add a custom build step that specifies another shell command.</p>
+<p>By default, Qt Creator uses all the CPU cores available to achieve maximum build parallelization. On Linux and macOS, you can specify the number of parallel jobs to use for building in the <b>Parallel jobs</b> field. Select the <b>Override MAKEFLAGS</b> check box to override existing MAKEFLAGS variables.</p>
+<p>To generate debug symbols also for applications compiled in release mode, select the <b>Generate separate debug info</b> check box. For more information, see <a href="creator-cpu-usage-analyzer.html#using-the-performance-analyzer">Using the Performance Analyzer</a>.</p>
+<a name="compiling-qml"></a>
+<h4 id="compiling-qml">Compiling QML</h4>
+<p>Since Qt 5.11, you can compile QML source code into the final binary. This improves the startup time of the application and eliminates the need to deploy QML files together with the application. For more information, see Compiling QML Ahead of Time.</p>
+<p>Qt Creator new project wizards create Qt Quick projects that can be compiled, because they are set up to use the Qt Resource System. To compile Qt Quick projects, select the <b>Enable Qt Quick Compiler</b> check box.</p>
+<p><b>Note: </b>In earlier Qt versions, this was a commercial feature. For more information, see <a href="http://doc.qt.io/QtQuickCompiler/">Qt Quick Compiler</a>.</p><a name="cmake-build-steps"></a>
+<h3 id="cmake-build-steps">CMake Build Steps</h3>
+<p>Qt Creator builds CMake projects by running <code>cmake . --build</code>, which then runs run whatever is needed based on how the project was configured: <code>make</code>, <code>mingw32-make</code>, <code>nmake</code>, or <code>ninja</code>, for example.</p>
+<p>You can add arguments and targets for the build command in <b>Build Steps</b>.</p>
+<p class="centerAlign"><img src="images/qtcreator-cmake-build-steps.png" alt="" /></p><p><b>Note: </b>While the other CMake generators are installed together with Qt, you usually need to install Ninja yourself. For more information, see <a href="creator-targets.html#using-ninja-as-a-cmake-generator">Using Ninja as a CMake Generator</a>.</p><a name="qbs-build-steps"></a>
+<h3 id="qbs-build-steps">Qbs Build Steps</h3>
+<p class="centerAlign"><img src="images/creator-qbs-build-app.png" alt="" /></p><p>To specify build steps for Qbs:</p>
+<ol class="1" type="1"><li>In the <b>Build variant</b> field, select <b>Debug</b> to include debug symbols in the build for debugging the application and <b>Release</b> to create the final installation file.</li>
+<li>In the <b>Parallel jobs</b> field, specify the number of parallel jobs to use for building.</li>
+<li>Select the <b>Enable QML debugging</b> check box to debug Qt Quick application projects.<p><b>Note: </b>Debugging requires opening a socket at a well-known port, which presents a security risk. Anyone on the Internet could connect to the application that you are debugging and execute any JavaScript functions. Therefore, you must make sure that the port is properly protected by a firewall.</p></li>
+<li>In the <b>Properties</b> field, specify the properties to pass to the project. Use colons (:) to separate keys from values. For more information, see <a href="http://doc.qt.io/qbs/language-introduction.html">Modules</a> in the Qbs Manual.</li>
+<li>In the <b>Flags</b> field:<ul>
+<li>Select <b>Keep going</b> to continue building when errors occur, if possible.</li>
+<li>Select <b>Show command lines</b> to print actual command lines to the compile output pane instead of high-level descriptions.</li>
+<li>Select <b>Force probes</b> to force re-execution of the configure scripts of <a href="https://doc.qt.io/qbs/probe-item.html">Probes</a>.</li>
+<li>Select <b>Install</b> to copy artifacts to their install location after building them. This option is enabled by default.<p><b>Note: </b>On Windows, the build will fail if the application is running, because the executable file cannot be overwritten. To avoid this issue, you can deselect this check box and add a <b>Qbs Install</b> deployment step in the run settings that will be performed just before running the application.</p></li>
+<li>Select <b>Clean install root</b> to remove the contents of the install root directory before the build starts.</li>
+<li>Select <b>Use default location</b> to install the artifacts to the default location. Deselect the check box to specify another location in the <b>Installation directory</b> field.</li>
+</ul>
+</li>
+</ol>
+<p>The <b>Equivalent command line</b> field displays the build command that is constructed based on the selected options.</p>
+<a name="adding-custom-build-steps"></a>
+<h3 id="adding-custom-build-steps">Adding Custom Build Steps</h3>
+<p>To add custom steps to the build settings, select <b>Add Build Step &gt; Custom Process Step</b>.</p>
+<p>By default, custom steps are enabled. To disable a custom step, select the <img src="images/buildstepdisable.png" alt="" /> (<b>Disable</b>) button.</p>
+<p class="centerAlign"><img src="images/qtcreator-build-steps-custom.png" alt="&quot;Custom Process Step&quot;" /></p><a name="executing-custom-commands"></a>
+<h3 id="executing-custom-commands">Executing Custom Commands</h3>
+<p>To execute custom commands when building for embedded devices, select <b>Add Build Step</b> &gt; <b>Custom Remote Command (via adb shell)</b> (commercial only) and enter the command to execute.</p>
+<a name="clean-steps"></a>
+<h2 id="clean-steps">Clean Steps</h2>
+<p>You can use the cleaning process to remove intermediate files. This process might help you to fix obscure issues during the process of building a project.</p>
+<p class="centerAlign"><img src="images/qtcreator-clean-steps.png" alt="&quot;Clean steps&quot;" /></p><p>You can define the cleaning steps for your builds in the <b>Clean Steps</b>.</p>
+<ul>
+<li>To add a clean step using make or a custom process, click <b>Add Clean Step</b> and select the type of step you want to add.<p>By default, custom steps are enabled. To disable a custom step, select the <b>Disable</b> button.</p>
+</li>
+<li>To remove a clean step, click <b>Remove Item</b>.</li>
+<li>To change the order of steps, click <img src="images/arrowup.png" alt="" /> (<b>Move Up</b>) and <img src="images/arrowdown.png" alt="" /> (<b>Move Down</b>).</li>
+</ul>
+<a name="cmake-clean-steps"></a>
+<h3 id="cmake-clean-steps">CMake Clean Steps</h3>
+<p>When building with CMake, you can add arguments and targets for the clean command in <b>Clean Steps</b>.</p>
+<p class="centerAlign"><img src="images/qtcreator-cmake-clean-steps.png" alt="" /></p><p>The build errors and warnings are parsed and displayed in the <b>Issues</b> output pane.</p>
+<a name="qbs-clean-steps"></a>
+<h3 id="qbs-clean-steps">Qbs Clean Steps</h3>
+<p>When building with Qbs, you can specify flags in <b>Clean Steps</b>:</p>
+<p class="centerAlign"><img src="images/creator-qbs-build-clean.png" alt="" /></p><ul>
+<li>Select <b>Dry run</b> to test cleaning without executing commands or making permanent changes to the build graph.</li>
+<li>Select <b>Keep going</b> to continue cleaning when errors occur, if possible.</li>
+</ul>
+<p>The <b>Equivalent command line</b> field displays the clean command that is constructed based on the selected options.</p>
+<a name="build-environment"></a>
+<h2 id="build-environment">Build Environment</h2>
+<p>You can specify the environment you want to use for building in the <b>Build Environment</b> section. By default, the environment in which Qt Creator was started is used and modified to include the Qt version. Depending on the selected Qt version, Qt Creator automatically sets the necessary environment variables. You can edit existing environment variables or add, reset and unset new variables based on your project requirements.</p>
+<p class="centerAlign"><img src="images/qtcreator-build-environment.png" alt="&quot;Build Environment&quot;" /></p><p><b>Note: </b>The changes are stored in the local project specific <code>.pro.user</code> file. Therefore, they are not suitable for sharing between developers or development PCs. To share settings, incorporate them into the build system. For example, if you use qmake, make the changes in the <code>.pro</code> file.</p><a name="batch-editing"></a>
+<h3 id="batch-editing">Batch Editing</h3>
+<p>To modify environment variable values for build or run environments, select <b>Batch Edit</b> in the build or run settings and enter environment variables in the <b>Edit Environment</b> dialog.</p>
+<p>To remove a variable value from the environment, enter the variable name. For example, <code>TEST</code> sets the value of the <code>TEST</code> variable empty when building or running the project.</p>
+<p>To add a variable value to the environment, enter the variable name and value, separated by the equals sign. For example, the following line prepends the <code>/opt/bin</code> folder to the existing PATH:</p>
+<ul>
+<li>On Windows: <code>PATH=C:\opt\bin;${PATH}</code></li>
+<li>On Linux: <code>PATH=/opt/bin:${PATH}</code></li>
+</ul>
+<p>To add or remove several variables, place them on separate lines. The order is important. If you remove a value on a line, you cannot refer to it on the following lines. However, you can remove a value after you have referred to it on an earlier line.</p>
+<a name="clearing-the-system-environment"></a>
+<h3 id="clearing-the-system-environment">Clearing the System Environment</h3>
+<p>To build with a clean system environment, select the <b>Clear system environment</b> check box. Qt Creator discards the current environment, and populates a clean system environment with the environment variables that the compilers and tools need. Therefore, the environment is never totally empty, even after you clear it.</p>
+</div>
+<!-- @@@creator-build-settings.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-debuggers.html">Adding Debuggers</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-run-settings.html">Specifying Run Settings</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- signalslotsyntaxes.qdoc -->
+  <title>Differences between String-Based and Functor-Based Connections | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Differences between String-Based and Functor-Based Connections</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#type-checking-and-implicit-type-conversions">Type Checking and Implicit Type Conversions</a></li>
+<li class="level1"><a href="#making-connections-to-lambda-expressions">Making Connections to Lambda Expressions</a></li>
+<li class="level1"><a href="#connecting-c-objects-to-qml-objects">Connecting C++ Objects to QML Objects</a></li>
+<li class="level1"><a href="#using-default-parameters-in-slots-to-connect-to-signals-with-fewer-parameters">Using Default Parameters in Slots to Connect to Signals with Fewer Parameters</a></li>
+<li class="level1"><a href="#selecting-overloaded-signals-and-slots">Selecting Overloaded Signals and Slots</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Differences between String-Based and Functor-Based Connections</h1>
+<span class="subtitle"></span>
+<!-- $$$signalsandslots-syntaxes.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>From Qt 5.0 onwards, Qt offers two different ways to write <a href="exceptionsafety.html#signals-and-slots">signal-slot connections</a> in C++: The <i>string-based</i> connection syntax and the <i>functor-based</i> connection syntax. There are pros and cons to both syntaxes. The table below summarizes their differences.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th ></th><th >String-based</th><th >Functor-based</th></tr></thead>
+<tr valign="top" class="odd"><td >Type checking is done at..&#x2e;</td><td >Run-time</td><td >Compile-time</td></tr>
+<tr valign="top" class="even"><td >Can perform implicit type conversions</td><td ></td><td >Y</td></tr>
+<tr valign="top" class="odd"><td >Can connect signals to lambda expressions</td><td ></td><td >Y</td></tr>
+<tr valign="top" class="even"><td >Can connect signals to slots which have more arguments than the signal (using default parameters)</td><td >Y</td><td ></td></tr>
+<tr valign="top" class="odd"><td >Can connect C++ functions to QML functions</td><td >Y</td><td ></td></tr>
+</table></div>
+<p>The following sections explain these differences in detail and demonstrate how to use the features unique to each connection syntax.</p>
+<a name="type-checking-and-implicit-type-conversions"></a>
+<h2 id="type-checking-and-implicit-type-conversions">Type Checking and Implicit Type Conversions</h2>
+<p>String-based connections type-check by comparing strings at run-time. There are three limitations with this approach:</p>
+<ol class="1" type="1"><li>Connection errors can only be detected after the program has started running.</li>
+<li>Implicit conversions cannot be done between signals and slots.</li>
+<li>Typedefs and namespaces cannot be resolved.</li>
+</ol>
+<p>Limitations 2 and 3 exist because the string comparator does not have access to C++ type information, so it relies on exact string matching.</p>
+<p>In contrast, functor-based connections are checked by the compiler. The compiler catches errors at compile-time, enables implicit conversions between compatible types, and recognizes different names of the same type.</p>
+<p>For example, only the functor-based syntax can be used to connect a signal that carries an <code>int</code> to a slot that accepts a <code>double</code>. A <a href="../qtwidgets/qslider.html">QSlider</a> holds an <code>int</code> value while a <a href="../qtwidgets/qdoublespinbox.html">QDoubleSpinBox</a> holds a <code>double</code> value. The following snippet shows how to keep them in sync:</p>
+<pre class="cpp">
+
+      <span class="keyword">auto</span> slider <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qslider.html">QSlider</a></span>(<span class="keyword">this</span>);
+      <span class="keyword">auto</span> doubleSpinBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qdoublespinbox.html">QDoubleSpinBox</a></span>(<span class="keyword">this</span>);
+
+      <span class="comment">// OK: The compiler can convert an int into a double</span>
+      connect(slider<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qslider.html">QSlider</a></span><span class="operator">::</span>valueChanged<span class="operator">,</span>
+              doubleSpinBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qdoublespinbox.html">QDoubleSpinBox</a></span><span class="operator">::</span>setValue);
+
+      <span class="comment">// ERROR: The string table doesn't contain conversion information</span>
+      connect(slider<span class="operator">,</span> SIGNAL(valueChanged(<span class="type">int</span>))<span class="operator">,</span>
+              doubleSpinBox<span class="operator">,</span> SLOT(setValue(<span class="type">double</span>)));
+
+</pre>
+<p>The following example illustrates the lack of name resolution. <a href="../qtmultimedia/qaudioinput.html#stateChanged">QAudioInput::stateChanged</a>() is declared with an argument of type &quot;<a href="../qtmultimedia/qaudio.html#State-enum">QAudio::State</a>&quot;. Thus, string-based connections must also specify &quot;<a href="../qtmultimedia/qaudio.html#State-enum">QAudio::State</a>&quot;, even if <code>&quot;State&quot;</code> is already visible. This issue does not apply to functor-based connections because argument types are not part of the connection.</p>
+<pre class="cpp">
+
+      <span class="keyword">auto</span> audioInput <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtmultimedia/qaudioinput.html">QAudioInput</a></span>(<span class="type"><a href="../qtmultimedia/qaudioformat.html">QAudioFormat</a></span>()<span class="operator">,</span> <span class="keyword">this</span>);
+      <span class="keyword">auto</span> widget <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>(<span class="keyword">this</span>);
+
+      <span class="comment">// OK</span>
+      connect(audioInput<span class="operator">,</span> SIGNAL(stateChanged(<span class="type"><a href="../qtmultimedia/qaudio.html">QAudio</a></span><span class="operator">::</span>State))<span class="operator">,</span>
+              widget<span class="operator">,</span> SLOT(show()));
+
+      <span class="comment">// ERROR: The strings &quot;State&quot; and &quot;QAudio::State&quot; don't match</span>
+      <span class="keyword">using</span> <span class="keyword">namespace</span> <span class="type"><a href="../qtmultimedia/qaudio.html">QAudio</a></span>;
+      connect(audioInput<span class="operator">,</span> SIGNAL(stateChanged(State))<span class="operator">,</span>
+              widget<span class="operator">,</span> SLOT(show()));
+
+      <span class="comment">// ...</span>
+
+</pre>
+<a name="making-connections-to-lambda-expressions"></a>
+<h2 id="making-connections-to-lambda-expressions">Making Connections to Lambda Expressions</h2>
+<p>The functor-based connection syntax can connect signals to C++11 lambda expressions, which are effectively inline slots. This feature is not available with the string-based syntax.</p>
+<p>In the following example, the TextSender class emits a <code>textCompleted()</code> signal which carries a <a href="../qtcore/qstring.html">QString</a> parameter. Here is the class declaration:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> TextSender : <span class="keyword">public</span> <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> {
+      Q_OBJECT
+
+      <span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span> <span class="operator">*</span>lineEdit;
+      <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>button;
+
+  <span class="keyword">signals</span>:
+      <span class="type">void</span> textCompleted(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">&amp;</span> text) <span class="keyword">const</span>;
+
+  <span class="keyword">public</span>:
+      TextSender(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+  };
+
+</pre>
+<p>Here is the connection which emits <code>TextSender::textCompleted()</code> when the user clicks the button:</p>
+<pre class="cpp">
+
+  TextSender<span class="operator">::</span>TextSender(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent) : <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>(parent) {
+      lineEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span>(<span class="keyword">this</span>);
+      button <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>(<span class="string">&quot;Send&quot;</span><span class="operator">,</span> <span class="keyword">this</span>);
+
+      connect(button<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span> <span class="operator">[</span><span class="operator">=</span><span class="operator">]</span> {
+          <span class="keyword">emit</span> textCompleted(lineEdit<span class="operator">-</span><span class="operator">&gt;</span>text());
+      });
+
+      <span class="comment">// ...</span>
+  }
+
+</pre>
+<p>In this example, the lambda function made the connection simple even though <a href="../qtwidgets/qabstractbutton.html#clicked">QPushButton::clicked</a>() and <code>TextSender::textCompleted()</code> have incompatible parameters. In contrast, a string-based implementation would require extra boilerplate code.</p>
+<p><b>Note: </b>The functor-based connection syntax accepts pointers to all functions, including standalone functions and regular member functions. However, for the sake of readability, signals should only be connected to slots, lambda expressions, and other signals.</p><a name="connecting-c-objects-to-qml-objects"></a>
+<h2 id="connecting-c-objects-to-qml-objects">Connecting C++ Objects to QML Objects</h2>
+<p>The string-based syntax can connect C++ objects to QML objects, but the functor-based syntax cannot. This is because QML types are resolved at run-time, so they are not available to the C++ compiler.</p>
+<p>In the following example, clicking on the QML object makes the C++ object print a message, and vice-versa. Here is the QML type (in <code>QmlGui.qml</code>):</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span>
+
+      signal <span class="type">qmlSignal</span>(string sentMsg)
+      <span class="keyword">function</span> <span class="name">qmlSlot</span>(receivedMsg) {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;QML received: &quot;</span> <span class="operator">+</span> <span class="name">receivedMsg</span>)
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">onClicked</span>: <span class="name">qmlSignal</span>(<span class="string">&quot;Hello from QML!&quot;</span>)
+      }
+  }
+
+</pre>
+<p>Here is the C++ class:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> CppGui : <span class="keyword">public</span> <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> {
+      Q_OBJECT
+
+      <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>button;
+
+  <span class="keyword">signals</span>:
+      <span class="type">void</span> cppSignal(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">&amp;</span> sentMsg) <span class="keyword">const</span>;
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> cppSlot(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">&amp;</span> receivedMsg) <span class="keyword">const</span> {
+          <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;C++ received:&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> receivedMsg;
+      }
+
+  <span class="keyword">public</span>:
+      CppGui(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr) : <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>(parent) {
+          button <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>(<span class="string">&quot;Click Me!&quot;</span><span class="operator">,</span> <span class="keyword">this</span>);
+          connect(button<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span> <span class="operator">[</span><span class="operator">=</span><span class="operator">]</span> {
+              <span class="keyword">emit</span> cppSignal(<span class="string">&quot;Hello from C++!&quot;</span>);
+          });
+      }
+  };
+
+</pre>
+<p>Here is the code that makes the signal-slot connections:</p>
+<pre class="cpp">
+
+      <span class="keyword">auto</span> cppObj <span class="operator">=</span> <span class="keyword">new</span> CppGui(<span class="keyword">this</span>);
+      <span class="keyword">auto</span> quickWidget <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtquick/qquickwidget.html">QQuickWidget</a></span>(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="string">&quot;QmlGui.qml&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      <span class="keyword">auto</span> qmlObj <span class="operator">=</span> quickWidget<span class="operator">-</span><span class="operator">&gt;</span>rootObject();
+
+      <span class="comment">// Connect QML signal to C++ slot</span>
+      connect(qmlObj<span class="operator">,</span> SIGNAL(qmlSignal(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span>
+              cppObj<span class="operator">,</span> SLOT(cppSlot(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>)));
+
+      <span class="comment">// Connect C++ signal to QML slot</span>
+      connect(cppObj<span class="operator">,</span> SIGNAL(cppSignal(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>))<span class="operator">,</span>
+              qmlObj<span class="operator">,</span> SLOT(qmlSlot(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>)));
+
+</pre>
+<p><b>Note: </b>All JavaScript functions in QML take parameters of <code>var</code> type, which maps to the <a href="../qtcore/qvariant.html">QVariant</a> type in C++.</p><p>When the <a href="../qtwidgets/qpushbutton.html">QPushButton</a> is clicked, the console prints, <i>'QML received: &quot;Hello from C++!&quot;'</i>. Likewise, when the Rectangle is clicked, the console prints, <i>'C++ received: &quot;Hello from QML!&quot;'</i>.</p>
+<p>See <a href="../qtqml/qtqml-cppintegration-overview.html#interacting-with-qml-objects-from-c">Interacting with QML Objects from C++</a> for other ways to let C++ objects interact with QML objects.</p>
+<a name="using-default-parameters-in-slots-to-connect-to-signals-with-fewer-parameters"></a>
+<h2 id="using-default-parameters-in-slots-to-connect-to-signals-with-fewer-parameters">Using Default Parameters in Slots to Connect to Signals with Fewer Parameters</h2>
+<p>Usually, a connection can only be made if the slot has the same number of arguments as the signal (or less), and if all the argument types are compatible.</p>
+<p>The string-based connection syntax provides a workaround for this rule: If the slot has default parameters, those parameters can be omitted from the signal. When the signal is emitted with fewer arguments than the slot, Qt runs the slot using default parameter values.</p>
+<p>Functor-based connections do not support this feature.</p>
+<p>Suppose there is a class called <code>DemoWidget</code> with a slot <code>printNumber()</code> that has a default argument:</p>
+<pre class="cpp">
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> printNumber(<span class="type">int</span> number <span class="operator">=</span> <span class="number">42</span>) {
+          <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Lucky number&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> number;
+      }
+
+</pre>
+<p>Using a string-based connection, <code>DemoWidget::printNumber()</code> can be connected to <a href="../qtcore/qcoreapplication.html#aboutToQuit">QApplication::aboutToQuit</a>(), even though the latter has no arguments. The functor-based connection will produce a compile-time error:</p>
+<pre class="cpp">
+
+  DemoWidget<span class="operator">::</span>DemoWidget(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent) : <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>(parent) {
+
+      <span class="comment">// OK: printNumber() will be called with a default value of 42</span>
+      connect(<a href="../qtwidgets/qapplication.html#qApp">qApp</a><span class="operator">,</span> SIGNAL(aboutToQuit())<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(printNumber()));
+
+      <span class="comment">// ERROR: Compiler requires compatible arguments</span>
+      connect(<a href="../qtwidgets/qapplication.html#qApp">qApp</a><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>aboutToQuit<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>DemoWidget<span class="operator">::</span>printNumber);
+  }
+
+</pre>
+<p>To work around this limitation with the functor-based syntax, connect the signal to a lambda function that calls the slot. See the section above, <a href="signalsandslots-syntaxes.html#making-connections-to-lambda-expressions">Making Connections to Lambda Expressions</a>.</p>
+<a name="selecting-overloaded-signals-and-slots"></a>
+<h2 id="selecting-overloaded-signals-and-slots">Selecting Overloaded Signals and Slots</h2>
+<p>With the string-based syntax, parameter types are explicitly specified. As a result, the desired instance of an overloaded signal or slot is unambiguous.</p>
+<p>In contrast, with the functor-based syntax, an overloaded signal or slot must be casted to tell the compiler which instance to use.</p>
+<p>For example, <a href="../qtwidgets/qlcdnumber.html">QLCDNumber</a> has three versions of the <code>display()</code> slot:</p>
+<ol class="1" type="1"><li><code>QLCDNumber::display(int)</code></li>
+<li><code>QLCDNumber::display(double)</code></li>
+<li><code>QLCDNumber::display(QString)</code></li>
+</ol>
+<p>To connect the <code>int</code> version to <a href="../qtwidgets/qabstractslider.html#valueChanged">QSlider::valueChanged</a>(), the two syntaxes are:</p>
+<pre class="cpp">
+
+      <span class="keyword">auto</span> slider <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qslider.html">QSlider</a></span>(<span class="keyword">this</span>);
+      <span class="keyword">auto</span> lcd <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qlcdnumber.html">QLCDNumber</a></span>(<span class="keyword">this</span>);
+
+      <span class="comment">// String-based syntax</span>
+      connect(slider<span class="operator">,</span> SIGNAL(valueChanged(<span class="type">int</span>))<span class="operator">,</span>
+              lcd<span class="operator">,</span> SLOT(display(<span class="type">int</span>)));
+
+      <span class="comment">// Functor-based syntax, first alternative</span>
+      connect(slider<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qslider.html">QSlider</a></span><span class="operator">::</span>valueChanged<span class="operator">,</span>
+              lcd<span class="operator">,</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type">void</span> (<span class="type"><a href="../qtwidgets/qlcdnumber.html">QLCDNumber</a></span><span class="operator">::</span><span class="operator">*</span>)(<span class="type">int</span>)<span class="operator">&gt;</span>(<span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qlcdnumber.html">QLCDNumber</a></span><span class="operator">::</span>display));
+
+      <span class="comment">// Functor-based syntax, second alternative</span>
+      <span class="type">void</span> (<span class="type"><a href="../qtwidgets/qlcdnumber.html">QLCDNumber</a></span><span class="operator">::</span><span class="operator">*</span>mySlot)(<span class="type">int</span>) <span class="operator">=</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qlcdnumber.html">QLCDNumber</a></span><span class="operator">::</span>display;
+      connect(slider<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qslider.html">QSlider</a></span><span class="operator">::</span>valueChanged<span class="operator">,</span>
+              lcd<span class="operator">,</span> mySlot);
+
+      <span class="comment">// Functor-based syntax, third alternative</span>
+      connect(slider<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qslider.html">QSlider</a></span><span class="operator">::</span>valueChanged<span class="operator">,</span>
+              lcd<span class="operator">,</span> <span class="type">QOverload</span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span><span class="operator">::</span>of(<span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qlcdnumber.html">QLCDNumber</a></span><span class="operator">::</span>display));
+
+      <span class="comment">// Functor-based syntax, fourth alternative (requires C++14)</span>
+      connect(slider<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qslider.html">QSlider</a></span><span class="operator">::</span>valueChanged<span class="operator">,</span>
+              lcd<span class="operator">,</span> <a href="../qtcore/qtglobal.html#qOverload">qOverload</a><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span>(<span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qlcdnumber.html">QLCDNumber</a></span><span class="operator">::</span>display));
+
+</pre>
+</div>
+<p><b>See also </b><a href="../qtcore/qtglobal.html#qOverload">qOverload</a>().</p>
+<!-- @@@signalsandslots-syntaxes.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

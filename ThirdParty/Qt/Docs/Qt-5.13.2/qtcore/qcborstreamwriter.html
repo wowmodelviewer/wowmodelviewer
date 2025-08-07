@@ -1,0 +1,594 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcborstream.cpp -->
+  <title>QCborStreamWriter Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QCborStreamWriter</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#cbor-support">CBOR support</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCborStreamWriter Class</h1>
+<!-- $$$QCborStreamWriter-brief -->
+<p>The <a href="qcborstreamwriter.html">QCborStreamWriter</a> class is a simple CBOR encoder operating on a one-way stream. <a href="#details">More...</a></p>
+<!-- @@@QCborStreamWriter -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QCborStreamWriter&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.12</td></tr></table></div><p>This class was introduced in  Qt 5.12.</p>
+<ul>
+<li><a href="qcborstreamwriter-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#QCborStreamWriter-1">QCborStreamWriter</a></b>(QByteArray *<i>data</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#QCborStreamWriter">QCborStreamWriter</a></b>(QIODevice *<i>device</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#dtor.QCborStreamWriter">~QCborStreamWriter</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#append">append</a></b>(quint64 <i>u</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#append-1">append</a></b>(qint64 <i>i</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#append-2">append</a></b>(QCborNegativeInteger <i>n</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#append-3">append</a></b>(const QByteArray &amp;<i>ba</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#append-4">append</a></b>(QLatin1String <i>str</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#append-5">append</a></b>(QStringView <i>str</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#append-6">append</a></b>(QCborTag <i>tag</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#append-7">append</a></b>(QCborKnownTags <i>tag</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#append-8">append</a></b>(QCborSimpleType <i>st</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#append-9">append</a></b>(<i>std::nullptr_t</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#append-10">append</a></b>(qfloat16 <i>f</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#append-11">append</a></b>(float <i>f</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#append-12">append</a></b>(double <i>d</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#append-13">append</a></b>(bool <i>b</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#append-14">append</a></b>(const char *<i>str</i>, qsizetype <i>size</i> = -1)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#appendByteString">appendByteString</a></b>(const char *<i>data</i>, qsizetype <i>len</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#appendNull">appendNull</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#appendTextString">appendTextString</a></b>(const char *<i>utf8</i>, qsizetype <i>len</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#appendUndefined">appendUndefined</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QIODevice *</td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#device">device</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#endArray">endArray</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#endMap">endMap</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#setDevice">setDevice</a></b>(QIODevice *<i>device</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#startArray">startArray</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#startArray-1">startArray</a></b>(quint64 <i>count</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#startMap">startMap</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamwriter.html#startMap-1">startMap</a></b>(quint64 <i>count</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCborStreamWriter-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This class can be used to quickly encode a stream of CBOR content directly to either a <a href="qbytearray.html">QByteArray</a> or <a href="qiodevice.html">QIODevice</a>. CBOR is the Concise Binary Object Representation, a very compact form of binary data encoding that is compatible with JSON. It was created by the IETF Constrained RESTful Environments (CoRE) WG, which has used it in many new RFCs. It is meant to be used alongside the <a href="https://tools.ietf.org/html/rfc7252">CoAP protocol</a>.</p>
+<p><a href="qcborstreamwriter.html">QCborStreamWriter</a> provides a StAX-like API, similar to that of <a href="qxmlstreamwriter.html">QXmlStreamWriter</a>. It is rather low-level and requires a bit of knowledge of CBOR encoding. For a simpler API, see <a href="qcborvalue.html">QCborValue</a> and especially the encoding function <a href="qcborvalue.html#toCbor">QCborValue::toCbor</a>().</p>
+<p>The typical use of <a href="qcborstreamwriter.html">QCborStreamWriter</a> is to create the object on the target <a href="qbytearray.html">QByteArray</a> or <a href="qiodevice.html">QIODevice</a>, then call one of the <a href="qcborstreamwriter.html#append">append</a>() overloads with the desired type to be encoded. To create arrays and maps, <a href="qcborstreamwriter.html">QCborStreamWriter</a> provides <a href="qcborstreamwriter.html#startArray">startArray</a>() and <a href="qcborstreamwriter.html#startMap">startMap</a>() overloads, which must be terminated by the corresponding <a href="qcborstreamwriter.html#endArray">endArray</a>() and <a href="qcborstreamwriter.html#endMap">endMap</a>() functions.</p>
+<p>The following example encodes the equivalent of this JSON content:</p>
+<div class="pre"><p>{ &quot;label&quot;: &quot;journald&quot;, &quot;autoDetect&quot;: false, &quot;condition&quot;: &quot;libs.journald&quot;, &quot;output&quot;: [ &quot;privateFeature&quot; ] }</p>
+</div><pre class="cpp">
+
+     writer<span class="operator">.</span>startMap(<span class="number">4</span>);    <span class="comment">// 4 elements in the map</span>
+
+     writer<span class="operator">.</span>append(QLatin1String(<span class="string">&quot;label&quot;</span>));
+     writer<span class="operator">.</span>append(QLatin1String(<span class="string">&quot;journald&quot;</span>));
+
+     writer<span class="operator">.</span>append(QLatin1String(<span class="string">&quot;autoDetect&quot;</span>));
+     writer<span class="operator">.</span>append(<span class="keyword">false</span>);
+
+     writer<span class="operator">.</span>append(QLatin1String(<span class="string">&quot;condition&quot;</span>));
+     writer<span class="operator">.</span>append(QLatin1String(<span class="string">&quot;libs.journald&quot;</span>));
+
+     writer<span class="operator">.</span>append(QLatin1String(<span class="string">&quot;output&quot;</span>));
+     writer<span class="operator">.</span>startArray(<span class="number">1</span>);
+     writer<span class="operator">.</span>append(QLatin1String(<span class="string">&quot;privateFeature&quot;</span>));
+     writer<span class="operator">.</span>endArray();
+
+     writer<span class="operator">.</span>endMap();
+
+</pre>
+<a name="cbor-support"></a>
+<h3 id="cbor-support">CBOR support</h3>
+<p><a href="qcborstreamwriter.html">QCborStreamWriter</a> supports all CBOR features required to create canonical and strict streams. It implements almost all of the features specified in <a href="https://tools.ietf.org/html/rfc7049">RFC 7049</a>.</p>
+<p>The following table lists the CBOR features that <a href="qcborstreamwriter.html">QCborStreamWriter</a> supports.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Feature</th><th >Support</th></tr></thead>
+<tr valign="top" class="odd"><td >Unsigned numbers</td><td >Yes (full range)</td></tr>
+<tr valign="top" class="even"><td >Negative numbers</td><td >Yes (full range)</td></tr>
+<tr valign="top" class="odd"><td >Byte strings</td><td >Yes</td></tr>
+<tr valign="top" class="even"><td >Text strings</td><td >Yes</td></tr>
+<tr valign="top" class="odd"><td >Chunked strings</td><td >No</td></tr>
+<tr valign="top" class="even"><td >Tags</td><td >Yes (arbitrary)</td></tr>
+<tr valign="top" class="odd"><td >Booleans</td><td >Yes</td></tr>
+<tr valign="top" class="even"><td >Null</td><td >Yes</td></tr>
+<tr valign="top" class="odd"><td >Undefined</td><td >Yes</td></tr>
+<tr valign="top" class="even"><td >Arbitrary simple values</td><td >Yes</td></tr>
+<tr valign="top" class="odd"><td >Half-precision float (16-bit)</td><td >Yes</td></tr>
+<tr valign="top" class="even"><td >Single-precision float (32-bit)</td><td >Yes</td></tr>
+<tr valign="top" class="odd"><td >Double-precision float (64-bit)</td><td >Yes</td></tr>
+<tr valign="top" class="even"><td >Infinities and NaN floating point</td><td >Yes</td></tr>
+<tr valign="top" class="odd"><td >Determinate-length arrays and maps</td><td >Yes</td></tr>
+<tr valign="top" class="even"><td >Indeterminate-length arrays and maps</td><td >Yes</td></tr>
+<tr valign="top" class="odd"><td >Map key types other than strings and integers</td><td >Yes (arbitrary)</td></tr>
+</table></div>
+<a name="canonical-cbor-encoding"></a>
+<h4 id="canonical-cbor-encoding">Canonical CBOR encoding</h4>
+<p>Canonical CBOR encoding is defined by <a href="https://tools.ietf.org/html/rfc7049#section-3.9">Section 3.9 of RFC 7049</a>. Canonical encoding is not a requirement for Qt's CBOR decoding functionality, but it may be required for some protocols. In particular, protocols that require the ability to reproduce the same stream identically may require this.</p>
+<p>In order to be considered &quot;canonical&quot;, a CBOR stream must meet the following requirements:</p>
+<ul>
+<li>Integers must be as small as possible. <a href="qcborstreamwriter.html">QCborStreamWriter</a> always does this (no user action is required and it is not possible to write overlong integers).</li>
+<li>Array, map and string lengths must be as short as possible. As above, <a href="qcborstreamwriter.html">QCborStreamWriter</a> automatically does this.</li>
+<li>Arrays, maps and strings must use explicit length. <a href="qcborstreamwriter.html">QCborStreamWriter</a> always does this for strings; for arrays and maps, be sure to call <a href="qcborstreamwriter.html#startArray">startArray</a>() and <a href="qcborstreamwriter.html#startMap">startMap</a>() overloads with explicit length.</li>
+<li>Keys in every map must be sorted in ascending order. <a href="qcborstreamwriter.html">QCborStreamWriter</a> offers no help in this item: the developer must ensure that before calling <a href="qcborstreamwriter.html#append">append</a>() for the map pairs.</li>
+<li>Floating point values should be as small as possible. <a href="qcborstreamwriter.html">QCborStreamWriter</a> will not convert floating point values; it is up to the developer to perform this check prior to calling <a href="qcborstreamwriter.html#append">append</a>() (see those functions' examples).</li>
+</ul>
+<a name="strict-cbor-mode"></a>
+<h4 id="strict-cbor-mode">Strict CBOR mode</h4>
+<p>Strict mode is defined by <a href="https://tools.ietf.org/html/rfc7049#section-3.10">Section 3.10 of RFC 7049</a>. As for Canonical encoding above, <a href="qcborstreamwriter.html">QCborStreamWriter</a> makes it possible to create strict CBOR streams, but does not require them or validate that the output is so.</p>
+<ul>
+<li>Keys in a map must be unique. <a href="qcborstreamwriter.html">QCborStreamWriter</a> performs no validation of map keys.</li>
+<li>Tags may be required to be paired only with the correct types, according to their specification. <a href="qcborstreamwriter.html">QCborStreamWriter</a> performs no validation of tag usage.</li>
+<li>Text Strings must be properly-encoded UTF-8. <a href="qcborstreamwriter.html">QCborStreamWriter</a> always writes proper UTF-8 for strings added with <a href="qcborstreamwriter.html#append">append</a>(), but performs no validation for strings added with <a href="qcborstreamwriter.html#appendTextString">appendTextString</a>().</li>
+</ul>
+<a name="invalid-cbor-stream"></a>
+<h4 id="invalid-cbor-stream">Invalid CBOR stream</h4>
+<p>It is also possible to misuse <a href="qcborstreamwriter.html">QCborStreamWriter</a> and produce invalid CBOR streams that will fail to be decoded by a receiver. The following actions will produce invalid streams:</p>
+<ul>
+<li>Append a tag and not append the corresponding tagged value (<a href="qcborstreamwriter.html">QCborStreamWriter</a> produces no diagnostic).</li>
+<li>Append too many or too few items to an array or map with explicit length (<a href="qcborstreamwriter.html#endMap">endMap</a>() and <a href="qcborstreamwriter.html#endArray">endArray</a>() will return false and <a href="qcborstreamwriter.html">QCborStreamWriter</a> will log with <a href="qtglobal.html#qWarning">qWarning</a>()).</li>
+</ul>
+</div>
+<p><b>See also </b><a href="qcborstreamreader.html">QCborStreamReader</a>, <a href="qcborvalue.html">QCborValue</a>, and <a href="qxmlstreamwriter.html">QXmlStreamWriter</a>.</p>
+<!-- @@@QCborStreamWriter -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QCborStreamWriter$$$QCborStreamWriterQByteArray* -->
+<h3 class="fn" id="QCborStreamWriter-1"><a name="QCborStreamWriter-1"></a>QCborStreamWriter::<span class="name">QCborStreamWriter</span>(<span class="type"><a href="qbytearray.html">QByteArray</a></span> *<i>data</i>)</h3>
+<p>Creates a <a href="qcborstreamwriter.html">QCborStreamWriter</a> object that will append the stream to <i>data</i>. All streaming is done immediately to the byte array, without the need for flushing any buffers.</p>
+<p>The following example writes a number to a byte array then returns it.</p>
+<pre class="cpp">
+
+     <span class="type"><a href="qbytearray.html">QByteArray</a></span> encodedNumber(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> value)
+     {
+         <span class="type"><a href="qbytearray.html">QByteArray</a></span> ba;
+         <span class="type"><a href="qcborstreamwriter.html#QCborStreamWriter">QCborStreamWriter</a></span> writer(<span class="operator">&amp;</span>ba);
+         writer<span class="operator">.</span>append(value);
+         <span class="keyword">return</span> ba;
+     }
+
+</pre>
+<p><a href="qcborstreamwriter.html">QCborStreamWriter</a> does not take ownership of <i>data</i>.</p>
+<!-- @@@QCborStreamWriter -->
+<!-- $$$QCborStreamWriter[overload1]$$$QCborStreamWriterQIODevice* -->
+<h3 class="fn" id="QCborStreamWriter"><a name="QCborStreamWriter"></a>QCborStreamWriter::<span class="name">QCborStreamWriter</span>(<span class="type"><a href="qiodevice.html">QIODevice</a></span> *<i>device</i>)</h3>
+<p>Creates a <a href="qcborstreamwriter.html">QCborStreamWriter</a> object that will write the stream to <i>device</i>. The device must be opened before the first <a href="qcborstreamwriter.html#append">append</a>() call is made. This constructor can be used with any class that derives from <a href="qiodevice.html">QIODevice</a>, such as <a href="qfile.html">QFile</a>, <a href="qprocess.html">QProcess</a> or <a href="../qtnetwork/qtcpsocket.html">QTcpSocket</a>.</p>
+<p><a href="qcborstreamwriter.html">QCborStreamWriter</a> has no buffering, so every <a href="qcborstreamwriter.html#append">append</a>() call will result in one or more calls to the device's <a href="qiodevice.html#write">write()</a> method.</p>
+<p>The following example writes an empty map to a file:</p>
+<pre class="cpp">
+
+     <span class="type"><a href="qfile.html">QFile</a></span> f(<span class="string">&quot;output&quot;</span><span class="operator">,</span> <span class="type"><a href="qiodevice.html">QIODevice</a></span><span class="operator">::</span>WriteOnly);
+     <span class="type">QCborStreamWriter</span> writer(<span class="operator">&amp;</span>f);
+     writer<span class="operator">.</span>startMap(<span class="number">0</span>);
+     writer<span class="operator">.</span>endMap();
+
+</pre>
+<p><a href="qcborstreamwriter.html">QCborStreamWriter</a> does not take ownership of <i>device</i>.</p>
+<p><b>See also </b><a href="qcborstreamwriter.html#device">device</a>() and <a href="qcborstreamwriter.html#setDevice">setDevice</a>().</p>
+<!-- @@@QCborStreamWriter -->
+<!-- $$$~QCborStreamWriter[overload1]$$$~QCborStreamWriter -->
+<h3 class="fn" id="dtor.QCborStreamWriter"><a name="dtor.QCborStreamWriter"></a>QCborStreamWriter::<span class="name">~QCborStreamWriter</span>()</h3>
+<p>Destroys this <a href="qcborstreamwriter.html">QCborStreamWriter</a> object and frees any resources associated.</p>
+<p><a href="qcborstreamwriter.html">QCborStreamWriter</a> does not perform error checking to see if all required items were written to the stream prior to the object being destroyed. It is the programmer's responsibility to ensure that it was done.</p>
+<!-- @@@~QCborStreamWriter -->
+<!-- $$$append[overload1]$$$appendquint64 -->
+<h3 class="fn" id="append"><a name="append"></a><span class="type">void</span> QCborStreamWriter::<span class="name">append</span>(<span class="type"><a href="qtglobal.html#quint64-typedef">quint64</a></span> <i>u</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Appends the 64-bit unsigned value <i>u</i> to the CBOR stream, creating a CBOR Unsigned Integer value. In the following example, we write the values 0, 2<sup>32</sup> and <code>UINT64_MAX</code>:</p>
+<pre class="cpp">
+
+     writer<span class="operator">.</span>append(<span class="number">0U</span>);
+     writer<span class="operator">.</span>append(Q_UINT64_C(<span class="number">4294967296</span>));
+     writer<span class="operator">.</span>append(std<span class="operator">::</span>numeric_limits<span class="operator">&lt;</span><span class="type"><a href="qtglobal.html#quint64-typedef">quint64</a></span><span class="operator">&gt;</span><span class="operator">::</span>max());
+
+</pre>
+<p><b>See also </b><a href="qcborstreamreader.html#isUnsignedInteger">QCborStreamReader::isUnsignedInteger</a>() and <a href="qcborstreamreader.html#toUnsignedInteger">QCborStreamReader::toUnsignedInteger</a>().</p>
+<!-- @@@append -->
+<!-- $$$append$$$appendqint64 -->
+<h3 class="fn" id="append-1"><a name="append-1"></a><span class="type">void</span> QCborStreamWriter::<span class="name">append</span>(<span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>i</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Appends the 64-bit signed value <i>i</i> to the CBOR stream. This will create either a CBOR Unsigned Integer or CBOR NegativeInteger value based on the sign of the parameter. In the following example, we write the values 0, -1, 2<sup>32</sup> and <code>INT64_MAX</code>:</p>
+<pre class="cpp">
+
+     writer<span class="operator">.</span>append(<span class="number">0</span>);
+     writer<span class="operator">.</span>append(<span class="operator">-</span><span class="number">1</span>);
+     writer<span class="operator">.</span>append(Q_INT64_C(<span class="number">4294967296</span>));
+     writer<span class="operator">.</span>append(std<span class="operator">::</span>numeric_limits<span class="operator">&lt;</span><span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span><span class="operator">&gt;</span><span class="operator">::</span>max());
+
+</pre>
+<p><b>See also </b><a href="qcborstreamreader.html#isInteger">QCborStreamReader::isInteger</a>() and <a href="qcborstreamreader.html#toInteger">QCborStreamReader::toInteger</a>().</p>
+<!-- @@@append -->
+<!-- $$$append$$$appendQCborNegativeInteger -->
+<h3 class="fn" id="append-2"><a name="append-2"></a><span class="type">void</span> QCborStreamWriter::<span class="name">append</span>(<span class="type">QCborNegativeInteger</span> <i>n</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Appends the 64-bit negative value <i>n</i> to the CBOR stream. QCborNegativeInteger is a 64-bit enum that holds the absolute value of the negative number we want to write. If n is zero, the value written will be equivalent to 2<sup>64</sup> (that is, -18,446,744,073,709,551,616).</p>
+<p>In the following example, we write the values -1, -2<sup>32</sup> and INT64_MIN:</p>
+<pre class="cpp">
+
+     writer<span class="operator">.</span>append(<span class="type">QCborNegativeInteger</span>(<span class="number">1</span>));
+     writer<span class="operator">.</span>append(<span class="type">QCborNegativeInteger</span>(Q_INT64_C(<span class="number">4294967296</span>)));
+     writer<span class="operator">.</span>append(<span class="type">QCborNegativeInteger</span>(<span class="operator">-</span><span class="type"><a href="qtglobal.html#quint64-typedef">quint64</a></span>(std<span class="operator">::</span>numeric_limits<span class="operator">&lt;</span><span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span><span class="operator">&gt;</span><span class="operator">::</span>min())));
+
+</pre>
+<p>Note how this function can be used to encode numbers that cannot fit a standard computer's 64-bit signed integer like <a href="qtglobal.html#qint64-typedef">qint64</a>. That is, if <i>n</i> is larger than <code>std::numeric_limits&lt;qint64&gt;::max()</code> or is 0, this will represent a negative number smaller than <code>std::numeric_limits&lt;qint64&gt;::min()</code>.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#isNegativeInteger">QCborStreamReader::isNegativeInteger</a>() and <a href="qcborstreamreader.html#toNegativeInteger">QCborStreamReader::toNegativeInteger</a>().</p>
+<!-- @@@append -->
+<!-- $$$append$$$appendconstQByteArray& -->
+<h3 class="fn" id="append-3"><a name="append-3"></a><span class="type">void</span> QCborStreamWriter::<span class="name">append</span>(const <span class="type"><a href="qbytearray.html">QByteArray</a></span> &amp;<i>ba</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Appends the byte array <i>ba</i> to the stream, creating a CBOR Byte String value. <a href="qcborstreamwriter.html">QCborStreamWriter</a> will attempt to write the entire string in one chunk.</p>
+<p>The following example will load and append the contents of a file to the stream:</p>
+<pre class="cpp">
+
+     <span class="type">void</span> writeFile(<span class="type"><a href="qcborstreamwriter.html#QCborStreamWriter">QCborStreamWriter</a></span> <span class="operator">&amp;</span>writer<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName)
+     {
+         <span class="type"><a href="qfile.html">QFile</a></span> f(fileName);
+         <span class="keyword">if</span> (f<span class="operator">.</span>open(<span class="type"><a href="qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly))
+             writer<span class="operator">.</span>append(f<span class="operator">.</span>readAll());
+     }
+
+</pre>
+<p>As the example shows, unlike JSON, CBOR requires no escaping for binary content.</p>
+<p><b>See also </b><a href="qcborstreamwriter.html#appendByteString">appendByteString</a>(), <a href="qcborstreamreader.html#isByteArray">QCborStreamReader::isByteArray</a>(), and <a href="qcborstreamreader.html#readByteArray">QCborStreamReader::readByteArray</a>().</p>
+<!-- @@@append -->
+<!-- $$$append$$$appendQLatin1String -->
+<h3 class="fn" id="append-4"><a name="append-4"></a><span class="type">void</span> QCborStreamWriter::<span class="name">append</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>str</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Appends the text string <i>str</i> to the stream, creating a CBOR Text String value. <a href="qcborstreamwriter.html">QCborStreamWriter</a> will attempt to write the entire string in one chunk.</p>
+<p>The following example appends a simple string to the stream:</p>
+<pre class="cpp">
+
+     writer<span class="operator">.</span>append(QLatin1String(<span class="string">&quot;Hello, World&quot;</span>));
+
+</pre>
+<p><b>Performance note</b>: CBOR requires that all Text Strings be encoded in UTF-8, so this function will iterate over the characters in the string to determine whether the contents are US-ASCII or not. If the string is found to contain characters outside of US-ASCII, it will allocate memory and convert to UTF-8. If this check is unnecessary, use <a href="qcborstreamwriter.html#appendTextString">appendTextString</a>() instead.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#isString">QCborStreamReader::isString</a>() and <a href="qcborstreamreader.html#readString">QCborStreamReader::readString</a>().</p>
+<!-- @@@append -->
+<!-- $$$append$$$appendQStringView -->
+<h3 class="fn" id="append-5"><a name="append-5"></a><span class="type">void</span> QCborStreamWriter::<span class="name">append</span>(<span class="type"><a href="qstringview.html">QStringView</a></span> <i>str</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Appends the text string <i>str</i> to the stream, creating a CBOR Text String value. <a href="qcborstreamwriter.html">QCborStreamWriter</a> will attempt to write the entire string in one chunk.</p>
+<p>The following example writes an arbitrary <a href="qstring.html">QString</a> to the stream:</p>
+<pre class="cpp">
+
+     <span class="type">void</span> writeString(<span class="type"><a href="qcborstreamwriter.html#QCborStreamWriter">QCborStreamWriter</a></span> <span class="operator">&amp;</span>writer<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qstring.html">QString</a></span> <span class="operator">&amp;</span>str)
+     {
+         writer<span class="operator">.</span>append(str);
+     }
+
+</pre>
+<p><b>See also </b><a href="qcborstreamreader.html#isString">QCborStreamReader::isString</a>() and <a href="qcborstreamreader.html#readString">QCborStreamReader::readString</a>().</p>
+<!-- @@@append -->
+<!-- $$$append$$$appendQCborTag -->
+<h3 class="fn" id="append-6"><a name="append-6"></a><span class="type">void</span> QCborStreamWriter::<span class="name">append</span>(<span class="type"><a href="qtcborcommon.html#QCborTag-enum">QCborTag</a></span> <i>tag</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Appends the CBOR tag <i>tag</i> to the stream, creating a CBOR Tag value. All tags must be followed by another type which they provide meaning for.</p>
+<p>In the following example, we append a CBOR Tag 36 (Regular Expression) and a <a href="qregularexpression.html">QRegularExpression</a>'s pattern to the stream:</p>
+<pre class="cpp">
+
+     <span class="type">void</span> writeRxPattern(<span class="type"><a href="qcborstreamwriter.html#QCborStreamWriter">QCborStreamWriter</a></span> <span class="operator">&amp;</span>writer<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qregularexpression.html">QRegularExpression</a></span> <span class="operator">&amp;</span>rx)
+     {
+         writer<span class="operator">.</span>append(<span class="type"><a href="qtcborcommon.html#QCborTag-enum">QCborTag</a></span>(<span class="number">36</span>));
+         writer<span class="operator">.</span>append(rx<span class="operator">.</span>pattern());
+     }
+
+</pre>
+<p><b>See also </b><a href="qcborstreamreader.html#isTag">QCborStreamReader::isTag</a>() and <a href="qcborstreamreader.html#toTag">QCborStreamReader::toTag</a>().</p>
+<!-- @@@append -->
+<!-- $$$append$$$appendQCborKnownTags -->
+<h3 class="fn" id="append-7"><a name="append-7"></a><span class="type">void</span> QCborStreamWriter::<span class="name">append</span>(<span class="type"><a href="qtcborcommon.html#QCborKnownTags-enum">QCborKnownTags</a></span> <i>tag</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Appends the CBOR tag <i>tag</i> to the stream, creating a CBOR Tag value. All tags must be followed by another type which they provide meaning for.</p>
+<p>In the following example, we append a CBOR Tag 1 (Unix <code>time_t</code>) and an integer representing the current time to the stream, obtained using the <code>time()</code> function:</p>
+<pre class="cpp">
+
+     <span class="type">void</span> writeCurrentTime(<span class="type"><a href="qcborstreamwriter.html#QCborStreamWriter">QCborStreamWriter</a></span> <span class="operator">&amp;</span>writer)
+     {
+         writer<span class="operator">.</span>append(<span class="type"><a href="qtcborcommon.html#QCborKnownTags-enum">QCborKnownTags</a></span><span class="operator">::</span>UnixTime_t);
+         writer<span class="operator">.</span>append(time(nullptr));
+     }
+
+</pre>
+<p><b>See also </b><a href="qcborstreamreader.html#isTag">QCborStreamReader::isTag</a>() and <a href="qcborstreamreader.html#toTag">QCborStreamReader::toTag</a>().</p>
+<!-- @@@append -->
+<!-- $$$append$$$appendQCborSimpleType -->
+<h3 class="fn" id="append-8"><a name="append-8"></a><span class="type">void</span> QCborStreamWriter::<span class="name">append</span>(<span class="type"><a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a></span> <i>st</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Appends the CBOR simple type <i>st</i> to the stream, creating a CBOR Simple Type value. In the following example, we write the simple type for Null as well as for type 32, which Qt has no support for.</p>
+<pre class="cpp">
+
+    writer<span class="operator">.</span>append(<span class="type"><a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a></span><span class="operator">::</span>Null);
+    writer<span class="operator">.</span>append(<span class="type"><a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a></span>(<span class="number">32</span>));
+
+</pre>
+<p><b>Note: </b>Using Simple Types for which there is no specification can lead to validation errors by the remote receiver. In addition, simple type values 24 through 31 (inclusive) are reserved and must not be used.</p><p><b>See also </b><a href="qcborstreamreader.html#isSimpleType">QCborStreamReader::isSimpleType</a>() and <a href="qcborstreamreader.html#toSimpleType">QCborStreamReader::toSimpleType</a>().</p>
+<!-- @@@append -->
+<!-- $$$append$$$appendstd::nullptr_t -->
+<h3 class="fn" id="append-9"><a name="append-9"></a><span class="type">void</span> QCborStreamWriter::<span class="name">append</span>(<i>std::nullptr_t</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Appends a CBOR Null value to the stream. This function is equivalent to (and implemented as): The parameter is ignored.</p>
+<pre class="cpp">
+
+     writer<span class="operator">.</span>append(<span class="type"><a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a></span><span class="operator">::</span>Null);
+
+</pre>
+<p><b>See also </b><a href="qcborstreamwriter.html#appendNull">appendNull</a>(), <a href="qcborstreamwriter.html#append-8">append</a>(QCborSimpleType), and <a href="qcborstreamreader.html#isNull">QCborStreamReader::isNull</a>().</p>
+<!-- @@@append -->
+<!-- $$$append$$$appendqfloat16 -->
+<h3 class="fn" id="append-10"><a name="append-10"></a><span class="type">void</span> QCborStreamWriter::<span class="name">append</span>(<span class="type">qfloat16</span> <i>f</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Appends the floating point number <i>f</i> to the stream, creating a CBOR 16-bit Half-Precision Floating Point value. The following code can be used to convert a C++ <code>float</code> to <code>qfloat16</code> if there's no loss of precision and append it, or instead append the <code>float</code>.</p>
+<pre class="cpp">
+
+     <span class="type">void</span> writeFloat(<span class="type"><a href="qcborstreamwriter.html#QCborStreamWriter">QCborStreamWriter</a></span> <span class="operator">&amp;</span>writer<span class="operator">,</span> <span class="type">float</span> f)
+     {
+         qfloat16 f16 <span class="operator">=</span> f;
+         <span class="keyword">if</span> (qIsNaN(f) <span class="operator">|</span><span class="operator">|</span> f16 <span class="operator">=</span><span class="operator">=</span> f)
+             writer<span class="operator">.</span>append(f16);
+         <span class="keyword">else</span>
+             writer<span class="operator">.</span>append(f);
+     }
+
+</pre>
+<p><b>See also </b><a href="qcborstreamreader.html#isFloat16">QCborStreamReader::isFloat16</a>() and <a href="qcborstreamreader.html#toFloat16">QCborStreamReader::toFloat16</a>().</p>
+<!-- @@@append -->
+<!-- $$$append$$$appendfloat -->
+<h3 class="fn" id="append-11"><a name="append-11"></a><span class="type">void</span> QCborStreamWriter::<span class="name">append</span>(<span class="type">float</span> <i>f</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Appends the floating point number <i>f</i> to the stream, creating a CBOR 32-bit Single-Precision Floating Point value. The following code can be used to convert a C++ <code>double</code> to <code>float</code> if there's no loss of precision and append it, or instead append the <code>double</code>.</p>
+<pre class="cpp">
+
+     <span class="type">void</span> writeFloat(<span class="type"><a href="qcborstreamwriter.html#QCborStreamWriter">QCborStreamWriter</a></span> <span class="operator">&amp;</span>writer<span class="operator">,</span> <span class="type">double</span> d)
+     {
+         <span class="type">float</span> f <span class="operator">=</span> d;
+         <span class="keyword">if</span> (qIsNaN(d) <span class="operator">|</span><span class="operator">|</span> d <span class="operator">=</span><span class="operator">=</span> f)
+             writer<span class="operator">.</span>append(f);
+         <span class="keyword">else</span>
+             writer<span class="operator">.</span>append(d);
+     }
+
+</pre>
+<p><b>See also </b><a href="qcborstreamreader.html#isFloat">QCborStreamReader::isFloat</a>() and <a href="qcborstreamreader.html#toFloat">QCborStreamReader::toFloat</a>().</p>
+<!-- @@@append -->
+<!-- $$$append$$$appenddouble -->
+<h3 class="fn" id="append-12"><a name="append-12"></a><span class="type">void</span> QCborStreamWriter::<span class="name">append</span>(<span class="type">double</span> <i>d</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Appends the floating point number <i>d</i> to the stream, creating a CBOR 64-bit Double-Precision Floating Point value. <a href="qcborstreamwriter.html">QCborStreamWriter</a> always appends the number as-is, performing no check for whether the number is the canonical form for NaN, an infinite, whether it is denormal or if it could be written with a shorter format.</p>
+<p>The following code performs all those checks, except for the denormal one, which is expected to be taken into account by the system FPU or floating point emulation directly.</p>
+<pre class="cpp">
+
+     <span class="type">void</span> writeDouble(<span class="type"><a href="qcborstreamwriter.html#QCborStreamWriter">QCborStreamWriter</a></span> <span class="operator">&amp;</span>writer<span class="operator">,</span> <span class="type">double</span> d)
+     {
+         <span class="type">float</span> f;
+         <span class="keyword">if</span> (qIsNaN(d)) {
+             writer<span class="operator">.</span>append(qfloat16(qQNaN()));
+         } <span class="keyword">else</span> <span class="keyword">if</span> (<a href="qtglobal.html#qIsInf">qIsInf</a>(d)) {
+             writer<span class="operator">.</span>append(d <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">?</span> <span class="operator">-</span><a href="qtglobal.html#qInf">qInf</a>() : <a href="qtglobal.html#qInf">qInf</a>());
+         } <span class="keyword">else</span> <span class="keyword">if</span> ((f <span class="operator">=</span> d) <span class="operator">=</span><span class="operator">=</span> d) {
+             qfloat16 f16 <span class="operator">=</span> f;
+             <span class="keyword">if</span> (f16 <span class="operator">=</span><span class="operator">=</span> f)
+                 writer<span class="operator">.</span>append(f16);
+             <span class="keyword">else</span>
+                 writer<span class="operator">.</span>append(f);
+         } <span class="keyword">else</span> {
+             writer<span class="operator">.</span>append(d);
+         }
+     }
+
+</pre>
+<p>Determining if a double can be converted to an integral with no loss of precision is left as an exercise to the reader.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#isDouble">QCborStreamReader::isDouble</a>() and <a href="qcborstreamreader.html#toDouble">QCborStreamReader::toDouble</a>().</p>
+<!-- @@@append -->
+<!-- $$$append$$$appendbool -->
+<h3 class="fn" id="append-13"><a name="append-13"></a><span class="type">void</span> QCborStreamWriter::<span class="name">append</span>(<span class="type">bool</span> <i>b</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Appends the boolean value <i>b</i> to the stream, creating either a CBOR False value or a CBOR True value. This function is equivalent to (and implemented as):</p>
+<pre class="cpp">
+
+     writer<span class="operator">.</span>append(b <span class="operator">?</span> <span class="type"><a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a></span><span class="operator">::</span>True : <span class="type"><a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a></span><span class="operator">::</span>False);
+
+</pre>
+<p><b>See also </b><a href="qcborstreamwriter.html#appendNull">appendNull</a>(), <a href="qcborstreamwriter.html#appendUndefined">appendUndefined</a>(), <a href="qcborstreamreader.html#isBool">QCborStreamReader::isBool</a>(), and <a href="qcborstreamreader.html#toBool">QCborStreamReader::toBool</a>().</p>
+<!-- @@@append -->
+<!-- $$$append$$$appendconstchar*qsizetype -->
+<h3 class="fn" id="append-14"><a name="append-14"></a><span class="type">void</span> QCborStreamWriter::<span class="name">append</span>(const <span class="type">char</span> *<i>str</i>, <span class="type">qsizetype</span> <i>size</i> = -1)</h3>
+<p>This is an overloaded function.</p>
+<p>Appends <i>size</i> bytes of text starting from <i>str</i> to the stream, creating a CBOR Text String value. <a href="qcborstreamwriter.html">QCborStreamWriter</a> will attempt to write the entire string in one chunk. If <i>size</i> is -1, this function will write <code>strlen(\a str)</code> bytes.</p>
+<p>The string pointed to by <i>str</i> is expected to be properly encoded UTF-8. <a href="qcborstreamwriter.html">QCborStreamWriter</a> performs no validation that this is the case.</p>
+<p>Unlike the <a href="qlatin1string.html">QLatin1String</a> overload of <a href="qcborstreamwriter.html#append">append</a>(), this function is not limited to 2 GB. However, note that neither <a href="qcborstreamreader.html">QCborStreamReader</a> nor <a href="qcborvalue.html">QCborValue</a> support reading CBOR streams with text strings larger than 2 GB.</p>
+<p><b>See also </b><a href="qcborstreamwriter.html#append-4">append</a>(QLatin1String), <a href="qcborstreamwriter.html#append-5">append</a>(QStringView), <a href="qcborstreamreader.html#isString">QCborStreamReader::isString</a>(), and <a href="qcborstreamreader.html#readString">QCborStreamReader::readString</a>().</p>
+<!-- @@@append -->
+<!-- $$$appendByteString[overload1]$$$appendByteStringconstchar*qsizetype -->
+<h3 class="fn" id="appendByteString"><a name="appendByteString"></a><span class="type">void</span> QCborStreamWriter::<span class="name">appendByteString</span>(const <span class="type">char</span> *<i>data</i>, <span class="type">qsizetype</span> <i>len</i>)</h3>
+<p>Appends <i>len</i> bytes of data starting from <i>data</i> to the stream, creating a CBOR Byte String value. <a href="qcborstreamwriter.html">QCborStreamWriter</a> will attempt to write the entire string in one chunk.</p>
+<p>Unlike the <a href="qbytearray.html">QByteArray</a> overload of <a href="qcborstreamwriter.html#append">append</a>(), this function is not limited by <a href="qbytearray.html">QByteArray</a>'s size limits. However, note that neither <a href="qcborstreamreader.html#readByteArray">QCborStreamReader::readByteArray</a>() nor <a href="qcborvalue.html">QCborValue</a> support reading CBOR streams with byte arrays larger than 2 GB.</p>
+<p><b>See also </b><a href="qcborstreamwriter.html#append">append</a>(), <a href="qcborstreamwriter.html#appendTextString">appendTextString</a>(), <a href="qcborstreamreader.html#isByteArray">QCborStreamReader::isByteArray</a>(), and <a href="qcborstreamreader.html#readByteArray">QCborStreamReader::readByteArray</a>().</p>
+<!-- @@@appendByteString -->
+<!-- $$$appendNull[overload1]$$$appendNull -->
+<h3 class="fn" id="appendNull"><a name="appendNull"></a><span class="type">void</span> QCborStreamWriter::<span class="name">appendNull</span>()</h3>
+<p>Appends a CBOR Null value to the stream. This function is equivalent to (and implemented as):</p>
+<pre class="cpp">
+
+     writer<span class="operator">.</span>append(<span class="type"><a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a></span><span class="operator">::</span>Null);
+
+</pre>
+<p><b>See also </b><a href="qcborstreamwriter.html#append-9">append</a>(std::nullptr_t), <a href="qcborstreamwriter.html#append-8">append</a>(QCborSimpleType), and <a href="qcborstreamreader.html#isNull">QCborStreamReader::isNull</a>().</p>
+<!-- @@@appendNull -->
+<!-- $$$appendTextString[overload1]$$$appendTextStringconstchar*qsizetype -->
+<h3 class="fn" id="appendTextString"><a name="appendTextString"></a><span class="type">void</span> QCborStreamWriter::<span class="name">appendTextString</span>(const <span class="type">char</span> *<i>utf8</i>, <span class="type">qsizetype</span> <i>len</i>)</h3>
+<p>Appends <i>len</i> bytes of text starting from <i>utf8</i> to the stream, creating a CBOR Text String value. <a href="qcborstreamwriter.html">QCborStreamWriter</a> will attempt to write the entire string in one chunk.</p>
+<p>The string pointed to by <i>utf8</i> is expected to be properly encoded UTF-8. <a href="qcborstreamwriter.html">QCborStreamWriter</a> performs no validation that this is the case.</p>
+<p>Unlike the <a href="qlatin1string.html">QLatin1String</a> overload of <a href="qcborstreamwriter.html#append">append</a>(), this function is not limited to 2 GB. However, note that neither <a href="qcborstreamreader.html#readString">QCborStreamReader::readString</a>() nor <a href="qcborvalue.html">QCborValue</a> support reading CBOR streams with text strings larger than 2 GB.</p>
+<p><b>See also </b><a href="qcborstreamwriter.html#append-4">append</a>(QLatin1String), <a href="qcborstreamwriter.html#append-5">append</a>(QStringView), <a href="qcborstreamreader.html#isString">QCborStreamReader::isString</a>(), and <a href="qcborstreamreader.html#readString">QCborStreamReader::readString</a>().</p>
+<!-- @@@appendTextString -->
+<!-- $$$appendUndefined[overload1]$$$appendUndefined -->
+<h3 class="fn" id="appendUndefined"><a name="appendUndefined"></a><span class="type">void</span> QCborStreamWriter::<span class="name">appendUndefined</span>()</h3>
+<p>Appends a CBOR Undefined value to the stream. This function is equivalent to (and implemented as):</p>
+<pre class="cpp">
+
+     writer<span class="operator">.</span>append(<span class="type"><a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a></span><span class="operator">::</span>Undefined);
+
+</pre>
+<p><b>See also </b><a href="qcborstreamwriter.html#append-8">append</a>(QCborSimpleType) and <a href="qcborstreamreader.html#isUndefined">QCborStreamReader::isUndefined</a>().</p>
+<!-- @@@appendUndefined -->
+<!-- $$$device[overload1]$$$device -->
+<h3 class="fn" id="device"><a name="device"></a><span class="type"><a href="qiodevice.html">QIODevice</a></span> *QCborStreamWriter::<span class="name">device</span>() const</h3>
+<p>Returns the <a href="qiodevice.html">QIODevice</a> that this <a href="qcborstreamwriter.html">QCborStreamWriter</a> object is writing to. The device must have previously been set with either the constructor or with <a href="qcborstreamwriter.html#setDevice">setDevice</a>().</p>
+<p>If this object was created by writing to a <a href="qbytearray.html">QByteArray</a>, this function will return an internal instance of <a href="qbuffer.html">QBuffer</a>, which is owned by <a href="qcborstreamwriter.html">QCborStreamWriter</a>.</p>
+<p><b>See also </b><a href="qcborstreamwriter.html#setDevice">setDevice</a>().</p>
+<!-- @@@device -->
+<!-- $$$endArray[overload1]$$$endArray -->
+<h3 class="fn" id="endArray"><a name="endArray"></a><span class="type">bool</span> QCborStreamWriter::<span class="name">endArray</span>()</h3>
+<p>Terminates the array started by either overload of <a href="qcborstreamwriter.html#startArray">startArray</a>() and returns true if the correct number of elements was added to the array. This function must be called for every <a href="qcborstreamwriter.html#startArray">startArray</a>() used.</p>
+<p>A return of false indicates error in the application and an unrecoverable error in this stream. <a href="qcborstreamwriter.html">QCborStreamWriter</a> also writes a warning using <a href="qtglobal.html#qWarning">qWarning</a>() if that happens.</p>
+<p>Calling this function when the current container is not an array is also an error, though <a href="qcborstreamwriter.html">QCborStreamWriter</a> cannot currently detect this condition.</p>
+<p><b>See also </b><a href="qcborstreamwriter.html#startArray">startArray</a>(), <a href="qcborstreamwriter.html#startArray-1">startArray</a>(quint64), and <a href="qcborstreamwriter.html#endMap">endMap</a>().</p>
+<!-- @@@endArray -->
+<!-- $$$endMap[overload1]$$$endMap -->
+<h3 class="fn" id="endMap"><a name="endMap"></a><span class="type">bool</span> QCborStreamWriter::<span class="name">endMap</span>()</h3>
+<p>Terminates the map started by either overload of <a href="qcborstreamwriter.html#startMap">startMap</a>() and returns true if the correct number of elements was added to the array. This function must be called for every <a href="qcborstreamwriter.html#startMap">startMap</a>() used.</p>
+<p>A return of false indicates error in the application and an unrecoverable error in this stream. <a href="qcborstreamwriter.html">QCborStreamWriter</a> also writes a warning using <a href="qtglobal.html#qWarning">qWarning</a>() if that happens.</p>
+<p>Calling this function when the current container is not a map is also an error, though <a href="qcborstreamwriter.html">QCborStreamWriter</a> cannot currently detect this condition.</p>
+<p><b>See also </b><a href="qcborstreamwriter.html#startMap">startMap</a>(), <a href="qcborstreamwriter.html#startMap-1">startMap</a>(quint64), and <a href="qcborstreamwriter.html#endArray">endArray</a>().</p>
+<!-- @@@endMap -->
+<!-- $$$setDevice[overload1]$$$setDeviceQIODevice* -->
+<h3 class="fn" id="setDevice"><a name="setDevice"></a><span class="type">void</span> QCborStreamWriter::<span class="name">setDevice</span>(<span class="type"><a href="qiodevice.html">QIODevice</a></span> *<i>device</i>)</h3>
+<p>Replaces the device or byte array that this <a href="qcborstreamwriter.html">QCborStreamWriter</a> object is writing to with <i>device</i>.</p>
+<p><b>See also </b><a href="qcborstreamwriter.html#device">device</a>().</p>
+<!-- @@@setDevice -->
+<!-- $$$startArray[overload1]$$$startArray -->
+<h3 class="fn" id="startArray"><a name="startArray"></a><span class="type">void</span> QCborStreamWriter::<span class="name">startArray</span>()</h3>
+<p>Starts a CBOR Array with indeterminate length in the CBOR stream. Each startArray() call must be paired with one <a href="qcborstreamwriter.html#endArray">endArray</a>() call and the current CBOR element extends until the end of the array.</p>
+<p>The array created by this function has no explicit length. Instead, its length is implied by the elements contained in it. Note, however, that use of indeterminate-length arrays is not compliant with canonical CBOR encoding.</p>
+<p>The following example appends elements from the linked list of strings passed as input:</p>
+<pre class="cpp">
+
+     <span class="type">void</span> appendList(<span class="type"><a href="qcborstreamwriter.html#QCborStreamWriter">QCborStreamWriter</a></span> <span class="operator">&amp;</span>writer<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qlinkedlist.html">QLinkedList</a></span><span class="operator">&lt;</span><span class="type"><a href="qstring.html">QString</a></span><span class="operator">&gt;</span> <span class="operator">&amp;</span>list)
+     {
+         writer<span class="operator">.</span>startArray();
+         <span class="keyword">for</span> (<span class="keyword">const</span> <span class="type"><a href="qstring.html">QString</a></span> <span class="operator">&amp;</span>s : list)
+             writer<span class="operator">.</span>append(s);
+         writer<span class="operator">.</span>endArray();
+     }
+
+</pre>
+<p><b>See also </b><a href="qcborstreamwriter.html#startArray-1">startArray</a>(quint64), <a href="qcborstreamwriter.html#endArray">endArray</a>(), <a href="qcborstreamwriter.html#startMap">startMap</a>(), <a href="qcborstreamreader.html#isArray">QCborStreamReader::isArray</a>(), and <a href="qcborstreamreader.html#isLengthKnown">QCborStreamReader::isLengthKnown</a>().</p>
+<!-- @@@startArray -->
+<!-- $$$startArray$$$startArrayquint64 -->
+<h3 class="fn" id="startArray-1"><a name="startArray-1"></a><span class="type">void</span> QCborStreamWriter::<span class="name">startArray</span>(<span class="type"><a href="qtglobal.html#quint64-typedef">quint64</a></span> <i>count</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Starts a CBOR Array with explicit length of <i>count</i> items in the CBOR stream. Each <a href="qcborstreamwriter.html#startArray">startArray</a> call must be paired with one <a href="qcborstreamwriter.html#endArray">endArray</a>() call and the current CBOR element extends until the end of the array.</p>
+<p>The array created by this function has an explicit length and therefore exactly <i>count</i> items must be added to the CBOR stream. Adding fewer or more items will result in failure during <a href="qcborstreamwriter.html#endArray">endArray</a>() and the CBOR stream will be corrupt. However, explicit-length arrays are required by canonical CBOR encoding.</p>
+<p>The following example appends all strings found in the <a href="qstringlist.html">QStringList</a> passed as input:</p>
+<pre class="cpp">
+
+     <span class="type">void</span> appendList(<span class="type"><a href="qcborstreamwriter.html#QCborStreamWriter">QCborStreamWriter</a></span> <span class="operator">&amp;</span>writer<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qstringlist.html">QStringList</a></span> <span class="operator">&amp;</span>list)
+     {
+         writer<span class="operator">.</span>startArray(list<span class="operator">.</span>size());
+         <span class="keyword">for</span> (<span class="keyword">const</span> <span class="type"><a href="qstring.html">QString</a></span> <span class="operator">&amp;</span>s : list)
+             writer<span class="operator">.</span>append(s);
+         writer<span class="operator">.</span>endArray();
+     }
+
+</pre>
+<p><b>Size limitations</b>: The parameter to this function is quint64, which would seem to allow up to 2<sup>64</sup>-1 elements in the array. However, both <a href="qcborstreamwriter.html">QCborStreamWriter</a> and <a href="qcborstreamreader.html">QCborStreamReader</a> are currently limited to 2<sup>32</sup>-2 items on 32-bit systems and 2<sup>64</sup>-2 items on 64-bit ones. Also note that <a href="qcborarray.html">QCborArray</a> is currently limited to 2<sup>27</sup> elements in any platform.</p>
+<p><b>See also </b><a href="qcborstreamwriter.html#startArray">startArray</a>(), <a href="qcborstreamwriter.html#endArray">endArray</a>(), <a href="qcborstreamwriter.html#startMap">startMap</a>(), <a href="qcborstreamreader.html#isArray">QCborStreamReader::isArray</a>(), and <a href="qcborstreamreader.html#isLengthKnown">QCborStreamReader::isLengthKnown</a>().</p>
+<!-- @@@startArray -->
+<!-- $$$startMap[overload1]$$$startMap -->
+<h3 class="fn" id="startMap"><a name="startMap"></a><span class="type">void</span> QCborStreamWriter::<span class="name">startMap</span>()</h3>
+<p>Starts a CBOR Map with indeterminate length in the CBOR stream. Each startMap() call must be paired with one <a href="qcborstreamwriter.html#endMap">endMap</a>() call and the current CBOR element extends until the end of the map.</p>
+<p>The map created by this function has no explicit length. Instead, its length is implied by the elements contained in it. Note, however, that use of indeterminate-length maps is not compliant with canonical CBOR encoding (canonical encoding also requires keys to be unique and in sorted order).</p>
+<p>The following example appends elements from the linked list of int and string pairs passed as input:</p>
+<pre class="cpp">
+
+     <span class="type">void</span> appendMap(<span class="type"><a href="qcborstreamwriter.html#QCborStreamWriter">QCborStreamWriter</a></span> <span class="operator">&amp;</span>writer<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qlinkedlist.html">QLinkedList</a></span><span class="operator">&lt;</span><span class="type"><a href="qpair.html">QPair</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="qstring.html">QString</a></span><span class="operator">&gt;</span><span class="operator">&gt;</span> <span class="operator">&amp;</span>list)
+     {
+         writer<span class="operator">.</span>startMap();
+         <span class="keyword">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span> pair : list) {
+             writer<span class="operator">.</span>append(pair<span class="operator">.</span>first)
+             writer<span class="operator">.</span>append(pair<span class="operator">.</span>second);
+         }
+         writer<span class="operator">.</span>endMap();
+     }
+
+</pre>
+<p><b>See also </b><a href="qcborstreamwriter.html#startMap-1">startMap</a>(quint64), <a href="qcborstreamwriter.html#endMap">endMap</a>(), <a href="qcborstreamwriter.html#startArray">startArray</a>(), <a href="qcborstreamreader.html#isMap">QCborStreamReader::isMap</a>(), and <a href="qcborstreamreader.html#isLengthKnown">QCborStreamReader::isLengthKnown</a>().</p>
+<!-- @@@startMap -->
+<!-- $$$startMap$$$startMapquint64 -->
+<h3 class="fn" id="startMap-1"><a name="startMap-1"></a><span class="type">void</span> QCborStreamWriter::<span class="name">startMap</span>(<span class="type"><a href="qtglobal.html#quint64-typedef">quint64</a></span> <i>count</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Starts a CBOR Map with explicit length of <i>count</i> items in the CBOR stream. Each <a href="qcborstreamwriter.html#startMap">startMap</a> call must be paired with one <a href="qcborstreamwriter.html#endMap">endMap</a>() call and the current CBOR element extends until the end of the map.</p>
+<p>The map created by this function has an explicit length and therefore exactly <i>count</i> pairs of items must be added to the CBOR stream. Adding fewer or more items will result in failure during <a href="qcborstreamwriter.html#endMap">endMap</a>() and the CBOR stream will be corrupt. However, explicit-length map are required by canonical CBOR encoding.</p>
+<p>The following example appends all strings found in the <a href="qmap.html">QMap</a> passed as input:</p>
+<pre class="cpp">
+
+     <span class="type">void</span> appendMap(<span class="type"><a href="qcborstreamwriter.html#QCborStreamWriter">QCborStreamWriter</a></span> <span class="operator">&amp;</span>writer<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qmap.html">QMap</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="qstring.html">QString</a></span><span class="operator">&gt;</span> <span class="operator">&amp;</span>map)
+     {
+         writer<span class="operator">.</span>startMap(map<span class="operator">.</span>size());
+         <span class="keyword">for</span> (<span class="keyword">auto</span> it <span class="operator">=</span> map<span class="operator">.</span>begin(); it <span class="operator">!</span><span class="operator">=</span> map<span class="operator">.</span>end(); <span class="operator">+</span><span class="operator">+</span>it) {
+             writer<span class="operator">.</span>append(it<span class="operator">.</span>key());
+             writer<span class="operator">.</span>append(it<span class="operator">.</span>value());
+         }
+         writer<span class="operator">.</span>endMap();
+     }
+
+</pre>
+<p><b>Size limitations</b>: The parameter to this function is quint64, which would seem to allow up to 2<sup>64</sup>-1 pairs in the map. However, both <a href="qcborstreamwriter.html">QCborStreamWriter</a> and <a href="qcborstreamreader.html">QCborStreamReader</a> are currently limited to 2<sup>31</sup>-1 items on 32-bit systems and 2<sup>63</sup>-1 items on 64-bit ones. Also note that <a href="qcbormap.html">QCborMap</a> is currently limited to 2<sup>26</sup> elements in any platform.</p>
+<p><b>See also </b><a href="qcborstreamwriter.html#startMap">startMap</a>(), <a href="qcborstreamwriter.html#endMap">endMap</a>(), <a href="qcborstreamwriter.html#startArray">startArray</a>(), <a href="qcborstreamreader.html#isMap">QCborStreamReader::isMap</a>(), and <a href="qcborstreamreader.html#isLengthKnown">QCborStreamReader::isLengthKnown</a>().</p>
+<!-- @@@startMap -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

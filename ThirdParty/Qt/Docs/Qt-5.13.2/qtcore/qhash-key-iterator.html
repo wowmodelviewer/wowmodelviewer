@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qhash.cpp -->
+  <title>key_iterator Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >key_iterator</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">key_iterator Class</h1>
+<span class="small-subtitle">Class key_iterator is declared in class <a href="qhash.html#qhash">QHash</a>.<br/></span>
+<!-- $$$key_iterator-brief -->
+<p>The <a href="qhash-key-iterator.html">QHash::key_iterator</a> class provides an STL-style const iterator for <a href="qhash.html#qhash">QHash</a> and <a href="qmultihash.html">QMultiHash</a> keys. <a href="#details">More...</a></p>
+<!-- @@@key_iterator -->
+<p>This class was introduced in  Qt 5.6.</p>
+<ul>
+<li><a href="qhash-key-iterator-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qhash-key-iterator.html#base">base</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qhash-key-iterator.html#operator-not-eq">operator!=</a></b>(key_iterator <i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const Key &amp;</td><td class="memItemRight bottomAlign"><b><a href="qhash-key-iterator.html#operator-2a">operator*</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> key_iterator &amp;</td><td class="memItemRight bottomAlign"><b><a href="qhash-key-iterator.html#operator-2b-2b">operator++</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> key_iterator </td><td class="memItemRight bottomAlign"><b><a href="qhash-key-iterator.html#operator-2b-2b-1">operator++</a></b>(<i>int</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> key_iterator &amp;</td><td class="memItemRight bottomAlign"><b><a href="qhash-key-iterator.html#operator--">operator--</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> key_iterator </td><td class="memItemRight bottomAlign"><b><a href="qhash-key-iterator.html#operator---1">operator--</a></b>(<i>int</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const Key *</td><td class="memItemRight bottomAlign"><b><a href="qhash-key-iterator.html#operator--gt">operator-&gt;</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qhash-key-iterator.html#operator-eq-eq">operator==</a></b>(key_iterator <i>other</i>) const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$key_iterator-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qhash-key-iterator.html">QHash::key_iterator</a> is essentially the same as <a href="qhash-const-iterator.html">QHash::const_iterator</a> with the difference that operator*() and operator-&gt;() return a key instead of a value.</p>
+<p>For most uses <a href="qhash-iterator.html">QHash::iterator</a> and <a href="qhash-const-iterator.html">QHash::const_iterator</a> should be used, you can easily access the key by calling <a href="qhash-iterator.html#key">QHash::iterator::key</a>():</p>
+<pre class="cpp">
+
+  <span class="keyword">for</span> (<span class="type"><a href="qhash.html#QHash">QHash</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="qstring.html">QString</a></span><span class="operator">&gt;</span><span class="operator">::</span>const_iterator it <span class="operator">=</span> hash<span class="operator">.</span>cbegin()<span class="operator">,</span> end <span class="operator">=</span> hash<span class="operator">.</span>cend(); it <span class="operator">!</span><span class="operator">=</span> end; <span class="operator">+</span><span class="operator">+</span>it) {
+      cout <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;The key: &quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> it<span class="operator">.</span>key() <span class="operator">&lt;</span><span class="operator">&lt;</span> endl
+      cout <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;The value: &quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> it<span class="operator">.</span>value() <span class="operator">&lt;</span><span class="operator">&lt;</span> endl;
+      cout <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Also the value: &quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> (<span class="operator">*</span>it) <span class="operator">&lt;</span><span class="operator">&lt;</span> endl;
+  }
+
+</pre>
+<p>However, to have interoperability between <a href="qhash.html#qhash">QHash</a>'s keys and STL-style algorithms we need an iterator that dereferences to a key instead of a value. With <a href="qhash-key-iterator.html">QHash::key_iterator</a> we can apply an algorithm to a range of keys without having to call <a href="qhash.html#keys">QHash::keys</a>(), which is inefficient as it costs one <a href="qhash.html#qhash">QHash</a> iteration and memory allocation to create a temporary <a href="qlist.html">QList</a>.</p>
+<pre class="cpp">
+
+  <span class="comment">// Inefficient, keys() is expensive</span>
+  <span class="type"><a href="qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span> keys <span class="operator">=</span> hash<span class="operator">.</span>keys();
+  <span class="type">int</span> numPrimes <span class="operator">=</span> std<span class="operator">::</span>count_if(keys<span class="operator">.</span>cbegin()<span class="operator">,</span> keys<span class="operator">.</span>cend()<span class="operator">,</span> isPrimeNumber);
+  <a href="qtalgorithms.html#qDeleteAll">qDeleteAll</a>(hash2<span class="operator">.</span>keys());
+
+  <span class="comment">// Efficient, no memory allocation needed</span>
+  <span class="type">int</span> numPrimes <span class="operator">=</span> std<span class="operator">::</span>count_if(hash<span class="operator">.</span>keyBegin()<span class="operator">,</span> hash<span class="operator">.</span>keyEnd()<span class="operator">,</span> isPrimeNumber);
+  <a href="qtalgorithms.html#qDeleteAll">qDeleteAll</a>(hash2<span class="operator">.</span>keyBegin()<span class="operator">,</span> hash2<span class="operator">.</span>keyEnd());
+
+</pre>
+<p><a href="qhash-key-iterator.html">QHash::key_iterator</a> is const, it's not possible to modify the key.</p>
+<p>The default <a href="qhash-key-iterator.html">QHash::key_iterator</a> constructor creates an uninitialized iterator. You must initialize it using a <a href="qhash.html#qhash">QHash</a> function like <a href="qhash.html#keyBegin">QHash::keyBegin</a>() or <a href="qhash.html#keyEnd">QHash::keyEnd</a>().</p>
+<p><b>Warning:</b> Iterators on implicitly shared containers do not work exactly like STL-iterators. You should avoid copying a container while iterators are active on that container. For more information, read <a href="containers.html#implicit-sharing-iterator-problem">Implicit sharing iterator problem</a>.</p>
+</div>
+<p><b>See also </b><a href="qhash-const-iterator.html">QHash::const_iterator</a> and <a href="qhash-iterator.html">QHash::iterator</a>.</p>
+<!-- @@@key_iterator -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$base[overload1]$$$base -->
+<h3 class="fn" id="base"><a name="base"></a><span class="type"><a href="qhash-const-iterator.html">const_iterator</a></span> key_iterator::<span class="name">base</span>() const</h3>
+<p>Returns the underlying <a href="qhash-const-iterator.html">const_iterator</a> this <a href="qhash-key-iterator.html">key_iterator</a> is based on.</p>
+<!-- @@@base -->
+<!-- $$$operator!=[overload1]$$$operator!=key_iterator -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> key_iterator::<span class="name">operator!=</span>(<span class="type">key_iterator</span> <i>other</i>) const</h3>
+<p>Returns <code>true</code> if <i>other</i> points to a different item than this iterator; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qhash-key-iterator.html#operator-eq-eq">operator==</a>().</p>
+<!-- @@@operator!= -->
+<!-- $$$operator*[overload1]$$$operator* -->
+<h3 class="fn" id="operator-2a"><a name="operator-2a"></a>const <span class="type">Key</span> &amp;key_iterator::<span class="name">operator*</span>() const</h3>
+<p>Returns the current item's key.</p>
+<!-- @@@operator* -->
+<!-- $$$operator++[overload1]$$$operator++ -->
+<h3 class="fn" id="operator-2b-2b"><a name="operator-2b-2b"></a><span class="type">key_iterator</span> &amp;key_iterator::<span class="name">operator++</span>()</h3>
+<p>The prefix ++ operator (<code>++i</code>) advances the iterator to the next item in the hash and returns an iterator to the new current item.</p>
+<p>Calling this function on <a href="qhash.html#keyEnd">QHash::keyEnd</a>() leads to undefined results.</p>
+<p><b>See also </b><a href="qhash-key-iterator.html#operator--">operator--</a>().</p>
+<!-- @@@operator++ -->
+<!-- $$$operator++$$$operator++int -->
+<h3 class="fn" id="operator-2b-2b-1"><a name="operator-2b-2b-1"></a><span class="type">key_iterator</span> key_iterator::<span class="name">operator++</span>(<i>int</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>The postfix ++ operator (<code>i++</code>) advances the iterator to the next item in the hash and returns an iterator to the previous item.</p>
+<!-- @@@operator++ -->
+<!-- $$$operator--[overload1]$$$operator-- -->
+<h3 class="fn" id="operator--"><a name="operator--"></a><span class="type">key_iterator</span> &amp;key_iterator::<span class="name">operator--</span>()</h3>
+<p>The prefix -- operator (<code>--i</code>) makes the preceding item current and returns an iterator pointing to the new current item.</p>
+<p>Calling this function on <a href="qhash.html#keyBegin">QHash::keyBegin</a>() leads to undefined results.</p>
+<p><b>See also </b><a href="qhash-key-iterator.html#operator-2b-2b">operator++</a>().</p>
+<!-- @@@operator-- -->
+<!-- $$$operator--$$$operator--int -->
+<h3 class="fn" id="operator---1"><a name="operator---1"></a><span class="type">key_iterator</span> key_iterator::<span class="name">operator--</span>(<i>int</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>The postfix -- operator (<code>i--</code>) makes the preceding item current and returns an iterator pointing to the previous item.</p>
+<!-- @@@operator-- -->
+<!-- $$$operator->[overload1]$$$operator-> -->
+<h3 class="fn" id="operator--gt"><a name="operator--gt"></a>const <span class="type">Key</span> *key_iterator::<span class="name">operator-&gt;</span>() const</h3>
+<p>Returns a pointer to the current item's key.</p>
+<!-- @@@operator-> -->
+<!-- $$$operator==[overload1]$$$operator==key_iterator -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> key_iterator::<span class="name">operator==</span>(<span class="type">key_iterator</span> <i>other</i>) const</h3>
+<p>Returns <code>true</code> if <i>other</i> points to the same item as this iterator; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qhash-key-iterator.html#operator-not-eq">operator!=</a>().</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

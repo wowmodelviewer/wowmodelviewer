@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<instructionals module="QtCore">
+    <examples>
+        <example name="Contiguous Cache Example" docUrl="qthelp://org.qt-project.qtcore.5132/qtcore/qtcore-tools-contiguouscache-example.html" projectPath="corelib/tools/contiguouscache/contiguouscache.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[The Contiguous Cache example shows how to use QContiguousCache to manage memory usage for very large models. In some environments memory is limited and, even when it isn't, users still dislike an application using excessive memory. Using QContiguousCache to manage a list, rather than loading the entire list into memory, allows the application to limit the amount of memory it uses, regardless of the size of the data set it accesses.]]></description>
+            <tags>cache,contiguous,core,ios</tags>
+            <fileToOpen mainFile="true">corelib/tools/contiguouscache/main.cpp</fileToOpen>
+        </example>
+        <example name="Custom Type Example" docUrl="qthelp://org.qt-project.qtcore.5132/qtcore/qtcore-tools-customtype-example.html" projectPath="corelib/tools/customtype/customtype.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[The Custom Type example shows how to integrate a custom type into Qt's meta-object system.]]></description>
+            <tags>core,custom,type</tags>
+            <fileToOpen mainFile="true">corelib/tools/customtype/main.cpp</fileToOpen>
+        </example>
+        <example name="JSON Save Game Example" docUrl="qthelp://org.qt-project.qtcore.5132/qtcore/qtcore-serialization-savegame-example.html" projectPath="corelib/serialization/savegame/savegame.pro" isHighlighted="true" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[The JSON Save Game example demonstrates how to save and load a small game using QJsonDocument, QJsonObject and QJsonArray.]]></description>
+            <tags>core,game,json,save</tags>
+            <fileToOpen mainFile="true">corelib/serialization/savegame/main.cpp</fileToOpen>
+        </example>
+        <example name="Local Fortune Client Example" docUrl="qthelp://org.qt-project.qtcore.5132/qtcore/qtcore-ipc-localfortuneclient-example.html" projectPath="corelib/ipc/localfortuneclient/localfortuneclient.pro" imageUrl="qthelp://org.qt-project.qtcore.5132/qtcore/images/localfortuneclient-example.png" isHighlighted="true">
+            <description><![CDATA[Demonstrates using QLocalSocket for a simple local service client.]]></description>
+            <tags>client,core,fortune,local</tags>
+            <fileToOpen mainFile="true">corelib/ipc/localfortuneclient/main.cpp</fileToOpen>
+        </example>
+        <example name="Local Fortune Server Example" docUrl="qthelp://org.qt-project.qtcore.5132/qtcore/qtcore-ipc-localfortuneserver-example.html" projectPath="corelib/ipc/localfortuneserver/localfortuneserver.pro" imageUrl="qthelp://org.qt-project.qtcore.5132/qtcore/images/localfortuneserver-example.png" isHighlighted="true">
+            <description><![CDATA[Demonstrates using QLocalServer and QLocalSocket for serving a simple local service.]]></description>
+            <tags>core,fortune,local,server</tags>
+            <fileToOpen mainFile="true">corelib/ipc/localfortuneserver/main.cpp</fileToOpen>
+        </example>
+        <example name="MIME Type Browser Example" docUrl="qthelp://org.qt-project.qtcore.5132/qtcore/qtcore-mimetypes-mimetypebrowser-example.html" projectPath="corelib/mimetypes/mimetypebrowser/mimetypebrowser.pro" imageUrl="qthelp://org.qt-project.qtcore.5132/qtcore/images/mimetypebrowser.png">
+            <description><![CDATA[Shows the hierarchy of MIME types and can be used to determine the MIME type of a file.]]></description>
+            <tags>browser,core,mime,type</tags>
+            <fileToOpen mainFile="true">corelib/mimetypes/mimetypebrowser/main.cpp</fileToOpen>
+        </example>
+        <example name="Mandelbrot Example" docUrl="qthelp://org.qt-project.qtcore.5132/qtcore/qtcore-threads-mandelbrot-example.html" projectPath="corelib/threads/mandelbrot/mandelbrot.pro" imageUrl="qthelp://org.qt-project.qtcore.5132/qtcore/images/mandelbrot-example.png">
+            <description><![CDATA[The Mandelbrot example demonstrates multi-thread programming using Qt. It shows how to use a worker thread to perform heavy computations without blocking the main thread's event loop.]]></description>
+            <tags>core,ios,mandelbrot</tags>
+            <fileToOpen mainFile="true">corelib/threads/mandelbrot/main.cpp</fileToOpen>
+        </example>
+        <example name="Queued Custom Type Example" docUrl="qthelp://org.qt-project.qtcore.5132/qtcore/qtcore-threads-queuedcustomtype-example.html" projectPath="corelib/threads/queuedcustomtype/queuedcustomtype.pro" imageUrl="qthelp://org.qt-project.qtcore.5132/qtcore/images/queuedcustomtype-example.png">
+            <description><![CDATA[Demonstrates multi-thread programming using Qt.]]></description>
+            <tags>core,custom,ios,queued,type</tags>
+            <fileToOpen mainFile="true">corelib/threads/queuedcustomtype/main.cpp</fileToOpen>
+        </example>
+        <example name="Semaphores Example" docUrl="qthelp://org.qt-project.qtcore.5132/qtcore/qtcore-threads-semaphores-example.html" projectPath="corelib/threads/semaphores/semaphores.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[Demonstrates multi-thread programming using Qt.]]></description>
+            <tags>core,semaphores</tags>
+            <fileToOpen mainFile="true">corelib/threads/semaphores/semaphores.cpp</fileToOpen>
+        </example>
+        <example name="Shared Memory Example" docUrl="qthelp://org.qt-project.qtcore.5132/qtcore/qtcore-ipc-sharedmemory-example.html" projectPath="corelib/ipc/sharedmemory/sharedmemory.pro" imageUrl="qthelp://org.qt-project.qtcore.5132/qtcore/images/sharedmemory-example_1.png">
+            <description><![CDATA[Demonstrates doing inter-process communication using shared memory with the QSharedMemory class.]]></description>
+            <tags>core,memory,shared</tags>
+            <fileToOpen mainFile="true">corelib/ipc/sharedmemory/main.cpp</fileToOpen>
+        </example>
+        <example name="Wait Conditions Example" docUrl="qthelp://org.qt-project.qtcore.5132/qtcore/qtcore-threads-waitconditions-example.html" projectPath="corelib/threads/waitconditions/waitconditions.pro" imageUrl="qthelp://org.qt-project.qtdoc.5132/qtdoc/images/qt-codesample.png">
+            <description><![CDATA[Demonstrates multi-thread programming using Qt.]]></description>
+            <tags>conditions,core,wait</tags>
+            <fileToOpen mainFile="true">corelib/threads/waitconditions/waitconditions.cpp</fileToOpen>
+        </example>
+    </examples>
+</instructionals>

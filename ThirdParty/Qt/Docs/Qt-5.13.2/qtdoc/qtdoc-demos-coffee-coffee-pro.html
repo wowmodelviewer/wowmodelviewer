@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- coffee.qdoc -->
+  <title>Coffee Machine Example | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Coffee Machine Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<h1 class="title">Coffee Machine Example</h1>
+<span class="subtitle"></span>
+<pre class="cpp">
+
+  QT += qml quick
+
+  CONFIG += c++11
+
+  SOURCES += main.cpp
+
+  RESOURCES += qml.qrc
+
+  # Additional import path used to resolve QML modules in Qt Creator's code model
+  QML_IMPORT_PATH = $$PWD/imports
+
+  # Additional import path used to resolve QML modules just for Qt Quick Designer
+  QML_DESIGNER_IMPORT_PATH =
+
+  # The following define makes your compiler emit warnings if you use
+  # any feature of Qt which as been marked deprecated (the exact warnings
+  # depend on your compiler). Please consult the documentation of the
+  # deprecated API in order to know how to port your code away from it.
+  DEFINES += QT_DEPRECATED_WARNINGS
+
+  # You can also make your code fail to compile if you use deprecated APIs.
+  # In order to do so, uncomment the following line.
+  # You can also select to disable deprecated APIs only up to a certain version of Qt.
+  #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+
+  qnx: target.path = /tmp/$${TARGET}/bin
+  else: win32|if(unix:!android): target.path = $$[QT_INSTALL_EXAMPLES]/demos/$${TARGET}
+  !isEmpty(target.path): INSTALLS += target
+
+  DISTFILES += \
+      images/ui components/loader/loading bar 1.png \
+      images/ui components/loader/loading bar 2.png \
+      images/ui components/loader/loading bar 3.png \
+      images/ui components/loader/loading bg.png
+
+</pre>

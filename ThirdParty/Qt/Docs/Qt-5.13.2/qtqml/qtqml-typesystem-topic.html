@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- topic.qdoc -->
+  <title>The QML Type System | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td >The QML Type System</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#basic-types">Basic Types</a></li>
+<li class="level1"><a href="#javascript-types">JavaScript Types</a></li>
+<li class="level1"><a href="#qml-object-types">QML Object Types</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">The QML Type System</h1>
+<span class="subtitle"></span>
+<!-- $$$qtqml-typesystem-topic.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The types which may be used in the definition of an object hierarchy in a QML document can come from various sources. They may be:</p>
+<ul>
+<li>provided natively by the QML language</li>
+<li>registered via C++ by QML modules</li>
+<li>provided as QML documents by QML modules</li>
+</ul>
+<p>Furthermore, application developers can provide their own types, either by registering C++ types directly, or by defining reusable components in QML documents which can then be imported.</p>
+<p>Wherever the type definitions come from, the engine will enforce type-safety for properties and instances of those types.</p>
+<a name="basic-types"></a>
+<h2 id="basic-types">Basic Types</h2>
+<p>The QML language has built-in support for various primitive types including integers, double-precision floating point numbers, strings, and boolean values. Objects may have properties of these types, and values of these types may be passed as arguments to methods of objects.</p>
+<p>See the <a href="qtqml-typesystem-basictypes.html">QML Basic Types</a> documentation for more information about basic types.</p>
+<a name="javascript-types"></a>
+<h2 id="javascript-types">JavaScript Types</h2>
+<p>JavaScript objects and arrays are supported by the QML engine. Any standard JavaScript type can be created and stored using the generic <a href="qml-var.html">var</a> type.</p>
+<p>For example, the standard <code>Date</code> and <code>Array</code> types are available, as below:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      property <span class="type"><a href="qml-var.html">var</a></span> <span class="name">theArray</span>: []
+      property <span class="type"><a href="qml-var.html">var</a></span> <span class="name">theDate</span>: new <span class="name">Date</span>()
+
+      <span class="name">Component</span>.onCompleted: {
+          <span class="keyword">for</span> (var i = 0; <span class="name">i</span> <span class="operator">&lt;</span> <span class="number">10</span>; i++)
+              <span class="name">theArray</span>.<span class="name">push</span>(<span class="string">&quot;Item &quot;</span> <span class="operator">+</span> <span class="name">i</span>)
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;There are&quot;</span>, <span class="name">theArray</span>.<span class="name">length</span>, <span class="string">&quot;items in the array&quot;</span>)
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;The time is&quot;</span>, <span class="name">theDate</span>.<span class="name">toUTCString</span>())
+      }
+  }
+
+</pre>
+<p>See <a href="qtqml-javascript-expressions.html">JavaScript Expressions in QML Documents</a> for more details.</p>
+<a name="qml-object-types"></a>
+<h2 id="qml-object-types">QML Object Types</h2>
+<p>A QML object type is a type from which a QML object can be instantiated. QML object types are derived from <a href="qml-qtqml-qtobject.html">QtObject</a>, and are provided by QML modules. Applications can import these modules to use the object types they provide. The <code>QtQuick</code> module provides the most common object types needed to create user interfaces in QML.</p>
+<p>Finally, every QML document implicitly defines a QML object type, which can be re-used in other QML documents. See the documentation about <a href="qtqml-typesystem-objecttypes.html">object types in the QML type system</a> for in-depth information about object types.</p>
+</div>
+<!-- @@@qtqml-typesystem-topic.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

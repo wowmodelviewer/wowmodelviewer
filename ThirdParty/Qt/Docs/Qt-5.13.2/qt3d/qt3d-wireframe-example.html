@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- wireframe.qdoc -->
+  <title>Qt 3D: Wireframe QML Example | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td >Qt 3D: Wireframe QML Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+<li class="level1"><a href="#creating-entities">Creating Entities</a></li>
+<li class="level1"><a href="#specifying-transformations">Specifying Transformations</a></li>
+<li class="level1"><a href="#loading-dynamic-per-vertex-data">Loading Dynamic Per-Vertex Data</a></li>
+<li class="level1"><a href="#aggregating-components">Aggregating Components</a></li>
+<li class="level1"><a href="#rendering-from-cameras">Rendering from Cameras</a></li>
+<li class="level1"><a href="#mapping-materials">Mapping Materials</a></li>
+<li class="level1"><a href="#using-animation-elements">Using Animation Elements</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt 3D: Wireframe QML Example</h1>
+<span class="subtitle"></span>
+<!-- $$$wireframe-brief -->
+<p>A Qt 3D QML application that implements a single-pass wireframe rendering method.</p>
+<!-- @@@wireframe -->
+<!-- $$$wireframe-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/qt3d-wireframe-rendering.png" alt="" /></p><p><i>Qt 3D Wireframe Rendering</i> illustrates how to draw a single entity (a trefoil knot) using a custom set of shaders to implement a single-pass wireframe rendering method.</p>
+<a name="running-the-example"></a>
+<h4 id="running-the-example">Running the Example</h4>
+<p>To run the example from <a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a>, open the <b>Welcome</b> mode and select the example from <b>Examples</b>. For more information, visit <a href="http://doc.qt.io/qtcreator/creator-build-example-application.html">Building and Running an Example</a>.</p>
+<a name="creating-entities"></a>
+<h4 id="creating-entities">Creating Entities</h4>
+<p>The renderer aspect looks for entities that have some geometry, a material, and optionally a transformation. These are all specified in the form of subclasses of QComponent that have been exported to the QML engine in the form of <a href="qml-qt3d-render-mesh.html">Mesh</a>, <a href="qml-qt3d-render-material.html">Material</a>, and <a href="qml-qt3d-core-transform.html">Transform</a>. We use these components to create a custom QML item in <i>TrefoilKnot.qml</i>.</p>
+<p>We start off by importing the <code>Qt3D 2.0</code> module that provides the <a href="qml-qt3d-core-entity.html">Entity</a> type and value type helpers, such as Qt.vector3d(). We also import the <code>Qt3D.Renderer</code> module that provides the components and other types picked up by the renderer aspect:</p>
+<pre class="cpp">
+
+  import Qt3D.Core 2.0
+  import Qt3D.Render 2.0
+
+</pre>
+<p>To use components from other aspects, we would need to import the corresponding QML module, too.</p>
+<p>We then use an <a href="qml-qt3d-core-entity.html">Entity</a> type as the root element of the custom QML type exposing some custom properties just as you would with any other type in QML:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+      <span class="name">id</span>: <span class="name">root</span>
+
+      property <span class="type">real</span> <span class="name">x</span>: <span class="number">0.0</span>
+      property <span class="type">real</span> <span class="name">y</span>: <span class="number">0.0</span>
+      property <span class="type">real</span> <span class="name">z</span>: <span class="number">0.0</span>
+      property <span class="type">real</span> <span class="name">scale</span>: <span class="number">1.0</span>
+      property <span class="type">real</span> <span class="name">theta</span>: <span class="number">0.0</span>
+      property <span class="type">real</span> <span class="name">phi</span>: <span class="number">0.0</span>
+      property <span class="type"><a href="qml-qt3d-render-material.html">Material</a></span> <span class="name">material</span>
+
+</pre>
+<p>In addition to aggregating components, the <a href="qml-qt3d-core-entity.html">Entity</a> type can be used to group child objects together. This is analogous to how the <a href="../qtquick/qml-qtquick-item.html">Item</a> type is used in Qt Quick 2.</p>
+<a name="specifying-transformations"></a>
+<h4 id="specifying-transformations">Specifying Transformations</h4>
+<p>We instantiate a <a href="qml-qt3d-core-transform.html">Transform</a> component and a <a href="qml-qt3d-render-mesh.html">Mesh</a> component. The <a href="qml-qt3d-core-transform.html">Transform</a> component specifies how the renderer should transform the geometry when it is drawn with the OpenGL pipeline. We combine an ordered set of transformations into a single <a href="qml-qt3d-core-transform.html">Transform</a> component. This information will be automatically available to our shaders through standard named uniform variables:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qml-qt3d-core-transform.html">Transform</a></span> {
+          <span class="name">id</span>: <span class="name">transform</span>
+          <span class="name">translation</span>: <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">root</span>.<span class="name">x</span>, <span class="name">root</span>.<span class="name">y</span>, <span class="name">root</span>.<span class="name">z</span>)
+          <span class="name">rotation</span>: <span class="name">fromEulerAngles</span>(<span class="name">theta</span>, <span class="name">phi</span>, <span class="number">0</span>)
+          <span class="name">scale</span>: <span class="name">root</span>.<span class="name">scale</span>
+      }
+
+</pre>
+<a name="loading-dynamic-per-vertex-data"></a>
+<h4 id="loading-dynamic-per-vertex-data">Loading Dynamic Per-Vertex Data</h4>
+<p>The <a href="qml-qt3d-render-mesh.html">Mesh</a> component is very simple. We use its source property to load in a static set of geometry (such as vertex positions, normal vectors, and texture coordinates) from a file in the Wavefront Obj format. This data was exported from the Blender application.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qml-qt3d-render-mesh.html">Mesh</a></span> {
+          <span class="name">id</span>: <span class="name">mesh</span>
+          <span class="name">source</span>: <span class="string">&quot;assets/obj/trefoil.obj&quot;</span>
+      }
+
+</pre>
+<p>In addition to the <a href="qml-qt3d-render-mesh.html">Mesh</a> element, Qt 3D also enables dynamic generation of per-vertex attribute data through C++ hooks that are called by the task-based engine.</p>
+<a name="aggregating-components"></a>
+<h4 id="aggregating-components">Aggregating Components</h4>
+<p>Simply instantiating components is not enough, however. In order for them to imbue special behavior on an entity, the entity must aggregate the components by means of its components property:</p>
+<pre class="cpp">
+
+      <span class="name">components</span>: [ <span class="name">transform</span>, <span class="name">mesh</span>, <span class="name">root</span>.<span class="name">material</span> ]
+
+</pre>
+<p>This allows components to be shared between multiple entities very easily. In this example, we have components for the transform and mesh that are contained within the TrefoilKnot custom type. The final component, of type <a href="qml-qt3d-render-material.html">Material</a>, is provided by a property of the TrefoilKnot custom type. We will later customize the appearance of the entity.</p>
+<a name="rendering-from-cameras"></a>
+<h4 id="rendering-from-cameras">Rendering from Cameras</h4>
+<p>We use the TrefoilKnot custom type in <i>main.qml</i> to draw the trefoil knot on the screen.</p>
+<p>We use the same import statements as in <i>TrefoilKnot.qml</i>, with the addition of a namespaced import for the Qt Quick module that we will need for animations:</p>
+<pre class="cpp">
+
+  import QtQuick 2.1 as QQ2
+  import Qt3D.Core 2.0
+  import Qt3D.Render 2.0
+
+</pre>
+<p>We use an <a href="qml-qt3d-core-entity.html">Entity</a> type as the root type simply to act as a parent for its children. In this sense, the <a href="qml-qt3d-core-entity.html">Entity</a> type is much like the <a href="../qtquick/qml-qtquick-item.html">Item</a> type:</p>
+<pre class="cpp">
+
+  import Qt3D.Input 2.0
+  import Qt3D.Extras 2.0
+
+  <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+      <span class="name">id</span>: <span class="name">root</span>
+
+</pre>
+<p>The RendererSettings component uses the <a href="qml-qt3d-extras-forwardrenderer.html">ForwardRenderer</a> type to completely configure the renderer without touching any C++ code:</p>
+<pre class="cpp">
+
+      <span class="comment">// Render from the mainCamera</span>
+      <span class="name">components</span>: [
+          <span class="type"><a href="qml-qt3d-render-rendersettings.html">RenderSettings</a></span> {
+              <span class="name">activeFrameGraph</span>: <span class="name">ForwardRenderer</span> {
+                  <span class="name">id</span>: <span class="name">renderer</span>
+                  <span class="name">camera</span>: <span class="name">mainCamera</span>
+              }
+          },
+          <span class="comment">// Event Source will be set by the Qt3DQuickWindow</span>
+          <span class="type"><a href="qml-qt3d-input-inputsettings.html">InputSettings</a></span> { }
+      ]
+
+</pre>
+<p>The BasicCamera type is a trivial wrapper around the built-in <a href="qml-qt3d-render-camera.html">Camera</a> type that represents a virtual camera. It has properties for such things as the near and far planes, field of view, aspect ratio, projection type, position, and orientation:</p>
+<pre class="cpp">
+
+      <span class="type">BasicCamera</span> {
+          <span class="name">id</span>: <span class="name">mainCamera</span>
+          <span class="name">position</span>: <span class="name">Qt</span>.<span class="name">vector3d</span>( <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">15.0</span> )
+      }
+
+</pre>
+<p>The <a href="../qtgui/qvulkaninstance.html#configuration">Configuration</a> type provides a temporary workaround for having mouse control of the camera while the proper implementation that uses aspects and components is being completed:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qml-qt3d-extras-firstpersoncameracontroller.html">FirstPersonCameraController</a></span> { <span class="name">camera</span>: <span class="name">mainCamera</span> }
+
+</pre>
+<p>It is trivial to use multiple cameras and choose between them using the framegraph for all or part of the scene rendering.</p>
+<a name="mapping-materials"></a>
+<h4 id="mapping-materials">Mapping Materials</h4>
+<p>Qt 3D has a robust and very flexible <a href="qt3d-overview.html#materials">material system</a> that allows multiple levels of customization. We use the WireframeMaterial custom type to wrap the <a href="qml-qt3d-render-material.html">Material</a> type:</p>
+<pre class="cpp">
+
+      <span class="type">WireframeMaterial</span> {
+          <span class="name">id</span>: <span class="name">wireframeMaterial</span>
+          <span class="name">effect</span>: <span class="name">WireframeEffect</span> {}
+          <span class="name">ambient</span>: <span class="name">Qt</span>.<span class="name">rgba</span>( <span class="number">0.2</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span> )
+          <span class="name">diffuse</span>: <span class="name">Qt</span>.<span class="name">rgba</span>( <span class="number">0.8</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span> )
+
+</pre>
+<p>We then instantiate the TrefoilKnot type and set the material on it:</p>
+<pre class="cpp">
+
+      <span class="type">TrefoilKnot</span> {
+          <span class="name">id</span>: <span class="name">trefoilKnot</span>
+          <span class="name">material</span>: <span class="name">wireframeMaterial</span>
+      }
+
+</pre>
+<p>The Qt 3D engine in conjunction with the renderer aspect now has enough information to finally render our mesh using the material we specified.</p>
+<a name="using-animation-elements"></a>
+<h4 id="using-animation-elements">Using Animation Elements</h4>
+<p>We use the animation elements provided by Qt Quick 2 to animate the properties of the TrefoilKnot and WireframeMaterial types. The properties of the components of a type are updated by using the QML property binding mechanism:</p>
+<pre class="cpp">
+
+          <span class="type">QQ2</span>.SequentialAnimation {
+              <span class="name">loops</span>: <span class="name">QQ2</span>.<span class="name">Animation</span>.<span class="name">Infinite</span>
+              <span class="name">running</span>: <span class="number">true</span>
+
+              <span class="type">QQ2</span>.NumberAnimation {
+                  <span class="name">target</span>: <span class="name">wireframeMaterial</span>;
+                  <span class="name">property</span>: <span class="string">&quot;lineWidth&quot;</span>;
+                  <span class="name">duration</span>: <span class="number">1000</span>;
+                  <span class="name">from</span>: <span class="number">0.8</span>
+                  <span class="name">to</span>: <span class="number">1.8</span>
+              }
+
+              <span class="type">QQ2</span>.NumberAnimation {
+                  <span class="name">target</span>: <span class="name">wireframeMaterial</span>;
+                  <span class="name">property</span>: <span class="string">&quot;lineWidth&quot;</span>;
+                  <span class="name">duration</span>: <span class="number">1000</span>;
+                  <span class="name">from</span>: <span class="number">1.8</span>
+                  <span class="name">to</span>: <span class="number">0.8</span>
+              }
+
+              <span class="type">QQ2</span>.PauseAnimation { <span class="name">duration</span>: <span class="number">1500</span> }
+          }
+
+</pre>
+<p>The property updates are noticed by the <a href="qt3dcore-qnode.html">QNode</a> base class and automatically sent through to the corresponding objects in the renderer aspect. The renderer then takes care of translating the property updates to new values for uniform variables in the GLSL shader programs.</p>
+<p>Run the example to view the trefoil knot with the width of the wireframe lines pulsing. All the heavy lifting is being done by the GPU. The CPU only has to run the property animations and to translate the scenegraph and framegraph into raw OpenGL calls.</p>
+<p>It is also possible to animate on the GPU via a custom shader program and material.</p>
+<p><a href="https://code.qt.io/cgit/qt/qt3d.git/tree/examples/qt3d/wireframe?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@wireframe -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qrendertargetselector.cpp -->
+  <title>QRenderTargetSelector Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QRenderTargetSelector</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QRenderTargetSelector Class</h1>
+<span class="small-subtitle">(<a href="qt3drender-qrendertargetselector.html">Qt3DRender::QRenderTargetSelector</a>)<br/></span>
+<!-- $$$QRenderTargetSelector-brief -->
+<p>Provides a way of specifying a render target. <a href="#details">More...</a></p>
+<!-- @@@QRenderTargetSelector -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QRenderTargetSelector&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3drender</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-rendertargetselector.html">RenderTargetSelector</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3drender-qframegraphnode.html">Qt3DRender::QFrameGraphNode</a></td></tr></table></div><p>This class was introduced in  Qt 5.7.</p>
+<ul>
+<li><a href="qt3drender-qrendertargetselector-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qt3drender-qrendertargetselector.html#target-prop">target</a></b> : Qt3DRender::QRenderTarget*</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrendertargetselector.html#QRenderTargetSelector">QRenderTargetSelector</a></b>(Qt3DCore::QNode *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;QRenderTargetOutput::AttachmentPoint&gt; </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrendertargetselector.html#outputs">outputs</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrendertargetselector.html#setOutputs">setOutputs</a></b>(const QVector&lt;QRenderTargetOutput::AttachmentPoint&gt; &amp;<i>buffers</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QRenderTarget *</td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrendertargetselector.html#target-prop">target</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrendertargetselector.html#target-prop">setTarget</a></b>(Qt3DRender::QRenderTarget *<i>target</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qrendertargetselector.html#target-prop">targetChanged</a></b>(Qt3DRender::QRenderTarget *<i>target</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QRenderTargetSelector-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A <a href="qt3drender-qrendertargetselector.html">Qt3DRender::QRenderTargetSelector</a> is used to select active <a href="qt3drender-qrendertarget.html">Qt3DRender::QRenderTarget</a> for the FrameGraph. When <a href="qt3drender-qrendertargetselector.html">QRenderTargetSelector</a> is present in the FrameGraph, the rendering is directed into QTexture objects or draw buffers instead of the surface specified in the <a href="qt3drender-qrendersurfaceselector.html">Qt3DRender::QRenderSurfaceSelector</a>. A render buffer is automatically generated for an attachment point if drawBuffers contain attachment point that any output in the <a href="qt3drender-qrendertarget.html">QRenderTarget</a> do not specify. If the drawBuffers is empty, the renderer will default to using all the outputs in <a href="qt3drender-qrendertarget.html">QRenderTarget</a>.</p>
+</div>
+<!-- @@@QRenderTargetSelector -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$target-prop$$$target$$$setTargetQt3DRender::QRenderTarget*$$$targetChangedQt3DRender::QRenderTarget* -->
+<h3 class="fn" id="target-prop"><a name="target-prop"></a><span class="name">target</span> : <span class="type"><a href="qt3drender-qrendertarget.html">Qt3DRender::QRenderTarget</a></span>*</h3>
+<p>Holds the current render target</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QRenderTarget *</td><td class="memItemRight bottomAlign"><span class="name"><b>target</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setTarget</b></span>(Qt3DRender::QRenderTarget *<i>target</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>targetChanged</b></span>(Qt3DRender::QRenderTarget *<i>target</i>)</td></tr>
+</table></div>
+<!-- @@@target -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QRenderTargetSelector[overload1]$$$QRenderTargetSelectorQt3DCore::QNode* -->
+<h3 class="fn" id="QRenderTargetSelector"><a name="QRenderTargetSelector"></a>QRenderTargetSelector::<span class="name">QRenderTargetSelector</span>(<span class="type"><a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs <a href="qt3drender-qrendertargetselector.html">QRenderTargetSelector</a> with given <i>parent</i>.</p>
+<!-- @@@QRenderTargetSelector -->
+<!-- $$$outputs[overload1]$$$outputs -->
+<h3 class="fn" id="outputs"><a name="outputs"></a><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="qt3drender-qrendertargetoutput.html#AttachmentPoint-enum">QRenderTargetOutput::AttachmentPoint</a></span>&gt; QRenderTargetSelector::<span class="name">outputs</span>() const</h3>
+<p>Returns the list of draw buffers for the current <a href="qt3drender-qrendertargetselector.html">Qt3DRender::QRenderTargetSelector</a> instance.</p>
+<p><b>See also </b><a href="qt3drender-qrendertargetselector.html#setOutputs">setOutputs</a>().</p>
+<!-- @@@outputs -->
+<!-- $$$setOutputs[overload1]$$$setOutputsconstQVector<QRenderTargetOutput::AttachmentPoint>& -->
+<h3 class="fn" id="setOutputs"><a name="setOutputs"></a><span class="type">void</span> QRenderTargetSelector::<span class="name">setOutputs</span>(const <span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="qt3drender-qrendertargetoutput.html#AttachmentPoint-enum">QRenderTargetOutput::AttachmentPoint</a></span>&gt; &amp;<i>buffers</i>)</h3>
+<p>Sets the draw <i>buffers</i> to be used. The draw buffers should be matching the <a href="qt3drender-qrendertargetoutput.html#AttachmentPoint-enum">Qt3DRender::QRenderTargetOutput::AttachmentPoint</a> defined in the attachments of the <a href="qt3drender-qrendertarget.html">Qt3DRender::QRenderTarget</a> associated to the <a href="qt3drender-qrendertargetselector.html">Qt3DRender::QRenderTargetSelector</a> instance.</p>
+<p><b>Note: </b>At render time, if no draw buffer has been specified, the renderer will default to using all the attachments' draw buffers.</p><p><b>See also </b><a href="qt3drender-qrendertargetselector.html#outputs">outputs</a>().</p>
+<!-- @@@setOutputs -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

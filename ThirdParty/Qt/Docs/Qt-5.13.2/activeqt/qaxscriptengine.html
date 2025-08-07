@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qaxscript.cpp -->
+  <title>QAxScriptEngine Class | Active Qt 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="activeqt-index.html">Active Qt</a></td><td >QAxScriptEngine</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="activeqt-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAxScriptEngine Class</h1>
+<!-- $$$QAxScriptEngine-brief -->
+<p>The <a href="qaxscriptengine.html">QAxScriptEngine</a> class provides a wrapper around a script engine. <a href="#details">More...</a></p>
+<!-- @@@QAxScriptEngine -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAxScriptEngine&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += axcontainer</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qaxobject.html">QAxObject</a></td></tr></table></div><ul>
+<li><a href="qaxscriptengine-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qaxscriptengine.html#State-enum">State</a></b> { Uninitialized, Initialized, Started, Connected, Disconnected, Closed }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qaxscriptengine.html#QAxScriptEngine">QAxScriptEngine</a></b>(const QString &amp;<i>language</i>, QAxScript *<i>script</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qaxscriptengine.html#dtor.QAxScriptEngine">~QAxScriptEngine</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaxscriptengine.html#addItem">addItem</a></b>(const QString &amp;<i>name</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qaxscriptengine.html#hasIntrospection">hasIntrospection</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qaxscriptengine.html#isValid">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> long </td><td class="memItemRight bottomAlign"><b><a href="qaxscriptengine.html#queryInterface">queryInterface</a></b>(const QUuid &amp;<i>uuid</i>, void **<i>iface</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qaxscriptengine.html#scriptLanguage">scriptLanguage</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qaxscriptengine.html#setState">setState</a></b>(QAxScriptEngine::State <i>st</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QAxScriptEngine::State </td><td class="memItemRight bottomAlign"><b><a href="qaxscriptengine.html#state">state</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qaxscriptengine.html#initialize">initialize</a></b>(IUnknown **<i>ptr</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAxScriptEngine-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Every instance of the <a href="qaxscriptengine.html">QAxScriptEngine</a> class represents an interpreter for script code in a particular scripting language. The class is usually not used directly. The <a href="qaxscript.html">QAxScript</a> and <a href="qaxscriptmanager.html">QAxScriptManager</a> classes provide convenient functions to handle and call script code.</p>
+<p>Direct access to the script engine is provided through <a href="qaxscriptengine.html#queryInterface">queryInterface</a>().</p>
+<p><b>Warning:</b> This class is not available with the bcc5.5 compiler.</p>
+</div>
+<p><b>See also </b><a href="qaxscript.html">QAxScript</a>, <a href="qaxscriptmanager.html">QAxScriptManager</a>, <a href="qaxbase.html">QAxBase</a>, and <a href="activeqt-index.html">ActiveQt Framework</a>.</p>
+<!-- @@@QAxScriptEngine -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$State$$$Uninitialized$$$Initialized$$$Started$$$Connected$$$Disconnected$$$Closed -->
+<h3 class="fn" id="State-enum"><a name="State-enum"></a>enum QAxScriptEngine::<span class="name">State</span></h3>
+<p>The State enumeration defines the different states a script engine can be in.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QAxScriptEngine::Uninitialized</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The script has been created, but not yet initialized</td></tr>
+<tr><td class="topAlign"><code>QAxScriptEngine::Initialized</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">The script has been initialized, but is not running</td></tr>
+<tr><td class="topAlign"><code>QAxScriptEngine::Started</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The script can execute code, but does not yet handle events</td></tr>
+<tr><td class="topAlign"><code>QAxScriptEngine::Connected</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The script can execute code and is connected so that it can handle events</td></tr>
+<tr><td class="topAlign"><code>QAxScriptEngine::Disconnected</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">The script is loaded, but is not connected to event sources</td></tr>
+<tr><td class="topAlign"><code>QAxScriptEngine::Closed</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">The script has been closed.</td></tr>
+</table></div>
+<!-- @@@State -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QAxScriptEngine[overload1]$$$QAxScriptEngineconstQString&QAxScript* -->
+<h3 class="fn" id="QAxScriptEngine"><a name="QAxScriptEngine"></a>QAxScriptEngine::<span class="name">QAxScriptEngine</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>language</i>, <span class="type"><a href="qaxscript.html">QAxScript</a></span> *<i>script</i>)</h3>
+<p>Constructs a <a href="qaxscriptengine.html">QAxScriptEngine</a> object interpreting script code in <i>language</i> provided by the code in <i>script</i>. This is usually done by the <a href="qaxscript.html">QAxScript</a> class when <a href="qaxscript.html#load">loading a script</a>.</p>
+<p>Instances of <a href="qaxscriptengine.html">QAxScriptEngine</a> should always have both a language and a script.</p>
+<!-- @@@QAxScriptEngine -->
+<!-- $$$~QAxScriptEngine[overload1]$$$~QAxScriptEngine -->
+<h3 class="fn" id="dtor.QAxScriptEngine"><a name="dtor.QAxScriptEngine"></a><code>[override virtual] </code>QAxScriptEngine::<span class="name">~QAxScriptEngine</span>()</h3>
+<p>Destroys the <a href="qaxscriptengine.html">QAxScriptEngine</a> object, releasing all allocated resources.</p>
+<!-- @@@~QAxScriptEngine -->
+<!-- $$$addItem[overload1]$$$addItemconstQString& -->
+<h3 class="fn" id="addItem"><a name="addItem"></a><span class="type">void</span> QAxScriptEngine::<span class="name">addItem</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>)</h3>
+<p>Registers an item with the script engine. Script code can refer to this item using <i>name</i>.</p>
+<!-- @@@addItem -->
+<!-- $$$hasIntrospection[overload1]$$$hasIntrospection -->
+<h3 class="fn" id="hasIntrospection"><a name="hasIntrospection"></a><span class="type">bool</span> QAxScriptEngine::<span class="name">hasIntrospection</span>() const</h3>
+<p>Returns true if the script engine supports introspection; otherwise returns false.</p>
+<!-- @@@hasIntrospection -->
+<!-- $$$initialize[overload1]$$$initializeIUnknown** -->
+<h3 class="fn" id="initialize"><a name="initialize"></a><code>[override virtual protected] </code><span class="type">bool</span> QAxScriptEngine::<span class="name">initialize</span>(<span class="type">IUnknown</span> **<i>ptr</i>)</h3>
+<p>Reimplements: <a href="qaxbase.html#initialize">QAxBase::initialize</a>(IUnknown **ptr).</p>
+<!-- @@@initialize -->
+<!-- $$$isValid[overload1]$$$isValid -->
+<h3 class="fn" id="isValid"><a name="isValid"></a><span class="type">bool</span> QAxScriptEngine::<span class="name">isValid</span>() const</h3>
+<p>Returns true if the script engine has been initialized correctly; otherwise returns false.</p>
+<!-- @@@isValid -->
+<!-- $$$queryInterface[overload1]$$$queryInterfaceconstQUuid&void** -->
+<h3 class="fn" id="queryInterface"><a name="queryInterface"></a><span class="type">long</span> QAxScriptEngine::<span class="name">queryInterface</span>(const <span class="type"><a href="../qtcore/quuid.html">QUuid</a></span> &amp;<i>uuid</i>, <span class="type">void</span> **<i>iface</i>) const</h3>
+<p>Requests the interface <i>uuid</i> from the script engine object and sets the value of <i>iface</i> to the provided interface, or to 0 if the requested interface could not be provided.</p>
+<p>Returns the result of the QueryInterface implementation of the COM object.</p>
+<!-- @@@queryInterface -->
+<!-- $$$scriptLanguage[overload1]$$$scriptLanguage -->
+<h3 class="fn" id="scriptLanguage"><a name="scriptLanguage"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QAxScriptEngine::<span class="name">scriptLanguage</span>() const</h3>
+<p>Returns the scripting language, for example &quot;VBScript&quot;, or &quot;JScript&quot;.</p>
+<!-- @@@scriptLanguage -->
+<!-- $$$setState[overload1]$$$setStateQAxScriptEngine::State -->
+<h3 class="fn" id="setState"><a name="setState"></a><span class="type">void</span> QAxScriptEngine::<span class="name">setState</span>(<span class="type"><a href="qaxscriptengine.html#State-enum">QAxScriptEngine::State</a></span> <i>st</i>)</h3>
+<p>Sets the state of the script engine to <i>st</i>. Calling this function is usually not necessary.</p>
+<p><b>See also </b><a href="qaxscriptengine.html#state">state</a>().</p>
+<!-- @@@setState -->
+<!-- $$$state[overload1]$$$state -->
+<h3 class="fn" id="state"><a name="state"></a><span class="type"><a href="qaxscriptengine.html#State-enum">QAxScriptEngine::State</a></span> QAxScriptEngine::<span class="name">state</span>() const</h3>
+<p>Returns the state of the script engine.</p>
+<p><b>See also </b><a href="qaxscriptengine.html#setState">setState</a>().</p>
+<!-- @@@state -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

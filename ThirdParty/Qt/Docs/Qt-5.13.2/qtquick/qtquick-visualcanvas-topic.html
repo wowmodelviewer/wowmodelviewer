@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- topic.qdoc -->
+  <title>Important Concepts In Qt Quick - The Visual Canvas | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td >Important Concepts In Qt Quick - The Visual Canvas</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#coordinate-system">Coordinate System</a></li>
+<li class="level1"><a href="#visual-parent">Visual Parent</a></li>
+<li class="level1"><a href="#scene-graph">Scene Graph</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Important Concepts In Qt Quick - The Visual Canvas</h1>
+<span class="subtitle"></span>
+<!-- $$$qtquick-visualcanvas-topic.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The visual canvas provided by the Qt Quick is a two dimensional canvas with z-ordering.</p>
+<a name="coordinate-system"></a>
+<h2 id="coordinate-system">Coordinate System</h2>
+<p>The top-left pixel in the Qt Quick coordinate system is the [0, 0] pixel. The coordinate system of a child item is relative to its visual parent item. See the documentation on the <a href="qtquick-visualcanvas-coordinates.html">Coordinate System</a> for in-depth information about the coordinate system utilized by Qt Quick.</p>
+<a name="visual-parent"></a>
+<h2 id="visual-parent">Visual Parent</h2>
+<p>There are two separate kinds of parenting in a QML application which uses Qt Quick. The first kind is the ownership-parent (also known as the <a href="../qtcore/qobject.html">QObject</a> parent) which determines object lifetime semantics. The second kind is the visual parent which determines where on the canvas an item is drawn, and also certain properties (for example, opacity applies to visual children).</p>
+<p>In almost all cases, the visual parent is identical to the ownership-parent. See the documentation about the <a href="qtquick-visualcanvas-visualparent.html">Visual Parent</a> for more in-depth information on the topic.</p>
+<a name="scene-graph"></a>
+<h2 id="scene-graph">Scene Graph</h2>
+<p>Modern computer systems and devices use graphics processing units or GPUs to render graphics. Qt Quick can leverage this graphics hardware by using graphics APIs like OpenGL. The default graphics adaptation for Qt Quick requires OpenGL and it is used to display applications developed with Qt Quick in QML. In particular, Qt Quick defines a scene graph which is then rendered. See the documentation about the <a href="qtquick-visualcanvas-scenegraph.html">Scene Graph</a> for in-depth information about the concept of a scene graph and why it is beneficial, and about the scene graph adaptations provided by Qt Quick.</p>
+</div>
+<!-- @@@qtquick-visualcanvas-topic.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

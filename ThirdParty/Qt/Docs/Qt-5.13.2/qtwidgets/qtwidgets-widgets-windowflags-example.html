@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- windowflags.qdoc -->
+  <title>Window Flags Example | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Window Flags Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#controllerwindow-class-definition">ControllerWindow Class Definition</a></li>
+<li class="level1"><a href="#controllerwindow-class-implementation">ControllerWindow Class Implementation</a></li>
+<li class="level1"><a href="#previewwindow-class-definition">PreviewWindow Class Definition</a></li>
+<li class="level1"><a href="#previewwindow-class-implementation">PreviewWindow Class Implementation</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Window Flags Example</h1>
+<span class="subtitle"></span>
+<!-- $$$widgets/windowflags-brief -->
+<p>The Window Flags example shows how to use the window flags available in Qt.</p>
+<!-- @@@widgets/windowflags -->
+<!-- $$$widgets/windowflags-description -->
+<div class="descr"> <a name="details"></a>
+<p>A window flag is either a type or a hint. A type is used to specify various window-system properties for the widget. A widget can only have one type, and the default is <a href="../qtcore/qt.html#WindowType-enum">Qt::Widget</a>. However, a widget can have zero or more hints. The hints are used to customize the appearance of top-level windows.</p>
+<p>A widget's flags are stored in a <a href="../qtcore/qt.html#WindowType-enum">Qt::WindowFlags</a> type which stores an OR combination of the flags.</p>
+<div class="border"><p class="centerAlign"><img src="images/windowflags-example.png" alt="" /></p></div><p class="figCaption">Screenshot of the Window Flags example</p>
+<p>The example consists of two classes:</p>
+<ul>
+<li><code>ControllerWindow</code> is the main application widget that allows the user to choose among the available window flags, and displays the effect on a separate preview window.</li>
+<li><code>PreviewWindow</code> is a custom widget displaying the name of its currently set window flags in a read-only text editor.</li>
+</ul>
+<p>We will start by reviewing the <code>ControllerWindow</code> class, then we will take a look at the <code>PreviewWindow</code> class.</p>
+<a name="controllerwindow-class-definition"></a>
+<h4 id="controllerwindow-class-definition">ControllerWindow Class Definition</h4>
+<pre class="cpp">
+
+  <span class="keyword">class</span> ControllerWindow : <span class="keyword">public</span> <span class="type"><a href="qwidget.html">QWidget</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      ControllerWindow(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+
+  <span class="keyword">private</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> updatePreview();
+
+  <span class="keyword">private</span>:
+      <span class="type">void</span> createTypeGroupBox();
+      <span class="type">void</span> createHintsGroupBox();
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>createCheckBox(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>text);
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>createRadioButton(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>text);
+
+      PreviewWindow <span class="operator">*</span>previewWindow;
+
+      <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>typeGroupBox;
+      <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>hintsGroupBox;
+      <span class="type"><a href="qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>quitButton;
+
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>windowRadioButton;
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>dialogRadioButton;
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>sheetRadioButton;
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>drawerRadioButton;
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>popupRadioButton;
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>toolRadioButton;
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>toolTipRadioButton;
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>splashScreenRadioButton;
+
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>msWindowsFixedSizeDialogCheckBox;
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>x11BypassWindowManagerCheckBox;
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>framelessWindowCheckBox;
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>windowNoShadowCheckBox;
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>windowTitleCheckBox;
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>windowSystemMenuCheckBox;
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>windowMinimizeButtonCheckBox;
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>windowMaximizeButtonCheckBox;
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>windowCloseButtonCheckBox;
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>windowContextHelpButtonCheckBox;
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>windowShadeButtonCheckBox;
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>windowStaysOnTopCheckBox;
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>windowStaysOnBottomCheckBox;
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>customizeWindowHintCheckBox;
+  };
+
+</pre>
+<p>The <code>ControllerWindow</code> class inherits <a href="qwidget.html">QWidget</a>. The widget allows the user to choose among the available window flags, and displays the effect on a separate preview window.</p>
+<p>We declare a private <code>updatePreview()</code> slot to refresh the preview window whenever the user changes the window flags.</p>
+<p>We also declare several private functions to simplify the constructor: We call the <code>createTypeGroupBox()</code> function to create a radio button for each available window type, using the private <code>createButton()</code> function, and gather them within a group box. In a similar way we use the <code>createHintsGroupBox()</code> function to create a check box for each available hint, using the private <code>createCheckBox()</code> function.</p>
+<p>In addition to the various radio buttons and checkboxes, we need an associated <code>PreviewWindow</code> to show the effect of the currently chosen window flags.</p>
+<p class="centerAlign"><img src="images/windowflags_controllerwindow.png" alt="Screenshot of the Controller Window" /></p><a name="controllerwindow-class-implementation"></a>
+<h4 id="controllerwindow-class-implementation">ControllerWindow Class Implementation</h4>
+<pre class="cpp">
+
+  ControllerWindow<span class="operator">::</span>ControllerWindow(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qwidget.html">QWidget</a></span>(parent)
+  {
+      previewWindow <span class="operator">=</span> <span class="keyword">new</span> PreviewWindow(<span class="keyword">this</span>);
+
+      createTypeGroupBox();
+      createHintsGroupBox();
+
+      quitButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;&amp;Quit&quot;</span>));
+      connect(quitButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qpushbutton.html">QPushButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span>
+              <a href="qapplication.html#qApp">qApp</a><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>quit);
+
+      <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span> <span class="operator">*</span>bottomLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span>;
+      bottomLayout<span class="operator">-</span><span class="operator">&gt;</span>addStretch();
+      bottomLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(quitButton);
+
+      <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span> <span class="operator">*</span>mainLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span>;
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(typeGroupBox);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(hintsGroupBox);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(bottomLayout);
+      setLayout(mainLayout);
+
+      setWindowTitle(tr(<span class="string">&quot;Window Flags&quot;</span>));
+      updatePreview();
+  }
+
+</pre>
+<p>In the constructor we first create the preview window. Then we create the group boxes containing the available window flags using the private <code>createTypeGroupBox()</code> and <code>createHintsGroupBox()</code> functions. In addition we create a <b>Quit</b> button. We put the button and a stretchable space in a separate layout to make the button appear in the <code>WindowFlag</code> widget's right bottom corner.</p>
+<p>Finally, we add the button's layout and the two goup boxes to a <a href="qvboxlayout.html">QVBoxLayout</a>, set the window title and refresh the preview window using the <code>updatePreview()</code> slot.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> ControllerWindow<span class="operator">::</span>updatePreview()
+  {
+      <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowFlags flags <span class="operator">=</span> <span class="number">0</span>;
+
+      <span class="keyword">if</span> (windowRadioButton<span class="operator">-</span><span class="operator">&gt;</span>isChecked()) {
+          flags <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Window;
+      } <span class="keyword">else</span> <span class="keyword">if</span> (dialogRadioButton<span class="operator">-</span><span class="operator">&gt;</span>isChecked()) {
+          flags <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Dialog;
+      } <span class="keyword">else</span> <span class="keyword">if</span> (sheetRadioButton<span class="operator">-</span><span class="operator">&gt;</span>isChecked()) {
+          flags <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Sheet;
+      } <span class="keyword">else</span> <span class="keyword">if</span> (drawerRadioButton<span class="operator">-</span><span class="operator">&gt;</span>isChecked()) {
+          flags <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Drawer;
+      } <span class="keyword">else</span> <span class="keyword">if</span> (popupRadioButton<span class="operator">-</span><span class="operator">&gt;</span>isChecked()) {
+          flags <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Popup;
+      } <span class="keyword">else</span> <span class="keyword">if</span> (toolRadioButton<span class="operator">-</span><span class="operator">&gt;</span>isChecked()) {
+          flags <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Tool;
+      } <span class="keyword">else</span> <span class="keyword">if</span> (toolTipRadioButton<span class="operator">-</span><span class="operator">&gt;</span>isChecked()) {
+          flags <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ToolTip;
+      } <span class="keyword">else</span> <span class="keyword">if</span> (splashScreenRadioButton<span class="operator">-</span><span class="operator">&gt;</span>isChecked()) {
+          flags <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>SplashScreen;
+      }
+
+</pre>
+<p>The <code>updatePreview()</code> slot is called whenever the user changes any of the window flags. First we create an empty <a href="../qtcore/qt.html#WindowType-enum">Qt::WindowFlags</a> <code>flags</code>, then we determine which one of the types that is checked and add it to <code>flags</code>.</p>
+<pre class="cpp">
+
+      <span class="keyword">if</span> (msWindowsFixedSizeDialogCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          flags <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>MSWindowsFixedSizeDialogHint;
+      <span class="keyword">if</span> (x11BypassWindowManagerCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          flags <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>X11BypassWindowManagerHint;
+      <span class="keyword">if</span> (framelessWindowCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          flags <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>FramelessWindowHint;
+      <span class="keyword">if</span> (windowNoShadowCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          flags <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoDropShadowWindowHint;
+      <span class="keyword">if</span> (windowTitleCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          flags <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowTitleHint;
+      <span class="keyword">if</span> (windowSystemMenuCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          flags <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowSystemMenuHint;
+      <span class="keyword">if</span> (windowMinimizeButtonCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          flags <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowMinimizeButtonHint;
+      <span class="keyword">if</span> (windowMaximizeButtonCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          flags <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowMaximizeButtonHint;
+      <span class="keyword">if</span> (windowCloseButtonCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          flags <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowCloseButtonHint;
+      <span class="keyword">if</span> (windowContextHelpButtonCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          flags <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowContextHelpButtonHint;
+      <span class="keyword">if</span> (windowShadeButtonCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          flags <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowShadeButtonHint;
+      <span class="keyword">if</span> (windowStaysOnTopCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          flags <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowStaysOnTopHint;
+      <span class="keyword">if</span> (windowStaysOnBottomCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          flags <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowStaysOnBottomHint;
+      <span class="keyword">if</span> (customizeWindowHintCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          flags <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CustomizeWindowHint;
+
+      previewWindow<span class="operator">-</span><span class="operator">&gt;</span>setWindowFlags(flags);
+
+</pre>
+<p>We also determine which of the hints that are checked, and add them to <code>flags</code> using an OR operator. We use <code>flags</code> to set the window flags for the preview window.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> pos <span class="operator">=</span> previewWindow<span class="operator">-</span><span class="operator">&gt;</span>pos();
+      <span class="keyword">if</span> (pos<span class="operator">.</span>x() <span class="operator">&lt;</span> <span class="number">0</span>)
+          pos<span class="operator">.</span>setX(<span class="number">0</span>);
+      <span class="keyword">if</span> (pos<span class="operator">.</span>y() <span class="operator">&lt;</span> <span class="number">0</span>)
+          pos<span class="operator">.</span>setY(<span class="number">0</span>);
+      previewWindow<span class="operator">-</span><span class="operator">&gt;</span>move(pos);
+      previewWindow<span class="operator">-</span><span class="operator">&gt;</span>show();
+  }
+
+</pre>
+<p>We adjust the position of the preview window. The reason we do that, is that playing around with the window's frame may on some platforms cause the window's position to be changed behind our back. If a window is located in the upper left corner of the screen, parts of the window may not be visible. So we adjust the widget's position to make sure that, if this happens, the window is moved within the screen's boundaries. Finally, we call <a href="qwidget.html#show">QWidget::show</a>() to make sure the preview window is visible.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> ControllerWindow<span class="operator">::</span>createTypeGroupBox()
+  {
+      typeGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;Type&quot;</span>));
+
+      windowRadioButton <span class="operator">=</span> createRadioButton(tr(<span class="string">&quot;Window&quot;</span>));
+      dialogRadioButton <span class="operator">=</span> createRadioButton(tr(<span class="string">&quot;Dialog&quot;</span>));
+      sheetRadioButton <span class="operator">=</span> createRadioButton(tr(<span class="string">&quot;Sheet&quot;</span>));
+      drawerRadioButton <span class="operator">=</span> createRadioButton(tr(<span class="string">&quot;Drawer&quot;</span>));
+      popupRadioButton <span class="operator">=</span> createRadioButton(tr(<span class="string">&quot;Popup&quot;</span>));
+      toolRadioButton <span class="operator">=</span> createRadioButton(tr(<span class="string">&quot;Tool&quot;</span>));
+      toolTipRadioButton <span class="operator">=</span> createRadioButton(tr(<span class="string">&quot;Tooltip&quot;</span>));
+      splashScreenRadioButton <span class="operator">=</span> createRadioButton(tr(<span class="string">&quot;Splash screen&quot;</span>));
+      windowRadioButton<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+
+      <span class="type"><a href="qgridlayout.html">QGridLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>;
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(windowRadioButton<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(dialogRadioButton<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(sheetRadioButton<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">0</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(drawerRadioButton<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">0</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(popupRadioButton<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(toolRadioButton<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(toolTipRadioButton<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">1</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(splashScreenRadioButton<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">1</span>);
+      typeGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(layout);
+  }
+
+</pre>
+<p>The private <code>createTypeGroupBox()</code> function is called from the constructor.</p>
+<p>First we create a group box, and then we create a radio button (using the private <code>createRadioButton()</code> function) for each of the available types among the window flags. We make <a href="../qtcore/qt.html#WindowType-enum">Qt::Window</a> the initially applied type. We put the radio buttons into a <a href="qgridlayout.html">QGridLayout</a> and install the layout on the group box.</p>
+<p>We do not include the default <a href="../qtcore/qt.html#WindowType-enum">Qt::Widget</a> type. The reason is that it behaves somewhat different than the other types. If the type is not specified for a widget, and it has no parent, the widget is a window. However, if it has a parent, it is a standard child widget. The other types are all top-level windows, and since the hints only affect top-level windows, we abandon the <a href="../qtcore/qt.html#WindowType-enum">Qt::Widget</a> type.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> ControllerWindow<span class="operator">::</span>createHintsGroupBox()
+  {
+      hintsGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;Hints&quot;</span>));
+
+      msWindowsFixedSizeDialogCheckBox <span class="operator">=</span>
+              createCheckBox(tr(<span class="string">&quot;MS Windows fixed size dialog&quot;</span>));
+      x11BypassWindowManagerCheckBox <span class="operator">=</span>
+              createCheckBox(tr(<span class="string">&quot;X11 bypass window manager&quot;</span>));
+      framelessWindowCheckBox <span class="operator">=</span> createCheckBox(tr(<span class="string">&quot;Frameless window&quot;</span>));
+      windowNoShadowCheckBox <span class="operator">=</span> createCheckBox(tr(<span class="string">&quot;No drop shadow&quot;</span>));
+      windowTitleCheckBox <span class="operator">=</span> createCheckBox(tr(<span class="string">&quot;Window title&quot;</span>));
+      windowSystemMenuCheckBox <span class="operator">=</span> createCheckBox(tr(<span class="string">&quot;Window system menu&quot;</span>));
+      windowMinimizeButtonCheckBox <span class="operator">=</span> createCheckBox(tr(<span class="string">&quot;Window minimize button&quot;</span>));
+      windowMaximizeButtonCheckBox <span class="operator">=</span> createCheckBox(tr(<span class="string">&quot;Window maximize button&quot;</span>));
+      windowCloseButtonCheckBox <span class="operator">=</span> createCheckBox(tr(<span class="string">&quot;Window close button&quot;</span>));
+      windowContextHelpButtonCheckBox <span class="operator">=</span>
+              createCheckBox(tr(<span class="string">&quot;Window context help button&quot;</span>));
+      windowShadeButtonCheckBox <span class="operator">=</span> createCheckBox(tr(<span class="string">&quot;Window shade button&quot;</span>));
+      windowStaysOnTopCheckBox <span class="operator">=</span> createCheckBox(tr(<span class="string">&quot;Window stays on top&quot;</span>));
+      windowStaysOnBottomCheckBox <span class="operator">=</span> createCheckBox(tr(<span class="string">&quot;Window stays on bottom&quot;</span>));
+      customizeWindowHintCheckBox<span class="operator">=</span> createCheckBox(tr(<span class="string">&quot;Customize window&quot;</span>));
+
+      <span class="type"><a href="qgridlayout.html">QGridLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>;
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(msWindowsFixedSizeDialogCheckBox<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(x11BypassWindowManagerCheckBox<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(framelessWindowCheckBox<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">0</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(windowNoShadowCheckBox<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">0</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(windowTitleCheckBox<span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> <span class="number">0</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(windowSystemMenuCheckBox<span class="operator">,</span> <span class="number">5</span><span class="operator">,</span> <span class="number">0</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(customizeWindowHintCheckBox<span class="operator">,</span> <span class="number">6</span><span class="operator">,</span> <span class="number">0</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(windowMinimizeButtonCheckBox<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(windowMaximizeButtonCheckBox<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(windowCloseButtonCheckBox<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">1</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(windowContextHelpButtonCheckBox<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">1</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(windowShadeButtonCheckBox<span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> <span class="number">1</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(windowStaysOnTopCheckBox<span class="operator">,</span> <span class="number">5</span><span class="operator">,</span> <span class="number">1</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(windowStaysOnBottomCheckBox<span class="operator">,</span> <span class="number">6</span><span class="operator">,</span> <span class="number">1</span>);
+      hintsGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(layout);
+  }
+
+</pre>
+<p>The private <code>createHintsGroupBox()</code> function is also called from the constructor.</p>
+<p>Again, the first thing we do is to create a group box. Then we create a checkbox, using the private <code>createCheckBox()</code> function, for each of the available hints among the window flags. We put the checkboxes into a <a href="qgridlayout.html">QGridLayout</a> and install the layout on the group box.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>ControllerWindow<span class="operator">::</span>createCheckBox(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>text)
+  {
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>checkBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(text);
+      connect(checkBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qcheckbox.html">QCheckBox</a></span><span class="operator">::</span>clicked<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ControllerWindow<span class="operator">::</span>updatePreview);
+      <span class="keyword">return</span> checkBox;
+  }
+
+</pre>
+<p>The private <code>createCheckBox()</code> function is called from <code>createHintsGroupBox()</code>.</p>
+<p>We simply create a <a href="qcheckbox.html">QCheckBox</a> with the provided text, connect it to the private <code>updatePreview()</code> slot, and return a pointer to the checkbox.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>ControllerWindow<span class="operator">::</span>createRadioButton(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>text)
+  {
+      <span class="type"><a href="qradiobutton.html">QRadioButton</a></span> <span class="operator">*</span>button <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qradiobutton.html">QRadioButton</a></span>(text);
+      connect(button<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qradiobutton.html">QRadioButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ControllerWindow<span class="operator">::</span>updatePreview);
+      <span class="keyword">return</span> button;
+  }
+
+</pre>
+<p>In the private <code>createRadioButton()</code> function it is a <a href="qradiobutton.html">QRadioButton</a> we create with the provided text, and connect to the private <code>updatePreview()</code> slot. The function is called from <code>createTypeGroupBox()</code>, and returns a pointer to the button.</p>
+<a name="previewwindow-class-definition"></a>
+<h4 id="previewwindow-class-definition">PreviewWindow Class Definition</h4>
+<pre class="cpp">
+
+  <span class="keyword">class</span> PreviewWindow : <span class="keyword">public</span> <span class="type"><a href="qwidget.html">QWidget</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      PreviewWindow(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+
+      <span class="type">void</span> setWindowFlags(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowFlags flags);
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="qtextedit.html">QTextEdit</a></span> <span class="operator">*</span>textEdit;
+      <span class="type"><a href="qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>closeButton;
+  };
+
+</pre>
+<p>The <code>PreviewWindow</code> class inherits <a href="qwidget.html">QWidget</a>. It is a custom widget that displays the names of its currently set window flags in a read-only text editor. It is also provided with a QPushbutton that closes the window.</p>
+<p>We reimplement the constructor to create the <b>Close</b> button and the text editor, and the <a href="qwidget.html#windowFlags-prop">QWidget::setWindowFlags</a>() function to display the names of the window flags.</p>
+<p class="centerAlign"><img src="images/windowflags_previewwindow.png" alt="Screenshot of the Preview Window" /></p><a name="previewwindow-class-implementation"></a>
+<h4 id="previewwindow-class-implementation">PreviewWindow Class Implementation</h4>
+<pre class="cpp">
+
+  PreviewWindow<span class="operator">::</span>PreviewWindow(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qwidget.html">QWidget</a></span>(parent)
+  {
+      textEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtextedit.html">QTextEdit</a></span>;
+      textEdit<span class="operator">-</span><span class="operator">&gt;</span>setReadOnly(<span class="keyword">true</span>);
+      textEdit<span class="operator">-</span><span class="operator">&gt;</span>setLineWrapMode(<span class="type"><a href="qtextedit.html">QTextEdit</a></span><span class="operator">::</span>NoWrap);
+
+      closeButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;&amp;Close&quot;</span>));
+      connect(closeButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qpushbutton.html">QPushButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>PreviewWindow<span class="operator">::</span>close);
+
+      <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(textEdit);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(closeButton);
+      setLayout(layout);
+
+      setWindowTitle(tr(<span class="string">&quot;Preview&quot;</span>));
+  }
+
+</pre>
+<p>In the constructor, we first create a <a href="qtextedit.html">QTextEdit</a> and make sure that it is read-only.</p>
+<p>We also prohibit any line wrapping in the text editor using the <a href="qtextedit.html#lineWrapMode-prop">QTextEdit::setLineWrapMode</a>() function. The result is that a horizontal scrollbar appears when a window flag's name exceeds the width of the editor. This is a reasonable solution since we construct the displayed text with built-in line breaks. If no line breaks were guaranteed, using another <a href="qtextedit.html#LineWrapMode-enum">QTextEdit::LineWrapMode</a> would perhaps make more sense.</p>
+<p>Then we create the <b>Close</b> button, and put both the widgets into a <a href="qvboxlayout.html">QVBoxLayout</a> before we set the window title.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> PreviewWindow<span class="operator">::</span>setWindowFlags(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowFlags flags)
+  {
+      <span class="type"><a href="qwidget.html">QWidget</a></span><span class="operator">::</span>setWindowFlags(flags);
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> text;
+
+      <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowFlags type <span class="operator">=</span> (flags <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowType_Mask);
+      <span class="keyword">if</span> (type <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Window) {
+          text <span class="operator">=</span> <span class="string">&quot;Qt::Window&quot;</span>;
+      } <span class="keyword">else</span> <span class="keyword">if</span> (type <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Dialog) {
+          text <span class="operator">=</span> <span class="string">&quot;Qt::Dialog&quot;</span>;
+      } <span class="keyword">else</span> <span class="keyword">if</span> (type <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Sheet) {
+          text <span class="operator">=</span> <span class="string">&quot;Qt::Sheet&quot;</span>;
+      } <span class="keyword">else</span> <span class="keyword">if</span> (type <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Drawer) {
+          text <span class="operator">=</span> <span class="string">&quot;Qt::Drawer&quot;</span>;
+      } <span class="keyword">else</span> <span class="keyword">if</span> (type <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Popup) {
+          text <span class="operator">=</span> <span class="string">&quot;Qt::Popup&quot;</span>;
+      } <span class="keyword">else</span> <span class="keyword">if</span> (type <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Tool) {
+          text <span class="operator">=</span> <span class="string">&quot;Qt::Tool&quot;</span>;
+      } <span class="keyword">else</span> <span class="keyword">if</span> (type <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ToolTip) {
+          text <span class="operator">=</span> <span class="string">&quot;Qt::ToolTip&quot;</span>;
+      } <span class="keyword">else</span> <span class="keyword">if</span> (type <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>SplashScreen) {
+          text <span class="operator">=</span> <span class="string">&quot;Qt::SplashScreen&quot;</span>;
+      }
+
+      <span class="keyword">if</span> (flags <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>MSWindowsFixedSizeDialogHint)
+          text <span class="operator">+</span><span class="operator">=</span> <span class="string">&quot;\n| Qt::MSWindowsFixedSizeDialogHint&quot;</span>;
+      <span class="keyword">if</span> (flags <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>X11BypassWindowManagerHint)
+          text <span class="operator">+</span><span class="operator">=</span> <span class="string">&quot;\n| Qt::X11BypassWindowManagerHint&quot;</span>;
+      <span class="keyword">if</span> (flags <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>FramelessWindowHint)
+          text <span class="operator">+</span><span class="operator">=</span> <span class="string">&quot;\n| Qt::FramelessWindowHint&quot;</span>;
+      <span class="keyword">if</span> (flags <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoDropShadowWindowHint)
+          text <span class="operator">+</span><span class="operator">=</span> <span class="string">&quot;\n| Qt::NoDropShadowWindowHint&quot;</span>;
+      <span class="keyword">if</span> (flags <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowTitleHint)
+          text <span class="operator">+</span><span class="operator">=</span> <span class="string">&quot;\n| Qt::WindowTitleHint&quot;</span>;
+      <span class="keyword">if</span> (flags <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowSystemMenuHint)
+          text <span class="operator">+</span><span class="operator">=</span> <span class="string">&quot;\n| Qt::WindowSystemMenuHint&quot;</span>;
+      <span class="keyword">if</span> (flags <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowMinimizeButtonHint)
+          text <span class="operator">+</span><span class="operator">=</span> <span class="string">&quot;\n| Qt::WindowMinimizeButtonHint&quot;</span>;
+      <span class="keyword">if</span> (flags <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowMaximizeButtonHint)
+          text <span class="operator">+</span><span class="operator">=</span> <span class="string">&quot;\n| Qt::WindowMaximizeButtonHint&quot;</span>;
+      <span class="keyword">if</span> (flags <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowCloseButtonHint)
+          text <span class="operator">+</span><span class="operator">=</span> <span class="string">&quot;\n| Qt::WindowCloseButtonHint&quot;</span>;
+      <span class="keyword">if</span> (flags <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowContextHelpButtonHint)
+          text <span class="operator">+</span><span class="operator">=</span> <span class="string">&quot;\n| Qt::WindowContextHelpButtonHint&quot;</span>;
+      <span class="keyword">if</span> (flags <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowShadeButtonHint)
+          text <span class="operator">+</span><span class="operator">=</span> <span class="string">&quot;\n| Qt::WindowShadeButtonHint&quot;</span>;
+      <span class="keyword">if</span> (flags <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowStaysOnTopHint)
+          text <span class="operator">+</span><span class="operator">=</span> <span class="string">&quot;\n| Qt::WindowStaysOnTopHint&quot;</span>;
+      <span class="keyword">if</span> (flags <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CustomizeWindowHint)
+          text <span class="operator">+</span><span class="operator">=</span> <span class="string">&quot;\n| Qt::CustomizeWindowHint&quot;</span>;
+
+      textEdit<span class="operator">-</span><span class="operator">&gt;</span>setPlainText(text);
+  }
+
+</pre>
+<p>In our reimplementation of the <code>setWindowFlags()</code> function, we first set the widgets flags using the <a href="qwidget.html#windowFlags-prop">QWidget::setWindowFlags</a>() function. Then we run through the available window flags, creating a text that contains the names of the flags that matches the <code>flags</code> parameter. Finally, we display the text in the widgets text editor.</p>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/widgets/windowflags?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@widgets/windowflags -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

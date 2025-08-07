@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qbackingstore.cpp -->
+  <title>QBackingStore Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QBackingStore</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QBackingStore Class</h1>
+<!-- $$$QBackingStore-brief -->
+<p>The <a href="qbackingstore.html">QBackingStore</a> class provides a drawing area for <a href="qwindow.html">QWindow</a>. <a href="#details">More...</a></p>
+<!-- @@@QBackingStore -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QBackingStore&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.0</td></tr></table></div><p>This class was introduced in  Qt 5.0.</p>
+<ul>
+<li><a href="qbackingstore-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qbackingstore.html#QBackingStore">QBackingStore</a></b>(QWindow *<i>window</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qbackingstore.html#dtor.QBackingStore">~QBackingStore</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbackingstore.html#beginPaint">beginPaint</a></b>(const QRegion &amp;<i>region</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbackingstore.html#endPaint">endPaint</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbackingstore.html#flush">flush</a></b>(const QRegion &amp;<i>region</i>, QWindow *<i>window</i> = nullptr, const QPoint &amp;<i>offset</i> = QPoint())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPlatformBackingStore *</td><td class="memItemRight bottomAlign"><b><a href="qbackingstore.html#handle">handle</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qbackingstore.html#hasStaticContents">hasStaticContents</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPaintDevice *</td><td class="memItemRight bottomAlign"><b><a href="qbackingstore.html#paintDevice">paintDevice</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbackingstore.html#resize">resize</a></b>(const QSize &amp;<i>size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qbackingstore.html#scroll">scroll</a></b>(const QRegion &amp;<i>area</i>, int <i>dx</i>, int <i>dy</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qbackingstore.html#setStaticContents">setStaticContents</a></b>(const QRegion &amp;<i>region</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qbackingstore.html#size">size</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRegion </td><td class="memItemRight bottomAlign"><b><a href="qbackingstore.html#staticContents">staticContents</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWindow *</td><td class="memItemRight bottomAlign"><b><a href="qbackingstore.html#window">window</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QBackingStore-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qbackingstore.html">QBackingStore</a> enables the use of <a href="qpainter.html">QPainter</a> to paint on a <a href="qwindow.html">QWindow</a> with type RasterSurface. The other way of rendering to a <a href="qwindow.html">QWindow</a> is through the use of OpenGL with <a href="qopenglcontext.html">QOpenGLContext</a>.</p>
+<p>A <a href="qbackingstore.html">QBackingStore</a> contains a buffered representation of the window contents, and thus supports partial updates by using <a href="qpainter.html">QPainter</a> to only update a sub region of the window contents.</p>
+<p><a href="qbackingstore.html">QBackingStore</a> might be used by an application that wants to use <a href="qpainter.html">QPainter</a> without OpenGL acceleration and without the extra overhead of using the <a href="../qtwidgets/qwidget.html">QWidget</a> or <a href="../qtwidgets/qgraphicsview.html">QGraphicsView</a> UI stacks. For an example of how to use <a href="qbackingstore.html">QBackingStore</a> see the <a href="qtgui-rasterwindow-example.html">Raster Window Example</a>.</p>
+</div>
+<!-- @@@QBackingStore -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QBackingStore[overload1]$$$QBackingStoreQWindow* -->
+<h3 class="fn" id="QBackingStore"><a name="QBackingStore"></a>QBackingStore::<span class="name">QBackingStore</span>(<span class="type"><a href="qwindow.html">QWindow</a></span> *<i>window</i>)</h3>
+<p>Constructs an empty surface for the given top-level <i>window</i>.</p>
+<!-- @@@QBackingStore -->
+<!-- $$$~QBackingStore[overload1]$$$~QBackingStore -->
+<h3 class="fn" id="dtor.QBackingStore"><a name="dtor.QBackingStore"></a>QBackingStore::<span class="name">~QBackingStore</span>()</h3>
+<p>Destroys this surface.</p>
+<!-- @@@~QBackingStore -->
+<!-- $$$beginPaint[overload1]$$$beginPaintconstQRegion& -->
+<h3 class="fn" id="beginPaint"><a name="beginPaint"></a><span class="type">void</span> QBackingStore::<span class="name">beginPaint</span>(const <span class="type"><a href="qregion.html">QRegion</a></span> &amp;<i>region</i>)</h3>
+<p>Begins painting on the backing store surface in the given <i>region</i>.</p>
+<p>You should call this function before using the <a href="qbackingstore.html#paintDevice">paintDevice</a>() to paint.</p>
+<p><b>See also </b><a href="qbackingstore.html#endPaint">endPaint</a>() and <a href="qbackingstore.html#paintDevice">paintDevice</a>().</p>
+<!-- @@@beginPaint -->
+<!-- $$$endPaint[overload1]$$$endPaint -->
+<h3 class="fn" id="endPaint"><a name="endPaint"></a><span class="type">void</span> QBackingStore::<span class="name">endPaint</span>()</h3>
+<p>Ends painting.</p>
+<p>You should call this function after painting with the <a href="qbackingstore.html#paintDevice">paintDevice</a>() has ended.</p>
+<p><b>See also </b><a href="qbackingstore.html#beginPaint">beginPaint</a>() and <a href="qbackingstore.html#paintDevice">paintDevice</a>().</p>
+<!-- @@@endPaint -->
+<!-- $$$flush[overload1]$$$flushconstQRegion&QWindow*constQPoint& -->
+<h3 class="fn" id="flush"><a name="flush"></a><span class="type">void</span> QBackingStore::<span class="name">flush</span>(const <span class="type"><a href="qregion.html">QRegion</a></span> &amp;<i>region</i>, <span class="type"><a href="qwindow.html">QWindow</a></span> *<i>window</i> = nullptr, const <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> &amp;<i>offset</i> = QPoint())</h3>
+<p>Flushes the given <i>region</i> from the specified <i>window</i> onto the screen.</p>
+<p>The <i>window</i> must either be the top level window represented by this backingstore, or a non-transient child of that window. Passing <code>nullptr</code> falls back to using the backingstore's top level window.</p>
+<p>If the <i>window</i> is a child window, the <i>region</i> should be in child window coordinates, and the <i>offset</i> should be the child window's offset in relation to the backingstore's top level window.</p>
+<p>You should call this function after ending painting with <a href="qbackingstore.html#endPaint">endPaint</a>().</p>
+<p><b>See also </b>QWindow::transientParent().</p>
+<!-- @@@flush -->
+<!-- $$$handle[overload1]$$$handle -->
+<h3 class="fn" id="handle"><a name="handle"></a><span class="type">QPlatformBackingStore</span> *QBackingStore::<span class="name">handle</span>() const</h3>
+<p>Returns a pointer to the QPlatformBackingStore implementation</p>
+<!-- @@@handle -->
+<!-- $$$hasStaticContents[overload1]$$$hasStaticContents -->
+<h3 class="fn" id="hasStaticContents"><a name="hasStaticContents"></a><span class="type">bool</span> QBackingStore::<span class="name">hasStaticContents</span>() const</h3>
+<p>Returns a boolean indicating if this window has static contents or not.</p>
+<!-- @@@hasStaticContents -->
+<!-- $$$paintDevice[overload1]$$$paintDevice -->
+<h3 class="fn" id="paintDevice"><a name="paintDevice"></a><span class="type"><a href="qpaintdevice.html">QPaintDevice</a></span> *QBackingStore::<span class="name">paintDevice</span>()</h3>
+<p>Returns the paint device for this surface.</p>
+<p><b>Warning:</b> The device is only valid between calls to <a href="qbackingstore.html#beginPaint">beginPaint</a>() and <a href="qbackingstore.html#endPaint">endPaint</a>(). You should not cache the returned value.</p>
+<!-- @@@paintDevice -->
+<!-- $$$resize[overload1]$$$resizeconstQSize& -->
+<h3 class="fn" id="resize"><a name="resize"></a><span class="type">void</span> QBackingStore::<span class="name">resize</span>(const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>size</i>)</h3>
+<p>Sets the size of the window surface to <i>size</i>.</p>
+<p><b>See also </b><a href="qbackingstore.html#size">size</a>().</p>
+<!-- @@@resize -->
+<!-- $$$scroll[overload1]$$$scrollconstQRegion&intint -->
+<h3 class="fn" id="scroll"><a name="scroll"></a><span class="type">bool</span> QBackingStore::<span class="name">scroll</span>(const <span class="type"><a href="qregion.html">QRegion</a></span> &amp;<i>area</i>, <span class="type">int</span> <i>dx</i>, <span class="type">int</span> <i>dy</i>)</h3>
+<p>Scrolls the given <i>area</i> <i>dx</i> pixels to the right and <i>dy</i> downward; both <i>dx</i> and <i>dy</i> may be negative.</p>
+<p>Returns <code>true</code> if the area was scrolled successfully; false otherwise.</p>
+<!-- @@@scroll -->
+<!-- $$$setStaticContents[overload1]$$$setStaticContentsconstQRegion& -->
+<h3 class="fn" id="setStaticContents"><a name="setStaticContents"></a><span class="type">void</span> QBackingStore::<span class="name">setStaticContents</span>(const <span class="type"><a href="qregion.html">QRegion</a></span> &amp;<i>region</i>)</h3>
+<p>Set <i>region</i> as the static contents of this window.</p>
+<p><b>See also </b><a href="qbackingstore.html#staticContents">staticContents</a>().</p>
+<!-- @@@setStaticContents -->
+<!-- $$$size[overload1]$$$size -->
+<h3 class="fn" id="size"><a name="size"></a><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QBackingStore::<span class="name">size</span>() const</h3>
+<p>Returns the current size of the window surface.</p>
+<!-- @@@size -->
+<!-- $$$staticContents[overload1]$$$staticContents -->
+<h3 class="fn" id="staticContents"><a name="staticContents"></a><span class="type"><a href="qregion.html">QRegion</a></span> QBackingStore::<span class="name">staticContents</span>() const</h3>
+<p>Returns a <a href="qregion.html">QRegion</a> representing the area of the window that has static contents.</p>
+<p><b>See also </b><a href="qbackingstore.html#setStaticContents">setStaticContents</a>().</p>
+<!-- @@@staticContents -->
+<!-- $$$window[overload1]$$$window -->
+<h3 class="fn" id="window"><a name="window"></a><span class="type"><a href="qwindow.html">QWindow</a></span> *QBackingStore::<span class="name">window</span>() const</h3>
+<p>Returns a pointer to the top-level window associated with this surface.</p>
+<!-- @@@window -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

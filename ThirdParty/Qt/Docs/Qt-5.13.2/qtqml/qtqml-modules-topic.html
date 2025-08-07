@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- topic.qdoc -->
+  <title>QML Modules | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td >QML Modules</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#defining-a-qml-module">Defining a QML Module</a></li>
+<li class="level1"><a href="#supported-qml-module-types">Supported QML Module Types</a></li>
+<li class="level1"><a href="#providing-types-and-functionality-in-a-c-plugin">Providing Types and Functionality in a C++ Plugin</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QML Modules</h1>
+<span class="subtitle"></span>
+<!-- $$$qtqml-modules-topic.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>A QML module provides versioned types and JavaScript resources in a type namespace which may be used by clients who import the module. The types which a module provides may be defined in C++ within a plugin, or in QML documents. Modules make use of the QML versioning system which allows modules to be independently updated.</p>
+<p>Defining of a QML module allows:</p>
+<ul>
+<li>The sharing of common QML types within a project - for example, a group of UI components that are used by different windows</li>
+<li>The distribution of QML-based libraries</li>
+<li>The modularization of distinct features, so that applications only load the libraries necessary for their individual needs</li>
+<li>Versioning of types and resources so that the module can be updated safely without breaking client code</li>
+</ul>
+<a name="defining-a-qml-module"></a>
+<h2 id="defining-a-qml-module">Defining a QML Module</h2>
+<p>A module is defined by a <a href="qtqml-modules-qmldir.html">module definition qmldir file</a>. Each module has an associated type namespace, which is the module's identifier. A module can provide QML object types (defined either by QML documents or via a C++ plugin) and JavaScript resources, and may be imported by clients.</p>
+<p>To define a module, a developer should gather together the various QML documents, JavaScript resources and C++ plugins which belong in the module into a single directory, and write an appropriate <a href="qtqml-modules-qmldir.html">module definition qmldir file</a> which should also be placed into the directory. The directory can then be installed into the <a href="qtqml-syntax-imports.html#qml-import-path">QML import path</a> as a module.</p>
+<p>Note that defining a module is not the only way to share common QML types within a project - a simple <a href="qtqml-syntax-directoryimports.html">QML document directory import</a> may also be used for this purpose.</p>
+<a name="supported-qml-module-types"></a>
+<h2 id="supported-qml-module-types">Supported QML Module Types</h2>
+<p>There are two different types of modules supported by QML:</p>
+<ul>
+<li><a href="qtqml-modules-identifiedmodules.html">Identified Modules</a></li>
+<li><a href="qtqml-modules-legacymodules.html">Legacy Modules</a> (deprecated)</li>
+</ul>
+<p>Identified modules explicitly define their identifier and are installed into QML import path. Identified modules are more maintainable (due to type versioning) and are provided with type registration guarantees by the QML engine which are not provided to legacy modules. Legacy modules are only supported to allow legacy code to continue to work with the latest version of QML, and should be avoided by clients if possible.</p>
+<p>Clients may import a QML module from within QML documents or JavaScript files. Please see the documentation about <a href="qtqml-syntax-imports.html#module-namespace-imports">importing a QML module</a> for more information on the topic.</p>
+<a name="providing-types-and-functionality-in-a-c-plugin"></a>
+<h2 id="providing-types-and-functionality-in-a-c-plugin">Providing Types and Functionality in a C++ Plugin</h2>
+<p>An application which has a lot of logic implemented in C++, or which defines types in C++ and exposes them to QML, may wish to implement a QML plugin. A QML extension module developer may wish to implement some types in a C++ plugin (as opposed to defining them via QML documents) to achieve better performance or for greater flexibility.</p>
+<p>Every C++ plugin for QML has an initialiatization function which is called by the QML engine when it loads the plugin. This initialization function must register any types that the plugin provides, but must not do anything else (for example, instantiating QObjects is not allowed).</p>
+<p>See <a href="qtqml-modules-cppplugins.html">Creating C++ Plugins For QML</a> for more information.</p>
+</div>
+<!-- @@@qtqml-modules-topic.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

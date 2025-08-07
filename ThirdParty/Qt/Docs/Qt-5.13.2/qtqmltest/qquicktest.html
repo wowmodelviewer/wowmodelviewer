@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtquicktest.qdoc -->
+  <title>QQuickTest Namespace | Qt Quick Test 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquicktest-index.html">Qt Quick Test</a></td><td >QQuickTest Namespace</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquicktest-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#functions">Functions</a></li>
+<li class="level1"><a href="#macros">Macros</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QQuickTest Namespace</h1>
+<!-- $$$QQuickTest-brief -->
+<p>The <a href="qquicktest.html">QQuickTest</a> namespace contains all the functions and macros related to Qt Quick Test. <a href="#details">More...</a></p>
+<!-- @@@QQuickTest -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QQuickTest&gt;</span>
+</td></tr></table></div><ul>
+</ul>
+<a name="functions"></a>
+<h2 id="functions">Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qquicktest.html#qIsPolishScheduled">qIsPolishScheduled</a></b>(const QQuickItem *<i>item</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qquicktest.html#qWaitForItemPolished">qWaitForItemPolished</a></b>(const QQuickItem *<i>item</i>, int <i>timeout</i> = 5000)</td></tr>
+</table></div>
+<a name="macros"></a>
+<h2 id="macros">Macros</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qquicktest.html#QUICK_TEST_MAIN">QUICK_TEST_MAIN</a></b>(<i>name</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qquicktest.html#QUICK_TEST_MAIN_WITH_SETUP">QUICK_TEST_MAIN_WITH_SETUP</a></b>(<i>name</i>, <i>QuickTestSetupClass</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QQuickTest-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>See the <a href="qtquicktest-index.html#introduction-to-qt-quick-test">Introduction to Qt Quick Test</a> for information about how to write Qt Quick unit tests.</p>
+<p>To link to the Qt Quick Test C++ library, see <a href="qtquicktest-module.html">Qt Quick Test C++ API</a>.</p>
+</div>
+<p><b>See also </b><a href="qtquicktest-index.html#executing-c-before-qml-tests">Executing C++ Before QML Tests</a>.</p>
+<!-- @@@QQuickTest -->
+<div class="func">
+<h2>Function Documentation</h2>
+<!-- $$$qIsPolishScheduled[overload1]$$$qIsPolishScheduledconstQQuickItem* -->
+<h3 class="fn" id="qIsPolishScheduled"><a name="qIsPolishScheduled"></a><span class="type">bool</span> QQuickTest::<span class="name">qIsPolishScheduled</span>(const <span class="type"><a href="../qtquick/qquickitem.html">QQuickItem</a></span> *<i>item</i>)</h3>
+<p>Returns <code>true</code> if <a href="../qtquick/qquickitem.html#updatePolish">updatePolish()</a> has not been called on <i>item</i> since the last call to <a href="../qtquick/qquickitem.html#polish">polish()</a>, otherwise returns <code>false</code>.</p>
+<p>When assigning values to properties in QML, any layouting the item must do as a result of the assignment might not take effect immediately, but can instead be postponed until the item is polished. For these cases, you can use this function to ensure that the item has been polished before the execution of the test continues. For example:</p>
+<pre class="cpp">
+
+  QVERIFY(<span class="type">QQuickTest</span><span class="operator">::</span>qIsPolishScheduled(item));
+  QVERIFY(<span class="type">QQuickTest</span><span class="operator">::</span><a href="qquicktest.html#qWaitForItemPolished">qWaitForItemPolished</a>(item));
+
+</pre>
+<p>Without the call to <code>qIsPolishScheduled()</code> above, the call to <code>qWaitForItemPolished()</code> might see that no polish was scheduled and therefore pass instantly, assuming that the item had already been polished. This function makes it obvious why an item wasn't polished and allows tests to fail early under such circumstances.</p>
+<p>The QML equivalent of this function is <a href="qml-qttest-testcase.html#isPolishScheduled-method">isPolishScheduled()</a>.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<p><b>See also </b><a href="../qtquick/qquickitem.html#polish">QQuickItem::polish</a>() and <a href="../qtquick/qquickitem.html#updatePolish">QQuickItem::updatePolish</a>().</p>
+<!-- @@@qIsPolishScheduled -->
+<!-- $$$qWaitForItemPolished[overload1]$$$qWaitForItemPolishedconstQQuickItem*int -->
+<h3 class="fn" id="qWaitForItemPolished"><a name="qWaitForItemPolished"></a><span class="type">bool</span> QQuickTest::<span class="name">qWaitForItemPolished</span>(const <span class="type"><a href="../qtquick/qquickitem.html">QQuickItem</a></span> *<i>item</i>, <span class="type">int</span> <i>timeout</i> = 5000)</h3>
+<p>Waits for <i>timeout</i> milliseconds or until <a href="../qtquick/qquickitem.html#updatePolish">updatePolish()</a> has been called on <i>item</i>.</p>
+<p>Returns <code>true</code> if <code>updatePolish()</code> was called on <i>item</i> within <i>timeout</i> milliseconds, otherwise returns <code>false</code>.</p>
+<p>The QML equivalent of this function is <a href="qml-qttest-testcase.html#waitForItemPolished-method">waitForItemPolished()</a>.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<p><b>See also </b><a href="../qtquick/qquickitem.html#polish">QQuickItem::polish</a>(), <a href="../qtquick/qquickitem.html#updatePolish">QQuickItem::updatePolish</a>(), and <a href="qquicktest.html#qIsPolishScheduled">QQuickTest::qIsPolishScheduled</a>().</p>
+<!-- @@@qWaitForItemPolished -->
+</div>
+<div class="macros">
+<h2>Macro Documentation</h2>
+<!-- $$$QUICK_TEST_MAIN[overload1]$$$QUICK_TEST_MAIN -->
+<h3 class="fn" id="QUICK_TEST_MAIN"><a name="QUICK_TEST_MAIN"></a><span class="name">QUICK_TEST_MAIN</span>(<i>name</i>)</h3>
+<p>Sets up the entry point for a Qt Quick Test application. The <i>name</i> argument uniquely identifies this set of tests.</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QtQuickTest&gt;</span>
+  QUICK_TEST_MAIN(example)
+
+</pre>
+<p><b>Note: </b>The macro assumes that your test sources are in the current directory, unless the <code>QUICK_TEST_SOURCE_DIR</code> environment variable is set.</p><p><b>See also </b><a href="qquicktest.html#QUICK_TEST_MAIN_WITH_SETUP">QUICK_TEST_MAIN_WITH_SETUP</a>() and <a href="qtquicktest-index.html#running-qt-quick-tests">Running Qt Quick Tests</a>.</p>
+<!-- @@@QUICK_TEST_MAIN -->
+<!-- $$$QUICK_TEST_MAIN_WITH_SETUP[overload1]$$$QUICK_TEST_MAIN_WITH_SETUP -->
+<h3 class="fn" id="QUICK_TEST_MAIN_WITH_SETUP"><a name="QUICK_TEST_MAIN_WITH_SETUP"></a><span class="name">QUICK_TEST_MAIN_WITH_SETUP</span>(<i>name</i>, <i>QuickTestSetupClass</i>)</h3>
+<p>Sets up the entry point for a Qt Quick Test application. The <i>name</i> argument uniquely identifies this set of tests.</p>
+<p>This macro is identical to <a href="qquicktest.html#QUICK_TEST_MAIN">QUICK_TEST_MAIN</a>(), except that it takes an additional argument <i>QuickTestSetupClass</i>, a pointer to a <a href="../qtcore/qobject.html">QObject</a>-derived class. With this class it is possible to define additional setup code to execute before running the QML test.</p>
+<p><b>Note: </b>The macro assumes that your test sources are in the current directory, unless the <code>QUICK_TEST_SOURCE_DIR</code> environment variable is set.</p><p>The following snippet demonstrates the use of this macro:</p>
+<pre class="cpp">
+
+  <span class="comment">// tst_mytest.cpp</span>
+  <span class="preprocessor">#include &lt;QtQuickTest&gt;</span>
+  <span class="preprocessor">#include &lt;QQmlEngine&gt;</span>
+  <span class="preprocessor">#include &lt;QQmlContext&gt;</span>
+
+  <span class="keyword">class</span> Setup : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      Setup() {}
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> qmlEngineAvailable(<span class="type"><a href="../qtqml/qqmlengine.html">QQmlEngine</a></span> <span class="operator">*</span>engine)
+      {
+          engine<span class="operator">-</span><span class="operator">&gt;</span>rootContext()<span class="operator">-</span><span class="operator">&gt;</span>setContextProperty(<span class="string">&quot;myContextProperty&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(<span class="keyword">true</span>));
+      }
+  };
+
+  QUICK_TEST_MAIN_WITH_SETUP(mytest<span class="operator">,</span> Setup)
+
+  <span class="preprocessor">#include &quot;tst_mytest.moc&quot;</span>
+
+</pre>
+<p><b>See also </b><a href="qquicktest.html#QUICK_TEST_MAIN">QUICK_TEST_MAIN</a>() and <a href="qtquicktest-index.html#running-qt-quick-tests">Running Qt Quick Tests</a>.</p>
+<!-- @@@QUICK_TEST_MAIN_WITH_SETUP -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

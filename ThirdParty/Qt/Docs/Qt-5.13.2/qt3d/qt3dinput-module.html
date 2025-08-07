@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qt3dinput-module.qdoc -->
+  <title>Qt 3D Input C++ Classes | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td >Qt 3D Input C++ Classes</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#namespaces">Namespaces</a></li>
+<li class="level1"><a href="#classes">Classes</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt 3D Input C++ Classes</h1>
+<span class="subtitle"></span>
+<!-- $$$Qt3DInput-brief -->
+<p>The Qt 3D Input module provides classes for handling user input in applications using Qt3D. <a href="#details">More...</a></p>
+<!-- @@@Qt3DInput -->
+<p>This module was introduced in  Qt 5.7.</p>
+<a name="namespaces"></a>
+<h2 id="namespaces">Namespaces</h2>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qt3dinput.html">Qt3DInput</a></p></td><td class="tblDescr"><p>Contains classes that enable user input</p></td></tr>
+</table></div>
+<a name="classes"></a>
+<h2 id="classes">Classes</h2>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qt3dinput-qabstractactioninput.html">Qt3DInput::QAbstractActionInput</a></p></td><td class="tblDescr"><p>The base class for the Action Input and all Aggregate Action Inputs</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qt3dinput-qabstractaxisinput.html">Qt3DInput::QAbstractAxisInput</a></p></td><td class="tblDescr"><p>QAbstractActionInput is the base class for all Axis Input</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qt3dinput-qabstractphysicaldevice.html">Qt3DInput::QAbstractPhysicalDevice</a></p></td><td class="tblDescr"><p>The base class used by Qt3d to interact with arbitrary input devices</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qt3dinput-qaction.html">Qt3DInput::QAction</a></p></td><td class="tblDescr"><p>Links a set of QAbstractActionInput that trigger the same event</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qt3dinput-qactioninput.html">Qt3DInput::QActionInput</a></p></td><td class="tblDescr"><p>Stores Device and Buttons used to trigger an input event</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qt3dinput-qanalogaxisinput.html">Qt3DInput::QAnalogAxisInput</a></p></td><td class="tblDescr"><p>An axis input controlled by an analog input The axis value is controlled like a traditional analog input such as a joystick</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qt3dinput-qaxis.html">Qt3DInput::QAxis</a></p></td><td class="tblDescr"><p>Stores QAbstractAxisInputs used to trigger an input event</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qt3dinput-qaxisaccumulator.html">Qt3DInput::QAxisAccumulator</a></p></td><td class="tblDescr"><p>Processes velocity or acceleration data from a QAxis</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qt3dinput-qaxissetting.html">Qt3DInput::QAxisSetting</a></p></td><td class="tblDescr"><p>Stores settings for the specified list of Axis</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qt3dinput-qbuttonaxisinput.html">Qt3DInput::QButtonAxisInput</a></p></td><td class="tblDescr"><p>An axis input controlled by buttons The axis value is controlled by buttons rather than a traditional analog input such as a joystick</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qt3dinput-qinputaspect.html">Qt3DInput::QInputAspect</a></p></td><td class="tblDescr"><p>Responsible for creating physical devices and handling associated jobs</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qt3dinput-qinputchord.html">Qt3DInput::QInputChord</a></p></td><td class="tblDescr"><p>Represents a set of QAbstractActionInput's that must be triggerd at once</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qt3dinput-qinputsequence.html">Qt3DInput::QInputSequence</a></p></td><td class="tblDescr"><p>Represents a set of QAbstractActionInput's that must be triggerd one after the other</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qt3dinput-qinputsettings.html">Qt3DInput::QInputSettings</a></p></td><td class="tblDescr"><p>Holds the pointer to an input event source object</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qt3dinput-qkeyboarddevice.html">Qt3DInput::QKeyboardDevice</a></p></td><td class="tblDescr"><p>In charge of dispatching keyboard events to attached QQKeyboardHandler objects</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qt3dinput-qkeyboardhandler.html">Qt3DInput::QKeyboardHandler</a></p></td><td class="tblDescr"><p>Provides keyboard event notification</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></p></td><td class="tblDescr"><p>Event type send by KeyBoardHandler</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qt3dinput-qlogicaldevice.html">Qt3DInput::QLogicalDevice</a></p></td><td class="tblDescr"><p>Allows the user to define a set of actions that they wish to use within an application</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qt3dinput-qmousedevice.html">Qt3DInput::QMouseDevice</a></p></td><td class="tblDescr"><p>Delegates mouse events to the attached MouseHandler objects</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qt3dinput-qmouseevent.html">Qt3DInput::QMouseEvent</a></p></td><td class="tblDescr"><p>Qt3DCore::QMouseEvent contains parameters that describe a mouse event</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qt3dinput-qwheelevent.html">Qt3DInput::QWheelEvent</a></p></td><td class="tblDescr"><p>Contains parameters that describe a mouse wheel event</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qt3dinput-qmousehandler.html">Qt3DInput::QMouseHandler</a></p></td><td class="tblDescr"><p>Provides a means of being notified about mouse events when attached to a QMouseDevice instance</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qt3dinput-qabstractphysicaldeviceproxy.html">Qt3DInput::QAbstractPhysicalDeviceProxy</a></p></td><td class="tblDescr"><p>Qt3DInput::QAbstractPhysicalDeviceProxy acts as a proxy for an actual Qt3DInput::QQAbstractPhysicalDevice device</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qt3dinput-qinputdeviceintegration.html">Qt3DInput::QInputDeviceIntegration</a></p></td><td class="tblDescr"><p>Abstract base class used to define new input methods such as game controllers</p></td></tr>
+</table></div>
+<!-- $$$Qt3DInput-description -->
+<a name="details"></a>
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>To use classes from this module, add this directive into the C++ files:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;Qt3DInput&gt;</span>
+
+</pre>
+<p>To link against the corresponding C++ libraries, add the following to your qmake project file:</p>
+<pre class="cpp plain">
+
+  QT += 3dinput
+
+</pre>
+</div>
+<!-- @@@Qt3DInput -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+    <namespace>org.qt-project.qttest.5132</namespace>
+    <virtualFolder>qttest</virtualFolder>
+    <metaData name="version" value="5.13.2"/>
+    <customFilter name="QtTest 5.13.2">
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qttest</filterAttribute>
+    </customFilter>
+    <filterSection>
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtrefdoc</filterAttribute>
+        <filterAttribute>qttest</filterAttribute>
+        <toc>
+            <section ref="qttest-index.html" title="Qt Test">
+                <section ref="qttest-module.html" title="C++ Classes">
+                    <section ref="qabstractitemmodeltester.html" title="QAbstractItemModelTester Class Reference">
+                        <section ref="qabstractitemmodeltester-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qsignalspy.html" title="QSignalSpy Class Reference">
+                        <section ref="qsignalspy-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qtest-qtoucheventsequence.html" title="QTest::QTouchEventSequence Class Reference">
+                        <section ref="qtest-qtoucheventsequence-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qtesteventlist.html" title="QTestEventList Class Reference">
+                        <section ref="qtesteventlist-members.html" title="List of all members"/>
+                    </section>
+                </section>
+            </section>
+        </toc>
+        <keywords>
+            <keyword name="Chapter 6: Skipping Tests with QSKIP" id="Chapter 6: Skipping Tests with QSKIP" ref="qttestlib-tutorial6.html"/>
+            <keyword name="Cycle" id="Cycle" ref="qttestlib-attribution-cycle.html"/>
+            <keyword name="Linux Performance Events, version 3.7" id="Linux Performance Events, version 3.7" ref="qttestlib-attribution-linuxperf.html"/>
+            <keyword name="QAbstractItemModelTester" id="QAbstractItemModelTester" ref="qabstractitemmodeltester.html"/>
+            <keyword name="QAbstractItemModelTester::FailureReportingMode" id="QAbstractItemModelTester::FailureReportingMode" ref="qabstractitemmodeltester.html#FailureReportingMode-enum"/>
+            <keyword name="QAbstractItemModelTester::Fatal" id="QAbstractItemModelTester::Fatal" ref="qabstractitemmodeltester.html#FailureReportingMode-enum"/>
+            <keyword name="QAbstractItemModelTester::QtTest" id="QAbstractItemModelTester::QtTest" ref="qabstractitemmodeltester.html#FailureReportingMode-enum"/>
+            <keyword name="QAbstractItemModelTester::Warning" id="QAbstractItemModelTester::Warning" ref="qabstractitemmodeltester.html#FailureReportingMode-enum"/>
+            <keyword name="QBENCHMARK" id="QBENCHMARK" ref="qtest.html#QBENCHMARK"/>
+            <keyword name="QBENCHMARK_ONCE" id="QBENCHMARK_ONCE" ref="qtest.html#QBENCHMARK_ONCE"/>
+            <keyword name="QCOMPARE" id="QCOMPARE" ref="qtest.html#QCOMPARE"/>
+            <keyword name="QEXPECT_FAIL" id="QEXPECT_FAIL" ref="qtest.html#QEXPECT_FAIL"/>
+            <keyword name="QFAIL" id="QFAIL" ref="qtest.html#QFAIL"/>
+            <keyword name="QFETCH" id="QFETCH" ref="qtest.html#QFETCH"/>
+            <keyword name="QFINDTESTDATA" id="QFINDTESTDATA" ref="qtest.html#QFINDTESTDATA"/>
+            <keyword name="QSKIP" id="QSKIP" ref="qtest.html#QSKIP"/>
+            <keyword name="QSignalSpy" id="QSignalSpy" ref="qsignalspy.html"/>
+            <keyword name="QTEST" id="QTEST" ref="qtest.html#QTEST"/>
+            <keyword name="QTEST_APPLESS_MAIN" id="QTEST_APPLESS_MAIN" ref="qtest.html#QTEST_APPLESS_MAIN"/>
+            <keyword name="QTEST_GUILESS_MAIN" id="QTEST_GUILESS_MAIN" ref="qtest.html#QTEST_GUILESS_MAIN"/>
+            <keyword name="QTEST_MAIN" id="QTEST_MAIN" ref="qtest.html#QTEST_MAIN"/>
+            <keyword name="QTRY_COMPARE" id="QTRY_COMPARE" ref="qtest.html#QTRY_COMPARE"/>
+            <keyword name="QTRY_COMPARE_WITH_TIMEOUT" id="QTRY_COMPARE_WITH_TIMEOUT" ref="qtest.html#QTRY_COMPARE_WITH_TIMEOUT"/>
+            <keyword name="QTRY_VERIFY" id="QTRY_VERIFY" ref="qtest.html#QTRY_VERIFY"/>
+            <keyword name="QTRY_VERIFY2" id="QTRY_VERIFY2" ref="qtest.html#QTRY_VERIFY2"/>
+            <keyword name="QTRY_VERIFY2_WITH_TIMEOUT" id="QTRY_VERIFY2_WITH_TIMEOUT" ref="qtest.html#QTRY_VERIFY2_WITH_TIMEOUT"/>
+            <keyword name="QTRY_VERIFY_WITH_TIMEOUT" id="QTRY_VERIFY_WITH_TIMEOUT" ref="qtest.html#QTRY_VERIFY_WITH_TIMEOUT"/>
+            <keyword name="QTest" id="QTest" ref="qtest.html"/>
+            <keyword name="QTest::AI_Description" id="QTest::AI_Description" ref="qtest.html#AttributeIndex-enum"/>
+            <keyword name="QTest::AI_Errors" id="QTest::AI_Errors" ref="qtest.html#AttributeIndex-enum"/>
+            <keyword name="QTest::AI_Failures" id="QTest::AI_Failures" ref="qtest.html#AttributeIndex-enum"/>
+            <keyword name="QTest::AI_File" id="QTest::AI_File" ref="qtest.html#AttributeIndex-enum"/>
+            <keyword name="QTest::AI_Iterations" id="QTest::AI_Iterations" ref="qtest.html#AttributeIndex-enum"/>
+            <keyword name="QTest::AI_Line" id="QTest::AI_Line" ref="qtest.html#AttributeIndex-enum"/>
+            <keyword name="QTest::AI_Metric" id="QTest::AI_Metric" ref="qtest.html#AttributeIndex-enum"/>
+            <keyword name="QTest::AI_Name" id="QTest::AI_Name" ref="qtest.html#AttributeIndex-enum"/>
+            <keyword name="QTest::AI_PropertyValue" id="QTest::AI_PropertyValue" ref="qtest.html#AttributeIndex-enum"/>
+            <keyword name="QTest::AI_QTestVersion" id="QTest::AI_QTestVersion" ref="qtest.html#AttributeIndex-enum"/>
+            <keyword name="QTest::AI_QtVersion" id="QTest::AI_QtVersion" ref="qtest.html#AttributeIndex-enum"/>
+            <keyword name="QTest::AI_Result" id="QTest::AI_Result" ref="qtest.html#AttributeIndex-enum"/>
+            <keyword name="QTest::AI_Tag" id="QTest::AI_Tag" ref="qtest.html#AttributeIndex-enum"/>
+            <keyword name="QTest::AI_Tests" id="QTest::AI_Tests" ref="qtest.html#AttributeIndex-enum"/>
+            <keyword name="QTest::AI_Type" id="QTest::AI_Type" ref="qtest.html#AttributeIndex-enum"/>
+            <keyword name="QTest::AI_Undefined" id="QTest::AI_Undefined" ref="qtest.html#AttributeIndex-enum"/>
+            <keyword name="QTest::AI_Value" id="QTest::AI_Value" ref="qtest.html#AttributeIndex-enum"/>
+            <keyword name="QTest::Abort" id="QTest::Abort" ref="qtest.html#TestFailMode-enum"/>
+            <keyword name="QTest::AlignmentFaults" id="QTest::AlignmentFaults" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::AttributeIndex" id="QTest::AttributeIndex" ref="qtest.html#AttributeIndex-enum"/>
+            <keyword name="QTest::BitsPerSecond" id="QTest::BitsPerSecond" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::BranchInstructions" id="QTest::BranchInstructions" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::BranchMisses" id="QTest::BranchMisses" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::BusCycles" id="QTest::BusCycles" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::BytesAllocated" id="QTest::BytesAllocated" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::BytesPerSecond" id="QTest::BytesPerSecond" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::CPUCycles" id="QTest::CPUCycles" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::CPUMigrations" id="QTest::CPUMigrations" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::CPUTicks" id="QTest::CPUTicks" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::CacheMisses" id="QTest::CacheMisses" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::CachePrefetchMisses" id="QTest::CachePrefetchMisses" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::CachePrefetches" id="QTest::CachePrefetches" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::CacheReadMisses" id="QTest::CacheReadMisses" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::CacheReads" id="QTest::CacheReads" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::CacheReferences" id="QTest::CacheReferences" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::CacheWriteMisses" id="QTest::CacheWriteMisses" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::CacheWrites" id="QTest::CacheWrites" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::Click" id="QTest::Click" ref="qtest.html#KeyAction-enum"/>
+            <keyword name="QTest::ContextSwitches" id="QTest::ContextSwitches" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::Continue" id="QTest::Continue" ref="qtest.html#TestFailMode-enum"/>
+            <keyword name="QTest::EmulationFaults" id="QTest::EmulationFaults" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::Events" id="QTest::Events" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::FramesPerSecond" id="QTest::FramesPerSecond" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::InstructionReads" id="QTest::InstructionReads" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::Instructions" id="QTest::Instructions" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::KeyAction" id="QTest::KeyAction" ref="qtest.html#KeyAction-enum"/>
+            <keyword name="QTest::LET_Benchmark" id="QTest::LET_Benchmark" ref="qtest.html#LogElementType-enum"/>
+            <keyword name="QTest::LET_Error" id="QTest::LET_Error" ref="qtest.html#LogElementType-enum"/>
+            <keyword name="QTest::LET_Failure" id="QTest::LET_Failure" ref="qtest.html#LogElementType-enum"/>
+            <keyword name="QTest::LET_Properties" id="QTest::LET_Properties" ref="qtest.html#LogElementType-enum"/>
+            <keyword name="QTest::LET_Property" id="QTest::LET_Property" ref="qtest.html#LogElementType-enum"/>
+            <keyword name="QTest::LET_SystemError" id="QTest::LET_SystemError" ref="qtest.html#LogElementType-enum"/>
+            <keyword name="QTest::LET_TestCase" id="QTest::LET_TestCase" ref="qtest.html#LogElementType-enum"/>
+            <keyword name="QTest::LET_TestSuite" id="QTest::LET_TestSuite" ref="qtest.html#LogElementType-enum"/>
+            <keyword name="QTest::LET_Undefined" id="QTest::LET_Undefined" ref="qtest.html#LogElementType-enum"/>
+            <keyword name="QTest::LogElementType" id="QTest::LogElementType" ref="qtest.html#LogElementType-enum"/>
+            <keyword name="QTest::MajorPageFaults" id="QTest::MajorPageFaults" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::MinorPageFaults" id="QTest::MinorPageFaults" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::MouseAction" id="QTest::MouseAction" ref="qtest.html#MouseAction-enum"/>
+            <keyword name="QTest::MouseClick" id="QTest::MouseClick" ref="qtest.html#MouseAction-enum"/>
+            <keyword name="QTest::MouseDClick" id="QTest::MouseDClick" ref="qtest.html#MouseAction-enum"/>
+            <keyword name="QTest::MouseMove" id="QTest::MouseMove" ref="qtest.html#MouseAction-enum"/>
+            <keyword name="QTest::MousePress" id="QTest::MousePress" ref="qtest.html#MouseAction-enum"/>
+            <keyword name="QTest::MouseRelease" id="QTest::MouseRelease" ref="qtest.html#MouseAction-enum"/>
+            <keyword name="QTest::PageFaults" id="QTest::PageFaults" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::Press" id="QTest::Press" ref="qtest.html#KeyAction-enum"/>
+            <keyword name="QTest::QBenchmarkMetric" id="QTest::QBenchmarkMetric" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::RefCPUCycles" id="QTest::RefCPUCycles" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::Release" id="QTest::Release" ref="qtest.html#KeyAction-enum"/>
+            <keyword name="QTest::Shortcut" id="QTest::Shortcut" ref="qtest.html#KeyAction-enum"/>
+            <keyword name="QTest::StalledCycles" id="QTest::StalledCycles" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::TestFailMode" id="QTest::TestFailMode" ref="qtest.html#TestFailMode-enum"/>
+            <keyword name="QTest::WalltimeMilliseconds" id="QTest::WalltimeMilliseconds" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTest::WalltimeNanoseconds" id="QTest::WalltimeNanoseconds" ref="qtest.html#QBenchmarkMetric-enum"/>
+            <keyword name="QTestEventList" id="QTestEventList" ref="qtesteventlist.html"/>
+            <keyword name="QTouchEventSequence" id="QTest::QTouchEventSequence" ref="qtest-qtoucheventsequence.html"/>
+            <keyword name="QVERIFY" id="QVERIFY" ref="qtest.html#QVERIFY"/>
+            <keyword name="QVERIFY2" id="QVERIFY2" ref="qtest.html#QVERIFY2"/>
+            <keyword name="QVERIFY_EXCEPTION_THROWN" id="QVERIFY_EXCEPTION_THROWN" ref="qtest.html#QVERIFY_EXCEPTION_THROWN"/>
+            <keyword name="QWARN" id="QWARN" ref="qtest.html#QWARN"/>
+            <keyword name="Qt Test" id="Qt Test" ref="qttest-index.html"/>
+            <keyword name="Qt Test C++ Classes" id="Qt Test C++ Classes" ref="qttest-module.html"/>
+            <keyword name="Qt Test Overview" id="Qt Test Overview" ref="qtest-overview.html"/>
+            <keyword name="Qt Test Tutorial" id="Qt Test Tutorial" ref="qtest-tutorial.html"/>
+            <keyword name="QtTest" id="QtTest" ref="qttest-module.html"/>
+            <keyword name="Valgrind, version 3.14.0" id="Valgrind, version 3.14.0" ref="qttestlib-attribution-valgrind.html"/>
+            <keyword name="addColumn" id="QTest::addColumn" ref="qtest.html#addColumn"/>
+            <keyword name="addDelay" id="QTestEventList::addDelay" ref="qtesteventlist.html#addDelay"/>
+            <keyword name="addKeyClick" id="QTestEventList::addKeyClick" ref="qtesteventlist.html#addKeyClick"/>
+            <keyword name="addKeyClicks" id="QTestEventList::addKeyClicks" ref="qtesteventlist.html#addKeyClicks"/>
+            <keyword name="addKeyPress" id="QTestEventList::addKeyPress" ref="qtesteventlist.html#addKeyPress"/>
+            <keyword name="addKeyRelease" id="QTestEventList::addKeyRelease" ref="qtesteventlist.html#addKeyRelease"/>
+            <keyword name="addMouseClick" id="QTestEventList::addMouseClick" ref="qtesteventlist.html#addMouseClick"/>
+            <keyword name="addMouseDClick" id="QTestEventList::addMouseDClick" ref="qtesteventlist.html#addMouseDClick"/>
+            <keyword name="addMouseMove" id="QTestEventList::addMouseMove" ref="qtesteventlist.html#addMouseMove"/>
+            <keyword name="addMousePress" id="QTestEventList::addMousePress" ref="qtesteventlist.html#addMousePress"/>
+            <keyword name="addMouseRelease" id="QTestEventList::addMouseRelease" ref="qtesteventlist.html#addMouseRelease"/>
+            <keyword name="addRow" id="QTest::addRow" ref="qtest.html#addRow"/>
+            <keyword name="benchmarkMetricName" id="QTest::benchmarkMetricName" ref="qtest.html#benchmarkMetricName"/>
+            <keyword name="benchmarkMetricUnit" id="QTest::benchmarkMetricUnit" ref="qtest.html#benchmarkMetricUnit"/>
+            <keyword name="clear" id="QTestEventList::clear" ref="qtesteventlist.html#clear"/>
+            <keyword name="commit" id="QTouchEventSequence::commit" ref="qtest-qtoucheventsequence.html#commit"/>
+            <keyword name="createTouchDevice" id="QTest::createTouchDevice" ref="qtest.html#createTouchDevice"/>
+            <keyword name="currentAppName" id="QTest::currentAppName" ref="qtest.html#currentAppName"/>
+            <keyword name="currentDataTag" id="QTest::currentDataTag" ref="qtest.html#currentDataTag"/>
+            <keyword name="currentTestFailed" id="QTest::currentTestFailed" ref="qtest.html#currentTestFailed"/>
+            <keyword name="currentTestFunction" id="QTest::currentTestFunction" ref="qtest.html#currentTestFunction"/>
+            <keyword name="failureReportingMode" id="QAbstractItemModelTester::failureReportingMode" ref="qabstractitemmodeltester.html#failureReportingMode"/>
+            <keyword name="ignoreMessage" id="QTest::ignoreMessage" ref="qtest.html#ignoreMessage"/>
+            <keyword name="isValid" id="QSignalSpy::isValid" ref="qsignalspy.html#isValid"/>
+            <keyword name="keyClick" id="QTest::keyClick" ref="qtest.html#keyClick"/>
+            <keyword name="keyClicks" id="QTest::keyClicks" ref="qtest.html#keyClicks"/>
+            <keyword name="keyEvent" id="QTest::keyEvent" ref="qtest.html#keyEvent"/>
+            <keyword name="keyPress" id="QTest::keyPress" ref="qtest.html#keyPress"/>
+            <keyword name="keyRelease" id="QTest::keyRelease" ref="qtest.html#keyRelease"/>
+            <keyword name="keySequence" id="QTest::keySequence" ref="qtest.html#keySequence"/>
+            <keyword name="model" id="QAbstractItemModelTester::model" ref="qabstractitemmodeltester.html#model"/>
+            <keyword name="mouseClick" id="QTest::mouseClick" ref="qtest.html#mouseClick"/>
+            <keyword name="mouseDClick" id="QTest::mouseDClick" ref="qtest.html#mouseDClick"/>
+            <keyword name="mouseMove" id="QTest::mouseMove" ref="qtest.html#mouseMove"/>
+            <keyword name="mousePress" id="QTest::mousePress" ref="qtest.html#mousePress"/>
+            <keyword name="mouseRelease" id="QTest::mouseRelease" ref="qtest.html#mouseRelease"/>
+            <keyword name="move" id="QTouchEventSequence::move" ref="qtest-qtoucheventsequence.html#move"/>
+            <keyword name="newRow" id="QTest::newRow" ref="qtest.html#newRow"/>
+            <keyword name="press" id="QTouchEventSequence::press" ref="qtest-qtoucheventsequence.html#press"/>
+            <keyword name="qExec" id="QTest::qExec" ref="qtest.html#qExec"/>
+            <keyword name="qExtractTestData" id="QTest::qExtractTestData" ref="qtest.html#qExtractTestData"/>
+            <keyword name="qSleep" id="QTest::qSleep" ref="qtest.html#qSleep"/>
+            <keyword name="qWait" id="QTest::qWait" ref="qtest.html#qWait"/>
+            <keyword name="qWaitFor" id="QTest::qWaitFor" ref="qtest.html#qWaitFor"/>
+            <keyword name="qWaitForWindowActive" id="QTest::qWaitForWindowActive" ref="qtest.html#qWaitForWindowActive"/>
+            <keyword name="qWaitForWindowExposed" id="QTest::qWaitForWindowExposed" ref="qtest.html#qWaitForWindowExposed"/>
+            <keyword name="qWaitForWindowShown" id="QTest::qWaitForWindowShown" ref="qtest-obsolete.html#qWaitForWindowShown"/>
+            <keyword name="qtestlib" id="qtestlib" ref="qtest-overview.html"/>
+            <keyword name="release" id="QTouchEventSequence::release" ref="qtest-qtoucheventsequence.html#release"/>
+            <keyword name="setBenchmarkResult" id="QTest::setBenchmarkResult" ref="qtest.html#setBenchmarkResult"/>
+            <keyword name="signal" id="QSignalSpy::signal" ref="qsignalspy.html#signal"/>
+            <keyword name="simulate" id="QTestEventList::simulate" ref="qtesteventlist.html#simulate"/>
+            <keyword name="stationary" id="QTouchEventSequence::stationary" ref="qtest-qtoucheventsequence.html#stationary"/>
+            <keyword name="toHexRepresentation" id="QTest::toHexRepresentation" ref="qtest.html#toHexRepresentation"/>
+            <keyword name="toString" id="QTest::toString" ref="qtest.html#toString"/>
+            <keyword name="touchEvent" id="QTest::touchEvent" ref="qtest.html#touchEvent"/>
+            <keyword name="wait" id="QSignalSpy::wait" ref="qsignalspy.html#wait"/>
+            <keyword name="~QTestEventList" id="QTestEventList::~QTestEventList" ref="qtesteventlist.html#dtor.QTestEventList"/>
+            <keyword name="~QTouchEventSequence" id="QTouchEventSequence::~QTouchEventSequence" ref="qtest-qtoucheventsequence.html#dtor.QTouchEventSequence"/>
+        </keywords>
+        <files>
+            <file>images/arrow_bc.png</file>
+            <file>images/bgrContent.png</file>
+            <file>images/btn_next.png</file>
+            <file>images/btn_prev.png</file>
+            <file>images/bullet_dn.png</file>
+            <file>images/bullet_sq.png</file>
+            <file>images/home.png</file>
+            <file>images/ico_note.png</file>
+            <file>images/ico_note_attention.png</file>
+            <file>images/ico_out.png</file>
+            <file>images/logo.png</file>
+            <file>qabstractitemmodeltester-members.html</file>
+            <file>qabstractitemmodeltester.html</file>
+            <file>qsignalspy-members.html</file>
+            <file>qsignalspy.html</file>
+            <file>qtest-obsolete.html</file>
+            <file>qtest-overview.html</file>
+            <file>qtest-qtoucheventsequence-members.html</file>
+            <file>qtest-qtoucheventsequence.html</file>
+            <file>qtest-tutorial.html</file>
+            <file>qtest.html</file>
+            <file>qtesteventlist-members.html</file>
+            <file>qtesteventlist.html</file>
+            <file>qttest-index.html</file>
+            <file>qttest-module.html</file>
+            <file>qttestlib-attribution-cycle.html</file>
+            <file>qttestlib-attribution-linuxperf.html</file>
+            <file>qttestlib-attribution-valgrind.html</file>
+            <file>qttestlib-tutorial1-example.html</file>
+            <file>qttestlib-tutorial2-example.html</file>
+            <file>qttestlib-tutorial3-example.html</file>
+            <file>qttestlib-tutorial4-example.html</file>
+            <file>qttestlib-tutorial5-example.html</file>
+            <file>qttestlib-tutorial6.html</file>
+            <file>style/offline-simple.css</file>
+            <file>style/offline.css</file>
+        </files>
+    </filterSection>
+</QtHelpProject>

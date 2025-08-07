@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtdbus-index.qdoc -->
+  <title>Qt D-Bus</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td >Qt D-Bus</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#introduction">Introduction</a></li>
+<li class="level1"><a href="#the-buses">The Buses</a></li>
+<li class="level1"><a href="#concepts">Concepts</a></li>
+<li class="level2"><a href="#messages">Messages</a></li>
+<li class="level2"><a href="#service-names">Service Names</a></li>
+<li class="level2"><a href="#object-paths">Object Paths</a></li>
+<li class="level2"><a href="#interfaces">Interfaces</a></li>
+<li class="level2"><a href="#cheat-sheet">Cheat Sheet</a></li>
+<li class="level1"><a href="#debugging">Debugging</a></li>
+<li class="level1"><a href="#licenses-and-attributions">Licenses and Attributions</a></li>
+<li class="level1"><a href="#further-reading">Further Reading</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt D-Bus</h1>
+<span class="subtitle"></span>
+<!-- $$$qtdbus-index.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="introduction"></a>
+<h2 id="introduction">Introduction</h2>
+<p>D-Bus is an Inter-Process Communication (IPC) and Remote Procedure Calling (RPC) mechanism originally developed for Linux to replace existing and competing IPC solutions with one unified protocol. It has also been designed to allow communication between system-level processes (such as printer and hardware driver services) and normal user processes.</p>
+<p>It uses a fast, binary message-passing protocol, which is suitable for same-machine communication due to its low latency and low overhead. Its specification is currently defined by the <code>freedesktop.org</code> project, and is available to all parties.</p>
+<p>Communication in general happens through a central server application, called the &quot;bus&quot; (hence the name), but direct application-to-application communication is also possible. When communicating on a bus, applications can query which other applications and services are available, as well as activate one on demand.</p>
+<a name="the-buses"></a>
+<h2 id="the-buses">The Buses</h2>
+<p>D-Bus buses are used to when many-to-many communication is desired. In order to achieve that, a central server is launched before any applications can connect to the bus: this server is responsible for keeping track of the applications that are connected and for properly routing messages from their source to their destination.</p>
+<p>In addition, D-Bus defines two well-known buses, called the system bus and the session bus. These buses are special in the sense that they have well-defined semantics: some services are defined to be found in one or both of these buses.</p>
+<p>For example, an application wishing to query the list of hardware devices attached to the computer will probably communicate to a service available on the system bus, while the service providing opening of the user's web browser will be probably found on the session bus.</p>
+<p>On the system bus, one can also expect to find restrictions on what services each application is allowed to offer. Therefore, one can be reasonably certain that, if a certain service is present, it is being offered by a trusted application.</p>
+<a name="concepts"></a>
+<h2 id="concepts">Concepts</h2>
+<a name="messages"></a>
+<h3 id="messages">Messages</h3>
+<p>On the low level, applications communicate over D-Bus by sending messages to one another. Messages are used to relay the remote procedure calls as well as the replies and errors associated with them. When used over a bus, messages have a destination, which means they are routed only to the interested parties, avoiding congestion due to &quot;swarming&quot; or broadcasting.</p>
+<p>A special kind of message called a &quot;signal message&quot; (a concept based on Qt's <a href="../qtdoc/exceptionsafety.html#signals-and-slots">Signals and Slots</a> mechanism), however, does not have a pre-defined destination. Since its purpose is to be used in a one-to-many context, signal messages are designed to work over an &quot;opt-in&quot; mechanism.</p>
+<p>The Qt D-Bus module fully encapsulates the low-level concept of messages into a simpler, object-oriented approach familiar to Qt developers. In most cases, the developer need not worry about sending or receiving messages.</p>
+<a name="service-names"></a>
+<h3 id="service-names">Service Names</h3>
+<p>When communicating over a bus, applications obtain what is called a &quot;service name&quot;: it is how that application chooses to be known by other applications on the same bus. The service names are brokered by the D-Bus bus daemon and are used to route messages from one application to another. An analogous concept to service names are IP addresses and hostnames: a computer normally has one IP address and may have one or more hostnames associated with it, according to the services that it provides to the network.</p>
+<p>On the other hand, if a bus is not used, service names are also not used. If we compare this to a computer network again, this would equate to a point-to-point network: since the peer is known, there is no need to use hostnames to find it or its IP address.</p>
+<p>The format of a D-Bus service name is in fact very similar to a host name: it is a dot-separated sequence of letters and digits. The common practice is even to name one's service name according to the domain name of the organization that defined that service.</p>
+<p>For example, the D-Bus service is defined by <code>freedesktop.org</code> and can be found on the bus under the service name:</p>
+<pre class="cpp">
+
+  org<span class="operator">.</span>freedesktop<span class="operator">.</span>DBus
+
+</pre>
+<a name="object-paths"></a>
+<h3 id="object-paths">Object Paths</h3>
+<p>Like network hosts, applications provide specific services to other applications by exporting objects. Those objects are hierarchically organised, much like the parent-child relationship that classes derived from <a href="../qtcore/qobject.html">QObject</a> possess. One difference, however, is that there is the concept of &quot;root object&quot;, that all objects have as ultimate parent.</p>
+<p>If we continue our analogy with Web services, object paths equate to the path part of a URL:</p>
+<p class="centerAlign"><img src="images/qurl-ftppath.png" alt="" /></p><p>Like them, object paths in D-Bus are formed resembling path names on the filesystem: they are slash-separated labels, each consisting of letters, digits and the underscore character (&quot;_&quot;). They must always start with a slash and must not end with one.</p>
+<a name="interfaces"></a>
+<h3 id="interfaces">Interfaces</h3>
+<p>Interfaces are similar to C++ abstract classes and Java's <code>interface</code> keyword and declare the &quot;contract&quot; that is established between caller and callee. That is, they establish the names of the methods, signals and properties that are available as well as the behavior that is expected from either side when communication is established.</p>
+<p>Qt uses a very similar mechanism in its <a href="../qtdoc/plugins-howto.html">Plugin system</a>: Base classes in C++ are associated with a unique identifier by way of the <a href="../qtcore/qtplugin.html#Q_DECLARE_INTERFACE">Q_DECLARE_INTERFACE</a>() macro.</p>
+<p>D-Bus interface names are, in fact, named in a manner similar to what is suggested by the Qt Plugin System: an identifier usually constructed from the domain name of the entity that defined that interface.</p>
+<a name="cheat-sheet"></a>
+<h3 id="cheat-sheet">Cheat Sheet</h3>
+<p>To facilitate remembering of the naming formats and their purposes, the following table can be used:</p>
+<div class="table"><table class="generic" width="90%">
+ <thead><tr class="qt-style"><th >D-Bus Concept</th><th >Analogy</th><th >Name format</th></tr></thead>
+<tr valign="top" class="odd"><td >Service name</td><td >Network hostnames</td><td >Dot-separated (&quot;looks like a hostname&quot;)</td></tr>
+<tr valign="top" class="even"><td >Object path</td><td >URL path component</td><td >Slash-separated (&quot;looks like a path&quot;)</td></tr>
+<tr valign="top" class="odd"><td >Interface</td><td >Plugin identifier</td><td >Dot-separated</td></tr>
+</table></div>
+<a name="debugging"></a>
+<h2 id="debugging">Debugging</h2>
+<p>When developing applications that use D-Bus, it is sometimes useful to be able to see information about the messages that are sent and received across the bus by each application.</p>
+<p>This feature can be enabled on a per-application basis by setting the <code>QDBUS_DEBUG</code> environment variable before running each application. For example, we can enable debugging only for the car in the <a href="qtdbus-remotecontrolledcar-example.html">D-Bus Remote Controlled Car Example</a> by running the controller and the car in the following way:</p>
+<pre class="cpp">
+
+  examples<span class="operator">/</span>dbus<span class="operator">/</span>remotecontrolledcar<span class="operator">/</span>controller<span class="operator">/</span>controller <span class="operator">&amp;</span>
+  QDBUS_DEBUG<span class="operator">=</span><span class="number">1</span> examples<span class="operator">/</span>dbus<span class="operator">/</span>remotecontrolledcar<span class="operator">/</span>car<span class="operator">/</span>car <span class="operator">&amp;</span>
+
+</pre>
+<p>Information about the messages will be written to the console the application was launched from.</p>
+<a name="licenses-and-attributions"></a>
+<h2 id="licenses-and-attributions">Licenses and Attributions</h2>
+<p>The Qt D-Bus module is available under commercial licenses from <a href="http://www.qt.io/about-us/">The Qt Company</a>. In addition, it is available under free software licenses. Since Qt 5.4, these free software licenses are <a href="http://www.gnu.org/licenses/lgpl-3.0.html">GNU Lesser General Public License, version 3</a>, or the <a href="http://www.gnu.org/licenses/gpl-2.0.html">GNU General Public License, version 2</a>. See <a href="../qtdoc/licensing.html">Qt Licensing</a> for further details.</p>
+<p>Furthermore, Qt D-Bus in Qt 5.13.2 may contain third party modules under following permissive licenses:</p>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtdbus-attribution-libdbus-1-headers.html">libdus-1 headers, version dbus-1.12.12</a></p></td><td class="tblDescr"><p>Academic Free License v2.1, or GNU General Public License v2.0 or later</p></td></tr>
+</table></div>
+<a name="further-reading"></a>
+<h2 id="further-reading">Further Reading</h2>
+<p>The following documents contain information about Qt's D-Bus integration features, and provide details about the mechanisms used to send and receive type information over the bus:</p>
+<ul>
+<li><a href="usingadaptors.html">Using Qt D-Bus Adaptors</a></li>
+<li><a href="qdbustypesystem.html">The Qt D-Bus Type System</a></li>
+<li><a href="qdbusxml2cpp.html">Qt D-Bus XML compiler (qdbusxml2cpp)</a></li>
+<li><a href="qtdbus-module.html">Qt D-Bus C++ Classes</a></li>
+<li><a href="examples-dbus.html">Qt D-Bus Examples</a></li>
+<li><a href="qdbusviewer.html">D-Bus Viewer</a></li>
+</ul>
+</div>
+<!-- @@@qtdbus-index.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

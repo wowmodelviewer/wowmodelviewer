@@ -1,0 +1,1852 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tagfile>
+    <compound kind="class">
+        <name>QPrinterInfo</name>
+        <filename>qprinterinfo.html</filename>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QPrinterInfo</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>QPrinterInfo</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QPrinterInfo</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>QPrinterInfo-1</anchor>
+            <arglist>(const QPrinterInfo &amp;other)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QPrinterInfo</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>QPrinterInfo-2</anchor>
+            <arglist>(const QPrinter &amp;printer)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>~QPrinterInfo</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>dtor.QPrinterInfo</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPrinterInfo &amp;</type>
+            <name>operator=</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>operator-eq</anchor>
+            <arglist>(const QPrinterInfo &amp;other)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QString</type>
+            <name>printerName</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>printerName</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QString</type>
+            <name>description</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>description</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QString</type>
+            <name>location</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>location</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QString</type>
+            <name>makeAndModel</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>makeAndModel</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>isNull</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>isNull</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>isDefault</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>isDefault</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>isRemote</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>isRemote</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPrinter::PrinterState</type>
+            <name>state</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>state</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QList&lt;QPageSize&gt;</type>
+            <name>supportedPageSizes</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>supportedPageSizes</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPageSize</type>
+            <name>defaultPageSize</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>defaultPageSize</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>supportsCustomPageSizes</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>supportsCustomPageSizes</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPageSize</type>
+            <name>minimumPhysicalPageSize</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>minimumPhysicalPageSize</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPageSize</type>
+            <name>maximumPhysicalPageSize</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>maximumPhysicalPageSize</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QList&lt;QPrinter::PaperSize&gt;</type>
+            <name>supportedPaperSizes</name>
+            <anchorfile>qprinterinfo-obsolete.html</anchorfile>
+            <anchor>supportedPaperSizes</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QList&lt;QPair&lt;QString, QSizeF&gt; &gt;</type>
+            <name>supportedSizesWithNames</name>
+            <anchorfile>qprinterinfo-obsolete.html</anchorfile>
+            <anchor>supportedSizesWithNames</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QList&lt;int&gt;</type>
+            <name>supportedResolutions</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>supportedResolutions</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPrinter::DuplexMode</type>
+            <name>defaultDuplexMode</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>defaultDuplexMode</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QList&lt;QPrinter::DuplexMode&gt;</type>
+            <name>supportedDuplexModes</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>supportedDuplexModes</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPrinter::ColorMode</type>
+            <name>defaultColorMode</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>defaultColorMode</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QList&lt;QPrinter::ColorMode&gt;</type>
+            <name>supportedColorModes</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>supportedColorModes</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>QStringList</type>
+            <name>availablePrinterNames</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>availablePrinterNames</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>QList&lt;QPrinterInfo&gt;</type>
+            <name>availablePrinters</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>availablePrinters</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>QString</type>
+            <name>defaultPrinterName</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>defaultPrinterName</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>QPrinterInfo</type>
+            <name>defaultPrinter</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>defaultPrinter</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="yes">
+            <type>QPrinterInfo</type>
+            <name>printerInfo</name>
+            <anchorfile>qprinterinfo.html</anchorfile>
+            <anchor>printerInfo</anchor>
+            <arglist>(const QString &amp;printerName)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QPrintPreviewDialog</name>
+        <filename>qprintpreviewdialog.html</filename>
+        <base>QDialog</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QPrintPreviewDialog</name>
+            <anchorfile>qprintpreviewdialog.html</anchorfile>
+            <anchor>QPrintPreviewDialog-1</anchor>
+            <arglist>(QWidget *parent, Qt::WindowFlags flags)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QPrintPreviewDialog</name>
+            <anchorfile>qprintpreviewdialog.html</anchorfile>
+            <anchor>QPrintPreviewDialog</anchor>
+            <arglist>(QPrinter *printer, QWidget *parent, Qt::WindowFlags flags)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QPrintPreviewDialog</name>
+            <anchorfile>qprintpreviewdialog.html</anchorfile>
+            <anchor>dtor.QPrintPreviewDialog</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>open</name>
+            <anchorfile>qprintpreviewdialog.html</anchorfile>
+            <anchor>open</anchor>
+            <arglist>(QObject *receiver, const char *member)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPrinter *</type>
+            <name>printer</name>
+            <anchorfile>qprintpreviewdialog.html</anchorfile>
+            <anchor>printer</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual void</type>
+            <name>setVisible</name>
+            <anchorfile>qprintpreviewdialog.html</anchorfile>
+            <anchor>setVisible</anchor>
+            <arglist>(bool visible) override</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual void</type>
+            <name>done</name>
+            <anchorfile>qprintpreviewdialog.html</anchorfile>
+            <anchor>done</anchor>
+            <arglist>(int result) override</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>paintRequested</name>
+            <anchorfile>qprintpreviewdialog.html</anchorfile>
+            <anchor>paintRequested</anchor>
+            <arglist>(QPrinter *printer)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QPrintPreviewWidget</name>
+        <filename>qprintpreviewwidget.html</filename>
+        <base>QWidget</base>
+        <member kind="enum">
+            <name>ViewMode</name>
+            <anchor>ViewMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="SinglePageView">
+            <anchor>ViewMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="FacingPagesView">
+            <anchor>ViewMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="AllPagesView">
+            <anchor>ViewMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="enum">
+            <name>ZoomMode</name>
+            <anchor>ZoomMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="CustomZoom">
+            <anchor>ZoomMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="FitToWidth">
+            <anchor>ZoomMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="FitInView">
+            <anchor>ZoomMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QPrintPreviewWidget</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>QPrintPreviewWidget</anchor>
+            <arglist>(QPrinter *printer, QWidget *parent, Qt::WindowFlags flags)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QPrintPreviewWidget</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>QPrintPreviewWidget-1</anchor>
+            <arglist>(QWidget *parent, Qt::WindowFlags flags)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QPrintPreviewWidget</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>dtor.QPrintPreviewWidget</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>qreal</type>
+            <name>zoomFactor</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>zoomFactor</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPrinter::Orientation</type>
+            <name>orientation</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>orientation</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPrintPreviewWidget::ViewMode</type>
+            <name>viewMode</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>viewMode</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPrintPreviewWidget::ZoomMode</type>
+            <name>zoomMode</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>zoomMode</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>currentPage</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>currentPage</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>pageCount</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>pageCount</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual void</type>
+            <name>setVisible</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>setVisible</anchor>
+            <arglist>(bool visible) override</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>print</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>print</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>zoomIn</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>zoomIn</anchor>
+            <arglist>(qreal factor)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>zoomOut</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>zoomOut</anchor>
+            <arglist>(qreal factor)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setZoomFactor</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>setZoomFactor</anchor>
+            <arglist>(qreal factor)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setOrientation</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>setOrientation</anchor>
+            <arglist>(QPrinter::Orientation orientation)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setViewMode</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>setViewMode</anchor>
+            <arglist>(QPrintPreviewWidget::ViewMode mode)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setZoomMode</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>setZoomMode</anchor>
+            <arglist>(QPrintPreviewWidget::ZoomMode zoomMode)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setCurrentPage</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>setCurrentPage</anchor>
+            <arglist>(int page)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>fitToWidth</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>fitToWidth</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>fitInView</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>fitInView</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setLandscapeOrientation</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>setLandscapeOrientation</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setPortraitOrientation</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>setPortraitOrientation</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setSinglePageViewMode</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>setSinglePageViewMode</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setFacingPagesViewMode</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>setFacingPagesViewMode</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setAllPagesViewMode</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>setAllPagesViewMode</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>updatePreview</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>updatePreview</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>paintRequested</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>paintRequested</anchor>
+            <arglist>(QPrinter *printer)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>previewChanged</name>
+            <anchorfile>qprintpreviewwidget.html</anchorfile>
+            <anchor>previewChanged</anchor>
+            <arglist>()</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QPrintDialog</name>
+        <filename>qprintdialog.html</filename>
+        <base>QAbstractPrintDialog</base>
+        <member kind="property" type="PrintDialogOptions">
+            <name>options</name>
+            <anchorfile>qprintdialog.html</anchorfile>
+            <anchor>options-prop</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QPrintDialog</name>
+            <anchorfile>qprintdialog.html</anchorfile>
+            <anchor>QPrintDialog</anchor>
+            <arglist>(QPrinter *printer, QWidget *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QPrintDialog</name>
+            <anchorfile>qprintdialog.html</anchorfile>
+            <anchor>dtor.QPrintDialog</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual int</type>
+            <name>exec</name>
+            <anchorfile>qprintdialog.html</anchorfile>
+            <anchor>exec</anchor>
+            <arglist>() override</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual void</type>
+            <name>done</name>
+            <anchorfile>qprintdialog.html</anchorfile>
+            <anchor>done</anchor>
+            <arglist>(int result) override</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setOption</name>
+            <anchorfile>qprintdialog.html</anchorfile>
+            <anchor>setOption</anchor>
+            <arglist>(QAbstractPrintDialog::PrintDialogOption option, bool on)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>testOption</name>
+            <anchorfile>qprintdialog.html</anchorfile>
+            <anchor>testOption</anchor>
+            <arglist>(QAbstractPrintDialog::PrintDialogOption option) const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setOptions</name>
+            <anchorfile>qprintdialog.html</anchorfile>
+            <anchor>options-prop</anchor>
+            <arglist>(QAbstractPrintDialog::PrintDialogOptions options)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QAbstractPrintDialog::PrintDialogOptions</type>
+            <name>options</name>
+            <anchorfile>qprintdialog.html</anchorfile>
+            <anchor>options-prop</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>open</name>
+            <anchorfile>qprintdialog.html</anchorfile>
+            <anchor>open</anchor>
+            <arglist>(QObject *receiver, const char *member)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPrinter *</type>
+            <name>printer</name>
+            <anchorfile>qprintdialog.html</anchorfile>
+            <anchor>printer</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>accepted</name>
+            <anchorfile>qprintdialog.html</anchorfile>
+            <anchor>accepted</anchor>
+            <arglist>(QPrinter *printer)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QPrintEngine</name>
+        <filename>qprintengine.html</filename>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QPrintEngine</name>
+            <anchorfile>qprintengine.html</anchorfile>
+            <anchor>dtor.QPrintEngine</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="enum">
+            <name>PrintEnginePropertyKey</name>
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_CollateCopies">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_ColorMode">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_Creator">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_DocumentName">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_FullPage">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_NumberOfCopies">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_Orientation">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_OutputFileName">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_PageOrder">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_PageRect">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_PageSize">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_PaperRect">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_PaperSource">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_PrinterName">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_PrinterProgram">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_Resolution">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_SelectionOption">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_SupportedResolutions">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_WindowsPageSize">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_FontEmbedding">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_Duplex">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_PaperSources">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_CustomPaperSize">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_PageMargins">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_CopyCount">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_SupportsMultipleCopies">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_PaperName">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_QPageSize">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_QPageMargins">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_QPageLayout">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_PaperSize">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PPK_CustomBase">
+            <anchor>PrintEnginePropertyKey-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual void</type>
+            <name>setProperty</name>
+            <anchorfile>qprintengine.html</anchorfile>
+            <anchor>setProperty</anchor>
+            <arglist>(QPrintEngine::PrintEnginePropertyKey key, const QVariant &amp;value) = 0</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual QVariant</type>
+            <name>property</name>
+            <anchorfile>qprintengine.html</anchorfile>
+            <anchor>property</anchor>
+            <arglist>(QPrintEngine::PrintEnginePropertyKey key) const const = 0</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>newPage</name>
+            <anchorfile>qprintengine.html</anchorfile>
+            <anchor>newPage</anchor>
+            <arglist>() = 0</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual bool</type>
+            <name>abort</name>
+            <anchorfile>qprintengine.html</anchorfile>
+            <anchor>abort</anchor>
+            <arglist>() = 0</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual int</type>
+            <name>metric</name>
+            <anchorfile>qprintengine.html</anchorfile>
+            <anchor>metric</anchor>
+            <arglist>(QPaintDevice::PaintDeviceMetric id) const const = 0</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual QPrinter::PrinterState</type>
+            <name>printerState</name>
+            <anchorfile>qprintengine.html</anchorfile>
+            <anchor>printerState</anchor>
+            <arglist>() const const = 0</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QPageSetupDialog</name>
+        <filename>qpagesetupdialog.html</filename>
+        <base>QDialog</base>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QPageSetupDialog</name>
+            <anchorfile>qpagesetupdialog.html</anchorfile>
+            <anchor>QPageSetupDialog</anchor>
+            <arglist>(QPrinter *printer, QWidget *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QPageSetupDialog</name>
+            <anchorfile>qpagesetupdialog.html</anchorfile>
+            <anchor>QPageSetupDialog-1</anchor>
+            <arglist>(QWidget *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QPageSetupDialog</name>
+            <anchorfile>qpagesetupdialog.html</anchorfile>
+            <anchor>dtor.QPageSetupDialog</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual int</type>
+            <name>exec</name>
+            <anchorfile>qpagesetupdialog.html</anchorfile>
+            <anchor>exec</anchor>
+            <arglist>() override</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>open</name>
+            <anchorfile>qpagesetupdialog.html</anchorfile>
+            <anchor>open</anchor>
+            <arglist>(QObject *receiver, const char *member)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual void</type>
+            <name>done</name>
+            <anchorfile>qpagesetupdialog.html</anchorfile>
+            <anchor>done</anchor>
+            <arglist>(int result) override</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPrinter *</type>
+            <name>printer</name>
+            <anchorfile>qpagesetupdialog.html</anchorfile>
+            <anchor>printer</anchor>
+            <arglist>()</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QPrinter</name>
+        <filename>qprinter.html</filename>
+        <base>QPagedPaintDevice</base>
+        <member kind="enum">
+            <name>PrinterMode</name>
+            <anchor>PrinterMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="ScreenResolution">
+            <anchor>PrinterMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PrinterResolution">
+            <anchor>PrinterMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="HighResolution">
+            <anchor>PrinterMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QPrinter</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>QPrinter</anchor>
+            <arglist>(QPrinter::PrinterMode mode)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QPrinter</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>QPrinter-1</anchor>
+            <arglist>(const QPrinterInfo &amp;printer, QPrinter::PrinterMode mode)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual </type>
+            <name>~QPrinter</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>dtor.QPrinter</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="enum">
+            <name>Orientation</name>
+            <anchor>Orientation-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Portrait">
+            <anchor>Orientation-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Landscape">
+            <anchor>Orientation-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="typedef" type="">
+            <name>PaperSize</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>PaperSize-typedef</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="enum">
+            <name>PageOrder</name>
+            <anchor>PageOrder-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="FirstPageFirst">
+            <anchor>PageOrder-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="LastPageFirst">
+            <anchor>PageOrder-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="enum">
+            <name>ColorMode</name>
+            <anchor>ColorMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="GrayScale">
+            <anchor>ColorMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Color">
+            <anchor>ColorMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="enum">
+            <name>PaperSource</name>
+            <anchor>PaperSource-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="OnlyOne">
+            <anchor>PaperSource-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Lower">
+            <anchor>PaperSource-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Middle">
+            <anchor>PaperSource-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Manual">
+            <anchor>PaperSource-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Envelope">
+            <anchor>PaperSource-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="EnvelopeManual">
+            <anchor>PaperSource-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Auto">
+            <anchor>PaperSource-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Tractor">
+            <anchor>PaperSource-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="SmallFormat">
+            <anchor>PaperSource-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="LargeFormat">
+            <anchor>PaperSource-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="LargeCapacity">
+            <anchor>PaperSource-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Cassette">
+            <anchor>PaperSource-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="FormSource">
+            <anchor>PaperSource-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="MaxPageSource">
+            <anchor>PaperSource-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="CustomSource">
+            <anchor>PaperSource-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="LastPaperSource">
+            <anchor>PaperSource-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Upper">
+            <anchor>PaperSource-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="enum">
+            <name>PrinterState</name>
+            <anchor>PrinterState-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Idle">
+            <anchor>PrinterState-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Active">
+            <anchor>PrinterState-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Aborted">
+            <anchor>PrinterState-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Error">
+            <anchor>PrinterState-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="enum">
+            <name>OutputFormat</name>
+            <anchor>OutputFormat-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="NativeFormat">
+            <anchor>OutputFormat-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PdfFormat">
+            <anchor>OutputFormat-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="enum">
+            <name>PrintRange</name>
+            <anchor>PrintRange-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="AllPages">
+            <anchor>PrintRange-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Selection">
+            <anchor>PrintRange-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PageRange">
+            <anchor>PrintRange-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="CurrentPage">
+            <anchor>PrintRange-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="enum">
+            <name>Unit</name>
+            <anchor>Unit-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Millimeter">
+            <anchor>Unit-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Point">
+            <anchor>Unit-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Inch">
+            <anchor>Unit-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Pica">
+            <anchor>Unit-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Didot">
+            <anchor>Unit-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Cicero">
+            <anchor>Unit-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="DevicePixel">
+            <anchor>Unit-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="enum">
+            <name>DuplexMode</name>
+            <anchor>DuplexMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="DuplexNone">
+            <anchor>DuplexMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="DuplexAuto">
+            <anchor>DuplexMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="DuplexLongSide">
+            <anchor>DuplexMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="DuplexShortSide">
+            <anchor>DuplexMode-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setOutputFormat</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setOutputFormat</anchor>
+            <arglist>(QPrinter::OutputFormat format)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPrinter::OutputFormat</type>
+            <name>outputFormat</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>outputFormat</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setPdfVersion</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setPdfVersion</anchor>
+            <arglist>(QPagedPaintDevice::PdfVersion version)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPagedPaintDevice::PdfVersion</type>
+            <name>pdfVersion</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>pdfVersion</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setPrinterName</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setPrinterName</anchor>
+            <arglist>(const QString &amp;name)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QString</type>
+            <name>printerName</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>printerName</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>isValid</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>isValid</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setOutputFileName</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setOutputFileName</anchor>
+            <arglist>(const QString &amp;fileName)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QString</type>
+            <name>outputFileName</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>outputFileName</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setPrintProgram</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setPrintProgram</anchor>
+            <arglist>(const QString &amp;printProg)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QString</type>
+            <name>printProgram</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>printProgram</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setDocName</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setDocName</anchor>
+            <arglist>(const QString &amp;name)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QString</type>
+            <name>docName</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>docName</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setCreator</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setCreator</anchor>
+            <arglist>(const QString &amp;creator)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QString</type>
+            <name>creator</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>creator</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>setPageLayout</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setPageLayout</anchor>
+            <arglist>(const QPageLayout &amp;newLayout)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>setPageSize</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setPageSize</anchor>
+            <arglist>(const QPageSize &amp;pageSize)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>setPageOrientation</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setPageOrientation</anchor>
+            <arglist>(QPageLayout::Orientation orientation)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>setPageMargins</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setPageMargins</anchor>
+            <arglist>(const QMarginsF &amp;margins)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>setPageMargins</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setPageMargins-1</anchor>
+            <arglist>(const QMarginsF &amp;margins, QPageLayout::Unit units)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPageLayout</type>
+            <name>pageLayout</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>pageLayout</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setOrientation</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>setOrientation</anchor>
+            <arglist>(QPrinter::Orientation orientation)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPrinter::Orientation</type>
+            <name>orientation</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>orientation</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual void</type>
+            <name>setPageSize</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>setPageSize-1</anchor>
+            <arglist>(QPagedPaintDevice::PageSize newPageSize) override</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPagedPaintDevice::PageSize</type>
+            <name>pageSize</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>pageSize</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual void</type>
+            <name>setPageSizeMM</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>setPageSizeMM</anchor>
+            <arglist>(const QSizeF &amp;size) override</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setPaperSize</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>setPaperSize</anchor>
+            <arglist>(QPrinter::PaperSize newPaperSize)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPrinter::PaperSize</type>
+            <name>paperSize</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>paperSize</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setPaperSize</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>setPaperSize-1</anchor>
+            <arglist>(const QSizeF &amp;paperSize, QPrinter::Unit unit)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QSizeF</type>
+            <name>paperSize</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>paperSize-1</anchor>
+            <arglist>(QPrinter::Unit unit) const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setPaperName</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>setPaperName</anchor>
+            <arglist>(const QString &amp;paperName)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QString</type>
+            <name>paperName</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>paperName</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setPageOrder</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setPageOrder</anchor>
+            <arglist>(QPrinter::PageOrder pageOrder)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPrinter::PageOrder</type>
+            <name>pageOrder</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>pageOrder</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setResolution</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setResolution</anchor>
+            <arglist>(int dpi)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>resolution</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>resolution</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setColorMode</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setColorMode</anchor>
+            <arglist>(QPrinter::ColorMode newColorMode)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPrinter::ColorMode</type>
+            <name>colorMode</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>colorMode</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setCollateCopies</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setCollateCopies</anchor>
+            <arglist>(bool collate)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>collateCopies</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>collateCopies</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setFullPage</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setFullPage</anchor>
+            <arglist>(bool fp)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>fullPage</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>fullPage</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setNumCopies</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>setNumCopies</anchor>
+            <arglist>(int numCopies)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>numCopies</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>numCopies</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>actualNumCopies</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>actualNumCopies</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setCopyCount</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setCopyCount</anchor>
+            <arglist>(int count)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>copyCount</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>copyCount</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>supportsMultipleCopies</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>supportsMultipleCopies</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setPaperSource</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setPaperSource</anchor>
+            <arglist>(QPrinter::PaperSource source)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPrinter::PaperSource</type>
+            <name>paperSource</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>paperSource</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setDuplex</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setDuplex</anchor>
+            <arglist>(QPrinter::DuplexMode duplex)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPrinter::DuplexMode</type>
+            <name>duplex</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>duplex</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QList&lt;int&gt;</type>
+            <name>supportedResolutions</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>supportedResolutions</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QList&lt;QPrinter::PaperSource&gt;</type>
+            <name>supportedPaperSources</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>supportedPaperSources</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setFontEmbeddingEnabled</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setFontEmbeddingEnabled</anchor>
+            <arglist>(bool enable)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>fontEmbeddingEnabled</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>fontEmbeddingEnabled</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setDoubleSidedPrinting</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>setDoubleSidedPrinting</anchor>
+            <arglist>(bool doubleSided)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>doubleSidedPrinting</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>doubleSidedPrinting</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setWinPageSize</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>setWinPageSize</anchor>
+            <arglist>(int pageSize)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>winPageSize</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>winPageSize</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QRect</type>
+            <name>paperRect</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>paperRect</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QRect</type>
+            <name>pageRect</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>pageRect</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QRectF</type>
+            <name>paperRect</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>paperRect-1</anchor>
+            <arglist>(QPrinter::Unit unit) const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QRectF</type>
+            <name>pageRect</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>pageRect-1</anchor>
+            <arglist>(QPrinter::Unit unit) const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QString</type>
+            <name>printerSelectionOption</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>printerSelectionOption</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setPrinterSelectionOption</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setPrinterSelectionOption</anchor>
+            <arglist>(const QString &amp;option)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual bool</type>
+            <name>newPage</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>newPage</anchor>
+            <arglist>() override</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>abort</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>abort</anchor>
+            <arglist>()</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPrinter::PrinterState</type>
+            <name>printerState</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>printerState</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual QPaintEngine *</type>
+            <name>paintEngine</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>paintEngine</anchor>
+            <arglist>() const const override</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPrintEngine *</type>
+            <name>printEngine</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>printEngine</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setFromTo</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setFromTo</anchor>
+            <arglist>(int from, int to)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>fromPage</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>fromPage</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>toPage</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>toPage</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setPrintRange</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setPrintRange</anchor>
+            <arglist>(QPrinter::PrintRange range)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPrinter::PrintRange</type>
+            <name>printRange</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>printRange</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="virtual" static="no">
+            <type>virtual void</type>
+            <name>setMargins</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>setMargins</anchor>
+            <arglist>(const QPagedPaintDevice::Margins &amp;m) override</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setPageMargins</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>setPageMargins-2</anchor>
+            <arglist>(qreal left, qreal top, qreal right, qreal bottom, QPrinter::Unit unit)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>getPageMargins</name>
+            <anchorfile>qprinter-obsolete.html</anchorfile>
+            <anchor>getPageMargins</anchor>
+            <arglist>(qreal *left, qreal *top, qreal *right, qreal *bottom, QPrinter::Unit unit) const const</arglist>
+        </member>
+        <member kind="function" protection="protected" virtualness="non" static="no">
+            <type>void</type>
+            <name>setEngines</name>
+            <anchorfile>qprinter.html</anchorfile>
+            <anchor>setEngines</anchor>
+            <arglist>(QPrintEngine *printEngine, QPaintEngine *paintEngine)</arglist>
+        </member>
+    </compound>
+    <compound kind="class">
+        <name>QAbstractPrintDialog</name>
+        <filename>qabstractprintdialog.html</filename>
+        <base>QDialog</base>
+        <member kind="enum">
+            <name>PrintRange</name>
+            <anchor>PrintRange-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="AllPages">
+            <anchor>PrintRange-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="Selection">
+            <anchor>PrintRange-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PageRange">
+            <anchor>PrintRange-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="CurrentPage">
+            <anchor>PrintRange-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="enum">
+            <name>PrintDialogOption</name>
+            <anchor>PrintDialogOption-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="None">
+            <anchor>PrintDialogOption-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PrintToFile">
+            <anchor>PrintDialogOption-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PrintSelection">
+            <anchor>PrintDialogOption-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PrintPageRange">
+            <anchor>PrintDialogOption-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PrintShowPageSize">
+            <anchor>PrintDialogOption-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PrintCollateCopies">
+            <anchor>PrintDialogOption-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="DontUseSheet">
+            <anchor>PrintDialogOption-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member name="PrintCurrentPage">
+            <anchor>PrintDialogOption-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="typedef" type="QAbstractPrintDialog::PrintDialogOption">
+            <name>PrintDialogOptions</name>
+            <anchorfile>qabstractprintdialog.html</anchorfile>
+            <anchor>PrintDialogOption-enum</anchor>
+            <arglist></arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type></type>
+            <name>QAbstractPrintDialog</name>
+            <anchorfile>qabstractprintdialog.html</anchorfile>
+            <anchor>QAbstractPrintDialog</anchor>
+            <arglist>(QPrinter *printer, QWidget *parent)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="pure" static="no">
+            <type>virtual int</type>
+            <name>exec</name>
+            <anchorfile>qabstractprintdialog.html</anchorfile>
+            <anchor>exec</anchor>
+            <arglist>() override = 0</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>addEnabledOption</name>
+            <anchorfile>qabstractprintdialog-obsolete.html</anchorfile>
+            <anchor>addEnabledOption</anchor>
+            <arglist>(QAbstractPrintDialog::PrintDialogOption option)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setEnabledOptions</name>
+            <anchorfile>qabstractprintdialog-obsolete.html</anchorfile>
+            <anchor>setEnabledOptions</anchor>
+            <arglist>(QAbstractPrintDialog::PrintDialogOptions options)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QAbstractPrintDialog::PrintDialogOptions</type>
+            <name>enabledOptions</name>
+            <anchorfile>qabstractprintdialog-obsolete.html</anchorfile>
+            <anchor>enabledOptions</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>bool</type>
+            <name>isOptionEnabled</name>
+            <anchorfile>qabstractprintdialog-obsolete.html</anchorfile>
+            <anchor>isOptionEnabled</anchor>
+            <arglist>(QAbstractPrintDialog::PrintDialogOption option) const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setOptionTabs</name>
+            <anchorfile>qabstractprintdialog.html</anchorfile>
+            <anchor>setOptionTabs</anchor>
+            <arglist>(const QList&lt;QWidget *&gt; &amp;tabs)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setPrintRange</name>
+            <anchorfile>qabstractprintdialog.html</anchorfile>
+            <anchor>setPrintRange</anchor>
+            <arglist>(QAbstractPrintDialog::PrintRange range)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QAbstractPrintDialog::PrintRange</type>
+            <name>printRange</name>
+            <anchorfile>qabstractprintdialog.html</anchorfile>
+            <anchor>printRange</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setMinMax</name>
+            <anchorfile>qabstractprintdialog.html</anchorfile>
+            <anchor>setMinMax</anchor>
+            <arglist>(int min, int max)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>minPage</name>
+            <anchorfile>qabstractprintdialog.html</anchorfile>
+            <anchor>minPage</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>maxPage</name>
+            <anchorfile>qabstractprintdialog.html</anchorfile>
+            <anchor>maxPage</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>void</type>
+            <name>setFromTo</name>
+            <anchorfile>qabstractprintdialog.html</anchorfile>
+            <anchor>setFromTo</anchor>
+            <arglist>(int from, int to)</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>fromPage</name>
+            <anchorfile>qabstractprintdialog.html</anchorfile>
+            <anchor>fromPage</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>int</type>
+            <name>toPage</name>
+            <anchorfile>qabstractprintdialog.html</anchorfile>
+            <anchor>toPage</anchor>
+            <arglist>() const const</arglist>
+        </member>
+        <member kind="function" protection="public" virtualness="non" static="no">
+            <type>QPrinter *</type>
+            <name>printer</name>
+            <anchorfile>qabstractprintdialog.html</anchorfile>
+            <anchor>printer</anchor>
+            <arglist>() const const</arglist>
+        </member>
+    </compound>
+</tagfile>

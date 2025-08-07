@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qsensormanager.cpp -->
+  <title>QSensorManager Class | Qt Sensors 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtsensors-index.html">Qt Sensors</a></td><td ><a href="qtsensors-module.html">C++ Classes</a></td><td >QSensorManager</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtsensors-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSensorManager Class</h1>
+<!-- $$$QSensorManager-brief -->
+<p>The <a href="qsensormanager.html">QSensorManager</a> class handles registration and creation of sensor backends. <a href="#details">More...</a></p>
+<!-- @@@QSensorManager -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QSensorManager&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += sensors</td></tr></table></div><ul>
+<li><a href="qsensormanager-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QSensorBackend *</td><td class="memItemRight bottomAlign"><b><a href="qsensormanager.html#createBackend">createBackend</a></b>(QSensor *<i>sensor</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qsensormanager.html#isBackendRegistered">isBackendRegistered</a></b>(const QByteArray &amp;<i>type</i>, const QByteArray &amp;<i>identifier</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsensormanager.html#registerBackend">registerBackend</a></b>(const QByteArray &amp;<i>type</i>, const QByteArray &amp;<i>identifier</i>, QSensorBackendFactory *<i>factory</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsensormanager.html#setDefaultBackend">setDefaultBackend</a></b>(const QByteArray &amp;<i>type</i>, const QByteArray &amp;<i>identifier</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsensormanager.html#unregisterBackend">unregisterBackend</a></b>(const QByteArray &amp;<i>type</i>, const QByteArray &amp;<i>identifier</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSensorManager-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Sensor plugins register backends using the <a href="qsensormanager.html#registerBackend">registerBackend</a>() function.</p>
+<p>When <a href="qsensor.html#connectToBackend">QSensor::connectToBackend</a>() is called, the <a href="qsensormanager.html#createBackend">createBackend</a>() function will be called.</p>
+</div>
+<!-- @@@QSensorManager -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$createBackend[overload1]$$$createBackendQSensor* -->
+<h3 class="fn" id="createBackend"><a name="createBackend"></a><code>[static] </code><span class="type"><a href="qsensorbackend.html">QSensorBackend</a></span> *QSensorManager::<span class="name">createBackend</span>(<span class="type"><a href="qsensor.html">QSensor</a></span> *<i>sensor</i>)</h3>
+<p>Create a backend for <i>sensor</i>. Returns null if no suitable backend exists.</p>
+<!-- @@@createBackend -->
+<!-- $$$isBackendRegistered[overload1]$$$isBackendRegisteredconstQByteArray&constQByteArray& -->
+<h3 class="fn" id="isBackendRegistered"><a name="isBackendRegistered"></a><code>[static] </code><span class="type">bool</span> QSensorManager::<span class="name">isBackendRegistered</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>type</i>, const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>identifier</i>)</h3>
+<p>Returns true if the backend identified by <i>type</i> and <i>identifier</i> is registered.</p>
+<p>This is a convenience method that helps out plugins doing dynamic registration.</p>
+<!-- @@@isBackendRegistered -->
+<!-- $$$registerBackend[overload1]$$$registerBackendconstQByteArray&constQByteArray&QSensorBackendFactory* -->
+<h3 class="fn" id="registerBackend"><a name="registerBackend"></a><code>[static] </code><span class="type">void</span> QSensorManager::<span class="name">registerBackend</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>type</i>, const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>identifier</i>, <span class="type"><a href="qsensorbackendfactory.html">QSensorBackendFactory</a></span> *<i>factory</i>)</h3>
+<p>Register a sensor for <i>type</i>. The <i>identifier</i> must be unique.</p>
+<p>The <i>factory</i> will be asked to create instances of the backend.</p>
+<!-- @@@registerBackend -->
+<!-- $$$setDefaultBackend[overload1]$$$setDefaultBackendconstQByteArray&constQByteArray& -->
+<h3 class="fn" id="setDefaultBackend"><a name="setDefaultBackend"></a><code>[static] </code><span class="type">void</span> QSensorManager::<span class="name">setDefaultBackend</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>type</i>, const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>identifier</i>)</h3>
+<p>Sets or overwrite the sensor <i>type</i> with the backend <i>identifier</i>.</p>
+<!-- @@@setDefaultBackend -->
+<!-- $$$unregisterBackend[overload1]$$$unregisterBackendconstQByteArray&constQByteArray& -->
+<h3 class="fn" id="unregisterBackend"><a name="unregisterBackend"></a><code>[static] </code><span class="type">void</span> QSensorManager::<span class="name">unregisterBackend</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>type</i>, const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>identifier</i>)</h3>
+<p>Unregister the backend for <i>type</i> with <i>identifier</i>.</p>
+<p>Note that this only prevents new instance of the backend from being created. It does not invalidate the existing instances of the backend. The backend code should handle the disappearance of the underlying hardware itself.</p>
+<!-- @@@unregisterBackend -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

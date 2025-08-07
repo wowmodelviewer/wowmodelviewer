@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+    <namespace>org.qt-project.qtprintsupport.5132</namespace>
+    <virtualFolder>qtprintsupport</virtualFolder>
+    <metaData name="version" value="5.13.2"/>
+    <customFilter name="QtPrintSupport 5.13.2">
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtprintsupport</filterAttribute>
+    </customFilter>
+    <filterSection>
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtprintsupport</filterAttribute>
+        <filterAttribute>qtrefdoc</filterAttribute>
+        <toc>
+            <section ref="qtprintsupport-index.html" title="Qt Print Support">
+                <section ref="qtprintsupport-module.html" title="C++ Classes">
+                    <section ref="qabstractprintdialog.html" title="QAbstractPrintDialog Class Reference">
+                        <section ref="qabstractprintdialog-members.html" title="List of all members"/>
+                        <section ref="qabstractprintdialog-obsolete.html" title="Obsolete members"/>
+                    </section>
+                    <section ref="qpagesetupdialog.html" title="QPageSetupDialog Class Reference">
+                        <section ref="qpagesetupdialog-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qprintdialog.html" title="QPrintDialog Class Reference">
+                        <section ref="qprintdialog-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qprintengine.html" title="QPrintEngine Class Reference">
+                        <section ref="qprintengine-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qprintpreviewdialog.html" title="QPrintPreviewDialog Class Reference">
+                        <section ref="qprintpreviewdialog-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qprintpreviewwidget.html" title="QPrintPreviewWidget Class Reference">
+                        <section ref="qprintpreviewwidget-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qprinter.html" title="QPrinter Class Reference">
+                        <section ref="qprinter-members.html" title="List of all members"/>
+                        <section ref="qprinter-obsolete.html" title="Obsolete members"/>
+                    </section>
+                    <section ref="qprinterinfo.html" title="QPrinterInfo Class Reference">
+                        <section ref="qprinterinfo-members.html" title="List of all members"/>
+                        <section ref="qprinterinfo-obsolete.html" title="Obsolete members"/>
+                    </section>
+                </section>
+            </section>
+        </toc>
+        <keywords>
+            <keyword name="Notes about PDF Licensing" id="Notes about PDF Licensing" ref="pdf-licensing.html"/>
+            <keyword name="Printer and Printing APIs" id="Printer and Printing APIs" ref="printing.html"/>
+            <keyword name="QAbstractPrintDialog" id="QAbstractPrintDialog" ref="qabstractprintdialog.html"/>
+            <keyword name="QAbstractPrintDialog::AllPages" id="QAbstractPrintDialog::AllPages" ref="qabstractprintdialog.html#PrintRange-enum"/>
+            <keyword name="QAbstractPrintDialog::CurrentPage" id="QAbstractPrintDialog::CurrentPage" ref="qabstractprintdialog.html#PrintRange-enum"/>
+            <keyword name="QAbstractPrintDialog::DontUseSheet" id="QAbstractPrintDialog::DontUseSheet" ref="qabstractprintdialog.html#PrintDialogOption-enum"/>
+            <keyword name="QAbstractPrintDialog::None" id="QAbstractPrintDialog::None" ref="qabstractprintdialog.html#PrintDialogOption-enum"/>
+            <keyword name="QAbstractPrintDialog::PageRange" id="QAbstractPrintDialog::PageRange" ref="qabstractprintdialog.html#PrintRange-enum"/>
+            <keyword name="QAbstractPrintDialog::PrintCollateCopies" id="QAbstractPrintDialog::PrintCollateCopies" ref="qabstractprintdialog.html#PrintDialogOption-enum"/>
+            <keyword name="QAbstractPrintDialog::PrintCurrentPage" id="QAbstractPrintDialog::PrintCurrentPage" ref="qabstractprintdialog.html#PrintDialogOption-enum"/>
+            <keyword name="QAbstractPrintDialog::PrintDialogOption" id="QAbstractPrintDialog::PrintDialogOption" ref="qabstractprintdialog.html#PrintDialogOption-enum"/>
+            <keyword name="QAbstractPrintDialog::PrintDialogOptions" id="QAbstractPrintDialog::PrintDialogOptions" ref="qabstractprintdialog.html#PrintDialogOption-enum"/>
+            <keyword name="QAbstractPrintDialog::PrintPageRange" id="QAbstractPrintDialog::PrintPageRange" ref="qabstractprintdialog.html#PrintDialogOption-enum"/>
+            <keyword name="QAbstractPrintDialog::PrintRange" id="QAbstractPrintDialog::PrintRange" ref="qabstractprintdialog.html#PrintRange-enum"/>
+            <keyword name="QAbstractPrintDialog::PrintSelection" id="QAbstractPrintDialog::PrintSelection" ref="qabstractprintdialog.html#PrintDialogOption-enum"/>
+            <keyword name="QAbstractPrintDialog::PrintShowPageSize" id="QAbstractPrintDialog::PrintShowPageSize" ref="qabstractprintdialog.html#PrintDialogOption-enum"/>
+            <keyword name="QAbstractPrintDialog::PrintToFile" id="QAbstractPrintDialog::PrintToFile" ref="qabstractprintdialog.html#PrintDialogOption-enum"/>
+            <keyword name="QAbstractPrintDialog::Selection" id="QAbstractPrintDialog::Selection" ref="qabstractprintdialog.html#PrintRange-enum"/>
+            <keyword name="QPageSetupDialog" id="QPageSetupDialog" ref="qpagesetupdialog.html"/>
+            <keyword name="QPrintDialog" id="QPrintDialog" ref="qprintdialog.html"/>
+            <keyword name="QPrintEngine" id="QPrintEngine" ref="qprintengine.html"/>
+            <keyword name="QPrintEngine::PPK_CollateCopies" id="QPrintEngine::PPK_CollateCopies" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_ColorMode" id="QPrintEngine::PPK_ColorMode" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_CopyCount" id="QPrintEngine::PPK_CopyCount" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_Creator" id="QPrintEngine::PPK_Creator" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_CustomBase" id="QPrintEngine::PPK_CustomBase" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_CustomPaperSize" id="QPrintEngine::PPK_CustomPaperSize" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_DocumentName" id="QPrintEngine::PPK_DocumentName" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_Duplex" id="QPrintEngine::PPK_Duplex" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_FontEmbedding" id="QPrintEngine::PPK_FontEmbedding" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_FullPage" id="QPrintEngine::PPK_FullPage" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_NumberOfCopies" id="QPrintEngine::PPK_NumberOfCopies" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_Orientation" id="QPrintEngine::PPK_Orientation" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_OutputFileName" id="QPrintEngine::PPK_OutputFileName" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_PageMargins" id="QPrintEngine::PPK_PageMargins" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_PageOrder" id="QPrintEngine::PPK_PageOrder" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_PageRect" id="QPrintEngine::PPK_PageRect" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_PageSize" id="QPrintEngine::PPK_PageSize" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_PaperName" id="QPrintEngine::PPK_PaperName" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_PaperRect" id="QPrintEngine::PPK_PaperRect" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_PaperSize" id="QPrintEngine::PPK_PaperSize" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_PaperSource" id="QPrintEngine::PPK_PaperSource" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_PaperSources" id="QPrintEngine::PPK_PaperSources" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_PrinterName" id="QPrintEngine::PPK_PrinterName" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_PrinterProgram" id="QPrintEngine::PPK_PrinterProgram" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_QPageLayout" id="QPrintEngine::PPK_QPageLayout" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_QPageMargins" id="QPrintEngine::PPK_QPageMargins" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_QPageSize" id="QPrintEngine::PPK_QPageSize" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_Resolution" id="QPrintEngine::PPK_Resolution" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_SelectionOption" id="QPrintEngine::PPK_SelectionOption" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_SupportedResolutions" id="QPrintEngine::PPK_SupportedResolutions" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_SupportsMultipleCopies" id="QPrintEngine::PPK_SupportsMultipleCopies" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PPK_WindowsPageSize" id="QPrintEngine::PPK_WindowsPageSize" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintEngine::PrintEnginePropertyKey" id="QPrintEngine::PrintEnginePropertyKey" ref="qprintengine.html#PrintEnginePropertyKey-enum"/>
+            <keyword name="QPrintPreviewDialog" id="QPrintPreviewDialog" ref="qprintpreviewdialog.html"/>
+            <keyword name="QPrintPreviewWidget" id="QPrintPreviewWidget" ref="qprintpreviewwidget.html"/>
+            <keyword name="QPrintPreviewWidget::AllPagesView" id="QPrintPreviewWidget::AllPagesView" ref="qprintpreviewwidget.html#ViewMode-enum"/>
+            <keyword name="QPrintPreviewWidget::CustomZoom" id="QPrintPreviewWidget::CustomZoom" ref="qprintpreviewwidget.html#ZoomMode-enum"/>
+            <keyword name="QPrintPreviewWidget::FacingPagesView" id="QPrintPreviewWidget::FacingPagesView" ref="qprintpreviewwidget.html#ViewMode-enum"/>
+            <keyword name="QPrintPreviewWidget::FitInView" id="QPrintPreviewWidget::FitInView" ref="qprintpreviewwidget.html#ZoomMode-enum"/>
+            <keyword name="QPrintPreviewWidget::FitToWidth" id="QPrintPreviewWidget::FitToWidth" ref="qprintpreviewwidget.html#ZoomMode-enum"/>
+            <keyword name="QPrintPreviewWidget::SinglePageView" id="QPrintPreviewWidget::SinglePageView" ref="qprintpreviewwidget.html#ViewMode-enum"/>
+            <keyword name="QPrintPreviewWidget::ViewMode" id="QPrintPreviewWidget::ViewMode" ref="qprintpreviewwidget.html#ViewMode-enum"/>
+            <keyword name="QPrintPreviewWidget::ZoomMode" id="QPrintPreviewWidget::ZoomMode" ref="qprintpreviewwidget.html#ZoomMode-enum"/>
+            <keyword name="QPrinter" id="QPrinter" ref="qprinter.html"/>
+            <keyword name="QPrinter::Aborted" id="QPrinter::Aborted" ref="qprinter.html#PrinterState-enum"/>
+            <keyword name="QPrinter::Active" id="QPrinter::Active" ref="qprinter.html#PrinterState-enum"/>
+            <keyword name="QPrinter::AllPages" id="QPrinter::AllPages" ref="qprinter.html#PrintRange-enum"/>
+            <keyword name="QPrinter::Auto" id="QPrinter::Auto" ref="qprinter.html#PaperSource-enum"/>
+            <keyword name="QPrinter::Cassette" id="QPrinter::Cassette" ref="qprinter.html#PaperSource-enum"/>
+            <keyword name="QPrinter::Cicero" id="QPrinter::Cicero" ref="qprinter.html#Unit-enum"/>
+            <keyword name="QPrinter::Color" id="QPrinter::Color" ref="qprinter.html#ColorMode-enum"/>
+            <keyword name="QPrinter::ColorMode" id="QPrinter::ColorMode" ref="qprinter.html#ColorMode-enum"/>
+            <keyword name="QPrinter::CurrentPage" id="QPrinter::CurrentPage" ref="qprinter.html#PrintRange-enum"/>
+            <keyword name="QPrinter::CustomSource" id="QPrinter::CustomSource" ref="qprinter.html#PaperSource-enum"/>
+            <keyword name="QPrinter::DevicePixel" id="QPrinter::DevicePixel" ref="qprinter.html#Unit-enum"/>
+            <keyword name="QPrinter::Didot" id="QPrinter::Didot" ref="qprinter.html#Unit-enum"/>
+            <keyword name="QPrinter::DuplexAuto" id="QPrinter::DuplexAuto" ref="qprinter.html#DuplexMode-enum"/>
+            <keyword name="QPrinter::DuplexLongSide" id="QPrinter::DuplexLongSide" ref="qprinter.html#DuplexMode-enum"/>
+            <keyword name="QPrinter::DuplexMode" id="QPrinter::DuplexMode" ref="qprinter.html#DuplexMode-enum"/>
+            <keyword name="QPrinter::DuplexNone" id="QPrinter::DuplexNone" ref="qprinter.html#DuplexMode-enum"/>
+            <keyword name="QPrinter::DuplexShortSide" id="QPrinter::DuplexShortSide" ref="qprinter.html#DuplexMode-enum"/>
+            <keyword name="QPrinter::Envelope" id="QPrinter::Envelope" ref="qprinter.html#PaperSource-enum"/>
+            <keyword name="QPrinter::EnvelopeManual" id="QPrinter::EnvelopeManual" ref="qprinter.html#PaperSource-enum"/>
+            <keyword name="QPrinter::Error" id="QPrinter::Error" ref="qprinter.html#PrinterState-enum"/>
+            <keyword name="QPrinter::FirstPageFirst" id="QPrinter::FirstPageFirst" ref="qprinter.html#PageOrder-enum"/>
+            <keyword name="QPrinter::FormSource" id="QPrinter::FormSource" ref="qprinter.html#PaperSource-enum"/>
+            <keyword name="QPrinter::GrayScale" id="QPrinter::GrayScale" ref="qprinter.html#ColorMode-enum"/>
+            <keyword name="QPrinter::HighResolution" id="QPrinter::HighResolution" ref="qprinter.html#PrinterMode-enum"/>
+            <keyword name="QPrinter::Idle" id="QPrinter::Idle" ref="qprinter.html#PrinterState-enum"/>
+            <keyword name="QPrinter::Inch" id="QPrinter::Inch" ref="qprinter.html#Unit-enum"/>
+            <keyword name="QPrinter::Landscape" id="QPrinter::Landscape" ref="qprinter.html#Orientation-enum"/>
+            <keyword name="QPrinter::LargeCapacity" id="QPrinter::LargeCapacity" ref="qprinter.html#PaperSource-enum"/>
+            <keyword name="QPrinter::LargeFormat" id="QPrinter::LargeFormat" ref="qprinter.html#PaperSource-enum"/>
+            <keyword name="QPrinter::LastPageFirst" id="QPrinter::LastPageFirst" ref="qprinter.html#PageOrder-enum"/>
+            <keyword name="QPrinter::LastPaperSource" id="QPrinter::LastPaperSource" ref="qprinter.html#PaperSource-enum"/>
+            <keyword name="QPrinter::Lower" id="QPrinter::Lower" ref="qprinter.html#PaperSource-enum"/>
+            <keyword name="QPrinter::Manual" id="QPrinter::Manual" ref="qprinter.html#PaperSource-enum"/>
+            <keyword name="QPrinter::MaxPageSource" id="QPrinter::MaxPageSource" ref="qprinter.html#PaperSource-enum"/>
+            <keyword name="QPrinter::Middle" id="QPrinter::Middle" ref="qprinter.html#PaperSource-enum"/>
+            <keyword name="QPrinter::Millimeter" id="QPrinter::Millimeter" ref="qprinter.html#Unit-enum"/>
+            <keyword name="QPrinter::NativeFormat" id="QPrinter::NativeFormat" ref="qprinter.html#OutputFormat-enum"/>
+            <keyword name="QPrinter::OnlyOne" id="QPrinter::OnlyOne" ref="qprinter.html#PaperSource-enum"/>
+            <keyword name="QPrinter::Orientation" id="QPrinter::Orientation" ref="qprinter.html#Orientation-enum"/>
+            <keyword name="QPrinter::OutputFormat" id="QPrinter::OutputFormat" ref="qprinter.html#OutputFormat-enum"/>
+            <keyword name="QPrinter::PageOrder" id="QPrinter::PageOrder" ref="qprinter.html#PageOrder-enum"/>
+            <keyword name="QPrinter::PageRange" id="QPrinter::PageRange" ref="qprinter.html#PrintRange-enum"/>
+            <keyword name="QPrinter::PaperSize" id="QPrinter::PaperSize" ref="qprinter.html#PaperSize-typedef"/>
+            <keyword name="QPrinter::PaperSource" id="QPrinter::PaperSource" ref="qprinter.html#PaperSource-enum"/>
+            <keyword name="QPrinter::PdfFormat" id="QPrinter::PdfFormat" ref="qprinter.html#OutputFormat-enum"/>
+            <keyword name="QPrinter::Pica" id="QPrinter::Pica" ref="qprinter.html#Unit-enum"/>
+            <keyword name="QPrinter::Point" id="QPrinter::Point" ref="qprinter.html#Unit-enum"/>
+            <keyword name="QPrinter::Portrait" id="QPrinter::Portrait" ref="qprinter.html#Orientation-enum"/>
+            <keyword name="QPrinter::PrintRange" id="QPrinter::PrintRange" ref="qprinter.html#PrintRange-enum"/>
+            <keyword name="QPrinter::PrinterMode" id="QPrinter::PrinterMode" ref="qprinter.html#PrinterMode-enum"/>
+            <keyword name="QPrinter::PrinterResolution" id="QPrinter::PrinterResolution" ref="qprinter.html#PrinterMode-enum"/>
+            <keyword name="QPrinter::PrinterState" id="QPrinter::PrinterState" ref="qprinter.html#PrinterState-enum"/>
+            <keyword name="QPrinter::ScreenResolution" id="QPrinter::ScreenResolution" ref="qprinter.html#PrinterMode-enum"/>
+            <keyword name="QPrinter::Selection" id="QPrinter::Selection" ref="qprinter.html#PrintRange-enum"/>
+            <keyword name="QPrinter::SmallFormat" id="QPrinter::SmallFormat" ref="qprinter.html#PaperSource-enum"/>
+            <keyword name="QPrinter::Tractor" id="QPrinter::Tractor" ref="qprinter.html#PaperSource-enum"/>
+            <keyword name="QPrinter::Unit" id="QPrinter::Unit" ref="qprinter.html#Unit-enum"/>
+            <keyword name="QPrinter::Upper" id="QPrinter::Upper" ref="qprinter.html#PaperSource-enum"/>
+            <keyword name="QPrinterInfo" id="QPrinterInfo" ref="qprinterinfo.html"/>
+            <keyword name="Qt Print Support" id="Qt Print Support" ref="qtprintsupport-index.html"/>
+            <keyword name="Qt Print Support C++ Classes" id="Qt Print Support C++ Classes" ref="qtprintsupport-module.html"/>
+            <keyword name="abort" id="QPrintEngine::abort" ref="qprintengine.html#abort"/>
+            <keyword name="abort" id="QPrinter::abort" ref="qprinter.html#abort"/>
+            <keyword name="accepted" id="QPrintDialog::accepted" ref="qprintdialog.html#accepted"/>
+            <keyword name="actualNumCopies" id="QPrinter::actualNumCopies" ref="qprinter-obsolete.html#actualNumCopies"/>
+            <keyword name="addEnabledOption" id="QAbstractPrintDialog::addEnabledOption" ref="qabstractprintdialog-obsolete.html#addEnabledOption"/>
+            <keyword name="availablePrinterNames" id="QPrinterInfo::availablePrinterNames" ref="qprinterinfo.html#availablePrinterNames"/>
+            <keyword name="availablePrinters" id="QPrinterInfo::availablePrinters" ref="qprinterinfo.html#availablePrinters"/>
+            <keyword name="collateCopies" id="QPrinter::collateCopies" ref="qprinter.html#collateCopies"/>
+            <keyword name="colorMode" id="QPrinter::colorMode" ref="qprinter.html#colorMode"/>
+            <keyword name="copyCount" id="QPrinter::copyCount" ref="qprinter.html#copyCount"/>
+            <keyword name="creator" id="QPrinter::creator" ref="qprinter.html#creator"/>
+            <keyword name="currentPage" id="QPrintPreviewWidget::currentPage" ref="qprintpreviewwidget.html#currentPage"/>
+            <keyword name="defaultColorMode" id="QPrinterInfo::defaultColorMode" ref="qprinterinfo.html#defaultColorMode"/>
+            <keyword name="defaultDuplexMode" id="QPrinterInfo::defaultDuplexMode" ref="qprinterinfo.html#defaultDuplexMode"/>
+            <keyword name="defaultPageSize" id="QPrinterInfo::defaultPageSize" ref="qprinterinfo.html#defaultPageSize"/>
+            <keyword name="defaultPrinter" id="QPrinterInfo::defaultPrinter" ref="qprinterinfo.html#defaultPrinter"/>
+            <keyword name="defaultPrinterName" id="QPrinterInfo::defaultPrinterName" ref="qprinterinfo.html#defaultPrinterName"/>
+            <keyword name="description" id="QPrinterInfo::description" ref="qprinterinfo.html#description"/>
+            <keyword name="docName" id="QPrinter::docName" ref="qprinter.html#docName"/>
+            <keyword name="done" id="QPageSetupDialog::done" ref="qpagesetupdialog.html#done"/>
+            <keyword name="done" id="QPrintDialog::done" ref="qprintdialog.html#done"/>
+            <keyword name="done" id="QPrintPreviewDialog::done" ref="qprintpreviewdialog.html#done"/>
+            <keyword name="doubleSidedPrinting" id="QPrinter::doubleSidedPrinting" ref="qprinter-obsolete.html#doubleSidedPrinting"/>
+            <keyword name="duplex" id="QPrinter::duplex" ref="qprinter.html#duplex"/>
+            <keyword name="enabledOptions" id="QAbstractPrintDialog::enabledOptions" ref="qabstractprintdialog-obsolete.html#enabledOptions"/>
+            <keyword name="exec" id="QAbstractPrintDialog::exec" ref="qabstractprintdialog.html#exec"/>
+            <keyword name="exec" id="QPageSetupDialog::exec" ref="qpagesetupdialog.html#exec"/>
+            <keyword name="exec" id="QPrintDialog::exec" ref="qprintdialog.html#exec"/>
+            <keyword name="fitInView" id="QPrintPreviewWidget::fitInView" ref="qprintpreviewwidget.html#fitInView"/>
+            <keyword name="fitToWidth" id="QPrintPreviewWidget::fitToWidth" ref="qprintpreviewwidget.html#fitToWidth"/>
+            <keyword name="fontEmbeddingEnabled" id="QPrinter::fontEmbeddingEnabled" ref="qprinter.html#fontEmbeddingEnabled"/>
+            <keyword name="fromPage" id="QAbstractPrintDialog::fromPage" ref="qabstractprintdialog.html#fromPage"/>
+            <keyword name="fromPage" id="QPrinter::fromPage" ref="qprinter.html#fromPage"/>
+            <keyword name="fullPage" id="QPrinter::fullPage" ref="qprinter.html#fullPage"/>
+            <keyword name="getPageMargins" id="QPrinter::getPageMargins" ref="qprinter-obsolete.html#getPageMargins"/>
+            <keyword name="isDefault" id="QPrinterInfo::isDefault" ref="qprinterinfo.html#isDefault"/>
+            <keyword name="isNull" id="QPrinterInfo::isNull" ref="qprinterinfo.html#isNull"/>
+            <keyword name="isOptionEnabled" id="QAbstractPrintDialog::isOptionEnabled" ref="qabstractprintdialog-obsolete.html#isOptionEnabled"/>
+            <keyword name="isRemote" id="QPrinterInfo::isRemote" ref="qprinterinfo.html#isRemote"/>
+            <keyword name="isValid" id="QPrinter::isValid" ref="qprinter.html#isValid"/>
+            <keyword name="location" id="QPrinterInfo::location" ref="qprinterinfo.html#location"/>
+            <keyword name="makeAndModel" id="QPrinterInfo::makeAndModel" ref="qprinterinfo.html#makeAndModel"/>
+            <keyword name="maxPage" id="QAbstractPrintDialog::maxPage" ref="qabstractprintdialog.html#maxPage"/>
+            <keyword name="maximumPhysicalPageSize" id="QPrinterInfo::maximumPhysicalPageSize" ref="qprinterinfo.html#maximumPhysicalPageSize"/>
+            <keyword name="metric" id="QPrintEngine::metric" ref="qprintengine.html#metric"/>
+            <keyword name="minPage" id="QAbstractPrintDialog::minPage" ref="qabstractprintdialog.html#minPage"/>
+            <keyword name="minimumPhysicalPageSize" id="QPrinterInfo::minimumPhysicalPageSize" ref="qprinterinfo.html#minimumPhysicalPageSize"/>
+            <keyword name="newPage" id="QPrintEngine::newPage" ref="qprintengine.html#newPage"/>
+            <keyword name="newPage" id="QPrinter::newPage" ref="qprinter.html#newPage"/>
+            <keyword name="numCopies" id="QPrinter::numCopies" ref="qprinter-obsolete.html#numCopies"/>
+            <keyword name="open" id="QPageSetupDialog::open" ref="qpagesetupdialog.html#open"/>
+            <keyword name="open" id="QPrintDialog::open" ref="qprintdialog.html#open"/>
+            <keyword name="open" id="QPrintPreviewDialog::open" ref="qprintpreviewdialog.html#open"/>
+            <keyword name="operator=" id="QPrinterInfo::operator=" ref="qprinterinfo.html#operator-eq"/>
+            <keyword name="options" id="QPrintDialog::options" ref="qprintdialog.html#options-prop"/>
+            <keyword name="options" id="QPrintDialog::options" ref="qprintdialog.html#options-prop"/>
+            <keyword name="orientation" id="QPrintPreviewWidget::orientation" ref="qprintpreviewwidget.html#orientation"/>
+            <keyword name="orientation" id="QPrinter::orientation" ref="qprinter-obsolete.html#orientation"/>
+            <keyword name="outputFileName" id="QPrinter::outputFileName" ref="qprinter.html#outputFileName"/>
+            <keyword name="outputFormat" id="QPrinter::outputFormat" ref="qprinter.html#outputFormat"/>
+            <keyword name="pageCount" id="QPrintPreviewWidget::pageCount" ref="qprintpreviewwidget.html#pageCount"/>
+            <keyword name="pageLayout" id="QPrinter::pageLayout" ref="qprinter.html#pageLayout"/>
+            <keyword name="pageOrder" id="QPrinter::pageOrder" ref="qprinter.html#pageOrder"/>
+            <keyword name="pageRect" id="QPrinter::pageRect" ref="qprinter-obsolete.html#pageRect"/>
+            <keyword name="pageSize" id="QPrinter::pageSize" ref="qprinter-obsolete.html#pageSize"/>
+            <keyword name="paintEngine" id="QPrinter::paintEngine" ref="qprinter.html#paintEngine"/>
+            <keyword name="paintRequested" id="QPrintPreviewDialog::paintRequested" ref="qprintpreviewdialog.html#paintRequested"/>
+            <keyword name="paintRequested" id="QPrintPreviewWidget::paintRequested" ref="qprintpreviewwidget.html#paintRequested"/>
+            <keyword name="paperName" id="QPrinter::paperName" ref="qprinter-obsolete.html#paperName"/>
+            <keyword name="paperRect" id="QPrinter::paperRect" ref="qprinter-obsolete.html#paperRect"/>
+            <keyword name="paperSize" id="QPrinter::paperSize" ref="qprinter-obsolete.html#paperSize"/>
+            <keyword name="paperSource" id="QPrinter::paperSource" ref="qprinter.html#paperSource"/>
+            <keyword name="pdfVersion" id="QPrinter::pdfVersion" ref="qprinter.html#pdfVersion"/>
+            <keyword name="previewChanged" id="QPrintPreviewWidget::previewChanged" ref="qprintpreviewwidget.html#previewChanged"/>
+            <keyword name="print" id="QPrintPreviewWidget::print" ref="qprintpreviewwidget.html#print"/>
+            <keyword name="printEngine" id="QPrinter::printEngine" ref="qprinter.html#printEngine"/>
+            <keyword name="printProgram" id="QPrinter::printProgram" ref="qprinter.html#printProgram"/>
+            <keyword name="printRange" id="QAbstractPrintDialog::printRange" ref="qabstractprintdialog.html#printRange"/>
+            <keyword name="printRange" id="QPrinter::printRange" ref="qprinter.html#printRange"/>
+            <keyword name="printer" id="QAbstractPrintDialog::printer" ref="qabstractprintdialog.html#printer"/>
+            <keyword name="printer" id="QPageSetupDialog::printer" ref="qpagesetupdialog.html#printer"/>
+            <keyword name="printer" id="QPrintDialog::printer" ref="qprintdialog.html#printer"/>
+            <keyword name="printer" id="QPrintPreviewDialog::printer" ref="qprintpreviewdialog.html#printer"/>
+            <keyword name="printerInfo" id="QPrinterInfo::printerInfo" ref="qprinterinfo.html#printerInfo"/>
+            <keyword name="printerName" id="QPrinter::printerName" ref="qprinter.html#printerName"/>
+            <keyword name="printerName" id="QPrinterInfo::printerName" ref="qprinterinfo.html#printerName"/>
+            <keyword name="printerSelectionOption" id="QPrinter::printerSelectionOption" ref="qprinter.html#printerSelectionOption"/>
+            <keyword name="printerState" id="QPrintEngine::printerState" ref="qprintengine.html#printerState"/>
+            <keyword name="printerState" id="QPrinter::printerState" ref="qprinter.html#printerState"/>
+            <keyword name="property" id="QPrintEngine::property" ref="qprintengine.html#property"/>
+            <keyword name="resolution" id="QPrinter::resolution" ref="qprinter.html#resolution"/>
+            <keyword name="setAllPagesViewMode" id="QPrintPreviewWidget::setAllPagesViewMode" ref="qprintpreviewwidget.html#setAllPagesViewMode"/>
+            <keyword name="setCollateCopies" id="QPrinter::setCollateCopies" ref="qprinter.html#setCollateCopies"/>
+            <keyword name="setColorMode" id="QPrinter::setColorMode" ref="qprinter.html#setColorMode"/>
+            <keyword name="setCopyCount" id="QPrinter::setCopyCount" ref="qprinter.html#setCopyCount"/>
+            <keyword name="setCreator" id="QPrinter::setCreator" ref="qprinter.html#setCreator"/>
+            <keyword name="setCurrentPage" id="QPrintPreviewWidget::setCurrentPage" ref="qprintpreviewwidget.html#setCurrentPage"/>
+            <keyword name="setDocName" id="QPrinter::setDocName" ref="qprinter.html#setDocName"/>
+            <keyword name="setDoubleSidedPrinting" id="QPrinter::setDoubleSidedPrinting" ref="qprinter-obsolete.html#setDoubleSidedPrinting"/>
+            <keyword name="setDuplex" id="QPrinter::setDuplex" ref="qprinter.html#setDuplex"/>
+            <keyword name="setEnabledOptions" id="QAbstractPrintDialog::setEnabledOptions" ref="qabstractprintdialog-obsolete.html#setEnabledOptions"/>
+            <keyword name="setEngines" id="QPrinter::setEngines" ref="qprinter.html#setEngines"/>
+            <keyword name="setFacingPagesViewMode" id="QPrintPreviewWidget::setFacingPagesViewMode" ref="qprintpreviewwidget.html#setFacingPagesViewMode"/>
+            <keyword name="setFontEmbeddingEnabled" id="QPrinter::setFontEmbeddingEnabled" ref="qprinter.html#setFontEmbeddingEnabled"/>
+            <keyword name="setFromTo" id="QAbstractPrintDialog::setFromTo" ref="qabstractprintdialog.html#setFromTo"/>
+            <keyword name="setFromTo" id="QPrinter::setFromTo" ref="qprinter.html#setFromTo"/>
+            <keyword name="setFullPage" id="QPrinter::setFullPage" ref="qprinter.html#setFullPage"/>
+            <keyword name="setLandscapeOrientation" id="QPrintPreviewWidget::setLandscapeOrientation" ref="qprintpreviewwidget.html#setLandscapeOrientation"/>
+            <keyword name="setMargins" id="QPrinter::setMargins" ref="qprinter-obsolete.html#setMargins"/>
+            <keyword name="setMinMax" id="QAbstractPrintDialog::setMinMax" ref="qabstractprintdialog.html#setMinMax"/>
+            <keyword name="setNumCopies" id="QPrinter::setNumCopies" ref="qprinter-obsolete.html#setNumCopies"/>
+            <keyword name="setOption" id="QPrintDialog::setOption" ref="qprintdialog.html#setOption"/>
+            <keyword name="setOptionTabs" id="QAbstractPrintDialog::setOptionTabs" ref="qabstractprintdialog.html#setOptionTabs"/>
+            <keyword name="setOptions" id="QPrintDialog::setOptions" ref="qprintdialog.html#options-prop"/>
+            <keyword name="setOrientation" id="QPrintPreviewWidget::setOrientation" ref="qprintpreviewwidget.html#setOrientation"/>
+            <keyword name="setOrientation" id="QPrinter::setOrientation" ref="qprinter-obsolete.html#setOrientation"/>
+            <keyword name="setOutputFileName" id="QPrinter::setOutputFileName" ref="qprinter.html#setOutputFileName"/>
+            <keyword name="setOutputFormat" id="QPrinter::setOutputFormat" ref="qprinter.html#setOutputFormat"/>
+            <keyword name="setPageLayout" id="QPrinter::setPageLayout" ref="qprinter.html#setPageLayout"/>
+            <keyword name="setPageMargins" id="QPrinter::setPageMargins" ref="qprinter.html#setPageMargins"/>
+            <keyword name="setPageOrder" id="QPrinter::setPageOrder" ref="qprinter.html#setPageOrder"/>
+            <keyword name="setPageOrientation" id="QPrinter::setPageOrientation" ref="qprinter.html#setPageOrientation"/>
+            <keyword name="setPageSize" id="QPrinter::setPageSize" ref="qprinter.html#setPageSize"/>
+            <keyword name="setPageSizeMM" id="QPrinter::setPageSizeMM" ref="qprinter-obsolete.html#setPageSizeMM"/>
+            <keyword name="setPaperName" id="QPrinter::setPaperName" ref="qprinter-obsolete.html#setPaperName"/>
+            <keyword name="setPaperSize" id="QPrinter::setPaperSize" ref="qprinter-obsolete.html#setPaperSize"/>
+            <keyword name="setPaperSource" id="QPrinter::setPaperSource" ref="qprinter.html#setPaperSource"/>
+            <keyword name="setPdfVersion" id="QPrinter::setPdfVersion" ref="qprinter.html#setPdfVersion"/>
+            <keyword name="setPortraitOrientation" id="QPrintPreviewWidget::setPortraitOrientation" ref="qprintpreviewwidget.html#setPortraitOrientation"/>
+            <keyword name="setPrintProgram" id="QPrinter::setPrintProgram" ref="qprinter.html#setPrintProgram"/>
+            <keyword name="setPrintRange" id="QAbstractPrintDialog::setPrintRange" ref="qabstractprintdialog.html#setPrintRange"/>
+            <keyword name="setPrintRange" id="QPrinter::setPrintRange" ref="qprinter.html#setPrintRange"/>
+            <keyword name="setPrinterName" id="QPrinter::setPrinterName" ref="qprinter.html#setPrinterName"/>
+            <keyword name="setPrinterSelectionOption" id="QPrinter::setPrinterSelectionOption" ref="qprinter.html#setPrinterSelectionOption"/>
+            <keyword name="setProperty" id="QPrintEngine::setProperty" ref="qprintengine.html#setProperty"/>
+            <keyword name="setResolution" id="QPrinter::setResolution" ref="qprinter.html#setResolution"/>
+            <keyword name="setSinglePageViewMode" id="QPrintPreviewWidget::setSinglePageViewMode" ref="qprintpreviewwidget.html#setSinglePageViewMode"/>
+            <keyword name="setViewMode" id="QPrintPreviewWidget::setViewMode" ref="qprintpreviewwidget.html#setViewMode"/>
+            <keyword name="setVisible" id="QPrintPreviewDialog::setVisible" ref="qprintpreviewdialog.html#setVisible"/>
+            <keyword name="setVisible" id="QPrintPreviewWidget::setVisible" ref="qprintpreviewwidget.html#setVisible"/>
+            <keyword name="setWinPageSize" id="QPrinter::setWinPageSize" ref="qprinter-obsolete.html#setWinPageSize"/>
+            <keyword name="setZoomFactor" id="QPrintPreviewWidget::setZoomFactor" ref="qprintpreviewwidget.html#setZoomFactor"/>
+            <keyword name="setZoomMode" id="QPrintPreviewWidget::setZoomMode" ref="qprintpreviewwidget.html#setZoomMode"/>
+            <keyword name="state" id="QPrinterInfo::state" ref="qprinterinfo.html#state"/>
+            <keyword name="supportedColorModes" id="QPrinterInfo::supportedColorModes" ref="qprinterinfo.html#supportedColorModes"/>
+            <keyword name="supportedDuplexModes" id="QPrinterInfo::supportedDuplexModes" ref="qprinterinfo.html#supportedDuplexModes"/>
+            <keyword name="supportedPageSizes" id="QPrinterInfo::supportedPageSizes" ref="qprinterinfo.html#supportedPageSizes"/>
+            <keyword name="supportedPaperSizes" id="QPrinterInfo::supportedPaperSizes" ref="qprinterinfo-obsolete.html#supportedPaperSizes"/>
+            <keyword name="supportedPaperSources" id="QPrinter::supportedPaperSources" ref="qprinter.html#supportedPaperSources"/>
+            <keyword name="supportedResolutions" id="QPrinter::supportedResolutions" ref="qprinter.html#supportedResolutions"/>
+            <keyword name="supportedResolutions" id="QPrinterInfo::supportedResolutions" ref="qprinterinfo.html#supportedResolutions"/>
+            <keyword name="supportedSizesWithNames" id="QPrinterInfo::supportedSizesWithNames" ref="qprinterinfo-obsolete.html#supportedSizesWithNames"/>
+            <keyword name="supportsCustomPageSizes" id="QPrinterInfo::supportsCustomPageSizes" ref="qprinterinfo.html#supportsCustomPageSizes"/>
+            <keyword name="supportsMultipleCopies" id="QPrinter::supportsMultipleCopies" ref="qprinter.html#supportsMultipleCopies"/>
+            <keyword name="testOption" id="QPrintDialog::testOption" ref="qprintdialog.html#testOption"/>
+            <keyword name="toPage" id="QAbstractPrintDialog::toPage" ref="qabstractprintdialog.html#toPage"/>
+            <keyword name="toPage" id="QPrinter::toPage" ref="qprinter.html#toPage"/>
+            <keyword name="updatePreview" id="QPrintPreviewWidget::updatePreview" ref="qprintpreviewwidget.html#updatePreview"/>
+            <keyword name="viewMode" id="QPrintPreviewWidget::viewMode" ref="qprintpreviewwidget.html#viewMode"/>
+            <keyword name="winPageSize" id="QPrinter::winPageSize" ref="qprinter-obsolete.html#winPageSize"/>
+            <keyword name="zoomFactor" id="QPrintPreviewWidget::zoomFactor" ref="qprintpreviewwidget.html#zoomFactor"/>
+            <keyword name="zoomIn" id="QPrintPreviewWidget::zoomIn" ref="qprintpreviewwidget.html#zoomIn"/>
+            <keyword name="zoomMode" id="QPrintPreviewWidget::zoomMode" ref="qprintpreviewwidget.html#zoomMode"/>
+            <keyword name="zoomOut" id="QPrintPreviewWidget::zoomOut" ref="qprintpreviewwidget.html#zoomOut"/>
+            <keyword name="~QPageSetupDialog" id="QPageSetupDialog::~QPageSetupDialog" ref="qpagesetupdialog.html#dtor.QPageSetupDialog"/>
+            <keyword name="~QPrintDialog" id="QPrintDialog::~QPrintDialog" ref="qprintdialog.html#dtor.QPrintDialog"/>
+            <keyword name="~QPrintEngine" id="QPrintEngine::~QPrintEngine" ref="qprintengine.html#dtor.QPrintEngine"/>
+            <keyword name="~QPrintPreviewDialog" id="QPrintPreviewDialog::~QPrintPreviewDialog" ref="qprintpreviewdialog.html#dtor.QPrintPreviewDialog"/>
+            <keyword name="~QPrintPreviewWidget" id="QPrintPreviewWidget::~QPrintPreviewWidget" ref="qprintpreviewwidget.html#dtor.QPrintPreviewWidget"/>
+            <keyword name="~QPrinter" id="QPrinter::~QPrinter" ref="qprinter.html#dtor.QPrinter"/>
+            <keyword name="~QPrinterInfo" id="QPrinterInfo::~QPrinterInfo" ref="qprinterinfo.html#dtor.QPrinterInfo"/>
+        </keywords>
+        <files>
+            <file>images/arrow_bc.png</file>
+            <file>images/bgrContent.png</file>
+            <file>images/btn_next.png</file>
+            <file>images/btn_prev.png</file>
+            <file>images/bullet_dn.png</file>
+            <file>images/bullet_sq.png</file>
+            <file>images/home.png</file>
+            <file>images/ico_note.png</file>
+            <file>images/ico_note_attention.png</file>
+            <file>images/ico_out.png</file>
+            <file>images/logo.png</file>
+            <file>images/plastique-printdialog-properties.png</file>
+            <file>images/plastique-printdialog.png</file>
+            <file>images/printer-rects.png</file>
+            <file>pdf-licensing.html</file>
+            <file>printing.html</file>
+            <file>qabstractprintdialog-members.html</file>
+            <file>qabstractprintdialog-obsolete.html</file>
+            <file>qabstractprintdialog.html</file>
+            <file>qpagesetupdialog-members.html</file>
+            <file>qpagesetupdialog.html</file>
+            <file>qprintdialog-members.html</file>
+            <file>qprintdialog.html</file>
+            <file>qprintengine-members.html</file>
+            <file>qprintengine.html</file>
+            <file>qprinter-members.html</file>
+            <file>qprinter-obsolete.html</file>
+            <file>qprinter.html</file>
+            <file>qprinterinfo-members.html</file>
+            <file>qprinterinfo-obsolete.html</file>
+            <file>qprinterinfo.html</file>
+            <file>qprintpreviewdialog-members.html</file>
+            <file>qprintpreviewdialog.html</file>
+            <file>qprintpreviewwidget-members.html</file>
+            <file>qprintpreviewwidget.html</file>
+            <file>qtprintsupport-index.html</file>
+            <file>qtprintsupport-module.html</file>
+            <file>style/offline-simple.css</file>
+            <file>style/offline.css</file>
+        </files>
+    </filterSection>
+</QtHelpProject>

@@ -3,17 +3,17 @@ project(WoWModelViewer)
 
 # Dependencies.
 # Qt5
-SET(QT_LOCATION C:/Qt/5.13.2/msvc2017)
-SET(CMAKE_PREFIX_PATH ${QT_LOCATION}/lib/cmake)
+set(QT_LOCATION "${CMAKE_SOURCE_DIR}/ThirdParty/Qt/5.13.2/msvc2017")
+list(PREPEND CMAKE_PREFIX_PATH "${QT_LOCATION}/lib/cmake")
 find_package(Qt5 5.13.2 COMPONENTS Core Network Widgets Xml Gui REQUIRED)
 
-#wxwidgets
-SET(CMAKE_PREFIX_PATH ThirdParty/wxWidgets)
-SET(wxWidgets_USE_UNICODE ON)
+# WxWidgets
+list(PREPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/ThirdParty/wxWidgets")
+set(wxWidgets_USE_UNICODE ON)
 find_package(wxWidgets COMPONENTS net aui xml adv core base REQUIRED)
-# add wx widgets inclusions
+# Include WxWidgets headers
 include(${wxWidgets_USE_FILE})
-include_directories(${wxWidgets_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/ThirdParty/include)
+include_directories(${wxWidgets_INCLUDE_DIRS} "${CMAKE_SOURCE_DIR}/ThirdParty/include")
 
 
 # Find includes in corresponding build directories

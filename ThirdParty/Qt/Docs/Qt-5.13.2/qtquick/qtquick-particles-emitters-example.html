@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- emitters.qdoc -->
+  <title>Qt Quick Particles Examples - Emitters | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td >Qt Quick Particles Examples - Emitters</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Quick Particles Examples - Emitters</h1>
+<span class="subtitle"></span>
+<!-- $$$particles/emitters-brief -->
+<p>This is a collection of examples using Emitters in the QML particle system.</p>
+<!-- @@@particles/emitters -->
+<!-- $$$particles/emitters-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/qml-emitters-example.png" alt="" /></p><p>This is a collection of small QML examples relating to using Emitters in the particle system. Each example is a small QML file emphasizing a particular type or feature.</p>
+<p>Velocity from motion gives the effect of strong particle motion through primarily moving the emitters:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-particles-emitter.html">Emitter</a></span> {
+      <span class="name">id</span>: <span class="name">trailsNormal</span>
+      <span class="name">system</span>: <span class="name">sys1</span>
+
+      <span class="name">emitRate</span>: <span class="number">500</span>
+      <span class="name">lifeSpan</span>: <span class="number">2000</span>
+
+      <span class="name">y</span>: <span class="name">mouseArea</span>.<span class="name">pressed</span> ? <span class="name">mouseArea</span>.<span class="name">mouseY</span> : <span class="name">circle</span>.<span class="name">cy</span>
+      <span class="name">x</span>: <span class="name">mouseArea</span>.<span class="name">pressed</span> ? <span class="name">mouseArea</span>.<span class="name">mouseX</span> : <span class="name">circle</span>.<span class="name">cx</span>
+
+      <span class="name">velocity</span>: <span class="name">PointDirection</span> {<span class="name">xVariation</span>: <span class="number">4</span>; <span class="name">yVariation</span>: <span class="number">4</span>;}
+      <span class="name">acceleration</span>: <span class="name">PointDirection</span> {<span class="name">xVariation</span>: <span class="number">10</span>; <span class="name">yVariation</span>: <span class="number">10</span>;}
+      <span class="name">velocityFromMovement</span>: <span class="number">8</span>
+
+      <span class="name">size</span>: <span class="number">8</span>
+      <span class="name">sizeVariation</span>: <span class="number">4</span>
+  }
+
+</pre>
+<p>Burst and pulse calls the burst and pulse methods on two idential emitters.</p>
+<pre class="qml">
+
+      <span class="keyword">if</span> (<span class="name">lastWasPulse</span>) {
+          <span class="name">burstEmitter</span>.<span class="name">burst</span>(<span class="number">500</span>);
+          <span class="name">lastWasPulse</span> <span class="operator">=</span> <span class="number">false</span>;
+      } <span class="keyword">else</span> {
+          <span class="name">pulseEmitter</span>.<span class="name">pulse</span>(<span class="number">500</span>);
+          <span class="name">lastWasPulse</span> <span class="operator">=</span> <span class="number">true</span>;
+      }
+
+</pre>
+<p>Note how burst takes an argument of number of particles to emit, and pulse takes an argument of number of milliseconds to emit for. This gives a slightly different behaviour, which is easy to see in this example.</p>
+<p>Custom Emitter connects to the emitParticles signal to set arbitrary values on particle data as they're emitted;</p>
+<pre class="qml">
+
+  <span class="name">onEmitParticles</span>: {
+      <span class="keyword">for</span> (var i=0; <span class="name">i</span><span class="operator">&lt;</span><span class="name">particles</span>.<span class="name">length</span>; i++) {
+          var particle = <span class="name">particles</span>[<span class="name">i</span>];
+          <span class="name">particle</span>.<span class="name">startSize</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">max</span>(<span class="number">02</span>,<span class="name">Math</span>.<span class="name">min</span>(<span class="number">492</span>,<span class="name">Math</span>.<span class="name">tan</span>(<span class="name">particle</span>.<span class="name">t</span><span class="operator">/</span><span class="number">2</span>)<span class="operator">*</span><span class="number">24</span>));
+          var theta = <span class="name">Math</span>.<span class="name">floor</span>(<span class="name">Math</span>.<span class="name">random</span>() <span class="operator">*</span> <span class="number">6.0</span>);
+          <span class="name">particle</span>.<span class="name">red</span> <span class="operator">=</span> <span class="name">theta</span> <span class="operator">==</span> <span class="number">0</span> <span class="operator">||</span> <span class="name">theta</span> <span class="operator">==</span> <span class="number">1</span> <span class="operator">||</span> <span class="name">theta</span> <span class="operator">==</span> <span class="number">2</span> ? <span class="number">0.2</span> : <span class="number">1</span>;
+          <span class="name">particle</span>.<span class="name">green</span> <span class="operator">=</span> <span class="name">theta</span> <span class="operator">==</span> <span class="number">2</span> <span class="operator">||</span> <span class="name">theta</span> <span class="operator">==</span> <span class="number">3</span> <span class="operator">||</span> <span class="name">theta</span> <span class="operator">==</span> <span class="number">4</span> ? <span class="number">0.2</span> : <span class="number">1</span>;
+          <span class="name">particle</span>.<span class="name">blue</span> <span class="operator">=</span> <span class="name">theta</span> <span class="operator">==</span> <span class="number">4</span> <span class="operator">||</span> <span class="name">theta</span> <span class="operator">==</span> <span class="number">5</span> <span class="operator">||</span> <span class="name">theta</span> <span class="operator">==</span> <span class="number">0</span> ? <span class="number">0.2</span> : <span class="number">1</span>;
+          <span class="name">theta</span> <span class="operator">/=</span> <span class="number">6.0</span>;
+          <span class="name">theta</span> <span class="operator">*=</span> <span class="number">2.0</span><span class="operator">*</span><span class="name">Math</span>.<span class="name">PI</span>;
+          <span class="name">theta</span> <span class="operator">+=</span> <span class="name">sys</span>.<span class="name">convert</span>(<span class="name">sys</span>.<span class="name">petalRotation</span>);<span class="comment">//Convert from degrees to radians</span>
+          <span class="name">particle</span>.<span class="name">initialVX</span> <span class="operator">=</span> <span class="name">petalLength</span> <span class="operator">*</span> <span class="name">Math</span>.<span class="name">cos</span>(<span class="name">theta</span>);
+          <span class="name">particle</span>.<span class="name">initialVY</span> <span class="operator">=</span> <span class="name">petalLength</span> <span class="operator">*</span> <span class="name">Math</span>.<span class="name">sin</span>(<span class="name">theta</span>);
+          <span class="name">particle</span>.<span class="name">initialAX</span> <span class="operator">=</span> <span class="name">particle</span>.<span class="name">initialVX</span> <span class="operator">*</span> -<span class="number">0.5</span>;
+          <span class="name">particle</span>.<span class="name">initialAY</span> <span class="operator">=</span> <span class="name">particle</span>.<span class="name">initialVY</span> <span class="operator">*</span> -<span class="number">0.5</span>;
+      }
+  }
+
+</pre>
+<p>This is used to emit curving particles in six rotating spokes.</p>
+<p>Emit mask sets an image mask on the Emitter, to emit out of an arbitrary shape.</p>
+<pre class="qml">
+
+  <span class="name">shape</span>: <span class="name">MaskShape</span> {
+      <span class="name">source</span>: <span class="string">&quot;../../images/starfish_mask.png&quot;</span>
+  }
+
+</pre>
+<p>Maximum emitted emits no more than a certain number of particles at a time. This example makes it easy to see what happens when the limit is reached.</p>
+<p>Shape and Direction emits particles out of an unfilled Ellipse shape, using a <a href="qml-qtquick-particles-targetdirection.html">TargetDirection</a></p>
+<pre class="qml">
+
+  <span class="name">shape</span>: <span class="name">EllipseShape</span> {<span class="name">fill</span>: <span class="number">false</span>}
+  <span class="name">velocity</span>: <span class="name">TargetDirection</span> {
+      <span class="name">targetX</span>: <span class="name">root</span>.<span class="name">width</span><span class="operator">/</span><span class="number">2</span>
+      <span class="name">targetY</span>: <span class="name">root</span>.<span class="name">height</span><span class="operator">/</span><span class="number">2</span>
+      <span class="name">proportionalMagnitude</span>: <span class="number">true</span>
+      <span class="name">magnitude</span>: <span class="number">0.5</span>
+  }
+
+</pre>
+<p>This sends the particles towards the center of the ellipse with proportional speed, keeping the ellipse outline as they move to the center.</p>
+<p><a href="qml-qtquick-particles-trailemitter.html">TrailEmitter</a> uses that type to add smoke particles to trail the fire particles in the scene.</p>
+<pre class="qml">
+
+  <span class="name">onEmitParticles</span>: {
+      <span class="keyword">for</span> (var i=0; <span class="name">i</span><span class="operator">&lt;</span><span class="name">particles</span>.<span class="name">length</span>; i++) {
+          var particle = <span class="name">particles</span>[<span class="name">i</span>];
+          <span class="name">particle</span>.<span class="name">startSize</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">max</span>(<span class="number">02</span>,<span class="name">Math</span>.<span class="name">min</span>(<span class="number">492</span>,<span class="name">Math</span>.<span class="name">tan</span>(<span class="name">particle</span>.<span class="name">t</span><span class="operator">/</span><span class="number">2</span>)<span class="operator">*</span><span class="number">24</span>));
+          var theta = <span class="name">Math</span>.<span class="name">floor</span>(<span class="name">Math</span>.<span class="name">random</span>() <span class="operator">*</span> <span class="number">6.0</span>);
+          <span class="name">particle</span>.<span class="name">red</span> <span class="operator">=</span> <span class="name">theta</span> <span class="operator">==</span> <span class="number">0</span> <span class="operator">||</span> <span class="name">theta</span> <span class="operator">==</span> <span class="number">1</span> <span class="operator">||</span> <span class="name">theta</span> <span class="operator">==</span> <span class="number">2</span> ? <span class="number">0.2</span> : <span class="number">1</span>;
+          <span class="name">particle</span>.<span class="name">green</span> <span class="operator">=</span> <span class="name">theta</span> <span class="operator">==</span> <span class="number">2</span> <span class="operator">||</span> <span class="name">theta</span> <span class="operator">==</span> <span class="number">3</span> <span class="operator">||</span> <span class="name">theta</span> <span class="operator">==</span> <span class="number">4</span> ? <span class="number">0.2</span> : <span class="number">1</span>;
+          <span class="name">particle</span>.<span class="name">blue</span> <span class="operator">=</span> <span class="name">theta</span> <span class="operator">==</span> <span class="number">4</span> <span class="operator">||</span> <span class="name">theta</span> <span class="operator">==</span> <span class="number">5</span> <span class="operator">||</span> <span class="name">theta</span> <span class="operator">==</span> <span class="number">0</span> ? <span class="number">0.2</span> : <span class="number">1</span>;
+          <span class="name">theta</span> <span class="operator">/=</span> <span class="number">6.0</span>;
+          <span class="name">theta</span> <span class="operator">*=</span> <span class="number">2.0</span><span class="operator">*</span><span class="name">Math</span>.<span class="name">PI</span>;
+          <span class="name">theta</span> <span class="operator">+=</span> <span class="name">sys</span>.<span class="name">convert</span>(<span class="name">sys</span>.<span class="name">petalRotation</span>);<span class="comment">//Convert from degrees to radians</span>
+          <span class="name">particle</span>.<span class="name">initialVX</span> <span class="operator">=</span> <span class="name">petalLength</span> <span class="operator">*</span> <span class="name">Math</span>.<span class="name">cos</span>(<span class="name">theta</span>);
+          <span class="name">particle</span>.<span class="name">initialVY</span> <span class="operator">=</span> <span class="name">petalLength</span> <span class="operator">*</span> <span class="name">Math</span>.<span class="name">sin</span>(<span class="name">theta</span>);
+          <span class="name">particle</span>.<span class="name">initialAX</span> <span class="operator">=</span> <span class="name">particle</span>.<span class="name">initialVX</span> <span class="operator">*</span> -<span class="number">0.5</span>;
+          <span class="name">particle</span>.<span class="name">initialAY</span> <span class="operator">=</span> <span class="name">particle</span>.<span class="name">initialVY</span> <span class="operator">*</span> -<span class="number">0.5</span>;
+      }
+  }
+
+</pre>
+<p><a href="https://code.qt.io/cgit/qt/qtdeclarative.git/tree/examples/quick/particles/emitters?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@particles/emitters -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

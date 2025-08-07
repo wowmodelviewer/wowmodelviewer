@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qbytearraylist.cpp -->
+  <title>QByteArrayList Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QByteArrayList</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QByteArrayList Class</h1>
+<!-- $$$QByteArrayList-brief -->
+<p>The <a href="qbytearraylist.html">QByteArrayList</a> class provides a list of byte arrays. <a href="#details">More...</a></p>
+<!-- @@@QByteArrayList -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QByteArrayList&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.4</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qlist.html">QList</a></td></tr></table></div><p>This class was introduced in  Qt 5.4.</p>
+<ul>
+<li><a href="qbytearraylist-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qbytearraylist.html#indexOf">indexOf</a></b>(const char *<i>needle</i>, int <i>from</i> = 0) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qbytearraylist.html#join">join</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qbytearraylist.html#join-1">join</a></b>(const QByteArray &amp;<i>separator</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qbytearraylist.html#join-2">join</a></b>(char <i>separator</i>) const</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qbytearraylist.html#QByteArrayListIterator-typedef">QByteArrayListIterator</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qbytearraylist.html#QMutableByteArrayListIterator-typedef">QMutableByteArrayListIterator</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QByteArrayList-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qbytearraylist.html">QByteArrayList</a> is actually just a <a href="qlist.html">QList</a>&lt;<a href="qbytearray.html">QByteArray</a>&gt;. It is documented as a full class just for simplicity of documenting the member methods that exist only in <a href="qlist.html">QList</a>&lt;<a href="qbytearray.html">QByteArray</a>&gt;.</p>
+<p>All of <a href="qlist.html">QList</a>'s functionality also applies to <a href="qbytearraylist.html">QByteArrayList</a>. For example, you can use <a href="qlist.html#isEmpty">isEmpty</a>() to test whether the list is empty, and you can call functions like <a href="qlist.html#append">append</a>(), <a href="qlist.html#prepend">prepend</a>(), <a href="qlist.html#insert">insert</a>(), <a href="qlist.html#replace">replace</a>(), <a href="qlist.html#removeAll">removeAll</a>(), <a href="qlist.html#removeAt">removeAt</a>(), <a href="qlist.html#removeFirst">removeFirst</a>(), <a href="qlist.html#removeLast">removeLast</a>(), and <a href="qlist.html#removeOne">removeOne</a>() to modify a <a href="qbytearraylist.html">QByteArrayList</a>. In addition, <a href="qbytearraylist.html">QByteArrayList</a> provides several <a href="qbytearraylist.html#join">join</a>() methods for concatenating the list into a single <a href="qbytearray.html">QByteArray</a>.</p>
+<p>The purpose of <a href="qbytearraylist.html">QByteArrayList</a> is quite different from that of <a href="qstringlist.html">QStringList</a>. Whereas <a href="qstringlist.html">QStringList</a> has many methods for manipulation of elements within the list, <a href="qbytearraylist.html">QByteArrayList</a> does not. Normally, <a href="qstringlist.html">QStringList</a> should be used whenever working with a list of printable strings. <a href="qbytearraylist.html">QByteArrayList</a> should be used to handle and efficiently join large blobs of binary data, as when sequentially receiving serialized data through a <a href="qiodevice.html">QIODevice</a>.</p>
+</div>
+<p><b>See also </b><a href="qbytearray.html">QByteArray</a> and <a href="qstringlist.html">QStringList</a>.</p>
+<!-- @@@QByteArrayList -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$indexOf[overload1]$$$indexOfconstchar*int -->
+<h3 class="fn" id="indexOf"><a name="indexOf"></a><span class="type">int</span> QByteArrayList::<span class="name">indexOf</span>(const <span class="type">char</span> *<i>needle</i>, <span class="type">int</span> <i>from</i> = 0) const</h3>
+<p>Returns the index position of the first occurrence of <i>needle</i> in the list, searching forward from index position <i>from</i>. Returns -1 if no item matched.</p>
+<p><i>needle</i> must be NUL-terminated.</p>
+<p>This overload doesn't require creating a <a href="qbytearray.html">QByteArray</a>, thus saving a memory allocation and some CPU time.</p>
+<p>This is an overloaded function.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@indexOf -->
+<!-- $$$join[overload1]$$$join -->
+<h3 class="fn" id="join"><a name="join"></a><span class="type"><a href="qbytearray.html">QByteArray</a></span> QByteArrayList::<span class="name">join</span>() const</h3>
+<p>Joins all the byte arrays into a single byte array.</p>
+<!-- @@@join -->
+<!-- $$$join$$$joinconstQByteArray& -->
+<h3 class="fn" id="join-1"><a name="join-1"></a><span class="type"><a href="qbytearray.html">QByteArray</a></span> QByteArrayList::<span class="name">join</span>(const <span class="type"><a href="qbytearray.html">QByteArray</a></span> &amp;<i>separator</i>) const</h3>
+<p>Joins all the byte arrays into a single byte array with each element separated by the given <i>separator</i>.</p>
+<!-- @@@join -->
+<!-- $$$join$$$joinchar -->
+<h3 class="fn" id="join-2"><a name="join-2"></a><span class="type"><a href="qbytearray.html">QByteArray</a></span> QByteArrayList::<span class="name">join</span>(<span class="type">char</span> <i>separator</i>) const</h3>
+<p>Joins all the byte arrays into a single byte array with each element separated by the given <i>separator</i>.</p>
+<!-- @@@join -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$QByteArrayListIterator -->
+<h3 class="fn" id="QByteArrayListIterator-typedef"><a name="QByteArrayListIterator-typedef"></a>typedef <span class="name">QByteArrayListIterator</span></h3>
+<p>The QByteArrayListIterator type definition provides a Java-style const iterator for <a href="qbytearraylist.html">QByteArrayList</a>.</p>
+<p><a href="qbytearraylist.html">QByteArrayList</a> provides both <a href="containers.html#java-style-iterators">Java-style iterators</a> and <a href="containers.html#stl-style-iterators">STL-style iterators</a>. The Java-style const iterator is simply a type definition for <a href="qlistiterator.html">QListIterator</a>&lt;<a href="qbytearray.html">QByteArray</a>&gt;.</p>
+<p><b>See also </b><a href="qbytearraylist.html#QMutableByteArrayListIterator-typedef">QMutableByteArrayListIterator</a> and <a href="qlist-const-iterator.html">QByteArrayList::const_iterator</a>.</p>
+<!-- @@@QByteArrayListIterator -->
+<!-- $$$QMutableByteArrayListIterator -->
+<h3 class="fn" id="QMutableByteArrayListIterator-typedef"><a name="QMutableByteArrayListIterator-typedef"></a>typedef <span class="name">QMutableByteArrayListIterator</span></h3>
+<p>The <a href="qbytearraylist.html#QByteArrayListIterator-typedef">QByteArrayListIterator</a> type definition provides a Java-style non-const iterator for <a href="qbytearraylist.html">QByteArrayList</a>.</p>
+<p><a href="qbytearraylist.html">QByteArrayList</a> provides both <a href="containers.html#java-style-iterators">Java-style iterators</a> and <a href="containers.html#stl-style-iterators">STL-style iterators</a>. The Java-style non-const iterator is simply a type definition for <a href="qmutablelistiterator.html">QMutableListIterator</a>&lt;<a href="qbytearray.html">QByteArray</a>&gt;.</p>
+<p><b>See also </b><a href="qbytearraylist.html#QByteArrayListIterator-typedef">QByteArrayListIterator</a> and <a href="qlist-iterator.html">QByteArrayList::iterator</a>.</p>
+<!-- @@@QMutableByteArrayListIterator -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

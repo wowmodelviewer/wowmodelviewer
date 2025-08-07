@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qpropertyanimation.cpp -->
+  <title>QPropertyAnimation Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QPropertyAnimation</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPropertyAnimation Class</h1>
+<!-- $$$QPropertyAnimation-brief -->
+<p>The <a href="qpropertyanimation.html">QPropertyAnimation</a> class animates Qt properties. <a href="#details">More...</a></p>
+<!-- @@@QPropertyAnimation -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QPropertyAnimation&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.6</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qvariantanimation.html">QVariantAnimation</a></td></tr></table></div><p>This class was introduced in  Qt 4.6.</p>
+<ul>
+<li><a href="qpropertyanimation-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qpropertyanimation.html#propertyName-prop">propertyName</a></b> : QByteArray</li>
+<li class="fn"><b><a href="qpropertyanimation.html#targetObject-prop">targetObject</a></b> : QObject*</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpropertyanimation.html#QPropertyAnimation-1">QPropertyAnimation</a></b>(QObject *<i>target</i>, const QByteArray &amp;<i>propertyName</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qpropertyanimation.html#QPropertyAnimation">QPropertyAnimation</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qpropertyanimation.html#dtor.QPropertyAnimation">~QPropertyAnimation</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qpropertyanimation.html#propertyName-prop">propertyName</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpropertyanimation.html#propertyName-prop">setPropertyName</a></b>(const QByteArray &amp;<i>propertyName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qpropertyanimation.html#targetObject-prop">setTargetObject</a></b>(QObject *<i>target</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QObject *</td><td class="memItemRight bottomAlign"><b><a href="qpropertyanimation.html#targetObject-prop">targetObject</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qpropertyanimation.html#event">event</a></b>(QEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qpropertyanimation.html#updateCurrentValue">updateCurrentValue</a></b>(const QVariant &amp;<i>value</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qpropertyanimation.html#updateState">updateState</a></b>(QAbstractAnimation::State <i>newState</i>, QAbstractAnimation::State <i>oldState</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPropertyAnimation-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qpropertyanimation.html">QPropertyAnimation</a> interpolates over <a href="properties.html">Qt properties</a>. As property values are stored in <a href="qvariant.html">QVariant</a>s, the class inherits <a href="qvariantanimation.html">QVariantAnimation</a>, and supports animation of the same <a href="qmetatype.html#Type-enum">meta types</a> as its super class.</p>
+<p>A class declaring properties must be a <a href="qobject.html">QObject</a>. To make it possible to animate a property, it must provide a setter (so that <a href="qpropertyanimation.html">QPropertyAnimation</a> can set the property's value). Note that this makes it possible to animate many of Qt's widgets. Let's look at an example:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qpropertyanimation.html#QPropertyAnimation">QPropertyAnimation</a></span> <span class="operator">*</span>animation <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpropertyanimation.html#QPropertyAnimation">QPropertyAnimation</a></span>(myWidget<span class="operator">,</span> <span class="string">&quot;geometry&quot;</span>);
+      animation<span class="operator">-</span><span class="operator">&gt;</span>setDuration(<span class="number">10000</span>);
+      animation<span class="operator">-</span><span class="operator">&gt;</span>setStartValue(<span class="type"><a href="qrect.html">QRect</a></span>(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">100</span><span class="operator">,</span> <span class="number">30</span>));
+      animation<span class="operator">-</span><span class="operator">&gt;</span>setEndValue(<span class="type"><a href="qrect.html">QRect</a></span>(<span class="number">250</span><span class="operator">,</span> <span class="number">250</span><span class="operator">,</span> <span class="number">100</span><span class="operator">,</span> <span class="number">30</span>));
+
+      animation<span class="operator">-</span><span class="operator">&gt;</span>start();
+
+</pre>
+<p>The property name and the <a href="qobject.html">QObject</a> instance of which property should be animated are passed to the constructor. You can then specify the start and end value of the property. The procedure is equal for properties in classes you have implemented yourself--just check with <a href="qvariantanimation.html">QVariantAnimation</a> that your <a href="qvariant.html">QVariant</a> type is supported.</p>
+<p>The <a href="qvariantanimation.html">QVariantAnimation</a> class description explains how to set up the animation in detail. Note, however, that if a start value is not set, the property will start at the value it had when the <a href="qpropertyanimation.html">QPropertyAnimation</a> instance was created.</p>
+<p><a href="qpropertyanimation.html">QPropertyAnimation</a> works like a charm on its own. For complex animations that, for instance, contain several objects, <a href="qanimationgroup.html">QAnimationGroup</a> is provided. An animation group is an animation that can contain other animations, and that can manage when its animations are played. Look at <a href="qparallelanimationgroup.html">QParallelAnimationGroup</a> for an example.</p>
+</div>
+<p><b>See also </b><a href="qvariantanimation.html">QVariantAnimation</a>, <a href="qanimationgroup.html">QAnimationGroup</a>, and <a href="animation-overview.html">The Animation Framework</a>.</p>
+<!-- @@@QPropertyAnimation -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$propertyName-prop$$$propertyName$$$setPropertyNameconstQByteArray& -->
+<h3 class="fn" id="propertyName-prop"><a name="propertyName-prop"></a><span class="name">propertyName</span> : <span class="type"><a href="qbytearray.html">QByteArray</a></span></h3>
+<p>This property holds the target property name for this animation</p>
+<p>This property defines the target property name for this animation. The property name is required for the animation to operate.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QByteArray </td><td class="memItemRight bottomAlign"><span class="name"><b>propertyName</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setPropertyName</b></span>(const QByteArray &amp;<i>propertyName</i>)</td></tr>
+</table></div>
+<!-- @@@propertyName -->
+<!-- $$$targetObject-prop$$$targetObject$$$setTargetObjectQObject* -->
+<h3 class="fn" id="targetObject-prop"><a name="targetObject-prop"></a><span class="name">targetObject</span> : <span class="type"><a href="qobject.html#QObject">QObject</a></span>*</h3>
+<p>This property holds the target <a href="qobject.html">QObject</a> for this animation.</p>
+<p>This property defines the target <a href="qobject.html">QObject</a> for this animation.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QObject *</td><td class="memItemRight bottomAlign"><span class="name"><b>targetObject</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setTargetObject</b></span>(QObject *<i>target</i>)</td></tr>
+</table></div>
+<!-- @@@targetObject -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QPropertyAnimation$$$QPropertyAnimationQObject*constQByteArray&QObject* -->
+<h3 class="fn" id="QPropertyAnimation-1"><a name="QPropertyAnimation-1"></a>QPropertyAnimation::<span class="name">QPropertyAnimation</span>(<span class="type"><a href="qobject.html#QObject">QObject</a></span> *<i>target</i>, const <span class="type"><a href="qbytearray.html">QByteArray</a></span> &amp;<i>propertyName</i>, <span class="type"><a href="qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Construct a <a href="qpropertyanimation.html">QPropertyAnimation</a> object. <i>parent</i> is passed to <a href="qobject.html">QObject</a>'s constructor. The animation changes the property <i>propertyName</i> on <i>target</i>. The default duration is 250ms.</p>
+<p><b>See also </b><a href="qpropertyanimation.html#targetObject-prop">targetObject</a> and <a href="qpropertyanimation.html#propertyName-prop">propertyName</a>.</p>
+<!-- @@@QPropertyAnimation -->
+<!-- $$$QPropertyAnimation[overload1]$$$QPropertyAnimationQObject* -->
+<h3 class="fn" id="QPropertyAnimation"><a name="QPropertyAnimation"></a>QPropertyAnimation::<span class="name">QPropertyAnimation</span>(<span class="type"><a href="qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Construct a <a href="qpropertyanimation.html">QPropertyAnimation</a> object. <i>parent</i> is passed to <a href="qobject.html">QObject</a>'s constructor.</p>
+<!-- @@@QPropertyAnimation -->
+<!-- $$$~QPropertyAnimation[overload1]$$$~QPropertyAnimation -->
+<h3 class="fn" id="dtor.QPropertyAnimation"><a name="dtor.QPropertyAnimation"></a><code>[virtual] </code>QPropertyAnimation::<span class="name">~QPropertyAnimation</span>()</h3>
+<p>Destroys the <a href="qpropertyanimation.html">QPropertyAnimation</a> instance.</p>
+<!-- @@@~QPropertyAnimation -->
+<!-- $$$event[overload1]$$$eventQEvent* -->
+<h3 class="fn" id="event"><a name="event"></a><code>[override virtual protected] </code><span class="type">bool</span> QPropertyAnimation::<span class="name">event</span>(<span class="type"><a href="qevent.html">QEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qvariantanimation.html#event">QVariantAnimation::event</a>(QEvent *event).</p>
+<!-- @@@event -->
+<!-- $$$updateCurrentValue[overload1]$$$updateCurrentValueconstQVariant& -->
+<h3 class="fn" id="updateCurrentValue"><a name="updateCurrentValue"></a><code>[override virtual protected] </code><span class="type">void</span> QPropertyAnimation::<span class="name">updateCurrentValue</span>(const <span class="type"><a href="qvariant.html">QVariant</a></span> &amp;<i>value</i>)</h3>
+<p>Reimplements: <a href="qvariantanimation.html#updateCurrentValue">QVariantAnimation::updateCurrentValue</a>(const QVariant &amp;value).</p>
+<p>This virtual function is called by <a href="qvariantanimation.html">QVariantAnimation</a> whenever the current value changes. <i>value</i> is the new, updated value. It updates the current value of the property on the target object.</p>
+<p><b>See also </b><a href="qvariantanimation.html#currentValue-prop">currentValue</a> and <a href="qabstractanimation.html#currentTime-prop">currentTime</a>.</p>
+<!-- @@@updateCurrentValue -->
+<!-- $$$updateState[overload1]$$$updateStateQAbstractAnimation::StateQAbstractAnimation::State -->
+<h3 class="fn" id="updateState"><a name="updateState"></a><code>[override virtual protected] </code><span class="type">void</span> QPropertyAnimation::<span class="name">updateState</span>(<span class="type"><a href="qabstractanimation.html#State-enum">QAbstractAnimation::State</a></span> <i>newState</i>, <span class="type"><a href="qabstractanimation.html#State-enum">QAbstractAnimation::State</a></span> <i>oldState</i>)</h3>
+<p>Reimplements: <a href="qvariantanimation.html#updateState">QVariantAnimation::updateState</a>(QAbstractAnimation::State newState, QAbstractAnimation::State oldState).</p>
+<p>If the <a href="qvariantanimation.html#startValue-prop">startValue</a> is not defined when the state of the animation changes from Stopped to Running, the current property value is used as the initial value for the animation.</p>
+<!-- @@@updateState -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

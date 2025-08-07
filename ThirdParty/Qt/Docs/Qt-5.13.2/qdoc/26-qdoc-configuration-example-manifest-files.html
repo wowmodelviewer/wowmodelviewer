@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdoc-manual-qdocconf.qdoc -->
+  <title>Example Manifest Files | QDoc Manual 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qdoc-index.html">QDoc Manual</a></td><td >Example Manifest Files</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qdoc-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="25-qdoc-configuration-derivedprojects.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="25-qdoc-configuration-derivedprojects.html">Supporting Derived Projects</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#manifest-xml-structure">Manifest XML Structure</a></li>
+<li class="level1"><a href="#manifest-meta-content">Manifest Meta Content</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Example Manifest Files</h1>
+<span class="subtitle"></span>
+<!-- $$$26-qdoc-configuration-example-manifest-files.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>QDoc generates XML files that contain information about all documented examples and demos. These files, named <code>examples-manifest.xml</code> and <code>demos-manifest.xml</code>, are used by Qt Creator to present a list of examples in its welcome screen and to link to their documentation.</p>
+<a name="manifest-xml-structure"></a>
+<h2 id="manifest-xml-structure">Manifest XML Structure</h2>
+<p>A manifest file has the following structure:</p>
+<pre class="cpp plain">
+
+  &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+  &lt;instructionals module=&quot;QtGui&quot;&gt;
+      &lt;examples&gt;
+          &lt;example
+              name=&quot;Analog Clock Window Example&quot;
+              docUrl=&quot;qthelp://org.qt-project.qtgui.502/qtgui/analogclock.html&quot;
+              projectPath=&quot;gui/analogclock/analogclock.pro&quot;
+              imageUrl=&quot;qthelp://org.qt-project.qtgui.502/qtgui/images/analogclock-window-example.png&quot;&gt;
+              &lt;description&gt;&lt;![CDATA[The Analog Clock Window example shows how
+                  to draw the contents of a custom window.]]&gt;&lt;/description&gt;
+              &lt;tags&gt;analog,clock,window&lt;/tags&gt;
+              &lt;fileToOpen&gt;gui/analogclock/main.cpp&lt;/fileToOpen&gt;
+          &lt;/example&gt;
+          ..&#x2e;
+      &lt;/examples&gt;
+  &lt;/instructionals&gt;
+
+</pre>
+<p>Each <code>&lt;example&gt;</code> element contains information about a name, description, the location of the project file and documentation, as well as a list of tags associated with the example.</p>
+<a name="metacontent"></a><a name="manifest-meta-content"></a>
+<h2 id="manifest-meta-content">Manifest Meta Content</h2>
+<p>It is possible to augment the manifest files with additional meta-content - that is, extra attributes and tags for selected examples, using the <code>manifestmeta</code> configuration command.</p>
+<p>One use case for meta-content is highlighting a number of prominent examples. Another is improving search functionality by adding relevant keywords as tags for a certain category of examples.</p>
+<p>The examples for which meta-content is applied to is specified using one or more filters. Matching examples to filters is done based on names, with each example name prefixed with a module name and a slash. Simple wildcard matching is supported; by using <code>*</code> at the end it's possible to match multiple examples with a single string.</p>
+<p>Example:</p>
+<pre class="cpp plain">
+
+  manifestmeta.filters                = highlighted sql webkit global
+
+  manifestmeta.highlighted.names      = &quot;QtGui/Analog Clock Window Example&quot; \
+                                        &quot;QtWidgets/Analog Clock Example&quot;
+  manifestmeta.highlighted.attributes = isHighlighted:true
+
+  manifestmeta.sql.names              = &quot;QtSql/*&quot;
+  manifestmeta.sql.tags               = database,sql
+
+  manifestmeta.webkit.names           = &quot;QtWebKitExamples/*&quot;
+  manifestmeta.webkit.tags            = webkit
+
+  manifestmeta.global.names           = *
+  manifestmeta.global.tags            = qt5
+
+</pre>
+<p>Above, an <code>isHighlighted</code> attribute is added to two examples. If the attribute value is omitted, QDoc uses the string <code>true</code> by default. Extra tags are added for Qt WebKit and Qt SQL examples, and another tag is applied to all examples by using just <code>*</code> as the match string.</p>
+</div>
+<!-- @@@26-qdoc-configuration-example-manifest-files.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="25-qdoc-configuration-derivedprojects.html">Supporting Derived Projects</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

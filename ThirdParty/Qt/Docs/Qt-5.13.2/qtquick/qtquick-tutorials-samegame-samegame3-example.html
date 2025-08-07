@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- advtutorial.qdoc -->
+  <title>QML Advanced Tutorial 3 - Implementing the Game Logic | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td >QML Advanced Tutorial 3 - Implementing the Game Logic</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="qtquick-tutorials-samegame-samegame2-example.html" />
+  <link rel="next" href="qtquick-tutorials-samegame-samegame4-example.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="qtquick-tutorials-samegame-samegame2-example.html">QML Advanced Tutorial 2 - Populating the Game Canvas</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qtquick-tutorials-samegame-samegame4-example.html">QML Advanced Tutorial 4 - Finishing Touches</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level2"><a href="#making-a-playable-game">Making a Playable Game</a></li>
+<li class="level2"><a href="#a-working-game">A Working Game</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QML Advanced Tutorial 3 - Implementing the Game Logic</h1>
+<span class="subtitle"></span>
+<!-- $$$tutorials/samegame/samegame3-description -->
+<div class="descr"> <a name="details"></a>
+<a name="making-a-playable-game"></a>
+<h5 id="making-a-playable-game">Making a Playable Game</h5>
+<p>Now that we have all the game components, we can add the game logic that dictates how a player interacts with the blocks and plays the game until it is won or lost.</p>
+<p>To do this, we have added the following functions to <code>samegame.js</code>:</p>
+<ul>
+<li><code>handleClick(x,y)</code></li>
+<li><code>floodFill(xIdx,yIdx,type)</code></li>
+<li><code>shuffleDown()</code></li>
+<li><code>victoryCheck()</code></li>
+<li><code>floodMoveCheck(xIdx, yIdx, type)</code></li>
+</ul>
+<p>As this is a tutorial about QML, not game design, we will only discuss <code>handleClick()</code> and <code>victoryCheck()</code> below since they interface directly with the QML types. Note that although the game logic here is written in JavaScript, it could have been written in C++ and then exposed to QML.</p>
+<a name="enabling-mouse-click-interaction"></a>
+<h6 id="enabling-mouse-click-interaction">Enabling Mouse Click Interaction</h6>
+<p>To make it easier for the JavaScript code to interface with the QML types, we have added an Item called <code>gameCanvas</code> to <code>samegame.qml</code>. It replaces the background as the item which contains the blocks. It also accepts mouse input from the user. Here is the item code:</p>
+<pre class="qml">
+
+          <span class="type"><a href="qml-qtquick-item.html">Item</a></span> {
+              <span class="name">id</span>: <span class="name">gameCanvas</span>
+
+              property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">score</span>: <span class="number">0</span>
+              property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">blockSize</span>: <span class="number">40</span>
+
+              <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span> <span class="operator">-</span> (<span class="name">parent</span>.<span class="name">width</span> <span class="operator">%</span> <span class="name">blockSize</span>)
+              <span class="name">height</span>: <span class="name">parent</span>.<span class="name">height</span> <span class="operator">-</span> (<span class="name">parent</span>.<span class="name">height</span> <span class="operator">%</span> <span class="name">blockSize</span>)
+              <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+
+              <span class="type"><a href="qml-qtquick-mousearea.html">MouseArea</a></span> {
+                  <span class="name">anchors</span>.fill: <span class="name">parent</span>
+                  <span class="name">onClicked</span>: <span class="name">SameGame</span>.<span class="name">handleClick</span>(<span class="name">mouse</span>.<span class="name">x</span>, <span class="name">mouse</span>.<span class="name">y</span>)
+              }
+          }
+
+</pre>
+<p>The <code>gameCanvas</code> item is the exact size of the board, and has a <code>score</code> property and a <a href="qml-qtquick-mousearea.html">MouseArea</a> to handle mouse clicks. The blocks are now created as its children, and its dimensions are used to determine the board size so that the application scales to the available screen size. Since its size is bound to a multiple of <code>blockSize</code>, <code>blockSize</code> was moved out of <code>samegame.js</code> and into <code>samegame.qml</code> as a QML property. Note that it can still be accessed from the script.</p>
+<p>When clicked, the <a href="qml-qtquick-mousearea.html">MouseArea</a> calls <code>handleClick()</code> in <code>samegame.js</code>, which determines whether the player's click should cause any blocks to be removed, and updates <code>gameCanvas.score</code> with the current score if necessary. Here is the <code>handleClick()</code> function:</p>
+<pre class="js">
+
+  <span class="keyword">function</span> <span class="name">handleClick</span>(xPos, yPos) {
+      var column = <span class="name">Math</span>.<span class="name">floor</span>(<span class="name">xPos</span> <span class="operator">/</span> <span class="name">gameCanvas</span>.<span class="name">blockSize</span>);
+      var row = <span class="name">Math</span>.<span class="name">floor</span>(<span class="name">yPos</span> <span class="operator">/</span> <span class="name">gameCanvas</span>.<span class="name">blockSize</span>);
+      <span class="keyword">if</span> (<span class="name">column</span> <span class="operator">&gt;=</span> <span class="name">maxColumn</span> <span class="operator">||</span> <span class="name">column</span> <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">||</span> <span class="name">row</span> <span class="operator">&gt;=</span> <span class="name">maxRow</span> <span class="operator">||</span> <span class="name">row</span> <span class="operator">&lt;</span> <span class="number">0</span>)
+          <span class="keyword">return</span>;
+      <span class="keyword">if</span> (<span class="name">board</span>[<span class="name">index</span>(<span class="name">column</span>, <span class="name">row</span>)] <span class="operator">==</span> <span class="number">null</span>)
+          <span class="keyword">return</span>;
+      <span class="comment">//If it's a valid block, remove it and all connected (does nothing if it's not connected)</span>
+      <span class="name">floodFill</span>(<span class="name">column</span>, <span class="name">row</span>, -<span class="number">1</span>);
+      <span class="keyword">if</span> (<span class="name">fillFound</span> <span class="operator">&lt;=</span> <span class="number">0</span>)
+          <span class="keyword">return</span>;
+      <span class="name">gameCanvas</span>.<span class="name">score</span> <span class="operator">+=</span> (<span class="name">fillFound</span> <span class="operator">-</span> <span class="number">1</span>) <span class="operator">*</span> (<span class="name">fillFound</span> <span class="operator">-</span> <span class="number">1</span>);
+      <span class="name">shuffleDown</span>();
+      <span class="name">victoryCheck</span>();
+  }
+
+</pre>
+<p>Note that if <code>score</code> was a global variable in the <code>samegame.js</code> file you would not be able to bind to it. You can only bind to QML properties.</p>
+<a name="updating-the-score"></a>
+<h6 id="updating-the-score">Updating the Score</h6>
+<p>When the player clicks a block and triggers <code>handleClick()</code>, <code>handleClick()</code> also calls <code>victoryCheck()</code> to update the score and to check whether the player has completed the game. Here is the <code>victoryCheck()</code> code:</p>
+<pre class="js">
+
+  <span class="keyword">function</span> <span class="name">victoryCheck</span>() {
+      <span class="comment">//Award bonus points if no blocks left</span>
+      var deservesBonus = <span class="number">true</span>;
+      <span class="keyword">for</span> (var column = maxColumn - 1; <span class="name">column</span> <span class="operator">&gt;=</span> <span class="number">0</span>; column--)
+          <span class="keyword">if</span> (<span class="name">board</span>[<span class="name">index</span>(<span class="name">column</span>, <span class="name">maxRow</span> <span class="operator">-</span> <span class="number">1</span>)] <span class="operator">!=</span> <span class="number">null</span>)
+          <span class="name">deservesBonus</span> <span class="operator">=</span> <span class="number">false</span>;
+      <span class="keyword">if</span> (<span class="name">deservesBonus</span>)
+          <span class="name">gameCanvas</span>.<span class="name">score</span> <span class="operator">+=</span> <span class="number">500</span>;
+
+      <span class="comment">//Check whether game has finished</span>
+      <span class="keyword">if</span> (<span class="name">deservesBonus</span> <span class="operator">||</span> !(<span class="name">floodMoveCheck</span>(<span class="number">0</span>, <span class="name">maxRow</span> <span class="operator">-</span> <span class="number">1</span>, -<span class="number">1</span>)))
+          <span class="name">dialog</span>.<span class="name">show</span>(<span class="string">&quot;Game Over. Your score is &quot;</span> <span class="operator">+</span> <span class="name">gameCanvas</span>.<span class="name">score</span>);
+  }
+
+</pre>
+<p>This updates the <code>gameCanvas.score</code> value and displays a &quot;Game Over&quot; dialog if the game is finished.</p>
+<p>The Game Over dialog is created using a <code>Dialog</code> type that is defined in <code>Dialog.qml</code>. Here is the <code>Dialog.qml</code> code. Notice how it is designed to be usable imperatively from the script file, via the functions and signals:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">container</span>
+
+      <span class="keyword">function</span> <span class="name">show</span>(text) {
+          <span class="name">dialogText</span>.<span class="name">text</span> <span class="operator">=</span> <span class="name">text</span>;
+          <span class="name">container</span>.<span class="name">opacity</span> <span class="operator">=</span> <span class="number">1</span>;
+      }
+
+      <span class="keyword">function</span> <span class="name">hide</span>() {
+          <span class="name">container</span>.<span class="name">opacity</span> <span class="operator">=</span> <span class="number">0</span>;
+      }
+
+      <span class="name">width</span>: <span class="name">dialogText</span>.<span class="name">width</span> <span class="operator">+</span> <span class="number">20</span>
+      <span class="name">height</span>: <span class="name">dialogText</span>.<span class="name">height</span> <span class="operator">+</span> <span class="number">20</span>
+      <span class="name">opacity</span>: <span class="number">0</span>
+
+      <span class="type"><a href="qml-qtquick-text.html">Text</a></span> {
+          <span class="name">id</span>: <span class="name">dialogText</span>
+          <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+          <span class="name">text</span>: <span class="string">&quot;&quot;</span>
+      }
+
+      <span class="type"><a href="qml-qtquick-mousearea.html">MouseArea</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">onClicked</span>: <span class="name">hide</span>();
+      }
+  }
+
+</pre>
+<p>And this is how it is used in the main <code>samegame.qml</code> file:</p>
+<pre class="qml">
+
+      <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-dialog.html">Dialog</a></span> {
+          <span class="name">id</span>: <span class="name">dialog</span>
+          <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+          <span class="name">z</span>: <span class="number">100</span>
+      }
+
+</pre>
+<p>We give the dialog a <a href="qml-qtquick-item.html#z-prop">z</a> value of 100 to ensure it is displayed on top of our other components. The default <code>z</code> value for an item is 0.</p>
+<a name="a-dash-of-color"></a>
+<h6 id="a-dash-of-color">A Dash of Color</h6>
+<p>It's not much fun to play Same Game if all the blocks are the same color, so we've modified the <code>createBlock()</code> function in <code>samegame.js</code> to randomly create a different type of block (for either red, green or blue) each time it is called. <code>Block.qml</code> has also changed so that each block contains a different image depending on its type:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">block</span>
+
+      property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">type</span>: <span class="number">0</span>
+
+      <span class="type"><a href="qml-qtquick-image.html">Image</a></span> {
+          <span class="name">id</span>: <span class="name">img</span>
+
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">source</span>: {
+              <span class="keyword">if</span> (<span class="name">type</span> <span class="operator">==</span> <span class="number">0</span>)
+                  <span class="keyword">return</span> <span class="string">&quot;../shared/pics/redStone.png&quot;</span>;
+              <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">type</span> <span class="operator">==</span> <span class="number">1</span>)
+                  <span class="keyword">return</span> <span class="string">&quot;../shared/pics/blueStone.png&quot;</span>;
+              <span class="keyword">else</span>
+                  <span class="keyword">return</span> <span class="string">&quot;../shared/pics/greenStone.png&quot;</span>;
+          }
+      }
+  }
+
+</pre>
+<a name="a-working-game"></a>
+<h5 id="a-working-game">A Working Game</h5>
+<p>Now we now have a working game! The blocks can be clicked, the player can score, and the game can end (and then you can start a new one). Here is a screenshot of what has been accomplished so far:</p>
+<p class="centerAlign"><img src="images/declarative-adv-tutorial3.png" alt="" /></p><p>This is what <code>samegame.qml</code> looks like now:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+  import &quot;samegame.js&quot; as SameGame
+
+  <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">screen</span>
+
+      <span class="name">width</span>: <span class="number">490</span>; <span class="name">height</span>: <span class="number">720</span>
+
+      <span class="type"><a href="qml-qtquick-systempalette.html">SystemPalette</a></span> { <span class="name">id</span>: <span class="name">activePalette</span> }
+
+      <span class="type"><a href="qml-qtquick-item.html">Item</a></span> {
+          <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+          <span class="type">anchors</span> { <span class="name">top</span>: <span class="name">parent</span>.<span class="name">top</span>; <span class="name">bottom</span>: <span class="name">toolBar</span>.<span class="name">top</span> }
+
+          <span class="type"><a href="qml-qtquick-image.html">Image</a></span> {
+              <span class="name">id</span>: <span class="name">background</span>
+              <span class="name">anchors</span>.fill: <span class="name">parent</span>
+              <span class="name">source</span>: <span class="string">&quot;../shared/pics/background.jpg&quot;</span>
+              <span class="name">fillMode</span>: <span class="name">Image</span>.<span class="name">PreserveAspectCrop</span>
+          }
+
+          <span class="type"><a href="qml-qtquick-item.html">Item</a></span> {
+              <span class="name">id</span>: <span class="name">gameCanvas</span>
+
+              property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">score</span>: <span class="number">0</span>
+              property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">blockSize</span>: <span class="number">40</span>
+
+              <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span> <span class="operator">-</span> (<span class="name">parent</span>.<span class="name">width</span> <span class="operator">%</span> <span class="name">blockSize</span>)
+              <span class="name">height</span>: <span class="name">parent</span>.<span class="name">height</span> <span class="operator">-</span> (<span class="name">parent</span>.<span class="name">height</span> <span class="operator">%</span> <span class="name">blockSize</span>)
+              <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+
+              <span class="type"><a href="qml-qtquick-mousearea.html">MouseArea</a></span> {
+                  <span class="name">anchors</span>.fill: <span class="name">parent</span>
+                  <span class="name">onClicked</span>: <span class="name">SameGame</span>.<span class="name">handleClick</span>(<span class="name">mouse</span>.<span class="name">x</span>, <span class="name">mouse</span>.<span class="name">y</span>)
+              }
+          }
+      }
+
+      <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-dialog.html">Dialog</a></span> {
+          <span class="name">id</span>: <span class="name">dialog</span>
+          <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+          <span class="name">z</span>: <span class="number">100</span>
+      }
+
+      <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">toolBar</span>
+          <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>; <span class="name">height</span>: <span class="number">30</span>
+          <span class="name">color</span>: <span class="name">activePalette</span>.<span class="name">window</span>
+          <span class="name">anchors</span>.bottom: <span class="name">screen</span>.<span class="name">bottom</span>
+
+          <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls2-button.html">Button</a></span> {
+              <span class="type">anchors</span> { <span class="name">left</span>: <span class="name">parent</span>.<span class="name">left</span>; <span class="name">verticalCenter</span>: <span class="name">parent</span>.<span class="name">verticalCenter</span> }
+              <span class="name">text</span>: <span class="string">&quot;New Game&quot;</span>
+              <span class="name">onClicked</span>: <span class="name">SameGame</span>.<span class="name">startNewGame</span>()
+          }
+
+          <span class="type"><a href="qml-qtquick-text.html">Text</a></span> {
+              <span class="name">id</span>: <span class="name">score</span>
+              <span class="type">anchors</span> { <span class="name">right</span>: <span class="name">parent</span>.<span class="name">right</span>; <span class="name">verticalCenter</span>: <span class="name">parent</span>.<span class="name">verticalCenter</span> }
+              <span class="name">text</span>: <span class="string">&quot;Score: Who knows?&quot;</span>
+          }
+      }
+  }
+
+</pre>
+<p>The game works, but it's a little boring right now. Where are the smooth animated transitions? Where are the high scores? If you were a QML expert you could have written these in the first iteration, but in this tutorial they've been saved until the next chapter - where your application becomes alive!</p>
+<p><a href="https://code.qt.io/cgit/qt/qtdeclarative.git/tree/examples/quick/tutorials/samegame/samegame3?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@tutorials/samegame/samegame3 -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="qtquick-tutorials-samegame-samegame2-example.html">QML Advanced Tutorial 2 - Populating the Game Canvas</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qtquick-tutorials-samegame-samegame4-example.html">QML Advanced Tutorial 4 - Finishing Touches</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

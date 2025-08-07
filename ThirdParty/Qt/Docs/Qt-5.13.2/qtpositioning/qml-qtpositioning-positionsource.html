@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdeclarativepositionsource.cpp -->
+  <title>PositionSource QML Type | Qt Positioning 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtpositioning-index.html">Qt Positioning</a></td><td ><a href="qtpositioning-qmlmodule.html">QML Types</a></td><td >PositionSource QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtpositioning-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#example-usage">Example Usage</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">PositionSource QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$PositionSource-brief -->
+<p>The <a href="qml-qtpositioning-positionsource.html">PositionSource</a> type provides the device's current position. <a href="#details">More...</a></p>
+<!-- @@@PositionSource -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtPositioning 5.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.2</td></tr></table></div><ul>
+<li><a href="qml-qtpositioning-positionsource-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtpositioning-positionsource.html#active-prop">active</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtpositioning-positionsource.html#name-prop">name</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtpositioning-positionsource.html#nmeaSource-prop">nmeaSource</a></b></b> : url</li>
+<li class="fn"><b><b><a href="qml-qtpositioning-positionsource.html#position-prop">position</a></b></b> : Position</li>
+<li class="fn"><b><b><a href="qml-qtpositioning-positionsource.html#preferredPositioningMethods-prop">preferredPositioningMethods</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtpositioning-positionsource.html#sourceError-prop">sourceError</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtpositioning-positionsource.html#supportedPositioningMethods-prop">supportedPositioningMethods</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtpositioning-positionsource.html#updateInterval-prop">updateInterval</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtpositioning-positionsource.html#valid-prop">valid</a></b></b> : bool</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtpositioning-positionsource.html#updateTimeout-signal">updateTimeout</a></b></b>()</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtpositioning-positionsource.html#start-method">start</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtpositioning-positionsource.html#stop-method">stop</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtpositioning-positionsource.html#update-method">update</a></b></b>()</li>
+</ul>
+<!-- $$$PositionSource-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qml-qtpositioning-positionsource.html">PositionSource</a> type provides information about the user device's current position. The position is available as a <a href="qml-qtpositioning-position.html">Position</a> type, which contains all the standard parameters typically available from GPS and other similar systems, including longitude, latitude, speed and accuracy details.</p>
+<p>As different position sources are available on different platforms and devices, these are categorized by their basic type (Satellite, NonSatellite, and AllPositioningMethods). The available methods for the current platform can be enumerated in the <a href="qml-qtpositioning-positionsource.html#supportedPositioningMethods-prop">supportedPositioningMethods</a> property.</p>
+<p>To indicate which methods are suitable for your application, set the <a href="qml-qtpositioning-positionsource.html#preferredPositioningMethods-prop">preferredPositioningMethods</a> property. If the preferred methods are not available, the default source of location data for the platform will be chosen instead. If no default source is available (because none are installed for the runtime platform, or because it is disabled), the <a href="qml-qtpositioning-positionsource.html#valid-prop">valid</a> property will be set to false.</p>
+<p>The <a href="qml-qtpositioning-positionsource.html#updateInterval-prop">updateInterval</a> property can then be used to indicate how often your application wishes to receive position updates. The <a href="qml-qtpositioning-positionsource.html#start-method">start</a>(), <a href="qml-qtpositioning-positionsource.html#stop-method">stop</a>() and <a href="qml-qtpositioning-positionsource.html#update-method">update</a>() methods can be used to control the operation of the <a href="qml-qtpositioning-positionsource.html">PositionSource</a>, as well as the <a href="qml-qtpositioning-positionsource.html#active-prop">active</a> property, which when set is equivalent to calling <a href="qml-qtpositioning-positionsource.html#start-method">start</a>() or <a href="qml-qtpositioning-positionsource.html#stop-method">stop</a>().</p>
+<p>When the <a href="qml-qtpositioning-positionsource.html">PositionSource</a> is active, position updates can be retrieved either by simply using the <a href="qml-qtpositioning-positionsource.html#position-prop">position</a> property in a binding (as the value of another item's property), or by providing an implementation of the <code>onPositionChanged</code> signal-handler.</p>
+<a name="example-usage"></a>
+<h3 id="example-usage">Example Usage</h3>
+<p>The following example shows a simple <a href="qml-qtpositioning-positionsource.html">PositionSource</a> used to receive updates every second and print the longitude and latitude out to the console.</p>
+<pre class="cpp">
+
+  PositionSource {
+      id: src
+      updateInterval: <span class="number">1000</span>
+      active: <span class="keyword">true</span>
+
+      onPositionChanged: {
+          var coord <span class="operator">=</span> src<span class="operator">.</span>position<span class="operator">.</span>coordinate;
+          console<span class="operator">.</span>log(<span class="string">&quot;Coordinate:&quot;</span><span class="operator">,</span> coord<span class="operator">.</span>longitude<span class="operator">,</span> coord<span class="operator">.</span>latitude);
+      }
+  }
+
+</pre>
+<p>The <a href="qtpositioning-geoflickr-example.html">GeoFlickr</a> example application shows how to use a <a href="qml-qtpositioning-positionsource.html">PositionSource</a> in your application to retrieve local data for users from a REST web service.</p>
+<p><b>See also </b><a href="qml-qtpositioning-position.html">QtPositioning::Position</a> and <a href="qgeopositioninfosource.html">QGeoPositionInfoSource</a>.</p>
+<!-- @@@PositionSource -->
+<h2>Property Documentation</h2>
+<!-- $$$active -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="active-prop"></a><span class="name">active</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property indicates whether the position source is active. Setting this property to false equals calling <a href="qml-qtpositioning-positionsource.html#stop-method">stop</a>, and setting this property true equals calling <a href="qml-qtpositioning-positionsource.html#start-method">start</a>.</p>
+<p><b>See also </b><a href="qml-qtpositioning-positionsource.html#start-method">start</a>, <a href="qml-qtpositioning-positionsource.html#stop-method">stop</a>, and <a href="qml-qtpositioning-positionsource.html#update-method">update</a>.</p>
+</div></div><!-- @@@active -->
+<br/>
+<!-- $$$name -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="name-prop"></a><span class="name">name</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the unique internal name for the plugin currently providing position information.</p>
+<p>Setting the property causes the <a href="qml-qtpositioning-positionsource.html">PositionSource</a> to use a particular positioning provider. If the <a href="qml-qtpositioning-positionsource.html">PositionSource</a> is active at the time that the name property is changed, it will become inactive. If the specified positioning provider cannot be loaded the position source will become invalid.</p>
+<p>Changing the name property may cause the <a href="qml-qtpositioning-positionsource.html#updateInterval-prop">updateInterval</a>, <a href="qml-qtpositioning-positionsource.html#supportedPositioningMethods-prop">supportedPositioningMethods</a> and <a href="qml-qtpositioning-positionsource.html#preferredPositioningMethods-prop">preferredPositioningMethods</a> properties to change as well.</p>
+</div></div><!-- @@@name -->
+<br/>
+<!-- $$$nmeaSource -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="nmeaSource-prop"></a><span class="name">nmeaSource</span> : <span class="type"><a href="../qtqml/qml-url.html">url</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the source for NMEA (National Marine Electronics Association) position-specification data (file). One purpose of this property is to be of development convenience.</p>
+<p>Setting this property will override any other position source. Currently only files local to the .qml -file are supported. The NMEA source is created in simulation mode, meaning that the data and time information in the NMEA source data is used to provide positional updates at the rate at which the data was originally recorded.</p>
+<p>If nmeaSource has been set for a <a href="qml-qtpositioning-positionsource.html">PositionSource</a> object, there is no way to revert back to non-file sources.</p>
+</div></div><!-- @@@nmeaSource -->
+<br/>
+<!-- $$$position -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="position-prop"></a><span class="name">position</span> : <span class="type"><a href="qml-qtpositioning-position.html">Position</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the last known positional data. It is a read-only property.</p>
+<p>The Position type has different positional member variables, whose validity can be checked with appropriate validity functions (for example sometimes an update does not have speed or altitude data).</p>
+<p>However, whenever a <code>positionChanged</code> signal has been received, at least position::coordinate::latitude, position::coordinate::longitude, and position::timestamp can be assumed to be valid.</p>
+<p><b>See also </b><a href="qml-qtpositioning-positionsource.html#start-method">start</a>, <a href="qml-qtpositioning-positionsource.html#stop-method">stop</a>, and <a href="qml-qtpositioning-positionsource.html#update-method">update</a>.</p>
+</div></div><!-- @@@position -->
+<br/>
+<!-- $$$preferredPositioningMethods -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="preferredPositioningMethods-prop"></a><span class="name">preferredPositioningMethods</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the preferred positioning methods of the current source.</p>
+<ul>
+<li><a href="qml-qtpositioning-positionsource.html">PositionSource</a>.NoPositioningMethods - No positioning method is preferred.</li>
+<li><a href="qml-qtpositioning-positionsource.html">PositionSource</a>.SatellitePositioningMethods - Satellite-based positioning methods such as GPS should be preferred.</li>
+<li><a href="qml-qtpositioning-positionsource.html">PositionSource</a>.NonSatellitePositioningMethods - Non-satellite-based methods should be preferred.</li>
+<li><a href="qml-qtpositioning-positionsource.html">PositionSource</a>.AllPositioningMethods - Any positioning methods are acceptable.</li>
+</ul>
+</div></div><!-- @@@preferredPositioningMethods -->
+<br/>
+<!-- $$$sourceError -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="sourceError-prop"></a><span class="name">sourceError</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the error which last occurred with the <a href="qml-qtpositioning-positionsource.html">PositionSource</a>.</p>
+<ul>
+<li><a href="qml-qtpositioning-positionsource.html">PositionSource</a>.AccessError - The connection setup to the remote positioning backend failed because the application lacked the required privileges.</li>
+<li><a href="qml-qtpositioning-positionsource.html">PositionSource</a>.ClosedError - The positioning backend closed the connection, which happens for example in case the user is switching location services to off. As soon as the location service is re-enabled regular updates will resume.</li>
+<li><a href="qml-qtpositioning-positionsource.html">PositionSource</a>.<a href="../qtnetwork/qdtls.html#QDtlsError-enum">NoError</a> - No error has occurred.</li>
+<li><a href="qml-qtpositioning-positionsource.html">PositionSource</a>.UnknownSourceError - An unidentified error occurred.</li>
+<li><a href="qml-qtpositioning-positionsource.html">PositionSource</a>.SocketError - An error occurred while connecting to an nmea source using a socket.</li>
+</ul>
+</div></div><!-- @@@sourceError -->
+<br/>
+<!-- $$$supportedPositioningMethods -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="supportedPositioningMethods-prop"></a><span class="name">supportedPositioningMethods</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the supported positioning methods of the current source.</p>
+<ul>
+<li><a href="qml-qtpositioning-positionsource.html">PositionSource</a>.NoPositioningMethods - No positioning methods supported (no source).</li>
+<li><a href="qml-qtpositioning-positionsource.html">PositionSource</a>.SatellitePositioningMethods - Satellite-based positioning methods such as GPS are supported.</li>
+<li><a href="qml-qtpositioning-positionsource.html">PositionSource</a>.NonSatellitePositioningMethods - Non-satellite-based methods are supported.</li>
+<li><a href="qml-qtpositioning-positionsource.html">PositionSource</a>.AllPositioningMethods - Both satellite-based and non-satellite positioning methods are supported.</li>
+</ul>
+</div></div><!-- @@@supportedPositioningMethods -->
+<br/>
+<!-- $$$updateInterval -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="updateInterval-prop"></a><span class="name">updateInterval</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the desired interval between updates (milliseconds).</p>
+<p><b>See also </b><a href="qgeopositioninfosource.html#updateInterval-prop">QGeoPositionInfoSource::updateInterval()</a>.</p>
+</div></div><!-- @@@updateInterval -->
+<br/>
+<!-- $$$valid -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="valid-prop"></a><span class="name">valid</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property is true if the <a href="qml-qtpositioning-positionsource.html">PositionSource</a> object has acquired a valid backend plugin to provide data. If false, other methods on the <a href="qml-qtpositioning-positionsource.html">PositionSource</a> will have no effect.</p>
+<p>Applications should check this property to determine whether positioning is available and enabled on the runtime platform, and react accordingly.</p>
+</div></div><!-- @@@valid -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$updateTimeout[overload1]$$$updateTimeout -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="updateTimeout-signal"></a><span class="name">updateTimeout</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>If <a href="qml-qtpositioning-positionsource.html#update-method">update()</a> was called, this signal is emitted if the current position could not be retrieved within a certain amount of time.</p>
+<p>If <a href="qml-qtpositioning-positionsource.html#start-method">start()</a> was called, this signal is emitted if the position engine determines that it is not able to provide further regular updates.</p>
+<p>This signal was introduced in  Qt Positioning 5.5.</p>
+<p><b>See also </b><a href="qgeopositioninfosource.html#updateTimeout">QGeoPositionInfoSource::updateTimeout()</a>.</p>
+</div></div><!-- @@@updateTimeout -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$start[overload1]$$$start -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="start-method"></a><span class="name">start</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Requests updates from the location source. Uses <a href="qml-qtpositioning-positionsource.html#updateInterval-prop">updateInterval</a> if set, default interval otherwise. If there is no source available, this method has no effect.</p>
+<p><b>See also </b><a href="qml-qtpositioning-positionsource.html#stop-method">stop</a>, <a href="qml-qtpositioning-positionsource.html#update-method">update</a>, and <a href="qml-qtpositioning-positionsource.html#active-prop">active</a>.</p>
+</div></div><!-- @@@start -->
+<br/>
+<!-- $$$stop[overload1]$$$stop -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="stop-method"></a><span class="name">stop</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Stops updates from the location source. If there is no source available or it is not active, this method has no effect.</p>
+<p><b>See also </b><a href="qml-qtpositioning-positionsource.html#start-method">start</a>, <a href="qml-qtpositioning-positionsource.html#update-method">update</a>, and <a href="qml-qtpositioning-positionsource.html#active-prop">active</a>.</p>
+</div></div><!-- @@@stop -->
+<br/>
+<!-- $$$update[overload1]$$$update -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="update-method"></a><span class="name">update</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>A convenience method to request single update from the location source. If there is no source available, this method has no effect.</p>
+<p>If the position source is not active, it will be activated for as long as it takes to receive an update, or until the request times out. The request timeout period is source-specific.</p>
+<p><b>See also </b><a href="qml-qtpositioning-positionsource.html#start-method">start</a>, <a href="qml-qtpositioning-positionsource.html#stop-method">stop</a>, and <a href="qml-qtpositioning-positionsource.html#active-prop">active</a>.</p>
+</div></div><!-- @@@update -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

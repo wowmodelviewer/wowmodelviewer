@@ -1,0 +1,1147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickpopup.cpp -->
+  <title>Popup QML Type | Qt Quick Controls 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td ><a href="qtquick-controls2-qmlmodule.html">QML Types</a></td><td >Popup QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickcontrols-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#popup-layout">Popup Layout</a></li>
+<li class="level2"><a href="#popup-sizing">Popup Sizing</a></li>
+<li class="level2"><a href="#popup-positioning">Popup Positioning</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Popup QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Popup-brief -->
+<p>Base type of popup-like user interface controls. <a href="#details">More...</a></p>
+<!-- @@@Popup -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Controls 2.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="../qtqml/qml-qtqml-qtobject.html">QtObject</a></p>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-controls2-dialog.html">Dialog</a>, <a href="qml-qtquick-controls2-drawer.html">Drawer</a>, <a href="qml-qtquick-controls2-menu.html">Menu</a>, and <a href="qml-qtquick-controls2-tooltip.html">ToolTip</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-controls2-popup-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#activeFocus-prop">activeFocus</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#anchors.centerIn-prop">anchors.centerIn</a></b></b> : Object</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#availableHeight-prop">availableHeight</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#availableWidth-prop">availableWidth</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#background-prop">background</a></b></b> : Item</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#bottomInset-prop">bottomInset</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#bottomMargin-prop">bottomMargin</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#bottomPadding-prop">bottomPadding</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#clip-prop">clip</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#closePolicy-prop">closePolicy</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#contentChildren-prop">contentChildren</a></b></b> : list&lt;Item&gt;</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#contentData-prop">contentData</a></b></b> : list&lt;Object&gt;</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#contentHeight-prop">contentHeight</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#contentItem-prop">contentItem</a></b></b> : Item</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#contentWidth-prop">contentWidth</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#dim-prop">dim</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#enabled-prop">enabled</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#enter-prop">enter</a></b></b> : Transition</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#exit-prop">exit</a></b></b> : Transition</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#focus-prop">focus</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#font-prop">font</a></b></b> : font</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#height-prop">height</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#horizontalPadding-prop">horizontalPadding</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#implicitBackgroundHeight-prop">implicitBackgroundHeight</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#implicitBackgroundWidth-prop">implicitBackgroundWidth</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#implicitContentHeight-prop">implicitContentHeight</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#implicitContentWidth-prop">implicitContentWidth</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#implicitHeight-prop">implicitHeight</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#implicitWidth-prop">implicitWidth</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#leftInset-prop">leftInset</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#leftMargin-prop">leftMargin</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#leftPadding-prop">leftPadding</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#locale-prop">locale</a></b></b> : Locale</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#margins-prop">margins</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#mirrored-prop">mirrored</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#modal-prop">modal</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#opacity-prop">opacity</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#opened-prop">opened</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#padding-prop">padding</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#palette-prop">palette</a></b></b> : palette</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#parent-prop">parent</a></b></b> : Item</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#rightInset-prop">rightInset</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#rightMargin-prop">rightMargin</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#rightPadding-prop">rightPadding</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#scale-prop">scale</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#spacing-prop">spacing</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#topInset-prop">topInset</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#topMargin-prop">topMargin</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#topPadding-prop">topPadding</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#transformOrigin-prop">transformOrigin</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#verticalPadding-prop">verticalPadding</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#visible-prop">visible</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#width-prop">width</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#x-prop">x</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#y-prop">y</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#z-prop">z</a></b></b> : real</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-popup.html#aboutToHide-signal">aboutToHide</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-popup.html#aboutToShow-signal">aboutToShow</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-popup.html#closed-signal">closed</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-popup.html#opened-signal">opened</a></b></b>()</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-popup.html#close-method">close</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-controls2-popup.html#forceActiveFocus-method">forceActiveFocus</a></b></b>(reason = <i>Qt.OtherFocusReason</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-controls2-popup.html#open-method">open</a></b></b>()</li>
+</ul>
+<!-- $$$Popup-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>Popup is the base type of popup-like user interface controls. It can be used with <a href="../qtquick/qml-qtquick-window-window.html">Window</a> or <a href="qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a>.</p>
+<pre class="qml">
+
+  import QtQuick.Window 2.2
+  import QtQuick.Controls 2.12
+
+  <span class="type"><a href="qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a></span> {
+      <span class="name">id</span>: <span class="name">window</span>
+      <span class="name">width</span>: <span class="number">400</span>
+      <span class="name">height</span>: <span class="number">400</span>
+      <span class="name">visible</span>: <span class="number">true</span>
+
+      <span class="type"><a href="qml-qtquick-controls2-button.html">Button</a></span> {
+          <span class="name">text</span>: <span class="string">&quot;Open&quot;</span>
+          <span class="name">onClicked</span>: <span class="name">popup</span>.<span class="name">open</span>()
+      }
+
+      <span class="type"><a href="qml-qtquick-controls2-popup.html">Popup</a></span> {
+          <span class="name">id</span>: <span class="name">popup</span>
+          <span class="name">x</span>: <span class="number">100</span>
+          <span class="name">y</span>: <span class="number">100</span>
+          <span class="name">width</span>: <span class="number">200</span>
+          <span class="name">height</span>: <span class="number">300</span>
+          <span class="name">modal</span>: <span class="number">true</span>
+          <span class="name">focus</span>: <span class="number">true</span>
+          <span class="name">closePolicy</span>: <span class="name">Popup</span>.<span class="name">CloseOnEscape</span> <span class="operator">|</span> <span class="name">Popup</span>.<span class="name">CloseOnPressOutsideParent</span>
+      }
+  }
+
+</pre>
+<p>In order to ensure that a popup is displayed above other items in the scene, it is recommended to use <a href="qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a>. <a href="qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a> also provides background dimming effects.</p>
+<p>Popup does not provide a layout of its own, but requires you to position its contents, for instance by creating a <a href="../qtquick/qml-qtquick-layouts-rowlayout.html">RowLayout</a> or a <a href="../qtquick/qml-qtquick-layouts-columnlayout.html">ColumnLayout</a>.</p>
+<p>Items declared as children of a Popup are automatically parented to the Popups's <a href="qml-qtquick-controls2-popup.html#contentItem-prop">contentItem</a>. Items created dynamically need to be explicitly parented to the <a href="qml-qtquick-controls2-popup.html#contentItem-prop">contentItem</a>.</p>
+<a name="popup-layout"></a>
+<h2 id="popup-layout">Popup Layout</h2>
+<p>The following diagram illustrates the layout of a popup within a window:</p>
+<p class="centerAlign"><img src="images/qtquickcontrols2-popup.png" alt="" /></p><p>The <a href="qml-qtquick-controls2-popup.html#implicitWidth-prop">implicitWidth</a> and <a href="qml-qtquick-controls2-popup.html#implicitHeight-prop">implicitHeight</a> of a popup are typically based on the implicit sizes of the background and the content item plus any insets and paddings. These properties determine how large the popup will be when no explicit <a href="qml-qtquick-controls2-popup.html#width-prop">width</a> or <a href="qml-qtquick-controls2-popup.html#height-prop">height</a> is specified.</p>
+<p>The geometry of the <a href="qml-qtquick-controls2-popup.html#contentItem-prop">contentItem</a> is determined by the padding. The following example reserves 10px padding between the boundaries of the popup and its content:</p>
+<pre class="cpp">
+
+  Popup {
+      padding: <span class="number">10</span>
+
+      contentItem: Text {
+          text: <span class="string">&quot;Content&quot;</span>
+      }
+  }
+
+</pre>
+<p>The <a href="qml-qtquick-controls2-popup.html#background-prop">background</a> item fills the entire width and height of the popup, unless insets or an explicit size have been given for it.</p>
+<p>Negative insets can be used to make the background larger than the popup. The following example uses negative insets to place a shadow outside the popup's boundaries:</p>
+<pre class="cpp">
+
+  Popup {
+      topInset: <span class="operator">-</span><span class="number">2</span>
+      leftInset: <span class="operator">-</span><span class="number">2</span>
+      rightInset: <span class="operator">-</span><span class="number">6</span>
+      bottomInset: <span class="operator">-</span><span class="number">6</span>
+
+      background: BorderImage {
+          source: <span class="string">&quot;:/images/shadowed-background.png&quot;</span>
+      }
+  }
+
+</pre>
+<a name="popup-sizing"></a>
+<h2 id="popup-sizing">Popup Sizing</h2>
+<p>If only a single item is used within a Popup, it will resize to fit the implicit size of its contained item. This makes it particularly suitable for use together with layouts.</p>
+<pre class="cpp">
+
+  Popup {
+      ColumnLayout {
+          anchors<span class="operator">.</span>fill: parent
+          CheckBox { text: qsTr(<span class="string">&quot;E-mail&quot;</span>) }
+          CheckBox { text: qsTr(<span class="string">&quot;Calendar&quot;</span>) }
+          CheckBox { text: qsTr(<span class="string">&quot;Contacts&quot;</span>) }
+      }
+  }
+
+</pre>
+<p>Sometimes there might be two items within the popup:</p>
+<pre class="cpp">
+
+  Popup {
+      SwipeView {
+          <span class="comment">// ...</span>
+      }
+      PageIndicator {
+          anchors<span class="operator">.</span>horizontalCenter: parent<span class="operator">.</span>horizontalCenter
+          anchors<span class="operator">.</span>bottom: parent<span class="operator">.</span>bottom
+      }
+  }
+
+</pre>
+<p>In this case, Popup cannot calculate a sensible implicit size. Since we're anchoring the <a href="qml-qtquick-controls2-pageindicator.html">PageIndicator</a> over the <a href="qml-qtquick-controls2-swipeview.html">SwipeView</a>, we can simply set the content size to the view's implicit size:</p>
+<pre class="cpp">
+
+  Popup {
+      contentWidth: view<span class="operator">.</span>implicitWidth
+      contentHeight: view<span class="operator">.</span>implicitHeight
+
+      SwipeView {
+          id: view
+          <span class="comment">// ...</span>
+      }
+      PageIndicator {
+          anchors<span class="operator">.</span>horizontalCenter: parent<span class="operator">.</span>horizontalCenter
+          anchors<span class="operator">.</span>bottom: parent<span class="operator">.</span>bottom
+      }
+   }
+
+</pre>
+<a name="popup-positioning"></a>
+<h2 id="popup-positioning">Popup Positioning</h2>
+<p>Similar to items in Qt Quick, Popup's <a href="qml-qtquick-controls2-popup.html#x-prop">x</a> and <a href="qml-qtquick-controls2-popup.html#y-prop">y</a> coordinates are relative to its parent. This means that opening a popup that is a child of a <a href="qml-qtquick-controls2-button.html">Button</a>, for example, will cause the popup to be positioned relative to the button.</p>
+<p>The following example uses the attached <a href="qml-qtquick-controls2-overlay.html#overlay-attached-prop">Overlay.overlay</a> property to position a popup in the center of the window, despite the position of the button that opens the popup:</p>
+<pre class="cpp">
+
+  Button {
+      onClicked: popup<span class="operator">.</span>open()
+
+      Popup {
+          id: popup
+
+          parent: Overlay<span class="operator">.</span>overlay
+
+          x: Math<span class="operator">.</span>round((parent<span class="operator">.</span>width <span class="operator">-</span> width) <span class="operator">/</span> <span class="number">2</span>)
+          y: Math<span class="operator">.</span>round((parent<span class="operator">.</span>height <span class="operator">-</span> height) <span class="operator">/</span> <span class="number">2</span>)
+          width: <span class="number">100</span>
+          height: <span class="number">100</span>
+      }
+  }
+
+</pre>
+<p>Another way to center a popup in the window regardless of its parent item is to use <a href="qml-qtquick-controls2-popup.html#anchors.centerIn-prop">anchors.centerIn</a>:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a></span> {
+      <span class="name">id</span>: <span class="name">window</span>
+      <span class="comment">// ...</span>
+
+      <span class="type"><a href="qml-qtquick-controls2-pane.html">Pane</a></span> {
+          <span class="comment">// ...</span>
+
+          <span class="type"><a href="qml-qtquick-controls2-popup.html">Popup</a></span> {
+              <span class="name">anchors</span>.centerIn: <span class="name">Overlay</span>.<span class="name">overlay</span>
+          }
+      }
+  }
+
+</pre>
+<p>To ensure that the popup is positioned within the bounds of the enclosing window, the <a href="qml-qtquick-controls2-popup.html#margins-prop">margins</a> property can be set to a non-negative value.</p>
+<p><b>See also </b><a href="qtquickcontrols2-popups.html">Popup Controls</a>, <a href="qtquickcontrols2-customize.html#customizing-popup">Customizing Popup</a>, and <a href="qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a>.</p>
+<!-- @@@Popup -->
+<h2>Property Documentation</h2>
+<!-- $$$activeFocus -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="activeFocus-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">activeFocus</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the popup has active focus.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#focus-prop">focus</a> and <a href="../qtquick/qtquick-input-focus.html">Keyboard Focus in Qt Quick</a>.</p>
+</div></div><!-- @@@activeFocus -->
+<br/>
+<!-- $$$anchors.centerIn -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="anchors.centerIn-prop"></a><span class="name">anchors.centerIn</span> : <span class="type">Object</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Anchors provide a way to position an item by specifying its relationship with other items.</p>
+<p>A common use case is to center a popup within its parent. One way to do this is with the <a href="../qtquick/qml-qtquick-item.html#x-prop">x</a> and <a href="../qtquick/qml-qtquick-item.html#y-prop">y</a> properties. Anchors offer a more convenient approach:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls2-pane.html">Pane</a></span> {
+      <span class="comment">// ...</span>
+
+      <span class="type"><a href="qml-qtquick-controls2-popup.html">Popup</a></span> {
+          <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+      }
+  }
+
+</pre>
+<p>It is also possible to center the popup in the window by using <a href="qml-qtquick-controls2-overlay.html">Overlay</a>:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-controls2-applicationwindow.html">ApplicationWindow</a></span> {
+      <span class="name">id</span>: <span class="name">window</span>
+      <span class="comment">// ...</span>
+
+      <span class="type"><a href="qml-qtquick-controls2-pane.html">Pane</a></span> {
+          <span class="comment">// ...</span>
+
+          <span class="type"><a href="qml-qtquick-controls2-popup.html">Popup</a></span> {
+              <span class="name">anchors</span>.centerIn: <span class="name">Overlay</span>.<span class="name">overlay</span>
+          }
+      }
+  }
+
+</pre>
+<p>This makes it easy to center a popup in the window from any component.</p>
+<p><b>Note: </b>Popups can only be centered within their immediate parent or the window overlay; trying to center in other items will produce a warning.</p><p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#popup-positioning">Popup Positioning</a> and Item::anchors.</p>
+</div></div><!-- @@@anchors.centerIn -->
+<br/>
+<!-- $$$availableHeight -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="availableHeight-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">availableHeight</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the height available to the <a href="qml-qtquick-controls2-popup.html#contentItem-prop">contentItem</a> after deducting vertical padding from the <a href="../qtquick/qml-qtquick-item.html#height-prop">height</a> of the popup.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#padding-prop">padding</a>, <a href="qml-qtquick-controls2-popup.html#topPadding-prop">topPadding</a>, and <a href="qml-qtquick-controls2-popup.html#bottomPadding-prop">bottomPadding</a>.</p>
+</div></div><!-- @@@availableHeight -->
+<br/>
+<!-- $$$availableWidth -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="availableWidth-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">availableWidth</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the width available to the <a href="qml-qtquick-controls2-popup.html#contentItem-prop">contentItem</a> after deducting horizontal padding from the <a href="../qtquick/qml-qtquick-item.html#width-prop">width</a> of the popup.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#padding-prop">padding</a>, <a href="qml-qtquick-controls2-popup.html#leftPadding-prop">leftPadding</a>, and <a href="qml-qtquick-controls2-popup.html#rightPadding-prop">rightPadding</a>.</p>
+</div></div><!-- @@@availableWidth -->
+<br/>
+<!-- $$$background -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="background-prop"></a><span class="name">background</span> : <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the background item.</p>
+<p><b>Note: </b>If the background item has no explicit size specified, it automatically follows the popup's size. In most cases, there is no need to specify width or height for a background item.</p><p><b>Note: </b>Most popups use the implicit size of the background item to calculate the implicit size of the popup itself. If you replace the background item with a custom one, you should also consider providing a sensible implicit size for it (unless it is an item like <a href="../qtquick/qml-qtquick-image.html">Image</a> which has its own implicit size).</p><p><b>See also </b><a href="qtquickcontrols2-customize.html#customizing-popup">Customizing Popup</a>.</p>
+</div></div><!-- @@@background -->
+<br/>
+<!-- $$$bottomInset -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="bottomInset-prop"></a><span class="name">bottomInset</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the bottom inset for the background.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#popup-layout">Popup Layout</a> and <a href="qml-qtquick-controls2-popup.html#topInset-prop">topInset</a>.</p>
+</div></div><!-- @@@bottomInset -->
+<br/>
+<!-- $$$bottomMargin -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="bottomMargin-prop"></a><span class="name">bottomMargin</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the distance between the bottom edge of the popup and the bottom edge of its window.</p>
+<p>A popup with a negative bottom margin is not pushed within the bottom edge of the enclosing window. The default value is <code>-1</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#margins-prop">margins</a>, <a href="qml-qtquick-controls2-popup.html#topMargin-prop">topMargin</a>, and <a href="qml-qtquick-controls2-popup.html#popup-layout">Popup Layout</a>.</p>
+</div></div><!-- @@@bottomMargin -->
+<br/>
+<!-- $$$bottomPadding -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="bottomPadding-prop"></a><span class="name">bottomPadding</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the bottom padding. Unless explicitly set, the value is equal to <code>verticalPadding</code>.</p>
+<p>The padding properties are used to control the geometry of the <a href="qml-qtquick-controls2-popup.html#contentItem-prop">content item</a>.</p>
+<p>Popup uses the same approach to padding as <a href="qml-qtquick-controls2-control.html#padding-prop">Control</a>. For a visual explanation of the padding system, see the <a href="qml-qtquick-controls2-control.html#control-layout">Control Layout</a> section of the documentation.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#padding-prop">padding</a>, <a href="qml-qtquick-controls2-popup.html#topPadding-prop">topPadding</a>, <a href="qml-qtquick-controls2-popup.html#verticalPadding-prop">verticalPadding</a>, and <a href="qml-qtquick-controls2-popup.html#availableHeight-prop">availableHeight</a>.</p>
+</div></div><!-- @@@bottomPadding -->
+<br/>
+<!-- $$$clip -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="clip-prop"></a><span class="name">clip</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether clipping is enabled. The default value is <code>false</code>.</p>
+</div></div><!-- @@@clip -->
+<br/>
+<!-- $$$closePolicy -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="closePolicy-prop"></a><span class="name">closePolicy</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property determines the circumstances under which the popup closes. The flags can be combined to allow several ways of closing the popup.</p>
+<p>The available values are:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Popup.NoAutoClose</code></td><td class="topAlign">The popup will only close when manually instructed to do so.</td></tr>
+<tr><td class="topAlign"><code>Popup.CloseOnPressOutside</code></td><td class="topAlign">The popup will close when the mouse is pressed outside of it.</td></tr>
+<tr><td class="topAlign"><code>Popup.CloseOnPressOutsideParent</code></td><td class="topAlign">The popup will close when the mouse is pressed outside of its parent.</td></tr>
+<tr><td class="topAlign"><code>Popup.CloseOnReleaseOutside</code></td><td class="topAlign">The popup will close when the mouse is released outside of it.</td></tr>
+<tr><td class="topAlign"><code>Popup.CloseOnReleaseOutsideParent</code></td><td class="topAlign">The popup will close when the mouse is released outside of its parent.</td></tr>
+<tr><td class="topAlign"><code>Popup.CloseOnEscape</code></td><td class="topAlign">The popup will close when the escape key is pressed while the popup has active focus.</td></tr>
+</table></div>
+<p>The default value is <code>Popup.CloseOnEscape | Popup.CloseOnPressOutside</code>.</p>
+<p><b>Note: </b>There is a known limitation that the <code>Popup.CloseOnReleaseOutside</code> and <code>Popup.CloseOnReleaseOutsideParent</code> policies only work with <a href="qml-qtquick-controls2-popup.html#modal-prop">modal</a> popups.</p></div></div><!-- @@@closePolicy -->
+<br/>
+<!-- $$$contentChildren -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="contentChildren-prop"></a><span class="name">contentChildren</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the list of content children.</p>
+<p>The list contains all items that have been declared in QML as children of the popup.</p>
+<p><b>Note: </b>Unlike <code>contentData</code>, <code>contentChildren</code> does not include non-visual QML objects.</p><p><b>See also </b><a href="../qtquick/qml-qtquick-item.html#children-prop">Item::children</a> and <a href="qml-qtquick-controls2-popup.html#contentData-prop">contentData</a>.</p>
+</div></div><!-- @@@contentChildren -->
+<br/>
+<!-- $$$contentData -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="contentData-prop"></a><span class="qmldefault">[default] </span><span class="name">contentData</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type">Object</span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the list of content data.</p>
+<p>The list contains all objects that have been declared in QML as children of the popup.</p>
+<p><b>Note: </b>Unlike <code>contentChildren</code>, <code>contentData</code> does include non-visual QML objects.</p><p><b>See also </b><a href="../qtquick/qml-qtquick-item.html#data-prop">Item::data</a> and <a href="qml-qtquick-controls2-popup.html#contentChildren-prop">contentChildren</a>.</p>
+</div></div><!-- @@@contentData -->
+<br/>
+<!-- $$$contentHeight -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="contentHeight-prop"></a><span class="name">contentHeight</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the content height. It is used for calculating the total implicit height of the Popup.</p>
+<p>For more information, see <a href="qml-qtquick-controls2-popup.html#popup-sizing">Popup Sizing</a>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#contentWidth-prop">contentWidth</a>.</p>
+</div></div><!-- @@@contentHeight -->
+<br/>
+<!-- $$$contentItem -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="contentItem-prop"></a><span class="name">contentItem</span> : <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the content item of the popup.</p>
+<p>The content item is the visual implementation of the popup. When the popup is made visible, the content item is automatically reparented to the <a href="qml-qtquick-controls2-overlay.html#overlay-attached-prop">overlay item</a>.</p>
+<p><b>Note: </b>The content item is automatically resized to fit within the <a href="qml-qtquick-controls2-popup.html#padding-prop">padding</a> of the popup.</p><p><b>Note: </b>Most popups use the implicit size of the content item to calculate the implicit size of the popup itself. If you replace the content item with a custom one, you should also consider providing a sensible implicit size for it (unless it is an item like <a href="../qtquick/qml-qtquick-text.html">Text</a> which has its own implicit size).</p><p><b>See also </b><a href="qtquickcontrols2-customize.html#customizing-popup">Customizing Popup</a>.</p>
+</div></div><!-- @@@contentItem -->
+<br/>
+<!-- $$$contentWidth -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="contentWidth-prop"></a><span class="name">contentWidth</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the content width. It is used for calculating the total implicit width of the Popup.</p>
+<p>For more information, see <a href="qml-qtquick-controls2-popup.html#popup-sizing">Popup Sizing</a>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#contentHeight-prop">contentHeight</a>.</p>
+</div></div><!-- @@@contentWidth -->
+<br/>
+<!-- $$$dim -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="dim-prop"></a><span class="name">dim</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the popup dims the background.</p>
+<p>Unless explicitly set, this property follows the value of <a href="qml-qtquick-controls2-popup.html#modal-prop">modal</a>. To return to the default value, set this property to <code>undefined</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#modal-prop">modal</a> and <a href="qml-qtquick-controls2-overlay.html#modeless-attached-prop">Overlay.modeless</a>.</p>
+</div></div><!-- @@@dim -->
+<br/>
+<!-- $$$enabled -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="enabled-prop"></a><span class="name">enabled</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the popup is enabled. The default value is <code>true</code>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#visible-prop">visible</a> and <a href="../qtquick/qml-qtquick-item.html#enabled-prop">Item::enabled</a>.</p>
+</div></div><!-- @@@enabled -->
+<br/>
+<!-- $$$enter -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="enter-prop"></a><span class="name">enter</span> : <span class="type"><a href="../qtquick/qml-qtquick-transition.html">Transition</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the transition that is applied to the popup item when the popup is opened and enters the screen.</p>
+<p>The following example animates the opacity of the popup when it enters the screen:</p>
+<pre class="cpp">
+
+  Popup {
+      enter: Transition {
+          NumberAnimation { property: <span class="string">&quot;opacity&quot;</span>; from: <span class="number">0.0</span>; to: <span class="number">1.0</span> }
+      }
+  }
+
+</pre>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#exit-prop">exit</a>.</p>
+</div></div><!-- @@@enter -->
+<br/>
+<!-- $$$exit -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="exit-prop"></a><span class="name">exit</span> : <span class="type"><a href="../qtquick/qml-qtquick-transition.html">Transition</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the transition that is applied to the popup item when the popup is closed and exits the screen.</p>
+<p>The following example animates the opacity of the popup when it exits the screen:</p>
+<pre class="cpp">
+
+  Popup {
+      exit: Transition {
+          NumberAnimation { property: <span class="string">&quot;opacity&quot;</span>; from: <span class="number">1.0</span>; to: <span class="number">0.0</span> }
+      }
+  }
+
+</pre>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#enter-prop">enter</a>.</p>
+</div></div><!-- @@@exit -->
+<br/>
+<!-- $$$focus -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="focus-prop"></a><span class="name">focus</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the popup wants focus.</p>
+<p>When the popup actually receives focus, <a href="qml-qtquick-controls2-popup.html#activeFocus-prop">activeFocus</a> will be <code>true</code>. For more information, see <a href="../qtquick/qtquick-input-focus.html">Keyboard Focus in Qt Quick</a>.</p>
+<p>The default value is <code>false</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#activeFocus-prop">activeFocus</a>.</p>
+</div></div><!-- @@@focus -->
+<br/>
+<!-- $$$font -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="font-prop"></a><span class="name">font</span> : <span class="type"><a href="../qtquick/qml-font.html">font</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the font currently set for the popup.</p>
+<p>Popup propagates explicit font properties to its children. If you change a specific property on a popup's font, that property propagates to all of the popup's children, overriding any system defaults for that property.</p>
+<pre class="cpp">
+
+  Popup {
+      font<span class="operator">.</span>family: <span class="string">&quot;Courier&quot;</span>
+
+      Column {
+          Label {
+              text: qsTr(<span class="string">&quot;This will use Courier...&quot;</span>)
+          }
+
+          Switch {
+              text: qsTr(<span class="string">&quot;... and so will this&quot;</span>)
+          }
+      }
+  }
+
+</pre>
+<p><b>See also </b><a href="qml-qtquick-controls2-control.html#font-prop">Control::font</a> and <a href="qml-qtquick-controls2-applicationwindow.html#font-prop">ApplicationWindow::font</a>.</p>
+</div></div><!-- @@@font -->
+<br/>
+<!-- $$$height -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="height-prop"></a><span class="name">height</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the height of the popup.</p>
+</div></div><!-- @@@height -->
+<br/>
+<!-- $$$horizontalPadding -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="horizontalPadding-prop"></a><span class="name">horizontalPadding</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the horizontal padding. Unless explicitly set, the value is equal to <code>padding</code>.</p>
+<p>The padding properties are used to control the geometry of the <a href="qml-qtquick-controls2-popup.html#contentItem-prop">content item</a>.</p>
+<p>Popup uses the same approach to padding as <a href="qml-qtquick-controls2-control.html#padding-prop">Control</a>. For a visual explanation of the padding system, see the <a href="qml-qtquick-controls2-control.html#control-layout">Control Layout</a> section of the documentation.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#padding-prop">padding</a>, <a href="qml-qtquick-controls2-popup.html#leftPadding-prop">leftPadding</a>, <a href="qml-qtquick-controls2-popup.html#rightPadding-prop">rightPadding</a>, and <a href="qml-qtquick-controls2-popup.html#verticalPadding-prop">verticalPadding</a>.</p>
+</div></div><!-- @@@horizontalPadding -->
+<br/>
+<!-- $$$implicitBackgroundHeight -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="implicitBackgroundHeight-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">implicitBackgroundHeight</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the implicit background height.</p>
+<p>The value is equal to <code>background ? background.implicitHeight : 0</code>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#implicitBackgroundWidth-prop">implicitBackgroundWidth</a> and <a href="qml-qtquick-controls2-popup.html#implicitContentHeight-prop">implicitContentHeight</a>.</p>
+</div></div><!-- @@@implicitBackgroundHeight -->
+<br/>
+<!-- $$$implicitBackgroundWidth -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="implicitBackgroundWidth-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">implicitBackgroundWidth</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the implicit background width.</p>
+<p>The value is equal to <code>background ? background.implicitWidth : 0</code>.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#implicitBackgroundHeight-prop">implicitBackgroundHeight</a> and <a href="qml-qtquick-controls2-popup.html#implicitContentWidth-prop">implicitContentWidth</a>.</p>
+</div></div><!-- @@@implicitBackgroundWidth -->
+<br/>
+<!-- $$$implicitContentHeight -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="implicitContentHeight-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">implicitContentHeight</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the implicit content height.</p>
+<p>The value is calculated based on the content children.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#implicitContentWidth-prop">implicitContentWidth</a> and <a href="qml-qtquick-controls2-popup.html#implicitBackgroundHeight-prop">implicitBackgroundHeight</a>.</p>
+</div></div><!-- @@@implicitContentHeight -->
+<br/>
+<!-- $$$implicitContentWidth -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="implicitContentWidth-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">implicitContentWidth</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the implicit content width.</p>
+<p>The value is calculated based on the content children.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#implicitContentHeight-prop">implicitContentHeight</a> and <a href="qml-qtquick-controls2-popup.html#implicitBackgroundWidth-prop">implicitBackgroundWidth</a>.</p>
+</div></div><!-- @@@implicitContentWidth -->
+<br/>
+<!-- $$$implicitHeight -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="implicitHeight-prop"></a><span class="name">implicitHeight</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the implicit height of the popup.</p>
+</div></div><!-- @@@implicitHeight -->
+<br/>
+<!-- $$$implicitWidth -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="implicitWidth-prop"></a><span class="name">implicitWidth</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the implicit width of the popup.</p>
+</div></div><!-- @@@implicitWidth -->
+<br/>
+<!-- $$$leftInset -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="leftInset-prop"></a><span class="name">leftInset</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the left inset for the background.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#popup-layout">Popup Layout</a> and <a href="qml-qtquick-controls2-popup.html#rightInset-prop">rightInset</a>.</p>
+</div></div><!-- @@@leftInset -->
+<br/>
+<!-- $$$leftMargin -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="leftMargin-prop"></a><span class="name">leftMargin</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the distance between the left edge of the popup and the left edge of its window.</p>
+<p>A popup with a negative left margin is not pushed within the left edge of the enclosing window. The default value is <code>-1</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#margins-prop">margins</a>, <a href="qml-qtquick-controls2-popup.html#rightMargin-prop">rightMargin</a>, and <a href="qml-qtquick-controls2-popup.html#popup-layout">Popup Layout</a>.</p>
+</div></div><!-- @@@leftMargin -->
+<br/>
+<!-- $$$leftPadding -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="leftPadding-prop"></a><span class="name">leftPadding</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the left padding. Unless explicitly set, the value is equal to <code>horizontalPadding</code>.</p>
+<p>The padding properties are used to control the geometry of the <a href="qml-qtquick-controls2-popup.html#contentItem-prop">content item</a>.</p>
+<p>Popup uses the same approach to padding as <a href="qml-qtquick-controls2-control.html#padding-prop">Control</a>. For a visual explanation of the padding system, see the <a href="qml-qtquick-controls2-control.html#control-layout">Control Layout</a> section of the documentation.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#padding-prop">padding</a>, <a href="qml-qtquick-controls2-popup.html#rightPadding-prop">rightPadding</a>, <a href="qml-qtquick-controls2-popup.html#horizontalPadding-prop">horizontalPadding</a>, and <a href="qml-qtquick-controls2-popup.html#availableWidth-prop">availableWidth</a>.</p>
+</div></div><!-- @@@leftPadding -->
+<br/>
+<!-- $$$locale -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="locale-prop"></a><span class="name">locale</span> : <span class="type"><a href="../qtqml/qml-qtqml-locale.html">Locale</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the locale of the popup.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#mirrored-prop">mirrored</a> and <a href="../qtquick/qml-qtquick-layoutmirroring.html">LayoutMirroring</a>.</p>
+</div></div><!-- @@@locale -->
+<br/>
+<!-- $$$margins -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="margins-prop"></a><span class="name">margins</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the distance between the edges of the popup and the edges of its window.</p>
+<p>A popup with negative margins is not pushed within the bounds of the enclosing window. The default value is <code>-1</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#topMargin-prop">topMargin</a>, <a href="qml-qtquick-controls2-popup.html#leftMargin-prop">leftMargin</a>, <a href="qml-qtquick-controls2-popup.html#rightMargin-prop">rightMargin</a>, <a href="qml-qtquick-controls2-popup.html#bottomMargin-prop">bottomMargin</a>, and <a href="qml-qtquick-controls2-popup.html#popup-layout">Popup Layout</a>.</p>
+</div></div><!-- @@@margins -->
+<br/>
+<!-- $$$mirrored -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="mirrored-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">mirrored</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the popup is mirrored.</p>
+<p>This property is provided for convenience. A popup is considered mirrored when its visual layout direction is right-to-left; that is, when using a right-to-left locale.</p>
+<p>This property was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#locale-prop">locale</a> and <a href="../qtquick/qtquick-positioning-righttoleft.html">Right-to-left User Interfaces</a>.</p>
+</div></div><!-- @@@mirrored -->
+<br/>
+<!-- $$$modal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="modal-prop"></a><span class="name">modal</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the popup is modal.</p>
+<p>Modal popups often have a distinctive background dimming effect defined in <a href="qml-qtquick-controls2-overlay.html#modal-attached-prop">Overlay.modal</a>, and do not allow press or release events through to items beneath them. For example, if the user accidentally clicks outside of a popup, any item beneath that popup at the location of the click will not receive the event.</p>
+<p>On desktop platforms, it is common for modal popups to be closed only when the escape key is pressed. To achieve this behavior, set <a href="qml-qtquick-controls2-popup.html#closePolicy-prop">closePolicy</a> to <code>Popup.CloseOnEscape</code>. By default, <code>closePolicy</code> is set to <code>Popup.CloseOnEscape | Popup.CloseOnPressOutside</code>, which means that clicking outside of a modal popup will close it.</p>
+<p>The default value is <code>false</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#dim-prop">dim</a>.</p>
+</div></div><!-- @@@modal -->
+<br/>
+<!-- $$$opacity -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="opacity-prop"></a><span class="name">opacity</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the opacity of the popup. Opacity is specified as a number between <code>0.0</code> (fully transparent) and <code>1.0</code> (fully opaque). The default value is <code>1.0</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#visible-prop">visible</a>.</p>
+</div></div><!-- @@@opacity -->
+<br/>
+<!-- $$$opened -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="opened-prop"></a><span class="name">opened</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the popup is fully open. The popup is considered opened when it's visible and neither the <a href="qml-qtquick-controls2-popup.html#enter-prop">enter</a> nor <a href="qml-qtquick-controls2-popup.html#exit-prop">exit</a> transitions are running.</p>
+<p>This property was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#open-method">open()</a>, <a href="qml-qtquick-controls2-popup.html#close-method">close()</a>, and <a href="qml-qtquick-controls2-popup.html#visible-prop">visible</a>.</p>
+</div></div><!-- @@@opened -->
+<br/>
+<!-- $$$padding -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="padding-prop"></a><span class="name">padding</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the default padding.</p>
+<p>The padding properties are used to control the geometry of the <a href="qml-qtquick-controls2-popup.html#contentItem-prop">content item</a>.</p>
+<p>Popup uses the same approach to padding as <a href="qml-qtquick-controls2-control.html#padding-prop">Control</a>. For a visual explanation of the padding system, see the <a href="qml-qtquick-controls2-control.html#control-layout">Control Layout</a> section of the documentation.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#availableWidth-prop">availableWidth</a>, <a href="qml-qtquick-controls2-popup.html#availableHeight-prop">availableHeight</a>, <a href="qml-qtquick-controls2-popup.html#topPadding-prop">topPadding</a>, <a href="qml-qtquick-controls2-popup.html#leftPadding-prop">leftPadding</a>, <a href="qml-qtquick-controls2-popup.html#rightPadding-prop">rightPadding</a>, and <a href="qml-qtquick-controls2-popup.html#bottomPadding-prop">bottomPadding</a>.</p>
+</div></div><!-- @@@padding -->
+<br/>
+<!-- $$$palette -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="palette-prop"></a><span class="name">palette</span> : <span class="type"><a href="qml-palette.html">palette</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the palette currently set for the popup.</p>
+<p>Popup propagates explicit palette properties to its children. If you change a specific property on a popup's palette, that property propagates to all of the popup's children, overriding any system defaults for that property.</p>
+<pre class="cpp">
+
+  Popup {
+      palette<span class="operator">.</span>text: <span class="string">&quot;red&quot;</span>
+
+      Column {
+          Label {
+              text: qsTr(<span class="string">&quot;This will use red color...&quot;</span>)
+          }
+
+          Switch {
+              text: qsTr(<span class="string">&quot;... and so will this&quot;</span>)
+          }
+      }
+  }
+
+</pre>
+<p>This property was introduced in  QtQuick.Controls 2.3 (Qt 5.10).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-control.html#palette-prop">Control::palette</a>, <a href="qml-qtquick-controls2-applicationwindow.html#palette-prop">ApplicationWindow::palette</a>, and <a href="qml-palette.html#qtquickcontrols2-palette">palette QML Basic Type</a>.</p>
+</div></div><!-- @@@palette -->
+<br/>
+<!-- $$$parent -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="parent-prop"></a><span class="name">parent</span> : <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the parent item.</p>
+</div></div><!-- @@@parent -->
+<br/>
+<!-- $$$rightInset -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="rightInset-prop"></a><span class="name">rightInset</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the right inset for the background.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#popup-layout">Popup Layout</a> and <a href="qml-qtquick-controls2-popup.html#leftInset-prop">leftInset</a>.</p>
+</div></div><!-- @@@rightInset -->
+<br/>
+<!-- $$$rightMargin -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="rightMargin-prop"></a><span class="name">rightMargin</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the distance between the right edge of the popup and the right edge of its window.</p>
+<p>A popup with a negative right margin is not pushed within the right edge of the enclosing window. The default value is <code>-1</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#margins-prop">margins</a>, <a href="qml-qtquick-controls2-popup.html#leftMargin-prop">leftMargin</a>, and <a href="qml-qtquick-controls2-popup.html#popup-layout">Popup Layout</a>.</p>
+</div></div><!-- @@@rightMargin -->
+<br/>
+<!-- $$$rightPadding -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="rightPadding-prop"></a><span class="name">rightPadding</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the right padding. Unless explicitly set, the value is equal to <code>horizontalPadding</code>.</p>
+<p>The padding properties are used to control the geometry of the <a href="qml-qtquick-controls2-popup.html#contentItem-prop">content item</a>.</p>
+<p>Popup uses the same approach to padding as <a href="qml-qtquick-controls2-control.html#padding-prop">Control</a>. For a visual explanation of the padding system, see the <a href="qml-qtquick-controls2-control.html#control-layout">Control Layout</a> section of the documentation.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#padding-prop">padding</a>, <a href="qml-qtquick-controls2-popup.html#leftPadding-prop">leftPadding</a>, <a href="qml-qtquick-controls2-popup.html#horizontalPadding-prop">horizontalPadding</a>, and <a href="qml-qtquick-controls2-popup.html#availableWidth-prop">availableWidth</a>.</p>
+</div></div><!-- @@@rightPadding -->
+<br/>
+<!-- $$$scale -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="scale-prop"></a><span class="name">scale</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the scale factor of the popup. The default value is <code>1.0</code>.</p>
+<p>A scale of less than <code>1.0</code> causes the popup to be rendered at a smaller size, and a scale greater than <code>1.0</code> renders the popup at a larger size. Negative scales are not supported.</p>
+</div></div><!-- @@@scale -->
+<br/>
+<!-- $$$spacing -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="spacing-prop"></a><span class="name">spacing</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the spacing.</p>
+<p>Spacing is useful for popups that have multiple or repetitive building blocks. For example, some styles use spacing to determine the distance between the header, content, and footer of <a href="qml-qtquick-controls2-dialog.html">Dialog</a>. Spacing is not enforced by Popup, so each style may interpret it differently, and some may ignore it altogether.</p>
+<p>This property was introduced in  QtQuick.Controls 2.1 (Qt 5.8).</p>
+</div></div><!-- @@@spacing -->
+<br/>
+<!-- $$$topInset -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="topInset-prop"></a><span class="name">topInset</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the top inset for the background.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#popup-layout">Popup Layout</a> and <a href="qml-qtquick-controls2-popup.html#bottomInset-prop">bottomInset</a>.</p>
+</div></div><!-- @@@topInset -->
+<br/>
+<!-- $$$topMargin -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="topMargin-prop"></a><span class="name">topMargin</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the distance between the top edge of the popup and the top edge of its window.</p>
+<p>A popup with a negative top margin is not pushed within the top edge of the enclosing window. The default value is <code>-1</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#margins-prop">margins</a>, <a href="qml-qtquick-controls2-popup.html#bottomMargin-prop">bottomMargin</a>, and <a href="qml-qtquick-controls2-popup.html#popup-layout">Popup Layout</a>.</p>
+</div></div><!-- @@@topMargin -->
+<br/>
+<!-- $$$topPadding -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="topPadding-prop"></a><span class="name">topPadding</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the top padding. Unless explicitly set, the value is equal to <code>verticalPadding</code>.</p>
+<p>The padding properties are used to control the geometry of the <a href="qml-qtquick-controls2-popup.html#contentItem-prop">content item</a>.</p>
+<p>Popup uses the same approach to padding as <a href="qml-qtquick-controls2-control.html#padding-prop">Control</a>. For a visual explanation of the padding system, see the <a href="qml-qtquick-controls2-control.html#control-layout">Control Layout</a> section of the documentation.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#padding-prop">padding</a>, <a href="qml-qtquick-controls2-popup.html#bottomPadding-prop">bottomPadding</a>, <a href="qml-qtquick-controls2-popup.html#verticalPadding-prop">verticalPadding</a>, and <a href="qml-qtquick-controls2-popup.html#availableHeight-prop">availableHeight</a>.</p>
+</div></div><!-- @@@topPadding -->
+<br/>
+<!-- $$$transformOrigin -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="transformOrigin-prop"></a><span class="name">transformOrigin</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the origin point for transformations in enter and exit transitions.</p>
+<p>Nine transform origins are available, as shown in the image below. The default transform origin is <code>Popup.Center</code>.</p>
+<p class="centerAlign"><img src="images/qtquickcontrols2-popup-transformorigin.png" alt="" /></p><p><b>See also </b><a href="qml-qtquick-controls2-popup.html#enter-prop">enter</a>, <a href="qml-qtquick-controls2-popup.html#exit-prop">exit</a>, and <a href="../qtquick/qml-qtquick-item.html#transformOrigin-prop">Item::transformOrigin</a>.</p>
+</div></div><!-- @@@transformOrigin -->
+<br/>
+<!-- $$$verticalPadding -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="verticalPadding-prop"></a><span class="name">verticalPadding</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the vertical padding. Unless explicitly set, the value is equal to <code>padding</code>.</p>
+<p>The padding properties are used to control the geometry of the <a href="qml-qtquick-controls2-popup.html#contentItem-prop">content item</a>.</p>
+<p>Popup uses the same approach to padding as <a href="qml-qtquick-controls2-control.html#padding-prop">Control</a>. For a visual explanation of the padding system, see the <a href="qml-qtquick-controls2-control.html#control-layout">Control Layout</a> section of the documentation.</p>
+<p>This property was introduced in  QtQuick.Controls 2.5 (Qt 5.12).</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#padding-prop">padding</a>, <a href="qml-qtquick-controls2-popup.html#topPadding-prop">topPadding</a>, <a href="qml-qtquick-controls2-popup.html#bottomPadding-prop">bottomPadding</a>, and <a href="qml-qtquick-controls2-popup.html#horizontalPadding-prop">horizontalPadding</a>.</p>
+</div></div><!-- @@@verticalPadding -->
+<br/>
+<!-- $$$visible -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="visible-prop"></a><span class="name">visible</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the popup is visible. The default value is <code>false</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#open-method">open()</a>, <a href="qml-qtquick-controls2-popup.html#close-method">close()</a>, and <a href="qml-qtquick-controls2-popup.html#opened-signal">opened</a>.</p>
+</div></div><!-- @@@visible -->
+<br/>
+<!-- $$$width -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="width-prop"></a><span class="name">width</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the width of the popup.</p>
+</div></div><!-- @@@width -->
+<br/>
+<!-- $$$x -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="x-prop"></a><span class="name">x</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the x-coordinate of the popup.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#y-prop">y</a> and <a href="qml-qtquick-controls2-popup.html#z-prop">z</a>.</p>
+</div></div><!-- @@@x -->
+<br/>
+<!-- $$$y -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="y-prop"></a><span class="name">y</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the y-coordinate of the popup.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#x-prop">x</a> and <a href="qml-qtquick-controls2-popup.html#z-prop">z</a>.</p>
+</div></div><!-- @@@y -->
+<br/>
+<!-- $$$z -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="z-prop"></a><span class="name">z</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the z-value of the popup. Z-value determines the stacking order of popups.</p>
+<p>If two visible popups have the same z-value, the last one that was opened will be on top.</p>
+<p>The default z-value is <code>0</code>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#x-prop">x</a> and <a href="qml-qtquick-controls2-popup.html#y-prop">y</a>.</p>
+</div></div><!-- @@@z -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$aboutToHide[overload1]$$$aboutToHide -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="aboutToHide-signal"></a><span class="type">void</span> <span class="name">aboutToHide</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the popup is about to hide.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#closed-signal">closed()</a>.</p>
+</div></div><!-- @@@aboutToHide -->
+<br/>
+<!-- $$$aboutToShow[overload1]$$$aboutToShow -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="aboutToShow-signal"></a><span class="type">void</span> <span class="name">aboutToShow</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the popup is about to show.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#opened-signal">opened()</a>.</p>
+</div></div><!-- @@@aboutToShow -->
+<br/>
+<!-- $$$closed[overload1]$$$closed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="closed-signal"></a><span class="type">void</span> <span class="name">closed</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the popup is closed.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#aboutToHide-signal">aboutToHide()</a>.</p>
+</div></div><!-- @@@closed -->
+<br/>
+<!-- $$$opened[overload1]$$$opened -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="opened-signal"></a><span class="type">void</span> <span class="name">opened</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the popup is opened.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#aboutToShow-signal">aboutToShow()</a>.</p>
+</div></div><!-- @@@opened -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$close[overload1]$$$close -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="close-method"></a><span class="type">void</span> <span class="name">close</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Closes the popup.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#visible-prop">visible</a>.</p>
+</div></div><!-- @@@close -->
+<br/>
+<!-- $$$forceActiveFocus[overload1]$$$forceActiveFocusreason= -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="forceActiveFocus-method"></a><span class="name">forceActiveFocus</span>(<span class="type">reason</span> = <i>Qt.OtherFocusReason</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Forces active focus on the popup with the given <i>reason</i>.</p>
+<p>This method sets focus on the popup and ensures that all ancestor <a href="../qtquick/qml-qtquick-focusscope.html">FocusScope</a> objects in the object hierarchy are also given <a href="qml-qtquick-controls2-popup.html#focus-prop">focus</a>.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#activeFocus-prop">activeFocus</a> and <a href="../qtcore/qt.html#FocusReason-enum">Qt::FocusReason</a>.</p>
+</div></div><!-- @@@forceActiveFocus -->
+<br/>
+<!-- $$$open[overload1]$$$open -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="open-method"></a><span class="type">void</span> <span class="name">open</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Opens the popup.</p>
+<p><b>See also </b><a href="qml-qtquick-controls2-popup.html#visible-prop">visible</a>.</p>
+</div></div><!-- @@@open -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

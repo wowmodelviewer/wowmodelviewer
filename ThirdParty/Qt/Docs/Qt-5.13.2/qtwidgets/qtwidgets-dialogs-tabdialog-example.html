@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- tabdialog.qdoc -->
+  <title>Tab Dialog Example | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Tab Dialog Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#tabdialog-class-definition">TabDialog Class Definition</a></li>
+<li class="level1"><a href="#tabdialog-class-implementation">TabDialog Class Implementation</a></li>
+<li class="level1"><a href="#generaltab-class-definition">GeneralTab Class Definition</a></li>
+<li class="level1"><a href="#generaltab-class-implementation">GeneralTab Class Implementation</a></li>
+<li class="level1"><a href="#permissionstab-class-definition">PermissionsTab Class Definition</a></li>
+<li class="level1"><a href="#permissionstab-class-implementation">PermissionsTab Class Implementation</a></li>
+<li class="level1"><a href="#applicationstab-class-definition">ApplicationsTab Class Definition</a></li>
+<li class="level1"><a href="#applicationstab-class-implementation">ApplicationsTab Class Implementation</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Tab Dialog Example</h1>
+<span class="subtitle"></span>
+<!-- $$$dialogs/tabdialog-brief -->
+<p>The Tab Dialog example shows how to construct a tab dialog using the <a href="qtabwidget.html">QTabWidget</a> class.</p>
+<!-- @@@dialogs/tabdialog -->
+<!-- $$$dialogs/tabdialog-description -->
+<div class="descr"> <a name="details"></a>
+<p>Dialogs provide an efficient way for the application to communicate with the user, but complex dialogs suffer from the problem that they often take up too much screen area. By using a number of tabs in a dialog, information can be split into different categories, while remaining accessible.</p>
+<p class="centerAlign"><img src="images/tabdialog-example.png" alt="" /></p><p>The Tab Dialog example consists of a single <code>TabDialog</code> class that provides three tabs, each containing information about a particular file, and two standard push buttons that are used to accept or reject the contents of the dialog.</p>
+<a name="tabdialog-class-definition"></a>
+<h4 id="tabdialog-class-definition">TabDialog Class Definition</h4>
+<p>The <code>TabDialog</code> class is a subclass of <a href="qdialog.html">QDialog</a> that displays a <a href="qtabwidget.html">QTabWidget</a> and two standard dialog buttons. The class definition only contain the class constructor and a private data member for the <a href="qtabwidget.html">QTabWidget</a>:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> TabDialog : <span class="keyword">public</span> <span class="type"><a href="qdialog.html">QDialog</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> TabDialog(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="qtabwidget.html">QTabWidget</a></span> <span class="operator">*</span>tabWidget;
+      <span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span> <span class="operator">*</span>buttonBox;
+  };
+
+</pre>
+<p>In the example, the widget will be used as a top-level window, but we define the constructor so that it can take a parent widget. This allows the dialog to be centered on top of an application's main window.</p>
+<a name="tabdialog-class-implementation"></a>
+<h4 id="tabdialog-class-implementation">TabDialog Class Implementation</h4>
+<p>The constructor calls the <a href="qdialog.html">QDialog</a> constructor and creates a <a href="../qtcore/qfileinfo.html">QFileInfo</a> object for the specified filename.</p>
+<pre class="cpp">
+
+  TabDialog<span class="operator">::</span>TabDialog(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qdialog.html">QDialog</a></span>(parent)
+  {
+      <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span> fileInfo(fileName);
+
+      tabWidget <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtabwidget.html">QTabWidget</a></span>;
+      tabWidget<span class="operator">-</span><span class="operator">&gt;</span>addTab(<span class="keyword">new</span> GeneralTab(fileInfo)<span class="operator">,</span> tr(<span class="string">&quot;General&quot;</span>));
+      tabWidget<span class="operator">-</span><span class="operator">&gt;</span>addTab(<span class="keyword">new</span> PermissionsTab(fileInfo)<span class="operator">,</span> tr(<span class="string">&quot;Permissions&quot;</span>));
+      tabWidget<span class="operator">-</span><span class="operator">&gt;</span>addTab(<span class="keyword">new</span> ApplicationsTab(fileInfo)<span class="operator">,</span> tr(<span class="string">&quot;Applications&quot;</span>));
+
+</pre>
+<p>The tab widget is populated with three custom widgets that each contain information about the file. We construct each of these without a parent widget because the tab widget will reparent them as they are added to it.</p>
+<p>We create two standard push buttons, and connect each of them to the appropriate slots in the dialog:</p>
+<pre class="cpp">
+
+      buttonBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span>(<span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span><span class="operator">::</span>Ok
+                                       <span class="operator">|</span> <span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span><span class="operator">::</span>Cancel);
+
+      connect(buttonBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span><span class="operator">::</span>accepted<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qdialog.html">QDialog</a></span><span class="operator">::</span>accept);
+      connect(buttonBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span><span class="operator">::</span>rejected<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qdialog.html">QDialog</a></span><span class="operator">::</span>reject);
+
+</pre>
+<p>We arrange the tab widget above the buttons in the dialog:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>mainLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(tabWidget);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(buttonBox);
+      setLayout(mainLayout);
+
+</pre>
+<p>Finally, we set the dialog's title:</p>
+<pre class="cpp">
+
+      setWindowTitle(tr(<span class="string">&quot;Tab Dialog&quot;</span>));
+  }
+
+</pre>
+<p>Each of the tabs are subclassed from <a href="qwidget.html">QWidget</a>, and only provide constructors.</p>
+<a name="generaltab-class-definition"></a>
+<h4 id="generaltab-class-definition">GeneralTab Class Definition</h4>
+<p>The GeneralTab widget definition is simple because we are only interested in displaying the contents of a widget within a tab:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> GeneralTab : <span class="keyword">public</span> <span class="type"><a href="qwidget.html">QWidget</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> GeneralTab(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span> <span class="operator">&amp;</span>fileInfo<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+  };
+
+</pre>
+<a name="generaltab-class-implementation"></a>
+<h4 id="generaltab-class-implementation">GeneralTab Class Implementation</h4>
+<p>The GeneralTab widget simply displays some information about the file passed by the TabDialog. Various widgets for this purpose, and these are arranged within a vertical layout:</p>
+<pre class="cpp">
+
+  GeneralTab<span class="operator">::</span>GeneralTab(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span> <span class="operator">&amp;</span>fileInfo<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qwidget.html">QWidget</a></span>(parent)
+  {
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>fileNameLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;File Name:&quot;</span>));
+      <span class="type"><a href="qlineedit.html">QLineEdit</a></span> <span class="operator">*</span>fileNameEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlineedit.html">QLineEdit</a></span>(fileInfo<span class="operator">.</span>fileName());
+
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>pathLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Path:&quot;</span>));
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>pathValueLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(fileInfo<span class="operator">.</span>absoluteFilePath());
+      pathValueLabel<span class="operator">-</span><span class="operator">&gt;</span>setFrameStyle(<span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>Panel <span class="operator">|</span> <span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>Sunken);
+
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>sizeLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Size:&quot;</span>));
+      <span class="type"><a href="../qtcore/qtglobal.html#qlonglong-typedef">qlonglong</a></span> size <span class="operator">=</span> fileInfo<span class="operator">.</span>size()<span class="operator">/</span><span class="number">1024</span>;
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>sizeValueLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;%1 K&quot;</span>)<span class="operator">.</span>arg(size));
+      sizeValueLabel<span class="operator">-</span><span class="operator">&gt;</span>setFrameStyle(<span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>Panel <span class="operator">|</span> <span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>Sunken);
+
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>lastReadLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Last Read:&quot;</span>));
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>lastReadValueLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(fileInfo<span class="operator">.</span>lastRead()<span class="operator">.</span>toString());
+      lastReadValueLabel<span class="operator">-</span><span class="operator">&gt;</span>setFrameStyle(<span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>Panel <span class="operator">|</span> <span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>Sunken);
+
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>lastModLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Last Modified:&quot;</span>));
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>lastModValueLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(fileInfo<span class="operator">.</span>lastModified()<span class="operator">.</span>toString());
+      lastModValueLabel<span class="operator">-</span><span class="operator">&gt;</span>setFrameStyle(<span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>Panel <span class="operator">|</span> <span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>Sunken);
+
+      <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>mainLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(fileNameLabel);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(fileNameEdit);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(pathLabel);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(pathValueLabel);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(sizeLabel);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(sizeValueLabel);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(lastReadLabel);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(lastReadValueLabel);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(lastModLabel);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(lastModValueLabel);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addStretch(<span class="number">1</span>);
+      setLayout(mainLayout);
+  }
+
+</pre>
+<a name="permissionstab-class-definition"></a>
+<h4 id="permissionstab-class-definition">PermissionsTab Class Definition</h4>
+<p>Like the GeneralTab, the PermissionsTab is just used as a placeholder widget for its children:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> PermissionsTab : <span class="keyword">public</span> <span class="type"><a href="qwidget.html">QWidget</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> PermissionsTab(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span> <span class="operator">&amp;</span>fileInfo<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+  };
+
+</pre>
+<a name="permissionstab-class-implementation"></a>
+<h4 id="permissionstab-class-implementation">PermissionsTab Class Implementation</h4>
+<p>The PermissionsTab shows information about the file's access information, displaying details of the file permissions and owner in widgets that are arranged in nested layouts:</p>
+<pre class="cpp">
+
+  PermissionsTab<span class="operator">::</span>PermissionsTab(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span> <span class="operator">&amp;</span>fileInfo<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qwidget.html">QWidget</a></span>(parent)
+  {
+      <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>permissionsGroup <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;Permissions&quot;</span>));
+
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>readable <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;Readable&quot;</span>));
+      <span class="keyword">if</span> (fileInfo<span class="operator">.</span>isReadable())
+          readable<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>writable <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;Writable&quot;</span>));
+      <span class="keyword">if</span> ( fileInfo<span class="operator">.</span>isWritable() )
+          writable<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>executable <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;Executable&quot;</span>));
+      <span class="keyword">if</span> ( fileInfo<span class="operator">.</span>isExecutable() )
+          executable<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+
+      <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>ownerGroup <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;Ownership&quot;</span>));
+
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>ownerLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Owner&quot;</span>));
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>ownerValueLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(fileInfo<span class="operator">.</span>owner());
+      ownerValueLabel<span class="operator">-</span><span class="operator">&gt;</span>setFrameStyle(<span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>Panel <span class="operator">|</span> <span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>Sunken);
+
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>groupLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Group&quot;</span>));
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>groupValueLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(fileInfo<span class="operator">.</span>group());
+      groupValueLabel<span class="operator">-</span><span class="operator">&gt;</span>setFrameStyle(<span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>Panel <span class="operator">|</span> <span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>Sunken);
+
+      <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>permissionsLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+      permissionsLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(readable);
+      permissionsLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(writable);
+      permissionsLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(executable);
+      permissionsGroup<span class="operator">-</span><span class="operator">&gt;</span>setLayout(permissionsLayout);
+
+      <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>ownerLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+      ownerLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(ownerLabel);
+      ownerLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(ownerValueLabel);
+      ownerLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(groupLabel);
+      ownerLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(groupValueLabel);
+      ownerGroup<span class="operator">-</span><span class="operator">&gt;</span>setLayout(ownerLayout);
+
+      <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>mainLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(permissionsGroup);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(ownerGroup);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addStretch(<span class="number">1</span>);
+      setLayout(mainLayout);
+  }
+
+</pre>
+<a name="applicationstab-class-definition"></a>
+<h4 id="applicationstab-class-definition">ApplicationsTab Class Definition</h4>
+<p>The ApplicationsTab is another placeholder widget that is mostly cosmetic:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> ApplicationsTab : <span class="keyword">public</span> <span class="type"><a href="qwidget.html">QWidget</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> ApplicationsTab(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span> <span class="operator">&amp;</span>fileInfo<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+  };
+
+</pre>
+<a name="applicationstab-class-implementation"></a>
+<h4 id="applicationstab-class-implementation">ApplicationsTab Class Implementation</h4>
+<p>The ApplicationsTab does not show any useful information, but could be used as a template for a more complicated example:</p>
+<pre class="cpp">
+
+  ApplicationsTab<span class="operator">::</span>ApplicationsTab(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span> <span class="operator">&amp;</span>fileInfo<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qwidget.html">QWidget</a></span>(parent)
+  {
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>topLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Open with:&quot;</span>));
+
+      <span class="type"><a href="qlistwidget.html">QListWidget</a></span> <span class="operator">*</span>applicationsListBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlistwidget.html">QListWidget</a></span>;
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> applications;
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">1</span>; i <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">30</span>; <span class="operator">+</span><span class="operator">+</span>i)
+          applications<span class="operator">.</span>append(tr(<span class="string">&quot;Application %1&quot;</span>)<span class="operator">.</span>arg(i));
+      applicationsListBox<span class="operator">-</span><span class="operator">&gt;</span>insertItems(<span class="number">0</span><span class="operator">,</span> applications);
+
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>alwaysCheckBox;
+
+      <span class="keyword">if</span> (fileInfo<span class="operator">.</span>suffix()<span class="operator">.</span>isEmpty())
+          alwaysCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;Always use this application to &quot;</span>
+              <span class="string">&quot;open this type of file&quot;</span>));
+      <span class="keyword">else</span>
+          alwaysCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;Always use this application to &quot;</span>
+              <span class="string">&quot;open files with the extension '%1'&quot;</span>)<span class="operator">.</span>arg(fileInfo<span class="operator">.</span>suffix()));
+
+      <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(topLabel);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(applicationsListBox);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(alwaysCheckBox);
+      setLayout(layout);
+  }
+
+</pre>
+<p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/dialogs/tabdialog?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@dialogs/tabdialog -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

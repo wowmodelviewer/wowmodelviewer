@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qplacecontactdetail.cpp -->
+  <title>QPlaceContactDetail Class | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-module.html">C++ Classes</a></td><td >QPlaceContactDetail</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#contact-types">Contact Types</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPlaceContactDetail Class</h1>
+<!-- $$$QPlaceContactDetail-brief -->
+<p>The <a href="qplacecontactdetail.html">QPlaceContactDetail</a> class represents a contact detail such as a phone number or website url. <a href="#details">More...</a></p>
+<!-- @@@QPlaceContactDetail -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QPlaceContactDetail&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += location</td></tr></table></div><ul>
+<li><a href="qplacecontactdetail-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qplacecontactdetail.html#QPlaceContactDetail-1">QPlaceContactDetail</a></b>(const QPlaceContactDetail &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qplacecontactdetail.html#QPlaceContactDetail">QPlaceContactDetail</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPlaceContactDetail &amp;</td><td class="memItemRight bottomAlign"><b><a href="qplacecontactdetail.html#operator-eq">operator=</a></b>(const QPlaceContactDetail &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qplacecontactdetail.html#dtor.QPlaceContactDetail">~QPlaceContactDetail</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacecontactdetail.html#clear">clear</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qplacecontactdetail.html#label">label</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacecontactdetail.html#setLabel">setLabel</a></b>(const QString &amp;<i>label</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacecontactdetail.html#setValue">setValue</a></b>(const QString &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qplacecontactdetail.html#value">value</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qplacecontactdetail.html#operator-not-eq">operator!=</a></b>(const QPlaceContactDetail &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qplacecontactdetail.html#operator-eq-eq">operator==</a></b>(const QPlaceContactDetail &amp;<i>other</i>) const</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> const QString </td><td class="memItemRight bottomAlign"><b><a href="qplacecontactdetail.html#Email-var">Email</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QString </td><td class="memItemRight bottomAlign"><b><a href="qplacecontactdetail.html#Fax-var">Fax</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QString </td><td class="memItemRight bottomAlign"><b><a href="qplacecontactdetail.html#Phone-var">Phone</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QString </td><td class="memItemRight bottomAlign"><b><a href="qplacecontactdetail.html#Website-var">Website</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPlaceContactDetail-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The detail consists of a label and value. The label is a localized string that can be presented to the end user that describes that detail value which is the actual phone number, email address and so on.</p>
+<a name="contact-types"></a>
+<h4 id="contact-types">Contact Types</h4>
+<p>The <a href="qplacecontactdetail.html">QPlaceContactDetail</a> class defines some constant strings which characterize standard <i>contact types</i>.</p>
+<ul>
+<li><a href="qplacecontactdetail.html#Phone-var">QPlaceContactDetail::Phone</a></li>
+<li><a href="qplacecontactdetail.html#Email-var">QPlaceContactDetail::Email</a></li>
+<li><a href="qplacecontactdetail.html#Website-var">QPlaceContactDetail::Website</a></li>
+<li><a href="qplacecontactdetail.html#Fax-var">QPlaceContactDetail::Fax</a></li>
+</ul>
+<p>These types are used to access and modify contact details in <a href="qplace.html">QPlace</a> via:</p>
+<ul>
+<li><a href="qplace.html#contactDetails">QPlace::contactDetails</a>()</li>
+<li><a href="qplace.html#setContactDetails">QPlace::setContactDetails</a>()</li>
+<li><a href="qplace.html#appendContactDetail">QPlace::appendContactDetail</a>()</li>
+<li><a href="qplace.html#contactTypes">QPlace::contactTypes</a>()</li>
+</ul>
+<p>The <i>contact type</i> is intended to be a string type so that providers are able to introduce new contact types if necessary.</p>
+</div>
+<!-- @@@QPlaceContactDetail -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QPlaceContactDetail$$$QPlaceContactDetailconstQPlaceContactDetail& -->
+<h3 class="fn" id="QPlaceContactDetail-1"><a name="QPlaceContactDetail-1"></a>QPlaceContactDetail::<span class="name">QPlaceContactDetail</span>(const <span class="type"><a href="qplacecontactdetail.html#QPlaceContactDetail">QPlaceContactDetail</a></span> &amp;<i>other</i>)</h3>
+<p>Creates a copy of <i>other</i>.</p>
+<!-- @@@QPlaceContactDetail -->
+<!-- $$$QPlaceContactDetail[overload1]$$$QPlaceContactDetail -->
+<h3 class="fn" id="QPlaceContactDetail"><a name="QPlaceContactDetail"></a>QPlaceContactDetail::<span class="name">QPlaceContactDetail</span>()</h3>
+<p>Constructs a contact detail.</p>
+<!-- @@@QPlaceContactDetail -->
+<!-- $$$operator=[overload1]$$$operator=constQPlaceContactDetail& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qplacecontactdetail.html#QPlaceContactDetail">QPlaceContactDetail</a></span> &amp;QPlaceContactDetail::<span class="name">operator=</span>(const <span class="type"><a href="qplacecontactdetail.html#QPlaceContactDetail">QPlaceContactDetail</a></span> &amp;<i>other</i>)</h3>
+<p>Assigns <i>other</i> to this contact detail and returns a reference to this contact detail.</p>
+<!-- @@@operator= -->
+<!-- $$$~QPlaceContactDetail[overload1]$$$~QPlaceContactDetail -->
+<h3 class="fn" id="dtor.QPlaceContactDetail"><a name="dtor.QPlaceContactDetail"></a><code>[virtual] </code>QPlaceContactDetail::<span class="name">~QPlaceContactDetail</span>()</h3>
+<p>Destroys the contact detail.</p>
+<!-- @@@~QPlaceContactDetail -->
+<!-- $$$clear[overload1]$$$clear -->
+<h3 class="fn" id="clear"><a name="clear"></a><span class="type">void</span> QPlaceContactDetail::<span class="name">clear</span>()</h3>
+<p>Clears the contact detail.</p>
+<!-- @@@clear -->
+<!-- $$$label[overload1]$$$label -->
+<h3 class="fn" id="label"><a name="label"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPlaceContactDetail::<span class="name">label</span>() const</h3>
+<p>Returns a label describing the contact detail.</p>
+<p>The label can potentially be localized. The language is dependent on the entity that sets it, typically this is the manager from which the places are sourced. The <a href="qplacemanager.html#locales">QPlaceManager::locales</a>() field defines what language is used.</p>
+<p><b>See also </b><a href="qplacecontactdetail.html#setLabel">setLabel</a>().</p>
+<!-- @@@label -->
+<!-- $$$setLabel[overload1]$$$setLabelconstQString& -->
+<h3 class="fn" id="setLabel"><a name="setLabel"></a><span class="type">void</span> QPlaceContactDetail::<span class="name">setLabel</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>label</i>)</h3>
+<p>Sets the <i>label</i> of the contact detail.</p>
+<p><b>See also </b><a href="qplacecontactdetail.html#label">label</a>().</p>
+<!-- @@@setLabel -->
+<!-- $$$setValue[overload1]$$$setValueconstQString& -->
+<h3 class="fn" id="setValue"><a name="setValue"></a><span class="type">void</span> QPlaceContactDetail::<span class="name">setValue</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>value</i>)</h3>
+<p>Sets the <i>value</i> of this contact detail.</p>
+<p><b>See also </b><a href="qplacecontactdetail.html#value">value</a>().</p>
+<!-- @@@setValue -->
+<!-- $$$value[overload1]$$$value -->
+<h3 class="fn" id="value"><a name="value"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPlaceContactDetail::<span class="name">value</span>() const</h3>
+<p>Returns the value of the contact detail.</p>
+<p><b>See also </b><a href="qplacecontactdetail.html#setValue">setValue</a>().</p>
+<!-- @@@value -->
+<!-- $$$operator!=[overload1]$$$operator!=constQPlaceContactDetail& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> QPlaceContactDetail::<span class="name">operator!=</span>(const <span class="type"><a href="qplacecontactdetail.html#QPlaceContactDetail">QPlaceContactDetail</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns true if <i>other</i> is not equal to this contact detail, otherwise returns false.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQPlaceContactDetail& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> QPlaceContactDetail::<span class="name">operator==</span>(const <span class="type"><a href="qplacecontactdetail.html#QPlaceContactDetail">QPlaceContactDetail</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns true if <i>other</i> is equal to this contact detail, otherwise returns false.</p>
+<!-- @@@operator== -->
+</div>
+<div class="vars">
+<h2>Member Variable Documentation</h2>
+<!-- $$$Email -->
+<h3 class="fn" id="Email-var"><a name="Email-var"></a>const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPlaceContactDetail::<span class="name">Email</span></h3>
+<p>The constant to specify email contact details.</p>
+<!-- @@@Email -->
+<!-- $$$Fax -->
+<h3 class="fn" id="Fax-var"><a name="Fax-var"></a>const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPlaceContactDetail::<span class="name">Fax</span></h3>
+<p>The constant used to specify fax contact details.</p>
+<!-- @@@Fax -->
+<!-- $$$Phone -->
+<h3 class="fn" id="Phone-var"><a name="Phone-var"></a>const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPlaceContactDetail::<span class="name">Phone</span></h3>
+<p>The constant to specify phone contact details</p>
+<!-- @@@Phone -->
+<!-- $$$Website -->
+<h3 class="fn" id="Website-var"><a name="Website-var"></a>const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPlaceContactDetail::<span class="name">Website</span></h3>
+<p>The constant used to specify website contact details.</p>
+<!-- @@@Website -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

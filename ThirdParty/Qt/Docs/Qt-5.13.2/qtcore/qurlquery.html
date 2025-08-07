@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qurlquery.cpp -->
+  <title>QUrlQuery Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QUrlQuery</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#encoding">Encoding</a></li>
+<li class="level2"><a href="#non-standard-delimiters">Non-standard delimiters</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QUrlQuery Class</h1>
+<!-- $$$QUrlQuery-brief -->
+<p>The <a href="qurlquery.html">QUrlQuery</a> class provides a way to manipulate a key-value pairs in a URL's query. <a href="#details">More...</a></p>
+<!-- @@@QUrlQuery -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QUrlQuery&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.0</td></tr></table></div><p>This class was introduced in  Qt 5.0.</p>
+<ul>
+<li><a href="qurlquery-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#QUrlQuery-4">QUrlQuery</a></b>(const QUrlQuery &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#QUrlQuery-3">QUrlQuery</a></b>(std::initializer_list&lt;QPair&lt;QString, QString&gt; &gt; <i>list</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#QUrlQuery-2">QUrlQuery</a></b>(const QString &amp;<i>queryString</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#QUrlQuery-1">QUrlQuery</a></b>(const QUrl &amp;<i>url</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#QUrlQuery">QUrlQuery</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QUrlQuery &amp;</td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#operator-eq-1">operator=</a></b>(QUrlQuery &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QUrlQuery &amp;</td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#operator-eq">operator=</a></b>(const QUrlQuery &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#dtor.QUrlQuery">~QUrlQuery</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#addQueryItem">addQueryItem</a></b>(const QString &amp;<i>key</i>, const QString &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#allQueryItemValues">allQueryItemValues</a></b>(const QString &amp;<i>key</i>, QUrl::ComponentFormattingOptions <i>encoding</i> = QUrl::PrettyDecoded) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#clear">clear</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#hasQueryItem">hasQueryItem</a></b>(const QString &amp;<i>key</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#isEmpty">isEmpty</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#query">query</a></b>(QUrl::ComponentFormattingOptions <i>encoding</i> = QUrl::PrettyDecoded) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#queryItemValue">queryItemValue</a></b>(const QString &amp;<i>key</i>, QUrl::ComponentFormattingOptions <i>encoding</i> = QUrl::PrettyDecoded) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QPair&lt;QString, QString&gt; &gt; </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#queryItems">queryItems</a></b>(QUrl::ComponentFormattingOptions <i>encoding</i> = QUrl::PrettyDecoded) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QChar </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#queryPairDelimiter">queryPairDelimiter</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QChar </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#queryValueDelimiter">queryValueDelimiter</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#removeAllQueryItems">removeAllQueryItems</a></b>(const QString &amp;<i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#removeQueryItem">removeQueryItem</a></b>(const QString &amp;<i>key</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#setQuery">setQuery</a></b>(const QString &amp;<i>queryString</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#setQueryDelimiters">setQueryDelimiters</a></b>(QChar <i>valueDelimiter</i>, QChar <i>pairDelimiter</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#setQueryItems">setQueryItems</a></b>(const QList&lt;QPair&lt;QString, QString&gt; &gt; &amp;<i>query</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#swap">swap</a></b>(QUrlQuery &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#toString">toString</a></b>(QUrl::ComponentFormattingOptions <i>encoding</i> = ...) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#operator-not-eq">operator!=</a></b>(const QUrlQuery &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#operator-eq-eq">operator==</a></b>(const QUrlQuery &amp;<i>other</i>) const</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QChar </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#defaultQueryPairDelimiter">defaultQueryPairDelimiter</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QChar </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#defaultQueryValueDelimiter">defaultQueryValueDelimiter</a></b>()</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qurlquery.html#qHash">qHash</a></b>(const QUrlQuery &amp;<i>key</i>, uint <i>seed</i> = 0)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QUrlQuery-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>It is used to parse the query strings found in URLs like the following:</p>
+<p class="centerAlign"><img src="images/qurl-querystring.png" alt="" /></p><p>Query strings like the above are used to transmit options in the URL and are usually decoded into multiple key-value pairs. The one above would contain two entries in its list, with keys &quot;type&quot; and &quot;color&quot;. <a href="qurlquery.html">QUrlQuery</a> can also be used to create a query string suitable for use in <a href="qurl.html#setQuery">QUrl::setQuery</a>() from the individual components of the query.</p>
+<p>The most common way of parsing a query string is to initialize it in the constructor by passing it the query string. Otherwise, the <a href="qurlquery.html#setQuery">setQuery</a>() method can be used to set the query to be parsed. That method can also be used to parse a query with non-standard delimiters, after having set them using the <a href="qurlquery.html#setQueryDelimiters">setQueryDelimiters</a>() function.</p>
+<p>The encoded query string can be obtained again using <a href="qurlquery.html#query">query</a>(). This will take all the internally-stored items and encode the string using the delimiters.</p>
+<a name="encoding"></a>
+<h3 id="encoding">Encoding</h3>
+<p>All of the getter methods in <a href="qurlquery.html">QUrlQuery</a> support an optional parameter of type <a href="qurl.html#ComponentFormattingOption-enum">QUrl::ComponentFormattingOptions</a>, including <a href="qurlquery.html#query">query</a>(), which dictate how to encode the data in question. Except for <a href="qurl.html#ComponentFormattingOption-enum">QUrl::FullyDecoded</a>, the returned value must still be considered a percent-encoded string, as there are certain values which cannot be expressed in decoded form (like control characters, byte sequences not decodable to UTF-8). For that reason, the percent character is always represented by the string &quot;%25&quot;.</p>
+<a name="handling-of-spaces-and-plus"></a>
+<h4 id="handling-of-spaces-and-plus">Handling of spaces and plus (&quot;+&quot;)</h4>
+<p>Web browsers usually encode spaces found in HTML FORM elements to a plus sign (&quot;+&quot;) and plus signs to its percent-encoded form (%2B). However, the Internet specifications governing URLs do not consider spaces and the plus character equivalent.</p>
+<p>For that reason, <a href="qurlquery.html">QUrlQuery</a> never encodes the space character to &quot;+&quot; and will never decode &quot;+&quot; to a space character. Instead, space characters will be rendered &quot;%20&quot; in encoded form.</p>
+<p>To support encoding like that of HTML forms, <a href="qurlquery.html">QUrlQuery</a> also never decodes the &quot;%2B&quot; sequence to a plus sign nor encode a plus sign. In fact, any &quot;%2B&quot; or &quot;+&quot; sequences found in the keys, values, or query string are left exactly like written (except for the uppercasing of &quot;%2b&quot; to &quot;%2B&quot;).</p>
+<a name="full-decoding"></a>
+<h4 id="full-decoding">Full decoding</h4>
+<p>With <a href="qurl.html#ComponentFormattingOption-enum">QUrl::FullyDecoded</a> formatting, all percent-encoded sequences will be decoded fully and the '%' character is used to represent itself. <a href="qurl.html#ComponentFormattingOption-enum">QUrl::FullyDecoded</a> should be used with care, since it may cause data loss. See the documentation of <a href="qurl.html#ComponentFormattingOption-enum">QUrl::FullyDecoded</a> for information on what data may be lost.</p>
+<p>This formatting mode should be used only when dealing with text presented to the user in contexts where percent-encoding is not desired. Note that <a href="qurlquery.html">QUrlQuery</a> setters and query methods do not support the counterpart <a href="qurl.html#ParsingMode-enum">QUrl::DecodedMode</a> parsing, so using <a href="qurl.html#ComponentFormattingOption-enum">QUrl::FullyDecoded</a> to obtain a listing of keys may result in keys not found in the object.</p>
+<a name="non-standard-delimiters"></a>
+<h3 id="non-standard-delimiters">Non-standard delimiters</h3>
+<p>By default, <a href="qurlquery.html">QUrlQuery</a> uses an equal sign (&quot;=&quot;) to separate a key from its value, and an ampersand (&quot;&amp;&quot;) to separate key-value pairs from each other. It is possible to change the delimiters that <a href="qurlquery.html">QUrlQuery</a> uses for parsing and for reconstructing the query by calling <a href="qurlquery.html#setQueryDelimiters">setQueryDelimiters</a>().</p>
+<p>Non-standard delimiters should be chosen from among what RFC 3986 calls &quot;sub-delimiters&quot;. They are:</p>
+<pre class="cpp">
+
+  sub<span class="operator">-</span>delims    <span class="operator">=</span> <span class="string">&quot;!&quot;</span> <span class="operator">/</span> <span class="string">&quot;$&quot;</span> <span class="operator">/</span> <span class="string">&quot;&amp;&quot;</span> <span class="operator">/</span> <span class="string">&quot;'&quot;</span> <span class="operator">/</span> <span class="string">&quot;(&quot;</span> <span class="operator">/</span> <span class="string">&quot;)&quot;</span>
+                <span class="operator">/</span> <span class="string">&quot;*&quot;</span> <span class="operator">/</span> <span class="string">&quot;+&quot;</span> <span class="operator">/</span> <span class="string">&quot;,&quot;</span> <span class="operator">/</span> <span class="string">&quot;;&quot;</span> <span class="operator">/</span> <span class="string">&quot;=&quot;</span>
+
+</pre>
+<p>Use of other characters is not supported and may result in unexpected behaviour. <a href="qurlquery.html">QUrlQuery</a> does not verify that you passed a valid delimiter.</p>
+</div>
+<p><b>See also </b><a href="qurl.html">QUrl</a>.</p>
+<!-- @@@QUrlQuery -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QUrlQuery$$$QUrlQueryconstQUrlQuery& -->
+<h3 class="fn" id="QUrlQuery-4"><a name="QUrlQuery-4"></a>QUrlQuery::<span class="name">QUrlQuery</span>(const <span class="type"><a href="qurlquery.html#QUrlQuery">QUrlQuery</a></span> &amp;<i>other</i>)</h3>
+<p>Copies the contents of the <i>other</i> <a href="qurlquery.html">QUrlQuery</a> object, including the query delimiters.</p>
+<!-- @@@QUrlQuery -->
+<!-- $$$QUrlQuery$$$QUrlQuerystd::initializer_list<QPair<QString,QString>> -->
+<h3 class="fn" id="QUrlQuery-3"><a name="QUrlQuery-3"></a>QUrlQuery::<span class="name">QUrlQuery</span>(<span class="type">std::initializer_list</span>&lt;<span class="type"><a href="qpair.html">QPair</a></span>&lt;<span class="type"><a href="qstring.html">QString</a></span>, <span class="type"><a href="qstring.html">QString</a></span>&gt; &gt; <i>list</i>)</h3>
+<p>Constructs a <a href="qurlquery.html">QUrlQuery</a> object from the <i>list</i> of key/value pair.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@QUrlQuery -->
+<!-- $$$QUrlQuery$$$QUrlQueryconstQString& -->
+<h3 class="fn" id="QUrlQuery-2"><a name="QUrlQuery-2"></a>QUrlQuery::<span class="name">QUrlQuery</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>queryString</i>)</h3>
+<p>Constructs a <a href="qurlquery.html">QUrlQuery</a> object and parses the <i>queryString</i> query string, using the default query delimiters. To parse a query string using other delimiters, you should first set them using <a href="qurlquery.html#setQueryDelimiters">setQueryDelimiters</a>() and then set the query with <a href="qurlquery.html#setQuery">setQuery</a>().</p>
+<!-- @@@QUrlQuery -->
+<!-- $$$QUrlQuery$$$QUrlQueryconstQUrl& -->
+<h3 class="fn" id="QUrlQuery-1"><a name="QUrlQuery-1"></a>QUrlQuery::<span class="name">QUrlQuery</span>(const <span class="type"><a href="qurl.html">QUrl</a></span> &amp;<i>url</i>)</h3>
+<p>Constructs a <a href="qurlquery.html">QUrlQuery</a> object and parses the query string found in the <i>url</i> URL, using the default query delimiters. To parse a query string using other delimiters, you should first set them using <a href="qurlquery.html#setQueryDelimiters">setQueryDelimiters</a>() and then set the query with <a href="qurlquery.html#setQuery">setQuery</a>().</p>
+<p><b>See also </b><a href="qurl.html#query">QUrl::query</a>().</p>
+<!-- @@@QUrlQuery -->
+<!-- $$$QUrlQuery[overload1]$$$QUrlQuery -->
+<h3 class="fn" id="QUrlQuery"><a name="QUrlQuery"></a>QUrlQuery::<span class="name">QUrlQuery</span>()</h3>
+<p>Constructs an empty <a href="qurlquery.html">QUrlQuery</a> object. A query can be set afterwards by calling <a href="qurlquery.html#setQuery">setQuery</a>() or items can be added by using <a href="qurlquery.html#addQueryItem">addQueryItem</a>().</p>
+<p><b>See also </b><a href="qurlquery.html#setQuery">setQuery</a>() and <a href="qurlquery.html#addQueryItem">addQueryItem</a>().</p>
+<!-- @@@QUrlQuery -->
+<!-- $$$operator=$$$operator=QUrlQuery&& -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type"><a href="qurlquery.html#QUrlQuery">QUrlQuery</a></span> &amp;QUrlQuery::<span class="name">operator=</span>(<span class="type"><a href="qurlquery.html#QUrlQuery">QUrlQuery</a></span> &amp;&amp;<i>other</i>)</h3>
+<p>Move-assigns <i>other</i> to this <a href="qurlquery.html">QUrlQuery</a> instance.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@operator= -->
+<!-- $$$operator=[overload1]$$$operator=constQUrlQuery& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qurlquery.html#QUrlQuery">QUrlQuery</a></span> &amp;QUrlQuery::<span class="name">operator=</span>(const <span class="type"><a href="qurlquery.html#QUrlQuery">QUrlQuery</a></span> &amp;<i>other</i>)</h3>
+<p>Copies the contents of the <i>other</i> <a href="qurlquery.html">QUrlQuery</a> object, including the query delimiters.</p>
+<!-- @@@operator= -->
+<!-- $$$~QUrlQuery[overload1]$$$~QUrlQuery -->
+<h3 class="fn" id="dtor.QUrlQuery"><a name="dtor.QUrlQuery"></a>QUrlQuery::<span class="name">~QUrlQuery</span>()</h3>
+<p>Destroys this <a href="qurlquery.html">QUrlQuery</a> object.</p>
+<!-- @@@~QUrlQuery -->
+<!-- $$$addQueryItem[overload1]$$$addQueryItemconstQString&constQString& -->
+<h3 class="fn" id="addQueryItem"><a name="addQueryItem"></a><span class="type">void</span> QUrlQuery::<span class="name">addQueryItem</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>, const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>value</i>)</h3>
+<p>Appends the pair <i>key</i> = <i>value</i> to the end of the query string of the URL. This method does not overwrite existing items that might exist with the same key.</p>
+<p><b>Note: </b>This method does not treat spaces (ASCII 0x20) and plus (&quot;+&quot;) signs as the same, like HTML forms do. If you need spaces to be represented as plus signs, use actual plus signs.</p><p><b>See also </b><a href="qurlquery.html#hasQueryItem">hasQueryItem</a>() and <a href="qurlquery.html#queryItemValue">queryItemValue</a>().</p>
+<!-- @@@addQueryItem -->
+<!-- $$$allQueryItemValues[overload1]$$$allQueryItemValuesconstQString&QUrl::ComponentFormattingOptions -->
+<h3 class="fn" id="allQueryItemValues"><a name="allQueryItemValues"></a><span class="type"><a href="qstringlist.html">QStringList</a></span> QUrlQuery::<span class="name">allQueryItemValues</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>, <span class="type"><a href="qurl.html#ComponentFormattingOption-enum">QUrl::ComponentFormattingOptions</a></span> <i>encoding</i> = QUrl::PrettyDecoded) const</h3>
+<p>Returns the a list of query string values whose key is equal to <i>key</i> from the URL, using the options specified in <i>encoding</i> to encode the return value. If the key <i>key</i> is not found, this function returns an empty list.</p>
+<p><b>See also </b><a href="qurlquery.html#queryItemValue">queryItemValue</a>() and <a href="qurlquery.html#addQueryItem">addQueryItem</a>().</p>
+<!-- @@@allQueryItemValues -->
+<!-- $$$clear[overload1]$$$clear -->
+<h3 class="fn" id="clear"><a name="clear"></a><span class="type">void</span> QUrlQuery::<span class="name">clear</span>()</h3>
+<p>Clears this <a href="qurlquery.html">QUrlQuery</a> object by removing all of the key-value pairs currently stored. If the query delimiters have been changed, this function will leave them with their changed values.</p>
+<p><b>See also </b><a href="qurlquery.html#isEmpty">isEmpty</a>() and <a href="qurlquery.html#setQueryDelimiters">setQueryDelimiters</a>().</p>
+<!-- @@@clear -->
+<!-- $$$defaultQueryPairDelimiter[overload1]$$$defaultQueryPairDelimiter -->
+<h3 class="fn" id="defaultQueryPairDelimiter"><a name="defaultQueryPairDelimiter"></a><code>[static] </code><span class="type"><a href="qchar.html">QChar</a></span> QUrlQuery::<span class="name">defaultQueryPairDelimiter</span>()</h3>
+<p>Returns the default character for separating keys-value pairs from each other, an ampersand (&quot;&amp;&quot;).</p>
+<p><b>See also </b><a href="qurlquery.html#setQueryDelimiters">setQueryDelimiters</a>(), <a href="qurlquery.html#queryPairDelimiter">queryPairDelimiter</a>(), and <a href="qurlquery.html#defaultQueryValueDelimiter">defaultQueryValueDelimiter</a>().</p>
+<!-- @@@defaultQueryPairDelimiter -->
+<!-- $$$defaultQueryValueDelimiter[overload1]$$$defaultQueryValueDelimiter -->
+<h3 class="fn" id="defaultQueryValueDelimiter"><a name="defaultQueryValueDelimiter"></a><code>[static] </code><span class="type"><a href="qchar.html">QChar</a></span> QUrlQuery::<span class="name">defaultQueryValueDelimiter</span>()</h3>
+<p>Returns the default character for separating keys from values in the query, an equal sign (&quot;=&quot;).</p>
+<p><b>See also </b><a href="qurlquery.html#setQueryDelimiters">setQueryDelimiters</a>(), <a href="qurlquery.html#queryValueDelimiter">queryValueDelimiter</a>(), and <a href="qurlquery.html#defaultQueryPairDelimiter">defaultQueryPairDelimiter</a>().</p>
+<!-- @@@defaultQueryValueDelimiter -->
+<!-- $$$hasQueryItem[overload1]$$$hasQueryItemconstQString& -->
+<h3 class="fn" id="hasQueryItem"><a name="hasQueryItem"></a><span class="type">bool</span> QUrlQuery::<span class="name">hasQueryItem</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>) const</h3>
+<p>Returns <code>true</code> if there is a query string pair whose key is equal to <i>key</i> from the URL.</p>
+<p><b>See also </b><a href="qurlquery.html#addQueryItem">addQueryItem</a>() and <a href="qurlquery.html#queryItemValue">queryItemValue</a>().</p>
+<!-- @@@hasQueryItem -->
+<!-- $$$isEmpty[overload1]$$$isEmpty -->
+<h3 class="fn" id="isEmpty"><a name="isEmpty"></a><span class="type">bool</span> QUrlQuery::<span class="name">isEmpty</span>() const</h3>
+<p>Returns <code>true</code> if this <a href="qurlquery.html">QUrlQuery</a> object contains no key-value pairs, such as after being default-constructed or after parsing an empty query string.</p>
+<p><b>See also </b><a href="qurlquery.html#setQuery">setQuery</a>() and <a href="qurlquery.html#clear">clear</a>().</p>
+<!-- @@@isEmpty -->
+<!-- $$$query[overload1]$$$queryQUrl::ComponentFormattingOptions -->
+<h3 class="fn" id="query"><a name="query"></a><span class="type"><a href="qstring.html">QString</a></span> QUrlQuery::<span class="name">query</span>(<span class="type"><a href="qurl.html#ComponentFormattingOption-enum">QUrl::ComponentFormattingOptions</a></span> <i>encoding</i> = QUrl::PrettyDecoded) const</h3>
+<p>Returns the reconstructed query string, formed from the key-value pairs currently stored in this <a href="qurlquery.html">QUrlQuery</a> object and separated by the query delimiters chosen for this object. The keys and values are encoded using the options given by the <i>encoding</i> parameter.</p>
+<p>For this function, the only ambiguous delimiter is the hash (&quot;#&quot;), as in URLs it is used to separate the query string from the fragment that may follow.</p>
+<p>The order of the key-value pairs in the returned string is exactly the same as in the original query.</p>
+<p><b>See also </b><a href="qurlquery.html#setQuery">setQuery</a>(), <a href="qurl.html#setQuery">QUrl::setQuery</a>(), <a href="qurl.html#fragment">QUrl::fragment</a>(), and <a href="qurlquery.html#encoding">Encoding</a>.</p>
+<!-- @@@query -->
+<!-- $$$queryItemValue[overload1]$$$queryItemValueconstQString&QUrl::ComponentFormattingOptions -->
+<h3 class="fn" id="queryItemValue"><a name="queryItemValue"></a><span class="type"><a href="qstring.html">QString</a></span> QUrlQuery::<span class="name">queryItemValue</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>, <span class="type"><a href="qurl.html#ComponentFormattingOption-enum">QUrl::ComponentFormattingOptions</a></span> <i>encoding</i> = QUrl::PrettyDecoded) const</h3>
+<p>Returns the query value associated with key <i>key</i> from the URL, using the options specified in <i>encoding</i> to encode the return value. If the key <i>key</i> is not found, this function returns an empty string. If you need to distinguish between an empty value and a non-existent key, you should check for the key's presence first using <a href="qurlquery.html#hasQueryItem">hasQueryItem</a>().</p>
+<p>If the key <i>key</i> is multiply defined, this function will return the first one found, in the order they were present in the query string or added using <a href="qurlquery.html#addQueryItem">addQueryItem</a>().</p>
+<p><b>See also </b><a href="qurlquery.html#addQueryItem">addQueryItem</a>(), <a href="qurlquery.html#allQueryItemValues">allQueryItemValues</a>(), and <a href="qurlquery.html#encoding">Encoding</a>.</p>
+<!-- @@@queryItemValue -->
+<!-- $$$queryItems[overload1]$$$queryItemsQUrl::ComponentFormattingOptions -->
+<h3 class="fn" id="queryItems"><a name="queryItems"></a><span class="type"><a href="qlist.html">QList</a></span>&lt;<span class="type"><a href="qpair.html">QPair</a></span>&lt;<span class="type"><a href="qstring.html">QString</a></span>, <span class="type"><a href="qstring.html">QString</a></span>&gt; &gt; QUrlQuery::<span class="name">queryItems</span>(<span class="type"><a href="qurl.html#ComponentFormattingOption-enum">QUrl::ComponentFormattingOptions</a></span> <i>encoding</i> = QUrl::PrettyDecoded) const</h3>
+<p>Returns the query string of the URL, as a map of keys and values, using the options specified in <i>encoding</i> to encode the items. The order of the elements is the same as the one found in the query string or set with <a href="qurlquery.html#setQueryItems">setQueryItems</a>().</p>
+<p><b>See also </b><a href="qurlquery.html#setQueryItems">setQueryItems</a>() and <a href="qurlquery.html#encoding">Encoding</a>.</p>
+<!-- @@@queryItems -->
+<!-- $$$queryPairDelimiter[overload1]$$$queryPairDelimiter -->
+<h3 class="fn" id="queryPairDelimiter"><a name="queryPairDelimiter"></a><span class="type"><a href="qchar.html">QChar</a></span> QUrlQuery::<span class="name">queryPairDelimiter</span>() const</h3>
+<p>Returns the character used to delimit between keys-value pairs when reconstructing the query string in <a href="qurlquery.html#query">query</a>() or when parsing in <a href="qurlquery.html#setQuery">setQuery</a>().</p>
+<p><b>See also </b><a href="qurlquery.html#setQueryDelimiters">setQueryDelimiters</a>() and <a href="qurlquery.html#queryValueDelimiter">queryValueDelimiter</a>().</p>
+<!-- @@@queryPairDelimiter -->
+<!-- $$$queryValueDelimiter[overload1]$$$queryValueDelimiter -->
+<h3 class="fn" id="queryValueDelimiter"><a name="queryValueDelimiter"></a><span class="type"><a href="qchar.html">QChar</a></span> QUrlQuery::<span class="name">queryValueDelimiter</span>() const</h3>
+<p>Returns the character used to delimit between keys and values when reconstructing the query string in <a href="qurlquery.html#query">query</a>() or when parsing in <a href="qurlquery.html#setQuery">setQuery</a>().</p>
+<p><b>See also </b><a href="qurlquery.html#setQueryDelimiters">setQueryDelimiters</a>() and <a href="qurlquery.html#queryPairDelimiter">queryPairDelimiter</a>().</p>
+<!-- @@@queryValueDelimiter -->
+<!-- $$$removeAllQueryItems[overload1]$$$removeAllQueryItemsconstQString& -->
+<h3 class="fn" id="removeAllQueryItems"><a name="removeAllQueryItems"></a><span class="type">void</span> QUrlQuery::<span class="name">removeAllQueryItems</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>)</h3>
+<p>Removes all the query string pairs whose key is equal to <i>key</i> from the URL.</p>
+<p><b>See also </b><a href="qurlquery.html#removeQueryItem">removeQueryItem</a>().</p>
+<!-- @@@removeAllQueryItems -->
+<!-- $$$removeQueryItem[overload1]$$$removeQueryItemconstQString& -->
+<h3 class="fn" id="removeQueryItem"><a name="removeQueryItem"></a><span class="type">void</span> QUrlQuery::<span class="name">removeQueryItem</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>key</i>)</h3>
+<p>Removes the query string pair whose key is equal to <i>key</i> from the URL. If there are multiple items with a key equal to <i>key</i>, it removes the first item in the order they were present in the query string or added with <a href="qurlquery.html#addQueryItem">addQueryItem</a>().</p>
+<p><b>See also </b><a href="qurlquery.html#removeAllQueryItems">removeAllQueryItems</a>().</p>
+<!-- @@@removeQueryItem -->
+<!-- $$$setQuery[overload1]$$$setQueryconstQString& -->
+<h3 class="fn" id="setQuery"><a name="setQuery"></a><span class="type">void</span> QUrlQuery::<span class="name">setQuery</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>queryString</i>)</h3>
+<p>Parses the query string in <i>queryString</i> and sets the internal items to the values found there. If any delimiters have been specified with <a href="qurlquery.html#setQueryDelimiters">setQueryDelimiters</a>(), this function will use them instead of the default delimiters to parse the string.</p>
+<p><b>See also </b><a href="qurlquery.html#query">query</a>().</p>
+<!-- @@@setQuery -->
+<!-- $$$setQueryDelimiters[overload1]$$$setQueryDelimitersQCharQChar -->
+<h3 class="fn" id="setQueryDelimiters"><a name="setQueryDelimiters"></a><span class="type">void</span> QUrlQuery::<span class="name">setQueryDelimiters</span>(<span class="type"><a href="qchar.html">QChar</a></span> <i>valueDelimiter</i>, <span class="type"><a href="qchar.html">QChar</a></span> <i>pairDelimiter</i>)</h3>
+<p>Sets the characters used for delimiting between keys and values, and between key-value pairs in the URL's query string. The default value delimiter is '=' and the default pair delimiter is '&amp;'.</p>
+<p class="centerAlign"><img src="images/qurl-querystring.png" alt="" /></p><p><i>valueDelimiter</i> will be used for separating keys from values, and <i>pairDelimiter</i> will be used to separate key-value pairs. Any occurrences of these delimiting characters in the encoded representation of the keys and values of the query string are percent encoded when returned in <a href="qurlquery.html#query">query</a>().</p>
+<p>If <i>valueDelimiter</i> is set to '(' and <i>pairDelimiter</i> is ')', the above query string would instead be represented like this:</p>
+<pre class="cpp">
+
+  http:<span class="comment">//www.example.com/cgi-bin/drawgraph.cgi?type(pie)color(green)</span>
+
+</pre>
+<p><b>Note: </b>Non-standard delimiters should be chosen from among what RFC 3986 calls &quot;sub-delimiters&quot;. They are:</p><pre class="cpp">
+
+  sub<span class="operator">-</span>delims    <span class="operator">=</span> <span class="string">&quot;!&quot;</span> <span class="operator">/</span> <span class="string">&quot;$&quot;</span> <span class="operator">/</span> <span class="string">&quot;&amp;&quot;</span> <span class="operator">/</span> <span class="string">&quot;'&quot;</span> <span class="operator">/</span> <span class="string">&quot;(&quot;</span> <span class="operator">/</span> <span class="string">&quot;)&quot;</span>
+                <span class="operator">/</span> <span class="string">&quot;*&quot;</span> <span class="operator">/</span> <span class="string">&quot;+&quot;</span> <span class="operator">/</span> <span class="string">&quot;,&quot;</span> <span class="operator">/</span> <span class="string">&quot;;&quot;</span> <span class="operator">/</span> <span class="string">&quot;=&quot;</span>
+
+</pre>
+<p>Use of other characters is not supported and may result in unexpected behaviour. This method does not verify that you passed a valid delimiter.</p>
+<p><b>See also </b><a href="qurlquery.html#queryValueDelimiter">queryValueDelimiter</a>() and <a href="qurlquery.html#queryPairDelimiter">queryPairDelimiter</a>().</p>
+<!-- @@@setQueryDelimiters -->
+<!-- $$$setQueryItems[overload1]$$$setQueryItemsconstQList<QPair<QString,QString>>& -->
+<h3 class="fn" id="setQueryItems"><a name="setQueryItems"></a><span class="type">void</span> QUrlQuery::<span class="name">setQueryItems</span>(const <span class="type"><a href="qlist.html">QList</a></span>&lt;<span class="type"><a href="qpair.html">QPair</a></span>&lt;<span class="type"><a href="qstring.html">QString</a></span>, <span class="type"><a href="qstring.html">QString</a></span>&gt; &gt; &amp;<i>query</i>)</h3>
+<p>Sets the items in this <a href="qurlquery.html">QUrlQuery</a> object to <i>query</i>. The order of the elements in <i>query</i> is preserved.</p>
+<p><b>Note: </b>This method does not treat spaces (ASCII 0x20) and plus (&quot;+&quot;) signs as the same, like HTML forms do. If you need spaces to be represented as plus signs, use actual plus signs.</p><p><b>See also </b><a href="qurlquery.html#queryItems">queryItems</a>() and <a href="qurlquery.html#isEmpty">isEmpty</a>().</p>
+<!-- @@@setQueryItems -->
+<!-- $$$swap[overload1]$$$swapQUrlQuery& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QUrlQuery::<span class="name">swap</span>(<span class="type"><a href="qurlquery.html#QUrlQuery">QUrlQuery</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps this URL query instance with <i>other</i>. This function is very fast and never fails.</p>
+<!-- @@@swap -->
+<!-- $$$toString[overload1]$$$toStringQUrl::ComponentFormattingOptions -->
+<h3 class="fn" id="toString"><a name="toString"></a><span class="type"><a href="qstring.html">QString</a></span> QUrlQuery::<span class="name">toString</span>(<span class="type"><a href="qurl.html#ComponentFormattingOption-enum">QUrl::ComponentFormattingOptions</a></span> <i>encoding</i> = ...) const</h3>
+<p>Returns this <a href="qurlquery.html">QUrlQuery</a> as a <a href="qstring.html">QString</a>. <i>encoding</i> can be used to specify the URL string encoding of the return value.</p>
+<!-- @@@toString -->
+<!-- $$$operator!=[overload1]$$$operator!=constQUrlQuery& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> QUrlQuery::<span class="name">operator!=</span>(const <span class="type"><a href="qurlquery.html#QUrlQuery">QUrlQuery</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns <code>true</code> if <i>other</i> is not equal to this <a href="qurlquery.html">QUrlQuery</a>. Otherwise, returns <code>false</code>.</p>
+<p><b>See also </b><a href="qurlquery.html#operator-eq-eq">operator==</a>().</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQUrlQuery& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> QUrlQuery::<span class="name">operator==</span>(const <span class="type"><a href="qurlquery.html#QUrlQuery">QUrlQuery</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns <code>true</code> if this object and the <i>other</i> object contain the same contents, in the same order, and use the same query delimiters.</p>
+<!-- @@@operator== -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$qHash[overload1]$$$qHashconstQUrlQuery&uint -->
+<h3 class="fn" id="qHash"><a name="qHash"></a><span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <span class="name">qHash</span>(const <span class="type"><a href="qurlquery.html#QUrlQuery">QUrlQuery</a></span> &amp;<i>key</i>, <span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <i>seed</i> = 0)</h3>
+<p>Returns the hash value for <i>key</i>, using <i>seed</i> to seed the calculation.</p>
+<p>This function was introduced in  Qt 5.6.</p>
+<!-- @@@qHash -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

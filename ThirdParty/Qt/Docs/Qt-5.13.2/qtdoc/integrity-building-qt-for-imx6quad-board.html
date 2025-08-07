@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- integrity-build-monolith-app-tutorial.qdoc -->
+  <title>Building Qt for i.MX6 Quad Board | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Building Qt for i.MX6 Quad Board</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="integrity-preparing-bsp-for-imx6quad-board.html" />
+  <link rel="next" href="integrity-building-monolith.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="integrity-preparing-bsp-for-imx6quad-board.html">Preparing BSP for i.MX6 Quad Board</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="integrity-building-monolith.html">Building Monolith Project</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#creating-script-for-running-exports">Creating Script for Running Exports</a></li>
+<li class="level1"><a href="#getting-qt-source-code">Getting Qt Source Code</a></li>
+<li class="level2"><a href="#getting-qt-sources-via-git">Getting Qt Sources via Git</a></li>
+<li class="level1"><a href="#configuring-qt">Configuring Qt</a></li>
+<li class="level1"><a href="#building-qt">Building Qt</a></li>
+<li class="level1"><a href="#installing-qt">Installing Qt</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Building Qt for i.MX6 Quad Board</h1>
+<span class="subtitle"></span>
+<!-- $$$integrity-building-qt-for-imx6quad-board.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>To set up the development environment for Qt for INTEGRITY, you need to build Qt from the sources for the i.MX6 Quad board. Before building Qt, create a shell script that will run the exports for your environment.</p>
+<a name="creating-script-for-running-exports"></a>
+<h2 id="creating-script-for-running-exports">Creating Script for Running Exports</h2>
+<p>Create a new shell script <i>setEnvironment.sh</i>, and save it under your home folder. Add the following export commands to the script:</p>
+<pre class="cpp plain">
+
+  export PATH=$PATH:/usr/ghs/comp_201654
+  export INTEGRITY_DIR=/usr/ghs/int1144
+  export INTEGRITY_BSP=platform-cortex-a9
+  export GL_INC_DIR=/usr/ghs/int1144/INTEGRITY-include/Vivante/sdk/inc
+  export GL_LIB_DIR=/usr/ghs/int1144/libs/Vivante
+
+</pre>
+<p>These exports assume you have used the default installation directories while installing MULTI IDE and INTEGRITY (see <a href="integrity-installing-dependencies.html">Installing Platform Dependencies</a>). If you have not used the default directories, you need to adjust the exported paths accordingly.</p>
+<p>To initialize your build environment, run the following command in a terminal:</p>
+<pre class="cpp plain">
+
+  source ~/setEnvironment.sh
+
+</pre>
+<p><b>Note: </b>You need to run this command in your terminal every time you build Qt, or use the <code>qmake</code> build system.</p><a name="getting-qt-source-code"></a>
+<h2 id="getting-qt-source-code">Getting Qt Source Code</h2>
+<p>You can download the Qt source code via your <a href="https://login.qt.io/login">Qt Account</a>.</p>
+<p>You can also get the Qt sources via the Git version control system. Qt Wiki has instructions for getting Qt sources via Git, see <a href="https://wiki.qt.io/Building_Qt_5_from_Git#Getting_the_source_code">https://wiki.qt.io/Building_Qt_5_from_Git#Getting_the_source_code</a>. You find the step by step instructions also from <a href="integrity-building-qt-for-imx6quad-board.html#getting-qt-sources-via-git">Getting Qt Sources via Git</a>.</p>
+<a name="getting-qt-sources-via-git"></a>
+<h3 id="getting-qt-sources-via-git">Getting Qt Sources via Git</h3>
+<p>Clone the top-level Qt 5 repository by running the following command in a terminal:</p>
+<pre class="cpp plain">
+
+  git clone git://code.qt.io/qt/qt5.git
+
+</pre>
+<p><b>Note: </b>If you are behind a firewall and want to use the HTTPS protocol, you can clone the top-level Qt 5 repository with the following command:</p><pre class="cpp plain">
+
+  git clone https://code.qt.io/qt/qt5.git
+
+</pre>
+<p>Check out the target branch and the Qt sources with the following commands:</p>
+<pre class="cpp plain">
+
+  cd qt5
+  git checkout &lt;Qt version&gt;
+  perl init-repository
+
+</pre>
+<p>For example, the <code>git checkout</code> command for Qt 5.9&#x2e;0 is <code>git checkout 5.9&#x2e;0</code>.</p>
+<p>The init-repository script initializes the Qt 5 repository and clones various Qt 5 sub-modules (see <a href="https://wiki.qt.io/Building_Qt_5_from_Git#Getting_the_submodule_source_code">https://wiki.qt.io/Building_Qt_5_from_Git#Getting_the_submodule_source_code</a>). Qt modules supported by Qt for INTEGRITY are listed in <a href="qtwebassembly-platform-notes.html#supported-qt-modules">Supported Qt Modules</a>.</p>
+<a name="configuring-qt"></a>
+<h2 id="configuring-qt">Configuring Qt</h2>
+<p>Configure Qt for the i.MX6 Quad board with the following command:</p>
+<pre class="cpp plain">
+
+  cd &lt;Qt installation directory&gt;
+  ./configure -prefix $PWD/qtbase -xplatform integrity-armv7-imx6 -confirm-license
+  -opensource -nomake examples -nomake tests -no-dbus -silent -opengl es2 -static
+
+</pre>
+<p><b>Note: </b>INTEGRITY supports only static Qt builds.</p><a name="building-qt"></a>
+<h2 id="building-qt">Building Qt</h2>
+<p>Build Qt with the <code>make</code> command in the terminal. You can run <code>make</code> with as many cores on your host machine as you desire. In our example we use six cores:</p>
+<pre class="cpp plain">
+
+  make -j6
+
+</pre>
+<a name="installing-qt-for-imx6"></a><a name="installing-qt"></a>
+<h2 id="installing-qt">Installing Qt</h2>
+<p>If you have not used the configure option <code>-prefix $PWD/qtbase</code> in <a href="integrity-building-qt-for-imx6quad-board.html#configuring-qt">Configuring Qt</a>, run the following command in a terminal:</p>
+<pre class="cpp plain">
+
+  cd &lt;Qt installation directory&gt;
+  make install
+
+</pre>
+<p>If you have used the configure option <code>-prefix $PWD/qtbase</code>, you can use Qt from the build directory, without running the <code>make install</code> command.</p>
+<p>Qt is now configured and built for the i.MX6 Quad board.</p>
+</div>
+<!-- @@@integrity-building-qt-for-imx6quad-board.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="integrity-preparing-bsp-for-imx6quad-board.html">Preparing BSP for i.MX6 Quad Board</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="integrity-building-monolith.html">Building Monolith Project</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

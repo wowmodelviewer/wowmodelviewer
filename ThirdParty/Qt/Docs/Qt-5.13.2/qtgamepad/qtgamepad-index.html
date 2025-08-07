@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtgamepad-index.qdoc -->
+  <title>Qt Gamepad 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td >Qt Gamepad</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#getting-started">Getting Started</a></li>
+<li class="level2"><a href="#linux">Linux</a></li>
+<li class="level2"><a href="#windows">Windows</a></li>
+<li class="level2"><a href="#android">Android</a></li>
+<li class="level2"><a href="#macos-ios-tvos">macOS, iOS, tvOS</a></li>
+<li class="level2"><a href="#troubleshooting">Troubleshooting</a></li>
+<li class="level1"><a href="#examples">Examples</a></li>
+<li class="level1"><a href="#api-reference">API Reference</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Gamepad</h1>
+<span class="subtitle"></span>
+<!-- $$$qtgamepad-index.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Qt Gamepad is an add-on library that enables Qt applications to support the use of gamepad hardware and in some cases remote control equipment. The module provides both QML and C++ interfaces. The primary target audience are embedded devices with fullscreen user interfaces, and mobile applications targeting TV-like form factors.</p>
+<p>The currently supported platforms are:</p>
+<ul>
+<li>Windows (Win32 desktop, via XInput 1.3 &amp; 1.4)</li>
+<li>Linux (evdev)</li>
+<li>Linux (SDL2)</li>
+<li>Android</li>
+<li><a href="../qtdoc/internationalization.html#macos">macOS</a>, iOS, tvOS (including the tvOS remote)</li>
+</ul>
+<p>This module provides classes that can:</p>
+<ul>
+<li>Read input events from game controllers (Button and Axis events),</li>
+<li>expose these events both to C++ and Qt Quick (QML),</li>
+<li>provide basic gamepad layout configurability, and</li>
+<li>provide optional key and mouse event generation upon gamepad button presses.</li>
+</ul>
+<p><b>Note: </b>The API is designed with XBox and similar controllers in mind. Joysticks are not in scope for this module. A number of third-party gamepads may be supported as well, however, some of these may need custom configuration steps in order to map the button/trigger codes the device or driver in question provides onto what <a href="qtgamepad-qmlmodule.html">QtGamepad</a> expects. This can be done by the <a href="qtgamepad-configurebuttons-example.html">configureButtons</a> example that can also save the generated layout persistently for use by other applications.</p><a name="getting-started"></a>
+<h2 id="getting-started">Getting Started</h2>
+<p>Before you start using the APIs provided by this module, ensure that the gamepad is detected by your development environment.</p>
+<a name="linux"></a>
+<h3 id="linux">Linux</h3>
+<p>On standard Linux distributions such as Ubuntu, gamepads such as XBox or PlayStation controllers are detected out-of-the-box. To check if the gamepad is detected, <code>grep</code> the <code>dmesg</code> logs using:</p>
+<pre class="cpp plain">
+
+  dmesg | grep &quot;&lt;gamepad-make&gt;&quot;
+
+</pre>
+<p>If you do not see the entries for the gamepad you are using, check if the <code>joystick</code> package is installed. If not, install the package and <code>grep</code> the <code>dmesg</code> logs again.</p>
+<p>It is strongly recommended to verify that the gamepad's input device is present, and is sending events, via the <code>lsinput</code> and <code>evtest</code> utilities.</p>
+<p>PlayStation controllers will likely need the help of an additional tool like <a href="https://github.com/xboxdrv/xboxdrv">xboxdrv</a>. Once installed, and having a PS3 controller connected via USB, the following will ensure correct operation with <a href="qtgamepad-qmlmodule.html">QtGamepad</a>:</p>
+<pre class="cpp plain">
+
+  sudo xboxdrv --detach-kernel-driver --mimic-xpad -s
+
+</pre>
+<p>Qt Gamepad uses a plugin-based, multi-backend architecture. This means that on some platforms, like Linux, there are multiple backends available. In case of Linux, the choices are:</p>
+<ul>
+<li><code>evdev</code> - a backend reading events directly from the evdev input device</li>
+<li><code>sdl2</code> - a backend using the Gamepad module of SDL2. This plugin is only built when SDL2 is present at build time, and therefore will typically be missing from the pre-built Qt packages. This backend likely has broader support for various hardware, at the expense of an additional third-party dependency.</li>
+</ul>
+<p>To force a given backend, set the <code>QT_GAMEPAD</code> environment variable to the name of the desired backend.</p>
+<p>The availability of gamepad devices is monitored via <code>libudev</code>, assuming Qt was built with libudev support enabled. This means that connecting wired gamepads or wireless dongles is possible also while an application is running.</p>
+<p><b>Note: </b>wireless dongles may report one or more input devices even when no actual controllers have been connected to them. Qt Gamepad will interpret this as having connected gamepads present.</p><p>With the <code>evdev</code> backend, to explicitly specify the input device to use, set the environment variable <code>QT_GAMEPAD_DEVICE</code> to the desired /dev/input/event* node. This should not be needed normally, but can be useful in case multiple gamepads are connected and only one of them is interesting to the application.</p>
+<a name="windows"></a>
+<h3 id="windows">Windows</h3>
+<p>The Windows Plug-n-Play service automatically installs the necessary drivers when the gamepad is connected through a USB port for the first time. Once the drivers are installed, select <b>Control Panel &gt; Device and Printers</b> and check if the gamepad is listed under the <b>Devices</b> section.</p>
+<p>To test whether gamepad input is detected, select <b>Gamepad Controller Settings</b> from the context menu, select <b>Properties &gt; Test</b>, and start testing. You can also run the <a href="qtgamepad-quickgamepad-example.html">quickGamepad</a> example to test.</p>
+<a name="android"></a>
+<h3 id="android">Android</h3>
+<p>The Android backend uses the <code>InputDevice</code> API.</p>
+<a name="macos-ios-tvos"></a>
+<h3 id="macos-ios-tvos">macOS, iOS, tvOS</h3>
+<p>This backend uses the <code>GCController</code> API.</p>
+<p>Besides game controllers, it also supports the tvOS remote (microGamepad). The mapping for this is the following:</p>
+<ul>
+<li><code>X button</code> - play/pause</li>
+<li><code>A button</code> - pressing the touch area</li>
+<li><code>left thumbstick</code> - the touch area</li>
+</ul>
+<a name="troubleshooting"></a>
+<h3 id="troubleshooting">Troubleshooting</h3>
+<p>Some backends (<code>evdev</code> on Linux and <code>xinput</code> on Windows) and the plugin loader utilize the logging category <code>qt.gamepad</code>. Enabling this will print useful information on the debug output.</p>
+<a name="examples"></a>
+<h2 id="examples">Examples</h2>
+<p>The <a href="qtgamepad-examples.html">examples</a> demonstrate how to handle input from a gamepad using the QML and C++ APIs.</p>
+<a name="api-reference"></a>
+<h2 id="api-reference">API Reference</h2>
+<ul>
+<li><a href="qtgamepad-qmlmodule.html">Qt Gamepad QML Types</a></li>
+<li><a href="qtgamepad-module.html">Qt Gamepad C++ Classes</a></li>
+</ul>
+</div>
+<!-- @@@qtgamepad-index.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

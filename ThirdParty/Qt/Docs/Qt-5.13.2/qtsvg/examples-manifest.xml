@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<instructionals module="QtSvg">
+    <examples>
+        <example name="SVG Generator Example" docUrl="qthelp://org.qt-project.qtsvg.5132/qtsvg/qtsvg-svggenerator-example.html" projectPath="svg/svggenerator/svggenerator.pro" imageUrl="qthelp://org.qt-project.qtsvg.5132/qtsvg/images/svggenerator-example.png">
+            <description><![CDATA[No description available]]></description>
+            <tags>generator,svg</tags>
+            <fileToOpen mainFile="true">svg/svggenerator/main.cpp</fileToOpen>
+        </example>
+        <example name="SVG Viewer Example" docUrl="qthelp://org.qt-project.qtsvg.5132/qtsvg/qtsvg-svgviewer-example.html" projectPath="svg/svgviewer/svgviewer.pro" imageUrl="qthelp://org.qt-project.qtsvg.5132/qtsvg/images/svgviewer-example.png">
+            <description><![CDATA[No description available]]></description>
+            <tags>svg,viewer</tags>
+            <fileToOpen mainFile="true">svg/svgviewer/main.cpp</fileToOpen>
+        </example>
+        <example name="Text Object Example" docUrl="qthelp://org.qt-project.qtsvg.5132/qtsvg/qtsvg-richtext-textobject-example.html" projectPath="svg/richtext/textobject/textobject.pro" imageUrl="qthelp://org.qt-project.qtsvg.5132/qtsvg/images/textobject-example.png">
+            <description><![CDATA[No description available]]></description>
+            <tags>object,svg,text</tags>
+            <fileToOpen mainFile="true">svg/richtext/textobject/main.cpp</fileToOpen>
+        </example>
+    </examples>
+</instructionals>

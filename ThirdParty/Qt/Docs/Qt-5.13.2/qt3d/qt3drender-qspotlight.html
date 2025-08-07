@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qspotlight.cpp -->
+  <title>QSpotLight Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QSpotLight</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSpotLight Class</h1>
+<span class="small-subtitle">(<a href="qt3drender-qspotlight.html">Qt3DRender::QSpotLight</a>)<br/></span>
+<!-- $$$QSpotLight-brief -->
+<p>Encapsulate a Spot Light object in a Qt 3D scene. <a href="#details">More...</a></p>
+<!-- @@@QSpotLight -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QSpotLight&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3drender</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-spotlight.html">SpotLight</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3drender-qabstractlight.html">Qt3DRender::QAbstractLight</a></td></tr></table></div><p>This class was introduced in  Qt 5.5.</p>
+<ul>
+<li><a href="qt3drender-qspotlight-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qt3drender-qspotlight.html#constantAttenuation-prop">constantAttenuation</a></b> : float</li>
+<li class="fn"><b><a href="qt3drender-qspotlight.html#cutOffAngle-prop">cutOffAngle</a></b> : float</li>
+<li class="fn"><b><a href="qt3drender-qspotlight.html#linearAttenuation-prop">linearAttenuation</a></b> : float</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qt3drender-qspotlight.html#localDirection-prop">localDirection</a></b> : QVector3D</li>
+<li class="fn"><b><a href="qt3drender-qspotlight.html#quadraticAttenuation-prop">quadraticAttenuation</a></b> : float</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qspotlight.html#QSpotLight">QSpotLight</a></b>(Qt3DCore::QNode *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> float </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qspotlight.html#constantAttenuation-prop">constantAttenuation</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> float </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qspotlight.html#cutOffAngle-prop">cutOffAngle</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> float </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qspotlight.html#linearAttenuation-prop">linearAttenuation</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector3D </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qspotlight.html#localDirection-prop">localDirection</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> float </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qspotlight.html#quadraticAttenuation-prop">quadraticAttenuation</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qspotlight.html#constantAttenuation-prop">setConstantAttenuation</a></b>(float <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qspotlight.html#cutOffAngle-prop">setCutOffAngle</a></b>(float <i>cutOffAngle</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qspotlight.html#linearAttenuation-prop">setLinearAttenuation</a></b>(float <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qspotlight.html#localDirection-prop">setLocalDirection</a></b>(const QVector3D &amp;<i>localDirection</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qspotlight.html#quadraticAttenuation-prop">setQuadraticAttenuation</a></b>(float <i>value</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qspotlight.html#constantAttenuation-prop">constantAttenuationChanged</a></b>(float <i>constantAttenuation</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qspotlight.html#cutOffAngle-prop">cutOffAngleChanged</a></b>(float <i>cutOffAngle</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qspotlight.html#linearAttenuation-prop">linearAttenuationChanged</a></b>(float <i>linearAttenuation</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qspotlight.html#localDirection-prop">localDirectionChanged</a></b>(const QVector3D &amp;<i>localDirection</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qspotlight.html#quadraticAttenuation-prop">quadraticAttenuationChanged</a></b>(float <i>quadraticAttenuation</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSpotLight-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A spotlight is a light source that emits a cone of light in a particular direction.</p>
+<p>A spotlight uses three attenuation factors to describe how the intensity of the light decreases over distance. These factors are designed to be used together in calcuating total attenuation. For the materials in Qt3D Extras the following formula is used, where distance is the distance from the light to the surface being rendered:</p>
+<pre class="cpp">
+
+  totalAttenuation <span class="operator">=</span> <span class="number">1.0</span> <span class="operator">/</span> (constantAttenuation <span class="operator">+</span> (linearAttenuation <span class="operator">*</span> distance) <span class="operator">+</span> (quadraticAttenuation <span class="operator">*</span> distance <span class="operator">*</span> distance));
+
+</pre>
+<p>Custom materials may choose to interpret these factors differently.</p>
+</div>
+<!-- @@@QSpotLight -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$constantAttenuation-prop$$$constantAttenuation$$$setConstantAttenuationfloat$$$constantAttenuationChangedfloat -->
+<h3 class="fn" id="constantAttenuation-prop"><a name="constantAttenuation-prop"></a><span class="name">constantAttenuation</span> : <span class="type">float</span></h3>
+<p>Specifies the constant attenuation of the spot light</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> float </td><td class="memItemRight bottomAlign"><span class="name"><b>constantAttenuation</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setConstantAttenuation</b></span>(float <i>value</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>constantAttenuationChanged</b></span>(float <i>constantAttenuation</i>)</td></tr>
+</table></div>
+<!-- @@@constantAttenuation -->
+<!-- $$$cutOffAngle-prop$$$cutOffAngle$$$setCutOffAnglefloat$$$cutOffAngleChangedfloat -->
+<h3 class="fn" id="cutOffAngle-prop"><a name="cutOffAngle-prop"></a><span class="name">cutOffAngle</span> : <span class="type">float</span></h3>
+<p>Specifies the cut off angle of the spot light</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> float </td><td class="memItemRight bottomAlign"><span class="name"><b>cutOffAngle</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setCutOffAngle</b></span>(float <i>cutOffAngle</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>cutOffAngleChanged</b></span>(float <i>cutOffAngle</i>)</td></tr>
+</table></div>
+<!-- @@@cutOffAngle -->
+<!-- $$$linearAttenuation-prop$$$linearAttenuation$$$setLinearAttenuationfloat$$$linearAttenuationChangedfloat -->
+<h3 class="fn" id="linearAttenuation-prop"><a name="linearAttenuation-prop"></a><span class="name">linearAttenuation</span> : <span class="type">float</span></h3>
+<p>Specifies the linear attenuation of the spot light</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> float </td><td class="memItemRight bottomAlign"><span class="name"><b>linearAttenuation</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setLinearAttenuation</b></span>(float <i>value</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>linearAttenuationChanged</b></span>(float <i>linearAttenuation</i>)</td></tr>
+</table></div>
+<!-- @@@linearAttenuation -->
+<!-- $$$localDirection-prop$$$localDirection$$$setLocalDirectionconstQVector3D&$$$localDirectionChangedconstQVector3D& -->
+<h3 class="fn" id="localDirection-prop"><a name="localDirection-prop"></a><span class="name">localDirection</span> : <span class="type"><a href="../qtgui/qvector3d.html">QVector3D</a></span></h3>
+<p>Specifies the local direction of the spot light</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QVector3D </td><td class="memItemRight bottomAlign"><span class="name"><b>localDirection</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setLocalDirection</b></span>(const QVector3D &amp;<i>localDirection</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>localDirectionChanged</b></span>(const QVector3D &amp;<i>localDirection</i>)</td></tr>
+</table></div>
+<!-- @@@localDirection -->
+<!-- $$$quadraticAttenuation-prop$$$quadraticAttenuation$$$setQuadraticAttenuationfloat$$$quadraticAttenuationChangedfloat -->
+<h3 class="fn" id="quadraticAttenuation-prop"><a name="quadraticAttenuation-prop"></a><span class="name">quadraticAttenuation</span> : <span class="type">float</span></h3>
+<p>Specifies the quadratic attenuation of the spot light</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> float </td><td class="memItemRight bottomAlign"><span class="name"><b>quadraticAttenuation</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setQuadraticAttenuation</b></span>(float <i>value</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>quadraticAttenuationChanged</b></span>(float <i>quadraticAttenuation</i>)</td></tr>
+</table></div>
+<!-- @@@quadraticAttenuation -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QSpotLight[overload1]$$$QSpotLightQt3DCore::QNode* -->
+<h3 class="fn" id="QSpotLight"><a name="QSpotLight"></a>QSpotLight::<span class="name">QSpotLight</span>(<span class="type"><a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new <a href="qt3drender-qspotlight.html">QSpotLight</a> with the specified <i>parent</i>.</p>
+<!-- @@@QSpotLight -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qprinterinfo.cpp -->
+  <title>QPrinterInfo Class | Qt Print Support 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtprintsupport-index.html">Qt Print Support</a></td><td ><a href="qtprintsupport-module.html">C++ Classes</a></td><td >QPrinterInfo</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtprintsupport-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPrinterInfo Class</h1>
+<!-- $$$QPrinterInfo-brief -->
+<p>The <a href="qprinterinfo.html">QPrinterInfo</a> class gives access to information about existing printers. <a href="#details">More...</a></p>
+<!-- @@@QPrinterInfo -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QPrinterInfo&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += printsupport</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.4</td></tr></table></div><p>This class was introduced in  Qt 4.4.</p>
+<ul>
+<li><a href="qprinterinfo-members.html">List of all members, including inherited members</a></li>
+<li><a href="qprinterinfo-obsolete.html">Obsolete members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#QPrinterInfo-2">QPrinterInfo</a></b>(const QPrinter &amp;<i>printer</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#QPrinterInfo-1">QPrinterInfo</a></b>(const QPrinterInfo &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#QPrinterInfo">QPrinterInfo</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPrinterInfo &amp;</td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#operator-eq">operator=</a></b>(const QPrinterInfo &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#dtor.QPrinterInfo">~QPrinterInfo</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPrinter::ColorMode </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#defaultColorMode">defaultColorMode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPrinter::DuplexMode </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#defaultDuplexMode">defaultDuplexMode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPageSize </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#defaultPageSize">defaultPageSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#description">description</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#isDefault">isDefault</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#isNull">isNull</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#isRemote">isRemote</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#location">location</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#makeAndModel">makeAndModel</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPageSize </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#maximumPhysicalPageSize">maximumPhysicalPageSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPageSize </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#minimumPhysicalPageSize">minimumPhysicalPageSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#printerName">printerName</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPrinter::PrinterState </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#state">state</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QPrinter::ColorMode&gt; </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#supportedColorModes">supportedColorModes</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QPrinter::DuplexMode&gt; </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#supportedDuplexModes">supportedDuplexModes</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QPageSize&gt; </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#supportedPageSizes">supportedPageSizes</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;int&gt; </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#supportedResolutions">supportedResolutions</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#supportsCustomPageSizes">supportsCustomPageSizes</a></b>() const</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#availablePrinterNames">availablePrinterNames</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QPrinterInfo&gt; </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#availablePrinters">availablePrinters</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPrinterInfo </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#defaultPrinter">defaultPrinter</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#defaultPrinterName">defaultPrinterName</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPrinterInfo </td><td class="memItemRight bottomAlign"><b><a href="qprinterinfo.html#printerInfo">printerInfo</a></b>(const QString &amp;<i>printerName</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPrinterInfo-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Use the static functions to generate a list of <a href="qprinterinfo.html">QPrinterInfo</a> objects. Each <a href="qprinterinfo.html">QPrinterInfo</a> object in the list represents a single printer and can be queried for name, supported paper sizes, and whether or not it is the default printer.</p>
+</div>
+<!-- @@@QPrinterInfo -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QPrinterInfo$$$QPrinterInfoconstQPrinter& -->
+<h3 class="fn" id="QPrinterInfo-2"><a name="QPrinterInfo-2"></a>QPrinterInfo::<span class="name">QPrinterInfo</span>(const <span class="type"><a href="qprinter.html">QPrinter</a></span> &amp;<i>printer</i>)</h3>
+<p>Constructs a <a href="qprinterinfo.html">QPrinterInfo</a> object from <i>printer</i>.</p>
+<!-- @@@QPrinterInfo -->
+<!-- $$$QPrinterInfo$$$QPrinterInfoconstQPrinterInfo& -->
+<h3 class="fn" id="QPrinterInfo-1"><a name="QPrinterInfo-1"></a>QPrinterInfo::<span class="name">QPrinterInfo</span>(const <span class="type"><a href="qprinterinfo.html#QPrinterInfo">QPrinterInfo</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a copy of <i>other</i>.</p>
+<!-- @@@QPrinterInfo -->
+<!-- $$$QPrinterInfo[overload1]$$$QPrinterInfo -->
+<h3 class="fn" id="QPrinterInfo"><a name="QPrinterInfo"></a>QPrinterInfo::<span class="name">QPrinterInfo</span>()</h3>
+<p>Constructs an empty <a href="qprinterinfo.html">QPrinterInfo</a> object.</p>
+<p><b>See also </b><a href="qprinterinfo.html#isNull">isNull</a>().</p>
+<!-- @@@QPrinterInfo -->
+<!-- $$$operator=[overload1]$$$operator=constQPrinterInfo& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qprinterinfo.html#QPrinterInfo">QPrinterInfo</a></span> &amp;QPrinterInfo::<span class="name">operator=</span>(const <span class="type"><a href="qprinterinfo.html#QPrinterInfo">QPrinterInfo</a></span> &amp;<i>other</i>)</h3>
+<p>Sets the <a href="qprinterinfo.html">QPrinterInfo</a> object to be equal to <i>other</i>.</p>
+<!-- @@@operator= -->
+<!-- $$$~QPrinterInfo[overload1]$$$~QPrinterInfo -->
+<h3 class="fn" id="dtor.QPrinterInfo"><a name="dtor.QPrinterInfo"></a>QPrinterInfo::<span class="name">~QPrinterInfo</span>()</h3>
+<p>Destroys the <a href="qprinterinfo.html">QPrinterInfo</a> object. References to the values in the object become invalid.</p>
+<!-- @@@~QPrinterInfo -->
+<!-- $$$availablePrinterNames[overload1]$$$availablePrinterNames -->
+<h3 class="fn" id="availablePrinterNames"><a name="availablePrinterNames"></a><code>[static] </code><span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> QPrinterInfo::<span class="name">availablePrinterNames</span>()</h3>
+<p>Returns a list of all the available Printer Names on this system.</p>
+<p>It is recommended to use this instead of <a href="qprinterinfo.html#availablePrinters">availablePrinters</a>() as it will be faster on most systems.</p>
+<p>Note that the list may become outdated if changes are made on the local system or remote print server. Only instantiate required <a href="qprinterinfo.html">QPrinterInfo</a> instances when needed, and always check for validity before calling.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<!-- @@@availablePrinterNames -->
+<!-- $$$availablePrinters[overload1]$$$availablePrinters -->
+<h3 class="fn" id="availablePrinters"><a name="availablePrinters"></a><code>[static] </code><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qprinterinfo.html#QPrinterInfo">QPrinterInfo</a></span>&gt; QPrinterInfo::<span class="name">availablePrinters</span>()</h3>
+<p>Returns a list of <a href="qprinterinfo.html">QPrinterInfo</a> objects for all the available printers on this system.</p>
+<p>It is NOT recommended to use this as creating each printer instance may take a long time, especially if there are remote networked printers, and retained instances may become outdated if changes are made on the local system or remote print server. Use <a href="qprinterinfo.html#availablePrinterNames">availablePrinterNames</a>() instead and only instantiate printer instances as you need them.</p>
+<!-- @@@availablePrinters -->
+<!-- $$$defaultColorMode[overload1]$$$defaultColorMode -->
+<h3 class="fn" id="defaultColorMode"><a name="defaultColorMode"></a><span class="type"><a href="qprinter.html#ColorMode-enum">QPrinter::ColorMode</a></span> QPrinterInfo::<span class="name">defaultColorMode</span>() const</h3>
+<p>Returns the default color mode of this printer.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@defaultColorMode -->
+<!-- $$$defaultDuplexMode[overload1]$$$defaultDuplexMode -->
+<h3 class="fn" id="defaultDuplexMode"><a name="defaultDuplexMode"></a><span class="type"><a href="qprinter.html#DuplexMode-enum">QPrinter::DuplexMode</a></span> QPrinterInfo::<span class="name">defaultDuplexMode</span>() const</h3>
+<p>Returns the default duplex mode of this printer.</p>
+<p>This function was introduced in  Qt 5.4.</p>
+<!-- @@@defaultDuplexMode -->
+<!-- $$$defaultPageSize[overload1]$$$defaultPageSize -->
+<h3 class="fn" id="defaultPageSize"><a name="defaultPageSize"></a><span class="type"><a href="../qtgui/qpagesize.html">QPageSize</a></span> QPrinterInfo::<span class="name">defaultPageSize</span>() const</h3>
+<p>Returns the current default Page Size for this printer.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<!-- @@@defaultPageSize -->
+<!-- $$$defaultPrinter[overload1]$$$defaultPrinter -->
+<h3 class="fn" id="defaultPrinter"><a name="defaultPrinter"></a><code>[static] </code><span class="type"><a href="qprinterinfo.html#QPrinterInfo">QPrinterInfo</a></span> QPrinterInfo::<span class="name">defaultPrinter</span>()</h3>
+<p>Returns the default printer on the system.</p>
+<p>The return value should be checked using <a href="qprinterinfo.html#isNull">isNull</a>() before being used, in case there is no default printer.</p>
+<p>On some systems it is possible for there to be available printers but none of them set to be the default printer.</p>
+<p><b>See also </b><a href="qprinterinfo.html#isNull">isNull</a>(), <a href="qprinterinfo.html#isDefault">isDefault</a>(), and <a href="qprinterinfo.html#availablePrinters">availablePrinters</a>().</p>
+<!-- @@@defaultPrinter -->
+<!-- $$$defaultPrinterName[overload1]$$$defaultPrinterName -->
+<h3 class="fn" id="defaultPrinterName"><a name="defaultPrinterName"></a><code>[static] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPrinterInfo::<span class="name">defaultPrinterName</span>()</h3>
+<p>Returns the current default printer name.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<!-- @@@defaultPrinterName -->
+<!-- $$$description[overload1]$$$description -->
+<h3 class="fn" id="description"><a name="description"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPrinterInfo::<span class="name">description</span>() const</h3>
+<p>Returns the human-readable description of the printer.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qprinterinfo.html#printerName">QPrinterInfo::printerName</a>().</p>
+<!-- @@@description -->
+<!-- $$$isDefault[overload1]$$$isDefault -->
+<h3 class="fn" id="isDefault"><a name="isDefault"></a><span class="type">bool</span> QPrinterInfo::<span class="name">isDefault</span>() const</h3>
+<p>Returns whether this printer is currently the default printer.</p>
+<!-- @@@isDefault -->
+<!-- $$$isNull[overload1]$$$isNull -->
+<h3 class="fn" id="isNull"><a name="isNull"></a><span class="type">bool</span> QPrinterInfo::<span class="name">isNull</span>() const</h3>
+<p>Returns whether this <a href="qprinterinfo.html">QPrinterInfo</a> object holds a printer definition.</p>
+<p>An empty <a href="qprinterinfo.html">QPrinterInfo</a> object could result for example from calling <a href="qprinterinfo.html#defaultPrinter">defaultPrinter</a>() when there are no printers on the system.</p>
+<!-- @@@isNull -->
+<!-- $$$isRemote[overload1]$$$isRemote -->
+<h3 class="fn" id="isRemote"><a name="isRemote"></a><span class="type">bool</span> QPrinterInfo::<span class="name">isRemote</span>() const</h3>
+<p>Returns whether this printer is a remote network printer.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<!-- @@@isRemote -->
+<!-- $$$location[overload1]$$$location -->
+<h3 class="fn" id="location"><a name="location"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPrinterInfo::<span class="name">location</span>() const</h3>
+<p>Returns the human-readable location of the printer.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@location -->
+<!-- $$$makeAndModel[overload1]$$$makeAndModel -->
+<h3 class="fn" id="makeAndModel"><a name="makeAndModel"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPrinterInfo::<span class="name">makeAndModel</span>() const</h3>
+<p>Returns the human-readable make and model of the printer.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@makeAndModel -->
+<!-- $$$maximumPhysicalPageSize[overload1]$$$maximumPhysicalPageSize -->
+<h3 class="fn" id="maximumPhysicalPageSize"><a name="maximumPhysicalPageSize"></a><span class="type"><a href="../qtgui/qpagesize.html">QPageSize</a></span> QPrinterInfo::<span class="name">maximumPhysicalPageSize</span>() const</h3>
+<p>Returns the maximum physical page size supported by this printer.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<p><b>See also </b><a href="qprinterinfo.html#minimumPhysicalPageSize">minimumPhysicalPageSize</a>().</p>
+<!-- @@@maximumPhysicalPageSize -->
+<!-- $$$minimumPhysicalPageSize[overload1]$$$minimumPhysicalPageSize -->
+<h3 class="fn" id="minimumPhysicalPageSize"><a name="minimumPhysicalPageSize"></a><span class="type"><a href="../qtgui/qpagesize.html">QPageSize</a></span> QPrinterInfo::<span class="name">minimumPhysicalPageSize</span>() const</h3>
+<p>Returns the minimum physical page size supported by this printer.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<p><b>See also </b><a href="qprinterinfo.html#maximumPhysicalPageSize">maximumPhysicalPageSize</a>().</p>
+<!-- @@@minimumPhysicalPageSize -->
+<!-- $$$printerInfo[overload1]$$$printerInfoconstQString& -->
+<h3 class="fn" id="printerInfo"><a name="printerInfo"></a><code>[static] </code><span class="type"><a href="qprinterinfo.html#QPrinterInfo">QPrinterInfo</a></span> QPrinterInfo::<span class="name">printerInfo</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>printerName</i>)</h3>
+<p>Returns the printer <i>printerName</i>.</p>
+<p>The return value should be checked using <a href="qprinterinfo.html#isNull">isNull</a>() before being used, in case the named printer does not exist.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qprinterinfo.html#isNull">isNull</a>().</p>
+<!-- @@@printerInfo -->
+<!-- $$$printerName[overload1]$$$printerName -->
+<h3 class="fn" id="printerName"><a name="printerName"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPrinterInfo::<span class="name">printerName</span>() const</h3>
+<p>Returns the name of the printer.</p>
+<p>This is a unique id to identify the printer and may not be human-readable.</p>
+<p><b>See also </b><a href="qprinterinfo.html#description">QPrinterInfo::description</a>() and <a href="qprinter.html#setPrinterName">QPrinter::setPrinterName</a>().</p>
+<!-- @@@printerName -->
+<!-- $$$state[overload1]$$$state -->
+<h3 class="fn" id="state"><a name="state"></a><span class="type"><a href="qprinter.html#PrinterState-enum">QPrinter::PrinterState</a></span> QPrinterInfo::<span class="name">state</span>() const</h3>
+<p>Returns the current state of this printer.</p>
+<p>This state may not always be accurate, depending on the platform, printer driver, or printer itself.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<!-- @@@state -->
+<!-- $$$supportedColorModes[overload1]$$$supportedColorModes -->
+<h3 class="fn" id="supportedColorModes"><a name="supportedColorModes"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qprinter.html#ColorMode-enum">QPrinter::ColorMode</a></span>&gt; QPrinterInfo::<span class="name">supportedColorModes</span>() const</h3>
+<p>Returns the supported color modes of this printer.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@supportedColorModes -->
+<!-- $$$supportedDuplexModes[overload1]$$$supportedDuplexModes -->
+<h3 class="fn" id="supportedDuplexModes"><a name="supportedDuplexModes"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qprinter.html#DuplexMode-enum">QPrinter::DuplexMode</a></span>&gt; QPrinterInfo::<span class="name">supportedDuplexModes</span>() const</h3>
+<p>Returns a list of duplex modes supported by this printer.</p>
+<p>This function was introduced in  Qt 5.4.</p>
+<!-- @@@supportedDuplexModes -->
+<!-- $$$supportedPageSizes[overload1]$$$supportedPageSizes -->
+<h3 class="fn" id="supportedPageSizes"><a name="supportedPageSizes"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="../qtgui/qpagesize.html">QPageSize</a></span>&gt; QPrinterInfo::<span class="name">supportedPageSizes</span>() const</h3>
+<p>Returns a list of Page Sizes supported by this printer.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<!-- @@@supportedPageSizes -->
+<!-- $$$supportedResolutions[overload1]$$$supportedResolutions -->
+<h3 class="fn" id="supportedResolutions"><a name="supportedResolutions"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type">int</span>&gt; QPrinterInfo::<span class="name">supportedResolutions</span>() const</h3>
+<p>Returns a list of resolutions supported by this printer.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<!-- @@@supportedResolutions -->
+<!-- $$$supportsCustomPageSizes[overload1]$$$supportsCustomPageSizes -->
+<h3 class="fn" id="supportsCustomPageSizes"><a name="supportsCustomPageSizes"></a><span class="type">bool</span> QPrinterInfo::<span class="name">supportsCustomPageSizes</span>() const</h3>
+<p>Returns whether this printer supports custom page sizes.</p>
+<p>This function was introduced in  Qt 5.3.</p>
+<!-- @@@supportsCustomPageSizes -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- quick3dentityloader.cpp -->
+  <title>EntityLoader QML Type | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-qml.html">QML Types</a></td><td >EntityLoader QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">EntityLoader QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$EntityLoader-brief -->
+<p>Provides a way to dynamically load an Entity subtree. <a href="#details">More...</a></p>
+<!-- @@@EntityLoader -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import Qt3D.Core 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qt3d-core-entity.html">Entity</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qt3d-core-entityloader-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qt3d-core-entityloader.html#entity-prop">entity</a></b></b> : QtQml::QtObject</li>
+<li class="fn"><b><b><a href="qml-qt3d-core-entityloader.html#source-prop">source</a></b></b> : url</li>
+<li class="fn"><b><b><a href="qml-qt3d-core-entityloader.html#status-prop">status</a></b></b> : Status</li>
+</ul>
+<!-- $$$EntityLoader-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>An <a href="qml-qt3d-core-entityloader.html">EntityLoader</a> provides the facitily to load predefined set of entities from qml source file. <a href="qml-qt3d-core-entityloader.html">EntityLoader</a> itself is an entity and the loaded entity tree is set as a child of the loader. The loaded entity tree root can be accessed with <a href="qml-qt3d-core-entityloader.html#entity-prop">EntityLoader::entity</a> property.</p>
+<pre class="cpp plain">
+
+  EntityLoader {
+      id: loader
+      source: &quot;./SphereEntity.qml&quot;
+  }
+
+</pre>
+<!-- @@@EntityLoader -->
+<h2>Property Documentation</h2>
+<!-- $$$entity -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="entity-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">entity</span> : <span class="type"><a href="../qtqml/qml-qtqml-qtobject.html">QtQml::QtObject</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the loaded entity tree root.</p>
+<p>This property allows access to the content of the loader. It references either a valid Entity object if the status property equals <a href="qml-qt3d-core-entityloader.html">EntityLoader</a>.Ready, it is equal to null otherwise.</p>
+</div></div><!-- @@@entity -->
+<br/>
+<!-- $$$source -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="source-prop"></a><span class="name">source</span> : <span class="type"><a href="../qtqml/qml-url.html">url</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the source url.</p>
+</div></div><!-- @@@source -->
+<br/>
+<!-- $$$status -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="status-prop"></a><span class="name">status</span> : <span class="type">Status</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the status of the entity loader.</p>
+<ul>
+<li><a href="qml-qt3d-core-entityloader.html">EntityLoader</a>.Null</li>
+<li><a href="qml-qt3d-core-entityloader.html">EntityLoader</a>.Loading</li>
+<li><a href="qml-qt3d-core-entityloader.html">EntityLoader</a>.Ready</li>
+<li><a href="qml-qt3d-core-entityloader.html">EntityLoader</a>.Error</li>
+</ul>
+</div></div><!-- @@@status -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

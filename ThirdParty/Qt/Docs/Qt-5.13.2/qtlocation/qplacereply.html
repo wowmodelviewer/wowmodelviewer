@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qplacereply.cpp -->
+  <title>QPlaceReply Class | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-module.html">C++ Classes</a></td><td >QPlaceReply</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QPlaceReply Class</h1>
+<!-- $$$QPlaceReply-brief -->
+<p>The <a href="qplacereply.html">QPlaceReply</a> class manages an operation started by an instance of <a href="qplacemanager.html">QPlaceManager</a> and serves as a base class for more specialized replies. <a href="#details">More...</a></p>
+<!-- @@@QPlaceReply -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QPlaceReply&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += location</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.6</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qplacecontentreply.html">QPlaceContentReply</a>, <a href="qplacedetailsreply.html">QPlaceDetailsReply</a>, <a href="qplaceidreply.html">QPlaceIdReply</a>, <a href="qplacematchreply.html">QPlaceMatchReply</a>, <a href="qplacesearchreply.html">QPlaceSearchReply</a>, and <a href="qplacesearchsuggestionreply.html">QPlaceSearchSuggestionReply</a></p>
+</td></tr></table></div><p>This class was introduced in  Qt 5.6.</p>
+<ul>
+<li><a href="qplacereply-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qplacereply.html#Error-enum">Error</a></b> { NoError, PlaceDoesNotExistError, CategoryDoesNotExistError, CommunicationError, ..., UnknownError }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qplacereply.html#Type-enum">Type</a></b> { Reply, DetailsReply, SearchReply, SearchSuggestionReply, ..., MatchReply }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qplacereply.html#QPlaceReply">QPlaceReply</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qplacereply.html#dtor.QPlaceReply">~QPlaceReply</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPlaceReply::Error </td><td class="memItemRight bottomAlign"><b><a href="qplacereply.html#error">error</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qplacereply.html#errorString">errorString</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qplacereply.html#isFinished">isFinished</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QPlaceReply::Type </td><td class="memItemRight bottomAlign"><b><a href="qplacereply.html#type">type</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qplacereply.html#abort">abort</a></b>()</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacereply.html#aborted">aborted</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacereply.html#contentUpdated">contentUpdated</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacereply.html#error-1">error</a></b>(QPlaceReply::Error <i>error</i>, const QString &amp;<i>errorString</i> = QString())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacereply.html#finished">finished</a></b>()</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacereply.html#setError">setError</a></b>(QPlaceReply::Error <i>error</i>, const QString &amp;<i>errorString</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qplacereply.html#setFinished">setFinished</a></b>(bool <i>finished</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QPlaceReply-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qplacereply.html">QPlaceReply</a> and each of its specialized subclasses manage the state and results of their corresponding operations. The <a href="qplacereply.html">QPlaceReply</a> itself is used for operations that have no results, that is, it only necessary to know if the operation succeeded or failed.</p>
+<p>The <a href="qplacereply.html#finished">finished</a>() signal can be used to monitor the progress of an operation. Once an operation is complete, the <a href="qplacereply.html#error">error</a>() and <a href="qplacereply.html#errorString">errorString</a>() methods provide information on whether the operation completed successfully. If successful, the reply will contain the results for that operation, that is, each subclass will have appropriate functions to retrieve the results of an operation.</p>
+</div>
+<p><b>See also </b><a href="qplacemanager.html">QPlaceManager</a>.</p>
+<!-- @@@QPlaceReply -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Error$$$NoError$$$PlaceDoesNotExistError$$$CategoryDoesNotExistError$$$CommunicationError$$$ParseError$$$PermissionsError$$$UnsupportedError$$$BadArgumentError$$$CancelError$$$UnknownError -->
+<h3 class="fn" id="Error-enum"><a name="Error-enum"></a>enum QPlaceReply::<span class="name">Error</span></h3>
+<p>Describes an error which occurred during an operation.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QPlaceReply::NoError</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">No error has occurred</td></tr>
+<tr><td class="topAlign"><code>QPlaceReply::PlaceDoesNotExistError</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">A specified place could not be found</td></tr>
+<tr><td class="topAlign"><code>QPlaceReply::CategoryDoesNotExistError</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">A specified category could not be found</td></tr>
+<tr><td class="topAlign"><code>QPlaceReply::CommunicationError</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">An error occurred communicating with the service provider.</td></tr>
+<tr><td class="topAlign"><code>QPlaceReply::ParseError</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">The response from the service provider or an import file was in an unrecognizable format</td></tr>
+<tr><td class="topAlign"><code>QPlaceReply::PermissionsError</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">The operation failed because of insufficient permissions.</td></tr>
+<tr><td class="topAlign"><code>QPlaceReply::UnsupportedError</code></td><td class="topAlign tblval"><code>6</code></td><td class="topAlign">The operation was not supported by the service provider.</td></tr>
+<tr><td class="topAlign"><code>QPlaceReply::BadArgumentError</code></td><td class="topAlign tblval"><code>7</code></td><td class="topAlign">. A parameter that was provided was invalid.</td></tr>
+<tr><td class="topAlign"><code>QPlaceReply::CancelError</code></td><td class="topAlign tblval"><code>8</code></td><td class="topAlign">The operation was canceled.</td></tr>
+<tr><td class="topAlign"><code>QPlaceReply::UnknownError</code></td><td class="topAlign tblval"><code>9</code></td><td class="topAlign">An error occurred which does not fit into any of the other categories.</td></tr>
+</table></div>
+<!-- @@@Error -->
+<!-- $$$Type$$$Reply$$$DetailsReply$$$SearchReply$$$SearchSuggestionReply$$$ContentReply$$$IdReply$$$MatchReply -->
+<h3 class="fn" id="Type-enum"><a name="Type-enum"></a>enum QPlaceReply::<span class="name">Type</span></h3>
+<p>Describes the reply's type.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QPlaceReply::Reply</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">This is a generic reply.</td></tr>
+<tr><td class="topAlign"><code>QPlaceReply::DetailsReply</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">This is a reply for the retrieval of place details</td></tr>
+<tr><td class="topAlign"><code>QPlaceReply::SearchReply</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">This is a reply for the place search operation.</td></tr>
+<tr><td class="topAlign"><code>QPlaceReply::SearchSuggestionReply</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">This is a reply for a search suggestion operation.</td></tr>
+<tr><td class="topAlign"><code>QPlaceReply::ContentReply</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">This is a reply for content associated with a place.</td></tr>
+<tr><td class="topAlign"><code>QPlaceReply::IdReply</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">This is a reply that returns an identifier of a place or category. Typically used for place or category save and remove operations.</td></tr>
+<tr><td class="topAlign"><code>QPlaceReply::MatchReply</code></td><td class="topAlign tblval"><code>6</code></td><td class="topAlign">This is a reply that returns places that match those from another provider.</td></tr>
+</table></div>
+<!-- @@@Type -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QPlaceReply[overload1]$$$QPlaceReplyQObject* -->
+<h3 class="fn" id="QPlaceReply"><a name="QPlaceReply"></a>QPlaceReply::<span class="name">QPlaceReply</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a reply object with a given <i>parent</i>.</p>
+<!-- @@@QPlaceReply -->
+<!-- $$$abort[overload1]$$$abort -->
+<h3 class="fn" id="abort"><a name="abort"></a><code>[virtual slot] </code><span class="type">void</span> QPlaceReply::<span class="name">abort</span>()</h3>
+<p>Cancels the operation immediately.</p>
+<p><b>See also </b><a href="qplacereply.html#aborted">aborted</a>().</p>
+<!-- @@@abort -->
+<!-- $$$aborted[overload1]$$$aborted -->
+<h3 class="fn" id="aborted"><a name="aborted"></a><code>[signal] </code><span class="type">void</span> QPlaceReply::<span class="name">aborted</span>()</h3>
+<p>This signal is emitted when the operation has been cancelled.</p>
+<p>This function was introduced in  Qt 5.9.</p>
+<p><b>See also </b><a href="qplacereply.html#abort">abort</a>().</p>
+<!-- @@@aborted -->
+<!-- $$$contentUpdated[overload1]$$$contentUpdated -->
+<h3 class="fn" id="contentUpdated"><a name="contentUpdated"></a><code>[signal] </code><span class="type">void</span> QPlaceReply::<span class="name">contentUpdated</span>()</h3>
+<p>This signal is emitted when this reply has updated content available. Depending on the plugin, this signal may never be emitted or emitted multiple times before <a href="qplacereply.html#finished">QPlaceReply::finished</a>() is emitted, as some backends are able to return the requested content asynchronously and incrementally.</p>
+<p><b>Note: </b>Do not delete or <a href="../qtcore/qobject.html#deleteLater">deleteLater</a> this reply object in the slot connected to this signal. Do it only upon <a href="qplacereply.html#finished">QPlaceReply::finished</a>.</p><!-- @@@contentUpdated -->
+<!-- $$$error$$$errorQPlaceReply::ErrorconstQString& -->
+<h3 class="fn" id="error-1"><a name="error-1"></a><code>[signal] </code><span class="type">void</span> QPlaceReply::<span class="name">error</span>(<span class="type"><a href="qplacereply.html#Error-enum">QPlaceReply::Error</a></span> <i>error</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>errorString</i> = QString())</h3>
+<p>This signal is emitted when an error has been detected in the processing of this reply. The <a href="qplacereply.html#finished">finished</a>() signal will probably follow.</p>
+<p>The error will be described by the error code <i>error</i>. If <i>errorString</i> is not empty it will contain a textual description of the error meant for developers and not end users.</p>
+<p>This signal and <a href="qplacemanager.html#error">QPlaceManager::error</a>() will be emitted at the same time.</p>
+<p><b>Note: </b>Do not delete this reply object in the slot connected to this signal. Use <a href="../qtcore/qobject.html#deleteLater">deleteLater</a>() instead.</p><p><b>Note:</b> Signal <i>error</i> is overloaded in this class. To connect to this signal by using the function pointer syntax, Qt provides a convenient helper for obtaining the function pointer as shown in this example:<pre class="cpp">
+
+  connect(placeReply<span class="operator">,</span> <span class="type">QOverload</span><span class="operator">&lt;</span><span class="type"><a href="qplacereply.html#QPlaceReply">QPlaceReply</a></span><span class="operator">::</span>Error<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span><span class="operator">&gt;</span><span class="operator">::</span>of(<span class="operator">&amp;</span><span class="type"><a href="qplacereply.html#QPlaceReply">QPlaceReply</a></span><span class="operator">::</span>error)<span class="operator">,</span>
+      <span class="operator">[</span><span class="operator">=</span><span class="operator">]</span>(<span class="type"><a href="qplacereply.html#QPlaceReply">QPlaceReply</a></span><span class="operator">::</span>Error error<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>errorString){ <span class="comment">/* ... */</span> });
+
+</pre>
+<!-- @@@error -->
+<!-- $$$finished[overload1]$$$finished -->
+<h3 class="fn" id="finished"><a name="finished"></a><code>[signal] </code><span class="type">void</span> QPlaceReply::<span class="name">finished</span>()</h3>
+<p>This signal is emitted when this reply has finished processing.</p>
+<p>If <a href="qplacereply.html#error">error</a>() equals <a href="qplacereply.html#Error-enum">QPlaceReply::NoError</a> then the processing finished successfully.</p>
+<p>This signal and <a href="qplacemanager.html#finished">QPlaceManager::finished</a>() will be emitted at the same time.</p>
+<p><b>Note: </b>Do not delete this reply object in the slot connected to this signal. Use <a href="../qtcore/qobject.html#deleteLater">deleteLater</a>() instead.</p><p><b>See also </b><a href="qplacereply.html#setFinished">setFinished</a>().</p>
+<!-- @@@finished -->
+<!-- $$$~QPlaceReply[overload1]$$$~QPlaceReply -->
+<h3 class="fn" id="dtor.QPlaceReply"><a name="dtor.QPlaceReply"></a><code>[virtual] </code>QPlaceReply::<span class="name">~QPlaceReply</span>()</h3>
+<p>Destroys the reply object.</p>
+<!-- @@@~QPlaceReply -->
+<!-- $$$error[overload1]$$$error -->
+<h3 class="fn" id="error"><a name="error"></a><span class="type"><a href="qplacereply.html#Error-enum">QPlaceReply::Error</a></span> QPlaceReply::<span class="name">error</span>() const</h3>
+<p>Returns the error code.</p>
+<p><b>See also </b><a href="qplacereply.html#setError">setError</a>().</p>
+<!-- @@@error -->
+<!-- $$$errorString[overload1]$$$errorString -->
+<h3 class="fn" id="errorString"><a name="errorString"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QPlaceReply::<span class="name">errorString</span>() const</h3>
+<p>Returns the error string of the reply. The error string is intended to be used by developers only and is not fit to be displayed to an end user.</p>
+<p>If no error has occurred, the string is empty.</p>
+<!-- @@@errorString -->
+<!-- $$$isFinished[overload1]$$$isFinished -->
+<h3 class="fn" id="isFinished"><a name="isFinished"></a><span class="type">bool</span> QPlaceReply::<span class="name">isFinished</span>() const</h3>
+<p>Return true if the reply has completed.</p>
+<!-- @@@isFinished -->
+<!-- $$$setError[overload1]$$$setErrorQPlaceReply::ErrorconstQString& -->
+<h3 class="fn" id="setError"><a name="setError"></a><code>[protected] </code><span class="type">void</span> QPlaceReply::<span class="name">setError</span>(<span class="type"><a href="qplacereply.html#Error-enum">QPlaceReply::Error</a></span> <i>error</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>errorString</i>)</h3>
+<p>Sets the <i>error</i> and <i>errorString</i> of the reply. This function does not cause the <a href="qplacereply.html#error">QPlaceReply::error</a>(<a href="qplacereply.html#Error-enum">QPlaceReply::Error</a>, const <a href="../qtcore/qstring.html">QString</a> &amp;<a href="qplacereply.html#errorString">errorString</a>) signal to be emitted.</p>
+<p><b>See also </b><a href="qplacereply.html#error">error</a>().</p>
+<!-- @@@setError -->
+<!-- $$$setFinished[overload1]$$$setFinishedbool -->
+<h3 class="fn" id="setFinished"><a name="setFinished"></a><code>[protected] </code><span class="type">void</span> QPlaceReply::<span class="name">setFinished</span>(<span class="type">bool</span> <i>finished</i>)</h3>
+<p>Sets the status of whether the reply is <i>finished</i> or not. This function does not cause the <a href="qplacereply.html#finished">finished</a>() signal to be emitted.</p>
+<p><b>See also </b><a href="qplacereply.html#finished">finished</a>().</p>
+<!-- @@@setFinished -->
+<!-- $$$type[overload1]$$$type -->
+<h3 class="fn" id="type"><a name="type"></a><code>[virtual] </code><span class="type"><a href="qplacereply.html#Type-enum">QPlaceReply::Type</a></span> QPlaceReply::<span class="name">type</span>() const</h3>
+<p>Returns the type of the reply.</p>
+<!-- @@@type -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

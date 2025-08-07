@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- cppmodels.qdoc -->
+  <title>Using C++ Models with Qt Quick Views | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td >Using C++ Models with Qt Quick Views</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#data-provided-in-a-custom-c-model">Data Provided In A Custom C++ Model</a></li>
+<li class="level2"><a href="#qstringlist-based-model">QStringList-based Model</a></li>
+<li class="level2"><a href="#qvariantlist-based-model">QVariantList-based Model</a></li>
+<li class="level2"><a href="#qobjectlist-based-model">QObjectList-based Model</a></li>
+<li class="level2"><a href="#qabstractitemmodel-subclass">QAbstractItemModel Subclass</a></li>
+<li class="level2"><a href="#sql-models">SQL Models</a></li>
+<li class="level2"><a href="#exposing-c-data-models-to-qml">Exposing C++ Data Models to QML</a></li>
+<li class="level2"><a href="#changing-model-data">Changing Model Data</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Using C++ Models with Qt Quick Views</h1>
+<span class="subtitle"></span>
+<!-- $$$qtquick-modelviewsdata-cppmodels.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="data-provided-in-a-custom-c-model"></a>
+<h2 id="data-provided-in-a-custom-c-model">Data Provided In A Custom C++ Model</h2>
+<p>Models can be defined in C++ and then made available to QML. This is useful for exposing existing C++ data models or otherwise complex datasets to QML.</p>
+<p>A C++ model class can be defined as a <a href="../qtcore/qstringlist.html">QStringList</a>, a <a href="../qtcore/qvariant.html#QVariantList-typedef">QVariantList</a>, a <a href="../qtcore/qobject.html#QObjectList-typedef">QObjectList</a> or a <a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a>. The first three are useful for exposing simpler datasets, while <a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a> provides a more flexible solution for more complex models.</p>
+<p>Here is a video tutorial that takes you through the whole process of exposing a C++ model to QML:</p>
+<div class="video">
+<span class="vspan"></span>
+<iframe src="https://www.youtube.com/embed/9BcAYDlpuT8" frameborder="0" allowfullscreen>
+<a href="https://www.youtube.com/watch/?v=9BcAYDlpuT8">
+<img src="images/9BcAYDlpuT8.jpg" title="Click to play in a browser" /></a>
+</iframe></div>
+<a name="qstringlist-based-model"></a>
+<h3 id="qstringlist-based-model">QStringList-based Model</h3>
+<p>A model may be a simple <a href="../qtcore/qstringlist.html">QStringList</a>, which provides the contents of the list via the <i>modelData</i> role.</p>
+<p>Here is a <a href="qml-qtquick-listview.html">ListView</a> with a delegate that references its model item's value using the <code>modelData</code> role:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-listview.html">ListView</a></span> {
+      <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span>
+
+      <span class="name">model</span>: <span class="name">myModel</span>
+      <span class="name">delegate</span>: <span class="name">Rectangle</span> {
+          <span class="name">height</span>: <span class="number">25</span>
+          <span class="name">width</span>: <span class="number">100</span>
+          <span class="type"><a href="qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="name">modelData</span> }
+      }
+  }
+
+</pre>
+<p>A Qt application can load this QML document and set the value of <code>myModel</code> to a <a href="../qtcore/qstringlist.html">QStringList</a>:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> dataList;
+      dataList<span class="operator">.</span>append(<span class="string">&quot;Item 1&quot;</span>);
+      dataList<span class="operator">.</span>append(<span class="string">&quot;Item 2&quot;</span>);
+      dataList<span class="operator">.</span>append(<span class="string">&quot;Item 3&quot;</span>);
+      dataList<span class="operator">.</span>append(<span class="string">&quot;Item 4&quot;</span>);
+
+      <span class="type"><a href="qquickview.html">QQuickView</a></span> view;
+      <span class="type"><a href="../qtqml/qqmlcontext.html">QQmlContext</a></span> <span class="operator">*</span>ctxt <span class="operator">=</span> view<span class="operator">.</span>rootContext();
+      ctxt<span class="operator">-</span><span class="operator">&gt;</span>setContextProperty(<span class="string">&quot;myModel&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(dataList));
+
+</pre>
+<p>The complete source code for this example is available in <a href="qtquick-models-stringlistmodel-example.html">examples/quick/models/stringlistmodel</a> within the Qt install directory.</p>
+<p><b>Note: </b>There is no way for the view to know that the contents of a <a href="../qtcore/qstringlist.html">QStringList</a> have changed. If the <a href="../qtcore/qstringlist.html">QStringList</a> changes, it will be necessary to reset the model by calling <a href="../qtqml/qqmlcontext.html#setContextProperty">QQmlContext::setContextProperty</a>() again.</p><a name="qvariantlist-based-model"></a>
+<h3 id="qvariantlist-based-model">QVariantList-based Model</h3>
+<p>A model may be a single <a href="../qtcore/qvariant.html#QVariantList-typedef">QVariantList</a>, which provides the contents of the list via the <i>modelData</i> role.</p>
+<p>The API works just like with <a href="../qtcore/qstringlist.html">QStringList</a>, as shown in the previous section.</p>
+<p><b>Note: </b>There is no way for the view to know that the contents of a <a href="../qtcore/qvariant.html#QVariantList-typedef">QVariantList</a> have changed. If the <a href="../qtcore/qvariant.html#QVariantList-typedef">QVariantList</a> changes, it will be necessary to reset the model.</p><a name="qobjectlist-based-model"></a>
+<h3 id="qobjectlist-based-model">QObjectList-based Model</h3>
+<p>A list of <a href="../qtcore/qobject.html">QObject</a>* values can also be used as a model. A <a href="../qtcore/qlist.html">QList</a>&lt;<a href="../qtcore/qobject.html">QObject</a>*&gt; provides the properties of the objects in the list as roles.</p>
+<p>The following application creates a <code>DataObject</code> class with <a href="../qtcore/qobject.html#Q_PROPERTY">Q_PROPERTY</a> values that will be accessible as named roles when a <a href="../qtcore/qlist.html">QList</a>&lt;DataObject*&gt; is exposed to QML:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> DataObject : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>
+  {
+      Q_OBJECT
+
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> name READ name WRITE setName NOTIFY nameChanged)
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> color READ color WRITE setColor NOTIFY colorChanged)
+      ...
+  };
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span><span class="operator">*</span> argv)
+  {
+      <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">*</span><span class="operator">&gt;</span> dataList;
+      dataList<span class="operator">.</span>append(<span class="keyword">new</span> DataObject(<span class="string">&quot;Item 1&quot;</span><span class="operator">,</span> <span class="string">&quot;red&quot;</span>));
+      dataList<span class="operator">.</span>append(<span class="keyword">new</span> DataObject(<span class="string">&quot;Item 2&quot;</span><span class="operator">,</span> <span class="string">&quot;green&quot;</span>));
+      dataList<span class="operator">.</span>append(<span class="keyword">new</span> DataObject(<span class="string">&quot;Item 3&quot;</span><span class="operator">,</span> <span class="string">&quot;blue&quot;</span>));
+      dataList<span class="operator">.</span>append(<span class="keyword">new</span> DataObject(<span class="string">&quot;Item 4&quot;</span><span class="operator">,</span> <span class="string">&quot;yellow&quot;</span>));
+
+      <span class="type"><a href="qquickview.html">QQuickView</a></span> view;
+      view<span class="operator">.</span>setResizeMode(<span class="type"><a href="qquickview.html">QQuickView</a></span><span class="operator">::</span>SizeRootObjectToView);
+      <span class="type"><a href="../qtqml/qqmlcontext.html">QQmlContext</a></span> <span class="operator">*</span>ctxt <span class="operator">=</span> view<span class="operator">.</span>rootContext();
+      ctxt<span class="operator">-</span><span class="operator">&gt;</span>setContextProperty(<span class="string">&quot;myModel&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(dataList));
+      ...
+
+</pre>
+<p>The <a href="../qtcore/qobject.html">QObject</a>* is available as the <code>modelData</code> property. As a convenience, the properties of the object are also made available directly in the delegate's context. Here, <code>view.qml</code> references the <code>DataModel</code> properties in the <a href="qml-qtquick-listview.html">ListView</a> delegate:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-listview.html">ListView</a></span> {
+      <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span>
+
+      <span class="name">model</span>: <span class="name">myModel</span>
+      <span class="name">delegate</span>: <span class="name">Rectangle</span> {
+          <span class="name">height</span>: <span class="number">25</span>
+          <span class="name">width</span>: <span class="number">100</span>
+          <span class="name">color</span>: <span class="name">model</span>.<span class="name">modelData</span>.<span class="name">color</span>
+          <span class="type"><a href="qml-qtquick-text.html">Text</a></span> { <span class="name">text</span>: <span class="name">name</span> }
+      }
+  }
+
+</pre>
+<p>Note the use of <code>color</code> property with qualifier. The properties of the object are not replicated in the <code>model</code> object, as they are easily available via the <code>modelData</code> object.</p>
+<p>The complete source code for this example is available in <a href="qtquick-models-objectlistmodel-example.html">examples/quick/models/objectlistmodel</a> within the Qt install directory.</p>
+<p>Note: There is no way for the view to know that the contents of a <a href="../qtcore/qlist.html">QList</a> has changed. If the <a href="../qtcore/qlist.html">QList</a> changes, it is necessary to reset the model by calling <a href="../qtqml/qqmlcontext.html#setContextProperty">QQmlContext::setContextProperty</a>() again.</p>
+<a name="qabstractitemmodel-subclass"></a>
+<h3 id="qabstractitemmodel-subclass">QAbstractItemModel Subclass</h3>
+<p>A model can be defined by subclassing <a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a>. This is the best approach if you have a more complex model that cannot be supported by the other approaches. A <a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a> can also automatically notify a QML view when the model data changes.</p>
+<p>The roles of a <a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a> subclass can be exposed to QML by reimplementing <a href="../qtcore/qabstractitemmodel.html#roleNames">QAbstractItemModel::roleNames</a>().</p>
+<p>Here is an application with a <a href="../qtcore/qabstractlistmodel.html">QAbstractListModel</a> subclass named <code>AnimalModel</code>, which exposes the <i>type</i> and <i>sizes</i> roles. It reimplements <a href="../qtcore/qabstractitemmodel.html#roleNames">QAbstractItemModel::roleNames</a>() to expose the role names, so that they can be accessed via QML:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> Animal
+  {
+  <span class="keyword">public</span>:
+      Animal(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>type<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>size);
+      ...
+  };
+
+  <span class="keyword">class</span> AnimalModel : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qabstractlistmodel.html">QAbstractListModel</a></span>
+  {
+      Q_OBJECT
+  <span class="keyword">public</span>:
+      <span class="keyword">enum</span> AnimalRoles {
+          TypeRole <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole <span class="operator">+</span> <span class="number">1</span><span class="operator">,</span>
+          SizeRole
+      };
+
+      AnimalModel(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+      ...
+  };
+
+  <span class="type"><a href="../qtcore/qhash.html">QHash</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> AnimalModel<span class="operator">::</span>roleNames() <span class="keyword">const</span> {
+      <span class="type"><a href="../qtcore/qhash.html">QHash</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> roles;
+      roles<span class="operator">[</span>TypeRole<span class="operator">]</span> <span class="operator">=</span> <span class="string">&quot;type&quot;</span>;
+      roles<span class="operator">[</span>SizeRole<span class="operator">]</span> <span class="operator">=</span> <span class="string">&quot;size&quot;</span>;
+      <span class="keyword">return</span> roles;
+  }
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span><span class="operator">*</span> argv)
+  {
+      <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      AnimalModel model;
+      model<span class="operator">.</span>addAnimal(Animal(<span class="string">&quot;Wolf&quot;</span><span class="operator">,</span> <span class="string">&quot;Medium&quot;</span>));
+      model<span class="operator">.</span>addAnimal(Animal(<span class="string">&quot;Polar bear&quot;</span><span class="operator">,</span> <span class="string">&quot;Large&quot;</span>));
+      model<span class="operator">.</span>addAnimal(Animal(<span class="string">&quot;Quoll&quot;</span><span class="operator">,</span> <span class="string">&quot;Small&quot;</span>));
+
+      <span class="type"><a href="qquickview.html">QQuickView</a></span> view;
+      view<span class="operator">.</span>setResizeMode(<span class="type"><a href="qquickview.html">QQuickView</a></span><span class="operator">::</span>SizeRootObjectToView);
+      <span class="type"><a href="../qtqml/qqmlcontext.html">QQmlContext</a></span> <span class="operator">*</span>ctxt <span class="operator">=</span> view<span class="operator">.</span>rootContext();
+      ctxt<span class="operator">-</span><span class="operator">&gt;</span>setContextProperty(<span class="string">&quot;myModel&quot;</span><span class="operator">,</span> <span class="operator">&amp;</span>model);
+      ...
+
+</pre>
+<p>This model is displayed by a <a href="qml-qtquick-listview.html">ListView</a> delegate that accesses the <i>type</i> and <i>size</i> roles:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-listview.html">ListView</a></span> {
+      <span class="name">width</span>: <span class="number">200</span>; <span class="name">height</span>: <span class="number">250</span>
+
+      <span class="name">model</span>: <span class="name">myModel</span>
+      <span class="name">delegate</span>: <span class="name">Text</span> { <span class="name">text</span>: <span class="string">&quot;Animal: &quot;</span> <span class="operator">+</span> <span class="name">type</span> <span class="operator">+</span> <span class="string">&quot;, &quot;</span> <span class="operator">+</span> <span class="name">size</span> }
+  }
+
+</pre>
+<p>QML views are automatically updated when the model changes. Remember the model must follow the standard rules for model changes and notify the view when the model has changed by using <a href="../qtcore/qabstractitemmodel.html#dataChanged">QAbstractItemModel::dataChanged</a>(), <a href="../qtcore/qabstractitemmodel.html#beginInsertRows">QAbstractItemModel::beginInsertRows</a>(), and so on. See the <a href="../qtwidgets/model-view-programming.html#model-subclassing-reference">Model subclassing reference</a> for more information.</p>
+<p>The complete source code for this example is available in <a href="qtquick-models-abstractitemmodel-example.html">examples/quick/models/abstractitemmodel</a> within the Qt install directory.</p>
+<p><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a> presents a hierarchy of tables, but the views currently provided by QML can only display list data. In order to display the child lists of a hierarchical model, use the <a href="../qtqml/qml-qtqml-models-delegatemodel.html">DelegateModel</a> QML type, which provides the following properties and functions to be used with list models of <a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a> type:</p>
+<ul>
+<li><i>hasModelChildren</i> role property to determine whether a node has child nodes.</li>
+<li><a href="../qtqml/qml-qtqml-models-delegatemodel.html#rootIndex-prop">DelegateModel::rootIndex</a> allows the root node to be specified</li>
+<li><a href="../qtqml/qml-qtqml-models-delegatemodel.html#modelIndex-method">DelegateModel::modelIndex</a>() returns a <a href="../qtcore/qmodelindex.html">QModelIndex</a> which can be assigned to <a href="../qtqml/qml-qtqml-models-delegatemodel.html#rootIndex-prop">DelegateModel::rootIndex</a></li>
+<li><a href="../qtqml/qml-qtqml-models-delegatemodel.html#parentModelIndex-method">DelegateModel::parentModelIndex</a>() returns a <a href="../qtcore/qmodelindex.html">QModelIndex</a> which can be assigned to <a href="../qtqml/qml-qtqml-models-delegatemodel.html#rootIndex-prop">DelegateModel::rootIndex</a></li>
+</ul>
+<a name="sql-models"></a>
+<h3 id="sql-models">SQL Models</h3>
+<p>Qt provides C++ classes that support SQL data models. These classes work transparently on the underlying SQL data, reducing the need to run SQL queries for basic SQL operations such as create, insert, or update. For more details about these classes, see <a href="../qtsql/sql-model.html">Using the SQL Model Classes</a>.</p>
+<p>Although the C++ classes provide complete feature sets to operate on SQL data, they do not provide data access to QML. So you must implement a C++ custom data model as a subclass of one of these classes, and expose it to QML either as a type or context property.</p>
+<a name="read-only-data-model"></a>
+<h4 id="read-only-data-model">Read-only Data Model</h4>
+<p>The custom model must reimplement the following methods to enable read-only access to the data from QML:</p>
+<ul>
+<li><a href="../qtcore/qabstractitemmodel.html#roleNames">roleNames</a>() to expose the role names to the QML frontend. For example, the following version returns the selected table's field names as role names:<pre class="cpp">
+
+   <span class="type"><a href="../qtcore/qhash.html">QHash</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> SqlQueryModel<span class="operator">::</span>roleNames() <span class="keyword">const</span>
+   {
+      <span class="type"><a href="../qtcore/qhash.html">QHash</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> roles;
+      <span class="comment">// record() returns an empty QSqlRecord</span>
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>record()<span class="operator">.</span>count(); i <span class="operator">+</span><span class="operator">+</span>) {
+          roles<span class="operator">.</span>insert(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole <span class="operator">+</span> i <span class="operator">+</span> <span class="number">1</span><span class="operator">,</span> record()<span class="operator">.</span>fieldName(i)<span class="operator">.</span>toUtf8());
+      }
+      <span class="keyword">return</span> roles;
+  }
+
+</pre>
+</li>
+<li><a href="../qtsql/qsqlquerymodel.html#data">data</a>() to expose SQL data to the QML frontend. For example, the following implementation returns data for the given model index:<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> SqlQueryModel<span class="operator">::</span>data(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> value;
+
+      <span class="keyword">if</span> (index<span class="operator">.</span>isValid()) {
+          <span class="keyword">if</span> (role <span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole) {
+              value <span class="operator">=</span> <span class="type"><a href="../qtsql/qsqlquerymodel.html">QSqlQueryModel</a></span><span class="operator">::</span>data(index<span class="operator">,</span> role);
+          } <span class="keyword">else</span> {
+              <span class="type">int</span> columnIdx <span class="operator">=</span> role <span class="operator">-</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole <span class="operator">-</span> <span class="number">1</span>;
+              <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> modelIndex <span class="operator">=</span> <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>index(index<span class="operator">.</span>row()<span class="operator">,</span> columnIdx);
+              value <span class="operator">=</span> <span class="type"><a href="../qtsql/qsqlquerymodel.html">QSqlQueryModel</a></span><span class="operator">::</span>data(modelIndex<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole);
+          }
+      }
+      <span class="keyword">return</span> value;
+  }
+
+</pre>
+</li>
+</ul>
+<p>The <a href="../qtquickcontrols/qtquickcontrols-chattutorial-example.html#qsqlquerymodel">QSqlQueryModel</a> class is good enough to implement a custom read-only model that represents data in an SQL database. The <a href="../qtquickcontrols/qtquickcontrols-chattutorial-example.html">chat tutorial</a> example demonstrates this very well by implementing a custom model to fetch the contact details from an <a href="../qtsql/qtsql-attribution-sqlite.html#sqlite">SQLite</a> database.</p>
+<a name="editable-data-model"></a>
+<h4 id="editable-data-model">Editable Data Model</h4>
+<p><a href="../qtquickcontrols/qtquickcontrols-chattutorial-example.html#qsqltablemodel">QSqlTableModel</a> implements setData() as described <a href="qtquick-modelviewsdata-cppmodels.html#changing-model-data">below</a>.</p>
+<p>Depending on the <a href="../qtsql/qsqltablemodel.html#EditStrategy-enum">EditStrategy</a> used by the model, the changes are either queued for submission later or submitted immediately.</p>
+<p>You can also insert new data into the model by calling <a href="../qtsql/qsqltablemodel.html#insertRecord">QSqlTableModel::insertRecord</a>(). In the following example snippet, a <a href="../qtsql/qsqlrecord.html">QSqlRecord</a> is populated with book details and appended to the model:</p>
+<pre class="cpp">
+
+  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  <span class="type"><a href="../qtsql/qsqlrecord.html">QSqlRecord</a></span> newRecord <span class="operator">=</span> record();
+  newRecord<span class="operator">.</span>setValue(<span class="string">&quot;author&quot;</span><span class="operator">,</span> <span class="string">&quot;John Grisham&quot;</span>);
+  newRecord<span class="operator">.</span>setValue(<span class="string">&quot;booktitle&quot;</span><span class="operator">,</span> <span class="string">&quot;The Litigators&quot;</span>);
+  insertRecord(rowCount()<span class="operator">,</span> newRecord);
+  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+</pre>
+<a name="exposing-c-data-models-to-qml"></a>
+<h3 id="exposing-c-data-models-to-qml">Exposing C++ Data Models to QML</h3>
+<p>The above examples use <a href="../qtqml/qqmlcontext.html#setContextProperty">QQmlContext::setContextProperty</a>() to set model values directly in QML components. An alternative to this is to register the C++ model class as a QML type (either <a href="../qtqml/qtqml-cppintegration-overview.html#defining-qml-types-from-c">directly</a> from a C++ entry-point, or within the initialization function of a <a href="../qtqml/qtqml-modules-cppplugins.html">QML C++ plugin</a>, as shown below). This would allow the model classes to be created directly as types within QML:</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td >C++</td><td ><pre class="cpp">
+
+  <span class="keyword">class</span> MyModelPlugin : <span class="keyword">public</span> <span class="type"><a href="../qtqml/qqmlextensionplugin.html">QQmlExtensionPlugin</a></span>
+  {
+      Q_OBJECT
+      Q_PLUGIN_METADATA(IID <span class="string">&quot;org.qt-project.QmlExtension.MyModel&quot;</span> FILE <span class="string">&quot;mymodel.json&quot;</span>)
+  <span class="keyword">public</span>:
+      <span class="type">void</span> registerTypes(<span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>uri)
+      {
+          qmlRegisterType<span class="operator">&lt;</span>MyModel<span class="operator">&gt;</span>(uri<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span>
+                  <span class="string">&quot;MyModel&quot;</span>);
+      }
+  }
+
+</pre>
+</td></tr>
+<tr valign="top" class="even"><td >QML</td><td ><pre class="qml">
+
+  <span class="type">MyModel</span> {
+      <span class="name">id</span>: <span class="name">myModel</span>
+      <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span> { <span class="name">someProperty</span>: <span class="string">&quot;some value&quot;</span> }
+  }
+
+</pre>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-listview.html">ListView</a></span> {
+      <span class="name">width</span>: <span class="number">200</span>; <span class="name">height</span>: <span class="number">250</span>
+      <span class="name">model</span>: <span class="name">myModel</span>
+      <span class="name">delegate</span>: <span class="name">Text</span> { <span class="name">text</span>: <span class="name">someProperty</span> }
+  }
+
+</pre>
+</td></tr>
+</table></div>
+<p>See <a href="../qtqml/qtqml-tutorials-extending-qml-example.html">Writing QML Extensions with C++</a> for details on writing QML C++ plugins.</p>
+<a name="changing-model-data"></a>
+<h3 id="changing-model-data">Changing Model Data</h3>
+<p>Besides the <code>roleNames()</code> and <code>data()</code>, editable models must reimplement the <a href="../qtcore/qabstractitemmodel.html#setData">setData</a> method to save changes to existing model data. The following version of the method checks if the given model index is valid and the <code>role</code> is equal to <a href="../qtcore/qt.html#ItemDataRole-enum">Qt::EditRole</a>:</p>
+<pre class="cpp">
+
+  bool EditableModel<span class="operator">::</span>setData(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> <span class="operator">&amp;</span>value<span class="operator">,</span> <span class="type">int</span> role)
+  {
+      <span class="keyword">if</span> (index<span class="operator">.</span>isValid() <span class="operator">&amp;</span><span class="operator">&amp;</span> role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole) {
+          <span class="comment">// Set data in model here. It can also be a good idea to check whether</span>
+          <span class="comment">// the new value actually differs from the current value</span>
+          <span class="keyword">if</span> (m_entries<span class="operator">[</span>index<span class="operator">.</span>row()<span class="operator">]</span> <span class="operator">!</span><span class="operator">=</span> value<span class="operator">.</span>toString()) {
+              m_entries<span class="operator">[</span>index<span class="operator">.</span>row()<span class="operator">]</span> <span class="operator">=</span> value<span class="operator">.</span>toString();
+              <span class="keyword">emit</span> dataChanged(index<span class="operator">,</span> index<span class="operator">,</span> { <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole });
+              <span class="keyword">return</span> <span class="keyword">true</span>;
+          }
+      }
+      <span class="keyword">return</span> <span class="keyword">false</span>;
+  }
+
+</pre>
+<p><b>Note: </b>It is important to emit the <a href="../qtcore/qabstractitemmodel.html#dataChanged">dataChanged</a>() signal after saving the changes.</p><p>Unlike the C++ item views such as <a href="../qtwidgets/qlistview.html">QListView</a> or <a href="../qtwidgets/qtableview.html">QTableView</a>, the <code>setData()</code> method must be explicitly invoked from QML delegates whenever appropriate. This is done by simply assigning a new value to the corresponding model property.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-listview.html">ListView</a></span> {
+      <span class="name">anchors</span>.fill: <span class="name">parent</span>
+      <span class="name">model</span>: <span class="name">EditableModel</span> {}
+      <span class="name">delegate</span>: <span class="name">TextField</span> {
+          <span class="name">width</span>: <span class="name">ListView</span>.<span class="name">view</span>.<span class="name">width</span>
+          <span class="name">text</span>: <span class="name">model</span>.<span class="name">edit</span>
+          <span class="name">onAccepted</span>: <span class="name">model</span>.<span class="name">edit</span> <span class="operator">=</span> <span class="name">text</span>
+      }
+  }
+
+</pre>
+<p><b>Note: </b>The <code>edit</code> role is equal to <a href="../qtcore/qt.html#ItemDataRole-enum">Qt::EditRole</a>. See <a href="../qtcore/qabstractitemmodel.html#roleNames">roleNames</a>() for the built-in role names. However, real life models would usually register custom roles.</p></div>
+<!-- @@@qtquick-modelviewsdata-cppmodels.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

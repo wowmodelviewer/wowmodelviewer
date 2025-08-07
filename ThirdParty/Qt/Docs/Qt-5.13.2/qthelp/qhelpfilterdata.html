@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qhelpfilterdata.cpp -->
+  <title>QHelpFilterData Class | Qt Help 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qthelp-index.html">Qt Help</a></td><td ><a href="qthelp-module.html">C++ Classes</a></td><td >QHelpFilterData</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qthelp-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QHelpFilterData Class</h1>
+<!-- $$$QHelpFilterData-brief -->
+<p>The <a href="qhelpfilterdata.html">QHelpFilterData</a> class provides details for the filters used by <a href="qhelpfilterengine.html">QHelpFilterEngine</a>. <a href="#details">More...</a></p>
+<!-- @@@QHelpFilterData -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QHelpFilterData&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += help</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.13</td></tr></table></div><p>This class was introduced in  Qt 5.13.</p>
+<ul>
+<li><a href="qhelpfilterdata-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qhelpfilterdata.html#QHelpFilterData-2">QHelpFilterData</a></b>(QHelpFilterData &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qhelpfilterdata.html#QHelpFilterData-1">QHelpFilterData</a></b>(const QHelpFilterData &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qhelpfilterdata.html#QHelpFilterData">QHelpFilterData</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QHelpFilterData &amp;</td><td class="memItemRight bottomAlign"><b><a href="qhelpfilterdata.html#operator-eq-1">operator=</a></b>(QHelpFilterData &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QHelpFilterData &amp;</td><td class="memItemRight bottomAlign"><b><a href="qhelpfilterdata.html#operator-eq">operator=</a></b>(const QHelpFilterData &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qhelpfilterdata.html#dtor.QHelpFilterData">~QHelpFilterData</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qhelpfilterdata.html#components">components</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qhelpfilterdata.html#setComponents">setComponents</a></b>(const QStringList &amp;<i>components</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qhelpfilterdata.html#setVersions">setVersions</a></b>(const QList&lt;QVersionNumber&gt; &amp;<i>versions</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QVersionNumber&gt; </td><td class="memItemRight bottomAlign"><b><a href="qhelpfilterdata.html#versions">versions</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QHelpFilterData-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>By using <a href="qhelpfilterdata.html#setComponents">setComponents</a>() you may constrain the search results to documents that belong only to components specified on the given list. By using <a href="qhelpfilterdata.html#setVersions">setVersions</a>() you may constrain the search results to documents that belong only to versions specified on the given list.</p>
+</div>
+<p><b>See also </b><a href="qhelpfilterengine.html">QHelpFilterEngine</a>.</p>
+<!-- @@@QHelpFilterData -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QHelpFilterData$$$QHelpFilterDataQHelpFilterData&& -->
+<h3 class="fn" id="QHelpFilterData-2"><a name="QHelpFilterData-2"></a>QHelpFilterData::<span class="name">QHelpFilterData</span>(<span class="type"><a href="qhelpfilterdata.html#QHelpFilterData">QHelpFilterData</a></span> &amp;&amp;<i>other</i>)</h3>
+<p>Move-constructs a <a href="qhelpfilterdata.html">QHelpFilterData</a> instance, making it point at the same object that <i>other</i> was pointing to.</p>
+<!-- @@@QHelpFilterData -->
+<!-- $$$QHelpFilterData$$$QHelpFilterDataconstQHelpFilterData& -->
+<h3 class="fn" id="QHelpFilterData-1"><a name="QHelpFilterData-1"></a>QHelpFilterData::<span class="name">QHelpFilterData</span>(const <span class="type"><a href="qhelpfilterdata.html#QHelpFilterData">QHelpFilterData</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a copy of <i>other</i>.</p>
+<!-- @@@QHelpFilterData -->
+<!-- $$$QHelpFilterData[overload1]$$$QHelpFilterData -->
+<h3 class="fn" id="QHelpFilterData"><a name="QHelpFilterData"></a>QHelpFilterData::<span class="name">QHelpFilterData</span>()</h3>
+<p>Constructs the empty filter.</p>
+<!-- @@@QHelpFilterData -->
+<!-- $$$operator=$$$operator=QHelpFilterData&& -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type"><a href="qhelpfilterdata.html#QHelpFilterData">QHelpFilterData</a></span> &amp;QHelpFilterData::<span class="name">operator=</span>(<span class="type"><a href="qhelpfilterdata.html#QHelpFilterData">QHelpFilterData</a></span> &amp;&amp;<i>other</i>)</h3>
+<p>Move-assigns <i>other</i> to this <a href="qhelpfilterdata.html">QHelpFilterData</a> instance.</p>
+<!-- @@@operator= -->
+<!-- $$$operator=[overload1]$$$operator=constQHelpFilterData& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qhelpfilterdata.html#QHelpFilterData">QHelpFilterData</a></span> &amp;QHelpFilterData::<span class="name">operator=</span>(const <span class="type"><a href="qhelpfilterdata.html#QHelpFilterData">QHelpFilterData</a></span> &amp;<i>other</i>)</h3>
+<p>Assigns <i>other</i> to this filter and returns a reference to this filter.</p>
+<!-- @@@operator= -->
+<!-- $$$~QHelpFilterData[overload1]$$$~QHelpFilterData -->
+<h3 class="fn" id="dtor.QHelpFilterData"><a name="dtor.QHelpFilterData"></a>QHelpFilterData::<span class="name">~QHelpFilterData</span>()</h3>
+<p>Destroys the filter.</p>
+<!-- @@@~QHelpFilterData -->
+<!-- $$$components[overload1]$$$components -->
+<h3 class="fn" id="components"><a name="components"></a><span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> QHelpFilterData::<span class="name">components</span>() const</h3>
+<p>Returns the component list that is used for filtering the search results.</p>
+<p><b>See also </b><a href="qhelpfilterdata.html#setComponents">setComponents</a>().</p>
+<!-- @@@components -->
+<!-- $$$setComponents[overload1]$$$setComponentsconstQStringList& -->
+<h3 class="fn" id="setComponents"><a name="setComponents"></a><span class="type">void</span> QHelpFilterData::<span class="name">setComponents</span>(const <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> &amp;<i>components</i>)</h3>
+<p>Specifies the component list that is used for filtering the search results. Only results from components in the list <i>components</i> shall be returned.</p>
+<p><b>See also </b><a href="qhelpfilterdata.html#components">components</a>().</p>
+<!-- @@@setComponents -->
+<!-- $$$setVersions[overload1]$$$setVersionsconstQList<QVersionNumber>& -->
+<h3 class="fn" id="setVersions"><a name="setVersions"></a><span class="type">void</span> QHelpFilterData::<span class="name">setVersions</span>(const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="../qtcore/qversionnumber.html">QVersionNumber</a></span>&gt; &amp;<i>versions</i>)</h3>
+<p>Specifies the version list that is used for filtering the search results. Only results from versions in the list <i>versions</i> shall be returned.</p>
+<p><b>See also </b><a href="qhelpfilterdata.html#versions">versions</a>().</p>
+<!-- @@@setVersions -->
+<!-- $$$versions[overload1]$$$versions -->
+<h3 class="fn" id="versions"><a name="versions"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="../qtcore/qversionnumber.html">QVersionNumber</a></span>&gt; QHelpFilterData::<span class="name">versions</span>() const</h3>
+<p>Returns the version list that is used for filtering the search results.</p>
+<p><b>See also </b><a href="qhelpfilterdata.html#setVersions">setVersions</a>().</p>
+<!-- @@@versions -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

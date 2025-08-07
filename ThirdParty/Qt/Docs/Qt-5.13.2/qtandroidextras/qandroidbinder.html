@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qandroidbinder.cpp -->
+  <title>QAndroidBinder Class | Qt Android Extras 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtandroidextras-index.html">Qt Android Extras</a></td><td ><a href="qtandroidextras-module.html">C++ Classes</a></td><td >QAndroidBinder</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtandroidextras-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAndroidBinder Class</h1>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAndroidBinder&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += androidextras</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.10</td></tr></table></div><p>This class was introduced in  Qt 5.10.</p>
+<ul>
+<li><a href="qandroidbinder-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qandroidbinder.html#CallType-enum">CallType</a></b> { Normal, OneWay }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qandroidbinder.html#QAndroidBinder-1">QAndroidBinder</a></b>(const QAndroidJniObject &amp;<i>binder</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qandroidbinder.html#QAndroidBinder">QAndroidBinder</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QAndroidJniObject </td><td class="memItemRight bottomAlign"><b><a href="qandroidbinder.html#handle">handle</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qandroidbinder.html#onTransact">onTransact</a></b>(int <i>code</i>, const QAndroidParcel &amp;<i>data</i>, const QAndroidParcel &amp;<i>reply</i>, QAndroidBinder::CallType <i>flags</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qandroidbinder.html#transact">transact</a></b>(int <i>code</i>, const QAndroidParcel &amp;<i>data</i>, QAndroidParcel *<i>reply</i> = nullptr, QAndroidBinder::CallType <i>flags</i> = CallType::Normal) const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAndroidBinder-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qandroidbinder.html">QAndroidBinder</a> is a convenience class that wraps the most important <a href="https://developer.android.com/reference/android/os/Binder.html">Android Binder</a> methods.</p>
+</div>
+<!-- @@@QAndroidBinder -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$CallType$$$Normal$$$OneWay -->
+<h3 class="fn" id="CallType-enum"><a name="CallType-enum"></a>enum QAndroidBinder::<span class="name">CallType</span></h3>
+<p>This enum is used with <a href="qandroidbinder.html#transact">QAndroidBinder::transact</a>() to describe the mode in which the IPC call is performed.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QAndroidBinder::Normal</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">normal IPC, meaning that the caller waits the result from the callee</td></tr>
+<tr><td class="topAlign"><code>QAndroidBinder::OneWay</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">one-way IPC, meaning that the caller returns immediately, without waiting for a result from the callee</td></tr>
+</table></div>
+<!-- @@@CallType -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QAndroidBinder$$$QAndroidBinderconstQAndroidJniObject& -->
+<h3 class="fn" id="QAndroidBinder-1"><a name="QAndroidBinder-1"></a>QAndroidBinder::<span class="name">QAndroidBinder</span>(const <span class="type"><a href="qandroidjniobject.html">QAndroidJniObject</a></span> &amp;<i>binder</i>)</h3>
+<p>Creates a new object from the <i>binder</i> Java object.</p>
+<p><b>See also </b><a href="qandroidbinder.html#transact">transact</a>.</p>
+<!-- @@@QAndroidBinder -->
+<!-- $$$QAndroidBinder[overload1]$$$QAndroidBinder -->
+<h3 class="fn" id="QAndroidBinder"><a name="QAndroidBinder"></a>QAndroidBinder::<span class="name">QAndroidBinder</span>()</h3>
+<p>Creates a new object which can be used to perform IPC.</p>
+<p><b>See also </b><a href="qandroidbinder.html#onTransact">onTransact</a> and <a href="qandroidbinder.html#transact">transact</a>.</p>
+<!-- @@@QAndroidBinder -->
+<!-- $$$handle[overload1]$$$handle -->
+<h3 class="fn" id="handle"><a name="handle"></a><span class="type"><a href="qandroidjniobject.html">QAndroidJniObject</a></span> QAndroidBinder::<span class="name">handle</span>() const</h3>
+<p>The return value is useful to call other Java API which are not covered by this wrapper</p>
+<!-- @@@handle -->
+<!-- $$$onTransact[overload1]$$$onTransactintconstQAndroidParcel&constQAndroidParcel&QAndroidBinder::CallType -->
+<h3 class="fn" id="onTransact"><a name="onTransact"></a><code>[virtual] </code><span class="type">bool</span> QAndroidBinder::<span class="name">onTransact</span>(<span class="type">int</span> <i>code</i>, const <span class="type"><a href="qandroidparcel.html">QAndroidParcel</a></span> &amp;<i>data</i>, const <span class="type"><a href="qandroidparcel.html">QAndroidParcel</a></span> &amp;<i>reply</i>, <span class="type"><a href="qandroidbinder.html#CallType-enum">QAndroidBinder::CallType</a></span> <i>flags</i>)</h3>
+<p>Default implementation is a stub that returns false. The user should override this method to get the transact data from the caller.</p>
+<p>The <i>code</i> is the action to perform. The <i>data</i> is the marshaled data sent by the caller.<br />
+ The <i>reply</i> is the marshaled data to be sent to the caller.<br />
+ The <i>flags</i> are the additional operation flags.<br />
+</p>
+<p><b>Warning:</b> This method is called from Binder's thread which is different from the thread that this object was created.</p>
+<p><b>See also </b><a href="qandroidbinder.html#transact">transact</a>.</p>
+<!-- @@@onTransact -->
+<!-- $$$transact[overload1]$$$transactintconstQAndroidParcel&QAndroidParcel*QAndroidBinder::CallType -->
+<h3 class="fn" id="transact"><a name="transact"></a><span class="type">bool</span> QAndroidBinder::<span class="name">transact</span>(<span class="type">int</span> <i>code</i>, const <span class="type"><a href="qandroidparcel.html">QAndroidParcel</a></span> &amp;<i>data</i>, <span class="type"><a href="qandroidparcel.html">QAndroidParcel</a></span> *<i>reply</i> = nullptr, <span class="type"><a href="qandroidbinder.html#CallType-enum">QAndroidBinder::CallType</a></span> <i>flags</i> = CallType::Normal) const</h3>
+<p>Performs an IPC call</p>
+<p>The <i>code</i> is the action to perform. Should be between <a href="https://developer.android.com/reference/android/os/IBinder.html#FIRST_CALL_TRANSACTION">FIRST_CALL_TRANSACTION</a> and <a href="https://developer.android.com/reference/android/os/IBinder.html#LAST_CALL_TRANSACTION">LAST_CALL_TRANSACTION</a>.<br />
+ The <i>data</i> is the marshaled data to send to the target.<br />
+ The <i>reply</i> (if specified) is the marshaled data to be received from the target. May be <b>nullptr</b> if you are not interested in the return value.<br />
+ The <i>flags</i> are the additional operation flags.<br />
+</p>
+<p>Returns true on success</p>
+<!-- @@@transact -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickshape.cpp -->
+  <title>Shape QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >Shape QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Shape QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Shape-brief -->
+<p>Renders a path. <a href="#details">More...</a></p>
+<!-- @@@Shape -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Shapes 1.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.10</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-item.html">Item</a></p>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-particles-ellipseshape.html">EllipseShape</a>, <a href="qml-qtquick-particles-lineshape.html">LineShape</a>, and <a href="qml-qtquick-particles-maskshape.html">MaskShape</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-shapes-shape-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-shapes-shape.html#asynchronous-prop">asynchronous</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-shapes-shape.html#containsMode-prop">containsMode</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-shapes-shape.html#data-prop">data</a></b></b> : list&lt;Object&gt;</li>
+<li class="fn"><b><b><a href="qml-qtquick-shapes-shape.html#rendererType-prop">rendererType</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-shapes-shape.html#status-prop">status</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-shapes-shape.html#vendorExtensionsEnabled-prop">vendorExtensionsEnabled</a></b></b> : bool</li>
+</ul>
+<!-- $$$Shape-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>Renders a path either by generating geometry via <a href="../qtgui/qpainterpath.html">QPainterPath</a> and manual triangulation or by using a GPU vendor extension like <code>GL_NV_path_rendering</code>.</p>
+<p>This approach is different from rendering shapes via <a href="qquickpainteditem.html">QQuickPaintedItem</a> or the 2D Canvas because the path never gets rasterized in software. Therefore Shape is suitable for creating shapes spreading over larger areas of the screen, avoiding the performance penalty for texture uploads or framebuffer blits. In addition, the declarative API allows manipulating, binding to, and even animating the path element properties like starting and ending position, the control points, and so on.</p>
+<p>The types for specifying path elements are shared between <a href="qml-qtquick-pathview.html">PathView</a> and Shape. However, not all Shape implementations support all path element types, while some may not make sense for <a href="qml-qtquick-pathview.html">PathView</a>. Shape's currently supported subset is: <a href="qml-qtquick-pathmove.html">PathMove</a>, <a href="qml-qtquick-pathline.html">PathLine</a>, <a href="qml-qtquick-pathquad.html">PathQuad</a>, <a href="qml-qtquick-pathcubic.html">PathCubic</a>, <a href="qml-qtquick-patharc.html">PathArc</a>, and <a href="qml-qtquick-pathsvg.html">PathSvg</a>.</p>
+<p>See <a href="qml-qtquick-path.html">Path</a> for a detailed overview of the supported path elements.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-shapes-shape.html">Shape</a></span> {
+      <span class="name">width</span>: <span class="number">200</span>
+      <span class="name">height</span>: <span class="number">150</span>
+      <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+      <span class="type"><a href="qml-qtquick-shapes-shapepath.html">ShapePath</a></span> {
+          <span class="name">strokeWidth</span>: <span class="number">4</span>
+          <span class="name">strokeColor</span>: <span class="string">&quot;red&quot;</span>
+          <span class="name">fillGradient</span>: <span class="name">LinearGradient</span> {
+              <span class="name">x1</span>: <span class="number">20</span>; <span class="name">y1</span>: <span class="number">20</span>
+              <span class="name">x2</span>: <span class="number">180</span>; <span class="name">y2</span>: <span class="number">130</span>
+              <span class="type"><a href="qml-qtquick-gradientstop.html">GradientStop</a></span> { <span class="name">position</span>: <span class="number">0</span>; <span class="name">color</span>: <span class="string">&quot;blue&quot;</span> }
+              <span class="type"><a href="qml-qtquick-gradientstop.html">GradientStop</a></span> { <span class="name">position</span>: <span class="number">0.2</span>; <span class="name">color</span>: <span class="string">&quot;green&quot;</span> }
+              <span class="type"><a href="qml-qtquick-gradientstop.html">GradientStop</a></span> { <span class="name">position</span>: <span class="number">0.4</span>; <span class="name">color</span>: <span class="string">&quot;red&quot;</span> }
+              <span class="type"><a href="qml-qtquick-gradientstop.html">GradientStop</a></span> { <span class="name">position</span>: <span class="number">0.6</span>; <span class="name">color</span>: <span class="string">&quot;yellow&quot;</span> }
+              <span class="type"><a href="qml-qtquick-gradientstop.html">GradientStop</a></span> { <span class="name">position</span>: <span class="number">1</span>; <span class="name">color</span>: <span class="string">&quot;cyan&quot;</span> }
+          }
+          <span class="name">strokeStyle</span>: <span class="name">ShapePath</span>.<span class="name">DashLine</span>
+          <span class="name">dashPattern</span>: [ <span class="number">1</span>, <span class="number">4</span> ]
+          <span class="name">startX</span>: <span class="number">20</span>; <span class="name">startY</span>: <span class="number">20</span>
+          <span class="type"><a href="qml-qtquick-pathline.html">PathLine</a></span> { <span class="name">x</span>: <span class="number">180</span>; <span class="name">y</span>: <span class="number">130</span> }
+          <span class="type"><a href="qml-qtquick-pathline.html">PathLine</a></span> { <span class="name">x</span>: <span class="number">20</span>; <span class="name">y</span>: <span class="number">130</span> }
+          <span class="type"><a href="qml-qtquick-pathline.html">PathLine</a></span> { <span class="name">x</span>: <span class="number">20</span>; <span class="name">y</span>: <span class="number">20</span> }
+      }
+  }
+
+</pre>
+<p class="centerAlign"><img src="images/pathitem-code-example.png" alt="" /></p><p>Like <a href="qml-qtquick-item.html">Item</a>, Shape also allows any visual or non-visual objects to be declared as children. <a href="qml-qtquick-shapes-shapepath.html">ShapePath</a> objects are handled specially. This is useful since it allows adding visual items, like <a href="qml-qtquick-rectangle.html">Rectangle</a> or <a href="qml-qtquick-image.html">Image</a>, and non-visual objects, like <a href="../qtqml/qml-qtqml-timer.html">Timer</a> directly as children of Shape.</p>
+<p>The following list summarizes the available Shape rendering approaches:</p>
+<ul>
+<li>When running with the default, OpenGL backend of Qt Quick, both the generic, triangulation-based and the NVIDIA-specific <code>GL_NV_path_rendering</code> methods are available. By default only the generic approach is used. Setting Shape.<a href="qml-qtquick-shapes-shape.html#vendorExtensionsEnabled-prop">vendorExtensionsEnabled</a> property to <code>true</code> leads to using NV_path_rendering on NVIDIA systems, and the generic method on others.</li>
+<li>The <code>software</code> backend is fully supported. The path is rendered via <a href="../qtgui/qpainter.html#strokePath">QPainter::strokePath()</a> and <a href="../qtgui/qpainter.html#fillPath">QPainter::fillPath()</a> in this case.</li>
+<li>The Direct 3D 12 backend is not currently supported.</li>
+<li>The <a href="qtquick-visualcanvas-adaptations.html#openvg">OpenVG</a> backend is not currently supported.</li>
+</ul>
+<p>When using Shape, it is important to be aware of potential performance implications:</p>
+<ul>
+<li>When the application is running with the generic, triangulation-based Shape implementation, the geometry generation happens entirely on the CPU. This is potentially expensive. Changing the set of path elements, changing the properties of these elements, or changing certain properties of the Shape itself all lead to retriangulation of the affected paths on every change. Therefore, applying animation to such properties can affect performance on less powerful systems.</li>
+<li>However, the data-driven, declarative nature of the Shape API often means better cacheability for the underlying CPU and GPU resources. A property change in one <a href="qml-qtquick-shapes-shapepath.html">ShapePath</a> will only lead to reprocessing the affected <a href="qml-qtquick-shapes-shapepath.html">ShapePath</a>, leaving other parts of the Shape unchanged. Therefore, a frequently changing property can still result in a lower overall system load than with imperative painting approaches (for example, <a href="../qtgui/qpainter.html">QPainter</a>).</li>
+<li>If animating properties other than stroke and fill colors is a must, it is recommended to target systems providing <code>GL_NV_path_rendering</code> where the cost of property changes is smaller.</li>
+<li>At the same time, attention must be paid to the number of Shape elements in the scene, in particular when using this special accelerated approach for <code>GL_NV_path_rendering</code>. The way such a Shape item is represented in the scene graph is different from an ordinary geometry-based item, and incurs a certain cost when it comes to OpenGL state changes.</li>
+<li>As a general rule, scenes should avoid using separate Shape items when it is not absolutely necessary. Prefer using one Shape item with multiple <a href="qml-qtquick-shapes-shapepath.html">ShapePath</a> elements over multiple Shape items.</li>
+</ul>
+<p><b>See also </b><a href="qtquick-shapes-example.html">Qt Quick Examples - Shapes</a>, <a href="qml-qtquick-path.html">Path</a>, <a href="qml-qtquick-pathmove.html">PathMove</a>, <a href="qml-qtquick-pathline.html">PathLine</a>, <a href="qml-qtquick-pathquad.html">PathQuad</a>, <a href="qml-qtquick-pathcubic.html">PathCubic</a>, <a href="qml-qtquick-patharc.html">PathArc</a>, and <a href="qml-qtquick-pathsvg.html">PathSvg</a>.</p>
+<!-- @@@Shape -->
+<h2>Property Documentation</h2>
+<!-- $$$asynchronous -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="asynchronous-prop"></a><span class="name">asynchronous</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>When <a href="qml-qtquick-shapes-shape.html#rendererType-prop">rendererType</a> is <code>Shape.GeometryRenderer</code>, the input path is triangulated on the CPU during the polishing phase of the Shape. This is potentially expensive. To offload this work to separate worker threads, set this property to <code>true</code>.</p>
+<p>When enabled, making a Shape visible will not wait for the content to become available. Instead, the gui/main thread is not blocked and the results of the path rendering are shown only when all the asynchronous work has been finished.</p>
+<p>The default value is <code>false</code>.</p>
+</div></div><!-- @@@asynchronous -->
+<br/>
+<!-- $$$containsMode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="containsMode-prop"></a><span class="name">containsMode</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property determines the definition of <a href="qquickitem.html#contains">contains()</a> for the Shape. It is useful in case you add <a href="qtquickhandlers-index.html">Qt Quick Input Handlers</a> and you want to react only when the mouse or touchpoint is fully inside the Shape.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Shape.BoundingRectContains</code></td><td class="topAlign">The default implementation of <a href="qquickitem.html#contains">QQuickItem::contains()</a> checks only whether the given point is inside the rectangular bounding box. This is the most efficient implementation, which is why it's the default.</td></tr>
+<tr><td class="topAlign"><code>Shape.FillContains</code></td><td class="topAlign">Check whether the interior (the part that would be filled if you are rendering it with fill) of any <a href="qml-qtquick-shapes-shapepath.html">ShapePath</a> that makes up this Shape contains the given point. The more complex and numerous ShapePaths you add, the less efficient this is to check, which can potentially slow down event delivery in your application. So it should be used with care.</td></tr>
+</table></div>
+<p>One way to speed up the <code>FillContains</code> check is to generate an approximate outline with as few points as possible, place that in a transparent Shape on top, and add your Pointer Handlers to that, so that the containment check is cheaper during event delivery.</p>
+<p>This property was introduced in  QtQuick.Shapes 1.11.</p>
+</div></div><!-- @@@containsMode -->
+<br/>
+<!-- $$$data -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="data-prop"></a><span class="qmldefault">[default] </span><span class="name">data</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type">Object</span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the <a href="qml-qtquick-shapes-shapepath.html">ShapePath</a> objects that define the contents of the Shape. It can also contain any other type of objects, since Shape, like Item, allows adding any visual or non-visual objects as children.</p>
+</div></div><!-- @@@data -->
+<br/>
+<!-- $$$rendererType -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="rendererType-prop"></a><span class="name">rendererType</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property determines which path rendering backend is active.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Shape.UnknownRenderer</code></td><td class="topAlign">The renderer is unknown.</td></tr>
+<tr><td class="topAlign"><code>Shape.GeometryRenderer</code></td><td class="topAlign">The generic, driver independent solution for OpenGL. Uses the same CPU-based triangulation approach as <a href="../qtgui/qpainter.html">QPainter</a>'s OpenGL 2 paint engine. This is the default on non-NVIDIA hardware when the default, OpenGL Qt Quick scenegraph backend is in use.</td></tr>
+<tr><td class="topAlign"><code>Shape.NvprRenderer</code></td><td class="topAlign">Path items are rendered by performing OpenGL calls using the <code>GL_NV_path_rendering</code> extension. This is the default on NVIDIA hardware when the default, OpenGL Qt Quick scenegraph backend is in use.</td></tr>
+<tr><td class="topAlign"><code>Shape.SoftwareRenderer</code></td><td class="topAlign">Pure <a href="../qtgui/qpainter.html">QPainter</a> drawing using the raster paint engine. This is the default, and only, option when the Qt Quick scenegraph is running with the <code>software</code> backend.</td></tr>
+</table></div>
+</div></div><!-- @@@rendererType -->
+<br/>
+<!-- $$$status -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="status-prop"></a><span class="name">status</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property determines the status of the Shape and is relevant when Shape.asynchronous is set to <code>true</code>.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Shape.Null</code></td><td class="topAlign">Not yet initialized.</td></tr>
+<tr><td class="topAlign"><code>Shape.Ready</code></td><td class="topAlign">The Shape has finished processing.</td></tr>
+<tr><td class="topAlign"><code>Shape.Processing</code></td><td class="topAlign">The path is being processed.</td></tr>
+</table></div>
+</div></div><!-- @@@status -->
+<br/>
+<!-- $$$vendorExtensionsEnabled -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="vendorExtensionsEnabled-prop"></a><span class="name">vendorExtensionsEnabled</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property controls the usage of non-standard OpenGL extensions like <code>GL_NV_path_rendering</code>.</p>
+<p>The default value is <code>false</code>.</p>
+<p>As of Qt 5.12 Shape.NvprRenderer is disabled by default and a uniform behavior, based on triangulating the path and generating <a href="qsggeometrynode.html">QSGGeometryNode</a> instances, is used regardless of the graphics card and drivers. To enable using vendor-specific path rendering approaches set the value to <code>true</code>. Depending on the platform and content, this can lead to improved performance. Setting the value to <code>true</code> is safe in any case since rendering falls back to the default method when the vendor-specific approach, such as <code>GL_NV_path_rendering</code>, is not supported at run time.</p>
+</div></div><!-- @@@vendorExtensionsEnabled -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

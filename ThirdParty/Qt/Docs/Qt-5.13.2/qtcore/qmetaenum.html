@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmetaobject.cpp -->
+  <title>QMetaEnum Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QMetaEnum</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QMetaEnum Class</h1>
+<!-- $$$QMetaEnum-brief -->
+<p>The <a href="qmetaenum.html">QMetaEnum</a> class provides meta-data about an enumerator. <a href="#details">More...</a></p>
+<!-- @@@QMetaEnum -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QMetaEnum&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr></table></div><ul>
+<li><a href="qmetaenum-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> const char *</td><td class="memItemRight bottomAlign"><b><a href="qmetaenum.html#enumName">enumName</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetaenum.html#isFlag">isFlag</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetaenum.html#isScoped">isScoped</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetaenum.html#isValid">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const char *</td><td class="memItemRight bottomAlign"><b><a href="qmetaenum.html#key">key</a></b>(int <i>index</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmetaenum.html#keyCount">keyCount</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmetaenum.html#keyToValue">keyToValue</a></b>(const char *<i>key</i>, bool *<i>ok</i> = nullptr) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmetaenum.html#keysToValue">keysToValue</a></b>(const char *<i>keys</i>, bool *<i>ok</i> = nullptr) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const char *</td><td class="memItemRight bottomAlign"><b><a href="qmetaenum.html#name">name</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const char *</td><td class="memItemRight bottomAlign"><b><a href="qmetaenum.html#scope">scope</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmetaenum.html#value">value</a></b>(int <i>index</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const char *</td><td class="memItemRight bottomAlign"><b><a href="qmetaenum.html#valueToKey">valueToKey</a></b>(int <i>value</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qmetaenum.html#valueToKeys">valueToKeys</a></b>(int <i>value</i>) const</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QMetaEnum </td><td class="memItemRight bottomAlign"><b><a href="qmetaenum.html#fromType">fromType</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QMetaEnum-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Use <a href="qmetaenum.html#name">name</a>() for the enumerator's name. The enumerator's keys (names of each enumerated item) are returned by <a href="qmetaenum.html#key">key</a>(); use <a href="qmetaenum.html#keyCount">keyCount</a>() to find the number of keys. <a href="qmetaenum.html#isFlag">isFlag</a>() returns whether the enumerator is meant to be used as a flag, meaning that its values can be combined using the OR operator.</p>
+<p>The conversion functions <a href="qmetaenum.html#keyToValue">keyToValue</a>(), <a href="qmetaenum.html#valueToKey">valueToKey</a>(), <a href="qmetaenum.html#keysToValue">keysToValue</a>(), and <a href="qmetaenum.html#valueToKeys">valueToKeys</a>() allow conversion between the integer representation of an enumeration or set value and its literal representation. The <a href="qmetaenum.html#scope">scope</a>() function returns the class scope this enumerator was declared in.</p>
+</div>
+<p><b>See also </b><a href="qmetaobject.html">QMetaObject</a>, <a href="qmetamethod.html">QMetaMethod</a>, and <a href="qmetaproperty.html">QMetaProperty</a>.</p>
+<!-- @@@QMetaEnum -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$enumName[overload1]$$$enumName -->
+<h3 class="fn" id="enumName"><a name="enumName"></a>const <span class="type">char</span> *QMetaEnum::<span class="name">enumName</span>() const</h3>
+<p>Returns the enum name of the flag (without the scope).</p>
+<p>For example, the <a href="qt.html#AlignmentFlag-enum">Qt::AlignmentFlag</a> flag has <code>AlignmentFlag</code> as the enum name, but <code>Alignment</code> as as the type name. Non flag enums has the same type and enum names.</p>
+<p>Enum names have the same scope as the type name.</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<p><b>See also </b><a href="qmetaenum.html#isValid">isValid</a>() and <a href="qmetaenum.html#name">name</a>().</p>
+<!-- @@@enumName -->
+<!-- $$$fromType[overload1]$$$fromType -->
+<h3 class="fn" id="fromType"><a name="fromType"></a><code>[static] </code><span class="type">QMetaEnum</span> QMetaEnum::<span class="name">fromType</span>()</h3>
+<p>Returns the <a href="qmetaenum.html">QMetaEnum</a> corresponding to the type in the template parameter. The enum needs to be declared with <a href="qobject.html#Q_ENUM">Q_ENUM</a>.</p>
+<p>This function was introduced in  Qt 5.5.</p>
+<!-- @@@fromType -->
+<!-- $$$isFlag[overload1]$$$isFlag -->
+<h3 class="fn" id="isFlag"><a name="isFlag"></a><span class="type">bool</span> QMetaEnum::<span class="name">isFlag</span>() const</h3>
+<p>Returns <code>true</code> if this enumerator is used as a flag; otherwise returns false.</p>
+<p>When used as flags, enumerators can be combined using the OR operator.</p>
+<p><b>See also </b><a href="qmetaenum.html#keysToValue">keysToValue</a>() and <a href="qmetaenum.html#valueToKeys">valueToKeys</a>().</p>
+<!-- @@@isFlag -->
+<!-- $$$isScoped[overload1]$$$isScoped -->
+<h3 class="fn" id="isScoped"><a name="isScoped"></a><span class="type">bool</span> QMetaEnum::<span class="name">isScoped</span>() const</h3>
+<p>Returns <code>true</code> if this enumerator is declared as a C++11 enum class; otherwise returns false.</p>
+<p>This function was introduced in  Qt 5.8.</p>
+<!-- @@@isScoped -->
+<!-- $$$isValid[overload1]$$$isValid -->
+<h3 class="fn" id="isValid"><a name="isValid"></a><span class="type">bool</span> QMetaEnum::<span class="name">isValid</span>() const</h3>
+<p>Returns <code>true</code> if this enum is valid (has a name); otherwise returns false.</p>
+<p><b>See also </b><a href="qmetaenum.html#name">name</a>().</p>
+<!-- @@@isValid -->
+<!-- $$$key[overload1]$$$keyint -->
+<h3 class="fn" id="key"><a name="key"></a>const <span class="type">char</span> *QMetaEnum::<span class="name">key</span>(<span class="type">int</span> <i>index</i>) const</h3>
+<p>Returns the key with the given <i>index</i>, or <code>nullptr</code> if no such key exists.</p>
+<p><b>See also </b><a href="qmetaenum.html#keyCount">keyCount</a>(), <a href="qmetaenum.html#value">value</a>(), and <a href="qmetaenum.html#valueToKey">valueToKey</a>().</p>
+<!-- @@@key -->
+<!-- $$$keyCount[overload1]$$$keyCount -->
+<h3 class="fn" id="keyCount"><a name="keyCount"></a><span class="type">int</span> QMetaEnum::<span class="name">keyCount</span>() const</h3>
+<p>Returns the number of keys.</p>
+<p><b>See also </b><a href="qmetaenum.html#key">key</a>().</p>
+<!-- @@@keyCount -->
+<!-- $$$keyToValue[overload1]$$$keyToValueconstchar*bool* -->
+<h3 class="fn" id="keyToValue"><a name="keyToValue"></a><span class="type">int</span> QMetaEnum::<span class="name">keyToValue</span>(const <span class="type">char</span> *<i>key</i>, <span class="type">bool</span> *<i>ok</i> = nullptr) const</h3>
+<p>Returns the integer value of the given enumeration <i>key</i>, or -1 if <i>key</i> is not defined.</p>
+<p>If <i>key</i> is not defined, *<i>ok</i> is set to false; otherwise *<i>ok</i> is set to true.</p>
+<p>For flag types, use <a href="qmetaenum.html#keysToValue">keysToValue</a>().</p>
+<p><b>See also </b><a href="qmetaenum.html#valueToKey">valueToKey</a>(), <a href="qmetaenum.html#isFlag">isFlag</a>(), and <a href="qmetaenum.html#keysToValue">keysToValue</a>().</p>
+<!-- @@@keyToValue -->
+<!-- $$$keysToValue[overload1]$$$keysToValueconstchar*bool* -->
+<h3 class="fn" id="keysToValue"><a name="keysToValue"></a><span class="type">int</span> QMetaEnum::<span class="name">keysToValue</span>(const <span class="type">char</span> *<i>keys</i>, <span class="type">bool</span> *<i>ok</i> = nullptr) const</h3>
+<p>Returns the value derived from combining together the values of the <i>keys</i> using the OR operator, or -1 if <i>keys</i> is not defined. Note that the strings in <i>keys</i> must be '|'-separated.</p>
+<p>If <i>keys</i> is not defined, *<i>ok</i> is set to false; otherwise *<i>ok</i> is set to true.</p>
+<p><b>See also </b><a href="qmetaenum.html#isFlag">isFlag</a>(), <a href="qmetaenum.html#valueToKey">valueToKey</a>(), and <a href="qmetaenum.html#valueToKeys">valueToKeys</a>().</p>
+<!-- @@@keysToValue -->
+<!-- $$$name[overload1]$$$name -->
+<h3 class="fn" id="name"><a name="name"></a>const <span class="type">char</span> *QMetaEnum::<span class="name">name</span>() const</h3>
+<p>Returns the name of the type (without the scope).</p>
+<p>For example, the <a href="qt.html#Key-enum">Qt::Key</a> enumeration has <code>Key</code> as the type name and <a href="qt.html">Qt</a> as the scope.</p>
+<p>For flags this returns the name of the flag type, not the name of the enum type.</p>
+<p><b>See also </b><a href="qmetaenum.html#isValid">isValid</a>(), <a href="qmetaenum.html#scope">scope</a>(), and <a href="qmetaenum.html#enumName">enumName</a>().</p>
+<!-- @@@name -->
+<!-- $$$scope[overload1]$$$scope -->
+<h3 class="fn" id="scope"><a name="scope"></a>const <span class="type">char</span> *QMetaEnum::<span class="name">scope</span>() const</h3>
+<p>Returns the scope this enumerator was declared in.</p>
+<p>For example, the <a href="qt.html#AlignmentFlag-enum">Qt::AlignmentFlag</a> enumeration has <code>Qt</code> as the scope and <code>AlignmentFlag</code> as the name.</p>
+<p><b>See also </b><a href="qmetaenum.html#name">name</a>().</p>
+<!-- @@@scope -->
+<!-- $$$value[overload1]$$$valueint -->
+<h3 class="fn" id="value"><a name="value"></a><span class="type">int</span> QMetaEnum::<span class="name">value</span>(<span class="type">int</span> <i>index</i>) const</h3>
+<p>Returns the value with the given <i>index</i>; or returns -1 if there is no such value.</p>
+<p><b>See also </b><a href="qmetaenum.html#keyCount">keyCount</a>(), <a href="qmetaenum.html#key">key</a>(), and <a href="qmetaenum.html#keyToValue">keyToValue</a>().</p>
+<!-- @@@value -->
+<!-- $$$valueToKey[overload1]$$$valueToKeyint -->
+<h3 class="fn" id="valueToKey"><a name="valueToKey"></a>const <span class="type">char</span> *QMetaEnum::<span class="name">valueToKey</span>(<span class="type">int</span> <i>value</i>) const</h3>
+<p>Returns the string that is used as the name of the given enumeration <i>value</i>, or <code>nullptr</code> if <i>value</i> is not defined.</p>
+<p>For flag types, use <a href="qmetaenum.html#valueToKeys">valueToKeys</a>().</p>
+<p><b>See also </b><a href="qmetaenum.html#isFlag">isFlag</a>() and <a href="qmetaenum.html#valueToKeys">valueToKeys</a>().</p>
+<!-- @@@valueToKey -->
+<!-- $$$valueToKeys[overload1]$$$valueToKeysint -->
+<h3 class="fn" id="valueToKeys"><a name="valueToKeys"></a><span class="type"><a href="qbytearray.html">QByteArray</a></span> QMetaEnum::<span class="name">valueToKeys</span>(<span class="type">int</span> <i>value</i>) const</h3>
+<p>Returns a byte array of '|'-separated keys that represents the given <i>value</i>.</p>
+<p><b>See also </b><a href="qmetaenum.html#isFlag">isFlag</a>(), <a href="qmetaenum.html#valueToKey">valueToKey</a>(), and <a href="qmetaenum.html#keysToValue">keysToValue</a>().</p>
+<!-- @@@valueToKeys -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

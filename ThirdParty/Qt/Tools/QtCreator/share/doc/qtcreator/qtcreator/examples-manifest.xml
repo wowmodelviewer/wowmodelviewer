@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<instructionals module="Qt Creator">
+    <examples>
+        <example name="Creating a Mobile Application" docUrl="qthelp:////qt-creator-accelbubble-example.html" projectPath="accelbubble/accelbubble.pro" imageUrl="qthelp:////images/creator_android_tutorial_ex_app.png">
+            <description><![CDATA[No description available]]></description>
+            <tags>application,creating,creator,mobile</tags>
+            <fileToOpen mainFile="true">accelbubble/main.qml</fileToOpen>
+        </example>
+        <example name="Creating a Qt Quick Application" docUrl="qthelp:////qt-creator-transitions-example.html" projectPath="transitions/transitions.pro" imageUrl="qthelp:////images/qmldesigner-tutorial.png">
+            <description><![CDATA[No description available]]></description>
+            <tags>application,creating,creator,quick</tags>
+            <fileToOpen mainFile="true">transitions/main.qml</fileToOpen>
+        </example>
+    </examples>
+</instructionals>

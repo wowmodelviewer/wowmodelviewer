@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdbusextratypes.cpp -->
+  <title>QDBusVariant Class | Qt D-Bus</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtdbus-index.html">Qt D-Bus</a></td><td ><a href="qtdbus-module.html">C++ Classes</a></td><td >QDBusVariant</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtdbus-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QDBusVariant Class</h1>
+<!-- $$$QDBusVariant-brief -->
+<p>The <a href="qdbusvariant.html">QDBusVariant</a> class enables the programmer to identify the variant type provided by the D-Bus typesystem. <a href="#details">More...</a></p>
+<!-- @@@QDBusVariant -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QDBusVariant&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += dbus</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.2</td></tr></table></div><p>This class was introduced in  Qt 4.2.</p>
+<ul>
+<li><a href="qdbusvariant-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdbusvariant.html#QDBusVariant-1">QDBusVariant</a></b>(const QVariant &amp;<i>variant</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdbusvariant.html#QDBusVariant">QDBusVariant</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdbusvariant.html#setVariant">setVariant</a></b>(const QVariant &amp;<i>variant</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qdbusvariant.html#swap">swap</a></b>(QDBusVariant &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariant </td><td class="memItemRight bottomAlign"><b><a href="qdbusvariant.html#variant">variant</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QDBusVariant-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A D-Bus function that takes an integer, a D-Bus variant and a string as parameters can be called with the following argument list (see <a href="qdbusmessage.html#setArguments">QDBusMessage::setArguments</a>()):</p>
+<pre class="cpp">
+
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">&gt;</span> arguments;
+      arguments <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(<span class="number">42</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="type"><a href="qdbusvariant.html#QDBusVariant">QDBusVariant</a></span>(<span class="number">43</span>)) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(<span class="string">&quot;hello&quot;</span>);
+      myDBusMessage<span class="operator">.</span>setArguments(arguments);
+
+</pre>
+<p>When a D-Bus function returns a D-Bus variant, it can be retrieved as follows:</p>
+<pre class="cpp">
+
+      <span class="comment">// call a D-Bus function that returns a D-Bus variant</span>
+      <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> v <span class="operator">=</span> callMyDBusFunction();
+      <span class="comment">// retrieve the D-Bus variant</span>
+      <span class="type"><a href="qdbusvariant.html#QDBusVariant">QDBusVariant</a></span> dbusVariant <span class="operator">=</span> qvariant_cast<span class="operator">&lt;</span><span class="type"><a href="qdbusvariant.html#QDBusVariant">QDBusVariant</a></span><span class="operator">&gt;</span>(v);
+      <span class="comment">// retrieve the actual value stored in the D-Bus variant</span>
+      <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> result <span class="operator">=</span> dbusVariant<span class="operator">.</span>variant();
+
+</pre>
+<p>The <a href="../qtcore/qvariant.html">QVariant</a> within a <a href="qdbusvariant.html">QDBusVariant</a> is required to distinguish between a normal D-Bus value and a value within a D-Bus variant.</p>
+</div>
+<p><b>See also </b><a href="qdbustypesystem.html">The Qt D-Bus Type System</a>.</p>
+<!-- @@@QDBusVariant -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QDBusVariant$$$QDBusVariantconstQVariant& -->
+<h3 class="fn" id="QDBusVariant-1"><a name="QDBusVariant-1"></a>QDBusVariant::<span class="name">QDBusVariant</span>(const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>variant</i>)</h3>
+<p>Constructs a new D-Bus variant from the given Qt <i>variant</i>.</p>
+<p><b>See also </b><a href="qdbusvariant.html#setVariant">setVariant</a>().</p>
+<!-- @@@QDBusVariant -->
+<!-- $$$QDBusVariant[overload1]$$$QDBusVariant -->
+<h3 class="fn" id="QDBusVariant"><a name="QDBusVariant"></a>QDBusVariant::<span class="name">QDBusVariant</span>()</h3>
+<p>Constructs a new D-Bus variant.</p>
+<!-- @@@QDBusVariant -->
+<!-- $$$setVariant[overload1]$$$setVariantconstQVariant& -->
+<h3 class="fn" id="setVariant"><a name="setVariant"></a><span class="type">void</span> QDBusVariant::<span class="name">setVariant</span>(const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>variant</i>)</h3>
+<p>Assigns the value of the given Qt <i>variant</i> to this D-Bus variant.</p>
+<p><b>See also </b><a href="qdbusvariant.html#variant">variant</a>().</p>
+<!-- @@@setVariant -->
+<!-- $$$swap[overload1]$$$swapQDBusVariant& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QDBusVariant::<span class="name">swap</span>(<span class="type"><a href="qdbusvariant.html#QDBusVariant">QDBusVariant</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps this <a href="qdbusvariant.html">QDBusVariant</a> instance with <i>other</i>.</p>
+<!-- @@@swap -->
+<!-- $$$variant[overload1]$$$variant -->
+<h3 class="fn" id="variant"><a name="variant"></a><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QDBusVariant::<span class="name">variant</span>() const</h3>
+<p>Returns this D-Bus variant as a <a href="../qtcore/qvariant.html">QVariant</a> object.</p>
+<p><b>See also </b><a href="qdbusvariant.html#setVariant">setVariant</a>().</p>
+<!-- @@@variant -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

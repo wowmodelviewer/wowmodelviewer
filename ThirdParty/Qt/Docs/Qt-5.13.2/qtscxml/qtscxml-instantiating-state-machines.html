@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtscxml-instantiating-state-machines.qdoc -->
+  <title>Instantiating State Machines | Qt SCXML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtscxml-index.html">Qt SCXML</a></td><td >Instantiating State Machines</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtscxml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Instantiating State Machines</h1>
+<span class="subtitle"></span>
+<!-- $$$qtscxml-instantiating-state-machines.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Both the dynamically created and the compiled state machines behave in the same way, have the same properties, states, data model, and so on. They only differ in the way they are instantiated. To dynamically create one in C++ from an SCXML file, you can use:</p>
+<pre class="cpp">
+
+  <span class="keyword">auto</span> <span class="operator">*</span>stateMachine <span class="operator">=</span> <span class="type"><a href="qscxmlstatemachine.html">QScxmlStateMachine</a></span><span class="operator">::</span>fromFile(<span class="string">&quot;MyStatemachine.scxml&quot;</span>);
+
+</pre>
+<p>Or, in QML:</p>
+<pre class="qml">
+
+  import QtScxml 5.8
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      property <span class="type">StateMachine</span> <span class="name">stateMachine</span>: <span class="name">scxmlLoader</span>.<span class="name">stateMachine</span>
+
+      <span class="type"><a href="qml-qtscxml-statemachineloader.html">StateMachineLoader</a></span> {
+          <span class="name">id</span>: <span class="name">scxmlLoader</span>
+          <span class="name">source</span>: <span class="string">&quot;statemachine.scxml&quot;</span>
+      }
+  }
+
+</pre>
+<p>A compiled state machine can be instantiated the same way as any C++ object:</p>
+<pre class="cpp">
+
+  <span class="keyword">auto</span> <span class="operator">*</span>stateMachine <span class="operator">=</span> <span class="keyword">new</span> MyStatemachine;
+
+</pre>
+<p>Or:</p>
+<pre class="cpp">
+
+  MyStatemachine stateMachine;
+
+</pre>
+<p>To use a compiled state machine in QML, you can register it as a QML type:</p>
+<pre class="cpp">
+
+  qmlRegisterType<span class="operator">&lt;</span>MyStateMachine<span class="operator">&gt;</span>(<span class="string">&quot;MyStateMachine&quot;</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;MyStateMachine&quot;</span>);
+
+</pre>
+<p>Then you can instantiate it in QML, like this:</p>
+<pre class="qml">
+
+  import MyStateMachine 1.0
+
+  <span class="type">MyStateMachine</span> {
+      <span class="name">id</span>: <span class="name">stateMachine</span>
+  }
+
+</pre>
+<p>To compile a state machine, the following lines have to be added to a .pro file:</p>
+<pre class="cpp plain">
+
+  QT += scxml
+  STATECHARTS = MyStatemachine.scxml
+
+</pre>
+<p>This will tell qmake to run <i>qscxmlc</i> which generates MyStatemachine.h and MyStatemachine.cpp, and adds them to <a href="../qmake/qmake-variable-reference.html#headers">HEADERS</a> and <a href="../qmake/qmake-variable-reference.html#sources">SOURCES</a> variables. By default, the generated files are saved in the build directory. The <i>QSCXMLC_DIR</i> variable can be set to specify another directory. The <i>QSCXMLC_NAMESPACE</i> variable can be set to put the state machine code into a C++ namespace.</p>
+<p>After instantiating a state machine, you can connect to any state's active property as follows. For example, if the state machine for a traffic light has a state indicating that the light is red (which has the convenient id &quot;red&quot; in the scxml file), you can write:</p>
+<pre class="cpp">
+
+  stateMachine<span class="operator">-</span><span class="operator">&gt;</span>connectToState(<span class="string">&quot;red&quot;</span><span class="operator">,</span> <span class="operator">[</span><span class="operator">]</span>(bool active) {
+      <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> (active <span class="operator">?</span> <span class="string">&quot;entered&quot;</span> : <span class="string">&quot;exited&quot;</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;the red state&quot;</span>;
+
+</pre>
+<p>And in QML:</p>
+<pre class="qml">
+
+  <span class="type">Light</span> {
+      <span class="name">id</span>: <span class="name">greenLight</span>
+      <span class="name">color</span>: <span class="string">&quot;green&quot;</span>
+      <span class="name">visible</span>: <span class="name">stateMachine</span>.<span class="name">green</span>
+  }
+
+</pre>
+<p>If you want to be notified when a state machine sends out an event, you can connect to the corresponding signal. For example, for a media player state machine which indicates that playback has stopped by sending an event, you can write:</p>
+<pre class="cpp">
+
+  stateMachine<span class="operator">-</span><span class="operator">&gt;</span>connectToEvent(<span class="string">&quot;playbackStopped&quot;</span><span class="operator">,</span> <span class="operator">[</span><span class="operator">]</span>(<span class="keyword">const</span> <span class="type"><a href="qscxmlevent.html">QScxmlEvent</a></span> <span class="operator">&amp;</span>){
+      <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Stopped!&quot;</span>;
+  });
+
+</pre>
+<p>And in QML:</p>
+<pre class="qml">
+
+  import QtScxml 5.8
+
+  <span class="type"><a href="qml-qtscxml-eventconnection.html">EventConnection</a></span> {
+      <span class="name">stateMachine</span>: <span class="name">stateMachine</span>
+      <span class="name">events</span>: [<span class="string">&quot;playbackStopped&quot;</span>]
+      <span class="name">onOccurred</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Stopped!&quot;</span>)
+  }
+
+</pre>
+<p>Sending events to a state machine is equally simple:</p>
+<pre class="cpp">
+
+  stateMachine<span class="operator">-</span><span class="operator">&gt;</span>submitEvent(<span class="string">&quot;tap&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html#QVariantMap-typedef">QVariantMap</a></span>({
+      { <span class="string">&quot;artist&quot;</span><span class="operator">,</span> <span class="string">&quot;Fatboy Slim&quot;</span> }<span class="operator">,</span>
+      { <span class="string">&quot;title&quot;</span><span class="operator">,</span> <span class="string">&quot;The Rockafeller Skank&quot;</span> }
+  });
+
+</pre>
+<p>This will generate a &quot;tap&quot; event with the map contents available in _event.data inside the state machine. In QML:</p>
+<pre class="cpp">
+
+  stateMachine<span class="operator">.</span>submitEvent(<span class="string">&quot;tap&quot;</span><span class="operator">,</span> {
+      <span class="string">&quot;artist&quot;</span>: <span class="string">&quot;Fatboy Slim&quot;</span>
+      <span class="string">&quot;title&quot;</span>: <span class="string">&quot;The Rockafeller Skank&quot;</span>
+  })
+
+</pre>
+<p><b>Note: </b>A state machine needs a <code>QEventLoop</code> to work correctly. The event loop is used to implement the <code>delay</code> attribute for events and to schedule the processing of a state machine when events are received from nested (or parent) state machines. A QML application or a widget application will always have an event loop running, so nothing extra is needed. For other applications, <code>QApplication::run</code> will have to be called to start the event loop processing.</p></div>
+<!-- @@@qtscxml-instantiating-state-machines.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

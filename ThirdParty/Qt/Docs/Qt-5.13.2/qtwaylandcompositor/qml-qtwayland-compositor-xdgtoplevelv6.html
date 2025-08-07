@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwaylandxdgshellv6.cpp -->
+  <title>XdgToplevelV6 QML Type | Qt Wayland Compositor 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwaylandcompositor-index.html">Qt Wayland Compositor</a></td><td ><a href="qtwayland-compositor-qmlmodule.html">QML Types</a></td><td >XdgToplevelV6 QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwaylandcompositor-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">XdgToplevelV6 QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$XdgToplevelV6-brief -->
+<p><a href="qml-qtwayland-compositor-xdgtoplevelv6.html">XdgToplevelV6</a> represents the toplevel window specific parts of an xdg surface. <a href="#details">More...</a></p>
+<!-- @@@XdgToplevelV6 -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtWayland.Compositor 1.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.10</td></tr></table></div><ul>
+<li><a href="qml-qtwayland-compositor-xdgtoplevelv6-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-xdgtoplevelv6.html#activated-prop">activated</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-xdgtoplevelv6.html#appId-prop">appId</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-xdgtoplevelv6.html#fullscreen-prop">fullscreen</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-xdgtoplevelv6.html#maxSize-prop">maxSize</a></b></b> : size</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-xdgtoplevelv6.html#maximized-prop">maximized</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-xdgtoplevelv6.html#minSize-prop">minSize</a></b></b> : size</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-xdgtoplevelv6.html#parentToplevel-prop">parentToplevel</a></b></b> : XdgToplevelV6</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-xdgtoplevelv6.html#resizing-prop">resizing</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtwayland-compositor-xdgtoplevelv6.html#title-prop">title</a></b></b> : string</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtwayland-compositor-xdgtoplevelv6.html#sendClose-method">sendClose</a></b></b>()</li>
+<li class="fn">int <b><b><a href="qml-qtwayland-compositor-xdgtoplevelv6.html#sendConfigure-method">sendConfigure</a></b></b>(<i>size</i>,  list&lt;int&gt; <i>states</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtwayland-compositor-xdgtoplevelv6.html#sendFullscreen-method">sendFullscreen</a></b></b>(<i>size</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtwayland-compositor-xdgtoplevelv6.html#sendMaximized-method">sendMaximized</a></b></b>(<i>size</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtwayland-compositor-xdgtoplevelv6.html#sendResizing-method">sendResizing</a></b></b>(<i>maxSize</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtwayland-compositor-xdgtoplevelv6.html#sendUnmaximized-method">sendUnmaximized</a></b></b>(<i>size</i>)</li>
+<li class="fn">size <b><b><a href="qml-qtwayland-compositor-xdgtoplevelv6.html#sizeForResize-method">sizeForResize</a></b></b>(<i>size</i>,  point <i>delta</i>,  uint <i>edges</i>)</li>
+</ul>
+<!-- $$$XdgToplevelV6-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>This type is part of the <a href="qml-qtwayland-compositor-xdgshellv6.html">XdgShellV6</a> extension and provides a way to extend the functionality of an <a href="qml-qtwayland-compositor-xdgsurfacev6.html">XdgSurfaceV6</a> with features specific to desktop-style windows.</p>
+<p>It corresponds to the Wayland interface <code>zxdg_toplevel_v6</code>.</p>
+<!-- @@@XdgToplevelV6 -->
+<h2>Property Documentation</h2>
+<!-- $$$activated -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="activated-prop"></a><span class="name">activated</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether toplevel is drawing itself as having input focus.</p>
+</div></div><!-- @@@activated -->
+<br/>
+<!-- $$$appId -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="appId-prop"></a><span class="name">appId</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the app id of the <a href="qml-qtwayland-compositor-xdgtoplevelv6.html">XdgToplevelV6</a>.</p>
+</div></div><!-- @@@appId -->
+<br/>
+<!-- $$$fullscreen -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="fullscreen-prop"></a><span class="name">fullscreen</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the client has acknowledged that it should be fullscreen.</p>
+</div></div><!-- @@@fullscreen -->
+<br/>
+<!-- $$$maxSize -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="maxSize-prop"></a><span class="name">maxSize</span> : <span class="type"><a href="../qtqml/qml-size.html">size</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the maximum size of the <a href="qml-qtwayland-compositor-xdgtoplevelv6.html">XdgToplevelV6</a> as requested by the client.</p>
+<p>The compositor is free to ignore this value and request a larger size.</p>
+</div></div><!-- @@@maxSize -->
+<br/>
+<!-- $$$maximized -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="maximized-prop"></a><span class="name">maximized</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the client has acknowledged that it should be maximized.</p>
+</div></div><!-- @@@maximized -->
+<br/>
+<!-- $$$minSize -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="minSize-prop"></a><span class="name">minSize</span> : <span class="type"><a href="../qtqml/qml-size.html">size</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the minimum size of the <a href="qml-qtwayland-compositor-xdgtoplevelv6.html">XdgToplevelV6</a> as requested by the client.</p>
+<p>The compositor is free to ignore this value and request a smaller size.</p>
+</div></div><!-- @@@minSize -->
+<br/>
+<!-- $$$parentToplevel -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="parentToplevel-prop"></a><span class="name">parentToplevel</span> : <span class="type"><a href="qml-qtwayland-compositor-xdgtoplevelv6.html">XdgToplevelV6</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the <a href="qml-qtwayland-compositor-xdgtoplevelv6.html">XdgToplevelV6</a> parent of this <a href="qml-qtwayland-compositor-xdgtoplevelv6.html">XdgToplevelV6</a>.</p>
+</div></div><!-- @@@parentToplevel -->
+<br/>
+<!-- $$$resizing -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="resizing-prop"></a><span class="name">resizing</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the client has acknowledged that it is being resized.</p>
+</div></div><!-- @@@resizing -->
+<br/>
+<!-- $$$title -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="title-prop"></a><span class="name">title</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the title of the <a href="qml-qtwayland-compositor-xdgtoplevelv6.html">XdgToplevelV6</a>.</p>
+</div></div><!-- @@@title -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$sendClose[overload1]$$$sendClose -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="sendClose-method"></a><span class="type">void</span> <span class="name">sendClose</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Sends a close event to the client. The client may choose to ignore the event.</p>
+</div></div><!-- @@@sendClose -->
+<br/>
+<!-- $$$sendConfigure[overload1]$$$sendConfigurelist<int> -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="sendConfigure-method"></a><span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">sendConfigure</span>(<i>size</i>,  <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="../qtqml/qml-int.html">int</a></span>&gt; <i>states</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Sends a configure event to the client. <i>size</i> contains the pixel size of the surface. A size of zero means the client is free to decide the size. Known <i>states</i> are enumerated in XdgToplevelV6::State.</p>
+</div></div><!-- @@@sendConfigure -->
+<br/>
+<!-- $$$sendFullscreen[overload1]$$$sendFullscreen -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="sendFullscreen-method"></a><span class="type">void</span> <span class="name">sendFullscreen</span>(<i>size</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Convenience for sending a configure event with the fullscreen state set, and maximized and resizing removed. The activated state is left in its current state.</p>
+<p><i>size</i> is the new size of the window.</p>
+<p><b>See also </b><a href="qml-qtwayland-compositor-xdgtoplevelv6.html#sendUnmaximized-method">sendUnmaximized</a>.</p>
+</div></div><!-- @@@sendFullscreen -->
+<br/>
+<!-- $$$sendMaximized[overload1]$$$sendMaximized -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="sendMaximized-method"></a><span class="type">void</span> <span class="name">sendMaximized</span>(<i>size</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Convenience for sending a configure event with the maximized state set, and fullscreen and resizing removed. The activated state is left in its current state.</p>
+<p><i>size</i> is the new size of the window.</p>
+</div></div><!-- @@@sendMaximized -->
+<br/>
+<!-- $$$sendResizing[overload1]$$$sendResizing -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="sendResizing-method"></a><span class="type">void</span> <span class="name">sendResizing</span>(<i>maxSize</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Convenience for sending a configure event with the resizing state set, and maximized and fullscreen removed. The activated state is left in its current state.</p>
+<p><i>maxSize</i> is the new size of the window.</p>
+</div></div><!-- @@@sendResizing -->
+<br/>
+<!-- $$$sendUnmaximized[overload1]$$$sendUnmaximized -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="sendUnmaximized-method"></a><span class="type">void</span> <span class="name">sendUnmaximized</span>(<i>size</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Convenience for sending a configure event with the maximized, fullscreen and resizing states removed, and fullscreen and resizing removed. The activated state is left in its current state.</p>
+<p><i>size</i> is the new size of the window. If <i>size</i> is zero, the client decides the size.</p>
+</div></div><!-- @@@sendUnmaximized -->
+<br/>
+<!-- $$$sizeForResize[overload1]$$$sizeForResizepointuint -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="sizeForResize-method"></a><span class="type"><a href="../qtqml/qml-size.html">size</a></span> <span class="name">sizeForResize</span>(<i>size</i>,  <span class="type"><a href="../qtqml/qml-point.html">point</a></span> <i>delta</i>,  <span class="type">uint</span> <i>edges</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Convenience for computing the new size given the current <i>size</i>, a <i>delta</i>, and the <i>edges</i> active in the drag.</p>
+</div></div><!-- @@@sizeForResize -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

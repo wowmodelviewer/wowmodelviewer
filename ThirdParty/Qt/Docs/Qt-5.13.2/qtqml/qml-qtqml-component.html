@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qqmlcomponent.cpp -->
+  <title>Component QML Type | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td ><a href="qtqml-qmlmodule.html">QML Types</a></td><td >Component QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#attached-signals">Attached Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#creation-context">Creation Context</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Component QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Component-brief -->
+<p>Encapsulates a QML component definition. <a href="#details">More...</a></p>
+<!-- @@@Component -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQml 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiates:</td><td class="memItemRight bottomAlign"> <a href="qml-qtqml-component.html"><a href="qqmlcomponent.html">QQmlComponent</a></td></tr></table></div><ul>
+<li><a href="qml-qtqml-component-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtqml-component.html#progress-prop">progress</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtqml-component.html#status-prop">status</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtqml-component.html#url-prop">url</a></b></b> : url</li>
+</ul>
+<a name="attached-signals"></a>
+<h2 id="attached-signals">Attached Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtqml-component.html#completed-signal">completed</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtqml-component.html#destruction-signal">destruction</a></b></b>()</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">object <b><b><a href="qml-qtqml-component.html#createObject-method">createObject</a></b></b>(<i>parent</i>,  object <i>properties</i>)</li>
+<li class="fn">string <b><b><a href="qml-qtqml-component.html#errorString-method">errorString</a></b></b>()</li>
+<li class="fn">object <b><b><a href="qml-qtqml-component.html#incubateObject-method">incubateObject</a></b></b>(<i>parent</i>,  object <i>properties</i>,  enumeration <i>mode</i>)</li>
+</ul>
+<!-- $$$Component-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>Components are reusable, encapsulated QML types with well-defined interfaces.</p>
+<p>Components are often defined by <a href="qtqml-documents-topic.html">component files</a> - that is, <code>.qml</code> files. The <i>Component</i> type essentially allows QML components to be defined inline, within a <a href="qtqml-documents-topic.html">QML document</a>, rather than as a separate QML file. This may be useful for reusing a small component within a QML file, or for defining a component that logically belongs with other QML components within a file.</p>
+<p>For example, here is a component that is used by multiple <a href="../qtquick/qml-qtquick-loader.html">Loader</a> objects. It contains a single item, a <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a>:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span>
+
+      <span class="type"><a href="qml-qtqml-component.html">Component</a></span> {
+          <span class="name">id</span>: <span class="name">redSquare</span>
+
+          <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+              <span class="name">color</span>: <span class="string">&quot;red&quot;</span>
+              <span class="name">width</span>: <span class="number">10</span>
+              <span class="name">height</span>: <span class="number">10</span>
+          }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-loader.html">Loader</a></span> { <span class="name">sourceComponent</span>: <span class="name">redSquare</span> }
+      <span class="type"><a href="../qtquick/qml-qtquick-loader.html">Loader</a></span> { <span class="name">sourceComponent</span>: <span class="name">redSquare</span>; <span class="name">x</span>: <span class="number">20</span> }
+  }
+
+</pre>
+<p>Notice that while a <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> by itself would be automatically rendered and displayed, this is not the case for the above rectangle because it is defined inside a <code>Component</code>. The component encapsulates the QML types within, as if they were defined in a separate QML file, and is not loaded until requested (in this case, by the two <a href="../qtquick/qml-qtquick-loader.html">Loader</a> objects). Because Component is not derived from Item, you cannot anchor anything to it.</p>
+<p>Defining a <code>Component</code> is similar to defining a <a href="qtqml-documents-topic.html">QML document</a>. A QML document has a single top-level item that defines the behavior and properties of that component, and cannot define properties or behavior outside of that top-level item. In the same way, a <code>Component</code> definition contains a single top level item (which in the above example is a <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a>) and cannot define any data outside of this item, with the exception of an <i>id</i> (which in the above example is <i>redSquare</i>).</p>
+<p>The <code>Component</code> type is commonly used to provide graphical components for views. For example, the <a href="../qtquick/qml-qtquick-listview.html#delegate-prop">ListView::delegate</a> property requires a <code>Component</code> to specify how each list item is to be displayed.</p>
+<p><code>Component</code> objects can also be created dynamically using <a href="qml-qtqml-qt.html#createComponent-method">Qt.createComponent()</a>.</p>
+<a name="creation-context"></a>
+<h3 id="creation-context">Creation Context</h3>
+<p>The creation context of a Component corresponds to the context where the Component was declared. This context is used as the parent context (creating a <a href="qtqml-documents-scope.html#component-instance-hierarchy">context hierarchy</a>) when the component is instantiated by an object such as a <a href="../qtquick/qml-qtquick-listview.html">ListView</a> or a Loader.</p>
+<p>In the following example, <code>comp1</code> is created within the root context of MyItem.qml, and any objects instantiated from this component will have access to the ids and properties within that context, such as <code>internalSettings.color</code>. When <code>comp1</code> is used as a <a href="../qtquick/qml-qtquick-listview.html">ListView</a> delegate in another context (as in main.qml below), it will continue to have access to the properties of its creation context (which would otherwise be private to external users).</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td >MyItem.qml</td><td ><pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      property <span class="type"><a href="qml-qtqml-component.html">Component</a></span> <span class="name">mycomponent</span>: <span class="name">comp1</span>
+
+      <span class="type"><a href="qml-qtqml-qtobject.html">QtObject</a></span> {
+          <span class="name">id</span>: <span class="name">internalSettings</span>
+          property <span class="type"><a href="../qtquick/qml-color.html">color</a></span> <span class="name">color</span>: <span class="string">&quot;green&quot;</span>
+      }
+
+      <span class="type"><a href="qml-qtqml-component.html">Component</a></span> {
+          <span class="name">id</span>: <span class="name">comp1</span>
+          <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> { <span class="name">color</span>: <span class="name">internalSettings</span>.<span class="name">color</span>; <span class="name">width</span>: <span class="number">400</span>; <span class="name">height</span>: <span class="number">50</span> }
+      }
+  }
+
+</pre>
+</td></tr>
+<tr valign="top" class="even"><td >main.qml</td><td ><pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+      <span class="name">width</span>: <span class="number">400</span>; <span class="name">height</span>: <span class="number">400</span>
+      <span class="name">model</span>: <span class="number">5</span>
+      <span class="name">delegate</span>: <span class="name">myItem</span>.<span class="name">mycomponent</span>    <span class="comment">//will create green Rectangles</span>
+
+      <span class="type">MyItem</span> { <span class="name">id</span>: <span class="name">myItem</span> }
+  }
+
+</pre>
+</td></tr>
+</table></div>
+<p>It is important that the lifetime of the creation context outlive any created objects. See <a href="qtqml-javascript-dynamicobjectcreation.html#maintaining-dynamically-created-objects">Maintaining Dynamically Created Objects</a> for more details.</p>
+<!-- @@@Component -->
+<h2>Property Documentation</h2>
+<!-- $$$progress -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="progress-prop"></a><span class="name">progress</span> : <span class="type"><a href="qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The progress of loading the component, from 0.0 (nothing loaded) to 1.0 (finished).</p>
+</div></div><!-- @@@progress -->
+<br/>
+<!-- $$$status -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="status-prop"></a><span class="name">status</span> : <span class="type"><a href="qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the status of component loading. The status can be one of the following:</p>
+<ul>
+<li>Component.Null - no data is available for the component</li>
+<li>Component.Ready - the component has been loaded, and can be used to create instances.</li>
+<li>Component.Loading - the component is currently being loaded</li>
+<li>Component.Error - an error occurred while loading the component. Calling <a href="qml-qtqml-component.html#errorString-method">errorString()</a> will provide a human-readable description of any errors.</li>
+</ul>
+</div></div><!-- @@@status -->
+<br/>
+<!-- $$$url -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="url-prop"></a><span class="name">url</span> : <span class="type"><a href="qml-url.html">url</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The component URL. This is the URL that was used to construct the component.</p>
+</div></div><!-- @@@url -->
+<br/>
+<h2>Attached Signal Documentation</h2>
+<!-- $$$completed[overload1]$$$completed -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="completed-signal"></a><span class="name">completed</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Emitted after the object has been instantiated. This can be used to execute script code at startup, once the full QML environment has been established.</p>
+<p>The corresponding handler is <code>onCompleted</code>. It can be declared on any object. The order of running the <code>onCompleted</code> handlers is undefined.</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">Component</span>.onCompleted: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Completed Running!&quot;</span>)
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">Component</span>.onCompleted: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Nested Completed Running!&quot;</span>)
+      }
+  }
+
+</pre>
+</div></div><!-- @@@completed -->
+<br/>
+<!-- $$$destruction[overload1]$$$destruction -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="destruction-signal"></a><span class="name">destruction</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Emitted as the object begins destruction. This can be used to undo work done in response to the <a href="qml-qtqml-component.html#completed-signal">completed()</a> signal, or other imperative code in your application.</p>
+<p>The corresponding handler is <code>onDestruction</code>. It can be declared on any object. The order of running the <code>onDestruction</code> handlers is undefined.</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">Component</span>.onDestruction: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Destruction Beginning!&quot;</span>)
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">Component</span>.onDestruction: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Nested Destruction Beginning!&quot;</span>)
+      }
+  }
+
+</pre>
+<p><b>See also </b><a href="qtqml-index.html">Qt QML</a>.</p>
+</div></div><!-- @@@destruction -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$createObject[overload1]$$$createObjectobject -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="createObject-method"></a><span class="type">object</span> <span class="name">createObject</span>(<i>parent</i>,  <span class="type">object</span> <i>properties</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates and returns an object instance of this component that will have the given <i>parent</i> and <i>properties</i>. The <i>properties</i> argument is optional. Returns null if object creation fails.</p>
+<p>The object will be created in the same context as the one in which the component was created. This function will always return null when called on components which were not created in QML.</p>
+<p>If you wish to create an object without setting a parent, specify <code>null</code> for the <i>parent</i> value. Note that if the returned object is to be displayed, you must provide a valid <i>parent</i> value or set the returned object's <a href="../qtquick/qml-qtquick-item.html#parent-prop">parent</a> property, otherwise the object will not be visible.</p>
+<p>If a <i>parent</i> is not provided to createObject(), a reference to the returned object must be held so that it is not destroyed by the garbage collector. This is true regardless of whether <a href="../qtquick/qml-qtquick-item.html#parent-prop">Item::parent</a> is set afterwards, because setting the Item parent does not change object ownership. Only the graphical parent is changed.</p>
+<p>As of <code>QtQuick 1.1</code>, this method accepts an optional <i>properties</i> argument that specifies a map of initial property values for the created object. These values are applied before the object creation is finalized. This is more efficient than setting property values after object creation, particularly where large sets of property values are defined, and also allows property bindings to be set up (using <a href="qml-qtqml-qt.html#binding-method">Qt.binding</a>) before the object is created.</p>
+<p>The <i>properties</i> argument is specified as a map of property-value items. For example, the code below creates an object with initial <code>x</code> and <code>y</code> values of 100 and 100, respectively:</p>
+<pre class="js">
+
+  var component = <span class="name">Qt</span>.<span class="name">createComponent</span>(<span class="string">&quot;Button.qml&quot;</span>);
+  <span class="keyword">if</span> (<span class="name">component</span>.<span class="name">status</span> <span class="operator">==</span> <span class="name">Component</span>.<span class="name">Ready</span>)
+      <span class="name">component</span>.<span class="name">createObject</span>(<span class="name">parent</span>, {x: <span class="number">100</span>, y: <span class="number">100</span>});
+
+</pre>
+<p>Dynamically created instances can be deleted with the <code>destroy()</code> method. See <a href="qtqml-javascript-dynamicobjectcreation.html">Dynamic QML Object Creation from JavaScript</a> for more information.</p>
+<p><b>See also </b><a href="qml-qtqml-component.html#incubateObject-method">incubateObject()</a>.</p>
+</div></div><!-- @@@createObject -->
+<br/>
+<!-- $$$errorString[overload1]$$$errorString -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="errorString-method"></a><span class="type"><a href="qml-string.html">string</a></span> <span class="name">errorString</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns a human-readable description of any error.</p>
+<p>The string includes the file, location, and description of each error. If multiple errors are present, they are separated by a newline character.</p>
+<p>If no errors are present, an empty string is returned.</p>
+</div></div><!-- @@@errorString -->
+<br/>
+<!-- $$$incubateObject[overload1]$$$incubateObjectobjectenumeration -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="incubateObject-method"></a><span class="type">object</span> <span class="name">incubateObject</span>(<i>parent</i>,  <span class="type">object</span> <i>properties</i>,  <span class="type"><a href="qml-enumeration.html">enumeration</a></span> <i>mode</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates an incubator for an instance of this component. Incubators allow new component instances to be instantiated asynchronously and do not cause freezes in the UI.</p>
+<p>The <i>parent</i> argument specifies the parent the created instance will have. Omitting the parameter or passing null will create an object with no parent. In this case, a reference to the created object must be held so that it is not destroyed by the garbage collector.</p>
+<p>The <i>properties</i> argument is specified as a map of property-value items which will be set on the created object during its construction. <i>mode</i> may be Qt.Synchronous or Qt.Asynchronous, and controls whether the instance is created synchronously or asynchronously. The default is asynchronous. In some circumstances, even if Qt.Synchronous is specified, the incubator may create the object asynchronously. This happens if the component calling incubateObject() is itself being created asynchronously.</p>
+<p>All three arguments are optional.</p>
+<p>If successful, the method returns an incubator, otherwise null. The incubator has the following properties:</p>
+<ul>
+<li>status The status of the incubator. Valid values are Component.Ready, Component.Loading and Component.Error.</li>
+<li>object The created object instance. Will only be available once the incubator is in the Ready status.</li>
+<li>onStatusChanged Specifies a callback function to be invoked when the status changes. The status is passed as a parameter to the callback.</li>
+<li>forceCompletion() Call to complete incubation synchronously.</li>
+</ul>
+<p>The following example demonstrates how to use an incubator:</p>
+<pre class="js">
+
+  var component = <span class="name">Qt</span>.<span class="name">createComponent</span>(<span class="string">&quot;Button.qml&quot;</span>);
+
+  var incubator = <span class="name">component</span>.<span class="name">incubateObject</span>(<span class="name">parent</span>, { x: <span class="number">10</span>, y: <span class="number">10</span> });
+  <span class="keyword">if</span> (<span class="name">incubator</span>.<span class="name">status</span> <span class="operator">!=</span> <span class="name">Component</span>.<span class="name">Ready</span>) {
+      <span class="name">incubator</span>.<span class="name">onStatusChanged</span> <span class="operator">=</span> <span class="keyword">function</span>(status) {
+          <span class="keyword">if</span> (<span class="name">status</span> <span class="operator">==</span> <span class="name">Component</span>.<span class="name">Ready</span>) {
+              <span class="name">print</span> (<span class="string">&quot;Object&quot;</span>, <span class="name">incubator</span>.<span class="name">object</span>, <span class="string">&quot;is now ready!&quot;</span>);
+          }
+      }
+  } <span class="keyword">else</span> {
+      <span class="name">print</span> (<span class="string">&quot;Object&quot;</span>, <span class="name">incubator</span>.<span class="name">object</span>, <span class="string">&quot;is ready immediately!&quot;</span>);
+  }
+
+</pre>
+<p>Dynamically created instances can be deleted with the <code>destroy()</code> method. See <a href="qtqml-javascript-dynamicobjectcreation.html">Dynamic QML Object Creation from JavaScript</a> for more information.</p>
+<p><b>See also </b><a href="qml-qtqml-component.html#createObject-method">createObject()</a>.</p>
+</div></div><!-- @@@incubateObject -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmodbusrtuserialmaster.cpp -->
+  <title>QModbusRtuSerialMaster Class | Qt Serial Bus 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtserialbus-index.html">Qt Serial Bus</a></td><td ><a href="qtserialbus-module.html">C++ Classes</a></td><td >QModbusRtuSerialMaster</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtserialbus-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QModbusRtuSerialMaster Class</h1>
+<!-- $$$QModbusRtuSerialMaster-brief -->
+<p>The <a href="qmodbusrtuserialmaster.html">QModbusRtuSerialMaster</a> class represents a Modbus client that uses a serial bus for its communication with the Modbus server. <a href="#details">More...</a></p>
+<!-- @@@QModbusRtuSerialMaster -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QModbusRtuSerialMaster&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += serialbus</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qmodbusclient.html">QModbusClient</a></td></tr></table></div><p>This class was introduced in  Qt 5.8.</p>
+<ul>
+<li><a href="qmodbusrtuserialmaster-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmodbusrtuserialmaster.html#QModbusRtuSerialMaster">QModbusRtuSerialMaster</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmodbusrtuserialmaster.html#interFrameDelay">interFrameDelay</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmodbusrtuserialmaster.html#setInterFrameDelay">setInterFrameDelay</a></b>(int <i>microseconds</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmodbusrtuserialmaster.html#setTurnaroundDelay">setTurnaroundDelay</a></b>(int <i>turnaroundDelay</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmodbusrtuserialmaster.html#turnaroundDelay">turnaroundDelay</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qmodbusrtuserialmaster.html#close">close</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qmodbusrtuserialmaster.html#open">open</a></b>() override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QModbusRtuSerialMaster-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Communication via Modbus requires the interaction between a single Modbus client instance and multiple Modbus servers. This class provides the client implementation via a serial port.</p>
+</div>
+<!-- @@@QModbusRtuSerialMaster -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QModbusRtuSerialMaster[overload1]$$$QModbusRtuSerialMasterQObject* -->
+<h3 class="fn" id="QModbusRtuSerialMaster"><a name="QModbusRtuSerialMaster"></a>QModbusRtuSerialMaster::<span class="name">QModbusRtuSerialMaster</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a serial Modbus master with the specified <i>parent</i>.</p>
+<!-- @@@QModbusRtuSerialMaster -->
+<!-- $$$close[overload1]$$$close -->
+<h3 class="fn" id="close"><a name="close"></a><code>[override virtual protected] </code><span class="type">void</span> QModbusRtuSerialMaster::<span class="name">close</span>()</h3>
+<p>Reimplements: <a href="qmodbusdevice.html#close">QModbusDevice::close</a>().</p>
+<!-- @@@close -->
+<!-- $$$interFrameDelay[overload1]$$$interFrameDelay -->
+<h3 class="fn" id="interFrameDelay"><a name="interFrameDelay"></a><span class="type">int</span> QModbusRtuSerialMaster::<span class="name">interFrameDelay</span>() const</h3>
+<p>Returns the amount of microseconds for the silent interval between two consecutive Modbus messages.</p>
+<p><b>See also </b><a href="qmodbusrtuserialmaster.html#setInterFrameDelay">setInterFrameDelay</a>().</p>
+<!-- @@@interFrameDelay -->
+<!-- $$$open[overload1]$$$open -->
+<h3 class="fn" id="open"><a name="open"></a><code>[override virtual protected] </code><span class="type">bool</span> QModbusRtuSerialMaster::<span class="name">open</span>()</h3>
+<p>Reimplements: <a href="qmodbusdevice.html#open">QModbusDevice::open</a>().</p>
+<p><b>Note: </b>When calling this function, existing buffered data is removed from the serial port.</p><!-- @@@open -->
+<!-- $$$setInterFrameDelay[overload1]$$$setInterFrameDelayint -->
+<h3 class="fn" id="setInterFrameDelay"><a name="setInterFrameDelay"></a><span class="type">void</span> QModbusRtuSerialMaster::<span class="name">setInterFrameDelay</span>(<span class="type">int</span> <i>microseconds</i>)</h3>
+<p>Sets the amount of <i>microseconds</i> for the silent interval between two consecutive Modbus messages. By default, the class implementation will use a pre-calculated value according to the Modbus specification. A active or running connection is not affected by such delay changes.</p>
+<p><b>Note: </b>If <i>microseconds</i> is set to -1 or <i>microseconds</i> is less than the pre-calculated delay then this pre-calculated value is used as frame delay.</p><p><b>See also </b><a href="qmodbusrtuserialmaster.html#interFrameDelay">interFrameDelay</a>().</p>
+<!-- @@@setInterFrameDelay -->
+<!-- $$$setTurnaroundDelay[overload1]$$$setTurnaroundDelayint -->
+<h3 class="fn" id="setTurnaroundDelay"><a name="setTurnaroundDelay"></a><span class="type">void</span> QModbusRtuSerialMaster::<span class="name">setTurnaroundDelay</span>(<span class="type">int</span> <i>turnaroundDelay</i>)</h3>
+<p>Sets the amount of milliseconds for the silent interval between a Modbus broadcast and a consecutive Modbus messages to <i>turnaroundDelay</i>. Typically the turnaround delay is in the range of <code>100</code> to <code>200</code> milliseconds.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<p><b>See also </b><a href="qmodbusrtuserialmaster.html#turnaroundDelay">turnaroundDelay</a>().</p>
+<!-- @@@setTurnaroundDelay -->
+<!-- $$$turnaroundDelay[overload1]$$$turnaroundDelay -->
+<h3 class="fn" id="turnaroundDelay"><a name="turnaroundDelay"></a><span class="type">int</span> QModbusRtuSerialMaster::<span class="name">turnaroundDelay</span>() const</h3>
+<p>Returns the amount of milliseconds for the silent interval between a Modbus broadcast and a consecutive Modbus messages. The default value is set to <code>100</code> milliseconds.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<p><b>See also </b><a href="qmodbusrtuserialmaster.html#setTurnaroundDelay">setTurnaroundDelay</a>().</p>
+<!-- @@@turnaroundDelay -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

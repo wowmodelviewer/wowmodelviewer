@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdeclarative_sound_p.cpp -->
+  <title>Sound QML Type | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-qmlmodule.html">QML Types</a></td><td >Sound QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Sound QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Sound-brief -->
+<p>Define a variety of samples and parameters to be used for <a href="qml-qtaudioengine-soundinstance.html">SoundInstance</a>. <a href="#details">More...</a></p>
+<!-- @@@Sound -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtAudioEngine 1.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.0</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="../qtquick/qml-qtquick-item.html">Item</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtaudioengine-sound-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtaudioengine-sound.html#attenuationModel-prop">attenuationModel</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtaudioengine-sound.html#category-prop">category</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtaudioengine-sound.html#cone.innerAngle-prop">cone.innerAngle</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtaudioengine-sound.html#cone.outerAngle-prop">cone.outerAngle</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtaudioengine-sound.html#cone.outerGain-prop">cone.outerGain</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtaudioengine-sound.html#name-prop">name</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtaudioengine-sound.html#playType-prop">playType</a></b></b> : enumeration</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtaudioengine-sound.html#addPlayVariation-method">addPlayVariation</a></b></b>(<i>playVariation</i>)</li>
+<li class="fn">QtAudioEngine::SoundInstance <b><b><a href="qml-qtaudioengine-sound.html#newInstance-method">newInstance</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtaudioengine-sound.html#play-method-11">play</a></b></b>(<i>position</i>, <i>velocity</i>, <i>direction</i>, <i>gain</i>, <i>pitch</i>)</li>
+<li class="fn"><b><b><a href="qml-qtaudioengine-sound.html#play-method-10">play</a></b></b>(<i>position</i>, <i>velocity</i>, <i>gain</i>, <i>pitch</i>)</li>
+<li class="fn"><b><b><a href="qml-qtaudioengine-sound.html#play-method-9">play</a></b></b>(<i>position</i>, <i>gain</i>, <i>pitch</i>)</li>
+<li class="fn"><b><b><a href="qml-qtaudioengine-sound.html#play-method-8">play</a></b></b>(<i>position</i>, <i>velocity</i>, <i>direction</i>, <i>gain</i>)</li>
+<li class="fn"><b><b><a href="qml-qtaudioengine-sound.html#play-method-7">play</a></b></b>(<i>position</i>, <i>velocity</i>, <i>gain</i>)</li>
+<li class="fn"><b><b><a href="qml-qtaudioengine-sound.html#play-method-6">play</a></b></b>(<i>position</i>, <i>gain</i>)</li>
+<li class="fn"><b><b><a href="qml-qtaudioengine-sound.html#play-method-5">play</a></b></b>(<i>position</i>, <i>velocity</i>, <i>direction</i>)</li>
+<li class="fn"><b><b><a href="qml-qtaudioengine-sound.html#play-method-4">play</a></b></b>(<i>position</i>, <i>velocity</i>)</li>
+<li class="fn"><b><b><a href="qml-qtaudioengine-sound.html#play-method-3">play</a></b></b>(<i>position</i>)</li>
+<li class="fn"><b><b><a href="qml-qtaudioengine-sound.html#play-method-2">play</a></b></b>(<i>gain</i>, <i>pitch</i>)</li>
+<li class="fn"><b><b><a href="qml-qtaudioengine-sound.html#play-method-1">play</a></b></b>(<i>gain</i>)</li>
+<li class="fn"><b><b><a href="qml-qtaudioengine-sound.html#play-method">play</a></b></b>()</li>
+</ul>
+<!-- $$$Sound-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>Sound can be accessed through <a href="qml-qtaudioengine-audioengine.html#sounds-prop">QtAudioEngine::AudioEngine::sounds</a> with its unique name and must be defined inside <a href="qml-qtaudioengine-audioengine.html">AudioEngine</a> or be added to it using <a href="qml-qtaudioengine-audioengine.html#addSound-method">AudioEngine.addSound()</a> if <a href="qml-qtaudioengine-sound.html">Sound</a> is created dynamically.</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">color</span>:<span class="string">&quot;white&quot;</span>
+      <span class="name">width</span>: <span class="number">300</span>
+      <span class="name">height</span>: <span class="number">500</span>
+
+      <span class="type"><a href="qml-qtaudioengine-audioengine.html">AudioEngine</a></span> {
+          <span class="name">id</span>:<span class="name">audioengine</span>
+
+          <span class="type"><a href="qml-qtaudioengine-audiosample.html">AudioSample</a></span> {
+              <span class="name">name</span>:<span class="string">&quot;explosion01&quot;</span>
+              <span class="name">source</span>: <span class="string">&quot;explosion-01.wav&quot;</span>
+          }
+
+          <span class="type"><a href="qml-qtaudioengine-audiosample.html">AudioSample</a></span> {
+              <span class="name">name</span>:<span class="string">&quot;explosion02&quot;</span>
+              <span class="name">source</span>: <span class="string">&quot;explosion-02.wav&quot;</span>
+          }
+
+          <span class="type"><a href="qml-qtaudioengine-sound.html">Sound</a></span> {
+              <span class="name">name</span>:<span class="string">&quot;explosion&quot;</span>
+              <span class="name">playType</span>: <span class="name">Sound</span>.<span class="name">Random</span>
+              <span class="type"><a href="qml-qtaudioengine-playvariation.html">PlayVariation</a></span> {
+                  <span class="name">sample</span>:<span class="string">&quot;explosion01&quot;</span>
+                  <span class="name">minPitch</span>: <span class="number">0.8</span>
+                  <span class="name">maxPitch</span>: <span class="number">1.1</span>
+              }
+              <span class="type"><a href="qml-qtaudioengine-playvariation.html">PlayVariation</a></span> {
+                  <span class="name">sample</span>:<span class="string">&quot;explosion02&quot;</span>
+                  <span class="name">minGain</span>: <span class="number">1.1</span>
+                  <span class="name">maxGain</span>: <span class="number">1.5</span>
+              }
+          }
+      }
+      <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">onPressed</span>: {
+              <span class="name">audioengine</span>.<span class="name">sounds</span>[<span class="string">&quot;explosion&quot;</span>].<span class="name">play</span>();
+          }
+      }
+  }
+
+</pre>
+<!-- @@@Sound -->
+<h2>Property Documentation</h2>
+<!-- $$$attenuationModel -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="attenuationModel-prop"></a><span class="name">attenuationModel</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property specifies which attenuation model this sound will apply.</p>
+</div></div><!-- @@@attenuationModel -->
+<br/>
+<!-- $$$category -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="category-prop"></a><span class="name">category</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property specifies which <a href="qml-qtaudioengine-audiocategory.html">AudioCategory</a> this sound belongs to.</p>
+</div></div><!-- @@@category -->
+<br/>
+<!-- $$$cone.innerAngle -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="cone.innerAngle-prop"></a><span class="name">cone.innerAngle</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the innerAngle for Sound definition. The range is [0, 360] degree. There is no directional attenuation within innerAngle.</p>
+</div></div><!-- @@@cone.innerAngle -->
+<br/>
+<!-- $$$cone.outerAngle -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="cone.outerAngle-prop"></a><span class="name">cone.outerAngle</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the outerAngle for Sound definition. The range is [0, 360] degree. All audio output from this sound will be attenuated by <a href="qml-qtaudioengine-sound.html#cone.outerGain-prop">outerGain</a> outside outerAngle.</p>
+</div></div><!-- @@@cone.outerAngle -->
+<br/>
+<!-- $$$cone.outerGain -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="cone.outerGain-prop"></a><span class="name">cone.outerGain</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds attenuation value for directional attenuation of this sound. The range is [0, 1]. All audio output from this sound will be attenuated by outerGain outside <a href="qml-qtaudioengine-sound.html#cone.outerAngle-prop">outerAngle</a>.</p>
+</div></div><!-- @@@cone.outerGain -->
+<br/>
+<!-- $$$name -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="name-prop"></a><span class="name">name</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the name of Sound, must be unique among all sounds and only defined once.</p>
+</div></div><!-- @@@name -->
+<br/>
+<!-- $$$playType -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="playType-prop"></a><span class="name">playType</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the playType. It can be one of:</p>
+<ul>
+<li>Random - randomly picks up a play variation when playback is triggered</li>
+<li>Sequential - plays each variation in sequence when playback is triggered</li>
+</ul>
+<p>The default value is Random.</p>
+</div></div><!-- @@@playType -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$addPlayVariation[overload1]$$$addPlayVariation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="addPlayVariation-method"></a><span class="name">addPlayVariation</span>(<i>playVariation</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Adds the given <i>playVariation</i> to sound. This can be used when the <a href="qml-qtaudioengine-playvariation.html">PlayVariation</a> is created dynamically:</p>
+<pre class="qml">
+
+  import QtAudioEngine 1.1
+
+  <span class="type"><a href="qml-qtaudioengine-audioengine.html">AudioEngine</a></span> {
+      <span class="name">id</span>: <span class="name">engine</span>
+
+      <span class="name">Component</span>.onCompleted: {
+          var playVariation = <span class="name">Qt</span>.<span class="name">createQmlObject</span>(<span class="string">'import QtAudioEngine 1.1; PlayVariation {}'</span>, <span class="name">engine</span>);
+          <span class="name">playVariation</span>.<span class="name">sample</span> <span class="operator">=</span> <span class="string">&quot;sample&quot;</span>;
+          <span class="name">playVariation</span>.<span class="name">minPitch</span> <span class="operator">=</span> <span class="number">0.8</span>
+          <span class="name">playVariation</span>.<span class="name">maxPitch</span> <span class="operator">=</span> <span class="number">1.1</span>
+
+          var sound = <span class="name">Qt</span>.<span class="name">createQmlObject</span>(<span class="string">'import QtAudioEngine 1.1; Sound {}'</span>, <span class="name">engine</span>);
+          <span class="name">sound</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;example&quot;</span>;
+          <span class="name">sound</span>.<span class="name">addPlayVariation</span>(<span class="name">playVariation</span>);
+          <span class="name">engine</span>.<span class="name">addSound</span>(<span class="name">sound</span>);
+      }
+  }
+
+</pre>
+</div></div><!-- @@@addPlayVariation -->
+<br/>
+<!-- $$$newInstance[overload1]$$$newInstance -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="newInstance-method"></a><span class="type"><a href="qml-qtaudioengine-soundinstance.html">QtAudioEngine::SoundInstance</a></span> <span class="name">newInstance</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Returns a new <a href="qml-qtaudioengine-soundinstance.html">SoundInstance</a>.</p>
+</div></div><!-- @@@newInstance -->
+<br/>
+<!-- $$$play$$$play -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="play-method-11"></a><span class="name">play</span>(<i>position</i>, <i>velocity</i>, <i>direction</i>, <i>gain</i>, <i>pitch</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a new <a href="qml-qtaudioengine-soundinstance.html">SoundInstance</a> and starts playing with specified <i>position</i>, <i>velocity</i>, <i>direction</i>, adjusted <i>gain</i> and <i>pitch</i>.</p>
+</div></div><!-- @@@play -->
+<br/>
+<!-- $$$play$$$play -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="play-method-10"></a><span class="name">play</span>(<i>position</i>, <i>velocity</i>, <i>gain</i>, <i>pitch</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a new <a href="qml-qtaudioengine-soundinstance.html">SoundInstance</a> and starts playing with specified <i>position</i>, <i>velocity</i>, adjusted <i>gain</i> and <i>pitch</i>. Direction is set to <code>&quot;0,0,0&quot;</code>.</p>
+</div></div><!-- @@@play -->
+<br/>
+<!-- $$$play$$$play -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="play-method-9"></a><span class="name">play</span>(<i>position</i>, <i>gain</i>, <i>pitch</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a new <a href="qml-qtaudioengine-soundinstance.html">SoundInstance</a> and starts playing with specified <i>position</i>, adjusted <i>gain</i> and <i>pitch</i>. Direction and velocity are all set to <code>&quot;0,0,0&quot;</code>.</p>
+</div></div><!-- @@@play -->
+<br/>
+<!-- $$$play$$$play -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="play-method-8"></a><span class="name">play</span>(<i>position</i>, <i>velocity</i>, <i>direction</i>, <i>gain</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a new <a href="qml-qtaudioengine-soundinstance.html">SoundInstance</a> and starts playing with specified <i>position</i>, <i>velocity</i>, <i>direction</i> and adjusted <i>gain</i>.</p>
+</div></div><!-- @@@play -->
+<br/>
+<!-- $$$play$$$play -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="play-method-7"></a><span class="name">play</span>(<i>position</i>, <i>velocity</i>, <i>gain</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a new <a href="qml-qtaudioengine-soundinstance.html">SoundInstance</a> and starts playing with specified <i>position</i>, <i>velocity</i> and adjusted <i>gain</i>. Direction is set to <code>&quot;0,0,0&quot;</code>.</p>
+</div></div><!-- @@@play -->
+<br/>
+<!-- $$$play$$$play -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="play-method-6"></a><span class="name">play</span>(<i>position</i>, <i>gain</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a new <a href="qml-qtaudioengine-soundinstance.html">SoundInstance</a> and starts playing with specified <i>position</i> and adjusted <i>gain</i>. Direction and velocity are all set to <code>&quot;0,0,0&quot;</code>.</p>
+</div></div><!-- @@@play -->
+<br/>
+<!-- $$$play$$$play -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="play-method-5"></a><span class="name">play</span>(<i>position</i>, <i>velocity</i>, <i>direction</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a new <a href="qml-qtaudioengine-soundinstance.html">SoundInstance</a> and starts playing with specified <i>position</i>, <i>velocity</i> and <i>direction</i>.</p>
+</div></div><!-- @@@play -->
+<br/>
+<!-- $$$play$$$play -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="play-method-4"></a><span class="name">play</span>(<i>position</i>, <i>velocity</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a new <a href="qml-qtaudioengine-soundinstance.html">SoundInstance</a> and starts playing with specified <i>position</i> and <i>velocity</i>. Direction is set to <code>&quot;0,0,0&quot;</code>.</p>
+</div></div><!-- @@@play -->
+<br/>
+<!-- $$$play$$$play -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="play-method-3"></a><span class="name">play</span>(<i>position</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a new <a href="qml-qtaudioengine-soundinstance.html">SoundInstance</a> and starts playing with specified <i>position</i>. Direction and velocity are all set to <code>&quot;0,0,0&quot;</code>.</p>
+</div></div><!-- @@@play -->
+<br/>
+<!-- $$$play$$$play -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="play-method-2"></a><span class="name">play</span>(<i>gain</i>, <i>pitch</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a new <a href="qml-qtaudioengine-soundinstance.html">SoundInstance</a> and starts playing with the adjusted <i>gain</i> and <i>pitch</i>. Position, direction and velocity are all set to <code>&quot;0,0,0&quot;</code>.</p>
+</div></div><!-- @@@play -->
+<br/>
+<!-- $$$play$$$play -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="play-method-1"></a><span class="name">play</span>(<i>gain</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a new <a href="qml-qtaudioengine-soundinstance.html">SoundInstance</a> and starts playing with the adjusted <i>gain</i>. Position, direction and velocity are all set to <code>&quot;0,0,0&quot;</code>.</p>
+</div></div><!-- @@@play -->
+<br/>
+<!-- $$$play[overload1]$$$play -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="play-method"></a><span class="name">play</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Creates a new <a href="qml-qtaudioengine-soundinstance.html">SoundInstance</a> and starts playing. Position, direction and velocity are all set to <code>&quot;0,0,0&quot;</code>.</p>
+</div></div><!-- @@@play -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

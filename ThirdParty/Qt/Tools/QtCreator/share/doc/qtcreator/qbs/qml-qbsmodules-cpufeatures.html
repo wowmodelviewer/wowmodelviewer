@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- cpufeatures-module.qdoc -->
+  <title>cpufeatures QML Type | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<p class="naviNextPrevious headerNavi">
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">cpufeatures QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$cpufeatures-brief -->
+<p>Provides support for fine-tuning CPU features. <a href="#details">More...</a></p>
+<!-- @@@cpufeatures -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QbsModules .</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qbs 1.10</td></tr></table></div><ul>
+<li><a href="qml-qbsmodules-cpufeatures-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qbsmodules-cpufeatures.html#arm_neon-prop">arm_neon</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-cpufeatures.html#arm_vfpv4-prop">arm_vfpv4</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-cpufeatures.html#mips_dsp-prop">mips_dsp</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-cpufeatures.html#mips_dspr2-prop">mips_dspr2</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-cpufeatures.html#x86_avx2-prop">x86_avx2</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-cpufeatures.html#x86_avx-prop">x86_avx</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-cpufeatures.html#x86_avx512bw-prop">x86_avx512bw</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-cpufeatures.html#x86_avx512cd-prop">x86_avx512cd</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-cpufeatures.html#x86_avx512dq-prop">x86_avx512dq</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-cpufeatures.html#x86_avx512er-prop">x86_avx512er</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-cpufeatures.html#x86_avx512f-prop">x86_avx512f</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-cpufeatures.html#x86_avx512ifma-prop">x86_avx512ifma</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-cpufeatures.html#x86_avx512pf-prop">x86_avx512pf</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-cpufeatures.html#x86_avx512vbmi-prop">x86_avx512vbmi</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-cpufeatures.html#x86_avx512vl-prop">x86_avx512vl</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-cpufeatures.html#x86_f16c-prop">x86_f16c</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-cpufeatures.html#x86_sse2-prop">x86_sse2</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-cpufeatures.html#x86_sse3-prop">x86_sse3</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-cpufeatures.html#x86_sse4_1-prop">x86_sse4_1</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-cpufeatures.html#x86_sse4_2-prop">x86_sse4_2</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qbsmodules-cpufeatures.html#x86_ssse3-prop">x86_ssse3</a></b></b> : bool</li>
+</ul>
+<!-- $$$cpufeatures-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The <code>cpufeatures</code> module offers properties for enabling or disabling specific CPU features. Use it if you want to override the compiler defaults for a given platform.</p>
+<p>The compiler rules in the <a href="qml-qbsmodules-cpp.html">cpp</a> module evaluate this module's properties and generate matching compiler flags. All properties in this module are of type <code>bool</code> and have the following semantics:</p>
+<ul>
+<li>The default value <code>undefined</code> has no effect on the compiler command line.</li>
+<li>If the value is <code>true</code> and the compiler has a flag to enable the feature, that flag is added to the command line if it is applicable to the current architecture. For example, enabling the property <code>x86_sse2</code> would result in the GCC option <code>-msse2</code>.</li>
+<li>If the value is <code>false</code> and the compiler has a flag to disable the feature, that flag is added to the command line if it is applicable to the current architecture. For example, disabling the property <code>x86_sse2</code> would result in the GCC option <code>-no-msse2</code>.</li>
+</ul>
+<!-- @@@cpufeatures -->
+<h2>Property Documentation</h2>
+<!-- $$$arm_neon -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="arm_neon-prop"></a><span class="name">arm_neon</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use NEON instructions in ARM binaries.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@arm_neon -->
+<br/>
+<!-- $$$arm_vfpv4 -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="arm_vfpv4-prop"></a><span class="name">arm_vfpv4</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use VFPv4 instructions in ARM binaries.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@arm_vfpv4 -->
+<br/>
+<!-- $$$mips_dsp -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="mips_dsp-prop"></a><span class="name">mips_dsp</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use DSP instructions in MIPS binaries.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@mips_dsp -->
+<br/>
+<!-- $$$mips_dspr2 -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="mips_dspr2-prop"></a><span class="name">mips_dspr2</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use DSPr2 instructions in MIPS binaries.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@mips_dspr2 -->
+<br/>
+<!-- $$$x86_avx2 -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="x86_avx2-prop"></a><span class="name">x86_avx2</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use AVX2 instructions in x86 binaries.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@x86_avx2 -->
+<br/>
+<!-- $$$x86_avx -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="x86_avx-prop"></a><span class="name">x86_avx</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use AVX instructions in x86 binaries.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@x86_avx -->
+<br/>
+<!-- $$$x86_avx512bw -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="x86_avx512bw-prop"></a><span class="name">x86_avx512bw</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use AVX-512-BW instructions in x86 binaries.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@x86_avx512bw -->
+<br/>
+<!-- $$$x86_avx512cd -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="x86_avx512cd-prop"></a><span class="name">x86_avx512cd</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use AVX-512-CD instructions in x86 binaries.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@x86_avx512cd -->
+<br/>
+<!-- $$$x86_avx512dq -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="x86_avx512dq-prop"></a><span class="name">x86_avx512dq</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use AVX-512-DQ instructions in x86 binaries.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@x86_avx512dq -->
+<br/>
+<!-- $$$x86_avx512er -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="x86_avx512er-prop"></a><span class="name">x86_avx512er</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use AVX-512-ER instructions in x86 binaries.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@x86_avx512er -->
+<br/>
+<!-- $$$x86_avx512f -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="x86_avx512f-prop"></a><span class="name">x86_avx512f</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use AVX-512 instructions in x86 binaries.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@x86_avx512f -->
+<br/>
+<!-- $$$x86_avx512ifma -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="x86_avx512ifma-prop"></a><span class="name">x86_avx512ifma</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use AVX-512-IFMA instructions in x86 binaries.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@x86_avx512ifma -->
+<br/>
+<!-- $$$x86_avx512pf -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="x86_avx512pf-prop"></a><span class="name">x86_avx512pf</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use AVX-512-PF instructions in x86 binaries.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@x86_avx512pf -->
+<br/>
+<!-- $$$x86_avx512vbmi -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="x86_avx512vbmi-prop"></a><span class="name">x86_avx512vbmi</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use AVX-512-VBMI instructions in x86 binaries.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@x86_avx512vbmi -->
+<br/>
+<!-- $$$x86_avx512vl -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="x86_avx512vl-prop"></a><span class="name">x86_avx512vl</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use AVX-512-VL instructions in x86 binaries.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@x86_avx512vl -->
+<br/>
+<!-- $$$x86_f16c -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="x86_f16c-prop"></a><span class="name">x86_f16c</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use F16C instructions in x86 binaries.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@x86_f16c -->
+<br/>
+<!-- $$$x86_sse2 -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="x86_sse2-prop"></a><span class="name">x86_sse2</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use SSE2 instructions in x86 binaries.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@x86_sse2 -->
+<br/>
+<!-- $$$x86_sse3 -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="x86_sse3-prop"></a><span class="name">x86_sse3</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use SSE3 instructions in x86 binaries.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@x86_sse3 -->
+<br/>
+<!-- $$$x86_sse4_1 -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="x86_sse4_1-prop"></a><span class="name">x86_sse4_1</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use SSE4.1 instructions in x86 binaries.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@x86_sse4_1 -->
+<br/>
+<!-- $$$x86_sse4_2 -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="x86_sse4_2-prop"></a><span class="name">x86_sse4_2</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use SSE4.2 instructions in x86 binaries.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@x86_sse4_2 -->
+<br/>
+<!-- $$$x86_ssse3 -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="x86_ssse3-prop"></a><span class="name">x86_ssse3</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether to use SSSE3 instructions in x86 binaries.</p>
+<p>Default: Undefined</p>
+</div></div><!-- @@@x86_ssse3 -->
+<br/>
+<p class="naviNextPrevious footerNavi">
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

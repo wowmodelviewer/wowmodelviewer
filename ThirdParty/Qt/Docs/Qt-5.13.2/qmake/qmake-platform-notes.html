@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmake-manual.qdoc -->
+  <title>Platform Notes | qmake Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qmake-manual.html">qmake Manual</a></td><td >Platform Notes</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qmake-manual.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="qmake-running.html" />
+  <link rel="next" href="qmake-language.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="qmake-running.html">Running qmake</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qmake-language.html">qmake Language</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#macos-ios-tvos-and-watchos">macOS, iOS, tvOS, and watchOS</a></li>
+<li class="level2"><a href="#source-and-binary-packages">Source and Binary Packages</a></li>
+<li class="level2"><a href="#using-frameworks">Using Frameworks</a></li>
+<li class="level2"><a href="#creating-frameworks">Creating Frameworks</a></li>
+<li class="level2"><a href="#creating-and-moving-xcode-projects">Creating and Moving Xcode Projects</a></li>
+<li class="level2"><a href="#supporting-two-build-targets-simultaneously">Supporting Two Build Targets Simultaneously</a></li>
+<li class="level1"><a href="#windows">Windows</a></li>
+<li class="level2"><a href="#adding-windows-resource-files">Adding Windows Resource Files</a></li>
+<li class="level2"><a href="#creating-visual-studio-project-files">Creating Visual Studio Project Files</a></li>
+<li class="level2"><a href="#visual-studio-manifest-files">Visual Studio Manifest Files</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Platform Notes</h1>
+<span class="subtitle"></span>
+<!-- $$$qmake-platform-notes.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Many cross-platform projects can be handled by the basic qmake configuration features. However, on some platforms, it is sometimes useful, or even necessary, to take advantage of platform-specific features. qmake knows about many of these features, which can be accessed via specific variables that only take effect on the platforms where they are relevant.</p>
+<a name="macos-ios-tvos-and-watchos"></a>
+<h2 id="macos-ios-tvos-and-watchos">macOS, iOS, tvOS, and watchOS</h2>
+<p>Features specific to these platforms include support for creating universal binaries, frameworks and bundles.</p>
+<a name="source-and-binary-packages"></a>
+<h3 id="source-and-binary-packages">Source and Binary Packages</h3>
+<p>The version of qmake supplied in source packages is configured slightly differently to that supplied in binary packages in that it uses a different feature specification. Where the source package typically uses the <code>macx-g++</code> specification, the binary package is typically configured to use the <code>macx-xcode</code> specification.</p>
+<p>Users of each package can override this configuration by invoking qmake with the <code>-spec</code> option (see <a href="qmake-running.html">Running qmake</a> for more information). For example, to use qmake from a binary package to create a Makefile in a project directory, invoke the following command:</p>
+<pre class="cpp">
+
+  qmake -spec macx-g++
+
+</pre>
+<a name="using-frameworks"></a>
+<h3 id="using-frameworks">Using Frameworks</h3>
+<p>qmake is able to automatically generate build rules for linking against frameworks in the standard framework directory on <a href="../qtdoc/internationalization.html#macos">macOS</a>, located at <code>/Library/Frameworks/</code>.</p>
+<p>Directories other than the standard framework directory need to be specified to the build system, and this is achieved by appending linker options to the <a href="qmake-variable-reference.html#libs">LIBS</a> variable, as shown in the following example:</p>
+<pre class="cpp">
+
+  LIBS += -F/path/to/framework/directory/
+
+</pre>
+<p>The framework itself is linked in by appending the <code>-framework</code> options and the name of the framework to the <a href="qmake-variable-reference.html#libs">LIBS</a> variable:</p>
+<pre class="cpp">
+
+  LIBS += -framework TheFramework
+
+</pre>
+<a name="creating-frameworks"></a>
+<h3 id="creating-frameworks">Creating Frameworks</h3>
+<p>Any given library project can be configured so that the resulting library file is placed in a <a href="http://developer.apple.com/documentation/MacOSX/Conceptual/BPFrameworks/Concepts/WhatAreFrameworks.html">framework</a>, ready for deployment. To do this, set up the project to use the <a href="qmake-variable-reference.html#template"><code>lib</code> template</a> and add the <code>lib_bundle</code> option to the <a href="qmake-variable-reference.html#config">CONFIG</a> variable:</p>
+<pre class="cpp">
+
+  TEMPLATE = lib
+  CONFIG += lib_bundle
+
+</pre>
+<p>The data associated with the library is specified using the <a href="qmake-variable-reference.html#qmake-bundle-data">QMAKE_BUNDLE_DATA</a> variable. This holds items that will be installed with a library bundle, and is often used to specify a collection of header files, as in the following example:</p>
+<pre class="cpp">
+
+  FRAMEWORK_HEADERS.version = Versions
+  FRAMEWORK_HEADERS.files = path/to/header_one.h path/to/header_two.h
+  FRAMEWORK_HEADERS.path = Headers
+  QMAKE_BUNDLE_DATA += FRAMEWORK_HEADERS
+
+</pre>
+<p>You use the <code>FRAMEWORK_HEADERS</code> variable to specify the headers required by a particular framework. Appending it to the <code>QMAKE_BUNDLE_DATA</code> variable ensures that information about these headers is added to the collection of resources that will be installed with the library bundle. Also, the framework name and version are specified by the <a href="qmake-variable-reference.html#qmake-framework-bundle-name">QMAKE_FRAMEWORK_BUNDLE_NAME</a> and <a href="qmake-variable-reference.html#qmake-framework-version">QMAKE_FRAMEWORK_VERSION</a> variables. By default, the values used for these variables are obtained from the <a href="qmake-variable-reference.html#target">TARGET</a> and <a href="qmake-variable-reference.html#version">VERSION</a> variables.</p>
+<p>See <a href="../qtdoc/macos-deployment.html">Qt for macOS - Deployment</a> for more information about deploying applications and libraries.</p>
+<a name="creating-and-moving-xcode-projects"></a>
+<h3 id="creating-and-moving-xcode-projects">Creating and Moving Xcode Projects</h3>
+<p>Developers on <a href="../qtdoc/internationalization.html#macos">macOS</a> can take advantage of the qmake support for Xcode project files, as described in <a href="../qtdoc/macos.html#additional-command-line-options">Qt for macOS</a> documentation. by running qmake to generate an Xcode project from an existing qmake project file. For example:</p>
+<pre class="cpp">
+
+  qmake -spec macx-xcode project.pro
+
+</pre>
+<p><b>Note: </b>If a project is later moved on the disk, qmake must be run again to process the project file and create a new Xcode project file.</p><a name="supporting-two-build-targets-simultaneously"></a>
+<h3 id="supporting-two-build-targets-simultaneously">Supporting Two Build Targets Simultaneously</h3>
+<p>Implementing this is currently not feasible, because the Xcode concept of Active Build Configurations is conceptually different from the qmake idea of build targets.</p>
+<p>The Xcode Active Build Configurations settings are for modifying Xcode configurations, compiler flags and similar build options. Unlike Visual Studio, Xcode does not allow for the selection of specific library files based on whether debug or release build configurations are selected. The qmake debug and release settings control which library files are linked to the executable.</p>
+<p>It is currently not possible to set files in Xcode configuration settings from the qmake generated Xcode project file. The way the libraries are linked in the <i>Frameworks &amp; Libraries</i> phase in the Xcode build system.</p>
+<p>Furthermore, the selected <i>Active Build Configuration</i> is stored in a .pbxuser file, which is generated by Xcode on first load, not created by qmake.</p>
+<a name="windows"></a>
+<h2 id="windows">Windows</h2>
+<p>Features specific to this platform include support for Windows resource files (provided or auto-generated), creating Visual Studio project files, and handling manifest files when deploying Qt applications developed using Visual Studio 2005, or later.</p>
+<a name="adding-windows-resource-files"></a>
+<h3 id="adding-windows-resource-files">Adding Windows Resource Files</h3>
+<p>This section describes how to handle a Windows resource file with qmake to have it linked to an application executable (EXE) or dynamic link library (DLL). qmake can optionally auto-generate a suitably filled Windows resource file.</p>
+<p>A linked Windows resource file may contain many elements that can be accessed by its EXE or DLL. However, the <a href="../qtcore/resources.html">Qt resource system</a> should be used for accessing linked-in resources in a platform-independent way. But some standard elements of the linked Windows resource file are accessed by Windows itself. For example, in Windows explorer the version tab of the file properties is filled by resource elements. In addition, the program icon of the EXE is read from these elements. So it is good practice for a Qt created Windows EXE or DLL to use both techniques at the same time: link platform-independent resources via the <a href="../qtcore/resources.html">Qt resource system</a> and add Windows specific resources via a Windows resource file.</p>
+<p>Typically, a resource-definition script (.rc file) is compiled to a Windows resource file. Within the Microsoft toolchain, the RC tool generates a .res file, which can be linked with the Microsoft linker to an EXE or DLL. The <a href="https://mingw-w64.org/">MinGW</a> toolchain uses the windres tool to generate an .o file that can be linked with the <a href="https://mingw-w64.org/">MinGW</a> linker to an EXE or DLL.</p>
+<p>The optional auto-generation of a suitably filled .rc file by qmake is triggered by setting at least one of the system variables <a href="qmake-variable-reference.html#version">VERSION</a> and <a href="qmake-variable-reference.html#rc-icons">RC_ICONS</a>. The generated .rc file is automatically compiled and linked. Elements that are added to the .rc file are defined by the system variables <a href="qmake-variable-reference.html#qmake-target-company">QMAKE_TARGET_COMPANY</a>, <a href="qmake-variable-reference.html#qmake-target-description">QMAKE_TARGET_DESCRIPTION</a>, <a href="qmake-variable-reference.html#qmake-target-copyright">QMAKE_TARGET_COPYRIGHT</a>, <a href="qmake-variable-reference.html#qmake-target-product">QMAKE_TARGET_PRODUCT</a>, <a href="qmake-variable-reference.html#rc-codepage">RC_CODEPAGE</a>, <a href="qmake-variable-reference.html#rc-icons">RC_ICONS</a>, <a href="qmake-variable-reference.html#rc-lang">RC_LANG</a>,and <a href="qmake-variable-reference.html#version">VERSION</a>.</p>
+<p>If these elements are not sufficient, qmake has the two system variables <a href="qmake-variable-reference.html#rc-file">RC_FILE</a> and <a href="qmake-variable-reference.html#res-file">RES_FILE</a> that point directly to an externally created .rc or .res file. By setting one of these variables, the specified file is linked to the EXE or DLL.</p>
+<p><b>Note: </b>The generation of the .rc file by qmake is blocked, if <a href="qmake-variable-reference.html#rc-file">RC_FILE</a> or <a href="qmake-variable-reference.html#res-file">RES_FILE</a> is set. In this case, no further changes are made to the given .rc file or the .res or .o file by qmake; the variables pertaining to .rc file generation have no effect.</p><a name="creating-visual-studio-project-files"></a>
+<h3 id="creating-visual-studio-project-files">Creating Visual Studio Project Files</h3>
+<p>This section describes how to import an existing qmake project into Visual Studio. qmake is able to take a project file and create a Visual Studio project that contains all the necessary information required by the development environment. This is achieved by setting the qmake <a href="qmake-variable-reference.html#template">project template</a> to either <code>vcapp</code> (for application projects) or <code>vclib</code> (for library projects).</p>
+<p>This can also be set using a command line option, for example:</p>
+<pre class="cpp">
+
+  qmake -tp vc
+
+</pre>
+<p>It is possible to recursively generate <code>.vcproj</code> files in subdirectories and a <code>.sln</code> file in the main directory, by typing:</p>
+<pre class="cpp">
+
+  qmake -tp vc -r
+
+</pre>
+<p>Each time you update the project file, you need to run qmake to generate an updated Visual Studio project.</p>
+<p><b>Note: </b>If you are using the Visual Studio Add-in, select <b>Qt</b> &gt; <b>Import from .pro file</b> to import <code>.pro</code> files.</p><a name="visual-studio-manifest-files"></a>
+<h3 id="visual-studio-manifest-files">Visual Studio Manifest Files</h3>
+<p>When deploying Qt applications built using Visual Studio 2005, or later, make sure that the manifest file that was created when the application was linked is handled correctly. This is handled automatically for projects that generate DLLs.</p>
+<p>Removing manifest embedding for application executables can be done with the following assignment to the <a href="qmake-variable-reference.html#config">CONFIG</a> variable:</p>
+<pre class="cpp">
+
+  CONFIG -= embed_manifest_exe
+
+</pre>
+<p>Also, the manifest embedding for DLLs can be removed with the following assignment to the <code>CONFIG</code> variable:</p>
+<pre class="cpp">
+
+  CONFIG -= embed_manifest_dll
+
+</pre>
+<p>This is discussed in more detail in the <a href="../qtdoc/windows-deployment.html#manifest-files">deployment guide for Windows</a>.</p>
+</div>
+<!-- @@@qmake-platform-notes.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="qmake-running.html">Running qmake</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qmake-language.html">qmake Language</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

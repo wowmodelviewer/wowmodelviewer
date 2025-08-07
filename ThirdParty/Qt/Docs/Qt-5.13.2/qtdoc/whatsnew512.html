@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- whatsnew512.qdoc -->
+  <title>What's New in Qt 5.12 | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >What's New in Qt 5.12</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#new-features-in-qt-5-12">New Features in Qt 5.12</a></li>
+<li class="level2"><a href="#qt-core-module">Qt Core Module</a></li>
+<li class="level2"><a href="#qt-network-module">Qt Network Module</a></li>
+<li class="level2"><a href="#qt-widgets-module">Qt Widgets Module</a></li>
+<li class="level2"><a href="#qt-qml-module">Qt QML Module</a></li>
+<li class="level2"><a href="#qt-quick-module">Qt Quick Module</a></li>
+<li class="level2"><a href="#qt-quick-controls-2-module">Qt Quick Controls 2 Module</a></li>
+<li class="level2"><a href="#qt-3d-module">Qt 3D Module</a></li>
+<li class="level2"><a href="#macos-specific">macOS-Specific</a></li>
+<li class="level2"><a href="#qt-wayland-module">Qt Wayland Module</a></li>
+<li class="level2"><a href="#qt-websockets-module">Qt Websockets Module</a></li>
+<li class="level2"><a href="#qt-location-module">Qt Location Module</a></li>
+<li class="level2"><a href="#qt-test-module">Qt Test Module</a></li>
+<li class="level2"><a href="#qt-labs-platform">Qt Labs Platform</a></li>
+<li class="level2"><a href="#qt-virtual-keyboard-module">Qt Virtual Keyboard Module</a></li>
+<li class="level2"><a href="#qt-webengine-module">Qt WebEngine Module</a></li>
+<li class="level2"><a href="#qt-gui-module">Qt GUI Module</a></li>
+<li class="level2"><a href="#qt-serial-bus-module">Qt Serial Bus Module</a></li>
+<li class="level2"><a href="#qt-bluetooth-module">Qt Bluetooth Module</a></li>
+<li class="level2"><a href="#qt-for-automation-offering">Qt for Automation Offering</a></li>
+<li class="level1"><a href="#new-modules">New Modules</a></li>
+<li class="level1"><a href="#platform-changes">Platform Changes</a></li>
+<li class="level1"><a href="#technology-preview-features">Technology Preview Features</a></li>
+<li class="level1"><a href="#deprecated-modules">Deprecated Modules</a></li>
+<li class="level1"><a href="#list-of-api-changes">List of API Changes</a></li>
+<li class="level1"><a href="#additions-to-other-qt-5-releases">Additions to Other Qt 5 Releases</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">What's New in Qt 5.12</h1>
+<span class="subtitle"></span>
+<!-- $$$whatsnew512.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="new-features-in-qt-5-12"></a>
+<h2 id="new-features-in-qt-5-12">New Features in Qt 5.12</h2>
+<a name="qt-core-module"></a>
+<h3 id="qt-core-module">Qt Core Module</h3>
+<ul>
+<li>Added the static <a href="../qtcore/qcryptographichash.html#hashLength">QCryptographicHash::hashLength</a> method. It returns the length of a hash's output.</li>
+<li>Added wildcardToRegularExpression helper method to <a href="../qtcore/qregularexpression.html">QRegularExpression</a> for easier wildcard implementation in user code.</li>
+<li>Added anchoredPattern helper method to <a href="../qtcore/qregularexpression.html">QRegularExpression</a> for easier exact matching implementation in user code.</li>
+<li>Added <a href="../qtcore/qregularexpression.html">QRegularExpression</a> support to <a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a>.</li>
+<li>Support for CBOR data similar to existing JSON support.</li>
+</ul>
+<a name="qt-network-module"></a>
+<h3 id="qt-network-module">Qt Network Module</h3>
+<ul>
+<li>Added DTLS (Datagram Transport Layer Security) over UDP support.</li>
+<li>Added renegotiation to Security Transport backend.</li>
+<li>Added ALPN support and HTTP/2 protocol negotiation to Security Transport backend.</li>
+<li>Added PKCS#8 support in the generic SSL backend (WinRT and Secure Transport).</li>
+<li>Added <a href="../qtnetwork/qpassworddigestor.html">QPasswordDigestor</a>: a new namespace that contains password-based key derivation functions (currently PBKDF1 and PBKDF2).</li>
+</ul>
+<a name="qt-widgets-module"></a>
+<h3 id="qt-widgets-module">Qt Widgets Module</h3>
+<ul>
+<li>Added <a href="../qtwidgets/qstyle.html#StyleHint-enum">QStyle::SH_SpinBox_StepModifier</a> style hint.</li>
+<li>Added <a href="../qtwidgets/qlineedit.html#inputRejected">QLineEdit::inputRejected</a> signal.</li>
+<li>Added <a href="../qtcore/qt.html#WidgetAttribute-enum">Qt::WA_StyleSheetTarget</a> attribute.</li>
+<li>Added <a href="../qtwidgets/qlayout.html#indexOf-1">QLayout::indexOf</a>(QLayoutItem *) function.</li>
+</ul>
+<a name="qt-qml-module"></a>
+<h3 id="qt-qml-module">Qt QML Module</h3>
+<ul>
+<li>The JavaScript engine now supports <a href="http://www.ecma-international.org/ecma-262/7.0/">ECMAScript 7</a>. This includes an upgrade to ECMAScript 6, see <a href="http://es6-features.org/">ECMAScript 6 - New Features: Overview &amp; Comparison</a>.</li>
+<li>ECMAScript modules can now be loaded directly with <a href="../qtqml/qjsengine.html#importModule">QJSEngine::importModule</a>() and imported in .qml files when using the .mjs file extension.</li>
+</ul>
+<a name="qt-quick-module"></a>
+<h3 id="qt-quick-module">Qt Quick Module</h3>
+<ul>
+<li>Pointer Handlers are renamed to Input Handlers (we include the pre-existing Keys attached property in this category) and are now fully supported as a first-class QML feature in Qt Quick. (C++ API for them is still not public yet.)</li>
+<li><a href="../qtquick/qml-qtquick-hoverhandler.html">HoverHandler</a> is a new type of handler for detecting mouse hover. It can detect hover even in cases of deep nesting: unlike <a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a>, you can hover multiple nested Items with HoverHandlers in them at the same time. (For example, a sidebar and an individual button on the sidebar).</li>
+<li><a href="../qtquick/qml-qtquick-draghandler.html">DragHandler</a> is now a multi-point handler: if you set minimumPointCount to <code>2</code>, it will react only to a 2-finger drag, for example. This can give you another degree of freedom: single-finger drag can perform the typical item movement, and 2-finger drag can do something else (change the tilt angle, for example).</li>
+<li>Added support for pregenerated distance field caches for faster startup times.</li>
+<li>Added <a href="../qtquick/qml-qtquick-tableview.html">TableView</a> as another type of Item View: on par with <a href="../qtquick/qml-qtquick-listview.html">ListView</a> but having multiple columns. Unlike the one in <a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a> Controls 1.x, it does not do any styling; rather it provides the optimal solution for instantiating (and pooling and reusing) delegates on demand as you scroll through the rows and columns.</li>
+<li>Tech Preview: Added <a href="delegatechooser-qmlmodule.html">DelegateChooser</a> as a means of choosing different delegates in Item Views (such as <a href="../qtquick/qml-qtquick-tableview.html">TableView</a>) depending on role values from the model, or depending on the index.</li>
+</ul>
+<a name="qt-quick-controls-2-module"></a>
+<h3 id="qt-quick-controls-2-module">Qt Quick Controls 2 Module</h3>
+<ul>
+<li>Dial: Added inputMode property, that adds two new ways of interacting with the Dial: horizontally and vertically. These new input modes use a relative input system that adds changes to the dial's position to its value. This results in a dial that is less &quot;jumpy&quot;, making it safe for operations that could be harmful if done incorrectly, like adjusting audio levels.</li>
+<li>Control and Popup: Added topInset, bottomInset, leftInset, and rightInset properties to control the geometry of the background, similarly to how paddings control the geometry of the contentItem.</li>
+<li>Added implicit*Width and implicit*Height properties (for example, implicitHeaderWidth, implicitContentWidth, and so on) to simplify complex implicit size bindings.</li>
+<li><a href="../qtquickcontrols/qml-qtquick-controls2-swipeview.html">SwipeView</a> and <a href="../qtquickcontrols/qml-qtquick-controls2-dialogbuttonbox.html">DialogButtonBox</a>: Added contentWidth and contentHeight properties.</li>
+<li><a href="../qtquickcontrols/qml-qtquick-controls2-rangeslider.html">RangeSlider</a>:<ul>
+<li>Added the valueAt() function, which enables tooltips to show up-to-date values for each handle when live is set to <code>false</code> (copied from Slider).</li>
+<li>Added first.moved() and second.moved() signals, similar to Slider's moved() signal.</li>
+</ul>
+</li>
+<li>Control: Unless explicitly specified, baselineOffset is now automatically updated based on the top padding of the control and the baselineOffset of the contentItem. Styles no longer need to specify the baselineOffset in QML.</li>
+<li>Popup: added anchors.centerIn to allow a convenient way of centering a popup.</li>
+<li><a href="../qtquickcontrols/qquickstyle.html">QQuickStyle</a>: Added stylePathList() and addStylePath() methods for managing the list of directories where Qt Quick Controls 2 searches for available styles.</li>
+<li>Slider and <a href="../qtquickcontrols/qml-qtquick-controls2-rangeslider.html">RangeSlider</a>: Added touchDragThreshold property for configuring the threshold to initiate the touch 'drag' of the handle of the slider. The mouse 'drag' is not affected by the property.</li>
+<li><a href="../qtquickcontrols/qml-qtquick-controls2-textarea.html">TextArea</a> and <a href="../qtquickcontrols/qml-qtquick-controls2-textfield.html">TextField</a>: Added placeholderTextColor property to customize the placeholderText color to fit the backgrounds.</li>
+<li>Material: Added a Dense variant of the Material style for use on desktop platforms. Some controls are slightly smaller in height and use smaller font sizes. The variant can be enabled by setting QT_QUICK_CONTROLS_MATERIAL_VARIANT to Dense or setting <code>Variant=Dense</code> in the qtquickcontrols2.conf file.</li>
+<li><a href="../qtquickcontrols/qml-qtquick-controls2-dialogbuttonbox.html">DialogButtonBox</a>: Added buttonLayout property that can be used to arrange the buttons.</li>
+<li>Tumbler: Added positionViewAtIndex() function that calls the respective <a href="../qtquick/qml-qtquick-pathview.html">PathView</a>/<a href="../qtquick/qml-qtquick-listview.html">ListView</a> function, depending on the value of wrap. This allows changing currentIndex without animations.</li>
+<li>Control and Popup: Added horizontalPadding and verticalPadding properties as convenient ways to set both left and right, or top and bottom paddings in one go.</li>
+<li><a href="../qtquickcontrols/qml-qtquick-controls2-tooltip.html">ToolTip</a>: Added non-attached show() and hide() methods to give the same level of convenience for showing non-attached tooltips with certain parameters.</li>
+</ul>
+<a name="qt-3d-module"></a>
+<h3 id="qt-3d-module">Qt 3D Module</h3>
+<ul>
+<li>Load an animation from a file containing several animations, either by name or index.</li>
+<li>Enable stepped animation curves.</li>
+<li>Fix for creation and re-parenting of QNodes in some circumstances.</li>
+<li>Reflect loaded texture properties for frontend texture objects.</li>
+<li><a href="../qt3d/qml-qt3d-render-textureimage.html">TextureImage</a> no longer requires a texture as parent.</li>
+<li>Reduce CPU usage when not in the simulation loop.</li>
+<li>Enable <a href="../qt3d/qml-qt3d-core-entityloader.html">EntityLoader</a> to load from a Component or file.</li>
+<li>Support rendering using OpenGL ES 3.1&#x2e;</li>
+<li>Performance and bug fixes in the renderer backend.</li>
+</ul>
+<a name="macos-specific"></a>
+<h3 id="macos-specific">macOS-Specific</h3>
+<ul>
+<li>Added support for QSurfaceType::MetalSurface.</li>
+<li>Added support for QSurfaceType::VulkanSurface and <a href="../qtgui/qvulkanwindow.html">QVulkanWindow</a>, using MoltenVK.</li>
+</ul>
+<a name="qt-wayland-module"></a>
+<h3 id="qt-wayland-module">Qt Wayland Module</h3>
+<ul>
+<li>Added support for xdg-shell stable (and deprecated unstable v5).</li>
+<li>Made the default window decorations look nicer.</li>
+<li>Added support for xdg-decoration-unstable-v1 for server-side window decorations.</li>
+</ul>
+<a name="qt-websockets-module"></a>
+<h3 id="qt-websockets-module">Qt Websockets Module</h3>
+<ul>
+<li>Added the <a href="../qtwebsockets/qwebsocket.html#bytesToWrite">QWebSocket::bytesToWrite</a> function.</li>
+</ul>
+<a name="qt-location-module"></a>
+<h3 id="qt-location-module">Qt Location Module</h3>
+<ul>
+<li>Updated <a href="../qtlocation/qtlocation-attribution-mapboxgl.html#mapboxgl">MapboxGL</a> plugin with QNX7 support.</li>
+<li>Exposed add/remove transitions in <a href="../qtlocation/qml-qtlocation-mapitemview.html">MapItemView</a>.</li>
+<li>Updated <a href="../qtlocation/qml-qtlocation-mapitemview.html">MapItemView</a> to inherit from <a href="../qtlocation/qml-qtlocation-mapitemgroup.html">MapItemGroup</a> so that it can nest itself. It can also be used as a delegate of itself.</li>
+<li>Support populating the <a href="../qtlocation/qml-qtlocation-placesearchmodel.html">PlaceSearchModel</a> incrementally, as opposed to only switching pages.</li>
+<li>Introduced Map.visibleArea, to restrict the visible area of the map.</li>
+<li>Updated the MapItem's geoShape property to be R/W, with a virtual setter in the base class.</li>
+<li>Added support for inner holes in <a href="../qtpositioning/qgeopolygon.html">QGeoPolygon</a>. These are currently honored, by <a href="../qtlocation/qml-qtlocation-mappolygon.html">MapPolygon</a>, only with the <a href="../qtlocation/qtlocation-attribution-mapboxgl.html#mapboxgl">MapboxGL</a> plugin. Support in the built-in renderer will follow.</li>
+<li>Added support for Route legs.</li>
+</ul>
+<a name="qt-test-module"></a>
+<h3 id="qt-test-module">Qt Test Module</h3>
+<ul>
+<li>Updated std::tuple errors to provide better diagnostics when used with QCompare.</li>
+</ul>
+<a name="qt-labs-platform"></a>
+<h3 id="qt-labs-platform">Qt Labs Platform</h3>
+<ul>
+<li>Menu, <a href="../qtquickcontrols/qml-qtquick-controls2-menuitem.html">MenuItem</a>, SystemTrayIcon: deprecated iconName and iconSource in favor of icon.name and icon.source grouped properties.</li>
+<li>Menu, <a href="../qtquickcontrols/qml-qtquick-controls2-menuitem.html">MenuItem</a>, SystemTrayIcon: added icon.mask grouped property.</li>
+</ul>
+<a name="qt-virtual-keyboard-module"></a>
+<h3 id="qt-virtual-keyboard-module">Qt Virtual Keyboard Module</h3>
+<ul>
+<li>Introduced an extension interface for the virtual keyboard. All the current input methods and some special keyboard layouts (for example, Hunspell, <a href="../qtvirtualkeyboard/qtvirtualkeyboard-attribution-openwnn.html#openwnn">OpenWnn</a>, and so on) have been moved to extensions. The extension interface allows third parties to create new input methods without having to modify or rebuild the virtual keyboard. In addition, this change makes it possible to add features and languages independently by copying the desired extensions to the system.</li>
+<li>Introduced a virtualkeyboard module, which can be linked against an extension plugin. This module provides the C++ API necessary for creating an input method.</li>
+<li>Added option to exclude all styles from the plugin at build time.</li>
+<li>Added support for <a href="../qtvirtualkeyboard/handwriting.html#myscript">MyScript</a> Superimposed handwriting recognition. <a href="../qtvirtualkeyboard/handwriting.html#myscript">MyScript</a> supports the recognition of isolated character, cursive, print and superimposed writing. In addition, it enables the recognition of letters, words or parts of words written one over the other, without any explicit separation between consecutive fragments. It targets small devices with sufficient hardware capabilities in terms of CPU power and memory.</li>
+<li>Added Vietnamese handwriting recognition (T9 Write).</li>
+<li>Added new layouts: Albanian, American English, Brazilian Portuguese, French Canadian, Indonesian, Malay, Mexican Spanish, Slovak, Slovenian, Thai, Turkish, Vietnamese, and Ukrainian.</li>
+<li>Added latin extra layout for Russian.</li>
+<li>The pinyin and tcime dictionaries are now bundled in the plugin by default.</li>
+<li>Added user dictionary and learning for Hunspell.</li>
+</ul>
+<a name="qt-webengine-module"></a>
+<h3 id="qt-webengine-module">Qt WebEngine Module</h3>
+<ul>
+<li>Updated to Chromium 69.</li>
+<li>Added <a href="../qtwebengine/qwebengineurlscheme.html">QWebEngineUrlScheme</a> interface to configure type and security of custom URL schemes.</li>
+<li>WebActions are now exposed in QML.</li>
+<li>The view or page that triggered a download can now be read from download items.</li>
+<li>Support client SSL certificates, in so far as the operating system supports them.</li>
+</ul>
+<a name="qt-gui-module"></a>
+<h3 id="qt-gui-module">Qt GUI Module</h3>
+<ul>
+<li>Added presets for <a href="../qtgui/qgradient.html">QGradient</a> based on https://webgradients.com/.</li>
+<li>Added 4xU16 RGBA64 formats to <a href="../qtgui/qimage.html">QImage</a>, reading them from PNGs, and uploading or grabbing them from OpenGL.</li>
+<li>Added support to Windows UI Automation to the WinRT QPA, allowing Qt-based UWP applications to operate with accessibility and programmatic UI control tools.</li>
+<li>Replaced the handling of tablet/touchscreen/touchpad/mouse input with a unified implementation based on the Windows Pointer Input Messages on Windows 8 and newer. Hardware such as the screen digitizer in the MS Surface line is now supported without special drivers.</li>
+</ul>
+<a name="qt-serial-bus-module"></a>
+<h3 id="qt-serial-bus-module">Qt Serial Bus Module</h3>
+<ul>
+<li>Added a virtual CAN bus plugin for simulation without CAN hardware.</li>
+<li>Added configuration options to canbusutil, for example for bitrate setting.</li>
+<li>Added CAN FD functionality to the PeakCAN plugin.</li>
+<li>Added the <a href="../qtserialbus/qcanbusdevice.html#readAllFrames">readAllFrames()</a> and <a href="../qtserialbus/qcanbusdevice.html#clear">clear()</a> functions to <a href="../qtserialbus/qcanbusdevice.html">QCanBusDevice</a>.</li>
+</ul>
+<a name="qt-bluetooth-module"></a>
+<h3 id="qt-bluetooth-module">Qt Bluetooth Module</h3>
+<ul>
+<li>Added manufacturer data to the <a href="../qtbluetooth/qbluetoothdeviceinfo.html">QBluetoothDeviceInfo</a> objects that are emitted from the BLE discovery agent. Decoding iBeacon payloads is still up to the application.</li>
+</ul>
+<a name="qt-for-automation-offering"></a>
+<h3 id="qt-for-automation-offering">Qt for Automation Offering</h3>
+<ul>
+<li>Qt MQTT now has full support for MQTT protocol level 5.</li>
+<li>Qt KNX<ul>
+<li>Support for KNXnet/IP Core Version 2.</li>
+<li>Support for KNXnet/IP Routing Version 1.</li>
+<li>Support for KNXnet/IP Tunneling Version 2.</li>
+<li>Support for KNXnet/IP communication via TCP.</li>
+<li>Tech Preview: Basic support for KNXnet/IP Secure Protocol.</li>
+</ul>
+</li>
+<li>Qt OPC UA (Tech Preview)<ul>
+<li>Support for events.</li>
+<li>Added a batch read API.</li>
+<li>Added a batch write API.</li>
+<li>Added a TranslateBrowsePathsToNodeIds API.</li>
+<li>Improved browse API.</li>
+<li>Support for the Argument and ExpandedNodeId types.</li>
+<li>Nodes can now be instantiated from an ExpandedNodeId.</li>
+<li>Support for multi-dimensional arrays has been fixed.</li>
+<li>Support reading and writing of extension objects.</li>
+</ul>
+</li>
+</ul>
+<a name="new-modules"></a>
+<h2 id="new-modules">New Modules</h2>
+<ul>
+<li>Qt Remote Objects is now fully supported.</li>
+<li>Qt WebGL Streaming Plugin is now fully supported.</li>
+</ul>
+<a name="platform-changes"></a>
+<h2 id="platform-changes">Platform Changes</h2>
+<ul>
+<li><a href="../qtcore/qtimezone.html">QTimeZone</a><ul>
+<li>Now uses ICU, when available, in preference to Microsoft's native APIs.</li>
+</ul>
+</li>
+</ul>
+<a name="technology-preview-features"></a>
+<h2 id="technology-preview-features">Technology Preview Features</h2>
+<ul>
+<li>Qt for WebAssembly (TP2) - A platform target to compile Qt applications for the web browsers using WebAssembly.</li>
+</ul>
+<a name="deprecated-modules"></a>
+<h2 id="deprecated-modules">Deprecated Modules</h2>
+<p>The following modules are part of the Qt 5.12 release, but are deprecated and considered for removal in subsequent releases of Qt:</p>
+<ul>
+<li>Qt Script</li>
+<li>Qt Quick Controls 1</li>
+<li>Qt Canvas 3D</li>
+</ul>
+<a name="list-of-api-changes"></a>
+<h2 id="list-of-api-changes">List of API Changes</h2>
+<p>The pages below contain a list of API changes in Qt 5.12:</p>
+<ul>
+<li><a href="newclasses512.html">New Classes and Functions in Qt 5.12</a></li>
+<li><a href="obsoleteclasses.html">Obsolete Classes</a></li>
+</ul>
+<a name="additions-to-other-qt-5-releases"></a>
+<h2 id="additions-to-other-qt-5-releases">Additions to Other Qt 5 Releases</h2>
+<ul>
+<li><a href="whatsnew511.html">What's New in Qt 5.11</a></li>
+<li><a href="whatsnew510.html">What's New in Qt 5.10</a></li>
+<li><a href="whatsnew59.html">What's New in Qt 5.9</a></li>
+<li><a href="whatsnew58.html">What's New in Qt 5.8</a></li>
+<li><a href="whatsnew57.html">What's New in Qt 5.7</a></li>
+<li><a href="whatsnew56.html">What's New in Qt 5.6</a></li>
+<li><a href="whatsnew55.html">What's New in Qt 5.5</a></li>
+<li><a href="whatsnew54.html">What's New in Qt 5.4</a></li>
+<li><a href="whatsnew53.html">What's New in Qt 5.3</a></li>
+<li><a href="whatsnew52.html">What's New in Qt 5.2</a></li>
+<li><a href="whatsnew51.html">What's New in Qt 5.1</a></li>
+<li><a href="whatsnew50.html">What's New in Qt 5.0</a></li>
+</ul>
+</div>
+<!-- @@@whatsnew512.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

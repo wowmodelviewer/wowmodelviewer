@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- tweetsearch.qdoc -->
+  <title>Qt Quick Demo - Tweet Search | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Qt Quick Demo - Tweet Search</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<h1 class="title">Qt Quick Demo - Tweet Search</h1>
+<span class="subtitle"></span>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2017 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">container</span>
+      property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">animDuration</span>: <span class="number">300</span>
+      property <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> <span class="name">front</span>: <span class="name">Item</span> {}
+      property <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> <span class="name">back</span>: <span class="name">Item</span> {}
+      property <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <span class="name">factor</span>: <span class="number">0.1</span> <span class="comment">// amount the edges fold in for the 3D effect</span>
+      property <span class="type">alias</span> <span class="name">delta</span>: <span class="name">effect</span>.<span class="name">delta</span>
+      property <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> <span class="name">cur</span>: <span class="name">frontShown</span> ? <span class="name">front</span> : <span class="name">back</span>
+      property <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> <span class="name">noncur</span>: <span class="name">frontShown</span> ? <span class="name">back</span> : <span class="name">front</span>
+
+      <span class="keyword">function</span> <span class="name">swap</span>() {
+          var tmp = <span class="name">front</span>;
+          <span class="name">front</span> <span class="operator">=</span> <span class="name">back</span>;
+          <span class="name">back</span> <span class="operator">=</span> <span class="name">tmp</span>;
+          <span class="name">resync</span>();
+      }
+
+      <span class="name">width</span>: <span class="name">cur</span>.<span class="name">width</span>
+      <span class="name">height</span>: <span class="name">cur</span>.<span class="name">height</span>
+      <span class="name">onFrontChanged</span>: <span class="name">resync</span>();
+      <span class="name">onBackChanged</span>: <span class="name">resync</span>();
+
+      <span class="keyword">function</span> <span class="name">resync</span>() {<span class="comment">//TODO: Are the items ever actually visible?</span>
+          <span class="name">back</span>.<span class="name">parent</span> <span class="operator">=</span> <span class="name">container</span>;
+          <span class="name">front</span>.<span class="name">parent</span> <span class="operator">=</span> <span class="name">container</span>;
+          <span class="name">frontShown</span> ? <span class="name">back</span>.<span class="name">visible</span> <span class="operator">=</span> <span class="number">false</span> : <span class="name">front</span>.<span class="name">visible</span> <span class="operator">=</span> <span class="number">false</span>;
+      }
+
+      property <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span> <span class="name">frontShown</span>: <span class="number">true</span>
+
+      <span class="name">onFrontShownChanged</span>: {
+          <span class="name">back</span>.<span class="name">visible</span> <span class="operator">=</span> !<span class="name">frontShown</span>
+          <span class="name">front</span>.<span class="name">visible</span> <span class="operator">=</span> <span class="name">frontShown</span>
+      }
+
+      <span class="keyword">function</span> <span class="name">flipUp</span>(start) {
+          <span class="name">effect</span>.<span class="name">visible</span> <span class="operator">=</span> <span class="number">true</span>;
+          <span class="name">effect</span>.<span class="name">sourceA</span> <span class="operator">=</span> <span class="name">effect</span>.<span class="name">source1</span>
+          <span class="name">effect</span>.<span class="name">sourceB</span> <span class="operator">=</span> <span class="name">effect</span>.<span class="name">source2</span>
+          <span class="keyword">if</span> (<span class="name">start</span> <span class="operator">==</span> <span class="name">undefined</span>)
+              <span class="name">start</span> <span class="operator">=</span> <span class="number">1.0</span>;
+          <span class="name">deltaAnim</span>.<span class="name">from</span> <span class="operator">=</span> <span class="name">start</span>;
+          <span class="name">deltaAnim</span>.<span class="name">to</span> <span class="operator">=</span> <span class="number">0.0</span>
+          <span class="name">dAnim</span>.<span class="name">start</span>();
+          <span class="name">frontShown</span> <span class="operator">=</span> <span class="number">false</span>;
+      }
+
+      <span class="keyword">function</span> <span class="name">flipDown</span>(start) {
+          <span class="name">effect</span>.<span class="name">visible</span> <span class="operator">=</span> <span class="number">true</span>;
+          <span class="name">effect</span>.<span class="name">sourceA</span> <span class="operator">=</span> <span class="name">effect</span>.<span class="name">source1</span>
+          <span class="name">effect</span>.<span class="name">sourceB</span> <span class="operator">=</span> <span class="name">effect</span>.<span class="name">source2</span>
+          <span class="keyword">if</span> (<span class="name">start</span> <span class="operator">==</span> <span class="name">undefined</span>)
+              <span class="name">start</span> <span class="operator">=</span> <span class="number">0.0</span>;
+          <span class="name">deltaAnim</span>.<span class="name">from</span> <span class="operator">=</span> <span class="name">start</span>;
+          <span class="name">deltaAnim</span>.<span class="name">to</span> <span class="operator">=</span> <span class="number">1.0</span>
+          <span class="name">dAnim</span>.<span class="name">start</span>();
+          <span class="name">frontShown</span> <span class="operator">=</span> <span class="number">true</span>;
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-shadereffect.html">ShaderEffect</a></span> {
+          <span class="name">id</span>: <span class="name">effect</span>
+          <span class="name">width</span>: <span class="name">cur</span>.<span class="name">width</span>
+          <span class="name">height</span>: <span class="name">cur</span>.<span class="name">height</span>
+          property <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <span class="name">factor</span>: <span class="name">container</span>.<span class="name">factor</span> <span class="operator">*</span> <span class="name">width</span>
+          property <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <span class="name">delta</span>: <span class="number">1.0</span>
+
+          <span class="name">mesh</span>: <span class="name">GridMesh</span> { <span class="name">resolution</span>: <span class="name">Qt</span>.<span class="name">size</span>(<span class="number">8</span>,<span class="number">2</span>) }
+
+          SequentialAnimation on <span class="name">delta</span> {
+              <span class="name">id</span>: <span class="name">dAnim</span>
+              <span class="name">running</span>: <span class="number">false</span>
+              <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> {
+              <span class="name">id</span>: <span class="name">deltaAnim</span>
+              <span class="name">duration</span>: <span class="name">animDuration</span><span class="comment">//expose anim</span>
+              }
+          }
+
+          property <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span> <span class="name">sourceA</span>: <span class="name">source1</span>
+          property <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span> <span class="name">sourceB</span>: <span class="name">source1</span>
+          property <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span> <span class="name">source1</span>: <span class="name">ShaderEffectSource</span> {
+              <span class="name">sourceItem</span>: <span class="name">front</span>
+              <span class="name">hideSource</span>: <span class="name">effect</span>.<span class="name">visible</span>
+          }
+
+          property <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span> <span class="name">source2</span>: <span class="name">ShaderEffectSource</span> {
+              <span class="name">sourceItem</span>: <span class="name">back</span>
+              <span class="name">hideSource</span>: <span class="name">effect</span>.<span class="name">visible</span>
+          }
+
+          <span class="name">fragmentShader</span>: <span class="string">&quot;
+              uniform lowp float qt_Opacity;
+              uniform sampler2D sourceA;
+              uniform sampler2D sourceB;
+              uniform highp float delta;
+              varying highp vec2 qt_TexCoord0;
+              void main() {
+                  highp vec4 tex = vec4(qt_TexCoord0.x, qt_TexCoord0.y * 2.0, qt_TexCoord0.x, (qt_TexCoord0.y-0.5) * 2.0);
+                  highp float shade = clamp(delta*2.0, 0.5, 1.0);
+                  highp vec4 col;
+                  if (qt_TexCoord0.y &lt; 0.5) {
+                      col = texture2D(sourceA, tex.xy) * (shade);
+                  } else {
+                      col = texture2D(sourceB, tex.zw) * (1.5 - shade);
+                      col.w = 1.0;
+                  }
+                  gl_FragColor = col * qt_Opacity;
+              }
+          &quot;</span>
+          property <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <span class="name">h</span>: <span class="name">height</span>
+          <span class="name">vertexShader</span>: <span class="string">&quot;
+          uniform highp float delta;
+          uniform highp float factor;
+          uniform highp float h;
+          uniform highp mat4 qt_Matrix;
+          attribute highp vec4 qt_Vertex;
+          attribute highp vec2 qt_MultiTexCoord0;
+          varying highp vec2 qt_TexCoord0;
+          void main() {
+              highp vec4 pos = qt_Vertex;
+              if (qt_MultiTexCoord0.y == 0.0)
+                  pos.x += factor * (1. - delta) * (qt_MultiTexCoord0.x * -2.0 + 1.0);
+              else if (qt_MultiTexCoord0.y == 1.0)
+                  pos.x += factor * (delta) * (qt_MultiTexCoord0.x * -2.0 + 1.0);
+              else
+                  pos.y = delta * h;
+              gl_Position = qt_Matrix * pos;
+              qt_TexCoord0 = qt_MultiTexCoord0;
+          }&quot;</span>
+
+      }
+  }
+
+</pre>

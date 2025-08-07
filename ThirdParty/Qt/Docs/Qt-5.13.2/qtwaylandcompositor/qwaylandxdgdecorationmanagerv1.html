@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwaylandxdgdecorationv1.cpp -->
+  <title>QWaylandXdgDecorationManagerV1 Class | Qt Wayland Compositor 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwaylandcompositor-index.html">Qt Wayland Compositor</a></td><td ><a href="qtwaylandcompositor-module.html">C++ Classes</a></td><td >QWaylandXdgDecorationManagerV1</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwaylandcompositor-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QWaylandXdgDecorationManagerV1 Class</h1>
+<!-- $$$QWaylandXdgDecorationManagerV1-brief -->
+<p>Provides an extension for negotiation of server-side and client-side window decorations. <a href="#details">More...</a></p>
+<!-- @@@QWaylandXdgDecorationManagerV1 -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QWaylandXdgDecorationManagerV1&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += waylandcompositor</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.12</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> QWaylandCompositorExtensionTemplate</td></tr></table></div><p>This class was introduced in  Qt 5.12.</p>
+<ul>
+<li><a href="qwaylandxdgdecorationmanagerv1-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qwaylandxdgdecorationmanagerv1.html#preferredMode-prop">preferredMode</a></b> : QWaylandXdgToplevel::DecorationMode</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgdecorationmanagerv1.html#QWaylandXdgDecorationManagerV1">QWaylandXdgDecorationManagerV1</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandXdgToplevel::DecorationMode </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgdecorationmanagerv1.html#preferredMode-prop">preferredMode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgdecorationmanagerv1.html#preferredMode-prop">setPreferredMode</a></b>(QWaylandXdgToplevel::DecorationMode <i>preferredMode</i>)</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgdecorationmanagerv1.html#initialize">initialize</a></b>() override</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgdecorationmanagerv1.html#preferredMode-prop">preferredModeChanged</a></b>()</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> const struct wl_interface *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandxdgdecorationmanagerv1.html#interface">interface</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QWaylandXdgDecorationManagerV1-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qwaylandxdgdecorationmanagerv1.html">QWaylandXdgDecorationManagerV1</a> extension provides a way for a compositor to announce support for server-side window decorations, and for xdg-shell clients to communicate whether they prefer client-side or server-side decorations.</p>
+<p><a href="qwaylandxdgdecorationmanagerv1.html">QWaylandXdgDecorationManagerV1</a> corresponds to the Wayland interface, <code>zxdg_decoration_manager_v1</code>.</p>
+</div>
+<p><b>See also </b>QWaylandXdgToplevel::decorationMode.</p>
+<!-- @@@QWaylandXdgDecorationManagerV1 -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$preferredMode-prop$$$preferredMode$$$setPreferredModeQWaylandXdgToplevel::DecorationMode$$$preferredModeChanged -->
+<h3 class="fn" id="preferredMode-prop"><a name="preferredMode-prop"></a><span class="name">preferredMode</span> : <span class="type"><a href="qwaylandxdgtoplevel.html#DecorationMode-enum">QWaylandXdgToplevel::DecorationMode</a></span></h3>
+<p>This property holds the decoration mode the compositor prefers.</p>
+<p>This is the mode used for clients that don't indicate a preference for server-side or client-side decorations.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QWaylandXdgToplevel::DecorationMode </td><td class="memItemRight bottomAlign"><span class="name"><b>preferredMode</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setPreferredMode</b></span>(QWaylandXdgToplevel::DecorationMode <i>preferredMode</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>preferredModeChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@preferredMode -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QWaylandXdgDecorationManagerV1[overload1]$$$QWaylandXdgDecorationManagerV1 -->
+<h3 class="fn" id="QWaylandXdgDecorationManagerV1"><a name="QWaylandXdgDecorationManagerV1"></a>QWaylandXdgDecorationManagerV1::<span class="name">QWaylandXdgDecorationManagerV1</span>()</h3>
+<p>Constructs a <a href="qwaylandxdgdecorationmanagerv1.html">QWaylandXdgDecorationManagerV1</a> object.</p>
+<!-- @@@QWaylandXdgDecorationManagerV1 -->
+<!-- $$$initialize[overload1]$$$initialize -->
+<h3 class="fn" id="initialize"><a name="initialize"></a><code>[override virtual] </code><span class="type">void</span> QWaylandXdgDecorationManagerV1::<span class="name">initialize</span>()</h3>
+<p>Initializes the extension.</p>
+<!-- @@@initialize -->
+<!-- $$$interface[overload1]$$$interface -->
+<h3 class="fn" id="interface"><a name="interface"></a><code>[static] </code>const <span class="type">struct</span> <span class="type">wl_interface</span> *QWaylandXdgDecorationManagerV1::<span class="name">interface</span>()</h3>
+<p>Returns the Wayland interface for the <a href="qwaylandxdgdecorationmanagerv1.html">QWaylandXdgDecorationManagerV1</a>.</p>
+<!-- @@@interface -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

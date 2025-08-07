@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- basictypes.qdoc -->
+  <title>enumeration QML Basic Type | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td ><a href="qtqml-qmlmodule.html">QML Types</a></td><td >enumeration QML Basic Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#using-the-enumeration-type-in-qml">Using the enumeration Type in QML</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">enumeration QML Basic Type</h1>
+<span class="subtitle"></span>
+<!-- $$$enumeration-description -->
+<div class="descr"> <a name="details"></a>
+<p>The <code>enumeration</code> type refers to a named enumeration value.</p>
+<p>Each named value can be referred to as <code>&lt;Type&gt;.&lt;value&gt;</code>. For example, the <a href="../qtquick/qml-qtquick-text.html">Text</a> type has an <code>AlignRight</code> enumeration value:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> { <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span> }
+
+</pre>
+<p>(For backwards compatibility, the enumeration value may also be specified as a string, e.g&#x2e; &quot;AlignRight&quot;. This form is not recommended for new code.)</p>
+<p>When integrating with C++, note that any <code>enum</code> value <a href="qtqml-cppintegration-data.html">passed into QML from C++</a> is automatically converted into an <code>enumeration</code> value, and vice-versa.</p>
+<p>This basic type is provided by the QML language. Some enumeration values are provided by the <a href="../qtquick/qtquick-qmlmodule.html">QtQuick</a> import.</p>
+<a name="using-the-enumeration-type-in-qml"></a>
+<h2 id="using-the-enumeration-type-in-qml">Using the enumeration Type in QML</h2>
+<p>The <code>enumeration</code> type is a representation of a C++ <code>enum</code> type. It is not possible to refer to the <code>enumeration</code> type in QML itself; instead, the <a href="qml-int.html">int</a> or <a href="qml-var.html">var</a> types can be used when referring to <code>enumeration</code> values from QML code.</p>
+<p>For example:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="comment">// refer to Text.AlignRight using an int type</span>
+      property <span class="type"><a href="qml-int.html">int</a></span> <span class="name">enumValue</span>: <span class="name">textItem</span>.<span class="name">horizontalAlignment</span>
+
+      signal <span class="type">valueEmitted</span>(int someValue)
+
+      <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+          <span class="name">id</span>: <span class="name">textItem</span>
+          <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+      }
+
+      <span class="comment">// emit valueEmitted() signal, which expects an int, with Text.AlignRight</span>
+      <span class="name">Component</span>.onCompleted: <span class="name">valueEmitted</span>(<span class="name">Text</span>.<span class="name">AlignRight</span>)
+  }
+
+</pre>
+</div>
+<p><b>See also </b><a href="qtqml-typesystem-basictypes.html">QML Basic Types</a> and <a href="qtqml-syntax-objectattributes.html#enumeration-attributes">Enumeration Attributes</a>.</p>
+<!-- @@@enumeration -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

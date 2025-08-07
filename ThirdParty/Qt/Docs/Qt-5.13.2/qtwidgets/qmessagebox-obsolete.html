@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmessagebox.cpp -->
+  <title>Obsolete Members for QMessageBox | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QMessageBox</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Obsolete Members for QMessageBox</h1>
+<p><b>The following members of class <a href="qmessagebox.html">QMessageBox</a> are obsolete.</b> They are provided to keep old source code working. We strongly advise against using them in new code.</p>
+<h2>Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>typedef </td><td class="memItemRight bottomAlign"><b><a href="qmessagebox-obsolete.html#Button-typedef">Button</a></b></td></tr>
+</table></div>
+<h2>Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code></td><td class="memItemRight bottomAlign"><b><a href="qmessagebox-obsolete.html#QMessageBox-2">QMessageBox</a></b>(const QString &amp;<i>title</i>, const QString &amp;<i>text</i>, QMessageBox::Icon <i>icon</i>, int <i>button0</i>, int <i>button1</i>, int <i>button2</i>, QWidget *<i>parent</i> = nullptr, Qt::WindowFlags <i>f</i> = Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint)</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>QString </td><td class="memItemRight bottomAlign"><b><a href="qmessagebox-obsolete.html#buttonText">buttonText</a></b>(int <i>button</i>) const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>void </td><td class="memItemRight bottomAlign"><b><a href="qmessagebox-obsolete.html#setButtonText">setButtonText</a></b>(int <i>button</i>, const QString &amp;<i>text</i>)</td></tr>
+</table></div>
+<h2>Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>int </td><td class="memItemRight bottomAlign"><b><a href="qmessagebox-obsolete.html#critical-1">critical</a></b>(QWidget *<i>parent</i>, const QString &amp;<i>title</i>, const QString &amp;<i>text</i>, int <i>button0</i>, int <i>button1</i>, int <i>button2</i> = 0)</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>int </td><td class="memItemRight bottomAlign"><b><a href="qmessagebox-obsolete.html#critical-2">critical</a></b>(QWidget *<i>parent</i>, const QString &amp;<i>title</i>, const QString &amp;<i>text</i>, const QString &amp;<i>button0Text</i>, const QString &amp;<i>button1Text</i> = QString(), const QString &amp;<i>button2Text</i> = QString(), int <i>defaultButtonNumber</i> = 0, int <i>escapeButtonNumber</i> = -1)</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>int </td><td class="memItemRight bottomAlign"><b><a href="qmessagebox-obsolete.html#information-1">information</a></b>(QWidget *<i>parent</i>, const QString &amp;<i>title</i>, const QString &amp;<i>text</i>, int <i>button0</i>, int <i>button1</i> = 0, int <i>button2</i> = 0)</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>int </td><td class="memItemRight bottomAlign"><b><a href="qmessagebox-obsolete.html#information-2">information</a></b>(QWidget *<i>parent</i>, const QString &amp;<i>title</i>, const QString &amp;<i>text</i>, const QString &amp;<i>button0Text</i>, const QString &amp;<i>button1Text</i> = QString(), const QString &amp;<i>button2Text</i> = QString(), int <i>defaultButtonNumber</i> = 0, int <i>escapeButtonNumber</i> = -1)</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>int </td><td class="memItemRight bottomAlign"><b><a href="qmessagebox-obsolete.html#question-1">question</a></b>(QWidget *<i>parent</i>, const QString &amp;<i>title</i>, const QString &amp;<i>text</i>, int <i>button0</i>, int <i>button1</i> = 0, int <i>button2</i> = 0)</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>int </td><td class="memItemRight bottomAlign"><b><a href="qmessagebox-obsolete.html#question-2">question</a></b>(QWidget *<i>parent</i>, const QString &amp;<i>title</i>, const QString &amp;<i>text</i>, const QString &amp;<i>button0Text</i>, const QString &amp;<i>button1Text</i> = QString(), const QString &amp;<i>button2Text</i> = QString(), int <i>defaultButtonNumber</i> = 0, int <i>escapeButtonNumber</i> = -1)</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>QPixmap </td><td class="memItemRight bottomAlign"><b><a href="qmessagebox-obsolete.html#standardIcon">standardIcon</a></b>(QMessageBox::Icon <i>icon</i>)</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>int </td><td class="memItemRight bottomAlign"><b><a href="qmessagebox-obsolete.html#warning-1">warning</a></b>(QWidget *<i>parent</i>, const QString &amp;<i>title</i>, const QString &amp;<i>text</i>, int <i>button0</i>, int <i>button1</i>, int <i>button2</i> = 0)</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> <code>(obsolete) </code>int </td><td class="memItemRight bottomAlign"><b><a href="qmessagebox-obsolete.html#warning-2">warning</a></b>(QWidget *<i>parent</i>, const QString &amp;<i>title</i>, const QString &amp;<i>text</i>, const QString &amp;<i>button0Text</i>, const QString &amp;<i>button1Text</i> = QString(), const QString &amp;<i>button2Text</i> = QString(), int <i>defaultButtonNumber</i> = 0, int <i>escapeButtonNumber</i> = -1)</td></tr>
+</table></div>
+<h2>Member Type Documentation</h2>
+<!-- $$$Button -->
+<h3 class="fn" id="Button-typedef"><a name="Button-typedef"></a>typedef QMessageBox::<span class="name">Button</span></h3>
+<p>This typedef is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Use <a href="qmessagebox.html#StandardButton-enum">QMessageBox::StandardButton</a> instead.</p>
+<!-- @@@Button -->
+<h2>Member Function Documentation</h2>
+<!-- $$$QMessageBox$$$QMessageBoxconstQString&constQString&QMessageBox::IconintintintQWidget*Qt::WindowFlags -->
+<h3 class="fn" id="QMessageBox-2"><a name="QMessageBox-2"></a>QMessageBox::<span class="name">QMessageBox</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>title</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>text</i>, <span class="type"><a href="qmessagebox.html#Icon-enum">QMessageBox::Icon</a></span> <i>icon</i>, <span class="type">int</span> <i>button0</i>, <span class="type">int</span> <i>button1</i>, <span class="type">int</span> <i>button2</i>, <span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i> = nullptr, <span class="type"><a href="../qtcore/qt.html#WindowType-enum">Qt::WindowFlags</a></span> <i>f</i> = Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint)</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Constructs a message box with a <i>title</i>, a <i>text</i>, an <i>icon</i>, and up to three buttons.</p>
+<p>The <i>icon</i> must be one of the following:</p>
+<ul>
+<li><a href="qmessagebox.html#Icon-enum">QMessageBox::NoIcon</a></li>
+<li><a href="qmessagebox.html#Icon-enum">QMessageBox::Question</a></li>
+<li><a href="qmessagebox.html#Icon-enum">QMessageBox::Information</a></li>
+<li><a href="qmessagebox.html#Icon-enum">QMessageBox::Warning</a></li>
+<li><a href="qmessagebox.html#Icon-enum">QMessageBox::Critical</a></li>
+</ul>
+<p>Each button, <i>button0</i>, <i>button1</i> and <i>button2</i>, can have one of the following values:</p>
+<ul>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::NoButton</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Ok</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Cancel</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Yes</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::No</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Abort</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Retry</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Ignore</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::YesAll</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::NoAll</a></li>
+</ul>
+<p>Use <a href="qmessagebox.html#StandardButton-enum">QMessageBox::NoButton</a> for the later parameters to have fewer than three buttons in your message box. If you don't specify any buttons at all, <a href="qmessagebox.html">QMessageBox</a> will provide an Ok button.</p>
+<p>One of the buttons can be OR-ed with the <a href="qmessagebox.html#StandardButton-enum">QMessageBox::Default</a> flag to make it the default button (clicked when Enter is pressed).</p>
+<p>One of the buttons can be OR-ed with the <a href="qmessagebox.html#StandardButton-enum">QMessageBox::Escape</a> flag to make it the cancel or close button (clicked when <b>Esc</b> is pressed).</p>
+<pre class="cpp">
+
+          <span class="type"><a href="qmessagebox.html#QMessageBox">QMessageBox</a></span> mb(<span class="string">&quot;Application Name&quot;</span><span class="operator">,</span>
+                         <span class="string">&quot;Hardware failure.\n\nDisk error detected\nDo you want to stop?&quot;</span><span class="operator">,</span>
+                         <span class="type"><a href="qmessagebox.html#QMessageBox">QMessageBox</a></span><span class="operator">::</span>Question<span class="operator">,</span>
+                         <span class="type"><a href="qmessagebox.html#QMessageBox">QMessageBox</a></span><span class="operator">::</span>Yes <span class="operator">|</span> <span class="type"><a href="qmessagebox.html#QMessageBox">QMessageBox</a></span><span class="operator">::</span>Default<span class="operator">,</span>
+                         <span class="type"><a href="qmessagebox.html#QMessageBox">QMessageBox</a></span><span class="operator">::</span>No <span class="operator">|</span> <span class="type"><a href="qmessagebox.html#QMessageBox">QMessageBox</a></span><span class="operator">::</span>Escape<span class="operator">,</span>
+                         <span class="type"><a href="qmessagebox.html#QMessageBox">QMessageBox</a></span><span class="operator">::</span>NoButton);
+          <span class="keyword">if</span> (mb<span class="operator">.</span>exec() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qmessagebox.html#QMessageBox">QMessageBox</a></span><span class="operator">::</span>No) {
+              <span class="comment">// try again</span>
+
+</pre>
+<p>The message box is an <a href="../qtcore/qt.html#WindowModality-enum">application modal</a> dialog box.</p>
+<p>The <i>parent</i> and <i>f</i> arguments are passed to the <a href="qdialog.html">QDialog</a> constructor.</p>
+<p><b>See also </b><a href="qmessagebox.html#setWindowTitle">setWindowTitle</a>(), <a href="qmessagebox.html#text-prop">setText</a>(), and <a href="qmessagebox.html#icon-prop">setIcon</a>().</p>
+<!-- @@@QMessageBox -->
+<!-- $$$buttonText[overload1]$$$buttonTextint -->
+<h3 class="fn" id="buttonText"><a name="buttonText"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QMessageBox::<span class="name">buttonText</span>(<span class="type">int</span> <i>button</i>) const</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Returns the text of the message box button <i>button</i>, or an empty string if the message box does not contain the button.</p>
+<p>Use <a href="qmessagebox.html#button">button</a>() and <a href="qabstractbutton.html#text-prop">QPushButton::text</a>() instead.</p>
+<p><b>See also </b><a href="qmessagebox-obsolete.html#setButtonText">setButtonText</a>().</p>
+<!-- @@@buttonText -->
+<!-- $$$critical$$$criticalQWidget*constQString&constQString&intintint -->
+<h3 class="fn" id="critical-1"><a name="critical-1"></a><code>[static] </code><span class="type">int</span> QMessageBox::<span class="name">critical</span>(<span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>title</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>text</i>, <span class="type">int</span> <i>button0</i>, <span class="type">int</span> <i>button1</i>, <span class="type">int</span> <i>button2</i> = 0)</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Opens a critical message box with the given <i>title</i> and <i>text</i>. The dialog may have up to three buttons. Each of the button parameters, <i>button0</i>, <i>button1</i> and <i>button2</i> may be set to one of the following values:</p>
+<ul>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::NoButton</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Ok</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Cancel</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Yes</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::No</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Abort</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Retry</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Ignore</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::YesAll</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::NoAll</a></li>
+</ul>
+<p>If you don't want all three buttons, set the last button, or last two buttons to <a href="qmessagebox.html#StandardButton-enum">QMessageBox::NoButton</a>.</p>
+<p>One button can be OR-ed with <a href="qmessagebox.html#StandardButton-enum">QMessageBox::Default</a>, and one button can be OR-ed with <a href="qmessagebox.html#StandardButton-enum">QMessageBox::Escape</a>.</p>
+<p>Returns the identity (<a href="qmessagebox.html#StandardButton-enum">QMessageBox::Ok</a>, or <a href="qmessagebox.html#StandardButton-enum">QMessageBox::No</a>, etc.) of the button that was clicked.</p>
+<p>The message box is an <a href="../qtcore/qt.html#WindowModality-enum">application modal</a> dialog box.</p>
+<p><b>Warning:</b> Do not delete <i>parent</i> during the execution of the dialog. If you want to do this, you should create the dialog yourself using one of the <a href="qmessagebox.html">QMessageBox</a> constructors.</p>
+<p><b>See also </b><a href="qmessagebox.html#information">information</a>(), <a href="qmessagebox.html#question">question</a>(), and <a href="qmessagebox.html#warning">warning</a>().</p>
+<!-- @@@critical -->
+<!-- $$$critical$$$criticalQWidget*constQString&constQString&constQString&constQString&constQString&intint -->
+<h3 class="fn" id="critical-2"><a name="critical-2"></a><code>[static] </code><span class="type">int</span> QMessageBox::<span class="name">critical</span>(<span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>title</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>text</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>button0Text</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>button1Text</i> = QString(), const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>button2Text</i> = QString(), <span class="type">int</span> <i>defaultButtonNumber</i> = 0, <span class="type">int</span> <i>escapeButtonNumber</i> = -1)</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>This is an overloaded function.</p>
+<p>Displays a critical error message box with the given <i>title</i> and <i>text</i>, as well as one, two, or three buttons. Returns the number of the button that was clicked (0, 1 or 2).</p>
+<p><i>button0Text</i> is the text of the first button, and is optional. If <i>button0Text</i> is not supplied, &quot;OK&quot; (translated) will be used. <i>button1Text</i> is the text of the second button, and is optional, and <i>button2Text</i> is the text of the third button, and is optional. <i>defaultButtonNumber</i> (0, 1 or 2) is the index of the default button; pressing Return or Enter is the same as clicking the default button. It defaults to 0 (the first button). <i>escapeButtonNumber</i> is the index of the Escape button; pressing Escape is the same as clicking this button. It defaults to -1; supply 0, 1, or 2 to make pressing Escape equivalent to clicking the relevant button.</p>
+<p>The message box is an <a href="../qtcore/qt.html#WindowModality-enum">application modal</a> dialog box.</p>
+<p><b>Warning:</b> Do not delete <i>parent</i> during the execution of the dialog. If you want to do this, you should create the dialog yourself using one of the <a href="qmessagebox.html">QMessageBox</a> constructors.</p>
+<p><b>See also </b><a href="qmessagebox.html#information">information</a>(), <a href="qmessagebox.html#question">question</a>(), and <a href="qmessagebox.html#warning">warning</a>().</p>
+<!-- @@@critical -->
+<!-- $$$information$$$informationQWidget*constQString&constQString&intintint -->
+<h3 class="fn" id="information-1"><a name="information-1"></a><code>[static] </code><span class="type">int</span> QMessageBox::<span class="name">information</span>(<span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>title</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>text</i>, <span class="type">int</span> <i>button0</i>, <span class="type">int</span> <i>button1</i> = 0, <span class="type">int</span> <i>button2</i> = 0)</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Opens an information message box with the given <i>title</i> and the <i>text</i>. The dialog may have up to three buttons. Each of the buttons, <i>button0</i>, <i>button1</i> and <i>button2</i> may be set to one of the following values:</p>
+<ul>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::NoButton</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Ok</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Cancel</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Yes</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::No</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Abort</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Retry</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Ignore</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::YesAll</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::NoAll</a></li>
+</ul>
+<p>If you don't want all three buttons, set the last button, or last two buttons to <a href="qmessagebox.html#StandardButton-enum">QMessageBox::NoButton</a>.</p>
+<p>One button can be OR-ed with <a href="qmessagebox.html#StandardButton-enum">QMessageBox::Default</a>, and one button can be OR-ed with <a href="qmessagebox.html#StandardButton-enum">QMessageBox::Escape</a>.</p>
+<p>Returns the identity (<a href="qmessagebox.html#StandardButton-enum">QMessageBox::Ok</a>, or <a href="qmessagebox.html#StandardButton-enum">QMessageBox::No</a>, etc.) of the button that was clicked.</p>
+<p>The message box is an <a href="../qtcore/qt.html#WindowModality-enum">application modal</a> dialog box.</p>
+<p><b>Warning:</b> Do not delete <i>parent</i> during the execution of the dialog. If you want to do this, you should create the dialog yourself using one of the <a href="qmessagebox.html">QMessageBox</a> constructors.</p>
+<p><b>See also </b><a href="qmessagebox.html#question">question</a>(), <a href="qmessagebox.html#warning">warning</a>(), and <a href="qmessagebox.html#critical">critical</a>().</p>
+<!-- @@@information -->
+<!-- $$$information$$$informationQWidget*constQString&constQString&constQString&constQString&constQString&intint -->
+<h3 class="fn" id="information-2"><a name="information-2"></a><code>[static] </code><span class="type">int</span> QMessageBox::<span class="name">information</span>(<span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>title</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>text</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>button0Text</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>button1Text</i> = QString(), const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>button2Text</i> = QString(), <span class="type">int</span> <i>defaultButtonNumber</i> = 0, <span class="type">int</span> <i>escapeButtonNumber</i> = -1)</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>This is an overloaded function.</p>
+<p>Displays an information message box with the given <i>title</i> and <i>text</i>, as well as one, two or three buttons. Returns the index of the button that was clicked (0, 1 or 2).</p>
+<p><i>button0Text</i> is the text of the first button, and is optional. If <i>button0Text</i> is not supplied, &quot;OK&quot; (translated) will be used. <i>button1Text</i> is the text of the second button, and is optional. <i>button2Text</i> is the text of the third button, and is optional. <i>defaultButtonNumber</i> (0, 1 or 2) is the index of the default button; pressing Return or Enter is the same as clicking the default button. It defaults to 0 (the first button). <i>escapeButtonNumber</i> is the index of the escape button; pressing <b>Esc</b> is the same as clicking this button. It defaults to -1; supply 0, 1 or 2 to make pressing <b>Esc</b> equivalent to clicking the relevant button.</p>
+<p>The message box is an <a href="../qtcore/qt.html#WindowModality-enum">application modal</a> dialog box.</p>
+<p><b>Warning:</b> Do not delete <i>parent</i> during the execution of the dialog. If you want to do this, you should create the dialog yourself using one of the <a href="qmessagebox.html">QMessageBox</a> constructors.</p>
+<p><b>See also </b><a href="qmessagebox.html#question">question</a>(), <a href="qmessagebox.html#warning">warning</a>(), and <a href="qmessagebox.html#critical">critical</a>().</p>
+<!-- @@@information -->
+<!-- $$$question$$$questionQWidget*constQString&constQString&intintint -->
+<h3 class="fn" id="question-1"><a name="question-1"></a><code>[static] </code><span class="type">int</span> QMessageBox::<span class="name">question</span>(<span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>title</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>text</i>, <span class="type">int</span> <i>button0</i>, <span class="type">int</span> <i>button1</i> = 0, <span class="type">int</span> <i>button2</i> = 0)</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Opens a question message box with the given <i>title</i> and <i>text</i>. The dialog may have up to three buttons. Each of the buttons, <i>button0</i>, <i>button1</i> and <i>button2</i> may be set to one of the following values:</p>
+<ul>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::NoButton</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Ok</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Cancel</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Yes</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::No</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Abort</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Retry</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Ignore</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::YesAll</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::NoAll</a></li>
+</ul>
+<p>If you don't want all three buttons, set the last button, or last two buttons to <a href="qmessagebox.html#StandardButton-enum">QMessageBox::NoButton</a>.</p>
+<p>One button can be OR-ed with <a href="qmessagebox.html#StandardButton-enum">QMessageBox::Default</a>, and one button can be OR-ed with <a href="qmessagebox.html#StandardButton-enum">QMessageBox::Escape</a>.</p>
+<p>Returns the identity (<a href="qmessagebox.html#StandardButton-enum">QMessageBox::Yes</a>, or <a href="qmessagebox.html#StandardButton-enum">QMessageBox::No</a>, etc.) of the button that was clicked.</p>
+<p>The message box is an <a href="../qtcore/qt.html#WindowModality-enum">application modal</a> dialog box.</p>
+<p><b>Warning:</b> Do not delete <i>parent</i> during the execution of the dialog. If you want to do this, you should create the dialog yourself using one of the <a href="qmessagebox.html">QMessageBox</a> constructors.</p>
+<p><b>See also </b><a href="qmessagebox.html#information">information</a>(), <a href="qmessagebox.html#warning">warning</a>(), and <a href="qmessagebox.html#critical">critical</a>().</p>
+<!-- @@@question -->
+<!-- $$$question$$$questionQWidget*constQString&constQString&constQString&constQString&constQString&intint -->
+<h3 class="fn" id="question-2"><a name="question-2"></a><code>[static] </code><span class="type">int</span> QMessageBox::<span class="name">question</span>(<span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>title</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>text</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>button0Text</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>button1Text</i> = QString(), const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>button2Text</i> = QString(), <span class="type">int</span> <i>defaultButtonNumber</i> = 0, <span class="type">int</span> <i>escapeButtonNumber</i> = -1)</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>This is an overloaded function.</p>
+<p>Displays a question message box with the given <i>title</i> and <i>text</i>, as well as one, two or three buttons. Returns the index of the button that was clicked (0, 1 or 2).</p>
+<p><i>button0Text</i> is the text of the first button, and is optional. If <i>button0Text</i> is not supplied, &quot;OK&quot; (translated) will be used. <i>button1Text</i> is the text of the second button, and is optional. <i>button2Text</i> is the text of the third button, and is optional. <i>defaultButtonNumber</i> (0, 1 or 2) is the index of the default button; pressing Return or Enter is the same as clicking the default button. It defaults to 0 (the first button). <i>escapeButtonNumber</i> is the index of the Escape button; pressing Escape is the same as clicking this button. It defaults to -1; supply 0, 1 or 2 to make pressing Escape equivalent to clicking the relevant button.</p>
+<p>The message box is an <a href="../qtcore/qt.html#WindowModality-enum">application modal</a> dialog box.</p>
+<p><b>Warning:</b> Do not delete <i>parent</i> during the execution of the dialog. If you want to do this, you should create the dialog yourself using one of the <a href="qmessagebox.html">QMessageBox</a> constructors.</p>
+<p><b>See also </b><a href="qmessagebox.html#information">information</a>(), <a href="qmessagebox.html#warning">warning</a>(), and <a href="qmessagebox.html#critical">critical</a>().</p>
+<!-- @@@question -->
+<!-- $$$setButtonText[overload1]$$$setButtonTextintconstQString& -->
+<h3 class="fn" id="setButtonText"><a name="setButtonText"></a><span class="type">void</span> QMessageBox::<span class="name">setButtonText</span>(<span class="type">int</span> <i>button</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>text</i>)</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Sets the text of the message box button <i>button</i> to <i>text</i>. Setting the text of a button that is not in the message box is silently ignored.</p>
+<p>Use <a href="qmessagebox.html#addButton">addButton</a>() instead.</p>
+<p><b>See also </b><a href="qmessagebox-obsolete.html#buttonText">buttonText</a>().</p>
+<!-- @@@setButtonText -->
+<!-- $$$standardIcon[overload1]$$$standardIconQMessageBox::Icon -->
+<h3 class="fn" id="standardIcon"><a name="standardIcon"></a><code>[static] </code><span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> QMessageBox::<span class="name">standardIcon</span>(<span class="type"><a href="qmessagebox.html#Icon-enum">QMessageBox::Icon</a></span> <i>icon</i>)</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Returns the pixmap used for a standard icon. This allows the pixmaps to be used in more complex message boxes. <i>icon</i> specifies the required icon, e.g&#x2e; <a href="qmessagebox.html#Icon-enum">QMessageBox::Question</a>, <a href="qmessagebox.html#Icon-enum">QMessageBox::Information</a>, <a href="qmessagebox.html#Icon-enum">QMessageBox::Warning</a> or <a href="qmessagebox.html#Icon-enum">QMessageBox::Critical</a>.</p>
+<p>Call <a href="qstyle.html#standardIcon">QStyle::standardIcon</a>() with <a href="qstyle.html#StandardPixmap-enum">QStyle::SP_MessageBoxInformation</a> etc. instead.</p>
+<!-- @@@standardIcon -->
+<!-- $$$warning$$$warningQWidget*constQString&constQString&intintint -->
+<h3 class="fn" id="warning-1"><a name="warning-1"></a><code>[static] </code><span class="type">int</span> QMessageBox::<span class="name">warning</span>(<span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>title</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>text</i>, <span class="type">int</span> <i>button0</i>, <span class="type">int</span> <i>button1</i>, <span class="type">int</span> <i>button2</i> = 0)</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>Opens a warning message box with the given <i>title</i> and <i>text</i>. The dialog may have up to three buttons. Each of the button parameters, <i>button0</i>, <i>button1</i> and <i>button2</i> may be set to one of the following values:</p>
+<ul>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::NoButton</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Ok</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Cancel</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Yes</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::No</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Abort</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Retry</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::Ignore</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::YesAll</a></li>
+<li><a href="qmessagebox.html#StandardButton-enum">QMessageBox::NoAll</a></li>
+</ul>
+<p>If you don't want all three buttons, set the last button, or last two buttons to <a href="qmessagebox.html#StandardButton-enum">QMessageBox::NoButton</a>.</p>
+<p>One button can be OR-ed with <a href="qmessagebox.html#StandardButton-enum">QMessageBox::Default</a>, and one button can be OR-ed with <a href="qmessagebox.html#StandardButton-enum">QMessageBox::Escape</a>.</p>
+<p>Returns the identity (<a href="qmessagebox.html#StandardButton-enum">QMessageBox::Ok</a> or <a href="qmessagebox.html#StandardButton-enum">QMessageBox::No</a> or ..&#x2e;) of the button that was clicked.</p>
+<p>The message box is an <a href="../qtcore/qt.html#WindowModality-enum">application modal</a> dialog box.</p>
+<p><b>Warning:</b> Do not delete <i>parent</i> during the execution of the dialog. If you want to do this, you should create the dialog yourself using one of the <a href="qmessagebox.html">QMessageBox</a> constructors.</p>
+<p><b>See also </b><a href="qmessagebox.html#information">information</a>(), <a href="qmessagebox.html#question">question</a>(), and <a href="qmessagebox.html#critical">critical</a>().</p>
+<!-- @@@warning -->
+<!-- $$$warning$$$warningQWidget*constQString&constQString&constQString&constQString&constQString&intint -->
+<h3 class="fn" id="warning-2"><a name="warning-2"></a><code>[static] </code><span class="type">int</span> QMessageBox::<span class="name">warning</span>(<span class="type"><a href="qwidget.html#QWidget">QWidget</a></span> *<i>parent</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>title</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>text</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>button0Text</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>button1Text</i> = QString(), const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>button2Text</i> = QString(), <span class="type">int</span> <i>defaultButtonNumber</i> = 0, <span class="type">int</span> <i>escapeButtonNumber</i> = -1)</h3>
+<p>This function is obsolete. It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>This is an overloaded function.</p>
+<p>Displays a warning message box with the given <i>title</i> and <i>text</i>, as well as one, two, or three buttons. Returns the number of the button that was clicked (0, 1, or 2).</p>
+<p><i>button0Text</i> is the text of the first button, and is optional. If <i>button0Text</i> is not supplied, &quot;OK&quot; (translated) will be used. <i>button1Text</i> is the text of the second button, and is optional, and <i>button2Text</i> is the text of the third button, and is optional. <i>defaultButtonNumber</i> (0, 1 or 2) is the index of the default button; pressing Return or Enter is the same as clicking the default button. It defaults to 0 (the first button). <i>escapeButtonNumber</i> is the index of the Escape button; pressing Escape is the same as clicking this button. It defaults to -1; supply 0, 1, or 2 to make pressing Escape equivalent to clicking the relevant button.</p>
+<p>The message box is an <a href="../qtcore/qt.html#WindowModality-enum">application modal</a> dialog box.</p>
+<p><b>Warning:</b> Do not delete <i>parent</i> during the execution of the dialog. If you want to do this, you should create the dialog yourself using one of the <a href="qmessagebox.html">QMessageBox</a> constructors.</p>
+<p><b>See also </b><a href="qmessagebox.html#information">information</a>(), <a href="qmessagebox.html#question">question</a>(), and <a href="qmessagebox.html#critical">critical</a>().</p>
+<!-- @@@warning -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

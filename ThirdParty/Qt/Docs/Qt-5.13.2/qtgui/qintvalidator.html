@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qvalidator.cpp -->
+  <title>QIntValidator Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QIntValidator</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QIntValidator Class</h1>
+<!-- $$$QIntValidator-brief -->
+<p>The <a href="qintvalidator.html">QIntValidator</a> class provides a validator that ensures a string contains a valid integer within a specified range. <a href="#details">More...</a></p>
+<!-- @@@QIntValidator -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QIntValidator&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qvalidator.html">QValidator</a></td></tr></table></div><ul>
+<li><a href="qintvalidator-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qintvalidator.html#bottom-prop">bottom</a></b> : int</li>
+<li class="fn"><b><a href="qintvalidator.html#top-prop">top</a></b> : int</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qintvalidator.html#QIntValidator-1">QIntValidator</a></b>(int <i>minimum</i>, int <i>maximum</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qintvalidator.html#QIntValidator">QIntValidator</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qintvalidator.html#dtor.QIntValidator">~QIntValidator</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qintvalidator.html#bottom-prop">bottom</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qintvalidator.html#bottom-prop">setBottom</a></b>(<i>int</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qintvalidator.html#setRange">setRange</a></b>(int <i>bottom</i>, int <i>top</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qintvalidator.html#top-prop">setTop</a></b>(<i>int</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qintvalidator.html#top-prop">top</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qintvalidator.html#fixup">fixup</a></b>(QString &amp;<i>input</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QValidator::State </td><td class="memItemRight bottomAlign"><b><a href="qintvalidator.html#validate">validate</a></b>(QString &amp;<i>input</i>, int &amp;<i>pos</i>) const override</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qintvalidator.html#bottom-prop">bottomChanged</a></b>(int <i>bottom</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qintvalidator.html#top-prop">topChanged</a></b>(int <i>top</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QIntValidator-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Example of use:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qvalidator.html#QValidator">QValidator</a></span> <span class="operator">*</span>validator <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qintvalidator.html#QIntValidator">QIntValidator</a></span>(<span class="number">100</span><span class="operator">,</span> <span class="number">999</span><span class="operator">,</span> <span class="keyword">this</span>);
+  <span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span> <span class="operator">*</span>edit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span>(<span class="keyword">this</span>);
+
+  <span class="comment">// the edit lineedit will only accept integers between 100 and 999</span>
+  edit<span class="operator">-</span><span class="operator">&gt;</span>setValidator(validator);
+
+</pre>
+<p>Below we present some examples of validators. In practice they would normally be associated with a widget as in the example above.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> str;
+  <span class="type">int</span> pos <span class="operator">=</span> <span class="number">0</span>;
+  <span class="type"><a href="qintvalidator.html#QIntValidator">QIntValidator</a></span> v(<span class="number">100</span><span class="operator">,</span> <span class="number">900</span><span class="operator">,</span> <span class="keyword">this</span>);
+
+  str <span class="operator">=</span> <span class="string">&quot;1&quot;</span>;
+  v<span class="operator">.</span>validate(str<span class="operator">,</span> pos);     <span class="comment">// returns Intermediate</span>
+  str <span class="operator">=</span> <span class="string">&quot;012&quot;</span>;
+  v<span class="operator">.</span>validate(str<span class="operator">,</span> pos);     <span class="comment">// returns Intermediate</span>
+
+  str <span class="operator">=</span> <span class="string">&quot;123&quot;</span>;
+  v<span class="operator">.</span>validate(str<span class="operator">,</span> pos);     <span class="comment">// returns Acceptable</span>
+  str <span class="operator">=</span> <span class="string">&quot;678&quot;</span>;
+  v<span class="operator">.</span>validate(str<span class="operator">,</span> pos);     <span class="comment">// returns Acceptable</span>
+
+  str <span class="operator">=</span> <span class="string">&quot;999&quot;</span>;
+  v<span class="operator">.</span>validate(str<span class="operator">,</span> pos);    <span class="comment">// returns Intermediate</span>
+
+  str <span class="operator">=</span> <span class="string">&quot;1234&quot;</span>;
+  v<span class="operator">.</span>validate(str<span class="operator">,</span> pos);     <span class="comment">// returns Invalid</span>
+  str <span class="operator">=</span> <span class="string">&quot;-123&quot;</span>;
+  v<span class="operator">.</span>validate(str<span class="operator">,</span> pos);     <span class="comment">// returns Invalid</span>
+  str <span class="operator">=</span> <span class="string">&quot;abc&quot;</span>;
+  v<span class="operator">.</span>validate(str<span class="operator">,</span> pos);     <span class="comment">// returns Invalid</span>
+  str <span class="operator">=</span> <span class="string">&quot;12cm&quot;</span>;
+  v<span class="operator">.</span>validate(str<span class="operator">,</span> pos);     <span class="comment">// returns Invalid</span>
+
+</pre>
+<p>Notice that the value <code>999</code> returns Intermediate. Values consisting of a number of digits equal to or less than the max value are considered intermediate. This is intended because the digit that prevents a number from being in range is not necessarily the last digit typed. This also means that an intermediate number can have leading zeros.</p>
+<p>The minimum and maximum values are set in one call with <a href="qintvalidator.html#setRange">setRange</a>(), or individually with <a href="qintvalidator.html#bottom-prop">setBottom</a>() and <a href="qintvalidator.html#top-prop">setTop</a>().</p>
+<p><a href="qintvalidator.html">QIntValidator</a> uses its <a href="qvalidator.html#locale">locale</a>() to interpret the number. For example, in Arabic locales, <a href="qintvalidator.html">QIntValidator</a> will accept Arabic digits.</p>
+<p><b>Note: </b>The <a href="../qtcore/qlocale.html#NumberOption-enum">QLocale::NumberOptions</a> set on the <a href="qvalidator.html#locale">locale</a>() also affect the way the number is interpreted. For example, since <a href="../qtcore/qlocale.html#NumberOption-enum">QLocale::RejectGroupSeparator</a> is not set by default, the validator will accept group separators. It is thus recommended to use <a href="../qtcore/qlocale.html#toInt">QLocale::toInt</a>() to obtain the numeric value.</p></div>
+<p><b>See also </b><a href="qdoublevalidator.html">QDoubleValidator</a>, <a href="qregexpvalidator.html">QRegExpValidator</a>, <a href="../qtcore/qlocale.html#toInt">QLocale::toInt</a>(), and <a href="../qtwidgets/qtwidgets-widgets-lineedits-example.html">Line Edits Example</a>.</p>
+<!-- @@@QIntValidator -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$bottom-prop$$$bottom$$$setBottomint$$$bottomChangedint -->
+<h3 class="fn" id="bottom-prop"><a name="bottom-prop"></a><span class="name">bottom</span> : <span class="type">int</span></h3>
+<p>This property holds the validator's lowest acceptable value</p>
+<p>By default, this property's value is derived from the lowest signed integer available (typically -2147483647).</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>bottom</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setBottom</b></span>(<i>int</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>bottomChanged</b></span>(int <i>bottom</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qintvalidator.html#setRange">setRange</a>().</p>
+<!-- @@@bottom -->
+<!-- $$$top-prop$$$top$$$setTopint$$$topChangedint -->
+<h3 class="fn" id="top-prop"><a name="top-prop"></a><span class="name">top</span> : <span class="type">int</span></h3>
+<p>This property holds the validator's highest acceptable value</p>
+<p>By default, this property's value is derived from the highest signed integer available (typically 2147483647).</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> int </td><td class="memItemRight bottomAlign"><span class="name"><b>top</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setTop</b></span>(<i>int</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>topChanged</b></span>(int <i>top</i>)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qintvalidator.html#setRange">setRange</a>().</p>
+<!-- @@@top -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QIntValidator$$$QIntValidatorintintQObject* -->
+<h3 class="fn" id="QIntValidator-1"><a name="QIntValidator-1"></a>QIntValidator::<span class="name">QIntValidator</span>(<span class="type">int</span> <i>minimum</i>, <span class="type">int</span> <i>maximum</i>, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a validator with a <i>parent</i>, that accepts integers from <i>minimum</i> to <i>maximum</i> inclusive.</p>
+<!-- @@@QIntValidator -->
+<!-- $$$QIntValidator[overload1]$$$QIntValidatorQObject* -->
+<h3 class="fn" id="QIntValidator"><a name="QIntValidator"></a>QIntValidator::<span class="name">QIntValidator</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a validator with a <i>parent</i> object that accepts all integers.</p>
+<!-- @@@QIntValidator -->
+<!-- $$$~QIntValidator[overload1]$$$~QIntValidator -->
+<h3 class="fn" id="dtor.QIntValidator"><a name="dtor.QIntValidator"></a><code>[virtual] </code>QIntValidator::<span class="name">~QIntValidator</span>()</h3>
+<p>Destroys the validator.</p>
+<!-- @@@~QIntValidator -->
+<!-- $$$fixup[overload1]$$$fixupQString& -->
+<h3 class="fn" id="fixup"><a name="fixup"></a><code>[override virtual] </code><span class="type">void</span> QIntValidator::<span class="name">fixup</span>(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>input</i>) const</h3>
+<p>Reimplements: <a href="qvalidator.html#fixup">QValidator::fixup</a>(QString &amp;input) const.</p>
+<!-- @@@fixup -->
+<!-- $$$setRange[overload1]$$$setRangeintint -->
+<h3 class="fn" id="setRange"><a name="setRange"></a><code>[virtual] </code><span class="type">void</span> QIntValidator::<span class="name">setRange</span>(<span class="type">int</span> <i>bottom</i>, <span class="type">int</span> <i>top</i>)</h3>
+<p>Sets the range of the validator to only accept integers between <i>bottom</i> and <i>top</i> inclusive.</p>
+<!-- @@@setRange -->
+<!-- $$$validate[overload1]$$$validateQString&int& -->
+<h3 class="fn" id="validate"><a name="validate"></a><code>[override virtual] </code><span class="type"><a href="qvalidator.html#State-enum">QValidator::State</a></span> QIntValidator::<span class="name">validate</span>(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>input</i>, <span class="type">int</span> &amp;<i>pos</i>) const</h3>
+<p>Reimplements: <a href="qvalidator.html#validate">QValidator::validate</a>(QString &amp;input, int &amp;pos) const.</p>
+<p>Returns <a href="qvalidator.html#State-enum">Acceptable</a> if the <i>input</i> is an integer within the valid range, <a href="qvalidator.html#State-enum">Intermediate</a> if the <i>input</i> is a prefix of an integer in the valid range, and <a href="qvalidator.html#State-enum">Invalid</a> otherwise.</p>
+<p>If the valid range consists of just positive integers (e.g&#x2e;, 32 to 100) and <i>input</i> is a negative integer, then Invalid is returned. (On the other hand, if the range consists of negative integers (e.g&#x2e;, -100 to -32) and <i>input</i> is a positive integer, then Intermediate is returned, because the user might be just about to type the minus (especially for right-to-left languages).</p>
+<pre class="cpp">
+
+  <span class="type">int</span> pos <span class="operator">=</span> <span class="number">0</span>;
+
+  s <span class="operator">=</span> <span class="string">&quot;abc&quot;</span>;
+  v<span class="operator">.</span>validate(s<span class="operator">,</span> pos);    <span class="comment">// returns Invalid</span>
+
+  s <span class="operator">=</span> <span class="string">&quot;5&quot;</span>;
+  v<span class="operator">.</span>validate(s<span class="operator">,</span> pos);    <span class="comment">// returns Intermediate</span>
+
+  s <span class="operator">=</span> <span class="string">&quot;50&quot;</span>;
+  v<span class="operator">.</span>validate(s<span class="operator">,</span> pos);    <span class="comment">// returns Acceptable</span>
+
+</pre>
+<p>By default, the <i>pos</i> parameter is not used by this validator.</p>
+<!-- @@@validate -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

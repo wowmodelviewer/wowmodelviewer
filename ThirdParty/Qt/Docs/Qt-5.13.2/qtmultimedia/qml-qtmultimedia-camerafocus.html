@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdeclarativecamerafocus.cpp -->
+  <title>CameraFocus QML Type | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-qmlmodule.html">QML Types</a></td><td >CameraFocus QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">CameraFocus QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$CameraFocus-brief -->
+<p>An interface for focus related camera settings. <a href="#details">More...</a></p>
+<!-- @@@CameraFocus -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtMultimedia 5.13</td></tr></table></div><ul>
+<li><a href="qml-qtmultimedia-camerafocus-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerafocus.html#customFocusPoint-prop">customFocusPoint</a></b></b> : point</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerafocus.html#focusMode-prop">focusMode</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerafocus.html#focusPointMode-prop">focusPointMode</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerafocus.html#focusZones-prop">focusZones</a></b></b> : list&lt;focusZone&gt;</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerafocus.html#supportedFocusModes-prop">supportedFocusModes</a></b></b> : list&lt;FocusMode&gt;</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-camerafocus.html#supportedFocusPointModes-prop">supportedFocusPointModes</a></b></b> : list&lt;enumeration&gt;</li>
+</ul>
+<!-- $$$CameraFocus-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>This type allows control over manual and automatic focus settings, including information about any parts of the camera frame that are selected for autofocusing.</p>
+<p>It should not be constructed separately, instead the <code>focus</code> property of a <a href="qml-multimedia.html#camera">Camera</a> should be used.</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">width</span>: <span class="number">640</span>
+      <span class="name">height</span>: <span class="number">360</span>
+
+      <span class="type"><a href="qml-qtmultimedia-camera.html">Camera</a></span> {
+          <span class="name">id</span>: <span class="name">camera</span>
+
+          <span class="type">focus</span> {
+              <span class="name">focusMode</span>: <span class="name">Camera</span>.<span class="name">FocusMacro</span>
+              <span class="name">focusPointMode</span>: <span class="name">Camera</span>.<span class="name">FocusPointCustom</span>
+              <span class="name">customFocusPoint</span>: <span class="name">Qt</span>.<span class="name">point</span>(<span class="number">0.2</span>, <span class="number">0.2</span>) <span class="comment">// Focus relative to top-left corner</span>
+          }
+      }
+
+      <span class="type"><a href="qml-qtmultimedia-videooutput.html">VideoOutput</a></span> {
+          <span class="name">source</span>: <span class="name">camera</span>
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+      }
+  }
+
+</pre>
+<!-- @@@CameraFocus -->
+<h2>Property Documentation</h2>
+<!-- $$$customFocusPoint -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="customFocusPoint-prop"></a><span class="name">customFocusPoint</span> : <span class="type"><a href="../qtqml/qml-point.html">point</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the position of custom focus point, in relative frame coordinates: <a href="../qtcore/qpointf.html">QPointF</a>(0,0) points to the left top frame point, <a href="../qtcore/qpointf.html">QPointF</a>(0.5,0.5) points to the frame center.</p>
+<p>Custom focus point is used only in FocusPointCustom focus mode.</p>
+</div></div><!-- @@@customFocusPoint -->
+<br/>
+<!-- $$$focusMode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="focusMode-prop"></a><span class="name">focusMode</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the current camera focus mode, which can be one of the following values:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Value</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >FocusManual</td><td >Manual or fixed focus mode.</td></tr>
+<tr valign="top" class="even"><td >FocusHyperfocal</td><td >Focus to hyperfocal distance, with the maximum depth of field achieved. All objects at distances from half of this distance out to infinity will be acceptably sharp.</td></tr>
+<tr valign="top" class="odd"><td >FocusInfinity</td><td >Focus strictly to infinity.</td></tr>
+<tr valign="top" class="even"><td >FocusAuto</td><td >One-shot auto focus mode.</td></tr>
+<tr valign="top" class="odd"><td >FocusContinuous</td><td >Continuous auto focus mode.</td></tr>
+<tr valign="top" class="even"><td >FocusMacro</td><td >One shot auto focus to objects close to camera.</td></tr>
+</table></div>
+<p>It's possible to combine multiple Camera::FocusMode values, for example Camera.FocusMacro + Camera.FocusContinuous.</p>
+<p>In automatic focusing modes, the <a href="qml-qtmultimedia-camerafocus.html#focusPointMode-prop">focusPointMode</a> property and <a href="qml-qtmultimedia-camerafocus.html#focusZones-prop">focusZones</a> property provide information and control over how automatic focusing is performed.</p>
+</div></div><!-- @@@focusMode -->
+<br/>
+<!-- $$$focusPointMode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="focusPointMode-prop"></a><span class="name">focusPointMode</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the current camera focus point mode. It is used in automatic focusing modes to determine what to focus on. If the current focus point mode is <code>Camera.FocusPointCustom</code>, the <a href="qml-qtmultimedia-camerafocus.html#customFocusPoint-prop">customFocusPoint</a> property allows you to specify which part of the frame to focus on.</p>
+<p>The property can take one of the following values:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Value</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >FocusPointAuto</td><td >Automatically select one or multiple focus points.</td></tr>
+<tr valign="top" class="even"><td >FocusPointCenter</td><td >Focus to the frame center.</td></tr>
+<tr valign="top" class="odd"><td >FocusPointFaceDetection</td><td >Focus on faces in the frame.</td></tr>
+<tr valign="top" class="even"><td >FocusPointCustom</td><td >Focus to the custom point, defined by the <a href="qml-qtmultimedia-camerafocus.html#customFocusPoint-prop">customFocusPoint</a> property.</td></tr>
+</table></div>
+</div></div><!-- @@@focusPointMode -->
+<br/>
+<!-- $$$focusZones -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="focusZones-prop"></a><span class="name">focusZones</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type">focusZone</span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the list of current camera focus zones, each including <code>area</code> specified in the same coordinates as <a href="qml-qtmultimedia-camerafocus.html#customFocusPoint-prop">customFocusPoint</a>, and zone <code>status</code> as one of the following values:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Value</th><th >Description</th></tr></thead>
+<tr valign="top" class="odd"><td >Camera.FocusAreaUnused</td><td >This focus point area is currently unused in autofocusing.</td></tr>
+<tr valign="top" class="even"><td >Camera.FocusAreaSelected</td><td >This focus point area is used in autofocusing, but is not in focus.</td></tr>
+<tr valign="top" class="odd"><td >Camera.FocusAreaFocused</td><td >This focus point is used in autofocusing, and is in focus.</td></tr>
+</table></div>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtmultimedia-videooutput.html">VideoOutput</a></span> {
+      <span class="name">id</span>: <span class="name">viewfinder</span>
+      <span class="name">source</span>: <span class="name">camera</span>
+
+      <span class="comment">//display focus areas on camera viewfinder:</span>
+      <span class="type"><a href="../qtquick/qml-qtquick-repeater.html">Repeater</a></span> {
+            <span class="name">model</span>: <span class="name">camera</span>.<span class="name">focus</span>.<span class="name">focusZones</span>
+
+            <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+                <span class="type">border</span> {
+                    <span class="name">width</span>: <span class="number">2</span>
+                    <span class="name">color</span>: <span class="name">status</span> <span class="operator">==</span> <span class="name">Camera</span>.<span class="name">FocusAreaFocused</span> ? <span class="string">&quot;green&quot;</span> : <span class="string">&quot;white&quot;</span>
+                }
+                <span class="name">color</span>: <span class="string">&quot;transparent&quot;</span>
+
+                <span class="comment">// Map from the relative, normalized frame coordinates</span>
+                property <span class="type"><a href="../qtqml/qml-variant.html">variant</a></span> <span class="name">mappedRect</span>: <span class="name">viewfinder</span>.<span class="name">mapNormalizedRectToItem</span>(<span class="name">area</span>);
+
+                <span class="name">x</span>: <span class="name">mappedRect</span>.<span class="name">x</span>
+                <span class="name">y</span>: <span class="name">mappedRect</span>.<span class="name">y</span>
+                <span class="name">width</span>: <span class="name">mappedRect</span>.<span class="name">width</span>
+                <span class="name">height</span>: <span class="name">mappedRect</span>.<span class="name">height</span>
+            }
+      }
+  }
+
+</pre>
+</div></div><!-- @@@focusZones -->
+<br/>
+<!-- $$$supportedFocusModes -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="supportedFocusModes-prop"></a><span class="name">supportedFocusModes</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type">FocusMode</span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the supported focus modes of the camera.</p>
+<p>This property was introduced in  Qt 5.11.</p>
+<p><b>See also </b><a href="qml-qtmultimedia-camerafocus.html#focusMode-prop">focusMode</a>.</p>
+</div></div><!-- @@@supportedFocusModes -->
+<br/>
+<!-- $$$supportedFocusPointModes -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="supportedFocusPointModes-prop"></a><span class="name">supportedFocusPointModes</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the supported focus point modes of the camera.</p>
+<p>This property was introduced in  Qt 5.10.</p>
+<p><b>See also </b><a href="qml-qtmultimedia-camerafocus.html#focusPointMode-prop">focusPointMode</a>.</p>
+</div></div><!-- @@@supportedFocusPointModes -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

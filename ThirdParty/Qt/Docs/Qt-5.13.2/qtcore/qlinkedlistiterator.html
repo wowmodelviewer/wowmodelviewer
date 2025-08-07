@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qiterator.qdoc -->
+  <title>QLinkedListIterator Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QLinkedListIterator</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QLinkedListIterator Class</h1>
+<!-- $$$QLinkedListIterator-brief -->
+<p>The <a href="qlinkedlistiterator.html">QLinkedListIterator</a> class provides a Java-style const iterator for <a href="qlinkedlist.html">QLinkedList</a>. <a href="#details">More...</a></p>
+<!-- @@@QLinkedListIterator -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QLinkedListIterator&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr></table></div><ul>
+<li><a href="qlinkedlistiterator-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qlinkedlistiterator.html#QLinkedListIterator">QLinkedListIterator</a></b>(const QLinkedList&lt;T&gt; &amp;<i>list</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QLinkedListIterator&lt;T&gt; &amp;</td><td class="memItemRight bottomAlign"><b><a href="qlinkedlistiterator.html#operator-eq">operator=</a></b>(const QLinkedList&lt;T&gt; &amp;<i>container</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qlinkedlistiterator.html#findNext">findNext</a></b>(const T &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qlinkedlistiterator.html#findPrevious">findPrevious</a></b>(const T &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qlinkedlistiterator.html#hasNext">hasNext</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qlinkedlistiterator.html#hasPrevious">hasPrevious</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const T &amp;</td><td class="memItemRight bottomAlign"><b><a href="qlinkedlistiterator.html#next">next</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const T &amp;</td><td class="memItemRight bottomAlign"><b><a href="qlinkedlistiterator.html#peekNext">peekNext</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const T &amp;</td><td class="memItemRight bottomAlign"><b><a href="qlinkedlistiterator.html#peekPrevious">peekPrevious</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const T &amp;</td><td class="memItemRight bottomAlign"><b><a href="qlinkedlistiterator.html#previous">previous</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlinkedlistiterator.html#toBack">toBack</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qlinkedlistiterator.html#toFront">toFront</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QLinkedListIterator-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qlinkedlist.html">QLinkedList</a> has both <a href="containers.html#java-style-iterators">Java-style iterators</a> and <a href="containers.html#stl-style-iterators">STL-style iterators</a>. The Java-style iterators are more high-level and easier to use than the STL-style iterators; on the other hand, they are slightly less efficient.</p>
+<p><a href="qlinkedlistiterator.html">QLinkedListIterator</a>&lt;T&gt; allows you to iterate over a <a href="qlinkedlist.html">QLinkedList</a>&lt;T&gt;. If you want to modify the list as you iterate over it, use <a href="qmutablelinkedlistiterator.html">QMutableLinkedListIterator</a>&lt;T&gt; instead.</p>
+<p>The <a href="qlinkedlistiterator.html">QLinkedListIterator</a> constructor takes a <a href="qlinkedlist.html">QLinkedList</a> as argument. After construction, the iterator is located at the very beginning of the list (before the first item). Here's how to iterate over all the elements sequentially:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qlinkedlist.html">QLinkedList</a></span><span class="operator">&lt;</span><span class="type">float</span><span class="operator">&gt;</span> list;
+  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  <span class="type"><a href="qlinkedlistiterator.html#QLinkedListIterator">QLinkedListIterator</a></span><span class="operator">&lt;</span><span class="type">float</span><span class="operator">&gt;</span> i(list);
+  <span class="keyword">while</span> (i<span class="operator">.</span>hasNext())
+      <a href="qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> i<span class="operator">.</span>next();
+
+</pre>
+<p>The <a href="qlinkedlistiterator.html#next">next</a>() function returns the next item in the list and advances the iterator. Unlike STL-style iterators, Java-style iterators point <i>between</i> items rather than directly <i>at</i> items. The first call to <a href="qlinkedlistiterator.html#next">next</a>() advances the iterator to the position between the first and second item, and returns the first item; the second call to <a href="qlinkedlistiterator.html#next">next</a>() advances the iterator to the position between the second and third item, and returns the second item; and so on.</p>
+<p class="centerAlign"><img src="images/javaiterators1.png" alt="" /></p><p>Here's how to iterate over the elements in reverse order:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qlinkedlistiterator.html#QLinkedListIterator">QLinkedListIterator</a></span><span class="operator">&lt;</span><span class="type">float</span><span class="operator">&gt;</span> i(list);
+  i<span class="operator">.</span>toBack();
+  <span class="keyword">while</span> (i<span class="operator">.</span>hasPrevious())
+      <a href="qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> i<span class="operator">.</span>previous();
+
+</pre>
+<p>If you want to find all occurrences of a particular value, use <a href="qlinkedlistiterator.html#findNext">findNext</a>() or <a href="qlinkedlistiterator.html#findPrevious">findPrevious</a>() in a loop.</p>
+<p>Multiple iterators can be used on the same list. If the list is modified while a <a href="qlinkedlistiterator.html">QLinkedListIterator</a> is active, the <a href="qlinkedlistiterator.html">QLinkedListIterator</a> will continue iterating over the original list, ignoring the modified copy.</p>
+</div>
+<p><b>See also </b><a href="qmutablelinkedlistiterator.html">QMutableLinkedListIterator</a> and <a href="qlinkedlist-const-iterator.html">QLinkedList::const_iterator</a>.</p>
+<!-- @@@QLinkedListIterator -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="findPrevious"><a name="findPrevious"></a><span class="type">bool</span> QLinkedListIterator::<span class="name">findPrevious</span>(const <span class="type">T</span> &amp;<i>value</i>)</h3>
+<p>Searches for <i>value</i> starting from the current iterator position backward. Returns <code>true</code> if <i>value</i> is found; otherwise returns false.</p>
+<p>After the call, if <i>value</i> was found, the iterator is positioned just before the matching item; otherwise, the iterator is positioned at the front of the container.</p>
+<p><b>See also </b><a href="qlinkedlistiterator.html#findNext">findNext</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="findNext"><a name="findNext"></a><span class="type">bool</span> QLinkedListIterator::<span class="name">findNext</span>(const <span class="type">T</span> &amp;<i>value</i>)</h3>
+<p>Searches for <i>value</i> starting from the current iterator position forward. Returns <code>true</code> if <i>value</i> is found; otherwise returns <code>false</code>.</p>
+<p>After the call, if <i>value</i> was found, the iterator is positioned just after the matching item; otherwise, the iterator is positioned at the back of the container.</p>
+<p><b>See also </b><a href="qlinkedlistiterator.html#findPrevious">findPrevious</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="peekPrevious"><a name="peekPrevious"></a>const <span class="type">T</span> &amp;QLinkedListIterator::<span class="name">peekPrevious</span>() const</h3>
+<p>Returns the previous item without moving the iterator.</p>
+<p>Calling this function on an iterator located at the front of the container leads to undefined results.</p>
+<p><b>See also </b><a href="qlinkedlistiterator.html#hasPrevious">hasPrevious</a>(), <a href="qlinkedlistiterator.html#previous">previous</a>(), and <a href="qlinkedlistiterator.html#peekNext">peekNext</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="previous"><a name="previous"></a>const <span class="type">T</span> &amp;QLinkedListIterator::<span class="name">previous</span>()</h3>
+<p>Returns the previous item and moves the iterator back by one position.</p>
+<p>Calling this function on an iterator located at the front of the container leads to undefined results.</p>
+<p><b>See also </b><a href="qlinkedlistiterator.html#hasPrevious">hasPrevious</a>(), <a href="qlinkedlistiterator.html#peekPrevious">peekPrevious</a>(), and <a href="qlinkedlistiterator.html#next">next</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="hasPrevious"><a name="hasPrevious"></a><span class="type">bool</span> QLinkedListIterator::<span class="name">hasPrevious</span>() const</h3>
+<p>Returns <code>true</code> if there is at least one item behind the iterator, i.e&#x2e; the iterator is <i>not</i> at the front of the container; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qlinkedlistiterator.html#hasNext">hasNext</a>() and <a href="qlinkedlistiterator.html#previous">previous</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="peekNext"><a name="peekNext"></a>const <span class="type">T</span> &amp;QLinkedListIterator::<span class="name">peekNext</span>() const</h3>
+<p>Returns the next item without moving the iterator.</p>
+<p>Calling this function on an iterator located at the back of the container leads to undefined results.</p>
+<p><b>See also </b><a href="qlinkedlistiterator.html#hasNext">hasNext</a>(), <a href="qlinkedlistiterator.html#next">next</a>(), and <a href="qlinkedlistiterator.html#peekPrevious">peekPrevious</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="next"><a name="next"></a>const <span class="type">T</span> &amp;QLinkedListIterator::<span class="name">next</span>()</h3>
+<p>Returns the next item and advances the iterator by one position.</p>
+<p>Calling this function on an iterator located at the back of the container leads to undefined results.</p>
+<p><b>See also </b><a href="qlinkedlistiterator.html#hasNext">hasNext</a>(), <a href="qlinkedlistiterator.html#peekNext">peekNext</a>(), and <a href="qlinkedlistiterator.html#previous">previous</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="hasNext"><a name="hasNext"></a><span class="type">bool</span> QLinkedListIterator::<span class="name">hasNext</span>() const</h3>
+<p>Returns <code>true</code> if there is at least one item ahead of the iterator, i.e&#x2e; the iterator is <i>not</i> at the back of the container; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qlinkedlistiterator.html#hasPrevious">hasPrevious</a>() and <a href="qlinkedlistiterator.html#next">next</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="toBack"><a name="toBack"></a><span class="type">void</span> QLinkedListIterator::<span class="name">toBack</span>()</h3>
+<p>Moves the iterator to the back of the container (after the last item).</p>
+<p><b>See also </b><a href="qlinkedlistiterator.html#toFront">toFront</a>() and <a href="qlinkedlistiterator.html#previous">previous</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="toFront"><a name="toFront"></a><span class="type">void</span> QLinkedListIterator::<span class="name">toFront</span>()</h3>
+<p>Moves the iterator to the front of the container (before the first item).</p>
+<p><b>See also </b><a href="qlinkedlistiterator.html#toBack">toBack</a>() and <a href="qlinkedlistiterator.html#next">next</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qlinkedlistiterator.html#QLinkedListIterator">QLinkedListIterator</a></span>&lt;<span class="type">T</span>&gt; &amp;QLinkedListIterator::<span class="name">operator=</span>(const <span class="type"><a href="qlinkedlist.html">QLinkedList</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>container</i>)</h3>
+<p>Makes the iterator operate on <i>list</i>. The iterator is set to be at the front of the list (before the first item).</p>
+<p><b>See also </b><a href="qlinkedlistiterator.html#toFront">toFront</a>() and <a href="qlinkedlistiterator.html#toBack">toBack</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<h3 class="fn fngroupitem" id="QLinkedListIterator"><a name="QLinkedListIterator"></a>QLinkedListIterator::<span class="name">QLinkedListIterator</span>(const <span class="type"><a href="qlinkedlist.html">QLinkedList</a></span>&lt;<span class="type">T</span>&gt; &amp;<i>list</i>)</h3>
+<p>Constructs an iterator for traversing <i>list</i>. The iterator is set to be at the front of the list (before the first item).</p>
+<p><b>See also </b><a href="qlinkedlistiterator.html#operator-eq">operator=</a>().</p>
+<!-- @@@ -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

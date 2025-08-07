@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwindowswindowfunctions.qdoc -->
+  <title>QWindowsWindowFunctions Class | Qt Platform Headers 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtplatformheaders-index.html">Qt Platform Headers</a></td><td ><a href="qtplatformheaders-module.html">C++ Classes</a></td><td >QWindowsWindowFunctions</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtplatformheaders-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QWindowsWindowFunctions Class</h1>
+<!-- $$$QWindowsWindowFunctions-brief -->
+<p>The <a href="qwindowswindowfunctions.html">QWindowsWindowFunctions</a> class is an inline class containing miscellaneous functionality for Windows window specific functionality. <a href="#details">More...</a></p>
+<!-- @@@QWindowsWindowFunctions -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QWindowsWindowFunctions&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.5</td></tr></table></div><p>This class was introduced in  Qt 5.5.</p>
+<ul>
+<li><a href="qwindowswindowfunctions-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qwindowswindowfunctions.html#IsTabletModeType-typedef">IsTabletModeType</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qwindowswindowfunctions.html#SetHasBorderInFullScreen-typedef">SetHasBorderInFullScreen</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qwindowswindowfunctions.html#SetHasBorderInFullScreenDefault-typedef">SetHasBorderInFullScreenDefault</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qwindowswindowfunctions.html#SetTouchWindowTouchType-typedef">SetTouchWindowTouchType</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qwindowswindowfunctions.html#SetWindowActivationBehaviorType-typedef">SetWindowActivationBehaviorType</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qwindowswindowfunctions.html#TouchWindowTouchType-enum">TouchWindowTouchType</a></b> { NormalTouch, FineTouch, WantPalmTouch }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qwindowswindowfunctions.html#TouchWindowTouchType-enum">TouchWindowTouchTypes</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qwindowswindowfunctions.html#WindowActivationBehavior-enum">WindowActivationBehavior</a></b> { DefaultActivateWindow, AlwaysActivateWindow }</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwindowswindowfunctions.html#isTabletMode">isTabletMode</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qwindowswindowfunctions.html#isTabletModeIdentifier">isTabletModeIdentifier</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindowswindowfunctions.html#setHasBorderInFullScreen">setHasBorderInFullScreen</a></b>(QWindow *<i>window</i>, bool <i>border</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindowswindowfunctions.html#setHasBorderInFullScreenDefault">setHasBorderInFullScreenDefault</a></b>(bool <i>border</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qwindowswindowfunctions.html#setHasBorderInFullScreenDefaultIdentifier">setHasBorderInFullScreenDefaultIdentifier</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qwindowswindowfunctions.html#setHasBorderInFullScreenIdentifier">setHasBorderInFullScreenIdentifier</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindowswindowfunctions.html#setTouchWindowTouchType">setTouchWindowTouchType</a></b>(QWindow *<i>window</i>, QWindowsWindowFunctions::TouchWindowTouchTypes <i>type</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qwindowswindowfunctions.html#setTouchWindowTouchTypeIdentifier">setTouchWindowTouchTypeIdentifier</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwindowswindowfunctions.html#setWindowActivationBehavior">setWindowActivationBehavior</a></b>(QWindowsWindowFunctions::WindowActivationBehavior <i>behavior</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qwindowswindowfunctions.html#setWindowActivationBehaviorIdentifier">setWindowActivationBehaviorIdentifier</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QWindowsWindowFunctions-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A common usage pattern is as follows:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span><span class="operator">*</span>argv)
+  {
+      <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> topLevelWidget(<span class="string">&quot;Hello World!&quot;</span>);
+      topLevelWidget<span class="operator">.</span>winId(); <span class="comment">//have to create the QWindow</span>
+
+      <span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> <span class="operator">*</span>tlwWindow <span class="operator">=</span> topLevelWidget<span class="operator">.</span>windowHandle();
+
+      <span class="type"><a href="qwindowswindowfunctions.html">QWindowsWindowFunctions</a></span><span class="operator">::</span>setTouchWindowTouchType(tlwWindow<span class="operator">,</span> <span class="type"><a href="qwindowswindowfunctions.html">QWindowsWindowFunctions</a></span><span class="operator">::</span>WantPalmTouch);
+
+      topLevelWidget<span class="operator">.</span>show();
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p><b>Note: </b>There is no binary compatibility guarantee for this class, meaning that an application using it is only guaranteed to work with the Qt version it was developed against.</p></div>
+<!-- @@@QWindowsWindowFunctions -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$IsTabletModeType -->
+<h3 class="fn" id="IsTabletModeType-typedef"><a name="IsTabletModeType-typedef"></a>typedef QWindowsWindowFunctions::<span class="name">IsTabletModeType</span></h3>
+<p>This is the typedef for the function returned by <a href="../qtgui/qguiapplication.html#platformFunction">QGuiApplication::platformFunction</a>() when passed <a href="qwindowswindowfunctions.html#isTabletModeIdentifier">isTabletModeIdentifier</a>().</p>
+<p>This typedef was introduced in  Qt 5.9.</p>
+<!-- @@@IsTabletModeType -->
+<!-- $$$SetHasBorderInFullScreen -->
+<h3 class="fn" id="SetHasBorderInFullScreen-typedef"><a name="SetHasBorderInFullScreen-typedef"></a>typedef QWindowsWindowFunctions::<span class="name">SetHasBorderInFullScreen</span></h3>
+<p>This is the typedef for the function returned by <a href="../qtgui/qguiapplication.html#platformFunction">QGuiApplication::platformFunction</a> when passed <a href="qwindowswindowfunctions.html#setHasBorderInFullScreenIdentifier">setHasBorderInFullScreenIdentifier</a>.</p>
+<!-- @@@SetHasBorderInFullScreen -->
+<!-- $$$SetHasBorderInFullScreenDefault -->
+<h3 class="fn" id="SetHasBorderInFullScreenDefault-typedef"><a name="SetHasBorderInFullScreenDefault-typedef"></a>typedef QWindowsWindowFunctions::<span class="name">SetHasBorderInFullScreenDefault</span></h3>
+<p>This is the typedef for the function returned by <a href="../qtgui/qguiapplication.html#platformFunction">QGuiApplication::platformFunction</a> when passed <a href="qwindowswindowfunctions.html#setHasBorderInFullScreenDefaultIdentifier">setHasBorderInFullScreenDefaultIdentifier</a>.</p>
+<p>This typedef was introduced in  Qt 5.13.</p>
+<!-- @@@SetHasBorderInFullScreenDefault -->
+<!-- $$$SetTouchWindowTouchType -->
+<h3 class="fn" id="SetTouchWindowTouchType-typedef"><a name="SetTouchWindowTouchType-typedef"></a>typedef QWindowsWindowFunctions::<span class="name">SetTouchWindowTouchType</span></h3>
+<p>This is the typedef for the function returned by <a href="../qtgui/qguiapplication.html#platformFunction">QGuiApplication::platformFunction</a> when passed <a href="qwindowswindowfunctions.html#setTouchWindowTouchTypeIdentifier">setTouchWindowTouchTypeIdentifier</a>.</p>
+<!-- @@@SetTouchWindowTouchType -->
+<!-- $$$SetWindowActivationBehaviorType -->
+<h3 class="fn" id="SetWindowActivationBehaviorType-typedef"><a name="SetWindowActivationBehaviorType-typedef"></a>typedef QWindowsWindowFunctions::<span class="name">SetWindowActivationBehaviorType</span></h3>
+<p>This is the typedef for the function returned by <a href="../qtgui/qguiapplication.html#platformFunction">QGuiApplication::platformFunction</a>() when passed <a href="qwindowswindowfunctions.html#setWindowActivationBehaviorIdentifier">setWindowActivationBehaviorIdentifier</a>().</p>
+<p>This typedef was introduced in  Qt 5.7.</p>
+<p><b>See also </b><a href="../qtwidgets/qwidget.html#activateWindow">QWidget::activateWindow</a>() and <a href="../qtgui/qwindow.html#requestActivate">QWindow::requestActivate</a>().</p>
+<!-- @@@SetWindowActivationBehaviorType -->
+<!-- $$$TouchWindowTouchType$$$NormalTouch$$$FineTouch$$$WantPalmTouch -->
+<h3 class="flags" id="TouchWindowTouchType-enum"><a name="TouchWindowTouchType-enum"></a>enum QWindowsWindowFunctions::<span class="name">TouchWindowTouchType</span><br/>flags QWindowsWindowFunctions::<span class="name">TouchWindowTouchTypes</span></h3>
+<p>This enum represents the supported TouchWindow touch flags for RegisterTouchWindow().</p>
+<div class="table"><table class="valuelist"><tr><th class="tblConst">Constant</th><th class="tblVal">Value</th></tr>
+<tr><td class="topAlign"><code>QWindowsWindowFunctions::NormalTouch</code></td><td class="topAlign tblval"><code>0x00000000</code></td></tr>
+<tr><td class="topAlign"><code>QWindowsWindowFunctions::FineTouch</code></td><td class="topAlign tblval"><code>0x00000001</code></td></tr>
+<tr><td class="topAlign"><code>QWindowsWindowFunctions::WantPalmTouch</code></td><td class="topAlign tblval"><code>0x00000002</code></td></tr>
+</table></div>
+<p>The TouchWindowTouchTypes type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;TouchWindowTouchType&gt;. It stores an OR combination of TouchWindowTouchType values.</p>
+<!-- @@@TouchWindowTouchType -->
+<!-- $$$WindowActivationBehavior$$$DefaultActivateWindow$$$AlwaysActivateWindow -->
+<h3 class="fn" id="WindowActivationBehavior-enum"><a name="WindowActivationBehavior-enum"></a>enum QWindowsWindowFunctions::<span class="name">WindowActivationBehavior</span></h3>
+<p>This enum specifies the behavior of <a href="../qtwidgets/qwidget.html#activateWindow">QWidget::activateWindow</a>() and <a href="../qtgui/qwindow.html#requestActivate">QWindow::requestActivate</a>().</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QWindowsWindowFunctions::DefaultActivateWindow</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The window is activated according to the default behavior of the Windows operating system. This means the window will not be activated in some circumstances (most notably when the calling process is not the active process); only the taskbar entry will be flashed.</td></tr>
+<tr><td class="topAlign"><code>QWindowsWindowFunctions::AlwaysActivateWindow</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The window is always activated, even when the calling process is not the active process.</td></tr>
+</table></div>
+<p>This enum was introduced or modified in  Qt 5.7.</p>
+<p><b>See also </b><a href="../qtwidgets/qwidget.html#activateWindow">QWidget::activateWindow</a>() and <a href="../qtgui/qwindow.html#requestActivate">QWindow::requestActivate</a>().</p>
+<!-- @@@WindowActivationBehavior -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$isTabletMode[overload1]$$$isTabletMode -->
+<h3 class="fn" id="isTabletMode"><a name="isTabletMode"></a><code>[static] </code><span class="type">bool</span> QWindowsWindowFunctions::<span class="name">isTabletMode</span>()</h3>
+<p>This is a convenience function that can be used directly instead of resolving the function pointer. Returns true if Windows 10 operates in <i>Tablet Mode</i>. In this mode, Windows forces all application main windows to open in maximized state. Applications should then avoid resizing windows or restoring geometries to non-maximized states.</p>
+<p>This function was introduced in  Qt 5.9.</p>
+<p><b>See also </b><a href="../qtwidgets/qwidget.html#showMaximized">QWidget::showMaximized</a>(), <a href="../qtwidgets/qwidget.html#saveGeometry">QWidget::saveGeometry</a>(), and <a href="../qtwidgets/qwidget.html#restoreGeometry">QWidget::restoreGeometry</a>().</p>
+<!-- @@@isTabletMode -->
+<!-- $$$isTabletModeIdentifier[overload1]$$$isTabletModeIdentifier -->
+<h3 class="fn" id="isTabletModeIdentifier"><a name="isTabletModeIdentifier"></a><code>[static] </code>const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> QWindowsWindowFunctions::<span class="name">isTabletModeIdentifier</span>()</h3>
+<p>Returns a bytearray that can be used to query <a href="../qtgui/qguiapplication.html#platformFunction">QGuiApplication::platformFunction</a>() to retrieve the <a href="qwindowswindowfunctions.html#IsTabletModeType-typedef">IsTabletModeType</a> function.</p>
+<p>This function was introduced in  Qt 5.9.</p>
+<!-- @@@isTabletModeIdentifier -->
+<!-- $$$setHasBorderInFullScreen[overload1]$$$setHasBorderInFullScreenQWindow*bool -->
+<h3 class="fn" id="setHasBorderInFullScreen"><a name="setHasBorderInFullScreen"></a><code>[static] </code><span class="type">void</span> QWindowsWindowFunctions::<span class="name">setHasBorderInFullScreen</span>(<span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> *<i>window</i>, <span class="type">bool</span> <i>border</i>)</h3>
+<p>This is a convenience function that can be used directly instead of resolving the function pointer. <i>window</i> and <i>border</i> will be relayed to the function retrieved by <a href="../qtgui/qguiapplication.html">QGuiApplication</a>. When <i>border</i> is true then it will enable the WS_BORDER flag in full screen mode to enable other top level windows inside the application to appear on top when required.</p>
+<p><b>Note: </b>The setting must be applied before showing the window or switching it to full screen. For QML, <a href="qwindowswindowfunctions.html#setHasBorderInFullScreenDefault">setHasBorderInFullScreenDefault</a>() can be used to set a default value.</p><p>See also <a href="../qtdoc/windows-issues.html#fullscreen-opengl-based-windows">Fullscreen OpenGL Based Windows</a></p>
+<p>This function was introduced in  Qt 5.6.</p>
+<!-- @@@setHasBorderInFullScreen -->
+<!-- $$$setHasBorderInFullScreenDefault[overload1]$$$setHasBorderInFullScreenDefaultbool -->
+<h3 class="fn" id="setHasBorderInFullScreenDefault"><a name="setHasBorderInFullScreenDefault"></a><code>[static] </code><span class="type">void</span> QWindowsWindowFunctions::<span class="name">setHasBorderInFullScreenDefault</span>(<span class="type">bool</span> <i>border</i>)</h3>
+<p>This is a convenience function that can be used directly instead of resolving the function pointer. <i>border</i> will be relayed to the function retrieved by <a href="../qtgui/qguiapplication.html">QGuiApplication</a>. When <i>border</i> is true, the WS_BORDER flag will be set in full screen mode for all windows by default.</p>
+<p>See also <a href="../qtdoc/windows-issues.html#fullscreen-opengl-based-windows">Fullscreen OpenGL Based Windows</a></p>
+<p>This function was introduced in  Qt 5.13.</p>
+<p><b>See also </b><a href="qwindowswindowfunctions.html#setHasBorderInFullScreen">setHasBorderInFullScreen</a>().</p>
+<!-- @@@setHasBorderInFullScreenDefault -->
+<!-- $$$setHasBorderInFullScreenDefaultIdentifier[overload1]$$$setHasBorderInFullScreenDefaultIdentifier -->
+<h3 class="fn" id="setHasBorderInFullScreenDefaultIdentifier"><a name="setHasBorderInFullScreenDefaultIdentifier"></a><code>[static] </code>const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> QWindowsWindowFunctions::<span class="name">setHasBorderInFullScreenDefaultIdentifier</span>()</h3>
+<p>This function returns the bytearray that can be used to query <a href="../qtgui/qguiapplication.html#platformFunction">QGuiApplication::platformFunction</a> to retrieve the <a href="qwindowswindowfunctions.html#SetHasBorderInFullScreen-typedef">SetHasBorderInFullScreen</a> function.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@setHasBorderInFullScreenDefaultIdentifier -->
+<!-- $$$setHasBorderInFullScreenIdentifier[overload1]$$$setHasBorderInFullScreenIdentifier -->
+<h3 class="fn" id="setHasBorderInFullScreenIdentifier"><a name="setHasBorderInFullScreenIdentifier"></a><code>[static] </code>const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> QWindowsWindowFunctions::<span class="name">setHasBorderInFullScreenIdentifier</span>()</h3>
+<p>This function returns the bytearray that can be used to query <a href="../qtgui/qguiapplication.html#platformFunction">QGuiApplication::platformFunction</a> to retrieve the <a href="qwindowswindowfunctions.html#SetHasBorderInFullScreen-typedef">SetHasBorderInFullScreen</a> function.</p>
+<p>This function was introduced in  Qt 5.6.</p>
+<!-- @@@setHasBorderInFullScreenIdentifier -->
+<!-- $$$setTouchWindowTouchType[overload1]$$$setTouchWindowTouchTypeQWindow*QWindowsWindowFunctions::TouchWindowTouchTypes -->
+<h3 class="fn" id="setTouchWindowTouchType"><a name="setTouchWindowTouchType"></a><code>[static] </code><span class="type">void</span> QWindowsWindowFunctions::<span class="name">setTouchWindowTouchType</span>(<span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> *<i>window</i>, <span class="type"><a href="qwindowswindowfunctions.html#TouchWindowTouchType-enum">QWindowsWindowFunctions::TouchWindowTouchTypes</a></span> <i>type</i>)</h3>
+<p>This is a convenience function that can be used directly instead of resolving the function pointer. <i>window</i> and <i>type</i> will be relayed to the function retrieved by <a href="../qtgui/qguiapplication.html">QGuiApplication</a></p>
+<!-- @@@setTouchWindowTouchType -->
+<!-- $$$setTouchWindowTouchTypeIdentifier[overload1]$$$setTouchWindowTouchTypeIdentifier -->
+<h3 class="fn" id="setTouchWindowTouchTypeIdentifier"><a name="setTouchWindowTouchTypeIdentifier"></a><code>[static] </code>const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> QWindowsWindowFunctions::<span class="name">setTouchWindowTouchTypeIdentifier</span>()</h3>
+<p>This function returns the bytearray that can be used to query <a href="../qtgui/qguiapplication.html#platformFunction">QGuiApplication::platformFunction</a> to retrieve the <a href="qwindowswindowfunctions.html#SetTouchWindowTouchType-typedef">SetTouchWindowTouchType</a> function.</p>
+<!-- @@@setTouchWindowTouchTypeIdentifier -->
+<!-- $$$setWindowActivationBehavior[overload1]$$$setWindowActivationBehaviorQWindowsWindowFunctions::WindowActivationBehavior -->
+<h3 class="fn" id="setWindowActivationBehavior"><a name="setWindowActivationBehavior"></a><code>[static] </code><span class="type">void</span> QWindowsWindowFunctions::<span class="name">setWindowActivationBehavior</span>(<span class="type"><a href="qwindowswindowfunctions.html#WindowActivationBehavior-enum">QWindowsWindowFunctions::WindowActivationBehavior</a></span> <i>behavior</i>)</h3>
+<p>This is a convenience function that can be used directly instead of resolving the function pointer. <i>behavior</i> will be relayed to the function retrieved by <a href="../qtgui/qguiapplication.html">QGuiApplication</a>.</p>
+<p>This function was introduced in  Qt 5.7.</p>
+<p><b>See also </b><a href="../qtwidgets/qwidget.html#activateWindow">QWidget::activateWindow</a>() and <a href="../qtgui/qwindow.html#requestActivate">QWindow::requestActivate</a>().</p>
+<!-- @@@setWindowActivationBehavior -->
+<!-- $$$setWindowActivationBehaviorIdentifier[overload1]$$$setWindowActivationBehaviorIdentifier -->
+<h3 class="fn" id="setWindowActivationBehaviorIdentifier"><a name="setWindowActivationBehaviorIdentifier"></a><code>[static] </code>const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> QWindowsWindowFunctions::<span class="name">setWindowActivationBehaviorIdentifier</span>()</h3>
+<p>This function returns a bytearray that can be used to query <a href="../qtgui/qguiapplication.html#platformFunction">QGuiApplication::platformFunction</a>() to retrieve the <a href="qwindowswindowfunctions.html#SetWindowActivationBehaviorType-typedef">SetWindowActivationBehaviorType</a> function.</p>
+<p>This function was introduced in  Qt 5.7.</p>
+<p><b>See also </b><a href="../qtwidgets/qwidget.html#activateWindow">QWidget::activateWindow</a>() and <a href="../qtgui/qwindow.html#requestActivate">QWindow::requestActivate</a>().</p>
+<!-- @@@setWindowActivationBehaviorIdentifier -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

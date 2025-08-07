@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qbackendnode.cpp -->
+  <title>QBackendNode Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QBackendNode</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QBackendNode Class</h1>
+<span class="small-subtitle">(<a href="qt3dcore-qbackendnode.html">Qt3DCore::QBackendNode</a>)<br/></span>
+<!-- $$$QBackendNode-brief -->
+<p>The base class for all Qt3D backend nodes. <a href="#details">More...</a></p>
+<!-- @@@QBackendNode -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;Qt3DCore/QBackendNode&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3dcore</td></tr></table></div><ul>
+<li><a href="qt3dcore-qbackendnode-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qbackendnode.html#Mode-enum">Mode</a></b> { ReadOnly, ReadWrite }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qbackendnode.html#isEnabled">isEnabled</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DCore::QBackendNode::Mode </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qbackendnode.html#mode">mode</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DCore::QNodeId </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qbackendnode.html#peerId">peerId</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qbackendnode.html#setEnabled">setEnabled</a></b>(bool <i>enabled</i>)</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qbackendnode.html#notifyObservers">notifyObservers</a></b>(const Qt3DCore::QSceneChangePtr &amp;<i>e</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qbackendnode.html#sceneChangeEvent">sceneChangeEvent</a></b>(const Qt3DCore::QSceneChangePtr &amp;<i>e</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QNodeCommand::CommandId </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qbackendnode.html#sendCommand">sendCommand</a></b>(const QString &amp;<i>name</i>, const QVariant &amp;<i>data</i>, QNodeCommand::CommandId <i>replyTo</i> = QNodeCommand::CommandId())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dcore-qbackendnode.html#sendReply">sendReply</a></b>(const Qt3DCore::QNodeCommandPtr &amp;<i>command</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QBackendNode-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QBackendNode -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Mode$$$ReadOnly$$$ReadWrite -->
+<h3 class="fn" id="Mode-enum"><a name="Mode-enum"></a>enum QBackendNode::<span class="name">Mode</span></h3>
+<p>The mode for the backend node.</p>
+<div class="table"><table class="valuelist"><tr><th class="tblConst">Constant</th><th class="tblVal">Value</th></tr>
+<tr><td class="topAlign"><code>Qt3DCore::QBackendNode::ReadOnly</code></td><td class="topAlign tblval"><code>0</code></td></tr>
+<tr><td class="topAlign"><code>Qt3DCore::QBackendNode::ReadWrite</code></td><td class="topAlign tblval"><code>1</code></td></tr>
+</table></div>
+<!-- @@@Mode -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$isEnabled[overload1]$$$isEnabled -->
+<h3 class="fn" id="isEnabled"><a name="isEnabled"></a><span class="type">bool</span> QBackendNode::<span class="name">isEnabled</span>() const</h3>
+<p>Returns <code>true</code> if the backend node is enabled.</p>
+<!-- @@@isEnabled -->
+<!-- $$$mode[overload1]$$$mode -->
+<h3 class="fn" id="mode"><a name="mode"></a><span class="type"><a href="qt3dcore-qbackendnode.html#Mode-enum">Qt3DCore::QBackendNode::Mode</a></span> QBackendNode::<span class="name">mode</span>() const</h3>
+<p>Returns the mode of the backend mode.</p>
+<!-- @@@mode -->
+<!-- $$$notifyObservers[overload1]$$$notifyObserversconstQt3DCore::QSceneChangePtr& -->
+<h3 class="fn" id="notifyObservers"><a name="notifyObservers"></a><code>[protected] </code><span class="type">void</span> QBackendNode::<span class="name">notifyObservers</span>(const <span class="type"><a href="qt3dcore-qscenechange.html#QSceneChangePtr-typedef">Qt3DCore::QSceneChangePtr</a></span> &amp;<i>e</i>)</h3>
+<p>Notifies observers of scene change <i>e</i>.</p>
+<!-- @@@notifyObservers -->
+<!-- $$$peerId[overload1]$$$peerId -->
+<h3 class="fn" id="peerId"><a name="peerId"></a><span class="type"><a href="qt3dcore-qnodeid.html">Qt3DCore::QNodeId</a></span> QBackendNode::<span class="name">peerId</span>() const</h3>
+<p>Returns the peer id of the backend node.</p>
+<!-- @@@peerId -->
+<!-- $$$sceneChangeEvent[overload1]$$$sceneChangeEventconstQt3DCore::QSceneChangePtr& -->
+<h3 class="fn" id="sceneChangeEvent"><a name="sceneChangeEvent"></a><code>[virtual protected] </code><span class="type">void</span> QBackendNode::<span class="name">sceneChangeEvent</span>(const <span class="type"><a href="qt3dcore-qscenechange.html#QSceneChangePtr-typedef">Qt3DCore::QSceneChangePtr</a></span> &amp;<i>e</i>)</h3>
+<p>TODO <i>e</i></p>
+<!-- @@@sceneChangeEvent -->
+<!-- $$$sendCommand[overload1]$$$sendCommandconstQString&constQVariant&QNodeCommand::CommandId -->
+<h3 class="fn" id="sendCommand"><a name="sendCommand"></a><code>[protected] </code><span class="type"><a href="qt3dcore-qnodecommand.html#CommandId-typedef">QNodeCommand::CommandId</a></span> QBackendNode::<span class="name">sendCommand</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>name</i>, const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>data</i>, <span class="type"><a href="qt3dcore-qnodecommand.html#CommandId-typedef">QNodeCommand::CommandId</a></span> <i>replyTo</i> = QNodeCommand::CommandId())</h3>
+<p>Send the command named <i>name</i> with contents <i>data</i>, and specify <i>replyTo</i> as the command id to which the reply needs to be sent.</p>
+<!-- @@@sendCommand -->
+<!-- $$$sendReply[overload1]$$$sendReplyconstQt3DCore::QNodeCommandPtr& -->
+<h3 class="fn" id="sendReply"><a name="sendReply"></a><code>[protected] </code><span class="type">void</span> QBackendNode::<span class="name">sendReply</span>(const <span class="type"><a href="qt3dcore-qnodecommand.html#QNodeCommandPtr-typedef">Qt3DCore::QNodeCommandPtr</a></span> &amp;<i>command</i>)</h3>
+<p>Send the reply to <i>command</i>.</p>
+<!-- @@@sendReply -->
+<!-- $$$setEnabled[overload1]$$$setEnabledbool -->
+<h3 class="fn" id="setEnabled"><a name="setEnabled"></a><span class="type">void</span> QBackendNode::<span class="name">setEnabled</span>(<span class="type">bool</span> <i>enabled</i>)</h3>
+<p>Enables or disables the backend node by <i>enabled</i>.</p>
+<p><b>See also </b><a href="qt3dcore-qbackendnode.html#isEnabled">isEnabled</a>().</p>
+<!-- @@@setEnabled -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtquick-buttons.qdoc -->
+  <title>Creating Buttons | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Creating Buttons</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="quick-components.html" />
+  <link rel="next" href="quick-scalable-image.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="quick-components.html">Creating Components</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="quick-scalable-image.html">Creating Scalable Buttons and Borders</a>
+</p><p/>
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Creating Buttons</h1>
+<span class="subtitle"></span>
+<!-- $$$quick-buttons.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>To create a button type:</p>
+<ol class="1" type="1"><li>Select <b>File</b> &gt; <b>New File or Project</b> &gt; <b>Qt</b> &gt; <b>QML File (Qt Quick 2)</b> &gt; <b>Choose</b> to create a QML file called Button.qml (for example).<p><b>Note: </b>Types are listed in the <b>Library</b> only if the filename begins with a capital letter.</p></li>
+<li>Click <b>Design</b> to edit the file in the <b>Form Editor</b>.</li>
+<li>In the <b>Navigator</b>, select <b>Item</b> and set the width (<b>W</b>) and height (<b>H</b>) of the button in the <b>Properties</b> pane.</li>
+<li>Drag and drop a <b>Rectangle</b> from the <b>Library</b> to the item in the navigator. This creates a nested item where the item is the parent of the rectangle. Items are positioned relative to their parents.</li>
+<li>In the <b>Properties</b> pane, modify the appearance of the rectangle:<ol class="a" type="a"><li>In the <b>Color</b> field, select the button color.</li>
+<li>In the <b>Radius</b> field, use the slider to set the radius of the rectangle and produce rounded corners for the button.</li>
+<li>Select <b>Layout</b>, and then select the <img src="images/anchor-fill.png" alt="" /> (<b>Fill to Parent</b>) button to anchor the rectangle to the item.</li>
+</ol>
+</li>
+<li>Drag and drop a <b>Text</b> type to the item in the navigator.</li>
+<li>In the <b>Properties</b> pane, edit the properties of the <b>Text</b> type.<ol class="a" type="a"><li>In the <b>Text</b> field, type <b>Button</b>.<p>You can select the text color in the <b>Text color</b> field and the font, size, and style in the <b>Font</b> section.</p>
+</li>
+<li>In the <b>Alignment</b> field, select the center buttons to align the text to the center of the button.</li>
+<li>Select <b>Layout</b> &gt; <b>Fill to Parent</b> to anchor the text to the whole button area.</li>
+</ol>
+</li>
+<li>Press <b>Ctrl+S</b> to save the button.<p class="centerAlign"><img src="images/qmldesigner-button.png" alt="&quot;Button component&quot;" /></p></li>
+</ol>
+<p>To create a graphical button that scales beautifully without using vector graphics, use the <a href="http://doc.qt.io/qt-5/qml-qtquick-borderimage.html">Border Image</a> type. For more information, see <a href="quick-scalable-image.html#">Creating Scalable Buttons and Borders</a>.</p>
+</div>
+<!-- @@@quick-buttons.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="quick-components.html">Creating Components</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="quick-scalable-image.html">Creating Scalable Buttons and Borders</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

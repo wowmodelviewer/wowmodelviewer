@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtscxml-examples.qdoc -->
+  <title>Qt SCXML Examples | Qt SCXML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtscxml-index.html">Qt SCXML</a></td><td >Qt SCXML Examples</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtscxml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt SCXML Examples</h1>
+<span class="subtitle"></span>
+<!-- $$$examples-qtscxml-description -->
+<div class="descr"> <a name="details"></a>
+<p>The Qt SCXML example applications demonstrate the functionality provided by the <a href="qtscxml-index.html">Qt SCXML</a> module.</p>
+<p>There are multiple versions of the <i>Invoke</i>, <i>Media Player</i>, and <i>Traffic Light</i> example applications. Each application has some common files that are stored in a common folder, in addition to the files stored in the example version folder.</p>
+<p>All versions of an example application have the same appearance and fuctionality. They demonstrate the different options for creating user interfaces (using <a href="../qtwidgets/qtwidgets-index.html">Qt Widgets</a> or <a href="../qtquick/qtquick-index.html">Qt Quick</a>) and for loading the SCXML dynamically versus first compiling it to a C++ class (the <i>static</i> versions).</p>
+<p>In addition, the Media Player example versions demonstrate how to access the C++ and ECMAScript data models.</p>
+</div>
+<!-- @@@examples-qtscxml -->
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtscxml-calculator-widgets-example.html">Qt SCXML Calculator Example</a></p></td><td class="tblDescr"><p>A widget-based application that implements the Calculator example presented in the SCXML Specification.</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtscxml-calculator-qml-example.html">Qt SCXML Calculator QML Example</a></p></td><td class="tblDescr"><p>A Qt Quick application that implements the Calculator example presented in the SCXML Specification.</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtscxml-ftpclient-example.html">Qt SCXML FTP Client Example</a></p></td><td class="tblDescr"><p>Implements a simple FTP client using a state machine.</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtscxml-invoke-dynamic-example.html">Qt SCXML Invoke Example (Dynamic)</a></p></td><td class="tblDescr"><p>Invokes a dynamically loaded nested state machine.</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtscxml-invoke-static-example.html">Qt SCXML Invoke Example (Static)</a></p></td><td class="tblDescr"><p>Invokes a compiled nested state machine.</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtscxml-mediaplayer-widgets-dynamic-example.html">Qt SCXML Media Player Example (Dynamic)</a></p></td><td class="tblDescr"><p>A widget-based application that sends data to and receives it from a dynamically loaded ECMAScript data model.</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtscxml-mediaplayer-widgets-static-example.html">Qt SCXML Media Player Example (Static)</a></p></td><td class="tblDescr"><p>A widget-based application that sends data to and receives it from a compiled ECMAScript data model.</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtscxml-mediaplayer-qml-cppdatamodel-example.html">Qt SCXML Media Player QML Example (C++ Data Model)</a></p></td><td class="tblDescr"><p>Sends data to and receives it from a C++ data model.</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtscxml-mediaplayer-qml-dynamic-example.html">Qt SCXML Media Player QML Example (Dynamic)</a></p></td><td class="tblDescr"><p>A Qt Quick application that sends data to and receives it from a dynamically loaded ECMAScript data model.</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtscxml-mediaplayer-qml-static-example.html">Qt SCXML Media Player QML Example (Static)</a></p></td><td class="tblDescr"><p>A Qt Quick application that sends data to and receives it from a compiled ECMAScript data model.</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtscxml-pinball-example.html">Qt SCXML Pinball Example</a></p></td><td class="tblDescr"><p>Encapsulates the internal logic of an application in an SCXML file.</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtscxml-sudoku-example.html">Qt SCXML Sudoku Example</a></p></td><td class="tblDescr"><p>Presents the use of SCXML in a sudoku game.</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtscxml-trafficlight-widgets-dynamic-example.html">Qt SCXML Traffic Light Example (Dynamic)</a></p></td><td class="tblDescr"><p>A widget-based application that uses a dynamically loaded state machine to implement a traffic light.</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtscxml-trafficlight-widgets-static-example.html">Qt SCXML Traffic Light Example (Static)</a></p></td><td class="tblDescr"><p>A widget-based application that uses a compiled state machine to implement a traffic light.</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtscxml-trafficlight-qml-dynamic-example.html">Qt SCXML Traffic Light QML Example (Dynamic)</a></p></td><td class="tblDescr"><p>A Qt Quick application that uses a dynamically loaded state machine to implement a traffic light.</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtscxml-trafficlight-qml-simple-example.html">Qt SCXML Traffic Light QML Example (Simple)</a></p></td><td class="tblDescr"><p>A Qt Quick application that uses a compiled state machine to implement a simplified traffic light.</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtscxml-trafficlight-qml-static-example.html">Qt SCXML Traffic Light QML Example (Static)</a></p></td><td class="tblDescr"><p>A Qt Quick application that uses a compiled state machine to implement a traffic light.</p></td></tr>
+</table></div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

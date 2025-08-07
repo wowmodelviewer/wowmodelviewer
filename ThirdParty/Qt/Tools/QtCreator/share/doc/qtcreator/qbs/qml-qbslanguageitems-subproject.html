@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- subproject.qdoc -->
+  <title>SubProject QML Type | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="qml-qbslanguageitems-scanner.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="qml-qbslanguageitems-scanner.html">Scanner</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">SubProject QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$SubProject-brief -->
+<p>Adds a project from a different file. <a href="#details">More...</a></p>
+<!-- @@@SubProject -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QbsLanguageItems .</td></tr></table></div><ul>
+<li><a href="qml-qbslanguageitems-subproject-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-subproject.html#filePath-prop">filePath</a></b></b> : path</li>
+<li class="fn"><b><b><a href="qml-qbslanguageitems-subproject.html#inheritProperties-prop">inheritProperties</a></b></b> : bool</li>
+</ul>
+<!-- $$$SubProject-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>A <a href="qml-qbslanguageitems-subproject.html">SubProject</a> item is used to add a sub-project that is defined in a separate file. Additionally, properties of the sub-project can be set without modifying the separate project file.</p>
+<p>The following example adds a sub-project defined in <code>subdir/project.qbs</code> and overrides its name.</p>
+<pre class="cpp">
+
+  Project {
+      SubProject {
+          filePath: <span class="string">&quot;subdir/project.qbs&quot;</span>
+          Properties {
+              name: <span class="string">&quot;A sub-project&quot;</span>
+          }
+      }
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  }
+
+</pre>
+<p>A typical use case for <a href="qml-qbslanguageitems-subproject.html">SubProject</a> items is to conditionally include sub-projects. The following example pulls in the <i>tests</i> sub-project if and only if the <code>withTests</code> property is <code>true</code>.</p>
+<pre class="cpp">
+
+  Project {
+      property bool withTests: <span class="keyword">false</span>
+      SubProject {
+          filePath: <span class="string">&quot;tests/tests.qbs&quot;</span>
+          Properties {
+              condition: parent<span class="operator">.</span>withTests
+          }
+      }
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  }
+
+</pre>
+<p>If you do not need to set any properties on the sub-project, you can also use the <a href="qml-qbslanguageitems-project.html#references-prop">Project.references</a> property, the same way you would for a product.</p>
+<pre class="cpp">
+
+  Project {
+      references: <span class="string">&quot;subdir/project.qbs&quot;</span>
+  }
+
+</pre>
+<p>is equivalent with</p>
+<pre class="cpp">
+
+  Project {
+      SubProject {
+          filePath: <span class="string">&quot;subdir/project.qbs&quot;</span>
+      }
+  }
+
+</pre>
+<p>It is also possible to nest <a href="qml-qbslanguageitems-project.html">Project</a> items directly in the same file.</p>
+<!-- @@@SubProject -->
+<h2>Property Documentation</h2>
+<!-- $$$filePath -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="filePath-prop"></a><span class="name">filePath</span> : <span class="type">path</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The file path of the project to add as a sub-project. If the top-level item in this file is a <a href="qml-qbslanguageitems-product.html">Product</a>, it gets wrapped automatically in a new project.</p>
+<p>Default: empty</p>
+</div></div><!-- @@@filePath -->
+<br/>
+<!-- $$$inheritProperties -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="inheritProperties-prop"></a><span class="name">inheritProperties</span> : <span class="type">bool</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Determines whether the sub-project should inherit the properties of the surrounding <a href="qml-qbslanguageitems-project.html">Project</a>. You can use this feature to share global settings between projects and sub-projects.</p>
+<p>Default: <code>true</code></p>
+</div></div><!-- @@@inheritProperties -->
+<br/>
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="qml-qbslanguageitems-scanner.html">Scanner</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

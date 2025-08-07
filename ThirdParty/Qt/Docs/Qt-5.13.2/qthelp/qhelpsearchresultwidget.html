@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qhelpsearchresultwidget.cpp -->
+  <title>QHelpSearchResultWidget Class | Qt Help 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qthelp-index.html">Qt Help</a></td><td ><a href="qthelp-module.html">C++ Classes</a></td><td >QHelpSearchResultWidget</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qthelp-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QHelpSearchResultWidget Class</h1>
+<!-- $$$QHelpSearchResultWidget-brief -->
+<p>The <a href="qhelpsearchresultwidget.html">QHelpSearchResultWidget</a> class provides a text browser to display search results. <a href="#details">More...</a></p>
+<!-- @@@QHelpSearchResultWidget -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QHelpSearchResultWidget&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += help</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.4</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtwidgets/qwidget.html">QWidget</a></td></tr></table></div><p>This class was introduced in  Qt 4.4.</p>
+<ul>
+<li><a href="qhelpsearchresultwidget-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qhelpsearchresultwidget.html#dtor.QHelpSearchResultWidget">~QHelpSearchResultWidget</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QUrl </td><td class="memItemRight bottomAlign"><b><a href="qhelpsearchresultwidget.html#linkAt">linkAt</a></b>(const QPoint &amp;<i>point</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qhelpsearchresultwidget.html#requestShowLink">requestShowLink</a></b>(const QUrl &amp;<i>link</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QHelpSearchResultWidget-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QHelpSearchResultWidget -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$requestShowLink[overload1]$$$requestShowLinkconstQUrl& -->
+<h3 class="fn" id="requestShowLink"><a name="requestShowLink"></a><code>[signal] </code><span class="type">void</span> QHelpSearchResultWidget::<span class="name">requestShowLink</span>(const <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> &amp;<i>link</i>)</h3>
+<p>This signal is emitted when a item is activated and its associated <i>link</i> should be shown.</p>
+<!-- @@@requestShowLink -->
+<!-- $$$~QHelpSearchResultWidget[overload1]$$$~QHelpSearchResultWidget -->
+<h3 class="fn" id="dtor.QHelpSearchResultWidget"><a name="dtor.QHelpSearchResultWidget"></a><code>[override virtual] </code>QHelpSearchResultWidget::<span class="name">~QHelpSearchResultWidget</span>()</h3>
+<p>Destroys the search result widget.</p>
+<!-- @@@~QHelpSearchResultWidget -->
+<!-- $$$linkAt[overload1]$$$linkAtconstQPoint& -->
+<h3 class="fn" id="linkAt"><a name="linkAt"></a><span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> QHelpSearchResultWidget::<span class="name">linkAt</span>(const <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> &amp;<i>point</i>)</h3>
+<p>Returns a reference of the URL that the item at <i>point</i> owns, or an empty URL if no item exists at that point.</p>
+<!-- @@@linkAt -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- designer-manual.qdoc -->
+  <title>Customizing Qt Designer Forms | Qt Designer Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtdesigner-manual.html">Qt Designer Manual</a></td><td >Customizing Qt Designer Forms</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtdesigner-manual.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="designer-stylesheet.html" />
+  <link rel="next" href="designer-using-custom-widgets.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="designer-stylesheet.html">Using Stylesheets with Qt Designer</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="designer-using-custom-widgets.html">Using Custom Widgets with Qt Designer</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#modifying-the-form-settings">Modifying the Form Settings</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Customizing Qt Designer Forms</h1>
+<span class="subtitle"></span>
+<!-- $$$designer-customizing-forms.html-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/designer-form-settings.png" alt="" /></p><p>When saving a form in <i>Qt Designer</i>, it is stored as a UI file. Several form settings, for example the grid settings or the margin and spacing for the default layout, are stored along with the form's components. These settings are used when the <a href="../qtdoc/uic.html">uic</a> generates the form's C++ code. For more information on how to use forms in your application, see the <a href="designer-using-a-ui-file.html">Using a Designer UI File in Your Application</a> section.</p>
+<a name="modifying-the-form-settings"></a>
+<h2 id="modifying-the-form-settings">Modifying the Form Settings</h2>
+<p>To modify the form settings, open the <b>Form</b> menu and select <b>Form Settings..&#x2e;</b></p>
+<p>In the forms settings dialog you can specify the <b>Author</b> of the form.</p>
+<p>You can also alter the margin and spacing properties for the form's default layout (<b>Layout Default</b>). These default layout properties will be replaced by the corresponding <b>Layout Function</b>, if the function is specified, when <code>uic</code> generates code for the form. The form settings dialog lets you specify functions for both the margin and the spacing.</p>
+<a name="layoutfunction"></a><div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><img src="images/designer-form-layoutfunction.png" alt="" /></td><td ><b>Layout Function</b><p>The default layout properties will be replaced by the corresponding <b>Layout Function</b>, when <code>uic</code> generates code for the form. This is useful when different environments requires different layouts for the same form.</p>
+<p>To specify layout functions for the form's margin and spacing, check the <b>Layout Function</b> group box to enable the line edits.</p>
+</td></tr>
+</table></div>
+<p>You can also specify the form's <b>Include Hints</b>; i.e&#x2e;, provide a list of the header files which will then be included in the form window's associated UI file. Header files may be local, i.e&#x2e;, relative to the project's directory, <code>&quot;mywidget.h&quot;</code>, or global, i.e&#x2e; part of Qt or the compilers standard libraries: <code>&lt;QtWidgets/QWidget&gt;</code>.</p>
+<p>Finally, you can specify the function used to load pixmaps into the form window (the <b>Pixmap Function</b>).</p>
+</div>
+<!-- @@@designer-customizing-forms.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="designer-stylesheet.html">Using Stylesheets with Qt Designer</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="designer-using-custom-widgets.html">Using Custom Widgets with Qt Designer</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

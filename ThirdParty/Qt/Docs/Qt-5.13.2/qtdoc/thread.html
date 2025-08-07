@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- threads.qdoc -->
+  <title>Threading Classes | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Threading Classes</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Threading Classes</h1>
+<span class="subtitle"></span>
+<!-- $$$thread-description -->
+<div class="descr"> <a name="details"></a>
+<p>These <a href="../qtcore/qtcore-index.html">Qt Core</a> classes provide threading support to applications. The <a href="threads.html">Thread Support in Qt</a> page covers how to use these classes.</p>
+</div>
+<!-- @@@thread -->
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtcore/qatomicinteger.html">QAtomicInteger</a></p></td><td class="tblDescr"><p>Platform-independent atomic operations on integers</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtcore/qatomicpointer.html">QAtomicPointer</a></p></td><td class="tblDescr"><p>Template class that provides platform-independent atomic operations on pointers</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtcore/qfuture.html">QFuture</a></p></td><td class="tblDescr"><p>Represents the result of an asynchronous computation</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtcore/qfuturesynchronizer.html">QFutureSynchronizer</a></p></td><td class="tblDescr"><p>Convenience class that simplifies QFuture synchronization</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtcore/qfuturewatcher.html">QFutureWatcher</a></p></td><td class="tblDescr"><p>Allows monitoring a QFuture using signals and slots</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtcore/qmutex.html">QMutex</a></p></td><td class="tblDescr"><p>Access serialization between threads</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtcore/qmutexlocker.html">QMutexLocker</a></p></td><td class="tblDescr"><p>Convenience class that simplifies locking and unlocking mutexes</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtcore/qreadlocker.html">QReadLocker</a></p></td><td class="tblDescr"><p>Convenience class that simplifies locking and unlocking read-write locks for read access</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtcore/qreadwritelock.html">QReadWriteLock</a></p></td><td class="tblDescr"><p>Read-write locking</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtcore/qwritelocker.html">QWriteLocker</a></p></td><td class="tblDescr"><p>Convenience class that simplifies locking and unlocking read-write locks for write access</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtcore/qrunnable.html">QRunnable</a></p></td><td class="tblDescr"><p>The base class for all runnable objects</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtcore/qsemaphore.html">QSemaphore</a></p></td><td class="tblDescr"><p>General counting semaphore</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtcore/qsemaphorereleaser.html">QSemaphoreReleaser</a></p></td><td class="tblDescr"><p>Exception-safe deferral of a QSemaphore::release() call</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtcore/qthread.html">QThread</a></p></td><td class="tblDescr"><p>Platform-independent way to manage threads</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtcore/qthreadpool.html">QThreadPool</a></p></td><td class="tblDescr"><p>Manages a collection of QThreads</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtcore/qthreadstorage.html">QThreadStorage</a></p></td><td class="tblDescr"><p>Per-thread data storage</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtcore/qwaitcondition.html">QWaitCondition</a></p></td><td class="tblDescr"><p>Condition variable for synchronizing threads</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtconcurrent/qtconcurrent.html">QtConcurrent</a></p></td><td class="tblDescr"><p>High-level APIs that make it possible to write multi-threaded programs without using low-level threading primitives</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtconcurrent/qtconcurrentfilter.html">Concurrent Filter and Filter-Reduce</a></p></td><td class="tblDescr"><p></p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtconcurrent/qtconcurrentmap.html">Concurrent Map and Map-Reduce</a></p></td><td class="tblDescr"><p></p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtconcurrent/qtconcurrentrun.html">Concurrent Run</a></p></td><td class="tblDescr"><p></p></td></tr>
+</table></div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

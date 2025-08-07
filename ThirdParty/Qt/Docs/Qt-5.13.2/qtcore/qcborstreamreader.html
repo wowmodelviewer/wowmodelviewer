@@ -1,0 +1,664 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcborstream.cpp -->
+  <title>QCborStreamReader Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QCborStreamReader</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#cbor-support">CBOR support</a></li>
+<li class="level2"><a href="#dealing-with-invalid-or-incomplete-cbor-streams">Dealing with invalid or incomplete CBOR streams</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCborStreamReader Class</h1>
+<!-- $$$QCborStreamReader-brief -->
+<p>The <a href="qcborstreamreader.html">QCborStreamReader</a> class is a simple CBOR stream decoder, operating on either a <a href="qbytearray.html">QByteArray</a> or <a href="qiodevice.html">QIODevice</a>. <a href="#details">More...</a></p>
+<!-- @@@QCborStreamReader -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QCborStreamReader&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.12</td></tr></table></div><p>This class was introduced in  Qt 5.12.</p>
+<ul>
+<li><a href="qcborstreamreader-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> class </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader-stringresult.html">StringResult</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#StringResultCode-enum">StringResultCode</a></b> { EndOfString, Ok, Error }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#Type-enum">Type</a></b> { UnsignedInteger, NegativeInteger, ByteArray, ByteString, ..., Invalid }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#QCborStreamReader-4">QCborStreamReader</a></b>(QIODevice *<i>device</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#QCborStreamReader-3">QCborStreamReader</a></b>(const QByteArray &amp;<i>data</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#QCborStreamReader-2">QCborStreamReader</a></b>(const quint8 *<i>data</i>, qsizetype <i>len</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#QCborStreamReader-1">QCborStreamReader</a></b>(const char *<i>data</i>, qsizetype <i>len</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#dtor.QCborStreamReader">~QCborStreamReader</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#addData">addData</a></b>(const QByteArray &amp;<i>data</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#addData-1">addData</a></b>(const char *<i>data</i>, qsizetype <i>len</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#addData-2">addData</a></b>(const quint8 *<i>data</i>, qsizetype <i>len</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#clear">clear</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#containerDepth">containerDepth</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint64 </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#currentOffset">currentOffset</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qsizetype </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#currentStringChunkSize">currentStringChunkSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QIODevice *</td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#device">device</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#enterContainer">enterContainer</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#hasNext">hasNext</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#isArray">isArray</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#isBool">isBool</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#isByteArray">isByteArray</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#isContainer">isContainer</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#isDouble">isDouble</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#isFalse">isFalse</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#isFloat16">isFloat16</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#isFloat">isFloat</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#isInteger">isInteger</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#isInvalid">isInvalid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#isLengthKnown">isLengthKnown</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#isMap">isMap</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#isNegativeInteger">isNegativeInteger</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#isNull">isNull</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#isSimpleType">isSimpleType</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#isSimpleType-1">isSimpleType</a></b>(QCborSimpleType <i>st</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#isString">isString</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#isTag">isTag</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#isTrue">isTrue</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#isUndefined">isUndefined</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#isUnsignedInteger">isUnsignedInteger</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#isValid">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborError </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#lastError">lastError</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#leaveContainer">leaveContainer</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> quint64 </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#length">length</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#next">next</a></b>(int <i>maxRecursion</i> = 10000)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborStreamReader::Type </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#parentContainerType">parentContainerType</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> StringResult&lt;QByteArray&gt; </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#readByteArray">readByteArray</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> StringResult&lt;QString&gt; </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#readString">readString</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> StringResult&lt;qsizetype&gt; </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#readStringChunk">readStringChunk</a></b>(char *<i>ptr</i>, qsizetype <i>maxlen</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#reparse">reparse</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#reset">reset</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#setDevice">setDevice</a></b>(QIODevice *<i>device</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#toBool">toBool</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#toDouble">toDouble</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qfloat16 </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#toFloat16">toFloat16</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> float </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#toFloat">toFloat</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint64 </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#toInteger">toInteger</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborNegativeInteger </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#toNegativeInteger">toNegativeInteger</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborSimpleType </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#toSimpleType">toSimpleType</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborTag </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#toTag">toTag</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> quint64 </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#toUnsignedInteger">toUnsignedInteger</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCborStreamReader::Type </td><td class="memItemRight bottomAlign"><b><a href="qcborstreamreader.html#type">type</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCborStreamReader-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This class can be used to decode a stream of CBOR content directly from either a <a href="qbytearray.html">QByteArray</a> or a <a href="qiodevice.html">QIODevice</a>. CBOR is the Concise Binary Object Representation, a very compact form of binary data encoding that is compatible with JSON. It was created by the IETF Constrained RESTful Environments (CoRE) WG, which has used it in many new RFCs. It is meant to be used alongside the <a href="https://tools.ietf.org/html/rfc7252">CoAP protocol</a>.</p>
+<p><a href="qcborstreamreader.html">QCborStreamReader</a> provides a StAX-like API, similar to that of <a href="qxmlstreamreader.html">QXmlStreamReader</a>. Using it requires a bit of knowledge of CBOR encoding. For a simpler API, see <a href="qcborvalue.html">QCborValue</a> and especially the decoding function <a href="qcborvalue.html#fromCbor">QCborValue::fromCbor</a>().</p>
+<p>Typically, one creates a <a href="qcborstreamreader.html">QCborStreamReader</a> by passing the source <a href="qbytearray.html">QByteArray</a> or <a href="qiodevice.html">QIODevice</a> as a parameter to the constructor, then pop elements off the stream if there were no errors in decoding. There are three kinds of CBOR types:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Kind</th><th >Types</th><th >Behavior</th></tr></thead>
+<tr valign="top" class="odd"><td >Fixed-width</td><td >Integers, Tags, Simple types, Floating point</td><td >Value is pre-parsed by <a href="qcborstreamreader.html">QCborStreamReader</a>, so accessor functions are <code>const</code>. Must call <a href="qcborstreamreader.html#next">next</a>() to advance.</td></tr>
+<tr valign="top" class="even"><td >Strings</td><td >Byte arrays, Text strings</td><td >Length (if known) is pre-parsed, but the string itself is not. The accessor functions are not const and may allocate memory. Once called, the accessor functions automatically advance to the next element.</td></tr>
+<tr valign="top" class="odd"><td >Containers</td><td >Arrays, Maps</td><td >Length (if known) is pre-parsed. To access the elements, you must call <a href="qcborstreamreader.html#enterContainer">enterContainer</a>(), read all elements, then call <a href="qcborstreamreader.html#leaveContainer">leaveContainer</a>(). That function advances to the next element.</td></tr>
+</table></div>
+<p>So a processor function typically looks like this:</p>
+<pre class="cpp">
+
+     <span class="type">void</span> handleStream(<span class="type"><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></span> <span class="operator">&amp;</span>reader)
+     {
+         <span class="keyword">switch</span> (reader<span class="operator">.</span>type())
+         <span class="keyword">case</span> <span class="type"><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></span><span class="operator">::</span>UnsignedInteger:
+         <span class="keyword">case</span> <span class="type"><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></span><span class="operator">::</span>NegativeInteger:
+         <span class="keyword">case</span> <span class="type"><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></span><span class="operator">::</span>SimpleType:
+         <span class="keyword">case</span> <span class="type"><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></span><span class="operator">::</span>Float16:
+         <span class="keyword">case</span> <span class="type"><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></span><span class="operator">::</span>Float:
+         <span class="keyword">case</span> <span class="type"><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></span><span class="operator">::</span>Double:
+             handleFixedWidth(reader);
+             reader<span class="operator">.</span>next();
+             <span class="keyword">break</span>;
+         <span class="keyword">case</span> <span class="type"><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></span><span class="operator">::</span>ByteArray:
+         <span class="keyword">case</span> <span class="type"><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></span><span class="operator">::</span>String:
+             handleString(reader);
+             <span class="keyword">break</span>;
+         <span class="keyword">case</span> <span class="type"><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></span><span class="operator">::</span>Array:
+         <span class="keyword">case</span> <span class="type"><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></span><span class="operator">::</span>Map:
+             reader<span class="operator">.</span>enterContainer();
+             <span class="keyword">while</span> (reader<span class="operator">.</span>lastError() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qcborerror.html">QCborError</a></span><span class="operator">::</span>NoError)
+                 handleStream(reader);
+             <span class="keyword">if</span> (reader<span class="operator">.</span>lastError() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qcborerror.html">QCborError</a></span><span class="operator">::</span>NoError)
+                 reader<span class="operator">.</span>leaveContainer();
+         }
+     }
+
+</pre>
+<a name="cbor-support"></a>
+<h3 id="cbor-support">CBOR support</h3>
+<p>The following table lists the CBOR features that <a href="qcborstreamreader.html">QCborStreamReader</a> supports.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Feature</th><th >Support</th></tr></thead>
+<tr valign="top" class="odd"><td >Unsigned numbers</td><td >Yes (full range)</td></tr>
+<tr valign="top" class="even"><td >Negative numbers</td><td >Yes (full range)</td></tr>
+<tr valign="top" class="odd"><td >Byte strings</td><td >Yes</td></tr>
+<tr valign="top" class="even"><td >Text strings</td><td >Yes</td></tr>
+<tr valign="top" class="odd"><td >Chunked strings</td><td >Yes</td></tr>
+<tr valign="top" class="even"><td >Tags</td><td >Yes (arbitrary)</td></tr>
+<tr valign="top" class="odd"><td >Booleans</td><td >Yes</td></tr>
+<tr valign="top" class="even"><td >Null</td><td >Yes</td></tr>
+<tr valign="top" class="odd"><td >Undefined</td><td >Yes</td></tr>
+<tr valign="top" class="even"><td >Arbitrary simple values</td><td >Yes</td></tr>
+<tr valign="top" class="odd"><td >Half-precision float (16-bit)</td><td >Yes</td></tr>
+<tr valign="top" class="even"><td >Single-precision float (32-bit)</td><td >Yes</td></tr>
+<tr valign="top" class="odd"><td >Double-precision float (64-bit)</td><td >Yes</td></tr>
+<tr valign="top" class="even"><td >Infinities and NaN floating point</td><td >Yes</td></tr>
+<tr valign="top" class="odd"><td >Determinate-length arrays and maps</td><td >Yes</td></tr>
+<tr valign="top" class="even"><td >Indeterminate-length arrays and maps</td><td >Yes</td></tr>
+<tr valign="top" class="odd"><td >Map key types other than strings and integers</td><td >Yes (arbitrary)</td></tr>
+</table></div>
+<a name="dealing-with-invalid-or-incomplete-cbor-streams"></a>
+<h3 id="dealing-with-invalid-or-incomplete-cbor-streams">Dealing with invalid or incomplete CBOR streams</h3>
+<p><a href="qcborstreamreader.html">QCborStreamReader</a> is capable of detecting corrupt input on its own. The library it uses has been extensively tested against invalid input of any kind and is quite able to report errors. If any is detected, <a href="qcborstreamreader.html">QCborStreamReader</a> will set <a href="qcborstreamreader.html#lastError">lastError</a>() to a value besides <a href="qcborerror.html#Code-enum">QCborError::NoError</a>, indicating which situation was detected.</p>
+<p>Most errors detected by <a href="qcborstreamreader.html">QCborStreamReader</a> during normal item parsing are not recoverable. The code using <a href="qcborstreamreader.html">QCborStreamReader</a> may opt to handle the data that was properly decoded or it can opt to discard the entire data.</p>
+<p>The only recoverable error is <a href="qcborerror.html#Code-enum">QCborError::EndOfFile</a>, which indicates that more data is required in order to complete the parsing. This situation is useful when data is being read from an asynchronous source, such as a pipe (<a href="qprocess.html">QProcess</a>) or a socket (<a href="../qtnetwork/qtcpsocket.html">QTcpSocket</a>, <a href="../qtnetwork/qudpsocket.html">QUdpSocket</a>, <a href="../qtnetwork/qnetworkreply.html">QNetworkReply</a>, etc.)&#x2e; When more data arrives, the surrounding code needs to call either <a href="qcborstreamreader.html#addData">addData</a>(), if parsing from a <a href="qbytearray.html">QByteArray</a>, or <a href="qcborstreamreader.html#reparse">reparse</a>(), if it is instead reading directly a the QIDOevice that now has more data available (see <a href="qcborstreamreader.html#setDevice">setDevice</a>()).</p>
+</div>
+<p><b>See also </b><a href="qcborstreamwriter.html">QCborStreamWriter</a>, <a href="qcborvalue.html">QCborValue</a>, and <a href="qxmlstreamreader.html">QXmlStreamReader</a>.</p>
+<!-- @@@QCborStreamReader -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$StringResultCode$$$EndOfString$$$Ok$$$Error -->
+<h3 class="fn" id="StringResultCode-enum"><a name="StringResultCode-enum"></a>enum QCborStreamReader::<span class="name">StringResultCode</span></h3>
+<p>This enum is returned by <a href="qcborstreamreader.html#readString">readString</a>() and <a href="qcborstreamreader.html#readByteArray">readByteArray</a>() and is used to indicate what the status of the parsing is.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QCborStreamReader::EndOfString</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The parsing for the string is complete, with no error.</td></tr>
+<tr><td class="topAlign"><code>QCborStreamReader::Ok</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The function returned data; there was no error.</td></tr>
+<tr><td class="topAlign"><code>QCborStreamReader::Error</code></td><td class="topAlign tblval"><code>-1</code></td><td class="topAlign">Parsing failed with an error.</td></tr>
+</table></div>
+<!-- @@@StringResultCode -->
+<!-- $$$Type$$$UnsignedInteger$$$NegativeInteger$$$ByteString$$$ByteArray$$$TextString$$$String$$$Array$$$Map$$$Tag$$$SimpleType$$$HalfFloat$$$Float16$$$Float$$$Double$$$Invalid -->
+<h3 class="fn" id="Type-enum"><a name="Type-enum"></a>enum QCborStreamReader::<span class="name">Type</span></h3>
+<p>This enumeration contains all possible CBOR types as decoded by <a href="qcborstreamreader.html">QCborStreamReader</a>. CBOR has 7 major types, plus a number of simple types carrying no value, and floating point values.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QCborStreamReader::UnsignedInteger</code></td><td class="topAlign tblval"><code>0x00</code></td><td class="topAlign">(Major type 0) Ranges from 0 to 2<sup>64</sup> - 1 (18,446,744,073,709,551,616)</td></tr>
+<tr><td class="topAlign"><code>QCborStreamReader::NegativeInteger</code></td><td class="topAlign tblval"><code>0x20</code></td><td class="topAlign">(Major type 1) Ranges from -1 to -2<sup>64</sup> (-18,446,744,073,709,551,616)</td></tr>
+<tr><td class="topAlign"><code>QCborStreamReader::ByteArray</code></td><td class="topAlign tblval"><code>ByteString</code></td><td class="topAlign">(Major type 2) Arbitrary binary data.</td></tr>
+<tr><td class="topAlign"><code>QCborStreamReader::ByteString</code></td><td class="topAlign tblval"><code>0x40</code></td><td class="topAlign">An alias to ByteArray.</td></tr>
+<tr><td class="topAlign"><code>QCborStreamReader::String</code></td><td class="topAlign tblval"><code>TextString</code></td><td class="topAlign">(Major type 3) Unicode text, possibly containing NULs.</td></tr>
+<tr><td class="topAlign"><code>QCborStreamReader::TextString</code></td><td class="topAlign tblval"><code>0x60</code></td><td class="topAlign">An alias to String</td></tr>
+<tr><td class="topAlign"><code>QCborStreamReader::Array</code></td><td class="topAlign tblval"><code>0x80</code></td><td class="topAlign">(Major type 4) Array of heterogeneous items.</td></tr>
+<tr><td class="topAlign"><code>QCborStreamReader::Map</code></td><td class="topAlign tblval"><code>0xa0</code></td><td class="topAlign">(Major type 5) Map/dictionary of heterogeneous items.</td></tr>
+<tr><td class="topAlign"><code>QCborStreamReader::Tag</code></td><td class="topAlign tblval"><code>0xc0</code></td><td class="topAlign">(Major type 6) Numbers giving further semantic value to generic CBOR items. See <a href="qtcborcommon.html#QCborTag-enum">QCborTag</a> for more information.</td></tr>
+<tr><td class="topAlign"><code>QCborStreamReader::SimpleType</code></td><td class="topAlign tblval"><code>0xe0</code></td><td class="topAlign">(Major type 7) Types carrying no further value. Includes booleans (true and false), null, undefined.</td></tr>
+<tr><td class="topAlign"><code>QCborStreamReader::Float16</code></td><td class="topAlign tblval"><code>HalfFloat</code></td><td class="topAlign">IEEE 754 half-precision floating point (<code>qfloat16</code>).</td></tr>
+<tr><td class="topAlign"><code>QCborStreamReader::HalfFloat</code></td><td class="topAlign tblval"><code>0xf9</code></td><td class="topAlign">An alias to Float16.</td></tr>
+<tr><td class="topAlign"><code>QCborStreamReader::Float</code></td><td class="topAlign tblval"><code>0xfa</code></td><td class="topAlign">IEEE 754 single-precision floating point (<code>float</code>).</td></tr>
+<tr><td class="topAlign"><code>QCborStreamReader::Double</code></td><td class="topAlign tblval"><code>0xfb</code></td><td class="topAlign">IEEE 754 double-precision floating point (<code>double</code>).</td></tr>
+<tr><td class="topAlign"><code>QCborStreamReader::Invalid</code></td><td class="topAlign tblval"><code>0xff</code></td><td class="topAlign">Not a valid type, either due to parsing error or due to reaching the end of an array or map.</td></tr>
+</table></div>
+<!-- @@@Type -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QCborStreamReader$$$QCborStreamReaderQIODevice* -->
+<h3 class="fn" id="QCborStreamReader-4"><a name="QCborStreamReader-4"></a>QCborStreamReader::<span class="name">QCborStreamReader</span>(<span class="type"><a href="qiodevice.html">QIODevice</a></span> *<i>device</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Creates a <a href="qcborstreamreader.html">QCborStreamReader</a> object that will parse the CBOR stream found by reading from <i>device</i>. <a href="qcborstreamreader.html">QCborStreamReader</a> does not take ownership of <i>device</i>, so it must remain valid until this oject is destroyed.</p>
+<!-- @@@QCborStreamReader -->
+<!-- $$$QCborStreamReader$$$QCborStreamReaderconstQByteArray& -->
+<h3 class="fn" id="QCborStreamReader-3"><a name="QCborStreamReader-3"></a>QCborStreamReader::<span class="name">QCborStreamReader</span>(const <span class="type"><a href="qbytearray.html">QByteArray</a></span> &amp;<i>data</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Creates a <a href="qcborstreamreader.html">QCborStreamReader</a> object that will parse the CBOR stream found in <i>data</i>.</p>
+<!-- @@@QCborStreamReader -->
+<!-- $$$QCborStreamReader$$$QCborStreamReaderconstquint8*qsizetype -->
+<h3 class="fn" id="QCborStreamReader-2"><a name="QCborStreamReader-2"></a>QCborStreamReader::<span class="name">QCborStreamReader</span>(const <span class="type"><a href="qtglobal.html#quint8-typedef">quint8</a></span> *<i>data</i>, <span class="type">qsizetype</span> <i>len</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Creates a <a href="qcborstreamreader.html">QCborStreamReader</a> object with <i>len</i> bytes of data starting at <i>data</i>. The pointer must remain valid until <a href="qcborstreamreader.html">QCborStreamReader</a> is destroyed.</p>
+<!-- @@@QCborStreamReader -->
+<!-- $$$QCborStreamReader$$$QCborStreamReaderconstchar*qsizetype -->
+<h3 class="fn" id="QCborStreamReader-1"><a name="QCborStreamReader-1"></a>QCborStreamReader::<span class="name">QCborStreamReader</span>(const <span class="type">char</span> *<i>data</i>, <span class="type">qsizetype</span> <i>len</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Creates a <a href="qcborstreamreader.html">QCborStreamReader</a> object with <i>len</i> bytes of data starting at <i>data</i>. The pointer must remain valid until <a href="qcborstreamreader.html">QCborStreamReader</a> is destroyed.</p>
+<!-- @@@QCborStreamReader -->
+<!-- $$$QCborStreamReader[overload1]$$$QCborStreamReader -->
+<h3 class="fn" id="QCborStreamReader"><a name="QCborStreamReader"></a>QCborStreamReader::<span class="name">QCborStreamReader</span>()</h3>
+<p>Creates a <a href="qcborstreamreader.html">QCborStreamReader</a> object with no source data. After construction, <a href="qcborstreamreader.html">QCborStreamReader</a> will report an error parsing.</p>
+<p>You can add more data by calling <a href="qcborstreamreader.html#addData">addData</a>() or by setting a different source device using <a href="qcborstreamreader.html#setDevice">setDevice</a>().</p>
+<p><b>See also </b><a href="qcborstreamreader.html#addData">addData</a>() and <a href="qcborstreamreader.html#isValid">isValid</a>().</p>
+<!-- @@@QCborStreamReader -->
+<!-- $$$~QCborStreamReader[overload1]$$$~QCborStreamReader -->
+<h3 class="fn" id="dtor.QCborStreamReader"><a name="dtor.QCborStreamReader"></a>QCborStreamReader::<span class="name">~QCborStreamReader</span>()</h3>
+<p>Destroys this <a href="qcborstreamreader.html">QCborStreamReader</a> object and frees any associated resources.</p>
+<!-- @@@~QCborStreamReader -->
+<!-- $$$addData[overload1]$$$addDataconstQByteArray& -->
+<h3 class="fn" id="addData"><a name="addData"></a><span class="type">void</span> QCborStreamReader::<span class="name">addData</span>(const <span class="type"><a href="qbytearray.html">QByteArray</a></span> &amp;<i>data</i>)</h3>
+<p>Adds <i>data</i> to the CBOR stream and reparses the current element. This function is useful if the end of the data was previously reached while processing the stream, but now more data is available.</p>
+<!-- @@@addData -->
+<!-- $$$addData$$$addDataconstchar*qsizetype -->
+<h3 class="fn" id="addData-1"><a name="addData-1"></a><span class="type">void</span> QCborStreamReader::<span class="name">addData</span>(const <span class="type">char</span> *<i>data</i>, <span class="type">qsizetype</span> <i>len</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Adds <i>len</i> bytes of data starting at <i>data</i> to the CBOR stream and reparses the current element. This function is useful if the end of the data was previously reached while processing the stream, but now more data is available.</p>
+<!-- @@@addData -->
+<!-- $$$addData$$$addDataconstquint8*qsizetype -->
+<h3 class="fn" id="addData-2"><a name="addData-2"></a><span class="type">void</span> QCborStreamReader::<span class="name">addData</span>(const <span class="type"><a href="qtglobal.html#quint8-typedef">quint8</a></span> *<i>data</i>, <span class="type">qsizetype</span> <i>len</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Adds <i>len</i> bytes of data starting at <i>data</i> to the CBOR stream and reparses the current element. This function is useful if the end of the data was previously reached while processing the stream, but now more data is available.</p>
+<!-- @@@addData -->
+<!-- $$$clear[overload1]$$$clear -->
+<h3 class="fn" id="clear"><a name="clear"></a><span class="type">void</span> QCborStreamReader::<span class="name">clear</span>()</h3>
+<p>Clears the decoder state and resets the input source data to an empty byte array. After this function is called, <a href="qcborstreamreader.html">QCborStreamReader</a> will be indicating an error parsing.</p>
+<p>Call <a href="qcborstreamreader.html#addData">addData</a>() to add more data to be parsed.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#reset">reset</a>() and <a href="qcborstreamreader.html#setDevice">setDevice</a>().</p>
+<!-- @@@clear -->
+<!-- $$$containerDepth[overload1]$$$containerDepth -->
+<h3 class="fn" id="containerDepth"><a name="containerDepth"></a><span class="type">int</span> QCborStreamReader::<span class="name">containerDepth</span>() const</h3>
+<p>Returns the number of containers that this stream has entered with <a href="qcborstreamreader.html#enterContainer">enterContainer</a>() but not yet left.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#enterContainer">enterContainer</a>() and <a href="qcborstreamreader.html#leaveContainer">leaveContainer</a>().</p>
+<!-- @@@containerDepth -->
+<!-- $$$currentOffset[overload1]$$$currentOffset -->
+<h3 class="fn" id="currentOffset"><a name="currentOffset"></a><span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> QCborStreamReader::<span class="name">currentOffset</span>() const</h3>
+<p>Returns the offset in the input stream of the item currently being decoded. The current offset is the number of decoded bytes so far only if the source data is a <a href="qbytearray.html">QByteArray</a> or it is a <a href="qiodevice.html">QIODevice</a> that was positioned at its beginning when decoding started.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#reset">reset</a>(), <a href="qcborstreamreader.html#clear">clear</a>(), and <a href="qcborstreamreader.html#device">device</a>().</p>
+<!-- @@@currentOffset -->
+<!-- $$$currentStringChunkSize[overload1]$$$currentStringChunkSize -->
+<h3 class="fn" id="currentStringChunkSize"><a name="currentStringChunkSize"></a><span class="type">qsizetype</span> QCborStreamReader::<span class="name">currentStringChunkSize</span>() const</h3>
+<p>Returns the size of the current text or byte string chunk. If the CBOR stream contains a non-chunked string (that is, if <a href="qcborstreamreader.html#isLengthKnown">isLengthKnown</a>() returns <code>true</code>), this function returns the size of the entire string, the same as <a href="qcborstreamreader.html#length">length</a>().</p>
+<p>This function is useful to pre-allocate the buffer whose pointer can be passed to <a href="qcborstreamreader.html#readStringChunk">readStringChunk</a>() later.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#readString">readString</a>(), <a href="qcborstreamreader.html#readByteArray">readByteArray</a>(), and <a href="qcborstreamreader.html#readStringChunk">readStringChunk</a>().</p>
+<!-- @@@currentStringChunkSize -->
+<!-- $$$device[overload1]$$$device -->
+<h3 class="fn" id="device"><a name="device"></a><span class="type"><a href="qiodevice.html">QIODevice</a></span> *QCborStreamReader::<span class="name">device</span>() const</h3>
+<p>Returns the <a href="qiodevice.html">QIODevice</a> that was set with either <a href="qcborstreamreader.html#setDevice">setDevice</a>() or the <a href="qcborstreamreader.html">QCborStreamReader</a> constructor. If this object was reading from a <a href="qbytearray.html">QByteArray</a>, this function returns nullptr instead.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#setDevice">setDevice</a>().</p>
+<!-- @@@device -->
+<!-- $$$enterContainer[overload1]$$$enterContainer -->
+<h3 class="fn" id="enterContainer"><a name="enterContainer"></a><span class="type">bool</span> QCborStreamReader::<span class="name">enterContainer</span>()</h3>
+<p>Enters the array or map that is the current item and prepares for iterating the elements contained in the container. Returns true if entering the container succeeded, false otherwise (usually, a parsing error). Each call to enterContainer() must be paired with a call to <a href="qcborstreamreader.html#leaveContainer">leaveContainer</a>().</p>
+<p>This function may only be called if the current item is an array or a map (that is, if <a href="qcborstreamreader.html#isArray">isArray</a>(), <a href="qcborstreamreader.html#isMap">isMap</a>() or <a href="qcborstreamreader.html#isContainer">isContainer</a>() is true). Calling it in any other condition is an error.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#leaveContainer">leaveContainer</a>(), <a href="qcborstreamreader.html#isContainer">isContainer</a>(), <a href="qcborstreamreader.html#isArray">isArray</a>(), and <a href="qcborstreamreader.html#isMap">isMap</a>().</p>
+<!-- @@@enterContainer -->
+<!-- $$$hasNext[overload1]$$$hasNext -->
+<h3 class="fn" id="hasNext"><a name="hasNext"></a><span class="type">bool</span> QCborStreamReader::<span class="name">hasNext</span>() const</h3>
+<p>Returns true if there are more items to be decoded in the current container or false of we've reached its end. If we're parsing the root element, hasNext() returning false indicates the parsing is complete; otherwise, if the container depth is non-zero, then the outer code needs to call <a href="qcborstreamreader.html#leaveContainer">leaveContainer</a>().</p>
+<p><b>See also </b><a href="qcborstreamreader.html#parentContainerType">parentContainerType</a>(), <a href="qcborstreamreader.html#containerDepth">containerDepth</a>(), and <a href="qcborstreamreader.html#leaveContainer">leaveContainer</a>().</p>
+<!-- @@@hasNext -->
+<!-- $$$isArray[overload1]$$$isArray -->
+<h3 class="fn" id="isArray"><a name="isArray"></a><span class="type">bool</span> QCborStreamReader::<span class="name">isArray</span>() const</h3>
+<p>Returns true if the type of the current element is an array (that is, if <a href="qcborstreamreader.html#type">type</a>() returns <a href="qcborstreamreader.html#Type-enum">QCborStreamReader::Array</a>). If this function returns true, you may call <a href="qcborstreamreader.html#enterContainer">enterContainer</a>() to begin parsing that container.</p>
+<p>When the current element is an array, you may also call <a href="qcborstreamreader.html#isLengthKnown">isLengthKnown</a>() to find out if the array's size is explicit in the CBOR stream. If it is, that size can be obtained by calling <a href="qcborstreamreader.html#length">length</a>().</p>
+<p>The following example pre-allocates a <a href="qvariant.html#QVariantList-typedef">QVariantList</a> given the array's size for more efficient decoding:</p>
+<pre class="cpp">
+
+     <span class="type"><a href="qvariant.html#QVariantList-typedef">QVariantList</a></span> populateFromCbor(<span class="type"><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></span> <span class="operator">&amp;</span>reader)
+     {
+         <span class="type"><a href="qvariant.html#QVariantList-typedef">QVariantList</a></span> list;
+         <span class="keyword">if</span> (reader<span class="operator">.</span>isLengthKnown())
+             list<span class="operator">.</span>reserve(reader<span class="operator">.</span>length());
+
+         reader<span class="operator">.</span>enterContainer();
+         <span class="keyword">while</span> (reader<span class="operator">.</span>lastError() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qcborerror.html">QCborError</a></span><span class="operator">::</span>NoError <span class="operator">&amp;</span><span class="operator">&amp;</span> reader<span class="operator">.</span>hasNext())
+             list<span class="operator">.</span>append(readOneElement(reader));
+         <span class="keyword">if</span> (reader<span class="operator">.</span>lastError() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qcborerror.html">QCborError</a></span><span class="operator">::</span>NoError)
+             reader<span class="operator">.</span>leaveContainer();
+     }
+
+</pre>
+<p><b>Note: </b>The code above does not validate that the length is a sensible value. If the input stream reports that the length is 1 billion elements, the above function will try to allocate some 16 GB or more of RAM, which can lead to a crash.</p><p><b>See also </b><a href="qcborstreamreader.html#type">type</a>(), <a href="qcborstreamreader.html#isMap">isMap</a>(), <a href="qcborstreamreader.html#isLengthKnown">isLengthKnown</a>(), <a href="qcborstreamreader.html#length">length</a>(), <a href="qcborstreamreader.html#enterContainer">enterContainer</a>(), and <a href="qcborstreamreader.html#leaveContainer">leaveContainer</a>().</p>
+<!-- @@@isArray -->
+<!-- $$$isBool[overload1]$$$isBool -->
+<h3 class="fn" id="isBool"><a name="isBool"></a><span class="type">bool</span> QCborStreamReader::<span class="name">isBool</span>() const</h3>
+<p>Returns true if the current element is a boolean value (<code>true</code> or <code>false</code>), false if it is anything else. If this function returns true, you may call <a href="qcborstreamreader.html#toBool">toBool</a>() to retrieve the value of the boolean. You may also call <a href="qcborstreamreader.html#toSimpleType">toSimpleType</a>() and compare to either QCborSimpleValue::True or QCborSimpleValue::False.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#type">type</a>(), <a href="qcborstreamreader.html#isFalse">isFalse</a>(), <a href="qcborstreamreader.html#isTrue">isTrue</a>(), <a href="qcborstreamreader.html#toBool">toBool</a>(), <a href="qcborstreamreader.html#isSimpleType">isSimpleType</a>(), and <a href="qcborstreamreader.html#toSimpleType">toSimpleType</a>().</p>
+<!-- @@@isBool -->
+<!-- $$$isByteArray[overload1]$$$isByteArray -->
+<h3 class="fn" id="isByteArray"><a name="isByteArray"></a><span class="type">bool</span> QCborStreamReader::<span class="name">isByteArray</span>() const</h3>
+<p>Returns true if the type of the current element is a byte array (that is, if <a href="qcborstreamreader.html#type">type</a>() returns <a href="qcborstreamreader.html#Type-enum">QCborStreamReader::ByteArray</a>). If this function returns true, you may call <a href="qcborstreamreader.html#readByteArray">readByteArray</a>() to read that data.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#type">type</a>(), <a href="qcborstreamreader.html#readByteArray">readByteArray</a>(), and <a href="qcborstreamreader.html#isString">isString</a>().</p>
+<!-- @@@isByteArray -->
+<!-- $$$isContainer[overload1]$$$isContainer -->
+<h3 class="fn" id="isContainer"><a name="isContainer"></a><span class="type">bool</span> QCborStreamReader::<span class="name">isContainer</span>() const</h3>
+<p>Returns true if the current element is a container (that is, an array or a map), false if it is anything else. If the current element is a container, the <a href="qcborstreamreader.html#isLengthKnown">isLengthKnown</a>() function may be used to find out if the container's size is explicit in the stream and, if so, <a href="qcborstreamreader.html#length">length</a>() can be used to get that size.</p>
+<p>More importantly, for a container, the <a href="qcborstreamreader.html#enterContainer">enterContainer</a>() function is available to begin iterating through the elements contained therein.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#type">type</a>(), <a href="qcborstreamreader.html#isArray">isArray</a>(), <a href="qcborstreamreader.html#isMap">isMap</a>(), <a href="qcborstreamreader.html#isLengthKnown">isLengthKnown</a>(), <a href="qcborstreamreader.html#length">length</a>(), <a href="qcborstreamreader.html#enterContainer">enterContainer</a>(), <a href="qcborstreamreader.html#leaveContainer">leaveContainer</a>(), and <a href="qcborstreamreader.html#containerDepth">containerDepth</a>().</p>
+<!-- @@@isContainer -->
+<!-- $$$isDouble[overload1]$$$isDouble -->
+<h3 class="fn" id="isDouble"><a name="isDouble"></a><span class="type">bool</span> QCborStreamReader::<span class="name">isDouble</span>() const</h3>
+<p>Returns true if the type of the current element is an IEEE 754 double-precision floating point (that is, if <a href="qcborstreamreader.html#type">type</a>() returns <a href="qcborstreamreader.html#Type-enum">QCborStreamReader::Double</a>). If this function returns true, you may call <a href="qcborstreamreader.html#toDouble">toDouble</a>() to read that data.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#type">type</a>(), <a href="qcborstreamreader.html#toDouble">toDouble</a>(), <a href="qcborstreamreader.html#isFloat16">isFloat16</a>(), and <a href="qcborstreamreader.html#isFloat">isFloat</a>().</p>
+<!-- @@@isDouble -->
+<!-- $$$isFalse[overload1]$$$isFalse -->
+<h3 class="fn" id="isFalse"><a name="isFalse"></a><span class="type">bool</span> QCborStreamReader::<span class="name">isFalse</span>() const</h3>
+<p>Returns true if the current element is the <code>false</code> value, false if it is anything else.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#type">type</a>(), <a href="qcborstreamreader.html#isTrue">isTrue</a>(), <a href="qcborstreamreader.html#isBool">isBool</a>(), <a href="qcborstreamreader.html#toBool">toBool</a>(), <a href="qcborstreamreader.html#isSimpleType">isSimpleType</a>(), and <a href="qcborstreamreader.html#toSimpleType">toSimpleType</a>().</p>
+<!-- @@@isFalse -->
+<!-- $$$isFloat16[overload1]$$$isFloat16 -->
+<h3 class="fn" id="isFloat16"><a name="isFloat16"></a><span class="type">bool</span> QCborStreamReader::<span class="name">isFloat16</span>() const</h3>
+<p>Returns true if the type of the current element is an IEEE 754 half-precision floating point (that is, if <a href="qcborstreamreader.html#type">type</a>() returns <a href="qcborstreamreader.html#Type-enum">QCborStreamReader::Float16</a>). If this function returns true, you may call <a href="qcborstreamreader.html#toFloat16">toFloat16</a>() to read that data.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#type">type</a>(), <a href="qcborstreamreader.html#toFloat16">toFloat16</a>(), <a href="qcborstreamreader.html#isFloat">isFloat</a>(), and <a href="qcborstreamreader.html#isDouble">isDouble</a>().</p>
+<!-- @@@isFloat16 -->
+<!-- $$$isFloat[overload1]$$$isFloat -->
+<h3 class="fn" id="isFloat"><a name="isFloat"></a><span class="type">bool</span> QCborStreamReader::<span class="name">isFloat</span>() const</h3>
+<p>Returns true if the type of the current element is an IEEE 754 single-precision floating point (that is, if <a href="qcborstreamreader.html#type">type</a>() returns <a href="qcborstreamreader.html#Type-enum">QCborStreamReader::Float</a>). If this function returns true, you may call <a href="qcborstreamreader.html#toFloat">toFloat</a>() to read that data.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#type">type</a>(), <a href="qcborstreamreader.html#toFloat">toFloat</a>(), <a href="qcborstreamreader.html#isFloat16">isFloat16</a>(), and <a href="qcborstreamreader.html#isDouble">isDouble</a>().</p>
+<!-- @@@isFloat -->
+<!-- $$$isInteger[overload1]$$$isInteger -->
+<h3 class="fn" id="isInteger"><a name="isInteger"></a><span class="type">bool</span> QCborStreamReader::<span class="name">isInteger</span>() const</h3>
+<p>Returns true if the type of the current element is either an unsigned integer or a negative one (that is, if <a href="qcborstreamreader.html#type">type</a>() returns <a href="qcborstreamreader.html#Type-enum">QCborStreamReader::UnsignedInteger</a> or <a href="qcborstreamreader.html#Type-enum">QCborStreamReader::NegativeInteger</a>). If this function returns true, you may call <a href="qcborstreamreader.html#toInteger">toInteger</a>() to read that value.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#type">type</a>(), <a href="qcborstreamreader.html#toInteger">toInteger</a>(), <a href="qcborstreamreader.html#toUnsignedInteger">toUnsignedInteger</a>(), <a href="qcborstreamreader.html#toNegativeInteger">toNegativeInteger</a>(), <a href="qcborstreamreader.html#isUnsignedInteger">isUnsignedInteger</a>(), and <a href="qcborstreamreader.html#isNegativeInteger">isNegativeInteger</a>().</p>
+<!-- @@@isInteger -->
+<!-- $$$isInvalid[overload1]$$$isInvalid -->
+<h3 class="fn" id="isInvalid"><a name="isInvalid"></a><span class="type">bool</span> QCborStreamReader::<span class="name">isInvalid</span>() const</h3>
+<p>Returns true if the current element is invalid, false otherwise. The current element may be invalid if there was a decoding error or we've just parsed the last element in an array or map.</p>
+<p><b>Note: </b>This function is not to be confused with <a href="qcborstreamreader.html#isNull">isNull</a>(). Null is a normal CBOR type that must be handled by the application.</p><p><b>See also </b><a href="qcborstreamreader.html#type">type</a>() and <a href="qcborstreamreader.html#isValid">isValid</a>().</p>
+<!-- @@@isInvalid -->
+<!-- $$$isLengthKnown[overload1]$$$isLengthKnown -->
+<h3 class="fn" id="isLengthKnown"><a name="isLengthKnown"></a><span class="type">bool</span> QCborStreamReader::<span class="name">isLengthKnown</span>() const</h3>
+<p>Returns true if the length of the current array, map, byte array or string is known (explicit in the CBOR stream), false otherwise. This function should only be called if the element is one of those.</p>
+<p>If the length is known, it may be obtained by calling <a href="qcborstreamreader.html#length">length</a>().</p>
+<p>If the length of a map or an array is not known, it is implied by the number of elements present in the stream. <a href="qcborstreamreader.html">QCborStreamReader</a> has no API to calculate the length in that condition.</p>
+<p>Strings and byte arrays may also have indeterminate length (that is, they may be transmitted in multiple chunks). Those cannot currently be created with <a href="qcborstreamwriter.html">QCborStreamWriter</a>, but they could be with other encoders, so <a href="qcborstreamreader.html">QCborStreamReader</a> supports them.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#length">length</a>(), <a href="qcborstreamwriter.html#startArray">QCborStreamWriter::startArray</a>(), and <a href="qcborstreamwriter.html#startMap">QCborStreamWriter::startMap</a>().</p>
+<!-- @@@isLengthKnown -->
+<!-- $$$isMap[overload1]$$$isMap -->
+<h3 class="fn" id="isMap"><a name="isMap"></a><span class="type">bool</span> QCborStreamReader::<span class="name">isMap</span>() const</h3>
+<p>Returns true if the type of the current element is a map (that is, if <a href="qcborstreamreader.html#type">type</a>() returns <a href="qcborstreamreader.html#Type-enum">QCborStreamReader::Map</a>). If this function returns true, you may call <a href="qcborstreamreader.html#enterContainer">enterContainer</a>() to begin parsing that container.</p>
+<p>When the current element is a map, you may also call <a href="qcborstreamreader.html#isLengthKnown">isLengthKnown</a>() to find out if the map's size is explicit in the CBOR stream. If it is, that size can be obtained by calling <a href="qcborstreamreader.html#length">length</a>().</p>
+<p>The following example pre-allocates a <a href="qvariant.html#QVariantMap-typedef">QVariantMap</a> given the map's size for more efficient decoding:</p>
+<pre class="cpp">
+
+     <span class="type"><a href="qvariant.html#QVariantMap-typedef">QVariantMap</a></span> populateFromCbor(<span class="type"><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></span> <span class="operator">&amp;</span>reader)
+     {
+         <span class="type"><a href="qvariant.html#QVariantMap-typedef">QVariantMap</a></span> map;
+         <span class="keyword">if</span> (reader<span class="operator">.</span>isLengthKnown())
+             map<span class="operator">.</span>reserve(reader<span class="operator">.</span>length());
+
+         reader<span class="operator">.</span>enterContainer();
+         <span class="keyword">while</span> (reader<span class="operator">.</span>lastError() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qcborerror.html">QCborError</a></span><span class="operator">::</span>NoError <span class="operator">&amp;</span><span class="operator">&amp;</span> reader<span class="operator">.</span>hasNext()) {
+             <span class="type"><a href="qstring.html">QString</a></span> key <span class="operator">=</span> readElementAsString(reader);
+             map<span class="operator">.</span>insert(key<span class="operator">,</span> readOneElement(reader));
+         }
+         <span class="keyword">if</span> (reader<span class="operator">.</span>lastError() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qcborerror.html">QCborError</a></span><span class="operator">::</span>NoError)
+             reader<span class="operator">.</span>leaveContainer();
+     }
+
+</pre>
+<p>The example above uses a function called <code>readElementAsString</code> to read the map's keys and obtain a string. That is because CBOR maps may contain any type as keys, not just strings. User code needs to either perform this conversion, reject non-string keys, or instead use a different container besides <a href="qvariant.html#QVariantMap-typedef">QVariantMap</a> and <a href="qvariant.html#QVariantHash-typedef">QVariantHash</a>. For example, if the map is expected to contain integer keys, which is recommended as it reduces stream size and parsing, the correct container would be <code>\l{QMap}&lt;int, QVariant&gt;</code> or <code>\l{QHash}&lt;int, QVariant&gt;</code>.</p>
+<p><b>Note: </b>The code above does not validate that the length is a sensible value. If the input stream reports that the length is 1 billion elements, the above function will try to allocate some 24 GB or more of RAM, which can lead to a crash.</p><p><b>See also </b><a href="qcborstreamreader.html#type">type</a>(), <a href="qcborstreamreader.html#isArray">isArray</a>(), <a href="qcborstreamreader.html#isLengthKnown">isLengthKnown</a>(), <a href="qcborstreamreader.html#length">length</a>(), <a href="qcborstreamreader.html#enterContainer">enterContainer</a>(), and <a href="qcborstreamreader.html#leaveContainer">leaveContainer</a>().</p>
+<!-- @@@isMap -->
+<!-- $$$isNegativeInteger[overload1]$$$isNegativeInteger -->
+<h3 class="fn" id="isNegativeInteger"><a name="isNegativeInteger"></a><span class="type">bool</span> QCborStreamReader::<span class="name">isNegativeInteger</span>() const</h3>
+<p>Returns true if the type of the current element is a negative integer (that is if <a href="qcborstreamreader.html#type">type</a>() returns <a href="qcborstreamreader.html#Type-enum">QCborStreamReader::NegativeInteger</a>). If this function returns true, you may call <a href="qcborstreamreader.html#toNegativeInteger">toNegativeInteger</a>() or <a href="qcborstreamreader.html#toInteger">toInteger</a>() to read that value.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#type">type</a>(), <a href="qcborstreamreader.html#toNegativeInteger">toNegativeInteger</a>(), <a href="qcborstreamreader.html#toInteger">toInteger</a>(), <a href="qcborstreamreader.html#isInteger">isInteger</a>(), and <a href="qcborstreamreader.html#isUnsignedInteger">isUnsignedInteger</a>().</p>
+<!-- @@@isNegativeInteger -->
+<!-- $$$isNull[overload1]$$$isNull -->
+<h3 class="fn" id="isNull"><a name="isNull"></a><span class="type">bool</span> QCborStreamReader::<span class="name">isNull</span>() const</h3>
+<p>Returns true if the current element is the <code>null</code> value, false if it is anything else. Null values may be used to indicate the absence of some optional data.</p>
+<p><b>Note: </b>This function is not the opposite of <a href="qcborstreamreader.html#isValid">isValid</a>(). A Null value is a valid CBOR value.</p><p><b>See also </b><a href="qcborstreamreader.html#type">type</a>(), <a href="qcborstreamreader.html#isSimpleType">isSimpleType</a>(), and <a href="qcborstreamreader.html#toSimpleType">toSimpleType</a>().</p>
+<!-- @@@isNull -->
+<!-- $$$isSimpleType[overload1]$$$isSimpleType -->
+<h3 class="fn" id="isSimpleType"><a name="isSimpleType"></a><span class="type">bool</span> QCborStreamReader::<span class="name">isSimpleType</span>() const</h3>
+<p>Returns true if the type of the current element is any CBOR simple type, including a boolean value (true and false) as well as null and undefined. To find out which simple type this is, call <a href="qcborstreamreader.html#toSimpleType">toSimpleType</a>(). Alternatively, to test for one specific simple type, call the overload that takes a <a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a> parameter.</p>
+<p>CBOR simple types are types that do not carry extra value. There are 255 possibilities, but there are currently only four values that have defined meaning. Code is not expected to cope with unknown simple types and may simply discard the stream as invalid if it finds an unknown one.</p>
+<p><b>See also </b><a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a>, <a href="qcborstreamreader.html#type">type</a>(), <a href="qcborstreamreader.html#isSimpleType-1">isSimpleType</a>(QCborSimpleType), and <a href="qcborstreamreader.html#toSimpleType">toSimpleType</a>().</p>
+<!-- @@@isSimpleType -->
+<!-- $$$isSimpleType$$$isSimpleTypeQCborSimpleType -->
+<h3 class="fn" id="isSimpleType-1"><a name="isSimpleType-1"></a><span class="type">bool</span> QCborStreamReader::<span class="name">isSimpleType</span>(<span class="type"><a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a></span> <i>st</i>) const</h3>
+<p>Returns true if the type of the current element is the simple type <i>st</i>, false otherwise. If this function returns true, then <a href="qcborstreamreader.html#toSimpleType">toSimpleType</a>() will return <i>st</i>.</p>
+<p>CBOR simple types are types that do not carry extra value. There are 255 possibilities, but there are currently only four values that have defined meaning. Code is not expected to cope with unknown simple types and may simply discard the stream as invalid if it finds an unknown one.</p>
+<p><b>See also </b><a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a>, <a href="qcborstreamreader.html#type">type</a>(), <a href="qcborstreamreader.html#isSimpleType">isSimpleType</a>(), and <a href="qcborstreamreader.html#toSimpleType">toSimpleType</a>().</p>
+<!-- @@@isSimpleType -->
+<!-- $$$isString[overload1]$$$isString -->
+<h3 class="fn" id="isString"><a name="isString"></a><span class="type">bool</span> QCborStreamReader::<span class="name">isString</span>() const</h3>
+<p>Returns true if the type of the current element is a text string (that is, if <a href="qcborstreamreader.html#type">type</a>() returns <a href="qcborstreamreader.html#Type-enum">QCborStreamReader::String</a>). If this function returns true, you may call <a href="qcborstreamreader.html#readString">readString</a>() to read that data.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#type">type</a>(), <a href="qcborstreamreader.html#readString">readString</a>(), and <a href="qcborstreamreader.html#isByteArray">isByteArray</a>().</p>
+<!-- @@@isString -->
+<!-- $$$isTag[overload1]$$$isTag -->
+<h3 class="fn" id="isTag"><a name="isTag"></a><span class="type">bool</span> QCborStreamReader::<span class="name">isTag</span>() const</h3>
+<p>Returns true if the type of the current element is a CBOR tag (that is, if <a href="qcborstreamreader.html#type">type</a>() returns <a href="qcborstreamreader.html#Type-enum">QCborStreamReader::Tag</a>). If this function returns true, you may call <a href="qcborstreamreader.html#toTag">toTag</a>() to read that data.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#type">type</a>() and <a href="qcborstreamreader.html#toTag">toTag</a>().</p>
+<!-- @@@isTag -->
+<!-- $$$isTrue[overload1]$$$isTrue -->
+<h3 class="fn" id="isTrue"><a name="isTrue"></a><span class="type">bool</span> QCborStreamReader::<span class="name">isTrue</span>() const</h3>
+<p>Returns true if the current element is the <code>true</code> value, false if it is anything else.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#type">type</a>(), <a href="qcborstreamreader.html#isFalse">isFalse</a>(), <a href="qcborstreamreader.html#isBool">isBool</a>(), <a href="qcborstreamreader.html#toBool">toBool</a>(), <a href="qcborstreamreader.html#isSimpleType">isSimpleType</a>(), and <a href="qcborstreamreader.html#toSimpleType">toSimpleType</a>().</p>
+<!-- @@@isTrue -->
+<!-- $$$isUndefined[overload1]$$$isUndefined -->
+<h3 class="fn" id="isUndefined"><a name="isUndefined"></a><span class="type">bool</span> QCborStreamReader::<span class="name">isUndefined</span>() const</h3>
+<p>Returns true if the current element is the <code>undefined</code> value, false if it is anything else. Undefined values may be encoded to indicate that some conversion failed or was not possible when creating the stream. <a href="qcborstreamreader.html">QCborStreamReader</a> never performs any replacement and this function will only return true if the stream contains an explicit undefined value.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#type">type</a>(), <a href="qcborstreamreader.html#isSimpleType">isSimpleType</a>(), and <a href="qcborstreamreader.html#toSimpleType">toSimpleType</a>().</p>
+<!-- @@@isUndefined -->
+<!-- $$$isUnsignedInteger[overload1]$$$isUnsignedInteger -->
+<h3 class="fn" id="isUnsignedInteger"><a name="isUnsignedInteger"></a><span class="type">bool</span> QCborStreamReader::<span class="name">isUnsignedInteger</span>() const</h3>
+<p>Returns true if the type of the current element is an unsigned integer (that is if <a href="qcborstreamreader.html#type">type</a>() returns <a href="qcborstreamreader.html#Type-enum">QCborStreamReader::UnsignedInteger</a>). If this function returns true, you may call <a href="qcborstreamreader.html#toUnsignedInteger">toUnsignedInteger</a>() or <a href="qcborstreamreader.html#toInteger">toInteger</a>() to read that value.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#type">type</a>(), <a href="qcborstreamreader.html#toUnsignedInteger">toUnsignedInteger</a>(), <a href="qcborstreamreader.html#toInteger">toInteger</a>(), <a href="qcborstreamreader.html#isInteger">isInteger</a>(), and <a href="qcborstreamreader.html#isNegativeInteger">isNegativeInteger</a>().</p>
+<!-- @@@isUnsignedInteger -->
+<!-- $$$isValid[overload1]$$$isValid -->
+<h3 class="fn" id="isValid"><a name="isValid"></a><span class="type">bool</span> QCborStreamReader::<span class="name">isValid</span>() const</h3>
+<p>Returns true if the current element is valid, false otherwise. The current element may be invalid if there was a decoding error or we've just parsed the last element in an array or map.</p>
+<p><b>Note: </b>This function is not the opposite of <a href="qcborstreamreader.html#isNull">isNull</a>(). Null is a normal CBOR type that must be handled by the application.</p><p><b>See also </b><a href="qcborstreamreader.html#type">type</a>() and <a href="qcborstreamreader.html#isInvalid">isInvalid</a>().</p>
+<!-- @@@isValid -->
+<!-- $$$lastError[overload1]$$$lastError -->
+<h3 class="fn" id="lastError"><a name="lastError"></a><span class="type"><a href="qcborerror.html">QCborError</a></span> QCborStreamReader::<span class="name">lastError</span>()</h3>
+<p>Returns the last error in decoding the stream, if any. If no error was encountered, this returns an <a href="qcborerror.html#Code-enum">QCborError::NoError</a>.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#isValid">isValid</a>().</p>
+<!-- @@@lastError -->
+<!-- $$$leaveContainer[overload1]$$$leaveContainer -->
+<h3 class="fn" id="leaveContainer"><a name="leaveContainer"></a><span class="type">bool</span> QCborStreamReader::<span class="name">leaveContainer</span>()</h3>
+<p>Leaves the array or map whose items were being processed and positions the decoder at the next item after the end of the container. Returns true if leaving the container succeeded, false otherwise (usually, a parsing error). Each call to <a href="qcborstreamreader.html#enterContainer">enterContainer</a>() must be paired with a call to leaveContainer().</p>
+<p>This function may only be called if <a href="qcborstreamreader.html#hasNext">hasNext</a>() has returned false and <a href="qcborstreamreader.html#containerDepth">containerDepth</a>() is not zero. Calling it in any other condition is an error.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#enterContainer">enterContainer</a>(), <a href="qcborstreamreader.html#parentContainerType">parentContainerType</a>(), and <a href="qcborstreamreader.html#containerDepth">containerDepth</a>().</p>
+<!-- @@@leaveContainer -->
+<!-- $$$length[overload1]$$$length -->
+<h3 class="fn" id="length"><a name="length"></a><span class="type"><a href="qtglobal.html#quint64-typedef">quint64</a></span> QCborStreamReader::<span class="name">length</span>() const</h3>
+<p>Returns the length of the string or byte array, or the number of items in an array or the number, of item pairs in a map, if known. This function must not be called if the length is unknown (that is, if <a href="qcborstreamreader.html#isLengthKnown">isLengthKnown</a>() returned false). It is an error to do that and it will cause <a href="qcborstreamreader.html">QCborStreamReader</a> to stop parsing the input stream.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#isLengthKnown">isLengthKnown</a>(), <a href="qcborstreamwriter.html#startArray">QCborStreamWriter::startArray</a>(), and <a href="qcborstreamwriter.html#startMap">QCborStreamWriter::startMap</a>().</p>
+<!-- @@@length -->
+<!-- $$$next[overload1]$$$nextint -->
+<h3 class="fn" id="next"><a name="next"></a><span class="type">bool</span> QCborStreamReader::<span class="name">next</span>(<span class="type">int</span> <i>maxRecursion</i> = 10000)</h3>
+<p>Advance the CBOR stream decoding one element. You should usually call this function when parsing fixed-width basic elements (that is, integers, simple values, tags and floating point values). But this function can be called when the current item is a string, array or map too and it will skip over that entire element, including all contained elements.</p>
+<p>This function returns true if advancing was successful, false otherwise. It may fail if the stream is corrupt, incomplete or if the nesting level of arrays and maps exceeds <i>maxRecursion</i>. Calling this function when <a href="qcborstreamreader.html#hasNext">hasNext</a>() has returned false is also an error. If this function returns false, <a href="qcborstreamreader.html#lastError">lastError</a>() will return the error code detailing what the failure was.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#lastError">lastError</a>(), <a href="qcborstreamreader.html#isValid">isValid</a>(), and <a href="qcborstreamreader.html#hasNext">hasNext</a>().</p>
+<!-- @@@next -->
+<!-- $$$parentContainerType[overload1]$$$parentContainerType -->
+<h3 class="fn" id="parentContainerType"><a name="parentContainerType"></a><span class="type"><a href="qcborstreamreader.html#Type-enum">QCborStreamReader::Type</a></span> QCborStreamReader::<span class="name">parentContainerType</span>() const</h3>
+<p>Returns either <a href="qcborstreamreader.html#Type-enum">QCborStreamReader::Array</a> or <a href="qcborstreamreader.html#Type-enum">QCborStreamReader::Map</a>, indicating whether the container that contains the current item was an array or map, respectively. If we're currently parsing the root element, this function returns <a href="qcborstreamreader.html#Type-enum">QCborStreamReader::Invalid</a>.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#containerDepth">containerDepth</a>() and <a href="qcborstreamreader.html#enterContainer">enterContainer</a>().</p>
+<!-- @@@parentContainerType -->
+<!-- $$$readByteArray[overload1]$$$readByteArray -->
+<h3 class="fn" id="readByteArray"><a name="readByteArray"></a><span class="type"><a href="qcborstreamreader-stringresult.html">StringResult</a></span>&lt;<span class="type"><a href="qbytearray.html">QByteArray</a></span>&gt; QCborStreamReader::<span class="name">readByteArray</span>()</h3>
+<p>Decodes one byte array chunk from the CBOR string and returns it. This function is used for both regular and chunked contents, so the caller must always loop around calling this function, even if <a href="qcborstreamreader.html#isLengthKnown">isLengthKnown</a>() has is true. The typical use of this function is as follows:</p>
+<pre class="cpp">
+
+     <span class="type">QBytearray</span> decodeBytearray(<span class="type"><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></span> <span class="operator">&amp;</span>reader)
+     {
+         <span class="type">QBytearray</span> result;
+         <span class="keyword">auto</span> r <span class="operator">=</span> reader<span class="operator">.</span>readBytearray();
+         <span class="keyword">while</span> (r<span class="operator">.</span>code <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></span><span class="operator">::</span>Ok) {
+             result <span class="operator">+</span><span class="operator">=</span> r<span class="operator">.</span>data;
+             r <span class="operator">=</span> reader<span class="operator">.</span>readByteArray();
+         }
+
+         <span class="keyword">if</span> (r<span class="operator">.</span>code <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></span><span class="operator">::</span>Error) {
+             <span class="comment">// handle error condition</span>
+             result<span class="operator">.</span>clear();
+         }
+         <span class="keyword">return</span> result;
+     }
+
+</pre>
+<p>This function does not perform any type conversions, including from integers or from strings. Therefore, it may only be called if <a href="qcborstreamreader.html#isByteArray">isByteArray</a>() is true; calling it in any other condition is an error.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#readString">readString</a>(), <a href="qcborstreamreader.html#isByteArray">isByteArray</a>(), and <a href="qcborstreamreader.html#readStringChunk">readStringChunk</a>().</p>
+<!-- @@@readByteArray -->
+<!-- $$$readString[overload1]$$$readString -->
+<h3 class="fn" id="readString"><a name="readString"></a><span class="type"><a href="qcborstreamreader-stringresult.html">StringResult</a></span>&lt;<span class="type"><a href="qstring.html">QString</a></span>&gt; QCborStreamReader::<span class="name">readString</span>()</h3>
+<p>Decodes one string chunk from the CBOR string and returns it. This function is used for both regular and chunked string contents, so the caller must always loop around calling this function, even if <a href="qcborstreamreader.html#isLengthKnown">isLengthKnown</a>() has is true. The typical use of this function is as follows:</p>
+<pre class="cpp">
+
+     <span class="type"><a href="qstring.html">QString</a></span> decodeString(<span class="type"><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></span> <span class="operator">&amp;</span>reader)
+     {
+         <span class="type"><a href="qstring.html">QString</a></span> result;
+         <span class="keyword">auto</span> r <span class="operator">=</span> reader<span class="operator">.</span>readString();
+         <span class="keyword">while</span> (r<span class="operator">.</span>code <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></span><span class="operator">::</span>Ok) {
+             result <span class="operator">+</span><span class="operator">=</span> r<span class="operator">.</span>data;
+             r <span class="operator">=</span> reader<span class="operator">.</span>readString();
+         }
+
+         <span class="keyword">if</span> (r<span class="operator">.</span>code <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></span><span class="operator">::</span>Error) {
+             <span class="comment">// handle error condition</span>
+             result<span class="operator">.</span>clear();
+         }
+         <span class="keyword">return</span> result;
+     }
+
+</pre>
+<p>This function does not perform any type conversions, including from integers or from byte arrays. Therefore, it may only be called if <a href="qcborstreamreader.html#isString">isString</a>() returned true; calling it in any other condition is an error.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#readByteArray">readByteArray</a>(), <a href="qcborstreamreader.html#isString">isString</a>(), and <a href="qcborstreamreader.html#readStringChunk">readStringChunk</a>().</p>
+<!-- @@@readString -->
+<!-- $$$readStringChunk[overload1]$$$readStringChunkchar*qsizetype -->
+<h3 class="fn" id="readStringChunk"><a name="readStringChunk"></a><span class="type"><a href="qcborstreamreader-stringresult.html">StringResult</a></span>&lt;<span class="type">qsizetype</span>&gt; QCborStreamReader::<span class="name">readStringChunk</span>(<span class="type">char</span> *<i>ptr</i>, <span class="type">qsizetype</span> <i>maxlen</i>)</h3>
+<p>Reads the current string chunk into the buffer pointed to by <i>ptr</i>, whose size is <i>maxlen</i>. This function returns a <a href="qcborstreamreader-stringresult.html">StringResult</a> object, with the number of bytes copied into <i>ptr</i> saved in the <code>\l</code> <a href="qcborstreamreader-stringresult.html#data-var">StringResult::data</a> member. The <code>\l</code> <a href="qcborstreamreader-stringresult.html#status-var">StringResult::status</a> member indicates whether there was an error reading the string, whether data was copied or whether this was the last chunk.</p>
+<p>This function can be called for both <a href="qcborstreamreader.html#Type-enum">String</a> and <a href="qcborstreamreader.html#Type-enum">ByteArray</a> types. For the latter, this function will read the same data that <a href="qcborstreamreader.html#readByteArray">readByteArray</a>() would have returned. For strings, it returns the UTF-8 equivalent of the <a href="qstring.html">QString</a> that would have been returned.</p>
+<p>This function is usually used alongside <a href="qcborstreamreader.html#currentStringChunkSize">currentStringChunkSize</a>() in a loop. For example:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></span><span class="operator">&lt;</span>qsizetype<span class="operator">&gt;</span> result;
+      <span class="keyword">do</span> {
+          qsizetype size <span class="operator">=</span> reader<span class="operator">.</span>currentStringChunkSize();
+          qsizetype oldsize <span class="operator">=</span> buffer<span class="operator">.</span>size();
+          buffer<span class="operator">.</span>resize(oldsize <span class="operator">+</span> size);
+          result <span class="operator">=</span> reader<span class="operator">.</span>readStringChunk(buffer<span class="operator">.</span>data() <span class="operator">+</span> oldsize<span class="operator">,</span> size);
+      } <span class="keyword">while</span> (result<span class="operator">.</span>status() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qcborstreamreader.html#QCborStreamReader">QCborStreamReader</a></span><span class="operator">::</span>Ok);
+
+</pre>
+<p>Unlike <a href="qcborstreamreader.html#readByteArray">readByteArray</a>() and <a href="qcborstreamreader.html#readString">readString</a>(), this function is not limited by implementation limits of <a href="qbytearray.html">QByteArray</a> and <a href="qstring.html">QString</a>.</p>
+<p><b>Note: </b>This function does not perform verification that the UTF-8 contents are properly formatted. That means this function does not produce the <a href="qcborerror.html#Code-enum">QCborError::InvalidUtf8String</a> error, even when <a href="qcborstreamreader.html#readString">readString</a>() does.</p><p><b>See also </b><a href="qcborstreamreader.html#currentStringChunkSize">currentStringChunkSize</a>(), <a href="qcborstreamreader.html#readString">readString</a>(), <a href="qcborstreamreader.html#readByteArray">readByteArray</a>(), <a href="qcborstreamreader.html#isString">isString</a>(), and <a href="qcborstreamreader.html#isByteArray">isByteArray</a>().</p>
+<!-- @@@readStringChunk -->
+<!-- $$$reparse[overload1]$$$reparse -->
+<h3 class="fn" id="reparse"><a name="reparse"></a><span class="type">void</span> QCborStreamReader::<span class="name">reparse</span>()</h3>
+<p>Reparses the current element. This function must be called when more data becomes available in the source <a href="qiodevice.html">QIODevice</a> after parsing failed due to reaching the end of the input data before the end of the CBOR stream.</p>
+<p>When reading from QByteArray(), the <a href="qcborstreamreader.html#addData">addData</a>() function automatically calls this function. Calling it when the reading had not failed is a no-op.</p>
+<!-- @@@reparse -->
+<!-- $$$reset[overload1]$$$reset -->
+<h3 class="fn" id="reset"><a name="reset"></a><span class="type">void</span> QCborStreamReader::<span class="name">reset</span>()</h3>
+<p>Resets the source back to the beginning and clears the decoder state. If the source data was a <a href="qbytearray.html">QByteArray</a>, <a href="qcborstreamreader.html">QCborStreamReader</a> will restart from the beginning of the array.</p>
+<p>If the source data is a <a href="qiodevice.html">QIODevice</a>, this function will call <a href="qiodevice.html#reset">QIODevice::reset</a>(), which will seek to byte position 0. If the CBOR stream is not found at the beginning of the device (e.g&#x2e;, beginning of a file), then this function will likely do the wrong thing. Instead, position the <a href="qiodevice.html">QIODevice</a> to the right offset and call <a href="qcborstreamreader.html#setDevice">setDevice</a>().</p>
+<p><b>See also </b><a href="qcborstreamreader.html#clear">clear</a>() and <a href="qcborstreamreader.html#setDevice">setDevice</a>().</p>
+<!-- @@@reset -->
+<!-- $$$setDevice[overload1]$$$setDeviceQIODevice* -->
+<h3 class="fn" id="setDevice"><a name="setDevice"></a><span class="type">void</span> QCborStreamReader::<span class="name">setDevice</span>(<span class="type"><a href="qiodevice.html">QIODevice</a></span> *<i>device</i>)</h3>
+<p>Sets the source of data to <i>device</i>, resetting the decoder to its initial state.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#device">device</a>().</p>
+<!-- @@@setDevice -->
+<!-- $$$toBool[overload1]$$$toBool -->
+<h3 class="fn" id="toBool"><a name="toBool"></a><span class="type">bool</span> QCborStreamReader::<span class="name">toBool</span>() const</h3>
+<p>Returns the boolean value of the current element.</p>
+<p>This function does not perform any type conversions, including from integer. Therefore, it may only be called if <a href="qcborstreamreader.html#isTrue">isTrue</a>(), <a href="qcborstreamreader.html#isFalse">isFalse</a>() or <a href="qcborstreamreader.html#isBool">isBool</a>() returned true; calling it in any other condition is an error.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#isBool">isBool</a>(), <a href="qcborstreamreader.html#isTrue">isTrue</a>(), <a href="qcborstreamreader.html#isFalse">isFalse</a>(), and <a href="qcborstreamreader.html#toInteger">toInteger</a>().</p>
+<!-- @@@toBool -->
+<!-- $$$toDouble[overload1]$$$toDouble -->
+<h3 class="fn" id="toDouble"><a name="toDouble"></a><span class="type">double</span> QCborStreamReader::<span class="name">toDouble</span>() const</h3>
+<p>Returns the 64-bit double-precision floating point value of the current element.</p>
+<p>This function does not perform any type conversions, including from other floating point types or from integer values. Therefore, it may only be called if <a href="qcborstreamreader.html#isDouble">isDouble</a>() is true; calling it in any other condition is an error.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#isDouble">isDouble</a>(), <a href="qcborstreamreader.html#toFloat16">toFloat16</a>(), and <a href="qcborstreamreader.html#toFloat">toFloat</a>().</p>
+<!-- @@@toDouble -->
+<!-- $$$toFloat16[overload1]$$$toFloat16 -->
+<h3 class="fn" id="toFloat16"><a name="toFloat16"></a><span class="type">qfloat16</span> QCborStreamReader::<span class="name">toFloat16</span>() const</h3>
+<p>Returns the 16-bit half-precision floating point value of the current element.</p>
+<p>This function does not perform any type conversions, including from other floating point types or from integer values. Therefore, it may only be called if <a href="qcborstreamreader.html#isFloat16">isFloat16</a>() is true; calling it in any other condition is an error.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#isFloat16">isFloat16</a>(), <a href="qcborstreamreader.html#toFloat">toFloat</a>(), and <a href="qcborstreamreader.html#toDouble">toDouble</a>().</p>
+<!-- @@@toFloat16 -->
+<!-- $$$toFloat[overload1]$$$toFloat -->
+<h3 class="fn" id="toFloat"><a name="toFloat"></a><span class="type">float</span> QCborStreamReader::<span class="name">toFloat</span>() const</h3>
+<p>Returns the 32-bit single-precision floating point value of the current element.</p>
+<p>This function does not perform any type conversions, including from other floating point types or from integer values. Therefore, it may only be called if <a href="qcborstreamreader.html#isFloat">isFloat</a>() is true; calling it in any other condition is an error.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#isFloat">isFloat</a>(), <a href="qcborstreamreader.html#toFloat16">toFloat16</a>(), and <a href="qcborstreamreader.html#toDouble">toDouble</a>().</p>
+<!-- @@@toFloat -->
+<!-- $$$toInteger[overload1]$$$toInteger -->
+<h3 class="fn" id="toInteger"><a name="toInteger"></a><span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> QCborStreamReader::<span class="name">toInteger</span>() const</h3>
+<p>Returns the integer value of the current element, be it negative, positive or zero. If the value is larger than 2<sup>63</sup> - 1 or smaller than -2<sup>63</sup>, the returned value will overflow and will have an incorrect sign. If handling those values is required, use <a href="qcborstreamreader.html#toUnsignedInteger">toUnsignedInteger</a>() or <a href="qcborstreamreader.html#toNegativeInteger">toNegativeInteger</a>() instead.</p>
+<p>This function does not perform any type conversions, including from boolean or CBOR tag. Therefore, it may only be called if <a href="qcborstreamreader.html#isInteger">isInteger</a>() is true; calling it in any other condition is an error.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#isInteger">isInteger</a>(), <a href="qcborstreamreader.html#toUnsignedInteger">toUnsignedInteger</a>(), and <a href="qcborstreamreader.html#toNegativeInteger">toNegativeInteger</a>().</p>
+<!-- @@@toInteger -->
+<!-- $$$toNegativeInteger[overload1]$$$toNegativeInteger -->
+<h3 class="fn" id="toNegativeInteger"><a name="toNegativeInteger"></a><span class="type">QCborNegativeInteger</span> QCborStreamReader::<span class="name">toNegativeInteger</span>() const</h3>
+<p>Returns the negative integer value of the current element. QCborNegativeValue is a 64-bit unsigned integer containing the absolute value of the negative number that was stored in the CBOR stream. Additionally, QCborNegativeValue(0) represents the number -2<sup>64</sup>.</p>
+<p>This function does not perform any type conversions, including from boolean or CBOR tag. Therefore, it may only be called if <a href="qcborstreamreader.html#isNegativeInteger">isNegativeInteger</a>() is true; calling it in any other condition is an error.</p>
+<p>This function may be used to obtain numbers beyond the range of the return type of <a href="qcborstreamreader.html#toInteger">toInteger</a>(). However, use of negative numbers smaller than -2<sup>63</sup> is extremely discouraged.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#type">type</a>(), <a href="qcborstreamreader.html#toInteger">toInteger</a>(), <a href="qcborstreamreader.html#isNegativeInteger">isNegativeInteger</a>(), and <a href="qcborstreamreader.html#isUnsignedInteger">isUnsignedInteger</a>().</p>
+<!-- @@@toNegativeInteger -->
+<!-- $$$toSimpleType[overload1]$$$toSimpleType -->
+<h3 class="fn" id="toSimpleType"><a name="toSimpleType"></a><span class="type"><a href="qtcborcommon.html#QCborSimpleType-enum">QCborSimpleType</a></span> QCborStreamReader::<span class="name">toSimpleType</span>() const</h3>
+<p>Returns value of the current simple type.</p>
+<p>This function does not perform any type conversions, including from integer. Therefore, it may only be called if <a href="qcborstreamreader.html#isSimpleType">isSimpleType</a>() is true; calling it in any other condition is an error.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#isSimpleType">isSimpleType</a>(), <a href="qcborstreamreader.html#isTrue">isTrue</a>(), <a href="qcborstreamreader.html#isFalse">isFalse</a>(), <a href="qcborstreamreader.html#isBool">isBool</a>(), <a href="qcborstreamreader.html#isNull">isNull</a>(), and <a href="qcborstreamreader.html#isUndefined">isUndefined</a>().</p>
+<!-- @@@toSimpleType -->
+<!-- $$$toTag[overload1]$$$toTag -->
+<h3 class="fn" id="toTag"><a name="toTag"></a><span class="type"><a href="qtcborcommon.html#QCborTag-enum">QCborTag</a></span> QCborStreamReader::<span class="name">toTag</span>() const</h3>
+<p>Returns the tag value of the current element.</p>
+<p>This function does not perform any type conversions, including from integer. Therefore, it may only be called if <a href="qcborstreamreader.html#isTag">isTag</a>() is true; calling it in any other condition is an error.</p>
+<p>Tags are 64-bit numbers attached to generic CBOR types that give them further meaning. For a list of known tags, see the <a href="qtcborcommon.html#QCborKnownTags-enum">QCborKnownTags</a> enumeration.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#isTag">isTag</a>(), <a href="qcborstreamreader.html#toInteger">toInteger</a>(), and <a href="qtcborcommon.html#QCborKnownTags-enum">QCborKnownTags</a>.</p>
+<!-- @@@toTag -->
+<!-- $$$toUnsignedInteger[overload1]$$$toUnsignedInteger -->
+<h3 class="fn" id="toUnsignedInteger"><a name="toUnsignedInteger"></a><span class="type"><a href="qtglobal.html#quint64-typedef">quint64</a></span> QCborStreamReader::<span class="name">toUnsignedInteger</span>() const</h3>
+<p>Returns the unsigned integer value of the current element.</p>
+<p>This function does not perform any type conversions, including from boolean or CBOR tag. Therefore, it may only be called if <a href="qcborstreamreader.html#isUnsignedInteger">isUnsignedInteger</a>() is true; calling it in any other condition is an error.</p>
+<p>This function may be used to obtain numbers beyond the range of the return type of <a href="qcborstreamreader.html#toInteger">toInteger</a>().</p>
+<p><b>See also </b><a href="qcborstreamreader.html#type">type</a>(), <a href="qcborstreamreader.html#toInteger">toInteger</a>(), <a href="qcborstreamreader.html#isUnsignedInteger">isUnsignedInteger</a>(), and <a href="qcborstreamreader.html#isNegativeInteger">isNegativeInteger</a>().</p>
+<!-- @@@toUnsignedInteger -->
+<!-- $$$type[overload1]$$$type -->
+<h3 class="fn" id="type"><a name="type"></a><span class="type"><a href="qcborstreamreader.html#Type-enum">QCborStreamReader::Type</a></span> QCborStreamReader::<span class="name">type</span>() const</h3>
+<p>Returns the type of the current element. It is one of the valid types or Invalid.</p>
+<p><b>See also </b><a href="qcborstreamreader.html#isValid">isValid</a>(), <a href="qcborstreamreader.html#isUnsignedInteger">isUnsignedInteger</a>(), <a href="qcborstreamreader.html#isNegativeInteger">isNegativeInteger</a>(), <a href="qcborstreamreader.html#isInteger">isInteger</a>(), <a href="qcborstreamreader.html#isByteArray">isByteArray</a>(), <a href="qcborstreamreader.html#isString">isString</a>(), <a href="qcborstreamreader.html#isArray">isArray</a>(), <a href="qcborstreamreader.html#isMap">isMap</a>(), <a href="qcborstreamreader.html#isTag">isTag</a>(), <a href="qcborstreamreader.html#isSimpleType">isSimpleType</a>(), <a href="qcborstreamreader.html#isBool">isBool</a>(), <a href="qcborstreamreader.html#isFalse">isFalse</a>(), <a href="qcborstreamreader.html#isTrue">isTrue</a>(), <a href="qcborstreamreader.html#isNull">isNull</a>(), <a href="qcborstreamreader.html#isUndefined">isUndefined</a>(), <a href="qcborstreamreader.html#isFloat16">isFloat16</a>(), <a href="qcborstreamreader.html#isFloat">isFloat</a>(), and <a href="qcborstreamreader.html#isDouble">isDouble</a>().</p>
+<!-- @@@type -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

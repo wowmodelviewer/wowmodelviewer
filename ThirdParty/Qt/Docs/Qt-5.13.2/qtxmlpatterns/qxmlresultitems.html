@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qxmlresultitems.cpp -->
+  <title>QXmlResultItems Class | Qt XML Patterns 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtxmlpatterns-index.html">Qt XML Patterns</a></td><td ><a href="qtxmlpatterns-module.html">C++ Classes</a></td><td >QXmlResultItems</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtxmlpatterns-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QXmlResultItems Class</h1>
+<!-- $$$QXmlResultItems-brief -->
+<p>The <a href="qxmlresultitems.html">QXmlResultItems</a> class iterates through the results of evaluating an <a href="xmlprocessing.html">XQuery</a> in <a href="qxmlquery.html">QXmlQuery</a>. <a href="#details">More...</a></p>
+<!-- @@@QXmlResultItems -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QXmlResultItems&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += xmlpatterns</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.4</td></tr></table></div><p>This class was introduced in  Qt 4.4.</p>
+<ul>
+<li><a href="qxmlresultitems-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qxmlresultitems.html#QXmlResultItems">QXmlResultItems</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qxmlresultitems.html#dtor.QXmlResultItems">~QXmlResultItems</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QXmlItem </td><td class="memItemRight bottomAlign"><b><a href="qxmlresultitems.html#current">current</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qxmlresultitems.html#hasError">hasError</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QXmlItem </td><td class="memItemRight bottomAlign"><b><a href="qxmlresultitems.html#next">next</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QXmlResultItems-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qxmlresultitems.html">QXmlResultItems</a> presents the evaluation of an associated query as a sequence of <a href="qxmlitem.html">QXmlItems</a>. The sequence is traversed by repeatedly calling <a href="qxmlresultitems.html#next">next</a>(), which actually produces the sequence by lazy evaluation of the query.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qxmlquery.html">QXmlQuery</a></span> query;
+  query<span class="operator">.</span>setQuery(<span class="string">&quot;&lt;e/&gt;, 1, 'two'&quot;</span>);
+  <span class="type"><a href="qxmlresultitems.html#QXmlResultItems">QXmlResultItems</a></span> result;
+
+  <span class="keyword">if</span> (query<span class="operator">.</span>isValid()) {
+      query<span class="operator">.</span>evaluateTo(<span class="operator">&amp;</span>result);
+      <span class="type"><a href="qxmlitem.html">QXmlItem</a></span> item(result<span class="operator">.</span>next());
+      <span class="keyword">while</span> (<span class="operator">!</span>item<span class="operator">.</span>isNull()) {
+          <span class="comment">// use item</span>
+          item <span class="operator">=</span> result<span class="operator">.</span>next();
+      }
+      <span class="keyword">if</span> (result<span class="operator">.</span>hasError()) {
+          <span class="comment">/* Runtime error! */</span>
+      }
+  }
+
+</pre>
+<p>An effect of letting <a href="qxmlresultitems.html#next">next</a>() produce the sequence by lazy evaluation is that a query error can occur on any call to <a href="qxmlresultitems.html#next">next</a>(). If an error occurs, both <a href="qxmlresultitems.html#next">next</a>() and <a href="qxmlresultitems.html#current">current</a>() will return the null <a href="qxmlitem.html">QXmlItem</a>, and <a href="qxmlresultitems.html#hasError">hasError</a>() will return true.</p>
+<p><a href="qxmlresultitems.html">QXmlResultItems</a> can be thought of as an &quot;iterator&quot; that traverses the sequence of query results once, in the forward direction. Each call to <a href="qxmlresultitems.html#next">next</a>() advances the iterator to the next <a href="qxmlitem.html">QXmlItem</a> in the sequence and returns it, and <a href="qxmlresultitems.html#current">current</a>() always returns the <a href="qxmlitem.html">QXmlItem</a> that <a href="qxmlresultitems.html#next">next</a>() returned the last time it was called.</p>
+<p><b>Note: </b>When using the <a href="qxmlresultitems.html">QXmlResultItems</a> overload of <a href="qxmlquery.html#evaluateTo">QXmlQuery::evaluateTo</a>() to execute a query, it is advisable to create a new instance of this class for each new set of results rather than reusing an old instance.</p></div>
+<p><b>See also </b><a href="qxmlitem.html#isNode">QXmlItem::isNode</a>(), <a href="qxmlitem.html#isAtomicValue">QXmlItem::isAtomicValue</a>(), and <a href="qxmlnodemodelindex.html">QXmlNodeModelIndex</a>.</p>
+<!-- @@@QXmlResultItems -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QXmlResultItems[overload1]$$$QXmlResultItems -->
+<h3 class="fn" id="QXmlResultItems"><a name="QXmlResultItems"></a>QXmlResultItems::<span class="name">QXmlResultItems</span>()</h3>
+<p>Constructs an instance of <a href="qxmlresultitems.html">QXmlResultItems</a>.</p>
+<!-- @@@QXmlResultItems -->
+<!-- $$$~QXmlResultItems[overload1]$$$~QXmlResultItems -->
+<h3 class="fn" id="dtor.QXmlResultItems"><a name="dtor.QXmlResultItems"></a><code>[virtual] </code>QXmlResultItems::<span class="name">~QXmlResultItems</span>()</h3>
+<p>Destroys this instance of <a href="qxmlresultitems.html">QXmlResultItems</a>.</p>
+<!-- @@@~QXmlResultItems -->
+<!-- $$$current[overload1]$$$current -->
+<h3 class="fn" id="current"><a name="current"></a><span class="type"><a href="qxmlitem.html">QXmlItem</a></span> QXmlResultItems::<span class="name">current</span>() const</h3>
+<p>Returns the current item. The current item is the last item that was produced and returned by <a href="qxmlresultitems.html#next">next</a>().</p>
+<p>Returns a null <a href="qxmlitem.html">QXmlItem</a> if there is no associated <a href="qxmlquery.html">QXmlQuery</a>.</p>
+<!-- @@@current -->
+<!-- $$$hasError[overload1]$$$hasError -->
+<h3 class="fn" id="hasError"><a name="hasError"></a><span class="type">bool</span> QXmlResultItems::<span class="name">hasError</span>() const</h3>
+<p>If an error occurred during evaluation of the query, true is returned.</p>
+<p>Returns false if query evaluation has been done.</p>
+<!-- @@@hasError -->
+<!-- $$$next[overload1]$$$next -->
+<h3 class="fn" id="next"><a name="next"></a><span class="type"><a href="qxmlitem.html">QXmlItem</a></span> QXmlResultItems::<span class="name">next</span>()</h3>
+<p>Returns the next result in the sequence produced by lazy evaluation of the associated query. When the returned <a href="qxmlitem.html">QXmlItem</a> is null, either the evaluation terminated normally without producing another result, or an error occurred. Call <a href="qxmlresultitems.html#hasError">hasError</a>() to determine whether the null item was caused by normal termination or by an error.</p>
+<p>Returns a null <a href="qxmlitem.html">QXmlItem</a> if there is no associated <a href="qxmlquery.html">QXmlQuery</a>.</p>
+<!-- @@@next -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qgeopath.cpp -->
+  <title>QGeoPath Class | Qt Positioning 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtpositioning-index.html">Qt Positioning</a></td><td ><a href="qtpositioning-module.html">C++ Classes</a></td><td >QGeoPath</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtpositioning-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QGeoPath Class</h1>
+<!-- $$$QGeoPath-brief -->
+<p>The <a href="qgeopath.html">QGeoPath</a> class defines a geographic path. <a href="#details">More...</a></p>
+<!-- @@@QGeoPath -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QGeoPath&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += positioning</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.9</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qgeoshape.html">QGeoShape</a></td></tr></table></div><p>This class was introduced in  Qt 5.9.</p>
+<ul>
+<li><a href="qgeopath-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qgeopath.html#path-prop">path</a></b> : const QVariantList</li>
+<li class="fn"><b><a href="qgeopath.html#width-prop">width</a></b> : qreal</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#QGeoPath-3">QGeoPath</a></b>(const QGeoShape &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#QGeoPath-2">QGeoPath</a></b>(const QGeoPath &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#QGeoPath-1">QGeoPath</a></b>(const QList&lt;QGeoCoordinate&gt; &amp;<i>path</i>, const qreal &amp;<i>width</i> = 0.0)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#QGeoPath">QGeoPath</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoPath &amp;</td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#operator-eq">operator=</a></b>(const QGeoPath &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#dtor.QGeoPath">~QGeoPath</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#addCoordinate">addCoordinate</a></b>(const QGeoCoordinate &amp;<i>coordinate</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#clearPath">clearPath</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#containsCoordinate">containsCoordinate</a></b>(const QGeoCoordinate &amp;<i>coordinate</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoCoordinate </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#coordinateAt">coordinateAt</a></b>(int <i>index</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#insertCoordinate">insertCoordinate</a></b>(int <i>index</i>, const QGeoCoordinate &amp;<i>coordinate</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#length">length</a></b>(int <i>indexFrom</i> = 0, int <i>indexTo</i> = -1) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QList&lt;QGeoCoordinate&gt; &amp;</td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#path">path</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#removeCoordinate">removeCoordinate</a></b>(const QGeoCoordinate &amp;<i>coordinate</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#removeCoordinate-1">removeCoordinate</a></b>(int <i>index</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#replaceCoordinate">replaceCoordinate</a></b>(int <i>index</i>, const QGeoCoordinate &amp;<i>coordinate</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#setPath">setPath</a></b>(const QList&lt;QGeoCoordinate&gt; &amp;<i>path</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#width-prop">setWidth</a></b>(const qreal &amp;<i>width</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#size">size</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#toString">toString</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#translate">translate</a></b>(double <i>degreesLatitude</i>, double <i>degreesLongitude</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGeoPath </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#translated">translated</a></b>(double <i>degreesLatitude</i>, double <i>degreesLongitude</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qreal </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#width">width</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#operator-not-eq">operator!=</a></b>(const QGeoPath &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgeopath.html#operator-eq-eq">operator==</a></b>(const QGeoPath &amp;<i>other</i>) const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QGeoPath-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The path is defined by an ordered list of QGeoCoordinates.</p>
+<p>Each two adjacent elements in the path are intended to be connected together by the shortest line segment of constant bearing passing through both elements. This type of connection can cross the dateline in the longitudinal direction, but never crosses the poles.</p>
+<p>This is relevant for the calculation of the bounding box returned by <a href="qgeoshape.html#boundingGeoRectangle">QGeoShape::boundingGeoRectangle</a>() for this shape, which will have the latitude of the top left corner set to the maximum latitude in the path point set. Similarly, the latitude of the bottom right corner will be the minimum latitude in the path point set.</p>
+<p>This class is a <a href="../qtcore/qobject.html#Q_GADGET">Q_GADGET</a>. It can be <a href="positioning-cpp-qml.html#cpp-value-integration-positioning">directly used from C++ and QML</a>.</p>
+<p>A <a href="qgeopath.html">QGeoPath</a> is both invalid and empty if it contains no coordinate.</p>
+<p><b>Note: </b>A default constructed <a href="qgeopath.html">QGeoPath</a> is both invalid and empty as it does not contain any coordinates.</p></div>
+<!-- @@@QGeoPath -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$path-prop -->
+<h3 class="fn" id="path-prop"><a name="path-prop"></a><span class="name">path</span> : const <span class="type"><a href="../qtcore/qvariant.html#QVariantList-typedef">QVariantList</a></span></h3>
+<p>This property holds the list of coordinates for the geo path.</p>
+<p><b>Note: </b>The coordinates cannot be processed in place. To change the value of this property, retrieve the complete list of coordinates, process them, and assign the new value to the property.</p><!-- @@@path -->
+<!-- $$$width-prop$$$width$$$setWidthconstqreal& -->
+<h3 class="fn" id="width-prop"><a name="width-prop"></a><span class="name">width</span> : <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span></h3>
+<p>This property holds the width of the path in meters.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qreal </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qgeopath.html#width">width</a></b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setWidth</b></span>(const qreal &amp;<i>width</i>)</td></tr>
+</table></div>
+<!-- @@@width -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QGeoPath$$$QGeoPathconstQGeoShape& -->
+<h3 class="fn" id="QGeoPath-3"><a name="QGeoPath-3"></a>QGeoPath::<span class="name">QGeoPath</span>(const <span class="type"><a href="qgeoshape.html#QGeoShape">QGeoShape</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a new geo path from the contents of <i>other</i>.</p>
+<!-- @@@QGeoPath -->
+<!-- $$$QGeoPath$$$QGeoPathconstQGeoPath& -->
+<h3 class="fn" id="QGeoPath-2"><a name="QGeoPath-2"></a>QGeoPath::<span class="name">QGeoPath</span>(const <span class="type"><a href="qgeopath.html#QGeoPath">QGeoPath</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a new geo path from the contents of <i>other</i>.</p>
+<!-- @@@QGeoPath -->
+<!-- $$$QGeoPath$$$QGeoPathconstQList<QGeoCoordinate>&constqreal& -->
+<h3 class="fn" id="QGeoPath-1"><a name="QGeoPath-1"></a>QGeoPath::<span class="name">QGeoPath</span>(const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span>&gt; &amp;<i>path</i>, const <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> &amp;<i>width</i> = 0.0)</h3>
+<p>Constructs a new geo path from a list of coordinates (<i>path</i> and <i>width</i>).</p>
+<!-- @@@QGeoPath -->
+<!-- $$$QGeoPath[overload1]$$$QGeoPath -->
+<h3 class="fn" id="QGeoPath"><a name="QGeoPath"></a>QGeoPath::<span class="name">QGeoPath</span>()</h3>
+<p>Constructs a new, empty geo path.</p>
+<!-- @@@QGeoPath -->
+<!-- $$$operator=[overload1]$$$operator=constQGeoPath& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qgeopath.html#QGeoPath">QGeoPath</a></span> &amp;QGeoPath::<span class="name">operator=</span>(const <span class="type"><a href="qgeopath.html#QGeoPath">QGeoPath</a></span> &amp;<i>other</i>)</h3>
+<p>Assigns <i>other</i> to this geo path and returns a reference to this geo path.</p>
+<!-- @@@operator= -->
+<!-- $$$~QGeoPath[overload1]$$$~QGeoPath -->
+<h3 class="fn" id="dtor.QGeoPath"><a name="dtor.QGeoPath"></a>QGeoPath::<span class="name">~QGeoPath</span>()</h3>
+<p>Destroys this path.</p>
+<!-- @@@~QGeoPath -->
+<!-- $$$addCoordinate[overload1]$$$addCoordinateconstQGeoCoordinate& -->
+<h3 class="fn" id="addCoordinate"><a name="addCoordinate"></a><span class="type">void</span> QGeoPath::<span class="name">addCoordinate</span>(const <span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span> &amp;<i>coordinate</i>)</h3>
+<p>Appends <i>coordinate</i> to the path.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@addCoordinate -->
+<!-- $$$clearPath[overload1]$$$clearPath -->
+<h3 class="fn" id="clearPath"><a name="clearPath"></a><span class="type">void</span> QGeoPath::<span class="name">clearPath</span>()</h3>
+<p>Clears the path.</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<!-- @@@clearPath -->
+<!-- $$$containsCoordinate[overload1]$$$containsCoordinateconstQGeoCoordinate& -->
+<h3 class="fn" id="containsCoordinate"><a name="containsCoordinate"></a><span class="type">bool</span> QGeoPath::<span class="name">containsCoordinate</span>(const <span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span> &amp;<i>coordinate</i>) const</h3>
+<p>Returns true if the path contains <i>coordinate</i> as one of the elements.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@containsCoordinate -->
+<!-- $$$coordinateAt[overload1]$$$coordinateAtint -->
+<h3 class="fn" id="coordinateAt"><a name="coordinateAt"></a><span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span> QGeoPath::<span class="name">coordinateAt</span>(<span class="type">int</span> <i>index</i>) const</h3>
+<p>Returns the coordinate at <i>index</i> .</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@coordinateAt -->
+<!-- $$$insertCoordinate[overload1]$$$insertCoordinateintconstQGeoCoordinate& -->
+<h3 class="fn" id="insertCoordinate"><a name="insertCoordinate"></a><span class="type">void</span> QGeoPath::<span class="name">insertCoordinate</span>(<span class="type">int</span> <i>index</i>, const <span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span> &amp;<i>coordinate</i>)</h3>
+<p>Inserts <i>coordinate</i> at the specified <i>index</i>.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@insertCoordinate -->
+<!-- $$$length[overload1]$$$lengthintint -->
+<h3 class="fn" id="length"><a name="length"></a><span class="type">double</span> QGeoPath::<span class="name">length</span>(<span class="type">int</span> <i>indexFrom</i> = 0, <span class="type">int</span> <i>indexTo</i> = -1) const</h3>
+<p>Returns the length of the path, in meters, from the element <i>indexFrom</i> to the element <i>indexTo</i>. The length is intended to be the sum of the shortest distances for each pair of adjacent points.</p>
+<p>If <i>indexTo</i> is -1 (the default value), the length will be including the distance between last coordinate and the first (closed loop). To retrieve the length for the path, use 0 for <i>indexFrom</i> and <a href="qgeopath.html#size">QGeoPath::size</a>() - 1 for <i>indexTo</i>.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@length -->
+<!-- $$$path[overload1]$$$path -->
+<h3 class="fn" id="path"><a name="path"></a>const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span>&gt; &amp;QGeoPath::<span class="name">path</span>() const</h3>
+<p>Returns all the elements of the path.</p>
+<p><b>See also </b><a href="qgeopath.html#setPath">setPath</a>().</p>
+<!-- @@@path -->
+<!-- $$$removeCoordinate[overload1]$$$removeCoordinateconstQGeoCoordinate& -->
+<h3 class="fn" id="removeCoordinate"><a name="removeCoordinate"></a><span class="type">void</span> QGeoPath::<span class="name">removeCoordinate</span>(const <span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span> &amp;<i>coordinate</i>)</h3>
+<p>Removes the last occurrence of <i>coordinate</i> from the path.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@removeCoordinate -->
+<!-- $$$removeCoordinate$$$removeCoordinateint -->
+<h3 class="fn" id="removeCoordinate-1"><a name="removeCoordinate-1"></a><span class="type">void</span> QGeoPath::<span class="name">removeCoordinate</span>(<span class="type">int</span> <i>index</i>)</h3>
+<p>Removes element at position <i>index</i> from the path.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@removeCoordinate -->
+<!-- $$$replaceCoordinate[overload1]$$$replaceCoordinateintconstQGeoCoordinate& -->
+<h3 class="fn" id="replaceCoordinate"><a name="replaceCoordinate"></a><span class="type">void</span> QGeoPath::<span class="name">replaceCoordinate</span>(<span class="type">int</span> <i>index</i>, const <span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span> &amp;<i>coordinate</i>)</h3>
+<p>Replaces the path element at the specified <i>index</i> with <i>coordinate</i>.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@replaceCoordinate -->
+<!-- $$$setPath[overload1]$$$setPathconstQList<QGeoCoordinate>& -->
+<h3 class="fn" id="setPath"><a name="setPath"></a><span class="type">void</span> QGeoPath::<span class="name">setPath</span>(const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span>&gt; &amp;<i>path</i>)</h3>
+<p>Sets all the elements of the <i>path</i>.</p>
+<p><b>See also </b><a href="qgeopath.html#path">path</a>().</p>
+<!-- @@@setPath -->
+<!-- $$$size[overload1]$$$size -->
+<h3 class="fn" id="size"><a name="size"></a><span class="type">int</span> QGeoPath::<span class="name">size</span>() const</h3>
+<p>Returns the number of elements in the path.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@size -->
+<!-- $$$toString[overload1]$$$toString -->
+<h3 class="fn" id="toString"><a name="toString"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QGeoPath::<span class="name">toString</span>() const</h3>
+<p>Returns the geo path properties as a string.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@toString -->
+<!-- $$$translate[overload1]$$$translatedoubledouble -->
+<h3 class="fn" id="translate"><a name="translate"></a><span class="type">void</span> QGeoPath::<span class="name">translate</span>(<span class="type">double</span> <i>degreesLatitude</i>, <span class="type">double</span> <i>degreesLongitude</i>)</h3>
+<p>Translates this geo path by <i>degreesLatitude</i> northwards and <i>degreesLongitude</i> eastwards.</p>
+<p>Negative values of <i>degreesLatitude</i> and <i>degreesLongitude</i> correspond to southward and westward translation respectively.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@translate -->
+<!-- $$$translated[overload1]$$$translateddoubledouble -->
+<h3 class="fn" id="translated"><a name="translated"></a><span class="type"><a href="qgeopath.html#QGeoPath">QGeoPath</a></span> QGeoPath::<span class="name">translated</span>(<span class="type">double</span> <i>degreesLatitude</i>, <span class="type">double</span> <i>degreesLongitude</i>) const</h3>
+<p>Returns a copy of this geo path translated by <i>degreesLatitude</i> northwards and <i>degreesLongitude</i> eastwards.</p>
+<p>Negative values of <i>degreesLatitude</i> and <i>degreesLongitude</i> correspond to southward and westward translation respectively.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<p><b>See also </b><a href="qgeopath.html#translate">translate</a>().</p>
+<!-- @@@translated -->
+<!-- $$$width -->
+<h3 class="fn" id="width"><a name="width"></a><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> QGeoPath::<span class="name">width</span>() const</h3>
+<p>Returns the width of the path, in meters. This information is used in the <a href="qml-geoshape.html#contains">contains</a> method. The default value is 0.</p>
+<p><b>Note:</b> Getter function for property <a href="qgeopath.html#width-prop">width</a>. </p><p><b>See also </b><a href="qgeopath.html#width-prop">setWidth</a>().</p>
+<!-- @@@width -->
+<!-- $$$operator!=[overload1]$$$operator!=constQGeoPath& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> QGeoPath::<span class="name">operator!=</span>(const <span class="type"><a href="qgeopath.html#QGeoPath">QGeoPath</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns whether this geo path is not equal to <i>other</i>.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQGeoPath& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> QGeoPath::<span class="name">operator==</span>(const <span class="type"><a href="qgeopath.html#QGeoPath">QGeoPath</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns whether this geo path is equal to <i>other</i>.</p>
+<!-- @@@operator== -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

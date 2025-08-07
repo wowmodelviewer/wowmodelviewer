@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qkeyboardhandler.cpp -->
+  <title>QKeyboardHandler Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QKeyboardHandler</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QKeyboardHandler Class</h1>
+<span class="small-subtitle">(<a href="qt3dinput-qkeyboardhandler.html">Qt3DInput::QKeyboardHandler</a>)<br/></span>
+<!-- $$$QKeyboardHandler-brief -->
+<p>Provides keyboard event notification. <a href="#details">More...</a></p>
+<!-- @@@QKeyboardHandler -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QKeyboardHandler&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3dinput</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.5</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-input-keyboardhandler.html">KeyboardHandler</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3dcore-qcomponent.html">Qt3DCore::QComponent</a></td></tr></table></div><p>This class was introduced in  Qt 5.5.</p>
+<ul>
+<li><a href="qt3dinput-qkeyboardhandler-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qt3dinput-qkeyboardhandler.html#focus-prop">focus</a></b> : bool</li>
+<li class="fn"><b><a href="qt3dinput-qkeyboardhandler.html#sourceDevice-prop">sourceDevice</a></b> : Qt3DInput::QKeyboardDevice*</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#QKeyboardHandler">QKeyboardHandler</a></b>(Qt3DCore::QNode *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#focus-prop">focus</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DInput::QKeyboardDevice *</td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#sourceDevice">sourceDevice</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#setFocus">setFocus</a></b>(bool <i>focus</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#sourceDevice-prop">setSourceDevice</a></b>(Qt3DInput::QKeyboardDevice *<i>keyboardDevice</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#asteriskPressed">asteriskPressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#backPressed">backPressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#backtabPressed">backtabPressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#callPressed">callPressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#cancelPressed">cancelPressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#context1Pressed">context1Pressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#context2Pressed">context2Pressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#context3Pressed">context3Pressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#context4Pressed">context4Pressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#deletePressed">deletePressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#digit0Pressed">digit0Pressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#digit1Pressed">digit1Pressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#digit2Pressed">digit2Pressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#digit3Pressed">digit3Pressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#digit4Pressed">digit4Pressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#digit5Pressed">digit5Pressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#digit6Pressed">digit6Pressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#digit7Pressed">digit7Pressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#digit8Pressed">digit8Pressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#digit9Pressed">digit9Pressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#downPressed">downPressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#enterPressed">enterPressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#escapePressed">escapePressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#flipPressed">flipPressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#focus-prop">focusChanged</a></b>(bool <i>focus</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#hangupPressed">hangupPressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#leftPressed">leftPressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#menuPressed">menuPressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#noPressed">noPressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#numberSignPressed">numberSignPressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#pressed">pressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#released">released</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#returnPressed">returnPressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#rightPressed">rightPressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#selectPressed">selectPressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#sourceDevice-prop">sourceDeviceChanged</a></b>(Qt3DInput::QKeyboardDevice *<i>keyboardDevice</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#spacePressed">spacePressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#tabPressed">tabPressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#upPressed">upPressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#volumeDownPressed">volumeDownPressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#volumeUpPressed">volumeUpPressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qt3dinput-qkeyboardhandler.html#yesPressed">yesPressed</a></b>(Qt3DInput::QKeyEvent *<i>event</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QKeyboardHandler-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QKeyboardHandler -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$focus-prop$$$focus$$$setFocusbool$$$focusChangedbool -->
+<h3 class="fn" id="focus-prop"><a name="focus-prop"></a><span class="name">focus</span> : <span class="type">bool</span></h3>
+<p>Holds <code>true</code> if the QKeyboardHandlers has focus.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>focus</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3dinput-qkeyboardhandler.html#setFocus">setFocus</a></b></span>(bool <i>focus</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>focusChanged</b></span>(bool <i>focus</i>)</td></tr>
+</table></div>
+<!-- @@@focus -->
+<!-- $$$sourceDevice-prop$$$sourceDevice$$$setSourceDeviceQt3DInput::QKeyboardDevice*$$$sourceDeviceChangedQt3DInput::QKeyboardDevice* -->
+<h3 class="fn" id="sourceDevice-prop"><a name="sourceDevice-prop"></a><span class="name">sourceDevice</span> : <span class="type"><a href="qt3dinput-qkeyboarddevice.html">Qt3DInput::QKeyboardDevice</a></span>*</h3>
+<p>Holds the keyboard device of the <a href="qt3dinput-qkeyboardhandler.html">QKeyboardHandler</a>. Without a valid device, the <a href="qt3dinput-qkeyboardhandler.html">QKeyboardHandler</a> won't receive any event.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DInput::QKeyboardDevice *</td><td class="memItemRight bottomAlign"><span class="name"><b><a href="qt3dinput-qkeyboardhandler.html#sourceDevice">sourceDevice</a></b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setSourceDevice</b></span>(Qt3DInput::QKeyboardDevice *<i>keyboardDevice</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>sourceDeviceChanged</b></span>(Qt3DInput::QKeyboardDevice *<i>keyboardDevice</i>)</td></tr>
+</table></div>
+<!-- @@@sourceDevice -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QKeyboardHandler[overload1]$$$QKeyboardHandlerQt3DCore::QNode* -->
+<h3 class="fn" id="QKeyboardHandler"><a name="QKeyboardHandler"></a>QKeyboardHandler::<span class="name">QKeyboardHandler</span>(<span class="type"><a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new <a href="qt3dinput-qkeyboardhandler.html">QKeyboardHandler</a> instance with parent <i>parent</i>.</p>
+<!-- @@@QKeyboardHandler -->
+<!-- $$$asteriskPressed[overload1]$$$asteriskPressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="asteriskPressed"><a name="asteriskPressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">asteriskPressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the * key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@asteriskPressed -->
+<!-- $$$backPressed[overload1]$$$backPressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="backPressed"><a name="backPressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">backPressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the back key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@backPressed -->
+<!-- $$$backtabPressed[overload1]$$$backtabPressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="backtabPressed"><a name="backtabPressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">backtabPressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the backtab key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@backtabPressed -->
+<!-- $$$callPressed[overload1]$$$callPressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="callPressed"><a name="callPressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">callPressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the call key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@callPressed -->
+<!-- $$$cancelPressed[overload1]$$$cancelPressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="cancelPressed"><a name="cancelPressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">cancelPressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the cancel key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@cancelPressed -->
+<!-- $$$context1Pressed[overload1]$$$context1PressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="context1Pressed"><a name="context1Pressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">context1Pressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the context 1 key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@context1Pressed -->
+<!-- $$$context2Pressed[overload1]$$$context2PressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="context2Pressed"><a name="context2Pressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">context2Pressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the context 2 key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@context2Pressed -->
+<!-- $$$context3Pressed[overload1]$$$context3PressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="context3Pressed"><a name="context3Pressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">context3Pressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the context 2 key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@context3Pressed -->
+<!-- $$$context4Pressed[overload1]$$$context4PressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="context4Pressed"><a name="context4Pressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">context4Pressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the context 4 key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@context4Pressed -->
+<!-- $$$deletePressed[overload1]$$$deletePressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="deletePressed"><a name="deletePressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">deletePressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the delete key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@deletePressed -->
+<!-- $$$digit0Pressed[overload1]$$$digit0PressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="digit0Pressed"><a name="digit0Pressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">digit0Pressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the 0 key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@digit0Pressed -->
+<!-- $$$digit1Pressed[overload1]$$$digit1PressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="digit1Pressed"><a name="digit1Pressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">digit1Pressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the 1 key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@digit1Pressed -->
+<!-- $$$digit2Pressed[overload1]$$$digit2PressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="digit2Pressed"><a name="digit2Pressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">digit2Pressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the 2 key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@digit2Pressed -->
+<!-- $$$digit3Pressed[overload1]$$$digit3PressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="digit3Pressed"><a name="digit3Pressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">digit3Pressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the 3 key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@digit3Pressed -->
+<!-- $$$digit4Pressed[overload1]$$$digit4PressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="digit4Pressed"><a name="digit4Pressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">digit4Pressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the 4 key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@digit4Pressed -->
+<!-- $$$digit5Pressed[overload1]$$$digit5PressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="digit5Pressed"><a name="digit5Pressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">digit5Pressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the 5 key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@digit5Pressed -->
+<!-- $$$digit6Pressed[overload1]$$$digit6PressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="digit6Pressed"><a name="digit6Pressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">digit6Pressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the 6 key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@digit6Pressed -->
+<!-- $$$digit7Pressed[overload1]$$$digit7PressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="digit7Pressed"><a name="digit7Pressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">digit7Pressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the 7 key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@digit7Pressed -->
+<!-- $$$digit8Pressed[overload1]$$$digit8PressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="digit8Pressed"><a name="digit8Pressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">digit8Pressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the 8 key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@digit8Pressed -->
+<!-- $$$digit9Pressed[overload1]$$$digit9PressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="digit9Pressed"><a name="digit9Pressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">digit9Pressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the 9 key is pressed with the event details being contained within <i>event</i></p>
+<!-- @@@digit9Pressed -->
+<!-- $$$downPressed[overload1]$$$downPressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="downPressed"><a name="downPressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">downPressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the down key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@downPressed -->
+<!-- $$$enterPressed[overload1]$$$enterPressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="enterPressed"><a name="enterPressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">enterPressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the enter key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@enterPressed -->
+<!-- $$$escapePressed[overload1]$$$escapePressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="escapePressed"><a name="escapePressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">escapePressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the escape key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@escapePressed -->
+<!-- $$$flipPressed[overload1]$$$flipPressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="flipPressed"><a name="flipPressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">flipPressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the flip key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@flipPressed -->
+<!-- $$$hangupPressed[overload1]$$$hangupPressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="hangupPressed"><a name="hangupPressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">hangupPressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the hangup key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@hangupPressed -->
+<!-- $$$leftPressed[overload1]$$$leftPressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="leftPressed"><a name="leftPressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">leftPressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the left key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@leftPressed -->
+<!-- $$$menuPressed[overload1]$$$menuPressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="menuPressed"><a name="menuPressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">menuPressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the menu key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@menuPressed -->
+<!-- $$$noPressed[overload1]$$$noPressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="noPressed"><a name="noPressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">noPressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the yes key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@noPressed -->
+<!-- $$$numberSignPressed[overload1]$$$numberSignPressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="numberSignPressed"><a name="numberSignPressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">numberSignPressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the number sign key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@numberSignPressed -->
+<!-- $$$pressed[overload1]$$$pressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="pressed"><a name="pressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">pressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when a key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@pressed -->
+<!-- $$$released[overload1]$$$releasedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="released"><a name="released"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">released</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when a key is released with the event details being contained within <i>event</i>.</p>
+<!-- @@@released -->
+<!-- $$$returnPressed[overload1]$$$returnPressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="returnPressed"><a name="returnPressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">returnPressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the return key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@returnPressed -->
+<!-- $$$rightPressed[overload1]$$$rightPressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="rightPressed"><a name="rightPressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">rightPressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the right key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@rightPressed -->
+<!-- $$$selectPressed[overload1]$$$selectPressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="selectPressed"><a name="selectPressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">selectPressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the select key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@selectPressed -->
+<!-- $$$setFocus -->
+<h3 class="fn" id="setFocus"><a name="setFocus"></a><code>[slot] </code><span class="type">void</span> QKeyboardHandler::<span class="name">setFocus</span>(<span class="type">bool</span> <i>focus</i>)</h3>
+<p>Sets the focus to <i>focus</i>. If focus is not currently set to <code>true</code>, this component will receive keyboard focus.</p>
+<p><b>Note:</b> Setter function for property <a href="qt3dinput-qkeyboardhandler.html#focus-prop">focus</a>. </p><p><b>See also </b><a href="qt3dinput-qkeyboardhandler.html#focus-prop">focus</a>().</p>
+<!-- @@@setFocus -->
+<!-- $$$spacePressed[overload1]$$$spacePressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="spacePressed"><a name="spacePressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">spacePressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the space key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@spacePressed -->
+<!-- $$$tabPressed[overload1]$$$tabPressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="tabPressed"><a name="tabPressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">tabPressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the tab key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@tabPressed -->
+<!-- $$$upPressed[overload1]$$$upPressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="upPressed"><a name="upPressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">upPressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the up key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@upPressed -->
+<!-- $$$volumeDownPressed[overload1]$$$volumeDownPressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="volumeDownPressed"><a name="volumeDownPressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">volumeDownPressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the volume down key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@volumeDownPressed -->
+<!-- $$$volumeUpPressed[overload1]$$$volumeUpPressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="volumeUpPressed"><a name="volumeUpPressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">volumeUpPressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the volume up key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@volumeUpPressed -->
+<!-- $$$yesPressed[overload1]$$$yesPressedQt3DInput::QKeyEvent* -->
+<h3 class="fn" id="yesPressed"><a name="yesPressed"></a><code>[signal] </code><span class="type">void</span> QKeyboardHandler::<span class="name">yesPressed</span>(<span class="type"><a href="qt3dinput-qkeyevent.html">Qt3DInput::QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>This signal is emitted when the yes key is pressed with the event details being contained within <i>event</i>.</p>
+<!-- @@@yesPressed -->
+<!-- $$$sourceDevice -->
+<h3 class="fn" id="sourceDevice"><a name="sourceDevice"></a><span class="type"><a href="qt3dinput-qkeyboarddevice.html">Qt3DInput::QKeyboardDevice</a></span> *QKeyboardHandler::<span class="name">sourceDevice</span>() const</h3>
+<p>Returns the current keyboard device.</p>
+<p><b>Note:</b> Getter function for property <a href="qt3dinput-qkeyboardhandler.html#sourceDevice-prop">sourceDevice</a>. </p><p><b>See also </b><a href="qt3dinput-qkeyboardhandler.html#sourceDevice-prop">setSourceDevice</a>().</p>
+<!-- @@@sourceDevice -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

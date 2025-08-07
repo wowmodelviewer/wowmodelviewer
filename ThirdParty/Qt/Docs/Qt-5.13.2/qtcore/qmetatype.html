@@ -1,0 +1,716 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmetatype.cpp -->
+  <title>QMetaType Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QMetaType</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#macros">Macros</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QMetaType Class</h1>
+<!-- $$$QMetaType-brief -->
+<p>The <a href="qmetatype.html">QMetaType</a> class manages named types in the meta-object system. <a href="#details">More...</a></p>
+<!-- @@@QMetaType -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QMetaType&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr></table></div><ul>
+<li><a href="qmetatype-members.html">List of all members, including inherited members</a></li>
+<li><a href="qmetatype-obsolete.html">Obsolete members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">thread-safe</a>.</p>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#Type-enum">Type</a></b> { Void, Bool, Int, UInt, ..., UnknownType }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#TypeFlag-enum">TypeFlag</a></b> { NeedsConstruction, NeedsDestruction, MovableType, IsEnumeration, PointerToQObject }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#TypeFlag-enum">TypeFlags</a></b></td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#QMetaType">QMetaType</a></b>(const int <i>typeId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#dtor.QMetaType">~QMetaType</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void *</td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#construct-2">construct</a></b>(void *<i>where</i>, const void *<i>copy</i> = ...) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void *</td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#create-1">create</a></b>(const void *<i>copy</i> = ...) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#destroy-1">destroy</a></b>(void *<i>data</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#destruct-1">destruct</a></b>(void *<i>data</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMetaType::TypeFlags </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#flags">flags</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#id">id</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#isRegistered-1">isRegistered</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#isValid">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QMetaObject *</td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#metaObject">metaObject</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#sizeOf-1">sizeOf</a></b>() const</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#compare">compare</a></b>(const void *<i>lhs</i>, const void *<i>rhs</i>, int <i>typeId</i>, int *<i>result</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void *</td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#construct-1">construct</a></b>(int <i>type</i>, void *<i>where</i>, const void *<i>copy</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#convert">convert</a></b>(const void *<i>from</i>, int <i>fromTypeId</i>, void *<i>to</i>, int <i>toTypeId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void *</td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#create">create</a></b>(int <i>type</i>, const void *<i>copy</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#debugStream">debugStream</a></b>(QDebug &amp;<i>dbg</i>, const void *<i>rhs</i>, int <i>typeId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#destroy">destroy</a></b>(int <i>type</i>, void *<i>data</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#destruct">destruct</a></b>(int <i>type</i>, void *<i>where</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#equals">equals</a></b>(const void *<i>lhs</i>, const void *<i>rhs</i>, int <i>typeId</i>, int *<i>result</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#hasRegisteredComparators">hasRegisteredComparators</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#hasRegisteredComparators-1">hasRegisteredComparators</a></b>(int <i>typeId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#hasRegisteredConverterFunction">hasRegisteredConverterFunction</a></b>(int <i>fromTypeId</i>, int <i>toTypeId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#hasRegisteredConverterFunction-1">hasRegisteredConverterFunction</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#hasRegisteredDebugStreamOperator">hasRegisteredDebugStreamOperator</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#hasRegisteredDebugStreamOperator-1">hasRegisteredDebugStreamOperator</a></b>(int <i>typeId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#isRegistered">isRegistered</a></b>(int <i>type</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#load">load</a></b>(QDataStream &amp;<i>stream</i>, int <i>type</i>, void *<i>data</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QMetaObject *</td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#metaObjectForType">metaObjectForType</a></b>(int <i>type</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#registerComparators">registerComparators</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#registerConverter">registerConverter</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#registerConverter-1">registerConverter</a></b>(MemberFunction <i>function</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#registerConverter-2">registerConverter</a></b>(MemberFunctionOk <i>function</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#registerConverter-3">registerConverter</a></b>(UnaryFunction <i>function</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#registerDebugStreamOperator">registerDebugStreamOperator</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#registerEqualsComparator">registerEqualsComparator</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#save">save</a></b>(QDataStream &amp;<i>stream</i>, int <i>type</i>, const void *<i>data</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#sizeOf">sizeOf</a></b>(int <i>type</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#type">type</a></b>(const char *<i>typeName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#type-1">type</a></b>(const ::QByteArray &amp;<i>typeName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMetaType::TypeFlags </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#typeFlags">typeFlags</a></b>(int <i>type</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const char *</td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#typeName">typeName</a></b>(int <i>typeId</i>)</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#qMetaTypeId">qMetaTypeId</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#qRegisterMetaType">qRegisterMetaType</a></b>(const char *<i>typeName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#qRegisterMetaType-1">qRegisterMetaType</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#qRegisterMetaTypeStreamOperators">qRegisterMetaTypeStreamOperators</a></b>(const char *<i>typeName</i>)</td></tr>
+</table></div>
+<a name="macros"></a>
+<h2 id="macros">Macros</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#Q_DECLARE_ASSOCIATIVE_CONTAINER_METATYPE">Q_DECLARE_ASSOCIATIVE_CONTAINER_METATYPE</a></b>(<i>Container</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#Q_DECLARE_METATYPE">Q_DECLARE_METATYPE</a></b>(<i>Type</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#Q_DECLARE_OPAQUE_POINTER">Q_DECLARE_OPAQUE_POINTER</a></b>(<i>PointerType</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#Q_DECLARE_SEQUENTIAL_CONTAINER_METATYPE">Q_DECLARE_SEQUENTIAL_CONTAINER_METATYPE</a></b>(<i>Container</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmetatype.html#Q_DECLARE_SMART_POINTER_METATYPE">Q_DECLARE_SMART_POINTER_METATYPE</a></b>(<i>SmartPointer</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QMetaType-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The class is used as a helper to marshall types in <a href="qmetatype.html#Type-enum">QVariant</a> and in queued signals and slots connections. It associates a type name to a type so that it can be created and destructed dynamically at run-time. Declare new types with <a href="qmetatype.html#Q_DECLARE_METATYPE">Q_DECLARE_METATYPE</a>() to make them available to <a href="qmetatype.html#Type-enum">QVariant</a> and other template-based functions. Call <a href="qmetatype.html#qRegisterMetaType-1">qRegisterMetaType</a>() to make types available to non-template based functions, such as the queued signal and slot connections.</p>
+<p>Any class or struct that has a public default constructor, a public copy constructor, and a public destructor can be registered.</p>
+<p>The following code allocates and destructs an instance of <code>MyClass</code>:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> id <span class="operator">=</span> <span class="type"><a href="qmetatype.html#QMetaType">QMetaType</a></span><span class="operator">::</span>type(<span class="string">&quot;MyClass&quot;</span>);
+  <span class="keyword">if</span> (id <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="qmetatype.html#QMetaType">QMetaType</a></span><span class="operator">::</span>UnknownType) {
+      <span class="type">void</span> <span class="operator">*</span>myClassPtr <span class="operator">=</span> <span class="type"><a href="qmetatype.html#QMetaType">QMetaType</a></span><span class="operator">::</span>create(id);
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+      <span class="type"><a href="qmetatype.html#QMetaType">QMetaType</a></span><span class="operator">::</span>destroy(id<span class="operator">,</span> myClassPtr);
+      myClassPtr <span class="operator">=</span> <span class="number">0</span>;
+  }
+
+</pre>
+<p>If we want the stream operators <code>operator&lt;&lt;()</code> and <code>operator&gt;&gt;()</code> to work on <a href="qmetatype.html#Type-enum">QVariant</a> objects that store custom types, the custom type must provide <code>operator&lt;&lt;()</code> and <code>operator&gt;&gt;()</code> operators.</p>
+</div>
+<p><b>See also </b><a href="qmetatype.html#Q_DECLARE_METATYPE">Q_DECLARE_METATYPE</a>(), <a href="qvariant.html#setValue">QVariant::setValue</a>(), <a href="qvariant.html#value">QVariant::value</a>(), and <a href="qvariant.html#fromValue">QVariant::fromValue</a>().</p>
+<!-- @@@QMetaType -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Type$$$UnknownType$$$Bool$$$Int$$$UInt$$$LongLong$$$ULongLong$$$Double$$$Long$$$Short$$$Char$$$ULong$$$UShort$$$UChar$$$Float$$$VoidStar$$$QChar$$$QString$$$QStringList$$$QByteArray$$$QBitArray$$$QDate$$$QTime$$$QDateTime$$$QUrl$$$QLocale$$$QRect$$$QRectF$$$QSize$$$QSizeF$$$QLine$$$QLineF$$$QPoint$$$QPointF$$$QRegExp$$$QEasingCurve$$$QUuid$$$QVariant$$$QModelIndex$$$QPersistentModelIndex$$$QRegularExpression$$$QJsonValue$$$QJsonObject$$$QJsonArray$$$QJsonDocument$$$QByteArrayList$$$QObjectStar$$$SChar$$$Void$$$Nullptr$$$QVariantMap$$$QVariantList$$$QVariantHash$$$QCborSimpleType$$$QCborValue$$$QCborArray$$$QCborMap$$$QFont$$$QPixmap$$$QBrush$$$QColor$$$QPalette$$$QIcon$$$QImage$$$QPolygon$$$QRegion$$$QBitmap$$$QCursor$$$QKeySequence$$$QPen$$$QTextLength$$$QTextFormat$$$QMatrix$$$QTransform$$$QMatrix4x4$$$QVector2D$$$QVector3D$$$QVector4D$$$QQuaternion$$$QPolygonF$$$QSizePolicy$$$LastCoreType$$$LastGuiType$$$User -->
+<h3 class="fn" id="Type-enum"><a name="Type-enum"></a>enum QMetaType::<span class="name">Type</span></h3>
+<p>These are the built-in types supported by <a href="qmetatype.html">QMetaType</a>:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QMetaType::Void</code></td><td class="topAlign tblval"><code>43</code></td><td class="topAlign"><code>void</code></td></tr>
+<tr><td class="topAlign"><code>QMetaType::Bool</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign"><code>bool</code></td></tr>
+<tr><td class="topAlign"><code>QMetaType::Int</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign"><code>int</code></td></tr>
+<tr><td class="topAlign"><code>QMetaType::UInt</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign"><code>unsigned int</code></td></tr>
+<tr><td class="topAlign"><code>QMetaType::Double</code></td><td class="topAlign tblval"><code>6</code></td><td class="topAlign"><code>double</code></td></tr>
+<tr><td class="topAlign"><code>QMetaType::QChar</code></td><td class="topAlign tblval"><code>7</code></td><td class="topAlign">QChar</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QString</code></td><td class="topAlign tblval"><code>10</code></td><td class="topAlign">QString</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QByteArray</code></td><td class="topAlign tblval"><code>12</code></td><td class="topAlign">QByteArray</td></tr>
+<tr><td class="topAlign"><code>QMetaType::Nullptr</code></td><td class="topAlign tblval"><code>51</code></td><td class="topAlign"><code>std::nullptr_t</code></td></tr>
+<tr><td class="topAlign"><code>QMetaType::VoidStar</code></td><td class="topAlign tblval"><code>31</code></td><td class="topAlign"><code>void *</code></td></tr>
+<tr><td class="topAlign"><code>QMetaType::Long</code></td><td class="topAlign tblval"><code>32</code></td><td class="topAlign"><code>long</code></td></tr>
+<tr><td class="topAlign"><code>QMetaType::LongLong</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">LongLong</td></tr>
+<tr><td class="topAlign"><code>QMetaType::Short</code></td><td class="topAlign tblval"><code>33</code></td><td class="topAlign"><code>short</code></td></tr>
+<tr><td class="topAlign"><code>QMetaType::Char</code></td><td class="topAlign tblval"><code>34</code></td><td class="topAlign"><code>char</code></td></tr>
+<tr><td class="topAlign"><code>QMetaType::ULong</code></td><td class="topAlign tblval"><code>35</code></td><td class="topAlign"><code>unsigned long</code></td></tr>
+<tr><td class="topAlign"><code>QMetaType::ULongLong</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">ULongLong</td></tr>
+<tr><td class="topAlign"><code>QMetaType::UShort</code></td><td class="topAlign tblval"><code>36</code></td><td class="topAlign"><code>unsigned short</code></td></tr>
+<tr><td class="topAlign"><code>QMetaType::SChar</code></td><td class="topAlign tblval"><code>40</code></td><td class="topAlign"><code>signed char</code></td></tr>
+<tr><td class="topAlign"><code>QMetaType::UChar</code></td><td class="topAlign tblval"><code>37</code></td><td class="topAlign"><code>unsigned char</code></td></tr>
+<tr><td class="topAlign"><code>QMetaType::Float</code></td><td class="topAlign tblval"><code>38</code></td><td class="topAlign"><code>float</code></td></tr>
+<tr><td class="topAlign"><code>QMetaType::QObjectStar</code></td><td class="topAlign tblval"><code>39</code></td><td class="topAlign"><a href="qobject.html">QObject</a> *</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QVariant</code></td><td class="topAlign tblval"><code>41</code></td><td class="topAlign">QVariant</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QCursor</code></td><td class="topAlign tblval"><code>74</code></td><td class="topAlign">QCursor</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QDate</code></td><td class="topAlign tblval"><code>14</code></td><td class="topAlign">QDate</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QSize</code></td><td class="topAlign tblval"><code>21</code></td><td class="topAlign">QSize</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QTime</code></td><td class="topAlign tblval"><code>15</code></td><td class="topAlign">QTime</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QVariantList</code></td><td class="topAlign tblval"><code>9</code></td><td class="topAlign">QVariantList</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QPolygon</code></td><td class="topAlign tblval"><code>71</code></td><td class="topAlign">QPolygon</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QPolygonF</code></td><td class="topAlign tblval"><code>86</code></td><td class="topAlign">QPolygonF</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QColor</code></td><td class="topAlign tblval"><code>67</code></td><td class="topAlign">QColor</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QSizeF</code></td><td class="topAlign tblval"><code>22</code></td><td class="topAlign">QSizeF</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QRectF</code></td><td class="topAlign tblval"><code>20</code></td><td class="topAlign">QRectF</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QLine</code></td><td class="topAlign tblval"><code>23</code></td><td class="topAlign">QLine</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QTextLength</code></td><td class="topAlign tblval"><code>77</code></td><td class="topAlign">QTextLength</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QStringList</code></td><td class="topAlign tblval"><code>11</code></td><td class="topAlign">QStringList</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QVariantMap</code></td><td class="topAlign tblval"><code>8</code></td><td class="topAlign">QVariantMap</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QVariantHash</code></td><td class="topAlign tblval"><code>28</code></td><td class="topAlign">QVariantHash</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QIcon</code></td><td class="topAlign tblval"><code>69</code></td><td class="topAlign">QIcon</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QPen</code></td><td class="topAlign tblval"><code>76</code></td><td class="topAlign">QPen</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QLineF</code></td><td class="topAlign tblval"><code>24</code></td><td class="topAlign">QLineF</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QTextFormat</code></td><td class="topAlign tblval"><code>78</code></td><td class="topAlign">QTextFormat</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QRect</code></td><td class="topAlign tblval"><code>19</code></td><td class="topAlign">QRect</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QPoint</code></td><td class="topAlign tblval"><code>25</code></td><td class="topAlign">QPoint</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QUrl</code></td><td class="topAlign tblval"><code>17</code></td><td class="topAlign">QUrl</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QRegExp</code></td><td class="topAlign tblval"><code>27</code></td><td class="topAlign">QRegExp</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QRegularExpression</code></td><td class="topAlign tblval"><code>44</code></td><td class="topAlign">QRegularExpression</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QDateTime</code></td><td class="topAlign tblval"><code>16</code></td><td class="topAlign">QDateTime</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QPointF</code></td><td class="topAlign tblval"><code>26</code></td><td class="topAlign">QPointF</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QPalette</code></td><td class="topAlign tblval"><code>68</code></td><td class="topAlign">QPalette</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QFont</code></td><td class="topAlign tblval"><code>64</code></td><td class="topAlign">QFont</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QBrush</code></td><td class="topAlign tblval"><code>66</code></td><td class="topAlign">QBrush</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QRegion</code></td><td class="topAlign tblval"><code>72</code></td><td class="topAlign">QRegion</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QBitArray</code></td><td class="topAlign tblval"><code>13</code></td><td class="topAlign">QBitArray</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QImage</code></td><td class="topAlign tblval"><code>70</code></td><td class="topAlign">QImage</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QKeySequence</code></td><td class="topAlign tblval"><code>75</code></td><td class="topAlign">QKeySequence</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QSizePolicy</code></td><td class="topAlign tblval"><code>121</code></td><td class="topAlign">QSizePolicy</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QPixmap</code></td><td class="topAlign tblval"><code>65</code></td><td class="topAlign">QPixmap</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QLocale</code></td><td class="topAlign tblval"><code>18</code></td><td class="topAlign">QLocale</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QBitmap</code></td><td class="topAlign tblval"><code>73</code></td><td class="topAlign">QBitmap</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QMatrix</code></td><td class="topAlign tblval"><code>79</code></td><td class="topAlign">QMatrix</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QTransform</code></td><td class="topAlign tblval"><code>80</code></td><td class="topAlign">QTransform</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QMatrix4x4</code></td><td class="topAlign tblval"><code>81</code></td><td class="topAlign">QMatrix4x4</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QVector2D</code></td><td class="topAlign tblval"><code>82</code></td><td class="topAlign">QVector2D</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QVector3D</code></td><td class="topAlign tblval"><code>83</code></td><td class="topAlign">QVector3D</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QVector4D</code></td><td class="topAlign tblval"><code>84</code></td><td class="topAlign">QVector4D</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QQuaternion</code></td><td class="topAlign tblval"><code>85</code></td><td class="topAlign">QQuaternion</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QEasingCurve</code></td><td class="topAlign tblval"><code>29</code></td><td class="topAlign">QEasingCurve</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QJsonValue</code></td><td class="topAlign tblval"><code>45</code></td><td class="topAlign">QJsonValue</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QJsonObject</code></td><td class="topAlign tblval"><code>46</code></td><td class="topAlign">QJsonObject</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QJsonArray</code></td><td class="topAlign tblval"><code>47</code></td><td class="topAlign">QJsonArray</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QJsonDocument</code></td><td class="topAlign tblval"><code>48</code></td><td class="topAlign">QJsonDocument</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QCborValue</code></td><td class="topAlign tblval"><code>53</code></td><td class="topAlign">QCborValue</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QCborArray</code></td><td class="topAlign tblval"><code>54</code></td><td class="topAlign">QCborArray</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QCborMap</code></td><td class="topAlign tblval"><code>55</code></td><td class="topAlign">QCborMap</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QCborSimpleType</code></td><td class="topAlign tblval"><code>52</code></td><td class="topAlign">QCborSimpleType</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QModelIndex</code></td><td class="topAlign tblval"><code>42</code></td><td class="topAlign">QModelIndex</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QPersistentModelIndex</code></td><td class="topAlign tblval"><code>50</code></td><td class="topAlign">QPersistentModelIndex (since 5.5)</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QUuid</code></td><td class="topAlign tblval"><code>30</code></td><td class="topAlign">QUuid</td></tr>
+<tr><td class="topAlign"><code>QMetaType::QByteArrayList</code></td><td class="topAlign tblval"><code>49</code></td><td class="topAlign">QByteArrayList</td></tr>
+<tr><td class="topAlign"><code>QMetaType::User</code></td><td class="topAlign tblval"><code>1024</code></td><td class="topAlign">Base value for user types</td></tr>
+<tr><td class="topAlign"><code>QMetaType::UnknownType</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">This is an invalid type id. It is returned from <a href="qmetatype.html">QMetaType</a> for types that are not registered</td></tr>
+</table></div>
+<p>Additional types can be registered using <a href="qmetatype.html#Q_DECLARE_METATYPE">Q_DECLARE_METATYPE</a>().</p>
+<p><b>See also </b><a href="qmetatype.html#type">type</a>() and <a href="qmetatype.html#typeName">typeName</a>().</p>
+<!-- @@@Type -->
+<!-- $$$TypeFlag$$$NeedsConstruction$$$NeedsDestruction$$$MovableType$$$PointerToQObject$$$IsEnumeration$$$SharedPointerToQObject$$$WeakPointerToQObject$$$TrackingPointerToQObject$$$WasDeclaredAsMetaType$$$IsGadget$$$PointerToGadget -->
+<h3 class="flags" id="TypeFlag-enum"><a name="TypeFlag-enum"></a>enum QMetaType::<span class="name">TypeFlag</span><br/>flags QMetaType::<span class="name">TypeFlags</span></h3>
+<p>The enum describes attributes of a type supported by <a href="qmetatype.html">QMetaType</a>.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QMetaType::NeedsConstruction</code></td><td class="topAlign tblval"><code>0x1</code></td><td class="topAlign">This type has non-trivial constructors. If the flag is not set instances can be safely initialized with memset to 0.</td></tr>
+<tr><td class="topAlign"><code>QMetaType::NeedsDestruction</code></td><td class="topAlign tblval"><code>0x2</code></td><td class="topAlign">This type has a non-trivial destructor. If the flag is not set calls to the destructor are not necessary before discarding objects.</td></tr>
+<tr><td class="topAlign"><code>QMetaType::MovableType</code></td><td class="topAlign tblval"><code>0x4</code></td><td class="topAlign">An instance of a type having this attribute can be safely moved by memcpy.</td></tr>
+<tr><td class="topAlign"><code>QMetaType::IsEnumeration</code></td><td class="topAlign tblval"><code>0x10</code></td><td class="topAlign">This type is an enumeration</td></tr>
+<tr><td class="topAlign"><code>QMetaType::PointerToQObject</code></td><td class="topAlign tblval"><code>0x8</code></td><td class="topAlign">This type is a pointer to a derived of <a href="qobject.html">QObject</a></td></tr>
+</table></div>
+<p>The TypeFlags type is a typedef for <a href="qflags.html">QFlags</a>&lt;TypeFlag&gt;. It stores an OR combination of TypeFlag values.</p>
+<!-- @@@TypeFlag -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QMetaType[overload1]$$$QMetaTypeconstint -->
+<h3 class="fn" id="QMetaType"><a name="QMetaType"></a>QMetaType::<span class="name">QMetaType</span>(const <span class="type">int</span> <i>typeId</i>)</h3>
+<p>Constructs a <a href="qmetatype.html">QMetaType</a> object that contains all information about type <i>typeId</i>.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@QMetaType -->
+<!-- $$$~QMetaType[overload1]$$$~QMetaType -->
+<h3 class="fn" id="dtor.QMetaType"><a name="dtor.QMetaType"></a>QMetaType::<span class="name">~QMetaType</span>()</h3>
+<p>Destructs this object.</p>
+<!-- @@@~QMetaType -->
+<!-- $$$compare[overload1]$$$compareconstvoid*constvoid*intint* -->
+<h3 class="fn" id="compare"><a name="compare"></a><code>[static] </code><span class="type">bool</span> QMetaType::<span class="name">compare</span>(const <span class="type">void</span> *<i>lhs</i>, const <span class="type">void</span> *<i>rhs</i>, <span class="type">int</span> <i>typeId</i>, <span class="type">int</span> *<i>result</i>)</h3>
+<p>Compares the objects at <i>lhs</i> and <i>rhs</i>. Both objects need to be of type <i>typeId</i>. <i>result</i> is set to less than, equal to or greater than zero, if <i>lhs</i> is less than, equal to or greater than <i>rhs</i>. Returns <code>true</code>, if the comparison succeeded, otherwise <code>false</code>.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@compare -->
+<!-- $$$construct$$$constructintvoid*constvoid* -->
+<h3 class="fn" id="construct-1"><a name="construct-1"></a><code>[static] </code><span class="type">void</span> *QMetaType::<span class="name">construct</span>(<span class="type">int</span> <i>type</i>, <span class="type">void</span> *<i>where</i>, const <span class="type">void</span> *<i>copy</i>)</h3>
+<p>Constructs a value of the given <i>type</i> in the existing memory addressed by <i>where</i>, that is a copy of <i>copy</i>, and returns <i>where</i>. If <i>copy</i> is zero, the value is default constructed.</p>
+<p>This is a low-level function for explicitly managing the memory used to store the type. Consider calling <a href="qmetatype.html#create">create</a>() if you don't need this level of control (that is, use &quot;new&quot; rather than &quot;placement new&quot;).</p>
+<p>You must ensure that <i>where</i> points to a location that can store a value of type <i>type</i>, and that <i>where</i> is suitably aligned. The type's size can be queried by calling <a href="qmetatype.html#sizeOf-1">sizeOf</a>().</p>
+<p>The rule of thumb for alignment is that a type is aligned to its natural boundary, which is the smallest power of 2 that is bigger than the type, unless that alignment is larger than the maximum useful alignment for the platform. For practical purposes, alignment larger than 2 * sizeof(void*) is only necessary for special hardware instructions (e.g&#x2e;, aligned SSE loads and stores on x86).</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qmetatype.html#destruct">destruct</a>() and <a href="qmetatype.html#sizeOf-1">sizeOf</a>().</p>
+<!-- @@@construct -->
+<!-- $$$construct$$$constructvoid*constvoid* -->
+<h3 class="fn" id="construct-2"><a name="construct-2"></a><span class="type">void</span> *QMetaType::<span class="name">construct</span>(<span class="type">void</span> *<i>where</i>, const <span class="type">void</span> *<i>copy</i> = ...) const</h3>
+<p>Constructs a value of the type that this <a href="qmetatype.html">QMetaType</a> instance was constructed for in the existing memory addressed by <i>where</i>, that is a copy of <i>copy</i>, and returns <i>where</i>. If <i>copy</i> is zero, the value is default constructed.</p>
+<p>This is a low-level function for explicitly managing the memory used to store the type. Consider calling <a href="qmetatype.html#create">create</a>() if you don't need this level of control (that is, use &quot;new&quot; rather than &quot;placement new&quot;).</p>
+<p>You must ensure that <i>where</i> points to a location where the new value can be stored and that <i>where</i> is suitably aligned. The type's size can be queried by calling <a href="qmetatype.html#sizeOf-1">sizeOf</a>().</p>
+<p>The rule of thumb for alignment is that a type is aligned to its natural boundary, which is the smallest power of 2 that is bigger than the type, unless that alignment is larger than the maximum useful alignment for the platform. For practical purposes, alignment larger than 2 * sizeof(void*) is only necessary for special hardware instructions (e.g&#x2e;, aligned SSE loads and stores on x86).</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@construct -->
+<!-- $$$convert[overload1]$$$convertconstvoid*intvoid*int -->
+<h3 class="fn" id="convert"><a name="convert"></a><code>[static] </code><span class="type">bool</span> QMetaType::<span class="name">convert</span>(const <span class="type">void</span> *<i>from</i>, <span class="type">int</span> <i>fromTypeId</i>, <span class="type">void</span> *<i>to</i>, <span class="type">int</span> <i>toTypeId</i>)</h3>
+<p>Converts the object at <i>from</i> from <i>fromTypeId</i> to the preallocated space at <i>to</i> typed <i>toTypeId</i>. Returns <code>true</code>, if the conversion succeeded, otherwise false.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@convert -->
+<!-- $$$create[overload1]$$$createintconstvoid* -->
+<h3 class="fn" id="create"><a name="create"></a><code>[static] </code><span class="type">void</span> *QMetaType::<span class="name">create</span>(<span class="type">int</span> <i>type</i>, const <span class="type">void</span> *<i>copy</i> = nullptr)</h3>
+<p>Returns a copy of <i>copy</i>, assuming it is of type <i>type</i>. If <i>copy</i> is zero, creates a default constructed instance.</p>
+<p><b>See also </b><a href="qmetatype.html#destroy">destroy</a>(), <a href="qmetatype.html#isRegistered-1">isRegistered</a>(), and <a href="qmetatype.html#Type-enum">Type</a>.</p>
+<!-- @@@create -->
+<!-- $$$create$$$createconstvoid* -->
+<h3 class="fn" id="create-1"><a name="create-1"></a><span class="type">void</span> *QMetaType::<span class="name">create</span>(const <span class="type">void</span> *<i>copy</i> = ...) const</h3>
+<p>Returns a copy of <i>copy</i>, assuming it is of the type that this <a href="qmetatype.html">QMetaType</a> instance was created for. If <i>copy</i> is <code>nullptr</code>, creates a default constructed instance.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qmetatype.html#destroy">QMetaType::destroy</a>().</p>
+<!-- @@@create -->
+<!-- $$$debugStream[overload1]$$$debugStreamQDebug&constvoid*int -->
+<h3 class="fn" id="debugStream"><a name="debugStream"></a><code>[static] </code><span class="type">bool</span> QMetaType::<span class="name">debugStream</span>(<span class="type"><a href="qdebug.html">QDebug</a></span> &amp;<i>dbg</i>, const <span class="type">void</span> *<i>rhs</i>, <span class="type">int</span> <i>typeId</i>)</h3>
+<p>Streams the object at <i>rhs</i> of type <i>typeId</i> to the debug stream <i>dbg</i>. Returns <code>true</code> on success, otherwise false.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@debugStream -->
+<!-- $$$destroy[overload1]$$$destroyintvoid* -->
+<h3 class="fn" id="destroy"><a name="destroy"></a><code>[static] </code><span class="type">void</span> QMetaType::<span class="name">destroy</span>(<span class="type">int</span> <i>type</i>, <span class="type">void</span> *<i>data</i>)</h3>
+<p>Destroys the <i>data</i>, assuming it is of the <i>type</i> given.</p>
+<p><b>See also </b><a href="qmetatype.html#create">create</a>(), <a href="qmetatype.html#isRegistered-1">isRegistered</a>(), and <a href="qmetatype.html#Type-enum">Type</a>.</p>
+<!-- @@@destroy -->
+<!-- $$$destroy$$$destroyvoid* -->
+<h3 class="fn" id="destroy-1"><a name="destroy-1"></a><span class="type">void</span> QMetaType::<span class="name">destroy</span>(<span class="type">void</span> *<i>data</i>) const</h3>
+<p>Destroys the <i>data</i>, assuming it is of the type that this <a href="qmetatype.html">QMetaType</a> instance was created for.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qmetatype.html#create">QMetaType::create</a>().</p>
+<!-- @@@destroy -->
+<!-- $$$destruct[overload1]$$$destructintvoid* -->
+<h3 class="fn" id="destruct"><a name="destruct"></a><code>[static] </code><span class="type">void</span> QMetaType::<span class="name">destruct</span>(<span class="type">int</span> <i>type</i>, <span class="type">void</span> *<i>where</i>)</h3>
+<p>Destructs the value of the given <i>type</i>, located at <i>where</i>.</p>
+<p>Unlike <a href="qmetatype.html#destroy">destroy</a>(), this function only invokes the type's destructor, it doesn't invoke the delete operator.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qmetatype-obsolete.html#construct">construct</a>().</p>
+<!-- @@@destruct -->
+<!-- $$$destruct$$$destructvoid* -->
+<h3 class="fn" id="destruct-1"><a name="destruct-1"></a><span class="type">void</span> QMetaType::<span class="name">destruct</span>(<span class="type">void</span> *<i>data</i>) const</h3>
+<p>Destructs the value, located at <i>data</i>, assuming that it is of the type for which this <a href="qmetatype.html">QMetaType</a> instance was constructed for.</p>
+<p>Unlike <a href="qmetatype.html#destroy">destroy</a>(), this function only invokes the type's destructor, it doesn't invoke the delete operator.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qmetatype-obsolete.html#construct">QMetaType::construct</a>().</p>
+<!-- @@@destruct -->
+<!-- $$$equals[overload1]$$$equalsconstvoid*constvoid*intint* -->
+<h3 class="fn" id="equals"><a name="equals"></a><code>[static] </code><span class="type">bool</span> QMetaType::<span class="name">equals</span>(const <span class="type">void</span> *<i>lhs</i>, const <span class="type">void</span> *<i>rhs</i>, <span class="type">int</span> <i>typeId</i>, <span class="type">int</span> *<i>result</i>)</h3>
+<p>Compares the objects at <i>lhs</i> and <i>rhs</i>. Both objects need to be of type <i>typeId</i>. <i>result</i> is set to zero, if <i>lhs</i> equals to rhs. Returns <code>true</code>, if the comparison succeeded, otherwise <code>false</code>.</p>
+<p>This function was introduced in  Qt 5.5.</p>
+<!-- @@@equals -->
+<!-- $$$flags[overload1]$$$flags -->
+<h3 class="fn" id="flags"><a name="flags"></a><span class="type"><a href="qmetatype.html#TypeFlag-enum">QMetaType::TypeFlags</a></span> QMetaType::<span class="name">flags</span>() const</h3>
+<p>Returns flags of the type for which this <a href="qmetatype.html">QMetaType</a> instance was constructed.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qmetatype.html#TypeFlag-enum">QMetaType::TypeFlags</a> and <a href="qmetatype.html#typeFlags">QMetaType::typeFlags</a>().</p>
+<!-- @@@flags -->
+<!-- $$$hasRegisteredComparators[overload1]$$$hasRegisteredComparators -->
+<h3 class="fn" id="hasRegisteredComparators"><a name="hasRegisteredComparators"></a><code>[static] </code><span class="type">bool</span> QMetaType::<span class="name">hasRegisteredComparators</span>()</h3>
+<p>Returns <code>true</code>, if the meta type system has registered comparators for type T.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@hasRegisteredComparators -->
+<!-- $$$hasRegisteredComparators$$$hasRegisteredComparatorsint -->
+<h3 class="fn" id="hasRegisteredComparators-1"><a name="hasRegisteredComparators-1"></a><code>[static] </code><span class="type">bool</span> QMetaType::<span class="name">hasRegisteredComparators</span>(<span class="type">int</span> <i>typeId</i>)</h3>
+<p>Returns <code>true</code>, if the meta type system has registered comparators for type id <i>typeId</i>.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@hasRegisteredComparators -->
+<!-- $$$hasRegisteredConverterFunction[overload1]$$$hasRegisteredConverterFunctionintint -->
+<h3 class="fn" id="hasRegisteredConverterFunction"><a name="hasRegisteredConverterFunction"></a><code>[static] </code><span class="type">bool</span> QMetaType::<span class="name">hasRegisteredConverterFunction</span>(<span class="type">int</span> <i>fromTypeId</i>, <span class="type">int</span> <i>toTypeId</i>)</h3>
+<p>Returns <code>true</code>, if the meta type system has a registered conversion from meta type id <i>fromTypeId</i> to <i>toTypeId</i></p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@hasRegisteredConverterFunction -->
+<!-- $$$hasRegisteredConverterFunction$$$hasRegisteredConverterFunction -->
+<h3 class="fn" id="hasRegisteredConverterFunction-1"><a name="hasRegisteredConverterFunction-1"></a><code>[static] </code><span class="type">bool</span> QMetaType::<span class="name">hasRegisteredConverterFunction</span>()</h3>
+<p>Returns <code>true</code>, if the meta type system has a registered conversion from type From to type To. <p>This is an overloaded function.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@hasRegisteredConverterFunction -->
+<!-- $$$hasRegisteredDebugStreamOperator[overload1]$$$hasRegisteredDebugStreamOperator -->
+<h3 class="fn" id="hasRegisteredDebugStreamOperator"><a name="hasRegisteredDebugStreamOperator"></a><code>[static] </code><span class="type">bool</span> QMetaType::<span class="name">hasRegisteredDebugStreamOperator</span>()</h3>
+<p>Returns <code>true</code>, if the meta type system has a registered debug stream operator for type T.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@hasRegisteredDebugStreamOperator -->
+<!-- $$$hasRegisteredDebugStreamOperator$$$hasRegisteredDebugStreamOperatorint -->
+<h3 class="fn" id="hasRegisteredDebugStreamOperator-1"><a name="hasRegisteredDebugStreamOperator-1"></a><code>[static] </code><span class="type">bool</span> QMetaType::<span class="name">hasRegisteredDebugStreamOperator</span>(<span class="type">int</span> <i>typeId</i>)</h3>
+<p>Returns <code>true</code>, if the meta type system has a registered debug stream operator for type id <i>typeId</i>.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@hasRegisteredDebugStreamOperator -->
+<!-- $$$id[overload1]$$$id -->
+<h3 class="fn" id="id"><a name="id"></a><span class="type">int</span> QMetaType::<span class="name">id</span>() const</h3>
+<p>Returns id type hold by this QMetatype instance.</p>
+<p>This function was introduced in  Qt 5.13.</p>
+<!-- @@@id -->
+<!-- $$$isRegistered[overload1]$$$isRegisteredint -->
+<h3 class="fn" id="isRegistered"><a name="isRegistered"></a><code>[static] </code><span class="type">bool</span> QMetaType::<span class="name">isRegistered</span>(<span class="type">int</span> <i>type</i>)</h3>
+<p>Returns <code>true</code> if the datatype with ID <i>type</i> is registered; otherwise returns <code>false</code>.</p>
+<p><b>See also </b><a href="qmetatype.html#type">type</a>(), <a href="qmetatype.html#typeName">typeName</a>(), and <a href="qmetatype.html#Type-enum">Type</a>.</p>
+<!-- @@@isRegistered -->
+<!-- $$$isRegistered$$$isRegistered -->
+<h3 class="fn" id="isRegistered-1"><a name="isRegistered-1"></a><span class="type">bool</span> QMetaType::<span class="name">isRegistered</span>() const</h3>
+<p>Returns <code>true</code> if this <a href="qmetatype.html">QMetaType</a> object contains valid information about a type, false otherwise.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@isRegistered -->
+<!-- $$$isValid[overload1]$$$isValid -->
+<h3 class="fn" id="isValid"><a name="isValid"></a><span class="type">bool</span> QMetaType::<span class="name">isValid</span>() const</h3>
+<p>Returns <code>true</code> if this <a href="qmetatype.html">QMetaType</a> object contains valid information about a type, false otherwise.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<!-- @@@isValid -->
+<!-- $$$load[overload1]$$$loadQDataStream&intvoid* -->
+<h3 class="fn" id="load"><a name="load"></a><code>[static] </code><span class="type">bool</span> QMetaType::<span class="name">load</span>(<span class="type"><a href="qdatastream.html">QDataStream</a></span> &amp;<i>stream</i>, <span class="type">int</span> <i>type</i>, <span class="type">void</span> *<i>data</i>)</h3>
+<p>Reads the object of the specified <i>type</i> from the given <i>stream</i> into <i>data</i>. Returns <code>true</code> if the object is loaded successfully; otherwise returns <code>false</code>.</p>
+<p>The type must have been registered with <a href="qmetatype.html#qRegisterMetaType-1">qRegisterMetaType</a>() and <a href="qmetatype.html#qRegisterMetaTypeStreamOperators">qRegisterMetaTypeStreamOperators</a>() beforehand.</p>
+<p>Normally, you should not need to call this function directly. Instead, use <a href="qmetatype.html#Type-enum">QVariant</a>'s <code>operator&gt;&gt;()</code>, which relies on load() to stream custom types.</p>
+<p><b>See also </b><a href="qmetatype.html#save">save</a>() and <a href="qmetatype.html#qRegisterMetaTypeStreamOperators">qRegisterMetaTypeStreamOperators</a>().</p>
+<!-- @@@load -->
+<!-- $$$metaObject[overload1]$$$metaObject -->
+<h3 class="fn" id="metaObject"><a name="metaObject"></a>const <span class="type"><a href="qmetaobject.html">QMetaObject</a></span> *QMetaType::<span class="name">metaObject</span>() const</h3>
+<p>return a <a href="qmetaobject.html">QMetaObject</a> relative to this type.</p>
+<p>If the type is a pointer type to a subclass of <a href="qobject.html">QObject</a>, <a href="qmetatype.html#flags">flags</a>() contains <a href="qmetatype.html#TypeFlag-enum">QMetaType::PointerToQObject</a> and this function returns the corresponding <a href="qmetaobject.html">QMetaObject</a>. This can be used to in combinaison with QMetaObject::construct to create <a href="qobject.html">QObject</a> of this type.</p>
+<p>If the type is a <a href="qobject.html#Q_GADGET">Q_GADGET</a>, <a href="qmetatype.html#flags">flags</a>() contains <a href="qmetatype.html#TypeFlag-enum">QMetaType::IsGadget</a>, and this function returns its <a href="qmetaobject.html">QMetaObject</a>. This can be used to retrieve <a href="qmetamethod.html">QMetaMethod</a> and <a href="qmetaproperty.html">QMetaProperty</a> and use them on a pointer of this type. (given by QVariant::data for example)</p>
+<p>If the type is an enumeration, <a href="qmetatype.html#flags">flags</a>() contains <a href="qmetatype.html#TypeFlag-enum">QMetaType::IsEnumeration</a>, and this function returns the <a href="qmetaobject.html">QMetaObject</a> of the enclosing object if the enum was registered as a <a href="qobject.html#Q_ENUM">Q_ENUM</a> or <code>nullptr</code> otherwise</p>
+<p>This function was introduced in  Qt 5.5.</p>
+<p><b>See also </b><a href="qmetatype.html#metaObjectForType">QMetaType::metaObjectForType</a>() and <a href="qmetatype.html#flags">QMetaType::flags</a>().</p>
+<!-- @@@metaObject -->
+<!-- $$$metaObjectForType[overload1]$$$metaObjectForTypeint -->
+<h3 class="fn" id="metaObjectForType"><a name="metaObjectForType"></a><code>[static] </code>const <span class="type"><a href="qmetaobject.html">QMetaObject</a></span> *QMetaType::<span class="name">metaObjectForType</span>(<span class="type">int</span> <i>type</i>)</h3>
+<p>returns <a href="qmetatype.html#metaObject">QMetaType::metaObject</a> for <i>type</i></p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qmetatype.html#metaObject">metaObject</a>().</p>
+<!-- @@@metaObjectForType -->
+<!-- $$$registerComparators[overload1]$$$registerComparators -->
+<h3 class="fn" id="registerComparators"><a name="registerComparators"></a><code>[static] </code><span class="type">bool</span> QMetaType::<span class="name">registerComparators</span>()</h3>
+<p>Registers comparison operators for the user-registered type T. This requires T to have both an operator== and an operator&lt;. Returns <code>true</code> if the registration succeeded, otherwise false.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@registerComparators -->
+<!-- $$$registerConverter[overload1]$$$registerConverter -->
+<h3 class="fn" id="registerConverter"><a name="registerConverter"></a><code>[static] </code><span class="type">bool</span> QMetaType::<span class="name">registerConverter</span>()</h3>
+<p>Registers the possibility of an implicit conversion from type From to type To in the meta type system. Returns <code>true</code> if the registration succeeded, otherwise false.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@registerConverter -->
+<!-- $$$registerConverter$$$registerConverterMemberFunction -->
+<h3 class="fn" id="registerConverter-1"><a name="registerConverter-1"></a><code>[static] </code><span class="type">bool</span> QMetaType::<span class="name">registerConverter</span>(<span class="type">MemberFunction</span> <i>function</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Registers a method <i>function</i> like To From::function() const as converter from type From to type To in the meta type system. Returns <code>true</code> if the registration succeeded, otherwise false.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@registerConverter -->
+<!-- $$$registerConverter$$$registerConverterMemberFunctionOk -->
+<h3 class="fn" id="registerConverter-2"><a name="registerConverter-2"></a><code>[static] </code><span class="type">bool</span> QMetaType::<span class="name">registerConverter</span>(<span class="type">MemberFunctionOk</span> <i>function</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Registers a method <i>function</i> like To From::function(bool *ok) const as converter from type From to type To in the meta type system. Returns <code>true</code> if the registration succeeded, otherwise false.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@registerConverter -->
+<!-- $$$registerConverter$$$registerConverterUnaryFunction -->
+<h3 class="fn" id="registerConverter-3"><a name="registerConverter-3"></a><code>[static] </code><span class="type">bool</span> QMetaType::<span class="name">registerConverter</span>(<span class="type">UnaryFunction</span> <i>function</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Registers a unary function object <i>function</i> as converter from type From to type To in the meta type system. Returns <code>true</code> if the registration succeeded, otherwise false.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@registerConverter -->
+<!-- $$$registerDebugStreamOperator[overload1]$$$registerDebugStreamOperator -->
+<h3 class="fn" id="registerDebugStreamOperator"><a name="registerDebugStreamOperator"></a><code>[static] </code><span class="type">bool</span> QMetaType::<span class="name">registerDebugStreamOperator</span>()</h3>
+<p>Registers the debug stream operator for the user-registered type T. This requires T to have an operator&lt;&lt;(<a href="qdebug.html">QDebug</a> dbg, T). Returns <code>true</code> if the registration succeeded, otherwise false.</p>
+<!-- @@@registerDebugStreamOperator -->
+<!-- $$$registerEqualsComparator[overload1]$$$registerEqualsComparator -->
+<h3 class="fn" id="registerEqualsComparator"><a name="registerEqualsComparator"></a><code>[static] </code><span class="type">bool</span> QMetaType::<span class="name">registerEqualsComparator</span>()</h3>
+<p>Registers equals operator for the user-registered type T. This requires T to have an operator==. Returns <code>true</code> if the registration succeeded, otherwise false.</p>
+<p>This function was introduced in  Qt 5.5.</p>
+<!-- @@@registerEqualsComparator -->
+<!-- $$$save[overload1]$$$saveQDataStream&intconstvoid* -->
+<h3 class="fn" id="save"><a name="save"></a><code>[static] </code><span class="type">bool</span> QMetaType::<span class="name">save</span>(<span class="type"><a href="qdatastream.html">QDataStream</a></span> &amp;<i>stream</i>, <span class="type">int</span> <i>type</i>, const <span class="type">void</span> *<i>data</i>)</h3>
+<p>Writes the object pointed to by <i>data</i> with the ID <i>type</i> to the given <i>stream</i>. Returns <code>true</code> if the object is saved successfully; otherwise returns <code>false</code>.</p>
+<p>The type must have been registered with <a href="qmetatype.html#qRegisterMetaType-1">qRegisterMetaType</a>() and <a href="qmetatype.html#qRegisterMetaTypeStreamOperators">qRegisterMetaTypeStreamOperators</a>() beforehand.</p>
+<p>Normally, you should not need to call this function directly. Instead, use <a href="qmetatype.html#Type-enum">QVariant</a>'s <code>operator&lt;&lt;()</code>, which relies on save() to stream custom types.</p>
+<p><b>See also </b><a href="qmetatype.html#load">load</a>() and <a href="qmetatype.html#qRegisterMetaTypeStreamOperators">qRegisterMetaTypeStreamOperators</a>().</p>
+<!-- @@@save -->
+<!-- $$$sizeOf[overload1]$$$sizeOfint -->
+<h3 class="fn" id="sizeOf"><a name="sizeOf"></a><code>[static] </code><span class="type">int</span> QMetaType::<span class="name">sizeOf</span>(<span class="type">int</span> <i>type</i>)</h3>
+<p>Returns the size of the given <i>type</i> in bytes (i.e&#x2e; sizeof(T), where T is the actual type identified by the <i>type</i> argument).</p>
+<p>This function is typically used together with construct() to perform low-level management of the memory used by a type.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qmetatype-obsolete.html#construct">construct</a>().</p>
+<!-- @@@sizeOf -->
+<!-- $$$sizeOf$$$sizeOf -->
+<h3 class="fn" id="sizeOf-1"><a name="sizeOf-1"></a><span class="type">int</span> QMetaType::<span class="name">sizeOf</span>() const</h3>
+<p>Returns the size of the type in bytes (i.e&#x2e; sizeof(T), where T is the actual type for which this <a href="qmetatype.html">QMetaType</a> instance was constructed for).</p>
+<p>This function is typically used together with construct() to perform low-level management of the memory used by a type.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qmetatype-obsolete.html#construct">QMetaType::construct</a>() and QMetaType::sizeOf().</p>
+<!-- @@@sizeOf -->
+<!-- $$$type[overload1]$$$typeconstchar* -->
+<h3 class="fn" id="type"><a name="type"></a><code>[static] </code><span class="type">int</span> QMetaType::<span class="name">type</span>(const <span class="type">char</span> *<i>typeName</i>)</h3>
+<p>Returns a handle to the type called <i>typeName</i>, or <a href="qmetatype.html#Type-enum">QMetaType::UnknownType</a> if there is no such type.</p>
+<p><b>See also </b><a href="qmetatype.html#isRegistered-1">isRegistered</a>(), <a href="qmetatype.html#typeName">typeName</a>(), and <a href="qmetatype.html#Type-enum">Type</a>.</p>
+<!-- @@@type -->
+<!-- $$$type$$$typeconst::QByteArray& -->
+<h3 class="fn" id="type-1"><a name="type-1"></a><code>[static] </code><span class="type">int</span> QMetaType::<span class="name">type</span>(const <span class="type">::QByteArray</span> &amp;<i>typeName</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>Returns a handle to the type called <i>typeName</i>, or 0 if there is no such type.</p>
+<p>This function was introduced in  Qt 5.5.</p>
+<p><b>See also </b><a href="qmetatype.html#isRegistered-1">isRegistered</a>() and <a href="qmetatype.html#typeName">typeName</a>().</p>
+<!-- @@@type -->
+<!-- $$$typeFlags[overload1]$$$typeFlagsint -->
+<h3 class="fn" id="typeFlags"><a name="typeFlags"></a><code>[static] </code><span class="type"><a href="qmetatype.html#TypeFlag-enum">QMetaType::TypeFlags</a></span> QMetaType::<span class="name">typeFlags</span>(<span class="type">int</span> <i>type</i>)</h3>
+<p>Returns flags of the given <i>type</i>.</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qmetatype.html#TypeFlag-enum">QMetaType::TypeFlags</a>.</p>
+<!-- @@@typeFlags -->
+<!-- $$$typeName[overload1]$$$typeNameint -->
+<h3 class="fn" id="typeName"><a name="typeName"></a><code>[static] </code>const <span class="type">char</span> *QMetaType::<span class="name">typeName</span>(<span class="type">int</span> <i>typeId</i>)</h3>
+<p>Returns the type name associated with the given <i>typeId</i>, or a null pointer if no matching type was found. The returned pointer must not be deleted.</p>
+<p><b>See also </b><a href="qmetatype.html#type">type</a>(), <a href="qmetatype.html#isRegistered-1">isRegistered</a>(), and <a href="qmetatype.html#Type-enum">Type</a>.</p>
+<!-- @@@typeName -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$qMetaTypeId[overload1]$$$qMetaTypeId -->
+<h3 class="fn" id="qMetaTypeId"><a name="qMetaTypeId"></a><span class="type">int</span> <span class="name">qMetaTypeId</span>()</h3>
+<p>Returns the meta type id of type <code>T</code> at compile time. If the type was not declared with <a href="qmetatype.html#Q_DECLARE_METATYPE">Q_DECLARE_METATYPE</a>(), compilation will fail.</p>
+<p>Typical usage:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> id <span class="operator">=</span> qMetaTypeId<span class="operator">&lt;</span><span class="type"><a href="qmetatype.html#Type-enum">QString</a></span><span class="operator">&gt;</span>();    <span class="comment">// id is now QMetaType::QString</span>
+  id <span class="operator">=</span> qMetaTypeId<span class="operator">&lt;</span>MyStruct<span class="operator">&gt;</span>();       <span class="comment">// compile error if MyStruct not declared</span>
+
+</pre>
+<p><a href="qmetatype.html#type">QMetaType::type</a>() returns the same ID as qMetaTypeId(), but does a lookup at runtime based on the name of the type. <a href="qmetatype.html#type">QMetaType::type</a>() is a bit slower, but compilation succeeds if a type is not registered.</p>
+<p>This function was introduced in  Qt 4.1.</p>
+<p><b>See also </b><a href="qmetatype.html#Q_DECLARE_METATYPE">Q_DECLARE_METATYPE</a>() and <a href="qmetatype.html#type">QMetaType::type</a>().</p>
+<!-- @@@qMetaTypeId -->
+<!-- $$$qRegisterMetaType[overload1]$$$qRegisterMetaTypeconstchar* -->
+<h3 class="fn" id="qRegisterMetaType"><a name="qRegisterMetaType"></a><span class="type">int</span> <span class="name">qRegisterMetaType</span>(const <span class="type">char</span> *<i>typeName</i>)</h3>
+<p>Registers the type name <i>typeName</i> for the type <code>T</code>. Returns the internal ID used by <a href="qmetatype.html">QMetaType</a>. Any class or struct that has a public default constructor, a public copy constructor and a public destructor can be registered.</p>
+<p>This function requires that <code>T</code> is a fully defined type at the point where the function is called. For pointer types, it also requires that the pointed to type is fully defined. Use <a href="qmetatype.html#Q_DECLARE_OPAQUE_POINTER">Q_DECLARE_OPAQUE_POINTER</a>() to be able to register pointers to forward declared types.</p>
+<p>After a type has been registered, you can create and destroy objects of that type dynamically at run-time.</p>
+<p>This example registers the class <code>MyClass</code>:</p>
+<pre class="cpp">
+
+  <a href="qmetatype.html#qRegisterMetaType-1">qRegisterMetaType</a><span class="operator">&lt;</span>MyClass<span class="operator">&gt;</span>(<span class="string">&quot;MyClass&quot;</span>);
+
+</pre>
+<p>This function is useful to register typedefs so they can be used by <a href="qmetaproperty.html">QMetaProperty</a>, or in QueuedConnections</p>
+<pre class="cpp">
+
+  <span class="keyword">typedef</span> <span class="type"><a href="qmetatype.html#Type-enum">QString</a></span> CustomString;
+  <a href="qmetatype.html#qRegisterMetaType-1">qRegisterMetaType</a><span class="operator">&lt;</span>CustomString<span class="operator">&gt;</span>(<span class="string">&quot;CustomString&quot;</span>);
+
+</pre>
+<p><b>Warning:</b> This function is useful only for registering an alias (typedef) for every other use case <a href="qmetatype.html#Q_DECLARE_METATYPE">Q_DECLARE_METATYPE</a> and <a href="qmetatype.html#qMetaTypeId">qMetaTypeId</a>() should be used instead.</p>
+<p><b>See also </b><a href="qmetatype.html#qRegisterMetaTypeStreamOperators">qRegisterMetaTypeStreamOperators</a>(), <a href="qmetatype.html#isRegistered-1">isRegistered</a>(), and <a href="qmetatype.html#Q_DECLARE_METATYPE">Q_DECLARE_METATYPE</a>().</p>
+<!-- @@@qRegisterMetaType -->
+<!-- $$$qRegisterMetaType$$$qRegisterMetaType -->
+<h3 class="fn" id="qRegisterMetaType-1"><a name="qRegisterMetaType-1"></a><span class="type">int</span> <span class="name">qRegisterMetaType</span>()</h3>
+<p>Call this function to register the type <code>T</code>. <code>T</code> must be declared with <a href="qmetatype.html#Q_DECLARE_METATYPE">Q_DECLARE_METATYPE</a>(). Returns the meta type Id.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> id <span class="operator">=</span> qRegisterMetaType<span class="operator">&lt;</span>MyStruct<span class="operator">&gt;</span>();
+
+</pre>
+<p>This function requires that <code>T</code> is a fully defined type at the point where the function is called. For pointer types, it also requires that the pointed to type is fully defined. Use <a href="qmetatype.html#Q_DECLARE_OPAQUE_POINTER">Q_DECLARE_OPAQUE_POINTER</a>() to be able to register pointers to forward declared types.</p>
+<p>After a type has been registered, you can create and destroy objects of that type dynamically at run-time.</p>
+<p>To use the type <code>T</code> in <a href="qmetatype.html#Type-enum">QVariant</a>, using <a href="qmetatype.html#Q_DECLARE_METATYPE">Q_DECLARE_METATYPE</a>() is sufficient. To use the type <code>T</code> in queued signal and slot connections, <code>qRegisterMetaType&lt;T&gt;()</code> must be called before the first connection is established.</p>
+<p>Also, to use type <code>T</code> with the <a href="qobject.html#property">QObject::property</a>() API, <code>qRegisterMetaType&lt;T&gt;()</code> must be called before it is used, typically in the constructor of the class that uses <code>T</code>, or in the <code>main()</code> function.</p>
+<p>This function was introduced in  Qt 4.2.</p>
+<p><b>See also </b><a href="qmetatype.html#Q_DECLARE_METATYPE">Q_DECLARE_METATYPE</a>().</p>
+<!-- @@@qRegisterMetaType -->
+<!-- $$$qRegisterMetaTypeStreamOperators[overload1]$$$qRegisterMetaTypeStreamOperatorsconstchar* -->
+<h3 class="fn" id="qRegisterMetaTypeStreamOperators"><a name="qRegisterMetaTypeStreamOperators"></a><span class="type">void</span> <span class="name">qRegisterMetaTypeStreamOperators</span>(const <span class="type">char</span> *<i>typeName</i>)</h3>
+<p>Registers the stream operators for the type <code>T</code> called <i>typeName</i>.</p>
+<p>Afterward, the type can be streamed using <a href="qmetatype.html#load">QMetaType::load</a>() and <a href="qmetatype.html#save">QMetaType::save</a>(). These functions are used when streaming a <a href="qmetatype.html#Type-enum">QVariant</a>.</p>
+<pre class="cpp">
+
+  qRegisterMetaTypeStreamOperators<span class="operator">&lt;</span>MyClass<span class="operator">&gt;</span>(<span class="string">&quot;MyClass&quot;</span>);
+
+</pre>
+<p>The stream operators should have the following signatures:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qdatastream.html">QDataStream</a></span> <span class="operator">&amp;</span><span class="keyword">operator</span><span class="operator">&lt;</span><span class="operator">&lt;</span>(<span class="type"><a href="qdatastream.html">QDataStream</a></span> <span class="operator">&amp;</span>out<span class="operator">,</span> <span class="keyword">const</span> MyClass <span class="operator">&amp;</span>myObj);
+  <span class="type"><a href="qdatastream.html">QDataStream</a></span> <span class="operator">&amp;</span><span class="keyword">operator</span><span class="operator">&gt;</span><span class="operator">&gt;</span>(<span class="type"><a href="qdatastream.html">QDataStream</a></span> <span class="operator">&amp;</span>in<span class="operator">,</span> MyClass <span class="operator">&amp;</span>myObj);
+
+</pre>
+<p><b>See also </b><a href="qmetatype.html#qRegisterMetaType-1">qRegisterMetaType</a>(), <a href="qmetatype.html#isRegistered-1">QMetaType::isRegistered</a>(), and <a href="qmetatype.html#Q_DECLARE_METATYPE">Q_DECLARE_METATYPE</a>().</p>
+<!-- @@@qRegisterMetaTypeStreamOperators -->
+</div>
+<div class="macros">
+<h2>Macro Documentation</h2>
+<!-- $$$Q_DECLARE_ASSOCIATIVE_CONTAINER_METATYPE[overload1]$$$Q_DECLARE_ASSOCIATIVE_CONTAINER_METATYPE -->
+<h3 class="fn" id="Q_DECLARE_ASSOCIATIVE_CONTAINER_METATYPE"><a name="Q_DECLARE_ASSOCIATIVE_CONTAINER_METATYPE"></a><span class="name">Q_DECLARE_ASSOCIATIVE_CONTAINER_METATYPE</span>(<i>Container</i>)</h3>
+<p>This macro makes the container <i>Container</i> known to <a href="qmetatype.html">QMetaType</a> as an associative container. This makes it possible to put an instance of Container&lt;T, U&gt; into a <a href="qmetatype.html#Type-enum">QVariant</a>, if T and U are themselves known to <a href="qmetatype.html">QMetaType</a>.</p>
+<p>Note that all of the Qt associative containers already have built-in support, and it is not necessary to use this macro with them. The std::map container also has built-in support.</p>
+<p>This example shows a typical use of Q_DECLARE_ASSOCIATIVE_CONTAINER_METATYPE():</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;unordered_list&gt;</span>
+
+  Q_DECLARE_ASSOCIATIVE_CONTAINER_METATYPE(std<span class="operator">::</span>unordered_map)
+
+  <span class="type">void</span> someFunc()
+  {
+      std<span class="operator">::</span>unordered_map<span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> bool<span class="operator">&gt;</span> container;
+      <span class="type"><a href="qmetatype.html#Type-enum">QVariant</a></span> var <span class="operator">=</span> <span class="type"><a href="qmetatype.html#Type-enum">QVariant</a></span><span class="operator">::</span>fromValue(container);
+      <span class="comment">// ...</span>
+  }
+
+</pre>
+<!-- @@@Q_DECLARE_ASSOCIATIVE_CONTAINER_METATYPE -->
+<!-- $$$Q_DECLARE_METATYPE[overload1]$$$Q_DECLARE_METATYPE -->
+<h3 class="fn" id="Q_DECLARE_METATYPE"><a name="Q_DECLARE_METATYPE"></a><span class="name">Q_DECLARE_METATYPE</span>(<i>Type</i>)</h3>
+<p>This macro makes the type <i>Type</i> known to <a href="qmetatype.html">QMetaType</a> as long as it provides a public default constructor, a public copy constructor and a public destructor. It is needed to use the type <i>Type</i> as a custom type in <a href="qmetatype.html#Type-enum">QVariant</a>.</p>
+<p>This macro requires that <i>Type</i> is a fully defined type at the point where it is used. For pointer types, it also requires that the pointed to type is fully defined. Use in conjunction with <a href="qmetatype.html#Q_DECLARE_OPAQUE_POINTER">Q_DECLARE_OPAQUE_POINTER</a>() to register pointers to forward declared types.</p>
+<p>Ideally, this macro should be placed below the declaration of the class or struct. If that is not possible, it can be put in a private header file which has to be included every time that type is used in a <a href="qmetatype.html#Type-enum">QVariant</a>.</p>
+<p>Adding a Q_DECLARE_METATYPE() makes the type known to all template based functions, including <a href="qmetatype.html#Type-enum">QVariant</a>. Note that if you intend to use the type in <i>queued</i> signal and slot connections or in <a href="qobject.html">QObject</a>'s property system, you also have to call <a href="qmetatype.html#qRegisterMetaType-1">qRegisterMetaType</a>() since the names are resolved at runtime.</p>
+<p>This example shows a typical use case of Q_DECLARE_METATYPE():</p>
+<pre class="cpp">
+
+  <span class="keyword">struct</span> MyStruct
+  {
+      <span class="type">int</span> i;
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  };
+
+  Q_DECLARE_METATYPE(MyStruct)
+
+</pre>
+<p>If <code>MyStruct</code> is in a namespace, the Q_DECLARE_METATYPE() macro has to be outside the namespace:</p>
+<pre class="cpp">
+
+  <span class="keyword">namespace</span> MyNamespace
+  {
+      <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  }
+
+  Q_DECLARE_METATYPE(MyNamespace<span class="operator">::</span>MyStruct)
+
+</pre>
+<p>Since <code>MyStruct</code> is now known to <a href="qmetatype.html">QMetaType</a>, it can be used in <a href="qmetatype.html#Type-enum">QVariant</a>:</p>
+<pre class="cpp">
+
+  MyStruct s;
+  <span class="type"><a href="qmetatype.html#Type-enum">QVariant</a></span> var;
+  var<span class="operator">.</span>setValue(s); <span class="comment">// copy s into the variant</span>
+
+  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+  <span class="comment">// retrieve the value</span>
+  MyStruct s2 <span class="operator">=</span> var<span class="operator">.</span>value<span class="operator">&lt;</span>MyStruct<span class="operator">&gt;</span>();
+
+</pre>
+<p>Some types are registered automatically and do not need this macro:</p>
+<ul>
+<li>Pointers to classes derived from <a href="qobject.html">QObject</a></li>
+<li><a href="qlist.html">QList</a>&lt;T&gt;, <a href="qvector.html">QVector</a>&lt;T&gt;, <a href="qqueue.html">QQueue</a>&lt;T&gt;, <a href="qstack.html">QStack</a>&lt;T&gt;, <a href="qset.html">QSet</a>&lt;T&gt; or <a href="qlinkedlist.html">QLinkedList</a>&lt;T&gt; where T is a registered meta type</li>
+<li><a href="qhash.html#qhash">QHash</a>&lt;T1, T2&gt;, <a href="qmap.html">QMap</a>&lt;T1, T2&gt; or <a href="qpair.html">QPair</a>&lt;T1, T2&gt; where T1 and T2 are registered meta types</li>
+<li><a href="qpointer.html">QPointer</a>&lt;T&gt;, <a href="qsharedpointer.html">QSharedPointer</a>&lt;T&gt;, <a href="qweakpointer.html">QWeakPointer</a>&lt;T&gt;, where T is a class that derives from <a href="qobject.html">QObject</a></li>
+<li>Enumerations registered with <a href="qobject.html#Q_ENUM">Q_ENUM</a> or <a href="qobject.html#Q_FLAG">Q_FLAG</a></li>
+<li>Classes that have a <a href="qobject.html#Q_GADGET">Q_GADGET</a> macro</li>
+</ul>
+<p><b>See also </b><a href="qmetatype.html#qRegisterMetaType-1">qRegisterMetaType</a>().</p>
+<!-- @@@Q_DECLARE_METATYPE -->
+<!-- $$$Q_DECLARE_OPAQUE_POINTER[overload1]$$$Q_DECLARE_OPAQUE_POINTER -->
+<h3 class="fn" id="Q_DECLARE_OPAQUE_POINTER"><a name="Q_DECLARE_OPAQUE_POINTER"></a><span class="name">Q_DECLARE_OPAQUE_POINTER</span>(<i>PointerType</i>)</h3>
+<p>This macro enables pointers to forward-declared types (<i>PointerType</i>) to be registered with <a href="qmetatype.html">QMetaType</a> using either <a href="qmetatype.html#Q_DECLARE_METATYPE">Q_DECLARE_METATYPE</a>() or <a href="qmetatype.html#qRegisterMetaType-1">qRegisterMetaType</a>().</p>
+<p>This function was introduced in  Qt 5.0.</p>
+<p><b>See also </b><a href="qmetatype.html#Q_DECLARE_METATYPE">Q_DECLARE_METATYPE</a>() and <a href="qmetatype.html#qRegisterMetaType-1">qRegisterMetaType</a>().</p>
+<!-- @@@Q_DECLARE_OPAQUE_POINTER -->
+<!-- $$$Q_DECLARE_SEQUENTIAL_CONTAINER_METATYPE[overload1]$$$Q_DECLARE_SEQUENTIAL_CONTAINER_METATYPE -->
+<h3 class="fn" id="Q_DECLARE_SEQUENTIAL_CONTAINER_METATYPE"><a name="Q_DECLARE_SEQUENTIAL_CONTAINER_METATYPE"></a><span class="name">Q_DECLARE_SEQUENTIAL_CONTAINER_METATYPE</span>(<i>Container</i>)</h3>
+<p>This macro makes the container <i>Container</i> known to <a href="qmetatype.html">QMetaType</a> as a sequential container. This makes it possible to put an instance of Container&lt;T&gt; into a <a href="qmetatype.html#Type-enum">QVariant</a>, if T itself is known to <a href="qmetatype.html">QMetaType</a>.</p>
+<p>Note that all of the Qt sequential containers already have built-in support, and it is not necessary to use this macro with them. The std::vector and std::list containers also have built-in support.</p>
+<p>This example shows a typical use of Q_DECLARE_SEQUENTIAL_CONTAINER_METATYPE():</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;deque&gt;</span>
+
+  Q_DECLARE_SEQUENTIAL_CONTAINER_METATYPE(std<span class="operator">::</span>deque)
+
+  <span class="type">void</span> someFunc()
+  {
+      std<span class="operator">::</span>deque<span class="operator">&lt;</span><span class="type"><a href="qfile.html">QFile</a></span><span class="operator">*</span><span class="operator">&gt;</span> container;
+      <span class="type"><a href="qmetatype.html#Type-enum">QVariant</a></span> var <span class="operator">=</span> <span class="type"><a href="qmetatype.html#Type-enum">QVariant</a></span><span class="operator">::</span>fromValue(container);
+      <span class="comment">// ...</span>
+  }
+
+</pre>
+<!-- @@@Q_DECLARE_SEQUENTIAL_CONTAINER_METATYPE -->
+<!-- $$$Q_DECLARE_SMART_POINTER_METATYPE[overload1]$$$Q_DECLARE_SMART_POINTER_METATYPE -->
+<h3 class="fn" id="Q_DECLARE_SMART_POINTER_METATYPE"><a name="Q_DECLARE_SMART_POINTER_METATYPE"></a><span class="name">Q_DECLARE_SMART_POINTER_METATYPE</span>(<i>SmartPointer</i>)</h3>
+<p>This macro makes the smart pointer <i>SmartPointer</i> known to <a href="qmetatype.html">QMetaType</a> as a smart pointer. This makes it possible to put an instance of SmartPointer&lt;T&gt; into a <a href="qmetatype.html#Type-enum">QVariant</a>, if T is a type which inherits <a href="qobject.html">QObject</a>.</p>
+<p>Note that the <a href="qweakpointer.html">QWeakPointer</a>, <a href="qsharedpointer.html">QSharedPointer</a> and <a href="qpointer.html">QPointer</a> already have built-in support, and it is not necessary to use this macro with them.</p>
+<p>This example shows a typical use of Q_DECLARE_SMART_POINTER_METATYPE():</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;memory&gt;</span>
+
+  Q_DECLARE_SMART_POINTER_METATYPE(std<span class="operator">::</span>shared_ptr)
+
+  <span class="type">void</span> someFunc()
+  {
+      <span class="keyword">auto</span> smart_ptr <span class="operator">=</span> std<span class="operator">::</span>make_shared<span class="operator">&lt;</span><span class="type"><a href="qfile.html">QFile</a></span><span class="operator">&gt;</span>();
+      <span class="type"><a href="qmetatype.html#Type-enum">QVariant</a></span> var <span class="operator">=</span> <span class="type"><a href="qmetatype.html#Type-enum">QVariant</a></span><span class="operator">::</span>fromValue(smart_ptr);
+      <span class="comment">// ...</span>
+      <span class="keyword">if</span> (var<span class="operator">.</span>canConvert<span class="operator">&lt;</span><span class="type"><a href="qobject.html">QObject</a></span><span class="operator">*</span><span class="operator">&gt;</span>()) {
+          <span class="type"><a href="qobject.html">QObject</a></span> <span class="operator">*</span>sp <span class="operator">=</span> var<span class="operator">.</span>value<span class="operator">&lt;</span><span class="type"><a href="qobject.html">QObject</a></span><span class="operator">*</span><span class="operator">&gt;</span>();
+          <a href="qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> sp<span class="operator">-</span><span class="operator">&gt;</span>metaObject()<span class="operator">-</span><span class="operator">&gt;</span>className(); <span class="comment">// Prints 'QFile'.</span>
+      }
+  }
+
+</pre>
+<!-- @@@Q_DECLARE_SMART_POINTER_METATYPE -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

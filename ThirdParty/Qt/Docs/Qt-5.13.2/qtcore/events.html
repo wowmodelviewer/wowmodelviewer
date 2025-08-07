@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- eventsandfilters.qdoc -->
+  <title>Event Classes | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td >Event Classes</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Event Classes</h1>
+<span class="subtitle"></span>
+<!-- $$$events-description -->
+<div class="descr"> <a name="details"></a>
+<p>These <a href="qtcore-index.html">Qt Core</a> classes are used to create and handle events.</p>
+<p>For more information see the <a href="eventsandfilters.html">Event System</a> page.</p>
+</div>
+<!-- @@@events -->
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qabstracteventdispatcher.html">QAbstractEventDispatcher</a></p></td><td class="tblDescr"><p>Interface to manage Qt's event queue</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qbasictimer.html">QBasicTimer</a></p></td><td class="tblDescr"><p>Timer events for objects</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qchildevent.html">QChildEvent</a></p></td><td class="tblDescr"><p>Contains event parameters for child object events</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qdynamicpropertychangeevent.html">QDynamicPropertyChangeEvent</a></p></td><td class="tblDescr"><p>Contains event parameters for dynamic property change events</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qevent.html">QEvent</a></p></td><td class="tblDescr"><p>The base class of all event classes. Event objects contain event parameters</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qtimerevent.html">QTimerEvent</a></p></td><td class="tblDescr"><p>Contains parameters that describe a timer event</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qtimer.html">QTimer</a></p></td><td class="tblDescr"><p>Repetitive and single-shot timers</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qactionevent.html">QActionEvent</a></p></td><td class="tblDescr"><p>Event that is generated when a QAction is added, removed, or changed</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qcloseevent.html">QCloseEvent</a></p></td><td class="tblDescr"><p>Contains parameters that describe a close event</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qcontextmenuevent.html">QContextMenuEvent</a></p></td><td class="tblDescr"><p>Contains parameters that describe a context menu event</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qdragenterevent.html">QDragEnterEvent</a></p></td><td class="tblDescr"><p>Event which is sent to a widget when a drag and drop action enters it</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qdragleaveevent.html">QDragLeaveEvent</a></p></td><td class="tblDescr"><p>Event that is sent to a widget when a drag and drop action leaves it</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qdragmoveevent.html">QDragMoveEvent</a></p></td><td class="tblDescr"><p>Event which is sent while a drag and drop action is in progress</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qdropevent.html">QDropEvent</a></p></td><td class="tblDescr"><p>Event which is sent when a drag and drop action is completed</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qenterevent.html">QEnterEvent</a></p></td><td class="tblDescr"><p>Contains parameters that describe an enter event</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qexposeevent.html">QExposeEvent</a></p></td><td class="tblDescr"><p>Contains event parameters for expose events</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qfileopenevent.html">QFileOpenEvent</a></p></td><td class="tblDescr"><p>Event that will be sent when there is a request to open a file or a URL</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qfocusevent.html">QFocusEvent</a></p></td><td class="tblDescr"><p>Contains event parameters for widget focus events</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qhelpevent.html">QHelpEvent</a></p></td><td class="tblDescr"><p>Event that is used to request helpful information about a particular point in a widget</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qhideevent.html">QHideEvent</a></p></td><td class="tblDescr"><p>Event which is sent after a widget is hidden</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qhoverevent.html">QHoverEvent</a></p></td><td class="tblDescr"><p>Contains parameters that describe a mouse event</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qicondragevent.html">QIconDragEvent</a></p></td><td class="tblDescr"><p>Indicates that a main icon drag has begun</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qinputevent.html">QInputEvent</a></p></td><td class="tblDescr"><p>The base class for events that describe user input</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qinputmethodevent.html">QInputMethodEvent</a></p></td><td class="tblDescr"><p>Parameters for input method events</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qkeyevent.html">QKeyEvent</a></p></td><td class="tblDescr"><p>Describes a key event</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qmouseevent.html">QMouseEvent</a></p></td><td class="tblDescr"><p>Contains parameters that describe a mouse event</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qmoveevent.html">QMoveEvent</a></p></td><td class="tblDescr"><p>Contains event parameters for move events</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qnativegestureevent.html">QNativeGestureEvent</a></p></td><td class="tblDescr"><p>Contains parameters that describe a gesture event</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qpaintevent.html">QPaintEvent</a></p></td><td class="tblDescr"><p>Contains event parameters for paint events</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qplatformsurfaceevent.html">QPlatformSurfaceEvent</a></p></td><td class="tblDescr"><p>Used to notify about native platform surface events</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qpointingdeviceuniqueid.html">QPointingDeviceUniqueId</a></p></td><td class="tblDescr"><p>Identifies a unique object, such as a tagged token or stylus, which is used with a pointing device</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qresizeevent.html">QResizeEvent</a></p></td><td class="tblDescr"><p>Contains event parameters for resize events</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qscrollevent.html">QScrollEvent</a></p></td><td class="tblDescr"><p>Sent when scrolling</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qscrollprepareevent.html">QScrollPrepareEvent</a></p></td><td class="tblDescr"><p>Sent in preparation of scrolling</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qshortcutevent.html">QShortcutEvent</a></p></td><td class="tblDescr"><p>Event which is generated when the user presses a key combination</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qshowevent.html">QShowEvent</a></p></td><td class="tblDescr"><p>Event that is sent when a widget is shown</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qstatustipevent.html">QStatusTipEvent</a></p></td><td class="tblDescr"><p>Event that is used to show messages in a status bar</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qtabletevent.html">QTabletEvent</a></p></td><td class="tblDescr"><p>Contains parameters that describe a Tablet event</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qtouchevent.html">QTouchEvent</a></p></td><td class="tblDescr"><p>Contains parameters that describe a touch event</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qwhatsthisclickedevent.html">QWhatsThisClickedEvent</a></p></td><td class="tblDescr"><p>Event that can be used to handle hyperlinks in a "What's This?" text</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtgui/qwheelevent.html">QWheelEvent</a></p></td><td class="tblDescr"><p>Contains parameters that describe a wheel event</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtgui/qwindowstatechangeevent.html">QWindowStateChangeEvent</a></p></td><td class="tblDescr"><p>The window state before a window state change</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="../qtwidgets/qgestureevent.html">QGestureEvent</a></p></td><td class="tblDescr"><p>The description of triggered gestures</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="../qtwidgets/qshortcut.html">QShortcut</a></p></td><td class="tblDescr"><p>Used to create keyboard shortcuts</p></td></tr>
+</table></div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qstringview.cpp -->
+  <title>QStringView Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QStringView</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QStringView Class</h1>
+<!-- $$$QStringView-brief -->
+<p>The <a href="qstringview.html">QStringView</a> class provides a unified view on UTF-16 strings with a read-only subset of the <a href="qstring.html">QString</a> API. <a href="#details">More...</a></p>
+<!-- @@@QStringView -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QStringView&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.10</td></tr></table></div><p>This class was introduced in  Qt 5.10.</p>
+<ul>
+<li><a href="qstringview-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#const_iterator-typedef">const_iterator</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#const_pointer-typedef">const_pointer</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#const_reference-typedef">const_reference</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#const_reverse_iterator-typedef">const_reverse_iterator</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#difference_type-typedef">difference_type</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#iterator-typedef">iterator</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#pointer-typedef">pointer</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#reference-typedef">reference</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#reverse_iterator-typedef">reverse_iterator</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#size_type-typedef">size_type</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#storage_type-typedef">storage_type</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> typedef </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#value_type-typedef">value_type</a></b></td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#QStringView-8">QStringView</a></b>(const StdBasicString &amp;<i>str</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#QStringView-7">QStringView</a></b>(const QStringRef &amp;<i>str</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#QStringView-6">QStringView</a></b>(const QString &amp;<i>str</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#QStringView-5">QStringView</a></b>(const Char *<i>str</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#QStringView-4">QStringView</a></b>(const Char (&amp;)[N] <i>string</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#QStringView-3">QStringView</a></b>(const Char *<i>first</i>, const Char *<i>last</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#QStringView-2">QStringView</a></b>(const Char *<i>str</i>, qsizetype <i>len</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#QStringView-1">QStringView</a></b>(<i>std::nullptr_t</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#QStringView">QStringView</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QChar </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#at">at</a></b>(qsizetype <i>n</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QChar </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#back">back</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringView::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#begin">begin</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringView::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#cbegin">cbegin</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringView::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#cend">cend</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#chop">chop</a></b>(qsizetype <i>length</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringView </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#chopped">chopped</a></b>(qsizetype <i>length</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#compare">compare</a></b>(QStringView <i>other</i>, Qt::CaseSensitivity <i>cs</i> = Qt::CaseSensitive) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringView::const_reverse_iterator </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#crbegin">crbegin</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringView::const_reverse_iterator </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#crend">crend</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringView::const_pointer </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#data">data</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#empty">empty</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringView::const_iterator </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#end">end</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#endsWith">endsWith</a></b>(QStringView <i>str</i>, Qt::CaseSensitivity <i>cs</i> = Qt::CaseSensitive) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#endsWith-1">endsWith</a></b>(QLatin1String <i>l1</i>, Qt::CaseSensitivity <i>cs</i> = Qt::CaseSensitive) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#endsWith-2">endsWith</a></b>(QChar <i>ch</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#endsWith-3">endsWith</a></b>(QChar <i>ch</i>, Qt::CaseSensitivity <i>cs</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QChar </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#first">first</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QChar </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#front">front</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#isEmpty">isEmpty</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#isNull">isNull</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#isRightToLeft">isRightToLeft</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QChar </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#last">last</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringView </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#left">left</a></b>(qsizetype <i>length</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#length">length</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringView </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#mid">mid</a></b>(qsizetype <i>start</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringView </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#mid-1">mid</a></b>(qsizetype <i>start</i>, qsizetype <i>length</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringView::const_reverse_iterator </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#rbegin">rbegin</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringView::const_reverse_iterator </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#rend">rend</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringView </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#right">right</a></b>(qsizetype <i>length</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qsizetype </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#size">size</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#startsWith">startsWith</a></b>(QStringView <i>str</i>, Qt::CaseSensitivity <i>cs</i> = Qt::CaseSensitive) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#startsWith-1">startsWith</a></b>(QLatin1String <i>l1</i>, Qt::CaseSensitivity <i>cs</i> = Qt::CaseSensitive) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#startsWith-2">startsWith</a></b>(QChar <i>ch</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#startsWith-3">startsWith</a></b>(QChar <i>ch</i>, Qt::CaseSensitivity <i>cs</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#toLatin1">toLatin1</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#toLocal8Bit">toLocal8Bit</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#toString">toString</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;uint&gt; </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#toUcs4">toUcs4</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#toUtf8">toUtf8</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringView </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#trimmed">trimmed</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#truncate">truncate</a></b>(qsizetype <i>length</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const QStringView::storage_type *</td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#utf16">utf16</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QChar </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#operator-5b-5d">operator[]</a></b>(qsizetype <i>n</i>) const</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qstringview.html#qHash">qHash</a></b>(QStringView <i>key</i>, uint <i>seed</i> = ...)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QStringView-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A <a href="qstringview.html">QStringView</a> references a contiguous portion of a UTF-16 string it does not own. It acts as an interface type to all kinds of UTF-16 string, without the need to construct a <a href="qstring.html">QString</a> first.</p>
+<p>The UTF-16 string may be represented as an array (or an array-compatible data-structure such as <a href="qstring.html">QString</a>, std::basic_string, etc.) of <a href="qchar.html">QChar</a>, <code>ushort</code>, <code>char16_t</code> (on compilers that support C++11 Unicode strings) or (on platforms, such as Windows, where it is a 16-bit type) <code>wchar_t</code>.</p>
+<p><a href="qstringview.html">QStringView</a> is designed as an interface type; its main use-case is as a function parameter type. When QStringViews are used as automatic variables or data members, care must be taken to ensure that the referenced string data (for example, owned by a <a href="qstring.html">QString</a>) outlives the <a href="qstringview.html">QStringView</a> on all code paths, lest the string view ends up referencing deleted data.</p>
+<p>When used as an interface type, <a href="qstringview.html">QStringView</a> allows a single function to accept a wide variety of UTF-16 string data sources. One function accepting <a href="qstringview.html">QStringView</a> thus replaces three function overloads (taking <a href="qstring.html">QString</a>, <a href="qstringref.html">QStringRef</a>, and <code>(const QChar*, int)</code>), while at the same time enabling even more string data sources to be passed to the function, such as <code>u&quot;Hello World&quot;</code>, a <code>char16_t</code> string literal.</p>
+<p>QStringViews should be passed by value, not by reference-to-const:</p>
+<pre class="cpp">
+
+      <span class="type">void</span> myfun1(<span class="type"><a href="qstringview.html#QStringView">QStringView</a></span> sv);        <span class="comment">// preferred</span>
+      <span class="type">void</span> myfun2(<span class="keyword">const</span> <span class="type"><a href="qstringview.html#QStringView">QStringView</a></span> <span class="operator">&amp;</span>sv); <span class="comment">// compiles and works, but slower</span>
+
+</pre>
+<p>If you want to give your users maximum freedom in what strings they can pass to your function, accompany the <a href="qstringview.html">QStringView</a> overload with overloads for</p>
+<ul>
+<li><i>QChar</i>: this overload can delegate to the <a href="qstringview.html">QStringView</a> version:<pre class="cpp">
+
+      <span class="type">void</span> fun(<span class="type"><a href="qchar.html">QChar</a></span> ch) { fun(<span class="type"><a href="qstringview.html#QStringView">QStringView</a></span>(<span class="operator">&amp;</span>ch<span class="operator">,</span> <span class="number">1</span>)); }
+
+</pre>
+<p>even though, for technical reasons, <a href="qstringview.html">QStringView</a> cannot provide a <a href="qchar.html">QChar</a> constructor by itself.</p>
+</li>
+<li><i>QString</i>: if you store an unmodified copy of the string and thus would like to take advantage of <a href="qstring.html">QString</a>'s implicit sharing.</li>
+<li><a href="qlatin1string.html">QLatin1String</a>: if you can implement the function without converting the <a href="qlatin1string.html">QLatin1String</a> to UTF-16 first; users expect a function overloaded on <a href="qlatin1string.html">QLatin1String</a> to perform strictly less memory allocations than the semantically equivalent call of the <a href="qstringview.html">QStringView</a> version, involving construction of a <a href="qstring.html">QString</a> from the <a href="qlatin1string.html">QLatin1String</a>.</li>
+</ul>
+<p><a href="qstringview.html">QStringView</a> can also be used as the return value of a function. If you call a function returning <a href="qstringview.html">QStringView</a>, take extra care to not keep the <a href="qstringview.html">QStringView</a> around longer than the function promises to keep the referenced string data alive. If in doubt, obtain a strong reference to the data by calling <a href="qstringview.html#toString">toString</a>() to convert the <a href="qstringview.html">QStringView</a> into a <a href="qstring.html">QString</a>.</p>
+<p><a href="qstringview.html">QStringView</a> is a <i>Literal Type</i>, but since it stores data as <code>char16_t</code>, iteration is not <code>constexpr</code> (casts from <code>const char16_t*</code> to <code>const QChar*</code>, which is not allowed in <code>constexpr</code> functions). You can use an indexed loop and/or <a href="qstringview.html#utf16">utf16</a>() in <code>constexpr</code> contexts instead.</p>
+<p><b>Note: </b>We strongly discourage the use of <a href="qlist.html">QList</a>&lt;<a href="qstringview.html">QStringView</a>&gt;, because <a href="qlist.html">QList</a> is a very inefficient container for QStringViews (it would heap-allocate every element). Use <a href="qvector.html">QVector</a> (or std::vector) to hold QStringViews instead.</p></div>
+<p><b>See also </b><a href="qstring.html">QString</a> and <a href="qstringref.html">QStringRef</a>.</p>
+<!-- @@@QStringView -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$const_iterator -->
+<h3 class="fn" id="const_iterator-typedef"><a name="const_iterator-typedef"></a>typedef QStringView::<span class="name">const_iterator</span></h3>
+<p>This typedef provides an STL-style const iterator for <a href="qstringview.html">QStringView</a>.</p>
+<p><b>See also </b><a href="qstringview.html#iterator-typedef">iterator</a> and <a href="qstringview.html#const_reverse_iterator-typedef">const_reverse_iterator</a>.</p>
+<!-- @@@const_iterator -->
+<!-- $$$const_pointer -->
+<h3 class="fn" id="const_pointer-typedef"><a name="const_pointer-typedef"></a>typedef QStringView::<span class="name">const_pointer</span></h3>
+<p>Alias for <code>value_type *</code>. Provided for compatibility with the STL.</p>
+<!-- @@@const_pointer -->
+<!-- $$$const_reference -->
+<h3 class="fn" id="const_reference-typedef"><a name="const_reference-typedef"></a>typedef QStringView::<span class="name">const_reference</span></h3>
+<p>Alias for <code>value_type &amp;</code>. Provided for compatibility with the STL.</p>
+<!-- @@@const_reference -->
+<!-- $$$const_reverse_iterator -->
+<h3 class="fn" id="const_reverse_iterator-typedef"><a name="const_reverse_iterator-typedef"></a>typedef QStringView::<span class="name">const_reverse_iterator</span></h3>
+<p>This typedef provides an STL-style const reverse iterator for <a href="qstringview.html">QStringView</a>.</p>
+<p><b>See also </b><a href="qstringview.html#reverse_iterator-typedef">reverse_iterator</a> and <a href="qstringview.html#const_iterator-typedef">const_iterator</a>.</p>
+<!-- @@@const_reverse_iterator -->
+<!-- $$$difference_type -->
+<h3 class="fn" id="difference_type-typedef"><a name="difference_type-typedef"></a>typedef QStringView::<span class="name">difference_type</span></h3>
+<p>Alias for <code>std::ptrdiff_t</code>. Provided for compatibility with the STL.</p>
+<!-- @@@difference_type -->
+<!-- $$$iterator -->
+<h3 class="fn" id="iterator-typedef"><a name="iterator-typedef"></a>typedef QStringView::<span class="name">iterator</span></h3>
+<p>This typedef provides an STL-style const iterator for <a href="qstringview.html">QStringView</a>.</p>
+<p><a href="qstringview.html">QStringView</a> does not support mutable iterators, so this is the same as <a href="qstringview.html#const_iterator-typedef">const_iterator</a>.</p>
+<p><b>See also </b><a href="qstringview.html#const_iterator-typedef">const_iterator</a> and <a href="qstringview.html#reverse_iterator-typedef">reverse_iterator</a>.</p>
+<!-- @@@iterator -->
+<!-- $$$pointer -->
+<h3 class="fn" id="pointer-typedef"><a name="pointer-typedef"></a>typedef QStringView::<span class="name">pointer</span></h3>
+<p>Alias for <code>value_type *</code>. Provided for compatibility with the STL.</p>
+<p><a href="qstringview.html">QStringView</a> does not support mutable pointers, so this is the same as <a href="qstringview.html#const_pointer-typedef">const_pointer</a>.</p>
+<!-- @@@pointer -->
+<!-- $$$reference -->
+<h3 class="fn" id="reference-typedef"><a name="reference-typedef"></a>typedef QStringView::<span class="name">reference</span></h3>
+<p>Alias for <code>value_type &amp;</code>. Provided for compatibility with the STL.</p>
+<p><a href="qstringview.html">QStringView</a> does not support mutable references, so this is the same as <a href="qstringview.html#const_reference-typedef">const_reference</a>.</p>
+<!-- @@@reference -->
+<!-- $$$reverse_iterator -->
+<h3 class="fn" id="reverse_iterator-typedef"><a name="reverse_iterator-typedef"></a>typedef QStringView::<span class="name">reverse_iterator</span></h3>
+<p>This typedef provides an STL-style const reverse iterator for <a href="qstringview.html">QStringView</a>.</p>
+<p><a href="qstringview.html">QStringView</a> does not support mutable reverse iterators, so this is the same as <a href="qstringview.html#const_reverse_iterator-typedef">const_reverse_iterator</a>.</p>
+<p><b>See also </b><a href="qstringview.html#const_reverse_iterator-typedef">const_reverse_iterator</a> and <a href="qstringview.html#iterator-typedef">iterator</a>.</p>
+<!-- @@@reverse_iterator -->
+<!-- $$$size_type -->
+<h3 class="fn" id="size_type-typedef"><a name="size_type-typedef"></a>typedef QStringView::<span class="name">size_type</span></h3>
+<p>Alias for qsizetype. Provided for compatibility with the STL.</p>
+<p>Unlike other Qt classes, <a href="qstringview.html">QStringView</a> uses qsizetype as its <code>size_type</code>, to allow accepting data from <code>std::basic_string</code> without truncation. The Qt API functions, for example <a href="qstringview.html#length">length</a>(), return <code>int</code>, while the STL-compatible functions, for example <a href="qstringview.html#size">size</a>(), return <code>size_type</code>.</p>
+<!-- @@@size_type -->
+<!-- $$$storage_type -->
+<h3 class="fn" id="storage_type-typedef"><a name="storage_type-typedef"></a>typedef QStringView::<span class="name">storage_type</span></h3>
+<p>Alias for <code>char16_t</code> for non-Windows or if Q_COMPILER_UNICODE_STRINGS is defined. Otherwise, alias for <code>wchar_t</code>.</p>
+<!-- @@@storage_type -->
+<!-- $$$value_type -->
+<h3 class="fn" id="value_type-typedef"><a name="value_type-typedef"></a>typedef QStringView::<span class="name">value_type</span></h3>
+<p>Alias for <code>const QChar</code>. Provided for compatibility with the STL.</p>
+<!-- @@@value_type -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$ -->
+<div class="fngroup">
+<h3 class="fn fngroupitem" id="endsWith"><a name="endsWith"></a><span class="type">bool</span> QStringView::<span class="name">endsWith</span>(<span class="type"><a href="qstringview.html#QStringView">QStringView</a></span> <i>str</i>, <span class="type"><a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitivity</a></span> <i>cs</i> = Qt::CaseSensitive) const</h3><h3 class="fn fngroupitem" id="endsWith-1"><a name="endsWith-1"></a><span class="type">bool</span> QStringView::<span class="name">endsWith</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>l1</i>, <span class="type"><a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitivity</a></span> <i>cs</i> = Qt::CaseSensitive) const</h3><h3 class="fn fngroupitem" id="endsWith-2"><a name="endsWith-2"></a><span class="type">bool</span> QStringView::<span class="name">endsWith</span>(<span class="type"><a href="qchar.html">QChar</a></span> <i>ch</i>) const</h3><h3 class="fn fngroupitem" id="endsWith-3"><a name="endsWith-3"></a><span class="type">bool</span> QStringView::<span class="name">endsWith</span>(<span class="type"><a href="qchar.html">QChar</a></span> <i>ch</i>, <span class="type"><a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitivity</a></span> <i>cs</i>) const</h3></div>
+<p>Returns <code>true</code> if this string-view ends with string-view <i>str</i>, Latin-1 string <i>l1</i>, or character <i>ch</i>, respectively; otherwise returns <code>false</code>.</p>
+<p>If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (the default), the search is case-sensitive; otherwise the search is case-insensitive.</p>
+<p><b>See also </b><a href="qstringview.html#startsWith">startsWith</a>().</p>
+<!-- @@@ -->
+<!-- $$$ -->
+<div class="fngroup">
+<h3 class="fn fngroupitem" id="startsWith"><a name="startsWith"></a><span class="type">bool</span> QStringView::<span class="name">startsWith</span>(<span class="type"><a href="qstringview.html#QStringView">QStringView</a></span> <i>str</i>, <span class="type"><a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitivity</a></span> <i>cs</i> = Qt::CaseSensitive) const</h3><h3 class="fn fngroupitem" id="startsWith-1"><a name="startsWith-1"></a><span class="type">bool</span> QStringView::<span class="name">startsWith</span>(<span class="type"><a href="qlatin1string.html">QLatin1String</a></span> <i>l1</i>, <span class="type"><a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitivity</a></span> <i>cs</i> = Qt::CaseSensitive) const</h3><h3 class="fn fngroupitem" id="startsWith-2"><a name="startsWith-2"></a><span class="type">bool</span> QStringView::<span class="name">startsWith</span>(<span class="type"><a href="qchar.html">QChar</a></span> <i>ch</i>) const</h3><h3 class="fn fngroupitem" id="startsWith-3"><a name="startsWith-3"></a><span class="type">bool</span> QStringView::<span class="name">startsWith</span>(<span class="type"><a href="qchar.html">QChar</a></span> <i>ch</i>, <span class="type"><a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitivity</a></span> <i>cs</i>) const</h3></div>
+<p>Returns <code>true</code> if this string-view starts with string-view <i>str</i>, Latin-1 string <i>l1</i>, or character <i>ch</i>, respectively; otherwise returns <code>false</code>.</p>
+<p>If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (the default), the search is case-sensitive; otherwise the search is case-insensitive.</p>
+<p><b>See also </b><a href="qstringview.html#endsWith">endsWith</a>().</p>
+<!-- @@@ -->
+<!-- $$$QStringView$$$QStringViewconstStdBasicString& -->
+<h3 class="fn" id="QStringView-8"><a name="QStringView-8"></a>QStringView::<span class="name">QStringView</span>(const <span class="type">StdBasicString</span> &amp;<i>str</i>)</h3>
+<p>Constructs a string view on <i>str</i>. The length is taken from <code>str.size()</code>.</p>
+<p><code>str.data()</code> must remain valid for the lifetime of this string view object.</p>
+<p>This constructor only participates in overload resolution if <code>StdBasicString</code> is an instantiation of <code>std::basic_string</code> with a compatible character type. The compatible character types are: <code>QChar</code>, <code>ushort</code>, <code>char16_t</code> and (on platforms, such as Windows, where it is a 16-bit type) <code>wchar_t</code>.</p>
+<p>The string view will be empty if and only if <code>str.empty()</code>. It is unspecified whether this constructor can result in a null string view (<code>str.data()</code> would have to return <code>nullptr</code> for this).</p>
+<p><b>See also </b><a href="qstringview.html#isNull">isNull</a>() and <a href="qstringview.html#isEmpty">isEmpty</a>().</p>
+<!-- @@@QStringView -->
+<!-- $$$QStringView$$$QStringViewconstQStringRef& -->
+<h3 class="fn" id="QStringView-7"><a name="QStringView-7"></a>QStringView::<span class="name">QStringView</span>(const <span class="type"><a href="qstringref.html">QStringRef</a></span> &amp;<i>str</i>)</h3>
+<p>Constructs a string view on <i>str</i>.</p>
+<p><code>str.data()</code> must remain valid for the lifetime of this string view object.</p>
+<p>The string view will be null if and only if <code>str.isNull()</code>.</p>
+<!-- @@@QStringView -->
+<!-- $$$QStringView$$$QStringViewconstQString& -->
+<h3 class="fn" id="QStringView-6"><a name="QStringView-6"></a>QStringView::<span class="name">QStringView</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>str</i>)</h3>
+<p>Constructs a string view on <i>str</i>.</p>
+<p><code>str.data()</code> must remain valid for the lifetime of this string view object.</p>
+<p>The string view will be null if and only if <code>str.isNull()</code>.</p>
+<!-- @@@QStringView -->
+<!-- $$$QStringView$$$QStringViewconstChar* -->
+<h3 class="fn" id="QStringView-5"><a name="QStringView-5"></a>QStringView::<span class="name">QStringView</span>(const <span class="type">Char</span> *<i>str</i>)</h3>
+<p>Constructs a string view on <i>str</i>. The length is determined by scanning for the first <code>Char(0)</code>.</p>
+<p><i>str</i> must remain valid for the lifetime of this string view object.</p>
+<p>Passing <code>nullptr</code> as <i>str</i> is safe and results in a null string view.</p>
+<p>This constructor only participates in overload resolution if <i>str</i> is not an array and if <code>Char</code> is a compatible character type. The compatible character types are: <code>QChar</code>, <code>ushort</code>, <code>char16_t</code> and (on platforms, such as Windows, where it is a 16-bit type) <code>wchar_t</code>.</p>
+<!-- @@@QStringView -->
+<!-- $$$QStringView$$$QStringViewconstChar(&)[N] -->
+<h3 class="fn" id="QStringView-4"><a name="QStringView-4"></a>QStringView::<span class="name">QStringView</span>(const <span class="type">Char</span> (&amp;)[<span class="type">N</span>] <i>string</i> = ...)</h3>
+<p>Constructs a string view on the character string literal <i>string</i>. The length is set to <code>N-1</code>, excluding the trailing {Char(0)}. If you need the full array, use the constructor from pointer and size instead:</p>
+<pre class="cpp">
+
+      <span class="keyword">auto</span> sv <span class="operator">=</span> <span class="type"><a href="qstringview.html#QStringView">QStringView</a></span>(array<span class="operator">,</span> std<span class="operator">::</span>size(array)); <span class="comment">// using C++17 std::size()</span>
+
+</pre>
+<p><i>string</i> must remain valid for the lifetime of this string view object.</p>
+<p>This constructor only participates in overload resolution if <i>string</i> is an actual array and <code>Char</code> is a compatible character type. The compatible character types are: <code>QChar</code>, <code>ushort</code>, <code>char16_t</code> and (on platforms, such as Windows, where it is a 16-bit type) <code>wchar_t</code>.</p>
+<!-- @@@QStringView -->
+<!-- $$$QStringView$$$QStringViewconstChar*constChar* -->
+<h3 class="fn" id="QStringView-3"><a name="QStringView-3"></a>QStringView::<span class="name">QStringView</span>(const <span class="type">Char</span> *<i>first</i>, const <span class="type">Char</span> *<i>last</i>)</h3>
+<p>Constructs a string view on <i>first</i> with length (<i>last</i> - <i>first</i>).</p>
+<p>The range <code>[first,last)</code> must remain valid for the lifetime of this string view object.</p>
+<p>Passing <code>\nullptr</code> as <i>first</i> is safe if <i>last</i> is <code>nullptr</code>, too, and results in a null string view.</p>
+<p>The behavior is undefined if <i>last</i> precedes <i>first</i>, or <i>first</i> is <code>nullptr</code> and <i>last</i> is not.</p>
+<p>This constructor only participates in overload resolution if <code>Char</code> is a compatible character type. The compatible character types are: <code>QChar</code>, <code>ushort</code>, <code>char16_t</code> and (on platforms, such as Windows, where it is a 16-bit type) <code>wchar_t</code>.</p>
+<!-- @@@QStringView -->
+<!-- $$$QStringView$$$QStringViewconstChar*qsizetype -->
+<h3 class="fn" id="QStringView-2"><a name="QStringView-2"></a>QStringView::<span class="name">QStringView</span>(const <span class="type">Char</span> *<i>str</i>, <span class="type">qsizetype</span> <i>len</i>)</h3>
+<p>Constructs a string view on <i>str</i> with length <i>len</i>.</p>
+<p>The range <code>[str,len)</code> must remain valid for the lifetime of this string view object.</p>
+<p>Passing <code>nullptr</code> as <i>str</i> is safe if <i>len</i> is 0, too, and results in a null string view.</p>
+<p>The behavior is undefined if <i>len</i> is negative or, when positive, if <i>str</i> is <code>nullptr</code>.</p>
+<p>This constructor only participates in overload resolution if <code>Char</code> is a compatible character type. The compatible character types are: <code>QChar</code>, <code>ushort</code>, <code>char16_t</code> and (on platforms, such as Windows, where it is a 16-bit type) <code>wchar_t</code>.</p>
+<!-- @@@QStringView -->
+<!-- $$$QStringView$$$QStringViewstd::nullptr_t -->
+<h3 class="fn" id="QStringView-1"><a name="QStringView-1"></a>QStringView::<span class="name">QStringView</span>(<i>std::nullptr_t</i>)</h3>
+<p>Constructs a null string view.</p>
+<p><b>See also </b><a href="qstringview.html#isNull">isNull</a>().</p>
+<!-- @@@QStringView -->
+<!-- $$$QStringView[overload1]$$$QStringView -->
+<h3 class="fn" id="QStringView"><a name="QStringView"></a>QStringView::<span class="name">QStringView</span>()</h3>
+<p>Constructs a null string view.</p>
+<p><b>See also </b><a href="qstringview.html#isNull">isNull</a>().</p>
+<!-- @@@QStringView -->
+<!-- $$$at[overload1]$$$atqsizetype -->
+<h3 class="fn" id="at"><a name="at"></a><span class="type"><a href="qchar.html">QChar</a></span> QStringView::<span class="name">at</span>(<span class="type">qsizetype</span> <i>n</i>) const</h3>
+<p>Returns the character at position <i>n</i> in this string view.</p>
+<p>The behavior is undefined if <i>n</i> is negative or not less than <a href="qstringview.html#size">size</a>().</p>
+<p><b>See also </b><a href="qstringview.html#operator-5b-5d">operator[]</a>(), <a href="qstringview.html#front">front</a>(), and <a href="qstringview.html#back">back</a>().</p>
+<!-- @@@at -->
+<!-- $$$back[overload1]$$$back -->
+<h3 class="fn" id="back"><a name="back"></a><span class="type"><a href="qchar.html">QChar</a></span> QStringView::<span class="name">back</span>() const</h3>
+<p>Returns the last character in the string. Same as <a href="qstringview.html#last">last</a>().</p>
+<p>This function is provided for STL compatibility.</p>
+<p><b>Warning:</b> Calling this function on an empty string view constitutes undefined behavior.</p>
+<p><b>See also </b><a href="qstringview.html#front">front</a>(), <a href="qstringview.html#first">first</a>(), and <a href="qstringview.html#last">last</a>().</p>
+<!-- @@@back -->
+<!-- $$$begin[overload1]$$$begin -->
+<h3 class="fn" id="begin"><a name="begin"></a><span class="type"><a href="qstringview.html#const_iterator-typedef">QStringView::const_iterator</a></span> QStringView::<span class="name">begin</span>() const</h3>
+<p>Returns a const <a href="containers.html#stl-style-iterators">STL-style iterator</a> pointing to the first character in the string.</p>
+<p>This function is provided for STL compatibility.</p>
+<p><b>See also </b><a href="qstringview.html#end">end</a>(), <a href="qstringview.html#cbegin">cbegin</a>(), <a href="qstringview.html#rbegin">rbegin</a>(), and <a href="qstringview.html#data">data</a>().</p>
+<!-- @@@begin -->
+<!-- $$$cbegin[overload1]$$$cbegin -->
+<h3 class="fn" id="cbegin"><a name="cbegin"></a><span class="type"><a href="qstringview.html#const_iterator-typedef">QStringView::const_iterator</a></span> QStringView::<span class="name">cbegin</span>() const</h3>
+<p>Same as <a href="qstringview.html#begin">begin</a>().</p>
+<p>This function is provided for STL compatibility.</p>
+<p><b>See also </b><a href="qstringview.html#cend">cend</a>(), <a href="qstringview.html#begin">begin</a>(), <a href="qstringview.html#crbegin">crbegin</a>(), and <a href="qstringview.html#data">data</a>().</p>
+<!-- @@@cbegin -->
+<!-- $$$cend[overload1]$$$cend -->
+<h3 class="fn" id="cend"><a name="cend"></a><span class="type"><a href="qstringview.html#const_iterator-typedef">QStringView::const_iterator</a></span> QStringView::<span class="name">cend</span>() const</h3>
+<p>Same as <a href="qstringview.html#end">end</a>().</p>
+<p>This function is provided for STL compatibility.</p>
+<p><b>See also </b><a href="qstringview.html#cbegin">cbegin</a>(), <a href="qstringview.html#end">end</a>(), and <a href="qstringview.html#crend">crend</a>().</p>
+<!-- @@@cend -->
+<!-- $$$chop[overload1]$$$chopqsizetype -->
+<h3 class="fn" id="chop"><a name="chop"></a><span class="type">void</span> QStringView::<span class="name">chop</span>(<span class="type">qsizetype</span> <i>length</i>)</h3>
+<p>Truncates this string view by <i>length</i> characters.</p>
+<p>Same as <code>*this = left(size() - length)</code>.</p>
+<p><b>Note: </b>The behavior is undefined when <i>length</i> &lt; 0 or <i>length</i> &gt; <a href="qstringview.html#size">size</a>().</p><p><b>See also </b><a href="qstringview.html#mid">mid</a>(), <a href="qstringview.html#left">left</a>(), <a href="qstringview.html#right">right</a>(), <a href="qstringview.html#chopped">chopped</a>(), and <a href="qstringview.html#truncate">truncate</a>().</p>
+<!-- @@@chop -->
+<!-- $$$chopped[overload1]$$$choppedqsizetype -->
+<h3 class="fn" id="chopped"><a name="chopped"></a><span class="type"><a href="qstringview.html#QStringView">QStringView</a></span> QStringView::<span class="name">chopped</span>(<span class="type">qsizetype</span> <i>length</i>) const</h3>
+<p>Returns the substring of length <a href="qstringview.html#size">size</a>() - <i>length</i> starting at the beginning of this object.</p>
+<p>Same as <code>left(size() - length)</code>.</p>
+<p><b>Note: </b>The behavior is undefined when <i>length</i> &lt; 0 or <i>length</i> &gt; <a href="qstringview.html#size">size</a>().</p><p><b>See also </b><a href="qstringview.html#mid">mid</a>(), <a href="qstringview.html#left">left</a>(), <a href="qstringview.html#right">right</a>(), <a href="qstringview.html#chop">chop</a>(), and <a href="qstringview.html#truncate">truncate</a>().</p>
+<!-- @@@chopped -->
+<!-- $$$compare[overload1]$$$compareQStringViewQt::CaseSensitivity -->
+<h3 class="fn" id="compare"><a name="compare"></a><span class="type">int</span> QStringView::<span class="name">compare</span>(<span class="type"><a href="qstringview.html#QStringView">QStringView</a></span> <i>other</i>, <span class="type"><a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitivity</a></span> <i>cs</i> = Qt::CaseSensitive) const</h3>
+<p>Compares this string-view with the <i>other</i> string-view and returns an integer less than, equal to, or greater than zero if this string-view is less than, equal to, or greater than the other string-view.</p>
+<p>If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a>, the comparison is case sensitive; otherwise the comparison is case insensitive.</p>
+<p>This function was introduced in  Qt 5.12.</p>
+<p><b>See also </b><a href="qchar.html#operator-eq-eq">operator==</a>(), <a href="qchar.html#operator-lt">operator&lt;</a>(), and <a href="qchar.html#operator-gt">operator&gt;</a>().</p>
+<!-- @@@compare -->
+<!-- $$$crbegin[overload1]$$$crbegin -->
+<h3 class="fn" id="crbegin"><a name="crbegin"></a><span class="type"><a href="qstringview.html#const_reverse_iterator-typedef">QStringView::const_reverse_iterator</a></span> QStringView::<span class="name">crbegin</span>() const</h3>
+<p>Same as <a href="qstringview.html#rbegin">rbegin</a>().</p>
+<p>This function is provided for STL compatibility.</p>
+<p><b>See also </b><a href="qstringview.html#crend">crend</a>(), <a href="qstringview.html#rbegin">rbegin</a>(), and <a href="qstringview.html#cbegin">cbegin</a>().</p>
+<!-- @@@crbegin -->
+<!-- $$$crend[overload1]$$$crend -->
+<h3 class="fn" id="crend"><a name="crend"></a><span class="type"><a href="qstringview.html#const_reverse_iterator-typedef">QStringView::const_reverse_iterator</a></span> QStringView::<span class="name">crend</span>() const</h3>
+<p>Same as <a href="qstringview.html#rend">rend</a>().</p>
+<p>This function is provided for STL compatibility.</p>
+<p><b>See also </b><a href="qstringview.html#crbegin">crbegin</a>(), <a href="qstringview.html#rend">rend</a>(), and <a href="qstringview.html#cend">cend</a>().</p>
+<!-- @@@crend -->
+<!-- $$$data[overload1]$$$data -->
+<h3 class="fn" id="data"><a name="data"></a><span class="type"><a href="qstringview.html#const_pointer-typedef">QStringView::const_pointer</a></span> QStringView::<span class="name">data</span>() const</h3>
+<p>Returns a const pointer to the first character in the string.</p>
+<p><b>Note: </b>The character array represented by the return value is <i>not</i> null-terminated.</p><p><b>See also </b><a href="qstringview.html#begin">begin</a>(), <a href="qstringview.html#end">end</a>(), and <a href="qstringview.html#utf16">utf16</a>().</p>
+<!-- @@@data -->
+<!-- $$$empty[overload1]$$$empty -->
+<h3 class="fn" id="empty"><a name="empty"></a><span class="type">bool</span> QStringView::<span class="name">empty</span>() const</h3>
+<p>Returns whether this string view is empty - that is, whether <code>size() == 0</code>.</p>
+<p>This function is provided for STL compatibility.</p>
+<p><b>See also </b><a href="qstringview.html#isEmpty">isEmpty</a>(), <a href="qstringview.html#isNull">isNull</a>(), <a href="qstringview.html#size">size</a>(), and <a href="qstringview.html#length">length</a>().</p>
+<!-- @@@empty -->
+<!-- $$$end[overload1]$$$end -->
+<h3 class="fn" id="end"><a name="end"></a><span class="type"><a href="qstringview.html#const_iterator-typedef">QStringView::const_iterator</a></span> QStringView::<span class="name">end</span>() const</h3>
+<p>Returns a const <a href="containers.html#stl-style-iterators">STL-style iterator</a> pointing to the imaginary character after the last character in the list.</p>
+<p>This function is provided for STL compatibility.</p>
+<p><b>See also </b><a href="qstringview.html#begin">begin</a>(), <a href="qstringview.html#cend">cend</a>(), and <a href="qstringview.html#rend">rend</a>().</p>
+<!-- @@@end -->
+<!-- $$$first[overload1]$$$first -->
+<h3 class="fn" id="first"><a name="first"></a><span class="type"><a href="qchar.html">QChar</a></span> QStringView::<span class="name">first</span>() const</h3>
+<p>Returns the first character in the string. Same as <a href="qstringview.html#front">front</a>().</p>
+<p>This function is provided for compatibility with other Qt containers.</p>
+<p><b>Warning:</b> Calling this function on an empty string view constitutes undefined behavior.</p>
+<p><b>See also </b><a href="qstringview.html#front">front</a>(), <a href="qstringview.html#back">back</a>(), and <a href="qstringview.html#last">last</a>().</p>
+<!-- @@@first -->
+<!-- $$$front[overload1]$$$front -->
+<h3 class="fn" id="front"><a name="front"></a><span class="type"><a href="qchar.html">QChar</a></span> QStringView::<span class="name">front</span>() const</h3>
+<p>Returns the first character in the string. Same as <a href="qstringview.html#first">first</a>().</p>
+<p>This function is provided for STL compatibility.</p>
+<p><b>Warning:</b> Calling this function on an empty string view constitutes undefined behavior.</p>
+<p><b>See also </b><a href="qstringview.html#back">back</a>(), <a href="qstringview.html#first">first</a>(), and <a href="qstringview.html#last">last</a>().</p>
+<!-- @@@front -->
+<!-- $$$isEmpty[overload1]$$$isEmpty -->
+<h3 class="fn" id="isEmpty"><a name="isEmpty"></a><span class="type">bool</span> QStringView::<span class="name">isEmpty</span>() const</h3>
+<p>Returns whether this string view is empty - that is, whether <code>size() == 0</code>.</p>
+<p>This function is provided for compatibility with other Qt containers.</p>
+<p><b>See also </b><a href="qstringview.html#empty">empty</a>(), <a href="qstringview.html#isNull">isNull</a>(), <a href="qstringview.html#size">size</a>(), and <a href="qstringview.html#length">length</a>().</p>
+<!-- @@@isEmpty -->
+<!-- $$$isNull[overload1]$$$isNull -->
+<h3 class="fn" id="isNull"><a name="isNull"></a><span class="type">bool</span> QStringView::<span class="name">isNull</span>() const</h3>
+<p>Returns whether this string view is null - that is, whether <code>data() == nullptr</code>.</p>
+<p>This functions is provided for compatibility with other Qt containers.</p>
+<p><b>See also </b><a href="qstringview.html#empty">empty</a>(), <a href="qstringview.html#isEmpty">isEmpty</a>(), <a href="qstringview.html#size">size</a>(), and <a href="qstringview.html#length">length</a>().</p>
+<!-- @@@isNull -->
+<!-- $$$isRightToLeft[overload1]$$$isRightToLeft -->
+<h3 class="fn" id="isRightToLeft"><a name="isRightToLeft"></a><span class="type">bool</span> QStringView::<span class="name">isRightToLeft</span>() const</h3>
+<p>Returns <code>true</code> if the string is read right to left.</p>
+<p>This function was introduced in  Qt 5.11.</p>
+<p><b>See also </b><a href="qstring.html#isRightToLeft">QString::isRightToLeft</a>().</p>
+<!-- @@@isRightToLeft -->
+<!-- $$$last[overload1]$$$last -->
+<h3 class="fn" id="last"><a name="last"></a><span class="type"><a href="qchar.html">QChar</a></span> QStringView::<span class="name">last</span>() const</h3>
+<p>Returns the last character in the string. Same as <a href="qstringview.html#back">back</a>().</p>
+<p>This function is provided for compatibility with other Qt containers.</p>
+<p><b>Warning:</b> Calling this function on an empty string view constitutes undefined behavior.</p>
+<p><b>See also </b><a href="qstringview.html#back">back</a>(), <a href="qstringview.html#front">front</a>(), and <a href="qstringview.html#first">first</a>().</p>
+<!-- @@@last -->
+<!-- $$$left[overload1]$$$leftqsizetype -->
+<h3 class="fn" id="left"><a name="left"></a><span class="type"><a href="qstringview.html#QStringView">QStringView</a></span> QStringView::<span class="name">left</span>(<span class="type">qsizetype</span> <i>length</i>) const</h3>
+<p>Returns the substring of length <i>length</i> starting at position 0 in this object.</p>
+<p><b>Note: </b>The behavior is undefined when <i>length</i> &lt; 0 or <i>length</i> &gt; <a href="qstringview.html#size">size</a>().</p><p><b>See also </b><a href="qstringview.html#mid">mid</a>(), <a href="qstringview.html#right">right</a>(), <a href="qstringview.html#chopped">chopped</a>(), <a href="qstringview.html#chop">chop</a>(), and <a href="qstringview.html#truncate">truncate</a>().</p>
+<!-- @@@left -->
+<!-- $$$length[overload1]$$$length -->
+<h3 class="fn" id="length"><a name="length"></a><span class="type">int</span> QStringView::<span class="name">length</span>() const</h3>
+<p>Same as <a href="qstringview.html#size">size</a>(), except returns the result as an <code>int</code>.</p>
+<p>This function is provided for compatibility with other Qt containers.</p>
+<p><b>Warning:</b> <a href="qstringview.html">QStringView</a> can represent strings with more than 2<sup>31</sup> characters. Calling this function on a string view for which <a href="qstringview.html#size">size</a>() returns a value greater than <code>INT_MAX</code> constitutes undefined behavior.</p>
+<p><b>See also </b><a href="qstringview.html#empty">empty</a>(), <a href="qstringview.html#isEmpty">isEmpty</a>(), <a href="qstringview.html#isNull">isNull</a>(), and <a href="qstringview.html#size">size</a>().</p>
+<!-- @@@length -->
+<!-- $$$mid[overload1]$$$midqsizetype -->
+<h3 class="fn" id="mid"><a name="mid"></a><span class="type"><a href="qstringview.html#QStringView">QStringView</a></span> QStringView::<span class="name">mid</span>(<span class="type">qsizetype</span> <i>start</i>) const</h3>
+<p>Returns the substring starting at position <i>start</i> in this object, and extending to the end of the string.</p>
+<p><b>Note: </b>The behavior is undefined when <i>start</i> &lt; 0 or <i>start</i> &gt; <a href="qstringview.html#size">size</a>().</p><p><b>See also </b><a href="qstringview.html#left">left</a>(), <a href="qstringview.html#right">right</a>(), <a href="qstringview.html#chopped">chopped</a>(), <a href="qstringview.html#chop">chop</a>(), and <a href="qstringview.html#truncate">truncate</a>().</p>
+<!-- @@@mid -->
+<!-- $$$mid$$$midqsizetypeqsizetype -->
+<h3 class="fn" id="mid-1"><a name="mid-1"></a><span class="type"><a href="qstringview.html#QStringView">QStringView</a></span> QStringView::<span class="name">mid</span>(<span class="type">qsizetype</span> <i>start</i>, <span class="type">qsizetype</span> <i>length</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>Returns the substring of length <i>length</i> starting at position <i>start</i> in this object.</p>
+<p><b>Note: </b>The behavior is undefined when <i>start</i> &lt; 0, <i>length</i> &lt; 0, or <i>start</i> + <i>length</i> &gt; <a href="qstringview.html#size">size</a>().</p><p><b>See also </b><a href="qstringview.html#left">left</a>(), <a href="qstringview.html#right">right</a>(), <a href="qstringview.html#chopped">chopped</a>(), <a href="qstringview.html#chop">chop</a>(), and <a href="qstringview.html#truncate">truncate</a>().</p>
+<!-- @@@mid -->
+<!-- $$$rbegin[overload1]$$$rbegin -->
+<h3 class="fn" id="rbegin"><a name="rbegin"></a><span class="type"><a href="qstringview.html#const_reverse_iterator-typedef">QStringView::const_reverse_iterator</a></span> QStringView::<span class="name">rbegin</span>() const</h3>
+<p>Returns a const <a href="containers.html#stl-style-iterators">STL-style</a> reverse iterator pointing to the first character in the string, in reverse order.</p>
+<p>This function is provided for STL compatibility.</p>
+<p><b>See also </b><a href="qstringview.html#rend">rend</a>(), <a href="qstringview.html#crbegin">crbegin</a>(), and <a href="qstringview.html#begin">begin</a>().</p>
+<!-- @@@rbegin -->
+<!-- $$$rend[overload1]$$$rend -->
+<h3 class="fn" id="rend"><a name="rend"></a><span class="type"><a href="qstringview.html#const_reverse_iterator-typedef">QStringView::const_reverse_iterator</a></span> QStringView::<span class="name">rend</span>() const</h3>
+<p>Returns a <a href="containers.html#stl-style-iterators">STL-style</a> reverse iterator pointing to one past the last character in the string, in reverse order.</p>
+<p>This function is provided for STL compatibility.</p>
+<p><b>See also </b><a href="qstringview.html#rbegin">rbegin</a>(), <a href="qstringview.html#crend">crend</a>(), and <a href="qstringview.html#end">end</a>().</p>
+<!-- @@@rend -->
+<!-- $$$right[overload1]$$$rightqsizetype -->
+<h3 class="fn" id="right"><a name="right"></a><span class="type"><a href="qstringview.html#QStringView">QStringView</a></span> QStringView::<span class="name">right</span>(<span class="type">qsizetype</span> <i>length</i>) const</h3>
+<p>Returns the substring of length <i>length</i> starting at position <a href="qstringview.html#size">size</a>() - <i>length</i> in this object.</p>
+<p><b>Note: </b>The behavior is undefined when <i>length</i> &lt; 0 or <i>length</i> &gt; <a href="qstringview.html#size">size</a>().</p><p><b>See also </b><a href="qstringview.html#mid">mid</a>(), <a href="qstringview.html#left">left</a>(), <a href="qstringview.html#chopped">chopped</a>(), <a href="qstringview.html#chop">chop</a>(), and <a href="qstringview.html#truncate">truncate</a>().</p>
+<!-- @@@right -->
+<!-- $$$size[overload1]$$$size -->
+<h3 class="fn" id="size"><a name="size"></a><span class="type">qsizetype</span> QStringView::<span class="name">size</span>() const</h3>
+<p>Returns the size of this string view, in UTF-16 code points (that is, surrogate pairs count as two for the purposes of this function, the same as in <a href="qstring.html">QString</a> and <a href="qstringref.html">QStringRef</a>).</p>
+<p><b>See also </b><a href="qstringview.html#empty">empty</a>(), <a href="qstringview.html#isEmpty">isEmpty</a>(), <a href="qstringview.html#isNull">isNull</a>(), and <a href="qstringview.html#length">length</a>().</p>
+<!-- @@@size -->
+<!-- $$$toLatin1[overload1]$$$toLatin1 -->
+<h3 class="fn" id="toLatin1"><a name="toLatin1"></a><span class="type"><a href="qbytearray.html">QByteArray</a></span> QStringView::<span class="name">toLatin1</span>() const</h3>
+<p>Returns a Latin-1 representation of the string as a <a href="qbytearray.html">QByteArray</a>.</p>
+<p>The behavior is undefined if the string contains non-Latin1 characters.</p>
+<p><b>See also </b><a href="qstringview.html#toUtf8">toUtf8</a>(), <a href="qstringview.html#toLocal8Bit">toLocal8Bit</a>(), and <a href="qtextcodec.html">QTextCodec</a>.</p>
+<!-- @@@toLatin1 -->
+<!-- $$$toLocal8Bit[overload1]$$$toLocal8Bit -->
+<h3 class="fn" id="toLocal8Bit"><a name="toLocal8Bit"></a><span class="type"><a href="qbytearray.html">QByteArray</a></span> QStringView::<span class="name">toLocal8Bit</span>() const</h3>
+<p>Returns a local 8-bit representation of the string as a <a href="qbytearray.html">QByteArray</a>.</p>
+<p><a href="qtextcodec.html#codecForLocale">QTextCodec::codecForLocale</a>() is used to perform the conversion from Unicode. If the locale's encoding could not be determined, this function does the same as <a href="qstringview.html#toLatin1">toLatin1</a>().</p>
+<p>The behavior is undefined if the string contains characters not supported by the locale's 8-bit encoding.</p>
+<p><b>See also </b><a href="qstringview.html#toLatin1">toLatin1</a>(), <a href="qstringview.html#toUtf8">toUtf8</a>(), and <a href="qtextcodec.html">QTextCodec</a>.</p>
+<!-- @@@toLocal8Bit -->
+<!-- $$$toString[overload1]$$$toString -->
+<h3 class="fn" id="toString"><a name="toString"></a><span class="type"><a href="qstring.html">QString</a></span> QStringView::<span class="name">toString</span>() const</h3>
+<p>Returns a deep copy of this string view's data as a <a href="qstring.html">QString</a>.</p>
+<p>The return value will be the null <a href="qstring.html">QString</a> if and only if this string view is null.</p>
+<p><b>Warning:</b> <a href="qstringview.html">QStringView</a> can store strings with more than 2<sup>30</sup> characters while <a href="qstring.html">QString</a> cannot. Calling this function on a string view for which <a href="qstringview.html#size">size</a>() returns a value greater than <code>INT_MAX / 2</code> constitutes undefined behavior.</p>
+<!-- @@@toString -->
+<!-- $$$toUcs4[overload1]$$$toUcs4 -->
+<h3 class="fn" id="toUcs4"><a name="toUcs4"></a><span class="type"><a href="qvector.html">QVector</a></span>&lt;<span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span>&gt; QStringView::<span class="name">toUcs4</span>() const</h3>
+<p>Returns a UCS-4/UTF-32 representation of the string as a <a href="qvector.html">QVector</a>&lt;uint&gt;.</p>
+<p>UCS-4 is a Unicode codec and therefore it is lossless. All characters from this string will be encoded in UCS-4. Any invalid sequence of code units in this string is replaced by the Unicode replacement character (<a href="qchar.html#SpecialCharacter-enum">QChar::ReplacementCharacter</a>, which corresponds to <code>U+FFFD</code>).</p>
+<p>The returned vector is not 0-terminated.</p>
+<p><b>See also </b><a href="qstringview.html#toUtf8">toUtf8</a>(), <a href="qstringview.html#toLatin1">toLatin1</a>(), <a href="qstringview.html#toLocal8Bit">toLocal8Bit</a>(), and <a href="qtextcodec.html">QTextCodec</a>.</p>
+<!-- @@@toUcs4 -->
+<!-- $$$toUtf8[overload1]$$$toUtf8 -->
+<h3 class="fn" id="toUtf8"><a name="toUtf8"></a><span class="type"><a href="qbytearray.html">QByteArray</a></span> QStringView::<span class="name">toUtf8</span>() const</h3>
+<p>Returns a UTF-8 representation of the string as a <a href="qbytearray.html">QByteArray</a>.</p>
+<p>UTF-8 is a Unicode codec and can represent all characters in a Unicode string like <a href="qstring.html">QString</a>.</p>
+<p><b>See also </b><a href="qstringview.html#toLatin1">toLatin1</a>(), <a href="qstringview.html#toLocal8Bit">toLocal8Bit</a>(), and <a href="qtextcodec.html">QTextCodec</a>.</p>
+<!-- @@@toUtf8 -->
+<!-- $$$trimmed[overload1]$$$trimmed -->
+<h3 class="fn" id="trimmed"><a name="trimmed"></a><span class="type"><a href="qstringview.html#QStringView">QStringView</a></span> QStringView::<span class="name">trimmed</span>() const</h3>
+<p>Strips leading and trailing whitespace and returns the result.</p>
+<p>Whitespace means any character for which <a href="qchar.html#isSpace">QChar::isSpace</a>() returns <code>true</code>. This includes the ASCII characters '\t', '\n', '\v', '\f', '\r', and ' '.</p>
+<!-- @@@trimmed -->
+<!-- $$$truncate[overload1]$$$truncateqsizetype -->
+<h3 class="fn" id="truncate"><a name="truncate"></a><span class="type">void</span> QStringView::<span class="name">truncate</span>(<span class="type">qsizetype</span> <i>length</i>)</h3>
+<p>Truncates this string view to length <i>length</i>.</p>
+<p>Same as <code>*this = left(length)</code>.</p>
+<p><b>Note: </b>The behavior is undefined when <i>length</i> &lt; 0 or <i>length</i> &gt; <a href="qstringview.html#size">size</a>().</p><p><b>See also </b><a href="qstringview.html#mid">mid</a>(), <a href="qstringview.html#left">left</a>(), <a href="qstringview.html#right">right</a>(), <a href="qstringview.html#chopped">chopped</a>(), and <a href="qstringview.html#chop">chop</a>().</p>
+<!-- @@@truncate -->
+<!-- $$$utf16[overload1]$$$utf16 -->
+<h3 class="fn" id="utf16"><a name="utf16"></a>const <span class="type"><a href="qstringview.html#storage_type-typedef">QStringView::storage_type</a></span> *QStringView::<span class="name">utf16</span>() const</h3>
+<p>Returns a const pointer to the first character in the string.</p>
+<p><code>storage_type</code> is <code>char16_t</code>.</p>
+<p><b>Note: </b>The character array represented by the return value is <i>not</i> null-terminated.</p><p><b>See also </b><a href="qstringview.html#begin">begin</a>(), <a href="qstringview.html#end">end</a>(), and <a href="qstringview.html#data">data</a>().</p>
+<!-- @@@utf16 -->
+<!-- $$$operator[][overload1]$$$operator[]qsizetype -->
+<h3 class="fn" id="operator-5b-5d"><a name="operator-5b-5d"></a><span class="type"><a href="qchar.html">QChar</a></span> QStringView::<span class="name">operator[]</span>(<span class="type">qsizetype</span> <i>n</i>) const</h3>
+<p>Returns the character at position <i>n</i> in this string view.</p>
+<p>The behavior is undefined if <i>n</i> is negative or not less than <a href="qstringview.html#size">size</a>().</p>
+<p><b>See also </b><a href="qstringview.html#at">at</a>(), <a href="qstringview.html#front">front</a>(), and <a href="qstringview.html#back">back</a>().</p>
+<!-- @@@operator[] -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$qHash[overload1]$$$qHashQStringViewuint -->
+<h3 class="fn" id="qHash"><a name="qHash"></a><span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <span class="name">qHash</span>(<span class="type"><a href="qstringview.html#QStringView">QStringView</a></span> <i>key</i>, <span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <i>seed</i> = ...)</h3>
+<p>Returns the hash value for the <i>key</i>, using <i>seed</i> to seed the calculation.</p>
+<p>This function was introduced in  Qt 5.10.</p>
+<!-- @@@qHash -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

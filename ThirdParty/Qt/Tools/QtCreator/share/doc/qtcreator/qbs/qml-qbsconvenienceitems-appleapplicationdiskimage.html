@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- appleapplicationdiskimage.qdoc -->
+  <title>AppleApplicationDiskImage QML Type | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="next" href="qml-qbsconvenienceitems-applediskimage.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="nextPage" href="qml-qbsconvenienceitems-applediskimage.html">AppleDiskImage</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">AppleApplicationDiskImage QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$AppleApplicationDiskImage-brief -->
+<p>Apple application drag 'n' drop disk image installer. <a href="#details">More...</a></p>
+<!-- @@@AppleApplicationDiskImage -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QbsConvenienceItems .</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qbs 1.9</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qbsconvenienceitems-applediskimage.html">AppleDiskImage</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qbsconvenienceitems-appleapplicationdiskimage-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qbsconvenienceitems-appleapplicationdiskimage.html#sourceBase-prop">sourceBase</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qbsconvenienceitems-appleapplicationdiskimage.html#symlinks-prop">symlinks</a></b></b> : stringList</li>
+</ul>
+<!-- $$$AppleApplicationDiskImage-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>An <a href="qml-qbsconvenienceitems-appleapplicationdiskimage.html">AppleApplicationDiskImage</a> item is a <a href="qml-qbslanguageitems-product.html">product</a> of the <a href="qml-qbslanguageitems-product.html#type-prop">type</a> <code>&quot;dmg.dmg&quot;</code> that has a dependency on the <a href="qml-qbsmodules-dmg.html">dmg</a> module. In addition, it has rules and properties specific to building drag 'n' drop disk image installers with an application bundle and symbolic link to the <code>/Applications</code> directory.</p>
+<p>Any artifacts of product dependencies that are tagged <code>&quot;installable&quot;</code> will be copied into the disk image, provided their file paths are relative to the path specified by the <a href="qml-qbsconvenienceitems-appleapplicationdiskimage.html#sourceBase-prop">sourceBase</a> property (that is, are located in that directory). Any artifacts tagged <code>&quot;installable&quot;</code> that are not relative to <a href="qml-qbsconvenienceitems-appleapplicationdiskimage.html#sourceBase-prop">sourceBase</a> will be ignored.</p>
+<p>Here is what the project file could look like for a simple DMG installer:</p>
+<pre class="cpp">
+
+  AppleApplicationDiskImage {
+      Depends { name: <span class="string">&quot;myapp&quot;</span> }
+      name: <span class="string">&quot;My App&quot;</span>
+      dmg<span class="operator">.</span>volumeName: name
+      dmg<span class="operator">.</span>iconSize: <span class="number">128</span>
+      dmg<span class="operator">.</span>windowWidth: <span class="number">640</span>
+      dmg<span class="operator">.</span>windowHeight: <span class="number">280</span>
+      dmg<span class="operator">.</span>iconPositions: <span class="operator">[</span>
+          {<span class="string">&quot;path&quot;</span>: <span class="string">&quot;Applications&quot;</span><span class="operator">,</span> <span class="string">&quot;x&quot;</span>: <span class="number">128</span><span class="operator">,</span> <span class="string">&quot;y&quot;</span>: <span class="number">128</span>}<span class="operator">,</span>
+          {<span class="string">&quot;path&quot;</span>: <span class="string">&quot;My App.app&quot;</span><span class="operator">,</span> <span class="string">&quot;x&quot;</span>: <span class="number">256</span><span class="operator">,</span> <span class="string">&quot;y&quot;</span>: <span class="number">128</span>}
+      <span class="operator">]</span>
+      files: <span class="operator">[</span><span class="string">&quot;background.tiff&quot;</span><span class="operator">,</span> <span class="string">&quot;volume-icon.icns&quot;</span><span class="operator">]</span>
+      Group {
+          files: <span class="operator">[</span><span class="string">&quot;*.lproj/**&quot;</span><span class="operator">]</span> <span class="comment">// licenses</span>
+          fileTags: <span class="operator">[</span><span class="string">&quot;dmg.license.input&quot;</span><span class="operator">]</span>
+      }
+  }
+
+</pre>
+<p>For plain disk images whose contents are not a single application bundle, consider the base <a href="qml-qbsconvenienceitems-applediskimage.html">AppleDiskImage</a> item instead.</p>
+<!-- @@@AppleApplicationDiskImage -->
+<h2>Property Documentation</h2>
+<!-- $$$sourceBase -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="sourceBase-prop"></a><span class="name">sourceBase</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The base directory from which artifacts installed into the disk image will be copied. This directory is always considered to be relative to <a href="qml-qbsmodules-qbs.html#installRoot-prop">qbs.installRoot</a>. For example, if the application Example.app exists at <code>qbs.installRoot/Applications/Example.app</code>, and the value of this property is <code>&quot;/Applications&quot;</code>, the application will be located at<code>/Example.app</code> relative to the disk image root. Therefore, its full path when the disk image is mounted would be something like <code>/Volumes/Example-1.0/Example.app</code>.</p>
+<p>Default: <code>&quot;/Applications&quot;</code></p>
+</div></div><!-- @@@sourceBase -->
+<br/>
+<!-- $$$symlinks -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="symlinks-prop"></a><span class="name">symlinks</span> : <span class="type">stringList</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>List of symlinks to create in the disk image. This is specified as a list of strings, each string containing two file paths separated by a colon. The first path is the symlink target, and the second path is the name of the symlink relative to the root of the disk image.</p>
+<p>Default: <code>[&quot;/Applications:Applications&quot;]</code></p>
+</div></div><!-- @@@symlinks -->
+<br/>
+<p class="naviNextPrevious footerNavi">
+<a class="nextPage" href="qml-qbsconvenienceitems-applediskimage.html">AppleDiskImage</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

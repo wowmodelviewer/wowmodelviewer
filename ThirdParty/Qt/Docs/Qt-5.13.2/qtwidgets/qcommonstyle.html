@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcommonstyle.cpp -->
+  <title>QCommonStyle Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QCommonStyle</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCommonStyle Class</h1>
+<!-- $$$QCommonStyle-brief -->
+<p>The <a href="qcommonstyle.html">QCommonStyle</a> class encapsulates the common Look and Feel of a GUI. <a href="#details">More...</a></p>
+<!-- @@@QCommonStyle -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QCommonStyle&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qstyle.html">QStyle</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qproxystyle.html">QProxyStyle</a></p>
+</td></tr></table></div><ul>
+<li><a href="qcommonstyle-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcommonstyle.html#QCommonStyle">QCommonStyle</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qcommonstyle.html#dtor.QCommonStyle">~QCommonStyle</a></b>()</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcommonstyle.html#drawComplexControl">drawComplexControl</a></b>(QStyle::ComplexControl <i>cc</i>, const QStyleOptionComplex *<i>opt</i>, QPainter *<i>p</i>, const QWidget *<i>widget</i> = nullptr) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcommonstyle.html#drawControl">drawControl</a></b>(QStyle::ControlElement <i>element</i>, const QStyleOption *<i>opt</i>, QPainter *<i>p</i>, const QWidget *<i>widget</i> = nullptr) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcommonstyle.html#drawPrimitive">drawPrimitive</a></b>(QStyle::PrimitiveElement <i>pe</i>, const QStyleOption *<i>opt</i>, QPainter *<i>p</i>, const QWidget *<i>widget</i> = nullptr) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QPixmap </td><td class="memItemRight bottomAlign"><b><a href="qcommonstyle.html#generatedIconPixmap">generatedIconPixmap</a></b>(QIcon::Mode <i>iconMode</i>, const QPixmap &amp;<i>pixmap</i>, const QStyleOption *<i>opt</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QStyle::SubControl </td><td class="memItemRight bottomAlign"><b><a href="qcommonstyle.html#hitTestComplexControl">hitTestComplexControl</a></b>(QStyle::ComplexControl <i>cc</i>, const QStyleOptionComplex *<i>opt</i>, const QPoint &amp;<i>pt</i>, const QWidget *<i>widget</i> = nullptr) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qcommonstyle.html#layoutSpacing">layoutSpacing</a></b>(QSizePolicy::ControlType <i>control1</i>, QSizePolicy::ControlType <i>control2</i>, Qt::Orientation <i>orientation</i>, const QStyleOption *<i>option</i> = nullptr, const QWidget *<i>widget</i> = nullptr) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qcommonstyle.html#pixelMetric">pixelMetric</a></b>(QStyle::PixelMetric <i>m</i>, const QStyleOption *<i>opt</i> = nullptr, const QWidget *<i>widget</i> = nullptr) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcommonstyle.html#polish">polish</a></b>(QPalette &amp;<i>pal</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcommonstyle.html#polish-1">polish</a></b>(QApplication *<i>app</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcommonstyle.html#polish-2">polish</a></b>(QWidget *<i>widget</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSize </td><td class="memItemRight bottomAlign"><b><a href="qcommonstyle.html#sizeFromContents">sizeFromContents</a></b>(QStyle::ContentsType <i>ct</i>, const QStyleOption *<i>opt</i>, const QSize &amp;<i>csz</i>, const QWidget *<i>widget</i> = nullptr) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QPixmap </td><td class="memItemRight bottomAlign"><b><a href="qcommonstyle.html#standardPixmap">standardPixmap</a></b>(QStyle::StandardPixmap <i>sp</i>, const QStyleOption *<i>option</i> = nullptr, const QWidget *<i>widget</i> = nullptr) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qcommonstyle.html#styleHint">styleHint</a></b>(QStyle::StyleHint <i>sh</i>, const QStyleOption *<i>opt</i> = nullptr, const QWidget *<i>widget</i> = nullptr, QStyleHintReturn *<i>hret</i> = nullptr) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QRect </td><td class="memItemRight bottomAlign"><b><a href="qcommonstyle.html#subControlRect">subControlRect</a></b>(QStyle::ComplexControl <i>cc</i>, const QStyleOptionComplex *<i>opt</i>, QStyle::SubControl <i>sc</i>, const QWidget *<i>widget</i> = nullptr) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QRect </td><td class="memItemRight bottomAlign"><b><a href="qcommonstyle.html#subElementRect">subElementRect</a></b>(QStyle::SubElement <i>sr</i>, const QStyleOption *<i>opt</i>, const QWidget *<i>widget</i> = nullptr) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcommonstyle.html#unpolish">unpolish</a></b>(QWidget *<i>widget</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcommonstyle.html#unpolish-1">unpolish</a></b>(QApplication *<i>application</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCommonStyle-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This abstract class implements some of the widget's look and feel that is common to all GUI styles provided and shipped as part of Qt.</p>
+<p>Since <a href="qcommonstyle.html">QCommonStyle</a> inherits <a href="qstyle.html">QStyle</a>, all of its functions are fully documented in the <a href="qstyle.html">QStyle</a> documentation.</p>
+</div>
+<p><b>See also </b><a href="qstyle.html">QStyle</a> and <a href="qproxystyle.html">QProxyStyle</a>.</p>
+<!-- @@@QCommonStyle -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QCommonStyle[overload1]$$$QCommonStyle -->
+<h3 class="fn" id="QCommonStyle"><a name="QCommonStyle"></a>QCommonStyle::<span class="name">QCommonStyle</span>()</h3>
+<p>Constructs a <a href="qcommonstyle.html">QCommonStyle</a>.</p>
+<!-- @@@QCommonStyle -->
+<!-- $$$~QCommonStyle[overload1]$$$~QCommonStyle -->
+<h3 class="fn" id="dtor.QCommonStyle"><a name="dtor.QCommonStyle"></a><code>[virtual] </code>QCommonStyle::<span class="name">~QCommonStyle</span>()</h3>
+<p>Destroys the style.</p>
+<!-- @@@~QCommonStyle -->
+<!-- $$$drawComplexControl[overload1]$$$drawComplexControlQStyle::ComplexControlconstQStyleOptionComplex*QPainter*constQWidget* -->
+<h3 class="fn" id="drawComplexControl"><a name="drawComplexControl"></a><code>[override virtual] </code><span class="type">void</span> QCommonStyle::<span class="name">drawComplexControl</span>(<span class="type"><a href="qstyle.html#ComplexControl-enum">QStyle::ComplexControl</a></span> <i>cc</i>, const <span class="type"><a href="qstyleoptioncomplex.html">QStyleOptionComplex</a></span> *<i>opt</i>, <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> *<i>p</i>, const <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i> = nullptr) const</h3>
+<p>Reimplements: <a href="qstyle.html#drawComplexControl">QStyle::drawComplexControl</a>(QStyle::ComplexControl control, const QStyleOptionComplex *option, QPainter *painter, const QWidget *widget) const.</p>
+<!-- @@@drawComplexControl -->
+<!-- $$$drawControl[overload1]$$$drawControlQStyle::ControlElementconstQStyleOption*QPainter*constQWidget* -->
+<h3 class="fn" id="drawControl"><a name="drawControl"></a><code>[override virtual] </code><span class="type">void</span> QCommonStyle::<span class="name">drawControl</span>(<span class="type"><a href="qstyle.html#ControlElement-enum">QStyle::ControlElement</a></span> <i>element</i>, const <span class="type"><a href="qstyleoption.html">QStyleOption</a></span> *<i>opt</i>, <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> *<i>p</i>, const <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i> = nullptr) const</h3>
+<p>Reimplements: <a href="qstyle.html#drawControl">QStyle::drawControl</a>(QStyle::ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const.</p>
+<!-- @@@drawControl -->
+<!-- $$$drawPrimitive[overload1]$$$drawPrimitiveQStyle::PrimitiveElementconstQStyleOption*QPainter*constQWidget* -->
+<h3 class="fn" id="drawPrimitive"><a name="drawPrimitive"></a><code>[override virtual] </code><span class="type">void</span> QCommonStyle::<span class="name">drawPrimitive</span>(<span class="type"><a href="qstyle.html#PrimitiveElement-enum">QStyle::PrimitiveElement</a></span> <i>pe</i>, const <span class="type"><a href="qstyleoption.html">QStyleOption</a></span> *<i>opt</i>, <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> *<i>p</i>, const <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i> = nullptr) const</h3>
+<p>Reimplements: <a href="qstyle.html#drawPrimitive">QStyle::drawPrimitive</a>(QStyle::PrimitiveElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const.</p>
+<!-- @@@drawPrimitive -->
+<!-- $$$generatedIconPixmap[overload1]$$$generatedIconPixmapQIcon::ModeconstQPixmap&constQStyleOption* -->
+<h3 class="fn" id="generatedIconPixmap"><a name="generatedIconPixmap"></a><code>[override virtual] </code><span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> QCommonStyle::<span class="name">generatedIconPixmap</span>(<span class="type"><a href="../qtgui/qicon.html#Mode-enum">QIcon::Mode</a></span> <i>iconMode</i>, const <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> &amp;<i>pixmap</i>, const <span class="type"><a href="qstyleoption.html">QStyleOption</a></span> *<i>opt</i>) const</h3>
+<p>Reimplements: <a href="qstyle.html#generatedIconPixmap">QStyle::generatedIconPixmap</a>(QIcon::Mode iconMode, const QPixmap &amp;pixmap, const QStyleOption *option) const.</p>
+<!-- @@@generatedIconPixmap -->
+<!-- $$$hitTestComplexControl[overload1]$$$hitTestComplexControlQStyle::ComplexControlconstQStyleOptionComplex*constQPoint&constQWidget* -->
+<h3 class="fn" id="hitTestComplexControl"><a name="hitTestComplexControl"></a><code>[override virtual] </code><span class="type"><a href="qstyle.html#SubControl-enum">QStyle::SubControl</a></span> QCommonStyle::<span class="name">hitTestComplexControl</span>(<span class="type"><a href="qstyle.html#ComplexControl-enum">QStyle::ComplexControl</a></span> <i>cc</i>, const <span class="type"><a href="qstyleoptioncomplex.html">QStyleOptionComplex</a></span> *<i>opt</i>, const <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> &amp;<i>pt</i>, const <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i> = nullptr) const</h3>
+<p>Reimplements: <a href="qstyle.html#hitTestComplexControl">QStyle::hitTestComplexControl</a>(QStyle::ComplexControl control, const QStyleOptionComplex *option, const QPoint &amp;position, const QWidget *widget) const.</p>
+<!-- @@@hitTestComplexControl -->
+<!-- $$$layoutSpacing[overload1]$$$layoutSpacingQSizePolicy::ControlTypeQSizePolicy::ControlTypeQt::OrientationconstQStyleOption*constQWidget* -->
+<h3 class="fn" id="layoutSpacing"><a name="layoutSpacing"></a><code>[override virtual] </code><span class="type">int</span> QCommonStyle::<span class="name">layoutSpacing</span>(<span class="type"><a href="qsizepolicy.html#ControlType-enum">QSizePolicy::ControlType</a></span> <i>control1</i>, <span class="type"><a href="qsizepolicy.html#ControlType-enum">QSizePolicy::ControlType</a></span> <i>control2</i>, <span class="type"><a href="../qtcore/qt.html#Orientation-enum">Qt::Orientation</a></span> <i>orientation</i>, const <span class="type"><a href="qstyleoption.html">QStyleOption</a></span> *<i>option</i> = nullptr, const <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i> = nullptr) const</h3>
+<p>Reimplements: <a href="qstyle.html#layoutSpacing">QStyle::layoutSpacing</a>(QSizePolicy::ControlType control1, QSizePolicy::ControlType control2, Qt::Orientation orientation, const QStyleOption *option, const QWidget *widget) const.</p>
+<!-- @@@layoutSpacing -->
+<!-- $$$pixelMetric[overload1]$$$pixelMetricQStyle::PixelMetricconstQStyleOption*constQWidget* -->
+<h3 class="fn" id="pixelMetric"><a name="pixelMetric"></a><code>[override virtual] </code><span class="type">int</span> QCommonStyle::<span class="name">pixelMetric</span>(<span class="type"><a href="qstyle.html#PixelMetric-enum">QStyle::PixelMetric</a></span> <i>m</i>, const <span class="type"><a href="qstyleoption.html">QStyleOption</a></span> *<i>opt</i> = nullptr, const <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i> = nullptr) const</h3>
+<p>Reimplements: <a href="qstyle.html#pixelMetric">QStyle::pixelMetric</a>(QStyle::PixelMetric metric, const QStyleOption *option, const QWidget *widget) const.</p>
+<!-- @@@pixelMetric -->
+<!-- $$$polish[overload1]$$$polishQPalette& -->
+<h3 class="fn" id="polish"><a name="polish"></a><code>[override virtual] </code><span class="type">void</span> QCommonStyle::<span class="name">polish</span>(<span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span> &amp;<i>pal</i>)</h3>
+<p>Reimplements: <a href="qstyle.html#polish-2">QStyle::polish</a>(QPalette &amp;palette).</p>
+<!-- @@@polish -->
+<!-- $$$polish$$$polishQApplication* -->
+<h3 class="fn" id="polish-1"><a name="polish-1"></a><code>[override virtual] </code><span class="type">void</span> QCommonStyle::<span class="name">polish</span>(<span class="type"><a href="qapplication.html">QApplication</a></span> *<i>app</i>)</h3>
+<p>Reimplements: <a href="qstyle.html#polish-1">QStyle::polish</a>(QApplication *application).</p>
+<!-- @@@polish -->
+<!-- $$$polish$$$polishQWidget* -->
+<h3 class="fn" id="polish-2"><a name="polish-2"></a><code>[override virtual] </code><span class="type">void</span> QCommonStyle::<span class="name">polish</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i>)</h3>
+<p>Reimplements: <a href="qstyle.html#polish">QStyle::polish</a>(QWidget *widget).</p>
+<!-- @@@polish -->
+<!-- $$$sizeFromContents[overload1]$$$sizeFromContentsQStyle::ContentsTypeconstQStyleOption*constQSize&constQWidget* -->
+<h3 class="fn" id="sizeFromContents"><a name="sizeFromContents"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QCommonStyle::<span class="name">sizeFromContents</span>(<span class="type"><a href="qstyle.html#ContentsType-enum">QStyle::ContentsType</a></span> <i>ct</i>, const <span class="type"><a href="qstyleoption.html">QStyleOption</a></span> *<i>opt</i>, const <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> &amp;<i>csz</i>, const <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i> = nullptr) const</h3>
+<p>Reimplements: <a href="qstyle.html#sizeFromContents">QStyle::sizeFromContents</a>(QStyle::ContentsType type, const QStyleOption *option, const QSize &amp;contentsSize, const QWidget *widget) const.</p>
+<!-- @@@sizeFromContents -->
+<!-- $$$standardPixmap[overload1]$$$standardPixmapQStyle::StandardPixmapconstQStyleOption*constQWidget* -->
+<h3 class="fn" id="standardPixmap"><a name="standardPixmap"></a><code>[override virtual] </code><span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> QCommonStyle::<span class="name">standardPixmap</span>(<span class="type"><a href="qstyle.html#StandardPixmap-enum">QStyle::StandardPixmap</a></span> <i>sp</i>, const <span class="type"><a href="qstyleoption.html">QStyleOption</a></span> *<i>option</i> = nullptr, const <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i> = nullptr) const</h3>
+<p>Reimplements: <a href="qstyle-obsolete.html#standardPixmap" class="obsolete">QStyle::standardPixmap</a>(QStyle::StandardPixmap standardPixmap, const QStyleOption *option, const QWidget *widget) const.</p>
+<!-- @@@standardPixmap -->
+<!-- $$$styleHint[overload1]$$$styleHintQStyle::StyleHintconstQStyleOption*constQWidget*QStyleHintReturn* -->
+<h3 class="fn" id="styleHint"><a name="styleHint"></a><code>[override virtual] </code><span class="type">int</span> QCommonStyle::<span class="name">styleHint</span>(<span class="type"><a href="qstyle.html#StyleHint-enum">QStyle::StyleHint</a></span> <i>sh</i>, const <span class="type"><a href="qstyleoption.html">QStyleOption</a></span> *<i>opt</i> = nullptr, const <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i> = nullptr, <span class="type"><a href="qstylehintreturn.html">QStyleHintReturn</a></span> *<i>hret</i> = nullptr) const</h3>
+<p>Reimplements: <a href="qstyle.html#styleHint">QStyle::styleHint</a>(QStyle::StyleHint hint, const QStyleOption *option, const QWidget *widget, QStyleHintReturn *returnData) const.</p>
+<!-- @@@styleHint -->
+<!-- $$$subControlRect[overload1]$$$subControlRectQStyle::ComplexControlconstQStyleOptionComplex*QStyle::SubControlconstQWidget* -->
+<h3 class="fn" id="subControlRect"><a name="subControlRect"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qrect.html">QRect</a></span> QCommonStyle::<span class="name">subControlRect</span>(<span class="type"><a href="qstyle.html#ComplexControl-enum">QStyle::ComplexControl</a></span> <i>cc</i>, const <span class="type"><a href="qstyleoptioncomplex.html">QStyleOptionComplex</a></span> *<i>opt</i>, <span class="type"><a href="qstyle.html#SubControl-enum">QStyle::SubControl</a></span> <i>sc</i>, const <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i> = nullptr) const</h3>
+<p>Reimplements: <a href="qstyle.html#subControlRect">QStyle::subControlRect</a>(QStyle::ComplexControl control, const QStyleOptionComplex *option, QStyle::SubControl subControl, const QWidget *widget) const.</p>
+<!-- @@@subControlRect -->
+<!-- $$$subElementRect[overload1]$$$subElementRectQStyle::SubElementconstQStyleOption*constQWidget* -->
+<h3 class="fn" id="subElementRect"><a name="subElementRect"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qrect.html">QRect</a></span> QCommonStyle::<span class="name">subElementRect</span>(<span class="type"><a href="qstyle.html#SubElement-enum">QStyle::SubElement</a></span> <i>sr</i>, const <span class="type"><a href="qstyleoption.html">QStyleOption</a></span> *<i>opt</i>, const <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i> = nullptr) const</h3>
+<p>Reimplements: <a href="qstyle.html#subElementRect">QStyle::subElementRect</a>(QStyle::SubElement element, const QStyleOption *option, const QWidget *widget) const.</p>
+<!-- @@@subElementRect -->
+<!-- $$$unpolish[overload1]$$$unpolishQWidget* -->
+<h3 class="fn" id="unpolish"><a name="unpolish"></a><code>[override virtual] </code><span class="type">void</span> QCommonStyle::<span class="name">unpolish</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i>)</h3>
+<p>Reimplements: <a href="qstyle.html#unpolish">QStyle::unpolish</a>(QWidget *widget).</p>
+<!-- @@@unpolish -->
+<!-- $$$unpolish$$$unpolishQApplication* -->
+<h3 class="fn" id="unpolish-1"><a name="unpolish-1"></a><code>[override virtual] </code><span class="type">void</span> QCommonStyle::<span class="name">unpolish</span>(<span class="type"><a href="qapplication.html">QApplication</a></span> *<i>application</i>)</h3>
+<p>Reimplements: <a href="qstyle.html#unpolish-1">QStyle::unpolish</a>(QApplication *application).</p>
+<!-- @@@unpolish -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

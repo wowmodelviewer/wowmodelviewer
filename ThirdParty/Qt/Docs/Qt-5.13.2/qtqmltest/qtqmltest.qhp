@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+    <namespace>org.qt-project.qtqmltest.5132</namespace>
+    <virtualFolder>qtqmltest</virtualFolder>
+    <metaData name="version" value="5.13.2"/>
+    <customFilter name="QtQmlTest 5.13.2">
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtqmltest</filterAttribute>
+    </customFilter>
+    <filterSection>
+        <filterAttribute>5.13.2</filterAttribute>
+        <filterAttribute>qtqmltest</filterAttribute>
+        <filterAttribute>qtrefdoc</filterAttribute>
+        <toc>
+            <section ref="qtquicktest-index.html" title="Qt Quick Test">
+                <section ref="qttest-qmlmodule.html" title="QML Types">
+                    <section ref="qml-qttest-signalspy.html" title="SignalSpy Type Reference">
+                        <section ref="qml-qttest-signalspy-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qttest-testcase.html" title="TestCase Type Reference">
+                        <section ref="qml-qttest-testcase-members.html" title="List of all members"/>
+                    </section>
+                    <section ref="qml-qttest-toucheventsequence.html" title="TouchEventSequence Type Reference">
+                        <section ref="qml-qttest-toucheventsequence-members.html" title="List of all members"/>
+                    </section>
+                </section>
+                <section ref="qtquicktest-module.html" title="C++ API">
+                    <section ref="qquicktest.html" title="QQuickTest"/>
+                </section>
+            </section>
+        </toc>
+        <keywords>
+            <keyword name="QQuickTest" id="QQuickTest" ref="qquicktest.html"/>
+            <keyword name="QUICK_TEST_MAIN" id="QUICK_TEST_MAIN" ref="qquicktest.html#QUICK_TEST_MAIN"/>
+            <keyword name="QUICK_TEST_MAIN_WITH_SETUP" id="QUICK_TEST_MAIN_WITH_SETUP" ref="qquicktest.html#QUICK_TEST_MAIN_WITH_SETUP"/>
+            <keyword name="Qt Quick Test" id="Qt Quick Test" ref="qtquicktest-index.html"/>
+            <keyword name="Qt Quick Test C++ API" id="Qt Quick Test C++ API" ref="qtquicktest-module.html"/>
+            <keyword name="Qt Quick Test C++ API" id="Qt Quick Test C++ API" ref="qtquicktest-module.html"/>
+            <keyword name="Qt Quick Test QML Types" id="Qt Quick Test QML Types" ref="qttest-qmlmodule.html"/>
+            <keyword name="SignalSpy" id="QML.SignalSpy" ref="qml-qttest-signalspy.html"/>
+            <keyword name="TestCase" id="QML.TestCase" ref="qml-qttest-testcase.html"/>
+            <keyword name="TouchEventSequence" id="QML.TouchEventSequence" ref="qml-qttest-toucheventsequence.html"/>
+            <keyword name="cleanup" id="TestCase::cleanup" ref="qml-qttest-testcase.html#cleanup-method"/>
+            <keyword name="cleanupTestCase" id="TestCase::cleanupTestCase" ref="qml-qttest-testcase.html#cleanupTestCase-method"/>
+            <keyword name="clear" id="SignalSpy::clear" ref="qml-qttest-signalspy.html#clear-method"/>
+            <keyword name="commit" id="TouchEventSequence::commit" ref="qml-qttest-toucheventsequence.html#commit-method"/>
+            <keyword name="compare" id="TestCase::compare" ref="qml-qttest-testcase.html#compare-method"/>
+            <keyword name="completed" id="TestCase::completed" ref="qml-qttest-testcase.html#completed-prop"/>
+            <keyword name="count" id="SignalSpy::count" ref="qml-qttest-signalspy.html#count-prop"/>
+            <keyword name="createTemporaryObject" id="TestCase::createTemporaryObject" ref="qml-qttest-testcase.html#createTemporaryObject-method"/>
+            <keyword name="createTemporaryQmlObject" id="TestCase::createTemporaryQmlObject" ref="qml-qttest-testcase.html#createTemporaryQmlObject-method"/>
+            <keyword name="expectFail" id="TestCase::expectFail" ref="qml-qttest-testcase.html#expectFail-method"/>
+            <keyword name="expectFailContinue" id="TestCase::expectFailContinue" ref="qml-qttest-testcase.html#expectFailContinue-method"/>
+            <keyword name="fail" id="TestCase::fail" ref="qml-qttest-testcase.html#fail-method"/>
+            <keyword name="findChild" id="TestCase::findChild" ref="qml-qttest-testcase.html#findChild-method"/>
+            <keyword name="fuzzyCompare" id="TestCase::fuzzyCompare" ref="qml-qttest-testcase.html#fuzzyCompare-method"/>
+            <keyword name="grabImage" id="TestCase::grabImage" ref="qml-qttest-testcase.html#grabImage-method"/>
+            <keyword name="ignoreWarning" id="TestCase::ignoreWarning" ref="qml-qttest-testcase.html#ignoreWarning-method"/>
+            <keyword name="init" id="TestCase::init" ref="qml-qttest-testcase.html#init-method"/>
+            <keyword name="initTestCase" id="TestCase::initTestCase" ref="qml-qttest-testcase.html#initTestCase-method"/>
+            <keyword name="isPolishScheduled" id="TestCase::isPolishScheduled" ref="qml-qttest-testcase.html#isPolishScheduled-method"/>
+            <keyword name="keyClick" id="TestCase::keyClick" ref="qml-qttest-testcase.html#keyClick-method"/>
+            <keyword name="keyPress" id="TestCase::keyPress" ref="qml-qttest-testcase.html#keyPress-method"/>
+            <keyword name="keyRelease" id="TestCase::keyRelease" ref="qml-qttest-testcase.html#keyRelease-method"/>
+            <keyword name="keySequence" id="TestCase::keySequence" ref="qml-qttest-testcase.html#keySequence-method"/>
+            <keyword name="mouseClick" id="TestCase::mouseClick" ref="qml-qttest-testcase.html#mouseClick-method"/>
+            <keyword name="mouseDoubleClick" id="TestCase::mouseDoubleClick" ref="qml-qttest-testcase.html#mouseDoubleClick-method"/>
+            <keyword name="mouseDoubleClickSequence" id="TestCase::mouseDoubleClickSequence" ref="qml-qttest-testcase.html#mouseDoubleClickSequence-method"/>
+            <keyword name="mouseDrag" id="TestCase::mouseDrag" ref="qml-qttest-testcase.html#mouseDrag-method"/>
+            <keyword name="mouseMove" id="TestCase::mouseMove" ref="qml-qttest-testcase.html#mouseMove-method"/>
+            <keyword name="mousePress" id="TestCase::mousePress" ref="qml-qttest-testcase.html#mousePress-method"/>
+            <keyword name="mouseRelease" id="TestCase::mouseRelease" ref="qml-qttest-testcase.html#mouseRelease-method"/>
+            <keyword name="mouseWheel" id="TestCase::mouseWheel" ref="qml-qttest-testcase.html#mouseWheel-method"/>
+            <keyword name="move" id="TouchEventSequence::move" ref="qml-qttest-toucheventsequence.html#move-method"/>
+            <keyword name="name" id="TestCase::name" ref="qml-qttest-testcase.html#name-prop"/>
+            <keyword name="optional" id="TestCase::optional" ref="qml-qttest-testcase.html#optional-prop"/>
+            <keyword name="press" id="TouchEventSequence::press" ref="qml-qttest-toucheventsequence.html#press-method"/>
+            <keyword name="qIsPolishScheduled" id="QQuickTest::qIsPolishScheduled" ref="qquicktest.html#qIsPolishScheduled"/>
+            <keyword name="qWaitForItemPolished" id="QQuickTest::qWaitForItemPolished" ref="qquicktest.html#qWaitForItemPolished"/>
+            <keyword name="release" id="TouchEventSequence::release" ref="qml-qttest-toucheventsequence.html#release-method"/>
+            <keyword name="running" id="TestCase::running" ref="qml-qttest-testcase.html#running-prop"/>
+            <keyword name="signalArguments" id="SignalSpy::signalArguments" ref="qml-qttest-signalspy.html#signalArguments-prop"/>
+            <keyword name="signalName" id="SignalSpy::signalName" ref="qml-qttest-signalspy.html#signalName-prop"/>
+            <keyword name="skip" id="TestCase::skip" ref="qml-qttest-testcase.html#skip-method"/>
+            <keyword name="sleep" id="TestCase::sleep" ref="qml-qttest-testcase.html#sleep-method"/>
+            <keyword name="stationary" id="TouchEventSequence::stationary" ref="qml-qttest-toucheventsequence.html#stationary-method"/>
+            <keyword name="target" id="SignalSpy::target" ref="qml-qttest-signalspy.html#target-prop"/>
+            <keyword name="touchEvent" id="TestCase::touchEvent" ref="qml-qttest-testcase.html#touchEvent-method"/>
+            <keyword name="tryCompare" id="TestCase::tryCompare" ref="qml-qttest-testcase.html#tryCompare-method"/>
+            <keyword name="tryVerify" id="TestCase::tryVerify" ref="qml-qttest-testcase.html#tryVerify-method"/>
+            <keyword name="valid" id="SignalSpy::valid" ref="qml-qttest-signalspy.html#valid-prop"/>
+            <keyword name="verify" id="TestCase::verify" ref="qml-qttest-testcase.html#verify-method"/>
+            <keyword name="wait" id="SignalSpy::wait" ref="qml-qttest-signalspy.html#wait-method"/>
+            <keyword name="wait" id="TestCase::wait" ref="qml-qttest-testcase.html#wait-method"/>
+            <keyword name="waitForItemPolished" id="TestCase::waitForItemPolished" ref="qml-qttest-testcase.html#waitForItemPolished-method"/>
+            <keyword name="waitForRendering" id="TestCase::waitForRendering" ref="qml-qttest-testcase.html#waitForRendering-method"/>
+            <keyword name="warn" id="TestCase::warn" ref="qml-qttest-testcase.html#warn-method"/>
+            <keyword name="when" id="TestCase::when" ref="qml-qttest-testcase.html#when-prop"/>
+            <keyword name="windowShown" id="TestCase::windowShown" ref="qml-qttest-testcase.html#windowShown-prop"/>
+        </keywords>
+        <files>
+            <file>images/arrow_bc.png</file>
+            <file>images/bgrContent.png</file>
+            <file>images/btn_next.png</file>
+            <file>images/btn_prev.png</file>
+            <file>images/bullet_dn.png</file>
+            <file>images/bullet_sq.png</file>
+            <file>images/home.png</file>
+            <file>images/ico_note.png</file>
+            <file>images/ico_note_attention.png</file>
+            <file>images/ico_out.png</file>
+            <file>images/logo.png</file>
+            <file>qml-qttest-signalspy-members.html</file>
+            <file>qml-qttest-signalspy.html</file>
+            <file>qml-qttest-testcase-members.html</file>
+            <file>qml-qttest-testcase.html</file>
+            <file>qml-qttest-toucheventsequence-members.html</file>
+            <file>qml-qttest-toucheventsequence.html</file>
+            <file>qquicktest.html</file>
+            <file>qtquicktest-index.html</file>
+            <file>qtquicktest-module.html</file>
+            <file>qttest-qmlmodule.html</file>
+            <file>style/offline-simple.css</file>
+            <file>style/offline.css</file>
+        </files>
+    </filterSection>
+</QtHelpProject>

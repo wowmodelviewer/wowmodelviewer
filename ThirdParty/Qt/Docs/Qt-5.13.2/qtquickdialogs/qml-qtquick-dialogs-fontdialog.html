@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickplatformfontdialog.cpp -->
+  <title>FontDialog QML Type | Qt Quick Dialogs 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickdialogs-index.html">Qt Quick Dialogs</a></td><td ><a href="qtquick-dialogs-qmlmodule.html">QML Types</a></td><td >FontDialog QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickdialogs-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">FontDialog QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$FontDialog-brief -->
+<p>Dialog component for choosing a font. <a href="#details">More...</a></p>
+<!-- @@@FontDialog -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Dialogs 1.3</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.2</td></tr></table></div><ul>
+<li><a href="qml-qtquick-dialogs-fontdialog-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-fontdialog.html#currentFont-prop">currentFont</a></b></b> : font</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-fontdialog.html#font-prop">font</a></b></b> : font</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-fontdialog.html#modality-prop">modality</a></b></b> : Qt::WindowModality</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-fontdialog.html#monospacedFonts-prop">monospacedFonts</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-fontdialog.html#nonScalableFonts-prop">nonScalableFonts</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-fontdialog.html#proportionalFonts-prop">proportionalFonts</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-fontdialog.html#scalableFonts-prop">scalableFonts</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-fontdialog.html#title-prop">title</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-dialogs-fontdialog.html#visible-prop">visible</a></b></b> : bool</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtquick-dialogs-fontdialog.html#close-method">close</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtquick-dialogs-fontdialog.html#open-method">open</a></b></b>()</li>
+</ul>
+<!-- $$$FontDialog-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><a href="qml-qtquick-dialogs-fontdialog.html">FontDialog</a> allows the user to select a font. The dialog is initially invisible. You need to set the properties as desired first, then set <a href="qml-qtquick-dialogs-fontdialog.html#visible-prop">visible</a> to true or call <a href="qml-qtquick-dialogs-fontdialog.html#open-method">open()</a>.</p>
+<p>Here is a minimal example to open a font dialog and exit after the user chooses a font:</p>
+<pre class="qml">
+
+  import QtQuick 2.2
+  import QtQuick.Dialogs 1.1
+
+  <span class="type"><a href="qml-qtquick-dialogs-fontdialog.html">FontDialog</a></span> {
+      <span class="name">id</span>: <span class="name">fontDialog</span>
+      <span class="name">title</span>: <span class="string">&quot;Please choose a font&quot;</span>
+      <span class="name">font</span>: <span class="name">Qt</span>.<span class="name">font</span>({ family: <span class="string">&quot;Arial&quot;</span>, pointSize: <span class="number">24</span>, weight: <span class="name">Font</span>.<span class="name">Normal</span> })
+      <span class="name">onAccepted</span>: {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;You chose: &quot;</span> <span class="operator">+</span> <span class="name">fontDialog</span>.<span class="name">font</span>)
+          <span class="name">Qt</span>.<span class="name">quit</span>()
+      }
+      <span class="name">onRejected</span>: {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Canceled&quot;</span>)
+          <span class="name">Qt</span>.<span class="name">quit</span>()
+      }
+      <span class="name">Component</span>.onCompleted: <span class="name">visible</span> <span class="operator">=</span> <span class="number">true</span>
+  }
+
+</pre>
+<p>A <a href="qml-qtquick-dialogs-fontdialog.html">FontDialog</a> window is automatically transient for its parent window. So whether you declare the dialog inside an <a href="../qtquick/qml-qtquick-item.html">Item</a> or inside a <a href="../qtquick/qml-qtquick-window-window.html">Window</a>, the dialog will appear centered over the window containing the item, or over the Window that you declared.</p>
+<p>The implementation of <a href="qml-qtquick-dialogs-fontdialog.html">FontDialog</a> will be a platform font dialog if possible. If that isn't possible, then it will try to instantiate a <a href="../qtwidgets/qfontdialog.html">QFontDialog</a>. If that also isn't possible, then it will fall back to a QML implementation, DefaultFontDialog.qml. In that case you can customize the appearance by editing this file. DefaultFontDialog.qml contains a Rectangle to hold the dialog's contents, because certain embedded systems do not support multiple top-level windows. When the dialog becomes visible, it will automatically be wrapped in a Window if possible, or simply reparented on top of the main window if there can only be one window.</p>
+<!-- @@@FontDialog -->
+<h2>Property Documentation</h2>
+<!-- $$$currentFont -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="currentFont-prop"></a><span class="name">currentFont</span> : <span class="type"><a href="../qtquick/qml-font.html">font</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The font which the user selected.</p>
+<p>This property was introduced in  Qt 5.3.</p>
+</div></div><!-- @@@currentFont -->
+<br/>
+<!-- $$$font -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="font-prop"></a><span class="name">font</span> : <span class="type"><a href="../qtquick/qml-font.html">font</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The font which the user selected and accepted.</p>
+</div></div><!-- @@@font -->
+<br/>
+<!-- $$$modality -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="modality-prop"></a><span class="name">modality</span> : <span class="type">Qt::WindowModality</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether the dialog should be shown modal with respect to the window containing the dialog's parent Item, modal with respect to the whole application, or non-modal.</p>
+<p>By default it is <code>Qt.NonModal</code>.</p>
+<p>Modality does not mean that there are any blocking calls to wait for the dialog to be accepted or rejected; it's only that the user will be prevented from interacting with the parent window and/or the application windows at the same time.</p>
+<p>You probably need to write an onAccepted handler if you wish to change a font after the user has pressed the OK button, or an onCurrentFontChanged handler if you wish to react to every change the user makes while the dialog is open.</p>
+</div></div><!-- @@@modality -->
+<br/>
+<!-- $$$monospacedFonts -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="monospacedFonts-prop"></a><span class="name">monospacedFonts</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether the dialog will show monospaced fonts or not.</p>
+</div></div><!-- @@@monospacedFonts -->
+<br/>
+<!-- $$$nonScalableFonts -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="nonScalableFonts-prop"></a><span class="name">nonScalableFonts</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether the dialog will show non scalable fonts or not.</p>
+</div></div><!-- @@@nonScalableFonts -->
+<br/>
+<!-- $$$proportionalFonts -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="proportionalFonts-prop"></a><span class="name">proportionalFonts</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether the dialog will show proportional fonts or not.</p>
+</div></div><!-- @@@proportionalFonts -->
+<br/>
+<!-- $$$scalableFonts -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="scalableFonts-prop"></a><span class="name">scalableFonts</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Whether the dialog will show scalable fonts or not.</p>
+</div></div><!-- @@@scalableFonts -->
+<br/>
+<!-- $$$title -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="title-prop"></a><span class="name">title</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The title of the dialog window.</p>
+</div></div><!-- @@@title -->
+<br/>
+<!-- $$$visible -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="visible-prop"></a><span class="name">visible</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the dialog is visible. By default this is false.</p>
+<p><b>See also </b><a href="qml-qtquick-dialogs-fontdialog.html#modality-prop">modality</a>.</p>
+</div></div><!-- @@@visible -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$close[overload1]$$$close -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="close-method"></a><span class="type">void</span> <span class="name">close</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Closes the dialog.</p>
+</div></div><!-- @@@close -->
+<br/>
+<!-- $$$open[overload1]$$$open -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="open-method"></a><span class="type">void</span> <span class="name">open</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Shows the dialog to the user. It is equivalent to setting <a href="qml-qtquick-dialogs-fontdialog.html#visible-prop">visible</a> to true.</p>
+</div></div><!-- @@@open -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

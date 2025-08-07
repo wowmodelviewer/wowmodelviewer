@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- PieMenu.qml -->
+  <title>PieMenu QML Type | Qt Quick Extras 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquickextras-index.html">Qt Quick Extras</a></td><td ><a href="qtquick-extras-qmlmodule.html">QML Types</a></td><td >PieMenu QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquickextras-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#populating-the-menu">Populating the Menu</a></li>
+<li class="level2"><a href="#displaying-the-menu">Displaying the Menu</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">PieMenu QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$PieMenu-brief -->
+<p>A popup menu that displays several menu items along an arc. <a href="#details">More...</a></p>
+<!-- @@@PieMenu -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Extras 1.4</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.5</td></tr></table></div><ul>
+<li><a href="qml-qtquick-extras-piemenu-members.html">List of all members, including inherited members</a></li>
+<li><a href="qml-qtquick-extras-piemenu-obsolete.html">Obsolete members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-extras-piemenu.html#boundingItem-prop">boundingItem</a></b></b> : Item</li>
+<li class="fn"><b><b><a href="qml-qtquick-extras-piemenu.html#currentIndex-prop">currentIndex</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-extras-piemenu.html#currentItem-prop">currentItem</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtquick-extras-piemenu.html#menuItems-prop">menuItems</a></b></b> : list&lt;MenuItem&gt;</li>
+<li class="fn"><b><b><a href="qml-qtquick-extras-piemenu.html#selectionAngle-prop">selectionAngle</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qtquick-extras-piemenu.html#title-prop">title</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-extras-piemenu.html#triggerMode-prop">triggerMode</a></b></b> : int</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtquick-extras-piemenu.html#addItem-method">addItem</a></b></b>(string <i>text</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-extras-piemenu.html#insertItem-method">insertItem</a></b></b>(int <i>before</i>, string <i>text</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-extras-piemenu.html#popup-method">popup</a></b></b>(real <i>x</i>, real <i>y</i>)</li>
+<li class="fn">void <b><b><a href="qml-qtquick-extras-piemenu.html#removeItem-method">removeItem</a></b></b>(<i>item</i>)</li>
+</ul>
+<!-- $$$PieMenu-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p class="centerAlign"><img src="images/piemenu.png" alt="A PieMenu" /></p><p>The <a href="qml-qtquick-extras-piemenu.html">PieMenu</a> provides a radial context menu as an alternative to a traditional menu. All of the items in a <a href="qml-qtquick-extras-piemenu.html">PieMenu</a> are an equal distance from the center of the control.</p>
+<a name="populating-the-menu"></a>
+<h3 id="populating-the-menu">Populating the Menu</h3>
+<p>To create a menu, define at least one <a href="../qtquickcontrols1/qml-qtquick-controls-menuitem.html">MenuItem</a> as a child of it:</p>
+<pre class="cpp">
+
+  PieMenu {
+      id: pieMenu
+
+      MenuItem {
+          text: <span class="string">&quot;Action 1&quot;</span>
+          onTriggered: print(<span class="string">&quot;Action 1&quot;</span>)
+      }
+      MenuItem {
+          text: <span class="string">&quot;Action 2&quot;</span>
+          onTriggered: print(<span class="string">&quot;Action 2&quot;</span>)
+      }
+      MenuItem {
+          text: <span class="string">&quot;Action 3&quot;</span>
+          onTriggered: print(<span class="string">&quot;Action 3&quot;</span>)
+      }
+  }
+
+</pre>
+<p>By default, only the currently selected item's text is displayed above the menu. To provide text that is always visible when there is no current item, set the <a href="qml-qtquick-extras-piemenu.html#title-prop">title</a> property.</p>
+<a name="displaying-the-menu"></a>
+<h3 id="displaying-the-menu">Displaying the Menu</h3>
+<p>The typical use case for a menu is to open at the point of the mouse cursor after a right click occurs. To do that, define a <a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a> that covers the region upon which clicks should open the menu. When the <a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a> is right-clicked, call the <a href="qml-qtquick-extras-piemenu.html#popup-method">popup()</a> function:</p>
+<pre class="cpp">
+
+  MouseArea {
+      anchors<span class="operator">.</span>fill: parent
+      acceptedButtons: <span class="type"><a href="../qtqml/qml-qtqml-qt.html">Qt</a></span><span class="operator">.</span>RightButton
+
+      onClicked: pieMenu<span class="operator">.</span>popup(mouseX<span class="operator">,</span> mouseY)
+  }
+
+</pre>
+<p>If the menu is opened in a position where some of its menu items would be outside of <a href="qml-qtquick-extras-piemenu.html#boundingItem-prop">boundingItem</a>, it is automatically moved to a position where they will not be hidden. By default, the <a href="qml-qtquick-extras-piemenu.html#boundingItem-prop">boundingItem</a> is set to the parent of the menu. It can also be set to <code>null</code> to prevent this behavior.</p>
+<p><a href="qml-qtquick-extras-piemenu.html">PieMenu</a> can be displayed at any position on the screen. With a traditional context menu, the menu would be positioned with its top left corner at the position of the right click, but since <a href="qml-qtquick-extras-piemenu.html">PieMenu</a> is radial, we position it centered over the position of the right click.</p>
+<p>To create a <a href="qml-qtquick-extras-piemenu.html">PieMenu</a> that opens after a long press and selects items upon releasing, you can combine ActivationMode.ActivateOnRelease with a <a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a> using a Timer:</p>
+<pre class="cpp">
+
+  MouseArea {
+      id: touchArea
+      anchors<span class="operator">.</span>fill: parent
+
+      Timer {
+          id: pressAndHoldTimer
+          interval: <span class="number">300</span>
+          onTriggered: pieMenu<span class="operator">.</span>popup(touchArea<span class="operator">.</span>mouseX<span class="operator">,</span> touchArea<span class="operator">.</span>mouseY);
+      }
+
+      onPressed: pressAndHoldTimer<span class="operator">.</span>start()
+      onReleased: pressAndHoldTimer<span class="operator">.</span>stop();
+  }
+
+  PieMenu {
+      id: pieMenu
+
+      triggerMode: TriggerMode<span class="operator">.</span>TriggerOnRelease
+
+      MenuItem {
+          text: <span class="string">&quot;Action 1&quot;</span>
+          onTriggered: print(<span class="string">&quot;Action 1&quot;</span>)
+      }
+      MenuItem {
+          text: <span class="string">&quot;Action 2&quot;</span>
+          onTriggered: print(<span class="string">&quot;Action 2&quot;</span>)
+      }
+      MenuItem {
+          text: <span class="string">&quot;Action 3&quot;</span>
+          onTriggered: print(<span class="string">&quot;Action 3&quot;</span>)
+      }
+  }
+
+</pre>
+<p>You can hide individual menu items by setting their visible property to <code>false</code>. Hiding items does not affect the <a href="../qtquickcontrols1/qml-qtquick-controls-styles-piemenustyle.html#startAngle-prop">startAngle</a> or <a href="../qtquickcontrols1/qml-qtquick-controls-styles-piemenustyle.html#endAngle-prop">endAngle</a>; the remaining items will grow to consume the available space.</p>
+<p>You can create a custom appearance for a <a href="qml-qtquick-extras-piemenu.html">PieMenu</a> by assigning a <a href="../qtquickcontrols1/qml-qtquick-controls-styles-piemenustyle.html">PieMenuStyle</a></p>
+<!-- @@@PieMenu -->
+<h2>Property Documentation</h2>
+<!-- $$$boundingItem -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="boundingItem-prop"></a><span class="name">boundingItem</span> : <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The item which the menu must stay within.</p>
+<p>A typical use case for <a href="qml-qtquick-extras-piemenu.html">PieMenu</a> involves:</p>
+<ul>
+<li>A <a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a> that determines the clickable area within which the menu can be opened.</li>
+<li>The bounds that the menu must not go outside of.</li>
+</ul>
+<p>Although they sound similar, they have different purposes. Consider the example below:</p>
+<p class="centerAlign"><img src="images/piemenu-boundingItem-example.png" alt="Canvas boundingItem example" /></p><p>The user can only open the menu within the inner rectangle. In this case, they've opened the menu on the edge of the <a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a>, but there would not be enough room to display the entire menu centered at the cursor position, so it was moved to the left.</p>
+<p>If for some reason we didn't want this restriction, we can set boundingItem to <code>null</code>:</p>
+<p class="centerAlign"><img src="images/piemenu-boundingItem-null-example.png" alt="Canvas null boundingItem example" /></p><p>By default, the menu's <a href="../qtquick/qml-qtquick-item.html#parent-prop">parent</a> is the boundingItem.</p>
+</div></div><!-- @@@boundingItem -->
+<br/>
+<!-- $$$currentIndex -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="currentIndex-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">currentIndex</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The index of the the menu item that is currently under the mouse, or <code>-1</code> if there is no such item.</p>
+</div></div><!-- @@@currentIndex -->
+<br/>
+<!-- $$$currentItem -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="currentItem-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">currentItem</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The menu item that is currently under the mouse, or <code>null</code> if there is no such item.</p>
+</div></div><!-- @@@currentItem -->
+<br/>
+<!-- $$$menuItems -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="menuItems-prop"></a><span class="qmldefault">[default] </span><span class="name">menuItems</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="../qtquickcontrols1/qml-qtquick-controls-menuitem.html">MenuItem</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The list of menu items displayed by this menu.</p>
+<p>You can assign menu items by declaring them as children of <a href="qml-qtquick-extras-piemenu.html">PieMenu</a>:</p>
+<pre class="cpp">
+
+  PieMenu {
+      MenuItem {
+          text: <span class="string">&quot;Action 1&quot;</span>
+          onTriggered: function() { print(<span class="string">&quot;Action 1&quot;</span>); }
+      }
+      MenuItem {
+          text: <span class="string">&quot;Action 2&quot;</span>
+          onTriggered: function() { print(<span class="string">&quot;Action 2&quot;</span>); }
+      }
+      MenuItem {
+          text: <span class="string">&quot;Action 3&quot;</span>
+          onTriggered: function() { print(<span class="string">&quot;Action 3&quot;</span>); }
+      }
+  }
+
+</pre>
+</div></div><!-- @@@menuItems -->
+<br/>
+<!-- $$$selectionAngle -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="selectionAngle-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">selectionAngle</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property reflects the angle (in radians) created by the imaginary line from the center of the menu to the position of the cursor.</p>
+<p>Its value is undefined when the menu is not visible.</p>
+</div></div><!-- @@@selectionAngle -->
+<br/>
+<!-- $$$title -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="title-prop"></a><span class="name">title</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property defines the text that is shown above the menu when there is no current menu item (<a href="qml-qtquick-extras-piemenu.html#currentIndex-prop">currentIndex</a> is <code>-1</code>).</p>
+<p>The default value is <code>&quot;&quot;</code> (an empty string).</p>
+</div></div><!-- @@@title -->
+<br/>
+<!-- $$$triggerMode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="triggerMode-prop"></a><span class="name">triggerMode</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property determines the method for selecting items in the menu.</p>
+<ul>
+<li>A triggerMode of <i>TriggerMode.TriggerOnPress</i> means that menu items will only be selected when a mouse press event occurs over them.</li>
+<li>A triggerMode of <i>TriggerMode.TriggerOnRelease</i> means that menu items will only be selected when a mouse release event occurs over them. This means that the user must keep the mouse button down after opening the menu and release the mouse over the item they wish to select.</li>
+<li>A triggerMode of <i>TriggerMode.TriggerOnClick</i> means that menu items will only be selected when the user clicks once over them.</li>
+</ul>
+<p><b>Warning:</b> Changing the triggerMode while the menu is visible will result in undefined behavior.</p>
+</div></div><!-- @@@triggerMode -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$addItem[overload1]$$$addItemstring -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="addItem-method"></a><span class="type">void</span> <span class="name">addItem</span>(<span class="type"><a href="../qtqml/qml-string.html">string</a></span> <i>text</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Adds an item to the end of the menu items.</p>
+<p>Equivalent to passing calling <code>insertItem(menuItems.length, text)</code>.</p>
+<p>Returns the newly added item.</p>
+</div></div><!-- @@@addItem -->
+<br/>
+<!-- $$$insertItem[overload1]$$$insertItemintstring -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="insertItem-method"></a><span class="type">void</span> <span class="name">insertItem</span>(<span class="type"><a href="../qtqml/qml-int.html">int</a></span> <i>before</i>, <span class="type"><a href="../qtqml/qml-string.html">string</a></span> <i>text</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Inserts a <a href="../qtquickcontrols1/qml-qtquick-controls-menuitem.html">MenuItem</a> with <i>text</i> before the index at <i>before</i>.</p>
+<p>To insert an item at the end, pass <code>menuItems.length</code>.</p>
+<p>Returns the newly inserted item, or <code>null</code> if <i>before</i> is invalid.</p>
+</div></div><!-- @@@insertItem -->
+<br/>
+<!-- $$$popup[overload1]$$$popuprealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="popup-method"></a><span class="type">void</span> <span class="name">popup</span>(<span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>x</i>, <span class="type"><a href="../qtqml/qml-real.html">real</a></span> <i>y</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Opens the menu at coordinates <i>x</i>, <i>y</i>.</p>
+</div></div><!-- @@@popup -->
+<br/>
+<!-- $$$removeItem[overload1]$$$removeItem -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="removeItem-method"></a><span class="type">void</span> <span class="name">removeItem</span>(<i>item</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Removes <i>item</i> from the menu.</p>
+</div></div><!-- @@@removeItem -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

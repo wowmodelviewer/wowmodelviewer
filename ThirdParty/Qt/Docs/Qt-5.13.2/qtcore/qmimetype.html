@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmimetype.cpp -->
+  <title>QMimeType Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QMimeType</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QMimeType Class</h1>
+<!-- $$$QMimeType-brief -->
+<p>The <a href="qmimetype.html">QMimeType</a> class describes types of file or data, represented by a MIME type string. <a href="#details">More...</a></p>
+<!-- @@@QMimeType -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QMimeType&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.0</td></tr></table></div><p>This class was introduced in  Qt 5.0.</p>
+<ul>
+<li><a href="qmimetype-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qmimetype.html#aliases-prop">aliases</a></b> : const QStringList</li>
+<li class="fn"><b><a href="qmimetype.html#allAncestors-prop">allAncestors</a></b> : const QStringList</li>
+<li class="fn"><b><a href="qmimetype.html#comment-prop">comment</a></b> : const QString</li>
+<li class="fn"><b><a href="qmimetype.html#filterString-prop">filterString</a></b> : const QString</li>
+<li class="fn"><b><a href="qmimetype.html#genericIconName-prop">genericIconName</a></b> : const QString</li>
+<li class="fn"><b><a href="qmimetype.html#globPatterns-prop">globPatterns</a></b> : const QStringList</li>
+<li class="fn"><b><a href="qmimetype.html#iconName-prop">iconName</a></b> : const QString</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qmimetype.html#isDefault-prop">isDefault</a></b> : const bool</li>
+<li class="fn"><b><a href="qmimetype.html#name-prop">name</a></b> : const QString</li>
+<li class="fn"><b><a href="qmimetype.html#parentMimeTypes-prop">parentMimeTypes</a></b> : const QStringList</li>
+<li class="fn"><b><a href="qmimetype.html#preferredSuffix-prop">preferredSuffix</a></b> : const QString</li>
+<li class="fn"><b><a href="qmimetype.html#suffixes-prop">suffixes</a></b> : const QStringList</li>
+<li class="fn"><b><a href="qmimetype.html#valid-prop">valid</a></b> : const bool</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#QMimeType-1">QMimeType</a></b>(const QMimeType &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#QMimeType">QMimeType</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMimeType &amp;</td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#operator-eq-1">operator=</a></b>(QMimeType &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QMimeType &amp;</td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#operator-eq">operator=</a></b>(const QMimeType &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#dtor.QMimeType">~QMimeType</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#aliases-prop">aliases</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#allAncestors-prop">allAncestors</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#comment-prop">comment</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#filterString-prop">filterString</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#genericIconName-prop">genericIconName</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#globPatterns-prop">globPatterns</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#iconName-prop">iconName</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#inherits">inherits</a></b>(const QString &amp;<i>mimeTypeName</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#isDefault-prop">isDefault</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#valid-prop">isValid</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#name-prop">name</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#parentMimeTypes-prop">parentMimeTypes</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#preferredSuffix-prop">preferredSuffix</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QStringList </td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#suffixes-prop">suffixes</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#swap">swap</a></b>(QMimeType &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#operator-not-eq">operator!=</a></b>(const QMimeType &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#operator-eq-eq">operator==</a></b>(const QMimeType &amp;<i>other</i>) const</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> uint </td><td class="memItemRight bottomAlign"><b><a href="qmimetype.html#qHash">qHash</a></b>(const QMimeType &amp;<i>key</i>, uint <i>seed</i> = 0)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QMimeType-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>For instance a file named &quot;readme.txt&quot; has the MIME type &quot;text/plain&quot;. The MIME type can be determined from the file name, or from the file contents, or from both. MIME type determination can also be done on buffers of data not coming from files.</p>
+<p>Determining the MIME type of a file can be useful to make sure your application supports it. It is also useful in file-manager-like applications or widgets, in order to display an appropriate <a href="qmimetype.html#iconName-prop">icon</a> for the file, or even the descriptive <a href="qmimetype.html#comment-prop">comment</a> in detailed views.</p>
+<p>To check if a file has the expected MIME type, you should use <a href="qmimetype.html#inherits">inherits</a>() rather than a simple string comparison based on the <a href="qmimetype.html#name-prop">name</a>(). This is because MIME types can inherit from each other: for instance a C source file is a specific type of plain text file, so text/x-csrc inherits text/plain.</p>
+</div>
+<p><b>See also </b><a href="qmimedatabase.html">QMimeDatabase</a> and <a href="qtcore-mimetypes-mimetypebrowser-example.html">MIME Type Browser Example</a>.</p>
+<!-- @@@QMimeType -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$aliases-prop$$$aliases -->
+<h3 class="fn" id="aliases-prop"><a name="aliases-prop"></a><span class="name">aliases</span> : const <span class="type"><a href="qstringlist.html">QStringList</a></span></h3>
+<p>This property holds the list of aliases of this mimetype</p>
+<p>For instance, for text/csv, the returned list would be: text/x-csv, text/x-comma-separated-values.</p>
+<p>Note that all <a href="qmimetype.html">QMimeType</a> instances refer to proper mimetypes, never to aliases directly.</p>
+<p>The order of the aliases in the list is undefined.</p>
+<p>While this property was introduced in 5.10, the corresponding accessor method has always been there.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QStringList </td><td class="memItemRight bottomAlign"><span class="name"><b>aliases</b></span>() const</td></tr>
+</table></div>
+<!-- @@@aliases -->
+<!-- $$$allAncestors-prop$$$allAncestors -->
+<h3 class="fn" id="allAncestors-prop"><a name="allAncestors-prop"></a><span class="name">allAncestors</span> : const <span class="type"><a href="qstringlist.html">QStringList</a></span></h3>
+<p>This property holds the names of direct and indirect parent MIME types</p>
+<p>Return all the parent mimetypes of this mimetype, direct and indirect. This includes the parent(s) of its parent(s), etc.</p>
+<p>For instance, for image/svg+xml the list would be: application/xml, text/plain, application/octet-stream.</p>
+<p>Note that application/octet-stream is the ultimate parent for all types of files (but not directories).</p>
+<p>While this property was introduced in 5.10, the corresponding accessor method has always been there.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QStringList </td><td class="memItemRight bottomAlign"><span class="name"><b>allAncestors</b></span>() const</td></tr>
+</table></div>
+<!-- @@@allAncestors -->
+<!-- $$$comment-prop$$$comment -->
+<h3 class="fn" id="comment-prop"><a name="comment-prop"></a><span class="name">comment</span> : const <span class="type"><a href="qstring.html">QString</a></span></h3>
+<p>This property holds the description of the MIME type to be displayed on user interfaces</p>
+<p>The default language (QLocale().<a href="qmimetype.html#name-prop">name</a>()) is used to select the appropriate translation.</p>
+<p>While this property was introduced in 5.10, the corresponding accessor method has always been there.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>comment</b></span>() const</td></tr>
+</table></div>
+<!-- @@@comment -->
+<!-- $$$filterString-prop$$$filterString -->
+<h3 class="fn" id="filterString-prop"><a name="filterString-prop"></a><span class="name">filterString</span> : const <span class="type"><a href="qstring.html">QString</a></span></h3>
+<p>This property holds a filter string usable for a file dialog</p>
+<p>While this property was introduced in 5.10, the corresponding accessor method has always been there.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>filterString</b></span>() const</td></tr>
+</table></div>
+<!-- @@@filterString -->
+<!-- $$$genericIconName-prop$$$genericIconName -->
+<h3 class="fn" id="genericIconName-prop"><a name="genericIconName-prop"></a><span class="name">genericIconName</span> : const <span class="type"><a href="qstring.html">QString</a></span></h3>
+<p>This property holds the file name of a generic icon that represents the MIME type</p>
+<p>This should be used if the icon returned by <a href="qmimetype.html#iconName-prop">iconName</a>() cannot be found on the system. It is used for categories of similar types (like spreadsheets or archives) that can use a common icon. The freedesktop.org Icon Naming Specification lists a set of such icon names.</p>
+<p>The icon name can be given to <a href="../qtgui/qicon.html#fromTheme">QIcon::fromTheme</a>() in order to load the icon.</p>
+<p>While this property was introduced in 5.10, the corresponding accessor method has always been there.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>genericIconName</b></span>() const</td></tr>
+</table></div>
+<!-- @@@genericIconName -->
+<!-- $$$globPatterns-prop$$$globPatterns -->
+<h3 class="fn" id="globPatterns-prop"><a name="globPatterns-prop"></a><span class="name">globPatterns</span> : const <span class="type"><a href="qstringlist.html">QStringList</a></span></h3>
+<p>This property holds the list of glob matching patterns</p>
+<p>While this property was introduced in 5.10, the corresponding accessor method has always been there.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QStringList </td><td class="memItemRight bottomAlign"><span class="name"><b>globPatterns</b></span>() const</td></tr>
+</table></div>
+<!-- @@@globPatterns -->
+<!-- $$$iconName-prop$$$iconName -->
+<h3 class="fn" id="iconName-prop"><a name="iconName-prop"></a><span class="name">iconName</span> : const <span class="type"><a href="qstring.html">QString</a></span></h3>
+<p>This property holds the file name of an icon image that represents the MIME type</p>
+<p>The icon name can be given to <a href="../qtgui/qicon.html#fromTheme">QIcon::fromTheme</a>() in order to load the icon.</p>
+<p>While this property was introduced in 5.10, the corresponding accessor method has always been there.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>iconName</b></span>() const</td></tr>
+</table></div>
+<!-- @@@iconName -->
+<!-- $$$isDefault-prop$$$isDefault -->
+<h3 class="fn" id="isDefault-prop"><a name="isDefault-prop"></a><span class="name">isDefault</span> : const <span class="type">bool</span></h3>
+<p><code>true</code> if this MIME type is the default MIME type which applies to all files: application/octet-stream.</p>
+<p>While this property was introduced in 5.10, the corresponding accessor method has always been there.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>isDefault</b></span>() const</td></tr>
+</table></div>
+<!-- @@@isDefault -->
+<!-- $$$name-prop$$$name -->
+<h3 class="fn" id="name-prop"><a name="name-prop"></a><span class="name">name</span> : const <span class="type"><a href="qstring.html">QString</a></span></h3>
+<p>This property holds the name of the MIME type</p>
+<p>While this property was introduced in 5.10, the corresponding accessor method has always been there.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>name</b></span>() const</td></tr>
+</table></div>
+<!-- @@@name -->
+<!-- $$$parentMimeTypes-prop$$$parentMimeTypes -->
+<h3 class="fn" id="parentMimeTypes-prop"><a name="parentMimeTypes-prop"></a><span class="name">parentMimeTypes</span> : const <span class="type"><a href="qstringlist.html">QStringList</a></span></h3>
+<p>This property holds the names of parent MIME types</p>
+<p>A type is a subclass of another type if any instance of the first type is also an instance of the second. For example, all image/svg+xml files are also text/xml, text/plain and application/octet-stream files. Subclassing is about the format, rather than the category of the data (for example, there is no 'generic spreadsheet' class that all spreadsheets inherit from). Conversely, the parent mimetype of image/svg+xml is text/xml.</p>
+<p>A mimetype can have multiple parents. For instance application/x-perl has two parents: application/x-executable and text/plain. This makes it possible to both execute perl scripts, and to open them in text editors.</p>
+<p>While this property was introduced in 5.10, the corresponding accessor method has always been there.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QStringList </td><td class="memItemRight bottomAlign"><span class="name"><b>parentMimeTypes</b></span>() const</td></tr>
+</table></div>
+<!-- @@@parentMimeTypes -->
+<!-- $$$preferredSuffix-prop$$$preferredSuffix -->
+<h3 class="fn" id="preferredSuffix-prop"><a name="preferredSuffix-prop"></a><span class="name">preferredSuffix</span> : const <span class="type"><a href="qstring.html">QString</a></span></h3>
+<p>This property holds the preferred suffix for the MIME type</p>
+<p>No leading dot is included, so for instance this would return &quot;pdf&quot; for application/pdf. The return value can be empty, for mime types which do not have any suffixes associated.</p>
+<p>While this property was introduced in 5.10, the corresponding accessor method has always been there.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QString </td><td class="memItemRight bottomAlign"><span class="name"><b>preferredSuffix</b></span>() const</td></tr>
+</table></div>
+<!-- @@@preferredSuffix -->
+<!-- $$$suffixes-prop$$$suffixes -->
+<h3 class="fn" id="suffixes-prop"><a name="suffixes-prop"></a><span class="name">suffixes</span> : const <span class="type"><a href="qstringlist.html">QStringList</a></span></h3>
+<p>This property holds the known suffixes for the MIME type</p>
+<p>No leading dot is included, so for instance this would return &quot;jpg&quot;, &quot;jpeg&quot; for image/jpeg.</p>
+<p>While this property was introduced in 5.10, the corresponding accessor method has always been there.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QStringList </td><td class="memItemRight bottomAlign"><span class="name"><b>suffixes</b></span>() const</td></tr>
+</table></div>
+<!-- @@@suffixes -->
+<!-- $$$valid-prop$$$isValid -->
+<h3 class="fn" id="valid-prop"><a name="valid-prop"></a><span class="name">valid</span> : const <span class="type">bool</span></h3>
+<p><code>true</code> if the <a href="qmimetype.html">QMimeType</a> object contains valid data, <code>false</code> otherwise</p>
+<p>A valid MIME type has a non-empty <a href="qmimetype.html#name-prop">name</a>(). The invalid MIME type is the default-constructed <a href="qmimetype.html">QMimeType</a>.</p>
+<p>While this property was introduced in 5.10, the corresponding accessor method has always been there.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>isValid</b></span>() const</td></tr>
+</table></div>
+<!-- @@@valid -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QMimeType$$$QMimeTypeconstQMimeType& -->
+<h3 class="fn" id="QMimeType-1"><a name="QMimeType-1"></a>QMimeType::<span class="name">QMimeType</span>(const <span class="type"><a href="qmimetype.html#QMimeType">QMimeType</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs this <a href="qmimetype.html">QMimeType</a> object as a copy of <i>other</i>.</p>
+<!-- @@@QMimeType -->
+<!-- $$$QMimeType[overload1]$$$QMimeType -->
+<h3 class="fn" id="QMimeType"><a name="QMimeType"></a>QMimeType::<span class="name">QMimeType</span>()</h3>
+<p>Constructs this <a href="qmimetype.html">QMimeType</a> object initialized with default property values that indicate an invalid MIME type.</p>
+<!-- @@@QMimeType -->
+<!-- $$$operator=$$$operator=QMimeType&& -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type"><a href="qmimetype.html#QMimeType">QMimeType</a></span> &amp;QMimeType::<span class="name">operator=</span>(<span class="type"><a href="qmimetype.html#QMimeType">QMimeType</a></span> &amp;&amp;<i>other</i>)</h3>
+<p>Move-assigns <i>other</i> to this <a href="qmimetype.html">QMimeType</a> instance.</p>
+<p>This function was introduced in  Qt 5.2.</p>
+<!-- @@@operator= -->
+<!-- $$$operator=[overload1]$$$operator=constQMimeType& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qmimetype.html#QMimeType">QMimeType</a></span> &amp;QMimeType::<span class="name">operator=</span>(const <span class="type"><a href="qmimetype.html#QMimeType">QMimeType</a></span> &amp;<i>other</i>)</h3>
+<p>Assigns the data of <i>other</i> to this <a href="qmimetype.html">QMimeType</a> object, and returns a reference to this object.</p>
+<!-- @@@operator= -->
+<!-- $$$~QMimeType[overload1]$$$~QMimeType -->
+<h3 class="fn" id="dtor.QMimeType"><a name="dtor.QMimeType"></a>QMimeType::<span class="name">~QMimeType</span>()</h3>
+<p>Destroys the <a href="qmimetype.html">QMimeType</a> object, and releases the d pointer.</p>
+<!-- @@@~QMimeType -->
+<!-- $$$inherits[overload1]$$$inheritsconstQString& -->
+<h3 class="fn" id="inherits"><a name="inherits"></a><span class="type">bool</span> QMimeType::<span class="name">inherits</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>mimeTypeName</i>) const</h3>
+<p>Returns <code>true</code> if this mimetype is <i>mimeTypeName</i>, or inherits <i>mimeTypeName</i> (see <a href="qmimetype.html#parentMimeTypes-prop">parentMimeTypes</a>()), or <i>mimeTypeName</i> is an alias for this mimetype.</p>
+<p>This method has been made invokable from QML since 5.10.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@inherits -->
+<!-- $$$swap[overload1]$$$swapQMimeType& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QMimeType::<span class="name">swap</span>(<span class="type"><a href="qmimetype.html#QMimeType">QMimeType</a></span> &amp;<i>other</i>)</h3>
+<p>Swaps <a href="qmimetype.html">QMimeType</a> <i>other</i> with this <a href="qmimetype.html">QMimeType</a> object.</p>
+<p>This operation is very fast and never fails.</p>
+<p>The swap() method helps with the implementation of assignment operators in an exception-safe way. For more information consult <a href="http://en.wikibooks.org/wiki/More_C++_Idioms/Copy-and-swap">More C++ Idioms - Copy-and-swap</a>.</p>
+<!-- @@@swap -->
+<!-- $$$operator!=[overload1]$$$operator!=constQMimeType& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> QMimeType::<span class="name">operator!=</span>(const <span class="type"><a href="qmimetype.html#QMimeType">QMimeType</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns <code>true</code> if <i>other</i> does not equal this <a href="qmimetype.html">QMimeType</a> object, otherwise returns <code>false</code>.</p>
+<!-- @@@operator!= -->
+<!-- $$$operator==[overload1]$$$operator==constQMimeType& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> QMimeType::<span class="name">operator==</span>(const <span class="type"><a href="qmimetype.html#QMimeType">QMimeType</a></span> &amp;<i>other</i>) const</h3>
+<p>Returns <code>true</code> if <i>other</i> equals this <a href="qmimetype.html">QMimeType</a> object, otherwise returns <code>false</code>. The name is the unique identifier for a mimetype, so two mimetypes with the same name, are equal.</p>
+<!-- @@@operator== -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$qHash[overload1]$$$qHashconstQMimeType&uint -->
+<h3 class="fn" id="qHash"><a name="qHash"></a><span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <span class="name">qHash</span>(const <span class="type"><a href="qmimetype.html#QMimeType">QMimeType</a></span> &amp;<i>key</i>, <span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <i>seed</i> = 0)</h3>
+<p>Returns the hash value for <i>key</i>, using <i>seed</i> to seed the calculation.</p>
+<p>This function was introduced in  Qt 5.6.</p>
+<!-- @@@qHash -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

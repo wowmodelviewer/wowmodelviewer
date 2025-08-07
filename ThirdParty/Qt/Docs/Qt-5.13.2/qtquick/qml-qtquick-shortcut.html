@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickshortcut.cpp -->
+  <title>Shortcut QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >Shortcut QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Shortcut QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Shortcut-brief -->
+<p>Provides keyboard shortcuts. <a href="#details">More...</a></p>
+<!-- @@@Shortcut -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.5</td></tr></table></div><ul>
+<li><a href="qml-qtquick-shortcut-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-shortcut.html#autoRepeat-prop">autoRepeat</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-shortcut.html#context-prop">context</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qtquick-shortcut.html#enabled-prop">enabled</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtquick-shortcut.html#nativeText-prop">nativeText</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-shortcut.html#portableText-prop">portableText</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-shortcut.html#sequence-prop">sequence</a></b></b> : keysequence</li>
+<li class="fn"><b><b><a href="qml-qtquick-shortcut.html#sequences-prop">sequences</a></b></b> : list&lt;keysequence&gt;</li>
+</ul>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-shortcut.html#activated-signal">activated</a></b></b>()</li>
+<li class="fn"><b><b><a href="qml-qtquick-shortcut.html#activatedAmbiguously-signal">activatedAmbiguously</a></b></b>()</li>
+</ul>
+<!-- $$$Shortcut-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The Shortcut type provides a way of handling keyboard shortcuts. The shortcut can be set to one of the <a href="../qtgui/qkeysequence.html#StandardKey-enum">standard keyboard shortcuts</a>, or it can be described with a string containing a sequence of up to four key presses that are needed to <a href="qml-qtquick-shortcut.html#activated-signal">activate</a> the shortcut.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">view</span>
+
+      property <span class="type"><a href="../qtqml/qml-int.html">int</a></span> <span class="name">currentIndex</span>
+
+      <span class="type"><a href="qml-qtquick-shortcut.html">Shortcut</a></span> {
+          <span class="name">sequence</span>: <span class="name">StandardKey</span>.<span class="name">NextChild</span>
+          <span class="name">onActivated</span>: view.currentIndex++
+      }
+  }
+
+</pre>
+<p>It is also possible to set multiple shortcut <a href="qml-qtquick-shortcut.html#sequences-prop">sequences</a>, so that the shortcut can be <a href="qml-qtquick-shortcut.html#activated-signal">activated</a> via several different sequences of key presses.</p>
+<p><b>See also </b><a href="qml-qtquick-keys.html">Keys</a> and <a href="qml-qtquick-keys.html#shortcutOverride-signal">shortcutOverride()</a>.</p>
+<!-- @@@Shortcut -->
+<h2>Property Documentation</h2>
+<!-- $$$autoRepeat -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="autoRepeat-prop"></a><span class="name">autoRepeat</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the shortcut can auto repeat.</p>
+<p>The default value is <code>true</code>.</p>
+</div></div><!-- @@@autoRepeat -->
+<br/>
+<!-- $$$context -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="context-prop"></a><span class="name">context</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the <a href="../qtcore/qt.html#ShortcutContext-enum">shortcut context</a>.</p>
+<p>Supported values are:</p>
+<ul>
+<li><code>Qt.WindowShortcut</code> (default) - The shortcut is active when its parent item is in an active top-level window.</li>
+<li><code>Qt.ApplicationShortcut</code> - The shortcut is active when one of the application's windows are active.</li>
+</ul>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-shortcut.html">Shortcut</a></span> {
+      <span class="name">sequence</span>: <span class="name">StandardKey</span>.<span class="name">Quit</span>
+      <span class="name">context</span>: <span class="name">Qt</span>.<span class="name">ApplicationShortcut</span>
+      <span class="name">onActivated</span>: <span class="name">Qt</span>.<span class="name">quit</span>()
+  }
+
+</pre>
+</div></div><!-- @@@context -->
+<br/>
+<!-- $$$enabled -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="enabled-prop"></a><span class="name">enabled</span> : <span class="type"><a href="../qtqml/qml-bool.html">bool</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds whether the shortcut is enabled.</p>
+<p>The default value is <code>true</code>.</p>
+</div></div><!-- @@@enabled -->
+<br/>
+<!-- $$$nativeText -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="nativeText-prop"></a><span class="name">nativeText</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property provides the shortcut's key sequence as a platform specific string. This means that it will be shown translated, and on <a href="../qtdoc/internationalization.html#macos">macOS</a> it will resemble a key sequence from the menu bar. It is best to display this text to the user (for example, on a tooltip).</p>
+<p>This property was introduced in  Qt 5.6.</p>
+<p><b>See also </b><a href="qml-qtquick-shortcut.html#sequence-prop">sequence</a> and <a href="qml-qtquick-shortcut.html#portableText-prop">portableText</a>.</p>
+</div></div><!-- @@@nativeText -->
+<br/>
+<!-- $$$portableText -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="portableText-prop"></a><span class="name">portableText</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property provides the shortcut's key sequence as a string in a &quot;portable&quot; format, suitable for reading and writing to a file. In many cases, it will look similar to the native text on Windows and X11.</p>
+<p>This property was introduced in  Qt 5.6.</p>
+<p><b>See also </b><a href="qml-qtquick-shortcut.html#sequence-prop">sequence</a> and <a href="qml-qtquick-shortcut.html#nativeText-prop">nativeText</a>.</p>
+</div></div><!-- @@@portableText -->
+<br/>
+<!-- $$$sequence -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="sequence-prop"></a><span class="name">sequence</span> : <span class="type">keysequence</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the shortcut's key sequence. The key sequence can be set to one of the <a href="../qtgui/qkeysequence.html#StandardKey-enum">standard keyboard shortcuts</a>, or it can be described with a string containing a sequence of up to four key presses that are needed to <a href="qml-qtquick-shortcut.html#activated-signal">activate</a> the shortcut.</p>
+<p>The default value is an empty key sequence.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-shortcut.html">Shortcut</a></span> {
+      <span class="name">sequence</span>: <span class="string">&quot;Ctrl+E,Ctrl+W&quot;</span>
+      <span class="name">onActivated</span>: <span class="name">edit</span>.<span class="name">wrapMode</span> <span class="operator">=</span> <span class="name">TextEdit</span>.<span class="name">Wrap</span>
+  }
+
+</pre>
+<p><b>See also </b><a href="qml-qtquick-shortcut.html#sequences-prop">sequences</a>.</p>
+</div></div><!-- @@@sequence -->
+<br/>
+<!-- $$$sequences -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="sequences-prop"></a><span class="name">sequences</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type">keysequence</span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds multiple key sequences for the shortcut. The key sequences can be set to one of the <a href="../qtgui/qkeysequence.html#StandardKey-enum">standard keyboard shortcuts</a>, or they can be described with strings containing sequences of up to four key presses that are needed to <a href="qml-qtquick-shortcut.html#activated-signal">activate</a> the shortcut.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtquick-shortcut.html">Shortcut</a></span> {
+      <span class="name">sequences</span>: [<span class="name">StandardKey</span>.<span class="name">Cut</span>, <span class="string">&quot;Ctrl+X&quot;</span>, <span class="string">&quot;Shift+Del&quot;</span>]
+      <span class="name">onActivated</span>: <span class="name">edit</span>.<span class="name">cut</span>()
+  }
+
+</pre>
+<p>This property was introduced in  Qt 5.9.</p>
+</div></div><!-- @@@sequences -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$activated[overload1]$$$activated -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="activated-signal"></a><span class="name">activated</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the shortcut is activated.</p>
+<p>The corresponding handler is <code>onActivated</code>.</p>
+</div></div><!-- @@@activated -->
+<br/>
+<!-- $$$activatedAmbiguously[overload1]$$$activatedAmbiguously -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="activatedAmbiguously-signal"></a><span class="name">activatedAmbiguously</span>()</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This signal is emitted when the shortcut is activated ambigously, meaning that it matches the start of more than one shortcut.</p>
+<p>The corresponding handler is <code>onActivatedAmbiguously</code>.</p>
+</div></div><!-- @@@activatedAmbiguously -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

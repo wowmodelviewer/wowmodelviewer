@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickweeknumbercolumn.cpp -->
+  <title>WeekNumberColumn QML Type | Qt Labs Calendar 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlabscalendar-index.html">Qt Labs Calendar</a></td><td ><a href="qt-labs-calendar-qmlmodule.html">QML Types</a></td><td >WeekNumberColumn QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlabscalendar-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">WeekNumberColumn QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$WeekNumberColumn-brief -->
+<p>A column of week numbers. <a href="#details">More...</a></p>
+<!-- @@@WeekNumberColumn -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import Qt.labs.calendar 1.0</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="../qtquickcontrols/qml-qtquick-controls2-control.html">Control</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qt-labs-calendar-weeknumbercolumn-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qt-labs-calendar-weeknumbercolumn.html#delegate-prop">delegate</a></b></b> : Component</li>
+<li class="fn"><b><b><a href="qml-qt-labs-calendar-weeknumbercolumn.html#month-prop">month</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qt-labs-calendar-weeknumbercolumn.html#year-prop">year</a></b></b> : int</li>
+</ul>
+<!-- $$$WeekNumberColumn-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><a href="qml-qt-labs-calendar-weeknumbercolumn.html">WeekNumberColumn</a> presents week numbers in a column. The week numbers are calculated for a given <a href="qml-qt-labs-calendar-weeknumbercolumn.html#month-prop">month</a> and <a href="qml-qt-labs-calendar-weeknumbercolumn.html#year-prop">year</a>, using the specified <a href="../qtquickcontrols/qml-qtquick-controls2-control.html#locale-prop">locale</a>.</p>
+<p class="centerAlign"><img src="images/qtlabscalendar-weeknumbercolumn.png" alt="" /></p><pre class="qml">
+
+  <span class="type"><a href="qml-qt-labs-calendar-weeknumbercolumn.html">WeekNumberColumn</a></span> {
+      <span class="name">month</span>: <span class="name">Calendar</span>.<span class="name">December</span>
+      <span class="name">year</span>: <span class="number">2015</span>
+      <span class="name">locale</span>: <span class="name">Qt</span>.<span class="name">locale</span>(<span class="string">&quot;en_US&quot;</span>)
+  }
+
+</pre>
+<p><a href="qml-qt-labs-calendar-weeknumbercolumn.html">WeekNumberColumn</a> can be used as a standalone control, but it is most often used in conjunction with <a href="qml-qt-labs-calendar-monthgrid.html">MonthGrid</a>. Regardless of the use case, positioning of the column is left to the user.</p>
+<p class="centerAlign"><img src="images/qtlabscalendar-weeknumbercolumn-layout.png" alt="" /></p><pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-layouts-rowlayout.html">RowLayout</a></span> {
+      <span class="type"><a href="qml-qt-labs-calendar-weeknumbercolumn.html">WeekNumberColumn</a></span> {
+          <span class="name">month</span>: <span class="name">grid</span>.<span class="name">month</span>
+          <span class="name">year</span>: <span class="name">grid</span>.<span class="name">year</span>
+          <span class="name">locale</span>: <span class="name">grid</span>.<span class="name">locale</span>
+          <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+      }
+
+      <span class="type"><a href="qml-qt-labs-calendar-monthgrid.html">MonthGrid</a></span> {
+          <span class="name">id</span>: <span class="name">grid</span>
+          <span class="name">month</span>: <span class="name">Calendar</span>.<span class="name">December</span>
+          <span class="name">year</span>: <span class="number">2015</span>
+          <span class="name">locale</span>: <span class="name">Qt</span>.<span class="name">locale</span>(<span class="string">&quot;en_US&quot;</span>)
+          <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+      }
+  }
+
+</pre>
+<p>The visual appearance of <a href="qml-qt-labs-calendar-weeknumbercolumn.html">WeekNumberColumn</a> can be changed by implementing a <a href="qml-qt-labs-calendar-weeknumbercolumn.html#delegate-prop">custom delegate</a>.</p>
+<p><b>Note: </b><i>Types in Qt.labs modules are not guaranteed to remain compatible in future versions.</i></p><p><b>See also </b><a href="qml-qt-labs-calendar-monthgrid.html">MonthGrid</a> and <a href="qml-qt-labs-calendar-dayofweekrow.html">DayOfWeekRow</a>.</p>
+<!-- @@@WeekNumberColumn -->
+<h2>Property Documentation</h2>
+<!-- $$$delegate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="delegate-prop"></a><span class="name">delegate</span> : <span class="type"><a href="../qtqml/qml-qtqml-component.html">Component</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the item delegate that visualizes each week number.</p>
+<p>In addition to the <code>index</code> property, a list of model data roles are available in the context of each delegate:</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><b>model.weekNumber</b> : int</td><td >The week number</td></tr>
+</table></div>
+<p>The following snippet presents the default implementation of the item delegate. It can be used as a starting point for implementing custom delegates.</p>
+<pre class="qml">
+
+  <span class="name">delegate</span>: <span class="name">Text</span> {
+      <span class="name">text</span>: <span class="name">model</span>.<span class="name">weekNumber</span>
+      <span class="name">font</span>: <span class="name">control</span>.<span class="name">font</span>
+      <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+      <span class="name">verticalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignVCenter</span>
+  }
+
+</pre>
+</div></div><!-- @@@delegate -->
+<br/>
+<!-- $$$month -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="month-prop"></a><span class="name">month</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the number of the month that the week numbers are calculated for. The default value is the current month.</p>
+<p>The Qt Labs Calendar module uses 0-based month numbers to be consistent with the JavaScript Date type, that is used by the QML language. This means that <code>Date::getMonth()</code> can be assigned to this property as is. When dealing with dealing with month numbers directly, it is highly recommended to use the following enumeration values to avoid confusion.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>Calendar.January</code></td><td class="topAlign">January (0)</td></tr>
+<tr><td class="topAlign"><code>Calendar.February</code></td><td class="topAlign">February (1)</td></tr>
+<tr><td class="topAlign"><code>Calendar.March</code></td><td class="topAlign">March (2)</td></tr>
+<tr><td class="topAlign"><code>Calendar.April</code></td><td class="topAlign">April (3)</td></tr>
+<tr><td class="topAlign"><code>Calendar.May</code></td><td class="topAlign">May (4)</td></tr>
+<tr><td class="topAlign"><code>Calendar.June</code></td><td class="topAlign">June (5)</td></tr>
+<tr><td class="topAlign"><code>Calendar.July</code></td><td class="topAlign">July (6)</td></tr>
+<tr><td class="topAlign"><code>Calendar.August</code></td><td class="topAlign">August (7)</td></tr>
+<tr><td class="topAlign"><code>Calendar.September</code></td><td class="topAlign">September (8)</td></tr>
+<tr><td class="topAlign"><code>Calendar.October</code></td><td class="topAlign">October (9)</td></tr>
+<tr><td class="topAlign"><code>Calendar.November</code></td><td class="topAlign">November (10)</td></tr>
+<tr><td class="topAlign"><code>Calendar.December</code></td><td class="topAlign">December (11)</td></tr>
+</table></div>
+<p><b>See also </b><a href="qml-qt-labs-calendar-calendar.html">Calendar</a>.</p>
+</div></div><!-- @@@month -->
+<br/>
+<!-- $$$year -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="year-prop"></a><span class="name">year</span> : <span class="type"><a href="../qtqml/qml-int.html">int</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the number of the year that the week numbers are calculated for.</p>
+<p>The value must be in the range from <code>-271820</code> to <code>275759</code>. The default value is the current year.</p>
+</div></div><!-- @@@year -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

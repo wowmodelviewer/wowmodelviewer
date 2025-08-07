@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qndefnfcsmartposterrecord.cpp -->
+  <title>QNdefNfcSmartPosterRecord Class | Qt NFC 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtnfc-index.html">Qt NFC</a></td><td ><a href="qtnfc-module.html">C++ Classes</a></td><td >QNdefNfcSmartPosterRecord</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtnfc-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QNdefNfcSmartPosterRecord Class</h1>
+<!-- $$$QNdefNfcSmartPosterRecord-brief -->
+<p>The <a href="qndefnfcsmartposterrecord.html">QNdefNfcSmartPosterRecord</a> class provides an NFC RTD-SmartPoster. <a href="#details">More...</a></p>
+<!-- @@@QNdefNfcSmartPosterRecord -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QNdefNfcSmartPosterRecord&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += nfc</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.2</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qndefrecord.html">QNdefRecord</a></td></tr></table></div><p>This class was introduced in  Qt 5.2.</p>
+<ul>
+<li><a href="qndefnfcsmartposterrecord-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#Action-enum">Action</a></b> { UnspecifiedAction, DoAction, SaveAction, EditAction }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#QNdefNfcSmartPosterRecord-2">QNdefNfcSmartPosterRecord</a></b>(const QNdefNfcSmartPosterRecord &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#QNdefNfcSmartPosterRecord-1">QNdefNfcSmartPosterRecord</a></b>(const QNdefRecord &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#QNdefNfcSmartPosterRecord">QNdefNfcSmartPosterRecord</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QNdefNfcSmartPosterRecord &amp;</td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#operator-eq">operator=</a></b>(const QNdefNfcSmartPosterRecord &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#dtor.QNdefNfcSmartPosterRecord">~QNdefNfcSmartPosterRecord</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QNdefNfcSmartPosterRecord::Action </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#action">action</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#addIcon">addIcon</a></b>(const QNdefNfcIconRecord &amp;<i>icon</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#addIcon-1">addIcon</a></b>(const QByteArray &amp;<i>type</i>, const QByteArray &amp;<i>data</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#addTitle">addTitle</a></b>(const QNdefNfcTextRecord &amp;<i>text</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#addTitle-1">addTitle</a></b>(const QString &amp;<i>text</i>, const QString &amp;<i>locale</i>, QNdefNfcTextRecord::Encoding <i>encoding</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#hasAction">hasAction</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#hasIcon">hasIcon</a></b>(const QByteArray &amp;<i>mimetype</i> = QByteArray()) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#hasSize">hasSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#hasTitle">hasTitle</a></b>(const QString &amp;<i>locale</i> = QString()) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#hasTypeInfo">hasTypeInfo</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#icon">icon</a></b>(const QByteArray &amp;<i>mimetype</i> = QByteArray()) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#iconCount">iconCount</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QNdefNfcIconRecord </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#iconRecord">iconRecord</a></b>(const int <i>index</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QNdefNfcIconRecord&gt; </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#iconRecords">iconRecords</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#removeIcon">removeIcon</a></b>(const QNdefNfcIconRecord &amp;<i>icon</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#removeIcon-1">removeIcon</a></b>(const QByteArray &amp;<i>type</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#removeTitle">removeTitle</a></b>(const QNdefNfcTextRecord &amp;<i>text</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#removeTitle-1">removeTitle</a></b>(const QString &amp;<i>locale</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#setAction">setAction</a></b>(QNdefNfcSmartPosterRecord::Action <i>act</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#setIcons">setIcons</a></b>(const QList&lt;QNdefNfcIconRecord&gt; &amp;<i>icons</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#setSize">setSize</a></b>(quint32 <i>size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#setTitles">setTitles</a></b>(const QList&lt;QNdefNfcTextRecord&gt; &amp;<i>titles</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#setTypeInfo">setTypeInfo</a></b>(const QByteArray &amp;<i>type</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#setUri">setUri</a></b>(const QNdefNfcUriRecord &amp;<i>url</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#setUri-1">setUri</a></b>(const QUrl &amp;<i>url</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> quint32 </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#size">size</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#title">title</a></b>(const QString &amp;<i>locale</i> = QString()) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#titleCount">titleCount</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QNdefNfcTextRecord </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#titleRecord">titleRecord</a></b>(const int <i>index</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QNdefNfcTextRecord&gt; </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#titleRecords">titleRecords</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#typeInfo">typeInfo</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QUrl </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#uri">uri</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QNdefNfcUriRecord </td><td class="memItemRight bottomAlign"><b><a href="qndefnfcsmartposterrecord.html#uriRecord">uriRecord</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QNdefNfcSmartPosterRecord-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>RTD-SmartPoster encapsulates a Smart Poster.</p>
+</div>
+<!-- @@@QNdefNfcSmartPosterRecord -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$Action$$$UnspecifiedAction$$$DoAction$$$SaveAction$$$EditAction -->
+<h3 class="fn" id="Action-enum"><a name="Action-enum"></a>enum QNdefNfcSmartPosterRecord::<span class="name">Action</span></h3>
+<p>This enum describes the course of action that a device should take with the content.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QNdefNfcSmartPosterRecord::UnspecifiedAction</code></td><td class="topAlign tblval"><code>-1</code></td><td class="topAlign">The action is not defined.</td></tr>
+<tr><td class="topAlign"><code>QNdefNfcSmartPosterRecord::DoAction</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Do the action (send the SMS, launch the browser, make the telephone call).</td></tr>
+<tr><td class="topAlign"><code>QNdefNfcSmartPosterRecord::SaveAction</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">Save for later (store the SMS in INBOX, put the URI in a bookmark, save the telephone number in contacts).</td></tr>
+<tr><td class="topAlign"><code>QNdefNfcSmartPosterRecord::EditAction</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">Open for editing (open an SMS in the SMS editor, open the URI in a URI editor, open the telephone number for editing).</td></tr>
+</table></div>
+<!-- @@@Action -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QNdefNfcSmartPosterRecord$$$QNdefNfcSmartPosterRecordconstQNdefNfcSmartPosterRecord& -->
+<h3 class="fn" id="QNdefNfcSmartPosterRecord-2"><a name="QNdefNfcSmartPosterRecord-2"></a>QNdefNfcSmartPosterRecord::<span class="name">QNdefNfcSmartPosterRecord</span>(const <span class="type"><a href="qndefnfcsmartposterrecord.html#QNdefNfcSmartPosterRecord">QNdefNfcSmartPosterRecord</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a new smart poster that is a copy of <i>other</i>.</p>
+<!-- @@@QNdefNfcSmartPosterRecord -->
+<!-- $$$QNdefNfcSmartPosterRecord$$$QNdefNfcSmartPosterRecordconstQNdefRecord& -->
+<h3 class="fn" id="QNdefNfcSmartPosterRecord-1"><a name="QNdefNfcSmartPosterRecord-1"></a>QNdefNfcSmartPosterRecord::<span class="name">QNdefNfcSmartPosterRecord</span>(const <span class="type"><a href="qndefrecord.html#QNdefRecord">QNdefRecord</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a new smart poster that is a copy of <i>other</i>.</p>
+<!-- @@@QNdefNfcSmartPosterRecord -->
+<!-- $$$QNdefNfcSmartPosterRecord[overload1]$$$QNdefNfcSmartPosterRecord -->
+<h3 class="fn" id="QNdefNfcSmartPosterRecord"><a name="QNdefNfcSmartPosterRecord"></a>QNdefNfcSmartPosterRecord::<span class="name">QNdefNfcSmartPosterRecord</span>()</h3>
+<p>Constructs a new empty smart poster.</p>
+<!-- @@@QNdefNfcSmartPosterRecord -->
+<!-- $$$operator=[overload1]$$$operator=constQNdefNfcSmartPosterRecord& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qndefnfcsmartposterrecord.html#QNdefNfcSmartPosterRecord">QNdefNfcSmartPosterRecord</a></span> &amp;QNdefNfcSmartPosterRecord::<span class="name">operator=</span>(const <span class="type"><a href="qndefnfcsmartposterrecord.html#QNdefNfcSmartPosterRecord">QNdefNfcSmartPosterRecord</a></span> &amp;<i>other</i>)</h3>
+<p>Assigns the <i>other</i> smart poster record to this record and returns a reference to this record.</p>
+<!-- @@@operator= -->
+<!-- $$$~QNdefNfcSmartPosterRecord[overload1]$$$~QNdefNfcSmartPosterRecord -->
+<h3 class="fn" id="dtor.QNdefNfcSmartPosterRecord"><a name="dtor.QNdefNfcSmartPosterRecord"></a>QNdefNfcSmartPosterRecord::<span class="name">~QNdefNfcSmartPosterRecord</span>()</h3>
+<p>Destroys the smart poster.</p>
+<!-- @@@~QNdefNfcSmartPosterRecord -->
+<!-- $$$action[overload1]$$$action -->
+<h3 class="fn" id="action"><a name="action"></a><span class="type"><a href="qndefnfcsmartposterrecord.html#Action-enum">QNdefNfcSmartPosterRecord::Action</a></span> QNdefNfcSmartPosterRecord::<span class="name">action</span>() const</h3>
+<p>Returns the action from the action record if available. Otherwise <a href="qndefnfcsmartposterrecord.html#Action-enum">UnspecifiedAction</a> is returned.</p>
+<p><b>See also </b><a href="qndefnfcsmartposterrecord.html#setAction">setAction</a>().</p>
+<!-- @@@action -->
+<!-- $$$addIcon[overload1]$$$addIconconstQNdefNfcIconRecord& -->
+<h3 class="fn" id="addIcon"><a name="addIcon"></a><span class="type">void</span> QNdefNfcSmartPosterRecord::<span class="name">addIcon</span>(const <span class="type">QNdefNfcIconRecord</span> &amp;<i>icon</i>)</h3>
+<p>Adds an icon record <i>icon</i> to the smart poster. If the smart poster already contains an icon record with the same type then the existing icon record is replaced.</p>
+<!-- @@@addIcon -->
+<!-- $$$addIcon$$$addIconconstQByteArray&constQByteArray& -->
+<h3 class="fn" id="addIcon-1"><a name="addIcon-1"></a><span class="type">void</span> QNdefNfcSmartPosterRecord::<span class="name">addIcon</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>type</i>, const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>data</i>)</h3>
+<p>Adds an icon record with type <i>type</i> and data <i>data</i> to the smart poster. If the smart poster already contains an icon record with the same type then the existing icon record is replaced.</p>
+<!-- @@@addIcon -->
+<!-- $$$addTitle[overload1]$$$addTitleconstQNdefNfcTextRecord& -->
+<h3 class="fn" id="addTitle"><a name="addTitle"></a><span class="type">bool</span> QNdefNfcSmartPosterRecord::<span class="name">addTitle</span>(const <span class="type"><a href="qndefnfctextrecord.html">QNdefNfcTextRecord</a></span> &amp;<i>text</i>)</h3>
+<p>Attempts to add a title record <i>text</i> to the smart poster. If the smart poster does not already contain a title record with the same locale as title record <i>text</i>, then the title record is added and the function returns true. Otherwise false is returned.</p>
+<!-- @@@addTitle -->
+<!-- $$$addTitle$$$addTitleconstQString&constQString&QNdefNfcTextRecord::Encoding -->
+<h3 class="fn" id="addTitle-1"><a name="addTitle-1"></a><span class="type">bool</span> QNdefNfcSmartPosterRecord::<span class="name">addTitle</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>text</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>locale</i>, <span class="type"><a href="qndefnfctextrecord.html#Encoding-enum">QNdefNfcTextRecord::Encoding</a></span> <i>encoding</i>)</h3>
+<p>Attempts to add a new title record with title <i>text</i>, locale <i>locale</i> and encoding <i>encoding</i>. If the smart poster does not already contain a title record with locale <i>locale</i>, then the title record is added and the function returns true. Otherwise false is returned.</p>
+<!-- @@@addTitle -->
+<!-- $$$hasAction[overload1]$$$hasAction -->
+<h3 class="fn" id="hasAction"><a name="hasAction"></a><span class="type">bool</span> QNdefNfcSmartPosterRecord::<span class="name">hasAction</span>() const</h3>
+<p>Returns true if the smart poster contains an action record, otherwise false.</p>
+<!-- @@@hasAction -->
+<!-- $$$hasIcon[overload1]$$$hasIconconstQByteArray& -->
+<h3 class="fn" id="hasIcon"><a name="hasIcon"></a><span class="type">bool</span> QNdefNfcSmartPosterRecord::<span class="name">hasIcon</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>mimetype</i> = QByteArray()) const</h3>
+<p>Returns true if the smart poster contains an icon record using type <i>mimetype</i>. If <i>mimetype</i> is empty then true is returned if the smart poster contains at least one icon record. In all other cases false is returned.</p>
+<!-- @@@hasIcon -->
+<!-- $$$hasSize[overload1]$$$hasSize -->
+<h3 class="fn" id="hasSize"><a name="hasSize"></a><span class="type">bool</span> QNdefNfcSmartPosterRecord::<span class="name">hasSize</span>() const</h3>
+<p>Returns true if the smart poster contains a size record, otherwise false.</p>
+<!-- @@@hasSize -->
+<!-- $$$hasTitle[overload1]$$$hasTitleconstQString& -->
+<h3 class="fn" id="hasTitle"><a name="hasTitle"></a><span class="type">bool</span> QNdefNfcSmartPosterRecord::<span class="name">hasTitle</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>locale</i> = QString()) const</h3>
+<p>Returns true if the smart poster contains a title record using locale <i>locale</i>. If <i>locale</i> is empty then true is returned if the smart poster contains at least one title record. In all cases false is returned.</p>
+<!-- @@@hasTitle -->
+<!-- $$$hasTypeInfo[overload1]$$$hasTypeInfo -->
+<h3 class="fn" id="hasTypeInfo"><a name="hasTypeInfo"></a><span class="type">bool</span> QNdefNfcSmartPosterRecord::<span class="name">hasTypeInfo</span>() const</h3>
+<p>Returns true if the smart poster contains a type record, otherwise false.</p>
+<!-- @@@hasTypeInfo -->
+<!-- $$$icon[overload1]$$$iconconstQByteArray& -->
+<h3 class="fn" id="icon"><a name="icon"></a><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> QNdefNfcSmartPosterRecord::<span class="name">icon</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>mimetype</i> = QByteArray()) const</h3>
+<p>Returns the associated icon record data if the smart poster contains an icon record with MIME type <i>mimetype</i>. If <i>mimetype</i> is omitted or empty then the first icon's record data is returned. In all other cases, an empty array is returned.</p>
+<!-- @@@icon -->
+<!-- $$$iconCount[overload1]$$$iconCount -->
+<h3 class="fn" id="iconCount"><a name="iconCount"></a><span class="type">int</span> QNdefNfcSmartPosterRecord::<span class="name">iconCount</span>() const</h3>
+<p>Returns the number of icon records contained inside the smart poster.</p>
+<!-- @@@iconCount -->
+<!-- $$$iconRecord[overload1]$$$iconRecordconstint -->
+<h3 class="fn" id="iconRecord"><a name="iconRecord"></a><span class="type">QNdefNfcIconRecord</span> QNdefNfcSmartPosterRecord::<span class="name">iconRecord</span>(const <span class="type">int</span> <i>index</i>) const</h3>
+<p>Returns the icon record corresponding to the index <i>index</i> inside the smart poster, where <i>index</i> is a value between 0 and <a href="qndefnfcsmartposterrecord.html#iconCount">iconCount</a>() - 1. Values outside of this range return an empty record.</p>
+<!-- @@@iconRecord -->
+<!-- $$$iconRecords[overload1]$$$iconRecords -->
+<h3 class="fn" id="iconRecords"><a name="iconRecords"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type">QNdefNfcIconRecord</span>&gt; QNdefNfcSmartPosterRecord::<span class="name">iconRecords</span>() const</h3>
+<p>Returns a copy of all icon records inside the smart poster.</p>
+<!-- @@@iconRecords -->
+<!-- $$$removeIcon[overload1]$$$removeIconconstQNdefNfcIconRecord& -->
+<h3 class="fn" id="removeIcon"><a name="removeIcon"></a><span class="type">bool</span> QNdefNfcSmartPosterRecord::<span class="name">removeIcon</span>(const <span class="type">QNdefNfcIconRecord</span> &amp;<i>icon</i>)</h3>
+<p>Attempts to remove the icon record <i>icon</i> from the smart poster. Removes the record and returns true if the smart poster contains a matching record, otherwise false.</p>
+<!-- @@@removeIcon -->
+<!-- $$$removeIcon$$$removeIconconstQByteArray& -->
+<h3 class="fn" id="removeIcon-1"><a name="removeIcon-1"></a><span class="type">bool</span> QNdefNfcSmartPosterRecord::<span class="name">removeIcon</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>type</i>)</h3>
+<p>Attempts to remove the icon record with type <i>type</i> from the smart poster. Removes the record and returns true if the smart poster contains a matching record, otherwise false.</p>
+<!-- @@@removeIcon -->
+<!-- $$$removeTitle[overload1]$$$removeTitleconstQNdefNfcTextRecord& -->
+<h3 class="fn" id="removeTitle"><a name="removeTitle"></a><span class="type">bool</span> QNdefNfcSmartPosterRecord::<span class="name">removeTitle</span>(const <span class="type"><a href="qndefnfctextrecord.html">QNdefNfcTextRecord</a></span> &amp;<i>text</i>)</h3>
+<p>Attempts to remove the title record <i>text</i> from the smart poster. Removes the record and returns true if the smart poster contains a matching record, otherwise false.</p>
+<!-- @@@removeTitle -->
+<!-- $$$removeTitle$$$removeTitleconstQString& -->
+<h3 class="fn" id="removeTitle-1"><a name="removeTitle-1"></a><span class="type">bool</span> QNdefNfcSmartPosterRecord::<span class="name">removeTitle</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>locale</i>)</h3>
+<p>Attempts to remove a title record with locale <i>locale</i> from the smart poster. Removes the record and returns true if the smart poster contains a matching record, otherwise false.</p>
+<!-- @@@removeTitle -->
+<!-- $$$setAction[overload1]$$$setActionQNdefNfcSmartPosterRecord::Action -->
+<h3 class="fn" id="setAction"><a name="setAction"></a><span class="type">void</span> QNdefNfcSmartPosterRecord::<span class="name">setAction</span>(<span class="type"><a href="qndefnfcsmartposterrecord.html#Action-enum">QNdefNfcSmartPosterRecord::Action</a></span> <i>act</i>)</h3>
+<p>Sets the action record to <i>act</i></p>
+<p><b>See also </b><a href="qndefnfcsmartposterrecord.html#action">action</a>().</p>
+<!-- @@@setAction -->
+<!-- $$$setIcons[overload1]$$$setIconsconstQList<QNdefNfcIconRecord>& -->
+<h3 class="fn" id="setIcons"><a name="setIcons"></a><span class="type">void</span> QNdefNfcSmartPosterRecord::<span class="name">setIcons</span>(const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type">QNdefNfcIconRecord</span>&gt; &amp;<i>icons</i>)</h3>
+<p>Adds the icon record list <i>icons</i> to the smart poster. Any existing records are overwritten.</p>
+<p><b>See also </b><a href="qndefnfcsmartposterrecord.html#hasIcon">hasIcon</a>() and <a href="qndefnfcsmartposterrecord.html#icon">icon</a>().</p>
+<!-- @@@setIcons -->
+<!-- $$$setSize[overload1]$$$setSizequint32 -->
+<h3 class="fn" id="setSize"><a name="setSize"></a><span class="type">void</span> QNdefNfcSmartPosterRecord::<span class="name">setSize</span>(<span class="type"><a href="../qtcore/qtglobal.html#quint32-typedef">quint32</a></span> <i>size</i>)</h3>
+<p>Sets the record <i>size</i>. The value contains the size in bytes of the object that the URI refers to.</p>
+<p><b>See also </b><a href="qndefnfcsmartposterrecord.html#size">size</a>() and <a href="qndefnfcsmartposterrecord.html#hasSize">hasSize</a>().</p>
+<!-- @@@setSize -->
+<!-- $$$setTitles[overload1]$$$setTitlesconstQList<QNdefNfcTextRecord>& -->
+<h3 class="fn" id="setTitles"><a name="setTitles"></a><span class="type">void</span> QNdefNfcSmartPosterRecord::<span class="name">setTitles</span>(const <span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qndefnfctextrecord.html">QNdefNfcTextRecord</a></span>&gt; &amp;<i>titles</i>)</h3>
+<p>Adds the title record list <i>titles</i> to the smart poster. Any existing records are overwritten.</p>
+<!-- @@@setTitles -->
+<!-- $$$setTypeInfo[overload1]$$$setTypeInfoconstQByteArray& -->
+<h3 class="fn" id="setTypeInfo"><a name="setTypeInfo"></a><span class="type">void</span> QNdefNfcSmartPosterRecord::<span class="name">setTypeInfo</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>type</i>)</h3>
+<p>Sets the type record to <i>type</i>. <i>type</i> must be UTF-8 encoded and describes the type of the object referenced by <a href="qndefnfcsmartposterrecord.html#uri">uri</a>()</p>
+<p><b>See also </b><a href="qndefnfcsmartposterrecord.html#typeInfo">typeInfo</a>().</p>
+<!-- @@@setTypeInfo -->
+<!-- $$$setUri[overload1]$$$setUriconstQNdefNfcUriRecord& -->
+<h3 class="fn" id="setUri"><a name="setUri"></a><span class="type">void</span> QNdefNfcSmartPosterRecord::<span class="name">setUri</span>(const <span class="type"><a href="qndefnfcurirecord.html">QNdefNfcUriRecord</a></span> &amp;<i>url</i>)</h3>
+<p>Sets the URI record to <i>url</i></p>
+<p><b>See also </b><a href="qndefnfcsmartposterrecord.html#uri">uri</a>().</p>
+<!-- @@@setUri -->
+<!-- $$$setUri$$$setUriconstQUrl& -->
+<h3 class="fn" id="setUri-1"><a name="setUri-1"></a><span class="type">void</span> QNdefNfcSmartPosterRecord::<span class="name">setUri</span>(const <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> &amp;<i>url</i>)</h3>
+<p>Constructs a URI record and sets its content inside the smart poster to <i>url</i></p>
+<!-- @@@setUri -->
+<!-- $$$size[overload1]$$$size -->
+<h3 class="fn" id="size"><a name="size"></a><span class="type"><a href="../qtcore/qtglobal.html#quint32-typedef">quint32</a></span> QNdefNfcSmartPosterRecord::<span class="name">size</span>() const</h3>
+<p>Returns the size from the size record if available; otherwise returns 0.</p>
+<p>The value is optional and contains the size in bytes of the object that the URI refers to. It may be used by the device to determine whether it can accommodate the object.</p>
+<p><b>See also </b><a href="qndefnfcsmartposterrecord.html#setSize">setSize</a>().</p>
+<!-- @@@size -->
+<!-- $$$title[overload1]$$$titleconstQString& -->
+<h3 class="fn" id="title"><a name="title"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QNdefNfcSmartPosterRecord::<span class="name">title</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>locale</i> = QString()) const</h3>
+<p>Returns the title record text associated with locale <i>locale</i> if available. If <i>locale</i> is empty then the title text of the first available record is returned. In all other cases an empty string is returned.</p>
+<!-- @@@title -->
+<!-- $$$titleCount[overload1]$$$titleCount -->
+<h3 class="fn" id="titleCount"><a name="titleCount"></a><span class="type">int</span> QNdefNfcSmartPosterRecord::<span class="name">titleCount</span>() const</h3>
+<p>Returns the number of title records contained inside the smart poster.</p>
+<!-- @@@titleCount -->
+<!-- $$$titleRecord[overload1]$$$titleRecordconstint -->
+<h3 class="fn" id="titleRecord"><a name="titleRecord"></a><span class="type"><a href="qndefnfctextrecord.html">QNdefNfcTextRecord</a></span> QNdefNfcSmartPosterRecord::<span class="name">titleRecord</span>(const <span class="type">int</span> <i>index</i>) const</h3>
+<p>Returns the title record corresponding to the index <i>index</i> inside the smart poster, where <i>index</i> is a value between 0 and <a href="qndefnfcsmartposterrecord.html#titleCount">titleCount</a>() - 1. Values outside of this range return an empty record.</p>
+<!-- @@@titleRecord -->
+<!-- $$$titleRecords[overload1]$$$titleRecords -->
+<h3 class="fn" id="titleRecords"><a name="titleRecords"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="qndefnfctextrecord.html">QNdefNfcTextRecord</a></span>&gt; QNdefNfcSmartPosterRecord::<span class="name">titleRecords</span>() const</h3>
+<p>Returns a copy of all title records inside the smart poster.</p>
+<!-- @@@titleRecords -->
+<!-- $$$typeInfo[overload1]$$$typeInfo -->
+<h3 class="fn" id="typeInfo"><a name="typeInfo"></a><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> QNdefNfcSmartPosterRecord::<span class="name">typeInfo</span>() const</h3>
+<p>Returns the UTF-8 encoded MIME type that describes the type of the objects that can be reached via <a href="qndefnfcsmartposterrecord.html#uri">uri</a>().</p>
+<p>If the type is not known the return <a href="../qtcore/qbytearray.html">QByteArray</a> is empty.</p>
+<p><b>See also </b><a href="qndefnfcsmartposterrecord.html#setTypeInfo">setTypeInfo</a>() and <a href="qndefnfcsmartposterrecord.html#hasTypeInfo">hasTypeInfo</a>().</p>
+<!-- @@@typeInfo -->
+<!-- $$$uri[overload1]$$$uri -->
+<h3 class="fn" id="uri"><a name="uri"></a><span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> QNdefNfcSmartPosterRecord::<span class="name">uri</span>() const</h3>
+<p>Returns the URI from the smart poster's URI record if set. Otherwise an empty URI is returned.</p>
+<p><b>See also </b><a href="qndefnfcsmartposterrecord.html#setUri">setUri</a>().</p>
+<!-- @@@uri -->
+<!-- $$$uriRecord[overload1]$$$uriRecord -->
+<h3 class="fn" id="uriRecord"><a name="uriRecord"></a><span class="type"><a href="qndefnfcurirecord.html">QNdefNfcUriRecord</a></span> QNdefNfcSmartPosterRecord::<span class="name">uriRecord</span>() const</h3>
+<p>Returns the smart poster's URI record if set. Otherwise an empty URI is returned.</p>
+<!-- @@@uriRecord -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qraycaster.cpp -->
+  <title>RayCaster QML Type | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-qml.html">QML Types</a></td><td >RayCaster QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">RayCaster QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$RayCaster-brief -->
+<p>used to perform ray casting tests in 3d world coordinates. <a href="#details">More...</a></p>
+<!-- @@@RayCaster -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import Qt3D.Render 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.11</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiates:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-raycaster.html"><a href="qt3drender-qraycaster.html">QRayCaster</a></td></tr></table></div><ul>
+<li><a href="qml-qt3d-render-raycaster-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qt3d-render-raycaster.html#direction-prop">direction</a></b></b> : vector3D</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-raycaster.html#length-prop">length</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-raycaster.html#origin-prop">origin</a></b></b> : vector3d</li>
+</ul>
+<!-- $$$RayCaster-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The 3d ray is defined by its origin, direction and length. It will be affected by the transformations applied to the entity it belongs to.</p>
+<p>Ray casting tests will be performed every frame as long as the component is enabled. The hits property will be updated with the list of intersections.</p>
+<p><b>See also </b><a href="qml-qt3d-render-abstractraycaster.html">AbstractRayCaster</a> and <a href="qml-qt3d-render-screenraycaster.html">ScreenRayCaster</a>.</p>
+<!-- @@@RayCaster -->
+<h2>Property Documentation</h2>
+<!-- $$$direction -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="direction-prop"></a><span class="name">direction</span> : <span class="type">vector3D</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the direction of the 3D ray. This should be a unit vector.</p>
+</div></div><!-- @@@direction -->
+<br/>
+<!-- $$$length -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="length-prop"></a><span class="name">length</span> : <span class="type"><a href="../qtqml/qml-real.html">real</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the length of the 3d ray.</p>
+</div></div><!-- @@@length -->
+<br/>
+<!-- $$$origin -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="origin-prop"></a><span class="name">origin</span> : <span class="type"><a href="../qtquick/qml-vector3d.html">vector3d</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the origin of the 3D ray in local coordinates.</p>
+</div></div><!-- @@@origin -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

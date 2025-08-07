@@ -1,0 +1,38 @@
+{
+    "version": 1,
+    "supportedProjectTypes": [ ],
+    "id": "K.GLSL",
+    "category": "U.GLSL",
+    "trDescription": "Creates a vertex shader in the Desktop OpenGL Shading Language (GLSL). Vertex shaders transform the positions, normals and texture coordinates of triangles, points and lines rendered with OpenGL.",
+    "trDisplayName": "Vertex Shader (Desktop OpenGL)",
+    "trDisplayCategory": "GLSL",
+    "iconText": "vert",
+    "platformIndependent": true,
+    "enabled": "%{JS: value('Plugins').indexOf('GLSLEditor') >= 0}",
+
+    "pages" :
+    [
+        {
+            "trDisplayName": "Location",
+            "trShortTitle": "Location",
+            "typeId": "File"
+        },
+        {
+            "trDisplayName": "Project Management",
+            "trShortTitle": "Summary",
+            "typeId": "Summary"
+        }
+    ],
+    "generators" :
+    [
+        {
+            "typeId": "File",
+            "data":
+            {
+                "source": "file.vert",
+                "target": "%{JS: Util.fileName(value('TargetPath'), Util.preferredSuffix('text/x-glsl-vert'))}",
+                "openInEditor": true
+            }
+        }
+    ]
+}

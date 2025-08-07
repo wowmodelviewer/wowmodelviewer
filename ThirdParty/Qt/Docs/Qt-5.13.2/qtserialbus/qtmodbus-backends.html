@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtmodbus-backends.qdoc -->
+  <title>Qt Modbus | Qt Serial Bus 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtserialbus-index.html">Qt Serial Bus</a></td><td >Qt Modbus</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtserialbus-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Modbus</h1>
+<span class="subtitle"></span>
+<!-- $$$qtmodbus-backends.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Modbus is a request/reply protocol that has one Modbus client in its network and may have many Modbus servers. Servers can control only their own internal states and clients can read and write data in them. Modbus is not restricted by the network type, in theory it can use any <a href="../qtcore/qiodevice.html">QIODevice</a>. However, not every plugin supports all classes derived from <a href="../qtcore/qiodevice.html">QIODevice</a>.</p>
+<p>Each Modbus server has four tables in which it can store data.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >name</th><th >data range in one field</th><th >permissions for client</th></tr></thead>
+<tr valign="top" class="odd"><td >Discrete Inputs</td><td >0-1</td><td >Read</td></tr>
+<tr valign="top" class="even"><td >Coils</td><td >0-1</td><td >Read/Write</td></tr>
+<tr valign="top" class="odd"><td >Input Registers</td><td >0-65535 (0xffff)</td><td >Read</td></tr>
+<tr valign="top" class="even"><td >Holding Registers</td><td >0-65535 (0xffff)</td><td >Read/Write</td></tr>
+</table></div>
+<p>The Modbus API provides some common API to access the Modbus devices:</p>
+<ul>
+<li><a href="qmodbusdevice.html">QModbusDevice</a> provides an API for common functionality with client and server.</li>
+<li><a href="qmodbusclient.html">QModbusClient</a> provides an API for direct access to Modbus client.</li>
+<li><a href="qmodbusserver.html">QModbusServer</a> provides an API for direct access to Modbus server.</li>
+<li><a href="qmodbusdataunit.html">QModbusDataUnit</a> represents a data value.</li>
+<li><a href="qmodbusreply.html">QModbusReply</a> is created by <a href="qmodbusclient.html">QModbusClient</a> as a handle for write/read operation.</li>
+</ul>
+</div>
+<!-- @@@qtmodbus-backends.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

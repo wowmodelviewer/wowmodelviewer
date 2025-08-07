@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- integrity-build-monolith-app-tutorial.qdoc -->
+  <title>Preparing BSP for i.MX6 Quad Board | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Preparing BSP for i.MX6 Quad Board</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="integrity-installing-dependencies.html" />
+  <link rel="next" href="integrity-building-qt-for-imx6quad-board.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="integrity-installing-dependencies.html">Installing Platform Dependencies</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="integrity-building-qt-for-imx6quad-board.html">Building Qt for i.MX6 Quad Board</a>
+</p><p/>
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Preparing BSP for i.MX6 Quad Board</h1>
+<span class="subtitle"></span>
+<!-- $$$integrity-preparing-bsp-for-imx6quad-board.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>With MULTI Launcher, you can prepare the board support package (BSP) for i.MX6 Quad board:</p>
+<ol class="1" type="1"><li>Start MULTI Launcher.</li>
+<li>Start Project Manager by selecting <b>Components</b> &gt; <b>Open Project Manager</b>.</li>
+<li>In your INTEGRITY installation, select the project file <i>default.gpj</i> under the <i>platform-cortex-a9</i> folder:<p class="centerAlign"><img src="images/open-project.png" alt="" /></p></li>
+<li>Select <b>Open</b>.</li>
+</ol>
+<p>In the MULTI Project Manager view, you see a tree structure of the opened project.</p>
+<p>Clean <i>default.gpj</i> and build the projects:</p>
+<ol class="1" type="1"><li>Select <b>Build</b> &gt; <b>Clean default.gpj</b>.</li>
+<li>Select the files <i>system_libs.gpj</i>, <i>bsp_libs.gpj</i>, and <i>kernel.gpj</i> one by one, and select <b>Build</b> &gt; <b>Build Project &lt;file name&gt;</b> for each selected file.</li>
+</ol>
+<p>Preparation for the board support package is now done.</p>
+</div>
+<!-- @@@integrity-preparing-bsp-for-imx6quad-board.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="integrity-installing-dependencies.html">Installing Platform Dependencies</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="integrity-building-qt-for-imx6quad-board.html">Building Qt for i.MX6 Quad Board</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

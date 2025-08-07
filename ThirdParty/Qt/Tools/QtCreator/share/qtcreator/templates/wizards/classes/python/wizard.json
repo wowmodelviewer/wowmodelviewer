@@ -1,0 +1,146 @@
+{
+    "version": 1,
+    "supportedProjectTypes": [ ],
+    "id": "P.PyClass",
+    "category": "U.Python",
+    "trDescription": "Creates new Python class file.",
+    "trDisplayName": "Python Class",
+    "trDisplayCategory": "Python",
+    "icon": "../../files/python/icon.png",
+    "enabled": "%{JS: value('Plugins').indexOf('PythonEditor') >= 0}",
+
+    "options":
+    [
+        { "key": "Base", "value":"%{JS: value('BaseCB') === '' ? value('BaseEdit') : value('BaseCB')}" },
+        { "key": "Imports", "value": "%{ImportQtCore}%{ImportQtWidgets}%{ImportQtDeclarative}"}
+    ],
+
+    "pages":
+    [
+        {
+            "trDisplayName": "Define Class",
+            "trShortTitle": "Details",
+            "typeId": "Fields",
+            "data" :
+            [
+                {
+                    "name": "Class",
+                    "trDisplayName": "Class name:",
+                    "mandatory": true,
+                    "type": "LineEdit",
+                    "data": { "validator": "^(?:[^\\d\\W]\\w*|)$" }
+                },
+                {
+                    "name": "Module",
+                    "trDisplayName": "Python module:",
+                    "type": "ComboBox",
+                    "data":
+                    {
+                        "items": ["PySide2", "PyQt5"]
+                    }
+                },
+                {
+                    "name": "BaseCB",
+                    "trDisplayName": "Base class:",
+                    "type": "ComboBox",
+                    "data":
+                    {
+                        "items": [ { "trKey": "<Custom>", "value": "" },
+                                   "QObject", "QWidget", "QMainWindow", "QDeclarativeItem" ]
+                    }
+                },
+                {
+                    "name": "BaseEdit",
+                    "type": "LineEdit",
+                    "enabled": "%{JS: value('BaseCB') === ''}",
+                    "mandatory": false,
+                    "data": { "trText": "%{BaseCB}" }
+                },
+
+
+
+                {
+                    "name": "Sp1",
+                    "type": "Spacer"
+                },
+                {
+                    "name": "ImportQtCore",
+                    "trDisplayName": "Import QtCore",
+                    "type": "CheckBox",
+                    "data":
+                    {
+                        "checkedValue": "QtCore",
+                        "uncheckedValue": "",
+                        "checked": "%{JS: value('Base') !== ''}"
+                    }
+                },
+                {
+                    "name": "ImportQWidget",
+                    "trDisplayName": "Import QtWidgets",
+                    "type": "CheckBox",
+                    "data":
+                    {
+                        "checkedValue": "QtWidgets",
+                        "uncheckedValue": "",
+                        "checked": "%{JS: value('Base') === 'QWidget'}"
+                    }
+                },
+                {
+                    "name": "ImportQtQuick",
+                    "trDisplayName": "Import QtQuick",
+                    "type": "CheckBox",
+                    "data":
+                    {
+                        "checkedValue": "QtQuick",
+                        "uncheckedValue": "",
+                        "checked": "%{JS: value('Base') === 'QQuickItem'}"
+                    }
+                },
+                {
+                    "name": "Sp2",
+                    "type": "Spacer"
+                },
+
+
+
+                {
+                    "name": "FileName",
+                    "type": "LineEdit",
+                    "trDisplayName": "Source file:",
+                    "mandatory": true,
+                    "data": { "trText": "%{JS: Util.fileName(value('Class'), Util.preferredSuffix('text/x-python'))}" }
+                },
+                {
+                    "name": "TargetPath",
+                    "type": "PathChooser",
+                    "trDisplayName": "Path:",
+                    "mandatory": true,
+                    "data":
+                    {
+                        "kind": "directory",
+                        "basePath": "%{InitialPath}",
+                        "path": "%{InitialPath}"
+                    }
+                }
+            ]
+        },
+        {
+            "trDisplayName": "Project Management",
+            "shortTitle": "Summary",
+            "typeId": "Summary"
+        }
+    ],
+
+    "generators":
+    [
+        {
+            "typeId": "File",
+            "data":
+            {
+                "source": "file.py",
+                "target": "%{FileName}",
+                "openInEditor": true
+            }
+        }
+    ]
+}

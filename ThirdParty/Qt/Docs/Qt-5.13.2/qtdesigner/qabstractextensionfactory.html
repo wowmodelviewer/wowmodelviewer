@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- extension.cpp -->
+  <title>QAbstractExtensionFactory Class | Qt Designer Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtdesigner-manual.html">Qt Designer Manual</a></td><td ><a href="qtdesigner-module.html">C++ Classes</a></td><td >QAbstractExtensionFactory</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtdesigner-manual.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAbstractExtensionFactory Class</h1>
+<!-- $$$QAbstractExtensionFactory-brief -->
+<p>The <a href="qabstractextensionfactory.html">QAbstractExtensionFactory</a> class provides an interface for extension factories in Qt Designer. <a href="#details">More...</a></p>
+<!-- @@@QAbstractExtensionFactory -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAbstractExtensionFactory&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += designer</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qextensionfactory.html">QExtensionFactory</a></p>
+</td></tr></table></div><ul>
+<li><a href="qabstractextensionfactory-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qabstractextensionfactory.html#dtor.QAbstractExtensionFactory">~QAbstractExtensionFactory</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QObject *</td><td class="memItemRight bottomAlign"><b><a href="qabstractextensionfactory.html#extension">extension</a></b>(QObject *<i>object</i>, const QString &amp;<i>iid</i>) const = 0</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAbstractExtensionFactory-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qabstractextensionfactory.html">QAbstractExtensionFactory</a> is not intended to be instantiated directly; use the <a href="qextensionfactory.html">QExtensionFactory</a> instead.</p>
+<p>In <i>Qt Designer</i>, extension factories are used to look up and create named extensions as they are required. For that reason, when implementing a custom extension, you must also create a <a href="qextensionfactory.html">QExtensionFactory</a>, i.e a class that is able to make an instance of your extension, and register it using <i>Qt Designer</i>'s <a href="qextensionmanager.html">extension manager</a>.</p>
+<p>When an extension is required, <i>Qt Designer</i>'s <a href="qextensionmanager.html">extension manager</a> will run through all its registered factories calling <a href="qextensionfactory.html#createExtension">QExtensionFactory::createExtension</a>() for each until the first one that is able to create the requested extension for the selected object, is found. This factory will then make an instance of the extension.</p>
+</div>
+<p><b>See also </b><a href="qextensionfactory.html">QExtensionFactory</a> and <a href="qextensionmanager.html">QExtensionManager</a>.</p>
+<!-- @@@QAbstractExtensionFactory -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$~QAbstractExtensionFactory[overload1]$$$~QAbstractExtensionFactory -->
+<h3 class="fn" id="dtor.QAbstractExtensionFactory"><a name="dtor.QAbstractExtensionFactory"></a><code>[virtual] </code>QAbstractExtensionFactory::<span class="name">~QAbstractExtensionFactory</span>()</h3>
+<p>Destroys the extension factory.</p>
+<!-- @@@~QAbstractExtensionFactory -->
+<!-- $$$extension[overload1]$$$extensionQObject*constQString& -->
+<h3 class="fn" id="extension"><a name="extension"></a><code>[pure virtual] </code><span class="type"><a href="../qtcore/qobject.html">QObject</a></span> *QAbstractExtensionFactory::<span class="name">extension</span>(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> *<i>object</i>, const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>iid</i>) const</h3>
+<p>Returns the extension specified by <i>iid</i> for the given <i>object</i>.</p>
+<!-- @@@extension -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

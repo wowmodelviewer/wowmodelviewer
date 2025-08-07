@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtcreator-dev.qdoc -->
+  <title>Extending Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+</tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Extending Qt Creator Manual 4.10.1</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#generating-domain-specific-code-and-templates">Generating Domain Specific Code and Templates</a></li>
+<li class="level2"><a href="#snippets">Snippets</a></li>
+<li class="level2"><a href="#file-and-project-templates">File and Project Templates</a></li>
+<li class="level2"><a href="#custom-wizards">Custom Wizards</a></li>
+<li class="level1"><a href="#supporting-additional-file-types">Supporting Additional File Types</a></li>
+<li class="level2"><a href="#mime-types">MIME Types</a></li>
+<li class="level2"><a href="#text-highlighting-and-indentation">Text Highlighting and Indentation</a></li>
+<li class="level2"><a href="#custom-text-editors">Custom Text Editors</a></li>
+<li class="level2"><a href="#other-custom-editors">Other Custom Editors</a></li>
+<li class="level1"><a href="#running-external-tools">Running External Tools</a></li>
+<li class="level2"><a href="#simple-external-tools">Simple External Tools</a></li>
+<li class="level2"><a href="#complex-external-tools">Complex External Tools</a></li>
+<li class="level1"><a href="#all-topics">All Topics</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Extending Qt Creator Manual</h1>
+<span class="subtitle"></span>
+<!-- $$$extending-index.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Qt Creator is a cross-platform integrated development environment (IDE) tailored to the needs of Qt developers.</p>
+<p>Qt Creator is extensible in various ways. For example, Qt Creator architecture is based on a plugin loader, which means that all functionality beyond plugin loading is implemented in plugins. However, you can extend and tweak many parts of Qt Creator without the need to resort to coding in C++ and implementing such a plugin.</p>
+<p>This document gives you an overview of the various ways in which you can extend Qt Creator, depending on what you want to achieve, and points you to the relevant documentation.</p>
+<a name="generating-domain-specific-code-and-templates"></a>
+<h2 id="generating-domain-specific-code-and-templates">Generating Domain Specific Code and Templates</h2>
+<p>If you regularly need to write the same code, be it little code snippets, whole files or classes spread over multiple files, or complete projects, you can create code snippets, templates, and wizards for that purpose.</p>
+<a name="snippets"></a>
+<h3 id="snippets">Snippets</h3>
+<p>Typically, snippets consist of a few lines of code (although they can also be plain text) that you regularly want to insert into a bigger body of code, but do not want to type each time. For example, <code>while</code> and <code>for</code> loops, <code>if-else</code> and <code>try-catch</code> constructs, and class skeletons. Snippets are triggered in the same way as normal code completion (see Providing Code Assist). Qt Creator contains a set of preconfigured snippets groups to which you can add your own snippets.</p>
+<ul>
+<li><a href="http://doc.qt.io/qtcreator/creator-completing-code.html#editing-code-snippets">Snippets User Interface</a></li>
+<li><a href="#snippets">Adding Snippets Groups</a></li>
+</ul>
+<a name="file-and-project-templates"></a>
+<h3 id="file-and-project-templates">File and Project Templates</h3>
+<p>You can extend the wizards in <b>File</b> &gt; <b>New File or Project</b> with your own file and project templates by writing JSON definition files for them.</p>
+<ul>
+<li><a href="http://doc.qt.io/qtcreator/creator-project-wizards.html">Adding New Custom Wizards</a></li>
+<li><a href="qtcreator-ui-text.html#">User Interface Text Guidelines</a></li>
+</ul>
+<a name="custom-wizards"></a>
+<h3 id="custom-wizards">Custom Wizards</h3>
+<p>If the above methods for code snippets and templates are not sufficient for your use case, you can create a custom Qt Creator plugin. While this gives you complete control over the wizard, it also requires you to write most of the UI and the logic yourself.</p>
+<ul>
+<li><a href="creating-plugins.html#">Creating Plugins</a></li>
+<li><a href="coding-style.html#">Qt Creator Coding Rules</a></li>
+<li><a href="qtcreator-dev-wizards.html#">Creating Wizards in Code</a></li>
+<li><a href="qtcreator-ui-text.html#">User Interface Text Guidelines</a></li>
+</ul>
+<a name="supporting-additional-file-types"></a>
+<h2 id="supporting-additional-file-types">Supporting Additional File Types</h2>
+<p>If you have files with extensions or MIME types that Qt Creator does not handle by default, you can edit the MIME type definitions, add highlight definition files, and create your own text editors.</p>
+<a name="mime-types"></a>
+<h3 id="mime-types">MIME Types</h3>
+<p>You might find that Qt Creator could handle a particular file of yours if it knew about the type of its contents. For example, C++ header or source files with file extensions that are not known to Qt Creator. You can adapt the MIME type definitions in Qt Creator to your specific setup, by adding or removing file extensions and specifying magic headers.</p>
+<ul>
+<li><a href="http://doc.qt.io/qtcreator/creator-mime-types.html">Editing MIME Types</a></li>
+<li><a href="http://standards.freedesktop.org/shared-mime-info-spec/shared-mime-info-spec-latest.html">MIME Type Specification Files</a></li>
+</ul>
+<a name="text-highlighting-and-indentation"></a>
+<h3 id="text-highlighting-and-indentation">Text Highlighting and Indentation</h3>
+<p>For text files, Qt Creator provides an easy way to add highlighting and indentation for file types that are not known to it by default. Generic highlighting is based on highlight definition files that are provided by the Kate Editor. You can download highlight definition files for use with Qt Creator and create your own definition files.</p>
+<ul>
+<li><a href="http://doc.qt.io/qtcreator/creator-editor-options.html#generic-highlighting">Generic Highlighting</a></li>
+<li><a href="http://kate-editor.org/2005/03/24/writing-a-syntax-highlighting-file/">Writing a Syntax Highlighting File</a></li>
+</ul>
+<a name="custom-text-editors"></a>
+<h3 id="custom-text-editors">Custom Text Editors</h3>
+<p>If you need more advanced features than the MIME type and highlighting features described above, such as custom text completion or features that rely on semantic analysis, you can extend Qt Creator with a text editor of your own. Qt Creator provides a special API for text editors that gives you a basis to build on, taking away some of the pain of implementing a text editor from the ground up.</p>
+<ul>
+<li><a href="creating-plugins.html#">Creating Plugins</a></li>
+<li><a href="coding-style.html#">Qt Creator Coding Rules</a></li>
+<li>Text Editors</li>
+<li>Providing Code Assist</li>
+</ul>
+<a name="other-custom-editors"></a>
+<h3 id="other-custom-editors">Other Custom Editors</h3>
+<p>You can also add a completely custom editor to gain complete control over its appearance and behavior.</p>
+<ul>
+<li><a href="creating-plugins.html#">Creating Plugins</a></li>
+<li><a href="coding-style.html#">Qt Creator Coding Rules</a></li>
+<li><a href="http://doc.qt.io/qt-5/whatsnew53.html#editors">Editors</a></li>
+</ul>
+<a name="running-external-tools"></a>
+<h2 id="running-external-tools">Running External Tools</h2>
+<p>Most software projects and development processes require various external tools. Several external tools, such as popular version control systems and build tool chains are integrated into Qt Creator. However, it is impossible for a single tool to cover all the use cases, and therefore you can integrate additional tools to Qt Creator.</p>
+<a name="simple-external-tools"></a>
+<h3 id="simple-external-tools">Simple External Tools</h3>
+<p>In Qt Creator, you can specify tools that you can then run from a menu or by using a keyboard shortcut that you assign. This allows you to accomplish several things, with some limitations. You specify a command to run, arguments and input for running it, and how to handle the output. To specify the values, you can use a set of internal Qt Creator variables, such as the file name of the current document or project, or the currently selected text in a text editor. If you find variables missing, please do not hesitate to fill a feature suggestion. The tool descriptions are saved as XML files that you can share.</p>
+<ul>
+<li><a href="http://doc.qt.io/qtcreator/creator-editor-external.html">Using External Tools</a></li>
+<li><a href="external-tool-spec.html#">External Tool Specification Files</a></li>
+</ul>
+<a name="complex-external-tools"></a>
+<h3 id="complex-external-tools">Complex External Tools</h3>
+<p>When you plan to integrate more complex tools, carefully consider whether there really are advantages to be gained by tightly integrating the tool into Qt Creator over loosely integrating it by mainly providing a means of starting the tool with fitting parameters.</p>
+<a name="loosely-integrating-tools"></a>
+<h4 id="loosely-integrating-tools">Loosely Integrating Tools</h4>
+<p>If no interaction is needed between Qt Creator and the external tool, just starting an external application with its own user interface is preferable. That way cluttering the Qt Creator UI is avoided, and the tool will be available with a nice interface even without using Qt Creator at all.</p>
+<p>Usually, you can use the external tool specification files to start the tool. If starting the tool and handling its output require more complex logic, you can add a menu item to Qt Creator with a plugin. If you need a way to configure the tool in Qt Creator, you can add an <b>Options</b> page for it.</p>
+<ul>
+<li><a href="http://doc.qt.io/qtcreator/creator-editor-external.html">Using External Tools</a></li>
+<li><a href="external-tool-spec.html#">External Tool Specification Files</a></li>
+<li><a href="creating-plugins.html#">Creating Plugins</a></li>
+<li><a href="coding-style.html#">Qt Creator Coding Rules</a></li>
+<li>Menus and Menu Items</li>
+<li>Options Pages</li>
+</ul>
+<a name="interacting-with-tool-output"></a>
+<h4 id="interacting-with-tool-output">Interacting with Tool Output</h4>
+<p>In some cases, running an external tool would not require tight integration with Qt Creator, but investigating the output of the tool would benefit from it. For example, some tools generate lists of issues in files that are part of the project and some tools create output that is related to the code. For these tools, it is useful to interactively switch between the output and the corresponding code.</p>
+<p>One way to handle that would be to let the tool create an output file, which is then opened within Qt Creator. You provide an editor (probably read-only) for handling this file. For lists of issues, consider creating task list files which are shown in the <b>Issues</b> output pane.</p>
+<ul>
+<li><a href="http://doc.qt.io/qtcreator/creator-task-lists.html">Showing Task List Files in the Issues Pane</a></li>
+<li><a href="creating-plugins.html#">Creating Plugins</a></li>
+<li><a href="coding-style.html#">Qt Creator Coding Rules</a></li>
+<li>Menus and Menu Items</li>
+<li>Options Pages</li>
+<li><a href="http://doc.qt.io/qt-5/whatsnew53.html#editors">Editors</a></li>
+</ul>
+<a name="all-topics"></a>
+<h2 id="all-topics">All Topics</h2>
+<ul>
+<li>Developing Qt Creator Plugins<ul>
+<li><a href="creating-plugins.html#">Creating Plugins</a></li>
+<li>Menus and Menu Items</li>
+<li><a href="qtcreator-dev-wizards.html#">Creating Wizards in Code</a></li>
+<li><a href="http://doc.qt.io/qt-5/whatsnew53.html#editors">Editors</a></li>
+<li>Text Editors</li>
+<li>Options Pages</li>
+</ul>
+</li>
+<li>Reference<ul>
+<li><a href="http://standards.freedesktop.org/shared-mime-info-spec/shared-mime-info-spec-latest.html">MIME Type Specification Files</a></li>
+<li><a href="external-tool-spec.html#">External Tool Specification Files</a></li>
+<li><a href="http://kate-editor.org/2005/03/24/writing-a-syntax-highlighting-file/">Highlight Definition Files</a></li>
+<li>Qt Creator Variables</li>
+<li><a href="qtcreator-ui-text.html#">User Interface Text Guidelines</a></li>
+<li><a href="qtcreator-documentation.html#">Writing Documentation</a></li>
+<li><a href="coding-style.html#">Qt Creator Coding Rules</a></li>
+<li><a href="qtcreator-api.html#">Qt Creator API Reference</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<!-- @@@extending-index.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

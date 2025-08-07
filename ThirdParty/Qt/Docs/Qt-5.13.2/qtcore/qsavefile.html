@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qsavefile.cpp -->
+  <title>QSaveFile Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QSaveFile</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSaveFile Class</h1>
+<!-- $$$QSaveFile-brief -->
+<p>The <a href="qsavefile.html">QSaveFile</a> class provides an interface for safely writing to files. <a href="#details">More...</a></p>
+<!-- @@@QSaveFile -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QSaveFile&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.1</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qfiledevice.html">QFileDevice</a></td></tr></table></div><p>This class was introduced in  Qt 5.1.</p>
+<ul>
+<li><a href="qsavefile-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsavefile.html#QSaveFile-2">QSaveFile</a></b>(const QString &amp;<i>name</i>, QObject *<i>parent</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsavefile.html#QSaveFile-1">QSaveFile</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsavefile.html#QSaveFile">QSaveFile</a></b>(const QString &amp;<i>name</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qsavefile.html#dtor.QSaveFile">~QSaveFile</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsavefile.html#cancelWriting">cancelWriting</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qsavefile.html#commit">commit</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qsavefile.html#directWriteFallback">directWriteFallback</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsavefile.html#setDirectWriteFallback">setDirectWriteFallback</a></b>(bool <i>enabled</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qsavefile.html#setFileName">setFileName</a></b>(const QString &amp;<i>name</i>)</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QString </td><td class="memItemRight bottomAlign"><b><a href="qsavefile.html#fileName">fileName</a></b>() const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qsavefile.html#open">open</a></b>(QIODevice::OpenMode <i>mode</i>) override</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual qint64 </td><td class="memItemRight bottomAlign"><b><a href="qsavefile.html#writeData">writeData</a></b>(const char *<i>data</i>, qint64 <i>len</i>) override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSaveFile-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qsavefile.html">QSaveFile</a> is an I/O device for writing text and binary files, without losing existing data if the writing operation fails.</p>
+<p>While writing, the contents will be written to a temporary file, and if no error happened, <a href="qsavefile.html#commit">commit</a>() will move it to the final file. This ensures that no data at the final file is lost in case an error happens while writing, and no partially-written file is ever present at the final location. Always use <a href="qsavefile.html">QSaveFile</a> when saving entire documents to disk.</p>
+<p><a href="qsavefile.html">QSaveFile</a> automatically detects errors while writing, such as the full partition situation, where <a href="qiodevice.html#write">write</a>() cannot write all the bytes. It will remember that an error happened, and will discard the temporary file in <a href="qsavefile.html#commit">commit</a>().</p>
+<p>Much like with <a href="qfile.html">QFile</a>, the file is opened with <a href="qsavefile.html#open">open</a>(). Data is usually read and written using <a href="qdatastream.html">QDataStream</a> or <a href="qtextstream.html">QTextStream</a>, but you can also call the <a href="qiodevice.html">QIODevice</a>-inherited functions <a href="qiodevice.html#read">read</a>(), <a href="qiodevice.html#readLine">readLine</a>(), <a href="qiodevice.html#readAll">readAll</a>(), <a href="qiodevice.html#write">write</a>().</p>
+<p>Unlike <a href="qfile.html">QFile</a>, calling <a href="qfiledevice.html#close">close</a>() is not allowed. <a href="qsavefile.html#commit">commit</a>() replaces it. If <a href="qsavefile.html#commit">commit</a>() was not called and the <a href="qsavefile.html">QSaveFile</a> instance is destroyed, the temporary file is discarded.</p>
+<p>To abort saving due to an application error, call <a href="qsavefile.html#cancelWriting">cancelWriting</a>(), so that even a call to <a href="qsavefile.html#commit">commit</a>() later on will not save.</p>
+</div>
+<p><b>See also </b><a href="qtextstream.html">QTextStream</a>, <a href="qdatastream.html">QDataStream</a>, <a href="qfileinfo.html">QFileInfo</a>, <a href="qdir.html">QDir</a>, <a href="qfile.html">QFile</a>, and <a href="qtemporaryfile.html">QTemporaryFile</a>.</p>
+<!-- @@@QSaveFile -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QSaveFile$$$QSaveFileconstQString&QObject* -->
+<h3 class="fn" id="QSaveFile-2"><a name="QSaveFile-2"></a>QSaveFile::<span class="name">QSaveFile</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>name</i>, <span class="type"><a href="qobject.html#QObject">QObject</a></span> *<i>parent</i>)</h3>
+<p>Constructs a new file object with the given <i>parent</i> to represent the file with the specified <i>name</i>.</p>
+<!-- @@@QSaveFile -->
+<!-- $$$QSaveFile$$$QSaveFileQObject* -->
+<h3 class="fn" id="QSaveFile-1"><a name="QSaveFile-1"></a>QSaveFile::<span class="name">QSaveFile</span>(<span class="type"><a href="qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a new file object with the given <i>parent</i>.</p>
+<!-- @@@QSaveFile -->
+<!-- $$$QSaveFile[overload1]$$$QSaveFileconstQString& -->
+<h3 class="fn" id="QSaveFile"><a name="QSaveFile"></a>QSaveFile::<span class="name">QSaveFile</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>name</i>)</h3>
+<p>Constructs a new file object to represent the file with the given <i>name</i>.</p>
+<!-- @@@QSaveFile -->
+<!-- $$$~QSaveFile[overload1]$$$~QSaveFile -->
+<h3 class="fn" id="dtor.QSaveFile"><a name="dtor.QSaveFile"></a><code>[virtual] </code>QSaveFile::<span class="name">~QSaveFile</span>()</h3>
+<p>Destroys the file object, discarding the saved contents unless <a href="qsavefile.html#commit">commit</a>() was called.</p>
+<!-- @@@~QSaveFile -->
+<!-- $$$cancelWriting[overload1]$$$cancelWriting -->
+<h3 class="fn" id="cancelWriting"><a name="cancelWriting"></a><span class="type">void</span> QSaveFile::<span class="name">cancelWriting</span>()</h3>
+<p>Cancels writing the new file.</p>
+<p>If the application changes its mind while saving, it can call cancelWriting(), which sets an error code so that <a href="qsavefile.html#commit">commit</a>() will discard the temporary file.</p>
+<p>Alternatively, it can simply make sure not to call <a href="qsavefile.html#commit">commit</a>().</p>
+<p>Further write operations are possible after calling this method, but none of it will have any effect, the written file will be discarded.</p>
+<p>This method has no effect when direct write fallback is used. This is the case when saving over an existing file in a readonly directory: no temporary file can be created, so the existing file is overwritten no matter what, and cancelWriting() cannot do anything about that, the contents of the existing file will be lost.</p>
+<p><b>See also </b><a href="qsavefile.html#commit">commit</a>().</p>
+<!-- @@@cancelWriting -->
+<!-- $$$commit[overload1]$$$commit -->
+<h3 class="fn" id="commit"><a name="commit"></a><span class="type">bool</span> QSaveFile::<span class="name">commit</span>()</h3>
+<p>Commits the changes to disk, if all previous writes were successful.</p>
+<p>It is mandatory to call this at the end of the saving operation, otherwise the file will be discarded.</p>
+<p>If an error happened during writing, deletes the temporary file and returns <code>false</code>. Otherwise, renames it to the final <a href="qsavefile.html#fileName">fileName</a> and returns <code>true</code> on success. Finally, closes the device.</p>
+<p><b>See also </b><a href="qsavefile.html#cancelWriting">cancelWriting</a>().</p>
+<!-- @@@commit -->
+<!-- $$$directWriteFallback[overload1]$$$directWriteFallback -->
+<h3 class="fn" id="directWriteFallback"><a name="directWriteFallback"></a><span class="type">bool</span> QSaveFile::<span class="name">directWriteFallback</span>() const</h3>
+<p>Returns <code>true</code> if the fallback solution for saving files in read-only directories is enabled.</p>
+<p><b>See also </b><a href="qsavefile.html#setDirectWriteFallback">setDirectWriteFallback</a>().</p>
+<!-- @@@directWriteFallback -->
+<!-- $$$fileName[overload1]$$$fileName -->
+<h3 class="fn" id="fileName"><a name="fileName"></a><code>[override virtual] </code><span class="type"><a href="qstring.html">QString</a></span> QSaveFile::<span class="name">fileName</span>() const</h3>
+<p>Reimplements: <a href="qfiledevice.html#fileName">QFileDevice::fileName</a>() const.</p>
+<p>Returns the name set by <a href="qsavefile.html#setFileName">setFileName</a>() or to the <a href="qsavefile.html">QSaveFile</a> constructor.</p>
+<p><b>See also </b><a href="qsavefile.html#setFileName">setFileName</a>().</p>
+<!-- @@@fileName -->
+<!-- $$$open[overload1]$$$openQIODevice::OpenMode -->
+<h3 class="fn" id="open"><a name="open"></a><code>[override virtual] </code><span class="type">bool</span> QSaveFile::<span class="name">open</span>(<span class="type"><a href="qiodevice.html#OpenModeFlag-enum">QIODevice::OpenMode</a></span> <i>mode</i>)</h3>
+<p>Reimplements: <a href="qiodevice.html#open">QIODevice::open</a>(QIODevice::OpenMode mode).</p>
+<p>Opens the file using <a href="qiodevice.html#OpenModeFlag-enum">OpenMode</a> <i>mode</i>, returning true if successful; otherwise false.</p>
+<p>Important: the <i>mode</i> must include <a href="qiodevice.html#OpenModeFlag-enum">QIODevice::WriteOnly</a>. It may also have additional flags, such as <a href="qiodevice.html#OpenModeFlag-enum">QIODevice::Text</a> and <a href="qiodevice.html#OpenModeFlag-enum">QIODevice::Unbuffered</a>.</p>
+<p><a href="qiodevice.html#OpenModeFlag-enum">QIODevice::ReadWrite</a>, <a href="qiodevice.html#OpenModeFlag-enum">QIODevice::Append</a>, <a href="qiodevice.html#OpenModeFlag-enum">QIODevice::NewOnly</a> and <a href="qiodevice.html#OpenModeFlag-enum">QIODevice::ExistingOnly</a> are not supported at the moment.</p>
+<p><b>See also </b><a href="qiodevice.html#OpenModeFlag-enum">QIODevice::OpenMode</a> and <a href="qsavefile.html#setFileName">setFileName</a>().</p>
+<!-- @@@open -->
+<!-- $$$setDirectWriteFallback[overload1]$$$setDirectWriteFallbackbool -->
+<h3 class="fn" id="setDirectWriteFallback"><a name="setDirectWriteFallback"></a><span class="type">void</span> QSaveFile::<span class="name">setDirectWriteFallback</span>(<span class="type">bool</span> <i>enabled</i>)</h3>
+<p>Allows writing over the existing file if necessary.</p>
+<p><a href="qsavefile.html">QSaveFile</a> creates a temporary file in the same directory as the final file and atomically renames it. However this is not possible if the directory permissions do not allow creating new files. In order to preserve atomicity guarantees, <a href="qsavefile.html#open">open</a>() fails when it cannot create the temporary file.</p>
+<p>In order to allow users to edit files with write permissions in a directory with restricted permissions, call setDirectWriteFallback() with <i>enabled</i> set to true, and the following calls to <a href="qsavefile.html#open">open</a>() will fallback to opening the existing file directly and writing into it, without the use of a temporary file. This does not have atomicity guarantees, i.e&#x2e; an application crash or for instance a power failure could lead to a partially-written file on disk. It also means <a href="qsavefile.html#cancelWriting">cancelWriting</a>() has no effect, in such a case.</p>
+<p>Typically, to save documents edited by the user, call setDirectWriteFallback(true), and to save application internal files (configuration files, data files, ..&#x2e;), keep the default setting which ensures atomicity.</p>
+<p><b>See also </b><a href="qsavefile.html#directWriteFallback">directWriteFallback</a>().</p>
+<!-- @@@setDirectWriteFallback -->
+<!-- $$$setFileName[overload1]$$$setFileNameconstQString& -->
+<h3 class="fn" id="setFileName"><a name="setFileName"></a><span class="type">void</span> QSaveFile::<span class="name">setFileName</span>(const <span class="type"><a href="qstring.html">QString</a></span> &amp;<i>name</i>)</h3>
+<p>Sets the <i>name</i> of the file. The name can have no path, a relative path, or an absolute path.</p>
+<p><b>See also </b><a href="qfile.html#setFileName">QFile::setFileName</a>() and <a href="qsavefile.html#fileName">fileName</a>().</p>
+<!-- @@@setFileName -->
+<!-- $$$writeData[overload1]$$$writeDataconstchar*qint64 -->
+<h3 class="fn" id="writeData"><a name="writeData"></a><code>[override virtual protected] </code><span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> QSaveFile::<span class="name">writeData</span>(const <span class="type">char</span> *<i>data</i>, <span class="type"><a href="qtglobal.html#qint64-typedef">qint64</a></span> <i>len</i>)</h3>
+<p>Reimplements: <a href="qfiledevice.html#writeData">QFileDevice::writeData</a>(const char *data, qint64 len).</p>
+<!-- @@@writeData -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

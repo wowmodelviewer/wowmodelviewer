@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qqmlapplicationengine.cpp -->
+  <title>QQmlApplicationEngine Class | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td ><a href="qtqml-module.html">C++ Classes</a></td><td >QQmlApplicationEngine</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QQmlApplicationEngine Class</h1>
+<!-- $$$QQmlApplicationEngine-brief -->
+<p><a href="qqmlapplicationengine.html">QQmlApplicationEngine</a> provides a convenient way to load an application from a single QML file. <a href="#details">More...</a></p>
+<!-- @@@QQmlApplicationEngine -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QQmlApplicationEngine&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += qml</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.1</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qqmlengine.html">QQmlEngine</a></td></tr></table></div><p>This class was introduced in  Qt 5.1.</p>
+<ul>
+<li><a href="qqmlapplicationengine-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qqmlapplicationengine.html#QQmlApplicationEngine-2">QQmlApplicationEngine</a></b>(const QString &amp;<i>filePath</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qqmlapplicationengine.html#QQmlApplicationEngine-1">QQmlApplicationEngine</a></b>(const QUrl &amp;<i>url</i>, QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qqmlapplicationengine.html#QQmlApplicationEngine">QQmlApplicationEngine</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qqmlapplicationengine.html#dtor.QQmlApplicationEngine">~QQmlApplicationEngine</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;QObject *&gt; </td><td class="memItemRight bottomAlign"><b><a href="qqmlapplicationengine.html#rootObjects">rootObjects</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlapplicationengine.html#load-1">load</a></b>(const QString &amp;<i>filePath</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlapplicationengine.html#load">load</a></b>(const QUrl &amp;<i>url</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlapplicationengine.html#loadData">loadData</a></b>(const QByteArray &amp;<i>data</i>, const QUrl &amp;<i>url</i> = QUrl())</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qqmlapplicationengine.html#objectCreated">objectCreated</a></b>(QObject *<i>object</i>, const QUrl &amp;<i>url</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QQmlApplicationEngine-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This class combines a <a href="qqmlengine.html">QQmlEngine</a> and <a href="qqmlcomponent.html">QQmlComponent</a> to provide a convenient way to load a single QML file. It also exposes some central application functionality to QML, which a C++/QML hybrid application would normally control from C++.</p>
+<p>It can be used like so:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QGuiApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QQmlApplicationEngine&gt;</span>
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span> app(argc<span class="operator">,</span> argv);
+      <span class="type"><a href="qqmlapplicationengine.html#QQmlApplicationEngine">QQmlApplicationEngine</a></span> engine(<span class="string">&quot;main.qml&quot;</span>);
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p>Unlike <a href="../qtquick/qquickview.html">QQuickView</a>, <a href="qqmlapplicationengine.html">QQmlApplicationEngine</a> does not automatically create a root window. If you are using visual items from Qt Quick, you will need to place them inside of a <a href="../qtquick/qml-qtquick-window-window.html">Window</a>.</p>
+<p>You can also use <a href="../qtcore/qcoreapplication.html">QCoreApplication</a> with <a href="qqmlapplicationengine.html">QQmlApplicationEngine</a>, if you are not using any QML modules which require a <a href="../qtgui/qguiapplication.html">QGuiApplication</a> (such as <code>QtQuick</code>).</p>
+<p>List of configuration changes from a default <a href="qqmlengine.html">QQmlEngine</a>:</p>
+<ul>
+<li>Connecting Qt.<a href="qqmlengine.html#quit">quit</a>() to <a href="../qtcore/qcoreapplication.html#quit">QCoreApplication::quit</a>()</li>
+<li>Automatically loads translation files from an i18n directory adjacent to the main QML file.<ul>
+<li>Translation files must have &quot;<a href="../qtdoc/whatsnew53.html#qml">qml_</a>&quot; prefix e.g&#x2e; qml_ja_JP.qm.</li>
+</ul>
+</li>
+<li>Automatically sets an incubation controller if the scene contains a <a href="../qtquick/qquickwindow.html">QQuickWindow</a>.</li>
+<li>Automatically sets a <code>QQmlFileSelector</code> as the url interceptor, applying file selectors to all QML files and assets.</li>
+</ul>
+<p>The engine behavior can be further tweaked by using the inherited methods from <a href="qqmlengine.html">QQmlEngine</a>.</p>
+</div>
+<!-- @@@QQmlApplicationEngine -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QQmlApplicationEngine$$$QQmlApplicationEngineconstQString&QObject* -->
+<h3 class="fn" id="QQmlApplicationEngine-2"><a name="QQmlApplicationEngine-2"></a>QQmlApplicationEngine::<span class="name">QQmlApplicationEngine</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>filePath</i>, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Create a new <a href="qqmlapplicationengine.html">QQmlApplicationEngine</a> and loads the QML file at the given <i>filePath</i>, which must be a local file path. If a relative path is given then it will be interpreted as relative to the working directory of the application.</p>
+<p>This is provided as a convenience, and is the same as using the empty constructor and calling load afterwards.</p>
+<!-- @@@QQmlApplicationEngine -->
+<!-- $$$QQmlApplicationEngine$$$QQmlApplicationEngineconstQUrl&QObject* -->
+<h3 class="fn" id="QQmlApplicationEngine-1"><a name="QQmlApplicationEngine-1"></a>QQmlApplicationEngine::<span class="name">QQmlApplicationEngine</span>(const <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> &amp;<i>url</i>, <span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Create a new <a href="qqmlapplicationengine.html">QQmlApplicationEngine</a> and loads the QML file at the given <i>url</i>. This is provided as a convenience, and is the same as using the empty constructor and calling load afterwards.</p>
+<!-- @@@QQmlApplicationEngine -->
+<!-- $$$QQmlApplicationEngine[overload1]$$$QQmlApplicationEngineQObject* -->
+<h3 class="fn" id="QQmlApplicationEngine"><a name="QQmlApplicationEngine"></a>QQmlApplicationEngine::<span class="name">QQmlApplicationEngine</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Create a new <a href="qqmlapplicationengine.html">QQmlApplicationEngine</a> with the given <i>parent</i>. You will have to call <a href="qqmlapplicationengine.html#load">load</a>() later in order to load a QML file.</p>
+<!-- @@@QQmlApplicationEngine -->
+<!-- $$$load$$$loadconstQString& -->
+<h3 class="fn" id="load-1"><a name="load-1"></a><code>[slot] </code><span class="type">void</span> QQmlApplicationEngine::<span class="name">load</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>filePath</i>)</h3>
+<p>Loads the root QML file located at <i>filePath</i>. <i>filePath</i> must be a path to a local file. If <i>filePath</i> is a relative path, it is taken as relative to the application's working directory. The object tree defined by the file is instantiated immediately.</p>
+<p>If an error occurs, error messages are printed with <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>.</p>
+<!-- @@@load -->
+<!-- $$$load[overload1]$$$loadconstQUrl& -->
+<h3 class="fn" id="load"><a name="load"></a><code>[slot] </code><span class="type">void</span> QQmlApplicationEngine::<span class="name">load</span>(const <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> &amp;<i>url</i>)</h3>
+<p>Loads the root QML file located at <i>url</i>. The object tree defined by the file is created immediately for local file urls. Remote urls are loaded asynchronously, listen to the <a href="qqmlapplicationengine.html#objectCreated">objectCreated</a> signal to determine when the object tree is ready.</p>
+<p>If an error occurs, the <a href="qqmlapplicationengine.html#objectCreated">objectCreated</a> signal is emitted with a null pointer as parameter and error messages are printed with <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>.</p>
+<!-- @@@load -->
+<!-- $$$loadData[overload1]$$$loadDataconstQByteArray&constQUrl& -->
+<h3 class="fn" id="loadData"><a name="loadData"></a><code>[slot] </code><span class="type">void</span> QQmlApplicationEngine::<span class="name">loadData</span>(const <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> &amp;<i>data</i>, const <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> &amp;<i>url</i> = QUrl())</h3>
+<p>Loads the QML given in <i>data</i>. The object tree defined by <i>data</i> is instantiated immediately.</p>
+<p>If a <i>url</i> is specified it is used as the base url of the component. This affects relative paths within the data and error messages.</p>
+<p>If an error occurs, error messages are printed with <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>.</p>
+<!-- @@@loadData -->
+<!-- $$$objectCreated[overload1]$$$objectCreatedQObject*constQUrl& -->
+<h3 class="fn" id="objectCreated"><a name="objectCreated"></a><code>[signal] </code><span class="type">void</span> QQmlApplicationEngine::<span class="name">objectCreated</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>object</i>, const <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> &amp;<i>url</i>)</h3>
+<p>This signal is emitted when an object finishes loading. If loading was successful, <i>object</i> contains a pointer to the loaded object, otherwise the pointer is NULL.</p>
+<p>The <i>url</i> to the component the <i>object</i> came from is also provided.</p>
+<p><b>Note: </b>If the path to the component was provided as a <a href="../qtcore/qstring.html">QString</a> containing a relative path, the <i>url</i> will contain a fully resolved path to the file.</p><!-- @@@objectCreated -->
+<!-- $$$~QQmlApplicationEngine[overload1]$$$~QQmlApplicationEngine -->
+<h3 class="fn" id="dtor.QQmlApplicationEngine"><a name="dtor.QQmlApplicationEngine"></a><code>[override virtual] </code>QQmlApplicationEngine::<span class="name">~QQmlApplicationEngine</span>()</h3>
+<p>Destroys the <a href="qqmlapplicationengine.html">QQmlApplicationEngine</a> and all QML objects it loaded.</p>
+<!-- @@@~QQmlApplicationEngine -->
+<!-- $$$rootObjects[overload1]$$$rootObjects -->
+<h3 class="fn" id="rootObjects"><a name="rootObjects"></a><span class="type"><a href="../qtcore/qlist.html">QList</a></span>&lt;<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *&gt; QQmlApplicationEngine::<span class="name">rootObjects</span>() const</h3>
+<p>Returns a list of all the root objects instantiated by the <a href="qqmlapplicationengine.html">QQmlApplicationEngine</a>. This will only contain objects loaded via <a href="qqmlapplicationengine.html#load">load</a>() or a convenience constructor.</p>
+<p><b>Note: </b>In Qt versions prior to 5.9, this function is marked as non-<code>const</code>.</p><!-- @@@rootObjects -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

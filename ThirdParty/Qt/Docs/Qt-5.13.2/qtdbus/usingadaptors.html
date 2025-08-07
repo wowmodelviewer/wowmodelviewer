@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- dbus-adaptors.qdoc -->
+  <title>Using Qt D-Bus Adaptors | Qt D-Bus</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtdbus-index.html">Qt D-Bus</a></td><td >Using Qt D-Bus Adaptors</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtdbus-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Using Qt D-Bus Adaptors</h1>
+<span class="subtitle"></span>
+<!-- $$$usingadaptors.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Adaptors are special classes that are attached to any <a href="../qtcore/qobject.html">QObject</a>-derived class and provide the interface to the external world using D-Bus. Adaptors are intended to be lightweight classes whose main purpose is to relay calls to and from the real object, possibly validating or converting the input from the external world and, thus, protecting the real object.</p>
+<p>Unlike multiple inheritance, adaptors can be added at any time to any object (but not removed), which allows for greater flexibility when exporting existing classes. Another advantage of adaptors is to provide similar but not identical functionality in methods of the same name in different interfaces, a case which can be quite common when adding a new version of a standard interface to an object.</p>
+<p>In order to use an adaptor, one must create a class which inherits <a href="qdbusabstractadaptor.html">QDBusAbstractAdaptor</a>. Since that is a standard <a href="../qtcore/qobject.html">QObject</a>-derived class, the <a href="../qtcore/qobject.html#Q_OBJECT">Q_OBJECT</a> macro must appear in the declaration and the source file must be processed with the <a href="../qtdoc/moc.html">moc</a> tool. The class must also contain one <a href="../qtcore/qobject.html#Q_CLASSINFO">Q_CLASSINFO</a> entry with the <code>&quot;D-Bus Interface&quot;</code> name, declaring which interface it is exporting. Only one entry per class is supported.</p>
+<p>Any public slot in the class will be accessible through the bus over messages of the MethodCall type. (See <a href="qdbusdeclaringslots.html">Declaring Slots in D-Bus Adaptors</a> for more information). Signals in the class will be automatically relayed over D-Bus. However, not all types are allowed signals or slots' parameter lists: see <a href="qdbustypesystem.html">The Qt D-Bus Type System</a> for more information.</p>
+<p>Also, any property declared with <a href="../qtcore/qobject.html#Q_PROPERTY">Q_PROPERTY</a> will be automatically exposed over the Properties interface on D-Bus. Since the <a href="../qtcore/qobject.html">QObject</a> property system does not allow for non-readable properties, it is not possible to declare write-only properties using adaptors.</p>
+<p>More information:</p>
+<ul>
+<li><a href="qdbusdeclaringslots.html">Declaring Slots in D-Bus Adaptors</a></li>
+<li><a href="qdbusdeclaringsignals.html">Declaring Signals in D-Bus Adaptors</a></li>
+<li><a href="qdbustypesystem.html">The Qt D-Bus Type System</a></li>
+<li>In the <a href="qtdbus-complexpingpong-example.html">D-Bus Complex Ping Pong Example</a>, <code>complexpong.h</code> and <code>complexpong.cpp</code> show an implementation of <a href="qdbusabstractadaptor.html">QDBusAbstractAdaptor</a>.</li>
+</ul>
+</div>
+<p><b>See also </b><a href="qdbusabstractadaptor.html">QDBusAbstractAdaptor</a>.</p>
+<!-- @@@usingadaptors.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

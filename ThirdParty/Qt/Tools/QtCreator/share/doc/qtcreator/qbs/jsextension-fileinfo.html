@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- jsextension-fileinfo.qdoc -->
+  <title>FileInfo Service | Qbs Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qbs Manual</a></td><td >FileInfo Service</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qbs 1.14.0</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<p class="naviNextPrevious headerNavi">
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#available-operations">Available Operations</a></li>
+<li class="level2"><a href="#basename">baseName</a></li>
+<li class="level2"><a href="#canonicalpath">canonicalPath</a></li>
+<li class="level2"><a href="#cleanpath">cleanPath</a></li>
+<li class="level2"><a href="#completebasename">completeBaseName</a></li>
+<li class="level2"><a href="#completesuffix">completeSuffix</a></li>
+<li class="level2"><a href="#filename">fileName</a></li>
+<li class="level2"><a href="#fromnativeseparators">fromNativeSeparators</a></li>
+<li class="level2"><a href="#fromwindowsseparators">fromWindowsSeparators</a></li>
+<li class="level2"><a href="#isabsolutepath">isAbsolutePath</a></li>
+<li class="level2"><a href="#joinpaths">joinPaths</a></li>
+<li class="level2"><a href="#path">path</a></li>
+<li class="level2"><a href="#relativepath">relativePath</a></li>
+<li class="level2"><a href="#suffix">suffix</a></li>
+<li class="level2"><a href="#tonativeseparators">toNativeSeparators</a></li>
+<li class="level2"><a href="#towindowsseparators">toWindowsSeparators</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">FileInfo Service</h1>
+<span class="subtitle"></span>
+<!-- $$$jsextension-fileinfo.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The <code>FileInfo</code> service offers various operations on file paths, such as turning absolute paths into relative ones, splitting a path into its components, and so on.</p>
+<a name="available-operations"></a>
+<h2 id="available-operations">Available Operations</h2>
+<a name="basename"></a>
+<h3 id="basename">baseName</h3>
+<pre class="cpp">
+
+  FileInfo<span class="operator">.</span>baseName(filePath: string): string
+
+</pre>
+<p>Returns the file name of <code>filePath</code> up to (but not including) the first '.' character.</p>
+<a name="canonicalpath"></a>
+<h3 id="canonicalpath">canonicalPath</h3>
+<pre class="cpp">
+
+  FileInfo<span class="operator">.</span>canonicalPath(filePath: string): string
+
+</pre>
+<p>Returns a canonicalized <code>filePath</code>, i.e&#x2e; an absolute path without symbolic links or redundant &quot;.&quot; or &quot;..&quot; elements. On Windows, drive substitutions are also resolved.</p>
+<p>It is recommended to use <code>canonicalPath</code> in only those cases where canonical paths are really necessary. In most cases, <code>cleanPath</code> should be enough.</p>
+<a name="cleanpath"></a>
+<h3 id="cleanpath">cleanPath</h3>
+<pre class="cpp">
+
+  FileInfo<span class="operator">.</span>cleanPath(filePath: string): string
+
+</pre>
+<p>Returns <code>filePath</code> without redundant separators and with resolved occurrences of <code>.</code> and <code>..</code> components. For instance, <code>/usr/local//../bin/</code> becomes <code>/usr/bin</code>.</p>
+<a name="completebasename"></a>
+<h3 id="completebasename">completeBaseName</h3>
+<pre class="cpp">
+
+  FileInfo<span class="operator">.</span>completeBaseName(filePath: string): string
+
+</pre>
+<p>Returns the file name of <code>filePath</code> up to (but not including) the last '.' character.</p>
+<a name="completesuffix"></a>
+<h3 id="completesuffix">completeSuffix</h3>
+<pre class="cpp">
+
+  FileInfo<span class="operator">.</span>completeSuffix(filePath: string): string
+
+</pre>
+<p>Returns the file suffix of <code>filePath</code> from (but not including) the last '.' character. <p>This function was introduced in version 1.12.</p></p>
+<a name="filename"></a>
+<h3 id="filename">fileName</h3>
+<pre class="cpp">
+
+  FileInfo<span class="operator">.</span>fileName(filePath: string): string
+
+</pre>
+<p>Returns the last component of <code>filePath</code>, that is, everything after the last '/' character.</p>
+<a name="fromnativeseparators"></a>
+<h3 id="fromnativeseparators">fromNativeSeparators</h3>
+<pre class="cpp">
+
+  FileInfo<span class="operator">.</span>fromNativeSeparators(filePath: string): string
+
+</pre>
+<p>On Windows hosts, this function behaves the same as <a href="#fromwindowsseparators">fromWindowsSeparators</a>. On other operating systems, it returns the input unmodified.</p>
+<a name="fromwindowsseparators"></a>
+<h3 id="fromwindowsseparators">fromWindowsSeparators</h3>
+<pre class="cpp">
+
+  FileInfo<span class="operator">.</span>fromWindowsSeparators(filePath: string): string
+
+</pre>
+<p>Returns <code>filePath</code> with all '\' characters replaced by '/'.</p>
+<a name="isabsolutepath"></a>
+<h3 id="isabsolutepath">isAbsolutePath</h3>
+<pre class="cpp">
+
+  FileInfo<span class="operator">.</span>isAbsolutePath(filePath: string<span class="operator">,</span> hostOS<span class="operator">?</span>: string<span class="operator">[</span><span class="operator">]</span>): boolean
+
+</pre>
+<p>Returns true if <code>filePath</code> is an absolute path and false if it is a relative one. If <code>hostOS</code> is specified, treats <code>filePath</code> as a file path of the kind found on that platform. This parameter defaults to the host OS on which Qbs is running and should normally be omitted.</p>
+<a name="joinpaths"></a>
+<h3 id="joinpaths">joinPaths</h3>
+<pre class="cpp">
+
+  FileInfo<span class="operator">.</span>joinPaths(<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>paths: string<span class="operator">[</span><span class="operator">]</span>): string
+
+</pre>
+<p>Concatenates the given paths using the '/' character.</p>
+<a name="path"></a>
+<h3 id="path">path</h3>
+<pre class="cpp">
+
+  FileInfo<span class="operator">.</span>path(filePath: string<span class="operator">,</span> hostOS<span class="operator">?</span>: string<span class="operator">[</span><span class="operator">]</span>): string
+
+</pre>
+<p>Returns the part of <code>filePath</code> that is not the file name, that is, everything up to (but not including) the last '/' character. If <code>filePath</code> is just a file name, then '.' is returned. If <code>filePath</code> ends with a '/' character, then the file name is assumed to be empty for the purpose of the above definition. If <code>hostOS</code> is specified, treats <code>filePath</code> as a file path of the kind found on that platform. This parameter defaults to the host OS on which Qbs is running and should normally be omitted.</p>
+<a name="relativepath"></a>
+<h3 id="relativepath">relativePath</h3>
+<pre class="cpp">
+
+  FileInfo<span class="operator">.</span>relativePath(dirPath: string<span class="operator">,</span> filePath: string): string
+
+</pre>
+<p>Returns a relative path so that joining <code>dirPath</code> and the returned path results in <code>filePath</code>. If necessary, '..' components are inserted. The function assumes <code>dirPath</code> and <code>filePath</code> to be absolute paths and <code>dirPath</code> to be a directory.</p>
+<a name="suffix"></a>
+<h3 id="suffix">suffix</h3>
+<pre class="cpp">
+
+  FileInfo<span class="operator">.</span>suffix(filePath: string): string
+
+</pre>
+<p>Returns the file suffix of <code>filePath</code> from (but not including) the first '.' character. <p>This function was introduced in version 1.12.</p></p>
+<a name="tonativeseparators"></a>
+<h3 id="tonativeseparators">toNativeSeparators</h3>
+<pre class="cpp">
+
+  FileInfo<span class="operator">.</span>toNativeSeparators(filePath: string): string
+
+</pre>
+<p>On Windows hosts, this function behaves the same as <a href="#towindowsseparators">toWindowsSeparators</a>. On other operating systems, it returns the input unmodified.</p>
+<a name="towindowsseparators"></a>
+<h3 id="towindowsseparators">toWindowsSeparators</h3>
+<pre class="cpp">
+
+  FileInfo<span class="operator">.</span>toWindowsSeparators(filePath: string): string
+
+</pre>
+<p>Returns <code>filePath</code> with all '/' characters replaced by '\'.</p>
+</div>
+<!-- @@@jsextension-fileinfo.html -->
+<p class="naviNextPrevious footerNavi">
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmodbusdevice.cpp -->
+  <title>QModbusDevice Class | Qt Serial Bus 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtserialbus-index.html">Qt Serial Bus</a></td><td ><a href="qtserialbus-module.html">C++ Classes</a></td><td >QModbusDevice</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtserialbus-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QModbusDevice Class</h1>
+<!-- $$$QModbusDevice-brief -->
+<p>The <a href="qmodbusdevice.html">QModbusDevice</a> class is the base class for Modbus classes, <a href="qmodbusserver.html">QModbusServer</a> and <a href="qmodbusclient.html">QModbusClient</a>. <a href="#details">More...</a></p>
+<!-- @@@QModbusDevice -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QModbusDevice&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += serialbus</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qmodbusclient.html">QModbusClient</a> and <a href="qmodbusserver.html">QModbusServer</a></p>
+</td></tr></table></div><p>This class was introduced in  Qt 5.8.</p>
+<ul>
+<li><a href="qmodbusdevice-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdevice.html#ConnectionParameter-enum">ConnectionParameter</a></b> { SerialPortNameParameter, SerialParityParameter, SerialBaudRateParameter, SerialDataBitsParameter, ..., UserParameter }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdevice.html#Error-enum">Error</a></b> { NoError, ReadError, WriteError, ConnectionError, ..., UnknownError }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdevice.html#State-enum">State</a></b> { UnconnectedState, ConnectingState, ConnectedState, ClosingState }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdevice.html#QModbusDevice">QModbusDevice</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdevice.html#dtor.QModbusDevice">~QModbusDevice</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdevice.html#connectDevice">connectDevice</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVariant </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdevice.html#connectionParameter">connectionParameter</a></b>(int <i>parameter</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdevice.html#disconnectDevice">disconnectDevice</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QModbusDevice::Error </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdevice.html#error">error</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdevice.html#errorString">errorString</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdevice.html#setConnectionParameter">setConnectionParameter</a></b>(int <i>parameter</i>, const QVariant &amp;<i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QModbusDevice::State </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdevice.html#state">state</a></b>() const</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdevice.html#errorOccurred">errorOccurred</a></b>(QModbusDevice::Error <i>error</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdevice.html#stateChanged">stateChanged</a></b>(QModbusDevice::State <i>state</i>)</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdevice.html#close">close</a></b>() = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdevice.html#open">open</a></b>() = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdevice.html#setError">setError</a></b>(const QString &amp;<i>errorText</i>, QModbusDevice::Error <i>error</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qmodbusdevice.html#setState">setState</a></b>(QModbusDevice::State <i>newState</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QModbusDevice-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QModbusDevice -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$ConnectionParameter$$$SerialPortNameParameter$$$SerialParityParameter$$$SerialBaudRateParameter$$$SerialDataBitsParameter$$$SerialStopBitsParameter$$$NetworkPortParameter$$$NetworkAddressParameter$$$UserParameter -->
+<h3 class="fn" id="ConnectionParameter-enum"><a name="ConnectionParameter-enum"></a>enum QModbusDevice::<span class="name">ConnectionParameter</span></h3>
+<p>This enum describes the possible values that can be set for a Modbus device connection.</p>
+<p>The general purpose value (and the associated types) are:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QModbusDevice::SerialPortNameParameter</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">This parameter holds the serial port used for device communication, e.g&#x2e; COM1. <code>QString</code></td></tr>
+<tr><td class="topAlign"><code>QModbusDevice::SerialParityParameter</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">This parameter holds the parity checking mode. <code>QSerialPort::Parity</code></td></tr>
+<tr><td class="topAlign"><code>QModbusDevice::SerialBaudRateParameter</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">This parameter holds the data baud rate for the communication. <code>QSerialPort::BaudRate</code></td></tr>
+<tr><td class="topAlign"><code>QModbusDevice::SerialDataBitsParameter</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">This parameter holds the data bits in a frame. <code>QSerialPort::DataBits</code></td></tr>
+<tr><td class="topAlign"><code>QModbusDevice::SerialStopBitsParameter</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">This parameter holds the number of stop bits in a frame. <code>QSerialPort::StopBits</code></td></tr>
+<tr><td class="topAlign"><code>QModbusDevice::NetworkPortParameter</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">This parameter holds the network port. <code>int</code></td></tr>
+<tr><td class="topAlign"><code>QModbusDevice::NetworkAddressParameter</code></td><td class="topAlign tblval"><code>6</code></td><td class="topAlign">This parameter holds the host address for network communication. <code>QString</code></td></tr>
+</table></div>
+<p>User options:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="even"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QModbusDevice::UserParameter</code></td><td class="topAlign tblval"><code>0x100</code></td><td class="topAlign">The first parameter that can be used for user-specific purposes. <code>QVariant</code></td></tr>
+</table></div>
+<!-- @@@ConnectionParameter -->
+<!-- $$$Error$$$NoError$$$ReadError$$$WriteError$$$ConnectionError$$$ConfigurationError$$$TimeoutError$$$ProtocolError$$$ReplyAbortedError$$$UnknownError -->
+<h3 class="fn" id="Error-enum"><a name="Error-enum"></a>enum QModbusDevice::<span class="name">Error</span></h3>
+<p>This enum describes all the possible error conditions.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QModbusDevice::NoError</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">No errors have occurred.</td></tr>
+<tr><td class="topAlign"><code>QModbusDevice::ReadError</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">An error occurred during a read operation.</td></tr>
+<tr><td class="topAlign"><code>QModbusDevice::WriteError</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">An error occurred during a write operation.</td></tr>
+<tr><td class="topAlign"><code>QModbusDevice::ConnectionError</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">An error occurred when attempting to open the backend.</td></tr>
+<tr><td class="topAlign"><code>QModbusDevice::ConfigurationError</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign">An error occurred when attempting to set a configuration parameter.</td></tr>
+<tr><td class="topAlign"><code>QModbusDevice::TimeoutError</code></td><td class="topAlign tblval"><code>5</code></td><td class="topAlign">A timeout occurred during I/O. An I/O operation did not finish within a given time frame.</td></tr>
+<tr><td class="topAlign"><code>QModbusDevice::ProtocolError</code></td><td class="topAlign tblval"><code>6</code></td><td class="topAlign">A Modbus specific protocol error occurred.</td></tr>
+<tr><td class="topAlign"><code>QModbusDevice::ReplyAbortedError</code></td><td class="topAlign tblval"><code>7</code></td><td class="topAlign">The reply was aborted due to a disconnection of the device.</td></tr>
+<tr><td class="topAlign"><code>QModbusDevice::UnknownError</code></td><td class="topAlign tblval"><code>8</code></td><td class="topAlign">An unknown error occurred.</td></tr>
+</table></div>
+<!-- @@@Error -->
+<!-- $$$State$$$UnconnectedState$$$ConnectingState$$$ConnectedState$$$ClosingState -->
+<h3 class="fn" id="State-enum"><a name="State-enum"></a>enum QModbusDevice::<span class="name">State</span></h3>
+<p>This enum describes all possible device states.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QModbusDevice::UnconnectedState</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The device is disconnected.</td></tr>
+<tr><td class="topAlign"><code>QModbusDevice::ConnectingState</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The device is being connected.</td></tr>
+<tr><td class="topAlign"><code>QModbusDevice::ConnectedState</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The device is connected to the Modbus network.</td></tr>
+<tr><td class="topAlign"><code>QModbusDevice::ClosingState</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">The device is being closed.</td></tr>
+</table></div>
+<!-- @@@State -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QModbusDevice[overload1]$$$QModbusDeviceQObject* -->
+<h3 class="fn" id="QModbusDevice"><a name="QModbusDevice"></a>QModbusDevice::<span class="name">QModbusDevice</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a Modbus device with the specified <i>parent</i>.</p>
+<!-- @@@QModbusDevice -->
+<!-- $$$errorOccurred[overload1]$$$errorOccurredQModbusDevice::Error -->
+<h3 class="fn" id="errorOccurred"><a name="errorOccurred"></a><code>[signal] </code><span class="type">void</span> QModbusDevice::<span class="name">errorOccurred</span>(<span class="type"><a href="qmodbusdevice.html#Error-enum">QModbusDevice::Error</a></span> <i>error</i>)</h3>
+<p>This signal is emitted when an error of the type, <i>error</i>, occurs.</p>
+<!-- @@@errorOccurred -->
+<!-- $$$stateChanged[overload1]$$$stateChangedQModbusDevice::State -->
+<h3 class="fn" id="stateChanged"><a name="stateChanged"></a><code>[signal] </code><span class="type">void</span> QModbusDevice::<span class="name">stateChanged</span>(<span class="type"><a href="qmodbusdevice.html#State-enum">QModbusDevice::State</a></span> <i>state</i>)</h3>
+<p>This signal is emitted every time the state of the device changes. The new state is represented by <i>state</i>.</p>
+<p><b>See also </b><a href="qmodbusdevice.html#setState">setState</a>() and <a href="qmodbusdevice.html#state">state</a>().</p>
+<!-- @@@stateChanged -->
+<!-- $$$~QModbusDevice[overload1]$$$~QModbusDevice -->
+<h3 class="fn" id="dtor.QModbusDevice"><a name="dtor.QModbusDevice"></a><code>[virtual] </code>QModbusDevice::<span class="name">~QModbusDevice</span>()</h3>
+<p>Destroys the <a href="qmodbusdevice.html">QModbusDevice</a> instance</p>
+<!-- @@@~QModbusDevice -->
+<!-- $$$close[overload1]$$$close -->
+<h3 class="fn" id="close"><a name="close"></a><code>[pure virtual protected] </code><span class="type">void</span> QModbusDevice::<span class="name">close</span>()</h3>
+<p>This function is responsible for closing the Modbus connection. The implementation must ensure that the instance's <a href="qmodbusdevice.html#state">state</a>() is set to <a href="qmodbusdevice.html#State-enum">QModbusDevice::UnconnectedState</a>.</p>
+<p><b>See also </b><a href="qmodbusdevice.html#disconnectDevice">disconnectDevice</a>().</p>
+<!-- @@@close -->
+<!-- $$$connectDevice[overload1]$$$connectDevice -->
+<h3 class="fn" id="connectDevice"><a name="connectDevice"></a><span class="type">bool</span> QModbusDevice::<span class="name">connectDevice</span>()</h3>
+<p>Connects the device to the Modbus network. Returns <code>true</code> if the connection process was successfully initiated; otherwise <code>false</code>. Final connection success confirmation requires the <a href="qmodbusdevice.html#state">state</a>() changing to <a href="qmodbusdevice.html#State-enum">QModbusDevice::ConnectedState</a>.</p>
+<p>This function calls <a href="qmodbusdevice.html#open">open</a>() as part of its implementation.</p>
+<p><b>See also </b><a href="qmodbusdevice.html#open">open</a>().</p>
+<!-- @@@connectDevice -->
+<!-- $$$connectionParameter[overload1]$$$connectionParameterint -->
+<h3 class="fn" id="connectionParameter"><a name="connectionParameter"></a><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QModbusDevice::<span class="name">connectionParameter</span>(<span class="type">int</span> <i>parameter</i>) const</h3>
+<p>Returns the value associated with the given connection <i>parameter</i>. The returned value can be empty.</p>
+<p>By default the <code>QModbusDevice</code> is initialized with some common values. The serial port settings are even parity, a baud rate of 19200 bits per second, eight data bits and one stop bit. The network settings for the host address is set to local host and port to 502.</p>
+<p><b>Note: </b>For a serial connection to succeed, the <a href="qmodbusdevice.html#ConnectionParameter-enum">SerialPortNameParameter</a> needs to be set to a valid communication port. The information about valid serial ports can be obtained from <a href="../qtserialport/qserialportinfo.html">QSerialPortInfo</a>.</p><p><b>Note: </b>If the device is already connected, the settings are taken into account after reconnecting the device.</p><p><b>See also </b><a href="qmodbusdevice.html#setConnectionParameter">setConnectionParameter</a>() and <a href="qmodbusdevice.html#ConnectionParameter-enum">ConnectionParameter</a>.</p>
+<!-- @@@connectionParameter -->
+<!-- $$$disconnectDevice[overload1]$$$disconnectDevice -->
+<h3 class="fn" id="disconnectDevice"><a name="disconnectDevice"></a><span class="type">void</span> QModbusDevice::<span class="name">disconnectDevice</span>()</h3>
+<p>Disconnects the device.</p>
+<p>This function calls <a href="qmodbusdevice.html#close">close</a>() as part of its implementation.</p>
+<!-- @@@disconnectDevice -->
+<!-- $$$error[overload1]$$$error -->
+<h3 class="fn" id="error"><a name="error"></a><span class="type"><a href="qmodbusdevice.html#Error-enum">QModbusDevice::Error</a></span> QModbusDevice::<span class="name">error</span>() const</h3>
+<p>Returns the error state of the device.</p>
+<p><b>See also </b><a href="qmodbusdevice.html#setError">setError</a>() and <a href="qmodbusdevice.html#Error-enum">QModbusDevice::Error</a>.</p>
+<!-- @@@error -->
+<!-- $$$errorString[overload1]$$$errorString -->
+<h3 class="fn" id="errorString"><a name="errorString"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QModbusDevice::<span class="name">errorString</span>() const</h3>
+<p>Returns descriptive error text for the device error.</p>
+<p><b>See also </b><a href="qmodbusdevice.html#Error-enum">QModbusDevice::Error</a>.</p>
+<!-- @@@errorString -->
+<!-- $$$open[overload1]$$$open -->
+<h3 class="fn" id="open"><a name="open"></a><code>[pure virtual protected] </code><span class="type">bool</span> QModbusDevice::<span class="name">open</span>()</h3>
+<p>This function is called by <a href="qmodbusdevice.html#connectDevice">connectDevice</a>(). Subclasses must provide an implementation that returns <code>true</code> on successful Modbus connection or connection initiation; otherwise returns <code>false</code>.</p>
+<p>The implementation must ensure that the instance's <a href="qmodbusdevice.html#state">state</a>() is set to <a href="qmodbusdevice.html#State-enum">QModbusDevice::ConnectingState</a> or <a href="qmodbusdevice.html#State-enum">QModbusDevice::ConnectedState</a> upon success; otherwise <a href="qmodbusdevice.html#State-enum">QModbusDevice::UnconnectedState</a>. Typically, <a href="qmodbusdevice.html#State-enum">QModbusDevice::ConnectingState</a> is used when the connection process reports back asynchronously and <a href="qmodbusdevice.html#State-enum">QModbusDevice::ConnectedState</a> in case of synchronous connect behavior.</p>
+<p><b>See also </b><a href="qmodbusdevice.html#connectDevice">connectDevice</a>().</p>
+<!-- @@@open -->
+<!-- $$$setConnectionParameter[overload1]$$$setConnectionParameterintconstQVariant& -->
+<h3 class="fn" id="setConnectionParameter"><a name="setConnectionParameter"></a><span class="type">void</span> QModbusDevice::<span class="name">setConnectionParameter</span>(<span class="type">int</span> <i>parameter</i>, const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>value</i>)</h3>
+<p>Sets the value of <i>parameter</i> to <i>value</i>. If the <i>parameter</i> already exists, the previous value is overwritten. A active or running connection is not affected by such parameter changes.</p>
+<p><b>See also </b><a href="qmodbusdevice.html#ConnectionParameter-enum">ConnectionParameter</a> and <a href="qmodbusdevice.html#connectionParameter">connectionParameter</a>().</p>
+<!-- @@@setConnectionParameter -->
+<!-- $$$setError[overload1]$$$setErrorconstQString&QModbusDevice::Error -->
+<h3 class="fn" id="setError"><a name="setError"></a><code>[protected] </code><span class="type">void</span> QModbusDevice::<span class="name">setError</span>(const <span class="type"><a href="../qtcore/qstring.html">QString</a></span> &amp;<i>errorText</i>, <span class="type"><a href="qmodbusdevice.html#Error-enum">QModbusDevice::Error</a></span> <i>error</i>)</h3>
+<p>Sets the error state of the device. ModBus device implementations must use this function in case of an error to set the <i>error</i> type and a descriptive <i>errorText</i>.</p>
+<p><b>See also </b><a href="qmodbusdevice.html#error">error</a>() and <a href="qmodbusdevice.html#Error-enum">QModbusDevice::Error</a>.</p>
+<!-- @@@setError -->
+<!-- $$$setState[overload1]$$$setStateQModbusDevice::State -->
+<h3 class="fn" id="setState"><a name="setState"></a><code>[protected] </code><span class="type">void</span> QModbusDevice::<span class="name">setState</span>(<span class="type"><a href="qmodbusdevice.html#State-enum">QModbusDevice::State</a></span> <i>newState</i>)</h3>
+<p>Sets the state of the device to <i>newState</i>. Modbus device implementations must use this function to update the device state.</p>
+<p><b>See also </b><a href="qmodbusdevice.html#state">state</a>().</p>
+<!-- @@@setState -->
+<!-- $$$state[overload1]$$$state -->
+<h3 class="fn" id="state"><a name="state"></a><span class="type"><a href="qmodbusdevice.html#State-enum">QModbusDevice::State</a></span> QModbusDevice::<span class="name">state</span>() const</h3>
+<p>Returns the current state of the device.</p>
+<p><b>See also </b><a href="qmodbusdevice.html#setState">setState</a>() and <a href="qmodbusdevice.html#stateChanged">stateChanged</a>().</p>
+<!-- @@@state -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

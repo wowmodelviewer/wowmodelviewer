@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-projects-settings-run.qdoc -->
+  <title>Specifying Run Settings | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Specifying Run Settings</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-build-settings.html" />
+  <link rel="next" href="creator-editor-settings.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-build-settings.html">Specifying Build Settings</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-editor-settings.html">Specifying Editor Settings</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#creating-run-configurations-for-subprojects">Creating Run Configurations for Subprojects</a></li>
+<li class="level1"><a href="#specifying-run-settings-for-desktop-device-types">Specifying Run Settings for Desktop Device Types</a></li>
+<li class="level1"><a href="#specifying-valgrind-settings">Specifying Valgrind Settings</a></li>
+<li class="level1"><a href="#specifying-debugger-settings">Specifying Debugger Settings</a></li>
+<li class="level1"><a href="#specifying-run-settings-for-android-devices">Specifying Run Settings for Android Devices</a></li>
+<li class="level1"><a href="#specifying-run-settings-for-linux-based-devices">Specifying Run Settings for Linux-Based Devices</a></li>
+<li class="level1"><a href="#specifying-run-settings-for-qnx-devices">Specifying Run Settings for QNX Devices</a></li>
+<li class="level1"><a href="#specifying-run-settings-for-embedded-devices">Specifying Run Settings for Embedded Devices</a></li>
+<li class="level1"><a href="#selecting-the-run-environment">Selecting the Run Environment</a></li>
+<li class="level1"><a href="#specifying-a-custom-executable-to-run">Specifying a Custom Executable to Run</a></li>
+<li class="level1"><a href="#specifying-run-settings-for-qt-quick-ui-projects">Specifying Run Settings for Qt Quick UI Projects</a></li>
+<li class="level1"><a href="#specifying-run-settings-for-python-projects">Specifying Run Settings for Python Projects</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Specifying Run Settings</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-run-settings.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The run settings to specify depend on the type of the project and on the <a href="creator-glossary.html#glossary-buildandrun-kit">kit</a> that you build and run the project with.</p>
+<p>Qt Creator automatically creates run configurations for your project. To view and modify them, select <b>Projects</b> &gt; <b>Build &amp; Run</b> &gt; <b>Run</b>.</p>
+<p>The available run configurations are listed in the <b>Run configuration</b> field. To add run configurations for a project, select <b>Add</b>. To remove the current run configuration, select <b>Remove</b>. To rename the current run configuration, select <b>Rename</b>.</p>
+<p>To prevent Qt Creator from automatically creating run configurations, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Build &amp; Run</b>, and then deselect the <b>Create suitable run configurations automatically</b> check box.</p>
+<p>The run configurations for qmake projects derive their executable from the parsed .pro files. For more information on how the commands are constructed, see <a href="creator-build-settings.html#starting-external-processes">Starting External Processes</a>.</p>
+<p>Qt Creator automatically adds run configurations for all targets specified in the CMake project file, <code>CMakeLists.txt</code>.</p>
+<a name="creating-run-configurations-for-subprojects"></a>
+<h2 id="creating-run-configurations-for-subprojects">Creating Run Configurations for Subprojects</h2>
+<p>To prevent Qt Creator from automatically creating run configurations for SUBDIRS projects, specify the following variable in the .pro file of the SUBDIRS project: <code>CONFIG += qtc_runnable</code>.</p>
+<p>Qt Creator creates run configurations only for subprojects that also have <code>CONFIG += qtc_runnable</code> set in their .pro files.</p>
+<a name="specifying-run-settings-for-desktop-device-types"></a>
+<h2 id="specifying-run-settings-for-desktop-device-types">Specifying Run Settings for Desktop Device Types</h2>
+<p>You can specify command line arguments to be passed to the executable and the working directory to use. The working directory defaults to the directory of the build result.</p>
+<p>For console applications, check the <b>Run in terminal</b> check box. To specify the terminal to use on Linux and macOS, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Environment</b> &gt; <b>System</b>.</p>
+<p>To run with special environment variables set up, select them in the <b>Run Environment</b> section. For more information, see <a href="#selecting-the-run-environment">Selecting the Run Environment</a>.</p>
+<p class="centerAlign"><img src="images/qtcreator-pprunsettings.png" alt="" /></p><p>When building an application, Qt Creator creates a list of directories where the linker will look for libraries that the application links to. By default, the linked libraries are made visible to the executable that Qt Creator is attempting to run. Usually, you should disable this option only if it causes unwanted side-effects or if you use deployment steps, such as <code>make install</code>, and want to make sure that the deployed application will find the libraries also when it is run without Qt Creator.</p>
+<p>To disable library linking for the current project, deselect the <b>Add build library search path to PATH</b> check box. To disable library linking for all projects, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>General</b>, and then deselect the <b>Add linker library search paths to run environment</b> check box.</p>
+<p>The <b>Use debug version of frameworks (DYLD_IMAGE_SUFFIX=_debug)</b> option (only available on macOS) enables you to debug (for example, step into) linked frameworks, such as the Qt framework itself. You do not need this option for debugging your application code.</p>
+<p>You can also create custom executable run configurations where you can set the executable to be run. For more information, see <a href="#specifying-a-custom-executable-to-run">Specifying a Custom Executable to Run</a>.</p>
+<a name="specifying-valgrind-settings"></a>
+<h2 id="specifying-valgrind-settings">Specifying Valgrind Settings</h2>
+<p>Qt Creator integrates <a href="creator-analyze-mode.html#">Valgrind code analysis tools</a> for detecting memory leaks and profiling function execution. You can configure the tools according to your needs.</p>
+<p>You can specify Valgrind settings either globally for all projects or separately for each project.</p>
+<p>To specify Valgrind settings for the current project:</p>
+<ol class="1" type="1"><li>In the <b>Valgrind Settings</b> section, select <b>Custom</b>.</li>
+<li>Specify Valgrind settings for the project.<p class="centerAlign"><img src="images/qtcreator-analyzer-settings.png" alt="&quot;Valgrind Settings&quot;" /></p></li>
+</ol>
+<p>For more information about the settings, see:</p>
+<ul>
+<li><a href="creator-cache-profiler.html#selecting-profiling-options">Selecting Profiling Options</a></li>
+<li><a href="creator-analyzer.html#selecting-options-for-memory-analysis">Selecting Options for Memory Analysis</a></li>
+</ul>
+<p>Click <b>Restore Global</b> to revert to the global settings.</p>
+<p>To specify global Valgrind settings, select <b>Tools &gt; Options &gt; Analyzer</b>.</p>
+<a name="specifying-debugger-settings"></a>
+<h2 id="specifying-debugger-settings">Specifying Debugger Settings</h2>
+<p class="centerAlign"><img src="images/qtquick-debugging-settings.png" alt="&quot;Debugger Settings&quot;" /></p><p>To select the languages to debug, select the <b>Enable C++</b> and <b>Enable QML</b> check boxes.</p>
+<p><b>Note: </b>Opening a socket at a well-known port presents a security risk. Anyone on the Internet could connect to the application that you are debugging and execute any JavaScript functions. Therefore, you must make sure that the port is properly protected by a firewall.</p><p>For more information about debugging, see <a href="creator-debugging.html#">Debugging</a>.</p>
+<a name="specifying-run-settings-for-android-devices"></a>
+<h2 id="specifying-run-settings-for-android-devices">Specifying Run Settings for Android Devices</h2>
+<p>To run and debug an application on an Android device, you must create connections from the development host to the device, as instructed in <a href="creator-developing-android.html#">Connecting Android Devices</a>.</p>
+<p>A default set of Android Activity manager (am) start options is applied when starting applications. You can specify additional start options in the <b>Activity manager start options</b> field. However, if the default options conflict with the added options, the application might not start.</p>
+<p>For example, to run the application as a particular user, enter the start option <code>--user 10</code>, where <code>10</code> is the user ID of the user account.</p>
+<p class="centerAlign"><img src="images/qtcreator-android-run-settings.png" alt="" /></p><p>You can specify shell commands to run before the application is started and after it is quit. For example, enter the following commands to unlock the screen and to switch to the user account <code>10</code> on the device before running the application:</p>
+<pre class="cpp">
+
+  input keyevent <span class="number">82</span>
+  am <span class="keyword">switch</span><span class="operator">-</span>user <span class="number">10</span>
+
+</pre>
+<p>Enter the following commands to switch back to the default user, <code>0</code>, and to unlock the screen after the application is quit:</p>
+<pre class="cpp">
+
+  am <span class="keyword">switch</span><span class="operator">-</span>user <span class="number">0</span>
+  input keyevent <span class="number">82</span>
+
+</pre>
+<a name="specifying-run-settings-for-linux-based-devices"></a>
+<h2 id="specifying-run-settings-for-linux-based-devices">Specifying Run Settings for Linux-Based Devices</h2>
+<p>To run and debug an application on a Linux-based device, you must create connections from the development host to the device and add the device configurations to <a href="creator-glossary.html#glossary-buildandrun-kit">kits</a>. Click <b>Manage Kits</b> to add devices to kits. For more information, see <a href="creator-developing-generic-linux.html#">Connecting Embedded Linux Devices</a>.</p>
+<p>When you run the application, Qt Creator copies the files to the connected device.</p>
+<p>The run settings display the path to the executable file on the development host and on the device. To specify that another application launches your application, for example, enter the command in the <b>Alternate executable on device</b> field and select the <b>Use this command instead</b> check box.</p>
+<p class="centerAlign"><img src="images/qtcreator-run-settings-linux.png" alt="&quot;Run settings for Linux-based devices&quot;" /></p><p>You can specify command line arguments to pass to your application in the <b>Arguments</b> field.</p>
+<a name="specifying-run-settings-for-qnx-devices"></a>
+<h2 id="specifying-run-settings-for-qnx-devices">Specifying Run Settings for QNX Devices</h2>
+<p>To run and debug an application on a QNX device, you must create connections from the development PC to the device. Click <b>Manage device configurations</b> to create a connection. For more information, see <a href="creator-developing-qnx.html#">Connecting QNX Devices</a>.</p>
+<p>Specifying run settings for QNX Neutrino devices is very similar to <a href="#specifying-run-settings-for-linux-based-devices">Specifying Run Settings for Linux-Based Devices</a>.</p>
+<a name="specifying-run-settings-for-embedded-devices"></a>
+<h2 id="specifying-run-settings-for-embedded-devices">Specifying Run Settings for Embedded Devices</h2>
+<p>To run and debug an application on an embedded device (commercial only), you must create connections from the development host to the device and add the device configurations to <a href="creator-glossary.html#glossary-buildandrun-kit">kits</a>. Select <b>Manage Kits</b> to add devices to kits. For more information, see the <a href="http://doc.qt.io/QtForDeviceCreation/qtee-installation-guide.html">Installation Guide</a> in the <a href="http://doc.qt.io/QtForDeviceCreation/index.html">Qt for Device Creation</a> documentation.</p>
+<p>The run settings display the path to the executable file on the development host and on the device.</p>
+<p>For more information on the deployment steps, see <a href="creator-deployment-embedded-linux.html#">Deploying Applications to Embedded Linux Devices</a>.</p>
+<a name="selecting-the-run-environment"></a>
+<h2 id="selecting-the-run-environment">Selecting the Run Environment</h2>
+<p>Qt Creator automatically selects the environment used for running the application based on the <a href="creator-glossary.html#glossary-device">device</a> type. You can edit the environment or select another environment in the <b>Run Environment</b> section.</p>
+<p>You can edit existing environment variables or add, reset and unset new variables.</p>
+<p class="centerAlign"><img src="images/qtcreator-run-environment.png" alt="&quot;Run Environment section&quot;" /></p><p>When running on the desktop, the <b>Build Environment</b> is used by default, but you can also use the <b>System Environment</b> without the additions made to the build environment. For more information, see <a href="creator-build-settings.html#build-environment">Build Environment</a>.</p>
+<p>To run in a clean system environment, select <b>Clean Environment</b>.</p>
+<p>When running on a mobile device connected to the development host, Qt Creator fetches information about the <b>Device Environment</b> from the device. Usually, it does not make sense to edit the device environment.</p>
+<p>To modify the environment variable values for the run environment, select <b>Batch Edit</b>. For more information, see <a href="creator-build-settings.html#batch-editing">Batch Editing</a>.</p>
+<a name="specifying-a-custom-executable-to-run"></a>
+<h2 id="specifying-a-custom-executable-to-run">Specifying a Custom Executable to Run</h2>
+<p>If you use CMake or the generic project type in Qt Creator, or want to run a custom desktop executable, create a <b>Custom Executable</b> run configuration for your project. For example, when working on a library, you can run a test application that links against the library.</p>
+<p>Specify the executable to run, command line arguments, working directory, and environment variables to use.</p>
+<p class="centerAlign"><img src="images/qmldesigner-run-custom-exe.png" alt="&quot;Run settings for custom executables&quot;" /></p><a name="specifying-run-settings-for-qt-quick-ui-projects"></a>
+<h2 id="specifying-run-settings-for-qt-quick-ui-projects">Specifying Run Settings for Qt Quick UI Projects</h2>
+<p>You can specify run settings for <a href="creator-glossary.html#glossary-buildandrun-kit">kits</a> with <b>Desktop</b> device type:</p>
+<ul>
+<li>In the <b>Arguments</b> field, you can specify command line arguments to be passed to the executable.</li>
+<li>In the <b>Main QML file</b>, select the file that Qt QML Viewer will be started with.</li>
+</ul>
+<p class="centerAlign"><img src="images/qmldesigner-run-settings.png" alt="&quot;Run settings for Qt Quick UI projects&quot;" /></p><a name="specifying-run-settings-for-python-projects"></a>
+<h2 id="specifying-run-settings-for-python-projects">Specifying Run Settings for Python Projects</h2>
+<p>You can specify settings for running Qt for Python applications:</p>
+<p class="centerAlign"><img src="images/qtcreator-python-run-settings.png" alt="" /></p><ul>
+<li>In the <b>Interpreter</b> field, specify the path to the Python executable.</li>
+<li>In the <b>Script</b> field, you can see the path to the main file of the project that will be run.</li>
+<li>In the <b>Command line arguments</b> field, specify command line arguments to be passed to the executable.</li>
+</ul>
+<p>If you want to run some other Python file than <code>main.py</code>, create a custom executable run configuration:</p>
+<p class="centerAlign"><img src="images/qtcreator-python-run-settings-custom-executable.png" alt="" /></p><ol class="1" type="1"><li>Select <b>Add</b> &gt; <b>Custom Executable</b>.</li>
+<li>In the <b>Executable</b> field, specify the path to the Python executable.</li>
+<li>In the <b>Command line arguments</b> field, select the Python file to run.</li>
+</ol>
+</div>
+<!-- @@@creator-run-settings.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-build-settings.html">Specifying Build Settings</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-editor-settings.html">Specifying Editor Settings</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

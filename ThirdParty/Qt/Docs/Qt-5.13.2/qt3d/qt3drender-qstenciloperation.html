@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qstenciloperation.cpp -->
+  <title>QStencilOperation Class | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-cpp.html">C++ Classes</a></td><td >QStencilOperation</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QStencilOperation Class</h1>
+<span class="small-subtitle">(<a href="qt3drender-qstenciloperation.html">Qt3DRender::QStencilOperation</a>)<br/></span>
+<!-- $$$QStencilOperation-brief -->
+<p>The <a href="qt3drender-qstenciloperation.html">QStencilOperation</a> class specifies stencil operation. <a href="#details">More...</a></p>
+<!-- @@@QStencilOperation -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QStencilOperation&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += 3drender</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiated By:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-stenciloperation.html">StencilOperation</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qt3drender-qrenderstate.html">Qt3DRender::QRenderState</a></td></tr></table></div><p>This class was introduced in  Qt 5.7.</p>
+<ul>
+<li><a href="qt3drender-qstenciloperation-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qt3drender-qstenciloperation.html#back-prop">back</a></b> : Qt3DRender::QStencilOperationArguments* const</li>
+<li class="fn"><b><a href="qt3drender-qstenciloperation.html#front-prop">front</a></b> : Qt3DRender::QStencilOperationArguments* const</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qstenciloperation.html#QStencilOperation">QStencilOperation</a></b>(Qt3DCore::QNode *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QStencilOperationArguments *</td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qstenciloperation.html#back-prop">back</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Qt3DRender::QStencilOperationArguments *</td><td class="memItemRight bottomAlign"><b><a href="qt3drender-qstenciloperation.html#front-prop">front</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QStencilOperation-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A <a href="qt3drender-qstenciloperation.html">Qt3DRender::QStencilOperation</a> class specifies the stencil operations for the front- and back-facing polygons. The stencil operation control what is done to fragment when the stencil and depth test pass or fail.</p>
+</div>
+<p><b>See also </b><a href="qt3drender-qstenciltest.html">Qt3DRender::QStencilTest</a>.</p>
+<!-- @@@QStencilOperation -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$back-prop$$$back -->
+<h3 class="fn" id="back-prop"><a name="back-prop"></a><span class="name">back</span> : <span class="type"><a href="qt3drender-qstenciloperationarguments.html">Qt3DRender::QStencilOperationArguments</a></span>* const</h3>
+<p>Holds the stencil operation arguments for back-facing polygons.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QStencilOperationArguments *</td><td class="memItemRight bottomAlign"><span class="name"><b>back</b></span>() const</td></tr>
+</table></div>
+<!-- @@@back -->
+<!-- $$$front-prop$$$front -->
+<h3 class="fn" id="front-prop"><a name="front-prop"></a><span class="name">front</span> : <span class="type"><a href="qt3drender-qstenciloperationarguments.html">Qt3DRender::QStencilOperationArguments</a></span>* const</h3>
+<p>Holds the stencil operation arguments for front-facing polygons.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> Qt3DRender::QStencilOperationArguments *</td><td class="memItemRight bottomAlign"><span class="name"><b>front</b></span>() const</td></tr>
+</table></div>
+<!-- @@@front -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QStencilOperation[overload1]$$$QStencilOperationQt3DCore::QNode* -->
+<h3 class="fn" id="QStencilOperation"><a name="QStencilOperation"></a>QStencilOperation::<span class="name">QStencilOperation</span>(<span class="type"><a href="qt3dcore-qnode.html">Qt3DCore::QNode</a></span> *<i>parent</i> = nullptr)</h3>
+<p>The constructor creates a new <a href="qt3drender-qstenciloperation.html">QStencilOperation::QStencilOperation</a> instance with the specified <i>parent</i>.</p>
+<!-- @@@QStencilOperation -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

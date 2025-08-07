@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdeclarativendeffilter.cpp -->
+  <title>NdefFilter QML Type | Qt NFC 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtnfc-index.html">Qt NFC</a></td><td ><a href="qtnfc-qmlmodule.html">QML Types</a></td><td >NdefFilter QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtnfc-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">NdefFilter QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$NdefFilter-brief -->
+<p>Represents a filtering constraint for NDEF message records. <a href="#details">More...</a></p>
+<!-- @@@NdefFilter -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtNfc 5.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.2</td></tr></table></div><ul>
+<li><a href="qml-qtnfc-ndeffilter-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtnfc-ndeffilter.html#maximum-prop">maximum</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtnfc-ndeffilter.html#minimum-prop">minimum</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtnfc-ndeffilter.html#type-prop">type</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtnfc-ndeffilter.html#typeNameFormat-prop">typeNameFormat</a></b></b> : QQmlNdefRecord::TypeNameFormat</li>
+</ul>
+<!-- $$$NdefFilter-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qml-qtnfc-ndeffilter.html">NdefFilter</a> type is used with the <a href="qml-qtnfc-nearfield.html">NearField</a> type to read NDEF messages from NFC Forum tags that match a given structure.</p>
+<pre class="cpp">
+
+  NearField {
+      filter: <span class="operator">[</span>
+          NdefFilter {
+              type: <span class="string">&quot;urn:nfc:wkt:U&quot;</span>
+              minimum: <span class="number">1</span>
+              maximum: <span class="number">1</span>
+          }
+      <span class="operator">]</span>
+  }
+
+</pre>
+<p><b>See also </b><a href="qml-qtnfc-nearfield.html">NearField</a> and <a href="qndeffilter.html">QNdefFilter</a>.</p>
+<!-- @@@NdefFilter -->
+<h2>Property Documentation</h2>
+<!-- $$$maximum -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="maximum-prop"></a><span class="name">maximum</span> : <span class="type">int</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the maximum number of records of the given type that must be in the NDEF message for it match.</p>
+<p>The default maximum is UINT_MAX.</p>
+<p><b>See also </b><a href="qml-qtnfc-ndeffilter.html#minimum-prop">minimum</a>.</p>
+</div></div><!-- @@@maximum -->
+<br/>
+<!-- $$$minimum -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="minimum-prop"></a><span class="name">minimum</span> : <span class="type">int</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the minimum number of records of the given type that must be in the NDEF message for it match.</p>
+<p>The default minimum is 1.</p>
+<p><b>See also </b><a href="qml-qtnfc-ndeffilter.html#maximum-prop">maximum</a>.</p>
+</div></div><!-- @@@minimum -->
+<br/>
+<!-- $$$type -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="type-prop"></a><span class="name">type</span> : <span class="type">string</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the NDEF record type that the filter matches. This property must be set to the fully qualified record type, i.e&#x2e; including the NIS and NSS prefixes. For example set to <code>urn:nfc:wkt:U</code> to match NFC RTD-URI records.</p>
+</div></div><!-- @@@type -->
+<br/>
+<!-- $$$typeNameFormat -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="typeNameFormat-prop"></a><span class="name">typeNameFormat</span> : <span class="type">QQmlNdefRecord::TypeNameFormat</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the NDEF record name format type <a href="qqmlndefrecord.html#TypeNameFormat-enum">QQmlNdefRecord::TypeNameFormat</a>.</p>
+</div></div><!-- @@@typeNameFormat -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

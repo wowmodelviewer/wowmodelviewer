@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwaylandwlscaler.cpp -->
+  <title>QWaylandWlScaler Class | Qt Wayland Compositor 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwaylandcompositor-index.html">Qt Wayland Compositor</a></td><td ><a href="qtwaylandcompositor-module.html">C++ Classes</a></td><td >QWaylandWlScaler</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwaylandcompositor-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QWaylandWlScaler Class</h1>
+<!-- $$$QWaylandWlScaler-brief -->
+<p>Provides an extension for surface resizing and croping. <a href="#details">More...</a></p>
+<!-- @@@QWaylandWlScaler -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QWaylandWlScaler&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += waylandcompositor</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> QWaylandCompositorExtensionTemplate</td></tr></table></div><p><b>This class is obsolete.</b> It is provided to keep old source code working. We strongly advise against using it in new code.</p>
+<p>This class was introduced in  Qt 5.13.</p>
+<ul>
+<li><a href="qwaylandwlscaler-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwaylandwlscaler.html#QWaylandWlScaler-1">QWaylandWlScaler</a></b>(QWaylandCompositor *<i>compositor</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwaylandwlscaler.html#QWaylandWlScaler">QWaylandWlScaler</a></b>()</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandwlscaler.html#initialize">initialize</a></b>() override</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> const struct wl_interface *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandwlscaler.html#interface">interface</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QWaylandWlScaler-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qwaylandwlscaler.html">QWaylandWlScaler</a> extension provides a way for clients to resize and crop surface contents.</p>
+<p><a href="qwaylandwlscaler.html">QWaylandWlScaler</a> corresponds to the Wayland interface, <code>wl_scaler</code>.</p>
+<p><code>wl_scaler</code> is a non-standard and deprecated protocol that has largely been replaced by <code>wp_viewporter</code>. I.e&#x2e; This extensions is only useful for supporting legacy clients.</p>
+</div>
+<p><b>See also </b><a href="qwaylandviewporter.html">QWaylandViewporter</a>.</p>
+<!-- @@@QWaylandWlScaler -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QWaylandWlScaler$$$QWaylandWlScalerQWaylandCompositor* -->
+<h3 class="fn" id="QWaylandWlScaler-1"><a name="QWaylandWlScaler-1"></a>QWaylandWlScaler::<span class="name">QWaylandWlScaler</span>(<span class="type"><a href="qwaylandcompositor.html">QWaylandCompositor</a></span> *<i>compositor</i>)</h3>
+<p>Constructs a <a href="qwaylandwlscaler.html" class="obsolete">QWaylandWlScaler</a> object for the provided <i>compositor</i>.</p>
+<!-- @@@QWaylandWlScaler -->
+<!-- $$$QWaylandWlScaler[overload1]$$$QWaylandWlScaler -->
+<h3 class="fn" id="QWaylandWlScaler"><a name="QWaylandWlScaler"></a>QWaylandWlScaler::<span class="name">QWaylandWlScaler</span>()</h3>
+<p>Constructs a <a href="qwaylandwlscaler.html" class="obsolete">QWaylandWlScaler</a> object.</p>
+<!-- @@@QWaylandWlScaler -->
+<!-- $$$initialize[overload1]$$$initialize -->
+<h3 class="fn" id="initialize"><a name="initialize"></a><code>[override virtual] </code><span class="type">void</span> QWaylandWlScaler::<span class="name">initialize</span>()</h3>
+<p>Initializes the extension.</p>
+<!-- @@@initialize -->
+<!-- $$$interface[overload1]$$$interface -->
+<h3 class="fn" id="interface"><a name="interface"></a><code>[static] </code>const <span class="type">struct</span> <span class="type">wl_interface</span> *QWaylandWlScaler::<span class="name">interface</span>()</h3>
+<p>Returns the Wayland interface for the <a href="qwaylandwlscaler.html" class="obsolete">QWaylandWlScaler</a>.</p>
+<!-- @@@interface -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

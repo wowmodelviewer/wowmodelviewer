@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwaylandclient.cpp -->
+  <title>QWaylandClient Class | Qt Wayland Compositor 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwaylandcompositor-index.html">Qt Wayland Compositor</a></td><td ><a href="qtwaylandcompositor-module.html">C++ Classes</a></td><td >QWaylandClient</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwaylandcompositor-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QWaylandClient Class</h1>
+<!-- $$$QWaylandClient-brief -->
+<p>The <a href="qwaylandclient.html">QWaylandClient</a> class represents a client connecting to the <a href="qwaylandcompositor.html">QWaylandCompositor</a>. <a href="#details">More...</a></p>
+<!-- @@@QWaylandClient -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QWaylandClient&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += waylandcompositor</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qobject.html">QObject</a></td></tr></table></div><p>This class was introduced in  Qt 5.8.</p>
+<ul>
+<li><a href="qwaylandclient-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qwaylandclient.html#compositor-prop">compositor</a></b> : QWaylandCompositor* const</li>
+<li class="fn"><b><a href="qwaylandclient.html#groupId-prop">groupId</a></b> : const qint64</li>
+<li class="fn"><b><a href="qwaylandclient.html#processId-prop">processId</a></b> : const qint64</li>
+<li class="fn"><b><a href="qwaylandclient.html#userId-prop">userId</a></b> : const qint64</li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qwaylandclient.html#dtor.QWaylandClient">~QWaylandClient</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> wl_client *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandclient.html#client">client</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandCompositor *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandclient.html#compositor-prop">compositor</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint64 </td><td class="memItemRight bottomAlign"><b><a href="qwaylandclient.html#groupId-prop">groupId</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandclient.html#kill">kill</a></b>(int <i>signal</i> = SIGTERM)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint64 </td><td class="memItemRight bottomAlign"><b><a href="qwaylandclient.html#processId-prop">processId</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> qint64 </td><td class="memItemRight bottomAlign"><b><a href="qwaylandclient.html#userId-prop">userId</a></b>() const</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandclient.html#close">close</a></b>()</td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandClient *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandclient.html#fromWlClient">fromWlClient</a></b>(QWaylandCompositor *<i>compositor</i>, wl_client *<i>wlClient</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QWaylandClient-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This class corresponds to a client connecting to the compositor using the Wayland protocol. It corresponds to the Wayland interface wl_client.</p>
+</div>
+<!-- @@@QWaylandClient -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$compositor-prop$$$compositor -->
+<h3 class="fn" id="compositor-prop"><a name="compositor-prop"></a><span class="name">compositor</span> : <span class="type"><a href="qwaylandcompositor.html">QWaylandCompositor</a></span>* const</h3>
+<p>This property holds the compositor of this <a href="qwaylandclient.html">QWaylandClient</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QWaylandCompositor *</td><td class="memItemRight bottomAlign"><span class="name"><b>compositor</b></span>() const</td></tr>
+</table></div>
+<!-- @@@compositor -->
+<!-- $$$groupId-prop$$$groupId -->
+<h3 class="fn" id="groupId-prop"><a name="groupId-prop"></a><span class="name">groupId</span> : const <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span></h3>
+<p>This property holds the group id of this <a href="qwaylandclient.html">QWaylandClient</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qint64 </td><td class="memItemRight bottomAlign"><span class="name"><b>groupId</b></span>() const</td></tr>
+</table></div>
+<!-- @@@groupId -->
+<!-- $$$processId-prop$$$processId -->
+<h3 class="fn" id="processId-prop"><a name="processId-prop"></a><span class="name">processId</span> : const <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span></h3>
+<p>This property holds the process id of this <a href="qwaylandclient.html">QWaylandClient</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qint64 </td><td class="memItemRight bottomAlign"><span class="name"><b>processId</b></span>() const</td></tr>
+</table></div>
+<!-- @@@processId -->
+<!-- $$$userId-prop$$$userId -->
+<h3 class="fn" id="userId-prop"><a name="userId-prop"></a><span class="name">userId</span> : const <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span></h3>
+<p>This property holds the user id of this <a href="qwaylandclient.html">QWaylandClient</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> qint64 </td><td class="memItemRight bottomAlign"><span class="name"><b>userId</b></span>() const</td></tr>
+</table></div>
+<!-- @@@userId -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$close[overload1]$$$close -->
+<h3 class="fn" id="close"><a name="close"></a><code>[slot] </code><span class="type">void</span> QWaylandClient::<span class="name">close</span>()</h3>
+<p>Closes the client.</p>
+<!-- @@@close -->
+<!-- $$$~QWaylandClient[overload1]$$$~QWaylandClient -->
+<h3 class="fn" id="dtor.QWaylandClient"><a name="dtor.QWaylandClient"></a><code>[override virtual] </code>QWaylandClient::<span class="name">~QWaylandClient</span>()</h3>
+<p>Destroys the <a href="qwaylandclient.html">QWaylandClient</a>.</p>
+<!-- @@@~QWaylandClient -->
+<!-- $$$client[overload1]$$$client -->
+<h3 class="fn" id="client"><a name="client"></a><span class="type">wl_client</span> *QWaylandClient::<span class="name">client</span>() const</h3>
+<p>Returns the Wayland client of this <a href="qwaylandclient.html">QWaylandClient</a>.</p>
+<!-- @@@client -->
+<!-- $$$fromWlClient[overload1]$$$fromWlClientQWaylandCompositor*wl_client* -->
+<h3 class="fn" id="fromWlClient"><a name="fromWlClient"></a><code>[static] </code><span class="type">QWaylandClient</span> *QWaylandClient::<span class="name">fromWlClient</span>(<span class="type"><a href="qwaylandcompositor.html">QWaylandCompositor</a></span> *<i>compositor</i>, <span class="type">wl_client</span> *<i>wlClient</i>)</h3>
+<p>Returns the <a href="qwaylandclient.html">QWaylandClient</a> corresponding to the Wayland client <i>wlClient</i> and <i>compositor</i>. If a <a href="qwaylandclient.html">QWaylandClient</a> has not already been created for a client, it is created and returned.</p>
+<!-- @@@fromWlClient -->
+<!-- $$$kill[overload1]$$$killint -->
+<h3 class="fn" id="kill"><a name="kill"></a><span class="type">void</span> QWaylandClient::<span class="name">kill</span>(<span class="type">int</span> <i>signal</i> = SIGTERM)</h3>
+<p>Kills the client with the specified <i>signal</i>.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@kill -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

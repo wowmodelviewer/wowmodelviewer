@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- metaobjects.qdoc -->
+  <title>The Meta-Object System | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td >The Meta-Object System</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">The Meta-Object System</h1>
+<span class="subtitle"></span>
+<!-- $$$metaobjects.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Qt's meta-object system provides the signals and slots mechanism for inter-object communication, run-time type information, and the dynamic property system.</p>
+<p>The meta-object system is based on three things:</p>
+<ol class="1" type="1"><li>The <a href="qobject.html">QObject</a> class provides a base class for objects that can take advantage of the meta-object system.</li>
+<li>The <a href="qobject.html#Q_OBJECT">Q_OBJECT</a> macro inside the private section of the class declaration is used to enable meta-object features, such as dynamic properties, signals, and slots.</li>
+<li>The <a href="../qtdoc/moc.html">Meta-Object Compiler</a> (<code>moc</code>) supplies each <a href="qobject.html">QObject</a> subclass with the necessary code to implement meta-object features.</li>
+</ol>
+<p>The <code>moc</code> tool reads a C++ source file. If it finds one or more class declarations that contain the <a href="qobject.html#Q_OBJECT">Q_OBJECT</a> macro, it produces another C++ source file which contains the meta-object code for each of those classes. This generated source file is either <code>#include</code>'d into the class's source file or, more usually, compiled and linked with the class's implementation.</p>
+<p>In addition to providing the <a href="signalsandslots.html">signals and slots</a> mechanism for communication between objects (the main reason for introducing the system), the meta-object code provides the following additional features:</p>
+<ul>
+<li><a href="qobject.html#metaObject">QObject::metaObject</a>() returns the associated <a href="qmetaobject.html">meta-object</a> for the class.</li>
+<li><a href="qmetaobject.html#className">QMetaObject::className</a>() returns the class name as a string at run-time, without requiring native run-time type information (RTTI) support through the C++ compiler.</li>
+<li><a href="qobject.html#inherits">QObject::inherits</a>() function returns whether an object is an instance of a class that inherits a specified class within the <a href="qobject.html">QObject</a> inheritance tree.</li>
+<li><a href="qobject.html#tr">QObject::tr</a>() and QObject::trUtf8() translate strings for <a href="../qtdoc/internationalization.html">internationalization</a>.</li>
+<li><a href="qobject.html#setProperty">QObject::setProperty</a>() and <a href="qobject.html#property">QObject::property</a>() dynamically set and get properties by name.</li>
+<li><a href="qmetaobject.html#newInstance">QMetaObject::newInstance</a>() constructs a new instance of the class.</li>
+</ul>
+<a name="qobjectcast"></a><p>It is also possible to perform dynamic casts using <a href="qobject.html#qobject_cast">qobject_cast</a>() on <a href="qobject.html">QObject</a> classes. The <a href="qobject.html#qobject_cast">qobject_cast</a>() function behaves similarly to the standard C++ <code>dynamic_cast()</code>, with the advantages that it doesn't require RTTI support and it works across dynamic library boundaries. It attempts to cast its argument to the pointer type specified in angle-brackets, returning a non-zero pointer if the object is of the correct type (determined at run-time), or <code>nullptr</code> if the object's type is incompatible.</p>
+<p>For example, let's assume <code>MyWidget</code> inherits from <a href="../qtwidgets/qwidget.html">QWidget</a> and is declared with the <a href="qobject.html#Q_OBJECT">Q_OBJECT</a> macro:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="qobject.html">QObject</a></span> <span class="operator">*</span>obj <span class="operator">=</span> <span class="keyword">new</span> MyWidget;
+
+</pre>
+<p>The <code>obj</code> variable, of type <code>QObject *</code>, actually refers to a <code>MyWidget</code> object, so we can cast it appropriately:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>widget <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(obj);
+
+</pre>
+<p>The cast from <a href="qobject.html">QObject</a> to <a href="../qtwidgets/qwidget.html">QWidget</a> is successful, because the object is actually a <code>MyWidget</code>, which is a subclass of <a href="../qtwidgets/qwidget.html">QWidget</a>. Since we know that <code>obj</code> is a <code>MyWidget</code>, we can also cast it to <code>MyWidget *</code>:</p>
+<pre class="cpp">
+
+      MyWidget <span class="operator">*</span>myWidget <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span>MyWidget <span class="operator">*</span><span class="operator">&gt;</span>(obj);
+
+</pre>
+<p>The cast to <code>MyWidget</code> is successful because <a href="qobject.html#qobject_cast">qobject_cast</a>() makes no distinction between built-in Qt types and custom types.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="../qtwidgets/qlabel.html">QLabel</a></span> <span class="operator">*</span>label <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="../qtwidgets/qlabel.html">QLabel</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(obj);
+      <span class="comment">// label is 0</span>
+
+</pre>
+<p>The cast to <a href="../qtwidgets/qlabel.html">QLabel</a>, on the other hand, fails. The pointer is then set to 0. This makes it possible to handle objects of different types differently at run-time, based on the type:</p>
+<pre class="cpp">
+
+      <span class="keyword">if</span> (<span class="type"><a href="../qtwidgets/qlabel.html">QLabel</a></span> <span class="operator">*</span>label <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="../qtwidgets/qlabel.html">QLabel</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(obj)) {
+          label<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;Ping&quot;</span>));
+      } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>button <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(obj)) {
+          button<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;Pong!&quot;</span>));
+      }
+
+</pre>
+<p>While it is possible to use <a href="qobject.html">QObject</a> as a base class without the <a href="qobject.html#Q_OBJECT">Q_OBJECT</a> macro and without meta-object code, neither signals and slots nor the other features described here will be available if the <a href="qobject.html#Q_OBJECT">Q_OBJECT</a> macro is not used. From the meta-object system's point of view, a <a href="qobject.html">QObject</a> subclass without meta code is equivalent to its closest ancestor with meta-object code. This means for example, that <a href="qmetaobject.html#className">QMetaObject::className</a>() will not return the actual name of your class, but the class name of this ancestor.</p>
+<p>Therefore, we strongly recommend that all subclasses of <a href="qobject.html">QObject</a> use the <a href="qobject.html#Q_OBJECT">Q_OBJECT</a> macro regardless of whether or not they actually use signals, slots, and properties.</p>
+</div>
+<p><b>See also </b><a href="qmetaobject.html">QMetaObject</a>, <a href="properties.html">Qt's Property System</a>, and <a href="signalsandslots.html">Signals and Slots</a>.</p>
+<!-- @@@metaobjects.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

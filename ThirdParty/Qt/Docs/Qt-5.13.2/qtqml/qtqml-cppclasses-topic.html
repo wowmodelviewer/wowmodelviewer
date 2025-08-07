@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- topic.qdoc -->
+  <title>Important C++ Classes Provided By The Qt QML Module | Qt QML 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td >Important C++ Classes Provided By The Qt QML Module</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtqml-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#qml-runtime">QML Runtime</a></li>
+<li class="level2"><a href="#the-qqmlengine-class">The QQmlEngine Class</a></li>
+<li class="level2"><a href="#the-qqmlcontext-class">The QQmlContext Class</a></li>
+<li class="level1"><a href="#dynamic-object-instantiation-and-expression-evaluation">Dynamic Object Instantiation and Expression Evaluation</a></li>
+<li class="level2"><a href="#the-qqmlcomponent-class">The QQmlComponent Class</a></li>
+<li class="level2"><a href="#the-qqmlexpression-class">The QQmlExpression Class</a></li>
+<li class="level1"><a href="#usage-of-the-classes-within-qml-applications">Usage of the Classes within QML Applications</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Important C++ Classes Provided By The Qt QML Module</h1>
+<span class="subtitle"></span>
+<!-- $$$qtqml-cppclasses-topic.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The <a href="qtqml-index.html">Qt QML</a> module provides C++ classes which implement the QML framework. Clients can use these classes to interact with the QML run-time (for example, by injecting data or invoking methods on objects), and to instantiate a hierarchy of objects from a QML document. The Qt QML module provides more C++ API than just the classes listed here, however the classes listed here provide the foundations of the QML runtime and the core concepts of QML.</p>
+<a name="qml-runtime"></a>
+<h2 id="qml-runtime">QML Runtime</h2>
+<p>A typical QML application with a C++ entry-point will instantiate a <a href="qqmlengine.html">QQmlEngine</a> and then use a <a href="qqmlcomponent.html">QQmlComponent</a> to load a QML document. The engine provides a default <a href="qqmlcontext.html">QQmlContext</a> which will be the top-level evaluation context used for evaluating functions and expressions defined in the QML document. The object hierarchy defined in the QML document will be instantiated by calling the <a href="qqmlcomponent.html#create">create()</a> function of the <a href="qqmlcomponent.html">QQmlComponent</a> instance, assuming that no errors were encountered during document loading.</p>
+<p>The client may wish to modify the <a href="qqmlcontext.html">QQmlContext</a> provided by the engine, by injecting properties or objects into the context. They can call the <a href="qqmlengine.html#rootContext">QQmlEngine::rootContext</a>() function to access the top-level context.</p>
+<p>After instantiating the object, the client will usually pass control to the application event loop so that user input events (like mouse-clicks) can be delivered and handled by the application.</p>
+<p><b>Note: </b>The Qt Quick module provides a convenience class, <a href="../qtquick/qquickview.html">QQuickView</a>, which provides a QML runtime and visual window for displaying a QML application.</p><a name="the-qqmlengine-class"></a>
+<h3 id="the-qqmlengine-class">The QQmlEngine Class</h3>
+<p>The <a href="qqmlengine.html">QQmlEngine</a> class provides an engine which can manage a hierarchy of objects which is defined in a QML document. It provides a root QML context within which expressions are evaluated, and ensures that properties of objects are updated correctly when required.</p>
+<p>A <a href="qqmlengine.html">QQmlEngine</a> allows the configuration of global settings that apply to all of the objects it manages; for example, the QNetworkAccessManager to be used for network communications, and the file path to be used for persistent storage.</p>
+<p>See the <a href="qqmlengine.html">QQmlEngine</a> class documentation for in-depth information about what the <a href="qqmlengine.html">QQmlEngine</a> class provides, and how it can be used in an application.</p>
+<a name="the-qqmlcontext-class"></a>
+<h3 id="the-qqmlcontext-class">The QQmlContext Class</h3>
+<p>The <a href="qqmlcontext.html">QQmlContext</a> class provides a context for object instantiation and expression evaluation. All objects are instantiated in a particular context, and all of the expressions which are evaluated while an application is running are evaluated within a particular context. This context defines how symbols are resolved, and thus which values the expression operates on.</p>
+<p>See the <a href="qqmlcontext.html">QQmlContext</a> class documentation for in-depth information about how to modify the evaluation context of an object by adding or removing properties of a <a href="qqmlcontext.html">QQmlContext</a>, and how to access the context for an object.</p>
+<a name="dynamic-object-instantiation-and-expression-evaluation"></a>
+<h2 id="dynamic-object-instantiation-and-expression-evaluation">Dynamic Object Instantiation and Expression Evaluation</h2>
+<p>Dynamic object instantiation and dynamic expression evaluation are both core concepts in QML. QML documents define object types which can be instantiated at run-time using a <a href="qqmlcomponent.html">QQmlComponent</a>. An instance of the <a href="qqmlcomponent.html">QQmlComponent</a> class can be created in C++ directly, or via the <a href="qml-qtqml-qt.html#createComponent-method">Qt.createComponent()</a> function in imperative QML code. Arbitrary expressions can be calculated in C++ via the <a href="qqmlexpression.html">QQmlExpression</a> class, and such expressions can interact directly with the QML context.</p>
+<a name="the-qqmlcomponent-class"></a>
+<h3 id="the-qqmlcomponent-class">The QQmlComponent Class</h3>
+<p>The <a href="qqmlcomponent.html">QQmlComponent</a> class can be used to load a QML document. It requires a <a href="qqmlengine.html">QQmlEngine</a> in order to instantiate the hierarchy of objects defined in the QML document.</p>
+<p>See the <a href="qqmlcomponent.html">QQmlComponent</a> class documentation for in-depth information about how to use <a href="qqmlcomponent.html">QQmlComponent</a>.</p>
+<a name="the-qqmlexpression-class"></a>
+<h3 id="the-qqmlexpression-class">The QQmlExpression Class</h3>
+<p>The <a href="qqmlexpression.html">QQmlExpression</a> class provides a way for clients to evaluate JavaScript expressions from C++, using a particular QML evaluation context. This allows clients to access QML objects by id, for example. The result of the evaluation is returned as a <a href="../qtcore/qvariant.html">QVariant</a>, and the conversion rules are defined by the QML engine.</p>
+<p>See the <a href="qqmlexpression.html">QQmlExpression</a> class documentation for in depth information about how to use <a href="qqmlexpression.html">QQmlExpression</a> in an application.</p>
+<a name="usage-of-the-classes-within-qml-applications"></a>
+<h2 id="usage-of-the-classes-within-qml-applications">Usage of the Classes within QML Applications</h2>
+<p>These pages describe how to create QML applications which interact with the C++ classes:</p>
+<ul>
+<li><a href="qtqml-cppintegration-topic.html">Integrating QML and C++</a><ul>
+<li><a href="qtqml-cppintegration-exposecppattributes.html">Exposing Attributes of C++ Classes to QML</a></li>
+<li><a href="qtqml-cppintegration-definetypes.html">Defining QML Types from C++</a></li>
+<li><a href="qtqml-cppintegration-contextproperties.html">Embedding C++ Objects into QML with Context Properties</a></li>
+<li><a href="qtqml-cppintegration-interactqmlfromcpp.html">Interacting with QML Objects from C++</a></li>
+<li><a href="qtqml-cppintegration-data.html">Data Type Conversion Between QML and C++</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<!-- @@@qtqml-cppclasses-topic.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

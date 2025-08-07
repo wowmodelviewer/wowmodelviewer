@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdatastream.cpp -->
+  <title>List of All Members for QDataStream | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QDataStream</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">List of All Members for QDataStream</h1>
+<p>This is the complete list of members for <a href="qdatastream.html">QDataStream</a>, including inherited members.</p>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn">enum <span class="name"><b><a href="qdatastream.html#ByteOrder-enum">ByteOrder</a></b></span></li>
+<li class="fn">enum <span class="name"><b><a href="qdatastream.html#FloatingPointPrecision-enum">FloatingPointPrecision</a></b></span></li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#QDataStream-3">QDataStream</a></b></span>(const QByteArray &amp;)</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#QDataStream-2">QDataStream</a></b></span>(QByteArray *, QIODevice::OpenMode )</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#QDataStream-1">QDataStream</a></b></span>(QIODevice *)</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#QDataStream">QDataStream</a></b></span>()</li>
+<li class="fn">enum <span class="name"><b><a href="qdatastream.html#Status-enum">Status</a></b></span></li>
+<li class="fn">enum <span class="name"><b><a href="qdatastream.html#Version-enum">Version</a></b></span></li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#dtor.QDataStream">~QDataStream</a></b></span>()</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#abortTransaction">abortTransaction</a></b></span>()</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#atEnd">atEnd</a></b></span>() const : bool</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#byteOrder">byteOrder</a></b></span>() const : QDataStream::ByteOrder</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#commitTransaction">commitTransaction</a></b></span>() : bool</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#device">device</a></b></span>() const : QIODevice *</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#floatingPointPrecision">floatingPointPrecision</a></b></span>() const : QDataStream::FloatingPointPrecision</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#readBytes">readBytes</a></b></span>(char *&amp;, uint &amp;) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#readRawData">readRawData</a></b></span>(char *, int ) : int</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#resetStatus">resetStatus</a></b></span>()</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#rollbackTransaction">rollbackTransaction</a></b></span>()</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#setByteOrder">setByteOrder</a></b></span>(QDataStream::ByteOrder )</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#setDevice">setDevice</a></b></span>(QIODevice *)</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#setFloatingPointPrecision">setFloatingPointPrecision</a></b></span>(QDataStream::FloatingPointPrecision )</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#setStatus">setStatus</a></b></span>(QDataStream::Status )</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#setVersion">setVersion</a></b></span>(int )</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#skipRawData">skipRawData</a></b></span>(int ) : int</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#startTransaction">startTransaction</a></b></span>()</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#status">status</a></b></span>() const : QDataStream::Status</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#version">version</a></b></span>() const : int</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#writeBytes">writeBytes</a></b></span>(const char *, uint ) : QDataStream &amp;</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#writeRawData">writeRawData</a></b></span>(const char *, int ) : int</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-lt-lt">operator&lt;&lt;</a></b></span>(qint8 ) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-lt-lt-1">operator&lt;&lt;</a></b></span>(quint8 ) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-lt-lt-2">operator&lt;&lt;</a></b></span>(qint16 ) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-lt-lt-3">operator&lt;&lt;</a></b></span>(quint16 ) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-lt-lt-4">operator&lt;&lt;</a></b></span>(qint32 ) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-lt-lt-5">operator&lt;&lt;</a></b></span>(quint32 ) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-lt-lt-6">operator&lt;&lt;</a></b></span>(qint64 ) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-lt-lt-7">operator&lt;&lt;</a></b></span>(quint64 ) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-lt-lt-8">operator&lt;&lt;</a></b></span>(std::nullptr_t ) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-lt-lt-9">operator&lt;&lt;</a></b></span>(bool ) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-lt-lt-10">operator&lt;&lt;</a></b></span>(qfloat16 ) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-lt-lt-11">operator&lt;&lt;</a></b></span>(float ) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-lt-lt-12">operator&lt;&lt;</a></b></span>(double ) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-lt-lt-13">operator&lt;&lt;</a></b></span>(const char *) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-gt-gt">operator&gt;&gt;</a></b></span>(qint8 &amp;) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-gt-gt-1">operator&gt;&gt;</a></b></span>(quint8 &amp;) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-gt-gt-2">operator&gt;&gt;</a></b></span>(qint16 &amp;) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-gt-gt-3">operator&gt;&gt;</a></b></span>(quint16 &amp;) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-gt-gt-4">operator&gt;&gt;</a></b></span>(qint32 &amp;) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-gt-gt-5">operator&gt;&gt;</a></b></span>(quint32 &amp;) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-gt-gt-6">operator&gt;&gt;</a></b></span>(qint64 &amp;) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-gt-gt-7">operator&gt;&gt;</a></b></span>(quint64 &amp;) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-gt-gt-8">operator&gt;&gt;</a></b></span>(std::nullptr_t &amp;) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-gt-gt-9">operator&gt;&gt;</a></b></span>(bool &amp;) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-gt-gt-10">operator&gt;&gt;</a></b></span>(qfloat16 &amp;) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-gt-gt-11">operator&gt;&gt;</a></b></span>(float &amp;) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-gt-gt-12">operator&gt;&gt;</a></b></span>(double &amp;) : QDataStream &amp;</li>
+<li class="fn"><span class="name"><b><a href="qdatastream.html#operator-gt-gt-13">operator&gt;&gt;</a></b></span>(char *&amp;) : QDataStream &amp;</li>
+</ul>
+</td></tr>
+</table></div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

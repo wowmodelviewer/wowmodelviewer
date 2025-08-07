@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qstyleoption.cpp -->
+  <title>QStyleOptionComboBox Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QStyleOptionComboBox</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-variables">Public Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QStyleOptionComboBox Class</h1>
+<!-- $$$QStyleOptionComboBox-brief -->
+<p>The <a href="qstyleoptioncombobox.html">QStyleOptionComboBox</a> class is used to describe the parameter for drawing a combobox. <a href="#details">More...</a></p>
+<!-- @@@QStyleOptionComboBox -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QStyleOptionComboBox&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qstyleoptioncomplex.html">QStyleOptionComplex</a></td></tr></table></div><ul>
+<li><a href="qstyleoptioncombobox-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptioncombobox.html#StyleOptionType-enum">StyleOptionType</a></b> { Type }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptioncombobox.html#StyleOptionVersion-enum">StyleOptionVersion</a></b> { Version }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptioncombobox.html#QStyleOptionComboBox-1">QStyleOptionComboBox</a></b>(const QStyleOptionComboBox &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptioncombobox.html#QStyleOptionComboBox">QStyleOptionComboBox</a></b>()</td></tr>
+</table></div>
+<a name="public-variables"></a>
+<h2 id="public-variables">Public Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QIcon </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptioncombobox.html#currentIcon-var">currentIcon</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptioncombobox.html#currentText-var">currentText</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptioncombobox.html#editable-var">editable</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptioncombobox.html#frame-var">frame</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QSize </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptioncombobox.html#iconSize-var">iconSize</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRect </td><td class="memItemRight bottomAlign"><b><a href="qstyleoptioncombobox.html#popupRect-var">popupRect</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QStyleOptionComboBox-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qstyleoptionbutton.html">QStyleOptionButton</a> contains all the information that <a href="qstyle.html">QStyle</a> functions need to draw <a href="qcombobox.html">QComboBox</a>.</p>
+<p>For performance reasons, the access to the member variables is direct (i.e&#x2e;, using the <code>.</code> or <code>-&gt;</code> operator). This low-level feel makes the structures straightforward to use and emphasizes that these are simply parameters used by the style functions.</p>
+<p>For an example demonstrating how style options can be used, see the <a href="qtwidgets-widgets-styles-example.html">Styles</a> example.</p>
+</div>
+<p><b>See also </b><a href="qstyleoption.html">QStyleOption</a>, <a href="qstyleoptioncomplex.html">QStyleOptionComplex</a>, and <a href="qcombobox.html">QComboBox</a>.</p>
+<!-- @@@QStyleOptionComboBox -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$StyleOptionType$$$Type -->
+<h3 class="fn" id="StyleOptionType-enum"><a name="StyleOptionType-enum"></a>enum QStyleOptionComboBox::<span class="name">StyleOptionType</span></h3>
+<p>This enum is used to hold information about the type of the style option, and is defined for each <a href="qstyleoption.html">QStyleOption</a> subclass.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QStyleOptionComboBox::Type</code></td><td class="topAlign tblval"><code>SO_ComboBox</code></td><td class="topAlign">The type of style option provided (<a href="qstyleoption.html#OptionType-enum">SO_ComboBox</a> for this class).</td></tr>
+</table></div>
+<p>The type is used internally by <a href="qstyleoption.html">QStyleOption</a>, its subclasses, and <a href="qstyleoption.html#qstyleoption_cast">qstyleoption_cast</a>() to determine the type of style option. In general you do not need to worry about this unless you want to create your own <a href="qstyleoption.html">QStyleOption</a> subclass and your own styles.</p>
+<p><b>See also </b><a href="qstyleoptioncombobox.html#StyleOptionVersion-enum">StyleOptionVersion</a>.</p>
+<!-- @@@StyleOptionType -->
+<!-- $$$StyleOptionVersion$$$Version -->
+<h3 class="fn" id="StyleOptionVersion-enum"><a name="StyleOptionVersion-enum"></a>enum QStyleOptionComboBox::<span class="name">StyleOptionVersion</span></h3>
+<p>This enum is used to hold information about the version of the style option, and is defined for each <a href="qstyleoption.html">QStyleOption</a> subclass.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QStyleOptionComboBox::Version</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">1</td></tr>
+</table></div>
+<p>The version is used by <a href="qstyleoption.html">QStyleOption</a> subclasses to implement extensions without breaking compatibility. If you use <a href="qstyleoption.html#qstyleoption_cast">qstyleoption_cast</a>(), you normally do not need to check it.</p>
+<p><b>See also </b><a href="qstyleoptioncombobox.html#StyleOptionType-enum">StyleOptionType</a>.</p>
+<!-- @@@StyleOptionVersion -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QStyleOptionComboBox$$$QStyleOptionComboBoxconstQStyleOptionComboBox& -->
+<h3 class="fn" id="QStyleOptionComboBox-1"><a name="QStyleOptionComboBox-1"></a>QStyleOptionComboBox::<span class="name">QStyleOptionComboBox</span>(const <span class="type"><a href="qstyleoptioncombobox.html#QStyleOptionComboBox">QStyleOptionComboBox</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a copy of the <i>other</i> style option.</p>
+<!-- @@@QStyleOptionComboBox -->
+<!-- $$$QStyleOptionComboBox[overload1]$$$QStyleOptionComboBox -->
+<h3 class="fn" id="QStyleOptionComboBox"><a name="QStyleOptionComboBox"></a>QStyleOptionComboBox::<span class="name">QStyleOptionComboBox</span>()</h3>
+<p>Creates a <a href="qstyleoptioncombobox.html">QStyleOptionComboBox</a>, initializing the members variables to their default values.</p>
+<!-- @@@QStyleOptionComboBox -->
+</div>
+<div class="vars">
+<h2>Member Variable Documentation</h2>
+<!-- $$$currentIcon -->
+<h3 class="fn" id="currentIcon-var"><a name="currentIcon-var"></a><span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> QStyleOptionComboBox::<span class="name">currentIcon</span></h3>
+<p>This variable holds the icon for the current item of the combo box</p>
+<p>The default value is an empty icon, i.e&#x2e; an icon with neither a pixmap nor a filename.</p>
+<!-- @@@currentIcon -->
+<!-- $$$currentText -->
+<h3 class="fn" id="currentText-var"><a name="currentText-var"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QStyleOptionComboBox::<span class="name">currentText</span></h3>
+<p>This variable holds the text for the current item of the combo box</p>
+<p>The default value is an empty string.</p>
+<!-- @@@currentText -->
+<!-- $$$editable -->
+<h3 class="fn" id="editable-var"><a name="editable-var"></a><span class="type">bool</span> QStyleOptionComboBox::<span class="name">editable</span></h3>
+<p>This variable holds whether or not the combobox is editable or not</p>
+<p>the default value is false</p>
+<p><b>See also </b><a href="qcombobox.html#editable-prop">QComboBox::isEditable</a>().</p>
+<!-- @@@editable -->
+<!-- $$$frame -->
+<h3 class="fn" id="frame-var"><a name="frame-var"></a><span class="type">bool</span> QStyleOptionComboBox::<span class="name">frame</span></h3>
+<p>This variable holds whether the combo box has a frame</p>
+<p>The default value is true.</p>
+<!-- @@@frame -->
+<!-- $$$iconSize -->
+<h3 class="fn" id="iconSize-var"><a name="iconSize-var"></a><span class="type"><a href="../qtcore/qsize.html">QSize</a></span> QStyleOptionComboBox::<span class="name">iconSize</span></h3>
+<p>This variable holds the icon size for the current item of the combo box</p>
+<p>The default value is <a href="../qtcore/qsize.html">QSize</a>(-1, -1), i.e&#x2e; an invalid size.</p>
+<!-- @@@iconSize -->
+<!-- $$$popupRect -->
+<h3 class="fn" id="popupRect-var"><a name="popupRect-var"></a><span class="type"><a href="../qtcore/qrect.html">QRect</a></span> QStyleOptionComboBox::<span class="name">popupRect</span></h3>
+<p>This variable holds the popup rectangle for the combobox</p>
+<p>The default value is a null rectangle, i.e&#x2e; a rectangle with both the width and the height set to 0.</p>
+<p>This variable is currently unused. You can safely ignore it.</p>
+<p><b>See also </b><a href="qstyle.html#SubControl-enum">QStyle::SC_ComboBoxListBoxPopup</a>.</p>
+<!-- @@@popupRect -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

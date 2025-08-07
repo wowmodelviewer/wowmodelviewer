@@ -1,0 +1,158 @@
+import QtQuick.tooling 1.0
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+
+Module {
+    Component {
+        name: "QDeclarativeFeedbackActuator"
+        prototype: "QObject"
+        exports: [
+            "QtMobility.feedback/Actuator 1.1"
+        ]
+        Property { name: "actuatorId"; type: "int"; isReadonly: true }
+        Property { name: "name"; type: "string"; isReadonly: true }
+        Property { name: "state"; type: "QFeedbackActuator::State"; isReadonly: true }
+        Property { name: "valid"; type: "bool"; isReadonly: true }
+        Property { name: "enabled"; type: "bool" }
+        Signal { name: "enabledChanged" }
+        Method {
+            name: "isCapabilitySupported"
+            type: "bool"
+            Parameter { name: "capbility"; type: "QFeedbackActuator::Capability" }
+        }
+    }
+    Component {
+        name: "QDeclarativeFeedbackEffect"
+        prototype: "QObject"
+        exports: [
+            "QtMobility.feedback/Feedback 1.1",
+            "QtMobility.feedback/FeedbackEffect 1.1"
+        ]
+        Enum {
+            name: "Duration"
+            values: {
+                "Infinite": -1
+            }
+        }
+        Enum {
+            name: "State"
+            values: {
+                "Stopped": 0,
+                "Paused": 1,
+                "Running": 2,
+                "Loading": 3
+            }
+        }
+        Enum {
+            name: "ErrorType"
+            values: {
+                "UnknownError": 0,
+                "DeviceBusy": 1
+            }
+        }
+        Property { name: "running"; type: "bool" }
+        Property { name: "paused"; type: "bool" }
+        Property { name: "duration"; type: "int" }
+        Property { name: "state"; type: "State" }
+        Property { name: "error"; type: "ErrorType"; isReadonly: true }
+        Signal { name: "runningChanged" }
+        Signal { name: "pausedChanged" }
+        Signal { name: "durationChanged" }
+        Signal { name: "stateChanged" }
+        Signal { name: "errorChanged" }
+        Method { name: "updateState" }
+    }
+    Component {
+        name: "QDeclarativeFileEffect"
+        prototype: "QDeclarativeFeedbackEffect"
+        exports: [
+            "QtMobility.feedback/FileEffect 1.1"
+        ]
+        Property { name: "loaded"; type: "bool" }
+        Property { name: "source"; type: "QUrl" }
+        Property { name: "supportedMimeTypes"; type: "QStringList"; isReadonly: true }
+        Signal { name: "loadedChanged" }
+        Signal { name: "sourceChanged" }
+        Method { name: "load" }
+        Method { name: "unload" }
+    }
+    Component {
+        name: "QDeclarativeHapticsEffect"
+        prototype: "QDeclarativeFeedbackEffect"
+        exports: [
+            "QtMobility.feedback/HapticsEffect 1.1"
+        ]
+        Property {
+            name: "availableActuators"
+            type: "QDeclarativeFeedbackActuator"
+            isList: true
+            isReadonly: true
+        }
+        Property { name: "intensity"; type: "qreal" }
+        Property { name: "attackTime"; type: "int" }
+        Property { name: "attackIntensity"; type: "qreal" }
+        Property { name: "fadeTime"; type: "int" }
+        Property { name: "fadeIntensity"; type: "qreal" }
+        Property { name: "period"; type: "int" }
+        Property { name: "actuator"; type: "QDeclarativeFeedbackActuator"; isPointer: true }
+        Signal { name: "intensityChanged" }
+        Signal { name: "attackTimeChanged" }
+        Signal { name: "attackIntensityChanged" }
+        Signal { name: "fadeTimeChanged" }
+        Signal { name: "fadeIntensityChanged" }
+        Signal { name: "periodChanged" }
+        Signal { name: "actuatorChanged" }
+    }
+    Component {
+        name: "QDeclarativeThemeEffect"
+        prototype: "QObject"
+        exports: [
+            "QtMobility.feedback/ThemeEffect 1.1"
+        ]
+        Enum {
+            name: "ThemeEffect"
+            values: {
+                "Basic": 0,
+                "Sensitive": 1,
+                "BasicButton": 2,
+                "SensitiveButton": 3,
+                "BasicKeypad": 4,
+                "SensitiveKeypad": 5,
+                "BasicSlider": 6,
+                "SensitiveSlider": 7,
+                "BasicItem": 8,
+                "SensitiveItem": 9,
+                "ItemScroll": 10,
+                "ItemPick": 11,
+                "ItemDrop": 12,
+                "ItemMoveOver": 13,
+                "BounceEffect": 14,
+                "CheckBox": 15,
+                "MultipleCheckBox": 16,
+                "Editor": 17,
+                "TextSelection": 18,
+                "BlankSelection": 19,
+                "LineSelection": 20,
+                "EmptyLineSelection": 21,
+                "PopUp": 22,
+                "PopupOpen": 23,
+                "PopupClose": 24,
+                "Flick": 25,
+                "StopFlick": 26,
+                "MultiPointTouchActivate": 27,
+                "RotateStep": 28,
+                "LongPress": 29,
+                "PositiveTacticon": 30,
+                "NeutralTacticon": 31,
+                "NegativeTacticon": 32,
+                "NumberOfThemeEffects": 33,
+                "ThemeUser": 65535
+            }
+        }
+        Property { name: "supported"; type: "bool"; isReadonly: true }
+        Property { name: "effect"; type: "ThemeEffect" }
+        Signal { name: "effectChanged" }
+        Method { name: "play" }
+    }
+}

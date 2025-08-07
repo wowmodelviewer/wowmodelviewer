@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdeclarativeplaceattribute.cpp -->
+  <title>PlaceAttribute QML Type | Qt Location 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-qmlmodule.html">QML Types</a></td><td >PlaceAttribute QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtlocation-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">PlaceAttribute QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$PlaceAttribute-brief -->
+<p>The <a href="qml-qtlocation-placeattribute.html">PlaceAttribute</a> type holds generic place attribute information. <a href="#details">More...</a></p>
+<!-- @@@PlaceAttribute -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtLocation 5.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  QtLocation 5.5</td></tr></table></div><ul>
+<li><a href="qml-qtlocation-placeattribute-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtlocation-placeattribute.html#attribute-prop">attribute</a></b></b> : QPlaceAttribute</li>
+<li class="fn"><b><b><a href="qml-qtlocation-placeattribute.html#label-prop">label</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtlocation-placeattribute.html#text-prop">text</a></b></b> : string</li>
+</ul>
+<!-- $$$PlaceAttribute-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>A place attribute stores an additional piece of information about a <a href="qml-qtlocation-place.html">Place</a> that is not otherwise exposed through the <a href="qml-qtlocation-place.html">Place</a> type. A <a href="qml-qtlocation-placeattribute.html">PlaceAttribute</a> is a textual piece of data, accessible through the <a href="qml-qtlocation-placeattribute.html#text-prop">text</a> property, and a <a href="qml-qtlocation-placeattribute.html#label-prop">label</a>. Both the <a href="qml-qtlocation-placeattribute.html#text-prop">text</a> and <a href="qml-qtlocation-placeattribute.html#label-prop">label</a> properties are intended to be displayed to the user. PlaceAttributes are stored in an <a href="qml-qtlocation-extendedattributes.html">ExtendedAttributes</a> map with a unique key.</p>
+<p>The following example shows how to display all attributes in a list:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+  import QtPositioning 5.5
+  import QtLocation 5.6
+
+  <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+      <span class="name">model</span>: <span class="name">place</span>.<span class="name">extendedAttributes</span>.<span class="name">keys</span>()
+      <span class="name">delegate</span>: <span class="name">Text</span> {
+          <span class="name">text</span>: <span class="string">&quot;&lt;b&gt;&quot;</span> <span class="operator">+</span> <span class="name">place</span>.<span class="name">extendedAttributes</span>[<span class="name">modelData</span>].<span class="name">label</span> <span class="operator">+</span> <span class="string">&quot;: &lt;/b&gt;&quot;</span> <span class="operator">+</span>
+                <span class="name">place</span>.<span class="name">extendedAttributes</span>[<span class="name">modelData</span>].<span class="name">text</span>
+      }
+  }
+
+</pre>
+<p>The following example shows how to assign and modify an attribute:</p>
+<pre class="qml">
+
+      <span class="comment">//assign a new attribute to a place</span>
+      var smokingAttrib = <span class="name">Qt</span>.<span class="name">createQmlObject</span>(<span class="string">'import QtLocation 5.3; PlaceAttribute {}'</span>, <span class="name">place</span>);
+      <span class="name">smokingAttrib</span>.<span class="name">label</span> <span class="operator">=</span> <span class="string">&quot;Smoking Allowed&quot;</span>
+      <span class="name">smokingAttrib</span>.<span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;No&quot;</span>
+      <span class="name">place</span>.<span class="name">extendedAttributes</span>.<span class="name">smoking</span> <span class="operator">=</span> <span class="name">smokingAttrib</span>;
+
+      <span class="comment">//modify an existing attribute</span>
+      <span class="name">place</span>.<span class="name">extendedAttributes</span>.<span class="name">smoking</span>.<span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Yes&quot;</span>
+
+</pre>
+<!-- @@@PlaceAttribute -->
+<h2>Property Documentation</h2>
+<!-- $$$attribute -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="attribute-prop"></a><span class="name">attribute</span> : <span class="type">QPlaceAttribute</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>For details on how to use this property to interface between C++ and QML see &quot;<a href="location-cpp-qml.html#placeattribute-qplaceattribute">Interfaces between C++ and QML Code</a>&quot;.</p>
+</div></div><!-- @@@attribute -->
+<br/>
+<!-- $$$label -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="label-prop"></a><span class="name">label</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the attribute label which is a user visible string describing the attribute.</p>
+</div></div><!-- @@@label -->
+<br/>
+<!-- $$$text -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="text-prop"></a><span class="name">text</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the attribute text which can be used to show additional information about the place.</p>
+</div></div><!-- @@@text -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

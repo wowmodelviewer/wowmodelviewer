@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtiltsensor.cpp -->
+  <title>QTiltSensor Class | Qt Sensors 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtsensors-index.html">Qt Sensors</a></td><td ><a href="qtsensors-module.html">C++ Classes</a></td><td >QTiltSensor</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtsensors-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QTiltSensor Class</h1>
+<!-- $$$QTiltSensor-brief -->
+<p>The <a href="qtiltsensor.html">QTiltSensor</a> class is a convenience wrapper around <a href="qsensor.html">QSensor</a>. <a href="#details">More...</a></p>
+<!-- @@@QTiltSensor -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QTiltSensor&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += sensors</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.1</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qsensor.html">QSensor</a></td></tr></table></div><p>This class was introduced in  Qt 5.1.</p>
+<ul>
+<li><a href="qtiltsensor-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qtiltsensor.html#QTiltSensor">QTiltSensor</a></b>(QObject *<i>parent</i> = Q_NULLPTR)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qtiltsensor.html#dtor.QTiltSensor">~QTiltSensor</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qtiltsensor.html#calibrate">calibrate</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QTiltReading *</td><td class="memItemRight bottomAlign"><b><a href="qtiltsensor.html#reading">reading</a></b>() const</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QTiltSensor-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The only behavioural difference is that this class sets the type properly.<a href="../qtcore/qmetaobject.html#invokeMethod">QMetaObject::invokeMethod</a>(backend(), &quot;calibrate&quot;);</p>
+<p>This class also features a <a href="qtiltsensor.html#reading">reading</a>() function that returns a <a href="qtiltreading.html">QTiltReading</a> instead of a <a href="qsensorreading.html">QSensorReading</a>.</p>
+<p>For details about how the sensor works, see <a href="qtiltreading.html">QTiltReading</a>.</p>
+</div>
+<p><b>See also </b><a href="qtiltreading.html">QTiltReading</a>.</p>
+<!-- @@@QTiltSensor -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QTiltSensor[overload1]$$$QTiltSensorQObject* -->
+<h3 class="fn" id="QTiltSensor"><a name="QTiltSensor"></a>QTiltSensor::<span class="name">QTiltSensor</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = Q_NULLPTR)</h3>
+<p>Construct the sensor as a child of <i>parent</i>.</p>
+<!-- @@@QTiltSensor -->
+<!-- $$$~QTiltSensor[overload1]$$$~QTiltSensor -->
+<h3 class="fn" id="dtor.QTiltSensor"><a name="dtor.QTiltSensor"></a><code>[virtual] </code>QTiltSensor::<span class="name">~QTiltSensor</span>()</h3>
+<p>Destroy the sensor. Stops the sensor if it has not already been stopped.</p>
+<!-- @@@~QTiltSensor -->
+<!-- $$$calibrate[overload1]$$$calibrate -->
+<h3 class="fn" id="calibrate"><a name="calibrate"></a><span class="type">void</span> QTiltSensor::<span class="name">calibrate</span>()</h3>
+<p>Calibrates the tilt sensor. Uses the current tilt angles as 0.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@calibrate -->
+<!-- $$$reading[overload1]$$$reading -->
+<h3 class="fn" id="reading"><a name="reading"></a><span class="type"><a href="qtiltreading.html">QTiltReading</a></span> *QTiltSensor::<span class="name">reading</span>() const</h3>
+<p>Returns the reading class for this sensor.</p>
+<p><b>See also </b><a href="qsensor.html#reading-prop">QSensor::reading</a>().</p>
+<!-- @@@reading -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

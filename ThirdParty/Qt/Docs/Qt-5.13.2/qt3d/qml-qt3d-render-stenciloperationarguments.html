@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qstenciloperationarguments.cpp -->
+  <title>StencilOperationArguments QML Type | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-qml.html">QML Types</a></td><td >StencilOperationArguments QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">StencilOperationArguments QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$StencilOperationArguments-brief -->
+<p>The <a href="qml-qt3d-render-stenciloperationarguments.html">StencilOperationArguments</a> type sets the actions to be taken when stencil and depth tests fail. <a href="#details">More...</a></p>
+<!-- @@@StencilOperationArguments -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import Qt3D.Render 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiates:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-stenciloperationarguments.html"><a href="qt3drender-qstenciloperationarguments.html">QStencilOperationArguments</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="../qtqml/qml-qtqml-qtobject.html">QtObject</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qt3d-render-stenciloperationarguments-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qt3d-render-stenciloperationarguments.html#allTestsPassOperation-prop">allTestsPassOperation</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-stenciloperationarguments.html#depthTestFailureOperation-prop">depthTestFailureOperation</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-stenciloperationarguments.html#faceMode-prop">faceMode</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-stenciloperationarguments.html#stencilTestFailureOperation-prop">stencilTestFailureOperation</a></b></b> : enumeration</li>
+</ul>
+<!-- $$$StencilOperationArguments-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qml-qt3d-render-stenciloperationarguments.html">StencilOperationArguments</a> type specifies the arguments for the stencil operations.</p>
+<p><b>See also </b><a href="qml-qt3d-render-stenciloperation.html">StencilOperation</a>.</p>
+<!-- @@@StencilOperationArguments -->
+<h2>Property Documentation</h2>
+<!-- $$$allTestsPassOperation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="allTestsPassOperation-prop"></a><span class="name">allTestsPassOperation</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the stencil test operation for when depth and stencil test pass. Default is <a href="qml-qt3d-render-stenciloperationarguments.html">StencilOperationArguments</a>.Keep.</p>
+<p><b>See also </b><a href="qml-qt3d-render-stenciloperationarguments.html#stencilTestFailureOperation-prop">StencilOperationArguments::stencilTestFailureOperation</a> and <a href="qt3drender-qstenciloperationarguments.html#Operation-enum">Qt3DRender::QStencilOperationArguments::Operation</a>.</p>
+</div></div><!-- @@@allTestsPassOperation -->
+<br/>
+<!-- $$$depthTestFailureOperation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="depthTestFailureOperation-prop"></a><span class="name">depthTestFailureOperation</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the stencil test operation for when the stencil test passes, but depth test fails. Default is <a href="qml-qt3d-render-stenciloperationarguments.html">StencilOperationArguments</a>.Keep.</p>
+<p><b>See also </b><a href="qml-qt3d-render-stenciloperationarguments.html#stencilTestFailureOperation-prop">StencilOperationArguments::stencilTestFailureOperation</a> and <a href="qt3drender-qstenciloperationarguments.html#Operation-enum">Qt3DRender::QStencilOperationArguments::Operation</a>.</p>
+</div></div><!-- @@@depthTestFailureOperation -->
+<br/>
+<!-- $$$faceMode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="faceMode-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">faceMode</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the faces the arguments are applied to.</p>
+<ul>
+<li><a href="qml-qt3d-render-stenciloperationarguments.html">StencilOperationArguments</a>.Front</li>
+<li><a href="qml-qt3d-render-stenciloperationarguments.html">StencilOperationArguments</a>.Back</li>
+<li><a href="qml-qt3d-render-stenciloperationarguments.html">StencilOperationArguments</a>.FrontAndBack</li>
+</ul>
+<p><b>See also </b><a href="qt3drender-qstenciloperationarguments.html#FaceMode-enum">Qt3DRender::QStencilOperationArguments::FaceMode</a>.</p>
+</div></div><!-- @@@faceMode -->
+<br/>
+<!-- $$$stencilTestFailureOperation -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="stencilTestFailureOperation-prop"></a><span class="name">stencilTestFailureOperation</span> : <span class="type"><a href="../qtqml/qml-enumeration.html">enumeration</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the stencil test operation for when the stencil test fails. Default is <a href="qml-qt3d-render-stenciloperationarguments.html">StencilOperationArguments</a>.Keep.</p>
+<ul>
+<li><a href="qml-qt3d-render-stenciloperationarguments.html">StencilOperationArguments</a>.Zero</li>
+<li><a href="qml-qt3d-render-stenciloperationarguments.html">StencilOperationArguments</a>.Keep</li>
+<li><a href="qml-qt3d-render-stenciloperationarguments.html">StencilOperationArguments</a>.Replace</li>
+<li><a href="qml-qt3d-render-stenciloperationarguments.html">StencilOperationArguments</a>.Increment</li>
+<li><a href="qml-qt3d-render-stenciloperationarguments.html">StencilOperationArguments</a>.Decrement</li>
+<li><a href="qml-qt3d-render-stenciloperationarguments.html">StencilOperationArguments</a>.IncrementWrap</li>
+<li><a href="qml-qt3d-render-stenciloperationarguments.html">StencilOperationArguments</a>.DecrementWrap</li>
+<li><a href="qml-qt3d-render-stenciloperationarguments.html">StencilOperationArguments</a>.Inverter</li>
+</ul>
+<p><b>See also </b><a href="qt3drender-qstenciloperationarguments.html#Operation-enum">Qt3DRender::QStencilOperationArguments::Operation</a>.</p>
+</div></div><!-- @@@stencilTestFailureOperation -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qwaylandcompositor.cpp -->
+  <title>QWaylandCompositor Class | Qt Wayland Compositor 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwaylandcompositor-index.html">Qt Wayland Compositor</a></td><td ><a href="qtwaylandcompositor-module.html">C++ Classes</a></td><td >QWaylandCompositor</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwaylandcompositor-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QWaylandCompositor Class</h1>
+<!-- $$$QWaylandCompositor-brief -->
+<p>The <a href="qwaylandcompositor.html">QWaylandCompositor</a> class manages the Wayland display server. <a href="#details">More...</a></p>
+<!-- @@@QWaylandCompositor -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QWaylandCompositor&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += waylandcompositor</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> QWaylandObject</td></tr></table></div><p>This class was introduced in  Qt 5.8.</p>
+<ul>
+<li><a href="qwaylandcompositor-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<div class="table"><table class="propsummary">
+<tr><td class="topAlign"><ul>
+<li class="fn"><b><a href="qwaylandcompositor.html#created-prop">created</a></b> : const bool</li>
+<li class="fn"><b><a href="qwaylandcompositor.html#defaultOutput-prop">defaultOutput</a></b> : QWaylandOutput*</li>
+<li class="fn"><b><a href="qwaylandcompositor.html#defaultSeat-prop">defaultSeat</a></b> : QWaylandSeat* const</li>
+</ul></td><td class="topAlign"><ul>
+<li class="fn"><b><a href="qwaylandcompositor.html#retainedSelection-prop">retainedSelection</a></b> : bool</li>
+<li class="fn"><b><a href="qwaylandcompositor.html#socketName-prop">socketName</a></b> : QByteArray</li>
+<li class="fn"><b><a href="qwaylandcompositor.html#useHardwareIntegrationExtension-prop">useHardwareIntegrationExtension</a></b> : bool</li>
+</ul>
+</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#QWaylandCompositor">QWaylandCompositor</a></b>(QObject *<i>parent</i> = nullptr)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#dtor.QWaylandCompositor">~QWaylandCompositor</a></b>() override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#addSocketDescriptor">addSocketDescriptor</a></b>(int <i>fd</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#create">create</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandOutput *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#defaultOutput-prop">defaultOutput</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandSeat *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#defaultSeat-prop">defaultSeat</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#destroyClient">destroyClient</a></b>(QWaylandClient *<i>client</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#destroyClientForSurface">destroyClientForSurface</a></b>(QWaylandSurface *<i>surface</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#grabSurface">grabSurface</a></b>(QWaylandSurfaceGrabber *<i>grabber</i>, const QWaylandBufferRef &amp;<i>buffer</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#created-prop">isCreated</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWaylandOutput *</td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#outputFor">outputFor</a></b>(QWindow *<i>window</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#retainedSelection-prop">retainedSelectionEnabled</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#defaultOutput-prop">setDefaultOutput</a></b>(QWaylandOutput *<i>output</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#retainedSelection-prop">setRetainedSelectionEnabled</a></b>(bool <i>enabled</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#socketName-prop">setSocketName</a></b>(const QByteArray &amp;<i>name</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#useHardwareIntegrationExtension-prop">setUseHardwareIntegrationExtension</a></b>(bool <i>use</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#socketName-prop">socketName</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#useHardwareIntegrationExtension-prop">useHardwareIntegrationExtension</a></b>() const</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#created-prop">createdChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#defaultOutput-prop">defaultOutputChanged</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#defaultSeat-prop">defaultSeatChanged</a></b>(QWaylandSeat *<i>newDevice</i>, QWaylandSeat *<i>oldDevice</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#retainedSelection-prop">retainedSelectionChanged</a></b>(bool <i>retainedSelection</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#socketName-prop">socketNameChanged</a></b>(const QByteArray &amp;<i>socketName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#surfaceCreated">surfaceCreated</a></b>(QWaylandSurface *<i>surface</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#surfaceRequested">surfaceRequested</a></b>(QWaylandClient *<i>client</i>, uint <i>id</i>, int <i>version</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qwaylandcompositor.html#useHardwareIntegrationExtension-prop">useHardwareIntegrationExtensionChanged</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QWaylandCompositor-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="qwaylandcompositor.html">QWaylandCompositor</a> manages the connections to the clients, as well as the different <a href="qwaylandoutput.html">outputs</a> and <a href="qwaylandseat.html">seats</a>.</p>
+<p>Normally, a compositor application will have a single <a href="qml-qtwayland-compositor-waylandcompositor.html">WaylandCompositor</a> instance, which can have several outputs as children.</p>
+</div>
+<!-- @@@QWaylandCompositor -->
+<div class="prop">
+<h2>Property Documentation</h2>
+<!-- $$$created-prop$$$isCreated$$$createdChanged -->
+<h3 class="fn" id="created-prop"><a name="created-prop"></a><span class="name">created</span> : const <span class="type">bool</span></h3>
+<p>This property is true if <a href="qwaylandcompositor.html">QWaylandCompositor</a> has been initialized, otherwise it's false.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>isCreated</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>createdChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@created -->
+<!-- $$$defaultOutput-prop$$$defaultOutput$$$setDefaultOutputQWaylandOutput*$$$defaultOutputChanged -->
+<h3 class="fn" id="defaultOutput-prop"><a name="defaultOutput-prop"></a><span class="name">defaultOutput</span> : <span class="type"><a href="qwaylandoutput.html">QWaylandOutput</a></span>*</h3>
+<p>This property contains the first in the list of outputs added to the <a href="qwaylandcompositor.html">QWaylandCompositor</a>, or null if no outputs have been added.</p>
+<p>Setting a new default output prepends it to the output list, making it the new default, but the previous default is not removed from the list. If the new default output was already in the list of outputs, it is moved to the beginning of the list.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QWaylandOutput *</td><td class="memItemRight bottomAlign"><span class="name"><b>defaultOutput</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setDefaultOutput</b></span>(QWaylandOutput *<i>output</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>defaultOutputChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@defaultOutput -->
+<!-- $$$defaultSeat-prop$$$defaultSeat$$$defaultSeatChangedQWaylandSeat*QWaylandSeat* -->
+<h3 class="fn" id="defaultSeat-prop"><a name="defaultSeat-prop"></a><span class="name">defaultSeat</span> : <span class="type"><a href="qwaylandseat.html">QWaylandSeat</a></span>* const</h3>
+<p>This property contains the default seat for this <a href="qwaylandcompositor.html">QWaylandCompositor</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QWaylandSeat *</td><td class="memItemRight bottomAlign"><span class="name"><b>defaultSeat</b></span>() const</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>defaultSeatChanged</b></span>(QWaylandSeat *<i>newDevice</i>, QWaylandSeat *<i>oldDevice</i>)</td></tr>
+</table></div>
+<!-- @@@defaultSeat -->
+<!-- $$$retainedSelection-prop$$$retainedSelectionEnabled$$$setRetainedSelectionEnabledbool$$$retainedSelectionChangedbool -->
+<h3 class="fn" id="retainedSelection-prop"><a name="retainedSelection-prop"></a><span class="name">retainedSelection</span> : <span class="type">bool</span></h3>
+<p>This property holds whether retained selection is enabled.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>retainedSelectionEnabled</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setRetainedSelectionEnabled</b></span>(bool <i>enabled</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>retainedSelectionChanged</b></span>(bool <i>retainedSelection</i>)</td></tr>
+</table></div>
+<!-- @@@retainedSelection -->
+<!-- $$$socketName-prop$$$socketName$$$setSocketNameconstQByteArray&$$$socketNameChangedconstQByteArray& -->
+<h3 class="fn" id="socketName-prop"><a name="socketName-prop"></a><span class="name">socketName</span> : <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span></h3>
+<p>This property holds the socket name used by <a href="qwaylandcompositor.html">QWaylandCompositor</a> to communicate with clients. This must be set before the <a href="qwaylandcompositor.html">QWaylandCompositor</a> is <a href="qwaylandcompositor.html#create">created</a>.</p>
+<p>If the socketName is empty (the default), the contents of the start argument <code>--wayland-socket-name</code> are used instead. If the argument is not set, the compositor tries to find a socket name, which is <code>wayland-0</code> by default.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> QByteArray </td><td class="memItemRight bottomAlign"><span class="name"><b>socketName</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setSocketName</b></span>(const QByteArray &amp;<i>name</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>socketNameChanged</b></span>(const QByteArray &amp;<i>socketName</i>)</td></tr>
+</table></div>
+<!-- @@@socketName -->
+<!-- $$$useHardwareIntegrationExtension-prop$$$useHardwareIntegrationExtension$$$setUseHardwareIntegrationExtensionbool$$$useHardwareIntegrationExtensionChanged -->
+<h3 class="fn" id="useHardwareIntegrationExtension-prop"><a name="useHardwareIntegrationExtension-prop"></a><span class="name">useHardwareIntegrationExtension</span> : <span class="type">bool</span></h3>
+<p>This property holds whether the hardware integration extension should be enabled for this <a href="qwaylandcompositor.html">QWaylandCompositor</a>.</p>
+<p>This property must be set before the compositor is <a href="qwaylandcompositor.html#create">created</a>.</p>
+<p><b>Access functions:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> bool </td><td class="memItemRight bottomAlign"><span class="name"><b>useHardwareIntegrationExtension</b></span>() const</td></tr>
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>setUseHardwareIntegrationExtension</b></span>(bool <i>use</i>)</td></tr>
+</table></div>
+<p><b>Notifier signal:</b></p>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft topAlign rightAlign"> void </td><td class="memItemRight bottomAlign"><span class="name"><b>useHardwareIntegrationExtensionChanged</b></span>()</td></tr>
+</table></div>
+<!-- @@@useHardwareIntegrationExtension -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QWaylandCompositor[overload1]$$$QWaylandCompositorQObject* -->
+<h3 class="fn" id="QWaylandCompositor"><a name="QWaylandCompositor"></a>QWaylandCompositor::<span class="name">QWaylandCompositor</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>parent</i> = nullptr)</h3>
+<p>Constructs a <a href="qwaylandcompositor.html">QWaylandCompositor</a> with the given <i>parent</i>.</p>
+<!-- @@@QWaylandCompositor -->
+<!-- $$$surfaceCreated[overload1]$$$surfaceCreatedQWaylandSurface* -->
+<h3 class="fn" id="surfaceCreated"><a name="surfaceCreated"></a><code>[signal] </code><span class="type">void</span> QWaylandCompositor::<span class="name">surfaceCreated</span>(<span class="type"><a href="qwaylandsurface.html">QWaylandSurface</a></span> *<i>surface</i>)</h3>
+<p>This signal is emitted when a new <a href="qwaylandsurface.html">QWaylandSurface</a> instance has been created.</p>
+<!-- @@@surfaceCreated -->
+<!-- $$$surfaceRequested[overload1]$$$surfaceRequestedQWaylandClient*uintint -->
+<h3 class="fn" id="surfaceRequested"><a name="surfaceRequested"></a><code>[signal] </code><span class="type">void</span> QWaylandCompositor::<span class="name">surfaceRequested</span>(<span class="type"><a href="qwaylandclient.html">QWaylandClient</a></span> *<i>client</i>, <span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> <i>id</i>, <span class="type">int</span> <i>version</i>)</h3>
+<p>This signal is emitted when a client has created a surface. The slot connecting to this signal may create and initialize a <a href="qwaylandsurface.html">QWaylandSurface</a> instance in the scope of the slot. Otherwise a default surface is created.</p>
+<p>Connections to this signal must be of <a href="../qtcore/qt.html#ConnectionType-enum">Qt::DirectConnection</a> connection type.</p>
+<!-- @@@surfaceRequested -->
+<!-- $$$~QWaylandCompositor[overload1]$$$~QWaylandCompositor -->
+<h3 class="fn" id="dtor.QWaylandCompositor"><a name="dtor.QWaylandCompositor"></a><code>[override virtual] </code>QWaylandCompositor::<span class="name">~QWaylandCompositor</span>()</h3>
+<p>Destroys the <a href="qwaylandcompositor.html">QWaylandCompositor</a></p>
+<!-- @@@~QWaylandCompositor -->
+<!-- $$$addSocketDescriptor[overload1]$$$addSocketDescriptorint -->
+<h3 class="fn" id="addSocketDescriptor"><a name="addSocketDescriptor"></a><span class="type">void</span> QWaylandCompositor::<span class="name">addSocketDescriptor</span>(<span class="type">int</span> <i>fd</i>)</h3>
+<p>Listen for client connections on a file descriptor, <i>fd</i>, referring to a server socket already bound and listening.</p>
+<p>Does not take ownership of the file descriptor; it must be closed explicitly if needed.</p>
+<p><b>Note: </b>This method is only available with libwayland 1.10.0 or newer. If built against an earlier libwayland runtime, this method is a noop.</p><p>This function was introduced in  Qt 5.12.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@addSocketDescriptor -->
+<!-- $$$create[overload1]$$$create -->
+<h3 class="fn" id="create"><a name="create"></a><code>[virtual] </code><span class="type">void</span> QWaylandCompositor::<span class="name">create</span>()</h3>
+<p>Initializes the <a href="qwaylandcompositor.html">QWaylandCompositor</a>. If you override this function in your subclass, be sure to call the base class implementation.</p>
+<!-- @@@create -->
+<!-- $$$destroyClient[overload1]$$$destroyClientQWaylandClient* -->
+<h3 class="fn" id="destroyClient"><a name="destroyClient"></a><span class="type">void</span> QWaylandCompositor::<span class="name">destroyClient</span>(<span class="type"><a href="qwaylandclient.html">QWaylandClient</a></span> *<i>client</i>)</h3>
+<p>Destroys the <i>client</i>.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@destroyClient -->
+<!-- $$$destroyClientForSurface[overload1]$$$destroyClientForSurfaceQWaylandSurface* -->
+<h3 class="fn" id="destroyClientForSurface"><a name="destroyClientForSurface"></a><span class="type">void</span> QWaylandCompositor::<span class="name">destroyClientForSurface</span>(<span class="type"><a href="qwaylandsurface.html">QWaylandSurface</a></span> *<i>surface</i>)</h3>
+<p>Destroys the client for the <i>surface</i>.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@destroyClientForSurface -->
+<!-- $$$grabSurface[overload1]$$$grabSurfaceQWaylandSurfaceGrabber*constQWaylandBufferRef& -->
+<h3 class="fn" id="grabSurface"><a name="grabSurface"></a><code>[virtual] </code><span class="type">void</span> QWaylandCompositor::<span class="name">grabSurface</span>(<span class="type"><a href="qwaylandsurfacegrabber.html">QWaylandSurfaceGrabber</a></span> *<i>grabber</i>, const <span class="type"><a href="qwaylandbufferref.html">QWaylandBufferRef</a></span> &amp;<i>buffer</i>)</h3>
+<p>Grab the surface content from the given <i>buffer</i>. The default implementation requires a OpenGL context to be bound to the current thread to work. If this is not possible, reimplement this function in your compositor subclass to implement custom logic. The default implementation only grabs shared memory and OpenGL buffers, reimplement this in your compositor subclass to handle more buffer types.</p>
+<p><b>Note: </b>You should not call this manually, but rather use <a href="qwaylandsurfacegrabber.html">QWaylandSurfaceGrabber</a> (<i>grabber</i>).</p><!-- @@@grabSurface -->
+<!-- $$$outputFor[overload1]$$$outputForQWindow* -->
+<h3 class="fn" id="outputFor"><a name="outputFor"></a><span class="type"><a href="qwaylandoutput.html">QWaylandOutput</a></span> *QWaylandCompositor::<span class="name">outputFor</span>(<span class="type"><a href="../qtgui/qwindow.html">QWindow</a></span> *<i>window</i>) const</h3>
+<p>Returns the <a href="qwaylandoutput.html">QWaylandOutput</a> that is connected to the given <i>window</i>.</p>
+<p><b>Note: </b>This function can be invoked via the meta-object system and from QML. See <a href="../qtcore/qobject.html#Q_INVOKABLE">Q_INVOKABLE</a>.</p>
+<!-- @@@outputFor -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

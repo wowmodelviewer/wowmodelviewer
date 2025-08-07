@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qbytearraymatcher.cpp -->
+  <title>QStaticByteArrayMatcher Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QStaticByteArrayMatcher</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#related-non-members">Related Non-Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QStaticByteArrayMatcher Class</h1>
+<!-- $$$QStaticByteArrayMatcher-brief -->
+<p>The <a href="qstaticbytearraymatcher.html">QStaticByteArrayMatcher</a> class is a compile-time version of <a href="qbytearraymatcher.html">QByteArrayMatcher</a>. <a href="#details">More...</a></p>
+<!-- @@@QStaticByteArrayMatcher -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QStaticByteArrayMatcher&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.9</td></tr></table></div><p>This class was introduced in  Qt 5.9.</p>
+<ul>
+<li><a href="qstaticbytearraymatcher-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qstaticbytearraymatcher.html#indexIn">indexIn</a></b>(const QByteArray &amp;<i>haystack</i>, int <i>from</i> = ...) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qstaticbytearraymatcher.html#indexIn-1">indexIn</a></b>(const char *<i>haystack</i>, int <i>hlen</i>, int <i>from</i> = ...) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QByteArray </td><td class="memItemRight bottomAlign"><b><a href="qstaticbytearraymatcher.html#pattern">pattern</a></b>() const</td></tr>
+</table></div>
+<a name="related-non-members"></a>
+<h2 id="related-non-members">Related Non-Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QStaticByteArrayMatcher&lt;N&gt; </td><td class="memItemRight bottomAlign"><b><a href="qstaticbytearraymatcher.html#qMakeStaticByteArrayMatcher">qMakeStaticByteArrayMatcher</a></b>(const char (&amp;)[N] <i>pattern</i> = N)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QStaticByteArrayMatcher-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>This class is useful when you have a sequence of bytes that you want to repeatedly match against some byte arrays (perhaps in a loop), or when you want to search for the same sequence of bytes multiple times in the same byte array. Using a matcher object and <a href="qstaticbytearraymatcher.html#indexIn">indexIn</a>() is faster than matching a plain <a href="qbytearray.html">QByteArray</a> with <a href="qbytearray.html#indexOf">QByteArray::indexOf</a>(), in particular if repeated matching takes place.</p>
+<p>Unlike <a href="qbytearraymatcher.html">QByteArrayMatcher</a>, this class calculates the internal representation at <i>compile-time</i>, if your compiler supports C++14-level <code>constexpr</code> (C++11 is not sufficient), so it can even benefit if you are doing one-off byte array matches.</p>
+<p>Create the <a href="qstaticbytearraymatcher.html">QStaticByteArrayMatcher</a> by calling <a href="qstaticbytearraymatcher.html#qMakeStaticByteArrayMatcher">qMakeStaticByteArrayMatcher</a>(), passing it the C string literal you want to search for. Store the return value of that function in a <code>static const auto</code> variable, so you don't need to pass the <code>N</code> template parameter explicitly:</p>
+<pre class="cpp">
+
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="keyword">auto</span> matcher <span class="operator">=</span> <a href="qstaticbytearraymatcher.html#qMakeStaticByteArrayMatcher">qMakeStaticByteArrayMatcher</a>(<span class="string">&quot;needle&quot;</span>);
+
+</pre>
+<p>Then call <a href="qstaticbytearraymatcher.html#indexIn">indexIn</a>() on the <a href="qbytearray.html">QByteArray</a> in which you want to search, just like with <a href="qbytearraymatcher.html">QByteArrayMatcher</a>.</p>
+<p>Since this class is designed to do all the up-front calculations at compile-time, it does not offer a setPattern() method.</p>
+<p><b>Note: </b>Qt detects the necessary C++14 compiler support by way of the feature test recommendations from <a href="https://isocpp.org/std/standing-documents/sd-6-sg10-feature-test-recommendations">C++ Committee's Standing Document 6</a>.</p></div>
+<p><b>See also </b><a href="qbytearraymatcher.html">QByteArrayMatcher</a> and <a href="qstringmatcher.html">QStringMatcher</a>.</p>
+<!-- @@@QStaticByteArrayMatcher -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$indexIn[overload1]$$$indexInconstQByteArray&int -->
+<h3 class="fn" id="indexIn"><a name="indexIn"></a><span class="type">int</span> QStaticByteArrayMatcher::<span class="name">indexIn</span>(const <span class="type"><a href="qbytearray.html">QByteArray</a></span> &amp;<i>haystack</i>, <span class="type">int</span> <i>from</i> = ...) const</h3>
+<p>Searches the char string <i>haystack</i>, from byte position <i>from</i> (default 0, i.e&#x2e; from the first byte), for the byte array <a href="qstaticbytearraymatcher.html#pattern">pattern</a>() that was set in the constructor.</p>
+<p>Returns the position where the <a href="qstaticbytearraymatcher.html#pattern">pattern</a>() matched in <i>haystack</i>, or -1 if no match was found.</p>
+<!-- @@@indexIn -->
+<!-- $$$indexIn$$$indexInconstchar*intint -->
+<h3 class="fn" id="indexIn-1"><a name="indexIn-1"></a><span class="type">int</span> QStaticByteArrayMatcher::<span class="name">indexIn</span>(const <span class="type">char</span> *<i>haystack</i>, <span class="type">int</span> <i>hlen</i>, <span class="type">int</span> <i>from</i> = ...) const</h3>
+<p>Searches the char string <i>haystack</i>, which has length <i>hlen</i>, from byte position <i>from</i> (default 0, i.e&#x2e; from the first byte), for the byte array <a href="qstaticbytearraymatcher.html#pattern">pattern</a>() that was set in the constructor.</p>
+<p>Returns the position where the <a href="qstaticbytearraymatcher.html#pattern">pattern</a>() matched in <i>haystack</i>, or -1 if no match was found.</p>
+<!-- @@@indexIn -->
+<!-- $$$pattern[overload1]$$$pattern -->
+<h3 class="fn" id="pattern"><a name="pattern"></a><span class="type"><a href="qbytearray.html">QByteArray</a></span> QStaticByteArrayMatcher::<span class="name">pattern</span>() const</h3>
+<p>Returns the byte array pattern that this byte array matcher will search for.</p>
+<p><b>See also </b><a href="qbytearraymatcher.html#setPattern">QByteArrayMatcher::setPattern</a>().</p>
+<!-- @@@pattern -->
+</div>
+<div class="relnonmem">
+<h2>Related Non-Members</h2>
+<!-- $$$qMakeStaticByteArrayMatcher[overload1]$$$qMakeStaticByteArrayMatcherconstchar(&)[N] -->
+<h3 class="fn" id="qMakeStaticByteArrayMatcher"><a name="qMakeStaticByteArrayMatcher"></a><span class="type">QStaticByteArrayMatcher</span>&lt;<span class="type">N</span>&gt; <span class="name">qMakeStaticByteArrayMatcher</span>(const <span class="type">char</span> (&amp;)[<span class="type">N</span>] <i>pattern</i> = N)</h3>
+<p>Return a <a href="qstaticbytearraymatcher.html">QStaticByteArrayMatcher</a> with the correct <code>N</code> determined automatically from the <i>pattern</i> passed.</p>
+<p>To take full advantage of this function, assign the result to an <code>auto</code> variable:</p>
+<pre class="cpp">
+
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="keyword">auto</span> matcher <span class="operator">=</span> qMakeStaticByteArrayMatcher(<span class="string">&quot;needle&quot;</span>);
+
+</pre>
+<p>This function was introduced in  Qt 5.9.</p>
+<!-- @@@qMakeStaticByteArrayMatcher -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

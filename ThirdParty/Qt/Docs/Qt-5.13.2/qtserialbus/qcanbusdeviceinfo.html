@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcanbusdeviceinfo.cpp -->
+  <title>QCanBusDeviceInfo Class | Qt Serial Bus 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtserialbus-index.html">Qt Serial Bus</a></td><td ><a href="qtserialbus-module.html">C++ Classes</a></td><td >QCanBusDeviceInfo</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtserialbus-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCanBusDeviceInfo Class</h1>
+<!-- $$$QCanBusDeviceInfo-brief -->
+<p>The <a href="qcanbusdeviceinfo.html">QCanBusDeviceInfo</a> provides information about CAN bus interfaces. <a href="#details">More...</a></p>
+<!-- @@@QCanBusDeviceInfo -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QCanBusDeviceInfo&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += serialbus</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.9</td></tr></table></div><p>This class was introduced in  Qt 5.9.</p>
+<ul>
+<li><a href="qcanbusdeviceinfo-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcanbusdeviceinfo.html#QCanBusDeviceInfo-1">QCanBusDeviceInfo</a></b>(const QCanBusDeviceInfo &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCanBusDeviceInfo &amp;</td><td class="memItemRight bottomAlign"><b><a href="qcanbusdeviceinfo.html#operator-eq-1">operator=</a></b>(QCanBusDeviceInfo &amp;&amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCanBusDeviceInfo &amp;</td><td class="memItemRight bottomAlign"><b><a href="qcanbusdeviceinfo.html#operator-eq">operator=</a></b>(const QCanBusDeviceInfo &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcanbusdeviceinfo.html#dtor.QCanBusDeviceInfo">~QCanBusDeviceInfo</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcanbusdeviceinfo.html#channel">channel</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qcanbusdeviceinfo.html#description">description</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcanbusdeviceinfo.html#hasFlexibleDataRate">hasFlexibleDataRate</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcanbusdeviceinfo.html#isVirtual">isVirtual</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qcanbusdeviceinfo.html#name">name</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="qcanbusdeviceinfo.html#serialNumber">serialNumber</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcanbusdeviceinfo.html#swap">swap</a></b>(QCanBusDeviceInfo &amp;<i>other</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCanBusDeviceInfo-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Each plugin may support one or more interfaces with different capabilities. This class provides information about available functions.</p>
+</div>
+<!-- @@@QCanBusDeviceInfo -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QCanBusDeviceInfo$$$QCanBusDeviceInfoconstQCanBusDeviceInfo& -->
+<h3 class="fn" id="QCanBusDeviceInfo-1"><a name="QCanBusDeviceInfo-1"></a>QCanBusDeviceInfo::<span class="name">QCanBusDeviceInfo</span>(const <span class="type">QCanBusDeviceInfo</span> &amp;<i>other</i>)</h3>
+<p>Constructs a copy of <i>other</i>.</p>
+<!-- @@@QCanBusDeviceInfo -->
+<!-- $$$operator=$$$operator=QCanBusDeviceInfo&& -->
+<h3 class="fn" id="operator-eq-1"><a name="operator-eq-1"></a><span class="type">QCanBusDeviceInfo</span> &amp;QCanBusDeviceInfo::<span class="name">operator=</span>(<span class="type">QCanBusDeviceInfo</span> &amp;&amp;<i>other</i>)</h3>
+<p>Move-assigns other to this <a href="qcanbusdeviceinfo.html">QCanBusDeviceInfo</a> instance.</p>
+<!-- @@@operator= -->
+<!-- $$$operator=[overload1]$$$operator=constQCanBusDeviceInfo& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type">QCanBusDeviceInfo</span> &amp;QCanBusDeviceInfo::<span class="name">operator=</span>(const <span class="type">QCanBusDeviceInfo</span> &amp;<i>other</i>)</h3>
+<p>Assigns <i>other</i> to this CAN bus device info and returns a reference to this CAN bus device info.</p>
+<!-- @@@operator= -->
+<!-- $$$~QCanBusDeviceInfo[overload1]$$$~QCanBusDeviceInfo -->
+<h3 class="fn" id="dtor.QCanBusDeviceInfo"><a name="dtor.QCanBusDeviceInfo"></a>QCanBusDeviceInfo::<span class="name">~QCanBusDeviceInfo</span>()</h3>
+<p>Destroys the CAN bus device info.</p>
+<!-- @@@~QCanBusDeviceInfo -->
+<!-- $$$channel[overload1]$$$channel -->
+<h3 class="fn" id="channel"><a name="channel"></a><span class="type">int</span> QCanBusDeviceInfo::<span class="name">channel</span>() const</h3>
+<p>Returns the sequential channel number of the CAN bus interface, starting with zero. For example, a two channel CAN interface may have the channels 0 and 1. If the interface has only one channel or if no information about the channel is available, zero is returned.</p>
+<p>This function was introduced in  Qt 5.11.</p>
+<!-- @@@channel -->
+<!-- $$$description[overload1]$$$description -->
+<h3 class="fn" id="description"><a name="description"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QCanBusDeviceInfo::<span class="name">description</span>() const</h3>
+<p>Returns a textual description of the CAN bus interface, if available. Example output: &quot;PCAN USB Pro FD&quot;. If no description is available, an empty string is returned.</p>
+<p>This function was introduced in  Qt 5.11.</p>
+<!-- @@@description -->
+<!-- $$$hasFlexibleDataRate[overload1]$$$hasFlexibleDataRate -->
+<h3 class="fn" id="hasFlexibleDataRate"><a name="hasFlexibleDataRate"></a><span class="type">bool</span> QCanBusDeviceInfo::<span class="name">hasFlexibleDataRate</span>() const</h3>
+<p>Returns true, if the CAN bus interface is CAN FD (flexible data rate) capable.</p>
+<p>If this information is not available, false is returned.</p>
+<!-- @@@hasFlexibleDataRate -->
+<!-- $$$isVirtual[overload1]$$$isVirtual -->
+<h3 class="fn" id="isVirtual"><a name="isVirtual"></a><span class="type">bool</span> QCanBusDeviceInfo::<span class="name">isVirtual</span>() const</h3>
+<p>Returns true, if the CAN bus interface is virtual (i.e&#x2e; not connected to real CAN hardware).</p>
+<p>If this information is not available, false is returned.</p>
+<!-- @@@isVirtual -->
+<!-- $$$name[overload1]$$$name -->
+<h3 class="fn" id="name"><a name="name"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QCanBusDeviceInfo::<span class="name">name</span>() const</h3>
+<p>Returns the interface name of this CAN bus interface, e.g&#x2e; can0.</p>
+<!-- @@@name -->
+<!-- $$$serialNumber[overload1]$$$serialNumber -->
+<h3 class="fn" id="serialNumber"><a name="serialNumber"></a><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QCanBusDeviceInfo::<span class="name">serialNumber</span>() const</h3>
+<p>Returns the serial number of the CAN bus interface as string, if available. Otherwise, an empty string is returned.</p>
+<p>This function was introduced in  Qt 5.11.</p>
+<!-- @@@serialNumber -->
+<!-- $$$swap[overload1]$$$swapQCanBusDeviceInfo& -->
+<h3 class="fn" id="swap"><a name="swap"></a><span class="type">void</span> QCanBusDeviceInfo::<span class="name">swap</span>(<span class="type">QCanBusDeviceInfo</span> &amp;<i>other</i>)</h3>
+<p>Swaps this CAN bus device info with <i>other</i>. This operation is very fast and never fails.</p>
+<!-- @@@swap -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

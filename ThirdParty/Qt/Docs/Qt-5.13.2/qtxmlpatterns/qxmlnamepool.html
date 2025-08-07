@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qxmlnamepool.cpp -->
+  <title>QXmlNamePool Class | Qt XML Patterns 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtxmlpatterns-index.html">Qt XML Patterns</a></td><td ><a href="qtxmlpatterns-module.html">C++ Classes</a></td><td >QXmlNamePool</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtxmlpatterns-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QXmlNamePool Class</h1>
+<!-- $$$QXmlNamePool-brief -->
+<p>The <a href="qxmlnamepool.html">QXmlNamePool</a> class is a table of shared strings referenced by instances of <a href="qxmlname.html">QXmlName</a>. <a href="#details">More...</a></p>
+<!-- @@@QXmlNamePool -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QXmlNamePool&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += xmlpatterns</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.4</td></tr></table></div><p>This class was introduced in  Qt 4.4.</p>
+<ul>
+<li><a href="qxmlnamepool-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qxmlnamepool.html#QXmlNamePool-1">QXmlNamePool</a></b>(const QXmlNamePool &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qxmlnamepool.html#QXmlNamePool">QXmlNamePool</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QXmlNamePool &amp;</td><td class="memItemRight bottomAlign"><b><a href="qxmlnamepool.html#operator-eq">operator=</a></b>(const QXmlNamePool &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qxmlnamepool.html#dtor.QXmlNamePool">~QXmlNamePool</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QXmlNamePool-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qxmlnamepool.html">QXmlNamePool</a> is used to optimize operations on instances of <a href="qxmlname.html">QXmlName</a>. An instance of <a href="qxmlname.html">QXmlName</a> represents an XML name in a way that allows the XML name to be compared and passed around efficiently. The efficiency is achieved by storing the strings comprising the XML names in an instance of <a href="qxmlnamepool.html">QXmlNamePool</a>, where they are mapped to binary identifiers, which are then packed into a key which is stored in the <a href="qxmlname.html">QXmlName</a>.</p>
+<p>This means that each instance of <a href="qxmlname.html">QXmlName</a> is tied to the name pool it was created with, and that name pool should be kept in scope and used to create all instances of <a href="qxmlname.html">QXmlName</a> that might be compared. Note also that the name pool is required if you must reconstitute the <a href="qxmlname.html">QXmlName</a> as text, or if you must access any of its component strings, so although instances of <a href="qxmlname.html">QXmlName</a> can be compared without reference to a name pool, the name pool must be kept in scope if the name's strings must be accessed later.</p>
+</div>
+<p><b>See also </b><a href="qxmlname.html">QXmlName</a> and <a href="qxmlquery.html#namePool">QXmlQuery::namePool</a>().</p>
+<!-- @@@QXmlNamePool -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QXmlNamePool$$$QXmlNamePoolconstQXmlNamePool& -->
+<h3 class="fn" id="QXmlNamePool-1"><a name="QXmlNamePool-1"></a>QXmlNamePool::<span class="name">QXmlNamePool</span>(const <span class="type"><a href="qxmlnamepool.html#QXmlNamePool">QXmlNamePool</a></span> &amp;<i>other</i>)</h3>
+<p>Constructs a copy of the <i>other</i> name pool.</p>
+<!-- @@@QXmlNamePool -->
+<!-- $$$QXmlNamePool[overload1]$$$QXmlNamePool -->
+<h3 class="fn" id="QXmlNamePool"><a name="QXmlNamePool"></a>QXmlNamePool::<span class="name">QXmlNamePool</span>()</h3>
+<p>Constructs an empty name pool.</p>
+<!-- @@@QXmlNamePool -->
+<!-- $$$operator=[overload1]$$$operator=constQXmlNamePool& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qxmlnamepool.html#QXmlNamePool">QXmlNamePool</a></span> &amp;QXmlNamePool::<span class="name">operator=</span>(const <span class="type"><a href="qxmlnamepool.html#QXmlNamePool">QXmlNamePool</a></span> &amp;<i>other</i>)</h3>
+<p>Assigns the <i>other</i> name pool to this one.</p>
+<!-- @@@operator= -->
+<!-- $$$~QXmlNamePool[overload1]$$$~QXmlNamePool -->
+<h3 class="fn" id="dtor.QXmlNamePool"><a name="dtor.QXmlNamePool"></a>QXmlNamePool::<span class="name">~QXmlNamePool</span>()</h3>
+<p>Destroys the name pool. Instances of <a href="qxmlname.html">QXmlName</a> constructed with this name pool can still be compared after this destructor is called, but their text strings cannot be accessed.</p>
+<!-- @@@~QXmlNamePool -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

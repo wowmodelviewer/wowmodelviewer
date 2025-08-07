@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdoc-manual-markupcmds.qdoc -->
+  <title>Including Images | QDoc Manual 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qdoc-index.html">QDoc Manual</a></td><td >Including Images</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qdoc-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="08-qdoc-commands-creatinglinks.html" />
+  <link rel="next" href="10-qdoc-commands-tablesandlists.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="08-qdoc-commands-creatinglinks.html">Creating Links</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="10-qdoc-commands-tablesandlists.html">Tables and Lists</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#image">\image</a></li>
+<li class="level1"><a href="#inlineimage">\inlineimage</a></li>
+<li class="level1"><a href="#caption">\caption</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Including Images</h1>
+<span class="subtitle"></span>
+<!-- $$$09-qdoc-commands-includingimages.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The graphic commands makes it possible to include images in the documentation. The images can be rendered as separate paragraphs, or within running text.</p>
+<a name="image-command"></a><a name="image"></a>
+<h2 id="image">\image</h2>
+<p>The \image command expands to the image specified by its first argument, and renders it centered as a separate paragraph.</p>
+<p>The command takes two arguments. The first argument is the name of the image file. The second argument is optional and is a simple description of the image, equivalent to the HTML alt=&quot;&quot; in an image tag. The description is used for tooltips and for browsers that don't support images, like the Lynx text browser.</p>
+<p>The remaining text <i>after</i> the file name is the optional, description argument. Be sure to follow the file name or the description with a line break. Curly brackets are required if the description argument spans multiple lines.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      <span class="type"><a href="../qtcore/qt.html">Qt</a></span> is a C<span class="operator">+</span><span class="operator">+</span> toolkit <span class="keyword">for</span> cross<span class="operator">-</span>platform GUI application development<span class="operator">.</span>
+
+      \image happyguy<span class="operator">.</span>jpg <span class="string">&quot;Happy guy&quot;</span>
+
+      <span class="type"><a href="../qtcore/qt.html">Qt</a></span> provides single<span class="operator">-</span>source portability across Microsoft
+      Windows<span class="operator">,</span> macOS<span class="operator">,</span> Linux<span class="operator">,</span> and all major commercial Unix
+      variants<span class="operator">.</span> It is also available <span class="keyword">for</span> embedded devices<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p>Qt is a C++ toolkit for cross-platform GUI application development.</p>
+<p class="centerAlign"><img src="images/happyguy.jpg" alt="image &quot;Happy guy&quot;" /></p><p>Qt provides single-source portability across Microsoft Windows, <a href="../qtdoc/internationalization.html#macos">macOS</a>, Linux, and all major commercial Unix variants. It is also available for embedded devices.</p>
+</blockquote>
+<p>See also <a href="09-qdoc-commands-includingimages.html#inlineimage-command">\inlineimage</a> and <a href="09-qdoc-commands-includingimages.html#caption-command">\caption</a>.</p>
+<a name="inlineimage-command"></a><a name="inlineimage"></a>
+<h2 id="inlineimage">\inlineimage</h2>
+<p>The \inlineimage command expands to the image specified by its argument. The image is rendered inline with the rest of the text.</p>
+<p>The command takes two arguments. The first argument is the name of the image file. The second argument is optional and is a simple description of the image, equivalent to the HTML alt=&quot;&quot; in an image tag. The description is used for tooltips, and for when a browser doesn't support images, like the Lynx text browser.</p>
+<p>The most common use of the \inlineimage command is in lists and tables. Here is an example of including inline images in a list:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \list <span class="number">1</span>
+        \li \inlineimage happy<span class="operator">.</span>gif Oh so happy<span class="operator">!</span>
+        \li \inlineimage happy<span class="operator">.</span>gif Oh so happy<span class="operator">!</span>
+        \li \inlineimage happy<span class="operator">.</span>gif Oh so happy<span class="operator">!</span>
+      \endlist
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<ol class="1" type="1"><li><img src="images/happy.gif" alt="Oh so happy!" /></li>
+<li><img src="images/happy.gif" alt="Oh so happy!" /></li>
+<li><img src="images/happy.gif" alt="Oh so happy!" /></li>
+</ol>
+<p>Here is an example of including inline images in a table:</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \table
+      \header
+          \li <span class="type"><a href="../qtcore/qt.html">Qt</a></span>
+          \li <span class="type"><a href="../qtcore/qt.html">Qt</a></span> Creator
+      \row
+          \li \inlineimage happy<span class="operator">.</span>gif Oh so happy<span class="operator">!</span>
+          \li \inlineimage happy<span class="operator">.</span>gif Oh so happy<span class="operator">!</span>
+      \row
+          \li \inlineimage happy<span class="operator">.</span>gif Oh so happy<span class="operator">!</span>
+          \li \inlineimage happy<span class="operator">.</span>gif Oh so happy<span class="operator">!</span>
+      \endtable
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+        <table align="center" cellpadding="2"
+            cellspacing="1" border="0">
+        <tr valign="top" bgcolor="#a2c511">
+            <th>Qt</th>
+            <th>Qt Creator</th>
+        </tr>
+        <tr valign="top" bgcolor="#f0f0f0">
+            <td><img src="images/happy.gif" alt="Oh so happy!" />
+            </td>
+            <td><img src="images/happy.gif" alt="Oh so happy!" />
+            </td>
+        </tr>
+        <tr valign="top" bgcolor="#f0f0f0">
+            <td><img src="images/happy.gif" alt="Oh so happy!"/>
+            </td>
+            <td><img src="images/happy.gif" alt="Oh so happy!" />
+            </td>
+        </tr>
+        </table>
+    <p>The command can also be used to insert an image inline with the text.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+      \inlineimage training<span class="operator">.</span>jpg <span class="type"><a href="../qtcore/qt.html">Qt</a></span> Training
+      The <span class="type"><a href="../qtcore/qt.html">Qt</a></span> Programming course is offered as a
+      five day Open Enrollment Course<span class="operator">.</span> The classes
+      are open to the <span class="keyword">public</span><span class="operator">.</span> Although the course is open
+      to anyone who wants to learn<span class="operator">,</span> attendees should
+      have significant experience in C<span class="operator">+</span><span class="operator">+</span> development
+      to derive maximum benefit from the course<span class="operator">.</span>
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<blockquote><p><img src="images/training.jpg" alt="Qt Training" /> The Qt Programming course is offered as a five day Open Enrollment Course. The classes are open to the public. Although the course is open to anyone who wants to learn, attendees should have significant experience in C++ development to derive maximum benefit from the course.</p>
+</blockquote>
+<p>See also <a href="09-qdoc-commands-includingimages.html#image-command">\image</a> and <a href="09-qdoc-commands-includingimages.html#caption-command">\caption</a>.</p>
+<a name="caption-command"></a><a name="caption"></a>
+<h2 id="caption">\caption</h2>
+<p>The \caption command provides a caption for an image.</p>
+<p>The command takes all the text up to the end of the paragraph to be the caption. Experiment until you get the effect you want.</p>
+<pre class="cpp">
+
+  <span class="operator">/</span> <span class="operator">*</span><span class="operator">!</span>
+    \table <span class="number">100</span><span class="operator">%</span>
+      \row
+        \li \image windowsvista<span class="operator">-</span>pushbutton<span class="operator">.</span>png
+           \caption The <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> widget provides a command button<span class="operator">.</span>
+        \li \image windowsvista<span class="operator">-</span>toolbutton<span class="operator">.</span>png
+           \caption The <span class="type"><a href="../qtwidgets/qtoolbutton.html">QToolButton</a></span> <span class="keyword">class</span> provides a quick<span class="operator">-</span>access button to commands
+           <span class="keyword">or</span> options<span class="operator">,</span> usually used inside a <span class="type"><a href="../qtwidgets/qtoolbar.html">QToolBar</a></span><span class="operator">.</span>
+     \endtable
+  <span class="operator">*</span> <span class="operator">/</span>
+
+</pre>
+<p>QDoc renders this as:</p>
+<div class="table"><table class="generic" width="100%">
+ <tr valign="top" class="odd"><td ><p class="centerAlign"><img src="images/windowsvista-pushbutton.png" alt="" /></p><p class="figCaption">The <a href="../qtwidgets/qpushbutton.html">QPushButton</a> widget provides a command button.</p>
+</td><td ><p class="centerAlign"><font color="red">[Missing image windowsvista-toolbutton.png]</font></p><p class="figCaption">The <a href="../qtwidgets/qtoolbutton.html">QToolButton</a> class provides a quick-access button to commands or options, usually used inside a <a href="../qtwidgets/qtoolbar.html">QToolBar</a>.</p>
+</td></tr>
+</table></div>
+<p>See also <a href="09-qdoc-commands-includingimages.html#image-command">\image</a> and <a href="09-qdoc-commands-includingimages.html#inlineimage-command">\inlineimage</a></p>
+</div>
+<!-- @@@09-qdoc-commands-includingimages.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="08-qdoc-commands-creatinglinks.html">Creating Links</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="10-qdoc-commands-tablesandlists.html">Tables and Lists</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

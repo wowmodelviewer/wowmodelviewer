@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qevent.cpp -->
+  <title>QCloseEvent Class | Qt GUI 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-module.html">C++ Classes</a></td><td >QCloseEvent</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtgui-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCloseEvent Class</h1>
+<!-- $$$QCloseEvent-brief -->
+<p>The <a href="qcloseevent.html">QCloseEvent</a> class contains parameters that describe a close event. <a href="#details">More...</a></p>
+<!-- @@@QCloseEvent -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QCloseEvent&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += gui</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="../qtcore/qevent.html">QEvent</a></td></tr></table></div><ul>
+<li><a href="qcloseevent-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcloseevent.html#QCloseEvent">QCloseEvent</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCloseEvent-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Close events are sent to widgets that the user wants to close, usually by choosing &quot;Close&quot; from the window menu, or by clicking the <b>X</b> title bar button. They are also sent when you call <a href="../qtwidgets/qwidget.html#close">QWidget::close</a>() to close a widget programmatically.</p>
+<p>Close events contain a flag that indicates whether the receiver wants the widget to be closed or not. When a widget accepts the close event, it is hidden (and destroyed if it was created with the <a href="../qtcore/qt.html#WidgetAttribute-enum">Qt::WA_DeleteOnClose</a> flag). If it refuses to accept the close event nothing happens. (Under X11 it is possible that the window manager will forcibly close the window; but at the time of writing we are not aware of any window manager that does this.)</p>
+<p>The event handler <a href="../qtwidgets/qwidget.html#closeEvent">QWidget::closeEvent</a>() receives close events. The default implementation of this event handler accepts the close event. If you do not want your widget to be hidden, or want some special handling, you should reimplement the event handler and <a href="../qtcore/qevent.html#ignore">ignore</a>() the event.</p>
+<p>The <a href="../qtwidgets/qtwidgets-mainwindows-application-example.html#close-event-handler">closeEvent() in the Application example</a> shows a close event handler that asks whether to save a document before closing.</p>
+<p>If you want the widget to be deleted when it is closed, create it with the <a href="../qtcore/qt.html#WidgetAttribute-enum">Qt::WA_DeleteOnClose</a> flag. This is very useful for independent top-level windows in a multi-window application.</p>
+<p><a href="../qtcore/qobject.html">QObject</a>s emits the <a href="../qtcore/qobject.html#destroyed">destroyed()</a> signal when they are deleted.</p>
+<p>If the last top-level window is closed, the <a href="qguiapplication.html#lastWindowClosed">QGuiApplication::lastWindowClosed</a>() signal is emitted.</p>
+<p>The <a href="../qtcore/qevent.html#accepted-prop">isAccepted</a>() function returns <code>true</code> if the event's receiver has agreed to close the widget; call <a href="../qtcore/qevent.html#accept">accept</a>() to agree to close the widget and call <a href="../qtcore/qevent.html#ignore">ignore</a>() if the receiver of this event does not want the widget to be closed.</p>
+</div>
+<p><b>See also </b><a href="../qtwidgets/qwidget.html#close">QWidget::close</a>(), <a href="../qtwidgets/qwidget.html#hide">QWidget::hide</a>(), <a href="../qtcore/qobject.html#destroyed">QObject::destroyed</a>(), <a href="../qtcore/qcoreapplication.html#exec">QCoreApplication::exec</a>(), <a href="../qtcore/qcoreapplication.html#quit">QCoreApplication::quit</a>(), and <a href="qguiapplication.html#lastWindowClosed">QGuiApplication::lastWindowClosed</a>().</p>
+<!-- @@@QCloseEvent -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QCloseEvent[overload1]$$$QCloseEvent -->
+<h3 class="fn" id="QCloseEvent"><a name="QCloseEvent"></a>QCloseEvent::<span class="name">QCloseEvent</span>()</h3>
+<p>Constructs a close event object.</p>
+<p><b>See also </b><a href="../qtcore/qevent.html#accept">accept</a>().</p>
+<!-- @@@QCloseEvent -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

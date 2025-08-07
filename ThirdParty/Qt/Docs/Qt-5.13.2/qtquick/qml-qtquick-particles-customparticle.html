@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qquickcustomparticle.cpp -->
+  <title>CustomParticle QML Type | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-qmlmodule.html">QML Types</a></td><td >CustomParticle QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">CustomParticle QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$CustomParticle-brief -->
+<p>For specifying shaders to paint particles. <a href="#details">More...</a></p>
+<!-- @@@CustomParticle -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtQuick.Particles 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtquick-particles-particlepainter.html">ParticlePainter</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtquick-particles-customparticle-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtquick-particles-customparticle.html#fragmentShader-prop">fragmentShader</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtquick-particles-customparticle.html#vertexShader-prop">vertexShader</a></b></b> : string</li>
+</ul>
+<!-- $$$CustomParticle-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><b>Note: </b>The maximum number of custom particles is limited to 16383.</p><!-- @@@CustomParticle -->
+<h2>Property Documentation</h2>
+<!-- $$$fragmentShader -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="fragmentShader-prop"></a><span class="name">fragmentShader</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the fragment shader's GLSL source code. The default shader expects the texture coordinate to be passed from the vertex shader as &quot;varying highp vec2 qt_TexCoord0&quot;, and it samples from a sampler2D named &quot;source&quot;.</p>
+</div></div><!-- @@@fragmentShader -->
+<br/>
+<!-- $$$vertexShader -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="vertexShader-prop"></a><span class="name">vertexShader</span> : <span class="type"><a href="../qtqml/qml-string.html">string</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property holds the vertex shader's GLSL source code.</p>
+<p>The default shader passes the texture coordinate along to the fragment shader as &quot;varying highp vec2 qt_TexCoord0&quot;.</p>
+<p>To aid writing a particle vertex shader, the following GLSL code is prepended to your vertex shader:</p>
+<pre class="cpp">
+
+  attribute highp vec2 qt_ParticlePos;
+  attribute highp vec2 qt_ParticleTex;
+  attribute highp vec4 qt_ParticleData; <span class="comment">//  x = time,  y = lifeSpan, z = size,  w = endSize</span>
+  attribute highp vec4 qt_ParticleVec; <span class="comment">// x,y = constant velocity,  z,w = acceleration</span>
+  attribute highp <span class="type">float</span> qt_ParticleR;
+  uniform highp mat4 qt_Matrix;
+  uniform highp <span class="type">float</span> qt_Timestamp;
+  varying highp vec2 qt_TexCoord0;
+  <span class="type">void</span> defaultMain() {
+      qt_TexCoord0 <span class="operator">=</span> qt_ParticleTex;
+      highp <span class="type">float</span> size <span class="operator">=</span> qt_ParticleData<span class="operator">.</span>z;
+      highp <span class="type">float</span> endSize <span class="operator">=</span> qt_ParticleData<span class="operator">.</span>w;
+      highp <span class="type">float</span> t <span class="operator">=</span> (qt_Timestamp <span class="operator">-</span> qt_ParticleData<span class="operator">.</span>x) <span class="operator">/</span> qt_ParticleData<span class="operator">.</span>y;
+      highp <span class="type">float</span> currentSize <span class="operator">=</span> mix(size<span class="operator">,</span> endSize<span class="operator">,</span> t <span class="operator">*</span> t);
+      <span class="keyword">if</span> (t <span class="operator">&lt;</span> <span class="number">0.</span> <span class="operator">|</span><span class="operator">|</span> t <span class="operator">&gt;</span> <span class="number">1.</span>)
+          currentSize <span class="operator">=</span> <span class="number">0.</span>;
+      highp vec2 pos <span class="operator">=</span> qt_ParticlePos
+                     <span class="operator">-</span> currentSize <span class="operator">/</span> <span class="number">2.</span> <span class="operator">+</span> currentSize <span class="operator">*</span> qt_ParticleTex   <span class="comment">// adjust size</span>
+                     <span class="operator">+</span> qt_ParticleVec<span class="operator">.</span>xy <span class="operator">*</span> t <span class="operator">*</span> qt_ParticleData<span class="operator">.</span>y         <span class="comment">// apply velocity vector..</span>
+                     <span class="operator">+</span> <span class="number">0.5</span> <span class="operator">*</span> qt_ParticleVec<span class="operator">.</span>zw <span class="operator">*</span> pow(t <span class="operator">*</span> qt_ParticleData<span class="operator">.</span>y<span class="operator">,</span> <span class="number">2.</span>);
+      gl_Position <span class="operator">=</span> qt_Matrix <span class="operator">*</span> vec4(pos<span class="operator">.</span>x<span class="operator">,</span> pos<span class="operator">.</span>y<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span>);
+  }
+
+</pre>
+<p>defaultMain() is the same code as in the default shader, you can call this for basic particle functions and then add additional variables for custom effects. Note that the vertex shader for particles is responsible for simulating the movement of particles over time, the particle data itself only has the starting position and spawn time.</p>
+</div></div><!-- @@@vertexShader -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

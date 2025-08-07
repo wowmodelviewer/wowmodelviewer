@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- editabletreemodel.qdoc -->
+  <title>Editable Tree Model Example | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td >Editable Tree Model Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#overview">Overview</a></li>
+<li class="level1"><a href="#design">Design</a></li>
+<li class="level1"><a href="#treeitem-class-definition">TreeItem Class Definition</a></li>
+<li class="level1"><a href="#treeitem-class-implementation">TreeItem Class Implementation</a></li>
+<li class="level1"><a href="#treemodel-class-definition">TreeModel Class Definition</a></li>
+<li class="level1"><a href="#treemodel-class-implementation">TreeModel Class Implementation</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Editable Tree Model Example</h1>
+<span class="subtitle"></span>
+<!-- $$$itemviews/editabletreemodel-brief -->
+<p>This example shows how to implement a simple item-based tree model that can be used with other classes the model/view framework.</p>
+<!-- @@@itemviews/editabletreemodel -->
+<!-- $$$itemviews/editabletreemodel-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/itemviews-editabletreemodel.png" alt="" /></p><p>The model supports editable items, custom headers, and the ability to insert and remove rows and columns. With these features, it is also possible to insert new child items, and this is shown in the supporting example code.</p>
+<a name="overview"></a>
+<h4 id="overview">Overview</h4>
+<p>As described in the <a href="model-view-programming.html#model-subclassing-reference">Model Subclassing Reference</a>, models must provide implementations for the standard set of model functions: <a href="../qtcore/qabstractitemmodel.html#flags">flags()</a>, <a href="../qtcore/qabstractitemmodel.html#data">data()</a>, <a href="../qtcore/qabstractitemmodel.html#headerData">headerData()</a>, <a href="../qtcore/qabstractitemmodel.html#columnCount">columnCount()</a>, and <a href="../qtcore/qabstractitemmodel.html#rowCount">rowCount()</a>. In addition, hierarchical models, such as this one, need to provide implementations of <a href="../qtcore/qabstractitemmodel.html#index">index()</a> and <a href="../qtcore/qabstractitemmodel.html#parent">parent()</a>.</p>
+<p>An editable model needs to provide implementations of <a href="../qtcore/qabstractitemmodel.html#setData">setData()</a> and <a href="../qtcore/qabstractitemmodel.html#setHeaderData">setHeaderData()</a>, and must return a suitable combination of flags from its <a href="../qtcore/qabstractitemmodel.html#flags">flags()</a> function.</p>
+<p>Since this example allows the dimensions of the model to be changed, we must also implement <a href="../qtcore/qabstractitemmodel.html#insertRows">insertRows()</a>, <a href="../qtcore/qabstractitemmodel.html#insertColumns">insertColumns()</a>, <a href="../qtcore/qabstractitemmodel.html#removeRows">removeRows()</a>, and <a href="../qtcore/qabstractitemmodel.html#removeColumns">removeColumns()</a>.</p>
+<a name="design"></a>
+<h4 id="design">Design</h4>
+<p>As with the <a href="qtwidgets-itemviews-simpletreemodel-example.html">Simple Tree Model</a> example, the model simply acts as a wrapper around a collection of instances of a <code>TreeItem</code> class. Each <code>TreeItem</code> is designed to hold data for a row of items in a tree view, so it contains a list of values corresponding to the data shown in each column.</p>
+<p>Since <a href="qtreeview.html">QTreeView</a> provides a row-oriented view onto a model, it is natural to choose a row-oriented design for data structures that will supply data via a model to this kind of view. Although this makes the tree model less flexible, and possibly less useful for use with more sophisticated views, it makes it less complex to design and easier to implement.</p>
+<a name="relations-between-internal-items"></a><div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><img src="images/itemviews-editabletreemodel-items.png" alt="" /></td><td ><b>Relations between internal items</b><p>When designing a data structure for use with a custom model, it is useful to expose each item's parent via a function like <a href="qtwidgets-itemviews-editabletreemodel-example.html#treeitem-parent">TreeItem::parent()</a> because it will make writing the model's own <a href="../qtcore/qabstractitemmodel.html#parent">parent()</a> function easier. Similarly, a function like <a href="qtwidgets-itemviews-editabletreemodel-example.html#treeitem-child">TreeItem::child()</a> is helpful when implementing the model's <a href="../qtcore/qabstractitemmodel.html#index">index()</a> function. As a result, each <code>TreeItem</code> maintains information about its parent and children, making it possible for us to traverse the tree structure.</p>
+<p>The diagram shows how <code>TreeItem</code> instances are connected via their <a href="qtwidgets-itemviews-editabletreemodel-example.html#treeitem-parent">parent()</a> and <a href="qtwidgets-itemviews-editabletreemodel-example.html#treeitem-child">child()</a> functions.</p>
+<p>In the example shown, two top-level items, <b>A</b> and <b>B</b>, can be obtained from the root item by calling its child() function, and each of these items return the root node from their parent() functions, though this is only shown for item <b>A</b>.</p>
+</td></tr>
+</table></div>
+<p>Each <code>TreeItem</code> stores data for each column in the row it represents in its <code>itemData</code> private member (a list of <a href="../qtcore/qvariant.html">QVariant</a> objects). Since there is a one-to-one mapping between each column in the view and each entry in the list, we provide a simple <a href="qtwidgets-itemviews-editabletreemodel-example.html#treeitem-data">data()</a> function to read entries in the <code>itemData</code> list and a <a href="qtwidgets-itemviews-editabletreemodel-example.html#treeitem-setdata">setData()</a> function to allow them to be modified. As with other functions in the item, this simplifies the implemention of the model's <a href="../qtcore/qabstractitemmodel.html#data">data()</a> and <a href="../qtcore/qabstractitemmodel.html#setData">setData()</a> functions.</p>
+<p>We place an item at the root of the tree of items. This root item corresponds to the null model index, <a href="../qtcore/qmodelindex.html#QModelIndex">QModelIndex()</a>, that is used to represent the parent of a top-level item when handling model indexes. Although the root item does not have a visible representation in any of the standard views, we use its internal list of <a href="../qtcore/qvariant.html">QVariant</a> objects to store a list of strings that will be passed to views for use as horizontal header titles.</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><img src="images/itemviews-editabletreemodel-model.png" alt="" /></td><td ><b>Accessing data via the model</b><p>In the case shown in the diagram, the piece of information represented by <b>a</b> can be obtained using the standard model/view API:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> a <span class="operator">=</span> model<span class="operator">-</span><span class="operator">&gt;</span>index(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>())<span class="operator">.</span>data();
+
+</pre>
+<p>Since each items holds pieces of data for each column in a given row, there can be many model indexes that map to the same <code>TreeItem</code> object. For example, the information represented by <b>b</b> can be obtained using the following code:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> b <span class="operator">=</span> model<span class="operator">-</span><span class="operator">&gt;</span>index(<span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>())<span class="operator">.</span>data();
+
+</pre>
+<p>The same underlying <code>TreeItem</code> would be accessed to obtain information for the other model indexes in the same row as <b>b</b>.</p>
+</td></tr>
+</table></div>
+<p>In the model class, <code>TreeModel</code>, we relate <code>TreeItem</code> objects to model indexes by passing a pointer for each item when we create its corresponding model index with <a href="../qtcore/qabstractitemmodel.html#createIndex">QAbstractItemModel::createIndex</a>() in our <a href="qtwidgets-itemviews-editabletreemodel-example.html#treemodel-index">index()</a> and <a href="qtwidgets-itemviews-editabletreemodel-example.html#treemodel-parent">parent()</a> implementations. We can retrieve pointers stored in this way by calling the <a href="../qtcore/qmodelindex.html#internalPointer">internalPointer()</a> function on the relevant model index - we create our own <a href="qtwidgets-itemviews-editabletreemodel-example.html#treemodel-getitem">getItem()</a> function to do the work for us, and call it from our <a href="qtwidgets-itemviews-editabletreemodel-example.html#treemodel-data">data()</a> and <a href="qtwidgets-itemviews-editabletreemodel-example.html#treemodel-parent">parent()</a> implementations.</p>
+<p>Storing pointers to items is convenient when we control how they are created and destroyed since we can assume that an address obtained from <a href="../qtcore/qmodelindex.html#internalPointer">internalPointer()</a> is a valid pointer. However, some models need to handle items that are obtained from other components in a system, and in many cases it is not possible to fully control how items are created or destroyed. In such situations, a pure pointer-based approach needs to be supplemented by safeguards to ensure that the model does not attempt to access items that have been deleted.</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><b>Storing information in the underlying data structure</b><p>Several pieces of data are stored as <a href="../qtcore/qvariant.html">QVariant</a> objects in the <code>itemData</code> member of each <code>TreeItem</code> instance.</p>
+<p>The diagram shows how pieces of information, represented by the labels <b>a</b>, <b>b</b> and <b>c</b> in the previous two diagrams, are stored in items <b>A</b>, <b>B</b> and <b>C</b> in the underlying data structure. Note that pieces of information from the same row in the model are all obtained from the same item. Each element in a list corresponds to a piece of information exposed by each column in a given row in the model.</p>
+</td><td ><img src="images/itemviews-editabletreemodel-values.png" alt="" /></td></tr>
+</table></div>
+<p>Since the <code>TreeModel</code> implementation has been designed for use with <a href="qtreeview.html">QTreeView</a>, we have added a restriction on the way it uses <code>TreeItem</code> instances: each item must expose the same number of columns of data. This makes viewing the model consistent, allowing us to use the root item to determine the number of columns for any given row, and only adds the requirement that we create items containing enough data for the total number of columns. As a result, inserting and removing columns are time-consuming operations because we need to traverse the entire tree to modify every item.</p>
+<p>An alternative approach would be to design the <code>TreeModel</code> class so that it truncates or expands the list of data in individual <code>TreeItem</code> instances as items of data are modified. However, this &quot;lazy&quot; resizing approach would only allow us to insert and remove columns at the end of each row and would not allow columns to be inserted or removed at arbitrary positions in each row.</p>
+<a name="relating-items-using-model-indexes"></a><div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><img src="images/itemviews-editabletreemodel-indexes.png" alt="" /></td><td ><b>Relating items using model indexes</b><p>As with the <a href="qtwidgets-itemviews-simpletreemodel-example.html">Simple Tree Model</a> example, the <code>TreeModel</code> needs to be able to take a model index, find the corresponding <code>TreeItem</code>, and return model indexes that correspond to its parents and children.</p>
+<p>In the diagram, we show how the model's <a href="qtwidgets-itemviews-editabletreemodel-example.html#treemodel-parent">parent()</a> implementation obtains the model index corresponding to the parent of an item supplied by the caller, using the items shown in a <a href="qtwidgets-itemviews-editabletreemodel-example.html#relations-between-internal-items">previous diagram</a>.</p>
+<p>A pointer to item <b>C</b> is obtained from the corresponding model index using the <a href="../qtcore/qmodelindex.html#internalPointer">QModelIndex::internalPointer</a>() function. The pointer was stored internally in the index when it was created. Since the child contains a pointer to its parent, we use its <a href="qtwidgets-itemviews-editabletreemodel-example.html#treeitem-parent">parent()</a> function to obtain a pointer to item <b>B</b>. The parent model index is created using the <a href="../qtcore/qabstractitemmodel.html#createIndex">QAbstractItemModel::createIndex</a>() function, passing the pointer to item <b>B</b> as the internal pointer.</p>
+</td></tr>
+</table></div>
+<a name="treeitem-class-definition"></a>
+<h4 id="treeitem-class-definition">TreeItem Class Definition</h4>
+<p>The <code>TreeItem</code> class provides simple items that contain several pieces of data, including information about their parent and child items:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> TreeItem
+  {
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> TreeItem(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">&gt;</span> <span class="operator">&amp;</span>data<span class="operator">,</span> TreeItem <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+      <span class="operator">~</span>TreeItem();
+
+      TreeItem <span class="operator">*</span>child(<span class="type">int</span> number);
+      <span class="type">int</span> childCount() <span class="keyword">const</span>;
+      <span class="type">int</span> columnCount() <span class="keyword">const</span>;
+      <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> data(<span class="type">int</span> column) <span class="keyword">const</span>;
+      bool insertChildren(<span class="type">int</span> position<span class="operator">,</span> <span class="type">int</span> count<span class="operator">,</span> <span class="type">int</span> columns);
+      bool insertColumns(<span class="type">int</span> position<span class="operator">,</span> <span class="type">int</span> columns);
+      TreeItem <span class="operator">*</span>parent();
+      bool removeChildren(<span class="type">int</span> position<span class="operator">,</span> <span class="type">int</span> count);
+      bool removeColumns(<span class="type">int</span> position<span class="operator">,</span> <span class="type">int</span> columns);
+      <span class="type">int</span> childNumber() <span class="keyword">const</span>;
+      bool setData(<span class="type">int</span> column<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> <span class="operator">&amp;</span>value);
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span>TreeItem<span class="operator">*</span><span class="operator">&gt;</span> childItems;
+      <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">&gt;</span> itemData;
+      TreeItem <span class="operator">*</span>parentItem;
+  };
+
+</pre>
+<p>We have designed the API to be similar to that provided by <a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a> by giving each item functions to return the number of columns of information, read and write data, and insert and remove columns. However, we make the relationship between items explicit by providing functions to deal with &quot;children&quot; rather than &quot;rows&quot;.</p>
+<p>Each item contains a list of pointers to child items, a pointer to its parent item, and a list of <a href="../qtcore/qvariant.html">QVariant</a> objects that correspond to information held in columns in a given row in the model.</p>
+<a name="treeitem-class-implementation"></a>
+<h4 id="treeitem-class-implementation">TreeItem Class Implementation</h4>
+<p>Each <code>TreeItem</code> is constructed with a list of data and an optional parent item:</p>
+<pre class="cpp">
+
+  TreeItem<span class="operator">::</span>TreeItem(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">&gt;</span> <span class="operator">&amp;</span>data<span class="operator">,</span> TreeItem <span class="operator">*</span>parent)
+      : itemData(data)<span class="operator">,</span>
+        parentItem(parent)
+  {}
+
+</pre>
+<p>Initially, each item has no children. These are added to the item's internal <code>childItems</code> member using the <code>insertChildren()</code> function described later.</p>
+<p>The destructor ensures that each child added to the item is deleted when the item itself is deleted:</p>
+<pre class="cpp">
+
+  TreeItem<span class="operator">::</span><span class="operator">~</span>TreeItem()
+  {
+      <a href="../qtcore/qtalgorithms.html#qDeleteAll">qDeleteAll</a>(childItems);
+  }
+
+</pre>
+<a name="treeitem-parent"></a><p>Since each item stores a pointer to its parent, the <code>parent()</code> function is trivial:</p>
+<pre class="cpp">
+
+  TreeItem <span class="operator">*</span>TreeItem<span class="operator">::</span>parent()
+  {
+      <span class="keyword">return</span> parentItem;
+  }
+
+</pre>
+<a name="treeitem-child"></a><p>Three functions provide information about the children of an item. <code>child()</code> returns a specific child from the internal list of children:</p>
+<pre class="cpp">
+
+  TreeItem <span class="operator">*</span>TreeItem<span class="operator">::</span>child(<span class="type">int</span> number)
+  {
+      <span class="keyword">if</span> (number <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> number <span class="operator">&gt;</span><span class="operator">=</span> childItems<span class="operator">.</span>size())
+          <span class="keyword">return</span> nullptr;
+      <span class="keyword">return</span> childItems<span class="operator">.</span>at(number);
+  }
+
+</pre>
+<p>The <code>childCount()</code> function returns the total number of children:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> TreeItem<span class="operator">::</span>childCount() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> childItems<span class="operator">.</span>count();
+  }
+
+</pre>
+<p>The <code>childNumber()</code> function is used to determine the index of the child in its parent's list of children. It accesses the parent's <code>childItems</code> member directly to obtain this information:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> TreeItem<span class="operator">::</span>childNumber() <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (parentItem)
+          <span class="keyword">return</span> parentItem<span class="operator">-</span><span class="operator">&gt;</span>childItems<span class="operator">.</span>indexOf(<span class="keyword">const_cast</span><span class="operator">&lt;</span>TreeItem<span class="operator">*</span><span class="operator">&gt;</span>(<span class="keyword">this</span>));
+      <span class="keyword">return</span> <span class="number">0</span>;
+  }
+
+</pre>
+<p>The root item has no parent item; for this item, we return zero to be consistent with the other items.</p>
+<p>The <code>columnCount()</code> function simply returns the number of elements in the internal <code>itemData</code> list of <a href="../qtcore/qvariant.html">QVariant</a> objects:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> TreeItem<span class="operator">::</span>columnCount() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> itemData<span class="operator">.</span>count();
+  }
+
+</pre>
+<a name="treeitem-data"></a><p>Data is retrieved using the <code>data()</code> function, which accesses the appropriate element in the <code>itemData</code> list:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> TreeItem<span class="operator">::</span>data(<span class="type">int</span> column) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (column <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> column <span class="operator">&gt;</span><span class="operator">=</span> itemData<span class="operator">.</span>size())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+      <span class="keyword">return</span> itemData<span class="operator">.</span>at(column);
+  }
+
+</pre>
+<a name="treeitem-setdata"></a><p>Data is set using the <code>setData()</code> function, which only stores values in the <code>itemData</code> list for valid list indexes, corresponding to column values in the model:</p>
+<pre class="cpp">
+
+  bool TreeItem<span class="operator">::</span>setData(<span class="type">int</span> column<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> <span class="operator">&amp;</span>value)
+  {
+      <span class="keyword">if</span> (column <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> column <span class="operator">&gt;</span><span class="operator">=</span> itemData<span class="operator">.</span>size())
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+
+      itemData<span class="operator">[</span>column<span class="operator">]</span> <span class="operator">=</span> value;
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+</pre>
+<p>To make implementation of the model easier, we return true to indicate that the data was set successfully.</p>
+<p>Editable models often need to be resizable, enabling rows and columns to be inserted and removed. The insertion of rows beneath a given model index in the model leads to the insertion of new child items in the corresponding item, handled by the <code>insertChildren()</code> function:</p>
+<pre class="cpp">
+
+  bool TreeItem<span class="operator">::</span>insertChildren(<span class="type">int</span> position<span class="operator">,</span> <span class="type">int</span> count<span class="operator">,</span> <span class="type">int</span> columns)
+  {
+      <span class="keyword">if</span> (position <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> position <span class="operator">&gt;</span> childItems<span class="operator">.</span>size())
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+
+      <span class="keyword">for</span> (<span class="type">int</span> row <span class="operator">=</span> <span class="number">0</span>; row <span class="operator">&lt;</span> count; <span class="operator">+</span><span class="operator">+</span>row) {
+          <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">&gt;</span> data(columns);
+          TreeItem <span class="operator">*</span>item <span class="operator">=</span> <span class="keyword">new</span> TreeItem(data<span class="operator">,</span> <span class="keyword">this</span>);
+          childItems<span class="operator">.</span>insert(position<span class="operator">,</span> item);
+      }
+
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+</pre>
+<p>This ensures that new items are created with the required number of columns and inserted at a valid position in the internal <code>childItems</code> list. Items are removed with the <code>removeChildren()</code> function:</p>
+<pre class="cpp">
+
+  bool TreeItem<span class="operator">::</span>removeChildren(<span class="type">int</span> position<span class="operator">,</span> <span class="type">int</span> count)
+  {
+      <span class="keyword">if</span> (position <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> position <span class="operator">+</span> count <span class="operator">&gt;</span> childItems<span class="operator">.</span>size())
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+
+      <span class="keyword">for</span> (<span class="type">int</span> row <span class="operator">=</span> <span class="number">0</span>; row <span class="operator">&lt;</span> count; <span class="operator">+</span><span class="operator">+</span>row)
+          <span class="keyword">delete</span> childItems<span class="operator">.</span>takeAt(position);
+
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+</pre>
+<p>As discussed above, the functions for inserting and removing columns are used differently to those for inserting and removing child items because they are expected to be called on every item in the tree. We do this by recursively calling this function on each child of the item:</p>
+<pre class="cpp">
+
+  bool TreeItem<span class="operator">::</span>insertColumns(<span class="type">int</span> position<span class="operator">,</span> <span class="type">int</span> columns)
+  {
+      <span class="keyword">if</span> (position <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> position <span class="operator">&gt;</span> itemData<span class="operator">.</span>size())
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+
+      <span class="keyword">for</span> (<span class="type">int</span> column <span class="operator">=</span> <span class="number">0</span>; column <span class="operator">&lt;</span> columns; <span class="operator">+</span><span class="operator">+</span>column)
+          itemData<span class="operator">.</span>insert(position<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>());
+
+      <span class="keyword">for</span> (TreeItem <span class="operator">*</span>child : <a href="../qtcore/qtglobal.html#qAsConst">qAsConst</a>(childItems))
+          child<span class="operator">-</span><span class="operator">&gt;</span>insertColumns(position<span class="operator">,</span> columns);
+
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+</pre>
+<a name="treemodel-class-definition"></a>
+<h4 id="treemodel-class-definition">TreeModel Class Definition</h4>
+<p>The <code>TreeModel</code> class provides an implementation of the <a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a> class, exposing the necessary interface for a model that can be edited and resized.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> TreeModel : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      TreeModel(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> <span class="operator">&amp;</span>headers<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>data<span class="operator">,</span>
+                <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent <span class="operator">=</span> nullptr);
+      <span class="operator">~</span>TreeModel();
+
+</pre>
+<p>The constructor and destructor are specific to this model.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> data(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> headerData(<span class="type">int</span> section<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Orientation orientation<span class="operator">,</span>
+                          <span class="type">int</span> role <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole) <span class="keyword">const</span> override;
+
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> index(<span class="type">int</span> row<span class="operator">,</span> <span class="type">int</span> column<span class="operator">,</span>
+                        <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent <span class="operator">=</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()) <span class="keyword">const</span> override;
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> parent(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span> override;
+
+      <span class="type">int</span> rowCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent <span class="operator">=</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()) <span class="keyword">const</span> override;
+      <span class="type">int</span> columnCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent <span class="operator">=</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()) <span class="keyword">const</span> override;
+
+</pre>
+<p>Read-only tree models only need to provide the above functions. The following public functions provide support for editing and resizing:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemFlags flags(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span> override;
+      bool setData(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> <span class="operator">&amp;</span>value<span class="operator">,</span>
+                   <span class="type">int</span> role <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole) override;
+      bool setHeaderData(<span class="type">int</span> section<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Orientation orientation<span class="operator">,</span>
+                         <span class="keyword">const</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> <span class="operator">&amp;</span>value<span class="operator">,</span> <span class="type">int</span> role <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole) override;
+
+      bool insertColumns(<span class="type">int</span> position<span class="operator">,</span> <span class="type">int</span> columns<span class="operator">,</span>
+                         <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent <span class="operator">=</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()) override;
+      bool removeColumns(<span class="type">int</span> position<span class="operator">,</span> <span class="type">int</span> columns<span class="operator">,</span>
+                         <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent <span class="operator">=</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()) override;
+      bool insertRows(<span class="type">int</span> position<span class="operator">,</span> <span class="type">int</span> rows<span class="operator">,</span>
+                      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent <span class="operator">=</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()) override;
+      bool removeRows(<span class="type">int</span> position<span class="operator">,</span> <span class="type">int</span> rows<span class="operator">,</span>
+                      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent <span class="operator">=</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()) override;
+
+  <span class="keyword">private</span>:
+      <span class="type">void</span> setupModelData(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> <span class="operator">&amp;</span>lines<span class="operator">,</span> TreeItem <span class="operator">*</span>parent);
+      TreeItem <span class="operator">*</span>getItem(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span>;
+
+      TreeItem <span class="operator">*</span>rootItem;
+  };
+
+</pre>
+<p>To simplify this example, the data exposed by the model is organized into a data structure by the model's <a href="qtwidgets-itemviews-editabletreemodel-example.html#treemodel-setupmodeldata">setupModelData()</a> function. Many real world models will not process the raw data at all, but simply work with an existing data structure or library API.</p>
+<a name="treemodel-class-implementation"></a>
+<h4 id="treemodel-class-implementation">TreeModel Class Implementation</h4>
+<p>The constructor creates a root item and initializes it with the header data supplied:</p>
+<pre class="cpp">
+
+  TreeModel<span class="operator">::</span>TreeModel(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> <span class="operator">&amp;</span>headers<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>data<span class="operator">,</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span>(parent)
+  {
+      <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">&gt;</span> rootData;
+      <span class="keyword">for</span> (<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>header : headers)
+          rootData <span class="operator">&lt;</span><span class="operator">&lt;</span> header;
+
+      rootItem <span class="operator">=</span> <span class="keyword">new</span> TreeItem(rootData);
+      setupModelData(data<span class="operator">.</span>split(<span class="char">'\n'</span>)<span class="operator">,</span> rootItem);
+  }
+
+</pre>
+<p>We call the internal <a href="qtwidgets-itemviews-editabletreemodel-example.html#treemodel-setupmodeldata">setupModelData()</a> function to convert the textual data supplied to a data structure we can use with the model. Other models may be initialized with a ready-made data structure, or use an API from a library that maintains its own data.</p>
+<p>The destructor only has to delete the root item, which will cause all child items to be recursively deleted.</p>
+<pre class="cpp">
+
+  TreeModel<span class="operator">::</span><span class="operator">~</span>TreeModel()
+  {
+      <span class="keyword">delete</span> rootItem;
+  }
+
+</pre>
+<a name="treemodel-getitem"></a><p>Since the model's interface to the other model/view components is based on model indexes, and since the internal data structure is item-based, many of the functions implemented by the model need to be able to convert any given model index to its corresponding item. For convenience and consistency, we have defined a <code>getItem()</code> function to perform this repetitive task:</p>
+<pre class="cpp">
+
+  TreeItem <span class="operator">*</span>TreeModel<span class="operator">::</span>getItem(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (index<span class="operator">.</span>isValid()) {
+          TreeItem <span class="operator">*</span>item <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span>TreeItem<span class="operator">*</span><span class="operator">&gt;</span>(index<span class="operator">.</span>internalPointer());
+          <span class="keyword">if</span> (item)
+              <span class="keyword">return</span> item;
+      }
+      <span class="keyword">return</span> rootItem;
+  }
+
+</pre>
+<p>Each model index passed to this function should correspond to a valid item in memory. If the index is invalid, or its internal pointer does not refer to a valid item, the root item is returned instead.</p>
+<p>The model's <code>rowCount()</code> implementation is simple: it first uses the <code>getItem()</code> function to obtain the relevant item; then it returns the number of children it contains:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> TreeModel<span class="operator">::</span>rowCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">const</span> TreeItem <span class="operator">*</span>parentItem <span class="operator">=</span> getItem(parent);
+
+      <span class="keyword">return</span> parentItem <span class="operator">?</span> parentItem<span class="operator">-</span><span class="operator">&gt;</span>childCount() : <span class="number">0</span>;
+  }
+
+</pre>
+<p>By contrast, the <code>columnCount()</code> implementation does not need to look for a particular item because all items are defined to have the same number of columns associated with them.</p>
+<pre class="cpp">
+
+  <span class="type">int</span> TreeModel<span class="operator">::</span>columnCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      Q_UNUSED(parent);
+      <span class="keyword">return</span> rootItem<span class="operator">-</span><span class="operator">&gt;</span>columnCount();
+  }
+
+</pre>
+<p>As a result, the number of columns can be obtained directly from the root item.</p>
+<p>To enable items to be edited and selected, the <code>flags()</code> function needs to be implemented so that it returns a combination of flags that includes the <a href="../qtcore/qt.html#ItemFlag-enum">Qt::ItemIsEditable</a> and <a href="../qtcore/qt.html#ItemFlag-enum">Qt::ItemIsSelectable</a> flags as well as <a href="../qtcore/qt.html#ItemFlag-enum">Qt::ItemIsEnabled</a>:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemFlags TreeModel<span class="operator">::</span>flags(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoItemFlags;
+
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemIsEditable <span class="operator">|</span> <span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span><span class="operator">::</span>flags(index);
+  }
+
+</pre>
+<a name="treemodel-index"></a><p>The model needs to be able to generate model indexes to allow other components to request data and information about its structure. This task is performed by the <code>index()</code> function, which is used to obtain model indexes corresponding to children of a given parent item:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> TreeModel<span class="operator">::</span>index(<span class="type">int</span> row<span class="operator">,</span> <span class="type">int</span> column<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (parent<span class="operator">.</span>isValid() <span class="operator">&amp;</span><span class="operator">&amp;</span> parent<span class="operator">.</span>column() <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+
+</pre>
+<p>In this model, we only return model indexes for child items if the parent index is invalid (corresponding to the root item) or if it has a zero column number.</p>
+<p>We use the custom <a href="qtwidgets-itemviews-editabletreemodel-example.html#treemodel-getitem">getItem()</a> function to obtain a <code>TreeItem</code> instance that corresponds to the model index supplied, and request its child item that corresponds to the specified row.</p>
+<pre class="cpp">
+
+      TreeItem <span class="operator">*</span>parentItem <span class="operator">=</span> getItem(parent);
+      <span class="keyword">if</span> (<span class="operator">!</span>parentItem)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+
+      TreeItem <span class="operator">*</span>childItem <span class="operator">=</span> parentItem<span class="operator">-</span><span class="operator">&gt;</span>child(row);
+      <span class="keyword">if</span> (childItem)
+          <span class="keyword">return</span> createIndex(row<span class="operator">,</span> column<span class="operator">,</span> childItem);
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+  }
+
+</pre>
+<p>Since each item contains information for an entire row of data, we create a model index to uniquely identify it by calling <a href="../qtcore/qabstractitemmodel.html#createIndex">createIndex()</a> it with the row and column numbers and a pointer to the item. In the <a href="qtwidgets-itemviews-editabletreemodel-example.html#treemodel-data">data()</a> function, we will use the item pointer and column number to access the data associated with the model index; in this model, the row number is not needed to identify data.</p>
+<a name="treemodel-parent"></a><p>The <code>parent()</code> function supplies model indexes for parents of items by finding the corresponding item for a given model index, using its <a href="qtwidgets-itemviews-editabletreemodel-example.html#treeitem-parent">parent()</a> function to obtain its parent item, then creating a model index to represent the parent. (See <a href="qtwidgets-itemviews-editabletreemodel-example.html#relating-items-using-model-indexes">the above diagram</a>).</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> TreeModel<span class="operator">::</span>parent(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+
+      TreeItem <span class="operator">*</span>childItem <span class="operator">=</span> getItem(index);
+      TreeItem <span class="operator">*</span>parentItem <span class="operator">=</span> childItem <span class="operator">?</span> childItem<span class="operator">-</span><span class="operator">&gt;</span>parent() : nullptr;
+
+      <span class="keyword">if</span> (parentItem <span class="operator">=</span><span class="operator">=</span> rootItem <span class="operator">|</span><span class="operator">|</span> <span class="operator">!</span>parentItem)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+
+      <span class="keyword">return</span> createIndex(parentItem<span class="operator">-</span><span class="operator">&gt;</span>childNumber()<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> parentItem);
+  }
+
+</pre>
+<p>Items without parents, including the root item, are handled by returning a null model index. Otherwise, a model index is created and returned as in the <a href="qtwidgets-itemviews-editabletreemodel-example.html#treemodel-index">index()</a> function, with a suitable row number, but with a zero column number to be consistent with the scheme used in the <a href="qtwidgets-itemviews-editabletreemodel-example.html#treemodel-index">index()</a> implementation.</p>
+<a name="treemodel-data"></a><a name="treemodel-setupmodeldata"></a><p><a href="https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/itemviews/editabletreemodel?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@itemviews/editabletreemodel -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

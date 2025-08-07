@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qsimplexmlnodemodel.cpp -->
+  <title>QSimpleXmlNodeModel Class | Qt XML Patterns 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtxmlpatterns-index.html">Qt XML Patterns</a></td><td ><a href="qtxmlpatterns-module.html">C++ Classes</a></td><td >QSimpleXmlNodeModel</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtxmlpatterns-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSimpleXmlNodeModel Class</h1>
+<!-- $$$QSimpleXmlNodeModel-brief -->
+<p>The <a href="qsimplexmlnodemodel.html">QSimpleXmlNodeModel</a> class is an implementation of <a href="qabstractxmlnodemodel.html">QAbstractXmlNodeModel</a> sufficient for many common cases. <a href="#details">More...</a></p>
+<!-- @@@QSimpleXmlNodeModel -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QSimpleXmlNodeModel&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += xmlpatterns</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.4</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qabstractxmlnodemodel.html">QAbstractXmlNodeModel</a></td></tr></table></div><p>This class was introduced in  Qt 4.4.</p>
+<ul>
+<li><a href="qsimplexmlnodemodel-members.html">List of all members, including inherited members</a></li>
+</ul>
+<p><b>Note:</b> All functions in this class are <a href="../qtdoc/threads-reentrancy.html">reentrant</a>.</p>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qsimplexmlnodemodel.html#QSimpleXmlNodeModel">QSimpleXmlNodeModel</a></b>(const QXmlNamePool &amp;<i>namePool</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qsimplexmlnodemodel.html#dtor.QSimpleXmlNodeModel">~QSimpleXmlNodeModel</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QXmlNamePool &amp;</td><td class="memItemRight bottomAlign"><b><a href="qsimplexmlnodemodel.html#namePool">namePool</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QUrl </td><td class="memItemRight bottomAlign"><b><a href="qsimplexmlnodemodel.html#baseUri">baseUri</a></b>(const QXmlNodeModelIndex &amp;<i>node</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QXmlNodeModelIndex </td><td class="memItemRight bottomAlign"><b><a href="qsimplexmlnodemodel.html#elementById">elementById</a></b>(const QXmlName &amp;<i>id</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QVector&lt;QXmlName&gt; </td><td class="memItemRight bottomAlign"><b><a href="qsimplexmlnodemodel.html#namespaceBindings">namespaceBindings</a></b>(const QXmlNodeModelIndex &amp;<i>node</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QVector&lt;QXmlNodeModelIndex&gt; </td><td class="memItemRight bottomAlign"><b><a href="qsimplexmlnodemodel.html#nodesByIdref">nodesByIdref</a></b>(const QXmlName &amp;<i>idref</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QString </td><td class="memItemRight bottomAlign"><b><a href="qsimplexmlnodemodel.html#stringValue">stringValue</a></b>(const QXmlNodeModelIndex &amp;<i>node</i>) const override</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSimpleXmlNodeModel-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Subclassing <a href="qabstractxmlnodemodel.html">QAbstractXmlNodeModel</a> can be a significant task, because it requires implementing several, complex member functions. <a href="qsimplexmlnodemodel.html">QSimpleXmlNodeModel</a> provides default implementations of these member functions that are suitable for a wide range of node models.</p>
+<p>Subclasses of <a href="qsimplexmlnodemodel.html">QSimpleXmlNodeModel</a> must be thread-safe.</p>
+</div>
+<!-- @@@QSimpleXmlNodeModel -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QSimpleXmlNodeModel[overload1]$$$QSimpleXmlNodeModelconstQXmlNamePool& -->
+<h3 class="fn" id="QSimpleXmlNodeModel"><a name="QSimpleXmlNodeModel"></a>QSimpleXmlNodeModel::<span class="name">QSimpleXmlNodeModel</span>(const <span class="type"><a href="qxmlnamepool.html">QXmlNamePool</a></span> &amp;<i>namePool</i>)</h3>
+<p>Constructs a <a href="qsimplexmlnodemodel.html">QSimpleXmlNodeModel</a> for use with with the specified <i>namePool</i>.</p>
+<!-- @@@QSimpleXmlNodeModel -->
+<!-- $$$~QSimpleXmlNodeModel[overload1]$$$~QSimpleXmlNodeModel -->
+<h3 class="fn" id="dtor.QSimpleXmlNodeModel"><a name="dtor.QSimpleXmlNodeModel"></a><code>[virtual] </code>QSimpleXmlNodeModel::<span class="name">~QSimpleXmlNodeModel</span>()</h3>
+<p>Destructor.</p>
+<!-- @@@~QSimpleXmlNodeModel -->
+<!-- $$$baseUri[overload1]$$$baseUriconstQXmlNodeModelIndex& -->
+<h3 class="fn" id="baseUri"><a name="baseUri"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> QSimpleXmlNodeModel::<span class="name">baseUri</span>(const <span class="type"><a href="qxmlnodemodelindex.html">QXmlNodeModelIndex</a></span> &amp;<i>node</i>) const</h3>
+<p>Reimplements: <a href="qabstractxmlnodemodel.html#baseUri">QAbstractXmlNodeModel::baseUri</a>(const QXmlNodeModelIndex &amp;n) const.</p>
+<p>Returns the base URI for <i>node</i>. This is always the document URI.</p>
+<p><b>See also </b><a href="qabstractxmlnodemodel.html#documentUri">documentUri</a>().</p>
+<!-- @@@baseUri -->
+<!-- $$$elementById[overload1]$$$elementByIdconstQXmlName& -->
+<h3 class="fn" id="elementById"><a name="elementById"></a><code>[override virtual] </code><span class="type"><a href="qxmlnodemodelindex.html">QXmlNodeModelIndex</a></span> QSimpleXmlNodeModel::<span class="name">elementById</span>(const <span class="type"><a href="qxmlname.html">QXmlName</a></span> &amp;<i>id</i>) const</h3>
+<p>Reimplements: <a href="qabstractxmlnodemodel.html#elementById">QAbstractXmlNodeModel::elementById</a>(const QXmlName &amp;id) const.</p>
+<p>Always returns a default constructed <a href="qxmlnodemodelindex.html">QXmlNodeModelIndex</a> instance, regardless of <i>id</i>.</p>
+<p>This effectively means the model has no elements that have an id.</p>
+<!-- @@@elementById -->
+<!-- $$$namePool[overload1]$$$namePool -->
+<h3 class="fn" id="namePool"><a name="namePool"></a><span class="type"><a href="qxmlnamepool.html">QXmlNamePool</a></span> &amp;QSimpleXmlNodeModel::<span class="name">namePool</span>() const</h3>
+<p>Returns the name pool associated with this model. The implementation of <a href="qabstractxmlnodemodel.html#name">name</a>() will use this name pool to create names.</p>
+<!-- @@@namePool -->
+<!-- $$$namespaceBindings[overload1]$$$namespaceBindingsconstQXmlNodeModelIndex& -->
+<h3 class="fn" id="namespaceBindings"><a name="namespaceBindings"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="qxmlname.html">QXmlName</a></span>&gt; QSimpleXmlNodeModel::<span class="name">namespaceBindings</span>(const <span class="type"><a href="qxmlnodemodelindex.html">QXmlNodeModelIndex</a></span> &amp;<i>node</i>) const</h3>
+<p>Reimplements: <a href="qabstractxmlnodemodel.html#namespaceBindings">QAbstractXmlNodeModel::namespaceBindings</a>(const QXmlNodeModelIndex &amp;n) const.</p>
+<p>Always returns an empty <a href="../qtcore/qvector.html">QVector</a>. This signals that no namespace bindings are in scope for <i>node</i>.</p>
+<!-- @@@namespaceBindings -->
+<!-- $$$nodesByIdref[overload1]$$$nodesByIdrefconstQXmlName& -->
+<h3 class="fn" id="nodesByIdref"><a name="nodesByIdref"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qvector.html">QVector</a></span>&lt;<span class="type"><a href="qxmlnodemodelindex.html">QXmlNodeModelIndex</a></span>&gt; QSimpleXmlNodeModel::<span class="name">nodesByIdref</span>(const <span class="type"><a href="qxmlname.html">QXmlName</a></span> &amp;<i>idref</i>) const</h3>
+<p>Reimplements: <a href="qabstractxmlnodemodel.html#nodesByIdref">QAbstractXmlNodeModel::nodesByIdref</a>(const QXmlName &amp;idref) const.</p>
+<p>Always returns an empty vector, regardless of <i>idref</i>.</p>
+<p>This effectively means the model has no elements or attributes of type <code>IDREF</code>.</p>
+<!-- @@@nodesByIdref -->
+<!-- $$$stringValue[overload1]$$$stringValueconstQXmlNodeModelIndex& -->
+<h3 class="fn" id="stringValue"><a name="stringValue"></a><code>[override virtual] </code><span class="type"><a href="../qtcore/qstring.html">QString</a></span> QSimpleXmlNodeModel::<span class="name">stringValue</span>(const <span class="type"><a href="qxmlnodemodelindex.html">QXmlNodeModelIndex</a></span> &amp;<i>node</i>) const</h3>
+<p>Reimplements: <a href="qabstractxmlnodemodel.html#stringValue">QAbstractXmlNodeModel::stringValue</a>(const QXmlNodeModelIndex &amp;n) const.</p>
+<p>If <i>node</i> is an element or attribute, <a href="qabstractxmlnodemodel.html#typedValue">typedValue</a>() is called, and the return value converted to a string, as per <a href="xmlprocessing.html">XQuery</a>'s rules.</p>
+<p>If <i>node</i> is another type of node, the empty string is returned.</p>
+<p>If this function is overridden for comments or processing instructions, it is important to remember to call it (for elements and attributes having values not of type <code>xs:string</code>) to ensure that the values are formatted according to <a href="xmlprocessing.html">XQuery</a>.</p>
+<!-- @@@stringValue -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

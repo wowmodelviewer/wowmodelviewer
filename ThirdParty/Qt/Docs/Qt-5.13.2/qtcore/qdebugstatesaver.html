@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdebug.cpp -->
+  <title>QDebugStateSaver Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QDebugStateSaver</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QDebugStateSaver Class</h1>
+<!-- $$$QDebugStateSaver-brief -->
+<p>Convenience class for custom <a href="qdebug.html">QDebug</a> operators. <a href="#details">More...</a></p>
+<!-- @@@QDebugStateSaver -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QDebugStateSaver&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.1</td></tr></table></div><p>This class was introduced in  Qt 5.1.</p>
+<ul>
+<li><a href="qdebugstatesaver-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdebugstatesaver.html#QDebugStateSaver">QDebugStateSaver</a></b>(QDebug &amp;<i>dbg</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qdebugstatesaver.html#dtor.QDebugStateSaver">~QDebugStateSaver</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QDebugStateSaver-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Saves the settings used by <a href="qdebug.html">QDebug</a>, and restores them upon destruction, then calls <a href="qdebug.html#maybeSpace">maybeSpace()</a>, to separate arguments with a space if <a href="qdebug.html#autoInsertSpaces">autoInsertSpaces()</a> was true at the time of constructing the <a href="qdebugstatesaver.html">QDebugStateSaver</a>.</p>
+<p>The automatic insertion of spaces between writes is one of the settings that <a href="qdebugstatesaver.html">QDebugStateSaver</a> stores for the duration of the current block.</p>
+<p>The settings of the internal <a href="qtextstream.html">QTextStream</a> are also saved and restored, so that using &lt;&lt; hex in a <a href="qdebug.html">QDebug</a> operator doesn't affect other <a href="qdebug.html">QDebug</a> operators.</p>
+</div>
+<!-- @@@QDebugStateSaver -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QDebugStateSaver[overload1]$$$QDebugStateSaverQDebug& -->
+<h3 class="fn" id="QDebugStateSaver"><a name="QDebugStateSaver"></a>QDebugStateSaver::<span class="name">QDebugStateSaver</span>(<span class="type"><a href="qdebug.html">QDebug</a></span> &amp;<i>dbg</i>)</h3>
+<p>Creates a <a href="qdebugstatesaver.html">QDebugStateSaver</a> instance, which saves the settings currently used by <i>dbg</i>.</p>
+<p><b>See also </b><a href="qdebug.html#setAutoInsertSpaces">QDebug::setAutoInsertSpaces</a>() and <a href="qdebug.html#autoInsertSpaces">QDebug::autoInsertSpaces</a>().</p>
+<!-- @@@QDebugStateSaver -->
+<!-- $$$~QDebugStateSaver[overload1]$$$~QDebugStateSaver -->
+<h3 class="fn" id="dtor.QDebugStateSaver"><a name="dtor.QDebugStateSaver"></a>QDebugStateSaver::<span class="name">~QDebugStateSaver</span>()</h3>
+<p>Destroys a <a href="qdebugstatesaver.html">QDebugStateSaver</a> instance, which restores the settings used when the <a href="qdebugstatesaver.html">QDebugStateSaver</a> instance was created.</p>
+<p><b>See also </b><a href="qdebug.html#setAutoInsertSpaces">QDebug::setAutoInsertSpaces</a>() and <a href="qdebug.html#autoInsertSpaces">QDebug::autoInsertSpaces</a>().</p>
+<!-- @@@~QDebugStateSaver -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

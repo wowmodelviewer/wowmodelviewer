@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qdeclarativemultimediaglobal.cpp -->
+  <title>QtMultimedia QML Type | Qt Multimedia 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-qmlmodule.html">QML Types</a></td><td >QtMultimedia QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtmultimedia-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QtMultimedia QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$QtMultimedia-brief -->
+<p>Provides a global object with useful functions from Qt Multimedia. <a href="#details">More...</a></p>
+<!-- @@@QtMultimedia -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtMultimedia 5.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.4</td></tr></table></div><ul>
+<li><a href="qml-qtmultimedia-qtmultimedia-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmultimedia-qtmultimedia.html#availableCameras-prop">availableCameras</a></b></b> : list&lt;object&gt;</li>
+<li class="fn"><b><b><a href="qml-qtmultimedia-qtmultimedia.html#defaultCamera-prop">defaultCamera</a></b></b> : object</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">real <b><b><a href="qml-qtmultimedia-qtmultimedia.html#convertVolume-method">convertVolume</a></b></b>(<i>volume</i>,  VolumeScale <i>from</i>,  VolumeScale <i>to</i>)</li>
+</ul>
+<!-- $$$QtMultimedia-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The <code>QtMultimedia</code> object is a global object with utility functions and properties.</p>
+<p>It is not instantiable; to use it, call the members of the global <code>QtMultimedia</code> object directly. For example:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtmultimedia-camera.html">Camera</a></span> {
+      <span class="name">deviceId</span>: <span class="name">QtMultimedia</span>.<span class="name">defaultCamera</span>.<span class="name">deviceId</span>
+  }
+
+</pre>
+<!-- @@@QtMultimedia -->
+<h2>Property Documentation</h2>
+<!-- $$$availableCameras -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="availableCameras-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">availableCameras</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type">object</span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>This property provides information about the cameras available on the system.</p>
+<p>Each object in the list has the following properties:</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><code>deviceId</code></td><td >This read-only property holds the unique identifier of the camera.<p>You can choose which device to use with a <a href="qml-multimedia.html#camera">Camera</a> object by setting its <a href="qml-qtmultimedia-camera.html#deviceId-prop">deviceId</a> property to this value.</p>
+</td></tr>
+<tr valign="top" class="even"><td ><code>displayName</code></td><td >This read-only property holds the human-readable name of the camera. You can use this property to display the name of the camera in a user interface.</td></tr>
+<tr valign="top" class="odd"><td ><code>position</code></td><td >This read-only property holds the physical position of the camera on the hardware system. Please see <a href="qml-qtmultimedia-camera.html#position-prop">Camera.position</a> for more information.</td></tr>
+<tr valign="top" class="even"><td ><code>orientation</code></td><td >This read-only property holds the physical orientation of the camera sensor. Please see <a href="qml-qtmultimedia-camera.html#orientation-prop">Camera.orientation</a> for more information.</td></tr>
+</table></div>
+<p><b>Note: </b>This property is static; it is not updated when cameras are added or removed from the system, like USB cameras on a desktop platform.</p><p>The following example shows how to display a list of available cameras. The user can change the active camera by selecting one of the items in the list.</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+
+      <span class="type"><a href="qml-qtmultimedia-camera.html">Camera</a></span> {
+          <span class="name">id</span>: <span class="name">camera</span>
+      }
+
+      <span class="type"><a href="qml-qtmultimedia-videooutput.html">VideoOutput</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">source</span>: <span class="name">camera</span>
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+
+          <span class="name">model</span>: <span class="name">QtMultimedia</span>.<span class="name">availableCameras</span>
+          <span class="name">delegate</span>: <span class="name">Text</span> {
+              <span class="name">text</span>: <span class="name">modelData</span>.<span class="name">displayName</span>
+
+              <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+                  <span class="name">anchors</span>.fill: <span class="name">parent</span>
+                  <span class="name">onClicked</span>: <span class="name">camera</span>.<span class="name">deviceId</span> <span class="operator">=</span> <span class="name">modelData</span>.<span class="name">deviceId</span>
+              }
+          }
+      }
+  }
+
+</pre>
+</div></div><!-- @@@availableCameras -->
+<br/>
+<!-- $$$defaultCamera -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="defaultCamera-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">defaultCamera</span> : <span class="type">object</span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>The <code>defaultCamera</code> object provides information about the default camera on the system.</p>
+<p>Its properties are <code>deviceId</code>, <code>displayName</code>, <code>position</code> and <code>orientation</code>. See <a href="qml-qtmultimedia-qtmultimedia.html#availableCameras-prop">availableCameras</a> for a description of each of them.</p>
+<p>If there is no default camera, <code>defaultCamera.deviceId</code> will contain an empty string.</p>
+<p><b>Note: </b>This property is static; it is not updated if the system's default camera changes after the application started.</p></div></div><!-- @@@defaultCamera -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$convertVolume[overload1]$$$convertVolumeVolumeScaleVolumeScale -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlFuncNode"><p>
+<a name="convertVolume-method"></a><span class="type"><a href="../qtqml/qml-real.html">real</a></span> <span class="name">convertVolume</span>(<i>volume</i>,  <span class="type">VolumeScale</span> <i>from</i>,  <span class="type">VolumeScale</span> <i>to</i>)</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Converts an audio <i>volume</i> <i>from</i> a volume scale <i>to</i> another, and returns the result.</p>
+<p>Depending on the context, different scales are used to represent audio volume. All Qt Multimedia classes that have an audio volume use a linear scale, the reason is that the loudness of a speaker is controlled by modulating its voltage on a linear scale. The human ear on the other hand, perceives loudness in a logarithmic way. Using a logarithmic scale for volume controls is therefore appropriate in most applications. The decibel scale is logarithmic by nature and is commonly used to define sound levels, it is usually used for UI volume controls in professional audio applications. The cubic scale is a computationally cheap approximation of a logarithmic scale, it provides more control over lower volume levels.</p>
+<p>Valid values for <i>from</i> and <i>to</i> are:</p>
+<ul>
+<li><a href="qtmultimedia-module.html">QtMultimedia</a>.LinearVolumeScale - Linear scale. <code>0.0</code> (0%) is silence and <code>1.0</code> (100%) is full volume. All Qt Multimedia types that have an audio volume use a linear scale.</li>
+<li><a href="qtmultimedia-module.html">QtMultimedia</a>.CubicVolumeScale - Cubic scale. <code>0.0</code> (0%) is silence and <code>1.0</code> (100%) is full volume.</li>
+<li><a href="qtmultimedia-module.html">QtMultimedia</a>.LogarithmicVolumeScale - Logarithmic scale. <code>0.0</code> (0%) is silence and <code>1.0</code> (100%) is full volume. UI volume controls should usually use a logarithmic scale.</li>
+<li><a href="qtmultimedia-module.html">QtMultimedia</a>.DecibelVolumeScale - Decibel (dB, amplitude) logarithmic scale. <code>-200</code> is silence and <code>0</code> is full volume.</li>
+</ul>
+<p>The following example shows how the volume value from a UI volume control can be converted so that the perceived increase in loudness is the same when increasing the volume control from 0.2 to 0.3 as it is from 0.5 to 0.6:</p>
+<pre class="cpp">
+
+  Slider {
+      id: volumeSlider
+
+      property real volume: <span class="type"><a href="qml-qtmultimedia-qtmultimedia.html">QtMultimedia</a></span><span class="operator">.</span>convertVolume(volumeSlider<span class="operator">.</span>value<span class="operator">,</span>
+                                                       <span class="type"><a href="qml-qtmultimedia-qtmultimedia.html">QtMultimedia</a></span><span class="operator">.</span>LogarithmicVolumeScale<span class="operator">,</span>
+                                                       <span class="type"><a href="qml-qtmultimedia-qtmultimedia.html">QtMultimedia</a></span><span class="operator">.</span>LinearVolumeScale)
+  }
+
+  MediaPlayer {
+      volume: volumeSlider<span class="operator">.</span>volume
+  }
+
+</pre>
+<p>This method was introduced in  Qt 5.8.</p>
+</div></div><!-- @@@convertVolume -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

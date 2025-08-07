@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qgeometry.cpp -->
+  <title>Geometry QML Type | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-qml.html">QML Types</a></td><td >Geometry QML Type</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Geometry QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Geometry-brief -->
+<p>Encapsulates geometry. <a href="#details">More...</a></p>
+<!-- @@@Geometry -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import Qt3D.Render 2.13</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.7</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Instantiates:</td><td class="memItemRight bottomAlign"> <a href="qml-qt3d-render-geometry.html"><a href="qt3drender-qgeometry.html">QGeometry</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qt3d-core-node.html">Node</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qt3d-render-geometry-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qt3d-render-geometry.html#attributes-prop">attributes</a></b></b> : list&lt;Attribute&gt;</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-geometry.html#boundingVolumePositionAttribute-prop">boundingVolumePositionAttribute</a></b></b> : Attribute</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-geometry.html#maxExtent-prop">maxExtent</a></b></b> : vector3d</li>
+<li class="fn"><b><b><a href="qml-qt3d-render-geometry.html#minExtent-prop">minExtent</a></b></b> : vector3d</li>
+</ul>
+<!-- $$$Geometry-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>A Geometry type is used to group a list of Attribute objects together to form a geometric shape Qt3D is able to render using <a href="qt3drender-geometry.html#geometryrenderer">GeometryRenderer</a>. Special attribute can be set in order to calculate bounding volume of the shape.</p>
+<!-- @@@Geometry -->
+<h2>Property Documentation</h2>
+<!-- $$$attributes -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="attributes-prop"></a><span class="name">attributes</span> : <span class="type"><a href="../qtqml/qml-list.html">list</a></span>&lt;<span class="type"><a href="qml-qt3d-render-attribute.html">Attribute</a></span>&gt;</p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the list of attributes the geometry comprises of.</p>
+</div></div><!-- @@@attributes -->
+<br/>
+<!-- $$$boundingVolumePositionAttribute -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="boundingVolumePositionAttribute-prop"></a><span class="name">boundingVolumePositionAttribute</span> : <span class="type"><a href="qml-qt3d-render-attribute.html">Attribute</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the attribute used to compute the bounding volume. The bounding volume is used internally for picking and view frustum culling.</p>
+<p>If unspecified, the system will look for the attribute using the name returned by QAttribute::defaultPositionAttributeName.</p>
+<p><b>See also </b><a href="qt3drender-geometry.html#attribute">Attribute</a>.</p>
+</div></div><!-- @@@boundingVolumePositionAttribute -->
+<br/>
+<!-- $$$maxExtent -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="maxExtent-prop"></a><span class="name">maxExtent</span> : <span class="type"><a href="../qtquick/qml-vector3d.html">vector3d</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the vertex with the highest x, y, z position values.</p>
+</div></div><!-- @@@maxExtent -->
+<br/>
+<!-- $$$minExtent -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="">
+<td class="tblQmlPropNode"><p>
+<a name="minExtent-prop"></a><span class="name">minExtent</span> : <span class="type"><a href="../qtquick/qml-vector3d.html">vector3d</a></span></p></td></tr>
+</table></div>
+</div><div class="qmldoc"><p>Holds the vertex with the lowest x, y, z position values.</p>
+</div></div><!-- @@@minExtent -->
+<br/>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-fakevim.qdoc -->
+  <title>Using FakeVim Mode | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Using FakeVim Mode</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-editor-options-text.html" />
+  <link rel="next" href="creator-language-servers.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-editor-options-text.html">Specifying Text Editor Settings</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-language-servers.html">Using Language Servers</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#supported-modes-and-commands">Supported Modes and Commands</a></li>
+<li class="level2"><a href="#normal-and-visual-modes">Normal and Visual Modes</a></li>
+<li class="level2"><a href="#command-line-mode">Command Line Mode</a></li>
+<li class="level2"><a href="#insert-mode">Insert Mode</a></li>
+<li class="level2"><a href="#options">Options</a></li>
+<li class="level2"><a href="#vimrc-example">Vimrc Example</a></li>
+<li class="level1"><a href="#mapping-fakevim-commands">Mapping FakeVim Commands</a></li>
+<li class="level1"><a href="#specifying-fakevim-options">Specifying FakeVim Options</a></li>
+<li class="level1"><a href="#quitting-fakevim-mode">Quitting FakeVim Mode</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Using FakeVim Mode</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-editor-fakevim.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>In the <b>FakeVim</b> mode, you can run the main editor in a manner similar to the Vim editor. To run the editor in the <b>FakeVim</b> mode, select <b>Edit</b> &gt; <b>Advanced</b> &gt; <b>Use Vim-style Editing</b> or press <b>Alt+V,Alt+V</b>.</p>
+<a name="supported-modes-and-commands"></a>
+<h2 id="supported-modes-and-commands">Supported Modes and Commands</h2>
+<p>In the <b>FakeVim</b> mode, most keystrokes in the main editor will be intercepted and interpreted in a way that resembles Vim. Most of the supported commands can be followed by a motion command or executed in visual mode, or they work with registers or can be prefixed with a number of repetitions.</p>
+<p>The following sections describe the commands emulated in the supported modes and how they diverge from Vim in functionality:</p>
+<ul>
+<li>Normal</li>
+<li>Visual</li>
+<li>Command line (:)</li>
+<li>Insert and replace</li>
+</ul>
+<p>For more information on using Vim, see <a href="http://www.vim.org/docs.php">Documentation</a> on the Vim web site.</p>
+<a name="normal-and-visual-modes"></a>
+<h3 id="normal-and-visual-modes">Normal and Visual Modes</h3>
+<ul>
+<li>Basic movement, such as <code>h/j/k/l</code>, <code>&lt;C-U&gt;</code>, <code>&lt;C-D&gt;</code>, <code>&lt;C-F&gt;</code>, <code>&lt;C-B&gt;</code>, <code>gg</code>, <code>G</code>, <code>0</code>, <code>^</code>, <code>$</code></li>
+<li>Word movement, such as <code>w</code>, <code>e</code>, <code>b</code></li>
+<li><i>Inner/a</i> movement, such as <code>ciw</code>, <code>3daw</code>, ya{</li>
+<li><code>f</code> and <code>t</code> movement</li>
+<li><code>[ and \c ]</code> movement</li>
+<li>{ and } paragraph movement</li>
+<li>Delete/change/yank/paste with register</li>
+<li>Undo and redo</li>
+<li><code>&lt;C-A&gt;</code> and <code>&lt;C-X&gt;</code> increase or decrease a number in decimal, octal, or hexadecimal format (for example <code>128&lt;C-A&gt;</code> on or before <code>&quot;0x0ff&quot;</code> changes it to <code>&quot;0x17f&quot;</code>)</li>
+<li><code>.</code> repeats the last change</li>
+<li><code>/search</code>, <code>?search</code>, <code>*</code>, <code>#</code>, <code>n</code>, <code>N</code> - most of regular expression syntax is used in Vim except that <code>\&lt;</code> and <code>\&gt;</code> are the same as <code>\b</code> in <a href="http://doc.qt.io/qt-5/qregexp.html">QRegExp</a></li>
+<li><code>@</code> and <code>q</code> (macro recording and execution) special keys are saved as <code>&lt;S-Left&gt;</code></li>
+<li>Marks</li>
+<li><code>gv</code> goes to last visual selection; can differ if text is edited around it</li>
+<li>Indentation using <code>=</code>, <code>&lt;&lt;</code>, <code>&gt;&gt;</code>, with movement, count, and in visual mode</li>
+<li><i>to upper/lower</i>, such as <code>~</code>, <code>gU</code>, <code>gu</code></li>
+<li><code>i</code>, <code>a</code>, <code>o</code>, <code>I</code>, <code>A</code>, and <code>O</code> enter insert mode</li>
+<li>Scroll window, such as <code>zt</code>, <code>zb</code>, <code>zz</code></li>
+<li>Wrap line movement, such as <code>gj</code>, <code>gk</code>, <code>g0</code>, <code>g^</code>, <code>g$</code></li>
+</ul>
+<a name="command-line-mode"></a>
+<h3 id="command-line-mode">Command Line Mode</h3>
+<ul>
+<li><code>:map</code>, <code>:unmap</code>, <code>:inoremap</code>, and so on</li>
+<li><code>:source</code> provides very basic line-by-line sourcing of vimrc files</li>
+<li><code>:substitute</code> substitutes an expression in a range</li>
+<li><code>:'&lt;,'&gt;!cmd</code> filters through an external command (for example, sorts the lines in a file with <code>:%!sort</code>)</li>
+<li><code>:&lt;range&gt;sor[t][!]</code></li>
+<li><code>:.!cmd</code> inserts the standard output of an external command</li>
+<li><code>:read</code></li>
+<li><code>:yank</code>, <code>:delete</code>, <code>:change</code></li>
+<li><code>:move</code>, <code>:join</code></li>
+<li><code>:20</code> goes to an address</li>
+<li><code>:history</code></li>
+<li><code>:registers</code>, <code>:display</code></li>
+<li><code>:nohlsearch</code></li>
+<li><code>:undo</code>, <code>:redo</code></li>
+<li><code>:normal</code></li>
+<li><code>:&lt;</code>, <code>:&gt;</code></li>
+</ul>
+<a name="insert-mode"></a>
+<h3 id="insert-mode">Insert Mode</h3>
+<ul>
+<li><code>&lt;C-O&gt;</code> executes a single command and returns to insert mode</li>
+<li><code>&lt;C-V&gt;</code> inserts a raw character</li>
+<li><code>&lt;insert&gt;</code> toggles replace mode</li>
+</ul>
+<a name="options"></a>
+<h3 id="options">Options</h3>
+<p>Use <code>:set ..&#x2e;</code> to set the options listed in the following table:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Long Name</th><th >Short Name</th><th >Arguments</th></tr></thead>
+<tr valign="top" class="odd"><td ><code>autoindent</code></td><td ><code>ai</code></td><td ></td></tr>
+<tr valign="top" class="even"><td ><code>backspace</code></td><td ><code>bs</code></td><td ><code>indent</code>, <code>eol</code>, <code>start</code></td></tr>
+<tr valign="top" class="odd"><td ><code>blinkingcursor</code></td><td ><code>bc</code></td><td ></td></tr>
+<tr valign="top" class="even"><td ><code>clipboard</code></td><td ><code>cb</code></td><td ></td></tr>
+<tr valign="top" class="odd"><td ><code>expandtab</code></td><td ><code>et</code></td><td ></td></tr>
+<tr valign="top" class="even"><td ><code>hlsearch</code></td><td ><code>hls</code></td><td ></td></tr>
+<tr valign="top" class="odd"><td ><code>ignorecase</code></td><td ><code>ic</code></td><td ></td></tr>
+<tr valign="top" class="even"><td ><code>incsearch</code></td><td ><code>is</code></td><td ></td></tr>
+<tr valign="top" class="odd"><td ><code>iskeyword</code></td><td ><code>isk</code></td><td >A combination of the following characters: <code>@</code>, <code>48-57</code>, <code>_</code>, <code>192-255</code>, <code>a-z</code>, <code>A-Z</code></td></tr>
+<tr valign="top" class="even"><td ><code>relativenumber</code></td><td ><code>rnu</code></td><td ></td></tr>
+<tr valign="top" class="odd"><td ><code>scrolloff</code></td><td ><code>so</code></td><td ></td></tr>
+<tr valign="top" class="even"><td ><code>shiftwidth</code></td><td ><code>sw</code></td><td ></td></tr>
+<tr valign="top" class="odd"><td ><code>showcmd</code></td><td ><code>sc</code></td><td ></td></tr>
+<tr valign="top" class="even"><td ><code>smartcase</code></td><td ><code>scs</code></td><td ></td></tr>
+<tr valign="top" class="odd"><td ><code>smartindent</code></td><td ><code>si</code></td><td ></td></tr>
+<tr valign="top" class="even"><td ><code>smarttab</code></td><td ><code>sta</code></td><td ></td></tr>
+<tr valign="top" class="odd"><td ><code>startofline</code></td><td ><code>sol</code></td><td ></td></tr>
+<tr valign="top" class="even"><td ><code>tabstop</code></td><td ><code>ts</code></td><td ></td></tr>
+<tr valign="top" class="odd"><td ><code>tildeop</code></td><td ><code>top</code></td><td ></td></tr>
+<tr valign="top" class="even"><td ><code>usecoresearch</code></td><td ><code>ucs</code></td><td ></td></tr>
+<tr valign="top" class="odd"><td ><code>wrapscan</code></td><td ><code>ws</code></td><td ></td></tr>
+</table></div>
+<a name="vimrc-example"></a>
+<h3 id="vimrc-example">Vimrc Example</h3>
+<pre class="cpp">
+
+  <span class="string">&quot; highlight matched
+  set hlsearch
+  &quot;</span> <span class="keyword">case</span> insensitive search
+  set ignorecase
+  set smartcase
+  <span class="string">&quot; search while typing
+  set incsearch
+  &quot;</span> wrap<span class="operator">-</span>around when searching
+  set wrapscan
+  <span class="string">&quot; show pressed keys in lower right corner
+  set showcmd
+  &quot;</span> tab <span class="operator">-</span><span class="operator">&gt;</span> spaces
+  set expandtab
+  set tabstop<span class="operator">=</span><span class="number">4</span>
+  set shiftwidth<span class="operator">=</span><span class="number">4</span>
+  <span class="string">&quot; keep a 5 line buffer for the cursor from top/bottom of window
+  set scrolloff=5
+  &quot;</span> X11 clipboard
+  set clipboard<span class="operator">=</span>unnamed
+  <span class="string">&quot; use ~ with movement
+  set tildeop
+
+  &quot;</span> mappings
+  nnoremap ; :
+  inoremap jj <span class="operator">&lt;</span>Esc<span class="operator">&gt;</span>
+
+  <span class="string">&quot; clear highlighted search term on space
+  noremap &lt;silent&gt; &lt;Space&gt; :nohls&lt;CR&gt;
+
+  &quot;</span> reselect visual block after indent
+  vnoremap <span class="operator">&lt;</span> <span class="operator">&lt;</span>gv
+  vnoremap <span class="operator">&gt;</span> <span class="operator">&gt;</span>gv
+
+  <span class="string">&quot; MOVE LINE/BLOCK
+  nnoremap &lt;C-S-J&gt; :m+&lt;CR&gt;==
+  nnoremap &lt;C-S-K&gt; :m-2&lt;CR&gt;==
+  inoremap &lt;C-S-J&gt; &lt;Esc&gt;:m+&lt;CR&gt;==gi
+  inoremap &lt;C-S-K&gt; &lt;Esc&gt;:m-2&lt;CR&gt;==gi
+  vnoremap &lt;C-S-J&gt; :m'&gt;+&lt;CR&gt;gv=gv
+  vnoremap &lt;C-S-K&gt; :m-2&lt;CR&gt;gv=gv
+  </span>
+
+</pre>
+<a name="mapping-fakevim-commands"></a>
+<h2 id="mapping-fakevim-commands">Mapping FakeVim Commands</h2>
+<p>To map commands entered on the <b>FakeVim</b> command line to actions of the Qt Creator core, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>FakeVim</b> &gt; <b>Ex Command Mapping</b>.</p>
+<p>To map <i>user commands</i> to keyboard shortcuts, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>FakeVim</b> &gt; <b>User Command Mapping</b>. The user command mapped to the shortcut is executed by FakeVim as if you were typing it (as when replaying a macro).</p>
+<a name="specifying-fakevim-options"></a>
+<h2 id="specifying-fakevim-options">Specifying FakeVim Options</h2>
+<p>To make changes to the Vim-style settings, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>FakeVim</b> &gt; <b>General</b>.</p>
+<p class="centerAlign"><img src="images/qtcreator-fakevim-options.png" alt="&quot;FakeVim options&quot;" /></p><p>To preselect the indentation settings specified for the text editor, select <b>Copy Text Editor Settings</b>. To preselect the Qt coding style, select <b>Set Qt Style</b>. To preselect a simple indentation style, select <b>Set Plain Style</b>. You can then change any of the preselected settings.</p>
+<p>To use a Vim-style color scheme, select <b>Tools</b> &gt; <b>Options</b> &gt; <b>Text Editor</b> &gt; <b>Fonts &amp; Color</b>. In the <b>Color Scheme</b> list, select <b>Vim (dark)</b>.</p>
+<a name="quitting-fakevim-mode"></a>
+<h2 id="quitting-fakevim-mode">Quitting FakeVim Mode</h2>
+<p>To quit the FakeVim mode, unselect <b>Tools</b> &gt; <b>Options</b> &gt; <b>FakeVim</b> &gt; <b>Use FakeVim</b> or press <b>Alt+V,Alt+V</b>.</p>
+<p>You can temporarily escape FakeVim mode to access the normal Qt Creator keyboard shortcuts like <b>Ctrl-R</b> for <b>Run</b> by pressing <b>,</b> first.</p>
+</div>
+<!-- @@@creator-editor-fakevim.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-editor-options-text.html">Specifying Text Editor Settings</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-language-servers.html">Using Language Servers</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

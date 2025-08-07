@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qabstractnativeeventfilter.cpp -->
+  <title>QAbstractNativeEventFilter Class | Qt Core 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-module.html">C++ Classes</a></td><td >QAbstractNativeEventFilter</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtcore-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QAbstractNativeEventFilter Class</h1>
+<!-- $$$QAbstractNativeEventFilter-brief -->
+<p>The <a href="qabstractnativeeventfilter.html">QAbstractNativeEventFilter</a> class provides an interface for receiving native events, such as MSG or XCB event structs. <a href="#details">More...</a></p>
+<!-- @@@QAbstractNativeEventFilter -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QAbstractNativeEventFilter&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += core</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.0</td></tr></table></div><p>This class was introduced in  Qt 5.0.</p>
+<ul>
+<li><a href="qabstractnativeeventfilter-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qabstractnativeeventfilter.html#QAbstractNativeEventFilter">QAbstractNativeEventFilter</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qabstractnativeeventfilter.html#dtor.QAbstractNativeEventFilter">~QAbstractNativeEventFilter</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qabstractnativeeventfilter.html#nativeEventFilter">nativeEventFilter</a></b>(const QByteArray &amp;<i>eventType</i>, void *<i>message</i>, long *<i>result</i>) = 0</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QAbstractNativeEventFilter-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+</div>
+<!-- @@@QAbstractNativeEventFilter -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QAbstractNativeEventFilter[overload1]$$$QAbstractNativeEventFilter -->
+<h3 class="fn" id="QAbstractNativeEventFilter"><a name="QAbstractNativeEventFilter"></a>QAbstractNativeEventFilter::<span class="name">QAbstractNativeEventFilter</span>()</h3>
+<p>Creates a native event filter.</p>
+<p>By default this doesn't do anything. Remember to install it on the application object.</p>
+<!-- @@@QAbstractNativeEventFilter -->
+<!-- $$$~QAbstractNativeEventFilter[overload1]$$$~QAbstractNativeEventFilter -->
+<h3 class="fn" id="dtor.QAbstractNativeEventFilter"><a name="dtor.QAbstractNativeEventFilter"></a><code>[virtual] </code>QAbstractNativeEventFilter::<span class="name">~QAbstractNativeEventFilter</span>()</h3>
+<p>Destroys the native event filter.</p>
+<p>This automatically removes it from the application.</p>
+<!-- @@@~QAbstractNativeEventFilter -->
+<!-- $$$nativeEventFilter[overload1]$$$nativeEventFilterconstQByteArray&void*long* -->
+<h3 class="fn" id="nativeEventFilter"><a name="nativeEventFilter"></a><code>[pure virtual] </code><span class="type">bool</span> QAbstractNativeEventFilter::<span class="name">nativeEventFilter</span>(const <span class="type"><a href="qbytearray.html">QByteArray</a></span> &amp;<i>eventType</i>, <span class="type">void</span> *<i>message</i>, <span class="type">long</span> *<i>result</i>)</h3>
+<p>This method is called for every native event.</p>
+<p><b>Note: </b>The filter function here receives native messages, for example, MSG or XCB event structs.</p><p>It is called by the QPA platform plugin. On Windows, it is called by the event dispatcher.</p>
+<p>The type of event <i>eventType</i> is specific to the platform plugin chosen at run-time, and can be used to cast <i>message</i> to the right type.</p>
+<p>On X11, <i>eventType</i> is set to &quot;xcb_generic_event_t&quot;, and the <i>message</i> can be casted to a xcb_generic_event_t pointer.</p>
+<p>On Windows, <i>eventType</i> is set to &quot;windows_generic_MSG&quot; for messages sent to toplevel windows, and &quot;windows_dispatcher_MSG&quot; for system-wide messages such as messages from a registered hot key. In both cases, the <i>message</i> can be casted to a MSG pointer. The <i>result</i> pointer is only used on Windows, and corresponds to the LRESULT pointer.</p>
+<p>On <a href="../qtdoc/internationalization.html#macos">macOS</a>, <i>eventType</i> is set to &quot;mac_generic_NSEvent&quot;, and the <i>message</i> can be casted to an NSEvent pointer.</p>
+<p>In your reimplementation of this function, if you want to filter the <i>message</i> out, i.e&#x2e; stop it being handled further, return true; otherwise return false.</p>
+<p><b>Linux example</b></p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> MyXcbEventFilter : <span class="keyword">public</span> <span class="type"><a href="qabstractnativeeventfilter.html#QAbstractNativeEventFilter">QAbstractNativeEventFilter</a></span>
+  {
+  <span class="keyword">public</span>:
+      bool nativeEventFilter(<span class="keyword">const</span> <span class="type"><a href="qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>eventType<span class="operator">,</span> <span class="type">void</span> <span class="operator">*</span>message<span class="operator">,</span> <span class="type">long</span> <span class="operator">*</span>) override
+      {
+          <span class="keyword">if</span> (eventType <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;xcb_generic_event_t&quot;</span>) {
+              xcb_generic_event_t<span class="operator">*</span> ev <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span>xcb_generic_event_t <span class="operator">*</span><span class="operator">&gt;</span>(message);
+              <span class="comment">// ...</span>
+          }
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      }
+  };
+
+</pre>
+<p><b><a href="../qtdoc/internationalization.html#macos">macOS</a> example</b></p>
+<p>mycocoaeventfilter.h:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QAbstractNativeEventFilter&gt;</span>
+
+  <span class="keyword">class</span> MyCocoaEventFilter : <span class="keyword">public</span> <span class="type"><a href="qabstractnativeeventfilter.html#QAbstractNativeEventFilter">QAbstractNativeEventFilter</a></span>
+  {
+  <span class="keyword">public</span>:
+      bool nativeEventFilter(<span class="keyword">const</span> <span class="type"><a href="qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>eventType<span class="operator">,</span> <span class="type">void</span> <span class="operator">*</span>message<span class="operator">,</span> <span class="type">long</span> <span class="operator">*</span>) override;
+  };
+
+</pre>
+<p>mycocoaeventfilter.mm:</p>
+<pre class="cpp">
+
+  #include &quot;mycocoaeventfilter.h&quot;
+
+  #import &lt;AppKit/AppKit.h&gt;
+
+  bool CocoaNativeEventFilter::nativeEventFilter(const QByteArray &amp;eventType, void *message, long *)
+  {
+      if (eventType == &quot;mac_generic_NSEvent&quot;) {
+          NSEvent *event = static_cast&lt;NSEvent *&gt;(message);
+          if ([event type] == NSKeyDown) {
+              // Handle key event
+              qDebug() &lt;&lt; QString::fromNSString([event characters]);
+          }
+      }
+      return false;
+  }
+
+</pre>
+<p>myapp.pro:</p>
+<pre class="cpp">
+
+  HEADERS += mycocoaeventfilter.h
+  OBJECTIVE_SOURCES += mycocoaeventfilter.mm
+  LIBS += -framework AppKit
+
+</pre>
+<!-- @@@nativeEventFilter -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qsgrendererinterface.cpp -->
+  <title>QSGRendererInterface Class | Qt Quick 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-module.html">C++ Classes</a></td><td >QSGRendererInterface</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtquick-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QSGRendererInterface Class</h1>
+<!-- $$$QSGRendererInterface-brief -->
+<p>An interface providing access to some of the graphics API specific internals of the scenegraph. <a href="#details">More...</a></p>
+<!-- @@@QSGRendererInterface -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QSGRendererInterface&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += quick</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 5.8</td></tr></table></div><p>This class was introduced in  Qt 5.8.</p>
+<ul>
+<li><a href="qsgrendererinterface-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qsgrendererinterface.html#GraphicsApi-enum">GraphicsApi</a></b> { Unknown, Software, OpenGL, Direct3D12, OpenVG }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qsgrendererinterface.html#Resource-enum">Resource</a></b> { DeviceResource, CommandQueueResource, CommandListResource, PainterResource }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qsgrendererinterface.html#ShaderCompilationType-enum">ShaderCompilationType</a></b> { RuntimeCompilation, OfflineCompilation }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qsgrendererinterface.html#ShaderCompilationType-enum">ShaderCompilationTypes</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qsgrendererinterface.html#ShaderSourceType-enum">ShaderSourceType</a></b> { ShaderSourceString, ShaderSourceFile, ShaderByteCode }</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> flags </td><td class="memItemRight bottomAlign"><b><a href="qsgrendererinterface.html#ShaderSourceType-enum">ShaderSourceTypes</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qsgrendererinterface.html#ShaderType-enum">ShaderType</a></b> { UnknownShadingLanguage, GLSL, HLSL }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void *</td><td class="memItemRight bottomAlign"><b><a href="qsgrendererinterface.html#getResource">getResource</a></b>(QQuickWindow *<i>window</i>, QSGRendererInterface::Resource <i>resource</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void *</td><td class="memItemRight bottomAlign"><b><a href="qsgrendererinterface.html#getResource-1">getResource</a></b>(QQuickWindow *<i>window</i>, const char *<i>resource</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSGRendererInterface::GraphicsApi </td><td class="memItemRight bottomAlign"><b><a href="qsgrendererinterface.html#graphicsApi">graphicsApi</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSGRendererInterface::ShaderCompilationTypes </td><td class="memItemRight bottomAlign"><b><a href="qsgrendererinterface.html#shaderCompilationType">shaderCompilationType</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSGRendererInterface::ShaderSourceTypes </td><td class="memItemRight bottomAlign"><b><a href="qsgrendererinterface.html#shaderSourceType">shaderSourceType</a></b>() const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSGRendererInterface::ShaderType </td><td class="memItemRight bottomAlign"><b><a href="qsgrendererinterface.html#shaderType">shaderType</a></b>() const = 0</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QSGRendererInterface-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Renderer interfaces allow accessing graphics API specific functionality in the scenegraph. Such internals are not typically exposed. However, when integrating custom rendering via <a href="qsgrendernode.html">QSGRenderNode</a> for example, it may become necessary to query certain values, for instance the graphics device (e.g&#x2e; the Direct3D or Vulkan device) that is used by the scenegraph.</p>
+<p><a href="qsgrendererinterface.html">QSGRendererInterface</a>'s functions have varying availability. API and language queries, like <a href="qsgrendererinterface.html#graphicsApi">graphicsApi</a>() or <a href="qsgrendererinterface.html#shaderType">shaderType</a>() are always available, meaning it is sufficient to construct a <a href="qquickwindow.html">QQuickWindow</a> or <a href="qquickview.html">QQuickView</a>, and the graphics API or shading language in use can be queried right after via <a href="qquickwindow.html#rendererInterface">QQuickWindow::rendererInterface</a>(). This guarantees that utilities like the <a href="qml-qtquick-graphicsinfo.html">GraphicsInfo</a> QML type are able to report the correct values as early as possible, without having conditional property values - depending on for instance <a href="qsgrendererinterface.html#shaderType">shaderType</a>() - evaluate to unexpected values.</p>
+<p>Engine-specific accessors, like <a href="qsgrendererinterface.html#getResource">getResource</a>(), are however available only after the scenegraph is initialized. Additionally, there may be backend-specific limitations on when such functions can be called. The only way that is guaranteed to succeed is calling them when the rendering of a node (i.e&#x2e; the preparation of the command list for the next frame) is active. In practice this typically means <a href="qsgrendernode.html#render">QSGRenderNode::render</a>().</p>
+</div>
+<!-- @@@QSGRendererInterface -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$GraphicsApi$$$Unknown$$$Software$$$OpenGL$$$Direct3D12$$$OpenVG -->
+<h3 class="fn" id="GraphicsApi-enum"><a name="GraphicsApi-enum"></a>enum QSGRendererInterface::<span class="name">GraphicsApi</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QSGRendererInterface::Unknown</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">An unknown graphics API is in use</td></tr>
+<tr><td class="topAlign"><code>QSGRendererInterface::Software</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The Qt Quick 2D Renderer is in use</td></tr>
+<tr><td class="topAlign"><code>QSGRendererInterface::OpenGL</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">OpenGL ES 2.0 or higher</td></tr>
+<tr><td class="topAlign"><code>QSGRendererInterface::Direct3D12</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">Direct3D 12</td></tr>
+<tr><td class="topAlign"><code>QSGRendererInterface::OpenVG</code></td><td class="topAlign tblval"><code>4</code></td><td class="topAlign"><a href="qtquick-visualcanvas-adaptations.html#openvg">OpenVG</a> via EGL</td></tr>
+</table></div>
+<!-- @@@GraphicsApi -->
+<!-- $$$Resource$$$DeviceResource$$$CommandQueueResource$$$CommandListResource$$$PainterResource -->
+<h3 class="fn" id="Resource-enum"><a name="Resource-enum"></a>enum QSGRendererInterface::<span class="name">Resource</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QSGRendererInterface::DeviceResource</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">The graphics device, when applicable.</td></tr>
+<tr><td class="topAlign"><code>QSGRendererInterface::CommandQueueResource</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">The graphics command queue used by the scenegraph, when applicable.</td></tr>
+<tr><td class="topAlign"><code>QSGRendererInterface::CommandListResource</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">The command list or buffer used by the scenegraph, when applicable.</td></tr>
+<tr><td class="topAlign"><code>QSGRendererInterface::PainterResource</code></td><td class="topAlign tblval"><code>3</code></td><td class="topAlign">The active <a href="../qtgui/qpainter.html">QPainter</a> used by the scenegraph, when running with the software backend.</td></tr>
+</table></div>
+<!-- @@@Resource -->
+<!-- $$$ShaderCompilationType$$$RuntimeCompilation$$$OfflineCompilation -->
+<h3 class="flags" id="ShaderCompilationType-enum"><a name="ShaderCompilationType-enum"></a>enum QSGRendererInterface::<span class="name">ShaderCompilationType</span><br/>flags QSGRendererInterface::<span class="name">ShaderCompilationTypes</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QSGRendererInterface::RuntimeCompilation</code></td><td class="topAlign tblval"><code>0x01</code></td><td class="topAlign">Runtime compilation of shader source code is supported</td></tr>
+<tr><td class="topAlign"><code>QSGRendererInterface::OfflineCompilation</code></td><td class="topAlign tblval"><code>0x02</code></td><td class="topAlign">Pre-compiled bytecode supported</td></tr>
+</table></div>
+<p>The ShaderCompilationTypes type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;ShaderCompilationType&gt;. It stores an OR combination of ShaderCompilationType values.</p>
+<!-- @@@ShaderCompilationType -->
+<!-- $$$ShaderSourceType$$$ShaderSourceString$$$ShaderSourceFile$$$ShaderByteCode -->
+<h3 class="flags" id="ShaderSourceType-enum"><a name="ShaderSourceType-enum"></a>enum QSGRendererInterface::<span class="name">ShaderSourceType</span><br/>flags QSGRendererInterface::<span class="name">ShaderSourceTypes</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QSGRendererInterface::ShaderSourceString</code></td><td class="topAlign tblval"><code>0x01</code></td><td class="topAlign">Shader source can be provided as a string in the corresponding properties of <a href="qml-qtquick-shadereffect.html">ShaderEffect</a></td></tr>
+<tr><td class="topAlign"><code>QSGRendererInterface::ShaderSourceFile</code></td><td class="topAlign tblval"><code>0x02</code></td><td class="topAlign">Local or resource files containing shader source code are supported</td></tr>
+<tr><td class="topAlign"><code>QSGRendererInterface::ShaderByteCode</code></td><td class="topAlign tblval"><code>0x04</code></td><td class="topAlign">Local or resource files containing shader bytecode are supported</td></tr>
+</table></div>
+<p>The ShaderSourceTypes type is a typedef for <a href="../qtcore/qflags.html">QFlags</a>&lt;ShaderSourceType&gt;. It stores an OR combination of ShaderSourceType values.</p>
+<!-- @@@ShaderSourceType -->
+<!-- $$$ShaderType$$$UnknownShadingLanguage$$$GLSL$$$HLSL -->
+<h3 class="fn" id="ShaderType-enum"><a name="ShaderType-enum"></a>enum QSGRendererInterface::<span class="name">ShaderType</span></h3>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QSGRendererInterface::UnknownShadingLanguage</code></td><td class="topAlign tblval"><code>0</code></td><td class="topAlign">Not yet known due to no window and scenegraph associated</td></tr>
+<tr><td class="topAlign"><code>QSGRendererInterface::GLSL</code></td><td class="topAlign tblval"><code>1</code></td><td class="topAlign">GLSL or GLSL ES</td></tr>
+<tr><td class="topAlign"><code>QSGRendererInterface::HLSL</code></td><td class="topAlign tblval"><code>2</code></td><td class="topAlign">HLSL</td></tr>
+</table></div>
+<!-- @@@ShaderType -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$getResource[overload1]$$$getResourceQQuickWindow*QSGRendererInterface::Resource -->
+<h3 class="fn" id="getResource"><a name="getResource"></a><code>[virtual] </code><span class="type">void</span> *QSGRendererInterface::<span class="name">getResource</span>(<span class="type"><a href="qquickwindow.html">QQuickWindow</a></span> *<i>window</i>, <span class="type"><a href="qsgrendererinterface.html#Resource-enum">QSGRendererInterface::Resource</a></span> <i>resource</i>) const</h3>
+<p>Queries a graphics <i>resource</i> in <i>window</i>. Returns null when the resource in question is not supported or not available.</p>
+<p>When successful, the returned pointer is either a direct pointer to an interface (and can be cast, for example, to <code>ID3D12Device *</code>) or a pointer to an opaque handle that needs to be dereferenced first (for example, <code>VkDevice dev = *static_cast&lt;VkDevice *&gt;(result)</code>). The latter is necessary since such handles may have sizes different from a pointer.</p>
+<p><b>Note: </b>The ownership of the returned pointer is never transferred to the caller.</p><p><b>Note: </b>This function must only be called on the render thread.</p><!-- @@@getResource -->
+<!-- $$$getResource$$$getResourceQQuickWindow*constchar* -->
+<h3 class="fn" id="getResource-1"><a name="getResource-1"></a><code>[virtual] </code><span class="type">void</span> *QSGRendererInterface::<span class="name">getResource</span>(<span class="type"><a href="qquickwindow.html">QQuickWindow</a></span> *<i>window</i>, const <span class="type">char</span> *<i>resource</i>) const</h3>
+<p>Queries a graphics resource. <i>resource</i> is a backend-specific key. This allows supporting any future resources that are not listed in the Resource enum.</p>
+<p><b>Note: </b>The ownership of the returned pointer is never transferred to the caller.</p><p><b>Note: </b>This function must only be called on the render thread.</p><!-- @@@getResource -->
+<!-- $$$graphicsApi[overload1]$$$graphicsApi -->
+<h3 class="fn" id="graphicsApi"><a name="graphicsApi"></a><code>[pure virtual] </code><span class="type"><a href="qsgrendererinterface.html#GraphicsApi-enum">QSGRendererInterface::GraphicsApi</a></span> QSGRendererInterface::<span class="name">graphicsApi</span>() const</h3>
+<p>Returns the graphics API that is in use by the Qt Quick scenegraph.</p>
+<p><b>Note: </b>This function can be called on any thread.</p><!-- @@@graphicsApi -->
+<!-- $$$shaderCompilationType[overload1]$$$shaderCompilationType -->
+<h3 class="fn" id="shaderCompilationType"><a name="shaderCompilationType"></a><code>[pure virtual] </code><span class="type"><a href="qsgrendererinterface.html#ShaderCompilationType-enum">QSGRendererInterface::ShaderCompilationTypes</a></span> QSGRendererInterface::<span class="name">shaderCompilationType</span>() const</h3>
+<p>Returns a bitmask of the shader compilation approaches supported by the Qt Quick backend the application is using.</p>
+<p><b>Note: </b>This function can be called on any thread.</p><p><b>See also </b><a href="qml-qtquick-graphicsinfo.html">QtQuick::GraphicsInfo</a>.</p>
+<!-- @@@shaderCompilationType -->
+<!-- $$$shaderSourceType[overload1]$$$shaderSourceType -->
+<h3 class="fn" id="shaderSourceType"><a name="shaderSourceType"></a><code>[pure virtual] </code><span class="type"><a href="qsgrendererinterface.html#ShaderSourceType-enum">QSGRendererInterface::ShaderSourceTypes</a></span> QSGRendererInterface::<span class="name">shaderSourceType</span>() const</h3>
+<p>Returns a bitmask of the supported ways of providing shader sources in <a href="qml-qtquick-shadereffect.html">ShaderEffect</a> items.</p>
+<p><b>Note: </b>This function can be called on any thread.</p><p><b>See also </b><a href="qml-qtquick-graphicsinfo.html">QtQuick::GraphicsInfo</a>.</p>
+<!-- @@@shaderSourceType -->
+<!-- $$$shaderType[overload1]$$$shaderType -->
+<h3 class="fn" id="shaderType"><a name="shaderType"></a><code>[pure virtual] </code><span class="type"><a href="qsgrendererinterface.html#ShaderType-enum">QSGRendererInterface::ShaderType</a></span> QSGRendererInterface::<span class="name">shaderType</span>() const</h3>
+<p>Returns the shading language supported by the Qt Quick backend the application is using.</p>
+<p><b>Note: </b>This function can be called on any thread.</p><p><b>See also </b><a href="qml-qtquick-graphicsinfo.html">QtQuick::GraphicsInfo</a>.</p>
+<!-- @@@shaderType -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

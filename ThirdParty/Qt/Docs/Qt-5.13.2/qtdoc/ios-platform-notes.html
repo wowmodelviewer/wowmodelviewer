@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- ios.qdoc -->
+  <title>Platform Notes - iOS | Qt 5.13</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.13</a></td><td >Platform Notes - iOS</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.13.2 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#deployment">Deployment</a></li>
+<li class="level2"><a href="#information-property-list-files">Information Property List Files</a></li>
+<li class="level2"><a href="#application-assets">Application Assets</a></li>
+<li class="level2"><a href="#icons">Icons</a></li>
+<li class="level2"><a href="#launch-images">Launch Images</a></li>
+<li class="level2"><a href="#native-image-picker">Native Image Picker</a></li>
+<li class="level2"><a href="#expressing-supported-ios-versions">Expressing Supported iOS Versions</a></li>
+<li class="level1"><a href="#publishing-to-apple-app-store">Publishing to Apple App Store</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Platform Notes - iOS</h1>
+<span class="subtitle"></span>
+<!-- $$$ios-platform-notes.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="deployment"></a>
+<h2 id="deployment">Deployment</h2>
+<p>Developing, building, running, and debugging a Qt for iOS application can all be done with Qt Creator on macOS. The toolchain is provided by Apple's Xcode, and running qmake on a project targeted for iOS will also generate an Xcode project file (.xcodeproj), with initial application settings. As Qt Creator does not provide an interface for managing all of the settings specific to iOS platform, it is sometimes necessary to adjust them in Xcode directly. Checking that the application is configured correctly is especially important before submitting an application for publishing in Apple's App Store.</p>
+<a name="info-plist"></a><a name="information-property-list-files"></a>
+<h3 id="information-property-list-files">Information Property List Files</h3>
+<p>Information property list file (Info.plist) on iOS and macOS is used for configuring an application bundle. These configuration settings include:</p>
+<ul>
+<li>Application display name and identifier</li>
+<li>Required device capabilities</li>
+<li>Supported user interface orientations</li>
+<li>Icons and launch images</li>
+</ul>
+<p>See the documentation on <a href="https://developer.apple.com/library/ios/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html">Information Property List File</a> in iOS Developer Library for details.</p>
+<p>When qmake is run, an <code>Info.plist</code> file is generated with appropriate default values.</p>
+<p>It is advisable to replace the generated Info.plist with your own copy, to prevent it from being overwritten the next time qmake is run. You can define a custom information property list with <a href="../qmake/qmake-variable-reference.html#qmake-info-plist">QMAKE_INFO_PLIST</a> variable in your .pro file.</p>
+<pre class="cpp plain">
+
+  ios {
+      QMAKE_INFO_PLIST = ios/Info.plist
+  }
+
+</pre>
+<a name="application-assets"></a>
+<h3 id="application-assets">Application Assets</h3>
+<p>For files that cannot be bundled into Qt resources, <a href="../qmake/qmake-variable-reference.html#qmake-bundle-data">QMAKE_BUNDLE_DATA</a> qmake variable provides a way to specify a set of files to be copied into the application bundle. For example:</p>
+<pre class="cpp plain">
+
+  ios {
+      fontFiles.files = $$files(fonts/*.ttf)
+      fontFiles.path = fonts
+      QMAKE_BUNDLE_DATA += fontFiles
+  }
+
+</pre>
+<p>For image resources, an alternative way is to make use of <a href="http://help.apple.com/xcode/mac/8.0/#/dev10510b1f7">asset catalogs</a> in Xcode, which can be added in a similar way:</p>
+<pre class="cpp plain">
+
+  ios {
+      QMAKE_ASSET_CATALOGS += ios/Assets.xcassets
+  }
+
+</pre>
+<a name="icons"></a>
+<h3 id="icons">Icons</h3>
+<p>Icons need to be set in the Info.plist and copied to the application bundle. Xcode has special support for icons, but when using Qt, it is usually better to set them in the .pro file.</p>
+<p>To support all resolutions and devices, several images should be created. A detailed list of what is required is available at <a href="https://developer.apple.com/library/content/qa/qa1686/_index.html">Icon files</a>. The filename is not important, but the actual pixel size is. Just a few icons are required. However, to support both iPhone and iPad, the following images are required:</p>
+<ul>
+<li>AppIcon29x29.png: 29 x 29</li>
+<li>AppIcon29x29@2x.png: 58 x 58</li>
+<li>AppIcon29x29@2x~ipad.png: 58 x 58</li>
+<li>AppIcon29x29~ipad.png: 29 x 29</li>
+<li>AppIcon40x40@2x.png: 80 x 80</li>
+<li>AppIcon40x40@2x~ipad.png: 80 x 80</li>
+<li>AppIcon40x40~ipad.png: 40 x 40</li>
+<li>AppIcon50x50@2x~ipad.png: 100 x 100</li>
+<li>AppIcon50x50~ipad.png: 50 x 50</li>
+<li>AppIcon57x57.png: 57 x 57</li>
+<li>AppIcon57x57@2x.png: 114 x 114</li>
+<li>AppIcon60x60@2x.png: 120 x 120</li>
+<li>AppIcon72x72@2x~ipad.png: 144 x 144</li>
+<li>AppIcon72x72~ipad.png: 72 x 72</li>
+<li>AppIcon76x76@2x~ipad.png: 152 x 152</li>
+<li>AppIcon76x76~ipad.png: 76 x 76</li>
+</ul>
+<p>These files should be copied to the application bundle by adding something like the following code snippet to the .pro file:</p>
+<pre class="cpp plain">
+
+  ios {
+      ios_icon.files = $$files($$PWD/ios/AppIcon*.png)
+      QMAKE_BUNDLE_DATA += ios_icon
+  }
+
+</pre>
+<p>For the icons to be used, the filenames also have to be listed in the Info.plist. The best way is to list all icon files using the <code>CFBundleIconFiles</code> key. The iPad specific version can be given using the <code>CFBundleIcons~ipad</code> key, by adding something like the following code snippet to Info.plist:</p>
+<pre class="cpp plain">
+
+  &lt;key&gt;CFBundleIcons&lt;/key&gt;
+  &lt;dict&gt;
+      &lt;key&gt;CFBundlePrimaryIcon&lt;/key&gt;
+      &lt;dict&gt;
+          &lt;key&gt;CFBundleIconFiles&lt;/key&gt;
+          &lt;array&gt;
+              &lt;string&gt;AppIcon29x29.png&lt;/string&gt;
+              &lt;string&gt;AppIcon29x29@2x.png&lt;/string&gt;
+              &lt;string&gt;AppIcon40x40@2x.png&lt;/string&gt;
+              &lt;string&gt;AppIcon57x57.png&lt;/string&gt;
+              &lt;string&gt;AppIcon57x57@2x.png&lt;/string&gt;
+              &lt;string&gt;AppIcon60x60@2x.png&lt;/string&gt;
+          &lt;/array&gt;
+      &lt;/dict&gt;
+  &lt;/dict&gt;
+  &lt;key&gt;CFBundleIcons~ipad&lt;/key&gt;
+  &lt;dict&gt;
+      &lt;key&gt;CFBundlePrimaryIcon&lt;/key&gt;
+      &lt;dict&gt;
+          &lt;key&gt;CFBundleIconFiles&lt;/key&gt;
+          &lt;array&gt;
+              &lt;string&gt;AppIcon29x29.png&lt;/string&gt;
+              &lt;string&gt;AppIcon29x29@2x.png&lt;/string&gt;
+              &lt;string&gt;AppIcon40x40@2x.png&lt;/string&gt;
+              &lt;string&gt;AppIcon57x57.png&lt;/string&gt;
+              &lt;string&gt;AppIcon57x57@2x.png&lt;/string&gt;
+              &lt;string&gt;AppIcon60x60@2x.png&lt;/string&gt;
+              &lt;string&gt;AppIcon29x29~ipad.png&lt;/string&gt;
+              &lt;string&gt;AppIcon29x29@2x~ipad.png&lt;/string&gt;
+              &lt;string&gt;AppIcon40x40~ipad.png&lt;/string&gt;
+              &lt;string&gt;AppIcon40x40@2x~ipad.png&lt;/string&gt;
+              &lt;string&gt;AppIcon50x50~ipad.png&lt;/string&gt;
+              &lt;string&gt;AppIcon50x50@2x~ipad.png&lt;/string&gt;
+              &lt;string&gt;AppIcon72x72~ipad.png&lt;/string&gt;
+              &lt;string&gt;AppIcon72x72@2x~ipad.png&lt;/string&gt;
+              &lt;string&gt;AppIcon76x76~ipad.png&lt;/string&gt;
+              &lt;string&gt;AppIcon76x76@2x~ipad.png&lt;/string&gt;
+          &lt;/array&gt;
+      &lt;/dict&gt;
+  &lt;/dict&gt;
+
+</pre>
+<p>This ensures that the appropriate files are copied to the right place and the correct icons are used as required by the Apple App Store. Ad-hoc distributions should also include the following filenames in the application bundle to visualize the application in iTunes:</p>
+<ul>
+<li>iTunesArtwork 512x512</li>
+<li>iTunesArtwork@2x 1024x1024</li>
+</ul>
+<a name="launch-images"></a>
+<h3 id="launch-images">Launch Images</h3>
+<p>Like icons, launch images consist of images that need to be copied to the application bundle and keys that have to be set in the Info.plist.</p>
+<p>To support the iPhone 6, a launch file (an interface builder .xib file or a storyboard file) should be provided. For more information, see <a href="https://developer.apple.com/library/ios/documentati on/userexperience/conceptual/MobileHIG/LaunchImages.html">Launch Images</a>. Assuming that you called the launch file Launch.xib, it can be added to the Info.plist as follows:</p>
+<pre class="cpp plain">
+
+  &lt;key&gt;UILaunchStoryboardName&lt;/key&gt;
+  &lt;string&gt;Launch&lt;/string&gt;
+
+</pre>
+<p>It is possible to use launch images (PNG files), as described below, to support the iPhone 6, but it is not recommended. Qmake generates a default LaunchScreen.xib, so it is better to use another name for a custom launch screen to avoid clashes.</p>
+<p>Starting with iOS 7, the launch images are defined using the <code>UILaunchImages</code> key. To support these devices, you need to prepare the following images:</p>
+<ul>
+<li>LaunchImage-iOS7-568h@2x.png: 640 x 1136</li>
+<li>LaunchImage-iOS7-Landscape.png: 1024 x 768</li>
+<li>LaunchImage-iOS7-Landscape@2x.png: 2048 x 1536</li>
+<li>LaunchImage-iOS7-Portrait.png: 768 x 1024</li>
+<li>LaunchImage-iOS7-Portrait@2x.png: 1536 x 2048</li>
+<li>LaunchImage-iOS7@2x.png: 640 x 960</li>
+</ul>
+<p>The images can be added to the Info.plist as follows:</p>
+<pre class="cpp plain">
+
+  &lt;key&gt;UILaunchImages&lt;/key&gt;
+  &lt;array&gt;
+      &lt;dict&gt;
+          &lt;key&gt;UILaunchImageMinimumOSVersion&lt;/key&gt;
+          &lt;string&gt;7.0&lt;/string&gt;
+          &lt;key&gt;UILaunchImageName&lt;/key&gt;
+          &lt;string&gt;LaunchImage-iOS7&lt;/string&gt;
+          &lt;key&gt;UILaunchImageOrientation&lt;/key&gt;
+          &lt;string&gt;Portrait&lt;/string&gt;
+          &lt;key&gt;UILaunchImageSize&lt;/key&gt;
+          &lt;string&gt;{320, 568}&lt;/string&gt;
+      &lt;/dict&gt;
+      &lt;dict&gt;
+          &lt;key&gt;UILaunchImageMinimumOSVersion&lt;/key&gt;
+          &lt;string&gt;7.0&lt;/string&gt;
+          &lt;key&gt;UILaunchImageName&lt;/key&gt;
+          &lt;string&gt;LaunchImage-iOS7&lt;/string&gt;
+          &lt;key&gt;UILaunchImageOrientation&lt;/key&gt;
+          &lt;string&gt;Portrait&lt;/string&gt;
+          &lt;key&gt;UILaunchImageSize&lt;/key&gt;
+          &lt;string&gt;{320, 480}&lt;/string&gt;
+      &lt;/dict&gt;
+  &lt;/array&gt;
+  &lt;key&gt;UILaunchImages~ipad&lt;/key&gt;
+  &lt;array&gt;
+      &lt;dict&gt;
+          &lt;key&gt;UILaunchImageMinimumOSVersion&lt;/key&gt;
+          &lt;string&gt;7.0&lt;/string&gt;
+          &lt;key&gt;UILaunchImageName&lt;/key&gt;
+          &lt;string&gt;LaunchImage-iOS7-Landscape&lt;/string&gt;
+          &lt;key&gt;UILaunchImageOrientation&lt;/key&gt;
+          &lt;string&gt;Landscape&lt;/string&gt;
+          &lt;key&gt;UILaunchImageSize&lt;/key&gt;
+          &lt;string&gt;{768, 1024}&lt;/string&gt;
+      &lt;/dict&gt;
+      &lt;dict&gt;
+          &lt;key&gt;UILaunchImageMinimumOSVersion&lt;/key&gt;
+          &lt;string&gt;7.0&lt;/string&gt;
+          &lt;key&gt;UILaunchImageName&lt;/key&gt;
+          &lt;string&gt;LaunchImage-iOS7-Portrait&lt;/string&gt;
+          &lt;key&gt;UILaunchImageOrientation&lt;/key&gt;
+          &lt;string&gt;Portrait&lt;/string&gt;
+          &lt;key&gt;UILaunchImageSize&lt;/key&gt;
+          &lt;string&gt;{768, 1024}&lt;/string&gt;
+      &lt;/dict&gt;
+      &lt;dict&gt;
+          &lt;key&gt;UILaunchImageMinimumOSVersion&lt;/key&gt;
+          &lt;string&gt;7.0&lt;/string&gt;
+          &lt;key&gt;UILaunchImageName&lt;/key&gt;
+          &lt;string&gt;LaunchImage-iOS7&lt;/string&gt;
+          &lt;key&gt;UILaunchImageOrientation&lt;/key&gt;
+          &lt;string&gt;Portrait&lt;/string&gt;
+          &lt;key&gt;UILaunchImageSize&lt;/key&gt;
+          &lt;string&gt;{320, 568}&lt;/string&gt;
+      &lt;/dict&gt;
+      &lt;dict&gt;
+          &lt;key&gt;UILaunchImageMinimumOSVersion&lt;/key&gt;
+          &lt;string&gt;7.0&lt;/string&gt;
+          &lt;key&gt;UILaunchImageName&lt;/key&gt;
+          &lt;string&gt;LaunchImage-iOS7&lt;/string&gt;
+          &lt;key&gt;UILaunchImageOrientation&lt;/key&gt;
+          &lt;string&gt;Portrait&lt;/string&gt;
+          &lt;key&gt;UILaunchImageSize&lt;/key&gt;
+          &lt;string&gt;{320, 480}&lt;/string&gt;
+      &lt;/dict&gt;
+  &lt;/array&gt;
+
+</pre>
+<p>To support earlier iOS versions, one can use the <code>UILaunchImageFile</code> string in the Info.plist:</p>
+<pre class="cpp plain">
+
+  &lt;key&gt;UILaunchImageFile&lt;/key&gt;
+  &lt;string&gt;LaunchImage&lt;/string&gt;
+
+</pre>
+<p>The name defaults to <code>Default</code>, but qmake generates some of the images, so it is easier to use another name (for example LaunchImage as we did) to avoid clashes.</p>
+<ul>
+<li>LaunchImage.png: 320 x 480</li>
+<li>LaunchImage@2x.png: 640 x 960</li>
+<li>LaunchImage-568h@2x.png: 640 x 1136</li>
+<li>LaunchImage-Landscape.png: 1024 x 748</li>
+<li>LaunchImage-Landscape@2x.png: 2048 x 1496</li>
+<li>LaunchImage-Portrait.png: 768 x 1004</li>
+<li>LaunchImage-Portrait@2x.png: 1536 x 2008</li>
+</ul>
+<p>You can change the filenames as long as the Info.plist and filenames stay in sync.</p>
+<p>Finally, all these files have to be copied to the application bundle by adding something like the following code snippet to the .pro file:</p>
+<pre class="cpp plain">
+
+  ios {
+      app_launch_images.files = $$PWD/ios/Launch.xib $$files($$PWD/ios/LaunchImage*.png)
+      QMAKE_BUNDLE_DATA += app_launch_images
+  }
+
+</pre>
+<p>This allows you to produce universal applications with valid LaunchImages as required by the Apple App Store.</p>
+<p><b>Important: </b><code>&quot;launch_images&quot;</code> is used internally by Qt, so it will be overwritten if used in your .pro file.</p><a name="native-image-picker"></a>
+<h3 id="native-image-picker">Native Image Picker</h3>
+<p>If your <code>Info.plist</code> file contains an entry for <code>NSPhotoLibraryUsageDescription</code>, qmake will automatically include an extra plugin which enables access to the native image picker. If the directory in your <a href="../qtwidgets/qfiledialog.html">QFileDialog</a> is set to:</p>
+<pre class="cpp plain">
+
+  QStandardPaths::standardLocations(QStandardPaths::PicturesLocation).last();
+
+</pre>
+<p>or alternatively the folder in a <a href="../qtquickdialogs/qml-qtquick-dialogs-filedialog.html">FileDialog</a> in QML to:</p>
+<pre class="cpp plain">
+
+  shortcuts.pictures
+
+</pre>
+<p>then the native image picker is shown to allow access to the user's photo album.</p>
+<a name="expressing-supported-ios-versions"></a>
+<h3 id="expressing-supported-ios-versions">Expressing Supported iOS Versions</h3>
+<p>Apple platforms have a built-in way to express the OS versions that an application supports, which allows older versions of the platforms to automatically display a user friendly error message prompting the user to update their OS, as opposed to crashing and displaying a stack trace.</p>
+<p>The main concepts involved in expressing support for a particular range of OS versions are:</p>
+<ul>
+<li><i>Deployment target</i> specifies the <i>hard</i> minimum version of macOS, iOS, tvOS, or watchOS that your application supports.</li>
+<li><i>SDK version</i> specifies the <i>soft</i> maximum version of macOS, iOS, tvOS, or watchOS that your application supports.</li>
+</ul>
+<p>When you develop an application for an Apple platform, you should always use the latest version of Xcode and the latest SDK available at the time of development. On some platforms, like iOS, you will actually be rejected from the App Store if you do not. Therefore, the SDK version is always greater than or equal to the deployment target.</p>
+<p>When you develop an application for an Apple platform, you must set the deployment target. Various build tools within the Xcode toolchain all have a flag which you can use to set this value, including but not limited to the compiler and linker. By setting the deployment target value, you are explicitly declaring that your application must work on at least that version, and will not work with any earlier versions of the OS. It is then up to you to ensure that your use of the system APIs matches what you have declared. Since the compiler knows what you have declared, it can help in enforcing that.</p>
+<p>The SDK version is considered a <i>soft</i> maximum version of the OS that an application is compatible with in the way that if the application is built with an SDK, it will continue to use the behaviors of that SDK even on newer OS versions, because the OS checks the binary's load commands and emulates backwards compatibility with the older OS. For example, if an application is built with the macOS 10.12 SDK, it will continue to use 10.12 behaviors even on 10.13 and above.</p>
+<p>However, Mach-O binaries are inherently forward compatible. For example, an application built with the iOS 9 SDK will run just fine on iOS 10, but might not be opted into whatever behavior changes may have been made to certain functionality on the new release, until that application is recompiled against that newer SDK.</p>
+<p>The minimum OS version can be expressed to the system by the compiler and linker flags that embed it into the Mach-O binary. In addition, the <code>LSMinimumSystemVersion</code> key must be set in the application's app bundle. This value must be equal to the value passed to the compiler and linker, because on macOS it will allow the OS to display a user friendly error dialog that says the application requires a newer version of the OS as opposed to a crash dialog. The <code>LSMinimumSystemVersion</code> is also the key that the App Store uses to display the required OS version; the compiler and linker flags have no power there.</p>
+<p>For the most part, Qt applications will work without problems. For example, in qmake, the Qt mkspecs set <a href="../qmake/qmake-variable-reference.html#qmake-ios-deployment-target">QMAKE_IOS_DEPLOYMENT_TARGET</a>, <a href="../qmake/qmake-variable-reference.html#qmake-macosx-deployment-target">QMAKE_MACOSX_DEPLOYMENT_TARGET</a>, <a href="../qmake/qmake-variable-reference.html#qmake-tvos-deployment-target">QMAKE_TVOS_DEPLOYMENT_TARGET</a>, or <a href="../qmake/qmake-variable-reference.html#qmake-watchos-deployment-target">QMAKE_WATCHOS_DEPLOYMENT_TARGET</a> to the minimum version that Qt itself supports. Similarly, in Qbs, the Qt modules set <code>cpp.minimumIosVersion</code>, <code>cpp.minimumMacosVersion</code>, <code>cpp.minimumTvosVersion</code>, or <code>cpp.minimumWatchosVersion</code> to the minimum version that Qt itself supports.</p>
+<p>However, you must take care when you manually set your own target version. If you set it to a value higher than what Qt requires and supply your own <code>Info.plist</code> file, you must add an <code>LSMinimumSystemVersion</code> entry to the <code>Info.plist</code> that matches the value of the deployment target, because the OS will use the <code>LSMinimumSystemVersion</code> value as the authoritative one.</p>
+<p>If you specify a deployment target value lower than what Qt requires, the application will almost certainly crash somewhere in the Qt libraries when run on an older version than Qt supports. Therefore, make sure that the actual build system code reflects the minimum OS version that is actually required.</p>
+<a name="publishing-to-apple-app-store"></a>
+<h2 id="publishing-to-apple-app-store">Publishing to Apple App Store</h2>
+<p>Verifying that your Qt for iOS application is ready for publishing to App Store can be done as described in <a href="https://developer.apple.com/Library/ios/documentation/LanguagesUtilities/Conceptual/iTunesConnect_Guide/Chapters/SubmittingTheApp.html">Submitting the Application</a>. To submit the application, you can use Xcode, or the Application Loader (installed with Xcode). Qt Creator does not provide an interface for managing all of the settings in an Xcode project configuration.</p>
+<p>The application should be tested on the iOS versions and devices that it is targeted to support. The minimum deployment target for Qt applications varies by Qt version. For more information, see <a href="ios.html#ios-supported-configurations">supported configurations</a>.</p>
+<p>The actual publishing process involves creating a distribution certificate and a provision profile, creating a signed archive of your application, and running a set of validation tests on it.</p>
+<p>See the <a href="https://developer.apple.com/library/ios/documentation/IDEs/Conceptual/AppDistributionGuide/SubmittingYourApp/SubmittingYourApp.html">App Distribution Guide</a> in iOS Developer Library for more information.</p>
+</div>
+<!-- @@@ios-platform-notes.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

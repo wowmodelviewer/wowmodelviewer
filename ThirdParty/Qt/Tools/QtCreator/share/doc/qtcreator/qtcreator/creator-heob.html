@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- creator-heob.qdoc -->
+  <title>Detecting Memory Leaks with Heob | Qt Creator Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html#">Qt Creator Manual</a></td><td >Detecting Memory Leaks with Heob</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="index.html#">Qt Creator Manual 4.10.1</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="creator-clang-tools.html" />
+  <link rel="next" href="creator-cpu-usage-analyzer.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="creator-clang-tools.html">Using Clang Tools</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-cpu-usage-analyzer.html">Analyzing CPU Usage</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#specifying-heob-settings">Specifying Heob Settings</a></li>
+<li class="level2"><a href="#recording-results">Recording Results</a></li>
+<li class="level2"><a href="#handling-exceptions">Handling Exceptions</a></li>
+<li class="level2"><a href="#raising-exceptions-on-errors">Raising Exceptions on Errors</a></li>
+<li class="level2"><a href="#protecting-pages">Protecting Pages</a></li>
+<li class="level2"><a href="#handling-leak-data">Handling Leak Data</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Detecting Memory Leaks with Heob</h1>
+<span class="subtitle"></span>
+<!-- $$$creator-heob.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Qt Creator integrates the <a href="https://github.com/ssbssa/heob">Heob</a> heap observer for detecting buffer overruns and memory leaks. You must download and install Heob to run it from Qt Creator.</p>
+<p>To run Heob on the currently open project:</p>
+<ol class="1" type="1"><li>Select <b>Analyze</b> &gt; <b>Heob</b>.</li>
+<li>In the <b>Heob path</b> field, enter the path to the Heob executable.</li>
+<li>Specify additional settings for running the checks. For more information about the available options, see <a href="#specifying-heob-settings">Specifying Heob Settings</a>.</li>
+<li>Select <b>OK</b> to run Heob.</li>
+</ol>
+<p>Qt Creator runs the application, and then it runs Heob in a console window.</p>
+<p class="centerAlign"><img src="images/qtcreator-heob.png" alt="" /></p><p>Heob raises an access violation on buffer overruns and provides stack traces of the offending instruction and buffer allocation. The results are displayed when Heob exits normally.</p>
+<p class="centerAlign"><img src="images/qtcreator-heob-output.png" alt="" /></p><a name="specifying-heob-settings"></a>
+<h2 id="specifying-heob-settings">Specifying Heob Settings</h2>
+<p>To specify settings for Heob, select <b>Analyze</b> &gt; <b>Heob</b>.</p>
+<p class="centerAlign"><img src="images/qtcreator-heob-settings.png" alt="" /></p><p>In the <b>Extra arguments</b> field, enter additional arguments for running Heob. To list the available arguments in the Heob console, enter <code>-H</code> in this field and press <b>Enter</b>.</p>
+<p>For example, use the <code>-oleaks.html</code> option to record leak data in an HTML file. Together with this option, you can use the <code>-g2</code> option to group the leaks visually in the file and the <code>-L1024</code> option to record leak contents up to 1024 bytes in the file. For example, <code>-oleaks.html -g2 -L1024</code></p>
+<p>Select <b>Save</b> to save the current settings as default.</p>
+<p>The following sections describe the available options in more detail.</p>
+<a name="recording-results"></a>
+<h3 id="recording-results">Recording Results</h3>
+<p>The results of the checks are displayed in the <b>Memcheck</b> view and recorded in a file. You can specify the file name in the <b>XML output file</b> field. Heob creates the file in the project directory.</p>
+<p>You can use the process identifier (PID) as a variable in the file name. For example, <code>leaks-%p.xml</code>. This injects Heob into the child processes, as well.</p>
+<p>Other variables you can use are <code>%P</code> for the parent PID and <code>%n</code> for the application name.</p>
+<p>If you use variables, Qt Creator cannot open the file automatically, but you can open it from the project directory.</p>
+<a name="handling-exceptions"></a>
+<h3 id="handling-exceptions">Handling Exceptions</h3>
+<p>In the <b>Handle exceptions</b> list, select <b>Off</b> to use the standard exception handler and have the debugger automatically attached if the application crashes. This works only if you register Qt Creator is as a post-mortem debugger by selecting <b>Tools</b> &gt; <b>Options</b> &gt; <b>Debugger</b> &gt; <b>General</b> &gt; <b>Use Qt Creator for post-mortem debugging</b>.</p>
+<p>Select <b>On</b> to use the Heob exception handler that checks the reason and location of the crash and detects whether it occurred because of buffer overrun.</p>
+<p>Select <b>Only</b> to disable all Heob functions, except installing the exception handler. If the application crashes, only a stack trace of the crash is displayed. Therefore, this option is mostly useful when using Heob on the console or running it for child processes, as well.</p>
+<a name="raising-exceptions-on-errors"></a>
+<h3 id="raising-exceptions-on-errors">Raising Exceptions on Errors</h3>
+<p>Select the <b>Raise breakpoint exception on error</b> check box to display errors when the application runs.</p>
+<p>If the option is disabled, errors such as <i>double free</i>, <i>free of invalid pointer</i>, and <i>not enough memory</i> just write all collected data into the results file and you will only see them at the end of the application run.</p>
+<p>If the option is enabled, the application stops at the error location. This is mostly useful when used with the <b>Run with debugger</b> option, which runs Heob under the debugger.</p>
+<a name="protecting-pages"></a>
+<h3 id="protecting-pages">Protecting Pages</h3>
+<p>In the <b>Page protection</b> list, select <b>Off</b> to use standard memory allocation functions and enable only memory leak detection.</p>
+<p>Select <b>After</b> to place a protected page at the end of each allocated block and throw an exception if it is accessed. Select <b>Before</b> to place a protected page before each allocated block. These options consume memory and slow down the checks, and are therefore recommended only for 64-bit or short-running programs.</p>
+<p>Select <b>Freed memory protection</b> to protect all allocation pages when freed, so that their address space can never be used again. This is useful for <i>use-after-free</i> and <i>double-free</i> detection. However, the available memory address space can run out fast for 32-bit programs.</p>
+<a name="handling-leak-data"></a>
+<h3 id="handling-leak-data">Handling Leak Data</h3>
+<p>In the <b>Leak details</b> list, determine how to handle the collected leak data when the process exits. Selecting <b>None</b> means that no leak data is collected. If you activate leak type detection, Heob might need more time to collect the data when the process exits.</p>
+<p>Select <b>Simple</b> to write all memory that was not freed into the results file.</p>
+<p>Select <b>Detect Leak Types</b> to parse all static and global memory blocks for references to the leaks. The reachable blocks are marked <i>reachable</i> and recursively checked for other references. If references are found, the blocks are marked <i>indirectly reachable</i>. The remaining blocks are checked for references to each other and marked either <i>indirectly lost</i> or <i>jointly lost</i> (if the blocks reference each other). The blocks that have no references at all are marked <i>lost</i>. Select <b>Detect Leak Types (Show Reachable)</b> to also record the the reachable blocks in the results file.</p>
+<p>Select <b>Fuzzy Detect Leak Types</b> to mark memory blocks <i>reachable</i> or <i>indirectly lost</i> if they contain references to any address. This option is useful when used with some custom allocators (such as <code>av_malloc()</code> in <code>ffmpeg</code>) that keep only an address somewhere inside the allocation block and do not refer directly to the start of an allocated block. Select <b>Detect Leak Types (Show Reachable)</b> to also record the reachable blocks in the results file.</p>
+<p>In the <b>Minimum leak size</b> list, select the size of leaks to detect in bytes.</p>
+<p>In the <b>Control leak recording</b> list, select <b>Off</b> to record all leaks. You cannot change leak recording while it is running.</p>
+<p>To start Heob without starting leak recording, select <b>On (Start Disabled)</b>. In the Heob console, turn recording <b>on</b> or <b>off</b>, <b>clear</b> all results, or select <b>show</b> to record all current leaks into the results file. Open the file to see its contents before the process exits.</p>
+<p>To start leak recording when Heob starts and still have the option to control the recording, select <b>On (Start Enabled)</b>.</p>
+</div>
+<!-- @@@creator-heob.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="creator-clang-tools.html">Using Clang Tools</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="creator-cpu-usage-analyzer.html">Analyzing CPU Usage</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

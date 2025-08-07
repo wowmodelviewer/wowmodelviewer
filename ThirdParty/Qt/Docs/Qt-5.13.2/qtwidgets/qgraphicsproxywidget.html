@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qgraphicsproxywidget.cpp -->
+  <title>QGraphicsProxyWidget Class | Qt Widgets 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-module.html">C++ Classes</a></td><td >QGraphicsProxyWidget</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qtwidgets-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#protected-slots">Protected Slots</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+<li class="level2"><a href="#embedding-a-widget-with-qgraphicsproxywidget">Embedding a Widget with QGraphicsProxyWidget</a></li>
+<li class="level2"><a href="#synchronizing-widget-states">Synchronizing Widget States</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QGraphicsProxyWidget Class</h1>
+<!-- $$$QGraphicsProxyWidget-brief -->
+<p>The <a href="qgraphicsproxywidget.html">QGraphicsProxyWidget</a> class provides a proxy layer for embedding a <a href="qwidget.html">QWidget</a> in a <a href="qgraphicsscene.html">QGraphicsScene</a>. <a href="#details">More...</a></p>
+<!-- @@@QGraphicsProxyWidget -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">   <span class="preprocessor">#include &lt;QGraphicsProxyWidget&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> qmake:</td><td class="memItemRight bottomAlign"> QT += widgets</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Since:</td><td class="memItemRight bottomAlign">  Qt 4.4</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qgraphicswidget.html">QGraphicsWidget</a></td></tr></table></div><p>This class was introduced in  Qt 4.4.</p>
+<ul>
+<li><a href="qgraphicsproxywidget-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#anonymous-enum">anonymous</a></b> { Type }</td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#QGraphicsProxyWidget">QGraphicsProxyWidget</a></b>(QGraphicsItem *<i>parent</i> = nullptr, Qt::WindowFlags <i>wFlags</i> = Qt::WindowFlags())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#dtor.QGraphicsProxyWidget">~QGraphicsProxyWidget</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QGraphicsProxyWidget *</td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#createProxyForChildWidget">createProxyForChildWidget</a></b>(QWidget *<i>child</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#setWidget">setWidget</a></b>(QWidget *<i>widget</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QRectF </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#subWidgetRect">subWidgetRect</a></b>(const QWidget *<i>widget</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QWidget *</td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#widget">widget</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#paint">paint</a></b>(QPainter *<i>painter</i>, const QStyleOptionGraphicsItem *<i>option</i>, QWidget *<i>widget</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#setGeometry">setGeometry</a></b>(const QRectF &amp;<i>rect</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#type">type</a></b>() const override</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#contextMenuEvent">contextMenuEvent</a></b>(QGraphicsSceneContextMenuEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#dragEnterEvent">dragEnterEvent</a></b>(QGraphicsSceneDragDropEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#dragLeaveEvent">dragLeaveEvent</a></b>(QGraphicsSceneDragDropEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#dragMoveEvent">dragMoveEvent</a></b>(QGraphicsSceneDragDropEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#dropEvent">dropEvent</a></b>(QGraphicsSceneDragDropEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#event">event</a></b>(QEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#eventFilter">eventFilter</a></b>(QObject *<i>object</i>, QEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#focusInEvent">focusInEvent</a></b>(QFocusEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual bool </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#focusNextPrevChild">focusNextPrevChild</a></b>(bool <i>next</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#focusOutEvent">focusOutEvent</a></b>(QFocusEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#grabMouseEvent">grabMouseEvent</a></b>(QEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#hideEvent">hideEvent</a></b>(QHideEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#hoverEnterEvent">hoverEnterEvent</a></b>(QGraphicsSceneHoverEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#hoverLeaveEvent">hoverLeaveEvent</a></b>(QGraphicsSceneHoverEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#hoverMoveEvent">hoverMoveEvent</a></b>(QGraphicsSceneHoverEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#inputMethodEvent">inputMethodEvent</a></b>(QInputMethodEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QVariant </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#inputMethodQuery">inputMethodQuery</a></b>(Qt::InputMethodQuery <i>query</i>) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QVariant </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#itemChange">itemChange</a></b>(QGraphicsItem::GraphicsItemChange <i>change</i>, const QVariant &amp;<i>value</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#keyPressEvent">keyPressEvent</a></b>(QKeyEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#keyReleaseEvent">keyReleaseEvent</a></b>(QKeyEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#mouseDoubleClickEvent">mouseDoubleClickEvent</a></b>(QGraphicsSceneMouseEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#mouseMoveEvent">mouseMoveEvent</a></b>(QGraphicsSceneMouseEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#mousePressEvent">mousePressEvent</a></b>(QGraphicsSceneMouseEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#mouseReleaseEvent">mouseReleaseEvent</a></b>(QGraphicsSceneMouseEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#resizeEvent">resizeEvent</a></b>(QGraphicsSceneResizeEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#showEvent">showEvent</a></b>(QShowEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QSizeF </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#sizeHint">sizeHint</a></b>(Qt::SizeHint <i>which</i>, const QSizeF &amp;<i>constraint</i> = QSizeF()) const override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#ungrabMouseEvent">ungrabMouseEvent</a></b>(QEvent *<i>event</i>) override</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#wheelEvent">wheelEvent</a></b>(QGraphicsSceneWheelEvent *<i>event</i>) override</td></tr>
+</table></div>
+<a name="protected-slots"></a>
+<h2 id="protected-slots">Protected Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QGraphicsProxyWidget *</td><td class="memItemRight bottomAlign"><b><a href="qgraphicsproxywidget.html#newProxyWidget">newProxyWidget</a></b>(const QWidget *<i>child</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QGraphicsProxyWidget-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p><a href="qgraphicsproxywidget.html">QGraphicsProxyWidget</a> embeds <a href="qwidget.html">QWidget</a>-based widgets, for example, a <a href="qpushbutton.html">QPushButton</a>, <a href="qfontcombobox.html">QFontComboBox</a>, or even <a href="qfiledialog.html">QFileDialog</a>, into <a href="qgraphicsscene.html">QGraphicsScene</a>. It forwards events between the two objects and translates between <a href="qwidget.html">QWidget</a>'s integer-based geometry and <a href="graphicsview.html#qgraphicswidget">QGraphicsWidget</a>'s qreal-based geometry. <a href="qgraphicsproxywidget.html">QGraphicsProxyWidget</a> supports all core features of <a href="qwidget.html">QWidget</a>, including tab focus, keyboard input, Drag &amp; Drop, and popups. You can also embed complex widgets, e.g&#x2e;, widgets with subwidgets.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span><span class="operator">*</span>argv)
+  {
+      <span class="type"><a href="qapplication.html">QApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      <span class="type"><a href="qtabwidget.html">QTabWidget</a></span> <span class="operator">*</span>tabWidget <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtabwidget.html">QTabWidget</a></span>;
+
+      <span class="type"><a href="qgraphicsscene.html">QGraphicsScene</a></span> scene;
+      <span class="type"><a href="qgraphicsproxywidget.html#QGraphicsProxyWidget">QGraphicsProxyWidget</a></span> <span class="operator">*</span>proxy <span class="operator">=</span> scene<span class="operator">.</span>addWidget(tabWidget);
+
+      <span class="type"><a href="qgraphicsview.html">QGraphicsView</a></span> view(<span class="operator">&amp;</span>scene);
+      view<span class="operator">.</span>show();
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p><a href="qgraphicsproxywidget.html">QGraphicsProxyWidget</a> takes care of automatically embedding popup children of embedded widgets through creating a child proxy for each popup. This means that when an embedded <a href="qcombobox.html">QComboBox</a> shows its popup list, a new <a href="qgraphicsproxywidget.html">QGraphicsProxyWidget</a> is created automatically, embedding the popup, and positioning it correctly. This only works if the popup is child of the embedded widget (for example <a href="qtoolbutton.html#setMenu">QToolButton::setMenu</a>() requires the <a href="qmenu.html">QMenu</a> instance to be child of the <a href="qtoolbutton.html">QToolButton</a>).</p>
+<a name="embedding-a-widget-with-qgraphicsproxywidget"></a>
+<h3 id="embedding-a-widget-with-qgraphicsproxywidget">Embedding a Widget with QGraphicsProxyWidget</h3>
+<p>There are two ways to embed a widget using <a href="qgraphicsproxywidget.html">QGraphicsProxyWidget</a>. The most common way is to pass a widget pointer to <a href="qgraphicsscene.html#addWidget">QGraphicsScene::addWidget</a>() together with any relevant <a href="../qtcore/qt.html#WindowType-enum">Qt::WindowFlags</a>. This function returns a pointer to a <a href="qgraphicsproxywidget.html">QGraphicsProxyWidget</a>. You can then choose to reparent or position either the proxy, or the embedded widget itself.</p>
+<p>For example, in the code snippet below, we embed a group box into the proxy:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>groupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(<span class="string">&quot;Contact Details&quot;</span>);
+  <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>numberLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(<span class="string">&quot;Telephone number&quot;</span>);
+  <span class="type"><a href="qlineedit.html">QLineEdit</a></span> <span class="operator">*</span>numberEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlineedit.html">QLineEdit</a></span>;
+
+  <span class="type"><a href="qformlayout.html">QFormLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qformlayout.html">QFormLayout</a></span>;
+  layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(numberLabel<span class="operator">,</span> numberEdit);
+  groupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(layout);
+
+  <span class="type"><a href="qgraphicsscene.html">QGraphicsScene</a></span> scene;
+  <span class="type"><a href="qgraphicsproxywidget.html#QGraphicsProxyWidget">QGraphicsProxyWidget</a></span> <span class="operator">*</span>proxy <span class="operator">=</span> scene<span class="operator">.</span>addWidget(groupBox);
+
+  <span class="type"><a href="qgraphicsview.html">QGraphicsView</a></span> view(<span class="operator">&amp;</span>scene);
+  view<span class="operator">.</span>show();
+
+</pre>
+<p>The image below is the output obtained with its contents margin and contents rect labeled.</p>
+<p class="centerAlign"><img src="images/qgraphicsproxywidget-embed.png" alt="" /></p><p>Alternatively, you can start by creating a new <a href="qgraphicsproxywidget.html">QGraphicsProxyWidget</a> item, and then call <a href="qgraphicsproxywidget.html#setWidget">setWidget</a>() to embed a <a href="qwidget.html">QWidget</a> later. The <a href="qgraphicsproxywidget.html#widget">widget</a>() function returns a pointer to the embedded widget. <a href="qgraphicsproxywidget.html">QGraphicsProxyWidget</a> shares ownership with <a href="qwidget.html">QWidget</a>, so if either of the two widgets are destroyed, the other widget will be automatically destroyed as well.</p>
+<a name="synchronizing-widget-states"></a>
+<h3 id="synchronizing-widget-states">Synchronizing Widget States</h3>
+<p><a href="qgraphicsproxywidget.html">QGraphicsProxyWidget</a> keeps its state in sync with the embedded widget. For example, if the proxy is hidden or disabled, the embedded widget will be hidden or disabled as well, and vice versa. When the widget is embedded by calling addWidget(), <a href="qgraphicsproxywidget.html">QGraphicsProxyWidget</a> copies the state from the widget into the proxy, and after that, the two will stay synchronized where possible. By default, when you embed a widget into a proxy, both the widget and the proxy will be visible because a <a href="graphicsview.html#qgraphicswidget">QGraphicsWidget</a> is visible when created (you do not have to call <a href="qgraphicsitem.html#show">show</a>()). If you explicitly hide the embedded widget, the proxy will also become invisible.</p>
+<p>Example:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qgraphicsscene.html">QGraphicsScene</a></span> scene;
+
+  <span class="type"><a href="qlineedit.html">QLineEdit</a></span> <span class="operator">*</span>edit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlineedit.html">QLineEdit</a></span>;
+  <span class="type"><a href="qgraphicsproxywidget.html#QGraphicsProxyWidget">QGraphicsProxyWidget</a></span> <span class="operator">*</span>proxy <span class="operator">=</span> scene<span class="operator">.</span>addWidget(edit);
+
+  edit<span class="operator">-</span><span class="operator">&gt;</span>isVisible();  <span class="comment">// returns true</span>
+  proxy<span class="operator">-</span><span class="operator">&gt;</span>isVisible(); <span class="comment">// also returns true</span>
+
+  edit<span class="operator">-</span><span class="operator">&gt;</span>hide();
+
+  edit<span class="operator">-</span><span class="operator">&gt;</span>isVisible();  <span class="comment">// returns false</span>
+  proxy<span class="operator">-</span><span class="operator">&gt;</span>isVisible(); <span class="comment">// also returns false</span>
+
+</pre>
+<p><a href="qgraphicsproxywidget.html">QGraphicsProxyWidget</a> maintains symmetry for the following states:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th ><a href="qwidget.html">QWidget</a> state</th><th ><a href="qgraphicsproxywidget.html">QGraphicsProxyWidget</a> state</th><th >Notes</th></tr></thead>
+<tr valign="top" class="odd"><td ><a href="qwidget.html#enabled-prop">QWidget::enabled</a></td><td ><a href="qgraphicsobject.html#enabled-prop">QGraphicsProxyWidget::enabled</a></td><td ></td></tr>
+<tr valign="top" class="even"><td ><a href="qwidget.html#visible-prop">QWidget::visible</a></td><td ><a href="qgraphicsobject.html#visible-prop">QGraphicsProxyWidget::visible</a></td><td >The explicit state is also symmetric.</td></tr>
+<tr valign="top" class="odd"><td ><a href="qwidget.html#geometry-prop">QWidget::geometry</a></td><td ><a href="qgraphicswidget.html#geometry-prop">QGraphicsProxyWidget::geometry</a></td><td >Geometry is only guaranteed to be symmetric while the embedded widget is visible.</td></tr>
+<tr valign="top" class="even"><td ><a href="qwidget.html#layoutDirection-prop">QWidget::layoutDirection</a></td><td ><a href="qgraphicswidget.html#layoutDirection-prop">QGraphicsProxyWidget::layoutDirection</a></td><td ></td></tr>
+<tr valign="top" class="odd"><td ><a href="qwidget.html#style">QWidget::style</a></td><td ><a href="qgraphicswidget.html#style">QGraphicsProxyWidget::style</a></td><td ></td></tr>
+<tr valign="top" class="even"><td ><a href="qwidget.html#palette-prop">QWidget::palette</a></td><td ><a href="qgraphicswidget.html#palette-prop">QGraphicsProxyWidget::palette</a></td><td ></td></tr>
+<tr valign="top" class="odd"><td ><a href="qwidget.html#font-prop">QWidget::font</a></td><td ><a href="qgraphicswidget.html#font-prop">QGraphicsProxyWidget::font</a></td><td ></td></tr>
+<tr valign="top" class="even"><td ><a href="qwidget.html#cursor-prop">QWidget::cursor</a></td><td ><a href="qgraphicsitem.html#cursor">QGraphicsProxyWidget::cursor</a></td><td >The embedded widget overrides the proxy widget cursor. The proxy cursor changes depending on which embedded subwidget is currently under the mouse.</td></tr>
+<tr valign="top" class="odd"><td ><a href="qwidget.html#sizeHint-prop">QWidget::sizeHint</a>()</td><td ><a href="qgraphicsproxywidget.html#sizeHint">QGraphicsProxyWidget::sizeHint</a>()</td><td >All size hint functionality from the embedded widget is forwarded by the proxy.</td></tr>
+<tr valign="top" class="even"><td ><a href="qwidget.html#getContentsMargins">QWidget::getContentsMargins</a>()</td><td ><a href="qgraphicswidget.html#getContentsMargins">QGraphicsProxyWidget::getContentsMargins</a>()</td><td >Updated once by <a href="qgraphicsproxywidget.html#setWidget">setWidget</a>().</td></tr>
+<tr valign="top" class="odd"><td ><a href="qwidget.html#windowTitle-prop">QWidget::windowTitle</a></td><td ><a href="qgraphicswidget.html#windowTitle-prop">QGraphicsProxyWidget::windowTitle</a></td><td >Updated once by <a href="qgraphicsproxywidget.html#setWidget">setWidget</a>().</td></tr>
+</table></div>
+<p><b>Note: </b><a href="qgraphicsscene.html">QGraphicsScene</a> keeps the embedded widget in a special state that prevents it from disturbing other widgets (both embedded and not embedded) while the widget is embedded. In this state, the widget may differ slightly in behavior from when it is not embedded.</p><p><b>Warning:</b> This class is provided for convenience when bridging QWidgets and QGraphicsItems, it should not be used for high-performance scenarios.</p>
+</div>
+<p><b>See also </b><a href="qgraphicsscene.html#addWidget">QGraphicsScene::addWidget</a>() and <a href="graphicsview.html#qgraphicswidget">QGraphicsWidget</a>.</p>
+<!-- @@@QGraphicsProxyWidget -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$anonymous$$$Type -->
+<h3 class="fn" id="anonymous-enum"><a name="anonymous-enum"></a>enum QGraphicsProxyWidget::<span class="name">anonymous</span></h3>
+<p>The value returned by the virtual <a href="qgraphicsproxywidget.html#type">type</a>() function.</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tblval">Value</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>QGraphicsProxyWidget::Type</code></td><td class="topAlign tblval"><code>12</code></td><td class="topAlign">A graphics proxy widget</td></tr>
+</table></div>
+<!-- @@@anonymous -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QGraphicsProxyWidget[overload1]$$$QGraphicsProxyWidgetQGraphicsItem*Qt::WindowFlags -->
+<h3 class="fn" id="QGraphicsProxyWidget"><a name="QGraphicsProxyWidget"></a>QGraphicsProxyWidget::<span class="name">QGraphicsProxyWidget</span>(<span class="type"><a href="qgraphicsitem.html#QGraphicsItem">QGraphicsItem</a></span> *<i>parent</i> = nullptr, <span class="type"><a href="../qtcore/qt.html#WindowType-enum">Qt::WindowFlags</a></span> <i>wFlags</i> = Qt::WindowFlags())</h3>
+<p>Constructs a new QGraphicsProxy widget. <i>parent</i> and <i>wFlags</i> are passed to <a href="qgraphicsitem.html">QGraphicsItem</a>'s constructor.</p>
+<!-- @@@QGraphicsProxyWidget -->
+<!-- $$$newProxyWidget[overload1]$$$newProxyWidgetconstQWidget* -->
+<h3 class="fn" id="newProxyWidget"><a name="newProxyWidget"></a><code>[protected slot] </code><span class="type"><a href="qgraphicsproxywidget.html#QGraphicsProxyWidget">QGraphicsProxyWidget</a></span> *QGraphicsProxyWidget::<span class="name">newProxyWidget</span>(const <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>child</i>)</h3>
+<p>Creates a proxy widget for the given <i>child</i> of the widget contained in this proxy.</p>
+<p>You should not call this function directly; use <a href="qgraphicsproxywidget.html#createProxyForChildWidget">QGraphicsProxyWidget::createProxyForChildWidget</a>() instead.</p>
+<p>This function is a fake virtual slot that you can reimplement in your subclass in order to control how new proxy widgets are created. The default implementation returns a proxy created with the <a href="qgraphicsproxywidget.html#QGraphicsProxyWidget">QGraphicsProxyWidget</a>() constructor with this proxy widget as the parent.</p>
+<p>This function was introduced in  Qt 4.5.</p>
+<p><b>See also </b><a href="qgraphicsproxywidget.html#createProxyForChildWidget">createProxyForChildWidget</a>().</p>
+<!-- @@@newProxyWidget -->
+<!-- $$$~QGraphicsProxyWidget[overload1]$$$~QGraphicsProxyWidget -->
+<h3 class="fn" id="dtor.QGraphicsProxyWidget"><a name="dtor.QGraphicsProxyWidget"></a><code>[virtual] </code>QGraphicsProxyWidget::<span class="name">~QGraphicsProxyWidget</span>()</h3>
+<p>Destroys the proxy widget and any embedded widget.</p>
+<!-- @@@~QGraphicsProxyWidget -->
+<!-- $$$contextMenuEvent[overload1]$$$contextMenuEventQGraphicsSceneContextMenuEvent* -->
+<h3 class="fn" id="contextMenuEvent"><a name="contextMenuEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">contextMenuEvent</span>(<span class="type"><a href="qgraphicsscenecontextmenuevent.html">QGraphicsSceneContextMenuEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicsitem.html#contextMenuEvent">QGraphicsItem::contextMenuEvent</a>(QGraphicsSceneContextMenuEvent *event).</p>
+<!-- @@@contextMenuEvent -->
+<!-- $$$createProxyForChildWidget[overload1]$$$createProxyForChildWidgetQWidget* -->
+<h3 class="fn" id="createProxyForChildWidget"><a name="createProxyForChildWidget"></a><span class="type"><a href="qgraphicsproxywidget.html#QGraphicsProxyWidget">QGraphicsProxyWidget</a></span> *QGraphicsProxyWidget::<span class="name">createProxyForChildWidget</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>child</i>)</h3>
+<p>Creates a proxy widget for the given <i>child</i> of the widget contained in this proxy.</p>
+<p>This function makes it possible to acquire proxies for non top-level widgets. For instance, you can embed a dialog, and then transform only one of its widgets.</p>
+<p>If the widget is already embedded, return the existing proxy widget.</p>
+<p>This function was introduced in  Qt 4.5.</p>
+<p><b>See also </b><a href="qgraphicsproxywidget.html#newProxyWidget">newProxyWidget</a>() and <a href="qgraphicsscene.html#addWidget">QGraphicsScene::addWidget</a>().</p>
+<!-- @@@createProxyForChildWidget -->
+<!-- $$$dragEnterEvent[overload1]$$$dragEnterEventQGraphicsSceneDragDropEvent* -->
+<h3 class="fn" id="dragEnterEvent"><a name="dragEnterEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">dragEnterEvent</span>(<span class="type"><a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicsitem.html#dragEnterEvent">QGraphicsItem::dragEnterEvent</a>(QGraphicsSceneDragDropEvent *event).</p>
+<!-- @@@dragEnterEvent -->
+<!-- $$$dragLeaveEvent[overload1]$$$dragLeaveEventQGraphicsSceneDragDropEvent* -->
+<h3 class="fn" id="dragLeaveEvent"><a name="dragLeaveEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">dragLeaveEvent</span>(<span class="type"><a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicsitem.html#dragLeaveEvent">QGraphicsItem::dragLeaveEvent</a>(QGraphicsSceneDragDropEvent *event).</p>
+<!-- @@@dragLeaveEvent -->
+<!-- $$$dragMoveEvent[overload1]$$$dragMoveEventQGraphicsSceneDragDropEvent* -->
+<h3 class="fn" id="dragMoveEvent"><a name="dragMoveEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">dragMoveEvent</span>(<span class="type"><a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicsitem.html#dragMoveEvent">QGraphicsItem::dragMoveEvent</a>(QGraphicsSceneDragDropEvent *event).</p>
+<!-- @@@dragMoveEvent -->
+<!-- $$$dropEvent[overload1]$$$dropEventQGraphicsSceneDragDropEvent* -->
+<h3 class="fn" id="dropEvent"><a name="dropEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">dropEvent</span>(<span class="type"><a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicsitem.html#dropEvent">QGraphicsItem::dropEvent</a>(QGraphicsSceneDragDropEvent *event).</p>
+<!-- @@@dropEvent -->
+<!-- $$$event[overload1]$$$eventQEvent* -->
+<h3 class="fn" id="event"><a name="event"></a><code>[override virtual protected] </code><span class="type">bool</span> QGraphicsProxyWidget::<span class="name">event</span>(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicswidget.html#event">QGraphicsWidget::event</a>(QEvent *event).</p>
+<!-- @@@event -->
+<!-- $$$eventFilter[overload1]$$$eventFilterQObject*QEvent* -->
+<h3 class="fn" id="eventFilter"><a name="eventFilter"></a><code>[override virtual protected] </code><span class="type">bool</span> QGraphicsProxyWidget::<span class="name">eventFilter</span>(<span class="type"><a href="../qtcore/qobject.html#QObject">QObject</a></span> *<i>object</i>, <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="../qtcore/qobject.html#eventFilter">QObject::eventFilter</a>(QObject *watched, QEvent *event).</p>
+<!-- @@@eventFilter -->
+<!-- $$$focusInEvent[overload1]$$$focusInEventQFocusEvent* -->
+<h3 class="fn" id="focusInEvent"><a name="focusInEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">focusInEvent</span>(<span class="type"><a href="../qtgui/qfocusevent.html">QFocusEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicswidget.html#focusInEvent">QGraphicsWidget::focusInEvent</a>(QFocusEvent *event).</p>
+<!-- @@@focusInEvent -->
+<!-- $$$focusNextPrevChild[overload1]$$$focusNextPrevChildbool -->
+<h3 class="fn" id="focusNextPrevChild"><a name="focusNextPrevChild"></a><code>[override virtual protected] </code><span class="type">bool</span> QGraphicsProxyWidget::<span class="name">focusNextPrevChild</span>(<span class="type">bool</span> <i>next</i>)</h3>
+<p>Reimplements: <a href="qgraphicswidget.html#focusNextPrevChild">QGraphicsWidget::focusNextPrevChild</a>(bool next).</p>
+<!-- @@@focusNextPrevChild -->
+<!-- $$$focusOutEvent[overload1]$$$focusOutEventQFocusEvent* -->
+<h3 class="fn" id="focusOutEvent"><a name="focusOutEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">focusOutEvent</span>(<span class="type"><a href="../qtgui/qfocusevent.html">QFocusEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicswidget.html#focusOutEvent">QGraphicsWidget::focusOutEvent</a>(QFocusEvent *event).</p>
+<!-- @@@focusOutEvent -->
+<!-- $$$grabMouseEvent[overload1]$$$grabMouseEventQEvent* -->
+<h3 class="fn" id="grabMouseEvent"><a name="grabMouseEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">grabMouseEvent</span>(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicswidget.html#grabMouseEvent">QGraphicsWidget::grabMouseEvent</a>(QEvent *event).</p>
+<!-- @@@grabMouseEvent -->
+<!-- $$$hideEvent[overload1]$$$hideEventQHideEvent* -->
+<h3 class="fn" id="hideEvent"><a name="hideEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">hideEvent</span>(<span class="type"><a href="../qtgui/qhideevent.html">QHideEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicswidget.html#hideEvent">QGraphicsWidget::hideEvent</a>(QHideEvent *event).</p>
+<!-- @@@hideEvent -->
+<!-- $$$hoverEnterEvent[overload1]$$$hoverEnterEventQGraphicsSceneHoverEvent* -->
+<h3 class="fn" id="hoverEnterEvent"><a name="hoverEnterEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">hoverEnterEvent</span>(<span class="type"><a href="qgraphicsscenehoverevent.html">QGraphicsSceneHoverEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicsitem.html#hoverEnterEvent">QGraphicsItem::hoverEnterEvent</a>(QGraphicsSceneHoverEvent *event).</p>
+<!-- @@@hoverEnterEvent -->
+<!-- $$$hoverLeaveEvent[overload1]$$$hoverLeaveEventQGraphicsSceneHoverEvent* -->
+<h3 class="fn" id="hoverLeaveEvent"><a name="hoverLeaveEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">hoverLeaveEvent</span>(<span class="type"><a href="qgraphicsscenehoverevent.html">QGraphicsSceneHoverEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicswidget.html#hoverLeaveEvent">QGraphicsWidget::hoverLeaveEvent</a>(QGraphicsSceneHoverEvent *event).</p>
+<!-- @@@hoverLeaveEvent -->
+<!-- $$$hoverMoveEvent[overload1]$$$hoverMoveEventQGraphicsSceneHoverEvent* -->
+<h3 class="fn" id="hoverMoveEvent"><a name="hoverMoveEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">hoverMoveEvent</span>(<span class="type"><a href="qgraphicsscenehoverevent.html">QGraphicsSceneHoverEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicswidget.html#hoverMoveEvent">QGraphicsWidget::hoverMoveEvent</a>(QGraphicsSceneHoverEvent *event).</p>
+<!-- @@@hoverMoveEvent -->
+<!-- $$$inputMethodEvent[overload1]$$$inputMethodEventQInputMethodEvent* -->
+<h3 class="fn" id="inputMethodEvent"><a name="inputMethodEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">inputMethodEvent</span>(<span class="type"><a href="../qtgui/qinputmethodevent.html">QInputMethodEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicsitem.html#inputMethodEvent">QGraphicsItem::inputMethodEvent</a>(QInputMethodEvent *event).</p>
+<!-- @@@inputMethodEvent -->
+<!-- $$$inputMethodQuery[overload1]$$$inputMethodQueryQt::InputMethodQuery -->
+<h3 class="fn" id="inputMethodQuery"><a name="inputMethodQuery"></a><code>[override virtual protected] </code><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QGraphicsProxyWidget::<span class="name">inputMethodQuery</span>(<span class="type"><a href="../qtcore/qt.html#InputMethodQuery-enum">Qt::InputMethodQuery</a></span> <i>query</i>) const</h3>
+<p>Reimplements: <a href="qgraphicsitem.html#inputMethodQuery">QGraphicsItem::inputMethodQuery</a>(Qt::InputMethodQuery query) const.</p>
+<!-- @@@inputMethodQuery -->
+<!-- $$$itemChange[overload1]$$$itemChangeQGraphicsItem::GraphicsItemChangeconstQVariant& -->
+<h3 class="fn" id="itemChange"><a name="itemChange"></a><code>[override virtual protected] </code><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> QGraphicsProxyWidget::<span class="name">itemChange</span>(<span class="type"><a href="qgraphicsitem.html#GraphicsItemChange-enum">QGraphicsItem::GraphicsItemChange</a></span> <i>change</i>, const <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> &amp;<i>value</i>)</h3>
+<p>Reimplements: <a href="qgraphicswidget.html#itemChange">QGraphicsWidget::itemChange</a>(QGraphicsItem::GraphicsItemChange change, const QVariant &amp;value).</p>
+<!-- @@@itemChange -->
+<!-- $$$keyPressEvent[overload1]$$$keyPressEventQKeyEvent* -->
+<h3 class="fn" id="keyPressEvent"><a name="keyPressEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">keyPressEvent</span>(<span class="type"><a href="../qtgui/qkeyevent.html">QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicsitem.html#keyPressEvent">QGraphicsItem::keyPressEvent</a>(QKeyEvent *event).</p>
+<!-- @@@keyPressEvent -->
+<!-- $$$keyReleaseEvent[overload1]$$$keyReleaseEventQKeyEvent* -->
+<h3 class="fn" id="keyReleaseEvent"><a name="keyReleaseEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">keyReleaseEvent</span>(<span class="type"><a href="../qtgui/qkeyevent.html">QKeyEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicsitem.html#keyReleaseEvent">QGraphicsItem::keyReleaseEvent</a>(QKeyEvent *event).</p>
+<!-- @@@keyReleaseEvent -->
+<!-- $$$mouseDoubleClickEvent[overload1]$$$mouseDoubleClickEventQGraphicsSceneMouseEvent* -->
+<h3 class="fn" id="mouseDoubleClickEvent"><a name="mouseDoubleClickEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">mouseDoubleClickEvent</span>(<span class="type"><a href="qgraphicsscenemouseevent.html">QGraphicsSceneMouseEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicsitem.html#mouseDoubleClickEvent">QGraphicsItem::mouseDoubleClickEvent</a>(QGraphicsSceneMouseEvent *event).</p>
+<!-- @@@mouseDoubleClickEvent -->
+<!-- $$$mouseMoveEvent[overload1]$$$mouseMoveEventQGraphicsSceneMouseEvent* -->
+<h3 class="fn" id="mouseMoveEvent"><a name="mouseMoveEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">mouseMoveEvent</span>(<span class="type"><a href="qgraphicsscenemouseevent.html">QGraphicsSceneMouseEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicsitem.html#mouseMoveEvent">QGraphicsItem::mouseMoveEvent</a>(QGraphicsSceneMouseEvent *event).</p>
+<!-- @@@mouseMoveEvent -->
+<!-- $$$mousePressEvent[overload1]$$$mousePressEventQGraphicsSceneMouseEvent* -->
+<h3 class="fn" id="mousePressEvent"><a name="mousePressEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">mousePressEvent</span>(<span class="type"><a href="qgraphicsscenemouseevent.html">QGraphicsSceneMouseEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicsitem.html#mousePressEvent">QGraphicsItem::mousePressEvent</a>(QGraphicsSceneMouseEvent *event).</p>
+<!-- @@@mousePressEvent -->
+<!-- $$$mouseReleaseEvent[overload1]$$$mouseReleaseEventQGraphicsSceneMouseEvent* -->
+<h3 class="fn" id="mouseReleaseEvent"><a name="mouseReleaseEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">mouseReleaseEvent</span>(<span class="type"><a href="qgraphicsscenemouseevent.html">QGraphicsSceneMouseEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicsitem.html#mouseReleaseEvent">QGraphicsItem::mouseReleaseEvent</a>(QGraphicsSceneMouseEvent *event).</p>
+<!-- @@@mouseReleaseEvent -->
+<!-- $$$paint[overload1]$$$paintQPainter*constQStyleOptionGraphicsItem*QWidget* -->
+<h3 class="fn" id="paint"><a name="paint"></a><code>[override virtual] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">paint</span>(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> *<i>painter</i>, const <span class="type"><a href="qstyleoptiongraphicsitem.html">QStyleOptionGraphicsItem</a></span> *<i>option</i>, <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i>)</h3>
+<p>Reimplements: <a href="qgraphicswidget.html#paint">QGraphicsWidget::paint</a>(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget).</p>
+<!-- @@@paint -->
+<!-- $$$resizeEvent[overload1]$$$resizeEventQGraphicsSceneResizeEvent* -->
+<h3 class="fn" id="resizeEvent"><a name="resizeEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">resizeEvent</span>(<span class="type"><a href="qgraphicssceneresizeevent.html">QGraphicsSceneResizeEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicswidget.html#resizeEvent">QGraphicsWidget::resizeEvent</a>(QGraphicsSceneResizeEvent *event).</p>
+<!-- @@@resizeEvent -->
+<!-- $$$setGeometry[overload1]$$$setGeometryconstQRectF& -->
+<h3 class="fn" id="setGeometry"><a name="setGeometry"></a><code>[override virtual] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">setGeometry</span>(const <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> &amp;<i>rect</i>)</h3>
+<p>Reimplements: <a href="qgraphicslayoutitem.html#setGeometry">QGraphicsLayoutItem::setGeometry</a>(const QRectF &amp;rect).</p>
+<!-- @@@setGeometry -->
+<!-- $$$setWidget[overload1]$$$setWidgetQWidget* -->
+<h3 class="fn" id="setWidget"><a name="setWidget"></a><span class="type">void</span> QGraphicsProxyWidget::<span class="name">setWidget</span>(<span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i>)</h3>
+<p>Embeds <i>widget</i> into this proxy widget. The embedded widget must reside exclusively either inside or outside of Graphics View. You cannot embed a widget as long as it is is visible elsewhere in the UI, at the same time.</p>
+<p><i>widget</i> must be a top-level widget whose parent is <code>nullptr</code>.</p>
+<p>When the widget is embedded, its state (e.g&#x2e;, visible, enabled, geometry, size hints) is copied into the proxy widget. If the embedded widget is explicitly hidden or disabled, the proxy widget will become explicitly hidden or disabled after embedding is complete. The class documentation has a full overview over the shared state.</p>
+<p><a href="qgraphicsproxywidget.html">QGraphicsProxyWidget</a>'s window flags determine whether the widget, after embedding, will be given window decorations or not.</p>
+<p>After this function returns, <a href="qgraphicsproxywidget.html">QGraphicsProxyWidget</a> will keep its state synchronized with that of <i>widget</i> whenever possible.</p>
+<p>If a widget is already embedded by this proxy when this function is called, that widget will first be automatically unembedded. Passing 0 for the <i>widget</i> argument will only unembed the widget, and the ownership of the currently embedded widget will be passed on to the caller. Every child widget that are embedded will also be embedded and their proxy widget destroyed.</p>
+<p>Note that widgets with the <a href="../qtcore/qt.html#WidgetAttribute-enum">Qt::WA_PaintOnScreen</a> widget attribute set and widgets that wrap an external application or controller cannot be embedded. Examples are QGLWidget and QAxWidget.</p>
+<p><b>See also </b><a href="qgraphicsproxywidget.html#widget">widget</a>().</p>
+<!-- @@@setWidget -->
+<!-- $$$showEvent[overload1]$$$showEventQShowEvent* -->
+<h3 class="fn" id="showEvent"><a name="showEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">showEvent</span>(<span class="type"><a href="../qtgui/qshowevent.html">QShowEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicswidget.html#showEvent">QGraphicsWidget::showEvent</a>(QShowEvent *event).</p>
+<!-- @@@showEvent -->
+<!-- $$$sizeHint[overload1]$$$sizeHintQt::SizeHintconstQSizeF& -->
+<h3 class="fn" id="sizeHint"><a name="sizeHint"></a><code>[override virtual protected] </code><span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span> QGraphicsProxyWidget::<span class="name">sizeHint</span>(<span class="type"><a href="../qtcore/qt.html#SizeHint-enum">Qt::SizeHint</a></span> <i>which</i>, const <span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span> &amp;<i>constraint</i> = QSizeF()) const</h3>
+<p>Reimplements: <a href="qgraphicswidget.html#sizeHint">QGraphicsWidget::sizeHint</a>(Qt::SizeHint which, const QSizeF &amp;constraint) const.</p>
+<!-- @@@sizeHint -->
+<!-- $$$subWidgetRect[overload1]$$$subWidgetRectconstQWidget* -->
+<h3 class="fn" id="subWidgetRect"><a name="subWidgetRect"></a><span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> QGraphicsProxyWidget::<span class="name">subWidgetRect</span>(const <span class="type"><a href="qwidget.html">QWidget</a></span> *<i>widget</i>) const</h3>
+<p>Returns the rectangle for <i>widget</i>, which must be a descendant of <a href="qgraphicsproxywidget.html#widget">widget</a>(), or <a href="qgraphicsproxywidget.html#widget">widget</a>() itself, in this proxy item's local coordinates.</p>
+<p>If no widget is embedded, <i>widget</i> is <code>nullptr</code>, or <i>widget</i> is not a descendant of the embedded widget, this function returns an empty <a href="../qtcore/qrectf.html">QRectF</a>.</p>
+<p><b>See also </b><a href="qgraphicsproxywidget.html#widget">widget</a>().</p>
+<!-- @@@subWidgetRect -->
+<!-- $$$type[overload1]$$$type -->
+<h3 class="fn" id="type"><a name="type"></a><code>[override virtual] </code><span class="type">int</span> QGraphicsProxyWidget::<span class="name">type</span>() const</h3>
+<p>Reimplements: <a href="qgraphicswidget.html#type">QGraphicsWidget::type</a>() const.</p>
+<!-- @@@type -->
+<!-- $$$ungrabMouseEvent[overload1]$$$ungrabMouseEventQEvent* -->
+<h3 class="fn" id="ungrabMouseEvent"><a name="ungrabMouseEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">ungrabMouseEvent</span>(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicswidget.html#ungrabMouseEvent">QGraphicsWidget::ungrabMouseEvent</a>(QEvent *event).</p>
+<!-- @@@ungrabMouseEvent -->
+<!-- $$$wheelEvent[overload1]$$$wheelEventQGraphicsSceneWheelEvent* -->
+<h3 class="fn" id="wheelEvent"><a name="wheelEvent"></a><code>[override virtual protected] </code><span class="type">void</span> QGraphicsProxyWidget::<span class="name">wheelEvent</span>(<span class="type"><a href="qgraphicsscenewheelevent.html">QGraphicsSceneWheelEvent</a></span> *<i>event</i>)</h3>
+<p>Reimplements: <a href="qgraphicsitem.html#wheelEvent">QGraphicsItem::wheelEvent</a>(QGraphicsSceneWheelEvent *event).</p>
+<!-- @@@wheelEvent -->
+<!-- $$$widget[overload1]$$$widget -->
+<h3 class="fn" id="widget"><a name="widget"></a><span class="type"><a href="qwidget.html">QWidget</a></span> *QGraphicsProxyWidget::<span class="name">widget</span>() const</h3>
+<p>Returns a pointer to the embedded widget.</p>
+<p><b>See also </b><a href="qgraphicsproxywidget.html#setWidget">setWidget</a>().</p>
+<!-- @@@widget -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

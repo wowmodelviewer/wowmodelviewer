@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- multiviewport.qdoc -->
+  <title>Qt 3D: Multi Viewport QML Example | Qt 3D 5.13.2</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");
+    // loading style sheet breaks anchors that were jumped to before
+    // so force jumping to anchor again
+    setTimeout(function() {
+        var anchor = location.hash;
+        // need to jump to different anchor first (e.g. none)
+        location.hash = "#";
+        setTimeout(function() {
+            location.hash = anchor;
+        }, 0);
+    }, 0);
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/index.html">Qt 5.13</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td >Qt 3D: Multi Viewport QML Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right"><a href="qt3d-index.html">Qt 5.13.2 Reference Documentation</a></td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+<li class="level1"><a href="#creating-multiple-renderviews">Creating Multiple RenderViews</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt 3D: Multi Viewport QML Example</h1>
+<span class="subtitle"></span>
+<!-- $$$multiviewport-brief -->
+<p>A QML example that demonstrates rendering a Scenegraph from multiple viewports.</p>
+<!-- @@@multiviewport -->
+<!-- $$$multiviewport-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/multiviewport-qml-example.jpg" alt="" /></p><p><i>Multi Viewport</i> renders a Scenegraph from the point of view of four virtual cameras into the four quadrants of a window. This is a common configuration for 3D CAD or modelling tools or could be adjusted to help with rendering a rear-view mirror in a car racing game or a CCTV camera display.</p>
+<p>For more information, see <a href="qt3drender-framegraph.html#a-multi-viewport-framegraph">A Multi Viewport FrameGraph</a>.</p>
+<a name="running-the-example"></a>
+<h4 id="running-the-example">Running the Example</h4>
+<p>To run the example from <a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a>, open the <b>Welcome</b> mode and select the example from <b>Examples</b>. For more information, visit <a href="http://doc.qt.io/qtcreator/creator-build-example-application.html">Building and Running an Example</a>.</p>
+<a name="creating-multiple-renderviews"></a>
+<h4 id="creating-multiple-renderviews">Creating Multiple RenderViews</h4>
+<p>Using the rules defined in <a href="qt3drender-framegraph.html#framegraph-rules">Framegraph Rules</a>, we construct five RenderView objects from the FrameGraph:</p>
+<pre class="cpp">
+
+          <span class="type"><a href="qml-qt3d-render-viewport.html">Viewport</a></span> {
+              <span class="name">id</span>: <span class="name">mainViewport</span>
+              <span class="name">normalizedRect</span>: <span class="name">Qt</span>.<span class="name">rect</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>)
+
+              <span class="type"><a href="qml-qt3d-render-clearbuffers.html">ClearBuffers</a></span> {
+                  <span class="name">buffers</span>: <span class="name">ClearBuffers</span>.<span class="name">ColorDepthBuffer</span>
+                  <span class="name">clearColor</span>: <span class="name">Qt</span>.<span class="name">rgba</span>(<span class="number">0.6</span>, <span class="number">0.6</span>, <span class="number">0.6</span>, <span class="number">1.0</span>)
+              }
+
+              <span class="type"><a href="qml-qt3d-render-viewport.html">Viewport</a></span> {
+                  <span class="name">id</span>: <span class="name">topLeftViewport</span>
+                  <span class="name">normalizedRect</span>: <span class="name">Qt</span>.<span class="name">rect</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0.5</span>, <span class="number">0.5</span>)
+                  <span class="type"><a href="qml-qt3d-render-cameraselector.html">CameraSelector</a></span> { <span class="name">id</span>: <span class="name">cameraSelectorTopLeftViewport</span> }
+              }
+
+              <span class="type"><a href="qml-qt3d-render-viewport.html">Viewport</a></span> {
+                  <span class="name">id</span>: <span class="name">topRightViewport</span>
+                  <span class="name">normalizedRect</span>: <span class="name">Qt</span>.<span class="name">rect</span>(<span class="number">0.5</span>, <span class="number">0</span>, <span class="number">0.5</span>, <span class="number">0.5</span>)
+                  <span class="type"><a href="qml-qt3d-render-cameraselector.html">CameraSelector</a></span> { <span class="name">id</span>: <span class="name">cameraSelectorTopRightViewport</span> }
+              }
+
+              <span class="type"><a href="qml-qt3d-render-viewport.html">Viewport</a></span> {
+                  <span class="name">id</span>: <span class="name">bottomLeftViewport</span>
+                  <span class="name">normalizedRect</span>: <span class="name">Qt</span>.<span class="name">rect</span>(<span class="number">0</span>, <span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>)
+                  <span class="type"><a href="qml-qt3d-render-cameraselector.html">CameraSelector</a></span> { <span class="name">id</span>: <span class="name">cameraSelectorBottomLeftViewport</span> }
+              }
+
+              <span class="type"><a href="qml-qt3d-render-viewport.html">Viewport</a></span> {
+                  <span class="name">id</span>: <span class="name">bottomRightViewport</span>
+                  <span class="name">normalizedRect</span>: <span class="name">Qt</span>.<span class="name">rect</span>(<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>)
+                  <span class="type"><a href="qml-qt3d-render-cameraselector.html">CameraSelector</a></span> { <span class="name">id</span>: <span class="name">cameraSelectorBottomRightViewport</span> }
+              }
+          }
+      }
+  }
+
+</pre>
+<p>The <i>order is important</i>. If the <a href="qml-qt3d-render-clearbuffers.html">ClearBuffers</a> node were to be the last instead of the first, this would result in a black screen for the simple reason that everything would be cleared right after having been so carefully rendered. For a similar reason, it could not be used as the root of the FrameGraph as that would result in a call to clear the whole screen for each of our viewports.</p>
+<p>Although the declaration order of the FrameGraph is important, Qt 3D is able to process each RenderView in parallel as each RenderView is independent of the others for the purposes of generating a set of RenderCommands to be submitted whilst the RenderView's state is in effect.</p>
+<p>Qt 3D uses a task-based approach to parallelism which naturally scales up with the number of available cores. The RenderCommands for the RenderViews can be generated in parallel across many cores, and as long as we take care to submit the RenderViews in the correct order on the dedicated OpenGL submission thread, the resulting scene will be rendered correctly.</p>
+<p><a href="https://code.qt.io/cgit/qt/qt3d.git/tree/examples/qt3d/multiviewport?h=5.13">Example project @ code.qt.io</a></p>
+</div>
+<!-- @@@multiviewport -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2019 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br/>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br/>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>
